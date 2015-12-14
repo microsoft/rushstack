@@ -1,6 +1,35 @@
-# MS core build tools
+# gulp-core-build
 
-Common Gulp tasks to support building web app modules.
+Common Gulp tasks to support building and testing web apps/libraries. This sets up the basic build tasks so you don't have to.
+
+This set of tasks gives you the following build support:
+
+* Build TypeScript files in /src and drop them to lib
+* Build LESS files and automatically export them as commonjs modules in lib
+* TS linting run against code
+
+# Usage
+
+Within your project, install gulp and gulp-core-build as dev dependencies:
+
+```
+npm install --save-dev gulp gulp-core-build
+```
+
+Create a gulpfile.js that calls initializeTasks:
+
+```javascript
+'use strict';
+
+let build = require('ms-core-build');
+
+build.initializeTasks(
+  require('gulp'), // the gulp instance to use for building
+  { ... } // optional settings
+);
+```
+
+Once this is set up, you should be able to execute general gulp tasks.
 
 # Available tasks
 
@@ -24,30 +53,67 @@ For quick app development, use `gulp serve`. This will spin up the express serve
 
 For quick library testing flows, use `gulp test-watch`.
 
-# Using the build
+# API
 
-Your gulpfile simply needs to initialize the core tasks:
+# initializeTasks(gulpInstance, [options])
 
-```javascript
-'use strict';
+Registers the gulp tasks.
 
-let build = require('ms-core-build');
+The options are broken down into task-specific sections, and all are optional, so only provide the ones
+that require deviating from defaults:
 
+```typescript
 build.initializeTasks(
-  require('gulp'), // the gulp instance to use for building
-  { ... } // optional options
-);
+  require('gulp'),
+  {
+    build: { /* build options */ },
+    bundle: { /* bundle options */ },
+    test: { /* test options */ },
+    serve: { /* serve options */ },
+    nuke: { /* nuke options */ }
+  });
 ```
 
+## Build options
 
-# Build options
+### build.paths
 
-TBD
+Collection of path matches and folder locations for locating the input source and drop directories.
 
+Type: `object`
+
+Default:
+```javascript
+{
+  sourceMatch: [
+    'src/**/*.ts',
+    'src/**/*.tsx',
+    'typings/tsd.d.ts'
+  ],
+  lessMatch: ['src/**/*.less'],
+  htmlMatch: ['src/**/*.html'],
+  staticsMatch: [
+    'src/**/*.js',
+    'src/**/*.css',
+    'src/**/*.jpg',
+    'src/**/*.png'
+  ],
+  libFolder: 'lib'
+}
+```
+### build.isLintingEnabled
+
+Type: `boolean`
+Default: `true`
+
+### build.lintConfig
+
+Type: `object`
+Default: default tslint.json found in gulp-core-build root. Use this to provide your own object.
 
 # Build input
 
-Your repo source should live under the 'src' directory. The default build will support the following formats:
+Using default build settings, your repo source should live under the 'src' directory. The default build will support the following formats:
 
 ```text
 /src
@@ -55,7 +121,7 @@ Your repo source should live under the 'src' directory. The default build will s
   **/*.test.ts - Typescript test files, which should live next to sources.
   **/*.less - Less css files that get converted into AMD modules that you can require as './filename.css'
   **/*.html - Static HTML files that get minified
-  **/*.png - PNGs that get minified 
+  **/*.png - PNGs that get minified
   **/*.jpg - JPEGs that get minified
 ```
 
