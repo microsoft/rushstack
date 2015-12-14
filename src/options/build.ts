@@ -31,7 +31,7 @@ export default {
     libFolder: 'lib'
   },
   copyTo: {},
-  isLintingEnabled: false,
+  isLintingEnabled: true,
   lintConfig: require('../../tslint.json')
 };
 
