@@ -53,7 +53,7 @@ module.exports = function(config) {
     },
 
     webpack: {
-      // webpack configuration
+    // webpack configuration
       module: {
         postLoaders: [{
           test: /\.js/,
