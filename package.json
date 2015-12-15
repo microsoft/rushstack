@@ -25,11 +25,11 @@
     "gulp-tslint": "^3.3.0",
     "gulp-typescript": "^2.9.0",
     "karma": "^0.13.10",
-    "karma-common-js-private": "^0.2.3",
     "karma-coverage": "^0.5.2",
     "karma-mocha": "^0.2.0",
     "karma-mocha-clean-reporter": "0.0.1",
     "karma-phantomjs-launcher": "^0.2.1",
+    "karma-webpack": "^1.7.0",
     "lodash": "^3.10.1",
     "merge2": "^0.3.6",
     "mocha": "^2.3.3",
@@ -39,6 +39,7 @@
     "resolve": "^1.1.6",
     "run-sequence": "^1.1.4",
     "systemjs-builder": "^0.14.9",
-    "typescript": "^1.6.2"
+    "typescript": "^1.6.2",
+    "webpack": "^1.12.9"
   }
 }

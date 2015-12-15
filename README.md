@@ -1,12 +1,17 @@
 # gulp-core-build
 
-Common Gulp tasks to support building and testing web apps/libraries. This sets up the basic build tasks so you don't have to.
+Common Gulp tasks to support building and testing web apps/libraries. The goal is to have
+a single premade module to install that provides all of the build so very little "build" code
+is in actual code module repositories.
 
 This set of tasks gives you the following build support:
 
 * Build TypeScript files in /src and drop them to lib
 * Build LESS files and automatically export them as commonjs modules in lib
 * TS linting run against code
+* Run tests (using karma, phantomjs, mocha, chai) and get code coverage reports
+* Create bundles
+* Host test apis
 
 # Usage
 
