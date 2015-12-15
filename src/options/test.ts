@@ -9,7 +9,7 @@ export interface ITestOptions {
 export default {
   paths: {
     sourceMatch: ['src/**/*.js'],
-    include: ['lib/**/*.js'],
+    include: ['lib/**/*.test.js'],
     exclude: []
   }
 };
