@@ -21,8 +21,10 @@ module.exports = function(config) {
     //frameworks: ['mocha', 'common_js'],
     frameworks: ['mocha'],
 
+
     // list of files / patterns to load in the browser
-    files: [ bindPolyfillPath ].concat([ 'lib/**/*.test.js' ]),
+    files: [ bindPolyfillPath ].concat(testConfig.paths.include),
+
 
     // list of files to exclude
     exclude: testConfig.paths.exclude,
@@ -35,36 +37,53 @@ module.exports = function(config) {
       '**/*.test.js': ['webpack']
     },
 
-    webpack: {
 
+    // test results reporter to use
+    // possible values: 'dots', 'progress'
+    // available reporters: https://npmjs.org/browse/keyword/karma-reporter
+    reporters: ['mocha-clean', 'coverage'],
+
+
+    coverageReporter: {
+      dir: 'coverage/',
+      reporters: [
+        { type: 'html' },
+        { type: 'text-summary' },
+      ]
     },
+
+    webpack: {
+      // webpack configuration
+      module: {
+        postLoaders: [{
+          test: /\.js/,
+          exclude: /(test|node_modules|bower_components)/,
+          loader: require.resolve('istanbul-instrumenter-loader')
+        }]
+      },
+      resolve: {
+        modulesDirectories: [
+          "",
+          "lib",
+          "node_modules"
+        ]
+      }
+    },
+
 
     webpackMiddleware: {
       noInfo: true
     },
 
     plugins: [
-      'karma-mocha',
-      'karma-coverage',
-      'karma-mocha-clean-reporter',
-      'karma-phantomjs-launcher',
+      require('karma-mocha'),
+      require('istanbul-instrumenter-loader'),
+      require('karma-coverage'),
+      require('karma-mocha-clean-reporter'),
+      require('karma-phantomjs-launcher'),
       require('karma-webpack')
     ],
 
-    common_js: {
-      transforms: {
-      },
-      // Array of globs to auto require when the tests run. You can use
-      // this to control the entry point for your tests.
-      autoRequire: [
-        '**/*.test.js'
-      ]
-    },
-
-    // test results reporter to use
-    // possible values: 'dots', 'progress'
-    // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['mocha-clean', 'coverage'],
 
 
     // web server port
