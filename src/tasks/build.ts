@@ -1,4 +1,4 @@
-/// <reference path="../../typings/tsd" />
+'use strict';
 
 import { IBuildOptions } from '../options/build';
 
@@ -16,6 +16,7 @@ export default class BuildTasks { // implements ITaskGroup {
     let plumber = require('gulp-plumber');
     let useLint = options.isLintingEnabled;
     let chalk = require('chalk');
+    let destChanged = require('gulp-changed');
 
     if (fs.existsSync(tsConfigPath)) {
       tsConfig = require(tsConfigPath);
@@ -24,38 +25,28 @@ export default class BuildTasks { // implements ITaskGroup {
     }
     let tsProject = ts.createProject(tsConfig.compilerOptions);
 
-    if (paths.sourceMatch && useLint) {
-      dependencies.push('build-lint');
-
-      build.task('build-lint', () => {
-        let lint = require('gulp-tslint');
-        let lintConfig = options.lintConfig;
-
-        return gulp.src(paths.sourceMatch)
-          .pipe(plumber())
-          .pipe(lint({
-            configuration: lintConfig
-          }))
-          .pipe(lint.report('prose', {
-            emitError: false
-          }));
-      });
-    }
-
     if (paths.sourceMatch) {
       dependencies.push('build-ts');
+
       build.task('build-ts', () => {
         let merge = require('merge2');
+        let lint = require('gulp-tslint');
         let errorCount = 0;
-        let tsResult = gulp.src(paths.sourceMatch)
-          .pipe(plumber({
-            errorHandler: (error) => {
-              errorCount++;
-              build.logError(error);
-            }
-          }))
-          .pipe(ts(tsProject, undefined, ts.reporter.nullReporter()));
+        let sourceStream = gulp.src(paths.sourceMatch);
 
+        if (useLint) {
+          sourceStream = sourceStream
+            .pipe(lint({
+              configuration: options.lintConfig
+            }))
+            .pipe(lint.report('prose', {
+              emitError: false
+            }));
+        }
+
+        sourceStream = sourceStream.pipe(destChanged(options.paths.libFolder, { extension: '.js' }));
+
+        let tsResult = sourceStream.pipe(ts(tsProject, undefined, ts.reporter.nullReporter()));
         let mergedStream = merge([
           tsResult.js.pipe(gulp.dest(paths.libFolder)),
           tsResult.dts.pipe(gulp.dest(paths.libFolder))
@@ -154,3 +145,4 @@ export default class BuildTasks { // implements ITaskGroup {
 
   }
 }
+
