@@ -18,12 +18,11 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['mocha', 'common_js'],
-
+    //frameworks: ['mocha', 'common_js'],
+    frameworks: ['mocha'],
 
     // list of files / patterns to load in the browser
-    files: [ bindPolyfillPath ].concat(testConfig.paths.include),
-
+    files: [ bindPolyfillPath ].concat([ 'lib/**/*.test.js' ]),
 
     // list of files to exclude
     exclude: testConfig.paths.exclude,
@@ -32,9 +31,25 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      'lib/**/!(*.test).js': ['coverage', 'common_js'],
-      '**/*.test.js': ['common_js']
+      'lib/**/!(*.test).js': ['coverage', 'webpack'],
+      '**/*.test.js': ['webpack']
     },
+
+    webpack: {
+
+    },
+
+    webpackMiddleware: {
+      noInfo: true
+    },
+
+    plugins: [
+      'karma-mocha',
+      'karma-coverage',
+      'karma-mocha-clean-reporter',
+      'karma-phantomjs-launcher',
+      require('karma-webpack')
+    ],
 
     common_js: {
       transforms: {

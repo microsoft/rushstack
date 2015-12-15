@@ -5,6 +5,5 @@
     "jsx": "react",
     "declaration": true,
     "sourceMap": true
-  },
-  "files": []
+  }
 }
