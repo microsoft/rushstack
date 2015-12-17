@@ -2,6 +2,7 @@ export interface IBuildOptions {
   paths: {
     sourceMatch: string[];
     lessMatch: string[];
+    sassMatch: string[];
     htmlMatch: string[];
     staticsMatch: string[];
     libFolder: string;
@@ -21,6 +22,7 @@ export default {
       'typings/tsd.d.ts'
     ],
     lessMatch: ['src/**/*.less'],
+    sassMatch: null,
     htmlMatch: ['src/**/*.html'],
     staticsMatch: [
       'src/**/*.css',

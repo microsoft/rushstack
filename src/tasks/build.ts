@@ -44,7 +44,11 @@ export default class BuildTasks { // implements ITaskGroup {
             }));
         }
 
-        sourceStream = sourceStream.pipe(destChanged(options.paths.libFolder, { extension: '.js' }));
+      let debug = require('gulp-debug');
+
+        sourceStream = sourceStream
+          .pipe(destChanged(options.paths.libFolder, { extension: '.js' }))
+          .pipe(debug());
 
         let tsResult = sourceStream.pipe(ts(tsProject, undefined, ts.reporter.nullReporter()));
         let mergedStream = merge([
@@ -75,6 +79,24 @@ export default class BuildTasks { // implements ITaskGroup {
           }))
           .pipe(less())
           .pipe(minifyCss())
+          .pipe(textToJs({
+            template: 'require(\'load-styles\')(<%= content %>);'
+          }))
+          .pipe(gulp.dest(paths.libFolder));
+      });
+    }
+
+    if (paths.sassMatch) {
+      dependencies.push('build-sass');
+      build.task('build-sass', () => {
+        let sass = require('gulp-sass');
+        let textToJs = require('gulp-texttojs');
+
+        return gulp.src(paths.sassMatch)
+          .pipe(plumber({
+            errorHandler: (error) => build.logError(error)
+          }))
+          .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
           .pipe(textToJs({
             template: 'require(\'load-styles\')(<%= content %>);'
           }))
