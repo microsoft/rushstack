@@ -16,6 +16,7 @@ let build = {
   dependencies: {},
   postDependencies: {},
   config: {},
+  allTasks: {},
 
   initializeTasks: function(gulp, userOptions?: any, buildPath?: string) {
     this.gulp = gulp;
@@ -60,16 +61,33 @@ let build = {
       }
     }
 
+    // Now register tasks in gulp.
+    for (let taskName in build.allTasks) {
+      if (build.allTasks.hasOwnProperty(taskName)) {
+        let task = build.allTasks[taskName];
+        build._createGulpTask(task.taskName, task.dependencies, task.callback);
+      }
+    }
   },
 
   task: function(taskName, dependencies, callback) {
-    let gulp = build.gulp;
-
     // Support no dependencies.
     if (arguments.length === 2 && typeof dependencies === 'function') {
       callback = dependencies;
       dependencies = null;
     }
+
+    if (!build.allTasks[taskName]) {
+      build.allTasks[taskName] = {
+        taskName: taskName,
+        dependencies: dependencies,
+        callback: callback
+      };
+    }
+  },
+
+  _createGulpTask: function(taskName, dependencies, callback) {
+    let gulp = build.gulp;
 
     // Merge dependencies provided with those registered.
     dependencies = (build.dependencies[taskName] || []).concat(dependencies || []);
