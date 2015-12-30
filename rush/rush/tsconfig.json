@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "target": "ES5",
+        "module": "commonjs",
+        "jsx": "react",
+        "declaration": true,
+        "sourceMap": true,
+        "experimentalDecorators": true,
+        "outDir": "lib",
+        "listFiles": true
+    },
+    "files": [ 
+      "src/ExecuteBuild.ts",
+      "src/ExecuteLink.ts",
+      "src/rush.ts",
+      "src/RushConfigLoader.ts"
+    ]
+}

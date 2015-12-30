@@ -1,0 +1,22 @@
+{
+  "name": "ms-rush",
+  "version": "1.0.0",
+  "description": "Manage building/installing of multiple NPM package folders",
+  "scripts": {
+    "build": "node_modules/.bin/jake",
+    "clean": "node_modules/.bin/jake clean"
+  },
+  "bin": {
+    "rush": "./bin/rush"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "jake": "^8.0.12",
+    "nomnom": "^1.8.1",
+    "rimraf": "^2.4.4",
+    "strip-json-comments": "^2.0.0",
+    "tslint": "^3.2.1",
+    "typescript": "^1.7.3",
+    "z-schema": "^3.16.1"
+  }
+}
