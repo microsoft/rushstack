@@ -1,0 +1,22 @@
+{
+  "title": "Rush Configuration",
+  "description": "Configuration file for the Rush multi-package build tool",
+
+  "type": "object",
+  "properties": {
+    "commonFolder": {
+      "description": "Specifies the name of a top-level global folder containing a package.json file with a superset of all dependencies for all projects in the repository.  Example: 'common'",
+      "type": "string"
+    },
+    "projects": {
+      "description": "An array of top-level project folders that will be managed by this tool, sorted according to build order.  Example: ['lib1', 'lib2', 'my-app']",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  },
+  "required": [ "projects" ]
+}

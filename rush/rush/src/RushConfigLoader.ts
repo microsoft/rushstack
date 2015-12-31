@@ -23,36 +23,13 @@ export default class RushConfigLoader {
     let stripped = stripJsonComments(buffer.toString());
     let config = JSON.parse(stripped) as IRushConfig;
 
-    // TODO: Move this to a standalone file that can be loaded into Visual Studio
-    // http://blogs.msdn.com/b/webdev/archive/2014/04/11/intellisense-for-json-schema-in-the-json-editor.aspx
-    let schema = {
-      // '$schema': 'http://json-schema.org/draft-04/schema#',
-      'title': 'Rush Configuration',
-      'description': 'Configuration file for the Rush bulk package management tool',
+    // Remove the $schema reference that appears in the config object (used for IntelliSense),
+    // since we are replacing it with the precompiled version.  The validator.setRemoteReference()
+    // API is a better way to handle this, but we'd first need to publish the schema file
+    // to a public web server where Visual Studio can find it.
+    delete config['$schema'];
 
-      'type': 'object',
-      'properties': {
-        'commonFolder': {
-          'description':
-              'Specifies the name of a top-level global folder containing a package.json file'
-            + 'with a superset of all dependencies for all projects in the repository.  Example: "common"',
-          'type': 'string'
-        },
-        'projects': {
-          'description':
-              'Ann array of top-level project folders that will be managed by this tool,'
-            + 'sorted according to build order.  Example: ["lib1", "lib2", "my-app"]',
-          'type': 'array',
-          'items': {
-            'type': 'string'
-          },
-          'minItems': 1,
-          'uniqueItems': true
-        }
-      },
-      'required': [ 'projects' ]
-    };
-
+    let schema = require('./rush-schema.json');
     let validator = new Validator({
       assumeAdditional: true,
       breakOnFirstError: true,
