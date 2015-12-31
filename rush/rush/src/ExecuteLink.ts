@@ -65,10 +65,7 @@ function createSymlinks(cleanOnly: boolean): void {
 
   if (!cleanOnly) {
     console.log('Linking dependencies');
-    linkDependencies('test2', ['test1']);
-    linkDependencies('test3', ['test1', 'test2']);
-    linkDependencies('sp-app-ui', ['sp-app-base']);
-    linkDependencies('sp-publishing-demo', ['sp-app-base', 'sp-app-ui']);
+    // linkDependencies('sp-publishing-demo', ['sp-app-base', 'sp-app-ui']);
   }
 }
 
