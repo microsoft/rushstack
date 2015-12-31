@@ -16,7 +16,21 @@
       },
       "minItems": 1,
       "uniqueItems": true
+    },
+    "dependencyLinks": {
+      "description": "For each project with local dependencies, a list of other projects to be symlinked into the node_modules folder.  Example: { 'app': [ 'lib1', 'lib2' ] }",
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z0-9_]+$": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      }
     }
   },
-  "required": [ "projects" ]
+  "required": [ "commonFolder", "projects", "dependencyLinks" ]
 }

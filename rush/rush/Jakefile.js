@@ -23,7 +23,7 @@ function execSync(command) {
 var tsconfig = JSON.parse(fs.readFileSync('tsconfig.json', 'utf8'));
 var tsFiles = tsconfig['files'];
 var sourceDeps = ['tsconfig.json'].concat(tsFiles);
-console.log('sourceDeps = ' + sourceDeps);
+// console.log('sourceDeps = ' + sourceDeps);
 
 desc('Default task');
 task('default', ['build'], function (params) {

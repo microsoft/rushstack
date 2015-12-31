@@ -8,6 +8,7 @@ import Validator = require('z-schema');
 export interface IRushConfig {
   commonFolder: string;
   projects: Array<string>;
+  dependencyLinks: { [project: string]: Array<string> };
 };
 
 export default class RushConfigLoader {

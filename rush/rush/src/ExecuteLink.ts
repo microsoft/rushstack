@@ -23,7 +23,7 @@ function getCommonFolder(): string {
   return commonFolder;
 }
 
-function linkDependencies(consumingProject: string, dependencyProjects: string[]): void {
+function createDependencyLinks(consumingProject: string, dependencyProjects: string[]): void {
   dependencyProjects.forEach((dependencyProject) => {
     console.log('  Linking ' + consumingProject + '/node_modules/' + dependencyProject);
     let dependencyProjectFolder = getProjectFolder(dependencyProject);
@@ -64,11 +64,15 @@ function createSymlinks(cleanOnly: boolean): void {
   });
 
   if (!cleanOnly) {
-    console.log('Linking dependencies');
-    linkDependencies('test2', ['test1']);
-    linkDependencies('test3', ['test1', 'test2']);
-    linkDependencies('sp-app-ui', ['sp-app-base']);
-    linkDependencies('sp-publishing-demo', ['sp-app-base', 'sp-app-ui']);
+    console.log('\nCreating dependency links');
+
+    let dependencyLinks = config.dependencyLinks;
+    let keys = Object.getOwnPropertyNames(dependencyLinks);
+    keys.forEach(function (consumingProject, idx, array) {
+      let dependencyProjects: Array<string> = dependencyLinks[consumingProject];
+      createDependencyLinks(consumingProject, dependencyProjects);
+    });
+    
   }
 }
 
