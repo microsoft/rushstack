@@ -7,6 +7,10 @@ import RushConfigLoader, { IRushConfig } from './RushConfigLoader';
 
 let config: IRushConfig = RushConfigLoader.load();
 
+/**
+ * Returns the folder path for the specified project, e.g. "./lib1"
+ * for "lib1".  Reports an error if the folder does not exist.
+ */
 function getProjectFolder(project: string): string {
   let projectFolder = path.join(path.resolve('.'), project);
   if (!fs.existsSync(projectFolder)) {
@@ -15,6 +19,11 @@ function getProjectFolder(project: string): string {
   return projectFolder;
 }
 
+/**
+ * Returns the "commonFolder" specified in rush.config.  The common folder
+ * contains the "node_modules" folder that is shared by all projects.
+ * Reports an error if the folder does not exist.
+ */
 function getCommonFolder(): string {
   let commonFolder = path.resolve(config.commonFolder);
   if (!fs.existsSync(commonFolder)) {
@@ -23,7 +32,13 @@ function getCommonFolder(): string {
   return commonFolder;
 }
 
-function linkDependencies(consumingProject: string, dependencyProjects: string[]): void {
+/**
+ * Used to implement the "dependencyLinks" setting in the the rush.json config
+ * file.  For the specified consumingProject, this function creates symlinks
+ * in the project's "node_modules" folder.  These symlinks point to the project
+ * folders for the specified dependencies.
+ */
+function createDependencyLinks(consumingProject: string, dependencyProjects: string[]): void {
   dependencyProjects.forEach((dependencyProject) => {
     console.log('  Linking ' + consumingProject + '/node_modules/' + dependencyProject);
     let dependencyProjectFolder = getProjectFolder(dependencyProject);
@@ -33,6 +48,9 @@ function linkDependencies(consumingProject: string, dependencyProjects: string[]
   });
 }
 
+/**
+ * This is the common implementation of the "rush link" and "rush unlink" commands.
+ */
 function createSymlinks(cleanOnly: boolean): void {
   config.projects.forEach((project) => {
     console.log('');
@@ -64,11 +82,21 @@ function createSymlinks(cleanOnly: boolean): void {
   });
 
   if (!cleanOnly) {
-    console.log('Linking dependencies');
-    // linkDependencies('sp-publishing-demo', ['sp-app-base', 'sp-app-ui']);
+    console.log('\nCreating dependency links');
+
+    let dependencyLinks = config.dependencyLinks;
+    let keys = Object.getOwnPropertyNames(dependencyLinks);
+    keys.forEach(function (consumingProject, idx, array) {
+      let dependencyProjects: Array<string> = dependencyLinks[consumingProject];
+      createDependencyLinks(consumingProject, dependencyProjects);
+    });
+
   }
 }
 
+/**
+ * Entry point for the "rush unlink" command.
+ */
 export function executeUnlink(): void {
 
   createSymlinks(true);
@@ -77,6 +105,9 @@ export function executeUnlink(): void {
   console.log('Done!');
 };
 
+/**
+ * Entry point for the "rush link" command.
+ */
 export default function executeLink(): void {
 
   createSymlinks(false);

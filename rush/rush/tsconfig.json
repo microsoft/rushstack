@@ -9,7 +9,7 @@
         "outDir": "lib",
         "listFiles": true
     },
-    "files": [ 
+    "files": [
       "src/ExecuteBuild.ts",
       "src/ExecuteLink.ts",
       "src/rush.ts",

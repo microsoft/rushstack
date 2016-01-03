@@ -8,7 +8,7 @@ function execSync(command) {
   var parts = command.split(' ');
   parts[0] = path.normalize(parts[0]);
   var normalizedCommand = parts.join(' ');
-  
+
   var options = {
     stdio: [0, 1, 2] // (omit this to suppress console output)
   };
@@ -23,14 +23,14 @@ function execSync(command) {
 var tsconfig = JSON.parse(fs.readFileSync('tsconfig.json', 'utf8'));
 var tsFiles = tsconfig['files'];
 var sourceDeps = ['tsconfig.json'].concat(tsFiles);
-console.log('sourceDeps = ' + sourceDeps);
+// console.log('sourceDeps = ' + sourceDeps);
 
 desc('Default task');
 task('default', ['build'], function (params) {
 }, false);
 
 desc('Build everything');
-task('build', ['lib/rush.js', 'lib/tslint.txt'], function (params) {
+task('build', ['lib/rush.js', 'lib/tslint.txt', 'lib/rush-schema.json'], function (params) {
   console.log('\nFINISHED TASK: build');
 }, false);
 
@@ -43,11 +43,17 @@ file('lib/rush.js', sourceDeps, function () {
 
 desc('Run tslint');
 file('lib/tslint.txt', sourceDeps, function () {
-  execSync('node_modules/.bin/tslint ' + tsFiles.join(' '));
-  
-  fs.writeFileSync('lib/tslint.txt', 'Done');
+    execSync('node_modules/.bin/tslint ' + tsFiles.join(' '));
 
-  console.log('\nFINISHED TASK: tslint');
+    fs.writeFileSync('lib/tslint.txt', 'Done');
+
+    console.log('\nFINISHED TASK: tslint');
+}, false);
+
+desc('Copy rush-schema.json');
+file('lib/rush-schema.json', 'src/rush-schema.json', function () {
+    jake.cpR('src/rush-schema.json', 'lib/');
+    console.log('\nFINISHED TASK: rush-schema.json');
 }, false);
 
 desc('Clean all built files');
