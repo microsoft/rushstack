@@ -5,6 +5,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 import RushConfigLoader, { IRushConfig } from './RushConfigLoader';
 
+/**
+ * Returns the folder path for the specified project, e.g. "./lib1"
+ * for "lib1".  Reports an error if the folder does not exist.
+ */
 function getProjectFolder(project: string): string {
   let projectFolder = path.join(path.resolve('.'), project);
   if (!fs.existsSync(projectFolder)) {
@@ -13,6 +17,9 @@ function getProjectFolder(project: string): string {
   return projectFolder;
 }
 
+/**
+ * Entry point for the "rush rebuild" command.
+ */
 export default function executeBuild(): void {
   let config: IRushConfig = RushConfigLoader.load();
 
