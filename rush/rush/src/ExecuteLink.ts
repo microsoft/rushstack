@@ -72,7 +72,7 @@ function createSymlinks(cleanOnly: boolean): void {
       let dependencyProjects: Array<string> = dependencyLinks[consumingProject];
       createDependencyLinks(consumingProject, dependencyProjects);
     });
-    
+
   }
 }
 

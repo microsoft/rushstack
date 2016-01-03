@@ -8,7 +8,7 @@ function execSync(command) {
   var parts = command.split(' ');
   parts[0] = path.normalize(parts[0]);
   var normalizedCommand = parts.join(' ');
-  
+
   var options = {
     stdio: [0, 1, 2] // (omit this to suppress console output)
   };
