@@ -22,7 +22,7 @@ export default {
       'typings/tsd.d.ts'
     ],
     lessMatch: ['src/**/*.less'],
-    sassMatch: null,
+    sassMatch: ['src/**/*.scss'],
     htmlMatch: ['src/**/*.html'],
     staticsMatch: [
       'src/**/*.css',

@@ -2,6 +2,7 @@ export interface IBuildOptions {
     paths: {
         sourceMatch: string[];
         lessMatch: string[];
+        sassMatch: string[];
         htmlMatch: string[];
         staticsMatch: string[];
         libFolder: string;
@@ -16,6 +17,7 @@ declare var _default: {
     paths: {
         sourceMatch: string[];
         lessMatch: string[];
+        sassMatch: string[];
         htmlMatch: string[];
         staticsMatch: string[];
         libFolder: string;
