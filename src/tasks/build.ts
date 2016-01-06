@@ -45,7 +45,7 @@ export default class BuildTasks { // implements ITaskGroup {
         }
 
         sourceStream = sourceStream
-          .pipe(destChanged(options.paths.libFolder, { extension: '.js' }))
+          .pipe(destChanged(options.paths.libFolder, { extension: '.js' }));
 
         let tsResult = sourceStream.pipe(ts(tsProject, undefined, ts.reporter.nullReporter()));
         let mergedStream = merge([
