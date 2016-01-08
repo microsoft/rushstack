@@ -1,4 +1,5 @@
 export interface ITestOptions {
+    frameworks: string[];
     paths: {
         sourceMatch: string[];
         include: string[];
@@ -6,6 +7,7 @@ export interface ITestOptions {
     };
 }
 declare var _default: {
+    frameworks: string[];
     paths: {
         sourceMatch: string[];
         include: string[];

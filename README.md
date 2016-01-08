@@ -141,6 +141,19 @@ Building the source will drop under the 'lib' folder, preserving the directory s
   **/*.d.ts - All typescript definitions will be dropped as well.
 ```
 
+# Tests
+
+In order for tests to work, we need to create a webpack bundle of all the tests and their dependencies. This process requires a tests.js file at
+your src root that has the following content:
+
+```typescript
+// require all modules ending in ".test." from the
+// current directory and all subdirectories
+
+var testsContext = require.context('../../lib', true, /.test.$/);
+
+testsContext.keys().forEach(testsContext);
+```
 
 # Adding custom build tasks to the task dependency tree
 

@@ -1,4 +1,5 @@
 export interface ITestOptions {
+  frameworks: string[];
   paths: {
     sourceMatch: string[];
     include: string[];
@@ -7,9 +8,10 @@ export interface ITestOptions {
 }
 
 export default {
+  frameworks: ['mocha', 'sinon'],
   paths: {
     sourceMatch: ['src/**/*.js'],
-    include: ['lib/**/*.test.js'],
+    include: ['lib/tests.js'],
     exclude: []
   }
 };
