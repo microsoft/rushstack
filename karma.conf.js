@@ -7,8 +7,9 @@ let build = require('./lib/index');
 let testConfig = build.config.test;
 let path = require('path');
 let bindPolyfillPath = require.resolve('phantomjs-polyfill/bind-polyfill.js');
+let debugRun = (process.argv.indexOf('--debug') > -1);
 
-module.exports = function(config) {
+module.exports = function (config) {
 
   config.set({
 
@@ -18,12 +19,11 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    //frameworks: ['mocha', 'common_js'],
-    frameworks: ['mocha'],
+    frameworks: testConfig.frameworks,
 
 
     // list of files / patterns to load in the browser
-    files: [ bindPolyfillPath ].concat(testConfig.paths.include),
+    files: [bindPolyfillPath].concat(testConfig.paths.include),
 
 
     // list of files to exclude
@@ -33,8 +33,7 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      'lib/**/!(*.test).js': ['coverage', 'webpack'],
-      '**/*.test.js': ['webpack']
+      [ testConfig.paths.include[0] ]: [ 'webpack' ]
     },
 
 
@@ -53,9 +52,15 @@ module.exports = function(config) {
     },
 
     webpack: {
-    // webpack configuration
+      // webpack configuration
       module: {
-        postLoaders: [{
+        loaders: [
+          {
+            test: /sinon\.js$/,
+            loader: "imports?define=>false"
+          }
+        ],
+        postLoaders: debugRun ? null : [{
           test: /\.js/,
           exclude: /(test|node_modules|bower_components)/,
           loader: require.resolve('istanbul-instrumenter-loader')
@@ -77,6 +82,7 @@ module.exports = function(config) {
 
     plugins: [
       require('karma-mocha'),
+      require('karma-sinon'),
       require('istanbul-instrumenter-loader'),
       require('karma-coverage'),
       require('karma-mocha-clean-reporter'),
