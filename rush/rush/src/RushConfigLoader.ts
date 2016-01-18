@@ -39,7 +39,6 @@ export default class RushConfigLoader {
 
     let schema = require('./rush-schema.json');
     let validator = new Validator({
-      assumeAdditional: true,
       breakOnFirstError: true,
       noTypeless: true
     });

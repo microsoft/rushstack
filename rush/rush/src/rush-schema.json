@@ -4,6 +4,10 @@
 
   "type": "object",
   "properties": {
+    "$schema": {
+      "description":  "The metadata to indicate the JSON schema, required by some editors such as VS2015",
+      "type": "string"
+    },
     "commonFolder": {
       "description": "Specifies the name of a top-level global folder containing a package.json file with a superset of all dependencies for all projects in the repository.  Example: 'common'",
       "type": "string"
@@ -32,5 +36,7 @@
       }
     }
   },
+  "additionalProperties": false,
+
   "required": [ "commonFolder", "projects", "dependencyLinks" ]
 }
