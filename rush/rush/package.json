@@ -1,11 +1,11 @@
 {
   "name": "@ms/ms-rush",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Manage building/installing of multiple NPM package folders",
   "repository": {
     "type": "git",
     "url": "https://onedrive.visualstudio.com/DefaultCollection/SPPPlat/_git/sp-next"
-  },  
+  },
   "scripts": {
     "build": "node_modules/.bin/jake",
     "clean": "node_modules/.bin/jake clean"
