@@ -8,14 +8,23 @@
     "strip-json-comments/strip-json-comments.d.ts": {
       "commit": "dc9dabe74a5be62613b17a3605309783a12ff28a"
     },
-    "rimraf/rimraf.d.ts": {
-      "commit": "dc9dabe74a5be62613b17a3605309783a12ff28a"
-    },
     "node/node.d.ts": {
-      "commit": "dc9dabe74a5be62613b17a3605309783a12ff28a"
+      "commit": "e69fe60f2d6377ea4fae539493997b098f52cad1"
     },
     "nomnom/nomnom.d.ts": {
       "commit": "dc9dabe74a5be62613b17a3605309783a12ff28a"
+    },
+    "glob/glob.d.ts": {
+      "commit": "e69fe60f2d6377ea4fae539493997b098f52cad1"
+    },
+    "minimatch/minimatch.d.ts": {
+      "commit": "e69fe60f2d6377ea4fae539493997b098f52cad1"
+    },
+    "es6-promise/es6-promise.d.ts": {
+      "commit": "e69fe60f2d6377ea4fae539493997b098f52cad1"
+    },
+    "del/del.d.ts": {
+      "commit": "e69fe60f2d6377ea4fae539493997b098f52cad1"
     }
   }
 }
