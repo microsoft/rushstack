@@ -1,6 +1,6 @@
 /// <reference path="../typings/tsd.d.ts" />
 
-import * as rimraf from 'rimraf';
+import * as del from 'del';
 import * as fs from 'fs';
 import * as path from 'path';
 import RushConfigLoader, { IRushConfig } from './RushConfigLoader';
@@ -58,11 +58,28 @@ function createSymlinks(cleanOnly: boolean): void {
 
     let projectModulesFolder = path.join(getProjectFolder(project), 'node_modules');
     console.log('Removing node_modules');
-    rimraf.sync(projectModulesFolder);
+    del.sync(projectModulesFolder);
 
     if (!cleanOnly) {
       console.log('Creating node_modules folder');
-      fs.mkdirSync(projectModulesFolder);
+
+      // We need to do a simple "fs.mkdirSync(projectModulesFolder)" here,
+      // however if the folder we deleted above happened to contain any files,
+      // then there seems to be some OS process (virus scanner?) that holds
+      // a lock on the folder for a split second, which causes mkdirSync to
+      // fail.  To workaround that, retry for up to 1 second before giving up.
+      let startTime = new Date();
+      while (true) {
+        try {
+          fs.mkdirSync(projectModulesFolder);
+          break;
+        } catch (e) {
+          let currentTime = new Date();
+          if (currentTime.getTime() - startTime.getTime() > 1000) {
+            throw e;
+          }
+        }
+      }
 
       console.log('Creating symlinks');
 
