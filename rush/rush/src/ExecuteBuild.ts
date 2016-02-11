@@ -20,8 +20,9 @@ function getProjectFolder(project: string): string {
 /**
  * Entry point for the "rush rebuild" command.
  */
-export default function executeBuild(): void {
+export default function executeBuild(params: any): void {
   let config: IRushConfig = RushConfigLoader.load();
+  let skipTest: boolean = params.notest;
 
   config.projects.forEach((project) => {
     console.log('');
@@ -38,6 +39,11 @@ export default function executeBuild(): void {
 
     console.log('gulp bundle');
     child_process.execSync('gulp bundle', options);
+
+    if (!skipTest) {
+      console.log('gulp test');
+      child_process.execSync('gulp test', options);
+    }
   });
 
   console.log('');
