@@ -4,6 +4,7 @@ import * as child_process from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import RushConfigLoader, { IRushConfig } from './RushConfigLoader';
+import { getCommonFolder } from './ExecuteLink';
 
 /**
  * Returns the folder path for the specified project, e.g. "./lib1"
@@ -34,15 +35,17 @@ export default function executeBuild(params: any): void {
       stdio: [0, 1, 2] // (omit this to suppress gulp console output)
     };
 
+    let fullPathToGulp = path.join(getCommonFolder(), 'node_modules/.bin/gulp');
+
     console.log('gulp nuke');
-    child_process.execSync('gulp nuke', options);
+    child_process.execSync(fullPathToGulp + ' nuke', options);
 
     console.log('gulp bundle');
-    child_process.execSync('gulp bundle', options);
+    child_process.execSync(fullPathToGulp + ' bundle', options);
 
     if (!skipTest) {
       console.log('gulp test');
-      child_process.execSync('gulp test', options);
+      child_process.execSync(fullPathToGulp + ' test', options);
     }
   });
 

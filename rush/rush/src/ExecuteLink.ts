@@ -24,7 +24,7 @@ function getProjectFolder(project: string): string {
  * contains the "node_modules" folder that is shared by all projects.
  * Reports an error if the folder does not exist.
  */
-function getCommonFolder(): string {
+export function getCommonFolder(): string {
   let commonFolder = path.resolve(config.commonFolder);
   if (!fs.existsSync(commonFolder)) {
     throw new Error(`Common folder not found: ${config.commonFolder}`);
