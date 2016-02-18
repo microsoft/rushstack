@@ -1,6 +1,6 @@
 {
-  "name": "@ms/ms-rush",
-  "version": "0.2.4",
+  "name": "@ms/rush",
+  "version": "0.3.0",
   "description": "Manage building/installing of multiple NPM package folders",
   "repository": {
     "type": "git",
