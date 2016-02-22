@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "target": "ES5",
+        "target": "es5",
         "module": "commonjs",
         "jsx": "react",
         "declaration": true,
@@ -12,6 +12,7 @@
     "files": [
       "src/ExecuteBuild.ts",
       "src/ExecuteLink.ts",
+      "src/gulp2vs.ts",
       "src/rush.ts",
       "src/RushConfigLoader.ts"
     ]
