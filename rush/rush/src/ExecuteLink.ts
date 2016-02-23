@@ -133,7 +133,7 @@ function createSymlinks(cleanOnly: boolean): void {
       // however if the folder we deleted above happened to contain any files,
       // then there seems to be some OS process (virus scanner?) that holds
       // a lock on the folder for a split second, which causes mkdirSync to
-      // fail.  To workaround that, retry for up to 1 second before giving up.
+      // fail.  To workaround that, retry for up to 7 seconds before giving up.
       let startTime = new Date();
       while (true) {
         try {
@@ -141,7 +141,7 @@ function createSymlinks(cleanOnly: boolean): void {
           break;
         } catch (e) {
           let currentTime = new Date();
-          if (currentTime.getTime() - startTime.getTime() > 1000) {
+          if (currentTime.getTime() - startTime.getTime() > 7000) {
             throw e;
           }
         }
