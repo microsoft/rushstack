@@ -18,17 +18,11 @@ function getProjectFolder(project: string): string {
   return projectFolder;
 }
 
-/**
- * Entry point for the "rush rebuild" command.
- */
-export default function executeBuild(params: any): void {
-  let config: IRushConfig = RushConfigLoader.load();
-  let skipTest: boolean = params.notest;
-
-  config.projects.forEach((project) => {
+function buildProject(projectName: string): Promise<void> {
+  return new Promise<void>((resolve: () => void, reject: () => void) => {
     console.log('');
-    console.log('PROJECT: ' + project);
-    let projectFolder = getProjectFolder(project);
+    console.log('PROJECT: ' + projectName);
+    let projectFolder = getProjectFolder(projectName);
 
     let options = {
       cwd: projectFolder,
@@ -43,9 +37,22 @@ export default function executeBuild(params: any): void {
     console.log('gulp bundle');
     child_process.execSync(fullPathToGulp + ' bundle', options);
 
-    if (!skipTest) {
-      console.log('gulp test');
-      child_process.execSync(fullPathToGulp + ' test', options);
+    resolve();
+  });
+}
+
+/**
+ * Entry point for the "rush rebuild" command.
+ */
+export default function executeBuild(params: any): void {
+  let config: IRushConfig = RushConfigLoader.load();
+
+  let promiseChain: Promise<void> = undefined;
+  config.projects.forEach((project) => {
+    if (!promiseChain) {
+      promiseChain = buildProject(project);
+    } else {
+      promiseChain = promiseChain.then(() => buildProject(project));
     }
   });
 

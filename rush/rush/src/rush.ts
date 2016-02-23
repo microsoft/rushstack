@@ -14,11 +14,6 @@ nomnom.command('unlink')
   .help('Remove node_modules symlinks for all projects');
 
 nomnom.command('rebuild')
-  .option('notest', {
-      abbr: 'n',
-      flag: true,
-      help: 'Skip running "gulp test" for all projects'
-  })
   .callback(executeBuild)
   .help('Run "gulp nuke" and "gulp bundle" for all projects');
 
