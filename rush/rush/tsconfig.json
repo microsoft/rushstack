@@ -14,6 +14,7 @@
       "src/ExecuteLink.ts",
       "src/gulp2vs.ts",
       "src/rush.ts",
-      "src/RushConfigLoader.ts"
+      "src/RushConfigLoader.ts",
+      "src/TaskOutputManager.ts"
     ]
 }
