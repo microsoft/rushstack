@@ -40,15 +40,22 @@ export default class TaskOutputManager {
   }
 
   public writeTaskOutput(taskName: string, data: string) {
+    const taskState = this._tasks[taskName];
+    if (!taskState || taskState.completed) {
+      throw new Error('The task is not registered or has been completed and written.');
+    }
+    taskState.stdout.push(data);
     if (this._activeTask === taskName) {
       process.stdout.write(data);
-    } else {
-      const taskState = this._tasks[taskName];
-      if (!taskState || taskState.completed) {
-        throw new Error('The task is not registered or has been completed and written.');
-      }
-      taskState.stdout.push(data);
     }
+  }
+
+  public getTaskOutput(taskName: string): string {
+    const taskState = this._tasks[taskName];
+    if (!taskState) {
+      throw new Error('The task is not registered!');
+    }
+    return taskState.stdout.join('');
   }
 
   public completeTask(taskName: string) {
