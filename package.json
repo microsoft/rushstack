@@ -1,0 +1,17 @@
+{
+  "name": "load-themed-styles",
+  "version": "1.0.0",
+  "description": "Loads themed styles.",
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/dzearing/load-themed-styles"
+  },
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "keywords": [],
+  "dependencies": {},
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-core-build": "^0.2.20"
+  }
+}
