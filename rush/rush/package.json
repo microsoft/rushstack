@@ -15,6 +15,7 @@
   },
   "license": "UNLICENSED",
   "dependencies": {
+    "colors": "^1.1.2",
     "del": "^2.2.0",
     "jake": "^8.0.12",
     "nomnom": "^1.8.1",

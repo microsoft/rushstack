@@ -1,11 +1,13 @@
 /// <reference path="../typings/tsd.d.ts" />
 
 import * as child_process from 'child_process';
+import colors = require('colors');
 import * as fs from 'fs';
 import * as path from 'path';
 import RushConfigLoader, { IRushConfig } from './RushConfigLoader';
 import { getCommonFolder } from './ExecuteLink';
 import TaskOutputManager from './TaskOutputManager';
+import { lintRegex, tscRegex, testRegex } from './ErrorDetector';
 
 const OutputManager = new TaskOutputManager();
 
@@ -42,7 +44,14 @@ function buildProject(projectName: string): Promise<void> {
     const buildTask = child_process.exec(fullPathToGulp + ' test', options);
 
     buildTask.stdout.on('data', (data: string) => {
+      // note that data does not return the whole line, so we may need to does
+      // some hackery here to make sure we are scanning whole individual lines 
       write(data);
+      checkForError(data, writeLine);
+    });
+
+    buildTask.stderr.on('data', (data: string) => {
+      write(colors.red(data));
     });
 
     buildTask.on('exit', (code: number) => {
@@ -51,6 +60,27 @@ function buildProject(projectName: string): Promise<void> {
       resolve();
     });
   });
+}
+
+function checkForError(line: string, write: (message: string) => void) {
+  let match = lintRegex.exec(line);
+  if (match) {
+    write(colors.yellow(formatVsoError(`${match[4]}(${match[5]}): [tslint] ${match[6]}`)));
+  } else {
+    match = tscRegex.exec(line);
+    if (match) {
+      write(colors.yellow(formatVsoError(`${match[1]}${match[2]} [tsc] ${match[3]}`)));
+    } else {
+      match = testRegex.exec(line);
+      if (match) {
+        write(colors.red(formatVsoError('[test] ' + match[1])));
+      }
+    }
+  }
+}
+
+function formatVsoError(errorMessage: string) {
+  return `##vso[task.logissue type=error;]${errorMessage}`;
 }
 
 /**

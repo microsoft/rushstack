@@ -1,3 +1,4 @@
+/// <reference path="colors/colors.d.ts" />
 /// <reference path="del/del.d.ts" />
 /// <reference path="es6-collections/es6-collections.d.ts" />
 /// <reference path="es6-promise/es6-promise.d.ts" />
