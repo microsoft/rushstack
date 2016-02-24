@@ -1,24 +1,8 @@
 import * as child_process from 'child_process';
 import * as path from 'path';
+import { lintRegex, tscRegex } from './ErrorDetector';
 
 console.log('gulp2vs: Running in "' + process.cwd() + '"');
-
-// Example: "[22:50:27] [gulp-tslint] error blah/test.ts[84, 20]: syntax error"
-// 0: input
-// 1: "[22:50:27]"
-// 2: "[gulp-tslint]"
-// 3: "error"
-// 4: "blah/test.ts"
-// 5: "84, 20"
-// 6: "syntax error"
-let lintRegex = new RegExp('^(\\[[^\\]]+\\]) *(\\[[^\\]]+\\]) *([^ ]+) *([^[]+) *\\[([^\\]]+)\\]: *(.*)$');
-
-// Example: "Error: TypeScript error: src\test.ts(68,6): error TS2304: Cannot find name 'x'."
-// 0: input
-// 1: "src\test.ts"
-// 2: "(68,6):"
-// 3: "error TS2304: Cannot find name 'x'."
-let tscRegex = new RegExp('^Error: TypeScript error: ([^\\(]+) *([^:]+:) *(.*)$');
 
 child_process.exec('gulp', function (err, stdout, stderr) {
   let lines = stdout.toString().split('\n');
