@@ -28,7 +28,7 @@ This will register any set of styles given. However, in the above example the co
 For example:
 
 ```js
-loadStyles('body { background: "[theme:primaryBackgroundColor, default: blue }]"');
+loadStyles('body { background: "[theme:primaryBackgroundColor, default: blue]"');
 ```
 
 When loading, the background will use the default value, blue. Providing your own theme values using the `loadTheme` function:
@@ -40,7 +40,7 @@ loadTheme({
   primaryBackgroundColor: "#EAEAEA"
 });
 
-loadStyles('body { background: "[theme:primaryBackgroundColor, default: blue }]"');
+loadStyles('body { background: "[theme:primaryBackgroundColor, default: #FFAAFA]"');
 ```
 
 This will register #EAEAEA as the body's background color. If you call loadTheme again after styles have already been registered, it will replace the style elements with retokenized values.
