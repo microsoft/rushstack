@@ -5,6 +5,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import RushConfigLoader, { IRushConfig } from './RushConfigLoader';
 import { getCommonFolder } from './ExecuteLink';
+import TaskOutputManager from './TaskOutputManager';
+
+const OutputManager = new TaskOutputManager();
 
 /**
  * Returns the folder path for the specified project, e.g. "./lib1"
@@ -20,24 +23,33 @@ function getProjectFolder(project: string): string {
 
 function buildProject(projectName: string): Promise<void> {
   return new Promise<void>((resolve: () => void, reject: () => void) => {
-    console.log('');
-    console.log('PROJECT: ' + projectName);
-    let projectFolder = getProjectFolder(projectName);
+    const { write, writeLine } = OutputManager.registerTask(projectName);
 
-    let options = {
+    writeLine(`> Project [${projectName}]:`);
+    const projectFolder = getProjectFolder(projectName);
+
+    const options = {
       cwd: projectFolder,
       stdio: [0, 1, 2] // (omit this to suppress gulp console output)
     };
 
-    let fullPathToGulp = path.join(getCommonFolder(), 'node_modules/.bin/gulp');
+    const fullPathToGulp = path.join(getCommonFolder(), 'node_modules/.bin/gulp');
 
-    console.log('gulp nuke');
+    writeLine('gulp nuke');
     child_process.execSync(fullPathToGulp + ' nuke', options);
 
-    console.log('gulp bundle');
-    child_process.execSync(fullPathToGulp + ' bundle', options);
+    writeLine('gulp test');
+    const buildTask = child_process.exec(fullPathToGulp + ' test', options);
 
-    resolve();
+    buildTask.stdout.on('data', (data: string) => {
+      write(data);
+    });
+
+    buildTask.on('exit', (code: number) => {
+      writeLine(`> Finished [${projectName}]!`);
+      OutputManager.completeTask(projectName);
+      resolve();
+    });
   });
 }
 
@@ -55,8 +67,9 @@ export default function executeBuild(params: any): void {
       promiseChain = promiseChain.then(() => buildProject(project));
     }
   });
-
-  console.log('');
-  console.log('Done!');
+  promiseChain.then(() => {
+    console.log('');
+    console.log('Done!');
+  });
 };
 
