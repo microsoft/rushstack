@@ -7,9 +7,9 @@ import * as path from 'path';
 import RushConfigLoader, { IRushConfig } from './RushConfigLoader';
 import { getCommonFolder } from './ExecuteLink';
 import TaskOutputManager from './TaskOutputManager';
-import { lintRegex, tscRegex, testRegex } from './ErrorDetector';
+import ErrorDetector, { ErrorDetectionMode } from './ErrorDetector';
 
-const OutputManager = new TaskOutputManager();
+const OutputManager: TaskOutputManager = new TaskOutputManager();
 
 /**
  * Returns the folder path for the specified project, e.g. "./lib1"
@@ -23,7 +23,7 @@ function getProjectFolder(project: string): string {
   return projectFolder;
 }
 
-function buildProject(projectName: string): Promise<void> {
+function buildProject(projectName: string, mode: ErrorDetectionMode): Promise<void> {
   return new Promise<void>((resolve: () => void, reject: () => void) => {
     const { write, writeLine } = OutputManager.registerTask(projectName);
 
@@ -44,10 +44,7 @@ function buildProject(projectName: string): Promise<void> {
     const buildTask = child_process.exec(fullPathToGulp + ' test', options);
 
     buildTask.stdout.on('data', (data: string) => {
-      // VSO #163486 note that data does not return the whole line, so we may need to does
-      // some hackery here to make sure we are scanning whole individual lines
       write(data);
-      checkForError(data, writeLine);
     });
 
     buildTask.stderr.on('data', (data: string) => {
@@ -55,32 +52,24 @@ function buildProject(projectName: string): Promise<void> {
     });
 
     buildTask.on('exit', (code: number) => {
-      writeLine(`> Finished [${projectName}] - Code: ${code}!\n`);
+      const errors = ErrorDetector(OutputManager.getTaskOutput(projectName), mode);
+      for (let i = 0; i < errors.length; i++) {
+        writeLine(colors.red(errors[i]));
+      }
+      write(`> Finished [${projectName}]`);
+      if (errors.length) {
+        write(colors.red(` ${errors.length} Errors!!`));
+      }
+      writeLine('\n');
+
       OutputManager.completeTask(projectName);
-      resolve();
+      if (errors.length) {
+        reject();
+      } else {
+        resolve();
+      }
     });
   });
-}
-
-function checkForError(line: string, write: (message: string) => void) {
-  let match = lintRegex.exec(line);
-  if (match) {
-    write(colors.red(formatVsoError(`${match[4]}(${match[5]}): [tslint] ${match[6]}`)));
-  } else {
-    match = tscRegex.exec(line);
-    if (match) {
-      write(colors.red(formatVsoError(`${match[1]}${match[2]} [tsc] ${match[3]}`)));
-    } else {
-      match = testRegex.exec(line);
-      if (match) {
-        write(colors.red(formatVsoError('[test] ' + match[1])));
-      }
-    }
-  }
-}
-
-function formatVsoError(errorMessage: string) {
-  return `##vso[task.logissue type=error;]${errorMessage}`;
 }
 
 /**
@@ -88,13 +77,15 @@ function formatVsoError(errorMessage: string) {
  */
 export default function executeBuild(params: any): void {
   let config: IRushConfig = RushConfigLoader.load();
+  let errorMode: ErrorDetectionMode = (params.vso ?
+    ErrorDetectionMode.VisualStudioOnline : ErrorDetectionMode.LocalBuild);
 
   let promiseChain: Promise<void> = undefined;
   config.projects.forEach((project) => {
     if (!promiseChain) {
-      promiseChain = buildProject(project);
+      promiseChain = buildProject(project, errorMode);
     } else {
-      promiseChain = promiseChain.then(() => buildProject(project));
+      promiseChain = promiseChain.then(() => buildProject(project, errorMode));
     }
   });
   promiseChain.then(() => {

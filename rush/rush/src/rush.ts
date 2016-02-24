@@ -15,6 +15,11 @@ nomnom.command('unlink')
 
 nomnom.command('rebuild')
   .callback(executeBuild)
+    .option('vso', {
+      abbr: 'n',
+      flag: true,
+      help: 'Display error messages in the VisualStudio Online format'
+  })
   .help('Run "gulp nuke" and "gulp bundle" for all projects');
 
 nomnom.parse();
