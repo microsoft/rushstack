@@ -44,8 +44,8 @@ function buildProject(projectName: string): Promise<void> {
     const buildTask = child_process.exec(fullPathToGulp + ' test', options);
 
     buildTask.stdout.on('data', (data: string) => {
-      // note that data does not return the whole line, so we may need to does
-      // some hackery here to make sure we are scanning whole individual lines 
+      // VSO #163486 note that data does not return the whole line, so we may need to does
+      // some hackery here to make sure we are scanning whole individual lines
       write(data);
       checkForError(data, writeLine);
     });
@@ -55,7 +55,7 @@ function buildProject(projectName: string): Promise<void> {
     });
 
     buildTask.on('exit', (code: number) => {
-      writeLine(`> Finished [${projectName}]!\n`);
+      writeLine(`> Finished [${projectName}] - Code: ${code}!\n`);
       OutputManager.completeTask(projectName);
       resolve();
     });
