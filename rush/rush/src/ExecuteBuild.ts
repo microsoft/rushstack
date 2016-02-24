@@ -55,7 +55,7 @@ function buildProject(projectName: string): Promise<void> {
     });
 
     buildTask.on('exit', (code: number) => {
-      writeLine(`> Finished [${projectName}]!`);
+      writeLine(`> Finished [${projectName}]!\n`);
       OutputManager.completeTask(projectName);
       resolve();
     });
@@ -65,11 +65,11 @@ function buildProject(projectName: string): Promise<void> {
 function checkForError(line: string, write: (message: string) => void) {
   let match = lintRegex.exec(line);
   if (match) {
-    write(colors.yellow(formatVsoError(`${match[4]}(${match[5]}): [tslint] ${match[6]}`)));
+    write(colors.red(formatVsoError(`${match[4]}(${match[5]}): [tslint] ${match[6]}`)));
   } else {
     match = tscRegex.exec(line);
     if (match) {
-      write(colors.yellow(formatVsoError(`${match[1]}${match[2]} [tsc] ${match[3]}`)));
+      write(colors.red(formatVsoError(`${match[1]}${match[2]} [tsc] ${match[3]}`)));
     } else {
       match = testRegex.exec(line);
       if (match) {
