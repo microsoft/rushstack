@@ -50,7 +50,7 @@ function reloadStyles(): void {
 function detokenize(styles: string): string {
   if (_theme && styles) {
     styles = styles.replace(
-      /[\'\"]\[theme:\s*(\w+)\s*(?:\,\s*default:\s*([\"\']?[\s\w]*\b[\"\']?))?\s*\][\'\"]/g,
+      /[\'\"]\[theme:\s*(\w+)\s*(?:\,\s*default:\s*([\"\']?[\#\-\s\w]*\b[\"\']?))?\s*\][\'\"]/g,
       (
         match: string,
         themeVariable: string,
