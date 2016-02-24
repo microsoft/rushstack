@@ -48,7 +48,7 @@ function reloadStyles(): void {
  * @param {string} styles Tokenized styles to fix.
  */
 function detokenize(styles: string): string {
-  if (_theme && styles) {
+  if (styles) {
     styles = styles.replace(
       /[\'\"]\[theme:\s*(\w+)\s*(?:\,\s*default:\s*([\"\']?[\#\-\s\w]*\b[\"\']?))?\s*\][\'\"]/g,
       (
