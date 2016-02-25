@@ -5,7 +5,7 @@
   "type": "object",
   "properties": {
     "$schema": {
-      "description":  "The metadata to indicate the JSON schema, required by some editors such as VS2015",
+      "description": "The metadata to indicate the JSON schema, required by some editors such as VS2015",
       "type": "string"
     },
     "commonFolder": {
@@ -13,30 +13,31 @@
       "type": "string"
     },
     "projects": {
-      "description": "An array of top-level project folders that will be managed by this tool, sorted according to build order.  Example: ['lib1', 'lib2', 'my-app']",
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "minItems": 1,
-      "uniqueItems": true
-    },
-    "dependencyLinks": {
-      "description": "For each project with local dependencies, a list of other projects to be symlinked into the node_modules folder.  Example: { 'app': [ 'lib1', 'lib2' ] }",
+      "description": "A mapping of project names to their information",
       "type": "object",
       "patternProperties": {
-        "^[a-zA-Z0-9_]+$": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "minItems": 1,
-          "uniqueItems": true
+        "^[a-zA-Z0-9_@/-]+$": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "description": "The path to the project relative to the repository root",
+              "type": "string"
+            },
+            "dependencies": {
+              "description":  "An array of the projects this project directly depends on",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 0,
+              "uniqueItems": true
+            }
+          }
         }
       }
     }
   },
   "additionalProperties": false,
 
-  "required": [ "commonFolder", "projects", "dependencyLinks" ]
+  "required": [ "commonFolder", "projects" ]
 }

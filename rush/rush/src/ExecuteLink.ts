@@ -3,7 +3,7 @@
 import * as del from 'del';
 import * as fs from 'fs';
 import * as path from 'path';
-import RushConfigLoader, { IRushConfig } from './RushConfigLoader';
+import RushConfigLoader, { IRushConfig, IRushProjects } from './RushConfigLoader';
 
 let config: IRushConfig = RushConfigLoader.load();
 
@@ -38,16 +38,15 @@ export function getCommonFolder(): string {
  * in the project's "node_modules" folder.  These symlinks point to the project
  * folders for the specified dependencies.
  */
-function createDependencyLinks(consumingProject: string, dependencyProjects: string[],
-  packageNamesByProject: Map<string, string>): void {
-  dependencyProjects.forEach((dependencyProject) => {
-    console.log('  Linking ' + consumingProject + '/node_modules/' + dependencyProject);
-
-    let packageName = packageNamesByProject.get(dependencyProject);
-    if (packageName === undefined) {
+function createDependencyLinks(consumingPackage: string, projects: IRushProjects): void {
+  const consumingProject = projects[consumingPackage];
+  consumingProject.dependencies.forEach((packageName) => {
+    const dependencyProject = projects[packageName].path;
+    if (dependencyProject === undefined) {
       throw new Error(`Cannot link to the project "${dependencyProject}" because it is`
         + ' missing from the "projects" section');
     }
+    console.log('  Linking ' + consumingProject.path + '/node_modules/' + dependencyProject);
 
     // Ex: "C:\MyRepo\my-library"
     let dependencyProjectFolder = getProjectFolder(dependencyProject);
@@ -68,7 +67,7 @@ function createDependencyLinks(consumingProject: string, dependencyProjects: str
       let packagePart = packageName.substr(index + 1);
 
       // Ex: "C:\MyRepo\my-app\node_modules\@ms"
-      let localScopedFolder = path.join(getProjectFolder(consumingProject),
+      let localScopedFolder = path.join(getProjectFolder(consumingProject.path),
         'node_modules', scopePart);
       if (!fs.existsSync(localScopedFolder)) {
         fs.mkdirSync(localScopedFolder);
@@ -78,7 +77,7 @@ function createDependencyLinks(consumingProject: string, dependencyProjects: str
       localModuleFolder = path.join(localScopedFolder, packagePart);
     } else {
       // Ex: "C:\MyRepo\my-app\node_modules\my-library"
-      localModuleFolder = path.join(getProjectFolder(consumingProject),
+      localModuleFolder = path.join(getProjectFolder(consumingProject.path),
         'node_modules', dependencyProject);
     }
 
@@ -87,6 +86,8 @@ function createDependencyLinks(consumingProject: string, dependencyProjects: str
   });
 }
 
+/*
+// @todo -- change this to be a function that ensure the project names match
 function fetchPackageName(project: string, packageNamesByProject: Map<string, string>): void {
   if (!packageNamesByProject.has(project)) {
     let projectFolder: string = getProjectFolder(project);
@@ -105,24 +106,21 @@ function fetchPackageName(project: string, packageNamesByProject: Map<string, st
     }
   }
 }
+*/
 
 /**
  * This is the common implementation of the "rush link" and "rush unlink" commands.
  */
 function createSymlinks(cleanOnly: boolean): void {
-  // For each project folder, we will load its package.json and determine the 
-  // package name published by NPM
-  // Ex: "sp-library" -> "@ms/sp-library"
-  let packageNamesByProject = new Map<string, string>();
-
-  config.projects.forEach((project) => {
+  Object.keys(config.projects).forEach((packageName: string) => {
+    const projectConfig = config.projects[packageName];
     console.log('');
-    console.log('PROJECT: ' + project);
+    console.log('PROJECT: ' + projectConfig.path);
 
-    fetchPackageName(project, packageNamesByProject);
+    // fetchPackageName(project, packageNamesByProject);
 
     // Ex: "C:\MyRepo\my-app\node_modules"
-    let localModulesFolder = path.join(getProjectFolder(project), 'node_modules');
+    let localModulesFolder = path.join(getProjectFolder(projectConfig.path), 'node_modules');
     console.log('Removing node_modules');
     del.sync(localModulesFolder);
 
@@ -153,7 +151,7 @@ function createSymlinks(cleanOnly: boolean): void {
       let commonModulesFolder = path.join(getCommonFolder(), 'node_modules');
       let commonModulesFolderItems = fs.readdirSync(commonModulesFolder);
       let linkCount: number = 0;
-      commonModulesFolderItems.forEach(function (filename) {
+      commonModulesFolderItems.forEach((filename) => {
         if (filename.substr(0, 1) === '@') {
           // For scoped folders (e.g. "@ms"), we need to create a regular folder
 
@@ -187,20 +185,10 @@ function createSymlinks(cleanOnly: boolean): void {
         }
       });
       console.log(`Created ${linkCount} links`);
+
+      createDependencyLinks(packageName, config.projects);
     }
   });
-
-  if (!cleanOnly) {
-    console.log('\nCreating dependency links');
-
-    let dependencyLinks = config.dependencyLinks;
-    let keys = Object.getOwnPropertyNames(dependencyLinks);
-    keys.forEach(function (consumingProject, idx, array) {
-      let dependencyProjects: Array<string> = dependencyLinks[consumingProject];
-      createDependencyLinks(consumingProject, dependencyProjects, packageNamesByProject);
-    });
-
-  }
 }
 
 /**
@@ -224,4 +212,3 @@ export default function executeLink(): void {
   console.log('');
   console.log('Done!');
 };
-

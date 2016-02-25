@@ -5,13 +5,21 @@ import * as fs from 'fs';
 import stripJsonComments = require('strip-json-comments');
 import Validator = require('z-schema');
 
+export interface IRushProjectConfig {
+  path: string;
+  dependencies?: Array<string>;
+};
+
+export interface IRushProjects {
+  [projectName: string]: IRushProjectConfig;
+};
+
 /**
  * This interface represents the definitions in the rush.json config file.
  */
 export interface IRushConfig {
   commonFolder: string;
-  projects: Array<string>;
-  dependencyLinks: { [project: string]: Array<string> };
+  projects: IRushProjects;
 };
 
 /**
@@ -19,7 +27,6 @@ export interface IRushConfig {
  * rush-schema.json, and then returns an IRushConfig object.
  */
 export default class RushConfigLoader {
-
   public static load(): IRushConfig {
     let configFile : string = path.resolve('rush.json');
 
