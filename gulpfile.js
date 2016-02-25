@@ -3,6 +3,16 @@
 let build = require('gulp-core-build');
 
 build.initializeTasks(
-  require('gulp')
+  require('gulp'),
+  {
+    build: {
+      paths: {
+        lessMatch: null,
+        sassMatch: null,
+        htmlMatch: null,
+        staticsMatch: [ 'src/**/*.js']
+      }
+    }
+  }
 );
 
