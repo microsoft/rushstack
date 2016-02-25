@@ -6,71 +6,11 @@ import * as fs from 'fs';
 import * as path from 'path';
 import RushConfigLoader, { IRushConfig, IRushProjects, IRushProjectConfig } from './RushConfigLoader';
 import { getCommonFolder } from './ExecuteLink';
-import TaskOutputManager from './TaskOutputManager';
+import ITask from './taskRunner/ITask';
+import TaskRunner from './taskRunner/TaskRunner';
+import ProjectBuildTask from './ProjectBuildTask';
 import ErrorDetector, { ErrorDetectionMode } from './ErrorDetector';
 
-const OutputManager: TaskOutputManager = new TaskOutputManager();
-
-/**
- * Returns the folder path for the specified project, e.g. "./lib1"
- * for "lib1".  Reports an error if the folder does not exist.
- */
-function getProjectFolder(project: string): string {
-  let projectFolder = path.join(path.resolve('.'), project);
-  if (!fs.existsSync(projectFolder)) {
-    throw new Error(`Project folder not found: ${project}`);
-  }
-  return projectFolder;
-}
-
-function buildProject(projectName: string, mode: ErrorDetectionMode): Promise<void> {
-  return new Promise<void>((resolve: () => void, reject: () => void) => {
-    const { write, writeLine } = OutputManager.registerTask(projectName);
-
-    writeLine(`> Project [${projectName}]:`);
-    const projectFolder = getProjectFolder(projectName);
-
-    const options = {
-      cwd: projectFolder,
-      stdio: [0, 1, 2] // (omit this to suppress gulp console output)
-    };
-
-    const fullPathToGulp = path.join(getCommonFolder(), 'node_modules/.bin/gulp');
-
-    writeLine('gulp nuke');
-    // child_process.execSync(fullPathToGulp + ' nuke', options);
-
-    writeLine('gulp test');
-    const buildTask = child_process.exec(fullPathToGulp + ' test', options);
-
-    buildTask.stdout.on('data', (data: string) => {
-      // write(data);
-    });
-
-    buildTask.stderr.on('data', (data: string) => {
-      write(colors.red(data));
-    });
-
-    buildTask.on('exit', (code: number) => {
-      const errors = ErrorDetector(OutputManager.getTaskOutput(projectName), mode);
-      for (let i = 0; i < errors.length; i++) {
-        writeLine(colors.red(errors[i]));
-      }
-      write(`> Finished [${projectName}]`);
-      if (errors.length) {
-        write(colors.red(` ${errors.length} Errors!!`));
-      }
-      writeLine('\n');
-
-      OutputManager.completeTask(projectName);
-      if (errors.length) {
-        reject();
-      } else {
-        resolve();
-      }
-    });
-  });
-}
 
 // Top level packages with no
 interface IProjectBuildInfo extends IRushProjectConfig {
@@ -131,6 +71,8 @@ function markProjectAsCompleted(projectName: string, projects: Map<string, IProj
   projects.delete(projectName);
 }
 
+
+
 function queueBuilds(projects: Map<string, IProjectBuildInfo>): Promise<any> {
   const ready = getProjectsWithNoDependencies(projects);
 
@@ -151,9 +93,46 @@ function queueBuilds(projects: Map<string, IProjectBuildInfo>): Promise<any> {
 export default function executeBuild(params: any): void {
   let config: IRushConfig = RushConfigLoader.load();
 
-  queueBuilds(buildDependencyGraph(config.projects)).then(() => {
+  const taskRunner = new TaskRunner(buildTaskList(config.projects));
+
+  taskRunner.execute().then(() => {
     console.log('');
     console.log('Done!');
   });
 };
 
+function buildTaskList(projects: IRushProjects): Map<string, ITask> {
+  const projectTasks = new Map<string, ITask>();
+
+  Object.keys(projects).forEach((projectName: string) => {
+    const projectConfig = projects[projectName];
+
+    const projectTask = new ProjectBuildTask(projectName,
+      projectConfig, ErrorDetectionMode.VisualStudioOnline);
+
+    projectTasks.set(projectName, projectTask);
+  });
+
+  setProjectDependencies(projects, projectTasks);
+  return projectTasks;
+}
+
+function setProjectDependencies(projects: IRushProjects, projectTasks: Map<string, ITask>) {
+  Object.keys(projects).forEach((projectName: string) => {
+    const projectConfig = projects[projectName];
+    const projectTask = projectTasks.get(projectName);
+    projectConfig.dependencies.forEach((dependencyName: string) => {
+      projectTask.dependencies.push(projectTasks.get(dependencyName));
+    });
+  });
+
+  setProjectDependents(projectTasks);
+}
+
+function setProjectDependents(projectTasks: Map<string, ITask>) {
+  this.projectTasks.forEach((task: ITask) => {
+    task.dependencies.forEach((dependency: ITask) => {
+      dependency.dependents.push(task);
+    });
+  });
+}
