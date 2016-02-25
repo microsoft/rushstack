@@ -47,10 +47,10 @@ function reloadStyles(): void {
  * Find theme tokens and replaces them with provided theme values.
  * @param {string} styles Tokenized styles to fix.
  */
-function detokenize(styles: string): string {
+export function detokenize(styles: string): string {
   if (styles) {
     styles = styles.replace(
-      /[\'\"]\[theme:\s*(\w+)\s*(?:\,\s*default:\s*([\"\']?[\#\-\s\w]*\b[\"\']?))?\s*\][\'\"]/g,
+      /[\'\"]\[theme:\s*(\w+)\s*(?:\,\s*default:\s*([\\"\']?[\.\,\(\)\#\-\s\w]*[\.\,\(\)\#\-\w][\"\']?))?\s*\][\'\"]/g,
       (
         match: string,
         themeVariable: string,
