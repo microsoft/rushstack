@@ -1,10 +1,13 @@
 ﻿import TaskStatus from './TaskStatus';
 import { ITaskWriter } from './TaskWriterFactory';
 
-export interface ITask {
+export interface ITaskDefinition {
   name: string;
-  status: TaskStatus;
   execute: (writer: ITaskWriter) => Promise<any>;
+}
+
+export interface ITask extends ITaskDefinition {
+  status: TaskStatus;
   dependencies: Array<ITask>;
   dependents: Array<ITask>;
 };

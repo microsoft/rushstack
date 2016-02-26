@@ -6,8 +6,7 @@ import colors = require('colors');
 import { IRushProjectConfig } from './RushConfigLoader';
 import { getCommonFolder } from './ExecuteLink'; // todo refactor helper funcs
 import ErrorDetector, { ErrorDetectionMode } from './ErrorDetector';
-import ITask from './taskRunner/ITask';
-import TaskStatus from './taskRunner/TaskStatus';
+import { ITaskDefinition } from './taskRunner/ITask';
 import { ITaskWriter } from './taskRunner/TaskWriterFactory';
 
 /**
@@ -22,10 +21,8 @@ function getProjectFolder(project: string): string {
   return projectFolder;
 }
 
-export default class ProjectBuildTask implements ITask {
+export default class ProjectBuildTask implements ITaskDefinition {
   public name: string;
-  public dependencies: Array<ITask> = new Array<ITask>();
-  public dependents: Array<ITask> = new Array<ITask>();
 
   private _errorDetectionMode: ErrorDetectionMode;
   private _config: IRushProjectConfig;
@@ -36,15 +33,11 @@ export default class ProjectBuildTask implements ITask {
     this._config = config;
   }
 
-  get status(): TaskStatus {
-    return TaskStatus.Blocked;
-  }
-
   public execute(writer: ITaskWriter): Promise<void> {
     return new Promise<void>((resolve: () => void, reject: () => void) => {
-      //@todo  check that deps are actually resolved
+      // @todo  check that deps are actually resolved
 
-      writer.writeLine(`> Project [${this._config.path}]:`);
+      writer.writeLine(`>>> ProjectBuildTask :: Project [${this._config.path}]:`);
       const projectFolder = getProjectFolder(this._config.path);
 
       const options = {
@@ -55,13 +48,15 @@ export default class ProjectBuildTask implements ITask {
       const fullPathToGulp = path.join(getCommonFolder(), 'node_modules/.bin/gulp');
 
       writer.writeLine('gulp nuke');
-      // child_process.execSync(fullPathToGulp + ' nuke', options);
+
+      /*const gulpNukeResult = */ child_process.execSync(fullPathToGulp + ' nuke', { cwd: projectFolder });
+      // writer.writeLine(gulpNukeResult.toString());
 
       writer.writeLine('gulp test');
       const buildTask = child_process.exec(fullPathToGulp + ' test', options);
 
       buildTask.stdout.on('data', (data: string) => {
-        writer.write(data);
+        // writer.write(data);
       });
 
       buildTask.stderr.on('data', (data: string) => {
@@ -73,12 +68,10 @@ export default class ProjectBuildTask implements ITask {
         for (let i = 0; i < errors.length; i++) {
           writer.writeLine(colors.red(errors[i]));
         }
-        writer.write(`> Finished [${this.name}]`);
         if (errors.length) {
           writer.write(colors.red(` ${errors.length} Errors!!`));
         }
         writer.writeLine('');
-
         if (errors.length) {
           reject();
         } else {

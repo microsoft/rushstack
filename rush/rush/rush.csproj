@@ -19,8 +19,18 @@
     </Content>
     <Content Include="sharepoint\feature_xml\**\*.*">
     </Content>
-    <TypeScriptCompile Include="src\**\*.ts">
-    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\ErrorDetector.ts" />
+    <TypeScriptCompile Include="src\ExecuteBuild.ts" />
+    <TypeScriptCompile Include="src\ExecuteLink.ts" />
+    <TypeScriptCompile Include="src\gulp2vs.ts" />
+    <TypeScriptCompile Include="src\rush.ts" />
+    <TypeScriptCompile Include="src\RushConfigLoader.ts" />
+    <TypeScriptCompile Include="src\ProjectBuildTask.ts" />
+    <TypeScriptCompile Include="src\TaskOutputManager.ts" />
+    <TypeScriptCompile Include="src\taskRunner\ITask.ts" />
+    <TypeScriptCompile Include="src\taskRunner\Task.ts" />
+    <TypeScriptCompile Include="src\taskRunner\TaskRunner.ts" />
+    <TypeScriptCompile Include="src\taskRunner\TaskStatus.ts" />
     <TypeScriptCompile Include="src\**\*.tsx">
     </TypeScriptCompile>
     <Content Include="src\**\*.js">
@@ -55,7 +65,7 @@
     <TypeScriptSourceRoot />
   </PropertyGroup>
   <Target Name="GulpToVs">
-      <Message Text="Jake not supported yet" Importance="normal"/>
-  </Target>  
+    <Message Text="Jake not supported yet" Importance="normal" />
+  </Target>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets')" />
 </Project>

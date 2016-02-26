@@ -28,13 +28,13 @@ export default class TaskWriterFactory {
       this._activeTask = taskName;
     }
 
-    console.log(`>>> Task [${taskName}] registered`);
+    // console.log(`>>> Task [${taskName}] registered`);
 
     return {
-      write: (data: string) => this._writeTaskOutput(taskName, data),
-      writeLine: (data: string) => this._writeTaskOutput(taskName, data + '\n'),
+      close: () => this._completeTask(taskName),
       getOutput: () => this._getTaskOutput(taskName),
-      close: () => this._completeTask(taskName)
+      write: (data: string) => this._writeTaskOutput(taskName, data),
+      writeLine: (data: string) => this._writeTaskOutput(taskName, data + '\n')
     };
   }
 
@@ -66,7 +66,7 @@ export default class TaskWriterFactory {
     if (!this._activeTask) {
       process.stdout.write(taskState.stdout.join(''));
     } else if (taskName === this._activeTask) {
-      this._activeTask = undefined
+      this._activeTask = undefined;
       this._tasks.delete(taskName);
       this._writeAllCompletedTasks();
     } else {
