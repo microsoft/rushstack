@@ -10,9 +10,9 @@ build.initializeTasks(
         lessMatch: null,
         sassMatch: null,
         htmlMatch: null,
+        amdLibFolder: 'lib-amd',
         staticsMatch: [ 'src/**/*.js']
       }
     }
   }
 );
-
