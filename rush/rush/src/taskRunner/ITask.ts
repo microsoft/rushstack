@@ -1,15 +1,27 @@
-﻿import TaskStatus from './TaskStatus';
+﻿/**
+ * @file ITask.ts
+ * @Copyright (c) Microsoft Corporation.  All rights reserved.
+ *
+ * The definition of a task as used by the TaskRunner
+ */
+
+import TaskStatus from './TaskStatus';
 import { ITaskWriter } from './TaskWriterFactory';
 
+/**
+ * A definition for a task, an execute function returning a promise and a unique string name
+ */
 export interface ITaskDefinition {
   name: string;
   execute: (writer: ITaskWriter) => Promise<any>;
 }
 
+/**
+ * The interface used internally by TaskRunner, which tracks the dependencies and execution status
+ */
 export interface ITask extends ITaskDefinition {
   status: TaskStatus;
-  dependencies: Array<ITask>;
-  dependents: Array<ITask>;
+  dependencies: ITask[];
+  dependents: ITask[];
 };
-
 export default ITask;

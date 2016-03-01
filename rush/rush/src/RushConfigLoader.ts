@@ -1,4 +1,9 @@
-/// <reference path="../typings/tsd.d.ts" />
+/**
+ * @file RushConfigLoader.ts
+ * @Copyright (c) Microsoft Corporation.  All rights reserved.
+ *
+ * Provides helper functions to load, validate, and read the rush config file
+ */
 
 import * as path from 'path';
 import * as fs from 'fs';
@@ -7,7 +12,7 @@ import Validator = require('z-schema');
 
 export interface IRushProjectConfig {
   path: string;
-  dependencies?: Array<string>;
+  dependencies?: string[];
 };
 
 export interface IRushProjects {
@@ -27,7 +32,12 @@ export interface IRushConfig {
  * rush-schema.json, and then returns an IRushConfig object.
  */
 export default class RushConfigLoader {
+  private static _cachedConfig: IRushConfig = undefined;
+
   public static load(): IRushConfig {
+    if (this._cachedConfig) {
+      return this._cachedConfig;
+    }
     let configFile : string = path.resolve('rush.json');
 
     if (!fs.existsSync(configFile)) {
@@ -61,7 +71,40 @@ export default class RushConfigLoader {
       throw new Error(errorMessage);
     }
 
+    Object.keys(config.projects).forEach((projectName: string) => {
+      const project = config.projects[projectName];
+      if (!project.dependencies) {
+        project.dependencies = [];
+      }
+    });
+
+    this._cachedConfig = config;
     return config;
   }
 
+  /**
+   * Returns the folder path for the specified project, e.g. "./lib1"
+   * for "lib1".  Reports an error if the folder does not exist.
+   */
+  public static getProjectFolder(project: string): string {
+    const projectFolder = path.join(path.resolve('.'), project);
+    if (!fs.existsSync(projectFolder)) {
+      throw new Error(`Project folder not found: ${project}`);
+    }
+    return projectFolder;
+  }
+
+  /**
+   * Returns the "commonFolder" specified in rush.config.  The common folder
+   * contains the "node_modules" folder that is shared by all projects.
+   * Reports an error if the folder does not exist.
+   */
+  public static getCommonFolder(): string {
+    const config = this.load();
+    const commonFolder = path.resolve(config.commonFolder);
+    if (!fs.existsSync(commonFolder)) {
+      throw new Error(`Common folder not found: ${config.commonFolder}`);
+    }
+    return commonFolder;
+  }
 }

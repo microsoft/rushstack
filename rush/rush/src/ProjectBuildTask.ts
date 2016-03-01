@@ -1,25 +1,18 @@
-﻿import * as fs from 'fs';
+﻿/**
+ * @file ProjectBuildTask.ts
+ * @Copyright (c) Microsoft Corporation.  All rights reserved.
+ *
+ * A TaskRunner task which cleans and builds a project
+ */
+
 import * as path from 'path';
 import * as child_process from 'child_process';
 import colors = require('colors');
 
-import { IRushProjectConfig } from './RushConfigLoader';
-import { getCommonFolder } from './ExecuteLink'; // todo refactor helper funcs
+import RushConfigLoader, { IRushProjectConfig } from './RushConfigLoader';
 import ErrorDetector, { ErrorDetectionMode } from './ErrorDetector';
 import { ITaskDefinition } from './taskRunner/ITask';
 import { ITaskWriter } from './taskRunner/TaskWriterFactory';
-
-/**
- * Returns the folder path for the specified project, e.g. "./lib1"
- * for "lib1".  Reports an error if the folder does not exist.
- */
-function getProjectFolder(project: string): string {
-  let projectFolder = path.join(path.resolve('.'), project);
-  if (!fs.existsSync(projectFolder)) {
-    throw new Error(`Project folder not found: ${project}`);
-  }
-  return projectFolder;
-}
 
 export default class ProjectBuildTask implements ITaskDefinition {
   public name: string;
@@ -35,17 +28,17 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
   public execute(writer: ITaskWriter): Promise<void> {
     return new Promise<void>((resolve: () => void, reject: () => void) => {
-      // @todo  check that deps are actually resolved
+      // @todo - check that deps are actually resolved
 
       writer.writeLine(`>>> ProjectBuildTask :: Project [${this._config.path}]:`);
-      const projectFolder = getProjectFolder(this._config.path);
+      const projectFolder = RushConfigLoader.getProjectFolder(this._config.path);
 
       const options = {
         cwd: projectFolder,
         stdio: [0, 1, 2] // (omit this to suppress gulp console output)
       };
 
-      const fullPathToGulp = path.join(getCommonFolder(), 'node_modules/.bin/gulp');
+      const fullPathToGulp = path.join(RushConfigLoader.getCommonFolder(), 'node_modules/.bin/gulp');
 
       writer.writeLine('gulp nuke');
 

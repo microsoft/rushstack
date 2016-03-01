@@ -1,3 +1,10 @@
+/**
+ * @file rush.ts
+ * @Copyright (c) Microsoft Corporation.  All rights reserved.
+ *
+ * Defines routing for the rush tool
+ */
+
 /// <reference path="../typings/tsd.d.ts" />
 
 import * as nomnom from 'nomnom';
