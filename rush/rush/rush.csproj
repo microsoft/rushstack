@@ -19,18 +19,8 @@
     </Content>
     <Content Include="sharepoint\feature_xml\**\*.*">
     </Content>
-    <TypeScriptCompile Include="src\ErrorDetector.ts" />
-    <TypeScriptCompile Include="src\ExecuteBuild.ts" />
-    <TypeScriptCompile Include="src\ExecuteLink.ts" />
-    <TypeScriptCompile Include="src\gulp2vs.ts" />
-    <TypeScriptCompile Include="src\rush.ts" />
-    <TypeScriptCompile Include="src\RushConfigLoader.ts" />
-    <TypeScriptCompile Include="src\ProjectBuildTask.ts" />
-    <TypeScriptCompile Include="src\TaskOutputManager.ts" />
-    <TypeScriptCompile Include="src\taskRunner\ITask.ts" />
-    <TypeScriptCompile Include="src\taskRunner\Task.ts" />
-    <TypeScriptCompile Include="src\taskRunner\TaskRunner.ts" />
-    <TypeScriptCompile Include="src\taskRunner\TaskStatus.ts" />
+    <TypeScriptCompile Include="src\**\*.ts">
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\**\*.tsx">
     </TypeScriptCompile>
     <Content Include="src\**\*.js">
