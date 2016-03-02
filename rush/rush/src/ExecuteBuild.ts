@@ -18,13 +18,15 @@ import { ErrorDetectionMode } from './ErrorDetector';
 export default function executeBuild(params: any): void {
   const config: IRushConfig = RushConfigLoader.load();
   const projects = config.projects;
+  const vsoMode = params.vso;
+  const quietMode = params.quiet;
 
-  const taskRunner = new TaskRunner();
+  const taskRunner = new TaskRunner(quietMode);
 
   // Create tasks and register with tax runner
   Object.keys(projects).forEach((projectName: string) => {
-    const projectTask = new ProjectBuildTask(projectName,
-      projects[projectName], ErrorDetectionMode.VisualStudioOnline);
+    const errorMode = vsoMode ? ErrorDetectionMode.VisualStudioOnline : ErrorDetectionMode.LocalBuild;
+    const projectTask = new ProjectBuildTask(projectName, projects[projectName], errorMode);
     taskRunner.addTask(projectTask);
   });
 

@@ -7,7 +7,6 @@
 
 import * as path from 'path';
 import * as child_process from 'child_process';
-import colors = require('colors');
 
 import RushConfigLoader, { IRushProjectConfig } from './RushConfigLoader';
 import ErrorDetector, { ErrorDetectionMode } from './ErrorDetector';
@@ -41,30 +40,28 @@ export default class ProjectBuildTask implements ITaskDefinition {
       const fullPathToGulp = path.join(RushConfigLoader.getCommonFolder(), 'node_modules/.bin/gulp');
 
       writer.writeLine('gulp nuke');
-
-      /*const gulpNukeResult = */ child_process.execSync(fullPathToGulp + ' nuke', { cwd: projectFolder });
-      // writer.writeLine(gulpNukeResult.toString());
+      const gulpNukeResult = child_process.execSync(fullPathToGulp + ' nuke', { cwd: projectFolder });
+      writer.writeLine(gulpNukeResult.toString());
 
       writer.writeLine('gulp test');
       const buildTask = child_process.exec(fullPathToGulp + ' test', options);
 
       buildTask.stdout.on('data', (data: string) => {
-        // writer.write(data);
+        writer.write(data);
       });
 
       buildTask.stderr.on('data', (data: string) => {
-        writer.write(colors.red(data));
+        writer.writeError(data);
       });
 
       buildTask.on('exit', (code: number) => {
         const errors = ErrorDetector(writer.getOutput(), this._errorDetectionMode);
         for (let i = 0; i < errors.length; i++) {
-          writer.writeLine(colors.red(errors[i]));
+          writer.writeError(errors[i] + '\n');
         }
         if (errors.length) {
-          writer.write(colors.red(` ${errors.length} Errors!!`));
+          writer.writeError(`${errors.length} Error${errors.length > 1 ? 's' : ''}! \n`);
         }
-        writer.writeLine('');
         if (errors.length) {
           reject();
         } else {

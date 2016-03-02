@@ -6,20 +6,31 @@
  * The streams 
  */
 
+import * as colors from 'colors';
+
 /**
  * An writable interface for managing output of simultaneous processes.
  * @todo - should we export a WritableStream or similar?
  */
 export interface ITaskWriter {
-  write(data: string): void;     // Writes a string to the buffer
-  writeLine(data: string): void; // Writes a string with a newline character at the end
-  getOutput(): string;           // Returns all output writted to the buffer
-  close(): void;                 // Closes the stream and marks the simultaneous process as completed
+  write(data: string): void;      // Writes a string to the buffer
+  writeLine(data: string): void;  // Writes a string with a newline character at the end
+  writeError(data: string): void; // Writes an error to the stderr stream
+  getOutput(): string;            // Returns all output writted to the buffer
+  close(): void;                  // Closes the stream and marks the simultaneous process as completed
 }
 
-interface ITaskState {
-  completed: boolean;
+enum TaskWriterState {
+  Open = 1,
+  ClosedUnwritten = 2,
+  Written = 3
+}
+
+interface ITaskWriterInfo {
+  state: TaskWriterState;
+  quietMode: boolean;
   stdout: string[];
+  stderr: string[];
 }
 
 /**
@@ -28,24 +39,26 @@ interface ITaskState {
  * @todo - add ability to inject stdout WritableStream
  */
 export default class TaskWriterFactory {
-  private static _tasks: Map<string, ITaskState> = new Map<string, ITaskState>();
+  private static _tasks: Map<string, ITaskWriterInfo> = new Map<string, ITaskWriterInfo>();
   private static _activeTask: string = undefined;
 
   /**
    * Registers a task into the list of active buffers and returns a ITaskWriter for the
    * calling process to use to manage output.
    */
-  public static registerTask(taskName: string): ITaskWriter {
+  public static registerTask(taskName: string, quietMode: boolean = false): ITaskWriter {
     if (this._tasks.has(taskName)) {
       throw new Error('A task with that name has already been registered');
     }
 
     this._tasks.set(taskName, {
-      completed: false,
+      quietMode: quietMode,
+      state: TaskWriterState.Open,
+      stderr: [],
       stdout: []
     });
 
-    if (!this._activeTask) {
+    if (this._activeTask === undefined) {
       this._activeTask = taskName;
     }
 
@@ -53,6 +66,7 @@ export default class TaskWriterFactory {
       close: () => this._completeTask(taskName),
       getOutput: () => this._getTaskOutput(taskName),
       write: (data: string) => this._writeTaskOutput(taskName, data),
+      writeError: (data: string) => this._writeTaskError(taskName, data),
       writeLine: (data: string) => this._writeTaskOutput(taskName, data + '\n')
     };
   }
@@ -61,13 +75,27 @@ export default class TaskWriterFactory {
    * Adds the text to the tasks's buffer, and writes it to the console if it is the active task
    */
   private static _writeTaskOutput(taskName: string, data: string) {
-    const taskState = this._tasks.get(taskName);
-    if (!taskState || taskState.completed) {
+    const taskInfo = this._tasks.get(taskName);
+    if (!taskInfo || taskInfo.state !== TaskWriterState.Open) {
       throw new Error('The task is not registered or has been completed and written.');
     }
-    taskState.stdout.push(data);
-    if (this._activeTask === taskName) {
+    taskInfo.stdout.push(data);
+    if (this._activeTask === taskName && !taskInfo.quietMode) {
       process.stdout.write(data);
+    }
+  }
+
+  /**
+   * Writes an error message to the standard buffer for the task
+   */
+  private static _writeTaskError(taskName: string, data: string) {
+    const taskInfo = this._tasks.get(taskName);
+    if (!taskInfo || taskInfo.state !== TaskWriterState.Open) {
+      throw new Error('The task is not registered or has been completed and written.');
+    }
+    taskInfo.stderr.push(data);
+    if (this._activeTask === taskName) {
+      process.stdout.write(colors.red(data));
     }
   }
 
@@ -75,11 +103,11 @@ export default class TaskWriterFactory {
    * Returns the current value of the task's buffer
    */
   private static _getTaskOutput(taskName: string): string {
-    const taskState = this._tasks.get(taskName);
-    if (!taskState) {
+    const taskInfo = this._tasks.get(taskName);
+    if (!taskInfo) {
       throw new Error('The task is not registered!');
     }
-    return taskState.stdout.join('');
+    return taskInfo.stdout.join('');
   }
 
   /**
@@ -89,20 +117,19 @@ export default class TaskWriterFactory {
    *  - If there is an active task, mark the task as completed and wait for active task to complete
    */
   private static _completeTask(taskName: string) {
-    const taskState = this._tasks.get(taskName);
-    if (!taskState || taskState.completed) {
+    const taskInfo = this._tasks.get(taskName);
+    if (!taskInfo || taskInfo.state !== TaskWriterState.Open) {
       throw new Error('The task is not registered or has been completed and written.');
     }
 
-    if (!this._activeTask) {
-      process.stdout.write(taskState.stdout.join(''));
-      this._tasks.delete(taskName);
+    if (this._activeTask === undefined) {
+      this._writeTask(taskName, taskInfo);
     } else if (taskName === this._activeTask) {
       this._activeTask = undefined;
-      this._tasks.delete(taskName);
+      taskInfo.state = TaskWriterState.Written;
       this._writeAllCompletedTasks();
     } else {
-      taskState.completed = true;
+      taskInfo.state = TaskWriterState.ClosedUnwritten;
     }
   }
 
@@ -110,11 +137,21 @@ export default class TaskWriterFactory {
    * Helper function which writes all completed tasks
    */
   private static _writeAllCompletedTasks() {
-    this._tasks.forEach((task: ITaskState, taskName: string) => {
-      if (task && task.completed) {
-        process.stdout.write(task.stdout.join(''));
-        this._tasks.delete(taskName);
+    this._tasks.forEach((task: ITaskWriterInfo, taskName: string) => {
+      if (task && task.state === TaskWriterState.ClosedUnwritten) {
+        this._writeTask(taskName, task);
       }
     });
+  }
+
+  /**
+   * Write and delete task
+   */
+  private static _writeTask(taskName: string, taskInfo: ITaskWriterInfo) {
+    taskInfo.state = TaskWriterState.Written;
+    if (!taskInfo.quietMode) {
+      process.stdout.write(taskInfo.stdout.join(''));
+    }
+    process.stdout.write(colors.red(taskInfo.stderr.join('')));
   }
 }

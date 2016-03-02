@@ -21,10 +21,12 @@ import TaskWriterFactory, { ITaskWriter } from './TaskWriterFactory';
 export default class TaskRunner {
   private _tasks: Map<string, ITask>;
   private _readyTaskQueue: ITask[];
+  private _quietMode: boolean;
 
-  constructor() {
+  constructor(quietMode: boolean = false) {
     this._tasks = new Map<string, ITask>();
     this._readyTaskQueue = [];
+    this._quietMode = quietMode;
   }
 
   /**
@@ -99,7 +101,7 @@ export default class TaskRunner {
         task.status = TaskStatus.Executing;
         console.log(colors.yellow(`> TaskRunner :: Starting task [${task.name}]`));
 
-        let taskWriter = TaskWriterFactory.registerTask(task.name);
+        let taskWriter = TaskWriterFactory.registerTask(task.name, this._quietMode);
 
         let onTaskComplete = (completedTask: ITask, writer: ITaskWriter) => {
           writer.close();
@@ -107,7 +109,12 @@ export default class TaskRunner {
           this._startAvailableTasks(complete, reject);
         };
 
-        task.execute(taskWriter).then(onTaskComplete.bind(this, task, taskWriter), reject);
+        let onTaskFail = (failedTask: ITask, writer: ITaskWriter) => {
+          writer.close();
+          reject();
+        };
+
+        task.execute(taskWriter).then(onTaskComplete.bind(this, task, taskWriter), onTaskFail.bind(this, task, taskWriter));
       }
     }
   }
