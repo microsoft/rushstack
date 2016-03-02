@@ -15,11 +15,15 @@
       "src/gulp2vs.ts",
       "src/rush.ts",
       "src/RushConfigLoader.ts",
-      "src/ErrorDetector.ts",
       "src/ProjectBuildTask.ts",
       "src/taskRunner/ITask.ts",
       "src/taskRunner/TaskRunner.ts",
       "src/taskRunner/TaskStatus.ts",
-      "src/taskRunner/TaskWriterFactory.ts"
+      "src/taskRunner/TaskWriterFactory.ts",
+      "src/errorDetection/ErrorDetector.ts",
+      "src/errorDetection/TaskError.ts",
+      "src/errorDetection/rules/TestErrorDetector.ts",
+      "src/errorDetection/rules/TsErrorDetector.ts",
+      "src/errorDetection/rules/TsLintErrorDetector.ts"
     ]
 }

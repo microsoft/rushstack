@@ -10,7 +10,8 @@ import * as colors from 'colors';
 import RushConfigLoader, { IRushConfig } from './RushConfigLoader';
 import TaskRunner from './taskRunner/TaskRunner';
 import ProjectBuildTask from './ProjectBuildTask';
-import { ErrorDetectionMode } from './ErrorDetector';
+import ErrorDetector, { ErrorDetectionMode } from './errorDetection/ErrorDetector';
+import * as ErrorDetectorRules from './errorDetection/rules/index';
 
 /**
  * Entry point for the "rush rebuild" command.
@@ -26,7 +27,14 @@ export default function executeBuild(params: any): void {
   // Create tasks and register with tax runner
   Object.keys(projects).forEach((projectName: string) => {
     const errorMode = vsoMode ? ErrorDetectionMode.VisualStudioOnline : ErrorDetectionMode.LocalBuild;
-    const projectTask = new ProjectBuildTask(projectName, projects[projectName], errorMode);
+
+    const activeRules = [
+      ErrorDetectorRules.TestErrorDetector,
+      ErrorDetectorRules.TsErrorDetector,
+      ErrorDetectorRules.TsLintErrorDetector
+    ];
+    const errorDetector = new ErrorDetector(activeRules);
+    const projectTask = new ProjectBuildTask(projectName, projects[projectName], errorDetector, errorMode);
     taskRunner.addTask(projectTask);
   });
 

@@ -1,0 +1,33 @@
+/**
+ * @file TaskError.ts
+ * @Copyright (c) Microsoft Corporation.  All rights reserved.
+ *
+ * Encapsulates information about an error
+ */
+
+import { ErrorDetectionMode } from './ErrorDetector';
+
+export default class TaskError {
+  private _file: string;
+  private _line: number;
+  private _offset: number;
+  private _type: string;
+  private _message: string;
+
+  constructor(file: string, line: number, offset: number, type: string, message: string) {
+    this._file = file;
+    this._line = line;
+    this._offset = offset;
+    this._type = type;
+    this._message = message;
+  }
+
+  public toString(mode: ErrorDetectionMode) {
+    const errorMessage = `${this._file}(${this._line}, ${this._offset}): [${this._type}] ${this._message}`;
+
+    if (mode === ErrorDetectionMode.VisualStudioOnline) {
+      return `##vso[task.logissue type=error;]${errorMessage}`;
+    }
+    return errorMessage;
+  }
+}

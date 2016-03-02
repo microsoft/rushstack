@@ -1,12 +1,18 @@
 import * as child_process from 'child_process';
-import ErrorDetector from './ErrorDetector';
+import ErrorDetector from './errorDetection/ErrorDetector';
+import * as ErrorDetectionRules from './errorDetection/rules/index';
 
 console.log('gulp2vs: Running in "' + process.cwd() + '"');
 
-child_process.exec('gulp', function(err, stdout, stderr) {
+const errorDetector = new ErrorDetector([
+  ErrorDetectionRules.TsErrorDetector,
+  ErrorDetectionRules.TsLintErrorDetector
+]);
+
+child_process.exec('gulp bundle', function(err, stdout, stderr) {
   const gulpOutput = stdout.toString();
   console.log(gulpOutput);
-  const errors = ErrorDetector(gulpOutput);
+  const errors = errorDetector.execute(gulpOutput);
 
   for (let i = 0; i < errors.length; i++) {
     console.log(errors[i]);

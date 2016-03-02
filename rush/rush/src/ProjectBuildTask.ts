@@ -9,19 +9,22 @@ import * as path from 'path';
 import * as child_process from 'child_process';
 
 import RushConfigLoader, { IRushProjectConfig } from './RushConfigLoader';
-import ErrorDetector, { ErrorDetectionMode } from './ErrorDetector';
+import ErrorDetector, { ErrorDetectionMode } from './errorDetection/ErrorDetector';
 import { ITaskDefinition } from './taskRunner/ITask';
 import { ITaskWriter } from './taskRunner/TaskWriterFactory';
 
 export default class ProjectBuildTask implements ITaskDefinition {
   public name: string;
 
-  private _errorDetectionMode: ErrorDetectionMode;
+  private _errorDetector: ErrorDetector;
+  private _errorDisplayMode: ErrorDetectionMode;
   private _config: IRushProjectConfig;
 
-  constructor(name: string, config: IRushProjectConfig, errorMode: ErrorDetectionMode) {
+  constructor(name: string, config: IRushProjectConfig,
+    errorDetector: ErrorDetector, errorDisplayMode: ErrorDetectionMode) {
     this.name = name;
-    this._errorDetectionMode = errorMode;
+    this._errorDetector = errorDetector;
+    this._errorDisplayMode = errorDisplayMode;
     this._config = config;
   }
 
@@ -55,9 +58,9 @@ export default class ProjectBuildTask implements ITaskDefinition {
       });
 
       buildTask.on('exit', (code: number) => {
-        const errors = ErrorDetector(writer.getOutput(), this._errorDetectionMode);
+        const errors = this._errorDetector.execute(writer.getOutput());
         for (let i = 0; i < errors.length; i++) {
-          writer.writeError(errors[i] + '\n');
+          writer.writeError(errors[i].toString(this._errorDisplayMode) + '\n');
         }
         if (errors.length) {
           writer.writeError(`${errors.length} Error${errors.length > 1 ? 's' : ''}! \n`);
