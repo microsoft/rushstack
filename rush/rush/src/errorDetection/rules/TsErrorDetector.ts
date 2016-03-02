@@ -17,7 +17,7 @@ import TaskError from '../TaskError';
 export default RegexErrorDetector(
   new RegExp('^Error: TypeScript error: ([^\\(]+) *([^:]+:) *(.*)'),
   (match: RegExpExecArray) => {
-    const [line, offset] = match[2].replace(')', '').replace('(', '').split(',');
+    const [line, offset] = match[2].replace(/\)|\(|:/g, '').split(',');
 
     return new TaskError(
       path.resolve(process.cwd(), 'src', match[1]),
