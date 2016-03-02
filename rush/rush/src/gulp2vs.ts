@@ -1,5 +1,5 @@
 import * as child_process from 'child_process';
-import ErrorDetector from './errorDetection/ErrorDetector';
+import ErrorDetector, { ErrorDetectionMode } from './errorDetection/ErrorDetector';
 import * as ErrorDetectionRules from './errorDetection/rules/index';
 
 console.log('gulp2vs: Running in "' + process.cwd() + '"');
@@ -15,7 +15,7 @@ child_process.exec('gulp bundle', function(err, stdout, stderr) {
   const errors = errorDetector.execute(gulpOutput);
 
   for (let i = 0; i < errors.length; i++) {
-    console.log(errors[i]);
+    console.log(errors[i].toString(ErrorDetectionMode.VisualStudio));
   }
 
   // FOR DEBUGGING:
