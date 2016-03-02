@@ -13,18 +13,18 @@
       "type": "string"
     },
     "projects": {
-      "description": "A mapping of project names to their information",
+      "description": "A mapping of NPM package names to their build information",
       "type": "object",
       "patternProperties": {
         "^[a-zA-Z0-9_@/-]+$": {
           "type": "object",
           "properties": {
             "path": {
-              "description": "The path to the project relative to the repository root",
+              "description": "The path to the project folder relative to the repository root",
               "type": "string"
             },
             "dependencies": {
-              "description":  "An array of the projects this project directly depends on",
+              "description":  "An array of the NPM package names in this repository that this project directly depends on",
               "type": "array",
               "items": {
                 "type": "string"

@@ -43,8 +43,8 @@ export default class ProjectBuildTask implements ITaskDefinition {
       const gulpNukeResult = child_process.execSync(fullPathToGulp + ' nuke', { cwd: projectFolder });
       writer.writeLine(gulpNukeResult.toString());
 
-      writer.writeLine('gulp test');
-      const buildTask = child_process.exec(fullPathToGulp + ' test', options);
+      writer.writeLine('gulp bundle test');
+      const buildTask = child_process.exec(fullPathToGulp + ' bundle test', options);
 
       buildTask.stdout.on('data', (data: string) => {
         writer.write(data);

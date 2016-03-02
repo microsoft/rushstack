@@ -18,7 +18,7 @@ const lintRegex = new RegExp('^(\\[[^\\]]+\\]) *(\\[[^\\]]+\\]) *([^ ]+) *([^[]+
 const tscRegex = new RegExp('^Error: TypeScript error: ([^\\(]+) *([^:]+:) *(.*)');
 
 // Example: "       × This Test Failed"
-const testRegex = new RegExp(' *× (\\D.*)');
+const testRegex = new RegExp('^ *× (\\D.*)');
 
 export enum ErrorDetectionMode {
   LocalBuild = 1,
