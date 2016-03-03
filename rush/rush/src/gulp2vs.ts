@@ -1,4 +1,6 @@
 import * as child_process from 'child_process';
+
+import TaskWriterFactory, { ITaskWriter } from './taskRunner/TaskWriterFactory';
 import ErrorDetector, { ErrorDetectionMode } from './errorDetection/ErrorDetector';
 import * as ErrorDetectionRules from './errorDetection/rules/index';
 
@@ -9,19 +11,27 @@ const errorDetector = new ErrorDetector([
   ErrorDetectionRules.TsLintErrorDetector
 ]);
 
-child_process.exec('gulp bundle', function(err, stdout, stderr) {
-  const gulpOutput = stdout.toString();
-  console.log(gulpOutput);
-  const errors = errorDetector.execute(gulpOutput);
+const writer = TaskWriterFactory.registerTask('vs gulp bundle');
+
+const gulpBundle = child_process.exec('gulp bundle');
+
+gulpBundle.stdout.on('data', (data: string) => {
+  writer.write(data);
+});
+
+gulpBundle.stderr.on('data', (data: string) => {
+  writer.writeError(data);
+});
+
+gulpBundle.on('exit', (code: number) => {
+  const errors = errorDetector.execute(writer.getOutput());
 
   for (let i = 0; i < errors.length; i++) {
-    console.log(errors[i].toString(ErrorDetectionMode.VisualStudio));
+    writer.writeError(errors[i].toString(ErrorDetectionMode.VisualStudio));
   }
-
-  // FOR DEBUGGING:
-  // fs.writeFileSync("gulp-errors.log", lines.join('\n'));
-
-  console.log('gulp2vs: Done.');
+  
+  writer.writeLine('gulp2vs: Done.');
+  writer.close();
   if (errors.length) {
     process.exit(1);
   }
