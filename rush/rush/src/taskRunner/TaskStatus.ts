@@ -6,8 +6,10 @@
  */
 
 enum TaskStatus {
-  NotStarted = 1,
+  Ready = 1,
   Executing = 2,
-  Completed = 3
+  Success = 3,
+  Failure = 4,
+  Blocked = 5
 };
 export default TaskStatus;

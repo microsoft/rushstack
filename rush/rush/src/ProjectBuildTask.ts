@@ -12,6 +12,7 @@ import RushConfigLoader, { IRushProjectConfig } from './RushConfigLoader';
 import ErrorDetector, { ErrorDetectionMode } from './errorDetection/ErrorDetector';
 import { ITaskDefinition } from './taskRunner/ITask';
 import { ITaskWriter } from './taskRunner/TaskWriterFactory';
+import TaskError, { ProjectTaskError } from './errorDetection/TaskError';
 
 export default class ProjectBuildTask implements ITaskDefinition {
   public name: string;
@@ -29,7 +30,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
   }
 
   public execute(writer: ITaskWriter): Promise<void> {
-    return new Promise<void>((resolve: () => void, reject: () => void) => {
+    return new Promise<void>((resolve: () => void, reject: (errors: TaskError[]) => void) => {
       // @todo - check that deps are actually resolved
 
       try {
@@ -67,14 +68,15 @@ export default class ProjectBuildTask implements ITaskDefinition {
             writer.writeError(`${errors.length} Error${errors.length > 1 ? 's' : ''}! \n`);
           }
           if (errors.length) {
-            reject();
+            reject(errors);
           } else {
             resolve();
           }
         });
       } catch (error) {
         console.log(error);
-        reject();
+        const taskError = new ProjectTaskError(undefined, undefined, undefined, 'error', error.toString());
+        reject([taskError]);
       }
     });
   }

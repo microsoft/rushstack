@@ -5,18 +5,8 @@
  * Detects an error that occurs while running tests from ms-core-build
  */
 
-import { IErrorDetectionRule, RegexErrorDetector, ErrorDetectionMode } from '../ErrorDetector';
-import TaskError from '../TaskError';
-
-/**
- * TestTaskError extends TaskError
- */
-class TestTaskError extends TaskError {
-  public toString(mode: ErrorDetectionMode) {
-    const errorMessage = `[${this._type}] '${this._message}' failed`;
-    return this._appendPrefix(errorMessage, mode);
-  }
-}
+import { IErrorDetectionRule, RegexErrorDetector } from '../ErrorDetector';
+import { ProjectTaskError } from '../TaskError';
 
 // Example: "       × This Test Failed"
 // 0: This Test Failed
@@ -24,7 +14,7 @@ class TestTaskError extends TaskError {
 export default RegexErrorDetector(
   / *× (\D.*)/,
   (match: RegExpExecArray) => {
-    return new TestTaskError(
+    return new ProjectTaskError(
       undefined,
       undefined,
       undefined,

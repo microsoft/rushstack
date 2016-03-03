@@ -5,7 +5,7 @@
  * Encapsulates information about an error
  */
 
-import { ErrorDetectionMode } from './ErrorDetector';
+import { ErrorDetectionMode } from '../errorDetection/ErrorDetector';
 
 export default class TaskError {
   protected _file: string;
@@ -32,5 +32,15 @@ export default class TaskError {
       return `##vso[task.logissue type=error;]${errorMessage}`;
     }
     return errorMessage;
+  }
+}
+
+/**
+ * TestTaskError extends TaskError
+ */
+export class ProjectTaskError extends TaskError {
+  public toString(mode: ErrorDetectionMode) {
+    const errorMessage = `[${this._type}] '${this._message}' failed`;
+    return this._appendPrefix(errorMessage, mode);
   }
 }

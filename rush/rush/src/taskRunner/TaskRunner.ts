@@ -8,6 +8,7 @@
 import * as colors from 'colors';
 import ITask, { ITaskDefinition } from './ITask';
 import TaskStatus from './TaskStatus';
+import TaskError from '../errorDetection/TaskError';
 import TaskWriterFactory, { ITaskWriter } from './TaskWriterFactory';
 
 /**
@@ -22,11 +23,13 @@ export default class TaskRunner {
   private _tasks: Map<string, ITask>;
   private _readyTaskQueue: ITask[];
   private _quietMode: boolean;
+  private _hasAnyFailures: boolean;
 
   constructor(quietMode: boolean = false) {
     this._tasks = new Map<string, ITask>();
     this._readyTaskQueue = [];
     this._quietMode = quietMode;
+    this._hasAnyFailures = false;
   }
 
   /**
@@ -41,7 +44,8 @@ export default class TaskRunner {
     const task = taskDefinition as ITask;
     task.dependencies = [];
     task.dependents = [];
-    task.status = TaskStatus.NotStarted;
+    task.errors = [];
+    task.status = TaskStatus.Ready;
     this._tasks.set(task.name, task);
   }
 
@@ -74,7 +78,7 @@ export default class TaskRunner {
    */
   public execute(): Promise<void> {
     this._tasks.forEach((task: ITask) => {
-      if (task.dependencies.length === 0 && task.status === TaskStatus.NotStarted) {
+      if (task.dependencies.length === 0 && task.status === TaskStatus.Ready) {
         this._readyTaskQueue.push(task);
       }
     });
@@ -89,15 +93,21 @@ export default class TaskRunner {
    * It calls the complete callback when all tasks are completed, or rejects if any task fails.
    */
   private _startAvailableTasks(complete: () => void, reject: () => void) {
-    if (this._areAllTasksCompleted()) {
-      console.log(colors.green('> TaskRunner :: All tasks completed!\n'));
-      complete();
+    if (!this._areAnyTasksReadyOrExecuting()) {
+      if (this._hasAnyFailures) {
+        console.log(colors.red('> TaskRunner :: Failures'));
+        reject();
+      } else {
+        console.log(colors.green('> TaskRunner :: All tasks completed!\n'));
+        complete();
+      }
     }
 
     // @todo - add ability to limit execution to n number of simultaneous tasks
+    // @todo - we should sort the ready task queue in such a way that we build projects with deps first
     while (this._readyTaskQueue.length) {
       const task: ITask = this._readyTaskQueue.shift();
-      if (task.status === TaskStatus.NotStarted) {
+      if (task.status === TaskStatus.Ready) {
         task.status = TaskStatus.Executing;
         console.log(colors.yellow(`> TaskRunner :: Starting task [${task.name}]`));
 
@@ -105,13 +115,16 @@ export default class TaskRunner {
 
         let onTaskComplete = (completedTask: ITask, writer: ITaskWriter) => {
           writer.close();
-          this._markTaskAsCompleted(completedTask);
+          this._markTaskAsSuccess(completedTask);
           this._startAvailableTasks(complete, reject);
         };
 
-        let onTaskFail = (failedTask: ITask, writer: ITaskWriter) => {
+        let onTaskFail = (failedTask: ITask, writer: ITaskWriter, errors: TaskError[]) => {
           writer.close();
-          reject();
+          this._hasAnyFailures = true;
+          failedTask.errors = errors;
+          this._markTaskAsFailed(failedTask);
+          this._startAvailableTasks(complete, reject);
         };
 
         task.execute(taskWriter).then(onTaskComplete.bind(this, task, taskWriter), onTaskFail.bind(this, task, taskWriter));
@@ -120,31 +133,55 @@ export default class TaskRunner {
   }
 
   /**
+   * Marks a task as having failed and marks each of its dependents as blocked
+   */
+  private _markTaskAsFailed(task: ITask) {
+    console.log(colors.red(`> TaskRunner :: Completed task [${task.name}] with errors!`));
+    task.status = TaskStatus.Failure;
+    task.dependents.forEach((dependent: ITask) => {
+      this._markTaskAsBlocked(dependent, task);
+    });
+  }
+
+  /**
+   * Marks a task and all its dependents as blocked
+   */
+  private _markTaskAsBlocked(task: ITask, failedTask: ITask) {
+    if (task.status === TaskStatus.Ready) {
+      console.log(colors.red(`> TaskRunner :: [${task.name}] blocked by [${failedTask.name}]!`));
+      task.status = TaskStatus.Blocked;
+      task.dependents.forEach((dependent: ITask) => {
+        this._markTaskAsBlocked(dependent, failedTask);
+      });
+    }
+  }
+
+  /**
    * Marks a task as being completed, and removes it from the dependencies list of all its dependents
    */
-  private _markTaskAsCompleted(task: ITask) {
-    console.log(colors.green(`> TaskRunner :: Completed task [${task.name}]\n`));
-    task.status = TaskStatus.Completed;
+  private _markTaskAsSuccess(task: ITask) {
+    console.log(colors.green(`> TaskRunner :: Completed task [${task.name}]`));
+    task.status = TaskStatus.Success;
     task.dependents.forEach((dependent: ITask) => {
       const i = dependent.dependencies.indexOf(task);
       if (i !== -1) {
         dependent.dependencies.splice(i, 1);
       }
 
-      if (dependent.dependencies.length === 0 && dependent.status === TaskStatus.NotStarted) {
+      if (dependent.dependencies.length === 0 && dependent.status === TaskStatus.Ready) {
         this._readyTaskQueue.push(dependent);
       }
     });
   }
 
   /**
-   * Iterates through all tasks and returns true if all have been completed.
+   * Do any Ready or Executing tasks exist?
    */
-  private _areAllTasksCompleted(): boolean {
-    let anyNonCompletedTasks = true;
+  private _areAnyTasksReadyOrExecuting(): boolean {
+    let anyNonCompletedTasks = false;
     this._tasks.forEach((task: ITask) => {
-      if (task.status !== TaskStatus.Completed) {
-        anyNonCompletedTasks = false;
+      if (task.status === TaskStatus.Executing || task.status === TaskStatus.Ready) {
+        anyNonCompletedTasks = true;
       }
     });
     return anyNonCompletedTasks;
