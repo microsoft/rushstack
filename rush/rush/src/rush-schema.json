@@ -13,21 +13,21 @@
       "type": "string"
     },
     "projects": {
-      "description": "A mapping of NPM package names to their build information",
+      "description": "A list of projects managed by this tool.",
       "type": "array",
       "items": {
         "type": "object",
         "properties": {
           "packageName": {
-            "description": "The NPM package name of the project",
+            "description": "The NPM package name of the project.",
             "type": "string"
           },
           "projectFolder": {
-            "description": "The path to the project folder relative to the repository root",
+            "description": "The path to the project folder relative to the Rush config file.",
             "type": "string"
           },
           "dependencies": {
-            "description": "An array of the NPM package names this project depends from this repository",
+            "description": "An array of the NPM package names (from this repository) which this project depends on.",
             "type": "array",
             "items": {
               "type": "string"
