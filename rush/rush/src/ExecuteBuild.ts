@@ -43,7 +43,12 @@ export default function executeBuild(params: any): void {
     taskRunner.addDependencies(project.packageName, project.dependencies);
   });
 
-  taskRunner.execute().then(() => {
-    console.log(colors.green('rush rebuild - Done!'));
-  });
+  taskRunner.execute().then(
+    () => {
+      console.log(colors.green('rush rebuild - Done!'));
+    },
+    () => {
+      console.log(colors.red('rush rebuild - Errors!'));
+      process.exit(1);
+    });
 };
