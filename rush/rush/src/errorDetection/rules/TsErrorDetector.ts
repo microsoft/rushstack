@@ -20,7 +20,7 @@ export default RegexErrorDetector(
     const [line, offset] = match[2].replace(/\)|\(|:/g, '').split(',');
 
     return new TaskError(
-      path.resolve(process.cwd(), 'src', match[1]),
+      path.resolve(process.cwd(), match[1]),
       Number(line),
       Number(offset),
       'tsc',
