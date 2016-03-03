@@ -9,7 +9,7 @@
 import * as del from 'del';
 import * as fs from 'fs';
 import * as path from 'path';
-import RushConfigLoader, { IRushProjects } from './RushConfigLoader';
+import RushConfigLoader, { IRushProjectConfig } from './RushConfigLoader';
 
 /**
  * Used to implement the "dependencyLinks" setting in the the rush.json config
@@ -17,16 +17,15 @@ import RushConfigLoader, { IRushProjects } from './RushConfigLoader';
  * in the project's "node_modules" folder.  These symlinks point to the project
  * folders for the specified dependencies.
  */
-function createDependencyLinks(consumingPackage: string, projects: IRushProjects): number {
-  const consumingProject = projects[consumingPackage];
+function createDependencyLinks(consumingProject: IRushProjectConfig, projects: Map<string, IRushProjectConfig>): number {
   let numberOfLinks = 0;
   consumingProject.dependencies.forEach((packageName) => {
-    const dependencyProject = projects[packageName].path;
+    const dependencyProject = projects.get(packageName).projectFolder;
     if (dependencyProject === undefined) {
       throw new Error(`Cannot link to the project "${dependencyProject}" because it is`
         + ' missing from the "projects" section');
     }
-    console.log('  Linking ' + consumingProject.path + '/node_modules/' + dependencyProject);
+    console.log('  Linking ' + consumingProject.projectFolder + '/node_modules/' + packageName + ' -> ' + dependencyProject);
 
     // Ex: "C:\MyRepo\my-library"
     const dependencyProjectFolder = RushConfigLoader.getProjectFolder(dependencyProject);
@@ -47,7 +46,7 @@ function createDependencyLinks(consumingPackage: string, projects: IRushProjects
       const packagePart = packageName.substr(index + 1);
 
       // Ex: "C:\MyRepo\my-app\node_modules\@ms"
-      const localScopedFolder = path.join(RushConfigLoader.getProjectFolder(consumingProject.path),
+      const localScopedFolder = path.join(RushConfigLoader.getProjectFolder(consumingProject.projectFolder),
         'node_modules', scopePart);
       if (!fs.existsSync(localScopedFolder)) {
         fs.mkdirSync(localScopedFolder);
@@ -57,7 +56,7 @@ function createDependencyLinks(consumingPackage: string, projects: IRushProjects
       localModuleFolder = path.join(localScopedFolder, packagePart);
     } else {
       // Ex: "C:\MyRepo\my-app\node_modules\my-library"
-      localModuleFolder = path.join(RushConfigLoader.getProjectFolder(consumingProject.path),
+      localModuleFolder = path.join(RushConfigLoader.getProjectFolder(consumingProject.projectFolder),
         'node_modules', dependencyProject);
     }
 
@@ -71,21 +70,21 @@ function createDependencyLinks(consumingPackage: string, projects: IRushProjects
 /**
  * Loads the package.json from a specified path and compares the project name to the expected name
  */
-function validatePackageNameAndPath(expectedName: string, projectPath: string) {
-  const projectFolder: string = RushConfigLoader.getProjectFolder(projectPath);
+function validatePackageNameAndPath(project: IRushProjectConfig) {
+  const projectFolder: string = RushConfigLoader.getProjectFolder(project.projectFolder);
   const packageJsonFilename = path.join(projectFolder, 'package.json');
-  let packageName: string;
+  let actualPackageName: string;
   try {
     const packageJsonBuffer: Buffer = fs.readFileSync(packageJsonFilename);
     const packageJson = JSON.parse(packageJsonBuffer.toString());
-    packageName = packageJson['name'];
+    actualPackageName = packageJson['name'];
   } catch (error) {
-    throw new Error(`Error reading package.json in ${projectPath}:\n${error}.`);
+    throw new Error(`Error reading package.json in ${project.projectFolder}:\n${error}.`);
   }
 
-  if (packageName !== expectedName) {
-    throw new Error(`Expected: '${expectedName}' Actual: '${packageName}'` +
-                    ` in ${path.join(projectPath, 'package.json') }`);
+  if (actualPackageName !== project.packageName) {
+    throw new Error(`Expected: '${project.packageName}' Actual: '${actualPackageName}'` +
+                    ` in ${path.join(project.projectFolder, 'package.json') }`);
   }
 }
 
@@ -94,15 +93,14 @@ function validatePackageNameAndPath(expectedName: string, projectPath: string) {
  */
 function createSymlinks(cleanOnly: boolean): void {
   const config = RushConfigLoader.load();
-  Object.keys(config.projects).forEach((packageName: string) => {
-    const projectConfig = config.projects[packageName];
+  config.projects.forEach((project: IRushProjectConfig) => {
     console.log('');
-    console.log('PROJECT: ' + projectConfig.path);
+    console.log('PROJECT: ' + project.packageName);
 
-    validatePackageNameAndPath(packageName, projectConfig.path);
+    validatePackageNameAndPath(project);
 
     // Ex: "C:\MyRepo\my-app\node_modules"
-    const localModulesFolder = path.join(RushConfigLoader.getProjectFolder(projectConfig.path), 'node_modules');
+    const localModulesFolder = path.join(RushConfigLoader.getProjectFolder(project.projectFolder), 'node_modules');
     console.log('Removing node_modules');
     del.sync(localModulesFolder);
 
@@ -167,7 +165,7 @@ function createSymlinks(cleanOnly: boolean): void {
         }
       });
 
-      linkCount += createDependencyLinks(packageName, config.projects);
+      linkCount += createDependencyLinks(project, config.projects);
       console.log(`Created ${linkCount} links`);
     }
   });

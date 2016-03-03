@@ -14,24 +14,26 @@
     },
     "projects": {
       "description": "A mapping of NPM package names to their build information",
-      "type": "object",
-      "patternProperties": {
-        "^[a-zA-Z0-9_@/-]+$": {
-          "type": "object",
-          "properties": {
-            "path": {
-              "description": "The path to the project folder relative to the repository root",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "packageName": {
+            "description": "The NPM package name of the project",
+            "type": "string"
+          },
+          "projectFolder": {
+            "description": "The path to the project folder relative to the repository root",
+            "type": "string"
+          },
+          "dependencies": {
+            "description": "An array of the NPM package names this project depends from this repository",
+            "type": "array",
+            "items": {
               "type": "string"
             },
-            "dependencies": {
-              "description":  "An array of the NPM package names in this repository that this project directly depends on",
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "minItems": 0,
-              "uniqueItems": true
-            }
+            "minItems": 0,
+            "uniqueItems": true
           }
         }
       }

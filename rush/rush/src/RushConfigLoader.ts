@@ -11,20 +11,22 @@ import stripJsonComments = require('strip-json-comments');
 import Validator = require('z-schema');
 
 export interface IRushProjectConfig {
-  path: string;
+  packageName: string;
+  projectFolder: string;
   dependencies?: string[];
-};
-
-export interface IRushProjects {
-  [projectName: string]: IRushProjectConfig;
 };
 
 /**
  * This interface represents the definitions in the rush.json config file.
  */
+interface IRushConfigRawFile {
+  commonFolder: string;
+  projects: IRushProjectConfig[];
+};
+
 export interface IRushConfig {
   commonFolder: string;
-  projects: IRushProjects;
+  projects: Map<string, IRushProjectConfig>;
 };
 
 /**
@@ -46,13 +48,13 @@ export default class RushConfigLoader {
 
     let buffer = fs.readFileSync(configFile);
     let stripped = stripJsonComments(buffer.toString());
-    let config = JSON.parse(stripped) as IRushConfig;
+    let rawConfig = JSON.parse(stripped) as IRushConfigRawFile;
 
     // Remove the $schema reference that appears in the config object (used for IntelliSense),
     // since we are replacing it with the precompiled version.  The validator.setRemoteReference()
     // API is a better way to handle this, but we'd first need to publish the schema file
     // to a public web server where Visual Studio can find it.
-    delete config['$schema'];
+    delete rawConfig['$schema'];
 
     let schema = require('./rush-schema.json');
     let validator = new Validator({
@@ -60,7 +62,7 @@ export default class RushConfigLoader {
       noTypeless: true
     });
 
-    if (!validator.validate(config, schema)) {
+    if (!validator.validate(rawConfig, schema)) {
       let error: ZSchema.Error = validator.getLastError();
 
       let detail: ZSchema.ErrorDetail = error.details[0];
@@ -71,15 +73,18 @@ export default class RushConfigLoader {
       throw new Error(errorMessage);
     }
 
-    Object.keys(config.projects).forEach((projectName: string) => {
-      const project = config.projects[projectName];
+    const projectMap = new Map<string, IRushProjectConfig>();
+    rawConfig.projects.forEach((project: IRushProjectConfig) => {
       if (!project.dependencies) {
         project.dependencies = [];
       }
+      projectMap.set(project.packageName, project);
     });
 
-    this._cachedConfig = config;
-    return config;
+    return this._cachedConfig = {
+      commonFolder: rawConfig.commonFolder,
+      projects: projectMap
+    };
   }
 
   /**

@@ -7,7 +7,7 @@
  */
 
 import * as colors from 'colors';
-import RushConfigLoader, { IRushConfig } from './RushConfigLoader';
+import RushConfigLoader, { IRushConfig, IRushProjectConfig } from './RushConfigLoader';
 import TaskRunner from './taskRunner/TaskRunner';
 import ProjectBuildTask from './ProjectBuildTask';
 import ErrorDetector, { ErrorDetectionMode } from './errorDetection/ErrorDetector';
@@ -25,7 +25,7 @@ export default function executeBuild(params: any): void {
   const taskRunner = new TaskRunner(quietMode);
 
   // Create tasks and register with tax runner
-  Object.keys(projects).forEach((projectName: string) => {
+  projects.forEach((project: IRushProjectConfig) => {
     const errorMode = vsoMode ? ErrorDetectionMode.VisualStudioOnline : ErrorDetectionMode.LocalBuild;
 
     const activeRules = [
@@ -34,14 +34,13 @@ export default function executeBuild(params: any): void {
       ErrorDetectorRules.TsLintErrorDetector
     ];
     const errorDetector = new ErrorDetector(activeRules);
-    const projectTask = new ProjectBuildTask(projectName, projects[projectName], errorDetector, errorMode);
+    const projectTask = new ProjectBuildTask(project, errorDetector, errorMode);
     taskRunner.addTask(projectTask);
   });
 
   // Add task dependencies
-  Object.keys(projects).forEach((projectName: string) => {
-    const projectConfig = projects[projectName];
-    taskRunner.addDependencies(projectName, projectConfig.dependencies);
+  projects.forEach((project: IRushProjectConfig) => {
+    taskRunner.addDependencies(project.packageName, project.dependencies);
   });
 
   taskRunner.execute().then(() => {
