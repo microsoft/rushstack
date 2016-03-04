@@ -51,7 +51,7 @@ file('lib/tslint.txt', sourceDeps, function () {
 }, false);
 
 desc('Copy rush-schema.json');
-file('lib/rush-schema.json', 'src/rush-schema.json', function () {
+file('lib/rush-schema.json', ['src/rush-schema.json'], function () {
     jake.cpR('src/rush-schema.json', 'lib/');
     console.log('\nFINISHED TASK: rush-schema.json');
 }, false);
