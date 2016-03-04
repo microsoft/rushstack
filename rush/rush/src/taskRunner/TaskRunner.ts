@@ -44,7 +44,6 @@ export default class TaskRunner {
     const task = taskDefinition as ITask;
     task.dependencies = [];
     task.dependents = [];
-    task.errors = [];
     task.status = TaskStatus.Ready;
     this._tasks.set(task.name, task);
   }
@@ -122,7 +121,6 @@ export default class TaskRunner {
         let onTaskFail = (failedTask: ITask, writer: ITaskWriter, errors: TaskError[]) => {
           writer.close();
           this._hasAnyFailures = true;
-          failedTask.errors = errors;
           this._markTaskAsFailed(failedTask);
           this._startAvailableTasks(complete, reject);
         };

@@ -6,7 +6,6 @@
  */
 
 import TaskStatus from './TaskStatus';
-import TaskError from '../errorDetection/TaskError';
 import { ITaskWriter } from './TaskWriterFactory';
 
 /**
@@ -24,6 +23,5 @@ export interface ITask extends ITaskDefinition {
   status: TaskStatus;
   dependencies: ITask[];
   dependents: ITask[];
-  errors: TaskError[];
 };
 export default ITask;
