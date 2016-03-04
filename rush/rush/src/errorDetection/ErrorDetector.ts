@@ -34,6 +34,7 @@ export function RegexErrorDetector(regex: RegExp, getError: (match: RegExpExecAr
 /**
  * The error detector will find all errors in a chunk of text by running a number
  * of error detection rules against each line of text.
+ * @todo #168353: add unit tests for the ErrorDetector & for each individual rule in rules/
  */
 export default class ErrorDetector {
   private _rules: IErrorDetectionRule[];

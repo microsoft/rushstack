@@ -10,7 +10,7 @@ import * as colors from 'colors';
 
 /**
  * An writable interface for managing output of simultaneous processes.
- * @todo - should we export a WritableStream or similar?
+ * @todo #168347: should we export a WritableStream or Buffer or similar?
  */
 export interface ITaskWriter {
   write(data: string): void;      // Writes a string to the buffer
@@ -35,8 +35,9 @@ interface ITaskWriterInfo {
 
 /**
  * A static class which manages the output of multiple threads.
- * @todo - make this class not be static
- * @todo - add ability to inject stdout WritableStream
+ * @todo #168348: make this class not be static
+ * @todo #168349: add ability to inject stdout WritableStream
+ * @todo #168350: add unit testing
  */
 export default class TaskWriterFactory {
   private static _tasks: Map<string, ITaskWriterInfo> = new Map<string, ITaskWriterInfo>();

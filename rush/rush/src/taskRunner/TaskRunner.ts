@@ -20,6 +20,7 @@ import TaskWriterFactory, { ITaskWriter } from './TaskWriterFactory';
  * are added to a ready queue which is then executed. This is done continually until all
  * tasks are complete, or prematurely fails if any of the tasks fail. Note that all task
  * definitions must
+ * @todo #168352: add unit tests
  */
 export default class TaskRunner {
   private _tasks: Map<string, ITask>;
@@ -42,7 +43,7 @@ export default class TaskRunner {
       throw new Error('A task with that name has already been registered.');
     }
 
-    // @todo - do a copy here
+    // @todo #168287: do a copy here
     const task = taskDefinition as ITask;
     task.dependencies = [];
     task.dependents = [];
@@ -104,8 +105,8 @@ export default class TaskRunner {
       }
     }
 
-    // @todo - add ability to limit execution to n number of simultaneous tasks
-    // @todo - we should sort the ready task queue in such a way that we build projects with deps first
+    // @todo #168344: add ability to limit execution to n number of simultaneous tasks
+    // @todo #168346: we should sort the ready task queue in such a way that we build projects with deps first
     while (this._readyTaskQueue.length) {
       const task: ITask = this._readyTaskQueue.shift();
       if (task.status === TaskStatus.Ready) {

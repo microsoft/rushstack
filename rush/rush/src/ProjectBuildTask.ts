@@ -31,8 +31,6 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
   public execute(writer: ITaskWriter): Promise<void> {
     return new Promise<void>((resolve: () => void, reject: (errors: TaskError[]) => void) => {
-      // @todo - check that deps are actually resolved
-
       try {
         writer.writeLine(`>>> ProjectBuildTask :: Project [${this.name}]:`);
         const projectFolder = RushConfigLoader.getProjectFolder(this._config.projectFolder);
@@ -60,6 +58,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
         });
 
         buildTask.on('exit', (code: number) => {
+          // @todo #168286: we should reject if we have an error code even if we didn't detect an error
           const errors = this._errorDetector.execute(writer.getOutput());
           for (let i = 0; i < errors.length; i++) {
             writer.writeError(errors[i].toString(this._errorDisplayMode) + '\n');
