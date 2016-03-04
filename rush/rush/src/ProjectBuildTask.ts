@@ -12,7 +12,7 @@ import RushConfigLoader, { IRushProjectConfig } from './RushConfigLoader';
 import ErrorDetector, { ErrorDetectionMode } from './errorDetection/ErrorDetector';
 import { ITaskDefinition } from './taskRunner/ITask';
 import { ITaskWriter } from './taskRunner/TaskWriterFactory';
-import TaskError, { ProjectTaskError } from './errorDetection/TaskError';
+import TaskError from './errorDetection/TaskError';
 
 export default class ProjectBuildTask implements ITaskDefinition {
   public name: string;
@@ -75,8 +75,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
         });
       } catch (error) {
         console.log(error);
-        const taskError = new ProjectTaskError(undefined, undefined, undefined, 'error', error.toString());
-        reject([taskError]);
+        reject([new TaskError('error', error.toString())]);
       }
     });
   }

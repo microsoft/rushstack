@@ -7,7 +7,7 @@
 
 import * as path from 'path';
 import { IErrorDetectionRule, RegexErrorDetector } from '../ErrorDetector';
-import TaskError from '../TaskError';
+import { BuildTaskError } from '../TaskError';
 
 // Example: "Error: TypeScript error: src\test.ts(68,6): error TS2304: Cannot find name 'x'."
 // 0: input
@@ -19,12 +19,12 @@ export default RegexErrorDetector(
   (match: RegExpExecArray) => {
     const [line, offset] = match[2].replace(/\)|\(|:/g, '').split(',');
 
-    return new TaskError(
+    return new BuildTaskError(
+      'tsc',
+      match[3],
       path.resolve(process.cwd(), match[1]),
       Number(line),
-      Number(offset),
-      'tsc',
-      match[3]
+      Number(offset)
     );
   }
 ) as IErrorDetectionRule;

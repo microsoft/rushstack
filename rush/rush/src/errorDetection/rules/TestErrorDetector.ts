@@ -6,7 +6,7 @@
  */
 
 import { IErrorDetectionRule, RegexErrorDetector } from '../ErrorDetector';
-import { ProjectTaskError } from '../TaskError';
+import TaskError from '../TaskError';
 
 // Example: "       × This Test Failed"
 // 0: This Test Failed
@@ -14,10 +14,7 @@ import { ProjectTaskError } from '../TaskError';
 export default RegexErrorDetector(
   / *× (\D.*)/,
   (match: RegExpExecArray) => {
-    return new ProjectTaskError(
-      undefined,
-      undefined,
-      undefined,
+    return new TaskError(
       'test',
       match[1]
     );

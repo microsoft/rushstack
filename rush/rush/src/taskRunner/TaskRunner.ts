@@ -6,6 +6,8 @@
  */
 
 import * as colors from 'colors';
+import * as assert from 'assert';
+
 import ITask, { ITaskDefinition } from './ITask';
 import TaskStatus from './TaskStatus';
 import TaskError from '../errorDetection/TaskError';
@@ -145,13 +147,12 @@ export default class TaskRunner {
    * Marks a task and all its dependents as blocked
    */
   private _markTaskAsBlocked(task: ITask, failedTask: ITask) {
-    if (task.status === TaskStatus.Ready) {
-      console.log(colors.red(`> TaskRunner :: [${task.name}] blocked by [${failedTask.name}]!`));
-      task.status = TaskStatus.Blocked;
-      task.dependents.forEach((dependent: ITask) => {
-        this._markTaskAsBlocked(dependent, failedTask);
-      });
-    }
+    assert.equal(task.status, TaskStatus.Ready, 'Tasks being marked as blocked should be in the ready state');
+    console.log(colors.red(`> TaskRunner :: [${task.name}] blocked by [${failedTask.name}]!`));
+    task.status = TaskStatus.Blocked;
+    task.dependents.forEach((dependent: ITask) => {
+      this._markTaskAsBlocked(dependent, failedTask);
+    });
   }
 
   /**

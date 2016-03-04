@@ -7,7 +7,7 @@
 
 import * as path from 'path';
 import { IErrorDetectionRule, RegexErrorDetector } from '../ErrorDetector';
-import TaskError from '../TaskError';
+import { BuildTaskError } from '../TaskError';
 
 // Example: "[22:50:27] [gulp-tslint] error blah/test.ts[84, 20]: syntax error"
 // 0: input
@@ -21,12 +21,12 @@ export default RegexErrorDetector(
   new RegExp('^(\\[[^\\]]+\\]) *(\\[[^\\]]+\\]) *([^ ]+) *([^[]+) *\\[([^\\]]+)\\]: *(.*)'),
   (match: RegExpExecArray) => {
     const [line, offset] = match[5].split(',');
-    return new TaskError(
+    return new BuildTaskError(
+      'tslint',
+      match[6],
       path.resolve(process.cwd(), 'src', match[4]),
       Number(line),
-      Number(offset),
-      'tslint',
-      match[6]
+      Number(offset)
     );
   }
 ) as IErrorDetectionRule;
