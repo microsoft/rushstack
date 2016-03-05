@@ -59,14 +59,21 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
         buildTask.on('exit', (code: number) => {
           // @todo #168286: we should reject if we have an error code even if we didn't detect an error
+
+          // Detect & display errors
           const errors = this._errorDetector.execute(writer.getOutput());
           for (let i = 0; i < errors.length; i++) {
             writer.writeError(errors[i].toString(this._errorDisplayMode) + '\n');
           }
+
+          // Display a summary of why the task failed or succeeded
           if (errors.length) {
             writer.writeError(`${errors.length} Error${errors.length > 1 ? 's' : ''}! \n`);
+          } else if (code !== 0) {
+            writer.writeError('gulp returned error code: ' + code + '\n');
           }
-          if (errors.length) {
+
+          if (errors.length > 0 || code !== 0) {
             reject(errors);
           } else {
             resolve();
