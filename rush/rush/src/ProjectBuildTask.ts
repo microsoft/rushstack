@@ -58,8 +58,6 @@ export default class ProjectBuildTask implements ITaskDefinition {
         });
 
         buildTask.on('exit', (code: number) => {
-          // @todo #168286: we should reject if we have an error code even if we didn't detect an error
-
           // Detect & display errors
           const errors = this._errorDetector.execute(writer.getOutput());
           for (let i = 0; i < errors.length; i++) {
