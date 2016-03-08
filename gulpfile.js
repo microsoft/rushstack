@@ -25,7 +25,6 @@ gulp.task('build', () => {
   let allStreams = [];
   let tsProject = ts.createProject(tsConfig.compilerOptions);
   let gutil = require('gulp-util');
-  let chalk = require('chalk');
   let sourceStream = gulp.src(paths.sourceMatch);
 
   sourceStream
@@ -39,7 +38,6 @@ gulp.task('build', () => {
   let tsResult = sourceStream
     .pipe(plumber({
       errorHandler: function(error) {
-       // console.log(error);
         errorCount++;
       }
     }))
@@ -48,15 +46,7 @@ gulp.task('build', () => {
   allStreams.push(tsResult.js.pipe(gulp.dest(paths.libFolder)));
   allStreams.push(tsResult.dts.pipe(gulp.dest(paths.libFolder)));
 
-  let mergedStream = merge(allStreams);
-
-  mergedStream.on('queueDrain', function() {
-    if (errorCount) {
-//      throw new gutil.PluginError('msg', `[gulp-typescript] TypeScript error(s): ${ chalk.red(errorCount) }`, { showStack: false });
-    }
-  });
-
-  return mergedStream;
+  return merge(allStreams);
 });
 
 gulp.task('test', ['build'], () => {
