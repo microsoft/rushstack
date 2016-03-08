@@ -1,66 +1,106 @@
 # gulp-core-build
 
-Common Gulp tasks to support building and testing web apps/libraries. The goal is to have
-a single premade module to install that provides all of the build so very little "build" code
-is in actual code module repositories.
+The gulp build system, along with its rich plugin ecosystem, is a very powerful tool for web development projects.
+However project gulp build setups become difficult to manage over time, as gulpfiles grow in complexity. This project
+simplifies a number of aspects of getting a build setup going for a majority of scenarios.
 
-This set of tasks gives you the following build support:
+Additionally gulp is quite free of opinions. But lack of opinions creates more setup required. Core build defines a
+contract for tasks to implement, such that they can share opinions about where things end up. Tasks are modular but they
+are designed to work well together.
 
-* Build TypeScript files in /src and drop them to lib
-* Build LESS files and automatically export them as commonjs modules in lib
-* TS linting run against code
-* Run tests (using karma, phantomjs, mocha, chai) and get code coverage reports
-* Create bundles
-* Host test apis
+With gulp core build, your gulpfile translates into a list of task definitions, each which define what to run:
+
+```typescript
+'use strict';
+
+// Import core build and the tasks the project needs.
+let build = require('gulp-core-build');
+let lint = require('gulp-core-build-typescript').tslint;
+let typescript = require('gulp-core-build-typescript').typescript;
+let sass = require('gulp-core-build-sass').default;
+let karma = require('gulp-core-build-karma').default;
+let webpack = require('gulp-core-build-webpack').default;
+let serve = require('gulp-core-build-serve').default;
+
+// Define gulp tasks.
+let buildTasks = build.task('build', build.parallel(lint, typescript, sass));
+let testTasks = build.task('test', build.serial(buildTasks, karma));
+let bundleTasks = build.task('bundle', build.serial(buildTasks, webpack));
+let serveTasks = build.task('serve', build.serial(bundleTasks, serve));
+let defaultTasks = build.task('default', testTasks);
+
+// Initialize!
+build.initialize(require('gulp'));
+```
 
 # Usage
 
-Within your project, install gulp and gulp-core-build as dev dependencies:
+Within your project, install gulp, gulp-core-build, and the tasks you need:
 
 ```
 npm install --save-dev gulp gulp-core-build
 ```
 
-Create a gulpfile.js that calls initializeTasks:
+Then install the tasks you need:
+
+```
+npm install --save-dev gulp-core-build-typescript gulp-core-build-karma gulp-core-build-webpack gulp-core-build-serve
+
+```
+
+Create a gulpfile.js that sets up the tasks in the way you want them to run:
 
 ```javascript
 'use strict';
 
-let build = require('ms-core-build');
+// Import core build.
+let build = require('gulp-core-build');
 
-build.initializeTasks(
-  require('gulp'), // the gulp instance to use for building
-  { ... } // optional settings
-);
+// Import the tasks.
+let lint = require('gulp-core-build-typescript').tslint;
+let typescript = require('gulp-core-build-typescript').typescript;
+let sass = require('gulp-core-build-sass').default;
+let karma = require('gulp-core-build-karma').default;
+let webpack = require('gulp-core-build-webpack').default;
+let serve = require('gulp-core-build-serve').default;
+
+// Define gulp tasks.
+let buildTasks = build.task('build', build.parallel(lint, typescript, sass));
+let testTasks = build.task('test', build.serial(buildTasks, karma));
+let bundleTasks = build.task('bundle', build.serial(buildTasks, webpack));
+let serveTasks = build.task('serve', build.serial(bundleTasks, serve));
+let defaultTasks = build.task('default', testTasks);
+
+// Tell the build to set up gulp tasks with the given gulp instance.
+build.initialize(require('gulp'));
 ```
 
-Once this is set up, you should be able to execute general gulp tasks.
+Once this is set up, you should be able to execute the gulp tasks and they should run in the order you defined.
 
 # Available tasks
 
-All tasks are executed with gulp using the standard gulp syntax:
-
-```bash
-gulp <taskname>
-```
-
-Tasks include:
-
-* **build** - Builds the inputs, drops to the output folder.
-* **build-watch** - Watches files and auto builds on changes.
-* **test** - Builds, and then runs tests.
-* **test-watch** - Watches all files and auto builds/runs tests on changes.
-* **bundle** - TBD
-* **serve** - Spins up a localhost server that lets you browse static pages.
-* **nuke** - Deletes build output.
-
-For quick app development, use `gulp serve`. This will spin up the express server and host the content.
-
-For quick library testing flows, use `gulp test-watch`.
+| Task name | Description |
+| --------- | ----------- |
+| gulp-core-build-typescript | Builds and lints typescript. |
+| gulp-core-build-sass | Compiles sass into css, into js modules, that are theme friendly. |
+| gulp-core-build-webpack | Runs webpack given a config, and outputs libraries plus the stats and logging. |
+| gulp-core-build-serve | Sets up a server and live reload for a quick dev loop. |
 
 # API
 
-# initializeTasks(gulpInstance, [options])
+## task(name, task)
+
+Defines a named task to be registered with gulp as a primary gulp task, which will run the provided task when execution.
+
+## parallel(tasks)
+
+Runs a given list of tasks in parallel execution order.
+
+## serial(tasks)
+
+Runs a given list of tasks in serial execution order.
+
+## initialize(gulpInstance, [buildOtions])
 
 Registers the gulp tasks.
 
@@ -79,112 +119,12 @@ build.initializeTasks(
   });
 ```
 
-## Build options
-
-### build.paths
-
-Collection of path matches and folder locations for locating the input source and drop directories.
-
-Type: `object`
-
-Default:
-```javascript
-{
-  sourceMatch: [
-    'src/**/*.ts',
-    'src/**/*.tsx',
-    'typings/tsd.d.ts'
-  ],
-  lessMatch: ['src/**/*.less'],
-  htmlMatch: ['src/**/*.html'],
-  staticsMatch: [
-    'src/**/*.js',
-    'src/**/*.css',
-    'src/**/*.jpg',
-    'src/**/*.png'
-  ],
-  libFolder: 'lib'
-}
-```
-### build.isLintingEnabled
-
-Type: `boolean`
-Default: `true`
-
-### build.lintConfig
-
-Type: `object`
-Default: default tslint.json found in gulp-core-build root. Use this to provide your own object.
-
-# Build input
-
-Using default build settings, your repo source should live under the 'src' directory. The default build will support the following formats:
-
-```text
-/src
-  **/*.ts - Typescript source files
-  **/*.test.ts - Typescript test files, which should live next to sources.
-  **/*.less - Less css files that get converted into AMD modules that you can require as './filename.css'
-  **/*.html - Static HTML files that get minified
-  **/*.png - PNGs that get minified
-  **/*.jpg - JPEGs that get minified
-```
+# Defining a custom task
 
 
-# Build output
+# License
 
-Building the source will drop under the 'lib' folder, preserving the directory structure from the src folder:
-
-```text
-/lib
-  **/* - All unbundled js/static resources will be dropped into lib.
-  **/*.d.ts - All typescript definitions will be dropped as well.
-```
-
-# Tests
-
-In order for tests to work, we need to create a webpack bundle of all the tests and their dependencies. This process requires a tests.js file at
-your src root that has the following content:
-
-```typescript
-// require all modules ending in ".test." from the
-// current directory and all subdirectories
-
-var testsContext = require.context('../../lib', true, /.test.$/);
-
-testsContext.keys().forEach(testsContext);
-```
-
-# Adding custom build tasks to the task dependency tree
-
-In cases where the general build tools don't cover every scenario you have, you can use helpers to inject custom
-build steps into the common build task dependencies.
-
-```javascript
-let build = require('ms-core-build');
-
-// Create a custom gulp task as you normally would.
-gulp.task('build-custom-stuff', () => { ... });
-
-// Register the task to execute before "build" starts, if build things depend on this step.
-build.doBefore('build', 'build-custom-stuff');
-
-// Or, register it to execute while "build" is executing, if nothing depends on this step.
-build.doDuring('build', 'build-custom-stuff');
-
-// Or, register it to execute after "build" is complete if this step depends on build to be complete.
-build.doAfter('build', 'build-custom-stuff');
-
-// After dependencies are registered, initialize core tasks. They will make sure all of the instructions
-// you've provided will be merged correctly into the gulp task dependencies.
-build.initializeTasks(
-  _dirname,
-  require('gulp')
-);
-```
-
-
-
+MIT
 
 
 

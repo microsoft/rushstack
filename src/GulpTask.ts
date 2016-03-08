@@ -1,23 +1,41 @@
 import { ITask } from './ITask';
 import { IBuildConfig } from './IBuildConfig';
-import { log } from './logging';
+import { log, logStartSubtask, logEndSubtask } from './logging';
 
-let chalk = require('chalk');
+let gutil = require('gulp-util');
 
-export class GulpTask implements ITask {
-  public name: string = 'unnamed gulp task';
+export class GulpTask<TASK_CONFIG> implements ITask<TASK_CONFIG> {
+  public name: string;
   public buildConfig: IBuildConfig;
+  public taskConfig: TASK_CONFIG;
+
+  public config(taskConfig: TASK_CONFIG) {
+    let assign = require('object-assign');
+    this.taskConfig = assign({}, this.taskConfig, taskConfig);
+  }
 
   public executeTask(gulp: any, completeCallback: (result?: any) => void): any {
     throw 'The task subclass is missing the "executeTask" method.';
   }
 
+  public log(message: string) {
+    log(`[${ gutil.colors.cyan(this.name) }] ${ message }`);
+  }
+
+  public logWarning(message: string) {
+    this.log(`warning: ${ gutil.colors.yellow(message) }`);
+  }
+
+  public logError(message: string) {
+    this.log(`error: ${ gutil.colors.red(message) }`);
+  }
+
   public execute(config: IBuildConfig): Promise<any> {
     this.buildConfig = config;
 
-    if (this.name) {
-      log(`Starting subtask '${ chalk.cyan(this.name) }'...`);
-    }
+    let startTime = new Date().getTime();
+
+    logStartSubtask(this.name);
 
     return new Promise((resolve, reject) => {
       let stream;
@@ -31,7 +49,7 @@ export class GulpTask implements ITask {
           }
         });
       } catch (e) {
-        console.log(`The task ${ this.name } threw an exception: ${ e }`);
+        this.logError(e);
         reject(e);
       }
 
@@ -40,11 +58,23 @@ export class GulpTask implements ITask {
           .on('error', (error) => {
             reject(error);
           })
+          .on('queueDrain', () => {
+            resolve();
+          })
           .on('end', () => {
-       debugger;
+            resolve();
+          })
+          .on('close', () => {
             resolve();
           });
       }
+    })
+    .then(() => {
+      logEndSubtask(this.name, new Date().getTime() - startTime);
+    })
+    .catch((ex) => {
+      logEndSubtask(this.name, new Date().getTime() - startTime, ex);
+      throw ex;
     });
   }
 
@@ -54,7 +84,30 @@ export class GulpTask implements ITask {
     return path.resolve(path.join(this.buildConfig.rootPath, localPath));
   }
 
-  public readConfig(localPath: string): string {
+  public fileExists(localPath: string): boolean {
+    let fs = require('fs');
+    let doesExist = false;
+    let fullPath = this.resolvePath(localPath);
+
+    try {
+      let stats = fs.statSync(fullPath);
+      doesExist = stats.isFile();
+    } catch (e) { /* no-op */ }
+
+    return doesExist;
+  }
+
+  public copyFile(localSourcePath: string, localDestPath?: string) {
+    let path = require('path');
+    let fs = require('fs-extra');
+
+    let fullSourcePath = path.resolve(__dirname, localSourcePath);
+    let fullDestPath = path.resolve(this.buildConfig.rootPath, (localDestPath || path.basename(localSourcePath)));
+
+    fs.copySync(fullSourcePath, fullDestPath);
+  }
+
+  public readJSONSync(localPath: string): string {
     let fullPath = this.resolvePath(localPath);
     let result = null;
     let fs = require('fs');
