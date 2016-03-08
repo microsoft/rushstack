@@ -14,6 +14,7 @@
     "gulp": "^3.9.0"
   },
   "dependencies": {
+    "gulp": "^3.9.0",
     "es6-promise": "^3.1.2",
     "fs-extra": "^0.26.5",
     "object-assign": "^4.0.1"
