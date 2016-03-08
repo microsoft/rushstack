@@ -15,7 +15,19 @@
       "commit": "98d3168c2c570352a3a7393788e2ec9fbb08ade6"
     },
     "node/node.d.ts": {
-      "commit": "98a9440752f3f2ad7786aba1bf9bdefec818919e"
+      "commit": "9f0f926a12026287b5a4a229e5672c01e7549313"
+    },
+    "es6-promise/es6-promise.d.ts": {
+      "commit": "9f0f926a12026287b5a4a229e5672c01e7549313"
+    },
+    "orchestrator/orchestrator.d.ts": {
+      "commit": "9f0f926a12026287b5a4a229e5672c01e7549313"
+    },
+    "gulp/gulp.d.ts": {
+      "commit": "9f0f926a12026287b5a4a229e5672c01e7549313"
+    },
+    "q/Q.d.ts": {
+      "commit": "9f0f926a12026287b5a4a229e5672c01e7549313"
     }
   }
 }
