@@ -1,0 +1,22 @@
+{
+  "name": "gulp-core-build-typescript",
+  "version": "0.0.1",
+  "description": "",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "license": "MIT",
+  "peerDependencies": {
+    "gulp-core-build": "^0.3.0",
+    "gulp": "^3.9.1"
+  },
+  "dependencies": {
+    "chalk": "^1.1.1",
+    "gulp-plumber": "^1.1.0",
+    "gulp-tslint": "^4.3.3",
+    "gulp-typescript": "^2.12.1",
+    "gulp-util": "^3.0.7",
+    "merge2": "^1.0.1",
+    "tslint": "^3.5.0",
+    "typescript": "^1.8.7"
+  }
+}
