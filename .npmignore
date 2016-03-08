@@ -1,0 +1,8 @@
+src
+node_modules
+.vscode
+
+.gitignore
+.gitattributes
+.editorconfig
+gulpfile.js
