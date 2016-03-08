@@ -39,7 +39,6 @@
     "no-shadowed-variable": true,
     "no-string-literal": true,
     "no-switch-case-fall-through": true,
-    "no-trailing-comma": true,
     "no-trailing-whitespace": true,
     "no-unused-expression": true,
     "no-unused-variable": true,
@@ -57,6 +56,10 @@
     "quotemark": [true, "single", "avoid-escape"],
     "radix": true,
     "semicolon": true,
+    "trailing-comma": {
+      "singleline": "never",
+      "multiline": "never"
+    },
     "triple-equals": [true, "allow-null-check"],
     "variable-name": ["check-format", "allow-leading-underscore", "ban-keywords"],
     "whitespace": [true,

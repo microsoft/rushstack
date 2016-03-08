@@ -3,8 +3,6 @@
 import GulpProxy from './GulpProxy';
 import { ITask } from './ITask';
 import { IBuildConfig } from './IBuildConfig';
-import { log } from './logging';
-import defaultConfig from './config';
 
 export { ITask } from './ITask';
 export { GulpTask } from './GulpTask';
@@ -14,19 +12,26 @@ export { log, logError } from './logging';
 require('es6-promise').polyfill();
 /* tslint:enable:variable-name */
 
-let _taskMap = {} as { [key: string]: ITask };
+const DEFAULT_CONFIG = {
+  distFolder: 'dist',
+  libAMDFolder: null,
+  libFolder: 'lib'
+};
+
+let _taskMap = {} as { [key: string]: ITask<any> };
 let _config: IBuildConfig;
 
-export function task(taskName: string, task: ITask): ITask {
+export function task(taskName: string, task: ITask<any>): ITask<any> {
   _taskMap[taskName] = task;
 
   return task;
 }
 
-export function serial(...tasks: ITask[]): ITask {
+export function serial(...tasks: ITask<any>[]): ITask<any> {
   tasks = _flatten(tasks);
 
   return {
+    config: null,
     execute: () => tasks.reduce(
       (previous, current) => previous.then(() => current.execute(_config)),
       Promise.resolve()
@@ -34,31 +39,55 @@ export function serial(...tasks: ITask[]): ITask {
   };
 }
 
-export function parallel(...tasks: ITask[]): ITask {
+export function parallel(...tasks: ITask<any>[]): ITask<any> {
   tasks = _flatten(tasks);
 
   return {
-    execute: () => Promise.all(
-      tasks.map(task => task.execute(_config))
-    )
+    config: null,
+    execute: () => {
+      return new Promise<void>((resolve, reject) => {
+        let succeeded = 0;
+        let failed = 0;
+
+        function _evaluateCompletion(isSuccess: boolean) {
+          isSuccess ? succeeded++ : failed++;
+
+          if ((succeeded + failed) === tasks.length) {
+            failed ? reject() : resolve();
+          }
+        }
+
+        for (let task of tasks) {
+          task.execute(_config)
+            .then(() => _evaluateCompletion(true))
+            .catch(() => _evaluateCompletion(false));
+        }
+      });
+    }
   };
 }
 
 export function initialize(gulp: any, configOverrides?: any) {
   let assign = require('object-assign');
 
-  _config = assign({}, defaultConfig, configOverrides);
+  _config = assign({}, DEFAULT_CONFIG, configOverrides);
   _config.rootPath = process.cwd();
   _config.gulp = new GulpProxy(gulp);
 
   Object.keys(_taskMap).forEach(taskName => _registerTask(gulp, taskName, _taskMap[taskName]));
 }
 
-function _registerTask(gulp: any, taskName: string, task: ITask) {
+function _registerTask(gulp: any, taskName: string, task: ITask<any>) {
+  let gutil = require('gulp-util');
+
   gulp.task(taskName, function(cb) {
-    task.execute(_config).then(cb).catch((error) => {
-      cb(error);
-    });
+    task.execute(_config)
+      .then(() => {
+        cb();
+      })
+      .catch((error) => {
+        cb(new gutil.PluginError(taskName, error || 'Errors were encountered.'));
+      });
   });
 }
 

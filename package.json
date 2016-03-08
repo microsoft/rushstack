@@ -15,12 +15,18 @@
   },
   "dependencies": {
     "es6-promise": "^3.1.2",
-    "gulp-fail": "^1.0.1",
+    "fs-extra": "^0.26.5",
     "object-assign": "^4.0.1"
   },
   "devDependencies": {
-    "typescript": "^1.6.2",
     "chai": "^3.5.0",
-    "gulp-mocha": "^2.2.0"
+    "gulp-mocha": "^2.2.0",
+    "gulp-plumber": "^1.1.0",
+    "gulp-tslint": "^4.3.3",
+    "gulp-typescript": "^2.12.1",
+    "gulp-util": "^3.0.7",
+    "merge2": "^1.0.1",
+    "tslint": "^3.5.0",
+    "typescript": "^1.6.2"
   }
 }
