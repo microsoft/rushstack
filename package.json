@@ -1,6 +1,6 @@
 {
   "name": "gulp-core-build",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Core gulp build tasks for building typescript, html, less, etc.",
   "repository": {
     "type": "git",
@@ -17,6 +17,7 @@
     "gulp": "^3.9.0",
     "es6-promise": "^3.1.2",
     "fs-extra": "^0.26.5",
+    "gulp-util": "^3.0.7",
     "object-assign": "^4.0.1"
   },
   "devDependencies": {
@@ -25,7 +26,6 @@
     "gulp-plumber": "^1.1.0",
     "gulp-tslint": "^4.3.3",
     "gulp-typescript": "^2.12.1",
-    "gulp-util": "^3.0.7",
     "merge2": "^1.0.1",
     "tslint": "^3.5.0",
     "typescript": "^1.6.2"
