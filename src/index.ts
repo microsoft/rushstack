@@ -3,7 +3,7 @@
 import GulpProxy from './GulpProxy';
 import { ITask } from './ITask';
 import { IBuildConfig } from './IBuildConfig';
-
+import { NukeTask } from './NukeTask';
 export { ITask } from './ITask';
 export { GulpTask } from './GulpTask';
 export { log, logError } from './logging';
@@ -15,7 +15,8 @@ require('es6-promise').polyfill();
 const DEFAULT_CONFIG = {
   distFolder: 'dist',
   libAMDFolder: null,
-  libFolder: 'lib'
+  libFolder: 'lib',
+  tempFolder: 'temp'
 };
 
 let _taskMap = {} as { [key: string]: ITask<any> };
@@ -94,3 +95,6 @@ function _registerTask(gulp: any, taskName: string, task: ITask<any>) {
 function _flatten(arr) {
   return arr.reduce((flat, toFlatten) => flat.concat(Array.isArray(toFlatten) ? _flatten(toFlatten) : toFlatten), []);
 }
+
+// Register default nuke task.
+task('nuke', new NukeTask());
