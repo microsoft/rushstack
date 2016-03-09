@@ -16,6 +16,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
 
   public executeTask(gulp, completeCallback): any {
     let sass = require('gulp-sass');
+    let cleancss = require('gulp-clean-css');
     let texttojs = require('gulp-texttojs');
     let merge = require('merge2');
 
@@ -23,6 +24,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       .pipe(sass.sync({
         importer: (url, prev, done) => ({ file: patchSassUrl(url) })
       }).on('error', sass.logError))
+      .pipe(cleancss())
       .pipe(texttojs({
         ext: '.scss.js',
         isExtensionAppended: false,
