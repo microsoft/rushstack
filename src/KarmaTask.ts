@@ -28,9 +28,10 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
         this.copyFile(path.resolve(__dirname, '../karma.config.js'));
         this.copyFile(path.resolve(__dirname, '../tests.js'), 'src/tests.js');
 
-        // install dev dependencies
-        // phantomjs-polyfill
+        // install dev dependencies?
+        // phantomjs-polyfill?
         //
+        // install typings for mocha/chai/sinon?
       }
 
       completeCallback();
