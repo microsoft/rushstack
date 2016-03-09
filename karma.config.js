@@ -4,7 +4,9 @@
 // Generated on Thu Oct 08 2015 18:13:05 GMT-0700 (PDT)
 
 let path = require('path');
-let bindPolyfillPath = require.resolve('phantomjs-polyfill/bind-polyfill.js');
+let configResources = require('gulp-core-build-karma').configResources;
+
+let bindPolyfillPath = configResources.bindPolyfillPath;
 let debugRun = (process.argv.indexOf('--debug') > -1);
 
 module.exports = function(config) {
@@ -19,7 +21,7 @@ module.exports = function(config) {
 
 
     // list of files / patterns to load in the browser
-    files: [bindPolyfillPath].concat(['lib/tests.js']),
+      files: [bindPolyfillPath].concat(['lib/tests.js']),
 
 
     // list of files to exclude
@@ -38,7 +40,7 @@ module.exports = function(config) {
         postLoaders: debugRun ? null : [{
           test: /\.js/,
           exclude: /(test|node_modules|bower_components)/,
-          loader: require.resolve('istanbul-instrumenter-loader')
+          loader: configResources.istanbulInstrumenterLoaderPath
         }]
       },
       resolve: {
@@ -60,14 +62,8 @@ module.exports = function(config) {
       'lib/**/*.js': ['webpack']
     },
 
-    plugins: [
-      require('karma-webpack'),
-      require('karma-mocha'),
-      require('karma-coverage'),
-      require('karma-mocha-clean-reporter'),
-      require('karma-phantomjs-launcher'),
-      require('karma-sinon-chai')
-    ],
+    plugins: configResources.plugins.concat([
+    ]),
 
     // test results reporter to use
     // possible values: 'dots', 'progress'
