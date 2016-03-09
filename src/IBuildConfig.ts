@@ -4,6 +4,7 @@ export interface IBuildConfig {
   libFolder?: string;
   libAMDFolder?: string;
   distFolder?: string;
+  tempFolder?: string;
 }
 
 export default IBuildConfig;
