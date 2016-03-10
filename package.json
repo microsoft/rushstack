@@ -1,6 +1,6 @@
 {
   "name": "web-library-build",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "index.js",
   "dependencies": {
@@ -12,7 +12,7 @@
     "gulp-core-build-serve": "0.0.1",
     "gulp-core-build-typescript": "0.0.2",
     "gulp-core-build-webpack": "0.0.3",
-    "karma": "^0.13.22",
+    "karma": "0.13.9",
     "karma-coverage": "^0.5.5",
     "karma-mocha": "^0.2.2",
     "karma-mocha-clean-reporter": "https://registry.npmjs.org/karma-mocha-clean-reporter/-/karma-mocha-clean-reporter-0.0.1.tgz",
