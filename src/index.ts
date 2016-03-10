@@ -20,6 +20,7 @@ const DEFAULT_CONFIG = {
 };
 
 let _taskMap = {} as { [key: string]: ITask<any> };
+
 let _config: IBuildConfig;
 
 export function task(taskName: string, task: ITask<any>): ITask<any> {
@@ -28,7 +29,26 @@ export function task(taskName: string, task: ITask<any>): ITask<any> {
   return task;
 }
 
-export function serial(...tasks: ITask<any>[]): ITask<any> {
+export function watch(watchMatch: string, task: ITask<any>): ITask<any> {
+  return {
+    config: null,
+    execute: () => {
+      _config.gulp.watch(watchMatch, function(cb) {
+        task.execute(_config)
+          .then(() => {
+            cb();
+          })
+          .catch((error) => {
+            cb();
+          });
+      });
+
+      return Promise.resolve();
+    }
+  };
+}
+
+export function serial(...tasks: ITask<any>[]): ITask<void> {
   tasks = _flatten(tasks);
 
   return {
