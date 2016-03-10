@@ -16,6 +16,10 @@ export class GulpProxy {
   public dest() {
     return this._gulp.dest.apply(this._gulp, arguments);
   }
+
+  public watch() {
+    return this._gulp.watch.apply(this._gulp, arguments);
+  }
 }
 
 export default GulpProxy;
