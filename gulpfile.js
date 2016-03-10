@@ -24,8 +24,6 @@ gulp.task('build', () => {
   let errorCount = 0;
   let allStreams = [];
   let tsProject = ts.createProject(tsConfig.compilerOptions);
-  let gutil = require('gulp-util');
-  let chalk = require('chalk');
   let sourceStream = gulp.src(paths.sourceMatch);
 
   sourceStream
