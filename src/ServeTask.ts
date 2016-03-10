@@ -16,7 +16,7 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
 
   public taskConfig: IServeTaskConfig = {
     api: null,
-    initialPage: '/dist/index.html',
+    initialPage: '/index.html',
     port: 4321
   };
 
