@@ -24,7 +24,9 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       .pipe(sass.sync({
         importer: (url, prev, done) => ({ file: patchSassUrl(url) })
       }).on('error', sass.logError))
-      .pipe(cleancss())
+      .pipe(cleancss({
+        advanced: false
+      }))
       .pipe(texttojs({
         ext: '.scss.js',
         isExtensionAppended: false,
