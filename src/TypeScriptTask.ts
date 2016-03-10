@@ -33,7 +33,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
 
     let tsConfig = this.readJSONSync('tsconfig.json') || require('../tsconfig.json');
     let tsProject = ts.createProject(tsConfig.compilerOptions);
-    let { libFolder } = this.buildConfig;
+    let { libFolder, libAMDFolder } = this.buildConfig;
 
     let tsResult = gulp.src(this.taskConfig.sourceMatch)
       .pipe(plumber({
@@ -50,6 +50,24 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     // Static passthrough files.
     allStreams.push(gulp.src(this.taskConfig.staticMatch)
       .pipe(gulp.dest(libFolder)));
+
+    // If AMD modules are required, also build that.
+    if (libAMDFolder) {
+      let assign = require('object-assign');
+      let tsAMDProject = ts.createProject(assign({}, tsConfig.compilerOptions, { module: 'amd' }));
+
+      tsResult = gulp.src(this.taskConfig.sourceMatch)
+        .pipe(plumber({
+          errorHandler: function(error) {
+            // console.log(error);
+            errorCount++;
+          }
+        }))
+        .pipe(ts(tsAMDProject, undefined, ts.reporter.longReporter()));
+
+      allStreams.push(tsResult.js.pipe(gulp.dest(libAMDFolder)));
+      allStreams.push(tsResult.dts.pipe(gulp.dest(libAMDFolder)));
+    }
 
     let mergedStream = merge(allStreams);
 
