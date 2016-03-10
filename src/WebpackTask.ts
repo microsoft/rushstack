@@ -63,41 +63,50 @@ export class WebpackTask extends GulpTask<IWebpackConfig> {
               completeEntries++;
 
               let duration = (new Date().getTime() - startTime);
+              let statsResultChildren = statsResult.children ? statsResult.children : [ statsResult ];
 
-              statsResult.chunks.forEach(chunk => chunk.files.forEach(file => (
-                this.log(`Bundled: '${gutil.colors.cyan(path.basename(file))}', ` +
-                  `size: ${gutil.colors.magenta(chunk.size)} bytes, ` +
-                  `took ${gutil.colors.magenta(duration)} ms.`)
-              )));
+              statsResultChildren.forEach(child => {
+                child.chunks.forEach(chunk => {
 
-              let chunk;
+                  chunk.files.forEach(file => (
+                    this.log(`Bundled: '${gutil.colors.cyan(path.basename(file))}', ` +
+                      `size: ${gutil.colors.magenta(chunk.size)} bytes, ` +
+                      `took ${gutil.colors.magenta(duration)} ms.`)
+                  )); // end file
 
-              for (let i = 0; i < statsResult.chunks.length; i++) {
-                let chunkStats = {
-                  chunk: null,
-                  modules: null
-                };
+/*
 
-                chunkStats.chunk = chunk = statsResult.chunks[i];
+                  let chunkStats = {
+                    chunk: chunk,
+                    modules: null
+                  };
+                  let statsPath = path.join(outputDir, chunk.files[0]) + '.stats.json';
 
-                let statsPath = path.join(outputDir, chunk.files[0]) + '.stats.json';
+                  if (child.modules) {
+                    chunkStats.modules = statsResult.modules
+                      .filter(mod => (mod.chunks && mod.chunks.indexOf(chunk.id) > -1))
+                      .map(mod => ({ name: mod.name, size: mod.size }))
+                      .sort((a, b) => (a.size < b.size ? 1 : -1));
+                  }
 
-                if (statsResult.modules) {
-                  chunkStats.modules = statsResult.modules
-                    .filter(mod => (mod.chunks && mod.chunks.indexOf(chunk.id) > -1))
-                    .map(mod => ({ name: mod.name, size: mod.size }))
-                    .sort((a, b) => (a.size < b.size ? 1 : -1));
-                }
+                  let fs = require('fs');
 
-                let fs = require('fs');
+                  fs.writeFileSync(
+                    statsPath,
+                    JSON.stringify(chunkStats, null, 2),
+                    'utf8'
+                  );
+*/
 
-                fs.writeFileSync(
-                  statsPath,
-                  JSON.stringify(chunkStats, null, 2),
-                  'utf8'
-                );
+                }); // end chunk
+
+              }); // end child
+
+              if (completeEntries === this.taskConfig.configPaths.length) {
+                completeCallback();
               }
-            });
+
+            }); // endwebpack callback
         }
 
         if (completeEntries === this.taskConfig.configPaths.length) {
