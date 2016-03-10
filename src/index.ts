@@ -12,16 +12,20 @@ export { log, logError } from './logging';
 require('es6-promise').polyfill();
 /* tslint:enable:variable-name */
 
-const DEFAULT_CONFIG = {
+let _taskMap = {} as { [key: string]: ITask<any> };
+
+let _buildConfig: IBuildConfig = {
   distFolder: 'dist',
   libAMDFolder: null,
   libFolder: 'lib',
   tempFolder: 'temp'
 };
 
-let _taskMap = {} as { [key: string]: ITask<any> };
+export function config(config: IBuildConfig) {
+  let assign = require('object-assign');
 
-let _config: IBuildConfig;
+  _buildConfig = assign({}, _buildConfig, config);
+}
 
 export function task(taskName: string, task: ITask<any>): ITask<any> {
   _taskMap[taskName] = task;
@@ -33,8 +37,8 @@ export function watch(watchMatch: string, task: ITask<any>): ITask<any> {
   return {
     config: null,
     execute: () => {
-      _config.gulp.watch(watchMatch, function(cb) {
-        task.execute(_config)
+      _buildConfig.gulp.watch(watchMatch, function(cb) {
+        task.execute(_buildConfig)
           .then(() => {
             cb();
           })
@@ -54,7 +58,7 @@ export function serial(...tasks: ITask<any>[]): ITask<void> {
   return {
     config: null,
     execute: () => tasks.reduce(
-      (previous, current) => previous.then(() => current.execute(_config)),
+      (previous, current) => previous.then(() => current.execute(_buildConfig)),
       Promise.resolve()
     )
   };
@@ -79,7 +83,7 @@ export function parallel(...tasks: ITask<any>[]): ITask<any> {
         }
 
         for (let task of tasks) {
-          task.execute(_config)
+          task.execute(_buildConfig)
             .then(() => _evaluateCompletion(true))
             .catch(() => _evaluateCompletion(false));
         }
@@ -89,11 +93,8 @@ export function parallel(...tasks: ITask<any>[]): ITask<any> {
 }
 
 export function initialize(gulp: any, configOverrides?: any) {
-  let assign = require('object-assign');
-
-  _config = assign({}, DEFAULT_CONFIG, configOverrides);
-  _config.rootPath = process.cwd();
-  _config.gulp = new GulpProxy(gulp);
+  _buildConfig.rootPath = process.cwd();
+  _buildConfig.gulp = new GulpProxy(gulp);
 
   Object.keys(_taskMap).forEach(taskName => _registerTask(gulp, taskName, _taskMap[taskName]));
 }
@@ -102,7 +103,7 @@ function _registerTask(gulp: any, taskName: string, task: ITask<any>) {
   let gutil = require('gulp-util');
 
   gulp.task(taskName, function(cb) {
-    task.execute(_config)
+    task.execute(_buildConfig)
       .then(() => {
         cb();
       })
