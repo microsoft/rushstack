@@ -1,0 +1,31 @@
+{
+  "name": "web-library-build",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "chai": "^3.5.0",
+    "gulp": "^3.9.1",
+    "gulp-core-build": "^0.3.3",
+    "gulp-core-build-karma": "0.0.2",
+    "gulp-core-build-sass": "0.0.2",
+    "gulp-core-build-serve": "0.0.1",
+    "gulp-core-build-typescript": "0.0.2",
+    "gulp-core-build-webpack": "0.0.3",
+    "karma": "^0.13.22",
+    "karma-coverage": "^0.5.5",
+    "karma-mocha": "^0.2.2",
+    "karma-mocha-clean-reporter": "https://registry.npmjs.org/karma-mocha-clean-reporter/-/karma-mocha-clean-reporter-0.0.1.tgz",
+    "karma-phantomjs-launcher": "^1.0.0",
+    "karma-sinon-chai": "^1.2.0",
+    "karma-webpack": "^1.7.0",
+    "load-themed-styles": "^1.0.4",
+    "lolex": "^1.4.0",
+    "mocha": "^2.4.5",
+    "phantomjs-polyfill": "0.0.2",
+    "phantomjs-prebuilt": "^2.1.5",
+    "sinon": "^1.17.3",
+    "sinon-chai": "^2.8.0",
+    "webpack": "^1.12.14"
+  }
+}
