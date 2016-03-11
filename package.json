@@ -1,6 +1,6 @@
 {
   "name": "gulp-core-build-serve",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "compression": "^1.6.1",
-    "gulp-connect": "^3.1.0",
+    "gulp-connect": "2.3.1",
     "gulp-core-build": "^0.3.0",
     "gulp-open": "^1.0.0",
     "gulp-util": "^3.0.7"
