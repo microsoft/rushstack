@@ -36,9 +36,9 @@ export function task(taskName: string, task: ITask<any>): ITask<any> {
 export function watch(watchMatch: string, task: ITask<any>): ITask<any> {
   return {
     config: null,
-    execute: () => {
-      _buildConfig.gulp.watch(watchMatch, function(cb) {
-        task.execute(_buildConfig)
+    execute: (buildConfig: IBuildConfig) => {
+      buildConfig.gulp.watch(watchMatch, function(cb) {
+        task.execute(buildConfig)
           .then(() => {
             cb();
           })
@@ -57,8 +57,8 @@ export function serial(...tasks: ITask<any>[]): ITask<void> {
 
   return {
     config: null,
-    execute: () => tasks.reduce(
-      (previous, current) => previous.then(() => current.execute(_buildConfig)),
+    execute: (buildConfig: IBuildConfig) => tasks.reduce(
+      (previous, current) => previous.then(() => current.execute(buildConfig)),
       Promise.resolve()
     )
   };
@@ -69,7 +69,7 @@ export function parallel(...tasks: ITask<any>[]): ITask<any> {
 
   return {
     config: null,
-    execute: () => {
+    execute: (buildConfig: IBuildConfig) => {
       return new Promise<void>((resolve, reject) => {
         let succeeded = 0;
         let failed = 0;
@@ -83,7 +83,7 @@ export function parallel(...tasks: ITask<any>[]): ITask<any> {
         }
 
         for (let task of tasks) {
-          task.execute(_buildConfig)
+          task.execute(buildConfig)
             .then(() => _evaluateCompletion(true))
             .catch(() => _evaluateCompletion(false));
         }
