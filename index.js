@@ -8,7 +8,7 @@ let plugins = {
   sass: require('gulp-core-build-sass'),
   karma: require('gulp-core-build-karma'),
   webpack: require('gulp-core-build-webpack'),
-  serve: require('gulp-core-build-serve'),
+  serve: require('gulp-core-build-serve')
 };
 
 let tasks = {
@@ -31,7 +31,7 @@ let watch = build.watch;
 // Define task groups.
 let buildTasks = task('build', parallel(tasks.tslint, tasks.typescript, tasks.text, tasks.sass));
 let testTasks = task('test', serial(buildTasks, tasks.karma));
-let bundleTasks = task('build', serial(buildTasks, tasks.webpack));
+let bundleTasks = task('bundle', serial(buildTasks, tasks.webpack));
 let defaultTasks = task('default', bundleTasks);
 let serveTasks = task('serve',
   serial(
