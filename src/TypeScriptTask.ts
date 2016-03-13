@@ -24,6 +24,8 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     ]
   };
 
+  private _tsProject;
+
   public executeTask(gulp, completeCallback): any {
     let ts = require('gulp-typescript');
     let plumber = require('gulp-plumber');
@@ -32,7 +34,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     let allStreams = [];
 
     let tsConfig = this.readJSONSync('tsconfig.json') || require('../tsconfig.json');
-    let tsProject = ts.createProject(tsConfig.compilerOptions);
+    let tsProject = this._tsProject = this._tsProject || ts.createProject(tsConfig.compilerOptions);
     let { libFolder, libAMDFolder } = this.buildConfig;
 
     let tsResult = gulp.src(this.taskConfig.sourceMatch)
