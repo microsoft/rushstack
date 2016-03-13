@@ -1,6 +1,6 @@
 {
   "name": "gulp-core-build-karma",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -9,7 +9,7 @@
     "phantomjs-polyfill": "0.0.2",
     "phantomjs-prebuilt": "^2.1.5",
     "sinon": "^1.17.3",
-    "karma": "^0.13.9",
+    "karma": "0.13.9",
     "sinon-chai": "^2.8.0",
     "webpack": "^1.12.14",
     "karma-coverage": "^0.5.5",
