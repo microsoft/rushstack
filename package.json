@@ -1,6 +1,6 @@
 {
   "name": "gulp-core-build",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "Core gulp build tasks for building typescript, html, less, etc.",
   "repository": {
     "type": "git",
@@ -28,6 +28,7 @@
     "gulp-tslint": "^4.3.3",
     "gulp-typescript": "^2.12.1",
     "merge2": "^1.0.1",
+    "mocha": "^2.4.5",
     "tslint": "^3.5.0",
     "typescript": "^1.6.2"
   }
