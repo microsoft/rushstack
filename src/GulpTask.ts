@@ -1,17 +1,22 @@
-import { ITask } from './ITask';
+import { IExecutable } from './IExecutable';
 import { IBuildConfig } from './IBuildConfig';
 import { log, logStartSubtask, logEndSubtask } from './logging';
 
 let gutil = require('gulp-util');
 
-export class GulpTask<TASK_CONFIG> implements ITask<TASK_CONFIG> {
+export class GulpTask<TASK_CONFIG> implements IExecutable {
   public name: string;
   public buildConfig: IBuildConfig;
   public taskConfig: TASK_CONFIG;
 
-  public config(taskConfig: TASK_CONFIG) {
-    let assign = require('object-assign');
-    this.taskConfig = assign({}, this.taskConfig, taskConfig);
+  public setConfig(taskConfig: TASK_CONFIG) {
+    let merge = require('lodash.merge');
+
+    this.taskConfig = merge({}, this.taskConfig, taskConfig);
+  }
+
+  public replaceConfig(taskConfig: TASK_CONFIG) {
+    this.taskConfig = taskConfig;
   }
 
   public executeTask(gulp: any, completeCallback: (result?: any) => void): any {

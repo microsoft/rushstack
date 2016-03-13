@@ -1,10 +1,10 @@
 'use strict';
 
 import GulpProxy from './GulpProxy';
-import { ITask } from './ITask';
+import { IExecutable } from './IExecutable';
 import { IBuildConfig } from './IBuildConfig';
 import { NukeTask } from './NukeTask';
-export { ITask } from './ITask';
+export { IExecutable } from './IExecutable';
 export { GulpTask } from './GulpTask';
 export { log, logError } from './logging';
 
@@ -12,7 +12,7 @@ export { log, logError } from './logging';
 require('es6-promise').polyfill();
 /* tslint:enable:variable-name */
 
-let _taskMap = {} as { [key: string]: ITask<any> };
+let _taskMap = {} as { [key: string]: IExecutable };
 
 let _buildConfig: IBuildConfig = {
   distFolder: 'dist',
@@ -22,39 +22,47 @@ let _buildConfig: IBuildConfig = {
 };
 
 /**
- * Configures the build param settings.
+ * Merges the given build config settings into existing settings.
  *
  * @param  {IBuildConfig} The build config settings.
  */
-export function config(config: IBuildConfig) {
-  let assign = require('object-assign');
+export function setConfig(config: IBuildConfig) {
+  let merge = require('lodash.merge');
 
-  _buildConfig = assign({}, _buildConfig, config);
+  _buildConfig = merge({}, _buildConfig, config);
 }
 
 /**
- * Defines a gulp task and maps it to a given ITask.
+ * Replaces the build config.
+ *
+ * @param  {IBuildConfig} config
+ */
+export function replaceConfig(config: IBuildConfig) {
+  _buildConfig = config;
+}
+
+/**
+ * Defines a gulp task and maps it to a given IExecutable.
  *
  * @param  {string} taskName
- * @param  {ITask<any>} task
- * @returns ITask
+ * @param  {IExecutable} task
+ * @returns IExecutable
  */
-export function task(taskName: string, task: ITask<any>): ITask<any> {
+export function task(taskName: string, task: IExecutable): IExecutable {
   _taskMap[taskName] = task;
 
   return task;
 }
 
 /**
- * Defines a gulp watch and maps it to a given ITask.
+ * Defines a gulp watch and maps it to a given IExecutable.
  *
  * @param  {string} watchMatch
- * @param  {ITask<any>} task
- * @returns ITask
+ * @param  {IExecutable} task
+ * @returns IExecutable
  */
-export function watch(watchMatch: string, task: ITask<any>): ITask<any> {
+export function watch(watchMatch: string, task: IExecutable): IExecutable {
   return {
-    config: null,
     execute: (buildConfig: IBuildConfig) => {
       buildConfig.gulp.watch(watchMatch, function(cb) {
         _executeTask(task, buildConfig)
@@ -72,16 +80,15 @@ export function watch(watchMatch: string, task: ITask<any>): ITask<any> {
 }
 
 /**
- * Takes in ITasks as arguments and returns an ITask that will execute them in serial.
+ * Takes in IExecutables as arguments and returns an IExecutable that will execute them in serial.
  *
- * @param  {ITask<any>[]} ...tasks
- * @returns ITask
+ * @param  {IExecutable[]} ...tasks
+ * @returns IExecutable
  */
-export function serial(...tasks: ITask<any>[]): ITask<void> {
+export function serial(...tasks: IExecutable[]): IExecutable {
   tasks = _flatten(tasks);
 
   return {
-    config: null,
     execute: (buildConfig: IBuildConfig) => tasks.reduce(
       (previous, current) => previous.then(() => _executeTask(current, buildConfig)),
       Promise.resolve()
@@ -90,16 +97,15 @@ export function serial(...tasks: ITask<any>[]): ITask<void> {
 }
 
 /**
- * Takes in ITasks as arguments and returns an ITask that will execute them in parallel.
+ * Takes in IExecutables as arguments and returns an IExecutable that will execute them in parallel.
  *
- * @param  {ITask<any>[]} ...tasks
- * @returns ITask
+ * @param  {IExecutable[]} ...tasks
+ * @returns IExecutable
  */
-export function parallel(...tasks: ITask<any>[]): ITask<any> {
+export function parallel(...tasks: IExecutable[]): IExecutable {
   tasks = _flatten(tasks);
 
   return {
-    config: null,
     execute: (buildConfig: IBuildConfig) => {
       return new Promise<void>((resolve, reject) => {
         let succeeded = 0;
@@ -136,13 +142,13 @@ export function initialize(gulp: any) {
 }
 
 /**
- * Registers a given gulp task given a name and an ITask.
+ * Registers a given gulp task given a name and an IExecutable.
  *
  * @param  {any} gulp
  * @param  {string} taskName
- * @param  {ITask<any>} task
+ * @param  {IExecutable} task
  */
-function _registerTask(gulp: any, taskName: string, task: ITask<any>) {
+function _registerTask(gulp: any, taskName: string, task: IExecutable) {
   let gutil = require('gulp-util');
 
   gulp.task(taskName, function(cb) {
@@ -157,13 +163,13 @@ function _registerTask(gulp: any, taskName: string, task: ITask<any>) {
 }
 
 /**
- * Executes a given ITask.
+ * Executes a given IExecutable.
  *
- * @param  {ITask<any>} task
+ * @param  {IExecutable} task
  * @param  {IBuildConfig} buildConfig
  * @returns Promise
  */
-function _executeTask(task: ITask<any>, buildConfig: IBuildConfig): Promise<any> {
+function _executeTask(task: IExecutable, buildConfig: IBuildConfig): Promise<any> {
   // Try to fallback to the default task if provided.
   if (task && !task.execute) {
     if ((task as any).default) {
