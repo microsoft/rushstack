@@ -47,7 +47,9 @@ module.exports = {
 
   tasks: tasks,
 
-  config: (config) => build.config(config),
+  setConfig: (config) => build.setConfig(config),
+
+  replaceConfig: (config) => build.replaceConfig(config),
 
   initialize: (gulp) => build.initialize(gulp)
 };
