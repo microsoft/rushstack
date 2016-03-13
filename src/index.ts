@@ -21,24 +21,43 @@ let _buildConfig: IBuildConfig = {
   tempFolder: 'temp'
 };
 
+/**
+ * Configures the build param settings.
+ *
+ * @param  {IBuildConfig} The build config settings.
+ */
 export function config(config: IBuildConfig) {
   let assign = require('object-assign');
 
   _buildConfig = assign({}, _buildConfig, config);
 }
 
+/**
+ * Defines a gulp task and maps it to a given ITask.
+ *
+ * @param  {string} taskName
+ * @param  {ITask<any>} task
+ * @returns ITask
+ */
 export function task(taskName: string, task: ITask<any>): ITask<any> {
   _taskMap[taskName] = task;
 
   return task;
 }
 
+/**
+ * Defines a gulp watch and maps it to a given ITask.
+ *
+ * @param  {string} watchMatch
+ * @param  {ITask<any>} task
+ * @returns ITask
+ */
 export function watch(watchMatch: string, task: ITask<any>): ITask<any> {
   return {
     config: null,
     execute: (buildConfig: IBuildConfig) => {
       buildConfig.gulp.watch(watchMatch, function(cb) {
-        task.execute(buildConfig)
+        _executeTask(task, buildConfig)
           .then(() => {
             cb();
           })
@@ -52,18 +71,30 @@ export function watch(watchMatch: string, task: ITask<any>): ITask<any> {
   };
 }
 
+/**
+ * Takes in ITasks as arguments and returns an ITask that will execute them in serial.
+ *
+ * @param  {ITask<any>[]} ...tasks
+ * @returns ITask
+ */
 export function serial(...tasks: ITask<any>[]): ITask<void> {
   tasks = _flatten(tasks);
 
   return {
     config: null,
     execute: (buildConfig: IBuildConfig) => tasks.reduce(
-      (previous, current) => previous.then(() => current.execute(buildConfig)),
+      (previous, current) => previous.then(() => _executeTask(current, buildConfig)),
       Promise.resolve()
     )
   };
 }
 
+/**
+ * Takes in ITasks as arguments and returns an ITask that will execute them in parallel.
+ *
+ * @param  {ITask<any>[]} ...tasks
+ * @returns ITask
+ */
 export function parallel(...tasks: ITask<any>[]): ITask<any> {
   tasks = _flatten(tasks);
 
@@ -83,7 +114,7 @@ export function parallel(...tasks: ITask<any>[]): ITask<any> {
         }
 
         for (let task of tasks) {
-          task.execute(buildConfig)
+          _executeTask(task, buildConfig)
             .then(() => _evaluateCompletion(true))
             .catch(() => _evaluateCompletion(false));
         }
@@ -92,18 +123,30 @@ export function parallel(...tasks: ITask<any>[]): ITask<any> {
   };
 }
 
-export function initialize(gulp: any, configOverrides?: any) {
+/**
+ * Initializes the gulp tasks.
+ *
+ * @param  {any} gulp
+ */
+export function initialize(gulp: any) {
   _buildConfig.rootPath = process.cwd();
   _buildConfig.gulp = new GulpProxy(gulp);
 
   Object.keys(_taskMap).forEach(taskName => _registerTask(gulp, taskName, _taskMap[taskName]));
 }
 
+/**
+ * Registers a given gulp task given a name and an ITask.
+ *
+ * @param  {any} gulp
+ * @param  {string} taskName
+ * @param  {ITask<any>} task
+ */
 function _registerTask(gulp: any, taskName: string, task: ITask<any>) {
   let gutil = require('gulp-util');
 
   gulp.task(taskName, function(cb) {
-    task.execute(_buildConfig)
+    _executeTask(task, _buildConfig)
       .then(() => {
         cb();
       })
@@ -113,6 +156,34 @@ function _registerTask(gulp: any, taskName: string, task: ITask<any>) {
   });
 }
 
+/**
+ * Executes a given ITask.
+ *
+ * @param  {ITask<any>} task
+ * @param  {IBuildConfig} buildConfig
+ * @returns Promise
+ */
+function _executeTask(task: ITask<any>, buildConfig: IBuildConfig): Promise<any> {
+  // Try to fallback to the default task if provided.
+  if (task && !task.execute) {
+    if ((task as any).default) {
+      task = (task as any).default;
+    }
+  }
+
+  // If the task is missing, throw a meaningful error.
+  if (!task || !task.execute) {
+    return Promise.reject(`A task was scheduled, but the task was null. This probably means the task wasn't imported correctly.`);
+  }
+
+  return task.execute(buildConfig);
+}
+
+/**
+ * Flattens a set of arrays into a single array.
+ *
+ * @param  {any} arr
+ */
 function _flatten(arr) {
   return arr.reduce((flat, toFlatten) => flat.concat(Array.isArray(toFlatten) ? _flatten(toFlatten) : toFlatten), []);
 }
