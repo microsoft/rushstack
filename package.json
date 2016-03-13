@@ -1,6 +1,6 @@
 {
   "name": "web-library-build",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "",
   "main": "index.js",
   "peerDependencies": {
@@ -10,7 +10,7 @@
   "dependencies": {
     "chai": "^3.5.0",
     "gulp": "^3.9.1",
-    "gulp-core-build": "^0.3.4",
+    "gulp-core-build": "^0.3.5",
     "gulp-core-build-karma": "^0.0.3",
     "gulp-core-build-sass": "^0.0.4",
     "gulp-core-build-serve": "^0.0.3",
