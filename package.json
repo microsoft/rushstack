@@ -1,16 +1,13 @@
 {
   "name": "gulp-core-build-mocha",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
-  "peerDependencies": {
-    "gulp-core-build": "^0.3.0",
-    "gulp": "^3.9.1"
-  },
   "dependencies": {
-    "gulp-util": "^3.0.7"
+    "gulp-core-build": "^0.4.0",
+    "gulp": "^3.9.1"
   },
   "devDependencies": {
     "gulp-plumber": "^1.1.0",
