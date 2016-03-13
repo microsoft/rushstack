@@ -1,6 +1,6 @@
 {
   "name": "gulp-core-build-sass",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -11,7 +11,7 @@
   "dependencies": {
     "gulp": "^3.9.1",
     "gulp-clean-css": "^2.0.3",
-    "gulp-core-build": "^0.3.0",
+    "gulp-core-build": "^0.4.0",
     "gulp-sass": "^2.2.0",
     "gulp-texttojs": "^1.0.3",
     "merge2": "^1.0.1"
