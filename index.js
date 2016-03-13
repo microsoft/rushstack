@@ -37,8 +37,7 @@ let serveTasks = task('serve',
   serial(
     bundleTasks,
     tasks.serve,
-    watch('src/**/*.{ts,tsx}', serial(parallel(tasks.tslint, tasks.typescript, tasks.text), tasks.webpack, tasks.reload)),
-    watch('src/**/*.scss', serial(serial(tasks.sass, tasks.webpack, tasks.reload)))
+    watch('src/**/*.{ts,tsx,scss,js,txt,html}', serial(bundleTasks, tasks.reload))
   )
 );
 
