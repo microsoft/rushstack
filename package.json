@@ -10,9 +10,6 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
-  "peerDependencies": {
-    "gulp": "^3.9.0"
-  },
   "dependencies": {
     "del": "^2.2.0",
     "es6-promise": "^3.1.2",
