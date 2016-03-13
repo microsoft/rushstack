@@ -1,6 +1,6 @@
 {
   "name": "gulp-core-build-karma",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "gulp": "^3.9.1",
-    "gulp-core-build": "^0.3.0",
+    "gulp-core-build": "^0.4.0",
     "gulp-karma": "0.0.5",
     "istanbul-instrumenter-loader": "^0.2.0"
   },
