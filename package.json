@@ -1,11 +1,12 @@
 {
   "name": "web-library-build",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "",
   "main": "index.js",
   "peerDependencies": {
     "karma": "0.13.9",
-    "webpack": "^1.12.14"
+    "webpack": "^1.12.14",
+    "load-themed-styles": "^1.0.4"
   },
   "dependencies": {
     "chai": "^3.5.0",
