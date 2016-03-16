@@ -18,7 +18,8 @@ let _buildConfig: IBuildConfig = {
   distFolder: 'dist',
   libAMDFolder: null,
   libFolder: 'lib',
-  tempFolder: 'temp'
+  tempFolder: 'temp',
+  properties: {}
 };
 
 /**
