@@ -77,7 +77,7 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
         for (let apiMapEntry in apiMap) {
           if (apiMap.hasOwnProperty(apiMapEntry)) {
             console.log(`Registring api: ${ gutil.colors.green(apiMapEntry) }`);
-            app.get(api, apiMap[apiMapEntry]);
+            app.get(apiMapEntry, apiMap[apiMapEntry]);
           }
         }
         app.listen(api.port || 5432);
