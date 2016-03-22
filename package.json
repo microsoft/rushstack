@@ -1,6 +1,6 @@
 {
   "name": "gulp-core-build",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "Core gulp build tasks for building typescript, html, less, etc.",
   "repository": {
     "type": "git",

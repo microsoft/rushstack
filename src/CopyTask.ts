@@ -7,7 +7,6 @@ export interface ICopyConfig {
 }
 
 export class CopyTask extends GulpTask<ICopyConfig> {
-
   public taskConfig: ICopyConfig = {
     copyTo: {}
   };
@@ -30,7 +29,11 @@ export class CopyTask extends GulpTask<ICopyConfig> {
       }
     }
 
-    return merge(allStreams);
+    if (allStreams.length === 0) {
+      completeCallback();
+    } else {
+      return merge(allStreams);
+    }
   }
 }
 

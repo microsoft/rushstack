@@ -4,7 +4,6 @@ export interface INukeConfig {
 }
 
 export class NukeTask extends GulpTask<INukeConfig> {
-
   public taskConfig: INukeConfig = {
   };
 
