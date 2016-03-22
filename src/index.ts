@@ -6,6 +6,8 @@ import { IBuildConfig } from './IBuildConfig';
 import { NukeTask } from './NukeTask';
 export { IExecutable } from './IExecutable';
 export { GulpTask } from './GulpTask';
+export { CopyTask } from './CopyTask';
+export { NukeTask } from './NukeTask';
 export { log, logError } from './logging';
 
 /* tslint:disable:variable-name */
