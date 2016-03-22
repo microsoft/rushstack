@@ -1,6 +1,6 @@
 {
   "name": "gulp-core-build",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Core gulp build tasks for building typescript, html, less, etc.",
   "repository": {
     "type": "git",
@@ -15,6 +15,7 @@
     "es6-promise": "^3.1.2",
     "fs-extra": "^0.26.5",
     "gulp": "^3.9.0",
+    "gulp-flatten": "^0.2.0",
     "gulp-util": "^3.0.7",
     "lodash.merge": "^4.3.2"
   },
