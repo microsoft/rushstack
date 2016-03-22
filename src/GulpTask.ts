@@ -19,6 +19,10 @@ export class GulpTask<TASK_CONFIG> implements IExecutable {
     this.taskConfig = taskConfig;
   }
 
+  public isEnabled(): boolean {
+    return true;
+  }
+
   public executeTask(gulp: any, completeCallback: (result?: any) => void): any {
     throw 'The task subclass is missing the "executeTask" method.';
   }

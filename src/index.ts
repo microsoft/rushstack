@@ -185,7 +185,31 @@ function _executeTask(task: IExecutable, buildConfig: IBuildConfig): Promise<any
     return Promise.reject(`A task was scheduled, but the task was null. This probably means the task wasn't imported correctly.`);
   }
 
-  return task.execute(buildConfig);
+  if (task.isEnabled === undefined || task.isEnabled()) {
+    let duration = new Date().getTime();
+
+    if (buildConfig.onTaskStart && task.name) {
+      buildConfig.onTaskStart(task.name);
+    }
+
+    let taskPromise = task.execute(buildConfig)
+      .then(() => {
+        duration = new Date().getTime() - duration;
+        if (buildConfig.onTaskEnd && task.name) {
+          buildConfig.onTaskEnd(task.name, duration);
+        }
+      })
+      .catch((error: any) => {
+        if (buildConfig.onTaskEnd && task.name) {
+          buildConfig.onTaskEnd(task.name, duration, error);
+        }
+      });
+
+    return taskPromise;
+  }
+
+  // No-op otherwise.
+  return Promise.resolve();
 }
 
 /**
