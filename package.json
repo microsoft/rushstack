@@ -1,0 +1,14 @@
+{
+  "name": "load-themed-styles-loader",
+  "version": "0.0.1",
+  "description": "",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "license": "MIT",
+  "dependencies": {
+    "loader-utils": "^0.2.12"
+  },
+  "devDependencies": {
+    "node-library-build": "^0.0.3"
+  }
+}
