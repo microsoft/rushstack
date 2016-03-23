@@ -1,38 +1,32 @@
 {
   "name": "gulp-core-build-karma",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
-  "peerDependencies": {
-    "phantomjs-polyfill": "0.0.2",
-    "phantomjs-prebuilt": "^2.1.5",
-    "sinon": "^1.17.3",
-    "karma": "0.13.9",
-    "sinon-chai": "^2.8.0",
-    "webpack": "^1.12.14",
-    "karma-coverage": "^0.5.5",
-    "karma-mocha": "^0.2.2",
-    "karma-mocha-clean-reporter": "0.0.1",
-    "karma-phantomjs-launcher": "^1.0.0",
-    "karma-sinon-chai": "^1.2.0",
-    "karma-webpack": "^1.7.0",
-    "chai": "^3.5.0",
-    "mocha": "^2.4.5"
-  },
   "dependencies": {
+    "chai": "^3.5.0",
     "gulp": "^3.9.1",
-    "gulp-core-build": "^0.4.0",
+    "gulp-core-build": "^0.4.4",
     "gulp-karma": "0.0.5",
-    "istanbul-instrumenter-loader": "^0.2.0"
+    "istanbul-instrumenter-loader": "^0.2.0",
+    "karma": "^0.13.9",
+    "akarma-coverage": "^0.5.5",
+    "akarma-mocha": "^0.2.2",
+    "akarma-mocha-clean-reporter": "0.0.1",
+    "akarma-phantomjs-launcher": "^1.0.0",
+    "akarma-sinon-chai": "^1.2.0",
+    "akarma-webpack": "^1.7.0",
+    "lolex": "^1.4.0",
+    "mocha": "^2.4.5",
+    "phantomjs-polyfill": "0.0.2",
+    "phantomjs-prebuilt": "^2.1.6",
+    "sinon": "^1.17.3",
+    "sinon-chai": "^2.8.0",
+    "webpack": "^1.12.14"
   },
   "devDependencies": {
-    "gulp-plumber": "^1.1.0",
-    "gulp-tslint": "^4.3.3",
-    "gulp-typescript": "^2.12.1",
-    "merge2": "^1.0.1",
-    "tslint": "^3.5.0",
-    "typescript": "^1.8.7"
+    "node-library-build": "^0.0.3"
   }
 }
