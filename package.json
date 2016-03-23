@@ -1,26 +1,19 @@
 {
   "name": "gulp-core-build-sass",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
-  "peerDependencies": {
-    "load-themed-styles": "^1.0.4"
-  },
   "dependencies": {
     "gulp": "^3.9.1",
     "gulp-clean-css": "^2.0.3",
-    "gulp-core-build": "^0.4.0",
+    "gulp-core-build": "^0.4.3",
     "gulp-sass": "^2.2.0",
     "gulp-texttojs": "^1.0.3",
     "merge2": "^1.0.1"
   },
   "devDependencies": {
-    "gulp-plumber": "^1.1.0",
-    "gulp-tslint": "^4.3.3",
-    "gulp-typescript": "^2.12.1",
-    "tslint": "^3.5.0",
-    "typescript": "^1.8.7"
+    "node-library-build": "^0.0.3"
   }
 }
