@@ -49,6 +49,14 @@ export class WebpackTask extends GulpTask<IWebpackConfig> {
         webpack(
           webpackConfig,
           (error, stats) => {
+            if (!this.buildConfig.properties) {
+              this.buildConfig.properties = {};
+            }
+
+            /* tslint:disable:no-string-literal */
+            this.buildConfig.properties['webpackStats'] = stats;
+            /* tslint:enable:no-string-literal */
+
             let statsResult = stats.toJson({
               hash: false,
               source: false
