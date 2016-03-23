@@ -5,6 +5,7 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
+  "repository": "github:iclanton/load-themed-styles-loader",
   "dependencies": {
     "loader-utils": "^0.2.12"
   },
