@@ -11,9 +11,11 @@ export class WebpackTask extends GulpTask<IWebpackConfig> {
     configPath: './webpack.config.js'
   };
 
+  public resources = {
+    webpack: require('webpack')
+  };
+
   public executeTask(gulp, completeCallback): any {
-    // let isProduction = (process.argv.indexOf('--production') > -1);
-    // let streams = [];
     let shouldInitWebpack = (process.argv.indexOf('--initwebpack') > -1);
     let path = require('path');
 
@@ -71,30 +73,6 @@ export class WebpackTask extends GulpTask<IWebpackConfig> {
                     `size: ${gutil.colors.magenta(chunk.size)} bytes, ` +
                     `took ${gutil.colors.magenta(duration)} ms.`)
                 )); // end file
-
-/*
-
-                let chunkStats = {
-                  chunk: chunk,
-                  modules: null
-                };
-                let statsPath = path.join(outputDir, chunk.files[0]) + '.stats.json';
-
-                if (child.modules) {
-                  chunkStats.modules = statsResult.modules
-                    .filter(mod => (mod.chunks && mod.chunks.indexOf(chunk.id) > -1))
-                    .map(mod => ({ name: mod.name, size: mod.size }))
-                    .sort((a, b) => (a.size < b.size ? 1 : -1));
-                }
-
-                let fs = require('fs');
-
-                fs.writeFileSync(
-                  statsPath,
-                  JSON.stringify(chunkStats, null, 2),
-                  'utf8'
-                );
-*/
 
               }); // end chunk
 

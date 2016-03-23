@@ -1,24 +1,17 @@
 {
   "name": "gulp-core-build-webpack",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
-  "peerDependencies": {
+  "dependencies": {
+    "gulp-core-build": "^0.4.4",
+    "gulp": "^3.9.1",
+    "gulp-util": "^3.0.7",
     "webpack": "^1.12.14"
   },
-  "dependencies": {
-    "gulp-core-build": "^0.4.0",
-    "gulp": "^3.9.1",
-    "gulp-util": "^3.0.7"
-  },
   "devDependencies": {
-    "gulp-plumber": "^1.1.0",
-    "gulp-tslint": "^4.3.3",
-    "gulp-typescript": "^2.12.1",
-    "merge2": "^1.0.1",
-    "tslint": "^3.5.0",
-    "typescript": "^1.8.7"
+    "node-library-build": "^0.0.3"
   }
 }
