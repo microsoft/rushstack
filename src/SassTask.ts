@@ -4,6 +4,8 @@ GulpTask
 
 export interface ISassTaskConfig {
   sassMatch?: string[];
+  commonModuleTemplate: string;
+  amdModuleTemplate: string;
 }
 
 export class SassTask extends GulpTask<ISassTaskConfig> {
@@ -11,7 +13,11 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
   public taskConfig: ISassTaskConfig = {
     sassMatch: [
       'src/**/*.scss'
-    ]
+    ],
+    commonModuleTemplate:
+      `require('load-themed-styles').loadStyles(<%= content %>);`,
+    amdModuleTemplate:
+      `define(['load-themed-styles'], function(loadStyles) { loadStyles.loadStyles(<%= content %>); });`
   };
 
   public executeTask(gulp, completeCallback): any {
@@ -30,7 +36,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       .pipe(texttojs({
         ext: '.scss.js',
         isExtensionAppended: false,
-        template: `require('load-themed-styles').loadStyles(<%= content %>);`
+        template: this.taskConfig.commonModuleTemplate
       }))
       .pipe(gulp.dest(this.buildConfig.libFolder));
 
@@ -45,7 +51,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
         .pipe(texttojs({
           ext: '.scss.js',
           isExtensionAppended: false,
-          template: `define(['load-themed-styles'], function(loadStyles) { loadStyles.loadStyles(<%= content %>); });`
+          template: this.taskConfig.amdModuleTemplate
         }))
         .pipe(gulp.dest(this.buildConfig.libAMDFolder));
 
