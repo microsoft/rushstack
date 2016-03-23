@@ -20,7 +20,11 @@ export class WebpackTask extends GulpTask<IWebpackConfig> {
     let path = require('path');
 
     if (shouldInitWebpack) {
-      this.log('Initializing a webpack.config.js, which bundles lib/index.js into dist/packagename.js into a UMD module.');
+
+      this.log(
+        'Initializing a webpack.config.js, which bundles lib/index.js ' +
+        'into dist/packagename.js into a UMD module.');
+
       this.copyFile(path.resolve(__dirname, '../webpack.config.js'));
       completeCallback();
     } else if (!this.taskConfig.configPath) {
@@ -33,7 +37,8 @@ export class WebpackTask extends GulpTask<IWebpackConfig> {
 
         this.logWarning(
           `The webpack config location '${relativeConfigPath}' doesn't exist. ` +
-          `Run again using --initwebpack to create a default config, or call webpack.setConfig({ configPath: null }).`);
+          `Run again using --initwebpack to create a default config, or call ` +
+          `webpack.setConfig({ configPath: null }).`);
 
         completeCallback();
       } else {
