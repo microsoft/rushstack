@@ -12,6 +12,19 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
     karmaConfigPath: './karma.config.js'
   };
 
+  public resources = {
+    bindPolyfillPath: require.resolve('phantomjs-polyfill/bind-polyfill.js'),
+    istanbulInstrumenterLoaderPath: require.resolve('istanbul-instrumenter-loader'),
+    plugins: [
+      require('karma-webpack'),
+      require('karma-mocha'),
+      require('karma-coverage'),
+      require('karma-mocha-clean-reporter'),
+      require('karma-phantomjs-launcher'),
+      require('karma-sinon-chai')
+    ]
+  };
+
   public executeTask(gulp, completeCallback): any {
     let { karmaConfigPath } = this.taskConfig;
 
