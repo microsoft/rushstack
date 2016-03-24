@@ -1,15 +1,15 @@
 import * as webpack from 'webpack';
 import { GulpTask } from 'gulp-core-build';
 
-export interface IWebpackConfig {
+export interface IWebpackTaskConfig {
   configPath: string;
   config?: webpack.Configuration;
 }
 
-export class WebpackTask extends GulpTask<IWebpackConfig> {
+export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
   public name = 'webpack';
 
-  public taskConfig: IWebpackConfig = {
+  public taskConfig: IWebpackTaskConfig = {
     configPath: './webpack.config.js'
   };
 
