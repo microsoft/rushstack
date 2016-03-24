@@ -23,7 +23,6 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
   public executeTask(gulp, completeCallback): any {
     let sass = require('gulp-sass');
     let cleancss = require('gulp-clean-css');
-    let rename = require('gulp-rename');
     let texttojs = require('gulp-texttojs');
     let merge = require('merge2');
 
@@ -34,10 +33,6 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       .pipe(cleancss({
         advanced: false
       }))
-      .pipe(rename({
-        extname: '.scss'
-      }))
-      .pipe(gulp.dest(this.buildConfig.libFolder))
       .pipe(texttojs({
         ext: '.scss.js',
         isExtensionAppended: false,
@@ -53,10 +48,6 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
         .pipe(cleancss({
           advanced: false
         }))
-        .pipe(rename({
-          extname: '.scss'
-        }))
-        .pipe(gulp.dest(this.buildConfig.libAMDFolder))
         .pipe(texttojs({
           ext: '.scss.js',
           isExtensionAppended: false,
