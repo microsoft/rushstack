@@ -1,8 +1,9 @@
+import * as webpack from 'webpack';
 import { GulpTask } from 'gulp-core-build';
 
 export interface IWebpackConfig {
   configPath: string;
-  config?: IWebpackConfig;
+  config?: webpack.Configuration;
 }
 
 export class WebpackTask extends GulpTask<IWebpackConfig> {
@@ -21,14 +22,11 @@ export class WebpackTask extends GulpTask<IWebpackConfig> {
     let path = require('path');
 
     if (shouldInitWebpack) {
-
       this.log(
         'Initializing a webpack.config.js, which bundles lib/index.js ' +
         'into dist/packagename.js into a UMD module.');
 
       this.copyFile(path.resolve(__dirname, '../webpack.config.js'));
-      completeCallback();
-    } else if (!this.taskConfig.config) {
       completeCallback();
     } else {
       let webpackConfig = null;
@@ -50,6 +48,8 @@ export class WebpackTask extends GulpTask<IWebpackConfig> {
 
           completeCallback();
           return;
+        } else {
+          webpackConfig = this.taskConfig.config;
         }
       } else if (this.taskConfig.config) {
         webpackConfig = this.taskConfig.config;
@@ -59,7 +59,6 @@ export class WebpackTask extends GulpTask<IWebpackConfig> {
         return;
       }
 
-      let webpack = require('webpack');
       let gutil = require('gulp-util');
 
       let startTime = new Date().getTime();
@@ -113,6 +112,7 @@ export class WebpackTask extends GulpTask<IWebpackConfig> {
   private logMissingConfigWarning() {
     this.logWarning(
       'No webpack config has been provided.' +
-      `Run again using --initwebpack to create a default config, or call webpack.setConfig({ configPath: null }).`);
+      'Run again using --initwebpack to create a default config,' +
+      `or call webpack.setConfig({ configPath: null }).`);
   }
 }
