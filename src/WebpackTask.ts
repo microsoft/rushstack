@@ -36,7 +36,7 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
         completeCallback();
         return;
       } else if (this.taskConfig.configPath) {
-        if (!this.fileExists(this.taskConfig.configPath)) {
+        if (this.fileExists(this.taskConfig.configPath)) {
           webpackConfig = require(this.taskConfig.configPath);
         } else if (!this.taskConfig.config) {
           let relativeConfigPath = path.relative(this.buildConfig.rootPath, this.taskConfig.config);
