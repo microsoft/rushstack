@@ -1,5 +1,5 @@
 import {
-GulpTask
+  GulpTask
 } from 'gulp-core-build';
 
 export interface ISassTaskConfig {
@@ -15,9 +15,9 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       'src/**/*.scss'
     ],
     commonModuleTemplate:
-      `require('load-themed-styles').loadStyles(<%= content %>);`,
+    `require('load-themed-styles').loadStyles(<%= content %>);`,
     amdModuleTemplate:
-      `define(['load-themed-styles'], function(loadStyles) { loadStyles.loadStyles(<%= content %>); });`
+    `define(['load-themed-styles'], function(loadStyles) { loadStyles.loadStyles(<%= content %>); });`
   };
 
   public executeTask(gulp, completeCallback): any {
@@ -29,7 +29,10 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     let commonJSResult = gulp.src(this.taskConfig.sassMatch)
       .pipe(sass.sync({
         importer: (url, prev, done) => ({ file: patchSassUrl(url) })
-      }).on('error', sass.logError))
+      }).on('error', function(error) {
+        sass.logError.call(this, error);
+        completeCallback('Errors found in sass file(s).');
+      }))
       .pipe(cleancss({
         advanced: false
       }))
