@@ -10,7 +10,6 @@
     "gulp-clean-css": "^2.0.3",
     "gulp-core-build": "^0.4.3",
     "gulp-sass": "^2.2.0",
-    "gulp-rename": "^1.2.2",
     "gulp-texttojs": "^1.0.3",
     "merge2": "^1.0.1"
   },
