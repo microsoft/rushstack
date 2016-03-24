@@ -1,13 +1,14 @@
 {
   "name": "load-themed-styles-loader",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "repository": "github:iclanton/load-themed-styles-loader",
   "dependencies": {
-    "loader-utils": "^0.2.12"
+    "loader-utils": "^0.2.12",
+    "load-themed-styles": "^1.0.4"
   },
   "devDependencies": {
     "node-library-build": "^0.0.3"
