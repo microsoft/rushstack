@@ -7,6 +7,15 @@
   "installed": {
     "node/node.d.ts": {
       "commit": "9f0f926a12026287b5a4a229e5672c01e7549313"
+    },
+    "source-map/source-map.d.ts": {
+      "commit": "a44529fcb1e1cdc0355e71c42a6048de99b57c34"
+    },
+    "webpack/webpack.d.ts": {
+      "commit": "a44529fcb1e1cdc0355e71c42a6048de99b57c34"
+    },
+    "uglify-js/uglify-js.d.ts": {
+      "commit": "a44529fcb1e1cdc0355e71c42a6048de99b57c34"
     }
   }
 }
