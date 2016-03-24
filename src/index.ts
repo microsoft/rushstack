@@ -120,6 +120,8 @@ export function parallel(...tasks: IExecutable[]): IExecutable {
           if ((succeeded + failed) === tasks.length) {
             failed ? reject() : resolve();
           }
+
+          return !isSuccess ? Promise.reject('') : null;
         }
 
         for (let task of tasks) {
@@ -203,6 +205,8 @@ function _executeTask(task: IExecutable, buildConfig: IBuildConfig): Promise<any
         if (buildConfig.onTaskEnd && task.name) {
           buildConfig.onTaskEnd(task.name, duration, error);
         }
+
+        return Promise.reject(error);
       });
 
     return taskPromise;

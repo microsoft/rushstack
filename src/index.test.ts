@@ -6,11 +6,8 @@ let { describe, it } = require('mocha');
  let { expect } = require('chai');
 
 let {
-//  task,
   serial,
   parallel,
-//  initialize,
-//  log,
 } = require('./index');
 
 describe('serial', () => {
@@ -18,7 +15,7 @@ describe('serial', () => {
     let execution = [];
     let tasks = createTasks('task', 3, command => execution.push(command));
 
-    serial(tasks).execute().then(() => {
+    serial(tasks).execute({}).then(() => {
       expect(execution).to.deep.equal([
         'executing task 0',
         'complete task 0',
@@ -38,7 +35,7 @@ describe('parallel', () => {
     let execution = [];
     let tasks = createTasks('task', 3, command => execution.push(command));
 
-    parallel(tasks).execute().then(() => {
+    parallel(tasks).execute({}).then(() => {
       expect(execution).to.deep.equal([
         'executing task 0',
         'executing task 1',
@@ -61,7 +58,7 @@ describe('parallel', () => {
       serial1Tasks,
       parallelTasks,
       serial2Tasks
-    ]).execute()
+    ]).execute({})
       .then(() => {
         expect(execution).to.deep.equal([
           'executing serial set 1 - 0',
@@ -81,20 +78,54 @@ describe('parallel', () => {
       })
       .catch(error => done(error));
   });
+
+  it('stops running serial tasks on failure', (done) => {
+    let execution = [];
+    let tasks = createTasks('task', 1, command => execution.push(command));
+
+    tasks.push(createTask('fail task', command => execution.push(command), true));
+    tasks.push(createTask('should not run task', command => execution.push(command), false));
+
+    serial(tasks).execute({}).then(
+      () => {
+        done('The task returned success unexpectedly.');
+      }).catch((error) => {
+      expect(execution).to.deep.equal([
+        'executing task 0',
+        'complete task 0',
+        'executing fail task',
+        'complete fail task'
+      ]);
+      done();
+    });
+
+  });
+
 });
 
-function createTasks(name: string, count: number, executionCallback: (message: string) => void) {
+function createTasks(
+  name: string,
+  count: number,
+  executionCallback: (message: string) => void) {
   return Array.apply(null, Array(count)).map((item, index) => createTask(name + ' ' + index, executionCallback));
 }
 
-function createTask(name: string, executionCallback: (message: string) => void) {
+function createTask(
+  name: string,
+  executionCallback: (message: string) => void,
+  shouldFail?: boolean) {
   return {
-    execute: () => new Promise((done) => {
+    execute: (buildConfig) => new Promise((done, error) => {
       executionCallback(`executing ${ name }`);
 
       setTimeout(() => {
         executionCallback(`complete ${ name }`);
-        done();
+
+        if (shouldFail) {
+          error('Failure');
+        } else {
+          done();
+        }
       }, 10);
     })
   };
