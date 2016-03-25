@@ -1,9 +1,9 @@
-import * as webpack from 'webpack';
+import * as Webpack from 'webpack';
 import { GulpTask } from 'gulp-core-build';
 
 export interface IWebpackTaskConfig {
   configPath: string;
-  config?: webpack.Configuration;
+  config?: Webpack.Configuration;
 }
 
 export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
@@ -26,7 +26,7 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
         'Initializing a webpack.config.js, which bundles lib/index.js ' +
         'into dist/packagename.js into a UMD module.');
 
-      this.copyFile(path.resolve(__dirname, '../webpack.config.js'));
+      this.copyFile(path.resolve(__dirname, '..', 'webpack.config.js'));
       completeCallback();
     } else {
       let webpackConfig = null;
@@ -37,14 +37,19 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
         return;
       } else if (this.taskConfig.configPath) {
         if (this.fileExists(this.taskConfig.configPath)) {
-          webpackConfig = require(this.taskConfig.configPath);
+          try {
+            webpackConfig = require(this.resolvePath(this.taskConfig.configPath));
+          } catch (err) {
+            completeCallback(`Error parsing webpack config: ${ this.taskConfig.configPath }: ${ err }`);
+            return;
+          }
         } else if (!this.taskConfig.config) {
           let relativeConfigPath = path.relative(this.buildConfig.rootPath, this.taskConfig.config);
 
-        this.logWarning(
-          `The webpack config location '${relativeConfigPath}' doesn't exist. ` +
-          `Run again using --initwebpack to create a default config, or call ` +
-          `webpack.setConfig({ configPath: null }).`);
+          this.logWarning(
+            `The webpack config location '${relativeConfigPath}' doesn't exist. ` +
+            `Run again using --initwebpack to create a default config, or call ` +
+            `webpack.setConfig({ configPath: null }).`);
 
           completeCallback();
           return;
@@ -59,8 +64,8 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
         return;
       }
 
+      let webpack = require('webpack');
       let gutil = require('gulp-util');
-
       let startTime = new Date().getTime();
       let outputDir = this.buildConfig.distFolder;
 
