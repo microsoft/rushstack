@@ -13,12 +13,10 @@ export * from 'gulp-core-build-webpack';
 export * from 'gulp-core-build-serve';
 
 // Define default task groups.
-let buildTasks = task('build', parallel(tslint, typescript, text, sass));
-let testTasks = task('test', serial(buildTasks, karma));
+let buildTasks = task('build', parallel(typescript, text, sass));
 let bundleTasks = task('bundle', serial(buildTasks, webpack));
 
-task('default', bundleTasks);
-
+task('test', serial(buildTasks, karma));
 task('serve',
   serial(
     bundleTasks,
@@ -27,4 +25,4 @@ task('serve',
   )
 );
 
-task('default', testTasks);
+task('default', serial(tslint, bundleTasks, karma));
