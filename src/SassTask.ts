@@ -25,14 +25,21 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     let cleancss = require('gulp-clean-css');
     let texttojs = require('gulp-texttojs');
     let merge = require('merge2');
+    let changed = require('gulp-changed');
+    let postcss = require('gulp-postcss');
+    let autoprefixer = require('autoprefixer');
 
     let commonJSResult = gulp.src(this.taskConfig.sassMatch)
+      .pipe(changed(this.buildConfig.libFolder, { extension: '.scss.js' }))
       .pipe(sass.sync({
         importer: (url, prev, done) => ({ file: patchSassUrl(url) })
       }).on('error', function(error) {
         sass.logError.call(this, error);
         completeCallback('Errors found in sass file(s).');
       }))
+      .pipe(postcss([
+        autoprefixer({ browsers: ['> 1%', 'last 2 versions', 'ie >= 10']})
+      ]))
       .pipe(cleancss({
         advanced: false
       }))
