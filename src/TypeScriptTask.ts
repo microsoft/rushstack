@@ -29,6 +29,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   public executeTask(gulp, completeCallback): any {
     let ts = require('gulp-typescript');
     let plumber = require('gulp-plumber');
+    let changed = require('gulp-changed');
     let merge = require('merge2');
     let errorCount = 0;
     let allStreams = [];
@@ -36,7 +37,6 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     let tsConfig = this.readJSONSync('tsconfig.json') || require('../tsconfig.json');
     let tsProject = this._tsProject = this._tsProject || ts.createProject(tsConfig.compilerOptions);
     let { libFolder, libAMDFolder } = this.buildConfig;
-
     let tsResult = gulp.src(this.taskConfig.sourceMatch)
       .pipe(plumber({
         errorHandler: function(error) {
@@ -44,6 +44,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
           errorCount++;
         }
       }))
+      .pipe(changed(this.buildConfig.libFolder, { extension: '.js' }))
       .pipe(ts(tsProject, undefined, ts.reporter.longReporter()));
 
     allStreams.push(tsResult.js.pipe(gulp.dest(libFolder)));
@@ -65,6 +66,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
             errorCount++;
           }
         }))
+        .pipe(changed(this.buildConfig.libFolder, { extension: '.js' }))
         .pipe(ts(tsAMDProject, undefined, ts.reporter.longReporter()));
 
       allStreams.push(tsResult.js.pipe(gulp.dest(libAMDFolder)));
