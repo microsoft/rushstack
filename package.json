@@ -1,6 +1,6 @@
 {
   "name": "web-library-build",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
