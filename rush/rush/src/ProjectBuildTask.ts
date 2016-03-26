@@ -5,7 +5,6 @@
  * A TaskRunner task which cleans and builds a project
  */
 
-import * as path from 'path';
 import * as child_process from 'child_process';
 
 import RushConfigLoader, { IRushProjectConfig } from './RushConfigLoader';
@@ -40,14 +39,12 @@ export default class ProjectBuildTask implements ITaskDefinition {
           stdio: [0, 1, 2] // (omit this to suppress gulp console output)
         };
 
-        const fullPathToGulp = path.join(RushConfigLoader.getCommonFolder(), 'node_modules/.bin/gulp');
-
-        writer.writeLine('gulp nuke');
-        const gulpNukeResult = child_process.execSync(fullPathToGulp + ' nuke', { cwd: projectFolder });
+        writer.writeLine('npm run clean');
+        const gulpNukeResult = child_process.execSync('npm run clean', { cwd: projectFolder });
         writer.writeLine(gulpNukeResult.toString());
 
-        writer.writeLine('gulp bundle test');
-        const buildTask = child_process.exec(fullPathToGulp + ' bundle test', options);
+        writer.writeLine('npm run test');
+        const buildTask = child_process.exec('npm run test', options);
 
         buildTask.stdout.on('data', (data: string) => {
           writer.write(data);
