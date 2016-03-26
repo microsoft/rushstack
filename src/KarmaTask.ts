@@ -62,8 +62,12 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
         },
         configFile: this.resolvePath(karmaConfigPath),
         singleRun: singleRun
-      }, () => {
-        completeCallback();
+      }, (exitCode) => {
+        if (exitCode) {
+          completeCallback('Error(s) occured during karma.');
+        } else {
+          completeCallback();
+        }
       }).start();
     }
   }
