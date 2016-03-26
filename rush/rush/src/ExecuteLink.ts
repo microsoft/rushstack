@@ -61,7 +61,12 @@ function createDependencyLinks(consumingProject: IRushProjectConfig, projects: M
     }
 
     // Create symlink: dependencyProjectFolder <-- consumingModuleFolder
+    if (fs.existsSync(localModuleFolder)) {
+      console.log(`WARNING: replace symlink to common/${dependencyProject} with ${dependencyProjectFolder}`);
+      fs.unlinkSync(localModuleFolder);
+    }
     fs.symlinkSync(dependencyProjectFolder, localModuleFolder, 'junction');
+
     numberOfLinks++;
   });
   return numberOfLinks;
