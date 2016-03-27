@@ -21,5 +21,3 @@ export class GulpProxy {
     return this._gulp.watch.apply(this._gulp, arguments);
   }
 }
-
-export default GulpProxy;

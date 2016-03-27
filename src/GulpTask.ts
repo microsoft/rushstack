@@ -8,6 +8,7 @@ export class GulpTask<TASK_CONFIG> implements IExecutable {
   public name: string;
   public buildConfig: IBuildConfig;
   public taskConfig: TASK_CONFIG;
+  public nukeMatch: string[];
 
   public setConfig(taskConfig: TASK_CONFIG) {
     let merge = require('lodash.merge');
@@ -37,6 +38,10 @@ export class GulpTask<TASK_CONFIG> implements IExecutable {
 
   public logError(message: string) {
     this.log(`error: ${ gutil.colors.red(message) }`);
+  }
+
+  public getNukeMatch(): string[] {
+    return this.nukeMatch;
   }
 
   public execute(config: IBuildConfig): Promise<any> {

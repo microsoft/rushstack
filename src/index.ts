@@ -1,20 +1,21 @@
 'use strict';
 
-import GulpProxy from './GulpProxy';
+import { GulpProxy } from './GulpProxy';
 import { IExecutable } from './IExecutable';
 import { IBuildConfig } from './IBuildConfig';
 import { NukeTask } from './NukeTask';
 export { IExecutable } from './IExecutable';
-export { GulpTask } from './GulpTask';
-export { CopyTask } from './CopyTask';
-export { NukeTask } from './NukeTask';
-export { log, logError } from './logging';
+export * from './GulpTask';
+export * from './CopyTask';
+export * from './NukeTask';
+export * from './logging';
 
 /* tslint:disable:variable-name */
 require('es6-promise').polyfill();
 /* tslint:enable:variable-name */
 
 let _taskMap = {} as { [key: string]: IExecutable };
+let _uniqueTasks = [];
 
 let _buildConfig: IBuildConfig = {
   distFolder: 'dist',
@@ -54,6 +55,8 @@ export function replaceConfig(config: IBuildConfig) {
 export function task(taskName: string, task: IExecutable): IExecutable {
   _taskMap[taskName] = task;
 
+  _trackTask(task);
+
   return task;
 }
 
@@ -65,6 +68,8 @@ export function task(taskName: string, task: IExecutable): IExecutable {
  * @returns IExecutable
  */
 export function watch(watchMatch: string, task: IExecutable): IExecutable {
+  _trackTask(task);
+
   return {
     execute: (buildConfig: IBuildConfig) => {
       buildConfig.gulp.watch(watchMatch, function(cb) {
@@ -91,6 +96,8 @@ export function watch(watchMatch: string, task: IExecutable): IExecutable {
 export function serial(...tasks: IExecutable[]): IExecutable {
   tasks = _flatten(tasks);
 
+  tasks.forEach(task => _trackTask(task));
+
   return {
     execute: (buildConfig: IBuildConfig) => tasks.reduce(
       (previous, current) => previous.then(() => _executeTask(current, buildConfig)),
@@ -107,6 +114,8 @@ export function serial(...tasks: IExecutable[]): IExecutable {
  */
 export function parallel(...tasks: IExecutable[]): IExecutable {
   tasks = _flatten(tasks);
+
+  tasks.forEach(task => _trackTask(task));
 
   return {
     execute: (buildConfig: IBuildConfig) => {
@@ -142,6 +151,7 @@ export function parallel(...tasks: IExecutable[]): IExecutable {
 export function initialize(gulp: any) {
   _buildConfig.rootPath = process.cwd();
   _buildConfig.gulp = new GulpProxy(gulp);
+  _buildConfig.uniqueTasks = _uniqueTasks;
 
   Object.keys(_taskMap).forEach(taskName => _registerTask(gulp, taskName, _taskMap[taskName]));
 }
@@ -216,6 +226,12 @@ function _executeTask(task: IExecutable, buildConfig: IBuildConfig): Promise<any
   return Promise.resolve();
 }
 
+function _trackTask(task: IExecutable) {
+  if (_uniqueTasks.indexOf(task) < 0) {
+    _uniqueTasks.push(task);
+  }
+}
+
 /**
  * Flattens a set of arrays into a single array.
  *
@@ -225,5 +241,7 @@ function _flatten(arr) {
   return arr.reduce((flat, toFlatten) => flat.concat(Array.isArray(toFlatten) ? _flatten(toFlatten) : toFlatten), []);
 }
 
+export let nuke = new NukeTask();
+
 // Register default nuke task.
-task('nuke', new NukeTask());
+task('nuke', nuke);
