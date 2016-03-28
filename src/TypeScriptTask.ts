@@ -24,18 +24,19 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     ]
   };
 
-  private _tsProject;
-
   public executeTask(gulp, completeCallback): any {
     let ts = require('gulp-typescript');
     let plumber = require('gulp-plumber');
     let changed = require('gulp-changed');
+    let sourcemaps = require('gulp-sourcemaps');
+    let assign = require('object-assign');
     let merge = require('merge2');
     let errorCount = 0;
     let allStreams = [];
-
     let tsConfig = this.readJSONSync('tsconfig.json') || require('../tsconfig.json');
-    let tsProject = this._tsProject = this._tsProject || ts.createProject(tsConfig.compilerOptions);
+    let tsCompilerOptions = assign({}, tsConfig.compilerOptions, { sortOutput: true });
+
+    let tsProject = ts.createProject(tsCompilerOptions);
     let { libFolder, libAMDFolder } = this.buildConfig;
     let tsResult = gulp.src(this.taskConfig.sourceMatch)
       .pipe(plumber({
@@ -45,31 +46,43 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
         }
       }))
       .pipe(changed(this.buildConfig.libFolder, { extension: '.js' }))
+      .pipe(sourcemaps.init())
       .pipe(ts(tsProject, undefined, ts.reporter.longReporter()));
 
-    allStreams.push(tsResult.js.pipe(gulp.dest(libFolder)));
+    allStreams.push(tsResult.js
+      .pipe(sourcemaps.write('.'))
+      .pipe(gulp.dest(libFolder)));
+
     allStreams.push(tsResult.dts.pipe(gulp.dest(libFolder)));
 
     // Static passthrough files.
-    allStreams.push(gulp.src(this.taskConfig.staticMatch)
-      .pipe(gulp.dest(libFolder)));
+    let staticSrc = gulp.src(this.taskConfig.staticMatch);
+
+    allStreams.push(
+      staticSrc.pipe(gulp.dest(libFolder)));
 
     // If AMD modules are required, also build that.
     if (libAMDFolder) {
-      let assign = require('object-assign');
-      let tsAMDProject = ts.createProject(assign({}, tsConfig.compilerOptions, { module: 'amd' }));
+      allStreams.push(
+        staticSrc.pipe(gulp.dest(libAMDFolder)));
+
+      let tsAMDProject = ts.createProject(assign({}, tsCompilerOptions, { module: 'amd' }));
 
       tsResult = gulp.src(this.taskConfig.sourceMatch)
         .pipe(plumber({
           errorHandler: function(error) {
-            // console.log(error);
             errorCount++;
           }
         }))
-        .pipe(changed(this.buildConfig.libFolder, { extension: '.js' }))
+        .pipe(changed(this.buildConfig.libAMDFolder, { extension: '.js' }))
+        .pipe(sourcemaps.write())
         .pipe(ts(tsAMDProject, undefined, ts.reporter.longReporter()));
 
-      allStreams.push(tsResult.js.pipe(gulp.dest(libAMDFolder)));
+      allStreams.push(
+        tsResult.js
+        .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest(libAMDFolder)));
+
       allStreams.push(tsResult.dts.pipe(gulp.dest(libAMDFolder)));
     }
 
