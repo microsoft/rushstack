@@ -5,7 +5,7 @@ export interface IInstrumentTaskConfig {
 }
 
 export class InstrumentTask extends GulpTask<IInstrumentTaskConfig> {
-  public name = 'Instrument';
+  public name = 'instrument';
 
   public taskConfig: IInstrumentTaskConfig = {
     coverageMatch: ['lib/**/*.js', '!lib/**/*.test.js']
