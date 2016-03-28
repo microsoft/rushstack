@@ -13,15 +13,19 @@ let _registeredStyles: IStyleRecord[] = [] as IStyleRecord[];
 const MAX_STYLE_CONTENT_SIZE = 10000;
 
 /**
- * Loads a set of style text. If it is registered too early, we will register it when the window.load event is fired.
+ * Loads a set of style text. If it is registered too early, we will register it when the window.load
+ * event is fired.
  * @param {string} styleText Style to register.
  */
 export function loadStyles(styles: string, styleRecord?: IStyleRecord) {
-  _areUnlimitedStylesheetsSupported ? registerStyles(styles, styleRecord) : registerStylesIE(styles, styleRecord);
+  _areUnlimitedStylesheetsSupported ?
+    registerStyles(styles, styleRecord) :
+    registerStylesIE(styles, styleRecord);
 }
 
 /**
- * Registers a set theme tokens to find and replace. If styles were already registered, they will be replaced.
+ * Registers a set theme tokens to find and replace. If styles were already registered, they will be
+ * replaced.
  * @param {any} theme JSON object of theme tokens to values.
  */
 export function loadTheme(theme: any) {
@@ -49,6 +53,7 @@ function reloadStyles(): void {
  */
 export function detokenize(styles: string): string {
   if (styles) {
+    /* tslint:disable: max-line-length */
     styles = styles.replace(
       /[\'\"]\[theme:\s*(\w+)\s*(?:\,\s*default:\s*([\\"\']?[\.\,\(\)\#\-\s\w]*[\.\,\(\)\#\-\w][\"\']?))?\s*\][\'\"]/g,
       (
@@ -60,18 +65,20 @@ export function detokenize(styles: string): string {
 
         // Warn to console if we hit an unthemed value even when themes are provided.
         if (_theme && !themedValue && console) {
-          console.warn(`Themed style value not provided for "${ themeVariable }". Falling back to "${ defaultValue || 'inherit' }".`);
+          console.warn(`Themed style value not provided for "${themeVariable}". Falling back to "${defaultValue || 'inherit'}".`);
         }
 
         return themedValue || defaultValue || 'inherit';
       });
+    /* tslint:enable: max-line-length */
   }
 
   return styles;
 }
 
 /**
- * Registers a set of style text. If it is registered too early, we will register it when the window.load event is fired.
+ * Registers a set of style text. If it is registered too early, we will register it when the
+ * window.load event is fired.
  * @param {string} styleText Style to register.
  */
 function registerStyles(styleText: string, styleRecord?: IStyleRecord): void {
@@ -97,7 +104,8 @@ function registerStyles(styleText: string, styleRecord?: IStyleRecord): void {
 }
 
 /**
- * Registers a set of style text, for IE 9 and below, which has a ~30 style element limit so we need to register slightly differently.
+ * Registers a set of style text, for IE 9 and below, which has a ~30 style element limit so we need
+ * to register slightly differently.
  * @param {string} styleText Style to register.
  */
 function registerStylesIE(styleText: string, styleRecord?: IStyleRecord) {
@@ -135,8 +143,14 @@ function registerStylesIE(styleText: string, styleRecord?: IStyleRecord) {
  * This will determine if style registration should be done via cssText (<= IE9) or not
  */
 function shouldUseCssText(): boolean {
-  let emptyStyle = document.createElement('style') as any;
-  emptyStyle.type = 'text/css';
+  let useCSSText = false;
 
-  return !!emptyStyle.styleSheet;
+  if (typeof document !== 'undefined') {
+    let emptyStyle = document.createElement('style') as any;
+
+    emptyStyle.type = 'text/css';
+    useCSSText = !!emptyStyle.styleSheet;
+  }
+
+  return useCSSText;
 }

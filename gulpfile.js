@@ -1,18 +1,9 @@
 'use strict';
 
-let build = require('gulp-core-build');
+let build = require('node-library-build');
 
-build.initializeTasks(
-  require('gulp'),
-  {
-    build: {
-      paths: {
-        lessMatch: null,
-        sassMatch: null,
-        htmlMatch: null,
-        amdLibFolder: 'lib-amd',
-        staticsMatch: [ 'src/**/*.js']
-      }
-    }
-  }
-);
+build.setConfig({
+  libAMDFolder: 'lib-amd'
+});
+
+build.initialize(require('gulp'));

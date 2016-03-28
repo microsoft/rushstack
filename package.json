@@ -1,6 +1,6 @@
 {
   "name": "load-themed-styles",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Loads themed styles.",
   "license": "MIT",
   "repository": {
@@ -13,6 +13,6 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "gulp": "^3.9.1",
-    "gulp-core-build": "^0.2.20"
+    "node-library-build": "~0.0.5"
   }
 }
