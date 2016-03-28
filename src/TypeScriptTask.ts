@@ -24,19 +24,25 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     ]
   };
 
+  private _tsProject;
+
   public executeTask(gulp, completeCallback): any {
     let ts = require('gulp-typescript');
     let plumber = require('gulp-plumber');
-    let changed = require('gulp-changed');
     let sourcemaps = require('gulp-sourcemaps');
     let assign = require('object-assign');
     let merge = require('merge2');
     let errorCount = 0;
     let allStreams = [];
     let tsConfig = this.readJSONSync('tsconfig.json') || require('../tsconfig.json');
-    let tsCompilerOptions = assign({}, tsConfig.compilerOptions, { sortOutput: true });
 
-    let tsProject = ts.createProject(tsCompilerOptions);
+    let tsCompilerOptions = assign({}, tsConfig.compilerOptions, {
+      sortOutput: true,
+      module: 'commonjs'
+    });
+
+    let tsProject = this._tsProject = this._tsProject || ts.createProject(tsCompilerOptions);
+
     let { libFolder, libAMDFolder } = this.buildConfig;
     let tsResult = gulp.src(this.taskConfig.sourceMatch)
       .pipe(plumber({
@@ -45,7 +51,6 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
           errorCount++;
         }
       }))
-      .pipe(changed(this.buildConfig.libFolder, { extension: '.js' }))
       .pipe(sourcemaps.init())
       .pipe(ts(tsProject, undefined, ts.reporter.longReporter()));
 
@@ -74,7 +79,6 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
             errorCount++;
           }
         }))
-        .pipe(changed(this.buildConfig.libAMDFolder, { extension: '.js' }))
         .pipe(sourcemaps.write())
         .pipe(ts(tsAMDProject, undefined, ts.reporter.longReporter()));
 
