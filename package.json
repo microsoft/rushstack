@@ -6,14 +6,14 @@
   "typings": "lib/index.d.ts",
   "dependencies": {
     "gulp": "~3.9.1",
-    "gulp-core-build": "~0.4.6",
-    "gulp-core-build-karma": "~0.1.3",
-    "gulp-core-build-sass": "~0.1.3",
+    "gulp-core-build": "~0.4.7",
+    "gulp-core-build-karma": "~0.1.4",
+    "gulp-core-build-sass": "~0.2.0",
     "gulp-core-build-serve": "~0.1.3",
-    "gulp-core-build-typescript": "~0.1.3",
+    "gulp-core-build-typescript": "~0.1.5",
     "gulp-core-build-webpack": "~0.1.3"
   },
   "devDependencies": {
-    "gulp-core-build-mocha": "~0.1.2"
+    "gulp-core-build-mocha": "~0.1.4"
   }
 }
