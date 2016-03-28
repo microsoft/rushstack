@@ -7,6 +7,7 @@ export interface ISassTaskConfig {
   commonModuleTemplate?: string;
   amdModuleTemplate?: string;
   useCSSModules?: boolean;
+  externalCss?: boolean;
 }
 
 let _classMaps = {};
@@ -22,7 +23,8 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     `require('load-themed-styles').loadStyles(<%= content %>);`,
     amdModuleTemplate:
     `define(['load-themed-styles'], function(loadStyles) { loadStyles.loadStyles(<%= content %>); });`,
-    useCSSModules: false
+    useCSSModules: false,
+    externalCss: true
   };
 
   public nukeMatch = [
@@ -30,6 +32,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
   ];
 
   public executeTask(gulp, completeCallback): any {
+    let path = require('path');
     let sass = require('gulp-sass');
     let cleancss = require('gulp-clean-css');
     let texttojs = require('gulp-texttojs');
@@ -38,7 +41,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     let autoprefixer = require('autoprefixer');
     let cssModules = require('postcss-modules');
     let postCSSPlugins = [
-        autoprefixer({ browsers: ['> 1%', 'last 2 versions', 'ie >= 10'] })
+      autoprefixer({ browsers: ['> 1%', 'last 2 versions', 'ie >= 10'] })
     ];
 
     if (this.taskConfig.useCSSModules) {
@@ -62,25 +65,44 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       .pipe(cleancss({
         advanced: false
       }))
+      // TODO: output .CSS somewhere before this step if "taskConfig.externalCss" is true
       .pipe(texttojs({
         ext: '.scss.ts',
         isExtensionAppended: false,
         template: (file) => {
-          let content = file.contents.toString('utf8');
-          let classNames = _classMaps[file.path];
+          const content = file.contents.toString('utf8');
+          const classNames = _classMaps[file.path];
+          const exportClassNames = classNames ?
+            `export = ${flipDoubleQuotes(JSON.stringify(classNames, null, 2))};\n\n` : '';
 
-          return (
-            !!content ?
-              `/* tslint:disable */` + '\n\n' +
-              `import { loadStyles } from 'load-themed-styles';` + '\n\n' +
-              (classNames ?
-                `export = ${ flipDoubleQuotes(JSON.stringify(classNames, null, 2)) };` + '\n\n'
-              : '') +
-              `loadStyles(${ flipDoubleQuotes(JSON.stringify(content)) });` + '\n'
-            : '');
+          let lines = [];
+          if (this.taskConfig.externalCss) {
+            lines = [
+              '/* tslint:disable */',
+              '',
+              exportClassNames,
+              '',
+              `require('${path.basename(file.path, path.extname(file.path))}.css');`,
+              ''
+            ];
+          } else if (!!content) {
+            lines = [
+              '/* tslint:disable */',
+              '',
+              'import { loadStyles } from \'load-themed-styles\';',
+              '',
+              exportClassNames,
+              '',
+              `loadStyles(${flipDoubleQuotes(JSON.stringify(content))});`,
+              ''
+            ];
+          }
+
+          return lines.join('\n').replace(/\n\n+/, '\n\n');
         }
       }))
-      .pipe(gulp.dest('src'));
+      // we're currently not overwriting files, so incremental builds without a clean don't work
+      .pipe(gulp.dest('src', { overwrite: true }));
   }
 
   private generateModuleStub(cssFileName, json) {
@@ -112,5 +134,5 @@ function flipDoubleQuotes(str: string) {
       .replace(/'/g, '\\\'')
       .replace(/"/g, `'`)
       .replace(/`/g, '"')
-    ) : str;
+  ) : str;
 }
