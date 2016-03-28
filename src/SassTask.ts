@@ -4,12 +4,16 @@ import {
 
 export interface ISassTaskConfig {
   sassMatch?: string[];
-  commonModuleTemplate: string;
-  amdModuleTemplate: string;
+  commonModuleTemplate?: string;
+  amdModuleTemplate?: string;
+  useCSSModules?: boolean;
 }
+
+let _classMaps = {};
 
 export class SassTask extends GulpTask<ISassTaskConfig> {
   public name = 'sass';
+
   public taskConfig: ISassTaskConfig = {
     sassMatch: [
       'src/**/*.scss'
@@ -17,58 +21,77 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     commonModuleTemplate:
     `require('load-themed-styles').loadStyles(<%= content %>);`,
     amdModuleTemplate:
-    `define(['load-themed-styles'], function(loadStyles) { loadStyles.loadStyles(<%= content %>); });`
+    `define(['load-themed-styles'], function(loadStyles) { loadStyles.loadStyles(<%= content %>); });`,
+    useCSSModules: false
   };
+
+  public nukeMatch = [
+    'src/**/*.scss.ts'
+  ];
 
   public executeTask(gulp, completeCallback): any {
     let sass = require('gulp-sass');
     let cleancss = require('gulp-clean-css');
     let texttojs = require('gulp-texttojs');
-    let merge = require('merge2');
     let changed = require('gulp-changed');
     let postcss = require('gulp-postcss');
     let autoprefixer = require('autoprefixer');
+    let cssModules = require('postcss-modules');
+    let postCSSPlugins = [
+        autoprefixer({ browsers: ['> 1%', 'last 2 versions', 'ie >= 10'] })
+    ];
 
-    let commonJSResult = gulp.src(this.taskConfig.sassMatch)
-      .pipe(changed(this.buildConfig.libFolder, { extension: '.scss.js' }))
+    if (this.taskConfig.useCSSModules) {
+      postCSSPlugins.push(
+        cssModules({
+          getJSON: this.generateModuleStub.bind(this),
+          generateScopedName: this.generateScopedName.bind(this)
+        })
+      );
+    }
+
+    return gulp.src(this.taskConfig.sassMatch)
+      .pipe(changed('src', { extension: '.scss.ts' }))
       .pipe(sass.sync({
         importer: (url, prev, done) => ({ file: patchSassUrl(url) })
       }).on('error', function(error) {
         sass.logError.call(this, error);
         completeCallback('Errors found in sass file(s).');
       }))
-      .pipe(postcss([
-        autoprefixer({ browsers: ['> 1%', 'last 2 versions', 'ie >= 10']})
-      ]))
+      .pipe(postcss(postCSSPlugins))
       .pipe(cleancss({
         advanced: false
       }))
       .pipe(texttojs({
-        ext: '.scss.js',
+        ext: '.scss.ts',
         isExtensionAppended: false,
-        template: this.taskConfig.commonModuleTemplate
+        template: (file) => {
+          let content = file.contents.toString('utf8');
+          let classNames = _classMaps[file.path];
+
+          return (
+            !!content ?
+              `/* tslint:disable */` + '\n\n' +
+              `import { loadStyles } from 'load-themed-styles';` + '\n\n' +
+              (classNames ?
+                `export = ${ flipDoubleQuotes(JSON.stringify(classNames, null, 2)) };` + '\n\n'
+              : '') +
+              `loadStyles(${ flipDoubleQuotes(JSON.stringify(content)) });` + '\n'
+            : '');
+        }
       }))
-      .pipe(gulp.dest(this.buildConfig.libFolder));
+      .pipe(gulp.dest('src'));
+  }
 
-    if (this.buildConfig.libAMDFolder) {
-      let amdResult = gulp.src(this.taskConfig.sassMatch)
-        .pipe(sass.sync({
-          importer: (url, prev, done) => ({ file: patchSassUrl(url) })
-        }).on('error', sass.logError))
-        .pipe(cleancss({
-          advanced: false
-        }))
-        .pipe(texttojs({
-          ext: '.scss.js',
-          isExtensionAppended: false,
-          template: this.taskConfig.amdModuleTemplate
-        }))
-        .pipe(gulp.dest(this.buildConfig.libAMDFolder));
+  private generateModuleStub(cssFileName, json) {
+    cssFileName = cssFileName.replace('.css', '.scss.ts');
+    _classMaps[cssFileName] = json;
+  }
 
-      return merge(commonJSResult, amdResult);
-    }
+  private generateScopedName(name, fileName, css) {
+    let crypto = require('crypto');
 
-    return commonJSResult;
+    return name + '_' + crypto.createHmac('sha1', fileName).update(name).digest('hex').substring(0, 8);
   }
 }
 
@@ -80,4 +103,14 @@ function patchSassUrl(url) {
   }
 
   return url;
+}
+
+function flipDoubleQuotes(str: string) {
+  return str ? (
+    str
+      .replace(/\\"/g, '`')
+      .replace(/'/g, '\\\'')
+      .replace(/"/g, `'`)
+      .replace(/`/g, '"')
+    ) : str;
 }
