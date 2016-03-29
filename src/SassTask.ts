@@ -157,7 +157,6 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
   }
 
   private generateModuleStub(cssFileName, json) {
-    // It looks like we have a pretty big problem here: "json" isn't reset with each new file, so it gets all previous files' keys as well.
     cssFileName = cssFileName.replace('.css', '.scss.ts');
     _classMaps[cssFileName] = json;
   }
