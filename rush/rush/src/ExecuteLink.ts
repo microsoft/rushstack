@@ -61,6 +61,7 @@ function createDependencyLinks(consumingProject: IRushProjectConfig, projects: M
     }
 
     // Create symlink: dependencyProjectFolder <-- consumingModuleFolder
+    // @todo VSO #178073 - revert this temporary hack
     if (fs.existsSync(localModuleFolder)) {
       console.log(`WARNING: replace symlink to common/${dependencyProject} with ${dependencyProjectFolder}`);
       fs.unlinkSync(localModuleFolder);
