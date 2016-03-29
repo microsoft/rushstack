@@ -4,13 +4,11 @@ import {
 
 export interface ISassTaskConfig {
   sassMatch?: string[];
-  commonModuleTemplate?: string;
-  amdModuleTemplate?: string;
   useCSSModules?: boolean;
-  externalCss?: boolean;
+  dropCssFiles?: boolean;
 }
 
-let _classMaps = {};
+const _classMaps = {};
 
 export class SassTask extends GulpTask<ISassTaskConfig> {
   public name = 'sass';
@@ -19,12 +17,8 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     sassMatch: [
       'src/**/*.scss'
     ],
-    commonModuleTemplate:
-    `require('load-themed-styles').loadStyles(<%= content %>);`,
-    amdModuleTemplate:
-    `define(['load-themed-styles'], function(loadStyles) { loadStyles.loadStyles(<%= content %>); });`,
     useCSSModules: false,
-    externalCss: true
+    dropCssFiles: false
   };
 
   public nukeMatch = [
@@ -32,17 +26,21 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
   ];
 
   public executeTask(gulp, completeCallback): any {
-    let path = require('path');
-    let sass = require('gulp-sass');
-    let cleancss = require('gulp-clean-css');
-    let texttojs = require('gulp-texttojs');
-    let changed = require('gulp-changed');
-    let postcss = require('gulp-postcss');
-    let autoprefixer = require('autoprefixer');
-    let cssModules = require('postcss-modules');
-    let postCSSPlugins = [
+    const path = require('path');
+    const sass = require('gulp-sass');
+    const cleancss = require('gulp-clean-css');
+    const texttojs = require('gulp-texttojs');
+    const changed = require('gulp-changed');
+    const postcss = require('gulp-postcss');
+    const autoprefixer = require('autoprefixer');
+    const cssModules = require('postcss-modules');
+    const clone = require('gulp-clone');
+    const merge = require('merge2');
+
+    const postCSSPlugins = [
       autoprefixer({ browsers: ['> 1%', 'last 2 versions', 'ie >= 10'] })
     ];
+    const tasks: NodeJS.ReadWriteStream[] = [];
 
     if (this.taskConfig.useCSSModules) {
       postCSSPlugins.push(
@@ -53,56 +51,64 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       );
     }
 
-    return gulp.src(this.taskConfig.sassMatch)
-      .pipe(changed('src', { extension: '.scss.ts' }))
+    const scssTsExtName = '.scss.ts';
+
+    let baseTask = gulp.src(this.taskConfig.sassMatch)
+      .pipe(changed('src', { extension: scssTsExtName }))
       .pipe(sass.sync({
         importer: (url, prev, done) => ({ file: patchSassUrl(url) })
       }).on('error', function(error) {
         sass.logError.call(this, error);
         completeCallback('Errors found in sass file(s).');
-      }))
-      .pipe(postcss(postCSSPlugins))
+      })).pipe(postcss(postCSSPlugins))
       .pipe(cleancss({
         advanced: false
-      }))
-      // TODO: output .CSS somewhere before this step if "taskConfig.externalCss" is true
-      .pipe(texttojs({
-        ext: '.scss.ts',
-        isExtensionAppended: false,
-        template: (file) => {
-          const content = file.contents.toString('utf8');
-          const classNames = _classMaps[file.path];
-          const exportClassNames = classNames ?
-            `export = ${flipDoubleQuotes(JSON.stringify(classNames, null, 2))};\n\n` : '';
+      }));
 
-          let lines = [];
-          if (this.taskConfig.externalCss) {
-            lines = [
-              '/* tslint:disable */',
-              '',
-              exportClassNames,
-              '',
-              `require('${path.basename(file.path, path.extname(file.path))}.css');`,
-              ''
-            ];
-          } else if (!!content) {
-            lines = [
-              '/* tslint:disable */',
-              '',
-              'import { loadStyles } from \'load-themed-styles\';',
-              '',
-              exportClassNames,
-              '',
-              `loadStyles(${flipDoubleQuotes(JSON.stringify(content))});`,
-              ''
-            ];
-          }
+    if (this.taskConfig.dropCssFiles) {
+      tasks.push(baseTask.pipe(clone())
+          .pipe(gulp.dest(this.buildConfig.libFolder)));
+    }
 
-          return lines.join('\n').replace(/\n\n+/, '\n\n');
+    tasks.push(baseTask.pipe(clone())
+    .pipe(texttojs({
+      ext: scssTsExtName,
+      isExtensionAppended: false,
+      template: (file) => {
+        const content = file.contents.toString('utf8');
+        const classNames = _classMaps[file.path];
+        const exportClassNames = classNames ?
+          `export = ${flipDoubleQuotes(JSON.stringify(classNames, null, 2))};` : '';
+
+        let lines = [];
+        if (this.taskConfig.dropCssFiles) {
+          lines = [
+            '/* tslint:disable */',
+            '',
+            exportClassNames,
+            '',
+            `require('${path.basename(file.path, scssTsExtName)}.css');`,
+            ''
+          ];
+        } else if (!!content) {
+          lines = [
+            '/* tslint:disable */',
+            '',
+            'import { loadStyles } from \'load-themed-styles\';',
+            '',
+            exportClassNames,
+            '',
+            `loadStyles(${flipDoubleQuotes(JSON.stringify(content))});`,
+            ''
+          ];
         }
-      }))
-      // we're currently not overwriting files, so incremental builds without a clean don't work
-      .pipe(gulp.dest('src', { overwrite: true }));
+
+        return lines.join('\n').replace(/\n\n+/, '\n\n');
+      }
+    }))
+      .pipe(gulp.dest('src')));
+
+    return merge(tasks);
   }
 
   private generateModuleStub(cssFileName, json) {
@@ -111,7 +117,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
   }
 
   private generateScopedName(name, fileName, css) {
-    let crypto = require('crypto');
+    const crypto = require('crypto');
 
     return name + '_' + crypto.createHmac('sha1', fileName).update(name).digest('hex').substring(0, 8);
   }
