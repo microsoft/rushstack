@@ -94,7 +94,9 @@ export class GulpTask<TASK_CONFIG> implements IExecutable {
 
   public resolvePath(localPath: string): string {
     let path = require('path');
-
+    if (path.isAbsolute(localPath)) {
+      return path.resolve(localPath);
+    }
     return path.resolve(path.join(this.buildConfig.rootPath, localPath));
   }
 
