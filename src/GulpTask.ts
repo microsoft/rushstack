@@ -101,7 +101,7 @@ export class GulpTask<TASK_CONFIG> implements IExecutable {
   public fileExists(localPath: string): boolean {
     let fs = require('fs');
     let doesExist = false;
-    let fullPath = this.resolvePath(localPath);
+    let fullPath = (path.isAbsolute(localPath) ? localPath : this.resolvePath(localPath));
 
     try {
       let stats = fs.statSync(fullPath);
