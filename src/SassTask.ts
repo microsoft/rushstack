@@ -2,9 +2,6 @@ import {
   GulpTask
 } from 'gulp-core-build';
 
-const clone = require('gulp-clone');
-const merge = require('merge2');
-
 const scssTsExtName = '.scss.ts';
 
 export interface ISassTaskConfig {
@@ -31,6 +28,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
   ];
 
   public executeTask(gulp, completeCallback): any {
+    const merge = require('merge2');
     const autoprefixer = require('autoprefixer');
     const cssModules = require('postcss-modules');
 
@@ -47,22 +45,23 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     const moduleSrcPattern = srcPattern.map((value: string) => value.replace('.scss', '.module.scss'));
 
     if (this.taskConfig.useCSSModules) {
-      return this.processFiles(gulp, srcPattern, completeCallback, modulePostCssPlugins);
+      return this.processFiles(gulp, merge, srcPattern, completeCallback, modulePostCssPlugins);
     } else {
       moduleSrcPattern.forEach((value: string) => srcPattern.push(`!${value}`));
 
-      return merge(this.processFiles(gulp, srcPattern, completeCallback, postCSSPlugins),
-                   this.processFiles(gulp, moduleSrcPattern, completeCallback, modulePostCssPlugins));
+      return merge(this.processFiles(gulp, merge, srcPattern, completeCallback, postCSSPlugins),
+                   this.processFiles(gulp, merge, moduleSrcPattern, completeCallback, modulePostCssPlugins));
     }
   }
 
-  private processFiles(gulp, srcPattern, completeCallback, postCSSPlugins): NodeJS.ReadWriteStream {
-    const cleancss = require('gulp-clean-css');
+  private processFiles(gulp, merge, srcPattern, completeCallback, postCSSPlugins): NodeJS.ReadWriteStream {
     const changed = require('gulp-changed');
-    const sass = require('gulp-sass');
-    const postcss = require('gulp-postcss');
-    const texttojs = require('gulp-texttojs');
+    const cleancss = require('gulp-clean-css');
+    const clone = require('gulp-clone');
     const path = require('path');
+    const postcss = require('gulp-postcss');
+    const sass = require('gulp-sass');
+    const texttojs = require('gulp-texttojs');
 
     const tasks: NodeJS.ReadWriteStream[] = [];
 
