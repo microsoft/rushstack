@@ -89,24 +89,56 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
         isExtensionAppended: false,
         template: (file) => {
           const content = file.contents.toString('utf8');
-          const classNames = _classMaps[file.path];
-          const exportClassNames = classNames ?
-            `export = ${flipDoubleQuotes(JSON.stringify(classNames, null, 2))};` : '';
+          const classNames: { [key: string]: string } = _classMaps[file.path];
+          let exportClassNames: string = '';
+
+          if (classNames) {
+            const nonCamelCaseKeys: string[] = [];
+            const classNamesLines = [
+              'export class Styles {'
+            ];
+
+            Object.keys(classNames).forEach((key: string) => {
+              const value = classNames[key];
+              if (key.indexOf('-') !== -1) {
+                this.logWarning(`The local CSS class '${key}' is not camelCase and will not be type-safe.`);
+                nonCamelCaseKeys.push(key);
+              } else {
+                classNamesLines.push(`  public ${key}: string = '${value}';`);
+              }
+            });
+
+            classNamesLines.push('}');
+            classNamesLines.push('');
+            classNamesLines.push('const styles = new Styles();');
+
+            if (nonCamelCaseKeys.length !== 0) {
+              classNamesLines.push('/* tslint:disable */');
+
+              nonCamelCaseKeys.forEach((key: string) => {
+                const value: string = classNames[key];
+                classNamesLines.push(`styles['${key}'] = '${value}';`);
+              });
+
+              classNamesLines.push('/* tslint:enable */');
+            }
+
+            classNamesLines.push('');
+            classNamesLines.push('export default styles');
+
+            exportClassNames = classNamesLines.join('\n');
+          }
 
           let lines = [];
           if (this.taskConfig.dropCssFiles) {
             lines = [
-              '/* tslint:disable */',
+              `require('${path.basename(file.path, scssTsExtName)}.css');`,
               '',
               exportClassNames,
-              '',
-              `require('${path.basename(file.path, scssTsExtName)}.css');`,
               ''
             ];
           } else if (!!content) {
             lines = [
-              '/* tslint:disable */',
-              '',
               'import { loadStyles } from \'load-themed-styles\';',
               '',
               exportClassNames,
