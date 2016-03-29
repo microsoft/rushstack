@@ -1,0 +1,15 @@
+{
+  "name": "set-webpack-public-path-loader",
+  "version": "0.0.1",
+  "description": "",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "license": "MIT",
+  "repository": "github:iclanton/set-webpack-public-path-loader",
+  "dependencies": {
+    "loader-utils": "^0.2.12"
+  },
+  "devDependencies": {
+    "node-library-build": "^0.0.3"
+  }
+}
