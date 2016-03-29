@@ -2,14 +2,15 @@ import {
   GulpTask
 } from 'gulp-core-build';
 
+const scssTsExtName = '.scss.ts';
+
 export interface ISassTaskConfig {
   sassMatch?: string[];
-  commonModuleTemplate?: string;
-  amdModuleTemplate?: string;
   useCSSModules?: boolean;
+  dropCssFiles?: boolean;
 }
 
-let _classMaps = {};
+const _classMaps = {};
 
 export class SassTask extends GulpTask<ISassTaskConfig> {
   public name = 'sass';
@@ -18,11 +19,8 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     sassMatch: [
       'src/**/*.scss'
     ],
-    commonModuleTemplate:
-    `require('load-themed-styles').loadStyles(<%= content %>);`,
-    amdModuleTemplate:
-    `define(['load-themed-styles'], function(loadStyles) { loadStyles.loadStyles(<%= content %>); });`,
-    useCSSModules: false
+    useCSSModules: false,
+    dropCssFiles: false
   };
 
   public nukeMatch = [
@@ -30,28 +28,45 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
   ];
 
   public executeTask(gulp, completeCallback): any {
-    let sass = require('gulp-sass');
-    let cleancss = require('gulp-clean-css');
-    let texttojs = require('gulp-texttojs');
-    let changed = require('gulp-changed');
-    let postcss = require('gulp-postcss');
-    let autoprefixer = require('autoprefixer');
-    let cssModules = require('postcss-modules');
-    let postCSSPlugins = [
-        autoprefixer({ browsers: ['> 1%', 'last 2 versions', 'ie >= 10'] })
+    const merge = require('merge2');
+    const autoprefixer = require('autoprefixer');
+    const cssModules = require('postcss-modules');
+
+    const postCSSPlugins = [
+      autoprefixer({ browsers: ['> 1%', 'last 2 versions', 'ie >= 10'] })
     ];
+    const modulePostCssPlugins = postCSSPlugins.slice(0);
+    modulePostCssPlugins.push(cssModules({
+      getJSON: this.generateModuleStub.bind(this),
+      generateScopedName: this.generateScopedName.bind(this)
+    }));
+
+    const srcPattern = this.taskConfig.sassMatch.slice(0);
+    const moduleSrcPattern = srcPattern.map((value: string) => value.replace('.scss', '.module.scss'));
 
     if (this.taskConfig.useCSSModules) {
-      postCSSPlugins.push(
-        cssModules({
-          getJSON: this.generateModuleStub.bind(this),
-          generateScopedName: this.generateScopedName.bind(this)
-        })
-      );
-    }
+      return this.processFiles(gulp, merge, srcPattern, completeCallback, modulePostCssPlugins);
+    } else {
+      moduleSrcPattern.forEach((value: string) => srcPattern.push(`!${value}`));
 
-    return gulp.src(this.taskConfig.sassMatch)
-      .pipe(changed('src', { extension: '.scss.ts' }))
+      return merge(this.processFiles(gulp, merge, srcPattern, completeCallback, postCSSPlugins),
+                   this.processFiles(gulp, merge, moduleSrcPattern, completeCallback, modulePostCssPlugins));
+    }
+  }
+
+  private processFiles(gulp, merge, srcPattern, completeCallback, postCSSPlugins): NodeJS.ReadWriteStream {
+    const changed = require('gulp-changed');
+    const cleancss = require('gulp-clean-css');
+    const clone = require('gulp-clone');
+    const path = require('path');
+    const postcss = require('gulp-postcss');
+    const sass = require('gulp-sass');
+    const texttojs = require('gulp-texttojs');
+
+    const tasks: NodeJS.ReadWriteStream[] = [];
+
+    const baseTask = gulp.src(srcPattern)
+      .pipe(changed('src', { extension: scssTsExtName }))
       .pipe(sass.sync({
         importer: (url, prev, done) => ({ file: patchSassUrl(url) })
       }).on('error', function(error) {
@@ -61,26 +76,52 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       .pipe(postcss(postCSSPlugins))
       .pipe(cleancss({
         advanced: false
-      }))
+      }));
+
+    if (this.taskConfig.dropCssFiles) {
+      tasks.push(baseTask.pipe(clone())
+        .pipe(gulp.dest(this.buildConfig.libFolder)));
+    }
+
+    tasks.push(baseTask.pipe(clone())
       .pipe(texttojs({
-        ext: '.scss.ts',
+        ext: scssTsExtName,
         isExtensionAppended: false,
         template: (file) => {
-          let content = file.contents.toString('utf8');
-          let classNames = _classMaps[file.path];
+          const content = file.contents.toString('utf8');
+          const classNames = _classMaps[file.path];
+          const exportClassNames = classNames ?
+            `export = ${flipDoubleQuotes(JSON.stringify(classNames, null, 2))};` : '';
 
-          return (
-            !!content ?
-              `/* tslint:disable */` + '\n\n' +
-              `import { loadStyles } from 'load-themed-styles';` + '\n\n' +
-              (classNames ?
-                `export = ${ flipDoubleQuotes(JSON.stringify(classNames, null, 2)) };` + '\n\n'
-              : '') +
-              `loadStyles(${ flipDoubleQuotes(JSON.stringify(content)) });` + '\n'
-            : '');
+          let lines = [];
+          if (this.taskConfig.dropCssFiles) {
+            lines = [
+              '/* tslint:disable */',
+              '',
+              exportClassNames,
+              '',
+              `require('${path.basename(file.path, scssTsExtName)}.css');`,
+              ''
+            ];
+          } else if (!!content) {
+            lines = [
+              '/* tslint:disable */',
+              '',
+              'import { loadStyles } from \'load-themed-styles\';',
+              '',
+              exportClassNames,
+              '',
+              `loadStyles(${flipDoubleQuotes(JSON.stringify(content))});`,
+              ''
+            ];
+          }
+
+          return lines.join('\n').replace(/\n\n+/, '\n\n');
         }
       }))
-      .pipe(gulp.dest('src'));
+      .pipe(gulp.dest('src')));
+
+    return merge(tasks);
   }
 
   private generateModuleStub(cssFileName, json) {
@@ -89,7 +130,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
   }
 
   private generateScopedName(name, fileName, css) {
-    let crypto = require('crypto');
+    const crypto = require('crypto');
 
     return name + '_' + crypto.createHmac('sha1', fileName).update(name).digest('hex').substring(0, 8);
   }
@@ -112,5 +153,5 @@ function flipDoubleQuotes(str: string) {
       .replace(/'/g, '\\\'')
       .replace(/"/g, `'`)
       .replace(/`/g, '"')
-    ) : str;
+  ) : str;
 }
