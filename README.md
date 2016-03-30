@@ -6,15 +6,13 @@
 
 ## Overview
 
-This simple loader sets the __webpack_public_path__ variable to
-a value specified in the arguments, appended to the SystemJs baseURL
+This simple loader sets the `__webpack_public_path__` variable to
+a value specified in the arguments, optionally appended to the SystemJs baseURL
 property.
 
 ## Usage
 
 [Documentation: Using loaders](http://webpack.github.io/docs/using-loaders.html)
-
-This loader is designed to be used in conjunction with css-loader.
 
 ``` javascript
 require("set-webpack-public-path!");
