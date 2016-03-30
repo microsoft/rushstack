@@ -36,7 +36,7 @@ This option is exclusive to other options. If it is set, systemJs and urlPrefix 
 
 #### `urlPrefix=...`
 
-Use the specified string as a URL prefix
+Use the specified string as a URL prefix.
 
 ### Config, pre-bundle options
 
