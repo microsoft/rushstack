@@ -56,7 +56,7 @@ export class SetWebpackPublicPathLoader {
       ];
     }
 
-    return lines.join('\n');
+    return lines.join('\n').replace(/\n\n+/, '\n\n');
   }
 
   private static getOptions(query: string): ISetWebpackPublicPathLoaderOptions {
