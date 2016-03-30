@@ -89,24 +89,49 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
         isExtensionAppended: false,
         template: (file) => {
           const content = file.contents.toString('utf8');
-          const classNames = _classMaps[file.path];
-          const exportClassNames = classNames ?
-            `export = ${flipDoubleQuotes(JSON.stringify(classNames, null, 2))};` : '';
+          const classNames: { [key: string]: string } = _classMaps[file.path];
+          let exportClassNames: string = '';
+
+          if (classNames) {
+            const classNamesLines = [
+              'const styles = {'
+            ];
+
+            const classKeys: string[] = Object.keys(classNames);
+            classKeys.forEach((key: string, index: number) => {
+              const value = classNames[key];
+              let line: string = '';
+              if (key.indexOf('-') !== -1) {
+                this.logWarning(`The local CSS class '${key}' is not camelCase and will not be type-safe.`);
+                line = `  '${key}': '${value}'`;
+              } else {
+                line = `  ${key}: '${value}'`;
+              }
+
+              if ((index + 1) <= classKeys.length) {
+                line += ',';
+              }
+
+              classNamesLines.push(line);
+            });
+
+            classNamesLines.push('};');
+            classNamesLines.push('');
+            classNamesLines.push('export default styles;');
+
+            exportClassNames = classNamesLines.join('\n');
+          }
 
           let lines = [];
           if (this.taskConfig.dropCssFiles) {
             lines = [
-              '/* tslint:disable */',
+              `require('${path.basename(file.path, scssTsExtName)}.css');`,
               '',
               exportClassNames,
-              '',
-              `require('${path.basename(file.path, scssTsExtName)}.css');`,
               ''
             ];
           } else if (!!content) {
             lines = [
-              '/* tslint:disable */',
-              '',
               'import { loadStyles } from \'load-themed-styles\';',
               '',
               exportClassNames,
