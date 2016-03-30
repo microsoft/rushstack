@@ -93,38 +93,31 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
           let exportClassNames: string = '';
 
           if (classNames) {
-            const nonCamelCaseKeys: string[] = [];
             const classNamesLines = [
-              'export class Styles {'
+              'const styles = {'
             ];
 
-            Object.keys(classNames).forEach((key: string) => {
+            const classKeys: string[] = Object.keys(classNames);
+            classKeys.forEach((key: string, index: number) => {
               const value = classNames[key];
+              let line: string = '';
               if (key.indexOf('-') !== -1) {
                 this.logWarning(`The local CSS class '${key}' is not camelCase and will not be type-safe.`);
-                nonCamelCaseKeys.push(key);
+                line = `  '${key}': '${value}'`;
               } else {
-                classNamesLines.push(`  public ${key}: string = '${value}';`);
+                line = `  ${key}: '${value}'`;
               }
+
+              if ((index + 1) <= classKeys.length) {
+                line += ',';
+              }
+
+              classNamesLines.push(line);
             });
 
-            classNamesLines.push('}');
+            classNamesLines.push('};');
             classNamesLines.push('');
-            classNamesLines.push('const styles = new Styles();');
-
-            if (nonCamelCaseKeys.length !== 0) {
-              classNamesLines.push('/* tslint:disable */');
-
-              nonCamelCaseKeys.forEach((key: string) => {
-                const value: string = classNames[key];
-                classNamesLines.push(`styles['${key}'] = '${value}';`);
-              });
-
-              classNamesLines.push('/* tslint:enable */');
-            }
-
-            classNamesLines.push('');
-            classNamesLines.push('export default styles');
+            classNamesLines.push('export default styles;');
 
             exportClassNames = classNamesLines.join('\n');
           }
