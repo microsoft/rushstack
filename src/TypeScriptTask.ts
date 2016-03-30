@@ -4,6 +4,8 @@ import {
 GulpTask
 } from 'gulp-core-build';
 
+let ts = require('gulp-typescript');
+
 export interface ITypeScriptTaskConfig {
   failBuildOnErrors: boolean;
   sourceMatch?: string[];
@@ -29,7 +31,6 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   private _tsProject;
 
   public executeTask(gulp, completeCallback): any {
-    let ts = require('gulp-typescript');
     let plumber = require('gulp-plumber');
     let sourcemaps = require('gulp-sourcemaps');
     let assign = require('object-assign');
