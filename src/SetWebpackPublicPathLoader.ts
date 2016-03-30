@@ -47,7 +47,7 @@ export class SetWebpackPublicPathLoader {
       }
 
       lines = (options.systemJs) ? [
-        `var publicPath = System ? System.baseURL || '' : '';`,
+        `var publicPath = window.System ? window.System.baseURL || '' : '';`,
         `if (publicPath !== '' && publicPath.substr(-1) !== '/') publicPath += '/';`] : [
         `var publicPath = '';`
       ];
