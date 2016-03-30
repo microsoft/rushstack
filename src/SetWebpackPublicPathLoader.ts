@@ -42,8 +42,9 @@ export class SetWebpackPublicPathLoader {
       ];
     } else {
       lines = [
-        `var publicPath = ''`,
-        `if (System && System.baseURL) publicPath += System.baseURL;`,
+        `var publicPath = ${(options.systemJs) ? `(System && System.baseURL) ? System.baseURL : ''` : ''};`,
+        '',
+        `if (publicPath !== '' && publicPath.substr(-1) !== '/') publicPath += '/';`,
         '',
         `__webpack_public_path__ = publicPath;`
       ];
