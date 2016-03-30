@@ -21,7 +21,12 @@ interface IServeTaskConfig {
 
 Usage (and defaults):
 ```typescript
-build.webpack.setConfig({
+let build = require('gulp-core-build');
+let serve = require('gulp-core-build-serve');
+
+build.task('serve', serve);
+
+serve.setConfig({
     api: null,
     initialPage: '/index.html',
     port: 4321
