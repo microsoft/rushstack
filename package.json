@@ -18,6 +18,7 @@
     "merge2": "1.0.1",
     "object-assign": "4.0.1",
     "touch": "1.0.0",
+    "ts-npm-lint": "^0.1.0",
     "tslint": "3.6.0",
     "typescript": "1.8.9"
   }
