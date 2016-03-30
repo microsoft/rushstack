@@ -46,14 +46,18 @@ export class SetWebpackPublicPathLoader {
         urlPrefix += '/';
       }
 
-      lines = [
-        `var publicPath = ${(options.systemJs) ? `(System && System.baseURL) ? System.baseURL : ''` : ''};`,
-        `if (publicPath !== '' && publicPath.substr(-1) !== '/') publicPath += '/';`,
+      lines = (options.systemJs) ? [
+        `var publicPath = System ? System.baseURL || '' : '';`,
+        `if (publicPath !== '' && publicPath.substr(-1) !== '/') publicPath += '/';`] : [
+        `var publicPath = '';`
+      ];
+
+      lines.push(
         '',
         (urlPrefix !== '') ? `publicPath += '${urlPrefix}';` : '',
         '',
         `__webpack_public_path__ = publicPath;`
-      ];
+      );
     }
 
     return lines.join('\n').replace(/\n\n+/, '\n\n');
