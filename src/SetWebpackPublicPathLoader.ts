@@ -5,13 +5,15 @@ export interface ISetWebpackPublicPathLoaderOptions {
   systemJs?: boolean;
   scriptPath?: string;
   urlPrefix?: string;
+  publicPath?: string;
 }
 
 export class SetWebpackPublicPathLoader {
   private static defaultOptions: ISetWebpackPublicPathLoaderOptions = {
     systemJs: false,
     scriptPath: null,
-    urlPrefix: null
+    urlPrefix: null,
+    publicPath: null
   };
 
   public static setOptions(options: ISetWebpackPublicPathLoaderOptions) {
@@ -19,8 +21,10 @@ export class SetWebpackPublicPathLoader {
   }
 
   public static pitch(remainingRequest: string): string {
+    const self: any = this;
+
     const options: ISetWebpackPublicPathLoaderOptions =
-      SetWebpackPublicPathLoader.getOptions((this as any).query);
+      SetWebpackPublicPathLoader.getOptions(self.query);
     let lines: string[] = [];
 
     if (options.scriptPath) {
@@ -28,11 +32,10 @@ export class SetWebpackPublicPathLoader {
         `var scripts = document.getElementsByTagName('script');`,
         '',
         'if (scripts && scripts.length) {',
-        `  var regex = new RegExp('${options.scriptPath.replace('\'', '\\\'')}')`,
+        `  var regex = new RegExp('${SetWebpackPublicPathLoader.escapeSingleQuotes(options.scriptPath)}');`,
         '  for (var i = 0; i < scripts.length; i++) {',
-        '    var script = scripts[i];',
-        '    if (!script) continue;',
-        `    var path = script.getAttribute('src');`,
+        '    if (!scripts[i]) continue;',
+        `    var path = scripts[i].getAttribute('src');`,
         '    if (path && path.match(regex)) {',
         `      __webpack_public_path__ = path.substring(0, path.lastIndexOf('/') + 1);`,
         '      break;',
@@ -41,20 +44,31 @@ export class SetWebpackPublicPathLoader {
         '}'
       ];
     } else {
-      let urlPrefix = options.urlPrefix || '';
-      if (urlPrefix !== '' && urlPrefix.substr(-1) !== '/') {
-        urlPrefix += '/';
+      if (options.publicPath) {
+        lines = [
+          'var publicPath = ' +
+            `'${SetWebpackPublicPathLoader.appendSlashAndEscapeSingleQuotes(options.publicPath)}';`
+        ];
+      } else if (options.systemJs) {
+        lines = [
+          `var publicPath = window.System ? window.System.baseURL || '' : '';`,
+          `if (publicPath !== '' && publicPath.substr(-1) !== '/') publicPath += '/';`
+        ];
+      } else {
+        self.emitWarning(`Neither 'publicPath' nor 'systemJs' is defined,` +
+          'so the public path will not be modified');
+
+        return '';
       }
 
-      lines = (options.systemJs) ? [
-        `var publicPath = window.System ? window.System.baseURL || '' : '';`,
-        `if (publicPath !== '' && publicPath.substr(-1) !== '/') publicPath += '/';`] : [
-        `var publicPath = '';`
-      ];
+      if (options.urlPrefix && options.urlPrefix !== '') {
+        lines.push(
+          '',
+          'publicPath += ' +
+            `'${SetWebpackPublicPathLoader.appendSlashAndEscapeSingleQuotes(options.urlPrefix)}';`);
+      }
 
       lines.push(
-        '',
-        (urlPrefix !== '') ? `publicPath += '${urlPrefix}';` : '',
         '',
         `__webpack_public_path__ = publicPath;`
       );
@@ -63,11 +77,28 @@ export class SetWebpackPublicPathLoader {
     return lines.join('\n').replace(/\n\n+/, '\n\n');
   }
 
+  private static escapeSingleQuotes(str: string): string {
+    if (str) {
+      return str.replace('\'', '\\\'');
+    } else {
+      return null;
+    }
+  }
+
+  private static appendSlashAndEscapeSingleQuotes(str: string): string {
+    if (str && str.substr(-1) !== '/') {
+      str = str + '/';
+    }
+
+    return SetWebpackPublicPathLoader.escapeSingleQuotes(str);
+  }
+
   private static getOptions(query: string): ISetWebpackPublicPathLoaderOptions {
     const options: ISetWebpackPublicPathLoaderOptions = {
       systemJs: SetWebpackPublicPathLoader.defaultOptions.systemJs,
       scriptPath: SetWebpackPublicPathLoader.defaultOptions.scriptPath,
-      urlPrefix: SetWebpackPublicPathLoader.defaultOptions.urlPrefix
+      urlPrefix: SetWebpackPublicPathLoader.defaultOptions.urlPrefix,
+      publicPath: SetWebpackPublicPathLoader.defaultOptions.publicPath
     };
 
     const queryOptions: ISetWebpackPublicPathLoaderOptions = loaderUtils.parseQuery(query);

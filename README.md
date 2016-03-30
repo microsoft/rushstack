@@ -22,19 +22,26 @@ require("set-webpack-public-path!");
 
 ### Inline Loader Options
 
-#### `systemJs`
-
-Use `System.baseURL` if it is defined.
-
 #### `scriptPath=...`
 
 Search through all script URLs on the page and use the last directory of the URL that contains the specified string.
 
-This option is exclusive to other options. If it is set, systemJs and urlPrefix will be ignored.
+This option is exclusive to other options. If it is set, `systemJs`, `publicPath`, and `urlPrefix` will be ignored.
+
+#### `systemJs`
+
+Use `System.baseURL` if it is defined.
+
+#### `publicPath=...`
+
+Use the specified path as the base public path. If `urlPrefix` is also defined, the public path will
+be the concatenation of the two (i.e. - `__webpack_public_path__ = URL.concat({publicPath} + {urlPrefix}`).
+This option takes precedence over the `systemJs` option.
 
 #### `urlPrefix=...`
 
-Use the specified string as a URL prefix.
+Use the specified string as a URL prefix after the SystemJS path or the `publicPath` option. If neither
+`systemJs` nor `publicPath` is defined, this option will not apply and a warning will be emitted.
 
 ### Config, pre-bundle options
 
