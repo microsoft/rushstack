@@ -1,3 +1,5 @@
+const tsdLinter = require('ts-npm-lint');
+
 import {
 GulpTask
 } from 'gulp-core-build';
@@ -97,6 +99,14 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
         if (this.taskConfig.failBuildOnErrors && errorCount) {
           completeCallback('TypeScript error(s) occured.');
         } else {
+          // Without this, the built .d.ts files will contain /// references
+          // to "../typings/tsd.d.ts" which won't resolve properly for projects
+          // that consume our NPM package.  ts-npm-lint is a workaround that strips
+          // those lines.  IntelliSense will still find the typings as long as
+          // they're present in the consumer's tsd.d.ts file.
+          // NOTE: The TypeScript team expects to have an official solution for us soon.
+          tsdLinter.fixTypings();
+
           completeCallback();
         }
       })
