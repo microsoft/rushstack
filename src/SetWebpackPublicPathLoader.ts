@@ -15,7 +15,7 @@ export class SetWebpackPublicPathLoader {
   };
 
   public static setOptions(options: ISetWebpackPublicPathLoaderOptions) {
-    this.defaultOptions = options;
+    this.defaultOptions = options || {};
   }
 
   public static pitch(remainingRequest: string): string {
