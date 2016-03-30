@@ -17,7 +17,6 @@ property.
 This loader is designed to be used in conjunction with css-loader.
 
 ``` javascript
-<<<<<<< HEAD
 require("set-webpack-public-path!");
 ```
 
