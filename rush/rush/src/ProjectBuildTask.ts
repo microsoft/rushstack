@@ -19,12 +19,16 @@ export default class ProjectBuildTask implements ITaskDefinition {
   private _errorDetector: ErrorDetector;
   private _errorDisplayMode: ErrorDetectionMode;
   private _config: IRushProjectConfig;
+  private _production: boolean;
 
   constructor(config: IRushProjectConfig,
-    errorDetector: ErrorDetector, errorDisplayMode: ErrorDetectionMode) {
+              errorDetector: ErrorDetector,
+              errorDisplayMode: ErrorDetectionMode,
+              production: boolean) {
     this.name = config.packageName;
     this._errorDetector = errorDetector;
     this._errorDisplayMode = errorDisplayMode;
+    this._production = production;
     this._config = config;
   }
 
@@ -43,8 +47,9 @@ export default class ProjectBuildTask implements ITaskDefinition {
         const gulpNukeResult = child_process.execSync('npm run clean', { cwd: projectFolder });
         writer.writeLine(gulpNukeResult.toString());
 
-        writer.writeLine('npm run test');
-        const buildTask = child_process.exec('npm run test', options);
+        const command = `npm run test${this._production ? ' -- --production' : ''}`;
+        writer.writeLine(command);
+        const buildTask = child_process.exec(command, options);
 
         buildTask.stdout.on('data', (data: string) => {
           writer.write(data);

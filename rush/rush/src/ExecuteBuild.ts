@@ -21,6 +21,7 @@ export default function executeBuild(params: any): void {
   const projects = config.projects;
   const vsoMode = params.vso;
   const quietMode = params.quiet;
+  const production = params.production;
 
   const taskRunner = new TaskRunner(quietMode);
 
@@ -34,7 +35,7 @@ export default function executeBuild(params: any): void {
       ErrorDetectorRules.TsLintErrorDetector
     ];
     const errorDetector = new ErrorDetector(activeRules);
-    const projectTask = new ProjectBuildTask(project, errorDetector, errorMode);
+    const projectTask = new ProjectBuildTask(project, errorDetector, errorMode, production);
     taskRunner.addTask(projectTask);
   });
 

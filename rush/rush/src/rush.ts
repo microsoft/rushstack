@@ -22,6 +22,11 @@ nomnom.command('unlink')
 
 nomnom.command('rebuild')
   .callback(executeBuild)
+    .option('production', {
+        abbr: 'prod',
+        flag: true,
+        help: 'Run build in production mode.'
+    })
     .option('vso', {
       flag: true,
       help: 'Display error messages in the VisualStudio Online format'

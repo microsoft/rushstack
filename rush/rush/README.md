@@ -3,5 +3,8 @@
 Mult-Package Build Tool
 
 Eventually this tool will have standalone documentation, but for now see
-[HowToBuild.md](../common/docs/HowToBuild.md).
+[HowToBuild.md](../../common/docs/HowToBuild.md).
 
+## Building
+
+To build rush, run `npm run build`.
