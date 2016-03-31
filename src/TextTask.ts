@@ -1,6 +1,5 @@
-import {
-  GulpTask
-} from 'gulp-core-build';
+import { GulpTask } from 'gulp-core-build';
+import gulpType = require('gulp');
 
 export interface ITextTaskConfig {
   textMatch?: string[];
@@ -12,15 +11,13 @@ export class TextTask extends GulpTask<ITextTaskConfig> {
     textMatch: ['src/**/*.txt']
   };
 
-  public executeTask(gulp, completeCallback): any {
+  public executeTask(gulp: gulpType.Gulp) {
     let merge = require('merge2');
     let texttojs = require('gulp-texttojs');
     let { textMatch } = this.taskConfig;
     let { libFolder, libAMDFolder } = this.buildConfig;
 
-    if (!textMatch) {
-      completeCallback();
-    } else {
+    if (textMatch) {
       let commonJSTextStream = gulp.src(textMatch)
         .pipe(texttojs({
           template: 'module.exports = <%= content %>;',

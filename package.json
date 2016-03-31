@@ -12,14 +12,17 @@
     "gulp-plumber": "1.1.0",
     "gulp-sourcemaps": "^1.6.0",
     "gulp-texttojs": "~1.0.3",
-    "gulp-tslint": "4.3.4",
     "gulp-typescript": "2.12.1",
     "gulp-util": "3.0.7",
     "merge2": "1.0.1",
     "object-assign": "4.0.1",
+    "through2": "^2.0.1",
     "touch": "1.0.0",
     "ts-npm-lint": "^0.1.0",
-    "tslint": "3.6.0",
+    "tslint": "^3.6.0",
     "typescript": "1.8.9"
+  },
+  "devDependencies": {
+    "node-library-build": "0.0.5"
   }
 }
