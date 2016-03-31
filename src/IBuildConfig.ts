@@ -16,7 +16,9 @@ export interface IBuildConfig {
   /** Unbundled commonjs modules folder, which will be referenced by other node projects. */
   libFolder?: string;
 
-  /** Unbundled amd modules folder, which can be optionally set to cause build tasks to ouput AMD modules if required for legacy reasons. */
+  /** Unbundled amd modules folder,
+   * which can be optionally set to cause build tasks to
+   * ouput AMD modules if required for legacy reasons. */
   libAMDFolder?: string;
 
   /** Dist folder, which includes all bundled resources which would be copied to a CDN for the project. */
@@ -32,5 +34,5 @@ export interface IBuildConfig {
   onTaskStart?: (taskName: string) => void;
 
   /** Optional callback to be executed when a task ends. */
-  onTaskEnd?: (taskName: string, durationMilliseconds: number, error?: any) => void;
+  onTaskEnd?: (taskName: string, duration: number[], error?: any) => void;
 }

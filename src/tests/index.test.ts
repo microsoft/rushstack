@@ -1,14 +1,12 @@
 'use strict';
+/// <reference path='../../typings/main.d.ts' />
 
-require('es6-promise');
+import 'es6-promise';
+import { expect } from 'chai';
+import { serial, parallel } from '../index';
 
-let { describe, it } = require('mocha');
- let { expect } = require('chai');
-
-let {
-  serial,
-  parallel,
-} = require('./index');
+// disable the exit watching
+global.dontWatchExit = true;
 
 describe('serial', () => {
   it('can run a set of tasks in serial', (done) => {
@@ -90,14 +88,15 @@ describe('parallel', () => {
       () => {
         done('The task returned success unexpectedly.');
       }).catch((error) => {
-      expect(execution).to.deep.equal([
-        'executing task 0',
-        'complete task 0',
-        'executing fail task',
-        'complete fail task'
-      ]);
-      done();
-    });
+        expect(error).to.equal('Failure', 'Make sure the proper error is propagate');
+        expect(execution).to.deep.equal([
+          'executing task 0',
+          'complete task 0',
+          'executing fail task',
+          'complete fail task'
+        ]);
+        done();
+      });
 
   });
 
@@ -107,7 +106,8 @@ function createTasks(
   name: string,
   count: number,
   executionCallback: (message: string) => void) {
-  return Array.apply(null, Array(count)).map((item, index) => createTask(name + ' ' + index, executionCallback));
+  return Array.apply(null, Array(count))
+    .map((item, index) => createTask(name + ' ' + index, executionCallback));
 }
 
 function createTask(
@@ -116,10 +116,10 @@ function createTask(
   shouldFail?: boolean) {
   return {
     execute: (buildConfig) => new Promise((done, error) => {
-      executionCallback(`executing ${ name }`);
+      executionCallback(`executing ${name}`);
 
       setTimeout(() => {
-        executionCallback(`complete ${ name }`);
+        executionCallback(`complete ${name}`);
 
         if (shouldFail) {
           error('Failure');

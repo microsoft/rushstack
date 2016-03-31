@@ -1,0 +1,19 @@
+{
+  "name": "gulp-core-build",
+  "version": false,
+  "ambientDependencies": {
+    "Q": "github:DefinitelyTyped/DefinitelyTyped/q/Q.d.ts#9f0f926a12026287b5a4a229e5672c01e7549313",
+    "assertion-error": "github:DefinitelyTyped/DefinitelyTyped/assertion-error/assertion-error.d.ts#98d3168c2c570352a3a7393788e2ec9fbb08ade6",
+    "chai": "github:DefinitelyTyped/DefinitelyTyped/chai/chai.d.ts#98d3168c2c570352a3a7393788e2ec9fbb08ade6",
+    "chalk": "registry:dt/chalk#0.4.0+20160317120654",
+    "es6-promise": "github:DefinitelyTyped/DefinitelyTyped/es6-promise/es6-promise.d.ts#9f0f926a12026287b5a4a229e5672c01e7549313",
+    "gulp": "github:DefinitelyTyped/DefinitelyTyped/gulp/gulp.d.ts#9f0f926a12026287b5a4a229e5672c01e7549313",
+    "gulp-util": "registry:dt/gulp-util#0.0.0+20160316155526",
+    "mocha": "github:DefinitelyTyped/DefinitelyTyped/mocha/mocha.d.ts#98d3168c2c570352a3a7393788e2ec9fbb08ade6",
+    "node": "registry:dt/node#4.0.0+20160330064709",
+    "orchestrator": "github:DefinitelyTyped/DefinitelyTyped/orchestrator/orchestrator.d.ts#9f0f926a12026287b5a4a229e5672c01e7549313",
+    "through2": "registry:dt/through2#2.0.0+20160317120654",
+    "vinyl": "registry:dt/vinyl#1.1.0+20160316155526",
+    "yargs": "registry:dt/yargs#0.0.0+20160326124407"
+  }
+}

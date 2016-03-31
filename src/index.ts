@@ -1,10 +1,14 @@
 'use strict';
 
+/* tslint:disable:max-line-length */
+
 import { GulpProxy } from './GulpProxy';
 import { IExecutable } from './IExecutable';
 import { IBuildConfig } from './IBuildConfig';
 import { NukeTask } from './NukeTask';
 export { IExecutable } from './IExecutable';
+import { initialize as initializeLogging, markTaskCreationTime, generateGulpError } from './logging';
+import gulpType = require('gulp');
 export * from './GulpTask';
 export * from './CopyTask';
 export * from './NukeTask';
@@ -72,7 +76,7 @@ export function watch(watchMatch: string, task: IExecutable): IExecutable {
 
   return {
     execute: (buildConfig: IBuildConfig) => {
-      buildConfig.gulp.watch(watchMatch, function(cb) {
+      buildConfig.gulp.watch(watchMatch, (cb) => {
         _executeTask(task, buildConfig)
           .then(() => {
             cb();
@@ -82,7 +86,7 @@ export function watch(watchMatch: string, task: IExecutable): IExecutable {
           });
       });
 
-      return Promise.resolve();
+      return Promise.resolve<void>();
     }
   };
 }
@@ -93,16 +97,23 @@ export function watch(watchMatch: string, task: IExecutable): IExecutable {
  * @param  {IExecutable[]} ...tasks
  * @returns IExecutable
  */
-export function serial(...tasks: IExecutable[]): IExecutable {
-  tasks = _flatten(tasks);
+export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutable {
+  let flatTasks = <IExecutable[]>_flatten(tasks);
 
-  tasks.forEach(task => _trackTask(task));
+  for (let task of flatTasks) {
+    _trackTask(task);
+  }
 
   return {
-    execute: (buildConfig: IBuildConfig) => tasks.reduce(
-      (previous, current) => previous.then(() => _executeTask(current, buildConfig)),
-      Promise.resolve()
-    )
+    execute: (buildConfig: IBuildConfig) => {
+      let output = Promise.resolve<void>();
+
+      for (let task of flatTasks) {
+        output = output.then(() => _executeTask(task, buildConfig));
+      }
+
+      return output;
+    }
   };
 }
 
@@ -112,32 +123,23 @@ export function serial(...tasks: IExecutable[]): IExecutable {
  * @param  {IExecutable[]} ...tasks
  * @returns IExecutable
  */
-export function parallel(...tasks: IExecutable[]): IExecutable {
-  tasks = _flatten(tasks);
+export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecutable {
+  let flattenTasks = _flatten(tasks);
 
-  tasks.forEach(task => _trackTask(task));
+  for (let task of flattenTasks) {
+    _trackTask(task);
+  }
 
   return {
-    execute: (buildConfig: IBuildConfig) => {
-      return new Promise<void>((resolve, reject) => {
-        let succeeded = 0;
-        let failed = 0;
-
-        function _evaluateCompletion(isSuccess: boolean) {
-          isSuccess ? succeeded++ : failed++;
-
-          if ((succeeded + failed) === tasks.length) {
-            failed ? reject() : resolve();
-          }
-
-          return !isSuccess ? Promise.reject('') : null;
+    execute: (buildConfig: IBuildConfig): Promise<void> => {
+      return new Promise<any>((resolve, reject) => {
+        let promises: Promise<void>[] = [];
+        for (let task of flattenTasks) {
+          promises.push(_executeTask(task, buildConfig));
         }
 
-        for (let task of tasks) {
-          _executeTask(task, buildConfig)
-            .then(() => _evaluateCompletion(true))
-            .catch(() => _evaluateCompletion(false));
-        }
+        // Use promise all to make sure errors are propagated correctly
+        Promise.all<void>(promises).then(resolve, reject);
       });
     }
   };
@@ -153,7 +155,11 @@ export function initialize(gulp: any) {
   _buildConfig.gulp = new GulpProxy(gulp);
   _buildConfig.uniqueTasks = _uniqueTasks;
 
+  initializeLogging(gulp, null, null);
+
   Object.keys(_taskMap).forEach(taskName => _registerTask(gulp, taskName, _taskMap[taskName]));
+
+  markTaskCreationTime();
 }
 
 /**
@@ -163,16 +169,14 @@ export function initialize(gulp: any) {
  * @param  {string} taskName
  * @param  {IExecutable} task
  */
-function _registerTask(gulp: any, taskName: string, task: IExecutable) {
-  let gutil = require('gulp-util');
-
-  gulp.task(taskName, function(cb) {
+function _registerTask(gulp: gulpType.Gulp, taskName: string, task: IExecutable) {
+  gulp.task(taskName, (cb) => {
     _executeTask(task, _buildConfig)
       .then(() => {
         cb();
-      })
-      .catch((error) => {
-        cb(new gutil.PluginError(taskName, error || 'Errors were encountered.'));
+      },
+      (error: any) => {
+        cb(generateGulpError(error));
       });
   });
 }
@@ -184,7 +188,7 @@ function _registerTask(gulp: any, taskName: string, task: IExecutable) {
  * @param  {IBuildConfig} buildConfig
  * @returns Promise
  */
-function _executeTask(task: IExecutable, buildConfig: IBuildConfig): Promise<any> {
+function _executeTask(task: IExecutable, buildConfig: IBuildConfig): Promise<void> {
   // Try to fallback to the default task if provided.
   if (task && !task.execute) {
     if ((task as any).default) {
@@ -194,11 +198,11 @@ function _executeTask(task: IExecutable, buildConfig: IBuildConfig): Promise<any
 
   // If the task is missing, throw a meaningful error.
   if (!task || !task.execute) {
-    return Promise.reject(`A task was scheduled, but the task was null. This probably means the task wasn't imported correctly.`);
+    return Promise.reject(new Error(`A task was scheduled, but the task was null. This probably means the task wasn't imported correctly.`));
   }
 
   if (task.isEnabled === undefined || task.isEnabled()) {
-    let duration = new Date().getTime();
+    let startTime = process.hrtime();
 
     if (buildConfig.onTaskStart && task.name) {
       buildConfig.onTaskStart(task.name);
@@ -206,14 +210,13 @@ function _executeTask(task: IExecutable, buildConfig: IBuildConfig): Promise<any
 
     let taskPromise = task.execute(buildConfig)
       .then(() => {
-        duration = new Date().getTime() - duration;
         if (buildConfig.onTaskEnd && task.name) {
-          buildConfig.onTaskEnd(task.name, duration);
+          buildConfig.onTaskEnd(task.name, process.hrtime(startTime));
         }
-      })
-      .catch((error: any) => {
+      },
+      (error: any) => {
         if (buildConfig.onTaskEnd && task.name) {
-          buildConfig.onTaskEnd(task.name, duration, error);
+          buildConfig.onTaskEnd(task.name, process.hrtime(startTime), error);
         }
 
         return Promise.reject(error);
@@ -223,7 +226,7 @@ function _executeTask(task: IExecutable, buildConfig: IBuildConfig): Promise<any
   }
 
   // No-op otherwise.
-  return Promise.resolve();
+  return Promise.resolve<void>();
 }
 
 function _trackTask(task: IExecutable) {
@@ -237,8 +240,18 @@ function _trackTask(task: IExecutable) {
  *
  * @param  {any} arr
  */
-function _flatten(arr) {
-  return arr.reduce((flat, toFlatten) => flat.concat(Array.isArray(toFlatten) ? _flatten(toFlatten) : toFlatten), []);
+function _flatten<T>(arr: Array<T | T[]>) {
+  let output: T[] = [];
+
+  for (let toFlatten of arr) {
+    if (Array.isArray(toFlatten)) {
+      output = output.concat(toFlatten);
+    } else {
+      output.push(toFlatten);
+    }
+  }
+
+  return output;
 }
 
 export let nuke = new NukeTask();
