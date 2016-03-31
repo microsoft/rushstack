@@ -5,8 +5,9 @@
  * Executes an arbitrary sequence of tasks based on their dependency graph
  */
 
-import * as colors from 'colors';
 import * as assert from 'assert';
+import * as colors from 'colors';
+import * as os from 'os';
 
 import ITask, { ITaskDefinition } from './ITask';
 import TaskStatus from './TaskStatus';
@@ -100,7 +101,7 @@ export default class TaskRunner {
         console.log(colors.red('> TaskRunner :: Failures'));
         reject();
       } else {
-        console.log(colors.green('> TaskRunner :: All tasks completed!\n'));
+        console.log(colors.green('> TaskRunner :: All tasks completed!' + os.EOL));
         complete();
       }
     }

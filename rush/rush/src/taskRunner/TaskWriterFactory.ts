@@ -3,10 +3,10 @@
  * @Copyright (c) Microsoft Corporation.  All rights reserved.
  *
  * A factory which creates streams designed for processes running in parallel to write their output to.
- * The streams 
  */
 
 import * as colors from 'colors';
+import * as os from 'os';
 
 /**
  * An writable interface for managing output of simultaneous processes.
@@ -16,7 +16,8 @@ export interface ITaskWriter {
   write(data: string): void;      // Writes a string to the buffer
   writeLine(data: string): void;  // Writes a string with a newline character at the end
   writeError(data: string): void; // Writes an error to the stderr stream
-  getOutput(): string;            // Returns all output writted to the buffer
+  getStdOutput(): string;            // Returns standard output buffer as a string
+  getStdError(): string;          // Returns standard error buffer as a string
   close(): void;                  // Closes the stream and marks the simultaneous process as completed
 }
 
@@ -31,6 +32,11 @@ interface ITaskWriterInfo {
   quietMode: boolean;
   stdout: string[];
   stderr: string[];
+}
+
+enum ITaskOutputStream {
+  stdout = 1,
+  stderr = 2
 }
 
 /**
@@ -65,50 +71,43 @@ export default class TaskWriterFactory {
 
     return {
       close: () => this._completeTask(taskName),
-      getOutput: () => this._getTaskOutput(taskName),
+      getStdError: () => this._getTaskOutput(taskName, ITaskOutputStream.stderr),
+      getStdOutput: () => this._getTaskOutput(taskName),
       write: (data: string) => this._writeTaskOutput(taskName, data),
-      writeError: (data: string) => this._writeTaskError(taskName, data),
-      writeLine: (data: string) => this._writeTaskOutput(taskName, data + '\n')
+      writeError: (data: string) => this._writeTaskOutput(taskName, data, ITaskOutputStream.stderr),
+      writeLine: (data: string) => this._writeTaskOutput(taskName, data + os.EOL)
     };
   }
 
   /**
    * Adds the text to the tasks's buffer, and writes it to the console if it is the active task
    */
-  private static _writeTaskOutput(taskName: string, data: string) {
+  private static _writeTaskOutput(taskName: string, data: string, stream: ITaskOutputStream = ITaskOutputStream.stdout) {
     const taskInfo = this._tasks.get(taskName);
     if (!taskInfo || taskInfo.state !== TaskWriterState.Open) {
       throw new Error('The task is not registered or has been completed and written.');
     }
-    taskInfo.stdout.push(data);
-    if (this._activeTask === taskName && !taskInfo.quietMode) {
-      process.stdout.write(data);
+    const outputBuffer: string[] = (stream === ITaskOutputStream.stdout ? taskInfo.stdout : taskInfo.stderr);
+
+    outputBuffer.push(data);
+    if (this._activeTask === taskName) {
+      if (stream === ITaskOutputStream.stdout && !taskInfo.quietMode) {
+        process.stdout.write(data);
+      } else if (stream === ITaskOutputStream.stderr) {
+        process.stdout.write(colors.red(data));
+      }
     }
   }
 
   /**
-   * Writes an error message to the standard buffer for the task
-   */
-  private static _writeTaskError(taskName: string, data: string) {
-    const taskInfo = this._tasks.get(taskName);
-    if (!taskInfo || taskInfo.state !== TaskWriterState.Open) {
-      throw new Error('The task is not registered or has been completed and written.');
-    }
-    taskInfo.stderr.push(data);
-    if (this._activeTask === taskName) {
-      process.stdout.write(colors.red(data));
-    }
-  }
-
-  /** 
    * Returns the current value of the task's buffer
    */
-  private static _getTaskOutput(taskName: string): string {
+  private static _getTaskOutput(taskName: string, stream: ITaskOutputStream = ITaskOutputStream.stdout): string {
     const taskInfo = this._tasks.get(taskName);
     if (!taskInfo) {
       throw new Error('The task is not registered!');
     }
-    return taskInfo.stdout.join('');
+    return (stream === ITaskOutputStream.stdout ? taskInfo.stdout : taskInfo.stderr).join('');
   }
 
   /**

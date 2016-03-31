@@ -6,6 +6,9 @@
  */
 
 import * as child_process from 'child_process';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 
 import RushConfigLoader, { IRushProjectConfig } from './RushConfigLoader';
 import ErrorDetector, { ErrorDetectionMode } from './errorDetection/ErrorDetector';
@@ -61,17 +64,20 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
         buildTask.on('exit', (code: number) => {
           // Detect & display errors
-          const errors = this._errorDetector.execute(writer.getOutput());
+          const errors = this._errorDetector.execute(writer.getStdOutput());
           for (let i = 0; i < errors.length; i++) {
-            writer.writeError(errors[i].toString(this._errorDisplayMode) + '\n');
+            writer.writeError(errors[i].toString(this._errorDisplayMode) + os.EOL);
           }
 
           // Display a summary of why the task failed or succeeded
           if (errors.length) {
-            writer.writeError(`${errors.length} Error${errors.length > 1 ? 's' : ''}! \n`);
+            writer.writeError(`${errors.length} Error${errors.length > 1 ? 's' : ''}!` + os.EOL);
           } else if (code) {
-            writer.writeError('gulp returned error code: ' + code + '\n');
+            writer.writeError('gulp returned error code: ' + code + os.EOL);
           }
+
+          // Write the logs to disk
+          this._writeLogsToDisk(writer);
 
           if (errors.length > 0 || code) {
             reject(errors);
@@ -81,8 +87,26 @@ export default class ProjectBuildTask implements ITaskDefinition {
         });
       } catch (error) {
         console.log(error);
+
+        // Write the logs to disk
+        this._writeLogsToDisk(writer);
         reject([new TaskError('error', error.toString())]);
       }
     });
+  }
+
+  // @todo #179371: add log files to list of things that get gulp nuke'd
+  private _writeLogsToDisk(writer: ITaskWriter) {
+    const logfilename = path.basename(this._config.projectFolder);
+
+    const stdout = writer.getStdOutput();
+    if (stdout) {
+      fs.writeFileSync(path.join(this._config.projectFolder, logfilename + '.build.log'), stdout);
+    }
+
+    const stderr = writer.getStdError();
+    if (stderr) {
+      fs.writeFileSync(path.join(this._config.projectFolder, logfilename + '.build.error.log'), stderr);
+    }
   }
 }

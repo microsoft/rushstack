@@ -6,6 +6,8 @@
  * the output of an application.
  */
 
+import * as os from 'os';
+
 import TaskError from './TaskError';
 
 export enum ErrorDetectionMode {
@@ -45,7 +47,7 @@ export default class ErrorDetector {
 
   public execute(data: string) {
     const errors: TaskError[] = [];
-    data.split('\n').forEach((line: string) => {
+    data.split(os.EOL).forEach((line: string) => {
       const error = this._checkLine(line);
       if (error) {
         errors.push(error);

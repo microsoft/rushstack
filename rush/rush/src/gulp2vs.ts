@@ -1,4 +1,5 @@
 import * as child_process from 'child_process';
+import * as os from 'os';
 
 import TaskWriterFactory from './taskRunner/TaskWriterFactory';
 import ErrorDetector, { ErrorDetectionMode } from './errorDetection/ErrorDetector';
@@ -24,10 +25,10 @@ gulpBundle.stderr.on('data', (data: string) => {
 });
 
 gulpBundle.on('exit', (code: number) => {
-  const errors = errorDetector.execute(writer.getOutput());
+  const errors = errorDetector.execute(writer.getStdOutput());
 
   for (let i = 0; i < errors.length; i++) {
-    writer.writeError(errors[i].toString(ErrorDetectionMode.VisualStudio) + '\n');
+    writer.writeError(errors[i].toString(ErrorDetectionMode.VisualStudio) + os.EOL);
   }
 
   writer.writeLine('gulp2vs: Done.');

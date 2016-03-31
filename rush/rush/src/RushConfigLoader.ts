@@ -7,6 +7,7 @@
 
 import * as path from 'path';
 import * as fs from 'fs';
+import * as os from 'os';
 import stripJsonComments = require('strip-json-comments');
 import Validator = require('z-schema');
 
@@ -67,9 +68,9 @@ export default class RushConfigLoader {
 
       let detail: ZSchema.ErrorDetail = error.details[0];
       let errorMessage: string = `Error parsing file '${path.basename(configFile)}', section [${detail.path}]:`
-        + `\r\n(${detail.code}) ${detail.message} `;
+        + os.EOL + `(${detail.code}) ${detail.message} `;
 
-      console.log('\r\nERROR: ' + errorMessage + '\r\n\r\n');
+      console.log(os.EOL + 'ERROR: ' + errorMessage + os.EOL + os.EOL);
       throw new Error(errorMessage);
     }
 
