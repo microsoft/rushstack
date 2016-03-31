@@ -1,15 +1,25 @@
-const tsdLinter = require('ts-npm-lint');
+import { GulpTask } from 'gulp-core-build';
+import gulpType = require('gulp');
+import ts = require('gulp-typescript');
 
-import {
-GulpTask
-} from 'gulp-core-build';
-
-let ts = require('gulp-typescript');
+interface ITypeScriptErrorObject {
+  diagnostic: {
+    messageText: string;
+    code: number;
+  };
+  relativeFilename: string;
+  message: string;
+  startPosition: {
+    character: number;
+    line: number;
+  };
+}
 
 export interface ITypeScriptTaskConfig {
   failBuildOnErrors: boolean;
   sourceMatch?: string[];
   staticMatch?: string[];
+  reporter?: ts.Reporter;
 }
 
 export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
@@ -20,17 +30,28 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     sourceMatch: [
       'src/**/*.ts',
       'src/**/*.tsx',
-      'typings/tsd.d.ts'
+      'typings/main/**/*.ts',
+      'typings/main.d.ts'
     ],
     staticMatch: [
       'src/**/*.js',
       'src/**/*.jsx'
-    ]
+    ],
+    reporter: {
+      error: (error: ITypeScriptErrorObject) => {
+        this.fileError(
+          error.relativeFilename,
+          error.startPosition.line,
+          error.startPosition.character,
+          `TS${error.diagnostic.code}`,
+          error.diagnostic.messageText);
+      }
+    },
   };
 
   private _tsProject;
 
-  public executeTask(gulp, completeCallback): any {
+  public executeTask(gulp: gulpType.Gulp, completeCallback: (result?: any) => void) {
     let plumber = require('gulp-plumber');
     let sourcemaps = require('gulp-sourcemaps');
     let assign = require('object-assign');
@@ -49,13 +70,13 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     let { libFolder, libAMDFolder } = this.buildConfig;
     let tsResult = gulp.src(this.taskConfig.sourceMatch)
       .pipe(plumber({
-        errorHandler: function(error) {
+        errorHandler: function(error: any) {
           // console.log(error);
           errorCount++;
         }
       }))
       .pipe(sourcemaps.init())
-      .pipe(ts(tsProject, undefined, ts.reporter.longReporter()));
+      .pipe(ts(tsProject, undefined, this.taskConfig.reporter));
 
     allStreams.push(tsResult.js
       .pipe(sourcemaps.write('.'))
@@ -78,40 +99,22 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
 
       tsResult = gulp.src(this.taskConfig.sourceMatch)
         .pipe(plumber({
-          errorHandler: function(error) {
+          errorHandler: function(error: any) {
             errorCount++;
           }
         }))
         .pipe(sourcemaps.write())
-        .pipe(ts(tsAMDProject, undefined, ts.reporter.longReporter()));
+        .pipe(ts(tsAMDProject, undefined, this.taskConfig.reporter));
 
       allStreams.push(
         tsResult.js
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest(libAMDFolder)));
+          .pipe(sourcemaps.write('.'))
+          .pipe(gulp.dest(libAMDFolder)));
 
       allStreams.push(tsResult.dts.pipe(gulp.dest(libAMDFolder)));
     }
 
     let mergedStream = merge(allStreams);
-
-    mergedStream
-      .on('queueDrain', () => {
-        if (this.taskConfig.failBuildOnErrors && errorCount) {
-          completeCallback('TypeScript error(s) occured.');
-        } else {
-          // Without this, the built .d.ts files will contain /// references
-          // to "../typings/tsd.d.ts" which won't resolve properly for projects
-          // that consume our NPM package.  ts-npm-lint is a workaround that strips
-          // those lines.  IntelliSense will still find the typings as long as
-          // they're present in the consumer's tsd.d.ts file.
-          // NOTE: The TypeScript team expects to have an official solution for us soon.
-          tsdLinter.fixTypings();
-
-          completeCallback();
-        }
-      })
-      .on('error', completeCallback);
 
     return mergedStream;
   }
