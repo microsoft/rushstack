@@ -69,11 +69,11 @@ export default class ProjectBuildTask implements ITaskDefinition {
           // Display a summary of why the task failed or succeeded
           if (errors.length) {
             writer.writeError(`${errors.length} Error${errors.length > 1 ? 's' : ''}! \n`);
-          } else if (code !== 0) {
+          } else if (code) {
             writer.writeError('gulp returned error code: ' + code + '\n');
           }
 
-          if (errors.length > 0 || code !== 0) {
+          if (errors.length > 0 || code) {
             reject(errors);
           } else {
             resolve();
