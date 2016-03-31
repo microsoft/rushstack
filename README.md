@@ -1,12 +1,12 @@
-# gulp-core-build
+# gulp-core-build [![npm version](https://badge.fury.io/js/gulp-core-build.svg)](https://badge.fury.io/js/gulp-core-build)
+
+[![Build Status](https://travis-ci.org/dzearing/gulp-core-build.svg?branch=master)](https://travis-ci.org/dzearing/gulp-core-build) [![Dependencies](https://david-dm.org/dzearing/gulp-core-build.svg)](https://david-dm.org/dzearing/gulp-core-build) 
 
 The gulp build system, along with its rich plugin ecosystem, is a very powerful tool for web development projects.
 However project gulp build setups become difficult to manage over time, as gulpfiles grow in complexity. This project
 simplifies a number of aspects of getting a build setup going for a majority of scenarios.
 
-Additionally gulp is quite free of opinions. But lack of opinions creates more setup required. Core build defines a
-contract for tasks to implement, such that they can share opinions about where things end up. Tasks are modular but they
-are designed to work well together.
+Core build defines a contract for tasks to implement, such that they can share opinions about where things end up. Tasks are modular but they are designed to work well together.
 
 With gulp core build, your gulpfile translates into a list of task definitions, each which define what to run:
 
@@ -118,6 +118,9 @@ build.initializeTasks(
     nuke: { /* nuke options */ }
   });
 ```
+# Building gulp-core-build
+1. ```npm install --force```
+2. ```gulp```
 
 # Defining a custom task
 

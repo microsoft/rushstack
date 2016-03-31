@@ -1,0 +1,15 @@
+language: node_js
+node_js:
+- '4.2'
+before_script:
+- npm install -g gulp
+script: gulp
+deploy:
+  provider: npm
+  email: dzearing@hotmail.com
+  api_key:
+    secure: jjA8gM8ptr/wJd1f6RbPXZuofEd4mXmhtZon8A0d3VZaop6eNJ6YUbgqb8/wJ6kCUw2xswW3vtAnlhfNAMzeNswPWUP7kC9v/lQr+aYVjtNVQR2qfQhYEZHN7csjHekSwfbqMyEuwrczfFjEgzOQBGOT74VqvZYgsUwsQoYSh+2naweti4Gbn5VshfABGgtFpsbIExmyvWtZeY9C06vcq8Px7oeBf6imLsVdmhnHnejvTIo/16fZbndJA+sNsYC1IqEk8ZQ9X8QqgaFuYZ7vil0XOAVEDHAOLGE4aDOYxRFtAvwvw/v3GlfVq2JPhMiPJzYzHHdKst2JezrF5tAADXPxnXHGf/u98hEMGnvJu7SToYMLmIR7k9c1RGRLrWI+EfpO3Uqd/f/n2977Y0sCuCYx6tNbhy1TuTSaikzKncPkgMkjaShIgG2g8RSRMjRcZv14mjMOTv/YVvuKMMSXKIr8BC/VcoNEJzQf2UulumM4FLmgtj2mDAWgj7QI7iiukbbg+iIvystLiSHWA4cyByFezU95+wDm2bIRixyPh06VluB2QLu1ulKlBYPhimNko38aKB9vVLBKLfN5ll2m3ykT9D49fre2vOwqtys5LT31VQIX0pKqhySGUw0p0ftZEXJV05bDPfbCZeZZFbSP+ZR/oDcUNBi7UdO0+a016xA=
+  skip_cleanup: true
+  on:
+    tags: true
+    repo: dzearing/gulp-core-build
