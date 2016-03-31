@@ -99,12 +99,12 @@ export default class ProjectBuildTask implements ITaskDefinition {
   private _writeLogsToDisk(writer: ITaskWriter) {
     const logfilename = path.basename(this._config.projectFolder);
 
-    const stdout = writer.getStdOutput();
+    const stdout = writer.getStdOutput().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
     if (stdout) {
       fs.writeFileSync(path.join(this._config.projectFolder, logfilename + '.build.log'), stdout);
     }
 
-    const stderr = writer.getStdError();
+    const stderr = writer.getStdError().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
     if (stderr) {
       fs.writeFileSync(path.join(this._config.projectFolder, logfilename + '.build.error.log'), stderr);
     }
