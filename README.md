@@ -4,9 +4,7 @@ The gulp build system, along with its rich plugin ecosystem, is a very powerful 
 However project gulp build setups become difficult to manage over time, as gulpfiles grow in complexity. This project
 simplifies a number of aspects of getting a build setup going for a majority of scenarios.
 
-Additionally gulp is quite free of opinions. But lack of opinions creates more setup required. Core build defines a
-contract for tasks to implement, such that they can share opinions about where things end up. Tasks are modular but they
-are designed to work well together.
+Core build defines a contract for tasks to implement, such that they can share opinions about where things end up. Tasks are modular but they are designed to work well together.
 
 With gulp core build, your gulpfile translates into a list of task definitions, each which define what to run:
 
