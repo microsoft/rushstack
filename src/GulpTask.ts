@@ -1,10 +1,15 @@
+/// <reference path='../typings/main.d.ts' />
+
+/* tslint:disable:max-line-length */
 import { IExecutable } from './IExecutable';
 import { IBuildConfig } from './IBuildConfig';
-import { log, logStartSubtask, logEndSubtask } from './logging';
+import { log, error, fileError, warn, logEndSubtask, logStartSubtask } from './logging';
+import gutil = require('gulp-util');
+import gulp = require('gulp');
+import through2 = require('through2');
+const eos = require('end-of-stream');
 
-let gutil = require('gulp-util');
-
-export class GulpTask<TASK_CONFIG> implements IExecutable {
+export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
   public name: string;
   public buildConfig: IBuildConfig;
   public taskConfig: TASK_CONFIG;
@@ -24,20 +29,22 @@ export class GulpTask<TASK_CONFIG> implements IExecutable {
     return true;
   }
 
-  public executeTask(gulp: any, completeCallback: (result?: any) => void): any {
-    throw 'The task subclass is missing the "executeTask" method.';
-  }
+  public abstract executeTask(gulp: gulp.Gulp, completeCallback?: (result?: any) => void): Promise<any> | NodeJS.ReadWriteStream | void;
 
   public log(message: string) {
-    log(`[${ gutil.colors.cyan(this.name) }] ${ message }`);
+    log(`[${gutil.colors.cyan(this.name)}] ${message}`);
   }
 
   public logWarning(message: string) {
-    this.log(`warning: ${ gutil.colors.yellow(message) }`);
+    warn(`[${gutil.colors.cyan(this.name)}] ${message}`);
   }
 
   public logError(message: string) {
-    this.log(`error: ${ gutil.colors.red(message) }`);
+    error(`[${gutil.colors.cyan(this.name)}] ${message}`);
+  }
+
+  public fileError(filePath: string, line: number, column: number, errorCode: string, message: string) {
+    fileError(this.name, filePath, line, column, errorCode, message);
   }
 
   public getNukeMatch(): string[] {
@@ -47,7 +54,7 @@ export class GulpTask<TASK_CONFIG> implements IExecutable {
   public execute(config: IBuildConfig): Promise<any> {
     this.buildConfig = config;
 
-    let startTime = new Date().getTime();
+    let startTime = process.hrtime();
 
     logStartSubtask(this.name);
 
@@ -55,6 +62,10 @@ export class GulpTask<TASK_CONFIG> implements IExecutable {
       let stream;
 
       try {
+        if (!this.executeTask) {
+          throw new Error('The task subclass is missing the "executeTask" method.');
+        }
+
         stream = this.executeTask(this.buildConfig.gulp, (result?: any) => {
           if (!result) {
             resolve();
@@ -68,28 +79,51 @@ export class GulpTask<TASK_CONFIG> implements IExecutable {
       }
 
       if (stream) {
-        stream
-          .on('error', (error) => {
-            reject(error);
-          })
-          .on('queueDrain', () => {
-            resolve();
-          })
-          .on('end', () => {
-            resolve();
-          })
-          .on('close', () => {
-            resolve();
+        if (stream.then) {
+          stream.then(resolve, reject);
+        } else if (stream.pipe) {
+          // wait for stream to end
+
+          eos(stream, {
+            error: true,
+            readable: stream.readable,
+            writable: stream.writable && !stream.readable
+          }, (err: any) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve();
+            }
           });
+
+          // Make sure the stream is completly read
+          stream.pipe(through2.obj(
+            function(
+              file: gutil.File,
+              encoding: string,
+              callback: (p?: any) => void) {
+              'use strict';
+              callback();
+            },
+            function(callback: () => void) {
+              'use strict';
+              callback();
+            }));
+
+        } else if (this.executeTask.length === 1) {
+          resolve(stream);
+        }
+      } else if (this.executeTask.length === 1) {
+        resolve(stream);
       }
     })
-    .then(() => {
-      logEndSubtask(this.name, new Date().getTime() - startTime);
-    })
-    .catch((ex) => {
-      logEndSubtask(this.name, new Date().getTime() - startTime, ex);
-      throw ex;
-    });
+      .then(() => {
+        logEndSubtask(this.name, startTime);
+      },
+      (ex) => {
+        logEndSubtask(this.name, startTime, ex);
+        throw ex;
+      });
   }
 
   public resolvePath(localPath: string): string {
@@ -118,7 +152,9 @@ export class GulpTask<TASK_CONFIG> implements IExecutable {
     let fs = require('fs-extra');
 
     let fullSourcePath = path.resolve(__dirname, localSourcePath);
-    let fullDestPath = path.resolve(this.buildConfig.rootPath, (localDestPath || path.basename(localSourcePath)));
+    let fullDestPath = path.resolve(
+      this.buildConfig.rootPath,
+      (localDestPath || path.basename(localSourcePath)));
 
     fs.copySync(fullSourcePath, fullDestPath);
   }
@@ -136,4 +172,3 @@ export class GulpTask<TASK_CONFIG> implements IExecutable {
     return result;
   }
 }
-
