@@ -1,4 +1,4 @@
-# gulp-core-build
+# gulp-core-build [![Build Status](https://travis-ci.org/dzearing/gulp-core-build.svg?branch=master)](https://travis-ci.org/dzearing/gulp-core-build)
 
 The gulp build system, along with its rich plugin ecosystem, is a very powerful tool for web development projects.
 However project gulp build setups become difficult to manage over time, as gulpfiles grow in complexity. This project
