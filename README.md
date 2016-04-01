@@ -118,6 +118,9 @@ build.initializeTasks(
     nuke: { /* nuke options */ }
   });
 ```
+# Building gulp-core-build
+1. ```npm install --force```
+2. ```gulp```
 
 # Defining a custom task
 

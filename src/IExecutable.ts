@@ -2,7 +2,7 @@ import { IBuildConfig } from './IBuildConfig';
 
 export interface IExecutable {
   /** Execution method. */
-  execute: (config: IBuildConfig) => Promise<any>;
+  execute: (config: IBuildConfig) => Promise<void>;
 
   /** Optional name to give the task. If no name is provided, the "Running subtask" logging will be silent. */
   name?: string;
