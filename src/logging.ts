@@ -46,7 +46,7 @@ let wiredUpErrorHandling = false;
 let duringFastExit = false;
 
 let globalInstance = global as any;
-let localCache = globalInstance.__loggingCache = globalInstance.__loggingCache || {
+let localCache: ILocalCache = globalInstance.__loggingCache = globalInstance.__loggingCache || {
   warnings: [],
   errors: [],
   testsRun: 0,
@@ -194,19 +194,19 @@ function writeSummary(callback: () => void) {
         }
         let totalDuration = process.hrtime(getStart());
 
-        log(`Built ${state.builtPackage.name} version:`, gutil.colors.yellow(state.builtPackage.version));
-        log('Buildtools version:', gutil.colors.yellow(state.coreBuildPackage.version));
+        log(`Project ${state.builtPackage.name} version:`, gutil.colors.yellow(state.builtPackage.version));
+        log('Build tools version:', gutil.colors.yellow(state.coreBuildPackage.version));
         log('Node version:', gutil.colors.yellow(process.version));
-        log('Create tasks duration:', gutil.colors.yellow(prettyTime(localCache.taskCreationTime)));
-        log('Read src tasks duration:', gutil.colors.yellow(prettyTime(localCache.totalTaskHrTime)));
+        // log('Create tasks duration:', gutil.colors.yellow(prettyTime(localCache.taskCreationTime)));
+        // log('Read src tasks duration:', gutil.colors.yellow(prettyTime(localCache.totalTaskHrTime)));
         log('Total duration:', gutil.colors.yellow(prettyTime(totalDuration)));
-        log(`Tasks run: ${gutil.colors.yellow(localCache.taskRun + '')} SubTasks run: ${gutil.colors.yellow(localCache.subTasksRun + '')}`);
+        // log(`Tasks run: ${gutil.colors.yellow(localCache.taskRun + '')} Subtasks run: ${gutil.colors.yellow(localCache.subTasksRun + '')}`);
 
         if (localCache.testsRun > 0) {
           log('Tests results -',
             'Passed:', gutil.colors.green(localCache.testsPassed + ''),
             'Failed:', gutil.colors.red(localCache.testsFailed + ''),
-            'Flaky:', gutil.colors.yellow(localCache.testsFlakyFailed + ''),
+            // 'Flakey:', gutil.colors.yellow(localCache.testsFlakyFailed + ''),
             'Skipped:', gutil.colors.yellow(localCache.testsSkipped + ''));
         }
 
@@ -219,7 +219,7 @@ function writeSummary(callback: () => void) {
         }
 
         if (getWarnings().length) {
-          log('Tasks warnings:', gutil.colors.red(getWarnings().length + '\r\n' + getWarnings().join('\r\n')));
+          log('Task warnings:', gutil.colors.red(getWarnings().length + '\r\n' + getWarnings().join('\r\n')));
         }
 
         let totalErrors = 0;
