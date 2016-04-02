@@ -19,8 +19,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
     lintConfig: require('../lib/defaultTslint.json'),
     sourceMatch: [
       'src/**/*.ts',
-      'src/**/*.tsx',
-      'typings/tsd.d.ts'
+      'src/**/*.tsx'
     ],
     reporter: (result: lintTypes.LintResult, file: gutil.File, options: ITSLintTaskConfig) => {
       for (let failure of result.failures) {
