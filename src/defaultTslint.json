@@ -1,15 +1,25 @@
 {
   "rules": {
     "class-name": true,
-    "comment-format": [true, "check-space"],
+    "comment-format": [
+      true,
+      "check-space"
+    ],
     "curly": true,
     "eofline": false,
     "forin": true,
-    "indent": [true, "spaces", 2],
+    "indent": [
+      true,
+      "spaces",
+      2
+    ],
     "interface-name": true,
     "label-position": true,
     "label-undefined": true,
-    "max-line-length": [true, 110],
+    "max-line-length": [
+      true,
+      110
+    ],
     "member-access": true,
     "member-ordering": [
       true,
@@ -53,16 +63,36 @@
       "check-else",
       "check-whitespace"
     ],
-    "quotemark": [true, "single", "avoid-escape"],
+    "quotemark": [
+      true,
+      "single",
+      "avoid-escape"
+    ],
     "radix": true,
     "semicolon": true,
     "trailing-comma": {
       "singleline": "never",
       "multiline": "never"
     },
-    "triple-equals": [true, "allow-null-check"],
-    "variable-name": ["check-format", "allow-leading-underscore", "ban-keywords"],
-    "whitespace": [true,
+    "typedef": [
+      true,
+      "callSignature",
+      "indexSignature",
+      "parameter",
+      "propertySignature",
+      "variableDeclarator"
+    ],
+    "triple-equals": [
+      true,
+      "allow-null-check"
+    ],
+    "variable-name": [
+      "check-format",
+      "allow-leading-underscore",
+      "ban-keywords"
+    ],
+    "whitespace": [
+      true,
       "check-branch",
       "check-decl",
       "check-operator",
