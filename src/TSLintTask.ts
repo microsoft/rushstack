@@ -16,7 +16,7 @@ export interface ITSLintTaskConfig {
 export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
   public name = 'tslint';
   public taskConfig: ITSLintTaskConfig = {
-    lintConfig: require('../src/tslint.json'),
+    lintConfig: require('../lib/tslint.json'),
     sourceMatch: [
       'src/**/*.ts',
       'src/**/*.tsx',
