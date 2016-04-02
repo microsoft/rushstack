@@ -1,13 +1,13 @@
 {
   "name": "node-library-build",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "dependencies": {
     "gulp": "~3.9.1",
-    "gulp-core-build": "~0.4.7",
+    "gulp-core-build": "~0.5.1",
     "gulp-core-build-mocha": "~0.1.4",
-    "gulp-core-build-typescript": "~0.1.5"
+    "gulp-core-build-typescript": "~0.1.7"
   }
 }
