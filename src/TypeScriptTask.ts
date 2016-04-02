@@ -35,6 +35,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     ],
     staticMatch: [
       'src/**/*.js',
+      'src/**/*.json',
       'src/**/*.jsx'
     ],
     reporter: {
