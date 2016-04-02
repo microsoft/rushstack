@@ -45,7 +45,8 @@ interface ILocalCache {
 let wiredUpErrorHandling = false;
 let duringFastExit = false;
 
-let localCache: ILocalCache = {
+let globalInstance = global as any;
+let localCache = globalInstance.__loggingCache = globalInstance.__loggingCache || {
   warnings: [],
   errors: [],
   testsRun: 0,
