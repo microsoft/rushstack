@@ -7,7 +7,7 @@ import { IExecutable } from './IExecutable';
 import { IBuildConfig } from './IBuildConfig';
 import { NukeTask } from './NukeTask';
 export { IExecutable } from './IExecutable';
-import { initialize as initializeLogging, markTaskCreationTime, generateGulpError } from './logging';
+import { initialize as initializeLogging, markTaskCreationTime, generateGulpError, setWatchMode } from './logging';
 import gulpType = require('gulp');
 export * from './GulpTask';
 export * from './CopyTask';
@@ -76,6 +76,8 @@ export function watch(watchMatch: string, task: IExecutable): IExecutable {
 
   return {
     execute: (buildConfig: IBuildConfig) => {
+      setWatchMode();
+
       buildConfig.gulp.watch(watchMatch, (cb) => {
         _executeTask(task, buildConfig)
           .then(() => {
