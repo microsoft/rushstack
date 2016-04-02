@@ -108,8 +108,15 @@ function logRequestsMiddleware(req, res, next) {
     } else if (req.url.indexOf('.js') >= 0) {
       resourceColor = colors.magenta;
     }
-    console.log('  Request: [' + req.ip + '] \'' + resourceColor(req.url) + '\'');
+
+    console.log(
+      [
+        `  Request: `,
+        `${ req.ip ? `[${ colors.cyan(req.ip) }] ` : `` }`,
+        `'${ resourceColor(req.url) }'`
+      ].join(''));
   }
+
   next();
 }
 
