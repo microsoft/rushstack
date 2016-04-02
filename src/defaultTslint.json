@@ -6,7 +6,7 @@
       "check-space"
     ],
     "curly": true,
-    "eofline": true,
+    "eofline": false,
     "forin": true,
     "indent": [
       true,
@@ -18,7 +18,7 @@
     "label-undefined": true,
     "max-line-length": [
       true,
-      140
+      110
     ],
     "member-access": true,
     "member-ordering": [
@@ -45,7 +45,7 @@
     "no-duplicate-variable": true,
     "no-empty": true,
     "no-eval": true,
-    "no-inferrable-types": true,
+    "no-inferrable-types": false,
     "no-shadowed-variable": true,
     "no-string-literal": true,
     "no-switch-case-fall-through": true,
