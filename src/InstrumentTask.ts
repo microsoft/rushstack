@@ -1,4 +1,5 @@
 import { GulpTask } from 'gulp-core-build';
+import gulp = require('gulp');
 
 export interface IInstrumentTaskConfig {
   coverageMatch: string[];
@@ -11,8 +12,12 @@ export class InstrumentTask extends GulpTask<IInstrumentTaskConfig> {
     coverageMatch: ['lib/**/*.js', '!lib/**/*.test.js']
   };
 
-  public executeTask(gulp, completeCallback): any {
-    let istanbul = require('gulp-istanbul');
+  public executeTask(
+    gulp: gulp.Gulp,
+    completeCallback?: (result?: any) => void
+  ): Promise<any> | NodeJS.ReadWriteStream | void {
+
+    const istanbul = require('gulp-istanbul');
 
     return gulp.src(this.taskConfig.coverageMatch)
       // Covering files
