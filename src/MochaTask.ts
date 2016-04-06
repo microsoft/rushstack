@@ -19,8 +19,10 @@ export class MochaTask extends GulpTask<IMochaTaskConfig> {
 
     const istanbul = require('gulp-istanbul');
     const mocha = require('gulp-mocha');
-    const matchIndex = (process.argv.indexOf('--match'));
-    const matchString = (matchIndex === -1) ? '' : process.argv[matchIndex + 1];
+
+    /* tslint:disable:no-string-literal */
+    const matchString = this.buildConfig.args['match'];
+    /* tslint:enable:no-string-literal */
 
     return gulp.src(this.taskConfig.testMatch, { read: false })
       .pipe(mocha({
