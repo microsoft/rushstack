@@ -4,9 +4,10 @@ import ts = require('gulp-typescript');
 
 interface ITypeScriptErrorObject {
   diagnostic: {
-    messageText: string;
+    messageText:  string | { messageText: string };
     code: number;
   };
+  fullFilename: string;
   relativeFilename: string;
   message: string;
   startPosition: {
@@ -41,12 +42,16 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     ],
     reporter: {
       error: (error: ITypeScriptErrorObject) => {
+        const errorMessage: string = (typeof error.diagnostic.messageText === 'object') ?
+          (error.diagnostic.messageText as { messageText: string }).messageText :
+          error.diagnostic.messageText as string;
+
         this.fileError(
-          error.relativeFilename,
+          error.relativeFilename || error.fullFilename,
           error.startPosition.line,
           error.startPosition.character,
           `TS${error.diagnostic.code}`,
-          error.diagnostic.messageText);
+          errorMessage);
       }
     },
   };
@@ -73,7 +78,6 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     let tsResult = gulp.src(this.taskConfig.sourceMatch)
       .pipe(plumber({
         errorHandler: function(error: any) {
-          // console.log(error);
           errorCount++;
         }
       }))
@@ -116,8 +120,15 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       allStreams.push(tsResult.dts.pipe(gulp.dest(libAMDFolder)));
     }
 
-    let mergedStream = merge(allStreams);
-
-    return mergedStream;
+    // Listen for pass/fail, and ensure that the task passes/fails appropriately.
+    merge(allStreams)
+      .on('queueDrain', () => {
+        if (this.taskConfig.failBuildOnErrors && errorCount) {
+          completeCallback('TypeScript error(s) occurred.');
+        } else {
+          completeCallback();
+        }
+      })
+      .on('error', completeCallback);
   }
 }
