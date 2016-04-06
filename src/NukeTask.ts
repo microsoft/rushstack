@@ -10,7 +10,10 @@ export class NukeTask extends GulpTask<INukeConfig> {
   public taskConfig: INukeConfig = {
   };
 
-  public executeTask(gulp: gulp.Gulp, completeCallback: (result?: any) => void): Promise<any> | NodeJS.ReadWriteStream | void {
+  public executeTask(
+    gulp: gulp.Gulp,
+    completeCallback: (result?: any) => void
+  ): Promise<any> | NodeJS.ReadWriteStream | void {
     let del = require('del');
     let { distFolder, libFolder, libAMDFolder, tempFolder } = this.buildConfig;
     let nukePaths = [

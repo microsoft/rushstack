@@ -27,6 +27,15 @@ export interface IBuildConfig {
   /** Temp folder for storing temporary files. */
   tempFolder?: string;
 
+  /** Re-log known issues after the build is complete. */
+  relogIssues?: boolean;
+
+  /** Use verbose logging. */
+  verbose?: boolean;
+
+  /** Build a full production build. */
+  production?: boolean;
+
   /** Arbitrary property bag for a task to store environment values in. */
   properties?: { [ key: string]: any };
 

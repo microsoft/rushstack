@@ -3,7 +3,7 @@
 /* tslint:disable:max-line-length */
 import { IExecutable } from './IExecutable';
 import { IBuildConfig } from './IBuildConfig';
-import { log, error, fileError, warn, logEndSubtask, logStartSubtask } from './logging';
+import { log, verbose, error, fileError, warn, logEndSubtask, logStartSubtask } from './logging';
 import gutil = require('gulp-util');
 import gulp = require('gulp');
 import through2 = require('through2');
@@ -33,6 +33,10 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
 
   public log(message: string) {
     log(`[${gutil.colors.cyan(this.name)}] ${message}`);
+  }
+
+  public logVerbose(message: string) {
+    verbose(`[${gutil.colors.cyan(this.name)}] ${message}`);
   }
 
   public logWarning(message: string) {

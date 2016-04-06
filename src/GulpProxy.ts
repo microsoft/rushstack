@@ -9,7 +9,9 @@ export class GulpProxy {
   }
 
   public task(): any {
-    throw new Error('You should not define gulp tasks, but instead subclass the GulpTask and override the executeTask method.');
+    throw new Error(
+      'You should not define gulp tasks, but instead subclass the GulpTask and override the executeTask method.'
+    );
   }
 
   public src(glob: string | string[], opt?: gulp.SrcOptions): NodeJS.ReadWriteStream {
