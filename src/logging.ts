@@ -7,9 +7,9 @@ import * as gulp from 'gulp';
 import * as path from 'path';
 let prettyTime = require('pretty-hrtime');
 import * as state from './State';
+import { getFlagValue } from './config';
 
 const WROTE_ERROR_KEY = '__gulpCoreBuildWroteError';
-let verboseMode = state.args['verbose'];
 
 interface ILocalCache {
   warnings: string[];
@@ -30,7 +30,7 @@ interface ILocalCache {
   taskCreationTime?: number[];
   totalTaskSrc: number;
   wroteSummary: boolean;
-  writtingSummary: boolean;
+  writingSummary: boolean;
   writeSummaryCallbacks: Array<() => void>;
   watchMode?: boolean;
   fromRunGulp?: boolean;
@@ -40,6 +40,8 @@ interface ILocalCache {
   gulpErrorCallback: (err: any) => void;
   gulpStopCallback: (err: any) => void;
   errorAndWarningSupressions: { [key: string]: boolean };
+  shouldLogWarningsDuringSummary: boolean;
+  shouldLogErrorsDuringSummary: boolean;
 }
 
 let wiredUpErrorHandling = false;
@@ -63,14 +65,16 @@ let localCache: ILocalCache = globalInstance.__loggingCache = globalInstance.__l
   totalTaskHrTime: null,
   totalTaskSrc: 0,
   wroteSummary: false,
-  writtingSummary: false,
+  writingSummary: false,
   writeSummaryCallbacks: [],
   exitCode: 0,
   writeSummaryLogs: [],
   errorAndWarningSupressions: {},
   gulp: null,
   gulpErrorCallback: null,
-  gulpStopCallback: null
+  gulpStopCallback: null,
+  shouldLogErrorsDuringSummary: false,
+  shouldLogWarningsDuringSummary: false
 };
 
 if (!localCache.start) {
@@ -79,11 +83,15 @@ if (!localCache.start) {
 
 wireUpProcessErrorHandling();
 
+function isVerbose(): boolean {
+  return getFlagValue('verbose');
+}
+
 function formatError(e: any) {
   'use strict';
 
   if (!e.err) {
-    if (verboseMode) {
+    if (isVerbose()) {
       return e.message + '\r\n' + e.stack;
     } else {
       return e.message;
@@ -92,12 +100,12 @@ function formatError(e: any) {
 
   // PluginError
   if (typeof e.err.showStack === 'boolean') {
-    return e.err.toString() + (e.err.stack && verboseMode ? '\r\n' + e.err.stack : '');
+    return e.err.toString() + (e.err.stack && isVerbose() ? '\r\n' + e.err.stack : '');
   }
 
   // normal error
   if (e.err.stack) {
-    if (verboseMode) {
+    if (isVerbose()) {
       return e.err.stack;
     } else {
       return e.err.message;
@@ -106,7 +114,7 @@ function formatError(e: any) {
 
   // unknown (string, number, etc.)
   if (typeof (Error) === 'undefined') {
-    if (verboseMode) {
+    if (isVerbose()) {
       return e.message + '\r\n' + e.stack;
     } else {
       return e.message;
@@ -120,7 +128,7 @@ function formatError(e: any) {
       // Do nothing
     }
 
-    if (verboseMode) {
+    if (isVerbose()) {
       return new Error(output)['stack'];
     } else {
       return new Error(output)['message'];
@@ -164,24 +172,25 @@ function afterStreamsFlushed(callback: () => void) {
 
 function writeSummary(callback: () => void) {
   'use strict';
+  let shouldRelogIssues = getFlagValue('relogIssues');
 
   localCache.writeSummaryCallbacks.push(callback);
 
-  if (!localCache.writtingSummary) {
-    localCache.writtingSummary = true;
+  if (!localCache.writingSummary) {
+    localCache.writingSummary = true;
 
     // flush the log
     afterStreamsFlushed(() => {
-      log(gutil.colors.magenta('******Finished******'));
+      log(gutil.colors.magenta('==================[ Finished ]=================='));
 
-      if (getWarnings().length) {
+      if (shouldRelogIssues && getWarnings().length) {
         let warnings = getWarnings();
         for (let x = 0; x < warnings.length; x++) {
           console.error(gutil.colors.yellow(warnings[x]));
         }
       }
 
-      if (localCache.taskErrors > 0 || getErrors().length) {
+      if (shouldRelogIssues && (localCache.taskErrors > 0 || getErrors().length)) {
         let errors = getErrors();
         for (let x = 0; x < errors.length; x++) {
           console.error(gutil.colors.red(errors[x]));
@@ -291,7 +300,7 @@ function wireUpProcessErrorHandling() {
     process.on('uncaughtException',
       function(err: any) {
         'use strict';
-        if (verboseMode) {
+        if (isVerbose()) {
           console.error(err);
         }
 
@@ -343,7 +352,7 @@ export function reset() {
   localCache.totalTaskHrTime = null;
   localCache.totalTaskSrc = 0;
   localCache.wroteSummary = false;
-  localCache.writtingSummary = false;
+  localCache.writingSummary = false;
   localCache.writeSummaryCallbacks = [];
   localCache.testsRun = 0;
   localCache.testsPassed = 0;
@@ -446,7 +455,9 @@ export function error(...args: Array<string | Chalk.ChalkChain>) {
 export function fileError(taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string) {
   'use strict';
 
-  if (path.isAbsolute(filePath)) {
+  if (!filePath) {
+    filePath = '<undefined path>';
+  } else if (path.isAbsolute(filePath)) {
     filePath = path.relative(process.cwd(), filePath);
   }
 
@@ -456,13 +467,13 @@ export function fileError(taskName: string, filePath: string, line: number, colu
 export function verbose(...args: Array<string | Chalk.ChalkChain>) {
   'use strict';
 
-  if (state.args.verbose) {
+  if (getFlagValue('verbose')) {
     log.apply(null, args);
   }
 };
 
 export function generateGulpError(error: any) {
-  if (verboseMode) {
+  if (isVerbose()) {
     return error;
   } else {
     let output = {
@@ -498,7 +509,7 @@ export function writeError(e: any) {
         }
       } else if (e.fileName) {
         // This is probably a plugin error
-        if (verboseMode) {
+        if (isVerbose()) {
           error(
             e.message,
             '\r\n',
@@ -514,7 +525,7 @@ export function writeError(e: any) {
           );
         }
       } else {
-        if (verboseMode) {
+        if (isVerbose()) {
           error(
             'Unknown',
             '\r\n',
@@ -608,7 +619,7 @@ export function initialize(gulp: gulp.Gulp, gulpErrorCallback?: (err: any) => vo
 
   gulp['on']('start', function(err: any) {
     'use strict';
-    log('Starting Gulp');
+    log('Starting gulp');
   });
 
   gulp['on']('stop', function(err: any) {

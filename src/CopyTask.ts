@@ -12,7 +12,10 @@ export class CopyTask extends GulpTask<ICopyConfig> {
     copyTo: {}
   };
 
-  public executeTask(gulp: gulp.Gulp, completeCallback: (result?: any) => void): Promise<any> | NodeJS.ReadWriteStream | void {
+  public executeTask(
+    gulp: gulp.Gulp,
+    completeCallback: (result?: any) => void
+  ): Promise<any> | NodeJS.ReadWriteStream | void {
     let flatten = require('gulp-flatten');
     let merge = require('merge2');
     let { copyTo } = this.taskConfig;

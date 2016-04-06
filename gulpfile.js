@@ -11,8 +11,4 @@ build.typescript.setConfig({
   ]
 });
 
-build.tslint.setConfig({
-  lintConfig: require('./tslint.json')
-});
-
 build.initialize(require('gulp'));

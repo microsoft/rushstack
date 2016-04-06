@@ -8,6 +8,7 @@ import { IBuildConfig } from './IBuildConfig';
 import { NukeTask } from './NukeTask';
 export { IExecutable } from './IExecutable';
 import { initialize as initializeLogging, markTaskCreationTime, generateGulpError, setWatchMode } from './logging';
+import { getFlagValue, setConfigDefaults } from './config';
 import gulpType = require('gulp');
 export * from './GulpTask';
 export * from './CopyTask';
@@ -26,7 +27,10 @@ let _buildConfig: IBuildConfig = {
   libAMDFolder: null,
   libFolder: 'lib',
   tempFolder: 'temp',
-  properties: {}
+  properties: {},
+  relogIssues: getFlagValue('relogIssues', true),
+  verbose: getFlagValue('verbose', false),
+  production: getFlagValue('production', false)
 };
 
 /**
@@ -71,7 +75,7 @@ export function task(taskName: string, task: IExecutable): IExecutable {
  * @param  {IExecutable} task
  * @returns IExecutable
  */
-export function watch(watchMatch: string, task: IExecutable): IExecutable {
+export function watch(watchMatch: string | string[], task: IExecutable): IExecutable {
   _trackTask(task);
 
   return {
@@ -156,6 +160,8 @@ export function initialize(gulp: any) {
   _buildConfig.rootPath = process.cwd();
   _buildConfig.gulp = new GulpProxy(gulp);
   _buildConfig.uniqueTasks = _uniqueTasks;
+
+  setConfigDefaults(_buildConfig);
 
   initializeLogging(gulp, null, null);
 
