@@ -7,10 +7,10 @@
   "license": "MIT",
   "repository": "github:iclanton/set-webpack-public-path-loader",
   "dependencies": {
-    "loader-utils": "^0.2.12",
-    "lodash": "^4.6.1"
+    "loader-utils": "^0.2.13",
+    "lodash": "^4.8.2"
   },
   "devDependencies": {
-    "node-library-build": "^0.0.3"
+    "node-library-build": "^0.0.5"
   }
 }
