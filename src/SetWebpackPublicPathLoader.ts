@@ -1,4 +1,5 @@
 import { merge } from 'lodash';
+import { EOL } from 'os';
 const loaderUtils = require('loader-utils');
 
 export interface ISetWebpackPublicPathLoaderOptions {
@@ -74,7 +75,7 @@ export class SetWebpackPublicPathLoader {
       );
     }
 
-    return lines.join('\n').replace(/\n\n+/, '\n\n');
+    return lines.join(EOL).replace(new RegExp(`${EOL}${EOL}+`, 'g'), `${EOL}${EOL}`);
   }
 
   private static escapeSingleQuotes(str: string): string {
@@ -102,6 +103,10 @@ export class SetWebpackPublicPathLoader {
     };
 
     const queryOptions: ISetWebpackPublicPathLoaderOptions = loaderUtils.parseQuery(query);
+    if (queryOptions.systemJs || queryOptions.publicPath) {
+      // If ?systemJs or ?publicPath=... is set inline, override scriptPath
+      options.scriptPath = undefined;
+    }
 
     return merge(options, queryOptions);
   }
