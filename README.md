@@ -30,13 +30,14 @@ This option is exclusive to other options. If it is set, `systemJs`, `publicPath
 
 #### `systemJs`
 
-Use `System.baseURL` if it is defined.
+Use `System.baseURL` if it is defined. Setting this option inline will override `scriptPath` set by `setOptions({ ... })`.
 
 #### `publicPath=...`
 
 Use the specified path as the base public path. If `urlPrefix` is also defined, the public path will
 be the concatenation of the two (i.e. - `__webpack_public_path__ = URL.concat({publicPath} + {urlPrefix}`).
-This option takes precedence over the `systemJs` option.
+This option takes precedence over the `systemJs` option.  Setting this option inline will override
+`scriptPath` set by `setOptions({ ... })`.
 
 #### `urlPrefix=...`
 
