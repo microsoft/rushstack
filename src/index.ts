@@ -6,6 +6,7 @@ import { GulpProxy } from './GulpProxy';
 import { IExecutable } from './IExecutable';
 import { IBuildConfig } from './IBuildConfig';
 import { NukeTask } from './NukeTask';
+import { args } from './State';
 export { IExecutable } from './IExecutable';
 import { initialize as initializeLogging, markTaskCreationTime, generateGulpError, setWatchMode } from './logging';
 import { getFlagValue, setConfigDefaults } from './config';
@@ -30,7 +31,8 @@ let _buildConfig: IBuildConfig = {
   properties: {},
   relogIssues: getFlagValue('relogIssues', true),
   verbose: getFlagValue('verbose', false),
-  production: getFlagValue('production', false)
+  production: getFlagValue('production', false),
+  args: args
 };
 
 /**

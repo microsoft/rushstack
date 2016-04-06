@@ -36,6 +36,9 @@ export interface IBuildConfig {
   /** Build a full production build. */
   production?: boolean;
 
+  /** Arguments passed in. */
+  args?: { [name: string]: string | boolean };
+
   /** Arbitrary property bag for a task to store environment values in. */
   properties?: { [ key: string]: any };
 
