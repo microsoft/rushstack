@@ -1,6 +1,7 @@
 import {
   GulpTask
 } from 'gulp-core-build';
+import gulp = require('gulp');
 
 const scssTsExtName = '.scss.ts';
 
@@ -11,6 +12,8 @@ export interface ISassTaskConfig {
 }
 
 const _classMaps = {};
+
+const merge = require('merge2');
 
 export class SassTask extends GulpTask<ISassTaskConfig> {
   public name = 'sass';
@@ -27,17 +30,20 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     'src/**/*.scss.ts'
   ];
 
-  public executeTask(gulp, completeCallback): any {
-    const merge = require('merge2');
+  public executeTask(
+    gulp: gulp.Gulp,
+    completeCallback?: (result?: string) => void
+  ): Promise<any> | NodeJS.ReadWriteStream | void {
+
     const autoprefixer = require('autoprefixer');
     const cssModules = require('postcss-modules');
-
     const postCSSPlugins = [
       autoprefixer({ browsers: ['> 1%', 'last 2 versions', 'ie >= 10'] })
     ];
     const modulePostCssPlugins = postCSSPlugins.slice(0);
+
     modulePostCssPlugins.push(cssModules({
-      getJSON: this.generateModuleStub.bind(this),
+      getJSON: this._generateModuleStub.bind(this),
       generateScopedName: this.generateScopedName.bind(this)
     }));
 
@@ -45,38 +51,44 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     const moduleSrcPattern = srcPattern.map((value: string) => value.replace('.scss', '.module.scss'));
 
     if (this.taskConfig.useCSSModules) {
-      return this.processFiles(gulp, merge, srcPattern, completeCallback, modulePostCssPlugins);
+      return this._processFiles(gulp, srcPattern, completeCallback, modulePostCssPlugins);
     } else {
       moduleSrcPattern.forEach((value: string) => srcPattern.push(`!${value}`));
 
-      return merge(this.processFiles(gulp, merge, srcPattern, completeCallback, postCSSPlugins),
-                   this.processFiles(gulp, merge, moduleSrcPattern, completeCallback, modulePostCssPlugins));
+      return merge(this._processFiles(gulp, srcPattern, completeCallback, postCSSPlugins),
+                   this._processFiles(gulp, moduleSrcPattern, completeCallback, modulePostCssPlugins));
     }
   }
 
-  private processFiles(gulp, merge, srcPattern, completeCallback, postCSSPlugins): NodeJS.ReadWriteStream {
+  private _processFiles(
+    gulp: gulp.Gulp,
+    srcPattern: string[],
+    completeCallback: (result?: any) => void,
+    postCSSPlugins: any[]
+  ): NodeJS.ReadWriteStream {
     const changed = require('gulp-changed');
     const cleancss = require('gulp-clean-css');
+    const clipEmptyFiles = require('gulp-clip-empty-files');
     const clone = require('gulp-clone');
     const path = require('path');
     const postcss = require('gulp-postcss');
     const sass = require('gulp-sass');
     const texttojs = require('gulp-texttojs');
-
     const tasks: NodeJS.ReadWriteStream[] = [];
 
     const baseTask = gulp.src(srcPattern)
       .pipe(changed('src', { extension: scssTsExtName }))
       .pipe(sass.sync({
-        importer: (url, prev, done) => ({ file: patchSassUrl(url) })
-      }).on('error', function(error) {
+        importer: (url, prev, done) => ({ file: _patchSassUrl(url) })
+      }).on('error', function(error: Error) {
         sass.logError.call(this, error);
         completeCallback('Errors found in sass file(s).');
       }))
       .pipe(postcss(postCSSPlugins))
       .pipe(cleancss({
         advanced: false
-      }));
+      }))
+      .pipe(clipEmptyFiles());
 
     if (this.taskConfig.dropCssFiles) {
       tasks.push(baseTask.pipe(clone())
@@ -136,7 +148,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
               '',
               exportClassNames,
               '',
-              `loadStyles(${flipDoubleQuotes(JSON.stringify(content))});`,
+              `loadStyles(${_flipDoubleQuotes(JSON.stringify(content))});`,
               ''
             ];
           }
@@ -149,19 +161,19 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     return merge(tasks);
   }
 
-  private generateModuleStub(cssFileName, json) {
+  private _generateModuleStub(cssFileName: string, json: any) {
     cssFileName = cssFileName.replace('.css', '.scss.ts');
     _classMaps[cssFileName] = json;
   }
 
-  private generateScopedName(name, fileName, css) {
+  private generateScopedName(name: string, fileName: string ) {
     const crypto = require('crypto');
 
     return name + '_' + crypto.createHmac('sha1', fileName).update(name).digest('hex').substring(0, 8);
   }
 }
 
-function patchSassUrl(url) {
+function _patchSassUrl(url: string) {
   if (url[0] === '~') {
     url = 'node_modules/' + url.substr(1);
   } else if (url === 'stdin') {
@@ -171,7 +183,7 @@ function patchSassUrl(url) {
   return url;
 }
 
-function flipDoubleQuotes(str: string) {
+function _flipDoubleQuotes(str: string) {
   return str ? (
     str
       .replace(/\\"/g, '`')

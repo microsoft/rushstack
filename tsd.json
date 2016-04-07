@@ -1,0 +1,12 @@
+{
+  "version": "v4",
+  "repo": "borisyankov/DefinitelyTyped",
+  "ref": "master",
+  "path": "typings",
+  "bundle": "typings/tsd.d.ts",
+  "installed": {
+    "chalk/chalk.d.ts": {
+      "commit": "513510a89acc648422c9abb047265116198f99ee"
+    }
+  }
+}
