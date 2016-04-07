@@ -12,6 +12,6 @@
     "gulp-mocha": "^2.2.0"
   },
   "devDependencies": {
-    "node-library-build": "0.0.5"
+    "node-library-build": "~0.1.0"
   }
 }
