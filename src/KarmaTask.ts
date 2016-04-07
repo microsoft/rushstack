@@ -1,6 +1,7 @@
 import {
 GulpTask
 } from 'gulp-core-build';
+import gulp = require('gulp');
 
 export interface IKarmaTaskConfig {
   karmaConfigPath: string;
@@ -25,7 +26,7 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
     ]
   };
 
-  public executeTask(gulp, completeCallback): any {
+  public executeTask(gulp: gulp.Gulp, completeCallback: (result?: any) => void): void {
     let { karmaConfigPath } = this.taskConfig;
 
     if (!this.fileExists(karmaConfigPath)) {
