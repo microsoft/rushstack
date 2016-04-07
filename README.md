@@ -1,4 +1,7 @@
-# load-themed-styles
+# load-themed-styles [![npm version](https://badge.fury.io/js/load-themed-styles.svg)](https://badge.fury.io/js/load-themed-styles)
+
+[![Build Status](https://travis-ci.org/dzearing/load-themed-styles.svg?branch=master)](https://travis-ci.org/dzearing/load-themed-styles) [![Dependencies](https://david-dm.org/dzearing/load-themed-styles.svg)](https://david-dm.org/dzearing/load-themed-styles)
+
 > Loads a string of style rules, but supports detokenizing theme constants built within it.
 
 ## Install
