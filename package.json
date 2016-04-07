@@ -23,6 +23,6 @@
     "typescript": "1.8.9"
   },
   "devDependencies": {
-    "node-library-build": "0.0.5"
+    "node-library-build": "~0.1.0"
   }
 }
