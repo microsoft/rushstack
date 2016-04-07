@@ -1,5 +1,9 @@
+# gulp-core-build-webpack [![npm version](https://badge.fury.io/js/gulp-core-build-webpack.svg)](https://badge.fury.io/js/gulp-core-build-webpack)
+
+[![Build Status](https://travis-ci.org/dzearing/gulp-core-build-webpack.svg?branch=master)](https://travis-ci.org/dzearing/gulp-core-build-webpack) [![Dependencies](https://david-dm.org/dzearing/gulp-core-build-webpack.svg)](https://david-dm.org/dzearing/gulp-core-build-webpack)
+
 # Description
-`gulp-core-build-webpack` is a plugin for gulp-core-build which introduces the ability to bundle various source files into a set of bundles, using webpack. 
+`gulp-core-build-webpack` is a plugin for gulp-core-build which introduces the ability to bundle various source files into a set of bundles, using webpack.
 
 # Tasks
 ## WebpackTask
