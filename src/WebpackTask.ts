@@ -1,5 +1,6 @@
 import * as Webpack from 'webpack';
 import { GulpTask } from 'gulp-core-build';
+import gulp = require('gulp');
 
 export interface IWebpackTaskConfig {
   configPath: string;
@@ -17,7 +18,7 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
     webpack: require('webpack')
   };
 
-  public executeTask(gulp, completeCallback): any {
+  public executeTask(gulp: gulp.Gulp, completeCallback: (result?: any) => void): void {
     let shouldInitWebpack = (process.argv.indexOf('--initwebpack') > -1);
     let path = require('path');
 

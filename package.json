@@ -1,17 +1,17 @@
 {
   "name": "gulp-core-build-webpack",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "dependencies": {
-    "gulp-core-build": "^0.4.4",
-    "gulp": "^3.9.1",
-    "gulp-util": "^3.0.7",
-    "webpack": "^1.12.14"
+    "gulp-core-build": "~0.6.0",
+    "gulp": "~3.9.1",
+    "gulp-util": "3.0.7",
+    "webpack": "1.12.14"
   },
   "devDependencies": {
-    "node-library-build": "^0.0.3"
+    "node-library-build": "~0.1.0"
   }
 }

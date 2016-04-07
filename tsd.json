@@ -6,7 +6,7 @@
   "bundle": "typings/tsd.d.ts",
   "installed": {
     "node/node.d.ts": {
-      "commit": "9f0f926a12026287b5a4a229e5672c01e7549313"
+      "commit": "513510a89acc648422c9abb047265116198f99ee"
     },
     "source-map/source-map.d.ts": {
       "commit": "a44529fcb1e1cdc0355e71c42a6048de99b57c34"
@@ -16,6 +16,18 @@
     },
     "uglify-js/uglify-js.d.ts": {
       "commit": "a44529fcb1e1cdc0355e71c42a6048de99b57c34"
+    },
+    "orchestrator/orchestrator.d.ts": {
+      "commit": "513510a89acc648422c9abb047265116198f99ee"
+    },
+    "gulp/gulp.d.ts": {
+      "commit": "513510a89acc648422c9abb047265116198f99ee"
+    },
+    "q/Q.d.ts": {
+      "commit": "513510a89acc648422c9abb047265116198f99ee"
+    },
+    "chalk/chalk.d.ts": {
+      "commit": "513510a89acc648422c9abb047265116198f99ee"
     }
   }
 }
