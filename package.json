@@ -6,7 +6,7 @@
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "dependencies": {
-    "gulp": "^3.9.1",
+    "gulp": "~3.9.1",
     "gulp-core-build": "~0.6.0",
     "gulp-istanbul": "0.10.3",
     "gulp-mocha": "2.2.0"
