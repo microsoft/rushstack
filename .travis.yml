@@ -1,0 +1,15 @@
+language: node_js
+node_js:
+- '4.2'
+before_script:
+- npm install -g gulp
+script: gulp
+deploy:
+  skip_cleanup: true
+  provider: npm
+  email: dzearing@hotmail.com
+  api_key:
+    secure: DaaXZ8y0B1Hc8yn4K/1VmALgoXjJhoX0vjlRu6eZJtjFf3sR+xtD6CYVh4woGZtQbAnDYF9x1bSEG8lOV5IZfsM/nSNSiBvTdIh1wNlPGzkbUt8OtLu5DMqEhCI8b61wmuy3HEJbNwCVV36e8XEhLLJoDHOOuMTQQX43QiLskvqfqlhhzE+mT8BjkEZgmiXECA5lQd/uVKGQgMZ+sxYD3Ydkw+LfAbRicdf8BqPlx2iDS8pvafTtLG0b3+TXBdxLvrP5fWFDS1lb8N9oLLj/VuYFSzKMduSlTAoyROY2eHklX26bUmgyThi+WFmVLvTp6fgs/G7c0+NZcddo99CaRuM9YRhAGybG7vGClvKLizeDRfIuhB3LbUVwlReat3z0KCP0GuA5TIDw2790bjsYbiTr4p+mcw/CG96iXHTKNb3gvS+7NXf/OLwV9RCjW3jE+uIenMpHZUYAIQ3fnjr8Y0e6bxcHBmU4jI/HaUg+xddBWvIBiKfDF+mfMYI6wkySGj2p+IPYUa48Qgksa+g2c0/PTIsqfMqYEKZ7ZhkKq7kH6xT1EU/tRl5RkRSUBziXIepTzDfivfBnaAgcB4qS/g7rYj4G4fQUbXKzMKnBSCJVEH2Nhs4Qlg3E9Zl1rEKEboi++NMw1xo2AYfZudk0IpDBTpRonmA5oATLhzTqDco=
+  on:
+    tags: true
+    repo: dzearing/load-themed-styles
