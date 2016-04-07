@@ -1,6 +1,8 @@
 import {
   GulpTask
 } from 'gulp-core-build';
+import gulp = require('gulp');
+import http = require('http');
 
 export interface IServeTaskConfig {
   api?: {
@@ -20,16 +22,20 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
     port: 4321
   };
 
-  public executeTask(gulp, completeCallback): any {
-    let gulpConnect = require('gulp-connect');
-    let compression = require('compression');
-    let gutil = require('gulp-util');
-    let open = require('gulp-open');
-    let path = require('path');
-    let openBrowser = (process.argv.indexOf('--nobrowser') === -1);
-    let portArgumentIndex = process.argv.indexOf('--port');
+  public executeTask(
+    gulp: gulp.Gulp,
+    completeCallback?: (result?: any) => void
+  ): Promise<any> | NodeJS.ReadWriteStream | void {
+
+    const gulpConnect = require('gulp-connect');
+    const compression = require('compression');
+    const gutil = require('gulp-util');
+    const open = require('gulp-open');
+    const path = require('path');
+    const openBrowser = (process.argv.indexOf('--nobrowser') === -1);
+    const portArgumentIndex = process.argv.indexOf('--port');
     let { port, initialPage, api } = this.taskConfig;
-    let { rootPath } = this.buildConfig;
+    const { rootPath } = this.buildConfig;
 
     if (portArgumentIndex >= 0 && process.argv.length > (portArgumentIndex + 1)) {
       port = Number(process.argv[portArgumentIndex + 1]);
@@ -38,7 +44,7 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
     // Spin up the connect server
     gulpConnect.server({
       livereload: true,
-      middleware: function(connectInstance, opt) {
+      middleware: function() {
         return [
           compression(),
           logRequestsMiddleware,
@@ -66,8 +72,8 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
       if (apiMap) {
         console.log(`Starting api server on port ${api.port}.`);
 
-        let express = require('express');
-        let app = express();
+        const express = require('express');
+        const app = express();
 
         app.use(logRequestsMiddleware);
         app.use(enableCorsMiddleware);
@@ -98,8 +104,9 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
   }
 }
 
-function logRequestsMiddleware(req, res, next) {
-  let { colors } = require('gulp-util');
+function logRequestsMiddleware(req: http.IncomingMessage, res: http.ServerResponse, next?: () => any) {
+  const { colors } = require('gulp-util');
+  const ipAddress = (req as any).ip;
   let resourceColor = colors.cyan;
 
   if (req && req.url) {
@@ -112,7 +119,7 @@ function logRequestsMiddleware(req, res, next) {
     console.log(
       [
         `  Request: `,
-        `${ req.ip ? `[${ colors.cyan(req.ip) }] ` : `` }`,
+        `${ ipAddress ? `[${ colors.cyan(ipAddress) }] ` : `` }`,
         `'${ resourceColor(req.url) }'`
       ].join(''));
   }
@@ -120,12 +127,18 @@ function logRequestsMiddleware(req, res, next) {
   next();
 }
 
-function enableCorsMiddleware(req, res, next) {
+function enableCorsMiddleware(
+  req: http.IncomingMessage,
+  res: http.ServerResponse,
+  next?: () => any) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   next();
 }
 
-function setJSONResponseContentTypeMiddleware(req, res, next) {
+function setJSONResponseContentTypeMiddleware(
+  req: http.IncomingMessage,
+  res: http.ServerResponse,
+  next?: () => any) {
   res.setHeader('content-type', 'application/json');
   next();
 }
