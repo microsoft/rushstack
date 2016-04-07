@@ -1,5 +1,8 @@
-# gulp-core-build-sass
-`gulp-core-build-sass` is a plugin for `gulp-core-build` which introduces the ability to compile SASS files to CSS. 
+# gulp-core-build-sass [![npm version](https://badge.fury.io/js/gulp-core-build-sass.svg)](https://badge.fury.io/js/gulp-core-build-sass)
+
+[![Build Status](https://travis-ci.org/dzearing/gulp-core-build-sass.svg?branch=master)](https://travis-ci.org/dzearing/gulp-core-build-sass) [![Dependencies](https://david-dm.org/dzearing/gulp-core-build-sass.svg)](https://david-dm.org/dzearing/gulp-core-build-sass)
+
+`gulp-core-build-sass` is a plugin for `gulp-core-build` which introduces the ability to compile SASS files to CSS.
 
 # Tasks
 ## SassTask
