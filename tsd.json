@@ -9,7 +9,19 @@
       "commit": "9f0f926a12026287b5a4a229e5672c01e7549313"
     },
     "node/node.d.ts": {
-      "commit": "b14601af3fb2ad72d5048e94188a569a1838fb9c"
+      "commit": "513510a89acc648422c9abb047265116198f99ee"
+    },
+    "chalk/chalk.d.ts": {
+      "commit": "513510a89acc648422c9abb047265116198f99ee"
+    },
+    "orchestrator/orchestrator.d.ts": {
+      "commit": "513510a89acc648422c9abb047265116198f99ee"
+    },
+    "gulp/gulp.d.ts": {
+      "commit": "513510a89acc648422c9abb047265116198f99ee"
+    },
+    "q/Q.d.ts": {
+      "commit": "513510a89acc648422c9abb047265116198f99ee"
     }
   }
 }

@@ -8,5 +8,9 @@ reviewers:
     - harry8525
     - iclanton
     - nickpape-msft
+    - pgonzal
+    - patmill
+    - manishgarg1
+    - nguyen-john
   name: default
   required: 1
