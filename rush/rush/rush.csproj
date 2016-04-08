@@ -27,6 +27,8 @@
     </Content>
     <Content Include="src\**\*.less">
     </Content>
+    <Content Include="src\**\*.scss">
+    </Content>
     <Content Include="src\**\*.html">
     </Content>
     <Content Include="src\**\*.json">
