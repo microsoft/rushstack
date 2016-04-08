@@ -1,4 +1,4 @@
-import { task, serial, parallel, watch } from 'gulp-core-build';
+import { task, serial, parallel, watch, CopyTask } from 'gulp-core-build';
 import { typescript, tslint, text } from 'gulp-core-build-typescript';
 import { sass } from 'gulp-core-build-sass';
 import { karma } from 'gulp-core-build-karma';
@@ -12,17 +12,30 @@ export * from 'gulp-core-build-karma';
 export * from 'gulp-core-build-webpack';
 export * from 'gulp-core-build-serve';
 
+export const preCopy = new CopyTask();
+preCopy.name = 'pre-copy';
+
+export const postCopy = new CopyTask();
+postCopy.name = 'post-copy';
+
 // Define default task groups.
-let buildTasks = task('build', serial(sass, parallel(tslint, typescript, text)));
+let buildTasks = task('build', serial(preCopy, sass, parallel(tslint, typescript, text), postCopy));
 let bundleTasks = task('bundle', serial(buildTasks, webpack));
 
 task('test', serial(buildTasks, karma));
 
+// For watch scenarios like serve, make sure to exclude generated files from src (like *.scss.ts.)
 task('serve',
   serial(
     bundleTasks,
     serve,
-    watch('src/**/*.{ts,tsx,scss,js,txt,html}', serial(bundleTasks, reload))
+    watch(
+      [
+        'src/**/*.{ts,tsx,scss,js,txt,html}',
+        '!src/**/*.scss.ts'
+      ],
+      serial(preCopy, sass, parallel(typescript, text), postCopy, webpack, reload)
+    )
   )
 );
 

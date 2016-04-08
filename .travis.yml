@@ -1,0 +1,15 @@
+language: node_js
+node_js:
+- '4.2'
+before_script:
+- npm install -g gulp
+script: gulp
+deploy:
+  skip_cleanup: true
+  provider: npm
+  email: dzearing@hotmail.com
+  api_key:
+    secure: u8H6jYZa3I1JFxNdcP095eozXuW9jE1icduXa4HTPYiwiSO1+PixRTx6chpSjfyWXDOJ1aEGKc3SIHysSfE+93J1/nQknqmzy4RC2c/ymu9D0ECXamabVs5sMpzzvtt9QVn8YVLwNbUXvP3G4NFJOVgWZ8f47+jM+TJYmoiCCFtZnwaA0jvVE09oOETUroFpTLDC1L4sadm3qakTjkf9NzhAWsq94XbVVrTLjDduLyZUkhGh5BeWTCxVWub3QL+DxPBZ+TtswMZI2FB/PDhhIkIDjD8Jp6/KMr4XqKWKd3Tx9uJr4yFOUp5CDKbt4EeOfPOgfctIqKM2OUm7gZZwlMGWJF/Nl443MVG6m+vpl7K7dMyt1YLH6I1S7j/dinnyMzosQrfROitTRz6I7l9qMDrpXpIeGjpTITxXtlKPXzyStdWFVwb0df+bsjNg1e1PZvS32zTvBlyVDURl86Wi24KF336wWYqkhNXLuHrY1KYqDA4oiFa3BbKIMHY0e/G7wbmkLRwdHo+u2/ZQypIUjdK59rhjjusXcrghdlcFvWWmmGB1rmnW8VnLYBu7velWiXGowig4xpKYwJwTQ86gi5kTgInaij8D6d0kY1oCu+63plE5K41orLTYFUR4NdLuuMwARA0ZhRhHSDxTyTZHZaRrx1pHoi8V8cpVvT1gsWg=
+  on:
+    tags: true
+    repo: dzearing/web-library-build
