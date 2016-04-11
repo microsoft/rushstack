@@ -1,5 +1,3 @@
-/// <reference path='../typings/main.d.ts' />
-
 /* tslint:disable:max-line-length */
 import { IExecutable } from './IExecutable';
 import { IBuildConfig } from './IBuildConfig';
