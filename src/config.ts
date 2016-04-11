@@ -24,7 +24,7 @@ export function getFlagValue(name: string, defaultValue?: boolean): boolean {
   return configValue === 'true' || configValue === true;
 }
 
-function _firstDefinedValue(...args): any {
+function _firstDefinedValue(...args: (string | boolean)[]): any {
   for (let arg of args) {
     if (arg !== undefined) {
       return arg;

@@ -20,6 +20,9 @@ export * from './logging';
 require('es6-promise').polyfill();
 /* tslint:enable:variable-name */
 
+let path = require('path');
+let packageJSON = require(path.resolve(process.cwd(), 'package.json'));
+
 let _taskMap = {} as { [key: string]: IExecutable };
 let _uniqueTasks = [];
 
@@ -30,6 +33,9 @@ let _buildConfig: IBuildConfig = {
   tempFolder: 'temp',
   properties: {},
   relogIssues: getFlagValue('relogIssues', true),
+  showToast: getFlagValue('showToast', true),
+  buildSuccessIconPath: path.resolve(__dirname, 'pass.png'),
+  buildErrorIconPath: path.resolve(__dirname, 'fail.png'),
   verbose: getFlagValue('verbose', false),
   production: getFlagValue('production', false),
   args: args
@@ -78,21 +84,62 @@ export function task(taskName: string, task: IExecutable): IExecutable {
  * @returns IExecutable
  */
 export function watch(watchMatch: string | string[], task: IExecutable): IExecutable {
+  const notifier = require('node-notifier');
   _trackTask(task);
+
+  let isWatchRunning = false;
+  let shouldRerunWatch = false;
+  let lastError = null;
 
   return {
     execute: (buildConfig: IBuildConfig) => {
-      setWatchMode();
 
-      buildConfig.gulp.watch(watchMatch, (cb) => {
-        _executeTask(task, buildConfig)
-          .then(() => {
-            cb();
-          })
-          .catch((error) => {
-            cb();
-          });
-      });
+      setWatchMode();
+      buildConfig.gulp.watch(watchMatch, _runWatch);
+
+      function _runWatch() {
+        if (isWatchRunning) {
+          shouldRerunWatch = true;
+        } else {
+          isWatchRunning = true;
+
+          _executeTask(task, buildConfig)
+            .then(() => {
+              if (buildConfig.showToast && lastError) {
+                lastError = null;
+
+                notifier.notify({
+                  title: 'Build succeeded',
+                  message: packageJSON.name,
+                  icon: buildConfig.buildSuccessIconPath
+                });
+              }
+              _finalizeWatch();
+            })
+            .catch((error) => {
+              if (buildConfig.showToast) {
+                if (!lastError || lastError !== error) {
+                  lastError = error;
+                  notifier.notify({
+                    title: 'Build failed',
+                    message: error,
+                    icon: buildConfig.buildErrorIconPath
+                  });
+                }
+              }
+              _finalizeWatch();
+            });
+        }
+      }
+
+      function _finalizeWatch() {
+        isWatchRunning = false;
+
+        if (shouldRerunWatch) {
+          shouldRerunWatch = false;
+          _runWatch();
+        }
+      }
 
       return Promise.resolve<void>();
     }

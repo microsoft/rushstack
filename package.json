@@ -11,28 +11,22 @@
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "dependencies": {
-    "del": "^2.2.0",
-    "end-of-stream": "^1.1.0",
-    "es6-promise": "^3.1.2",
-    "fs-extra": "^0.26.7",
-    "gulp": "^3.9.1",
-    "gulp-flatten": "^0.2.0",
-    "gulp-util": "^3.0.7",
-    "lodash.merge": "^4.3.2",
-    "merge2": "^1.0.1",
-    "pretty-hrtime": "^1.0.2",
-    "through2": "^2.0.1",
-    "yargs": "^4.3.2"
+    "del": "2.2.0",
+    "end-of-stream": "1.1.0",
+    "es6-promise": "3.1.2",
+    "fs-extra": "0.26.7",
+    "gulp": "~3.9.1",
+    "gulp-flatten": "0.2.0",
+    "gulp-util": "~3.0.7",
+    "lodash.merge": "~4.3.2",
+    "merge2": "~1.0.1",
+    "node-notifier": "4.5.0",
+    "pretty-hrtime": "1.0.2",
+    "through2": "2.0.1",
+    "yargs": "4.3.2"
   },
   "devDependencies": {
     "chai": "^3.5.0",
-    "gulp-mocha": "^2.2.0",
-    "gulp-plumber": "^1.1.0",
-    "gulp-tslint": "^4.3.3",
-    "gulp-typescript": "^2.12.1",
-    "mocha": "^2.4.5",
-    "node-library-build": "0.0.5",
-    "tslint": "^3.6.0",
-    "typescript": "^1.8.9"
+    "node-library-build": "~0.1.0"
   }
 }

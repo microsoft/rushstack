@@ -8,7 +8,8 @@ build.typescript.setConfig({
     'src/**/*.tsx',
     'typings/main/**/*.ts',
     'typings/main.d.ts'
-  ]
+  ],
+  staticMatch: [ 'src/**/*.png' ]
 });
 
 build.initialize(require('gulp'));
