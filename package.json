@@ -6,11 +6,10 @@
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "dependencies": {
-    "compression": "1.6.1",
     "express": "4.13.4",
     "gulp": "~3.9.1",
     "gulp-connect": "3.2.2",
-    "gulp-core-build": "~0.6.0",
+    "gulp-core-build": "~0.6.1",
     "gulp-open": "1.0.0",
     "gulp-util": "3.0.7"
   },
