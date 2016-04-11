@@ -28,7 +28,6 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
   ): Promise<any> | NodeJS.ReadWriteStream | void {
 
     const gulpConnect = require('gulp-connect');
-    const compression = require('compression');
     const gutil = require('gulp-util');
     const open = require('gulp-open');
     const path = require('path');
@@ -46,7 +45,6 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
       livereload: true,
       middleware: function() {
         return [
-          compression(),
           logRequestsMiddleware,
           enableCorsMiddleware
         ];
