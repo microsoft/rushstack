@@ -30,6 +30,15 @@ export interface IBuildConfig {
   /** Re-log known issues after the build is complete. */
   relogIssues?: boolean;
 
+  /** Show toast on build failures and recoveries. */
+  showToast?: boolean;
+
+  /** Path to icon shown in toast on a successful build recovery. */
+  buildSuccessIconPath?: string;
+
+  /** Path to icon shown in toast on a build error. */
+  buildErrorIconPath?: string;
+
   /** Use verbose logging. */
   verbose?: boolean;
 
