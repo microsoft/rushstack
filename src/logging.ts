@@ -1,5 +1,3 @@
-/// <reference path='../typings/main.d.ts' />
-
 /* tslint:disable:no-string-literal */
 /* tslint:disable:max-line-length */
 import * as gutil from 'gulp-util';

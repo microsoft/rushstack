@@ -1,5 +1,3 @@
-/// <reference path='../typings/main.d.ts' />
-
 import { argv as clArgs } from 'yargs';
 import * as path from 'path';
 
