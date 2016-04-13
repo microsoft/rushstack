@@ -20,11 +20,12 @@ import RushConfigLoader, { IRushProjectConfig } from './RushConfigLoader';
 function createDependencyLinks(consumingProject: IRushProjectConfig, projects: Map<string, IRushProjectConfig>): number {
   let numberOfLinks = 0;
   consumingProject.dependencies.forEach((packageName) => {
-    const dependencyProject = projects.get(packageName).projectFolder;
-    if (dependencyProject === undefined) {
-      throw new Error(`Cannot link to the project "${dependencyProject}" because it is`
-        + ' missing from the "projects" section');
+    const dependencyProjectConfig = projects.get(packageName);
+    if (dependencyProjectConfig === undefined) {
+      throw new Error(`The "${consumingProject.packageName}" project cannot have a local link to`
+        + ` "${packageName}" because it is external to this Rush configuration`);
     }
+    const dependencyProject = dependencyProjectConfig.projectFolder;
     console.log('  Linking ' + consumingProject.projectFolder + '/node_modules/' + packageName + ' -> ' + dependencyProject);
 
     // Ex: "C:\MyRepo\my-library"
@@ -63,7 +64,7 @@ function createDependencyLinks(consumingProject: IRushProjectConfig, projects: M
     // Create symlink: dependencyProjectFolder <-- consumingModuleFolder
     // @todo VSO #178073 - revert this temporary hack
     if (fs.existsSync(localModuleFolder)) {
-      console.log(`WARNING: replace symlink to common/${dependencyProject} with ${dependencyProjectFolder}`);
+      console.log(`WARNING: replacing symlink to common/${dependencyProject} with ${dependencyProjectFolder}`);
       fs.unlinkSync(localModuleFolder);
     }
     fs.symlinkSync(dependencyProjectFolder, localModuleFolder, 'junction');

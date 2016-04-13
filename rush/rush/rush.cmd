@@ -1,3 +1,3 @@
 @ECHO OFF
 @SETLOCAL
-cmd /c "(cd .. && rush.cmd %*)"
+cmd /c "(cd ..\.. && node "%~dp0\lib\rush" %*)"

@@ -7,6 +7,7 @@
 
 /// <reference path="../typings/tsd.d.ts" />
 
+import * as os from 'os';
 import * as nomnom from 'nomnom';
 
 import executeLink, { executeUnlink } from './ExecuteLink';
@@ -37,4 +38,8 @@ nomnom.command('rebuild')
     })
   .help('Run "gulp nuke" and "gulp bundle" for all projects');
 
-nomnom.parse();
+try {
+  nomnom.parse();
+} catch (error) {
+  console.error(os.EOL + 'ERROR: ' + error.message);
+}
