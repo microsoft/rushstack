@@ -6,7 +6,7 @@
 
 ## Overview
 
-This simple loader loads a script file's contents directly in a webpack bundle.
+This simple loader loads a script file's contents directly in a webpack bundle using an `eval(...)`.
 
 ## Usage
 
