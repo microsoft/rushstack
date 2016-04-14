@@ -11,6 +11,8 @@ export interface ISetWebpackPublicPathLoaderOptions {
 }
 
 export class SetWebpackPublicPathLoader {
+  public static registryVarName = 'window.__setWebpackPublicPathLoaderSrcRegistry__';
+
   private static defaultOptions: ISetWebpackPublicPathLoaderOptions = {
     systemJs: false,
     scriptPath: null,
@@ -18,19 +20,17 @@ export class SetWebpackPublicPathLoader {
     publicPath: null
   };
 
-  private static registerName = 'window.__setWebpackPublicPathLoaderSrcRegister__';
-
   public static getGlobalRegisterCode(debug: boolean = false) {
 
     const lines: string[] = [
       '(function(){',
-      `if (!${SetWebpackPublicPathLoader.registerName}) ${SetWebpackPublicPathLoader.registerName}={};`,
+      `if (!${SetWebpackPublicPathLoader.registryVarName}) ${SetWebpackPublicPathLoader.registryVarName}={};`,
       `var scripts = document.getElementsByTagName('script');`,
       'if (scripts && scripts.length) {',
       '  for (var i = 0; i < scripts.length; i++) {',
       '    if (!scripts[i]) continue;',
       `    var path = scripts[i].getAttribute('src');`,
-      `    if (path) ${SetWebpackPublicPathLoader.registerName}[path]=true;`,
+      `    if (path) ${SetWebpackPublicPathLoader.registryVarName}[path]=true;`,
       '  }',
       '}',
       '})();'
@@ -84,7 +84,7 @@ export class SetWebpackPublicPathLoader {
         '}',
         '',
         'if (!found) {',
-        `  for (var global in ${SetWebpackPublicPathLoader.registerName}) {`,
+        `  for (var global in ${SetWebpackPublicPathLoader.registryVarName}) {`,
         '    if (global && global.match(regex)) {',
         `      __webpack_public_path__ = global.substring(0, global.lastIndexOf('/') + 1);`,
         '      break;',
