@@ -52,6 +52,7 @@ to set any of the above options. For example:
 
 ``` javascript
 var setWebpackPublicPath = require('set-webpack-public-path-loader');
+
 setWebpackPublicPath.setOptions({
   systemJs: true,
   urlPrefix: process.env.BUILD_BUILDNUMBER
@@ -59,6 +60,32 @@ setWebpackPublicPath.setOptions({
 ```
 
 Inline options override options set in the webpack.config.
+
+## SystemJS Caveat
+
+When modules are loaded with SystemJS (and with the , `scriptLoad: true` meta option) `<script src="..."></script>`
+tags are injected onto the page, evaludated and then immediately removed. This causes an issue because they are removed
+before webpack module code begins to execute, so the `publicPath=...` option won't work for modules loaded with SystemJS.
+
+To circumvent this issue, a small bit of code is availble to that will maintain a global register of script paths
+that have been inserted onto the page. This code block should be appended to bundles that are expected to be loaded
+with SystemJS and use the `publicPath=...` option.
+
+### `getGlobalRegisterCode(bool)`
+
+This function returns a block of JavaScript that maintains a global register of script tags. If the optional boolean paramter
+is set to `true`, the code is not minified. By default, it is minified.
+
+### Usage
+
+``` javascript
+var setWebpackPublicPath = require('set-webpack-public-path-loader');
+var gulpInsert = require('gulp-insert');
+
+gulp.src('finizlied/webpack/bundle/path')
+  .pipe(gulpInsert.append(setWebpackPublicPath.getGlobalRegisterCode(true)))
+  .pipe(gulp.dest('dest/path'));
+```
 
 ## License
 
