@@ -1,0 +1,15 @@
+{
+  "name": "raw-script-loader",
+  "version": "0.1.5",
+  "description": "",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "license": "MIT",
+  "repository": "github:iclanton/raw-script-loader",
+  "dependencies": {
+    "loader-utils": "^0.2.13"
+  },
+  "devDependencies": {
+    "node-library-build": "^0.0.5"
+  }
+}
