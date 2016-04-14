@@ -8,7 +8,8 @@
   "repository": "github:iclanton/set-webpack-public-path-loader",
   "dependencies": {
     "loader-utils": "^0.2.13",
-    "lodash": "^4.8.2"
+    "lodash": "^4.8.2",
+    "uglify-js": "^2.6.2"
   },
   "devDependencies": {
     "node-library-build": "^0.0.5"

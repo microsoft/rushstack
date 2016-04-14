@@ -1,5 +1,6 @@
 import { merge } from 'lodash';
 import { EOL } from 'os';
+import * as uglify from 'uglify-js';
 const loaderUtils = require('loader-utils');
 
 export interface ISetWebpackPublicPathLoaderOptions {
@@ -17,6 +18,42 @@ export class SetWebpackPublicPathLoader {
     publicPath: null
   };
 
+  private static registerName = 'window.__setWebpackPublicPathLoaderSrcRegister__';
+
+  public static getGlobalRegisterCode(debug: boolean = false) {
+
+    const lines: string[] = [
+      '(function(){',
+      `if (!${SetWebpackPublicPathLoader.registerName}) ${SetWebpackPublicPathLoader.registerName}={};`,
+      `var scripts = document.getElementsByTagName('script');`,
+      'if (scripts && scripts.length) {',
+      '  for (var i = 0; i < scripts.length; i++) {',
+      '    if (!scripts[i]) continue;',
+      `    var path = scripts[i].getAttribute('src');`,
+      `    if (path) ${SetWebpackPublicPathLoader.registerName}[path]=true;`,
+      '  }',
+      '}',
+      '})();'
+    ];
+
+    const joinedScript = SetWebpackPublicPathLoader.joinLines(lines);
+
+    if (debug) {
+      return `${EOL}${joinedScript}`;
+    } else {
+      const uglified = uglify.parse(joinedScript);
+      uglified.figure_out_scope();
+      const compressor = uglify.Compressor({
+        dead_code: true
+      });
+      const compressed = uglified.transform(compressor);
+      compressed.figure_out_scope();
+      compressed.compute_char_frequency();
+      compressed.mangle_names();
+      return `${EOL}${compressed.print_to_string()}`;
+    }
+  }
+
   public static setOptions(options: ISetWebpackPublicPathLoaderOptions) {
     this.defaultOptions = options || {};
   }
@@ -31,14 +68,25 @@ export class SetWebpackPublicPathLoader {
     if (options.scriptPath) {
       lines = [
         `var scripts = document.getElementsByTagName('script');`,
+        `var regex = new RegExp('${SetWebpackPublicPathLoader.escapeSingleQuotes(options.scriptPath)}');`,
+        'var found = false;',
         '',
         'if (scripts && scripts.length) {',
-        `  var regex = new RegExp('${SetWebpackPublicPathLoader.escapeSingleQuotes(options.scriptPath)}');`,
         '  for (var i = 0; i < scripts.length; i++) {',
         '    if (!scripts[i]) continue;',
         `    var path = scripts[i].getAttribute('src');`,
         '    if (path && path.match(regex)) {',
         `      __webpack_public_path__ = path.substring(0, path.lastIndexOf('/') + 1);`,
+        '      found = true;',
+        '      break;',
+        '    }',
+        '  }',
+        '}',
+        '',
+        'if (!found) {',
+        `  for (var global in ${SetWebpackPublicPathLoader.registerName}) {`,
+        '    if (global && global.match(regex)) {',
+        `      __webpack_public_path__ = global.substring(0, global.lastIndexOf('/') + 1);`,
         '      break;',
         '    }',
         '  }',
@@ -75,6 +123,10 @@ export class SetWebpackPublicPathLoader {
       );
     }
 
+    return SetWebpackPublicPathLoader.joinLines(lines);
+  }
+
+  private static joinLines(lines: string[]): string {
     return lines.join(EOL).replace(new RegExp(`${EOL}${EOL}+`, 'g'), `${EOL}${EOL}`);
   }
 
