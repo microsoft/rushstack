@@ -5,6 +5,7 @@
  * The definition of a task as used by the TaskRunner
  */
 
+import TaskError from '../errorDetection/TaskError';
 import TaskStatus from './TaskStatus';
 import { ITaskWriter } from './TaskWriterFactory';
 
@@ -23,5 +24,6 @@ export interface ITask extends ITaskDefinition {
   status: TaskStatus;
   dependencies: ITask[];
   dependents: ITask[];
+  errors: TaskError[];
 };
 export default ITask;

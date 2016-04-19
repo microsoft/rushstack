@@ -6,8 +6,6 @@
  * the output of an application.
  */
 
-import * as os from 'os';
-
 import TaskError from './TaskError';
 
 export enum ErrorDetectionMode {
@@ -25,7 +23,7 @@ export interface IErrorDetectionRule {
  */
 export function RegexErrorDetector(regex: RegExp, getError: (match: RegExpExecArray) => TaskError): IErrorDetectionRule {
   return (line: string): TaskError => {
-    let match = regex.exec(line);
+    const match = regex.exec(line);
     if (match) {
       return getError(match);
     }
@@ -47,7 +45,7 @@ export default class ErrorDetector {
 
   public execute(data: string) {
     const errors: TaskError[] = [];
-    data.split(os.EOL).forEach((line: string) => {
+    data.split('\n').forEach((line: string) => {
       const error = this._checkLine(line);
       if (error) {
         errors.push(error);

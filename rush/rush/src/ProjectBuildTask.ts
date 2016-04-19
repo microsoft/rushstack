@@ -64,7 +64,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
         buildTask.on('close', (code: number) => {
           // Detect & display errors
-          const errors = this._errorDetector.execute(writer.getStdOutput());
+          const errors = this._errorDetector.execute(writer.getStdOutput() + os.EOL + writer.getStdError());
           for (let i = 0; i < errors.length; i++) {
             writer.writeError(errors[i].toString(this._errorDisplayMode) + os.EOL);
           }

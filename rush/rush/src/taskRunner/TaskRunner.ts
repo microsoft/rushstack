@@ -12,6 +12,7 @@ import ITask, { ITaskDefinition } from './ITask';
 import TaskStatus from './TaskStatus';
 import TaskError from '../errorDetection/TaskError';
 import TaskWriterFactory, { ITaskWriter } from './TaskWriterFactory';
+import { ErrorDetectionMode } from '../errorDetection/ErrorDetector';
 
 /**
  * A class which manages the execution of a set of tasks with interdependencies.
@@ -47,6 +48,7 @@ export default class TaskRunner {
     const task = taskDefinition as ITask;
     task.dependencies = [];
     task.dependents = [];
+    task.errors = [];
     task.status = TaskStatus.Ready;
     this._tasks.set(task.name, task);
   }
@@ -96,11 +98,10 @@ export default class TaskRunner {
    */
   private _startAvailableTasks(complete: () => void, reject: () => void) {
     if (!this._areAnyTasksReadyOrExecuting()) {
+      this._printTaskStatus();
       if (this._hasAnyFailures) {
-        console.log(colors.red('> TaskRunner :: Failures'));
         reject();
       } else {
-        console.log(colors.green('> TaskRunner :: All tasks completed!' + os.EOL));
         complete();
       }
     }
@@ -124,6 +125,7 @@ export default class TaskRunner {
         let onTaskFail = (failedTask: ITask, writer: ITaskWriter, errors: TaskError[]) => {
           writer.close();
           this._hasAnyFailures = true;
+          failedTask.errors = errors;
           this._markTaskAsFailed(failedTask);
           this._startAvailableTasks(complete, reject);
         };
@@ -137,7 +139,7 @@ export default class TaskRunner {
    * Marks a task as having failed and marks each of its dependents as blocked
    */
   private _markTaskAsFailed(task: ITask) {
-    console.log(colors.red(`> TaskRunner :: Completed task [${task.name}] with errors!`));
+    console.log(colors.red(`${os.EOL}> TaskRunner :: Completed task [${task.name}] with errors!`));
     task.status = TaskStatus.Failure;
     task.dependents.forEach((dependent: ITask) => {
       this._markTaskAsBlocked(dependent, task);
@@ -187,4 +189,49 @@ export default class TaskRunner {
     });
     return anyNonCompletedTasks;
   }
+
+  /**
+   * Prints out a report of the status of each project
+   */
+  private _printTaskStatus() {
+    const tasksByStatus: { [status: number]: ITask[] } = {};
+    this._tasks.forEach((task: ITask) => {
+      if (tasksByStatus[task.status]) {
+        tasksByStatus[task.status].push(task);
+      } else {
+        tasksByStatus[task.status] = [task];
+      }
+    });
+
+    console.log('');
+
+    this._printStatus('EXECUTING', tasksByStatus[TaskStatus.Executing], colors.yellow);
+    this._printStatus('READY', tasksByStatus[TaskStatus.Ready], colors.white);
+    this._printStatus('SUCCESS', tasksByStatus[TaskStatus.Success], colors.green);
+    this._printStatus('BLOCKED', tasksByStatus[TaskStatus.Blocked], colors.red);
+    this._printStatus('FAILURE', tasksByStatus[TaskStatus.Failure], colors.red);
+
+    const tasksWithErrors = tasksByStatus[TaskStatus.Failure];
+    if (tasksWithErrors) {
+      tasksWithErrors.forEach((task: ITask) => {
+        task.errors.forEach((error: TaskError) => {
+          console.log(colors.red(`[${task.name}] ${error.toString(ErrorDetectionMode.LocalBuild) }`));
+        });
+      });
+    }
+
+    console.log('');
+  }
+
+  private _printStatus(status: string, tasks: ITask[], color: (a: string) => string) {
+    if (tasks && tasks.length) {
+      console.log(color(`${status} (${tasks.length})`));
+      console.log(color('================================'));
+      for (const task of tasks) {
+        console.log(color(task.name));
+      }
+      console.log(color('================================' + os.EOL));
+    }
+  }
+
 }

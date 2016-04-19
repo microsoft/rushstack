@@ -5,26 +5,24 @@
  * Detects a TypeScript compiler error
  */
 
-import * as path from 'path';
 import { IErrorDetectionRule, RegexErrorDetector } from '../ErrorDetector';
 import { BuildTaskError } from '../TaskError';
 
-// Example: "Error: TypeScript error: src\test.ts(68,6): error TS2304: Cannot find name 'x'."
+// Example: "[gulp-typescript] src\test.ts(68,6): error TS1005 ';' expected."
 // 0: input
 // 1: "src\test.ts"
-// 2: "(68,6):"
-// 3: "error TS2304: Cannot find name 'x'."
+// 2: "68"
+// 3: "6"
+// 4: "error TS2304: Cannot find name 'x'."
 export default RegexErrorDetector(
-  new RegExp('^Error: TypeScript error: ([^\\(]+) *([^:]+:) *(.*)'),
+  /\[gulp\-typescript] (.*)\((.*),(.*)\): error (.*)/,
   (match: RegExpExecArray) => {
-    const [line, offset] = match[2].replace(/\)|\(|:/g, '').split(',');
-
     return new BuildTaskError(
       'tsc',
-      match[3],
-      path.resolve(process.cwd(), match[1]),
-      Number(line),
-      Number(offset)
+      match[4],
+      match[1],
+      Number(match[2]),
+      Number(match[3])
     );
   }
 ) as IErrorDetectionRule;
