@@ -62,7 +62,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
           writer.writeError(data);
         });
 
-        buildTask.on('exit', (code: number) => {
+        buildTask.on('close', (code: number) => {
           // Detect & display errors
           const errors = this._errorDetector.execute(writer.getStdOutput());
           for (let i = 0; i < errors.length; i++) {
