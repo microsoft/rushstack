@@ -10,7 +10,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import RushConfigLoader, { IRushProjectConfig } from './RushConfigLoader';
+import RushConfigProject from './RushConfigProject';
 import ErrorDetector, { ErrorDetectionMode } from './errorDetection/ErrorDetector';
 import { ITaskDefinition } from './taskRunner/ITask';
 import { ITaskWriter } from './taskRunner/TaskWriterFactory';
@@ -21,25 +21,25 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
   private _errorDetector: ErrorDetector;
   private _errorDisplayMode: ErrorDetectionMode;
-  private _config: IRushProjectConfig;
+  private _rushProject: RushConfigProject;
   private _production: boolean;
 
-  constructor(config: IRushProjectConfig,
+  constructor(rushProject: RushConfigProject,
               errorDetector: ErrorDetector,
               errorDisplayMode: ErrorDetectionMode,
               production: boolean) {
-    this.name = config.packageName;
+    this.name = rushProject.packageName;
     this._errorDetector = errorDetector;
     this._errorDisplayMode = errorDisplayMode;
     this._production = production;
-    this._config = config;
+    this._rushProject = rushProject;
   }
 
   public execute(writer: ITaskWriter): Promise<void> {
     return new Promise<void>((resolve: () => void, reject: (errors: TaskError[]) => void) => {
       try {
         writer.writeLine(`>>> ProjectBuildTask :: Project [${this.name}]:`);
-        const projectFolder = RushConfigLoader.getProjectFolder(this._config.projectFolder);
+        const projectFolder: string = this._rushProject.projectFolder;
 
         const options = {
           cwd: projectFolder,
@@ -97,16 +97,16 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
   // @todo #179371: add log files to list of things that get gulp nuke'd
   private _writeLogsToDisk(writer: ITaskWriter) {
-    const logfilename = path.basename(this._config.projectFolder);
+    const logfilename = path.basename(this._rushProject.projectFolder);
 
     const stdout = writer.getStdOutput().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
     if (stdout) {
-      fs.writeFileSync(path.join(this._config.projectFolder, logfilename + '.build.log'), stdout);
+      fs.writeFileSync(path.join(this._rushProject.projectFolder, logfilename + '.build.log'), stdout);
     }
 
     const stderr = writer.getStdError().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
     if (stderr) {
-      fs.writeFileSync(path.join(this._config.projectFolder, logfilename + '.build.error.log'), stderr);
+      fs.writeFileSync(path.join(this._rushProject.projectFolder, logfilename + '.build.error.log'), stderr);
     }
   }
 }

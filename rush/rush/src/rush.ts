@@ -6,23 +6,25 @@
  */
 
 /// <reference path="../typings/tsd.d.ts" />
-
 import * as os from 'os';
 import * as nomnom from 'nomnom';
 
-import executeLink, { executeUnlink } from './ExecuteLink';
-import executeBuild from './ExecuteBuild';
+import RushConfig from './RushConfig';
+import executeLink from './ExecuteLink';
+import executeBuild, { IExecuteBuildOptions } from './ExecuteBuild';
+
+console.log(os.EOL + `Rush Mult-Package Build Tool`);
 
 nomnom.command('link')
-  .callback(executeLink)
+  .callback((options: any) => executeLink(RushConfig.loadFromDefaultLocation(), false))
   .help('Create node_modules symlinks for all projects');
 
 nomnom.command('unlink')
-  .callback(executeUnlink)
+  .callback((options: any) => executeLink(RushConfig.loadFromDefaultLocation(), true))
   .help('Remove node_modules symlinks for all projects');
 
 nomnom.command('rebuild')
-  .callback(executeBuild)
+  .callback((options: IExecuteBuildOptions) => executeBuild(RushConfig.loadFromDefaultLocation(), options))
     .option('production', {
         flag: true,
         help: 'Run build in production mode.'

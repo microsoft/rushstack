@@ -7,27 +7,27 @@
  */
 
 import * as colors from 'colors';
-import RushConfigLoader, { IRushConfig, IRushProjectConfig } from './RushConfigLoader';
+import RushConfig from './RushConfig';
 import TaskRunner from './taskRunner/TaskRunner';
 import ProjectBuildTask from './ProjectBuildTask';
 import ErrorDetector, { ErrorDetectionMode } from './errorDetection/ErrorDetector';
 import * as ErrorDetectorRules from './errorDetection/rules/index';
 
+export interface IExecuteBuildOptions {
+  production?: boolean;
+  vso?: boolean;
+  quiet?: boolean;
+}
+
 /**
  * Entry point for the "rush rebuild" command.
  */
-export default function executeBuild(params: any): void {
-  const config: IRushConfig = RushConfigLoader.load();
-  const projects = config.projects;
-  const vsoMode = params.vso;
-  const quietMode = params.quiet;
-  const production = params.production;
-
-  const taskRunner = new TaskRunner(quietMode);
+export default function executeBuild(rushConfig: RushConfig, options: IExecuteBuildOptions): void {
+  const taskRunner: TaskRunner = new TaskRunner(options.quiet);
 
   // Create tasks and register with tax runner
-  projects.forEach((project: IRushProjectConfig) => {
-    const errorMode = vsoMode ? ErrorDetectionMode.VisualStudioOnline : ErrorDetectionMode.LocalBuild;
+  for (let rushProject of rushConfig.projects) {
+    const errorMode = options.vso ? ErrorDetectionMode.VisualStudioOnline : ErrorDetectionMode.LocalBuild;
 
     const activeRules = [
       ErrorDetectorRules.TestErrorDetector,
@@ -35,14 +35,14 @@ export default function executeBuild(params: any): void {
       ErrorDetectorRules.TsLintErrorDetector
     ];
     const errorDetector = new ErrorDetector(activeRules);
-    const projectTask = new ProjectBuildTask(project, errorDetector, errorMode, production);
+    const projectTask = new ProjectBuildTask(rushProject, errorDetector, errorMode, options.production);
     taskRunner.addTask(projectTask);
-  });
+  }
 
   // Add task dependencies
-  projects.forEach((project: IRushProjectConfig) => {
-    taskRunner.addDependencies(project.packageName, project.dependencies);
-  });
+  for (let rushProject of rushConfig.projects) {
+    taskRunner.addDependencies(rushProject.packageName, rushProject.dependencies);
+  }
 
   taskRunner.execute().then(
     () => {
