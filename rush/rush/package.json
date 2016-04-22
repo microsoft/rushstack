@@ -19,6 +19,8 @@
     "colors": "^1.1.2",
     "del": "^2.2.0",
     "nomnom": "^1.8.1",
+    "read-package-tree": "^5.1.2",
+    "semver": "^5.1.0",
     "strip-json-comments": "^2.0.0",
     "z-schema": "^3.16.1"
   },

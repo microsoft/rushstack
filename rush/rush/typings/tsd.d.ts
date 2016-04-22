@@ -6,5 +6,7 @@
 /// <reference path="minimatch/minimatch.d.ts" />
 /// <reference path="node/node.d.ts" />
 /// <reference path="nomnom/nomnom.d.ts" />
+/// <reference path="read-package-tree/read-package-tree.d.ts" />
+/// <reference path="semver/semver.d.ts" />
 /// <reference path="strip-json-comments/strip-json-comments.d.ts" />
 /// <reference path="z-schema/z-schema.d.ts" />
