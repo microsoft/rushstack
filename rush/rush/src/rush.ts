@@ -8,12 +8,18 @@
 /// <reference path="../typings/tsd.d.ts" />
 import * as os from 'os';
 import * as nomnom from 'nomnom';
+import * as path from 'path';
 
 import RushConfig from './RushConfig';
 import executeLink from './ExecuteLink';
 import executeBuild, { IExecuteBuildOptions } from './ExecuteBuild';
 
-console.log(os.EOL + `Rush Mult-Package Build Tool`);
+let myPackageJsonFilename: string = path.resolve(path.join(module.filename, '..', '..', 'package.json'));
+let myPackageJson: PackageJson = require(myPackageJsonFilename);
+
+console.log(os.EOL + `Rush Mult-Package Build Tool ${myPackageJson.version}`);
+
+nomnom.script('rush');
 
 nomnom.command('link')
   .callback((options: any) => executeLink(RushConfig.loadFromDefaultLocation(), false))
