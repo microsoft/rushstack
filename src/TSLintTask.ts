@@ -37,7 +37,6 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
   };
 
   public executeTask(gulp: gulpType.Gulp) {
-    let touch = require('touch');
     let taskScope = this;
 
     if (this.taskConfig.lintConfig) {
@@ -71,9 +70,6 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
 
           if (result.failureCount > 0) {
             taskScope.taskConfig.reporter(result, file, taskScope.taskConfig);
-
-            // Touch all errored files
-            touch.sync(file.path);
           }
 
           this.push(file);
