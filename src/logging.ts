@@ -226,7 +226,7 @@ function writeSummary(callback: () => void) {
         }
 
         if (getWarnings().length) {
-          log('Task warnings:', gutil.colors.red(getWarnings().length + '\r\n' + getWarnings().join('\r\n')));
+          log('Task warnings:', gutil.colors.yellow(getWarnings().length + '\r\n' + getWarnings().join('\r\n')));
         }
 
         let totalErrors = 0;
@@ -623,10 +623,9 @@ export function initialize(gulp: gulp.Gulp, gulpErrorCallback?: (err: any) => vo
   gulp['on']('stop', function(err: any) {
     'use strict';
     writeSummary(() => {
-      // error if we have any errors or warnings
+      // error if we have any errors
       if (localCache.taskErrors > 0 ||
         getErrors().length ||
-        getWarnings().length ||
         localCache.testsFailed > 0) {
         exitProcess(1);
       }

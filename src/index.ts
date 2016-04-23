@@ -11,6 +11,8 @@ export { IExecutable } from './IExecutable';
 import { initialize as initializeLogging, markTaskCreationTime, generateGulpError, setWatchMode } from './logging';
 import { getFlagValue, setConfigDefaults } from './config';
 import gulpType = require('gulp');
+
+export * from './IBuildConfig';
 export * from './GulpTask';
 export * from './CopyTask';
 export * from './NukeTask';
@@ -59,6 +61,15 @@ export function setConfig(config: IBuildConfig) {
  */
 export function replaceConfig(config: IBuildConfig) {
   _buildConfig = config;
+}
+
+/**
+ * Gets the current config.
+ *
+ * @returns IBuildConfig
+ */
+export function getConfig(): IBuildConfig {
+  return _buildConfig;
 }
 
 /**
