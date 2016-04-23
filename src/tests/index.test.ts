@@ -3,7 +3,8 @@
 
 import 'es6-promise';
 import { expect } from 'chai';
-import { serial, parallel } from '../index';
+import { serial, parallel, getConfig, setConfig } from '../index';
+import { IBuildConfig } from './../IBuildConfig';
 
 // disable the exit watching
 global.dontWatchExit = true;
@@ -100,6 +101,22 @@ describe('parallel', () => {
 
   });
 
+  it('can read the current config', (done) => {
+    const config = getConfig();
+    expect(config).to.be.not.null;
+    done();
+  });
+
+  it('can set the config', (done) => {
+    const distFolder = 'testFolder';
+    const newConfig: IBuildConfig = {
+      distFolder: distFolder
+    };
+
+    setConfig(newConfig);
+    expect(getConfig().distFolder).to.eq(distFolder);
+    done();
+  });
 });
 
 function createTasks(
