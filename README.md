@@ -22,11 +22,11 @@ This task invokes `gulp-sass` to compile source SASS files into a CommonJS modul
 
 Usage (and defaults):
 ```typescript
-build.webpack.setConfig({
-    sassMatch: [
-      'src/**/*.scss'
-    ],
-    commonModuleTemplate: "require('load-themed-styles').loadStyles(<%= content %>);",
-    amdModuleTemplate: "define(['load-themed-styles'], function(loadStyles) { loadStyles.loadStyles(<%= content %>); });"
-  )
+sass.setConfig({
+  sassMatch: [
+    'src/**/*.scss'
+  ],
+  commonModuleTemplate: "require('load-themed-styles').loadStyles(<%= content %>);",
+  amdModuleTemplate: "define(['load-themed-styles'], function(loadStyles) { loadStyles.loadStyles(<%= content %>); });"
+});
 ```
