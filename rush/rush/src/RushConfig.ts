@@ -40,8 +40,8 @@ export default class RushConfig {
     this._projects = [];
     this._projectsByName = new Map<string, RushConfigProject>();
 
-    for (let rawProject of rushConfigJson.projects) {
-      let project = new RushConfigProject(rawProject, this);
+    for (const rawProject of rushConfigJson.projects) {
+      const project = new RushConfigProject(rawProject, this);
       this._projects.push(project);
       this._projectsByName.set(project.packageName, project);
     }
@@ -68,11 +68,11 @@ export default class RushConfig {
     const rushSchema: any = require('./rush-schema.json');
 
     if (!validator.validate(rushConfigJson, rushSchema)) {
-      let error: ZSchema.Error = validator.getLastError();
+      const error: ZSchema.Error = validator.getLastError();
 
-      let detail: ZSchema.ErrorDetail = error.details[0];
-      let errorMessage: string = `Error parsing file '${path.basename(rushJsonFilename)}', section [${detail.path}]:`
-        + os.EOL + `(${detail.code}) ${detail.message} `;
+      const detail: ZSchema.ErrorDetail = error.details[0];
+      const errorMessage: string = `Error parsing file '${path.basename(rushJsonFilename)}',`
+        + `section[${detail.path}]:${os.EOL}(${detail.code}) ${detail.message}`;
 
       console.log(os.EOL + 'ERROR: ' + errorMessage + os.EOL + os.EOL);
       throw new Error(errorMessage);

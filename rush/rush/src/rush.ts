@@ -14,8 +14,10 @@ import RushConfig from './RushConfig';
 import executeLink from './ExecuteLink';
 import executeBuild, { IExecuteBuildOptions } from './ExecuteBuild';
 
-let myPackageJsonFilename: string = path.resolve(path.join(module.filename, '..', '..', 'package.json'));
-let myPackageJson: PackageJson = require(myPackageJsonFilename);
+const myPackageJsonFilename: string = path.resolve(path.join(
+  module.filename, '..', '..', 'package.json')
+);
+const myPackageJson: PackageJson = require(myPackageJsonFilename);
 
 console.log(os.EOL + `Rush Mult-Package Build Tool ${myPackageJson.version}`);
 

@@ -26,7 +26,7 @@ export default function executeBuild(rushConfig: RushConfig, options: IExecuteBu
   const taskRunner: TaskRunner = new TaskRunner(options.quiet);
 
   // Create tasks and register with tax runner
-  for (let rushProject of rushConfig.projects) {
+  for (const rushProject of rushConfig.projects) {
     const errorMode = options.vso ? ErrorDetectionMode.VisualStudioOnline : ErrorDetectionMode.LocalBuild;
 
     const activeRules = [
@@ -40,7 +40,7 @@ export default function executeBuild(rushConfig: RushConfig, options: IExecuteBu
   }
 
   // Add task dependencies
-  for (let rushProject of rushConfig.projects) {
+  for (const rushProject of rushConfig.projects) {
     taskRunner.addDependencies(rushProject.packageName, rushProject.dependencies);
   }
 

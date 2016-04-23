@@ -13,8 +13,8 @@ export default class JsonFile {
       throw new Error(`Input file not found: ${jsonFilename}`);
     }
 
-    let buffer = fs.readFileSync(jsonFilename);
-    let stripped = stripJsonComments(buffer.toString());
+    const buffer: Buffer = fs.readFileSync(jsonFilename);
+    const stripped: string = stripJsonComments(buffer.toString());
     try {
       return JSON.parse(stripped);
     } catch (error) {
