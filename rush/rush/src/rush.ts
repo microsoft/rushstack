@@ -11,7 +11,7 @@ import * as nomnom from 'nomnom';
 import * as path from 'path';
 
 import RushConfig from './RushConfig';
-import executeLink from './ExecuteLink';
+import executeLink, { IExecuteLinkOptions } from './ExecuteLink';
 import executeBuild, { IExecuteBuildOptions } from './ExecuteBuild';
 import executeUpdate from './ExecuteUpdate';
 
@@ -30,12 +30,18 @@ nomnom.command('update')
     + ' and then rebuilds the Rush common folder.');
 
 nomnom.command('link')
-  .callback((options: any) => executeLink(RushConfig.loadFromDefaultLocation(), false))
+  .callback((options: IExecuteLinkOptions) => executeLink(RushConfig.loadFromDefaultLocation(), options))
+  .option('noLocalLinks', {
+    flag: true,
+    help: 'Do not locally link the projects; always link to the common folder.'
+  })
   .help('Create node_modules symlinks for all projects');
 
+/*
 nomnom.command('unlink')
   .callback((options: any) => executeLink(RushConfig.loadFromDefaultLocation(), true))
   .help('Remove node_modules symlinks for all projects');
+*/
 
 nomnom.command('rebuild')
   .callback((options: IExecuteBuildOptions) => executeBuild(RushConfig.loadFromDefaultLocation(), options))

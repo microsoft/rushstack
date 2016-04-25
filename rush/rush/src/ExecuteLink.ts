@@ -8,153 +8,290 @@
 
 import * as del from 'del';
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
+import * as semver from 'semver';
+import readPackageTree = require('read-package-tree');
+
+import JsonFile from './JsonFile';
 import RushConfig from './RushConfig';
 import RushConfigProject from './RushConfigProject';
+import Package from './Package';
+import PackageLookup from './PackageLookup';
+import { performance_now, createFolderWithRetry } from './Utilities';
 
-/**
- * Used to implement the "dependencyLinks" setting in the the rush.json config
- * file.  For the specified consumingProject, this function creates symlinks
- * in the project's "node_modules" folder.  These symlinks point to the project
- * folders for the specified dependencies.
- */
-function createDependencyLinks(rushConfig: RushConfig, consumingProject: RushConfigProject): number {
-  let numberOfLinks = 0;
-  consumingProject.dependencies.forEach((packageName) => {
-    const dependencyProject: RushConfigProject = rushConfig.getProjectByName(packageName);
-    if (!dependencyProject) {
-      throw new Error(`The "${consumingProject.packageName}" project cannot have a local link to`
-        + ` "${packageName}" because it is external to this Rush configuration`);
+export interface IExecuteLinkOptions {
+  noLocalLinks?: boolean;
+}
+
+interface IRushLinkJson {
+  localLinks: {
+    [name: string]: string[]
+  };
+}
+
+interface IQueueItem {
+  commonPackage: Package;
+  localPackage: Package;
+}
+
+function createSymlinks(localPackage: Package): void {
+  const localModuleFolder: string = path.join(localPackage.folderPath, 'node_modules');
+
+  if (!localPackage.parent) {
+    // The root-level folder is the project itself, so we simply delete its node_modules
+    // to start clean
+    console.log('Purging ' + localModuleFolder);
+    del.sync(localModuleFolder, { force: true });
+    console.log('Done');
+  } else {
+    if (!localPackage.symlinkTargetFolderPath) {
+      // Program bug
+      throw Error('localPackage.symlinkTargetFolderPath was not assigned');
     }
 
-    console.log('  Linking ' + consumingProject.projectFolder + '/node_modules/' + packageName
-      + ' -> ' + dependencyProject.packageName);
-
-    // Ex: "C:\MyRepo\my-library"
-    const dependencyProjectFolder = dependencyProject.projectFolder;
-
-    // Ex: "C:\MyRepo\my-app\node_modules\my-library"
-    //  or "C:\MyRepo\my-app\node_modules\@ms\my-library"
-    let localModuleFolder: string;
-
-    // Ex: "my-library" or "@ms/my-library"
-    if (packageName.substr(0, 1) === '@') {
-      const index: number = packageName.indexOf('/');
-      if (index < 0) {
-        throw new Error('Invalid scoped name: ' + packageName);
+    // This is special case for when localPackage.name has the form '@scope/name',
+    // in which case we need to create the '@scope' folder first.
+    const parentFolderPath: string = path.dirname(localPackage.folderPath);
+    if (parentFolderPath && parentFolderPath !== localPackage.folderPath) {
+      if (!fs.existsSync(parentFolderPath)) {
+        createFolderWithRetry(parentFolderPath);
       }
-      // Ex: "@ms"
-      const scopePart = packageName.substr(0, index);
-      // Ex: "my-library"
-      const packagePart = packageName.substr(index + 1);
+    }
 
-      // Ex: "C:\MyRepo\my-app\node_modules\@ms"
-      const localScopedFolder = path.join(consumingProject.projectFolder, 'node_modules', scopePart);
-      if (!fs.existsSync(localScopedFolder)) {
-        fs.mkdirSync(localScopedFolder);
-      }
-
-      // Ex: "C:\MyRepo\my-app\node_modules\@ms\my-library"
-      localModuleFolder = path.join(localScopedFolder, packagePart);
+    if (localPackage.children.length === 0) {
+      // If there are no children, then we can symlink the entire folder
+      fs.symlinkSync(localPackage.symlinkTargetFolderPath, localPackage.folderPath, 'junction');
     } else {
-      // Ex: "C:\MyRepo\my-app\node_modules\my-library"
-      localModuleFolder = path.join(consumingProject.projectFolder, 'node_modules', dependencyProject);
+      // If there are children, then we need to symlink each item in the folder individually
+      createFolderWithRetry(localPackage.folderPath);
+
+      for (let filename of fs.readdirSync(localPackage.symlinkTargetFolderPath)) {
+        if (filename.toLowerCase() !== 'node_modules') {
+          // Create the symlink
+          let linkType: string = 'file';
+
+          const linkFrom: string = path.join(localPackage.folderPath, filename);
+          let linkTo: string = path.join(localPackage.symlinkTargetFolderPath, filename);
+
+          const linkStats: fs.Stats = fs.lstatSync(linkTo);
+
+          if (linkStats.isSymbolicLink()) {
+            const targetStats: fs.Stats = fs.statSync(linkTo);
+            if (targetStats.isDirectory()) {
+              // Neither a junction nor a directory-symlink can have a directory-symlink
+              // as its target; instead, we must obtain the real physical path.
+              // A junction can link to another junction.  Unfortunately, the node 'fs' API
+              // lacks the ability to distinguish between a junction and a directory-symlink
+              // (even though it has the ability to create them both), so the safest policy
+              // is to always make a junction and always to the real physical path.
+              linkTo = fs.realpathSync(linkTo);
+              linkType = 'junction';
+            }
+          } else if (linkStats.isDirectory()) {
+            linkType = 'junction';
+          }
+
+          fs.symlinkSync(linkTo, linkFrom, linkType);
+        }
+      }
+    }
+  }
+
+  if (localPackage.children.length > 0) {
+    createFolderWithRetry(localModuleFolder);
+
+    for (let child of localPackage.children) {
+      createSymlinks(child);
+    }
+  }
+}
+
+function linkProject(project: RushConfigProject, commonRootPackage: Package,
+  commonPackageLookup: PackageLookup, rushConfig: RushConfig, rushLinkJson: IRushLinkJson,
+  options: IExecuteLinkOptions): void {
+
+  const commonProjectPackage: Package = commonRootPackage.getChildByName(project.tempProjectName);
+  if (!commonProjectPackage) {
+    throw new Error(`Unable to find a temp package for ${project.packageName} `
+      + `-- you may need to run "rush update" again`);
+  }
+
+  // TODO: Validate that the project's package.json still matches the common folder
+  const localProjectPackage = new Package(
+    project.packageJson.name,
+    commonProjectPackage.version,
+    commonProjectPackage.dependencies,
+    project.projectFolder
+  );
+
+  let queue: IQueueItem[] = [];
+  queue.push({ commonPackage: commonProjectPackage, localPackage: localProjectPackage });
+
+  while (true) {
+    const queueItem: IQueueItem = queue.shift();
+    if (!queueItem) {
+      break;
     }
 
-    // Create symlink: dependencyProjectFolder <-- consumingModuleFolder
-    // @todo VSO #178073 - revert this temporary hack
-    if (fs.existsSync(localModuleFolder)) {
-      console.log(`WARNING: replacing symlink to common/${dependencyProject} with ${dependencyProjectFolder}`);
-      fs.unlinkSync(localModuleFolder);
-    }
-    fs.symlinkSync(dependencyProjectFolder, localModuleFolder, 'junction');
+    const commonPackage: Package = queueItem.commonPackage;
+    const localPackage: Package = queueItem.localPackage;
 
-    numberOfLinks++;
-  });
-  return numberOfLinks;
+    // NOTE: It's important that we use the dependencies from the Common folder,
+    // because for Rush projects this will be the union of
+    // devDependencies / dependencies / optionalDependencies.
+    for (let dependency of commonPackage.dependencies) {
+
+      // Should this be a symlink to an Rush project?
+      const matchedRushPackage: RushConfigProject = rushConfig.getProjectByName(dependency.name);
+      if (matchedRushPackage && !options.noLocalLinks) {
+        // The dependency name matches an Rush project, but is it compatible with
+        // the requested version?
+        const matchedVersion: string = matchedRushPackage.packageJson.version;
+        if (semver.satisfies(matchedVersion, dependency.versionRange)) {
+          // Yes, it is compatible, so create a symlink to the Rush project.
+
+          // If the link is coming from our top-level Rush project, then record a
+          // build dependency in rush-link.json:
+          if (localPackage === localProjectPackage) {
+            let localLinks: string[] = rushLinkJson.localLinks[localPackage.name];
+            if (!localLinks) {
+              localLinks = [];
+              rushLinkJson.localLinks[localPackage.name] = localLinks;
+            }
+            localLinks.push(dependency.name);
+          }
+
+          // Is the dependency already resolved?
+          const resolution = localPackage.resolveOrCreate(dependency.name);
+
+          if (!resolution.found || resolution.found.version !== matchedVersion) {
+            // We did not find a suitable match, so place a new local package that
+            // symlinks to the Rush project
+            const newLocalFolderPath: string = path.join(
+              resolution.parentForCreate.folderPath, 'node_modules', dependency.name);
+
+            const newLocalPackage: Package = new Package(
+              dependency.name,
+              matchedVersion,
+              // Since matchingRushProject does not have a parent, its dependencies are
+              // guaranteed to be already fully resolved inside its node_modules folder.
+              [],
+              newLocalFolderPath
+            );
+
+            newLocalPackage.symlinkTargetFolderPath = matchedRushPackage.projectFolder;
+
+            resolution.parentForCreate.addChild(newLocalPackage);
+
+            // (There are no dependencies, so we do not need to push it onto the queue.)
+          }
+
+          continue;
+        } else {
+          console.log(`Rush will not link ${dependency.name} for ${localPackage.name}`
+            + ` because it requested version "${dependency.versionRange}" which is incompatible`
+            + ` with version ${matchedVersion }`);
+        }
+      }
+
+      // We can't symlink to an Rush project, so instead we will symlink to a folder
+      // under the "Common" folder
+      const commonDependencyPackage = commonPackage.resolve(dependency.name);
+      if (commonDependencyPackage) {
+        // This is the version that was chosen when "npm install" ran in the common folder
+        const effectiveDependencyVersion = commonDependencyPackage.version;
+
+        // Is the dependency already resolved?
+        const resolution = localPackage.resolveOrCreate(dependency.name);
+
+        if (!resolution.found || resolution.found.version !== effectiveDependencyVersion) {
+          // We did not find a suitable match, so place a new local package
+
+          const newLocalFolderPath: string = path.join(
+            resolution.parentForCreate.folderPath, 'node_modules', commonDependencyPackage.name);
+
+          const newLocalPackage: Package = new Package(
+            commonDependencyPackage.name,
+            commonDependencyPackage.version,
+            commonDependencyPackage.dependencies,
+            newLocalFolderPath
+          );
+
+          let commonPackage: Package = commonPackageLookup.getPackage(newLocalPackage.nameAndVersion);
+          if (!commonPackage) {
+            throw Error(`The ${localPackage.name}@${localPackage.version} package was not found in the Common folder`);
+          }
+          newLocalPackage.symlinkTargetFolderPath = commonPackage.folderPath;
+
+          resolution.parentForCreate.addChild(newLocalPackage);
+          queue.push({ commonPackage: commonDependencyPackage, localPackage: newLocalPackage });
+        }
+      } else {
+        if (!dependency.isOptional) {
+          throw Error(`The dependency "${dependency.name}" needed by "${localPackage.name}"`
+            + ` was not found the Common folder`);
+        } else {
+          console.log('Skipping optional dependency: ' + dependency.name);
+        }
+      }
+    }
+  }
+
+  // localProjectPackage.printTree();
+
+  createSymlinks(localProjectPackage);
+
+  // Also symlink the ".bin" folder
+  if (localProjectPackage.children.length > 0) {
+    const commonBinFolder: string = path.join(rushConfig.commonFolder, 'node_modules', '.bin');
+    const projectBinFolder: string = path.join(localProjectPackage.folderPath, 'node_modules', '.bin');
+
+    if (fs.existsSync(commonBinFolder)) {
+      fs.symlinkSync(commonBinFolder, projectBinFolder, 'junction');
+    }
+  }
 }
 
 /**
  * Entry point for the "rush link" and "rush unlink" commands.
  */
-export default function executeLink(rushConfig: RushConfig, unlinkOnly: boolean): void {
+export default function executeLink(rushConfig: RushConfig, options: IExecuteLinkOptions): void {
+  const startTime: number = performance_now();
 
-  rushConfig.projects.forEach((rushProject: RushConfigProject) => {
-    console.log('');
-    console.log('PROJECT: ' + rushProject.packageName);
-
-    // Ex: "C:\MyRepo\my-app\node_modules"
-    const localModulesFolder: string = path.join(rushProject.projectFolder, 'node_modules');
-    console.log('Removing node_modules');
-    del.sync(localModulesFolder, { force: true });
-
-    if (!unlinkOnly) {
-      console.log('Creating node_modules folder');
-
-      // We need to do a simple "fs.mkdirSync(localModulesFolder)" here,
-      // however if the folder we deleted above happened to contain any files,
-      // then there seems to be some OS process (virus scanner?) that holds
-      // a lock on the folder for a split second, which causes mkdirSync to
-      // fail.  To workaround that, retry for up to 7 seconds before giving up.
-      const startTime = new Date();
-      while (true) {
-        try {
-          fs.mkdirSync(localModulesFolder);
-          break;
-        } catch (e) {
-          const currentTime = new Date();
-          if (currentTime.getTime() - startTime.getTime() > 7000) {
-            throw e;
-          }
-        }
+  const promise: Promise<PackageNode> = new Promise((resolve, reject) => {
+    readPackageTree(rushConfig.commonFolder, (error: Error, rootNode: PackageNode) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(rootNode);
       }
-
-      console.log('Creating symlinks');
-
-      // Ex: "C:\MyRepo\common\node_modules"
-      const commonModulesFolder: string = path.join(rushConfig.commonFolder, 'node_modules');
-      const commonModulesFolderItems: string[] = fs.readdirSync(commonModulesFolder);
-
-      let linkCount: number = 0;
-      commonModulesFolderItems.forEach((filename) => {
-        if (filename.substr(0, 1) === '@') {
-          // For scoped folders (e.g. "@ms"), we need to create a regular folder
-
-          // Ex: "C:\MyRepo\common\node_modules\@ms"
-          const commonScopedFolder: string = path.join(commonModulesFolder, filename);
-          // Ex: "C:\MyRepo\my-app\node_modules\@ms"
-          const localScopedFolder: string = path.join(localModulesFolder, filename);
-          fs.mkdirSync(localScopedFolder);
-
-          // Then create links for each of the packages in the scoped folder
-          const commonScopedFolderItems: string[] = fs.readdirSync(commonScopedFolder);
-          commonScopedFolderItems.forEach(function (scopedFilename) {
-            // Ex: "C:\MyRepo\common\node_modules\@ms\my-library"
-            const commonScopedPackagePath: string = path.join(commonScopedFolder, scopedFilename);
-            // Ex: "C:\MyRepo\my-app\node_modules\@ms\my-library"
-            const localScopedPackagePath: string = path.join(localScopedFolder, scopedFilename);
-
-            // Create symlink: commonScopedPackagePath <-- localScopedPackagePath
-            fs.symlinkSync(commonScopedPackagePath, localScopedPackagePath, 'junction');
-            ++linkCount;
-          });
-        } else {
-          // Ex: "C:\MyRepo\common\node_modules\my-library2"
-          const commonPackagePath: string = path.join(commonModulesFolder, filename);
-          // Ex: "C:\MyRepo\my-app\node_modules\my-library2"
-          const localPackagePath: string = path.join(localModulesFolder, filename);
-
-          // Create symlink: commonPackagePath <-- localPackagePath
-          fs.symlinkSync(commonPackagePath, localPackagePath, 'junction');
-          ++linkCount;
-        }
-      });
-
-      linkCount += createDependencyLinks(rushConfig, rushProject);
-      console.log(`Created ${linkCount} links`);
-    }
+    });
   });
+  promise.then((npmPackage: PackageNode) => {
+    const commonRootPackage = Package.createFromNpm(npmPackage);
+    // commonRootPackage.printTree();
 
-  console.log('');
-  console.log('Done!');
+    const commonPackageLookup: PackageLookup = new PackageLookup();
+    commonPackageLookup.loadTree(commonRootPackage);
+
+    let rushLinkJson: IRushLinkJson = { localLinks: {} };
+
+    for (let project of rushConfig.projects) {
+      console.log('\nLINKING: ' + project.packageName);
+      linkProject(project, commonRootPackage, commonPackageLookup, rushConfig, rushLinkJson,
+        options);
+    }
+
+    let rushLinkJsonFilename = path.join(rushConfig.commonFolder, 'rush-link.json');
+    console.log(`Writing "${rushLinkJsonFilename}"`);
+    JsonFile.saveJsonFile(rushLinkJson, rushLinkJsonFilename);
+
+    const endTime: number = performance_now();
+    const totalSeconds = (endTime - startTime) / 1000.0;
+    console.log(os.EOL + `Done! Total Time: ${totalSeconds} secs`);
+
+  }).catch((error: any) => {
+    console.error(os.EOL + 'ERROR: ' + error.message);
+  });
 };
