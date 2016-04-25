@@ -28,8 +28,9 @@ export default class RushConfigProject {
   private _projectFolder: string;
   private _dependencies: string[];
   private _packageJson: PackageJson;
+  private _tempProjectName: string;
 
-  constructor(projectJson: IRushConfigProjectJson, rushConfig: RushConfig) {
+  constructor(projectJson: IRushConfigProjectJson, rushConfig: RushConfig, tempProjectName: string) {
     this._packageName = projectJson.packageName;
 
     this._projectFolder = path.join(rushConfig.rushJsonFolder, projectJson.projectFolder);
@@ -47,6 +48,8 @@ export default class RushConfigProject {
       throw new Error(`The package name "${this._packageName}" specified in rush.json does not`
         + ` match the name "${this._packageJson.name}" from package.json`);
     }
+
+    this._tempProjectName = tempProjectName;
   }
 
   /**
@@ -77,5 +80,13 @@ export default class RushConfigProject {
   public get packageJson(): PackageJson {
     return this._packageJson;
   }
-}
 
+  /**
+   * The unique name for the temporary project that will be generated in the Common folder.
+   * For example, if the project name is "@ms/MyProject", the temporary project name
+   * might be "rush-MyProject-2".
+   */
+  public get tempProjectName(): string {
+    return this._tempProjectName;
+  }
+}

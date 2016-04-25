@@ -13,6 +13,7 @@ import * as path from 'path';
 import RushConfig from './RushConfig';
 import executeLink from './ExecuteLink';
 import executeBuild, { IExecuteBuildOptions } from './ExecuteBuild';
+import executeUpdate from './ExecuteUpdate';
 
 const myPackageJsonFilename: string = path.resolve(path.join(
   module.filename, '..', '..', 'package.json')
@@ -22,6 +23,11 @@ const myPackageJson: PackageJson = require(myPackageJsonFilename);
 console.log(os.EOL + `Rush Mult-Package Build Tool ${myPackageJson.version}`);
 
 nomnom.script('rush');
+
+nomnom.command('update')
+  .callback((options: any) => executeUpdate(RushConfig.loadFromDefaultLocation()))
+  .help('Use this after changing package.json.  It scans all project dependencies'
+    + ' and then rebuilds the Rush common folder.');
 
 nomnom.command('link')
   .callback((options: any) => executeLink(RushConfig.loadFromDefaultLocation(), false))

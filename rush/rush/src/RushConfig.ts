@@ -11,6 +11,7 @@ import * as os from 'os';
 import Validator = require('z-schema');
 import JsonFile from './JsonFile';
 import RushConfigProject, { IRushConfigProjectJson } from './RushConfigProject';
+import { parseScopedPackgeName } from './Utilities';
 
 /**
  * This represents the JSON data object for the Rush.json config file.
@@ -40,8 +41,12 @@ export default class RushConfig {
     this._projects = [];
     this._projectsByName = new Map<string, RushConfigProject>();
 
-    for (const rawProject of rushConfigJson.projects) {
-      const project = new RushConfigProject(rawProject, this);
+    const tempNamesByProject: Map<IRushConfigProjectJson, string>
+      = RushConfig._generateTempNamesForProjects(rushConfigJson.projects);
+
+    for (const projectJson of rushConfigJson.projects) {
+      const tempProjectName: string = tempNamesByProject.get(projectJson);
+      const project = new RushConfigProject(projectJson, this, tempProjectName);
       this._projects.push(project);
       this._projectsByName.set(project.packageName, project);
     }
@@ -103,6 +108,38 @@ export default class RushConfig {
       currentFolder = parentFolder;
     }
     throw new Error('Unable to find rush.json configuration file');
+  }
+
+  /**
+   * This generates the unique names that are used to create temporary projects
+   * in the Rush common folder.
+   */
+  private static _generateTempNamesForProjects(projectJsons: IRushConfigProjectJson[])
+    : Map<IRushConfigProjectJson, string> {
+
+    const tempNamesByProject = new Map<IRushConfigProjectJson, string>();
+    let usedTempNames: Set<string> = new Set<string>();
+
+    const sortedProjectJsons: IRushConfigProjectJson[] = projectJsons.sort(
+      (a: IRushConfigProjectJson, b: IRushConfigProjectJson) => a.packageName.localeCompare(a.packageName)
+    );
+    for (const projectJson of sortedProjectJsons) {
+      // If the name is "@ms/MyProject", extract the "MyProject" part
+      let unscopedName: string = parseScopedPackgeName(projectJson.packageName).name;
+
+      // Generate a unique like name "rush-MyProject", or "rush-MyProject-2" if
+      // there is a naming conflict
+      let counter: number = 0;
+      let tempProjectName: string = 'rush-' + unscopedName;
+      while (usedTempNames.has(tempProjectName)) {
+        ++counter;
+        tempProjectName = 'rush-' + unscopedName + '-' + counter;
+      }
+      usedTempNames.add(tempProjectName);
+      tempNamesByProject.set(projectJson, tempProjectName);
+    }
+
+    return tempNamesByProject;
   }
 
   /**
