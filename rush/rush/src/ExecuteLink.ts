@@ -71,13 +71,16 @@ function createSymlinks(localPackage: Package): void {
           // Create the symlink
           let linkType: string = 'file';
 
-          const linkFrom: string = path.join(localPackage.folderPath, filename);
-          let linkTo: string = path.join(localPackage.symlinkTargetFolderPath, filename);
+          const linkSource: string = path.join(localPackage.folderPath, filename);
+          let linkTarget: string = path.join(localPackage.symlinkTargetFolderPath, filename);
 
-          const linkStats: fs.Stats = fs.lstatSync(linkTo);
+          /* tslint:disable:no-debugger */
+          debugger;
+
+          const linkStats: fs.Stats = fs.lstatSync(linkTarget);
 
           if (linkStats.isSymbolicLink()) {
-            const targetStats: fs.Stats = fs.statSync(linkTo);
+            const targetStats: fs.Stats = fs.statSync(linkTarget);
             if (targetStats.isDirectory()) {
               // Neither a junction nor a directory-symlink can have a directory-symlink
               // as its target; instead, we must obtain the real physical path.
@@ -85,14 +88,14 @@ function createSymlinks(localPackage: Package): void {
               // lacks the ability to distinguish between a junction and a directory-symlink
               // (even though it has the ability to create them both), so the safest policy
               // is to always make a junction and always to the real physical path.
-              linkTo = fs.realpathSync(linkTo);
+              linkTarget = fs.realpathSync(linkTarget);
               linkType = 'junction';
             }
           } else if (linkStats.isDirectory()) {
             linkType = 'junction';
           }
 
-          fs.symlinkSync(linkTo, linkFrom, linkType);
+          fs.symlinkSync(linkTarget, linkSource, linkType);
         }
       }
     }
