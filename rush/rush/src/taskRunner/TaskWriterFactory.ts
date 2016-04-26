@@ -36,7 +36,8 @@ interface ITaskWriterInfo {
 
 enum ITaskOutputStream {
   stdout = 1,
-  stderr = 2
+  stderr = 2,
+  warning = 3
 }
 
 /**
@@ -74,7 +75,13 @@ export default class TaskWriterFactory {
       getStdError: () => this._getTaskOutput(taskName, ITaskOutputStream.stderr),
       getStdOutput: () => this._getTaskOutput(taskName),
       write: (data: string) => this._writeTaskOutput(taskName, data),
-      writeError: (data: string) => this._writeTaskOutput(taskName, data, ITaskOutputStream.stderr),
+      writeError: (data: string) => {
+        const stream: ITaskOutputStream = (data.indexOf('Warning - ') === 0) ?
+          ITaskOutputStream.warning : // Warning written to stderr
+          ITaskOutputStream.stderr;
+
+        this._writeTaskOutput(taskName, data, stream);
+      },
       writeLine: (data: string) => this._writeTaskOutput(taskName, data + os.EOL)
     };
   }
@@ -93,6 +100,8 @@ export default class TaskWriterFactory {
     if (this._activeTask === taskName) {
       if (stream === ITaskOutputStream.stdout && !taskInfo.quietMode) {
         process.stdout.write(data);
+      } else if (stream === ITaskOutputStream.warning && !taskInfo.quietMode) {
+        process.stdout.write(colors.yellow(data));
       } else if (stream === ITaskOutputStream.stderr) {
         process.stdout.write(colors.red(data));
       }
