@@ -7,11 +7,12 @@
  */
 
 import * as colors from 'colors';
-import RushConfig from './RushConfig';
+import RushConfig, { IRushLinkJson } from './RushConfig';
 import TaskRunner from './taskRunner/TaskRunner';
 import ProjectBuildTask from './ProjectBuildTask';
 import ErrorDetector, { ErrorDetectionMode } from './errorDetection/ErrorDetector';
 import * as ErrorDetectorRules from './errorDetection/rules/index';
+import JsonFile from './JsonFile';
 
 export interface IExecuteBuildOptions {
   production?: boolean;
@@ -40,8 +41,10 @@ export default function executeBuild(rushConfig: RushConfig, options: IExecuteBu
   }
 
   // Add task dependencies
-  for (const rushProject of rushConfig.projects) {
-    taskRunner.addDependencies(rushProject.packageName, rushProject.dependencies);
+  const rushLinkJson: IRushLinkJson = JsonFile.loadJsonFile(rushConfig.rushLinkJsonFilename);
+  for (const projectName of Object.keys(rushLinkJson.localLinks)) {
+    const projectDependencies: string[] = rushLinkJson.localLinks[projectName];
+    taskRunner.addDependencies(projectName, projectDependencies);
   }
 
   taskRunner.execute().then(

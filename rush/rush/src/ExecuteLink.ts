@@ -14,7 +14,7 @@ import * as semver from 'semver';
 import readPackageTree = require('read-package-tree');
 
 import JsonFile from './JsonFile';
-import RushConfig from './RushConfig';
+import RushConfig, { IRushLinkJson } from './RushConfig';
 import RushConfigProject from './RushConfigProject';
 import Package from './Package';
 import PackageLookup from './PackageLookup';
@@ -22,12 +22,6 @@ import { performance_now, createFolderWithRetry } from './Utilities';
 
 export interface IExecuteLinkOptions {
   noLocalLinks?: boolean;
-}
-
-interface IRushLinkJson {
-  localLinks: {
-    [name: string]: string[]
-  };
 }
 
 interface IQueueItem {
@@ -278,9 +272,8 @@ export default function executeLink(rushConfig: RushConfig, options: IExecuteLin
           options);
       }
 
-      const rushLinkJsonFilename = path.join(rushConfig.commonFolder, 'rush-link.json');
-      console.log(`Writing "${rushLinkJsonFilename}"`);
-      JsonFile.saveJsonFile(rushLinkJson, rushLinkJsonFilename);
+      console.log(`Writing "${rushConfig.rushLinkJsonFilename}"`);
+      JsonFile.saveJsonFile(rushLinkJson, rushConfig.rushLinkJsonFilename);
 
       const endTime: number = performance_now();
       const totalSeconds = (endTime - startTime) / 1000.0;

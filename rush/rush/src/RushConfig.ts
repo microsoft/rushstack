@@ -14,12 +14,21 @@ import RushConfigProject, { IRushConfigProjectJson } from './RushConfigProject';
 import { parseScopedPackgeName } from './Utilities';
 
 /**
- * This represents the JSON data object for the Rush.json config file.
+ * This represents the JSON data structure for the "rush.json" config file.
  */
 export interface IRushConfigJson {
   commonFolder: string;
   projects: IRushConfigProjectJson[];
 };
+
+/**
+ * This represents the JSON data structure for the "rush-link.json" data file.
+ */
+export interface IRushLinkJson {
+  localLinks: {
+    [name: string]: string[]
+  };
+}
 
 /**
  * This represents the Rush configuration for a repository, based on the Rush.json
@@ -28,6 +37,7 @@ export interface IRushConfigJson {
 export default class RushConfig {
   private _rushJsonFolder: string;
   private _commonFolder: string;
+  private _rushLinkJsonFilename: string;
   private _projects: RushConfigProject[];
   private _projectsByName: Map<string, RushConfigProject>;
 
@@ -37,6 +47,8 @@ export default class RushConfig {
     if (!fs.existsSync(this._commonFolder)) {
       throw new Error(`Common folder not found: ${rushConfigJson.commonFolder}`);
     }
+
+    this._rushLinkJsonFilename = path.join(this._commonFolder, 'rush-link.json');
 
     this._projects = [];
     this._projectsByName = new Map<string, RushConfigProject>();
@@ -155,6 +167,15 @@ export default class RushConfig {
    */
   public get commonFolder(): string {
     return this._commonFolder;
+  }
+
+  /**
+   * The filename of the build dependency data file.  By default this is
+   * called 'rush-link.json' resides in the Rush common folder.
+   * Its data structure is defined by IRushLinkJson.
+   */
+  public get rushLinkJsonFilename(): string {
+    return this._rushLinkJsonFilename;
   }
 
   public get projects(): RushConfigProject[] {
