@@ -28,6 +28,18 @@ interface IQueueItem {
   localPackage: Package;
 }
 
+function createSymlink(linkTarget: string, linkSource: string, linkType: string): void {
+  try {
+    fs.symlinkSync(linkTarget, linkSource, linkType);
+  } catch (error) {
+    // If you try to create a regular file symlink, it appears to require Administrator
+    // permissions.  Whereas if you create a junction, that seems to NOT require any
+    // special permissions.
+    throw new Error(error.message + os.EOL
+      + '(You may need to do "Run As Administrator" when starting your command prompt.)');
+  }
+}
+
 function createSymlinks(localPackage: Package): void {
   const localModuleFolder: string = path.join(localPackage.folderPath, 'node_modules');
 
@@ -54,7 +66,7 @@ function createSymlinks(localPackage: Package): void {
 
     if (localPackage.children.length === 0) {
       // If there are no children, then we can symlink the entire folder
-      fs.symlinkSync(localPackage.symlinkTargetFolderPath, localPackage.folderPath, 'junction');
+      createSymlink(localPackage.symlinkTargetFolderPath, localPackage.folderPath, 'junction');
     } else {
       // If there are children, then we need to symlink each item in the folder individually
       Utilities.createFolderWithRetry(localPackage.folderPath);
@@ -85,7 +97,7 @@ function createSymlinks(localPackage: Package): void {
             linkType = 'junction';
           }
 
-          fs.symlinkSync(linkTarget, linkSource, linkType);
+          createSymlink(linkTarget, linkSource, linkType);
         }
       }
     }
@@ -248,7 +260,7 @@ function linkProject(
     const projectBinFolder: string = path.join(localProjectPackage.folderPath, 'node_modules', '.bin');
 
     if (fs.existsSync(commonBinFolder)) {
-      fs.symlinkSync(commonBinFolder, projectBinFolder, 'junction');
+      createSymlink(commonBinFolder, projectBinFolder, 'junction');
     }
   }
 }
