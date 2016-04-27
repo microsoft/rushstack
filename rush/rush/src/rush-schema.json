@@ -25,21 +25,13 @@
           "projectFolder": {
             "description": "The path to the project folder relative to the Rush config file.",
             "type": "string"
-          },
-          "dependencies": {
-            "description": "An array of the NPM package names (from this repository) which this project depends on.",
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "minItems": 0,
-            "uniqueItems": true
           }
-        }
+        },
+        "additionalProperties": false,
+        "required": [ "packageName", "projectFolder" ]
       }
     }
   },
   "additionalProperties": false,
-
   "required": [ "commonFolder", "projects" ]
 }

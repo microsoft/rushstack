@@ -16,7 +16,6 @@ import RushConfig from './RushConfig';
 export interface IRushConfigProjectJson {
   packageName: string;
   projectFolder: string;
-  dependencies?: string[];
 };
 
 /**
@@ -26,7 +25,6 @@ export interface IRushConfigProjectJson {
 export default class RushConfigProject {
   private _packageName: string;
   private _projectFolder: string;
-  private _dependencies: string[];
   private _packageJson: PackageJson;
   private _tempProjectName: string;
 
@@ -38,8 +36,6 @@ export default class RushConfigProject {
     if (!fs.existsSync(this._projectFolder)) {
       throw new Error(`Project folder not found: ${projectJson.projectFolder}`);
     }
-
-    this._dependencies = projectJson.dependencies || [];
 
     const packageJsonFilename: string = path.join(this._projectFolder, 'package.json');
     this._packageJson = JsonFile.loadJsonFile(packageJsonFilename);
@@ -65,13 +61,6 @@ export default class RushConfigProject {
    */
   public get projectFolder(): string {
     return this._projectFolder;
-  }
-
-  /**
-   * A list of names of projects that must be built before this project can be built.
-   */
-  public get dependencies(): string[] {
-    return this._dependencies;
   }
 
   /**
