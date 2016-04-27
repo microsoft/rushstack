@@ -18,12 +18,12 @@ export default class PackageLookup {
     // traversal
 
     while (true) {
-      let current: Package = queue.shift();
+      const current: Package = queue.shift();
       if (!current) {
         break;
       }
 
-      for (let child of current.children) {
+      for (const child of current.children) {
         queue.push(child);
       }
 

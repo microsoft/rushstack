@@ -8,12 +8,13 @@ import * as path from 'path';
 import * as fs from 'fs';
 import RushConfig from './RushConfig';
 import JsonFile from './JsonFile';
-import { createFolderWithRetry } from './Utilities';
+import { performance_now, createFolderWithRetry } from './Utilities';
 
 /**
  * Entry point for the "rush update" command.
  */
 export default function executeUpdate(rushConfig: RushConfig): void {
+  const startTime: number = performance_now();
   console.log('Starting "rush update"\n');
 
   // 1. Delete "common\node_modules"
@@ -116,5 +117,8 @@ export default function executeUpdate(rushConfig: RushConfig): void {
   child_process.execSync('npm shrinkwrap', options);
   console.log('"npm shrinkwrap" completed\n');
 
-  console.log('\nRush update finished successfully.');
+  const endTime: number = performance_now();
+  const totalSeconds: string = ((endTime - startTime) / 1000.0).toFixed(2);
+
+  console.log(`\nRush update finished successfully. (${totalSeconds} seconds)`);
 };

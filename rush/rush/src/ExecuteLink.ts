@@ -18,7 +18,7 @@ import RushConfig, { IRushLinkJson } from './RushConfig';
 import RushConfigProject from './RushConfigProject';
 import Package from './Package';
 import PackageLookup from './PackageLookup';
-import { performance_now, createFolderWithRetry } from './Utilities';
+import { createFolderWithRetry } from './Utilities';
 
 export interface IExecuteLinkOptions {
   noLocalLinks?: boolean;
@@ -253,8 +253,6 @@ function linkProject(project: RushConfigProject, commonRootPackage: Package,
  * Entry point for the "rush link" and "rush unlink" commands.
  */
 export default function executeLink(rushConfig: RushConfig, options: IExecuteLinkOptions): void {
-  const startTime: number = performance_now();
-
   readPackageTree(rushConfig.commonFolder, (error: Error, npmPackage: PackageNode) => {
     if (error) {
       console.error(os.EOL + 'ERROR: ' + error.message);
@@ -274,10 +272,6 @@ export default function executeLink(rushConfig: RushConfig, options: IExecuteLin
 
       console.log(`Writing "${rushConfig.rushLinkJsonFilename}"`);
       JsonFile.saveJsonFile(rushLinkJson, rushConfig.rushLinkJsonFilename);
-
-      const endTime: number = performance_now();
-      const totalSeconds = (endTime - startTime) / 1000.0;
-      console.log(os.EOL + `Done! Total Time: ${totalSeconds} secs`);
     }
   });
 };
