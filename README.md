@@ -18,9 +18,13 @@ If the `--initwebpack` flag is passed to the command line, this task will initia
 ```typescript
 interface IWebpackConfig {
   configPath: string;
+  config: Webpack.Configuration;
+  suppressWarnings: string[];
 }
 ```
 * **configPath** used to specify the local package relative path to a `webpack.config.js`
+* **config** used to specify a webpack config object. **configPath** takes precidence over this option if it is set and the file it refefences exists.
+* **suppressWarnings** used to specify regular expressions or regular expression strings that will prevent logging of a warning if that warning matches.
 
 Usage:
 ```typescript

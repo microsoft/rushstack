@@ -3,15 +3,29 @@ import { GulpTask } from 'gulp-core-build';
 import gulp = require('gulp');
 
 export interface IWebpackTaskConfig {
+  /**
+   * Path to a webpack config. A path to a config takes precidence over the "config" ooption.
+   */
   configPath: string;
+
+  /**
+   * Webpack config object. If a path is specified by "configPath," and it is valid, this option is ignored.
+   */
   config?: Webpack.Configuration;
+
+  /**
+   * An array of regular expressions or regular expression strings. If a warning matches any of them, it
+   * will not be logged.
+   */
+  suppressWarnings?: (string | RegExp)[];
 }
 
 export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
   public name = 'webpack';
 
   public taskConfig: IWebpackTaskConfig = {
-    configPath: './webpack.config.js'
+    configPath: './webpack.config.js',
+    suppressWarnings: []
   };
 
   public resources = {
@@ -91,7 +105,29 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
           }
 
           if (statsResult.warnings && statsResult.warnings.length) {
-            this.logWarning(`'${outputDir}':` + '\n' + statsResult.warnings.join('\n') + '\n');
+            const unsuppressedWarnings: string[] = [];
+            const warningSuppressonRegexes = (this.taskConfig.suppressWarnings || []).map((regex: string) => {
+              return new RegExp(regex);
+            });
+
+            statsResult.warnings.forEach((warning: string) => {
+              let suppressed = false;
+              for (let i = 0; i < warningSuppressonRegexes.length; i++) {
+                const suppressionRegex = warningSuppressonRegexes[i];
+                if (warning.match(suppressionRegex)) {
+                  suppressed = true;
+                  break;
+                }
+              }
+
+              if (!suppressed) {
+                unsuppressedWarnings.push(warning);
+              }
+            });
+
+            if (unsuppressedWarnings.length > 0) {
+              this.logWarning(`'${outputDir}':` + '\n' + unsuppressedWarnings.join('\n') + '\n');
+            }
           }
 
           let duration = (new Date().getTime() - startTime);
