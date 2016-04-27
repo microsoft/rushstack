@@ -101,8 +101,12 @@ function createSymlinks(localPackage: Package): void {
   }
 }
 
-function linkProject(project: RushConfigProject, commonRootPackage: Package,
-  commonPackageLookup: PackageLookup, rushConfig: RushConfig, rushLinkJson: IRushLinkJson,
+function linkProject(
+  project: RushConfigProject,
+  commonRootPackage: Package,
+  commonPackageLookup: PackageLookup,
+  rushConfig: RushConfig,
+  rushLinkJson: IRushLinkJson,
   options: IExecuteLinkOptions): void {
 
   const commonProjectPackage: Package = commonRootPackage.getChildByName(project.tempProjectName);
@@ -119,7 +123,7 @@ function linkProject(project: RushConfigProject, commonRootPackage: Package,
     project.projectFolder
   );
 
-  let queue: IQueueItem[] = [];
+  const queue: IQueueItem[] = [];
   queue.push({ commonPackage: commonProjectPackage, localPackage: localProjectPackage });
 
   while (true) {
@@ -134,7 +138,7 @@ function linkProject(project: RushConfigProject, commonRootPackage: Package,
     // NOTE: It's important that we use the dependencies from the Common folder,
     // because for Rush projects this will be the union of
     // devDependencies / dependencies / optionalDependencies.
-    for (let dependency of commonPackage.dependencies) {
+    for (const dependency of commonPackage.dependencies) {
 
       // Should this be a symlink to an Rush project?
       const matchedRushPackage: RushConfigProject = rushConfig.getProjectByName(dependency.name);
@@ -214,7 +218,8 @@ function linkProject(project: RushConfigProject, commonRootPackage: Package,
 
           let commonPackage: Package = commonPackageLookup.getPackage(newLocalPackage.nameAndVersion);
           if (!commonPackage) {
-            throw Error(`The ${localPackage.name}@${localPackage.version} package was not found in the Common folder`);
+            throw Error(`The ${localPackage.name}@${localPackage.version} package was not found`
+              + ` in the ${rushConfig.commonFolderName} folder`);
           }
           newLocalPackage.symlinkTargetFolderPath = commonPackage.folderPath;
 
@@ -224,7 +229,7 @@ function linkProject(project: RushConfigProject, commonRootPackage: Package,
       } else {
         if (!dependency.isOptional) {
           throw Error(`The dependency "${dependency.name}" needed by "${localPackage.name}"`
-            + ` was not found the Common folder`);
+            + ` was not found the ${rushConfig.commonFolderName} folder`);
         } else {
           console.log('Skipping optional dependency: ' + dependency.name);
         }

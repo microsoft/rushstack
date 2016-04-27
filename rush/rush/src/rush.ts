@@ -20,7 +20,7 @@ const myPackageJsonFilename: string = path.resolve(path.join(
 );
 const myPackageJson: PackageJson = require(myPackageJsonFilename);
 
-console.log(os.EOL + `Rush Mult-Package Build Tool ${myPackageJson.version}`);
+console.log(os.EOL + `Rush Multi-Package Build Tool ${myPackageJson.version}`);
 
 nomnom.script('rush');
 

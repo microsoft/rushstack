@@ -37,6 +37,7 @@ export interface IRushLinkJson {
 export default class RushConfig {
   private _rushJsonFolder: string;
   private _commonFolder: string;
+  private _commonFolderName: string;
   private _rushLinkJsonFilename: string;
   private _projects: RushConfigProject[];
   private _projectsByName: Map<string, RushConfigProject>;
@@ -45,8 +46,9 @@ export default class RushConfig {
     this._rushJsonFolder = path.dirname(rushJsonFilename);
     this._commonFolder = path.resolve(path.join(this._rushJsonFolder, rushConfigJson.commonFolder));
     if (!fs.existsSync(this._commonFolder)) {
-      throw new Error(`Common folder not found: ${rushConfigJson.commonFolder}`);
+      throw new Error(`Rush common folder does not exist: ${rushConfigJson.commonFolder}`);
     }
+    this._commonFolderName = path.basename(this._commonFolder);
 
     this._rushLinkJsonFilename = path.join(this._commonFolder, 'rush-link.json');
 
@@ -162,11 +164,20 @@ export default class RushConfig {
   }
 
   /**
-   * The common folder specified in rush.json.  By default, this is a subfolder
-   * of rushJsonFolder whose name is "common".
+   * The common folder specified in rush.json.  By default, this is the fully
+   * resolved path for a subfolder of rushJsonFolder whose name is "common".
    */
   public get commonFolder(): string {
     return this._commonFolder;
+  }
+
+  /**
+   * This is how we refer to the common folder, e.g. in error messages.
+   * For example if commonFolder is "C:\MyRepo\common" then
+   * commonFolderName="common".
+   */
+  public get commonFolderName(): string {
+    return this._commonFolderName;
   }
 
   /**
