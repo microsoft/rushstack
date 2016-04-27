@@ -65,45 +65,33 @@ export default function executeUpdate(rushConfig: RushConfig): void {
 
     const tempPackageJsonFilename: string = path.join(tempProjectFolder, 'package.json');
 
-    let tempPackageJson: PackageJson = {
+    const tempPackageJson: PackageJson = {
       name: tempProjectName,
       version: '0.0.0',
       private: true,
       dependencies: {}
     };
 
-    let seenDependencies: Set<string> = new Set<string>();
+    // If there are any optional dependencies, copy them over directly
     if (packageJson.optionalDependencies) {
-      tempPackageJson.optionalDependencies = {};
-      for (let key of Object.keys(packageJson.optionalDependencies)) {
-        if (!seenDependencies.has(key)) {
-          seenDependencies.add(key);
-          tempPackageJson.optionalDependencies[key]
-            = packageJson.optionalDependencies[key];
-        }
+      tempPackageJson.optionalDependencies = packageJson.optionalDependencies;
+    }
+
+    // If there are devDependencies, we need to merge them with the regular
+    // dependencies.  If the same library appears in both places, then the
+    // regular dependency takes precedence over the devDependency.
+    // It also takes precedence over a duplicate in optionalDependencies,
+    // but NPM will take care of that for us.  (Frankly any kind of duplicate
+    // should be an error, but NPM is pretty lax about this.)
+    if (packageJson.devDependencies) {
+      for (let key of Object.keys(packageJson.devDependencies)) {
+        tempPackageJson.dependencies[key] = packageJson.devDependencies[key];
       }
     }
 
     if (packageJson.dependencies) {
       for (let key of Object.keys(packageJson.dependencies)) {
-        if (!seenDependencies.has(key)) {
-          seenDependencies.add(key);
-          tempPackageJson.dependencies[key]
-            = packageJson.dependencies[key];
-        }
-      }
-    }
-
-    // Merge the devDependencies into the regular dependencies, since NPM is going
-    // to think of the temp package as being a secondary dependency, and thus will
-    // not install its devDependencies
-    if (packageJson.devDependencies) {
-      for (let key of Object.keys(packageJson.devDependencies)) {
-        if (!seenDependencies.has(key)) {
-          seenDependencies.add(key);
-          tempPackageJson.dependencies[key]
-            = packageJson.devDependencies[key];
-        }
+        tempPackageJson.dependencies[key] = packageJson.dependencies[key];
       }
     }
 

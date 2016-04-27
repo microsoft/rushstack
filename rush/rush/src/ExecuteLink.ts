@@ -74,9 +74,6 @@ function createSymlinks(localPackage: Package): void {
           const linkSource: string = path.join(localPackage.folderPath, filename);
           let linkTarget: string = path.join(localPackage.symlinkTargetFolderPath, filename);
 
-          /* tslint:disable:no-debugger */
-          debugger;
-
           const linkStats: fs.Stats = fs.lstatSync(linkTarget);
 
           if (linkStats.isSymbolicLink()) {
@@ -241,6 +238,8 @@ function linkProject(project: RushConfigProject, commonRootPackage: Package,
     }
   }
 
+  // When debugging, you can uncomment this line to dump the data structure
+  // to the console:
   // localProjectPackage.printTree();
 
   createSymlinks(localProjectPackage);
@@ -262,39 +261,30 @@ function linkProject(project: RushConfigProject, commonRootPackage: Package,
 export default function executeLink(rushConfig: RushConfig, options: IExecuteLinkOptions): void {
   const startTime: number = performance_now();
 
-  const promise: Promise<PackageNode> = new Promise((resolve, reject) => {
-    readPackageTree(rushConfig.commonFolder, (error: Error, rootNode: PackageNode) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(rootNode);
+  readPackageTree(rushConfig.commonFolder, (error: Error, npmPackage: PackageNode) => {
+    if (error) {
+      console.error(os.EOL + 'ERROR: ' + error.message);
+    } else {
+      const commonRootPackage = Package.createFromNpm(npmPackage);
+
+      const commonPackageLookup: PackageLookup = new PackageLookup();
+      commonPackageLookup.loadTree(commonRootPackage);
+
+      const rushLinkJson: IRushLinkJson = { localLinks: {} };
+
+      for (const project of rushConfig.projects) {
+        console.log('\nLINKING: ' + project.packageName);
+        linkProject(project, commonRootPackage, commonPackageLookup, rushConfig, rushLinkJson,
+          options);
       }
-    });
-  });
-  promise.then((npmPackage: PackageNode) => {
-    const commonRootPackage = Package.createFromNpm(npmPackage);
-    // commonRootPackage.printTree();
 
-    const commonPackageLookup: PackageLookup = new PackageLookup();
-    commonPackageLookup.loadTree(commonRootPackage);
+      const rushLinkJsonFilename = path.join(rushConfig.commonFolder, 'rush-link.json');
+      console.log(`Writing "${rushLinkJsonFilename}"`);
+      JsonFile.saveJsonFile(rushLinkJson, rushLinkJsonFilename);
 
-    let rushLinkJson: IRushLinkJson = { localLinks: {} };
-
-    for (let project of rushConfig.projects) {
-      console.log('\nLINKING: ' + project.packageName);
-      linkProject(project, commonRootPackage, commonPackageLookup, rushConfig, rushLinkJson,
-        options);
+      const endTime: number = performance_now();
+      const totalSeconds = (endTime - startTime) / 1000.0;
+      console.log(os.EOL + `Done! Total Time: ${totalSeconds} secs`);
     }
-
-    let rushLinkJsonFilename = path.join(rushConfig.commonFolder, 'rush-link.json');
-    console.log(`Writing "${rushLinkJsonFilename}"`);
-    JsonFile.saveJsonFile(rushLinkJson, rushLinkJsonFilename);
-
-    const endTime: number = performance_now();
-    const totalSeconds = (endTime - startTime) / 1000.0;
-    console.log(os.EOL + `Done! Total Time: ${totalSeconds} secs`);
-
-  }).catch((error: any) => {
-    console.error(os.EOL + 'ERROR: ' + error.message);
   });
 };
