@@ -11,7 +11,7 @@ import * as os from 'os';
 import Validator = require('z-schema');
 import JsonFile from './JsonFile';
 import RushConfigProject, { IRushConfigProjectJson } from './RushConfigProject';
-import { parseScopedPackgeName } from './Utilities';
+import Utilities from './Utilities';
 
 /**
  * This represents the JSON data structure for the "rush.json" config file.
@@ -139,7 +139,7 @@ export default class RushConfig {
     );
     for (const projectJson of sortedProjectJsons) {
       // If the name is "@ms/MyProject", extract the "MyProject" part
-      let unscopedName: string = parseScopedPackgeName(projectJson.packageName).name;
+      let unscopedName: string = Utilities.parseScopedPackgeName(projectJson.packageName).name;
 
       // Generate a unique like name "rush-MyProject", or "rush-MyProject-2" if
       // there is a naming conflict

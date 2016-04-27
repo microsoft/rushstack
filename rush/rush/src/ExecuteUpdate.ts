@@ -2,19 +2,18 @@
  * @Copyright (c) Microsoft Corporation.  All rights reserved.
  */
 
-import * as del from 'del';
 import * as child_process from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
 import RushConfig from './RushConfig';
 import JsonFile from './JsonFile';
-import { performance_now, createFolderWithRetry } from './Utilities';
+import Utilities from './Utilities';
 
 /**
  * Entry point for the "rush update" command.
  */
 export default function executeUpdate(rushConfig: RushConfig): void {
-  const startTime: number = performance_now();
+  const startTime: number = Utilities.getTimeInMs();
   console.log('Starting "rush update"\n');
 
   // 1. Delete "common\node_modules"
@@ -22,7 +21,7 @@ export default function executeUpdate(rushConfig: RushConfig): void {
 
   if (fs.existsSync(nodeModulesPath)) {
     console.log('Deleting common/node_modules folder...');
-    del.sync(nodeModulesPath, { force: true });
+    Utilities.dangerouslyDeletePath(nodeModulesPath);
   }
 
   // 2. Delete "common\temp_modules"
@@ -30,7 +29,7 @@ export default function executeUpdate(rushConfig: RushConfig): void {
 
   if (fs.existsSync(tempModulesPath)) {
     console.log('Deleting common/temp_modules folder');
-    del.sync(tempModulesPath, { force: true });
+    Utilities.dangerouslyDeletePath(tempModulesPath);
   }
 
   // 3. Delete the previous npm-shrinkwrap.json
@@ -38,12 +37,12 @@ export default function executeUpdate(rushConfig: RushConfig): void {
 
   if (fs.existsSync(shrinkwrapFilename)) {
     console.log('Deleting common/npm-shrinkwrap.json');
-    del.sync(shrinkwrapFilename, { force: true });
+    Utilities.dangerouslyDeletePath(shrinkwrapFilename);
   }
 
   // 4. Construct common\package.json and common\temp_modules
   console.log('Creating a clean common/temp_modules folder');
-  createFolderWithRetry(tempModulesPath);
+  Utilities.createFolderWithRetry(tempModulesPath);
 
   let commonPackageJson: PackageJson = {
     dependencies: {},
@@ -117,7 +116,7 @@ export default function executeUpdate(rushConfig: RushConfig): void {
   child_process.execSync('npm shrinkwrap', options);
   console.log('"npm shrinkwrap" completed\n');
 
-  const endTime: number = performance_now();
+  const endTime: number = Utilities.getTimeInMs();
   const totalSeconds: string = ((endTime - startTime) / 1000.0).toFixed(2);
 
   console.log(`\nRush update finished successfully. (${totalSeconds} seconds)`);

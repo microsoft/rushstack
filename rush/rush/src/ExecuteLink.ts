@@ -6,7 +6,6 @@
  * Additionally, adds symlinks for projects with interdependencies.
  */
 
-import * as del from 'del';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -18,7 +17,7 @@ import RushConfig, { IRushLinkJson } from './RushConfig';
 import RushConfigProject from './RushConfigProject';
 import Package from './Package';
 import PackageLookup from './PackageLookup';
-import { createFolderWithRetry } from './Utilities';
+import Utilities from './Utilities';
 
 export interface IExecuteLinkOptions {
   noLocalLinks?: boolean;
@@ -36,7 +35,7 @@ function createSymlinks(localPackage: Package): void {
     // The root-level folder is the project itself, so we simply delete its node_modules
     // to start clean
     console.log('Purging ' + localModuleFolder);
-    del.sync(localModuleFolder, { force: true });
+    Utilities.dangerouslyDeletePath(localModuleFolder);
     console.log('Done');
   } else {
     if (!localPackage.symlinkTargetFolderPath) {
@@ -49,7 +48,7 @@ function createSymlinks(localPackage: Package): void {
     const parentFolderPath: string = path.dirname(localPackage.folderPath);
     if (parentFolderPath && parentFolderPath !== localPackage.folderPath) {
       if (!fs.existsSync(parentFolderPath)) {
-        createFolderWithRetry(parentFolderPath);
+        Utilities.createFolderWithRetry(parentFolderPath);
       }
     }
 
@@ -58,7 +57,7 @@ function createSymlinks(localPackage: Package): void {
       fs.symlinkSync(localPackage.symlinkTargetFolderPath, localPackage.folderPath, 'junction');
     } else {
       // If there are children, then we need to symlink each item in the folder individually
-      createFolderWithRetry(localPackage.folderPath);
+      Utilities.createFolderWithRetry(localPackage.folderPath);
 
       for (let filename of fs.readdirSync(localPackage.symlinkTargetFolderPath)) {
         if (filename.toLowerCase() !== 'node_modules') {
@@ -93,7 +92,7 @@ function createSymlinks(localPackage: Package): void {
   }
 
   if (localPackage.children.length > 0) {
-    createFolderWithRetry(localModuleFolder);
+    Utilities.createFolderWithRetry(localModuleFolder);
 
     for (let child of localPackage.children) {
       createSymlinks(child);
@@ -260,23 +259,27 @@ function linkProject(
 export default function executeLink(rushConfig: RushConfig, options: IExecuteLinkOptions): void {
   readPackageTree(rushConfig.commonFolder, (error: Error, npmPackage: PackageNode) => {
     if (error) {
-      console.error(os.EOL + 'ERROR: ' + error.message);
+      Utilities.reportError(error);
     } else {
-      const commonRootPackage = Package.createFromNpm(npmPackage);
+      try {
+        const commonRootPackage = Package.createFromNpm(npmPackage);
 
-      const commonPackageLookup: PackageLookup = new PackageLookup();
-      commonPackageLookup.loadTree(commonRootPackage);
+        const commonPackageLookup: PackageLookup = new PackageLookup();
+        commonPackageLookup.loadTree(commonRootPackage);
 
-      const rushLinkJson: IRushLinkJson = { localLinks: {} };
+        const rushLinkJson: IRushLinkJson = { localLinks: {} };
 
-      for (const project of rushConfig.projects) {
-        console.log('\nLINKING: ' + project.packageName);
-        linkProject(project, commonRootPackage, commonPackageLookup, rushConfig, rushLinkJson,
-          options);
+        for (const project of rushConfig.projects) {
+          console.log('\nLINKING: ' + project.packageName);
+          linkProject(project, commonRootPackage, commonPackageLookup, rushConfig, rushLinkJson,
+            options);
+        }
+
+        console.log(`Writing "${rushConfig.rushLinkJsonFilename}"`);
+        JsonFile.saveJsonFile(rushLinkJson, rushConfig.rushLinkJsonFilename);
+      } catch (error) {
+        Utilities.reportError(error);
       }
-
-      console.log(`Writing "${rushConfig.rushLinkJsonFilename}"`);
-      JsonFile.saveJsonFile(rushLinkJson, rushConfig.rushLinkJsonFilename);
     }
   });
 };

@@ -14,6 +14,7 @@ import RushConfig from './RushConfig';
 import executeLink, { IExecuteLinkOptions } from './ExecuteLink';
 import executeBuild, { IExecuteBuildOptions } from './ExecuteBuild';
 import executeUpdate from './ExecuteUpdate';
+import Utilities from './Utilities';
 
 const myPackageJsonFilename: string = path.resolve(path.join(
   module.filename, '..', '..', 'package.json')
@@ -63,5 +64,5 @@ nomnom.command('rebuild')
 try {
   nomnom.parse();
 } catch (error) {
-  console.error(os.EOL + 'ERROR: ' + error.message);
+  Utilities.reportError(error);
 }
