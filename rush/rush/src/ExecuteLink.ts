@@ -40,65 +40,62 @@ function createSymlink(linkTarget: string, linkSource: string, linkType: string)
   }
 }
 
-function createSymlinks(localPackage: Package): void {
+/**
+ * This is a helper function used by createSymlinksForTopLevelProject().
+ * It will recursively creates symlinked folders corresponding to each of the
+ * Package objects in the provided tree.
+ */
+function createSymlinksForDependencies(localPackage: Package): void {
   const localModuleFolder: string = path.join(localPackage.folderPath, 'node_modules');
 
-  if (!localPackage.parent) {
-    // The root-level folder is the project itself, so we simply delete its node_modules
-    // to start clean
-    console.log('Purging ' + localModuleFolder);
-    Utilities.dangerouslyDeletePath(localModuleFolder);
-    console.log('Done');
+  if (!localPackage.symlinkTargetFolderPath) {
+    // Program bug
+    throw Error('localPackage.symlinkTargetFolderPath was not assigned');
+  }
+
+  // This is special case for when localPackage.name has the form '@scope/name',
+  // in which case we need to create the '@scope' folder first.
+  const parentFolderPath: string = path.dirname(localPackage.folderPath);
+  if (parentFolderPath && parentFolderPath !== localPackage.folderPath) {
+    if (!fs.existsSync(parentFolderPath)) {
+      Utilities.createFolderWithRetry(parentFolderPath);
+    }
+  }
+
+  if (localPackage.children.length === 0) {
+    // If there are no children, then we can symlink the entire folder
+    createSymlink(localPackage.symlinkTargetFolderPath, localPackage.folderPath, 'junction');
   } else {
-    if (!localPackage.symlinkTargetFolderPath) {
-      // Program bug
-      throw Error('localPackage.symlinkTargetFolderPath was not assigned');
-    }
+    // If there are children, then we need to symlink each item in the folder individually
+    Utilities.createFolderWithRetry(localPackage.folderPath);
 
-    // This is special case for when localPackage.name has the form '@scope/name',
-    // in which case we need to create the '@scope' folder first.
-    const parentFolderPath: string = path.dirname(localPackage.folderPath);
-    if (parentFolderPath && parentFolderPath !== localPackage.folderPath) {
-      if (!fs.existsSync(parentFolderPath)) {
-        Utilities.createFolderWithRetry(parentFolderPath);
-      }
-    }
+    for (let filename of fs.readdirSync(localPackage.symlinkTargetFolderPath)) {
+      if (filename.toLowerCase() !== 'node_modules') {
+        // Create the symlink
+        let linkType: string = 'file';
 
-    if (localPackage.children.length === 0) {
-      // If there are no children, then we can symlink the entire folder
-      createSymlink(localPackage.symlinkTargetFolderPath, localPackage.folderPath, 'junction');
-    } else {
-      // If there are children, then we need to symlink each item in the folder individually
-      Utilities.createFolderWithRetry(localPackage.folderPath);
+        const linkSource: string = path.join(localPackage.folderPath, filename);
+        let linkTarget: string = path.join(localPackage.symlinkTargetFolderPath, filename);
 
-      for (let filename of fs.readdirSync(localPackage.symlinkTargetFolderPath)) {
-        if (filename.toLowerCase() !== 'node_modules') {
-          // Create the symlink
-          let linkType: string = 'file';
+        const linkStats: fs.Stats = fs.lstatSync(linkTarget);
 
-          const linkSource: string = path.join(localPackage.folderPath, filename);
-          let linkTarget: string = path.join(localPackage.symlinkTargetFolderPath, filename);
-
-          const linkStats: fs.Stats = fs.lstatSync(linkTarget);
-
-          if (linkStats.isSymbolicLink()) {
-            const targetStats: fs.Stats = fs.statSync(linkTarget);
-            if (targetStats.isDirectory()) {
-              // Neither a junction nor a directory-symlink can have a directory-symlink
-              // as its target; instead, we must obtain the real physical path.
-              // A junction can link to another junction.  Unfortunately, the node 'fs' API
-              // lacks the ability to distinguish between a junction and a directory-symlink
-              // (even though it has the ability to create them both), so the safest policy
-              // is to always make a junction and always to the real physical path.
-              linkTarget = fs.realpathSync(linkTarget);
-              linkType = 'junction';
-            }
-          } else if (linkStats.isDirectory()) {
+        if (linkStats.isSymbolicLink()) {
+          const targetStats: fs.Stats = fs.statSync(linkTarget);
+          if (targetStats.isDirectory()) {
+            // Neither a junction nor a directory-symlink can have a directory-symlink
+            // as its target; instead, we must obtain the real physical path.
+            // A junction can link to another junction.  Unfortunately, the node 'fs' API
+            // lacks the ability to distinguish between a junction and a directory-symlink
+            // (even though it has the ability to create them both), so the safest policy
+            // is to always make a junction and always to the real physical path.
+            linkTarget = fs.realpathSync(linkTarget);
             linkType = 'junction';
           }
-
-          createSymlink(linkTarget, linkSource, linkType);
+        } else if (linkStats.isDirectory()) {
+          linkType = 'junction';
         }
+
+        createSymlink(linkTarget, linkSource, linkType);
       }
     }
   }
@@ -107,7 +104,35 @@ function createSymlinks(localPackage: Package): void {
     Utilities.createFolderWithRetry(localModuleFolder);
 
     for (let child of localPackage.children) {
-      createSymlinks(child);
+      createSymlinksForDependencies(child);
+    }
+  }
+}
+
+/**
+ * For a Package object that represents a top-level Rush project folder
+ * (i.e. with source code that we will be building), this clears out its
+ * node_modules folder and then recursively creates all the symlinked folders.
+ */
+function createSymlinksForTopLevelProject(localPackage: Package): void {
+  const localModuleFolder: string = path.join(localPackage.folderPath, 'node_modules');
+
+  // Sanity check
+  if (localPackage.parent) {
+    throw new Error('The provided package is not a top-level project');
+  }
+
+  // The root-level folder is the project itself, so we simply delete its node_modules
+  // to start clean
+  console.log('Purging ' + localModuleFolder);
+  Utilities.dangerouslyDeletePath(localModuleFolder);
+  console.log('Done');
+
+  if (localPackage.children.length > 0) {
+    Utilities.createFolderWithRetry(localModuleFolder);
+
+    for (let child of localPackage.children) {
+      createSymlinksForDependencies(child);
     }
   }
 }
@@ -252,7 +277,7 @@ function linkProject(
   // to the console:
   // localProjectPackage.printTree();
 
-  createSymlinks(localProjectPackage);
+  createSymlinksForTopLevelProject(localProjectPackage);
 
   // Also symlink the ".bin" folder
   if (localProjectPackage.children.length > 0) {
