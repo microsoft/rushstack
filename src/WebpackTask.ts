@@ -3,9 +3,21 @@ import { GulpTask } from 'gulp-core-build';
 import gulp = require('gulp');
 
 export interface IWebpackTaskConfig {
+  /**
+   * Path to a webpack config. A path to a config takes precidence over the "config" ooption.
+   */
   configPath: string;
+
+  /**
+   * Webpack config object. If a path is specified by "configPath," and it is valid, this option is ignored.
+   */
   config?: Webpack.Configuration;
-  suppressWarnings?: string[];
+
+  /**
+   * An array of regular expressions or regular expression strings. If a warning matches any of them, it
+   * will not be logged.
+   */
+  suppressWarnings?: (string | RegExp)[];
 }
 
 export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
