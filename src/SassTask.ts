@@ -1,7 +1,6 @@
-import {
-  GulpTask
-} from 'gulp-core-build';
+import { GulpTask } from 'gulp-core-build';
 import gulp = require('gulp');
+import { EOL } from 'os';
 
 const scssTsExtName = '.scss.ts';
 
@@ -106,6 +105,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
 
           if (classNames) {
             const classNamesLines = [
+              '/* tslint:disable */',
               'const styles = {'
             ];
 
@@ -127,11 +127,13 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
               classNamesLines.push(line);
             });
 
-            classNamesLines.push('};');
-            classNamesLines.push('');
-            classNamesLines.push('export default styles;');
+            classNamesLines.push(
+              '};',
+              '',
+              'export default styles;',
+              '/* tslint:enable */');
 
-            exportClassNames = classNamesLines.join('\n');
+            exportClassNames = classNamesLines.join(EOL);
           }
 
           let lines = [];
@@ -153,7 +155,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
             ];
           }
 
-          return lines.join('\n').replace(/\n\n+/, '\n\n');
+          return lines.join(EOL).replace(new RegExp(`${EOL}${EOL}+`), `${EOL}${EOL}`);
         }
       }))
       .pipe(gulp.dest('src')));
