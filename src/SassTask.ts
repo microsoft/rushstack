@@ -150,7 +150,9 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
               '',
               exportClassNames,
               '',
+              '/* tslint:disable:max-line-length */',
               `loadStyles(${_flipDoubleQuotes(JSON.stringify(content))});`,
+              '/* tslint:enable:max-line-length */',
               ''
             ];
           }
