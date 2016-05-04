@@ -18,23 +18,25 @@ preCopy.name = 'pre-copy';
 export const postCopy = new CopyTask();
 postCopy.name = 'post-copy';
 
+const sourceMatch = [
+  'src/**/*.{ts,tsx,scss,js,txt,html}',
+  '!src/**/*.scss.ts'
+];
+
 // Define default task groups.
 let buildTasks = task('build', serial(preCopy, sass, parallel(tslint, typescript, text), postCopy));
 let bundleTasks = task('bundle', serial(buildTasks, webpack));
 
-task('test', serial(buildTasks, karma));
+task('test', serial(sass, parallel(typescript, text), karma));
+
+task('test-watch', watch(sourceMatch, serial(sass, parallel(typescript, text), karma)));
 
 // For watch scenarios like serve, make sure to exclude generated files from src (like *.scss.ts.)
 task('serve',
   serial(
     bundleTasks,
     serve,
-    watch(
-      [
-        'src/**/*.{ts,tsx,scss,js,txt,html}',
-        '!src/**/*.scss.ts'
-      ],
-      serial(preCopy, sass, parallel(typescript, text), postCopy, webpack, reload)
+    watch(sourceMatch, serial(preCopy, sass, parallel(typescript, text), postCopy, webpack, reload)
     )
   )
 );
