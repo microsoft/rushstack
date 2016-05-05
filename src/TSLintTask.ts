@@ -3,6 +3,7 @@ import gulpType = require('gulp');
 import through2 = require('through2');
 import gutil = require('gulp-util');
 import tslint = require('tslint');
+import { merge } from 'lodash';
 import * as path from 'path';
 import * as lintTypes from 'tslint/lib/lint';
 import * as ts from 'typescript';
@@ -11,6 +12,7 @@ export interface ITSLintTaskConfig {
   /* tslint:disable:no-any */
   lintConfig?: any;
   /* tslint:enable:no-any */
+  useOldConfig?: boolean; // TEMPORARY FLAG
   rulesDirectory?: string | string[];
   sourceMatch?: string[];
   reporter?: (result: lintTypes.LintResult, file: gutil.File, options: ITSLintTaskConfig) => void;
@@ -19,7 +21,8 @@ export interface ITSLintTaskConfig {
 export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
   public name: string = 'tslint';
   public taskConfig: ITSLintTaskConfig = {
-    lintConfig: require('../lib/defaultTslint.json'),
+    // lintConfig: require('../lib/defaultTslint.json'),
+    lintConfig: {},
     reporter: (result: lintTypes.LintResult, file: gutil.File, options: ITSLintTaskConfig): void => {
       for (const failure of result.failures) {
         const pathFromRoot: string = path.relative(this.buildConfig.rootPath, file.path);
@@ -37,13 +40,21 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
     sourceMatch: [
       'src/**/*.ts',
       'src/**/*.tsx'
-    ]
+    ],
+    useOldConfig: false
   };
 
   public executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream {
     const taskScope: TSLintTask = this;
 
     if (this.taskConfig.lintConfig) {
+      /* tslint:disable:no-any */
+      const defaultConfig: any = this.taskConfig.useOldConfig
+      /* tslint:enable:no-any */
+        ? require('./defaultTslint_oldRules.json')
+        : require('./defaultTslint.json');
+      this.taskConfig.lintConfig = merge(defaultConfig, this.taskConfig.lintConfig);
+
       return gulp.src(this.taskConfig.sourceMatch)
         .pipe(through2.obj(function(
           file: gutil.File,
