@@ -8,7 +8,7 @@ import * as lintTypes from 'tslint/lib/lint';
 
 export interface ITSLintTaskConfig {
   lintConfig?: any;
-  rulesDirectory?: string;
+  rulesDirectory?: string | string[];
   sourceMatch?: string[];
   reporter?: (result: lintTypes.LintResult, file: gutil.File, options: ITSLintTaskConfig) => void;
 }
