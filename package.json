@@ -14,6 +14,7 @@
     "gulp-texttojs": "~1.0.3",
     "gulp-typescript": "2.12.1",
     "gulp-util": "3.0.7",
+    "lodash": "^4.11.2",
     "merge2": "1.0.1",
     "object-assign": "4.0.1",
     "through2": "2.0.1",
