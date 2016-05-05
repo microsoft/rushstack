@@ -24,24 +24,12 @@ export interface ITypeScriptTaskConfig {
 }
 
 export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
-  public name = 'typescript';
+  public name: string = 'typescript';
 
   public taskConfig: ITypeScriptTaskConfig = {
     failBuildOnErrors: true,
-    sourceMatch: [
-      'src/**/*.ts',
-      'src/**/*.tsx',
-      'typings/main/**/*.ts',
-      'typings/main.d.ts',
-      'typings/tsd.d.ts'
-    ],
-    staticMatch: [
-      'src/**/*.js',
-      'src/**/*.json',
-      'src/**/*.jsx'
-    ],
     reporter: {
-      error: (error: ITypeScriptErrorObject) => {
+      error: (error: ITypeScriptErrorObject): void => {
         const errorMessage: string = (typeof error.diagnostic.messageText === 'object') ?
           (error.diagnostic.messageText as { messageText: string }).messageText :
           error.diagnostic.messageText as string;
@@ -54,30 +42,47 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
           errorMessage);
       }
     },
+    sourceMatch: [
+      'src/**/*.ts',
+      'src/**/*.tsx',
+      'typings/main/**/*.ts',
+      'typings/main.d.ts',
+      'typings/tsd.d.ts'
+    ],
+    staticMatch: [
+      'src/**/*.js',
+      'src/**/*.json',
+      'src/**/*.jsx'
+    ]
   };
 
-  private _tsProject;
+  private _tsProject: ts.Project;
 
-  public executeTask(gulp: gulpType.Gulp, completeCallback: (result?: any) => void) {
-    let plumber = require('gulp-plumber');
-    let sourcemaps = require('gulp-sourcemaps');
-    let assign = require('object-assign');
-    let merge = require('merge2');
-    let errorCount = 0;
-    let allStreams = [];
-    let tsConfig = this.readJSONSync('tsconfig.json') || require('../tsconfig.json');
+  public executeTask(gulp: gulpType.Gulp, completeCallback: (result?: string) => void): void {
+    /* tslint:disable:typedef */
+    const plumber = require('gulp-plumber');
+    const sourcemaps = require('gulp-sourcemaps');
+    const assign = require('object-assign');
+    const merge = require('merge2');
+    /* tslint:enable:typedef */
 
-    let tsCompilerOptions = assign({}, tsConfig.compilerOptions, {
-      sortOutput: true,
-      module: 'commonjs'
+    let errorCount: number = 0;
+    const allStreams: NodeJS.ReadWriteStream[] = [];
+    const tsConfig: ts.TsConfig = this.readJSONSync('tsconfig.json') || require('../tsconfig.json');
+
+    const tsCompilerOptions: ts.Params = assign({}, tsConfig.compilerOptions, {
+      module: 'commonjs',
+      sortOutput: true
     });
 
-    let tsProject = this._tsProject = this._tsProject || ts.createProject(tsCompilerOptions);
+    const tsProject: ts.Project = this._tsProject = this._tsProject || ts.createProject(tsCompilerOptions);
 
-    let { libFolder, libAMDFolder } = this.buildConfig;
-    let tsResult = gulp.src(this.taskConfig.sourceMatch)
+    /* tslint:disable:typedef */
+    const { libFolder, libAMDFolder } = this.buildConfig;
+    /* tslint:enable:typedef */
+    let tsResult: ts.CompilationStream = gulp.src(this.taskConfig.sourceMatch)
       .pipe(plumber({
-        errorHandler: function(error: any) {
+        errorHandler: (): void => {
           errorCount++;
         }
       }))
@@ -91,7 +96,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     allStreams.push(tsResult.dts.pipe(gulp.dest(libFolder)));
 
     // Static passthrough files.
-    let staticSrc = gulp.src(this.taskConfig.staticMatch);
+    const staticSrc: NodeJS.ReadWriteStream = gulp.src(this.taskConfig.staticMatch);
 
     allStreams.push(
       staticSrc.pipe(gulp.dest(libFolder)));
@@ -101,11 +106,11 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       allStreams.push(
         staticSrc.pipe(gulp.dest(libAMDFolder)));
 
-      let tsAMDProject = ts.createProject(assign({}, tsCompilerOptions, { module: 'amd' }));
+      const tsAMDProject: ts.Project = ts.createProject(assign({}, tsCompilerOptions, { module: 'amd' }));
 
       tsResult = gulp.src(this.taskConfig.sourceMatch)
         .pipe(plumber({
-          errorHandler: function(error: any) {
+          errorHandler: (): void => {
             errorCount++;
           }
         }))

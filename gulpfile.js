@@ -1,6 +1,11 @@
 'use strict';
 
-var build = require('node-library-build');
+const tslint = require('tslint');
+const build = require('node-library-build');
+build.tslint.setConfig({
+  lintConfig: require('./src/defaultTslint.json'),
+  rulesDirectory: tslint.getRulesDirectories(tslint.getRulesDirectories([ './node_modules/tslint-microsoft-contrib' ], __dirname))
+});
 
 build.typescript.setConfig({
   sourceMatch: [
