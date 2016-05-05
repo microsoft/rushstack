@@ -6,19 +6,21 @@ export interface ITextTaskConfig {
 }
 
 export class TextTask extends GulpTask<ITextTaskConfig> {
-  public name = 'text';
+  public name: string = 'text';
   public taskConfig: ITextTaskConfig = {
     textMatch: ['src/**/*.txt']
   };
 
-  public executeTask(gulp: gulpType.Gulp) {
-    let merge = require('merge2');
-    let texttojs = require('gulp-texttojs');
-    let { textMatch } = this.taskConfig;
-    let { libFolder, libAMDFolder } = this.buildConfig;
+  public executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream {
+    /* tslint:disable:typedef */
+    const merge = require('merge2');
+    const texttojs = require('gulp-texttojs');
+    const { textMatch } = this.taskConfig;
+    const { libFolder, libAMDFolder } = this.buildConfig;
+    /* tslint:enable:typedef */
 
     if (textMatch) {
-      let commonJSTextStream = gulp.src(textMatch)
+      const commonJSTextStream: NodeJS.ReadWriteStream = gulp.src(textMatch)
         .pipe(texttojs({
           template: 'module.exports = <%= content %>;',
 
@@ -37,5 +39,4 @@ export class TextTask extends GulpTask<ITextTaskConfig> {
       }
     }
   }
-
 }

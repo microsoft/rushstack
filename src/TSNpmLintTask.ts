@@ -1,5 +1,7 @@
 import gulp = require('gulp');
+/* tslint:disable:typedef */
 const tsdLinter = require('ts-npm-lint');
+/* tslint:enable:typedef */
 
 import {
   GulpTask
@@ -9,7 +11,7 @@ export interface ITSNPMLintTaskConfig {
 }
 
 export class TSNpmLintTask extends GulpTask<ITSNPMLintTaskConfig> {
-  public name = 'ts-npm-lint';
+  public name: string = 'ts-npm-lint';
 
   public taskConfig: ITSNPMLintTaskConfig = {
   };
