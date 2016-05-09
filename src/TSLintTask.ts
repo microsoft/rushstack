@@ -3,29 +3,31 @@ import gulpType = require('gulp');
 import through2 = require('through2');
 import gutil = require('gulp-util');
 import tslint = require('tslint');
+import { merge } from 'lodash';
 import * as path from 'path';
 import * as lintTypes from 'tslint/lib/lint';
+import * as ts from 'typescript';
 
 export interface ITSLintTaskConfig {
+  /* tslint:disable:no-any */
   lintConfig?: any;
-  rulesDirectory?: string;
+  /* tslint:enable:no-any */
+  useOldConfig?: boolean; // TEMPORARY FLAG
+  rulesDirectory?: string | string[];
   sourceMatch?: string[];
   reporter?: (result: lintTypes.LintResult, file: gutil.File, options: ITSLintTaskConfig) => void;
 }
 
 export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
-  public name = 'tslint';
+  public name: string = 'tslint';
   public taskConfig: ITSLintTaskConfig = {
-    lintConfig: require('../lib/defaultTslint.json'),
-    sourceMatch: [
-      'src/**/*.ts',
-      'src/**/*.tsx'
-    ],
-    reporter: (result: lintTypes.LintResult, file: gutil.File, options: ITSLintTaskConfig) => {
-      for (let failure of result.failures) {
-        let pathFromRoot = path.relative(this.buildConfig.rootPath, file.path);
+    // lintConfig: require('../lib/defaultTslint.json'),
+    lintConfig: {},
+    reporter: (result: lintTypes.LintResult, file: gutil.File, options: ITSLintTaskConfig): void => {
+      for (const failure of result.failures) {
+        const pathFromRoot: string = path.relative(this.buildConfig.rootPath, file.path);
 
-        let start = failure.getStartPosition().getLineAndCharacter();
+        const start: ts.LineAndCharacter = failure.getStartPosition().getLineAndCharacter();
         this.fileError(
           pathFromRoot,
           start.line + 1,
@@ -33,21 +35,34 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
           failure.getRuleName(),
           failure.getFailure());
       }
-    }
+    },
+    rulesDirectory: tslint.getRulesDirectories([ './../node_modules/tslint-microsoft-contrib' ], __dirname),
+    sourceMatch: [
+      'src/**/*.ts',
+      'src/**/*.tsx'
+    ],
+    useOldConfig: false
   };
 
-  public executeTask(gulp: gulpType.Gulp) {
-    let taskScope = this;
+  public executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream {
+    const taskScope: TSLintTask = this;
 
     if (this.taskConfig.lintConfig) {
+      /* tslint:disable:no-any */
+      const defaultConfig: any = this.taskConfig.useOldConfig
+      /* tslint:enable:no-any */
+        ? require('./defaultTslint_oldRules.json')
+        : require('./defaultTslint.json');
+      this.taskConfig.lintConfig = merge(defaultConfig, this.taskConfig.lintConfig);
+
       return gulp.src(this.taskConfig.sourceMatch)
         .pipe(through2.obj(function(
           file: gutil.File,
           encoding: string,
-          callback: (encoding?: string, file?: gutil.File) => void) {
+          callback: (encoding?: string, file?: gutil.File) => void): void {
           // Lint the file
           if (file.isNull()) {
-            return callback(null, file);
+            return callback(undefined, file);
           }
 
           // Stream is not supported
@@ -56,16 +71,16 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
             return callback();
           }
 
-          let options = {
-            formatter: 'json',
+          const options: lintTypes.ILinterOptions = {
             configuration: taskScope.taskConfig.lintConfig,
-            rulesDirectory: taskScope.taskConfig.rulesDirectory || null,
-            formattersDirectory: null // not used, use reporters instead
+            formatter: 'json',
+            formattersDirectory: undefined, // not used, use reporters instead
+            rulesDirectory: taskScope.taskConfig.rulesDirectory || []
           };
 
-          let tslintOutput = new tslint(file.relative, (<any>file.contents).toString('utf8'), options);
+          const tslintOutput: tslint = new tslint(file.relative, file.contents.toString('utf8'), options);
           /* tslint:disable:no-string-literal */
-          let result = file['tslint'] = tslintOutput.lint();
+          const result: lintTypes.LintResult = file['tslint'] = tslintOutput.lint();
           /* tslint:enable:no-string-literal */
 
           if (result.failureCount > 0) {
