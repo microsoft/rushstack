@@ -1,10 +1,13 @@
 import { GulpTask } from 'gulp-core-build';
 import gulp = require('gulp');
 import { EOL } from 'os';
+import { splitStyles } from 'load-themed-styles';
 
 const scssTsExtName = '.scss.ts';
 
 export interface ISassTaskConfig {
+  preamble?: string;
+  postamble?: string;
   sassMatch?: string[];
   useCSSModules?: boolean;
   dropCssFiles?: boolean;
@@ -18,6 +21,8 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
   public name = 'sass';
 
   public taskConfig: ISassTaskConfig = {
+    preamble: '/* tslint:disable */',
+    postamble: '/* tslint:enable */',
     sassMatch: [
       'src/**/*.scss'
     ],
@@ -105,7 +110,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
 
           if (classNames) {
             const classNamesLines = [
-              '/* tslint:disable */',
+              this.taskConfig.preamble || '',
               'const styles = {'
             ];
 
@@ -131,7 +136,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
               '};',
               '',
               'export default styles;',
-              '/* tslint:enable */');
+              this.taskConfig.postamble || '');
 
             exportClassNames = classNamesLines.join(EOL);
           }
@@ -150,14 +155,14 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
               '',
               exportClassNames,
               '',
-              '/* tslint:disable:max-line-length */',
-              `loadStyles(${_flipDoubleQuotes(JSON.stringify(content))});`,
-              '/* tslint:enable:max-line-length */',
+              this.taskConfig.preamble || '',
+              `loadStyles(${JSON.stringify(splitStyles(content))});`,
+              this.taskConfig.postamble || '',
               ''
             ];
           }
 
-          return lines.join(EOL).replace(new RegExp(`${EOL}(${EOL})+`), `${EOL}${EOL}`);
+          return lines.join(EOL).replace(new RegExp(`${EOL}{3,}`, 'g'), `${EOL}${EOL}`);
         }
       }))
       .pipe(gulp.dest('src')));
@@ -185,14 +190,4 @@ function _patchSassUrl(url: string) {
   }
 
   return url;
-}
-
-function _flipDoubleQuotes(str: string) {
-  return str ? (
-    str
-      .replace(/\\"/g, '`')
-      .replace(/'/g, '\\\'')
-      .replace(/"/g, `'`)
-      .replace(/`/g, '"')
-  ) : str;
 }
