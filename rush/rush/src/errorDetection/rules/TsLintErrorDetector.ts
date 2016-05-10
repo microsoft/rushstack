@@ -8,24 +8,22 @@
 import { IErrorDetectionRule, RegexErrorDetector } from '../ErrorDetector';
 import { BuildTaskError } from '../TaskError';
 
-// Example: "[22:50:27] [gulp-tslint] error blah/test.ts[84, 20]: syntax error"
+// Example: "[20:22:07] Error - tslint - src\Cache.ts(5,8): error no-any: 'any' is not allowed"
 // 0: input
-// 1: "[22:50:27]"
-// 2: "[gulp-tslint]"
-// 3: "(no-consecutive-blank-lines)"
-// 4: "c:/src/blah/test.ts"
-// 5: "84, 20"
-// 6: "consecutive blank lines are disallowed"
+// 1: "[20:22:07]"
+// 2: "src\Cache.ts"
+// 3: "5"
+// 4: "8"
+// 5: "error no-any: 'any' is not allowed"
 export default RegexErrorDetector(
-  /(\[[^\]]+\]) *(\[[^\]]+\]) error *(\([^ ]+\)) *([^[]+) *\[([^\]]+)\]: *(.*)/,
+  /^\s*(\[[^\]]+\])\s*Error\s*-\s*tslint\s*-\s*([^(]+)\(([0-9]+)\s*,\s*([0-9]+)\):\s*(.*)\s*$/,
   (match: RegExpExecArray) => {
-    const [line, offset] = match[5].split(',');
     return new BuildTaskError(
-      'tslint',
-      `${match[3]} ${match[6]}`,
-      match[4],
-      Number(line),
-      Number(offset)
+      'tslint',         // type
+      match[5],         // message
+      match[2],         // file
+      Number(match[3]), // line
+      Number(match[4])  // offset
     );
   }
 ) as IErrorDetectionRule;

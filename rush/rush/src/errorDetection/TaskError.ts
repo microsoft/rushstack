@@ -45,6 +45,7 @@ export class BuildTaskError extends TaskError {
   }
 
   public toString(mode: ErrorDetectionMode) {
+    // Example: "C:\Project\Blah.ts(123, 1): [tslint] error no-any: 'any' is not allowed"
     const errorMessage = `${this._file}(${this._line}, ${this._offset}): [${this._type}] ${this._message}`;
     return this._appendPrefix(errorMessage, mode);
   }
