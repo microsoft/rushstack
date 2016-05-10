@@ -22,8 +22,7 @@ export class TextTask extends GulpTask<ITextTaskConfig> {
     if (textMatch) {
       const commonJSTextStream: NodeJS.ReadWriteStream = gulp.src(textMatch)
         .pipe(texttojs({
-          template: 'module.exports = <%= content %>;',
-
+          template: 'module.exports = <%= content %>;'
         }))
         .pipe(gulp.dest(libFolder));
 
