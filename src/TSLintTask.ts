@@ -36,7 +36,11 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
           failure.getFailure());
       }
     },
-    rulesDirectory: tslint.getRulesDirectories([ './../node_modules/tslint-microsoft-contrib' ], __dirname),
+    rulesDirectory: ((): string[] => {
+      const msCustomRulesMain: string = require.resolve('tslint-microsoft-contrib');
+      const msCustomRulesDirectory: string = path.dirname(msCustomRulesMain);
+      return tslint.getRulesDirectories([ msCustomRulesDirectory ], __dirname);
+    })(),
     sourceMatch: [
       'src/**/*.ts',
       'src/**/*.tsx'
