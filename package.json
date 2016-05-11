@@ -20,7 +20,7 @@
     "through2": "2.0.1",
     "ts-npm-lint": "0.1.0",
     "tslint": "3.6.0",
-    "tslint-microsoft-contrib": "2.0.3",
+    "tslint-microsoft-contrib": "2.0.5",
     "typescript": "1.8.9"
   },
   "devDependencies": {
