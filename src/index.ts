@@ -10,15 +10,30 @@ export interface IThemingInstruction {
 
 export type ThemableArray = Array<IThemingInstruction>;
 
+interface IThemeState {
+  theme: { [key: string]: string };
+  lastStyleElement: HTMLStyleElement;
+  registeredStyles: IStyleRecord[];
+}
+
 interface IStyleRecord {
   styleElement: Element;
   themableStyle: ThemableArray;
 };
 
-let _lastStyleElement: any = null;
-let _theme = null;
-let _areUnlimitedStylesheetsSupported = null; // lazily intialize
-let _registeredStyles: IStyleRecord[] = [] as IStyleRecord[];
+// IE needs to inject styles using cssText. However, we need to evaluate this lazily, so this
+// value will initialize as undefined, and later will be set once on first loadStyles injection.
+let _injectStylesWithCssText: boolean;
+
+// Store the theming state in __themeState__ global scope for reuse in the case of duplicate
+// load-themed-styles hosted on the page.
+const _root: any = (typeof window === 'undefined') ? {} : window;
+
+const _themeState: IThemeState = _root.__themeState__ = _root.__themeState__ || {
+  theme: null,
+  lastStyleElement: null,
+  registeredStyles: []
+};
 
 /**
  * Matches theming tokens. For example, "[theme: themeSlotName, default: #FFF]" (including the quotes).
@@ -36,11 +51,12 @@ const MAX_STYLE_CONTENT_SIZE = 10000;
  * @param {string | ThemableArray} styles Themable style text to register.
  */
 export function loadStyles(styles: string | ThemableArray) {
-  if (_areUnlimitedStylesheetsSupported === null) {
-    _areUnlimitedStylesheetsSupported = !shouldUseCssText();
+  let styleParts: ThemableArray = Array.isArray(styles) ? styles : splitStyles(styles);
+
+  if (_injectStylesWithCssText === undefined) {
+    _injectStylesWithCssText = shouldUseCssText();
   }
 
-  let styleParts: ThemableArray = Array.isArray(styles) ? styles : splitStyles(styles);
   applyThemableStyles(styleParts);
 }
 
@@ -51,9 +67,9 @@ export function loadStyles(styles: string | ThemableArray) {
  * @param {IStyleRecord} styleRecord Existing style record to re-apply.
  */
 function applyThemableStyles(styles: ThemableArray, styleRecord?: IStyleRecord) {
-  _areUnlimitedStylesheetsSupported ?
-    registerStyles(styles, styleRecord) :
-    registerStylesIE(styles, styleRecord);
+  _injectStylesWithCssText ?
+    registerStylesIE(styles, styleRecord) :
+    registerStyles(styles, styleRecord);
 }
 
 /**
@@ -62,7 +78,7 @@ function applyThemableStyles(styles: ThemableArray, styleRecord?: IStyleRecord) 
  * @param {any} theme JSON object of theme tokens to values.
  */
 export function loadTheme(theme: any) {
-  _theme = theme;
+  _themeState.theme = theme;
 
   // reload styles.
   reloadStyles();
@@ -73,8 +89,8 @@ export function loadTheme(theme: any) {
  * @param {any} theme JSON object of theme tokens to values.
  */
 function reloadStyles(): void {
-  if (_theme) {
-    for (let styleRecord of _registeredStyles) {
+  if (_themeState.theme) {
+    for (let styleRecord of _themeState.registeredStyles) {
       applyThemableStyles(styleRecord.themableStyle, styleRecord);
     }
   }
@@ -97,6 +113,7 @@ export function detokenize(styles: string): string {
  * @param {ThemableArray} splitStyleArray ThemableArray to resolve and join.
  */
 function resolveThemableArray(splitStyleArray: ThemableArray): string {
+  let { theme } = _themeState;
   let resolvedCss: string;
   if (splitStyleArray) {
     // Resolve the array of theming instructions to an array of strings.
@@ -105,12 +122,12 @@ function resolveThemableArray(splitStyleArray: ThemableArray): string {
       let themeSlot = currentValue.theme;
       if (themeSlot != null) {
         // A theming annotation. Resolve it.
-        let themedValue = _theme ? _theme[themeSlot] : null;
+        let themedValue = theme ? theme[themeSlot] : null;
         let defaultValue = currentValue.defaultValue;
 
         // Warn to console if we hit an unthemed value even when themes are provided.
         // Allow the themedValue to be null to explicitly request the default value.
-        if (_theme && !themedValue && console && !(themeSlot in _theme)) {
+        if (theme && !themedValue && console && !(themeSlot in theme)) {
           /* tslint:disable: max-line-length */
           console.warn(`Theming value not provided for "${themeSlot}". Falling back to "${defaultValue || 'inherit'}".`);
           /* tslint:enable: max-line-length */
@@ -185,7 +202,7 @@ function registerStyles(styleArray: ThemableArray, styleRecord?: IStyleRecord): 
   }
 
   if (!styleRecord) {
-    _registeredStyles.push({
+    _themeState.registeredStyles.push({
       styleElement: styleElement,
       themableStyle: styleArray
     });
@@ -200,33 +217,38 @@ function registerStyles(styleArray: ThemableArray, styleRecord?: IStyleRecord): 
  */
 function registerStylesIE(styleArray: ThemableArray, styleRecord?: IStyleRecord) {
   let head = document.getElementsByTagName('head')[0];
-  let stylesheet = _lastStyleElement ? (_lastStyleElement as any).styleSheet : null;
+  let { lastStyleElement, registeredStyles } = _themeState;
+
+  let stylesheet = lastStyleElement ? (lastStyleElement as any).styleSheet : null;
   let lastStyleContent = stylesheet ? stylesheet.cssText : '';
-  let lastRegisteredStyle = _registeredStyles[_registeredStyles.length - 1];
+  let lastRegisteredStyle = registeredStyles[registeredStyles.length - 1];
   let resolvedStyleText = resolveThemableArray(styleArray);
 
-  if (!_lastStyleElement || (lastStyleContent.length + resolvedStyleText.length) > MAX_STYLE_CONTENT_SIZE) {
-    _lastStyleElement = document.createElement('style');
-    _lastStyleElement.type = 'text/css';
+  if (!lastStyleElement || (lastStyleContent.length + resolvedStyleText.length) > MAX_STYLE_CONTENT_SIZE) {
+    lastStyleElement = document.createElement('style');
+    lastStyleElement.type = 'text/css';
 
     if (styleRecord) {
-      head.replaceChild(_lastStyleElement, styleRecord.styleElement);
-      styleRecord.styleElement = _lastStyleElement;
+      head.replaceChild(lastStyleElement, styleRecord.styleElement);
+      styleRecord.styleElement = lastStyleElement;
     } else {
-      head.appendChild(_lastStyleElement);
+      head.appendChild(lastStyleElement);
     }
 
     if (!styleRecord) {
       lastRegisteredStyle = {
-        styleElement: _lastStyleElement,
+        styleElement: lastStyleElement,
         themableStyle: styleArray
       };
-      _registeredStyles.push(lastRegisteredStyle);
+      registeredStyles.push(lastRegisteredStyle);
     }
   }
 
-  _lastStyleElement.styleSheet.cssText += detokenize(resolvedStyleText);
+  (lastStyleElement as any).styleSheet.cssText += detokenize(resolvedStyleText);
   Array.prototype.push.apply(lastRegisteredStyle.themableStyle, styleArray); // concat in-place
+
+  // Preserve the theme state.
+  _themeState.lastStyleElement = lastStyleElement;
 }
 
 /**
