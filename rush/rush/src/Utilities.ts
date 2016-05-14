@@ -4,7 +4,7 @@
 
 import * as fs from 'fs';
 import * as os from 'os';
-import * as del from 'del';
+import * as rimraf from 'rimraf';
 
 export default class Utilities {
   /**
@@ -68,7 +68,7 @@ export default class Utilities {
    */
   public static dangerouslyDeletePath(folderPath: string): void {
     try {
-      del.sync(folderPath, { force: true });
+      rimraf.sync(folderPath);
     } catch (e) {
       throw new Error(e.message + os.EOL + 'Often this is caused by a file lock'
         + ' from a process such as your text editor, command prompt, or "gulp serve"');

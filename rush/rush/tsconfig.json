@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ES5",
     "module": "commonjs",
     "jsx": "react",
     "declaration": true,
     "sourceMap": true,
     "experimentalDecorators": true,
     "outDir": "lib",
-    "listFiles": true
+    "listFiles": false
   },
   "files": [
     "src/ExecuteBuild.ts",
@@ -19,6 +19,9 @@
     "src/PackageLookup.ts",
     "src/ProjectBuildTask.ts",
     "src/Utilities.ts",
+    "src/commandLine/CommandLineAction.ts",
+    "src/commandLine/CommandLineParameter.ts",
+    "src/commandLine/CommandLineParser.ts",
     "src/errorDetection/ErrorDetector.ts",
     "src/errorDetection/TaskError.ts",
     "src/errorDetection/rules/TestErrorDetector.ts",
