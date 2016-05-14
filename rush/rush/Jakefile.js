@@ -30,7 +30,7 @@ task('default', ['build'], function (params) {
 }, false);
 
 desc('Build everything');
-task('build', ['lib/rush.js', 'lib/tslint.txt', 'lib/rush-schema.json'], function (params) {
+task('build', ['lib/rush.js', /* 'lib/tslint.txt', */ 'lib/rush-schema.json'], function (params) {
   console.log('\nFINISHED TASK: build');
 }, false);
 
@@ -43,7 +43,9 @@ file('lib/rush.js', sourceDeps, function () {
 
 desc('Run tslint');
 file('lib/tslint.txt', sourceDeps, function () {
-    execSync('node_modules/.bin/tslint ' + tsFiles.join(' '));
+    execSync('node_modules/.bin/tslint '
+      + '-r node_modules/tslint-microsoft-contrib '
+      + tsFiles.join(' '));
 
     fs.writeFileSync('lib/tslint.txt', 'Done');
 

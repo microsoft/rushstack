@@ -26,7 +26,8 @@
   },
   "devDependencies": {
     "jake": "^8.0.12",
-    "tslint": "^3.2.1",
-    "typescript": "^1.7.3"
+    "tslint": "3.6.0",
+    "tslint-microsoft-contrib": "2.0.3",
+    "typescript": "1.8.9"    
   }
 }
