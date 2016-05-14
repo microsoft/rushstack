@@ -15,11 +15,11 @@ import CommandLineAction from './commandLine/CommandLineAction';
 import CommandLineParser from './commandLine/CommandLineParser';
 import { CommandLineFlag } from './commandLine/CommandLineParameter';
 
-import RushConfig from './RushConfig';
-import executeLink, { IExecuteLinkOptions } from './ExecuteLink';
-import executeBuild, { IExecuteBuildOptions } from './ExecuteBuild';
-import executeUpdate from './ExecuteUpdate';
-import Utilities from './Utilities';
+import RushConfig from './data/RushConfig';
+import executeLink, { IExecuteLinkOptions } from './actions/LinkAction';
+import executeBuild, { IExecuteBuildOptions } from './actions/RebuildAction';
+import executeUpdate from './actions/UpdateAction';
+import Utilities from './utilities/Utilities';
 
 const myPackageJsonFilename: string = path.resolve(path.join(
   module.filename, '..', '..', 'package.json')

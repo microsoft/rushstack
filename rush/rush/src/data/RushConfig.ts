@@ -9,9 +9,9 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
 import Validator = require('z-schema');
-import JsonFile from './JsonFile';
+import JsonFile from '../utilities/JsonFile';
 import RushConfigProject, { IRushConfigProjectJson } from './RushConfigProject';
-import Utilities from './Utilities';
+import Utilities from '../utilities/Utilities';
 
 /**
  * This represents the JSON data structure for the "rush.json" config file.

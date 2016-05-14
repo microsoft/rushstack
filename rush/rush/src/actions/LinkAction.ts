@@ -12,12 +12,12 @@ import * as path from 'path';
 import * as semver from 'semver';
 import readPackageTree = require('read-package-tree');
 
-import JsonFile from './JsonFile';
-import RushConfig, { IRushLinkJson } from './RushConfig';
-import RushConfigProject from './RushConfigProject';
-import Package from './Package';
-import PackageLookup from './PackageLookup';
-import Utilities from './Utilities';
+import JsonFile from '../utilities/JsonFile';
+import RushConfig, { IRushLinkJson } from '../data/RushConfig';
+import RushConfigProject from '../data/RushConfigProject';
+import Package from '../data/Package';
+import PackageLookup from '../data/PackageLookup';
+import Utilities from '../utilities/Utilities';
 
 export interface IExecuteLinkOptions {
   noLocalLinks?: boolean;

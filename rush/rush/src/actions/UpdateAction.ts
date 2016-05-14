@@ -5,9 +5,9 @@
 import * as child_process from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
-import RushConfig from './RushConfig';
-import JsonFile from './JsonFile';
-import Utilities from './Utilities';
+import RushConfig from '../data/RushConfig';
+import JsonFile from '../utilities/JsonFile';
+import Utilities from '../utilities/Utilities';
 
 /**
  * Entry point for the "rush update" command.

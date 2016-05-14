@@ -7,8 +7,8 @@
 
 import * as path from 'path';
 import * as fs from 'fs';
-import JsonFile from './JsonFile';
-import RushConfig from './RushConfig';
+import JsonFile from '../utilities/JsonFile';
+import RushConfig from '../data/RushConfig';
 
 /**
  * This represents the JSON data object for a project entry in the Rush.json config file.

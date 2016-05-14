@@ -7,12 +7,12 @@
  */
 
 import * as colors from 'colors';
-import RushConfig, { IRushLinkJson } from './RushConfig';
-import TaskRunner from './taskRunner/TaskRunner';
-import ProjectBuildTask from './ProjectBuildTask';
-import ErrorDetector, { ErrorDetectionMode } from './errorDetection/ErrorDetector';
-import * as ErrorDetectorRules from './errorDetection/rules/index';
-import JsonFile from './JsonFile';
+import RushConfig, { IRushLinkJson } from '../data/RushConfig';
+import TaskRunner from '../taskRunner/TaskRunner';
+import ProjectBuildTask from '../taskRunner/ProjectBuildTask';
+import ErrorDetector, { ErrorDetectionMode } from '../errorDetection/ErrorDetector';
+import * as ErrorDetectorRules from '../errorDetection/rules/index';
+import JsonFile from '../utilities/JsonFile';
 
 export interface IExecuteBuildOptions {
   production?: boolean;
