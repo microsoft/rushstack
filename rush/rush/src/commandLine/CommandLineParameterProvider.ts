@@ -1,3 +1,7 @@
+/**
+ * @Copyright (c) Microsoft Corporation.  All rights reserved.
+ */
+
 import * as argparse from 'argparse';
 import { ICommandLineFlagDefinition, CommandLineFlagParameter } from './CommandLineParameter';
 
@@ -6,22 +10,29 @@ export interface ICommandLineParserData {
   [key: string]: any;
 }
 
+/**
+ * This is the common base class for CommandLineAction and CommandLineParser
+ * that provides functionality for defining command-line parameters.
+ */
 abstract class CommandLineParameterProvider {
-  static keyCounter: number = 0;
+  private static _keyCounter: number = 0;
 
-  private _parameters: CommandLineFlagParameter[];
   protected argumentParser: argparse.ArgumentParser;
+  private _parameters: CommandLineFlagParameter[];
 
   constructor() {
     this._parameters = [];
   }
 
+  /**
+   * The child class should implement this hook to define its command-line parameters,
+   * e.g. by calling defineFlagParameter().
+   */
   protected abstract onDefineParameters(): void;
 
-  private _createKeyName(): string {
-    return 'key_' + (CommandLineParameterProvider.keyCounter++).toString();
-  }
-
+  /**
+   * Defines a flag parameter.  See ICommandLineFlagDefinition for details.
+   */
   protected defineFlagParameter(options: ICommandLineFlagDefinition): CommandLineFlagParameter {
     let names: string[] = [];
     if (options.parameterShortName) {
@@ -48,6 +59,10 @@ abstract class CommandLineParameterProvider {
     for (const parameter of this._parameters) {
       parameter.value = data[parameter.key];
     }
+  }
+
+  private _createKeyName(): string {
+    return 'key_' + (CommandLineParameterProvider._keyCounter++).toString();
   }
 }
 

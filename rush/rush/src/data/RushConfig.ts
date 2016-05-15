@@ -1,8 +1,5 @@
 /**
- * @file RushConfigLoader.ts
  * @Copyright (c) Microsoft Corporation.  All rights reserved.
- *
- * Provides helper functions to load, validate, and read the rush config file
  */
 
 import * as path from 'path';

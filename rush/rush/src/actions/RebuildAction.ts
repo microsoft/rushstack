@@ -1,9 +1,5 @@
 /**
- * @file ExecuteBuild.ts
  * @Copyright (c) Microsoft Corporation.  All rights reserved.
- *
- * Executes the building of all projects by constructing build tasks
- * and using the TaskRunner to execute them in the proper order
  */
 
 import * as colors from 'colors';

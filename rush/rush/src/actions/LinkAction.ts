@@ -1,9 +1,5 @@
 /**
- * @file ExecuteLink.ts
  * @Copyright (c) Microsoft Corporation.  All rights reserved.
- *
- * For each project, replaces node_modules with links to the modules in the common project.
- * Additionally, adds symlinks for projects with interdependencies.
  */
 
 import * as fs from 'fs';

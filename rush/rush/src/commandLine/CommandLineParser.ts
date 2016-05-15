@@ -1,3 +1,7 @@
+/**
+ * @Copyright (c) Microsoft Corporation.  All rights reserved.
+ */
+
 import * as argparse from 'argparse';
 import CommandLineAction from './CommandLineAction';
 import CommandLineParameterProvider, { ICommandLineParserData } from './CommandLineParameterProvider';
@@ -9,13 +13,20 @@ export interface ICommandListParserOptions {
   toolDescription: string;
 }
 
+/**
+ * The "argparse" library is a relatively advanced command-line parser with features such
+ * as word-wrapping and intelligible error messages (that are lacking in other similar
+ * libraries such as commander, yargs, and nomnom).  Unfortunately, its ruby-inspired API
+ * is awkward to use.  The abstract base classes CommandLineParser and CommandLineAction
+ * provide a wrapper for "argparse" that makes defining and consuming arguments quick
+ * and simple, and enforces that appropriate documentation is provided for each parameter.
+ */
 abstract class CommandLineParser extends CommandLineParameterProvider {
-  private _actionsSubParser: argparse.SubParser;
+  protected chosenAction: CommandLineAction;
 
+  private _actionsSubParser: argparse.SubParser;
   private _options: ICommandListParserOptions;
   private _actions: CommandLineAction[];
-
-  protected chosenAction: CommandLineAction;
 
   constructor(options: ICommandListParserOptions) {
     super();
@@ -39,11 +50,21 @@ abstract class CommandLineParser extends CommandLineParameterProvider {
     this.onDefineParameters();
   }
 
-  public addCommand(command: CommandLineAction): void {
+  /**
+   * Defines a new action that can be used with the CommandLineParser instance.
+   */
+  public addAction(command: CommandLineAction): void {
     command.buildParser(this._actionsSubParser);
     this._actions.push(command);
   }
 
+  /**
+   * This is the main entry point to begin parsing command-line arguments
+   * and executing the corresponding action.
+   *
+   * @param args   the command-line arugments to be parsed; if omitted, then
+   *               the process.argv will be used
+   */
   public execute(args?: string[]): void {
     if (!args) {
       // 0=node.exe, 1=script name
@@ -53,8 +74,6 @@ abstract class CommandLineParser extends CommandLineParameterProvider {
     const data: ICommandLineParserData = this.argumentParser.parseArgs();
 
     this.processParsedData(data);
-
-    this
 
     for (const action of this._actions) {
       if (action.options.actionVerb === data.action) {
@@ -70,6 +89,10 @@ abstract class CommandLineParser extends CommandLineParameterProvider {
     this.onExecute();
   }
 
+  /**
+   * This hook allows the subclass to perform additional operations before or after
+   * the chosen action is executed.
+   */
   protected onExecute(): void {
     this.chosenAction.execute();
   }
