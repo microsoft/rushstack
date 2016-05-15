@@ -18,7 +18,7 @@ export default class UpdateAction extends CommandLineAction {
 
   constructor(parser: RushCommandLineParser) {
     super({
-      commandVerb: 'update',
+      actionVerb: 'update',
       summary: 'Rebuild the Rush common folder',
       documentation: 'Use this after changing package.json.  It scans all project dependencies'
       + ' and then rebuilds the Rush common folder.'
@@ -26,7 +26,7 @@ export default class UpdateAction extends CommandLineAction {
     this._parser = parser;
   }
 
-  protected onDefineOptions(): void {
+  protected onDefineParameters(): void {
     // abstract
   }
 

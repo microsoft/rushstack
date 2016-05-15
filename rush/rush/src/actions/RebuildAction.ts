@@ -16,18 +16,18 @@ import RushCommandLineParser from './RushCommandLineParser';
 import RushConfig, { IRushLinkJson } from '../data/RushConfig';
 import ProjectBuildTask from '../taskRunner/ProjectBuildTask';
 import TaskRunner from '../taskRunner/TaskRunner';
-import { CommandLineFlag } from '../commandLine/CommandLineParameter';
+import { CommandLineFlagParameter } from '../commandLine/CommandLineParameter';
 
 export default class RebuildAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
   private _rushConfig: RushConfig;
-  private _quietParameter: CommandLineFlag;
-  private _productionParameter: CommandLineFlag;
-  private _vsoParameter: CommandLineFlag;
+  private _quietParameter: CommandLineFlagParameter;
+  private _productionParameter: CommandLineFlagParameter;
+  private _vsoParameter: CommandLineFlagParameter;
 
   constructor(parser: RushCommandLineParser) {
     super({
-      commandVerb: 'rebuild',
+      actionVerb: 'rebuild',
       summary: 'Cleans and rebuilds the entire set of projects',
       documentation: 'The Rush rebuild command assumes that the package.json file for each'
       + ' project will contain scripts for "npm run clean" and "npm run test".  It invokes'
@@ -37,7 +37,7 @@ export default class RebuildAction extends CommandLineAction {
     this._parser = parser;
   }
 
-  protected onDefineOptions(): void {
+  protected onDefineParameters(): void {
     this._quietParameter = this.defineFlagParameter({
       parameterLongName: '--quiet',
       parameterShortName: '-q',

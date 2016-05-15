@@ -1,5 +1,6 @@
 import * as argparse from 'argparse';
 import CommandLineAction from './CommandLineAction';
+import CommandLineParameterProvider, { ICommandLineParserData } from './CommandLineParameter';
 
 export interface ICommandListParserOptions {
   // The name of your tool when invoked from the command line
@@ -8,23 +9,21 @@ export interface ICommandListParserOptions {
   toolDescription: string;
 }
 
-export interface ICommandLineParserData {
-  action: string;
-  [key: string]: any;
-}
-
-abstract class CommandLineParser {
-  private _parser: argparse.ArgumentParser;
+abstract class CommandLineParser extends CommandLineParameterProvider {
   private _actionsSubParser: argparse.SubParser;
 
   private _options: ICommandListParserOptions;
-  private _commands: CommandLineAction[];
+  private _actions: CommandLineAction[];
+
+  protected chosenAction: CommandLineAction;
 
   constructor(options: ICommandListParserOptions) {
-    this._options = options;
-    this._commands = [];
+    super();
 
-    this._parser = new argparse.ArgumentParser({
+    this._options = options;
+    this._actions = [];
+
+    this.argumentParser = new argparse.ArgumentParser({
       addHelp: true,
       prog: this._options.toolFilename,
       description: this._options.toolDescription,
@@ -32,39 +31,47 @@ abstract class CommandLineParser {
         + ` ${this._options.toolFilename} <command> -h`
     });
 
-    this._actionsSubParser = this._parser.addSubparsers({
+    this._actionsSubParser = this.argumentParser.addSubparsers({
       metavar: '<command>',
       dest: 'action'
     });
+
+    this.onDefineParameters();
   }
 
   public addCommand(command: CommandLineAction): void {
     command.buildParser(this._actionsSubParser);
-    this._commands.push(command);
+    this._actions.push(command);
   }
 
   public execute(args?: string[]): void {
     if (!args) {
-      // 0=node.exe, 1=rush
+      // 0=node.exe, 1=script name
       args = process.argv.slice(2);
     }
 
-    const data: ICommandLineParserData = this._parser.parseArgs();
+    const data: ICommandLineParserData = this.argumentParser.parseArgs();
 
-    this.onExecute();
+    this.processParsedData(data);
 
-    for (const command of this._commands) {
-      if (command.options.commandVerb === data.action) {
-        command.execute(data);
-        return;
+    this
+
+    for (const action of this._actions) {
+      if (action.options.actionVerb === data.action) {
+        this.chosenAction = action;
+        action.processParsedData(data);
+        break;
       }
     }
+    if (!this.chosenAction) {
+      throw Error('Unrecognized action');
+    }
 
-    throw Error('Unrecognized action');
+    this.onExecute();
   }
 
   protected onExecute(): void {
-    // abstract
+    this.chosenAction.execute();
   }
 }
 export default CommandLineParser;

@@ -74,14 +74,4 @@ export default class Utilities {
         + ' from a process such as your text editor, command prompt, or "gulp serve"');
     }
   }
-
-  /**
-   * Any top-level try catch blocks should report their error through this
-   * function.  When debugging, we can show the full call stack.
-   */
-  public static exitWithError(error: Error): void {
-    console.error(os.EOL + 'ERROR: ' + error.message);
-    process.exit(1);
-  }
 }
-

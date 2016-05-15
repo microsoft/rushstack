@@ -20,7 +20,62 @@ import RushConfigProject from '../data/RushConfigProject';
 import Package from '../data/Package';
 import PackageLookup from '../data/PackageLookup';
 import Utilities from '../utilities/Utilities';
-import { CommandLineFlag } from '../commandLine/CommandLineParameter';
+import { CommandLineFlagParameter } from '../commandLine/CommandLineParameter';
+
+export default class LinkAction extends CommandLineAction {
+  private _parser: RushCommandLineParser;
+  private _rushConfig: RushConfig;
+  private _noLocalLinksParameter: CommandLineFlagParameter;
+
+  constructor(parser: RushCommandLineParser) {
+    super({
+      actionVerb: 'link',
+      summary: 'Create node_modules symlinks for all projects',
+      documentation: 'Create node_modules symlinks for all projects'
+    });
+    this._parser = parser;
+  }
+
+  protected onDefineParameters(): void {
+    this._noLocalLinksParameter = this.defineFlagParameter({
+      parameterLongName: '--no-local-links',
+      parameterShortName: '-n',
+      description: 'Do not locally link the projects; always link to the common folder'
+    });
+  }
+
+  protected onExecute(): void {
+    this._rushConfig = this._rushConfig = RushConfig.loadFromDefaultLocation();
+
+    const options: IExecuteLinkOptions = {
+      noLocalLinks: this._noLocalLinksParameter.value
+    };
+
+    readPackageTree(this._rushConfig.commonFolder, (error: Error, npmPackage: PackageNode) => {
+      this._parser.trapErrors(() => {
+        if (error) {
+          throw error;
+        } else {
+          const commonRootPackage = Package.createFromNpm(npmPackage);
+
+          const commonPackageLookup: PackageLookup = new PackageLookup();
+          commonPackageLookup.loadTree(commonRootPackage);
+
+          const rushLinkJson: IRushLinkJson = { localLinks: {} };
+
+          for (const project of this._rushConfig.projects) {
+            console.log('\nLINKING: ' + project.packageName);
+            linkProject(project, commonRootPackage, commonPackageLookup, this._rushConfig, rushLinkJson,
+              options);
+          }
+
+          console.log(`Writing "${this._rushConfig.rushLinkJsonFilename}"`);
+          JsonFile.saveJsonFile(rushLinkJson, this._rushConfig.rushLinkJsonFilename);
+        }
+      });
+    });
+  }
+}
 
 interface IExecuteLinkOptions {
   noLocalLinks?: boolean;
@@ -290,62 +345,5 @@ function linkProject(
     if (fs.existsSync(commonBinFolder)) {
       createSymlink(commonBinFolder, projectBinFolder, 'junction');
     }
-  }
-}
-
-export default class LinkAction extends CommandLineAction {
-  private _parser: RushCommandLineParser;
-  private _rushConfig: RushConfig;
-  private _noLocalLinksParameter: CommandLineFlag;
-
-  constructor(parser: RushCommandLineParser) {
-    super({
-      commandVerb: 'link',
-      summary: 'Create node_modules symlinks for all projects',
-      documentation: 'Create node_modules symlinks for all projects'
-    });
-    this._parser = parser;
-  }
-
-  protected onDefineOptions(): void {
-    this._noLocalLinksParameter = this.defineFlagParameter({
-      parameterLongName: '--no-local-links',
-      parameterShortName: '-n',
-      description: 'Do not locally link the projects; always link to the common folder'
-    });
-  }
-
-  protected onExecute(): void {
-    this._rushConfig = this._rushConfig = RushConfig.loadFromDefaultLocation();
-
-    const options: IExecuteLinkOptions = {
-      noLocalLinks: this._noLocalLinksParameter.value
-    };
-
-    readPackageTree(this._rushConfig.commonFolder, (error: Error, npmPackage: PackageNode) => {
-      if (error) {
-        Utilities.exitWithError(error);
-      } else {
-        try {
-          const commonRootPackage = Package.createFromNpm(npmPackage);
-
-          const commonPackageLookup: PackageLookup = new PackageLookup();
-          commonPackageLookup.loadTree(commonRootPackage);
-
-          const rushLinkJson: IRushLinkJson = { localLinks: {} };
-
-          for (const project of this._rushConfig.projects) {
-            console.log('\nLINKING: ' + project.packageName);
-            linkProject(project, commonRootPackage, commonPackageLookup, this._rushConfig, rushLinkJson,
-              options);
-          }
-
-          console.log(`Writing "${this._rushConfig.rushLinkJsonFilename}"`);
-          JsonFile.saveJsonFile(rushLinkJson, this._rushConfig.rushLinkJsonFilename);
-        } catch (error) {
-          Utilities.exitWithError(error);
-        }
-      }
-    });
   }
 }
