@@ -1,5 +1,4 @@
 import * as argparse from 'argparse';
-import * as os from 'os';
 import CommandLineAction from './CommandLineAction';
 
 export interface ICommandListParserOptions {
@@ -30,23 +29,29 @@ abstract class CommandLineParser {
       prog: this._options.toolFilename,
       description: this._options.toolDescription,
       epilog: 'For help with individual actions, you can run:'
-      + os.EOL + os.EOL + `${this._options.toolFilename} <command> -h`
+        + ` ${this._options.toolFilename} <command> -h`
     });
 
     this._actionsSubParser = this._parser.addSubparsers({
-      metavar: "<command>",
-      dest: "action"
+      metavar: '<command>',
+      dest: 'action'
     });
   }
 
-  public addCommand(command: CommandLineAction) {
+  public addCommand(command: CommandLineAction): void {
     command.buildParser(this._actionsSubParser);
     this._commands.push(command);
   }
 
-  public execute(): void {
+  public execute(args?: string[]): void {
+    if (!args) {
+      // 0=node.exe, 1=rush
+      args = process.argv.slice(2);
+    }
+
     const data: ICommandLineParserData = this._parser.parseArgs();
-    console.log(JSON.stringify(data));
+
+    this.onExecute();
 
     for (const command of this._commands) {
       if (command.options.commandVerb === data.action) {
@@ -56,6 +61,10 @@ abstract class CommandLineParser {
     }
 
     throw Error('Unrecognized action');
+  }
+
+  protected onExecute(): void {
+    // abstract
   }
 }
 export default CommandLineParser;

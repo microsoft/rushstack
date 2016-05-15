@@ -1,11 +1,11 @@
 
-export interface CommandLineFlagDefinition {
-  parameterLongName: string,
-  parameterShortName?: string,
-  description: string
+export interface ICommandLineFlagDefinition {
+  parameterLongName: string;
+  parameterShortName?: string;
+  description: string;
 }
 
 export class CommandLineFlag {
-  key: string;
-  value: boolean;
+  public key: string;
+  public value: boolean;
 }

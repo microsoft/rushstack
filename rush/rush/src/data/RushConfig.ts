@@ -84,7 +84,7 @@ export default class RushConfig {
       noTypeless: true
     });
 
-    const rushSchema: any = require('./rush-schema.json');
+    const rushSchema: any = require('../rush-schema.json');
 
     if (!validator.validate(rushConfigJson, rushSchema)) {
       const error: ZSchema.Error = validator.getLastError();

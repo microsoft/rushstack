@@ -1,5 +1,5 @@
 import * as argparse from 'argparse';
-import { CommandLineFlagDefinition, CommandLineFlag } from './CommandLineParameter';
+import { ICommandLineFlagDefinition, CommandLineFlag } from './CommandLineParameter';
 import { ICommandLineParserData } from './CommandLineParser';
 
 export interface ICommandLineActionOptions {
@@ -8,7 +8,7 @@ export interface ICommandLineActionOptions {
   documentation: string;
 }
 
-abstract class CommandLineAction {
+export abstract class CommandLineAction {
   public options: ICommandLineActionOptions;
 
   private _argumentParser: argparse.ArgumentParser;
@@ -33,7 +33,7 @@ abstract class CommandLineAction {
 
   protected abstract onDefineOptions(): void;
 
-  protected defineFlagParameter(options: CommandLineFlagDefinition): CommandLineFlag {
+  protected defineFlagParameter(options: ICommandLineFlagDefinition): CommandLineFlag {
     let names: string[] = [];
     if (options.parameterShortName) {
       names.push(options.parameterShortName);
