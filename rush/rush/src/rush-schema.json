@@ -9,8 +9,13 @@
       "type": "string"
     },
     "commonFolder": {
-      "description": "Specifies the name of a top-level global folder containing a package.json file with a superset of all dependencies for all projects in the repository.  Example: 'common'",
+      "description": "Specifies the name of a top-level global folder containing a package.json file with a superset of all dependencies for all projects in the repository.  Example: 'common",
       "type": "string"
+    },
+    "npmVersion": {
+      "description": "The version of the NPM tool to install.",
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
     },
     "projects": {
       "description": "A list of projects managed by this tool.",
@@ -33,5 +38,5 @@
     }
   },
   "additionalProperties": false,
-  "required": [ "commonFolder", "projects" ]
+  "required": [ "commonFolder", "npmVersion", "projects" ]
 }

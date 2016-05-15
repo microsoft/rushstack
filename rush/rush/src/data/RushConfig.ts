@@ -15,6 +15,7 @@ import Utilities from '../utilities/Utilities';
  */
 export interface IRushConfigJson {
   commonFolder: string;
+  npmVersion: string;
   projects: IRushConfigProjectJson[];
 };
 
@@ -35,7 +36,9 @@ export default class RushConfig {
   private _rushJsonFolder: string;
   private _commonFolder: string;
   private _commonFolderName: string;
+  private _homeFolder: string;
   private _rushLinkJsonFilename: string;
+  private _npmVersion: string;
   private _projects: RushConfigProject[];
   private _projectsByName: Map<string, RushConfigProject>;
 
@@ -47,7 +50,15 @@ export default class RushConfig {
     }
     this._commonFolderName = path.basename(this._commonFolder);
 
+    const unresolvedUserFolder: string = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
+    this._homeFolder = path.resolve(unresolvedUserFolder);
+    if (!fs.existsSync(this._homeFolder)) {
+      throw new Error('Unable to determine the current user\'s home directory');
+    }
+
     this._rushLinkJsonFilename = path.join(this._commonFolder, 'rush-link.json');
+
+    this._npmVersion = rushConfigJson.npmVersion;
 
     this._projects = [];
     this._projectsByName = new Map<string, RushConfigProject>();
@@ -178,12 +189,27 @@ export default class RushConfig {
   }
 
   /**
+   * The absolute path to the home directory for the current user.  On Windows,
+   * it would be something like "C:\Users\YourName".
+   */
+  public get homeFolder(): string {
+    return this._homeFolder;
+  }
+
+  /**
    * The filename of the build dependency data file.  By default this is
    * called 'rush-link.json' resides in the Rush common folder.
    * Its data structure is defined by IRushLinkJson.
    */
   public get rushLinkJsonFilename(): string {
     return this._rushLinkJsonFilename;
+  }
+
+  /**
+   * The version of the NPM tool to be installed.  (Example: "1.2.3")
+   */
+  public get npmVersion(): string {
+    return this._npmVersion;
   }
 
   public get projects(): RushConfigProject[] {

@@ -9,6 +9,7 @@ import * as wordwrap from 'wordwrap';
 import { CommandLineFlagParameter } from '../commandLine/CommandLineParameter';
 import CommandLineParser from '../commandLine/CommandLineParser';
 import RushConfig from '../data/RushConfig';
+import InstallAction from './InstallAction';
 import LinkAction from './LinkAction';
 import RebuildAction from './RebuildAction';
 import GenerateAction from './GenerateAction';
@@ -31,6 +32,7 @@ export default class RushCommandLineParser extends CommandLineParser {
     });
 
     this.addAction(new GenerateAction(this));
+    this.addAction(new InstallAction(this));
     this.addAction(new LinkAction(this));
     this.addAction(new RebuildAction(this));
   }

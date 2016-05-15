@@ -10,6 +10,7 @@
   },
   "files": [
     "src/actions/GenerateAction.ts",
+    "src/actions/InstallAction.ts",
     "src/actions/LinkAction.ts",
     "src/actions/RushCommandLineParser.ts",
     "src/actions/RebuildAction.ts",
