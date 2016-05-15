@@ -1,6 +1,5 @@
 import * as argparse from 'argparse';
-import { ICommandLineFlagDefinition, CommandLineFlagParameter } from './CommandLineParameter';
-import CommandLineParameterProvider, { ICommandLineParserData } from './CommandLineParameter';
+import CommandLineParameterProvider, { ICommandLineParserData } from './CommandLineParameterProvider';
 
 export interface ICommandLineActionOptions {
   actionVerb: string;

@@ -15,6 +15,7 @@
     "src/actions/UpdateAction.ts",
     "src/commandLine/CommandLineAction.ts",
     "src/commandLine/CommandLineParameter.ts",
+    "src/commandLine/CommandLineParameterProvider.ts",
     "src/commandLine/CommandLineParser.ts",
     "src/data/RushConfig.ts",
     "src/data/RushConfigProject.ts",
