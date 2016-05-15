@@ -24,11 +24,11 @@ export default class RebuildAction extends CommandLineAction {
   constructor(parser: RushCommandLineParser) {
     super({
       actionVerb: 'rebuild',
-      summary: 'Cleans and rebuilds the entire set of projects',
+      summary: 'Clean and rebuilds the entire set of projects',
       documentation: 'The Rush rebuild command assumes that the package.json file for each'
       + ' project will contain scripts for "npm run clean" and "npm run test".  It invokes'
       + ' these commands to build each project.  Projects are built in parallel where'
-      + ' possible, but always respecting the dependency ordering.'
+      + ' possible, but always respecting the dependency graph for locally linked projects.'
     });
     this._parser = parser;
   }

@@ -3,6 +3,7 @@
  */
 
 import * as argparse from 'argparse';
+import * as colors from 'colors';
 import CommandLineAction from './CommandLineAction';
 import CommandLineParameterProvider, { ICommandLineParserData } from './CommandLineParameterProvider';
 
@@ -38,8 +39,8 @@ abstract class CommandLineParser extends CommandLineParameterProvider {
       addHelp: true,
       prog: this._options.toolFilename,
       description: this._options.toolDescription,
-      epilog: 'For help with individual actions, you can run:'
-        + ` ${this._options.toolFilename} <command> -h`
+      epilog: colors.bold('For detailed help about a specific command, use:'
+        + ` ${this._options.toolFilename} <command> -h`)
     });
 
     this._actionsSubParser = this.argumentParser.addSubparsers({

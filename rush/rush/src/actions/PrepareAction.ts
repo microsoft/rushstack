@@ -12,16 +12,16 @@ import RushCommandLineParser from './RushCommandLineParser';
 import RushConfig from '../data/RushConfig';
 import Utilities from '../utilities/Utilities';
 
-export default class UpdateAction extends CommandLineAction {
+export default class PrepareAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
   private _rushConfig: RushConfig;
 
   constructor(parser: RushCommandLineParser) {
     super({
-      actionVerb: 'update',
-      summary: 'Rebuild the Rush common folder',
+      actionVerb: 'prepare',
+      summary: 'Regenerate the Rush common folder',
       documentation: 'Use this after changing package.json.  It scans all project dependencies'
-      + ' and then rebuilds the Rush common folder.'
+      + ' and then regenerates the Rush common folder.'
     });
     this._parser = parser;
   }

@@ -11,8 +11,8 @@
   "files": [
     "src/actions/LinkAction.ts",
     "src/actions/RushCommandLineParser.ts",
+    "src/actions/PrepareAction.ts",
     "src/actions/RebuildAction.ts",
-    "src/actions/UpdateAction.ts",
     "src/commandLine/CommandLineAction.ts",
     "src/commandLine/CommandLineParameter.ts",
     "src/commandLine/CommandLineParameterProvider.ts",
