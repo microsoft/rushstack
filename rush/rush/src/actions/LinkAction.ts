@@ -63,7 +63,7 @@ export default class LinkAction extends CommandLineAction {
           const rushLinkJson: IRushLinkJson = { localLinks: {} };
 
           for (const project of this._rushConfig.projects) {
-            console.log('\nLINKING: ' + project.packageName);
+            console.log(os.EOL + 'LINKING: ' + project.packageName);
             linkProject(project, commonRootPackage, commonPackageLookup, this._rushConfig, rushLinkJson,
               options);
           }
