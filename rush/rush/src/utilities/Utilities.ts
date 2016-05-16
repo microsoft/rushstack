@@ -5,6 +5,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as rimraf from 'rimraf';
+import * as tty from 'tty';
 
 export default class Utilities {
   /**
@@ -73,5 +74,16 @@ export default class Utilities {
       throw new Error(e.message + os.EOL + 'Often this is caused by a file lock'
         + ' from a process such as your text editor, command prompt, or "gulp serve"');
     }
+  }
+
+  /**
+   * Returns the width of the console, measured in columns
+   */
+  public static getConsoleWidth(): number {
+    const stdout: tty.WriteStream = process.stdout as tty.WriteStream;
+    if (stdout && stdout.columns) {
+      return stdout.columns;
+    }
+    return 80;
   }
 }

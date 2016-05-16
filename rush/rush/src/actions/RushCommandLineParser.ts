@@ -4,6 +4,7 @@
 
 import * as os from 'os';
 import * as colors from 'colors';
+import * as wordwrap from 'wordwrap';
 
 import { CommandLineFlagParameter } from '../commandLine/CommandLineParameter';
 import CommandLineParser from '../commandLine/CommandLineParser';
@@ -11,6 +12,7 @@ import RushConfig from '../data/RushConfig';
 import LinkAction from './LinkAction';
 import RebuildAction from './RebuildAction';
 import PrepareAction from './PrepareAction';
+import Utilities from '../utilities/Utilities';
 
 export default class RushCommandLineParser extends CommandLineParser {
   public rushConfig: RushConfig;
@@ -54,7 +56,9 @@ export default class RushCommandLineParser extends CommandLineParser {
       try {
         action();
       } catch (error) {
-        console.error(os.EOL + colors.red('ERROR: ' + error.message));
+
+        const wrap: (textToWrap: string) => string = wordwrap.soft(7, Utilities.getConsoleWidth());
+        console.error(os.EOL + colors.red('ERROR: ' + wrap(error.message).trim()));
         process.exit(1);
       }
     }

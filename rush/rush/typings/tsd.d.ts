@@ -9,4 +9,5 @@
 /// <reference path="rimraf/rimraf.d.ts" />
 /// <reference path="semver/semver.d.ts" />
 /// <reference path="strip-json-comments/strip-json-comments.d.ts" />
+/// <reference path="wordwrap/wordwrap.d.ts" />
 /// <reference path="z-schema/z-schema.d.ts" />

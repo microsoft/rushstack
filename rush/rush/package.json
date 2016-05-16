@@ -22,6 +22,7 @@
     "rimraf": "^2.2.0",
     "semver": "^5.1.0",
     "strip-json-comments": "^2.0.0",
+    "wordwrap": "^1.0.0",
     "z-schema": "^3.16.1"
   },
   "devDependencies": {
