@@ -38,7 +38,8 @@ export default class RushConfig {
   private _commonFolderName: string;
   private _homeFolder: string;
   private _rushLinkJsonFilename: string;
-  private _npmVersion: string;
+  private _npmToolVersion: string;
+  private _npmToolFilename: string;
   private _projects: RushConfigProject[];
   private _projectsByName: Map<string, RushConfigProject>;
 
@@ -58,7 +59,8 @@ export default class RushConfig {
 
     this._rushLinkJsonFilename = path.join(this._commonFolder, 'rush-link.json');
 
-    this._npmVersion = rushConfigJson.npmVersion;
+    this._npmToolVersion = rushConfigJson.npmVersion;
+    this._npmToolFilename = path.join(this._commonFolder, 'local-npm', 'node_modules', '.bin', 'npm');
 
     this._projects = [];
     this._projectsByName = new Map<string, RushConfigProject>();
@@ -174,6 +176,7 @@ export default class RushConfig {
   /**
    * The common folder specified in rush.json.  By default, this is the fully
    * resolved path for a subfolder of rushJsonFolder whose name is "common".
+   * Example: "C:\MyRepo\common"
    */
   public get commonFolder(): string {
     return this._commonFolder;
@@ -206,10 +209,19 @@ export default class RushConfig {
   }
 
   /**
-   * The version of the NPM tool to be installed.  (Example: "1.2.3")
+   * The version of the locally installed NPM tool.  (Example: "1.2.3")
    */
-  public get npmVersion(): string {
-    return this._npmVersion;
+  public get npmToolVersion(): string {
+    return this._npmToolVersion;
+  }
+
+  /**
+   * The absolute path to the locally installed NPM tool.  If "rush install" has not
+   * been run, then this file may not exist yet.
+   * Example: "C:\MyRepo\common\local-npm\node_modules\.bin\npm"
+   */
+  public get npmToolFilename(): string {
+    return this._npmToolFilename;
   }
 
   public get projects(): RushConfigProject[] {
