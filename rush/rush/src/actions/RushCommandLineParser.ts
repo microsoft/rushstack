@@ -57,8 +57,9 @@ export default class RushCommandLineParser extends CommandLineParser {
         action();
       } catch (error) {
 
-        const wrap: (textToWrap: string) => string = wordwrap.soft(7, Utilities.getConsoleWidth());
-        console.error(os.EOL + colors.red('ERROR: ' + wrap(error.message).trim()));
+        const prefix: string = 'ERROR: ';
+        const wrap: (textToWrap: string) => string = wordwrap.soft(prefix.length, Utilities.getConsoleWidth());
+        console.error(os.EOL + colors.red(prefix + wrap(error.message).trim()));
         process.exit(1);
       }
     }

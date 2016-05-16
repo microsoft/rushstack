@@ -34,13 +34,13 @@ abstract class CommandLineParameterProvider {
    * Defines a flag parameter.  See ICommandLineFlagDefinition for details.
    */
   protected defineFlagParameter(options: ICommandLineFlagDefinition): CommandLineFlagParameter {
-    let names: string[] = [];
+    const names: string[] = [];
     if (options.parameterShortName) {
       names.push(options.parameterShortName);
     }
     names.push(options.parameterLongName);
 
-    let result: CommandLineFlagParameter = new CommandLineFlagParameter();
+    const result: CommandLineFlagParameter = new CommandLineFlagParameter();
     result.key = this._createKeyName();
 
     this.argumentParser.addArgument(names, {
