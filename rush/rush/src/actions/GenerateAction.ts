@@ -101,6 +101,9 @@ export default class GenerateAction extends CommandLineAction {
         tempPackageJson.optionalDependencies = packageJson.optionalDependencies;
       }
 
+      // Collect pairs of (packageName, packageVersion) to be added as temp package dependencies
+      const pairs: { packageName: string, packageVersion: string }[] = [];
+
       // If there are devDependencies, we need to merge them with the regular
       // dependencies.  If the same library appears in both places, then the
       // regular dependency takes precedence over the devDependency.
@@ -108,14 +111,29 @@ export default class GenerateAction extends CommandLineAction {
       // but NPM will take care of that for us.  (Frankly any kind of duplicate
       // should be an error, but NPM is pretty lax about this.)
       if (packageJson.devDependencies) {
-        for (let key of Object.keys(packageJson.devDependencies)) {
-          tempPackageJson.dependencies[key] = packageJson.devDependencies[key];
+        for (let packageName of Object.keys(packageJson.devDependencies)) {
+          pairs.push({ packageName: packageName, packageVersion: packageJson.devDependencies[packageName] });
         }
       }
 
       if (packageJson.dependencies) {
-        for (let key of Object.keys(packageJson.dependencies)) {
-          tempPackageJson.dependencies[key] = packageJson.dependencies[key];
+        for (let packageName of Object.keys(packageJson.dependencies)) {
+          pairs.push({ packageName: packageName, packageVersion: packageJson.dependencies[packageName] });
+        }
+      }
+
+      for (const pair of pairs) {
+        if (this._rushConfig.getProjectByName(pair.packageName)) {
+          // If this is a locally buildable dependency, then it's possible that it hasn't
+          // actually been published yet, in which case we could build it using "rush link",
+          // so we treat it as an optional dependency.
+          if (!tempPackageJson.optionalDependencies) {
+            tempPackageJson.optionalDependencies = {};
+          }
+          tempPackageJson.optionalDependencies[pair.packageName] = pair.packageVersion;
+        } else {
+          // Otherwise, add it as a regular dependency.
+          tempPackageJson.dependencies[pair.packageName] = pair.packageVersion;
         }
       }
 

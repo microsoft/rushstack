@@ -86,8 +86,9 @@ export default class Utilities {
    * Returns false if either of the files does not exist.
    */
   public static isFileTimestampCurrent(outputFilename: string, inputFilename: string): boolean {
-    if (!fs.existsSync(outputFilename) || !fs.existsSync(inputFilename))
+    if (!fs.existsSync(outputFilename) || !fs.existsSync(inputFilename)) {
       return false;
+    }
     let outputStats: fs.Stats = fs.statSync(outputFilename);
     let inputStats: fs.Stats = fs.statSync(inputFilename);
     return outputStats.mtime >= inputStats.mtime;
