@@ -19,6 +19,7 @@ import TaskError from './errorDetection/TaskError';
 export default class ProjectBuildTask implements ITaskDefinition {
   public name: string;
 
+  private _hasError: boolean;
   private _errorDetector: ErrorDetector;
   private _errorDisplayMode: ErrorDetectionMode;
   private _rushProject: RushConfigProject;
@@ -37,6 +38,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
   public execute(writer: ITaskWriter): Promise<void> {
     return new Promise<void>((resolve: () => void, reject: (errors: TaskError[]) => void) => {
+      this._hasError = false;
       try {
         writer.writeLine(`>>> ProjectBuildTask :: Project [${this.name}]:`);
         const projectFolder: string = this._rushProject.projectFolder;
@@ -50,8 +52,16 @@ export default class ProjectBuildTask implements ITaskDefinition {
         const gulpNukeResult = child_process.execSync('npm run clean', { cwd: projectFolder });
         writer.writeLine(gulpNukeResult.toString());
 
-        const command = `npm run test${this._production ? ' -- --production' : ''}`;
+
+        const command = [
+          'npm',
+          'run test',
+          '--', // Everything after this will be passed directly to the gulp task
+          '--color',
+          this._production ? '--production' : ''
+        ].join(' ');
         writer.writeLine(command);
+
         const buildTask = child_process.exec(command, options);
 
         buildTask.stdout.on('data', (data: string) => {
@@ -59,6 +69,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
         });
 
         buildTask.stderr.on('data', (data: string) => {
+          this._hasError = true;
           writer.writeError(data);
         });
 
@@ -79,7 +90,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
           // Write the logs to disk
           this._writeLogsToDisk(writer);
 
-          if (errors.length > 0 || code) {
+          if (code || this._hasError || errors.length > 0) {
             reject(errors);
           } else {
             resolve();
