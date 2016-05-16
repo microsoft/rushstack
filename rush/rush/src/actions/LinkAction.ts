@@ -2,6 +2,7 @@
  * @Copyright (c) Microsoft Corporation.  All rights reserved.
  */
 
+import * as colors from 'colors';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -43,6 +44,8 @@ export default class LinkAction extends CommandLineAction {
   protected onExecute(): void {
     this._rushConfig = this._rushConfig = RushConfig.loadFromDefaultLocation();
 
+    console.log('Starting "rush link"');
+
     const options: IExecuteLinkOptions = {
       noLocalLinks: this._noLocalLinksParameter.value
     };
@@ -67,6 +70,9 @@ export default class LinkAction extends CommandLineAction {
 
           console.log(`Writing "${this._rushConfig.rushLinkJsonFilename}"`);
           JsonFile.saveJsonFile(rushLinkJson, this._rushConfig.rushLinkJsonFilename);
+
+          console.log(os.EOL + colors.green('Rush link finished successfully.'));
+          console.log(os.EOL + 'Next you should probably run: "rush rebuild -q"');
         }
       });
     });
@@ -202,7 +208,7 @@ function linkProject(
   const commonProjectPackage: Package = commonRootPackage.getChildByName(project.tempProjectName);
   if (!commonProjectPackage) {
     throw new Error(`Unable to find a temp package for ${project.packageName} `
-      + `-- you may need to run "rush update" again`);
+      + `-- you may need to run "rush prepare" again`);
   }
 
   // TODO: Validate that the project's package.json still matches the common folder

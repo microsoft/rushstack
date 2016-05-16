@@ -10,6 +10,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
+import RushConfig from '../data/RushConfig';
 import RushConfigProject from '../data/RushConfigProject';
 import ErrorDetector, { ErrorDetectionMode } from '../errorDetection/ErrorDetector';
 import { ITaskDefinition } from '../taskRunner/ITask';
@@ -23,9 +24,11 @@ export default class ProjectBuildTask implements ITaskDefinition {
   private _errorDetector: ErrorDetector;
   private _errorDisplayMode: ErrorDetectionMode;
   private _rushProject: RushConfigProject;
+  private _rushConfig: RushConfig;
   private _production: boolean;
 
   constructor(rushProject: RushConfigProject,
+              rushConfig: RushConfig,
               errorDetector: ErrorDetector,
               errorDisplayMode: ErrorDetectionMode,
               production: boolean) {
@@ -34,6 +37,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
     this._errorDisplayMode = errorDisplayMode;
     this._production = production;
     this._rushProject = rushProject;
+    this._rushConfig = rushConfig;
   }
 
   public execute(writer: ITaskWriter): Promise<void> {
@@ -49,12 +53,13 @@ export default class ProjectBuildTask implements ITaskDefinition {
         };
 
         writer.writeLine('npm run clean');
-        const gulpNukeResult = child_process.execSync('npm run clean', { cwd: projectFolder });
+        const gulpNukeResult = child_process.execSync(this._rushConfig.npmToolFilename + ' run clean',
+          { cwd: projectFolder });
         writer.writeLine(gulpNukeResult.toString());
 
 
         const command = [
-          'npm',
+          this._rushConfig.npmToolFilename,
           'run test',
           '--', // Everything after this will be passed directly to the gulp task
           '--color',

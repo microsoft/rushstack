@@ -3,6 +3,8 @@
  */
 
 import * as colors from 'colors';
+import * as fs from 'fs';
+import * as os from 'os';
 
 import * as ErrorDetectorRules from '../errorDetection/rules/index';
 import CommandLineAction from '../commandLine/CommandLineAction';
@@ -52,6 +54,8 @@ export default class RebuildAction extends CommandLineAction {
   protected onExecute(): void {
     this._rushConfig = this._rushConfig = RushConfig.loadFromDefaultLocation();
 
+    console.log('Starting "rush rebuild"' + os.EOL);
+
     const taskRunner: TaskRunner = new TaskRunner(this._quietParameter.value);
 
     // Create tasks and register with tax runner
@@ -66,12 +70,17 @@ export default class RebuildAction extends CommandLineAction {
         ErrorDetectorRules.TsLintErrorDetector
       ];
       const errorDetector = new ErrorDetector(activeRules);
-      const projectTask = new ProjectBuildTask(rushProject, errorDetector, errorMode,
+      const projectTask = new ProjectBuildTask(rushProject, this._rushConfig, errorDetector, errorMode,
         this._productionParameter.value);
       taskRunner.addTask(projectTask);
     }
 
     // Add task dependencies
+    if (!fs.existsSync(this._rushConfig.rushLinkJsonFilename)) {
+      throw new Error('File not found: ' + this._rushConfig.rushLinkJsonFilename
+        + os.EOL + 'Did you run "rush link"?  Were all its outputs added to git?');
+    }
+
     const rushLinkJson: IRushLinkJson = JsonFile.loadJsonFile(this._rushConfig.rushLinkJsonFilename);
     for (const projectName of Object.keys(rushLinkJson.localLinks)) {
       const projectDependencies: string[] = rushLinkJson.localLinks[projectName];

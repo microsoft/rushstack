@@ -54,6 +54,9 @@ export default class InstallAction extends CommandLineAction {
   protected onExecute(): void {
     this._rushConfig = this._rushConfig = RushConfig.loadFromDefaultLocation();
 
+    const startTime: number = Utilities.getTimeInMs();
+    console.log('Starting "rush install"' + os.EOL);
+
     // Example: "C:\Users\YourName\.rush"
     const rushHomeFolder: string = path.join(this._rushConfig.homeFolder, '.rush');
 
@@ -64,10 +67,10 @@ export default class InstallAction extends CommandLineAction {
 
     // Example: "C:\Users\YourName\.rush\npm-1.2.3"
     const npmToolFolder: string = path.join(rushHomeFolder, 'npm-' + this._rushConfig.npmToolVersion);
-    // Example: "C:\Users\YourName\.rush\npm-1.2.3\node_modules\LastInstall.txt"
-    const npmToolFlagFile: string = path.join(npmToolFolder, 'node_modules', 'LastInstall.txt');
+    // Example: "C:\Users\YourName\.rush\npm-1.2.3\last-install.log"
+    const npmToolFlagFile: string = path.join(npmToolFolder, 'last-install.log');
 
-    // NOTE: We don't care about the timestamp for LastInstall.txt, because noboy will change
+    // NOTE: We don't care about the timestamp for last-install.log, because noboy will change
     // the package.json for this case
     if (this._cleanInstallFull.value || !fs.existsSync(npmToolFlagFile)) {
       console.log(colors.bold('Installing NPM version ' + this._rushConfig.npmToolVersion) + os.EOL);
@@ -118,10 +121,18 @@ export default class InstallAction extends CommandLineAction {
       throw new Error('Failed to create "' + npmToolFilename + '"');
     }
 
-    console.log(os.EOL + colors.bold('Installing modules in ' + this._rushConfig.commonFolder) + os.EOL);
+    console.log(os.EOL + colors.bold('Checking modules in ' + this._rushConfig.commonFolder) + os.EOL);
+
+    // Example: "C:\MyRepo\common\last-install.log"
+    const commonNodeModulesFlagFilename: string = path.join(this._rushConfig.commonFolder, 'last-install.log');
 
     let needToPrune: boolean = true;
     if (this._cleanInstall.value || this._cleanInstallFull.value) {
+      if (fs.existsSync(commonNodeModulesFlagFilename)) {
+        // If we are cleaning the node_modules folder, then also delete the flag file
+        // to force a reinstall
+        fs.unlinkSync(commonNodeModulesFlagFilename);
+      }
 
       // Example: "C:\MyRepo\common\node_modules"
       const commonNodeModulesFolder: string = path.join(this._rushConfig.commonFolder, 'node_modules');
@@ -133,18 +144,14 @@ export default class InstallAction extends CommandLineAction {
       needToPrune = false;
     }
 
-    // Compare the timestamps LastInstall.txt and package.json
-    // Example: "C:\MyRepo\common\node_modules\LastInstall.txt"
-    const commonNodeModulesFlagFilename: string = path.join(this._rushConfig.commonFolder,
-      'node_modules', 'LastInstall.txt');
+    // Compare the timestamps last-install.log and package.json
     // Example: "C:\MyRepo\common\package.json"
-    const commonPackageJsonFilename: string = path.join(this._rushConfig.commonFolder,
-      'package.json');
+    const commonPackageJsonFilename: string = path.join(this._rushConfig.commonFolder, 'package.json');
 
     if (!Utilities.isFileTimestampCurrent(commonNodeModulesFlagFilename, commonPackageJsonFilename)) {
       if (needToPrune) {
         console.log('Running "npm prune" in ' + this._rushConfig.commonFolder);
-        child_process.execSync('"' + npmToolFilename + '" prune', {
+        child_process.execSync(npmToolFilename + ' prune', {
           cwd: this._rushConfig.commonFolder,
           stdio: [0, 1, 2] // (omit this to suppress gulp console output)
         });
@@ -152,7 +159,7 @@ export default class InstallAction extends CommandLineAction {
 
       // Next, run "npm install" in the common folder
       console.log(os.EOL + 'Running "npm install" in ' + this._rushConfig.commonFolder);
-      child_process.execSync('"' + npmToolFilename + '" install', {
+      child_process.execSync(npmToolFilename + ' install', {
         cwd: this._rushConfig.commonFolder,
         stdio: [0, 1, 2] // (omit this to suppress gulp console output)
       });
@@ -162,6 +169,10 @@ export default class InstallAction extends CommandLineAction {
       console.log('');
     }
 
-    console.log(colors.green('The common NPM packages are up to date.'));
+    const endTime: number = Utilities.getTimeInMs();
+    const totalSeconds: string = ((endTime - startTime) / 1000.0).toFixed(2);
+
+    console.log(colors.green(`The common NPM packages are up to date. (${totalSeconds} seconds)`));
+    console.log(os.EOL + 'Next you should probably run: "rush link"');
   }
 }

@@ -3,6 +3,8 @@
  */
 
 import * as child_process from 'child_process';
+import * as colors from 'colors';
+import * as os from 'os';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -36,7 +38,7 @@ export default class GenerateAction extends CommandLineAction {
     this._rushConfig = this._rushConfig = RushConfig.loadFromDefaultLocation();
 
     const startTime: number = Utilities.getTimeInMs();
-    console.log('Starting "rush update"\n');
+    console.log('Starting "rush prepare"' + os.EOL);
 
     // 1. Delete "common\node_modules"
     const nodeModulesPath: string = path.join(this._rushConfig.commonFolder, 'node_modules');
@@ -130,17 +132,18 @@ export default class GenerateAction extends CommandLineAction {
       stdio: [0, 1, 2] // (omit this to suppress gulp console output)
     };
 
-    console.log('\nRunning "npm install"...');
-    child_process.execSync('npm install', options);
-    console.log('"npm install" completed\n');
+    console.log(os.EOL + colors.bold('Running "npm install"...'));
+    child_process.execSync(this._rushConfig.npmToolFilename + ' install', options);
+    console.log('"npm install" completed' + os.EOL);
 
-    console.log('\nRunning "npm shrinkwrap"...');
-    child_process.execSync('npm shrinkwrap', options);
-    console.log('"npm shrinkwrap" completed\n');
+    console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
+    child_process.execSync(this._rushConfig.npmToolFilename + ' shrinkwrap', options);
+    console.log('"npm shrinkwrap" completed' + os.EOL);
 
     const endTime: number = Utilities.getTimeInMs();
     const totalSeconds: string = ((endTime - startTime) / 1000.0).toFixed(2);
 
-    console.log(`\nRush update finished successfully. (${totalSeconds} seconds)`);
+    console.log(os.EOL + colors.green(`Rush prepare finished successfully. (${totalSeconds} seconds)`));
+    console.log(os.EOL + 'Next you should probably run: "rush link"');
   }
 }
