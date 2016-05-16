@@ -12,16 +12,17 @@ import RushCommandLineParser from './RushCommandLineParser';
 import RushConfig from '../data/RushConfig';
 import Utilities from '../utilities/Utilities';
 
-export default class PrepareAction extends CommandLineAction {
+export default class GenerateAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
   private _rushConfig: RushConfig;
 
   constructor(parser: RushCommandLineParser) {
     super({
-      actionVerb: 'prepare',
-      summary: 'Regenerate the Rush common folder',
-      documentation: 'Use this after changing any project\'s package.json.  It scans all project'
-      + ' dependencies and then regenerates the configuration in the Rush common folder.'
+      actionVerb: 'generate',
+      summary: 'Run this command after changing any project\'s package.json.',
+      documentation: 'Run "rush regenerate" after changing any project\'s package.json.'
+      + ' It scans the dependencies for all projects referenced in "rush.json", and then'
+      + ' constructs a superset package.json in the Rush common folder.'
       + ' After running this command, you will need to commit your changes to git.'
     });
     this._parser = parser;

@@ -11,7 +11,7 @@ import CommandLineParser from '../commandLine/CommandLineParser';
 import RushConfig from '../data/RushConfig';
 import LinkAction from './LinkAction';
 import RebuildAction from './RebuildAction';
-import PrepareAction from './PrepareAction';
+import GenerateAction from './GenerateAction';
 import Utilities from '../utilities/Utilities';
 
 export default class RushCommandLineParser extends CommandLineParser {
@@ -30,7 +30,7 @@ export default class RushCommandLineParser extends CommandLineParser {
       + ' NPM progress bar, Rush is for you.'
     });
 
-    this.addAction(new PrepareAction(this));
+    this.addAction(new GenerateAction(this));
     this.addAction(new LinkAction(this));
     this.addAction(new RebuildAction(this));
   }
