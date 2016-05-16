@@ -8,12 +8,12 @@
  */
 export interface ICommandLineFlagDefinition {
   /**
-   * The long name of the flag, e.g. "--do-something"
+   * The long name of the flag including double dashes, e.g. "--do-something"
    */
   parameterLongName: string;
 
   /**
-   * An optional short name for the flag, e.g. "-d"
+   * An optional short name for the flag including the dash, e.g. "-d"
    */
   parameterShortName?: string;
 

@@ -20,8 +20,9 @@ export default class PrepareAction extends CommandLineAction {
     super({
       actionVerb: 'prepare',
       summary: 'Regenerate the Rush common folder',
-      documentation: 'Use this after changing package.json.  It scans all project dependencies'
-      + ' and then regenerates the Rush common folder.'
+      documentation: 'Use this after changing any project\'s package.json.  It scans all project'
+      + ' dependencies and then regenerates the configuration in the Rush common folder.'
+      + ' After running this command, you will need to commit your changes to git.'
     });
     this._parser = parser;
   }
