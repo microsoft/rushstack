@@ -4,7 +4,8 @@
 
 import * as fs from 'fs';
 import * as os from 'os';
-import * as del from 'del';
+import * as rimraf from 'rimraf';
+import * as tty from 'tty';
 
 export default class Utilities {
   /**
@@ -41,6 +42,8 @@ export default class Utilities {
     // then there seems to be some OS process (virus scanner?) that holds
     // a lock on the folder for a split second, which causes mkdirSync to
     // fail.  To workaround that, retry for up to 7 seconds before giving up.
+    const maxWaitTimeMs: number = 7 * 1000;
+
     const startTime: number = Utilities.getTimeInMs();
     let looped: boolean = false;
     while (true) {
@@ -50,7 +53,7 @@ export default class Utilities {
       } catch (e) {
         looped = true;
         const currentTime: number = Utilities.getTimeInMs();
-        if (currentTime - startTime > 7000) {
+        if (currentTime - startTime > maxWaitTimeMs) {
           throw new Error(e.message + os.EOL + 'Often this is caused by a file lock'
             + ' from a process such as your text editor, command prompt, or "gulp serve"');
         }
@@ -65,10 +68,12 @@ export default class Utilities {
 
   /**
    * BE VERY CAREFUL CALLING THIS FUNCTION!
+   * If you specify the wrong folderPath (e.g. "/"), it could potentially delete your entire
+   * hard disk.
    */
   public static dangerouslyDeletePath(folderPath: string): void {
     try {
-      del.sync(folderPath, { force: true });
+      rimraf.sync(folderPath);
     } catch (e) {
       throw new Error(e.message + os.EOL + 'Often this is caused by a file lock'
         + ' from a process such as your text editor, command prompt, or "gulp serve"');
@@ -76,11 +81,13 @@ export default class Utilities {
   }
 
   /**
-   * Any top-level try catch blocks should report their error through this
-   * function.  When debugging, we can show the full call stack.
+   * Returns the width of the console, measured in columns
    */
-  public static reportError(error: Error) {
-    console.error(os.EOL + 'ERROR: ' + error.message);
+  public static getConsoleWidth(): number {
+    const stdout: tty.WriteStream = process.stdout as tty.WriteStream;
+    if (stdout && stdout.columns) {
+      return stdout.columns;
+    }
+    return 80;
   }
 }
-

@@ -1,9 +1,5 @@
 /**
- * @file ExecuteLink.ts
  * @Copyright (c) Microsoft Corporation.  All rights reserved.
- *
- * For each project, replaces node_modules with links to the modules in the common project.
- * Additionally, adds symlinks for projects with interdependencies.
  */
 
 import * as fs from 'fs';
@@ -12,14 +8,72 @@ import * as path from 'path';
 import * as semver from 'semver';
 import readPackageTree = require('read-package-tree');
 
-import JsonFile from './JsonFile';
-import RushConfig, { IRushLinkJson } from './RushConfig';
-import RushConfigProject from './RushConfigProject';
-import Package from './Package';
-import PackageLookup from './PackageLookup';
-import Utilities from './Utilities';
+import CommandLineAction from '../commandLine/CommandLineAction';
+import JsonFile from '../utilities/JsonFile';
+import RushCommandLineParser from './RushCommandLineParser';
+import RushConfig, { IRushLinkJson } from '../data/RushConfig';
+import RushConfigProject from '../data/RushConfigProject';
+import Package from '../data/Package';
+import PackageLookup from '../data/PackageLookup';
+import Utilities from '../utilities/Utilities';
+import { CommandLineFlagParameter } from '../commandLine/CommandLineParameter';
 
-export interface IExecuteLinkOptions {
+export default class LinkAction extends CommandLineAction {
+  private _parser: RushCommandLineParser;
+  private _rushConfig: RushConfig;
+  private _noLocalLinksParameter: CommandLineFlagParameter;
+
+  constructor(parser: RushCommandLineParser) {
+    super({
+      actionVerb: 'link',
+      summary: 'Create node_modules symlinks for all projects',
+      documentation: 'Create node_modules symlinks for all projects'
+    });
+    this._parser = parser;
+  }
+
+  protected onDefineParameters(): void {
+    this._noLocalLinksParameter = this.defineFlagParameter({
+      parameterLongName: '--no-local-links',
+      parameterShortName: '-n',
+      description: 'Do not locally link the projects; always link to the common folder'
+    });
+  }
+
+  protected onExecute(): void {
+    this._rushConfig = this._rushConfig = RushConfig.loadFromDefaultLocation();
+
+    const options: IExecuteLinkOptions = {
+      noLocalLinks: this._noLocalLinksParameter.value
+    };
+
+    readPackageTree(this._rushConfig.commonFolder, (error: Error, npmPackage: PackageNode) => {
+      this._parser.trapErrors(() => {
+        if (error) {
+          throw error;
+        } else {
+          const commonRootPackage = Package.createFromNpm(npmPackage);
+
+          const commonPackageLookup: PackageLookup = new PackageLookup();
+          commonPackageLookup.loadTree(commonRootPackage);
+
+          const rushLinkJson: IRushLinkJson = { localLinks: {} };
+
+          for (const project of this._rushConfig.projects) {
+            console.log('\nLINKING: ' + project.packageName);
+            linkProject(project, commonRootPackage, commonPackageLookup, this._rushConfig, rushLinkJson,
+              options);
+          }
+
+          console.log(`Writing "${this._rushConfig.rushLinkJsonFilename}"`);
+          JsonFile.saveJsonFile(rushLinkJson, this._rushConfig.rushLinkJsonFilename);
+        }
+      });
+    });
+  }
+}
+
+interface IExecuteLinkOptions {
   noLocalLinks?: boolean;
 }
 
@@ -289,34 +343,3 @@ function linkProject(
     }
   }
 }
-
-/**
- * Entry point for the "rush link" and "rush unlink" commands.
- */
-export default function executeLink(rushConfig: RushConfig, options: IExecuteLinkOptions): void {
-  readPackageTree(rushConfig.commonFolder, (error: Error, npmPackage: PackageNode) => {
-    if (error) {
-      Utilities.reportError(error);
-    } else {
-      try {
-        const commonRootPackage = Package.createFromNpm(npmPackage);
-
-        const commonPackageLookup: PackageLookup = new PackageLookup();
-        commonPackageLookup.loadTree(commonRootPackage);
-
-        const rushLinkJson: IRushLinkJson = { localLinks: {} };
-
-        for (const project of rushConfig.projects) {
-          console.log('\nLINKING: ' + project.packageName);
-          linkProject(project, commonRootPackage, commonPackageLookup, rushConfig, rushLinkJson,
-            options);
-        }
-
-        console.log(`Writing "${rushConfig.rushLinkJsonFilename}"`);
-        JsonFile.saveJsonFile(rushLinkJson, rushConfig.rushLinkJsonFilename);
-      } catch (error) {
-        Utilities.reportError(error);
-      }
-    }
-  });
-};

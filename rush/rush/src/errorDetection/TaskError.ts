@@ -5,7 +5,7 @@
  * Encapsulates information about an error
  */
 
-import { ErrorDetectionMode } from '../errorDetection/ErrorDetector';
+import { ErrorDetectionMode } from './ErrorDetector';
 
 export default class TaskError {
   protected _type: string;

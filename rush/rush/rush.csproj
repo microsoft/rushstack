@@ -4,7 +4,7 @@
   <PropertyGroup>
     <ProjectView>ProjectFiles</ProjectView>
     <ProjectGuid>{89A0415A-3F01-4BC5-B624-89172C2DF338}</ProjectGuid>
-    <TypeScriptToolsVersion>1.7</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>1.8</TypeScriptToolsVersion>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="*.js">

@@ -1,17 +1,14 @@
 /**
- * @file RushConfigLoader.ts
  * @Copyright (c) Microsoft Corporation.  All rights reserved.
- *
- * Provides helper functions to load, validate, and read the rush config file
  */
 
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
 import Validator = require('z-schema');
-import JsonFile from './JsonFile';
+import JsonFile from '../utilities/JsonFile';
 import RushConfigProject, { IRushConfigProjectJson } from './RushConfigProject';
-import Utilities from './Utilities';
+import Utilities from '../utilities/Utilities';
 
 /**
  * This represents the JSON data structure for the "rush.json" config file.
@@ -84,7 +81,7 @@ export default class RushConfig {
       noTypeless: true
     });
 
-    const rushSchema: any = require('./rush-schema.json');
+    const rushSchema: any = require('../rush-schema.json');
 
     if (!validator.validate(rushConfigJson, rushSchema)) {
       const error: ZSchema.Error = validator.getLastError();
