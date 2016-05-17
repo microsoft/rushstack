@@ -29,6 +29,7 @@ let _taskMap = {} as { [key: string]: IExecutable };
 let _uniqueTasks = [];
 
 let _buildConfig: IBuildConfig = {
+  srcFolder: 'src',
   distFolder: 'dist',
   libAMDFolder: null,
   libFolder: 'lib',
