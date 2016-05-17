@@ -141,6 +141,13 @@ export default class InstallAction extends CommandLineAction {
         Utilities.dangerouslyDeletePath(commonNodeModulesFolder);
         Utilities.createFolderWithRetry(commonNodeModulesFolder);
       }
+
+      console.log(os.EOL + 'Running "npm cache clean"');
+      child_process.execSync(npmToolFilename + ' cache clean', {
+        cwd: this._rushConfig.commonFolder,
+        stdio: [0, 1, 2] // (omit this to suppress gulp console output)
+      });
+
       needToPrune = false;
     }
 
