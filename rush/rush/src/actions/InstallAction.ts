@@ -51,12 +51,26 @@ export default class InstallAction extends CommandLineAction {
     });
   }
 
+  private _ensureSharedNpmFolder(): void {
+  }
+
   protected onExecute(): void {
-    this._rushConfig = this._rushConfig = RushConfig.loadFromDefaultLocation();
+    this._rushConfig = RushConfig.loadFromDefaultLocation();
 
     const startTime: number = Utilities.getTimeInMs();
     console.log('Starting "rush install"' + os.EOL);
 
+    this._ensureLocalNpmTool();
+    this._installCommonModules();
+
+    const endTime: number = Utilities.getTimeInMs();
+    const totalSeconds: string = ((endTime - startTime) / 1000.0).toFixed(2);
+
+    console.log(colors.green(`The common NPM packages are up to date. (${totalSeconds} seconds)`));
+    console.log(os.EOL + 'Next you should probably run: "rush link"');
+  }
+
+  private _ensureLocalNpmTool(): void {
     // Example: "C:\Users\YourName\.rush"
     const rushHomeFolder: string = path.join(this._rushConfig.homeFolder, '.rush');
 
@@ -70,7 +84,7 @@ export default class InstallAction extends CommandLineAction {
     // Example: "C:\Users\YourName\.rush\npm-1.2.3\last-install.log"
     const npmToolFlagFile: string = path.join(npmToolFolder, 'last-install.log');
 
-    // NOTE: We don't care about the timestamp for last-install.log, because noboy will change
+    // NOTE: We don't care about the timestamp for last-install.log, because nobody will change
     // the package.json for this case
     if (this._cleanInstallFull.value || !fs.existsSync(npmToolFlagFile)) {
       console.log(colors.bold('Installing NPM version ' + this._rushConfig.npmToolVersion) + os.EOL);
@@ -113,7 +127,9 @@ export default class InstallAction extends CommandLineAction {
     console.log(os.EOL + 'Symlinking "' + localNpmToolFolder + '"');
     console.log('  --> "' + npmToolFolder + '"');
     fs.symlinkSync(npmToolFolder, localNpmToolFolder, 'junction');
+  }
 
+  private _installCommonModules(): void {
     // Example: "C:\MyRepo\common\local-npm\node_modules\.bin\npm"
     const npmToolFilename: string = this._rushConfig.npmToolFilename;
     if (!fs.existsSync(npmToolFilename)) {
@@ -176,10 +192,5 @@ export default class InstallAction extends CommandLineAction {
       console.log('');
     }
 
-    const endTime: number = Utilities.getTimeInMs();
-    const totalSeconds: string = ((endTime - startTime) / 1000.0).toFixed(2);
-
-    console.log(colors.green(`The common NPM packages are up to date. (${totalSeconds} seconds)`));
-    console.log(os.EOL + 'Next you should probably run: "rush link"');
   }
 }
