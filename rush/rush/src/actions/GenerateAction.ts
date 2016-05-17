@@ -4,6 +4,8 @@
 
 import * as child_process from 'child_process';
 import * as colors from 'colors';
+import * as glob from 'glob';
+import globEscape = require('glob-escape');
 import * as os from 'os';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -13,10 +15,12 @@ import JsonFile from '../utilities/JsonFile';
 import RushCommandLineParser from './RushCommandLineParser';
 import RushConfig from '../data/RushConfig';
 import Utilities from '../utilities/Utilities';
+import { CommandLineFlagParameter } from '../commandLine/CommandLineParameter';
 
 export default class GenerateAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
   private _rushConfig: RushConfig;
+  private _lazyParameter: CommandLineFlagParameter;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -31,7 +35,12 @@ export default class GenerateAction extends CommandLineAction {
   }
 
   protected onDefineParameters(): void {
-    // abstract
+    this._lazyParameter = this.defineFlagParameter({
+      parameterLongName: '--lazy',
+      parameterShortName: '-l',
+      description: 'Do not clean the "node_modules" folder before running "npm install".'
+        + ' This is faster, but less correct, so only use it for debugging.'
+    });
   }
 
   protected onExecute(): void {
@@ -43,9 +52,19 @@ export default class GenerateAction extends CommandLineAction {
     // 1. Delete "common\node_modules"
     const nodeModulesPath: string = path.join(this._rushConfig.commonFolder, 'node_modules');
 
-    if (fs.existsSync(nodeModulesPath)) {
-      console.log('Deleting common/node_modules folder...');
-      Utilities.dangerouslyDeletePath(nodeModulesPath);
+    if (this._lazyParameter.value) {
+      // In the lazy case, we keep the existing common/node_modules.  However, we need to delete
+      // the temp projects (that were copied from common/temp_modules into common/node_modules).
+      // We can recognize them because their names start with "rush-"
+      console.log('Deleting common/node_modules/rush-*');
+      for (const tempModulePath of glob.sync(globEscape(nodeModulesPath.replace('\\', '/')) + '/rush-*')) {
+        Utilities.dangerouslyDeletePath(tempModulePath);
+      }
+    } else {
+      if (fs.existsSync(nodeModulesPath)) {
+        console.log('Deleting common/node_modules folder...');
+        Utilities.dangerouslyDeletePath(nodeModulesPath);
+      }
     }
 
     // 2. Delete "common\temp_modules"
@@ -154,9 +173,14 @@ export default class GenerateAction extends CommandLineAction {
     child_process.execSync(this._rushConfig.npmToolFilename + ' install', options);
     console.log('"npm install" completed' + os.EOL);
 
-    console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
-    child_process.execSync(this._rushConfig.npmToolFilename + ' shrinkwrap', options);
-    console.log('"npm shrinkwrap" completed' + os.EOL);
+    if (this._lazyParameter.value) {
+      // If we're not doing it for real, then don't bother with "npm shrinkwrap"
+      console.log(os.EOL + colors.bold('(Skipping "npm shrinkwrap")') + os.EOL);
+    } else {
+      console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
+      child_process.execSync(this._rushConfig.npmToolFilename + ' shrinkwrap', options);
+      console.log('"npm shrinkwrap" completed' + os.EOL);
+    }
 
     const endTime: number = Utilities.getTimeInMs();
     const totalSeconds: string = ((endTime - startTime) / 1000.0).toFixed(2);
