@@ -9,7 +9,7 @@
       "type": "string"
     },
     "commonFolder": {
-      "description": "Specifies the name of a top-level global folder containing a package.json file with a superset of all dependencies for all projects in the repository.  Example: 'common",
+      "description": "Specifies the name of a top-level global folder containing a package.json file with a superset of all dependencies for all projects in the repository.  Example: 'common'",
       "type": "string"
     },
     "npmVersion": {

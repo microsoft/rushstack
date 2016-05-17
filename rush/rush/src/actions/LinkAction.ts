@@ -208,7 +208,7 @@ function linkProject(
   const commonProjectPackage: Package = commonRootPackage.getChildByName(project.tempProjectName);
   if (!commonProjectPackage) {
     throw new Error(`Unable to find a temp package for ${project.packageName} `
-      + `-- you may need to run "rush prepare" again`);
+      + `-- you may need to run "rush generate" again`);
   }
 
   // TODO: Validate that the project's package.json still matches the common folder

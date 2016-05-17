@@ -78,7 +78,7 @@ export default class RebuildAction extends CommandLineAction {
     // Add task dependencies
     if (!fs.existsSync(this._rushConfig.rushLinkJsonFilename)) {
       throw new Error('File not found: ' + this._rushConfig.rushLinkJsonFilename
-        + os.EOL + 'Did you run "rush link"?  Were all its outputs added to git?');
+        + os.EOL + 'Did you run "rush link"?');
     }
 
     const rushLinkJson: IRushLinkJson = JsonFile.loadJsonFile(this._rushConfig.rushLinkJsonFilename);

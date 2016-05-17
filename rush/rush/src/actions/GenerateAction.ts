@@ -47,7 +47,7 @@ export default class GenerateAction extends CommandLineAction {
     this._rushConfig = this._rushConfig = RushConfig.loadFromDefaultLocation();
 
     const startTime: number = Utilities.getTimeInMs();
-    console.log('Starting "rush prepare"' + os.EOL);
+    console.log('Starting "rush generate"' + os.EOL);
 
     // 1. Delete "common\node_modules"
     const nodeModulesPath: string = path.join(this._rushConfig.commonFolder, 'node_modules');
@@ -185,7 +185,7 @@ export default class GenerateAction extends CommandLineAction {
     const endTime: number = Utilities.getTimeInMs();
     const totalSeconds: string = ((endTime - startTime) / 1000.0).toFixed(2);
 
-    console.log(os.EOL + colors.green(`Rush prepare finished successfully. (${totalSeconds} seconds)`));
+    console.log(os.EOL + colors.green(`Rush generate finished successfully. (${totalSeconds} seconds)`));
     console.log(os.EOL + 'Next you should probably run: "rush link"');
   }
 }
