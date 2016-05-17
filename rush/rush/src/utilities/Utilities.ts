@@ -61,8 +61,8 @@ export default class Utilities {
     }
     if (looped) {
       const currentTime: number = Utilities.getTimeInMs();
-      console.log('createFolderWithRetry() stalled for '
-        + (currentTime - startTime).toString() + ' ms');
+      const totalSeconds: string = ((currentTime - startTime) / 1000.0).toFixed(2);
+      console.log(`createFolderWithRetry() stalled for ${totalSeconds} seconds`);
     }
   }
 
@@ -73,7 +73,7 @@ export default class Utilities {
    */
   public static dangerouslyDeletePath(folderPath: string): void {
     try {
-      rimraf.sync(folderPath);
+      rimraf.sync(folderPath, { disableGlob: true });
     } catch (e) {
       throw new Error(e.message + os.EOL + 'Often this is caused by a file lock'
         + ' from a process such as your text editor, command prompt, or "gulp serve"');
