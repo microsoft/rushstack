@@ -43,6 +43,12 @@ export default class CheckAction extends CommandLineAction {
     const requireRegExps: RegExp[] = [
       /\Wrequire\s*\(\s*[']([^']+\s*)[']\)/,
       /\Wrequire\s*\(\s*["]([^"]+)["]\s*\)/,
+      /\Wrequire.ensure\s*\(\s*[']([^']+\s*)[']\)/,
+      /\Wrequire.ensure\s*\(\s*["]([^"]+)["]\s*\)/,
+      /\Wrequire.resolve\s*\(\s*[']([^']+\s*)[']\)/,
+      /\Wrequire.resolve\s*\(\s*["]([^"]+)["]\s*\)/,
+      /\WSystem.import\s*\(\s*[']([^']+\s*)[']\)/,
+      /\WSystem.import\s*\(\s*["]([^"]+)["]\s*\)/,
       /\Wfrom\s*[']([^']+)[']/,
       /\Wfrom\s*["]([^"]+)["]/
     ];
