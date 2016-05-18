@@ -116,17 +116,18 @@ export default class TaskRunner {
 
         const taskWriter: ITaskWriter = TaskWriterFactory.registerTask(task.name, this._quietMode);
 
-        task.execute(taskWriter).then((writer: ITaskWriter) => {
-          writer.close();
-          this._markTaskAsSuccess(task);
-          this._startAvailableTasks(complete, reject);
-        }).catch((errors: TaskError[]) => {
-          taskWriter.close();
-          this._hasAnyFailures = true;
-          task.errors = errors;
-          this._markTaskAsFailed(task);
-          this._startAvailableTasks(complete, reject);
-        });
+        task.execute(taskWriter)
+          .then(() => {
+            taskWriter.close();
+            this._markTaskAsSuccess(task);
+            this._startAvailableTasks(complete, reject);
+          }).catch((errors: TaskError[]) => {
+            taskWriter.close();
+            this._hasAnyFailures = true;
+            task.errors = errors;
+            this._markTaskAsFailed(task);
+            this._startAvailableTasks(complete, reject);
+          });
       }
     }
   }

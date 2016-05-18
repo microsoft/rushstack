@@ -15,7 +15,7 @@ import { ITaskWriter } from './TaskWriterFactory';
 export interface ITaskDefinition {
   name: string;
   /* tslint:disable:no-any */
-  execute: (writer: ITaskWriter) => Promise<any>;
+  execute: (writer: ITaskWriter) => Promise<void>;
   /* tslint:enable:no-any */
 }
 

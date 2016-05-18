@@ -12,11 +12,10 @@ function execSync(command) {
   var options = {
     stdio: [0, 1, 2] // (omit this to suppress console output)
   };
-  console.log('\nStarting: ' + normalizedCommand);
+  console.log('\nExecuting: ' + normalizedCommand);
   child_process.execSync(normalizedCommand, options, function () {
     complete();
   });
-  console.log('Finished: ' + normalizedCommand);
 }
 
 // Extract the input file list from tsconfig.json
