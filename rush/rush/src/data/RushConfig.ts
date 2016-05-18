@@ -149,7 +149,7 @@ export default class RushConfig {
     }
     this._commonFolderName = path.basename(this._commonFolder);
 
-    const unresolvedUserFolder: string = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
+    const unresolvedUserFolder: string = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
     this._homeFolder = path.resolve(unresolvedUserFolder);
     if (!fs.existsSync(this._homeFolder)) {
       throw new Error('Unable to determine the current user\'s home directory');
@@ -163,13 +163,13 @@ export default class RushConfig {
     this._projectFolderMinDepth = rushConfigJson.projectFolderMinDepth !== undefined
       ? rushConfigJson.projectFolderMinDepth : 2;
     if (this._projectFolderMinDepth < 1) {
-      throw new Error('Invalid projectFolderMinDepth; the minimum possible value is 1')
+      throw new Error('Invalid projectFolderMinDepth; the minimum possible value is 1');
     }
 
     this._projectFolderMaxDepth = rushConfigJson.projectFolderMaxDepth !== undefined
       ? rushConfigJson.projectFolderMaxDepth : 2;
     if (this._projectFolderMaxDepth < this._projectFolderMinDepth) {
-      throw new Error('The projectFolderMaxDepth cannot be smaller than the projectFolderMinDepth')
+      throw new Error('The projectFolderMaxDepth cannot be smaller than the projectFolderMinDepth');
     }
 
     this._projects = [];
@@ -180,7 +180,7 @@ export default class RushConfig {
 
     for (const projectJson of rushConfigJson.projects) {
       const tempProjectName: string = tempNamesByProject.get(projectJson);
-      const project = new RushConfigProject(projectJson, this, tempProjectName);
+      const project: RushConfigProject = new RushConfigProject(projectJson, this, tempProjectName);
       this._projects.push(project);
       this._projectsByName.set(project.packageName, project);
     }

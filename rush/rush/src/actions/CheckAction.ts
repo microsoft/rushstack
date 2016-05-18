@@ -11,7 +11,6 @@ import builtinPackageNames = require('builtins');
 
 import CommandLineAction from '../commandLine/CommandLineAction';
 import RushCommandLineParser from './RushCommandLineParser';
-import RushConfig from '../data/RushConfig';
 
 export default class CheckAction extends CommandLineAction {
   private _parser: RushCommandLineParser;

@@ -29,7 +29,7 @@ export default class RushConfigProject {
     this._packageName = projectJson.packageName;
 
     // For example, the depth of "a/b/c" would be 3.  The depth of "a" is 1.
-    const projectFolderDepth = projectJson.projectFolder.split('/').length;
+    const projectFolderDepth: number = projectJson.projectFolder.split('/').length;
     if (projectFolderDepth < rushConfig.projectFolderMinDepth) {
       throw new Error(`To keep things organized, this repository has a policy that project folders `
         + `should be at least ${rushConfig.projectFolderMinDepth} levels deep.  `
