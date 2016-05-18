@@ -9,6 +9,7 @@
     "listFiles": false
   },
   "files": [
+    "src/actions/CheckAction.ts",
     "src/actions/GenerateAction.ts",
     "src/actions/InstallAction.ts",
     "src/actions/LinkAction.ts",

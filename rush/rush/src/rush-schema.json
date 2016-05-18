@@ -17,6 +17,14 @@
       "type": "string",
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
     },
+    "projectFolderMinDepth": {
+      "description": "The minimum folder depth for the projectFolder field.  The default value is 2, i.e. a single slash in the path name.",
+      "type": "number"
+    },
+    "projectFolderMaxDepth": {
+      "description": "The maximum folder depth for the projectFolder field.  The default value is 2, i.e. a single slash in the path name.",
+      "type": "number"
+    },
     "projects": {
       "description": "A list of projects managed by this tool.",
       "type": "array",

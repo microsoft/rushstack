@@ -17,6 +17,8 @@ export interface IRushConfigJson {
   $schema: string;
   commonFolder: string;
   npmVersion: string;
+  projectFolderMinDepth?: number;
+  projectFolderMaxDepth?: number;
   projects: IRushConfigProjectJson[];
 }
 
@@ -41,6 +43,9 @@ export default class RushConfig {
   private _rushLinkJsonFilename: string;
   private _npmToolVersion: string;
   private _npmToolFilename: string;
+  private _projectFolderMinDepth: number;
+  private _projectFolderMaxDepth: number;
+
   private _projects: RushConfigProject[];
   private _projectsByName: Map<string, RushConfigProject>;
 
@@ -144,7 +149,7 @@ export default class RushConfig {
     }
     this._commonFolderName = path.basename(this._commonFolder);
 
-    const unresolvedUserFolder: string = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
+    const unresolvedUserFolder: string = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
     this._homeFolder = path.resolve(unresolvedUserFolder);
     if (!fs.existsSync(this._homeFolder)) {
       throw new Error('Unable to determine the current user\'s home directory');
@@ -155,6 +160,18 @@ export default class RushConfig {
     this._npmToolVersion = rushConfigJson.npmVersion;
     this._npmToolFilename = path.join(this._commonFolder, 'local-npm', 'node_modules', '.bin', 'npm');
 
+    this._projectFolderMinDepth = rushConfigJson.projectFolderMinDepth !== undefined
+      ? rushConfigJson.projectFolderMinDepth : 2;
+    if (this._projectFolderMinDepth < 1) {
+      throw new Error('Invalid projectFolderMinDepth; the minimum possible value is 1')
+    }
+
+    this._projectFolderMaxDepth = rushConfigJson.projectFolderMaxDepth !== undefined
+      ? rushConfigJson.projectFolderMaxDepth : 2;
+    if (this._projectFolderMaxDepth < this._projectFolderMinDepth) {
+      throw new Error('The projectFolderMaxDepth cannot be smaller than the projectFolderMinDepth')
+    }
+
     this._projects = [];
     this._projectsByName = new Map<string, RushConfigProject>();
 
@@ -163,7 +180,7 @@ export default class RushConfig {
 
     for (const projectJson of rushConfigJson.projects) {
       const tempProjectName: string = tempNamesByProject.get(projectJson);
-      const project: RushConfigProject = new RushConfigProject(projectJson, this, tempProjectName);
+      const project = new RushConfigProject(projectJson, this, tempProjectName);
       this._projects.push(project);
       this._projectsByName.set(project.packageName, project);
     }
@@ -225,6 +242,26 @@ export default class RushConfig {
    */
   public get npmToolFilename(): string {
     return this._npmToolFilename;
+  }
+
+  /**
+   * The minimum allowable folder depth for the projectFolder field in the rush.json file.
+   * This setting provides a way for repository maintainers to discourage nesting of project folders
+   * that makes the directory tree more difficult to navigate.  The default value is 2,
+   * which implements a standard 2-level hierarchy of <categoryFolder>/<projectFolder>/package.json.
+   */
+  public get projectFolderMinDepth(): number {
+    return this._projectFolderMinDepth;
+  }
+
+  /**
+   * The maximum allowable folder depth for the projectFolder field in the rush.json file.
+   * This setting provides a way for repository maintainers to discourage nesting of project folders
+   * that makes the directory tree more difficult to navigate.  The default value is 2,
+   * which implements on a standard convention of <categoryFolder>/<projectFolder>/package.json.
+   */
+  public get projectFolderMaxDepth(): number {
+    return this._projectFolderMaxDepth;
   }
 
   public get projects(): RushConfigProject[] {
