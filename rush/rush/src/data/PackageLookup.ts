@@ -11,13 +11,13 @@ export default class PackageLookup {
     this._packageMap = new Map<string, Package>();
   }
 
-  public loadTree(root: Package) {
+  public loadTree(root: Package): void {
     const queue: Package[] = [root];
 
     // We want the lookup to return the shallowest match, so this is a breadth first
     // traversal
 
-    while (true) {
+    for (; ; ) {
       const current: Package = queue.shift();
       if (!current) {
         break;

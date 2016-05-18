@@ -8,7 +8,7 @@ import * as os from 'os';
 
 import * as ErrorDetectorRules from '../errorDetection/rules/index';
 import CommandLineAction from '../commandLine/CommandLineAction';
-import ErrorDetector, { ErrorDetectionMode } from '../errorDetection/ErrorDetector';
+import ErrorDetector, { ErrorDetectionMode, IErrorDetectionRule } from '../errorDetection/ErrorDetector';
 import JsonFile from '../utilities/JsonFile';
 import RushCommandLineParser from './RushCommandLineParser';
 import RushConfig, { IRushLinkJson } from '../data/RushConfig';
@@ -60,18 +60,18 @@ export default class RebuildAction extends CommandLineAction {
 
     // Create tasks and register with tax runner
     for (const rushProject of this._rushConfig.projects) {
-      const errorMode = this._vsoParameter.value
+      const errorMode: ErrorDetectionMode = this._vsoParameter.value
         ? ErrorDetectionMode.VisualStudioOnline
         : ErrorDetectionMode.LocalBuild;
 
-      const activeRules = [
+      const activeRules: IErrorDetectionRule[] = [
         ErrorDetectorRules.TestErrorDetector,
         ErrorDetectorRules.TsErrorDetector,
         ErrorDetectorRules.TsLintErrorDetector
       ];
-      const errorDetector = new ErrorDetector(activeRules);
-      const projectTask = new ProjectBuildTask(rushProject, this._rushConfig, errorDetector, errorMode,
-        this._productionParameter.value);
+      const errorDetector: ErrorDetector = new ErrorDetector(activeRules);
+      const projectTask: ProjectBuildTask = new ProjectBuildTask(rushProject,
+        this._rushConfig, errorDetector, errorMode, this._productionParameter.value);
       taskRunner.addTask(projectTask);
     }
 

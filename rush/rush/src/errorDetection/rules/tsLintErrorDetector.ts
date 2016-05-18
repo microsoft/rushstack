@@ -15,7 +15,7 @@ import { BuildTaskError } from '../TaskError';
 // 3: "5"
 // 4: "8"
 // 5: "error no-any: 'any' is not allowed"
-export default RegexErrorDetector(
+const tsLintErrorDetector: IErrorDetectionRule = RegexErrorDetector(
   /^\s*(\[[^\]]+\])\s*Error\s*-\s*tslint\s*-\s*([^(]+)\(([0-9]+)\s*,\s*([0-9]+)\):\s*(.*)\s*$/,
   (match: RegExpExecArray) => {
     return new BuildTaskError(
@@ -27,3 +27,5 @@ export default RegexErrorDetector(
     );
   }
 ) as IErrorDetectionRule;
+
+export default tsLintErrorDetector;

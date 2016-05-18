@@ -69,6 +69,65 @@ export default class Package {
   public children: Package[];
   private _childrenByName: Map<string, Package>;
 
+  /**
+   * Recursive constructs a tree of Package objects using information returned
+   * by the "read-package-tree" library.
+   */
+  public static createFromNpm(npmPackage: PackageNode): Package {
+    if (npmPackage.error) {
+      throw Error(`Failed to parse package.json for ${path.basename(npmPackage.path)}: `
+        + npmPackage.error.message);
+    }
+
+    let dependencies: IPackageDependency[] = [];
+    const dependencyNames: Set<string> = new Set<string>();
+    const packageJson: PackageJson = npmPackage.package;
+
+    if (packageJson.optionalDependencies) {
+      for (const dependencyName of Object.keys(packageJson.optionalDependencies)) {
+        if (!dependencyNames.has(dependencyName)) {
+          dependencyNames.add(dependencyName);
+          dependencies.push({
+            isOptional: true,
+            name: dependencyName,
+            versionRange: packageJson.optionalDependencies[dependencyName]
+          });
+        }
+      }
+    }
+    if (packageJson.dependencies) {
+      for (const dependencyName of Object.keys(packageJson.dependencies)) {
+        if (!dependencyNames.has(dependencyName)) {
+          dependencyNames.add(dependencyName);
+          dependencies.push({
+            isOptional: false,
+            name: dependencyName,
+            versionRange: packageJson.dependencies[dependencyName]
+          });
+        }
+      }
+    }
+    dependencies = dependencies.sort((a, b) => a.name.localeCompare(b.name));
+
+    const newPackage: Package = new Package(
+      npmPackage.package.name,
+      npmPackage.package.version,
+      dependencies,
+      // NOTE: We don't use packageNode.realpath here, because if "npm unlink" was
+      // performed without redoing "rush link", then a broken symlink is better than
+      // a symlink to the wrong thing.
+      npmPackage.path
+    );
+
+    newPackage.originalPackageJson = packageJson;
+
+    for (const child of npmPackage.children) {
+      newPackage.addChild(Package.createFromNpm(child));
+    }
+
+    return newPackage;
+  }
+
   constructor(name: string, version: string, dependencies: IPackageDependency[], folderPath: string) {
 
     this.name = name;
@@ -97,65 +156,6 @@ export default class Package {
     return result;
   }
 
-  /**
-   * Recursive constructs a tree of Package objects using information returned
-   * by the "read-package-tree" library.
-   */
-  public static createFromNpm(npmPackage: PackageNode): Package {
-    if (npmPackage.error) {
-      throw Error(`Failed to parse package.json for ${path.basename(npmPackage.path)}: `
-        + npmPackage.error.message);
-    }
-
-    let dependencies: IPackageDependency[] = [];
-    let dependencyNames: Set<string> = new Set<string>();
-    const packageJson: PackageJson = npmPackage.package;
-
-    if (packageJson.optionalDependencies) {
-      for (let dependencyName of Object.keys(packageJson.optionalDependencies)) {
-        if (!dependencyNames.has(dependencyName)) {
-          dependencyNames.add(dependencyName);
-          dependencies.push({
-            isOptional: true,
-            name: dependencyName,
-            versionRange: packageJson.optionalDependencies[dependencyName]
-          });
-        }
-      }
-    }
-    if (packageJson.dependencies) {
-      for (let dependencyName of Object.keys(packageJson.dependencies)) {
-        if (!dependencyNames.has(dependencyName)) {
-          dependencyNames.add(dependencyName);
-          dependencies.push({
-            isOptional: false,
-            name: dependencyName,
-            versionRange: packageJson.dependencies[dependencyName]
-          });
-        }
-      }
-    }
-    dependencies = dependencies.sort((a, b) => a.name.localeCompare(b.name));
-
-    const newPackage: Package = new Package(
-      npmPackage.package.name,
-      npmPackage.package.version,
-      dependencies,
-      // NOTE: We don't use packageNode.realpath here, because if "npm unlink" was
-      // performed without redoing "rush link", then a broken symlink is better than
-      // a symlink to the wrong thing.
-      npmPackage.path
-    );
-
-    newPackage.originalPackageJson = packageJson;
-
-    for (let child of npmPackage.children) {
-      newPackage.addChild(Package.createFromNpm(child));
-    }
-
-    return newPackage;
-  }
-
   public addChild(child: Package): void {
     if (child.parent) {
       throw Error('Child already has a parent');
@@ -180,18 +180,17 @@ export default class Package {
    * dependency can be added, i.e. if the requested dependency was not found
    * or was found with an incompatible version.
    */
-  public resolveOrCreate(dependencyName: string)
-    : { found: Package, parentForCreate: Package } {
+  public resolveOrCreate(dependencyName: string): IResolveOrCreateResult {
 
     let currentParent: Package = this;
     let parentForCreate: Package = this;
 
-    while (true) {
+    for (; ; ) {
       // NOTE: Initially we don't compare against ourself, because self-references
       // are a special case
 
       // Does any child match?
-      for (let child of currentParent.children) {
+      for (const child of currentParent.children) {
         if (child.name === dependencyName) {
           // One of the children matched.
           // parentForCreate will be the parent
@@ -221,7 +220,7 @@ export default class Package {
    * Searches the node_modules hierarchy for the nearest matching package with the
    * given name.  If no match is found, then undefined is returned.
    */
-  public resolve(dependencyName: string) {
+  public resolve(dependencyName: string): Package {
     return this.resolveOrCreate(dependencyName).found;
   }
 
@@ -230,8 +229,13 @@ export default class Package {
       indent = '';
     }
     console.log(indent + this.nameAndVersion);
-    for (let child of this.children) {
+    for (const child of this.children) {
       child.printTree(indent + '  ');
     }
   }
+}
+
+export interface IResolveOrCreateResult {
+  found: Package;
+  parentForCreate: Package;
 }

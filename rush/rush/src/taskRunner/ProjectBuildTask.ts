@@ -16,6 +16,7 @@ import ErrorDetector, { ErrorDetectionMode } from '../errorDetection/ErrorDetect
 import { ITaskDefinition } from '../taskRunner/ITask';
 import { ITaskWriter } from '../taskRunner/TaskWriterFactory';
 import TaskError from '../errorDetection/TaskError';
+import Utilities from '../utilities/Utilities';
 
 export default class ProjectBuildTask implements ITaskDefinition {
   public name: string;
@@ -47,18 +48,17 @@ export default class ProjectBuildTask implements ITaskDefinition {
         writer.writeLine(`>>> ProjectBuildTask :: Project [${this.name}]:`);
         const projectFolder: string = this._rushProject.projectFolder;
 
+        /* tslint:disable:typedef */  // the type is anonymous
         const options = {
           cwd: projectFolder,
           stdio: [0, 1, 2] // (omit this to suppress gulp console output)
         };
+        /* tslint:enable:typedef */
 
         writer.writeLine('npm run clean');
-        const gulpNukeResult = child_process.execSync(this._rushConfig.npmToolFilename + ' run clean',
-          { cwd: projectFolder });
-        writer.writeLine(gulpNukeResult.toString());
+        Utilities.executeCommand(this._rushConfig.npmToolFilename, 'run clean', projectFolder);
 
-
-        const command = [
+        const command: string = [
           this._rushConfig.npmToolFilename,
           'run test',
           '--', // Everything after this will be passed directly to the gulp task
@@ -67,7 +67,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
         ].join(' ');
         writer.writeLine(command);
 
-        const buildTask = child_process.exec(command, options);
+        const buildTask: child_process.ChildProcess = child_process.exec(command, options);
 
         buildTask.stdout.on('data', (data: string) => {
           writer.write(data);
@@ -80,8 +80,10 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
         buildTask.on('close', (code: number) => {
           // Detect & display errors
-          const errors = this._errorDetector.execute(writer.getStdOutput() + os.EOL + writer.getStdError());
-          for (let i = 0; i < errors.length; i++) {
+          const errors: TaskError[] = this._errorDetector.execute(
+            writer.getStdOutput() + os.EOL + writer.getStdError());
+
+          for (let i: number = 0; i < errors.length; i++) {
             writer.writeError(errors[i].toString(this._errorDisplayMode) + os.EOL);
           }
 
@@ -112,17 +114,17 @@ export default class ProjectBuildTask implements ITaskDefinition {
   }
 
   // @todo #179371: add log files to list of things that get gulp nuke'd
-  private _writeLogsToDisk(writer: ITaskWriter) {
-    const logfilename = path.basename(this._rushProject.projectFolder);
+  private _writeLogsToDisk(writer: ITaskWriter): void {
+    const logFilename: string = path.basename(this._rushProject.projectFolder);
 
-    const stdout = writer.getStdOutput().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
+    const stdout: string = writer.getStdOutput().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
     if (stdout) {
-      fs.writeFileSync(path.join(this._rushProject.projectFolder, logfilename + '.build.log'), stdout);
+      fs.writeFileSync(path.join(this._rushProject.projectFolder, logFilename + '.build.log'), stdout);
     }
 
-    const stderr = writer.getStdError().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
+    const stderr: string = writer.getStdError().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
     if (stderr) {
-      fs.writeFileSync(path.join(this._rushProject.projectFolder, logfilename + '.build.error.log'), stderr);
+      fs.writeFileSync(path.join(this._rushProject.projectFolder, logFilename + '.build.error.log'), stderr);
     }
   }
 }

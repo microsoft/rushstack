@@ -14,7 +14,7 @@ import JsonFile from '../utilities/JsonFile';
 import RushCommandLineParser from './RushCommandLineParser';
 import RushConfig, { IRushLinkJson } from '../data/RushConfig';
 import RushConfigProject from '../data/RushConfigProject';
-import Package from '../data/Package';
+import Package, { IResolveOrCreateResult } from '../data/Package';
 import PackageLookup from '../data/PackageLookup';
 import Utilities from '../utilities/Utilities';
 import { CommandLineFlagParameter } from '../commandLine/CommandLineParameter';
@@ -55,7 +55,7 @@ export default class LinkAction extends CommandLineAction {
         if (error) {
           throw error;
         } else {
-          const commonRootPackage = Package.createFromNpm(npmPackage);
+          const commonRootPackage: Package = Package.createFromNpm(npmPackage);
 
           const commonPackageLookup: PackageLookup = new PackageLookup();
           commonPackageLookup.loadTree(commonRootPackage);
@@ -129,7 +129,7 @@ function createSymlinksForDependencies(localPackage: Package): void {
     // If there are children, then we need to symlink each item in the folder individually
     Utilities.createFolderWithRetry(localPackage.folderPath);
 
-    for (let filename of fs.readdirSync(localPackage.symlinkTargetFolderPath)) {
+    for (const filename of fs.readdirSync(localPackage.symlinkTargetFolderPath)) {
       if (filename.toLowerCase() !== 'node_modules') {
         // Create the symlink
         let linkType: string = 'file';
@@ -163,7 +163,7 @@ function createSymlinksForDependencies(localPackage: Package): void {
   if (localPackage.children.length > 0) {
     Utilities.createFolderWithRetry(localModuleFolder);
 
-    for (let child of localPackage.children) {
+    for (const child of localPackage.children) {
       createSymlinksForDependencies(child);
     }
   }
@@ -191,7 +191,7 @@ function createSymlinksForTopLevelProject(localPackage: Package): void {
   if (localPackage.children.length > 0) {
     Utilities.createFolderWithRetry(localModuleFolder);
 
-    for (let child of localPackage.children) {
+    for (const child of localPackage.children) {
       createSymlinksForDependencies(child);
     }
   }
@@ -212,7 +212,7 @@ function linkProject(
   }
 
   // TODO: Validate that the project's package.json still matches the common folder
-  const localProjectPackage = new Package(
+  const localProjectPackage: Package = new Package(
     project.packageJson.name,
     commonProjectPackage.version,
     commonProjectPackage.dependencies,
@@ -222,7 +222,7 @@ function linkProject(
   const queue: IQueueItem[] = [];
   queue.push({ commonPackage: commonProjectPackage, localPackage: localProjectPackage });
 
-  while (true) {
+  for (; ; ) {
     const queueItem: IQueueItem = queue.shift();
     if (!queueItem) {
       break;
@@ -257,7 +257,7 @@ function linkProject(
           }
 
           // Is the dependency already resolved?
-          const resolution = localPackage.resolveOrCreate(dependency.name);
+          const resolution: IResolveOrCreateResult = localPackage.resolveOrCreate(dependency.name);
 
           if (!resolution.found || resolution.found.version !== matchedVersion) {
             // We did not find a suitable match, so place a new local package that
@@ -291,13 +291,13 @@ function linkProject(
 
       // We can't symlink to an Rush project, so instead we will symlink to a folder
       // under the "Common" folder
-      const commonDependencyPackage = commonPackage.resolve(dependency.name);
+      const commonDependencyPackage: Package = commonPackage.resolve(dependency.name);
       if (commonDependencyPackage) {
         // This is the version that was chosen when "npm install" ran in the common folder
-        const effectiveDependencyVersion = commonDependencyPackage.version;
+        const effectiveDependencyVersion: string = commonDependencyPackage.version;
 
         // Is the dependency already resolved?
-        const resolution = localPackage.resolveOrCreate(dependency.name);
+        const resolution: IResolveOrCreateResult = localPackage.resolveOrCreate(dependency.name);
 
         if (!resolution.found || resolution.found.version !== effectiveDependencyVersion) {
           // We did not find a suitable match, so place a new local package
@@ -312,7 +312,7 @@ function linkProject(
             newLocalFolderPath
           );
 
-          let commonPackage: Package = commonPackageLookup.getPackage(newLocalPackage.nameAndVersion);
+          const commonPackage: Package = commonPackageLookup.getPackage(newLocalPackage.nameAndVersion);
           if (!commonPackage) {
             throw Error(`The ${localPackage.name}@${localPackage.version} package was not found`
               + ` in the ${rushConfig.commonFolderName} folder`);

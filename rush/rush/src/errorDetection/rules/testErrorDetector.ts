@@ -10,8 +10,8 @@ import TaskError from '../TaskError';
 
 // Example: "       × This Test Failed"
 // 0: This Test Failed
-// This test should intentionally fail for the following: "       × 23 tests failed" 
-export default RegexErrorDetector(
+// This test should intentionally fail for the following: "       × 23 tests failed"
+const testErrorDetector: IErrorDetectionRule = RegexErrorDetector(
   / *× (\D.*)/,
   (match: RegExpExecArray) => {
     return new TaskError(
@@ -20,3 +20,5 @@ export default RegexErrorDetector(
     );
   }
 ) as IErrorDetectionRule;
+
+export default testErrorDetector;

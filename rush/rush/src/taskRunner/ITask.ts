@@ -14,7 +14,9 @@ import { ITaskWriter } from './TaskWriterFactory';
  */
 export interface ITaskDefinition {
   name: string;
+  /* tslint:disable:no-any */
   execute: (writer: ITaskWriter) => Promise<any>;
+  /* tslint:enable:no-any */
 }
 
 /**
@@ -25,5 +27,5 @@ export interface ITask extends ITaskDefinition {
   dependencies: ITask[];
   dependents: ITask[];
   errors: TaskError[];
-};
+}
 export default ITask;

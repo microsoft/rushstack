@@ -16,12 +16,12 @@ export default class TaskError {
     this._message = message;
   }
 
-  public toString(mode: ErrorDetectionMode) {
-    const errorMessage = `[${this._type}] '${this._message}'`;
+  public toString(mode: ErrorDetectionMode): string {
+    const errorMessage: string = `[${this._type}] '${this._message}'`;
     return this._appendPrefix(errorMessage, mode);
   }
 
-  protected _appendPrefix(errorMessage: string, mode: ErrorDetectionMode) {
+  protected _appendPrefix(errorMessage: string, mode: ErrorDetectionMode): string {
     if (mode === ErrorDetectionMode.VisualStudioOnline) {
       return `##vso[task.logissue type=error;]${errorMessage}`;
     }
@@ -44,9 +44,9 @@ export class BuildTaskError extends TaskError {
     this._offset = offset;
   }
 
-  public toString(mode: ErrorDetectionMode) {
+  public toString(mode: ErrorDetectionMode): string {
     // Example: "C:\Project\Blah.ts(123, 1): [tslint] error no-any: 'any' is not allowed"
-    const errorMessage = `${this._file}(${this._line}, ${this._offset}): [${this._type}] ${this._message}`;
+    const errorMessage: string = `${this._file}(${this._line}, ${this._offset}): [${this._type}] ${this._message}`;
     return this._appendPrefix(errorMessage, mode);
   }
 }

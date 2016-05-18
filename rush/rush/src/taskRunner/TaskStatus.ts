@@ -11,5 +11,5 @@ enum TaskStatus {
   Success = 3,
   Failure = 4,
   Blocked = 5
-};
+}
 export default TaskStatus;

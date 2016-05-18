@@ -7,7 +7,9 @@ import { ICommandLineFlagDefinition, CommandLineFlagParameter } from './CommandL
 
 export interface ICommandLineParserData {
   action: string;
+  /* tslint:disable:no-any */
   [key: string]: any;
+  /* tslint:enable:no-any */
 }
 
 /**

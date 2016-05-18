@@ -13,7 +13,7 @@ import RushConfig from '../data/RushConfig';
 export interface IRushConfigProjectJson {
   packageName: string;
   projectFolder: string;
-};
+}
 
 /**
  * This represents the configuration of a project that is built by Rush, based on

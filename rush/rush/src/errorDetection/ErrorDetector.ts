@@ -21,9 +21,11 @@ export interface IErrorDetectionRule {
 /**
  * Creates an Error Detection Rule based on a regex and a function which converts a regex match to a TaskError
  */
-export function RegexErrorDetector(regex: RegExp, getError: (match: RegExpExecArray) => TaskError): IErrorDetectionRule {
+export function RegexErrorDetector(regex: RegExp,
+    getError: (match: RegExpExecArray) => TaskError): IErrorDetectionRule {
+
   return (line: string): TaskError => {
-    const match = regex.exec(line);
+    const match: RegExpExecArray = regex.exec(line);
     if (match) {
       return getError(match);
     }
@@ -43,10 +45,10 @@ export default class ErrorDetector {
     this._rules = rules;
   }
 
-  public execute(data: string) {
+  public execute(data: string): TaskError[] {
     const errors: TaskError[] = [];
     data.split('\n').forEach((line: string) => {
-      const error = this._checkLine(line);
+      const error: TaskError = this._checkLine(line);
       if (error) {
         errors.push(error);
       }
@@ -56,7 +58,7 @@ export default class ErrorDetector {
 
   private _checkLine(line: string): TaskError {
     for (const rule of this._rules) {
-      const error = rule(line);
+      const error: TaskError = rule(line);
       if (error) {
         return error;
       }

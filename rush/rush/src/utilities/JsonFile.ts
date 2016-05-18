@@ -8,6 +8,8 @@ import * as path from 'path';
  */
 export default class JsonFile {
 
+  /* tslint:disable:no-any */ // JSON objects are dynamically typed
+
   public static loadJsonFile(jsonFilename: string): any {
     if (!fs.existsSync(jsonFilename)) {
       throw new Error(`Input file not found: ${jsonFilename}`);
@@ -24,7 +26,7 @@ export default class JsonFile {
   }
 
   public static saveJsonFile(jsonData: any, jsonFilename: string): void {
-    const stringified: string = JSON.stringify(jsonData, null, 2) + '\n';
+    const stringified: string = JSON.stringify(jsonData, undefined, 2) + '\n';
     fs.writeFileSync(jsonFilename, stringified.replace('\n', '\r\n'));
   }
 }

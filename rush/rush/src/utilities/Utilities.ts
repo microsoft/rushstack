@@ -2,6 +2,7 @@
  * @Copyright (c) Microsoft Corporation.  All rights reserved.
  */
 
+import * as child_process from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as rimraf from 'rimraf';
@@ -46,7 +47,7 @@ export default class Utilities {
 
     const startTime: number = Utilities.getTimeInMs();
     let looped: boolean = false;
-    while (true) {
+    for (; ; ) {
       try {
         fs.mkdirSync(folderName);
         break;
@@ -89,8 +90,8 @@ export default class Utilities {
     if (!fs.existsSync(outputFilename) || !fs.existsSync(inputFilename)) {
       return false;
     }
-    let outputStats: fs.Stats = fs.statSync(outputFilename);
-    let inputStats: fs.Stats = fs.statSync(inputFilename);
+    const outputStats: fs.Stats = fs.statSync(outputFilename);
+    const inputStats: fs.Stats = fs.statSync(inputFilename);
     return outputStats.mtime >= inputStats.mtime;
   }
 
@@ -103,5 +104,19 @@ export default class Utilities {
       return stdout.columns;
     }
     return 80;
+  }
+
+  /**
+   * Executes the command with the specified command-line parameters, and waits for it to complete.
+   * The current directory will be set to the specified workingDirectory.
+   */
+  public static executeCommand(command: string, args: string, workingDirectory: string): void {
+    /* tslint:disable:typedef */  // the type is anonymous
+    const options = {
+      cwd: workingDirectory,
+      stdio: [0, 1, 2] // (omit this to suppress gulp console output)
+    };
+    /* tslint:enable:typedef */
+    child_process.execSync('"' + command + '" ' + args, options);
   }
 }

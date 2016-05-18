@@ -2,7 +2,6 @@
  * @Copyright (c) Microsoft Corporation.  All rights reserved.
  */
 
-import * as child_process from 'child_process';
 import * as colors from 'colors';
 import * as fs from 'fs';
 import * as os from 'os';
@@ -49,9 +48,6 @@ export default class InstallAction extends CommandLineAction {
       parameterShortName: '-C',
       description: 'Like "--clean", but also deletes and reinstalls the NPM tool itself'
     });
-  }
-
-  private _ensureSharedNpmFolder(): void {
   }
 
   protected onExecute(): void {
@@ -107,10 +103,7 @@ export default class InstallAction extends CommandLineAction {
       console.log(os.EOL + 'Running "npm install" in ' + npmToolFolder);
 
       // NOTE: Here we use whatever version of NPM we happen to find in the PATH
-      child_process.execSync('npm install', {
-        cwd: npmToolFolder,
-        stdio: [0, 1, 2] // (omit this to suppress gulp console output)
-      });
+      Utilities.executeCommand('npm', 'install', npmToolFolder);
 
       // Create the marker file to indicate a successful install
       fs.writeFileSync(npmToolFlagFile, '');
@@ -159,10 +152,7 @@ export default class InstallAction extends CommandLineAction {
       }
 
       console.log(os.EOL + 'Running "npm cache clean"');
-      child_process.execSync(npmToolFilename + ' cache clean', {
-        cwd: this._rushConfig.commonFolder,
-        stdio: [0, 1, 2] // (omit this to suppress gulp console output)
-      });
+      Utilities.executeCommand(npmToolFilename, 'cache clean', this._rushConfig.commonFolder);
 
       needToPrune = false;
     }
@@ -174,18 +164,12 @@ export default class InstallAction extends CommandLineAction {
     if (!Utilities.isFileTimestampCurrent(commonNodeModulesFlagFilename, commonPackageJsonFilename)) {
       if (needToPrune) {
         console.log('Running "npm prune" in ' + this._rushConfig.commonFolder);
-        child_process.execSync(npmToolFilename + ' prune', {
-          cwd: this._rushConfig.commonFolder,
-          stdio: [0, 1, 2] // (omit this to suppress gulp console output)
-        });
+        Utilities.executeCommand(npmToolFilename, 'prune', this._rushConfig.commonFolder);
       }
 
       // Next, run "npm install" in the common folder
       console.log(os.EOL + 'Running "npm install" in ' + this._rushConfig.commonFolder);
-      child_process.execSync(npmToolFilename + ' install', {
-        cwd: this._rushConfig.commonFolder,
-        stdio: [0, 1, 2] // (omit this to suppress gulp console output)
-      });
+      Utilities.executeCommand(npmToolFilename, 'install', this._rushConfig.commonFolder);
 
       // Create the marker file to indicate a successful install
       fs.writeFileSync(commonNodeModulesFlagFilename, '');

@@ -71,26 +71,28 @@ export default class TaskWriterFactory {
     }
 
     return {
-      close: () => this._completeTask(taskName),
-      getStdError: () => this._getTaskOutput(taskName, ITaskOutputStream.stderr),
-      getStdOutput: () => this._getTaskOutput(taskName),
-      write: (data: string) => this._writeTaskOutput(taskName, data),
-      writeError: (data: string) => {
+      close: (): void => this._completeTask(taskName),
+      getStdError: (): string => this._getTaskOutput(taskName, ITaskOutputStream.stderr),
+      getStdOutput: (): string => this._getTaskOutput(taskName),
+      write: (data: string): void => this._writeTaskOutput(taskName, data),
+      writeError: (data: string): void => {
         const stream: ITaskOutputStream = (data.indexOf('Warning - ') === 0) ?
           ITaskOutputStream.warning : // Warning written to stderr
           ITaskOutputStream.stderr;
 
         this._writeTaskOutput(taskName, data, stream);
       },
-      writeLine: (data: string) => this._writeTaskOutput(taskName, data + os.EOL)
+      writeLine: (data: string): void => this._writeTaskOutput(taskName, data + os.EOL)
     };
   }
 
   /**
    * Adds the text to the tasks's buffer, and writes it to the console if it is the active task
    */
-  private static _writeTaskOutput(taskName: string, data: string, stream: ITaskOutputStream = ITaskOutputStream.stdout) {
-    const taskInfo = this._tasks.get(taskName);
+  private static _writeTaskOutput(taskName: string, data: string,
+    stream: ITaskOutputStream = ITaskOutputStream.stdout): void {
+
+    const taskInfo: ITaskWriterInfo = this._tasks.get(taskName);
     if (!taskInfo || taskInfo.state !== TaskWriterState.Open) {
       throw new Error('The task is not registered or has been completed and written.');
     }
@@ -112,7 +114,7 @@ export default class TaskWriterFactory {
    * Returns the current value of the task's buffer
    */
   private static _getTaskOutput(taskName: string, stream: ITaskOutputStream = ITaskOutputStream.stdout): string {
-    const taskInfo = this._tasks.get(taskName);
+    const taskInfo: ITaskWriterInfo = this._tasks.get(taskName);
     if (!taskInfo) {
       throw new Error('The task is not registered!');
     }
@@ -125,8 +127,8 @@ export default class TaskWriterFactory {
    *  - If there is no active task, write the output to the screen
    *  - If there is an active task, mark the task as completed and wait for active task to complete
    */
-  private static _completeTask(taskName: string) {
-    const taskInfo = this._tasks.get(taskName);
+  private static _completeTask(taskName: string): void {
+    const taskInfo: ITaskWriterInfo = this._tasks.get(taskName);
     if (!taskInfo || taskInfo.state !== TaskWriterState.Open) {
       throw new Error('The task is not registered or has been completed and written.');
     }
@@ -145,7 +147,7 @@ export default class TaskWriterFactory {
   /**
    * Helper function which writes all completed tasks
    */
-  private static _writeAllCompletedTasks() {
+  private static _writeAllCompletedTasks(): void {
     this._tasks.forEach((task: ITaskWriterInfo, taskName: string) => {
       if (task && task.state === TaskWriterState.ClosedUnwritten) {
         this._writeTask(taskName, task);
@@ -156,7 +158,7 @@ export default class TaskWriterFactory {
   /**
    * Write and delete task
    */
-  private static _writeTask(taskName: string, taskInfo: ITaskWriterInfo) {
+  private static _writeTask(taskName: string, taskInfo: ITaskWriterInfo): void {
     taskInfo.state = TaskWriterState.Written;
     if (!taskInfo.quietMode) {
       process.stdout.write(taskInfo.stdout.join(''));

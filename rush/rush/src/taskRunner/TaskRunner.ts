@@ -39,13 +39,13 @@ export default class TaskRunner {
   /**
    * Registers a task definition to the map of defined tasks
    */
-  public addTask(taskDefinition: ITaskDefinition) {
+  public addTask(taskDefinition: ITaskDefinition): void {
     if (this._tasks.has(taskDefinition.name)) {
       throw new Error('A task with that name has already been registered.');
     }
 
     // @todo #168287: do a copy here
-    const task = taskDefinition as ITask;
+    const task: ITask = taskDefinition as ITask;
     task.dependencies = [];
     task.dependents = [];
     task.errors = [];
@@ -59,8 +59,8 @@ export default class TaskRunner {
    * name must already have been registered.
    * @taskDependencies
    */
-  public addDependencies(taskName: string, taskDependencies: string[]) {
-    const task = this._tasks.get(taskName);
+  public addDependencies(taskName: string, taskDependencies: string[]): void {
+    const task: ITask = this._tasks.get(taskName);
 
     if (!task) {
       throw new Error(`The task '${taskName}' has not been registered`);
@@ -70,7 +70,7 @@ export default class TaskRunner {
     }
 
     taskDependencies.forEach((dependencyName: string) => {
-      const dependency = this._tasks.get(dependencyName);
+      const dependency: ITask = this._tasks.get(dependencyName);
       task.dependencies.push(dependency);
       dependency.dependents.push(task);
     });
@@ -96,7 +96,7 @@ export default class TaskRunner {
    * Helper function which finds any tasks which are available to run and begins executing them.
    * It calls the complete callback when all tasks are completed, or rejects if any task fails.
    */
-  private _startAvailableTasks(complete: () => void, reject: () => void) {
+  private _startAvailableTasks(complete: () => void, reject: () => void): void {
     if (!this._areAnyTasksReadyOrExecuting()) {
       this._printTaskStatus();
       if (this._hasAnyFailures) {
@@ -114,23 +114,19 @@ export default class TaskRunner {
         task.status = TaskStatus.Executing;
         console.log(colors.yellow(`> TaskRunner :: Starting task [${task.name}]`));
 
-        let taskWriter = TaskWriterFactory.registerTask(task.name, this._quietMode);
+        const taskWriter: ITaskWriter = TaskWriterFactory.registerTask(task.name, this._quietMode);
 
-        let onTaskComplete = (completedTask: ITask, writer: ITaskWriter) => {
+        task.execute(taskWriter).then((writer: ITaskWriter) => {
           writer.close();
-          this._markTaskAsSuccess(completedTask);
+          this._markTaskAsSuccess(task);
           this._startAvailableTasks(complete, reject);
-        };
-
-        let onTaskFail = (failedTask: ITask, writer: ITaskWriter, errors: TaskError[]) => {
-          writer.close();
+        }).catch((errors: TaskError[]) => {
+          taskWriter.close();
           this._hasAnyFailures = true;
-          failedTask.errors = errors;
-          this._markTaskAsFailed(failedTask);
+          task.errors = errors;
+          this._markTaskAsFailed(task);
           this._startAvailableTasks(complete, reject);
-        };
-
-        task.execute(taskWriter).then(onTaskComplete.bind(this, task, taskWriter), onTaskFail.bind(this, task, taskWriter));
+        });
       }
     }
   }
@@ -138,7 +134,7 @@ export default class TaskRunner {
   /**
    * Marks a task as having failed and marks each of its dependents as blocked
    */
-  private _markTaskAsFailed(task: ITask) {
+  private _markTaskAsFailed(task: ITask): void {
     console.log(colors.red(`${os.EOL}> TaskRunner :: Completed task [${task.name}] with errors!`));
     task.status = TaskStatus.Failure;
     task.dependents.forEach((dependent: ITask) => {
@@ -149,7 +145,7 @@ export default class TaskRunner {
   /**
    * Marks a task and all its dependents as blocked
    */
-  private _markTaskAsBlocked(task: ITask, failedTask: ITask) {
+  private _markTaskAsBlocked(task: ITask, failedTask: ITask): void {
     if (task.status === TaskStatus.Ready) {
       console.log(colors.red(`> TaskRunner :: [${task.name}] blocked by [${failedTask.name}]!`));
       task.status = TaskStatus.Blocked;
@@ -162,11 +158,11 @@ export default class TaskRunner {
   /**
    * Marks a task as being completed, and removes it from the dependencies list of all its dependents
    */
-  private _markTaskAsSuccess(task: ITask) {
+  private _markTaskAsSuccess(task: ITask): void {
     console.log(colors.green(`> TaskRunner :: Completed task [${task.name}]`));
     task.status = TaskStatus.Success;
     task.dependents.forEach((dependent: ITask) => {
-      const i = dependent.dependencies.indexOf(task);
+      const i: number = dependent.dependencies.indexOf(task);
       if (i !== -1) {
         dependent.dependencies.splice(i, 1);
       }
@@ -181,7 +177,7 @@ export default class TaskRunner {
    * Do any Ready or Executing tasks exist?
    */
   private _areAnyTasksReadyOrExecuting(): boolean {
-    let anyNonCompletedTasks = false;
+    let anyNonCompletedTasks: boolean = false;
     this._tasks.forEach((task: ITask) => {
       if (task.status === TaskStatus.Executing || task.status === TaskStatus.Ready) {
         anyNonCompletedTasks = true;
@@ -193,7 +189,7 @@ export default class TaskRunner {
   /**
    * Prints out a report of the status of each project
    */
-  private _printTaskStatus() {
+  private _printTaskStatus(): void {
     const tasksByStatus: { [status: number]: ITask[] } = {};
     this._tasks.forEach((task: ITask) => {
       if (tasksByStatus[task.status]) {
@@ -211,7 +207,7 @@ export default class TaskRunner {
     this._printStatus('BLOCKED', tasksByStatus[TaskStatus.Blocked], colors.red);
     this._printStatus('FAILURE', tasksByStatus[TaskStatus.Failure], colors.red);
 
-    const tasksWithErrors = tasksByStatus[TaskStatus.Failure];
+    const tasksWithErrors: ITask[] = tasksByStatus[TaskStatus.Failure];
     if (tasksWithErrors) {
       tasksWithErrors.forEach((task: ITask) => {
         task.errors.forEach((error: TaskError) => {
@@ -223,7 +219,7 @@ export default class TaskRunner {
     console.log('');
   }
 
-  private _printStatus(status: string, tasks: ITask[], color: (a: string) => string) {
+  private _printStatus(status: string, tasks: ITask[], color: (a: string) => string): void {
     if (tasks && tasks.length) {
       console.log(color(`${status} (${tasks.length})`));
       console.log(color('================================'));
