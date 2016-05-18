@@ -7,6 +7,7 @@ import * as fs from 'fs';
 import * as glob from 'glob';
 import * as os from 'os';
 import * as path from 'path';
+import builtinPackageNames = require('builtins');
 
 import CommandLineAction from '../commandLine/CommandLineAction';
 import RushCommandLineParser from './RushCommandLineParser';
@@ -14,7 +15,6 @@ import RushConfig from '../data/RushConfig';
 
 export default class CheckAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
-  private _rushConfig: RushConfig;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -30,8 +30,6 @@ export default class CheckAction extends CommandLineAction {
   }
 
   protected onExecute(): void {
-    this._rushConfig = this._rushConfig = RushConfig.loadFromDefaultLocation();
-
     console.log('Starting "rush check"' + os.EOL);
 
     const packageJsonFilename: string = path.resolve('./package.json');
@@ -53,18 +51,18 @@ export default class CheckAction extends CommandLineAction {
       /\Wfrom\s*["]([^"]+)["]/
     ];
 
+    // Example: "my-package/lad/dee/dah" --> "my-package"
+    // Example: "@ms/my-package" --> "@ms/my-package"
     const packageRegExp: RegExp = /^((@[a-z\-0-9!_]+\/)?[a-z\-0-9!_]+)\/?/;
 
     const requireMatches: Set<string> = new Set<string>();
 
     for (const filename of glob.sync('{./*.{ts,js,tsx,jsx},./{src,lib}/**/*.{ts,js,tsx,jsx}}')) {
-      // console.log(filename);
       try {
         const contents: string = fs.readFileSync(filename, 'utf8');
         const lines: string[] = contents.split('\n');
 
         for (const line of lines) {
-          // console.log('[' + line.trim() + ']');
           for (const requireRegExp of requireRegExps) {
             const requireRegExpResult: RegExpExecArray = requireRegExp.exec(line);
             if (requireRegExpResult) {
@@ -83,8 +81,6 @@ export default class CheckAction extends CommandLineAction {
       const packageRegExpResult: RegExpExecArray = packageRegExp.exec(requireMatch);
       if (packageRegExpResult) {
         packageMatches.add(packageRegExpResult[1]);
-      } else {
-        // console.log('REJECT: ' + requireMatch);
       }
     });
 
@@ -96,15 +92,9 @@ export default class CheckAction extends CommandLineAction {
 
     packageNames.sort();
 
-    const nodejsNames: string[] = [
-      'assert', 'buffer', 'child_process', 'cluster', 'constants', 'crypto', 'dgram', 'dns',
-      'domain', 'events', 'fs', 'http', 'https', 'net', 'os', 'path', 'punycode', 'querystring',
-      'readline', 'repl', 'stream', 'string_decoder', 'tls', 'tty', 'url', 'util', 'vm', 'zlib'
-    ];
-
     console.log('Detected dependencies:');
     for (const packageName of packageNames) {
-      if (nodejsNames.indexOf(packageName) < 0) {
+      if (builtinPackageNames.indexOf(packageName) < 0) {
         console.log('  ' + packageName);
       }
     }
