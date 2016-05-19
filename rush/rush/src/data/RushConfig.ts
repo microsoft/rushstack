@@ -67,9 +67,7 @@ export default class RushConfig {
       noTypeless: true
     });
 
-    /* tslint:disable:no-any */ // third party library
-    const rushSchema: any = require('../rush-schema.json');
-    /* tslint:enable:no-any */
+    const rushSchema: Object = require('../rush-schema.json');
 
     if (!validator.validate(rushConfigJson, rushSchema)) {
       const error: ZSchema.Error = validator.getLastError();
