@@ -283,9 +283,9 @@ function linkProject(
 
           continue;
         } else {
-          console.log(`Rush will not link ${dependency.name} for ${localPackage.name}`
+          console.log(colors.yellow(`Rush will not link ${dependency.name} for ${localPackage.name}`
             + ` because it requested version "${dependency.versionRange}" which is incompatible`
-            + ` with version ${matchedVersion }`);
+            + ` with version ${matchedVersion }`));
         }
       }
 
@@ -327,7 +327,7 @@ function linkProject(
           throw Error(`The dependency "${dependency.name}" needed by "${localPackage.name}"`
             + ` was not found the ${rushConfig.commonFolderName} folder`);
         } else {
-          console.log('Skipping optional dependency: ' + dependency.name);
+          console.log(colors.yellow('Skipping optional dependency: ' + dependency.name));
         }
       }
     }
