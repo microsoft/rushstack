@@ -185,7 +185,7 @@ export default class Package {
     let currentParent: Package = this;
     let parentForCreate: Package = this;
 
-    for (; ; ) {
+    while (true) {
       // NOTE: Initially we don't compare against ourself, because self-references
       // are a special case
 

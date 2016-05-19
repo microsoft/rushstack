@@ -31,7 +31,7 @@
       "timeEnd",
       "trace"
     ],
-    "no-constant-condition": true,
+    "no-constant-condition": false,
     "no-construct": true,
     "no-debugger": true,
     "no-duplicate-case": true,

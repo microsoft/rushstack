@@ -17,7 +17,7 @@ export default class PackageLookup {
     // We want the lookup to return the shallowest match, so this is a breadth first
     // traversal
 
-    for (; ; ) {
+    while (true) {
       const current: Package = queue.shift();
       if (!current) {
         break;

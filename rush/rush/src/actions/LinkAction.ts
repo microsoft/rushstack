@@ -222,7 +222,7 @@ function linkProject(
   const queue: IQueueItem[] = [];
   queue.push({ commonPackage: commonProjectPackage, localPackage: localProjectPackage });
 
-  for (; ; ) {
+  while (true) {
     const queueItem: IQueueItem = queue.shift();
     if (!queueItem) {
       break;

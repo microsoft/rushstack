@@ -47,7 +47,7 @@ export default class Utilities {
 
     const startTime: number = Utilities.getTimeInMs();
     let looped: boolean = false;
-    for (; ; ) {
+    while (true) {
       try {
         fs.mkdirSync(folderName);
         break;
