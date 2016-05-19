@@ -110,10 +110,24 @@ export default class Utilities {
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
    */
-  public static executeCommand(command: string, args: string, workingDirectory: string): void {
-    child_process.execSync('"' + command + '" ' + args, {
+  public static executeCommand(command: string, args: string[], workingDirectory: string): void {
+    /* tslint:disable:no-any */  // result.error.errno not supported by our typings
+    const options: any = {
       cwd: workingDirectory,
       stdio: [0, 1, 2] // (omit this to suppress gulp console output)
-    });
+    };
+
+    let result: any = child_process.spawnSync(command, args, options);
+
+    if (result.error.errno === 'ENOENT') {
+      // This is a workaround for GitHub issue #25330
+      // https://github.com/nodejs/node-v0.x-archive/issues/25330
+      result = child_process.spawnSync(command + '.cmd', args, options);
+    }
+
+    if (result.error) {
+      throw result.error;
+    }
+    /* tslint:enable:no-any */
   }
 }

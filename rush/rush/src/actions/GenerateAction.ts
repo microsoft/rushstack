@@ -10,6 +10,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 import CommandLineAction from '../commandLine/CommandLineAction';
+import InstallAction from './InstallAction';
 import JsonFile from '../utilities/JsonFile';
 import RushCommandLineParser from './RushCommandLineParser';
 import RushConfig from '../data/RushConfig';
@@ -162,9 +163,14 @@ export default class GenerateAction extends CommandLineAction {
     const commonPackageJsonFilename: string = path.join(this._rushConfig.commonFolder, 'package.json');
     JsonFile.saveJsonFile(commonPackageJson, commonPackageJsonFilename);
 
+    // 4. Make sure the NPM tool is set up properly.  Usually "rush install" should have
+    //    already done this, but not if they just cloned the repo
+    console.log('');
+    InstallAction.ensureLocalNpmTool(this._rushConfig, false);
+
     // 5. Run "npm install" and "npm shrinkwrap"
     console.log(os.EOL + colors.bold('Running "npm install"...'));
-    Utilities.executeCommand(this._rushConfig.npmToolFilename, 'install', this._rushConfig.commonFolder);
+    Utilities.executeCommand(this._rushConfig.npmToolFilename, [ 'install' ], this._rushConfig.commonFolder);
     console.log('"npm install" completed' + os.EOL);
 
     if (this._lazyParameter.value) {
@@ -172,7 +178,7 @@ export default class GenerateAction extends CommandLineAction {
       console.log(os.EOL + colors.bold('(Skipping "npm shrinkwrap")') + os.EOL);
     } else {
       console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
-      Utilities.executeCommand(this._rushConfig.npmToolFilename, 'shrinkwrap', this._rushConfig.commonFolder);
+      Utilities.executeCommand(this._rushConfig.npmToolFilename, ['shrinkwrap' ], this._rushConfig.commonFolder);
       console.log('"npm shrinkwrap" completed' + os.EOL);
     }
 
