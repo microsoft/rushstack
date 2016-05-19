@@ -48,13 +48,6 @@ export default class ProjectBuildTask implements ITaskDefinition {
         writer.writeLine(`>>> ProjectBuildTask :: Project [${this.name}]:`);
         const projectFolder: string = this._rushProject.projectFolder;
 
-        /* tslint:disable:typedef */  // the type is anonymous
-        const options = {
-          cwd: projectFolder,
-          stdio: [0, 1, 2] // (omit this to suppress gulp console output)
-        };
-        /* tslint:enable:typedef */
-
         writer.writeLine('npm run clean');
         Utilities.executeCommand(this._rushConfig.npmToolFilename, 'run clean', projectFolder);
 
@@ -67,7 +60,10 @@ export default class ProjectBuildTask implements ITaskDefinition {
         ].join(' ');
         writer.writeLine(command);
 
-        const buildTask: child_process.ChildProcess = child_process.exec(command, options);
+        const buildTask: child_process.ChildProcess = child_process.exec(command, {
+          cwd: projectFolder,
+          stdio: [0, 1, 2] // (omit this to suppress gulp console output)
+        });
 
         buildTask.stdout.on('data', (data: string) => {
           writer.write(data);

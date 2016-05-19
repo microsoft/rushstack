@@ -111,12 +111,9 @@ export default class Utilities {
    * The current directory will be set to the specified workingDirectory.
    */
   public static executeCommand(command: string, args: string, workingDirectory: string): void {
-    /* tslint:disable:typedef */  // the type is anonymous
-    const options = {
+    child_process.execSync('"' + command + '" ' + args, {
       cwd: workingDirectory,
       stdio: [0, 1, 2] // (omit this to suppress gulp console output)
-    };
-    /* tslint:enable:typedef */
-    child_process.execSync('"' + command + '" ' + args, options);
+    });
   }
 }
