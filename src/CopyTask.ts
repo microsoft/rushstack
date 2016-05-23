@@ -14,16 +14,20 @@ export class CopyTask extends GulpTask<ICopyConfig> {
 
   public executeTask(
     gulp: gulp.Gulp,
-    completeCallback: (result?: any) => void
-  ): Promise<any> | NodeJS.ReadWriteStream | void {
-    let flatten = require('gulp-flatten');
-    let merge = require('merge2');
-    let { copyTo } = this.taskConfig;
-    let allStreams = [];
+    completeCallback: (result?: Object) => void
+  ): Promise<Object> | NodeJS.ReadWriteStream | void {
 
-    for (let copyDest in copyTo) {
+    /* tslint:disable:typedef */
+    const flatten = require('gulp-flatten');
+    const merge = require('merge2');
+    const { copyTo } = this.taskConfig;
+    /* tslint:enable:typedef */
+
+    const allStreams: NodeJS.ReadWriteStream[] = [];
+
+    for (const copyDest in copyTo) {
       if (copyTo.hasOwnProperty(copyDest)) {
-        let sources = copyTo[copyDest];
+        const sources: string[] = copyTo[copyDest];
 
         sources.forEach(sourceMatch => allStreams.push(
           gulp.src(sourceMatch)
