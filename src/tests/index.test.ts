@@ -3,7 +3,7 @@
 
 import 'es6-promise';
 import { expect } from 'chai';
-import { serial, parallel, getConfig, setConfig } from '../index';
+import { serial, parallel, getConfig, setConfig, IExecutable } from '../index';
 import { IBuildConfig } from './../IBuildConfig';
 
 // disable the exit watching
@@ -11,8 +11,8 @@ global.dontWatchExit = true;
 
 describe('serial', () => {
   it('can run a set of tasks in serial', (done) => {
-    let execution = [];
-    let tasks = createTasks('task', 3, command => execution.push(command));
+    const execution: string[] = [];
+    const tasks: IExecutable[] = createTasks('task', 3, command => execution.push(command));
 
     serial(tasks).execute({}).then(() => {
       expect(execution).to.deep.equal([
@@ -31,8 +31,8 @@ describe('serial', () => {
 
 describe('parallel', () => {
   it('can run a set of tasks in parallel', (done) => {
-    let execution = [];
-    let tasks = createTasks('task', 3, command => execution.push(command));
+    const execution: string[] = [];
+    const tasks: IExecutable[] = createTasks('task', 3, command => execution.push(command));
 
     parallel(tasks).execute({}).then(() => {
       expect(execution).to.deep.equal([
@@ -48,10 +48,10 @@ describe('parallel', () => {
   });
 
   it('can mix in serial sets of tasks', (done) => {
-    let execution = [];
-    let serial1Tasks = serial(createTasks('serial set 1 -', 2, command => execution.push(command)));
-    let parallelTasks = parallel(createTasks('parallel', 2, command => execution.push(command)));
-    let serial2Tasks = serial(createTasks('serial set 2 -', 2, command => execution.push(command)));
+    const execution: string[] = [];
+    const serial1Tasks: IExecutable = serial(createTasks('serial set 1 -', 2, command => execution.push(command)));
+    const parallelTasks: IExecutable = parallel(createTasks('parallel', 2, command => execution.push(command)));
+    const serial2Tasks: IExecutable = serial(createTasks('serial set 2 -', 2, command => execution.push(command)));
 
     serial([
       serial1Tasks,
@@ -79,8 +79,8 @@ describe('parallel', () => {
   });
 
   it('stops running serial tasks on failure', (done) => {
-    let execution = [];
-    let tasks = createTasks('task', 1, command => execution.push(command));
+    const execution: string[] = [];
+    const tasks: IExecutable[] = createTasks('task', 1, command => execution.push(command));
 
     tasks.push(createTask('fail task', command => execution.push(command), true));
     tasks.push(createTask('should not run task', command => execution.push(command), false));
@@ -102,13 +102,13 @@ describe('parallel', () => {
   });
 
   it('can read the current config', (done) => {
-    const config = getConfig();
+    const config: IBuildConfig = getConfig();
     expect(config).to.be.not.null;
     done();
   });
 
   it('can set the config', (done) => {
-    const distFolder = 'testFolder';
+    const distFolder: string = 'testFolder';
     const newConfig: IBuildConfig = {
       distFolder: distFolder
     };
@@ -122,17 +122,17 @@ describe('parallel', () => {
 function createTasks(
   name: string,
   count: number,
-  executionCallback: (message: string) => void) {
-  return Array.apply(null, Array(count))
+  executionCallback: (message: string) => void): IExecutable[] {
+  return Array.apply(undefined, Array(count))
     .map((item, index) => createTask(name + ' ' + index, executionCallback));
 }
 
 function createTask(
   name: string,
   executionCallback: (message: string) => void,
-  shouldFail?: boolean) {
+  shouldFail?: boolean): IExecutable {
   return {
-    execute: (buildConfig) => new Promise((done, error) => {
+    execute: (buildConfig): Promise<void> => new Promise<void>((done, error) => {
       executionCallback(`executing ${name}`);
 
       setTimeout(() => {
