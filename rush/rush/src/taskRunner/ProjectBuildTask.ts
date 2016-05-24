@@ -10,11 +10,13 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
+import { ITaskWriter } from '@ms/interleaver';
+
 import RushConfig from '../data/RushConfig';
 import RushConfigProject from '../data/RushConfigProject';
 import ErrorDetector, { ErrorDetectionMode } from '../errorDetection/ErrorDetector';
 import { ITaskDefinition } from '../taskRunner/ITask';
-import { ITaskWriter } from '../taskRunner/TaskWriterFactory';
+
 import TaskError from '../errorDetection/TaskError';
 import Utilities from '../utilities/Utilities';
 

@@ -32,7 +32,6 @@
     "src/taskRunner/ProjectBuildTask.ts",
     "src/taskRunner/TaskRunner.ts",
     "src/taskRunner/TaskStatus.ts",
-    "src/taskRunner/TaskWriterFactory.ts",
     "src/utilities/JsonFile.ts",
     "src/utilities/Utilities.ts",
     "src/gulp2vs.ts",

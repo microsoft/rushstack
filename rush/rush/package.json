@@ -15,6 +15,7 @@
   },
   "license": "UNLICENSED",
   "dependencies": {
+    "@ms/interleaver": "^0.0.1",
     "argparse": "^1.0.7",
     "builtins": "^1.0.3",
     "colors": "^1.1.2",

@@ -2,7 +2,7 @@ import * as child_process from 'child_process';
 import * as os from 'os';
 
 import TaskError from './errorDetection/TaskError';
-import TaskWriterFactory, { ITaskWriter } from './taskRunner/TaskWriterFactory';
+import Interleaver, { ITaskWriter } from '@ms/interleaver';
 import ErrorDetector, { ErrorDetectionMode } from './errorDetection/ErrorDetector';
 import * as ErrorDetectionRules from './errorDetection/rules/index';
 
@@ -13,7 +13,7 @@ const errorDetector: ErrorDetector = new ErrorDetector([
   ErrorDetectionRules.TsLintErrorDetector
 ]);
 
-const writer: ITaskWriter = TaskWriterFactory.registerTask('vs gulp bundle');
+const writer: ITaskWriter = Interleaver.registerTask('vs gulp bundle');
 
 const gulpBundle: child_process.ChildProcess = child_process.exec('gulp bundle');
 

@@ -11,7 +11,7 @@ import * as os from 'os';
 import ITask, { ITaskDefinition } from './ITask';
 import TaskStatus from './TaskStatus';
 import TaskError from '../errorDetection/TaskError';
-import TaskWriterFactory, { ITaskWriter } from './TaskWriterFactory';
+import Interleaver, { ITaskWriter } from '@ms/interleaver';
 import { ErrorDetectionMode } from '../errorDetection/ErrorDetector';
 
 /**
@@ -114,7 +114,7 @@ export default class TaskRunner {
         task.status = TaskStatus.Executing;
         console.log(colors.yellow(`> TaskRunner :: Starting task [${task.name}]`));
 
-        const taskWriter: ITaskWriter = TaskWriterFactory.registerTask(task.name, this._quietMode);
+        const taskWriter: ITaskWriter = Interleaver.registerTask(task.name, this._quietMode);
 
         task.execute(taskWriter)
           .then(() => {
