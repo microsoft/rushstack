@@ -1,8 +1,12 @@
+import * as gulp from 'gulp';
+import { GulpProxy } from './GulpProxy';
 import { IExecutable } from './IExecutable';
+
+/* tslint:disable:no-any */
 
 export interface IBuildConfig {
   /** Proxy gulp instance. */
-  gulp?: any;
+  gulp?: GulpProxy | gulp.Gulp;
 
   /** Array of all unique tasks. */
   uniqueTasks?: IExecutable[];
