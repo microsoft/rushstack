@@ -1,13 +1,15 @@
-/* tslint:disable:no-string-literal */
 /* tslint:disable:max-line-length */
+
 import * as gutil from 'gulp-util';
 import * as gulp from 'gulp';
 import * as path from 'path';
-let prettyTime = require('pretty-hrtime');
+/* tslint:disable:typedef */
+const prettyTime = require('pretty-hrtime');
+/* tslint:enable:typedef */
 import * as state from './State';
 import { getFlagValue } from './config';
 
-const WROTE_ERROR_KEY = '__gulpCoreBuildWroteError';
+const WROTE_ERROR_KEY: string = '__gulpCoreBuildWroteError';
 
 interface ILocalCache {
   warnings: string[];
@@ -35,24 +37,27 @@ interface ILocalCache {
   exitCode: number;
   writeSummaryLogs: string[];
   gulp: gulp.Gulp;
-  gulpErrorCallback: (err: any) => void;
-  gulpStopCallback: (err: any) => void;
+  gulpErrorCallback: (err: Object) => void;
+  gulpStopCallback: (err: Object) => void;
   errorAndWarningSupressions: { [key: string]: boolean };
   shouldLogWarningsDuringSummary: boolean;
   shouldLogErrorsDuringSummary: boolean;
 }
 
-let wiredUpErrorHandling = false;
-let duringFastExit = false;
+let wiredUpErrorHandling: boolean = false;
+let duringFastExit: boolean = false;
 
-let globalInstance = global as any;
-let localCache: ILocalCache = globalInstance.__loggingCache = globalInstance.__loggingCache || {
+/* tslint:disable:no-any */
+let globalInstance: any = global as any;
+/* tslint:enable:no-any */
+
+const localCache: ILocalCache = globalInstance.__loggingCache = globalInstance.__loggingCache || {
   warnings: [],
   errors: [],
   testsRun: 0,
   subTasksRun: 0,
   testsPassed: 0,
-  testsFailed: 0,
+testsFailed: 0,
   testsFlakyFailed: 0,
   testsSkipped: 0,
   taskRun: 0,
@@ -60,7 +65,7 @@ let localCache: ILocalCache = globalInstance.__loggingCache = globalInstance.__l
   coverageResults: 0,
   coveragePass: 0,
   coverageTotal: 0,
-  totalTaskHrTime: null,
+  totalTaskHrTime: undefined,
   totalTaskSrc: 0,
   wroteSummary: false,
   writingSummary: false,
@@ -68,9 +73,9 @@ let localCache: ILocalCache = globalInstance.__loggingCache = globalInstance.__l
   exitCode: 0,
   writeSummaryLogs: [],
   errorAndWarningSupressions: {},
-  gulp: null,
-  gulpErrorCallback: null,
-  gulpStopCallback: null,
+  gulp: undefined,
+  gulpErrorCallback: undefined,
+  gulpStopCallback: undefined,
   shouldLogErrorsDuringSummary: false,
   shouldLogWarningsDuringSummary: false
 };
@@ -85,7 +90,9 @@ function isVerbose(): boolean {
   return getFlagValue('verbose');
 }
 
-function formatError(e: any) {
+/* tslint:disable:no-any */
+function formatError(e: any): string {
+/* tslint:enable:no-any */
   'use strict';
 
   if (!e.err) {
@@ -118,7 +125,7 @@ function formatError(e: any) {
       return e.message;
     }
   } else {
-    let output = String(e.err);
+    let output: string = String(e.err);
 
     try {
       output = JSON.stringify(e.err);
@@ -127,20 +134,20 @@ function formatError(e: any) {
     }
 
     if (isVerbose()) {
-      return new Error(output)['stack'];
-    } else {
-      return new Error(output)['message'];
+      return new Error(output).stack;
+  } else {
+      return new Error(output).message;
     }
   }
 }
 
-function afterStreamFlushed(streamName: string, callback: () => void) {
+function afterStreamFlushed(streamName: string, callback: () => void): void {
   'use strict';
   if (duringFastExit) {
     callback();
   } else {
-    let stream: NodeJS.WritableStream = process[streamName];
-    let outputWritten = stream.write('');
+    const stream: NodeJS.WritableStream = process[streamName];
+    const outputWritten: boolean = stream.write('');
     if (outputWritten) {
       /* tslint:disable:ban-native-functions */
       setTimeout(() => {
@@ -159,7 +166,7 @@ function afterStreamFlushed(streamName: string, callback: () => void) {
   }
 }
 
-function afterStreamsFlushed(callback: () => void) {
+function afterStreamsFlushed(callback: () => void): void {
   'use strict';
   afterStreamFlushed('stdout', () => {
     afterStreamFlushed('stderr', () => {
@@ -168,9 +175,9 @@ function afterStreamsFlushed(callback: () => void) {
   });
 }
 
-function writeSummary(callback: () => void) {
+function writeSummary(callback: () => void): void {
   'use strict';
-  let shouldRelogIssues = getFlagValue('relogIssues');
+  const shouldRelogIssues: boolean = getFlagValue('relogIssues');
 
   localCache.writeSummaryCallbacks.push(callback);
 
@@ -182,15 +189,15 @@ function writeSummary(callback: () => void) {
       log(gutil.colors.magenta('==================[ Finished ]=================='));
 
       if (shouldRelogIssues && getWarnings().length) {
-        let warnings = getWarnings();
-        for (let x = 0; x < warnings.length; x++) {
-          console.error(gutil.colors.yellow(warnings[x]));
+        const warnings: string[] = getWarnings();
+        for (let x: number = 0; x < warnings.length; x++) {
+          console.log(gutil.colors.yellow(warnings[x]));
         }
       }
 
       if (shouldRelogIssues && (localCache.taskErrors > 0 || getErrors().length)) {
-        let errors = getErrors();
-        for (let x = 0; x < errors.length; x++) {
+        let errors: string[] = getErrors();
+        for (let x: number = 0; x < errors.length; x++) {
           console.error(gutil.colors.red(errors[x]));
         }
       }
@@ -199,7 +206,7 @@ function writeSummary(callback: () => void) {
         for (let writeSummaryString of localCache.writeSummaryLogs) {
           log(writeSummaryString);
         }
-        let totalDuration = process.hrtime(getStart());
+        let totalDuration: number[] = process.hrtime(getStart());
 
         log(`Project ${state.builtPackage.name} version:`, gutil.colors.yellow(state.builtPackage.version));
         log('Build tools version:', gutil.colors.yellow(state.coreBuildPackage.version));
@@ -229,7 +236,7 @@ function writeSummary(callback: () => void) {
           log('Task warnings:', gutil.colors.yellow(getWarnings().length + '\r\n' + getWarnings().join('\r\n')));
         }
 
-        let totalErrors = 0;
+        let totalErrors: number = 0;
 
         if (localCache.taskErrors > 0 || getErrors().length) {
           totalErrors = (localCache.taskErrors + getErrors().length);
@@ -237,7 +244,7 @@ function writeSummary(callback: () => void) {
         }
 
         localCache.wroteSummary = true;
-        let callbacks = localCache.writeSummaryCallbacks;
+        const callbacks: (() => void)[] = localCache.writeSummaryCallbacks;
         localCache.writeSummaryCallbacks = [];
         for (let writeSummaryCallback of callbacks) {
           writeSummaryCallback();
@@ -245,7 +252,7 @@ function writeSummary(callback: () => void) {
       });
     });
   } else if (localCache.wroteSummary) {
-    let callbacks = localCache.writeSummaryCallbacks;
+    const callbacks: (() => void)[] = localCache.writeSummaryCallbacks;
     localCache.writeSummaryCallbacks = [];
     for (let writeSummaryCallback of callbacks) {
       writeSummaryCallback();
@@ -253,7 +260,9 @@ function writeSummary(callback: () => void) {
   }
 }
 
-function _writeTaskError(e: any) {
+/* tslint:disable:no-any */
+function _writeTaskError(e: any): void {
+/* tslint:enable:no-any */
   'use strict';
   if (!e || !(e.err && e.err[WROTE_ERROR_KEY])) {
     writeError(e);
@@ -261,21 +270,21 @@ function _writeTaskError(e: any) {
   }
 }
 
-function exitProcess(errorCode: number) {
+function exitProcess(errorCode: number): void {
   'use strict';
 
   if (!localCache.watchMode) {
-    process.stdout.write('', function() {
+    process.stdout.write('', () => {
       process.exit(errorCode);
     });
   }
 }
 
-function wireUpProcessErrorHandling() {
+function wireUpProcessErrorHandling(): void {
   'use strict';
   if (!wiredUpErrorHandling) {
     wiredUpErrorHandling = true;
-    process.on('exit', function(code: number) {
+    process.on('exit', (code: number) => {
       'use strict';
       duringFastExit = true;
 
@@ -296,7 +305,7 @@ function wireUpProcessErrorHandling() {
     });
 
     process.on('uncaughtException',
-      function(err: any) {
+      (err: Error) => {
         'use strict';
         if (isVerbose()) {
           console.error(err);
@@ -307,7 +316,7 @@ function wireUpProcessErrorHandling() {
           exitProcess(1);
 
           if (localCache.gulp) {
-            localCache.gulp['stop']();
+            localCache.gulp.stop();
           }
 
           if (localCache.gulpErrorCallback) {
@@ -318,7 +327,7 @@ function wireUpProcessErrorHandling() {
   }
 }
 
-function markErrorAsWritten(error: any) {
+function markErrorAsWritten(error: Error): void {
   try {
     error[WROTE_ERROR_KEY] = true;
   } catch (e) {
@@ -326,17 +335,17 @@ function markErrorAsWritten(error: any) {
   }
 }
 
-export function logSummary(value: string) {
+export function logSummary(value: string): void {
   'use strict';
   localCache.writeSummaryLogs.push(value);
 }
 
-export function log(...args: Array<string | Chalk.ChalkChain>) {
+export function log(...args: Array<string | Chalk.ChalkChain>): void {
   'use strict';
   gutil.log.apply(this, args);
 }
 
-export function reset() {
+export function reset(): void {
   'use strict';
   localCache.start = process.hrtime();
   localCache.warnings = [];
@@ -347,7 +356,7 @@ export function reset() {
   localCache.taskRun = 0;
   localCache.subTasksRun = 0;
   localCache.taskErrors = 0;
-  localCache.totalTaskHrTime = null;
+  localCache.totalTaskHrTime = undefined;
   localCache.totalTaskSrc = 0;
   localCache.wroteSummary = false;
   localCache.writingSummary = false;
@@ -358,7 +367,7 @@ export function reset() {
   localCache.testsFlakyFailed = 0;
   localCache.testsSkipped = 0;
   localCache.writeSummaryLogs = [];
-};
+}
 
 export enum TestResultState {
   Passed,
@@ -367,7 +376,7 @@ export enum TestResultState {
   Skipped
 }
 
-export function functionalTestRun(name: string, result: TestResultState, duration: number) {
+export function functionalTestRun(name: string, result: TestResultState, duration: number): void {
   'use strict';
   localCache.testsRun++;
 
@@ -385,17 +394,17 @@ export function functionalTestRun(name: string, result: TestResultState, duratio
       localCache.testsSkipped++;
       break;
   }
-};
+}
 
-export function endTaskSrc(taskName: string, startHrtime: number[], fileCount: number) {
+export function endTaskSrc(taskName: string, startHrtime: number[], fileCount: number): void {
   'use strict';
   localCache.totalTaskSrc++;
-  let taskDuration = process.hrtime(startHrtime);
+  const taskDuration: number[] = process.hrtime(startHrtime);
   if (!localCache.totalTaskHrTime) {
     localCache.totalTaskHrTime = taskDuration;
   } else {
     localCache.totalTaskHrTime[0] += taskDuration[0];
-    let nanoSecTotal = taskDuration[1] + localCache.totalTaskHrTime[1];
+    const nanoSecTotal: number = taskDuration[1] + localCache.totalTaskHrTime[1];
     if (nanoSecTotal > 1e9) {
       localCache.totalTaskHrTime[0]++;
       localCache.totalTaskHrTime[1] = nanoSecTotal - 1e9;
@@ -407,7 +416,7 @@ export function endTaskSrc(taskName: string, startHrtime: number[], fileCount: n
   log(taskName, 'read src task duration:', gutil.colors.yellow(prettyTime(taskDuration)), `- ${fileCount} files`);
 }
 
-export function coverageData(coverage: number, threshold: number, filePath: string) {
+export function coverageData(coverage: number, threshold: number, filePath: string): void {
   'use strict';
   localCache.coverageResults++;
 
@@ -420,37 +429,37 @@ export function coverageData(coverage: number, threshold: number, filePath: stri
   localCache.coverageTotal += coverage;
 }
 
-export function addSupression(str: string) {
+export function addSupression(str: string): void {
   'use strict';
   localCache.errorAndWarningSupressions[str] = true;
   logSummary(`${gutil.colors.yellow('Supressing')} - ${str}`);
 }
 
-export function warn(...args: Array<string | Chalk.ChalkChain>) {
+export function warn(...args: Array<string | Chalk.ChalkChain>): void {
   'use strict';
   args.splice(0, 0, 'Warning -');
 
-  let stringMessage = args.join(' ');
+  const stringMessage: string = args.join(' ');
 
   if (!localCache.errorAndWarningSupressions[stringMessage]) {
     localCache.warnings.push(stringMessage);
-    log(gutil.colors.yellow.apply(null, args));
+    log(gutil.colors.yellow.apply(undefined, args));
   }
-};
+}
 
-export function error(...args: Array<string | Chalk.ChalkChain>) {
+export function error(...args: Array<string | Chalk.ChalkChain>): void {
   'use strict';
   args.splice(0, 0, 'Error -');
 
-  let stringMessage = args.join(' ');
+  const stringMessage: string = args.join(' ');
 
   if (!localCache.errorAndWarningSupressions[stringMessage]) {
     localCache.errors.push(stringMessage);
-    log(gutil.colors.red.apply(null, args));
+    log(gutil.colors.red.apply(undefined, args));
   }
-};
+}
 
-export function fileError(taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string) {
+export function fileError(taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void {
   'use strict';
 
   if (!filePath) {
@@ -462,21 +471,23 @@ export function fileError(taskName: string, filePath: string, line: number, colu
   error(`${gutil.colors.cyan(taskName)} - ${filePath}(${line},${column}): error ${errorCode}: ${message}`);
 }
 
-export function verbose(...args: Array<string | Chalk.ChalkChain>) {
+export function verbose(...args: Array<string | Chalk.ChalkChain>): void {
   'use strict';
 
   if (getFlagValue('verbose')) {
-    log.apply(null, args);
+    log.apply(undefined, args);
   }
-};
+}
 
-export function generateGulpError(error: any) {
+export function generateGulpError(error: Object): Object {
   if (isVerbose()) {
     return error;
   } else {
-    let output = {
+    /* tslint:disable:no-any */
+    const output: any = {
+    /* tslint:enable:no-any */
       showStack: false,
-      toString: () => {
+      toString: (): string => {
         return '';
       }
     };
@@ -485,16 +496,18 @@ export function generateGulpError(error: any) {
 
     return output;
   }
-};
+}
 
-export function writeError(e: any) {
+/* tslint:disable:no-any */
+export function writeError(e: any): void {
+/* tslint:enable:no-any */
   'use strict';
   if (e) {
     if (!e[WROTE_ERROR_KEY]) {
       if (e.err) {
         if (!e.err[WROTE_ERROR_KEY]) {
-          let msg = formatError(e);
-          let time = prettyTime(e.hrDuration);
+          const msg: string = formatError(e);
+          const time: string = prettyTime(e.hrDuration);
 
           error(
             '\'' + gutil.colors.cyan(e.task) + '\'',
@@ -542,49 +555,49 @@ export function writeError(e: any) {
   } else {
     error('Unknown Error Object');
   }
-};
+}
 
-export function getWarnings() {
+export function getWarnings(): string[] {
   'use strict';
   return localCache.warnings;
-};
+}
 
-export function getErrors() {
+export function getErrors(): string[] {
   'use strict';
   return localCache.errors;
-};
+}
 
-export function getStart() {
+export function getStart(): number[] {
   'use strict';
   return localCache.start;
-};
+}
 
-export function setWatchMode() {
+export function setWatchMode(): void {
   'use strict';
   localCache.watchMode = true;
-};
+}
 
-export function getWatchMode() {
+export function getWatchMode(): boolean {
   'use strict';
   return localCache.watchMode;
-};
+}
 
-export function setExitCode(exitCode: number) {
+export function setExitCode(exitCode: number): void {
   'use strict';
   localCache.exitCode = exitCode;
-};
+}
 
-export function logStartSubtask(name: string) {
+export function logStartSubtask(name: string): void {
   log(`Starting subtask '${gutil.colors.cyan(name)}'...`);
   localCache.subTasksRun++;
 }
 
-export function logEndSubtask(name: string, startTime: number[], errorObject?: any) {
-  let duration = process.hrtime(startTime);
+export function logEndSubtask(name: string, startTime: number[], errorObject?: Error): void {
+const duration: number[] = process.hrtime(startTime);
 
   if (name) {
     if (!errorObject) {
-      let durationString = prettyTime(duration);
+      const durationString: string = prettyTime(duration);
       log(`Finished subtask '${gutil.colors.cyan(name)}' after ${gutil.colors.magenta(durationString)}`);
     } else {
       writeError({
@@ -597,7 +610,7 @@ export function logEndSubtask(name: string, startTime: number[], errorObject?: a
   }
 }
 
-export function initialize(gulp: gulp.Gulp, gulpErrorCallback?: (err: any) => void, gulpStopCallback?: (err: any) => void) {
+export function initialize(gulp: gulp.Gulp, gulpErrorCallback?: (err: Error) => void, gulpStopCallback?: (err: Error) => void): void {
   'use strict';
   // This will add logging to the gulp execution
 
@@ -605,22 +618,22 @@ export function initialize(gulp: gulp.Gulp, gulpErrorCallback?: (err: any) => vo
 
   wireUpProcessErrorHandling();
 
-  localCache.gulpErrorCallback = gulpErrorCallback || function() {
+  localCache.gulpErrorCallback = gulpErrorCallback || (() => {
     'use strict';
     // Do Nothing
-  };
+  });
 
-  localCache.gulpStopCallback = gulpStopCallback || function() {
+  localCache.gulpStopCallback = gulpStopCallback || (() => {
     'use strict';
     // Do Nothing
-  };
+  });
 
-  gulp['on']('start', function(err: any) {
+  gulp.on('start', (err: Object) => {
     'use strict';
     log('Starting gulp');
   });
 
-  gulp['on']('stop', function(err: any) {
+  gulp.on('stop', (err: Object) => {
     'use strict';
     writeSummary(() => {
       // error if we have any errors
@@ -635,7 +648,7 @@ export function initialize(gulp: gulp.Gulp, gulpErrorCallback?: (err: any) => vo
     });
   });
 
-  gulp['on']('err', function(err: any) {
+  gulp.on('err', (err: Object) => {
     'use strict';
     _writeTaskError(err);
     writeSummary(() => {
@@ -644,7 +657,9 @@ export function initialize(gulp: gulp.Gulp, gulpErrorCallback?: (err: any) => vo
     });
   });
 
-  gulp['on']('task_start', function(e: any) {
+  /* tslint:disable:no-any */
+  gulp.on('task_start', (e: any) => {
+  /* tslint:enable:no-any */
     'use strict';
     if (localCache.fromRunGulp) {
       log('Starting', '\'' + gutil.colors.cyan(e.task) + '\'...');
@@ -653,9 +668,11 @@ export function initialize(gulp: gulp.Gulp, gulpErrorCallback?: (err: any) => vo
     localCache.taskRun++;
   });
 
-  gulp['on']('task_stop', function(e: any) {
+  /* tslint:disable:no-any */
+  gulp.on('task_stop', (e: any) => {
+  /* tslint:enable:no-any */
     'use strict';
-    let time = prettyTime(e.hrDuration);
+    const time: string = prettyTime(e.hrDuration);
 
     if (localCache.fromRunGulp) {
       log(
@@ -665,7 +682,9 @@ export function initialize(gulp: gulp.Gulp, gulpErrorCallback?: (err: any) => vo
     }
   });
 
-  gulp['on']('task_err', function(err: any) {
+  /* tslint:disable:no-any */
+  gulp.on('task_err', (err: any) => {
+  /* tslint:enable:no-any */
     'use strict';
     _writeTaskError(err);
     writeSummary(() => {
@@ -673,7 +692,9 @@ export function initialize(gulp: gulp.Gulp, gulpErrorCallback?: (err: any) => vo
     });
   });
 
-  gulp['on']('task_not_found', function(err: any) {
+  /* tslint:disable:no-any */
+  gulp.on('task_not_found', (err: any) => {
+  /* tslint:enable:no-any */
     'use strict';
     log(
       gutil.colors.red('Task \'' + err.task + '\' is not in your gulpfile')
@@ -681,9 +702,9 @@ export function initialize(gulp: gulp.Gulp, gulpErrorCallback?: (err: any) => vo
     log('Please check the documentation for proper gulpfile formatting');
     exitProcess(1);
   });
-};
+}
 
-export function markTaskCreationTime() {
+export function markTaskCreationTime(): void {
   'use strict';
   localCache.taskCreationTime = process.hrtime(getStart());
-};
+}

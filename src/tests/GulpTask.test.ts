@@ -11,16 +11,18 @@ import { Readable } from 'stream';
 interface IConfig {
 }
 
-let testArray = [];
+let testArray: string[] = [];
 
 class PromiseTask extends GulpTask<IConfig> {
-  public name = 'promise';
+  public name: string = 'promise';
 
   public taskConfig: IConfig = {
   };
 
-  public executeTask(gulp: gulp.Gulp): any {
-    return new Promise((resolve, reject) => {
+  /* tslint:disable:no-any */
+  public executeTask(gulp: gulp.Gulp): Promise<any> {
+  /* tslint:enable:no-any */
+    return new Promise<void>((resolve: () => void, reject: () => void) => {
       testArray.push(this.name);
       resolve();
     });
@@ -28,22 +30,24 @@ class PromiseTask extends GulpTask<IConfig> {
 }
 
 class StreamTask extends GulpTask<IConfig> {
-  public name = 'stream';
+  public name: string = 'stream';
 
   public taskConfig: IConfig = {
   };
 
+  /* tslint:disable:no-any */
   public executeTask(gulp: gulp.Gulp): any {
-    let stream = new Readable({ objectMode: true });
+  /* tslint:enable:no-any */
+    const stream: Readable = new Readable({ objectMode: true });
 
     // Add no opt function to make it compat with through
-    stream._read = function() {
+    stream._read = () => {
       // Do Nothing
      };
 
     setTimeout(() => {
 
-      let file = new gutil.File({
+      let file: gutil.File = new gutil.File({
         path: 'test.js',
         contents: new Buffer('test')
       });
@@ -60,35 +64,34 @@ class StreamTask extends GulpTask<IConfig> {
 }
 
 class SyncTask extends GulpTask<IConfig> {
-  public name = 'sync';
+  public name: string = 'sync';
 
   public taskConfig: IConfig = {
   };
 
-  public executeTask(gulp: gulp.Gulp): any {
+  public executeTask(gulp: gulp.Gulp): void {
     testArray.push(this.name);
   }
 }
 
 class SyncWithReturnTask extends GulpTask<IConfig> {
-  public name = 'sync-with-return';
+  public name: string = 'sync-with-return';
 
   public taskConfig: IConfig = {
   };
 
-  public executeTask(gulp: gulp.Gulp): any {
+  public executeTask(gulp: gulp.Gulp): void {
     testArray.push(this.name);
-    return true;
   }
 }
 
 class CallbackTask extends GulpTask<IConfig> {
-  public name = 'callback';
+  public name: string = 'callback';
 
   public taskConfig: IConfig = {
   };
 
-  public executeTask(gulp: gulp.Gulp, callback: (result?: any) => void): any {
+  public executeTask(gulp: gulp.Gulp, callback: (result?: Object) => void): void {
     testArray.push(this.name);
     callback();
   }
@@ -104,7 +107,7 @@ tasks.push(new SyncWithReturnTask());
 tasks.push(new CallbackTask());
 
 describe('GulpTask', () => {
-  for (let task of tasks) {
+  for (const task of tasks) {
     it(`${task.name} serial`, (done) => {
       testArray = [];
       task.setConfig({ addToMe: testArray });
@@ -126,11 +129,11 @@ describe('GulpTask', () => {
 
   it(`all tasks serial`, (done) => {
     testArray = [];
-    for (let task of tasks) {
+    for (const task of tasks) {
       task.setConfig({ addToMe: testArray });
     }
     serial(tasks).execute({}).then(() => {
-      for (let task of tasks) {
+      for (const task of tasks) {
         expect(testArray.indexOf(task.name)).to.be.greaterThan(-1);
       }
       done();
@@ -139,11 +142,11 @@ describe('GulpTask', () => {
 
   it(`all tasks parallel`, (done) => {
     testArray = [];
-    for (let task of tasks) {
+    for (const task of tasks) {
       task.setConfig({ addToMe: testArray });
     }
     parallel(tasks).execute({}).then(() => {
-      for (let task of tasks) {
+      for (const task of tasks) {
         expect(testArray.indexOf(task.name)).to.be.greaterThan(-1);
       }
       done();

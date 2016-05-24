@@ -10,7 +10,7 @@ import { args } from './State';
 export { IExecutable } from './IExecutable';
 import { initialize as initializeLogging, markTaskCreationTime, generateGulpError, setWatchMode } from './logging';
 import { getFlagValue, setConfigDefaults } from './config';
-import gulpType = require('gulp');
+import * as gulp from 'gulp';
 
 export * from './IBuildConfig';
 export * from './GulpTask';
@@ -22,15 +22,20 @@ export * from './logging';
 require('es6-promise').polyfill();
 /* tslint:enable:variable-name */
 
-let path = require('path');
-let packageJSON = require(path.resolve(process.cwd(), 'package.json'));
+/* tslint:disable:typedef */
+const path = require('path');
+/* tslint:enable:typedef */
 
-let _taskMap = {} as { [key: string]: IExecutable };
-let _uniqueTasks = [];
+/* tslint:disable:no-any */
+const packageJSON: any = require(path.resolve(process.cwd(), 'package.json'));
+/* tslint:enable:no-any */
+
+const _taskMap: { [key: string]: IExecutable } = {};
+const _uniqueTasks: IExecutable[]  = [];
 
 let _buildConfig: IBuildConfig = {
   distFolder: 'dist',
-  libAMDFolder: null,
+  libAMDFolder: undefined,
   libFolder: 'lib',
   tempFolder: 'temp',
   properties: {},
@@ -48,8 +53,10 @@ let _buildConfig: IBuildConfig = {
  *
  * @param  {IBuildConfig} The build config settings.
  */
-export function setConfig(config: IBuildConfig) {
-  let merge = require('lodash.merge');
+export function setConfig(config: IBuildConfig): void {
+  /* tslint:disable:typedef */
+  const merge = require('lodash.merge');
+  /* tslint:enable:typedef */
 
   _buildConfig = merge({}, _buildConfig, config);
 }
@@ -59,7 +66,7 @@ export function setConfig(config: IBuildConfig) {
  *
  * @param  {IBuildConfig} config
  */
-export function replaceConfig(config: IBuildConfig) {
+export function replaceConfig(config: IBuildConfig): void {
   _buildConfig = config;
 }
 
@@ -95,20 +102,23 @@ export function task(taskName: string, task: IExecutable): IExecutable {
  * @returns IExecutable
  */
 export function watch(watchMatch: string | string[], task: IExecutable): IExecutable {
+  /* tslint:disable:typedef */
   const notifier = require('node-notifier');
+  /* tslint:enable:typedef */
+
   _trackTask(task);
 
-  let isWatchRunning = false;
-  let shouldRerunWatch = false;
-  let lastError = null;
+  let isWatchRunning: boolean = false;
+  let shouldRerunWatch: boolean = false;
+  let lastError: boolean = undefined;
 
   return {
-    execute: (buildConfig: IBuildConfig) => {
+    execute: (buildConfig: IBuildConfig): Promise<void> => {
 
       setWatchMode();
       buildConfig.gulp.watch(watchMatch, _runWatch);
 
-      function _runWatch() {
+      function _runWatch(): void {
         if (isWatchRunning) {
           shouldRerunWatch = true;
         } else {
@@ -117,7 +127,7 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
           _executeTask(task, buildConfig)
             .then(() => {
               if (buildConfig.showToast && lastError) {
-                lastError = null;
+                lastError = undefined;
 
                 notifier.notify({
                   title: 'Build succeeded',
@@ -143,7 +153,7 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
         }
       }
 
-      function _finalizeWatch() {
+      function _finalizeWatch(): void {
         isWatchRunning = false;
 
         if (shouldRerunWatch) {
@@ -164,15 +174,15 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
  * @returns IExecutable
  */
 export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutable {
-  let flatTasks = <IExecutable[]>_flatten(tasks);
+  const flatTasks: IExecutable[] = <IExecutable[]>_flatten(tasks);
 
-  for (let task of flatTasks) {
+  for (const task of flatTasks) {
     _trackTask(task);
   }
 
   return {
-    execute: (buildConfig: IBuildConfig) => {
-      let output = Promise.resolve<void>();
+    execute: (buildConfig: IBuildConfig): Promise<void> => {
+      let output: Promise<void> = Promise.resolve<void>();
 
       for (let task of flatTasks) {
         output = output.then(() => _executeTask(task, buildConfig));
@@ -190,22 +200,24 @@ export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutabl
  * @returns IExecutable
  */
 export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecutable {
-  let flattenTasks = _flatten(tasks);
+  const flattenTasks: IExecutable[] = _flatten(tasks);
 
-  for (let task of flattenTasks) {
+  for (const task of flattenTasks) {
     _trackTask(task);
   }
 
   return {
-    execute: (buildConfig: IBuildConfig): Promise<void> => {
-      return new Promise<any>((resolve, reject) => {
-        let promises: Promise<void>[] = [];
-        for (let task of flattenTasks) {
+    /* tslint:disable:no-any */
+    execute: (buildConfig: IBuildConfig): Promise<any> => {
+    /* tslint:enable:no-any */
+      return new Promise<void[]>((resolve, reject) => {
+        const promises: Promise<void>[] = [];
+        for (const task of flattenTasks) {
           promises.push(_executeTask(task, buildConfig));
         }
 
         // Use promise all to make sure errors are propagated correctly
-        Promise.all<void>(promises).then(resolve, reject);
+      Promise.all<void>(promises).then(resolve, reject);
       });
     }
   };
@@ -216,14 +228,14 @@ export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecuta
  *
  * @param  {any} gulp
  */
-export function initialize(gulp: any) {
+export function initialize(gulp: gulp.Gulp): void {
   _buildConfig.rootPath = process.cwd();
   _buildConfig.gulp = new GulpProxy(gulp);
   _buildConfig.uniqueTasks = _uniqueTasks;
 
   setConfigDefaults(_buildConfig);
 
-  initializeLogging(gulp, null, null);
+  initializeLogging(gulp, undefined, undefined);
 
   Object.keys(_taskMap).forEach(taskName => _registerTask(gulp, taskName, _taskMap[taskName]));
 
@@ -237,13 +249,13 @@ export function initialize(gulp: any) {
  * @param  {string} taskName
  * @param  {IExecutable} task
  */
-function _registerTask(gulp: gulpType.Gulp, taskName: string, task: IExecutable) {
+function _registerTask(gulp: gulp.Gulp, taskName: string, task: IExecutable): void {
   gulp.task(taskName, (cb) => {
     _executeTask(task, _buildConfig)
       .then(() => {
         cb();
       },
-      (error: any) => {
+      (error: Error) => {
         cb(generateGulpError(error));
       });
   });
@@ -258,11 +270,13 @@ function _registerTask(gulp: gulpType.Gulp, taskName: string, task: IExecutable)
  */
 function _executeTask(task: IExecutable, buildConfig: IBuildConfig): Promise<void> {
   // Try to fallback to the default task if provided.
+  /* tslint:disable:no-any */
   if (task && !task.execute) {
     if ((task as any).default) {
       task = (task as any).default;
     }
   }
+  /* tslint:enable:no-any */
 
   // If the task is missing, throw a meaningful error.
   if (!task || !task.execute) {
@@ -270,19 +284,21 @@ function _executeTask(task: IExecutable, buildConfig: IBuildConfig): Promise<voi
   }
 
   if (task.isEnabled === undefined || task.isEnabled()) {
-    let startTime = process.hrtime();
+    const startTime: number[] = process.hrtime();
 
     if (buildConfig.onTaskStart && task.name) {
       buildConfig.onTaskStart(task.name);
     }
 
-    let taskPromise = task.execute(buildConfig)
+    const taskPromise: Promise<void> = task.execute(buildConfig)
       .then(() => {
         if (buildConfig.onTaskEnd && task.name) {
           buildConfig.onTaskEnd(task.name, process.hrtime(startTime));
         }
       },
+      /* tslint:disable:no-any */
       (error: any) => {
+      /* tslint:enable:no-any */
         if (buildConfig.onTaskEnd && task.name) {
           buildConfig.onTaskEnd(task.name, process.hrtime(startTime), error);
         }
@@ -297,7 +313,7 @@ function _executeTask(task: IExecutable, buildConfig: IBuildConfig): Promise<voi
   return Promise.resolve<void>();
 }
 
-function _trackTask(task: IExecutable) {
+function _trackTask(task: IExecutable): void {
   if (_uniqueTasks.indexOf(task) < 0) {
     _uniqueTasks.push(task);
   }
@@ -308,7 +324,7 @@ function _trackTask(task: IExecutable) {
  *
  * @param  {any} arr
  */
-function _flatten<T>(arr: Array<T | T[]>) {
+function _flatten<T>(arr: Array<T | T[]>): T[] {
   let output: T[] = [];
 
   for (let toFlatten of arr) {
@@ -322,7 +338,7 @@ function _flatten<T>(arr: Array<T | T[]>) {
   return output;
 }
 
-export let nuke = new NukeTask();
+export const nuke: IExecutable = new NukeTask();
 
 // Register default nuke task.
 task('nuke', nuke);
