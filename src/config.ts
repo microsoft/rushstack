@@ -1,31 +1,33 @@
 import { args } from './State';
 
-const ENVIRONMENT_VARIABLE_PREFIX = 'GCB_';
+const ENVIRONMENT_VARIABLE_PREFIX: string = 'GCB_';
 
 let _defaultValues: Object = {};
 
-export function setConfigDefaults(defaultValues: Object) {
+export function setConfigDefaults(defaultValues: Object): void {
   _defaultValues = defaultValues;
 }
 
 export function getConfigValue(name: string, defaultValue?: string | boolean): string | boolean {
 
   // Try to get config value from environment variable.
-  let envVariable = ENVIRONMENT_VARIABLE_PREFIX + name.toUpperCase();
-  let envValue = process.env[envVariable];
-  let argsValue = args[name.toLowerCase()];
+  const envVariable: string = ENVIRONMENT_VARIABLE_PREFIX + name.toUpperCase();
+  const envValue: string = process.env[envVariable];
+  const argsValue: string | boolean = args[name.toLowerCase()];
 
   return _firstDefinedValue(argsValue, envValue, defaultValue, _defaultValues[name]);
 }
 
 export function getFlagValue(name: string, defaultValue?: boolean): boolean {
-  let configValue = getConfigValue(name, defaultValue);
+  const configValue: string | boolean = getConfigValue(name, defaultValue);
 
   return configValue === 'true' || configValue === true;
 }
 
+/* tslint:disable:no-any */
 function _firstDefinedValue(...args: (string | boolean)[]): any {
-  for (let arg of args) {
+/* tslint:enable:no-any */
+  for (const arg of args) {
     if (arg !== undefined) {
       return arg;
     }

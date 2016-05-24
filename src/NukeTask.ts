@@ -5,17 +5,20 @@ export interface INukeConfig {
 }
 
 export class NukeTask extends GulpTask<INukeConfig> {
-  public name = 'nuke';
+  public name: string = 'nuke';
 
   public taskConfig: INukeConfig = {
   };
 
   public executeTask(
     gulp: gulp.Gulp,
-    completeCallback: (result?: any) => void
-  ): Promise<any> | NodeJS.ReadWriteStream | void {
-    let del = require('del');
-    let { distFolder, libFolder, libAMDFolder, tempFolder } = this.buildConfig;
+    completeCallback: (result?: Object) => void
+  ): void {
+    /* tslint:disable:typedef */
+    const del = require('del');
+    /* tslint:disable:typedef */
+
+    const { distFolder, libFolder, libAMDFolder, tempFolder } = this.buildConfig;
     let nukePaths = [
       distFolder,
       libAMDFolder,
@@ -30,7 +33,7 @@ export class NukeTask extends GulpTask<INukeConfig> {
       }
     }
 
-    let uniquePaths = {};
+    let uniquePaths: { [key: string]: string } = {};
 
     // Create dictionary of unique paths. (Could be replaced with ES6 set.)
     nukePaths.forEach(path => {

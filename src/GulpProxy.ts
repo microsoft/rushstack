@@ -4,11 +4,11 @@ import gulp = require('gulp');
 export class GulpProxy {
   private _gulp: gulp.Gulp;
 
-  constructor(gulpInstance: any) {
+  constructor(gulpInstance: gulp.Gulp) {
     this._gulp = gulpInstance;
   }
 
-  public task(): any {
+  public task(): void {
     throw new Error(
       'You should not define gulp tasks, but instead subclass the GulpTask and override the executeTask method.'
     );
