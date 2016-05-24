@@ -34,6 +34,7 @@ const _taskMap: { [key: string]: IExecutable } = {};
 const _uniqueTasks: IExecutable[]  = [];
 
 let _buildConfig: IBuildConfig = {
+  srcFolder: 'src',
   distFolder: 'dist',
   libAMDFolder: undefined,
   libFolder: 'lib',
