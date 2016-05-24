@@ -1,11 +1,14 @@
 /* tslint:disable:max-line-length */
+import { GulpProxy } from './GulpProxy';
 import { IExecutable } from './IExecutable';
 import { IBuildConfig } from './IBuildConfig';
 import { log, verbose, error, fileError, warn, logEndSubtask, logStartSubtask } from './logging';
 import gutil = require('gulp-util');
 import gulp = require('gulp');
 import through2 = require('through2');
+/* tslint:disable:typedef */
 const eos = require('end-of-stream');
+/* tslint:enable:typedef */
 
 export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
   public name: string;
@@ -13,13 +16,15 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
   public taskConfig: TASK_CONFIG;
   public nukeMatch: string[];
 
-  public setConfig(taskConfig: TASK_CONFIG) {
+  public setConfig(taskConfig: TASK_CONFIG): void {
+    /* tslint:disable:typedef */
     let merge = require('lodash.merge');
+    /* tslint:enable:typedef */
 
     this.taskConfig = merge({}, this.taskConfig, taskConfig);
   }
 
-  public replaceConfig(taskConfig: TASK_CONFIG) {
+  public replaceConfig(taskConfig: TASK_CONFIG): void {
     this.taskConfig = taskConfig;
   }
 
@@ -27,25 +32,25 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
     return true;
   }
 
-  public abstract executeTask(gulp: gulp.Gulp, completeCallback?: (result?: any) => void): Promise<any> | NodeJS.ReadWriteStream | void;
+  public abstract executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (result?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
 
-  public log(message: string) {
+public log(message: string): void {
     log(`[${gutil.colors.cyan(this.name)}] ${message}`);
   }
 
-  public logVerbose(message: string) {
+  public logVerbose(message: string): void {
     verbose(`[${gutil.colors.cyan(this.name)}] ${message}`);
   }
 
-  public logWarning(message: string) {
+  public logWarning(message: string): void {
     warn(`[${gutil.colors.cyan(this.name)}] ${message}`);
   }
 
-  public logError(message: string) {
+  public logError(message: string): void {
     error(`[${gutil.colors.cyan(this.name)}] ${message}`);
   }
 
-  public fileError(filePath: string, line: number, column: number, errorCode: string, message: string) {
+  public fileError(filePath: string, line: number, column: number, errorCode: string, message: string): void {
     fileError(this.name, filePath, line, column, errorCode, message);
   }
 
@@ -53,22 +58,24 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
     return this.nukeMatch;
   }
 
-  public execute(config: IBuildConfig): Promise<any> {
+  public execute(config: IBuildConfig): Promise<void> {
     this.buildConfig = config;
 
-    let startTime = process.hrtime();
+    const startTime: number[] = process.hrtime();
 
     logStartSubtask(this.name);
 
     return new Promise((resolve, reject) => {
+      /* tslint:disable:typedef */
       let stream;
+      /* tslint:enable:typedef */
 
       try {
         if (!this.executeTask) {
           throw new Error('The task subclass is missing the "executeTask" method.');
         }
 
-        stream = this.executeTask(this.buildConfig.gulp, (result?: any) => {
+        stream = this.executeTask(this.buildConfig.gulp, (result?: Object) => {
           if (!result) {
             resolve();
           } else {
@@ -90,7 +97,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
             error: true,
             readable: stream.readable,
             writable: stream.writable && !stream.readable
-          }, (err: any) => {
+          }, (err: Object) => {
             if (err) {
               reject(err);
             } else {
@@ -100,14 +107,13 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
 
           // Make sure the stream is completly read
           stream.pipe(through2.obj(
-            function(
-              file: gutil.File,
+            (file: gutil.File,
               encoding: string,
-              callback: (p?: any) => void) {
-              'use strict';
-              callback();
+              callback: (p?: Object) => void) => {
+                'use strict';
+                callback();
             },
-            function(callback: () => void) {
+            (callback: () => void) => {
               'use strict';
               callback();
             }));
@@ -129,7 +135,9 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
   }
 
   public resolvePath(localPath: string): string {
-    let path = require('path');
+    /* tslint:disable:typedef */
+    const path = require('path');
+    /* tslint:enable:typedef */
     if (path.isAbsolute(localPath)) {
       return path.resolve(localPath);
     }
@@ -137,37 +145,43 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
   }
 
   public fileExists(localPath: string): boolean {
-    let fs = require('fs');
-    let doesExist = false;
-    let fullPath = this.resolvePath(localPath);
+    /* tslint:disable:typedef */
+    const fs = require('fs');
+    /* tslint:enable:typedef */
+    let doesExist: boolean = false;
+    const fullPath: string = this.resolvePath(localPath);
 
     try {
-      let stats = fs.statSync(fullPath);
-      doesExist = stats.isFile();
+      doesExist = fs.statSync(fullPath).isFile();
     } catch (e) { /* no-op */ }
 
     return doesExist;
   }
 
-  public copyFile(localSourcePath: string, localDestPath?: string) {
-    let path = require('path');
-    let fs = require('fs-extra');
+  public copyFile(localSourcePath: string, localDestPath?: string): void {
+    /* tslint:disable:typedef */
+    const path = require('path');
+    const fs = require('fs-extra');
+    /* tslint:enable:typedef */
 
-    let fullSourcePath = path.resolve(__dirname, localSourcePath);
-    let fullDestPath = path.resolve(
+    const fullSourcePath: string = path.resolve(__dirname, localSourcePath);
+    const fullDestPath: string = path.resolve(
       this.buildConfig.rootPath,
       (localDestPath || path.basename(localSourcePath)));
 
     fs.copySync(fullSourcePath, fullDestPath);
   }
 
-  public readJSONSync(localPath: string): string {
-    let fullPath = this.resolvePath(localPath);
-    let result = null;
-    let fs = require('fs');
+  public readJSONSync(localPath: string): Object {
+    const fullPath: string = this.resolvePath(localPath);
+    let result: Object = undefined;
+
+    /* tslint:disable:typedef */
+    const fs = require('fs');
+    /* tslint:enable:typedef */
 
     try {
-      let content = fs.readFileSync(fullPath, 'utf8');
+      let content: string = fs.readFileSync(fullPath, 'utf8');
       result = JSON.parse(content);
     } catch (e) { /* no-op */ }
 
