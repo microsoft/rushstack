@@ -6,16 +6,16 @@
   "bundle": "typings/tsd.d.ts",
   "installed": {
     "node/node.d.ts": {
-      "commit": "513510a89acc648422c9abb047265116198f99ee"
+      "commit": "7ad4e09016898d9c4837e250121fef2aedbecaaa"
     },
     "source-map/source-map.d.ts": {
-      "commit": "a44529fcb1e1cdc0355e71c42a6048de99b57c34"
+      "commit": "7ad4e09016898d9c4837e250121fef2aedbecaaa"
     },
     "webpack/webpack.d.ts": {
-      "commit": "a44529fcb1e1cdc0355e71c42a6048de99b57c34"
+      "commit": "7ad4e09016898d9c4837e250121fef2aedbecaaa"
     },
     "uglify-js/uglify-js.d.ts": {
-      "commit": "a44529fcb1e1cdc0355e71c42a6048de99b57c34"
+      "commit": "7ad4e09016898d9c4837e250121fef2aedbecaaa"
     },
     "orchestrator/orchestrator.d.ts": {
       "commit": "513510a89acc648422c9abb047265116198f99ee"

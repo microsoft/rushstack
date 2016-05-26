@@ -147,7 +147,7 @@ declare module "webpack" {
 
         interface Resolve {
             /** Replace modules by other modules or paths. */
-            alias: { [key: string]: string; };
+            alias?: { [key: string]: string; };
             /**
              * The directory (absolute path) that contains your modules.
              * May also be an array of directories.
@@ -327,7 +327,9 @@ declare module "webpack" {
              * Assign the module and chunk ids by occurrence count. Ids that are used often get lower (shorter) ids.
              * This make ids predictable, reduces to total file size and is recommended.
              */
+            // TODO: This is a typo, and will be removed in Webpack 2.
             OccurenceOrderPlugin: optimize.OccurenceOrderPluginStatic;
+            OccurrenceOrderPlugin: optimize.OccurenceOrderPluginStatic;
             /**
              * Minimize all JavaScript output of chunks. Loaders are switched into minimizing mode.
              * You can pass an object containing UglifyJs options.
@@ -536,4 +538,3 @@ declare module "webpack" {
     //export default webpack;
     export = webpack;
 }
-
