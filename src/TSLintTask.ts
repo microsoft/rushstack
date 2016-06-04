@@ -7,6 +7,7 @@ import through2 = require('through2');
 import gutil = require('gulp-util');
 import tslint = require('tslint');
 import { merge } from 'lodash';
+import md5 = require('md5');
 import * as path from 'path';
 import * as lintTypes from 'tslint/lib/lint';
 import * as ts from 'typescript';
@@ -96,6 +97,10 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
           this.push(file);
           callback();
         }), {
+          // Scope the cache to a combination of the lint rules and the build path
+          name: md5(
+            tslint.VERSION + JSON.stringify(taskScope._loadLintRules()) +
+            taskScope.name + taskScope.buildConfig.rootPath),
           // What on the result indicates it was successful
           success: (jshintedFile: gutil.File): boolean => {
             /* tslint:disable:no-string-literal */
