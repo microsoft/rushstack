@@ -1,9 +1,13 @@
 import { GulpTask } from 'gulp-core-build';
 import gulpType = require('gulp');
+/* tslint:disable:typedef */
+const cached = require('gulp-cache');
+/* tslint:enable:typedef */
 import through2 = require('through2');
 import gutil = require('gulp-util');
 import tslint = require('tslint');
 import { merge } from 'lodash';
+import md5 = require('md5');
 import * as path from 'path';
 import * as lintTypes from 'tslint/lib/lint';
 import * as ts from 'typescript';
@@ -48,22 +52,21 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
     useOldConfig: false
   };
 
+  /* tslint:disable:no-any */
+  private _lintRules: any = undefined;
+  /* tslint:enable:no-any */
+
   public executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream {
     const taskScope: TSLintTask = this;
 
-    if (this.taskConfig.lintConfig) {
-      /* tslint:disable:no-any */
-      const defaultConfig: any = this.taskConfig.useOldConfig
-      /* tslint:enable:no-any */
-        ? require('./defaultTslint_oldRules.json')
-        : require('./defaultTslint.json');
-      this.taskConfig.lintConfig = merge(defaultConfig, this.taskConfig.lintConfig);
-
-      return gulp.src(this.taskConfig.sourceMatch)
-        .pipe(through2.obj(function(
+    return gulp.src(this.taskConfig.sourceMatch)
+      .pipe(cached(
+        through2.obj(function(
           file: gutil.File,
           encoding: string,
           callback: (encoding?: string, file?: gutil.File) => void): void {
+          taskScope.logVerbose(file.path);
+
           // Lint the file
           if (file.isNull()) {
             return callback(undefined, file);
@@ -76,7 +79,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
           }
 
           const options: lintTypes.ILinterOptions = {
-            configuration: taskScope.taskConfig.lintConfig,
+            configuration: taskScope._loadLintRules(),
             formatter: 'json',
             formattersDirectory: undefined, // not used, use reporters instead
             rulesDirectory: taskScope.taskConfig.rulesDirectory || []
@@ -93,7 +96,29 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
 
           this.push(file);
           callback();
-        }));
+        }), {
+          // Scope the cache to a combination of the lint rules and the build path
+          name: md5(
+            tslint.VERSION + JSON.stringify(taskScope._loadLintRules()) +
+            taskScope.name + taskScope.buildConfig.rootPath),
+          // What on the result indicates it was successful
+          success: (jshintedFile: gutil.File): boolean => {
+            /* tslint:disable:no-string-literal */
+            return jshintedFile['tslint'].failureCount === 0;
+            /* tslint:enable:no-string-literal */
+          }
+        }
+      ));
+  }
+  /* tslint:disable:no-any */
+  private _loadLintRules(): any {
+    if (!this._lintRules) {
+      const defaultConfig: any = this.taskConfig.useOldConfig
+  /* tslint:enable:no-any */
+        ? require('./defaultTslint_oldRules.json')
+        : require('./defaultTslint.json');
+      this._lintRules = merge(defaultConfig, this.taskConfig.lintConfig || {});
     }
+    return this._lintRules;
   }
 }
