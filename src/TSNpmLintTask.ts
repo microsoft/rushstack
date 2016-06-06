@@ -33,7 +33,6 @@ export class TSNpmLintTask extends GulpTask<ITSNPMLintTaskConfig> {
      *  ///<reference path='../../typings.d.ts'/>
      */
     const referencePathRegex: RegExp = /^\/\/\/[ ]?<reference path=['"](.*)['"][ ]?\/>/gm;
-
     return gulp.src(filePattern)
       .pipe(cached(
         /* tslint:disable:no-function-expression */
@@ -46,8 +45,15 @@ export class TSNpmLintTask extends GulpTask<ITSNPMLintTaskConfig> {
             const relativePathToCurrentFile: string = path.relative(taskScope.buildConfig.rootPath, file.path);
             taskScope.logVerbose(relativePathToCurrentFile);
 
+            /* tslint:disable:no-string-literal */
+            file[taskScope.name] = {
+              failureCount: 0
+            };
+            /* tslint:enable:no-string-literal */
+
             const newContents: string = rawContents.replace(referencePathRegex,
               (_: string, tsdFile: string) => {
+                file[taskScope.name].failureCount++;
                 taskScope.log(`Removed reference to '${tsdFile}' in ${relativePathToCurrentFile}`);
                 return `// [${taskScope.name}] removed reference to '${tsdFile}'`;
               }
@@ -62,7 +68,13 @@ export class TSNpmLintTask extends GulpTask<ITSNPMLintTaskConfig> {
           }
         }),
         {
-          name: md5(taskScope.name + taskScope.buildConfig.rootPath)
+          name: md5(taskScope.name + taskScope.buildConfig.rootPath),
+          // What on the result indicates it was successful
+          success: (jshintedFile: gulpUtil.File): boolean => {
+            /* tslint:disable:no-string-literal */
+            return jshintedFile[taskScope.name].failureCount === 0;
+            /* tslint:enable:no-string-literal */
+          }
         }
       ))
       .pipe(gulp.dest(taskScope.buildConfig.libFolder));
