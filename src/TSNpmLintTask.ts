@@ -1,6 +1,10 @@
 import gulp = require('gulp');
+import gulpUtil = require('gulp-util');
+import md5 = require('md5');
+import * as path from 'path';
+import through2 = require('through2');
 /* tslint:disable:typedef */
-const tsdLinter = require('ts-npm-lint');
+const cached = require('gulp-cache');
 /* tslint:enable:typedef */
 
 import {
@@ -17,6 +21,50 @@ export class TSNpmLintTask extends GulpTask<ITSNPMLintTaskConfig> {
   };
 
   public executeTask(gulp: gulp.Gulp): void {
-    tsdLinter.fixTypings();
+    const taskScope: TSNpmLintTask = this;
+
+    const filePattern: string = path.join(taskScope.buildConfig.libFolder, '**', '*.d.ts');
+
+    /**
+     * Matches:
+     *  /// <reference path="../../typings.d.ts" />
+     *  /// <reference path='../../typings.d.ts' />
+     *  ///<reference path='../../typings.d.ts' />
+     *  ///<reference path='../../typings.d.ts'/>
+     */
+    const referencePathRegex: RegExp = /^\/\/\/[ ]?<reference path=['"](.*)['"][ ]?\/>/gm;
+
+    return gulp.src(filePattern)
+      .pipe(cached(
+        /* tslint:disable:no-function-expression */
+        through2.obj(function(file: gulpUtil.File, encoding: string,
+          callback: (encoding?: string, file?: gulpUtil.File) => void): void {
+          /* tslint:enable:no-function-expression */
+
+          try {
+            const rawContents: string = file.contents.toString(encoding);
+            const relativePathToCurrentFile: string = path.relative(taskScope.buildConfig.rootPath, file.path);
+            taskScope.logVerbose(relativePathToCurrentFile);
+
+            const newContents: string = rawContents.replace(referencePathRegex,
+              (_: string, tsdFile: string) => {
+                taskScope.log(`Removed reference to '${tsdFile}' in ${relativePathToCurrentFile}`);
+                return `// [${taskScope.name}] removed reference to '${tsdFile}'`;
+              }
+            );
+
+            file.contents = new Buffer(newContents);
+            this.push(file);
+            callback();
+          } catch (e) {
+            taskScope.logError(e);
+            callback(e);
+          }
+        }),
+        {
+          name: md5(taskScope.name + taskScope.buildConfig.rootPath)
+        }
+      ))
+      .pipe(gulp.dest(taskScope.buildConfig.libFolder));
   }
 }
