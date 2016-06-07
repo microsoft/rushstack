@@ -45,11 +45,9 @@ export class TSNpmLintTask extends GulpTask<ITSNPMLintTaskConfig> {
             const relativePathToCurrentFile: string = path.relative(taskScope.buildConfig.rootPath, file.path);
             taskScope.logVerbose(relativePathToCurrentFile);
 
-            /* tslint:disable:no-string-literal */
             file[taskScope.name] = {
               failureCount: 0
             };
-            /* tslint:enable:no-string-literal */
 
             const newContents: string = rawContents.replace(referencePathRegex,
               (_: string, tsdFile: string) => {
