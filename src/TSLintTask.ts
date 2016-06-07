@@ -106,6 +106,12 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
             /* tslint:disable:no-string-literal */
             return jshintedFile['tslint'].failureCount === 0;
             /* tslint:enable:no-string-literal */
+          },
+          value: (file: gutil.File): Object => {
+            return {
+              contents: file.contents.toString('base64'),
+              path: file.path
+            };
           }
         }
       ));
