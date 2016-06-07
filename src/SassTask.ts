@@ -1,9 +1,13 @@
 import { GulpTask } from 'gulp-core-build';
 import gulp = require('gulp');
+import * as gulpUtil from 'gulp-util';
 import { EOL } from 'os';
 import { splitStyles } from 'load-themed-styles';
+/* tslint:disable:typedef */
+const merge = require('merge2');
+/* tslint:enable:typedef */
 
-const scssTsExtName = '.scss.ts';
+const scssTsExtName: string = '.scss.ts';
 
 export interface ISassTaskConfig {
   preamble?: string;
@@ -13,12 +17,10 @@ export interface ISassTaskConfig {
   dropCssFiles?: boolean;
 }
 
-const _classMaps = {};
-
-const merge = require('merge2');
+const _classMaps: { [file: string]: Object } = {};
 
 export class SassTask extends GulpTask<ISassTaskConfig> {
-  public name = 'sass';
+  public name: string = 'sass';
 
   public taskConfig: ISassTaskConfig = {
     preamble: '/* tslint:disable */',
@@ -30,29 +32,34 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     dropCssFiles: false
   };
 
-  public nukeMatch = [
+  public nukeMatch: string[] = [
     'src/**/*.scss.ts'
   ];
 
   public executeTask(
     gulp: gulp.Gulp,
     completeCallback?: (result?: string) => void
-  ): Promise<any> | NodeJS.ReadWriteStream | void {
+  ): Promise<{}> | NodeJS.ReadWriteStream | void {
 
+    /* tslint:disable:typedef */
     const autoprefixer = require('autoprefixer');
     const cssModules = require('postcss-modules');
-    const postCSSPlugins = [
+    /* tslint:enable:typedef */
+
+    /* tslint:disable:no-any */
+    const postCSSPlugins: any[] = [
       autoprefixer({ browsers: ['> 1%', 'last 2 versions', 'ie >= 10'] })
     ];
-    const modulePostCssPlugins = postCSSPlugins.slice(0);
+    const modulePostCssPlugins: any[] = postCSSPlugins.slice(0);
+    /* tslint:enable:no-any */
 
     modulePostCssPlugins.push(cssModules({
       getJSON: this._generateModuleStub.bind(this),
       generateScopedName: this.generateScopedName.bind(this)
     }));
 
-    const srcPattern = this.taskConfig.sassMatch.slice(0);
-    const moduleSrcPattern = srcPattern.map((value: string) => value.replace('.scss', '.module.scss'));
+    const srcPattern: string[] = this.taskConfig.sassMatch.slice(0);
+    const moduleSrcPattern: string[] = srcPattern.map((value: string) => value.replace('.scss', '.module.scss'));
 
     if (this.taskConfig.useCSSModules) {
       return this._processFiles(gulp, srcPattern, completeCallback, modulePostCssPlugins);
@@ -67,9 +74,13 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
   private _processFiles(
     gulp: gulp.Gulp,
     srcPattern: string[],
+    /* tslint:disable:no-any */
     completeCallback: (result?: any) => void,
     postCSSPlugins: any[]
+    /* tslint:enable:no-any */
   ): NodeJS.ReadWriteStream {
+
+    /* tslint:disable:typedef */
     const changed = require('gulp-changed');
     const cleancss = require('gulp-clean-css');
     const clipEmptyFiles = require('gulp-clip-empty-files');
@@ -78,13 +89,15 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     const postcss = require('gulp-postcss');
     const sass = require('gulp-sass');
     const texttojs = require('gulp-texttojs');
+    /* tslint:enable:typedef */
+
     const tasks: NodeJS.ReadWriteStream[] = [];
 
-    const baseTask = gulp.src(srcPattern)
+    const baseTask: NodeJS.ReadWriteStream = gulp.src(srcPattern)
       .pipe(changed('src', { extension: scssTsExtName }))
       .pipe(sass.sync({
-        importer: (url, prev, done) => ({ file: _patchSassUrl(url) })
-      }).on('error', function(error: Error) {
+        importer: (url: string, prev: string, done: boolean): Object => ({ file: _patchSassUrl(url) })
+      }).on('error', function(error: Error): void {
         sass.logError.call(this, error);
         completeCallback('Errors found in sass file(s).');
       }))
@@ -103,20 +116,20 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       .pipe(texttojs({
         ext: scssTsExtName,
         isExtensionAppended: false,
-        template: (file) => {
-          const content = file.contents.toString('utf8');
-          const classNames: { [key: string]: string } = _classMaps[file.path];
+        template: (file: gulpUtil.File): string => {
+          const content: string = file.contents.toString('utf8');
+          const classNames: Object = _classMaps[file.path];
           let exportClassNames: string = '';
 
           if (classNames) {
-            const classNamesLines = [
+            const classNamesLines: string[] = [
               this.taskConfig.preamble || '',
               'const styles = {'
             ];
 
             const classKeys: string[] = Object.keys(classNames);
             classKeys.forEach((key: string, index: number) => {
-              const value = classNames[key];
+              const value: string = classNames[key];
               let line: string = '';
               if (key.indexOf('-') !== -1) {
                 this.logWarning(`The local CSS class '${key}' is not camelCase and will not be type-safe.`);
@@ -141,7 +154,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
             exportClassNames = classNamesLines.join(EOL);
           }
 
-          let lines = [];
+          let lines: string[] = [];
           if (this.taskConfig.dropCssFiles) {
             lines = [
               `require('${path.basename(file.path, scssTsExtName)}.css');`,
@@ -170,19 +183,21 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     return merge(tasks);
   }
 
-  private _generateModuleStub(cssFileName: string, json: any) {
+  private _generateModuleStub(cssFileName: string, json: Object): void {
     cssFileName = cssFileName.replace('.css', '.scss.ts');
     _classMaps[cssFileName] = json;
   }
 
-  private generateScopedName(name: string, fileName: string ) {
+  private generateScopedName(name: string, fileName: string): string {
+    /* tslint:disable:typedef */
     const crypto = require('crypto');
+    /* tslint:enable:typedef */
 
     return name + '_' + crypto.createHmac('sha1', fileName).update(name).digest('hex').substring(0, 8);
   }
 }
 
-function _patchSassUrl(url: string) {
+function _patchSassUrl(url: string): string {
   if (url[0] === '~') {
     url = 'node_modules/' + url.substr(1);
   } else if (url === 'stdin') {
