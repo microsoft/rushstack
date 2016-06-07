@@ -110,7 +110,9 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
           // By default, the cache attempts to store the value of the objects in the stream
           // For this task, this is over-engineering since we never need to store anything extra.
           value: (file: gutil.File): Object => {
-            return { };
+            return {
+              path: file.path
+            };
           }
         }
       ));
