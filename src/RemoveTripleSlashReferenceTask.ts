@@ -30,9 +30,10 @@ export class RemoveTripleSlashReferenceTask extends GulpTask<IRemoveTripleSlashR
      *  /// <reference path="../../typings.d.ts" />
      *  /// <reference path='../../typings.d.ts' />
      *  ///<reference path='../../typings.d.ts' />
-     *  ///<reference path='../../typings.d.ts'/>
+     *  ///<reference foo="bar" path='../../typings.d.ts'/>
+     *  /// <reference path='../../typings.d.ts' bar="foo" />
      */
-    const referencePathRegex: RegExp = /^\/\/\/[ ]?<reference path=['"](.*)['"][ ]?\/>/gm;
+    const referencePathRegex: RegExp = /^\/\/\/[ ]+<reference.*path=['"]([^'"]*)['"][^>]+>/gm;
     return gulp.src(filePattern)
       .pipe(cached(
         /* tslint:disable:no-function-expression */
