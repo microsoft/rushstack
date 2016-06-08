@@ -11,17 +11,17 @@ import {
   GulpTask
 } from 'gulp-core-build';
 
-export interface ITSNPMLintTaskConfig {
+export interface IRemoveTripleSlashReferenceTaskConfig {
 }
 
-export class TSNpmLintTask extends GulpTask<ITSNPMLintTaskConfig> {
+export class RemoveTripleSlashReferenceTask extends GulpTask<IRemoveTripleSlashReferenceTaskConfig> {
   public name: string = 'ts-npm-lint';
 
-  public taskConfig: ITSNPMLintTaskConfig = {
+  public taskConfig: IRemoveTripleSlashReferenceTaskConfig = {
   };
 
   public executeTask(gulp: gulp.Gulp): void {
-    const taskScope: TSNpmLintTask = this;
+    const taskScope: RemoveTripleSlashReferenceTask = this;
 
     const filePattern: string = path.join(taskScope.buildConfig.libFolder, '**', '*.d.ts');
 
