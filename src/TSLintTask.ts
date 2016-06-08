@@ -106,6 +106,13 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
             /* tslint:disable:no-string-literal */
             return jshintedFile['tslint'].failureCount === 0;
             /* tslint:enable:no-string-literal */
+          },
+          // By default, the cache attempts to store the value of the objects in the stream
+          // For this task, this is over-engineering since we never need to store anything extra.
+          value: (file: gutil.File): Object => {
+            return {
+              path: file.path
+            };
           }
         }
       ));
