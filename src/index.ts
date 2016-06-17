@@ -1,7 +1,6 @@
-import { IExecutable } from 'gulp-core-build';
 import { SassTask } from './SassTask';
 
-export const sass: IExecutable = new SassTask();
+export const sass: SassTask = new SassTask();
 
 /* tslint:disable:export-name */
 export default sass;
