@@ -1,10 +1,11 @@
 let loaderUtils = require('loader-utils');
+let loadedThemedStylesPath = require.resolve('load-themed-styles');
 
 export class LoadThemedStylesLoader {
   public static pitch(remainingRequest: string): string {
     return [
       `var content = require(${loaderUtils.stringifyRequest(this, '!!' + remainingRequest)});`,
-      'var loader = require("load-themed-styles");',
+      `var loader = require(${JSON.stringify(loadedThemedStylesPath)});`,
       '',
       'if(typeof content === "string") content = [[module.id, content]];',
       '',
