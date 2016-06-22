@@ -53,19 +53,19 @@ export default class ProjectBuildTask implements ITaskDefinition {
         writer.writeLine('npm run clean');
         Utilities.executeCommand(this._rushConfig.npmToolFilename, [ 'run', 'clean' ], projectFolder);
 
-        const command: string = [
-          this._rushConfig.npmToolFilename,
-          'run test',
+        const args: string[] = [
+          'run',
+          'test',
           '--', // Everything after this will be passed directly to the gulp task
-          '--color',
-          this._production ? '--production' : ''
-        ].join(' ');
-        writer.writeLine(command);
+          '--color'
+        ];
+        if (this._production) {
+          args.push('--production');
+        }
+        writer.writeLine('npm ' + args.join(' '));
 
-        const buildTask: child_process.ChildProcess = child_process.exec(command, {
-          cwd: projectFolder,
-          stdio: [0, 1, 2] // (omit this to suppress gulp console output)
-        });
+        const buildTask: child_process.ChildProcess = Utilities.executeCommandAsync(
+          this._rushConfig.npmToolFilename, args, projectFolder);
 
         buildTask.stdout.on('data', (data: string) => {
           writer.write(data);
