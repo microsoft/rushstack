@@ -47,7 +47,8 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       'src/**/*.tsx',
       'typings/main/**/*.ts',
       'typings/main.d.ts',
-      'typings/tsd.d.ts'
+      'typings/tsd.d.ts',
+      'typings/index.d.ts'
     ],
     staticMatch: [
       'src/**/*.js',
