@@ -1,6 +1,6 @@
 {
   "name": "web-library-build",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -10,7 +10,7 @@
     "gulp-core-build-karma": "~0.2.0",
     "gulp-core-build-sass": "0.3.1",
     "gulp-core-build-serve": "~0.2.2",
-    "gulp-core-build-typescript": "~0.2.3",
+    "gulp-core-build-typescript": "~0.4.1",
     "gulp-core-build-webpack": "~0.2.1",
     "node-notifier": "^4.5.0"
   },
