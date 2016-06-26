@@ -1,5 +1,8 @@
-let loaderUtils = require('loader-utils');
-let loadedThemedStylesPath = require.resolve('load-themed-styles');
+/* tslint:disable:typedef */
+const loaderUtils = require('loader-utils');
+/* tslint:enable:typedef */
+
+const loadedThemedStylesPath: string = require.resolve('load-themed-styles');
 
 export class LoadThemedStylesLoader {
   public static pitch(remainingRequest: string): string {
