@@ -1,7 +1,7 @@
 {
   "name": "load-themed-styles-loader",
   "version": "0.0.2",
-  "description": "",
+  "description": "This simple loader wraps the loading of CSS in script equivalent to `require('load-themed-styles').loadStyles( /* css text */ )`. It is designed to be a replacement for style-loader.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
