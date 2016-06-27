@@ -166,4 +166,8 @@ export class SetWebpackPublicPathLoader {
 
     return merge(options, queryOptions);
   }
+
+  constructor() {
+    throw new Error('Constructing "LoadThemedStylesLoader" is not supported.');
+  }
 }
