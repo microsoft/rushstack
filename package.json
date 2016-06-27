@@ -7,11 +7,11 @@
   "license": "MIT",
   "repository": "github:iclanton/set-webpack-public-path-loader",
   "dependencies": {
-    "loader-utils": "^0.2.13",
-    "lodash": "^4.8.2",
-    "uglify-js": "^2.6.2"
+    "loader-utils": "^0.2.15",
+    "lodash": "^4.13.1",
+    "uglify-js": "^2.6.4"
   },
   "devDependencies": {
-    "node-library-build": "^0.0.5"
+    "node-library-build": "^0.1.2"
   }
 }
