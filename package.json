@@ -10,6 +10,8 @@
     "loader-utils": "^0.2.15"
   },
   "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^2.5.3",
     "node-library-build": "^0.1.2"
   }
 }
