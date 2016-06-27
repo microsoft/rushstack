@@ -7,9 +7,9 @@
   "license": "MIT",
   "repository": "github:iclanton/raw-script-loader",
   "dependencies": {
-    "loader-utils": "^0.2.13"
+    "loader-utils": "^0.2.15"
   },
   "devDependencies": {
-    "node-library-build": "^0.0.5"
+    "node-library-build": "^0.1.2"
   }
 }
