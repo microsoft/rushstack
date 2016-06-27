@@ -1,7 +1,10 @@
 import { merge } from 'lodash';
 import { EOL } from 'os';
 import * as uglify from 'uglify-js';
+
+/* tslint:disable:typedef */
 const loaderUtils = require('loader-utils');
+/* tslint:enable:typedef */
 
 export interface ISetWebpackPublicPathLoaderOptions {
   systemJs?: boolean;
@@ -11,17 +14,16 @@ export interface ISetWebpackPublicPathLoaderOptions {
 }
 
 export class SetWebpackPublicPathLoader {
-  public static registryVarName = 'window.__setWebpackPublicPathLoaderSrcRegistry__';
+  public static registryVarName: string = 'window.__setWebpackPublicPathLoaderSrcRegistry__';
 
   private static defaultOptions: ISetWebpackPublicPathLoaderOptions = {
     systemJs: false,
-    scriptPath: null,
-    urlPrefix: null,
-    publicPath: null
+    scriptPath: undefined,
+    urlPrefix: undefined,
+    publicPath: undefined
   };
 
-  public static getGlobalRegisterCode(debug: boolean = false) {
-
+  public static getGlobalRegisterCode(debug: boolean = false): string {
     const lines: string[] = [
       '(function(){',
       `if (!${SetWebpackPublicPathLoader.registryVarName}) ${SetWebpackPublicPathLoader.registryVarName}={};`,
@@ -36,17 +38,17 @@ export class SetWebpackPublicPathLoader {
       '})();'
     ];
 
-    const joinedScript = SetWebpackPublicPathLoader.joinLines(lines);
+    const joinedScript: string = SetWebpackPublicPathLoader.joinLines(lines);
 
     if (debug) {
       return `${EOL}${joinedScript}`;
     } else {
-      const uglified = uglify.parse(joinedScript);
+      const uglified: uglify.AST_Toplevel = uglify.parse(joinedScript);
       uglified.figure_out_scope();
-      const compressor = uglify.Compressor({
+      const compressor: uglify.AST_Toplevel = uglify.Compressor({
         dead_code: true
       });
-      const compressed = uglified.transform(compressor);
+      const compressed: uglify.AST_Toplevel = uglified.transform(compressor);
       compressed.figure_out_scope();
       compressed.compute_char_frequency();
       compressed.mangle_names();
@@ -54,12 +56,14 @@ export class SetWebpackPublicPathLoader {
     }
   }
 
-  public static setOptions(options: ISetWebpackPublicPathLoaderOptions) {
+  public static setOptions(options: ISetWebpackPublicPathLoaderOptions): void {
     this.defaultOptions = options || {};
   }
 
   public static pitch(remainingRequest: string): string {
+    /* tslint:disable:no-any */
     const self: any = this;
+    /* tslint:enable:no-any */
 
     const options: ISetWebpackPublicPathLoaderOptions =
       SetWebpackPublicPathLoader.getOptions(self.query);
@@ -134,7 +138,7 @@ export class SetWebpackPublicPathLoader {
     if (str) {
       return str.replace('\'', '\\\'');
     } else {
-      return null;
+      return undefined;
     }
   }
 
