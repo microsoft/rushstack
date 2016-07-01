@@ -7,13 +7,16 @@ import * as glob from 'glob';
 import globEscape = require('glob-escape');
 import * as os from 'os';
 import * as path from 'path';
+import * as semver from 'semver';
 import * as fs from 'fs';
 
 import CommandLineAction from '../commandLine/CommandLineAction';
 import InstallAction from './InstallAction';
+import { IPackageJson } from '../data/Package';
 import JsonFile from '../utilities/JsonFile';
 import RushCommandLineParser from './RushCommandLineParser';
 import RushConfig from '../data/RushConfig';
+import RushConfigProject from '../data/RushConfigProject';
 import Utilities from '../utilities/Utilities';
 import { CommandLineFlagParameter } from '../commandLine/CommandLineParameter';
 
@@ -108,7 +111,7 @@ export default class GenerateAction extends CommandLineAction {
 
       const tempPackageJsonFilename: string = path.join(tempProjectFolder, 'package.json');
 
-      const tempPackageJson: PackageJson = {
+      const tempPackageJson: IPackageJson = {
         name: tempProjectName,
         version: '0.0.0',
         private: true,
@@ -142,18 +145,24 @@ export default class GenerateAction extends CommandLineAction {
       }
 
       for (const pair of pairs) {
-        if (this._rushConfig.getProjectByName(pair.packageName)) {
-          // If this is a locally buildable dependency, then it's possible that it hasn't
-          // actually been published yet, in which case we could build it using "rush link",
-          // so we treat it as an optional dependency.
-          if (!tempPackageJson.optionalDependencies) {
-            tempPackageJson.optionalDependencies = {};
+        // Is there a locally built Rush project that could satisfy this dependency?
+        // If so, then we will symlink to the project folder rather than to common/node_modules.
+        // In this case, we don't want "npm install" to process this package, but we do need
+        // to record this decision for later, so we add it to a special 'rushDependencies' list.
+        const localProject: RushConfigProject = this._rushConfig.getProjectByName(pair.packageName);
+        if (localProject) {
+          const localProjectVersion: string = localProject.packageJson.version;
+          if (semver.satisfies(localProjectVersion, pair.packageVersion)) {
+            if (!tempPackageJson.rushDependencies) {
+              tempPackageJson.rushDependencies = {};
+            }
+            tempPackageJson.rushDependencies[pair.packageName] = pair.packageVersion;
+            continue;
           }
-          tempPackageJson.optionalDependencies[pair.packageName] = pair.packageVersion;
-        } else {
-          // Otherwise, add it as a regular dependency.
-          tempPackageJson.dependencies[pair.packageName] = pair.packageVersion;
         }
+
+        // Otherwise, add it as a regular dependency.
+        tempPackageJson.dependencies[pair.packageName] = pair.packageVersion;
       }
 
       JsonFile.saveJsonFile(tempPackageJson, tempPackageJsonFilename);

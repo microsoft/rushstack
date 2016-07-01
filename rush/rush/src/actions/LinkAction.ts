@@ -14,7 +14,7 @@ import JsonFile from '../utilities/JsonFile';
 import RushCommandLineParser from './RushCommandLineParser';
 import RushConfig, { IRushLinkJson } from '../data/RushConfig';
 import RushConfigProject from '../data/RushConfigProject';
-import Package, { IResolveOrCreateResult } from '../data/Package';
+import Package, { IResolveOrCreateResult, PackageDependencyKind } from '../data/Package';
 import PackageLookup from '../data/PackageLookup';
 import Utilities from '../utilities/Utilities';
 import { CommandLineFlagParameter } from '../commandLine/CommandLineParameter';
@@ -197,6 +197,15 @@ function createSymlinksForTopLevelProject(localPackage: Package): void {
   }
 }
 
+/**
+ * This is called once for each local project from Rush.json.
+ * @param project             The local project that we will create symlinks for
+ * @param commonRootPackage   The common/package.json package
+ * @param commonPackageLookup A dictionary for finding packages under common/node_modules
+ * @param rushConfig          The rush.json file contents
+ * @param rushLinkJson        The common/rush-link.json output file
+ * @param options             Command line options for "rush link"
+ */
 function linkProject(
   project: RushConfigProject,
   commonRootPackage: Package,
@@ -228,7 +237,10 @@ function linkProject(
       break;
     }
 
+    // A project from somewhere under "common/node_modules"
     const commonPackage: Package = queueItem.commonPackage;
+    // A symlinked virtual package somewhere under "this-project/node_modules",
+    // where "this-project" corresponds to the "project" parameter for linkProject().
     const localPackage: Package = queueItem.localPackage;
 
     // NOTE: It's important that we use the dependencies from the Common folder,
@@ -242,7 +254,8 @@ function linkProject(
         // The dependency name matches an Rush project, but is it compatible with
         // the requested version?
         const matchedVersion: string = matchedRushPackage.packageJson.version;
-        if (semver.satisfies(matchedVersion, dependency.versionRange)) {
+        if (dependency.kind === PackageDependencyKind.LocalLink
+          || semver.satisfies(matchedVersion, dependency.versionRange)) {
           // Yes, it is compatible, so create a symlink to the Rush project.
 
           // If the link is coming from our top-level Rush project, then record a
@@ -323,7 +336,7 @@ function linkProject(
           queue.push({ commonPackage: commonDependencyPackage, localPackage: newLocalPackage });
         }
       } else {
-        if (!dependency.isOptional) {
+        if (dependency.kind !== PackageDependencyKind.Optional) {
           throw Error(`The dependency "${dependency.name}" needed by "${localPackage.name}"`
             + ` was not found the ${rushConfig.commonFolderName} folder`);
         } else {

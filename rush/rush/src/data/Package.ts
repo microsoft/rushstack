@@ -4,6 +4,19 @@
 
 import * as path from 'path';
 
+export enum PackageDependencyKind {
+  Normal,
+  /**
+   * The dependency was listed in the optionalDependencies section of package.json.
+   */
+  Optional,
+
+  /**
+   * The dependency should be a symlink to a project that is locally built by Rush..
+   */
+  LocalLink
+}
+
 export interface IPackageDependency {
   /**
    * The name of the dependency
@@ -15,9 +28,17 @@ export interface IPackageDependency {
   versionRange: string;
 
   /**
-   * Whether the dependency was listed in the optionalDependencies section of package.json.
+   * The kind of dependency
    */
-  isOptional: boolean;
+  kind: PackageDependencyKind;
+}
+
+export interface IPackageJson extends PackageJson {
+  /**
+   * An extra setting written into package.json for temp packages, to track
+   * references to locally built projects.
+   */
+  rushDependencies?: { [key: string]: string };
 }
 
 export default class Package {
@@ -81,16 +102,16 @@ export default class Package {
 
     let dependencies: IPackageDependency[] = [];
     const dependencyNames: Set<string> = new Set<string>();
-    const packageJson: PackageJson = npmPackage.package;
+    const packageJson: IPackageJson = npmPackage.package;
 
     if (packageJson.optionalDependencies) {
       for (const dependencyName of Object.keys(packageJson.optionalDependencies)) {
         if (!dependencyNames.has(dependencyName)) {
           dependencyNames.add(dependencyName);
           dependencies.push({
-            isOptional: true,
             name: dependencyName,
-            versionRange: packageJson.optionalDependencies[dependencyName]
+            versionRange: packageJson.optionalDependencies[dependencyName],
+            kind: PackageDependencyKind.Optional
           });
         }
       }
@@ -100,13 +121,26 @@ export default class Package {
         if (!dependencyNames.has(dependencyName)) {
           dependencyNames.add(dependencyName);
           dependencies.push({
-            isOptional: false,
             name: dependencyName,
-            versionRange: packageJson.dependencies[dependencyName]
+            versionRange: packageJson.dependencies[dependencyName],
+            kind: PackageDependencyKind.Normal
           });
         }
       }
     }
+    if (packageJson.rushDependencies) {
+      for (const dependencyName of Object.keys(packageJson.rushDependencies)) {
+        if (!dependencyNames.has(dependencyName)) {
+          dependencyNames.add(dependencyName);
+          dependencies.push({
+            name: dependencyName,
+            versionRange: packageJson.dependencies[dependencyName],
+            kind: PackageDependencyKind.LocalLink
+          });
+        }
+      }
+    }
+
     dependencies = dependencies.sort((a, b) => a.name.localeCompare(b.name));
 
     const newPackage: Package = new Package(
