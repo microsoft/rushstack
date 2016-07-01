@@ -38,16 +38,18 @@ export default class CheckAction extends CommandLineAction {
     }
 
     const requireRegExps: RegExp[] = [
-      /\Wrequire\s*\(\s*[']([^']+\s*)[']\)/,
-      /\Wrequire\s*\(\s*["]([^"]+)["]\s*\)/,
-      /\Wrequire.ensure\s*\(\s*[']([^']+\s*)[']\)/,
-      /\Wrequire.ensure\s*\(\s*["]([^"]+)["]\s*\)/,
-      /\Wrequire.resolve\s*\(\s*[']([^']+\s*)[']\)/,
-      /\Wrequire.resolve\s*\(\s*["]([^"]+)["]\s*\)/,
-      /\WSystem.import\s*\(\s*[']([^']+\s*)[']\)/,
-      /\WSystem.import\s*\(\s*["]([^"]+)["]\s*\)/,
-      /\Wfrom\s*[']([^']+)[']/,
-      /\Wfrom\s*["]([^"]+)["]/
+      /\brequire\s*\(\s*[']([^']+\s*)[']\)/,
+      /\brequire\s*\(\s*["]([^"]+)["]\s*\)/,
+      /\brequire.ensure\s*\(\s*[']([^']+\s*)[']\)/,
+      /\brequire.ensure\s*\(\s*["]([^"]+)["]\s*\)/,
+      /\brequire.resolve\s*\(\s*[']([^']+\s*)[']\)/,
+      /\brequire.resolve\s*\(\s*["]([^"]+)["]\s*\)/,
+      /\bSystem.import\s*\(\s*[']([^']+\s*)[']\)/,
+      /\bSystem.import\s*\(\s*["]([^"]+)["]\s*\)/,
+      /\bfrom\s*[']([^']+)[']/,
+      /\bfrom\s*["]([^"]+)["]/,
+      /\bimport\s*[']([^']+)[']\s*\;/,
+      /\bimport\s*["]([^"]+)["]\s*\;/
     ];
 
     // Example: "my-package/lad/dee/dah" --> "my-package"
