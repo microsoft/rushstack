@@ -29,7 +29,7 @@ task('default', ['build'], function (params) {
 }, false);
 
 desc('Build everything');
-task('build', ['lib/rush.js', 'lib/tslint.txt', 'lib/rush-schema.json'], function (params) {
+task('build', ['lib/rush.js', 'lib/rush-schema.json', 'lib/tslint.txt'], function (params) {
   console.log('\nFINISHED TASK: build');
 }, false);
 

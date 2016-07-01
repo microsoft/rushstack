@@ -1,7 +1,6 @@
 ﻿import stripJsonComments = require('strip-json-comments');
 import * as fs from 'fs';
 import * as os from 'os';
-import * as path from 'path';
 
 /**
  * Utilities for reading/writing JSON files.
@@ -19,8 +18,7 @@ export default class JsonFile {
     try {
       return JSON.parse(stripped);
     } catch (error) {
-      const shortFilename: string = path.basename(jsonFilename);
-      throw new Error(`Error reading "${shortFilename}":` + os.EOL + `  ${error.message}`);
+      throw new Error(`Error reading "${jsonFilename}":` + os.EOL + `  ${error.message}`);
     }
   }
 
