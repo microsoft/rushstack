@@ -110,17 +110,24 @@ export default class Utilities {
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
    */
-  public static executeCommand(command: string, args: string[], workingDirectory: string): void {
-    // This is a workaround for GitHub issue #25330
-    // https://github.com/nodejs/node-v0.x-archive/issues/25330
-    if (fs.existsSync(command + '.cmd')) {
-      command += '.cmd';
-    }
+  public static executeCommand(command: string, args: string[], workingDirectory: string,
+    suppressOutput: boolean = false): void {
 
-    const result: child_process.SpawnSyncReturns<Buffer> = child_process.spawnSync(command, args, {
+    const options: child_process.SpawnSyncOptions = {
       cwd: workingDirectory,
-      shell: true
-    });
+      shell: true,
+      stdio: suppressOutput ? undefined : [0, 1, 2]
+    };
+
+    let result: child_process.SpawnSyncReturns<Buffer> = child_process.spawnSync(command, args, options);
+
+    /* tslint:disable:no-any */
+    if ((result.error as any).errno === 'ENOENT') {
+      // This is a workaround for GitHub issue #25330
+      // https://github.com/nodejs/node-v0.x-archive/issues/25330
+      result = child_process.spawnSync(command + '.cmd', args, options);
+    }
+    /* tslint:enable:no-any */
 
     if (result.error) {
       throw result.error;
@@ -134,6 +141,9 @@ export default class Utilities {
   public static executeCommandAsync(command: string, args: string[], workingDirectory: string):
     child_process.ChildProcess {
 
+    // This is a workaround for GitHub issue #25330.  It is not as complete as the workaround above,
+    // but there doesn't seem to be an easy asynchronous solution.
+    // https://github.com/nodejs/node-v0.x-archive/issues/25330
     if (fs.existsSync(command + '.cmd')) {
       command += '.cmd';
     }
