@@ -71,11 +71,9 @@ export default class GenerateAction extends CommandLineAction {
     }
 
     // 2. Delete "common\temp_modules"
-    const tempModulesPath: string = path.join(this._rushConfig.commonFolder, 'temp_modules');
-
-    if (fs.existsSync(tempModulesPath)) {
+    if (fs.existsSync(this._rushConfig.tempModulesFolder)) {
       console.log('Deleting common/temp_modules folder');
-      Utilities.dangerouslyDeletePath(tempModulesPath);
+      Utilities.dangerouslyDeletePath(this._rushConfig.tempModulesFolder);
     }
 
     // 3. Delete the previous npm-shrinkwrap.json
@@ -88,7 +86,7 @@ export default class GenerateAction extends CommandLineAction {
 
     // 4. Construct common\package.json and common\temp_modules
     console.log('Creating a clean common/temp_modules folder');
-    Utilities.createFolderWithRetry(tempModulesPath);
+    Utilities.createFolderWithRetry(this._rushConfig.tempModulesFolder);
 
     const commonPackageJson: PackageJson = {
       dependencies: {},
@@ -104,7 +102,7 @@ export default class GenerateAction extends CommandLineAction {
 
       const tempProjectName: string = rushProject.tempProjectName;
 
-      const tempProjectFolder: string = path.join(tempModulesPath, tempProjectName);
+      const tempProjectFolder: string = path.join(this._rushConfig.tempModulesFolder, tempProjectName);
       fs.mkdirSync(tempProjectFolder);
 
       commonPackageJson.dependencies[tempProjectName] = 'file:./temp_modules/' + tempProjectName;

@@ -4,6 +4,8 @@
 
 import * as colors from 'colors';
 import * as fs from 'fs';
+import * as glob from 'glob';
+import globEscape = require('glob-escape');
 import * as os from 'os';
 import * as path from 'path';
 
@@ -159,9 +161,15 @@ export default class InstallAction extends CommandLineAction {
 
     // Compare the timestamps last-install.log and package.json
     // Example: "C:\MyRepo\common\package.json"
-    const commonPackageJsonFilename: string = path.join(this._rushConfig.commonFolder, 'package.json');
+    const packageJsonFilenames: string[] = [];
 
-    if (!Utilities.isFileTimestampCurrent(commonNodeModulesFlagFilename, commonPackageJsonFilename)) {
+    packageJsonFilenames.push(path.join(this._rushConfig.commonFolder, 'package.json'));
+
+    const globPattern: string = globEscape(this._rushConfig.tempModulesFolder.replace('\\', '/'))
+      + '/rush-*/package.json';
+    packageJsonFilenames.push(... glob.sync(globPattern, { nodir: true }));
+
+    if (!Utilities.isFileTimestampCurrent(commonNodeModulesFlagFilename, packageJsonFilenames)) {
       if (needToPrune) {
         console.log('Running "npm prune" in ' + this._rushConfig.commonFolder);
         Utilities.executeCommand(npmToolFilename, [ 'prune' ], this._rushConfig.commonFolder);

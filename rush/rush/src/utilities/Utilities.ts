@@ -83,16 +83,27 @@ export default class Utilities {
 
   /*
    * Returns true if outputFilename has a more recent last modified timestamp
-   * than inputFilename, which would imply that we don't need to rebuild it.
-   * Returns false if either of the files does not exist.
+   * than all of the inputFilenames, which would imply that we don't need to rebuild it.
+   * Returns false if any of the files does not exist.
    */
-  public static isFileTimestampCurrent(outputFilename: string, inputFilename: string): boolean {
-    if (!fs.existsSync(outputFilename) || !fs.existsSync(inputFilename)) {
+  public static isFileTimestampCurrent(outputFilename: string, inputFilenames: string[]): boolean {
+    if (!fs.existsSync(outputFilename)) {
       return false;
     }
     const outputStats: fs.Stats = fs.statSync(outputFilename);
-    const inputStats: fs.Stats = fs.statSync(inputFilename);
-    return outputStats.mtime >= inputStats.mtime;
+
+    for (const inputFilename of inputFilenames) {
+      if (!fs.existsSync(inputFilename)) {
+        return false;
+      }
+
+      const inputStats: fs.Stats = fs.statSync(inputFilename);
+      if (outputStats.mtime < inputStats.mtime) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   /**
