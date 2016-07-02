@@ -136,8 +136,11 @@ export default class InstallAction extends CommandLineAction {
 
     // Example: "C:\MyRepo\common\last-install.log"
     const commonNodeModulesFlagFilename: string = path.join(this._rushConfig.commonFolder, 'last-install.log');
+    const commonNodeModulesFolder: string = path.join(this._rushConfig.commonFolder, 'node_modules');
 
-    let needToPrune: boolean = true;
+    let needToInstall: boolean = false;
+    let skipPrune: boolean = false;
+
     if (this._cleanInstall.value || this._cleanInstallFull.value) {
       if (fs.existsSync(commonNodeModulesFlagFilename)) {
         // If we are cleaning the node_modules folder, then also delete the flag file
@@ -146,7 +149,6 @@ export default class InstallAction extends CommandLineAction {
       }
 
       // Example: "C:\MyRepo\common\node_modules"
-      const commonNodeModulesFolder: string = path.join(this._rushConfig.commonFolder, 'node_modules');
       if (fs.existsSync(commonNodeModulesFolder)) {
         console.log('Deleting old files from ' + commonNodeModulesFolder);
         Utilities.dangerouslyDeletePath(commonNodeModulesFolder);
@@ -154,23 +156,33 @@ export default class InstallAction extends CommandLineAction {
       }
 
       console.log(os.EOL + 'Running "npm cache clean"');
-      Utilities.executeCommand(npmToolFilename, [ 'cache', 'clean' ], this._rushConfig.commonFolder);
+      Utilities.executeCommand(npmToolFilename, ['cache', 'clean'], this._rushConfig.commonFolder);
 
-      needToPrune = false;
+      needToInstall = true;
+      skipPrune = true;
+    } else {
+      // Compare the timestamps last-install.log and package.json to see if our install is outdated
+      const packageJsonFilenames: string[] = [];
+
+      // Example: "C:\MyRepo\common\package.json"
+      packageJsonFilenames.push(path.join(this._rushConfig.commonFolder, 'package.json'));
+
+      // Also consider the timestamp on the node_modules folder; if someone tampered with it
+      // or deleted it entirely, then isFileTimestampCurrent() will cause us to redo "npm install".
+      packageJsonFilenames.push(commonNodeModulesFolder);
+
+      // Example: "C:\MyRepo\common\temp_modules\rush-example-project\package.json"
+      const globPattern: string = globEscape(this._rushConfig.tempModulesFolder.replace('\\', '/'))
+        + '/rush-*/package.json';
+      packageJsonFilenames.push(...glob.sync(globPattern, { nodir: true }));
+
+      if (!Utilities.isFileTimestampCurrent(commonNodeModulesFlagFilename, packageJsonFilenames)) {
+        needToInstall = true;
+      }
     }
 
-    // Compare the timestamps last-install.log and package.json
-    // Example: "C:\MyRepo\common\package.json"
-    const packageJsonFilenames: string[] = [];
-
-    packageJsonFilenames.push(path.join(this._rushConfig.commonFolder, 'package.json'));
-
-    const globPattern: string = globEscape(this._rushConfig.tempModulesFolder.replace('\\', '/'))
-      + '/rush-*/package.json';
-    packageJsonFilenames.push(... glob.sync(globPattern, { nodir: true }));
-
-    if (!Utilities.isFileTimestampCurrent(commonNodeModulesFlagFilename, packageJsonFilenames)) {
-      if (needToPrune) {
+    if (needToInstall) {
+      if (!skipPrune) {
         console.log('Running "npm prune" in ' + this._rushConfig.commonFolder);
         Utilities.executeCommand(npmToolFilename, [ 'prune' ], this._rushConfig.commonFolder);
       }

@@ -85,6 +85,8 @@ export default class Utilities {
    * Returns true if outputFilename has a more recent last modified timestamp
    * than all of the inputFilenames, which would imply that we don't need to rebuild it.
    * Returns false if any of the files does not exist.
+   * NOTE: The filenames can also be paths for directories, in which case the directory
+   * timestamp is compared.
    */
   public static isFileTimestampCurrent(outputFilename: string, inputFilenames: string[]): boolean {
     if (!fs.existsSync(outputFilename)) {
