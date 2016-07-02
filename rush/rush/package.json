@@ -1,6 +1,6 @@
 {
   "name": "@ms/rush",
-  "version": "0.3.14",
+  "version": "0.4.0",
   "description": "Manage building/installing of multiple NPM package folders",
   "repository": {
     "type": "git",
@@ -15,21 +15,21 @@
   },
   "license": "UNLICENSED",
   "dependencies": {
-    "@ms/interleaver": "^0.0.1",
-    "argparse": "^1.0.7",
-    "builtins": "^1.0.3",
-    "colors": "^1.1.2",
-    "glob": "^7.0.3",
-    "glob-escape": "0.0.1",
-    "read-package-tree": "^5.1.2",
-    "rimraf": "^2.5.2",
-    "semver": "^5.1.0",
-    "strip-json-comments": "^2.0.0",
-    "wordwrap": "^1.0.0",
-    "z-schema": "^3.16.1"
+    "@ms/interleaver": "~0.0.1",
+    "argparse": "~1.0.7",
+    "builtins": "~1.0.3",
+    "colors": "~1.1.2",
+    "glob": "~7.0.5",
+    "glob-escape": "~0.0.1",
+    "read-package-tree": "~5.1.5",
+    "rimraf": "~2.5.2",
+    "semver": "~5.2.0",
+    "strip-json-comments": "~2.0.1",
+    "wordwrap": "~1.0.0",
+    "z-schema": "~3.17.0"
   },
   "devDependencies": {
-    "jake": "^8.0.12",
+    "jake": "~8.0.12",
     "tslint": "3.9.0",
     "tslint-microsoft-contrib": "2.0.6",
     "typescript": "1.8.9"
