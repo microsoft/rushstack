@@ -71,7 +71,10 @@ abstract class CommandLineParser extends CommandLineParameterProvider {
       // 0=node.exe, 1=script name
       args = process.argv.slice(2);
     }
-
+    if (args.length === 0) {
+      this.argumentParser.printHelp();
+      return;
+    }
     const data: ICommandLineParserData = this.argumentParser.parseArgs();
 
     this.processParsedData(data);
