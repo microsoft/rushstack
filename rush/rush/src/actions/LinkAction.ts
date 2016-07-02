@@ -186,7 +186,6 @@ function createSymlinksForTopLevelProject(localPackage: Package): void {
   // to start clean
   console.log('Purging ' + localModuleFolder);
   Utilities.dangerouslyDeletePath(localModuleFolder);
-  console.log('Done');
 
   if (localPackage.children.length > 0) {
     Utilities.createFolderWithRetry(localModuleFolder);

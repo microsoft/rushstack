@@ -184,7 +184,15 @@ export default class InstallAction extends CommandLineAction {
     if (needToInstall) {
       if (!skipPrune) {
         console.log('Running "npm prune" in ' + this._rushConfig.commonFolder);
-        Utilities.executeCommand(npmToolFilename, [ 'prune' ], this._rushConfig.commonFolder);
+        Utilities.executeCommand(npmToolFilename, ['prune'], this._rushConfig.commonFolder);
+
+        // Delete the temp projects because NPM will not notice when they are changed.
+        // We can recognize them because their names start with "rush-"
+        console.log('Deleting common/node_modules/rush-*');
+        // Example: "C:\MyRepo\common\node_modules\rush-example-project"
+        for (const tempModulePath of glob.sync(globEscape(commonNodeModulesFolder.replace('\\', '/')) + '/rush-*')) {
+          Utilities.dangerouslyDeletePath(tempModulePath);
+        }
       }
 
       // Next, run "npm install" in the common folder
