@@ -152,6 +152,38 @@ export default class Utilities {
   }
 
   /**
+   * Attempts to run Utilities.executeCommand() up to maxAttempts times before giving up.
+   */
+  public static executeCommandWithRetry(command: string, args: string[], maxAttempts: number,
+    workingDirectory: string, suppressOutput: boolean = false): void {
+
+    if (maxAttempts < 1) {
+      throw new Error('The maxAttempts parameter cannot be less than 1');
+    }
+
+    let attemptNumber: number = 1;
+    while (true) {
+      try {
+        Utilities.executeCommand(command, args, workingDirectory, suppressOutput);
+      } catch (error) {
+        console.log(os.EOL + 'The command failed:');
+        console.log(` ${command} ` + args.join(' '));
+        console.log(`ERROR: ${error.toString()}`);
+
+        if (attemptNumber < maxAttempts) {
+          ++attemptNumber;
+          console.log(`Trying again (attempt #${attemptNumber})...` + os.EOL);
+          continue;
+        } else {
+          console.error(`Giving up after ${attemptNumber} attempts` + os.EOL);
+          throw error;
+        }
+      }
+      break;
+    }
+  }
+
+  /**
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
    */
@@ -170,4 +202,5 @@ export default class Utilities {
       shell: true
     });
   }
+
 }

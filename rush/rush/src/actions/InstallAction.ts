@@ -16,6 +16,8 @@ import RushConfig from '../data/RushConfig';
 import Utilities from '../utilities/Utilities';
 import { CommandLineFlagParameter } from '../commandLine/CommandLineParameter';
 
+const MAX_INSTALL_ATTEMPTS: number = 2;
+
 export default class InstallAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
   private _rushConfig: RushConfig;
@@ -59,7 +61,7 @@ export default class InstallAction extends CommandLineAction {
       console.log(os.EOL + 'Running "npm install" in ' + npmToolFolder);
 
       // NOTE: Here we use whatever version of NPM we happen to find in the PATH
-      Utilities.executeCommand('npm', ['install'], npmToolFolder);
+      Utilities.executeCommandWithRetry('npm', ['install'], MAX_INSTALL_ATTEMPTS, npmToolFolder);
 
       // Create the marker file to indicate a successful install
       fs.writeFileSync(npmToolFlagFile, '');
@@ -184,7 +186,8 @@ export default class InstallAction extends CommandLineAction {
     if (needToInstall) {
       if (!skipPrune) {
         console.log('Running "npm prune" in ' + this._rushConfig.commonFolder);
-        Utilities.executeCommand(npmToolFilename, ['prune'], this._rushConfig.commonFolder);
+        Utilities.executeCommandWithRetry(npmToolFilename, ['prune'], MAX_INSTALL_ATTEMPTS,
+          this._rushConfig.commonFolder);
 
         // Delete the temp projects because NPM will not notice when they are changed.
         // We can recognize them because their names start with "rush-"
@@ -197,7 +200,8 @@ export default class InstallAction extends CommandLineAction {
 
       // Next, run "npm install" in the common folder
       console.log(os.EOL + 'Running "npm install" in ' + this._rushConfig.commonFolder);
-      Utilities.executeCommand(npmToolFilename, [ 'install' ], this._rushConfig.commonFolder);
+      Utilities.executeCommandWithRetry(npmToolFilename, ['install'], MAX_INSTALL_ATTEMPTS,
+        this._rushConfig.commonFolder);
 
       // Create the marker file to indicate a successful install
       fs.writeFileSync(commonNodeModulesFlagFilename, '');
