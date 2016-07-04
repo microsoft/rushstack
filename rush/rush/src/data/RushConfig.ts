@@ -5,6 +5,9 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
+import * as semver from 'semver';
+
+import rushVersion from '../rushVersion';
 import Validator = require('z-schema');
 import JsonFile from '../utilities/JsonFile';
 import RushConfigProject, { IRushConfigProjectJson } from './RushConfigProject';
@@ -12,11 +15,13 @@ import Utilities from '../utilities/Utilities';
 
 /**
  * This represents the JSON data structure for the "rush.json" config file.
+ * See rush-schema.json for documentation.
  */
 export interface IRushConfigJson {
   $schema: string;
   commonFolder: string;
   npmVersion: string;
+  rushMinimumVersion: string;
   projectFolderMinDepth?: number;
   projectFolderMaxDepth?: number;
   projects: IRushConfigProjectJson[];
@@ -141,6 +146,12 @@ export default class RushConfig {
   }
 
   constructor(rushConfigJson: IRushConfigJson, rushJsonFilename: string) {
+    if (semver.lt(rushVersion, rushConfigJson.rushMinimumVersion)) {
+      throw new Error(`Your rush tool is version ${rushVersion}, but rush.json`
+        + ` requires version ${rushConfigJson.rushMinimumVersion} or newer.  To upgrade,`
+        + ` run "npm install @ms/rush -g".`);
+    }
+
     this._rushJsonFolder = path.dirname(rushJsonFilename);
     this._commonFolder = path.resolve(path.join(this._rushJsonFolder, rushConfigJson.commonFolder));
     if (!fs.existsSync(this._commonFolder)) {

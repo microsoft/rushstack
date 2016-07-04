@@ -35,6 +35,7 @@
     "src/utilities/JsonFile.ts",
     "src/utilities/Utilities.ts",
     "src/gulp2vs.ts",
-    "src/rush.ts"
+    "src/rush.ts",
+    "src/rushVersion.ts"
   ]
 }
