@@ -145,6 +145,10 @@ export default class Utilities {
     if (result.error) {
       throw result.error;
     }
+
+    if (result.status) {
+      throw new Error('The command failed with exit code ' + result.status);
+    }
   }
 
   /**
