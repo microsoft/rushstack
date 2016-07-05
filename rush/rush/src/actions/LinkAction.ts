@@ -98,9 +98,15 @@ function createSymlink(linkTarget: string, linkSource: string, symlinkKind: Syml
     // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
     fs.symlinkSync(linkTarget, linkSource, 'junction');
   } else {
-    // For files, we use a Windows "hard link", because creating a symbolic link requires
-    // administrator permission.  On Unix, this also produces a hard link.
-    fs.linkSync(linkTarget, linkSource);
+    if (process.platform === 'win32') {
+      // For files, we use a Windows "hard link", because creating a symbolic link requires
+      // administrator permission.
+      fs.linkSync(linkTarget, linkSource);
+    } else {
+      // However hard links seem to cause build failures on Mac, so for all other operating systems
+      // we use symbolic links for this case.
+      fs.symlinkSync(linkTarget, linkSource, 'file');
+    }
   }
 }
 
