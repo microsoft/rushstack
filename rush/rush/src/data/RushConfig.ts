@@ -194,6 +194,10 @@ export default class RushConfig {
       const tempProjectName: string = tempNamesByProject.get(projectJson);
       const project: RushConfigProject = new RushConfigProject(projectJson, this, tempProjectName);
       this._projects.push(project);
+      if (this._projectsByName.get(project.packageName)) {
+        throw new Error(`The project name "${project.packageName}" was specified more than once`
+          + ` in the rush.json config file.`);
+      }
       this._projectsByName.set(project.packageName, project);
     }
   }
