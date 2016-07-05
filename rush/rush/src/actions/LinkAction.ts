@@ -88,15 +88,19 @@ interface IQueueItem {
   localPackage: Package;
 }
 
-function createSymlink(linkTarget: string, linkSource: string, linkType: string): void {
-  try {
-    fs.symlinkSync(linkTarget, linkSource, linkType);
-  } catch (error) {
-    // If you try to create a regular file symlink, it appears to require Administrator
-    // permissions.  Whereas if you create a junction, that seems to NOT require any
-    // special permissions.
-    throw new Error(error.message + os.EOL
-      + '(You may need to do "Run As Administrator" when starting your command prompt.)');
+enum SymlinkKind {
+  File,
+  Directory
+}
+
+function createSymlink(linkTarget: string, linkSource: string, symlinkKind: SymlinkKind): void {
+  if (symlinkKind === SymlinkKind.Directory) {
+    // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
+    fs.symlinkSync(linkTarget, linkSource, 'junction');
+  } else {
+    // For files, we use a Windows "hard link", because creating a symbolic link requires
+    // administrator permission.  On Unix, this also produces a hard link.
+    fs.linkSync(linkTarget, linkSource);
   }
 }
 
@@ -124,7 +128,7 @@ function createSymlinksForDependencies(localPackage: Package): void {
 
   if (localPackage.children.length === 0) {
     // If there are no children, then we can symlink the entire folder
-    createSymlink(localPackage.symlinkTargetFolderPath, localPackage.folderPath, 'junction');
+    createSymlink(localPackage.symlinkTargetFolderPath, localPackage.folderPath, SymlinkKind.Directory);
   } else {
     // If there are children, then we need to symlink each item in the folder individually
     Utilities.createFolderWithRetry(localPackage.folderPath);
@@ -132,7 +136,7 @@ function createSymlinksForDependencies(localPackage: Package): void {
     for (const filename of fs.readdirSync(localPackage.symlinkTargetFolderPath)) {
       if (filename.toLowerCase() !== 'node_modules') {
         // Create the symlink
-        let linkType: string = 'file';
+        let symlinkKind: SymlinkKind = SymlinkKind.File;
 
         const linkSource: string = path.join(localPackage.folderPath, filename);
         let linkTarget: string = path.join(localPackage.symlinkTargetFolderPath, filename);
@@ -149,13 +153,13 @@ function createSymlinksForDependencies(localPackage: Package): void {
             // (even though it has the ability to create them both), so the safest policy
             // is to always make a junction and always to the real physical path.
             linkTarget = fs.realpathSync(linkTarget);
-            linkType = 'junction';
+            symlinkKind = SymlinkKind.Directory;
           }
         } else if (linkStats.isDirectory()) {
-          linkType = 'junction';
+          symlinkKind = SymlinkKind.Directory;
         }
 
-        createSymlink(linkTarget, linkSource, linkType);
+        createSymlink(linkTarget, linkSource, symlinkKind);
       }
     }
   }
@@ -357,7 +361,7 @@ function linkProject(
     const projectBinFolder: string = path.join(localProjectPackage.folderPath, 'node_modules', '.bin');
 
     if (fs.existsSync(commonBinFolder)) {
-      createSymlink(commonBinFolder, projectBinFolder, 'junction');
+      createSymlink(commonBinFolder, projectBinFolder, SymlinkKind.Directory);
     }
   }
 }
