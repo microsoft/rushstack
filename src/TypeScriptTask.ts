@@ -91,7 +91,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       .pipe(ts(tsProject, undefined, this.taskConfig.reporter));
 
     allStreams.push(tsResult.js
-      .pipe(sourcemaps.write('.'))
+      .pipe(sourcemaps.write('.', { sourceRoot: '/src' }))
       .pipe(gulp.dest(libFolder)));
 
     allStreams.push(tsResult.dts.pipe(gulp.dest(libFolder)));
@@ -115,12 +115,12 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
             errorCount++;
           }
         }))
-        .pipe(sourcemaps.write())
+        .pipe(sourcemaps.write({ sourceRoot: '/src' }))
         .pipe(ts(tsAMDProject, undefined, this.taskConfig.reporter));
 
       allStreams.push(
         tsResult.js
-          .pipe(sourcemaps.write('.'))
+          .pipe(sourcemaps.write('.', { sourceRoot: '/src' }))
           .pipe(gulp.dest(libAMDFolder)));
 
       allStreams.push(tsResult.dts.pipe(gulp.dest(libAMDFolder)));
