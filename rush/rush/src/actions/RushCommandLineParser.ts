@@ -14,6 +14,7 @@ import LinkAction from './LinkAction';
 import RebuildAction from './RebuildAction';
 import GenerateAction from './GenerateAction';
 import CheckAction from './CheckAction';
+import UnlinkAction from './UnlinkAction';
 import Utilities from '../utilities/Utilities';
 
 export default class RushCommandLineParser extends CommandLineParser {
@@ -35,6 +36,7 @@ export default class RushCommandLineParser extends CommandLineParser {
     this.addAction(new GenerateAction(this));
     this.addAction(new InstallAction(this));
     this.addAction(new LinkAction(this));
+    this.addAction(new UnlinkAction(this));
     this.addAction(new RebuildAction(this));
     this.addAction(new CheckAction(this));
   }

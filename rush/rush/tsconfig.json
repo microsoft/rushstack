@@ -15,6 +15,7 @@
     "src/actions/LinkAction.ts",
     "src/actions/RushCommandLineParser.ts",
     "src/actions/RebuildAction.ts",
+    "src/actions/UnlinkAction.ts",
     "src/commandLine/CommandLineAction.ts",
     "src/commandLine/CommandLineParameter.ts",
     "src/commandLine/CommandLineParameterProvider.ts",
