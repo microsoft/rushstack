@@ -63,6 +63,18 @@ export default class RushConfig {
   public static loadFromConfigFile(rushJsonFilename: string): RushConfig {
     const rushConfigJson: IRushConfigJson = JsonFile.loadJsonFile(rushJsonFilename);
 
+    // Check the Rush version *before* we validate the schema, since if the version is outdated
+    // then the schema may have changed.
+    const rushMinimumVersion: string = rushConfigJson.rushMinimumVersion;
+    // If the version is missing or malformed, fall through and let the schema handle it.
+    if (rushMinimumVersion && semver.valid(rushMinimumVersion)) {
+      if (semver.lt(rushVersion, rushMinimumVersion)) {
+        throw new Error(`Your rush tool is version ${rushVersion}, but rush.json`
+          + ` requires version ${rushConfigJson.rushMinimumVersion} or newer.  To upgrade,`
+          + ` run "npm install @ms/rush -g".`);
+      }
+    }
+
     // Remove the $schema reference that appears in the config object (used for IntelliSense),
     // since we are replacing it with the precompiled version.  The validator.setRemoteReference()
     // API is a better way to handle this, but we'd first need to publish the schema file
@@ -146,13 +158,11 @@ export default class RushConfig {
     return tempNamesByProject;
   }
 
+  /**
+   * DO NOT CALL -- Use RushConfig.loadFromConfigFile() or Use RushConfig.loadFromDefaultLocation()
+   * instead.
+   */
   constructor(rushConfigJson: IRushConfigJson, rushJsonFilename: string) {
-    if (semver.lt(rushVersion, rushConfigJson.rushMinimumVersion)) {
-      throw new Error(`Your rush tool is version ${rushVersion}, but rush.json`
-        + ` requires version ${rushConfigJson.rushMinimumVersion} or newer.  To upgrade,`
-        + ` run "npm install @ms/rush -g".`);
-    }
-
     if (rushConfigJson.nodeSupportedVersionRange) {
       if (!semver.validRange(rushConfigJson.nodeSupportedVersionRange)) {
         throw new Error('Error parsing the node-semver expression in the "nodeSupportedVersionRange"'
