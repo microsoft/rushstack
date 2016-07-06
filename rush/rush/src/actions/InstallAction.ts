@@ -174,7 +174,8 @@ export default class InstallAction extends CommandLineAction {
       packageJsonFilenames.push(commonNodeModulesFolder);
 
       // Example: "C:\MyRepo\common\temp_modules\rush-example-project\package.json"
-      const globPattern: string = globEscape(this._rushConfig.tempModulesFolder.replace('\\', '/'))
+      const normalizedPath: string = Utilities.getAllReplaced(this._rushConfig.tempModulesFolder, '\\', '/');
+      const globPattern: string = globEscape(normalizedPath)
         + '/rush-*/package.json';
       packageJsonFilenames.push(...glob.sync(globPattern, { nodir: true }));
 
@@ -193,7 +194,8 @@ export default class InstallAction extends CommandLineAction {
         // We can recognize them because their names start with "rush-"
         console.log('Deleting common/node_modules/rush-*');
         // Example: "C:\MyRepo\common\node_modules\rush-example-project"
-        for (const tempModulePath of glob.sync(globEscape(commonNodeModulesFolder.replace('\\', '/')) + '/rush-*')) {
+        const normalizedPath: string = Utilities.getAllReplaced(commonNodeModulesFolder, '\\', '/');
+        for (const tempModulePath of glob.sync(globEscape(normalizedPath) + '/rush-*')) {
           Utilities.dangerouslyDeletePath(tempModulePath);
         }
       }

@@ -1,6 +1,7 @@
 ﻿import stripJsonComments = require('strip-json-comments');
 import * as fs from 'fs';
 import * as os from 'os';
+import Utilities from './Utilities';
 
 /**
  * Utilities for reading/writing JSON files.
@@ -24,7 +25,8 @@ export default class JsonFile {
 
   public static saveJsonFile(jsonData: any, jsonFilename: string): void {
     const stringified: string = JSON.stringify(jsonData, undefined, 2) + '\n';
-    fs.writeFileSync(jsonFilename, stringified.replace('\n', '\r\n'));
+    const normalized: string = Utilities.getAllReplaced(stringified, '\n', '\r\n');
+    fs.writeFileSync(jsonFilename, normalized);
   }
   /* tslint:enable:no-any */
 }

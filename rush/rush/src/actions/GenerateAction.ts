@@ -60,7 +60,8 @@ export default class GenerateAction extends CommandLineAction {
       // the temp projects (that were copied from common/temp_modules into common/node_modules).
       // We can recognize them because their names start with "rush-"
       console.log('Deleting common/node_modules/rush-*');
-      for (const tempModulePath of glob.sync(globEscape(nodeModulesPath.replace('\\', '/')) + '/rush-*')) {
+      const normalizedPath: string = Utilities.getAllReplaced(nodeModulesPath, '\\', '/');
+      for (const tempModulePath of glob.sync(globEscape(normalizedPath) + '/rush-*')) {
         Utilities.dangerouslyDeletePath(tempModulePath);
       }
     } else {
