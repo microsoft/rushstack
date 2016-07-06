@@ -22,6 +22,7 @@ export interface IRushConfigJson {
   commonFolder: string;
   npmVersion: string;
   rushMinimumVersion: string;
+  nodeSupportedVersionRange: string;
   projectFolderMinDepth?: number;
   projectFolderMaxDepth?: number;
   projects: IRushConfigProjectJson[];
@@ -150,6 +151,18 @@ export default class RushConfig {
       throw new Error(`Your rush tool is version ${rushVersion}, but rush.json`
         + ` requires version ${rushConfigJson.rushMinimumVersion} or newer.  To upgrade,`
         + ` run "npm install @ms/rush -g".`);
+    }
+
+    if (rushConfigJson.nodeSupportedVersionRange) {
+      if (!semver.validRange(rushConfigJson.nodeSupportedVersionRange)) {
+        throw new Error('Error parsing the node-semver expression in the "nodeSupportedVersionRange"'
+          + ` field from rush.json: "${rushConfigJson.nodeSupportedVersionRange}"`);
+      }
+      if (!semver.satisfies(process.version, rushConfigJson.nodeSupportedVersionRange)) {
+        throw new Error(`Your dev environment is running Node.js version ${process.version} which does`
+          + ` not meet the requirements for building this repository.  (The rush.json configuration`
+          + ` requires nodeSupportedVersionRange="${rushConfigJson.nodeSupportedVersionRange}")`);
+      }
     }
 
     this._rushJsonFolder = path.dirname(rushJsonFilename);
