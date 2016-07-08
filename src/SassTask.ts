@@ -164,11 +164,11 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
             ];
           } else if (!!content) {
             lines = [
+              this.taskConfig.preamble || '',
               'import { loadStyles } from \'load-themed-styles\';',
               '',
               exportClassNames,
               '',
-              this.taskConfig.preamble || '',
               `loadStyles(${JSON.stringify(splitStyles(content))});`,
               this.taskConfig.postamble || '',
               ''
