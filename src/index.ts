@@ -2,6 +2,11 @@
  * An IThemingInstruction can specify a rawString to be preserved or a theme slot and a default value
  * to use if that slot is not specified by the theme.
  */
+
+// Declaring a global here in case that the execution environment is Node.js (without importing the
+// entire node.js d.ts for now)
+declare var global: any;
+
 export interface IThemingInstruction {
   theme?: string;
   defaultValue?: string;
@@ -14,6 +19,7 @@ interface IThemeState {
   theme: { [key: string]: string };
   lastStyleElement: HTMLStyleElement;
   registeredStyles: IStyleRecord[];
+  loadStyles: (styles: string) => void;
 }
 
 interface IStyleRecord {
@@ -27,7 +33,7 @@ let _injectStylesWithCssText: boolean;
 
 // Store the theming state in __themeState__ global scope for reuse in the case of duplicate
 // load-themed-styles hosted on the page.
-const _root: any = (typeof window === 'undefined') ? {} : window;
+const _root: any = (typeof window === 'undefined') ? global : window;
 
 const _themeState: IThemeState = _root.__themeState__ = _root.__themeState__ || {
   theme: null,
@@ -61,15 +67,28 @@ export function loadStyles(styles: string | ThemableArray) {
 }
 
 /**
+ * Allows for customizable loadStyles logic. e.g. for server side rendering application
+ * @param {(styles: string) => void} a loadStyles callback that gets called when styles are loaded or reloaded
+ */
+export function configureLoadStyles(callback: (styles: string) => void) {
+  _themeState.loadStyles = callback;
+}
+
+/**
  * Loads a set of style text. If it is registered too early, we will register it when the window.load event
  * is fired.
  * @param {string} styleText Style to register.
  * @param {IStyleRecord} styleRecord Existing style record to re-apply.
  */
-function applyThemableStyles(styles: ThemableArray, styleRecord?: IStyleRecord) {
-  _injectStylesWithCssText ?
-    registerStylesIE(styles, styleRecord) :
-    registerStyles(styles, styleRecord);
+function applyThemableStyles(stylesArray: ThemableArray, styleRecord?: IStyleRecord) {
+  if (_themeState.loadStyles) {
+    let styles = resolveThemableArray(stylesArray);
+    _themeState.loadStyles(styles);
+  } else {
+    _injectStylesWithCssText ?
+      registerStylesIE(stylesArray, styleRecord) :
+      registerStyles(stylesArray, styleRecord);
+  }
 }
 
 /**
