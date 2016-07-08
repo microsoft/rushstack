@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { detokenize, loadTheme, splitStyles } from './index';
+import { detokenize, loadTheme, splitStyles, loadStyles, configureLoadStyles } from './index';
 
 describe('detokenize', () => {
   it('handles colors', () => {
@@ -56,5 +56,21 @@ describe('detokenize', () => {
               expect(typeof arr[i].theme).to.equal('string');
           }
       }
+  });
+
+  it('passes the styles to loadStyles override callback', () => {
+    let expected = 'xxx.foo { color: #FFF }xxx';
+    let subject: string;
+
+    let callback = (str: string) => {
+      subject = 'xxx' + str + 'xxx';
+    };
+
+    configureLoadStyles(callback);
+
+    loadStyles('.foo { color: "[theme:fooColor, default: #FFF]" }');
+    expect(subject).to.equal(expected);
+
+    configureLoadStyles(null);
   });
 });
