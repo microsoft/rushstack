@@ -72,7 +72,7 @@ export class SetWebpackPublicPathLoader {
     if (options.scriptPath) {
       lines = [
         `var scripts = document.getElementsByTagName('script');`,
-        `var regex = new RegExp('${SetWebpackPublicPathLoader.escapeSingleQuotes(options.scriptPath)}');`,
+        `var regex = new RegExp('${SetWebpackPublicPathLoader.escapeSingleQuotes(options.scriptPath)}', 'i');`,
         'var found = false;',
         '',
         'if (scripts && scripts.length) {',
