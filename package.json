@@ -12,6 +12,7 @@
     "gulp-core-build-serve": "~0.2.2",
     "gulp-core-build-typescript": "~0.4.1",
     "gulp-core-build-webpack": "~0.2.1",
+    "gulp-replace": "^0.5.4",
     "node-notifier": "^4.5.0"
   },
   "devDependencies": {

@@ -4,6 +4,7 @@ import { sass } from 'gulp-core-build-sass';
 import { karma } from 'gulp-core-build-karma';
 import { webpack } from 'gulp-core-build-webpack';
 import { serve, reload } from 'gulp-core-build-serve';
+import { PostProcessSourceMaps } from './PostProcessSourceMaps';
 
 export * from 'gulp-core-build';
 export * from 'gulp-core-build-typescript';
@@ -26,6 +27,7 @@ const sourceMatch = [
 // Define default task groups.
 let buildTasks = task('build', serial(preCopy, sass, parallel(tslint, typescript, text), postCopy));
 let bundleTasks = task('bundle', serial(buildTasks, webpack));
+const postProcess = new PostProcessSourceMaps();
 
 task('test', serial(sass, parallel(typescript, text), karma));
 
@@ -36,7 +38,10 @@ task('serve',
   serial(
     bundleTasks,
     serve,
-    watch(sourceMatch, serial(preCopy, sass, parallel(typescript, text), postCopy, webpack, reload)
+    postProcess,
+    watch(
+      sourceMatch, serial(preCopy, sass, parallel(typescript, text),
+      postCopy, webpack, postProcess, reload)
     )
   )
 );
