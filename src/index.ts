@@ -27,7 +27,7 @@ const sourceMatch = [
 // Define default task groups.
 let buildTasks = task('build', serial(preCopy, sass, parallel(tslint, typescript, text), postCopy));
 let bundleTasks = task('bundle', serial(buildTasks, webpack));
-const postProcess = new PostProcessSourceMaps();
+const postProcessSourceMaps = new PostProcessSourceMaps();
 
 task('test', serial(sass, parallel(typescript, text), karma));
 
@@ -38,10 +38,10 @@ task('serve',
   serial(
     bundleTasks,
     serve,
-    postProcess,
+    postProcessSourceMaps,
     watch(
       sourceMatch, serial(preCopy, sass, parallel(typescript, text),
-      postCopy, webpack, postProcess, reload)
+      postCopy, webpack, postProcessSourceMaps, reload)
     )
   )
 );
