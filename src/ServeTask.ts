@@ -91,6 +91,10 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
     if (openBrowser) {
       let uri: string = initialPage;
       if (initialPage.match(/^https?:\/\//)) {
+        if (initialPage.match(/^\//)) {
+          initialPage = `/${initialPage}`;
+        }
+
         uri = `http://localhost:${port}${initialPage}`;
       }
 
