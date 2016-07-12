@@ -1,20 +1,16 @@
-import {
-  GulpTask
-} from 'gulp-core-build';
+import { GulpTask } from 'gulp-core-build';
 import gulp = require('gulp');
 
 export class ReloadTask extends GulpTask<{}> {
-  public name = 'reload';
+  public name: string = 'reload';
 
-  public executeTask(
-    gulp: gulp.Gulp,
-    completeCallback?: (result?: any) => void
-  ): Promise<any> | NodeJS.ReadWriteStream | void {
-
-    let gulpConnect = require('gulp-connect');
+  public executeTask(gulp: gulp.Gulp, completeCallback?: (error?: string) => void): void {
+    /* tslint:disable:typedef */
+    const gulpConnect = require('gulp-connect');
+    /* tslint:enable:typedef */
 
     gulp.src('')
-      .pipe(gulpConnect.reload());
+        .pipe(gulpConnect.reload());
 
     completeCallback();
   }
