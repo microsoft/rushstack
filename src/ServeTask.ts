@@ -89,7 +89,10 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
 
     // Spin up the browser.
     if (openBrowser) {
-      let uri = 'http://localhost:' + port + initialPage;
+      let uri: string = initialPage;
+      if (initialPage.match(/^https?:\/\//)) {
+        uri = `http://localhost:${port}${initialPage}`;
+      }
 
       gulp.src('')
         .pipe(open({
