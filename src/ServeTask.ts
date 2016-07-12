@@ -90,8 +90,8 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
     // Spin up the browser.
     if (openBrowser) {
       let uri: string = initialPage;
-      if (initialPage.match(/^https?:\/\//)) {
-        if (initialPage.match(/^\//)) {
+      if (!initialPage.match(/^https?:\/\//)) {
+        if (!initialPage.match(/^\//)) {
           initialPage = `/${initialPage}`;
         }
 
