@@ -9,7 +9,7 @@
       "commit": "9f0f926a12026287b5a4a229e5672c01e7549313"
     },
     "node/node.d.ts": {
-      "commit": "513510a89acc648422c9abb047265116198f99ee"
+      "commit": "5ccabc86eca6cfcda2b7ec83cca31dbd07c8a31b"
     },
     "chalk/chalk.d.ts": {
       "commit": "513510a89acc648422c9abb047265116198f99ee"
@@ -22,6 +22,24 @@
     },
     "q/Q.d.ts": {
       "commit": "513510a89acc648422c9abb047265116198f99ee"
+    },
+    "express/express.d.ts": {
+      "commit": "5ccabc86eca6cfcda2b7ec83cca31dbd07c8a31b"
+    },
+    "serve-static/serve-static.d.ts": {
+      "commit": "5ccabc86eca6cfcda2b7ec83cca31dbd07c8a31b"
+    },
+    "log4js/log4js.d.ts": {
+      "commit": "5ccabc86eca6cfcda2b7ec83cca31dbd07c8a31b"
+    },
+    "mime/mime.d.ts": {
+      "commit": "5ccabc86eca6cfcda2b7ec83cca31dbd07c8a31b"
+    },
+    "karma/karma.d.ts": {
+      "commit": "5ccabc86eca6cfcda2b7ec83cca31dbd07c8a31b"
+    },
+    "express-serve-static-core/express-serve-static-core.d.ts": {
+      "commit": "5ccabc86eca6cfcda2b7ec83cca31dbd07c8a31b"
     }
   }
 }

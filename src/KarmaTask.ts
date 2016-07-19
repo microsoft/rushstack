@@ -1,19 +1,22 @@
 import {
 GulpTask
 } from 'gulp-core-build';
-import gulp = require('gulp');
+
+import * as gulp from 'gulp';
+import * as karma from 'karma';
+import * as path from 'path';
 
 export interface IKarmaTaskConfig {
   karmaConfigPath: string;
 }
 
 export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
-  public name = 'karma';
+  public name: string = 'karma';
   public taskConfig: IKarmaTaskConfig = {
     karmaConfigPath: './karma.config.js'
   };
 
-  public resources = {
+  public resources: Object = {
     bindPolyfillPath: require.resolve('phantomjs-polyfill/bind-polyfill.js'),
     istanbulInstrumenterLoaderPath: require.resolve('istanbul-instrumenter-loader'),
     plugins: [
@@ -26,19 +29,17 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
     ]
   };
 
-  public executeTask(gulp: gulp.Gulp, completeCallback: (result?: any) => void): void {
-    let { karmaConfigPath } = this.taskConfig;
+  public executeTask(gulp: gulp.Gulp, completeCallback: (error?: Error | string) => void): void {
+    const { karmaConfigPath }: IKarmaTaskConfig = this.taskConfig;
 
     if (!this.fileExists(karmaConfigPath)) {
-      let shouldInitKarma = (process.argv.indexOf('--initkarma') > -1);
+      const shouldInitKarma: boolean = (process.argv.indexOf('--initkarma') > -1);
 
       if (!shouldInitKarma) {
         this.logWarning(
           `The karma config location '${ karmaConfigPath }' doesn't exist. ` +
           `Run again using --initkarma to create a default config.`);
       } else {
-        let path = require('path');
-
         this.copyFile(path.resolve(__dirname, '../karma.config.js'));
         this.copyFile(path.resolve(__dirname, '../tests.js'), 'src/tests.js');
 
@@ -50,10 +51,10 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
 
       completeCallback();
     } else {
-      let server = require('karma').Server;
-      let singleRun = (process.argv.indexOf('--debug') === -1);
-      let matchIndex = (process.argv.indexOf('--match'));
-      let matchString = (matchIndex === -1) ? '' : process.argv[matchIndex + 1];
+      const server: karma.Server = karma.Server;
+      const singleRun: boolean = (process.argv.indexOf('--debug') === -1);
+      const matchIndex: number = (process.argv.indexOf('--match'));
+      const matchString: string = (matchIndex === -1) ? '' : process.argv[matchIndex + 1];
 
       new server({
         client: {
