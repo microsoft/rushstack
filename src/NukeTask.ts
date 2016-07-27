@@ -29,6 +29,8 @@ export class NukeTask extends GulpTask<INukeConfig> {
     // Give each registered task an opportunity to add their own nuke paths.
     for (let executable of this.buildConfig.uniqueTasks) {
       if (executable.getNukeMatch) {
+        // Set the build config, as tasks need this to build up paths
+        (executable as GulpTask<Object>).buildConfig = this.buildConfig;
         nukePaths = nukePaths.concat(executable.getNukeMatch());
       }
     }
