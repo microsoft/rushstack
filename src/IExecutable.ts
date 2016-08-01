@@ -11,5 +11,5 @@ export interface IExecutable {
   isEnabled?: () => boolean;
 
   /** Optional method to indicate directory matches to clean up when the nuke task is run. */
-  getNukeMatch?: () => string[];
+  getNukeMatch?: (config: IBuildConfig) => string[];
 }
