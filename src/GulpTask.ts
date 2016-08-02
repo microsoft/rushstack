@@ -54,7 +54,7 @@ public log(message: string): void {
     fileError(this.name, filePath, line, column, errorCode, message);
   }
 
-  public getNukeMatch(): string[] {
+  public getNukeMatch(buildConfig: IBuildConfig, taskConfig: TASK_CONFIG = this.taskConfig): string[] {
     return this.nukeMatch;
   }
 
