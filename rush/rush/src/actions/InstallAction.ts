@@ -16,7 +16,7 @@ import RushConfig from '../data/RushConfig';
 import Utilities from '../utilities/Utilities';
 import { CommandLineFlagParameter } from '../commandLine/CommandLineParameter';
 
-const MAX_INSTALL_ATTEMPTS: number = 2;
+const MAX_INSTALL_ATTEMPTS: number = 5;
 
 export default class InstallAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
