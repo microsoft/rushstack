@@ -1,6 +1,6 @@
 # raw-script loader for webpack
 
-## installation
+## Installation
 
 `npm @microsoft/loader-raw-script --save-dev`
 
