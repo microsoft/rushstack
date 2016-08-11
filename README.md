@@ -17,7 +17,7 @@ It is designed to be a replacement for style-loader.
 This loader is designed to be used in conjunction with css-loader.
 
 ``` javascript
-var css = require("load-themed-styles!css!./file.css");
+var css = require("@microsoft/loader-load-themed-styles!css!./file.css");
 // => returns css code from file.css, uses load-themed-styles to load the CSS on the page.
 ```
 
@@ -27,7 +27,7 @@ var css = require("load-themed-styles!css!./file.css");
 module.exports = {
   module: {
     loaders: [
-      { test: /\.css$/, loader: "loader-load-themed-styles!css-loader" }
+      { test: /\.css$/, loader: "@microsoft/loader-load-themed-styles!css-loader" }
     ]
   }
 };
