@@ -1,6 +1,6 @@
 # load-themed-styles loader for webpack
 
-## installation
+## Installation
 
 `npm install @microsoft/loader-load-themed-styles --save-dev`
 
