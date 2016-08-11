@@ -1,8 +1,8 @@
 # set-webpack-public-path loader for webpack
 
-## installation
+## Installation
 
-`npm set-webpack-public-path-loader --save-dev`
+`npm @microsoft/loader-set-webpack-public-path --save-dev`
 
 ## Overview
 
@@ -15,7 +15,7 @@ property.
 [Documentation: Using loaders](http://webpack.github.io/docs/using-loaders.html)
 
 ``` javascript
-require("set-webpack-public-path!");
+require("@microsoft/loader-set-webpack-public-path!");
 ```
 
 ## Options
@@ -51,7 +51,7 @@ so you can require the package in your `webpack.config.js` and call `setOptions(
 to set any of the above options. For example:
 
 ``` javascript
-var setWebpackPublicPath = require('set-webpack-public-path-loader');
+var setWebpackPublicPath = require('@microsoft/loader-set-webpack-public-path');
 
 setWebpackPublicPath.setOptions({
   systemJs: true,
@@ -79,7 +79,7 @@ is set to `true`, the code is not minified. By default, it is minified.
 ### Usage
 
 ``` javascript
-var setWebpackPublicPath = require('set-webpack-public-path-loader');
+var setWebpackPublicPath = require('@microsoft/loader-set-webpack-public-path');
 var gulpInsert = require('gulp-insert');
 
 gulp.src('finizlied/webpack/bundle/path')

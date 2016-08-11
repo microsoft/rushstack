@@ -1,11 +1,11 @@
 {
-  "name": "set-webpack-public-path-loader",
+  "name": "@microsoft/loader-set-webpack-public-path",
   "version": "0.1.7",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
-  "repository": "github:iclanton/set-webpack-public-path-loader",
+  "repository": "github:microsoft/loader-set-webpack-public-path",
   "dependencies": {
     "loader-utils": "^0.2.15",
     "lodash": "^4.13.1",
@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
-    "mocha": "^2.5.3",
-    "node-library-build": "^0.1.2"
+    "mocha": "^3.0.2",
+    "node-library-build": "^0.2.0"
   }
 }

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+ * See LICENSE in the project root for license information.
+ */
+
 import { merge } from 'lodash';
 import { EOL } from 'os';
 import * as uglify from 'uglify-js';

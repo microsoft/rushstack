@@ -1,5 +1,10 @@
-// var context = require.context('.', true, /.+\.test\.js?$/);
+/*
+ * Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+ * See LICENSE in the project root for license information.
+ */
 
-// context.keys().forEach(context);
+var context = require.context('.', true, /.+\.test\.js?$/);
 
-// module.exports = context;
+context.keys().forEach(context);
+
+module.exports = context;
