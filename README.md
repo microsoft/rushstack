@@ -1,8 +1,8 @@
-# load-themed-styles loader for webpack
+load-themed-styles loader for webpack
 
 ## installation
 
-`npm install load-themed-styles-loader --save-dev`
+`npm install @microsoft/loader-load-themed-styles --save-dev`
 
 ## Overview
 
@@ -23,13 +23,11 @@ var css = require("load-themed-styles!css!./file.css");
 
 ### Example config
 
-This webpack config can load css files, embed small png images as Data Urls and jpg images as files.
-
 ``` javascript
 module.exports = {
   module: {
     loaders: [
-      { test: /\.css$/, loader: "load-themed-styles-loader!css-loader" }
+      { test: /\.css$/, loader: "loader-load-themed-styles!css-loader" }
     ]
   }
 };
