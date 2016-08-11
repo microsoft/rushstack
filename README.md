@@ -1,4 +1,4 @@
-load-themed-styles loader for webpack
+# load-themed-styles loader for webpack
 
 ## installation
 
