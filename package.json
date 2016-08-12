@@ -13,6 +13,7 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
+    "gulp": "^3.9.1",
     "mocha": "^3.0.2",
     "node-library-build": "^0.2.0"
   }
