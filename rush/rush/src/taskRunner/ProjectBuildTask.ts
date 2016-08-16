@@ -29,16 +29,19 @@ export default class ProjectBuildTask implements ITaskDefinition {
   private _rushProject: RushConfigProject;
   private _rushConfig: RushConfig;
   private _production: boolean;
+  private _npmMode: boolean;
 
   constructor(rushProject: RushConfigProject,
               rushConfig: RushConfig,
               errorDetector: ErrorDetector,
               errorDisplayMode: ErrorDetectionMode,
-              production: boolean) {
+              production: boolean,
+              npmMode: boolean) {
     this.name = rushProject.packageName;
     this._errorDetector = errorDetector;
     this._errorDisplayMode = errorDisplayMode;
     this._production = production;
+    this._npmMode = npmMode;
     this._rushProject = rushProject;
     this._rushConfig = rushConfig;
   }
@@ -62,6 +65,9 @@ export default class ProjectBuildTask implements ITaskDefinition {
         ];
         if (this._production) {
           args.push('--production');
+        }
+        if (this._npmMode) {
+          args.push('--npm');
         }
         writer.writeLine('npm ' + args.join(' '));
 

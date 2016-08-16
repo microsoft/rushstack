@@ -22,6 +22,7 @@ export default class RebuildAction extends CommandLineAction {
   private _quietParameter: CommandLineFlagParameter;
   private _productionParameter: CommandLineFlagParameter;
   private _vsoParameter: CommandLineFlagParameter;
+  private _npmParamter: CommandLineFlagParameter;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -49,6 +50,10 @@ export default class RebuildAction extends CommandLineAction {
       parameterLongName: '--vso',
       description: 'Display error messages in the format expected by Visual Studio Online'
     });
+    this._npmParamter = this.defineFlagParameter({
+      parameterLongName: '--npm',
+      description: 'Perform a npm-mode build. Designed for building code for distribution on NPM'
+    });
   }
 
   protected onExecute(): void {
@@ -71,7 +76,11 @@ export default class RebuildAction extends CommandLineAction {
       ];
       const errorDetector: ErrorDetector = new ErrorDetector(activeRules);
       const projectTask: ProjectBuildTask = new ProjectBuildTask(rushProject,
-        this._rushConfig, errorDetector, errorMode, this._productionParameter.value);
+                                                                 this._rushConfig,
+                                                                 errorDetector,
+                                                                 errorMode,
+                                                                 this._productionParameter.value,
+                                                                 this._npmParamter.value);
       taskRunner.addTask(projectTask);
     }
 
