@@ -1,6 +1,7 @@
-# load-themed-styles [![npm version](https://badge.fury.io/js/load-themed-styles.svg)](https://badge.fury.io/js/load-themed-styles)
+# load-themed-styles
+[![npm version](https://badge.fury.io/js/load-themed-styles.svg)](https://badge.fury.io/js/load-themed-styles)
 
-[![Build Status](https://travis-ci.org/dzearing/load-themed-styles.svg?branch=master)](https://travis-ci.org/dzearing/load-themed-styles) [![Dependencies](https://david-dm.org/dzearing/load-themed-styles.svg)](https://david-dm.org/dzearing/load-themed-styles)
+[![Build Status](https://travis-ci.org/Microsoft/load-themed-styles.svg?branch=master)](https://travis-ci.org/Microsoft/load-themed-styles) [![Dependencies](https://david-dm.org/Microsoft/load-themed-styles.svg)](https://david-dm.org/Microsoft/load-themed-styles)
 
 > Loads a string of style rules, but supports detokenizing theme constants built within it.
 
@@ -50,4 +51,8 @@ This will register #EAEAEA as the body's background color. If you call loadTheme
 
 ## License
 
-MIT © [David Zearing](http://github.com/dzearing)
+MIT © [Microsoft](http://github.com/Microsoft)
+=======
+# load-themed-styles
+load-themed-styles
+>>>>>>> 5ee343bacb8787c36b229f379fcf3afdb7642d96
