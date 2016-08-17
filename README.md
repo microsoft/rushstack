@@ -1,6 +1,6 @@
 # gulp-core-build [![npm version](https://badge.fury.io/js/gulp-core-build.svg)](https://badge.fury.io/js/gulp-core-build)
 
-[![Build Status](https://travis-ci.org/dzearing/gulp-core-build.svg?branch=master)](https://travis-ci.org/dzearing/gulp-core-build) [![Dependencies](https://david-dm.org/dzearing/gulp-core-build.svg)](https://david-dm.org/dzearing/gulp-core-build) 
+[![Build Status](https://travis-ci.org/Microsoft/gulp-core-build.svg?branch=master)](https://travis-ci.org/Microsoft/gulp-core-build) [![Dependencies](https://david-dm.org/Microsoft/gulp-core-build.svg)](https://david-dm.org/Microsoft/gulp-core-build)
 
 The gulp build system, along with its rich plugin ecosystem, is a very powerful tool for web development projects.
 However project gulp build setups become difficult to manage over time, as gulpfiles grow in complexity. This project
@@ -128,7 +128,3 @@ build.initializeTasks(
 # License
 
 MIT
-
-
-
-
