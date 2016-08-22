@@ -1,4 +1,4 @@
-@microsoft/loader-load-themed-styles
+@microsoft/loader-set-webpack-public-path
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 
