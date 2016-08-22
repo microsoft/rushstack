@@ -1,10 +1,10 @@
 {
-  "name": "gulp-core-build",
+  "name": "@microsoft/gulp-core-build",
   "version": "0.7.1",
   "description": "Core gulp build tasks for building typescript, html, less, etc.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dzearing/gulp-core-build"
+    "url": "https://github.com/microsoft/gulp-core-build"
   },
   "scripts": {},
   "main": "lib/index.js",
@@ -27,6 +27,6 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
-    "node-library-build": "~0.1.0"
+    "node-library-build": "~0.2.0"
   }
 }
