@@ -44,6 +44,12 @@ export interface ITSLintTaskConfig {
    * overriden. Defaults to `false`.
    */
   displayAsWarning?: boolean;
+
+  /**
+   * If true, the lintConfig rules which were previously set will be removed. This flag is useful
+   * for ensuring that there are no rules activated by default.
+   */
+  removeExistingRules?: boolean;
 }
 
 export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
@@ -88,6 +94,18 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
   /* tslint:disable:no-any */
   private _lintRules: any = undefined;
   /* tslint:enable:no-any */
+
+  public setConfig(config: ITSLintTaskConfig): void {
+    // If the removeExistingRules flag is set, clear out any existing rules
+    if (config.removeExistingRules &&
+        this.taskConfig &&
+        this.taskConfig.lintConfig) {
+      delete this.taskConfig.lintConfig.rules;
+      delete config.removeExistingRules;
+    }
+
+    super.setConfig(config);
+  }
 
   public executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream {
     const taskScope: TSLintTask = this;
