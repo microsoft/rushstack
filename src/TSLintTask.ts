@@ -40,8 +40,8 @@ export interface ITSLintTaskConfig {
   reporter?: (result: lintTypes.LintResult, file: gutil.File, options: ITSLintTaskConfig) => void;
 
   /**
-   * If true, displays warnings as errors. This flag has no effect if the reporter function is
-   * overriden. Defaults to `false`.
+   * If true, displays warnings as errors. If the reporter function is overwritten, it should reference
+   * this flag. Defaults to `false`.
    */
   displayAsWarning?: boolean;
 
