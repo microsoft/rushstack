@@ -7,9 +7,9 @@ script: gulp
 deploy:
   skip_cleanup: true
   provider: npm
-  email: dzearing@hotmail.com
+  email: odspnpm@microsoft.com
   api_key:
     secure: k52bIwDW/2IzrthVanhzX4us3T0/A05o3DJzx8F5V3GKwG9a72BPicw2CaGYg2KtSp3w4IONGb3XzBX0AjU1ZCHUwDddwoOSqLuX3gSnY0ykGi4UIfWbrwzCRZTINSJrZUud8j/AsscKbtRZFpuLkn+1q01W1r4jqRG/H5xXkXzD79VjM1anuqzmhDRlCWKpg7j+a4gxxZ1kKvocy2HvwVfp+k46qes6KsgYRx79ZFIUD+ZZ4E8B9z9F63d+Mxg0BjcSri4FtkNkPWeFeFhC2J0bkdH1lXyqlEQXaNLHlZZt6UtTDS51l8DVqPCOkX9NlwtdWTpPam5KDt/snJ0+Vj2ZJwDrEjir4dwFZPtb8C62TKB8Ze2xkptFNcjLMULL6I7om3aRU2wps80H1sdNBapyPO8H1xriV8TPGiPMj47FTMlrGj5BGBUfr+5ob/oG7N+BZbMo0SBinYtSVdNQ+W+P7fvHsWoZs1sMti/zHgN+Hndcgin/PewjU09Ez8h8ndTe9CfJwI07PHUO2XC6RAS6zdLGNGeQ5HMerwyBcjggnfJjqZ+O5kpAH87NbtcFa0gtIjbOPy3x/f6+qZbYkJHVsO3hGsrKljW0qOXpObBa3KqxUtGfk4ko0GfzjnrIeyyr1539JMwZmoMJ/jHfMgsCZP0h3JjP2Kax0Ayli+s=
   on:
     tags: true
-    repo: dzearing/node-library-build
+    repo: microsoft/node-library-build
