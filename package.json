@@ -1,15 +1,15 @@
 {
-  "name": "gulp-core-build-typescript",
+  "name": "@microsoft/gulp-core-build-typescript",
   "version": "0.4.3",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "dependencies": {
+    "@microsoft/gulp-core-build": "~0.7.0",
     "gulp": "~3.9.1",
     "gulp-cache": "0.4.5",
     "gulp-changed": "1.3.0",
-    "gulp-core-build": "~0.7.0",
     "gulp-plumber": "1.1.0",
     "gulp-sourcemaps": "1.6.0",
     "gulp-texttojs": "~1.0.3",
@@ -25,6 +25,6 @@
     "typescript": "1.8.9"
   },
   "devDependencies": {
-    "node-library-build": "~0.1.0"
+    "node-library-build": "~0.2.0"
   }
 }
