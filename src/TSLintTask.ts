@@ -38,6 +38,12 @@ export interface ITSLintTaskConfig {
    * this.fileError() function.
     */
   reporter?: (result: lintTypes.LintResult, file: gutil.File, options: ITSLintTaskConfig) => void;
+
+  /**
+   * If true, displays warnings as errors. This flag has no effect if the reporter function is
+   * overriden. Defaults to `false`.
+   */
+  displayAsWarning?: boolean;
 }
 
 export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
@@ -50,12 +56,21 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
         const pathFromRoot: string = path.relative(this.buildConfig.rootPath, file.path);
 
         const start: ts.LineAndCharacter = failure.getStartPosition().getLineAndCharacter();
-        this.fileError(
-          pathFromRoot,
-          start.line + 1,
-          start.character + 1,
-          failure.getRuleName(),
-          failure.getFailure());
+        if (this.taskConfig.displayAsWarning) {
+          this.fileWarning(
+            pathFromRoot,
+            start.line + 1,
+            start.character + 1,
+            failure.getRuleName(),
+            failure.getFailure());
+        } else {
+          this.fileError(
+            pathFromRoot,
+            start.line + 1,
+            start.character + 1,
+            failure.getRuleName(),
+            failure.getFailure());
+        }
       }
     },
     rulesDirectory: ((): string[] => {
