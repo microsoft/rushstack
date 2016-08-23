@@ -19,11 +19,6 @@ export interface ITSLintTaskConfig {
   lintConfig?: any; /* tslint:disable-line */
 
   /**
-   * Temporary flag, do not use
-   */
-  useOldConfig?: boolean;
-
-  /**
    * Directories to search for custom linter rules
    */
   rulesDirectory?: string | string[];
@@ -94,7 +89,6 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
       'src/**/*.ts',
       'src/**/*.tsx'
     ],
-    useOldConfig: false,
     removeExistingRules: false,
     useDefaultConfigAsBase: true
   };
@@ -181,11 +175,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
     if (!this._lintRules) {
       const defaultConfig: any =
         /* tslint:enable:no-any */
-        this.taskConfig.useDefaultConfigAsBase
-          ? (this.taskConfig.useOldConfig
-            ? require('./defaultTslint_oldRules.json')
-            : require('./defaultTslint.json'))
-          : {};
+        this.taskConfig.useDefaultConfigAsBase ? require('./defaultTslint.json') : {};
       this._lintRules = merge(defaultConfig, this.taskConfig.lintConfig || {});
     }
     return this._lintRules;
