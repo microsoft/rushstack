@@ -57,7 +57,7 @@ const localCache: ILocalCache = globalInstance.__loggingCache = globalInstance._
   testsRun: 0,
   subTasksRun: 0,
   testsPassed: 0,
-testsFailed: 0,
+  testsFailed: 0,
   testsFlakyFailed: 0,
   testsSkipped: 0,
   taskRun: 0,
@@ -459,7 +459,7 @@ export function error(...args: Array<string | Chalk.ChalkChain>): void {
   }
 }
 
-export function fileError(taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void {
+export function fileLog(write: (text: string) => void, taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void {
   'use strict';
 
   if (!filePath) {
@@ -468,7 +468,15 @@ export function fileError(taskName: string, filePath: string, line: number, colu
     filePath = path.relative(process.cwd(), filePath);
   }
 
-  error(`${gutil.colors.cyan(taskName)} - ${filePath}(${line},${column}): error ${errorCode}: ${message}`);
+  write(`${gutil.colors.cyan(taskName)} - ${filePath}(${line},${column}): error ${errorCode}: ${message}`);
+}
+
+export function fileWarning(taskName: string, filePath: string, line: number, column: number, errorCode: string,  message: string): void {
+  fileLog(warn, taskName, filePath, line, column, errorCode, message);
+}
+
+export function fileError(taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void {
+  fileLog(error, taskName, filePath, line, column, errorCode, message);
 }
 
 export function verbose(...args: Array<string | Chalk.ChalkChain>): void {
