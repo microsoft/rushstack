@@ -94,7 +94,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
   };
 
   /* tslint:disable:no-any */
-  private _lintRules: any = undefined;
+  private _defaultLintRules: any = undefined;
   /* tslint:enable:no-any */
 
   public setConfig(config: ITSLintTaskConfig): void {
@@ -111,6 +111,8 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
 
   public executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream {
     const taskScope: TSLintTask = this;
+
+    const activeLintRules = taskScope._loadLintRules();
 
     return gulp.src(this.taskConfig.sourceMatch)
       .pipe(cached(
@@ -132,7 +134,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
           }
 
           const options: lintTypes.ILinterOptions = {
-            configuration: taskScope._loadLintRules(),
+            configuration: activeLintRules,
             formatter: 'json',
             formattersDirectory: undefined, // not used, use reporters instead
             rulesDirectory: taskScope.taskConfig.rulesDirectory || []
@@ -152,7 +154,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
         }), {
           // Scope the cache to a combination of the lint rules and the build path
           name: md5(
-            tslint.VERSION + JSON.stringify(taskScope._loadLintRules()) +
+            tslint.VERSION + JSON.stringify(activeLintRules) +
             taskScope.name + taskScope.buildConfig.rootPath),
           // What on the result indicates it was successful
           success: (jshintedFile: gutil.File): boolean => {
@@ -172,12 +174,11 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
   }
   /* tslint:disable:no-any */
   private _loadLintRules(): any {
-    if (!this._lintRules) {
-      const defaultConfig: any =
-        /* tslint:enable:no-any */
-        this.taskConfig.useDefaultConfigAsBase ? require('./defaultTslint.json') : {};
-      this._lintRules = merge(defaultConfig, this.taskConfig.lintConfig || {});
+    if (!this._defaultLintRules) {
+      this._defaultLintRules = require('./defaultTslint.json');
     }
-    return this._lintRules;
+    return merge(
+      (this.taskConfig.useDefaultConfigAsBase ? this._defaultLintRules : {}),
+      this.taskConfig.lintConfig || {});
   }
 }
