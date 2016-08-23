@@ -13,12 +13,30 @@ import * as lintTypes from 'tslint/lib/lint';
 import * as ts from 'typescript';
 
 export interface ITSLintTaskConfig {
-  /* tslint:disable:no-any */
-  lintConfig?: any;
-  /* tslint:enable:no-any */
-  useOldConfig?: boolean; // TEMPORARY FLAG
+  /**
+   * A TsLint configuration objects
+   */
+  lintConfig?: any; /* tslint:disable-line */
+
+  /**
+   * Temporary flag, do not use
+   */
+  useOldConfig?: boolean;
+
+  /**
+   * Directories to search for custom linter rules
+   */
   rulesDirectory?: string | string[];
+
+  /**
+   * An array of files which the linter should analyze
+   */
   sourceMatch?: string[];
+
+  /**
+   * A function which reports errors to the proper location. Defaults to using the base GulpTask's
+   * this.fileError() function.
+    */
   reporter?: (result: lintTypes.LintResult, file: gutil.File, options: ITSLintTaskConfig) => void;
 }
 
