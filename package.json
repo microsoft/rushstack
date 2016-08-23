@@ -1,5 +1,5 @@
 {
-  "name": "gulp-core-build-webpack",
+  "name": "@microsoft/gulp-core-build-webpack",
   "version": "0.2.3",
   "description": "",
   "main": "lib/index.js",
@@ -12,6 +12,6 @@
     "webpack": "1.13.0"
   },
   "devDependencies": {
-    "node-library-build": "~0.1.1"
+    "node-library-build": "~0.2.0"
   }
 }
