@@ -16,7 +16,7 @@ export interface ITSLintTaskConfig {
   /**
    * A TsLint configuration objects
    */
-  lintConfig?: any; /* tslint:disable-line */
+  lintConfig?: any; /* tslint:disable-line:no-any */
 
   /**
    * Directories to search for custom linter rules
