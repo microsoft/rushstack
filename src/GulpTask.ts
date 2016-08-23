@@ -2,7 +2,8 @@
 import { GulpProxy } from './GulpProxy';
 import { IExecutable } from './IExecutable';
 import { IBuildConfig } from './IBuildConfig';
-import { log, verbose, error, fileError, warn, logEndSubtask, logStartSubtask } from './logging';
+import { log, verbose, error, fileError, fileWarning,
+  warn, logEndSubtask, logStartSubtask } from './logging';
 import gutil = require('gulp-util');
 import gulp = require('gulp');
 import through2 = require('through2');
@@ -52,6 +53,10 @@ public log(message: string): void {
 
   public fileError(filePath: string, line: number, column: number, errorCode: string, message: string): void {
     fileError(this.name, filePath, line, column, errorCode, message);
+  }
+
+  public fileWarning(filePath: string, line: number, column: number, errorCode: string, message: string): void {
+    fileWarning(this.name, filePath, line, column, errorCode, message);
   }
 
   public getNukeMatch(buildConfig: IBuildConfig, taskConfig: TASK_CONFIG = this.taskConfig): string[] {
