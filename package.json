@@ -1,11 +1,12 @@
 {
-  "name": "gulp-core-build-sass",
+  "name": "@microsoft/gulp-core-build-sass",
   "version": "0.3.8",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "dependencies": {
+    "@microsoft/load-themed-styles": "~1.2.0",
     "autoprefixer": "6.3.7",
     "gulp": "~3.9.1",
     "gulp-changed": "1.3.0",
@@ -16,11 +17,10 @@
     "gulp-postcss": "6.1.1",
     "gulp-sass": "2.3.2",
     "gulp-texttojs": "~1.0.3",
-    "load-themed-styles": "~1.2.0",
     "merge2": "1.0.2",
     "postcss-modules": "0.5.0"
   },
   "devDependencies": {
-    "node-library-build": "~0.1.2"
+    "node-library-build": "~0.2.0"
   }
 }
