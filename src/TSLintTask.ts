@@ -47,9 +47,15 @@ export interface ITSLintTaskConfig {
 
   /**
    * If true, the lintConfig rules which were previously set will be removed. This flag is useful
-   * for ensuring that there are no rules activated by default.
+   * for ensuring that there are no rules activated from previous calls to setConfig(). Default is 'false'.
    */
   removeExistingRules?: boolean;
+
+  /**
+   * If false, does not use a default tslint configuration as the basis for creating the list of active rules.
+   * Defaults to 'true'
+   */
+  useDefaultConfigAsBase?: boolean;
 }
 
 export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
@@ -88,7 +94,9 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
       'src/**/*.ts',
       'src/**/*.tsx'
     ],
-    useOldConfig: false
+    useOldConfig: false,
+    removeExistingRules: false,
+    useDefaultConfigAsBase: true
   };
 
   /* tslint:disable:no-any */
@@ -171,10 +179,13 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
   /* tslint:disable:no-any */
   private _loadLintRules(): any {
     if (!this._lintRules) {
-      const defaultConfig: any = this.taskConfig.useOldConfig
-  /* tslint:enable:no-any */
-        ? require('./defaultTslint_oldRules.json')
-        : require('./defaultTslint.json');
+      const defaultConfig: any =
+        /* tslint:enable:no-any */
+        this.taskConfig.useDefaultConfigAsBase
+          ? (this.taskConfig.useOldConfig
+            ? require('./defaultTslint_oldRules.json')
+            : require('./defaultTslint.json'))
+          : {};
       this._lintRules = merge(defaultConfig, this.taskConfig.lintConfig || {});
     }
     return this._lintRules;
