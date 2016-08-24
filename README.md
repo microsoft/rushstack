@@ -52,7 +52,3 @@ This will register #EAEAEA as the body's background color. If you call loadTheme
 ## License
 
 MIT © [Microsoft](http://github.com/Microsoft)
-=======
-# load-themed-styles
-load-themed-styles
->>>>>>> 5ee343bacb8787c36b229f379fcf3afdb7642d96
