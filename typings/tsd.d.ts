@@ -4,3 +4,6 @@
 /// <reference path="orchestrator/orchestrator.d.ts" />
 /// <reference path="q/Q.d.ts" />
 /// <reference path="chalk/chalk.d.ts" />
+/// <reference path="gulp-istanbul/gulp-istanbul.d.ts" />
+/// <reference path="gulp-mocha/gulp-mocha.d.ts" />
+/// <reference path="mocha/mocha.d.ts" />
