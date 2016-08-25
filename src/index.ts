@@ -1,4 +1,4 @@
-import { serial, IExecutable } from 'gulp-core-build';
+import { serial, IExecutable } from '@microsoft/gulp-core-build';
 import { MochaTask } from './MochaTask';
 import { InstrumentTask } from './InstrumentTask';
 
