@@ -1,8 +1,8 @@
 'use strict';
 
-let build = require('gulp-core-build');
-let typescript = require('gulp-core-build-typescript');
-let mocha = require('gulp-core-build-mocha');
+let build = require('@microsoft/gulp-core-build');
+let typescript = require('@microsoft/gulp-core-build-typescript');
+let mocha = require('@microsoft/gulp-core-build-mocha');
 
 build.task('default', build.serial(typescript, mocha));
 
