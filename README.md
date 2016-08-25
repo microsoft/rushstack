@@ -1,4 +1,4 @@
-# gulp-core-build [![npm version](https://badge.fury.io/js/gulp-core-build.svg)](https://badge.fury.io/js/gulp-core-build)
+# gulp-core-build [![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build)
 
 [![Build Status](https://travis-ci.org/Microsoft/gulp-core-build.svg?branch=master)](https://travis-ci.org/Microsoft/gulp-core-build) [![Dependencies](https://david-dm.org/Microsoft/gulp-core-build.svg)](https://david-dm.org/Microsoft/gulp-core-build)
 
