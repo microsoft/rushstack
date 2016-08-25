@@ -1,4 +1,4 @@
-import { GulpTask } from 'gulp-core-build';
+import { GulpTask } from '@Microsoft/gulp-core-build';
 import gulpType = require('gulp');
 /* tslint:disable:typedef */
 const cached = require('gulp-cache');
@@ -112,7 +112,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
   public executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream {
     const taskScope: TSLintTask = this;
 
-    const activeLintRules = taskScope._loadLintRules();
+    const activeLintRules: any = taskScope._loadLintRules(); // tslint:disable-line:no-any
 
     return gulp.src(this.taskConfig.sourceMatch)
       .pipe(cached(
@@ -172,8 +172,8 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
         }
       ));
   }
-  /* tslint:disable:no-any */
-  private _loadLintRules(): any {
+
+  private _loadLintRules(): any { // tslint:disable-line:no-any
     if (!this._defaultLintRules) {
       this._defaultLintRules = require('./defaultTslint.json');
     }
