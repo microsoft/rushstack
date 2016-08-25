@@ -2,7 +2,7 @@ import { TypeScriptTask } from './TypeScriptTask';
 import { TSLintTask } from './TSLintTask';
 import { TextTask } from './TextTask';
 import { RemoveTripleSlashReferenceTask } from './RemoveTripleSlashReferenceTask';
-import { IExecutable, parallel, serial } from '@Microsoft/gulp-core-build';
+import { IExecutable, parallel, serial } from '@microsoft/gulp-core-build';
 
 export const typescript: TypeScriptTask = new TypeScriptTask();
 export const tslint: TSLintTask = new TSLintTask();

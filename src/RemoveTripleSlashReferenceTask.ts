@@ -7,7 +7,7 @@ import through2 = require('through2');
 const cached = require('gulp-cache');
 /* tslint:enable:typedef */
 
-import { GulpTask } from '@Microsoft/gulp-core-build';
+import { GulpTask } from '@microsoft/gulp-core-build';
 
 export interface IRemoveTripleSlashReferenceTaskConfig {
 }
