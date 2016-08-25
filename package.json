@@ -4,6 +4,7 @@
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
+  "license": "MIT",
   "dependencies": {
     "@microsoft/gulp-core-build": "~0.8.2",
     "@microsoft/gulp-core-build-mocha": "~0.2.3",
