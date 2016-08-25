@@ -1,4 +1,4 @@
-import { GulpTask } from 'gulp-core-build';
+import { GulpTask } from '@Microsoft/gulp-core-build';
 import gulpType = require('gulp');
 
 export interface ITextTaskConfig {
