@@ -27,12 +27,12 @@ describe('LoadThemedStylesLoader', () => {
   });
 
   it('it correctly resolves load-themed-styles', () => {
-    const expectedPath: string = require.resolve('load-themed-styles');
+    const expectedPath: string = require.resolve('@microsoft/load-themed-styles');
     assert.equal(LoadThemedStylesLoader.loadedThemedStylesPath, expectedPath);
   });
 
   it('it inserts the resolved load-themed-styles path', () => {
-    const expectedPath: string = require.resolve('load-themed-styles');
+    const expectedPath: string = require.resolve('@microsoft/load-themed-styles');
     const loaderResult: string = LoadThemedStylesLoader.pitch('');
     assert.isNotNull(loaderResult.indexOf(expectedPath));
   });
@@ -43,7 +43,7 @@ describe('LoadThemedStylesLoader', () => {
     assert.equal(LoadThemedStylesLoader.loadedThemedStylesPath, expectedPath);
 
     LoadThemedStylesLoader.resetLoadedThemedStylesPath();
-    expectedPath = require.resolve('load-themed-styles');
+    expectedPath = require.resolve('@microsoft/load-themed-styles');
     assert.equal(LoadThemedStylesLoader.loadedThemedStylesPath, expectedPath);
   });
 

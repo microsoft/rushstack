@@ -7,7 +7,7 @@
 const loaderUtils = require('loader-utils');
 /* tslint:enable:typedef */
 
-const loadedThemedStylesPath: string = require.resolve('load-themed-styles');
+const loadedThemedStylesPath: string = require.resolve('@microsoft/load-themed-styles');
 
 export class LoadThemedStylesLoader {
   private static _loadedThemedStylesPath: string = loadedThemedStylesPath;
