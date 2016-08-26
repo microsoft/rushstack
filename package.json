@@ -12,6 +12,6 @@
     "gulp-mocha": "2.2.0"
   },
   "devDependencies": {
-    "node-library-build": "~0.1.0"
+    "@microsoft/node-library-build": "~0.2.2"
   }
 }
