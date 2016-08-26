@@ -1,4 +1,4 @@
-import { task, serial, parallel, watch, CopyTask } from '@microsoft/gulp-core-build';
+import { task, serial, parallel, watch, CopyTask, IExecutable } from '@microsoft/gulp-core-build';
 import { typescript, tslint, text } from '@microsoft/gulp-core-build-typescript';
 import { sass } from '@microsoft/gulp-core-build-sass';
 import { karma } from '@microsoft/gulp-core-build-karma';
@@ -13,21 +13,21 @@ export * from '@microsoft/gulp-core-build-karma';
 export * from '@microsoft/gulp-core-build-webpack';
 export * from '@microsoft/gulp-core-build-serve';
 
-export const preCopy = new CopyTask();
+export const preCopy: CopyTask = new CopyTask();
 preCopy.name = 'pre-copy';
 
-export const postCopy = new CopyTask();
+export const postCopy: CopyTask = new CopyTask();
 postCopy.name = 'post-copy';
 
-const sourceMatch = [
+const sourceMatch: string[] = [
   'src/**/*.{ts,tsx,scss,js,txt,html}',
   '!src/**/*.scss.ts'
 ];
 
 // Define default task groups.
-let buildTasks = task('build', serial(preCopy, sass, parallel(tslint, typescript, text), postCopy));
-let bundleTasks = task('bundle', serial(buildTasks, webpack));
-const postProcessSourceMaps = new PostProcessSourceMaps();
+let buildTasks: IExecutable = task('build', serial(preCopy, sass, parallel(tslint, typescript, text), postCopy));
+let bundleTasks: IExecutable = task('bundle', serial(buildTasks, webpack));
+const postProcessSourceMaps: PostProcessSourceMaps = new PostProcessSourceMaps();
 
 task('test', serial(sass, parallel(typescript, text), karma));
 
