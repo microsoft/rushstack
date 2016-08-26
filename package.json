@@ -1,5 +1,5 @@
 {
-  "name": "gulp-core-build-karma",
+  "name": "@microsoft/gulp-core-build-karma",
   "version": "0.2.2",
   "description": "",
   "main": "lib/index.js",
@@ -8,7 +8,7 @@
   "dependencies": {
     "chai": "3.5.0",
     "gulp": "~3.9.1",
-    "gulp-core-build": "~0.6.0",
+    "@microsoft/gulp-core-build": "~0.8.2",
     "gulp-karma": "0.0.5",
     "istanbul-instrumenter-loader": "0.2.0",
     "karma": "0.13.9",
@@ -27,6 +27,6 @@
     "webpack": "^1.12.14"
   },
   "devDependencies": {
-    "node-library-build": "~0.1.0"
+    "@microsoft/node-library-build": "~0.2.2"
   }
 }
