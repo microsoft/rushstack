@@ -165,7 +165,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
           } else if (!!content) {
             lines = [
               this.taskConfig.preamble || '',
-              'import { loadStyles } from \'load-themed-styles\';',
+              'import { loadStyles } from \'@microsoft/load-themed-styles\';',
               '',
               exportClassNames,
               '',
