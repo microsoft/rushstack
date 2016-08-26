@@ -6,7 +6,7 @@
   "typings": "lib/index.d.ts",
   "dependencies": {
     "@microsoft/gulp-core-build": "~0.8.2",
-    "@microsoft/gulp-core-build-karma": "~0.2.3",
+    "@microsoft/gulp-core-build-karma": "~0.2.4",
     "@microsoft/gulp-core-build-sass": "0.3.10",
     "@microsoft/gulp-core-build-serve": "~0.2.4",
     "@microsoft/gulp-core-build-typescript": "~0.4.4",
