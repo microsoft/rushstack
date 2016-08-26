@@ -13,6 +13,7 @@ export interface IServeTaskConfig {
   };
   initialPage: string;
   port: number;
+  https: boolean;
 }
 
 interface IApiMap {
@@ -25,7 +26,8 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
   public taskConfig: IServeTaskConfig = {
     api: undefined,
     initialPage: '/index.html',
-    port: 4321
+    port: 4321,
+    https: false
   };
 
   public executeTask(gulp: gulp.Gulp, completeCallback?: (error?: string) => void): void {
@@ -49,7 +51,8 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
       livereload: true,
       middleware: (): Function[] => [logRequestsMiddleware, enableCorsMiddleware],
       port: port,
-      root: rootPath
+      root: rootPath,
+      https: this.taskConfig.https
     });
 
     // If an api is provided, spin it up.
