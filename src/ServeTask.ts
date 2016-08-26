@@ -1,5 +1,5 @@
-import { GulpTask } from 'gulp-core-build';
-import { IBuildConfig } from 'gulp-core-build/lib/IBuildConfig';
+import { GulpTask } from '@microsoft/gulp-core-build';
+import { IBuildConfig } from '@microsoft/gulp-core-build/lib/IBuildConfig';
 import gulp = require('gulp');
 import http = require('http');
 import * as pathType from 'path';
