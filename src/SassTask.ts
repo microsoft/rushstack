@@ -1,8 +1,8 @@
-import { GulpTask } from 'gulp-core-build';
+import { GulpTask } from '@microsoft/gulp-core-build';
 import gulp = require('gulp');
 import * as gulpUtil from 'gulp-util';
 import { EOL } from 'os';
-import { splitStyles } from 'load-themed-styles';
+import { splitStyles } from '@microsoft/load-themed-styles';
 /* tslint:disable:typedef */
 const merge = require('merge2');
 /* tslint:enable:typedef */
