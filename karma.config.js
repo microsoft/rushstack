@@ -4,7 +4,7 @@
 // Generated on Thu Oct 08 2015 18:13:05 GMT-0700 (PDT)
 
 let path = require('path');
-let configResources = require('gulp-core-build-karma').configResources;
+let configResources = require('@microsoft/gulp-core-build-karma').configResources;
 
 let bindPolyfillPath = configResources.bindPolyfillPath;
 let debugRun = (process.argv.indexOf('--debug') > -1);
