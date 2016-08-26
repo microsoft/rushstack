@@ -27,6 +27,6 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
-    "node-library-build": "~0.2.0"
+    "@microsoft/node-library-build": "~0.2.2"
   }
 }
