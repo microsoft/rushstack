@@ -13,6 +13,6 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "gulp": "^3.9.1",
-    "node-library-build": "~0.0.5"
+    "@microsoft/node-library-build": "~0.2.2"
   }
 }
