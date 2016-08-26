@@ -1,4 +1,4 @@
-import { GulpTask } from 'gulp-core-build';
+import { GulpTask } from '@microsoft/gulp-core-build';
 import gulpType = require('gulp');
 
 export class PostProcessSourceMaps extends GulpTask<{}> {

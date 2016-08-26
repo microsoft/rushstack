@@ -1,17 +1,17 @@
-import { task, serial, parallel, watch, CopyTask } from 'gulp-core-build';
-import { typescript, tslint, text } from 'gulp-core-build-typescript';
-import { sass } from 'gulp-core-build-sass';
-import { karma } from 'gulp-core-build-karma';
-import { webpack } from 'gulp-core-build-webpack';
-import { serve, reload } from 'gulp-core-build-serve';
+import { task, serial, parallel, watch, CopyTask } from '@microsoft/gulp-core-build';
+import { typescript, tslint, text } from '@microsoft/gulp-core-build-typescript';
+import { sass } from '@microsoft/gulp-core-build-sass';
+import { karma } from '@microsoft/gulp-core-build-karma';
+import { webpack } from '@microsoft/gulp-core-build-webpack';
+import { serve, reload } from '@microsoft/gulp-core-build-serve';
 import { PostProcessSourceMaps } from './PostProcessSourceMaps';
 
-export * from 'gulp-core-build';
-export * from 'gulp-core-build-typescript';
-export * from 'gulp-core-build-sass';
-export * from 'gulp-core-build-karma';
-export * from 'gulp-core-build-webpack';
-export * from 'gulp-core-build-serve';
+export * from '@microsoft/gulp-core-build';
+export * from '@microsoft/gulp-core-build-typescript';
+export * from '@microsoft/gulp-core-build-sass';
+export * from '@microsoft/gulp-core-build-karma';
+export * from '@microsoft/gulp-core-build-webpack';
+export * from '@microsoft/gulp-core-build-serve';
 
 export const preCopy = new CopyTask();
 preCopy.name = 'pre-copy';
@@ -38,10 +38,10 @@ task('serve',
   serial(
     bundleTasks,
     serve,
-    postProcessSourceMaps,
+    postProcessSourceMaps as any, // tslint:disable-line:no-any
     watch(
       sourceMatch, serial(preCopy, sass, parallel(typescript, text),
-      postCopy, webpack, postProcessSourceMaps, reload)
+      postCopy, webpack, postProcessSourceMaps as any, reload) // tslint:disable-line:no-any
     )
   )
 );
