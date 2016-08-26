@@ -25,6 +25,6 @@
     "typescript": "1.8.9"
   },
   "devDependencies": {
-    "node-library-build": "~0.2.0"
+    "@microsoft/node-library-build": "~0.2.2"
   }
 }
