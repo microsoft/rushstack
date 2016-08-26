@@ -1,6 +1,6 @@
 'use strict';
 
-var build = require('node-library-build');
+var build = require('@microsoft/node-library-build');
 
 build.typescript.setConfig({
   sourceMatch: [
