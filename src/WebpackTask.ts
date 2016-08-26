@@ -1,5 +1,5 @@
 import * as Webpack from 'webpack';
-import { GulpTask } from 'gulp-core-build';
+import { GulpTask } from '@microsoft/gulp-core-build';
 import gulp = require('gulp');
 import { EOL } from 'os';
 
