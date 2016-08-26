@@ -1,6 +1,6 @@
 'use strict';
 
-let build = require('node-library-build');
+let build = require('@microsoft/node-library-build');
 
 build.setConfig({
   libAMDFolder: 'lib-amd'
