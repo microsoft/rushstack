@@ -46,14 +46,14 @@ describe('detokenize', () => {
   });
 
   it('splits non-themable CSS', () => {
-      let cssString: string = '.sampleClass\n{\n color: #FF0000;\n}\n';
-      let arr: IThemingInstruction[] = splitStyles(cssString);
+      const cssString: string = '.sampleClass\n{\n color: #FF0000;\n}\n';
+      const arr: IThemingInstruction[] = splitStyles(cssString);
       expect(arr.length).to.equal(1);
       expect(arr[0].rawString).to.equal(cssString);
   });
 
   it('splits themable CSS', () => {
-      let arr: IThemingInstruction[] = splitStyles('.firstClass { color: "[theme: firstColor ]";}\n' +
+      const arr: IThemingInstruction[] = splitStyles('.firstClass { color: "[theme: firstColor ]";}\n' +
           ' .secondClass { color: "[theme:secondColor, default: #AAA]";}\n .coach { color: #333; }');
       expect(arr.length).to.equal(5);
       for (let i: number = 0; i < arr.length; i++) {
@@ -66,10 +66,10 @@ describe('detokenize', () => {
   });
 
   it('passes the styles to loadStyles override callback', () => {
-    let expected: string = 'xxx.foo { color: #FFF }xxx';
+    const expected: string = 'xxx.foo { color: #FFF }xxx';
     let subject: string;
 
-    let callback: (str: string) => void = (str: string) => {
+    const callback: (str: string) => void = (str: string) => {
       subject = 'xxx' + str + 'xxx';
     };
 
