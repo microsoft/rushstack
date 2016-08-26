@@ -7,12 +7,12 @@
   "license": "MIT",
   "repository": "github:microsoft/loader-load-themed-styles",
   "dependencies": {
-    "loader-utils": "^0.2.15",
-    "load-themed-styles": "^1.1.0"
+    "loader-utils": "~0.2.15",
+    "@microsoft/load-themed-styles": "~1.2.2"
   },
   "devDependencies": {
     "chai": "^3.5.0",
     "gulp": "^3.9.1",
-    "node-library-build": "^0.2.0"
+    "@microsoft/node-library-build": "~0.2.2"
   }
 }
