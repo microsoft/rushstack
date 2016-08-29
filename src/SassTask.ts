@@ -175,7 +175,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
             ];
           }
 
-          return lines.join(EOL).replace(new RegExp(`${EOL}{3,}`, 'g'), `${EOL}${EOL}`);
+          return lines.join(EOL).replace(new RegExp(`(${EOL}){3,}`, 'g'), `${EOL}${EOL}`);
         }
       }))
       .pipe(gulp.dest('src')));
