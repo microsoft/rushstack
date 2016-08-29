@@ -3261,11 +3261,6 @@
       "from": "load-json-file@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/load-json-file/-/load-json-file-1.1.0.tgz"
     },
-    "load-themed-styles": {
-      "version": "1.1.0",
-      "from": "load-themed-styles@>=1.1.0 <1.2.0",
-      "resolved": "https://registry.npmjs.org/load-themed-styles/-/load-themed-styles-1.1.0.tgz"
-    },
     "loader-utils": {
       "version": "0.2.15",
       "from": "loader-utils@>=0.2.11 <0.3.0",
