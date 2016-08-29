@@ -17,7 +17,6 @@
     "gulp-postcss": "~6.1.1",
     "gulp-sass": "~2.3.2",
     "gulp-texttojs": "~1.0.3",
-    "load-themed-styles": "~1.1.0",
     "merge2": "~1.0.2",
     "postcss-modules": "~0.5.0"
   },
