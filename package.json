@@ -7,9 +7,9 @@
   "license": "MIT",
   "dependencies": {
     "gulp": "~3.9.1",
-    "@microsoft/gulp-core-build": "~0.8.2",
-    "gulp-util": "3.0.7",
-    "webpack": "1.13.0"
+    "@microsoft/gulp-core-build": "~0.9.0",
+    "gulp-util": "~3.0.7",
+    "webpack": "~1.13.0"
   },
   "devDependencies": {
     "@microsoft/node-library-build": "~0.2.2"
