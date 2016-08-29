@@ -231,11 +231,13 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
             }
 
             if (!certExists) {
-              this.logError(`Cert file not found at path "${this.taskConfig.certPath}`)
+              this.logError(`Cert file not found at path "${this.taskConfig.certPath}`);
             }
           }
         } else {
-          this.logError(`When serving in HTTPS mode, a PFX cert path or a cert path and a key path must be provided.`);
+          this.logWarning('When serving in HTTPS mode, a PFX cert path or a cert path and a key path must be ' +
+                          'provided. If a SSL certificate isn\'t provided, a default, self-signed certificate will ' +
+                          'be used. Expect browser security warnings.');
         }
       }
     }
