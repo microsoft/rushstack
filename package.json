@@ -6,12 +6,12 @@
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "dependencies": {
-    "@microsoft/gulp-core-build": "~0.8.2",
-    "express": "4.14.0",
+    "@microsoft/gulp-core-build": "~0.9.0",
+    "express": "~4.14.0",
     "gulp": "~3.9.1",
-    "gulp-connect": "5.0.0",
-    "gulp-open": "2.0.0",
-    "gulp-util": "3.0.7"
+    "gulp-connect": "~5.0.0",
+    "gulp-open": "~2.0.0",
+    "gulp-util": "~3.0.7"
   },
   "devDependencies": {
     "@microsoft/node-library-build": "~0.2.2"
