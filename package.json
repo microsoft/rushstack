@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build",
-  "version": "0.8.2",
+  "version": "0.9.0",
   "description": "Core gulp build tasks for building typescript, html, less, etc.",
   "repository": {
     "type": "git",
@@ -11,22 +11,22 @@
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "dependencies": {
-    "del": "2.2.0",
-    "end-of-stream": "1.1.0",
-    "es6-promise": "3.1.2",
-    "fs-extra": "0.26.7",
+    "del": "~2.2.0",
+    "end-of-stream": "~1.1.0",
+    "es6-promise": "~3.1.2",
+    "fs-extra": "~0.26.7",
     "gulp": "~3.9.1",
-    "gulp-flatten": "0.2.0",
+    "gulp-flatten": "~0.2.0",
     "gulp-util": "~3.0.7",
     "lodash.merge": "~4.3.2",
-    "merge2": "~1.0.1",
-    "node-notifier": "4.5.0",
-    "pretty-hrtime": "1.0.2",
-    "through2": "2.0.1",
-    "yargs": "4.3.2"
+    "merge2": "~1.0.2",
+    "node-notifier": "~4.5.0",
+    "pretty-hrtime": "~1.0.2",
+    "through2": "~2.0.1",
+    "yargs": "~4.6.0"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
+    "chai": "~3.5.0",
     "@microsoft/node-library-build": "~0.2.2"
   }
 }
