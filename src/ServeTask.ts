@@ -7,13 +7,36 @@ import * as gUtilType from 'gulp-util';
 import * as expressType from 'express';
 
 export interface IServeTaskConfig {
+  /**
+   * API server configuration
+   */
   api?: {
+    /**
+     * The port on which to run the API server
+     */
     port: number,
+
+    /**
+     * The path to the script to run as the API server
+     */
     entryPath: string
   };
-  initialPage: string;
-  port: number;
-  https: boolean;
+
+  /**
+   * The path to the page which should open automatically after this task completes. If you prefer no page to be
+   * launched, run the build with the "--nobrowser" flag
+   */
+  initialPage?: string;
+
+  /**
+   * The port on which to host the file server.
+   */
+  port?: number;
+
+  /**
+   * If true, the server should run on HTTPS
+   */
+  https?: boolean;
 }
 
 interface IApiMap {
