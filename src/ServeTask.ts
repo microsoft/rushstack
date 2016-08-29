@@ -130,9 +130,9 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
 
         const apiPort: number = api.port || 5432;
         if (this.taskConfig.https) {
-          http.createServer(app).listen(apiPort);
-        } else {
           https.createServer(httpsServerOptions, app).listen(apiPort);
+        } else {
+          http.createServer(app).listen(apiPort);
         }
       }
     }
