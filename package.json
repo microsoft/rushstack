@@ -22,7 +22,7 @@
     "object-assign": "~4.0.1",
     "through2": "~2.0.1",
     "tslint": "~3.14.0",
-    "tslint-microsoft-contrib": "~2.0.6",
+    "tslint-microsoft-contrib": "~2.0.10",
     "typescript": "1.8.9"
   },
   "devDependencies": {
