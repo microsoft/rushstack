@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "dependencies": {
     "@microsoft/gulp-core-build": {
       "version": "0.8.2",
@@ -31,33 +31,6 @@
           "version": "4.3.2",
           "from": "yargs@4.3.2",
           "resolved": "https://registry.npmjs.org/yargs/-/yargs-4.3.2.tgz"
-        }
-      }
-    },
-    "@microsoft/gulp-core-build-mocha": {
-      "version": "0.2.3",
-      "from": "@microsoft/gulp-core-build-mocha@>=0.2.3 <0.3.0",
-      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-mocha/-/gulp-core-build-mocha-0.2.3.tgz"
-    },
-    "@microsoft/gulp-core-build-typescript": {
-      "version": "0.4.4",
-      "from": "@microsoft/gulp-core-build-typescript@>=0.4.4 <0.5.0",
-      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-typescript/-/gulp-core-build-typescript-0.4.4.tgz",
-      "dependencies": {
-        "lodash": {
-          "version": "4.11.2",
-          "from": "lodash@4.11.2",
-          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.11.2.tgz"
-        },
-        "merge2": {
-          "version": "1.0.1",
-          "from": "merge2@1.0.1",
-          "resolved": "https://registry.npmjs.org/merge2/-/merge2-1.0.1.tgz"
-        },
-        "object-assign": {
-          "version": "4.0.1",
-          "from": "object-assign@4.0.1",
-          "resolved": "https://registry.npmjs.org/object-assign/-/object-assign-4.0.1.tgz"
         }
       }
     },
