@@ -154,4 +154,3 @@ describe('GulpTask', () => {
   });
 
 });
-

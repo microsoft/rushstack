@@ -44,4 +44,3 @@ export class CopyTask extends GulpTask<ICopyConfig> {
     }
   }
 }
-
