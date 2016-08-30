@@ -195,9 +195,9 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
   }
 
   private _loadHttpsServerOptions(): https.ServerOptions {
-    const result: https.ServerOptions = {};
-
     if (this.taskConfig.https) {
+      const result: https.ServerOptions = {};
+
       // We're configuring an HTTPS server, so we need a certificate
       if (this.taskConfig.pfxPath) {
         // There's a PFX path in the config, so try that
@@ -240,8 +240,10 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
                           'be used. Expect browser security warnings.');
         }
       }
-    }
 
-    return result;
+      return result
+    } else {
+      return undefined;
+    }
   }
 }
