@@ -14,6 +14,6 @@
     "gulp-util": "~3.0.7"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "~0.2.2"
+    "@microsoft/node-library-build": "~0.3.0"
   }
 }
