@@ -1,13 +1,13 @@
 {
   "name": "@microsoft/node-library-build",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "dependencies": {
     "@microsoft/gulp-core-build": "~0.9.1",
-    "@microsoft/gulp-core-build-mocha": "~0.3.1",
+    "@microsoft/gulp-core-build-mocha": "~0.3.0",
     "@microsoft/gulp-core-build-typescript": "~0.5.1",
     "gulp": "~3.9.1"
   }
