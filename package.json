@@ -27,6 +27,6 @@
     "webpack": "~1.13.0"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "~0.3.2"
+    "@microsoft/node-library-build": "~0.3.1"
   }
 }
