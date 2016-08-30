@@ -4,7 +4,7 @@ import ts = require('gulp-typescript');
 
 interface ITypeScriptErrorObject {
   diagnostic: {
-    messageText:  string | { messageText: string };
+    messageText: string | { messageText: string };
     code: number;
   };
   fullFilename: string;
@@ -17,10 +17,33 @@ interface ITypeScriptErrorObject {
 }
 
 export interface ITypeScriptTaskConfig {
+  /**
+   * Fails the build when errors occur.
+   * @default true
+   */
   failBuildOnErrors: boolean;
+
+  /**
+   * Glob matches for files to be included in the build.
+   */
   sourceMatch?: string[];
+
+  /**
+   * Glob matches for files to be passed through the build.
+   */
   staticMatch?: string[];
+
+  /**
+   * Optional override for a custom reporter object to be passed into the TypeScript compiler.
+   */
   reporter?: ts.Reporter;
+
+  /**
+   * Optional override for the TypeScript compiler.
+   */
+  /* tslint:disable:no-any */
+  typescript?: any;
+  /* tslint:enable:no-any */
 }
 
 export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
@@ -30,15 +53,19 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     failBuildOnErrors: true,
     reporter: {
       error: (error: ITypeScriptErrorObject): void => {
+        const filename: string = error.relativeFilename || error.fullFilename;
+        const line: number = error.startPosition ? error.startPosition.line : 0;
+        const character: number = error.startPosition ? error.startPosition.character : 0;
+        const code: number = error.diagnostic.code;
         const errorMessage: string = (typeof error.diagnostic.messageText === 'object') ?
           (error.diagnostic.messageText as { messageText: string }).messageText :
           error.diagnostic.messageText as string;
 
         this.fileError(
-          error.relativeFilename || error.fullFilename,
-          error.startPosition.line,
-          error.startPosition.character,
-          `TS${error.diagnostic.code}`,
+          filename,
+          line,
+          character,
+          'TS' + code,
           errorMessage);
       }
     },
@@ -73,7 +100,8 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
 
     const tsCompilerOptions: ts.Params = assign({}, tsConfig.compilerOptions, {
       module: 'commonjs',
-      sortOutput: true
+      sortOutput: true,
+      typescript: this.taskConfig.typescript
     });
 
     const tsProject: ts.Project = this._tsProject = this._tsProject || ts.createProject(tsCompilerOptions);
