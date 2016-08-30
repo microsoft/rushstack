@@ -21,6 +21,6 @@
     "postcss-modules": "~0.5.0"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "~0.2.2"
+    "@microsoft/node-library-build": "~0.3.0"
   }
 }
