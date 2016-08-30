@@ -241,7 +241,7 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
         }
       }
 
-      return result
+      return result;
     } else {
       return undefined;
     }
