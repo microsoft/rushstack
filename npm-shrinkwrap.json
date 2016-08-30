@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-serve",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "dependencies": {
     "@microsoft/gulp-core-build": {
       "version": "0.9.0",
