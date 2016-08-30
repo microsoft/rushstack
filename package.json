@@ -7,11 +7,11 @@
   "license": "MIT",
   "dependencies": {
     "gulp": "~3.9.1",
-    "@microsoft/gulp-core-build": "~0.9.0",
+    "@microsoft/gulp-core-build": "~0.9.1",
     "gulp-util": "~3.0.7",
     "webpack": "~1.13.0"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "~0.3.0"
+    "@microsoft/node-library-build": "~0.3.1"
   }
 }
