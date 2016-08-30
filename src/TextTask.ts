@@ -2,6 +2,9 @@ import { GulpTask } from '@microsoft/gulp-core-build';
 import gulpType = require('gulp');
 
 export interface ITextTaskConfig {
+  /**
+   * Glob matches for files that should be converted into modules.
+   */
   textMatch?: string[];
 }
 
