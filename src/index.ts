@@ -6,4 +6,3 @@ export { IWebpackTaskConfig, WebpackTask } from './WebpackTask'
 export const webpack: WebpackTask = new WebpackTask();
 export default webpack;
 /* tslint:enable:export-name */
-
