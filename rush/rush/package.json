@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "jake": "~8.0.12",
-    "tslint": "3.9.0",
+    "tslint": "~3.15.1",
     "tslint-microsoft-contrib": "~2.0.10",
     "typescript": "1.8.9"
   }
