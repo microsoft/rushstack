@@ -10,5 +10,4 @@ lib/**/*.test.js
 lib/**/*.test.d.ts
 npm-shrinkwrap.json
 coverage
-.vscode
 typings
