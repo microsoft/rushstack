@@ -9,7 +9,9 @@
   // Configure glob patterns for excluding files and folders in searches. Inherits all glob patterns from the file.exclude setting.
   "files.exclude": {
     "**/.git": true,
-    "**/.DS_Store": true
+    "**/.DS_Store": true,
+    "**/node_modules": true,
+    "**/lib": true
   },
 	// Configure glob patterns for excluding files and folders in searches. Inherits all glob patterns from the file.exclude setting.
   "search.exclude": {
