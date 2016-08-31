@@ -7,7 +7,7 @@
   "license": "MIT",
   "dependencies": {
     "gulp": "~3.9.1",
-    "@microsoft/gulp-core-build": "~0.9.1",
+    "@microsoft/gulp-core-build": "~0.9.2",
     "gulp-istanbul": "~0.10.3",
     "gulp-mocha": "~2.2.0"
   },
