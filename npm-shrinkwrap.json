@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-karma",
-  "version": "0.3.0",
+  "version": "0.3.3",
   "dependencies": {
     "@microsoft/gulp-core-build": {
       "version": "0.9.0",
