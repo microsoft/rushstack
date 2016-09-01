@@ -124,12 +124,13 @@ export default class Utilities {
    * The current directory will be set to the specified workingDirectory.
    */
   public static executeCommand(command: string, args: string[], workingDirectory: string,
-    suppressOutput: boolean = false): void {
+    suppressOutput: boolean = false, environmentVariables?: { [key: string]: string }): void {
 
     const options: child_process.SpawnSyncOptions = {
       cwd: workingDirectory,
       shell: true,
-      stdio: suppressOutput ? undefined : [0, 1, 2]
+      stdio: suppressOutput ? undefined : [0, 1, 2],
+      env: environmentVariables
     };
 
     let result: child_process.SpawnSyncReturns<Buffer> = child_process.spawnSync(command, args, options);
@@ -187,9 +188,8 @@ export default class Utilities {
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
    */
-  public static executeCommandAsync(command: string, args: string[], workingDirectory: string):
-    child_process.ChildProcess {
-
+  public static executeCommandAsync(command: string, args: string[], workingDirectory: string,
+    environmentVariables?: { [key: string]: string }): child_process.ChildProcess {
     // This is a workaround for GitHub issue #25330.  It is not as complete as the workaround above,
     // but there doesn't seem to be an easy asynchronous solution.
     // https://github.com/nodejs/node-v0.x-archive/issues/25330
@@ -199,7 +199,8 @@ export default class Utilities {
 
     return child_process.spawn(command, args, {
       cwd: workingDirectory,
-      shell: true
+      shell: true,
+      env: environmentVariables
     });
   }
 

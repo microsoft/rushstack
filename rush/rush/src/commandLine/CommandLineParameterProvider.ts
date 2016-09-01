@@ -3,13 +3,22 @@
  */
 
 import * as argparse from 'argparse';
-import { ICommandLineFlagDefinition, CommandLineFlagParameter } from './CommandLineParameter';
+import {
+  IBaseCommandLineDefinition,
+  ICommandLineFlagDefinition,
+  ICommandLineStringDefinition
+} from './CommandLineDefinition';
+
+import {
+  CommandLineParameter,
+  IConverterFunction,
+  CommandLineFlagParameter,
+  CommandLineStringParameter
+} from './CommandLineParameter';
 
 export interface ICommandLineParserData {
   action: string;
-  /* tslint:disable:no-any */
-  [key: string]: any;
-  /* tslint:enable:no-any */
+  [key: string]: any; /* tslint:disable-line:no-any */
 }
 
 /**
@@ -20,7 +29,8 @@ abstract class CommandLineParameterProvider {
   private static _keyCounter: number = 0;
 
   protected argumentParser: argparse.ArgumentParser;
-  private _parameters: CommandLineFlagParameter[];
+  /* tslint:disable-next-line:no-any */
+  private _parameters: CommandLineParameter<any>[];
 
   constructor() {
     this._parameters = [];
@@ -36,35 +46,55 @@ abstract class CommandLineParameterProvider {
    * Defines a flag parameter.  See ICommandLineFlagDefinition for details.
    */
   protected defineFlagParameter(options: ICommandLineFlagDefinition): CommandLineFlagParameter {
-    const names: string[] = [];
-    if (options.parameterShortName) {
-      names.push(options.parameterShortName);
-    }
-    names.push(options.parameterLongName);
+    return this._createParameter(options, {
+      action: 'storeTrue'
+    }) as CommandLineFlagParameter;
+  }
 
-    const result: CommandLineFlagParameter = new CommandLineFlagParameter();
-    result.key = this._createKeyName();
-
-    this.argumentParser.addArgument(names, {
-      help: options.description,
-      action: 'storeTrue',
-      dest: result.key
-    });
-
-    this._parameters.push(result);
-
-    return result;
+  /**
+   * Defines a string parameter.
+   */
+  protected defineStringParameter(options: ICommandLineStringDefinition): CommandLineStringParameter {
+    return this._createParameter(options) as CommandLineStringParameter;
   }
 
   protected processParsedData(data: ICommandLineParserData): void {
     // Fill in the values for the parameters
     for (const parameter of this._parameters) {
-      parameter.value = data[parameter.key];
+      parameter.setValue(data);
     }
   }
 
   private _createKeyName(): string {
     return 'key_' + (CommandLineParameterProvider._keyCounter++).toString();
+  }
+
+  private _createParameter(definition: IBaseCommandLineDefinition,
+                           argparseOptions?: argparse.ArgumentOptions,
+                           /* tslint:disable-next-line:no-any */
+                           converter?: IConverterFunction<any>): CommandLineParameter<any> {
+    const names: string[] = [];
+    if (definition.parameterShortName) {
+      names.push(definition.parameterShortName);
+    }
+    names.push(definition.parameterLongName);
+
+    /* tslint:disable-next-line:no-any */
+    const result: CommandLineParameter<any> = new CommandLineParameter<any>(this._createKeyName(), converter);
+
+    this._parameters.push(result);
+
+    const baseArgparseOptions: argparse.ArgumentOptions = {
+      help: definition.description,
+      dest: result.key
+    };
+
+    Object.keys(argparseOptions || {}).forEach((key: string) => {
+      baseArgparseOptions[key] = argparseOptions[key];
+    });
+
+    this.argumentParser.addArgument(names, baseArgparseOptions);
+    return result;
   }
 }
 

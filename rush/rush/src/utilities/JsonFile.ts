@@ -30,4 +30,3 @@ export default class JsonFile {
   }
   /* tslint:enable:no-any */
 }
-

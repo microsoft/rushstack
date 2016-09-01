@@ -1,6 +1,6 @@
 {
   "name": "@ms/rush",
-  "version": "0.4.10",
+  "version": "0.4.11",
   "description": "Manage building/installing of multiple NPM package folders",
   "repository": {
     "type": "git",
@@ -21,6 +21,7 @@
     "colors": "~1.1.2",
     "glob": "~7.0.5",
     "glob-escape": "~0.0.1",
+    "minimatch": "~3.0.2",
     "read-package-tree": "~5.1.5",
     "rimraf": "~2.5.2",
     "semver": "~5.2.0",

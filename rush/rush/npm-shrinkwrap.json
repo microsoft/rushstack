@@ -1,6 +1,6 @@
 {
   "name": "@ms/rush",
-  "version": "0.4.8",
+  "version": "0.4.11",
   "dependencies": {
     "@ms/interleaver": {
       "version": "0.0.1",
@@ -53,9 +53,9 @@
       "resolved": "https://registry.npmjs.org/aws4/-/aws4-1.4.1.tgz"
     },
     "balanced-match": {
-      "version": "0.4.1",
+      "version": "0.4.2",
       "from": "balanced-match@>=0.4.1 <0.5.0",
-      "resolved": "https://registry.npmjs.org/balanced-match/-/balanced-match-0.4.1.tgz"
+      "resolved": "https://registry.npmjs.org/balanced-match/-/balanced-match-0.4.2.tgz"
     },
     "bl": {
       "version": "1.1.2",
@@ -68,9 +68,9 @@
       "resolved": "https://registry.npmjs.org/boom/-/boom-2.10.1.tgz"
     },
     "brace-expansion": {
-      "version": "1.1.5",
+      "version": "1.1.6",
       "from": "brace-expansion@>=1.0.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/brace-expansion/-/brace-expansion-1.1.5.tgz"
+      "resolved": "https://registry.npmjs.org/brace-expansion/-/brace-expansion-1.1.6.tgz"
     },
     "builtin-modules": {
       "version": "1.1.1",

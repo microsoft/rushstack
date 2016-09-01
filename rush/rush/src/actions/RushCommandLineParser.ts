@@ -11,6 +11,7 @@ import CommandLineParser from '../commandLine/CommandLineParser';
 import RushConfig from '../data/RushConfig';
 import InstallAction from './InstallAction';
 import LinkAction from './LinkAction';
+import PublishAction from './PublishAction';
 import RebuildAction from './RebuildAction';
 import GenerateAction from './GenerateAction';
 import CheckAction from './CheckAction';
@@ -39,6 +40,7 @@ export default class RushCommandLineParser extends CommandLineParser {
     this.addAction(new UnlinkAction(this));
     this.addAction(new RebuildAction(this));
     this.addAction(new CheckAction(this));
+    this.addAction(new PublishAction(this));
   }
 
   protected onDefineParameters(): void {
