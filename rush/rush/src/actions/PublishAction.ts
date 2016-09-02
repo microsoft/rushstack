@@ -12,13 +12,14 @@ import RushConfig from '../data/RushConfig';
 import RushConfigProject from '../data/RushConfigProject';
 
 import RushCommandLineParser from './RushCommandLineParser';
-import { CommandLineStringParameter } from '../commandLine/CommandLineParameter';
+import { CommandLineStringParameter, CommandLineFlagParameter } from '../commandLine/CommandLineParameter';
 
 export default class PublishAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
   private _rushConfig: RushConfig;
   private _registryUrl: CommandLineStringParameter;
   private _includes: CommandLineStringParameter;
+  private _unpublish: CommandLineFlagParameter;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -44,6 +45,12 @@ export default class PublishAction extends CommandLineAction {
                    `using * as a wildcard. If not specified, all packages will be published. ` +
                    `Example: --include=@microsoft/* will match all packages in the @microsoft scope.`
     });
+    this._unpublish = this.defineFlagParameter({
+      parameterLongName: '--unpublish',
+      parameterShortName: '-u',
+      description: `If this flag is specified, we will attempt to unpublish the specific version before publishing.` +
+                   ` If a registry is not defined, this flag will have no effect.`
+    });
   }
 
   protected onExecute(): void {
@@ -51,21 +58,48 @@ export default class PublishAction extends CommandLineAction {
 
     console.log(`Starting "rush publish" ${EOL}`);
 
+    const skippedProjects: RushConfigProject[] = [];
+    const failedProjects: RushConfigProject[] = [];
+    const successfulProjects: RushConfigProject[] = [];
+
     // Publish each package
     for (const project of this._rushConfig.projects) {
-      if (minimatch(project.packageName, this._includes.value)) {
-        this.publishProject(project);
+      if (!this._includes.value || minimatch(project.packageName, this._includes.value)) {
+        try {
+          this.publishProject(project);
+          successfulProjects.push(project);
+        } catch (error) {
+          console.log(colors.red(`Failed to publish ${project.packageName}!`));
+          console.log(error);
+          failedProjects.push(project);
+        }
       } else {
-        console.warn(colors.yellow(`Skipping project "${project.packageName}", ` +
-          'which did not match pattern from "--include" parameter'));
+        skippedProjects.push(project);
       }
     }
 
-    console.log(colors.green(`${EOL}Finished "rush publish" successfully!`));
+    if (this._includes.value) {
+      console.log(colors.yellow(`${EOL}Skipped packages (did not match pattern from --include):`));
+      for (const project of skippedProjects) {
+        console.warn(colors.yellow(` - ${project.packageName}`));
+      }
+    }
+
+    if (failedProjects.length === 0) {
+      console.log(colors.green(`${EOL}Successfully published:`));
+      for (const project of successfulProjects) {
+        console.log(colors.green(` - ${project.packageName}`));
+      }
+    } else {
+      console.log(colors.red(`${EOL}Failed to publish:`));
+      for (const project of failedProjects) {
+        console.log(colors.red(` - ${project.packageName}`));
+      }
+      process.exit(1);
+    }
   }
 
   protected publishProject(rushProject: RushConfigProject): void {
-    try {
       console.log(`${EOL}Publishing ${rushProject.packageName}`);
       const projectFolder: string = rushProject.projectFolder;
 
@@ -77,13 +111,15 @@ export default class PublishAction extends CommandLineAction {
 
       // Unpublish existing versions, since using publish --force causes lots of
       // things to be written to stderr. This is cleaner.
-      if (this._registryUrl.value) {
-        console.log('npm unpublish --force');
+      if (this._unpublish) {
+        const packageFullName: string = `${rushProject.packageName}@${rushProject.packageJson.version}`;
+
+        console.log(`npm unpublish ${packageFullName}`);
         Utilities.executeCommand(
           this._rushConfig.npmToolFilename,
-          ['unpublish', '--force'],
+          ['unpublish', packageFullName],
           projectFolder,
-          true /* suppress output */,
+          false /* suppress output */,
           env);
       }
 
@@ -96,9 +132,5 @@ export default class PublishAction extends CommandLineAction {
         env);
 
       console.log(colors.green(`Published ${rushProject.packageName}!${EOL}`));
-    } catch (error) {
-      console.log(error);
-      process.exit(1);
-    }
   }
 }
