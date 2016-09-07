@@ -2,6 +2,7 @@
 
 /* tslint:disable:max-line-length */
 
+import { GulpTask } from './GulpTask';
 import { GulpProxy } from './GulpProxy';
 import { IExecutable } from './IExecutable';
 import { IBuildConfig } from './IBuildConfig';
@@ -93,6 +94,30 @@ export function task(taskName: string, task: IExecutable): IExecutable {
   _trackTask(task);
 
   return task;
+}
+
+export interface ICustomGulpTask {
+  (gulp: gulp.Gulp | GulpProxy, buildConfig: IBuildConfig, done: () => void):
+    Promise<Object> | NodeJS.ReadWriteStream | void;
+}
+
+class CustomTask extends GulpTask<void> {
+  private _fn: ICustomGulpTask;
+  constructor(name: string, fn: ICustomGulpTask) {
+    super();
+    this.name = name;
+    this._fn = fn.bind(this);
+  }
+
+  public executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (result?: Object) => void):
+    Promise<Object> | NodeJS.ReadWriteStream | void {
+    return this._fn(gulp, getConfig(), completeCallback);
+  }
+}
+
+export function defineTask(taskName: string, fn: ICustomGulpTask): IExecutable {
+  const customTask: CustomTask = new CustomTask(taskName, fn);
+  return customTask;
 }
 
 /**
