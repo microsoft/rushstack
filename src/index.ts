@@ -2,6 +2,7 @@
 
 /* tslint:disable:max-line-length */
 
+import { GulpTask } from './GulpTask';
 import { GulpProxy } from './GulpProxy';
 import { IExecutable } from './IExecutable';
 import { IBuildConfig } from './IBuildConfig';
@@ -93,6 +94,43 @@ export function task(taskName: string, task: IExecutable): IExecutable {
   _trackTask(task);
 
   return task;
+}
+
+/**
+ * The callback interface for a custom task definition.
+ * The task should either return a Promise, a stream, or call the
+ * callback function (passing in an object value if there was an error).
+ */
+export interface ICustomGulpTask {
+  (gulp: gulp.Gulp | GulpProxy, buildConfig: IBuildConfig, done: (failure?: Object) => void):
+    Promise<Object> | NodeJS.ReadWriteStream | void;
+}
+
+class CustomTask extends GulpTask<void> {
+  private _fn: ICustomGulpTask;
+  constructor(name: string, fn: ICustomGulpTask) {
+    super();
+    this.name = name;
+    this._fn = fn.bind(this);
+  }
+
+  public executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (failure?: Object) => void):
+    Promise<Object> | NodeJS.ReadWriteStream | void {
+    return this._fn(gulp, getConfig(), completeCallback);
+  }
+}
+
+/**
+ * Creates a new task from a function callback. Useful as a shorthand way
+ * of defining tasks directly in a gulpfile.
+ *
+ * @param {string} taskName - the name of the task, appearing in build logs
+ * @param {boolean} addCommandLine - true if this task should be registered to the command line
+ * @param {ICustomGulpTask} fn - the callback function to execute when this task runs
+ */
+export function defineTask(taskName: string, addCommandLine: boolean, fn: ICustomGulpTask): IExecutable {
+  const customTask: CustomTask = new CustomTask(taskName, fn);
+  return customTask;
 }
 
 /**
