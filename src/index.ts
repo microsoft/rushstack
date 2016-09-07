@@ -272,6 +272,8 @@ export function initialize(gulp: gulp.Gulp): void {
   _buildConfig.gulp = new GulpProxy(gulp);
   _buildConfig.uniqueTasks = _uniqueTasks;
 
+  _handleCommandLineArguments();
+
   setConfigDefaults(_buildConfig);
 
   initializeLogging(gulp, undefined, undefined);
@@ -375,6 +377,17 @@ function _flatten<T>(arr: Array<T | T[]>): T[] {
   }
 
   return output;
+}
+
+function _handleCommandLineArguments(): void {
+  _handleTasksListArguments();
+}
+
+function _handleTasksListArguments(): void {
+  /* tslint:disable-next-line:no-string-literal */
+  if (args['tasks'] || args['tasks-simple'] || args['T']) {
+    global.dontWatchExit = true;
+  }
 }
 
 export const nuke: IExecutable = new NukeTask();
