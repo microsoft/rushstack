@@ -1,0 +1,26 @@
+{
+  "name": "@ms/console-moderator",
+  "version": "0.2.1",
+  "description": "Manage interleaving the output of multiple simultaneous processes",
+  "repository": {
+    "type": "git",
+    "url": "https://onedrive.visualstudio.com/DefaultCollection/SPPPlat/_git/sp-next"
+  },
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "build": "gulp",
+    "test": "gulp",
+    "clean": "gulp nuke"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "colors": "~1.1.2"
+  },
+  "devDependencies": {
+    "chai": "~3.5.0",
+    "gulp": "~3.9.1",
+    "mocha": "~2.5.3",
+    "@microsoft/sp-build-node": "~0.1.0"
+  }
+}
