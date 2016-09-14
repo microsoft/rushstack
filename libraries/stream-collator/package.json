@@ -1,7 +1,7 @@
 {
-  "name": "@ms/console-moderator",
-  "version": "0.2.1",
-  "description": "Manage interleaving the output of multiple simultaneous processes",
+  "name": "@ms/stream-moderator",
+  "version": "0.3.1",
+  "description": "Manage interleaving of multiple streams into a single stream...",
   "repository": {
     "type": "git",
     "url": "https://onedrive.visualstudio.com/DefaultCollection/SPPPlat/_git/sp-next"

@@ -91,4 +91,79 @@ describe('DualTaskStream', () => {
 
     stream.end();
   });
+
+  it('end() closes both substreams even if stdout is complete', (done: () => void) => {
+    const stream: DualTaskStream = new DualTaskStream(true);
+
+    let stderrClosed: boolean, stdoutClosed: boolean = false;
+
+    const finishedIfBothStreamsClosed: () => void = () => {
+      if (stderrClosed && stdoutClosed) {
+        done();
+      }
+    };
+
+    stream.stderr.on('end', () => {
+      stderrClosed = true;
+      finishedIfBothStreamsClosed();
+    });
+
+    stream.stdout.on('end', () => {
+      stdoutClosed = true;
+      finishedIfBothStreamsClosed();
+    });
+
+    stream.stdout.end();
+    stream.end();
+  });
+
+  it('end() closes both substreams even if stderr is complete', (done: () => void) => {
+    const stream: DualTaskStream = new DualTaskStream(true);
+
+    let stderrClosed: boolean, stdoutClosed: boolean = false;
+
+    const finishedIfBothStreamsClosed: () => void = () => {
+      if (stderrClosed && stdoutClosed) {
+        done();
+      }
+    };
+
+    stream.stderr.on('end', () => {
+      stderrClosed = true;
+      finishedIfBothStreamsClosed();
+    });
+
+    stream.stdout.on('end', () => {
+      stdoutClosed = true;
+      finishedIfBothStreamsClosed();
+    });
+
+    stream.stderr.end();
+    stream.end();
+  });
+
+    it('can call end twice without error', (done: () => void) => {
+    const stream: DualTaskStream = new DualTaskStream(true);
+
+    let stderrClosed: boolean, stdoutClosed: boolean = false;
+
+    const finishedIfBothStreamsClosed: () => void = () => {
+      if (stderrClosed && stdoutClosed) {
+        assert.doesNotThrow(() => { stream.end(); });
+        done();
+      }
+    };
+
+    stream.stderr.on('end', () => {
+      stderrClosed = true;
+      finishedIfBothStreamsClosed();
+    });
+
+    stream.stdout.on('end', () => {
+      stdoutClosed = true;
+      finishedIfBothStreamsClosed();
+    });
+
+    stream.end();
+  });
 });

@@ -1,3 +1,11 @@
+/**
+ * @file DualTaskStream.ts
+ * @Copyright (c) Microsoft Corporation.  All rights reserved.
+ *
+ * This is a special type of stream class which has two substreams (stderr and stdout), which you can write to.
+ */
+/* istanbul ignore next */
+
 import * as colors from 'colors';
 import * as stream from 'stream';
 
@@ -54,7 +62,7 @@ export default class DualTaskStream extends stream.Readable implements NodeJS.Re
   }
 
   /**
-   * Closes both substreams and marks closes the readable stream
+   * Closes both substreams and closes the readable stream
    */
   public end(): void {
     if (!this._stdoutClosed) {
