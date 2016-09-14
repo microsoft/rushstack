@@ -104,6 +104,10 @@ export default class PublishAction extends CommandLineAction {
       const projectFolder: string = rushProject.projectFolder;
 
       const env: { [key: string]: string } = {};
+      // Copy existing process.env values (for nodist)
+      Object.keys(process.env).forEach((key: string) => {
+        env[key] = process.env[key];
+      });
 
       if (this._registryUrl.value) {
         env['npm_config_registry'] = this._registryUrl.value; // tslint:disable-line:no-string-literal
