@@ -11,7 +11,8 @@
     "gulp": "~3.9.1",
     "gulp-connect": "~5.0.0",
     "gulp-open": "~2.0.0",
-    "gulp-util": "~3.0.7"
+    "gulp-util": "~3.0.7",
+    "node-forge": "~0.6.42"
   },
   "devDependencies": {
     "@microsoft/node-library-build": "~0.3.1"
