@@ -106,6 +106,10 @@ export function tryTrustCertificate(certificatePath: string): boolean {
     } else {
       const certutilExePath: string = where.stdout.toString().trim();
 
+      console.log('Attempting to trust a dev certificate. This self-signed certificate only points to localhost ' +
+                  'and will be stored in your local user profile to be used by other instances of ' +
+                  'gulp-core-build-serve. If you do not consent to trust this certificate, click "NO" in the dialog.');
+
       const trustResult: child_process.SpawnSyncReturns<string> =
         child_process.spawnSync(certutilExePath, ['-user', '-addstore', 'root', certificatePath]);
 
