@@ -98,6 +98,7 @@ export function CreateCert(): ICertificate {
   };
 }
 
+export function tryTrustCertificate(certPath: string): boolean {
   if (process.platform === 'win32') {
     const where: child_process.SpawnSyncReturns<string> = child_process.spawnSync('where', ['certutil']);
 
@@ -107,23 +108,61 @@ export function CreateCert(): ICertificate {
     } else {
       const certUtilExePath: string = where.stdout.toString().trim();
 
-      const returns: child_process.SpawnSyncReturns<string> =
-        child_process.spawnSync(certUtilExePath, ['-user', '-addstore', 'root', tempCertPath]);
+      const trustResult: child_process.SpawnSyncReturns<string> =
+        child_process.spawnSync(certUtilExePath, ['-user', '-addstore', 'root', certPath]);
 
-      if (returns.status !== 0) {
-        const errorLines: string[] = returns.stdout.toString().split(EOL).map((line: string) => line.trim());
-        if (returns.status === 2147943623 || // Not sure if this is always the status code for "cancelled"
+      if (trustResult.status !== 0) {
+        console.log(`Error: ${trustResult.stdout.toString()}`);
+
+        const errorLines: string[] = trustResult.stdout.toString().split(EOL).map((line: string) => line.trim());
+
+        // Not sure if this is always the status code for "cancelled" - should confirm.
+        if (trustResult.status === 2147943623 ||
             errorLines[errorLines.length - 1].indexOf('The operation was canceled by the user.') > 0) {
-          // 2147943623
           console.log('Certificate trust cancelled.');
         } else {
           console.log('Certificate trust failed with an unknown error.');
         }
+
+        return false;
       } else {
         console.log('Successfully trusted development certificate.');
+        return true;
       }
     }
   } else {
     // Not implemented yet
   }
+}
+
+export function ensureCertificate(): ICertificate {
+  const certStore: CertificateStore = CertificateStore.instance;
+
+  if (!certStore.certData || !certStore.keyData) {
+    const generatedCert: ICertificate = CreateCert();
+
+    const now: Date = new Date();
+    const certName: string = now.getTime().toString();
+    const tempDirName: string = path.join(__dirname, '..', 'temp');
+    if (!fs.existsSync(tempDirName)) {
+      fs.mkdirSync(tempDirName); // Create the temp dir if it doesn't exist
+    }
+
+    const tempCertPath: string = path.join(tempDirName, `${certName}.cer`);
+    fs.writeFileSync(tempCertPath, generatedCert.pemCertificate);
+
+    if (tryTrustCertificate(tempCertPath)) {
+      certStore.certData = generatedCert.pemCertificate;
+      certStore.keyData = generatedCert.pemKey;
+    } else {
+      // Clear out the existing store data, if any exists
+      certStore.certData = undefined;
+      certStore.keyData = undefined;
+    }
+  }
+
+  return {
+    pemCertificate: certStore.certData,
+    pemKey: certStore.keyData
+  };
 }
