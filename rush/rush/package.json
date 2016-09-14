@@ -1,6 +1,6 @@
 {
   "name": "@ms/rush",
-  "version": "0.4.14",
+  "version": "0.5.3",
   "description": "Manage building/installing of multiple NPM package folders",
   "repository": {
     "type": "git",
@@ -15,7 +15,7 @@
   },
   "license": "UNLICENSED",
   "dependencies": {
-    "@ms/console-moderator": "~0.2.1",
+    "@ms/stream-moderator": "~0.3.1",
     "argparse": "~1.0.7",
     "builtins": "~1.0.3",
     "colors": "~1.1.2",

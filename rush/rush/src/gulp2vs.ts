@@ -2,7 +2,7 @@ import * as child_process from 'child_process';
 import * as os from 'os';
 
 import TaskError from './errorDetection/TaskError';
-import ConsoleModerator, { DualTaskStream } from '@ms/console-moderator';
+import StreamModerator, { DualTaskStream } from '@ms/stream-moderator';
 import ErrorDetector, { ErrorDetectionMode } from './errorDetection/ErrorDetector';
 import * as ErrorDetectionRules from './errorDetection/rules/index';
 
@@ -13,12 +13,14 @@ const errorDetector: ErrorDetector = new ErrorDetector([
   ErrorDetectionRules.TsLintErrorDetector
 ]);
 
-const moderator: ConsoleModerator<DualTaskStream> = new ConsoleModerator<DualTaskStream>();
+const moderator: StreamModerator<DualTaskStream> = new StreamModerator<DualTaskStream>();
 const dualStream: DualTaskStream = new DualTaskStream(false);
 
-moderator.registerTask('vs gulp bundle', dualStream);
+moderator.register(dualStream);
 
 const gulpBundle: child_process.ChildProcess = child_process.exec('gulp bundle');
+
+moderator.pipe(process.stdout);
 
 gulpBundle.stdout.pipe(dualStream.stdout);
 gulpBundle.stderr.pipe(dualStream.stderr);

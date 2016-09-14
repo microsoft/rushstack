@@ -11,7 +11,7 @@ import * as os from 'os';
 import ITask, { ITaskDefinition } from './ITask';
 import TaskStatus from './TaskStatus';
 import TaskError from '../errorDetection/TaskError';
-import ConsoleModerator, { DualTaskStream } from '@ms/console-moderator';
+import StreamModerator, { DualTaskStream } from '@ms/stream-moderator';
 import { ErrorDetectionMode } from '../errorDetection/ErrorDetector';
 
 /**
@@ -28,14 +28,19 @@ export default class TaskRunner {
   private _readyTaskQueue: ITask[];
   private _quietMode: boolean;
   private _hasAnyFailures: boolean;
-  private _moderator: ConsoleModerator<DualTaskStream>;
+  private _moderator: StreamModerator<DualTaskStream>;
 
   constructor(quietMode: boolean = false) {
     this._tasks = new Map<string, ITask>();
     this._readyTaskQueue = [];
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
-    this._moderator = new ConsoleModerator<DualTaskStream>();
+    this._moderator = new StreamModerator<DualTaskStream>();
+    this._moderator.pipe(process.stdout);
+
+    this._moderator.on('end', () => {
+      this._printTaskStatus();
+    });
   }
 
   /**
@@ -100,7 +105,6 @@ export default class TaskRunner {
    */
   private _startAvailableTasks(complete: () => void, reject: () => void): void {
     if (!this._areAnyTasksReadyOrExecuting()) {
-      this._printTaskStatus();
       if (this._hasAnyFailures) {
         reject();
       } else {
@@ -118,7 +122,7 @@ export default class TaskRunner {
 
         const taskStream: DualTaskStream = new DualTaskStream(this._quietMode);
 
-        this._moderator.registerTask(task.name, taskStream);
+        this._moderator.register(taskStream);
 
         task.execute(taskStream)
           .then(() => {

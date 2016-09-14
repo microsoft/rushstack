@@ -7,7 +7,7 @@
 
 import TaskError from '../errorDetection/TaskError';
 import TaskStatus from './TaskStatus';
-import { DualTaskStream } from '@ms/console-moderator';
+import { DualTaskStream } from '@ms/stream-moderator';
 
 /**
  * A definition for a task, an execute function returning a promise and a unique string name

@@ -11,7 +11,7 @@ import * as os from 'os';
 import * as colors from 'colors';
 import * as path from 'path';
 
-import { DualTaskStream } from '@ms/console-moderator';
+import { DualTaskStream } from '@ms/stream-moderator';
 
 import RushConfig from '../data/RushConfig';
 import RushConfigProject from '../data/RushConfigProject';
