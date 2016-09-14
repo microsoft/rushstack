@@ -37,7 +37,7 @@ interface IForgeCertificate {
 
 interface IExtendedPki {
   createCertificate(): IForgeCertificate;
-  certificateToPem(cert: IForgeCertificate): string;
+  certificateToPem(certificate: IForgeCertificate): string;
 }
 
 interface IForgeSignatureAlgorithm {
@@ -53,25 +53,25 @@ interface IExtendedForge {
   };
 }
 
-export function CreateCert(): ICertificate {
+export function CreateDevelopmentCertificate(): ICertificate {
   const keys: forgeType.pki.KeyPair = forge.pki.rsa.generateKeyPair(2048);
-  const cert: IForgeCertificate = forge.pki.createCertificate();
-  cert.publicKey = keys.publicKey;
+  const certificate: IForgeCertificate = forge.pki.createCertificate();
+  certificate.publicKey = keys.publicKey;
 
   const now: Date = new Date();
 
-  cert.validity.notBefore = now;
-  cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 5); // Five years from now
+  certificate.validity.notBefore = now;
+  certificate.validity.notAfter.setFullYear(certificate.validity.notBefore.getFullYear() + 5); // Five years from now
 
   const attrs: IAttr[] = [{
     name: 'commonName',
     value: 'localhost'
   }];
 
-  cert.setSubject(attrs);
-  cert.setIssuer(attrs);
+  certificate.setSubject(attrs);
+  certificate.setIssuer(attrs);
 
-  cert.setExtensions([
+  certificate.setExtensions([
     {
       name: 'keyUsage',
       digitalSignature: true,
@@ -86,10 +86,10 @@ export function CreateCert(): ICertificate {
     }]);
 
   // self-sign certificate
-  cert.sign(keys.privateKey, forge.md.sha256.create());
+  certificate.sign(keys.privateKey, forge.md.sha256.create());
 
   // convert a Forge certificate to PEM
-  const pem: string = forge.pki.certificateToPem(cert);
+  const pem: string = forge.pki.certificateToPem(certificate);
   const privateKey: string = forge.pki.privateKeyToPem(keys.privateKey);
 
   return {
@@ -98,7 +98,7 @@ export function CreateCert(): ICertificate {
   };
 }
 
-export function tryTrustCertificate(certPath: string): boolean {
+export function tryTrustCertificate(certificatePath: string): boolean {
   if (process.platform === 'win32') {
     const where: child_process.SpawnSyncReturns<string> = child_process.spawnSync('where', ['certutil']);
 
@@ -106,10 +106,10 @@ export function tryTrustCertificate(certPath: string): boolean {
     if (!!whereErr) {
       console.error(`Error finding certUtil command: "${whereErr}"`);
     } else {
-      const certUtilExePath: string = where.stdout.toString().trim();
+      const certutilExePath: string = where.stdout.toString().trim();
 
       const trustResult: child_process.SpawnSyncReturns<string> =
-        child_process.spawnSync(certUtilExePath, ['-user', '-addstore', 'root', certPath]);
+        child_process.spawnSync(certutilExePath, ['-user', '-addstore', 'root', certificatePath]);
 
       if (trustResult.status !== 0) {
         console.log(`Error: ${trustResult.stdout.toString()}`);
@@ -136,33 +136,33 @@ export function tryTrustCertificate(certPath: string): boolean {
 }
 
 export function ensureCertificate(): ICertificate {
-  const certStore: CertificateStore = CertificateStore.instance;
+  const certificateStore: CertificateStore = CertificateStore.instance;
 
-  if (!certStore.certData || !certStore.keyData) {
-    const generatedCert: ICertificate = CreateCert();
+  if (!certificateStore.certificateData || !certificateStore.keyData) {
+    const generatedCertificate: ICertificate = CreateDevelopmentCertificate();
 
     const now: Date = new Date();
-    const certName: string = now.getTime().toString();
+    const certificateName: string = now.getTime().toString();
     const tempDirName: string = path.join(__dirname, '..', 'temp');
     if (!fs.existsSync(tempDirName)) {
       fs.mkdirSync(tempDirName); // Create the temp dir if it doesn't exist
     }
 
-    const tempCertPath: string = path.join(tempDirName, `${certName}.cer`);
-    fs.writeFileSync(tempCertPath, generatedCert.pemCertificate);
+    const tempCertificatePath: string = path.join(tempDirName, `${certificateName}.cer`);
+    fs.writeFileSync(tempCertificatePath, generatedCertificate.pemCertificate);
 
-    if (tryTrustCertificate(tempCertPath)) {
-      certStore.certData = generatedCert.pemCertificate;
-      certStore.keyData = generatedCert.pemKey;
+    if (tryTrustCertificate(tempCertificatePath)) {
+      certificateStore.certificateData = generatedCertificate.pemCertificate;
+      certificateStore.keyData = generatedCertificate.pemKey;
     } else {
       // Clear out the existing store data, if any exists
-      certStore.certData = undefined;
-      certStore.keyData = undefined;
+      certificateStore.certificateData = undefined;
+      certificateStore.keyData = undefined;
     }
   }
 
   return {
-    pemCertificate: certStore.certData,
-    pemKey: certStore.keyData
+    pemCertificate: certificateStore.certificateData,
+    pemKey: certificateStore.keyData
   };
 }
