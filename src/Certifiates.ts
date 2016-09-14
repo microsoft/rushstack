@@ -1,5 +1,5 @@
 import * as forgeType from 'node-forge';
-const forge: typeof forgeType & IExtendedForge = require('node-forge');
+const forge: typeof forgeType & IForgeExtensions = require('node-forge');
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -35,16 +35,14 @@ interface IForgeCertificate {
   sign(privateKey: string, algorithm: IForgeSignatureAlgorithm): void; // tslint:disable-line:no-any
 }
 
-interface IExtendedPki {
-  createCertificate(): IForgeCertificate;
-  certificateToPem(certificate: IForgeCertificate): string;
-}
-
 interface IForgeSignatureAlgorithm {
 }
 
-interface IExtendedForge {
-  pki: IExtendedPki;
+interface IForgeExtensions {
+  pki: {
+    createCertificate(): IForgeCertificate;
+    certificateToPem(certificate: IForgeCertificate): string;
+  };
 
   md: {
     sha256: {
