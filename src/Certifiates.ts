@@ -1,13 +1,61 @@
-const forge = require('node-forge'); // tslint:disable-line:typedef
+import * as forgeType from 'node-forge';
+const forge: typeof forgeType & IExtendedForge = require('node-forge');
 import * as fs from 'fs';
 import * as path from 'path';
 
 import * as child_process from 'child_process';
 import { EOL } from 'os';
 
-export function CreateCert(): void {
-  const keys = forge.pki.rsa.generateKeyPair(2048);
-  const cert = forge.pki.createCertificate();
+import CertificateStore from './CertificateStore';
+
+export interface ICertificate {
+  pemCertificate: string;
+  pemKey: string;
+}
+
+interface IAttr {
+  name: string;
+  value: string;
+}
+
+interface IForgeCertificate {
+  publicKey: any; // tslint:disable-line:no-any
+
+  validity: {
+    notBefore: Date;
+    notAfter: Date;
+  };
+
+  setSubject(attrs: IAttr[]): void;
+
+  setIssuer(attrs: IAttr[]): void;
+
+  setExtensions(extensions: any[]): void; // tslint:disable-line:no-any
+
+  sign(privateKey: string, algorithm: IForgeSignatureAlgorithm): void; // tslint:disable-line:no-any
+}
+
+interface IExtendedPki {
+  createCertificate(): IForgeCertificate;
+  certificateToPem(cert: IForgeCertificate): string;
+}
+
+interface IForgeSignatureAlgorithm {
+}
+
+interface IExtendedForge {
+  pki: IExtendedPki;
+
+  md: {
+    sha256: {
+      create(): IForgeSignatureAlgorithm;
+    }
+  };
+}
+
+export function CreateCert(): ICertificate {
+  const keys: forgeType.pki.KeyPair = forge.pki.rsa.generateKeyPair(2048);
+  const cert: IForgeCertificate = forge.pki.createCertificate();
   cert.publicKey = keys.publicKey;
 
   const now: Date = new Date();
@@ -15,7 +63,7 @@ export function CreateCert(): void {
   cert.validity.notBefore = now;
   cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 5); // Five years from now
 
-  const attrs = [{
+  const attrs: IAttr[] = [{
     name: 'commonName',
     value: 'localhost'
   }];
@@ -44,15 +92,11 @@ export function CreateCert(): void {
   const pem: string = forge.pki.certificateToPem(cert);
   const privateKey: string = forge.pki.privateKeyToPem(keys.privateKey);
 
-  const certName: string = now.getTime().toString();
-  const tempDirName: string = path.join(__dirname, '..', 'temp');
-  if (!fs.existsSync(tempDirName)) {
-    fs.mkdirSync(tempDirName); // Create the temp dir if it doesn't exist
-  }
-
-  const tempCertPath: string = path.join(tempDirName, `${certName}.cer`);
-  fs.writeFileSync(tempCertPath, pem);
-  fs.writeFileSync(path.join(tempDirName, `${certName}.key`), privateKey);
+  return {
+    pemCertificate: pem,
+    pemKey: privateKey
+  };
+}
 
   if (process.platform === 'win32') {
     const where: child_process.SpawnSyncReturns<string> = child_process.spawnSync('where', ['certutil']);
