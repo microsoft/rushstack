@@ -245,7 +245,6 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
           }
         }
       } else {
-        debugger;
         let devCertificate: ICertificate = ensureCertificate(this.taskConfig.tryCreateDevCertificate);
         if (devCertificate.pemCertificate && devCertificate.pemKey) {
           result.cert = devCertificate.pemCertificate;
