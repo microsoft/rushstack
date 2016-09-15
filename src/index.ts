@@ -57,10 +57,10 @@ let _buildConfig: IBuildConfig = {
  */
 export function setConfig(config: IBuildConfig): void {
   /* tslint:disable:typedef */
-  const merge = require('lodash.merge');
+  const objectAssign = require('object-assign');
   /* tslint:enable:typedef */
 
-  _buildConfig = merge({}, _buildConfig, config);
+  _buildConfig = objectAssign({}, _buildConfig, config);
 }
 
 /**
