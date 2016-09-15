@@ -8,10 +8,7 @@ import * as gUtilType from 'gulp-util';
 import * as expressType from 'express';
 import * as fs from 'fs';
 
-import {
-  ensureCertificate,
-  ICertificate
-} from './Certifiates';
+import { ensureCertificate } from './Certifiates';
 
 export interface IServeTaskConfig {
   /**
@@ -245,10 +242,10 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
           }
         }
       } else {
-        let devCertificate: ICertificate = ensureCertificate(this.taskConfig.tryCreateDevCertificate);
-        if (devCertificate.pemCertificate && devCertificate.pemKey) {
-          result.cert = devCertificate.pemCertificate;
-          result.key = devCertificate.pemKey;
+        let devCertificate: string = ensureCertificate(this.taskConfig.tryCreateDevCertificate);
+        if (devCertificate) {
+          result.pfx = devCertificate;
+          result.passphrase = 'gcbserve';
         } else {
           this.logWarning('When serving in HTTPS mode, a PFX cert path or a cert path and a key path must be ' +
                           'provided, or a dev certificate must be generated and trusted. If a SSL certificate isn\'t ' +
