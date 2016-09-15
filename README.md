@@ -64,11 +64,19 @@ let karma = require('gulp-core-build-karma').default;
 let webpack = require('gulp-core-build-webpack').default;
 let serve = require('gulp-core-build-serve').default;
 
+// Shorthand for defining custom subtasks
+// The proper method for this is to introduce a new package which exports a class that extends GulpTask
+// However, this shorthand allows an easy way to introduce one-off subtasks directly in the gulpfile
+let helloWorldSubtask = build.subTask('do-hello-world-subtask', function(gulp, buildOptions, done) {
+  this.log('Hello, World!'); // use functions from GulpTask
+});
+
 // Define gulp tasks.
-let buildTasks = build.task('build', build.parallel(lint, typescript, sass));
+let buildTasks = build.task('build', build.parallel(helloWorldSubtask, lint, typescript, sass));
 let testTasks = build.task('test', build.serial(buildTasks, karma));
 let bundleTasks = build.task('bundle', build.serial(buildTasks, webpack));
 let serveTasks = build.task('serve', build.serial(bundleTasks, serve));
+let helloWorldTasks = build.task('hello-world', helloWorldSubtask);
 let defaultTasks = build.task('default', testTasks);
 
 // Tell the build to set up gulp tasks with the given gulp instance.
@@ -81,10 +89,13 @@ Once this is set up, you should be able to execute the gulp tasks and they shoul
 
 | Task name | Description |
 | --------- | ----------- |
-| gulp-core-build-typescript | Builds and lints typescript. |
-| gulp-core-build-sass | Compiles sass into css, into js modules, that are theme friendly. |
-| gulp-core-build-webpack | Runs webpack given a config, and outputs libraries plus the stats and logging. |
-| gulp-core-build-serve | Sets up a server and live reload for a quick dev loop. |
+| [gulp-core-build-typescript](https://www.npmjs.com/package/@microsoft/gulp-core-build-typescript) | Builds and lints typescript. |
+| [gulp-core-build-sass](https://www.npmjs.com/package/@microsoft/gulp-core-build) | Compiles sass into css, into js modules, that are theme friendly. |
+| [gulp-core-build-webpack](https://www.npmjs.com/package/@microsoft/gulp-core-build-webpack) | Runs webpack given a config, and outputs libraries plus the stats and logging. |
+| [gulp-core-build-serve](https://www.npmjs.com/package/@microsoft/gulp-core-build-serve) | Sets up a server and live reload for a quick dev loop. |
+| [gulp-core-build-karma](https://www.npmjs.com/package/@microsoft/gulp-core-build-karma) | Runs unit tests in a browser using [Karma](https://www.npmjs.com/package/karma) |
+| [gulp-core-build-mocha](https://www.npmjs.com/package/@microsoft/gulp-core-build-mocha) | Runs unit tests in a NodeJS environment with [Mocha](https://www.npmjs.com/package/mocha) |
+| [sp-build-core-tasks](https://www.npmjs.com/package/@microsoft/sp-build-core-tasks) | Special tasks for developing with the SharePoint Framework (SPFx) |
 
 # API
 
@@ -99,6 +110,14 @@ Runs a given list of tasks in parallel execution order.
 ## serial(tasks)
 
 Runs a given list of tasks in serial execution order.
+
+## subtask(name, fn)
+
+Creates a subtask (which is not registered directly with gulp, use `task()` for that) which can be
+used with parallel and serial. The `this` variable in the callback function will be an instance of a `GulpTask`.
+
+`fn` should be a function which accepts 3 parameters: a `gulp` instance, the build configuration
+object, and an optional callback function to signify subtask completion.
 
 ## initialize(gulpInstance, [buildOtions])
 
@@ -123,6 +142,21 @@ build.initializeTasks(
 2. ```gulp```
 
 # Defining a custom task
+
+The `subtask()` function is used to define a custom task. For example,
+you could create the following subtask, which is registered to the command
+`gulp hello-world`:
+
+```javascript
+let helloWorldSubtask = build.subTask('do-hello-world-subtask', function(gulp, buildOptions, done) {
+  this.log('Hello, World!'); // use functions from GulpTask
+});
+
+// Register the task with gulp command line
+let helloWorldTask = build.task('hello-world', helloWorldSubtask);
+```
+
+Note that the command `gulp do-hello-world-subtask` would error.
 
 
 # License

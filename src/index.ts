@@ -121,14 +121,14 @@ class CustomTask extends GulpTask<void> {
 }
 
 /**
- * Creates a new task from a function callback. Useful as a shorthand way
+ * Creates a new subtask from a function callback. Useful as a shorthand way
  * of defining tasks directly in a gulpfile.
  *
  * @param {string} taskName - the name of the task, appearing in build logs
  * @param {boolean} addCommandLine - true if this task should be registered to the command line
  * @param {ICustomGulpTask} fn - the callback function to execute when this task runs
  */
-export function defineTask(taskName: string, addCommandLine: boolean, fn: ICustomGulpTask): IExecutable {
+export function subTask(taskName: string, fn: ICustomGulpTask): IExecutable {
   const customTask: CustomTask = new CustomTask(taskName, fn);
   return customTask;
 }
