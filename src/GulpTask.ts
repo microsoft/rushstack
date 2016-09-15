@@ -23,7 +23,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
     const objectAssign = require('object-assign');
     /* tslint:enable:typedef */
 
-    this.taskConfig = objectAssign({}, this.taskConfig, taskConfig);
+    objectAssign(this.taskConfig, taskConfig);
   }
 
   public replaceConfig(taskConfig: TASK_CONFIG): void {

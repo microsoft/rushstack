@@ -60,7 +60,7 @@ export function setConfig(config: IBuildConfig): void {
   const objectAssign = require('object-assign');
   /* tslint:enable:typedef */
 
-  _buildConfig = objectAssign({}, _buildConfig, config);
+  objectAssign(_buildConfig, config);
 }
 
 /**
