@@ -8,10 +8,7 @@ import { EOL } from 'os';
 
 import CertificateStore from './CertificateStore';
 
-export interface ICertificate {
-  pemCertificate: string;
-  pemKey: string;
-}
+const certPassword: string = 'gcbserve';
 
 interface IAttr {
   name: string;
@@ -35,6 +32,9 @@ interface IForgeCertificate {
   sign(privateKey: string, algorithm: IForgeSignatureAlgorithm): void; // tslint:disable-line:no-any
 }
 
+interface IForgePkcs12Asn1 {
+}
+
 interface IForgeSignatureAlgorithm {
 }
 
@@ -49,10 +49,24 @@ interface IForgeExtensions {
       create(): IForgeSignatureAlgorithm;
     }
   };
+
+  pkcs12: {
+    toPkcs12Asn1(privateKey: any, // tslint:disable-line:no-any
+                 certificate: IForgeCertificate,
+                 password: string,
+                 options?: { algorithm: string }): IForgePkcs12Asn1
+  };
+
+  asn1: {
+    toDer(pkcs12Asn1: IForgePkcs12Asn1): {
+      getBytes(): string;
+    }
+  };
 }
 
-export function CreateDevelopmentCertificate(): ICertificate {
+export function CreateDevelopmentCertificate(): string {
   const keys: forgeType.pki.KeyPair = forge.pki.rsa.generateKeyPair(2048);
+
   const certificate: IForgeCertificate = forge.pki.createCertificate();
   certificate.publicKey = keys.publicKey;
 
@@ -61,21 +75,18 @@ export function CreateDevelopmentCertificate(): ICertificate {
   certificate.validity.notBefore = now;
   certificate.validity.notAfter.setFullYear(certificate.validity.notBefore.getFullYear() + 5); // Five years from now
 
-  const attrs: IAttr[] = [{
+  certificate.setSubject([{
     name: 'commonName',
     value: 'localhost'
-  }];
+  }]);
 
-  certificate.setSubject(attrs);
-  certificate.setIssuer(attrs);
+  certificate.setIssuer([{
+    name: 'commonName',
+    value: 'localhost'
+  }]);
 
   certificate.setExtensions([
     {
-      name: 'keyUsage',
-      digitalSignature: true,
-      keyEncipherment: true,
-      dataEncipherment: true
-    }, {
       name: 'extKeyUsage',
       serverAuth: true
     }, {
@@ -86,14 +97,12 @@ export function CreateDevelopmentCertificate(): ICertificate {
   // self-sign certificate
   certificate.sign(keys.privateKey, forge.md.sha256.create());
 
-  // convert a Forge certificate to PEM
-  const pem: string = forge.pki.certificateToPem(certificate);
-  const privateKey: string = forge.pki.privateKeyToPem(keys.privateKey);
+  // convert a Forge certificate to Pkcs12Asn1
+  const p12Asn1: IForgePkcs12Asn1 =
+          forge.pkcs12.toPkcs12Asn1(keys.privateKey, certificate, certPassword, { algorithm: '3des' });
+  const p12Der: string = forge.asn1.toDer(p12Asn1).getBytes();
 
-  return {
-    pemCertificate: pem,
-    pemKey: privateKey
-  };
+  return p12Der;
 }
 
 export function tryTrustCertificate(certificatePath: string): boolean {
@@ -111,7 +120,7 @@ export function tryTrustCertificate(certificatePath: string): boolean {
                   'gulp-core-build-serve. If you do not consent to trust this certificate, click "NO" in the dialog.');
 
       const trustResult: child_process.SpawnSyncReturns<string> =
-        child_process.spawnSync(certutilExePath, ['-user', '-addstore', 'root', certificatePath]);
+        child_process.spawnSync(certutilExePath, ['-user', '-p', certPassword, '-importPfx', 'root', certificatePath]);
 
       if (trustResult.status !== 0) {
         console.log(`Error: ${trustResult.stdout.toString()}`);
@@ -141,11 +150,11 @@ export function tryTrustCertificate(certificatePath: string): boolean {
  * Get the dev certificate from the store, or, optionally, generate a new one and trust it if one doesn't exist in the
  *  store.
  */
-export function ensureCertificate(canGenerateNewCertificate: boolean): ICertificate {
+export function ensureCertificate(canGenerateNewCertificate: boolean): string {
   const certificateStore: CertificateStore = CertificateStore.instance;
 
-  if ((!certificateStore.certificateData || !certificateStore.keyData) && canGenerateNewCertificate) {
-    const generatedCertificate: ICertificate = CreateDevelopmentCertificate();
+  if ((!certificateStore.certificate) && canGenerateNewCertificate) {
+    const generatedCertificate: string = CreateDevelopmentCertificate();
 
     const now: Date = new Date();
     const certificateName: string = now.getTime().toString();
@@ -154,21 +163,16 @@ export function ensureCertificate(canGenerateNewCertificate: boolean): ICertific
       fs.mkdirSync(tempDirName); // Create the temp dir if it doesn't exist
     }
 
-    const tempCertificatePath: string = path.join(tempDirName, `${certificateName}.cer`);
-    fs.writeFileSync(tempCertificatePath, generatedCertificate.pemCertificate);
+    const tempCertificatePath: string = path.join(tempDirName, `${certificateName}.p12`);
+    fs.writeFileSync(tempCertificatePath, generatedCertificate, { encoding: 'binary' });
 
     if (tryTrustCertificate(tempCertificatePath)) {
-      certificateStore.certificateData = generatedCertificate.pemCertificate;
-      certificateStore.keyData = generatedCertificate.pemKey;
+      certificateStore.certificate = generatedCertificate;
     } else {
       // Clear out the existing store data, if any exists
-      certificateStore.certificateData = undefined;
-      certificateStore.keyData = undefined;
+      certificateStore.certificate = undefined;
     }
   }
 
-  return {
-    pemCertificate: certificateStore.certificateData,
-    pemKey: certificateStore.keyData
-  };
+  return certificateStore.certificate;
 }

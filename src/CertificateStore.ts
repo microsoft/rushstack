@@ -18,53 +18,28 @@ export default class CertificateStore {
   private _userProfilePath: string;
   private _gcbServeDataPath: string;
   private _certificatePath: string;
-  private _keyPath: string;
+  private _certificate: string;
 
-  private _certificateData: string;
-  private _keyData: string;
-
-  public get certificateData(): string {
-    if (!this._certificateData) {
+  public get certificate(): string {
+    if (!this._certificate) {
       if (fs.existsSync(this._certificatePath)) {
-        this._certificateData = fs.readFileSync(this._certificatePath, 'utf8');
+        this._certificate = fs.readFileSync(this._certificatePath, 'utf8');
       } else {
         return undefined;
       }
     }
 
-    return this._certificateData;
+    return this._certificate;
   }
 
-  public set certificateData(certificate: string) {
+  public set certificate(certificate: string) {
     if (certificate) {
       fs.writeFileSync(this._certificatePath, certificate, { encoding });
     } else if (fs.existsSync(this._certificatePath)) {
       fs.unlinkSync(this._certificatePath);
     }
 
-    this._certificateData = certificate;
-  }
-
-  public get keyData(): string {
-    if (!this._keyData) {
-      if (fs.existsSync(this._keyPath)) {
-        this._keyData = fs.readFileSync(this._keyPath, encoding);
-      } else {
-        return undefined;
-      }
-    }
-
-    return this._keyData;
-  }
-
-  public set keyData(key: string) {
-    if (key) {
-      fs.writeFileSync(this._keyPath, key, { encoding });
-    } else if (fs.existsSync(this._certificatePath)) {
-      fs.unlinkSync(this._keyPath);
-    }
-
-    this._keyData = key;
+    this._certificate = certificate;
   }
 
   private _initialize(): void {
@@ -79,7 +54,6 @@ export default class CertificateStore {
       fs.mkdirSync(this._gcbServeDataPath);
     }
 
-    this._certificatePath = path.join(this._gcbServeDataPath, 'gcb-serve.cer');
-    this._keyPath = path.join(this._gcbServeDataPath, 'gcb-serve.key');
+    this._certificatePath = path.join(this._gcbServeDataPath, 'gcb-serve.p12');
   }
 }
