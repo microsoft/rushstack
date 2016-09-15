@@ -36,7 +36,12 @@ export default class CertificateStore {
   }
 
   public set certificateData(certificate: string) {
-    fs.writeFileSync(this._certificatePath, certificate, { encoding });
+    if (certificate) {
+      fs.writeFileSync(this._certificatePath, certificate, { encoding });
+    } else if (fs.existsSync(this._certificatePath)) {
+      fs.unlinkSync(this._certificatePath);
+    }
+
     this._certificateData = certificate;
   }
 
@@ -53,7 +58,12 @@ export default class CertificateStore {
   }
 
   public set keyData(key: string) {
-    fs.writeFileSync(this._keyPath, key, { encoding });
+    if (key) {
+      fs.writeFileSync(this._keyPath, key, { encoding });
+    } else if (fs.existsSync(this._certificatePath)) {
+      fs.unlinkSync(this._keyPath);
+    }
+
     this._keyData = key;
   }
 
