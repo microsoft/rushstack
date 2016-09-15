@@ -137,10 +137,14 @@ export function tryTrustCertificate(certificatePath: string): boolean {
   }
 }
 
-export function ensureCertificate(): ICertificate {
+/**
+ * Get the dev certificate from the store, or, optionally, generate a new one and trust it if one doesn't exist in the
+ *  store.
+ */
+export function ensureCertificate(canGenerateNewCertificate: boolean): ICertificate {
   const certificateStore: CertificateStore = CertificateStore.instance;
 
-  if (!certificateStore.certificateData || !certificateStore.keyData) {
+  if ((!certificateStore.certificateData || !certificateStore.keyData) && canGenerateNewCertificate) {
     const generatedCertificate: ICertificate = CreateDevelopmentCertificate();
 
     const now: Date = new Date();

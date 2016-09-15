@@ -41,7 +41,7 @@ export default class CertificateStore {
   }
 
   public get keyData(): string {
-    if (!this._keyPath) {
+    if (!this._keyData) {
       if (fs.existsSync(this._keyPath)) {
         this._keyData = fs.readFileSync(this._keyPath, encoding);
       } else {
