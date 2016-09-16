@@ -8,10 +8,9 @@
 import * as child_process from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
-import * as colors from 'colors';
 import * as path from 'path';
 
-import { DualTaskStream } from '@ms/stream-moderator';
+import { ITaskWriter } from '@ms/stream-moderator';
 
 import RushConfig from '../data/RushConfig';
 import RushConfigProject from '../data/RushConfigProject';
@@ -47,16 +46,16 @@ export default class ProjectBuildTask implements ITaskDefinition {
     this._rushConfig = rushConfig;
   }
 
-  public execute(writer: DualTaskStream): Promise<void> {
+  public execute(writer: ITaskWriter): Promise<void> {
     return new Promise<void>((resolve: () => void, reject: (errors: TaskError[]) => void) => {
       this._hasError = false;
       try {
-        writer.stdout.write(`Project: [${this.name}]${os.EOL}`);
+        writer.writeLine(`>>> ProjectBuildTask :: Project [${this.name}]:`);
         const projectFolder: string = this._rushProject.projectFolder;
 
-        writer.stdout.write(`npm run clean${os.EOL}`);
+        writer.writeLine('npm run clean');
         Utilities.executeCommand(this._rushConfig.npmToolFilename, ['run', 'clean'],
-          projectFolder, /* suppressOutput */ true);
+          projectFolder, true);
 
         const args: string[] = [
           'run',
@@ -70,32 +69,34 @@ export default class ProjectBuildTask implements ITaskDefinition {
         if (this._npmMode) {
           args.push('--npm');
         }
-        writer.stdout.write('npm ' + args.join(' ') + os.EOL);
+        writer.writeLine('npm ' + args.join(' '));
 
         const buildTask: child_process.ChildProcess = Utilities.executeCommandAsync(
           this._rushConfig.npmToolFilename, args, projectFolder);
 
-        buildTask.stdout.pipe(writer.stdout);
+        buildTask.stdout.on('data', (data: string) => {
+          writer.write(data);
+        });
 
         buildTask.stderr.on('data', (data: string) => {
           this._hasError = true;
-          writer.stderr.write(data);
+          writer.writeError(data);
         });
 
         buildTask.on('close', (code: number) => {
           // Detect & display errors
           const errors: TaskError[] = this._errorDetector.execute(
-            writer.stdout.readAll() + os.EOL + writer.stderr.readAll());
+            writer.getStdOutput() + os.EOL + writer.getStdError());
 
           for (let i: number = 0; i < errors.length; i++) {
-            writer.push(colors.red(errors[i].toString(this._errorDisplayMode) + os.EOL));
+            writer.writeError(errors[i].toString(this._errorDisplayMode) + os.EOL);
           }
 
           // Display a summary of why the task failed or succeeded
           if (errors.length) {
-            writer.push(colors.red(`${errors.length} Error${errors.length > 1 ? 's' : ''}!` + os.EOL));
+            writer.writeError(`${errors.length} Error${errors.length > 1 ? 's' : ''}!` + os.EOL);
           } else if (code) {
-            writer.push(colors.red('gulp returned error code: ' + code + os.EOL));
+            writer.writeError('gulp returned error code: ' + code + os.EOL);
           }
 
           // Write the logs to disk
@@ -118,16 +119,15 @@ export default class ProjectBuildTask implements ITaskDefinition {
   }
 
   // @todo #179371: add log files to list of things that get gulp nuke'd
-  private _writeLogsToDisk(writer: DualTaskStream): void {
+  private _writeLogsToDisk(writer: ITaskWriter): void {
     const logFilename: string = path.basename(this._rushProject.projectFolder);
-    const colorCodeRegex: RegExp = /\x1B[[(?);]{0,2}(;?\d)*./g;
 
-    const stdout: string = writer.stdout.readAll().replace(colorCodeRegex, '');
+    const stdout: string = writer.getStdOutput().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
     if (stdout) {
       fs.writeFileSync(path.join(this._rushProject.projectFolder, logFilename + '.build.log'), stdout);
     }
 
-    const stderr: string = writer.stdout.readAll().replace(colorCodeRegex, '');
+    const stderr: string = writer.getStdError().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
     if (stderr) {
       fs.writeFileSync(path.join(this._rushProject.projectFolder, logFilename + '.build.error.log'), stderr);
     }

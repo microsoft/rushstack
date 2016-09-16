@@ -7,14 +7,14 @@
 
 import TaskError from '../errorDetection/TaskError';
 import TaskStatus from './TaskStatus';
-import { DualTaskStream } from '@ms/stream-moderator';
+import { ITaskWriter } from '@ms/stream-moderator';
 
 /**
  * A definition for a task, an execute function returning a promise and a unique string name
  */
 export interface ITaskDefinition {
   name: string;
-  execute: (writer: DualTaskStream) => Promise<void>;
+  execute: (writer: ITaskWriter) => Promise<void>;
 }
 
 /**
