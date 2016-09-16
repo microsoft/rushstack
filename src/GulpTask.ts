@@ -7,7 +7,6 @@ import { log, verbose, error, fileError, fileWarning,
 import gutil = require('gulp-util');
 import gulp = require('gulp');
 import through2 = require('through2');
-
 /* tslint:disable:typedef */
 const eos = require('end-of-stream');
 /* tslint:enable:typedef */
@@ -20,10 +19,10 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
 
   public setConfig(taskConfig: TASK_CONFIG): void {
     /* tslint:disable:typedef */
-    const objectAssign = require('object-assign');
+    let merge = require('lodash.merge');
     /* tslint:enable:typedef */
 
-    objectAssign(this.taskConfig, taskConfig);
+    this.taskConfig = merge({}, this.taskConfig, taskConfig);
   }
 
   public replaceConfig(taskConfig: TASK_CONFIG): void {

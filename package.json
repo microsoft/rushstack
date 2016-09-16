@@ -18,9 +18,9 @@
     "gulp": "~3.9.1",
     "gulp-flatten": "~0.2.0",
     "gulp-util": "~3.0.7",
+    "lodash.merge": "~4.3.2",
     "merge2": "~1.0.2",
     "node-notifier": "~4.5.0",
-    "object-assign": "~4.1.0",
     "pretty-hrtime": "~1.0.2",
     "through2": "~2.0.1",
     "yargs": "~4.6.0"
