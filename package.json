@@ -20,7 +20,7 @@
     "gulp-typescript": "~2.13.6",
     "gulp-util": "~3.0.7",
     "lodash": "~4.15.0",
-    "md5": "~2.1.0",
+    "md5": "~2.2.1",
     "merge2": "~1.0.2",
     "object-assign": "~4.1.0",
     "through2": "~2.0.1",
