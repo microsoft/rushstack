@@ -1,3 +1,5 @@
-export { default as default } from './StreamModerator';
-export { default as DualTaskStream } from './DualTaskStream';
-export { default as PersistentStream } from './PersistentStream';
+export { default as default } from './Interleaver';
+export { ITaskWriter as ITaskWriter } from './Interleaver';
+export { default as StreamModerator } from './next/StreamModerator';
+export { default as DualTaskStream } from './next/DualTaskStream';
+export { default as PersistentStream } from './next/PersistentStream';
