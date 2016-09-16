@@ -18,14 +18,31 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
   public taskConfig: TASK_CONFIG;
   public nukeMatch: string[];
 
+  /**
+   * Shallow merges config settings into the task config.
+   */
   public setConfig(taskConfig: TASK_CONFIG): void {
     /* tslint:disable:typedef */
     const objectAssign = require('object-assign');
     /* tslint:enable:typedef */
 
-    objectAssign(this.taskConfig, taskConfig);
+    this.taskConfig = objectAssign({}, this.taskConfig, taskConfig);
   }
 
+  /**
+   * Deep merges config settings into task config.
+   */
+  public mergeConfig(taskConfig: TASK_CONFIG): void {
+    /* tslint:disable:typedef */
+    const merge = require('lodash.merge');
+    /* tslint:enable:typedef */
+
+    this.taskConfig = merge({}, this.taskConfig, taskConfig);
+  }
+
+  /**
+   * Replaces task config settings with new settings.
+   */
   public replaceConfig(taskConfig: TASK_CONFIG): void {
     this.taskConfig = taskConfig;
   }
