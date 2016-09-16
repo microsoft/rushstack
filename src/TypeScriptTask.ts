@@ -170,4 +170,9 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       })
       .on('error', completeCallback);
   }
+
+  /** Override the new mergeConfig API */
+  public mergeConfig(config: ITypeScriptTaskConfig): void {
+    throw 'Do not use mergeConfig with gulp-core-build-typescript';
+  }
 }
