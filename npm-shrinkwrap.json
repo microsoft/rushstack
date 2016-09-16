@@ -1,11 +1,11 @@
 {
   "name": "@microsoft/gulp-core-build",
-  "version": "0.9.3",
+  "version": "0.9.5",
   "dependencies": {
     "@microsoft/gulp-core-build": {
-      "version": "0.9.3",
+      "version": "0.9.5",
       "from": "@microsoft/gulp-core-build@>=0.9.1 <0.10.0",
-      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build/-/gulp-core-build-0.9.3.tgz"
+      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build/-/gulp-core-build-0.9.5.tgz"
     },
     "@microsoft/gulp-core-build-mocha": {
       "version": "0.3.2",
@@ -1241,9 +1241,9 @@
       "resolved": "https://registry.npmjs.org/lodash._baseassign/-/lodash._baseassign-3.2.0.tgz"
     },
     "lodash._baseclone": {
-      "version": "3.3.0",
-      "from": "lodash._baseclone@>=3.0.0 <4.0.0",
-      "resolved": "https://registry.npmjs.org/lodash._baseclone/-/lodash._baseclone-3.3.0.tgz"
+      "version": "4.5.7",
+      "from": "lodash._baseclone@>=4.5.0 <4.6.0",
+      "resolved": "https://registry.npmjs.org/lodash._baseclone/-/lodash._baseclone-4.5.7.tgz"
     },
     "lodash._basecopy": {
       "version": "3.0.1",
@@ -1318,7 +1318,14 @@
     "lodash.clonedeep": {
       "version": "3.0.2",
       "from": "lodash.clonedeep@>=3.0.0 <4.0.0",
-      "resolved": "https://registry.npmjs.org/lodash.clonedeep/-/lodash.clonedeep-3.0.2.tgz"
+      "resolved": "https://registry.npmjs.org/lodash.clonedeep/-/lodash.clonedeep-3.0.2.tgz",
+      "dependencies": {
+        "lodash._baseclone": {
+          "version": "3.3.0",
+          "from": "lodash._baseclone@>=3.0.0 <4.0.0",
+          "resolved": "https://registry.npmjs.org/lodash._baseclone/-/lodash._baseclone-3.3.0.tgz"
+        }
+      }
     },
     "lodash.escape": {
       "version": "3.2.0",
@@ -1373,14 +1380,7 @@
     "lodash.merge": {
       "version": "4.3.5",
       "from": "lodash.merge@>=4.3.2 <4.4.0",
-      "resolved": "https://registry.npmjs.org/lodash.merge/-/lodash.merge-4.3.5.tgz",
-      "dependencies": {
-        "lodash._baseclone": {
-          "version": "4.5.7",
-          "from": "lodash._baseclone@>=4.5.0 <4.6.0",
-          "resolved": "https://registry.npmjs.org/lodash._baseclone/-/lodash._baseclone-4.5.7.tgz"
-        }
-      }
+      "resolved": "https://registry.npmjs.org/lodash.merge/-/lodash.merge-4.3.5.tgz"
     },
     "lodash.pick": {
       "version": "4.4.0",
@@ -1587,7 +1587,7 @@
     },
     "object-assign": {
       "version": "4.1.0",
-      "from": "object-assign@>=4.1.0 <5.0.0",
+      "from": "object-assign@>=4.1.0 <4.2.0",
       "resolved": "https://registry.npmjs.org/object-assign/-/object-assign-4.1.0.tgz"
     },
     "object-keys": {
