@@ -1,14 +1,14 @@
 {
   "name": "@microsoft/gulp-core-build-karma",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "dependencies": {
+    "@microsoft/gulp-core-build": "^0.10.0",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
-    "@microsoft/gulp-core-build": "~0.9.2",
     "gulp-karma": "~0.0.5",
     "istanbul-instrumenter-loader": "~0.2.0",
     "karma": "~0.13.9",
@@ -27,6 +27,6 @@
     "webpack": "~1.13.0"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "~0.3.1"
+    "@microsoft/node-library-build": "^0.3.1"
   }
 }
