@@ -242,7 +242,7 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
           }
         }
       } else {
-        let devCertificate: string = ensureCertificate(this.taskConfig.tryCreateDevCertificate);
+        let devCertificate: Buffer = ensureCertificate(this.taskConfig.tryCreateDevCertificate);
         if (devCertificate) {
           result.pfx = devCertificate;
           result.passphrase = 'gcbserve';
