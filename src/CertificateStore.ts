@@ -18,12 +18,15 @@ export default class CertificateStore {
   private _userProfilePath: string;
   private _gcbServeDataPath: string;
   private _certificatePath: string;
-  private _certificate: string;
+  private _certificate: Buffer;
 
-  public get certificate(): string {
+  private _certificatePem: string;
+  private _certificatePemKey: string;
+
+  public get certificate(): Buffer {
     if (!this._certificate) {
       if (fs.existsSync(this._certificatePath)) {
-        this._certificate = fs.readFileSync(this._certificatePath, 'utf8');
+        this._certificate = fs.readFileSync(this._certificatePath);
       } else {
         return undefined;
       }
@@ -32,14 +35,22 @@ export default class CertificateStore {
     return this._certificate;
   }
 
-  public set certificate(certificate: string) {
+  public set certificate(certificate: Buffer) {
     if (certificate) {
-      fs.writeFileSync(this._certificatePath, certificate, { encoding });
+      fs.writeFileSync(this._certificatePath, certificate);
     } else if (fs.existsSync(this._certificatePath)) {
       fs.unlinkSync(this._certificatePath);
     }
 
     this._certificate = certificate;
+  }
+
+  public get certificatePem(): string {
+    return this._certificatePem;
+  }
+
+  public get certificatePemKey(): string {
+    return this._certificatePemKey;
   }
 
   private _initialize(): void {

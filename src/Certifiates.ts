@@ -102,6 +102,8 @@ export function CreateDevelopmentCertificate(): string {
           forge.pkcs12.toPkcs12Asn1(keys.privateKey, certificate, certPassword, { algorithm: '3des' });
   const p12Der: string = forge.asn1.toDer(p12Asn1).getBytes();
 
+  debugger;
+
   return p12Der;
 }
 
@@ -150,7 +152,7 @@ export function tryTrustCertificate(certificatePath: string): boolean {
  * Get the dev certificate from the store, or, optionally, generate a new one and trust it if one doesn't exist in the
  *  store.
  */
-export function ensureCertificate(canGenerateNewCertificate: boolean): string {
+export function ensureCertificate(canGenerateNewCertificate: boolean): Buffer {
   const certificateStore: CertificateStore = CertificateStore.instance;
 
   if ((!certificateStore.certificate) && canGenerateNewCertificate) {
@@ -167,11 +169,13 @@ export function ensureCertificate(canGenerateNewCertificate: boolean): string {
     fs.writeFileSync(tempCertificatePath, generatedCertificate, { encoding: 'binary' });
 
     if (tryTrustCertificate(tempCertificatePath)) {
-      certificateStore.certificate = generatedCertificate;
+      certificateStore.certificate = new Buffer(generatedCertificate);
     } else {
       // Clear out the existing store data, if any exists
       certificateStore.certificate = undefined;
     }
+
+    fs.unlinkSync(tempCertificatePath);
   }
 
   return certificateStore.certificate;
