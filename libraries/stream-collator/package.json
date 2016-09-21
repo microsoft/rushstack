@@ -13,7 +13,7 @@
     "test": "gulp",
     "clean": "gulp nuke"
   },
-  "license": "UNLICENSED",
+  "license": "SEE LICENSE IN LICENSE.docx",
   "dependencies": {
     "colors": "~1.1.2"
   },
