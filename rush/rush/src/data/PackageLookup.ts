@@ -17,6 +17,7 @@ export default class PackageLookup {
     // We want the lookup to return the shallowest match, so this is a breadth first
     // traversal
 
+    // tslint:disable-next-line:no-constant-condition
     while (true) {
       const current: Package = queue.shift();
       if (!current) {

@@ -219,6 +219,7 @@ export default class Package {
     let currentParent: Package = this;
     let parentForCreate: Package = this;
 
+    // tslint:disable-next-line:no-constant-condition
     while (true) {
       // NOTE: Initially we don't compare against ourself, because self-references
       // are a special case

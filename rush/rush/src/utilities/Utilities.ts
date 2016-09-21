@@ -47,6 +47,8 @@ export default class Utilities {
 
     const startTime: number = Utilities.getTimeInMs();
     let looped: boolean = false;
+
+    // tslint:disable-next-line:no-constant-condition
     while (true) {
       try {
         fs.mkdirSync(folderName);
@@ -163,6 +165,8 @@ export default class Utilities {
     }
 
     let attemptNumber: number = 1;
+
+    // tslint:disable-next-line:no-constant-condition
     while (true) {
       try {
         Utilities.executeCommand(command, args, workingDirectory, suppressOutput);

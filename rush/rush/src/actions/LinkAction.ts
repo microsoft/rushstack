@@ -240,6 +240,7 @@ function linkProject(
   const queue: IQueueItem[] = [];
   queue.push({ commonPackage: commonProjectPackage, localPackage: localProjectPackage });
 
+  // tslint:disable-next-line:no-constant-condition
   while (true) {
     const queueItem: IQueueItem = queue.shift();
     if (!queueItem) {
