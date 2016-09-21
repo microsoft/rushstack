@@ -1,9 +1,9 @@
-## What is Stream-Moderator?
+## stream-collator
 
 Oftentimes, when working with multiple parallel asynchronous processes, it is helpful to ensure that their
 outputs are not mixed together, as this can cause readability issues in the console or log. The
-stream moderator manages the output of these streams carefully, such that no two streams are writing
-at the same time. At any given time, one stream registered with the moderator is the **active stream**
+**stream-collator** manages the output of these streams carefully, such that no two streams are writing
+at the same time. At any given time, one stream registered with the collator is the **active stream**
 which means that particular stream will be live streaming, while the others will wait for that stream
 to finish before their completion.
 
@@ -25,29 +25,29 @@ Most likely, something like the following would be much more useful to users of 
 
 `AAAAABBBBBBBBBBBBBBBCCCCCCCCCC`
 
-This is where the stream-moderator comes in handy!
+This is where the **stream-collator** comes in handy!
 
 ## Installation
 
-Install the stream-moderator:
+Install the stream-collator:
 
-`npm install --save @microsoft/stream-moderator`
+`npm install --save @microsoft/stream-collator`
 
-Import the moderator:
+Import the collator:
 
 ```javascript
-import StreamModerator from '@microsoft/stream-moderator'; // es6
+import StreamCollator from '@microsoft/stream-collator'; // es6
 ```
 
 ```javascript
-const StreamModerator = require('@microsoft/stream-moderator'); // commonjs
+const StreamCollator = require('@microsoft/stream-collator'); // commonjs
 ```
 
 ## Usage
 
-A stream moderator adheres to the [NodeJS Stream API](https://nodejs.org/api/stream.html), meaning that it effectively
+A stream collator adheres to the [NodeJS Stream API](https://nodejs.org/api/stream.html), meaning that it effectively
 is special type of [ReadableStream](https://nodejs.org/api/stream.html#stream_class_stream_readable). This makes
-working with the stream moderator very simple. Imagine we had the 3 streams from the example above:
+working with the stream collator very simple. Imagine we had the 3 streams from the example above:
 
 ```javascript
 const streamA = getRepeaterStream('A', 5); // fake helper function that returns a ReadableStream
@@ -55,27 +55,27 @@ const streamB = getRepeaterStream('B', 15); // fake helper function that returns
 const streamC = getRepeaterStream('C', 10); // fake helper function that returns a ReadableStream
 ```
 
-Now, instantiate a stream moderator instance and register the streams with it:
+Now, instantiate a stream collator instance and register the streams with it:
 
 ```javascript
-const moderator = new StreamModerator();
+const collator = new StreamCollator();
 
-moderator.register(streamA);
-moderator.register(streamB);
-moderator.register(streamC);
+collator.register(streamA);
+collator.register(streamB);
+collator.register(streamC);
 ```
 
-`moderator` is now a stream which can be accessed with the standard stream API's. For example, you could pass the output
+`collator` is now a stream which can be accessed with the standard stream API's. For example, you could pass the output
 to process.stdout:
 
-`moderator.pipe(process.stdout);`
+`collator.pipe(process.stdout);`
 
 Or a file:
 
 ```javascript
 var wstream = fs.createWriteStream('myOutput.txt');
 
-moderator.pipe(wstream);
+collator.pipe(wstream);
 ```
 
 ## The active stream
@@ -97,7 +97,7 @@ A special string-based stream with a function `readAll()` which will return the 
 to the stream as a string, regardless of whether the stream is open or closed.
 
 ## Improvements
-NOTE: Ending the moderator stream could be improved with an option that lets you select between the following behaviors:
-* Close the moderator stream when ANY registered stream has been closed
-* Close the moderator stream when ALL registered streams have been closed
-* Don't automatically close the moderator stream
+NOTE: Ending the collator stream could be improved with an option that lets you select between the following behaviors:
+* Close the collator stream when ANY registered stream has been closed
+* Close the collator stream when ALL registered streams have been closed
+* Don't automatically close the collator stream

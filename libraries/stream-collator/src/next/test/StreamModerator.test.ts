@@ -1,16 +1,16 @@
 import * as chai from 'chai';
 
-import StreamModerator from '../StreamModerator';
+import StreamCollator from '../StreamCollator';
 import PersistentStream from '../PersistentStream';
 
 const assert: Chai.AssertStatic = chai.assert;
 
-let moderator: StreamModerator<NodeJS.ReadableStream>;
+let collator: StreamCollator<NodeJS.ReadableStream>;
 let stdout: PersistentStream, taskA: PersistentStream, taskB: PersistentStream;
 
-describe('StreamModerator tests', () => {
+describe('StreamCollator tests', () => {
   beforeEach(() => {
-    moderator = new StreamModerator();
+    collator = new StreamCollator();
     stdout = new PersistentStream();
     taskA = new PersistentStream();
     taskB = new PersistentStream();
@@ -18,10 +18,10 @@ describe('StreamModerator tests', () => {
     taskA.on('data', () => { /* no-op */ });
     taskB.on('data', () => { /* no-op */ });
 
-    moderator.pipe(stdout);
+    collator.pipe(stdout);
 
-    moderator.register(taskA);
-    moderator.register(taskB);
+    collator.register(taskA);
+    collator.register(taskB);
   });
 
   it('should write text to stdout', (done: MochaDone) => {
@@ -34,7 +34,7 @@ describe('StreamModerator tests', () => {
   });
 
   it('should not write non-active tasks to stdout', (done: MochaDone) => {
-    testWrite(taskA, '1', moderator, 'data', () => {
+    testWrite(taskA, '1', collator, 'data', () => {
       assert.equal(stdout.readAll(), '1');
 
       taskB.write('2');
@@ -69,7 +69,7 @@ describe('StreamModerator tests', () => {
         assert.equal(stdout.readAll(), '13');
 
         testEnd(taskB,
-          moderator, 'end',
+          collator, 'end',
           () => {
             assert.equal(stdout.readAll(), '132');
             assert.equal(taskA.readAll(), '13');
@@ -82,7 +82,7 @@ describe('StreamModerator tests', () => {
   });
 
   it('should update the active task once the active task is closed', (done: MochaDone) => {
-    testWrite(taskA, '1', moderator, 'data', () => {
+    testWrite(taskA, '1', collator, 'data', () => {
       assert.equal(stdout.readAll(), '1');
 
       taskA.end();
@@ -109,7 +109,7 @@ describe('StreamModerator tests', () => {
   });
 
   it('should write completed tasks after the active task is completed', (done: MochaDone) => {
-    testWrite(taskA, '1', moderator, 'data', () => {
+    testWrite(taskA, '1', collator, 'data', () => {
       assert.equal(stdout.readAll(), '1');
 
       taskB.write('2');

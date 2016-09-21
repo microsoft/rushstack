@@ -1,7 +1,7 @@
 {
-  "name": "@ms/stream-moderator",
+  "name": "@microsoft/stream-collator",
   "version": "1.0.0",
-  "description": "Manage interleaving of multiple streams into a single stream...",
+  "description": "Display intelligible realtime output from your asynchronous streams",
   "repository": {
     "type": "git",
     "url": "https://onedrive.visualstudio.com/DefaultCollection/SPPPlat/_git/sp-next"

@@ -1,5 +1,5 @@
 /**
- * @file StreamModerator.ts
+ * @file StreamCollator.ts
  * @Copyright (c) Microsoft Corporation.  All rights reserved.
  *
  * A special stream which will manage the output of multiple parallel streams,
@@ -37,7 +37,7 @@ class StreamInfo<T extends NodeJS.ReadableStream> {
 /**
  * A class which manages the output of multiple threads.
  */
-export default class StreamModerator<T extends NodeJS.ReadableStream>
+export default class StreamCollator<T extends NodeJS.ReadableStream>
   extends stream.Readable implements NodeJS.ReadableStream {
   private _streams: StreamInfo<T>[] = [];
   private _activeStream: StreamInfo<T> = undefined;
@@ -47,8 +47,7 @@ export default class StreamModerator<T extends NodeJS.ReadableStream>
   };
 
   /**
-   * Registers a stream into the list of active buffers and returns a IConsoleModerator for the
-   * calling process to use to manage output.
+   * Registers a stream into the list of active buffers.
    */
   public register(stream: T): void {
     const streamState: StreamInfo<T> = new StreamInfo<T>(stream);
