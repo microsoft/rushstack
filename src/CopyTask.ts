@@ -5,11 +5,13 @@ export interface ICopyConfig {
   copyTo: {
     [destPath: string]: string[];
   };
+  shouldFlatten?: boolean;
 }
 
 export class CopyTask extends GulpTask<ICopyConfig> {
   public taskConfig: ICopyConfig = {
-    copyTo: {}
+    copyTo: {},
+    shouldFlatten: true
   };
 
   public executeTask(
@@ -19,8 +21,9 @@ export class CopyTask extends GulpTask<ICopyConfig> {
 
     /* tslint:disable:typedef */
     const flatten = require('gulp-flatten');
+    const gulpif = require('gulp-if');
     const merge = require('merge2');
-    const { copyTo } = this.taskConfig;
+    const { copyTo, shouldFlatten } = this.taskConfig;
     /* tslint:enable:typedef */
 
     const allStreams: NodeJS.ReadWriteStream[] = [];
@@ -31,7 +34,7 @@ export class CopyTask extends GulpTask<ICopyConfig> {
 
         sources.forEach(sourceMatch => allStreams.push(
           gulp.src(sourceMatch)
-            .pipe(flatten())
+            .pipe(gulpif(shouldFlatten, flatten()))
             .pipe(gulp.dest(copyDest))
         ));
       }
