@@ -11,15 +11,11 @@ import {
 
 import {
   CommandLineParameter,
+  ICommandLineParserData,
   IConverterFunction,
   CommandLineFlagParameter,
   CommandLineStringParameter
 } from './CommandLineParameter';
-
-export interface ICommandLineParserData {
-  action: string;
-  [key: string]: any; /* tslint:disable-line:no-any */
-}
 
 /**
  * This is the common base class for CommandLineAction and CommandLineParser

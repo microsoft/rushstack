@@ -3,7 +3,8 @@
  */
 
 import * as argparse from 'argparse';
-import CommandLineParameterProvider, { ICommandLineParserData } from './CommandLineParameterProvider';
+import { ICommandLineParserData } from './CommandLineParameter';
+import CommandLineParameterProvider from './CommandLineParameterProvider';
 
 export interface ICommandLineActionOptions {
   /**

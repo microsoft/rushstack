@@ -5,7 +5,8 @@
 import * as argparse from 'argparse';
 import * as colors from 'colors';
 import CommandLineAction from './CommandLineAction';
-import CommandLineParameterProvider, { ICommandLineParserData } from './CommandLineParameterProvider';
+import { ICommandLineParserData } from './CommandLineParameter';
+import CommandLineParameterProvider from './CommandLineParameterProvider';
 
 export interface ICommandListParserOptions {
   // The name of your tool when invoked from the command line
