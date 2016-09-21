@@ -6,13 +6,16 @@ import * as colors from 'colors';
 import * as minimatch from 'minimatch';
 import { EOL } from 'os';
 
-import CommandLineAction from '../commandLine/CommandLineAction';
+import {
+  CommandLineAction,
+  CommandLineFlagParameter,
+  CommandLineStringParameter
+} from '@microsoft/ts-command-line';
+
 import Utilities from '../utilities/Utilities';
 import RushConfig from '../data/RushConfig';
 import RushConfigProject from '../data/RushConfigProject';
-
 import RushCommandLineParser from './RushCommandLineParser';
-import { CommandLineStringParameter, CommandLineFlagParameter } from '../commandLine/CommandLineParameter';
 
 export default class PublishAction extends CommandLineAction {
   private _parser: RushCommandLineParser;

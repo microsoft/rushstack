@@ -6,15 +6,14 @@ import * as colors from 'colors';
 import * as fs from 'fs';
 import * as os from 'os';
 
+import { CommandLineAction, CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import * as ErrorDetectorRules from '../errorDetection/rules/index';
-import CommandLineAction from '../commandLine/CommandLineAction';
 import ErrorDetector, { ErrorDetectionMode, IErrorDetectionRule } from '../errorDetection/ErrorDetector';
 import JsonFile from '../utilities/JsonFile';
 import RushCommandLineParser from './RushCommandLineParser';
 import RushConfig, { IRushLinkJson } from '../data/RushConfig';
 import ProjectBuildTask from '../taskRunner/ProjectBuildTask';
 import TaskRunner from '../taskRunner/TaskRunner';
-import { CommandLineFlagParameter } from '../commandLine/CommandLineParameter';
 
 export default class RebuildAction extends CommandLineAction {
   private _parser: RushCommandLineParser;

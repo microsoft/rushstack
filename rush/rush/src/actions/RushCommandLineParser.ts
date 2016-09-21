@@ -6,8 +6,7 @@ import * as os from 'os';
 import * as colors from 'colors';
 import * as wordwrap from 'wordwrap';
 
-import { CommandLineFlagParameter } from '../commandLine/CommandLineParameter';
-import CommandLineParser from '../commandLine/CommandLineParser';
+import { CommandLineParser, CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import RushConfig from '../data/RushConfig';
 import InstallAction from './InstallAction';
 import LinkAction from './LinkAction';

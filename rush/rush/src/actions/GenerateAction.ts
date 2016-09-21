@@ -10,7 +10,7 @@ import * as path from 'path';
 import * as semver from 'semver';
 import * as fs from 'fs';
 
-import CommandLineAction from '../commandLine/CommandLineAction';
+import { CommandLineAction, CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import InstallAction from './InstallAction';
 import { IPackageJson } from '../data/Package';
 import JsonFile from '../utilities/JsonFile';
@@ -18,7 +18,6 @@ import RushCommandLineParser from './RushCommandLineParser';
 import RushConfig from '../data/RushConfig';
 import RushConfigProject from '../data/RushConfigProject';
 import Utilities from '../utilities/Utilities';
-import { CommandLineFlagParameter } from '../commandLine/CommandLineParameter';
 
 export default class GenerateAction extends CommandLineAction {
   private _parser: RushCommandLineParser;

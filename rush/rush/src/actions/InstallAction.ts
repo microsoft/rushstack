@@ -9,12 +9,11 @@ import globEscape = require('glob-escape');
 import * as os from 'os';
 import * as path from 'path';
 
-import CommandLineAction from '../commandLine/CommandLineAction';
+import { CommandLineAction, CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import JsonFile from '../utilities/JsonFile';
 import RushCommandLineParser from './RushCommandLineParser';
 import RushConfig from '../data/RushConfig';
 import Utilities from '../utilities/Utilities';
-import { CommandLineFlagParameter } from '../commandLine/CommandLineParameter';
 
 const MAX_INSTALL_ATTEMPTS: number = 5;
 

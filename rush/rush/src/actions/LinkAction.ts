@@ -9,7 +9,7 @@ import * as path from 'path';
 import * as semver from 'semver';
 import readPackageTree = require('read-package-tree');
 
-import CommandLineAction from '../commandLine/CommandLineAction';
+import { CommandLineAction, CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import JsonFile from '../utilities/JsonFile';
 import RushCommandLineParser from './RushCommandLineParser';
 import RushConfig, { IRushLinkJson } from '../data/RushConfig';
@@ -17,7 +17,6 @@ import RushConfigProject from '../data/RushConfigProject';
 import Package, { IResolveOrCreateResult, PackageDependencyKind } from '../data/Package';
 import PackageLookup from '../data/PackageLookup';
 import Utilities from '../utilities/Utilities';
-import { CommandLineFlagParameter } from '../commandLine/CommandLineParameter';
 
 export default class LinkAction extends CommandLineAction {
   private _parser: RushCommandLineParser;

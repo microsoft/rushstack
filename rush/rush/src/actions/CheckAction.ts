@@ -9,7 +9,7 @@ import * as os from 'os';
 import * as path from 'path';
 import builtinPackageNames = require('builtins');
 
-import CommandLineAction from '../commandLine/CommandLineAction';
+import { CommandLineAction } from '@microsoft/ts-command-line';
 import RushCommandLineParser from './RushCommandLineParser';
 
 export default class CheckAction extends CommandLineAction {
