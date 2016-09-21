@@ -7,7 +7,7 @@
 
 import TaskError from '../errorDetection/TaskError';
 import TaskStatus from './TaskStatus';
-import { ITaskWriter } from '@ms/stream-moderator';
+import { ITaskWriter } from '@microsoft/stream-collator';
 
 /**
  * A definition for a task, an execute function returning a promise and a unique string name

@@ -10,7 +10,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import { ITaskWriter } from '@ms/stream-moderator';
+import { ITaskWriter } from '@microsoft/stream-collator';
 
 import RushConfig from '../data/RushConfig';
 import RushConfigProject from '../data/RushConfigProject';

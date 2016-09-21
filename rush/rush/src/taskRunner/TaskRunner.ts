@@ -11,7 +11,7 @@ import * as os from 'os';
 import ITask, { ITaskDefinition } from './ITask';
 import TaskStatus from './TaskStatus';
 import TaskError from '../errorDetection/TaskError';
-import Interleaver, { ITaskWriter } from '@ms/stream-moderator';
+import Interleaver, { ITaskWriter } from '@microsoft/stream-collator';
 import { ErrorDetectionMode } from '../errorDetection/ErrorDetector';
 
 /**
