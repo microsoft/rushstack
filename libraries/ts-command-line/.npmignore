@@ -1,0 +1,7 @@
+.vscode
+coverage
+node_modules
+typings
+gulpfile.js
+tsconfig.json
+lib/test

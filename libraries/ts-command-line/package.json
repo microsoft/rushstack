@@ -1,0 +1,27 @@
+{
+  "name": "@microsoft/ts-command-line",
+  "version": "1.0.0",
+  "description": "An object-oriented command-line parser for TypeScript",
+  "repository": {
+    "type": "git",
+    "url": "https://onedrive.visualstudio.com/DefaultCollection/SPPPlat/_git/sp-next"
+  },
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "build": "gulp",
+    "test": "gulp",
+    "clean": "gulp nuke"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "argparse": "~1.0.7",
+    "colors": "~1.1.2"
+  },
+  "devDependencies": {
+    "chai": "~3.5.0",
+    "gulp": "~3.9.1",
+    "mocha": "~2.5.3",
+    "@microsoft/sp-build-node": "~0.1.0"
+  }
+}
