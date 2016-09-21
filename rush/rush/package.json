@@ -14,7 +14,7 @@
   "bin": {
     "rush": "./bin/rush"
   },
-  "license": "UNLICENSED",
+  "license": "SEE LICENSE IN LICENSE.docx",
   "dependencies": {
     "@microsoft/stream-collator": "~1.0.0",
     "@microsoft/ts-command-line": "~1.0.0",
