@@ -1,5 +1,5 @@
 {
-  "name": "@ms/rush",
+  "name": "@microsoft/rush",
   "version": "0.5.5",
   "description": "Manage building/installing of multiple NPM package folders",
   "repository": {
@@ -7,15 +7,17 @@
     "url": "https://onedrive.visualstudio.com/DefaultCollection/SPPPlat/_git/sp-next"
   },
   "scripts": {
-    "build": "node_modules/.bin/jake",
-    "clean": "node_modules/.bin/jake clean"
+    "build": "gulp",
+    "clean": "gulp nuke",
+    "test": "gulp"
   },
   "bin": {
     "rush": "./bin/rush"
   },
   "license": "UNLICENSED",
   "dependencies": {
-    "@ms/stream-moderator": "~1.0.0",
+    "@microsoft/stream-collator": "~1.0.0",
+    "@microsoft/ts-command-line": "~1.0.0",
     "argparse": "~1.0.7",
     "builtins": "~1.0.3",
     "colors": "~1.1.2",
@@ -30,9 +32,7 @@
     "z-schema": "~3.17.0"
   },
   "devDependencies": {
-    "jake": "~8.0.12",
-    "tslint": "~3.15.1",
-    "tslint-microsoft-contrib": "~2.0.10",
-    "typescript": "~1.8.9"
+    "@microsoft/sp-build-node": "~0.1.0",
+    "gulp": "~3.9.1"
   }
 }
