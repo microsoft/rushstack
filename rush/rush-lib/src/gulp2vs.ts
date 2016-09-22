@@ -13,9 +13,9 @@ const errorDetector: ErrorDetector = new ErrorDetector([
   ErrorDetectionRules.TsLintErrorDetector
 ]);
 
-const writer: ITaskWriter = Interleaver.registerTask('vs gulp bundle');
+const writer: ITaskWriter = Interleaver.registerTask('vs gulp');
 
-const gulpBundle: child_process.ChildProcess = child_process.exec('gulp bundle');
+const gulpBundle: child_process.ChildProcess = child_process.exec('gulp');
 
 gulpBundle.stdout.on('data', (data: string) => {
   writer.write(data);
