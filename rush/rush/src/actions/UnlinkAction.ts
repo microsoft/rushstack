@@ -5,11 +5,13 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-
 import { CommandLineAction } from '@microsoft/ts-command-line';
+import {
+  RushConfig,
+  Utilities
+} from '@microsoft/rush-lib';
+
 import RushCommandLineParser from './RushCommandLineParser';
-import RushConfig from '../data/RushConfig';
-import Utilities from '../utilities/Utilities';
 
 export default class UnlinkAction extends CommandLineAction {
   private _parser: RushCommandLineParser;

@@ -5,16 +5,17 @@
 import * as colors from 'colors';
 import * as minimatch from 'minimatch';
 import { EOL } from 'os';
-
 import {
   CommandLineAction,
   CommandLineFlagParameter,
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
+import {
+  RushConfig,
+  RushConfigProject,
+  Utilities
+} from '@microsoft/rush-lib';
 
-import Utilities from '../utilities/Utilities';
-import RushConfig from '../data/RushConfig';
-import RushConfigProject from '../data/RushConfigProject';
 import RushCommandLineParser from './RushCommandLineParser';
 
 export default class PublishAction extends CommandLineAction {

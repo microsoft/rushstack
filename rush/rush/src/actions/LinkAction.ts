@@ -8,15 +8,20 @@ import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import readPackageTree = require('read-package-tree');
-
 import { CommandLineAction, CommandLineFlagParameter } from '@microsoft/ts-command-line';
-import JsonFile from '../utilities/JsonFile';
+import {
+  JsonFile,
+  RushConfig,
+  IRushLinkJson,
+  RushConfigProject,
+  Package,
+  IResolveOrCreateResult,
+  PackageDependencyKind,
+  Utilities
+} from '@microsoft/rush-lib';
+
+import PackageLookup from './PackageLookup';
 import RushCommandLineParser from './RushCommandLineParser';
-import RushConfig, { IRushLinkJson } from '../data/RushConfig';
-import RushConfigProject from '../data/RushConfigProject';
-import Package, { IResolveOrCreateResult, PackageDependencyKind } from '../data/Package';
-import PackageLookup from '../data/PackageLookup';
-import Utilities from '../utilities/Utilities';
 
 export default class LinkAction extends CommandLineAction {
   private _parser: RushCommandLineParser;

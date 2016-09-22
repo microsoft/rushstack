@@ -5,13 +5,20 @@
 import * as colors from 'colors';
 import * as fs from 'fs';
 import * as os from 'os';
-
 import { CommandLineAction, CommandLineFlagParameter } from '@microsoft/ts-command-line';
-import * as ErrorDetectorRules from '../errorDetection/rules/index';
-import ErrorDetector, { ErrorDetectionMode, IErrorDetectionRule } from '../errorDetection/ErrorDetector';
-import JsonFile from '../utilities/JsonFile';
+import {
+  TestErrorDetector,
+  TsErrorDetector,
+  TsLintErrorDetector,
+  ErrorDetector,
+  ErrorDetectionMode,
+  IErrorDetectionRule,
+  JsonFile,
+  RushConfig,
+  IRushLinkJson
+} from '@microsoft/rush-lib';
+
 import RushCommandLineParser from './RushCommandLineParser';
-import RushConfig, { IRushLinkJson } from '../data/RushConfig';
 import ProjectBuildTask from '../taskRunner/ProjectBuildTask';
 import TaskRunner from '../taskRunner/TaskRunner';
 
@@ -69,9 +76,9 @@ export default class RebuildAction extends CommandLineAction {
         : ErrorDetectionMode.LocalBuild;
 
       const activeRules: IErrorDetectionRule[] = [
-        ErrorDetectorRules.TestErrorDetector,
-        ErrorDetectorRules.TsErrorDetector,
-        ErrorDetectorRules.TsLintErrorDetector
+        TestErrorDetector,
+        TsErrorDetector,
+        TsLintErrorDetector
       ];
       const errorDetector: ErrorDetector = new ErrorDetector(activeRules);
       const projectTask: ProjectBuildTask = new ProjectBuildTask(rushProject,

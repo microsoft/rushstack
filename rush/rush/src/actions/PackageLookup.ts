@@ -2,7 +2,7 @@
  * @Copyright (c) Microsoft Corporation.  All rights reserved.
  */
 
-import Package from './Package';
+import { Package } from '@microsoft/rush-lib';
 
 export default class PackageLookup {
   private _packageMap: Map<string, Package>;

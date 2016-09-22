@@ -5,9 +5,12 @@
 import * as os from 'os';
 import * as colors from 'colors';
 import * as wordwrap from 'wordwrap';
-
 import { CommandLineParser, CommandLineFlagParameter } from '@microsoft/ts-command-line';
-import RushConfig from '../data/RushConfig';
+import {
+  RushConfig,
+  Utilities
+} from '@microsoft/rush-lib';
+
 import InstallAction from './InstallAction';
 import LinkAction from './LinkAction';
 import PublishAction from './PublishAction';
@@ -15,7 +18,6 @@ import RebuildAction from './RebuildAction';
 import GenerateAction from './GenerateAction';
 import CheckAction from './CheckAction';
 import UnlinkAction from './UnlinkAction';
-import Utilities from '../utilities/Utilities';
 
 export default class RushCommandLineParser extends CommandLineParser {
   public rushConfig: RushConfig;

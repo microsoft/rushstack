@@ -5,9 +5,10 @@
  * The definition of a task as used by the TaskRunner
  */
 
-import TaskError from '../errorDetection/TaskError';
-import TaskStatus from './TaskStatus';
 import { ITaskWriter } from '@microsoft/stream-collator';
+import { TaskError } from '@microsoft/rush-lib';
+
+import TaskStatus from './TaskStatus';
 
 /**
  * A definition for a task, an execute function returning a promise and a unique string name

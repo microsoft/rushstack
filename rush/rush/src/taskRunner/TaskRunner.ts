@@ -7,12 +7,14 @@
 
 import * as colors from 'colors';
 import * as os from 'os';
+import Interleaver, { ITaskWriter } from '@microsoft/stream-collator';
+import {
+  TaskError,
+  ErrorDetectionMode
+} from '@microsoft/rush-lib';
 
 import ITask, { ITaskDefinition } from './ITask';
 import TaskStatus from './TaskStatus';
-import TaskError from '../errorDetection/TaskError';
-import Interleaver, { ITaskWriter } from '@microsoft/stream-collator';
-import { ErrorDetectionMode } from '../errorDetection/ErrorDetector';
 
 /**
  * A class which manages the execution of a set of tasks with interdependencies.

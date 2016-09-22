@@ -9,16 +9,17 @@ import * as child_process from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-
 import { ITaskWriter } from '@microsoft/stream-collator';
+import {
+  RushConfig,
+  RushConfigProject,
+  ErrorDetector,
+  ErrorDetectionMode,
+  TaskError,
+  Utilities
+} from '@microsoft/rush-lib';
 
-import RushConfig from '../data/RushConfig';
-import RushConfigProject from '../data/RushConfigProject';
-import ErrorDetector, { ErrorDetectionMode } from '../errorDetection/ErrorDetector';
 import { ITaskDefinition } from '../taskRunner/ITask';
-
-import TaskError from '../errorDetection/TaskError';
-import Utilities from '../utilities/Utilities';
 
 export default class ProjectBuildTask implements ITaskDefinition {
   public name: string;

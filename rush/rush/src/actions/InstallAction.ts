@@ -8,12 +8,14 @@ import * as glob from 'glob';
 import globEscape = require('glob-escape');
 import * as os from 'os';
 import * as path from 'path';
-
 import { CommandLineAction, CommandLineFlagParameter } from '@microsoft/ts-command-line';
-import JsonFile from '../utilities/JsonFile';
+import {
+  JsonFile,
+  RushConfig,
+  Utilities
+} from '@microsoft/rush-lib';
+
 import RushCommandLineParser from './RushCommandLineParser';
-import RushConfig from '../data/RushConfig';
-import Utilities from '../utilities/Utilities';
 
 const MAX_INSTALL_ATTEMPTS: number = 5;
 
