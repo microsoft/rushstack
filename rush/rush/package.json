@@ -18,18 +18,15 @@
   "dependencies": {
     "@microsoft/stream-collator": "~1.0.0",
     "@microsoft/ts-command-line": "~1.0.0",
-    "argparse": "~1.0.7",
+    "@microsoft/rush-lib": "0.5.5",
     "builtins": "~1.0.3",
     "colors": "~1.1.2",
     "glob": "~7.0.5",
     "glob-escape": "~0.0.1",
     "minimatch": "~3.0.2",
     "read-package-tree": "~5.1.5",
-    "rimraf": "~2.5.2",
     "semver": "~5.2.0",
-    "strip-json-comments": "~2.0.1",
-    "wordwrap": "~1.0.0",
-    "z-schema": "~3.17.0"
+    "wordwrap": "~1.0.0"
   },
   "devDependencies": {
     "@microsoft/sp-build-node": "~0.1.0",
