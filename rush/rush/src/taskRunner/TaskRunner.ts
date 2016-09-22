@@ -7,7 +7,7 @@
 
 import * as colors from 'colors';
 import * as os from 'os';
-import Interleaver, { ITaskWriter } from '@microsoft/stream-collator';
+import { Interleaver, ITaskWriter } from '@microsoft/stream-collator';
 import {
   TaskError,
   ErrorDetectionMode

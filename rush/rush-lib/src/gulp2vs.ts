@@ -2,7 +2,7 @@ import * as child_process from 'child_process';
 import * as os from 'os';
 
 import TaskError from './errorDetection/TaskError';
-import Interleaver, { ITaskWriter } from '@microsoft/stream-collator';
+import { Interleaver, ITaskWriter } from '@microsoft/stream-collator';
 import ErrorDetector, { ErrorDetectionMode } from './errorDetection/ErrorDetector';
 import * as ErrorDetectionRules from './errorDetection/rules/index';
 
