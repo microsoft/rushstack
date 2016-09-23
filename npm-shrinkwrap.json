@@ -161,6 +161,11 @@
       "from": "beeper@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/beeper/-/beeper-1.1.0.tgz"
     },
+    "bindings": {
+      "version": "1.2.1",
+      "from": "bindings@>=1.2.1 <1.3.0",
+      "resolved": "https://registry.npmjs.org/bindings/-/bindings-1.2.1.tgz"
+    },
     "bluebird": {
       "version": "3.4.6",
       "from": "bluebird@>=3.0.5 <4.0.0",
@@ -497,6 +502,11 @@
       "from": "dateformat@>=1.0.11 <2.0.0",
       "resolved": "https://registry.npmjs.org/dateformat/-/dateformat-1.0.12.tgz"
     },
+    "deasync": {
+      "version": "0.1.7",
+      "from": "deasync@latest",
+      "resolved": "https://registry.npmjs.org/deasync/-/deasync-0.1.7.tgz"
+    },
     "debug": {
       "version": "2.2.0",
       "from": "debug@>=2.2.0 <2.3.0",
@@ -817,6 +827,11 @@
       "from": "for-own@>=0.1.3 <0.2.0",
       "resolved": "https://registry.npmjs.org/for-own/-/for-own-0.1.4.tgz"
     },
+    "fork-stream": {
+      "version": "0.0.4",
+      "from": "fork-stream@>=0.0.4 <0.0.5",
+      "resolved": "https://registry.npmjs.org/fork-stream/-/fork-stream-0.0.4.tgz"
+    },
     "forwarded": {
       "version": "0.1.0",
       "from": "forwarded@>=0.1.0 <0.2.0",
@@ -1013,6 +1028,11 @@
       "from": "gulp-flatten@>=0.2.0 <0.3.0",
       "resolved": "https://registry.npmjs.org/gulp-flatten/-/gulp-flatten-0.2.0.tgz"
     },
+    "gulp-if": {
+      "version": "2.0.1",
+      "from": "gulp-if@>=2.0.1 <3.0.0",
+      "resolved": "https://registry.npmjs.org/gulp-if/-/gulp-if-2.0.1.tgz"
+    },
     "gulp-istanbul": {
       "version": "0.10.4",
       "from": "gulp-istanbul@>=0.10.3 <0.11.0",
@@ -1024,6 +1044,11 @@
           "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.16.0.tgz"
         }
       }
+    },
+    "gulp-match": {
+      "version": "1.0.2",
+      "from": "gulp-match@>=1.0.2 <2.0.0",
+      "resolved": "https://registry.npmjs.org/gulp-match/-/gulp-match-1.0.2.tgz"
     },
     "gulp-mocha": {
       "version": "2.2.0",
@@ -1255,6 +1280,11 @@
       "version": "1.3.4",
       "from": "ini@>=1.3.4 <2.0.0",
       "resolved": "https://registry.npmjs.org/ini/-/ini-1.3.4.tgz"
+    },
+    "inpath": {
+      "version": "1.0.2",
+      "from": "inpath@>=1.0.2 <1.1.0",
+      "resolved": "https://registry.npmjs.org/inpath/-/inpath-1.0.2.tgz"
     },
     "interpret": {
       "version": "1.0.1",
@@ -1972,6 +2002,16 @@
       "from": "multipipe@>=0.1.2 <0.2.0",
       "resolved": "https://registry.npmjs.org/multipipe/-/multipipe-0.1.2.tgz"
     },
+    "mute-stream": {
+      "version": "0.0.6",
+      "from": "mute-stream@>=0.0.4 <0.1.0",
+      "resolved": "https://registry.npmjs.org/mute-stream/-/mute-stream-0.0.6.tgz"
+    },
+    "nan": {
+      "version": "2.4.0",
+      "from": "nan@>=2.0.7 <3.0.0",
+      "resolved": "https://registry.npmjs.org/nan/-/nan-2.4.0.tgz"
+    },
     "natives": {
       "version": "1.1.0",
       "from": "natives@>=1.1.0 <2.0.0",
@@ -2198,6 +2238,11 @@
       "from": "pause-stream@0.0.11",
       "resolved": "https://registry.npmjs.org/pause-stream/-/pause-stream-0.0.11.tgz"
     },
+    "pidof": {
+      "version": "1.0.2",
+      "from": "pidof@>=1.0.2 <1.1.0",
+      "resolved": "https://registry.npmjs.org/pidof/-/pidof-1.0.2.tgz"
+    },
     "pify": {
       "version": "2.3.0",
       "from": "pify@>=2.0.0 <3.0.0",
@@ -2284,6 +2329,11 @@
           "resolved": "https://registry.npmjs.org/iconv-lite/-/iconv-lite-0.4.13.tgz"
         }
       }
+    },
+    "read": {
+      "version": "1.0.7",
+      "from": "read@>=1.0.3 <1.1.0",
+      "resolved": "https://registry.npmjs.org/read/-/read-1.0.7.tgz"
     },
     "read-pkg": {
       "version": "1.1.0",
@@ -2549,6 +2599,11 @@
       "from": "strip-indent@>=1.0.1 <2.0.0",
       "resolved": "https://registry.npmjs.org/strip-indent/-/strip-indent-1.0.1.tgz"
     },
+    "sudo": {
+      "version": "1.0.3",
+      "from": "sudo@latest",
+      "resolved": "https://registry.npmjs.org/sudo/-/sudo-1.0.3.tgz"
+    },
     "supports-color": {
       "version": "2.0.0",
       "from": "supports-color@>=2.0.0 <3.0.0",
@@ -2570,6 +2625,11 @@
           "resolved": "https://registry.npmjs.org/rimraf/-/rimraf-2.2.8.tgz"
         }
       }
+    },
+    "ternary-stream": {
+      "version": "2.0.0",
+      "from": "ternary-stream@>=2.0.0 <3.0.0",
+      "resolved": "https://registry.npmjs.org/ternary-stream/-/ternary-stream-2.0.0.tgz"
     },
     "through": {
       "version": "2.3.8",
