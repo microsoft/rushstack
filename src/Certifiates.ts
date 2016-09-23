@@ -8,7 +8,7 @@ import { EOL } from 'os';
 
 import CertificateStore from './CertificateStore';
 
-const serialNumber: string = '73 1c 32 17 44 e3 46 50 a2 02 e3 ef 91 c3 c1 b9'.replace(/ /g, '');
+const serialNumber: string = '731c321744e34650a202e3ef91c3c1b9';
 const friendlyName: string = 'gulp-core-build-serve Development Certificate';
 
 let _certutilExePath: string;
