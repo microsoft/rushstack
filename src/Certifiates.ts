@@ -191,8 +191,6 @@ function tryTrustCertificate(certificatePath: string): boolean {
         deasync.sleep(100);
       }
 
-      debugger;
-
       if (macTrustResultCode === 0) {
         console.log('Successfully trusted development certificate.');
         return true;
@@ -288,8 +286,6 @@ export function ensureCertificate(canGenerateNewCertificate: boolean): ICertific
       certificateStore.certificateData = undefined;
       certificateStore.keyData = undefined;
     }
-
-    debugger;
 
     fs.unlinkSync(tempCertificatePath);
   }
