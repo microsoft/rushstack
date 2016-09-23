@@ -8,6 +8,11 @@ import { EOL } from 'os';
 
 import CertificateStore from './CertificateStore';
 
+const serialNumber: string = '73 1c 32 17 44 e3 46 50 a2 02 e3 ef 91 c3 c1 b9'.replace(/ /g, '');
+const friendlyName: string = 'gulp-core-build-serve Development Certificate';
+
+let _certutilExePath: string;
+
 export interface ICertificate {
   pemCertificate: string;
   pemKey: string;
@@ -25,6 +30,8 @@ interface IForgeCertificate {
     notBefore: Date;
     notAfter: Date;
   };
+
+  serialNumber: string;
 
   setSubject(attrs: IAttr[]): void;
 
@@ -56,8 +63,9 @@ export function CreateDevelopmentCertificate(): ICertificate {
   const certificate: IForgeCertificate = forge.pki.createCertificate();
   certificate.publicKey = keys.publicKey;
 
-  const now: Date = new Date();
+  certificate.serialNumber = serialNumber;
 
+  const now: Date = new Date();
   certificate.validity.notBefore = now;
   certificate.validity.notAfter.setFullYear(certificate.validity.notBefore.getFullYear() + 5); // Five years from now
 
@@ -78,9 +86,6 @@ export function CreateDevelopmentCertificate(): ICertificate {
     }, {
       name: 'extKeyUsage',
       serverAuth: true
-    }, {
-      name: 'friendlyName',
-      value: 'gulp-core-build-serve Development Certificate'
     }]);
 
   // self-sign certificate
@@ -96,41 +101,98 @@ export function CreateDevelopmentCertificate(): ICertificate {
   };
 }
 
-export function tryTrustCertificate(certificatePath: string): boolean {
-  if (process.platform === 'win32') {
+function ensureCertUtilExePath(): string {
+  if (!_certutilExePath) {
     const where: child_process.SpawnSyncReturns<string> = child_process.spawnSync('where', ['certutil']);
 
     const whereErr: string = where.stderr.toString();
     if (!!whereErr) {
       console.error(`Error finding certUtil command: "${whereErr}"`);
+      _certutilExePath = undefined;
     } else {
-      const certutilExePath: string = where.stdout.toString().trim();
+      _certutilExePath = where.stdout.toString().trim();
+    }
+  }
 
-      console.log('Attempting to trust a dev certificate. This self-signed certificate only points to localhost ' +
-                  'and will be stored in your local user profile to be used by other instances of ' +
-                  'gulp-core-build-serve. If you do not consent to trust this certificate, click "NO" in the dialog.');
+  return _certutilExePath;
+}
 
-      const trustResult: child_process.SpawnSyncReturns<string> =
-        child_process.spawnSync(certutilExePath, ['-user', '-addstore', 'root', certificatePath]);
+function tryTrustCertificate(certificatePath: string): boolean {
+  if (process.platform === 'win32') {
+    const certutilExePath: string = ensureCertUtilExePath();
+    if (!certutilExePath) {
+      // Unable to find the cert utility
+      return false;
+    }
 
-      if (trustResult.status !== 0) {
-        console.log(`Error: ${trustResult.stdout.toString()}`);
+    console.log('Attempting to trust a dev certificate. This self-signed certificate only points to localhost ' +
+                'and will be stored in your local user profile to be used by other instances of ' +
+                'gulp-core-build-serve. If you do not consent to trust this certificate, click "NO" in the dialog.');
 
-        const errorLines: string[] = trustResult.stdout.toString().split(EOL).map((line: string) => line.trim());
+    const trustResult: child_process.SpawnSyncReturns<string> =
+      child_process.spawnSync(certutilExePath, ['-user', '-addstore', 'root', certificatePath]);
 
-        // Not sure if this is always the status code for "cancelled" - should confirm.
-        if (trustResult.status === 2147943623 ||
-            errorLines[errorLines.length - 1].indexOf('The operation was canceled by the user.') > 0) {
-          console.log('Certificate trust cancelled.');
-        } else {
-          console.log('Certificate trust failed with an unknown error.');
-        }
+    if (trustResult.status !== 0) {
+      console.log(`Error: ${trustResult.stdout.toString()}`);
 
-        return false;
+      const errorLines: string[] = trustResult.stdout.toString().split(EOL).map((line: string) => line.trim());
+
+      // Not sure if this is always the status code for "cancelled" - should confirm.
+      if (trustResult.status === 2147943623 ||
+          errorLines[errorLines.length - 1].indexOf('The operation was canceled by the user.') > 0) {
+        console.log('Certificate trust cancelled.');
       } else {
-        console.log('Successfully trusted development certificate.');
-        return true;
+        console.log('Certificate trust failed with an unknown error.');
       }
+
+      return false;
+    } else {
+      console.log('Successfully trusted development certificate.');
+
+      return true;
+    }
+  } else {
+    // Not implemented yet
+  }
+}
+
+function trySetFriendlyName(certificatePath: string): boolean {
+  if (process.platform === 'win32') {
+    const certutilExePath: string = ensureCertUtilExePath();
+    if (!certutilExePath) {
+      // Unable to find the cert utility
+      return false;
+    }
+
+    const basePath: string = path.dirname(certificatePath);
+    const fileName: string = path.basename(certificatePath, path.extname(certificatePath));
+    const friendlyNamePath: string = path.join(basePath, `${fileName}.inf`);
+
+    const friendlyNameFile: string = [
+      '[Version]',
+      'Signature = "$Windows NT$"',
+      '[Properties]',
+      `11 = "{text}${friendlyName}"`,
+      ''
+    ].join(EOL);
+
+    fs.writeFileSync(friendlyNamePath, friendlyNameFile);
+
+    const repairStoreResult: child_process.SpawnSyncReturns<string> =
+      child_process.spawnSync(certutilExePath, ['–repairstore',
+                                                '–user',
+                                                'root',
+                                                serialNumber,
+                                                friendlyNamePath]);
+
+    if (repairStoreResult.status !== 0) {
+      console.log(`Error: ${repairStoreResult.stdout.toString()}`);
+
+      return false;
+    } else {
+      console.log('Successfully set certificate name.');
+
+      return true;
     }
   } else {
     // Not implemented yet
@@ -160,6 +222,10 @@ export function ensureCertificate(canGenerateNewCertificate: boolean): ICertific
     if (tryTrustCertificate(tempCertificatePath)) {
       certificateStore.certificateData = generatedCertificate.pemCertificate;
       certificateStore.keyData = generatedCertificate.pemKey;
+
+      if (!trySetFriendlyName(tempCertificatePath)) { // Try to set the friendly name, and only error if we can't
+        console.error('Unable to set the certificate\'s friendly name.');
+      }
     } else {
       // Clear out the existing store data, if any exists
       certificateStore.certificateData = undefined;
