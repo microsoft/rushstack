@@ -88,6 +88,9 @@ export function CreateDevelopmentCertificate(): ICertificate {
     }, {
       name: 'extKeyUsage',
       serverAuth: true
+    }, {
+      name: 'friendlyName',
+      value: friendlyName
     }]);
 
   // self-sign certificate
