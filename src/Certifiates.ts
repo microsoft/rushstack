@@ -5,6 +5,8 @@ import * as path from 'path';
 
 import * as child_process from 'child_process';
 import { EOL } from 'os';
+const sudo: (args: string[], options: Object) => child_process.ChildProcess = require('sudo');
+const deasync: { sleep: (ms: number) => void } = require('deasync');
 
 import CertificateStore from './CertificateStore';
 
@@ -118,41 +120,92 @@ function ensureCertUtilExePath(): string {
 }
 
 function tryTrustCertificate(certificatePath: string): boolean {
-  if (process.platform === 'win32') {
-    const certutilExePath: string = ensureCertUtilExePath();
-    if (!certutilExePath) {
-      // Unable to find the cert utility
-      return false;
-    }
-
-    console.log('Attempting to trust a dev certificate. This self-signed certificate only points to localhost ' +
-                'and will be stored in your local user profile to be used by other instances of ' +
-                'gulp-core-build-serve. If you do not consent to trust this certificate, click "NO" in the dialog.');
-
-    const trustResult: child_process.SpawnSyncReturns<string> =
-      child_process.spawnSync(certutilExePath, ['-user', '-addstore', 'root', certificatePath]);
-
-    if (trustResult.status !== 0) {
-      console.log(`Error: ${trustResult.stdout.toString()}`);
-
-      const errorLines: string[] = trustResult.stdout.toString().split(EOL).map((line: string) => line.trim());
-
-      // Not sure if this is always the status code for "cancelled" - should confirm.
-      if (trustResult.status === 2147943623 ||
-          errorLines[errorLines.length - 1].indexOf('The operation was canceled by the user.') > 0) {
-        console.log('Certificate trust cancelled.');
-      } else {
-        console.log('Certificate trust failed with an unknown error.');
+  switch (process.platform) {
+    case 'win32':
+      const certutilExePath: string = ensureCertUtilExePath();
+      if (!certutilExePath) {
+        // Unable to find the cert utility
+        return false;
       }
 
-      return false;
-    } else {
-      console.log('Successfully trusted development certificate.');
+      console.log('Attempting to trust a dev certificate. This self-signed certificate only points to localhost ' +
+                  'and will be stored in your local user profile to be used by other instances of ' +
+                  'gulp-core-build-serve. If you do not consent to trust this certificate, click "NO" in the dialog.');
 
-      return true;
-    }
-  } else {
-    // Not implemented yet
+      const winTrustResult: child_process.SpawnSyncReturns<string> =
+        child_process.spawnSync(certutilExePath, ['-user', '-addstore', 'root', certificatePath]);
+
+      if (winTrustResult.status !== 0) {
+        console.log(`Error: ${winTrustResult.stdout.toString()}`);
+
+        const errorLines: string[] = winTrustResult.stdout.toString().split(EOL).map((line: string) => line.trim());
+
+        // Not sure if this is always the status code for "cancelled" - should confirm.
+        if (winTrustResult.status === 2147943623 ||
+            errorLines[errorLines.length - 1].indexOf('The operation was canceled by the user.') > 0) {
+          console.log('Certificate trust cancelled.');
+        } else {
+          console.log('Certificate trust failed with an unknown error.');
+        }
+
+        return false;
+      } else {
+        console.log('Successfully trusted development certificate.');
+
+        return true;
+      }
+
+    case 'darwin': // tslint:disable-line:no-switch-case-fall-through
+      console.log('Attempting to trust a dev certificate. This self-signed certificate only points to localhost ' +
+                  'and will be stored in your local user profile to be used by other instances of ' +
+                  'gulp-core-build-serve. If you do not consent to trust this certificate, do not enter your root ' +
+                  'password in the prompt.');
+
+      const macTrustResult: child_process.ChildProcess = sudo([ 'security',
+                                                                'add-trusted-cert',
+                                                                '-d',
+                                                                '-r',
+                                                                'trustRoot',
+                                                                '-k',
+                                                                '/Library/Keychains/System.keychain',
+                                                                certificatePath],
+                                                              {
+                                                                cachePassword: false,
+                                                                prompt: 'Enter your password: '
+                                                              });
+
+      const stderr: string[] = [];
+      macTrustResult.stderr.on('data', (data: Buffer) => {
+        stderr.push(data.toString());
+      });
+
+      let macTrustResultCode: number = undefined;
+      macTrustResult.on('close', (code: number) => {
+        macTrustResultCode = code;
+      });
+
+      while (macTrustResultCode === undefined) {
+        deasync.sleep(100);
+      }
+
+      debugger;
+
+      if (macTrustResultCode === 0) {
+        console.log('Successfully trusted development certificate.');
+        return true;
+      } else {
+        if (stderr.some((value: string) => !!value.match(/The authorization was cancelled by the user\./))) {
+          console.log('Certificate trust cancelled.');
+          return false;
+        } else {
+          console.log('Certificate trust failed with an unknown error.');
+          return false;
+        }
+      }
+
+    default: // tslint:disable-line:no-switch-case-fall-through
+      // Not implemented yet
+      return false;
   }
 }
 
@@ -195,7 +248,8 @@ function trySetFriendlyName(certificatePath: string): boolean {
       return true;
     }
   } else {
-    // Not implemented yet
+    // No equivalent concept outside of Windows
+    return true;
   }
 }
 
@@ -231,6 +285,8 @@ export function ensureCertificate(canGenerateNewCertificate: boolean): ICertific
       certificateStore.certificateData = undefined;
       certificateStore.keyData = undefined;
     }
+
+    debugger;
 
     fs.unlinkSync(tempCertificatePath);
   }
