@@ -2,11 +2,11 @@
 
 /* tslint:disable:max-line-length */
 
-import { GulpTask } from './GulpTask';
+import { GulpTask } from './tasks/GulpTask';
 import { GulpProxy } from './GulpProxy';
 import { IExecutable } from './IExecutable';
 import { IBuildConfig } from './IBuildConfig';
-import { NukeTask } from './NukeTask';
+import { NukeTask } from './tasks/NukeTask';
 import { args } from './State';
 export { IExecutable } from './IExecutable';
 import { initialize as initializeLogging, markTaskCreationTime, generateGulpError, setWatchMode } from './logging';
@@ -14,10 +14,12 @@ import { getFlagValue, setConfigDefaults } from './config';
 import * as gulp from 'gulp';
 
 export * from './IBuildConfig';
-export * from './GulpTask';
-export * from './CopyTask';
-export * from './NukeTask';
 export * from './logging';
+export * from './tasks/CopyTask';
+export * from './tasks/GenerateShrinkwrapTask';
+export * from './tasks/GulpTask';
+export * from './tasks/NukeTask';
+export * from './tasks/ValidateShrinkwrapTask';
 
 /* tslint:disable:variable-name */
 require('es6-promise').polyfill();
