@@ -187,6 +187,7 @@ function tryTrustCertificate(certificatePath: string): boolean {
         macTrustResultCode = code;
       });
 
+      // Because we're running with sudo, we can't run synchronously, so synchronize by polling.
       while (macTrustResultCode === undefined) {
         deasync.sleep(100);
       }
@@ -205,8 +206,11 @@ function tryTrustCertificate(certificatePath: string): boolean {
       }
 
     default: // tslint:disable-line:no-switch-case-fall-through
-      // Not implemented yet
-      return false;
+      // Linux + others: Have the user manually trust the cert if they want to
+      console.log('Automatic certificate trust is only implemented for gulp-core-build-serve on Windows and ' +
+                  'macOS. To trust the development certificate, add this certificate to your trusted root ' +
+                  `certification authorities: "${CertificateStore.instance.certificatePath}".`);
+      return true;
   }
 }
 
