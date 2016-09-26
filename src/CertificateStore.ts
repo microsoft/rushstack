@@ -23,6 +23,10 @@ export default class CertificateStore {
   private _certificateData: string;
   private _keyData: string;
 
+  public get certificatePath(): string {
+    return this._certificatePath;
+  }
+
   public get certificateData(): string {
     if (!this._certificateData) {
       if (fs.existsSync(this._certificatePath)) {
