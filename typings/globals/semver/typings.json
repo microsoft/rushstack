@@ -1,0 +1,8 @@
+{
+  "resolution": "main",
+  "tree": {
+    "src": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/6ae1c56196c8018da94cfd0ebb75dd1d5f05466d/semver/semver.d.ts",
+    "raw": "registry:dt/semver#5.3.0+20160801120957",
+    "typings": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/6ae1c56196c8018da94cfd0ebb75dd1d5f05466d/semver/semver.d.ts"
+  }
+}

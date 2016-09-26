@@ -15,5 +15,10 @@
     "through2": "registry:dt/through2#2.0.0+20160317120654",
     "vinyl": "registry:dt/vinyl#1.1.0+20160316155526",
     "yargs": "registry:dt/yargs#0.0.0+20160326124407"
+  },
+  "dependencies": {},
+  "globalDependencies": {
+    "rimraf": "registry:dt/rimraf#0.0.0+20160317120654",
+    "semver": "registry:dt/semver#5.3.0+20160801120957"
   }
 }
