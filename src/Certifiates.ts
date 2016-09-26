@@ -69,7 +69,7 @@ export function CreateDevelopmentCertificate(): ICertificate {
 
   const now: Date = new Date();
   certificate.validity.notBefore = now;
-  certificate.validity.notAfter.setFullYear(certificate.validity.notBefore.getFullYear() + 5); // Five years from now
+  certificate.validity.notAfter.setFullYear(certificate.validity.notBefore.getFullYear() + 3); // Three years from now
 
   const attrs: IAttr[] = [{
     name: 'commonName',
