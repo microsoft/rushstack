@@ -10,6 +10,9 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
+  "engines": {
+    "npm": "3.10.8"
+  },
   "dependencies": {
     "del": "~2.2.0",
     "end-of-stream": "~1.1.0",
@@ -24,6 +27,7 @@
     "node-notifier": "~4.5.0",
     "object-assign": "~4.1.0",
     "pretty-hrtime": "~1.0.2",
+    "semver": "^5.3.0",
     "through2": "~2.0.1",
     "yargs": "~4.6.0"
   },

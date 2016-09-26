@@ -1,9 +1,9 @@
 /* tslint:disable:max-line-length */
-import { GulpProxy } from './GulpProxy';
-import { IExecutable } from './IExecutable';
-import { IBuildConfig } from './IBuildConfig';
+import { GulpProxy } from '../GulpProxy';
+import { IExecutable } from '../IExecutable';
+import { IBuildConfig } from '../IBuildConfig';
 import { log, verbose, error, fileError, fileWarning,
-  warn, logEndSubtask, logStartSubtask } from './logging';
+  warn, logEndSubtask, logStartSubtask } from '../logging';
 import gutil = require('gulp-util');
 import gulp = require('gulp');
 import through2 = require('through2');
