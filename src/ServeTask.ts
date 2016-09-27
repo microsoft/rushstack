@@ -11,7 +11,7 @@ import * as fs from 'fs';
 import {
   ensureCertificate,
   ICertificate
-} from './Certifiates';
+} from './certificates';
 
 export interface IServeTaskConfig {
   /**
