@@ -80,7 +80,8 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
     api: undefined,
     initialPage: '/index.html',
     port: 4321,
-    https: false
+    https: false,
+    tryCreateDevCertificate: false
   };
 
   public executeTask(gulp: gulp.Gulp, completeCallback?: (error?: string) => void): void {
