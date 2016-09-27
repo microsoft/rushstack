@@ -8,7 +8,7 @@ export interface ISudoSyncResult {
   code: number;
 }
 
-export function runSudoSync(...params: string[]): ISudoSyncResult {
+export function runSudoSync(params: string[]): ISudoSyncResult {
     const sudoResult: child_process.ChildProcess = sudo(params,
                                                         {
                                                           cachePassword: false,
@@ -26,8 +26,8 @@ export function runSudoSync(...params: string[]): ISudoSyncResult {
   });
 
   let code: number = undefined;
-  sudoResult.on('close', (code: number) => {
-    code = code;
+  sudoResult.on('close', (exitCode: number) => {
+    code = exitCode;
   });
 
   // Because we're running with sudo, we can't run synchronously, so synchronize by polling.
