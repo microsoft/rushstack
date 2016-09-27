@@ -1,7 +1,7 @@
 import { GulpTask } from '@microsoft/gulp-core-build';
 import * as gulp from 'gulp';
 
-import { ensureCertificate, ICertificate } from './Certifiates';
+import { ensureCertificate, ICertificate } from './certificates';
 
 export default class TrustCertTask extends GulpTask<{}> {
   public name: string = 'trust-cert';

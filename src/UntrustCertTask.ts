@@ -2,7 +2,7 @@ import { GulpTask } from '@microsoft/gulp-core-build';
 import * as gulp from 'gulp';
 
 import CertificateStore from './CertificateStore';
-import { untrustCertificate } from './Certifiates';
+import { untrustCertificate } from './certificates';
 
 export default class UntrustCertTask extends GulpTask<{}> {
   public name: string = 'untrust-cert';
