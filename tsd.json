@@ -43,6 +43,9 @@
     },
     "express-serve-static-core/express-serve-static-core.d.ts": {
       "commit": "de82425735f84a10b43921ae4b1d085b3752a626"
+    },
+    "node-forge/node-forge.d.ts": {
+      "commit": "2fc5063371b44b5b020e96f3fde1a747761fa8a6"
     }
   }
 }
