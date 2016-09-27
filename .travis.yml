@@ -1,6 +1,7 @@
 language: node_js
 node_js:
 - '4.2'
+before_install: if [[ `npm -v` != 3.10.8 ]]; then npm i -g npm@^3.10.8; fi
 before_script:
 - npm install -g gulp
 script: gulp
