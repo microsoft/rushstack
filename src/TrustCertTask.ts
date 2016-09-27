@@ -6,7 +6,7 @@ import { ensureCertificate, ICertificate } from './Certifiates';
 export default class TrustCertTask extends GulpTask<{}> {
   public name: string = 'trust-cert';
 
-  executeTask(gulp: gulp.Gulp, completeCallback: (error?: string) => void): void {
+  public executeTask(gulp: gulp.Gulp, completeCallback: (error?: string) => void): void {
     const certificate: ICertificate = ensureCertificate(true, this);
 
     if (certificate.pemCertificate && certificate.pemKey) {
