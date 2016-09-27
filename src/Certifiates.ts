@@ -12,6 +12,7 @@ import CertificateStore from './CertificateStore';
 
 const serialNumber: string = '731c321744e34650a202e3ef91c3c1b9';
 const friendlyName: string = 'gulp-core-build-serve Development Certificate';
+const macKeychain: string = '/Library/Keychains/System.keychain';
 
 let _certutilExePath: string;
 
@@ -165,14 +166,14 @@ function tryTrustCertificate(certificatePath: string, parentTask: GulpTask<{}>):
                       'gulp-core-build-serve. If you do not consent to trust this certificate, do not enter your ' +
                       'root password in the prompt.');
 
-      const result: ISudoSyncResult = runSudoSync('security',
-                                                      'add-trusted-cert',
-                                                      '-d',
-                                                      '-r',
-                                                      'trustRoot',
-                                                      '-k',
-                                                      '/Library/Keychains/System.keychain',
-                                                      certificatePath);
+      const result: ISudoSyncResult = runSudoSync([ 'security',
+                                                    'add-trusted-cert',
+                                                    '-d',
+                                                    '-r',
+                                                    'trustRoot',
+                                                    '-k',
+                                                    macKeychain,
+                                                    certificatePath]);
 
       if (result.code === 0) {
         parentTask.logVerbose('Successfully trusted development certificate.');
