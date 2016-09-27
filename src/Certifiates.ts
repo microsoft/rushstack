@@ -1,10 +1,11 @@
+import { GulpTask } from '@microsoft/gulp-core-build';
 import * as forgeType from 'node-forge';
 const forge: typeof forgeType & IForgeExtensions = require('node-forge');
 import * as fs from 'fs';
 import * as path from 'path';
-
 import * as child_process from 'child_process';
 import { EOL } from 'os';
+
 const sudo: (args: string[], options: Object) => child_process.ChildProcess = require('sudo');
 const deasync: { sleep: (ms: number) => void } = require('deasync');
 
@@ -60,7 +61,7 @@ interface IForgeExtensions {
   };
 }
 
-export function CreateDevelopmentCertificate(): ICertificate {
+function CreateDevelopmentCertificate(): ICertificate {
   const keys: forgeType.pki.KeyPair = forge.pki.rsa.generateKeyPair(2048);
   const certificate: IForgeCertificate = forge.pki.createCertificate();
   certificate.publicKey = keys.publicKey;
@@ -106,13 +107,13 @@ export function CreateDevelopmentCertificate(): ICertificate {
   };
 }
 
-function ensureCertUtilExePath(): string {
+function ensureCertUtilExePath(parentTask: GulpTask<{}>): string {
   if (!_certutilExePath) {
     const where: child_process.SpawnSyncReturns<string> = child_process.spawnSync('where', ['certutil']);
 
     const whereErr: string = where.stderr.toString();
     if (!!whereErr) {
-      console.error(`Error finding certUtil command: "${whereErr}"`);
+      parentTask.logError(`Error finding certUtil command: "${whereErr}"`);
       _certutilExePath = undefined;
     } else {
       _certutilExePath = where.stdout.toString().trim();
@@ -122,31 +123,32 @@ function ensureCertUtilExePath(): string {
   return _certutilExePath;
 }
 
-function tryTrustCertificate(certificatePath: string): boolean {
+function tryTrustCertificate(certificatePath: string, parentTask: GulpTask<{}>): boolean {
   switch (process.platform) {
     case 'win32':
-      const certutilExePath: string = ensureCertUtilExePath();
+      const certutilExePath: string = ensureCertUtilExePath(parentTask);
       if (!certutilExePath) {
         // Unable to find the cert utility
         return false;
       }
 
-      console.log('Attempting to trust a dev certificate. This self-signed certificate only points to localhost ' +
-                  'and will be stored in your local user profile to be used by other instances of ' +
-                  'gulp-core-build-serve. If you do not consent to trust this certificate, click "NO" in the dialog.');
+      parentTask.log( 'Attempting to trust a dev certificate. This self-signed certificate only points to localhost ' +
+                      'and will be stored in your local user profile to be used by other instances of ' +
+                      'gulp-core-build-serve. If you do not consent to trust this certificate, click "NO" in the ' +
+                      'dialog.');
 
       const winTrustResult: child_process.SpawnSyncReturns<string> =
         child_process.spawnSync(certutilExePath, ['-user', '-addstore', 'root', certificatePath]);
 
       if (winTrustResult.status !== 0) {
-        console.log(`Error: ${winTrustResult.stdout.toString()}`);
+        parentTask.logError(`Error: ${winTrustResult.stdout.toString()}`);
 
         const errorLines: string[] = winTrustResult.stdout.toString().split(EOL).map((line: string) => line.trim());
 
         // Not sure if this is always the status code for "cancelled" - should confirm.
         if (winTrustResult.status === 2147943623 ||
             errorLines[errorLines.length - 1].indexOf('The operation was canceled by the user.') > 0) {
-          console.log('Certificate trust cancelled.');
+          parentTask.log('Certificate trust cancelled.');
         } else {
           console.log('Certificate trust failed with an unknown error.');
         }
@@ -214,7 +216,7 @@ function tryTrustCertificate(certificatePath: string): boolean {
   }
 }
 
-function trySetFriendlyName(certificatePath: string): boolean {
+function trySetFriendlyName(certificatePath: string, parentTask: GulpTask<{}>): boolean {
   if (process.platform === 'win32') {
     const certutilExePath: string = ensureCertUtilExePath();
     if (!certutilExePath) {
@@ -244,11 +246,11 @@ function trySetFriendlyName(certificatePath: string): boolean {
                                                 friendlyNamePath]);
 
     if (repairStoreResult.status !== 0) {
-      console.log(`Error: ${repairStoreResult.stdout.toString()}`);
+      parentTask.logError(`CertUtil Error: ${repairStoreResult.stdout.toString()}`);
 
       return false;
     } else {
-      console.log('Successfully set certificate name.');
+      parentTask.logVerbose('Successfully set certificate name.');
 
       return true;
     }
@@ -262,7 +264,8 @@ function trySetFriendlyName(certificatePath: string): boolean {
  * Get the dev certificate from the store, or, optionally, generate a new one and trust it if one doesn't exist in the
  *  store.
  */
-export function ensureCertificate(canGenerateNewCertificate: boolean): ICertificate {
+export function ensureCertificate(canGenerateNewCertificate: boolean,
+                                  parentTask: GulpTask<{}>): ICertificate {
   const certificateStore: CertificateStore = CertificateStore.instance;
 
   if ((!certificateStore.certificateData || !certificateStore.keyData) && canGenerateNewCertificate) {
