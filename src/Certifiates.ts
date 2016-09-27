@@ -283,3 +283,62 @@ export function ensureCertificate(canGenerateNewCertificate: boolean,
     pemKey: certificateStore.keyData
   };
 }
+
+export function untrustCertificate(parentTask: GulpTask<{}>): boolean {
+  switch (process.platform) {
+    case 'win32':
+
+    case 'darwin': // tslint:disable-line:no-switch-case-fall-through
+      parentTask.logVerbose('Trying to find the signature of the dev cert');
+
+      const macFindCertificateResult: child_process.SpawnSyncReturns<string> =
+        child_process.spawnSync('security', ['find-certificate', '-c', 'localhost', '-a', '-Z', macKeychain]);
+
+      if (macFindCertificateResult.status !== 0) {
+        parentTask.logError(`Error finding the dev certifiate: ${macFindCertificateResult.output.join(' ')}`);
+        return false;
+      }
+
+      const outputLines: string[] = macFindCertificateResult.stdout.toString().split(EOL);
+      let found: boolean = false;
+      let shaHash: string = undefined;
+      for (let i: number = 0; i < outputLines.length; i++) {
+        const line: string = outputLines[i];
+        const shaMatch: string[] = line.match(/^SHA-1 hash: (.+)$/);
+        if (shaMatch) {
+          shaHash = shaMatch[1];
+        }
+
+        const snbrMatch: string[] = line.match(/^\s*"snbr"<blob>=0x([^\s]+).+$/);
+        if (snbrMatch && (snbrMatch[1] || '').toLowerCase() === serialNumber) {
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) {
+        parentTask.logError('Unable to find the dev certificate.');
+        return false;
+      }
+
+      parentTask.logVerbose(`Found the dev cert. SHA is ${shaHash}`);
+
+      const macUntrustResult: ISudoSyncResult =
+        runSudoSync(['security', 'delete-certificate', '-Z', shaHash, macKeychain]);
+
+      if (macUntrustResult.code === 0) {
+        return true;
+      } else {
+        parentTask.logError(macUntrustResult.stderr.join(' '));
+        return false;
+      }
+
+    default: // tslint:disable-line:no-switch-case-fall-through
+      // Linux + others: Have the user manually untrust the cert
+      parentTask.log( 'Automatic certificate untrust is only implemented for gulp-core-build-serve on Windows and ' +
+                      'macOS. To untrust the development certificate, remove this certificate from your trusted ' +
+                      `root certification authorities: "${CertificateStore.instance.certificatePath}". The ` +
+                      `certificate has serial number "${serialNumber}".`);
+      return false;
+  }
+}
