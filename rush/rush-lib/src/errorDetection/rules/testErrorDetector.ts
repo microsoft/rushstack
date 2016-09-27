@@ -2,7 +2,7 @@
  * @file TestErrorDetector.ts
  * @Copyright (c) Microsoft Corporation.  All rights reserved.
  *
- * Detects an error that occurs while running tests from ms-core-build
+ * Detects an error that occurs while running tests from sp-build-internal-web
  */
 
 import { IErrorDetectionRule, RegexErrorDetector } from '../ErrorDetector';
