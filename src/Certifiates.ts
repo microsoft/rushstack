@@ -150,21 +150,21 @@ function tryTrustCertificate(certificatePath: string, parentTask: GulpTask<{}>):
             errorLines[errorLines.length - 1].indexOf('The operation was canceled by the user.') > 0) {
           parentTask.log('Certificate trust cancelled.');
         } else {
-          console.log('Certificate trust failed with an unknown error.');
+          parentTask.logError('Certificate trust failed with an unknown error.');
         }
 
         return false;
       } else {
-        console.log('Successfully trusted development certificate.');
+        parentTask.logVerbose('Successfully trusted development certificate.');
 
         return true;
       }
 
     case 'darwin': // tslint:disable-line:no-switch-case-fall-through
-      console.log('Attempting to trust a dev certificate. This self-signed certificate only points to localhost ' +
-                  'and will be stored in your local user profile to be used by other instances of ' +
-                  'gulp-core-build-serve. If you do not consent to trust this certificate, do not enter your root ' +
-                  'password in the prompt.');
+      parentTask.log( 'Attempting to trust a dev certificate. This self-signed certificate only points to localhost ' +
+                      'and will be stored in your local user profile to be used by other instances of ' +
+                      'gulp-core-build-serve. If you do not consent to trust this certificate, do not enter your ' +
+                      'root password in the prompt.');
 
       const macTrustResult: child_process.ChildProcess = sudo([ 'security',
                                                                 'add-trusted-cert',
@@ -195,30 +195,30 @@ function tryTrustCertificate(certificatePath: string, parentTask: GulpTask<{}>):
       }
 
       if (macTrustResultCode === 0) {
-        console.log('Successfully trusted development certificate.');
+        parentTask.logVerbose('Successfully trusted development certificate.');
         return true;
       } else {
         if (stderr.some((value: string) => !!value.match(/The authorization was cancelled by the user\./))) {
-          console.log('Certificate trust cancelled.');
+          parentTask.log('Certificate trust cancelled.');
           return false;
         } else {
-          console.log('Certificate trust failed with an unknown error.');
+          parentTask.logError('Certificate trust failed with an unknown error.');
           return false;
         }
       }
 
     default: // tslint:disable-line:no-switch-case-fall-through
       // Linux + others: Have the user manually trust the cert if they want to
-      console.log('Automatic certificate trust is only implemented for gulp-core-build-serve on Windows and ' +
-                  'macOS. To trust the development certificate, add this certificate to your trusted root ' +
-                  `certification authorities: "${CertificateStore.instance.certificatePath}".`);
+      parentTask.log( 'Automatic certificate trust is only implemented for gulp-core-build-serve on Windows and ' +
+                      'macOS. To trust the development certificate, add this certificate to your trusted root ' +
+                      `certification authorities: "${CertificateStore.instance.certificatePath}".`);
       return true;
   }
 }
 
 function trySetFriendlyName(certificatePath: string, parentTask: GulpTask<{}>): boolean {
   if (process.platform === 'win32') {
-    const certutilExePath: string = ensureCertUtilExePath();
+    const certutilExePath: string = ensureCertUtilExePath(parentTask);
     if (!certutilExePath) {
       // Unable to find the cert utility
       return false;
@@ -281,12 +281,12 @@ export function ensureCertificate(canGenerateNewCertificate: boolean,
     const tempCertificatePath: string = path.join(tempDirName, `${certificateName}.cer`);
     fs.writeFileSync(tempCertificatePath, generatedCertificate.pemCertificate);
 
-    if (tryTrustCertificate(tempCertificatePath)) {
+    if (tryTrustCertificate(tempCertificatePath, parentTask)) {
       certificateStore.certificateData = generatedCertificate.pemCertificate;
       certificateStore.keyData = generatedCertificate.pemKey;
 
-      if (!trySetFriendlyName(tempCertificatePath)) { // Try to set the friendly name, and only error if we can't
-        console.error('Unable to set the certificate\'s friendly name.');
+      if (!trySetFriendlyName(tempCertificatePath, parentTask)) { // Try to set the friendly name, and warn if we can't
+        parentTask.logWarning('Unable to set the certificate\'s friendly name.');
       }
     } else {
       // Clear out the existing store data, if any exists
