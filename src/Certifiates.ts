@@ -287,6 +287,22 @@ export function ensureCertificate(canGenerateNewCertificate: boolean,
 export function untrustCertificate(parentTask: GulpTask<{}>): boolean {
   switch (process.platform) {
     case 'win32':
+      const certutilExePath: string = ensureCertUtilExePath(parentTask);
+      if (!certutilExePath) {
+        // Unable to find the cert utility
+        return false;
+      }
+
+      const winUntrustResult: child_process.SpawnSyncReturns<string> =
+        child_process.spawnSync(certutilExePath, ['-user', '-delstore', 'root', serialNumber]);
+
+      if (winUntrustResult.status !== 0) {
+        parentTask.logError(`Error: ${winUntrustResult.stdout.toString()}`);
+        return false;
+      } else {
+        parentTask.logVerbose('Successfully untrusted development certificate.');
+        return true;
+      }
 
     case 'darwin': // tslint:disable-line:no-switch-case-fall-through
       parentTask.logVerbose('Trying to find the signature of the dev cert');
@@ -295,7 +311,7 @@ export function untrustCertificate(parentTask: GulpTask<{}>): boolean {
         child_process.spawnSync('security', ['find-certificate', '-c', 'localhost', '-a', '-Z', macKeychain]);
 
       if (macFindCertificateResult.status !== 0) {
-        parentTask.logError(`Error finding the dev certifiate: ${macFindCertificateResult.output.join(' ')}`);
+        parentTask.logError(`Error finding the dev certificate: ${macFindCertificateResult.output.join(' ')}`);
         return false;
       }
 
@@ -327,6 +343,7 @@ export function untrustCertificate(parentTask: GulpTask<{}>): boolean {
         runSudoSync(['security', 'delete-certificate', '-Z', shaHash, macKeychain]);
 
       if (macUntrustResult.code === 0) {
+        parentTask.logVerbose('Successfully untrusted dev certificate.');
         return true;
       } else {
         parentTask.logError(macUntrustResult.stderr.join(' '));
