@@ -63,6 +63,8 @@ export interface IServeTaskConfig {
   /**
    * If true, when gulp-core-build-serve is initialized and a dev certificate doesn't already exist and hasn't been
    *  specified, attempt to generate one and trust it automatically.
+   *
+   * @default false
    */
   tryCreateDevCertificate?: boolean;
 }

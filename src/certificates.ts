@@ -6,7 +6,7 @@ import * as path from 'path';
 import * as child_process from 'child_process';
 import { EOL } from 'os';
 
-import { runSudoSync, ISudoSyncResult } from './SudoSync';
+import { runSudoSync, ISudoSyncResult } from './sudoSync';
 
 import CertificateStore from './CertificateStore';
 
@@ -61,7 +61,7 @@ interface IForgeExtensions {
   };
 }
 
-function CreateDevelopmentCertificate(): ICertificate {
+function createDevelopmentCertificate(): ICertificate {
   const keys: forgeType.pki.KeyPair = forge.pki.rsa.generateKeyPair(2048);
   const certificate: IForgeCertificate = forge.pki.createCertificate();
   certificate.publicKey = keys.publicKey;
@@ -166,14 +166,17 @@ function tryTrustCertificate(certificatePath: string, parentTask: GulpTask<{}>):
                       'gulp-core-build-serve. If you do not consent to trust this certificate, do not enter your ' +
                       'root password in the prompt.');
 
-      const result: ISudoSyncResult = runSudoSync([ 'security',
-                                                    'add-trusted-cert',
-                                                    '-d',
-                                                    '-r',
-                                                    'trustRoot',
-                                                    '-k',
-                                                    macKeychain,
-                                                    certificatePath]);
+      const commands: string[] = [
+        'security',
+        'add-trusted-cert',
+        '-d',
+        '-r',
+        'trustRoot',
+        '-k',
+        macKeychain,
+        certificatePath
+      ];
+      const result: ISudoSyncResult = runSudoSync(commands);
 
       if (result.code === 0) {
         parentTask.logVerbose('Successfully trusted development certificate.');
@@ -219,12 +222,15 @@ function trySetFriendlyName(certificatePath: string, parentTask: GulpTask<{}>): 
 
     fs.writeFileSync(friendlyNamePath, friendlyNameFile);
 
+    const commands: string[] = [
+      '–repairstore',
+      '–user',
+      'root',
+      serialNumber,
+      friendlyNamePath
+    ];
     const repairStoreResult: child_process.SpawnSyncReturns<string> =
-      child_process.spawnSync(certutilExePath, ['–repairstore',
-                                                '–user',
-                                                'root',
-                                                serialNumber,
-                                                friendlyNamePath]);
+      child_process.spawnSync(certutilExePath, commands);
 
     if (repairStoreResult.status !== 0) {
       parentTask.logError(`CertUtil Error: ${repairStoreResult.stdout.toString()}`);
@@ -250,7 +256,7 @@ export function ensureCertificate(canGenerateNewCertificate: boolean,
   const certificateStore: CertificateStore = CertificateStore.instance;
 
   if ((!certificateStore.certificateData || !certificateStore.keyData) && canGenerateNewCertificate) {
-    const generatedCertificate: ICertificate = CreateDevelopmentCertificate();
+    const generatedCertificate: ICertificate = createDevelopmentCertificate();
 
     const now: Date = new Date();
     const certificateName: string = now.getTime().toString();
