@@ -1,4 +1,13 @@
-import { task, serial, parallel, watch, CopyTask, IExecutable } from '@microsoft/gulp-core-build';
+import {
+  CopyTask,
+  GenerateShrinkwrapTask,
+  IExecutable,
+  ValidateShrinkwrapTask,
+  parallel,
+  serial,
+  task,
+  watch
+} from '@microsoft/gulp-core-build';
 import { typescript, tslint, text } from '@microsoft/gulp-core-build-typescript';
 import { sass } from '@microsoft/gulp-core-build-sass';
 import { karma } from '@microsoft/gulp-core-build-karma';
@@ -28,6 +37,11 @@ const sourceMatch: string[] = [
 let buildTasks: IExecutable = task('build', serial(preCopy, sass, parallel(tslint, typescript, text), postCopy));
 let bundleTasks: IExecutable = task('bundle', serial(buildTasks, webpack));
 const postProcessSourceMaps: PostProcessSourceMaps = new PostProcessSourceMaps();
+const validateShrinkwrapTask: ValidateShrinkwrapTask = new ValidateShrinkwrapTask();
+const generateShrinkwrapTask: GenerateShrinkwrapTask = new GenerateShrinkwrapTask();
+
+task('validate-shrinkwrap', validateShrinkwrapTask);
+task('generate', generateShrinkwrapTask);
 
 task('test', serial(sass, parallel(typescript, text), karma));
 

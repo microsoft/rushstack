@@ -8,3 +8,5 @@ node_modules
 gulpfile.js
 lib/**/*.test.js
 lib/**/*.test.d.ts
+npm-shrinkwrap.json
+ccoverage
