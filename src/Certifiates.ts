@@ -6,8 +6,7 @@ import * as path from 'path';
 import * as child_process from 'child_process';
 import { EOL } from 'os';
 
-const sudo: (args: string[], options: Object) => child_process.ChildProcess = require('sudo');
-const deasync: { sleep: (ms: number) => void } = require('deasync');
+import { runSudoSync, ISudoSyncResult } from './SudoSync';
 
 import CertificateStore from './CertificateStore';
 
@@ -166,39 +165,20 @@ function tryTrustCertificate(certificatePath: string, parentTask: GulpTask<{}>):
                       'gulp-core-build-serve. If you do not consent to trust this certificate, do not enter your ' +
                       'root password in the prompt.');
 
-      const macTrustResult: child_process.ChildProcess = sudo([ 'security',
-                                                                'add-trusted-cert',
-                                                                '-d',
-                                                                '-r',
-                                                                'trustRoot',
-                                                                '-k',
-                                                                '/Library/Keychains/System.keychain',
-                                                                certificatePath],
-                                                              {
-                                                                cachePassword: false,
-                                                                prompt: 'Enter your password: '
-                                                              });
+      const result: ISudoSyncResult = runSudoSync('security',
+                                                      'add-trusted-cert',
+                                                      '-d',
+                                                      '-r',
+                                                      'trustRoot',
+                                                      '-k',
+                                                      '/Library/Keychains/System.keychain',
+                                                      certificatePath);
 
-      const stderr: string[] = [];
-      macTrustResult.stderr.on('data', (data: Buffer) => {
-        stderr.push(data.toString());
-      });
-
-      let macTrustResultCode: number = undefined;
-      macTrustResult.on('close', (code: number) => {
-        macTrustResultCode = code;
-      });
-
-      // Because we're running with sudo, we can't run synchronously, so synchronize by polling.
-      while (macTrustResultCode === undefined) {
-        deasync.sleep(100);
-      }
-
-      if (macTrustResultCode === 0) {
+      if (result.code === 0) {
         parentTask.logVerbose('Successfully trusted development certificate.');
         return true;
       } else {
-        if (stderr.some((value: string) => !!value.match(/The authorization was cancelled by the user\./))) {
+        if (result.stderr.some((value: string) => !!value.match(/The authorization was cancelled by the user\./))) {
           parentTask.log('Certificate trust cancelled.');
           return false;
         } else {
