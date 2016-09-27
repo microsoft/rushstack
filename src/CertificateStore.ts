@@ -64,7 +64,7 @@ export default class CertificateStore {
   public set keyData(key: string) {
     if (key) {
       fs.writeFileSync(this._keyPath, key, { encoding });
-    } else if (fs.existsSync(this._certificatePath)) {
+    } else if (fs.existsSync(this._keyPath)) {
       fs.unlinkSync(this._keyPath);
     }
 
