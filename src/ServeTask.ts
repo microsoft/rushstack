@@ -8,6 +8,11 @@ import * as gUtilType from 'gulp-util';
 import * as expressType from 'express';
 import * as fs from 'fs';
 
+import {
+  ensureCertificate,
+  ICertificate
+} from './certificates';
+
 export interface IServeTaskConfig {
   /**
    * API server configuration
@@ -54,6 +59,14 @@ export interface IServeTaskConfig {
    * Path to the HTTPS PFX cert
    */
   pfxPath?: string;
+
+  /**
+   * If true, when gulp-core-build-serve is initialized and a dev certificate doesn't already exist and hasn't been
+   *  specified, attempt to generate one and trust it automatically.
+   *
+   * @default false
+   */
+  tryCreateDevCertificate?: boolean;
 }
 
 interface IApiMap {
@@ -67,7 +80,8 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
     api: undefined,
     initialPage: '/index.html',
     port: 4321,
-    https: false
+    https: false,
+    tryCreateDevCertificate: false
   };
 
   public executeTask(gulp: gulp.Gulp, completeCallback?: (error?: string) => void): void {
@@ -212,32 +226,37 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
         } else {
           this.logError(`PFX file not found at path "${this.taskConfig.pfxPath}"`);
         }
-      } else {
-        if (this.taskConfig.keyPath && this.taskConfig.certPath) {
-          this.logVerbose(`Trying key path "${this.taskConfig.keyPath}" and cert path "${this.taskConfig.certPath}".`);
-          const certExists: boolean = fs.existsSync(this.taskConfig.certPath);
-          const keyExists: boolean = fs.existsSync(this.taskConfig.keyPath);
+      } else if (this.taskConfig.keyPath && this.taskConfig.certPath) {
+        this.logVerbose(`Trying key path "${this.taskConfig.keyPath}" and cert path "${this.taskConfig.certPath}".`);
+        const certExists: boolean = fs.existsSync(this.taskConfig.certPath);
+        const keyExists: boolean = fs.existsSync(this.taskConfig.keyPath);
 
-          if (keyExists && certExists) {
-            try {
-              result.cert = fs.readFileSync(this.taskConfig.certPath);
-              result.key = fs.readFileSync(this.taskConfig.keyPath);
-            } catch (e) {
-              this.logError(`Error loading key or cert file: ${e}`);
-            }
-          } else {
-            if (!keyExists) {
-              this.logError(`Key file not found at path "${this.taskConfig.keyPath}`);
-            }
-
-            if (!certExists) {
-              this.logError(`Cert file not found at path "${this.taskConfig.certPath}`);
-            }
+        if (keyExists && certExists) {
+          try {
+            result.cert = fs.readFileSync(this.taskConfig.certPath);
+            result.key = fs.readFileSync(this.taskConfig.keyPath);
+          } catch (e) {
+            this.logError(`Error loading key or cert file: ${e}`);
           }
         } else {
+          if (!keyExists) {
+            this.logError(`Key file not found at path "${this.taskConfig.keyPath}`);
+          }
+
+          if (!certExists) {
+            this.logError(`Cert file not found at path "${this.taskConfig.certPath}`);
+          }
+        }
+      } else {
+        let devCertificate: ICertificate = ensureCertificate(this.taskConfig.tryCreateDevCertificate, this);
+        if (devCertificate.pemCertificate && devCertificate.pemKey) {
+          result.cert = devCertificate.pemCertificate;
+          result.key = devCertificate.pemKey;
+        } else {
           this.logWarning('When serving in HTTPS mode, a PFX cert path or a cert path and a key path must be ' +
-                          'provided. If a SSL certificate isn\'t provided, a default, self-signed certificate will ' +
-                          'be used. Expect browser security warnings.');
+                          'provided, or a dev certificate must be generated and trusted. If a SSL certificate isn\'t ' +
+                          'provided, a default, self-signed certificate will be used. Expect browser security ' +
+                          'warnings.');
         }
       }
 
