@@ -1,3 +1,5 @@
+/// <reference path="./NodeForgeExtensions.d.ts" />
+
 import { GulpTask } from '@microsoft/gulp-core-build';
 import * as forgeType from 'node-forge';
 const forge: typeof forgeType & IForgeExtensions = require('node-forge');
@@ -19,46 +21,6 @@ let _certutilExePath: string;
 export interface ICertificate {
   pemCertificate: string;
   pemKey: string;
-}
-
-interface IAttr {
-  name: string;
-  value: string;
-}
-
-interface IForgeCertificate {
-  publicKey: any; // tslint:disable-line:no-any
-
-  validity: {
-    notBefore: Date;
-    notAfter: Date;
-  };
-
-  serialNumber: string;
-
-  setSubject(attrs: IAttr[]): void;
-
-  setIssuer(attrs: IAttr[]): void;
-
-  setExtensions(extensions: any[]): void; // tslint:disable-line:no-any
-
-  sign(privateKey: string, algorithm: IForgeSignatureAlgorithm): void; // tslint:disable-line:no-any
-}
-
-interface IForgeSignatureAlgorithm {
-}
-
-interface IForgeExtensions {
-  pki: {
-    createCertificate(): IForgeCertificate;
-    certificateToPem(certificate: IForgeCertificate): string;
-  };
-
-  md: {
-    sha256: {
-      create(): IForgeSignatureAlgorithm;
-    }
-  };
 }
 
 function createDevelopmentCertificate(): ICertificate {
@@ -186,7 +148,8 @@ function tryTrustCertificate(certificatePath: string, parentTask: GulpTask<{}>):
           parentTask.log('Certificate trust cancelled.');
           return false;
         } else {
-          parentTask.logError('Certificate trust failed with an unknown error.');
+          parentTask.logError(`Certificate trust failed with an unknown error. Exit code: ${result.code}. ` +
+                              `Error: ${result.stderr.join(' ')}`);
           return false;
         }
       }

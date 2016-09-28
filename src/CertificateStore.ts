@@ -1,5 +1,6 @@
 import * as path from 'path';
 import * as fs from 'fs';
+import { homedir } from 'os';
 
 const encoding: string = 'utf8';
 
@@ -72,7 +73,7 @@ export default class CertificateStore {
   }
 
   private _initialize(): void {
-    const unresolvedUserFolder: string = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
+    const unresolvedUserFolder: string = homedir();
     this._userProfilePath = path.resolve(unresolvedUserFolder);
     if (!fs.existsSync(this._userProfilePath)) {
       throw new Error('Unable to determine the current user\'s home directory');
