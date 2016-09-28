@@ -5,13 +5,15 @@ import * as gulpIstanbul from 'gulp-istanbul';
 
 export interface IMochaTaskConfig {
   testMatch: string[];
+  reportDir: string;
 }
 
 export class MochaTask extends GulpTask<IMochaTaskConfig> {
   public name: string = 'mocha';
 
   public taskConfig: IMochaTaskConfig = {
-    testMatch: ['lib/**/*.test.js']
+    testMatch: ['lib/**/*.test.js'],
+    reportDir: 'coverage'
   };
 
   public executeTask(gulp: gulp.Gulp, completeCallback?: (error?: string) => void): NodeJS.ReadWriteStream {
@@ -26,6 +28,8 @@ export class MochaTask extends GulpTask<IMochaTaskConfig> {
       .pipe(mocha({
         grep: matchString
       }))
-      .pipe(istanbul.writeReports());
+      .pipe(istanbul.writeReports({
+        dir: this.taskConfig.reportDir
+      }));
   }
 }
