@@ -4,7 +4,7 @@ import * as gulp from 'gulp';
 import { ensureCertificate, ICertificate } from './certificates';
 
 /**
- * This task gnerates and trusts a development certificate. The certificate is self-signed
+ * This task generates and trusts a development certificate. The certificate is self-signed
  *  and stored, along with its private key, in the user's home directory. On Windows, it's
  *  trusted as a root certification authority in the user certificate store. On macOS, it's
  *  trusted as a root cert in the keychain. On other platforms, the certificate is generated
