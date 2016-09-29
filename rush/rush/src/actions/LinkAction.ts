@@ -8,7 +8,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import readPackageTree = require('read-package-tree');
-import { CommandLineAction, CommandLineFlagParameter } from '@microsoft/ts-command-line';
+import { CommandLineAction } from '@microsoft/ts-command-line';
 import {
   JsonFile,
   RushConfig,
@@ -26,7 +26,6 @@ import RushCommandLineParser from './RushCommandLineParser';
 export default class LinkAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
   private _rushConfig: RushConfig;
-  private _noLocalLinksParameter: CommandLineFlagParameter;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -38,21 +37,13 @@ export default class LinkAction extends CommandLineAction {
   }
 
   protected onDefineParameters(): void {
-    this._noLocalLinksParameter = this.defineFlagParameter({
-      parameterLongName: '--no-local-links',
-      parameterShortName: '-n',
-      description: 'Do not locally link the projects; always link to the common folder'
-    });
+    // abstract
   }
 
   protected onExecute(): void {
     this._rushConfig = this._rushConfig = RushConfig.loadFromDefaultLocation();
 
     console.log('Starting "rush link"');
-
-    const options: IExecuteLinkOptions = {
-      noLocalLinks: this._noLocalLinksParameter.value
-    };
 
     readPackageTree(this._rushConfig.commonFolder, (error: Error, npmPackage: PackageNode) => {
       this._parser.trapErrors(() => {
@@ -68,8 +59,7 @@ export default class LinkAction extends CommandLineAction {
 
           for (const rushProject of this._rushConfig.projects) {
             console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
-            linkProject(rushProject, commonRootPackage, commonPackageLookup, this._rushConfig, rushLinkJson,
-              options);
+            linkProject(rushProject, commonRootPackage, commonPackageLookup, this._rushConfig, rushLinkJson);
           }
 
           console.log(`Writing "${this._rushConfig.rushLinkJsonFilename}"`);
@@ -81,10 +71,6 @@ export default class LinkAction extends CommandLineAction {
       });
     });
   }
-}
-
-interface IExecuteLinkOptions {
-  noLocalLinks?: boolean;
 }
 
 interface IQueueItem {
@@ -224,8 +210,7 @@ function linkProject(
   commonRootPackage: Package,
   commonPackageLookup: PackageLookup,
   rushConfig: RushConfig,
-  rushLinkJson: IRushLinkJson,
-  options: IExecuteLinkOptions): void {
+  rushLinkJson: IRushLinkJson): void {
 
   const commonProjectPackage: Package = commonRootPackage.getChildByName(project.tempProjectName);
   if (!commonProjectPackage) {
@@ -257,14 +242,14 @@ function linkProject(
     // where "this-project" corresponds to the "project" parameter for linkProject().
     const localPackage: Package = queueItem.localPackage;
 
-    // NOTE: It's important that we use the dependencies from the Common folder,
+    // NOTE: It's important that this traversal follows the dependencies in the Common folder,
     // because for Rush projects this will be the union of
     // devDependencies / dependencies / optionalDependencies.
     for (const dependency of commonPackage.dependencies) {
 
       // Should this be a local link to an Rush project?
       const matchedRushPackage: RushConfigProject = rushConfig.getProjectByName(dependency.name);
-      if (matchedRushPackage && !options.noLocalLinks) {
+      if (matchedRushPackage) {
         // The dependency name matches an Rush project, but is it compatible with
         // the requested version?
         const matchedVersion: string = matchedRushPackage.packageJson.version;
