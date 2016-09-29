@@ -223,6 +223,16 @@ export default class RushConfig {
       }
       this._projectsByName.set(project.packageName, project);
     }
+
+    for (const project of this._projects) {
+      project.cyclicDependencyProjects.forEach((cyclicDependencyProject: string) => {
+        if (!this.getProjectByName(cyclicDependencyProject)) {
+          throw new Error(`The project name "${cyclicDependencyProject}" was specified in`
+            + ` the cyclicDependencyProjects for ${project.packageName},`
+            + ` but it has not been added to rush.json`);
+        }
+      });
+    }
   }
 
   /**

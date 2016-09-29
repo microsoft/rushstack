@@ -13,6 +13,7 @@ import RushConfig from '../data/RushConfig';
 export interface IRushConfigProjectJson {
   packageName: string;
   projectFolder: string;
+  cyclicDependencyProjects: string[];
 }
 
 /**
@@ -24,6 +25,7 @@ export default class RushConfigProject {
   private _projectFolder: string;
   private _packageJson: PackageJson;
   private _tempProjectName: string;
+  private _cyclicDependencyProjects: Set<string>;
 
   constructor(projectJson: IRushConfigProjectJson, rushConfig: RushConfig, tempProjectName: string) {
     this._packageName = projectJson.packageName;
@@ -56,6 +58,13 @@ export default class RushConfigProject {
     }
 
     this._tempProjectName = tempProjectName;
+
+    this._cyclicDependencyProjects = new Set<string>();
+    if (projectJson.cyclicDependencyProjects) {
+      for (const cyclicDependencyProject of projectJson.cyclicDependencyProjects) {
+        this._cyclicDependencyProjects.add(cyclicDependencyProject);
+      }
+    }
   }
 
   /**
@@ -71,6 +80,17 @@ export default class RushConfigProject {
    */
   public get projectFolder(): string {
     return this._projectFolder;
+  }
+
+  /**
+   * A list of local projects that appear as devDependencies for this project, but cannot be
+   * locally linked because it would create a cyclic dependency; instead, the last published
+   * version will be installed in the Common folder.
+   *
+   * These are package names that would be found by RushConfig.getProjectByName().
+   */
+  public get cyclicDependencyProjects(): Set<string> {
+    return this._cyclicDependencyProjects;
   }
 
   /**
