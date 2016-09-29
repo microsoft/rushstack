@@ -148,20 +148,28 @@ export default class GenerateAction extends CommandLineAction {
         // Is there a locally built Rush project that could satisfy this dependency?
         // If so, then we will symlink to the project folder rather than to common/node_modules.
         // In this case, we don't want "npm install" to process this package, but we do need
-        // to record this decision for later, so we add it to a special 'rushDependencies' list.
+        // to record this decision for "rush link" later, so we add it to a special 'rushDependencies' field.
         const localProject: RushConfigProject = this._rushConfig.getProjectByName(pair.packageName);
         if (localProject) {
-          const localProjectVersion: string = localProject.packageJson.version;
-          if (semver.satisfies(localProjectVersion, pair.packageVersion)) {
-            if (!tempPackageJson.rushDependencies) {
-              tempPackageJson.rushDependencies = {};
+
+          // Don't locally link if it's listed in the cyclicDependencyProjects
+          if (!rushProject.cyclicDependencyProjects.has(pair.packageName)) {
+
+            // Also, don't locally link if the SemVer doesn't match
+            const localProjectVersion: string = localProject.packageJson.version;
+            if (semver.satisfies(localProjectVersion, pair.packageVersion)) {
+
+              // We will locally link this package
+              if (!tempPackageJson.rushDependencies) {
+                tempPackageJson.rushDependencies = {};
+              }
+              tempPackageJson.rushDependencies[pair.packageName] = pair.packageVersion;
+              continue;
             }
-            tempPackageJson.rushDependencies[pair.packageName] = pair.packageVersion;
-            continue;
           }
         }
 
-        // Otherwise, add it as a regular dependency.
+        // We will NOT locally link this package; add it as a regular dependency.
         tempPackageJson.dependencies[pair.packageName] = pair.packageVersion;
       }
 

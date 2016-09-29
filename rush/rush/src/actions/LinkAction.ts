@@ -262,7 +262,7 @@ function linkProject(
     // devDependencies / dependencies / optionalDependencies.
     for (const dependency of commonPackage.dependencies) {
 
-      // Should this be a symlink to an Rush project?
+      // Should this be a local link to an Rush project?
       const matchedRushPackage: RushConfigProject = rushConfig.getProjectByName(dependency.name);
       if (matchedRushPackage && !options.noLocalLinks) {
         // The dependency name matches an Rush project, but is it compatible with
