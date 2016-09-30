@@ -1,0 +1,65 @@
+{
+  "npmVersion": "3.10.8",
+  "npmxMinimumVersion": "0.6.0",
+  "nodeSupportedVersionRange": ">=4.3.0",
+  "commonFolder": "common",
+  "projects": [
+    {
+      "packageName": "@microsoft/gulp-core-build",
+      "projectFolder": "gulp-core-build",
+      "cyclicDependencyProjects": [
+        "@microsoft/node-library-build"
+      ]
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-karma",
+      "projectFolder": "gulp-core-build-karma",
+      "cyclicDependencyProjects": [
+        "@microsoft/node-library-build"
+      ]
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-mocha",
+      "projectFolder": "gulp-core-build-mocha",
+      "cyclicDependencyProjects": [
+        "@microsoft/node-library-build"
+      ]
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-sass",
+      "projectFolder": "gulp-core-build-sass",
+      "cyclicDependencyProjects": [
+        "@microsoft/node-library-build"
+      ]
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-serve",
+      "projectFolder": "gulp-core-build-serve",
+      "cyclicDependencyProjects": [
+        "@microsoft/node-library-build"
+      ]
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "projectFolder": "gulp-core-build-typescript",
+      "cyclicDependencyProjects": [
+        "@microsoft/node-library-build"
+      ]
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-webpack",
+      "projectFolder": "gulp-core-build-webpack",
+      "cyclicDependencyProjects": [
+        "@microsoft/node-library-build"
+      ]
+    },
+    {
+      "packageName": "@microsoft/node-library-build",
+      "projectFolder": "node-library-build"
+    },
+    {
+      "packageName": "@microsoft/web-library-build",
+      "projectFolder": "web-library-build"
+    }
+  ]
+}
