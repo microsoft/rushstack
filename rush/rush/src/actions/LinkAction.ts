@@ -8,7 +8,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import readPackageTree = require('read-package-tree');
-import { CommandLineAction, CommandLineFlagParameter } from '@microsoft/ts-command-line';
+import { CommandLineAction } from '@microsoft/ts-command-line';
 import {
   JsonFile,
   RushConfig,
@@ -26,7 +26,6 @@ import RushCommandLineParser from './RushCommandLineParser';
 export default class LinkAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
   private _rushConfig: RushConfig;
-  private _noLocalLinksParameter: CommandLineFlagParameter;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -38,21 +37,13 @@ export default class LinkAction extends CommandLineAction {
   }
 
   protected onDefineParameters(): void {
-    this._noLocalLinksParameter = this.defineFlagParameter({
-      parameterLongName: '--no-local-links',
-      parameterShortName: '-n',
-      description: 'Do not locally link the projects; always link to the common folder'
-    });
+    // abstract
   }
 
   protected onExecute(): void {
     this._rushConfig = this._rushConfig = RushConfig.loadFromDefaultLocation();
 
     console.log('Starting "rush link"');
-
-    const options: IExecuteLinkOptions = {
-      noLocalLinks: this._noLocalLinksParameter.value
-    };
 
     readPackageTree(this._rushConfig.commonFolder, (error: Error, npmPackage: PackageNode) => {
       this._parser.trapErrors(() => {
@@ -68,8 +59,7 @@ export default class LinkAction extends CommandLineAction {
 
           for (const rushProject of this._rushConfig.projects) {
             console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
-            linkProject(rushProject, commonRootPackage, commonPackageLookup, this._rushConfig, rushLinkJson,
-              options);
+            linkProject(rushProject, commonRootPackage, commonPackageLookup, this._rushConfig, rushLinkJson);
           }
 
           console.log(`Writing "${this._rushConfig.rushLinkJsonFilename}"`);
@@ -83,13 +73,16 @@ export default class LinkAction extends CommandLineAction {
   }
 }
 
-interface IExecuteLinkOptions {
-  noLocalLinks?: boolean;
-}
-
 interface IQueueItem {
+  // A project from somewhere under "common/node_modules"
   commonPackage: Package;
+
+  // A symlinked virtual package that we will create somewhere under "this-project/node_modules"
   localPackage: Package;
+
+  // If we encounter a dependency listed in cyclicDependencyProjects, this will be set to the root
+  // of the localPackage subtree where we will stop creating local links.
+  cyclicSubtreeRoot: Package;
 }
 
 enum SymlinkKind {
@@ -224,8 +217,7 @@ function linkProject(
   commonRootPackage: Package,
   commonPackageLookup: PackageLookup,
   rushConfig: RushConfig,
-  rushLinkJson: IRushLinkJson,
-  options: IExecuteLinkOptions): void {
+  rushLinkJson: IRushLinkJson): void {
 
   const commonProjectPackage: Package = commonRootPackage.getChildByName(project.tempProjectName);
   if (!commonProjectPackage) {
@@ -242,7 +234,11 @@ function linkProject(
   );
 
   const queue: IQueueItem[] = [];
-  queue.push({ commonPackage: commonProjectPackage, localPackage: localProjectPackage });
+  queue.push({
+    commonPackage: commonProjectPackage,
+    localPackage: localProjectPackage,
+    cyclicSubtreeRoot: undefined
+  });
 
   // tslint:disable-next-line:no-constant-condition
   while (true) {
@@ -253,23 +249,49 @@ function linkProject(
 
     // A project from somewhere under "common/node_modules"
     const commonPackage: Package = queueItem.commonPackage;
+
     // A symlinked virtual package somewhere under "this-project/node_modules",
     // where "this-project" corresponds to the "project" parameter for linkProject().
     const localPackage: Package = queueItem.localPackage;
 
-    // NOTE: It's important that we use the dependencies from the Common folder,
+    // If we encounter a dependency listed in cyclicDependencyProjects, this will be set to the root
+    // of the localPackage subtree where we will stop creating local links.
+    const cyclicSubtreeRoot: Package = queueItem.cyclicSubtreeRoot;
+
+    // NOTE: It's important that this traversal follows the dependencies in the Common folder,
     // because for Rush projects this will be the union of
     // devDependencies / dependencies / optionalDependencies.
     for (const dependency of commonPackage.dependencies) {
+      let startingCyclicSubtree: boolean;
 
-      // Should this be a symlink to an Rush project?
+      // Should this be a "local link" to a top-level Rush project (i.e. versus a regular link
+      // into the Common folder)?
       const matchedRushPackage: RushConfigProject = rushConfig.getProjectByName(dependency.name);
-      if (matchedRushPackage && !options.noLocalLinks) {
-        // The dependency name matches an Rush project, but is it compatible with
-        // the requested version?
+
+      if (matchedRushPackage) {
         const matchedVersion: string = matchedRushPackage.packageJson.version;
-        if (dependency.kind === PackageDependencyKind.LocalLink
-          || semver.satisfies(matchedVersion, dependency.versionRange)) {
+
+        // The dependency name matches an Rush project, but are there any other reasons not
+        // to create a local link?
+        if (cyclicSubtreeRoot) {
+          // DO NOT create a local link, because this is part of an existing
+          // cyclicDependencyProjects subtree
+        } else if (project.cyclicDependencyProjects.has(dependency.name)) {
+          // DO NOT create a local link, because we are starting a new
+          // cyclicDependencyProjects subtree
+          startingCyclicSubtree = true;
+        } else if (dependency.kind !== PackageDependencyKind.LocalLink
+          && !semver.satisfies(matchedVersion, dependency.versionRange)) {
+          // DO NOT create a local link, because the local project's version isn't SemVer compatible.
+
+          // (Note that in order to make version bumping work as expected, we ignore SemVer for
+          // immediate dependencies of top-level projects, indicated by PackageDependencyKind.LocalLink.
+          // Is this wise?)
+
+          console.log(colors.yellow(`Rush will not locally link ${dependency.name} for ${localPackage.name}`
+            + ` because the requested version "${dependency.versionRange}" is incompatible`
+            + ` with the local version ${matchedVersion}`));
+        } else {
           // Yes, it is compatible, so create a symlink to the Rush project.
 
           // If the link is coming from our top-level Rush project, then record a
@@ -309,10 +331,6 @@ function linkProject(
           }
 
           continue;
-        } else {
-          console.log(colors.yellow(`Rush will not link ${dependency.name} for ${localPackage.name}`
-            + ` because it requested version "${dependency.versionRange}" which is incompatible`
-            + ` with version ${matchedVersion }`));
         }
       }
 
@@ -324,7 +342,17 @@ function linkProject(
         const effectiveDependencyVersion: string = commonDependencyPackage.version;
 
         // Is the dependency already resolved?
-        const resolution: IResolveOrCreateResult = localPackage.resolveOrCreate(dependency.name);
+        let resolution: IResolveOrCreateResult;
+        if (!cyclicSubtreeRoot || !matchedRushPackage) {
+          // Perform normal module resolution.
+          resolution = localPackage.resolveOrCreate(dependency.name);
+        } else {
+          // We are inside a cyclicDependencyProjects subtree (i.e. cyclicSubtreeRoot != undefined),
+          // and the dependency is a local project (i.e. matchedRushPackage != undefined), so
+          // we use a special module resolution strategy that places everything under the
+          // cyclicSubtreeRoot.
+          resolution = localPackage.resolveOrCreate(dependency.name, cyclicSubtreeRoot);
+        }
 
         if (!resolution.found || resolution.found.version !== effectiveDependencyVersion) {
           // We did not find a suitable match, so place a new local package
@@ -346,13 +374,25 @@ function linkProject(
           }
           newLocalPackage.symlinkTargetFolderPath = commonPackage.folderPath;
 
+          let newCyclicSubtreeRoot: Package = cyclicSubtreeRoot;
+          if (startingCyclicSubtree) {
+            // If we are starting a new subtree, then newLocalPackage will be its root
+            // NOTE: cyclicSubtreeRoot is guaranteed to be undefined here, since we never start
+            // a new tree inside an existing tree
+            newCyclicSubtreeRoot = newLocalPackage;
+          }
+
           resolution.parentForCreate.addChild(newLocalPackage);
-          queue.push({ commonPackage: commonDependencyPackage, localPackage: newLocalPackage });
+          queue.push({
+            commonPackage: commonDependencyPackage,
+            localPackage: newLocalPackage,
+            cyclicSubtreeRoot: newCyclicSubtreeRoot
+          });
         }
       } else {
         if (dependency.kind !== PackageDependencyKind.Optional) {
           throw Error(`The dependency "${dependency.name}" needed by "${localPackage.name}"`
-            + ` was not found the ${rushConfig.commonFolderName} folder`);
+            + ` was not found the ${rushConfig.commonFolderName} folder -- do you need to run "rush generate"?`);
         } else {
           console.log(colors.yellow('Skipping optional dependency: ' + dependency.name));
         }

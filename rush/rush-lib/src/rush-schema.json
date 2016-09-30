@@ -47,6 +47,13 @@
           "projectFolder": {
             "description": "The path to the project folder relative to the Rush config file.",
             "type": "string"
+          },
+          "cyclicDependencyProjects": {
+            "description": "A list of local projects that appear as devDependencies for this project, but cannot be locally linked because it would create a cyclic dependency; instead, the last published version will be installed in the Common folder.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "additionalProperties": false,

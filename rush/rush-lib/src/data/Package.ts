@@ -213,41 +213,41 @@ export default class Package {
    * In either case, the parentForCreate result indicates where the missing
    * dependency can be added, i.e. if the requested dependency was not found
    * or was found with an incompatible version.
+   *
+   * "cyclicSubtreeRoot" is a special optional parameter that specifies a different
+   * root for the tree; the cyclicDependencyProjects feature uses this to isolate
+   * certain devDependencies in their own subtree.
    */
-  public resolveOrCreate(dependencyName: string): IResolveOrCreateResult {
+  public resolveOrCreate(dependencyName: string, cyclicSubtreeRoot?: Package): IResolveOrCreateResult {
 
     let currentParent: Package = this;
-    let parentForCreate: Package = this;
+    let parentForCreate: Package = undefined;
 
     // tslint:disable-next-line:no-constant-condition
     while (true) {
-      // NOTE: Initially we don't compare against ourself, because self-references
-      // are a special case
-
       // Does any child match?
       for (const child of currentParent.children) {
         if (child.name === dependencyName) {
-          // One of the children matched.
-          // parentForCreate will be the parent
+          // One of the children matched.  Note that parentForCreate may be
+          // undefined, e.g. if an immediate child is found but has the wrong version,
+          // then we have no place in the tree to create another version.
           return { found: child, parentForCreate };
         }
       }
 
-      // Go up to the next parent
+      // If no child matched, then make this node the "parentForCreate" where we
+      // could add a missing dependency.
       parentForCreate = currentParent;
-      currentParent = currentParent.parent;
 
-      if (!currentParent) {
+      if (!currentParent.parent
+        || (cyclicSubtreeRoot && currentParent === cyclicSubtreeRoot)) {
         // We reached the root without finding a match
         // parentForCreate will be the root.
         return { found: undefined, parentForCreate };
       }
 
-      if (currentParent.name === dependencyName) {
-        // One of the parents was the match.
-        // parentForCreate will be the parent we checked before
-        return { found: currentParent, parentForCreate };
-      }
+      // Continue walking upwards.
+      currentParent = currentParent.parent;
     }
   }
 
