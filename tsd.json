@@ -1,0 +1,33 @@
+{
+  "version": "v4",
+  "repo": "borisyankov/DefinitelyTyped",
+  "ref": "master",
+  "path": "typings",
+  "bundle": "typings/tsd.d.ts",
+  "installed": {
+    "node/node.d.ts": {
+      "commit": "23c9f2230960c4a9b83e4297471d082a27d02b74"
+    },
+    "chalk/chalk.d.ts": {
+      "commit": "513510a89acc648422c9abb047265116198f99ee"
+    },
+    "gulp/gulp.d.ts": {
+      "commit": "513510a89acc648422c9abb047265116198f99ee"
+    },
+    "orchestrator/orchestrator.d.ts": {
+      "commit": "513510a89acc648422c9abb047265116198f99ee"
+    },
+    "q/Q.d.ts": {
+      "commit": "513510a89acc648422c9abb047265116198f99ee"
+    },
+    "gulp-istanbul/gulp-istanbul.d.ts": {
+      "commit": "23c9f2230960c4a9b83e4297471d082a27d02b74"
+    },
+    "gulp-mocha/gulp-mocha.d.ts": {
+      "commit": "23c9f2230960c4a9b83e4297471d082a27d02b74"
+    },
+    "mocha/mocha.d.ts": {
+      "commit": "23c9f2230960c4a9b83e4297471d082a27d02b74"
+    }
+  }
+}
