@@ -227,9 +227,8 @@ export default class RushConfig {
     for (const project of this._projects) {
       project.cyclicDependencyProjects.forEach((cyclicDependencyProject: string) => {
         if (!this.getProjectByName(cyclicDependencyProject)) {
-          throw new Error(`The project name "${cyclicDependencyProject}" was specified in`
-            + ` the cyclicDependencyProjects for ${project.packageName},`
-            + ` but it has not been added to rush.json`);
+          throw new Error(`In rush.json, the "${cyclicDependencyProject}" project does not exist,`
+            + ` but was referenced by the cyclicDependencyProjects for ${project.packageName}`);
         }
       });
     }

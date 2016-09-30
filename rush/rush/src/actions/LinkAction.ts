@@ -274,9 +274,11 @@ function linkProject(
         // The dependency name matches an Rush project, but are there any other reasons not
         // to create a local link?
         if (cyclicSubtreeRoot) {
-          // DO NOT create a local link, because this is part of a cyclicDependencyProjects subtree
+          // DO NOT create a local link, because this is part of an existing
+          // cyclicDependencyProjects subtree
         } else if (project.cyclicDependencyProjects.has(dependency.name)) {
-          // DO NOT create a local link, because rush.json is told us not to
+          // DO NOT create a local link, because we are starting a new
+          // cyclicDependencyProjects subtree
           startingCyclicSubtree = true;
         } else if (dependency.kind !== PackageDependencyKind.LocalLink
           && !semver.satisfies(matchedVersion, dependency.versionRange)) {
@@ -340,10 +342,17 @@ function linkProject(
         const effectiveDependencyVersion: string = commonDependencyPackage.version;
 
         // Is the dependency already resolved?
-        const resolution: IResolveOrCreateResult = localPackage.resolveOrCreate(dependency.name,
-          // Only use the cyclicSubtreeRoot if this package is eligible to be locally linked;
-          // for regular packages, it's safe to place them anywhere in the tree.
-          matchedRushPackage ? cyclicSubtreeRoot : undefined);
+        let resolution: IResolveOrCreateResult;
+        if (!cyclicSubtreeRoot || !matchedRushPackage) {
+          // Perform normal module resolution.
+          resolution = localPackage.resolveOrCreate(dependency.name);
+        } else {
+          // We are inside a cyclicDependencyProjects subtree (i.e. cyclicSubtreeRoot != undefined),
+          // and the dependency is a local project (i.e. matchedRushPackage != undefined), so
+          // we use a special module resolution strategy that places everything under the
+          // cyclicSubtreeRoot.
+          resolution = localPackage.resolveOrCreate(dependency.name, cyclicSubtreeRoot);
+        }
 
         if (!resolution.found || resolution.found.version !== effectiveDependencyVersion) {
           // We did not find a suitable match, so place a new local package
@@ -365,8 +374,13 @@ function linkProject(
           }
           newLocalPackage.symlinkTargetFolderPath = commonPackage.folderPath;
 
-          // If startingCyclicSubtree=true, then replace the old cyclicSubtreeRoot with newLocalPackage
-          const newCyclicSubtreeRoot: Package = startingCyclicSubtree ? newLocalPackage : cyclicSubtreeRoot;
+          let newCyclicSubtreeRoot: Package = cyclicSubtreeRoot;
+          if (startingCyclicSubtree) {
+            // If we are starting a new subtree, then newLocalPackage will be its root
+            // NOTE: cyclicSubtreeRoot is guaranteed to be undefined here, since we never start
+            // a new tree inside an existing tree
+            newCyclicSubtreeRoot = newLocalPackage;
+          }
 
           resolution.parentForCreate.addChild(newLocalPackage);
           queue.push({
