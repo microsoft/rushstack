@@ -2,10 +2,6 @@
   "name": "@microsoft/rush-lib",
   "version": "1.0.0",
   "description": "Library support for the Rush tool",
-  "repository": {
-    "type": "git",
-    "url": "https://onedrive.visualstudio.com/DefaultCollection/SPPPlat/_git/sp-next"
-  },
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {

@@ -2,10 +2,6 @@
   "name": "@microsoft/rush",
   "version": "1.0.0",
   "description": "Manage building/installing of multiple NPM package folders",
-  "repository": {
-    "type": "git",
-    "url": "https://onedrive.visualstudio.com/DefaultCollection/SPPPlat/_git/sp-next"
-  },
   "scripts": {
     "build": "gulp",
     "clean": "gulp nuke",
