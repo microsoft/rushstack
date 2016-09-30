@@ -3,6 +3,7 @@
 var build = require('@microsoft/node-library-build');
 
 build.typescript.setConfig({
+  typescript: require('typescript'),
   sourceMatch: [
     'src/**/*.ts',
     'src/**/*.tsx',
