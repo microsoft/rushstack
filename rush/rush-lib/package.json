@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush-lib",
-  "version": "0.5.5",
+  "version": "1.0.0",
   "description": "Library support for the Rush tool",
   "repository": {
     "type": "git",
