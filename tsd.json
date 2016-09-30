@@ -1,0 +1,51 @@
+{
+  "version": "v4",
+  "repo": "borisyankov/DefinitelyTyped",
+  "ref": "master",
+  "path": "typings",
+  "bundle": "typings/tsd.d.ts",
+  "installed": {
+    "chalk/chalk.d.ts": {
+      "commit": "de82425735f84a10b43921ae4b1d085b3752a626"
+    },
+    "node/node.d.ts": {
+      "commit": "de82425735f84a10b43921ae4b1d085b3752a626"
+    },
+    "gulp/gulp.d.ts": {
+      "commit": "513510a89acc648422c9abb047265116198f99ee"
+    },
+    "orchestrator/orchestrator.d.ts": {
+      "commit": "513510a89acc648422c9abb047265116198f99ee"
+    },
+    "q/Q.d.ts": {
+      "commit": "513510a89acc648422c9abb047265116198f99ee"
+    },
+    "connect/connect.d.ts": {
+      "commit": "513510a89acc648422c9abb047265116198f99ee"
+    },
+    "through2/through2.d.ts": {
+      "commit": "de82425735f84a10b43921ae4b1d085b3752a626"
+    },
+    "vinyl/vinyl.d.ts": {
+      "commit": "de82425735f84a10b43921ae4b1d085b3752a626"
+    },
+    "gulp-util/gulp-util.d.ts": {
+      "commit": "de82425735f84a10b43921ae4b1d085b3752a626"
+    },
+    "serve-static/serve-static.d.ts": {
+      "commit": "de82425735f84a10b43921ae4b1d085b3752a626"
+    },
+    "mime/mime.d.ts": {
+      "commit": "de82425735f84a10b43921ae4b1d085b3752a626"
+    },
+    "express/express.d.ts": {
+      "commit": "de82425735f84a10b43921ae4b1d085b3752a626"
+    },
+    "express-serve-static-core/express-serve-static-core.d.ts": {
+      "commit": "de82425735f84a10b43921ae4b1d085b3752a626"
+    },
+    "node-forge/node-forge.d.ts": {
+      "commit": "2fc5063371b44b5b020e96f3fde1a747761fa8a6"
+    }
+  }
+}
