@@ -1,7 +1,7 @@
-node_modules
-coverage
 .DS_Store
-npm*.log
-lib
-temp
+coverage
 dist
+lib
+node_modules
+npm*.log
+temp
