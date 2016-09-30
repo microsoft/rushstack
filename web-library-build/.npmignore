@@ -1,3 +1,5 @@
+*.build.error.log
+*.build.log
 .editorconfig
 .gitattributes
 .gitignore

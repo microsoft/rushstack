@@ -1,9 +1,9 @@
 {
   "npmVersion": "3.10.8",
-  "npmxMinimumVersion": "0.6.0",
+  "npmxMinimumVersion": "0.5.5",
   "nodeSupportedVersionRange": ">=4.3.0",
   "commonFolder": "common",
-  "projectFolderMinDepth": 0,
+  "projectFolderMinDepth": 1,
   "projects": [
     {
       "packageName": "@microsoft/gulp-core-build",
