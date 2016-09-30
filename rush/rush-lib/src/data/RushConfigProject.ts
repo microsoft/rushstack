@@ -33,14 +33,14 @@ export default class RushConfigProject {
     // For example, the depth of "a/b/c" would be 3.  The depth of "a" is 1.
     const projectFolderDepth: number = projectJson.projectFolder.split('/').length;
     if (projectFolderDepth < rushConfig.projectFolderMinDepth) {
-      throw new Error(`To keep things organized, this repository has a policy that project folders `
-        + `should be at least ${rushConfig.projectFolderMinDepth} levels deep.  `
-        + `Problem folder: "${projectJson.projectFolder}"`);
+      throw new Error(`To keep things organized, this repository has a projectFolderMinDepth policy`
+        + ` requiring project folders to be at least ${rushConfig.projectFolderMinDepth} levels deep.`
+        + `  Problem folder: "${projectJson.projectFolder}"`);
     }
     if (projectFolderDepth > rushConfig.projectFolderMaxDepth) {
-      throw new Error(`To keep things organized, this repository has a policy that project folders `
-        + `must not have more than ${rushConfig.projectFolderMaxDepth} levels of nesting.  `
-        + `Problem folder:  "${projectJson.projectFolder}"`);
+      throw new Error(`To keep things organized, this repository has a projectFolderMaxDepth policy`
+        + ` preventing project folders from being deeper than ${rushConfig.projectFolderMaxDepth} levels.`
+        + `  Problem folder:  "${projectJson.projectFolder}"`);
     }
 
     this._projectFolder = path.join(rushConfig.rushJsonFolder, projectJson.projectFolder);

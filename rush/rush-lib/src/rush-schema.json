@@ -27,7 +27,7 @@
       "type": "string"
     },
     "projectFolderMinDepth": {
-      "description": "The minimum folder depth for the projectFolder field.  The default value is 2, i.e. a single slash in the path name.",
+      "description": "The minimum folder depth for the projectFolder field.  The default value is 1, i.e. no slashes in the path name.",
       "type": "number"
     },
     "projectFolderMaxDepth": {

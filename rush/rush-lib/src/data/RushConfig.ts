@@ -196,7 +196,7 @@ export default class RushConfig {
     this._npmToolFilename = path.join(this._commonFolder, 'local-npm', 'node_modules', '.bin', 'npm');
 
     this._projectFolderMinDepth = rushConfigJson.projectFolderMinDepth !== undefined
-      ? rushConfigJson.projectFolderMinDepth : 2;
+      ? rushConfigJson.projectFolderMinDepth : 1;
     if (this._projectFolderMinDepth < 1) {
       throw new Error('Invalid projectFolderMinDepth; the minimum possible value is 1');
     }
