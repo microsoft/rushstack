@@ -1,0 +1,15 @@
+language: node_js
+node_js:
+- '4.2'
+before_script:
+- npm install -g gulp
+script: gulp
+deploy:
+  skip_cleanup: true
+  provider: npm
+  email: odspnpm@microsoft.com
+  api_key:
+    secure: JdySR821h+CyfzNgN48J6MXdUwFhIv3qZGBQPAkwN15/62nv/PJE273AGS6/1sUnkWFr8fzgL8wfJqYaYaUK7icvbmmlbs6Z/fCm9LJX0QP6wB0fIsmyqXGrbsuVA/5PqkBaIuVFMTHmkMIMJzxzfxMMxMnIYw3H272LN8rWfCnFno0N/Ihqs94hcO1+Yb8WnnOJsU+Wwl7Gii6S4jo54g8lOcMPp4dfTDu/DiReCAnwWfIHbfCqxP8y7VCHJBLnd+UCWI2xiqmFaZ690e1Yt3OXZb0puiw8I5GXxvqHeETNwL9OJwd8A4HqUoBPqUp7wr3H+fYqkhUBAf7rDHr+EYXxP3s2P3K5IScC9SsRzu4caL1QSOjnie5kHd9WmS3/SnQdzRATlepB1GFg2uiLmptcnCqxTgdpn6++HPi8VnyJJO4HAKMVbQF6uQ8J6Cj7ofCWcipwgMeiYEPkjPfYaUNBWeuR2RV4i4Imi4JTi9oihkrA4B70trlBE6Y0dzh4kyD/58atRVfTZhSPkWvUjBPCWihEbvHmP2hOYrjgXvXG8qrtQNw3N+45bJH9GQtvkC1x+19zPdLtqoI7h/VXuS3TZId1lukjLsQy4fMtYgPvWQDQASyS3DQ0+dJ8LVzMvIAvNvRwt2Xy+RYPsJomU1vYyyN6sDxKMeCadEaDeiA=
+  on:
+    tags: true
+    repo: Microsoft/gulp-core-build-serve
