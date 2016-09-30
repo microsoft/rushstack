@@ -1,0 +1,27 @@
+{
+  "name": "@microsoft/web-library-build",
+  "version": "0.5.0",
+  "description": "",
+  "engines": {
+    "npm": "3.10.8"
+  },
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "dependencies": {
+    "@microsoft/gulp-core-build": ">=0.11.0 <1.0.0",
+    "@microsoft/gulp-core-build-karma": ">=0.4.0 <1.0.0",
+    "@microsoft/gulp-core-build-sass": ">=0.5.0 <1.0.0",
+    "@microsoft/gulp-core-build-serve": ">=0.4.0 <1.0.0",
+    "@microsoft/gulp-core-build-typescript": ">=0.6.0 <1.0.0",
+    "@microsoft/gulp-core-build-webpack": ">=0.4.0 <1.0.0",
+    "gulp": "~3.9.1",
+    "gulp-replace": "^0.5.4",
+    "node-notifier": "~4.6.1"
+  },
+  "devDependencies": {
+    "@microsoft/node-library-build": ">=0.4.0 <1.0.0"
+  },
+  "optionalDependencies": {
+    "fsevents": "*"
+  }
+}
