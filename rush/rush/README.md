@@ -69,11 +69,18 @@ But when you use Rush, you get these powerful benefits:
 
 - A single command that runs "npm publish" for all your packages
 
+- Support for cyclic dependencies:  For example, suppose that **my-gulp-task**
+  depends on **my-library**, but **my-library**'s Gulpfile has a devDependency
+  on **my-gulp-task**.  Rush can install the last published version of these
+  packages for the Gulpfile, while still creating local links for other
+  projects outside the cyclic dependency.
+
 # Usage
 
 ## Building a repo that is configured for Rush
 
-1. Run "**npm install -g @microsoft/rush**"
+1. Run "**npm install -g @microsoft/rush**".  To confirm that it's working,
+   run "rush -h" which prints the version number and usage information.
 
 2. From anywhere in your git working folder, run "**rush install**".  This
    will install NPM modules in Rush's "Common" folder.
@@ -89,12 +96,14 @@ But when you use Rush, you get these powerful benefits:
 
    NOTE: The "**rush.json**" config file specifies how this linking is performed.
 
-   NOTE: DO NOT RUN "npm install" INSIDE PROJECT FOLDERS THAT HAVE BEEN LINKED
-   BY THE Rush TOOL.  If you want to do that, you need to "rush unlink" first.
+   > IMPORTANT: DO NOT run "npm install" inside project folders that have been linked
+   > by the Rush tool.  If you want to do that, you need to "rush unlink" first.
 
-4. Do your initial build by running "**rush rebuild -q**" .  This will
+4. Do your initial build by running "**rush rebuild**" .  This will
    recurse through each project folder and run "gulp nuke", "gulp",
    and "gulp test", and then give you a report of anything that failed to build.
+   
+   NOTE: To suppress verbose output, use "**rush rebuild -q**".
 
 ## Pull -> Edit -> Build -> Run -> Push
 
@@ -123,7 +132,7 @@ look like this:
 ## If you need to modify your package.json
 
 If you need to add new dependencies to your package.json, you will need to
-regenerate the common folder scripts.  Use these commands:
+regenerate the files in the common folder.  Use these commands:
 
     > C:\MyRepo> **rush generate**
     >
@@ -135,6 +144,14 @@ changes in your Pull Request.
 The "**rush generate**" command takes a long time.  To speed up debugging, you can use
 "**rush generate --lazy**" instead; however you must run the full "**rush generate**"
 before submitting your PR.
+
+## Publishing your NPM packages
+
+To publish all NPM projects in your repository, run "**rush publish**".  You
+can select a subset of projects using the "**--include**" option followed by
+a [glob](https://en.wikipedia.org/wiki/Glob_(programming)) pattern.  You can
+use the "**--registry**" option to specify a custom NPM registry, e.g. if you
+are testing with [Verdaccio](https://github.com/verdaccio/verdaccio).
 
 ## Converting a repo to build with Rush
 
