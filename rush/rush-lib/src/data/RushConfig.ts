@@ -71,7 +71,7 @@ export default class RushConfig {
       if (semver.lt(rushVersion, rushMinimumVersion)) {
         throw new Error(`Your rush tool is version ${rushVersion}, but rush.json`
           + ` requires version ${rushConfigJson.rushMinimumVersion} or newer.  To upgrade,`
-          + ` run "npm install @ms/rush -g".`);
+          + ` run "npm install @microsoft/rush -g".`);
       }
     }
 
