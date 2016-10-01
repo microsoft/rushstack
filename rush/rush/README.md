@@ -1,73 +1,75 @@
 # rush
 
-A typical web project may consume hundreds of NPM packages.  These packages
-are developed by various strangers on the internet.  Each project has its
-own Git repository, is conceptually self-contained, and tries to maintain an
-API contract conforming to [SemVer](http://semver.org/).  When there is
-a bug in one of these packages, a pull request is merged, its version is
-bumped, and a new release is published.  The new release then begins a
+A typical web project may consume hundreds of NPM packages, each developed
+independently by a random stranger somewhere on the internet.  Each project
+has its own Git repository, is conceptually self-contained, and tries to
+maintain an API contract conforming to [SemVer](http://semver.org/).  When
+there is a bug in one of these packages, a pull request is merged, the version
+is bumped, and a new release is published.  The new release then begins a
 slow propagation across the internet, as each downstream project upgrades
-and reacts to any incompatibilities that may arise.
+and reacts to any incompatibilities that may arise in a delightful symphony
+of distributed collaboration.
 
 At the root of this massive dependency tree is your client-side web application.
-Oddly, it is one huge monolith that consumes all these packages.  The bigger it grows,
+Unlike everything else, it is one huge monolith.  The bigger it grows,
 the more you begin to think "This is stupid -- we should break this thing up
 into 30 small NPM packages that can be reused and versioned independently."
 One heroic Saturday night, you create 30 Git repos and refactor everything.
 
-Immediately people start complaining.  Your team isn't 30 strangers making
+Eventually people start complaining.  Your team isn't 30 strangers making
 frivolous little "left-pad" utilities.  They are application developers
-creating a mission-critical product with messy business logic.  These components
-work together in complex ways, and every time you change one package, you seem
-to be breaking other packages.  Every day you find yourself cloning and building
-30 different Git repositories, even though you only have 10 people on your team.
+creating a mission-critical product with messy business logic.  The components
+interact in complex ways, and every time you change one package, you seem
+to be breaking other packages.  It feels wrong to be cloning and building
+30 different Git repositories every day, when there's only 10 people on your team.
 Publishing is getting tedious.  Running "npm link" is a minefield.  This is no
 way to work!
 
 And so, you consolidate all your NPM packages into one central Git repository, and
 write a script that runs "npm install", "npm link", and "gulp" 30 times, in the
 right order.  This is way better!  In the past, when Bob made a big change to a
-core library and then went backpacking across Europe, it could take a week before Alice
-upgraded to the new version and realized that something was broken.  Even though
-Bob caused the trouble, his victims unfairly had to shoulder the cost of debugging it.
-But with a bulk build, Bob _cannot merge his PR_ without passing the unit tests for
-every downstream project.  Catching problems early makes everyone more efficient.
-Having a central repository also makes library owners directly aware of the
-source code and PRs that consume their work; no more "out of site, out of mind."
+core library and then left for a backpacking trip across Europe, it could take
+a week for Alice to upgrade to the new version and realize that something was broken.
+Even though Bob caused the trouble, his victims unfairly had to shoulder the cost
+of debugging it.  Having a unified build means that Bob _cannot even merge his PR_
+(let alone publish a new release) without passing all the unit tests for every
+downstream project.  Catching problems early makes everyone more efficient.
+Having a central repository forces library owners pay attention to the source code
+and PRs that consume their APIs; no more "out of sight, out of mind."
 
 There is just one problem...  Builds are slowwwww.  If "npm install" takes
 1 minute (on a good day), then 30 installs take 30 minutes.  Building 30 small projects
-is slower than building one big project.  Other details like managing [shrinkwrap](https://docs.npmjs.com/cli/shrinkwrap)
-and publishing can be tricky.
+is slower than building one big project.  Other details like managing
+[shrinkwrap](https://docs.npmjs.com/cli/shrinkwrap) and publishing can be tricky.
 
 ## Rush is here to help!
 
-Rush formalizes this strategy and makes it quick.  It works completely within
-the conventional NPM model:  Each package will still have its own Gulpfile.
+Rush formalizes this model and makes it quick.  It works completely within
+the conventional NPM system:  Each package will still have its own Gulpfile.
 Each package can still run "npm install" without Rush if desired.
 You are always free to move your projects around between Git repositories
 without any changes to package.json.
 
-But when you use Rush, you get these powerful benefits:
+But when you use Rush, you get some big improvements:
 
-- Ability to install all dependencies for all packages via a single
+- Save time by installing all dependencies for all packages via a single
   "npm install" invocation
 
-- A single shrinkwrap file for the entire repository.  This is the only
-  way to avoid maddening problems of "what are you talking about, it
-  works on my PC!"
+- Rush automatically generates a shrinkwrap file for the entire repository.
+  NPM shrinkwrap is the only way to avoid maddening problems of "what are you talking
+  about, it works on my PC!"
 
 - All projects are automatically hooked up with "npm link" (using local
   symlinks so multiple Git folders won't get cross-linked)
 
-- A dependency solver that uses package.json to automatically determine
-  the build order
+- A dependency solver uses package.json to automatically determine
+  the build order.
 
-- Since each project has its own Gulpfile, gulp processes are spawned
-  in parallel, which makes the build significantly faster.  (No matter how
-  many promises you write, NodeJS is still fundamentally single-threaded.)
+- Since each project has its own Gulpfile, Rush can spawn multiple NodeJS
+  processes in parallel, making the build go significantly faster.  (No matter
+  how many promises you write, your Gulpfile is still fundamentally single-threaded.)
 
-- A single command that runs "npm publish" for all your packages
+- Use a single command to run "npm publish" for many packages
 
 - Support for cyclic dependencies:  For example, suppose that **my-gulp-task**
   depends on **my-library**, but **my-library**'s Gulpfile has a devDependency
@@ -97,7 +99,7 @@ But when you use Rush, you get these powerful benefits:
    NOTE: The "**rush.json**" config file specifies how this linking is performed.
 
    > IMPORTANT: DO NOT run "npm install" inside project folders that have been linked
-   > by the Rush tool.  If you want to do that, you need to "rush unlink" first.
+   > by the Rush tool.  If you want to do that, you need to "**rush unlink**" first.
 
 4. Do your initial build by running "**rush rebuild**" .  This will
    recurse through each project folder and run "gulp nuke", "gulp",
@@ -136,7 +138,7 @@ regenerate the files in the common folder.  Use these commands:
 
     > C:\MyRepo> **rush generate**
     >
-    > C:\MyRepo>**rush link**
+    > C:\MyRepo> **rush link**
 
 This will change various generated files in common folder.  You shuld include these
 changes in your Pull Request.
