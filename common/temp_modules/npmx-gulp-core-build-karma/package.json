@@ -1,0 +1,29 @@
+{
+  "name": "npmx-gulp-core-build-karma",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "@microsoft/node-library-build": ">= 0.3.1 <1.0.0",
+    "chai": "~3.5.0",
+    "gulp": "~3.9.1",
+    "gulp-karma": "~0.0.5",
+    "istanbul-instrumenter-loader": "~0.2.0",
+    "karma": "~0.13.9",
+    "karma-coverage": "~0.5.5",
+    "karma-mocha": "~0.2.2",
+    "karma-mocha-clean-reporter": "~0.0.1",
+    "karma-phantomjs-launcher": "~1.0.0",
+    "karma-sinon-chai": "~1.2.0",
+    "karma-webpack": "~1.7.0",
+    "lolex": "~1.4.0",
+    "mocha": "~2.5.3",
+    "phantomjs-polyfill": "~0.0.2",
+    "phantomjs-prebuilt": "~2.1.6",
+    "sinon": "~1.17.3",
+    "sinon-chai": "~2.8.0",
+    "webpack": "~1.13.0"
+  },
+  "npmxDependencies": {
+    "@microsoft/gulp-core-build": ">=0.11.0 <1.0.0"
+  }
+}
