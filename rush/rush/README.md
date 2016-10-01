@@ -136,9 +136,9 @@ look like this:
 If you need to add new dependencies to your package.json, you will need to
 regenerate the files in the common folder.  Use these commands:
 
-    > C:\MyRepo> **rush generate**
-    >
-    > C:\MyRepo> **rush link**
+> C:\MyRepo> **rush generate**
+>
+> C:\MyRepo> **rush link**
 
 This will change various generated files in common folder.  You shuld include these
 changes in your Pull Request.
