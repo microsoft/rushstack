@@ -1,0 +1,14 @@
+{
+  "name": "npmx-node-library-build",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "typescript": "2.0.3",
+    "@microsoft/gulp-core-build": "^0.10.0",
+    "gulp": "~3.9.1"
+  },
+  "npmxDependencies": {
+    "@microsoft/gulp-core-build-mocha": "^0.4.0",
+    "@microsoft/gulp-core-build-typescript": "^0.6.0"
+  }
+}

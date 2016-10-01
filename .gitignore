@@ -3,9 +3,7 @@
 .DS_Store
 /common/last-install.log
 /common/local-npm
-/common/local-npm/**
 /common/npmx-link.json
-common
 coverage
 dist
 lib
