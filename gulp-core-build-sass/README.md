@@ -2,31 +2,43 @@
 
 [![Build Status](https://travis-ci.org/Microsoft/gulp-core-build-sass.svg?branch=master)](https://travis-ci.org/Microsoft/gulp-core-build-sass) [![Dependencies](https://david-dm.org/Microsoft/gulp-core-build-sass.svg)](https://david-dm.org/Microsoft/gulp-core-build-sass)
 
+# Description
 `gulp-core-build-sass` is a plugin for `gulp-core-build` which introduces the ability to compile SASS files to CSS.
 
-# Tasks
-## SassTask
+# SassTask
 
-### Description
+## Usage
 This task invokes `gulp-sass` to compile source SASS files into a CommonJS module which uses `load-themed-styles` to load styles onto the page. If the `libAmdFolder` is specified globally, this task will also output an AMD module. Various templates may be specified.
 
-### Config
-```typescript
- interface ISassTaskConfig {
-  sassMatch?: string[];
-  commonModuleTemplate: string;
-  amdModuleTemplate: string;
-}
-```
-* **
+## Config
+### preamble
+An optional parameter for text to include in the generated typescript file.
 
-Usage (and defaults):
-```typescript
-sass.setConfig({
-  sassMatch: [
-    'src/**/*.scss'
-  ],
-  commonModuleTemplate: "require('load-themed-styles').loadStyles(<%= content %>);",
-  amdModuleTemplate: "define(['load-themed-styles'], function(loadStyles) { loadStyles.loadStyles(<%= content %>); });"
-});
-```
+**Default:** `'/* tslint:disable */'`
+
+### postamble
+An optional parameter for text to include at the end of the generated typescript file.
+
+**Default:** `'/* tslint:enable */'`
+
+### sassMatch
+An array of glob patterns for locating SASS files.
+
+**Default:** `['src/**/*.scss']`
+
+### useCSSModules
+If this option is specified, files ending with `.module.scss` extension will automatically
+generate a corresponding TypeScript file. All classes will be appended with a hash
+to help ensure uniqueness on a page. This file can be imported directly, and will
+contain an object describing the mangled class names.
+
+**Default:** `false`
+
+### dropCssFiles
+If this is false, then we do not create `.css` files in the `lib` directory.
+
+**Default:** `false`
+
+# License
+
+MIT
