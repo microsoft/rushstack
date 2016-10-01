@@ -1,10 +1,15 @@
 *.build.error.log
 *.build.log
 .DS_Store
+/common/last-install.log
+/common/local-npm
+/common/local-npm/**
+/common/npmx-link.json
 common
 coverage
 dist
 lib
+lib-amd
 node_modules
 npm*.log
 temp
