@@ -1,41 +1,138 @@
-@microsoft/gulp-core-build-typescript
-=====================================
 A set of gulp-core-build tasks for building TypeScript code.
 
 [![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-typescript.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-typescript)
 [![Build Status](https://travis-ci.org/Microsoft/gulp-core-build-typescript.svg?branch=master)](https://travis-ci.org/Microsoft/gulp-core-build-typescript)
 [![Dependencies](https://david-dm.org/Microsoft/gulp-core-build-typescript.svg)](https://david-dm.org/Microsoft/gulp-core-build-typescript)
 
-# Usage
+# TypescriptTask
+## Usage
+The task for building TypeScript into JavaScript.
 
-This collection of tasks is designed to be used with a gulp-core-build based build setup. It abstracts the TypeScript based build tasks used to build typescript code.
+## Config
+See the `ITypeScriptTaskConfig` interface for the definition.
 
-The tasks exported are:
+### failBuildOnErrors
+Fails the build when errors occur.
 
-* `typescript` - The task for building TypeScript into JavaScript.
-* `tslint` - The task for linting the TypeScript code.
-* `text` - Converts text files into JavaScript.
+Default: `true`
 
-To use these tasks in your build setup, simply import the package and add the task to a build task group.
+### sourceMatch
+An array of glob matches for files to be included in the build.
 
-```typescript
-import { task, serial, parallel, watch, CopyTask, IExecutable } from '@microsoft/gulp-core-build';
-import { typescript, tslint, text } from '@microsoft/gulp-core-build-typescript';
-
-export * from '@microsoft/gulp-core-build';
-export * from '@microsoft/gulp-core-build-typescript';
-
-// Examples of creating some copy tasks to be run pre/post build.
-export const preCopy: CopyTask = new CopyTask();
-preCopy.name = 'pre-copy';
-
-export const postCopy: CopyTask = new CopyTask();
-postCopy.name = 'post-copy';
-
-// Define a task group.
-task('build', serial(preCopy, parallel(tslint, typescript, text), postCopy));
+Default:
+```javascript
+[
+  'src/**/*.ts',
+  'src/**/*.tsx',
+  'typings/main/**/*.ts',
+  'typings/main.d.ts',
+  'typings/tsd.d.ts',
+  'typings/index.d.ts'
+]
 ```
 
+### staticMatch
+Array of glob matches for files that should by passed through (copied) to the build output.
+
+Default:
+```javascript
+[
+  'src/**/*.js',
+  'src/**/*.json',
+  'src/**/*.jsx'
+]
+```
+
+### reporter
+Custom TypeScript reporter.
+
+Should be an interface conforming to:
+```typescript
+interface IErrorReporter {
+  error: (error: ITypeScriptErrorObject) => void
+}
+```
+
+Default: a custom function which writes errors to the console.
+
+### typescript
+Optional override of the typescript compiler. Set this to the result of require('typescript').
+
+Default: `undefined`
+
+# TSLintTask
+## Usage
+The task for linting the TypeScript code.
+
+By default, it includes a cache, such that files which have not been updated since the last linting
+are not checked again, unless the config or tslint version has changed.
+
+## Config
+See the `ITSLintTaskConfig` interface for the definition.
+
+### lintConfig
+The tslint configuration object.
+
+Default: `{}`
+
+### rulesDirectory
+Directories to search for custom linter rules. An array of glob expressions.
+
+Default: the tslint-microsoft-contrib directory
+
+### sourceMatch
+Provides the glob matches for files to be analyzed.
+
+Default: `['src/**/*.ts', 'src/**/*.tsx']`
+
+### reporter
+A function which reports errors to the proper location. It should conform to the following interface:
+
+`((result: lintTypes.LintResult, file: gutil.File, options: ITSLintTaskConfig) => void;)`
+
+Defaults to using the base GulpTask's this.fileError() function.
+
+### displayAsWarning
+If true, displays warnings as errors. If the reporter function is overwritten, it should reference
+this flag.
+
+Default: `false`
+
+### removeExistingRules
+If true, the lintConfig rules which were previously set will be removed. This flag is useful
+for ensuring that there are no rules activated from previous calls to setConfig().
+
+Default: `false`
+
+### useDefaultConfigAsBase
+If false, does not use a default tslint configuration as the basis for creating the list of active rules.
+
+Default: `true`
+
+# RemoveTripleSlashReferencesTask
+## Usage
+Removes any `/// <reference path='...' />` entries from compiled D.TS files.
+This helps mitigate an issue with duplicated typings in TS 1.8.
+
+## Config
+*This task has no configuration options.*
+
+# TextTask
+Converts text files into JavaScript.
+
+## Usage
+## Config
+See the `ITextTaskConfig` interface for the definition.
+
+### textMatch
+Glob matches for files that should be converted into modules.
+
+Default: `['src/**/*.txt']`
+
+# Usage
+To use these tasks in your build setup, simply import the package and add the task to a build task group.
+
+# Examples
 Some examples of build packages that use this task:
 
 * [@microsoft/web-library-build](https://github.com/Microsoft/web-library-build)
@@ -52,34 +149,6 @@ typescript.setConfig({
   typescript: require('typescript')
 });
 ```
-
-## `typescript` task options
-
-See the `ITypeScriptTaskConfig` interface for the definition.
-
-* `failBuildOnErrors` (boolean, default: true) - Fails the build when errors occur.
-* `sourceMatch` (string[]) - Glob matches for files to be included in the build.
-* `staticMatch` (string[]) - Files that should by passed through (copied) to the build output.
-* `reporter` - Custom TypeScript reporter.
-* `typescript` - Optional override of the typescript compiler. Set this to the result of require('typescript').
-
-## `tslint` task options
-
-See the `ITSLintTaskConfig` interface for the definition.
-
-* `lintConfig` (Object) - The tslint configuration object.
-* `rulesDirectory` (string | string[]) - Directories to search for custom linter rules
-* `sourceMatch` (string[]) - Provides the glob matches for files to be analyzed.
-* `reporter` ((result: lintTypes.LintResult, file: gutil.File, options: ITSLintTaskConfig) => void;) - A function which reports errors to the proper location. Defaults to using the base GulpTask's this.fileError() function.
-* `displayAsWarning` (boolean, default: false) - If true, displays warnings as errors. If the reporter function is overwritten, it should reference
-* `remoteExistingRules` (boolean, default: false) - If true, the lintConfig rules which were previously set will be removed. This flag is useful for ensuring that there are no rules activated from previous calls to setConfig().
-* `useDefaultConfigAsBase` (boolean, default: true) - If false, does not use a default tslint configuration as the basis for creating the list of active rules.
-
-## `text` task options
-
-See the `ITextTaskConfig` interface for the definition.
-
-* `textMatch` (string[]) - Glob matches for files that should be converted into modules.
 
 # Related projects
 
