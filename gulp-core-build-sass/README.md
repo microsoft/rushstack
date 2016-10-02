@@ -1,8 +1,9 @@
-# gulp-core-build-sass [![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-sass.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-sass)
+# @microsoft/gulp-core-build-sass
 
+`gulp-core-build-sass` is a `gulp-core-build` subtask which processes scss files using SASS, runs them through postcss, and produces commonjs/amd modules which are injected using the `@microsoft/load-themed-styles` package.
+
+[![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-sass.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-sass)
 [![Build Status](https://travis-ci.org/Microsoft/gulp-core-build-sass.svg?branch=master)](https://travis-ci.org/Microsoft/gulp-core-build-sass) [![Dependencies](https://david-dm.org/Microsoft/gulp-core-build-sass.svg)](https://david-dm.org/Microsoft/gulp-core-build-sass)
-
-`gulp-core-build-sass` is a plugin for `gulp-core-build` which introduces the ability to compile SASS files to CSS.
 
 # Tasks
 ## SassTask
