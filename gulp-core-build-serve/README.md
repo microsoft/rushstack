@@ -1,8 +1,9 @@
-# gulp-core-build-serve [![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-serve.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-serve)
+# @microsoft/gulp-core-build-serve
 
+`gulp-core-build-serve` is a `gulp-core-build` subtask for testing/serving web content on the localhost, and live reloading it when things change.
+
+[![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-serve.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-serve)
 [![Build Status](https://travis-ci.org/Microsoft/gulp-core-build-serve.svg?branch=master)](https://travis-ci.org/Microsoft/gulp-core-build-serve) [![Dependencies](https://david-dm.org/Microsoft/gulp-core-build-serve.svg)](https://david-dm.org/Microsoft/gulp-core-build-serve)
-
-`gulp-core-build-serve` is a plugin for `gulp-core-build` which introduces the ability to serve files from a directory using `gulp-connect` and `express`.
 
 # Tasks
 ## ServeTask
