@@ -119,7 +119,7 @@ export default class PublishAction extends CommandLineAction {
 
       // Unpublish existing versions, since using publish --force causes lots of
       // things to be written to stderr. This is cleaner.
-      if (this._unpublish) {
+      if (this._unpublish.value) {
         const packageFullName: string = `${rushProject.packageName}@${rushProject.packageJson.version}`;
 
         console.log(`npm unpublish ${packageFullName}`);
