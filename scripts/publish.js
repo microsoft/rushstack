@@ -191,7 +191,7 @@ function updatePackage(change, allChanges) {
     }
   }
 
-  //console.log(JSON.stringify(pkg, null, 2));
+  fs.writeFileSync(change.packagePath, JSON.stringify(pkg, null, 2), 'utf8');
 }
 
 function commitChanges() {
