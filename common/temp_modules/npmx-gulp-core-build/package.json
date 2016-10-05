@@ -1,0 +1,29 @@
+{
+  "name": "npmx-gulp-core-build",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "@microsoft/node-library-build": ">=0.3.0 <1.0.0",
+    "chai": "~3.5.0",
+    "typescript": "2.0.3",
+    "@types/rimraf": "0.0.28",
+    "@types/semver": "^5.3.30",
+    "del": "~2.2.0",
+    "end-of-stream": "~1.1.0",
+    "es6-promise": "~3.1.2",
+    "fs-extra": "~0.26.7",
+    "gulp": "~3.9.1",
+    "gulp-flatten": "~0.2.0",
+    "gulp-if": "^2.0.1",
+    "gulp-util": "~3.0.7",
+    "lodash.merge": "~4.3.2",
+    "merge2": "~1.0.2",
+    "node-notifier": "~4.5.0",
+    "object-assign": "~4.1.0",
+    "pretty-hrtime": "~1.0.2",
+    "rimraf": "~2.5.4",
+    "semver": "~5.3.0",
+    "through2": "~2.0.1",
+    "yargs": "~4.6.0"
+  }
+}

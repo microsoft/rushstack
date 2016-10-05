@@ -7,10 +7,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/gulp-core-build-typescript.git"
+    "url": "https://github.com/microsoft/web-build-tools"
   },
-  "engines": {
-    "npm": "3.10.8"
+  "scripts": {
+    "build": "gulp",
+    "clean": "gulp nuke",
+    "test": "gulp"
   },
   "dependencies": {
     "@microsoft/gulp-core-build": ">=0.11.0 <1.0.0",
