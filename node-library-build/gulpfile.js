@@ -1,7 +1,7 @@
 'use strict';
 
 let build = require('@microsoft/gulp-core-build');
-let { typescript } = require('@microsoft/gulp-core-build-typescript');
+let typescript = require('@microsoft/gulp-core-build-typescript').typescript;
 let mocha = require('@microsoft/gulp-core-build-mocha');
 
 typescript.setConfig({ typescript: require('typescript') });
