@@ -4,16 +4,19 @@
   "description": "Core gulp build tasks for building typescript, html, less, etc.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/gulp-core-build"
+    "url": "https://github.com/microsoft/web-build-tools"
   },
-  "scripts": {},
+  "scripts": {
+    "build": "gulp",
+    "clean": "gulp nuke",
+    "test": "gulp"
+  },
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
-  "engines": {
-    "npm": "3.10.8"
-  },
   "dependencies": {
+    "@types/rimraf": "0.0.28",
+    "@types/semver": "^5.3.30",
     "del": "~2.2.0",
     "end-of-stream": "~1.1.0",
     "es6-promise": "~3.1.2",
@@ -27,12 +30,14 @@
     "node-notifier": "~4.5.0",
     "object-assign": "~4.1.0",
     "pretty-hrtime": "~1.0.2",
-    "semver": "^5.3.0",
+    "rimraf": "~2.5.4",
+    "semver": "~5.3.0",
     "through2": "~2.0.1",
     "yargs": "~4.6.0"
   },
   "devDependencies": {
+    "@microsoft/node-library-build": ">=0.3.0 <1.0.0",
     "chai": "~3.5.0",
-    "@microsoft/node-library-build": ">=0.3.0 <1.0.0"
+    "typescript": "2.0.3"
   }
 }

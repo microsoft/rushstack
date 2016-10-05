@@ -1,6 +1,7 @@
 import { GulpTask } from './GulpTask';
 import gulpType = require('gulp');
 import * as path from 'path';
+import * as semver from 'semver';
 
 type ShrinkwrapDep = { [name: string]: { version: string } };
 type PackageDep = { [name: string]: string };
@@ -39,15 +40,14 @@ export class ValidateShrinkwrapTask extends GulpTask<{}> {
 
     const packagejson: INpmPackage = require(pathToPackageJson);
     const shrinkwrapjson: INpmShrinkwrap = require(pathToShrinkwrap);
-    const semver: SemVerStatic = require('semver');
 
-    this._validate(semver, packagejson.dependencies, shrinkwrapjson.dependencies);
-    this._validate(semver, packagejson.devDependencies, shrinkwrapjson.dependencies);
+    this._validate(packagejson.dependencies, shrinkwrapjson.dependencies);
+    this._validate(packagejson.devDependencies, shrinkwrapjson.dependencies);
 
     return;
   }
 
-  private _validate(semver: SemVerStatic, packageDep: PackageDep, shrinkwrapDep: ShrinkwrapDep): void {
+  private _validate(packageDep: PackageDep, shrinkwrapDep: ShrinkwrapDep): void {
     for (let pkg in packageDep) {
       if (!shrinkwrapDep.hasOwnProperty(pkg)) {
         this.logError(`Failed to find package ${pkg} in shrinkwrap file`);

@@ -1,6 +1,8 @@
-An extensible, opinionated build system which extends and structures gulp
-# gulp-core-build [![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build)
+# @microsoft/gulp-core-build
 
+`gulp-core-build` is a set of utility functions that makes it easy to create gulp-based build rigs. Instead of having unweildy unmaintainable gulpfiles in every project, we want the build setup to be as reusable and centralized as possible.
+
+[![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build)
 [![Build Status](https://travis-ci.org/Microsoft/gulp-core-build.svg?branch=master)](https://travis-ci.org/Microsoft/gulp-core-build) [![Dependencies](https://david-dm.org/Microsoft/gulp-core-build.svg)](https://david-dm.org/Microsoft/gulp-core-build)
 
 The gulp build system, along with its rich plugin ecosystem, is a very powerful tool for web development projects.
