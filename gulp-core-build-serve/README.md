@@ -1,70 +1,95 @@
 # @microsoft/gulp-core-build-serve
 
+
 `gulp-core-build-serve` is a `gulp-core-build` subtask for testing/serving web content on the localhost, and live reloading it when things change.
 
 [![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-serve.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-serve)
 [![Build Status](https://travis-ci.org/Microsoft/gulp-core-build-serve.svg?branch=master)](https://travis-ci.org/Microsoft/gulp-core-build-serve) [![Dependencies](https://david-dm.org/Microsoft/gulp-core-build-serve.svg)](https://david-dm.org/Microsoft/gulp-core-build-serve)
 
-# Tasks
-## ServeTask
+# ServeTask
+A task which spins up two servers, one for serving files in the project, and another for
+mocking out an API server to run on a different port.
 
-### Description
+## Usage
+`--nobrowser` will stop the browser from automatically launching.
 
-### Config
+`--port X` will use X as the currently active port.
+
+## Config
+### api
+This configuration has two options. If it is undefined, no API endpoint is created.
+
+Default: `undefined`
+
+### port
+The port to run the API server on.
+
+### entryPath
+The path to the API file. This file should export an object of the following interface:
+
 ```typescript
-interface IServeTaskConfig {
-  api?: {
-    port: number,
-    entryPath: string
-  };
-  https: boolean;
-  initialPage: string;
-  port: number;
-  keyPath: string;
-  certPath: string;
-  pfxPath: string;
-  tryCreateDevCertificate: boolean;
+interface IApiMap {
+  [ route: string ]: Function;
 }
 ```
-* **
 
-Usage (and defaults):
-```typescript
-let build = require('gulp-core-build');
-let serve = require('gulp-core-build-serve');
+### initialPage
+The initial URL to load. This is ignored if the `--nobrowser` option is specified.
 
-build.task('serve', serve);
+Default: `'/index.html'`
 
-serve.setConfig({
-    api: null,
-    initialPage: '/index.html',
-    port: 4321,
-    https: false,
-    tryCreateDevCertificate: false,
-    keyPath: undefined,
-    certPath: undefined,
-    pfxPath: undefined
-  }
-);
-```
+### port
+The port to serve on.
 
-## TrustCertTask
+Default: `4321`
 
-### Description
-This task gnerates and trusts a development certificate. The certificate is self-signed
+### https
+A boolean determining whether HTTPS mode should be turned on.
+
+Default: `false`
+
+### keyPath
+When the `https` option is `true`, this is the path to the HTTPS key
+
+Default: `undefined`
+
+### certPath
+Path to the HTTPS cert
+
+Default: `undefined`
+
+### pfxPath
+Path to the HTTPS PFX cert
+
+Default: `undefined`
+
+### tryCreateDevCertificate
+If true, when gulp-core-build-serve is initialized and a dev certificate doesn't already exist and hasn't been
+specified, attempt to generate one and trust it automatically.
+
+Default: `false`
+
+# ReloadTask
+## Usage
+If this task is configured, whenever it is triggered it will tell `gulp-connect` to reload the page.
+
+## Config
+*This task doesn't have any configuration options.*
+
+# TrustCertTask
+## Usage
+This task generates and trusts a development certificate. The certificate is self-signed
 and stored, along with its private key, in the user's home directory. On Windows, it's
 trusted as a root certification authority in the user certificate store. On macOS, it's
 trusted as a root cert in the keychain. On other platforms, the certificate is generated
 and signed, but the user must trust it manually. See ***Development Certificate*** below for
 more information.
 
-### Config
-
+## Config
 *This task doesn't have any configuration options.*
 
-## UntrustCertTask
-
-### Description
+# UntrustCertTask
+## Usage
 On Windows, this task removes the certificate with the expected serial number from the user's
 root certification authorities list. On macOS, it finds the SHA signature of the certificate
 with the expected serial number and then removes that certificate from the keychain. On
@@ -72,8 +97,7 @@ other platforms, the user must untrust the certificate manually. On all platform
 the certificate and private key are deleted from the user's home directory. See
 ***Development Certificate*** below for more information.
 
-### Config
-
+## Config
 *This task doesn't have any configuration options.*
 
 # Development Certificate
