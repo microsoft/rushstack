@@ -100,7 +100,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
 
     // Log the compiler version for custom verisons.
     if (this.taskConfig.typescript && this.taskConfig.typescript.version) {
-      this.log(`Using custom version: ${ this.taskConfig.typescript.version }`);
+      this.log(`Using custom version: ${this.taskConfig.typescript.version}`);
     }
 
     const tsCompilerOptions: ts.Params = assign({}, tsConfig.compilerOptions, {
@@ -109,55 +109,51 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       typescript: this.taskConfig.typescript
     });
 
-    const tsProject: ts.Project = this._tsProject = this._tsProject || ts.createProject(tsCompilerOptions);
-
     /* tslint:disable:typedef */
-    const { libFolder, libAMDFolder } = this.buildConfig;
+    const { libFolder, libAMDFolder, libES6Folder } = this.buildConfig;
     /* tslint:enable:typedef */
-    let tsResult: ts.CompilationStream = gulp.src(this.taskConfig.sourceMatch)
-      .pipe(plumber({
-        errorHandler: (): void => {
-          errorCount++;
-        }
-      }))
-      .pipe(sourcemaps.init())
-      .pipe(ts(tsProject, undefined, this.taskConfig.reporter));
 
-    allStreams.push(tsResult.js
-      .pipe(sourcemaps.write('.', { sourceRoot: '/src' }))
-      .pipe(gulp.dest(libFolder)));
+    /* tslint:disable:no-any */
+    const initializeCompilation: Function = (project: ts.Project, destPath: string): ts.Project => {
+      let tsResult: any;
+      /* tslint:enable:no-any */
+      this.log('initializing ts compilation: ' + destPath);
 
-    allStreams.push(tsResult.dts.pipe(gulp.dest(libFolder)));
+      if (destPath) {
+        tsResult = gulp.src(this.taskConfig.sourceMatch)
+          .pipe(plumber({
+            errorHandler: (): void => {
+              errorCount++;
+            }
+          }))
+          .pipe(sourcemaps.write({ sourceRoot: '/src' }))
+          .pipe(ts(project, undefined, this.taskConfig.reporter));
 
-    // Static passthrough files.
-    const staticSrc: NodeJS.ReadWriteStream = gulp.src(this.taskConfig.staticMatch);
+        allStreams.push(
+          tsResult.js
+            .pipe(sourcemaps.write('.', { sourceRoot: '/src' }))
+            .pipe(gulp.dest(destPath)));
 
-    allStreams.push(
-      staticSrc.pipe(gulp.dest(libFolder)));
+        allStreams.push(tsResult.dts.pipe(gulp.dest(destPath)));
+      }
+
+      return project;
+    };
+
+    // Build commonjs.
+    this._tsProject = initializeCompilation(
+      ts.createProject(tsCompilerOptions),
+      libFolder);
 
     // If AMD modules are required, also build that.
-    if (libAMDFolder) {
-      allStreams.push(
-        staticSrc.pipe(gulp.dest(libAMDFolder)));
+    initializeCompilation(
+      ts.createProject(assign({}, tsCompilerOptions, { module: 'amd' })),
+      libAMDFolder);
 
-      const tsAMDProject: ts.Project = ts.createProject(assign({}, tsCompilerOptions, { module: 'amd' }));
-
-      tsResult = gulp.src(this.taskConfig.sourceMatch)
-        .pipe(plumber({
-          errorHandler: (): void => {
-            errorCount++;
-          }
-        }))
-        .pipe(sourcemaps.write({ sourceRoot: '/src' }))
-        .pipe(ts(tsAMDProject, undefined, this.taskConfig.reporter));
-
-      allStreams.push(
-        tsResult.js
-          .pipe(sourcemaps.write('.', { sourceRoot: '/src' }))
-          .pipe(gulp.dest(libAMDFolder)));
-
-      allStreams.push(tsResult.dts.pipe(gulp.dest(libAMDFolder)));
-    }
+    // If ES6 modules are required, also build that.
+    initializeCompilation(
+      ts.createProject(assign({}, tsCompilerOptions, { module: 'es6', target: 'es6' })),
+      libES6Folder);
 
     // Listen for pass/fail, and ensure that the task passes/fails appropriately.
     merge(allStreams)

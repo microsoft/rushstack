@@ -39,5 +39,9 @@
     "@microsoft/node-library-build": ">=0.3.0 <1.0.0",
     "chai": "~3.5.0",
     "typescript": "2.0.3"
+  },
+  "directories": {
+    "package": "./package",
+    "lib": "./package/lib"
   }
 }

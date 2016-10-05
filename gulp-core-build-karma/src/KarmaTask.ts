@@ -30,12 +30,16 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
   public executeTask(gulp: gulp.Gulp, completeCallback: (error?: Error | string) => void): void {
     const { karmaConfigPath }: IKarmaTaskConfig = this.taskConfig;
 
-    if (!this.fileExists(karmaConfigPath)) {
+    /* tslint:disable:no-null-keyword */
+    if (karmaConfigPath === null) {
+    /* tslint:enable:no-null-keyword */
+      completeCallback();
+    } else if (!this.fileExists(karmaConfigPath)) {
       const shouldInitKarma: boolean = (process.argv.indexOf('--initkarma') > -1);
 
       if (!shouldInitKarma) {
         this.logWarning(
-          `The karma config location '${ karmaConfigPath }' doesn't exist. ` +
+          `The karma config location '${karmaConfigPath}' doesn't exist. ` +
           `Run again using --initkarma to create a default config.`);
       } else {
         this.copyFile(path.resolve(__dirname, '../karma.config.js'));

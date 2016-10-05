@@ -25,6 +25,9 @@ export interface IBuildConfig {
    * ouput AMD modules if required for legacy reasons. */
   libAMDFolder?: string;
 
+  /** Unbundled es6 folder, which can be optionally set to cause build tasks to output ES6 modules. */
+  libES6Folder?: string;
+
   /** Dist folder, which includes all bundled resources which would be copied to a CDN for the project. */
   distFolder?: string;
 

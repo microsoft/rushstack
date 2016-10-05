@@ -5,10 +5,10 @@
 			"name": "Launch",
 			"type": "node",
 			"request": "launch",
-			"program": "node_modules/gulp/bin/gulp.js",
+			"program": "${workspaceRoot}/../../../../David/.npm-packages/bin/npm",
 			"stopOnEntry": false,
-			"args": [],
-			"cwd": ".",
+			"args": ["install", "--save", "office-ui-fabric-react"],
+			"cwd": "${workspaceRoot}/test-web-library-build",
 			"runtimeExecutable": null,
 			"runtimeArgs": [
 				"--nolazy"

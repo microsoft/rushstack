@@ -38,9 +38,10 @@ const _uniqueTasks: IExecutable[]  = [];
 
 let _buildConfig: IBuildConfig = {
   srcFolder: 'src',
-  distFolder: 'dist',
-  libAMDFolder: undefined,
-  libFolder: 'lib',
+  distFolder: 'package/dist',
+  libFolder: 'package/lib',
+  libAMDFolder: 'package/lib-amd',
+  libES6Folder: 'package/lib-es6',
   tempFolder: 'temp',
   properties: {},
   relogIssues: getFlagValue('relogIssues', true),

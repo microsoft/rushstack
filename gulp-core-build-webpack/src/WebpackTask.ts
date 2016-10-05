@@ -50,11 +50,8 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
     } else {
       let webpackConfig: Object;
 
-      if (!this.taskConfig.configPath && !this.taskConfig.config) {
-        this.logMissingConfigWarning();
-        completeCallback();
-        return;
-      } else if (this.taskConfig.configPath) {
+      // If the configPath is explicitly set as null, we will avoid logging about a missing config.
+      if (this.taskConfig.configPath) {
         if (this.fileExists(this.taskConfig.configPath)) {
           try {
             webpackConfig = require(this.resolvePath(this.taskConfig.configPath));
@@ -157,9 +154,13 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
   }
 
   private logMissingConfigWarning() {
-    this.logWarning(
-      'No webpack config has been provided.' +
-      'Run again using --initwebpack to create a default config,' +
-      `or call webpack.setConfig({ configPath: null }).`);
+    /* tslint:disable:no-null-keyword */
+    if (this.taskConfig.configPath !== null) {
+      /* tslint:enable:no-null-keyword */
+      this.logWarning(
+        'No webpack config has been provided.' +
+        'Run again using --initwebpack to create a default config,' +
+        `or call webpack.setConfig({ configPath: null }).`);
+    }
   }
 }

@@ -1,0 +1,24 @@
+{
+  "name": "test-web-library-build",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build": "gulp",
+    "clean": "gulp nuke",
+    "test": "gulp"
+  },
+  "devDependencies": {
+    "@microsoft/web-library-build": ">=0.5.0 <1.0.0",
+    "babel-plugin-external-helpers": "^6.8.0",
+    "babel-preset-es2015": "^6.16.0",
+    "gulp": "~3.9.1",
+    "rollup": "^0.36.1",
+    "rollup-plugin-babel": "^2.6.1",
+    "typescript": "2.0.3"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "office-ui-fabric-react": "^0.56.0"
+  }
+}

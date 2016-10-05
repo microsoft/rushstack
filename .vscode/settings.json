@@ -8,12 +8,15 @@
   "editor.insertSpaces": true,
   // Configure glob patterns for excluding files and folders in searches. Inherits all glob patterns from the file.exclude setting.
   "files.exclude": {
+    "**/node_modules": true,
     "**/.git": true,
     "**/.DS_Store": true
   },
 	// Configure glob patterns for excluding files and folders in searches. Inherits all glob patterns from the file.exclude setting.
   "search.exclude": {
     "**/node_modules": true,
-    "**/lib": true
+    "**/lib": true,
+    "**/lib-amd": true,
+    "**/lib-es6": true
   }
 }

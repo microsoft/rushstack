@@ -42,9 +42,7 @@ const generateShrinkwrapTask: GenerateShrinkwrapTask = new GenerateShrinkwrapTas
 
 task('validate-shrinkwrap', validateShrinkwrapTask);
 task('generate', generateShrinkwrapTask);
-
 task('test', serial(sass, parallel(typescript, text), karma));
-
 task('test-watch', watch(sourceMatch, serial(sass, parallel(typescript, text), karma)));
 
 // For watch scenarios like serve, make sure to exclude generated files from src (like *.scss.ts.)
