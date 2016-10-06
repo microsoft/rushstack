@@ -22,7 +22,7 @@ let _changeTypes = {
   0: 'dependency'
 };
 
-let _shouldCommit = process.argv.indexOf('--commit');
+let _shouldCommit = process.argv.indexOf('--commit') >= 0;
 
 /* Find all changes and return parsed change definitions. */
 function findChangesSync() {
@@ -158,6 +158,7 @@ function applyChanges(allChanges) {
       .keys(allChanges)
       .map(key => allChanges[key])
       .sort((a, b) => a.order < b.order ? -1 : 1));
+
   if (orderedChanges.length > 1) {
     for (let change of orderedChanges) {
       updatePackage(change, allChanges);
@@ -165,7 +166,10 @@ function applyChanges(allChanges) {
     }
 
     deleteChangeFiles();
-    commitChanges();
+    gitAddChanges(allChanges);
+    gitAddTags(allChanges);
+    gitCommit();
+    gitPush();
 
     for (let change of orderedChanges) {
       publishPackage(change);
@@ -177,7 +181,6 @@ function applyChanges(allChanges) {
 
 /** Update the package.json for a given change. */
 function updatePackage(change, allChanges) {
-
   console.log(os.EOL + `* Applying ${_changeTypes[change.changeType]} update for ${change.packageName} to ${change.newVersion}`);
 
   let pkg = _allPackages[change.packageName].package;
@@ -187,12 +190,13 @@ function updatePackage(change, allChanges) {
 
     if (depChange) {
       let requiredVersion = pkg.dependencies[depName];
-      let newVersionRange = `>=${depChange.newVersion} <${semver.inc(change.newVersion, 'major')}`;
+      let newVersionRange = `>=${depChange.newVersion} <${semver.inc(depChange.newVersion, 'major')}`;
 
       console.log(` - updating ${depName}: ${requiredVersion} to ${newVersionRange}`);
       pkg.dependencies[depName] = newVersionRange;
 
-      if (!semver.satisfies(change.newVersion, requiredVersion)) {
+      if (!semver.satisfies(depChange.newVersion, requiredVersion)) {
+        console.log(`semver not satisfied: ${depChange.packageName} ${depChange.newVersion} ${requiredVersion}`);
         change.changeType = Math.max(change.changeType, _changeTypes.patch);
         change.newVersion = semver.inc(pkg.version, _changeTypes[change.changeType]);
       }
@@ -206,23 +210,44 @@ function updatePackage(change, allChanges) {
   }
 }
 
-function commitChanges() {
-  execSync('git add .', {
-    cwd: process.cwd()
-  });
-  // git add
-  // git commit
-  // git push
-  console.log(os.EOL + `Committing all changes`);
+function execCommand(commandLine, workingPath) {
+  workingPath = workingPath || process.cwd();
+
+  console.log(`Executing: "${commandLine}" from ${workingPath}`);
+
+  if (_shouldCommit) {
+    execSync(commandLine, {
+      cwd: workingPath
+    });
+  }
+}
+
+function gitAddChanges() {
+  execCommand('git add .');
+}
+
+function gitAddTags(allChanges) {
+  for (let packageName in allChanges) {
+    let change = allChanges[packageName];
+
+    if (change.changeType > _changeTypes.dependency) {
+      let tagName = packageName + ':v' + change.newVersion;
+
+      execCommand(`git tag ${tagName}`);
+    }
+  }
+}
+
+function gitCommit() {
+  execCommand('git commit -m "Applying package updates."');
+}
+
+function gitPush() {
+  execCommand('git push --follow-tags');
 }
 
 function publishPackage(change) {
-  // npm publish
-  console.log(os.EOL + `TODO: Running: npm publish ${change.packageName}`);
-}
-
-function commitTags(changes) {
-  console.log(os.EOL + `TODO: Committing tags`);
+  execCommand(`npm publish`, change.packagePath);
 }
 
 function updateChangeLog(change) {
@@ -230,22 +255,24 @@ function updateChangeLog(change) {
 }
 
 function deleteChangeFiles() {
-  let changesPath = path.join(process.cwd(), 'changes');
-  let changeFiles = [];
+  if (_shouldCommit) {
+    let changesPath = path.join(process.cwd(), 'changes');
+    let changeFiles = [];
 
-  try {
-    changeFiles = fs.readdirSync(changesPath).filter(filename => filename.indexOf('.json') >= 0);
-  } catch (e) { }
+    try {
+      changeFiles = fs.readdirSync(changesPath).filter(filename => filename.indexOf('.json') >= 0);
+    } catch (e) { }
 
-  if (changeFiles.length) {
-    console.log(os.EOL + `Deleting ${changeFiles.length} change file(s).`);
+    if (changeFiles.length) {
+      console.log(os.EOL + `Deleting ${changeFiles.length} change file(s).`);
 
-    for (let fileName of changeFiles) {
-      let filePath = path.join(changesPath, fileName);
+      for (let fileName of changeFiles) {
+        let filePath = path.join(changesPath, fileName);
 
-      console.log(` - ${ filePath}`);
+        console.log(` - ${filePath}`);
 
-      deleteFile(filePath);
+        deleteFile(filePath);
+      }
     }
   }
 }
