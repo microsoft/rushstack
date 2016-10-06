@@ -2,7 +2,8 @@
 
 let fs = require('fs');
 let path = require('path');
-let { fileExists, directoryExists } = require('./utils');
+let fileExists = require('./utils').fileExists;
+let directoryExists = require('./utils').directoryExists;
 
 let rootPackagePath = path.resolve('./package.json');
 
