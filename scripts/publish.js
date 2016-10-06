@@ -174,8 +174,6 @@ function applyChanges(allChanges) {
     for (let change of orderedChanges) {
       publishPackage(change);
     }
-
-    commitTags(allChanges);
   }
 }
 
