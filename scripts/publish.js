@@ -5,6 +5,7 @@ let os = require('os');
 let path = require('path');
 let semver = require('semver');
 let deleteFile = require('./utils').deleteFile;
+let execSync = require('child_process').execSync;
 let forEachPackage = require('./enumerate').forEachPackage;
 let getAllProjects = require('./enumerate').getAllProjects;
 
@@ -206,6 +207,9 @@ function updatePackage(change, allChanges) {
 }
 
 function commitChanges() {
+  execSync('git add .', {
+    cwd: process.cwd()
+  });
   // git add
   // git commit
   // git push
@@ -214,28 +218,27 @@ function commitChanges() {
 
 function publishPackage(change) {
   // npm publish
-  console.log(os.EOL + `Running: npm publish ${change.packageName}`);
+  console.log(os.EOL + `TODO: Running: npm publish ${change.packageName}`);
 }
 
 function commitTags(changes) {
-  console.log(os.EOL + `Committing tags`);
+  console.log(os.EOL + `TODO: Committing tags`);
 }
 
 function updateChangeLog(change) {
-  console.log(` - updating CHANGELOG.md`);
+  console.log(` - TODO: updating CHANGELOG.md`);
 }
 
 function deleteChangeFiles() {
   let changesPath = path.join(process.cwd(), 'changes');
   let changeFiles = [];
-  console.log(`Deleting change requests`);
 
   try {
     changeFiles = fs.readdirSync(changesPath).filter(filename => filename.indexOf('.json') >= 0);
   } catch (e) { }
 
   if (changeFiles.length) {
-    console.log(`Deleting ${changeFiles.length} change file(s).`);
+    console.log(os.EOL + `Deleting ${changeFiles.length} change file(s).`);
 
     for (let fileName of changeFiles) {
       let filePath = path.join(changesPath, fileName);
