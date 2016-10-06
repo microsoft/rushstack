@@ -22,18 +22,15 @@ function directoryExists(path) {
 }
 
 function deleteFile(filePath) {
-   return new Promise(done => {
-    if (fileExists(filePath)) {
-      console.log(`Deleting: ${filepath}`);
-      fs.unlinkSync(filePath);
-    }
-
-    done();
-  });
+  if (fileExists(filePath)) {
+    console.log(`Deleting: ${filePath}`);
+    fs.unlinkSync(filePath);
+  }
+  return Promise.resolve();
 }
 
 function deleteDirectory(directoryPath) {
-   return new Promise(done => {
+  return new Promise(done => {
     if (directoryExists(directoryPath)) {
       console.log(`Deleting: ${directoryPath}`);
       rimraf(directoryPath, done);

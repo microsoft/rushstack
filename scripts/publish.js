@@ -1,21 +1,27 @@
 'use strict';
 
-let { getAllProjects, forEachPackage } = require('./enumerate');
 let fs = require('fs');
+let os = require('os');
 let path = require('path');
 let semver = require('semver');
+let deleteFile = require('./utils').deleteFile;
+let forEachPackage = require('./enumerate').forEachPackage;
+let getAllProjects = require('./enumerate').getAllProjects;
 
 let _downstreamDeps = getDownstreamDependencies();
 let _allPackages = getAllProjects();
 let _changeTypes = {
-  major: 2,
-  minor: 1,
-  patch: 0,
-  2: 'major',
-  1: 'minor',
-  0: 'patch'
+  major: 3,
+  minor: 2,
+  patch: 1,
+  dependency: 0,
+  3: 'major',
+  2: 'minor',
+  1: 'patch',
+  0: 'dependency'
 };
-let _shouldCommit = false;
+
+let _shouldCommit = process.argv.indexOf('--commit');
 
 /* Find all changes and return parsed change definitions. */
 function findChangesSync() {
@@ -23,7 +29,7 @@ function findChangesSync() {
   let allChanges = {};
   let changesPath = path.join(process.cwd(), 'changes');
 
-  console.log(`Finding changes in: ${ changesPath }`);
+  console.log(`Finding changes in: ${changesPath}`);
 
   try {
     changeFiles = fs.readdirSync(changesPath).filter(filename => filename.indexOf('.json') >= 0);
@@ -56,7 +62,7 @@ function findChangesSync() {
     let deps = _downstreamDeps[packageName];
 
     // Write the new version expected for the change.
-    change.newVersion = semver.inc(pkg.version, _changeTypes[change.changeType]);
+    change.newVersion = (change.changeType > _changeTypes.dependency) ? semver.inc(pkg.version, _changeTypes[change.changeType]) : pkg.version;
 
     if (deps) {
       for (let depName of deps) {
@@ -74,7 +80,6 @@ function findChangesSync() {
 
 /** Add a change request to the allChanges dictionary if necessary. */
 function addChange(allChanges, packageName, packagePath, changeType, comments) {
-  changeType = changeType || _changeTypes.patch;
   comments = comments || [];
 
   if (!allChanges[packageName]) {
@@ -121,7 +126,7 @@ function addDependencies(allChanges, packageName, updatedDeps) {
         allChanges,
         depPackage.package.name,
         depPackage.path,
-        _changeTypes.patch,
+        _changeTypes.dependency,
         [`Updating dependency: ${packageName}`]
       );
 
@@ -137,7 +142,7 @@ function printChanges(changes) {
 
     if (_allPackages[change.packageName]) {
       let pkg = _allPackages[change.packageName].package;
-      let newVersion = semver.inc(pkg.version, _changeTypes[change.changeType]);
+      let newVersion = (change.changeType > _changeTypes.dependency) ? semver.inc(pkg.version, _changeTypes[change.changeType]) : pkg.version;
 
       console.log(`${change.packageName} [${_changeTypes[change.changeType]}] ${pkg.version} -> ${newVersion}`);
       change.comments.forEach(comment => console.log(`|-- ${comment}`))
@@ -172,49 +177,74 @@ function applyChanges(allChanges) {
 /** Update the package.json for a given change. */
 function updatePackage(change, allChanges) {
 
-  console.log(`* ${_changeTypes[change.changeType]} bumping package ${change.packageName} to ${change.newVersion}`);
+  console.log(os.EOL + `* Applying ${_changeTypes[change.changeType]} update for ${change.packageName} to ${change.newVersion}`);
 
   let pkg = _allPackages[change.packageName].package;
 
-  pkg.version = change.newVersion;
-
   for (let depName in pkg.dependencies) {
-    if (allChanges[depName]) {
+    let depChange = allChanges[depName];
+
+    if (depChange) {
       let requiredVersion = pkg.dependencies[depName];
-      let newVersionRange = `>=${change.newVersion} <${semver.inc(change.newVersion, 'major')}`;
+      let newVersionRange = `>=${depChange.newVersion} <${semver.inc(change.newVersion, 'major')}`;
+
+      console.log(` - updating ${depName}: ${requiredVersion} to ${newVersionRange}`);
+      pkg.dependencies[depName] = newVersionRange;
 
       if (!semver.satisfies(change.newVersion, requiredVersion)) {
-
-        console.log(` - updating ${depName}: ${requiredVersion} to ${newVersionRange}`);
-        pkg.dependencies[depName] = newVersionRange;
+        change.changeType = Math.max(change.changeType, _changeTypes.patch);
+        change.newVersion = semver.inc(pkg.version, _changeTypes[change.changeType]);
       }
     }
   }
 
-  fs.writeFileSync(change.packagePath, JSON.stringify(pkg, null, 2), 'utf8');
+  pkg.version = change.newVersion;
+
+  if (_shouldCommit) {
+    fs.writeFileSync(change.packagePath, JSON.stringify(pkg, null, 2), 'utf8');
+  }
 }
 
 function commitChanges() {
   // git add
   // git commit
   // git push
-  console.log(`commiting all changes`);
+  console.log(os.EOL + `Committing all changes`);
 }
 
 function publishPackage(change) {
   // npm publish
-  console.log(`npm publish ${change.packageName}`);
+  console.log(os.EOL + `Running: npm publish ${change.packageName}`);
 }
-function commitTags(changes) {
 
-  console.log(`commiting tags`);
+function commitTags(changes) {
+  console.log(os.EOL + `Committing tags`);
 }
 
 function updateChangeLog(change) {
-  console.log(`updating ${change.packageName} CHANGELOG.md`)
+  console.log(` - updating CHANGELOG.md`);
 }
+
 function deleteChangeFiles() {
-  console.log('deleting change files');
+  let changesPath = path.join(process.cwd(), 'changes');
+  let changeFiles = [];
+  console.log(`Deleting change requests`);
+
+  try {
+    changeFiles = fs.readdirSync(changesPath).filter(filename => filename.indexOf('.json') >= 0);
+  } catch (e) { }
+
+  if (changeFiles.length) {
+    console.log(`Deleting ${changeFiles.length} change file(s).`);
+
+    for (let fileName of changeFiles) {
+      let filePath = path.join(changesPath, fileName);
+
+      console.log(` - ${ filePath}`);
+
+      deleteFile(filePath);
+    }
+  }
 }
 
 let changes = findChangesSync();
