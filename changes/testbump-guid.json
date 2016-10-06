@@ -1,14 +1,18 @@
 {
   "changes": [
     {
-      "packageName": "@microsoft/gulp-core-build-sass",
+      "packageName": "@microsoft/gulp-core-build",
       "type": "patch",
-      "comments": ["Fixing bug that caused x issue."]
+      "comments": [
+        "Fixing bug that caused x issue."
+      ]
     },
     {
-      "packageName": "@microsoft/gulp-core-build-typescript",
+      "packageName": "@microsoft/gulp-core-build-sass",
       "type": "patch",
-      "comments": ["b"]
+      "comments": [
+        "Fixing bug that caused x issue."
+      ]
     }
   ]
 }
