@@ -247,7 +247,6 @@ function applyChanges(allChanges) {
     deleteChangeFiles();
     gitAddChanges(allChanges);
     gitCommit();
-    gitAddTags(allChanges);
     gitPush();
 
     for (let change of orderedChanges) {
@@ -255,6 +254,9 @@ function applyChanges(allChanges) {
         publishPackage(change);
       }
     }
+
+    gitAddTags(allChanges);
+    gitPush();
   }
 }
 
