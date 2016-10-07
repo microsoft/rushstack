@@ -174,10 +174,15 @@ function execCommand(commandLine, workingPath, isDisabled) {
   console.log(`Executing: "${commandLine}" from ${workingPath}`);
 
   if (_shouldCommit && !isDisabled) {
-    execSync(commandLine, {
-      cwd: workingPath,
-      stdio: [0, 1, 2]
-    });
+    try {
+      execSync(commandLine, {
+        cwd: workingPath,
+        stdio: [0, 1, 2]
+      });
+    } catch(error) {
+      console.log('ERROR: ' + error.toString());
+      throw error;
+    }
   }
 }
 
