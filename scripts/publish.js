@@ -195,15 +195,11 @@ function gitCommit() {
 }
 
 function gitPush() {
-  execCommand('git push --follow-tags', null, true);
+  execCommand('git push --follow-tags');
 }
 
 function publishPackage(change) {
-  execCommand(`npm publish`, change.packagePath, true);
-}
-
-function updateChangeLog(change) {
-//  console.log(` - TODO: updating CHANGELOG.md`);
+  execCommand(`npm publish`, change.packagePath);
 }
 
 function deleteChangeFiles() {
@@ -240,7 +236,6 @@ function applyChanges(allChanges) {
   if (orderedChanges.length > 1) {
     for (let change of orderedChanges) {
       updatePackage(change, allChanges);
-      updateChangeLog(change);
     }
 
     deleteChangeFiles();
