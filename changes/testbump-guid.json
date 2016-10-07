@@ -1,17 +1,10 @@
 {
   "changes": [
     {
-      "packageName": "@microsoft/gulp-core-build",
+      "packageName": "@microsoft/gulp-core-serve",
       "type": "patch",
       "comments": [
-        "Fixing bug that caused x issue."
-      ]
-    },
-    {
-      "packageName": "@microsoft/gulp-core-build-sass",
-      "type": "patch",
-      "comments": [
-        "Fixing bug that caused x issue."
+        "Republishing a package from new repo."
       ]
     }
   ]
