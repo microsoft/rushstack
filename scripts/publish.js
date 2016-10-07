@@ -202,7 +202,8 @@ function gitCommit() {
 }
 
 function gitPush() {
-  execCommand('git push --follow-tags --verbose');
+  execCommand('git pull');
+  execCommand('git push origin HEAD:master --follow-tags --verbose');
 }
 
 function publishPackage(change) {
