@@ -174,7 +174,8 @@ function execCommand(commandLine, workingPath, isDisabled) {
 
   if (_shouldCommit && !isDisabled) {
     execSync(commandLine, {
-      cwd: workingPath
+      cwd: workingPath,
+      stdio: [0, 1, 2]
     });
   }
 }
