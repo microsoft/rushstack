@@ -262,8 +262,8 @@ function applyChanges(allChanges) {
       updatePackage(change, allChanges);
     }
 
-    deleteChangeFiles();
     gitRefresh();
+    deleteChangeFiles();
     gitAddChanges(allChanges);
     gitCommit();
     gitPush();
