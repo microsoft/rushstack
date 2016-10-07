@@ -4,7 +4,9 @@
   "description": "",
   "main": "enumerate.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "echo",
+    "clean": "echo",
+    "test": "echo"
   },
   "author": "",
   "license": "ISC",
