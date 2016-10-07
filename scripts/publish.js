@@ -173,10 +173,9 @@ function execCommand(commandLine, workingPath, isDisabled) {
   console.log(`Executing: "${commandLine}" from ${workingPath}`);
 
   if (_shouldCommit && !isDisabled) {
-    let result = execSync(commandLine, {
+    execSync(commandLine, {
       cwd: workingPath
     });
-    console.log(result);
   }
 }
 
@@ -191,21 +190,21 @@ function gitAddTags(allChanges) {
     if (change.changeType > _changeTypes.dependency) {
       let tagName = packageName + '_v' + change.newVersion;
 
-      execCommand(`git tag ${tagName}`, null, false);
+      execCommand(`git tag ${tagName}`);
     }
   }
 }
 
 function gitCommit() {
-  execCommand('git commit -m "Applying package updates."', null, false);
+  execCommand('git commit -m "Applying package updates."');
 }
 
 function gitPush() {
-  execCommand('git push origin HEAD:master --follow-tags', null, false);
+  execCommand('git push origin HEAD:master --follow-tags');
 }
 
 function publishPackage(change) {
-  execCommand(`npm publish`, change.packagePath, false);
+  execCommand(`npm publish`, change.packagePath);
 }
 
 function deleteChangeFiles() {
