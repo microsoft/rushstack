@@ -258,6 +258,7 @@ function applyChanges(allChanges) {
     }
 
     deleteChangeFiles();
+    gitRefresh();
     gitAddChanges(allChanges);
     gitCommit();
     gitPush();
