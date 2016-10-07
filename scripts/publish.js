@@ -200,7 +200,7 @@ function gitCommit() {
 }
 
 function gitPush() {
-  execCommand('git push --follow-tags');
+  execCommand('git push origin HEAD:master --follow-tags');
 }
 
 function publishPackage(change) {
