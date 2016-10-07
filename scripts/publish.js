@@ -203,7 +203,7 @@ function gitCommit() {
 }
 
 function gitRefresh() {
-  execCommand('get checkout master');
+  execCommand('git checkout master');
   execCommand('git pull origin master');
 }
 
