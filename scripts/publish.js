@@ -202,7 +202,7 @@ function gitCommit() {
 }
 
 function gitPush() {
-  execCommand('git push origin refs/heads/master:refs/heads/master --follow-tags --verbose');
+  execCommand('git push --follow-tags --verbose');
 }
 
 function publishPackage(change) {
