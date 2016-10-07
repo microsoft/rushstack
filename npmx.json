@@ -61,6 +61,10 @@
     {
       "packageName": "@microsoft/web-library-build",
       "projectFolder": "web-library-build"
+    },
+    {
+      "packageName": "web-build-tools-scripts",
+      "projectFolder": "scripts"
     }
   ]
 }

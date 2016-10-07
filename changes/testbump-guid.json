@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-serve",
+      "type": "patch",
+      "comments": [
+        "Republishing a package from new repo."
+      ]
+    }
+  ]
+}
