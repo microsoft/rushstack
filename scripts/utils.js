@@ -1,3 +1,5 @@
+'use strict';
+
 let fs = require('fs');
 let rimraf = require('rimraf');
 
