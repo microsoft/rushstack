@@ -78,6 +78,11 @@ function findChangesSync() {
 function addChange(allChanges, change) {
   let packageName = change.packageName;
   let pkgEntry = _allPackages[packageName];
+
+  if (!pkgEntry) {
+    throw `The package ${packageName} was requested for publishing but does not exist. Please fix change requests.`;
+  }
+
   let pkg = pkgEntry.package;
   let currentChange;
 
