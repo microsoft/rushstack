@@ -223,7 +223,7 @@ function publishPackage(change) {
     authParam = `--//registry.npmjs.org/:_authToken=${_authToken}`;
   }
 
-  execCommand(`npm publish ${authParam}`, change.packagePath);
+  execCommand(`npm publish ${authParam}`, path.dirname(change.packagePath));
 }
 
 function deleteChangeFiles() {
