@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "packageName": "@microsoft/gulp-core-serve",
+      "packageName": "@microsoft/gulp-core-build-serve",
       "type": "patch",
       "comments": [
         "Republishing a package from new repo."
