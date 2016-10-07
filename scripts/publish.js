@@ -191,7 +191,7 @@ function gitAddTags(allChanges) {
     if (change.changeType > _changeTypes.dependency) {
       let tagName = packageName + '_v' + change.newVersion;
 
-      execCommand(`git tag ${tagName}`);
+      execCommand(`git tag -a ${tagName} -m "${packageName} v${change.newVersion}"`);
     }
   }
 }
@@ -201,7 +201,7 @@ function gitCommit() {
 }
 
 function gitPush() {
-  execCommand('git push origin HEAD:master --follow-tags');
+  execCommand('git push origin refs/heads/master:refs/heads/master --follow-tags --verbose');
 }
 
 function publishPackage(change) {
