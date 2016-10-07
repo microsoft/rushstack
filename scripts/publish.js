@@ -186,7 +186,6 @@ function execCommand(commandLine, workingPath, isDisabled) {
   }
 }
 
-
 function gitAddChanges() {
   execCommand('git add .');
 }
