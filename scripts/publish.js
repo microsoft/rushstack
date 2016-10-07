@@ -21,8 +21,9 @@ let _changeTypes = {
   1: 'patch',
   0: 'dependency'
 };
-
-let _shouldCommit = process.argv.indexOf('--commit') >= 0;
+let argv = require('yargs').argv;
+let _shouldCommit = argv.commit;
+let _authToken = argv.npmAuthToken;
 
 /* Find all changes and return parsed change definitions. */
 function findChangesSync() {
@@ -201,13 +202,23 @@ function gitCommit() {
   execCommand('git commit -m "Applying package updates."');
 }
 
+function gitRefresh() {
+  execCommand('get checkout master');
+  execCommand('git pull origin master');
+}
+
 function gitPush() {
-  execCommand('git pull');
   execCommand('git push origin HEAD:master --follow-tags --verbose');
 }
 
 function publishPackage(change) {
-  execCommand(`npm publish`, change.packagePath);
+  let authParam = '';
+
+  if (_authToken) {
+    authParam = `--//registry.npmjs.org/:_authToken=${_authToken}`;
+  }
+
+  execCommand(`npm publish ${authParam}`, change.packagePath);
 }
 
 function deleteChangeFiles() {

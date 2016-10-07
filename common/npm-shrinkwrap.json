@@ -447,9 +447,9 @@
       "resolved": "https://registry.npmjs.org/camelcase-keys/-/camelcase-keys-2.1.0.tgz"
     },
     "caniuse-db": {
-      "version": "1.0.30000547",
+      "version": "1.0.30000548",
       "from": "caniuse-db@>=1.0.30000488 <2.0.0",
-      "resolved": "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000547.tgz"
+      "resolved": "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000548.tgz"
     },
     "cardinal": {
       "version": "1.0.0",
@@ -1761,7 +1761,7 @@
         "event-stream": {
           "version": "3.3.4",
           "from": "event-stream@>=3.3.2 <4.0.0",
-          "resolved": "https://registry.npmjs.org/event-stream/-/event-stream-3.3.4.tgz"
+          "resolved": "https://registry.npmjs.com/event-stream/-/event-stream-3.3.4.tgz"
         },
         "finalhandler": {
           "version": "0.4.0",
@@ -2492,7 +2492,7 @@
     "isarray": {
       "version": "0.0.1",
       "from": "isarray@0.0.1",
-      "resolved": "https://registry.npmjs.org/isarray/-/isarray-0.0.1.tgz"
+      "resolved": "http://registry.npmjs.org/isarray/-/isarray-0.0.1.tgz"
     },
     "isbinaryfile": {
       "version": "3.0.1",
@@ -3551,7 +3551,24 @@
     "npmx-web-build-tools-scripts": {
       "version": "0.0.0",
       "from": "temp_modules/npmx-web-build-tools-scripts",
-      "resolved": "file:temp_modules/npmx-web-build-tools-scripts"
+      "resolved": "file:temp_modules/npmx-web-build-tools-scripts",
+      "dependencies": {
+        "camelcase": {
+          "version": "3.0.0",
+          "from": "camelcase@>=3.0.0 <4.0.0",
+          "resolved": "https://registry.npmjs.org/camelcase/-/camelcase-3.0.0.tgz"
+        },
+        "yargs": {
+          "version": "6.0.0",
+          "from": "yargs@>=6.0.0 <7.0.0",
+          "resolved": "https://registry.npmjs.org/yargs/-/yargs-6.0.0.tgz"
+        },
+        "yargs-parser": {
+          "version": "4.0.2",
+          "from": "yargs-parser@>=4.0.2 <5.0.0",
+          "resolved": "https://registry.npmjs.org/yargs-parser/-/yargs-parser-4.0.2.tgz"
+        }
+      }
     },
     "npmx-web-library-build": {
       "version": "0.0.0",
