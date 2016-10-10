@@ -3823,6 +3823,11 @@
       "from": "parseurl@>=1.3.1 <1.4.0",
       "resolved": "https://registry.npmjs.org/parseurl/-/parseurl-1.3.1.tgz"
     },
+    "path": {
+      "version": "0.12.7",
+      "from": "path@>=0.12.7 <0.13.0",
+      "resolved": "https://registry.npmjs.org/path/-/path-0.12.7.tgz"
+    },
     "path-array": {
       "version": "1.0.1",
       "from": "path-array@>=1.0.0 <2.0.0",
@@ -5224,7 +5229,7 @@
     "yargs-parser": {
       "version": "2.4.1",
       "from": "yargs-parser@>=2.4.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/yargs-parser/-/yargs-parser-2.4.1.tgz",
+      "resolved": "https://registry.npmjs.com/yargs-parser/-/yargs-parser-2.4.1.tgz",
       "dependencies": {
         "camelcase": {
           "version": "3.0.0",
