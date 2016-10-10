@@ -12,6 +12,7 @@
   "license": "ISC",
   "devDependencies": {
     "fs": "0.0.1-security",
+    "glob": "^7.1.1",
     "guid": "0.0.12",
     "inquirer": "^1.2.1",
     "rimraf": "^2.5.4",

@@ -1,44 +1,19 @@
 'use strict';
  
 let fs = require('fs');
-let inquirer = require('inquirer');
-let path = require('path')
+let glob = require('glob')
 let guid = require('guid');
+let inquirer = require('inquirer');
 
 let packages = [];  // keeps track of package.json files that have been found
 let answers = {};
 let data = [];
 
 // Gets all the package.json files under the current executing directory
-let getPackages = (dir, done) => {
-    fs.readdir(dir, (err, files) => {
-        let remaining = files.length;
-
-        if (remaining === 0) {
-            done();
-        }
-
-        files.forEach((file) => {
-            file = path.resolve(dir, file);
-            fs.stat(file, (err, stat) => {
-                if (stat && stat.isDirectory() && path.basename(file) !== 'node_modules') {   // found a directory, so call into that directory
-                    getPackages(file, () => {
-                        remaining--;
-                        if (remaining === 0) {
-                            done();
-                        }
-                    })
-                } else {
-                    if (path.basename(file) === 'package.json') {
-                        packages.push(path.basename(path.dirname(file)));   // found a package.json file
-                    }
-                    remaining--;
-                    if (remaining === 0) {
-                        done();
-                    }
-                }   
-            });
-        });
+let getPackages = () => {
+    glob('**/package.json', /*options*/ {}, (error, files) {
+        packages = files;
+        promptUser();
     });
 }
 
@@ -98,4 +73,4 @@ let promptUser = () => {
     }
 };
 
-getPackages('../', promptUser);
+getPackages();
