@@ -101,7 +101,7 @@ let help = () => {
     console.log("is exported.")
     console.log("");
     console.log("MINOR - these are changes that are backwards compatible (but not");
-    console.log("forwards compatible. Examples are: adding a new public API or adding an");
+    console.log("forwards compatible). Examples are: adding a new public API or adding an");
     console.log("optional parameter to a public API");
     console.log("");
     console.log("PATCH - these are changes that are backwards and forwards compatible.");
