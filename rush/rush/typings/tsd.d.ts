@@ -10,3 +10,6 @@
 /// <reference path="read-package-tree/read-package-tree.d.ts" />
 /// <reference path="semver/semver.d.ts" />
 /// <reference path="wordwrap/wordwrap.d.ts" />
+/// <reference path="inquirer/inquirer.d.ts" />
+/// <reference path="rx/rx-lite.d.ts" />
+/// <reference path="through/through.d.ts" />
