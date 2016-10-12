@@ -4,28 +4,16 @@
 
 /// <reference path='../../typings/tsd.d.ts' />
 
-import * as colors from 'colors';
 import * as fs from 'fs';
-import * as glob from 'glob';
 import * as os from 'os';
-import * as path from 'path';
 
 const gitEmail: () => string = require('git-user-email');
 
-const inquirer = require('inquirer'); /* Is this the right library? */
+// tslint:disable-next-line:no-any
+const inquirer: any = require('inquirer'); /* @todo Is this the right library? */
 
 import { CommandLineAction } from '@microsoft/ts-command-line';
-
-import {
-  JsonFile,
-  RushConfig,
-  IRushLinkJson,
-  RushConfigProject,
-  Package,
-  IResolveOrCreateResult,
-  PackageDependencyKind,
-  Utilities
-} from '@microsoft/rush-lib';
+import { RushConfig } from '@microsoft/rush-lib';
 
 import RushCommandLineParser from './RushCommandLineParser';
 
@@ -44,9 +32,12 @@ interface IChangeInfo {
 
 export default class ChangeAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
-  private _prompt: any; // inquirer.PromptModule;
   private _projectList: string[];
   private _changes: IChangeInfo[];
+
+  // @todo use correct typings
+  // tslint:disable-next-line:no-any
+  private _prompt: any; // inquirer.PromptModule;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -57,32 +48,35 @@ export default class ChangeAction extends CommandLineAction {
         ' in the common folder. Later, run the `version-bump` command to actually perform the proper ' +
         ' version bumps. Note these changes will eventually be published in the packages\' changelog.md.'
         + os.EOL +
-        ["Here's some help in figuring out what kind of change you are making: ",
-        "",
-        "MAJOR - these are breaking changes that are not backwards compatible. " +
-        "Examples are: renaming a file/class, adding/removing a non-optional " +
-        "parameter from a public API, or renaming an variable or function that " +
-        "is exported.",
-        "",
-        "MINOR - these are changes that are backwards compatible (but not " +
-        "forwards compatible). Examples are: adding a new public API or adding an " +
-        "optional parameter to a public API",
-        "",
-        "PATCH - these are changes that are backwards and forwards compatible. " +
-        "Examples are: Modifying a private API or fixing a bug in the logic " +
-        "of how an existing API works.",
-        ""].join(os.EOL)
+        ['Here\'s some help in figuring out what kind of change you are making: ',
+        '',
+        'MAJOR - these are breaking changes that are not backwards compatible. ' +
+        'Examples are: renaming a file/class, adding/removing a non-optional ' +
+        'parameter from a public API, or renaming an variable or function that ' +
+        'is exported.',
+        '',
+        'MINOR - these are changes that are backwards compatible (but not ' +
+        'forwards compatible). Examples are: adding a new public API or adding an ' +
+        'optional parameter to a public API',
+        '',
+        'PATCH - these are changes that are backwards and forwards compatible. ' +
+        'Examples are: Modifying a private API or fixing a bug in the logic ' +
+        'of how an existing API works.',
+        ''].join(os.EOL)
     });
     this._parser = parser;
   }
 
-  protected onDefineParameters(): void {
+  public onDefineParameters(): void {
     // abstract
   }
 
-  protected onExecute(): void {
+  public onExecute(): void {
     // Code below adapted from web-build-tools
-    this._projectList = RushConfig.loadFromDefaultLocation().projects
+
+    // @todo - there is a problem accessing public readonly properties.. the typings appear to be wrong
+    // tslint:disable-next-line:no-any
+    this._projectList = (RushConfig.loadFromDefaultLocation() as any).projects
       .map(project => project.packageName).sort();
     this._prompt = inquirer.createPromptModule();
     this._changes = [];
@@ -91,7 +85,9 @@ export default class ChangeAction extends CommandLineAction {
     this._promptLoop();
   }
 
-  private _promptLoop(): Promise<{}> {
+  private _promptLoop(): Promise<void> {
+    // @todo
+    // tslint:disable-next-line:no-any
     const continuePrompt: any = [{
       name: 'addMore',
       type: 'confirm',
@@ -100,37 +96,47 @@ export default class ChangeAction extends CommandLineAction {
 
     return this._promptForBump()
       .then(this._prompt(continuePrompt))
-      .then((answers: any) => {
+      .then((answers: { addMore: boolean }) => {
+
         if (answers.addMore) {
           return this._promptLoop();
         } else {
           return this._writeChangeFile();
         }
+      })
+      .catch((error: Error) => {
+        console.error('There was an issue creating the changefile:' + os.EOL + error.toString());
       });
-    };
-
+  }
 
   private _promptForBump(): Promise<void> {
-    return this._askQuestions()
-      .then((answers: IPromptAnswers) => {
-      const projectInfo: IChangeInfo = {
-        projects: answers.projects,
-        bumpType: (answers.bumpType.substring(0, answers.bumpType.indexOf(" - ")) as 'major' | 'minor' | 'patch'),
-        comments: answers.comments,
-        email: undefined
-      };
+    return this._askQuestions().then((answers: IPromptAnswers) => {
+      return this._detectOrAskForEmail().then((email: string) => {
 
-      this._changes.push(projectInfo);
+        const projectInfo: IChangeInfo = {
+          projects: answers.projects,
+          bumpType: (answers.bumpType.substring(0, answers.bumpType.indexOf(' - ')) as 'major' | 'minor' | 'patch'),
+          comments: answers.comments,
+          email: email
+        };
+
+        this._changes.push(projectInfo);
+      });
     });
   }
 
-
+  /**
+   * Asks all questions which are needed to generate changelist for a project.
+   */
   private _askQuestions(): Promise<IPromptAnswers> {
     // Questions related to the project. Had to split into two sets of questions in case user selects additional help
+
+    // @todo
+    // tslint:disable-next-line:no-any
     const projectQuestions: any = [
       {
         name: 'projects',
-        type: 'checkbox',
+        type: 'checkbox', // @todo I think we should do a checkbox because sometimes you might want the same message
         message: 'Select the project(s) you would like to bump:',
         choices: this._projectList
       },
@@ -142,7 +148,7 @@ export default class ChangeAction extends CommandLineAction {
         choices: [
           'major - for breaking changes (ex: renaming a file)',
           'minor - for adding new features (ex: exposing a new public API)',
-          'patch - for fixes (ex: updating how an API works w/o touching its signature)',
+          'patch - for fixes (ex: updating how an API works w/o touching its signature)'
         ]
       },
       {
@@ -155,37 +161,44 @@ export default class ChangeAction extends CommandLineAction {
     return this._prompt(projectQuestions);
   }
 
-  protected detectOrPromptForAlias(): Promise<string> {
-    return this._detectEmail()
-      .then((email: string) => {
-        if (email) {
-          return Promise.resolve(email);
-        } else {
-          return this._promptForEmail();
-        }
-      });
-    }
+  /**
+   * Will determine a user's email by first detecting it from their git config,
+   * or will ask for it if it is not found or the git config is wrong.
+   */
+  private _detectOrAskForEmail(): Promise<string> {
+    return this._detectAndConfirmEmail().then((email: string) => {
+
+      if (email) {
+        return Promise.resolve(email);
+      } else {
+        return this._promptForEmail();
+      }
+
+    });
+  }
 
   /**
    * Detects the user's email address from their git configuration, prompts the user to approve the
    * detected email. It returns undefined if it cannot be detected.
    */
-  protected _detectEmail() {
+  private _detectAndConfirmEmail(): Promise<string> {
     let email: string = gitEmail();
     if (email) {
       return this._prompt([
         {
           type: 'confirm',
           name: 'email',
-          message: `Is your email address ${email} ?`,
+          message: `Is your email address ${email} ?`
         }
       ]).then((answers) => {
+
         if (answers.email) {
           return email;
         } else {
           return undefined;
         }
-      })
+
+      });
     } else {
       Promise.resolve(undefined);
     }
@@ -194,7 +207,7 @@ export default class ChangeAction extends CommandLineAction {
   /**
    * Asks the user for their e-mail address
    */
-  protected _promptForEmail(): Promise<string> {
+  private _promptForEmail(): Promise<string> {
     return this._prompt([
       {
         type: 'input',
@@ -210,11 +223,15 @@ export default class ChangeAction extends CommandLineAction {
     });
   }
 
-  protected _writeChangeFile(): Promise<{}> {
-    return new Promise<{}>((resolve: () => void, reject: (error?: any) => void) => {
+  /**
+   * Writes all queued changes to a file in the common folder that has a GUID filename
+   */
+  private _writeChangeFile(): Promise<void> {
+    return new Promise<void>((resolve: () => void, reject: (error?: Error) => void) => {
       const output: string = JSON.stringify(this._changes, undefined, 2);
 
-      const fileName = './changes/' + guid.create() + '.json';
+      // @todo actually create a guid
+      const fileName: string = 'c:/changes/foobar.json';
       console.log('Create new changes file: ' + fileName);
       fs.writeFile(fileName, output, resolve);
     });

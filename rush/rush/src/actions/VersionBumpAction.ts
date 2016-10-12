@@ -2,6 +2,9 @@
  * @Copyright (c) Microsoft Corporation.  All rights reserved.
  */
 
+// @todo
+// tslint:disable
+
 import * as colors from 'colors';
 import * as fs from 'fs';
 import * as glob from 'glob';
