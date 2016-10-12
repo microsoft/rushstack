@@ -22,9 +22,10 @@ export interface IRushConfigJson {
   commonFolder: string;
   npmVersion: string;
   rushMinimumVersion: string;
-  nodeSupportedVersionRange: string;
+  nodeSupportedVersionRange?: string;
   projectFolderMinDepth?: number;
   projectFolderMaxDepth?: number;
+  packageReviewFile?: string;
   projects: IRushConfigProjectJson[];
 }
 
@@ -52,6 +53,7 @@ export default class RushConfig {
   private _npmToolFilename: string;
   private _projectFolderMinDepth: number;
   private _projectFolderMaxDepth: number;
+  private _packageReviewFile: string;
 
   private _projects: RushConfigProject[];
   private _projectsByName: Map<string, RushConfigProject>;
@@ -207,6 +209,14 @@ export default class RushConfig {
       throw new Error('The projectFolderMaxDepth cannot be smaller than the projectFolderMinDepth');
     }
 
+    this._packageReviewFile = undefined;
+    if (rushConfigJson.packageReviewFile) {
+      this._packageReviewFile = path.resolve(path.join(this._rushJsonFolder, rushConfigJson.packageReviewFile));
+      if (!fs.existsSync(this._packageReviewFile)) {
+        throw new Error('The packageReviewFile file was not found: "' + this._packageReviewFile + '"');
+      }
+    }
+
     this._projects = [];
     this._projectsByName = new Map<string, RushConfigProject>();
 
@@ -318,6 +328,24 @@ export default class RushConfig {
    */
   public get projectFolderMaxDepth(): number {
     return this._projectFolderMaxDepth;
+  }
+
+  /**
+   * The absolute path to a JSON file that tracks the NPM packages that were approved for usage
+   * in this repository.  This is part of an optional approval workflow, whose purpose is to
+   * review any new dependencies that are introduced (e.g. maybe a legal review is required, or
+   * maybe we are trying to minimize bloat).  When "rush generate" is run, any new
+   * package.json dependencies will be appended to this file.  When "rush install" is run
+   * (e.g. as part of a PR build), an error will be reported if the file is not up to date.
+   * The intent is that this file will be stored in Git and tracked by a branch policy which
+   * notifies reviewers whenever a PR attempts to modify the file.
+   *
+   * The PackageReviewConfig class can load/save this file format.
+   *
+   * Example: "C:\MyRepo\common\reviews\PackageDependenies.json"
+   */
+  public get packageReviewFile(): string {
+    return this._packageReviewFile;
   }
 
   public get projects(): RushConfigProject[] {

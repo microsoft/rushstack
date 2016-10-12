@@ -34,6 +34,10 @@
       "description": "The maximum folder depth for the projectFolder field.  The default value is 2, i.e. a single slash in the path name.",
       "type": "number"
     },
+    "packageReviewFile": {
+      "description": "The filename of a JSON file that tracks which NPM packages have been approved for usage in this repo.  Example: \"common/reviews/PackageDependenies.json\"",
+      "type": "string"
+    },
     "projects": {
       "description": "A list of projects managed by this tool.",
       "type": "array",
