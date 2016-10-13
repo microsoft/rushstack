@@ -35,11 +35,11 @@
       "type": "number"
     },
     "packageReviewFile": {
-      "description": "The filename of a JSON file that tracks which NPM packages have been approved for usage in this repo.  Example: \"common/reviews/PackageDependenies.json\"",
+      "description": "The filename of a JSON file that tracks which NPM packages have been approved for usage in this repo.  Example: \"common/reviews/PackageDependencies.json\"",
       "type": "string"
     },
     "reviewCategories": {
-      "description": "An list of category names that can be applied to each project, for usage in the packageReviewFile",
+      "description": "A list of category names that can be applied to each project, for usage in the packageReviewFile",
       "type": "array",
       "items": {
         "type": "string"

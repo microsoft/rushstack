@@ -57,7 +57,7 @@ export default class RushConfigProject {
         throw new Error(`The project "${projectJson.packageName}" specifies a reviewCategory.`
           + `  In order to use categories, the reviewCategories array must be specified.`);
       }
-      if (rushConfig.reviewCategories.indexOf(projectJson.reviewCategory) < 0) {
+      if (!rushConfig.reviewCategories.has(projectJson.reviewCategory)) {
         throw new Error(`The project "${projectJson.packageName}" specifies its reviewCategory=`
           + `"${projectJson.reviewCategory}" which is not one of the defined reviewCategories.`);
       }

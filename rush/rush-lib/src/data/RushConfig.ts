@@ -55,7 +55,7 @@ export default class RushConfig {
   private _projectFolderMinDepth: number;
   private _projectFolderMaxDepth: number;
   private _packageReviewFile: string;
-  private _reviewCategories: string[];
+  private _reviewCategories: Set<string>;
   private _projects: RushConfigProject[];
   private _projectsByName: Map<string, RushConfigProject>;
 
@@ -218,7 +218,7 @@ export default class RushConfig {
       }
     }
 
-    this._reviewCategories = rushConfigJson.reviewCategories || [];
+    this._reviewCategories = new Set<string>(rushConfigJson.reviewCategories);
 
     this._projects = [];
     this._projectsByName = new Map<string, RushConfigProject>();
@@ -355,7 +355,7 @@ export default class RushConfig {
    * A list of category names that are valid for usage as the RushConfigProject.reviewCategory field.
    * This array will never be undefined.
    */
-  public get reviewCategories(): string[] {
+  public get reviewCategories(): Set<string> {
     return this._reviewCategories;
   }
 

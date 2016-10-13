@@ -122,6 +122,10 @@ export default class PackageReviewConfig {
     this._loadedJson.browserPackages = [];
     this._loadedJson.nonBrowserPackages = [];
 
+    this.items.sort((a: PackageReviewItem, b: PackageReviewItem) => {
+      return a.packageName.localeCompare(b.packageName);
+    });
+
     for (const item of this.items) {
       // Sort the items from the set.  Too bad we can't use the new Array.from().
       const allowedCategories: string[] = [];
@@ -180,16 +184,15 @@ export default class PackageReviewConfig {
     this._addItem(item);
   }
 
+  /**
+   * Helper function that adds an already created PackageReviewItem to the
+   * list and set.
+   */
   private _addItem(item: PackageReviewItem): void {
     if (this._itemsByName.has(item.packageName)) {
       throw new Error('Duplicate key'); // this is a program bug
     }
     this.items.push(item);
     this._itemsByName.set(item.packageName, item);
-
-    // This is O(n*log(n))
-    this.items.sort((a: PackageReviewItem, b: PackageReviewItem) => {
-      return a.packageName.localeCompare(b.packageName);
-    });
   }
 }
