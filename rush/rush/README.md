@@ -163,3 +163,63 @@ to be built.  You also need to set up your "common" folder, and add the
 appropriate files to Git.  (We are working on an "rush init" command to
 simplify this.)
 
+## Detecting when new NPM dependencies are introduced
+
+Suppose that your Rush repo has 30 different projects, and you want to keep track of
+what NPM packages people are using.  When someone finds a new package and tries to add
+it to their project, you want to ask questions like:  "Is this a good quality package?"  
+"Are we already using a different library that does the same thing?"  "Is the license
+allowed?"  "How many other dependencies will this pull into our node_modules folder?"
+Rush can alert you when this happens.
+
+In your **rush.json** file, add these optional fields:
+
+```json
+  "reviewCategories": [ "published", "internal", "experiments" ],
+  "packageReviewFile": "common/PackageDependencies.json",
+```
+
+In this example, we defined three kinds of projects that we care about:
+Projects that we publish externally, projects kept internal to our company,
+and throwaway experiments.  For each project in the repo, we will assign one
+of these categories as the "reviewCategory" field.
+
+The **PackageDependencies.json** file contains the list of approved packages.
+This file should be added to Git.  It might look like this:
+
+```json
+{
+  "browserPackages": [
+    {
+      "name": "lodash",
+      "allowedCategories": [ "internal", "experiment" ]
+    }
+  ],
+  "nonBrowserPackages": [
+    {
+      "name": "gulp",
+      "allowedCategories": [ "published", "internal", "experiment" ]
+    },
+    {
+      "name": "some-crazy-tool",
+      "allowedCategories": [ "experiment" ]
+    }
+  ]
+}
+```
+
+Above, we specified that only our internal projects and experiments are allowed
+to use "lodash", whereas "gulp" is allowed everywhere.  The "some-crazy-tool" library
+is being used by an experimental prototype, but should never be used in real projects.
+
+Note that Rush distinguishes "**browserPackages**" from "**nonBrowserPackages**",
+since the approval criteria is generally different for these environments.
+
+Now, suppose someone changes their package.json to add "lodash" to a project that
+was designated as "published".  When they  run "rush generate", Rush will automatically
+rewrite the **PackageDependencies.json** file, appending "published" to the
+"allowedCategories" for "lodash".  In other words, it automatically broadens the rules
+so that they describe reality.  When the pull request is created, reviewers will spot this diff
+and can ask appropriate questions.  Since our criteria is based on generalized categories,
+the reviewers aren't hassled about every little package.json change; the **PackageDependencies.json**
+diff only appears for genuinely interesting changes.
