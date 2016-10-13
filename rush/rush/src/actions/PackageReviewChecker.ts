@@ -33,12 +33,8 @@ export default class PackageReviewChecker {
 
     if (dependencies) {
       for (const packageName of Object.keys(dependencies)) {
-
-        // Is it an external package?
-        if (!this._rushConfig.getProjectByName(packageName)) {
-          // Yes, add it to the list if it's not already there
-          this._packageReviewConfig.addOrUpdatePackage(packageName, false, rushProject.reviewCategory);
-        }
+        // Yes, add it to the list if it's not already there
+        this._packageReviewConfig.addOrUpdatePackage(packageName, false, rushProject.reviewCategory);
       }
     }
   }
