@@ -6,6 +6,8 @@
 
 import * as fs from 'fs';
 import * as os from 'os';
+import * as path from 'path';
+import * as mkdirp from 'mkdirp';
 
 const gitEmail: () => string = require('git-user-email');
 
@@ -23,17 +25,21 @@ interface IPromptAnswers {
   comments: string;
 }
 
+interface IChangeFile {
+  changes: IChangeInfo[];
+  email: string;
+}
+
 interface IChangeInfo {
   projects: string[];
   bumpType: 'major' | 'minor' | 'patch';
   comments: string;
-  email: string;
 }
 
 export default class ChangeAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
   private _projectList: string[];
-  private _changes: IChangeInfo[];
+  private _data: IChangeFile;
 
   // @todo use correct typings
   // tslint:disable-next-line:no-any
@@ -79,7 +85,10 @@ export default class ChangeAction extends CommandLineAction {
     this._projectList = (RushConfig.loadFromDefaultLocation() as any).projects
       .map(project => project.packageName).sort();
     this._prompt = inquirer.createPromptModule();
-    this._changes = [];
+    this._data = {
+      changes: [],
+      email: undefined
+    };
 
     // We should consider making onExecute either be an async/await or have it return a promise
     this._promptLoop();
@@ -95,13 +104,16 @@ export default class ChangeAction extends CommandLineAction {
     }];
 
     return this._promptForBump()
-      .then(this._prompt(continuePrompt))
+      .then(() => { return this._prompt(continuePrompt); })
       .then((answers: { addMore: boolean }) => {
 
         if (answers.addMore) {
           return this._promptLoop();
         } else {
-          return this._writeChangeFile();
+          return this._detectOrAskForEmail().then((email: string) => {
+            this._data.email = email;
+            this._writeChangeFile();
+          });
         }
       })
       .catch((error: Error) => {
@@ -109,19 +121,18 @@ export default class ChangeAction extends CommandLineAction {
       });
   }
 
+  /**
+   * Ask the set of questions necessary for determining which changes were made
+   */
   private _promptForBump(): Promise<void> {
     return this._askQuestions().then((answers: IPromptAnswers) => {
-      return this._detectOrAskForEmail().then((email: string) => {
+      const projectInfo: IChangeInfo = {
+        projects: answers.projects,
+        bumpType: (answers.bumpType.substring(0, answers.bumpType.indexOf(' - ')) as 'major' | 'minor' | 'patch'),
+        comments: answers.comments
+      };
 
-        const projectInfo: IChangeInfo = {
-          projects: answers.projects,
-          bumpType: (answers.bumpType.substring(0, answers.bumpType.indexOf(' - ')) as 'major' | 'minor' | 'patch'),
-          comments: answers.comments,
-          email: email
-        };
-
-        this._changes.push(projectInfo);
-      });
+      this._data.changes.push(projectInfo);
     });
   }
 
@@ -228,12 +239,26 @@ export default class ChangeAction extends CommandLineAction {
    */
   private _writeChangeFile(): Promise<void> {
     return new Promise<void>((resolve: () => void, reject: (error?: Error) => void) => {
-      const output: string = JSON.stringify(this._changes, undefined, 2);
+      const output: string = JSON.stringify(this._data, undefined, 2);
 
       // @todo actually create a guid
-      const fileName: string = 'c:/changes/foobar.json';
+      const fileName: string = 'c:\\changes\\foobar.json';
       console.log('Create new changes file: ' + fileName);
-      fs.writeFile(fileName, output, resolve);
+
+      // We need mkdirp because writeFile will error if the dir doesn't exist
+      // tslint:disable-next-line:no-any
+      mkdirp(path.dirname(fileName), (err: any) => {
+        if (err) {
+          reject(err);
+        }
+        fs.writeFile(fileName, output, (error: NodeJS.ErrnoException) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve();
+          }
+        });
+      });
     });
   }
 }
