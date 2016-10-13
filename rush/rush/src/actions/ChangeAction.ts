@@ -38,7 +38,7 @@ interface IChangeInfo {
 
 export default class ChangeAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
-  private _projectList: string[];
+  private _sortedProjectList: string[];
   private _data: IChangeFile;
 
   // @todo use correct typings
@@ -80,7 +80,7 @@ export default class ChangeAction extends CommandLineAction {
   public onExecute(): void {
     // @todo - there is a problem accessing public readonly properties.. the typings appear to be wrong
     // tslint:disable-next-line:no-any
-    this._projectList = (RushConfig.loadFromDefaultLocation() as any).projects
+    this._sortedProjectList = (RushConfig.loadFromDefaultLocation() as any).projects
       .map(project => project.packageName).sort();
     this._prompt = inquirer.createPromptModule();
     this._data = {
@@ -150,7 +150,7 @@ export default class ChangeAction extends CommandLineAction {
         name: 'projects',
         type: 'checkbox',
         message: 'Select the project(s) you would like to bump:',
-        choices: this._projectList
+        choices: this._sortedProjectList
       },
       {
         name: 'bumpType',
@@ -226,7 +226,7 @@ export default class ChangeAction extends CommandLineAction {
         name: 'email',
         message: 'What is your email address?',
         validate: (input: string) => {
-          // @todo should be an email
+          return true; // @todo should be an email
         }
       }
     ])
