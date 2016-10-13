@@ -51,14 +51,20 @@ export default class RushConfigProject {
       throw new Error(`Project folder not found: ${projectJson.projectFolder}`);
     }
 
-    if (projectJson.reviewCategory) {
-      // Make sure the category is one of the allowed choices
-      if (!rushConfig.reviewCategories) {
-        throw new Error(`The project "${projectJson.packageName}" specifies a reviewCategory.`
-          + `  In order to use categories, the reviewCategories array must be specified.`);
+    // Are we using a package review file?
+    if (rushConfig.packageReviewFile) {
+      // If so, then every project needs to have a reviewCategory that was defined
+      // by the reviewCategories array.
+      if (!rushConfig.reviewCategories.size) {
+        throw new Error(`The rush.json file specifies a packageReviewFile, but the reviewCategories`
+          + ` list is not configured.`);
+      }
+      if (!projectJson.reviewCategory) {
+        throw new Error(`The rush.json file configures a packageReviewFile, but a reviewCategory` +
+          ` was not specified for the project "${projectJson.packageName}".`);
       }
       if (!rushConfig.reviewCategories.has(projectJson.reviewCategory)) {
-        throw new Error(`The project "${projectJson.packageName}" specifies its reviewCategory=`
+        throw new Error(`The project "${projectJson.packageName}" specifies its reviewCategory as`
           + `"${projectJson.reviewCategory}" which is not one of the defined reviewCategories.`);
       }
       this._reviewCategory = projectJson.reviewCategory;
