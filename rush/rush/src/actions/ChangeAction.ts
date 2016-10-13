@@ -19,12 +19,6 @@ import { RushConfig } from '@microsoft/rush-lib';
 
 import RushCommandLineParser from './RushCommandLineParser';
 
-interface IPromptAnswers {
-  projects: string[];
-  bumpType: string;
-  comments: string;
-}
-
 interface IChangeFile {
   changes: IChangeInfo[];
   email: string;
@@ -127,7 +121,7 @@ export default class ChangeAction extends CommandLineAction {
    * Ask the set of questions necessary for determining which changes were made
    */
   private _promptForBump(): Promise<void> {
-    return this._askQuestions().then((answers: IPromptAnswers) => {
+    return this._askQuestions().then((answers: IChangeInfo) => {
       const projectInfo: IChangeInfo = {
         projects: answers.projects,
         bumpType: (answers.bumpType.substring(0, answers.bumpType.indexOf(' - ')) as 'major' | 'minor' | 'patch'),
@@ -141,7 +135,7 @@ export default class ChangeAction extends CommandLineAction {
   /**
    * Asks all questions which are needed to generate changelist for a project.
    */
-  private _askQuestions(): Promise<IPromptAnswers> {
+  private _askQuestions(): Promise<IChangeInfo> {
     // Questions related to the project. Had to split into two sets of questions in case user selects additional help
 
     // tslint:disable-next-line:no-any
