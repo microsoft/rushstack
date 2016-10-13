@@ -167,7 +167,7 @@ simplify this.)
 
 Suppose that your Rush repo has 30 different projects, and you want to keep track of
 what NPM packages people are using.  When someone finds a new package and tries to add
-it to their project, you want to ask questions like:  "Is this a good quality package?"  
+it to their project, you want to ask questions like:  "Is this a good quality package?"
 "Are we already using a different library that does the same thing?"  "Is the license
 allowed?"  "How many other dependencies will this pull into our node_modules folder?"
 Rush can alert you when this happens.
@@ -175,7 +175,7 @@ Rush can alert you when this happens.
 In your **rush.json** file, add these optional fields:
 
 ```json
-  "reviewCategories": [ "published", "internal", "experiments" ],
+  "reviewCategories": [ "published", "internal", "experiment" ],
   "packageReviewFile": "common/PackageDependencies.json",
 ```
 
@@ -221,5 +221,5 @@ rewrite the **PackageDependencies.json** file, appending "published" to the
 "allowedCategories" for "lodash".  In other words, it automatically broadens the rules
 so that they describe reality.  When the pull request is created, reviewers will spot this diff
 and can ask appropriate questions.  Since our criteria is based on generalized categories,
-the reviewers aren't hassled about every little package.json change; the **PackageDependencies.json**
+the reviewers aren't hassled about every little package.json change; a **PackageDependencies.json**
 diff only appears for genuinely interesting changes.

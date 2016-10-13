@@ -27,4 +27,8 @@
 
 # 1.0.3
 
+- `PATCH` Fix Mac OS X compatibility issue
+
+# 1.0.0
+
 *Initial release*
