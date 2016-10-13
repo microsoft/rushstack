@@ -114,13 +114,24 @@ Runs a given list of tasks in parallel execution order.
 
 Runs a given list of tasks in serial execution order.
 
-## subtask(name, fn)
+## subtask(name: string, fn: ICustomGulpTask)
 
 Creates a subtask (which is not registered directly with gulp, use `task()` for that) which can be
-used with parallel and serial. The `this` variable in the callback function will be an instance of a `GulpTask`.
+used with `parallel()` and `serial()`. The `this` variable in the callback function will be an instance of a `GulpTask`.
 
-`fn` should be a function which accepts 3 parameters: a `gulp` instance, the build configuration
-object, and an optional callback function to signify subtask completion.
+`fn` should be a function of type `ICustomGulpTask`
+
+```typescript
+/**
+ * The callback interface for a custom task definition.
+ * The task should either return a Promise, a stream, or call the
+ * callback function (passing in an object value if there was an error).
+ */
+export interface ICustomGulpTask {
+  (gulp: gulp.Gulp | GulpProxy, buildConfig: IBuildConfig, done: (failure?: Object) => void):
+    Promise<Object> | NodeJS.ReadWriteStream | void;
+}
+```
 
 ## initialize(gulpInstance, [buildOtions])
 
