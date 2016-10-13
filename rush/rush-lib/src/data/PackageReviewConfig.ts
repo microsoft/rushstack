@@ -2,11 +2,13 @@
  * @Copyright (c) Microsoft Corporation.  All rights reserved.
  */
 
+import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 
 import Validator = require('z-schema');
 import JsonFile from '../utilities/JsonFile';
+import Utilities from '../utilities/Utilities';
 
 /**
  * Part of IPackageReviewJson.
@@ -121,7 +123,7 @@ export default class PackageReviewConfig {
     this._loadedJson.nonBrowserPackages = [];
 
     for (const item of this.items) {
-      // Sort the items from the set
+      // Sort the items from the set.  Too bad we can't use the new Array.from().
       const allowedCategories: string[] = [];
       item.allowedCategories.forEach((value: string) => {
         allowedCategories.push(value);
@@ -140,9 +142,22 @@ export default class PackageReviewConfig {
     }
 
     // Save the file
-    const header: string = '// DO NOT ADD COMMENTS IN THIS FILE.'
-      + '  They will be lost when the Rush tool resaves it.';
-    JsonFile.saveJsonFile(this._loadedJson, jsonFilename, header);
+    let body: string = JSON.stringify(this._loadedJson, undefined, 2) + '\n';
+
+    // Unindent the allowedCategories array to improve readability
+    body = body.replace(
+      /("allowedCategories": +\[)([^\]]+)/g,
+      (substring: string, ...args: string[]) => {
+        return args[0] + args[1].replace(/\s+/g, ' ');
+      }
+    );
+
+    // Add a header
+    body = '// DO NOT ADD COMMENTS IN THIS FILE.'
+      + '  They will be lost when the Rush tool resaves it.\n' + body;
+
+    body = Utilities.getAllReplaced(body, '\n', '\r\n');
+    fs.writeFileSync(jsonFilename, body);
   }
 
   /**
