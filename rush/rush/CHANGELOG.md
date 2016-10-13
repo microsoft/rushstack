@@ -18,8 +18,12 @@
 
 # Unreleased changes
 
+# 1.0.4
+
 - `MINOR` Added optional support for a "packageReviewFile" that helps detect when new
   NPM package dependencies are introduced
+
+- `PATCH` Replaced JSON.parse() with jju for improved error handling.
 
 # 1.0.3
 
