@@ -9,36 +9,6 @@
     "listFiles": false
   },
   "files": [
-    "src/actions/CheckAction.ts",
-    "src/actions/GenerateAction.ts",
-    "src/actions/InstallAction.ts",
-    "src/actions/LinkAction.ts",
-    "src/actions/RushCommandLineParser.ts",
-    "src/actions/RebuildAction.ts",
-    "src/actions/PublishAction.ts",
-    "src/actions/UnlinkAction.ts",
-    "src/commandLine/CommandLineAction.ts",
-    "src/commandLine/CommandLineDefinition.ts",
-    "src/commandLine/CommandLineParameter.ts",
-    "src/commandLine/CommandLineParameterProvider.ts",
-    "src/commandLine/CommandLineParser.ts",
-    "src/data/RushConfig.ts",
-    "src/data/RushConfigProject.ts",
-    "src/data/Package.ts",
-    "src/data/PackageLookup.ts",
-    "src/errorDetection/rules/testErrorDetector.ts",
-    "src/errorDetection/rules/tsErrorDetector.ts",
-    "src/errorDetection/rules/tsLintErrorDetector.ts",
-    "src/errorDetection/ErrorDetector.ts",
-    "src/errorDetection/TaskError.ts",
-    "src/taskRunner/ITask.ts",
-    "src/taskRunner/ProjectBuildTask.ts",
-    "src/taskRunner/TaskRunner.ts",
-    "src/taskRunner/TaskStatus.ts",
-    "src/utilities/JsonFile.ts",
-    "src/utilities/Utilities.ts",
-    "src/gulp2vs.ts",
-    "src/rush.ts",
-    "src/rushVersion.ts"
+    "typings/tsd.d.ts"
   ]
 }

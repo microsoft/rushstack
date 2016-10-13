@@ -2,8 +2,6 @@
  * @Copyright (c) Microsoft Corporation.  All rights reserved.
  */
 
-/// <reference path='../../typings/tsd.d.ts' />
-
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -11,33 +9,28 @@ import * as mkdirp from 'mkdirp';
 
 const gitEmail: () => string = require('git-user-email');
 
-// tslint:disable-next-line:no-any
-const inquirer: any = require('inquirer'); /* @todo Is this the right library? */
+// tslint:disable-next-line:typedef
+import inquirer = require('inquirer'); /* @todo Is this the right library? */
 
 import { CommandLineAction } from '@microsoft/ts-command-line';
-import { RushConfig } from '@microsoft/rush-lib';
+import {
+  RushConfig,
+  RushConfigProject,
+  IChangeFile,
+  IChangeInfo
+} from '@microsoft/rush-lib';
 
 import RushCommandLineParser from './RushCommandLineParser';
 
-interface IChangeFile {
-  changes: IChangeInfo[];
-  email: string;
-}
-
-interface IChangeInfo {
-  projects: string[];
-  bumpType: 'major' | 'minor' | 'patch';
-  comments: string;
-}
 
 export default class ChangeAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
   private _sortedProjectList: string[];
-  private _data: IChangeFile;
+  private _changeFileData: IChangeFile;
 
   // @todo use correct typings
   // tslint:disable-next-line:no-any
-  private _prompt: any; // inquirer.PromptModule;
+  private _prompt: inquirer.PromptModule;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -72,12 +65,13 @@ export default class ChangeAction extends CommandLineAction {
   }
 
   public onExecute(): void {
-    // @todo - there is a problem accessing public readonly properties.. the typings appear to be wrong
+    // @todo 262592 - there is a problem accessing public readonly properties.. the typings appear to be wrong
     // tslint:disable-next-line:no-any
-    this._sortedProjectList = (RushConfig.loadFromDefaultLocation() as any).projects
-      .map(project => project.packageName).sort();
+    this._sortedProjectList = (RushConfig.loadFromDefaultLocation().projects)
+      .map(project => project.packageName)
+      .sort();
     this._prompt = inquirer.createPromptModule();
-    this._data = {
+    this._changeFileData = {
       changes: [],
       email: undefined
     };
@@ -91,9 +85,7 @@ export default class ChangeAction extends CommandLineAction {
    * have any more, at which point we collect their email and write the change file.
    */
   private _promptLoop(): Promise<void> {
-    // @todo
-    // tslint:disable-next-line:no-any
-    const continuePrompt: any = [{
+    const continuePrompt: inquirer.Questions = [{
       name: 'addMore',
       type: 'confirm',
       message: 'Would you like to bump any additional projects?'
@@ -107,7 +99,7 @@ export default class ChangeAction extends CommandLineAction {
           return this._promptLoop();
         } else {
           return this._detectOrAskForEmail().then((email: string) => {
-            this._data.email = email;
+            this._changeFileData.email = email;
             this._writeChangeFile();
           });
         }
@@ -128,7 +120,7 @@ export default class ChangeAction extends CommandLineAction {
         comments: answers.comments
       };
 
-      this._data.changes.push(projectInfo);
+      this._changeFileData.changes.push(projectInfo);
     });
   }
 
@@ -138,8 +130,7 @@ export default class ChangeAction extends CommandLineAction {
   private _askQuestions(): Promise<IChangeInfo> {
     // Questions related to the project. Had to split into two sets of questions in case user selects additional help
 
-    // tslint:disable-next-line:no-any
-    const projectQuestions: any = [
+    const projectQuestions: inquirer.Questions = [
       {
         name: 'projects',
         type: 'checkbox',
@@ -234,7 +225,7 @@ export default class ChangeAction extends CommandLineAction {
    */
   private _writeChangeFile(): Promise<void> {
     return new Promise<void>((resolve: () => void, reject: (error?: Error) => void) => {
-      const output: string = JSON.stringify(this._data, undefined, 2);
+      const output: string = JSON.stringify(this._changeFileData, undefined, 2);
 
       // @todo actually create a guid
       const fileName: string = 'c:\\changes\\foobar.json';

@@ -19,6 +19,11 @@ export {
 } from './data/Package';
 
 export {
+IChangeFile,
+IChangeInfo
+} from './data/ChangeManagement';
+
+export {
   ErrorDetectionMode,
   IErrorDetectionRule,
   RegexErrorDetector,
