@@ -13,6 +13,7 @@ import JsonFile from '../utilities/JsonFile';
  */
 export interface IPackageReviewItemJson {
   name: string;
+  allowedCategories: string[];
 }
 
 /**
@@ -28,6 +29,7 @@ export interface IPackageReviewJson {
 export class PackageReviewItem {
   public packageName: string;
   public allowedInBrowser: boolean;
+  public allowedCategories: Set<string> = new Set<string>();
 }
 
 /**
@@ -58,7 +60,8 @@ export default class PackageReviewConfig {
       noTypeless: true
     });
 
-    const packageReviewSchema: Object = require('../packagereview-schema.json');
+    const packageReviewSchema: Object = JsonFile.loadJsonFile(
+      path.join(__dirname, '../packagereview-schema.json'));
 
     if (!validator.validate(packageReviewJson, packageReviewSchema)) {
       const error: ZSchema.Error = validator.getLastError();
@@ -86,27 +89,28 @@ export default class PackageReviewConfig {
     for (const nonBrowserPackage of packageReviewJson.nonBrowserPackages) {
       this._addItemJson(nonBrowserPackage, jsonFilename, false);
     }
-    this._sortItems();
   }
 
   public getItemByName(packageName: string): PackageReviewItem {
     return this._itemsByName.get(packageName);
   }
 
-  public addOrUpdatePackage(packageName: string, allowedInBrowser: boolean): void {
+  public addOrUpdatePackage(packageName: string, allowedInBrowser: boolean, reviewCategory: string): void {
     let item: PackageReviewItem = this._itemsByName.get(packageName);
     if (!item) {
       item = new PackageReviewItem();
       item.packageName = packageName;
       item.allowedInBrowser = false;
-      this.items.push(item);
-      this._sortItems();
-      this._itemsByName.set(item.packageName, item);
+      this._addItem(item);
     }
 
+    // Broaden (but do not narrow) the approval
     if (allowedInBrowser) {
-      // Broaden, but do not narrow the approval
       item.allowedInBrowser = true;
+    }
+
+    if (reviewCategory) {
+      item.allowedCategories.add(reviewCategory);
     }
   }
 
@@ -117,8 +121,16 @@ export default class PackageReviewConfig {
     this._loadedJson.nonBrowserPackages = [];
 
     for (const item of this.items) {
+      // Sort the items from the set
+      const allowedCategories: string[] = [];
+      item.allowedCategories.forEach((value: string) => {
+        allowedCategories.push(value);
+      });
+      allowedCategories.sort();
+
       const itemJson: IPackageReviewItemJson = {
-        name: item.packageName
+        name: item.packageName,
+        allowedCategories: allowedCategories
       };
       if (item.allowedInBrowser) {
         this._loadedJson.browserPackages.push(itemJson);
@@ -141,10 +153,26 @@ export default class PackageReviewConfig {
       throw new Error(`Error loading package review file ${jsonFilename}:` + os.EOL
         + ` the name "${itemJson.name}" appears more than once`);
     }
-    this.addOrUpdatePackage(itemJson.name, allowedInBrowser);
+
+    let item: PackageReviewItem = new PackageReviewItem();
+    item.packageName = itemJson.name;
+    item.allowedInBrowser = allowedInBrowser;
+    if (itemJson.allowedCategories) {
+      for (const allowedCategory of itemJson.allowedCategories) {
+        item.allowedCategories.add(allowedCategory);
+      }
+    }
+    this._addItem(item);
   }
 
-  private _sortItems(): void {
+  private _addItem(item: PackageReviewItem): void {
+    if (this._itemsByName.has(item.packageName)) {
+      throw new Error('Duplicate key'); // this is a program bug
+    }
+    this.items.push(item);
+    this._itemsByName.set(item.packageName, item);
+
+    // This is O(n*log(n))
     this.items.sort((a: PackageReviewItem, b: PackageReviewItem) => {
       return a.packageName.localeCompare(b.packageName);
     });

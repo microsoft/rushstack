@@ -26,6 +26,7 @@ export interface IRushConfigJson {
   projectFolderMinDepth?: number;
   projectFolderMaxDepth?: number;
   packageReviewFile?: string;
+  reviewCategories?: string[];
   projects: IRushConfigProjectJson[];
 }
 
@@ -54,7 +55,7 @@ export default class RushConfig {
   private _projectFolderMinDepth: number;
   private _projectFolderMaxDepth: number;
   private _packageReviewFile: string;
-
+  private _reviewCategories: string[];
   private _projects: RushConfigProject[];
   private _projectsByName: Map<string, RushConfigProject>;
 
@@ -88,7 +89,7 @@ export default class RushConfig {
       noTypeless: true
     });
 
-    const rushSchema: Object = require('../rush-schema.json');
+    const rushSchema: Object = JsonFile.loadJsonFile(path.join(__dirname, '../rush-schema.json'));
 
     if (!validator.validate(rushConfigJson, rushSchema)) {
       const error: ZSchema.Error = validator.getLastError();
@@ -216,6 +217,8 @@ export default class RushConfig {
         throw new Error('The packageReviewFile file was not found: "' + this._packageReviewFile + '"');
       }
     }
+
+    this._reviewCategories = rushConfigJson.reviewCategories || [];
 
     this._projects = [];
     this._projectsByName = new Map<string, RushConfigProject>();
@@ -346,6 +349,14 @@ export default class RushConfig {
    */
   public get packageReviewFile(): string {
     return this._packageReviewFile;
+  }
+
+  /**
+   * A list of category names that are valid for usage as the RushConfigProject.reviewCategory field.
+   * This array will never be undefined.
+   */
+  public get reviewCategories(): string[] {
+    return this._reviewCategories;
   }
 
   public get projects(): RushConfigProject[] {

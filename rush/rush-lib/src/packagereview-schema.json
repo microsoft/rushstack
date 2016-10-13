@@ -8,6 +8,13 @@
         "name": {
           "description": "The name of the NPM package, e.g. \"@scope/example",
           "type": "string"
+        },
+        "allowedCategories": {
+          "description": "If rush.json is using the \"reviewCategories\" field to classify projects, then the approval is limited to the listed \"allowedCategories\"; otherwise, any project may use the package.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "additionalProperties": false,

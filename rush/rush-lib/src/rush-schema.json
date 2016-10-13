@@ -9,7 +9,7 @@
       "type": "string"
     },
     "commonFolder": {
-      "description": "Specifies the name of a top-level global folder containing a package.json file with a superset of all dependencies for all projects in the repository.  Example: 'common",
+      "description": "Specifies the name of a top-level global folder containing a package.json file with a superset of all dependencies for all projects in the repository.  Example: \"common\"",
       "type": "string"
     },
     "npmVersion": {
@@ -38,6 +38,13 @@
       "description": "The filename of a JSON file that tracks which NPM packages have been approved for usage in this repo.  Example: \"common/reviews/PackageDependenies.json\"",
       "type": "string"
     },
+    "reviewCategories": {
+      "description": "An list of category names that can be applied to each project, for usage in the packageReviewFile",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "projects": {
       "description": "A list of projects managed by this tool.",
       "type": "array",
@@ -52,13 +59,17 @@
             "description": "The path to the project folder relative to the Rush config file.",
             "type": "string"
           },
+          "reviewCategory": {
+            "description": "An optional category for usage in the packageReviewFile.  Only strings from reviewCategories are allowed here.",
+            "type": "string"
+          },
           "cyclicDependencyProjects": {
             "description": "A list of local projects that appear as devDependencies for this project, but cannot be locally linked because it would create a cyclic dependency; instead, the last published version will be installed in the Common folder.",
             "type": "array",
             "items": {
               "type": "string"
             }
-          }
+          },
         },
         "additionalProperties": false,
         "required": [ "packageName", "projectFolder" ]

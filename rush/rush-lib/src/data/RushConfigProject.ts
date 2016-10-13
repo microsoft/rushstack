@@ -13,6 +13,7 @@ import RushConfig from '../data/RushConfig';
 export interface IRushConfigProjectJson {
   packageName: string;
   projectFolder: string;
+  reviewCategory?: string;
   cyclicDependencyProjects: string[];
 }
 
@@ -23,6 +24,7 @@ export interface IRushConfigProjectJson {
 export default class RushConfigProject {
   private _packageName: string;
   private _projectFolder: string;
+  private _reviewCategory: string;
   private _packageJson: PackageJson;
   private _tempProjectName: string;
   private _cyclicDependencyProjects: Set<string>;
@@ -47,6 +49,19 @@ export default class RushConfigProject {
 
     if (!fs.existsSync(this._projectFolder)) {
       throw new Error(`Project folder not found: ${projectJson.projectFolder}`);
+    }
+
+    if (projectJson.reviewCategory) {
+      // Make sure the category is one of the allowed choices
+      if (!rushConfig.reviewCategories) {
+        throw new Error(`The project "${projectJson.packageName}" specifies a reviewCategory.`
+          + `  In order to use categories, the reviewCategories array must be specified.`);
+      }
+      if (rushConfig.reviewCategories.indexOf(projectJson.reviewCategory) < 0) {
+        throw new Error(`The project "${projectJson.packageName}" specifies its reviewCategory=`
+          + `"${projectJson.reviewCategory}" which is not one of the defined reviewCategories.`);
+      }
+      this._reviewCategory = projectJson.reviewCategory;
     }
 
     const packageJsonFilename: string = path.join(this._projectFolder, 'package.json');
@@ -80,6 +95,14 @@ export default class RushConfigProject {
    */
   public get projectFolder(): string {
     return this._projectFolder;
+  }
+
+  /**
+   * The review category name, or undefined if no category was assigned.
+   * This name must be one of the valid choices listed in RushConfig.reviewCategories.
+   */
+  public get reviewCategory(): string {
+    return this._reviewCategory;
   }
 
   /**
