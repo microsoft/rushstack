@@ -78,8 +78,6 @@ export default class ChangeAction extends CommandLineAction {
   }
 
   public onExecute(): void {
-    // Code below adapted from web-build-tools
-
     // @todo - there is a problem accessing public readonly properties.. the typings appear to be wrong
     // tslint:disable-next-line:no-any
     this._projectList = (RushConfig.loadFromDefaultLocation() as any).projects
@@ -94,6 +92,10 @@ export default class ChangeAction extends CommandLineAction {
     this._promptLoop();
   }
 
+  /**
+   * The main loop which continually asks user for questions about changes until they don't
+   * have any more, at which point we collect their email and write the change file.
+   */
   private _promptLoop(): Promise<void> {
     // @todo
     // tslint:disable-next-line:no-any
@@ -142,12 +144,11 @@ export default class ChangeAction extends CommandLineAction {
   private _askQuestions(): Promise<IPromptAnswers> {
     // Questions related to the project. Had to split into two sets of questions in case user selects additional help
 
-    // @todo
     // tslint:disable-next-line:no-any
     const projectQuestions: any = [
       {
         name: 'projects',
-        type: 'checkbox', // @todo I think we should do a checkbox because sometimes you might want the same message
+        type: 'checkbox',
         message: 'Select the project(s) you would like to bump:',
         choices: this._projectList
       },
