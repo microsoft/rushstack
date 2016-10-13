@@ -22,6 +22,12 @@ import {
 
 import RushCommandLineParser from './RushCommandLineParser';
 
+const BUMP_OPTIONS: { [type: string]: string } = {
+  'major': 'major - for breaking changes (ex: renaming a file)',
+  'minor': 'minor - for adding new features (ex: exposing a new public API)',
+  'patch': 'patch - for fixes (ex: updating how an API works w/o touching its signature)',
+  'none': 'none - the change does not require a version bump (e.g. changing tests)'
+};
 
 export default class ChangeAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
@@ -35,16 +41,15 @@ export default class ChangeAction extends CommandLineAction {
   constructor(parser: RushCommandLineParser) {
     super({
       actionVerb: 'change',
-      summary: 'Record a change made to a package which will later require the package version number' +
-        ' to be bumped',
-      documentation: 'Asks a series of questions and then generates a <hash>.json file which is stored in ' +
+      summary: 'Record a change made to a package which indicate how the package version number should be bumped.',
+      documentation: ['Asks a series of questions and then generates a <branchname>-<guid>.json file which is stored in ' +
         ' in the common folder. Later, run the `version-bump` command to actually perform the proper ' +
-        ' version bumps. Note these changes will eventually be published in the packages\' changelog.md.'
-        + os.EOL +
-        ['Here\'s some help in figuring out what kind of change you are making: ',
+        ' version bumps. Note these changes will eventually be published in the packages\' changelog.md files.',
+        '',
+        'Here\'s some help in figuring out what kind of change you are making: ',
         '',
         'MAJOR - these are breaking changes that are not backwards compatible. ' +
-        'Examples are: renaming a file/class, adding/removing a non-optional ' +
+        'Examples are: renaming a class, adding/removing a non-optional ' +
         'parameter from a public API, or renaming an variable or function that ' +
         'is exported.',
         '',
@@ -93,9 +98,9 @@ export default class ChangeAction extends CommandLineAction {
 
     return this._promptForBump()
       .then(() => { return this._prompt(continuePrompt); })
-      .then((answers: { addMore: boolean }) => {
+      .then(({ addMore }: { addMore: boolean }) => {
 
-        if (answers.addMore) {
+        if (addMore) {
           return this._promptLoop();
         } else {
           return this._detectOrAskForEmail().then((email: string) => {
@@ -116,7 +121,7 @@ export default class ChangeAction extends CommandLineAction {
     return this._askQuestions().then((answers: IChangeInfo) => {
       const projectInfo: IChangeInfo = {
         projects: answers.projects,
-        bumpType: (answers.bumpType.substring(0, answers.bumpType.indexOf(' - ')) as 'major' | 'minor' | 'patch'),
+        bumpType: BUMP_OPTIONS[answers.bumpType],
         comments: answers.comments
       };
 
@@ -142,11 +147,7 @@ export default class ChangeAction extends CommandLineAction {
         type: 'list',
         message: 'Select the type of change:',
         default: 'patch',
-        choices: [
-          'major - for breaking changes (ex: renaming a file)',
-          'minor - for adding new features (ex: exposing a new public API)',
-          'patch - for fixes (ex: updating how an API works w/o touching its signature)'
-        ]
+        choices: Object.keys(BUMP_OPTIONS).map(option => BUMP_OPTIONS[option])
       },
       {
         name: 'comments',
@@ -187,9 +188,9 @@ export default class ChangeAction extends CommandLineAction {
           name: 'email',
           message: `Is your email address ${email} ?`
         }
-      ]).then((answers) => {
+      ]).then(({ email } : { email: string }) => {
 
-        if (answers.email) {
+        if (email) {
           return email;
         } else {
           return undefined;

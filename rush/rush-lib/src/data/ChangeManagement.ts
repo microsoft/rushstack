@@ -11,6 +11,6 @@ export interface IChangeFile {
  */
 export interface IChangeInfo {
   projects: string[];
-  bumpType: 'major' | 'minor' | 'patch';
+  bumpType: 'major' | 'minor' | 'patch' | 'none';
   comments: string;
 }
