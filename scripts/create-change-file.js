@@ -15,7 +15,7 @@ let getPackages = () => {
     glob('**!(node_modules)/package.json', /*options*/ {}, (error, files) => {
         packages = files.forEach((file) => {
             packages.push(path.basename(path.dirname(file)));   // push the package name of the parent directory
-        });;
+        });
         promptUser();
     });
 }
@@ -34,7 +34,7 @@ let projectQuestions = [
         message: 'Select the type of change:',
         default: 'patch',
         choices: [
-            'major - for breaking changes (ex: renaming a file)',
+            'major - for breaking changes (ex: adding a required parameter to a pulic API)',
             'minor - for adding new features (ex: exposing a new public API)',
             'patch - for fixes (ex: updating how an API works w/o touching its signature)',
             'help'
