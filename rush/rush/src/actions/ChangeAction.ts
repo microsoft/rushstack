@@ -15,7 +15,6 @@ import inquirer = require('inquirer'); /* @todo Is this the right library? */
 import { CommandLineAction } from '@microsoft/ts-command-line';
 import {
   RushConfig,
-  RushConfigProject,
   IChangeFile,
   IChangeInfo
 } from '@microsoft/rush-lib';
@@ -42,8 +41,8 @@ export default class ChangeAction extends CommandLineAction {
     super({
       actionVerb: 'change',
       summary: 'Record a change made to a package which indicate how the package version number should be bumped.',
-      documentation: ['Asks a series of questions and then generates a <branchname>-<guid>.json file which is stored in ' +
-        ' in the common folder. Later, run the `version-bump` command to actually perform the proper ' +
+      documentation: ['Asks a series of questions and then generates a <branchname>-<guid>.json file which is ' +
+        ' stored in the common folder. Later, run the `version-bump` command to actually perform the proper ' +
         ' version bumps. Note these changes will eventually be published in the packages\' changelog.md files.',
         '',
         'Here\'s some help in figuring out what kind of change you are making: ',
@@ -121,7 +120,7 @@ export default class ChangeAction extends CommandLineAction {
     return this._askQuestions().then((answers: IChangeInfo) => {
       const projectInfo: IChangeInfo = {
         projects: answers.projects,
-        bumpType: BUMP_OPTIONS[answers.bumpType],
+        bumpType: BUMP_OPTIONS[answers.bumpType] as 'major' | 'minor' | 'patch' | 'none',
         comments: answers.comments
       };
 
@@ -188,15 +187,7 @@ export default class ChangeAction extends CommandLineAction {
           name: 'email',
           message: `Is your email address ${email} ?`
         }
-      ]).then(({ email } : { email: string }) => {
-
-        if (email) {
-          return email;
-        } else {
-          return undefined;
-        }
-
-      });
+      ]).then((questions: { email: string }) => questions.email);
     } else {
       Promise.resolve(undefined);
     }
