@@ -1,6 +1,6 @@
-﻿import stripJsonComments = require('strip-json-comments');
-import * as fs from 'fs';
+﻿import * as fs from 'fs';
 import * as os from 'os';
+import * as jju from 'jju';
 import Utilities from './Utilities';
 
 /**
@@ -15,16 +15,15 @@ export default class JsonFile {
     }
 
     const buffer: Buffer = fs.readFileSync(jsonFilename);
-    const stripped: string = stripJsonComments(buffer.toString());
     try {
-      return JSON.parse(stripped);
+      return jju.parse(buffer.toString());
     } catch (error) {
       throw new Error(`Error reading "${jsonFilename}":` + os.EOL + `  ${error.message}`);
     }
   }
 
   public static saveJsonFile(jsonData: any, jsonFilename: string): void {
-    const stringified: string = JSON.stringify(jsonData, undefined, 2) + '\n';
+    let stringified: string = JSON.stringify(jsonData, undefined, 2) + '\n';
     const normalized: string = Utilities.getAllReplaced(stringified, '\n', '\r\n');
     fs.writeFileSync(jsonFilename, normalized);
   }

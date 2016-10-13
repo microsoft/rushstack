@@ -11,6 +11,11 @@ export {
 } from './data/RushConfigProject';
 
 export {
+  PackageReviewItem,
+  default as PackageReviewConfig
+} from './data/PackageReviewConfig';
+
+export {
   PackageDependencyKind,
   IPackageDependency,
   IPackageJson,

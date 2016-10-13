@@ -13,6 +13,7 @@ import RushConfig from '../data/RushConfig';
 export interface IRushConfigProjectJson {
   packageName: string;
   projectFolder: string;
+  reviewCategory?: string;
   cyclicDependencyProjects: string[];
 }
 
@@ -23,6 +24,7 @@ export interface IRushConfigProjectJson {
 export default class RushConfigProject {
   private _packageName: string;
   private _projectFolder: string;
+  private _reviewCategory: string;
   private _packageJson: PackageJson;
   private _tempProjectName: string;
   private _cyclicDependencyProjects: Set<string>;
@@ -47,6 +49,25 @@ export default class RushConfigProject {
 
     if (!fs.existsSync(this._projectFolder)) {
       throw new Error(`Project folder not found: ${projectJson.projectFolder}`);
+    }
+
+    // Are we using a package review file?
+    if (rushConfig.packageReviewFile) {
+      // If so, then every project needs to have a reviewCategory that was defined
+      // by the reviewCategories array.
+      if (!rushConfig.reviewCategories.size) {
+        throw new Error(`The rush.json file specifies a packageReviewFile, but the reviewCategories`
+          + ` list is not configured.`);
+      }
+      if (!projectJson.reviewCategory) {
+        throw new Error(`The rush.json file configures a packageReviewFile, but a reviewCategory` +
+          ` was not specified for the project "${projectJson.packageName}".`);
+      }
+      if (!rushConfig.reviewCategories.has(projectJson.reviewCategory)) {
+        throw new Error(`The project "${projectJson.packageName}" specifies its reviewCategory as`
+          + `"${projectJson.reviewCategory}" which is not one of the defined reviewCategories.`);
+      }
+      this._reviewCategory = projectJson.reviewCategory;
     }
 
     const packageJsonFilename: string = path.join(this._projectFolder, 'package.json');
@@ -80,6 +101,14 @@ export default class RushConfigProject {
    */
   public get projectFolder(): string {
     return this._projectFolder;
+  }
+
+  /**
+   * The review category name, or undefined if no category was assigned.
+   * This name must be one of the valid choices listed in RushConfig.reviewCategories.
+   */
+  public get reviewCategory(): string {
+    return this._reviewCategory;
   }
 
   /**
