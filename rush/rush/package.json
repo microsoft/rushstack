@@ -18,6 +18,7 @@
     "builtins": "~1.0.3",
     "colors": "~1.1.2",
     "git-user-email": "~0.2.1",
+    "git-repo-info": "~1.1.4",
     "glob": "~7.0.5",
     "glob-escape": "~0.0.1",
     "inquirer": "~1.2.1",
