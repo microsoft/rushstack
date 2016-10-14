@@ -223,13 +223,13 @@ export default class ChangeAction extends CommandLineAction {
   }
 
   /**
-   * Writes all queued changes to a file in the common folder that has a GUID filename
+   * Writes changefile to the common/changes folder. Will prompt for overwrite if file already exists.
    */
   private _writeChangeFile(): Promise<void> {
     const output: string = JSON.stringify(this._changeFileData, undefined, 2);
 
     const branch: string = gitInfo().branch;
-    const branchfile: string = path.join(this._rushConfig.commonFolder, branch + '.json');
+    const branchfile: string = path.join(this._rushConfig.commonFolder, 'changes', branch + '.json');
 
     if (fs.existsSync(branchfile)) {
       // prompt about overwrite
@@ -252,6 +252,9 @@ export default class ChangeAction extends CommandLineAction {
     }
   }
 
+  /**
+   * Writes a file to disk, ensuring the directory structure up to that point exists
+   */
   private _writeFile(fileName: string, output: string): Promise<void> {
     return new Promise<void>((resolve: () => void, reject: (err: Error) => void) => {
       // We need mkdirp because writeFile will error if the dir doesn't exist
