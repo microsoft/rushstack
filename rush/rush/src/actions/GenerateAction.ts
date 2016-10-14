@@ -51,12 +51,15 @@ export default class GenerateAction extends CommandLineAction {
 
   protected onExecute(): void {
     this._rushConfig = this._rushConfig = RushConfig.loadFromDefaultLocation();
-    this._packageReviewChecker = new PackageReviewChecker(this._rushConfig);
+    
 
     const startTime: number = Utilities.getTimeInMs();
     console.log('Starting "rush generate"' + os.EOL);
 
-    this._packageReviewChecker.saveCurrentDependencies();
+    if (this._rushConfig.packageReviewFile) {
+        this._packageReviewChecker = new PackageReviewChecker(this._rushConfig);
+        this._packageReviewChecker.saveCurrentDependencies();
+    }
 
     // 1. Delete "common\node_modules"
     const nodeModulesPath: string = path.join(this._rushConfig.commonFolder, 'node_modules');
