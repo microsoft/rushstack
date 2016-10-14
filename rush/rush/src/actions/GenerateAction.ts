@@ -51,7 +51,6 @@ export default class GenerateAction extends CommandLineAction {
 
   protected onExecute(): void {
     this._rushConfig = this._rushConfig = RushConfig.loadFromDefaultLocation();
-    
 
     const startTime: number = Utilities.getTimeInMs();
     console.log('Starting "rush generate"' + os.EOL);
