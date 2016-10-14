@@ -7,6 +7,8 @@ import * as os from 'os';
 import * as path from 'path';
 import * as mkdirp from 'mkdirp';
 
+import gitInfo = require('git-repo-info');
+
 const gitEmail: () => string = require('git-user-email');
 
 // tslint:disable-next-line:typedef
@@ -30,6 +32,7 @@ const BUMP_OPTIONS: { [type: string]: string } = {
 
 export default class ChangeAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
+  private _rushConfig: RushConfig;
   private _sortedProjectList: string[];
   private _changeFileData: IChangeFile;
 
@@ -69,11 +72,11 @@ export default class ChangeAction extends CommandLineAction {
   }
 
   public onExecute(): void {
-    // @todo 262592 - there is a problem accessing public readonly properties.. the typings appear to be wrong
-    // tslint:disable-next-line:no-any
-    this._sortedProjectList = (RushConfig.loadFromDefaultLocation().projects)
+    this._rushConfig = RushConfig.loadFromDefaultLocation();
+    this._sortedProjectList = this._rushConfig.projects
       .map(project => project.packageName)
       .sort();
+
     this._prompt = inquirer.createPromptModule();
     this._changeFileData = {
       changes: [],
@@ -89,16 +92,12 @@ export default class ChangeAction extends CommandLineAction {
    * have any more, at which point we collect their email and write the change file.
    */
   private _promptLoop(): Promise<void> {
-    const continuePrompt: inquirer.Questions = [{
-      name: 'addMore',
-      type: 'confirm',
-      message: 'Would you like to bump any additional projects?'
-    }];
 
     return this._promptForBump()
-      .then(() => { return this._prompt(continuePrompt); })
-      .then(({ addMore }: { addMore: boolean }) => {
+      .then(this._shouldAddMoreProjects)
+      .then((addMore: boolean) => {
 
+        // Continue to loop
         if (addMore) {
           return this._promptLoop();
         } else {
@@ -107,10 +106,23 @@ export default class ChangeAction extends CommandLineAction {
             this._writeChangeFile();
           });
         }
+
       })
       .catch((error: Error) => {
         console.error('There was an issue creating the changefile:' + os.EOL + error.toString());
       });
+  }
+
+  private _shouldAddMoreProjects(): Promise<boolean> {
+    return new Promise<boolean>((resolve: (addMore: boolean) => void, revert: () => void) => {
+      const continuePrompt: inquirer.Questions = [{
+        name: 'addMore',
+        type: 'confirm',
+        message: 'Would you like to bump any additional projects?'
+      }];
+
+      this._prompt(continuePrompt).then(({ addMore }: { addMore: boolean }) => addMore);
+    });
   }
 
   /**
@@ -132,8 +144,6 @@ export default class ChangeAction extends CommandLineAction {
    * Asks all questions which are needed to generate changelist for a project.
    */
   private _askQuestions(): Promise<IChangeInfo> {
-    // Questions related to the project. Had to split into two sets of questions in case user selects additional help
-
     const projectQuestions: inquirer.Questions = [
       {
         name: 'projects',
@@ -151,7 +161,7 @@ export default class ChangeAction extends CommandLineAction {
       {
         name: 'comments',
         type: 'input',
-        message: 'Please add any comments to help explain this change:'
+        message: 'Useful comment which explains this change:'
       }
     ];
 
@@ -216,13 +226,34 @@ export default class ChangeAction extends CommandLineAction {
    * Writes all queued changes to a file in the common folder that has a GUID filename
    */
   private _writeChangeFile(): Promise<void> {
-    return new Promise<void>((resolve: () => void, reject: (error?: Error) => void) => {
-      const output: string = JSON.stringify(this._changeFileData, undefined, 2);
+    const output: string = JSON.stringify(this._changeFileData, undefined, 2);
 
-      // @todo actually create a guid
-      const fileName: string = 'c:\\changes\\foobar.json';
-      console.log('Create new changes file: ' + fileName);
+    const branch: string = gitInfo().branch;
+    const branchfile: string = path.join(this._rushConfig.commonFolder, branch + '.json');
 
+    if (fs.existsSync(branchfile)) {
+      // prompt about overwrite
+      this._prompt([
+        {
+          name: 'overwrite',
+          type: 'confirm',
+          message: `Overwrite ${branchfile} ?`
+        }
+      ]).then(({ overwrite }: { overwrite: string }) => {
+        if (overwrite) {
+          return this._writeFile(branchfile, output);
+        } else {
+          console.log(`Not overwriting ${branchfile}...`);
+          return Promise.resolve(undefined);
+        }
+      });
+    } else {
+      return this._writeFile(branchfile, output);
+    }
+  }
+
+  private _writeFile(fileName: string, output: string): Promise<void> {
+    return new Promise<void>((resolve: () => void, reject: (err: Error) => void) => {
       // We need mkdirp because writeFile will error if the dir doesn't exist
       // tslint:disable-next-line:no-any
       mkdirp(path.dirname(fileName), (err: any) => {
@@ -233,6 +264,7 @@ export default class ChangeAction extends CommandLineAction {
           if (error) {
             reject(error);
           } else {
+            console.log('Created file: ' + fileName);
             resolve();
           }
         });
