@@ -187,7 +187,7 @@ export default class ChangeAction extends CommandLineAction {
           name: 'email',
           message: `Is your email address ${email} ?`
         }
-      ]).then((questions: { email: string }) => questions.email);
+      ]).then(({ isCorrectEmail }: { isCorrectEmail: string }) => isCorrectEmail ? email : undefined);
     } else {
       Promise.resolve(undefined);
     }
