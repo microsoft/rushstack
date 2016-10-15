@@ -18,6 +18,10 @@
 
 # Unreleased changes
 
+# 1.0.5
+- `PATCH` Fixed a bug in Rush Generate which showed: `ERROR: Input file not found: undefined`
+  when packageReviewFile is omitted
+
 # 1.0.4
 
 - `MINOR` Added optional support for a "packageReviewFile" that helps detect when new
