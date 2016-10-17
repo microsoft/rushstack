@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush-lib",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Library support for the Rush tool",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -12,9 +12,9 @@
   "license": "SEE LICENSE IN LICENSE.docx",
   "dependencies": {
     "@microsoft/stream-collator": "~1.0.1",
+    "jju": "~1.3.0",
     "rimraf": "~2.5.2",
     "semver": "~5.2.0",
-    "strip-json-comments": "~2.0.1",
     "z-schema": "~3.17.0"
   },
   "devDependencies": {

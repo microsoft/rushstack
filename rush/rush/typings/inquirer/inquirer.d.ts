@@ -31,7 +31,7 @@ declare module "inquirer" {
              * @param cb Callback being passed the user answers
              * @return
              */
-            prompt(questions: Questions, cb?: (answers: Answers) => any): ui.Prompt;
+            prompt(questions: Questions): Promise<any>;
             prompts: Prompts;
             Separator: objects.SeparatorStatic;
             ui: {
@@ -41,7 +41,7 @@ declare module "inquirer" {
         }
 
         interface PromptModule {
-            (questions: Questions, cb: (answers: Answers) => any): ui.Prompt;
+            (questions: Questions): Promise<any>;
             /**
              * Register a prompt type
              * @param name Prompt type name

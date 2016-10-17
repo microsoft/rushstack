@@ -20,10 +20,12 @@ import {
 
 import InstallAction from './InstallAction';
 import RushCommandLineParser from './RushCommandLineParser';
+import PackageReviewChecker from './PackageReviewChecker';
 
 export default class GenerateAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
   private _rushConfig: RushConfig;
+  private _packageReviewChecker: PackageReviewChecker;
   private _lazyParameter: CommandLineFlagParameter;
 
   constructor(parser: RushCommandLineParser) {
@@ -49,9 +51,12 @@ export default class GenerateAction extends CommandLineAction {
 
   protected onExecute(): void {
     this._rushConfig = this._rushConfig = RushConfig.loadFromDefaultLocation();
+    this._packageReviewChecker = new PackageReviewChecker(this._rushConfig);
 
     const startTime: number = Utilities.getTimeInMs();
     console.log('Starting "rush generate"' + os.EOL);
+
+    this._packageReviewChecker.saveCurrentDependencies();
 
     // 1. Delete "common\node_modules"
     const nodeModulesPath: string = path.join(this._rushConfig.commonFolder, 'node_modules');

@@ -3,6 +3,7 @@
 /// <reference path="colors/colors.d.ts" />
 /// <reference path="es6-collections/es6-collections.d.ts" />
 /// <reference path="es6-promise/es6-promise.d.ts" />
+/// <reference path="git-repo-info/git-repo-info.d.ts" />
 /// <reference path="glob/glob.d.ts" />
 /// <reference path="glob-escape/glob-escape.d.ts" />
 /// <reference path="minimatch/minimatch.d.ts" />

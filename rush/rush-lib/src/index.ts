@@ -11,12 +11,22 @@ export {
 } from './data/RushConfigProject';
 
 export {
+  PackageReviewItem,
+  default as PackageReviewConfig
+} from './data/PackageReviewConfig';
+
+export {
   PackageDependencyKind,
   IPackageDependency,
   IPackageJson,
   IResolveOrCreateResult,
   default as Package
 } from './data/Package';
+
+export {
+  IChangeFile,
+  IChangeInfo
+} from './data/ChangeManagement';
 
 export {
   ErrorDetectionMode,

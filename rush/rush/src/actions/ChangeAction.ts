@@ -2,55 +2,54 @@
  * @Copyright (c) Microsoft Corporation.  All rights reserved.
  */
 
-/// <reference path='../../typings/tsd.d.ts' />
-
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import * as mkdirp from 'mkdirp';
 import * as child_process from 'child_process';
+import gitInfo = require('git-repo-info');
 
-// tslint:disable-next-line:no-any
-const inquirer: any = require('inquirer'); /* @todo Is this the right library? */
+// tslint:disable-next-line:typedef
+import inquirer = require('inquirer'); /* @todo Is this the right library? */
 
 import { CommandLineAction } from '@microsoft/ts-command-line';
-import { RushConfig } from '@microsoft/rush-lib';
+import {
+  RushConfig,
+  IChangeFile,
+  IChangeInfo
+} from '@microsoft/rush-lib';
 
 import RushCommandLineParser from './RushCommandLineParser';
 
-interface IChangeFile {
-  changes: IChangeInfo[];
-  email: string;
-}
-
-interface IChangeInfo {
-  projects: string[];
-  bumpType: 'major' | 'minor' | 'patch';
-  comments: string;
-}
+const BUMP_OPTIONS: { [type: string]: string } = {
+  'major': 'major - for breaking changes (ex: renaming a file)',
+  'minor': 'minor - for adding new features (ex: exposing a new public API)',
+  'patch': 'patch - for fixes (ex: updating how an API works w/o touching its signature)',
+  'none': 'none - the change does not require a version bump (e.g. changing tests)'
+};
 
 export default class ChangeAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
+  private _rushConfig: RushConfig;
   private _sortedProjectList: string[];
-  private _data: IChangeFile;
+  private _changeFileData: IChangeFile;
 
   // @todo use correct typings
   // tslint:disable-next-line:no-any
-  private _prompt: any; // inquirer.PromptModule;
+  private _prompt: inquirer.PromptModule;
 
   constructor(parser: RushCommandLineParser) {
     super({
       actionVerb: 'change',
-      summary: 'Record a change made to a package which will later require the package version number' +
-        ' to be bumped',
-      documentation: 'Asks a series of questions and then generates a <hash>.json file which is stored in ' +
-        ' in the common folder. Later, run the `version-bump` command to actually perform the proper ' +
-        ' version bumps. Note these changes will eventually be published in the packages\' changelog.md.'
-        + os.EOL +
-        ['Here\'s some help in figuring out what kind of change you are making: ',
+      summary: 'Record a change made to a package which indicate how the package version number should be bumped.',
+      documentation: ['Asks a series of questions and then generates a <branchname>.json file which is ' +
+        ' stored in the common folder. Later, run the `version-bump` command to actually perform the proper ' +
+        ' version bumps. Note these changes will eventually be published in the packages\' changelog.md files.',
+        '',
+        'Here\'s some help in figuring out what kind of change you are making: ',
         '',
         'MAJOR - these are breaking changes that are not backwards compatible. ' +
-        'Examples are: renaming a file/class, adding/removing a non-optional ' +
+        'Examples are: renaming a class, adding/removing a non-optional ' +
         'parameter from a public API, or renaming an variable or function that ' +
         'is exported.',
         '',
@@ -71,12 +70,13 @@ export default class ChangeAction extends CommandLineAction {
   }
 
   public onExecute(): void {
-    // @todo - there is a problem accessing public readonly properties.. the typings appear to be wrong
-    // tslint:disable-next-line:no-any
-    this._sortedProjectList = (RushConfig.loadFromDefaultLocation() as any).projects
-      .map(project => project.packageName).sort();
+    this._rushConfig = RushConfig.loadFromDefaultLocation();
+    this._sortedProjectList = this._rushConfig.projects
+      .map(project => project.packageName)
+      .sort();
+
     this._prompt = inquirer.createPromptModule();
-    this._data = {
+    this._changeFileData = {
       changes: [],
       email: undefined
     };
@@ -90,30 +90,37 @@ export default class ChangeAction extends CommandLineAction {
    * have any more, at which point we collect their email and write the change file.
    */
   private _promptLoop(): Promise<void> {
-    // @todo
-    // tslint:disable-next-line:no-any
-    const continuePrompt: any = [{
-      name: 'addMore',
-      type: 'confirm',
-      message: 'Would you like to bump any additional projects?'
-    }];
 
     return this._promptForBump()
-      .then(() => { return this._prompt(continuePrompt); })
-      .then((answers: { addMore: boolean }) => {
+      .then(this._shouldAddMoreProjects)
+      .then((addMore: boolean) => {
 
-        if (answers.addMore) {
+        // Continue to loop
+        if (addMore) {
           return this._promptLoop();
         } else {
           return this._detectOrAskForEmail().then((email: string) => {
-            this._data.email = email;
+            this._changeFileData.email = email;
             this._writeChangeFile();
           });
         }
+
       })
       .catch((error: Error) => {
         console.error('There was an issue creating the changefile:' + os.EOL + error.toString());
       });
+  }
+
+  private _shouldAddMoreProjects(): Promise<boolean> {
+    return new Promise<boolean>((resolve: (addMore: boolean) => void, revert: () => void) => {
+      const continuePrompt: inquirer.Questions = [{
+        name: 'addMore',
+        type: 'confirm',
+        message: 'Would you like to bump any additional projects?'
+      }];
+
+      this._prompt(continuePrompt).then(({ addMore }: { addMore: boolean }) => addMore);
+    });
   }
 
   /**
@@ -123,11 +130,11 @@ export default class ChangeAction extends CommandLineAction {
     return this._askQuestions().then((answers: IChangeInfo) => {
       const projectInfo: IChangeInfo = {
         projects: answers.projects,
-        bumpType: (answers.bumpType.substring(0, answers.bumpType.indexOf(' - ')) as 'major' | 'minor' | 'patch'),
+        bumpType: BUMP_OPTIONS[answers.bumpType] as 'major' | 'minor' | 'patch' | 'none',
         comments: answers.comments
       };
 
-      this._data.changes.push(projectInfo);
+      this._changeFileData.changes.push(projectInfo);
     });
   }
 
@@ -135,10 +142,7 @@ export default class ChangeAction extends CommandLineAction {
    * Asks all questions which are needed to generate changelist for a project.
    */
   private _askQuestions(): Promise<IChangeInfo> {
-    // Questions related to the project. Had to split into two sets of questions in case user selects additional help
-
-    // tslint:disable-next-line:no-any
-    const projectQuestions: any = [
+    const projectQuestions: inquirer.Questions = [
       {
         name: 'projects',
         type: 'checkbox',
@@ -150,16 +154,12 @@ export default class ChangeAction extends CommandLineAction {
         type: 'list',
         message: 'Select the type of change:',
         default: 'patch',
-        choices: [
-          'major - for breaking changes (ex: renaming a file)',
-          'minor - for adding new features (ex: exposing a new public API)',
-          'patch - for fixes (ex: updating how an API works w/o touching its signature)'
-        ]
+        choices: Object.keys(BUMP_OPTIONS).map(option => BUMP_OPTIONS[option])
       },
       {
         name: 'comments',
         type: 'input',
-        message: 'Please add any comments to help explain this change:'
+        message: 'Useful comment which explains this change:'
       }
     ];
 
@@ -204,15 +204,7 @@ export default class ChangeAction extends CommandLineAction {
           name: 'email',
           message: `Is your email address ${email} ?`
         }
-      ]).then((answers) => {
-
-        if (answers.email) {
-          return email;
-        } else {
-          return undefined;
-        }
-
-      });
+      ]).then(({ isCorrectEmail }: { isCorrectEmail: string }) => isCorrectEmail ? email : undefined);
     } else {
       Promise.resolve(undefined);
     }
@@ -238,16 +230,40 @@ export default class ChangeAction extends CommandLineAction {
   }
 
   /**
-   * Writes all queued changes to a file in the common folder that has a GUID filename
+   * Writes changefile to the common/changes folder. Will prompt for overwrite if file already exists.
    */
   private _writeChangeFile(): Promise<void> {
-    return new Promise<void>((resolve: () => void, reject: (error?: Error) => void) => {
-      const output: string = JSON.stringify(this._data, undefined, 2);
+    const output: string = JSON.stringify(this._changeFileData, undefined, 2);
 
-      // @todo actually create a guid
-      const fileName: string = 'c:\\changes\\foobar.json';
-      console.log('Create new changes file: ' + fileName);
+    const branch: string = gitInfo().branch;
+    const branchfile: string = path.join(this._rushConfig.commonFolder, 'changes', branch + '.json');
 
+    if (fs.existsSync(branchfile)) {
+      // prompt about overwrite
+      this._prompt([
+        {
+          name: 'overwrite',
+          type: 'confirm',
+          message: `Overwrite ${branchfile} ?`
+        }
+      ]).then(({ overwrite }: { overwrite: string }) => {
+        if (overwrite) {
+          return this._writeFile(branchfile, output);
+        } else {
+          console.log(`Not overwriting ${branchfile}...`);
+          return Promise.resolve(undefined);
+        }
+      });
+    } else {
+      return this._writeFile(branchfile, output);
+    }
+  }
+
+  /**
+   * Writes a file to disk, ensuring the directory structure up to that point exists
+   */
+  private _writeFile(fileName: string, output: string): Promise<void> {
+    return new Promise<void>((resolve: () => void, reject: (err: Error) => void) => {
       // We need mkdirp because writeFile will error if the dir doesn't exist
       // tslint:disable-next-line:no-any
       mkdirp(path.dirname(fileName), (err: any) => {
@@ -258,6 +274,7 @@ export default class ChangeAction extends CommandLineAction {
           if (error) {
             reject(error);
           } else {
+            console.log('Created file: ' + fileName);
             resolve();
           }
         });
