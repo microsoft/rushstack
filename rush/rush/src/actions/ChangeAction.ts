@@ -8,8 +8,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import * as mkdirp from 'mkdirp';
-
-const gitEmail: () => string = require('git-user-email');
+import * as child_process from 'child_process';
 
 // tslint:disable-next-line:no-any
 const inquirer: any = require('inquirer'); /* @todo Is this the right library? */
@@ -188,7 +187,16 @@ export default class ChangeAction extends CommandLineAction {
    * detected email. It returns undefined if it cannot be detected.
    */
   private _detectAndConfirmEmail(): Promise<string> {
-    let email: string = gitEmail();
+    let email: string;
+    try {
+      email = child_process.execSync('git config user.email')
+        .toString()
+        .replace(/(\r\n|\n|\r)/gm, '');
+    } catch (err) {
+      console.log('There was an issue detecting your git email...');
+      email = undefined;
+    }
+
     if (email) {
       return this._prompt([
         {

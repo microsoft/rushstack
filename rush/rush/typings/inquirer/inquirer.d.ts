@@ -3,7 +3,6 @@
 // Definitions by: Qubo <https://github.com/tkQubo>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
-/// <reference path="../rx/rx-lite.d.ts" />
 /// <reference path="../through/through.d.ts" />
 
 declare module "inquirer" {
@@ -12,7 +11,7 @@ declare module "inquirer" {
     namespace inquirer {
         type Prompts = { [name: string]: PromptModule };
         type ChoiceType = string|objects.ChoiceOption|objects.Separator;
-        type Questions = Question|Question[]|Rx.Observable<Question>;
+        type Questions = Question|Question[];
 
         interface Inquirer {
             restoreDefaultPrompts(): void;
