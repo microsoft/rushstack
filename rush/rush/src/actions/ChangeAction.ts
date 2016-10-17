@@ -111,16 +111,14 @@ export default class ChangeAction extends CommandLineAction {
       });
   }
 
-  private _shouldAddMoreProjects(): Promise<boolean> {
-    return new Promise<boolean>((resolve: (addMore: boolean) => void, revert: () => void) => {
-      const continuePrompt: inquirer.Questions = [{
-        name: 'addMore',
-        type: 'confirm',
-        message: 'Would you like to bump any additional projects?'
-      }];
+  private _shouldAddMoreProjects: () => Promise<boolean> = () => {
+    const continuePrompt: inquirer.Questions = [{
+      name: 'addMore',
+      type: 'confirm',
+      message: 'Would you like to bump any additional projects?'
+    }];
 
-      this._prompt(continuePrompt).then(({ addMore }: { addMore: boolean }) => addMore);
-    });
+    return this._prompt(continuePrompt).then(({ addMore }: { addMore: boolean }) => addMore);
   }
 
   /**
@@ -192,6 +190,7 @@ export default class ChangeAction extends CommandLineAction {
       email = child_process.execSync('git config user.email')
         .toString()
         .replace(/(\r\n|\n|\r)/gm, '');
+      console.log(email);
     } catch (err) {
       console.log('There was an issue detecting your git email...');
       email = undefined;
@@ -201,12 +200,14 @@ export default class ChangeAction extends CommandLineAction {
       return this._prompt([
         {
           type: 'confirm',
-          name: 'email',
+          name: 'isCorrectEmail',
           message: `Is your email address ${email} ?`
         }
-      ]).then(({ isCorrectEmail }: { isCorrectEmail: string }) => isCorrectEmail ? email : undefined);
+      ]).then(({ isCorrectEmail }: { isCorrectEmail: boolean }) => {
+        return isCorrectEmail ? email : undefined;
+      });
     } else {
-      Promise.resolve(undefined);
+      return Promise.resolve(undefined);
     }
   }
 
