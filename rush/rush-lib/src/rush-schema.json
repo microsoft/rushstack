@@ -70,6 +70,10 @@
               "type": "string"
             }
           },
+          "shouldTrackChanges": {
+            "description": "A flag indicating that changes to this project should be tracked by the Rush changelog workflow",
+            "type": "boolean"
+          }
         },
         "additionalProperties": false,
         "required": [ "packageName", "projectFolder" ]
