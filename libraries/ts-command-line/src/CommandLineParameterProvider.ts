@@ -6,7 +6,8 @@ import * as argparse from 'argparse';
 import {
   IBaseCommandLineDefinition,
   ICommandLineFlagDefinition,
-  ICommandLineStringDefinition
+  ICommandLineStringDefinition,
+  ICommandLineIntegerDefinition
 } from './CommandLineDefinition';
 
 import {
@@ -14,7 +15,8 @@ import {
   ICommandLineParserData,
   IConverterFunction,
   CommandLineFlagParameter,
-  CommandLineStringParameter
+  CommandLineStringParameter,
+  CommandLineIntegerParameter
 } from './CommandLineParameter';
 
 /**
@@ -52,6 +54,13 @@ abstract class CommandLineParameterProvider {
    */
   protected defineStringParameter(options: ICommandLineStringDefinition): CommandLineStringParameter {
     return this._createParameter(options) as CommandLineStringParameter;
+  }
+
+  /**
+   * Defines an integer parameter
+   */
+  protected defineIntegerParameter(options: ICommandLineIntegerDefinition): CommandLineIntegerParameter {
+    return this._createParameter(options) as CommandLineIntegerParameter;
   }
 
   protected processParsedData(data: ICommandLineParserData): void {

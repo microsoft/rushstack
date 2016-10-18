@@ -38,3 +38,5 @@ export class CommandLineStringParameter extends CommandLineParameter<string> { }
 export class CommandLineListParameter extends CommandLineParameter<string[]> { }
 
 export class CommandLineFlagParameter extends CommandLineParameter<boolean> { }
+
+export class CommandLineIntegerParameter extends CommandLineParameter<number> { }

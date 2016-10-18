@@ -31,3 +31,8 @@ export interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition {
  * For use with CommandLineParser, this interface represents a string command line parameter
  */
 export interface ICommandLineStringDefinition extends IBaseCommandLineDefinition { }
+
+/**
+ * For use with CommandLineParser, this interface represents an integer command line parameter
+ */
+export interface ICommandLineIntegerDefinition extends IBaseCommandLineDefinition { }
