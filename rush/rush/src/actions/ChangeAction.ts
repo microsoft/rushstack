@@ -186,6 +186,7 @@ export default class ChangeAction extends CommandLineAction {
         {
           type: 'confirm',
           name: 'isCorrectEmail',
+          default: 'Y',
           message: `Is your email address ${email} ?`
         }
       ]).then(({ isCorrectEmail }: { isCorrectEmail: boolean }) => {
