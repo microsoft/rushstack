@@ -10,7 +10,7 @@ export interface IChangeFile {
  * Represents a single change to a number of projects
  */
 export interface IChangeInfo {
-  projects: string[];
+  project: string;
   bumpType: 'major' | 'minor' | 'patch' | 'none';
   comments: string;
 }

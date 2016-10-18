@@ -23,8 +23,7 @@ import RushCommandLineParser from './RushCommandLineParser';
 const BUMP_OPTIONS: { [type: string]: string } = {
   'major': 'major - for breaking changes (ex: renaming a file)',
   'minor': 'minor - for adding new features (ex: exposing a new public API)',
-  'patch': 'patch - for fixes (ex: updating how an API works w/o touching its signature)',
-  'none': 'none - the change does not require a version bump (e.g. changing tests)'
+  'patch': 'patch - for fixes (ex: updating how an API works w/o touching its signature)'
 };
 
 export default class ChangeAction extends CommandLineAction {
@@ -80,7 +79,10 @@ export default class ChangeAction extends CommandLineAction {
     };
 
     // We should consider making onExecute either be an async/await or have it return a promise
-    this._promptLoop();
+    this._promptLoop()
+      .catch((error: Error) => {
+        console.error('There was an issue creating the changefile:' + os.EOL + error.toString());
+      });
   }
 
   /**
@@ -89,77 +91,61 @@ export default class ChangeAction extends CommandLineAction {
    */
   private _promptLoop(): Promise<void> {
 
-    return this._promptForBump()
-      .then(this._shouldAddMoreProjects)
-      .then((addMore: boolean) => {
+    // If there are still projects, ask about the next one
+    if (this._sortedProjectList.length) {
+      return this._askQuestions(this._sortedProjectList.pop())
+        .then((answers: IChangeInfo) => {
 
-        // Continue to loop
-        if (addMore) {
+          // Save the info into the changefile
+          this._changeFileData.changes.push(answers);
+
+          // Continue to loop
           return this._promptLoop();
-        } else {
-          return this._detectOrAskForEmail().then((email: string) => {
-            this._changeFileData.email = email;
-            this._writeChangeFile();
-          });
-        }
 
-      })
-      .catch((error: Error) => {
-        console.error('There was an issue creating the changefile:' + os.EOL + error.toString());
+        });
+    } else {
+      // We are done, collect their e-mail
+      return this._detectOrAskForEmail().then((email: string) => {
+        this._changeFileData.email = email;
+        return this._writeChangeFile();
       });
-  }
-
-  private _shouldAddMoreProjects: () => Promise<boolean> = () => {
-    const continuePrompt: inquirer.Questions = [{
-      name: 'addMore',
-      type: 'confirm',
-      message: 'Would you like to bump any additional projects?'
-    }];
-
-    return this._prompt(continuePrompt).then(({ addMore }: { addMore: boolean }) => addMore);
-  }
-
-  /**
-   * Ask the set of questions necessary for determining which changes were made
-   */
-  private _promptForBump(): Promise<void> {
-    return this._askQuestions().then((answers: IChangeInfo) => {
-      const projectInfo: IChangeInfo = {
-        projects: answers.projects,
-        bumpType: BUMP_OPTIONS[answers.bumpType] as 'major' | 'minor' | 'patch' | 'none',
-        comments: answers.comments
-      };
-
-      this._changeFileData.changes.push(projectInfo);
-    });
+    }
   }
 
   /**
    * Asks all questions which are needed to generate changelist for a project.
    */
-  private _askQuestions(): Promise<IChangeInfo> {
-    const projectQuestions: inquirer.Questions = [
-      {
-        name: 'projects',
-        type: 'checkbox',
-        message: 'Select the project(s) you would like to bump:',
-        choices: this._sortedProjectList
-      },
-      {
-        name: 'bumpType',
-        type: 'list',
-        message: 'Select the type of change:',
-        default: 'patch',
-        choices: Object.keys(BUMP_OPTIONS).map(option => BUMP_OPTIONS[option])
-      },
-      {
+  private _askQuestions(projectName: string): Promise<IChangeInfo> {
+    console.log(`${os.EOL}${projectName}`);
+
+    return this._prompt({
         name: 'comments',
         type: 'input',
-        message: 'Useful comment which explains this change:'
-      }
-    ];
-
-    return this._prompt(projectQuestions);
+        message: `Describe changes, or ENTER if no changes:`
+      })
+      .then(({ comments }: { comments: string }) => {
+        if (comments) {
+          return this._prompt({
+            name: 'bumpType',
+            type: 'list',
+            message: 'Select the type of change:',
+            default: BUMP_OPTIONS['patch'], // tslint:disable-line:no-string-literal
+            choices: Object.keys(BUMP_OPTIONS).map(option => BUMP_OPTIONS[option])
+          }).then(({ bumpType }: { bumpType: string }) => {
+            return {
+              project: projectName,
+              comments: comments,
+              bumpType: BUMP_OPTIONS[bumpType] as 'major' | 'minor' | 'patch' | 'none'
+            } as IChangeInfo;
+          });
+        } else {
+          return {
+            project: projectName,
+            comments: '',
+            bumpType: 'none'
+          } as IChangeInfo;
+        }
+      });
   }
 
   /**
@@ -188,7 +174,6 @@ export default class ChangeAction extends CommandLineAction {
       email = child_process.execSync('git config user.email')
         .toString()
         .replace(/(\r\n|\n|\r)/gm, '');
-      console.log(email);
     } catch (err) {
       console.log('There was an issue detecting your git email...');
       email = undefined;
@@ -199,6 +184,7 @@ export default class ChangeAction extends CommandLineAction {
         {
           type: 'confirm',
           name: 'isCorrectEmail',
+          default: 'Y',
           message: `Is your email address ${email} ?`
         }
       ]).then(({ isCorrectEmail }: { isCorrectEmail: boolean }) => {
