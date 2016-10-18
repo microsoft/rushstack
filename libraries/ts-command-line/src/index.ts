@@ -7,7 +7,8 @@ export {
 export {
   IBaseCommandLineDefinition,
   ICommandLineFlagDefinition,
-  ICommandLineStringDefinition
+  ICommandLineStringDefinition,
+  ICommandLineIntegerDefinition
 } from './CommandLineDefinition';
 
 export {
@@ -15,7 +16,8 @@ export {
   CommandLineParameter,
   CommandLineStringParameter,
   CommandLineListParameter,
-  CommandLineFlagParameter
+  CommandLineFlagParameter,
+  CommandLineIntegerParameter
 } from './CommandLineParameter';
 
 export {
