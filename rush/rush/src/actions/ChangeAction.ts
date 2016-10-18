@@ -42,7 +42,7 @@ export default class ChangeAction extends CommandLineAction {
     super({
       actionVerb: 'change',
       summary: 'Record a change made to a package which indicate how the package version number should be bumped.',
-      documentation: ['Asks a series of questions and then generates a <filenamename>.json file which is ' +
+      documentation: ['Asks a series of questions and then generates a <branchname>-<timstamp>.json file which is ' +
         ' stored in the common folder. Later, run the `version-bump` command to actually perform the proper ' +
         ' version bumps. Note these changes will eventually be published in the packages\' changelog.md files.',
         '',
