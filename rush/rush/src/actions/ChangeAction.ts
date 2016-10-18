@@ -9,8 +9,7 @@ import * as mkdirp from 'mkdirp';
 import * as child_process from 'child_process';
 import gitInfo = require('git-repo-info');
 
-// tslint:disable-next-line:typedef
-import inquirer = require('inquirer'); /* @todo Is this the right library? */
+import inquirer = require('inquirer');
 
 import { CommandLineAction } from '@microsoft/ts-command-line';
 import {
@@ -34,8 +33,6 @@ export default class ChangeAction extends CommandLineAction {
   private _sortedProjectList: string[];
   private _changeFileData: IChangeFile;
 
-  // @todo use correct typings
-  // tslint:disable-next-line:no-any
   private _prompt: inquirer.PromptModule;
 
   constructor(parser: RushCommandLineParser) {
