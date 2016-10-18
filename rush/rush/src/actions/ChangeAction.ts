@@ -69,6 +69,7 @@ export default class ChangeAction extends CommandLineAction {
   public onExecute(): void {
     this._rushConfig = RushConfig.loadFromDefaultLocation();
     this._sortedProjectList = this._rushConfig.projects
+      .filter(project => project.shouldTrackChanges)
       .map(project => project.packageName)
       .sort();
 
