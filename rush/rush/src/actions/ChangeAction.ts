@@ -42,7 +42,7 @@ export default class ChangeAction extends CommandLineAction {
     super({
       actionVerb: 'change',
       summary: 'Record a change made to a package which indicate how the package version number should be bumped.',
-      documentation: ['Asks a series of questions and then generates a <branchname>.json file which is ' +
+      documentation: ['Asks a series of questions and then generates a <filenamename>.json file which is ' +
         ' stored in the common folder. Later, run the `version-bump` command to actually perform the proper ' +
         ' version bumps. Note these changes will eventually be published in the packages\' changelog.md files.',
         '',
@@ -236,27 +236,27 @@ export default class ChangeAction extends CommandLineAction {
   private _writeChangeFile(): Promise<void> {
     const output: string = JSON.stringify(this._changeFileData, undefined, 2);
 
-    const branch: string = gitInfo().branch;
-    const branchfile: string = path.join(this._rushConfig.commonFolder, 'changes', branch + '.json');
+    const filename: string = `${gitInfo().branch}-${this._getTimestamp()}.json`;
+    const filepath: string = path.join(this._rushConfig.commonFolder, 'changes', filename);
 
-    if (fs.existsSync(branchfile)) {
+    if (fs.existsSync(filepath)) {
       // prompt about overwrite
       this._prompt([
         {
           name: 'overwrite',
           type: 'confirm',
-          message: `Overwrite ${branchfile} ?`
+          message: `Overwrite ${filepath} ?`
         }
       ]).then(({ overwrite }: { overwrite: string }) => {
         if (overwrite) {
-          return this._writeFile(branchfile, output);
+          return this._writeFile(filepath, output);
         } else {
-          console.log(`Not overwriting ${branchfile}...`);
+          console.log(`Not overwriting ${filepath}...`);
           return Promise.resolve(undefined);
         }
       });
     } else {
-      return this._writeFile(branchfile, output);
+      return this._writeFile(filepath, output);
     }
   }
 
@@ -281,5 +281,22 @@ export default class ChangeAction extends CommandLineAction {
         });
       });
     });
+  }
+
+  /** Gets the current time, formatted as YYYY-MM-DD-HH-MM */
+  private _getTimestamp(): string {
+    // Create a date object with the current time
+    const now: Date = new Date();
+
+    const date: [number | string] = [
+      now.getFullYear(),
+      now.getMonth() + 1,
+      now.getDate(),
+      now.getHours(),
+      (now.getMinutes() < 10 ? '0' : '') + now.getMinutes()
+    ];
+
+    // Return the formatted string
+    return date.join('-');
   }
 }
