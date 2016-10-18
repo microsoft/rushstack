@@ -30,12 +30,17 @@ export default class TaskRunner {
   private _readyTaskQueue: ITask[];
   private _quietMode: boolean;
   private _hasAnyFailures: boolean;
+  private _parallelism: number;
+  private _currentActiveTasks: number;
 
-  constructor(quietMode: boolean = false) {
+  constructor(quietMode: boolean = false, parallelism?: number) {
     this._tasks = new Map<string, ITask>();
     this._readyTaskQueue = [];
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
+
+    this._parallelism = parallelism || os.cpus().length;
+    console.log('parallelism: ' + this._parallelism);
   }
 
   /**
@@ -83,6 +88,8 @@ export default class TaskRunner {
    * tasks are completed successfully, or rejects when any task fails.
    */
   public execute(): Promise<void> {
+    this._currentActiveTasks = 0;
+
     this._tasks.forEach((task: ITask) => {
       if (task.dependencies.length === 0 && task.status === TaskStatus.Ready) {
         this._readyTaskQueue.push(task);
@@ -110,7 +117,7 @@ export default class TaskRunner {
 
     // @todo #168344: add ability to limit execution to n number of simultaneous tasks
     // @todo #168346: we should sort the ready task queue in such a way that we build projects with deps first
-    while (this._readyTaskQueue.length) {
+    while (this._readyTaskQueue.length && this._currentActiveTasks <= this._parallelism) {
       const task: ITask = this._readyTaskQueue.shift();
       if (task.status === TaskStatus.Ready) {
         task.status = TaskStatus.Executing;
@@ -118,13 +125,20 @@ export default class TaskRunner {
 
         const taskWriter: ITaskWriter = Interleaver.registerTask(task.name, this._quietMode);
 
+        console.log('active++: ' + this._currentActiveTasks++);
         task.execute(taskWriter)
           .then(() => {
+            console.log('active--: ' + this._currentActiveTasks--);
             taskWriter.close();
+
             this._markTaskAsSuccess(task);
             this._startAvailableTasks(complete, reject);
+
           }).catch((errors: TaskError[]) => {
+            console.log('active--: ' + this._currentActiveTasks--);
+
             taskWriter.close();
+
             this._hasAnyFailures = true;
             task.errors = errors;
             this._markTaskAsFailed(task);

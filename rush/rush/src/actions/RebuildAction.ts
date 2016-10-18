@@ -5,7 +5,11 @@
 import * as colors from 'colors';
 import * as fs from 'fs';
 import * as os from 'os';
-import { CommandLineAction, CommandLineFlagParameter } from '@microsoft/ts-command-line';
+import {
+  CommandLineAction,
+  CommandLineFlagParameter,
+  CommandLineIntegerParameter
+} from '@microsoft/ts-command-line';
 import {
   TestErrorDetector,
   TsErrorDetector,
@@ -29,6 +33,7 @@ export default class RebuildAction extends CommandLineAction {
   private _productionParameter: CommandLineFlagParameter;
   private _vsoParameter: CommandLineFlagParameter;
   private _npmParamter: CommandLineFlagParameter;
+  private _parallelismParameter: CommandLineIntegerParameter;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -60,6 +65,11 @@ export default class RebuildAction extends CommandLineAction {
       parameterLongName: '--npm',
       description: 'Perform a npm-mode build. Designed for building code for distribution on NPM'
     });
+    this._parallelismParameter = this.defineIntegerParameter({
+      parameterLongName: '--parallelism',
+      parameterShortName: '-p',
+      description: 'Limit the number of active builds to N number of simultaneous processes'
+    });
   }
 
   protected onExecute(): void {
@@ -67,7 +77,7 @@ export default class RebuildAction extends CommandLineAction {
 
     console.log('Starting "rush rebuild"' + os.EOL);
 
-    const taskRunner: TaskRunner = new TaskRunner(this._quietParameter.value);
+    const taskRunner: TaskRunner = new TaskRunner(this._quietParameter.value, this._parallelismParameter.value);
 
     // Create tasks and register with tax runner
     for (const rushProject of this._rushConfig.projects) {
