@@ -120,7 +120,7 @@ export default class RebuildAction extends CommandLineAction {
         const endTime: number = Utilities.getTimeInMs();
         const totalSeconds: string = ((endTime - startTime) / 1000.0).toFixed(2);
 
-        console.log(colors.green(`rush rebuild - completed in ${totalSeconds} seconds!`));
+        console.log(colors.green(`rush rebuild - completed in ${totalSeconds} seconds`));
       },
       () => {
         console.log(colors.red(`rush rebuild - Errors!`));
