@@ -222,7 +222,7 @@ export default class ChangeAction extends CommandLineAction {
 
     let branch: string = undefined;
     try {
-      branch = gitInfo().branch
+      branch = gitInfo().branch;
     } catch (error) {
       console.log('Could not automatically detect git branch name, using timestamps instead.');
     }
@@ -296,7 +296,7 @@ export default class ChangeAction extends CommandLineAction {
     if (useSeconds) {
       date.push(
         this._padTime(now.getSeconds(), 2)
-      )
+      );
     }
 
     // Return the formatted string
@@ -317,7 +317,6 @@ export default class ChangeAction extends CommandLineAction {
     }
     return pads.join('') + nstring;
   }
-
 
   private _escapeFilename(filename: string, replacer: string = '-'): string {
     // Removes / ? < > \ : * | "
