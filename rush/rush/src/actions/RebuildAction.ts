@@ -114,12 +114,12 @@ export default class RebuildAction extends CommandLineAction {
       taskRunner.addDependencies(projectName, projectDependencies);
     }
 
-    const endTime: number = Utilities.getTimeInMs();
-    const totalSeconds: string = ((endTime - startTime) / 1000.0).toFixed(2);
-
     taskRunner.execute()
       .then(
       () => {
+        const endTime: number = Utilities.getTimeInMs();
+        const totalSeconds: string = ((endTime - startTime) / 1000.0).toFixed(2);
+
         console.log(colors.green(`rush rebuild - completed in ${totalSeconds} seconds!`));
       },
       () => {

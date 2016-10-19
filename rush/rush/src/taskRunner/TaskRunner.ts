@@ -39,8 +39,7 @@ export default class TaskRunner {
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
 
-    this._parallelism = parallelism || os.cpus().length;
-    console.log('parallelism: ' + this._parallelism);
+    this._parallelism = parallelism || os.cpus().length || 8;
   }
 
   /**
@@ -88,6 +87,7 @@ export default class TaskRunner {
    */
   public execute(): Promise<void> {
     this._currentActiveTasks = 0;
+    console.log(`Executing a maximum of ${this._parallelism} simultaneous processes...`);
 
     this._tasks.forEach((task: ITask) => {
       if (task.dependencies.length === 0 && task.status === TaskStatus.Ready) {
@@ -119,22 +119,18 @@ export default class TaskRunner {
       const task: ITask = this._readyTaskQueue.shift();
       if (task.status === TaskStatus.Ready) {
         task.status = TaskStatus.Executing;
-        console.log(colors.yellow(`> TaskRunner :: Starting task [${task.name}]`));
+        console.log(colors.yellow(`> Starting task [${task.name}]`));
 
         const taskWriter: ITaskWriter = Interleaver.registerTask(task.name, this._quietMode);
 
-        console.log('active++: ' + this._currentActiveTasks++);
         task.execute(taskWriter)
           .then(() => {
-            console.log('active--: ' + this._currentActiveTasks--);
             taskWriter.close();
 
             this._markTaskAsSuccess(task);
             this._startAvailableTasks(complete, reject);
 
           }).catch((errors: TaskError[]) => {
-            console.log('active--: ' + this._currentActiveTasks--);
-
             taskWriter.close();
 
             this._hasAnyFailures = true;
@@ -150,7 +146,7 @@ export default class TaskRunner {
    * Marks a task as having failed and marks each of its dependents as blocked
    */
   private _markTaskAsFailed(task: ITask): void {
-    console.log(colors.red(`${os.EOL}> TaskRunner :: Completed task [${task.name}] with errors!`));
+    console.log(colors.red(`${os.EOL}> Completed task [${task.name}] with errors!`));
     task.status = TaskStatus.Failure;
     task.dependents.forEach((dependent: ITask) => {
       this._markTaskAsBlocked(dependent, task);
@@ -162,7 +158,7 @@ export default class TaskRunner {
    */
   private _markTaskAsBlocked(task: ITask, failedTask: ITask): void {
     if (task.status === TaskStatus.Ready) {
-      console.log(colors.red(`> TaskRunner :: [${task.name}] blocked by [${failedTask.name}]!`));
+      console.log(colors.red(`> [${task.name}] blocked by [${failedTask.name}]!`));
       task.status = TaskStatus.Blocked;
       task.dependents.forEach((dependent: ITask) => {
         this._markTaskAsBlocked(dependent, failedTask);
@@ -174,7 +170,7 @@ export default class TaskRunner {
    * Marks a task as being completed, and removes it from the dependencies list of all its dependents
    */
   private _markTaskAsSuccess(task: ITask): void {
-    console.log(colors.green(`> TaskRunner :: Completed task [${task.name}]`));
+    console.log(colors.green(`> Completed task [${task.name}]`));
     task.status = TaskStatus.Success;
     task.dependents.forEach((dependent: ITask) => {
       const i: number = dependent.dependencies.indexOf(task);
