@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/ts-command-line",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "An object-oriented command-line parser for TypeScript",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
