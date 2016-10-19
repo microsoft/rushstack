@@ -17,7 +17,7 @@
 > - `PATCH` Correctly handling negative numbers in the `setZIndex` function.
 
 # Unreleased changes
-- `PATCH` Limit Rush Rebuild parallelism to 8 simultaneous builds, optionally overridable on command line
+- `PATCH` Limit Rush Rebuild parallelism to 'number-of-cores' simultaneous builds, optionally overridable on command line
 
 # 1.0.5
 - `PATCH` Fixed a bug in Rush Generate which showed: `ERROR: Input file not found: undefined`
