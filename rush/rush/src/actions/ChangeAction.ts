@@ -67,8 +67,20 @@ export default class ChangeAction extends CommandLineAction {
 
   public onExecute(): void {
     this._rushConfig = RushConfig.loadFromDefaultLocation();
+
+    // Are we using the shouldTrackChanges feature? If so, scope to only those projects.
+    // Otherwise show all projects
+    let anyTrackChanges: boolean = false;
+    for (const project of this._rushConfig.projects) {
+      if (project.shouldTrackChanges) {
+        console.log(JSON.stringify(project, undefined, 2));
+        anyTrackChanges = true;
+        break;
+      }
+    }
+
     this._sortedProjectList = this._rushConfig.projects
-      .filter(project => project.shouldTrackChanges)
+      .filter(project => (project.shouldTrackChanges || !anyTrackChanges))
       .map(project => project.packageName)
       .sort();
 
