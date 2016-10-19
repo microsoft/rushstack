@@ -68,21 +68,21 @@ export default class ChangeAction extends CommandLineAction {
   public onExecute(): void {
     this._rushConfig = RushConfig.loadFromDefaultLocation();
 
-    // Are we using the shouldTrackChanges feature? If so, scope to only those projects.
-    // Otherwise show all projects
-    let anyTrackChanges: boolean = false;
-    for (const project of this._rushConfig.projects) {
-      if (project.shouldTrackChanges) {
-        console.log(JSON.stringify(project, undefined, 2));
-        anyTrackChanges = true;
-        break;
-      }
-    }
-
+    let anyProjectTracksChanges: boolean = false;
     this._sortedProjectList = this._rushConfig.projects
-      .filter(project => (project.shouldTrackChanges || !anyTrackChanges))
+      .filter(project => {
+        if (project.shouldTrackChanges) {
+          anyProjectTracksChanges = true;
+        }
+        return project.shouldTrackChanges;
+      })
       .map(project => project.packageName)
       .sort();
+
+    if (!anyProjectTracksChanges) {
+      console.error('There are no projects marked with the \'shouldTrackChanges\' flag in Rush.json.');
+      return;
+    }
 
     this._prompt = inquirer.createPromptModule();
     this._changeFileData = {
@@ -240,7 +240,7 @@ export default class ChangeAction extends CommandLineAction {
     }
 
     const filename: string = (branch ?
-      this._escapeFilename(branch + '_' + this._getTimestamp()) + `.json` :
+      this._escapeFilename(`${branch}_${this._getTimestamp()}.json`) :
       `${this._getTimestamp()}.json`);
 
     const filepath: string = path.join(this._rushConfig.commonFolder, 'changes', filename);
@@ -294,40 +294,32 @@ export default class ChangeAction extends CommandLineAction {
   * Optionally will include seconds
   */
   private _getTimestamp(useSeconds: boolean = false): string {
-    // Create a date object with the current time
-    const now: Date = new Date();
+    // Create a date string with the current time
 
-    const date: [number | string] = [
-      this._padTime(now.getFullYear(), 4),
-      this._padTime(now.getMonth() + 1, 2),
-      this._padTime(now.getDate(), 2),
-      this._padTime(now.getHours(), 2),
-      this._padTime(now.getMinutes(), 2)
-    ];
+    // dateString === "2016-10-19T22:47:49.606Z"
+    const dateString: string = new Date().toJSON();
 
+    // Parse out 2 capture groups, the date and the time
+    const dateParseRegex: RegExp = /([0-9]{4}-[0-9]{2}-[0-9]{2}).*([0-9]{2}:[0-9]{2}:[0-9]{2})/;
+
+    // matches[1] === "2016-10-19"
+    // matches[2] === "22:47:49"
+    const matches: RegExpMatchArray = dateString.match(dateParseRegex);
+
+    // formattedDate === "2016-10-19"
+    const formattedDate: string = matches[1];
+
+    let formattedTime: string;
     if (useSeconds) {
-      date.push(
-        this._padTime(now.getSeconds(), 2)
-      );
+      // formattedTime === "22-47-49"
+      formattedTime = matches[2].replace(':', '-');
+    } else {
+      // formattedTime === "22-47"
+      const timeparts: string[] = matches[2].split(':');
+      formattedTime = `${timeparts[0]}-${timeparts[1]}`;
     }
 
-    // Return the formatted string
-    return date.join('-');
-  }
-
-  /**
-   * Converts a number to a string, padding it to a minimum number of digits using a pad.
-   * Note this function cannot handle negative numbers
-   */
-  private _padTime(n: number, digits: number, pad: string = '0'): string {
-    let nstring: string = n.toString();
-
-    const toPad: number = Math.max(digits - nstring.length, 0);
-    const pads: string[] = [];
-    for (let i: number = 0; i < toPad; i++) {
-      pads.push(pad);
-    }
-    return pads.join('') + nstring;
+    return `${formattedDate}-${formattedTime}`;
   }
 
   private _escapeFilename(filename: string, replacer: string = '-'): string {
