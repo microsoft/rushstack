@@ -60,7 +60,9 @@ abstract class CommandLineParameterProvider {
    * Defines an integer parameter
    */
   protected defineIntegerParameter(options: ICommandLineIntegerDefinition): CommandLineIntegerParameter {
-    return this._createParameter(options) as CommandLineIntegerParameter;
+    return this._createParameter(options, {
+      type: 'int'
+    }) as CommandLineIntegerParameter;
   }
 
   protected processParsedData(data: ICommandLineParserData): void {
