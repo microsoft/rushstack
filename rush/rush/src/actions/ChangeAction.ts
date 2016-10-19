@@ -323,8 +323,8 @@ export default class ChangeAction extends CommandLineAction {
   }
 
   private _escapeFilename(filename: string, replacer: string = '-'): string {
-    // Removes / ? < > \ : * | "
-    const illegalRe: RegExp = /[\/\?<>\\:\*\|":]/g;
-    return filename.replace(illegalRe, replacer);
+    // Removes / ? < > \ : * | ", really anything that isn't a letter, number, '.' '_' or '-'
+    const badCharacters: RegExp = /[^a-zA-Z0-9._-]/g;
+    return filename.replace(badCharacters, replacer);
   }
 }
