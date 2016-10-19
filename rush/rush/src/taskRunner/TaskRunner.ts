@@ -51,7 +51,6 @@ export default class TaskRunner {
       throw new Error('A task with that name has already been registered.');
     }
 
-    // @todo #168287: do a copy here
     const task: ITask = taskDefinition as ITask;
     task.dependencies = [];
     task.dependents = [];
@@ -115,9 +114,8 @@ export default class TaskRunner {
       }
     }
 
-    // @todo #168344: add ability to limit execution to n number of simultaneous tasks
     // @todo #168346: we should sort the ready task queue in such a way that we build projects with deps first
-    while (this._readyTaskQueue.length && this._currentActiveTasks <= this._parallelism) {
+    while (this._readyTaskQueue.length && this._currentActiveTasks < this._parallelism) {
       const task: ITask = this._readyTaskQueue.shift();
       if (task.status === TaskStatus.Ready) {
         task.status = TaskStatus.Executing;
