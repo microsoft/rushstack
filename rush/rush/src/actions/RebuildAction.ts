@@ -19,7 +19,8 @@ import {
   IErrorDetectionRule,
   JsonFile,
   RushConfig,
-  IRushLinkJson
+  IRushLinkJson,
+  Utilities
 } from '@microsoft/rush-lib';
 
 import RushCommandLineParser from './RushCommandLineParser';
@@ -76,6 +77,7 @@ export default class RebuildAction extends CommandLineAction {
     this._rushConfig = this._rushConfig = RushConfig.loadFromDefaultLocation();
 
     console.log('Starting "rush rebuild"' + os.EOL);
+    const startTime: number = Utilities.getTimeInMs();
 
     const taskRunner: TaskRunner = new TaskRunner(this._quietParameter.value, this._parallelismParameter.value);
 
@@ -112,12 +114,16 @@ export default class RebuildAction extends CommandLineAction {
       taskRunner.addDependencies(projectName, projectDependencies);
     }
 
-    taskRunner.execute().then(
+    const endTime: number = Utilities.getTimeInMs();
+    const totalSeconds: string = ((endTime - startTime) / 1000.0).toFixed(2);
+
+    taskRunner.execute()
+      .then(
       () => {
-        console.log(colors.green('rush rebuild - Done!'));
+        console.log(colors.green(`rush rebuild - completed in ${totalSeconds} seconds!`));
       },
       () => {
-        console.log(colors.red('rush rebuild - Errors!'));
+        console.log(colors.red(`rush rebuild - Errors!`));
         process.exit(1);
       });
   }
