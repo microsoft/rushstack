@@ -44,6 +44,8 @@ export default class RebuildAction extends CommandLineAction {
       + ' project will contain scripts for "npm run clean" and "npm run test".  It invokes'
       + ' these commands to build each project.  Projects are built in parallel where'
       + ' possible, but always respecting the dependency graph for locally linked projects.'
+      + ' The number of simultaneous processes will be equal to the number of machine cores.'
+      + ' unless overriden by the --parallelism flag.'
     });
     this._parser = parser;
   }
@@ -69,7 +71,8 @@ export default class RebuildAction extends CommandLineAction {
     this._parallelismParameter = this.defineIntegerParameter({
       parameterLongName: '--parallelism',
       parameterShortName: '-p',
-      description: 'Limit the number of active builds to N simultaneous processes'
+      description: 'Change the limit the number of active builds from number of machine cores'
+        + ' to N simultaneous processes'
     });
   }
 
