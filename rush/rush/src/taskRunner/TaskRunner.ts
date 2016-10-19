@@ -39,7 +39,7 @@ export default class TaskRunner {
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
 
-    this._parallelism = parallelism || os.cpus().length || 8;
+    this._parallelism = parallelism || os.cpus().length;
   }
 
   /**
