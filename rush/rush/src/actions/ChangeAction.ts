@@ -220,7 +220,17 @@ export default class ChangeAction extends CommandLineAction {
   private _writeChangeFile(): Promise<void> {
     const output: string = JSON.stringify(this._changeFileData, undefined, 2);
 
-    const filename: string = `${gitInfo().branch}-${this._getTimestamp()}.json`;
+    let branch: string = undefined;
+    try {
+      branch = gitInfo().branch
+    } catch (error) {
+      console.log('Could not automatically detect git branch name, using timestamps instead.');
+    }
+
+    const filename: string = (branch ?
+      this._escapeFilename(branch + '_' + this._getTimestamp()) + `.json` :
+      `${this._getTimestamp()}.json`);
+
     const filepath: string = path.join(this._rushConfig.commonFolder, 'changes', filename);
 
     if (fs.existsSync(filepath)) {
@@ -267,20 +277,51 @@ export default class ChangeAction extends CommandLineAction {
     });
   }
 
-  /** Gets the current time, formatted as YYYY-MM-DD-HH-MM */
-  private _getTimestamp(): string {
+  /**
+  * Gets the current time, formatted as YYYY-MM-DD-HH-MM
+  * Optionally will include seconds
+  */
+  private _getTimestamp(useSeconds: boolean = false): string {
     // Create a date object with the current time
     const now: Date = new Date();
 
     const date: [number | string] = [
-      now.getFullYear(),
-      now.getMonth() + 1,
-      now.getDate(),
-      now.getHours(),
-      (now.getMinutes() < 10 ? '0' : '') + now.getMinutes()
+      this._padTime(now.getFullYear(), 4),
+      this._padTime(now.getMonth() + 1, 2),
+      this._padTime(now.getDate(), 2),
+      this._padTime(now.getHours(), 2),
+      this._padTime(now.getMinutes(), 2)
     ];
+
+    if (useSeconds) {
+      date.push(
+        this._padTime(now.getSeconds(), 2)
+      )
+    }
 
     // Return the formatted string
     return date.join('-');
+  }
+
+  /**
+   * Converts a number to a string, padding it to a minimum number of digits using a pad.
+   * Note this function cannot handle negative numbers
+   */
+  private _padTime(n: number, digits: number, pad: string = '0'): string {
+    let nstring: string = n.toString();
+
+    const toPad: number = Math.max(digits - nstring.length, 0);
+    const pads: string[] = [];
+    for (let i: number = 0; i < toPad; i++) {
+      pads.push(pad);
+    }
+    return pads.join('') + nstring;
+  }
+
+
+  private _escapeFilename(filename: string, replacer: string = '-'): string {
+    // Removes / ? < > \ : * | "
+    const illegalRe: RegExp = /[\/\?<>\\:\*\|":]/g;
+    return filename.replace(illegalRe, replacer);
   }
 }
