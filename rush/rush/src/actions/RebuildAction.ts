@@ -69,7 +69,7 @@ export default class RebuildAction extends CommandLineAction {
     this._parallelismParameter = this.defineIntegerParameter({
       parameterLongName: '--parallelism',
       parameterShortName: '-p',
-      description: 'Limit the number of active builds to N number of simultaneous processes'
+      description: 'Limit the number of active builds to N simultaneous processes'
     });
   }
 
