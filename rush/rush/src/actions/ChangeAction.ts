@@ -14,8 +14,10 @@ import inquirer = require('inquirer');
 import { CommandLineAction } from '@microsoft/ts-command-line';
 import {
   RushConfig,
+  RushConfigProject,
   IChangeFile,
-  IChangeInfo
+  IChangeInfo,
+  VersionControl
 } from '@microsoft/rush-lib';
 
 import RushCommandLineParser from './RushCommandLineParser';
@@ -67,8 +69,10 @@ export default class ChangeAction extends CommandLineAction {
 
   public onExecute(): void {
     this._rushConfig = RushConfig.loadFromDefaultLocation();
+    const changedFolders: string[] = VersionControl.getChangedFolders();
     this._sortedProjectList = this._rushConfig.projects
       .filter(project => project.shouldTrackChanges)
+      .filter(project => this._hasProjectChanged(changedFolders, project))
       .map(project => project.packageName)
       .sort();
 
@@ -83,6 +87,16 @@ export default class ChangeAction extends CommandLineAction {
       .catch((error: Error) => {
         console.error('There was an issue creating the changefile:' + os.EOL + error.toString());
       });
+  }
+
+  private _hasProjectChanged(changedFolders: string[],
+    project: RushConfigProject): boolean {
+    const pathRegex: RegExp = new RegExp(`^${project.projectRelativeFolder}`, 'i');
+    for (const folder of changedFolders) {
+      if (folder && folder.match(pathRegex)) {
+        return true;
+      }
+    }
   }
 
   /**

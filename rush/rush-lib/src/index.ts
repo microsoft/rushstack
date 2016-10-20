@@ -45,6 +45,10 @@ export {
 } from './utilities/JsonFile';
 
 export {
+  default as VersionControl
+} from './utilities/VersionControl';
+
+export {
   default as Utilities
 } from './utilities/Utilities';
 
