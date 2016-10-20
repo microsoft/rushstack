@@ -5,7 +5,11 @@
 import * as colors from 'colors';
 import * as fs from 'fs';
 import * as os from 'os';
-import { CommandLineAction, CommandLineFlagParameter } from '@microsoft/ts-command-line';
+import {
+  CommandLineAction,
+  CommandLineFlagParameter,
+  CommandLineIntegerParameter
+} from '@microsoft/ts-command-line';
 import {
   TestErrorDetector,
   TsErrorDetector,
@@ -15,7 +19,8 @@ import {
   IErrorDetectionRule,
   JsonFile,
   RushConfig,
-  IRushLinkJson
+  IRushLinkJson,
+  Utilities
 } from '@microsoft/rush-lib';
 
 import RushCommandLineParser from './RushCommandLineParser';
@@ -29,6 +34,7 @@ export default class RebuildAction extends CommandLineAction {
   private _productionParameter: CommandLineFlagParameter;
   private _vsoParameter: CommandLineFlagParameter;
   private _npmParamter: CommandLineFlagParameter;
+  private _parallelismParameter: CommandLineIntegerParameter;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -38,6 +44,8 @@ export default class RebuildAction extends CommandLineAction {
       + ' project will contain scripts for "npm run clean" and "npm run test".  It invokes'
       + ' these commands to build each project.  Projects are built in parallel where'
       + ' possible, but always respecting the dependency graph for locally linked projects.'
+      + ' The number of simultaneous processes will be equal to the number of machine cores.'
+      + ' unless overriden by the --parallelism flag.'
     });
     this._parser = parser;
   }
@@ -60,14 +68,21 @@ export default class RebuildAction extends CommandLineAction {
       parameterLongName: '--npm',
       description: 'Perform a npm-mode build. Designed for building code for distribution on NPM'
     });
+    this._parallelismParameter = this.defineIntegerParameter({
+      parameterLongName: '--parallelism',
+      parameterShortName: '-p',
+      description: 'Change the limit the number of active builds from number of machine cores'
+        + ' to N simultaneous processes'
+    });
   }
 
   protected onExecute(): void {
     this._rushConfig = this._rushConfig = RushConfig.loadFromDefaultLocation();
 
     console.log('Starting "rush rebuild"' + os.EOL);
+    const startTime: number = Utilities.getTimeInMs();
 
-    const taskRunner: TaskRunner = new TaskRunner(this._quietParameter.value);
+    const taskRunner: TaskRunner = new TaskRunner(this._quietParameter.value, this._parallelismParameter.value);
 
     // Create tasks and register with tax runner
     for (const rushProject of this._rushConfig.projects) {
@@ -102,12 +117,16 @@ export default class RebuildAction extends CommandLineAction {
       taskRunner.addDependencies(projectName, projectDependencies);
     }
 
-    taskRunner.execute().then(
+    taskRunner.execute()
+      .then(
       () => {
-        console.log(colors.green('rush rebuild - Done!'));
+        const endTime: number = Utilities.getTimeInMs();
+        const totalSeconds: string = ((endTime - startTime) / 1000.0).toFixed(2);
+
+        console.log(colors.green(`rush rebuild - completed in ${totalSeconds} seconds`));
       },
       () => {
-        console.log(colors.red('rush rebuild - Errors!'));
+        console.log(colors.red(`rush rebuild - Errors!`));
         process.exit(1);
       });
   }

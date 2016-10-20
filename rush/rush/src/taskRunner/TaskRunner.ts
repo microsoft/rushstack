@@ -30,12 +30,16 @@ export default class TaskRunner {
   private _readyTaskQueue: ITask[];
   private _quietMode: boolean;
   private _hasAnyFailures: boolean;
+  private _parallelism: number;
+  private _currentActiveTasks: number;
 
-  constructor(quietMode: boolean = false) {
+  constructor(quietMode: boolean = false, parallelism?: number) {
     this._tasks = new Map<string, ITask>();
     this._readyTaskQueue = [];
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
+
+    this._parallelism = parallelism || os.cpus().length;
   }
 
   /**
@@ -46,7 +50,6 @@ export default class TaskRunner {
       throw new Error('A task with that name has already been registered.');
     }
 
-    // @todo #168287: do a copy here
     const task: ITask = taskDefinition as ITask;
     task.dependencies = [];
     task.dependents = [];
@@ -83,6 +86,9 @@ export default class TaskRunner {
    * tasks are completed successfully, or rejects when any task fails.
    */
   public execute(): Promise<void> {
+    this._currentActiveTasks = 0;
+    console.log(`Executing a maximum of ${this._parallelism} simultaneous processes...`);
+
     this._tasks.forEach((task: ITask) => {
       if (task.dependencies.length === 0 && task.status === TaskStatus.Ready) {
         this._readyTaskQueue.push(task);
@@ -108,23 +114,25 @@ export default class TaskRunner {
       }
     }
 
-    // @todo #168344: add ability to limit execution to n number of simultaneous tasks
     // @todo #168346: we should sort the ready task queue in such a way that we build projects with deps first
-    while (this._readyTaskQueue.length) {
+    while (this._readyTaskQueue.length && this._currentActiveTasks < this._parallelism) {
       const task: ITask = this._readyTaskQueue.shift();
       if (task.status === TaskStatus.Ready) {
         task.status = TaskStatus.Executing;
-        console.log(colors.yellow(`> TaskRunner :: Starting task [${task.name}]`));
+        console.log(colors.yellow(`> Starting task [${task.name}]`));
 
         const taskWriter: ITaskWriter = Interleaver.registerTask(task.name, this._quietMode);
 
         task.execute(taskWriter)
           .then(() => {
             taskWriter.close();
+
             this._markTaskAsSuccess(task);
             this._startAvailableTasks(complete, reject);
+
           }).catch((errors: TaskError[]) => {
             taskWriter.close();
+
             this._hasAnyFailures = true;
             task.errors = errors;
             this._markTaskAsFailed(task);
@@ -138,7 +146,7 @@ export default class TaskRunner {
    * Marks a task as having failed and marks each of its dependents as blocked
    */
   private _markTaskAsFailed(task: ITask): void {
-    console.log(colors.red(`${os.EOL}> TaskRunner :: Completed task [${task.name}] with errors!`));
+    console.log(colors.red(`${os.EOL}> Completed task [${task.name}] with errors!`));
     task.status = TaskStatus.Failure;
     task.dependents.forEach((dependent: ITask) => {
       this._markTaskAsBlocked(dependent, task);
@@ -150,7 +158,7 @@ export default class TaskRunner {
    */
   private _markTaskAsBlocked(task: ITask, failedTask: ITask): void {
     if (task.status === TaskStatus.Ready) {
-      console.log(colors.red(`> TaskRunner :: [${task.name}] blocked by [${failedTask.name}]!`));
+      console.log(colors.red(`> [${task.name}] blocked by [${failedTask.name}]!`));
       task.status = TaskStatus.Blocked;
       task.dependents.forEach((dependent: ITask) => {
         this._markTaskAsBlocked(dependent, failedTask);
@@ -162,7 +170,7 @@ export default class TaskRunner {
    * Marks a task as being completed, and removes it from the dependencies list of all its dependents
    */
   private _markTaskAsSuccess(task: ITask): void {
-    console.log(colors.green(`> TaskRunner :: Completed task [${task.name}]`));
+    console.log(colors.green(`> Completed task [${task.name}]`));
     task.status = TaskStatus.Success;
     task.dependents.forEach((dependent: ITask) => {
       const i: number = dependent.dependencies.indexOf(task);
