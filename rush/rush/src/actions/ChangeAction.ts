@@ -91,8 +91,9 @@ export default class ChangeAction extends CommandLineAction {
 
   private _hasProjectChanged(changedFolders: string[],
     project: RushConfigProject): boolean {
+    const pathRegex: RegExp = new RegExp(`^${project.projectRelativeFolder}`, 'i');
     for (const folder of changedFolders) {
-      if (folder && folder.indexOf(project.projectRelativeFolder) >= 0) {
+      if (folder && folder.match(pathRegex)) {
         return true;
       }
     }
