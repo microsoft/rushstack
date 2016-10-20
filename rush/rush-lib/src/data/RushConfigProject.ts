@@ -25,6 +25,7 @@ export interface IRushConfigProjectJson {
 export default class RushConfigProject {
   private _packageName: string;
   private _projectFolder: string;
+  private _projectRelativeFolder: string;
   private _reviewCategory: string;
   private _packageJson: PackageJson;
   private _tempProjectName: string;
@@ -33,6 +34,7 @@ export default class RushConfigProject {
 
   constructor(projectJson: IRushConfigProjectJson, rushConfig: RushConfig, tempProjectName: string) {
     this._packageName = projectJson.packageName;
+    this._projectRelativeFolder = projectJson.projectFolder;
 
     // For example, the depth of "a/b/c" would be 3.  The depth of "a" is 1.
     const projectFolderDepth: number = projectJson.projectFolder.split('/').length;
@@ -105,6 +107,13 @@ export default class RushConfigProject {
    */
   public get projectFolder(): string {
     return this._projectFolder;
+  }
+
+  /**
+   * The relative path of the folder that contains the project to be built by Rush.
+   */
+  public get projectRelativeFolder(): string {
+    return this._projectRelativeFolder;
   }
 
   /**
