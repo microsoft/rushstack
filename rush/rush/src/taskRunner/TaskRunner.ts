@@ -10,7 +10,8 @@ import * as os from 'os';
 import { Interleaver, ITaskWriter } from '@microsoft/stream-collator';
 import {
   TaskError,
-  ErrorDetectionMode
+  ErrorDetectionMode,
+  Utilities
 } from '@microsoft/rush-lib';
 
 import ITask, { ITaskDefinition } from './ITask';
@@ -27,7 +28,7 @@ import TaskStatus from './TaskStatus';
  */
 export default class TaskRunner {
   private _tasks: Map<string, ITask>;
-  private _readyTaskQueue: ITask[];
+  private _buildQueue: ITask[];
   private _quietMode: boolean;
   private _hasAnyFailures: boolean;
   private _parallelism: number;
@@ -35,7 +36,7 @@ export default class TaskRunner {
 
   constructor(quietMode: boolean = false, parallelism?: number) {
     this._tasks = new Map<string, ITask>();
-    this._readyTaskQueue = [];
+    this._buildQueue = [];
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
 
@@ -55,6 +56,7 @@ export default class TaskRunner {
     task.dependents = [];
     task.errors = [];
     task.status = TaskStatus.Ready;
+    task.criticalPathLength = undefined;
     this._tasks.set(task.name, task);
   }
 
@@ -89,10 +91,19 @@ export default class TaskRunner {
     this._currentActiveTasks = 0;
     console.log(`Executing a maximum of ${this._parallelism} simultaneous processes...`);
 
+    // Precalculate the number of dependent packages
     this._tasks.forEach((task: ITask) => {
-      if (task.dependencies.length === 0 && task.status === TaskStatus.Ready) {
-        this._readyTaskQueue.push(task);
-      }
+      this._calculateCriticalPaths(task);
+    });
+
+    // Add everything to the buildQueue
+    this._tasks.forEach((task: ITask) => {
+      this._buildQueue.push(task);
+    });
+
+    // Sort the queue in descending order, nothing will mess with the order
+    this._buildQueue.sort((taskA: ITask, taskB: ITask): number => {
+      return taskB.criticalPathLength - taskA.criticalPathLength;
     });
 
     return new Promise<void>((complete: () => void, reject: () => void) => {
@@ -101,10 +112,32 @@ export default class TaskRunner {
   }
 
   /**
+   * Pulls the next task with no dependencies off the build queue
+   * Removes any non-ready tasks from the build queue (this should only be blocked tasks)
+   */
+  private _getNextTask(): ITask {
+    for (let i: number = 0; i < this._buildQueue.length; i++) {
+      const task: ITask = this._buildQueue[i];
+
+      if (task.status !== TaskStatus.Ready) {
+        // It shouldn't be on the queue, remove it
+        this._buildQueue.splice(i, 1);
+        // Decrement since we modified the array
+        i--;
+      } else if (task.dependencies.length === 0 && task.status === TaskStatus.Ready) {
+        // this is a task which is ready to go. remove it and return it
+        return this._buildQueue.splice(i, 1)[0];
+      }
+      // Otherwise task is still waiting
+    }
+    return undefined; // There are no tasks ready to go at this time
+  }
+
+  /**
    * Helper function which finds any tasks which are available to run and begins executing them.
    * It calls the complete callback when all tasks are completed, or rejects if any task fails.
    */
-  private _startAvailableTasks(complete: () => void, reject: () => void): void {
+  private _startAvailableTasks(complete: () => void, reject: (err?: Object) => void): void {
     if (!this._areAnyTasksReadyOrExecuting()) {
       this._printTaskStatus();
       if (this._hasAnyFailures) {
@@ -114,31 +147,32 @@ export default class TaskRunner {
       }
     }
 
-    // @todo #168346: we should sort the ready task queue in such a way that we build projects with deps first
-    while (this._readyTaskQueue.length && this._currentActiveTasks < this._parallelism) {
-      const task: ITask = this._readyTaskQueue.shift();
-      if (task.status === TaskStatus.Ready) {
-        task.status = TaskStatus.Executing;
-        console.log(colors.yellow(`> Starting task [${task.name}]`));
+    let ctask: ITask;
+    while (this._currentActiveTasks < this._parallelism && (ctask = this._getNextTask())) {
+      const task: ITask = ctask;
+      task.status = TaskStatus.Executing;
+      console.log(colors.yellow(`> Starting task [${task.name}]`));
 
-        const taskWriter: ITaskWriter = Interleaver.registerTask(task.name, this._quietMode);
+      const taskWriter: ITaskWriter = Interleaver.registerTask(task.name, this._quietMode);
 
-        task.execute(taskWriter)
-          .then(() => {
-            taskWriter.close();
+      task.startTimestamp = Utilities.getTimeInMs();
 
-            this._markTaskAsSuccess(task);
-            this._startAvailableTasks(complete, reject);
+      task.execute(taskWriter)
+        .then(() => {
+          taskWriter.close();
 
-          }).catch((errors: TaskError[]) => {
-            taskWriter.close();
+          this._markTaskAsSuccess(task);
+          this._startAvailableTasks(complete, reject);
 
-            this._hasAnyFailures = true;
-            task.errors = errors;
-            this._markTaskAsFailed(task);
-            this._startAvailableTasks(complete, reject);
-          });
-      }
+        }).catch((errors: TaskError[]) => {
+          taskWriter.close();
+
+          this._hasAnyFailures = true;
+          task.errors = errors;
+          this._markTaskAsFailed(task);
+          this._startAvailableTasks(complete, reject);
+        }
+      );
     }
   }
 
@@ -170,16 +204,15 @@ export default class TaskRunner {
    * Marks a task as being completed, and removes it from the dependencies list of all its dependents
    */
   private _markTaskAsSuccess(task: ITask): void {
-    console.log(colors.green(`> Completed task [${task.name}]`));
+    const endTime: number = Utilities.getTimeInMs();
+    const totalSeconds: string = ((endTime - task.startTimestamp) / 1000.0).toFixed(2);
+
+    console.log(colors.green(`> Completed task [${task.name}] in ${totalSeconds} seconds`));
     task.status = TaskStatus.Success;
     task.dependents.forEach((dependent: ITask) => {
       const i: number = dependent.dependencies.indexOf(task);
       if (i !== -1) {
         dependent.dependencies.splice(i, 1);
-      }
-
-      if (dependent.dependencies.length === 0 && dependent.status === TaskStatus.Ready) {
-        this._readyTaskQueue.push(dependent);
       }
     });
   }
@@ -195,6 +228,27 @@ export default class TaskRunner {
       }
     });
     return anyNonCompletedTasks;
+  }
+
+  /**
+   * Calculate the number of packages which must be build before we reach
+   * the furthest away "root" node
+   */
+  private _calculateCriticalPaths(task: ITask): number {
+    // Return the memoized value
+    if (task.criticalPathLength !== undefined) {
+      return task.criticalPathLength;
+    }
+
+    // If no dependents, we are in a "root"
+    if (task.dependents.length === 0) {
+      return task.criticalPathLength = 0;
+    } else {
+      // Otherwise we are as long as the longest package + 1
+      return task.criticalPathLength = Math.max(
+        ...task.dependents.map((dep) => this._calculateCriticalPaths(dep))
+      ) + 1;
+    }
   }
 
   /**
