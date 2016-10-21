@@ -1,7 +1,6 @@
 /**
  * @Copyright (c) Microsoft Corporation.  All rights reserved.
  */
-
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -11,7 +10,7 @@ import gitInfo = require('git-repo-info');
 
 import inquirer = require('inquirer');
 
-import { CommandLineAction } from '@microsoft/ts-command-line';
+import { CommandLineAction, CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import {
   RushConfig,
   RushConfigProject,
@@ -33,6 +32,7 @@ export default class ChangeAction extends CommandLineAction {
   private _rushConfig: RushConfig;
   private _sortedProjectList: string[];
   private _changeFileData: IChangeFile;
+  private _verifyParameter: CommandLineFlagParameter;
 
   private _prompt: inquirer.PromptModule;
 
@@ -64,27 +64,23 @@ export default class ChangeAction extends CommandLineAction {
   }
 
   public onDefineParameters(): void {
-    // abstract
+    this._verifyParameter = this.defineFlagParameter({
+      parameterLongName: '--verify',
+      parameterShortName: '-v',
+      description: 'Verify the change log file is generated and is valid json file'
+    });
   }
 
   public onExecute(): void {
     this._rushConfig = RushConfig.loadFromDefaultLocation();
+    if (this._verifyParameter.value) {
+      return this._verify();
+    }
+    this._sortedProjectList = this._getChangedProjects()
+       .sort();
 
-    const changedFolders: string[] = VersionControl.getChangedFolders();
-    let anyProjectTracksChanges: boolean = false;
-    this._sortedProjectList = this._rushConfig.projects
-      .filter(project => {
-        if (project.shouldTrackChanges) {
-          anyProjectTracksChanges = true;
-        }
-        return project.shouldTrackChanges;
-      })
-      .filter(project => this._hasProjectChanged(changedFolders, project))
-      .map(project => project.packageName)
-      .sort();
-
-    if (!anyProjectTracksChanges) {
-      console.error('There are no projects marked with the \'shouldTrackChanges\' flag in Rush.json.');
+    if (this._sortedProjectList.length === 0) {
+      console.log('No change file is needed.');
       return;
     }
 
@@ -99,6 +95,39 @@ export default class ChangeAction extends CommandLineAction {
       .catch((error: Error) => {
         console.error('There was an issue creating the changefile:' + os.EOL + error.toString());
       });
+  }
+
+  private _verify(): void {
+    if (this._getChangedProjects().length > 0) {
+      this._validateChangeFile();
+    } else {
+      console.log('No change is needed.');
+    }
+  }
+
+  private _getChangedProjects(): string[] {
+    const changedFolders: string[] = VersionControl.getChangedFolders();
+    return this._rushConfig.projects
+      .filter(project => project.shouldTrackChanges)
+      .filter(project => this._hasProjectChanged(changedFolders, project))
+      .map(project => project.packageName);
+  }
+
+  private _validateChangeFile(): void {
+    const changeFiles: string[] = this._getChangeFiles();
+    if (changeFiles.length === 1) {
+      // TODO: validate the change file against json schema.
+      console.log('Found one change file');
+    } else if (changeFiles.length === 0) {
+      throw new Error(`No change file is found. Run 'rush change' to generate a change file.`);
+    } else {
+      throw new Error('More than one change files are found. Delete and only keep one.');
+    }
+  }
+
+  private _getChangeFiles(): string[] {
+    const branch: string = gitInfo().branch;
+    return VersionControl.getChangedFiles(`common/changes/${branch}-`);
   }
 
   private _hasProjectChanged(changedFolders: string[],
