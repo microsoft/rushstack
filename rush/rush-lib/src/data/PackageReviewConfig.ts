@@ -173,7 +173,7 @@ export default class PackageReviewConfig {
         + ` the name "${itemJson.name}" appears more than once`);
     }
 
-    let item: PackageReviewItem = new PackageReviewItem();
+    const item: PackageReviewItem = new PackageReviewItem();
     item.packageName = itemJson.name;
     item.allowedInBrowser = allowedInBrowser;
     if (itemJson.allowedCategories) {

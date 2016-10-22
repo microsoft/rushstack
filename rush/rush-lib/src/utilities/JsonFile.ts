@@ -23,7 +23,7 @@ export default class JsonFile {
   }
 
   public static saveJsonFile(jsonData: any, jsonFilename: string): void {
-    let stringified: string = JSON.stringify(jsonData, undefined, 2) + '\n';
+    const stringified: string = JSON.stringify(jsonData, undefined, 2) + '\n';
     const normalized: string = Utilities.getAllReplaced(stringified, '\n', '\r\n');
     fs.writeFileSync(jsonFilename, normalized);
   }
