@@ -20,7 +20,7 @@ import {
   JsonFile,
   RushConfig,
   IRushLinkJson,
-  Utilities
+  Stopwatch
 } from '@microsoft/rush-lib';
 
 import RushCommandLineParser from './RushCommandLineParser';
@@ -80,7 +80,7 @@ export default class RebuildAction extends CommandLineAction {
     this._rushConfig = this._rushConfig = RushConfig.loadFromDefaultLocation();
 
     console.log('Starting "rush rebuild"' + os.EOL);
-    const startTime: number = Utilities.getTimeInMs();
+    const stopwatch: Stopwatch = Stopwatch.start();
 
     const taskRunner: TaskRunner = new TaskRunner(this._quietParameter.value, this._parallelismParameter.value);
 
@@ -120,10 +120,8 @@ export default class RebuildAction extends CommandLineAction {
     taskRunner.execute()
       .then(
       () => {
-        const endTime: number = Utilities.getTimeInMs();
-        const totalSeconds: string = ((endTime - startTime) / 1000.0).toFixed(2);
-
-        console.log(colors.green(`rush rebuild - completed in ${totalSeconds} seconds`));
+        stopwatch.stop();
+        console.log(colors.green(`rush rebuild (${stopwatch.toString()})`));
       },
       () => {
         console.log(colors.red(`rush rebuild - Errors!`));

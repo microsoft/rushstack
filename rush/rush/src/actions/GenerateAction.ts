@@ -15,7 +15,8 @@ import {
   JsonFile,
   RushConfig,
   RushConfigProject,
-  Utilities
+  Utilities,
+  Stopwatch
 } from '@microsoft/rush-lib';
 
 import InstallAction from './InstallAction';
@@ -52,7 +53,8 @@ export default class GenerateAction extends CommandLineAction {
   protected onExecute(): void {
     this._rushConfig = this._rushConfig = RushConfig.loadFromDefaultLocation();
 
-    const startTime: number = Utilities.getTimeInMs();
+    const stopwatch: Stopwatch = Stopwatch.start();
+
     console.log('Starting "rush generate"' + os.EOL);
 
     if (this._rushConfig.packageReviewFile) {
@@ -205,11 +207,8 @@ export default class GenerateAction extends CommandLineAction {
       Utilities.executeCommand(this._rushConfig.npmToolFilename, ['shrinkwrap' ], this._rushConfig.commonFolder);
       console.log('"npm shrinkwrap" completed' + os.EOL);
     }
-
-    const endTime: number = Utilities.getTimeInMs();
-    const totalSeconds: string = ((endTime - startTime) / 1000.0).toFixed(2);
-
-    console.log(os.EOL + colors.green(`Rush generate finished successfully. (${totalSeconds} seconds)`));
+    stopwatch.stop();
+    console.log(os.EOL + colors.green(`Rush generate finished successfully. (${stopwatch.toString()})`));
     console.log(os.EOL + 'Next you should probably run: "rush link"');
   }
 }

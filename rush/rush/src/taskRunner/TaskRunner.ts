@@ -11,7 +11,7 @@ import { Interleaver, ITaskWriter } from '@microsoft/stream-collator';
 import {
   TaskError,
   ErrorDetectionMode,
-  Utilities
+  Stopwatch
 } from '@microsoft/rush-lib';
 
 import ITask, { ITaskDefinition } from './ITask';
@@ -155,10 +155,11 @@ export default class TaskRunner {
 
       const taskWriter: ITaskWriter = Interleaver.registerTask(task.name, this._quietMode);
 
-      task.startTimestamp = Utilities.getTimeInMs();
+      task.stopwatch = Stopwatch.start();
 
       task.execute(taskWriter)
         .then(() => {
+          task.stopwatch.stop();
           taskWriter.close();
 
           this._markTaskAsSuccess(task);
@@ -204,10 +205,7 @@ export default class TaskRunner {
    * Marks a task as being completed, and removes it from the dependencies list of all its dependents
    */
   private _markTaskAsSuccess(task: ITask): void {
-    const endTime: number = Utilities.getTimeInMs();
-    const totalSeconds: string = ((endTime - task.startTimestamp) / 1000.0).toFixed(2);
-
-    console.log(colors.green(`> Completed task [${task.name}] in ${totalSeconds} seconds`));
+    console.log(colors.green(`> Completed task [${task.name}] in ${task.stopwatch.toString()}`));
     task.status = TaskStatus.Success;
     task.dependents.forEach((dependent: ITask) => {
       const i: number = dependent.dependencies.indexOf(task);
