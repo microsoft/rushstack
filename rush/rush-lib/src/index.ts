@@ -53,6 +53,11 @@ export {
 } from './utilities/Utilities';
 
 export {
+  Stopwatch,
+  StopwatchState
+} from './utilities/Stopwatch';
+
+export {
   default as rushVersion
 } from './rushVersion';
 

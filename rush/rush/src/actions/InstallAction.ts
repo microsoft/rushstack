@@ -12,7 +12,8 @@ import { CommandLineAction, CommandLineFlagParameter } from '@microsoft/ts-comma
 import {
   JsonFile,
   RushConfig,
-  Utilities
+  Utilities,
+  Stopwatch
 } from '@microsoft/rush-lib';
 
 import RushCommandLineParser from './RushCommandLineParser';
@@ -114,16 +115,15 @@ export default class InstallAction extends CommandLineAction {
   protected onExecute(): void {
     this._rushConfig = RushConfig.loadFromDefaultLocation();
 
-    const startTime: number = Utilities.getTimeInMs();
+    const stopwatch: Stopwatch = Stopwatch.start();
+
     console.log('Starting "rush install"' + os.EOL);
 
     InstallAction.ensureLocalNpmTool(this._rushConfig, this._cleanInstallFull.value);
     this._installCommonModules();
 
-    const endTime: number = Utilities.getTimeInMs();
-    const totalSeconds: string = ((endTime - startTime) / 1000.0).toFixed(2);
-
-    console.log(colors.green(`The common NPM packages are up to date. (${totalSeconds} seconds)`));
+    stopwatch.stop();
+    console.log(colors.green(`The common NPM packages are up to date. (${stopwatch.toString()})`));
     console.log(os.EOL + 'Next you should probably run: "rush link"');
   }
 

@@ -6,7 +6,7 @@
  */
 
 import { ITaskWriter } from '@microsoft/stream-collator';
-import { TaskError } from '@microsoft/rush-lib';
+import { TaskError, Stopwatch } from '@microsoft/rush-lib';
 
 import TaskStatus from './TaskStatus';
 
@@ -79,8 +79,8 @@ export interface ITask extends ITaskDefinition {
   errors: TaskError[];
 
   /**
-   * The timestamp of the beginning of task execution, in milliseconds since the epoch
+   * The stopwatch which measures how long it takes the task to execute
    */
-  startTimestamp: number;
+  stopwatch: Stopwatch;
 }
 export default ITask;
