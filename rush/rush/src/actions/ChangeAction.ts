@@ -1,6 +1,7 @@
 /**
  * @Copyright (c) Microsoft Corporation.  All rights reserved.
  */
+
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -67,7 +68,7 @@ export default class ChangeAction extends CommandLineAction {
     this._verifyParameter = this.defineFlagParameter({
       parameterLongName: '--verify',
       parameterShortName: '-v',
-      description: 'Verify the change log file is generated and is valid json file'
+      description: 'Verify the change log file is generated and is a valid JSON file'
     });
   }
 
@@ -121,13 +122,12 @@ export default class ChangeAction extends CommandLineAction {
     } else if (changeFiles.length === 0) {
       throw new Error(`No change file is found. Run 'rush change' to generate a change file.`);
     } else {
-      throw new Error('More than one change files are found. Delete and only keep one.');
+      throw new Error('More than one change file was found. Delete and only keep one.');
     }
   }
 
   private _getChangeFiles(): string[] {
-    const branch: string = gitInfo().branch;
-    return VersionControl.getChangedFiles(`common/changes/${branch}-`);
+    return VersionControl.getChangedFiles(`common/changes/`);
   }
 
   private _hasProjectChanged(changedFolders: string[],
