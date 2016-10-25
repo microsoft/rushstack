@@ -191,6 +191,23 @@ export default class InstallAction extends CommandLineAction {
     }
 
     if (needToInstall) {
+      // Rush install is transactional, so if the process is killed while it's in-progress, the
+      //  common/node_modules directory won't be invalid. The process follows this sequence:
+      //   1. The common/npm-install-temp directory is deleted if it already exists
+      //   2. A new common/npm-install-temp directory is created
+      //   3. If a common/node_modules directory already exists, it's moved into the
+      //        npm-install-temp directory
+      //   4. The package.json fole and the common/temp_modules directory are copied into
+      //        the npm-install-temp directory
+      //   5. `npm prune` is optionally run in the npm-install-temp directory
+      //   6. `npm install` is run in the npm-install-temp directory
+      //   7. The now-complete the npm-install-temp/node_modules directory is moved back to
+      //        the common directory (so now we have a complete common/node_modules directory)
+      //
+      // Because the move operation is atomic, if the process is killed during any of these steps,
+      //  an incomplete or invalid node_modules directory will be under the npm-install-temp directory,
+      //  and not in the common directory. The next time Rush install runs, the invalid 
+      //  npm-install-temp/node_modules directory is deleted, so the repository is never in an invalid state.  
       const npmTempInstallDirectory: string = path.join(this._rushConfig.commonFolder, 'npm-install-temp');
       const tempNodeModulesPath: string = path.join(npmTempInstallDirectory, 'node_modules');
       if (fs.existsSync(npmTempInstallDirectory)) {
