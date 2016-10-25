@@ -3,7 +3,7 @@
  */
 
 import * as colors from 'colors';
-import * as fs from 'fs';
+import * as fs from 'fs-extra';
 import * as glob from 'glob';
 import globEscape = require('glob-escape');
 import * as os from 'os';
@@ -191,16 +191,37 @@ export default class InstallAction extends CommandLineAction {
     }
 
     if (needToInstall) {
+      const npmTempInstallDirectory: string = path.join(this._rushConfig.commonFolder, 'npm-install-temp');
+      const tempNodeModulesPath: string = path.join(npmTempInstallDirectory, 'node_modules');
+      if (fs.existsSync(npmTempInstallDirectory)) {
+        console.log(`Deleting ${npmTempInstallDirectory}`);
+        Utilities.dangerouslyDeletePath(npmTempInstallDirectory);
+      }
+
+      console.log(`Creating ${npmTempInstallDirectory}`);
+      Utilities.createFolderWithRetry(npmTempInstallDirectory);
+
+      if (fs.existsSync(commonNodeModulesFolder)) {
+        console.log(`Moving existing common node_modules folder to ${tempNodeModulesPath}`);
+        fs.renameSync(commonNodeModulesFolder, tempNodeModulesPath);
+      }
+
+      console.log(`Copying package.json files to ${npmTempInstallDirectory}`);
+      fs.copySync(path.join(this._rushConfig.commonFolder, 'package.json'),
+                  path.join(npmTempInstallDirectory, 'package.json'));
+      fs.copySync(this._rushConfig.tempModulesFolder,
+                  path.join(npmTempInstallDirectory, path.basename(this._rushConfig.tempModulesFolder)));
+
       if (!skipPrune) {
-        console.log('Running "npm prune" in ' + this._rushConfig.commonFolder);
+        console.log(`Running "npm prune" in ${npmTempInstallDirectory}`);
         Utilities.executeCommandWithRetry(npmToolFilename, ['prune'], MAX_INSTALL_ATTEMPTS,
-          this._rushConfig.commonFolder);
+          npmTempInstallDirectory);
 
         // Delete the temp projects because NPM will not notice when they are changed.
         // We can recognize them because their names start with "rush-"
-        console.log('Deleting common/node_modules/rush-*');
+        console.log(`Deleting ${npmTempInstallDirectory}/node_modules/rush-*`);
         // Example: "C:\MyRepo\common\node_modules\rush-example-project"
-        const normalizedPath: string = Utilities.getAllReplaced(commonNodeModulesFolder, '\\', '/');
+        const normalizedPath: string = Utilities.getAllReplaced(npmTempInstallDirectory, '\\', '/');
         for (const tempModulePath of glob.sync(globEscape(normalizedPath) + '/rush-*')) {
           Utilities.dangerouslyDeletePath(tempModulePath);
         }
@@ -216,9 +237,14 @@ export default class InstallAction extends CommandLineAction {
       }
 
       // Next, run "npm install" in the common folder
-      console.log(os.EOL + `Running "npm ${npmInstallArgs.join(' ')}" in ${this._rushConfig.commonFolder}`);
-      Utilities.executeCommandWithRetry(npmToolFilename, npmInstallArgs, MAX_INSTALL_ATTEMPTS,
-        this._rushConfig.commonFolder);
+      console.log(os.EOL + `Running "npm ${npmInstallArgs.join(' ')}" in ${npmTempInstallDirectory}`);
+      Utilities.executeCommandWithRetry(npmToolFilename,
+                                        npmInstallArgs,
+                                        MAX_INSTALL_ATTEMPTS,
+                                        npmTempInstallDirectory);
+
+      console.log(`Moving ${tempNodeModulesPath} to ${commonNodeModulesFolder}`);
+      fs.renameSync(tempNodeModulesPath, commonNodeModulesFolder);
 
       // Create the marker file to indicate a successful install
       fs.writeFileSync(commonNodeModulesFlagFilename, '');
