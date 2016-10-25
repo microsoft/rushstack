@@ -17,6 +17,7 @@
     "@microsoft/ts-command-line": "~1.1.0",
     "builtins": "~1.0.3",
     "colors": "~1.1.2",
+    "fs-extra": "~0.30.0",
     "git-repo-info": "~1.1.4",
     "glob": "~7.0.5",
     "glob-escape": "~0.0.1",
