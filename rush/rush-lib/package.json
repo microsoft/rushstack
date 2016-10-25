@@ -12,6 +12,7 @@
   "license": "SEE LICENSE IN LICENSE.docx",
   "dependencies": {
     "@microsoft/stream-collator": "~1.0.1",
+    "deasync": "~0.1.8",
     "fs-extra": "~0.30.0",
     "jju": "~1.3.0",
     "rimraf": "~2.5.2",
