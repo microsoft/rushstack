@@ -5,7 +5,7 @@
 /// <reference path='../../typings/tsd.d.ts' />
 
 import * as colors from 'colors';
-import * as fs from 'fs';
+import * as fs from 'fs-extra';
 import * as os from 'os';
 import {
   CommandLineAction,
