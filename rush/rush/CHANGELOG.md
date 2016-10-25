@@ -17,6 +17,10 @@
 > - `PATCH` Correctly handling negative numbers in the `setZIndex` function.
 
 # Unreleased changes
+
+# 1.0.7
+
+- `PATCH` Include NPM --cache and NPM --tmp options in the rush.json file.
 - `PATCH` Limit Rush Rebuild parallelism to 'number-of-cores' simultaneous builds, optionally overridable on command line
 
 # 1.0.5
