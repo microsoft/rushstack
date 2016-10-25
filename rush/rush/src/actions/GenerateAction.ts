@@ -204,7 +204,7 @@ export default class GenerateAction extends CommandLineAction {
       npmInstallArgs.push('--tmp', this._rushConfig.tmpFolder);
     }
 
-    console.log(os.EOL + colors.bold(`Running "npm ${npmInstallArgs}"...`));
+    console.log(os.EOL + colors.bold(`Running "npm ${npmInstallArgs.join(' ')}"...`));
     Utilities.executeCommand(this._rushConfig.npmToolFilename, npmInstallArgs, this._rushConfig.commonFolder);
     console.log('"npm install" completed' + os.EOL);
 
