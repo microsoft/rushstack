@@ -55,7 +55,7 @@ let globalInstance: any = global as any;
 const localCache: ILocalCache = globalInstance.__loggingCache = globalInstance.__loggingCache || {
   warnings: [],
   errors: [],
-  testsRun: 0,;
+  testsRun: 0,
   subTasksRun: 0,
   testsPassed: 0,
   testsFailed: 0,
