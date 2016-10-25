@@ -14,4 +14,21 @@ export default class VersionControl {
         return undefined;
       });
   }
+
+  public static getChangedFiles(prefix?: string): string[] {
+    const output: string = child_process.execSync('git diff master --name-only --diff-filter=A')
+      .toString();
+    const regex: RegExp = prefix ? new RegExp(`^${prefix}`, 'i') : undefined;
+    return output.split('\n').map(s => {
+      if (s) {
+        const trimmedLine: string = s.trim();
+        if (trimmedLine.match(regex)) {
+          return trimmedLine;
+        }
+      }
+      return undefined;
+    }).filter(s => {
+      return s && s.length > 0;
+    });
+  }
 }
