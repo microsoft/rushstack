@@ -195,8 +195,17 @@ export default class GenerateAction extends CommandLineAction {
     InstallAction.ensureLocalNpmTool(this._rushConfig, false);
 
     // 5. Run "npm install" and "npm shrinkwrap"
-    console.log(os.EOL + colors.bold('Running "npm install"...'));
-    Utilities.executeCommand(this._rushConfig.npmToolFilename, [ 'install' ], this._rushConfig.commonFolder);
+    const npmInstallArgs: string[] = ['install'];
+    if (this._rushConfig.cacheFolder) {
+      npmInstallArgs.push('--cache', this._rushConfig.cacheFolder);
+    }
+
+    if (this._rushConfig.tmpFolder) {
+      npmInstallArgs.push('--tmp', this._rushConfig.tmpFolder);
+    }
+
+    console.log(os.EOL + colors.bold(`Running "npm ${npmInstallArgs}"...`));
+    Utilities.executeCommand(this._rushConfig.npmToolFilename, npmInstallArgs, this._rushConfig.commonFolder);
     console.log('"npm install" completed' + os.EOL);
 
     if (this._lazyParameter.value) {
