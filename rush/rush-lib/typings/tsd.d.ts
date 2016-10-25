@@ -8,3 +8,4 @@
 /// <reference path="rimraf/rimraf.d.ts" />
 /// <reference path="semver/semver.d.ts" />
 /// <reference path="z-schema/z-schema.d.ts" />
+/// <reference path="fs-extra/fs-extra.d.ts" />
