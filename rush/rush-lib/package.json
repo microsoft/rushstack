@@ -6,7 +6,7 @@
   "typings": "lib/index.d.ts",
   "scripts": {
     "build": "gulp",
-    "test": "gulp",
+    "test": "gulp test",
     "clean": "gulp nuke"
   },
   "license": "SEE LICENSE IN LICENSE.docx",
