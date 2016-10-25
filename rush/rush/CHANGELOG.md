@@ -20,6 +20,7 @@
 
 # 1.0.7
 
+- `PATCH` Renaming the `local-npm` directory to `npm-local`.
 - `PATCH` Include NPM --cache and NPM --tmp options in the rush.json file.
 - `PATCH` Limit Rush Rebuild parallelism to 'number-of-cores' simultaneous builds, optionally overridable on command line
 

@@ -12,14 +12,6 @@
       "description": "Specifies the name of a top-level global folder containing a package.json file with a superset of all dependencies for all projects in the repository.  Example: \"common\"",
       "type": "string"
     },
-    "cacheFolder": {
-      "description": "Specifies the name of a repository-scoped NPM cache folder. Example: \"common/npm-cache\"",
-      "type": "string"
-    },
-    "tmpFolder": {
-      "description": "Specifies the name of a repository-scoped NPM tmp folder. Example: \"common/__temp\"",
-      "type": "string"
-    },
     "npmVersion": {
       "description": "The version of the NPM tool to install.",
       "type": "string",
@@ -52,6 +44,10 @@
       "items": {
         "type": "string"
       }
+    },
+    "useLocalNpmCache": {
+      "description": "If true, use repository-scoped NPM cache and tmp folders",
+      "type": "boolean"
     },
     "projects": {
       "description": "A list of projects managed by this tool.",

@@ -20,8 +20,6 @@ import Utilities from '../utilities/Utilities';
 export interface IRushConfigJson {
   $schema: string;
   commonFolder: string;
-  cacheFolder: string;
-  tmpFolder: string;
   npmVersion: string;
   rushMinimumVersion: string;
   nodeSupportedVersionRange?: string;
@@ -29,6 +27,7 @@ export interface IRushConfigJson {
   projectFolderMaxDepth?: number;
   packageReviewFile?: string;
   reviewCategories?: string[];
+  useLocalNpmCache?: boolean;
   projects: IRushConfigProjectJson[];
 }
 
@@ -189,12 +188,9 @@ export default class RushConfig {
     }
     this._commonFolderName = path.basename(this._commonFolder);
 
-    if (rushConfigJson.cacheFolder) {
-      this._cacheFolder = path.resolve(path.join(this._rushJsonFolder, rushConfigJson.cacheFolder));
-    }
-
-    if (rushConfigJson.tmpFolder) {
-      this._tmpFolder = path.resolve(path.join(this._rushJsonFolder, rushConfigJson.tmpFolder));
+    if (rushConfigJson.useLocalNpmCache) {
+      this._cacheFolder = path.resolve(path.join(this._commonFolder, 'npm-cache'));
+      this._tmpFolder = path.resolve(path.join(this._commonFolder, 'npm-tmp'));
     }
 
     this._tempModulesFolder = path.join(this._commonFolder, 'temp_modules');
@@ -208,7 +204,7 @@ export default class RushConfig {
     this._rushLinkJsonFilename = path.join(this._commonFolder, 'rush-link.json');
 
     this._npmToolVersion = rushConfigJson.npmVersion;
-    this._npmToolFilename = path.join(this._commonFolder, 'local-npm', 'node_modules', '.bin', 'npm');
+    this._npmToolFilename = path.join(this._commonFolder, 'npm-local', 'node_modules', '.bin', 'npm');
 
     this._projectFolderMinDepth = rushConfigJson.projectFolderMinDepth !== undefined
       ? rushConfigJson.projectFolderMinDepth : 1;
@@ -296,7 +292,7 @@ export default class RushConfig {
   /**
    * The tmp folder specified in rush.json. If no folder is specified, this
    * value is undefined.
-   * Example: "C:\MyRepo\common\__temp"
+   * Example: "C:\MyRepo\common\npm-tmp"
    */
   public get tmpFolder(): string {
     return this._tmpFolder;
@@ -337,7 +333,7 @@ export default class RushConfig {
   /**
    * The absolute path to the locally installed NPM tool.  If "rush install" has not
    * been run, then this file may not exist yet.
-   * Example: "C:\MyRepo\common\local-npm\node_modules\.bin\npm"
+   * Example: "C:\MyRepo\common\npm-local\node_modules\.bin\npm"
    */
   public get npmToolFilename(): string {
     return this._npmToolFilename;
