@@ -16,7 +16,7 @@
 > - `MINOR` Including new performance logging functions.
 > - `PATCH` Correctly handling negative numbers in the `setZIndex` function.
 
-# Unreleased changes
+# 1.1.0
 - `MINOR` introduces a new command line argument type for a list of strings
 - `MINOR` introduces a new command line argument type for integers
 
