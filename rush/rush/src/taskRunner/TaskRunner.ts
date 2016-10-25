@@ -52,12 +52,23 @@ export default class TaskRunner {
     }
 
     const task: ITask = taskDefinition as ITask;
-    task.dependencies = [];
-    task.dependents = [];
-    task.errors = [];
+    task.dependencies = new Set<ITask>();
+    task.dependents = new Set<ITask>();
+    task.errors = new Set<TaskError>();
     task.status = TaskStatus.Ready;
     task.criticalPathLength = undefined;
     this._tasks.set(task.name, task);
+
+    if (!this._quietMode) {
+      console.log(`Registered ${task.name}`);
+    }
+  }
+
+  /**
+   * Returns true if a task with that name has been registered
+   */
+  public hasTask(taskName: string): boolean {
+    return this._tasks.has(taskName);
   }
 
   /**
@@ -76,11 +87,14 @@ export default class TaskRunner {
       throw new Error('The list of dependencies must be defined');
     }
 
-    taskDependencies.forEach((dependencyName: string) => {
+    for (const dependencyName of taskDependencies) {
+      if (!this._tasks.has(dependencyName)) {
+        throw new Error(`The project '${dependencyName}' has not been registered.`);
+      }
       const dependency: ITask = this._tasks.get(dependencyName);
-      task.dependencies.push(dependency);
-      dependency.dependents.push(task);
-    });
+      task.dependencies.add(dependency);
+      dependency.dependents.add(task);
+    }
   }
 
   /**
@@ -89,7 +103,7 @@ export default class TaskRunner {
    */
   public execute(): Promise<void> {
     this._currentActiveTasks = 0;
-    console.log(`Executing a maximum of ${this._parallelism} simultaneous processes...`);
+    console.log(`${os.EOL}Executing a maximum of ${this._parallelism} simultaneous processes...`);
 
     // Precalculate the number of dependent packages
     this._tasks.forEach((task: ITask) => {
@@ -124,7 +138,7 @@ export default class TaskRunner {
         this._buildQueue.splice(i, 1);
         // Decrement since we modified the array
         i--;
-      } else if (task.dependencies.length === 0 && task.status === TaskStatus.Ready) {
+      } else if (task.dependencies.size === 0 && task.status === TaskStatus.Ready) {
         // this is a task which is ready to go. remove it and return it
         return this._buildQueue.splice(i, 1)[0];
       }
@@ -169,7 +183,7 @@ export default class TaskRunner {
           taskWriter.close();
 
           this._hasAnyFailures = true;
-          task.errors = errors;
+          task.errors = new Set<TaskError>(errors);
           this._markTaskAsFailed(task);
           this._startAvailableTasks(complete, reject);
         }
@@ -208,10 +222,7 @@ export default class TaskRunner {
     console.log(colors.green(`> Completed task [${task.name}] in ${task.stopwatch.toString()}`));
     task.status = TaskStatus.Success;
     task.dependents.forEach((dependent: ITask) => {
-      const i: number = dependent.dependencies.indexOf(task);
-      if (i !== -1) {
-        dependent.dependencies.splice(i, 1);
-      }
+      dependent.dependencies.delete(task);
     });
   }
 
@@ -239,13 +250,13 @@ export default class TaskRunner {
     }
 
     // If no dependents, we are in a "root"
-    if (task.dependents.length === 0) {
+    if (task.dependents.size === 0) {
       return task.criticalPathLength = 0;
     } else {
       // Otherwise we are as long as the longest package + 1
-      return task.criticalPathLength = Math.max(
-        ...task.dependents.map((dep) => this._calculateCriticalPaths(dep))
-      ) + 1;
+      const depsLengths: number[] = [];
+      task.dependents.forEach(dep => this._calculateCriticalPaths(dep));
+      return task.criticalPathLength = Math.max(...depsLengths) + 1;
     }
   }
 

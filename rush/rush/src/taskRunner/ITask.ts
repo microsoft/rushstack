@@ -34,12 +34,12 @@ export interface ITask extends ITaskDefinition {
    * A set of all dependencies which must be executed before this task is complete.
    * When dependencies finish execution, they are removed from this list.
    */
-  dependencies: ITask[];
+  dependencies: Set<ITask>;
 
   /**
    * The inverse of dependencies, lists all projects which are directly dependent on this one.
    */
-  dependents: ITask[];
+  dependents: Set<ITask>;
 
   /**
    * This number represents how far away this Task is from the furthest "root" project (i.e.
@@ -76,7 +76,7 @@ export interface ITask extends ITaskDefinition {
    * A list of all errors which occurred while executing this task, this is stored in case we need
    * it later (for example to re-print errors at end of execution).
    */
-  errors: TaskError[];
+  errors: Set<TaskError>;
 
   /**
    * The stopwatch which measures how long it takes the task to execute
