@@ -159,8 +159,9 @@ export default class InstallAction extends CommandLineAction {
       }
 
       if (!this._rushConfig.cacheFolder) {
-        console.log(os.EOL + 'Running "npm cache clean"');
-        Utilities.executeCommand(npmToolFilename, ['cache', 'clean'], this._rushConfig.commonFolder);
+        const cacheCleanArgs: string[] = ['cache', 'clean', this._rushConfig.cacheFolder];
+        console.log(os.EOL + `Running "npm ${cacheCleanArgs.join(' ')}"`);
+        Utilities.executeCommand(npmToolFilename, cacheCleanArgs, this._rushConfig.commonFolder);
       } else {
         console.log(os.EOL + 'Skipping "npm cache clean" because the cache is global.');
       }
