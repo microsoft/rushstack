@@ -192,7 +192,7 @@ function writeSummary(callback: () => void): void {
       if (shouldRelogIssues && getWarnings().length) {
         const warnings: string[] = getWarnings();
         for (let x: number = 0; x < warnings.length; x++) {
-          console.log(gutil.colors.yellow(warnings[x]));
+          console.error(gutil.colors.yellow(warnings[x]));
         }
       }
 
@@ -443,13 +443,8 @@ export function warn(...args: Array<string | Chalk.ChalkChain>): void {
   const stringMessage: string = args.join(' ');
 
   if (!localCache.errorAndWarningSupressions[stringMessage]) {
-    if (getConfig().showWarningsAsErrors) {
-      localCache.errors.push(stringMessage);
-      log(gutil.colors.red.apply(undefined, args));
-    } else {
-      localCache.warnings.push(stringMessage);
-      log(gutil.colors.yellow.apply(undefined, args));
-    }
+    localCache.errors.push(stringMessage);
+    log(gutil.colors.yellow.apply(undefined, args));
   }
 }
 
@@ -652,6 +647,7 @@ export function initialize(gulp: gulp.Gulp, gulpErrorCallback?: (err: Error) => 
     writeSummary(() => {
       // error if we have any errors
       if (localCache.taskErrors > 0 ||
+        (getWarnings().length && getConfig().showWarningsAsErrors) ||
         getErrors().length ||
         localCache.testsFailed > 0) {
         exitProcess(1);
