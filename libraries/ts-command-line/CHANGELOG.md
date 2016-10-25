@@ -17,6 +17,7 @@
 > - `PATCH` Correctly handling negative numbers in the `setZIndex` function.
 
 # Unreleased changes
+- `MINOR` introduces a new command line argument type for a list of strings
 - `MINOR` introduces a new command line argument type for integers
 
 # 1.0.1

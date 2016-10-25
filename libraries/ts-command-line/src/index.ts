@@ -8,6 +8,7 @@ export {
   IBaseCommandLineDefinition,
   ICommandLineFlagDefinition,
   ICommandLineStringDefinition,
+  ICommandLineStringListDefinition,
   ICommandLineIntegerDefinition
 } from './CommandLineDefinition';
 
@@ -15,7 +16,7 @@ export {
   ICommandLineParserData,
   CommandLineParameter,
   CommandLineStringParameter,
-  CommandLineListParameter,
+  CommandLineStringListParameter,
   CommandLineFlagParameter,
   CommandLineIntegerParameter
 } from './CommandLineParameter';

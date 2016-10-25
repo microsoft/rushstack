@@ -159,7 +159,7 @@ describe('StreamCollator tests', () => {
 
   function testActionOnStream(action: () => void,
     stream: NodeJS.EventEmitter, event: string, cb: () => void): void {
-    let wrapper: () => void = () => {
+    const wrapper: () => void = () => {
       stream.removeListener(event, wrapper);
       cb();
     };

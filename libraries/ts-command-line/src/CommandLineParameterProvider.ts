@@ -7,6 +7,7 @@ import {
   IBaseCommandLineDefinition,
   ICommandLineFlagDefinition,
   ICommandLineStringDefinition,
+  ICommandLineStringListDefinition,
   ICommandLineIntegerDefinition
 } from './CommandLineDefinition';
 
@@ -16,6 +17,7 @@ import {
   IConverterFunction,
   CommandLineFlagParameter,
   CommandLineStringParameter,
+  CommandLineStringListParameter,
   CommandLineIntegerParameter
 } from './CommandLineParameter';
 
@@ -54,6 +56,15 @@ abstract class CommandLineParameterProvider {
    */
   protected defineStringParameter(options: ICommandLineStringDefinition): CommandLineStringParameter {
     return this._createParameter(options) as CommandLineStringParameter;
+  }
+
+  /**
+   * Defines a list of string by specifying the flag multiple times.
+   */
+  protected defineStringListParameter(options: ICommandLineStringListDefinition): CommandLineStringListParameter {
+    return this._createParameter(options, {
+      action: 'append'
+    }) as CommandLineStringListParameter;
   }
 
   /**

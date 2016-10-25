@@ -35,7 +35,7 @@ export class CommandLineParameter<T> {
 
 export class CommandLineStringParameter extends CommandLineParameter<string> { }
 
-export class CommandLineListParameter extends CommandLineParameter<string[]> { }
+export class CommandLineStringListParameter extends CommandLineParameter<string[]> { }
 
 export class CommandLineFlagParameter extends CommandLineParameter<boolean> { }
 
