@@ -3,7 +3,7 @@
  */
 
 import * as colors from 'colors';
-import * as fs from 'fs';
+import * as fs from 'fs-extra';
 import * as glob from 'glob';
 import * as os from 'os';
 import * as path from 'path';

@@ -1,4 +1,4 @@
-﻿import * as fs from 'fs';
+﻿import * as fs from 'fs-extra';
 import * as os from 'os';
 import * as jju from 'jju';
 import Utilities from './Utilities';

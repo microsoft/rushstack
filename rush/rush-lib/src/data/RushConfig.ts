@@ -3,7 +3,7 @@
  */
 
 import * as path from 'path';
-import * as fs from 'fs';
+import * as fs from 'fs-extra';
 import * as os from 'os';
 import * as semver from 'semver';
 
