@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Manage building/installing of multiple NPM package folders",
   "scripts": {
     "build": "gulp",
