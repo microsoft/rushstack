@@ -8,6 +8,7 @@ const prettyTime = require('pretty-hrtime');
 /* tslint:enable:typedef */
 import * as state from './State';
 import { getFlagValue } from './config';
+import { getConfig } from './index';
 
 const WROTE_ERROR_KEY: string = '__gulpCoreBuildWroteError';
 
@@ -54,7 +55,7 @@ let globalInstance: any = global as any;
 const localCache: ILocalCache = globalInstance.__loggingCache = globalInstance.__loggingCache || {
   warnings: [],
   errors: [],
-  testsRun: 0,
+  testsRun: 0,;
   subTasksRun: 0,
   testsPassed: 0,
   testsFailed: 0,
@@ -442,8 +443,13 @@ export function warn(...args: Array<string | Chalk.ChalkChain>): void {
   const stringMessage: string = args.join(' ');
 
   if (!localCache.errorAndWarningSupressions[stringMessage]) {
-    localCache.warnings.push(stringMessage);
-    log(gutil.colors.yellow.apply(undefined, args));
+    if (getConfig().showWarningsAsErrors) {
+      localCache.errors.push(stringMessage);
+      log(gutil.colors.red.apply(undefined, args));
+    } else {
+      localCache.warnings.push(stringMessage);
+      log(gutil.colors.yellow.apply(undefined, args));
+    }
   }
 }
 
