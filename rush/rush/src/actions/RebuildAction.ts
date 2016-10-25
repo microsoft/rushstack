@@ -2,13 +2,16 @@
  * @Copyright (c) Microsoft Corporation.  All rights reserved.
  */
 
+/// <reference path='../../typings/tsd.d.ts' />
+
 import * as colors from 'colors';
 import * as fs from 'fs';
 import * as os from 'os';
 import {
   CommandLineAction,
   CommandLineFlagParameter,
-  CommandLineIntegerParameter
+  CommandLineIntegerParameter,
+  CommandLineStringListParameter
 } from '@microsoft/ts-command-line';
 import {
   TestErrorDetector,
@@ -19,6 +22,7 @@ import {
   IErrorDetectionRule,
   JsonFile,
   RushConfig,
+  RushConfigProject,
   IRushLinkJson,
   Stopwatch
 } from '@microsoft/rush-lib';
@@ -30,11 +34,15 @@ import TaskRunner from '../taskRunner/TaskRunner';
 export default class RebuildAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
   private _rushConfig: RushConfig;
+  private _rushLinkJson: IRushLinkJson;
+  private _dependentList: { [project: string]: Set<string> };
   private _quietParameter: CommandLineFlagParameter;
   private _productionParameter: CommandLineFlagParameter;
   private _vsoParameter: CommandLineFlagParameter;
   private _npmParamter: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineIntegerParameter;
+  private _toFlag: CommandLineStringListParameter;
+  private _fromFlag: CommandLineStringListParameter;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -74,47 +82,43 @@ export default class RebuildAction extends CommandLineAction {
       description: 'Change the limit the number of active builds from number of machine cores'
         + ' to N simultaneous processes'
     });
+    this._toFlag = this.defineStringListParameter({
+      parameterLongName: '--to',
+      parameterShortName: '-t',
+      description: 'Build all dependencies of the listed project'
+    });
+    this._fromFlag = this.defineStringListParameter({
+      parameterLongName: '--from',
+      parameterShortName: '-f',
+      description: 'Build all projects which are downstream from the listed project'
+    });
   }
 
   protected onExecute(): void {
-    this._rushConfig = this._rushConfig = RushConfig.loadFromDefaultLocation();
+    this._rushConfig = RushConfig.loadFromDefaultLocation();
+
+    if (!fs.existsSync(this._rushConfig.rushLinkJsonFilename)) {
+      throw new Error('File not found: ' + this._rushConfig.rushLinkJsonFilename
+        + os.EOL + 'Did you run "rush link"?');
+    }
+    this._rushLinkJson = JsonFile.loadJsonFile(this._rushConfig.rushLinkJsonFilename);
 
     console.log('Starting "rush rebuild"' + os.EOL);
     const stopwatch: Stopwatch = Stopwatch.start();
 
     const taskRunner: TaskRunner = new TaskRunner(this._quietParameter.value, this._parallelismParameter.value);
 
-    // Create tasks and register with tax runner
-    for (const rushProject of this._rushConfig.projects) {
-      const errorMode: ErrorDetectionMode = this._vsoParameter.value
-        ? ErrorDetectionMode.VisualStudioOnline
-        : ErrorDetectionMode.LocalBuild;
+    const toFlags: string[] = this._toFlag.value;
+    const fromFlags: string[] = this._fromFlag.value;
 
-      const activeRules: IErrorDetectionRule[] = [
-        TestErrorDetector,
-        TsErrorDetector,
-        TsLintErrorDetector
-      ];
-      const errorDetector: ErrorDetector = new ErrorDetector(activeRules);
-      const projectTask: ProjectBuildTask = new ProjectBuildTask(rushProject,
-                                                                 this._rushConfig,
-                                                                 errorDetector,
-                                                                 errorMode,
-                                                                 this._productionParameter.value,
-                                                                 this._npmParamter.value);
-      taskRunner.addTask(projectTask);
+    if (toFlags) {
+      this._registerToFlags(taskRunner, toFlags);
     }
-
-    // Add task dependencies
-    if (!fs.existsSync(this._rushConfig.rushLinkJsonFilename)) {
-      throw new Error('File not found: ' + this._rushConfig.rushLinkJsonFilename
-        + os.EOL + 'Did you run "rush link"?');
+    if (fromFlags) {
+      this._registerFromFlags(taskRunner, fromFlags);
     }
-
-    const rushLinkJson: IRushLinkJson = JsonFile.loadJsonFile(this._rushConfig.rushLinkJsonFilename);
-    for (const projectName of Object.keys(rushLinkJson.localLinks)) {
-      const projectDependencies: string[] = rushLinkJson.localLinks[projectName];
-      taskRunner.addDependencies(projectName, projectDependencies);
+    if (!toFlags && !fromFlags) {
+      this._registerAll(taskRunner);
     }
 
     taskRunner.execute()
@@ -127,5 +131,116 @@ export default class RebuildAction extends CommandLineAction {
         console.log(colors.red(`rush rebuild - Errors!`));
         process.exit(1);
       });
+  }
+
+  private _registerToFlags(taskRunner: TaskRunner, toFlags: string[]): void {
+    for (const toFlag of toFlags) {
+      if (!this._rushConfig.getProjectByName(toFlag)) {
+        throw new Error(`The project '${toFlag}' does not exist in rush.json`);
+      }
+
+      const deps: Set<string> = this._collectAllDependencies(toFlag);
+
+      // Register any dependencies it may have
+      deps.forEach(dep => this._registerTask(taskRunner, this._rushConfig.getProjectByName(dep)));
+
+      // Register the dependency graph to the TaskRunner
+      deps.forEach(dep => taskRunner.addDependencies(dep, this._rushLinkJson.localLinks[dep] || []));
+    }
+  }
+
+  private _registerFromFlags(taskRunner: TaskRunner, fromFlags: string[]): void {
+    for (const fromFlag of fromFlags) {
+      if (!this._rushConfig.getProjectByName(fromFlag)) {
+        throw new Error(`The project '${fromFlag}' does not exist in rush.json`);
+      }
+
+      // Only register projects which depend on the current package, as well as things that depend on them
+      this._buildDependentGraph();
+
+      // We will assume this project will be built, but act like it has no dependencies
+      const dependents: Set<string> = this._collectAllDependents(fromFlag);
+      dependents.add(fromFlag);
+
+      // Register all downstream dependents
+      dependents.forEach(dependent => this._registerTask(taskRunner, this._rushConfig.getProjectByName(dependent)));
+
+      // Only register dependencies graph for projects which have been registered
+      // e.g. package C may depend on A & B, but if we are only building A's downstream, we will ignore B
+      dependents.forEach(dependent =>
+        taskRunner.addDependencies(dependent,
+          this._rushLinkJson.localLinks[dependent].filter(dep => dependents.has(dep))));
+    }
+  }
+
+  private _registerAll(taskRunner: TaskRunner): void {
+    // Register all tasks
+    for (const rushProject of this._rushConfig.projects) {
+      this._registerTask(taskRunner, rushProject);
+    }
+
+    // Add all dependencies
+    for (const projectName of Object.keys(this._rushLinkJson.localLinks)) {
+      taskRunner.addDependencies(projectName, this._rushLinkJson.localLinks[projectName]);
+    }
+  }
+
+  /**
+   * Collects all upstream dependencies for a certain project
+   */
+  private _collectAllDependencies(project: string): Set<string> {
+    const deps: Set<string> = new Set<string>(this._rushLinkJson.localLinks[project]);
+    deps.forEach(dep => this._collectAllDependencies(dep).forEach(innerDep => deps.add(innerDep)));
+    deps.add(project);
+    return deps;
+  }
+
+  /**
+   * Collects all downstream dependents of a certain project
+   */
+  private _collectAllDependents(project: string): Set<string> {
+    const deps: Set<string> = new Set<string>(this._dependentList[project]);
+    deps.forEach(dep => this._collectAllDependents(dep).forEach(innerDep => deps.add(innerDep)));
+    return deps;
+  }
+
+  /**
+   * Inverts the localLinks to arrive at the dependent graph, rather than using the dependency graph
+   * this helps when using the --from flag
+   */
+  private _buildDependentGraph(): void {
+    this._dependentList = {};
+
+    Object.keys(this._rushLinkJson.localLinks).forEach(project => {
+      this._rushLinkJson.localLinks[project].forEach(dep => {
+        if (!this._dependentList[dep]) {
+          this._dependentList[dep] = new Set<string>();
+        }
+        this._dependentList[dep].add(project);
+      });
+    });
+  }
+
+  private _registerTask(taskRunner: TaskRunner, project: RushConfigProject): void {
+    const errorMode: ErrorDetectionMode = this._vsoParameter.value
+      ? ErrorDetectionMode.VisualStudioOnline
+      : ErrorDetectionMode.LocalBuild;
+
+    const activeRules: IErrorDetectionRule[] = [
+      TestErrorDetector,
+      TsErrorDetector,
+      TsLintErrorDetector
+    ];
+    const errorDetector: ErrorDetector = new ErrorDetector(activeRules);
+    const projectTask: ProjectBuildTask = new ProjectBuildTask(project,
+                                                                this._rushConfig,
+                                                                errorDetector,
+                                                                errorMode,
+                                                                this._productionParameter.value,
+                                                                this._npmParamter.value);
+
+    if (!taskRunner.hasTask(projectTask.name)) {
+      taskRunner.addTask(projectTask);
+    }
   }
 }
