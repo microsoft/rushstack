@@ -201,9 +201,18 @@ export default class InstallAction extends CommandLineAction {
         }
       }
 
+      const npmInstallArgs: string[] = ['install'];
+      if (this._rushConfig.cacheFolder) {
+        npmInstallArgs.push('--cache', this._rushConfig.cacheFolder);
+      }
+
+      if (this._rushConfig.tmpFolder) {
+        npmInstallArgs.push('--tmp', this._rushConfig.tmpFolder);
+      }
+
       // Next, run "npm install" in the common folder
-      console.log(os.EOL + 'Running "npm install" in ' + this._rushConfig.commonFolder);
-      Utilities.executeCommandWithRetry(npmToolFilename, ['install'], MAX_INSTALL_ATTEMPTS,
+      console.log(os.EOL + `Running "npm ${npmInstallArgs.join(' ')}" in ${this._rushConfig.commonFolder}`);
+      Utilities.executeCommandWithRetry(npmToolFilename, npmInstallArgs, MAX_INSTALL_ATTEMPTS,
         this._rushConfig.commonFolder);
 
       // Create the marker file to indicate a successful install

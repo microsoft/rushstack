@@ -20,6 +20,8 @@ import Utilities from '../utilities/Utilities';
 export interface IRushConfigJson {
   $schema: string;
   commonFolder: string;
+  cacheFolder: string;
+  tmpFolder: string;
   npmVersion: string;
   rushMinimumVersion: string;
   nodeSupportedVersionRange?: string;
@@ -47,6 +49,8 @@ export default class RushConfig {
   private _rushJsonFolder: string;
   private _commonFolder: string;
   private _commonFolderName: string;
+  private _cacheFolder: string;
+  private _tmpFolder: string;
   private _tempModulesFolder: string;
   private _homeFolder: string;
   private _rushLinkJsonFilename: string;
@@ -185,6 +189,14 @@ export default class RushConfig {
     }
     this._commonFolderName = path.basename(this._commonFolder);
 
+    if (rushConfigJson.cacheFolder) {
+      this._cacheFolder = path.resolve(path.join(this._rushJsonFolder, rushConfigJson.cacheFolder));
+    }
+
+    if (rushConfigJson.tmpFolder) {
+      this._tmpFolder = path.resolve(path.join(this._rushJsonFolder, rushConfigJson.tmpFolder));
+    }
+
     this._tempModulesFolder = path.join(this._commonFolder, 'temp_modules');
 
     const unresolvedUserFolder: string = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
@@ -270,6 +282,24 @@ export default class RushConfig {
    */
   public get commonFolderName(): string {
     return this._commonFolderName;
+  }
+
+  /**
+   * The cache folder specified in rush.json. If no folder is specified, this
+   * value is undefined.
+   * Example: "C:\MyRepo\common\npm-cache"
+   */
+  public get cacheFolder(): string {
+    return this._cacheFolder;
+  }
+
+  /**
+   * The tmp folder specified in rush.json. If no folder is specified, this
+   * value is undefined.
+   * Example: "C:\MyRepo\common\__temp"
+   */
+  public get tmpFolder(): string {
+    return this._tmpFolder;
   }
 
   /**
