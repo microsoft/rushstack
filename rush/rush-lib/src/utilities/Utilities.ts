@@ -3,10 +3,12 @@
  */
 
 import * as child_process from 'child_process';
-import * as fs from 'fs';
+import * as fs from 'fs-extra';
 import * as os from 'os';
 import * as rimraf from 'rimraf';
 import * as tty from 'tty';
+
+const deasync: { sleep: (ms: number) => void } = require('deasync');
 
 export default class Utilities {
   /**
@@ -219,4 +221,22 @@ export default class Utilities {
     return targetString.split(searchValue).join(replaceValue);
   }
 
+  public static moveSync(sourcePath: string, destPath: string, options: fs.MoveOptions = {}): void {
+    let complete: boolean = false;
+    let error: Error;
+
+    fs.move(sourcePath, destPath, options, (err: Error) => {
+      complete = true;
+      error = err;
+    });
+
+    // Wait until "complete" gets set to "true"
+    while (!complete) {
+      deasync.sleep(100);
+    }
+
+    if (error) {
+      throw error;
+    }
+  }
 }
