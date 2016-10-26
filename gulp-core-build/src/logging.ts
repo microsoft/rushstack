@@ -192,7 +192,11 @@ function writeSummary(callback: () => void): void {
       if (shouldRelogIssues && getWarnings().length) {
         const warnings: string[] = getWarnings();
         for (let x: number = 0; x < warnings.length; x++) {
-          console.error(gutil.colors.yellow(warnings[x]));
+          if (getConfig().shouldWarningsFailBuild) {
+            console.error(gutil.colors.yellow(warnings[x]));
+          } else {
+            console.log(gutil.colors.yellow(warnings[x]));
+          }
         }
       }
 
@@ -647,7 +651,7 @@ export function initialize(gulp: gulp.Gulp, gulpErrorCallback?: (err: Error) => 
     writeSummary(() => {
       // error if we have any errors
       if (localCache.taskErrors > 0 ||
-        (getWarnings().length && getConfig().showWarningsAsErrors) ||
+        (getWarnings().length && getConfig().shouldWarningsFailBuild) ||
         getErrors().length ||
         localCache.testsFailed > 0) {
         exitProcess(1);
