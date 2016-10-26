@@ -49,7 +49,8 @@ let _buildConfig: IBuildConfig = {
   buildErrorIconPath: path.resolve(__dirname, 'fail.png'),
   verbose: getFlagValue('verbose', false),
   production: getFlagValue('production', false),
-  args: args
+  args: args,
+  shouldWarningsFailBuild: false
 };
 
 /**
