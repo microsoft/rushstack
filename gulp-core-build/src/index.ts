@@ -50,7 +50,7 @@ let _buildConfig: IBuildConfig = {
   verbose: getFlagValue('verbose', false),
   production: getFlagValue('production', false),
   args: args,
-  showWarningsAsErrors: false
+  shouldWarningsFailBuild: false
 };
 
 /**

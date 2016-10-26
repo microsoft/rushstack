@@ -49,8 +49,8 @@ export interface IBuildConfig {
   /** Build a full production build. */
   production?: boolean;
 
-  /** Show warnings as errors (write them in red vs yellow to stderr, and fail the build) */
-  showWarningsAsErrors?: boolean;
+  /** Should warnings be written to STDERR and cause build to return non-zero exit code */
+  shouldWarningsFailBuild?: boolean;
 
   /** Arguments passed in. */
   args?: { [name: string]: string | boolean };
