@@ -234,7 +234,7 @@ function writeSummary(callback: () => void): void {
         }
 
         if (getWarnings().length) {
-          log('Task warnings:', gutil.colors.yellow(getWarnings().length + '\r\n' + getWarnings().join('\r\n')));
+          log('Task warnings:', gutil.colors.yellow(getWarnings().length.toString()));
         }
 
         let totalErrors: number = 0;
@@ -443,7 +443,7 @@ export function warn(...args: Array<string | Chalk.ChalkChain>): void {
   const stringMessage: string = args.join(' ');
 
   if (!localCache.errorAndWarningSupressions[stringMessage]) {
-    localCache.errors.push(stringMessage);
+    localCache.warnings.push(stringMessage);
     log(gutil.colors.yellow.apply(undefined, args));
   }
 }
