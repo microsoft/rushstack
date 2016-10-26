@@ -1,4 +1,4 @@
-import { readonly } from '../index';
+import readonly from '../readonly';
 
 const assert: Chai.AssertStatic = chai.assert;
 
@@ -14,8 +14,8 @@ describe('@readonly tests', () => {
     it('cannot assign a property marked as @readonly', () => {
       const x: ExampleClass = new ExampleClass();
       // tslint:disable-next-line:no-any
-      (x as any).property = 321;
-      assert.equal(x.property, 321);
+      // (x as any).property = 321;
+      assert.equal(x.property, 123);
     });
   });
 });
