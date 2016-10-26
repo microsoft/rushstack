@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/@ms/sp-build-internal-web/lib/schemas/config.schema.json",
+  "entries": [
+    {
+      "entry": "./lib/index.js",
+      "manifest": "./src/decorators.manifest.json",
+      "outputPath": "dist/decorators.js"
+    }
+  ],
+  "externals": {
+  },
+  "localizedResources": {
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "@ms/decorators",
+  "version": "0.1.0",
+  "description": "A very conservative set of decorators for TypeScript projects",
+  "license": "SEE LICENSE IN LICENSE.docx",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "devDependencies": {
+    "@ms/sp-build-internal-web": "~0.5.0",
+    "chai": "~3.5.0",
+    "gulp": "~3.9.1"
+  },
+  "dependencies": {
+    "@microsoft/sp-module-loader": "~0.4.0"
+  },
+  "scripts": {
+    "build": "gulp bundle",
+    "clean": "gulp nuke",
+    "test": "gulp test"
+  }
+}
