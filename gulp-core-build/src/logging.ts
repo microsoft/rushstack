@@ -8,6 +8,7 @@ const prettyTime = require('pretty-hrtime');
 /* tslint:enable:typedef */
 import * as state from './State';
 import { getFlagValue } from './config';
+import { getConfig } from './index';
 
 const WROTE_ERROR_KEY: string = '__gulpCoreBuildWroteError';
 
@@ -191,7 +192,11 @@ function writeSummary(callback: () => void): void {
       if (shouldRelogIssues && getWarnings().length) {
         const warnings: string[] = getWarnings();
         for (let x: number = 0; x < warnings.length; x++) {
-          console.log(gutil.colors.yellow(warnings[x]));
+          if (getConfig().shouldWarningsFailBuild) {
+            console.error(gutil.colors.yellow(warnings[x]));
+          } else {
+            console.log(gutil.colors.yellow(warnings[x]));
+          }
         }
       }
 
@@ -233,7 +238,7 @@ function writeSummary(callback: () => void): void {
         }
 
         if (getWarnings().length) {
-          log('Task warnings:', gutil.colors.yellow(getWarnings().length + '\r\n' + getWarnings().join('\r\n')));
+          log('Task warnings:', gutil.colors.yellow(getWarnings().length.toString()));
         }
 
         let totalErrors: number = 0;
@@ -646,6 +651,7 @@ export function initialize(gulp: gulp.Gulp, gulpErrorCallback?: (err: Error) => 
     writeSummary(() => {
       // error if we have any errors
       if (localCache.taskErrors > 0 ||
+        (getWarnings().length && getConfig().shouldWarningsFailBuild) ||
         getErrors().length ||
         localCache.testsFailed > 0) {
         exitProcess(1);
