@@ -1,7 +1,5 @@
 import {
   CopyTask,
-  CheckBuildReceiptTask,
-  UpdateBuildReceiptTask,
   GenerateShrinkwrapTask,
   IExecutable,
   ValidateShrinkwrapTask,
@@ -30,25 +28,13 @@ preCopy.name = 'pre-copy';
 export const postCopy: CopyTask = new CopyTask();
 postCopy.name = 'post-copy';
 
-export const checkReceipt: CheckBuildReceiptTask = new CheckBuildReceiptTask();
-export const updateReceipt: UpdateBuildReceiptTask = new UpdateBuildReceiptTask();
-
 const sourceMatch: string[] = [
   'src/**/*.{ts,tsx,scss,js,txt,html}',
   '!src/**/*.scss.ts'
 ];
 
 // Define default task groups.
-let buildTasks: IExecutable = task(
-  'build',
-  serial(
-    checkReceipt,
-    preCopy,
-    sass,
-    parallel(tslint, typescript, text),
-    postCopy,
-    updateReceipt));
-
+let buildTasks: IExecutable = task('build', serial(preCopy, sass, parallel(tslint, typescript, text), postCopy));
 let bundleTasks: IExecutable = task('bundle', serial(buildTasks, webpack));
 const postProcessSourceMaps: PostProcessSourceMaps = new PostProcessSourceMaps();
 const validateShrinkwrapTask: ValidateShrinkwrapTask = new ValidateShrinkwrapTask();
