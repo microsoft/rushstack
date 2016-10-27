@@ -47,8 +47,8 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
     this.taskConfig = taskConfig;
   }
 
-  public isEnabled(): boolean {
-    return true;
+  public isEnabled(buildConfig: IBuildConfig): boolean {
+    return (!buildConfig || !buildConfig.isRedundantBuild);
   }
 
   public abstract executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (result?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;

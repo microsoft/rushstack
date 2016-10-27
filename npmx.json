@@ -65,6 +65,10 @@
     {
       "packageName": "web-build-tools-scripts",
       "projectFolder": "scripts"
+    },
+    {
+      "packageName": "test-web-library-build",
+      "projectFolder": "test-web-library-build"
     }
   ]
 }
