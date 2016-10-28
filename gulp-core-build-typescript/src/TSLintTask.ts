@@ -2,12 +2,12 @@ import { GulpTask } from '@microsoft/gulp-core-build';
 import gulpType = require('gulp');
 /* tslint:disable:typedef */
 const cached = require('gulp-cache');
+const md5 = require('md5');
+const merge = require('lodash').merge;
 /* tslint:enable:typedef */
 import through2 = require('through2');
 import gutil = require('gulp-util');
 import tslint = require('tslint');
-import { merge } from 'lodash';
-import md5 = require('md5');
 import * as path from 'path';
 import * as lintTypes from 'tslint/lib/lint';
 import * as ts from 'typescript';
@@ -140,7 +140,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
             rulesDirectory: taskScope.taskConfig.rulesDirectory || []
           };
 
-          const tslintOutput: tslint = new tslint(file.relative, file.contents.toString('utf8'), options);
+          const tslintOutput: tslint = new tslint(file.relative, file.contents.toString(), options);
           /* tslint:disable:no-string-literal */
           const result: lintTypes.LintResult = file['tslint'] = tslintOutput.lint();
           /* tslint:enable:no-string-literal */

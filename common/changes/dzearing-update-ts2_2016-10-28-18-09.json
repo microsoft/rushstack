@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comments": "Updating default TS build to 2.0.3",
+      "type": "patch"
+    }
+  ],
+  "email": "dzearing@microsoft.com"
+}
