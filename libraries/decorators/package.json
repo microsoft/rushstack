@@ -1,5 +1,5 @@
 {
-  "name": "@ms/decorators",
+  "name": "@microsoft/decorators",
   "version": "0.1.0",
   "description": "A very conservative set of decorators for TypeScript projects",
   "license": "SEE LICENSE IN LICENSE.docx",
