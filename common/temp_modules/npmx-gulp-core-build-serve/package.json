@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@microsoft/node-library-build": ">=0.4.0 <1.0.0",
+    "typescript": "2.0.3",
     "deasync": "~0.1.7",
     "express": "~4.14.0",
     "gulp": "~3.9.1",

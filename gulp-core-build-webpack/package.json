@@ -21,7 +21,8 @@
     "webpack": "~1.13.0"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": ">=0.4.0 <1.0.0"
+    "@microsoft/node-library-build": ">=0.4.0 <1.0.0",
+    "typescript": "2.0.3"
   },
   "optionalDependencies": {
     "fsevents": "*"
