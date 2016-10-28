@@ -1,5 +1,5 @@
-import virtual from '../virtual';
-import override from '../override';
+import { virtual } from '../virtual';
+import { override } from '../override';
 
 const assert: Chai.AssertStatic = chai.assert;
 

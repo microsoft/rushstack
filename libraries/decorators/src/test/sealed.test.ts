@@ -1,4 +1,4 @@
-import sealed from '../sealed';
+import { sealed } from '../sealed';
 
 const assert: Chai.AssertStatic = chai.assert;
 

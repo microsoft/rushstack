@@ -5,10 +5,7 @@
  * In the future, it may be enforced at runtime.
  * @alpha
  */
-function sealed(target: Function): void {
+export function sealed(target: Function): void {
   // Eventually we may implement runtime validation (e.g. in DEBUG builds)
   // but currently this decorator is only used by the build tools.
 }
-
-// tslint:disable-next-line:export-name
-export default sealed as ClassDecorator;

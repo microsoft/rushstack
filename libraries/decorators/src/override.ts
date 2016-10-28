@@ -1,3 +1,5 @@
+// tslint:disable:no-any
+
 /**
  * This decorator is applied to a class's member function or property.
  * It indicates that the definition overrides another defintion (of the same name)
@@ -6,11 +8,8 @@
  * In the future, it may be enforced at runtime.
  * @alpha
  */
-function override(target: Object, propertyKey: string | symbol,
-  descriptor: TypedPropertyDescriptor<void>): void {
+export function override(target: Object, propertyKey: string | symbol,
+  descriptor: TypedPropertyDescriptor<any>): void {
   // Eventually we may implement runtime validation (e.g. in DEBUG builds)
   // but currently this decorator is only used by the build tools.
 }
-
-// tslint:disable-next-line:export-name
-export default override as MethodDecorator;
