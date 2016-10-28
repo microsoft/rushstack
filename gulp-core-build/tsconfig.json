@@ -3,6 +3,9 @@
     "target": "es5",
     "module": "commonjs",
     "declaration": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "types": [
+      "mocha"
+    ]
   }
 }
