@@ -5,6 +5,8 @@
  * Detects an error from TypeScript Linter
  */
 
+// tslint:disable:export-name
+
 import { IErrorDetectionRule, RegexErrorDetector } from '../ErrorDetector';
 import { BuildTaskError } from '../TaskError';
 
