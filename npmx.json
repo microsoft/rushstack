@@ -8,6 +8,7 @@
     {
       "packageName": "@microsoft/gulp-core-build",
       "projectFolder": "gulp-core-build",
+      "shouldTrackChanges": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
       ]
@@ -15,6 +16,7 @@
     {
       "packageName": "@microsoft/gulp-core-build-karma",
       "projectFolder": "gulp-core-build-karma",
+      "shouldTrackChanges": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
       ]
@@ -22,6 +24,7 @@
     {
       "packageName": "@microsoft/gulp-core-build-mocha",
       "projectFolder": "gulp-core-build-mocha",
+      "shouldTrackChanges": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
       ]
@@ -29,6 +32,7 @@
     {
       "packageName": "@microsoft/gulp-core-build-sass",
       "projectFolder": "gulp-core-build-sass",
+      "shouldTrackChanges": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
       ]
@@ -36,6 +40,7 @@
     {
       "packageName": "@microsoft/gulp-core-build-serve",
       "projectFolder": "gulp-core-build-serve",
+      "shouldTrackChanges": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
       ]
@@ -43,6 +48,7 @@
     {
       "packageName": "@microsoft/gulp-core-build-typescript",
       "projectFolder": "gulp-core-build-typescript",
+      "shouldTrackChanges": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
       ]
@@ -56,11 +62,13 @@
     },
     {
       "packageName": "@microsoft/node-library-build",
-      "projectFolder": "node-library-build"
+      "projectFolder": "node-library-build",
+      "shouldTrackChanges": true
     },
     {
       "packageName": "@microsoft/web-library-build",
-      "projectFolder": "web-library-build"
+      "projectFolder": "web-library-build",
+      "shouldTrackChanges": true
     },
     {
       "packageName": "web-build-tools-scripts",

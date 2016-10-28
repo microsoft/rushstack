@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "project": "@microsoft/gulp-core-build-typescript",
+      "comments": "Making TypeScript 2.0.3 the default."
+    }
+  ],
+  "email": "dzearing@microsoft.com"
+}
