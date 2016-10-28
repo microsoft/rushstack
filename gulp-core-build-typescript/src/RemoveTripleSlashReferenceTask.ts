@@ -1,10 +1,10 @@
 import gulp = require('gulp');
 import gulpUtil = require('gulp-util');
-import md5 = require('md5');
 import * as path from 'path';
 import through2 = require('through2');
 /* tslint:disable:typedef */
 const cached = require('gulp-cache');
+const md5 = require('md5');
 /* tslint:enable:typedef */
 
 import { GulpTask } from '@microsoft/gulp-core-build';
@@ -40,7 +40,7 @@ export class RemoveTripleSlashReferenceTask extends GulpTask<IRemoveTripleSlashR
           /* tslint:enable:no-function-expression */
 
           try {
-            const rawContents: string = file.contents.toString(encoding);
+            const rawContents: string = file.contents.toString();
             const relativePathToCurrentFile: string = path.relative(taskScope.buildConfig.rootPath, file.path);
             taskScope.logVerbose(relativePathToCurrentFile);
 

@@ -48,7 +48,7 @@
     },
     "@microsoft/node-library-build": {
       "version": "0.4.0",
-      "from": "@microsoft/node-library-build@>=0.3.0 <1.0.0",
+      "from": "@microsoft/node-library-build@>=0.4.0 <1.0.0",
       "resolved": "https://registry.npmjs.org/@microsoft/node-library-build/-/node-library-build-0.4.0.tgz"
     },
     "@types/rimraf": {
@@ -447,9 +447,9 @@
       "resolved": "https://registry.npmjs.org/camelcase-keys/-/camelcase-keys-2.1.0.tgz"
     },
     "caniuse-db": {
-      "version": "1.0.30000569",
+      "version": "1.0.30000570",
       "from": "caniuse-db@>=1.0.30000488 <2.0.0",
-      "resolved": "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000569.tgz"
+      "resolved": "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000570.tgz"
     },
     "cardinal": {
       "version": "1.0.0",
@@ -4198,33 +4198,6 @@
       "from": "temp_modules/npmx-gulp-core-build-typescript",
       "resolved": "file:temp_modules/npmx-gulp-core-build-typescript",
       "dependencies": {
-        "@microsoft/gulp-core-build": {
-          "version": "0.9.7",
-          "from": "@microsoft/gulp-core-build@>=0.9.1 <0.10.0",
-          "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build/-/gulp-core-build-0.9.7.tgz"
-        },
-        "@microsoft/gulp-core-build-mocha": {
-          "version": "0.3.2",
-          "from": "@microsoft/gulp-core-build-mocha@>=0.3.0 <0.4.0",
-          "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-mocha/-/gulp-core-build-mocha-0.3.2.tgz"
-        },
-        "@microsoft/gulp-core-build-typescript": {
-          "version": "0.5.4",
-          "from": "@microsoft/gulp-core-build-typescript@>=0.5.1 <0.6.0",
-          "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-typescript/-/gulp-core-build-typescript-0.5.4.tgz",
-          "dependencies": {
-            "typescript": {
-              "version": "1.8.10",
-              "from": "typescript@>=1.8.10 <1.9.0",
-              "resolved": "https://registry.npmjs.org/typescript/-/typescript-1.8.10.tgz"
-            }
-          }
-        },
-        "@microsoft/node-library-build": {
-          "version": "0.3.3",
-          "from": "@microsoft/node-library-build@>=0.3.1 <0.4.0",
-          "resolved": "https://registry.npmjs.org/@microsoft/node-library-build/-/node-library-build-0.3.3.tgz"
-        },
         "lodash": {
           "version": "4.15.0",
           "from": "lodash@>=4.15.0 <4.16.0",
