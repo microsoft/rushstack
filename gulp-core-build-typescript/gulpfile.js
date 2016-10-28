@@ -8,6 +8,7 @@ build.tslint.setConfig({
 });
 
 build.typescript.setConfig({
+  typescript: require('typescript'),
   sourceMatch: [
     'src/**/*.ts',
     'src/**/*.tsx',
