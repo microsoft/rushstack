@@ -6,6 +6,7 @@
  * from the base class.  The base class definition must be marked as @virtual.
  * This decorator is currently used for documentation purposes only.
  * In the future, it may be enforced at runtime.
+ * 
  * @alpha
  */
 export function override(target: Object, propertyKey: string | symbol,

@@ -3,6 +3,7 @@
  * It indicates that subclasses must not inherit from this class.
  * This decorator is currently used for documentation purposes only.
  * In the future, it may be enforced at runtime.
+ * 
  * @alpha
  */
 export function sealed(target: Function): void {
