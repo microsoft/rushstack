@@ -192,11 +192,7 @@ function writeSummary(callback: () => void): void {
       if (shouldRelogIssues && getWarnings().length) {
         const warnings: string[] = getWarnings();
         for (let x: number = 0; x < warnings.length; x++) {
-          if (getConfig().shouldWarningsFailBuild) {
-            console.error(gutil.colors.yellow(warnings[x]));
-          } else {
-            console.log(gutil.colors.yellow(warnings[x]));
-          }
+          console.error(gutil.colors.yellow(warnings[x]));
         }
       }
 
