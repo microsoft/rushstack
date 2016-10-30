@@ -8,6 +8,10 @@
       "es6-promise",
       "mocha",
       "node"
+    ],
+    "typeRoots": [
+      "../common/node_modules/@types"
     ]
+
   }
 }
