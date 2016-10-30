@@ -56,6 +56,11 @@
       "from": "@types/assertion-error@>=1.0.30 <2.0.0",
       "resolved": "https://registry.npmjs.org/@types/assertion-error/-/assertion-error-1.0.30.tgz"
     },
+    "@types/bluebird": {
+      "version": "3.0.35",
+      "from": "@types/bluebird@*",
+      "resolved": "https://registry.npmjs.org/@types/bluebird/-/bluebird-3.0.35.tgz"
+    },
     "@types/chai": {
       "version": "3.4.34",
       "from": "@types/chai@>=3.4.34 <4.0.0",
@@ -71,6 +76,16 @@
       "from": "@types/es6-promise@0.0.32",
       "resolved": "https://registry.npmjs.org/@types/es6-promise/-/es6-promise-0.0.32.tgz"
     },
+    "@types/express": {
+      "version": "4.0.33",
+      "from": "@types/express@*",
+      "resolved": "https://registry.npmjs.org/@types/express/-/express-4.0.33.tgz"
+    },
+    "@types/express-serve-static-core": {
+      "version": "4.0.38",
+      "from": "@types/express-serve-static-core@*",
+      "resolved": "https://registry.npmjs.org/@types/express-serve-static-core/-/express-serve-static-core-4.0.38.tgz"
+    },
     "@types/gulp": {
       "version": "3.8.32",
       "from": "@types/gulp@>=3.8.32 <4.0.0",
@@ -80,6 +95,21 @@
       "version": "3.0.29",
       "from": "@types/gulp-util@>=3.0.29 <4.0.0",
       "resolved": "https://registry.npmjs.org/@types/gulp-util/-/gulp-util-3.0.29.tgz"
+    },
+    "@types/karma": {
+      "version": "0.13.33",
+      "from": "@types/karma@>=0.13.33 <0.14.0",
+      "resolved": "https://registry.npmjs.org/@types/karma/-/karma-0.13.33.tgz"
+    },
+    "@types/log4js": {
+      "version": "0.0.32",
+      "from": "@types/log4js@*",
+      "resolved": "https://registry.npmjs.org/@types/log4js/-/log4js-0.0.32.tgz"
+    },
+    "@types/mime": {
+      "version": "0.0.29",
+      "from": "@types/mime@*",
+      "resolved": "https://registry.npmjs.org/@types/mime/-/mime-0.0.29.tgz"
     },
     "@types/mocha": {
       "version": "2.2.32",
@@ -110,6 +140,11 @@
       "version": "5.3.30",
       "from": "@types/semver@>=5.3.30 <6.0.0",
       "resolved": "https://registry.npmjs.org/@types/semver/-/semver-5.3.30.tgz"
+    },
+    "@types/serve-static": {
+      "version": "1.7.31",
+      "from": "@types/serve-static@*",
+      "resolved": "https://registry.npmjs.org/@types/serve-static/-/serve-static-1.7.31.tgz"
     },
     "@types/through2": {
       "version": "2.0.31",
