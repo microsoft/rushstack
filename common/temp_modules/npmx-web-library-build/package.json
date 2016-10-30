@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
-    "typescript": "2.0.3",
+    "typescript": "~2.0.6",
     "gulp": "~3.9.1",
     "gulp-replace": "^0.5.4",
     "node-notifier": "~4.6.1"
