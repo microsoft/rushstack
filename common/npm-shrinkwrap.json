@@ -91,6 +91,16 @@
       "from": "@types/gulp@>=3.8.32 <4.0.0",
       "resolved": "https://registry.npmjs.org/@types/gulp/-/gulp-3.8.32.tgz"
     },
+    "@types/gulp-istanbul": {
+      "version": "0.9.30",
+      "from": "@types/gulp-istanbul@>=0.9.30 <0.10.0",
+      "resolved": "https://registry.npmjs.org/@types/gulp-istanbul/-/gulp-istanbul-0.9.30.tgz"
+    },
+    "@types/gulp-mocha": {
+      "version": "0.0.29",
+      "from": "@types/gulp-mocha@0.0.29",
+      "resolved": "https://registry.npmjs.org/@types/gulp-mocha/-/gulp-mocha-0.0.29.tgz"
+    },
     "@types/gulp-util": {
       "version": "3.0.29",
       "from": "@types/gulp-util@>=3.0.29 <4.0.0",
