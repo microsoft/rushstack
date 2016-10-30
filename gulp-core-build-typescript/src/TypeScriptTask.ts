@@ -36,7 +36,7 @@ export interface ITypeScriptTaskConfig {
   /**
    * Optional override for a custom reporter object to be passed into the TypeScript compiler.
    */
-  reporter?: ts.Reporter;
+  reporter?: ts.reporter.Reporter;
 
   /**
    * Optional override for the TypeScript compiler.
@@ -52,7 +52,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   public taskConfig: ITypeScriptTaskConfig = {
     failBuildOnErrors: true,
     reporter: {
-      error: (error: ITypeScriptErrorObject): void => {
+      error: (error: ts.reporter.TypeScriptError): void => {
         const filename: string = error.relativeFilename || error.fullFilename;
         const line: number = error.startPosition ? error.startPosition.line : 0;
         const character: number = error.startPosition ? error.startPosition.character : 0;
@@ -96,14 +96,17 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
 
     let errorCount: number = 0;
     const allStreams: NodeJS.ReadWriteStream[] = [];
-    const tsConfig: ts.TsConfig = this.readJSONSync('tsconfig.json') || require('../tsconfig.json');
+
+    /* tslint:disable:no-any */
+    const tsConfig: any = this.readJSONSync('tsconfig.json') || require('../tsconfig.json');
+    /* tslint:enable:no-any */
 
     // Log the compiler version for custom verisons.
     if (this.taskConfig.typescript && this.taskConfig.typescript.version) {
       this.log(`Using custom version: ${ this.taskConfig.typescript.version }`);
     }
 
-    const tsCompilerOptions: ts.Params = assign({}, tsConfig.compilerOptions, {
+    const tsCompilerOptions: ts.Project = assign({}, tsConfig.compilerOptions, {
       module: 'commonjs',
       sortOutput: true,
       typescript: this.taskConfig.typescript
@@ -114,14 +117,14 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     /* tslint:disable:typedef */
     const { libFolder, libAMDFolder } = this.buildConfig;
     /* tslint:enable:typedef */
-    let tsResult: ts.CompilationStream = gulp.src(this.taskConfig.sourceMatch)
+    let tsResult: ts.CompileStream = gulp.src(this.taskConfig.sourceMatch)
       .pipe(plumber({
         errorHandler: (): void => {
           errorCount++;
         }
       }))
       .pipe(sourcemaps.init())
-      .pipe(ts(tsProject, undefined, this.taskConfig.reporter));
+      .pipe(ts(tsProject, this.taskConfig.reporter));
 
     allStreams.push(tsResult.js
       .pipe(sourcemaps.write('.', { sourceRoot: '/src' }))
@@ -149,7 +152,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
           }
         }))
         .pipe(sourcemaps.write({ sourceRoot: '/src' }))
-        .pipe(ts(tsAMDProject, undefined, this.taskConfig.reporter));
+        .pipe(ts(tsAMDProject, this.taskConfig.reporter));
 
       allStreams.push(
         tsResult.js

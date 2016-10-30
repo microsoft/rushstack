@@ -161,15 +161,30 @@
       "from": "@types/serve-static@*",
       "resolved": "https://registry.npmjs.org/@types/serve-static/-/serve-static-1.7.31.tgz"
     },
+    "@types/source-map": {
+      "version": "0.1.28",
+      "from": "@types/source-map@>=0.1.28 <0.2.0",
+      "resolved": "https://registry.npmjs.org/@types/source-map/-/source-map-0.1.28.tgz"
+    },
     "@types/through2": {
       "version": "2.0.31",
       "from": "@types/through2@>=2.0.31 <3.0.0",
       "resolved": "https://registry.npmjs.org/@types/through2/-/through2-2.0.31.tgz"
     },
+    "@types/uglify-js": {
+      "version": "2.6.28",
+      "from": "@types/uglify-js@>=2.6.28 <3.0.0",
+      "resolved": "https://registry.npmjs.org/@types/uglify-js/-/uglify-js-2.6.28.tgz"
+    },
     "@types/vinyl": {
       "version": "1.2.30",
       "from": "@types/vinyl@>=1.2.30 <2.0.0",
       "resolved": "https://registry.npmjs.org/@types/vinyl/-/vinyl-1.2.30.tgz"
+    },
+    "@types/webpack": {
+      "version": "1.12.35",
+      "from": "@types/webpack@>=1.12.35 <2.0.0",
+      "resolved": "https://registry.npmjs.org/@types/webpack/-/webpack-1.12.35.tgz"
     },
     "@types/yargs": {
       "version": "0.0.34",
@@ -3626,37 +3641,92 @@
       "from": "temp_modules/npmx-gulp-core-build-typescript",
       "resolved": "file:temp_modules/npmx-gulp-core-build-typescript",
       "dependencies": {
-        "@microsoft/gulp-core-build": {
-          "version": "0.9.7",
-          "from": "@microsoft/gulp-core-build@>=0.9.1 <0.10.0",
-          "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build/-/gulp-core-build-0.9.7.tgz"
+        "glob": {
+          "version": "5.0.15",
+          "from": "glob@>=5.0.3 <6.0.0",
+          "resolved": "https://registry.npmjs.org/glob/-/glob-5.0.15.tgz"
         },
-        "@microsoft/gulp-core-build-mocha": {
-          "version": "0.3.2",
-          "from": "@microsoft/gulp-core-build-mocha@>=0.3.0 <0.4.0",
-          "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-mocha/-/gulp-core-build-mocha-0.3.2.tgz"
+        "glob-parent": {
+          "version": "3.0.1",
+          "from": "glob-parent@>=3.0.0 <4.0.0",
+          "resolved": "https://registry.npmjs.org/glob-parent/-/glob-parent-3.0.1.tgz"
         },
-        "@microsoft/gulp-core-build-typescript": {
-          "version": "0.5.4",
-          "from": "@microsoft/gulp-core-build-typescript@>=0.5.1 <0.6.0",
-          "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-typescript/-/gulp-core-build-typescript-0.5.4.tgz",
+        "glob-stream": {
+          "version": "5.3.5",
+          "from": "glob-stream@>=5.3.2 <6.0.0",
+          "resolved": "https://registry.npmjs.org/glob-stream/-/glob-stream-5.3.5.tgz",
           "dependencies": {
-            "typescript": {
-              "version": "1.8.10",
-              "from": "typescript@>=1.8.10 <1.9.0",
-              "resolved": "https://registry.npmjs.org/typescript/-/typescript-1.8.10.tgz"
+            "isarray": {
+              "version": "0.0.1",
+              "from": "isarray@0.0.1",
+              "resolved": "https://registry.npmjs.org/isarray/-/isarray-0.0.1.tgz"
+            },
+            "readable-stream": {
+              "version": "1.0.34",
+              "from": "readable-stream@>=1.0.33-1 <1.1.0-0",
+              "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-1.0.34.tgz"
+            },
+            "through2": {
+              "version": "0.6.5",
+              "from": "through2@>=0.6.0 <0.7.0",
+              "resolved": "https://registry.npmjs.org/through2/-/through2-0.6.5.tgz"
             }
           }
         },
-        "@microsoft/node-library-build": {
-          "version": "0.3.3",
-          "from": "@microsoft/node-library-build@>=0.3.1 <0.4.0",
-          "resolved": "https://registry.npmjs.org/@microsoft/node-library-build/-/node-library-build-0.3.3.tgz"
+        "gulp-typescript": {
+          "version": "3.1.2",
+          "from": "gulp-typescript@>=3.1.2 <3.2.0",
+          "resolved": "https://registry.npmjs.org/gulp-typescript/-/gulp-typescript-3.1.2.tgz"
+        },
+        "is-extglob": {
+          "version": "2.1.0",
+          "from": "is-extglob@>=2.1.0 <3.0.0",
+          "resolved": "https://registry.npmjs.org/is-extglob/-/is-extglob-2.1.0.tgz"
+        },
+        "is-glob": {
+          "version": "3.1.0",
+          "from": "is-glob@>=3.1.0 <4.0.0",
+          "resolved": "https://registry.npmjs.org/is-glob/-/is-glob-3.1.0.tgz"
+        },
+        "isarray": {
+          "version": "1.0.0",
+          "from": "isarray@>=1.0.0 <1.1.0",
+          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
         },
         "lodash": {
           "version": "4.15.0",
           "from": "lodash@>=4.15.0 <4.16.0",
           "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.15.0.tgz"
+        },
+        "ordered-read-streams": {
+          "version": "0.3.0",
+          "from": "ordered-read-streams@>=0.3.0 <0.4.0",
+          "resolved": "https://registry.npmjs.org/ordered-read-streams/-/ordered-read-streams-0.3.0.tgz"
+        },
+        "readable-stream": {
+          "version": "2.1.5",
+          "from": "readable-stream@>=2.0.4 <3.0.0",
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.1.5.tgz"
+        },
+        "source-map": {
+          "version": "0.5.6",
+          "from": "source-map@>=0.5.3 <0.6.0",
+          "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.5.6.tgz"
+        },
+        "unique-stream": {
+          "version": "2.2.1",
+          "from": "unique-stream@>=2.0.2 <3.0.0",
+          "resolved": "https://registry.npmjs.org/unique-stream/-/unique-stream-2.2.1.tgz"
+        },
+        "vinyl": {
+          "version": "1.2.0",
+          "from": "vinyl@>=1.0.0 <2.0.0",
+          "resolved": "https://registry.npmjs.org/vinyl/-/vinyl-1.2.0.tgz"
+        },
+        "vinyl-fs": {
+          "version": "2.4.4",
+          "from": "vinyl-fs@>=2.4.3 <2.5.0",
+          "resolved": "https://registry.npmjs.org/vinyl-fs/-/vinyl-fs-2.4.4.tgz"
         }
       }
     },

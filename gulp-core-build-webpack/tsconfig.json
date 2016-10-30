@@ -4,6 +4,14 @@
     "module": "commonjs",
     "jsx": "react",
     "declaration": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "types": [
+      "es6-promise",
+      "node"
+    ],
+    "typeRoots": [
+      "../common/node_modules/@types",
+      "node_modules"
+    ]
   }
 }
