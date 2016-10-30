@@ -18,6 +18,9 @@
     "@microsoft/gulp-core-build": ">=0.12.0 <1.0.0",
     "@microsoft/gulp-core-build-mocha": ">=0.4.2 <1.0.0",
     "@microsoft/gulp-core-build-typescript": ">=0.6.1 <1.0.0",
+    "@types/es6-promise": "0.0.32",
+    "@types/gulp": "^3.8.32",
+    "@types/node": "^6.0.46",
     "gulp": "~3.9.1"
   },
   "devDependencies": {

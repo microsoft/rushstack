@@ -108,7 +108,6 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
 
     const tsCompilerOptions: ts.Project = assign({}, tsConfig.compilerOptions, {
       module: 'commonjs',
-      sortOutput: true,
       typescript: this.taskConfig.typescript
     });
 
@@ -124,7 +123,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
         }
       }))
       .pipe(sourcemaps.init())
-      .pipe(ts(tsProject, this.taskConfig.reporter));
+      .pipe(tsProject(this.taskConfig.reporter));
 
     allStreams.push(tsResult.js
       .pipe(sourcemaps.write('.', { sourceRoot: '/src' }))
@@ -152,7 +151,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
           }
         }))
         .pipe(sourcemaps.write({ sourceRoot: '/src' }))
-        .pipe(ts(tsAMDProject, this.taskConfig.reporter));
+        .pipe(tsAMDProject(this.taskConfig.reporter));
 
       allStreams.push(
         tsResult.js

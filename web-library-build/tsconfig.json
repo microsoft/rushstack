@@ -4,6 +4,13 @@
     "module": "commonjs",
     "declaration": true,
     "sourceMap": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "types": [
+      "es6-promise",
+      "node"
+    ],
+    "typeRoots": [
+      "../common/node_modules/@types"
+    ]
   }
 }
