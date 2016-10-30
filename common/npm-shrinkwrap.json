@@ -131,6 +131,11 @@
       "from": "@types/node@>=6.0.46 <7.0.0",
       "resolved": "https://registry.npmjs.org/@types/node/-/node-6.0.46.tgz"
     },
+    "@types/node-forge": {
+      "version": "0.6.4",
+      "from": "@types/node-forge@>=0.6.4 <0.7.0",
+      "resolved": "https://registry.npmjs.org/@types/node-forge/-/node-forge-0.6.4.tgz"
+    },
     "@types/orchestrator": {
       "version": "0.0.30",
       "from": "@types/orchestrator@0.0.30",

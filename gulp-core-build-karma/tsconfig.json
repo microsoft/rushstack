@@ -6,7 +6,8 @@
     "declaration": true,
     "sourceMap": true,
     "types": [
-      "es6-promise"
+      "es6-promise",
+      "node"
     ],
     "typeRoots": [
       "../common/node_modules/@types"
