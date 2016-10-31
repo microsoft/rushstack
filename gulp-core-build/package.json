@@ -15,7 +15,6 @@
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-library-build": ">=0.3.0 <1.0.0",
     "@types/assertion-error": "^1.0.30",
     "@types/chai": "^3.4.34",
     "@types/chalk": "^0.4.31",
