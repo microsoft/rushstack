@@ -3,47 +3,47 @@
     {
       "packageName": "@microsoft/gulp-core-build",
       "type": "major",
-      "comments": "Updating to use TypeScript 2 and @types typings."
+      "comment": "Updating to use TypeScript 2 and @types typings."
     },
     {
       "packageName": "@microsoft/gulp-core-build-karma",
       "type": "major",
-      "comments": "Updating to use TypeScript 2 and @types typings."
+      "comment": "Updating to use TypeScript 2 and @types typings."
     },
     {
       "packageName": "@microsoft/gulp-core-build-mocha",
       "type": "major",
-      "comments": "Updating to use TypeScript 2 and @types typings."
+      "comment": "Updating to use TypeScript 2 and @types typings."
     },
     {
       "packageName": "@microsoft/gulp-core-build-sass",
       "type": "major",
-      "comments": "Updating to use TypeScript 2 and @types typings."
+      "comment": "Updating to use TypeScript 2 and @types typings."
     },
     {
       "packageName": "@microsoft/gulp-core-build-serve",
       "type": "major",
-      "comments": "Updating to use TypeScript 2 and @types typings."
+      "comment": "Updating to use TypeScript 2 and @types typings."
     },
     {
       "packageName": "@microsoft/gulp-core-build-typescript",
       "type": "major",
-      "comments": "Updating to use TypeScript 2 and @types typings."
+      "comment": "Updating to use TypeScript 2 and @types typings."
     },
     {
       "packageName": "@microsoft/gulp-core-build-webpack",
       "type": "major",
-      "comments": "Updating to use TypeScript 2 and @types typings."
+      "comment": "Updating to use TypeScript 2 and @types typings."
     },
     {
       "packageName": "@microsoft/node-library-build",
       "type": "major",
-      "comments": "Updating to use TypeScript 2 and @types typings."
+      "comment": "Updating to use TypeScript 2 and @types typings."
     },
     {
       "packageName": "@microsoft/web-library-build",
       "type": "major",
-      "comments": "Updating to use TypeScript 2 and @types typings."
+      "comment": "Updating to use TypeScript 2 and @types typings."
     }
   ]
 }
