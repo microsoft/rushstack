@@ -1,8 +1,9 @@
 import { GulpTask } from '@microsoft/gulp-core-build';
 import { IBuildConfig } from '@microsoft/gulp-core-build/lib/IBuildConfig';
-import gulp = require('gulp');
-import http = require('http');
-import https = require('https');
+import * as gulp from 'gulp';
+import * as http from 'http';
+import * as https from 'https';
+import * as Chalk from 'chalk';
 import * as pathType from 'path';
 import * as gUtilType from 'gulp-util';
 import * as expressType from 'express';
@@ -78,9 +79,9 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
 
   public taskConfig: IServeTaskConfig = {
     api: undefined,
+    https: false,
     initialPage: '/index.html',
     port: 4321,
-    https: false,
     tryCreateDevCertificate: false
   };
 
@@ -88,6 +89,7 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
     /* tslint:disable:typedef */
     const gulpConnect = require('gulp-connect');
     const open = require('gulp-open');
+    const http = require('http');
     /* tslint:enable:typedef */
     const gutil: typeof gUtilType = require('gulp-util');
     const path: typeof pathType = require('path');
@@ -103,11 +105,11 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
 
     // Spin up the connect server
     gulpConnect.server({
+      https: httpsServerOptions,
       livereload: true,
       middleware: (): Function[] => [this._logRequestsMiddleware, this._enableCorsMiddleware],
       port: port,
-      root: rootPath,
-      https: httpsServerOptions
+      root: rootPath
     });
 
     // If an api is provided, spin it up.

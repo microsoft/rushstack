@@ -7,7 +7,7 @@ import { serial, parallel, getConfig, setConfig, IExecutable } from '../index';
 import { IBuildConfig } from './../IBuildConfig';
 
 // disable the exit watching
-global.dontWatchExit = true;
+global['dontWatchExit'] = true; // tslint:disable-line:no-string-literal
 
 describe('serial', () => {
   it('can run a set of tasks in serial', (done) => {
