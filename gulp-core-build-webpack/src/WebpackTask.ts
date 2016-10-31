@@ -1,5 +1,5 @@
 import * as Webpack from 'webpack';
-import { GulpTask } from '@microsoft/gulp-core-build';
+import { GulpTask, IBuildConfig } from '@microsoft/gulp-core-build';
 import gulp = require('gulp');
 import { EOL } from 'os';
 
@@ -33,6 +33,13 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
     webpack: require('webpack')
   };
 
+  public isEnabled(buildConfig: IBuildConfig): boolean {
+    return (
+      super.isEnabled(buildConfig) &&
+      this.taskConfig.configPath !== null // tslint:disable-line:no-null-keyword
+    );
+  }
+
   public executeTask(gulp: gulp.Gulp, completeCallback: (result?: Object) => void): void {
     let shouldInitWebpack: boolean = (process.argv.indexOf('--initwebpack') > -1);
 
@@ -50,33 +57,17 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
     } else {
       let webpackConfig: Object;
 
-      if (!this.taskConfig.configPath && !this.taskConfig.config) {
-        this.logMissingConfigWarning();
-        completeCallback();
-        return;
-      } else if (this.taskConfig.configPath) {
-        if (this.fileExists(this.taskConfig.configPath)) {
-          try {
-            webpackConfig = require(this.resolvePath(this.taskConfig.configPath));
-          } catch (err) {
-            completeCallback(`Error parsing webpack config: ${ this.taskConfig.configPath }: ${ err }`);
-            return;
-          }
-        } else if (!this.taskConfig.config) {
-          this.logWarning(
-            `The webpack config location '${ this.taskConfig.configPath }' doesn't exist. ` +
-            `Run again using --initwebpack to create a default config, or call ` +
-            `webpack.setConfig({ configPath: null }).`);
-
-          completeCallback();
+      if (this.taskConfig.configPath && this.fileExists(this.taskConfig.configPath)) {
+        try {
+          webpackConfig = require(this.resolvePath(this.taskConfig.configPath));
+        } catch (err) {
+          completeCallback(`Error parsing webpack config: ${this.taskConfig.configPath}: ${err}`);
           return;
-        } else {
-          webpackConfig = this.taskConfig.config;
         }
       } else if (this.taskConfig.config) {
         webpackConfig = this.taskConfig.config;
       } else {
-        this.logMissingConfigWarning();
+        this._logMissingConfigWarning();
         completeCallback();
         return;
       }
@@ -134,7 +125,7 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
             }
 
             let duration = (new Date().getTime() - startTime);
-            let statsResultChildren = statsResult.children ? statsResult.children : [ statsResult ];
+            let statsResultChildren = statsResult.children ? statsResult.children : [statsResult];
 
             statsResultChildren.forEach(child => {
               if (child.chunks) {
@@ -156,10 +147,10 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
     }
   }
 
-  private logMissingConfigWarning() {
+  private _logMissingConfigWarning() {
     this.logWarning(
-      'No webpack config has been provided.' +
-      'Run again using --initwebpack to create a default config,' +
-      `or call webpack.setConfig({ configPath: null }).`);
+      'No webpack config has been provided. ' +
+      'Run again using --initwebpack to create a default config, ' +
+      `or call webpack.setConfig({ configPath: null }) in your gulpfile.`);
   }
 }

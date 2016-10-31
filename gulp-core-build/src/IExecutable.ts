@@ -8,7 +8,7 @@ export interface IExecutable {
   name?: string;
 
   /** Optional callback to indicate if the task is enabled or not. */
-  isEnabled?: () => boolean;
+  isEnabled?: (config?: IBuildConfig) => boolean;
 
   /** Optional method to indicate directory matches to clean up when the nuke task is run. */
   getNukeMatch?: (config: IBuildConfig, taskConfig?: any) => string[]; /* tslint:disable-line:no-any */

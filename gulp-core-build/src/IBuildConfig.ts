@@ -14,6 +14,12 @@ export interface IBuildConfig {
   /** Full physical path to the root path directory. */
   rootPath?: string;
 
+  /**
+   * Package output folder in which publishable output should be dropped.
+   * @default package.json directories/packagePath value.
+   */
+  packageFolder?: string;
+
   /** Source folder name where source is included.  */
   srcFolder?: string;
 
@@ -63,4 +69,7 @@ export interface IBuildConfig {
 
   /** Optional callback to be executed when a task ends. */
   onTaskEnd?: (taskName: string, duration: number[], error?: any) => void;
+
+  /** Flag used to indicate if the build is redundant and should be exited prematurely. */
+  isRedundantBuild?: boolean;
 }

@@ -12,3 +12,4 @@ lib-amd
 node_modules
 npm*.log
 temp
+package
