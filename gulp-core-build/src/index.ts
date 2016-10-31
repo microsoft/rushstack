@@ -345,7 +345,7 @@ function _executeTask(task: IExecutable, buildConfig: IBuildConfig): Promise<voi
   }
 
   if (task.isEnabled === undefined || task.isEnabled(buildConfig)) {
-    const startTime: number[] = process.hrtime();
+    const startTime: [number, number] = process.hrtime();
 
     if (buildConfig.onTaskStart && task.name) {
       buildConfig.onTaskStart(task.name);
@@ -406,7 +406,7 @@ function _handleCommandLineArguments(): void {
 function _handleTasksListArguments(): void {
   /* tslint:disable-next-line:no-string-literal */
   if (args['tasks'] || args['tasks-simple'] || args['T']) {
-    global.dontWatchExit = true;
+    global['dontWatchExit'] = true; // tslint:disable-line:no-string-literal
   }
 }
 
