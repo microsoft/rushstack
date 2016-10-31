@@ -3,6 +3,15 @@
     "target": "es5",
     "module": "commonjs",
     "declaration": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "types": [
+      "es6-promise",
+      "mocha",
+      "node"
+    ],
+    "typeRoots": [
+      "../common/node_modules/@types"
+    ]
+
   }
 }

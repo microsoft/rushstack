@@ -41,7 +41,7 @@ class StreamTask extends GulpTask<IConfig> {
     const stream: Readable = new Readable({ objectMode: true });
 
     // Add no opt function to make it compat with through
-    stream._read = () => {
+    stream['_read'] = () => { // tslint:disable-line:no-string-literal
       // Do Nothing
      };
 
