@@ -1,17 +1,17 @@
-import { GulpTask } from '@microsoft/gulp-core-build';
+import { GulpTask, IBuildConfig } from '@microsoft/gulp-core-build';
 
 import * as gulp from 'gulp';
 import * as karma from 'karma';
 import * as path from 'path';
 
 export interface IKarmaTaskConfig {
-  karmaConfigPath: string;
+  configPath: string;
 }
 
 export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
   public name: string = 'karma';
   public taskConfig: IKarmaTaskConfig = {
-    karmaConfigPath: './karma.config.js'
+    configPath: './karma.config.js'
   };
 
   public resources: Object = {
@@ -27,16 +27,24 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
     ]
   };
 
-  public executeTask(gulp: gulp.Gulp, completeCallback: (error?: Error | string) => void): void {
-    const { karmaConfigPath }: IKarmaTaskConfig = this.taskConfig;
+  public isEnabled(buildConfig: IBuildConfig): boolean {
+    return (
+      super.isEnabled(buildConfig) &&
+      this.taskConfig.configPath !== null // tslint:disable-line:no-null-keyword
+    );
+  }
 
-    if (!this.fileExists(karmaConfigPath)) {
+  public executeTask(gulp: gulp.Gulp, completeCallback: (error?: Error | string) => void): void {
+    const { configPath }: IKarmaTaskConfig = this.taskConfig;
+
+    if (!this.fileExists(configPath)) {
       const shouldInitKarma: boolean = (process.argv.indexOf('--initkarma') > -1);
 
       if (!shouldInitKarma) {
         this.logWarning(
-          `The karma config location '${ karmaConfigPath }' doesn't exist. ` +
-          `Run again using --initkarma to create a default config.`);
+          `No karma config has been provided. ` +
+          `Run again using --initkarma to create a default config, or call ` +
+          ` karma.setConfig({ configPath: null }) in your gulpfile.`);
       } else {
         this.copyFile(path.resolve(__dirname, '../karma.config.js'));
         this.copyFile(path.resolve(__dirname, '../tests.js'), 'src/tests.js');
@@ -60,7 +68,7 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
             grep: matchString
           }
         },
-        configFile: this.resolvePath(karmaConfigPath),
+        configFile: this.resolvePath(configPath),
         singleRun: singleRun
       }, (exitCode) => {
         if (exitCode) {
