@@ -577,9 +577,9 @@
       "resolved": "https://registry.npmjs.org/camelcase-keys/-/camelcase-keys-2.1.0.tgz"
     },
     "caniuse-db": {
-      "version": "1.0.30000570",
+      "version": "1.0.30000572",
       "from": "caniuse-db@>=1.0.30000488 <2.0.0",
-      "resolved": "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000570.tgz"
+      "resolved": "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000572.tgz"
     },
     "cardinal": {
       "version": "1.0.0",
@@ -1481,9 +1481,9 @@
           "resolved": "https://registry.npmjs.org/async/-/async-2.1.2.tgz"
         },
         "lodash": {
-          "version": "4.16.4",
+          "version": "4.16.5",
           "from": "lodash@>=4.14.0 <5.0.0",
-          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.16.4.tgz"
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.16.5.tgz"
         }
       }
     },
@@ -1987,9 +1987,9 @@
       "resolved": "https://registry.npmjs.org/gulp-istanbul/-/gulp-istanbul-0.10.4.tgz",
       "dependencies": {
         "lodash": {
-          "version": "4.16.4",
+          "version": "4.16.5",
           "from": "lodash@>=4.0.0 <5.0.0",
-          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.16.4.tgz"
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.16.5.tgz"
         }
       }
     },
@@ -2895,9 +2895,9 @@
       "resolved": "https://registry.npmjs.org/karma-phantomjs-launcher/-/karma-phantomjs-launcher-1.0.2.tgz",
       "dependencies": {
         "lodash": {
-          "version": "4.16.4",
+          "version": "4.16.5",
           "from": "lodash@>=4.0.1 <5.0.0",
-          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.16.4.tgz"
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.16.5.tgz"
         }
       }
     },
@@ -3565,9 +3565,9 @@
           "resolved": "https://registry.npmjs.org/globule/-/globule-1.1.0.tgz"
         },
         "lodash": {
-          "version": "4.16.4",
+          "version": "4.16.5",
           "from": "lodash@>=4.16.4 <4.17.0",
-          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.16.4.tgz"
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.16.5.tgz"
         },
         "lodash.clonedeep": {
           "version": "4.5.0",
@@ -3739,6 +3739,11 @@
       "version": "0.0.0",
       "from": "temp_modules/npmx-node-library-build",
       "resolved": "file:temp_modules/npmx-node-library-build"
+    },
+    "npmx-test-web-library-build": {
+      "version": "0.0.0",
+      "from": "temp_modules/npmx-test-web-library-build",
+      "resolved": "file:temp_modules/npmx-test-web-library-build"
     },
     "npmx-web-build-tools-scripts": {
       "version": "0.0.0",
@@ -4399,9 +4404,9 @@
       "resolved": "https://registry.npmjs.org/sass-graph/-/sass-graph-2.1.2.tgz",
       "dependencies": {
         "lodash": {
-          "version": "4.16.4",
+          "version": "4.16.5",
           "from": "lodash@>=4.0.0 <5.0.0",
-          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.16.4.tgz"
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.16.5.tgz"
         },
         "yargs": {
           "version": "4.8.1",

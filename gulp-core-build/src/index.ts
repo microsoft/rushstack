@@ -35,12 +35,16 @@ const packageJSON: any = require(path.resolve(process.cwd(), 'package.json'));
 
 const _taskMap: { [key: string]: IExecutable } = {};
 const _uniqueTasks: IExecutable[]  = [];
+const packageFolder: string =
+  (packageJSON.directories && packageJSON.directories.packagePath) ?
+  packageJSON.directories.packagePath : '';
 
 let _buildConfig: IBuildConfig = {
+  packageFolder,
   srcFolder: 'src',
-  distFolder: 'dist',
+  distFolder: path.join(packageFolder, 'dist'),
   libAMDFolder: undefined,
-  libFolder: 'lib',
+  libFolder: path.join(packageFolder, 'lib'),
   tempFolder: 'temp',
   properties: {},
   relogIssues: getFlagValue('relogIssues', true),
@@ -340,7 +344,7 @@ function _executeTask(task: IExecutable, buildConfig: IBuildConfig): Promise<voi
     return Promise.reject(new Error(`A task was scheduled, but the task was null. This probably means the task wasn't imported correctly.`));
   }
 
-  if (task.isEnabled === undefined || task.isEnabled()) {
+  if (task.isEnabled === undefined || task.isEnabled(buildConfig)) {
     const startTime: [number, number] = process.hrtime();
 
     if (buildConfig.onTaskStart && task.name) {

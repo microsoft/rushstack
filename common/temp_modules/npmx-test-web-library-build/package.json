@@ -1,0 +1,11 @@
+{
+  "name": "npmx-test-web-library-build",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "gulp": "~3.9.1"
+  },
+  "npmxDependencies": {
+    "@microsoft/web-library-build": ">=0.5.0 < 1.0.0"
+  }
+}
