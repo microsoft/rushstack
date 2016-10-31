@@ -7,19 +7,23 @@ import * as child_process from 'child_process';
 export interface IBuildReceiptTask {
 }
 
-const PROCESS_OUTPUT_DELIMITER: string = '~X~X~X~X~X~X~';
+const PROCESS_OUTPUT_DELIMITER: string = '///~X~X~X~X~X~X~///';
 
 let _lastLocalHashes: { [path: string]: string } = {};
 
 /**
- * This task is responsible for the following:
+ * This task is responsible for generating a build receipt, which is a hash of filePath to sha1 git hash,
+ * based on the current folder's content. If a {buildConfig.packagePath}/build.json file exists, it will
+ * parse it and object compare the computed build receipt with the contents. If everything is the same, it
+ * will set buildConfig.isRedundantBuild flag to true, which can be used in task isEnabled methods to skip
+ * unnecessary work.
  *
- * 1. Gather the local files build receipt of the current files. Cache it in _lastFilesHash for later use.
+ * The utility function "_getLocalHashes" will use the git.exe process to get the hashes from the git
+ * cache. It also asks for git status, which will tell us what has been changed since. It uses this info
+ * to build the hash.
  *
- * 2. Check for the existence of a package build receipt. If none exists, complete the task.
- *
- * 3. Compare the package build hashes with the local build hashes. If they match, update the buildConfig to
- *    have isRedundantBuild flat set to true. This allows other tasks to completely prematurely.
+ * The utility funciton "_readPackageHashes" will read the local build.json file from the packagePath
+ * folder.
  */
 export class CheckBuildReceiptTask extends GulpTask<IBuildReceiptTask> {
   public name: string = 'check-for-changes';
@@ -28,17 +32,15 @@ export class CheckBuildReceiptTask extends GulpTask<IBuildReceiptTask> {
     completeCallback: (result?: Object) => void
   ): Promise<Object> | NodeJS.ReadWriteStream | void {
 
-    getLocalHashes().then(localHashes => {
+    _getLocalHashes().then(localHashes => {
       _lastLocalHashes = localHashes;
-      debugger;
-      readPackageHashes(path.join(process.cwd(), this.buildConfig.packageFolder, 'build.json')).then(packageHashes => {
+      _readPackageHashes(path.join(process.cwd(), this.buildConfig.packageFolder, 'build.json')).then(packageHashes => {
         if (packageHashes) {
-          if (areObjectsEqual(localHashes, packageHashes)) {
+          if (_areObjectsEqual(localHashes, packageHashes)) {
             this.buildConfig.isRedundantBuild = true;
             this.log('Build is redundant. Skipping steps.');
           } else {
-            debugger;
-            areObjectsEqual(localHashes, packageHashes);
+            _areObjectsEqual(localHashes, packageHashes);
             this.log('Build has new content, continuing execution.');
           }
         }
@@ -66,7 +68,7 @@ export class UpdateBuildReceiptTask extends GulpTask<IBuildReceiptTask> {
   }
 }
 
-function getLocalHashes(): Promise<{ [path: string]: string }> {
+function _getLocalHashes(): Promise<{ [path: string]: string }> {
   return new Promise((complete) => {
     child_process.exec(
       `git ls-tree HEAD -r && echo ${PROCESS_OUTPUT_DELIMITER} && git status --s -u .`,
@@ -108,7 +110,7 @@ function getLocalHashes(): Promise<{ [path: string]: string }> {
   });
 }
 
-function readPackageHashes(receiptPath: string): Promise<{ [path: string]: string }> {
+function _readPackageHashes(receiptPath: string): Promise<{ [path: string]: string }> {
   return new Promise((complete) => {
     fs.readFile(receiptPath, 'utf8', (err, data) => {
       complete(err ? undefined : JSON.parse(data));
@@ -116,7 +118,7 @@ function readPackageHashes(receiptPath: string): Promise<{ [path: string]: strin
   });
 }
 
-function areObjectsEqual(obj1: Object, obj2: Object): boolean {
+function _areObjectsEqual(obj1: Object, obj2: Object): boolean {
   let obj1Keys: string[] = Object.keys(obj1);
   let obj2Keys: string[] = Object.keys(obj2);
 
