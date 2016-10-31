@@ -48,7 +48,7 @@
     },
     "@microsoft/node-library-build": {
       "version": "0.4.0",
-      "from": "@microsoft/node-library-build@>=0.3.0 <1.0.0",
+      "from": "@microsoft/node-library-build@>=0.4.0 <1.0.0",
       "resolved": "https://registry.npmjs.org/@microsoft/node-library-build/-/node-library-build-0.4.0.tgz"
     },
     "@types/assertion-error": {
