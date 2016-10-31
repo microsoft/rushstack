@@ -84,7 +84,7 @@ public log(message: string): void {
   public execute(config: IBuildConfig): Promise<void> {
     this.buildConfig = config;
 
-    const startTime: number[] = process.hrtime();
+    const startTime: [number, number] = process.hrtime();
 
     logStartSubtask(this.name);
 

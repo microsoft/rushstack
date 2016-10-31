@@ -3,4 +3,14 @@ node_js:
   - '4.6'
 before_script:
   - npm install -g gulp @microsoft/npmx
-script: npmx install && npmx link && npmx rebuild
+script:
+  - echo 'Installing...' && echo -en 'travis_fold:start:install\\r'
+  - npmx install
+  - echo -en 'travis_fold:end:install\\r'
+  - echo 'Linking...' && echo -en 'travis_fold:start:link\\r'
+  - npmx link
+  - echo -en 'travis_fold:end:link\\r'
+  - echo 'Building...' && echo -en 'travis_fold:start:build\\r'
+  - npmx rebuild
+  - echo -en 'travis_fold:end:build\\r'
+

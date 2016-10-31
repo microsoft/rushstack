@@ -9,6 +9,7 @@ const prettyTime = require('pretty-hrtime');
 import * as state from './State';
 import { getFlagValue } from './config';
 import { getConfig } from './index';
+import * as Chalk from 'chalk';
 
 const WROTE_ERROR_KEY: string = '__gulpCoreBuildWroteError';
 
@@ -26,9 +27,9 @@ interface ILocalCache {
   coverageResults: number;
   coveragePass: number;
   coverageTotal: number;
-  totalTaskHrTime: number[];
-  start?: number[];
-  taskCreationTime?: number[];
+  totalTaskHrTime: [number, number];
+  start?: [number, number];
+  taskCreationTime?: [number, number];
   totalTaskSrc: number;
   wroteSummary: boolean;
   writingSummary: boolean;
@@ -207,7 +208,7 @@ function writeSummary(callback: () => void): void {
         for (let writeSummaryString of localCache.writeSummaryLogs) {
           log(writeSummaryString);
         }
-        let totalDuration: number[] = process.hrtime(getStart());
+        let totalDuration: [number, number] = process.hrtime(getStart());
 
         log(`Project ${state.builtPackage.name} version:`, gutil.colors.yellow(state.builtPackage.version));
         log('Build tools version:', gutil.colors.yellow(state.coreBuildPackage.version));
@@ -289,7 +290,7 @@ function wireUpProcessErrorHandling(): void {
       'use strict';
       duringFastExit = true;
 
-      if (!global.dontWatchExit) {
+      if (!global['dontWatchExit']) { // tslint:disable-line:no-string-literal
         if (!localCache.wroteSummary) {
           localCache.wroteSummary = true;
           console.log('About to exit with code:', code);
@@ -397,10 +398,10 @@ export function functionalTestRun(name: string, result: TestResultState, duratio
   }
 }
 
-export function endTaskSrc(taskName: string, startHrtime: number[], fileCount: number): void {
+export function endTaskSrc(taskName: string, startHrtime: [number, number], fileCount: number): void {
   'use strict';
   localCache.totalTaskSrc++;
-  const taskDuration: number[] = process.hrtime(startHrtime);
+  const taskDuration: [number, number] = process.hrtime(startHrtime);
   if (!localCache.totalTaskHrTime) {
     localCache.totalTaskHrTime = taskDuration;
   } else {
@@ -576,7 +577,7 @@ export function getErrors(): string[] {
   return localCache.errors;
 }
 
-export function getStart(): number[] {
+export function getStart(): [number, number] {
   'use strict';
   return localCache.start;
 }
@@ -601,8 +602,8 @@ export function logStartSubtask(name: string): void {
   localCache.subTasksRun++;
 }
 
-export function logEndSubtask(name: string, startTime: number[], errorObject?: Error): void {
-const duration: number[] = process.hrtime(startTime);
+export function logEndSubtask(name: string, startTime: [number, number], errorObject?: Error): void {
+const duration: [number, number] = process.hrtime(startTime);
 
   if (name) {
     if (!errorObject) {
