@@ -62,7 +62,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     const moduleSrcPattern: string[] = srcPattern.map((value: string) => value.replace('.scss', '.module.scss'));
 
     if (this.taskConfig.useCSSModules) {
-      this.log('Generating css modules.');
+      this.logVerbose('Generating css modules.');
       return this._processFiles(gulp, srcPattern, completeCallback, modulePostCssPlugins);
     } else {
       moduleSrcPattern.forEach((value: string) => srcPattern.push(`!${value}`));
