@@ -5,6 +5,8 @@
  * Detects an error that occurs while running tests from sp-build-internal-web
  */
 
+// tslint:disable:export-name
+
 import { IErrorDetectionRule, RegexErrorDetector } from '../ErrorDetector';
 import TaskError from '../TaskError';
 

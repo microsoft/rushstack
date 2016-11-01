@@ -31,6 +31,7 @@ export default class RushConfigProject {
   private _tempProjectName: string;
   private _cyclicDependencyProjects: Set<string>;
   private _shouldTrackChanges: boolean;
+  private _downstreamDependencyProjects: string[];
 
   constructor(projectJson: IRushConfigProjectJson, rushConfig: RushConfig, tempProjectName: string) {
     this._packageName = projectJson.packageName;
@@ -90,7 +91,7 @@ export default class RushConfigProject {
         this._cyclicDependencyProjects.add(cyclicDependencyProject);
       }
     }
-
+    this._downstreamDependencyProjects = [];
     this._shouldTrackChanges = !!projectJson.shouldTrackChanges;
   }
 
@@ -133,6 +134,13 @@ export default class RushConfigProject {
    */
   public get cyclicDependencyProjects(): Set<string> {
     return this._cyclicDependencyProjects;
+  }
+
+  /**
+   * A list of projects within the Rush config which directly depend on this package.
+   */
+  public get downstreamDependencyProjects(): string[] {
+    return this._downstreamDependencyProjects;
   }
 
   /**
