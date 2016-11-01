@@ -3,7 +3,7 @@
  */
 
 import * as colors from 'colors';
-import * as fs from 'fs-extra';
+import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
@@ -93,16 +93,16 @@ enum SymlinkKind {
 function createSymlink(linkTarget: string, linkSource: string, symlinkKind: SymlinkKind): void {
   if (symlinkKind === SymlinkKind.Directory) {
     // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
-    fs.symlinkSync(linkTarget, linkSource, 'junction');
+    fsx.symlinkSync(linkTarget, linkSource, 'junction');
   } else {
     if (process.platform === 'win32') {
       // For files, we use a Windows "hard link", because creating a symbolic link requires
       // administrator permission.
-      fs.linkSync(linkTarget, linkSource);
+      fsx.linkSync(linkTarget, linkSource);
     } else {
       // However hard links seem to cause build failures on Mac, so for all other operating systems
       // we use symbolic links for this case.
-      fs.symlinkSync(linkTarget, linkSource, 'file');
+      fsx.symlinkSync(linkTarget, linkSource, 'file');
     }
   }
 }
@@ -124,7 +124,7 @@ function createSymlinksForDependencies(localPackage: Package): void {
   // in which case we need to create the '@scope' folder first.
   const parentFolderPath: string = path.dirname(localPackage.folderPath);
   if (parentFolderPath && parentFolderPath !== localPackage.folderPath) {
-    if (!fs.existsSync(parentFolderPath)) {
+    if (!fsx.existsSync(parentFolderPath)) {
       Utilities.createFolderWithRetry(parentFolderPath);
     }
   }
@@ -136,7 +136,7 @@ function createSymlinksForDependencies(localPackage: Package): void {
     // If there are children, then we need to symlink each item in the folder individually
     Utilities.createFolderWithRetry(localPackage.folderPath);
 
-    for (const filename of fs.readdirSync(localPackage.symlinkTargetFolderPath)) {
+    for (const filename of fsx.readdirSync(localPackage.symlinkTargetFolderPath)) {
       if (filename.toLowerCase() !== 'node_modules') {
         // Create the symlink
         let symlinkKind: SymlinkKind = SymlinkKind.File;
@@ -144,10 +144,10 @@ function createSymlinksForDependencies(localPackage: Package): void {
         const linkSource: string = path.join(localPackage.folderPath, filename);
         let linkTarget: string = path.join(localPackage.symlinkTargetFolderPath, filename);
 
-        const linkStats: fs.Stats = fs.lstatSync(linkTarget);
+        const linkStats: fsx.Stats = fsx.lstatSync(linkTarget);
 
         if (linkStats.isSymbolicLink()) {
-          const targetStats: fs.Stats = fs.statSync(linkTarget);
+          const targetStats: fsx.Stats = fsx.statSync(linkTarget);
           if (targetStats.isDirectory()) {
             // Neither a junction nor a directory-symlink can have a directory-symlink
             // as its target; instead, we must obtain the real physical path.
@@ -155,7 +155,7 @@ function createSymlinksForDependencies(localPackage: Package): void {
             // lacks the ability to distinguish between a junction and a directory-symlink
             // (even though it has the ability to create them both), so the safest policy
             // is to always make a junction and always to the real physical path.
-            linkTarget = fs.realpathSync(linkTarget);
+            linkTarget = fsx.realpathSync(linkTarget);
             symlinkKind = SymlinkKind.Directory;
           }
         } else if (linkStats.isDirectory()) {
@@ -411,7 +411,7 @@ function linkProject(
     const commonBinFolder: string = path.join(rushConfig.commonFolder, 'node_modules', '.bin');
     const projectBinFolder: string = path.join(localProjectPackage.folderPath, 'node_modules', '.bin');
 
-    if (fs.existsSync(commonBinFolder)) {
+    if (fsx.existsSync(commonBinFolder)) {
       createSymlink(commonBinFolder, projectBinFolder, SymlinkKind.Directory);
     }
   }
