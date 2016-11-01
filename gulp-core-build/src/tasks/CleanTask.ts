@@ -1,13 +1,13 @@
 import { GulpTask } from './GulpTask';
 import gulp = require('gulp');
 
-export interface INukeConfig {
+export interface ICleanConfig {
 }
 
-export class NukeTask extends GulpTask<INukeConfig> {
-  public name: string = 'nuke';
+export class CleanTask extends GulpTask<ICleanConfig> {
+  public name: string = 'clean';
 
-  public taskConfig: INukeConfig = {
+  public taskConfig: ICleanConfig = {
   };
 
   public executeTask(
@@ -19,39 +19,39 @@ export class NukeTask extends GulpTask<INukeConfig> {
     /* tslint:disable:typedef */
 
     const { distFolder, libFolder, libAMDFolder, tempFolder } = this.buildConfig;
-    let nukePaths = [
+    let cleanPaths = [
       distFolder,
       libAMDFolder,
       libFolder,
       tempFolder
     ];
 
-    // Give each registered task an opportunity to add their own nuke paths.
+    // Give each registered task an opportunity to add their own clean paths.
     for (const executable of this.buildConfig.uniqueTasks) {
-      if (executable.getNukeMatch) {
+      if (executable.getCleanMatch) {
         // Set the build config, as tasks need this to build up paths
-        nukePaths = nukePaths.concat(executable.getNukeMatch(this.buildConfig));
+        cleanPaths = cleanPaths.concat(executable.getCleanMatch(this.buildConfig));
       }
     }
 
     let uniquePaths: { [key: string]: string } = {};
 
     // Create dictionary of unique paths. (Could be replaced with ES6 set.)
-    nukePaths.forEach(path => {
+    cleanPaths.forEach(path => {
       if (!!path) {
         uniquePaths[path] = path;
       }
     });
 
-    // Reset nukePaths to only unique non-empty paths.
-    nukePaths = [];
+    // Reset cleanPaths to only unique non-empty paths.
+    cleanPaths = [];
     for (let path in uniquePaths) {
       if (uniquePaths.hasOwnProperty(path)) {
-        nukePaths.push(path);
+        cleanPaths.push(path);
       }
     }
 
-    del(nukePaths)
+    del(cleanPaths)
       .then(() => completeCallback())
       .catch((error) => completeCallback(error));
   }
