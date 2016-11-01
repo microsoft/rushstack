@@ -170,34 +170,34 @@ export default class ChangeAction extends CommandLineAction {
   /**
    * Asks all questions which are needed to generate changelist for a project.
    */
-  private _askQuestions(projectName: string): Promise<IChangeInfo> {
-    console.log(`${os.EOL}${projectName}`);
+  private _askQuestions(packageName: string): Promise<IChangeInfo> {
+    console.log(`${os.EOL}${packageName}`);
 
     return this._prompt({
         name: 'comments',
         type: 'input',
         message: `Describe changes, or ENTER if no changes:`
       })
-      .then(({ comments }: { comments: string }) => {
-        if (comments) {
+      .then(({ comment }: { comment: string }) => {
+        if (comment) {
           return this._prompt({
-            name: 'bumpType',
-            type: 'list',
-            message: 'Select the type of change:',
+            choices: Object.keys(BUMP_OPTIONS).map(option => BUMP_OPTIONS[option]),
             default: BUMP_OPTIONS['patch'], // tslint:disable-line:no-string-literal
-            choices: Object.keys(BUMP_OPTIONS).map(option => BUMP_OPTIONS[option])
+            message: 'Select the type of change:',
+            name: 'bumpType',
+            type: 'list'
           }).then(({ bumpType }: { bumpType: string }) => {
             return {
-              project: projectName,
-              comments: comments,
-              bumpType: BUMP_OPTIONS[bumpType] as 'major' | 'minor' | 'patch' | 'none'
+              packageName,
+              comment,
+              type: BUMP_OPTIONS[bumpType] as 'major' | 'minor' | 'patch' | 'none'
             } as IChangeInfo;
           });
         } else {
           return {
-            project: projectName,
-            comments: '',
-            bumpType: 'none'
+            comment: '',
+            packageName,
+            type: 'none'
           } as IChangeInfo;
         }
       });

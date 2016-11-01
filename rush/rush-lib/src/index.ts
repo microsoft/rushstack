@@ -24,6 +24,7 @@ export {
 } from './data/Package';
 
 export {
+  ChangeType,
   IChangeFile,
   IChangeInfo
 } from './data/ChangeManagement';

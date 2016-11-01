@@ -70,6 +70,34 @@ export default class Utilities {
   }
 
   /**
+   * Determines if the path points to a file and that it exists.
+   */
+  public static fileExists(path: string): boolean {
+    let exists: boolean = false;
+
+    try {
+      const lstat: fs.Stats = fs.lstatSync(path);
+      exists = lstat.isFile();
+    } catch (e) { /* no-op */ }
+
+    return exists;
+  }
+
+  /**
+   * Determines if a path points to a directory and that it exists.
+   */
+  public static directoryExists(path: string): boolean {
+    let exists: boolean = false;
+
+    try {
+      const lstat: fs.Stats = fs.lstatSync(path);
+      exists = lstat.isDirectory();
+    } catch (e) { /* no-op */ }
+
+    return exists;
+  }
+
+  /**
    * BE VERY CAREFUL CALLING THIS FUNCTION!
    * If you specify the wrong folderPath (e.g. "/"), it could potentially delete your entire
    * hard disk.
@@ -80,6 +108,16 @@ export default class Utilities {
     } catch (e) {
       throw new Error(e.message + os.EOL + 'Often this is caused by a file lock'
         + ' from a process such as your text editor, command prompt, or "gulp serve"');
+    }
+  }
+
+  /**
+   * Attempts to delete a file. If it does not exist, or the path is not a file, it no-ops.
+   */
+  public static deleteFile(filePath: string): void {
+    if (Utilities.fileExists(filePath)) {
+      console.log(`Deleting: ${filePath}`);
+      fs.unlinkSync(filePath);
     }
   }
 
