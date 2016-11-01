@@ -252,6 +252,17 @@ export default class RushConfig {
             + ` but was referenced by the cyclicDependencyProjects for ${project.packageName}`);
         }
       });
+
+      // Compute the downstream dependencies within the list of Rush projects.
+      if (project.packageJson.dependencies) {
+        Object.keys(project.packageJson.dependencies).forEach(dependencyName => {
+          const depProject: RushConfigProject = this._projectsByName.get(dependencyName);
+
+          if (depProject) {
+            depProject.downstreamDependencyProjects.push(project.packageName);
+          }
+        });
+      }
     }
   }
 
@@ -387,6 +398,10 @@ export default class RushConfig {
 
   public get projects(): RushConfigProject[] {
     return this._projects;
+  }
+
+  public get projectsByName(): Map<string, RushConfigProject> {
+    return this._projectsByName;
   }
 
   public getProjectByName(projectName: string): RushConfigProject {

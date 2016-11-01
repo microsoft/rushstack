@@ -1,0 +1,7 @@
+{
+  "changes": [{
+    "packageName": "a",
+    "type": "patch",
+    "comment": "Patching a"
+  }]
+}

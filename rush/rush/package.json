@@ -29,6 +29,9 @@
   },
   "devDependencies": {
     "@microsoft/sp-build-node": "~0.1.0",
+    "@types/chai": "^3.4.34",
+    "@types/mocha": "^2.2.32",
+    "chai": "~3.5.0",
     "gulp": "~3.9.1"
   }
 }
