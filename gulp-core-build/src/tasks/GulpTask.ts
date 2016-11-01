@@ -16,7 +16,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
   public name: string;
   public buildConfig: IBuildConfig;
   public taskConfig: TASK_CONFIG;
-  public nukeMatch: string[];
+  public cleanMatch: string[];
 
   /**
    * Shallow merges config settings into the task config.
@@ -77,8 +77,8 @@ public log(message: string): void {
     fileWarning(this.name, filePath, line, column, errorCode, message);
   }
 
-  public getNukeMatch(buildConfig: IBuildConfig, taskConfig: TASK_CONFIG = this.taskConfig): string[] {
-    return this.nukeMatch;
+  public getCleanMatch(buildConfig: IBuildConfig, taskConfig: TASK_CONFIG = this.taskConfig): string[] {
+    return this.cleanMatch;
   }
 
   public execute(config: IBuildConfig): Promise<void> {
