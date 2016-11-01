@@ -1,5 +1,7 @@
+import test from './test.scss';
+
 export function log(message: string): void {
-  console.log(message);
+  console.log(test.foo);
 }
 
 export function add(num1: number, num2: number): number {

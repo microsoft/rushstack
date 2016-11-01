@@ -41,7 +41,7 @@ interface ILocalCache {
   gulp: gulp.Gulp;
   gulpErrorCallback: (err: Object) => void;
   gulpStopCallback: (err: Object) => void;
-  errorAndWarningSupressions: { [key: string]: boolean };
+  errorAndWarningSuppressions: { [key: string]: boolean };
   shouldLogWarningsDuringSummary: boolean;
   shouldLogErrorsDuringSummary: boolean;
 }
@@ -74,7 +74,7 @@ const localCache: ILocalCache = globalInstance.__loggingCache = globalInstance._
   writeSummaryCallbacks: [],
   exitCode: 0,
   writeSummaryLogs: [],
-  errorAndWarningSupressions: {},
+  errorAndWarningSuppressions: {},
   gulp: undefined,
   gulpErrorCallback: undefined,
   gulpStopCallback: undefined,
@@ -431,9 +431,14 @@ export function coverageData(coverage: number, threshold: number, filePath: stri
   localCache.coverageTotal += coverage;
 }
 
-export function addSupression(str: string): void {
+export function addSuppression(str: string): void {
   'use strict';
-  localCache.errorAndWarningSupressions[str] = true;
+
+  str = str
+    .replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '') // remove colors
+    .replace(/\r\n/g, '\n'); // normalize newline
+  localCache.errorAndWarningSuppressions[str] = true;
+
   logSummary(`${gutil.colors.yellow('Supressing')} - ${str}`);
 }
 
@@ -443,7 +448,7 @@ export function warn(...args: Array<string | Chalk.ChalkChain>): void {
 
   const stringMessage: string = args.join(' ');
 
-  if (!localCache.errorAndWarningSupressions[stringMessage]) {
+  if (!localCache.errorAndWarningSuppressions[stringMessage.replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '')]) {
     localCache.warnings.push(stringMessage);
     log(gutil.colors.yellow.apply(undefined, args));
   }
@@ -455,7 +460,7 @@ export function error(...args: Array<string | Chalk.ChalkChain>): void {
 
   const stringMessage: string = args.join(' ');
 
-  if (!localCache.errorAndWarningSupressions[stringMessage]) {
+  if (!localCache.errorAndWarningSuppressions[stringMessage.replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '')]) {
     localCache.errors.push(stringMessage);
     log(gutil.colors.red.apply(undefined, args));
   }
