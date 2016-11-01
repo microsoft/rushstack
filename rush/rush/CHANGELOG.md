@@ -18,6 +18,10 @@
 
 # Unreleased changes
 
+# 1.0.9
+
+- `PATCH` Updating the `publish` workflow.
+
 # 1.0.7
 
 - `PATCH` Renaming the `local-npm` directory to `npm-local`.
