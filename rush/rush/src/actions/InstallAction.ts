@@ -3,7 +3,7 @@
  */
 
 import * as colors from 'colors';
-import * as fs from 'fs-extra';
+import * as fsx from 'fs-extra';
 import * as glob from 'glob';
 import globEscape = require('glob-escape');
 import * as os from 'os';
@@ -30,9 +30,9 @@ export default class InstallAction extends CommandLineAction {
     // Example: "C:\Users\YourName\.rush"
     const rushHomeFolder: string = path.join(rushConfig.homeFolder, '.rush');
 
-    if (!fs.existsSync(rushHomeFolder)) {
+    if (!fsx.existsSync(rushHomeFolder)) {
       console.log('Creating ' + rushHomeFolder);
-      fs.mkdirSync(rushHomeFolder);
+      fsx.mkdirSync(rushHomeFolder);
     }
 
     // Example: "C:\Users\YourName\.rush\npm-1.2.3"
@@ -42,10 +42,10 @@ export default class InstallAction extends CommandLineAction {
 
     // NOTE: We don't care about the timestamp for last-install.log, because nobody will change
     // the package.json for this case
-    if (cleanInstall || !fs.existsSync(npmToolFlagFile)) {
+    if (cleanInstall || !fsx.existsSync(npmToolFlagFile)) {
       console.log(colors.bold('Installing NPM version ' + rushConfig.npmToolVersion) + os.EOL);
 
-      if (fs.existsSync(npmToolFolder)) {
+      if (fsx.existsSync(npmToolFolder)) {
         console.log('Deleting old files from ' + npmToolFolder);
         Utilities.dangerouslyDeletePath(npmToolFolder);
       }
@@ -66,7 +66,7 @@ export default class InstallAction extends CommandLineAction {
       Utilities.executeCommandWithRetry('npm', ['install'], MAX_INSTALL_ATTEMPTS, npmToolFolder);
 
       // Create the marker file to indicate a successful install
-      fs.writeFileSync(npmToolFlagFile, '');
+      fsx.writeFileSync(npmToolFlagFile, '');
       console.log('Successfully installed NPM ' + rushConfig.npmToolVersion);
     } else {
       console.log('Found NPM version ' + rushConfig.npmToolVersion + ' in ' + npmToolFolder);
@@ -74,12 +74,12 @@ export default class InstallAction extends CommandLineAction {
 
     // Example: "C:\MyRepo\common\npm-local"
     const localNpmToolFolder: string = path.join(rushConfig.commonFolder, 'npm-local');
-    if (fs.existsSync(localNpmToolFolder)) {
-      fs.unlinkSync(localNpmToolFolder);
+    if (fsx.existsSync(localNpmToolFolder)) {
+      fsx.unlinkSync(localNpmToolFolder);
     }
     console.log(os.EOL + 'Symlinking "' + localNpmToolFolder + '"');
     console.log('  --> "' + npmToolFolder + '"');
-    fs.symlinkSync(npmToolFolder, localNpmToolFolder, 'junction');
+    fsx.symlinkSync(npmToolFolder, localNpmToolFolder, 'junction');
   }
 
   constructor(parser: RushCommandLineParser) {
@@ -130,7 +130,7 @@ export default class InstallAction extends CommandLineAction {
   private _installCommonModules(): void {
     // Example: "C:\MyRepo\common\npm-local\node_modules\.bin\npm"
     const npmToolFilename: string = this._rushConfig.npmToolFilename;
-    if (!fs.existsSync(npmToolFilename)) {
+    if (!fsx.existsSync(npmToolFilename)) {
       // This is a sanity check.  It should never happen if the above logic worked correctly.
       throw new Error('Failed to create "' + npmToolFilename + '"');
     }
@@ -145,14 +145,14 @@ export default class InstallAction extends CommandLineAction {
     let skipPrune: boolean = false;
 
     if (this._cleanInstall.value || this._cleanInstallFull.value) {
-      if (fs.existsSync(commonNodeModulesFlagFilename)) {
+      if (fsx.existsSync(commonNodeModulesFlagFilename)) {
         // If we are cleaning the node_modules folder, then also delete the flag file
         // to force a reinstall
-        fs.unlinkSync(commonNodeModulesFlagFilename);
+        fsx.unlinkSync(commonNodeModulesFlagFilename);
       }
 
       // Example: "C:\MyRepo\common\node_modules"
-      if (fs.existsSync(commonNodeModulesFolder)) {
+      if (fsx.existsSync(commonNodeModulesFolder)) {
         console.log('Deleting old files from ' + commonNodeModulesFolder);
         Utilities.dangerouslyDeletePath(commonNodeModulesFolder);
         Utilities.createFolderWithRetry(commonNodeModulesFolder);
@@ -206,11 +206,11 @@ export default class InstallAction extends CommandLineAction {
       //
       // Because the move operation is atomic, if the process is killed during any of these steps,
       //  an incomplete or invalid node_modules directory will be under the npm-install-temp directory,
-      //  and not in the common directory. The next time Rush install runs, the invalid 
-      //  npm-install-temp/node_modules directory is deleted, so the repository is never in an invalid state.  
+      //  and not in the common directory. The next time Rush install runs, the invalid
+      //  npm-install-temp/node_modules directory is deleted, so the repository is never in an invalid state.
       const npmTempInstallDirectory: string = path.join(this._rushConfig.commonFolder, 'npm-install-temp');
       const tempNodeModulesPath: string = path.join(npmTempInstallDirectory, 'node_modules');
-      if (fs.existsSync(npmTempInstallDirectory)) {
+      if (fsx.existsSync(npmTempInstallDirectory)) {
         console.log(`Deleting ${npmTempInstallDirectory}`);
         Utilities.dangerouslyDeletePath(npmTempInstallDirectory);
       }
@@ -218,15 +218,15 @@ export default class InstallAction extends CommandLineAction {
       console.log(`Creating ${npmTempInstallDirectory}`);
       Utilities.createFolderWithRetry(npmTempInstallDirectory);
 
-      if (fs.existsSync(commonNodeModulesFolder)) {
+      if (fsx.existsSync(commonNodeModulesFolder)) {
         console.log(`Moving existing common node_modules folder to ${tempNodeModulesPath}`);
-        fs.renameSync(commonNodeModulesFolder, tempNodeModulesPath);
+        fsx.renameSync(commonNodeModulesFolder, tempNodeModulesPath);
       }
 
       console.log(`Copying package.json files to ${npmTempInstallDirectory}`);
-      fs.copySync(path.join(this._rushConfig.commonFolder, 'package.json'),
+      fsx.copySync(path.join(this._rushConfig.commonFolder, 'package.json'),
                   path.join(npmTempInstallDirectory, 'package.json'));
-      fs.copySync(this._rushConfig.tempModulesFolder,
+      fsx.copySync(this._rushConfig.tempModulesFolder,
                   path.join(npmTempInstallDirectory, path.basename(this._rushConfig.tempModulesFolder)));
 
       if (!skipPrune) {
@@ -261,10 +261,10 @@ export default class InstallAction extends CommandLineAction {
                                         npmTempInstallDirectory);
 
       console.log(`Moving ${tempNodeModulesPath} to ${commonNodeModulesFolder}`);
-      fs.renameSync(tempNodeModulesPath, commonNodeModulesFolder);
+      fsx.renameSync(tempNodeModulesPath, commonNodeModulesFolder);
 
       // Create the marker file to indicate a successful install
-      fs.writeFileSync(commonNodeModulesFlagFilename, '');
+      fsx.writeFileSync(commonNodeModulesFlagFilename, '');
       console.log('');
     }
 

@@ -3,7 +3,7 @@
  */
 import * as colors from 'colors';
 import * as path from 'path';
-import * as fs from 'fs';
+import * as fsx from 'fs-extra';
 import { EOL } from 'os';
 import {
   CommandLineAction,
@@ -200,7 +200,7 @@ export default class PublishAction extends CommandLineAction {
     let changeFiles: string[] = [];
 
     try {
-      changeFiles = fs.readdirSync(changesPath).filter(filename => filename.indexOf('.json') >= 0);
+      changeFiles = fsx.readdirSync(changesPath).filter(filename => filename.indexOf('.json') >= 0);
     } catch (e) { /* no-op */ }
 
     if (changeFiles.length) {
