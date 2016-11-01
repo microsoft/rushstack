@@ -433,10 +433,12 @@ export function coverageData(coverage: number, threshold: number, filePath: stri
 
 export function addSuppression(str: string): void {
   'use strict';
-  localCache.errorAndWarningSuppressions[str] = true;
+
   str = str
     .replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '') // remove colors
     .replace(/\r\n/g, '\n'); // normalize newline
+  localCache.errorAndWarningSuppressions[str] = true;
+
   logSummary(`${gutil.colors.yellow('Supressing')} - ${str}`);
 }
 
