@@ -169,7 +169,7 @@ export default class RebuildAction extends CommandLineAction {
       // e.g. package C may depend on A & B, but if we are only building A's downstream, we will ignore B
       dependents.forEach(dependent =>
         taskRunner.addDependencies(dependent,
-          this._rushLinkJson.localLinks[dependent].filter(dep => dependents.has(dep))));
+          (this._rushLinkJson.localLinks[dependent] || []).filter(dep => dependents.has(dep))));
     }
   }
 
