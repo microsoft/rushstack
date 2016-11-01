@@ -1,0 +1,49 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build",
+      "type": "major",
+      "comment": "Updating to use TypeScript 2 and @types typings."
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-karma",
+      "type": "major",
+      "comment": "Updating to use TypeScript 2 and @types typings."
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-mocha",
+      "type": "major",
+      "comment": "Updating to use TypeScript 2 and @types typings."
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-sass",
+      "type": "major",
+      "comment": "Updating to use TypeScript 2 and @types typings."
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-serve",
+      "type": "major",
+      "comment": "Updating to use TypeScript 2 and @types typings."
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "type": "major",
+      "comment": "Updating to use TypeScript 2 and @types typings."
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-webpack",
+      "type": "major",
+      "comment": "Updating to use TypeScript 2 and @types typings."
+    },
+    {
+      "packageName": "@microsoft/node-library-build",
+      "type": "major",
+      "comment": "Updating to use TypeScript 2 and @types typings."
+    },
+    {
+      "packageName": "@microsoft/web-library-build",
+      "type": "major",
+      "comment": "Updating to use TypeScript 2 and @types typings."
+    }
+  ]
+}
