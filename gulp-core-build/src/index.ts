@@ -6,7 +6,7 @@ import { GulpTask } from './tasks/GulpTask';
 import { GulpProxy } from './GulpProxy';
 import { IExecutable } from './IExecutable';
 import { IBuildConfig } from './IBuildConfig';
-import { NukeTask } from './tasks/NukeTask';
+import { CleanTask } from './tasks/CleanTask';
 import { args } from './State';
 export { IExecutable } from './IExecutable';
 import { initialize as initializeLogging, markTaskCreationTime, generateGulpError, setWatchMode } from './logging';
@@ -18,7 +18,7 @@ export * from './logging';
 export * from './tasks/CopyTask';
 export * from './tasks/GenerateShrinkwrapTask';
 export * from './tasks/GulpTask';
-export * from './tasks/NukeTask';
+export * from './tasks/CleanTask';
 export * from './tasks/ValidateShrinkwrapTask';
 
 /* tslint:disable:variable-name */
@@ -410,7 +410,7 @@ function _handleTasksListArguments(): void {
   }
 }
 
-export const nuke: IExecutable = new NukeTask();
+export const clean: IExecutable = new CleanTask();
 
-// Register default nuke task.
-task('nuke', nuke);
+// Register default clean task.
+task('clean', clean);

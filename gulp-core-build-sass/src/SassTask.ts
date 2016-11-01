@@ -32,7 +32,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     dropCssFiles: false
   };
 
-  public nukeMatch: string[] = [
+  public cleanMatch: string[] = [
     'src/**/*.scss.ts'
   ];
 
