@@ -1,0 +1,30 @@
+{
+  "commonFolder": "common",
+  "npmVersion": "3.10.8",
+  "rushMinimumVersion": "1.0.5",
+  "nodeSupportedVersionRange": ">=4.3.0 <5.0.0",
+  "projectFolderMinDepth": 1,
+  "reviewCategories": [ "first-party", "third-party", "prototype" ],
+  "projects": [
+    {
+      "packageName": "a",
+      "projectFolder": "a",
+      "reviewCategory": "third-party"
+    },
+    {
+      "packageName": "b",
+      "projectFolder": "b",
+      "reviewCategory": "third-party"
+    },
+    {
+      "packageName": "c",
+      "projectFolder": "c",
+      "reviewCategory": "third-party"
+    },
+    {
+      "packageName": "d",
+      "projectFolder": "d",
+      "reviewCategory": "third-party"
+    }
+  ]
+}
