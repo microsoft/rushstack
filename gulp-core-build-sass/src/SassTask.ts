@@ -62,6 +62,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     const moduleSrcPattern: string[] = srcPattern.map((value: string) => value.replace('.scss', '.module.scss'));
 
     if (this.taskConfig.useCSSModules) {
+      this.logVerbose('Generating css modules.');
       return this._processFiles(gulp, srcPattern, completeCallback, modulePostCssPlugins);
     } else {
       moduleSrcPattern.forEach((value: string) => srcPattern.push(`!${value}`));
@@ -79,7 +80,6 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     postCSSPlugins: any[]
     /* tslint:enable:no-any */
   ): NodeJS.ReadWriteStream {
-
     /* tslint:disable:typedef */
     const changed = require('gulp-changed');
     const cleancss = require('gulp-clean-css');
@@ -123,7 +123,6 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
 
           if (classNames) {
             const classNamesLines: string[] = [
-              this.taskConfig.preamble || '',
               'const styles = {'
             ];
 
@@ -148,35 +147,39 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
             classNamesLines.push(
               '};',
               '',
-              'export default styles;',
-              this.taskConfig.postamble || '');
+              'export default styles;'
+            );
 
             exportClassNames = classNamesLines.join(EOL);
           }
 
           let lines: string[] = [];
+
+          lines.push(this.taskConfig.preamble || '');
+
           if (this.taskConfig.dropCssFiles) {
-            lines = [
+            lines = lines.concat([
               `require('${path.basename(file.path, scssTsExtName)}.css');`,
-              '',
-              exportClassNames,
-              ''
-            ];
+              exportClassNames
+            ]);
           } else if (!!content) {
-            lines = [
-              this.taskConfig.preamble || '',
+            lines = lines.concat([
               'import { loadStyles } from \'@microsoft/load-themed-styles\';',
               '',
               exportClassNames,
               '',
-              `loadStyles(${JSON.stringify(splitStyles(content))});`,
-              this.taskConfig.postamble || '',
-              ''
-            ];
+              `loadStyles(${JSON.stringify(splitStyles(content))});`
+            ]);
           }
 
-          return lines.join(EOL).replace(new RegExp(`(${EOL}){3,}`, 'g'), `${EOL}${EOL}`)
-                                .replace(new RegExp(`(${EOL})+$`, 'm'), EOL);
+          lines.push(this.taskConfig.postamble || '');
+
+          return (
+            lines
+              .join(EOL)
+              .replace(new RegExp(`(${EOL}){3,}`, 'g'), `${EOL}${EOL}`)
+              .replace(new RegExp(`(${EOL})+$`, 'm'), EOL)
+            );
         }
       }))
       .pipe(gulp.dest('src')));
