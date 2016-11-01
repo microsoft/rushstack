@@ -62,6 +62,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     const moduleSrcPattern: string[] = srcPattern.map((value: string) => value.replace('.scss', '.module.scss'));
 
     if (this.taskConfig.useCSSModules) {
+      this.log('Generating css modules.');
       return this._processFiles(gulp, srcPattern, completeCallback, modulePostCssPlugins);
     } else {
       moduleSrcPattern.forEach((value: string) => srcPattern.push(`!${value}`));
@@ -79,7 +80,6 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     postCSSPlugins: any[]
     /* tslint:enable:no-any */
   ): NodeJS.ReadWriteStream {
-
     /* tslint:disable:typedef */
     const changed = require('gulp-changed');
     const cleancss = require('gulp-clean-css');
@@ -155,28 +155,31 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
 
           let lines: string[] = [];
 
+          lines.push(this.taskConfig.preamble || '');
+
           if (this.taskConfig.dropCssFiles) {
-            lines = [
-              this.taskConfig.preamble || '',
+            lines = lines.concat([
               `require('${path.basename(file.path, scssTsExtName)}.css');`,
-              exportClassNames,
-              this.taskConfig.postamble || ''
-            ];
+              exportClassNames
+            ]);
           } else if (!!content) {
-            lines = [
-              this.taskConfig.preamble || '',
+            lines = lines.concat([
               'import { loadStyles } from \'@microsoft/load-themed-styles\';',
               '',
               exportClassNames,
               '',
-              `loadStyles(${JSON.stringify(splitStyles(content))});`,
-              this.taskConfig.postamble || '',
-              ''
-            ];
+              `loadStyles(${JSON.stringify(splitStyles(content))});`
+            ]);
           }
 
-          return lines.join(EOL).replace(new RegExp(`(${EOL}){3,}`, 'g'), `${EOL}${EOL}`)
-                                .replace(new RegExp(`(${EOL})+$`, 'm'), EOL);
+          lines.push(this.taskConfig.postamble || '');
+
+          return (
+            lines
+              .join(EOL)
+              .replace(new RegExp(`(${EOL}){3,}`, 'g'), `${EOL}${EOL}`)
+              .replace(new RegExp(`(${EOL})+$`, 'm'), EOL)
+            );
         }
       }))
       .pipe(gulp.dest('src')));

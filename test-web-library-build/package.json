@@ -8,11 +8,9 @@
     "clean": "gulp nuke",
     "test": "gulp"
   },
-  "directories": {
-    "packagePath": "package"
-  },
   "dependencies": {
-    "gulp": "~3.9.1",
-    "@microsoft/web-library-build": ">=0.5.0 <1.0.0"
+    "@microsoft/load-themed-styles": "^1.2.2",
+    "@microsoft/web-library-build": ">=0.5.0 <1.0.0",
+    "gulp": "~3.9.1"
   }
 }
