@@ -123,7 +123,6 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
 
           if (classNames) {
             const classNamesLines: string[] = [
-              this.taskConfig.preamble || '',
               'const styles = {'
             ];
 
@@ -148,19 +147,20 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
             classNamesLines.push(
               '};',
               '',
-              'export default styles;',
-              this.taskConfig.postamble || '');
+              'export default styles;'
+            );
 
             exportClassNames = classNamesLines.join(EOL);
           }
 
           let lines: string[] = [];
+
           if (this.taskConfig.dropCssFiles) {
             lines = [
+              this.taskConfig.preamble || '',
               `require('${path.basename(file.path, scssTsExtName)}.css');`,
-              '',
               exportClassNames,
-              ''
+              this.taskConfig.postamble || ''
             ];
           } else if (!!content) {
             lines = [
