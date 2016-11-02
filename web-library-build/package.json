@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/web-library-build",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "engines": {
     "npm": "3.10.8"
@@ -17,7 +17,7 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "dependencies": {
-    "@microsoft/gulp-core-build": ">=1.0.0 <2.0.0",
+    "@microsoft/gulp-core-build": ">=1.0.1 <2.0.0",
     "@microsoft/gulp-core-build-karma": ">=1.0.0 <2.0.0",
     "@microsoft/gulp-core-build-sass": ">=1.0.0 <2.0.0",
     "@microsoft/gulp-core-build-serve": ">=1.0.0 <2.0.0",
