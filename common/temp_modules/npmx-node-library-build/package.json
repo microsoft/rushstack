@@ -10,8 +10,8 @@
     "gulp": "~3.9.1"
   },
   "npmxDependencies": {
-    "@microsoft/gulp-core-build": ">=0.12.0 <1.0.0",
-    "@microsoft/gulp-core-build-mocha": ">=0.4.2 <1.0.0",
-    "@microsoft/gulp-core-build-typescript": ">=0.6.1 <1.0.0"
+    "@microsoft/gulp-core-build": ">=1.0.0 <2.0.0",
+    "@microsoft/gulp-core-build-mocha": ">=1.0.0 <2.0.0",
+    "@microsoft/gulp-core-build-typescript": ">=1.0.0 <2.0.0"
   }
 }
