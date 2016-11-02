@@ -11,7 +11,7 @@
   },
   "scripts": {
     "build": "gulp",
-    "clean": "gulp clean",
+    "clean": "echo",
     "test": "gulp"
   },
   "dependencies": {
