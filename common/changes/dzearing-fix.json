@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build",
+      "type": "patch",
+      "comment": "Adding 'del' as a dependency, which should fix gulp clean."
+    }
+  ]
+}
