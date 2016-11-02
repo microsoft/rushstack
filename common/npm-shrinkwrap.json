@@ -993,7 +993,7 @@
     },
     "del": {
       "version": "2.2.2",
-      "from": "del@>=2.2.0 <2.3.0",
+      "from": "del@>=2.2.2 <3.0.0",
       "resolved": "https://registry.npmjs.org/del/-/del-2.2.2.tgz"
     },
     "delayed-stream": {

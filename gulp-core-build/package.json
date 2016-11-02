@@ -30,6 +30,7 @@
     "@types/through2": "^2.0.31",
     "@types/vinyl": "^1.2.30",
     "@types/yargs": "0.0.34",
+    "del": "^2.2.2",
     "end-of-stream": "~1.1.0",
     "es6-promise": "~3.1.2",
     "fs-extra": "~0.26.7",
