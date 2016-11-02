@@ -11,7 +11,7 @@
   },
   "scripts": {
     "build": "gulp",
-    "clean": "gulp clean",
+    "clean": "echo",
     "test": "gulp"
   },
   "main": "lib/index.js",
@@ -31,7 +31,6 @@
     "node-notifier": "~4.6.1"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": ">=0.4.0 <1.0.0",
     "typescript": "~2.0.6"
   },
   "optionalDependencies": {
