@@ -5,7 +5,7 @@ import { EOL } from 'os';
 
 export interface IWebpackTaskConfig {
   /**
-   * Path to a webpack config. A path to a config takes precidence over the "config" ooption.
+   * Path to a webpack config. A path to a config takes precidence over the "config" option.
    */
   configPath: string;
 
