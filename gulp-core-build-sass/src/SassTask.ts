@@ -23,7 +23,10 @@ export interface ISassTaskConfig {
    * imported directly, and will contain an object describing the mangled class names.
    */
   useCSSModules?: boolean;
-  /** If true, we will generate a CSS in the lib folder. If false, the CSS is directly embedded into the TypeScript file */
+  /**
+   * If true, we will generate a CSS in the lib folder. If false, the CSS is directly embedded
+   * into the TypeScript file
+   */
   dropCssFiles?: boolean;
 }
 
