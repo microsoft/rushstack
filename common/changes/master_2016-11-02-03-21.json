@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "packageName": "@microsoft/web-library-build",
+      "type": "minor"
+    }
+  ],
+  "email": "zihankoh@microsoft.com"
+}
