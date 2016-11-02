@@ -1,31 +1,41 @@
 import { GulpTask, IBuildConfig } from '@microsoft/gulp-core-build';
 
 import * as gulp from 'gulp';
-import * as karma from 'karma';
 import * as path from 'path';
+import * as Karma from 'karma';
 
 export interface IKarmaTaskConfig {
   configPath: string;
 }
 
 export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
+
   public name: string = 'karma';
+
   public taskConfig: IKarmaTaskConfig = {
     configPath: './karma.config.js'
   };
 
-  public resources: Object = {
-    bindPolyfillPath: require.resolve('phantomjs-polyfill/bind-polyfill.js'),
-    istanbulInstrumenterLoaderPath: require.resolve('istanbul-instrumenter-loader'),
-    plugins: [
-      require('karma-webpack'),
-      require('karma-mocha'),
-      require('karma-coverage'),
-      require('karma-mocha-clean-reporter'),
-      require('karma-phantomjs-launcher'),
-      require('karma-sinon-chai')
-    ]
-  };
+  public get resources(): Object {
+    if (!this._resources) {
+      this._resources = {
+        bindPolyfillPath: require.resolve('phantomjs-polyfill/bind-polyfill.js'),
+        istanbulInstrumenterLoaderPath: require.resolve('istanbul-instrumenter-loader'),
+        plugins: [
+          require('karma-webpack'),
+          require('karma-mocha'),
+          require('karma-coverage'),
+          require('karma-mocha-clean-reporter'),
+          require('karma-phantomjs-launcher'),
+          require('karma-sinon-chai')
+        ]
+      };
+    }
+
+    return this._resources;
+  }
+
+  private _resources: Object;
 
   public isEnabled(buildConfig: IBuildConfig): boolean {
     return (
@@ -57,7 +67,8 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
 
       completeCallback();
     } else {
-      const server: karma.Server = karma.Server;
+      const karma = require('karma'); // tslint:disable-line
+      const server: Karma.Server = karma.Server;
       const singleRun: boolean = (process.argv.indexOf('--debug') === -1);
       const matchIndex: number = (process.argv.indexOf('--match'));
       const matchString: string = (matchIndex === -1) ? '' : process.argv[matchIndex + 1];

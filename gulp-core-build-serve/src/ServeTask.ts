@@ -1,16 +1,15 @@
 import { GulpTask } from '@microsoft/gulp-core-build';
 import { IBuildConfig } from '@microsoft/gulp-core-build/lib/IBuildConfig';
 import * as gulp from 'gulp';
-import * as http from 'http';
-import * as https from 'https';
-import * as Chalk from 'chalk';
+import * as fs from 'fs';
+import * as ChalkType from 'chalk';
+import * as HttpType from 'http';
+import * as HttpsType from 'https';
 import * as pathType from 'path';
 import * as gUtilType from 'gulp-util';
 import * as expressType from 'express';
-import * as fs from 'fs';
 
 import {
-  ensureCertificate,
   ICertificate
 } from './certificates';
 
@@ -90,14 +89,16 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
     const gulpConnect = require('gulp-connect');
     const open = require('gulp-open');
     const http = require('http');
+    const https = require('https');
     /* tslint:enable:typedef */
+
     const gutil: typeof gUtilType = require('gulp-util');
     const path: typeof pathType = require('path');
     const openBrowser: boolean = (process.argv.indexOf('--nobrowser') === -1);
     const portArgumentIndex: number = process.argv.indexOf('--port');
     let { port, initialPage, api }: IServeTaskConfig = this.taskConfig;
     const { rootPath }: IBuildConfig = this.buildConfig;
-    const httpsServerOptions: https.ServerOptions = this._loadHttpsServerOptions();
+    const httpsServerOptions: HttpsType.ServerOptions = this._loadHttpsServerOptions();
 
     if (portArgumentIndex >= 0 && process.argv.length > (portArgumentIndex + 1)) {
       port = Number(process.argv[portArgumentIndex + 1]);
@@ -173,12 +174,12 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
     completeCallback();
   }
 
-  private _logRequestsMiddleware(req: http.IncomingMessage, res: http.ServerResponse, next?: () => void): void {
+  private _logRequestsMiddleware(req: HttpType.IncomingMessage, res: HttpType.ServerResponse, next?: () => void): void {
     const { colors }: typeof gUtilType = require('gulp-util');
     /* tslint:disable:no-any */
     const ipAddress: string = (req as any).ip;
     /* tslint:enable:no-any */
-    let resourceColor: Chalk.ChalkChain = colors.cyan;
+    let resourceColor: ChalkType.ChalkChain = colors.cyan;
 
     if (req && req.url) {
       if (req.url.indexOf('.bundle.js') >= 0) {
@@ -198,21 +199,21 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
     next();
   }
 
-  private _enableCorsMiddleware(req: http.IncomingMessage, res: http.ServerResponse, next?: () => void): void {
+  private _enableCorsMiddleware(req: HttpType.IncomingMessage, res: HttpType.ServerResponse, next?: () => void): void {
     res.setHeader('Access-Control-Allow-Origin', '*');
     next();
   }
 
-  private _setJSONResponseContentTypeMiddleware(req: http.IncomingMessage,
-                                                res: http.ServerResponse,
+  private _setJSONResponseContentTypeMiddleware(req: HttpType.IncomingMessage,
+                                                res: HttpType.ServerResponse,
                                                 next?: () => void): void {
     res.setHeader('content-type', 'application/json');
     next();
   }
 
-  private _loadHttpsServerOptions(): https.ServerOptions {
+  private _loadHttpsServerOptions(): HttpsType.ServerOptions {
     if (this.taskConfig.https) {
-      const result: https.ServerOptions = {};
+      const result: HttpsType.ServerOptions = {};
 
       // We're configuring an HTTPS server, so we need a certificate
       if (this.taskConfig.pfxPath) {
@@ -250,6 +251,7 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
           }
         }
       } else {
+        const { ensureCertificate } = require('./certificates'); // tslint:disable-line
         let devCertificate: ICertificate = ensureCertificate(this.taskConfig.tryCreateDevCertificate, this);
         if (devCertificate.pemCertificate && devCertificate.pemKey) {
           result.cert = devCertificate.pemCertificate;

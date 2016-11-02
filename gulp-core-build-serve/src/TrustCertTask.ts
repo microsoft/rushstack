@@ -1,7 +1,6 @@
 import { GulpTask } from '@microsoft/gulp-core-build';
 import * as gulp from 'gulp';
-
-import { ensureCertificate, ICertificate } from './certificates';
+import { ICertificate } from './certificates';
 
 /**
  * This task generates and trusts a development certificate. The certificate is self-signed
@@ -14,6 +13,7 @@ export default class TrustCertTask extends GulpTask<{}> {
   public name: string = 'trust-cert';
 
   public executeTask(gulp: gulp.Gulp, completeCallback: (error?: string) => void): void {
+    const { ensureCertificate } = require('./certificates'); // tslint:disable-line
     const certificate: ICertificate = ensureCertificate(true, this);
 
     if (certificate.pemCertificate && certificate.pemKey) {
