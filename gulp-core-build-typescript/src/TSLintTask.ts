@@ -1,7 +1,6 @@
 import { GulpTask } from '@microsoft/gulp-core-build';
 import gulpType = require('gulp');
 /* tslint:disable:typedef */
-const cached = require('gulp-cache');
 const md5 = require('md5');
 const merge = require('lodash').merge;
 /* tslint:enable:typedef */
@@ -113,6 +112,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
     const taskScope: TSLintTask = this;
 
     const activeLintRules: any = taskScope._loadLintRules(); // tslint:disable-line:no-any
+    const cached = require('gulp-cache'); // tslint:disable-line
 
     return gulp.src(this.taskConfig.sourceMatch)
       .pipe(cached(

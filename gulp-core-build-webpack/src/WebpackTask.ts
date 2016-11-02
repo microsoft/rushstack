@@ -29,9 +29,16 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
     suppressWarnings: []
   };
 
-  public resources: Object = {
-    webpack: require('webpack')
-  };
+  public get resources(): Object {
+    if (!this._resources) {
+      this._resources = {
+        webpack: require('webpack')
+      };
+    }
+    return this._resources;
+  }
+
+  private _resources: Object;
 
   public isEnabled(buildConfig: IBuildConfig): boolean {
     return (
