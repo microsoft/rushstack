@@ -1,0 +1,10 @@
+{
+  "name": "web-build-tools",
+  "version": "0.0.0",
+  "description": "Web build tools",
+  "scripts": {
+  },
+  "devDependencies": {
+    "@microsoft/npmx": "^1.0.9"
+  }
+}
