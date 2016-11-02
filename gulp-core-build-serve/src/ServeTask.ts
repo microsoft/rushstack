@@ -7,7 +7,7 @@ import * as HttpType from 'http';
 import * as HttpsType from 'https';
 import * as pathType from 'path';
 import * as gUtilType from 'gulp-util';
-import * as expressType from 'express';
+import * as ExpressType from 'express';
 
 import {
   ICertificate
@@ -130,8 +130,8 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
       if (apiMap) {
         console.log(`Starting api server on port ${api.port}.`);
 
-        const express: typeof expressType = require('express');
-        const app: expressType.Express = express();
+        const express: typeof ExpressType = require('express');
+        const app: ExpressType.Express = express();
 
         app.use(this._logRequestsMiddleware);
         app.use(this._enableCorsMiddleware);

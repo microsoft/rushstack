@@ -2,7 +2,7 @@ import { GulpTask, IBuildConfig } from '@microsoft/gulp-core-build';
 
 import * as gulp from 'gulp';
 import * as path from 'path';
-import * as Karma from 'karma';
+import * as KarmaType from 'karma';
 
 export interface IKarmaTaskConfig {
   configPath: string;
@@ -67,8 +67,8 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
 
       completeCallback();
     } else {
-      const karma = require('karma'); // tslint:disable-line
-      const server: Karma.Server = karma.Server;
+      const karma: typeof KarmaType = require('karma'); // tslint:disable-line
+      const server: KarmaType.Server = karma.Server;
       const singleRun: boolean = (process.argv.indexOf('--debug') === -1);
       const matchIndex: number = (process.argv.indexOf('--match'));
       const matchString: string = (matchIndex === -1) ? '' : process.argv[matchIndex + 1];
