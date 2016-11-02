@@ -10,10 +10,20 @@ const merge = require('merge2');
 const scssTsExtName: string = '.scss.ts';
 
 export interface ISassTaskConfig {
+  /** An optional parameter for text to include in the generated typescript file. */
   preamble?: string;
+  /** An optional parameter for text to include at the end of the generated typescript file. */
   postamble?: string;
+  /** An array of glob patterns for locating SASS files. */
   sassMatch?: string[];
+  /** 
+   * If this option is specified, files ending with .module.scss extension will
+   * automatically generate a corresponding TypeScript file. All classes will be
+   * appended with a hash to help ensure uniqueness on a page. This file can be
+   * imported directly, and will contain an object describing the mangled class names.
+   */
   useCSSModules?: boolean;
+  /** If true, we will generate a CSS in the lib folder. If false, the CSS is directly embedded into the TypeScript file */
   dropCssFiles?: boolean;
 }
 
