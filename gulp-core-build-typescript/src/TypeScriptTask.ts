@@ -123,7 +123,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
         }
       }))
       .pipe(sourcemaps.init())
-      .pipe(tsProject(this.taskConfig.reporter));
+      .pipe(ts(tsProject, undefined, this.taskConfig.reporter));
 
     allStreams.push(tsResult.js
       .pipe(sourcemaps.write('.', { sourceRoot: '/src' }))
@@ -151,7 +151,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
           }
         }))
         .pipe(sourcemaps.write({ sourceRoot: '/src' }))
-        .pipe(tsAMDProject(this.taskConfig.reporter));
+        .pipe(ts(tsAMDProject, undefined, this.taskConfig.reporter));
 
       allStreams.push(
         tsResult.js

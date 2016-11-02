@@ -7,6 +7,6 @@
     "gulp": "~3.9.1"
   },
   "npmxDependencies": {
-    "@microsoft/web-library-build": ">=1.0.0 <2.0.0"
+    "@microsoft/web-library-build": ">=1.0.1 <2.0.0"
   }
 }
