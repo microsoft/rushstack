@@ -98,12 +98,26 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     const allStreams: NodeJS.ReadWriteStream[] = [];
 
     /* tslint:disable:no-any */
-    const tsConfig: any = this.readJSONSync('tsconfig.json') || require('../tsconfig.json');
+    let tsConfig: any = this.readJSONSync('tsconfig.json');
     /* tslint:enable:no-any */
+
+    // Set default config if no local tsconfig.json exists.
+    if (!tsConfig) {
+      tsConfig = {
+        compilerOptions: {
+          'declaration': true,
+          'experimentalDecorators': true,
+          'jsx': 'react',
+          'moduleResolution': 'node',
+          'sourceMap': true,
+          'target': 'es5'
+        }
+      };
+    }
 
     // Log the compiler version for custom verisons.
     if (this.taskConfig.typescript && this.taskConfig.typescript.version) {
-      this.log(`Using custom version: ${ this.taskConfig.typescript.version }`);
+      this.log(`Using custom version: ${this.taskConfig.typescript.version}`);
     }
 
     const tsCompilerOptions: ts.Project = assign({}, tsConfig.compilerOptions, {
