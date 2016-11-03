@@ -62,6 +62,6 @@ export {
   default as rushVersion
 } from './rushVersion';
 
-export { default as TestErrorDetector } from './errorDetection/rules/TestErrorDetector';
-export { default as TsErrorDetector } from './errorDetection/rules/TsErrorDetector';
-export { default as TsLintErrorDetector } from './errorDetection/rules/TsLintErrorDetector';
+export { default as TestErrorDetector } from './errorDetection/rules/testErrorDetector';
+export { default as TsErrorDetector } from './errorDetection/rules/tsErrorDetector';
+export { default as TsLintErrorDetector } from './errorDetection/rules/tsLintErrorDetector';
