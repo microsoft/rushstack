@@ -2,12 +2,22 @@ import { GulpTask } from './GulpTask';
 import gulp = require('gulp');
 
 export interface ICopyConfig {
+  /**
+   * Object of dest: [source] for the copy task.
+   */
   copyTo: {
     [destPath: string]: string[];
   };
+
+  /**
+   * Whether to remove or replace relative path for files. True by default.
+   */
   shouldFlatten?: boolean;
 }
 
+/**
+ * This task takes in a map of dest: [sources], and copies items from one place to another.
+ */
 export class CopyTask extends GulpTask<ICopyConfig> {
   public taskConfig: ICopyConfig = {
     copyTo: {},

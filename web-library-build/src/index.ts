@@ -22,6 +22,7 @@ export * from '@microsoft/gulp-core-build-karma';
 export * from '@microsoft/gulp-core-build-webpack';
 export * from '@microsoft/gulp-core-build-serve';
 
+// pre copy and post copy allows you to specify a map of dest: [sources] to copy from one place to another.
 export const preCopy: CopyTask = new CopyTask();
 preCopy.name = 'pre-copy';
 
@@ -38,7 +39,7 @@ export const buildTasks: IExecutable = task('build', serial(preCopy, sass, paral
 export const bundleTasks: IExecutable = task('bundle', serial(buildTasks, webpack));
 export const compileTsTasks: IExecutable = parallel(typescript, text);
 export const testTasks: IExecutable = serial(sass, compileTsTasks, karma);
-export const defaultBuildBundleAndTest: IExecutable = serial(bundleTasks, karma);
+export const buildBundleAndTestDefaultTask: IExecutable = serial(bundleTasks, karma);
 export const postProcessSourceMapsTask: PostProcessSourceMaps = new PostProcessSourceMaps();
 export const validateShrinkwrapTask: ValidateShrinkwrapTask = new ValidateShrinkwrapTask();
 export const generateShrinkwrapTask: GenerateShrinkwrapTask = new GenerateShrinkwrapTask();
