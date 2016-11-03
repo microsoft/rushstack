@@ -18,6 +18,8 @@
 
 # Unreleased changes
 
+- `PATCH` Fixing Rush to run on UNIX and Linux.
+
 # 1.0.9
 
 - `PATCH` Updating the `publish` workflow.
