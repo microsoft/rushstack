@@ -15,7 +15,7 @@ export interface IRushConfigProjectJson {
   projectFolder: string;
   reviewCategory?: string;
   cyclicDependencyProjects: string[];
-  shouldTrackChanges?: boolean;
+  shouldPublish?: boolean;
 }
 
 /**
@@ -30,7 +30,7 @@ export default class RushConfigProject {
   private _packageJson: PackageJson;
   private _tempProjectName: string;
   private _cyclicDependencyProjects: Set<string>;
-  private _shouldTrackChanges: boolean;
+  private _shouldPublish: boolean;
   private _downstreamDependencyProjects: string[];
 
   constructor(projectJson: IRushConfigProjectJson, rushConfig: RushConfig, tempProjectName: string) {
@@ -92,7 +92,7 @@ export default class RushConfigProject {
       }
     }
     this._downstreamDependencyProjects = [];
-    this._shouldTrackChanges = !!projectJson.shouldTrackChanges;
+    this._shouldPublish = !!projectJson.shouldPublish;
   }
 
   /**
@@ -160,10 +160,11 @@ export default class RushConfigProject {
   }
 
   /**
-   * A flag which indicates whether changes to this project should be tracked by the
-   * changefile workflow. If this is false, the project will not show up the `rush change` UI
+   * A flag which indicates whether changes to this project should be published. This controls
+   * whether or not the project would show up when running `rush change`, and whether or not it
+   * should be published during `rush publish`.
    */
-  public get shouldTrackChanges(): boolean {
-    return this._shouldTrackChanges;
+  public get shouldPublish(): boolean {
+    return this._shouldPublish;
   }
 }

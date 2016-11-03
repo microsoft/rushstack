@@ -109,7 +109,7 @@ export default class ChangeAction extends CommandLineAction {
   private _getChangedProjects(): string[] {
     const changedFolders: string[] = VersionControl.getChangedFolders();
     return this._rushConfig.projects
-      .filter(project => project.shouldTrackChanges)
+      .filter(project => project.shouldPublish)
       .filter(project => this._hasProjectChanged(changedFolders, project))
       .map(project => project.packageName);
   }
