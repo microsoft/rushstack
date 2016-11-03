@@ -64,4 +64,4 @@ task('serve',
   )
 );
 
-task('default', defaultBuildBundleAndTest);
+task('default', buildBundleAndTestDefaultTask);
