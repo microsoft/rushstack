@@ -35,9 +35,9 @@ const sourceMatch: string[] = [
 ];
 
 // Define default task groups.
-export const buildTasks: IExecutable = task('build', serial(preCopy, sass, parallel(tslint, typescript, text), postCopy));
-export const bundleTasks: IExecutable = task('bundle', serial(buildTasks, webpack));
 export const compileTsTasks: IExecutable = parallel(typescript, text);
+export const buildTasks: IExecutable = task('build', serial(preCopy, sass, parallel(compileTsTasks, text), postCopy));
+export const bundleTasks: IExecutable = task('bundle', serial(buildTasks, webpack));
 export const testTasks: IExecutable = serial(sass, compileTsTasks, karma);
 export const buildBundleAndTestDefaultTask: IExecutable = serial(bundleTasks, karma);
 export const postProcessSourceMapsTask: PostProcessSourceMaps = new PostProcessSourceMaps();
