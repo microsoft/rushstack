@@ -22,6 +22,7 @@ export * from '@microsoft/gulp-core-build-karma';
 export * from '@microsoft/gulp-core-build-webpack';
 export * from '@microsoft/gulp-core-build-serve';
 
+// pre copy and post copy allows you to specify a map of dest: [sources] to copy from one place to another.
 export const preCopy: CopyTask = new CopyTask();
 preCopy.name = 'pre-copy';
 
@@ -34,30 +35,33 @@ const sourceMatch: string[] = [
 ];
 
 // Define default task groups.
-let buildTasks: IExecutable = task('build', serial(preCopy, sass, parallel(tslint, typescript, text), postCopy));
-let bundleTasks: IExecutable = task('bundle', serial(buildTasks, webpack));
-const postProcessSourceMaps: PostProcessSourceMaps = new PostProcessSourceMaps();
-const validateShrinkwrapTask: ValidateShrinkwrapTask = new ValidateShrinkwrapTask();
-const generateShrinkwrapTask: GenerateShrinkwrapTask = new GenerateShrinkwrapTask();
+export const compileTsTasks: IExecutable = parallel(typescript, text);
+export const buildTasks: IExecutable = task('build', serial(preCopy, sass, parallel(compileTsTasks, text), postCopy));
+export const bundleTasks: IExecutable = task('bundle', serial(buildTasks, webpack));
+export const testTasks: IExecutable = serial(sass, compileTsTasks, karma);
+export const defaultTasks: IExecutable = serial(bundleTasks, karma);
+export const postProcessSourceMapsTask: PostProcessSourceMaps = new PostProcessSourceMaps();
+export const validateShrinkwrapTask: ValidateShrinkwrapTask = new ValidateShrinkwrapTask();
+export const generateShrinkwrapTask: GenerateShrinkwrapTask = new GenerateShrinkwrapTask();
 
 task('validate-shrinkwrap', validateShrinkwrapTask);
 task('generate', generateShrinkwrapTask);
 
-task('test', serial(sass, parallel(typescript, text), karma));
+task('test', serial(sass, testTasks));
 
-task('test-watch', watch(sourceMatch, serial(sass, parallel(typescript, text), karma)));
+task('test-watch', watch(sourceMatch, serial(sass, compileTsTasks, karma)));
 
 // For watch scenarios like serve, make sure to exclude generated files from src (like *.scss.ts.)
 task('serve',
   serial(
     bundleTasks,
     serve,
-    postProcessSourceMaps as any, // tslint:disable-line:no-any
+    postProcessSourceMapsTask,
     watch(
-      sourceMatch, serial(preCopy, sass, parallel(typescript, text),
-      postCopy, webpack, postProcessSourceMaps as any, reload) // tslint:disable-line:no-any
+      sourceMatch, serial(preCopy, sass, compileTsTasks,
+        postCopy, webpack, postProcessSourceMapsTask, reload)
     )
   )
 );
 
-task('default', serial(bundleTasks, karma));
+task('default', defaultTasks);
