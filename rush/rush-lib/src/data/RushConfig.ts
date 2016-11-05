@@ -147,7 +147,7 @@ export default class RushConfig {
     );
     for (const projectJson of sortedProjectJsons) {
       // If the name is "@ms/MyProject", extract the "MyProject" part
-      const unscopedName: string = Utilities.parseScopedPackgeName(projectJson.packageName).name;
+      const unscopedName: string = Utilities.parseScopedPackageName(projectJson.packageName).name;
 
       // Generate a unique like name "rush-MyProject", or "rush-MyProject-2" if
       // there is a naming conflict
