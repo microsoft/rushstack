@@ -3,11 +3,11 @@ import { IPackageChanges } from './IPackageChanges';
 
 const PROCESS_OUTPUT_DELIMITER: string = '///~X~X~X~X~X~X~///';
 
-export function getPackageChanges(packagePath?: string): Promise<IPackageChanges> {
+export function getPackageChanges(packagePath: string = process.cwd()): Promise<IPackageChanges> {
   return new Promise((complete) => {
     child_process.exec(
       `git ls-tree HEAD -r && echo ${PROCESS_OUTPUT_DELIMITER} && git status -s -u .`,
-      { cwd: packagePath || process.cwd() },
+      { cwd: packagePath },
       (error: Error, stdout: string) => {
         const changes: IPackageChanges = {
           files: {},
@@ -23,22 +23,35 @@ export function getPackageChanges(packagePath?: string): Promise<IPackageChanges
         });
 
         if (processOutputBlocks[1]) {
-          const changedFiles: string[] =
-            processOutputBlocks[1]
-              .split('\n')
-              .map(line => line.trim().split(' ')[1]).filter(name => !!name);
+          const filesToHash = [];
 
-          if (changedFiles.length) {
+          processOutputBlocks[1]
+            .split('\n')
+            .forEach(line => {
+              const parts = line.trim().split(' ');
+
+              if (parts.length === 2) {
+                if (parts[0] === 'D') {
+                  delete changes.files[parts[1]];
+                } else {
+                  filesToHash.push(parts[1]);
+                }
+              }
+            });
+
+          if (filesToHash.length) {
             child_process.exec(
-              'git hash-object ' + changedFiles.join(' '),
-              { cwd: process.cwd() },
+              'git hash-object ' + filesToHash.join(' '),
+              { cwd: packagePath },
               (hashError: Error, hashStdout: string) => {
                 const hashes: string[] = hashStdout.split('\n');
 
-                changedFiles.forEach((filename, i) => changes.files[filename] = hashes[i]);
+                filesToHash.forEach((filename, i) => changes.files[filename] = hashes[i]);
 
                 complete(changes);
               });
+          } else {
+            complete(changes);
           }
         } else {
           complete(changes);
