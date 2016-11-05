@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "gulp",
-    "clean": "gulp nuke",
+    "clean": "gulp clean",
     "test": "gulp"
   },
   "main": "lib/index.js",
