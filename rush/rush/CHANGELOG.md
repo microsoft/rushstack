@@ -18,6 +18,11 @@
 
 # Unreleased changes
 
+# 1.0.11
+
+- `PATCH` The "packageReviewFile" feature now ignores any packages under the "@types" scope,
+  because presumably the corresponding JavaScript package was already reviewed
+
 # 1.0.10
 
 - `MAJOR` Rename `shouldTrackChanges` to `shouldPublish` which indicates whether a package
