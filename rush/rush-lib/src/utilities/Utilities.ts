@@ -11,10 +11,10 @@ import * as tty from 'tty';
 export default class Utilities {
   /**
    * For a scoped NPM package name this separates the scope and name parts.  For example:
-   * parseScopedPackgeName('@my-scope/myproject') = { scope: '@my-scope', name: 'myproject' }
-   * parseScopedPackgeName('myproject') = { scope: '', name: 'myproject' }
+   * parseScopedPackageName('@my-scope/myproject') = { scope: '@my-scope', name: 'myproject' }
+   * parseScopedPackageName('myproject') = { scope: '', name: 'myproject' }
    */
-  public static parseScopedPackgeName(scopedName: string): { scope: string, name: string } {
+  public static parseScopedPackageName(scopedName: string): { scope: string, name: string } {
     if (scopedName.substr(0, 1) !== '@') {
       return { scope: '', name: scopedName };
     }

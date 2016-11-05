@@ -2,7 +2,12 @@
  * @Copyright (c) Microsoft Corporation.  All rights reserved.
  */
 
-import { RushConfig, RushConfigProject, PackageReviewConfig } from '@microsoft/rush-lib';
+import {
+  RushConfig,
+  RushConfigProject,
+  PackageReviewConfig,
+  Utilities
+} from '@microsoft/rush-lib';
 
 export default class PackageReviewChecker {
   private _rushConfig: RushConfig;
@@ -33,8 +38,14 @@ export default class PackageReviewChecker {
 
     if (dependencies) {
       for (const packageName of Object.keys(dependencies)) {
-        // Yes, add it to the list if it's not already there
-        this._packageReviewConfig.addOrUpdatePackage(packageName, false, rushProject.reviewCategory);
+        const scope: string = Utilities.parseScopedPackageName(packageName).scope;
+
+        // We don't track typings, because presumably the corresponding JavaScript package
+        // will also be included in the review.
+        if (scope !== '@types') {
+          // Yes, add it to the list if it's not already there
+          this._packageReviewConfig.addOrUpdatePackage(packageName, false, rushProject.reviewCategory);
+        }
       }
     }
   }
