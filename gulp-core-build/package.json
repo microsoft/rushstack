@@ -49,7 +49,7 @@
     "yargs": "~4.6.0"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": ">=0.4.0 <1.0.0",
+    "@microsoft/node-library-build": ">=1.0.0 <2.0.0",
     "chai": "~3.5.0",
     "typescript": "~2.0.6"
   }

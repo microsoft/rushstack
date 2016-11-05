@@ -1,0 +1,27 @@
+{
+  "name": "@microsoft/package-changes",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/web-build-tools"
+  },
+  "scripts": {
+    "build": "gulp",
+    "clean": "gulp clean",
+    "test": "gulp test"
+  },
+  "devDependencies": {
+    "@microsoft/node-library-build": ">=1.0.0 <2.0.0",
+    "chai": "~3.5.0",
+    "gulp": "~3.9.1",
+    "typescript": "~2.0.6",
+    "@types/chai": "^3.4.34",
+    "@types/es6-promise": "0.0.32",
+    "@types/mocha": "^2.2.32",
+    "@types/node": "^6.0.46"
+  }
+}

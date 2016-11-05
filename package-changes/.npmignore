@@ -1,0 +1,13 @@
+*.build.error.log
+*.build.log
+.editorconfig
+.gitattributes
+.gitignore
+.vscode
+coverage
+gulpfile.js
+lib/**/*.test.d.ts
+lib/**/*.test.js
+node_modules
+npm-shrinkwrap.json
+src
