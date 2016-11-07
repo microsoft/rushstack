@@ -23,12 +23,12 @@ export function getPackageChanges(packagePath: string = process.cwd()): Promise<
         });
 
         if (processOutputBlocks[1]) {
-          const filesToHash = [];
+          const filesToHash: string[] = [];
 
           processOutputBlocks[1]
             .split('\n')
             .forEach(line => {
-              const parts = line.trim().split(' ');
+              const parts: string[] = line.trim().split(' ');
 
               if (parts.length === 2) {
                 if (parts[0] === 'D') {
