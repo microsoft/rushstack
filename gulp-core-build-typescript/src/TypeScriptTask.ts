@@ -193,7 +193,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     throw 'Do not use mergeConfig with gulp-core-build-typescript';
   }
 
-  private _resolveSourceMapRoot(file: { relative: string, cwd: string }) {
+  private _resolveSourceMapRoot(file: { relative: string, cwd: string }): string {
     return path.relative(file.relative, path.join(file.cwd, 'src'));
   }
 }
