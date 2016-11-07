@@ -1,6 +1,7 @@
 import { GulpTask } from '@microsoft/gulp-core-build';
 import gulpType = require('gulp');
 import ts = require('gulp-typescript');
+import * as path from 'path';
 
 interface ITypeScriptErrorObject {
   diagnostic: {
@@ -140,7 +141,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       .pipe(ts(tsProject, undefined, this.taskConfig.reporter));
 
     allStreams.push(tsResult.js
-      .pipe(sourcemaps.write('.', { sourceRoot: '/src' }))
+      .pipe(sourcemaps.write('.', { sourceRoot: this._resolveSourceMapRoot }))
       .pipe(gulp.dest(libFolder)));
 
     allStreams.push(tsResult.dts.pipe(gulp.dest(libFolder)));
@@ -164,12 +165,12 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
             errorCount++;
           }
         }))
-        .pipe(sourcemaps.write({ sourceRoot: '/src' }))
+        .pipe(sourcemaps.write({ sourceRoot: this._resolveSourceMapRoot }))
         .pipe(ts(tsAMDProject, undefined, this.taskConfig.reporter));
 
       allStreams.push(
         tsResult.js
-          .pipe(sourcemaps.write('.', { sourceRoot: '/src' }))
+          .pipe(sourcemaps.write('.', { sourceRoot: this._resolveSourceMapRoot }))
           .pipe(gulp.dest(libAMDFolder)));
 
       allStreams.push(tsResult.dts.pipe(gulp.dest(libAMDFolder)));
@@ -190,5 +191,9 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   /** Override the new mergeConfig API */
   public mergeConfig(config: ITypeScriptTaskConfig): void {
     throw 'Do not use mergeConfig with gulp-core-build-typescript';
+  }
+
+  private _resolveSourceMapRoot(file: { relative: string, cwd: string }) {
+    return path.relative(file.relative, path.join(file.cwd, 'src'));
   }
 }
