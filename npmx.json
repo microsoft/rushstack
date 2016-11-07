@@ -8,7 +8,7 @@
     {
       "packageName": "@microsoft/gulp-core-build",
       "projectFolder": "gulp-core-build",
-      "shouldTrackChanges": true,
+      "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
       ]
@@ -16,7 +16,7 @@
     {
       "packageName": "@microsoft/gulp-core-build-karma",
       "projectFolder": "gulp-core-build-karma",
-      "shouldTrackChanges": true,
+      "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
       ]
@@ -24,7 +24,7 @@
     {
       "packageName": "@microsoft/gulp-core-build-mocha",
       "projectFolder": "gulp-core-build-mocha",
-      "shouldTrackChanges": true,
+      "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
       ]
@@ -32,7 +32,7 @@
     {
       "packageName": "@microsoft/gulp-core-build-sass",
       "projectFolder": "gulp-core-build-sass",
-      "shouldTrackChanges": true,
+      "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
       ]
@@ -40,7 +40,7 @@
     {
       "packageName": "@microsoft/gulp-core-build-serve",
       "projectFolder": "gulp-core-build-serve",
-      "shouldTrackChanges": true,
+      "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
       ]
@@ -48,7 +48,7 @@
     {
       "packageName": "@microsoft/gulp-core-build-typescript",
       "projectFolder": "gulp-core-build-typescript",
-      "shouldTrackChanges": true,
+      "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
       ]
@@ -63,12 +63,12 @@
     {
       "packageName": "@microsoft/node-library-build",
       "projectFolder": "node-library-build",
-      "shouldTrackChanges": true
+      "shouldPublish": true
     },
     {
       "packageName": "@microsoft/web-library-build",
       "projectFolder": "web-library-build",
-      "shouldTrackChanges": true
+      "shouldPublish": true
     },
     {
       "packageName": "web-build-tools-scripts",
