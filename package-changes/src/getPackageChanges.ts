@@ -10,8 +10,7 @@ export function getPackageChanges(packagePath: string = process.cwd()): Promise<
       { cwd: packagePath },
       (error: Error, stdout: string) => {
         const changes: IPackageChanges = {
-          files: {},
-          dependencies: {}
+          files: {}
         };
         const processOutputBlocks: string[] = stdout.split(PROCESS_OUTPUT_DELIMITER + '\n');
 
