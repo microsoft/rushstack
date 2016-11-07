@@ -20,6 +20,12 @@
 
 - `PATCH` Fixing Rush to run on UNIX and Linux.
 
+# 1.0.10
+
+- `MAJOR` Rename `shouldTrackChanges` to `shouldPublish` which indicates whether a package
+should be included for the `publish` workflow.
+- `PATCH` Updating the `publish` workflow.
+
 # 1.0.9
 
 - `PATCH` Updating the `publish` workflow.
