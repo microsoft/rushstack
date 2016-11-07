@@ -3,7 +3,13 @@ import { IPackageDeps } from './IPackageDeps';
 
 const PROCESS_OUTPUT_DELIMITER: string = '///~X~X~X~X~X~X~///';
 
-export function getPackageDeps(packagePath: string = process.cwd()): Promise<IPackageDeps> {
+export function getPackageDeps(packagePath: string = process.cwd(), excludedPaths?: string[]): Promise<IPackageDeps> {
+  const excludedHashes: {[key: string]: boolean} = {};
+
+  if (excludedPaths) {
+    excludedPaths.forEach(path => excludedHashes[path] = true);
+  }
+
   return new Promise((complete) => {
     child_process.exec(
       `git ls-tree HEAD -r && echo ${PROCESS_OUTPUT_DELIMITER} && git status -s -u .`,
@@ -17,7 +23,9 @@ export function getPackageDeps(packagePath: string = process.cwd()): Promise<IPa
         processOutputBlocks[0].split('\n').forEach(line => {
           if (line) {
             const parts: string[] = line.substr(line.indexOf('blob ') + 5).split('\t');
-            changes.files[parts[1]] = parts[0];
+            if (!excludedPaths[parts[1]]) {
+              changes.files[parts[1]] = parts[0];
+            }
           }
         });
 
@@ -33,7 +41,9 @@ export function getPackageDeps(packagePath: string = process.cwd()): Promise<IPa
                 if (parts[0] === 'D') {
                   delete changes.files[parts[1]];
                 } else {
-                  filesToHash.push(parts[1]);
+                  if (!excludedPaths[parts[1]]) {
+                    filesToHash.push(parts[1]);
+                  }
                 }
               }
             });
