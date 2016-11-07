@@ -37,6 +37,18 @@ export default class Utilities {
     return seconds * 1000 + nanoseconds / 1000000;
   }
 
+  /**
+   * Returns the values from a Set<T>
+   */
+  public static getSetAsArray<T>(set: Set<T>): T[] {
+    // When ES6 is supported, we can use Array.from() instead.
+    const result: T[] = [];
+    set.forEach((value: T) => {
+      result.push(value);
+    });
+    return result;
+  }
+
   public static createFolderWithRetry(folderName: string): void {
     // We need to do a simple "fs.mkdirSync(localModulesFolder)" here,
     // however if the folder we deleted above happened to contain any files,
