@@ -23,6 +23,8 @@
 - `MINOR` The "packageReviewFile" feature now supports a setting "ignoredNpmScopes" that can be used
   e.g. to ignore the "@types" scope
 
+- `PATCH` Fixing Rush to run on UNIX and Linux.
+
 # 1.0.10
 
 - `MAJOR` Rename `shouldTrackChanges` to `shouldPublish` which indicates whether a package
