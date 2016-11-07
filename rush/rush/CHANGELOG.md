@@ -18,10 +18,10 @@
 
 # Unreleased changes
 
-# 1.0.11
+# 1.1.0
 
-- `PATCH` The "packageReviewFile" feature now ignores any packages under the "@types" scope,
-  because presumably the corresponding JavaScript package was already reviewed
+- `MINOR` The "packageReviewFile" feature now supports a setting "ignoredNpmScopes" that can be used
+  e.g. to ignore the "@types" scope
 
 # 1.0.10
 
