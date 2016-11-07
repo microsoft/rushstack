@@ -61,8 +61,8 @@
       ]
     },
     {
-      "packageName": "@microsoft/package-changes",
-      "projectFolder": "package-changes",
+      "packageName": "@microsoft/package-deps",
+      "projectFolder": "package-deps",
       "shouldPublish": true
     },
     {

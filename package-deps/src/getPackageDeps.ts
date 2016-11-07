@@ -1,15 +1,15 @@
 import * as child_process from 'child_process';
-import { IPackageChanges } from './IPackageChanges';
+import { IPackageDeps } from './IPackageDeps';
 
 const PROCESS_OUTPUT_DELIMITER: string = '///~X~X~X~X~X~X~///';
 
-export function getPackageChanges(packagePath: string = process.cwd()): Promise<IPackageChanges> {
+export function getPackageDeps(packagePath: string = process.cwd()): Promise<IPackageDeps> {
   return new Promise((complete) => {
     child_process.exec(
       `git ls-tree HEAD -r && echo ${PROCESS_OUTPUT_DELIMITER} && git status -s -u .`,
       { cwd: packagePath },
       (error: Error, stdout: string) => {
-        const changes: IPackageChanges = {
+        const changes: IPackageDeps = {
           files: {}
         };
         const processOutputBlocks: string[] = stdout.split(PROCESS_OUTPUT_DELIMITER + '\n');

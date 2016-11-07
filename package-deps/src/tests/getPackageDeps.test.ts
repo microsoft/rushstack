@@ -1,4 +1,4 @@
-import { getPackageChanges } from '../getPackageChanges';
+import { getPackageDeps } from '../getPackageDeps';
 import { expect } from 'chai';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -8,10 +8,10 @@ const SOURCE_PATH: string = path.join(__dirname).replace(
   path.join('lib', 'tests'),
   path.join('src', 'tests'));
 
-describe('getPackageChanges', () => {
+describe('getPackageDeps', () => {
 
   it('can parse one file', (done) => {
-    getPackageChanges(path.join(SOURCE_PATH, 'oneFile')).then((results) => {
+    getPackageDeps(path.join(SOURCE_PATH, 'oneFile')).then((results) => {
       try {
         let expectedFiles: { [key: string]: string } = {
           'file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
@@ -39,7 +39,7 @@ describe('getPackageChanges', () => {
       done(e);
     }
 
-    getPackageChanges(path.join(SOURCE_PATH, 'oneFile')).then((results) => {
+    getPackageDeps(path.join(SOURCE_PATH, 'oneFile')).then((results) => {
       try {
         let expectedFiles: { [key: string]: string } = {
           'a.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
@@ -72,7 +72,7 @@ describe('getPackageChanges', () => {
       done(e);
     }
 
-    getPackageChanges(path.join(SOURCE_PATH, 'oneFile')).then((results) => {
+    getPackageDeps(path.join(SOURCE_PATH, 'oneFile')).then((results) => {
       try {
         let expectedFiles: { [key: string]: string } = {
           'package.json': '33703d582243a41bdebff8ee7dd046a01fc054b9'
@@ -101,7 +101,7 @@ describe('getPackageChanges', () => {
       done(e);
     }
 
-    getPackageChanges(path.join(SOURCE_PATH, 'oneFile')).then((results) => {
+    getPackageDeps(path.join(SOURCE_PATH, 'oneFile')).then((results) => {
       try {
         let expectedFiles: { [key: string]: string } = {
           'file1.txt': 'f2ba8f84ab5c1bce84a7b441cb1959cfc7093b7f',
