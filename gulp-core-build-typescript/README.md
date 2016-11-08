@@ -62,6 +62,11 @@ Optional override of the typescript compiler. Set this to the result of require(
 
 Default: `undefined`
 
+### removeCommentsFromTypeScript
+Removes comments from all generated `.ts` files. Will **not** remove comments from `.d.ts` files.
+
+Default: `false`
+
 # TSLintTask
 ## Usage
 The task for linting the TypeScript code.
