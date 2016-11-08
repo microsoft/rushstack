@@ -88,7 +88,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       'src/**/*.json',
       'src/**/*.jsx'
     ],
-    removeCommentsFromTypeScript: true
+    removeCommentsFromTypeScript: false
   };
 
   private _tsProject: ts.Project;
