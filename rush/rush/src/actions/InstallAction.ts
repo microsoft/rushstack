@@ -138,7 +138,7 @@ export default class InstallAction extends CommandLineAction {
     console.log(os.EOL + colors.bold('Checking modules in ' + this._rushConfig.commonFolder) + os.EOL);
 
     // Example: "C:\MyRepo\common\last-install.log"
-    const commonNodeModulesFlagFilename: string = path.join(this._rushConfig.commonFolder, 'last-install.log');
+    const commonNodeModulesFlagFilename: string = path.join(this._rushConfig.commonFolder, 'last-install-marker');
     const commonNodeModulesFolder: string = path.join(this._rushConfig.commonFolder, 'node_modules');
 
     let needToInstall: boolean = false;
@@ -181,8 +181,7 @@ export default class InstallAction extends CommandLineAction {
 
       // Example: "C:\MyRepo\common\temp_modules\rush-example-project\package.json"
       const normalizedPath: string = Utilities.getAllReplaced(this._rushConfig.tempModulesFolder, '\\', '/');
-      const globPattern: string = globEscape(normalizedPath)
-        + '/rush-*/package.json';
+      const globPattern: string = `${globEscape(normalizedPath)}/rush-*/package.json`;
       packageJsonFilenames.push(...glob.sync(globPattern, { nodir: true }));
 
       if (!Utilities.isFileTimestampCurrent(commonNodeModulesFlagFilename, packageJsonFilenames)) {
@@ -191,13 +190,14 @@ export default class InstallAction extends CommandLineAction {
     }
 
     if (needToInstall) {
-      // Rush install is transactional, so if the process is killed while it's in-progress, the
-      //  common/node_modules directory won't be invalid. The process follows this sequence:
-      //   1. The common/npm-install-temp directory is deleted if it already exists
+      // Rush install is transactional, so if the process is killed while it's in-progress, Rush will know if the
+      //  common/node_modules directory is invalid. The process follows this sequence:
+      //   1. If the "common/npm-install-started" file exists, we were in an install that was killed in-progress, so
+      //        the common/node_modules directory is probably invalid, so we should move it to a recycling folder.
       //   2. A new common/npm-install-temp directory is created
       //   3. If a common/node_modules directory already exists, it's moved into the
       //        npm-install-temp directory
-      //   4. The package.json fole and the common/temp_modules directory are copied into
+      //   4. The package.json file and the common/temp_modules directory are copied into
       //        the npm-install-temp directory
       //   5. `npm prune` is optionally run in the npm-install-temp directory
       //   6. `npm install` is run in the npm-install-temp directory
@@ -208,37 +208,34 @@ export default class InstallAction extends CommandLineAction {
       //  an incomplete or invalid node_modules directory will be under the npm-install-temp directory,
       //  and not in the common directory. The next time Rush install runs, the invalid
       //  npm-install-temp/node_modules directory is deleted, so the repository is never in an invalid state.
-      const npmTempInstallDirectory: string = path.join(this._rushConfig.commonFolder, 'npm-install-temp');
-      const tempNodeModulesPath: string = path.join(npmTempInstallDirectory, 'node_modules');
-      if (fsx.existsSync(npmTempInstallDirectory)) {
-        console.log(`Deleting ${npmTempInstallDirectory}`);
-        Utilities.dangerouslyDeletePath(npmTempInstallDirectory);
+
+      const installInProgressFilename: string = path.join(this._rushConfig.commonFolder, 'npm-install-started');
+      if (fsx.existsSync(installInProgressFilename)) {
+        // Install was killed, we're in a bad state
+        console.log('Rush install was killed in-progress, so the node_modules directory is probably invalid. ' +
+                    'Preparing it for deletion.');
+
+        // Create a randomly-named directory to move the existing node_modules folder into
+        const recyclerDirectory: string = path.join(this._rushConfig.commonFolder, 'npm-recycle');
+        fsx.renameSync(commonNodeModulesFolder, path.join(recyclerDirectory, Math.random()));
+        fsx.unlink(recyclerDirectory, (error: Error) => {
+          // Unlink completed. It may have failed, but we don't care if it fails
+        });
       }
 
-      console.log(`Creating ${npmTempInstallDirectory}`);
-      Utilities.createFolderWithRetry(npmTempInstallDirectory);
-
-      if (fsx.existsSync(commonNodeModulesFolder)) {
-        console.log(`Moving existing common node_modules folder to ${tempNodeModulesPath}`);
-        fsx.renameSync(commonNodeModulesFolder, tempNodeModulesPath);
-      }
-
-      console.log(`Copying package.json files to ${npmTempInstallDirectory}`);
-      fsx.copySync(path.join(this._rushConfig.commonFolder, 'package.json'),
-                  path.join(npmTempInstallDirectory, 'package.json'));
-      fsx.copySync(this._rushConfig.tempModulesFolder,
-                  path.join(npmTempInstallDirectory, path.basename(this._rushConfig.tempModulesFolder)));
+      // Create the in-progress file to indicate the install has started
+      fsx.createFileSync(installInProgressFilename);
 
       if (!skipPrune) {
-        console.log(`Running "npm prune" in ${npmTempInstallDirectory}`);
+        console.log(`Running "npm prune" in ${installInProgressFilename}`);
         Utilities.executeCommandWithRetry(npmToolFilename, ['prune'], MAX_INSTALL_ATTEMPTS,
-          npmTempInstallDirectory);
+          installInProgressFilename);
 
         // Delete the temp projects because NPM will not notice when they are changed.
         // We can recognize them because their names start with "rush-"
-        console.log(`Deleting ${npmTempInstallDirectory}/node_modules/rush-*`);
+        console.log(`Deleting ${installInProgressFilename}/node_modules/rush-*`);
         // Example: "C:\MyRepo\common\node_modules\rush-example-project"
-        const normalizedPath: string = Utilities.getAllReplaced(npmTempInstallDirectory, '\\', '/');
+        const normalizedPath: string = Utilities.getAllReplaced(installInProgressFilename, '\\', '/');
         for (const tempModulePath of glob.sync(globEscape(normalizedPath) + '/rush-*')) {
           Utilities.dangerouslyDeletePath(tempModulePath);
         }
@@ -254,17 +251,17 @@ export default class InstallAction extends CommandLineAction {
       }
 
       // Next, run "npm install" in the common folder
-      console.log(os.EOL + `Running "npm ${npmInstallArgs.join(' ')}" in ${npmTempInstallDirectory}`);
+      console.log(os.EOL + `Running "npm ${npmInstallArgs.join(' ')}" in ${this._rushConfig.commonFolder}`);
       Utilities.executeCommandWithRetry(npmToolFilename,
                                         npmInstallArgs,
                                         MAX_INSTALL_ATTEMPTS,
-                                        npmTempInstallDirectory);
+                                        this._rushConfig.commonFolder);
 
-      console.log(`Moving ${tempNodeModulesPath} to ${commonNodeModulesFolder}`);
-      fsx.renameSync(tempNodeModulesPath, commonNodeModulesFolder);
+      // Delete the in-progress file to indicate the install has finished
+      fsx.unlinkSync(installInProgressFilename);
 
       // Create the marker file to indicate a successful install
-      fsx.writeFileSync(commonNodeModulesFlagFilename, '');
+      fsx.createFileSync(commonNodeModulesFlagFilename);
       console.log('');
     }
 
