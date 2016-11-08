@@ -16,6 +16,10 @@
 > - `MINOR` Including new performance logging functions.
 > - `PATCH` Correctly handling negative numbers in the `setZIndex` function.
 
+# 1.1.1
+
+- `PATCH` correcting casing of files and imports
+
 # 1.1.0
 
 - `MINOR` Rush should not break when something is written to stderr, only if the build task returns non zero error code

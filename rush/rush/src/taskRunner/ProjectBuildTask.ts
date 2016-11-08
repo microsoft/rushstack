@@ -109,7 +109,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
     });
   }
 
-  // @todo #179371: add log files to list of things that get gulp nuke'd
+  // @todo #179371: add log files to list of things that get gulp cleaned
   private _writeLogsToDisk(writer: ITaskWriter): void {
     const logFilename: string = path.basename(this._rushProject.projectFolder);
 
