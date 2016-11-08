@@ -7,7 +7,7 @@
 
 import * as colors from 'colors';
 import * as os from 'os';
-import { Interleaver, ITaskWriter } from '@microsoft/stream-collator';
+import { Interleaver } from '@microsoft/stream-collator';
 import {
   TaskError,
   ErrorDetectionMode,
@@ -103,7 +103,7 @@ export default class TaskRunner {
    */
   public execute(): Promise<void> {
     this._currentActiveTasks = 0;
-    console.log(`${os.EOL}Executing a maximum of ${this._parallelism} simultaneous processes...`);
+    console.log(`Executing a maximum of ${this._parallelism} simultaneous processes...`);
 
     // Precalculate the number of dependent packages
     this._tasks.forEach((task: ITask) => {
@@ -165,22 +165,21 @@ export default class TaskRunner {
     while (this._currentActiveTasks < this._parallelism && (ctask = this._getNextTask())) {
       const task: ITask = ctask;
       task.status = TaskStatus.Executing;
-      console.log(colors.yellow(`> Starting task [${task.name}]`));
-
-      const taskWriter: ITaskWriter = Interleaver.registerTask(task.name, this._quietMode);
+      console.log(colors.white(`> Starting task [${task.name}]`));
 
       task.stopwatch = Stopwatch.start();
+      task.writer = Interleaver.registerTask(task.name, this._quietMode);
 
-      task.execute(taskWriter)
+      task.execute(task.writer)
         .then(() => {
           task.stopwatch.stop();
-          taskWriter.close();
+          task.writer.close();
 
           this._markTaskAsSuccess(task);
           this._startAvailableTasks(complete, reject);
 
         }).catch((errors: TaskError[]) => {
-          taskWriter.close();
+          task.writer.close();
 
           this._hasAnyFailures = true;
           task.errors = new Set<TaskError>(errors);
@@ -219,8 +218,14 @@ export default class TaskRunner {
    * Marks a task as being completed, and removes it from the dependencies list of all its dependents
    */
   private _markTaskAsSuccess(task: ITask): void {
-    console.log(colors.green(`> Completed task [${task.name}] in ${task.stopwatch.toString()}`));
-    task.status = TaskStatus.Success;
+    const stderr: string = task.writer.getStdError();
+    if (stderr) {
+      console.log(colors.yellow(`> Completed task [${task.name}] with warnings in ${task.stopwatch.toString()}`));
+      task.status = TaskStatus.SuccessWithWarning;
+    } else {
+      console.log(colors.green(`> Completed task [${task.name}] in ${task.stopwatch.toString()}`));
+      task.status = TaskStatus.Success;
+    }
     task.dependents.forEach((dependent: ITask) => {
       dependent.dependencies.delete(task);
     });
@@ -278,6 +283,7 @@ export default class TaskRunner {
     this._printStatus('EXECUTING', tasksByStatus[TaskStatus.Executing], colors.yellow);
     this._printStatus('READY', tasksByStatus[TaskStatus.Ready], colors.white);
     this._printStatus('SUCCESS', tasksByStatus[TaskStatus.Success], colors.green);
+    this._printStatus('SUCCESS WITH WARNINGS', tasksByStatus[TaskStatus.SuccessWithWarning], colors.yellow.underline);
     this._printStatus('BLOCKED', tasksByStatus[TaskStatus.Blocked], colors.red);
     this._printStatus('FAILURE', tasksByStatus[TaskStatus.Failure], colors.red);
 
@@ -297,8 +303,21 @@ export default class TaskRunner {
     if (tasks && tasks.length) {
       console.log(color(`${status} (${tasks.length})`));
       console.log(color('================================'));
-      for (const task of tasks) {
+      for (let i: number = 0; i < tasks.length; i++) {
+        const task: ITask = tasks[i];
+
         console.log(color(task.name));
+
+        // Print summary of warnings/errors
+        let stderr: string = task.writer.getStdError();
+        if (stderr && (task.status === TaskStatus.Failure || task.status === TaskStatus.SuccessWithWarning)) {
+          stderr = stderr.split(os.EOL)
+            .map(text => text.trim())
+            .filter(text => text)
+            .join(os.EOL);
+
+          console.log(stderr + (i !== tasks.length - 1 ? os.EOL : ''));
+        }
       }
       console.log(color('================================' + os.EOL));
     }
