@@ -8,7 +8,7 @@ const SOURCE_PATH: string = path.join(__dirname).replace(
   path.join('lib', 'tests'),
   path.join('src', 'tests'));
 
-const TEST_PROJECT_PATH = path.join(SOURCE_PATH, 'testProject');
+const TEST_PROJECT_PATH: string = path.join(SOURCE_PATH, 'testProject');
 
 describe('getPackageDeps', () => {
 

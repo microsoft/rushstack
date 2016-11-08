@@ -19,11 +19,10 @@ export function getPackageDeps(packagePath: string = process.cwd(), excludedPath
           files: {}
         };
         const processOutputBlocks: string[] = stdout.split(PROCESS_OUTPUT_DELIMITER + '\n');
-
         processOutputBlocks[0].split('\n').forEach(line => {
           if (line) {
             const parts: string[] = line.substr(line.indexOf('blob ') + 5).split('\t');
-            if (!excludedPaths[parts[1]]) {
+            if (!excludedHashes[parts[1]]) {
               changes.files[parts[1]] = parts[0];
             }
           }
@@ -41,7 +40,7 @@ export function getPackageDeps(packagePath: string = process.cwd(), excludedPath
                 if (parts[0] === 'D') {
                   delete changes.files[parts[1]];
                 } else {
-                  if (!excludedPaths[parts[1]]) {
+                  if (!excludedHashes[parts[1]]) {
                     filesToHash.push(parts[1]);
                   }
                 }
