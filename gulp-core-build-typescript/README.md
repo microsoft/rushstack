@@ -62,8 +62,8 @@ Optional override of the typescript compiler. Set this to the result of require(
 
 Default: `undefined`
 
-### removeCommentsFromTypeScript
-Removes comments from all generated `.ts` files. Will **not** remove comments from `.d.ts` files.
+### removeCommentsFromJavaScript
+Removes comments from all generated `.js` files. Will **not** remove comments from generated `.d.ts` files.
 
 Default: `false`
 
