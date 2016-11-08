@@ -47,9 +47,9 @@ export interface ITypeScriptTaskConfig {
   /* tslint:enable:no-any */
 
   /**
-   * Removes comments from all generated `.ts` files. Will **not** remove comments from `.d.ts` files.
+   * Removes comments from all generated `.js` files. Will **not** remove comments from generated `.d.ts` files.
    */
-  removeCommentsFromTypeScript?: boolean;
+  removeCommentsFromJavaScript?: boolean;
 }
 
 export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
@@ -88,7 +88,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       'src/**/*.json',
       'src/**/*.jsx'
     ],
-    removeCommentsFromTypeScript: false
+    removeCommentsFromJavaScript: false
   };
 
   private _tsProject: ts.Project;
@@ -147,7 +147,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       .pipe(ts(tsProject, undefined, this.taskConfig.reporter));
 
     // tslint:disable-next-line:typedef
-    const jsResult = (this.taskConfig.removeCommentsFromTypeScript
+    let jsResult = (this.taskConfig.removeCommentsFromJavaScript
       ? tsResult.js.pipe(require('gulp-decomment')({
         space: true /* leave this on for sourcemaps */
       }))
@@ -182,7 +182,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
         .pipe(ts(tsAMDProject, undefined, this.taskConfig.reporter));
 
       // tslint:disable-next-line:typedef
-      const jsResult = (this.taskConfig.removeCommentsFromTypeScript
+      jsResult = (this.taskConfig.removeCommentsFromJavaScript
         ? tsResult.js.pipe(require('gulp-decomment')({
           space: true /* leave this on for sourcemaps */
         }))
