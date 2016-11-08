@@ -1,4 +1,5 @@
 import * as child_process from 'child_process';
+import * as os from 'os';
 import { IPackageDeps } from './IPackageDeps';
 
 const PROCESS_OUTPUT_DELIMITER: string = '///~X~X~X~X~X~X~///';
@@ -10,7 +11,7 @@ export function getPackageDeps(packagePath: string = process.cwd(), excludedPath
     excludedPaths.forEach(path => excludedHashes[path] = true);
   }
 
-  return new Promise((complete) => {
+  return new Promise((complete) => {    
     child_process.exec(
       `git ls-tree HEAD -r && echo ${PROCESS_OUTPUT_DELIMITER} && git status -s -u .`,
       { cwd: packagePath },
@@ -18,7 +19,11 @@ export function getPackageDeps(packagePath: string = process.cwd(), excludedPath
         const changes: IPackageDeps = {
           files: {}
         };
-        const processOutputBlocks: string[] = stdout.split(PROCESS_OUTPUT_DELIMITER + '\n');
+        
+        debugger;
+
+        const processOutputBlocks: string[] = stdout.split(PROCESS_OUTPUT_DELIMITER);
+        
         processOutputBlocks[0].split('\n').forEach(line => {
           if (line) {
             const parts: string[] = line.substr(line.indexOf('blob ') + 5).split('\t');
@@ -32,7 +37,8 @@ export function getPackageDeps(packagePath: string = process.cwd(), excludedPath
           const filesToHash: string[] = [];
 
           processOutputBlocks[1]
-            .split('\n')
+            .trim()
+            .split(os.EOL)
             .forEach(line => {
               const parts: string[] = line.trim().split(' ');
 

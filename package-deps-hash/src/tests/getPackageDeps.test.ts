@@ -40,7 +40,7 @@ describe('getPackageDeps', () => {
           'package.json': '33703d582243a41bdebff8ee7dd046a01fc054b9'
         };
         const filePaths: string[] = Object.keys(results.files).sort();
-console.log(results);
+
         filePaths.forEach(filePath => (
           expect(results.files[filePath])
             .equals(expectedFiles[filePath], `path: ${filePath}`)));
