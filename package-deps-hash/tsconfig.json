@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "declaration": true,
+    "sourceMap": true,
+    "moduleResolution": "node",
+    "types": [
+      "es6-promise",
+      "node",
+      "mocha"
+    ],
+    "typeRoots": [
+      "../common/node_modules/@types"
+    ]
+  }
+}

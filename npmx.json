@@ -61,6 +61,11 @@
       ]
     },
     {
+      "packageName": "@microsoft/package-deps-hash",
+      "projectFolder": "package-deps-hash",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@microsoft/node-library-build",
       "projectFolder": "node-library-build",
       "shouldPublish": true
