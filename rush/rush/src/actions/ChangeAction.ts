@@ -109,7 +109,7 @@ export default class ChangeAction extends CommandLineAction {
   private _getChangedProjects(): string[] {
     const changedFolders: string[] = VersionControl.getChangedFolders();
     return this._rushConfig.projects
-      .filter(project => project.shouldTrackChanges)
+      .filter(project => project.shouldPublish)
       .filter(project => this._hasProjectChanged(changedFolders, project))
       .map(project => project.packageName);
   }
@@ -132,7 +132,11 @@ export default class ChangeAction extends CommandLineAction {
 
   private _hasProjectChanged(changedFolders: string[],
     project: RushConfigProject): boolean {
-    const pathRegex: RegExp = new RegExp(`^${project.projectRelativeFolder}`, 'i');
+    let normalizedFolder: string = project.projectRelativeFolder;
+    if (normalizedFolder.charAt(normalizedFolder.length - 1) !== '/') {
+      normalizedFolder = normalizedFolder + '/';
+    }
+    const pathRegex: RegExp = new RegExp(`^${normalizedFolder}`, 'i');
     for (const folder of changedFolders) {
       if (folder && folder.match(pathRegex)) {
         return true;
@@ -174,29 +178,34 @@ export default class ChangeAction extends CommandLineAction {
     console.log(`${os.EOL}${packageName}`);
 
     return this._prompt({
-        name: 'comments',
+        name: 'comment',
         type: 'input',
         message: `Describe changes, or ENTER if no changes:`
       })
       .then(({ comment }: { comment: string }) => {
         if (comment) {
           return this._prompt({
-            choices: Object.keys(BUMP_OPTIONS).map(option => BUMP_OPTIONS[option]),
-            default: BUMP_OPTIONS['patch'], // tslint:disable-line:no-string-literal
+            choices: Object.keys(BUMP_OPTIONS).map(option => {
+              return {
+                'value': option,
+                'name': BUMP_OPTIONS[option]
+              };
+            }),
+            default: 'patch',
             message: 'Select the type of change:',
             name: 'bumpType',
             type: 'list'
           }).then(({ bumpType }: { bumpType: string }) => {
             return {
-              packageName,
-              comment,
-              type: BUMP_OPTIONS[bumpType] as 'major' | 'minor' | 'patch' | 'none'
+              packageName: packageName,
+              comment: comment,
+              type: bumpType
             } as IChangeInfo;
           });
         } else {
           return {
             comment: '',
-            packageName,
+            packageName: packageName,
             type: 'none'
           } as IChangeInfo;
         }

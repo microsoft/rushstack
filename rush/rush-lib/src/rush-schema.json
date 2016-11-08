@@ -74,8 +74,8 @@
               "type": "string"
             }
           },
-          "shouldTrackChanges": {
-            "description": "A flag indicating that changes to this project should be tracked by the Rush changelog workflow",
+          "shouldPublish": {
+            "description": "A flag indicating that changes to this project will be published to npm, which affects the Rush change and publish workflows.",
             "type": "boolean"
           }
         },
