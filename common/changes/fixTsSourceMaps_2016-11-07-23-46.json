@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Fixing source maps",
+      "type": "patch"
+    }
+  ],
+  "email": "zihankoh@microsoft.com"
+}
