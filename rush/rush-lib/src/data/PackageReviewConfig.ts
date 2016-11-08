@@ -2,7 +2,7 @@
  * @Copyright (c) Microsoft Corporation.  All rights reserved.
  */
 
-import * as fs from 'fs-extra';
+import * as fsx from 'fs-extra';
 import * as path from 'path';
 import * as os from 'os';
 
@@ -196,7 +196,7 @@ export default class PackageReviewConfig {
       + '  They will be lost when the Rush tool resaves it.\n' + body;
 
     body = Utilities.getAllReplaced(body, '\n', '\r\n');
-    fs.writeFileSync(jsonFilename, body);
+    fsx.writeFileSync(jsonFilename, body);
   }
 
   /**

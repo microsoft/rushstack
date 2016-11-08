@@ -3,7 +3,7 @@
  */
 
 import * as path from 'path';
-import * as fs from 'fs-extra';
+import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as semver from 'semver';
 
@@ -115,7 +115,7 @@ export default class RushConfig {
     for (let i: number = 0; i < 10; ++i) {
       const rushJsonFilename: string = path.join(currentFolder, 'rush.json');
 
-      if (fs.existsSync(rushJsonFilename)) {
+      if (fsx.existsSync(rushJsonFilename)) {
         if (i > 0) {
           console.log('Found config in ' + rushJsonFilename);
         }
@@ -183,7 +183,7 @@ export default class RushConfig {
 
     this._rushJsonFolder = path.dirname(rushJsonFilename);
     this._commonFolder = path.resolve(path.join(this._rushJsonFolder, rushConfigJson.commonFolder));
-    if (!fs.existsSync(this._commonFolder)) {
+    if (!fsx.existsSync(this._commonFolder)) {
       throw new Error(`Rush common folder does not exist: ${rushConfigJson.commonFolder}`);
     }
     this._commonFolderName = path.basename(this._commonFolder);
@@ -197,7 +197,7 @@ export default class RushConfig {
 
     const unresolvedUserFolder: string = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
     this._homeFolder = path.resolve(unresolvedUserFolder);
-    if (!fs.existsSync(this._homeFolder)) {
+    if (!fsx.existsSync(this._homeFolder)) {
       throw new Error('Unable to determine the current user\'s home directory');
     }
 
@@ -221,7 +221,7 @@ export default class RushConfig {
     this._packageReviewFile = undefined;
     if (rushConfigJson.packageReviewFile) {
       this._packageReviewFile = path.resolve(path.join(this._rushJsonFolder, rushConfigJson.packageReviewFile));
-      if (!fs.existsSync(this._packageReviewFile)) {
+      if (!fsx.existsSync(this._packageReviewFile)) {
         throw new Error('The packageReviewFile file was not found: "' + this._packageReviewFile + '"');
       }
     }

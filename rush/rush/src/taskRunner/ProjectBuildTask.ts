@@ -6,7 +6,7 @@
  */
 
 import * as child_process from 'child_process';
-import * as fs from 'fs-extra';
+import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import { ITaskWriter } from '@microsoft/stream-collator';
@@ -115,12 +115,12 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
     const stdout: string = writer.getStdOutput().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
     if (stdout) {
-      fs.writeFileSync(path.join(this._rushProject.projectFolder, logFilename + '.build.log'), stdout);
+      fsx.writeFileSync(path.join(this._rushProject.projectFolder, logFilename + '.build.log'), stdout);
     }
 
     const stderr: string = writer.getStdError().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
     if (stderr) {
-      fs.writeFileSync(path.join(this._rushProject.projectFolder, logFilename + '.build.error.log'), stderr);
+      fsx.writeFileSync(path.join(this._rushProject.projectFolder, logFilename + '.build.error.log'), stderr);
     }
   }
 }
