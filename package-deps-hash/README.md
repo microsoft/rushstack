@@ -1,6 +1,6 @@
-# @microsoft/package-deps
+# @microsoft/package-deps-hash
 
-`package-deps` is a general utility for building a JSON object containing the git hashes of all files used to produce a given package.
+`package-deps-hash` is a general utility for building a JSON object containing the git hashes of all files used to produce a given package.
 
 This utility is useful for scenarios where you want to define a "change receipt" file to be published with a package. The file content
 and the current state of the package can be compared then to determin if the package needs to be rebuilt.
@@ -15,7 +15,7 @@ NOTE: GIT is required to be accessible in the command line path.
 
 ```
 let _ = require('lodash');
-let { getPackageDeps } = require('package-deps');
+let { getPackageDeps } = require('package-deps-hash');
 
 // Gets the current deps object for the current working directory
 let deps = getPackageDeps();

@@ -1,5 +1,5 @@
 {
-  "name": "@microsoft/package-deps",
+  "name": "@microsoft/package-deps-hash",
   "version": "1.0.0",
   "description": "",
   "main": "lib/index.js",

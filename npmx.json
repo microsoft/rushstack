@@ -61,8 +61,8 @@
       ]
     },
     {
-      "packageName": "@microsoft/package-deps",
-      "projectFolder": "package-deps",
+      "packageName": "@microsoft/package-deps-hash",
+      "projectFolder": "package-deps-hash",
       "shouldPublish": true
     },
     {
