@@ -9,6 +9,7 @@ const SOURCE_PATH: string = path.join(__dirname).replace(
   path.join('src', 'tests'));
 
 const TEST_PROJECT_PATH: string = path.join(SOURCE_PATH, 'testProject');
+const NESTED_TEST_PROJECT_PATH: string = path.join(SOURCE_PATH, 'nestedTestProject');
 
 describe('getPackageDeps', () => {
 
@@ -30,6 +31,26 @@ describe('getPackageDeps', () => {
       done();
     });
   });
+
+  it('can handle files in subfolders', (done) => {
+    getPackageDeps(NESTED_TEST_PROJECT_PATH).then((results) => {
+      try {
+        const expectedFiles: { [key: string]: string } = {
+          'src/file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
+          'package.json': '33703d582243a41bdebff8ee7dd046a01fc054b9'
+        };
+        const filePaths: string[] = Object.keys(results.files).sort();
+
+        filePaths.forEach(filePath => (
+          expect(results.files[filePath])
+            .equals(expectedFiles[filePath], `path: ${filePath}`)));
+
+      } catch (e) { return done(e); }
+
+      done();
+    });
+  });
+
 
   it('can can handle adding one file', (done) => { // tslint:disable-line
     const tempFilePath: string = path.join(TEST_PROJECT_PATH, 'a.txt');
