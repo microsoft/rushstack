@@ -4,7 +4,7 @@
   "description": "Manage building/installing of multiple NPM package folders",
   "scripts": {
     "build": "gulp",
-    "clean": "gulp nuke",
+    "clean": "gulp clean",
     "test": "gulp test"
   },
   "bin": {
