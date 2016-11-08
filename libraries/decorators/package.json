@@ -15,7 +15,7 @@
   },
   "scripts": {
     "build": "gulp bundle",
-    "clean": "gulp nuke",
+    "clean": "gulp clean",
     "test": "gulp test"
   }
 }
