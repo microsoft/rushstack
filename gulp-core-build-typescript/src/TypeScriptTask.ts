@@ -45,6 +45,11 @@ export interface ITypeScriptTaskConfig {
   /* tslint:disable:no-any */
   typescript?: any;
   /* tslint:enable:no-any */
+
+  /**
+   * Removes comments from all generated `.ts` files. Will **not** remove comments from `.d.ts` files.
+   */
+  removeCommentsFromTypeScript?: boolean;
 }
 
 export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
@@ -82,7 +87,8 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       'src/**/*.js',
       'src/**/*.json',
       'src/**/*.jsx'
-    ]
+    ],
+    removeCommentsFromTypeScript: true
   };
 
   private _tsProject: ts.Project;
@@ -140,7 +146,14 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       .pipe(sourcemaps.init())
       .pipe(ts(tsProject, undefined, this.taskConfig.reporter));
 
-    allStreams.push(tsResult.js
+    // tslint:disable-next-line:typedef
+    const jsResult = (this.taskConfig.removeCommentsFromTypeScript
+      ? tsResult.js.pipe(require('gulp-decomment')({
+        space: true /* leave this on for sourcemaps */
+      }))
+      : tsResult.js);
+
+    allStreams.push(jsResult
       .pipe(sourcemaps.write('.', { sourceRoot: this._resolveSourceMapRoot }))
       .pipe(gulp.dest(libFolder)));
 
@@ -168,8 +181,15 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
         .pipe(sourcemaps.write({ sourceRoot: this._resolveSourceMapRoot }))
         .pipe(ts(tsAMDProject, undefined, this.taskConfig.reporter));
 
+      // tslint:disable-next-line:typedef
+      const jsResult = (this.taskConfig.removeCommentsFromTypeScript
+        ? tsResult.js.pipe(require('gulp-decomment')({
+          space: true /* leave this on for sourcemaps */
+        }))
+        : tsResult.js);
+
       allStreams.push(
-        tsResult.js
+        jsResult
           .pipe(sourcemaps.write('.', { sourceRoot: this._resolveSourceMapRoot }))
           .pipe(gulp.dest(libAMDFolder)));
 
