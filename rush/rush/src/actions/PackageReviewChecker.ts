@@ -2,7 +2,12 @@
  * @Copyright (c) Microsoft Corporation.  All rights reserved.
  */
 
-import { RushConfig, RushConfigProject, PackageReviewConfig } from '@microsoft/rush-lib';
+import {
+  RushConfig,
+  RushConfigProject,
+  PackageReviewConfig,
+  Utilities
+} from '@microsoft/rush-lib';
 
 export default class PackageReviewChecker {
   private _rushConfig: RushConfig;
@@ -33,8 +38,13 @@ export default class PackageReviewChecker {
 
     if (dependencies) {
       for (const packageName of Object.keys(dependencies)) {
-        // Yes, add it to the list if it's not already there
-        this._packageReviewConfig.addOrUpdatePackage(packageName, false, rushProject.reviewCategory);
+        const scope: string = Utilities.parseScopedPackageName(packageName).scope;
+
+        // Make sure the scope isn't something like "@types" which should be ignored
+        if (!this._packageReviewConfig.ignoredNpmScopes.has(scope)) {
+          // Yes, add it to the list if it's not already there
+          this._packageReviewConfig.addOrUpdatePackage(packageName, false, rushProject.reviewCategory);
+        }
       }
     }
   }

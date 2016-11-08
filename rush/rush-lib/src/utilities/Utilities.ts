@@ -11,10 +11,10 @@ import * as tty from 'tty';
 export default class Utilities {
   /**
    * For a scoped NPM package name this separates the scope and name parts.  For example:
-   * parseScopedPackgeName('@my-scope/myproject') = { scope: '@my-scope', name: 'myproject' }
-   * parseScopedPackgeName('myproject') = { scope: '', name: 'myproject' }
+   * parseScopedPackageName('@my-scope/myproject') = { scope: '@my-scope', name: 'myproject' }
+   * parseScopedPackageName('myproject') = { scope: '', name: 'myproject' }
    */
-  public static parseScopedPackgeName(scopedName: string): { scope: string, name: string } {
+  public static parseScopedPackageName(scopedName: string): { scope: string, name: string } {
     if (scopedName.substr(0, 1) !== '@') {
       return { scope: '', name: scopedName };
     }
@@ -35,6 +35,18 @@ export default class Utilities {
     let nanoseconds: number;
     [seconds, nanoseconds] = process.hrtime();
     return seconds * 1000 + nanoseconds / 1000000;
+  }
+
+  /**
+   * Returns the values from a Set<T>
+   */
+  public static getSetAsArray<T>(set: Set<T>): T[] {
+    // When ES6 is supported, we can use Array.from() instead.
+    const result: T[] = [];
+    set.forEach((value: T) => {
+      result.push(value);
+    });
+    return result;
   }
 
   public static createFolderWithRetry(folderName: string): void {

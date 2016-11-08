@@ -103,7 +103,7 @@ export default class PublishAction extends CommandLineAction {
       updatePackages(allChanges, allPackages, this._apply.value);
 
       // Remove the change request files.
-      this._deleteChangeFiles();
+      this._deleteChangeFiles(changesPath);
 
       // Stage, commit, and push the changes to remote temp branch.
       this._gitAddChanges();
@@ -194,13 +194,12 @@ export default class PublishAction extends CommandLineAction {
     this._execCommand(!!this._targetBranch.value, 'git', `pull origin ${this._targetBranch.value}`.split(' '));
   }
 
-  private _deleteChangeFiles(): void {
-    const changesPath: string = path.join(process.cwd(), 'changes');
+  private _deleteChangeFiles(changesPath: string): void {
     const shouldDelete: boolean = !!this._targetBranch.value;
     let changeFiles: string[] = [];
 
     try {
-      changeFiles = fsx.readdirSync(changesPath).filter(filename => filename.indexOf('.json') >= 0);
+      changeFiles = fsx.readdirSync(changesPath).filter(fileName => path.extname(fileName) === '.json');
     } catch (e) { /* no-op */ }
 
     if (changeFiles.length) {
@@ -228,8 +227,10 @@ export default class PublishAction extends CommandLineAction {
 
   private _gitAddTags(orderedChanges: IChangeInfo[]): void {
     for (const change of orderedChanges) {
-
-      if (change.changeType > ChangeType.dependency) {
+      if (
+        change.changeType > ChangeType.dependency &&
+        this._rushConfig.projectsByName.get(change.packageName).shouldPublish
+      ) {
         const tagName: string = change.packageName + '_v' + change.newVersion;
 
         // Tagging only happens if we're publishing to real NPM and committing to git.
@@ -254,22 +255,24 @@ export default class PublishAction extends CommandLineAction {
 
   private _npmPublish(change: IChangeInfo, packagePath: string): void {
     const env: { [key: string]: string } = this._getEnvArgs();
-    const args: string[] = [ 'publish' ];
+    const args: string[] = ['publish'];
 
-    if (this._registryUrl.value) {
-      env['npm_config_registry'] = this._registryUrl.value; // tslint:disable-line:no-string-literal
+    if (this._rushConfig.projectsByName.get(change.packageName).shouldPublish) {
+      if (this._registryUrl.value) {
+        env['npm_config_registry'] = this._registryUrl.value; // tslint:disable-line:no-string-literal
+      }
+
+      if (this._npmAuthToken.value) {
+        args.push(`--//registry.npmjs.org/:_authToken=${this._npmAuthToken.value}`);
+      }
+
+      this._execCommand(
+        !!this._publish.value,
+        this._rushConfig.npmToolFilename,
+        args,
+        packagePath,
+        env);
     }
-
-    if (this._npmAuthToken.value) {
-      args.push(`--//registry.npmjs.org/:_authToken=${this._npmAuthToken.value}`);
-    }
-
-    this._execCommand(
-      !!this._publish.value,
-      this._rushConfig.npmToolFilename,
-      args,
-      packagePath,
-      env);
   }
 
 }
