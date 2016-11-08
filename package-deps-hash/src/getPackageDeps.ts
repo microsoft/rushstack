@@ -20,8 +20,6 @@ export function getPackageDeps(packagePath: string = process.cwd(), excludedPath
           files: {}
         };
         
-        debugger;
-
         const processOutputBlocks: string[] = stdout.split(PROCESS_OUTPUT_DELIMITER);
         
         processOutputBlocks[0].split('\n').forEach(line => {
