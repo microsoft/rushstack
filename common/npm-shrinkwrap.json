@@ -3641,10 +3641,10 @@
       "from": "temp_modules/npmx-node-library-build",
       "resolved": "file:temp_modules/npmx-node-library-build"
     },
-    "npmx-package-deps": {
+    "npmx-package-deps-hash": {
       "version": "0.0.0",
-      "from": "temp_modules/npmx-package-deps",
-      "resolved": "file:temp_modules/npmx-package-deps"
+      "from": "temp_modules/npmx-package-deps-hash",
+      "resolved": "file:temp_modules/npmx-package-deps-hash"
     },
     "npmx-test-web-library-build": {
       "version": "0.0.0",
@@ -4835,9 +4835,9 @@
       "resolved": "https://registry.npmjs.org/typedarray/-/typedarray-0.0.6.tgz"
     },
     "typescript": {
-      "version": "2.0.7",
+      "version": "2.0.8",
       "from": "typescript@>=2.0.6 <2.1.0",
-      "resolved": "https://registry.npmjs.org/typescript/-/typescript-2.0.7.tgz"
+      "resolved": "https://registry.npmjs.org/typescript/-/typescript-2.0.8.tgz"
     },
     "uglify-js": {
       "version": "2.7.4",

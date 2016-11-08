@@ -1,5 +1,5 @@
 {
-  "name": "npmx-package-deps",
+  "name": "npmx-package-deps-hash",
   "version": "0.0.0",
   "private": true,
   "dependencies": {
