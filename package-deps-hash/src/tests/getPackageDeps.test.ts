@@ -36,11 +36,11 @@ describe('getPackageDeps', () => {
     getPackageDeps(NESTED_TEST_PROJECT_PATH).then((results) => {
       try {
         const expectedFiles: { [key: string]: string } = {
-          'src/file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
+          'src/file 1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
           'package.json': '33703d582243a41bdebff8ee7dd046a01fc054b9'
         };
         const filePaths: string[] = Object.keys(results.files).sort();
-
+console.log(results);
         filePaths.forEach(filePath => (
           expect(results.files[filePath])
             .equals(expectedFiles[filePath], `path: ${filePath}`)));
