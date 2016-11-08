@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/package-deps",
+      "comment": "Creating package.",
+      "type": "patch"
+    }
+  ],
+  "email": "dzearing@microsoft.com"
+}

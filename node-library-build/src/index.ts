@@ -7,9 +7,9 @@ export * from '@microsoft/gulp-core-build-typescript';
 export * from '@microsoft/gulp-core-build-mocha';
 
 // Define default task groups.
-const buildTasks: IExecutable = task('build', parallel(tslint, typescript));
-const testTasks: IExecutable = task('test', serial(buildTasks, instrument, mocha));
+export const buildTasks: IExecutable = task('build', parallel(tslint, typescript));
+export const testTasks: IExecutable = task('test', serial(typescript, mocha));
+export const defaultTasks: IExecutable = task('default', serial(buildTasks, instrument, mocha));
 
 task('watch', watch('src/**.ts', testTasks));
 
-task('default', testTasks);
