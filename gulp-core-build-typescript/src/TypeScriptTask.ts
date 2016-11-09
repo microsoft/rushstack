@@ -174,9 +174,8 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     throw 'Do not use mergeConfig with gulp-core-build-typescript';
   }
 
-
-
-  private _compileProject(gulp: gulpType.Gulp, tsCompilerOptions: ts.Settings, destDir: string, allStreams: NodeJS.ReadWriteStream[], result: { errorCount: number }) {
+  private _compileProject(gulp: gulpType.Gulp, tsCompilerOptions: ts.Settings, destDir: string,
+    allStreams: NodeJS.ReadWriteStream[], result: { errorCount: number }): void {
     /* tslint:disable:typedef */
     const plumber = require('gulp-plumber');
     const sourcemaps = require('gulp-sourcemaps');
@@ -184,13 +183,19 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
 
     const tsProject: ts.Project = this._tsProject = this._tsProject || ts.createProject(tsCompilerOptions);
 
-    let tsResult: ts.CompileStream = gulp.src(this.taskConfig.sourceMatch)
+    // tslint:disable-next-line:no-any
+    let tsResult: any = gulp.src(this.taskConfig.sourceMatch)
       .pipe(plumber({
         errorHandler: (): void => {
           result.errorCount++;
         }
-      }))
-      .pipe(sourcemaps.init())
+      }));
+
+    if (this.taskConfig.emitSourceMaps) {
+      tsResult = tsResult.pipe(sourcemaps.init());
+    }
+
+    tsResult = tsResult
       .pipe(ts(tsProject, undefined, this.taskConfig.reporter));
 
     // tslint:disable-next-line:typedef
@@ -200,9 +205,9 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       }))
       : tsResult.js);
 
-    jsResult = (this.taskConfig.emitSourceMaps ?
-      jsResult.pipe(sourcemaps.write('.', { sourceRoot: this._resolveSourceMapRoot })) :
-      jsResult);
+    if (this.taskConfig.emitSourceMaps) {
+      jsResult = jsResult.pipe(sourcemaps.write('.', { sourceRoot: this._resolveSourceMapRoot }));
+    }
 
     allStreams.push(jsResult
       .pipe(gulp.dest(destDir)));
