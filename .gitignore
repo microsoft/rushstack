@@ -14,3 +14,4 @@ npm*.log
 temp
 package
 *.scss.ts
+package-deps.json
