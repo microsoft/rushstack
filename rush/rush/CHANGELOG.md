@@ -16,6 +16,10 @@
 > - `MINOR` Including new performance logging functions.
 > - `PATCH` Correctly handling negative numbers in the `setZIndex` function.
 
+# 1.2.0
+
+- `MINOR` Making Rush install transactional.
+
 # 1.1.1
 
 - `PATCH` correcting casing of files and imports
