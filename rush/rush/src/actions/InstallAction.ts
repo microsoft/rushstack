@@ -193,18 +193,22 @@ export default class InstallAction extends CommandLineAction {
     if (needToInstall) {
       // Rush install is transactional, so if the process is killed while it's in-progress, Rush will know if the
       //  common/node_modules directory is invalid. If the last-install.log file doesn't exist, we know the install
-      // didn't finish, so we should delete the existing node_modules folder and run install again.
-
-      if (!fsx.existsSync(commonNodeModulesMarkerFilename)) {
-        // Install was killed, we're in a bad state
-        console.log('Rush install was killed in-progress, so the node_modules directory is probably invalid. ' +
-                    'Preparing it for deletion.');
-
-        AsyncRecycle.recycleDirectory(this._rushConfig, commonNodeModulesFolder);
-      }
+      //  didn't finish, so we should delete the existing node_modules folder and run install again.
 
       // Delete the successful install file to indicate the install has started
       fsx.unlinkSync(commonNodeModulesMarkerFilename);
+
+      if (!fsx.existsSync(commonNodeModulesMarkerFilename)) {
+        if (fsx.existsSync(commonNodeModulesFolder)) {
+          // Install was killed, we're in a bad state
+          console.log('Rush install was killed in-progress, so the node_modules directory is probably invalid. ' +
+                      'Preparing it for deletion.');
+
+          AsyncRecycle.recycleDirectory(this._rushConfig, commonNodeModulesFolder);
+        }
+
+        skipPrune = true;
+      }
 
       if (!skipPrune) {
         console.log(`Running "npm prune" in ${this._rushConfig.commonFolder}`);
