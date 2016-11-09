@@ -38,10 +38,10 @@ export default class InstallAction extends CommandLineAction {
 
     // Example: "C:\Users\YourName\.rush\npm-1.2.3"
     const npmToolFolder: string = path.join(rushHomeFolder, 'npm-' + rushConfig.npmToolVersion);
-    // Example: "C:\Users\YourName\.rush\npm-1.2.3\last-install.log"
-    const npmToolFlagFile: string = path.join(npmToolFolder, 'last-install.log');
+    // Example: "C:\Users\YourName\.rush\npm-1.2.3\last-install.flag"
+    const npmToolFlagFile: string = path.join(npmToolFolder, 'last-install.flag');
 
-    // NOTE: We don't care about the timestamp for last-install.log, because nobody will change
+    // NOTE: We don't care about the timestamp for last-install.flag, because nobody will change
     // the package.json for this case
     if (cleanInstall || !fsx.existsSync(npmToolFlagFile)) {
       console.log(colors.bold('Installing NPM version ' + rushConfig.npmToolVersion) + os.EOL);
@@ -138,8 +138,8 @@ export default class InstallAction extends CommandLineAction {
 
     console.log(os.EOL + colors.bold('Checking modules in ' + this._rushConfig.commonFolder) + os.EOL);
 
-    // Example: "C:\MyRepo\common\last-install.log"
-    const commonNodeModulesMarkerFilename: string = path.join(this._rushConfig.commonFolder, 'last-install.log');
+    // Example: "C:\MyRepo\common\last-install.flag"
+    const commonNodeModulesMarkerFilename: string = path.join(this._rushConfig.commonFolder, 'last-install.flag');
     const commonNodeModulesFolder: string = path.join(this._rushConfig.commonFolder, 'node_modules');
 
     let needToInstall: boolean = false;
@@ -170,7 +170,7 @@ export default class InstallAction extends CommandLineAction {
       needToInstall = true;
       skipPrune = true;
     } else {
-      // Compare the timestamps last-install.log and package.json to see if our install is outdated
+      // Compare the timestamps last-install.flag and package.json to see if our install is outdated
       const packageJsonFilenames: string[] = [];
 
       // Example: "C:\MyRepo\common\package.json"
@@ -192,7 +192,7 @@ export default class InstallAction extends CommandLineAction {
 
     if (needToInstall) {
       // Rush install is transactional, so if the process is killed while it's in-progress, Rush will know if the
-      //  common/node_modules directory is invalid. If the last-install.log file doesn't exist, we know the install
+      //  common/node_modules directory is invalid. If the last-install.flag file doesn't exist, we know the install
       //  didn't finish, so we should delete the existing node_modules folder and run install again.
 
       // Delete the successful install file to indicate the install has started
