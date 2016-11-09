@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Fixes a small bug causing lib AMD to not compile correctly",
+      "type": "patch"
+    }
+  ],
+  "email": "nickpape@microsoft.com"
+}
