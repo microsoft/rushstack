@@ -21,9 +21,11 @@
     "z-schema": "~3.17.0"
   },
   "devDependencies": {
+    "@microsoft/sp-build-node": "~0.1.0",
     "chai": "~3.5.0",
+    "@types/chai": "^3.4.34",
     "gulp": "~3.9.1",
     "mocha": "~2.5.3",
-    "@microsoft/sp-build-node": "~0.1.0"
+    "@types/mocha": "^2.2.32"
   }
 }
