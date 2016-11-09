@@ -102,9 +102,9 @@ But when you use Rush, you get some big improvements:
    > by the Rush tool.  If you want to do that, you need to "**rush unlink**" first.
 
 4. Do your initial build by running "**rush rebuild**" .  This will
-   recurse through each project folder and run "gulp nuke", "gulp",
+   recurse through each project folder and run "gulp clean", "gulp",
    and "gulp test", and then give you a report of anything that failed to build.
-   
+
    NOTE: To suppress verbose output, use "**rush rebuild -q**".
 
 ## Pull -> Edit -> Build -> Run -> Push
