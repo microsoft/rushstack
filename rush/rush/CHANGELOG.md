@@ -19,6 +19,7 @@
 # 1.1.1
 
 - `PATCH` correcting casing of files and imports
+- `PATCH` Fix a bug in rush `change`
 
 # 1.1.0
 
