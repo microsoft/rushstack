@@ -94,8 +94,8 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       'src/**/*.json',
       'src/**/*.jsx'
     ],
-    removeCommentsFromJavaScript: true,
-    emitSourceMaps: false
+    removeCommentsFromJavaScript: false,
+    emitSourceMaps: true
   };
 
   private _tsProject: ts.Project;
