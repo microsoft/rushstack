@@ -13,9 +13,9 @@
       "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-mocha/-/gulp-core-build-mocha-1.0.0.tgz"
     },
     "@microsoft/gulp-core-build-typescript": {
-      "version": "1.0.1",
+      "version": "1.0.2",
       "from": "@microsoft/gulp-core-build-typescript@>=1.0.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-typescript/-/gulp-core-build-typescript-1.0.1.tgz",
+      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-typescript/-/gulp-core-build-typescript-1.0.2.tgz",
       "dependencies": {
         "lodash": {
           "version": "4.15.0",
@@ -951,6 +951,18 @@
       "version": "1.2.0",
       "from": "decamelize@>=1.1.2 <2.0.0",
       "resolved": "https://registry.npmjs.org/decamelize/-/decamelize-1.2.0.tgz"
+    },
+    "decomment": {
+      "version": "0.8.6",
+      "from": "decomment@>=0.8.2 <0.9.0",
+      "resolved": "https://registry.npmjs.org/decomment/-/decomment-0.8.6.tgz",
+      "dependencies": {
+        "esprima": {
+          "version": "2.7.3",
+          "from": "esprima@>=2.7.0 <2.8.0",
+          "resolved": "https://registry.npmjs.org/esprima/-/esprima-2.7.3.tgz"
+        }
+      }
     },
     "deep-eql": {
       "version": "0.1.3",
@@ -1954,6 +1966,11 @@
         }
       }
     },
+    "gulp-decomment": {
+      "version": "0.1.3",
+      "from": "gulp-decomment@>=0.1.3 <0.2.0",
+      "resolved": "https://registry.npmjs.org/gulp-decomment/-/gulp-decomment-0.1.3.tgz"
+    },
     "gulp-flatten": {
       "version": "0.2.0",
       "from": "gulp-flatten@>=0.2.0 <0.3.0",
@@ -2605,7 +2622,7 @@
     "isarray": {
       "version": "0.0.1",
       "from": "isarray@0.0.1",
-      "resolved": "http://registry.npmjs.org/isarray/-/isarray-0.0.1.tgz"
+      "resolved": "https://registry.npmjs.org/isarray/-/isarray-0.0.1.tgz"
     },
     "isbinaryfile": {
       "version": "3.0.1",
@@ -3487,7 +3504,7 @@
     },
     "nan": {
       "version": "2.4.0",
-      "from": "nan@>=2.3.0 <3.0.0",
+      "from": "nan@>=2.3.2 <3.0.0",
       "resolved": "https://registry.npmjs.org/nan/-/nan-2.4.0.tgz"
     },
     "natives": {
@@ -3596,33 +3613,33 @@
     },
     "npmx-gulp-core-build": {
       "version": "0.0.0",
-      "from": "temp_modules/npmx-gulp-core-build",
-      "resolved": "file:temp_modules/npmx-gulp-core-build"
+      "from": "temp_modules\\npmx-gulp-core-build",
+      "resolved": "file:temp_modules\\npmx-gulp-core-build"
     },
     "npmx-gulp-core-build-karma": {
       "version": "0.0.0",
-      "from": "temp_modules/npmx-gulp-core-build-karma",
-      "resolved": "file:temp_modules/npmx-gulp-core-build-karma"
+      "from": "temp_modules\\npmx-gulp-core-build-karma",
+      "resolved": "file:temp_modules\\npmx-gulp-core-build-karma"
     },
     "npmx-gulp-core-build-mocha": {
       "version": "0.0.0",
-      "from": "temp_modules/npmx-gulp-core-build-mocha",
-      "resolved": "file:temp_modules/npmx-gulp-core-build-mocha"
+      "from": "temp_modules\\npmx-gulp-core-build-mocha",
+      "resolved": "file:temp_modules\\npmx-gulp-core-build-mocha"
     },
     "npmx-gulp-core-build-sass": {
       "version": "0.0.0",
-      "from": "temp_modules/npmx-gulp-core-build-sass",
-      "resolved": "file:temp_modules/npmx-gulp-core-build-sass"
+      "from": "temp_modules\\npmx-gulp-core-build-sass",
+      "resolved": "file:temp_modules\\npmx-gulp-core-build-sass"
     },
     "npmx-gulp-core-build-serve": {
       "version": "0.0.0",
-      "from": "temp_modules/npmx-gulp-core-build-serve",
-      "resolved": "file:temp_modules/npmx-gulp-core-build-serve"
+      "from": "temp_modules\\npmx-gulp-core-build-serve",
+      "resolved": "file:temp_modules\\npmx-gulp-core-build-serve"
     },
     "npmx-gulp-core-build-typescript": {
       "version": "0.0.0",
-      "from": "temp_modules/npmx-gulp-core-build-typescript",
-      "resolved": "file:temp_modules/npmx-gulp-core-build-typescript",
+      "from": "temp_modules\\npmx-gulp-core-build-typescript",
+      "resolved": "file:temp_modules\\npmx-gulp-core-build-typescript",
       "dependencies": {
         "lodash": {
           "version": "4.15.0",
@@ -3633,28 +3650,28 @@
     },
     "npmx-gulp-core-build-webpack": {
       "version": "0.0.0",
-      "from": "temp_modules/npmx-gulp-core-build-webpack",
-      "resolved": "file:temp_modules/npmx-gulp-core-build-webpack"
+      "from": "temp_modules\\npmx-gulp-core-build-webpack",
+      "resolved": "file:temp_modules\\npmx-gulp-core-build-webpack"
     },
     "npmx-node-library-build": {
       "version": "0.0.0",
-      "from": "temp_modules/npmx-node-library-build",
-      "resolved": "file:temp_modules/npmx-node-library-build"
+      "from": "temp_modules\\npmx-node-library-build",
+      "resolved": "file:temp_modules\\npmx-node-library-build"
     },
     "npmx-package-deps-hash": {
       "version": "0.0.0",
-      "from": "temp_modules/npmx-package-deps-hash",
-      "resolved": "file:temp_modules/npmx-package-deps-hash"
+      "from": "temp_modules\\npmx-package-deps-hash",
+      "resolved": "file:temp_modules\\npmx-package-deps-hash"
     },
     "npmx-test-web-library-build": {
       "version": "0.0.0",
-      "from": "temp_modules/npmx-test-web-library-build",
-      "resolved": "file:temp_modules/npmx-test-web-library-build"
+      "from": "temp_modules\\npmx-test-web-library-build",
+      "resolved": "file:temp_modules\\npmx-test-web-library-build"
     },
     "npmx-web-build-tools-scripts": {
       "version": "0.0.0",
-      "from": "temp_modules/npmx-web-build-tools-scripts",
-      "resolved": "file:temp_modules/npmx-web-build-tools-scripts",
+      "from": "temp_modules\\npmx-web-build-tools-scripts",
+      "resolved": "file:temp_modules\\npmx-web-build-tools-scripts",
       "dependencies": {
         "camelcase": {
           "version": "3.0.0",
@@ -3675,8 +3692,8 @@
     },
     "npmx-web-library-build": {
       "version": "0.0.0",
-      "from": "temp_modules/npmx-web-library-build",
-      "resolved": "file:temp_modules/npmx-web-library-build",
+      "from": "temp_modules\\npmx-web-library-build",
+      "resolved": "file:temp_modules\\npmx-web-library-build",
       "dependencies": {
         "node-notifier": {
           "version": "4.6.1",
