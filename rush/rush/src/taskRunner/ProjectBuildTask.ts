@@ -60,7 +60,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
           'run',
           'test',
           '--', // Everything after this will be passed directly to the gulp task
-          (this._errorDisplayMode === ErrorDetectionMode.VisualStudioOnline ? '--no-color' : '--color')
+          '--color'
         ];
         if (this._production) {
           args.push('--production');
@@ -88,6 +88,13 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
           for (let i: number = 0; i < errors.length; i++) {
             writer.writeError(errors[i].toString(this._errorDisplayMode) + os.EOL);
+          }
+
+          // Display a summary of why the task failed or succeeded
+          if (errors.length) {
+            writer.writeError(`${errors.length} Error${errors.length > 1 ? 's' : ''}!` + os.EOL);
+          } else if (code) {
+            writer.writeError('gulp returned error code: ' + code + os.EOL);
           }
 
           // Write the logs to disk
