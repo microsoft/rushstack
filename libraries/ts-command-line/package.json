@@ -7,7 +7,7 @@
   "scripts": {
     "build": "gulp",
     "test": "gulp test",
-    "clean": "gulp nuke"
+    "clean": "gulp clean"
   },
   "license": "SEE LICENSE IN LICENSE.docx",
   "dependencies": {
