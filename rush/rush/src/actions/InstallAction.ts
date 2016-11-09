@@ -13,7 +13,8 @@ import {
   JsonFile,
   RushConfig,
   Utilities,
-  Stopwatch
+  Stopwatch,
+  AsyncRecycle
 } from '@microsoft/rush-lib';
 
 import RushCommandLineParser from './RushCommandLineParser';
@@ -138,17 +139,17 @@ export default class InstallAction extends CommandLineAction {
     console.log(os.EOL + colors.bold('Checking modules in ' + this._rushConfig.commonFolder) + os.EOL);
 
     // Example: "C:\MyRepo\common\last-install.log"
-    const commonNodeModulesFlagFilename: string = path.join(this._rushConfig.commonFolder, 'last-install-marker');
+    const commonNodeModulesMarkerFilename: string = path.join(this._rushConfig.commonFolder, 'last-install.log');
     const commonNodeModulesFolder: string = path.join(this._rushConfig.commonFolder, 'node_modules');
 
     let needToInstall: boolean = false;
     let skipPrune: boolean = false;
 
     if (this._cleanInstall.value || this._cleanInstallFull.value) {
-      if (fsx.existsSync(commonNodeModulesFlagFilename)) {
+      if (fsx.existsSync(commonNodeModulesMarkerFilename)) {
         // If we are cleaning the node_modules folder, then also delete the flag file
         // to force a reinstall
-        fsx.unlinkSync(commonNodeModulesFlagFilename);
+        fsx.unlinkSync(commonNodeModulesMarkerFilename);
       }
 
       // Example: "C:\MyRepo\common\node_modules"
@@ -184,58 +185,37 @@ export default class InstallAction extends CommandLineAction {
       const globPattern: string = `${globEscape(normalizedPath)}/rush-*/package.json`;
       packageJsonFilenames.push(...glob.sync(globPattern, { nodir: true }));
 
-      if (!Utilities.isFileTimestampCurrent(commonNodeModulesFlagFilename, packageJsonFilenames)) {
+      if (!Utilities.isFileTimestampCurrent(commonNodeModulesMarkerFilename, packageJsonFilenames)) {
         needToInstall = true;
       }
     }
 
     if (needToInstall) {
       // Rush install is transactional, so if the process is killed while it's in-progress, Rush will know if the
-      //  common/node_modules directory is invalid. The process follows this sequence:
-      //   1. If the "common/npm-install-started" file exists, we were in an install that was killed in-progress, so
-      //        the common/node_modules directory is probably invalid, so we should move it to a recycling folder.
-      //   2. A new common/npm-install-temp directory is created
-      //   3. If a common/node_modules directory already exists, it's moved into the
-      //        npm-install-temp directory
-      //   4. The package.json file and the common/temp_modules directory are copied into
-      //        the npm-install-temp directory
-      //   5. `npm prune` is optionally run in the npm-install-temp directory
-      //   6. `npm install` is run in the npm-install-temp directory
-      //   7. The now-complete the npm-install-temp/node_modules directory is moved back to
-      //        the common directory (so now we have a complete common/node_modules directory)
-      //
-      // Because the move operation is atomic, if the process is killed during any of these steps,
-      //  an incomplete or invalid node_modules directory will be under the npm-install-temp directory,
-      //  and not in the common directory. The next time Rush install runs, the invalid
-      //  npm-install-temp/node_modules directory is deleted, so the repository is never in an invalid state.
+      //  common/node_modules directory is invalid. If the last-install.log file doesn't exist, we know the install
+      // didn't finish, so we should delete the existing node_modules folder and run install again.
 
-      const installInProgressFilename: string = path.join(this._rushConfig.commonFolder, 'npm-install-started');
-      if (fsx.existsSync(installInProgressFilename)) {
+      if (!fsx.existsSync(commonNodeModulesMarkerFilename)) {
         // Install was killed, we're in a bad state
         console.log('Rush install was killed in-progress, so the node_modules directory is probably invalid. ' +
                     'Preparing it for deletion.');
 
-        // Create a randomly-named directory to move the existing node_modules folder into
-        const recyclerDirectory: string = path.join(this._rushConfig.commonFolder, 'npm-recycle');
-        fsx.renameSync(commonNodeModulesFolder, path.join(recyclerDirectory, Math.random()));
-        fsx.unlink(recyclerDirectory, (error: Error) => {
-          // Unlink completed. It may have failed, but we don't care if it fails
-        });
+        AsyncRecycle.recycleDirectory(this._rushConfig, commonNodeModulesFolder);
       }
 
-      // Create the in-progress file to indicate the install has started
-      fsx.createFileSync(installInProgressFilename);
+      // Delete the successful install file to indicate the install has started
+      fsx.unlinkSync(commonNodeModulesMarkerFilename);
 
       if (!skipPrune) {
-        console.log(`Running "npm prune" in ${installInProgressFilename}`);
+        console.log(`Running "npm prune" in ${this._rushConfig.commonFolder}`);
         Utilities.executeCommandWithRetry(npmToolFilename, ['prune'], MAX_INSTALL_ATTEMPTS,
-          installInProgressFilename);
+          this._rushConfig.commonFolder);
 
         // Delete the temp projects because NPM will not notice when they are changed.
         // We can recognize them because their names start with "rush-"
-        console.log(`Deleting ${installInProgressFilename}/node_modules/rush-*`);
+        console.log(`Deleting ${this._rushConfig.commonFolder}/node_modules/rush-*`);
         // Example: "C:\MyRepo\common\node_modules\rush-example-project"
-        const normalizedPath: string = Utilities.getAllReplaced(installInProgressFilename, '\\', '/');
+        const normalizedPath: string = Utilities.getAllReplaced(this._rushConfig.commonFolder, '\\', '/');
         for (const tempModulePath of glob.sync(globEscape(normalizedPath) + '/rush-*')) {
           Utilities.dangerouslyDeletePath(tempModulePath);
         }
@@ -257,11 +237,8 @@ export default class InstallAction extends CommandLineAction {
                                         MAX_INSTALL_ATTEMPTS,
                                         this._rushConfig.commonFolder);
 
-      // Delete the in-progress file to indicate the install has finished
-      fsx.unlinkSync(installInProgressFilename);
-
       // Create the marker file to indicate a successful install
-      fsx.createFileSync(commonNodeModulesFlagFilename);
+      fsx.createFileSync(commonNodeModulesMarkerFilename);
       console.log('');
     }
 
