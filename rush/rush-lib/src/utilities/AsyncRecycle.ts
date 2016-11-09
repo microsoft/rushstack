@@ -22,10 +22,10 @@ export default class AsyncRecycle {
 
     if (os.platform() === 'win32') {
       // Windows
-      child_process.exec(`PowerShell -Command "Remove-Item -Path '\\?\${recyclerDirectory}'"`);
+      child_process.exec(`PowerShell -Command "Remove-Item -Path '\\?\${recyclerDirectoryContents}'"`);
     } else {
       // Assume 'NIX or Darwin
-      child_process.exec(`rm -rf "${recyclerDirectory}"`);
+      child_process.exec(`rm -rf "${recyclerDirectoryContents}"`);
     }
   }
 
