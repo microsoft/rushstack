@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "packageName": "@microsoft/package-deps-hash",
+      "packageName": "package-deps-hash",
       "comment": "Creating initial package.",
       "type": "patch"
     }

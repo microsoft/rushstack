@@ -13,9 +13,9 @@
       "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-mocha/-/gulp-core-build-mocha-1.0.0.tgz"
     },
     "@microsoft/gulp-core-build-typescript": {
-      "version": "1.0.1",
+      "version": "1.0.2",
       "from": "@microsoft/gulp-core-build-typescript@>=1.0.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-typescript/-/gulp-core-build-typescript-1.0.1.tgz",
+      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-typescript/-/gulp-core-build-typescript-1.0.2.tgz",
       "dependencies": {
         "lodash": {
           "version": "4.15.0",
