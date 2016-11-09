@@ -7,9 +7,9 @@
     "npmx-gulp-core-build-serve": "file:./temp_modules/npmx-gulp-core-build-serve",
     "npmx-gulp-core-build-typescript": "file:./temp_modules/npmx-gulp-core-build-typescript",
     "npmx-gulp-core-build-karma": "file:./temp_modules/npmx-gulp-core-build-karma",
+    "npmx-package-deps-hash": "file:./temp_modules/npmx-package-deps-hash",
     "npmx-node-library-build": "file:./temp_modules/npmx-node-library-build",
     "npmx-web-library-build": "file:./temp_modules/npmx-web-library-build",
-    "npmx-package-deps-hash": "file:./temp_modules/npmx-package-deps-hash",
     "npmx-web-build-tools-scripts": "file:./temp_modules/npmx-web-build-tools-scripts",
     "npmx-test-web-library-build": "file:./temp_modules/npmx-test-web-library-build"
   },
