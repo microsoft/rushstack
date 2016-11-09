@@ -102,14 +102,15 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
 
   public executeTask(gulp: gulpType.Gulp, completeCallback: (result?: string) => void): void {
     /* tslint:disable:typedef */
-    const plumber = require('gulp-plumber');
-    const sourcemaps = require('gulp-sourcemaps');
     const assign = require('object-assign');
     const merge = require('merge2');
     /* tslint:enable:typedef */
 
-    let errorCount: number = 0;
     const allStreams: NodeJS.ReadWriteStream[] = [];
+
+    const result: { errorCount: number } = {
+      errorCount: 0
+    };
 
     /* tslint:disable:no-any */
     let tsConfig: any = this.readJSONSync('tsconfig.json');
@@ -134,20 +135,59 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       this.log(`Using custom version: ${this.taskConfig.typescript.version}`);
     }
 
-    const tsCompilerOptions: ts.Project = assign({}, tsConfig.compilerOptions, {
+    const tsCompilerOptions: ts.Settings = assign({}, tsConfig.compilerOptions, {
       module: 'commonjs',
       typescript: this.taskConfig.typescript
     });
 
+    this._compileProject(gulp, tsCompilerOptions, this.buildConfig.libFolder, allStreams, result);
+
+    // Static passthrough files.
+    const staticSrc: NodeJS.ReadWriteStream = gulp.src(this.taskConfig.staticMatch);
+
+    allStreams.push(
+      staticSrc.pipe(gulp.dest(this.buildConfig.libFolder)));
+
+    // If AMD modules are required, also build that.
+    if (this.buildConfig.libAMDFolder) {
+      allStreams.push(
+        staticSrc.pipe(gulp.dest(this.buildConfig.libAMDFolder)));
+
+      const tsAMDProject: ts.Project = ts.createProject(assign({}, tsCompilerOptions, { module: 'amd' }));
+      this._compileProject(gulp, tsAMDProject, this.buildConfig.libAMDFolder, allStreams, result);
+    }
+
+    // Listen for pass/fail, and ensure that the task passes/fails appropriately.
+    merge(allStreams)
+      .on('queueDrain', () => {
+        if (this.taskConfig.failBuildOnErrors && result.errorCount) {
+          completeCallback('TypeScript error(s) occurred.');
+        } else {
+          completeCallback();
+        }
+      })
+      .on('error', completeCallback);
+  }
+
+  /** Override the new mergeConfig API */
+  public mergeConfig(config: ITypeScriptTaskConfig): void {
+    throw 'Do not use mergeConfig with gulp-core-build-typescript';
+  }
+
+
+
+  private _compileProject(gulp: gulpType.Gulp, tsCompilerOptions: ts.Settings, destDir: string, allStreams: NodeJS.ReadWriteStream[], result: { errorCount: number }) {
+    /* tslint:disable:typedef */
+    const plumber = require('gulp-plumber');
+    const sourcemaps = require('gulp-sourcemaps');
+    /* tslint:enable:typedef */
+
     const tsProject: ts.Project = this._tsProject = this._tsProject || ts.createProject(tsCompilerOptions);
 
-    /* tslint:disable:typedef */
-    const { libFolder, libAMDFolder } = this.buildConfig;
-    /* tslint:enable:typedef */
     let tsResult: ts.CompileStream = gulp.src(this.taskConfig.sourceMatch)
       .pipe(plumber({
         errorHandler: (): void => {
-          errorCount++;
+          result.errorCount++;
         }
       }))
       .pipe(sourcemaps.init())
@@ -165,64 +205,9 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       jsResult);
 
     allStreams.push(jsResult
-      .pipe(gulp.dest(libFolder)));
+      .pipe(gulp.dest(destDir)));
 
-    allStreams.push(tsResult.dts.pipe(gulp.dest(libFolder)));
-
-    // Static passthrough files.
-    const staticSrc: NodeJS.ReadWriteStream = gulp.src(this.taskConfig.staticMatch);
-
-    allStreams.push(
-      staticSrc.pipe(gulp.dest(libFolder)));
-
-    // If AMD modules are required, also build that.
-    if (libAMDFolder) {
-      allStreams.push(
-        staticSrc.pipe(gulp.dest(libAMDFolder)));
-
-      const tsAMDProject: ts.Project = ts.createProject(assign({}, tsCompilerOptions, { module: 'amd' }));
-
-      tsResult = gulp.src(this.taskConfig.sourceMatch)
-        .pipe(plumber({
-          errorHandler: (): void => {
-            errorCount++;
-          }
-        }))
-        .pipe(ts(tsAMDProject, undefined, this.taskConfig.reporter));
-
-      // tslint:disable-next-line:typedef
-      jsResult = (this.taskConfig.removeCommentsFromJavaScript
-        ? tsResult.js.pipe(require('gulp-decomment')({
-          space: true /* leave this on for sourcemaps */
-        }))
-        : tsResult.js);
-
-      jsResult = (this.taskConfig.emitSourceMaps ?
-        jsResult.pipe(sourcemaps.write('.', { sourceRoot: this._resolveSourceMapRoot })) :
-        jsResult);
-
-      allStreams.push(
-        jsResult
-          .pipe(gulp.dest(libAMDFolder)));
-
-      allStreams.push(tsResult.dts.pipe(gulp.dest(libAMDFolder)));
-    }
-
-    // Listen for pass/fail, and ensure that the task passes/fails appropriately.
-    merge(allStreams)
-      .on('queueDrain', () => {
-        if (this.taskConfig.failBuildOnErrors && errorCount) {
-          completeCallback('TypeScript error(s) occurred.');
-        } else {
-          completeCallback();
-        }
-      })
-      .on('error', completeCallback);
-  }
-
-  /** Override the new mergeConfig API */
-  public mergeConfig(config: ITypeScriptTaskConfig): void {
-    throw 'Do not use mergeConfig with gulp-core-build-typescript';
+    allStreams.push(tsResult.dts.pipe(gulp.dest(destDir)));
   }
 
   private _resolveSourceMapRoot(file: { relative: string, cwd: string }): string {
