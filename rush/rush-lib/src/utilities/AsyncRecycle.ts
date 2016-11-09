@@ -14,7 +14,11 @@ export default class AsyncRecycle {
     const recyclerDirectory: string = AsyncRecycle._getRecyclerDirectory(rushConfig);
     const oldDirectoryName: string = path.basename(directoryPath);
     const newDirectoryPath: string = path.join(recyclerDirectory, `${oldDirectoryName}_${new Date().getTime()}`);
+
+    // If the recycler directory doesn't already, this will create it
     fsx.renameSync(directoryPath, newDirectoryPath);
+
+    const recyclerDirectoryContents: string = path.join(recyclerDirectory, '*');
 
     if (os.platform() === 'win32') {
       // Windows
@@ -26,6 +30,6 @@ export default class AsyncRecycle {
   }
 
   private static _getRecyclerDirectory(rushConfig: RushConfig): string {
-    return path.join(rushConfig.commonFolder, 'npm-recycler');
+    return path.join(rushConfig.commonFolder, 'rush-recycler');
   }
 }
