@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Added additional options which will remove comments and one that will turn off sourcemaps",
+      "type": "minor"
+    }
+  ],
+  "email": "nickpape@microsoft.com"
+}
