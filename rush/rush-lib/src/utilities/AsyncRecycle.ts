@@ -15,7 +15,10 @@ export default class AsyncRecycle {
     const oldDirectoryName: string = path.basename(directoryPath);
     const newDirectoryPath: string = path.join(recyclerDirectory, `${oldDirectoryName}_${new Date().getTime()}`);
 
-    // If the recycler directory doesn't already, this will create it
+    if (!fsx.existsSync(recyclerDirectory)) {
+      fsx.mkdir(recyclerDirectory);
+    }
+
     fsx.renameSync(directoryPath, newDirectoryPath);
 
     const recyclerDirectoryContents: string = path.join(recyclerDirectory, '*');

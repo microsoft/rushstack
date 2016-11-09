@@ -195,9 +195,6 @@ export default class InstallAction extends CommandLineAction {
       //  common/node_modules directory is invalid. If the last-install.flag file doesn't exist, we know the install
       //  didn't finish, so we should delete the existing node_modules folder and run install again.
 
-      // Delete the successful install file to indicate the install has started
-      fsx.unlinkSync(commonNodeModulesMarkerFilename);
-
       if (!fsx.existsSync(commonNodeModulesMarkerFilename)) {
         if (fsx.existsSync(commonNodeModulesFolder)) {
           // Install was killed, we're in a bad state
@@ -208,6 +205,9 @@ export default class InstallAction extends CommandLineAction {
         }
 
         skipPrune = true;
+      } else {
+        // Delete the successful install file to indicate the install has started
+        fsx.unlinkSync(commonNodeModulesMarkerFilename);
       }
 
       if (!skipPrune) {
