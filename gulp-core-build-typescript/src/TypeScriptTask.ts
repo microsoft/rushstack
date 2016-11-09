@@ -45,6 +45,17 @@ export interface ITypeScriptTaskConfig {
   /* tslint:disable:no-any */
   typescript?: any;
   /* tslint:enable:no-any */
+
+  /**
+   * Removes comments from all generated `.js` files. Will **not** remove comments from generated `.d.ts` files.
+   * Defaults to false.
+   */
+  removeCommentsFromJavaScript?: boolean;
+
+  /**
+   * If true, creates sourcemap files which are useful for debugging. Defaults to true.
+   */
+  emitSourceMaps?: boolean;
 }
 
 export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
@@ -82,21 +93,24 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       'src/**/*.js',
       'src/**/*.json',
       'src/**/*.jsx'
-    ]
+    ],
+    removeCommentsFromJavaScript: false,
+    emitSourceMaps: true
   };
 
   private _tsProject: ts.Project;
 
   public executeTask(gulp: gulpType.Gulp, completeCallback: (result?: string) => void): void {
     /* tslint:disable:typedef */
-    const plumber = require('gulp-plumber');
-    const sourcemaps = require('gulp-sourcemaps');
     const assign = require('object-assign');
     const merge = require('merge2');
     /* tslint:enable:typedef */
 
-    let errorCount: number = 0;
     const allStreams: NodeJS.ReadWriteStream[] = [];
+
+    const result: { errorCount: number } = {
+      errorCount: 0
+    };
 
     /* tslint:disable:no-any */
     let tsConfig: any = this.readJSONSync('tsconfig.json');
@@ -121,65 +135,32 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       this.log(`Using custom version: ${this.taskConfig.typescript.version}`);
     }
 
-    const tsCompilerOptions: ts.Project = assign({}, tsConfig.compilerOptions, {
+    const tsCompilerOptions: ts.Settings = assign({}, tsConfig.compilerOptions, {
       module: 'commonjs',
       typescript: this.taskConfig.typescript
     });
 
-    const tsProject: ts.Project = this._tsProject = this._tsProject || ts.createProject(tsCompilerOptions);
-
-    /* tslint:disable:typedef */
-    const { libFolder, libAMDFolder } = this.buildConfig;
-    /* tslint:enable:typedef */
-    let tsResult: ts.CompileStream = gulp.src(this.taskConfig.sourceMatch)
-      .pipe(plumber({
-        errorHandler: (): void => {
-          errorCount++;
-        }
-      }))
-      .pipe(sourcemaps.init())
-      .pipe(ts(tsProject, undefined, this.taskConfig.reporter));
-
-    allStreams.push(tsResult.js
-      .pipe(sourcemaps.write('.', { sourceRoot: this._resolveSourceMapRoot }))
-      .pipe(gulp.dest(libFolder)));
-
-    allStreams.push(tsResult.dts.pipe(gulp.dest(libFolder)));
+    this._compileProject(gulp, tsCompilerOptions, this.buildConfig.libFolder, allStreams, result);
 
     // Static passthrough files.
     const staticSrc: NodeJS.ReadWriteStream = gulp.src(this.taskConfig.staticMatch);
 
     allStreams.push(
-      staticSrc.pipe(gulp.dest(libFolder)));
+      staticSrc.pipe(gulp.dest(this.buildConfig.libFolder)));
 
     // If AMD modules are required, also build that.
-    if (libAMDFolder) {
+    if (this.buildConfig.libAMDFolder) {
       allStreams.push(
-        staticSrc.pipe(gulp.dest(libAMDFolder)));
+        staticSrc.pipe(gulp.dest(this.buildConfig.libAMDFolder)));
 
       const tsAMDProject: ts.Project = ts.createProject(assign({}, tsCompilerOptions, { module: 'amd' }));
-
-      tsResult = gulp.src(this.taskConfig.sourceMatch)
-        .pipe(plumber({
-          errorHandler: (): void => {
-            errorCount++;
-          }
-        }))
-        .pipe(sourcemaps.write({ sourceRoot: this._resolveSourceMapRoot }))
-        .pipe(ts(tsAMDProject, undefined, this.taskConfig.reporter));
-
-      allStreams.push(
-        tsResult.js
-          .pipe(sourcemaps.write('.', { sourceRoot: this._resolveSourceMapRoot }))
-          .pipe(gulp.dest(libAMDFolder)));
-
-      allStreams.push(tsResult.dts.pipe(gulp.dest(libAMDFolder)));
+      this._compileProject(gulp, tsAMDProject, this.buildConfig.libAMDFolder, allStreams, result);
     }
 
     // Listen for pass/fail, and ensure that the task passes/fails appropriately.
     merge(allStreams)
       .on('queueDrain', () => {
-        if (this.taskConfig.failBuildOnErrors && errorCount) {
+        if (this.taskConfig.failBuildOnErrors && result.errorCount) {
           completeCallback('TypeScript error(s) occurred.');
         } else {
           completeCallback();
@@ -191,6 +172,47 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   /** Override the new mergeConfig API */
   public mergeConfig(config: ITypeScriptTaskConfig): void {
     throw 'Do not use mergeConfig with gulp-core-build-typescript';
+  }
+
+  private _compileProject(gulp: gulpType.Gulp, tsCompilerOptions: ts.Settings, destDir: string,
+    allStreams: NodeJS.ReadWriteStream[], result: { errorCount: number }): void {
+    /* tslint:disable:typedef */
+    const plumber = require('gulp-plumber');
+    const sourcemaps = require('gulp-sourcemaps');
+    /* tslint:enable:typedef */
+
+    const tsProject: ts.Project = this._tsProject = this._tsProject || ts.createProject(tsCompilerOptions);
+
+    // tslint:disable-next-line:no-any
+    let tsResult: any = gulp.src(this.taskConfig.sourceMatch)
+      .pipe(plumber({
+        errorHandler: (): void => {
+          result.errorCount++;
+        }
+      }));
+
+    if (this.taskConfig.emitSourceMaps) {
+      tsResult = tsResult.pipe(sourcemaps.init());
+    }
+
+    tsResult = tsResult
+      .pipe(ts(tsProject, undefined, this.taskConfig.reporter));
+
+    // tslint:disable-next-line:typedef
+    let jsResult = (this.taskConfig.removeCommentsFromJavaScript
+      ? tsResult.js.pipe(require('gulp-decomment')({
+        space: !!this.taskConfig.emitSourceMaps /* turn comments into spaces to preserve sourcemaps */
+      }))
+      : tsResult.js);
+
+    if (this.taskConfig.emitSourceMaps) {
+      jsResult = jsResult.pipe(sourcemaps.write('.', { sourceRoot: this._resolveSourceMapRoot }));
+    }
+
+    allStreams.push(jsResult
+      .pipe(gulp.dest(destDir)));
+
+    allStreams.push(tsResult.dts.pipe(gulp.dest(destDir)));
   }
 
   private _resolveSourceMapRoot(file: { relative: string, cwd: string }): string {
