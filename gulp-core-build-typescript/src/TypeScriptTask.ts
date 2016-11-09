@@ -48,8 +48,14 @@ export interface ITypeScriptTaskConfig {
 
   /**
    * Removes comments from all generated `.js` files. Will **not** remove comments from generated `.d.ts` files.
+   * Defaults to false.
    */
   removeCommentsFromJavaScript?: boolean;
+
+  /**
+   * If true, creates sourcemap files which are useful for debugging. Defaults to true.
+   */
+  emitSourceMaps?: boolean;
 }
 
 export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
@@ -88,7 +94,8 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       'src/**/*.json',
       'src/**/*.jsx'
     ],
-    removeCommentsFromJavaScript: false
+    removeCommentsFromJavaScript: true,
+    emitSourceMaps: false
   };
 
   private _tsProject: ts.Project;
@@ -153,8 +160,11 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       }))
       : tsResult.js);
 
+    jsResult = (this.taskConfig.emitSourceMaps ?
+      jsResult.pipe(sourcemaps.write('.', { sourceRoot: this._resolveSourceMapRoot })) :
+      jsResult);
+
     allStreams.push(jsResult
-      .pipe(sourcemaps.write('.', { sourceRoot: this._resolveSourceMapRoot }))
       .pipe(gulp.dest(libFolder)));
 
     allStreams.push(tsResult.dts.pipe(gulp.dest(libFolder)));
@@ -178,7 +188,6 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
             errorCount++;
           }
         }))
-        .pipe(sourcemaps.write({ sourceRoot: this._resolveSourceMapRoot }))
         .pipe(ts(tsAMDProject, undefined, this.taskConfig.reporter));
 
       // tslint:disable-next-line:typedef
@@ -188,9 +197,12 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
         }))
         : tsResult.js);
 
+      jsResult = (this.taskConfig.emitSourceMaps ?
+        jsResult.pipe(sourcemaps.write('.', { sourceRoot: this._resolveSourceMapRoot })) :
+        jsResult);
+
       allStreams.push(
         jsResult
-          .pipe(sourcemaps.write('.', { sourceRoot: this._resolveSourceMapRoot }))
           .pipe(gulp.dest(libAMDFolder)));
 
       allStreams.push(tsResult.dts.pipe(gulp.dest(libAMDFolder)));
