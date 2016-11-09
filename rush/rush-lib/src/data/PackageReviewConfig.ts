@@ -19,11 +19,19 @@ export interface IPackageReviewItemJson {
 }
 
 /**
+ * Part of IPackageReviewJson.
+ */
+export interface IPackageReviewSettingsJson {
+  ignoredNpmScopes?: string[];
+}
+
+/**
  * This represents the JSON data structure for the "PackageDependencies.json" config file.
  * See packagereview-schema.json for documentation.
  */
 export interface IPackageReviewJson {
   $schema: string;
+  settings?: IPackageReviewSettingsJson;
   browserPackages: IPackageReviewItemJson[];
   nonBrowserPackages: IPackageReviewItemJson[];
 }
@@ -41,8 +49,9 @@ export default class PackageReviewConfig {
   public items: PackageReviewItem[] = [];
   private _itemsByName: Map<string, PackageReviewItem> = new Map<string, PackageReviewItem>();
 
-  // tslint:disable-next-line:no-any
-  private _loadedJson: any;
+  private _ignoredNpmScopes: Set<string> = new Set<string>();
+
+  private _loadedJson: IPackageReviewJson;
 
   /**
    * Loads the configuration data from PackageDependencies.json and returns
@@ -85,12 +94,28 @@ export default class PackageReviewConfig {
   constructor(packageReviewJson: IPackageReviewJson, jsonFilename: string) {
     this._loadedJson = packageReviewJson;
 
+    this._ignoredNpmScopes.clear();
+    if (packageReviewJson.settings) {
+      if (packageReviewJson.settings.ignoredNpmScopes) {
+        for (const ignoredNpmScope of packageReviewJson.settings.ignoredNpmScopes) {
+          this._ignoredNpmScopes.add(ignoredNpmScope);
+        }
+      }
+    }
+
     for (const browserPackage of packageReviewJson.browserPackages) {
       this._addItemJson(browserPackage, jsonFilename, true);
     }
     for (const nonBrowserPackage of packageReviewJson.nonBrowserPackages) {
       this._addItemJson(nonBrowserPackage, jsonFilename, false);
     }
+  }
+
+  /**
+   * A list of NPM package scopes that will be excluded from review (e.g. \"@types\")
+   */
+  public get ignoredNpmScopes(): Set<string> {
+    return this._ignoredNpmScopes;
   }
 
   public getItemByName(packageName: string): PackageReviewItem {
@@ -119,6 +144,19 @@ export default class PackageReviewConfig {
   public saveFile(jsonFilename: string): void {
     // Update the JSON structure that we already loaded, preserving any existing state
     // (which passed schema validation).
+
+    // Only write settings if was there before, or if we have some settings
+    const writeSettings: boolean = this._loadedJson.settings !== undefined
+      || this._ignoredNpmScopes.size > 0;
+
+    if (writeSettings) {
+      if (!this._loadedJson.settings) {
+        this._loadedJson.settings = {};
+      }
+      this._loadedJson.settings.ignoredNpmScopes = Utilities.getSetAsArray(this._ignoredNpmScopes)
+        .sort();
+    }
+
     this._loadedJson.browserPackages = [];
     this._loadedJson.nonBrowserPackages = [];
 
@@ -128,10 +166,7 @@ export default class PackageReviewConfig {
 
     for (const item of this.items) {
       // Sort the items from the set.  Too bad we can't use the new Array.from().
-      const allowedCategories: string[] = [];
-      item.allowedCategories.forEach((value: string) => {
-        allowedCategories.push(value);
-      });
+      const allowedCategories: string[] = Utilities.getSetAsArray(item.allowedCategories);
       allowedCategories.sort();
 
       const itemJson: IPackageReviewItemJson = {

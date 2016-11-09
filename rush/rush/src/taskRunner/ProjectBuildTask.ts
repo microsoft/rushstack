@@ -24,7 +24,6 @@ import { ITaskDefinition } from '../taskRunner/ITask';
 export default class ProjectBuildTask implements ITaskDefinition {
   public name: string;
 
-  private _hasError: boolean;
   private _errorDetector: ErrorDetector;
   private _errorDisplayMode: ErrorDetectionMode;
   private _rushProject: RushConfigProject;
@@ -49,9 +48,8 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
   public execute(writer: ITaskWriter): Promise<void> {
     return new Promise<void>((resolve: () => void, reject: (errors: TaskError[]) => void) => {
-      this._hasError = false;
       try {
-        writer.writeLine(`>>> ProjectBuildTask :: Project [${this.name}]:`);
+        writer.writeLine(`>>> ${this.name}`);
         const projectFolder: string = this._rushProject.projectFolder;
 
         writer.writeLine('npm run clean');
@@ -62,7 +60,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
           'run',
           'test',
           '--', // Everything after this will be passed directly to the gulp task
-          '--color'
+          (this._errorDisplayMode === ErrorDetectionMode.VisualStudioOnline ? '--no-color' : '--color')
         ];
         if (this._production) {
           args.push('--production');
@@ -80,7 +78,6 @@ export default class ProjectBuildTask implements ITaskDefinition {
         });
 
         buildTask.stderr.on('data', (data: string) => {
-          this._hasError = true;
           writer.writeError(data);
         });
 
@@ -93,17 +90,10 @@ export default class ProjectBuildTask implements ITaskDefinition {
             writer.writeError(errors[i].toString(this._errorDisplayMode) + os.EOL);
           }
 
-          // Display a summary of why the task failed or succeeded
-          if (errors.length) {
-            writer.writeError(`${errors.length} Error${errors.length > 1 ? 's' : ''}!` + os.EOL);
-          } else if (code) {
-            writer.writeError('gulp returned error code: ' + code + os.EOL);
-          }
-
           // Write the logs to disk
           this._writeLogsToDisk(writer);
 
-          if (code || this._hasError || errors.length > 0) {
+          if (code || errors.length > 0) {
             reject(errors);
           } else {
             resolve();
@@ -119,7 +109,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
     });
   }
 
-  // @todo #179371: add log files to list of things that get gulp nuke'd
+  // @todo #179371: add log files to list of things that get gulp cleaned
   private _writeLogsToDisk(writer: ITaskWriter): void {
     const logFilename: string = path.basename(this._rushProject.projectFolder);
 
