@@ -201,7 +201,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     // tslint:disable-next-line:typedef
     let jsResult = (this.taskConfig.removeCommentsFromJavaScript
       ? tsResult.js.pipe(require('gulp-decomment')({
-        space: !!this.taskConfig.emitSourceMaps
+        space: !!this.taskConfig.emitSourceMaps /* turn comments into spaces to preserve sourcemaps */
       }))
       : tsResult.js);
 
