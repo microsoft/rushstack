@@ -1,4 +1,4 @@
-# package-deps-hash
+# @microsoft/package-deps-hash
 
 `package-deps-hash` is a general utility for building a JSON object containing the git hashes of all files used to produce a given package. Only
 files in a git repo that are not in .gitignore will be considered in building the hash.
@@ -16,7 +16,7 @@ NOTE: GIT is required to be accessible in the command line path.
 
 ```
 let _ = require('lodash');
-let { getPackageDeps } = require('package-deps-hash');
+let { getPackageDeps } = require('@microsoft/package-deps-hash');
 
 // Gets the current deps object for the current working directory
 let deps = getPackageDeps();
