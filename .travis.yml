@@ -3,7 +3,6 @@ node_js:
   - '4.6'
 before_script:
   - npm install -g gulp
-  - npm install
 script:
   - echo 'Installing...' && echo -en 'travis_fold:start:install\\r'
   - node node_modules/@microsoft/npmx/lib/npmx.js install
