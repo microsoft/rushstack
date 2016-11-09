@@ -99,6 +99,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   };
 
   private _tsProject: ts.Project;
+  private _tsAMDProject: ts.Project;
 
   public executeTask(gulp: gulpType.Gulp, completeCallback: (result?: string) => void): void {
     /* tslint:disable:typedef */
@@ -140,7 +141,9 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       typescript: this.taskConfig.typescript
     });
 
-    this._compileProject(gulp, tsCompilerOptions, this.buildConfig.libFolder, allStreams, result);
+    this._tsProject = this._tsProject || ts.createProject(tsCompilerOptions);
+
+    this._compileProject(gulp, this._tsProject, this.buildConfig.libFolder, allStreams, result);
 
     // Static passthrough files.
     const staticSrc: NodeJS.ReadWriteStream = gulp.src(this.taskConfig.staticMatch);
@@ -153,8 +156,8 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       allStreams.push(
         staticSrc.pipe(gulp.dest(this.buildConfig.libAMDFolder)));
 
-      const tsAMDProject: ts.Project = ts.createProject(assign({}, tsCompilerOptions, { module: 'amd' }));
-      this._compileProject(gulp, tsAMDProject, this.buildConfig.libAMDFolder, allStreams, result);
+      this._tsAMDProject = this._tsAMDProject || ts.createProject(assign({}, tsCompilerOptions, { module: 'amd' }));
+      this._compileProject(gulp, this._tsAMDProject, this.buildConfig.libAMDFolder, allStreams, result);
     }
 
     // Listen for pass/fail, and ensure that the task passes/fails appropriately.
@@ -174,14 +177,12 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     throw 'Do not use mergeConfig with gulp-core-build-typescript';
   }
 
-  private _compileProject(gulp: gulpType.Gulp, tsCompilerOptions: ts.Settings, destDir: string,
+  private _compileProject(gulp: gulpType.Gulp, tsProject: ts.Project, destDir: string,
     allStreams: NodeJS.ReadWriteStream[], result: { errorCount: number }): void {
     /* tslint:disable:typedef */
     const plumber = require('gulp-plumber');
     const sourcemaps = require('gulp-sourcemaps');
     /* tslint:enable:typedef */
-
-    const tsProject: ts.Project = this._tsProject = this._tsProject || ts.createProject(tsCompilerOptions);
 
     // tslint:disable-next-line:no-any
     let tsResult: any = gulp.src(this.taskConfig.sourceMatch)
