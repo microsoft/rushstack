@@ -20,10 +20,13 @@
 
 - `PATCH` Partially reverting changes for treating success with warnings differently.
 
+# 1.1.2
+
+- `PATCH` Fix a bug in rush `change`
+
 # 1.1.1
 
 - `PATCH` correcting casing of files and imports
-- `PATCH` Fix a bug in rush `change`
 
 # 1.1.0
 
