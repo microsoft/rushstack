@@ -16,20 +16,24 @@
 > - `MINOR` Including new performance logging functions.
 > - `PATCH` Correctly handling negative numbers in the `setZIndex` function.
 
+## 1.1.3
+
+- `PATCH` Partially reverting changes for treating success with warnings differently.
+- `PATCH` Making Rush install transactional.
+
 # 1.1.2
 
-- `MINOR` Making Rush install transactional.
+- `PATCH` Fix a bug in rush `change`
 
 # 1.1.1
 
 - `PATCH` correcting casing of files and imports
-- `PATCH` Fix a bug in rush `change`
 
 # 1.1.0
 
-- `MINOR` Rush should not break when something is written to stderr, only if the build task returns non zero error code
 - `MINOR` The "packageReviewFile" feature now supports a setting "ignoredNpmScopes" that can be used
   e.g. to ignore the "@types" scope
+
 - `PATCH` Fixing Rush to run on UNIX and Linux.
 
 # 1.0.10
