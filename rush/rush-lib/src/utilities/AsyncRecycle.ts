@@ -23,13 +23,28 @@ export default class AsyncRecycle {
 
     const recyclerDirectoryContents: string = path.join(recyclerDirectory, '*');
 
-    if (os.platform() === 'win32') {
+    const windowsTrimmedRecyclerDirectory: string = recyclerDirectory.match(/\\$/)
+      ? recyclerDirectory.substring(0, recyclerDirectory.length - 1)
+      : recyclerDirectory;
+    const command: string = os.platform() === 'win32'
       // Windows
-      child_process.exec(`PowerShell -Command "Remove-Item -Path '\\?\${recyclerDirectoryContents}'"`);
-    } else {
+      ? 'cmd.exe'
       // Assume 'NIX or Darwin
-      child_process.exec(`rm -rf "${recyclerDirectoryContents}"`);
-    }
+      : 'rm';
+
+    const args: string[] = os.platform() === 'win32'
+      // Windows
+      ? ['/c', `FOR /F %f IN ('dir /B \\\\?\\${recyclerDirectoryContents}') DO rd /S /Q \\\\?\\${windowsTrimmedRecyclerDirectory}\\%f`] // tslint:disable-line:max-line-length
+      // Assume 'NIX or Darwin
+      : ['-rf', `"${recyclerDirectoryContents}"`];
+
+    const options: child_process.SpawnOptions = {
+      detached: true,
+      stdio: [ 'ignore', 'ignore', 'ignore' ]
+    };
+
+    const process: child_process.ChildProcess = child_process.spawn(command, args, options);
+    process.unref();
   }
 
   private static _getRecyclerDirectory(rushConfig: RushConfig): string {
