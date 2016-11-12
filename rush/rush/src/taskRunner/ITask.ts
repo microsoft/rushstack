@@ -14,8 +14,20 @@ import TaskStatus from './TaskStatus';
  * A definition for a task, an execute function returning a promise and a unique string name
  */
 export interface ITaskDefinition {
+  /**
+   * Name of the task definition.
+   */
   name: string;
-  execute: (writer: ITaskWriter) => Promise<void>;
+
+  /**
+   * This flag determines if an incremental build is allowed for the task.
+   */
+  isIncrementalBuildAllowed: boolean;
+
+  /**
+   * Method to be executed for the task.
+   */
+  execute: (writer: ITaskWriter) => Promise<TaskStatus>;
 }
 
 /**

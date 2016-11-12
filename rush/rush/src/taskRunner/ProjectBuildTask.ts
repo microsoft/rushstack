@@ -7,6 +7,7 @@
 
 import * as child_process from 'child_process';
 import * as fsx from 'fs-extra';
+
 import * as os from 'os';
 import * as path from 'path';
 import { ITaskWriter } from '@microsoft/stream-collator';
@@ -18,11 +19,18 @@ import {
   TaskError,
   Utilities
 } from '@microsoft/rush-lib';
-
+import TaskStatus from './TaskStatus';
+import {
+  getPackageDeps,
+  IPackageDeps
+} from '@microsoft/package-deps-hash';
 import { ITaskDefinition } from '../taskRunner/ITask';
+
+const PACKAGE_DEPS_FILENAME: string = 'package-deps.json';
 
 export default class ProjectBuildTask implements ITaskDefinition {
   public name: string;
+  public isIncrementalBuildAllowed: boolean;
 
   private _errorDetector: ErrorDetector;
   private _errorDisplayMode: ErrorDetectionMode;
@@ -31,12 +39,15 @@ export default class ProjectBuildTask implements ITaskDefinition {
   private _production: boolean;
   private _npmMode: boolean;
 
-  constructor(rushProject: RushConfigProject,
-              rushConfig: RushConfig,
-              errorDetector: ErrorDetector,
-              errorDisplayMode: ErrorDetectionMode,
-              production: boolean,
-              npmMode: boolean) {
+  constructor(
+    rushProject: RushConfigProject,
+    rushConfig: RushConfig,
+    errorDetector: ErrorDetector,
+    errorDisplayMode: ErrorDetectionMode,
+    production: boolean,
+    npmMode: boolean,
+    isIncrementalBuildAllowed: boolean
+  ) {
     this.name = rushProject.packageName;
     this._errorDetector = errorDetector;
     this._errorDisplayMode = errorDisplayMode;
@@ -44,13 +55,51 @@ export default class ProjectBuildTask implements ITaskDefinition {
     this._npmMode = npmMode;
     this._rushProject = rushProject;
     this._rushConfig = rushConfig;
+    this.isIncrementalBuildAllowed = isIncrementalBuildAllowed;
   }
 
-  public execute(writer: ITaskWriter): Promise<void> {
-    return new Promise<void>((resolve: () => void, reject: (errors: TaskError[]) => void) => {
-      try {
-        writer.writeLine(`>>> ${this.name}`);
-        const projectFolder: string = this._rushProject.projectFolder;
+  public execute(writer: ITaskWriter): Promise<TaskStatus> {
+    return new Promise<TaskStatus>((resolve: (status: TaskStatus) => void, reject: (errors: TaskError[]) => void) => {
+      getPackageDeps(this._rushProject.projectFolder, [PACKAGE_DEPS_FILENAME]).then(
+        (deps: IPackageDeps) => { this._executeTask(writer, deps, resolve, reject); },
+        (error: Error) => { this._executeTask(writer, undefined, resolve, reject); }
+      );
+    });
+  }
+
+  private _executeTask(
+    writer: ITaskWriter,
+    currentPackageDeps: IPackageDeps,
+    resolve: (status: TaskStatus) => void,
+    reject: (errors: TaskError[]) => void
+  ): void {
+
+    const projectFolder: string = this._rushProject.projectFolder;
+    const currentDepsPath: string = path.join(this._rushProject.projectFolder, PACKAGE_DEPS_FILENAME);
+    let lastPackageDeps: IPackageDeps;
+
+    try {
+      writer.writeLine(`>>> ${this.name}`);
+
+      if (fsx.existsSync(currentDepsPath)) {
+        lastPackageDeps = JSON.parse(fsx.readFileSync(currentDepsPath, 'utf8')) as IPackageDeps;
+      }
+
+      const isPackageUnchanged: boolean = (
+        !!(
+          lastPackageDeps &&
+          currentPackageDeps &&
+          _areShallowEqual(currentPackageDeps.files, lastPackageDeps.files)
+        )
+      );
+
+      if (isPackageUnchanged && this.isIncrementalBuildAllowed) {
+        resolve(TaskStatus.Skipped);
+      } else {
+        // If the deps file exists, remove it before starting a build.
+        if (fsx.existsSync(currentDepsPath)) {
+          fsx.unlinkSync(currentDepsPath);
+        }
 
         writer.writeLine('npm run clean');
         Utilities.executeCommand(this._rushConfig.npmToolFilename, ['run', 'clean'],
@@ -103,17 +152,20 @@ export default class ProjectBuildTask implements ITaskDefinition {
           if (code || errors.length > 0) {
             reject(errors);
           } else {
-            resolve();
+            // Write deps on success.
+            fsx.writeFileSync(currentDepsPath, JSON.stringify(currentPackageDeps, undefined, 2));
+
+            resolve(TaskStatus.Success);
           }
         });
-      } catch (error) {
-        console.log(error);
-
-        // Write the logs to disk
-        this._writeLogsToDisk(writer);
-        reject([new TaskError('error', error.toString())]);
       }
-    });
+    } catch (error) {
+      console.log(error);
+
+      // Write the logs to disk
+      this._writeLogsToDisk(writer);
+      reject([new TaskError('error', error.toString())]);
+    }
   }
 
   // @todo #179371: add log files to list of things that get gulp cleaned
@@ -130,4 +182,20 @@ export default class ProjectBuildTask implements ITaskDefinition {
       fsx.writeFileSync(path.join(this._rushProject.projectFolder, logFilename + '.build.error.log'), stderr);
     }
   }
+}
+
+function _areShallowEqual(object1: Object, object2: Object): boolean {
+  for (const n in object1) {
+    if (!(n in object2) || object1[n] !== object2[n]) {
+      console.log(`Found mismatch: "${n}": "${object1[n]}" !== "${object2[n]}"`);
+      return false;
+    }
+  }
+  for (const n in object2) {
+    if (!(n in object1)) {
+      console.log(`Found new prop in obj2: "${n}" value="${object2[n]}"`);
+      return false;
+    }
+  }
+  return true;
 }

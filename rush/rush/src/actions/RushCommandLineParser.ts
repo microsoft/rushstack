@@ -11,14 +11,15 @@ import {
   Utilities
 } from '@microsoft/rush-lib';
 
+import BuildAction from './BuildAction';
+import ChangeAction from './ChangeAction';
+import CheckAction from './CheckAction';
+import GenerateAction from './GenerateAction';
 import InstallAction from './InstallAction';
 import LinkAction from './LinkAction';
 import PublishAction from './PublishAction';
 import RebuildAction from './RebuildAction';
-import GenerateAction from './GenerateAction';
-import CheckAction from './CheckAction';
 import UnlinkAction from './UnlinkAction';
-import ChangeAction from './ChangeAction';
 
 export default class RushCommandLineParser extends CommandLineParser {
   public rushConfig: RushConfig;
@@ -36,14 +37,15 @@ export default class RushCommandLineParser extends CommandLineParser {
       + ' NPM progress bar, Rush is for you.'
     });
 
+    this.addAction(new BuildAction(this));
+    this.addAction(new ChangeAction(this));
+    this.addAction(new CheckAction(this));
     this.addAction(new GenerateAction(this));
     this.addAction(new InstallAction(this));
     this.addAction(new LinkAction(this));
-    this.addAction(new UnlinkAction(this));
-    this.addAction(new RebuildAction(this));
-    this.addAction(new CheckAction(this));
     this.addAction(new PublishAction(this));
-    this.addAction(new ChangeAction(this));
+    this.addAction(new RebuildAction(this));
+    this.addAction(new UnlinkAction(this));
   }
 
   protected onDefineParameters(): void {
