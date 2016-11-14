@@ -112,6 +112,23 @@ export function isRangeDependency(version: string): boolean {
   return LOOSE_PKG_REGEX.test(version);
 }
 
+/**
+ * Find changed packages that are not included in the provided change file.
+ */
+export function findMissingChangedPackages(changeFileFullPath: string,
+  changedPackages: string[]): string[] {
+  const changeRequest: IChangeInfo = JSON.parse(fsx.readFileSync(changeFileFullPath, 'utf8'));
+  const requiredSet: Set<string> = new Set(changedPackages);
+  changeRequest.changes.forEach(change => {
+    requiredSet.delete(change.packageName);
+  });
+  const missingProjects: string[] = [];
+  requiredSet.forEach(name => {
+    missingProjects.push(name);
+  });
+  return missingProjects;
+}
+
 function _updatePackage(
   change: IChangeInfo,
   allChanges: IChangeInfoHash,
