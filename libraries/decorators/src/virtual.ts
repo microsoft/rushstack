@@ -7,7 +7,7 @@
  * a definition, then child classes may NOT override it.
  * This decorator is currently used for documentation purposes only.
  * In the future, it may be enforced at runtime.
- * 
+ *
  * @alpha
  */
 export function virtual(target: Object, propertyKey: string | symbol,
