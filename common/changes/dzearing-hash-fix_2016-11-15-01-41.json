@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/package-deps-hash",
+      "comment": "Fixing a bug in the hash calculation.",
+      "type": "patch"
+    }
+  ],
+  "email": "dzearing@microsoft.com"
+}
