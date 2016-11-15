@@ -20,6 +20,7 @@ export function getPackageDeps(packagePath: string = process.cwd(), excludedPath
         };
         const processOutputBlocks: string[] = stdout.split(PROCESS_OUTPUT_DELIMITER);
 
+        // Note: The output of git ls-tree uses \n newlines regardless of OS.
         processOutputBlocks[0].split('\n').forEach(line => {
           if (line) {
             const parts: string[] = line.substr(line.indexOf('blob ') + 5).split('\t');
@@ -32,6 +33,7 @@ export function getPackageDeps(packagePath: string = process.cwd(), excludedPath
         if (processOutputBlocks[1]) {
           const filesToHash: string[] = [];
 
+          // Note: The output of git hash-object uses \n newlines regardless of OS.
           processOutputBlocks[1]
             .trim()
             .split('\n')
