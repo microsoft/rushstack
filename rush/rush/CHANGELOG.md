@@ -16,6 +16,10 @@
 > - `MINOR` Including new performance logging functions.
 > - `PATCH` Correctly handling negative numbers in the `setZIndex` function.
 
+## 1.2.1
+
+- `PATCH` Updating the rush `change` with better verification logic.
+
 ## 1.2.0
 
 - `MINOR` Adding the 'build' action, which support incremental build.
