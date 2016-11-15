@@ -9,41 +9,49 @@ import {
   CommandLineAction,
   CommandLineFlagParameter,
   CommandLineIntegerParameter,
-  CommandLineStringListParameter
+  CommandLineStringListParameter,
+  ICommandLineActionOptions
 } from '@microsoft/ts-command-line';
 import {
-  TestErrorDetector,
-  TsErrorDetector,
-  TsLintErrorDetector,
-  ErrorDetector,
   ErrorDetectionMode,
+  ErrorDetector,
   IErrorDetectionRule,
+  IRushLinkJson,
   JsonFile,
   RushConfig,
   RushConfigProject,
-  IRushLinkJson,
-  Stopwatch
+  Stopwatch,
+  TestErrorDetector,
+  TsErrorDetector,
+  TsLintErrorDetector
 } from '@microsoft/rush-lib';
 
-import RushCommandLineParser from './RushCommandLineParser';
-import ProjectBuildTask from '../taskRunner/ProjectBuildTask';
 import TaskRunner from '../taskRunner/TaskRunner';
+import ProjectBuildTask from '../taskRunner/ProjectBuildTask';
+import RushCommandLineParser from './RushCommandLineParser';
 
 export default class RebuildAction extends CommandLineAction {
-  private _parser: RushCommandLineParser;
+
+  /**
+   * Defines the default state of forced (aka clean) build, where we do not try and compare
+   * dependencies to evaluate if we need to build or not.
+   */
+  protected _isIncrementalBuildAllowed: boolean;
+
+  private _dependentList: Map<string, Set<string>>;
+  private _fromFlag: CommandLineStringListParameter;
+  private _npmParameter: CommandLineFlagParameter;
   private _rushConfig: RushConfig;
   private _rushLinkJson: IRushLinkJson;
-  private _dependentList: { [project: string]: Set<string> };
-  private _quietParameter: CommandLineFlagParameter;
-  private _productionParameter: CommandLineFlagParameter;
-  private _vsoParameter: CommandLineFlagParameter;
-  private _npmParamter: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineIntegerParameter;
+  private _parser: RushCommandLineParser;
+  private _productionParameter: CommandLineFlagParameter;
+  private _quietParameter: CommandLineFlagParameter;
   private _toFlag: CommandLineStringListParameter;
-  private _fromFlag: CommandLineStringListParameter;
+  private _vsoParameter: CommandLineFlagParameter;
 
-  constructor(parser: RushCommandLineParser) {
-    super({
+  constructor(parser: RushCommandLineParser, options?: ICommandLineActionOptions) {
+    super(options || {
       actionVerb: 'rebuild',
       summary: 'Clean and rebuild the entire set of projects',
       documentation: 'The Rush rebuild command assumes that the package.json file for each'
@@ -54,6 +62,7 @@ export default class RebuildAction extends CommandLineAction {
       + ' unless overriden by the --parallelism flag.'
     });
     this._parser = parser;
+    this._isIncrementalBuildAllowed = false;
   }
 
   protected onDefineParameters(): void {
@@ -70,7 +79,7 @@ export default class RebuildAction extends CommandLineAction {
       parameterLongName: '--vso',
       description: 'Display error messages in the format expected by Visual Studio Online'
     });
-    this._npmParamter = this.defineFlagParameter({
+    this._npmParameter = this.defineFlagParameter({
       parameterLongName: '--npm',
       description: 'Perform a npm-mode build. Designed for building code for distribution on NPM'
     });
@@ -78,7 +87,7 @@ export default class RebuildAction extends CommandLineAction {
       parameterLongName: '--parallelism',
       parameterShortName: '-p',
       description: 'Change the limit the number of active builds from number of machine cores'
-        + ' to N simultaneous processes'
+      + ' to N simultaneous processes'
     });
     this._toFlag = this.defineStringListParameter({
       parameterLongName: '--to',
@@ -101,7 +110,7 @@ export default class RebuildAction extends CommandLineAction {
     }
     this._rushLinkJson = JsonFile.loadJsonFile(this._rushConfig.rushLinkJsonFilename);
 
-    console.log('Starting "rush rebuild"' + os.EOL);
+    console.log(`Starting "rush ${this.options.actionVerb}"` + os.EOL);
     const stopwatch: Stopwatch = Stopwatch.start();
 
     const taskRunner: TaskRunner = new TaskRunner(this._quietParameter.value, this._parallelismParameter.value);
@@ -123,10 +132,11 @@ export default class RebuildAction extends CommandLineAction {
       .then(
       () => {
         stopwatch.stop();
-        console.log(colors.green(`rush rebuild (${stopwatch.toString()})`));
+        console.log(colors.green(`rush ${this.options.actionVerb} (${stopwatch.toString()})`));
       },
       () => {
-        console.log(colors.red(`rush rebuild - Errors!`));
+        stopwatch.stop();
+        console.log(colors.red(`rush ${this.options.actionVerb} - Errors! (${stopwatch.toString()})`));
         process.exit(1);
       });
   }
@@ -197,7 +207,7 @@ export default class RebuildAction extends CommandLineAction {
    * Collects all downstream dependents of a certain project
    */
   private _collectAllDependents(project: string): Set<string> {
-    const deps: Set<string> = new Set<string>(this._dependentList[project]);
+    const deps: Set<string> = new Set<string>(this._dependentList.get(project));
     deps.forEach(dep => this._collectAllDependents(dep).forEach(innerDep => deps.add(innerDep)));
     return deps;
   }
@@ -207,14 +217,14 @@ export default class RebuildAction extends CommandLineAction {
    * this helps when using the --from flag
    */
   private _buildDependentGraph(): void {
-    this._dependentList = {};
+    this._dependentList = new Map<string, Set<string>>();
 
     Object.keys(this._rushLinkJson.localLinks).forEach(project => {
       this._rushLinkJson.localLinks[project].forEach(dep => {
-        if (!this._dependentList[dep]) {
-          this._dependentList[dep] = new Set<string>();
+        if (!this._dependentList.has(dep)) {
+          this._dependentList.set(dep, new Set<string>());
         }
-        this._dependentList[dep].add(project);
+        this._dependentList.get(dep).add(project);
       });
     });
   }
@@ -230,12 +240,14 @@ export default class RebuildAction extends CommandLineAction {
       TsLintErrorDetector
     ];
     const errorDetector: ErrorDetector = new ErrorDetector(activeRules);
-    const projectTask: ProjectBuildTask = new ProjectBuildTask(project,
-                                                                this._rushConfig,
-                                                                errorDetector,
-                                                                errorMode,
-                                                                this._productionParameter.value,
-                                                                this._npmParamter.value);
+    const projectTask: ProjectBuildTask = new ProjectBuildTask(
+      project,
+      this._rushConfig,
+      errorDetector,
+      errorMode,
+      this._productionParameter.value,
+      this._npmParameter.value,
+      this._isIncrementalBuildAllowed);
 
     if (!taskRunner.hasTask(projectTask.name)) {
       taskRunner.addTask(projectTask);

@@ -21,6 +21,7 @@ import {
 } from '@microsoft/rush-lib';
 
 import RushCommandLineParser from './RushCommandLineParser';
+import { findMissingChangedPackages } from './publish';
 
 const BUMP_OPTIONS: { [type: string]: string } = {
   'major': 'major - for breaking changes (ex: renaming a file)',
@@ -77,7 +78,7 @@ export default class ChangeAction extends CommandLineAction {
     if (this._verifyParameter.value) {
       return this._verify();
     }
-    this._sortedProjectList = this._getChangedProjects()
+    this._sortedProjectList = this._getChangedPackageNames()
        .sort();
 
     if (this._sortedProjectList.length === 0) {
@@ -99,14 +100,16 @@ export default class ChangeAction extends CommandLineAction {
   }
 
   private _verify(): void {
-    if (this._getChangedProjects().length > 0) {
-      this._validateChangeFile();
+    const changedPackages: string[] = this._getChangedPackageNames();
+
+    if (changedPackages.length > 0) {
+      this._validateChangeFile(changedPackages);
     } else {
       console.log('No change is needed.');
     }
   }
 
-  private _getChangedProjects(): string[] {
+  private _getChangedPackageNames(): string[] {
     const changedFolders: string[] = VersionControl.getChangedFolders();
     return this._rushConfig.projects
       .filter(project => project.shouldPublish)
@@ -114,15 +117,24 @@ export default class ChangeAction extends CommandLineAction {
       .map(project => project.packageName);
   }
 
-  private _validateChangeFile(): void {
+  private _validateChangeFile(changedPackages: string[]): void {
     const changeFiles: string[] = this._getChangeFiles();
     if (changeFiles.length === 1) {
-      // TODO: validate the change file against json schema.
-      console.log('Found one change file');
+      console.log('Found one change file: ' + changeFiles[0]);
+      this._validateChangedProjects(changeFiles[0], changedPackages);
     } else if (changeFiles.length === 0) {
       throw new Error(`No change file is found. Run 'rush change' to generate a change file.`);
     } else {
       throw new Error('More than one change file was found. Delete and only keep one.');
+    }
+  }
+
+  private _validateChangedProjects(changeFile: string,
+    changedPackages: string[]): void {
+    const fileFullPath: string = path.join(this._rushConfig.rushJsonFolder, changeFile);
+    const missingPackages: string[] = findMissingChangedPackages(fileFullPath, changedPackages);
+    if (missingPackages.length > 0) {
+      throw new Error(`Change file does not contain ${missingPackages.join(',')}.`);
     }
   }
 

@@ -11,7 +11,8 @@ import {
   findChangeRequests,
   isRangeDependency,
   sortChangeRequests,
-  updatePackages
+  updatePackages,
+  findMissingChangedPackages
 } from '../publish';
 
 /* tslint:disable:no-string-literal */
@@ -158,5 +159,23 @@ describe('isRangeDependency', () => {
     expect(isRangeDependency('1.0.0')).is.false;
     expect(isRangeDependency('^1.0.0')).is.false;
     expect(isRangeDependency('~1.0.0')).is.false;
+  });
+});
+
+describe('findMissingChangedPackages', () => {
+  it('finds the missing package.', () => {
+    const changeFile: string = path.join(__dirname, 'verifyChanges', 'changes.json');
+    const changedPackages: string[] = ['a', 'b', 'c'];
+    expect(findMissingChangedPackages(changeFile, changedPackages)).to.contain('c',
+      'c should be missing');
+    expect(findMissingChangedPackages(changeFile, changedPackages)).to.have.lengthOf(1,
+      'only c is missing');
+  });
+
+  it('finds nothing when no missing packages', () => {
+    const changeFile: string = path.join(__dirname, 'verifyChanges', 'changes.json');
+    const changedPackages: string[] = ['a'];
+    expect(findMissingChangedPackages(changeFile, changedPackages)).to.have.lengthOf(0,
+      'nothing is missing');
   });
 });
