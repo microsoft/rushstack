@@ -2,7 +2,7 @@
  * @Copyright (c) Microsoft Corporation.  All rights reserved.
  */
 
-import * as fs from 'fs';
+import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import * as mkdirp from 'mkdirp';
@@ -297,7 +297,7 @@ export default class ChangeAction extends CommandLineAction {
 
     const filepath: string = path.join(this._rushConfig.commonFolder, 'changes', filename);
 
-    if (fs.existsSync(filepath)) {
+    if (fsx.existsSync(filepath)) {
       // prompt about overwrite
       this._prompt([
         {
@@ -329,7 +329,7 @@ export default class ChangeAction extends CommandLineAction {
         if (err) {
           reject(err);
         }
-        fs.writeFile(fileName, output, (error: NodeJS.ErrnoException) => {
+        fsx.writeFile(fileName, output, (error: NodeJS.ErrnoException) => {
           if (error) {
             reject(error);
           } else {

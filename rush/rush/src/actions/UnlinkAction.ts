@@ -2,7 +2,7 @@
  * @Copyright (c) Microsoft Corporation.  All rights reserved.
  */
 
-import * as fs from 'fs';
+import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import { CommandLineAction } from '@microsoft/ts-command-line';
@@ -39,7 +39,7 @@ export default class UnlinkAction extends CommandLineAction {
     let didAnything: boolean = false;
     for (const rushProject of this._rushConfig.projects) {
       const localModuleFolder: string = path.join(rushProject.projectFolder, 'node_modules');
-      if (fs.existsSync(localModuleFolder)) {
+      if (fsx.existsSync(localModuleFolder)) {
         console.log('Purging ' + localModuleFolder);
         Utilities.dangerouslyDeletePath(localModuleFolder);
         didAnything = true;

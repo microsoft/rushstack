@@ -2,7 +2,7 @@ import * as child_process from 'child_process';
 
 export default class VersionControl {
   public static getChangedFolders(): string[] {
-    const output: string = child_process.execSync('git diff master... --dirstat=files')
+    const output: string = child_process.execSync('git diff origin/master... --dirstat=files')
       .toString();
     return output.split('\n').map(s => {
         if (s) {
@@ -16,7 +16,7 @@ export default class VersionControl {
   }
 
   public static getChangedFiles(prefix?: string): string[] {
-    const output: string = child_process.execSync('git diff master... --name-only --diff-filter=A')
+    const output: string = child_process.execSync('git diff origin/master... --name-only --diff-filter=A')
       .toString();
     const regex: RegExp = prefix ? new RegExp(`^${prefix}`, 'i') : undefined;
     return output.split('\n').map(s => {

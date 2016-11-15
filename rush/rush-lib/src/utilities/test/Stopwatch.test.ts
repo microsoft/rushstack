@@ -1,4 +1,5 @@
 /// <reference path='../../../typings/tsd.d.ts' />
+/// <reference types='mocha' />
 
 import { assert } from 'chai';
 
