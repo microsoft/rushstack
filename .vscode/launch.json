@@ -5,10 +5,10 @@
 			"name": "Launch",
 			"type": "node",
 			"request": "launch",
-			"program": "/Users/david/git/sharepoint/sp-client/spfx-tools/npmx/lib/npmx.js",
+			"program": "/git/sp-client/spfx-tools/npmx/lib/npmx.js",
 			"stopOnEntry": false,
 			"args": [
-        "publish"
+        "build"
       ],
 			"cwd": "${workspaceRoot}",
 			"runtimeExecutable": null,
