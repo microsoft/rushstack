@@ -8,7 +8,7 @@
  */
 
 import { EOL } from 'os';
-import * as fs from 'fs';
+import * as fsx from 'fs-extra';
 import * as path from 'path';
 import * as semver from 'semver';
 import {
@@ -37,13 +37,13 @@ export function findChangeRequests(
   console.log(`Finding changes in: ${changesPath}`);
 
   try {
-    changeFiles = fs.readdirSync(changesPath).filter(filename => path.extname(filename) === '.json');
+    changeFiles = fsx.readdirSync(changesPath).filter(filename => path.extname(filename) === '.json');
   } catch (e) { /* no-op */ }
 
   // Add the minimum changes defined by the change descriptions.
   changeFiles.forEach((file: string) => {
     const fullPath: string = path.resolve(changesPath, file);
-    const changeRequest: IChangeInfo = JSON.parse(fs.readFileSync(fullPath, 'utf8'));
+    const changeRequest: IChangeInfo = JSON.parse(fsx.readFileSync(fullPath, 'utf8'));
 
     for (const change of changeRequest.changes) {
       _addChange(change, allChanges, allPackages);
@@ -154,7 +154,7 @@ function _updatePackage(
   });
 
   if (shouldCommit) {
-    fs.writeFileSync(packagePath, JSON.stringify(pkg, undefined, 2), 'utf8');
+    fsx.writeFileSync(packagePath, JSON.stringify(pkg, undefined, 2), 'utf8');
   }
 }
 

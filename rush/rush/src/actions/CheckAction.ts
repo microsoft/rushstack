@@ -3,7 +3,7 @@
  */
 
 import * as colors from 'colors';
-import * as fs from 'fs';
+import * as fsx from 'fs-extra';
 import * as glob from 'glob';
 import * as os from 'os';
 import * as path from 'path';
@@ -33,7 +33,7 @@ export default class CheckAction extends CommandLineAction {
 
     const packageJsonFilename: string = path.resolve('./package.json');
 
-    if (!fs.existsSync(packageJsonFilename)) {
+    if (!fsx.existsSync(packageJsonFilename)) {
       throw new Error('You must run this project from the top-level folder that contains a package.json file');
     }
 
@@ -60,7 +60,7 @@ export default class CheckAction extends CommandLineAction {
 
     for (const filename of glob.sync('{./*.{ts,js,tsx,jsx},./{src,lib}/**/*.{ts,js,tsx,jsx}}')) {
       try {
-        const contents: string = fs.readFileSync(filename, 'utf8');
+        const contents: string = fsx.readFileSync(filename, 'utf8');
         const lines: string[] = contents.split('\n');
 
         for (const line of lines) {

@@ -8,7 +8,7 @@ import globEscape = require('glob-escape');
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-import * as fs from 'fs';
+import * as fsx from 'fs-extra';
 import { CommandLineAction, CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import {
   IPackageJson,
@@ -75,14 +75,14 @@ export default class GenerateAction extends CommandLineAction {
         Utilities.dangerouslyDeletePath(tempModulePath);
       }
     } else {
-      if (fs.existsSync(nodeModulesPath)) {
+      if (fsx.existsSync(nodeModulesPath)) {
         console.log('Deleting common/node_modules folder...');
         Utilities.dangerouslyDeletePath(nodeModulesPath);
       }
     }
 
     // 2. Delete "common\temp_modules"
-    if (fs.existsSync(this._rushConfig.tempModulesFolder)) {
+    if (fsx.existsSync(this._rushConfig.tempModulesFolder)) {
       console.log('Deleting common/temp_modules folder');
       Utilities.dangerouslyDeletePath(this._rushConfig.tempModulesFolder);
     }
@@ -90,7 +90,7 @@ export default class GenerateAction extends CommandLineAction {
     // 3. Delete the previous npm-shrinkwrap.json
     const shrinkwrapFilename: string = path.join(this._rushConfig.commonFolder, 'npm-shrinkwrap.json');
 
-    if (fs.existsSync(shrinkwrapFilename)) {
+    if (fsx.existsSync(shrinkwrapFilename)) {
       console.log('Deleting common/npm-shrinkwrap.json');
       Utilities.dangerouslyDeletePath(shrinkwrapFilename);
     }
@@ -114,7 +114,7 @@ export default class GenerateAction extends CommandLineAction {
       const tempProjectName: string = rushProject.tempProjectName;
 
       const tempProjectFolder: string = path.join(this._rushConfig.tempModulesFolder, tempProjectName);
-      fs.mkdirSync(tempProjectFolder);
+      fsx.mkdirSync(tempProjectFolder);
 
       commonPackageJson.dependencies[tempProjectName] = 'file:./temp_modules/' + tempProjectName;
 

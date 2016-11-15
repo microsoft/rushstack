@@ -6,7 +6,7 @@
  */
 
 import * as child_process from 'child_process';
-import * as fs from 'fs';
+import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import { ITaskWriter } from '@microsoft/stream-collator';
@@ -60,7 +60,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
           'run',
           'test',
           '--', // Everything after this will be passed directly to the gulp task
-          (this._errorDisplayMode === ErrorDetectionMode.VisualStudioOnline ? '--no-color' : '--color')
+          '--color'
         ];
         if (this._production) {
           args.push('--production');
@@ -90,6 +90,13 @@ export default class ProjectBuildTask implements ITaskDefinition {
             writer.writeError(errors[i].toString(this._errorDisplayMode) + os.EOL);
           }
 
+          // Display a summary of why the task failed or succeeded
+          if (errors.length) {
+            writer.writeError(`${errors.length} Error${errors.length > 1 ? 's' : ''}!` + os.EOL);
+          } else if (code) {
+            writer.writeError('gulp returned error code: ' + code + os.EOL);
+          }
+
           // Write the logs to disk
           this._writeLogsToDisk(writer);
 
@@ -115,12 +122,12 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
     const stdout: string = writer.getStdOutput().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
     if (stdout) {
-      fs.writeFileSync(path.join(this._rushProject.projectFolder, logFilename + '.build.log'), stdout);
+      fsx.writeFileSync(path.join(this._rushProject.projectFolder, logFilename + '.build.log'), stdout);
     }
 
     const stderr: string = writer.getStdError().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
     if (stderr) {
-      fs.writeFileSync(path.join(this._rushProject.projectFolder, logFilename + '.build.error.log'), stderr);
+      fsx.writeFileSync(path.join(this._rushProject.projectFolder, logFilename + '.build.error.log'), stderr);
     }
   }
 }

@@ -2,10 +2,8 @@
  * @Copyright (c) Microsoft Corporation.  All rights reserved.
  */
 
-/// <reference path='../../typings/tsd.d.ts' />
-
 import * as colors from 'colors';
-import * as fs from 'fs';
+import * as fsx from 'fs-extra';
 import * as os from 'os';
 import {
   CommandLineAction,
@@ -97,7 +95,7 @@ export default class RebuildAction extends CommandLineAction {
   protected onExecute(): void {
     this._rushConfig = RushConfig.loadFromDefaultLocation();
 
-    if (!fs.existsSync(this._rushConfig.rushLinkJsonFilename)) {
+    if (!fsx.existsSync(this._rushConfig.rushLinkJsonFilename)) {
       throw new Error('File not found: ' + this._rushConfig.rushLinkJsonFilename
         + os.EOL + 'Did you run "rush link"?');
     }

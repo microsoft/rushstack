@@ -3,7 +3,7 @@
  */
 
 import * as child_process from 'child_process';
-import * as fs from 'fs';
+import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as rimraf from 'rimraf';
 import * as tty from 'tty';
@@ -63,7 +63,7 @@ export default class Utilities {
     // tslint:disable-next-line:no-constant-condition
     while (true) {
       try {
-        fs.mkdirSync(folderName);
+        fsx.mkdirSync(folderName);
         break;
       } catch (e) {
         looped = true;
@@ -88,7 +88,7 @@ export default class Utilities {
     let exists: boolean = false;
 
     try {
-      const lstat: fs.Stats = fs.lstatSync(path);
+      const lstat: fsx.Stats = fsx.lstatSync(path);
       exists = lstat.isFile();
     } catch (e) { /* no-op */ }
 
@@ -102,7 +102,7 @@ export default class Utilities {
     let exists: boolean = false;
 
     try {
-      const lstat: fs.Stats = fs.lstatSync(path);
+      const lstat: fsx.Stats = fsx.lstatSync(path);
       exists = lstat.isDirectory();
     } catch (e) { /* no-op */ }
 
@@ -129,7 +129,7 @@ export default class Utilities {
   public static deleteFile(filePath: string): void {
     if (Utilities.fileExists(filePath)) {
       console.log(`Deleting: ${filePath}`);
-      fs.unlinkSync(filePath);
+      fsx.unlinkSync(filePath);
     }
   }
 
@@ -141,17 +141,17 @@ export default class Utilities {
    * timestamp is compared.
    */
   public static isFileTimestampCurrent(outputFilename: string, inputFilenames: string[]): boolean {
-    if (!fs.existsSync(outputFilename)) {
+    if (!fsx.existsSync(outputFilename)) {
       return false;
     }
-    const outputStats: fs.Stats = fs.statSync(outputFilename);
+    const outputStats: fsx.Stats = fsx.statSync(outputFilename);
 
     for (const inputFilename of inputFilenames) {
-      if (!fs.existsSync(inputFilename)) {
+      if (!fsx.existsSync(inputFilename)) {
         return false;
       }
 
-      const inputStats: fs.Stats = fs.statSync(inputFilename);
+      const inputStats: fsx.Stats = fsx.statSync(inputFilename);
       if (outputStats.mtime < inputStats.mtime) {
         return false;
       }
@@ -247,7 +247,7 @@ export default class Utilities {
     // This is a workaround for GitHub issue #25330.  It is not as complete as the workaround above,
     // but there doesn't seem to be an easy asynchronous solution.
     // https://github.com/nodejs/node-v0.x-archive/issues/25330
-    if (fs.existsSync(command + '.cmd')) {
+    if (fsx.existsSync(command + '.cmd')) {
       command += '.cmd';
     }
 

@@ -3,7 +3,7 @@
  */
 
 import * as path from 'path';
-import * as fs from 'fs';
+import * as fsx from 'fs-extra';
 import JsonFile from '../utilities/JsonFile';
 import RushConfig from '../data/RushConfig';
 
@@ -52,7 +52,7 @@ export default class RushConfigProject {
 
     this._projectFolder = path.join(rushConfig.rushJsonFolder, projectJson.projectFolder);
 
-    if (!fs.existsSync(this._projectFolder)) {
+    if (!fsx.existsSync(this._projectFolder)) {
       throw new Error(`Project folder not found: ${projectJson.projectFolder}`);
     }
 

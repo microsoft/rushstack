@@ -65,3 +65,4 @@ export {
 export { default as TestErrorDetector } from './errorDetection/rules/TestErrorDetector';
 export { default as TsErrorDetector } from './errorDetection/rules/TsErrorDetector';
 export { default as TsLintErrorDetector } from './errorDetection/rules/TsLintErrorDetector';
+export { default as AsyncRecycle } from './utilities/AsyncRecycle';
