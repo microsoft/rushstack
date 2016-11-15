@@ -172,11 +172,22 @@ export default class TaskRunner {
       task.stopwatch = Stopwatch.start();
 
       task.execute(taskWriter)
-        .then(() => {
+        .then((result: TaskStatus) => {
           task.stopwatch.stop();
           taskWriter.close();
 
-          this._markTaskAsSuccess(task);
+          switch (result) {
+            case TaskStatus.Success:
+              this._markTaskAsSuccess(task);
+              break;
+            case TaskStatus.Skipped:
+              this._markTaskAsSkipped(task);
+              break;
+            case TaskStatus.Failure:
+              this._markTaskAsSuccess(task);
+              break;
+          }
+
           this._startAvailableTasks(complete, reject);
 
         }).catch((errors: TaskError[]) => {
@@ -221,6 +232,18 @@ export default class TaskRunner {
   private _markTaskAsSuccess(task: ITask): void {
     console.log(colors.green(`> Completed task [${task.name}] in ${task.stopwatch.toString()}`));
     task.status = TaskStatus.Success;
+    task.dependents.forEach((dependent: ITask) => {
+      dependent.isIncrementalBuildAllowed = false;
+      dependent.dependencies.delete(task);
+    });
+  }
+
+  /**
+   * Marks a task as skipped.
+   */
+  private _markTaskAsSkipped(task: ITask): void {
+    console.log(colors.green(`> Skipped task [${task.name}] in ${task.stopwatch.toString()}`));
+    task.status = TaskStatus.Skipped;
     task.dependents.forEach((dependent: ITask) => {
       dependent.dependencies.delete(task);
     });
@@ -278,6 +301,7 @@ export default class TaskRunner {
     this._printStatus('EXECUTING', tasksByStatus[TaskStatus.Executing], colors.yellow);
     this._printStatus('READY', tasksByStatus[TaskStatus.Ready], colors.white);
     this._printStatus('SUCCESS', tasksByStatus[TaskStatus.Success], colors.green);
+    this._printStatus('SKIPPED', tasksByStatus[TaskStatus.Skipped], colors.grey);
     this._printStatus('BLOCKED', tasksByStatus[TaskStatus.Blocked], colors.red);
     this._printStatus('FAILURE', tasksByStatus[TaskStatus.Failure], colors.red);
 
