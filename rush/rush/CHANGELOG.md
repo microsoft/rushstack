@@ -16,6 +16,11 @@
 > - `MINOR` Including new performance logging functions.
 > - `PATCH` Correctly handling negative numbers in the `setZIndex` function.
 
+# 1.2.2
+
+- `PATCH` Updating the deps hash dependency, which includes a fix which resolves a bug where changes were not being
+recalculated when multiple files were changed.
+
 # 1.2.1
 
 - `PATCH` Updating the rush `change` with better verification logic.
