@@ -89,7 +89,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
         !!(
           lastPackageDeps &&
           currentPackageDeps &&
-          _areShallowEqual(currentPackageDeps.files, lastPackageDeps.files)
+          _areShallowEqual(currentPackageDeps.files, lastPackageDeps.files, writer)
         )
       );
 
@@ -184,16 +184,16 @@ export default class ProjectBuildTask implements ITaskDefinition {
   }
 }
 
-function _areShallowEqual(object1: Object, object2: Object): boolean {
+function _areShallowEqual(object1: Object, object2: Object, writer: ITaskWriter): boolean {
   for (const n in object1) {
     if (!(n in object2) || object1[n] !== object2[n]) {
-      console.log(`Found mismatch: "${n}": "${object1[n]}" !== "${object2[n]}"`);
+      writer.writeLine(`Found mismatch: "${n}": "${object1[n]}" !== "${object2[n]}"`);
       return false;
     }
   }
   for (const n in object2) {
     if (!(n in object1)) {
-      console.log(`Found new prop in obj2: "${n}" value="${object2[n]}"`);
+      writer.writeLine(`Found new prop in obj2: "${n}" value="${object2[n]}"`);
       return false;
     }
   }
