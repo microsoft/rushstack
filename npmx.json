@@ -4,10 +4,13 @@
   "nodeSupportedVersionRange": ">=4.3.0",
   "commonFolder": "common",
   "projectFolderMinDepth": 1,
+  "reviewCategories": [ "libraries", "other" ],
+  "packageReviewFile": "common/reviews/PackageDependencies.json",
   "projects": [
     {
       "packageName": "@microsoft/gulp-core-build",
       "projectFolder": "gulp-core-build",
+      "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
@@ -16,6 +19,7 @@
     {
       "packageName": "@microsoft/gulp-core-build-karma",
       "projectFolder": "gulp-core-build-karma",
+      "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
@@ -24,6 +28,7 @@
     {
       "packageName": "@microsoft/gulp-core-build-mocha",
       "projectFolder": "gulp-core-build-mocha",
+      "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
@@ -32,6 +37,7 @@
     {
       "packageName": "@microsoft/gulp-core-build-sass",
       "projectFolder": "gulp-core-build-sass",
+      "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
@@ -40,6 +46,7 @@
     {
       "packageName": "@microsoft/gulp-core-build-serve",
       "projectFolder": "gulp-core-build-serve",
+      "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
@@ -48,6 +55,7 @@
     {
       "packageName": "@microsoft/gulp-core-build-typescript",
       "projectFolder": "gulp-core-build-typescript",
+      "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
@@ -56,6 +64,7 @@
     {
       "packageName": "@microsoft/gulp-core-build-webpack",
       "projectFolder": "gulp-core-build-webpack",
+      "reviewCategory": "libraries",
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
       ]
@@ -63,25 +72,30 @@
     {
       "packageName": "@microsoft/package-deps-hash",
       "projectFolder": "package-deps-hash",
+      "reviewCategory": "libraries",
       "shouldPublish": true
     },
     {
       "packageName": "@microsoft/node-library-build",
       "projectFolder": "node-library-build",
+      "reviewCategory": "libraries",
       "shouldPublish": true
     },
     {
       "packageName": "@microsoft/web-library-build",
       "projectFolder": "web-library-build",
+      "reviewCategory": "libraries",
       "shouldPublish": true
     },
     {
       "packageName": "web-build-tools-scripts",
+      "reviewCategory": "other",
       "projectFolder": "scripts"
     },
     {
       "packageName": "test-web-library-build",
-      "projectFolder": "test-web-library-build"
+      "projectFolder": "test-web-library-build",
+      "reviewCategory": "other"
     }
   ]
 }
