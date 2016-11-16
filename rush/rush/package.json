@@ -12,6 +12,7 @@
   },
   "license": "SEE LICENSE IN LICENSE.docx",
   "dependencies": {
+    "@microsoft/rush-lib": "~1.2.0",
     "@microsoft/rush-lib": "1.2.1",
     "@microsoft/package-deps-hash": "0.0.3",
     "@microsoft/stream-collator": "~1.0.1",
@@ -34,7 +35,7 @@
     "wordwrap": "~1.0.0"
   },
   "devDependencies": {
-    "@microsoft/sp-build-node": "~0.1.0",
+    "@microsoft/sp-build-node": "~0.2.0",
     "@types/chai": "^3.4.34",
     "@types/mocha": "^2.2.32",
     "chai": "~3.5.0",
