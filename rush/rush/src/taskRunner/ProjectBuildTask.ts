@@ -102,8 +102,8 @@ export default class ProjectBuildTask implements ITaskDefinition {
         }
 
         writer.writeLine('npm run clean');
-        Utilities.executeCommand(this._rushConfig.npmToolFilename, ['run', 'clean'],
-          projectFolder, true);
+
+        Utilities.executeCommand(this._rushConfig.npmToolFilename, ['run', 'clean'], projectFolder, true);
 
         const args: string[] = [
           'run',
