@@ -109,7 +109,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
           'run',
           'test',
           '--', // Everything after this will be passed directly to the gulp task
-          '--color'
+          (this._errorDisplayMode === ErrorDetectionMode.VisualStudioOnline ? '--no-color' : '--color')
         ];
         if (this._production) {
           args.push('--production');
