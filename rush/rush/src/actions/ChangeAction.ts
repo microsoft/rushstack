@@ -11,7 +11,11 @@ import gitInfo = require('git-repo-info');
 
 import inquirer = require('inquirer');
 
-import { CommandLineAction, CommandLineFlagParameter } from '@microsoft/ts-command-line';
+import { CommandLineAction,
+  CommandLineFlagParameter,
+  CommandLineStringParameter
+} from '@microsoft/ts-command-line';
+
 import {
   RushConfig,
   RushConfigProject,
@@ -35,6 +39,7 @@ export default class ChangeAction extends CommandLineAction {
   private _sortedProjectList: string[];
   private _changeFileData: IChangeFile;
   private _verifyParameter: CommandLineFlagParameter;
+  private _targetBranch: CommandLineStringParameter;
 
   private _prompt: inquirer.PromptModule;
 
@@ -70,6 +75,12 @@ export default class ChangeAction extends CommandLineAction {
       parameterLongName: '--verify',
       parameterShortName: '-v',
       description: 'Verify the change log file is generated and is a valid JSON file'
+    });
+    this._targetBranch = this.defineStringParameter({
+      parameterLongName: '--target-branch',
+      parameterShortName: '-b',
+      description:
+      'If this flag is specified, compare current branch with the target branch to get changes.'
     });
   }
 
@@ -110,7 +121,7 @@ export default class ChangeAction extends CommandLineAction {
   }
 
   private _getChangedPackageNames(): string[] {
-    const changedFolders: string[] = VersionControl.getChangedFolders();
+    const changedFolders: string[] = VersionControl.getChangedFolders(this._targetBranch.value);
     return this._rushConfig.projects
       .filter(project => project.shouldPublish)
       .filter(project => this._hasProjectChanged(changedFolders, project))
@@ -139,7 +150,8 @@ export default class ChangeAction extends CommandLineAction {
   }
 
   private _getChangeFiles(): string[] {
-    return VersionControl.getChangedFiles(`common/changes/`);
+    return VersionControl.getChangedFiles(`common/changes/`,
+      this._targetBranch.value);
   }
 
   private _hasProjectChanged(changedFolders: string[],

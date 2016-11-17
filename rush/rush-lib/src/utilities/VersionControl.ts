@@ -1,8 +1,9 @@
 import * as child_process from 'child_process';
 
 export default class VersionControl {
-  public static getChangedFolders(): string[] {
-    const output: string = child_process.execSync('git diff origin/master... --dirstat=files')
+  public static getChangedFolders(targetBranch?: string): string[] {
+    const branchName: string = targetBranch ? targetBranch : 'origin/master';
+    const output: string = child_process.execSync(`git diff ${branchName}... --dirstat=files`)
       .toString();
     return output.split('\n').map(s => {
         if (s) {
@@ -15,8 +16,10 @@ export default class VersionControl {
       });
   }
 
-  public static getChangedFiles(prefix?: string): string[] {
-    const output: string = child_process.execSync('git diff origin/master... --name-only --diff-filter=A')
+  public static getChangedFiles(prefix?: string, targetBranch?: string): string[] {
+    const branchName: string = targetBranch ? targetBranch : 'origin/master';
+    const output: string = child_process
+      .execSync(`git diff ${branchName}... --name-only --diff-filter=A`)
       .toString();
     const regex: RegExp = prefix ? new RegExp(`^${prefix}`, 'i') : undefined;
     return output.split('\n').map(s => {
