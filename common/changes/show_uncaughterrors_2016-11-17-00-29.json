@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build",
+      "comment": "Dump out uncaught exception whether verbose or not.",
+      "type": "patch"
+    }
+  ],
+  "email": "microsoft@microsoft.com"
+}

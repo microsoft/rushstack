@@ -309,9 +309,7 @@ function wireUpProcessErrorHandling(): void {
     process.on('uncaughtException',
       (err: Error) => {
         'use strict';
-        if (isVerbose()) {
-          console.error(err);
-        }
+        console.error(err);
 
         _writeTaskError(err);
         writeSummary(() => {
