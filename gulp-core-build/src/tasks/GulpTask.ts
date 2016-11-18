@@ -12,11 +12,24 @@ import through2 = require('through2');
 const eos = require('end-of-stream');
 /* tslint:enable:typedef */
 
-export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
+export abstract class GulpTask<TASK_CONFIG> implements IExecutable<TASK_CONFIG> {
   public name: string;
   public buildConfig: IBuildConfig;
   public taskConfig: TASK_CONFIG;
   public cleanMatch: string[];
+  public schema: Object;
+
+  constructor() {
+    this.schema = this.getSchema();
+  }
+
+  /**
+   * Override this function to provide a schema which will be used to validate
+   * the task's configuration file.
+   */
+  public getSchema(): Object {
+    return undefined;
+  }
 
   /**
    * Shallow merges config settings into the task config.
@@ -53,7 +66,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
 
   public abstract executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (result?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
 
-public log(message: string): void {
+  public log(message: string): void {
     log(`[${gutil.colors.cyan(this.name)}] ${message}`);
   }
 
