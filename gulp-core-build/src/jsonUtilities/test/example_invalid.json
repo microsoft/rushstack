@@ -1,0 +1,5 @@
+{
+  "foobar": [ "123", "456", "789" ],
+  "bat": "Hello, World!",
+  "foo": "test"
+}
