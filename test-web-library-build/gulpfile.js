@@ -11,5 +11,6 @@ build.setConfig({
   libAMDFolder: path.join(build.getConfig().packageFolder, 'lib-amd')
 });
 
-build.initialize(require('gulp'));
+build.preCopy.cleanMatch = ['src/pre-copy-test.ts'];
 
+build.initialize(require('gulp'));
