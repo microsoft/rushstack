@@ -294,9 +294,9 @@ export function initialize(gulp: gulp.Gulp): void {
 
   for (const task of _buildConfig.uniqueTasks) {
     const configFilename: string = path.join(process.cwd(), 'config', `${task.name}.json`);
-    const schemaFile: Object = task.schema;
+    const schema: Object = task.schema;
 
-    const rawConfig: {} = readConfigFile(configFilename, schemaFile);
+    const rawConfig: {} = readConfigFile(configFilename, schema);
 
     if (rawConfig) {
       task.mergeConfig(rawConfig);
@@ -318,7 +318,7 @@ export function initialize(gulp: gulp.Gulp): void {
  * Helper function which loads a custom config file from disk, runs the SchemaValidator on it,
  * and then apply it to the callback defined on the IConfigurableTask
  */
-function readConfigFile(filename: string, schema: Object): Object {
+function readConfigFile(filename: string, schema?: Object): Object {
   if (!fs.existsSync(filename)) {
     return undefined;
   } else {
@@ -328,7 +328,9 @@ function readConfigFile(filename: string, schema: Object): Object {
 
     const rawData: Object = SchemaValidator.readCommentedJsonFile(filename);
 
-    SchemaValidator.validate(rawData, schema, filename);
+    if (schema) {
+      SchemaValidator.validate(rawData, schema, filename);
+    }
 
     return rawData;
   }
