@@ -35,11 +35,11 @@ const sourceMatch: string[] = [
 ];
 
 // Define default task groups.
-export const compileTsTasks: IExecutable = parallel(typescript, text);
-export const buildTasks: IExecutable = task('build', serial(preCopy, sass, parallel(compileTsTasks, text), postCopy));
-export const bundleTasks: IExecutable = task('bundle', serial(buildTasks, webpack));
-export const testTasks: IExecutable = serial(sass, compileTsTasks, karma);
-export const defaultTasks: IExecutable = serial(bundleTasks, karma);
+export const compileTsTasks: IExecutable<void> = parallel(typescript, text);
+export const buildTasks: IExecutable<void> = task('build', serial(preCopy, sass, parallel(compileTsTasks, text), postCopy));
+export const bundleTasks: IExecutable<void> = task('bundle', serial(buildTasks, webpack));
+export const testTasks: IExecutable<void> = serial(sass, compileTsTasks, karma);
+export const defaultTasks: IExecutable<void> = serial(bundleTasks, karma);
 export const postProcessSourceMapsTask: PostProcessSourceMaps = new PostProcessSourceMaps();
 export const validateShrinkwrapTask: ValidateShrinkwrapTask = new ValidateShrinkwrapTask();
 export const generateShrinkwrapTask: GenerateShrinkwrapTask = new GenerateShrinkwrapTask();
