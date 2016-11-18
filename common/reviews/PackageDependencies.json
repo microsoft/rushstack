@@ -1,0 +1,303 @@
+// DO NOT ADD COMMENTS IN THIS FILE.  They will be lost when the NPMX tool resaves it.
+{
+  "settings": {
+    "ignoredNpmScopes": [
+      "@types"
+    ]
+  },
+  "browserPackages": [],
+  "nonBrowserPackages": [
+    {
+      "name": "@microsoft/gulp-core-build",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@microsoft/gulp-core-build-karma",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@microsoft/gulp-core-build-mocha",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@microsoft/gulp-core-build-sass",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@microsoft/gulp-core-build-serve",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@microsoft/gulp-core-build-typescript",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@microsoft/gulp-core-build-webpack",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@microsoft/load-themed-styles",
+      "allowedCategories": [ "libraries", "other" ]
+    },
+    {
+      "name": "@microsoft/node-library-build",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@microsoft/web-library-build",
+      "allowedCategories": [ "other" ]
+    },
+    {
+      "name": "autoprefixer",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "chai",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "deasync",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "del",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "end-of-stream",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "es6-promise",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "express",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "fs-extra",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "fsevents",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "gulp",
+      "allowedCategories": [ "libraries", "other" ]
+    },
+    {
+      "name": "gulp-cache",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "gulp-changed",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "gulp-clean-css",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "gulp-clip-empty-files",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "gulp-clone",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "gulp-connect",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "gulp-decomment",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "gulp-flatten",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "gulp-if",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "gulp-istanbul",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "gulp-karma",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "gulp-mocha",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "gulp-open",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "gulp-plumber",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "gulp-postcss",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "gulp-replace",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "gulp-sass",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "gulp-sourcemaps",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "gulp-texttojs",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "gulp-typescript",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "gulp-util",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "istanbul-instrumenter-loader",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "karma",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "karma-coverage",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "karma-mocha",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "karma-mocha-clean-reporter",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "karma-phantomjs-launcher",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "karma-sinon-chai",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "karma-webpack",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "lodash",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "lodash.merge",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "lolex",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "md5",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "merge2",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "mocha",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "node-forge",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "node-notifier",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "object-assign",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "phantomjs-polyfill",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "phantomjs-prebuilt",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "postcss-modules",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "pretty-hrtime",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "rimraf",
+      "allowedCategories": [ "libraries", "other" ]
+    },
+    {
+      "name": "semver",
+      "allowedCategories": [ "libraries", "other" ]
+    },
+    {
+      "name": "sinon",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "sinon-chai",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "sudo",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "through2",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "tslint",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "tslint-microsoft-contrib",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "typescript",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "webpack",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "yargs",
+      "allowedCategories": [ "libraries", "other" ]
+    }
+  ]
+}
