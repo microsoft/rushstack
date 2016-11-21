@@ -9,7 +9,7 @@ export interface IBuildConfig {
   gulp?: GulpProxy | gulp.Gulp;
 
   /** Array of all unique tasks. */
-  uniqueTasks?: IExecutable<any>[];
+  uniqueTasks?: IExecutable[];
 
   /** Full physical path to the root path directory. */
   rootPath?: string;

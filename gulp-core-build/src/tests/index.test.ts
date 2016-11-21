@@ -14,7 +14,7 @@ global['dontWatchExit'] = true; // tslint:disable-line:no-string-literal
 describe('serial', () => {
   it('can run a set of tasks in serial', (done) => {
     const execution: string[] = [];
-    const tasks: IExecutable<any>[] = createTasks('task', 3, command => execution.push(command));
+    const tasks: IExecutable execution.push(command));
 
     serial(tasks).execute({}).then(() => {
       expect(execution).to.deep.equal([
@@ -34,7 +34,7 @@ describe('serial', () => {
 describe('parallel', () => {
   it('can run a set of tasks in parallel', (done) => {
     const execution: string[] = [];
-    const tasks: IExecutable<any>[] = createTasks('task', 3, command => execution.push(command));
+    const tasks: IExecutable execution.push(command));
 
     parallel(tasks).execute({}).then(() => {
       expect(execution).to.deep.equal([
@@ -51,9 +51,9 @@ describe('parallel', () => {
 
   it('can mix in serial sets of tasks', (done) => {
     const execution: string[] = [];
-    const serial1Tasks: IExecutable<any> = serial(createTasks('serial set 1 -', 2, command => execution.push(command)));
-    const parallelTasks: IExecutable<any> = parallel(createTasks('parallel', 2, command => execution.push(command)));
-    const serial2Tasks: IExecutable<any> = serial(createTasks('serial set 2 -', 2, command => execution.push(command)));
+    const serial1Tasks: IExecutable execution.push(command)));
+    const parallelTasks: IExecutable execution.push(command)));
+    const serial2Tasks: IExecutable execution.push(command)));
 
     serial([
       serial1Tasks,
@@ -82,7 +82,7 @@ describe('parallel', () => {
 
   it('stops running serial tasks on failure', (done) => {
     const execution: string[] = [];
-    const tasks: IExecutable<any>[] = createTasks('task', 1, command => execution.push(command));
+    const tasks: IExecutable execution.push(command));
 
     tasks.push(createTask('fail task', command => execution.push(command), true));
     tasks.push(createTask('should not run task', command => execution.push(command), false));
@@ -124,7 +124,7 @@ describe('parallel', () => {
 function createTasks(
   name: string,
   count: number,
-  executionCallback: (message: string) => void): IExecutable<any>[] {
+  executionCallback: (message: string) => void): IExecutable[] {
   return Array.apply(undefined, Array(count))
     .map((item, index) => createTask(name + ' ' + index, executionCallback));
 }
@@ -132,7 +132,7 @@ function createTasks(
 function createTask(
   name: string,
   executionCallback: (message: string) => void,
-  shouldFail?: boolean): IExecutable<any> {
+  shouldFail?: boolean): IExecutable {
   return {
     execute: (buildConfig): Promise<void> => new Promise<void>((done, error) => {
       executionCallback(`executing ${name}`);
