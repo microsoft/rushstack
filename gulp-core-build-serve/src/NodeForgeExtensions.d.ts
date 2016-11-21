@@ -19,7 +19,7 @@ interface IForgeCertificate {
 
   setExtensions(extensions: any[]): void; // tslint:disable-line:no-any
 
-  sign(privateKey: string, algorithm: IForgeSignatureAlgorithm): void; // tslint:disable-line:no-any
+  sign(privateKey: string, algorithm: IForgeSignatureAlgorithm): void;
 }
 
 interface IForgeSignatureAlgorithm {

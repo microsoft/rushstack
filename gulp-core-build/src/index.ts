@@ -34,8 +34,8 @@ const path = require('path');
 /* tslint:enable:typedef */
 
 const packageJSON: any = require(path.resolve(process.cwd(), 'package.json'));
-const _taskMap: { [key: string]: IExecutable<any> } = {};
-const _uniqueTasks: IExecutable<any>[] = [];
+const _taskMap: { [key: string]: IExecutable } = {};
+const _uniqueTasks: IExecutable[] = [];
 
 const packageFolder: string =
   (packageJSON.directories && packageJSON.directories.packagePath) ?
@@ -104,13 +104,13 @@ export function getConfig(): IBuildConfig {
 }
 
 /**
- * Defines a gulp task and maps it to a given IExecutable<any>.
+ * Defines a gulp task and maps it to a given IExecutable.
  *
  * @param  {string} taskName
- * @param  {IExecutable<any>} task
- * @returns IExecutable<any>
+ * @param  {IExecutable} task
+ * @returns IExecutable
  */
-export function task(taskName: string, task: IExecutable<any>): IExecutable<any> {
+export function task(taskName: string, task: IExecutable {
   _taskMap[taskName] = task;
 
   _trackTask(task);
@@ -150,19 +150,19 @@ class CustomTask extends GulpTask<void> {
  * @param {boolean} addCommandLine - true if this task should be registered to the command line
  * @param {ICustomGulpTask} fn - the callback function to execute when this task runs
  */
-export function subTask(taskName: string, fn: ICustomGulpTask): IExecutable<any> {
+export function subTask(taskName: string, fn: ICustomGulpTask): IExecutable {
   const customTask: CustomTask = new CustomTask(taskName, fn);
   return customTask;
 }
 
 /**
- * Defines a gulp watch and maps it to a given IExecutable<any>.
+ * Defines a gulp watch and maps it to a given IExecutable.
  *
  * @param  {string} watchMatch
- * @param  {IExecutable<any>} task
- * @returns IExecutable<any>
+ * @param  {IExecutable} task
+ * @returns IExecutable
  */
-export function watch(watchMatch: string | string[], task: IExecutable<any>): IExecutable<any> {
+export function watch(watchMatch: string | string[], task: IExecutable {
   /* tslint:disable:typedef */
   const notifier = require('node-notifier');
   /* tslint:enable:typedef */
@@ -229,13 +229,13 @@ export function watch(watchMatch: string | string[], task: IExecutable<any>): IE
 }
 
 /**
- * Takes in IExecutable<any>s as arguments and returns an IExecutable<any> that will execute them in serial.
+ * Takes in IExecutable that will execute them in serial.
  *
- * @param  {IExecutable<any>[]} ...tasks
- * @returns IExecutable<any>
+ * @param  {IExecutable[]} ...tasks
+ * @returns IExecutable
  */
-export function serial(...tasks: Array<IExecutable<any>[] | IExecutable<any>>): IExecutable<any> {
-  const flatTasks: IExecutable<any>[] = <IExecutable<any>[]>_flatten(tasks);
+export function serial(...tasks: Array<IExecutable {
+  const flatTasks: IExecutable_flatten(tasks);
 
   for (const task of flatTasks) {
     _trackTask(task);
@@ -255,13 +255,13 @@ export function serial(...tasks: Array<IExecutable<any>[] | IExecutable<any>>): 
 }
 
 /**
- * Takes in IExecutables as arguments and returns an IExecutable<void> that will execute them in parallel.
+ * Takes in IExecutables as arguments and returns an IExecutable that will execute them in parallel.
  *
- * @param  {IExecutable<any>[]} ...tasks
- * @returns IExecutable<any>
+ * @param  {IExecutable[]} ...tasks
+ * @returns IExecutable
  */
-export function parallel(...tasks: Array<IExecutable<any>[] | IExecutable<any>>): IExecutable<void> {
-  const flattenTasks: IExecutable<void>[] = _flatten<IExecutable<void>, IExecutable<any>>(tasks);
+export function parallel(...tasks: Array<IExecutable {
+  const flattenTasks: IExecutable(tasks);
 
   for (const task of flattenTasks) {
     _trackTask(task);
@@ -337,13 +337,13 @@ function readConfigFile(filename: string, schema?: Object): Object {
 }
 
 /**
- * Registers a given gulp task given a name and an IExecutable<any>.
+ * Registers a given gulp task given a name and an IExecutable.
  *
  * @param  {any} gulp
  * @param  {string} taskName
- * @param  {IExecutable<any>} task
+ * @param  {IExecutable} task
  */
-function _registerTask(gulp: gulp.Gulp, taskName: string, task: IExecutable<any>): void {
+function _registerTask(gulp: gulp.Gulp, taskName: string, task: IExecutable): void {
   gulp.task(taskName, (cb) => {
     _executeTask(task, _buildConfig)
       .then(() => {
@@ -356,13 +356,13 @@ function _registerTask(gulp: gulp.Gulp, taskName: string, task: IExecutable<any>
 }
 
 /**
- * Executes a given IExecutable<any>.
+ * Executes a given IExecutable.
  *
- * @param  {IExecutable<any>} task
+ * @param  {IExecutable} task
  * @param  {IBuildConfig} buildConfig
  * @returns Promise
  */
-function _executeTask(task: IExecutable<any>, buildConfig: IBuildConfig): Promise<void> {
+function _executeTask(task: IExecutable {
   // Try to fallback to the default task if provided.
   if (task && !task.execute) {
     if ((task as any).default) {
@@ -403,7 +403,7 @@ function _executeTask(task: IExecutable<any>, buildConfig: IBuildConfig): Promis
   return Promise.resolve<void>();
 }
 
-function _trackTask(task: IExecutable<any>): void {
+function _trackTask(task: IExecutable): void {
   if (_uniqueTasks.indexOf(task) < 0) {
     _uniqueTasks.push(task);
   }
@@ -439,7 +439,7 @@ function _handleTasksListArguments(): void {
   }
 }
 
-export const clean: IExecutable<any> = new CleanTask();
+export const clean: IExecutable = new CleanTask();
 
 // Register default clean task.
 task('clean', clean);
