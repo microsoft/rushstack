@@ -39,6 +39,8 @@ export default class ProjectBuildTask implements ITaskDefinition {
   private _production: boolean;
   private _npmMode: boolean;
 
+  private _hasWarningOrError: boolean;
+
   constructor(
     rushProject: RushConfigProject,
     rushConfig: RushConfig,
@@ -73,6 +75,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
     resolve: (status: TaskStatus) => void,
     reject: (errors: TaskError[]) => void
   ): void {
+    this._hasWarningOrError = false;
 
     const projectFolder: string = this._rushProject.projectFolder;
     const currentDepsPath: string = path.join(this._rushProject.projectFolder, PACKAGE_DEPS_FILENAME);
@@ -125,8 +128,11 @@ export default class ProjectBuildTask implements ITaskDefinition {
           build.args.push('--npm');
         }
 
+        const actualCleanCommand: string = `${clean.command} ${clean.args.join(' ')}`;
+        const actualBuildCommand: string = `${build.command} ${build.args.join(' ')}`;
+
         // Run the clean step
-        writer.writeLine(`${clean.command} ${clean.args.join(' ')}`);
+        writer.writeLine(actualCleanCommand);
         try {
           Utilities.executeCommand(clean.command, clean.args, projectFolder, true, process.env);
         } catch (error) {
@@ -134,7 +140,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
         }
 
         // Run the test step
-        writer.writeLine(`${build.command} ${build.args.join(' ')}`);
+        writer.writeLine(actualBuildCommand);
         const buildTask: child_process.ChildProcess = Utilities.executeCommandAsync(
           build.command, build.args, projectFolder, process.env);
 
@@ -145,6 +151,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
         buildTask.stderr.on('data', (data: string) => {
           writer.writeError(data);
+          this._hasWarningOrError = true;
         });
 
         buildTask.on('close', (code: number) => {
@@ -160,7 +167,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
           if (errors.length) {
             writer.writeError(`${errors.length} Error${errors.length > 1 ? 's' : ''}!` + os.EOL);
           } else if (code) {
-            writer.writeError('gulp returned error code: ' + code + os.EOL);
+            writer.writeError(`${clean.command} returned error code: ${code}${os.EOL}`);
           }
 
           // Write the logs to disk
@@ -168,6 +175,8 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
           if (code || errors.length > 0) {
             reject(errors);
+          } else if (this._hasWarningOrError) {
+            resolve(TaskStatus.SuccessWithWarning);
           } else {
             // Write deps on success.
             fsx.writeFileSync(currentDepsPath, JSON.stringify(currentPackageDeps, undefined, 2));
