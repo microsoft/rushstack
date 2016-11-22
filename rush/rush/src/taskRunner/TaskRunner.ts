@@ -300,8 +300,8 @@ export default class TaskRunner {
 
     this._printStatus('EXECUTING', tasksByStatus[TaskStatus.Executing], colors.yellow);
     this._printStatus('READY', tasksByStatus[TaskStatus.Ready], colors.white);
-    this._printStatus('SUCCESS', tasksByStatus[TaskStatus.Success], colors.green);
     this._printStatus('SKIPPED', tasksByStatus[TaskStatus.Skipped], colors.grey);
+    this._printStatus('SUCCESS', tasksByStatus[TaskStatus.Success], colors.green);
     this._printStatus('BLOCKED', tasksByStatus[TaskStatus.Blocked], colors.red);
     this._printStatus('FAILURE', tasksByStatus[TaskStatus.Failure], colors.red);
 
@@ -309,7 +309,9 @@ export default class TaskRunner {
     if (tasksWithErrors) {
       tasksWithErrors.forEach((task: ITask) => {
         task.errors.forEach((error: TaskError) => {
-          console.log(colors.red(`[${task.name}] ${error.toString(ErrorDetectionMode.LocalBuild) }`));
+          if (error) {
+            console.log(colors.red(`[${task.name}] ${error.toString(ErrorDetectionMode.LocalBuild)}`));
+          }
         });
       });
     }
@@ -327,5 +329,4 @@ export default class TaskRunner {
       console.log(color('================================' + os.EOL));
     }
   }
-
 }
