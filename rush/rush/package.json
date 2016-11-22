@@ -12,7 +12,7 @@
   },
   "license": "SEE LICENSE IN LICENSE.docx",
   "dependencies": {
-    "@microsoft/rush-lib": "~1.2.0",
+    "@microsoft/rush-lib": "~1.2.2",
     "@microsoft/package-deps-hash": "~0.0.4",
     "@microsoft/stream-collator": "~1.0.1",
     "@microsoft/ts-command-line": "~1.1.0",
