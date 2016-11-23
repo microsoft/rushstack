@@ -85,7 +85,7 @@ export default class GenerateAction extends CommandLineAction {
     // 2. Delete "common\temp_modules"
     if (fsx.existsSync(this._rushConfig.tempModulesFolder)) {
       console.log('Deleting common/temp_modules folder');
-      AsyncRecycle.recycleDirectory(this._rushConfig, this._rushConfig.tempModulesFolder);
+      Utilities.dangerouslyDeletePath(this._rushConfig.tempModulesFolder);
     }
 
     // 3. Delete the previous npm-shrinkwrap.json
