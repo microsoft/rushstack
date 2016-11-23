@@ -11,6 +11,7 @@ import * as semver from 'semver';
 import * as fsx from 'fs-extra';
 import { CommandLineAction, CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import {
+  AsyncRecycle,
   IPackageJson,
   JsonFile,
   RushConfig,
@@ -72,19 +73,19 @@ export default class GenerateAction extends CommandLineAction {
       console.log('Deleting common/node_modules/rush-*');
       const normalizedPath: string = Utilities.getAllReplaced(nodeModulesPath, '\\', '/');
       for (const tempModulePath of glob.sync(globEscape(normalizedPath) + '/rush-*')) {
-        Utilities.dangerouslyDeletePath(tempModulePath);
+        AsyncRecycle.recycleDirectory(this._rushConfig, tempModulePath);
       }
     } else {
       if (fsx.existsSync(nodeModulesPath)) {
         console.log('Deleting common/node_modules folder...');
-        Utilities.dangerouslyDeletePath(nodeModulesPath);
+        AsyncRecycle.recycleDirectory(this._rushConfig, nodeModulesPath);
       }
     }
 
     // 2. Delete "common\temp_modules"
     if (fsx.existsSync(this._rushConfig.tempModulesFolder)) {
       console.log('Deleting common/temp_modules folder');
-      Utilities.dangerouslyDeletePath(this._rushConfig.tempModulesFolder);
+      AsyncRecycle.recycleDirectory(this._rushConfig, this._rushConfig.tempModulesFolder);
     }
 
     // 3. Delete the previous npm-shrinkwrap.json
