@@ -5,4 +5,4 @@ import { InstrumentTask } from './InstrumentTask';
 export const instrument: InstrumentTask = new InstrumentTask();
 export const mocha: MochaTask = new MochaTask();
 
-export default serial(instrument as any, mocha as any) as IExecutable; // tslint:disable-line:export-name no-any
+export default serial(instrument as any, mocha as any) as IExecutable<void>; // tslint:disable-line:export-name no-any
