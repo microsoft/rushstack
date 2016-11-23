@@ -12,7 +12,7 @@ import through2 = require('through2');
 const eos = require('end-of-stream');
 /* tslint:enable:typedef */
 
-export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
+export abstract class GulpTask<TASK_CONFIG> implements IExecutable<TASK_CONFIG> {
   public name: string;
   public buildConfig: IBuildConfig;
   public taskConfig: TASK_CONFIG;
