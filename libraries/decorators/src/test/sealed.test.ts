@@ -1,6 +1,7 @@
-import { sealed } from '../sealed';
+/// <reference types="mocha" />
 
-const assert: Chai.AssertStatic = chai.assert;
+import { assert } from 'chai';
+import { sealed } from '../sealed';
 
 describe('@sealed tests', () => {
   it('Inheriting from a @sealed class', () => {

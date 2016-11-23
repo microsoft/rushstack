@@ -1,10 +1,10 @@
-import * as chai from 'chai';
+/// <reference types="mocha" />
+
+import { assert } from 'chai';
 import * as colors from 'colors';
 import * as os from 'os';
 
 import Interleaver, { ITaskWriter } from '../Interleaver';
-
-const assert: Chai.AssertStatic = chai.assert;
 
 class StringStream {
   private _buffer: string[] = [];

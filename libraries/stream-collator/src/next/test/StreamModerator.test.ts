@@ -1,9 +1,8 @@
-import * as chai from 'chai';
+/// <reference types="mocha" />
 
+import { assert } from 'chai';
 import StreamCollator from '../StreamCollator';
 import PersistentStream from '../PersistentStream';
-
-const assert: Chai.AssertStatic = chai.assert;
 
 let collator: StreamCollator<NodeJS.ReadableStream>;
 let stdout: PersistentStream, taskA: PersistentStream, taskB: PersistentStream;

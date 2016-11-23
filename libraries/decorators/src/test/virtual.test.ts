@@ -1,7 +1,8 @@
+/// <reference types="mocha" />
+
+import { assert } from 'chai';
 import { virtual } from '../virtual';
 import { override } from '../override';
-
-const assert: Chai.AssertStatic = chai.assert;
 
 describe('@virtual tests', () => {
   describe('Main scenario', () => {

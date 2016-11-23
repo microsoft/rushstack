@@ -1,9 +1,9 @@
-import * as chai from 'chai';
+/// <reference types="mocha" />
+
+import { assert } from 'chai';
 import * as colors from 'colors';
 
 import DualTaskStream from '../DualTaskStream';
-
-const assert: Chai.AssertStatic = chai.assert;
 
 const helloWorld: string = 'Hello, world!';
 

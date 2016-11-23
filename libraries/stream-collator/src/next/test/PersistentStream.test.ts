@@ -1,8 +1,7 @@
-import * as chai from 'chai';
+/// <reference types="mocha" />
 
+import { assert } from 'chai';
 import PersistentStream from '../PersistentStream';
-
-const assert: Chai.AssertStatic = chai.assert;
 
 describe('PersistentStream', () => {
   it('passes through unmodified values', (done: () => void) => {
