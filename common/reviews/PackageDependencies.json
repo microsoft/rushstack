@@ -176,6 +176,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "jju",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "karma",
       "allowedCategories": [ "libraries" ]
     },
@@ -298,6 +302,10 @@
     {
       "name": "yargs",
       "allowedCategories": [ "libraries", "other" ]
+    },
+    {
+      "name": "z-schema",
+      "allowedCategories": [ "libraries" ]
     }
   ]
 }
