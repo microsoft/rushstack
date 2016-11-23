@@ -255,7 +255,7 @@ export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutabl
  * @returns IExecutable
  */
 export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecutable {
-  const flattenTasks: IExecutable[] = _flatten<IExecutable, IExecutable>(tasks);
+  const flattenTasks: IExecutable[] = _flatten<IExecutable>(tasks);
 
   for (const task of flattenTasks) {
     _trackTask(task);
@@ -381,8 +381,8 @@ function _trackTask(task: IExecutable): void {
  *
  * @param  {any} arr
  */
-function _flatten<T extends V, V>(arr: Array<T | T[]>): V[] {
-  let output: V[] = [];
+function _flatten<T>(arr: Array<T | T[]>): T[] {
+  let output: T[] = [];
 
   for (let toFlatten of arr) {
     if (Array.isArray(toFlatten)) {
