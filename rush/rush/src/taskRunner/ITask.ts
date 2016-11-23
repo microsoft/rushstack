@@ -91,6 +91,11 @@ export interface ITask extends ITaskDefinition {
   errors: Set<TaskError>;
 
   /**
+   * The task writer which contains information from the output streams of this task
+   */
+  writer: ITaskWriter;
+
+  /**
    * The stopwatch which measures how long it takes the task to execute
    */
   stopwatch: Stopwatch;

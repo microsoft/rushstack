@@ -131,6 +131,32 @@ look like this:
     >
     > C:\MyRepo\my-project> **gulp serve**
 
+## Configuring a project to be built by Rush
+
+Once a project has been added to the `rush.json` file, several commands must be defined in the
+project's `package.json` file, under the `scripts` section. Every project must define a `clean`
+script. Additionally, every project must define either a `test` or `build` command. By default,
+Rush will default to using the `test` command if both are defined, but will fall back to `build`
+if `test` is missing.
+
+The defined commands should either reference something on the `PATH` or should be an absolute path.
+If the command is defined simply as `gulp`, the version of gulp from the common folder's `node_modules/.bin`
+folder will be used.
+
+An example configuration is below:
+
+```json
+{
+  "name": "my-project",
+  "version": "1.0.0",
+  "scripts": {
+    "clean": "gulp nuke",
+    "build": "echo",
+    "test": "/usr/bin/testcommand --compile --things"
+  }
+}
+```
+
 ## If you need to modify your package.json
 
 If you need to add new dependencies to your package.json, you will need to

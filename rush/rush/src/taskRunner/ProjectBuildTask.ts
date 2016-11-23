@@ -39,6 +39,8 @@ export default class ProjectBuildTask implements ITaskDefinition {
   private _production: boolean;
   private _npmMode: boolean;
 
+  private _hasWarningOrError: boolean;
+
   constructor(
     rushProject: RushConfigProject,
     rushConfig: RushConfig,
@@ -73,6 +75,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
     resolve: (status: TaskStatus) => void,
     reject: (errors: TaskError[]) => void
   ): void {
+    this._hasWarningOrError = false;
 
     const projectFolder: string = this._rushProject.projectFolder;
     const currentDepsPath: string = path.join(this._rushProject.projectFolder, PACKAGE_DEPS_FILENAME);
@@ -101,33 +104,54 @@ export default class ProjectBuildTask implements ITaskDefinition {
           fsx.unlinkSync(currentDepsPath);
         }
 
-        writer.writeLine('npm run clean');
+        const clean: { command: string, args: string[] } = this._getScriptCommand('clean');
+        const build: { command: string, args: string[] } =
+          this._getScriptCommand('test') || this._getScriptCommand('build');
 
-        Utilities.executeCommand(this._rushConfig.npmToolFilename, ['run', 'clean'], projectFolder, true);
+        if (!clean) {
+          // tslint:disable-next-line:max-line-length
+          throw new Error(`The project [${this._rushProject.packageName}] does not define a 'clean' command in it's package.json`);
+        }
 
-        const args: string[] = [
-          'run',
-          'test',
-          '--', // Everything after this will be passed directly to the gulp task
-          (this._errorDisplayMode === ErrorDetectionMode.VisualStudioOnline ? '--no-color' : '--color')
-        ];
+        if (!build) {
+          // tslint:disable-next-line:max-line-length
+          throw new Error(`The project [${this._rushProject.packageName}] does not define a 'test' or 'build' command in it's package.json`);
+        }
+
+        // Normalize test command step
+        build.args.push(this._errorDisplayMode === ErrorDetectionMode.VisualStudioOnline ? '--no-color' : '--color');
+
         if (this._production) {
-          args.push('--production');
+          build.args.push('--production');
         }
         if (this._npmMode) {
-          args.push('--npm');
+          build.args.push('--npm');
         }
-        writer.writeLine('npm ' + args.join(' '));
 
+        const actualCleanCommand: string = `${clean.command} ${clean.args.join(' ')}`;
+        const actualBuildCommand: string = `${build.command} ${build.args.join(' ')}`;
+
+        // Run the clean step
+        writer.writeLine(actualCleanCommand);
+        try {
+          Utilities.executeCommand(clean.command, clean.args, projectFolder, true, process.env);
+        } catch (error) {
+          throw new Error(`There was a problem running the 'clean' script: ${os.EOL} ${error.toString()}`);
+        }
+
+        // Run the test step
+        writer.writeLine(actualBuildCommand);
         const buildTask: child_process.ChildProcess = Utilities.executeCommandAsync(
-          this._rushConfig.npmToolFilename, args, projectFolder);
+          build.command, build.args, projectFolder, process.env);
 
+        // Hook into events, in order to get live streaming of build log
         buildTask.stdout.on('data', (data: string) => {
           writer.write(data);
         });
 
         buildTask.stderr.on('data', (data: string) => {
           writer.writeError(data);
+          this._hasWarningOrError = true;
         });
 
         buildTask.on('close', (code: number) => {
@@ -143,7 +167,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
           if (errors.length) {
             writer.writeError(`${errors.length} Error${errors.length > 1 ? 's' : ''}!` + os.EOL);
           } else if (code) {
-            writer.writeError('gulp returned error code: ' + code + os.EOL);
+            writer.writeError(`${clean.command} returned error code: ${code}${os.EOL}`);
           }
 
           // Write the logs to disk
@@ -151,6 +175,8 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
           if (code || errors.length > 0) {
             reject(errors);
+          } else if (this._hasWarningOrError) {
+            resolve(TaskStatus.SuccessWithWarning);
           } else {
             // Write deps on success.
             fsx.writeFileSync(currentDepsPath, JSON.stringify(currentPackageDeps, undefined, 2));
@@ -166,6 +192,27 @@ export default class ProjectBuildTask implements ITaskDefinition {
       this._writeLogsToDisk(writer);
       reject([new TaskError('error', error.toString())]);
     }
+  }
+
+  private _getScriptCommand(script: string): { command: string, args: string[] } {
+    // tslint:disable-next-line:no-string-literal
+    const rawCommand: string = this._rushProject.packageJson.scripts[script];
+
+    if (!rawCommand) {
+      return undefined;
+    }
+
+    const command: string[] = rawCommand.split(' ');
+    const commandArgs: string[] = command.splice(1);
+
+    if (command[0] === 'gulp') {
+      command[0] = path.join(this._rushConfig.commonFolder, 'node_modules', '.bin', command[0]);
+    }
+
+    return {
+      command: command[0],
+      args: commandArgs
+    };
   }
 
   // @todo #179371: add log files to list of things that get gulp cleaned

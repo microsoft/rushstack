@@ -215,13 +215,13 @@ export default class Utilities {
     /* tslint:enable:no-any */
 
     if (result.error) {
-      result.error.message += os.EOL + result.stderr.toString() + os.EOL;
+      result.error.message += os.EOL + (result.stderr ? result.stderr.toString() + os.EOL : '');
       throw result.error;
     }
 
     if (result.status) {
       throw new Error('The command failed with exit code ' + result.status + os.EOL +
-        result.stderr.toString());
+        (result.stderr ? result.stderr.toString() : ''));
     }
   }
 
