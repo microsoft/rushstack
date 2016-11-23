@@ -19,6 +19,7 @@
 # 1.2.3
 
 - `PATCH` Make deletion of node_modules folder more cautious to improve failure rate on automated builds.
+- `PATCH` Updating Rush generate to more efficiently delete folders.
 
 # 1.2.2
 
