@@ -9,8 +9,9 @@ enum TaskStatus {
   Ready = 1,
   Executing = 2,
   Success = 3,
-  Skipped = 4,
-  Failure = 5,
-  Blocked = 6
+  SuccessWithWarning = 4,
+  Skipped = 5,
+  Failure = 6,
+  Blocked = 7
 }
 export default TaskStatus;
