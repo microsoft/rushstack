@@ -11,4 +11,4 @@ export const tslint: TSLintTask = new TSLintTask();
 export const text: TextTask = new TextTask();
 export const removeTripleSlash: RemoveTripleSlashReferenceTask = new RemoveTripleSlashReferenceTask();
 
-export default parallel(tslint, serial(typescript, removeTripleSlash)) as IExecutable<void>;
+export default parallel(tslint, serial(typescript, removeTripleSlash)) as IExecutable;

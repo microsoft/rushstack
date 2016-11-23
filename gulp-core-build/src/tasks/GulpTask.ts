@@ -1,4 +1,7 @@
 /* tslint:disable:max-line-length */
+import * as path from 'path';
+import * as fs from 'fs';
+
 import { GulpProxy } from '../GulpProxy';
 import { IExecutable } from '../IExecutable';
 import { IBuildConfig } from '../IBuildConfig';
@@ -12,22 +15,28 @@ import through2 = require('through2');
 const eos = require('end-of-stream');
 /* tslint:enable:typedef */
 
-export abstract class GulpTask<TASK_CONFIG> implements IExecutable<TASK_CONFIG> {
+import { args } from '../State';
+import { SchemaValidator } from '../jsonUtilities/SchemaValidator';
+
+export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
   public name: string;
   public buildConfig: IBuildConfig;
   public taskConfig: TASK_CONFIG;
   public cleanMatch: string[];
-  public schema: Object;
 
-  constructor() {
-    this.schema = this.getSchema();
+  private _schema: Object;
+
+  public get schema(): Object {
+    return this._schema ?
+      this._schema :
+      this._schema = this.loadSchema();
   }
 
   /**
    * Override this function to provide a schema which will be used to validate
    * the task's configuration file.
    */
-  public getSchema(): Object {
+  public loadSchema(): Object {
     return undefined;
   }
 
@@ -58,6 +67,17 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable<TASK_CONFIG> 
    */
   public replaceConfig(taskConfig: TASK_CONFIG): void {
     this.taskConfig = taskConfig;
+  }
+
+  public beforeExecute(): void {
+    const configFilename: string = path.join(process.cwd(), 'config', `${this.name}.json`);
+    const schema: Object = this.schema;
+
+    const rawConfig: TASK_CONFIG = this._readConfigFile(configFilename, schema);
+
+    if (rawConfig) {
+      this.mergeConfig(rawConfig);
+    }
   }
 
   public isEnabled(buildConfig: IBuildConfig): boolean {
@@ -222,5 +242,27 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable<TASK_CONFIG> 
     } catch (e) { /* no-op */ }
 
     return result;
+  }
+
+  /**
+   * Helper function which loads a custom config file from disk, runs the SchemaValidator on it,
+   * and then apply it to the callback defined on the IConfigurableTask
+   */
+  private _readConfigFile(filename: string, schema?: Object): TASK_CONFIG {
+    if (!fs.existsSync(filename)) {
+      return undefined;
+    } else {
+      if (args['verbose']) { // tslint:disable-line:no-string-literal
+        console.log(`Found config file: ${path.basename(filename)}`);
+      }
+
+      const rawData: TASK_CONFIG = SchemaValidator.readCommentedJsonFile(filename) as TASK_CONFIG;
+
+      if (schema) {
+        SchemaValidator.validate(rawData, schema, filename);
+      }
+
+      return rawData;
+    }
   }
 }
