@@ -29,7 +29,7 @@ export default class AsyncRecycle {
 
     Utilities.retryUntilTimeout(() => fsx.renameSync(directoryPath, newDirectoryPath),
                                 maxWaitTimeMs,
-                                (e) => new Error(`${e.message}${os.EOL}Often this is caused by a file lock ` +
+                                (e) => new Error(`Error: ${e}${os.EOL}Often this is caused by a file lock ` +
                                                 'from a process like the virus scanner.'),
                                 'recycleDirectory');
 
