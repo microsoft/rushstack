@@ -10,9 +10,6 @@ export interface IExecutable {
   /** Optional name to give the task. If no name is provided, the "Running subtask" logging will be silent. */
   name?: string;
 
-  /** A JSON Schema object which will be used to validate this task's configuration file */
-  schema?: Object;
-
   /** Optional callback to indicate if the task is enabled or not. */
   isEnabled?: (config?: IBuildConfig) => boolean;
 

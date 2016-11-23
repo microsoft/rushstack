@@ -26,6 +26,9 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
 
   private _schema: Object;
 
+  /**
+   * A JSON Schema object which will be used to validate this task's configuration file
+   */
   public get schema(): Object {
     return this._schema ?
       this._schema :
@@ -38,7 +41,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
    */
   public loadSchema(): Object {
     return undefined;
-  }
+  };
 
   /**
    * Shallow merges config settings into the task config.
@@ -70,10 +73,10 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
   }
 
   public beforeExecute(): void {
-    const configFilename: string = path.join(process.cwd(), 'config', `${this.name}.json`);
+    const configFilename: string = this._getConfigFilePath();
     const schema: Object = this.schema;
 
-    const rawConfig: TASK_CONFIG = this._readConfigFile(configFilename, schema);
+    let rawConfig: TASK_CONFIG = this._readConfigFile(configFilename, schema);
 
     if (rawConfig) {
       this.mergeConfig(rawConfig);
@@ -245,6 +248,20 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
   }
 
   /**
+   * Returns the path to the config file used to configure this task
+   */
+  protected _getConfigFilePath(): string {
+    return path.join(process.cwd(), 'config', `${this.name}.json`);
+  }
+
+  /**
+   * Loads a JSON file, supports reading JSON files with comments
+   */
+  protected _readCommentedJsonFile(filename: string): TASK_CONFIG {
+    return SchemaValidator.readCommentedJsonFile(filename) as TASK_CONFIG;
+  }
+
+  /**
    * Helper function which loads a custom config file from disk, runs the SchemaValidator on it,
    * and then apply it to the callback defined on the IConfigurableTask
    */
@@ -256,7 +273,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
         console.log(`Found config file: ${path.basename(filename)}`);
       }
 
-      const rawData: TASK_CONFIG = SchemaValidator.readCommentedJsonFile(filename) as TASK_CONFIG;
+      const rawData: TASK_CONFIG =  this._readCommentedJsonFile(filename);
 
       if (schema) {
         SchemaValidator.validate(rawData, schema, filename);
