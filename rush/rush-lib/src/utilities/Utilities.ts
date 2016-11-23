@@ -49,6 +49,41 @@ export default class Utilities {
     return result;
   }
 
+  /**
+   * Retries a function until a timeout is reached. The function is expected to throw if it failed and
+   *  should be retried.
+   */
+  public static retryUntilTimeout<TResult>(fn: () => TResult,
+                                           maxWaitTimeMs: number,
+                                           getTimeoutError: (innerError: Error) => Error,
+                                           fnName: string): TResult {
+    const startTime: number = Utilities.getTimeInMs();
+    let looped: boolean = false;
+
+    let result: TResult;
+    // tslint:disable-next-line:no-constant-condition
+    while (true) {
+      try {
+        result = fn();
+        break;
+      } catch (e) {
+        looped = true;
+        const currentTime: number = Utilities.getTimeInMs();
+        if (currentTime - startTime > maxWaitTimeMs) {
+          throw getTimeoutError(e);
+        }
+      }
+    }
+
+    if (looped) {
+      const currentTime: number = Utilities.getTimeInMs();
+      const totalSeconds: string = ((currentTime - startTime) / 1000.0).toFixed(2);
+      console.log(`${fnName}() stalled for ${totalSeconds} seconds`);
+    }
+
+    return result;
+  }
+
   public static createFolderWithRetry(folderName: string): void {
     // We need to do a simple "fs.mkdirSync(localModulesFolder)" here,
     // however if the folder we deleted above happened to contain any files,
@@ -57,28 +92,12 @@ export default class Utilities {
     // fail.  To workaround that, retry for up to 7 seconds before giving up.
     const maxWaitTimeMs: number = 7 * 1000;
 
-    const startTime: number = Utilities.getTimeInMs();
-    let looped: boolean = false;
-
-    // tslint:disable-next-line:no-constant-condition
-    while (true) {
-      try {
-        fsx.mkdirSync(folderName);
-        break;
-      } catch (e) {
-        looped = true;
-        const currentTime: number = Utilities.getTimeInMs();
-        if (currentTime - startTime > maxWaitTimeMs) {
-          throw new Error(e.message + os.EOL + 'Often this is caused by a file lock'
-            + ' from a process such as your text editor, command prompt, or "gulp serve"');
-        }
-      }
-    }
-    if (looped) {
-      const currentTime: number = Utilities.getTimeInMs();
-      const totalSeconds: string = ((currentTime - startTime) / 1000.0).toFixed(2);
-      console.log(`createFolderWithRetry() stalled for ${totalSeconds} seconds`);
-    }
+    return Utilities.retryUntilTimeout(() => fsx.mkdirSync(folderName),
+                                       maxWaitTimeMs,
+                                       (e) => new Error(`${e.message}${os.EOL}Often this is caused by a file lock ` +
+                                                        'from a process such as your text editor, command prompt, ' +
+                                                        'or "gulp serve"'),
+                                       'createFolderWithRetry');
   }
 
   /**
