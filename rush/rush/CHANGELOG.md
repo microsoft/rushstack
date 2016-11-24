@@ -16,6 +16,11 @@
 > - `MINOR` Including new performance logging functions.
 > - `PATCH` Correctly handling negative numbers in the `setZIndex` function.
 
+# 1.2.4
+
+- `PATCH` If the `test`, `clean`, or `build` commands are defined in the package.json, but are
+  empty strings, then do a no-op during the build.
+
 # 1.2.3
 
 - `PATCH` Make deletion of node_modules folder more cautious to improve failure rate on automated builds.

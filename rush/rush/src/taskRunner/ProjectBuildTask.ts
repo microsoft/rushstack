@@ -118,6 +118,27 @@ export default class ProjectBuildTask implements ITaskDefinition {
           throw new Error(`The project [${this._rushProject.packageName}] does not define a 'test' or 'build' command in it's package.json`);
         }
 
+        // Run the clean step
+        if (!clean.command) {
+          // tslint:disable-next-line:max-line-length
+          writer.writeLine(`The clean command was registered in the package.json but is blank. Skipping 'clean' step...`);
+        } else {
+          const actualCleanCommand: string = `${clean.command} ${clean.args.join(' ')}`;
+          writer.writeLine(actualCleanCommand);
+          try {
+            Utilities.executeCommand(clean.command, clean.args, projectFolder, true, process.env);
+          } catch (error) {
+            throw new Error(`There was a problem running the 'clean' script: ${os.EOL} ${error.toString()}`);
+          }
+        }
+
+        if (!build.command) {
+          // tslint:disable-next-line:max-line-length
+          writer.writeLine(`The 'build' or 'test' command was registered in the package.json but is blank. Skipping 'clean' step...`);
+          resolve(TaskStatus.Success);
+          return;
+        }
+
         // Normalize test command step
         build.args.push(this._errorDisplayMode === ErrorDetectionMode.VisualStudioOnline ? '--no-color' : '--color');
 
@@ -128,16 +149,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
           build.args.push('--npm');
         }
 
-        const actualCleanCommand: string = `${clean.command} ${clean.args.join(' ')}`;
         const actualBuildCommand: string = `${build.command} ${build.args.join(' ')}`;
-
-        // Run the clean step
-        writer.writeLine(actualCleanCommand);
-        try {
-          Utilities.executeCommand(clean.command, clean.args, projectFolder, true, process.env);
-        } catch (error) {
-          throw new Error(`There was a problem running the 'clean' script: ${os.EOL} ${error.toString()}`);
-        }
 
         // Run the test step
         writer.writeLine(actualBuildCommand);
@@ -198,8 +210,16 @@ export default class ProjectBuildTask implements ITaskDefinition {
     // tslint:disable-next-line:no-string-literal
     const rawCommand: string = this._rushProject.packageJson.scripts[script];
 
-    if (!rawCommand) {
+    // tslint:disable-next-line:no-null-keyword
+    if (rawCommand === undefined || rawCommand === null) {
       return undefined;
+    }
+
+    if (rawCommand === '') {
+      return {
+        command: undefined,
+        args: undefined
+      };
     }
 
     const command: string[] = rawCommand.split(' ');
