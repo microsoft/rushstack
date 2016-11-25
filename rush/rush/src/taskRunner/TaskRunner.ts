@@ -163,6 +163,7 @@ export default class TaskRunner {
 
     let ctask: ITask;
     while (this._currentActiveTasks < this._parallelism && (ctask = this._getNextTask())) {
+      this._currentActiveTasks++;
       const task: ITask = ctask;
       task.status = TaskStatus.Executing;
       console.log(colors.white(`> Starting task [${task.name}]`));
@@ -175,6 +176,7 @@ export default class TaskRunner {
           task.stopwatch.stop();
           task.writer.close();
 
+          this._currentActiveTasks--;
           switch (result) {
             case TaskStatus.Success:
               this._markTaskAsSuccess(task);
@@ -194,6 +196,8 @@ export default class TaskRunner {
 
         }).catch((errors: TaskError[]) => {
           task.writer.close();
+
+          this._currentActiveTasks--;
 
           this._hasAnyFailures = true;
           task.errors = new Set<TaskError>(errors);
