@@ -1,5 +1,4 @@
 'use strict';
-/// <reference path='../../typings/main.d.ts' />
 
 import 'es6-promise';
 import { assert, expect } from 'chai';
@@ -177,7 +176,7 @@ describe('GulpTask', () => {
   it(`reads schema file if loadSchema is implemented`, (done) => {
     const schemaTask: SchemaTask = new SchemaTask();
     assert.isFalse(schemaTask.taskConfig.shouldDoThings);
-    schemaTask.beforeExecute();
+    schemaTask.onRegister();
     assert.isTrue(schemaTask.taskConfig.shouldDoThings);
     done();
   });
@@ -191,7 +190,7 @@ describe('GulpTask', () => {
     };
 
     assert.isFalse(schemaTask.taskConfig.shouldDoThings);
-    assert.throws(schemaTask.beforeExecute);
+    assert.throws(schemaTask.onRegister);
     done();
   });
 });

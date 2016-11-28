@@ -1,8 +1,6 @@
 'use strict';
 /// <reference path='../../typings/main.d.ts' />
 
-// tslint:disable:no-any
-
 import 'es6-promise';
 import { expect } from 'chai';
 import { serial, parallel, getConfig, setConfig, IExecutable } from '../index';
