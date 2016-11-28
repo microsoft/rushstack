@@ -7,8 +7,6 @@
       "outputPath": "dist/decorators.js"
     }
   ],
-  "externals": {
-  },
   "localizedResources": {
   }
 }
