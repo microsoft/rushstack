@@ -1,3 +1,5 @@
+/// <reference types="jju" />
+
 import * as os from 'os';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -40,7 +42,7 @@ export class SchemaValidator {
    * It will throw if there is an issue with the data object.
    * For an improved error message, pass the filename in the optional third parameter
    */
-  public static validate(data: {}, schema: {}, dataFilePath?: string): void {
+  public static validate(data: Object, schema: Object, dataFilePath?: string): void {
     if (!this._schemaValidator.validate(data, schema)) {
       const error: ISchemaValidatorResult = this._schemaValidator.getLastError();
       throw this.getFormattedErrorMessage(error, dataFilePath);

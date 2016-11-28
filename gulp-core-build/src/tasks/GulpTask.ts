@@ -72,7 +72,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
     this.taskConfig = taskConfig;
   }
 
-  public beforeExecute(): void {
+  public onRegister(): void {
     const configFilename: string = this._getConfigFilePath();
     const schema: Object = this.schema;
 

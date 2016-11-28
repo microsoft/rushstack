@@ -1,6 +1,6 @@
 'use strict';
 
-/* tslint:disable:max-line-length no-any */
+/* tslint:disable:max-line-length */
 
 import * as path from 'path';
 
@@ -27,6 +27,7 @@ export * from './tasks/ValidateShrinkwrapTask';
 require('es6-promise').polyfill();
 /* tslint:enable:variable-name */
 
+// tslint:disable-next-line:no-any
 const packageJSON: any = require(path.resolve(process.cwd(), 'package.json'));
 const _taskMap: { [key: string]: IExecutable } = {};
 const _uniqueTasks: IExecutable[] = [];
@@ -262,6 +263,7 @@ export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecuta
   }
 
   return {
+    // tslint:disable-next-line:no-any
     execute: (buildConfig: IBuildConfig): Promise<any> => {
       return new Promise<void[]>((resolve, reject) => {
         const promises: Promise<void>[] = [];
@@ -291,8 +293,8 @@ export function initialize(gulp: gulp.Gulp): void {
   setConfigDefaults(_buildConfig);
 
   for (const task of _buildConfig.uniqueTasks) {
-    if (task.beforeExecute) {
-      task.beforeExecute();
+    if (task.onRegister) {
+      task.onRegister();
     }
   }
 
@@ -332,9 +334,11 @@ function _registerTask(gulp: gulp.Gulp, taskName: string, task: IExecutable): vo
 function _executeTask(task: IExecutable, buildConfig: IBuildConfig): Promise<void> {
   // Try to fallback to the default task if provided.
   if (task && !task.execute) {
+    /* tslint:disable:no-any */
     if ((task as any).default) {
       task = (task as any).default;
     }
+    /* tslint:enable:no-any */
   }
 
   // If the task is missing, throw a meaningful error.
@@ -355,6 +359,7 @@ function _executeTask(task: IExecutable, buildConfig: IBuildConfig): Promise<voi
           buildConfig.onTaskEnd(task.name, process.hrtime(startTime));
         }
       },
+      // tslint:disable-next-line:no-any
       (error: any) => {
         if (buildConfig.onTaskEnd && task.name) {
           buildConfig.onTaskEnd(task.name, process.hrtime(startTime), error);
@@ -379,7 +384,7 @@ function _trackTask(task: IExecutable): void {
 /**
  * Flattens a set of arrays into a single array.
  *
- * @param  {any} arr
+ * @param  {T} arr
  */
 function _flatten<T>(arr: Array<T | T[]>): T[] {
   let output: T[] = [];
