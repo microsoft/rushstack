@@ -1,4 +1,3 @@
-/// <reference path='../../../typings/tsd.d.ts' />
 ///<reference types="mocha" />
 
 import * as path from 'path';

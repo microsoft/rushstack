@@ -1,5 +1,3 @@
-// tslint:disable:export-name
-
 import { TypeScriptTask } from './TypeScriptTask';
 import { TSLintTask } from './TSLintTask';
 import { TextTask } from './TextTask';
@@ -11,4 +9,5 @@ export const tslint: TSLintTask = new TSLintTask();
 export const text: TextTask = new TextTask();
 export const removeTripleSlash: RemoveTripleSlashReferenceTask = new RemoveTripleSlashReferenceTask();
 
+// tslint:disable:export-name
 export default parallel(tslint, serial(typescript, removeTripleSlash)) as IExecutable;
