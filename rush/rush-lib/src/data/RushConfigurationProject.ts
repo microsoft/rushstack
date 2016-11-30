@@ -5,7 +5,7 @@
 import * as path from 'path';
 import * as fsx from 'fs-extra';
 import JsonFile from '../utilities/JsonFile';
-import RushConfiguration from '../data/RushConfig';
+import RushConfiguration from '../data/RushConfiguration';
 
 /**
  * This represents the JSON data object for a project entry in the rush.json configuration file.
