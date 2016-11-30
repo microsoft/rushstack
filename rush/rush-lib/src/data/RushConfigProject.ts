@@ -5,12 +5,12 @@
 import * as path from 'path';
 import * as fsx from 'fs-extra';
 import JsonFile from '../utilities/JsonFile';
-import RushConfig from '../data/RushConfig';
+import RushConfiguration from '../data/RushConfig';
 
 /**
- * This represents the JSON data object for a project entry in the Rush.json config file.
+ * This represents the JSON data object for a project entry in the rush.json configuration file.
  */
-export interface IRushConfigProjectJson {
+export interface IRushConfigurationProjectJson {
   packageName: string;
   projectFolder: string;
   reviewCategory?: string;
@@ -20,9 +20,9 @@ export interface IRushConfigProjectJson {
 
 /**
  * This represents the configuration of a project that is built by Rush, based on
- * the Rush.json config file.
+ * the Rush.json configuration file.
  */
-export default class RushConfigProject {
+export default class RushConfigurationProject {
   private _packageName: string;
   private _projectFolder: string;
   private _projectRelativeFolder: string;
@@ -33,34 +33,36 @@ export default class RushConfigProject {
   private _shouldPublish: boolean;
   private _downstreamDependencyProjects: string[];
 
-  constructor(projectJson: IRushConfigProjectJson, rushConfig: RushConfig, tempProjectName: string) {
+  constructor(projectJson: IRushConfigurationProjectJson,
+              rushConfiguration: RushConfiguration,
+              tempProjectName: string) {
     this._packageName = projectJson.packageName;
     this._projectRelativeFolder = projectJson.projectFolder;
 
     // For example, the depth of "a/b/c" would be 3.  The depth of "a" is 1.
     const projectFolderDepth: number = projectJson.projectFolder.split('/').length;
-    if (projectFolderDepth < rushConfig.projectFolderMinDepth) {
+    if (projectFolderDepth < rushConfiguration.projectFolderMinDepth) {
       throw new Error(`To keep things organized, this repository has a projectFolderMinDepth policy`
-        + ` requiring project folders to be at least ${rushConfig.projectFolderMinDepth} levels deep.`
+        + ` requiring project folders to be at least ${rushConfiguration.projectFolderMinDepth} levels deep.`
         + `  Problem folder: "${projectJson.projectFolder}"`);
     }
-    if (projectFolderDepth > rushConfig.projectFolderMaxDepth) {
+    if (projectFolderDepth > rushConfiguration.projectFolderMaxDepth) {
       throw new Error(`To keep things organized, this repository has a projectFolderMaxDepth policy`
-        + ` preventing project folders from being deeper than ${rushConfig.projectFolderMaxDepth} levels.`
+        + ` preventing project folders from being deeper than ${rushConfiguration.projectFolderMaxDepth} levels.`
         + `  Problem folder:  "${projectJson.projectFolder}"`);
     }
 
-    this._projectFolder = path.join(rushConfig.rushJsonFolder, projectJson.projectFolder);
+    this._projectFolder = path.join(rushConfiguration.rushJsonFolder, projectJson.projectFolder);
 
     if (!fsx.existsSync(this._projectFolder)) {
       throw new Error(`Project folder not found: ${projectJson.projectFolder}`);
     }
 
     // Are we using a package review file?
-    if (rushConfig.packageReviewFile) {
+    if (rushConfiguration.packageReviewFile) {
       // If so, then every project needs to have a reviewCategory that was defined
       // by the reviewCategories array.
-      if (!rushConfig.reviewCategories.size) {
+      if (!rushConfiguration.reviewCategories.size) {
         throw new Error(`The rush.json file specifies a packageReviewFile, but the reviewCategories`
           + ` list is not configured.`);
       }
@@ -68,7 +70,7 @@ export default class RushConfigProject {
         throw new Error(`The rush.json file configures a packageReviewFile, but a reviewCategory` +
           ` was not specified for the project "${projectJson.packageName}".`);
       }
-      if (!rushConfig.reviewCategories.has(projectJson.reviewCategory)) {
+      if (!rushConfiguration.reviewCategories.has(projectJson.reviewCategory)) {
         throw new Error(`The project "${projectJson.packageName}" specifies its reviewCategory as`
           + `"${projectJson.reviewCategory}" which is not one of the defined reviewCategories.`);
       }
@@ -119,7 +121,7 @@ export default class RushConfigProject {
 
   /**
    * The review category name, or undefined if no category was assigned.
-   * This name must be one of the valid choices listed in RushConfig.reviewCategories.
+   * This name must be one of the valid choices listed in RushConfiguration.reviewCategories.
    */
   public get reviewCategory(): string {
     return this._reviewCategory;
@@ -130,14 +132,14 @@ export default class RushConfigProject {
    * locally linked because it would create a cyclic dependency; instead, the last published
    * version will be installed in the Common folder.
    *
-   * These are package names that would be found by RushConfig.getProjectByName().
+   * These are package names that would be found by RushConfiguration.getProjectByName().
    */
   public get cyclicDependencyProjects(): Set<string> {
     return this._cyclicDependencyProjects;
   }
 
   /**
-   * A list of projects within the Rush config which directly depend on this package.
+   * A list of projects within the Rush configuration which directly depend on this package.
    */
   public get downstreamDependencyProjects(): string[] {
     return this._downstreamDependencyProjects;

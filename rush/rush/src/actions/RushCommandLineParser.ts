@@ -7,7 +7,7 @@ import * as colors from 'colors';
 import * as wordwrap from 'wordwrap';
 import { CommandLineParser, CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import {
-  RushConfig,
+  RushConfiguration,
   Utilities
 } from '@microsoft/rush-lib';
 
@@ -22,7 +22,7 @@ import RebuildAction from './RebuildAction';
 import UnlinkAction from './UnlinkAction';
 
 export default class RushCommandLineParser extends CommandLineParser {
-  public rushConfig: RushConfig;
+  public rushConfiguration: RushConfiguration;
   private _debugParameter: CommandLineFlagParameter;
 
   constructor() {

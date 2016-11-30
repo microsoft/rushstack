@@ -11,9 +11,9 @@ import readPackageTree = require('read-package-tree');
 import { CommandLineAction } from '@microsoft/ts-command-line';
 import {
   JsonFile,
-  RushConfig,
+  RushConfiguration,
   IRushLinkJson,
-  RushConfigProject,
+  RushConfigurationProject,
   Package,
   IResolveOrCreateResult,
   PackageDependencyKind,
@@ -25,7 +25,7 @@ import RushCommandLineParser from './RushCommandLineParser';
 
 export default class LinkAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
-  private _rushConfig: RushConfig;
+  private _rushConfiguration: RushConfiguration;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -41,11 +41,11 @@ export default class LinkAction extends CommandLineAction {
   }
 
   protected onExecute(): void {
-    this._rushConfig = this._rushConfig = RushConfig.loadFromDefaultLocation();
+    this._rushConfiguration = this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
 
     console.log('Starting "rush link"');
 
-    readPackageTree(this._rushConfig.commonFolder, (error: Error, npmPackage: PackageNode) => {
+    readPackageTree(this._rushConfiguration.commonFolder, (error: Error, npmPackage: PackageNode) => {
       this._parser.trapErrors(() => {
         if (error) {
           throw error;
@@ -57,13 +57,13 @@ export default class LinkAction extends CommandLineAction {
 
           const rushLinkJson: IRushLinkJson = { localLinks: {} };
 
-          for (const rushProject of this._rushConfig.projects) {
+          for (const rushProject of this._rushConfiguration.projects) {
             console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
-            linkProject(rushProject, commonRootPackage, commonPackageLookup, this._rushConfig, rushLinkJson);
+            linkProject(rushProject, commonRootPackage, commonPackageLookup, this._rushConfiguration, rushLinkJson);
           }
 
-          console.log(`Writing "${this._rushConfig.rushLinkJsonFilename}"`);
-          JsonFile.saveJsonFile(rushLinkJson, this._rushConfig.rushLinkJsonFilename);
+          console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
+          JsonFile.saveJsonFile(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
 
           console.log(os.EOL + colors.green('Rush link finished successfully.'));
           console.log(os.EOL + 'Next you should probably run: "rush rebuild -q"');
@@ -208,15 +208,15 @@ function createSymlinksForTopLevelProject(localPackage: Package): void {
  * @param project             The local project that we will create symlinks for
  * @param commonRootPackage   The common/package.json package
  * @param commonPackageLookup A dictionary for finding packages under common/node_modules
- * @param rushConfig          The rush.json file contents
+ * @param rushConfiguration   The rush.json file contents
  * @param rushLinkJson        The common/rush-link.json output file
  * @param options             Command line options for "rush link"
  */
 function linkProject(
-  project: RushConfigProject,
+  project: RushConfigurationProject,
   commonRootPackage: Package,
   commonPackageLookup: PackageLookup,
-  rushConfig: RushConfig,
+  rushConfiguration: RushConfiguration,
   rushLinkJson: IRushLinkJson): void {
 
   const commonProjectPackage: Package = commonRootPackage.getChildByName(project.tempProjectName);
@@ -266,7 +266,7 @@ function linkProject(
 
       // Should this be a "local link" to a top-level Rush project (i.e. versus a regular link
       // into the Common folder)?
-      const matchedRushPackage: RushConfigProject = rushConfig.getProjectByName(dependency.name);
+      const matchedRushPackage: RushConfigurationProject = rushConfiguration.getProjectByName(dependency.name);
 
       if (matchedRushPackage) {
         const matchedVersion: string = matchedRushPackage.packageJson.version;
@@ -370,7 +370,7 @@ function linkProject(
           const commonPackage: Package = commonPackageLookup.getPackage(newLocalPackage.nameAndVersion);
           if (!commonPackage) {
             throw Error(`The ${localPackage.name}@${localPackage.version} package was not found`
-              + ` in the ${rushConfig.commonFolderName} folder`);
+              + ` in the ${rushConfiguration.commonFolderName} folder`);
           }
           newLocalPackage.symlinkTargetFolderPath = commonPackage.folderPath;
 
@@ -392,7 +392,7 @@ function linkProject(
       } else {
         if (dependency.kind !== PackageDependencyKind.Optional) {
           throw Error(`The dependency "${dependency.name}" needed by "${localPackage.name}"`
-            + ` was not found the ${rushConfig.commonFolderName} folder -- do you need to run "rush generate"?`);
+            + ` was not found the ${rushConfiguration.commonFolderName} folder -- do you need to run "rush generate"?`);
         } else {
           console.log(colors.yellow('Skipping optional dependency: ' + dependency.name));
         }
@@ -408,7 +408,7 @@ function linkProject(
 
   // Also symlink the ".bin" folder
   if (localProjectPackage.children.length > 0) {
-    const commonBinFolder: string = path.join(rushConfig.commonFolder, 'node_modules', '.bin');
+    const commonBinFolder: string = path.join(rushConfiguration.commonFolder, 'node_modules', '.bin');
     const projectBinFolder: string = path.join(localProjectPackage.folderPath, 'node_modules', '.bin');
 
     if (fsx.existsSync(commonBinFolder)) {

@@ -7,7 +7,7 @@ import * as os from 'os';
 import * as path from 'path';
 import { CommandLineAction } from '@microsoft/ts-command-line';
 import {
-  RushConfig,
+  RushConfiguration,
   Utilities
 } from '@microsoft/rush-lib';
 
@@ -15,7 +15,7 @@ import RushCommandLineParser from './RushCommandLineParser';
 
 export default class UnlinkAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
-  private _rushConfig: RushConfig;
+  private _rushConfiguration: RushConfiguration;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -32,12 +32,12 @@ export default class UnlinkAction extends CommandLineAction {
   }
 
   protected onExecute(): void {
-    this._rushConfig = this._rushConfig = RushConfig.loadFromDefaultLocation();
+    this._rushConfiguration = this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
 
     console.log('Starting "rush unlink"' + os.EOL);
 
     let didAnything: boolean = false;
-    for (const rushProject of this._rushConfig.projects) {
+    for (const rushProject of this._rushConfiguration.projects) {
       const localModuleFolder: string = path.join(rushProject.projectFolder, 'node_modules');
       if (fsx.existsSync(localModuleFolder)) {
         console.log('Purging ' + localModuleFolder);

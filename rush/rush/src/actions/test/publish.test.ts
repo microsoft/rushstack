@@ -2,8 +2,8 @@ import { expect } from 'chai';
 import {
   IChangeInfo,
   ChangeType,
-  RushConfig,
-  RushConfigProject
+  RushConfiguration,
+  RushConfigurationProject
 } from '@microsoft/rush-lib';
 import * as path from 'path';
 import {
@@ -20,16 +20,16 @@ import {
 describe('findChangeRequests', () => {
 
   it('returns no changes in an empty change folder', () => {
-    const allPackages: Map<string, RushConfigProject> =
-      RushConfig.loadFromConfigFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = findChangeRequests(allPackages, path.join(__dirname, 'noChange'));
 
     expect(Object.keys(allChanges).length).to.equal(0);
   });
 
   it('returns 1 change when changing a leaf package', () => {
-    const allPackages: Map<string, RushConfigProject> =
-      RushConfig.loadFromConfigFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = findChangeRequests(allPackages, path.join(__dirname, 'leafChange'));
 
     expect(Object.keys(allChanges).length).to.equal(1);
@@ -38,8 +38,8 @@ describe('findChangeRequests', () => {
   });
 
   it('returns 2 changes when patching a root package', () => {
-    const allPackages: Map<string, RushConfigProject> =
-      RushConfig.loadFromConfigFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = findChangeRequests(allPackages, path.join(__dirname, 'rootPatchChange'));
 
     expect(Object.keys(allChanges).length).to.equal(2);
@@ -55,8 +55,8 @@ describe('findChangeRequests', () => {
   });
 
   it('returns 3 changes when major bumping a root package', () => {
-    const allPackages: Map<string, RushConfigProject> =
-      RushConfig.loadFromConfigFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = findChangeRequests(allPackages, path.join(__dirname, 'rootMajorChange'));
 
     expect(Object.keys(allChanges).length).to.equal(3);
@@ -75,8 +75,8 @@ describe('findChangeRequests', () => {
   });
 
   it('can resolve multiple changes requests on the same package', () => {
-    const allPackages: Map<string, RushConfigProject> =
-      RushConfig.loadFromConfigFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = findChangeRequests(allPackages, path.join(__dirname, 'multipleChanges'));
 
     expect(Object.keys(allChanges).length).to.equal(3);
@@ -92,8 +92,8 @@ describe('findChangeRequests', () => {
   });
 
   it('can update an explicit dependency', () => {
-    const allPackages: Map<string, RushConfigProject> =
-      RushConfig.loadFromConfigFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = findChangeRequests(allPackages, path.join(__dirname, 'explicitVersionChange'));
 
     expect(Object.keys(allChanges).length).to.equal(2);
@@ -107,8 +107,8 @@ describe('findChangeRequests', () => {
 
 describe('sortChangeRequests', () => {
   it('can return a sorted array of the change requests to be published in the correct order', () => {
-    const allPackages: Map<string, RushConfigProject> =
-      RushConfig.loadFromConfigFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = findChangeRequests(allPackages, path.join(__dirname, 'multipleChanges'));
     const orderedChanges: IChangeInfo[] = sortChangeRequests(allChanges);
 
@@ -121,8 +121,8 @@ describe('sortChangeRequests', () => {
 
 describe('updatePackages', () => {
   it('can apply changes to the package.json files in the dictionary', () => {
-    const allPackages: Map<string, RushConfigProject> =
-      RushConfig.loadFromConfigFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = findChangeRequests(allPackages, path.join(__dirname, 'multipleChanges'));
 
     updatePackages(allChanges, allPackages, false);
@@ -139,8 +139,8 @@ describe('updatePackages', () => {
   });
 
   it('can update explicit version dependency', () => {
-    const allPackages: Map<string, RushConfigProject> =
-      RushConfig.loadFromConfigFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = findChangeRequests(allPackages, path.join(__dirname, 'explicitVersionChange'));
 
     updatePackages(allChanges, allPackages, false);

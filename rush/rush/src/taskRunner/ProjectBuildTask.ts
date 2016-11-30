@@ -12,8 +12,8 @@ import * as os from 'os';
 import * as path from 'path';
 import { ITaskWriter } from '@microsoft/stream-collator';
 import {
-  RushConfig,
-  RushConfigProject,
+  RushConfiguration,
+  RushConfigurationProject,
   ErrorDetector,
   ErrorDetectionMode,
   TaskError,
@@ -34,16 +34,16 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
   private _errorDetector: ErrorDetector;
   private _errorDisplayMode: ErrorDetectionMode;
-  private _rushProject: RushConfigProject;
-  private _rushConfig: RushConfig;
+  private _rushProject: RushConfigurationProject;
+  private _rushConfiguration: RushConfiguration;
   private _production: boolean;
   private _npmMode: boolean;
 
   private _hasWarningOrError: boolean;
 
   constructor(
-    rushProject: RushConfigProject,
-    rushConfig: RushConfig,
+    rushProject: RushConfigurationProject,
+    rushConfiguration: RushConfiguration,
     errorDetector: ErrorDetector,
     errorDisplayMode: ErrorDetectionMode,
     production: boolean,
@@ -56,7 +56,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
     this._production = production;
     this._npmMode = npmMode;
     this._rushProject = rushProject;
-    this._rushConfig = rushConfig;
+    this._rushConfiguration = rushConfiguration;
     this.isIncrementalBuildAllowed = isIncrementalBuildAllowed;
   }
 
@@ -226,7 +226,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
     const commandArgs: string[] = command.splice(1);
 
     if (command[0] === 'gulp') {
-      command[0] = path.join(this._rushConfig.commonFolder, 'node_modules', '.bin', command[0]);
+      command[0] = path.join(this._rushConfiguration.commonFolder, 'node_modules', '.bin', command[0]);
     }
 
     return {
