@@ -10,7 +10,7 @@ import * as semver from 'semver';
 import rushVersion from '../rushVersion';
 import Validator = require('z-schema');
 import JsonFile from '../utilities/JsonFile';
-import RushConfigurationProject, { IRushConfigurationProjectJson } from './RushConfigProject';
+import RushConfigurationProject, { IRushConfigurationProjectJson } from './RushConfigurationProject';
 import Utilities from '../utilities/Utilities';
 
 /**
