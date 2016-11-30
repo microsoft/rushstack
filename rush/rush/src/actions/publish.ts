@@ -15,7 +15,7 @@ import {
   IPackageJson,
   IChangeInfo,
   ChangeType,
-  RushConfigProject
+  RushConfigurationProject
 } from '@microsoft/rush-lib';
 
 export interface IChangeInfoHash {
@@ -28,7 +28,7 @@ export interface IChangeInfoHash {
  * @returns Dictionary of all change requests, keyed by package name.
  */
 export function findChangeRequests(
-  allPackages: Map<string, RushConfigProject>,
+  allPackages: Map<string, RushConfigurationProject>,
   changesPath: string
 ): IChangeInfoHash {
 
@@ -54,7 +54,7 @@ export function findChangeRequests(
   for (const packageName in allChanges) {
     if (allChanges.hasOwnProperty(packageName)) {
       const change: IChangeInfo = allChanges[packageName];
-      const project: RushConfigProject = allPackages.get(packageName);
+      const project: RushConfigurationProject = allPackages.get(packageName);
       const pkg: IPackageJson = project.packageJson;
       const deps: string[] = project.downstreamDependencyProjects;
 
@@ -95,7 +95,7 @@ export function sortChangeRequests(allChanges: IChangeInfoHash): IChangeInfo[] {
  */
 export function updatePackages(
   allChanges: IChangeInfoHash,
-  allPackages: Map<string, RushConfigProject>,
+  allPackages: Map<string, RushConfigurationProject>,
   shouldCommit: boolean
 ): void {
 
@@ -132,7 +132,7 @@ export function findMissingChangedPackages(changeFileFullPath: string,
 function _updatePackage(
   change: IChangeInfo,
   allChanges: IChangeInfoHash,
-  allPackages: Map<string, RushConfigProject>,
+  allPackages: Map<string, RushConfigurationProject>,
   shouldCommit: boolean
 ): void {
 
@@ -141,7 +141,7 @@ function _updatePackage(
     `for ${change.packageName} to ${change.newVersion}`
   );
 
-  const project: RushConfigProject = allPackages.get(change.packageName);
+  const project: RushConfigurationProject = allPackages.get(change.packageName);
   const pkg: IPackageJson = project.packageJson;
   const packagePath: string = path.join(project.projectFolder, 'package.json');
 
@@ -178,11 +178,11 @@ function _updatePackage(
 function _addChange(
   change: IChangeInfo,
   allChanges: IChangeInfoHash,
-  allPackages: Map<string, RushConfigProject>
+  allPackages: Map<string, RushConfigurationProject>
   ): void {
 
   const packageName: string = change.packageName;
-  const project: RushConfigProject = allPackages.get(packageName);
+  const project: RushConfigurationProject = allPackages.get(packageName);
 
   if (!project) {
     throw new Error(
@@ -223,7 +223,7 @@ function _addChange(
 function _updateDownstreamDependencies(
   change: IChangeInfo,
   allChanges: IChangeInfoHash,
-  allPackages: Map<string, RushConfigProject>
+  allPackages: Map<string, RushConfigurationProject>
 ): void {
 
   const packageName: string = change.packageName;

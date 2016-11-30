@@ -3,23 +3,23 @@
  */
 
 import {
-  RushConfig,
-  RushConfigProject,
-  PackageReviewConfig,
+  RushConfiguration,
+  RushConfigurationProject,
+  PackageReviewConfiguration,
   Utilities
 } from '@microsoft/rush-lib';
 
 export default class PackageReviewChecker {
-  private _rushConfig: RushConfig;
-  private _packageReviewConfig: PackageReviewConfig;
+  private _rushConfiguration: RushConfiguration;
+  private _packageReviewConfiguration: PackageReviewConfiguration;
 
-  constructor(rushConfig: RushConfig) {
-    this._rushConfig = rushConfig;
-    this._packageReviewConfig = PackageReviewConfig.loadFromFile(rushConfig.packageReviewFile);
+  constructor(rushConfiguraton: RushConfiguration) {
+    this._rushConfiguration = rushConfiguraton;
+    this._packageReviewConfiguration = PackageReviewConfiguration.loadFromFile(rushConfiguraton.packageReviewFile);
   }
 
   public saveCurrentDependencies(): void {
-    for (const rushProject of this._rushConfig.projects) {
+    for (const rushProject of this._rushConfiguration.projects) {
       const packageJson: PackageJson = rushProject.packageJson;
 
       this._collectDependencies(packageJson.dependencies, rushProject);
@@ -30,20 +30,20 @@ export default class PackageReviewChecker {
   }
 
   public saveFile(): void {
-    this._packageReviewConfig.saveFile(this._rushConfig.packageReviewFile);
+    this._packageReviewConfiguration.saveFile(this._rushConfiguration.packageReviewFile);
   }
 
   private _collectDependencies(dependencies: { [key: string]: string },
-    rushProject: RushConfigProject): void {
+    rushProject: RushConfigurationProject): void {
 
     if (dependencies) {
       for (const packageName of Object.keys(dependencies)) {
         const scope: string = Utilities.parseScopedPackageName(packageName).scope;
 
         // Make sure the scope isn't something like "@types" which should be ignored
-        if (!this._packageReviewConfig.ignoredNpmScopes.has(scope)) {
+        if (!this._packageReviewConfiguration.ignoredNpmScopes.has(scope)) {
           // Yes, add it to the list if it's not already there
-          this._packageReviewConfig.addOrUpdatePackage(packageName, false, rushProject.reviewCategory);
+          this._packageReviewConfiguration.addOrUpdatePackage(packageName, false, rushProject.reviewCategory);
         }
       }
     }
