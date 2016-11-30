@@ -18,8 +18,8 @@ import {
   IErrorDetectionRule,
   IRushLinkJson,
   JsonFile,
-  RushConfig,
-  RushConfigProject,
+  RushConfiguration,
+  RushConfigurationProject,
   Stopwatch,
   TestErrorDetector,
   TsErrorDetector,
@@ -41,7 +41,7 @@ export default class RebuildAction extends CommandLineAction {
   private _dependentList: Map<string, Set<string>>;
   private _fromFlag: CommandLineStringListParameter;
   private _npmParameter: CommandLineFlagParameter;
-  private _rushConfig: RushConfig;
+  private _rushConfiguration: RushConfiguration;
   private _rushLinkJson: IRushLinkJson;
   private _parallelismParameter: CommandLineIntegerParameter;
   private _parser: RushCommandLineParser;
@@ -102,13 +102,13 @@ export default class RebuildAction extends CommandLineAction {
   }
 
   protected onExecute(): void {
-    this._rushConfig = RushConfig.loadFromDefaultLocation();
+    this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
 
-    if (!fsx.existsSync(this._rushConfig.rushLinkJsonFilename)) {
-      throw new Error('File not found: ' + this._rushConfig.rushLinkJsonFilename
+    if (!fsx.existsSync(this._rushConfiguration.rushLinkJsonFilename)) {
+      throw new Error('File not found: ' + this._rushConfiguration.rushLinkJsonFilename
         + os.EOL + 'Did you run "rush link"?');
     }
-    this._rushLinkJson = JsonFile.loadJsonFile(this._rushConfig.rushLinkJsonFilename);
+    this._rushLinkJson = JsonFile.loadJsonFile(this._rushConfiguration.rushLinkJsonFilename);
 
     console.log(`Starting "rush ${this.options.actionVerb}"` + os.EOL);
     const stopwatch: Stopwatch = Stopwatch.start();
@@ -143,14 +143,14 @@ export default class RebuildAction extends CommandLineAction {
 
   private _registerToFlags(taskRunner: TaskRunner, toFlags: string[]): void {
     for (const toFlag of toFlags) {
-      if (!this._rushConfig.getProjectByName(toFlag)) {
+      if (!this._rushConfiguration.getProjectByName(toFlag)) {
         throw new Error(`The project '${toFlag}' does not exist in rush.json`);
       }
 
       const deps: Set<string> = this._collectAllDependencies(toFlag);
 
       // Register any dependencies it may have
-      deps.forEach(dep => this._registerTask(taskRunner, this._rushConfig.getProjectByName(dep)));
+      deps.forEach(dep => this._registerTask(taskRunner, this._rushConfiguration.getProjectByName(dep)));
 
       // Register the dependency graph to the TaskRunner
       deps.forEach(dep => taskRunner.addDependencies(dep, this._rushLinkJson.localLinks[dep] || []));
@@ -159,7 +159,7 @@ export default class RebuildAction extends CommandLineAction {
 
   private _registerFromFlags(taskRunner: TaskRunner, fromFlags: string[]): void {
     for (const fromFlag of fromFlags) {
-      if (!this._rushConfig.getProjectByName(fromFlag)) {
+      if (!this._rushConfiguration.getProjectByName(fromFlag)) {
         throw new Error(`The project '${fromFlag}' does not exist in rush.json`);
       }
 
@@ -171,7 +171,8 @@ export default class RebuildAction extends CommandLineAction {
       dependents.add(fromFlag);
 
       // Register all downstream dependents
-      dependents.forEach(dependent => this._registerTask(taskRunner, this._rushConfig.getProjectByName(dependent)));
+      dependents.forEach(dependent => this._registerTask(taskRunner,
+                                                         this._rushConfiguration.getProjectByName(dependent)));
 
       // Only register dependencies graph for projects which have been registered
       // e.g. package C may depend on A & B, but if we are only building A's downstream, we will ignore B
@@ -183,7 +184,7 @@ export default class RebuildAction extends CommandLineAction {
 
   private _registerAll(taskRunner: TaskRunner): void {
     // Register all tasks
-    for (const rushProject of this._rushConfig.projects) {
+    for (const rushProject of this._rushConfiguration.projects) {
       this._registerTask(taskRunner, rushProject);
     }
 
@@ -229,7 +230,7 @@ export default class RebuildAction extends CommandLineAction {
     });
   }
 
-  private _registerTask(taskRunner: TaskRunner, project: RushConfigProject): void {
+  private _registerTask(taskRunner: TaskRunner, project: RushConfigurationProject): void {
     const errorMode: ErrorDetectionMode = this._vsoParameter.value
       ? ErrorDetectionMode.VisualStudioOnline
       : ErrorDetectionMode.LocalBuild;
@@ -242,7 +243,7 @@ export default class RebuildAction extends CommandLineAction {
     const errorDetector: ErrorDetector = new ErrorDetector(activeRules);
     const projectTask: ProjectBuildTask = new ProjectBuildTask(
       project,
-      this._rushConfig,
+      this._rushConfiguration,
       errorDetector,
       errorMode,
       this._productionParameter.value,

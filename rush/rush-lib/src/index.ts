@@ -1,18 +1,18 @@
 
 export {
-  IRushConfigJson,
+  IRushConfigurationJson,
   IRushLinkJson,
-  default as RushConfig
+  default as RushConfiguration
 } from './data/RushConfig';
 
 export {
-  IRushConfigProjectJson,
-  default as RushConfigProject
+  IRushConfigurationProjectJson,
+  default as RushConfigurationProject
 } from './data/RushConfigProject';
 
 export {
   PackageReviewItem,
-  default as PackageReviewConfig
+  default as PackageReviewConfiguration
 } from './data/PackageReviewConfig';
 
 export {

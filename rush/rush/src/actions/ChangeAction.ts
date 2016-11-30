@@ -17,8 +17,8 @@ import { CommandLineAction,
 } from '@microsoft/ts-command-line';
 
 import {
-  RushConfig,
-  RushConfigProject,
+  RushConfiguration,
+  RushConfigurationProject,
   IChangeFile,
   IChangeInfo,
   VersionControl
@@ -35,7 +35,7 @@ const BUMP_OPTIONS: { [type: string]: string } = {
 
 export default class ChangeAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
-  private _rushConfig: RushConfig;
+  private _rushConfiguration: RushConfiguration;
   private _sortedProjectList: string[];
   private _changeFileData: IChangeFile;
   private _verifyParameter: CommandLineFlagParameter;
@@ -85,7 +85,7 @@ export default class ChangeAction extends CommandLineAction {
   }
 
   public onExecute(): void {
-    this._rushConfig = RushConfig.loadFromDefaultLocation();
+    this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
     if (this._verifyParameter.value) {
       return this._verify();
     }
@@ -122,7 +122,7 @@ export default class ChangeAction extends CommandLineAction {
 
   private _getChangedPackageNames(): string[] {
     const changedFolders: string[] = VersionControl.getChangedFolders(this._targetBranch.value);
-    return this._rushConfig.projects
+    return this._rushConfiguration.projects
       .filter(project => project.shouldPublish)
       .filter(project => this._hasProjectChanged(changedFolders, project))
       .map(project => project.packageName);
@@ -142,7 +142,7 @@ export default class ChangeAction extends CommandLineAction {
 
   private _validateChangedProjects(changeFile: string,
     changedPackages: string[]): void {
-    const fileFullPath: string = path.join(this._rushConfig.rushJsonFolder, changeFile);
+    const fileFullPath: string = path.join(this._rushConfiguration.rushJsonFolder, changeFile);
     const missingPackages: string[] = findMissingChangedPackages(fileFullPath, changedPackages);
     if (missingPackages.length > 0) {
       throw new Error(`Change file does not contain ${missingPackages.join(',')}.`);
@@ -155,7 +155,7 @@ export default class ChangeAction extends CommandLineAction {
   }
 
   private _hasProjectChanged(changedFolders: string[],
-    project: RushConfigProject): boolean {
+    project: RushConfigurationProject): boolean {
     let normalizedFolder: string = project.projectRelativeFolder;
     if (normalizedFolder.charAt(normalizedFolder.length - 1) !== '/') {
       normalizedFolder = normalizedFolder + '/';
@@ -319,7 +319,7 @@ export default class ChangeAction extends CommandLineAction {
       this._escapeFilename(`${branch}_${this._getTimestamp()}.json`) :
       `${this._getTimestamp()}.json`);
 
-    const filepath: string = path.join(this._rushConfig.commonFolder, 'changes', filename);
+    const filepath: string = path.join(this._rushConfiguration.commonFolder, 'changes', filename);
 
     if (fsx.existsSync(filepath)) {
       // prompt about overwrite

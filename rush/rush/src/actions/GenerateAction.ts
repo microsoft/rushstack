@@ -14,8 +14,8 @@ import {
   AsyncRecycle,
   IPackageJson,
   JsonFile,
-  RushConfig,
-  RushConfigProject,
+  RushConfiguration,
+  RushConfigurationProject,
   Utilities,
   Stopwatch
 } from '@microsoft/rush-lib';
@@ -26,7 +26,7 @@ import PackageReviewChecker from './PackageReviewChecker';
 
 export default class GenerateAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
-  private _rushConfig: RushConfig;
+  private _rushConfiguration: RushConfiguration;
   private _packageReviewChecker: PackageReviewChecker;
   private _lazyParameter: CommandLineFlagParameter;
 
@@ -52,19 +52,19 @@ export default class GenerateAction extends CommandLineAction {
   }
 
   protected onExecute(): void {
-    this._rushConfig = this._rushConfig = RushConfig.loadFromDefaultLocation();
+    this._rushConfiguration = this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
 
     const stopwatch: Stopwatch = Stopwatch.start();
 
     console.log('Starting "rush generate"' + os.EOL);
 
-    if (this._rushConfig.packageReviewFile) {
-        this._packageReviewChecker = new PackageReviewChecker(this._rushConfig);
+    if (this._rushConfiguration.packageReviewFile) {
+        this._packageReviewChecker = new PackageReviewChecker(this._rushConfiguration);
         this._packageReviewChecker.saveCurrentDependencies();
     }
 
     // 1. Delete "common\node_modules"
-    const nodeModulesPath: string = path.join(this._rushConfig.commonFolder, 'node_modules');
+    const nodeModulesPath: string = path.join(this._rushConfiguration.commonFolder, 'node_modules');
 
     if (this._lazyParameter.value) {
       // In the lazy case, we keep the existing common/node_modules.  However, we need to delete
@@ -73,23 +73,23 @@ export default class GenerateAction extends CommandLineAction {
       console.log('Deleting common/node_modules/rush-*');
       const normalizedPath: string = Utilities.getAllReplaced(nodeModulesPath, '\\', '/');
       for (const tempModulePath of glob.sync(globEscape(normalizedPath) + '/rush-*')) {
-        AsyncRecycle.recycleDirectory(this._rushConfig, tempModulePath);
+        AsyncRecycle.recycleDirectory(this._rushConfiguration, tempModulePath);
       }
     } else {
       if (fsx.existsSync(nodeModulesPath)) {
         console.log('Deleting common/node_modules folder...');
-        AsyncRecycle.recycleDirectory(this._rushConfig, nodeModulesPath);
+        AsyncRecycle.recycleDirectory(this._rushConfiguration, nodeModulesPath);
       }
     }
 
     // 2. Delete "common\temp_modules"
-    if (fsx.existsSync(this._rushConfig.tempModulesFolder)) {
+    if (fsx.existsSync(this._rushConfiguration.tempModulesFolder)) {
       console.log('Deleting common/temp_modules folder');
-      Utilities.dangerouslyDeletePath(this._rushConfig.tempModulesFolder);
+      Utilities.dangerouslyDeletePath(this._rushConfiguration.tempModulesFolder);
     }
 
     // 3. Delete the previous npm-shrinkwrap.json
-    const shrinkwrapFilename: string = path.join(this._rushConfig.commonFolder, 'npm-shrinkwrap.json');
+    const shrinkwrapFilename: string = path.join(this._rushConfiguration.commonFolder, 'npm-shrinkwrap.json');
 
     if (fsx.existsSync(shrinkwrapFilename)) {
       console.log('Deleting common/npm-shrinkwrap.json');
@@ -98,7 +98,7 @@ export default class GenerateAction extends CommandLineAction {
 
     // 4. Construct common\package.json and common\temp_modules
     console.log('Creating a clean common/temp_modules folder');
-    Utilities.createFolderWithRetry(this._rushConfig.tempModulesFolder);
+    Utilities.createFolderWithRetry(this._rushConfiguration.tempModulesFolder);
 
     const commonPackageJson: PackageJson = {
       dependencies: {},
@@ -109,12 +109,12 @@ export default class GenerateAction extends CommandLineAction {
     };
 
     console.log('Creating temp projects...');
-    for (const rushProject of this._rushConfig.projects) {
+    for (const rushProject of this._rushConfiguration.projects) {
       const packageJson: PackageJson = rushProject.packageJson;
 
       const tempProjectName: string = rushProject.tempProjectName;
 
-      const tempProjectFolder: string = path.join(this._rushConfig.tempModulesFolder, tempProjectName);
+      const tempProjectFolder: string = path.join(this._rushConfiguration.tempModulesFolder, tempProjectName);
       fsx.mkdirSync(tempProjectFolder);
 
       commonPackageJson.dependencies[tempProjectName] = 'file:./temp_modules/' + tempProjectName;
@@ -159,7 +159,7 @@ export default class GenerateAction extends CommandLineAction {
         // If so, then we will symlink to the project folder rather than to common/node_modules.
         // In this case, we don't want "npm install" to process this package, but we do need
         // to record this decision for "rush link" later, so we add it to a special 'rushDependencies' field.
-        const localProject: RushConfigProject = this._rushConfig.getProjectByName(pair.packageName);
+        const localProject: RushConfigurationProject = this._rushConfiguration.getProjectByName(pair.packageName);
         if (localProject) {
 
           // Don't locally link if it's listed in the cyclicDependencyProjects
@@ -187,26 +187,28 @@ export default class GenerateAction extends CommandLineAction {
     }
 
     console.log('Writing common/package.json');
-    const commonPackageJsonFilename: string = path.join(this._rushConfig.commonFolder, 'package.json');
+    const commonPackageJsonFilename: string = path.join(this._rushConfiguration.commonFolder, 'package.json');
     JsonFile.saveJsonFile(commonPackageJson, commonPackageJsonFilename);
 
     // 4. Make sure the NPM tool is set up properly.  Usually "rush install" should have
     //    already done this, but not if they just cloned the repo
     console.log('');
-    InstallAction.ensureLocalNpmTool(this._rushConfig, false);
+    InstallAction.ensureLocalNpmTool(this._rushConfiguration, false);
 
     // 5. Run "npm install" and "npm shrinkwrap"
     const npmInstallArgs: string[] = ['install'];
-    if (this._rushConfig.cacheFolder) {
-      npmInstallArgs.push('--cache', this._rushConfig.cacheFolder);
+    if (this._rushConfiguration.cacheFolder) {
+      npmInstallArgs.push('--cache', this._rushConfiguration.cacheFolder);
     }
 
-    if (this._rushConfig.tmpFolder) {
-      npmInstallArgs.push('--tmp', this._rushConfig.tmpFolder);
+    if (this._rushConfiguration.tmpFolder) {
+      npmInstallArgs.push('--tmp', this._rushConfiguration.tmpFolder);
     }
 
     console.log(os.EOL + colors.bold(`Running "npm ${npmInstallArgs.join(' ')}"...`));
-    Utilities.executeCommand(this._rushConfig.npmToolFilename, npmInstallArgs, this._rushConfig.commonFolder);
+    Utilities.executeCommand(this._rushConfiguration.npmToolFilename,
+                             npmInstallArgs,
+                             this._rushConfiguration.commonFolder);
     console.log('"npm install" completed' + os.EOL);
 
     if (this._lazyParameter.value) {
@@ -214,7 +216,9 @@ export default class GenerateAction extends CommandLineAction {
       console.log(os.EOL + colors.bold('(Skipping "npm shrinkwrap")') + os.EOL);
     } else {
       console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
-      Utilities.executeCommand(this._rushConfig.npmToolFilename, ['shrinkwrap' ], this._rushConfig.commonFolder);
+      Utilities.executeCommand(this._rushConfiguration.npmToolFilename,
+                               ['shrinkwrap' ],
+                               this._rushConfiguration.commonFolder);
       console.log('"npm shrinkwrap" completed' + os.EOL);
     }
     stopwatch.stop();
