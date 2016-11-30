@@ -3,7 +3,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as fsx from 'fs-extra';
 
-import RushConfiguration from '../data/RushConfig';
+import RushConfiguration from '../data/RushConfiguration';
 import Utilities from './Utilities';
 
 export default class AsyncRecycle {

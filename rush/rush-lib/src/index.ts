@@ -3,17 +3,17 @@ export {
   IRushConfigurationJson,
   IRushLinkJson,
   default as RushConfiguration
-} from './data/RushConfig';
+} from './data/RushConfiguration';
 
 export {
   IRushConfigurationProjectJson,
   default as RushConfigurationProject
-} from './data/RushConfigProject';
+} from './data/RushConfigurationProject';
 
 export {
   PackageReviewItem,
   default as PackageReviewConfiguration
-} from './data/PackageReviewConfig';
+} from './data/PackageReviewConfiguration';
 
 export {
   PackageDependencyKind,
