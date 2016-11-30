@@ -13,8 +13,8 @@ import {
 import {
   IChangeInfo,
   ChangeType,
-  RushConfig,
-  RushConfigProject,
+  RushConfiguration,
+  RushConfigurationProject,
   Utilities
 } from '@microsoft/rush-lib';
 import RushCommandLineParser from './RushCommandLineParser';
@@ -30,7 +30,7 @@ export default class PublishAction extends CommandLineAction {
   private _publish: CommandLineFlagParameter;
   private _targetBranch: CommandLineStringParameter;
   private _npmAuthToken: CommandLineStringParameter;
-  private _rushConfig: RushConfig;
+  private _rushConfiguration: RushConfiguration;
   private _parser: RushCommandLineParser;
   private _registryUrl: CommandLineStringParameter;
 
@@ -86,10 +86,10 @@ export default class PublishAction extends CommandLineAction {
   protected onExecute(): void {
     console.log(`Starting "rush publish" ${EOL}`);
 
-    this._rushConfig = RushConfig.loadFromDefaultLocation();
+    this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
 
-    const changesPath: string = path.join(this._rushConfig.commonFolder, 'changes');
-    const allPackages: Map<string, RushConfigProject> = this._rushConfig.projectsByName;
+    const changesPath: string = path.join(this._rushConfiguration.commonFolder, 'changes');
+    const allPackages: Map<string, RushConfigurationProject> = this._rushConfiguration.projectsByName;
     const allChanges: IChangeInfoHash = findChangeRequests(allPackages, changesPath);
     const orderedChanges: IChangeInfo[] = sortChangeRequests(allChanges);
 
@@ -229,7 +229,7 @@ export default class PublishAction extends CommandLineAction {
     for (const change of orderedChanges) {
       if (
         change.changeType > ChangeType.dependency &&
-        this._rushConfig.projectsByName.get(change.packageName).shouldPublish
+        this._rushConfiguration.projectsByName.get(change.packageName).shouldPublish
       ) {
         const tagName: string = change.packageName + '_v' + change.newVersion;
 
@@ -257,7 +257,7 @@ export default class PublishAction extends CommandLineAction {
     const env: { [key: string]: string } = this._getEnvArgs();
     const args: string[] = ['publish'];
 
-    if (this._rushConfig.projectsByName.get(change.packageName).shouldPublish) {
+    if (this._rushConfiguration.projectsByName.get(change.packageName).shouldPublish) {
       if (this._registryUrl.value) {
         env['npm_config_registry'] = this._registryUrl.value; // tslint:disable-line:no-string-literal
       }
@@ -268,7 +268,7 @@ export default class PublishAction extends CommandLineAction {
 
       this._execCommand(
         !!this._publish.value,
-        this._rushConfig.npmToolFilename,
+        this._rushConfiguration.npmToolFilename,
         args,
         packagePath,
         env);

@@ -10,14 +10,14 @@ import * as semver from 'semver';
 import rushVersion from '../rushVersion';
 import Validator = require('z-schema');
 import JsonFile from '../utilities/JsonFile';
-import RushConfigProject, { IRushConfigProjectJson } from './RushConfigProject';
+import RushConfigurationProject, { IRushConfigurationProjectJson } from './RushConfigProject';
 import Utilities from '../utilities/Utilities';
 
 /**
- * This represents the JSON data structure for the "rush.json" config file.
+ * This represents the JSON data structure for the "rush.json" configuration file.
  * See rush-schema.json for documentation.
  */
-export interface IRushConfigJson {
+export interface IRushConfigurationJson {
   $schema: string;
   commonFolder: string;
   npmVersion: string;
@@ -28,7 +28,7 @@ export interface IRushConfigJson {
   packageReviewFile?: string;
   reviewCategories?: string[];
   useLocalNpmCache?: boolean;
-  projects: IRushConfigProjectJson[];
+  projects: IRushConfigurationProjectJson[];
 }
 
 /**
@@ -42,9 +42,9 @@ export interface IRushLinkJson {
 
 /**
  * This represents the Rush configuration for a repository, based on the Rush.json
- * config file.
+ * configuration file.
  */
-export default class RushConfig {
+export default class RushConfiguration {
   private _rushJsonFolder: string;
   private _commonFolder: string;
   private _commonFolderName: string;
@@ -59,33 +59,33 @@ export default class RushConfig {
   private _projectFolderMaxDepth: number;
   private _packageReviewFile: string;
   private _reviewCategories: Set<string>;
-  private _projects: RushConfigProject[];
-  private _projectsByName: Map<string, RushConfigProject>;
+  private _projects: RushConfigurationProject[];
+  private _projectsByName: Map<string, RushConfigurationProject>;
 
   /**
-   * Loads the configuration data from an Rush.json config file and returns
-   * an RushConfig object.
+   * Loads the configuration data from an Rush.json configuration file and returns
+   * an RushConfiguration object.
    */
-  public static loadFromConfigFile(rushJsonFilename: string): RushConfig {
-    const rushConfigJson: IRushConfigJson = JsonFile.loadJsonFile(rushJsonFilename);
+  public static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration {
+    const rushConfigurationJson: IRushConfigurationJson = JsonFile.loadJsonFile(rushJsonFilename);
 
     // Check the Rush version *before* we validate the schema, since if the version is outdated
     // then the schema may have changed.
-    const rushMinimumVersion: string = rushConfigJson.rushMinimumVersion;
+    const rushMinimumVersion: string = rushConfigurationJson.rushMinimumVersion;
     // If the version is missing or malformed, fall through and let the schema handle it.
     if (rushMinimumVersion && semver.valid(rushMinimumVersion)) {
       if (semver.lt(rushVersion, rushMinimumVersion)) {
         throw new Error(`Your rush tool is version ${rushVersion}, but rush.json`
-          + ` requires version ${rushConfigJson.rushMinimumVersion} or newer.  To upgrade,`
+          + ` requires version ${rushConfigurationJson.rushMinimumVersion} or newer.  To upgrade,`
           + ` run "npm install @microsoft/rush -g".`);
       }
     }
 
-    // Remove the $schema reference that appears in the config object (used for IntelliSense),
+    // Remove the $schema reference that appears in the configuration object (used for IntelliSense),
     // since we are replacing it with the precompiled version.  The validator.setRemoteReference()
     // API is a better way to handle this, but we'd first need to publish the schema file
     // to a public web server where Visual Studio can find it.
-    delete rushConfigJson.$schema;
+    delete rushConfigurationJson.$schema;
 
     const validator: ZSchema.Validator = new Validator({
       breakOnFirstError: true,
@@ -94,7 +94,7 @@ export default class RushConfig {
 
     const rushSchema: Object = JsonFile.loadJsonFile(path.join(__dirname, '../rush-schema.json'));
 
-    if (!validator.validate(rushConfigJson, rushSchema)) {
+    if (!validator.validate(rushConfigurationJson, rushSchema)) {
       const error: ZSchema.Error = validator.getLastError();
 
       const detail: ZSchema.ErrorDetail = error.details[0];
@@ -105,10 +105,10 @@ export default class RushConfig {
       throw new Error(errorMessage);
     }
 
-    return new RushConfig(rushConfigJson, rushJsonFilename);
+    return new RushConfiguration(rushConfigurationJson, rushJsonFilename);
   }
 
-  public static loadFromDefaultLocation(): RushConfig {
+  public static loadFromDefaultLocation(): RushConfiguration {
     let currentFolder: string = process.cwd();
 
     // Look upwards at parent folders until we find a folder containing rush.json
@@ -117,10 +117,10 @@ export default class RushConfig {
 
       if (fsx.existsSync(rushJsonFilename)) {
         if (i > 0) {
-          console.log('Found config in ' + rushJsonFilename);
+          console.log('Found configuration in ' + rushJsonFilename);
         }
         console.log('');
-        return RushConfig.loadFromConfigFile(rushJsonFilename);
+        return RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
       }
 
       const parentFolder: string = path.dirname(currentFolder);
@@ -136,14 +136,15 @@ export default class RushConfig {
    * This generates the unique names that are used to create temporary projects
    * in the Rush common folder.
    */
-  private static _generateTempNamesForProjects(projectJsons: IRushConfigProjectJson[]):
-    Map<IRushConfigProjectJson, string> {
+  private static _generateTempNamesForProjects(projectJsons: IRushConfigurationProjectJson[]):
+    Map<IRushConfigurationProjectJson, string> {
 
-    const tempNamesByProject: Map<IRushConfigProjectJson, string> = new Map<IRushConfigProjectJson, string>();
+    const tempNamesByProject: Map<IRushConfigurationProjectJson, string> =
+      new Map<IRushConfigurationProjectJson, string>();
     const usedTempNames: Set<string> = new Set<string>();
 
-    const sortedProjectJsons: IRushConfigProjectJson[] = projectJsons.sort(
-      (a: IRushConfigProjectJson, b: IRushConfigProjectJson) => a.packageName.localeCompare(a.packageName)
+    const sortedProjectJsons: IRushConfigurationProjectJson[] = projectJsons.sort(
+      (a: IRushConfigurationProjectJson, b: IRushConfigurationProjectJson) => a.packageName.localeCompare(a.packageName)
     );
     for (const projectJson of sortedProjectJsons) {
       // If the name is "@ms/MyProject", extract the "MyProject" part
@@ -165,30 +166,30 @@ export default class RushConfig {
   }
 
   /**
-   * DO NOT CALL -- Use RushConfig.loadFromConfigFile() or Use RushConfig.loadFromDefaultLocation()
+   * DO NOT CALL -- Use RushConfiguration.loadFromConfigurationFile() or Use RushConfiguration.loadFromDefaultLocation()
    * instead.
    */
-  constructor(rushConfigJson: IRushConfigJson, rushJsonFilename: string) {
-    if (rushConfigJson.nodeSupportedVersionRange) {
-      if (!semver.validRange(rushConfigJson.nodeSupportedVersionRange)) {
+  constructor(rushConfigurationJson: IRushConfigurationJson, rushJsonFilename: string) {
+    if (rushConfigurationJson.nodeSupportedVersionRange) {
+      if (!semver.validRange(rushConfigurationJson.nodeSupportedVersionRange)) {
         throw new Error('Error parsing the node-semver expression in the "nodeSupportedVersionRange"'
-          + ` field from rush.json: "${rushConfigJson.nodeSupportedVersionRange}"`);
+          + ` field from rush.json: "${rushConfigurationJson.nodeSupportedVersionRange}"`);
       }
-      if (!semver.satisfies(process.version, rushConfigJson.nodeSupportedVersionRange)) {
+      if (!semver.satisfies(process.version, rushConfigurationJson.nodeSupportedVersionRange)) {
         throw new Error(`Your dev environment is running Node.js version ${process.version} which does`
           + ` not meet the requirements for building this repository.  (The rush.json configuration`
-          + ` requires nodeSupportedVersionRange="${rushConfigJson.nodeSupportedVersionRange}")`);
+          + ` requires nodeSupportedVersionRange="${rushConfigurationJson.nodeSupportedVersionRange}")`);
       }
     }
 
     this._rushJsonFolder = path.dirname(rushJsonFilename);
-    this._commonFolder = path.resolve(path.join(this._rushJsonFolder, rushConfigJson.commonFolder));
+    this._commonFolder = path.resolve(path.join(this._rushJsonFolder, rushConfigurationJson.commonFolder));
     if (!fsx.existsSync(this._commonFolder)) {
-      throw new Error(`Rush common folder does not exist: ${rushConfigJson.commonFolder}`);
+      throw new Error(`Rush common folder does not exist: ${rushConfigurationJson.commonFolder}`);
     }
     this._commonFolderName = path.basename(this._commonFolder);
 
-    if (rushConfigJson.useLocalNpmCache) {
+    if (rushConfigurationJson.useLocalNpmCache) {
       this._cacheFolder = path.resolve(path.join(this._commonFolder, 'npm-cache'));
       this._tmpFolder = path.resolve(path.join(this._commonFolder, 'npm-tmp'));
     }
@@ -203,44 +204,44 @@ export default class RushConfig {
 
     this._rushLinkJsonFilename = path.join(this._commonFolder, 'rush-link.json');
 
-    this._npmToolVersion = rushConfigJson.npmVersion;
+    this._npmToolVersion = rushConfigurationJson.npmVersion;
     this._npmToolFilename = path.join(this._commonFolder, 'npm-local', 'node_modules', '.bin', 'npm');
 
-    this._projectFolderMinDepth = rushConfigJson.projectFolderMinDepth !== undefined
-      ? rushConfigJson.projectFolderMinDepth : 1;
+    this._projectFolderMinDepth = rushConfigurationJson.projectFolderMinDepth !== undefined
+      ? rushConfigurationJson.projectFolderMinDepth : 1;
     if (this._projectFolderMinDepth < 1) {
       throw new Error('Invalid projectFolderMinDepth; the minimum possible value is 1');
     }
 
-    this._projectFolderMaxDepth = rushConfigJson.projectFolderMaxDepth !== undefined
-      ? rushConfigJson.projectFolderMaxDepth : 2;
+    this._projectFolderMaxDepth = rushConfigurationJson.projectFolderMaxDepth !== undefined
+      ? rushConfigurationJson.projectFolderMaxDepth : 2;
     if (this._projectFolderMaxDepth < this._projectFolderMinDepth) {
       throw new Error('The projectFolderMaxDepth cannot be smaller than the projectFolderMinDepth');
     }
 
     this._packageReviewFile = undefined;
-    if (rushConfigJson.packageReviewFile) {
-      this._packageReviewFile = path.resolve(path.join(this._rushJsonFolder, rushConfigJson.packageReviewFile));
+    if (rushConfigurationJson.packageReviewFile) {
+      this._packageReviewFile = path.resolve(path.join(this._rushJsonFolder, rushConfigurationJson.packageReviewFile));
       if (!fsx.existsSync(this._packageReviewFile)) {
         throw new Error('The packageReviewFile file was not found: "' + this._packageReviewFile + '"');
       }
     }
 
-    this._reviewCategories = new Set<string>(rushConfigJson.reviewCategories);
+    this._reviewCategories = new Set<string>(rushConfigurationJson.reviewCategories);
 
     this._projects = [];
-    this._projectsByName = new Map<string, RushConfigProject>();
+    this._projectsByName = new Map<string, RushConfigurationProject>();
 
-    const tempNamesByProject: Map<IRushConfigProjectJson, string>
-      = RushConfig._generateTempNamesForProjects(rushConfigJson.projects);
+    const tempNamesByProject: Map<IRushConfigurationProjectJson, string>
+      = RushConfiguration._generateTempNamesForProjects(rushConfigurationJson.projects);
 
-    for (const projectJson of rushConfigJson.projects) {
+    for (const projectJson of rushConfigurationJson.projects) {
       const tempProjectName: string = tempNamesByProject.get(projectJson);
-      const project: RushConfigProject = new RushConfigProject(projectJson, this, tempProjectName);
+      const project: RushConfigurationProject = new RushConfigurationProject(projectJson, this, tempProjectName);
       this._projects.push(project);
       if (this._projectsByName.get(project.packageName)) {
         throw new Error(`The project name "${project.packageName}" was specified more than once`
-          + ` in the rush.json config file.`);
+          + ` in the rush.json configuration file.`);
       }
       this._projectsByName.set(project.packageName, project);
     }
@@ -256,7 +257,7 @@ export default class RushConfig {
       // Compute the downstream dependencies within the list of Rush projects.
       if (project.packageJson.dependencies) {
         Object.keys(project.packageJson.dependencies).forEach(dependencyName => {
-          const depProject: RushConfigProject = this._projectsByName.get(dependencyName);
+          const depProject: RushConfigurationProject = this._projectsByName.get(dependencyName);
 
           if (depProject) {
             depProject.downstreamDependencyProjects.push(project.packageName);
@@ -380,7 +381,7 @@ export default class RushConfig {
    * The intent is that this file will be stored in Git and tracked by a branch policy which
    * notifies reviewers whenever a PR attempts to modify the file.
    *
-   * The PackageReviewConfig class can load/save this file format.
+   * The PackageReviewConfiguration class can load/save this file format.
    *
    * Example: "C:\MyRepo\common\reviews\PackageDependenies.json"
    */
@@ -389,22 +390,22 @@ export default class RushConfig {
   }
 
   /**
-   * A list of category names that are valid for usage as the RushConfigProject.reviewCategory field.
+   * A list of category names that are valid for usage as the RushConfigurationProject.reviewCategory field.
    * This array will never be undefined.
    */
   public get reviewCategories(): Set<string> {
     return this._reviewCategories;
   }
 
-  public get projects(): RushConfigProject[] {
+  public get projects(): RushConfigurationProject[] {
     return this._projects;
   }
 
-  public get projectsByName(): Map<string, RushConfigProject> {
+  public get projectsByName(): Map<string, RushConfigurationProject> {
     return this._projectsByName;
   }
 
-  public getProjectByName(projectName: string): RushConfigProject {
+  public getProjectByName(projectName: string): RushConfigurationProject {
     return this._projectsByName.get(projectName);
   }
 }

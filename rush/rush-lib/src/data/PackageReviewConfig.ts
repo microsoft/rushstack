@@ -26,7 +26,7 @@ export interface IPackageReviewSettingsJson {
 }
 
 /**
- * This represents the JSON data structure for the "PackageDependencies.json" config file.
+ * This represents the JSON data structure for the "PackageDependencies.json" configuration file.
  * See packagereview-schema.json for documentation.
  */
 export interface IPackageReviewJson {
@@ -45,7 +45,7 @@ export class PackageReviewItem {
 /**
  * This represents the JSON file specified via the "packageReviewFile" option in rush.json.
  */
-export default class PackageReviewConfig {
+export default class PackageReviewConfiguration {
   public items: PackageReviewItem[] = [];
   private _itemsByName: Map<string, PackageReviewItem> = new Map<string, PackageReviewItem>();
 
@@ -57,10 +57,10 @@ export default class PackageReviewConfig {
    * Loads the configuration data from PackageDependencies.json and returns
    * an PackageReviewFile object.
    */
-  public static loadFromFile(jsonFilename: string): PackageReviewConfig {
+  public static loadFromFile(jsonFilename: string): PackageReviewConfiguration {
     const packageReviewJson: IPackageReviewJson = JsonFile.loadJsonFile(jsonFilename);
 
-    // Remove the $schema reference that appears in the config object (used for IntelliSense),
+    // Remove the $schema reference that appears in the configuration object (used for IntelliSense),
     // since we are replacing it with the precompiled version.  The validator.setRemoteReference()
     // API is a better way to handle this, but we'd first need to publish the schema file
     // to a public web server where Visual Studio can find it.
@@ -85,7 +85,7 @@ export default class PackageReviewConfig {
       throw new Error(errorMessage);
     }
 
-    return new PackageReviewConfig(packageReviewJson, jsonFilename);
+    return new PackageReviewConfiguration(packageReviewJson, jsonFilename);
   }
 
   /**

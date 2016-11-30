@@ -3,7 +3,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as fsx from 'fs-extra';
 
-import RushConfig from '../data/RushConfig';
+import RushConfiguration from '../data/RushConfig';
 import Utilities from './Utilities';
 
 export default class AsyncRecycle {
@@ -11,7 +11,7 @@ export default class AsyncRecycle {
    * Moves the specified directory into the recycler directory and asynchronously deletes the recycler directory.
    *  Delete will continue even if the node process is killed.
    */
-  public static recycleDirectory(rushConfig: RushConfig, directoryPath: string): void {
+  public static recycleDirectory(rushConfiguration: RushConfiguration, directoryPath: string): void {
     // We need to do a simple "fs.renameSync" here, however if the folder we're trying to rename
     // has a lock, or if its destination container doesn't exist yet,
     // then there seems to be some OS process (virus scanner?) that holds
@@ -19,7 +19,7 @@ export default class AsyncRecycle {
     // fail. To workaround that, retry for up to 7 seconds before giving up.
     const maxWaitTimeMs: number = 7 * 1000;
 
-    const recyclerDirectory: string = AsyncRecycle._getRecyclerDirectory(rushConfig);
+    const recyclerDirectory: string = AsyncRecycle._getRecyclerDirectory(rushConfiguration);
     const oldDirectoryName: string = path.basename(directoryPath);
     const newDirectoryPath: string = path.join(recyclerDirectory, `${oldDirectoryName}_${new Date().getTime()}`);
 
@@ -60,7 +60,7 @@ export default class AsyncRecycle {
     process.unref();
   }
 
-  private static _getRecyclerDirectory(rushConfig: RushConfig): string {
-    return path.join(rushConfig.commonFolder, 'rush-recycler');
+  private static _getRecyclerDirectory(rushConfiguration: RushConfiguration): string {
+    return path.join(rushConfiguration.commonFolder, 'rush-recycler');
   }
 }
