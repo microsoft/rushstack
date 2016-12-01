@@ -11,7 +11,8 @@
   },
   "license": "SEE LICENSE IN LICENSE.docx",
   "dependencies": {
-    "colors": "~1.1.2"
+    "colors": "~1.1.2",
+    "@types/node": ">=6.0.51 <6.9.1"
   },
   "devDependencies": {
     "@types/chai": ">=3.4.34 <3.6.0",

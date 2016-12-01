@@ -5,7 +5,10 @@
     "module": "commonjs",
     "jsx": "react",
     "declaration": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "types": [
+      "node"
+    ]
   },
   "files": ["typings/tsd.d.ts"]
 }
