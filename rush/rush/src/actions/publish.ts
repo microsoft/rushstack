@@ -153,13 +153,7 @@ function _updatePackage(
       const depChange: IChangeInfo = allChanges[depName];
 
       if (depChange && depChange.changeType >= ChangeType.patch) {
-        const currentDependencyVersion: string = pkg.dependencies[depName];
-
-        if (isRangeDependency(currentDependencyVersion)) {
-          pkg.dependencies[depName] = depChange.newRangeDependency;
-        } else {
-          pkg.dependencies[depName] = depChange.newVersion;
-        }
+        _updateDependencyVersion(pkg, depName, depChange);
       }
     });
   }
@@ -252,3 +246,20 @@ function _updateDownstreamDependencies(
     }
   }
 }
+
+function _updateDependencyVersion(
+    packageJson: IPackageJson,
+    dependencyName: string,
+    dependencyChange: IChangeInfo
+  ): void {
+    const currentDependencyVersion: string = packageJson.dependencies[dependencyName];
+    if (isRangeDependency(currentDependencyVersion)) {
+      packageJson.dependencies[dependencyName] = dependencyChange.newRangeDependency;
+    } else if (currentDependencyVersion.lastIndexOf('~', 0) === 0) {
+      packageJson.dependencies[dependencyName] = '~' + dependencyChange.newVersion;
+    } else if (currentDependencyVersion.lastIndexOf('^', 0) === 0) {
+      packageJson.dependencies[dependencyName] = '^' + dependencyChange.newVersion;
+    } else {
+      packageJson.dependencies[dependencyName] = dependencyChange.newVersion;
+    }
+  }
