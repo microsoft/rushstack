@@ -16,7 +16,7 @@
     "@microsoft/package-deps-hash": "~0.0.4",
     "@microsoft/stream-collator": "~1.0.1",
     "@microsoft/ts-command-line": "~1.1.0",
-    "@types/node": ">=4.0.30 <5.0.0",
+    "@types/node": ">=6.0.51 <7.0.0",
     "builtins": "~1.0.3",
     "colors": "~1.1.2",
     "fs-extra": "~0.26.0",
