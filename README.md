@@ -1,4 +1,4 @@
-# load-themed-styles
+# @microsoft/load-themed-styles
 [![npm version](https://badge.fury.io/js/%40microsoft%2Fload-themed-styles.svg)](https://badge.fury.io/js/%40microsoft%2Fload-themed-styles)
 
 [![Build Status](https://travis-ci.org/Microsoft/load-themed-styles.svg?branch=master)](https://travis-ci.org/Microsoft/load-themed-styles) [![Dependencies](https://david-dm.org/Microsoft/load-themed-styles.svg)](https://david-dm.org/Microsoft/load-themed-styles)
