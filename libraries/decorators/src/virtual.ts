@@ -8,7 +8,7 @@
  * This decorator is currently used for documentation purposes only.
  * In the future, it may be enforced at runtime.
  *
- * @alpha
+ * @public
  */
 export function virtual(target: Object, propertyKey: string | symbol,
   descriptor: TypedPropertyDescriptor<any>): void {
