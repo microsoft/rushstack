@@ -3,7 +3,7 @@ import * as child_process from 'child_process';
 export default class VersionControl {
   public static getChangedFolders(targetBranch?: string): string[] {
     const branchName: string = targetBranch ? targetBranch : 'origin/master';
-    const output: string = child_process.execSync(`git diff ${branchName}... --dirstat=files`)
+    const output: string = child_process.execSync(`git diff ${branchName}... --dirstat=files,0`)
       .toString();
     return output.split('\n').map(s => {
         if (s) {
