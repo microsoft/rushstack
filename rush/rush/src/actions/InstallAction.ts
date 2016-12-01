@@ -160,7 +160,7 @@ export default class InstallAction extends CommandLineAction {
         Utilities.createFolderWithRetry(commonNodeModulesFolder);
       }
 
-      if (!this._rushConfiguration.cacheFolder) {
+      if (this._rushConfiguration.cacheFolder) {
         const cacheCleanArgs: string[] = ['cache', 'clean', this._rushConfiguration.cacheFolder];
         console.log(os.EOL + `Running "npm ${cacheCleanArgs.join(' ')}"`);
         Utilities.executeCommand(npmToolFilename, cacheCleanArgs, this._rushConfiguration.commonFolder);
