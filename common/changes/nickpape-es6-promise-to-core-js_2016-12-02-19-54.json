@@ -1,0 +1,50 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/web-library-build",
+      "comment": "Replace es6-promise typings with core-js.",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/package-deps-hash",
+      "comment": "Replace es6-promise typings with core-js.",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/node-library-build",
+      "comment": "Replace es6-promise typings with core-js.",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Replace es6-promise typings with core-js.",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-serve",
+      "comment": "Replace es6-promise typings with core-js.",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-sass",
+      "comment": "Replace es6-promise typings with core-js.",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-mocha",
+      "comment": "Replace es6-promise typings with core-js.",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-karma",
+      "comment": "Replace es6-promise typings with core-js.",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build",
+      "comment": "Replace es6-promise typings with core-js.",
+      "type": "patch"
+    }
+  ],
+  "email": "nickpape@microsoft.com"
+}
