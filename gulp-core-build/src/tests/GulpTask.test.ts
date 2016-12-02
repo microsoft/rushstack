@@ -1,7 +1,6 @@
 'use strict';
 /// <reference path='../../typings/main.d.ts' />
 
-import 'es6-promise';
 import { expect } from 'chai';
 import { serial, parallel, GulpTask } from '../index';
 import gutil = require('gulp-util');

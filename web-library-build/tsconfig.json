@@ -6,7 +6,7 @@
     "sourceMap": true,
     "moduleResolution": "node",
     "types": [
-      "es6-promise",
+      "core-js",
       "node"
     ],
     "typeRoots": [
