@@ -10,7 +10,7 @@
     "@types/q": "0.0.32",
     "@types/through2": "^2.0.31",
     "@types/vinyl": "^1.2.30",
-    "@types/es6-promise": "0.0.32",
+    "@types/core-js": ">=0.9.35 <1.0.0",
     "@types/gulp": "^3.8.32",
     "@types/node": "^6.0.46",
     "gulp": "~3.9.1",
@@ -32,6 +32,6 @@
     "typescript": "~2.0.6"
   },
   "npmxDependencies": {
-    "@microsoft/gulp-core-build": ">=1.0.1 <2.0.0"
+    "@microsoft/gulp-core-build": ">=1.0.2 <2.0.0"
   }
 }

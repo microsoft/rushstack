@@ -9,7 +9,7 @@
     "@types/assertion-error": "^1.0.30",
     "@types/chai": "^3.4.34",
     "@types/chalk": "^0.4.31",
-    "@types/es6-promise": "0.0.32",
+    "@types/core-js": ">=0.9.35 <1.0.0",
     "@types/gulp": "^3.8.32",
     "@types/gulp-util": "^3.0.29",
     "@types/mocha": "^2.2.32",
