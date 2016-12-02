@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@microsoft/gulp-core-build": ">=1.0.2 <2.0.0",
-    "@types/es6-promise": "0.0.32",
+    "@types/core-js": ">=0.9.35 <1.0.0",
     "@types/node": "^6.0.46",
     "gulp": "~3.9.1",
     "gulp-istanbul": "~0.10.3",

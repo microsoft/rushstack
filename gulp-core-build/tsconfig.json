@@ -5,7 +5,7 @@
     "declaration": true,
     "sourceMap": true,
     "types": [
-      "es6-promise",
+      "core-js",
       "mocha",
       "node"
     ],

@@ -1,7 +1,6 @@
 'use strict';
 /// <reference path='../../typings/main.d.ts' />
 
-import 'es6-promise';
 import { expect } from 'chai';
 import { serial, parallel, getConfig, setConfig, IExecutable } from '../index';
 import { IBuildConfig } from './../IBuildConfig';
