@@ -221,7 +221,7 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
         }
       }
 
-      return Promise.resolve<void>();
+      return Promise.resolve<void>(undefined);
     }
   };
 }
@@ -241,7 +241,7 @@ export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutabl
 
   return {
     execute: (buildConfig: IBuildConfig): Promise<void> => {
-      let output: Promise<void> = Promise.resolve<void>();
+      let output: Promise<void> = Promise.resolve<void>(undefined);
 
       for (let task of flatTasks) {
         output = output.then(() => _executeTask(task, buildConfig));
@@ -371,7 +371,7 @@ function _executeTask(task: IExecutable, buildConfig: IBuildConfig): Promise<voi
   }
 
   // No-op otherwise.
-  return Promise.resolve<void>();
+  return Promise.resolve<void>(undefined);
 }
 
 function _trackTask(task: IExecutable): void {
