@@ -197,32 +197,23 @@ export default class Utilities {
   public static executeCommand(command: string, args: string[], workingDirectory: string,
     suppressOutput: boolean = false, environmentVariables?: { [key: string]: string }): void {
 
-    const options: child_process.SpawnSyncOptions = {
-      cwd: workingDirectory,
-      shell: true,
-      stdio: suppressOutput ? undefined : [0, 1, 2],
-      env: environmentVariables
-    };
+    Utilities._executeCommandInternal(command, args, workingDirectory,
+      suppressOutput ? undefined : [0, 1, 2],
+      environmentVariables);
+  }
 
-    let result: child_process.SpawnSyncReturns<Buffer> = child_process.spawnSync(command, args, options);
+  /**
+   * Executes the command with the specified command-line parameters, and waits for it to complete.
+   * The current directory will be set to the specified workingDirectory.
+   */
+  public static executeCommandAndCaptureOutput(command: string, args: string[], workingDirectory: string,
+    environmentVariables?: { [key: string]: string }): string {
 
-    /* tslint:disable:no-any */
-    if (result.error && (result.error as any).errno === 'ENOENT') {
-      // This is a workaround for GitHub issue #25330
-      // https://github.com/nodejs/node-v0.x-archive/issues/25330
-      result = child_process.spawnSync(command + '.cmd', args, options);
-    }
-    /* tslint:enable:no-any */
+    const  result: child_process.SpawnSyncReturns<Buffer>
+      = Utilities._executeCommandInternal(command, args, workingDirectory,
+        ['pipe', 'pipe', 'pipe'], environmentVariables);
 
-    if (result.error) {
-      result.error.message += os.EOL + (result.stderr ? result.stderr.toString() + os.EOL : '');
-      throw result.error;
-    }
-
-    if (result.status) {
-      throw new Error('The command failed with exit code ' + result.status + os.EOL +
-        (result.stderr ? result.stderr.toString() : ''));
-    }
+    return result.stdout.toString();
   }
 
   /**
@@ -290,4 +281,42 @@ export default class Utilities {
     return targetString.split(searchValue).join(replaceValue);
   }
 
+  /**
+   * Executes the command with the specified command-line parameters, and waits for it to complete.
+   * The current directory will be set to the specified workingDirectory.
+   */
+  private static _executeCommandInternal(
+    command: string, args: string[], workingDirectory: string,
+    stdio: (string|number)[],
+    environmentVariables: { [key: string]: string }): child_process.SpawnSyncReturns<Buffer> {
+
+    const options: child_process.SpawnSyncOptions = {
+      cwd: workingDirectory,
+      shell: true,
+      stdio: stdio,
+      env: environmentVariables
+    };
+
+    let result: child_process.SpawnSyncReturns<Buffer> = child_process.spawnSync(command, args, options);
+
+    /* tslint:disable:no-any */
+    if (result.error && (result.error as any).errno === 'ENOENT') {
+      // This is a workaround for GitHub issue #25330
+      // https://github.com/nodejs/node-v0.x-archive/issues/25330
+      result = child_process.spawnSync(command + '.cmd', args, options);
+    }
+    /* tslint:enable:no-any */
+
+    if (result.error) {
+      result.error.message += os.EOL + (result.stderr ? result.stderr.toString() + os.EOL : '');
+      throw result.error;
+    }
+
+    if (result.status) {
+      throw new Error('The command failed with exit code ' + result.status + os.EOL +
+        (result.stderr ? result.stderr.toString() : ''));
+    }
+
+    return result;
+  }
 }
