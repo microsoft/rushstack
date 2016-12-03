@@ -165,6 +165,9 @@ export default class InstallAction extends CommandLineAction {
         console.log(os.EOL + `Running "npm ${cacheCleanArgs.join(' ')}"`);
         Utilities.executeCommand(npmToolFilename, cacheCleanArgs, this._rushConfiguration.commonFolder);
       } else {
+        // Ideally we should clean the global cache here.  However, the global NPM cache
+        // is (inexplicably) not threadsafe, so if there are any concurrent "npm install"
+        // processes running this would cause them to crash.
         console.log(os.EOL + 'Skipping "npm cache clean" because the cache is global.');
       }
 
@@ -192,15 +195,16 @@ export default class InstallAction extends CommandLineAction {
     }
 
     if (needToInstall) {
-      // Rush install is transactional, so if the process is killed while it's in-progress, Rush will know if the
-      //  common/node_modules directory is invalid. If the last-install.flag file doesn't exist, we know the install
-      //  didn't finish, so we should delete the existing node_modules folder and run install again.
-
+      // The "npm install" command is not transactional; if it is killed, then the "node_modules"
+      // folder may be in a corrupted state (e.g. because a postinstall script only executed partially).
+      // Rush works around this using a marker file "last-install.flag".  We delete this file
+      // before installing, and then create it again after a successful "npm install".  Thus,
+      // if this file exists, it guarantees we are in a good state.  If not, we must do a clean intall.
       if (!fsx.existsSync(commonNodeModulesMarkerFilename)) {
         if (fsx.existsSync(commonNodeModulesFolder)) {
-          // Install was killed, we're in a bad state
-          console.log('Rush install was killed in-progress, so the node_modules directory is probably invalid. ' +
-                      'Preparing it for deletion.');
+          // If an "npm install" is interrupted,
+          console.log('Deleting the "node_modules" folder because the previous Rush install' +
+                      ' did not complete successfully.');
 
           AsyncRecycle.recycleDirectory(this._rushConfiguration, commonNodeModulesFolder);
         }
@@ -218,15 +222,19 @@ export default class InstallAction extends CommandLineAction {
 
         // Delete the temp projects because NPM will not notice when they are changed.
         // We can recognize them because their names start with "rush-"
-        console.log(`Deleting ${this._rushConfiguration.commonFolder}/node_modules/rush-*`);
-        // Example: "C:\MyRepo\common\node_modules\rush-example-project"
-        const normalizedPath: string = Utilities.getAllReplaced(this._rushConfiguration.commonFolder, '\\', '/');
-        for (const tempModulePath of glob.sync(globEscape(normalizedPath) + '/rush-*')) {
+
+        // Example: "C:\MyRepo\common\node_modules\rush-"
+        const pathToDeleteWithoutStar: string = path.join(commonNodeModulesFolder, 'rush-');
+        console.log(`Deleting ${pathToDeleteWithoutStar}*`);
+        // Glob can't handle Windows paths
+        const normalizedpathToDeleteWithoutStar: string
+          = Utilities.getAllReplaced(pathToDeleteWithoutStar, '\\', '/');
+        for (const tempModulePath of glob.sync(globEscape(normalizedpathToDeleteWithoutStar) + '*')) {
           Utilities.dangerouslyDeletePath(tempModulePath);
         }
       }
 
-      const npmInstallArgs: string[] = ['install'];
+      const npmInstallArgs: string[] = [ 'install' ];
       if (this._rushConfiguration.cacheFolder) {
         npmInstallArgs.push('--cache', this._rushConfiguration.cacheFolder);
       }
