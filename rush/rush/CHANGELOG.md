@@ -1,6 +1,28 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 02 Dec 2016 22:27:16 GMT and should not be manually modified.
+## 1.3.0
+
+### Minor changes
+
+- Adding support for changelog generation to rush publish.
+- Refactoring "config" into "configuration."
+- Adds the ability to define clean or build as a no-op.
+- Support target branch for rush change action
+
+### Patches
+
+- Updating the package-deps-hash version dependency.
+- Make deletion of node_modules folder more cautious to improve failure rate on automated builds.
+- Updating Rush generate to more efficiently delete folders.
+- Converting node and webpack-env typings to use @types, and cleaning them up.
+- Improving error messages during the `npm run clean` step
+- Ensuring that the hash mismatch warning is not displayed in quiet mode
+- Fix a bug with the --parallelism flag
+- When the VSO flag is specified, turn colors off
+- The cache should be cleaned unless we are using the global cache
+- When building a project, run the commands in the scripts section of the project's package.json directly, instead of relying on the 'npm run' command, which ends up writing lots of unnecessary information to the build log.
+- Treat things written to stderr as a non blocking \"warning\". Prints a summary of tasks with warnings at the end of the build. Only fail build if npm run test returns a non-zero error code.
+- Fixed a regression where "rush install" would sometimes corrupt the node_modules folder.  Also, common/package.json is now sorted deterministically.
 
 ## 1.2.4
 
