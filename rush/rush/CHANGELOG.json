@@ -8,37 +8,10 @@
       "comments": {
         "patch": [
           {
-            "comment": "Updating the package-deps-hash version dependency."
-          },
-          {
-            "comment": "Make deletion of node_modules folder more cautious to improve failure rate on automated builds."
-          },
-          {
-            "comment": "Updating Rush generate to more efficiently delete folders."
-          },
-          {
             "comment": "Converting node and webpack-env typings to use @types, and cleaning them up."
           },
           {
-            "comment": "Improving error messages during the `npm run clean` step"
-          },
-          {
-            "comment": "Ensuring that the hash mismatch warning is not displayed in quiet mode"
-          },
-          {
-            "comment": "Fix a bug with the --parallelism flag"
-          },
-          {
-            "comment": "When the VSO flag is specified, turn colors off"
-          },
-          {
             "comment": "The cache should be cleaned unless we are using the global cache"
-          },
-          {
-            "comment": "When building a project, run the commands in the scripts section of the project's package.json directly, instead of relying on the 'npm run' command, which ends up writing lots of unnecessary information to the build log."
-          },
-          {
-            "comment": "Treat things written to stderr as a non blocking \\\"warning\\\". Prints a summary of tasks with warnings at the end of the build. Only fail build if npm run test returns a non-zero error code."
           },
           {
             "comment": "Fixed a regression where \"rush install\" would sometimes corrupt the node_modules folder.  Also, common/package.json is now sorted deterministically."
@@ -50,12 +23,6 @@
           },
           {
             "comment": "Refactoring \"config\" into \"configuration.\""
-          },
-          {
-            "comment": "Adds the ability to define clean or build as a no-op."
-          },
-          {
-            "comment": "Support target branch for rush change action"
           }
         ]
       }
