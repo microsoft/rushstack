@@ -25,7 +25,7 @@ import {
 } from '@microsoft/rush-lib';
 
 import RushCommandLineParser from './RushCommandLineParser';
-import { findMissingChangedPackages } from './publish';
+import PublishUtilities from './PublishUtilities';
 
 const BUMP_OPTIONS: { [type: string]: string } = {
   'major': 'major - for breaking changes (ex: renaming a file)',
@@ -143,7 +143,7 @@ export default class ChangeAction extends CommandLineAction {
   private _validateChangedProjects(changeFile: string,
     changedPackages: string[]): void {
     const fileFullPath: string = path.join(this._rushConfiguration.rushJsonFolder, changeFile);
-    const missingPackages: string[] = findMissingChangedPackages(fileFullPath, changedPackages);
+    const missingPackages: string[] = PublishUtilities.findMissingChangedPackages(fileFullPath, changedPackages);
     if (missingPackages.length > 0) {
       throw new Error(`Change file does not contain ${missingPackages.join(',')}.`);
     }
