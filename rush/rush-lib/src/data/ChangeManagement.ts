@@ -37,6 +37,16 @@ export interface IChangeInfo {
   comment?: string;
 
   /**
+   * The email of the user who provided the comment. Pulled from the git log.
+   */
+  author?: string;
+
+  /**
+   * The commit hash for the change.
+   */
+  commit?: string;
+
+  /**
    * The new downstream range dependency, as calculated by the findChangeRequests function.
    */
   newRangeDependency?: string;

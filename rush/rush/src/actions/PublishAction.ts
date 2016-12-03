@@ -18,21 +18,21 @@ import {
   Utilities
 } from '@microsoft/rush-lib';
 import RushCommandLineParser from './RushCommandLineParser';
-import {
-  IChangeInfoHash,
-  findChangeRequests,
-  sortChangeRequests,
-  updatePackages
-} from './publish';
+import PublishUtilities, {
+  IChangeInfoHash
+} from './PublishUtilities';
+import ChangelogGenerator from './ChangelogGenerator';
 
 export default class PublishAction extends CommandLineAction {
+  private _addCommitDetails: CommandLineFlagParameter;
   private _apply: CommandLineFlagParameter;
-  private _publish: CommandLineFlagParameter;
-  private _targetBranch: CommandLineStringParameter;
   private _npmAuthToken: CommandLineStringParameter;
   private _rushConfiguration: RushConfiguration;
   private _parser: RushCommandLineParser;
+  private _publish: CommandLineFlagParameter;
+  private _regenerateChangelogs: CommandLineFlagParameter;
   private _registryUrl: CommandLineStringParameter;
+  private _targetBranch: CommandLineStringParameter;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -66,6 +66,16 @@ export default class PublishAction extends CommandLineAction {
       parameterShortName: '-p',
       description: 'If this flag is specified, applied changes will be published to npm.'
     });
+    this._addCommitDetails = this.defineFlagParameter({
+      parameterLongName: '--add-commit-details',
+      parameterShortName: undefined,
+      description: 'Adds commit author and hash to the changelog.json files for each change.'
+    });
+    this._regenerateChangelogs = this.defineFlagParameter({
+      parameterLongName: '--regenerate-changelogs',
+      parameterShortName: undefined,
+      description: 'Regenerates all changelog files based on the current JSON content.'
+    });
     this._registryUrl = this.defineStringParameter({
       parameterLongName: '--registry',
       parameterShortName: '-r',
@@ -87,11 +97,20 @@ export default class PublishAction extends CommandLineAction {
     console.log(`Starting "rush publish" ${EOL}`);
 
     this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
+    const allPackages: Map<string, RushConfigurationProject> = this._rushConfiguration.projectsByName;
+
+    if (this._regenerateChangelogs.value) {
+      console.log('Regenerating changelogs');
+      ChangelogGenerator.regenerateChangelogs(allPackages);
+      return;
+    }
 
     const changesPath: string = path.join(this._rushConfiguration.commonFolder, 'changes');
-    const allPackages: Map<string, RushConfigurationProject> = this._rushConfiguration.projectsByName;
-    const allChanges: IChangeInfoHash = findChangeRequests(allPackages, changesPath);
-    const orderedChanges: IChangeInfo[] = sortChangeRequests(allChanges);
+    const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
+      allPackages,
+      changesPath,
+      this._addCommitDetails.value);
+    const orderedChanges: IChangeInfo[] = PublishUtilities.sortChangeRequests(allChanges);
 
     if (orderedChanges.length > 0) {
       const tempBranch: string = 'publish-' + new Date().getTime();
@@ -100,7 +119,10 @@ export default class PublishAction extends CommandLineAction {
       this._gitCheckout(tempBranch, true);
 
       // Apply all changes to package.json files.
-      updatePackages(allChanges, allPackages, this._apply.value);
+      PublishUtilities.updatePackages(allChanges, allPackages, this._apply.value);
+
+      // Update changelogs.
+      ChangelogGenerator.updateChangelogs(allChanges, allPackages, this._apply.value);
 
       // Remove the change request files.
       this._deleteChangeFiles(changesPath);
@@ -231,7 +253,7 @@ export default class PublishAction extends CommandLineAction {
         change.changeType > ChangeType.dependency &&
         this._rushConfiguration.projectsByName.get(change.packageName).shouldPublish
       ) {
-        const tagName: string = change.packageName + '_v' + change.newVersion;
+        const tagName: string = PublishUtilities.createTagname(change.packageName, change.newVersion);
 
         // Tagging only happens if we're publishing to real NPM and committing to git.
         this._execCommand(
