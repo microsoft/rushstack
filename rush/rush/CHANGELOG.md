@@ -1,97 +1,118 @@
-> ## Overview
-> We break changes into three categories (following [semver](http://semver.org/)), corresponding to the types of version
->  bumps we may make:
-> - **`PATCH`** A patch change should be released when a backwards-compatible bugfix is made.
-> - **`MINOR`** A minor change should be released when functionality is added, but backwards-compatibility is maintained.
-> - **`MAJOR`** A major change should be released whenever backwards compatibility is broken.
->
-> Whenver a change is made to this project, a brief description of the change should be included in this file under the
-> **Unreleased changes** heading with an annotation tagging the change. When the package is released, all of the
-> changes listed under **Unreleased changes** will be moved under a heading for the new version.
->
-> Example changes:
-> ## Unreleased changes
-> - `PATCH` Fixing a minor style issue where a textbox can overlap with its label.
-> - `MAJOR` Changing the interface of `BaseClientSideWebPart.onInit()` to be async.
-> - `MINOR` Including new performance logging functions.
-> - `PATCH` Correctly handling negative numbers in the `setZIndex` function.
+# Change Log - @microsoft/rush
 
-# 1.2.4
+This log was last generated on Fri, 02 Dec 2016 22:27:16 GMT and should not be manually modified.
 
-- `PATCH` If the `test`, `clean`, or `build` commands are defined in the package.json, but are
-  empty strings, then do a no-op during the build.
+## 1.2.4
 
-# 1.2.3
+### Patches
 
-- `PATCH` Make deletion of node_modules folder more cautious to improve failure rate on automated builds.
-- `PATCH` Updating Rush generate to more efficiently delete folders.
+- If the `test`, `clean`, or `build` commands are defined in the package.json, but are empty strings, then do a no-op during the build.
 
-# 1.2.2
+## 1.2.3
 
-- `PATCH` Updating the deps hash dependency, which includes a fix which resolves a bug where changes were not being
-recalculated when multiple files were changed.
+### Patches
 
-# 1.2.1
+- Make deletion of node_modules folder more cautious to improve failure rate on automated builds.
+- Updating Rush generate to more efficiently delete folders.
 
-- `PATCH` Updating the rush `change` with better verification logic.
+## 1.2.2
 
-# 1.2.0
+### Patches
 
-- `MINOR` Adding the 'build' action, which support incremental build.
+- Updating the deps hash dependency, which includes a fix which resolves a bug where changes were not being recalculated when multiple files were changed.
 
-# 1.1.3
+## 1.2.1
 
-- `PATCH` Partially reverting changes for treating success with warnings differently.
-- `PATCH` Making Rush install transactional.
+### Patches
 
-# 1.1.2
+- Updating the rush `change` with better verification logic.
 
-- `PATCH` Fix a bug in rush `change`
+## 1.2.0
 
-# 1.1.1
+### Minor changes
 
-- `PATCH` correcting casing of files and imports
+- Adding the 'build' action, which support incremental build.
 
-# 1.1.0
+## 1.1.3
 
-- `MINOR` The "packageReviewFile" feature now supports a setting "ignoredNpmScopes" that can be used
-  e.g. to ignore the "@types" scope
+### Patches
 
-- `PATCH` Fixing Rush to run on UNIX and Linux.
+- Partially reverting changes for treating success with warnings differently.
+- Making Rush install transactional.
 
-# 1.0.10
+## 1.1.2
 
-- `MAJOR` Rename `shouldTrackChanges` to `shouldPublish` which indicates whether a package
-should be included for the `publish` workflow.
-- `PATCH` Updating the `publish` workflow.
+### Patches
 
-- `MINOR` Updating `rush install` to be transactional.
+- Fix a bug in rush `change`
 
-# 1.0.9
+## 1.1.1
 
-- `PATCH` Updating the `publish` workflow.
+### Patches
 
-# 1.0.7
+- correcting casing of files and imports
 
-- `PATCH` Renaming the `local-npm` directory to `npm-local`.
-- `PATCH` Include NPM --cache and NPM --tmp options in the rush.json file.
-- `PATCH` Limit Rush Rebuild parallelism to 'number-of-cores' simultaneous builds, optionally overridable on command line
+## 1.1.0
 
-# 1.0.5
-- `PATCH` Fixed a bug in Rush Generate which showed: `ERROR: Input file not found: undefined`
-  when packageReviewFile is omitted
+### Minor changes
 
-# 1.0.4
+- The "packageReviewFile" feature now supports a setting "ignoredNpmScopes" that can be used e.g. to ignore the "@types" scope
 
-- `MINOR` Added optional support for a "packageReviewFile" that helps detect when new
-  NPM package dependencies are introduced
+### Patches
 
-- `PATCH` Replaced JSON.parse() with jju for improved error handling.
+- Fixing Rush to run on UNIX and Linux.
 
-# 1.0.3
+## 1.0.10
 
-- `PATCH` Fix Mac OS X compatibility issue
+### Breaking changes
 
-# 1.0.0
+- Rename `shouldTrackChanges` to `shouldPublish` which indicates whether a package should be included for the `publish` workflow.
+
+### Minor changes
+
+- Updating `rush install` to be transactional.
+
+### Patches
+
+- Updating the `publish` workflow.
+
+## 1.0.9
+
+### Patches
+
+- Updating the `publish` workflow.
+
+## 1.0.7
+
+### Patches
+
+- Renaming the `local-npm` directory to `npm-local`.
+- Include NPM --cache and NPM --tmp options in the rush.json file.
+- Limit Rush Rebuild parallelism to 'number-of-cores' simultaneous builds, optionally overridable on command line
+
+## 1.0.5
+
+### Patches
+
+- Fixed a bug in Rush Generate which showed: `ERROR: Input file not found: undefined` when packageReviewFile is omitted
+
+## 1.0.4
+
+### Minor changes
+
+- Added optional support for a "packageReviewFile" that helps detect when new NPM package dependencies are introduced
+
+### Patches
+
+- Replaced JSON.parse() with jju for improved error handling.
+
+## 1.0.3
+
+### Patches
+
+- Fix Mac OS X compatibility issue
+
+## 1.0.0
 
 *Initial release*
+
