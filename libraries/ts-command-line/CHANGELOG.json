@@ -1,0 +1,29 @@
+{
+  "name": "@microsoft/ts-command-line",
+  "entries": [
+    {
+      "version": "1.2.0",
+      "tag": "@microsoft/ts-command-line_v1.2.0",
+      "comments": {}
+    },
+    {
+      "version": "1.1.0",
+      "tag": "@microsoft/ts-command-line_v1.1.0",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Introduces a new command line argument type for a list of strings"
+          },
+          {
+            "comment": "Introduces a new command line argument type for integers"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.1",
+      "tag": "@microsoft/ts-command-line_v1.0.1",
+      "comments": {}
+    }
+  ]
+}
