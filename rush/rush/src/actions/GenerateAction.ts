@@ -109,7 +109,14 @@ export default class GenerateAction extends CommandLineAction {
     };
 
     console.log('Creating temp projects...');
-    for (const rushProject of this._rushConfiguration.projects) {
+
+    // To make the common/package.json file more readable, sort alphabetically
+    // according to rushProject.tempProjectName instead of packageName.
+    const sortedRushProjects: RushConfigurationProject[] = this._rushConfiguration.projects.slice(0);
+    sortedRushProjects.sort(
+      (a: RushConfigurationProject, b: RushConfigurationProject) => a.tempProjectName.localeCompare(b.tempProjectName)
+    );
+    for (const rushProject of sortedRushProjects) {
       const packageJson: PackageJson = rushProject.packageJson;
 
       const tempProjectName: string = rushProject.tempProjectName;

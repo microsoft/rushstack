@@ -135,17 +135,16 @@ export default class RushConfiguration {
   /**
    * This generates the unique names that are used to create temporary projects
    * in the Rush common folder.
+   * NOTE: sortedProjectJsons is sorted by the caller.
    */
-  private static _generateTempNamesForProjects(projectJsons: IRushConfigurationProjectJson[]):
+  private static _generateTempNamesForProjects(sortedProjectJsons: IRushConfigurationProjectJson[]):
     Map<IRushConfigurationProjectJson, string> {
 
     const tempNamesByProject: Map<IRushConfigurationProjectJson, string> =
       new Map<IRushConfigurationProjectJson, string>();
     const usedTempNames: Set<string> = new Set<string>();
 
-    const sortedProjectJsons: IRushConfigurationProjectJson[] = projectJsons.sort(
-      (a: IRushConfigurationProjectJson, b: IRushConfigurationProjectJson) => a.packageName.localeCompare(a.packageName)
-    );
+    // NOTE: projectJsons was already sorted in alphabetical order by the caller.
     for (const projectJson of sortedProjectJsons) {
       // If the name is "@ms/MyProject", extract the "MyProject" part
       const unscopedName: string = Utilities.parseScopedPackageName(projectJson.packageName).name;
@@ -232,10 +231,17 @@ export default class RushConfiguration {
     this._projects = [];
     this._projectsByName = new Map<string, RushConfigurationProject>();
 
-    const tempNamesByProject: Map<IRushConfigurationProjectJson, string>
-      = RushConfiguration._generateTempNamesForProjects(rushConfigurationJson.projects);
+    // We sort the projects array in alphabetical order.  This ensures that the packages
+    // are processed in a deterministic order by the various Rush algorithms.
+    const sortedProjectJsons: IRushConfigurationProjectJson[] = rushConfigurationJson.projects.slice(0);
+    sortedProjectJsons.sort(
+      (a: IRushConfigurationProjectJson, b: IRushConfigurationProjectJson) => a.packageName.localeCompare(b.packageName)
+    );
 
-    for (const projectJson of rushConfigurationJson.projects) {
+    const tempNamesByProject: Map<IRushConfigurationProjectJson, string>
+      = RushConfiguration._generateTempNamesForProjects(sortedProjectJsons);
+
+    for (const projectJson of sortedProjectJsons) {
       const tempProjectName: string = tempNamesByProject.get(projectJson);
       const project: RushConfigurationProject = new RushConfigurationProject(projectJson, this, tempProjectName);
       this._projects.push(project);
