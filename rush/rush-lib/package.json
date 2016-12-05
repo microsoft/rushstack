@@ -11,6 +11,7 @@
   },
   "license": "SEE LICENSE IN LICENSE.docx",
   "dependencies": {
+    "@types/es6-collections": "^0.5.29",
     "@types/node": ">=6.0.51 <7.0.0",
     "@microsoft/stream-collator": "~1.0.1",
     "fs-extra": "~0.26.0",

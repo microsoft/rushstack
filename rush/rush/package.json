@@ -12,6 +12,8 @@
   },
   "license": "SEE LICENSE IN LICENSE.docx",
   "dependencies": {
+    "@types/es6-promise": "0.0.32",
+    "@types/es6-collections": "^0.5.29",
     "@microsoft/rush-lib": "1.3.0",
     "@microsoft/package-deps-hash": "~0.0.4",
     "@microsoft/stream-collator": "~1.0.1",
