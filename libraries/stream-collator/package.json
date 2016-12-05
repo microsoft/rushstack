@@ -17,6 +17,7 @@
   "devDependencies": {
     "@types/chai": ">=3.4.34 <3.6.0",
     "@types/mocha": ">=2.2.33 <2.6.0",
+    "@types/es6-collections": "^0.5.29",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "mocha": "~2.5.3",
