@@ -9,6 +9,8 @@
     "outDir": "lib",
     "listFiles": false,
     "types": [
+      "es6-collections",
+      "es6-promise",
       "mocha"
     ]
   }

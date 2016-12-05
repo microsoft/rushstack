@@ -6,7 +6,10 @@
     "jsx": "react",
     "declaration": true,
     "sourceMap": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "types": [
+      "es6-collections"
+    ]
   },
   "files": [ "typings/tsd.d.ts" ]
 }
