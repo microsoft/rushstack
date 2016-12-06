@@ -5,6 +5,8 @@ import * as colors from 'colors';
 import * as path from 'path';
 import * as fsx from 'fs-extra';
 import { EOL } from 'os';
+import * as child_process from 'child_process';
+import * as semver from 'semver';
 import {
   CommandLineAction,
   CommandLineFlagParameter,
@@ -26,6 +28,7 @@ import ChangelogGenerator from './ChangelogGenerator';
 export default class PublishAction extends CommandLineAction {
   private _addCommitDetails: CommandLineFlagParameter;
   private _apply: CommandLineFlagParameter;
+  private _includeAll: CommandLineFlagParameter;
   private _npmAuthToken: CommandLineStringParameter;
   private _rushConfiguration: RushConfiguration;
   private _parser: RushCommandLineParser;
@@ -88,6 +91,12 @@ export default class PublishAction extends CommandLineAction {
       description:
       'Provide the default scope npm auth token to be passed into npm publish for global package publishing.'
     });
+    this._includeAll = this.defineFlagParameter({
+      parameterLongName: '--include-all',
+      parameterShortName: undefined,
+      description: 'If this flag is specified with --publish, all packages with ShouldPublish being true ' +
+        'will be published if their version is newer than published version.'
+    });
   }
 
   /**
@@ -105,6 +114,16 @@ export default class PublishAction extends CommandLineAction {
       return;
     }
 
+    if (this._includeAll.value && this._publish.value) {
+      this._publishAll(allPackages);
+    } else {
+      this._publishChanges(allPackages);
+    }
+
+    console.log(EOL + colors.green('Rush publish finished successfully.'));
+  }
+
+  private _publishChanges(allPackages: Map<string, RushConfigurationProject>): void {
     const changesPath: string = path.join(this._rushConfiguration.commonFolder, 'changes');
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
@@ -135,7 +154,7 @@ export default class PublishAction extends CommandLineAction {
       // NPM publish the things that need publishing.
       for (const change of orderedChanges) {
         if (change.changeType > ChangeType.dependency) {
-          this._npmPublish(change, allPackages.get(change.packageName).projectFolder);
+          this._npmPublish(change.packageName, allPackages.get(change.packageName).projectFolder);
         }
       }
 
@@ -150,8 +169,24 @@ export default class PublishAction extends CommandLineAction {
       this._gitPush(this._targetBranch.value);
       this._gitDeleteBranch(tempBranch);
     }
+  }
 
-    console.log(EOL + colors.green('Rush publish finished successfully.'));
+  private _publishAll(allPackages: Map<string, RushConfigurationProject>): void {
+    let updated: boolean = false;
+    allPackages.forEach((packageConfig, packageName) => {
+      if (packageConfig.shouldPublish) {
+        if (this._isNewerThanPublished(packageConfig)) {
+          this._npmPublish(packageName, packageConfig.projectFolder);
+          this._gitAddTag(packageName, packageConfig.packageJson.version);
+          updated = true;
+        } else {
+          console.log(`Skip ${packageName}. Not updated.`);
+        }
+      }
+    });
+    if (updated) {
+      this._gitPush(this._targetBranch.value);
+    }
   }
 
   private _getEnvArgs(): { [key: string]: string } {
@@ -253,15 +288,18 @@ export default class PublishAction extends CommandLineAction {
         change.changeType > ChangeType.dependency &&
         this._rushConfiguration.projectsByName.get(change.packageName).shouldPublish
       ) {
-        const tagName: string = PublishUtilities.createTagname(change.packageName, change.newVersion);
-
-        // Tagging only happens if we're publishing to real NPM and committing to git.
-        this._execCommand(
-          !!this._targetBranch.value && !!this._publish.value && !this._registryUrl.value,
-          'git',
-          ['tag', '-a', tagName, '-m', `"${change.packageName} v${change.newVersion}"`]);
+        this._gitAddTag(change.packageName, change.newVersion);
       }
     }
+  }
+
+  private _gitAddTag(packageName: string, packageVersion: string): void {
+    // Tagging only happens if we're publishing to real NPM and committing to git.
+    const tagName: string = PublishUtilities.createTagname(packageName, packageVersion);
+    this._execCommand(
+      !!this._targetBranch.value && !!this._publish.value && !this._registryUrl.value,
+      'git',
+      ['tag', '-a', tagName, '-m', `"${packageName} v${packageVersion}"`]);
   }
 
   private _gitCommit(): void {
@@ -275,11 +313,11 @@ export default class PublishAction extends CommandLineAction {
       ['push', 'origin', 'HEAD:' + branchName, '--follow-tags', '--verbose']);
   }
 
-  private _npmPublish(change: IChangeInfo, packagePath: string): void {
+  private _npmPublish(packageName: string, packagePath: string): void {
     const env: { [key: string]: string } = this._getEnvArgs();
     const args: string[] = ['publish'];
 
-    if (this._rushConfiguration.projectsByName.get(change.packageName).shouldPublish) {
+    if (this._rushConfiguration.projectsByName.get(packageName).shouldPublish) {
       if (this._registryUrl.value) {
         env['npm_config_registry'] = this._registryUrl.value; // tslint:disable-line:no-string-literal
       }
@@ -297,4 +335,30 @@ export default class PublishAction extends CommandLineAction {
     }
   }
 
+  private _isNewerThanPublished(packageConfig: RushConfigurationProject): boolean {
+    let isNewer: boolean = false;
+    const env: { [key: string]: string } = this._getEnvArgs();
+    if (this._registryUrl.value) {
+        env['npm_config_registry'] = this._registryUrl.value; // tslint:disable-line:no-string-literal
+      }
+    try {
+      const publishedVersion: string = child_process.execSync(
+        `npm view ${packageConfig.packageName} version`,
+        {
+          cwd: packageConfig.projectFolder,
+          env: env,
+          stdio: ['inherit']
+        }).toString();
+      isNewer = semver.gt(packageConfig.packageJson.version, publishedVersion);
+    } catch (error) {
+      if (error.message.indexOf('npm ERR! 404') >= 0) {
+        console.log(`Package ${packageConfig.packageName} does not have published version.`
+        + ` New version is ${packageConfig.packageJson.version}`);
+        isNewer = true;
+      } else {
+        throw error;
+      }
+    }
+    return isNewer;
+  }
 }

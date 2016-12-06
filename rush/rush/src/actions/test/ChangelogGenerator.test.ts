@@ -144,4 +144,59 @@ describe('updateIndividualChangelog', () => {
     expect(actualResult).eql(expectedResult);
   });
 
+  it('can handle dependency bumps', () => {
+    const actualResult: IChangelog = ChangelogGenerator.updateIndividualChangelog(
+      {
+        packageName: 'a',
+        newVersion: '0.0.2',
+        changeType: ChangeType.dependency,
+        changes: [{
+          packageName: 'a',
+          type: 'dependency',
+          changeType: ChangeType.dependency,
+          comment: 'Updating a'
+        }]
+      },
+      path.resolve(__dirname, 'exampleChangelog'),
+      false
+    );
+
+    const expectedResult: IChangelog = {
+      name: 'a',
+      entries: [
+        {
+          version: '0.0.2',
+          tag: 'a_v0.0.2',
+          date: undefined,
+          comments: {
+            dependency: [
+              {
+                author: undefined,
+                comment: 'Updating a',
+                commit: undefined
+              }
+            ]
+          }
+        },
+        {
+          version: '0.0.1',
+          tag: 'a_v0.0.1',
+          date: 'Wed, 30 Nov 2016 18:37:45 GMT',
+          comments: {
+            patch: [
+              {
+                comment: 'Patching a'
+              }
+            ]
+          }
+        }
+      ]
+    };
+
+    // Remove date.
+    actualResult.entries[0].date = undefined;
+
+    expect(actualResult).eql(expectedResult);
+  });
+
 });

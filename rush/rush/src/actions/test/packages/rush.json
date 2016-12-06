@@ -25,6 +25,16 @@
       "packageName": "d",
       "projectFolder": "d",
       "reviewCategory": "third-party"
+    },
+    {
+      "packageName": "cyclic-dep-1",
+      "projectFolder": "cyclic-dep-1",
+      "reviewCategory": "third-party"
+    },
+    {
+      "packageName": "cyclic-dep-2",
+      "projectFolder": "cyclic-dep-2",
+      "reviewCategory": "third-party"
     }
   ]
 }

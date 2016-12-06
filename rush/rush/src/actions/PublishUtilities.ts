@@ -49,13 +49,24 @@ export default class PublishUtilities {
       const changeRequest: IChangeInfo = JSON.parse(fsx.readFileSync(fullPath, 'utf8'));
 
       if (includeCommitDetails) {
-        _updateCommitDetails(fullPath, changeRequest.changes);
+        PublishUtilities._updateCommitDetails(fullPath, changeRequest.changes);
       }
 
       for (const change of changeRequest.changes) {
-        _addChange(change, allChanges, allPackages);
+        PublishUtilities._addChange(change, allChanges, allPackages);
       }
     });
+
+    // For each requested package change, ensure downstream dependencies are also updated.
+    for (const packageName in allChanges) {
+      if (allChanges.hasOwnProperty(packageName)) {
+        PublishUtilities._updateDownstreamDependencies(
+          allChanges[packageName],
+          allChanges,
+          allPackages
+        );
+      }
+    }
 
     // Update orders so that downstreams are marked to come after upstreams.
     for (const packageName in allChanges) {
@@ -106,7 +117,7 @@ export default class PublishUtilities {
     shouldCommit: boolean
   ): void {
 
-    Object.keys(allChanges).forEach(packageName => _updatePackage(
+    Object.keys(allChanges).forEach(packageName => PublishUtilities._writePackageChanges(
       allChanges[packageName],
       allChanges,
       allPackages,
@@ -144,152 +155,224 @@ export default class PublishUtilities {
     });
     return missingProjects;
   }
-}
 
-function _updateCommitDetails(filename: string, changes: IChangeInfo[]): void {
-  try {
-    const fileLog: string = execSync('git log -n 1 ' + filename, { cwd: path.dirname(filename) }).toString();
-    const author: string = fileLog.match(/Author: (.*)/)[1];
-    const commit: string = fileLog.match(/commit (.*)/)[1];
+  private static _updateCommitDetails(filename: string, changes: IChangeInfo[]): void {
+    try {
+      const fileLog: string = execSync('git log -n 1 ' + filename, { cwd: path.dirname(filename) }).toString();
+      const author: string = fileLog.match(/Author: (.*)/)[1];
+      const commit: string = fileLog.match(/commit (.*)/)[1];
 
-    changes.forEach(change => {
-      change.author = author;
-      change.commit = commit;
+      changes.forEach(change => {
+        change.author = author;
+        change.commit = commit;
+      });
+    } catch (e) { /* no-op, best effort. */ }
+  }
+
+  private static _writePackageChanges(
+    change: IChangeInfo,
+    allChanges: IChangeInfoHash,
+    allPackages: Map<string, RushConfigurationProject>,
+    shouldCommit: boolean
+  ): void {
+
+    console.log(
+      `${EOL}* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: ${ChangeType[change.changeType]} update ` +
+      `for ${change.packageName} to ${change.newVersion}`
+    );
+
+    const project: RushConfigurationProject = allPackages.get(change.packageName);
+    const pkg: IPackageJson = project.packageJson;
+    const packagePath: string = path.join(project.projectFolder, 'package.json');
+
+    pkg.version = change.newVersion;
+
+    // Update the package's dependencies.
+    PublishUtilities._updateDependencies(pkg.name, pkg.dependencies, allChanges, allPackages);
+    // Update the package's dev dependencies.
+    PublishUtilities._updateDependencies(pkg.name, pkg.devDependencies, allChanges, allPackages);
+
+    change.changes.forEach(subChange => {
+      if (subChange.comment) {
+        console.log(` - [${ChangeType[subChange.changeType]}] ${subChange.comment}`);
+      }
     });
-  } catch (e) { /* no-op, best effort. */ }
-}
 
-function _updatePackage(
-  change: IChangeInfo,
-  allChanges: IChangeInfoHash,
-  allPackages: Map<string, RushConfigurationProject>,
-  shouldCommit: boolean
-): void {
+    if (shouldCommit) {
+      fsx.writeFileSync(packagePath, JSON.stringify(pkg, undefined, 2), 'utf8');
+    }
+  }
 
-  console.log(
-    `${EOL}* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: ${ChangeType[change.changeType]} update ` +
-    `for ${change.packageName} to ${change.newVersion}`
-  );
+  private static _updateDependencies(
+    packageName: string,
+    dependencies: { [key: string]: string; },
+    allChanges: IChangeInfoHash,
+    allPackages: Map<string, RushConfigurationProject>
+    ): void {
 
-  const project: RushConfigurationProject = allPackages.get(change.packageName);
-  const pkg: IPackageJson = project.packageJson;
-  const packagePath: string = path.join(project.projectFolder, 'package.json');
-
-  pkg.version = change.newVersion;
-
-  // Update the package's dependencies.
-  if (pkg.dependencies) {
-    Object.keys(pkg.dependencies).forEach(depName => {
+    if (dependencies) {
+    Object.keys(dependencies).forEach(depName => {
       const depChange: IChangeInfo = allChanges[depName];
 
       if (depChange && depChange.changeType >= ChangeType.patch) {
-        _updateDependencyVersion(pkg, depName, depChange);
+        PublishUtilities._updateDependencyVersion(
+          packageName,
+          dependencies,
+          depName,
+          depChange,
+          allChanges,
+          allPackages);
       }
     });
-  }
-
-  change.changes.forEach(subChange => {
-    if (subChange.comment) {
-      console.log(` - [${ChangeType[subChange.changeType]}] ${subChange.comment}`);
     }
-  });
-
-  if (shouldCommit) {
-    fsx.writeFileSync(packagePath, JSON.stringify(pkg, undefined, 2), 'utf8');
-  }
-}
-
-function _addChange(
-  change: IChangeInfo,
-  allChanges: IChangeInfoHash,
-  allPackages: Map<string, RushConfigurationProject>
-): void {
-
-  const packageName: string = change.packageName;
-  const project: RushConfigurationProject = allPackages.get(packageName);
-
-  if (!project) {
-    throw new Error(
-      `The package ${packageName} was requested for publishing but does not exist. Please fix change requests.`
-    );
   }
 
-  const pkg: IPackageJson = project.packageJson;
-  let currentChange: IChangeInfo;
+  /**
+   * Adds the given change to the allChanges map.
+   *
+   * @returns true if the change caused the dependency change type to increase.
+   */
+  private static _addChange(
+    change: IChangeInfo,
+    allChanges: IChangeInfoHash,
+    allPackages: Map<string, RushConfigurationProject>
+  ): boolean {
+    let hasChanged: boolean = false;
+    const packageName: string = change.packageName;
+    const project: RushConfigurationProject = allPackages.get(packageName);
 
-  // If the given change does not have a changeType, derive it from the "type" string.
-  if (change.changeType === undefined) {
-    change.changeType = ChangeType[change.type];
+    if (!project) {
+      throw new Error(
+        `The package ${packageName} was requested for publishing but does not exist. Please fix change requests.`
+      );
+    }
+
+    const pkg: IPackageJson = project.packageJson;
+    let currentChange: IChangeInfo;
+
+    // If the given change does not have a changeType, derive it from the "type" string.
+    if (change.changeType === undefined) {
+      change.changeType = ChangeType[change.type];
+    }
+
+    if (!allChanges[packageName]) {
+      hasChanged = true;
+      currentChange = allChanges[packageName] = {
+        packageName,
+        changeType: change.changeType,
+        order: 0,
+        changes: [change]
+      };
+    } else {
+      currentChange = allChanges[packageName];
+
+      const oldChangeType: ChangeType = currentChange.changeType;
+
+      currentChange.changeType = Math.max(currentChange.changeType, change.changeType);
+      currentChange.changes.push(change);
+
+      hasChanged = hasChanged || (oldChangeType !== currentChange.changeType);
+    }
+
+    currentChange.newVersion = change.changeType >= ChangeType.patch ?
+      semver.inc(pkg.version, ChangeType[currentChange.changeType]) :
+      pkg.version;
+
+    currentChange.newRangeDependency =
+      `>=${currentChange.newVersion} <${semver.inc(currentChange.newVersion, 'major')}`;
+
+    return hasChanged;
   }
 
-  if (!allChanges[packageName]) {
-    currentChange = allChanges[packageName] = {
-      packageName,
-      changeType: change.changeType,
-      order: 0,
-      changes: [change]
-    };
-  } else {
-    currentChange = allChanges[packageName];
-    currentChange.changeType = Math.max(currentChange.changeType, change.changeType);
-    currentChange.changes.push(change);
+  private static _updateDownstreamDependencies(
+    change: IChangeInfo,
+    allChanges: IChangeInfoHash,
+    allPackages: Map<string, RushConfigurationProject>
+  ): void {
+
+    const packageName: string = change.packageName;
+    const downstreamNames: string[] = allPackages.get(packageName).downstreamDependencyProjects;
+
+    // Iterate through all downstream dependencies for the package.
+    if (change.changeType >= ChangeType.patch && downstreamNames) {
+      for (const depName of downstreamNames) {
+        const pkg: IPackageJson = allPackages.get(depName).packageJson;
+
+        PublishUtilities._updateDownstreamDependency(pkg.name, pkg.dependencies, change, allChanges, allPackages);
+        PublishUtilities._updateDownstreamDependency(pkg.name, pkg.devDependencies, change, allChanges, allPackages);
+      }
+    }
   }
 
-  currentChange.newVersion = change.changeType >= ChangeType.patch ?
-    semver.inc(pkg.version, ChangeType[currentChange.changeType]) :
-    pkg.version;
+  private static _updateDownstreamDependency(
+    parentPackageName: string,
+    dependencies: { [packageName: string]: string },
+    change: IChangeInfo,
+    allChanges: IChangeInfoHash,
+    allPackages: Map<string, RushConfigurationProject>
+    ): void {
 
-  currentChange.newRangeDependency = `>=${currentChange.newVersion} <${semver.inc(currentChange.newVersion, 'major')}`;
+    if (dependencies && dependencies[change.packageName]) {
+      const requiredVersion: string = dependencies[change.packageName];
 
-  _updateDownstreamDependencies(currentChange, allChanges, allPackages);
-}
-
-function _updateDownstreamDependencies(
-  change: IChangeInfo,
-  allChanges: IChangeInfoHash,
-  allPackages: Map<string, RushConfigurationProject>
-): void {
-
-  const packageName: string = change.packageName;
-  const downstreamNames: string[] = allPackages.get(packageName).downstreamDependencyProjects;
-
-  // Iterate through all downstream dependencies for the package.
-  if (change.changeType >= ChangeType.patch && downstreamNames) {
-    for (const depName of downstreamNames) {
-      const pkg: IPackageJson = allPackages.get(depName).packageJson;
-      const requiredVersion: string = pkg.dependencies[packageName];
-
-      // If the version range has not yet been updated to this version, update it.
+      // If the version range exists and has not yet been updated to this version, update it.
       if (requiredVersion !== change.newRangeDependency) {
 
-        // Either it already satisfies the new version, or doesn't. If not, the downstream dep needs to be republished.
+        // Either it already satisfies the new version, or doesn't.
+        // If not, the downstream dep needs to be republished.
         const changeType: ChangeType = semver.satisfies(change.newVersion, requiredVersion) ?
           ChangeType.dependency :
           ChangeType.patch;
 
-        _addChange({
-          packageName: pkg.name,
-          changeType,
-          comment: `Updating dependency version for ${packageName} (was ${requiredVersion})`
+        const hasChanged: boolean = PublishUtilities._addChange({
+          packageName: parentPackageName,
+          changeType
         }, allChanges, allPackages);
+
+        if (hasChanged) {
+          // Only re-evaluate downstream dependencies if updating the parent package's dependency
+          // caused a version bump.
+          PublishUtilities._updateDownstreamDependencies(
+            allChanges[parentPackageName],
+            allChanges,
+            allPackages
+          );
+        }
       }
     }
   }
-}
 
-function _updateDependencyVersion(
-  packageJson: IPackageJson,
-  dependencyName: string,
-  dependencyChange: IChangeInfo
-): void {
-  const currentDependencyVersion: string = packageJson.dependencies[dependencyName];
-  if (PublishUtilities.isRangeDependency(currentDependencyVersion)) {
-    packageJson.dependencies[dependencyName] = dependencyChange.newRangeDependency;
-  } else if (currentDependencyVersion.lastIndexOf('~', 0) === 0) {
-    packageJson.dependencies[dependencyName] = '~' + dependencyChange.newVersion;
-  } else if (currentDependencyVersion.lastIndexOf('^', 0) === 0) {
-    packageJson.dependencies[dependencyName] = '^' + dependencyChange.newVersion;
-  } else {
-    packageJson.dependencies[dependencyName] = dependencyChange.newVersion;
+  private static _updateDependencyVersion(
+    packageName: string,
+    dependencies: { [key: string]: string; },
+    dependencyName: string,
+    dependencyChange: IChangeInfo,
+    allChanges: IChangeInfoHash,
+    allPackages: Map<string, RushConfigurationProject>
+  ): void {
+    const currentDependencyVersion: string = dependencies[dependencyName];
+
+    if (PublishUtilities.isRangeDependency(currentDependencyVersion)) {
+      dependencies[dependencyName] = dependencyChange.newRangeDependency;
+    } else if (currentDependencyVersion.lastIndexOf('~', 0) === 0) {
+      dependencies[dependencyName] = '~' + dependencyChange.newVersion;
+    } else if (currentDependencyVersion.lastIndexOf('^', 0) === 0) {
+      dependencies[dependencyName] = '^' + dependencyChange.newVersion;
+    } else {
+      dependencies[dependencyName] = dependencyChange.newVersion;
+    }
+
+    // Add dependency version update comment.
+    PublishUtilities._addChange(
+      {
+        packageName: packageName,
+        changeType: ChangeType.dependency,
+        comment:
+          `Updating dependency "${dependencyName}" from \`${currentDependencyVersion}\`` +
+          ` to \`${dependencies[dependencyName]}\``
+      },
+      allChanges,
+      allPackages
+    );
   }
 }

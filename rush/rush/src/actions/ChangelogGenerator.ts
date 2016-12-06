@@ -139,7 +139,7 @@ export default class ChangelogGenerator {
     const changelog: IChangelog = ChangelogGenerator._getChangelog(change.packageName, projectFolder);
 
     if (
-      change.changeType > ChangeType.dependency &&
+      change.changeType > ChangeType.none &&
       !changelog.entries.some(entry => entry.version === change.newVersion)) {
 
       const changelogEntry: IChangeLogEntry = {
@@ -150,16 +150,20 @@ export default class ChangelogGenerator {
       };
 
       change.changes.forEach(individualChange => {
-        // Initialize the comments array only as necessary.
-        const comments: IChangeLogComment[] =
-          changelogEntry.comments[individualChange.type] =
-          changelogEntry.comments[individualChange.type] || [];
+        if (individualChange.comment) {
 
-        comments.push({
-          author: individualChange.author,
-          commit: individualChange.commit,
-          comment: individualChange.comment
-        });
+          // Initialize the comments array only as necessary.
+          const changeTypeString: string = ChangeType[individualChange.changeType];
+          const comments: IChangeLogComment[] =
+            changelogEntry.comments[changeTypeString] =
+            changelogEntry.comments[changeTypeString] || [];
+
+          comments.push({
+            author: individualChange.author,
+            commit: individualChange.commit,
+            comment: individualChange.comment
+          });
+        }
       });
 
       // Add the changelog entry to the start of the list.
