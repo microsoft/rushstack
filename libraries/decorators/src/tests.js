@@ -1,4 +1,4 @@
-require('@microsoft/sp-module-loader/lib/FrameworkPolyfills');
+require('@microsoft/sp-loader/lib/FrameworkPolyfills');
 
 var context = require.context('.', true, /.+\.test\.js?$/);
 
