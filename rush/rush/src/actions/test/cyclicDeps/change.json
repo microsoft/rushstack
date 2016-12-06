@@ -1,0 +1,7 @@
+{
+  "changes": [{
+    "packageName": "cyclic-dep-1",
+    "type": "major",
+    "comment": "Patching cyclic dep"
+  }]
+}

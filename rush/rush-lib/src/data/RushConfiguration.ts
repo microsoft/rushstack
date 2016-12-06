@@ -261,15 +261,8 @@ export default class RushConfiguration {
       });
 
       // Compute the downstream dependencies within the list of Rush projects.
-      if (project.packageJson.dependencies) {
-        Object.keys(project.packageJson.dependencies).forEach(dependencyName => {
-          const depProject: RushConfigurationProject = this._projectsByName.get(dependencyName);
-
-          if (depProject) {
-            depProject.downstreamDependencyProjects.push(project.packageName);
-          }
-        });
-      }
+      this._populateDownstreamDependencies(project.packageJson.dependencies, project.packageName);
+      this._populateDownstreamDependencies(project.packageJson.devDependencies, project.packageName);
     }
   }
 
@@ -413,5 +406,18 @@ export default class RushConfiguration {
 
   public getProjectByName(projectName: string): RushConfigurationProject {
     return this._projectsByName.get(projectName);
+  }
+
+  private _populateDownstreamDependencies(dependencies: { [key: string]: string }, packageName: string): void {
+    if (!dependencies) {
+      return;
+    }
+    Object.keys(dependencies).forEach(dependencyName => {
+      const depProject: RushConfigurationProject = this._projectsByName.get(dependencyName);
+
+      if (depProject) {
+        depProject.downstreamDependencyProjects.push(packageName);
+      }
+    });
   }
 }

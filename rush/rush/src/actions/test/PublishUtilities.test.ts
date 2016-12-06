@@ -77,6 +77,22 @@ describe('findChangeRequests', () => {
     expect(allChanges['c'].newVersion).equals('1.0.0', 'c was not left unchanged');
   });
 
+  it('returns 2 changes when bumping cyclic dependencies', () => {
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
+      allPackages,
+      path.join(__dirname, 'cyclicDeps'));
+
+    expect(Object.keys(allChanges).length).to.equal(2);
+
+    expect(allChanges).has.property('cyclic-dep-1');
+    expect(allChanges).has.property('cyclic-dep-2');
+
+    expect(allChanges['cyclic-dep-1'].changeType).equals(ChangeType.major, 'cyclic-dep-1 was not a major');
+    expect(allChanges['cyclic-dep-2'].changeType).equals(ChangeType.patch, 'cyclic-dep-2 was not a patch');
+  });
+
   it('can resolve multiple changes requests on the same package', () => {
     const allPackages: Map<string, RushConfigurationProject> =
       RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
