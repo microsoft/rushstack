@@ -53,7 +53,11 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
 
   public abstract executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (result?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
 
-public log(message: string): void {
+  public onDefineParameters(): void {
+    /* no-op */
+  }
+
+  public log(message: string): void {
     log(`[${gutil.colors.cyan(this.name)}] ${message}`);
   }
 

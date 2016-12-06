@@ -2,6 +2,8 @@
 
 /* tslint:disable:max-line-length */
 
+import { ICommandLineActionOptions } from '@microsoft/ts-command-line';
+
 import { GulpTask } from './tasks/GulpTask';
 import { GulpProxy } from './GulpProxy';
 import { IExecutable } from './IExecutable';
@@ -12,6 +14,7 @@ export { IExecutable } from './IExecutable';
 import { initialize as initializeLogging, markTaskCreationTime, generateGulpError, setWatchMode } from './logging';
 import { getFlagValue, setConfigDefaults } from './config';
 import * as gulp from 'gulp';
+import { CoreBuildCommandLineParser } from './CoreBuildCommandLineParser';
 
 export * from './IBuildConfig';
 export * from './logging';
@@ -33,8 +36,16 @@ const path = require('path');
 const packageJSON: any = require(path.resolve(process.cwd(), 'package.json'));
 /* tslint:enable:no-any */
 
-const _taskMap: { [key: string]: IExecutable } = {};
+export interface ITaskMap {
+  [key: string]: {
+    action: IExecutable,
+    commandLine: ICommandLineActionOptions
+  };
+}
+
+const _taskMap: ITaskMap = {};
 const _uniqueTasks: IExecutable[]  = [];
+
 const packageFolder: string =
   (packageJSON.directories && packageJSON.directories.packagePath) ?
   packageJSON.directories.packagePath : '';
@@ -108,8 +119,11 @@ export function getConfig(): IBuildConfig {
  * @param  {IExecutable} task
  * @returns IExecutable
  */
-export function task(taskName: string, task: IExecutable): IExecutable {
-  _taskMap[taskName] = task;
+export function task(taskName: string, task: IExecutable, commandLine?: ICommandLineActionOptions): IExecutable {
+  _taskMap[taskName] = {
+    action: task,
+    commandLine: undefined
+  };
 
   _trackTask(task);
 
@@ -128,15 +142,24 @@ export interface ICustomGulpTask {
 
 class CustomTask extends GulpTask<void> {
   private _fn: ICustomGulpTask;
-  constructor(name: string, fn: ICustomGulpTask) {
+  private _onDefine: () => void;
+
+  constructor(name: string, fn: ICustomGulpTask, defineParameters: () => void) {
     super();
     this.name = name;
     this._fn = fn.bind(this);
+    this._onDefine = defineParameters;
   }
 
   public executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (failure?: Object) => void):
     Promise<Object> | NodeJS.ReadWriteStream | void {
     return this._fn(gulp, getConfig(), completeCallback);
+  }
+
+  public onDefineParameters(): void {
+    if (this._onDefine) {
+      this._onDefine();
+    }
   }
 }
 
@@ -148,8 +171,8 @@ class CustomTask extends GulpTask<void> {
  * @param {boolean} addCommandLine - true if this task should be registered to the command line
  * @param {ICustomGulpTask} fn - the callback function to execute when this task runs
  */
-export function subTask(taskName: string, fn: ICustomGulpTask): IExecutable {
-  const customTask: CustomTask = new CustomTask(taskName, fn);
+export function subTask(taskName: string, fn: ICustomGulpTask, defineParameters?: () => void): IExecutable {
+  const customTask: CustomTask = new CustomTask(taskName, fn, defineParameters);
   return customTask;
 }
 
@@ -172,6 +195,11 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
   let lastError: boolean = undefined;
 
   return {
+    onDefineParameters: () => {
+      if (task.onDefineParameters) {
+        task.onDefineParameters();
+      }
+    },
     execute: (buildConfig: IBuildConfig): Promise<void> => {
 
       setWatchMode();
@@ -240,6 +268,13 @@ export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutabl
   }
 
   return {
+    onDefineParameters: () => {
+      for (const task of flatTasks) {
+        if (task.onDefineParameters) {
+          task.onDefineParameters();
+        }
+      }
+    },
     execute: (buildConfig: IBuildConfig): Promise<void> => {
       let output: Promise<void> = Promise.resolve<void>();
 
@@ -266,6 +301,13 @@ export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecuta
   }
 
   return {
+    onDefineParameters: () => {
+      for (const task of flattenTasks) {
+        if (task.onDefineParameters) {
+          task.onDefineParameters();
+        }
+      }
+    },
     /* tslint:disable:no-any */
     execute: (buildConfig: IBuildConfig): Promise<any> => {
     /* tslint:enable:no-any */
@@ -276,7 +318,7 @@ export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecuta
         }
 
         // Use promise all to make sure errors are propagated correctly
-      Promise.all<void>(promises).then(resolve, reject);
+        Promise.all<void>(promises).then(resolve, reject);
       });
     }
   };
@@ -298,7 +340,7 @@ export function initialize(gulp: gulp.Gulp): void {
 
   initializeLogging(gulp, undefined, undefined);
 
-  Object.keys(_taskMap).forEach(taskName => _registerTask(gulp, taskName, _taskMap[taskName]));
+  Object.keys(_taskMap).forEach(taskName => _registerTask(gulp, taskName, _taskMap[taskName].action));
 
   markTaskCreationTime();
 }
@@ -401,6 +443,18 @@ function _flatten<T>(arr: Array<T | T[]>): T[] {
 
 function _handleCommandLineArguments(): void {
   _handleTasksListArguments();
+
+  const parser: CoreBuildCommandLineParser =
+    new CoreBuildCommandLineParser(_taskMap);
+
+  try {
+    parser.execute();
+  } catch (err) {
+    console.log('catch!!');
+    console.log(err);
+    global['dontWatchExit'] = true; // tslint:disable-line:no-string-literal
+    process.exit();
+  }
 }
 
 function _handleTasksListArguments(): void {
