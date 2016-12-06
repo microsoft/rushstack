@@ -13,7 +13,7 @@
     "gulp": "~3.9.1"
   },
   "dependencies": {
-    "@microsoft/sp-module-loader": "~0.5.1",
+    "@microsoft/sp-loader": "~0.5.1",
     "@types/webpack-env": ">=1.12.1 <1.14.0"
   },
   "scripts": {
