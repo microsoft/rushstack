@@ -12,4 +12,7 @@ export interface IExecutable {
 
   /** Optional method to indicate directory matches to clean up when the clean task is run. */
   getCleanMatch?: (config: IBuildConfig, taskConfig?: any) => string[]; /* tslint:disable-line:no-any */
+
+  /** Gets the command line options which can be configured for this task */
+  onDefineParameters?: () => void;
 }
