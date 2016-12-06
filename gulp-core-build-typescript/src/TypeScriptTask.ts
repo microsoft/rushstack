@@ -62,6 +62,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   public name: string = 'typescript';
 
   public taskConfig: ITypeScriptTaskConfig = {
+    typescript: require('typescript'),
     failBuildOnErrors: true,
     reporter: {
       error: (error: ts.reporter.TypeScriptError): void => {
