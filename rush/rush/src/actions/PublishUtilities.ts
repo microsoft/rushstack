@@ -242,9 +242,9 @@ export default class PublishUtilities {
     const project: RushConfigurationProject = allPackages.get(packageName);
 
     if (!project) {
-      throw new Error(
-        `The package ${packageName} was requested for publishing but does not exist. Please fix change requests.`
-      );
+      console.log(`The package ${packageName} was requested for publishing but ` +
+        `does not exist. Skip this change.`);
+      return;
     }
 
     const pkg: IPackageJson = project.packageJson;
