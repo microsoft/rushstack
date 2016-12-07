@@ -19,17 +19,21 @@ export interface ISassTaskConfig {
   /** An array of glob patterns for locating SASS files. */
   sassMatch?: string[];
   /**
-   * If this option is specified, files ending with .module.scss extension will
+   * If this option is specified, ALL files will be treated as a module.scss and will
    * automatically generate a corresponding TypeScript file. All classes will be
    * appended with a hash to help ensure uniqueness on a page. This file can be
    * imported directly, and will contain an object describing the mangled class names.
    */
-  useCSSModules?: boolean;
+  treatAllFilesAsCSSModules?: boolean;
   /**
    * If true, we will generate a CSS in the lib folder. If false, the CSS is directly embedded
    * into the TypeScript file
    */
   dropCssFiles?: boolean;
+  /**
+   * If files are matched by sassMatch which do not end in .module.scss, throw a warning.
+   */
+  warnOnNonCSSModules?: boolean;
 }
 
 const _classMaps: { [file: string]: Object } = {};
@@ -43,8 +47,9 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     sassMatch: [
       'src/**/*.scss'
     ],
-    useCSSModules: false,
-    dropCssFiles: false
+    treatAllFilesAsCSSModules: false,
+    dropCssFiles: false,
+    warnOnNonCSSModules: false
   };
 
   public cleanMatch: string[] = [
@@ -74,22 +79,24 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     }));
 
     const srcPattern: string[] = this.taskConfig.sassMatch.slice(0);
-    const moduleSrcPattern: string[] = srcPattern.map((value: string) => value.replace('.scss', '.module.scss'));
 
-    if (this.taskConfig.useCSSModules) {
+    const checkFilenameForCSSModule: (file: gulpUtil.File) => void = (file: gulpUtil.File) => {
+      if (!path.basename(file.path).match(/module\.scss$/)) {
+        this.logWarning(`${file.path}: filename should end with module.scss`);
+      }
+    };
+
+    if (this.taskConfig.treatAllFilesAsCSSModules) {
       this.logVerbose('Generating css modules.');
       return this._processFiles(gulp, srcPattern, completeCallback, modulePostCssPlugins,
-        (file: gulpUtil.File) => {
-          if (!path.basename(file.path).match(/module\.css$/)) {
-            this.logWarning(`${file.path}: filename should end with module.scss`);
-          }
-        }
-      );
+        this.taskConfig.warnOnNonCSSModules ? checkFilenameForCSSModule : undefined);
     } else {
+      const moduleSrcPattern: string[] = srcPattern.map((value: string) => value.replace('.scss', '.module.scss'));
       moduleSrcPattern.forEach((value: string) => srcPattern.push(`!${value}`));
 
       return merge(this._processFiles(gulp, srcPattern, completeCallback, postCSSPlugins),
-                   this._processFiles(gulp, moduleSrcPattern, completeCallback, modulePostCssPlugins));
+                   this._processFiles(gulp, moduleSrcPattern, completeCallback, modulePostCssPlugins,
+                     this.taskConfig.warnOnNonCSSModules ? checkFilenameForCSSModule : undefined));
     }
   }
 
