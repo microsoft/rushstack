@@ -92,10 +92,15 @@ export default class ChangelogGenerator {
   ): void {
     for (const packageName in allChanges) {
       if (allChanges.hasOwnProperty(packageName)) {
-        ChangelogGenerator.updateIndividualChangelog(
-          allChanges[packageName],
-          allProjects.get(packageName).projectFolder,
-          shouldCommit);
+        const project: RushConfigurationProject = allProjects[packageName];
+
+        // Changelogs should only be generated for publishable projects.
+        if (project.shouldPublish) {
+          ChangelogGenerator.updateIndividualChangelog(
+            allChanges[packageName],
+            allProjects.get(packageName).projectFolder,
+            shouldCommit);
+        }
       }
     }
   }
