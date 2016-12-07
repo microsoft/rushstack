@@ -3,7 +3,7 @@
 let path = require('path');
 let build = require('@microsoft/web-library-build');
 
-build.sass.setConfig({ useCSSModules: true });
+build.sass.setConfig({ treatAllFilesAsCSSModules: true });
 build.webpack.setConfig({ configPath: null });
 build.karma.setConfig({ configPath: null });
 
