@@ -3,6 +3,8 @@ import gulp = require('gulp');
 import * as gulpUtil from 'gulp-util';
 import { EOL } from 'os';
 import { splitStyles } from '@microsoft/load-themed-styles';
+import through2 = require('through2');
+import * as path from 'path';
 /* tslint:disable:typedef */
 const merge = require('merge2');
 /* tslint:enable:typedef */
@@ -16,7 +18,7 @@ export interface ISassTaskConfig {
   postamble?: string;
   /** An array of glob patterns for locating SASS files. */
   sassMatch?: string[];
-  /** 
+  /**
    * If this option is specified, files ending with .module.scss extension will
    * automatically generate a corresponding TypeScript file. All classes will be
    * appended with a hash to help ensure uniqueness on a page. This file can be
@@ -76,7 +78,13 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
 
     if (this.taskConfig.useCSSModules) {
       this.logVerbose('Generating css modules.');
-      return this._processFiles(gulp, srcPattern, completeCallback, modulePostCssPlugins);
+      return this._processFiles(gulp, srcPattern, completeCallback, modulePostCssPlugins,
+        (file: gulpUtil.File) => {
+          if (!path.basename(file.path).match(/module\.css$/)) {
+            this.logWarning(`${file.path}: filename should end with module.scss`);
+          }
+        }
+      );
     } else {
       moduleSrcPattern.forEach((value: string) => srcPattern.push(`!${value}`));
 
@@ -90,8 +98,9 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     srcPattern: string[],
     /* tslint:disable:no-any */
     completeCallback: (result?: any) => void,
-    postCSSPlugins: any[]
+    postCSSPlugins: any[],
     /* tslint:enable:no-any */
+    checkFile?: (file: gulpUtil.File) => void
   ): NodeJS.ReadWriteStream {
     /* tslint:disable:typedef */
     const changed = require('gulp-changed');
@@ -106,7 +115,21 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
 
     const tasks: NodeJS.ReadWriteStream[] = [];
 
-    const baseTask: NodeJS.ReadWriteStream = gulp.src(srcPattern)
+    const srcStream: NodeJS.ReadWriteStream = gulp.src(srcPattern);
+
+    const checkedStream: NodeJS.ReadWriteStream = (checkFile ?
+      srcStream.pipe(through2.obj(
+        // tslint:disable-next-line:no-function-expression
+        function (file: gulpUtil.File, encoding: string, callback: (p?: Object) => void): void {
+          // tslint:disable-next-line:no-unused-expression
+          checkFile(file);
+          this.push(file);
+          callback();
+        }
+      ))
+      : srcStream);
+
+    const baseTask: NodeJS.ReadWriteStream = checkedStream
       .pipe(changed('src', { extension: scssTsExtName }))
       .pipe(sass.sync({
         importer: (url: string, prev: string, done: boolean): Object => ({ file: _patchSassUrl(url) })
