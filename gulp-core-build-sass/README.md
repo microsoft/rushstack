@@ -27,15 +27,20 @@ An array of glob patterns for locating SASS files.
 **Default:** `['src/**/*.scss']`
 
 ### useCSSModules
-If this option is specified, files ending with `.module.scss` extension will automatically
-generate a corresponding TypeScript file. All classes will be appended with a hash
-to help ensure uniqueness on a page. This file can be imported directly, and will
-contain an object describing the mangled class names.
+If this option is specified, ALL files will be treated as a `module.scss` and will
+automatically generate a corresponding TypeScript file. All classes will be
+appended with a hash to help ensure uniqueness on a page. This file can be
+imported directly, and will contain an object describing the mangled class names.
 
 **Default:** `false`
 
 ### dropCssFiles
 If this is false, then we do not create `.css` files in the `lib` directory.
+
+**Default:** `false`
+
+### warnOnNonCSSModules
+If files are matched by sassMatch which do not end in .module.scss, log a warning.
 
 **Default:** `false`
 
