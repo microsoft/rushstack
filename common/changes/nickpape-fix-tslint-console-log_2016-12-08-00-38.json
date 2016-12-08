@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-sass",
+      "comment": "Remove logging things directly to console",
+      "type": "patch"
+    }
+  ],
+  "email": "nickpape@microsoft.com"
+}
