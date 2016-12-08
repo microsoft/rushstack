@@ -31,7 +31,7 @@ export interface ISassTaskConfig {
    */
   dropCssFiles?: boolean;
   /**
-   * If files are matched by sassMatch which do not end in .module.scss, throw a warning.
+   * If files are matched by sassMatch which do not end in .module.scss, log a warning.
    */
   warnOnNonCSSModules?: boolean;
 }
