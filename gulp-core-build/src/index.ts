@@ -2,6 +2,8 @@
 
 /* tslint:disable:max-line-length */
 
+import * as path from 'path';
+
 import { GulpTask } from './tasks/GulpTask';
 import { GulpProxy } from './GulpProxy';
 import { IExecutable } from './IExecutable';
@@ -25,16 +27,11 @@ export * from './tasks/ValidateShrinkwrapTask';
 require('es6-promise').polyfill();
 /* tslint:enable:variable-name */
 
-/* tslint:disable:typedef */
-const path = require('path');
-/* tslint:enable:typedef */
-
-/* tslint:disable:no-any */
+// tslint:disable-next-line:no-any
 const packageJSON: any = require(path.resolve(process.cwd(), 'package.json'));
-/* tslint:enable:no-any */
-
 const _taskMap: { [key: string]: IExecutable } = {};
-const _uniqueTasks: IExecutable[]  = [];
+const _uniqueTasks: IExecutable[] = [];
+
 const packageFolder: string =
   (packageJSON.directories && packageJSON.directories.packagePath) ?
   packageJSON.directories.packagePath : '';
@@ -259,16 +256,15 @@ export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutabl
  * @returns IExecutable
  */
 export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecutable {
-  const flattenTasks: IExecutable[] = _flatten(tasks);
+  const flattenTasks: IExecutable[] = _flatten<IExecutable>(tasks);
 
   for (const task of flattenTasks) {
     _trackTask(task);
   }
 
   return {
-    /* tslint:disable:no-any */
+    // tslint:disable-next-line:no-any
     execute: (buildConfig: IBuildConfig): Promise<any> => {
-    /* tslint:enable:no-any */
       return new Promise<void[]>((resolve, reject) => {
         const promises: Promise<void>[] = [];
         for (const task of flattenTasks) {
@@ -295,6 +291,12 @@ export function initialize(gulp: gulp.Gulp): void {
   _handleCommandLineArguments();
 
   setConfigDefaults(_buildConfig);
+
+  for (const task of _buildConfig.uniqueTasks) {
+    if (task.onRegister) {
+      task.onRegister();
+    }
+  }
 
   initializeLogging(gulp, undefined, undefined);
 
@@ -331,13 +333,13 @@ function _registerTask(gulp: gulp.Gulp, taskName: string, task: IExecutable): vo
  */
 function _executeTask(task: IExecutable, buildConfig: IBuildConfig): Promise<void> {
   // Try to fallback to the default task if provided.
-  /* tslint:disable:no-any */
   if (task && !task.execute) {
+    /* tslint:disable:no-any */
     if ((task as any).default) {
       task = (task as any).default;
     }
+    /* tslint:enable:no-any */
   }
-  /* tslint:enable:no-any */
 
   // If the task is missing, throw a meaningful error.
   if (!task || !task.execute) {
@@ -357,9 +359,8 @@ function _executeTask(task: IExecutable, buildConfig: IBuildConfig): Promise<voi
           buildConfig.onTaskEnd(task.name, process.hrtime(startTime));
         }
       },
-      /* tslint:disable:no-any */
+      // tslint:disable-next-line:no-any
       (error: any) => {
-      /* tslint:enable:no-any */
         if (buildConfig.onTaskEnd && task.name) {
           buildConfig.onTaskEnd(task.name, process.hrtime(startTime), error);
         }
@@ -383,7 +384,7 @@ function _trackTask(task: IExecutable): void {
 /**
  * Flattens a set of arrays into a single array.
  *
- * @param  {any} arr
+ * @param  {T} arr
  */
 function _flatten<T>(arr: Array<T | T[]>): T[] {
   let output: T[] = [];

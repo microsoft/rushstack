@@ -1,0 +1,27 @@
+{
+  "title": "basic schema",
+  "description": "An example schema with 2 properties",
+
+  "type": "object",
+  "required": [
+    "bar"
+  ],
+  "properties": {
+    "foo": {
+      "title": "A list of foo",
+      "description": "list of foo strings",
+
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "bar": {
+      "title": "The bar string",
+      "description": "A string of bar",
+      "type": "string"
+    }
+  }
+}

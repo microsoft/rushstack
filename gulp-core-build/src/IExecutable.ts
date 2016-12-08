@@ -1,6 +1,9 @@
 import { IBuildConfig } from './IBuildConfig';
 
 export interface IExecutable {
+  /** Helper function which is called one time when the task is registered */
+  onRegister?: () => void;
+
   /** Execution method. */
   execute: (config: IBuildConfig) => Promise<void>;
 

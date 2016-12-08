@@ -12,4 +12,3 @@ export const testTasks: IExecutable = task('test', serial(typescript, mocha));
 export const defaultTasks: IExecutable = task('default', serial(buildTasks, instrument, mocha));
 
 task('watch', watch('src/**.ts', testTasks));
-

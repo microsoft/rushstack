@@ -1,4 +1,7 @@
 /* tslint:disable:max-line-length */
+import * as path from 'path';
+import * as fs from 'fs';
+
 import { GulpProxy } from '../GulpProxy';
 import { IExecutable } from '../IExecutable';
 import { IBuildConfig } from '../IBuildConfig';
@@ -12,11 +15,33 @@ import through2 = require('through2');
 const eos = require('end-of-stream');
 /* tslint:enable:typedef */
 
+import { args } from '../State';
+import { SchemaValidator } from '../jsonUtilities/SchemaValidator';
+
 export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
   public name: string;
   public buildConfig: IBuildConfig;
   public taskConfig: TASK_CONFIG;
   public cleanMatch: string[];
+
+  private _schema: Object;
+
+  /**
+   * A JSON Schema object which will be used to validate this task's configuration file
+   */
+  public get schema(): Object {
+    return this._schema ?
+      this._schema :
+      this._schema = this.loadSchema();
+  }
+
+  /**
+   * Override this function to provide a schema which will be used to validate
+   * the task's configuration file.
+   */
+  public loadSchema(): Object {
+    return undefined;
+  };
 
   /**
    * Shallow merges config settings into the task config.
@@ -47,13 +72,24 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
     this.taskConfig = taskConfig;
   }
 
+  public onRegister(): void {
+    const configFilename: string = this._getConfigFilePath();
+    const schema: Object = this.schema;
+
+    let rawConfig: TASK_CONFIG = this._readConfigFile(configFilename, schema);
+
+    if (rawConfig) {
+      this.mergeConfig(rawConfig);
+    }
+  }
+
   public isEnabled(buildConfig: IBuildConfig): boolean {
     return (!buildConfig || !buildConfig.isRedundantBuild);
   }
 
   public abstract executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (result?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
 
-public log(message: string): void {
+  public log(message: string): void {
     log(`[${gutil.colors.cyan(this.name)}] ${message}`);
   }
 
@@ -209,5 +245,41 @@ public log(message: string): void {
     } catch (e) { /* no-op */ }
 
     return result;
+  }
+
+  /**
+   * Returns the path to the config file used to configure this task
+   */
+  protected _getConfigFilePath(): string {
+    return path.join(process.cwd(), 'config', `${this.name}.json`);
+  }
+
+  /**
+   * Loads a JSON file, supports reading JSON files with comments
+   */
+  protected _readCommentedJsonFile(filename: string): TASK_CONFIG {
+    return SchemaValidator.readCommentedJsonFile(filename) as TASK_CONFIG;
+  }
+
+  /**
+   * Helper function which loads a custom config file from disk, runs the SchemaValidator on it,
+   * and then apply it to the callback defined on the IConfigurableTask
+   */
+  private _readConfigFile(filename: string, schema?: Object): TASK_CONFIG {
+    if (!fs.existsSync(filename)) {
+      return undefined;
+    } else {
+      if (args['verbose']) { // tslint:disable-line:no-string-literal
+        console.log(`Found config file: ${path.basename(filename)}`);
+      }
+
+      const rawData: TASK_CONFIG =  this._readCommentedJsonFile(filename);
+
+      if (schema) {
+        SchemaValidator.validate(rawData, schema, filename);
+      }
+
+      return rawData;
+    }
   }
 }
