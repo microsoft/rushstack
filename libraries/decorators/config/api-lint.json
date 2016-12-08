@@ -1,5 +1,4 @@
 {
   "enabled": true,
-  "apiReviewFolder": "../../common/reviews/api",
   "entry": "src/index.ts"
 }
