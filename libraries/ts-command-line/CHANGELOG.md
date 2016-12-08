@@ -1,6 +1,13 @@
 # Change Log - @microsoft/ts-command-line
 
-This log was last generated on Fri, 02 Dec 2016 22:27:16 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Dec 2016 20:44:26 GMT and should not be manually modified.
+
+## 1.1.1
+Tue, 06 Dec 2016 20:44:26 GMT
+
+### Patches
+
+- Changes for RC0 release.
 
 ## 1.2.0
 

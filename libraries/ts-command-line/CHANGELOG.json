@@ -2,6 +2,18 @@
   "name": "@microsoft/ts-command-line",
   "entries": [
     {
+      "version": "1.1.1",
+      "tag": "@microsoft/ts-command-line_v1.1.1",
+      "date": "Tue, 06 Dec 2016 20:44:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Changes for RC0 release."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.0",
       "tag": "@microsoft/ts-command-line_v1.2.0",
       "comments": {}

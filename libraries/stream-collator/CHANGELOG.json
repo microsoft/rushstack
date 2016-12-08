@@ -1,0 +1,17 @@
+{
+  "name": "@microsoft/stream-collator",
+  "entries": [
+    {
+      "version": "1.0.2",
+      "tag": "@microsoft/stream-collator_v1.0.2",
+      "date": "Tue, 06 Dec 2016 20:44:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Changes for RC0 release."
+          }
+        ]
+      }
+    }
+  ]
+}

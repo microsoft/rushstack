@@ -1,4 +1,22 @@
 {
   "name": "@microsoft/decorators",
-  "entries": []
+  "entries": [
+    {
+      "version": "0.2.0",
+      "tag": "@microsoft/decorators_v0.2.0",
+      "date": "Tue, 06 Dec 2016 20:44:26 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Changes for RC0 release."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/sp-loader\" from `~0.5.1` to `~0.6.0`"
+          }
+        ]
+      }
+    }
+  ]
 }
