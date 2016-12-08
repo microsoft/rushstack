@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-sass",
+      "comment": "Add an additional option called `warnOnNonCSSModules` which will warn about files that do not end with .scss",
+      "type": "minor"
+    }
+  ],
+  "email": "nickpape@microsoft.com"
+}
