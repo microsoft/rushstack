@@ -1,0 +1,7 @@
+{
+  "copyTo": {
+    "src": [
+      "pre-copy-test.ts"
+    ]
+  }
+}

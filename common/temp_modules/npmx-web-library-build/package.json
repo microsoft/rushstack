@@ -15,11 +15,11 @@
     "fsevents": "*"
   },
   "npmxDependencies": {
-    "@microsoft/gulp-core-build": ">=1.0.1 <2.0.0",
+    "@microsoft/gulp-core-build": ">=1.0.2 <2.0.0",
     "@microsoft/gulp-core-build-karma": ">=1.0.1 <2.0.0",
     "@microsoft/gulp-core-build-sass": ">=1.0.0 <2.0.0",
     "@microsoft/gulp-core-build-serve": ">=1.0.1 <2.0.0",
-    "@microsoft/gulp-core-build-typescript": ">=1.0.1 <2.0.0",
+    "@microsoft/gulp-core-build-typescript": ">=1.1.1 <2.0.0",
     "@microsoft/gulp-core-build-webpack": ">=1.0.1 <2.0.0"
   }
 }

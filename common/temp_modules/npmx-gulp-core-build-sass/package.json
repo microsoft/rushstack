@@ -33,6 +33,6 @@
     "postcss-modules": "~0.5.0"
   },
   "npmxDependencies": {
-    "@microsoft/gulp-core-build": ">=1.0.1 <2.0.0"
+    "@microsoft/gulp-core-build": ">=1.0.2 <2.0.0"
   }
 }

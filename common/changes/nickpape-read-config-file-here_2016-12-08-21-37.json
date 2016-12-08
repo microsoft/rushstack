@@ -1,0 +1,25 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "packageName": "@microsoft/node-library-build",
+      "type": "none"
+    },
+    {
+      "comment": "",
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "type": "none"
+    },
+    {
+      "comment": "",
+      "packageName": "@microsoft/gulp-core-build-mocha",
+      "type": "none"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build",
+      "comment": "Each build task should read a file from the config/ folder  and set its taskConfig with that value after it has been run through a schema validator.",
+      "type": "minor"
+    }
+  ],
+  "email": "nickpape@microsoft.com"
+}
