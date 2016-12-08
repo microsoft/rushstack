@@ -24,7 +24,7 @@ export interface ISassTaskConfig {
    * appended with a hash to help ensure uniqueness on a page. This file can be
    * imported directly, and will contain an object describing the mangled class names.
    */
-  treatAllFilesAsCSSModules?: boolean;
+  useCSSModules?: boolean;
   /**
    * If true, we will generate a CSS in the lib folder. If false, the CSS is directly embedded
    * into the TypeScript file
@@ -47,7 +47,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     sassMatch: [
       'src/**/*.scss'
     ],
-    treatAllFilesAsCSSModules: false,
+    useCSSModules: false,
     dropCssFiles: false,
     warnOnNonCSSModules: false
   };
@@ -90,10 +90,9 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
 
     console.log('warnOnNonCSSModules: ' + this.taskConfig.warnOnNonCSSModules);
 
-    if (this.taskConfig.treatAllFilesAsCSSModules) {
+    if (this.taskConfig.useCSSModules) {
       this.logVerbose('Generating css modules.');
-      return this._processFiles(gulp, srcPattern, completeCallback, modulePostCssPlugins,
-        this.taskConfig.warnOnNonCSSModules ? checkFilenameForCSSModule : undefined);
+      return this._processFiles(gulp, srcPattern, completeCallback, modulePostCssPlugins);
     } else {
       const moduleSrcPattern: string[] = srcPattern.map((value: string) => value.replace('.scss', '.module.scss'));
       moduleSrcPattern.forEach((value: string) => srcPattern.push(`!${value}`));
