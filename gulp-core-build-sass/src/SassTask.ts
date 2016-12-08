@@ -88,8 +88,6 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       }
     };
 
-    console.log('warnOnNonCSSModules: ' + this.taskConfig.warnOnNonCSSModules);
-
     if (this.taskConfig.useCSSModules) {
       this.logVerbose('Generating css modules.');
       return this._processFiles(gulp, srcPattern, completeCallback, modulePostCssPlugins);
