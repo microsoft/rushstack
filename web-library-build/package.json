@@ -11,7 +11,7 @@
   },
   "scripts": {
     "build": "gulp",
-    "clean": "echo",
+    "clean": "gulp clean",
     "test": "gulp"
   },
   "main": "lib/index.js",

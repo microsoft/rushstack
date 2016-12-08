@@ -15,6 +15,8 @@
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "dependencies": {
+    "@microsoft/ts-command-line": "~1.1.0",
+    "@types/argparse": ">=1.0.30 <1.1.0",
     "@types/assertion-error": "^1.0.30",
     "@types/chai": "^3.4.34",
     "@types/chalk": "^0.4.31",
