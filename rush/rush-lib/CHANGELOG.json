@@ -1,0 +1,22 @@
+{
+  "name": "@microsoft/rush-lib",
+  "entries": [
+    {
+      "version": "1.4.0",
+      "tag": "@microsoft/rush-lib_v1.4.0",
+      "date": "Tue, 06 Dec 2016 20:44:26 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Changes for RC0 release."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/stream-collator\" from `~1.0.1` to `~1.0.2`"
+          }
+        ]
+      }
+    }
+  ]
+}
