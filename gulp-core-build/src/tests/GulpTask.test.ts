@@ -1,12 +1,12 @@
 'use strict';
-/// <reference path='../../typings/main.d.ts' />
 
 import 'es6-promise';
-import { expect } from 'chai';
+import { assert, expect } from 'chai';
 import { serial, parallel, GulpTask } from '../index';
 import gutil = require('gulp-util');
 import gulp = require('gulp');
 import { Readable } from 'stream';
+import * as path from 'path';
 
 interface IConfig {
 }
@@ -97,6 +97,26 @@ class CallbackTask extends GulpTask<IConfig> {
   }
 }
 
+interface ISimpleConfig {
+  shouldDoThings: boolean;
+}
+
+class SchemaTask extends GulpTask<ISimpleConfig> {
+  public name: string = 'schema-task';
+
+  public taskConfig: ISimpleConfig = {
+    shouldDoThings: false
+  };
+
+  public executeTask(gulp: gulp.Gulp, callback: (result?: Object) => void): void {
+    callback();
+  }
+
+  protected _getConfigFilePath(): string {
+    return path.join(__dirname, 'schema-task.config.json');
+  }
+}
+
 let tasks: GulpTask<IConfig>[] = [
 ];
 
@@ -153,4 +173,24 @@ describe('GulpTask', () => {
     }).catch(error => done(error));
   });
 
+  it(`reads schema file if loadSchema is implemented`, (done) => {
+    const schemaTask: SchemaTask = new SchemaTask();
+    assert.isFalse(schemaTask.taskConfig.shouldDoThings);
+    schemaTask.onRegister();
+    assert.isTrue(schemaTask.taskConfig.shouldDoThings);
+    done();
+  });
+
+  it(`throws validation error is config does not conform to schema file`, (done) => {
+    const schemaTask: SchemaTask = new SchemaTask();
+
+    // tslint:disable-next-line:no-any
+    (schemaTask as any)._getConfigFilePath = (): string => {
+      return path.join(__dirname, 'other-schema-task.config.json');
+    };
+
+    assert.isFalse(schemaTask.taskConfig.shouldDoThings);
+    assert.throws(schemaTask.onRegister);
+    done();
+  });
 });

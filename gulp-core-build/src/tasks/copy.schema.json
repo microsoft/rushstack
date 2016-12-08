@@ -1,0 +1,28 @@
+{
+  "title": "Copy Task configuration",
+  "description": "Defines the static assets which should be copied as a build step",
+
+  "type": "object",
+  "required": ["copyTo"],
+  "properties": {
+    "copyTo": {
+      "description": "A mapping of destination folders to a list of files to get copied",
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z0-9_@/-]+$": {
+          "type": "array",
+          "description": "A list of paths to the source files which get copied",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "shouldFlatten": {
+      "description": "An optional property that indicates whether to keep the directory structure intact. By default it copies all files to the same directory level",
+      "type": "boolean"
+    }
+  }
+}
