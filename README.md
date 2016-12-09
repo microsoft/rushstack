@@ -10,7 +10,7 @@ See individual projects for details:
 
 ### [@microsoft/gulp-core-build](./gulp-core-build/README.md)
 
-`gulp-core-build` is a set of utility functions that makes it easy to create gulp-based build rigs. Instead of having unweildy unmaintainable gulpfiles in every project, we want the build setup to be as reusable and centralized as possible.
+`gulp-core-build` is a set of utility functions that makes it easy to create gulp-based build rigs. Instead of having unwieldy unmaintainable gulpfiles in every project, we want the build setup to be as reusable and centralized as possible.
 
 [![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build)
 [![Dependencies](https://david-dm.org/Microsoft/gulp-core-build.svg)](https://david-dm.org/Microsoft/gulp-core-build)
