@@ -21,7 +21,7 @@
     "@microsoft/gulp-core-build-karma": ">=1.0.1 <2.0.0",
     "@microsoft/gulp-core-build-sass": ">=1.1.1 <2.0.0",
     "@microsoft/gulp-core-build-serve": ">=1.0.1 <2.0.0",
-    "@microsoft/gulp-core-build-typescript": ">=1.1.2 <2.0.0",
+    "@microsoft/gulp-core-build-typescript": ">=1.2.0 <2.0.0",
     "@microsoft/gulp-core-build-webpack": ">=1.0.1 <2.0.0",
     "@types/es6-promise": "0.0.32",
     "@types/gulp": "^3.8.32",
