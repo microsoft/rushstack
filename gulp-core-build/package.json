@@ -54,6 +54,6 @@
   "devDependencies": {
     "@microsoft/node-library-build": ">=1.0.0 <2.0.0",
     "chai": "~3.5.0",
-    "typescript": "~2.0.6"
+    "typescript": "~2.1.4"
   }
 }
