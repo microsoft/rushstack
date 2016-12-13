@@ -8,7 +8,7 @@
     "@types/es6-promise": "0.0.32",
     "@types/gulp": "^3.8.32",
     "@types/karma": "^0.13.33",
-    "typescript": "~2.0.6",
+    "typescript": "~2.1.4",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "gulp-karma": "~0.0.5",
@@ -29,6 +29,6 @@
     "webpack": "~1.13.0"
   },
   "npmxDependencies": {
-    "@microsoft/gulp-core-build": ">=1.0.2 <2.0.0"
+    "@microsoft/gulp-core-build": ">=1.1.0 <2.0.0"
   }
 }
