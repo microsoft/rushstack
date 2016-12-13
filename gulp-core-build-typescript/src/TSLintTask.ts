@@ -158,9 +158,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
         }), {
           // Scope the cache to a combination of the lint rules and the build path
           name: md5(
-            /* tslint:disable:no-string-literal */
-            TSLint['VERSION'] + JSON.stringify(activeLintRules) +
-            /* tslint:enable:no-string-literal */
+            TSLint.Linter.VERSION + JSON.stringify(activeLintRules) +
             taskScope.name + taskScope.buildConfig.rootPath),
           // What on the result indicates it was successful
           success: (jshintedFile: gutil.File): boolean => {
