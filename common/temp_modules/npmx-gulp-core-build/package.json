@@ -5,7 +5,7 @@
   "dependencies": {
     "@microsoft/node-library-build": ">=1.0.0 <2.0.0",
     "chai": "~3.5.0",
-    "typescript": "~2.0.6",
+    "typescript": "~2.1.4",
     "@types/assertion-error": "^1.0.30",
     "@types/chai": "^3.4.34",
     "@types/chalk": "^0.4.31",

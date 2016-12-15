@@ -1,0 +1,50 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/web-library-build",
+      "comment": "Increment typescript dependency to v2.1",
+      "type": "major"
+    },
+    {
+      "packageName": "@microsoft/package-deps-hash",
+      "comment": "Increment typescript dependency to v2.1",
+      "type": "major"
+    },
+    {
+      "packageName": "@microsoft/node-library-build",
+      "comment": "Increment typescript dependency to v2.1",
+      "type": "major"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Increment typescript dependency to v2.1",
+      "type": "major"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-serve",
+      "comment": "Increment typescript dependency to v2.1",
+      "type": "major"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-sass",
+      "comment": "Increment typescript dependency to v2.1",
+      "type": "major"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-mocha",
+      "comment": "Increment typescript dependency to v2.1",
+      "type": "major"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-karma",
+      "comment": "Increment typescript dependency to v2.1",
+      "type": "major"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build",
+      "comment": "Increment typescript dependency to v2.1",
+      "type": "major"
+    }
+  ],
+  "email": "tmichon@microsoft.com"
+}
