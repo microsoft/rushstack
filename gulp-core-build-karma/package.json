@@ -41,6 +41,6 @@
     "@types/es6-promise": "0.0.32",
     "@types/gulp": "^3.8.32",
     "@types/karma": "^0.13.33",
-    "typescript": "~2.0.6"
+    "typescript": "~2.1.4"
   }
 }

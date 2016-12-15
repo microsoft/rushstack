@@ -251,7 +251,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     }
 
     tsResult = tsResult
-      .pipe(ts(tsProject, undefined, this.taskConfig.reporter));
+      .pipe(tsProject(this.taskConfig.reporter));
 
     // tslint:disable-next-line:typedef
     let jsResult = (this.taskConfig.removeCommentsFromJavaScript

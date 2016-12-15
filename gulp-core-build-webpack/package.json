@@ -31,7 +31,7 @@
     "@types/source-map": "^0.1.28",
     "@types/uglify-js": "^2.6.28",
     "@types/webpack": "^1.12.35",
-    "typescript": "~2.0.6"
+    "typescript": "~2.1.4"
   },
   "optionalDependencies": {
     "fsevents": "*"
