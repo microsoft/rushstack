@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-webpack",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -15,7 +15,7 @@
     "test": "gulp"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": ">=1.1.0 <2.0.0",
+    "@microsoft/gulp-core-build": ">=2.0.0 <3.0.0",
     "@types/es6-promise": "0.0.32",
     "@types/gulp": "^3.8.32",
     "@types/node": "^6.0.46",
