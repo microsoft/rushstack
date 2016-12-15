@@ -1,6 +1,6 @@
 {
   "name": "test-web-library-build",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@microsoft/load-themed-styles": "^1.2.2",
-    "@microsoft/web-library-build": ">=1.1.0 <2.0.0",
+    "@microsoft/web-library-build": ">=2.0.0 <3.0.0",
     "gulp": "~3.9.1"
   }
 }
