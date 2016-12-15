@@ -45,6 +45,6 @@
     "@types/serve-static": "^1.7.31",
     "@types/through2": "^2.0.31",
     "@types/vinyl": "^1.2.30",
-    "typescript": "~2.0.6"
+    "typescript": "~2.1.4"
   }
 }

@@ -5,7 +5,7 @@ const build = require('@microsoft/node-library-build');
 
 build.tslint.setConfig({
   lintConfig: require('./src/defaultTslint.json'),
-  rulesDirectory: tslint.getRulesDirectories(tslint.getRulesDirectories([ './node_modules/tslint-microsoft-contrib' ], __dirname))
+  rulesDirectory: tslint.Configuration.getRulesDirectories(tslint.Configuration.getRulesDirectories([ './node_modules/tslint-microsoft-contrib' ], __dirname))
 });
 
 build.typescript.setConfig({

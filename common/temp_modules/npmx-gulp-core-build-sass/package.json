@@ -16,7 +16,7 @@
     "@types/serve-static": "^1.7.31",
     "@types/through2": "^2.0.31",
     "@types/vinyl": "^1.2.30",
-    "typescript": "~2.0.6",
+    "typescript": "~2.1.4",
     "@microsoft/load-themed-styles": "^1.2.2",
     "@types/es6-promise": "0.0.32",
     "@types/node": "^6.0.46",
@@ -33,6 +33,6 @@
     "postcss-modules": "~0.5.0"
   },
   "npmxDependencies": {
-    "@microsoft/gulp-core-build": ">=1.0.2 <2.0.0"
+    "@microsoft/gulp-core-build": ">=1.1.0 <2.0.0"
   }
 }
