@@ -1,6 +1,6 @@
 {
   "npmVersion": "3.10.9",
-  "npmxMinimumVersion": "1.4.0",
+  "npmxMinimumVersion": "1.3.0",
   "nodeSupportedVersionRange": ">=4.3.0",
   "commonFolder": "common",
   "projectFolderMinDepth": 1,
@@ -91,7 +91,8 @@
     {
       "packageName": "test-web-library-build",
       "projectFolder": "test-web-library-build",
-      "reviewCategory": "other"
+      "reviewCategory": "other",
+      "shouldPublish": false
     }
   ]
 }
