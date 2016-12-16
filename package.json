@@ -5,6 +5,6 @@
   "scripts": {
   },
   "devDependencies": {
-    "@microsoft/npmx": "1.2.0"
+    "@microsoft/npmx": "~1.4.0"
   }
 }
