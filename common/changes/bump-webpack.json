@@ -1,0 +1,8 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-webpack",
+      "comment": "Patching webpack due to a publishing issue not publishing it in the last batch.",
+      "type": "patch"
+    },
+}
