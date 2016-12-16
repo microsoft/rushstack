@@ -88,11 +88,6 @@
       "shouldPublish": true
     },
     {
-      "packageName": "web-build-tools-scripts",
-      "reviewCategory": "other",
-      "projectFolder": "scripts"
-    },
-    {
       "packageName": "test-web-library-build",
       "projectFolder": "test-web-library-build",
       "reviewCategory": "other"
