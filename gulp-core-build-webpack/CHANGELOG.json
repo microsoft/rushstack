@@ -1,0 +1,17 @@
+{
+  "name": "@microsoft/gulp-core-build-webpack",
+  "entries": [
+    {
+      "version": "1.0.3",
+      "tag": "@microsoft/gulp-core-build-webpack_v1.0.3",
+      "date": "Fri, 16 Dec 2016 07:47:32 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Patching webpack due to a publishing issue not publishing it in the last batch."
+          }
+        ]
+      }
+    }
+  ]
+}
