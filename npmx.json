@@ -65,6 +65,7 @@
       "packageName": "@microsoft/gulp-core-build-webpack",
       "projectFolder": "gulp-core-build-webpack",
       "reviewCategory": "libraries",
+      "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
       ]
