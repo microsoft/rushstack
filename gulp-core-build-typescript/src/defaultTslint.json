@@ -9,7 +9,6 @@
     "indent": [true, "spaces", 2],
     "interface-name": true,
     "label-position": true,
-    "label-undefined": true,
     "max-line-length": [true, 120],
     "member-access": true,
     "member-ordering": [
@@ -35,7 +34,6 @@
     "no-construct": true,
     "no-debugger": true,
     "no-duplicate-case": true,
-    "no-duplicate-key": true,
     "no-duplicate-parameter-names": true,
     "no-duplicate-variable": true,
     "no-empty": true,
@@ -52,7 +50,6 @@
     "no-unused-expression": true,
     "no-unused-imports": true,
     "no-unused-variable": true,
-    "no-unreachable": true,
     "no-use-before-declare": true,
     "no-with-statement": true,
     "no-var-keyword": true,
