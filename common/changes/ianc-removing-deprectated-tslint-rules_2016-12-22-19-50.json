@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Fixing TSLint task by removing some deprecated rules (“label-undefined”, \"no-duplicate-key”, and ”no-unreachable\") and setting the “noUnusedParameters” and “noUnusedLocals” TS compiler options to cover the deprecated \"no-unused-variable\".",
+      "type": "patch"
+    }
+  ],
+  "email": "ianc@microsoft.com"
+}
