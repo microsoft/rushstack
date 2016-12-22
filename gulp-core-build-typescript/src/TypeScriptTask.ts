@@ -152,7 +152,9 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
           'jsx': 'react',
           'moduleResolution': 'node',
           'sourceMap': true,
-          'target': 'es5'
+          'target': 'es5',
+          'noUnusedParameters': true,
+          'noUnusedLocals': true
         }
       };
     }
