@@ -68,7 +68,7 @@ See individual projects for details:
 [![npm version](https://badge.fury.io/js/%40microsoft%2Fnode-library-build.svg)](https://badge.fury.io/js/%40microsoft%2Fnode-library-build)
 [![Dependencies](https://david-dm.org/Microsoft/node-library-build.svg)](https://david-dm.org/Microsoft/node-library-build)
 
-### [@microsoft/gulp-core-build-webpack](./gulp-core-build-webpack/README.md)
+### [@microsoft/web-library-build](./web-library-build/README.md)
 
 `web-library-build` is a `gulp-core-build` build rig for building web libraries. It includes build subtasks for processing css, typescript, serving, and running browser tests using karma.
 
