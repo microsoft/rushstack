@@ -2,6 +2,29 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "1.4.1",
+      "tag": "@microsoft/rush_v1.4.1",
+      "date": "Tue, 03 Jan 2017 21:52:49 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixing `rush publish` changelog code to reference projects correctly."
+          },
+          {
+            "comment": "`rush publish` now only updates changelogs for projects that are marked as shouldPublish=true."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/sp-build-node\" from `~0.2.0` to `~0.2.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-lib\" from `1.4.0` to `1.4.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.0",
       "tag": "@microsoft/rush_v1.4.0",
       "date": "Tue, 06 Dec 2016 20:44:26 GMT",
