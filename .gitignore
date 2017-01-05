@@ -1,7 +1,7 @@
 *.build.error.log
 *.build.log
 .DS_Store
-.vscode
+.vscode/launch.json
 /common/last-install.*
 /common/npm-local
 /common/local-npm
