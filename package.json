@@ -4,6 +4,6 @@
   "description": "Web build tools",
 
   "devDependencies": {
-    "@microsoft/npmx": "~1.3.0"
+    "@microsoft/rush": "~1.4.0"
   }
 }
