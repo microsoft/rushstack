@@ -6,6 +6,7 @@
 /common/npm-local
 /common/local-npm
 /common/rush-link.json
+/common/rush-recycler
 coverage
 dist
 lib
