@@ -1,0 +1,24 @@
+{
+  "name": "rush-gulp-core-build-mocha",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "@microsoft/node-library-build": ">=1.0.0 <2.0.0",
+    "@types/chalk": "^0.4.31",
+    "@types/gulp": "^3.8.32",
+    "@types/gulp-istanbul": "^0.9.30",
+    "@types/gulp-mocha": "0.0.29",
+    "@types/mocha": "^2.2.32",
+    "@types/orchestrator": "0.0.30",
+    "@types/q": "0.0.32",
+    "typescript": "~2.1.4",
+    "@types/es6-promise": "0.0.32",
+    "@types/node": "^6.0.46",
+    "gulp": "~3.9.1",
+    "gulp-istanbul": "~0.10.3",
+    "gulp-mocha": "~2.2.0"
+  },
+  "rushDependencies": {
+    "@microsoft/gulp-core-build": ">=2.0.0 <3.0.0"
+  }
+}
