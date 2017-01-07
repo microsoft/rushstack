@@ -24,6 +24,7 @@ import PublishUtilities, {
   IChangeInfoHash
 } from './PublishUtilities';
 import ChangelogGenerator from './ChangelogGenerator';
+import GenerateAction from './GenerateAction';
 
 export default class PublishAction extends CommandLineAction {
   private _addCommitDetails: CommandLineFlagParameter;
@@ -139,6 +140,9 @@ export default class PublishAction extends CommandLineAction {
 
       // Apply all changes to package.json files.
       PublishUtilities.updatePackages(allChanges, allPackages, this._apply.value);
+      if (this._apply.value) {
+        GenerateAction.updateTempModules();
+      }
 
       // Update changelogs.
       ChangelogGenerator.updateChangelogs(allChanges, allPackages, this._apply.value);
