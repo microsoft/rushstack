@@ -4,7 +4,7 @@
   "description": "Validatation, documentation, and auditing for the exported API of a TypeScript package",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "scripts": {
     "build": "gulp",
     "clean": "gulp clean",
