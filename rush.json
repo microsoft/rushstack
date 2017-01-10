@@ -98,7 +98,10 @@
       "packageName": "@microsoft/api-extractor",
       "projectFolder": "api-extractor",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "shouldPublish": true,
+      "cyclicDependencyProjects": [
+        "@microsoft/node-library-build"
+      ]
     }
   ]
 }
