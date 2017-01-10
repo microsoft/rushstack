@@ -1,0 +1,334 @@
+{
+  "kind": "package",
+  "exports": {
+    "inheritCorrectlyButNotFound": {
+      "kind": "enum",
+      "values": {},
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "See documentation for @microsoft/sp-core-library:Display"
+        }
+      ],
+      "remarks": [],
+      "isBeta": false
+    },
+    "inheritDisplayMode": {
+      "kind": "enum",
+      "values": {},
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "DisplayMode indicates the mode in which a page and/or its contents (e.g. text and web parts) are dislayed."
+        }
+      ],
+      "remarks": [
+        {
+          "kind": "textDocElement",
+          "value": "This is a test remarks message, it should be written to the test cases."
+        }
+      ],
+      "isBeta": false
+    },
+    "inheritDisplayModeError": {
+      "kind": "enum",
+      "values": {},
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "DisplayMode indicates the mode in which a page and/or its contents (e.g. text and web parts) are dislayed."
+        }
+      ],
+      "remarks": [
+        {
+          "kind": "textDocElement",
+          "value": "This is a test remarks message, it should be written to the test cases."
+        }
+      ],
+      "isBeta": false
+    },
+    "inheritDisplayModeErrorDeprecated": {
+      "kind": "enum",
+      "values": {},
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "DisplayMode indicates the mode in which a page and/or its contents (e.g. text and web parts) are dislayed."
+        }
+      ],
+      "remarks": [
+        {
+          "kind": "textDocElement",
+          "value": "This is a test remarks message, it should be written to the test cases."
+        }
+      ],
+      "isBeta": false
+    },
+    "inheritDisplayModeNoErrorDeprecated": {
+      "kind": "enum",
+      "values": {},
+      "deprecatedMessage": [
+        {
+          "kind": "textDocElement",
+          "value": "- deprecated message must be present if the inherited Api item is deprecated. If not error is reported."
+        }
+      ],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "DisplayMode indicates the mode in which a page and/or its contents (e.g. text and web parts) are dislayed."
+        }
+      ],
+      "remarks": [
+        {
+          "kind": "textDocElement",
+          "value": "This is a test remarks message, it should be written to the test cases."
+        }
+      ],
+      "isBeta": false
+    },
+    "MyDocumentedClass": {
+      "kind": "class",
+      "extends": "",
+      "implements": "",
+      "typeParameters": [],
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "This is a class to test JsDoc parser and this is description that can span to multiple lines and we need to make sure we parse this block correctly. It can contain a"
+        },
+        {
+          "kind": "linkDocElement",
+          "targetUrl": "https://bing.com/"
+        },
+        {
+          "kind": "textDocElement",
+          "value": ". This block is entirely valid and a correct documentation object should be built for this ApiItem."
+        }
+      ],
+      "remarks": [],
+      "isBeta": false,
+      "members": {
+        "fieldWithBadTag": {
+          "kind": "property",
+          "isOptional": false,
+          "isReadOnly": false,
+          "isStatic": false,
+          "type": "string",
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "This doc has an invalid tag that should throw an error (Error #3)"
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        },
+        "fieldWithInvalidInlineTag": {
+          "kind": "property",
+          "isOptional": false,
+          "isReadOnly": false,
+          "isStatic": false,
+          "type": "string",
+          "deprecatedMessage": [
+            {
+              "kind": "textDocElement",
+              "value": "- see next version."
+            }
+          ],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "This doc has an unknown inline tag"
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        },
+        "fieldWithValidEscapedBraces": {
+          "kind": "property",
+          "isOptional": false,
+          "isReadOnly": false,
+          "isStatic": false,
+          "type": "string",
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "This doc has {curly braces} and valid inline block"
+            },
+            {
+              "kind": "linkDocElement",
+              "targetUrl": "validURL \\{text\\}"
+            },
+            {
+              "kind": "textDocElement",
+              "value": "."
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        },
+        "linkTagMissingParam": {
+          "kind": "property",
+          "isOptional": false,
+          "isReadOnly": false,
+          "isStatic": false,
+          "type": "string",
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "This doc has too few params for link tag"
+            },
+            {
+              "kind": "linkDocElement",
+              "targetUrl": ""
+            },
+            {
+              "kind": "textDocElement",
+              "value": "(Error #5)"
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        },
+        "methodWithTwoParams": {
+          "kind": "method",
+          "signature": "public methodWithTwoParams(param1: number, param2: string): string;",
+          "accessModifier": "public",
+          "isOptional": false,
+          "isStatic": false,
+          "returnValue": {
+            "type": "string",
+            "description": [
+              {
+                "kind": "textDocElement",
+                "value": "the result"
+              }
+            ]
+          },
+          "parameters": {
+            "param1": {
+              "name": "param1",
+              "description": [
+                {
+                  "kind": "textDocElement",
+                  "value": "First parameter that can have a long and multi- line description with - hyphens -"
+                }
+              ],
+              "isOptional": false,
+              "isSpread": false,
+              "type": "number"
+            },
+            "param2": {
+              "name": "param2",
+              "description": [
+                {
+                  "kind": "textDocElement",
+                  "value": "second parameter"
+                }
+              ],
+              "isOptional": false,
+              "isSpread": false,
+              "type": "string"
+            }
+          },
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "This method has two params with docs."
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        },
+        "methodWithTypeLiterals": {
+          "kind": "method",
+          "signature": "public methodWithTypeLiterals:",
+          "accessModifier": "public",
+          "isOptional": false,
+          "isStatic": false,
+          "returnValue": {
+            "type": "{ \r\n    name: string, \r\n    obj: MyDocumentedClass \r\n  }",
+            "description": [
+              {
+                "kind": "textDocElement",
+                "value": "the result"
+              }
+            ]
+          },
+          "parameters": {
+            "param": {
+              "name": "param",
+              "description": [
+                {
+                  "kind": "textDocElement",
+                  "value": "First parameter"
+                }
+              ],
+              "isOptional": false,
+              "isSpread": false,
+              "type": "{ x: number, y: number}"
+            }
+          },
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "This method uses type literals."
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        },
+        "methodWithTypeReferences": {
+          "kind": "method",
+          "signature": "public methodWithTypeReferences(param: MyDocumentedClass[]): MyDocumentedClass;",
+          "accessModifier": "public",
+          "isOptional": false,
+          "isStatic": false,
+          "returnValue": {
+            "type": "MyDocumentedClass",
+            "description": [
+              {
+                "kind": "textDocElement",
+                "value": "the result"
+              }
+            ]
+          },
+          "parameters": {
+            "param": {
+              "name": "param",
+              "description": [
+                {
+                  "kind": "textDocElement",
+                  "value": "First parameter"
+                }
+              ],
+              "isOptional": false,
+              "isSpread": false,
+              "type": "MyDocumentedClass[]"
+            }
+          },
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "This method references a custom type."
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        }
+      }
+    }
+  }
+}
