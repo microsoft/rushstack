@@ -97,7 +97,8 @@
     {
       "packageName": "@microsoft/api-extractor",
       "projectFolder": "api-extractor",
-      "reviewCategory": "libraries"
+      "reviewCategory": "libraries",
+      "shouldPublish": true
     }
   ]
 }
