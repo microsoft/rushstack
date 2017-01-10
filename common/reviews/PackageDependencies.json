@@ -8,6 +8,10 @@
   "browserPackages": [],
   "nonBrowserPackages": [
     {
+      "name": "@microsoft/api-extractor",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@microsoft/gulp-core-build",
       "allowedCategories": [ "libraries" ]
     },
@@ -229,6 +233,10 @@
     },
     {
       "name": "merge2",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "mkdirp",
       "allowedCategories": [ "libraries" ]
     },
     {
