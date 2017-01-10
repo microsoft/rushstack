@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-extractor",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Validatation, documentation, and auditing for the exported API of a TypeScript package",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
