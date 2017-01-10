@@ -5,6 +5,17 @@ import Validator = require('z-schema');
 
 export type ValidateErrorCallback = (errorDetail: string) => void;
 
+
+interface SchemaError extends ZSchema.SchemaError {
+  // Ex. "z-schema validation error"
+  name: string;
+  details: Array<ErrorDetail>;
+}
+
+interface ErrorDetail extends ZSchema.SchemaError {
+  inner?: ErrorDetail[];
+}
+
 /**
  * Utilities for reading/writing JSON files.
  */
@@ -26,7 +37,7 @@ export default class JsonFile {
     });
 
     if (!validator.validate(jsonObject, jsonSchemaObject)) {
-      const error: ZSchema.Error = validator.getLastError();
+      const error: SchemaError = validator.getLastError() as SchemaError;
 
       let errorDetail: string = 'JSON schema validation failed:';
 
@@ -77,7 +88,7 @@ export default class JsonFile {
 
   }
 
-  private static _formatErrorDetails(errorDetails:  ZSchema.ErrorDetail[], indent: string,
+  private static _formatErrorDetails(errorDetails: ErrorDetail[], indent: string,
     result: string): string {
     for (const detail of errorDetails) {
       result += os.EOL + indent + `Error: ${detail.path}`;
