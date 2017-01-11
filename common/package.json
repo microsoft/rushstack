@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "rush-api-extractor": "file:./temp_modules/rush-api-extractor",
     "rush-gulp-core-build": "file:./temp_modules/rush-gulp-core-build",
     "rush-gulp-core-build-karma": "file:./temp_modules/rush-gulp-core-build-karma",
     "rush-gulp-core-build-mocha": "file:./temp_modules/rush-gulp-core-build-mocha",
