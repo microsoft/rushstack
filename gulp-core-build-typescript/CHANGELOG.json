@@ -2,6 +2,23 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "2.1.0",
+      "tag": "@microsoft/gulp-core-build-typescript_v2.1.0",
+      "date": "Wed, 11 Jan 2017 14:11:26 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Adding an API Extractor task."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `>=0.0.1 <1.0.0` to `>=1.0.0 <2.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.1",
       "tag": "@microsoft/gulp-core-build-typescript_v2.0.1",
       "date": "Wed, 04 Jan 2017 03:02:12 GMT",
