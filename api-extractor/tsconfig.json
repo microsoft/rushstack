@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "forceConsistentCasingInFileNames": true,
+    "module": "commonjs",
+    "declaration": true,
+    "sourceMap": true,
+    "experimentalDecorators": true,
+    "types": [
+      "es6-collections",
+      "node"
+    ]
+  }
+}

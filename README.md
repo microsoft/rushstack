@@ -76,3 +76,11 @@ See individual projects for details:
 [![Dependencies](https://david-dm.org/Microsoft/web-library-build.svg)](https://david-dm.org/Microsoft/web-library-build)
 
 
+# Utilities
+
+### [@microsoft/api-extractor](./api-extractor/README.md)
+
+`api-extractor` is a utility which can analyze TypeScript source code and extract the public API into a single file (in several formats, such as markdown or .d.ts). This is especially useful when doing API reviews.
+
+[![npm version](https://badge.fury.io/js/%40microsoft%2Fapi-extractor.svg)](https://badge.fury.io/js/%40microsoft%2Fapi-extractor)
+[![Dependencies](https://david-dm.org/Microsoft/api-extractor.svg)](https://david-dm.org/Microsoft/api-extractor)

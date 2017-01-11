@@ -8,6 +8,10 @@
   "browserPackages": [],
   "nonBrowserPackages": [
     {
+      "name": "@microsoft/api-extractor",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@microsoft/gulp-core-build",
       "allowedCategories": [ "libraries" ]
     },
@@ -44,8 +48,12 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@microsoft/sp-tslint-rules",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@microsoft/web-library-build",
-      "allowedCategories": [ "other" ]
+      "allowedCategories": [ "libraries", "other" ]
     },
     {
       "name": "autoprefixer",
@@ -225,6 +233,10 @@
     },
     {
       "name": "merge2",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "mkdirp",
       "allowedCategories": [ "libraries" ]
     },
     {

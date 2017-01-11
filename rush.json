@@ -93,6 +93,15 @@
       "projectFolder": "test-web-library-build",
       "reviewCategory": "other",
       "shouldPublish": false
+    },
+    {
+      "packageName": "@microsoft/api-extractor",
+      "projectFolder": "api-extractor",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": [
+        "@microsoft/node-library-build"
+      ]
     }
   ]
 }
