@@ -24,6 +24,10 @@ export class CopyTask extends GulpTask<ICopyConfig> {
     shouldFlatten: true
   };
 
+  public loadSchema(): Object {
+    return require('./copy.schema.json');
+  };
+
   public executeTask(
     gulp: gulp.Gulp,
     completeCallback: (result?: Object) => void
