@@ -8,7 +8,7 @@ import {
   task,
   watch
 } from '@microsoft/gulp-core-build';
-import { typescript, tslint, text } from '@microsoft/gulp-core-build-typescript';
+import { apiExtractor, typescript, tslint, text } from '@microsoft/gulp-core-build-typescript';
 import { sass } from '@microsoft/gulp-core-build-sass';
 import { karma } from '@microsoft/gulp-core-build-karma';
 import { webpack } from '@microsoft/gulp-core-build-webpack';
@@ -35,7 +35,7 @@ const sourceMatch: string[] = [
 ];
 
 // Define default task groups.
-export const compileTsTasks: IExecutable = parallel(typescript, text);
+export const compileTsTasks: IExecutable = parallel(typescript, text, apiExtractor);
 export const buildTasks: IExecutable = task('build', serial(preCopy, sass, parallel(compileTsTasks, text), postCopy));
 export const bundleTasks: IExecutable = task('bundle', serial(buildTasks, webpack));
 export const testTasks: IExecutable = serial(sass, compileTsTasks, karma);
@@ -47,9 +47,9 @@ export const generateShrinkwrapTask: GenerateShrinkwrapTask = new GenerateShrink
 task('validate-shrinkwrap', validateShrinkwrapTask);
 task('generate', generateShrinkwrapTask);
 
-task('test', serial(sass, testTasks));
+task('test', testTasks);
 
-task('test-watch', watch(sourceMatch, serial(sass, compileTsTasks, karma)));
+task('test-watch', watch(sourceMatch, testTasks));
 
 // For watch scenarios like serve, make sure to exclude generated files from src (like *.scss.ts.)
 task('serve',

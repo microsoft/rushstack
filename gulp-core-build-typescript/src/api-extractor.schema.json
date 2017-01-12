@@ -1,0 +1,20 @@
+{
+  "title": "api-extractor Configuration",
+  "description": "Generates a report of the Public API exports for a project, and detects changes that impact the SemVer contract",
+
+  "type": "object",
+  "properties": {
+    "enabled": {
+      "description": "Indicates whether the task should be run",
+      "type": "boolean"
+    },
+    "entry": {
+      "description": "The file path of the exported entry point, relative to the project folder",
+      "type": "string"
+    },
+    "apiReviewFolder": {
+      "description": "The file path of the folder containing already approved API files, relative to the project folder",
+      "type": "string"
+    }
+  }
+}
