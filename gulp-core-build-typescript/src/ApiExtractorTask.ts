@@ -63,13 +63,17 @@ export interface IApiExtractorTaskConfig {
  * find the aliased exports of the project. An api-extractor.ts file is generated for the project in the temp folder.
  */
 export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
-  public name: string = 'apiExtractor';
+  public name: string = 'api-extractor';
 
   public taskConfig: IApiExtractorTaskConfig = {
     enabled: false,
     entry: undefined,
     apiReviewFolder: undefined,
     apiJsonFolder: undefined
+  };
+
+  public loadSchema(): Object {
+    return require('./api-extractor.schema.json');
   };
 
   public executeTask(gulp: gulp.Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream {
