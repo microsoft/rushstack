@@ -104,7 +104,9 @@
         },
         {
           "kind": "linkDocElement",
-          "targetUrl": "https://bing.com/"
+          "referenceType": "href",
+          "targetUrl": "https://bing.com/",
+          "value": "bing home"
         },
         {
           "kind": "textDocElement",
@@ -124,7 +126,7 @@
           "summary": [
             {
               "kind": "textDocElement",
-              "value": "This doc has an invalid tag that should throw an error (Error #3)"
+              "value": "This doc has an invalid tag that should throw an error (Error #5)"
             }
           ],
           "remarks": [],
@@ -146,6 +148,10 @@
             {
               "kind": "textDocElement",
               "value": "This doc has an unknown inline tag"
+            },
+            {
+              "kind": "textDocElement",
+              "value": "(Error #6)"
             }
           ],
           "remarks": [],
@@ -161,15 +167,11 @@
           "summary": [
             {
               "kind": "textDocElement",
-              "value": "This doc has {curly braces} and valid inline block"
-            },
-            {
-              "kind": "linkDocElement",
-              "targetUrl": "validURL \\{text\\}"
+              "value": "This doc has {curly braces} which is valid but the inline @link token is missing a pipe between the url and the display text"
             },
             {
               "kind": "textDocElement",
-              "value": "."
+              "value": "(Error #9). The displayName is not allowed to have non word characters."
             }
           ],
           "remarks": [],
@@ -188,12 +190,8 @@
               "value": "This doc has too few params for link tag"
             },
             {
-              "kind": "linkDocElement",
-              "targetUrl": ""
-            },
-            {
               "kind": "textDocElement",
-              "value": "(Error #5)"
+              "value": "(Error #7)"
             }
           ],
           "remarks": [],

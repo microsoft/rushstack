@@ -1,12 +1,16 @@
+/// <reference types="mocha" />
+
+import { assert } from 'chai';
 import * as ts from 'typescript';
 import * as path from 'path';
 import DocElementParser from '../DocElementParser';
-import { IDocElement, IParam } from '../IDocElement';
+import { IDocElement, IParam, IHrefLinkElement, ICodeLinkElement, ITextElement, ISeeDocElement } from '../IDocElement';
 import TestFileComparer from '../TestFileComparer';
 import JsonFile from '../JsonFile';
 import ApiStructuredType from '../definitions/ApiStructuredType';
 import ApiDocumentation from '../definitions/ApiDocumentation';
 import Analyzer from './../Analyzer';
+import Tokenizer from './../Tokenizer';
 
 const capturedErrors: {
   message: string;
@@ -30,8 +34,8 @@ class TestApiDocumentation extends ApiDocumentation {
     super(myDocumentedClass, analyzer.docItemLoader, (msg: string) => { return; });
   }
 
-  public parseParam(tokenStream: string[]): IParam {
-    return this._parseParam(tokenStream);
+  public parseParam(tokenizer: Tokenizer): IParam {
+    return this._parseParam(tokenizer);
   }
 }
 
@@ -55,34 +59,36 @@ describe('DocElementParser tests', function (): void {
   describe('Basic Tests', (): void => {
     it('Should parse basic doc comment stream', (): void => {
       const apiDoc: TestApiDocumentation = new TestApiDocumentation();
-      const tokenStream: string[] = [
-          'This function parses docTokens for the apiExtractor website',
-          '{@link https://github.com/OfficeDev/office-ui-fabric-react}',
-          '@returns',
-          'an object',
-          '@param',
-          'param1 - description of the type param1',
-          '@param',
-          'param2 - description of the type param2',
-          '@internal'
-      ];
+
+      const docs: string = 'This function parses docTokens for the apiLint website ' +
+      '{@link https://github.com/OfficeDev/office-ui-fabric-react} \n' +
+      '@returns an object \n' +
+      '@param param1 - description of the type param1 \n' +
+      '@param param2 - description of the type param2 \n' +
+      '@internal';
+      const tokenizer: Tokenizer = new Tokenizer(docs, console.log);
 
       // Testing Summary Doc Elements
       const expectedSummary: IDocElement[] = [
-          {kind: 'textDocElement', value: 'This function parses docTokens for the apiExtractor website'},
-          {kind: 'linkDocElement', targetUrl: 'https://github.com/OfficeDev/office-ui-fabric-react'}
+          {kind: 'textDocElement', value: 'This function parses docTokens for the apiLint website'} as ITextElement,
+          {
+              kind: 'linkDocElement',
+              referenceType: 'href',
+              targetUrl: 'https://github.com/OfficeDev/office-ui-fabric-react',
+              value: ''
+        } as IHrefLinkElement
       ];
-      const actualSummary: IDocElement[] = DocElementParser.parse(tokenStream);
+      const actualSummary: IDocElement[] = DocElementParser.parse(tokenizer, console.log);
       JsonFile.saveJsonFile('./lib/basicDocExpected.json', JSON.stringify(expectedSummary));
       JsonFile.saveJsonFile('./lib/basicDocActual.json', JSON.stringify(actualSummary));
       TestFileComparer.assertFileMatchesExpected('./lib/basicDocActual.json', './lib/basicDocExpected.json');
 
       // Testing Returns Doc Elements
       const expectedReturn: IDocElement[] = [
-          {kind: 'textDocElement', value: 'an object'}
+          {kind: 'textDocElement', value: 'an object'} as ITextElement
       ];
-      tokenStream.shift();
-      const actualReturn: IDocElement[] = DocElementParser.parse(tokenStream);
+      tokenizer.getToken();
+      const actualReturn: IDocElement[] = DocElementParser.parse(tokenizer, console.log);
       JsonFile.saveJsonFile('./lib/returnDocExpected.json', JSON.stringify(expectedReturn));
       JsonFile.saveJsonFile('./lib/returnDocActual.json', JSON.stringify(actualReturn));
       TestFileComparer.assertFileMatchesExpected('./lib/returnDocActual.json', './lib/returnDocExpected.json');
@@ -92,17 +98,17 @@ describe('DocElementParser tests', function (): void {
           {
               name: 'param1',
               description: [{kind: 'textDocElement', value: 'description of the type param1'}]
-          },
+          } as IParam,
           {
               name: 'param2',
               description: [{kind: 'textDocElement', value: 'description of the type param2'}]
-          }
+          } as IParam
       ];
       const actualParam: IParam[] = [];
-      tokenStream.shift();
-      actualParam.push(apiDoc.parseParam(tokenStream));
-      tokenStream.shift();
-      actualParam.push(apiDoc.parseParam(tokenStream));
+      tokenizer.getToken();
+      actualParam.push(apiDoc.parseParam(tokenizer));
+      tokenizer.getToken();
+      actualParam.push(apiDoc.parseParam(tokenizer));
 
       JsonFile.saveJsonFile('./lib/paramDocExpected.json', JSON.stringify(expectedParam));
       JsonFile.saveJsonFile('./lib/paramDocActual.json', JSON.stringify(actualParam));
@@ -110,42 +116,41 @@ describe('DocElementParser tests', function (): void {
     });
 
     it('Should parse @deprecated correctly', (): void => {
-      const tokenStream: string[] = [
-          '@deprecated',
-          '- description of the deprecation'
-      ];
+      const docs: string = '@deprecated - description of the deprecation';
+      const tokenizer: Tokenizer = new Tokenizer(docs, console.log);
 
       // Testing Deprecated Doc Elements
       const expectedDeprecated: IDocElement[] = [
-          {kind: 'textDocElement', value: '- description of the deprecation'}
+          {kind: 'textDocElement', value: '- description of the deprecation'} as ITextElement
       ];
-      tokenStream.shift();
-      const actualDeprecated: IDocElement[] = DocElementParser.parse(tokenStream);
+      tokenizer.getToken();
+      const actualDeprecated: IDocElement[] = DocElementParser.parse(tokenizer, console.log);
       JsonFile.saveJsonFile('./lib/deprecatedDocExpected.json', JSON.stringify(expectedDeprecated));
       JsonFile.saveJsonFile('./lib/deprecatedDocActual.json', JSON.stringify(actualDeprecated));
       TestFileComparer.assertFileMatchesExpected('./lib/deprecatedDocActual.json', './lib/deprecatedDocExpected.json');
     });
 
     it('Should parse @see with nested link and/or text', (): void => {
-      const tokenStream: string[] = [
-          'Text describing the function’s purpose/nuances/context.',
-          '@see',
-          '{@link https://github.com/OfficeDev/office-ui-fabric-react}',
-          'The link will provide context.'
-      ];
+      const docs: string = 'Text describing the function’s purpose/nuances/context. \n' +
+      '@see {@link https://github.com/OfficeDev/office-ui-fabric-react | The link will provide context}';
+      const tokenizer: Tokenizer = new Tokenizer(docs, console.log);
 
       // Testing Summary Elements
       const expectedSummary: IDocElement[] = [
-          {kind: 'textDocElement', value: 'Text describing the function’s purpose/nuances/context.'},
+          {kind: 'textDocElement', value: 'Text describing the function’s purpose/nuances/context.'} as ITextElement,
           {
               kind: 'seeDocElement',
               seeElements: [
-                  {kind: 'linkDocElement', targetUrl: 'https://github.com/OfficeDev/office-ui-fabric-react'},
-                  {kind: 'textDocElement', value: 'The link will provide context.'}
+                  {
+                      kind: 'linkDocElement',
+                      referenceType: 'href',
+                      targetUrl: 'https://github.com/OfficeDev/office-ui-fabric-react',
+                      value: 'The link will provide context'
+                  } as IHrefLinkElement
               ]
-          }
+          } as ISeeDocElement
       ];
-      const actualSummary: IDocElement[] = DocElementParser.parse(tokenStream);
+      const actualSummary: IDocElement[] = DocElementParser.parse(tokenizer, console.log);
       JsonFile.saveJsonFile('./lib/seeDocExpected.json', JSON.stringify(expectedSummary));
       JsonFile.saveJsonFile('./lib/seeDocActual.json', JSON.stringify(actualSummary));
       TestFileComparer.assertFileMatchesExpected('./lib/seeDocExpected.json', './lib/seeDocActual.json');
@@ -153,27 +158,134 @@ describe('DocElementParser tests', function (): void {
 
     it('Should parse @param with nested link and/or text', (): void => {
       const apiDoc: TestApiDocumentation = new TestApiDocumentation();
-      const tokenStream: string[] = [
-          'x - The height in {@link http://wikipedia.org/pixel_units}'
-      ];
+
+      // Don't include the "@param" in the doc string, parseParam() expects this to be processed in a 
+      // previous step.
+      const docs: string = 'x - The height in {@link http://wikipedia.org/pixel_units}';
+      const tokenizer: Tokenizer = new Tokenizer(docs, console.log);
 
       // Testing Param Doc Elements
       const description: IDocElement[] = [
-          {kind: 'textDocElement', value: 'The height in'},
-          {kind: 'linkDocElement', targetUrl: 'http://wikipedia.org/pixel_units'}
+        {kind: 'textDocElement', value: 'The height in'} as ITextElement,
+          {
+              kind: 'linkDocElement',
+              referenceType: 'href',
+              targetUrl: 'http://wikipedia.org/pixel_units',
+              value: ''
+          } as IHrefLinkElement
       ];
       const expectedParam: IParam = {
           name: 'x',
           description: description
-      };
-      const actualParam: IParam = apiDoc.parseParam(tokenStream);
+      } as IParam;
+      const actualParam: IParam = apiDoc.parseParam(tokenizer);
 
       JsonFile.saveJsonFile('./lib/nestedParamDocExpected.json', JSON.stringify(expectedParam));
       JsonFile.saveJsonFile('./lib/nestedParamDocActual.json', JSON.stringify(actualParam));
       TestFileComparer.assertFileMatchesExpected(
-          './lib/nestedParamDocActual.json',
-          './lib/nestedParamDocExpected.json'
+        './lib/nestedParamDocActual.json',
+        './lib/nestedParamDocExpected.json'
       );
+    });
+
+    it('Should parse @link with url', (): void => {
+      const docs: string = '{@link https://microsoft.com}';
+      const tokenizer: Tokenizer = new Tokenizer(docs, console.log);
+
+      let docElements: IDocElement[];
+      /* tslint:disable-next-line:no-any */
+      let errorMessage: any;
+      try {
+        docElements = DocElementParser.parse(tokenizer, console.log);
+      } catch (error) {
+        errorMessage = error;
+      }
+      assert.isUndefined(errorMessage);
+
+      const linkDocElement: IHrefLinkElement = (docElements[0] as IHrefLinkElement);
+      assert.equal(linkDocElement.referenceType, 'href');
+      assert.equal(linkDocElement.targetUrl, 'https://microsoft.com');
+      assert.equal(linkDocElement.value, '');
+    });
+
+    it('Should parse @link with url and text', (): void => {
+     const docs: string = '{@link https://microsoft.com | microsoft home}';
+     const tokenizer: Tokenizer = new Tokenizer(docs, console.log);
+
+      let docElements: IDocElement[];
+      /* tslint:disable-next-line:no-any */
+      let errorMessage: any;
+      try {
+        docElements = DocElementParser.parse(tokenizer, console.log);
+      } catch (error) {
+        errorMessage = error;
+      }
+      assert.isUndefined(errorMessage);
+
+      const linkDocElement: IHrefLinkElement = (docElements[0] as IHrefLinkElement);
+      assert.equal(linkDocElement.referenceType, 'href');
+      assert.equal(linkDocElement.targetUrl, 'https://microsoft.com');
+      assert.equal(linkDocElement.value, 'microsoft home');
+    });
+
+    it('Should parse @link with API defintion reference', (): void => {
+      const docs: string = '{@link @microsoft/sp-core-library:Guid.equals}';
+      const tokenizer: Tokenizer = new Tokenizer(docs, console.log);
+
+      let docElements: IDocElement[];
+      /* tslint:disable-next-line:no-any */
+      let errorMessage: any;
+      try {
+        docElements = DocElementParser.parse(tokenizer, console.log);
+      } catch (error) {
+        errorMessage = error;
+      }
+      assert.isUndefined(errorMessage);
+
+      const linkDocElement: ICodeLinkElement = (docElements[0] as ICodeLinkElement);
+      assert.equal(linkDocElement.referenceType, 'code');
+      assert.equal(linkDocElement.scopeName, '@microsoft');
+      assert.equal(linkDocElement.packageName, 'sp-core-library');
+      assert.equal(linkDocElement.exportName, 'Guid');
+      assert.equal(linkDocElement.memberName, 'equals');
+    });
+
+    it('Should parse @link with API defintion reference and text', (): void => {
+      const docs: string = '{@link @microsoft/sp-core-library:Guid.equals | Guid equals}';
+      const tokenizer: Tokenizer = new Tokenizer(docs, console.log);
+
+      let docElements: IDocElement[];
+      /* tslint:disable-next-line:no-any */
+      let errorMessage: any;
+      try {
+        docElements = DocElementParser.parse(tokenizer, console.log);
+      } catch (error) {
+        errorMessage = error;
+      }
+      assert.isUndefined(errorMessage);
+
+      const linkDocElement: ICodeLinkElement = (docElements[0] as ICodeLinkElement);
+      assert.equal(linkDocElement.referenceType, 'code');
+      assert.equal(linkDocElement.scopeName, '@microsoft');
+      assert.equal(linkDocElement.packageName, 'sp-core-library');
+      assert.equal(linkDocElement.exportName, 'Guid');
+      assert.equal(linkDocElement.memberName, 'equals');
+      assert.equal(linkDocElement.value, 'Guid equals');
+    });
+
+    it('Should report errors @link', (): void => {
+      const docs: string = '{@link @microsoft/sp-core-library:Guid.equals | Guid equals | something}';
+      const tokenizer: Tokenizer = new Tokenizer(docs, console.log);
+
+      let docElements: IDocElement[];
+      /* tslint:disable-next-line:no-any */
+      let errorMessage: any;
+      try {
+        docElements = DocElementParser.parse(tokenizer, console.log);
+      } catch (error) {
+        errorMessage = error;
+      }
+      assert.isNotNull(errorMessage);
     });
   });
 });
