@@ -1,0 +1,9 @@
+# Change Log - @microsoft/gulp-core-build-mocha
+
+This log was last generated on Fri, 13 Jan 2017 06:46:05 GMT and should not be manually modified.
+
+## 2.0.1
+Fri, 13 Jan 2017 06:46:05 GMT
+
+*Initial release*
+

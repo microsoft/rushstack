@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "1.0.1",
+      "tag": "@microsoft/api-extractor_v1.0.1",
+      "date": "Fri, 13 Jan 2017 06:46:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `~2.0.0` to `~2.1.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.0",
       "tag": "@microsoft/api-extractor_v1.0.0",
       "date": "Wed, 11 Jan 2017 14:11:26 GMT",
