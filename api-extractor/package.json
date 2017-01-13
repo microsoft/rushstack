@@ -4,25 +4,25 @@
   "description": "Validatation, documentation, and auditing for the exported API of a TypeScript package",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "scripts": {
     "build": "gulp",
     "clean": "gulp clean",
     "test": "gulp test"
   },
   "devDependencies": {
-    "@microsoft/sp-tslint-rules": "~0.5.1",
     "@types/chai": ">=3.4.34 <3.6.0",
     "@types/mocha": ">=2.2.33 <2.6.0",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "mocha": "~2.5.3",
-    "@microsoft/sp-build-node": "~0.2.1"
+    "@microsoft/node-library-build": "~2.0.0"
   },
   "dependencies": {
     "@types/es6-collections": "^0.5.29",
     "@types/fs-extra": "~0.0.34",
     "@types/node": ">=6.0.51 <6.9.1",
+    "@types/z-schema": "3.16.20-alpha",
     "fs-extra": "~0.26.0",
     "jju": "~1.3.0",
     "typescript": "~2.0.3",
