@@ -429,6 +429,8 @@ export function coverageData(coverage: number, threshold: number, filePath: stri
   localCache.coverageTotal += coverage;
 }
 
+const colorCodeRegex: RegExp = /\x1B[[(?);]{0,2}(;?\d)*./g;
+
 export function addSuppression(str: string): void {
   'use strict';
 
@@ -439,8 +441,6 @@ export function addSuppression(str: string): void {
 
   logSummary(`${gutil.colors.yellow('Supressing')} - ${str}`);
 }
-
-const colorCodeRegex: RegExp = /\x1B[[(?);]{0,2}(;?\d)*./g;
 
 export function warn(...args: Array<string | Chalk.ChalkChain>): void {
   'use strict';
