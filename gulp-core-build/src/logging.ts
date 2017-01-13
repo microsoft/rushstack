@@ -429,11 +429,13 @@ export function coverageData(coverage: number, threshold: number, filePath: stri
   localCache.coverageTotal += coverage;
 }
 
+const colorCodeRegex: RegExp = /\x1B[[(?);]{0,2}(;?\d)*./g;
+
 export function addSuppression(str: string): void {
   'use strict';
 
   str = str
-    .replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '') // remove colors
+    .replace(colorCodeRegex, '') // remove colors
     .replace(/\r\n/g, '\n'); // normalize newline
   localCache.errorAndWarningSuppressions[str] = true;
 
@@ -446,7 +448,7 @@ export function warn(...args: Array<string | Chalk.ChalkChain>): void {
 
   const stringMessage: string = args.join(' ');
 
-  if (!localCache.errorAndWarningSuppressions[stringMessage.replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '')]) {
+  if (!localCache.errorAndWarningSuppressions[stringMessage.replace(colorCodeRegex, '')]) {
     localCache.warnings.push(stringMessage);
     log(gutil.colors.yellow.apply(undefined, args));
   }
@@ -458,7 +460,7 @@ export function error(...args: Array<string | Chalk.ChalkChain>): void {
 
   const stringMessage: string = args.join(' ');
 
-  if (!localCache.errorAndWarningSuppressions[stringMessage.replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '')]) {
+  if (!localCache.errorAndWarningSuppressions[stringMessage.replace(colorCodeRegex, '')]) {
     localCache.errors.push(stringMessage);
     log(gutil.colors.red.apply(undefined, args));
   }
