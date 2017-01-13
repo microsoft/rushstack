@@ -1,0 +1,14 @@
+# Ignore everything by default
+**
+
+# Use negative patterns to bring back the specific things we want to publish
+!/bin/**
+!/lib/**
+!/dist/**
+
+# NOTE: These don't need to be specified, because NPM includes them automatically.
+#
+# package.json
+# README (and its variants)
+# CHANGELOG (and its variants)
+# LICENSE / LICENCE
