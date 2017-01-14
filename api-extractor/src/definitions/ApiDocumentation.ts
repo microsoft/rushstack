@@ -4,10 +4,12 @@ import * as ts from 'typescript';
 import TypeScriptHelpers from '../TypeScriptHelpers';
 import ApiItem from './ApiItem';
 import DocElementParser from '../DocElementParser';
-import { IDocElement, IParam } from '../IDocElement';
+import { IDocElement, IParam, IHrefLinkElement, ICodeLinkElement } from '../IDocElement';
 import { IDocItem, IDocFunction } from '../IDocItem';
 import DocItemLoader from '../DocItemLoader';
 import { IApiDefinitionReference } from '../IApiDefinitionReference';
+import Token from '../Token';
+import Tokenizer from '../Tokenizer';
 
 /**
   * An "API Tag" is a custom JSDoc tag which indicates whether an ApiItem definition
@@ -118,14 +120,19 @@ export default class ApiDocumentation {
   public docComment: string;
 
   /**
-   * The docComment text string split into an array of tokens.  The tokens are either
+   * The docComment text string split into an array of ITokenItems.  The tokens are essentially either
    * JSDoc tags (which start with the "@" character) or substrings containing the
    * remaining text.  The array can be empty, but not undefined.
    * Example:
    * docComment       = "Example Function\n@returns the number of items\n@internal  "
-   * docCommentTokens = [ "Example Function\n", "@returns", "the number of items\n", "@internal", "  "]
+   * docCommentTokens = [ 
+   *  {tokenType: 'text', parameter: 'Example Function\n'}, 
+   *  {tokenType: '\@returns', parameter: ''}
+   *  {tokenType: 'text', parameter: 'the number of items\n'}
+   *  {tokenType: '@internal', parameter: ''}
+   * ];
    */
-  public docCommentTokens: string[];
+  public docCommentTokens: Token[];
 
    /**
    * docCommentTokens that are parsed into Doc Elements.
@@ -171,11 +178,55 @@ export default class ApiDocumentation {
   public reportError: (message: string) => void;
 
   /**
+   * Takes an API reference expression of the form '@scopeName/packageName:exportName.memberName'
+   * and deconstructs it into an IApiDefinitionReference interface object. 
+   */
+  public static parseApiReferenceExpression(
+    apiReferenceExpr: string,
+    reportError: (message: string) => void): IApiDefinitionReference {
+    if (!apiReferenceExpr || apiReferenceExpr.split(' ').length > 1) {
+      reportError('API reference expression must be of the form: ' +
+        '\'scopeName/packageName:exportName.memberName | display text\'' +
+        'where the \'|\' is required if a display text is provided');
+      return;
+    }
+
+    const apiDefitionRef: IApiDefinitionReference = { scopeName: '', packageName: '', exportName: '', memberName: ''};
+    let parts: string[];
+
+    // E.g. @microsoft/sp-core-library:Guid.equals
+    parts = apiReferenceExpr.match(ApiDocumentation._packageRegEx);
+    if (parts) {
+      // parts[1] is of the form ‘@microsoft/sp-core-library’ or ‘sp-core-library’
+      const scopePackageName: IScopePackageName = ApiDocumentation.parseScopedPackageName(parts[1]);
+      apiDefitionRef.scopeName = scopePackageName.scope;
+      apiDefitionRef.packageName = scopePackageName.package;
+      apiReferenceExpr = parts[2]; // e.g. Guid.equals
+    }
+
+    // E.g. Guid.equals
+    parts = apiReferenceExpr.match(ApiDocumentation._memberRegEx);
+    if (parts) {
+      apiDefitionRef.exportName = parts[1]; // e.g. Guid, can never be undefined
+      apiDefitionRef.memberName = parts[2] ? parts[2] : ''; // e.g. equals
+    } else {
+      // the export name is required 
+       throw reportError(`Api reference expression contains invalid characters: ${apiReferenceExpr}`);
+    }
+
+    if (!apiReferenceExpr.match(ApiDocumentation._exportRegEx)) {
+      throw reportError(`Api reference expression contains invalid characters: ${apiReferenceExpr}`);
+    }
+
+    return apiDefitionRef;
+  }
+
+  /**
    * For a scoped NPM package name this separates the scope and package parts.  For example:
    * parseScopedPackageName('@my-scope/myproject') = { scope: '@my-scope', package: 'myproject' }
    * parseScopedPackageName('myproject') = { scope: '', package: 'myproject' }
    */
-  private  static parseScopedPackageName(scopedName: string): IScopePackageName {
+  private static parseScopedPackageName(scopedName: string): IScopePackageName {
     if (scopedName.substr(0, 1) !== '@') {
       return { scope: '', package: scopedName };
     }
@@ -193,9 +244,8 @@ export default class ApiDocumentation {
     this.docItemLoader = docItemLoader;
     this.reportError = errorLogger;
     this.docComment = this._getJsDocs(apiItem);
-    this.docCommentTokens = this._tokenizeDocs(this.docComment);
     this.parameters = new Map<string, IParam>();
-    this._parseDocTokens(this.docCommentTokens);
+    this._parseDocs();
   }
 
   protected _getJsDocs(apiItem: ApiItem): string {
@@ -219,43 +269,9 @@ export default class ApiDocumentation {
     return jsdoc;
   }
 
-  /**
-   * Converts a JsDoc-like text block to an array of string tokens. Each token is either text, JsDocTag or inline tag
-   * Example: "This is a JsDoc description with a {@link URL} and more text. @summary example @public"
-   * => ["This is a JsDoc description with a", "{@link URL}", "and more text.", "@summary", "example", "@public"]
-   */
-  protected _tokenizeDocs(docs: string): string[] {
-    const tokens: string[] = TypeScriptHelpers.splitStringWithRegEx(docs, ApiDocumentation._jsdocTagsRegex);
-    return this._sanitizeDocTokens(tokens);
-  }
-
-  /**
-   * Trims whitespaces on either end of the tokens, replaces \r and \n's with single whitespace, removes empty tokens
-   * and checks for the following errors:
-   * - Unsupported tags
-   * - Unescaped { and }, which are only allowed for inline tags e.g. {@link URL}
-   *
-   * @param tokens - Array of token strings to be santitized
-   */
-  protected _sanitizeDocTokens(tokens: string[]): string[] {
-    const result: string[] = [];
-    for (let token of tokens) {
-      token = token.replace(/(\\(r|n))+/gi, ' ');
-      token = token.replace(/\s+/g, ' ');
-      token = token.trim();
-
-      if (token === '') {
-        continue;
-      }
-
-      result.push(token);
-    }
-
-    return result;
-  }
-
-  protected _parseDocTokens(tokenStream: string[]): void {
-    this.summary = DocElementParser.parse(tokenStream);
+  protected _parseDocs(): void {
+    const tokenizer: Tokenizer = new Tokenizer(this.docComment, this.reportError);
+    this.summary = DocElementParser.parse(tokenizer, this.reportError);
     this.returnsMessage = [];
     this.deprecatedMessage = [];
     this.remarks = [];
@@ -265,7 +281,7 @@ export default class ApiDocumentation {
     let parsing: boolean = true;
 
     while (parsing) {
-      const token: string = tokenStream.length === 0 ? undefined : tokenStream[0]; // peek
+      const token: Token = tokenizer.peekToken();
       if (!token) {
         parsing = false; // end of stream
         // Report error if @inheritdoc is deprecated but no @deprecated tag present here 
@@ -280,87 +296,110 @@ export default class ApiDocumentation {
         break;
       }
 
-      switch (token) {
-        case '@remarks':
-          tokenStream.shift();
-          this._checkInheritDocStatus();
-          this.remarks = DocElementParser.parse(tokenStream);
-          break;
-        case '@returns':
-          tokenStream.shift();
-          this._checkInheritDocStatus();
-          this.returnsMessage = DocElementParser.parse(tokenStream);
-          break;
-        case '@param':
-          tokenStream.shift();
-          this._checkInheritDocStatus();
-          const param: IParam = this._parseParam(tokenStream);
-          if (param) {
-            this.parameters[param.name] = param;
-          }
-          break;
-        case '@deprecated':
-          tokenStream.shift();
-          this.deprecatedMessage = DocElementParser.parse(tokenStream);
-          if (!this.deprecatedMessage || this.deprecatedMessage.length === 0) {
-            this.reportError(`deprecated description required after @deprecated JSDoc tag.`);
-          }
-          break;
-        case '@internalremarks':
-          // parse but discard
-          tokenStream.shift();
-          DocElementParser.parse(tokenStream);
-          break;
-        case '@public':
-          tokenStream.shift();
-          this.apiTag = ApiTag.Public;
-          ++apiTagCount;
-          break;
-        case '@internal':
-          tokenStream.shift();
-          this.apiTag = ApiTag.Internal;
-          ++apiTagCount;
-          break;
-        case '@alpha':
-          tokenStream.shift();
-          this.apiTag = ApiTag.Alpha;
-          ++apiTagCount;
-          break;
-        case '@beta':
-          tokenStream.shift();
-          this.apiTag = ApiTag.Beta;
-          ++apiTagCount;
-          break;
-        case '@preapproved':
-          tokenStream.shift();
-          this.preapproved = true;
-          break;
-        case '@readonly':
-          tokenStream.shift();
-          this.readonly = true;
-          break;
-        case '@summary':
-          tokenStream.shift(); // consume the summary token
-          break;
-        case '@betadocumentation':
-          tokenStream.shift();
-          this.isDocBeta = true;
-          break;
-        default:
-          tokenStream.shift();
-
-          if (token.substr(0, 12) === '{@inheritdoc') {
+      if (token.type === 'Tag') {
+        switch (token.tag) {
+          case '@remarks':
+            tokenizer.getToken();
+            this._checkInheritDocStatus();
+            this.remarks = DocElementParser.parse(tokenizer, this.reportError);
+            break;
+          case '@returns':
+            tokenizer.getToken();
+            this._checkInheritDocStatus();
+            this.returnsMessage = DocElementParser.parse(tokenizer, this.reportError);
+            break;
+          case '@param':
+            tokenizer.getToken();
+            this._checkInheritDocStatus();
+            const param: IParam = this._parseParam(tokenizer);
+            if (param) {
+               this.parameters[param.name] = param;
+            }
+            break;
+          case '@deprecated':
+            tokenizer.getToken();
+            this.deprecatedMessage = DocElementParser.parse(tokenizer, this.reportError);
+            if (!this.deprecatedMessage || this.deprecatedMessage.length === 0) {
+              this.reportError(`deprecated description required after @deprecated JSDoc tag.`);
+            }
+            break;
+          case '@internalremarks':
+            // parse but discard
+            tokenizer.getToken();
+            DocElementParser.parse(tokenizer, this.reportError);
+            break;
+          case '@public':
+            tokenizer.getToken();
+            this.apiTag = ApiTag.Public;
+            ++apiTagCount;
+            break;
+          case '@internal':
+            tokenizer.getToken();
+            this.apiTag = ApiTag.Internal;
+            ++apiTagCount;
+            break;
+          case '@alpha':
+            tokenizer.getToken();
+            this.apiTag = ApiTag.Alpha;
+            ++apiTagCount;
+            break;
+          case '@beta':
+            tokenizer.getToken();
+            this.apiTag = ApiTag.Beta;
+            ++apiTagCount;
+            break;
+          case '@preapproved':
+            tokenizer.getToken();
+            this.preapproved = true;
+            break;
+          case '@readonly':
+            tokenizer.getToken();
+            this.readonly = true;
+            break;
+          case '@betadocumentation':
+            tokenizer.getToken();
+            this.isDocBeta = true;
+            break;
+          default:
+            tokenizer.getToken();
+            if (ApiDocumentation._allowedJsdocTags.indexOf(token.tag) < 0) {
+              this.reportError(`The JSDoc tag \"${token.tag}\" is not allowed`);
+              break;
+            } else {
+              this.reportError(`Error formatting token tag: ${token.tag}`);
+              break;
+            }
+        }
+      } else if (token.type === 'Inline') {
+        switch (token.tag) {
+          case '@inheritdoc':
+            tokenizer.getToken();
             if (this.summary.length > 0) {
               this.reportError('Cannot provide summary in JsDoc if @inheritdoc tag is given');
             }
             this._parseInheritDoc(token);
             this.isDocInherited = true;
-          } else if (token.charAt(0) === '@' && ApiDocumentation._allowedJsdocTags.indexOf(token) < 0) {
-            this.reportError(`The JSDoc tag "${token}" is not allowed`);
-          } else {
-            console.log('Unexpected text: ' + token.toString());
-          }
-          break;
+            break;
+          case '@link':
+            const linkDocElement: IHrefLinkElement | ICodeLinkElement = DocElementParser.parseLinkTag(
+            tokenizer.getToken(),
+            this.reportError);
+            if (linkDocElement) {
+              this.summary.push(linkDocElement);
+            }
+            break;
+          default:
+            tokenizer.getToken();
+            this.reportError(`Unidentifiable inline token ${token.tag}`);
+            break;
+        }
+      } else if (token.type === 'Text')  {
+        tokenizer.getToken();
+        this.reportError('Unexpected text. Text must either be the first sentences of the JSDoc, or if too long for ' +
+        'the first 2-3 sentences the text must be preceded by a @internalremarks tag.');
+      } else {
+        tokenizer.getToken();
+        this.reportError(`Unexpected token: ${token.type} ${token.tag} ${token.text}`);
       }
     }
 
@@ -384,30 +423,25 @@ export default class ApiDocumentation {
    * all the relevant documenation properties from the inherited doc onto the documenation 
    * of the current api item.
    * 
-   * The format for the \@inheritdoc tag is {\@inheritdoc scopeName/packageName:exportName.memberName(s)}.
+   * The format for the \@inheritdoc tag is {\@inheritdoc scopeName/packageName:exportName.memberName}.
    * For more information on the format see IInheritdocRef.
    */
-  protected _parseInheritDoc(tokenInline: string): void {
-    // Enforce inheritdoc structure 
-    if (tokenInline.charAt(0) !== '{' || tokenInline.charAt(tokenInline.length - 1) !== '}') {
-      this.reportError('inheritdoc tags should be wrapped inside curly braces.');
-      return;
-    }
-    const tokenContent: string = tokenInline.slice(1, tokenInline.length - 1).trim();
+  protected _parseInheritDoc(token: Token): void {
 
-    const tokenChunks: string[] = tokenContent.split(' ');
-    if (tokenChunks.length > 2) {
+    // Check to make sure the API definition reference is at most one string
+    const tokenChunks: string[] = token.text.split(' ');
+    if (tokenChunks.length > 1) {
       this.reportError('Too many parameters for @inheritdoc inline tag.' +
         'The format should be {@inheritdoc scopeName/packageName:exportName}. Extra parameters are ignored');
-      return;
-    } else if (tokenChunks.length < 1) {
-      this.reportError('Too few parameters for @inheritdoc inline tag.');
       return;
     }
 
     // Create the IApiDefinitionReference object 
     // Deconstruct the API reference expression 'scopeName/packageName:exportName.memberName' 
-    const apiDefinitionRef: IApiDefinitionReference = this._parseApiReferenceExpression(tokenChunks[1]);
+    const apiDefinitionRef: IApiDefinitionReference = ApiDocumentation.parseApiReferenceExpression(
+      token.text,
+      this.reportError
+    );
     // if API reference expression is formatted incorrectly then apiDefinitionRef will be undefined
     if (!apiDefinitionRef) {
       return;
@@ -421,7 +455,7 @@ export default class ApiDocumentation {
     if (!inheritedDoc) {
       const textDocItem: IDocElement = {
         kind: 'textDocElement',
-        value: `See documentation for ${tokenChunks[1]}`
+        value: `See documentation for ${tokenChunks[0]}`
       };
       this.summary = [textDocItem];
       return;
@@ -446,156 +480,38 @@ export default class ApiDocumentation {
     this.isDocInheritedDeprecated = inheritedDoc.deprecatedMessage.length > 0 ? true : false;
   }
 
-  /**
-   * Takes an API reference expression of the form '@scopeName/packageName:exportName.memberName'
-   * and deconstructs it into an IApiDefinitionReference interface object. 
-   */
-  protected _parseApiReferenceExpression(apiReferenceExpr: string): IApiDefinitionReference {
-    if (!apiReferenceExpr) {
-      this.reportError('API reference expression must be of the form: scopeName/packageName:exportName.memberName(s)');
-      return undefined;
-    }
-
-    const apiDefitionRef: IApiDefinitionReference = { scopeName: '', packageName: '', exportName: '', memberName: ''};
-    let parts: string[];
-
-    // E.g. @microsoft/sp-core-library:Guid.equals
-    parts = apiReferenceExpr.match(ApiDocumentation._packageRegEx);
-    if (parts) {
-      // parts[1] is of the form ‘@microsoft/sp-core-library’ or ‘sp-core-library’
-      const scopePackageName: IScopePackageName = ApiDocumentation.parseScopedPackageName(parts[1]);
-      apiDefitionRef.scopeName = scopePackageName.scope;
-      apiDefitionRef.packageName = scopePackageName.package;
-      apiReferenceExpr = parts[2]; // e.g. Guid.equals
-    }
-
-    // E.g. Guid.equals
-    parts = apiReferenceExpr.match(ApiDocumentation._memberRegEx);
-    if (parts) {
-      apiDefitionRef.exportName = parts[1]; // e.g. Guid, can never be undefined
-      apiDefitionRef.memberName = parts[2] ? parts[2] : ''; // e.g. equals
-    } else {
-      // the export name is required 
-       throw this.reportError(`Api reference expression contains invalid characters: ${apiReferenceExpr}`);
-    }
-
-    if (!apiReferenceExpr.match(ApiDocumentation._exportRegEx)) {
-      throw this.reportError(`Api reference expression contains invalid characters: ${apiReferenceExpr}`);
-    }
-
-    return apiDefitionRef;
-  }
-
-  protected _parseParam(tokenStream: string[]): IParam {
-        const paramToken: string = tokenStream.shift();
-        const hyphenIndex: number = paramToken ? paramToken.indexOf('-') : -1;
-        if (!paramToken || paramToken.charAt(0) === '@') {
-            this.reportError(`The documentation tag @param is missing required description.`);
-        } else if (hyphenIndex < 0) {
-            this.reportError('No hyphens found in the @param line. ' +
+  protected _parseParam(tokenizer: Tokenizer): IParam {
+        const paramDescriptionToken: Token = tokenizer.getToken();
+        if (!paramDescriptionToken) {
+          this.reportError('@param tag missing required description');
+          return;
+        }
+        const hyphenIndex: number = paramDescriptionToken ? paramDescriptionToken.text.indexOf('-') : -1;
+        if (hyphenIndex < 0) {
+          this.reportError('No hyphens found in the @param line. ' +
               'There should be a hyphen between the parameter name and its description.');
+          return;
         } else {
-            const name: string = paramToken.slice(0, hyphenIndex).trim();
-            const comment: string = paramToken.substr(hyphenIndex + 1).trim();
-            const commentTokens: string[] = this._tokenizeDocs(comment);
-            tokenStream = commentTokens.concat(tokenStream);
+          const name: string = paramDescriptionToken.text.slice(0, hyphenIndex).trim();
+          const comment: string = paramDescriptionToken.text.substr(hyphenIndex + 1).trim();
 
-            const paramDocElement: IParam = {
-                name: name,
-                description: DocElementParser.parse(tokenStream)
-            };
-            return paramDocElement;
+          if (!comment) {
+            this.reportError('@param tag requires a description following the hyphen');
+            return;
+          }
+
+          const commentTextElement: IDocElement = DocElementParser.makeTextElement(comment);
+          // Full param description may contain additional Tokens (Ex: @link)
+          const remainingElements: IDocElement[] = DocElementParser.parse(tokenizer, this.reportError);
+          const descriptionElements: IDocElement[] = [commentTextElement].concat(remainingElements);
+
+          const paramDocElement: IParam = {
+              name: name,
+              description: descriptionElements
+          };
+          return paramDocElement;
         }
     }
-
-  /**
-   * Parse an inline tag and returns the output string for it
-   * Example '{@link https://bing.com Bing}' => '{@link https://bing.com Bing}'
-   *
-   * @internalremarks Right now this is just returning the escaped input back, but we might need to
-   * change this to return markdown
-   */
-  protected _parseDocsInline(token: string): string {
-    if (token.charAt(0) !== '{' || token.charAt(token.length - 1) !== '}') {
-      this.reportError('All inline tags should be wrapped inside curly braces.');
-      return '';
-    }
-    const tokenContent: string = token.slice(1, token.length - 1).trim();
-
-    if (tokenContent.charAt(0) !== '@') {
-      this.reportError('Content of inline tags should start with a leading \'@\'.');
-      return '';
-    }
-
-    const unescapedCurlyBraces: RegExp = /([^\\])({|}[^$])/gi;
-    if (unescapedCurlyBraces.test(tokenContent)) {
-      this.reportError(`Unescaped '{' or '}' detected inside an inline tag. ` +
-        'Use \\ to escape curly braces inside inline tags.');
-      return '';
-    }
-
-    // Split the inline tag content with whitespace
-    // Example: '@link    https://bing.com    Bing' => ['@link', 'https://bing.com', 'Bing']
-    const tokenChunks: string[] = tokenContent.split(/\s+/gi);
-    if (tokenChunks[0] === '@link') {
-      if (tokenChunks.length > 3) {
-        this.reportError('Too many parameters for @link inline tag.' +
-          'The format should be {@link URL [text]}. Extra parameters are ignored');
-          return '';
-      } else if (tokenChunks.length < 2) {
-        this.reportError('Too few parameters for @link inline tag.');
-        return '';
-      }
-      const url: string = tokenChunks[1];
-      let result: string = `{@link ${url}`;
-      const text: string = this._unescapeCurlyBraces(tokenChunks[2]);
-      if (text) {
-        result += ` ${text}`;
-      }
-      result += '}';
-      return result;
-    }
-
-    this.reportError('Unknown tag name for inline tag.');
-    return '';
-  }
-
-  /**
-   * Validates that a description follows the tagName.
-   *
-   * If you provide a tag name, then there should be a description after the tagName, otherwise
-   * will throw an error.
-   */
-  protected _parseDocsBlock(tokens: string[], startingIndex: number = 0, tagName?: string): string {
-    let result: string = '';
-    for (let i: number = startingIndex; i < tokens.length; i++) {
-      if (tokens[i].charAt(0) === '@') {
-        break;
-      } else if (tokens[i].charAt(0) === '{') {
-        // inline tag token
-        result += this._parseDocsInline(tokens[i]);
-      } else {
-        const text: string = this._unescapeAtSign(tokens[i]);
-        result += `${text} `;
-      }
-    }
-
-    result = result.trim();
-
-    if (result === '' && tagName) {
-      this.reportError(`The documentation tag ${tagName} is missing required description.`);
-    }
-
-    return result;
-  }
-
-  private _unescapeCurlyBraces(text: string): string {
-    return text ? text.replace('\\{', '{').replace('\\}', '}') : undefined;
-  }
-
-  private _unescapeAtSign(text: string): string {
-    return text ? text.replace('\\@', '@') : undefined;
-  }
 
   private _checkInheritDocStatus(): void {
     if (this.isDocInherited) {

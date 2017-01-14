@@ -38,13 +38,22 @@
           "type": "string",
           "enum": [ "linkDocElement" ]
         },
+        "referenceType": {
+          "description": "The link can either refer to a API definition or href",
+          "type": "string",
+          "enum": [ "href", "code" ]
+        },
         "targetUrl": {
           "description": "The target URL for the hyperlink",
+          "type": "string"
+        },
+        "value": {
+          "description": "An optional display name to show for a link",
           "type": "string"
         }
       },
       "additionalProperties": false,
-      "required": [ "kind", "targetUrl" ]
+      "required": [ "kind", "referenceType", "targetUrl" ]
     },
 
     //---------------------------------------------------------------------------------------------

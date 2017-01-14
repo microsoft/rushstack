@@ -1,6 +1,8 @@
 
 /**
-  * @badjsdoctag This is some jsdoc
+  * @badjsdoctag (Error #1 is the bad tag) Text can not come after a tag unless it is a parameter of
+  * the tag. It must come in the first few sentences of the JSDoc or come after 
+  * an \@internalremarks tag. (Error #2 text coming after a tag that is not \@internalremarks)
   */
 export default class MyClass {
   public test(): void {
