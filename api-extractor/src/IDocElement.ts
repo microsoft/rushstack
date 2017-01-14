@@ -15,15 +15,65 @@ export interface ITextElement extends IBaseDocElement {
 }
 
 /**
- * Any link that was specified as {@link linkAddress | optionalDisplayName}.
+ * A link that was specified as \{@link http://url | optional display text\}.
+ * The alternative to the IHrefLinkElement is ICodeLinkElement, where instead 
+ * of a href the reference is to an API definition.
  * 
- * Example: {@link http://microsoft.com | Microsoft}
- * ->
- * {kind: 'linkDocElement', targetUrl: http://microsoft.com, value: Microsoft}
+ * Examples: 
+ * \{@link http://microsoft.com | Microsoft \}
+ * \{@link http://microsoft.com \}
  */
-export interface ILinkDocElement extends IBaseDocElement {
-  kind: 'linkDocElement';
+export interface IHrefLinkElement extends IBaseDocElement {
+  /**
+   * Used to distinguish from an ICodeLinkElement.
+   */
+  referenceType: 'href';
+
+  /**
+   * The url that this link element references.
+   */
   targetUrl: string;
+
+  /**
+   * Text to be shown in place of the full link text.
+   */
+  value?: string;
+}
+
+/**
+ * A link that references an API definition as \{@link ApiReference | optional display text \}.
+ * The presentation of the reference link is left to the ts-spec tool.
+ */
+export interface ICodeLinkElement extends IBaseDocElement {
+  /**
+   * Used to distinguish from an IHrefLinkElement..
+   */
+  referenceType: 'code';
+
+  /**
+   * Example: 'Guid'
+   */
+  exportName: string;
+
+  /**
+   * Example: '@microsoft'
+   */
+  scopeName?: string;
+
+  /**
+   * Example: 'sp-core-library'
+   */
+  packageName?: string;
+
+  /**
+   * Example: 'newGuid'
+   */
+  memberName?: string;
+
+  /**
+   * Optional text to display in place of the API reference string url that is
+   * constructed from the ts-spec tool.
+   */
   value?: string;
 }
 
@@ -47,6 +97,8 @@ export interface ISeeDocElement extends IBaseDocElement {
   kind: 'seeDocElement';
   seeElements: IDocElement[];
 }
+
+export type ILinkDocElement = IHrefLinkElement | ICodeLinkElement;
 
 export type IDocElement = ITextElement | ILinkDocElement | ISeeDocElement;
 
