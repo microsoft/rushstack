@@ -57,7 +57,6 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
           ` karma.setConfig({ configPath: null }) in your gulpfile.`);
       } else {
         this.copyFile(path.resolve(__dirname, '../karma.config.js'));
-        this.copyFile(path.resolve(__dirname, '../tests.js'), 'src/tests.js');
 
         // install dev dependencies?
         // phantomjs-polyfill?
