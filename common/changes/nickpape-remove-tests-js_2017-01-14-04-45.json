@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-karma",
+      "comment": "Update --initkarma to no longer require a tests.js file",
+      "type": "patch"
+    }
+  ],
+  "email": "nickpape@microsoft.com"
+}
