@@ -4,15 +4,22 @@
 import * as ts from 'typescript';
 import Analyzer from './Analyzer';
 import ApiFileGenerator from './generators/ApiFileGenerator';
-import TypeDocGenerator from './generators/TypeDocGenerator';
 import ApiJsonGenerator from './generators/ApiJsonGenerator';
 import { IDocItem } from './IDocItem';
 import { IApiDefinitionReference } from './IApiDefinitionReference';
+import { IDocElement, IParam } from './IDocElement';
 import DocItemLoader from './DocItemLoader';
+import DocElementParser from './DocElementParser';
 import TestFileComparer from './TestFileComparer';
 import JsonFile from './JsonFile';
 import ApiStructuredType from './definitions/ApiStructuredType';
 import ApiDocumentation from './definitions/ApiDocumentation';
+import Tokenizer from './Tokenizer';
+
+let docs: string = '{@link @microsoft/sp-core-library:Guid.equals | Guid equals}';
+let tokenizer: Tokenizer = new Tokenizer(docs, console.log);
+/* tslint:disable:no-unused-variable */
+const linkResult: IDocElement[] = DocElementParser.parse(tokenizer, console.log);
 
 const analyzer: Analyzer = new Analyzer();
 
@@ -25,20 +32,8 @@ class TestApiDocumentation extends ApiDocumentation {
     super(myDocumentedClass, analyzer.docItemLoader, (msg: string) => { return; });
   }
 
-  public tokenizeDocs(docs: string): string[] {
-    return this._tokenizeDocs(docs);
-  }
-
-  public parseDocsBlock(tokens: string[], startingIndex: number, tagName?: string): string {
-    return this._parseDocsBlock(tokens, startingIndex, tagName);
-  }
-
-  public parseDocsInline(token: string): string {
-    return this._parseDocsInline(token);
-  }
-
-  public parseApiReferenceExpression(apiDefinitionRef: string): IApiDefinitionReference {
-    return this._parseApiReferenceExpression(apiDefinitionRef);
+  public parseParam(_tokenizer: Tokenizer): IParam {
+    return this._parseParam(_tokenizer);
   }
 }
 
@@ -49,17 +44,14 @@ analyzer.analyze({
     moduleResolution: ts.ModuleResolutionKind.NodeJs,
     experimentalDecorators: true,
     jsx: ts.JsxEmit.React,
-    rootDir: '../../spfx-core/sp-loader'
+    rootDir: '../../spfx-core/sp-client-base'
   },
-  entryPointFile: '../../spfx-core/sp-loader/src/index.ts', // local/bundles/platform-exports.ts',
-  otherFiles: ['../../spfx-core/sp-loader/typings/tsd.d.ts']
+  entryPointFile: '../../spfx-core/sp-client-base/src/index.ts', // local/bundles/platform-exports.ts',
+  otherFiles: ['../../spfx-core/sp-client-base/typings/tsd.d.ts']
 });
 
 const apiFileGenerator: ApiFileGenerator = new ApiFileGenerator();
 apiFileGenerator.writeApiFile('./lib/DebugRun.api.ts', analyzer);
-
-const typeDocGenerator: TypeDocGenerator = new TypeDocGenerator();
-typeDocGenerator.writeApiFile('./lib/DebugRun.typedoc.ts', analyzer);
 
 const apiJsonGenerator: ApiJsonGenerator = new ApiJsonGenerator();
 apiJsonGenerator.writeJsonFile('./lib/DebugRun.json', analyzer);
@@ -85,29 +77,35 @@ myDocumentedClass = analyzer.package.getSortedMemberItems()
   .filter(apiItem => apiItem.name === 'MyDocumentedClass')[0] as ApiStructuredType;
 const apiDoc: TestApiDocumentation = new TestApiDocumentation();
 
+docs = '@param x - The height in {@link http://wikipedia.org/pixel_units}';
+tokenizer = new Tokenizer(docs, console.log);
+// ApiDocumentation gets the @param token before calling parseParam()
+tokenizer.getToken();
+apiDoc.parseParam(tokenizer);
+
 /**
  * Put test cases here
  */
 let apiReferenceExpr: string = '@microsoft/sp-core-library:Guid.equals';
 let actual: IApiDefinitionReference;
-actual = apiDoc.parseApiReferenceExpression(apiReferenceExpr);
+actual = ApiDocumentation.parseApiReferenceExpression(apiReferenceExpr, apiDoc.reportError);
 
 apiReferenceExpr = '@microsoft/sp-core-library:Guid';
-actual = apiDoc.parseApiReferenceExpression(apiReferenceExpr);
+actual = ApiDocumentation.parseApiReferenceExpression(apiReferenceExpr, apiDoc.reportError);
 
 apiReferenceExpr = 'sp-core-library:Guid';
-actual = apiDoc.parseApiReferenceExpression(apiReferenceExpr);
+actual = ApiDocumentation.parseApiReferenceExpression(apiReferenceExpr, apiDoc.reportError);
 
 apiReferenceExpr = 'Guid.equals';
-actual = apiDoc.parseApiReferenceExpression(apiReferenceExpr);
+actual = ApiDocumentation.parseApiReferenceExpression(apiReferenceExpr, apiDoc.reportError);
 
 apiReferenceExpr = 'Guid';
-actual = apiDoc.parseApiReferenceExpression(apiReferenceExpr);
+actual = ApiDocumentation.parseApiReferenceExpression(apiReferenceExpr, apiDoc.reportError);
 
 // Should report error
 apiReferenceExpr = 'sp-core-library:Guid:equals';
 try {
-  actual = apiDoc.parseApiReferenceExpression(apiReferenceExpr);
+  actual = ApiDocumentation.parseApiReferenceExpression(apiReferenceExpr, apiDoc.reportError);
 } catch (error) {
   console.log(error);
 }

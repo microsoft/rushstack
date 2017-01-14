@@ -25,9 +25,8 @@ export enum inheritDisplayModeError {
  * {@inheritdoc @microsoft/sp-core-library:DisplayModeDeprecated}
  */
 export enum inheritDisplayModeErrorDeprecated {
-  // This will raise (Error #2) in ApiDocumentation testing because the inherited 
-  // API item is deprecated but this documentation does not have its own @deprecated 
-  // tag and message
+  // (Error #2) Testing because the inherited API item is deprecated but this 
+  // documentation does not have its own @deprecated tag and message
 }
 
 /** 
@@ -41,38 +40,41 @@ export enum inheritDisplayModeNoErrorDeprecated {
 /**
  * This is a class to test JsDoc parser and this is description that can
  * span to multiple lines and we need to make sure we parse this block
- * correctly. It can contain a {@link https://bing.com/}. This block is entirely
+ * correctly. It can contain a {@link https://bing.com/ | bing home}. This block is entirely
  * valid and a correct documentation object should be built for this ApiItem.
  *
- * @summary Mock class for testing JsDoc parser
+ * @summary Mock class for testing JsDoc parser (Error #3 and #4 - \@summary not allowed and text 
+ * should be marked with \@internal.)
  * @public
  */
 export default class MyDocumentedClass {
   /**
-   * This doc has an invalid tag that should throw an error (Error #3)
+   * This doc has an invalid tag that should throw an error (Error #5)
    * @badJsDocTag
    */
   public fieldWithBadTag: string;
 
   /**
-   * This doc has an unknown inline tag {@badTag}. (Error #4)
+   * This doc has an unknown inline tag {@badTag} (Error #6)
    * @deprecated - see next version.
    */
   public fieldWithInvalidInlineTag: string;
 
   /**
-   * This doc has too few params for link tag {@link } (Error #5)
+   * This doc has too few params for link tag {@link } (Error #7)
    */
   public linkTagMissingParam: string;
 
   /**
    * @beta
-   * @internalremarks the @beta tag above should have a description (Error #6)
+   * @internalremarks these remarks @beta can not contain a tag (Error #8)
    */
   public betaTagmissingParam: string;
 
   /**
-   * This doc has {curly braces} and valid inline block {@link validURL \{text\}}.
+   * This doc has {curly braces} which is valid but the inline \@link token is missing a
+   * pipe between the url and the display text {@link validURL \{text\}} (Error #9).
+   * The displayName is not allowed to have non word characters.
    */
   public fieldWithValidEscapedBraces: string;
 

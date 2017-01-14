@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "@link capability for href and API definition references",
+      "type": "patch"
+    }
+  ],
+  "email": "nickpape@microsoft.com"
+}

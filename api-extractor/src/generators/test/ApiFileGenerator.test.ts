@@ -55,8 +55,14 @@ describe('ApiFileGenerator tests', function (): void {
 
       assertFileMatchesExpected(outputFile, expectedFile);
 
-      assert.equal(capturedErrors.length, 1);
+      /**
+       * Errors can be found in testInputs/folder/MyClass
+       */
+      assert.equal(capturedErrors.length, 2);
       assert.equal(capturedErrors[0].message, 'The JSDoc tag "@badjsdoctag" is not allowed');
+      assert.equal(capturedErrors[1].message, 'Unexpected text. Text must either be the first ' +
+        'sentences of the JSDoc, or if too long for the first 2-3 sentences the text must be ' +
+        'preceded by a @internalremarks tag.');
     });
   });
 });
