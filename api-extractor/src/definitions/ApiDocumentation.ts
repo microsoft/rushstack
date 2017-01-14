@@ -249,24 +249,24 @@ export default class ApiDocumentation {
   }
 
   protected _getJsDocs(apiItem: ApiItem): string {
-    let jsdoc: string = '';
     const sourceFile: ts.SourceFile = apiItem.getDeclaration().getSourceFile();
-    const comments: ts.CommentRange[] = TypeScriptHelpers.getJsDocComments(apiItem.getDeclaration(), sourceFile);
-    if (comments) {
-      for (const comment of comments) {
-        const commentBody: string = sourceFile.text.substring(comment.pos, comment.end);
-        jsdoc += TypeScriptHelpers.extractCommentContent(commentBody);
-      }
-    }
+    // const comments: ts.CommentRange[] = TypeScriptHelpers.getJsDocComments(apiItem.getDeclaration(), sourceFile);
+    // if (comments) {
+    //   for (const comment of comments) {
+    //     const commentBody: string = sourceFile.text.substring(comment.pos, comment.end);
+    //     jsdoc += TypeScriptHelpers.extractCommentContent(commentBody);
+    //   }
+    // }
+    let jsDoc: string = TypeScriptHelpers.getJsDocComments(apiItem.getDeclaration(), sourceFile);
 
     // Eliminate tags and then count the English letters.  Are there at least 10 letters of text?
     // If not, we consider the definition to be "missingDocumentation".
-    const condensedDocs: string = jsdoc
+    const condensedDocs: string = jsDoc
       .replace(ApiDocumentation._jsdocTagsRegex, '')
       .replace(/[^a-z]/gi, '');
     this.isMissing = apiItem.shouldHaveDocumentation() && condensedDocs.length <= 10;
 
-    return jsdoc;
+    return jsDoc;
   }
 
   protected _parseDocs(): void {

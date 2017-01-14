@@ -48,6 +48,7 @@ export enum inheritDisplayModeNoErrorDeprecated {
  * @public
  */
 export default class MyDocumentedClass {
+  private _privateTest: number = 123;
   /**
    * This doc has an invalid tag that should throw an error (Error #5)
    * @badJsDocTag

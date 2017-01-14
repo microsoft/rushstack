@@ -111,6 +111,7 @@ describe('ApiDocumentation tests', function (): void {
        * - testInputs/example2/folder/MyDocumentedClass (9 errors)
        * - the test in this file '_parseApiReferenceExpression() without scope name and invalid memberName' (1 error)
        */
+      console.log(capturedErrors);
       assert.equal(capturedErrors.length, 10);
     });
 
