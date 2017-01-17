@@ -48,7 +48,7 @@ export class ValidateShrinkwrapTask extends GulpTask<{}> {
   }
 
   private _validate(packageDep: PackageDep, shrinkwrapDep: ShrinkwrapDep): void {
-    for (let pkg in packageDep) {
+    for (const pkg in packageDep) {
       if (!shrinkwrapDep.hasOwnProperty(pkg)) {
         this.logError(`Failed to find package ${pkg} in shrinkwrap file`);
       } else if (!semver.satisfies(shrinkwrapDep[pkg].version, packageDep[pkg])) {

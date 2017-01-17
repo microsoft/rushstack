@@ -76,7 +76,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
     const configFilename: string = this._getConfigFilePath();
     const schema: Object = this.schema;
 
-    let rawConfig: TASK_CONFIG = this._readConfigFile(configFilename, schema);
+    const rawConfig: TASK_CONFIG = this._readConfigFile(configFilename, schema);
 
     if (rawConfig) {
       this.mergeConfig(rawConfig);
@@ -240,7 +240,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
     /* tslint:enable:typedef */
 
     try {
-      let content: string = fs.readFileSync(fullPath, 'utf8');
+      const content: string = fs.readFileSync(fullPath, 'utf8');
       result = JSON.parse(content);
     } catch (e) { /* no-op */ }
 
