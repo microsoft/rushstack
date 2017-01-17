@@ -166,7 +166,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       this.log(`Using custom version: ${this.taskConfig.typescript.version}`);
     }
 
-    let compilerOptions: ICompilerOptions = assign(
+    const compilerOptions: ICompilerOptions = assign(
       {},
       tsConfig.compilerOptions,
       {
