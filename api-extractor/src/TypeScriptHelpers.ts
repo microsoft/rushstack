@@ -6,6 +6,26 @@ import PrettyPrinter from './PrettyPrinter';
 export default class TypeScriptHelpers {
 
   /**
+   * Splits by the characters '\r\n'.
+   */
+  public static newLineSeq: RegExp = /\r\n/g;
+
+  /**
+   * Start sequence is '/**'.
+   */
+  public static jsDocStartSeq: RegExp = /^\s*\/\*\*/g;
+
+  /**
+   * End sequence is '*\/'.
+   */
+  public static jsDocEndSeq: RegExp = /^\s*\*\//g;
+
+  /**
+   * Intermediate lines of JSDoc comment character.
+   */
+  public static jsDocIntermediateSeq: RegExp = /^\s*[*]/g;
+
+  /**
    * Returns the Symbol for the provided Declaration.  This is a workaround for a missing
    * feature of the TypeScript Compiler API.   It is the only apparent way to reach
    * certain data structures, and seems to always work, but is not officially documented.
@@ -16,6 +36,7 @@ export default class TypeScriptHelpers {
   public static tryGetSymbolForDeclaration(declaration: ts.Declaration): ts.Symbol {
     /* tslint:disable:no-any */
     const symbol: ts.Symbol = (declaration as any).symbol;
+    symbol.getJsDocTags();
     /* tslint:enable:no-any */
     return symbol;
   }
@@ -36,9 +57,35 @@ export default class TypeScriptHelpers {
   /**
    * Returns the JSDoc comments associated with the specified node, if any.
    */
-  public static getJsDocComments(node: ts.Node, sourceFile: ts.SourceFile): ts.CommentRange[] {
+  public static getJsDocComments(node: ts.Node, sourceFile: ts.SourceFile): string {
+    let jsDoc: string = '';
     // tslint:disable-next-line:no-any
-    return (ts as any).getJsDocComments(node, sourceFile);
+    if ((node as any).jsDoc) {
+      // tslint:disable-next-line:no-any
+      const jsDocFullText: string = (node as any).jsDoc[0].getText();
+      const jsDocLines: string[] = jsDocFullText.split(TypeScriptHelpers.newLineSeq);
+      const jsDocStartSeqExists: boolean = TypeScriptHelpers.jsDocStartSeq.test(jsDocLines[0]);
+      const jsDocEndSeqExists: boolean = TypeScriptHelpers.jsDocEndSeq.test(jsDocLines[jsDocLines.length - 1]);
+      if (!(jsDocStartSeqExists && jsDocEndSeqExists)) {
+        throw new Error('JsDoc comment must begin with \"/**\" sequence and end with \"*/\" sequence.');
+      }
+
+      // Remove '/**'
+      jsDocLines[0] = jsDocLines[0].replace(TypeScriptHelpers.jsDocStartSeq, '');
+      // Remove '*/'
+      jsDocLines[jsDocLines.length - 1] = jsDocLines[jsDocLines.length - 1].replace(TypeScriptHelpers.jsDocEndSeq, '');
+
+      // Remove the leading '*' from any intermediate lines
+      if (jsDocLines.length > 1) {
+        for (let i: number = 1; i < jsDocLines.length - 1; i++) {
+          jsDocLines[i] = jsDocLines[i].replace(TypeScriptHelpers.jsDocIntermediateSeq, '');
+        }
+      }
+
+      jsDoc = jsDocLines.join(' ').trim();
+    }
+
+    return jsDoc;
   }
 
   /**
