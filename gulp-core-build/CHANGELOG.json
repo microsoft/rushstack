@@ -1,0 +1,22 @@
+{
+  "name": "@microsoft/gulp-core-build",
+  "entries": [
+    {
+      "version": "2.0.1",
+      "tag": "@microsoft/gulp-core-build_v2.0.1",
+      "date": "Fri, 13 Jan 2017 06:46:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Enable the schema for CopyTask."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `>=1.0.0 <2.0.0` to `>=2.1.0 <3.0.0`"
+          }
+        ]
+      }
+    }
+  ]
+}
