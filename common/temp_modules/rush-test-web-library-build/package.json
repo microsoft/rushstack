@@ -7,6 +7,6 @@
     "gulp": "~3.9.1"
   },
   "rushDependencies": {
-    "@microsoft/web-library-build": ">=2.0.0 <3.0.0"
+    "@microsoft/web-library-build": ">=2.1.0 <3.0.0"
   }
 }
