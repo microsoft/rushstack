@@ -8,22 +8,22 @@ export default class TypeScriptHelpers {
   /**
    * Splits by the characters '\r\n'.
    */
-  public static newLineSeq: RegExp = /\r\n/g;
+  public static newLineRegEx: RegExp = /\r\n|\n/g;
 
   /**
    * Start sequence is '/**'.
    */
-  public static jsDocStartSeq: RegExp = /^\s*\/\*\*/g;
+  public static jsDocStartRegEx: RegExp = /^\s*\/\*\*/g;
 
   /**
    * End sequence is '*\/'.
    */
-  public static jsDocEndSeq: RegExp = /^\s*\*\//g;
+  public static jsDocEndRegEx: RegExp = /^\s*\*\//g;
 
   /**
    * Intermediate lines of JSDoc comment character.
    */
-  public static jsDocIntermediateSeq: RegExp = /^\s*[*]/g;
+  public static jsDocIntermediateRegEx: RegExp = /^\s*[*]/g;
 
   /**
    * Returns the Symbol for the provided Declaration.  This is a workaround for a missing
@@ -36,7 +36,6 @@ export default class TypeScriptHelpers {
   public static tryGetSymbolForDeclaration(declaration: ts.Declaration): ts.Symbol {
     /* tslint:disable:no-any */
     const symbol: ts.Symbol = (declaration as any).symbol;
-    symbol.getJsDocTags();
     /* tslint:enable:no-any */
     return symbol;
   }
@@ -60,29 +59,34 @@ export default class TypeScriptHelpers {
   public static getJsDocComments(node: ts.Node, sourceFile: ts.SourceFile): string {
     let jsDoc: string = '';
     // tslint:disable-next-line:no-any
-    if ((node as any).jsDoc) {
+    if ((node as any).jsDoc && (node as any).jsDoc.length > 0) {
       // tslint:disable-next-line:no-any
-      const jsDocFullText: string = (node as any).jsDoc[0].getText();
-      const jsDocLines: string[] = jsDocFullText.split(TypeScriptHelpers.newLineSeq);
-      const jsDocStartSeqExists: boolean = TypeScriptHelpers.jsDocStartSeq.test(jsDocLines[0]);
-      const jsDocEndSeqExists: boolean = TypeScriptHelpers.jsDocEndSeq.test(jsDocLines[jsDocLines.length - 1]);
-      if (!(jsDocStartSeqExists && jsDocEndSeqExists)) {
-        throw new Error('JsDoc comment must begin with \"/**\" sequence and end with \"*/\" sequence.');
-      }
-
-      // Remove '/**'
-      jsDocLines[0] = jsDocLines[0].replace(TypeScriptHelpers.jsDocStartSeq, '');
-      // Remove '*/'
-      jsDocLines[jsDocLines.length - 1] = jsDocLines[jsDocLines.length - 1].replace(TypeScriptHelpers.jsDocEndSeq, '');
-
-      // Remove the leading '*' from any intermediate lines
-      if (jsDocLines.length > 1) {
-        for (let i: number = 1; i < jsDocLines.length - 1; i++) {
-          jsDocLines[i] = jsDocLines[i].replace(TypeScriptHelpers.jsDocIntermediateSeq, '');
+      for (let i: number = 0; i <  (node as any).jsDoc.length; i++) {
+        // tslint:disable-next-line:no-any
+        const jsDocFullText: string = (node as any).jsDoc[i].getText();
+        const jsDocLines: string[] = jsDocFullText.split(TypeScriptHelpers.newLineRegEx);
+        const jsDocStartSeqExists: boolean = TypeScriptHelpers.jsDocStartRegEx.test(jsDocLines[0]);
+        const jsDocEndSeqExists: boolean = TypeScriptHelpers.jsDocEndRegEx.test(jsDocLines[jsDocLines.length - 1]);
+        if (!(jsDocStartSeqExists && jsDocEndSeqExists)) {
+          throw new Error('JsDoc comment must begin with \"/**\" sequence and end with \"*/\" sequence.');
         }
-      }
 
-      jsDoc = jsDocLines.join(' ').trim();
+        // Remove '/**'
+        jsDocLines[0] = jsDocLines[0].replace(TypeScriptHelpers.jsDocStartRegEx, '');
+        // Remove '*/'
+        jsDocLines[jsDocLines.length - 1] = jsDocLines[jsDocLines.length - 1].replace(
+          TypeScriptHelpers.jsDocEndRegEx,
+          '');
+
+        // Remove the leading '*' from any intermediate lines
+        if (jsDocLines.length > 1) {
+          for (let i: number = 1; i < jsDocLines.length - 1; i++) {
+            jsDocLines[i] = jsDocLines[i].replace(TypeScriptHelpers.jsDocIntermediateRegEx, '');
+          }
+        }
+
+        jsDoc += jsDocLines.join('\n').trim() + '\n';
+      }
     }
 
     return jsDoc;
