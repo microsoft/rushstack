@@ -91,7 +91,7 @@ export default class ApiDocumentation {
   private static _jsdocTagsRegex: RegExp = /{\s*@(\\{|\\}|[^{}])*}|(?:^|\s)(\@[a-z_]+)(?=\s|$)/gi;
 
   /**
-   * Splits an API reference expression into two parts, first part is the scopename/packageName and 
+   * Splits an API reference expression into two parts, first part is the scopename/packageName and
    * the second part is the exportName.memberName.
    */
   private static _packageRegEx: RegExp = /^([^:]*)\:(.*)$/;
@@ -125,8 +125,8 @@ export default class ApiDocumentation {
    * remaining text.  The array can be empty, but not undefined.
    * Example:
    * docComment       = "Example Function\n@returns the number of items\n@internal  "
-   * docCommentTokens = [ 
-   *  {tokenType: 'text', parameter: 'Example Function\n'}, 
+   * docCommentTokens = [
+   *  {tokenType: 'text', parameter: 'Example Function\n'},
    *  {tokenType: '\@returns', parameter: ''}
    *  {tokenType: 'text', parameter: 'the number of items\n'}
    *  {tokenType: '@internal', parameter: ''}
@@ -179,7 +179,7 @@ export default class ApiDocumentation {
 
   /**
    * Takes an API reference expression of the form '@scopeName/packageName:exportName.memberName'
-   * and deconstructs it into an IApiDefinitionReference interface object. 
+   * and deconstructs it into an IApiDefinitionReference interface object.
    */
   public static parseApiReferenceExpression(
     apiReferenceExpr: string,
@@ -210,7 +210,7 @@ export default class ApiDocumentation {
       apiDefitionRef.exportName = parts[1]; // e.g. Guid, can never be undefined
       apiDefitionRef.memberName = parts[2] ? parts[2] : ''; // e.g. equals
     } else {
-      // the export name is required 
+      // the export name is required
        throw reportError(`Api reference expression contains invalid characters: ${apiReferenceExpr}`);
     }
 
@@ -250,13 +250,6 @@ export default class ApiDocumentation {
 
   protected _getJsDocs(apiItem: ApiItem): string {
     const sourceFile: ts.SourceFile = apiItem.getDeclaration().getSourceFile();
-    // const comments: ts.CommentRange[] = TypeScriptHelpers.getJsDocComments(apiItem.getDeclaration(), sourceFile);
-    // if (comments) {
-    //   for (const comment of comments) {
-    //     const commentBody: string = sourceFile.text.substring(comment.pos, comment.end);
-    //     jsdoc += TypeScriptHelpers.extractCommentContent(commentBody);
-    //   }
-    // }
     let jsDoc: string = TypeScriptHelpers.getJsDocComments(apiItem.getDeclaration(), sourceFile);
 
     // Eliminate tags and then count the English letters.  Are there at least 10 letters of text?
@@ -284,10 +277,10 @@ export default class ApiDocumentation {
       const token: Token = tokenizer.peekToken();
       if (!token) {
         parsing = false; // end of stream
-        // Report error if @inheritdoc is deprecated but no @deprecated tag present here 
+        // Report error if @inheritdoc is deprecated but no @deprecated tag present here
         if (this.isDocInheritedDeprecated && this.deprecatedMessage.length === 0) {
-          // if this documentation inherits docs from a deprecated API item, then 
-          // this documentation must either have a deprecated message or it must 
+          // if this documentation inherits docs from a deprecated API item, then
+          // this documentation must either have a deprecated message or it must
           // not use the @inheritdoc and copy+paste the documentation
           this.reportError(`Use of @inheritdoc API item reference that is deprecated. ` +
           'Either include @deprecated JSDoc with message on this item or remove the @inheritdoc tag ' +
@@ -420,9 +413,9 @@ export default class ApiDocumentation {
 
   /**
    * This method parses the semantic information in an \@inheritdoc JSDoc tag and sets
-   * all the relevant documenation properties from the inherited doc onto the documenation 
+   * all the relevant documenation properties from the inherited doc onto the documenation
    * of the current api item.
-   * 
+   *
    * The format for the \@inheritdoc tag is {\@inheritdoc scopeName/packageName:exportName.memberName}.
    * For more information on the format see IInheritdocRef.
    */
@@ -436,8 +429,8 @@ export default class ApiDocumentation {
       return;
     }
 
-    // Create the IApiDefinitionReference object 
-    // Deconstruct the API reference expression 'scopeName/packageName:exportName.memberName' 
+    // Create the IApiDefinitionReference object
+    // Deconstruct the API reference expression 'scopeName/packageName:exportName.memberName'
     const apiDefinitionRef: IApiDefinitionReference = ApiDocumentation.parseApiReferenceExpression(
       token.text,
       this.reportError
@@ -451,7 +444,7 @@ export default class ApiDocumentation {
     const inheritedDoc: IDocItem = this.docItemLoader.getItem(apiDefinitionRef);
 
     // If no IDocItem found then nothing to inherit
-    // But for the time being set the summary to a text object 
+    // But for the time being set the summary to a text object
     if (!inheritedDoc) {
       const textDocItem: IDocElement = {
         kind: 'textDocElement',
@@ -461,12 +454,12 @@ export default class ApiDocumentation {
       return;
     }
 
-    // inheritdoc found, copy over IDocBase properties 
+    // inheritdoc found, copy over IDocBase properties
     this.summary =  inheritedDoc.summary;
     this.remarks = inheritedDoc.remarks;
 
     // Copy over detailed properties if neccessary
-    // Add additional cases if needed 
+    // Add additional cases if needed
     switch (inheritedDoc.kind) {
       case 'function':
         this.parameters = (inheritedDoc as IDocFunction).parameters;
@@ -474,8 +467,8 @@ export default class ApiDocumentation {
         break;
     }
 
-    // Check if inheritdoc is depreacted 
-    // We need to check if this documentation has a deprecated message 
+    // Check if inheritdoc is depreacted
+    // We need to check if this documentation has a deprecated message
     // but it may not appear until after this token.
     this.isDocInheritedDeprecated = inheritedDoc.deprecatedMessage.length > 0 ? true : false;
   }
