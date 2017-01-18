@@ -1,4 +1,12 @@
 /**
+ * Degenerate comment
+ star missing here
+ * end of comment
+ */
+export enum TestMissingCommentStar {
+}
+
+/**
  * {@inheritdoc @microsoft/sp-core-library:DisplayMode}
  */
 export enum inheritDisplayMode {
