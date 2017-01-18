@@ -7,7 +7,7 @@ import * as through from 'through2';
 import * as gulpUtil from 'gulp-util';
 import { GulpTask } from '@microsoft/gulp-core-build';
 import { Analyzer, IApiAnalyzerOptions, ApiFileGenerator, ApiJsonGenerator } from '@microsoft/api-extractor';
-import { TsConfigProvider } from './TsConfigProvider';
+import { TypeScriptConfiguration } from './TypeScriptConfiguration';
 import * as typescript from 'typescript'; /* tslint:disable-line */
 
 function writeStringToGulpUtilFile(content: string, filename: string = 'tempfile'): gulpUtil.File {
@@ -89,7 +89,7 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
 
     // tslint:disable-next-line:no-any
     const compilerOptions: typescript.CompilerOptions =
-      TsConfigProvider.getTypescriptOptions(this.buildConfig).compilerOptions;
+      TypeScriptConfiguration.getTypescriptOptions(this.buildConfig).compilerOptions;
 
     const analyzerOptions: IApiAnalyzerOptions = {
       entryPointFile,

@@ -14,7 +14,7 @@ export interface ITsConfigFile<T> {
  * It also is a central place for managing the version of typescript which this project
  * should be built with.
  */
-export class TsConfigProvider {
+export class TypeScriptConfiguration {
   private static _baseTsConfig: ITsConfigFile<ts.Settings>;
   private static _typescript: any = require('typescript');
 
@@ -26,7 +26,6 @@ export class TsConfigProvider {
     const file: ITsConfigFile<ts.Settings> = assign({}, this._getTsConfigFile(buildConfig));
     assign(file.compilerOptions, {
       rootDir: buildConfig.rootPath,
-      module: 'commonjs',
       typescript: this.getTypescriptCompiler()
     });
     return file;
