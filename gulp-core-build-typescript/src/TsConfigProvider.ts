@@ -1,14 +1,14 @@
 import * as path from 'path';
 import assign = require('object-assign');
-
 import { SchemaValidator, IBuildConfig } from '@microsoft/gulp-core-build';
+import ts = require('gulp-typescript');
 
 /* tslint:disable:no-any */
 export class TsConfigProvider {
-  private static _tsconfig: any;
+  private static _tsconfig: { compilerOptions: ts.Settings };
   private static _typescript: any = require('typescript');
 
-  public static getConfig(buildConfig: IBuildConfig): any {
+  public static getConfig(buildConfig: IBuildConfig): { compilerOptions: ts.Settings } {
     if (!this._tsconfig) {
       try {
         this._tsconfig = SchemaValidator.readCommentedJsonFile<any>(
