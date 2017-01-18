@@ -8,7 +8,6 @@ import * as gulpUtil from 'gulp-util';
 import { GulpTask } from '@microsoft/gulp-core-build';
 import { Analyzer, IApiAnalyzerOptions, ApiFileGenerator, ApiJsonGenerator } from '@microsoft/api-extractor';
 import { TsConfigProvider } from './TsConfigProvider';
-import * as ts from 'typescript';
 
 function writeStringToGulpUtilFile(content: string, filename: string = 'tempfile'): gulpUtil.File {
   return new gulpUtil.File({
@@ -87,18 +86,14 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
     const typingsFilePath: string = path.join(this.buildConfig.rootPath, 'typings/tsd.d.ts');
     const otherFiles: string[] = fsx.existsSync(typingsFilePath) ? [typingsFilePath] : [];
 
-    const compilerOptions: ts.CompilerOptions = TsConfigProvider.getConfig(this.buildConfig).compilerOptions;
+    // tslint:disable-next-line:no-any
+    const compilerOptions: any = TsConfigProvider.getConfig(this.buildConfig).compilerOptions;
 
     const analyzerOptions: IApiAnalyzerOptions = {
       entryPointFile,
       compilerOptions,
       otherFiles
     } as any; /* tslint:disable-line:no-any */
-
-    /* tslint:disable-next-line */
-    delete analyzerOptions.compilerOptions['typescript'];
-
-    console.log(JSON.stringify(analyzerOptions, undefined, 2));
 
     const analyzer: Analyzer = new Analyzer(
       (message: string, fileName: string, lineNumber: number): void => {
