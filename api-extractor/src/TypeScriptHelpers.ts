@@ -56,7 +56,9 @@ export default class TypeScriptHelpers {
   /**
    * Returns the JSDoc comments associated with the specified node, if any.
    */
-  public static getJsDocComments(node: ts.Node, sourceFile: ts.SourceFile): string {
+  public static getJsDocComments(node: ts.Node,
+    sourceFile: ts.SourceFile,
+    errorLogger: (message: string) => void): string {
     let jsDoc: string = '';
     // tslint:disable-next-line:no-any
     if ((node as any).jsDoc && (node as any).jsDoc.length > 0) {
@@ -68,7 +70,8 @@ export default class TypeScriptHelpers {
         const jsDocStartSeqExists: boolean = TypeScriptHelpers.jsDocStartRegEx.test(jsDocLines[0]);
         const jsDocEndSeqExists: boolean = TypeScriptHelpers.jsDocEndRegEx.test(jsDocLines[jsDocLines.length - 1]);
         if (!(jsDocStartSeqExists && jsDocEndSeqExists)) {
-          throw new Error('JsDoc comment must begin with \"/**\" sequence and end with \"*/\" sequence.');
+          errorLogger('JsDoc comment must begin with \"/**\" sequence and end with \"*/\" sequence.');
+          return '';
         }
 
         // Remove '/**'
