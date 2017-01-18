@@ -1,4 +1,4 @@
-import { IDocElement, IHrefLinkElement, ICodeLinkElement } from './IDocElement';
+import { ITextElement, IDocElement, IHrefLinkElement, ICodeLinkElement, ISeeDocElement } from './IDocElement';
 import { IApiDefinitionReference } from './IApiDefinitionReference';
 import ApiDocumentation from './definitions/ApiDocumentation';
 import Token from './Token';
@@ -8,7 +8,7 @@ export default class DocElementParser {
 
   /**
    * Matches only strings that contain characters for words.
-   * Any non word characters or spaces, will be present in the third entry in the match results 
+   * Any non word characters or spaces, will be present in the third entry in the match results
    * if they exist.
    */
   private static _wordRegEx: RegExp = /^([\w\s]*)/;
@@ -16,11 +16,11 @@ export default class DocElementParser {
   /**
    * Matches a href reference. This is used to get an idea whether a given reference is for an href
    * or an API definition reference.
-   * 
+   *
    * For example, the following would be matched:
    * 'http://'
    * 'https://'
-   * 
+   *
    * The following would not be matched:
    * '@microsoft/sp-core-library:Guid.newGuid'
    * 'Guid.newGuid'
@@ -32,7 +32,7 @@ export default class DocElementParser {
     if (!text) {
       return;
     }
-    return {kind: 'textDocElement', value: text};
+    return {kind: 'textDocElement', value: text} as ITextElement;
   }
 
   public static parse(tokenizer: Tokenizer, reportError: (message: string) => void): IDocElement[] {
@@ -54,7 +54,7 @@ export default class DocElementParser {
             docElements.push({
               kind: 'seeDocElement',
               seeElements: this.parse(tokenizer, reportError)
-            });
+            } as ISeeDocElement);
             break;
           default:
             parsing = false; // end of summary tokens
@@ -67,14 +67,14 @@ export default class DocElementParser {
             if (linkDocElement) {
               docElements.push(linkDocElement);
             }
-            tokenizer.getToken(); // get the link token 
+            tokenizer.getToken(); // get the link token
             break;
           default:
             parsing = false;
             break;
         }
       } else if (token.type === 'Text') {
-        docElements.push({kind: 'textDocElement', value: token.text});
+        docElements.push({kind: 'textDocElement', value: token.text} as ITextElement);
           tokenizer.getToken();
       } else {
         reportError(`Unidentifiable Token ${token.type} ${token.tag} ${token.text}`);
@@ -85,12 +85,12 @@ export default class DocElementParser {
 
   /**
    * This method parses the semantic information in an \@link JSDoc tag, creates and returns a
-   * linkDocElement with the corresponding information. If the corresponding inline tag \@link is 
+   * linkDocElement with the corresponding information. If the corresponding inline tag \@link is
    * not formatted correctly an error will be reported.
-   * 
-   * The format for the \@link tag is {\@link url or API defintion reference | display text}, where 
+   *
+   * The format for the \@link tag is {\@link url or API defintion reference | display text}, where
    * the '|' is only needed if the optional display text is given.
-   * 
+   *
    * Examples:
    * \{@link http://microsoft.com | microsoft home \}
    * \{@link http://microsoft.com \}
@@ -104,7 +104,7 @@ export default class DocElementParser {
        return;
     }
 
-    // Make sure there are no extra pipes 
+    // Make sure there are no extra pipes
     let pipeSplitContent: string[] = tokenItem.text.split('|');
     pipeSplitContent = pipeSplitContent.map( value => {
       if (value) {
@@ -116,7 +116,7 @@ export default class DocElementParser {
       return;
     }
 
-    // Try to guess if the tokenContent is a link or API definition reference 
+    // Try to guess if the tokenContent is a link or API definition reference
     let linkDocElement: ICodeLinkElement | IHrefLinkElement;
     if (tokenItem.text.match(this._hrefRegEx)) {
       const urlContent: string[] = pipeSplitContent[0].split(' ');
@@ -135,7 +135,7 @@ export default class DocElementParser {
       };
 
     } else {
-      // we are processing an API definition reference 
+      // we are processing an API definition reference
       const apiDefitionRef: IApiDefinitionReference = ApiDocumentation.parseApiReferenceExpression(
         pipeSplitContent[0], reportError);
 
@@ -160,7 +160,7 @@ export default class DocElementParser {
         reportError('Display name in @link token may only contain alphabetic characters.');
         return;
       }
-      // Full match is valid text 
+      // Full match is valid text
       linkDocElement.value = displayTextParts[0].trim();
     }
 

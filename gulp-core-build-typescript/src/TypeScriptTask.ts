@@ -4,6 +4,7 @@ import ts = require('gulp-typescript');
 import * as path from 'path';
 
 import { IBuildConfig } from '@microsoft/gulp-core-build';
+import { TypeScriptConfiguration } from './TypeScriptConfiguration';
 
 interface ITypeScriptErrorObject {
   diagnostic: {
@@ -47,18 +48,6 @@ export interface ITypeScriptTaskConfig {
   reporter?: ts.reporter.Reporter;
 
   /**
-   * Optional override for the TypeScript compiler.
-   */
-  /* tslint:disable:no-any */
-  typescript?: any;
-  /* tslint:enable:no-any */
-
-  /**
-   * Compiler options. Overrides values from the tsconfig.json
-   */
-  compilerOptions?: ICompilerOptions;
-
-  /**
    * Removes comments from all generated `.js` files. Will **not** remove comments from generated `.d.ts` files.
    * Defaults to false.
    */
@@ -84,7 +73,6 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   public name: string = 'typescript';
 
   public taskConfig: ITypeScriptTaskConfig = {
-    typescript: require('typescript'),
     failBuildOnErrors: true,
     reporter: {
       error: (error: ts.reporter.TypeScriptError): void => {
@@ -119,7 +107,6 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     ],
     removeCommentsFromJavaScript: false,
     emitSourceMaps: true,
-    compilerOptions: {},
     libDir: undefined,
     libAMDDir: undefined
   };
@@ -139,42 +126,22 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       errorCount: 0
     };
 
-    /* tslint:disable:no-any */
-    let tsConfig: any = this.readJSONSync('tsconfig.json');
-    /* tslint:enable:no-any */
-
-    // Set default config if no local tsconfig.json exists.
-    if (!tsConfig) {
-      tsConfig = {
-        compilerOptions: {
-          'declaration': true,
-          'experimentalDecorators': true,
-          'jsx': 'react',
-          'moduleResolution': 'node',
-          'sourceMap': true,
-          'target': 'es5',
-          'noUnusedParameters': true,
-          'noUnusedLocals': true
-        }
-      };
-    }
-
     this._normalizeConfig();
 
     // Log the compiler version for custom verisons.
-    if (this.taskConfig.typescript && this.taskConfig.typescript.version) {
-      this.log(`Using custom version: ${this.taskConfig.typescript.version}`);
+    const typescript: any = TypeScriptConfiguration.getTypescriptCompiler(); // tslint:disable-line:no-any
+    if (typescript && typescript.version) {
+      this.log(`TypeScript version: ${typescript.version}`);
     }
+    // tslint:disable-next-line:no-any
+    const compilerOptions: ICompilerOptions =
+      TypeScriptConfiguration.getGulpTypescriptOptions(this.buildConfig).compilerOptions;
 
-    const compilerOptions: ICompilerOptions = assign(
-      {},
-      tsConfig.compilerOptions,
-      {
-        module: 'commonjs',
-        typescript: this.taskConfig.typescript
-      },
-      this.taskConfig.compilerOptions
-    );
+    if (compilerOptions.module !== 'commonjs' && compilerOptions.module) {
+      this.logWarning(`Your tsconfig.json file specifies a different "target" than expected. `
+        + `Expected: "commonjs". Actual: "${compilerOptions.module}". Using "commonjs" instead.`);
+      compilerOptions.module = 'commonjs';
+    }
 
     this._tsProject = this._tsProject || ts.createProject(compilerOptions);
 
