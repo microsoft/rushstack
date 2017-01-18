@@ -1,4 +1,12 @@
 /**
+ * Degenerate comment
+ star missing here
+ * end of comment
+ */
+export enum TestMissingCommentStar {
+}
+
+/**
  * {@inheritdoc @microsoft/sp-core-library:DisplayMode}
  */
 export enum inheritDisplayMode {
@@ -48,6 +56,7 @@ export enum inheritDisplayModeNoErrorDeprecated {
  * @public
  */
 export default class MyDocumentedClass {
+  private _privateTest: number = 123;
   /**
    * This doc has an invalid tag that should throw an error (Error #5)
    * @badJsDocTag
