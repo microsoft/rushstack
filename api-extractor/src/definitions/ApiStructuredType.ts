@@ -82,7 +82,7 @@ export default class ApiStructuredType extends ApiItemContainer {
     // If there is a getter and no setter, mark it as readonly.
     for (const member of this.getSortedMemberItems()) {
       const memberSymbol: ts.Symbol = TypeScriptHelpers.tryGetSymbolForDeclaration(member.getDeclaration());
-      if (memberSymbol && (memberSymbol.flags & ts.SymbolFlags.GetAccessor)) {
+      if (memberSymbol && (memberSymbol.flags === ts.SymbolFlags.GetAccessor)) {
         if (!this._setterNames.has(member.name)) {
           (member as ApiProperty).isReadOnly = true;
         }
@@ -157,12 +157,17 @@ export default class ApiStructuredType extends ApiItemContainer {
   }
 
   private _processMember(memberSymbol: ts.Symbol, memberDeclaration: ts.Declaration): void {
-    if (memberDeclaration.flags & ts.NodeFlags.Private) {
-      return;
+    if (memberDeclaration.modifiers) {
+      for (let i: number = 0; i < memberDeclaration.modifiers.length; i++ ) {
+        const modifier: ts.Modifier = memberDeclaration.modifiers[i];
+        if (modifier.kind === ts.SyntaxKind.PrivateKeyword) {
+          return;
+        }
+      }
     }
 
     if (this._processedMemberNames.has(memberSymbol.name)) {
-      if (memberSymbol.flags & ts.SymbolFlags.SetAccessor) {
+      if (memberSymbol.flags === ts.SymbolFlags.SetAccessor) {
         // In case of setters, just add them to a list to check later if they have a getter
         this._setterNames.add(memberSymbol.name);
       }

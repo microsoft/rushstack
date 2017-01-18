@@ -6,6 +6,26 @@ import PrettyPrinter from './PrettyPrinter';
 export default class TypeScriptHelpers {
 
   /**
+   * Splits by the characters '\r\n'.
+   */
+  public static newLineRegEx: RegExp = /\r\n|\n/g;
+
+  /**
+   * Start sequence is '/**'.
+   */
+  public static jsDocStartRegEx: RegExp = /^\s*\/\*\*\s?/g;
+
+  /**
+   * End sequence is '*\/'.
+   */
+  public static jsDocEndRegEx: RegExp = /^\s*\*\//g;
+
+  /**
+   * Intermediate lines of JSDoc comment character.
+   */
+  public static jsDocIntermediateRegEx: RegExp = /^\s*[*]\s?/g;
+
+  /**
    * Returns the Symbol for the provided Declaration.  This is a workaround for a missing
    * feature of the TypeScript Compiler API.   It is the only apparent way to reach
    * certain data structures, and seems to always work, but is not officially documented.
@@ -35,10 +55,60 @@ export default class TypeScriptHelpers {
 
   /**
    * Returns the JSDoc comments associated with the specified node, if any.
+   *
+   * Example:
+   * "This \n is \n a comment" from "\/** This\r\n* is\r\n* a comment *\/
    */
-  public static getJsDocComments(node: ts.Node, sourceFile: ts.SourceFile): ts.CommentRange[] {
+  public static getJsDocComments(node: ts.Node, errorLogger: (message: string) => void): string {
+    let jsDoc: string = '';
     // tslint:disable-next-line:no-any
-    return (ts as any).getJsDocComments(node, sourceFile);
+    const nodeJsDocObjects: any = (node as any).jsDoc;
+    if (nodeJsDocObjects && nodeJsDocObjects.length > 0) {
+      // Use the JSDoc closest to the declaration
+      const lastJsDocIndex: number = nodeJsDocObjects.length - 1;
+      const jsDocFullText: string = nodeJsDocObjects[lastJsDocIndex].getText();
+      const jsDocLines: string[] = jsDocFullText.split(TypeScriptHelpers.newLineRegEx);
+      const jsDocStartSeqExists: boolean = TypeScriptHelpers.jsDocStartRegEx.test(jsDocLines[0]);
+      const jsDocEndSeqExists: boolean = TypeScriptHelpers.jsDocEndRegEx.test(jsDocLines[jsDocLines.length - 1]);
+      if (!(jsDocStartSeqExists && jsDocEndSeqExists)) {
+        errorLogger('JsDoc comment must begin with \"/**\" sequence and end with \"*/\" sequence.');
+        return '';
+      }
+
+      jsDoc = TypeScriptHelpers.removeJsDocSequences(jsDocLines);
+    }
+
+    return jsDoc;
+  }
+
+  /**
+   * Helper function to remove the comment stars ('/**'. '*', '/*) from lines of comment text.
+   * 
+   * Example:
+   * ["\/**", "*This \n", "*is \n", "*a comment", "*\/"] to "This \n is \n a comment"
+   */
+  public static removeJsDocSequences(textLines: string[]): string {
+  // Remove '/**'
+    textLines[0] = textLines[0].replace(TypeScriptHelpers.jsDocStartRegEx, '');
+    if (textLines[0] === '') {
+      textLines.shift();
+    }
+    // Remove '*/'
+    textLines[textLines.length - 1] = textLines[textLines.length - 1].replace(
+      TypeScriptHelpers.jsDocEndRegEx,
+      '');
+    if (textLines[textLines.length - 1] === '') {
+      textLines.pop();
+    }
+
+    // Remove the leading '*' from any intermediate lines
+    if (textLines.length > 0) {
+      for (let i: number = 0; i < textLines.length; i++) {
+        textLines[i] = textLines[i].replace(TypeScriptHelpers.jsDocIntermediateRegEx, '');
+      }
+    }
+
+    return textLines.join('\n');
   }
 
   /**
