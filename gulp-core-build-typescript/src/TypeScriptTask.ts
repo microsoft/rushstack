@@ -135,7 +135,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     }
 
     // tslint:disable-next-line:no-any
-    let compilerOptions: ICompilerOptions = TsConfigProvider.getConfig(this.buildConfig).compilerOptions as any;
+    let compilerOptions: ICompilerOptions = TsConfigProvider.getGulpTypescriptOptions(this.buildConfig).compilerOptions;
 
     this._tsProject = this._tsProject || ts.createProject(compilerOptions);
 
