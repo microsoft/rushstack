@@ -32,6 +32,13 @@ describe('TypeScriptHelpers tests', () => {
         TypeScriptHelpers.extractCommentContent('/** single line comment */'),
         'single line comment');
     });
+
+    it('degenerate comment', () => {
+      assert.equal(
+        TypeScriptHelpers.removeJsDocSequences(
+        ['/**', '* degenerate comment', 'star missing here', '* end of comment', '*/']),
+        'degenerate comment\nstar missing here\nend of comment');
+    });
   });
 
 });
