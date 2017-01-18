@@ -19,6 +19,11 @@ export interface IWebpackTaskConfig {
    * will not be logged.
    */
   suppressWarnings?: (string | RegExp)[];
+
+  /**
+   * An instance of the webpack compiler object, useful for building with Webpack 2.X while GCB is still on 1.X.
+   */
+  webpack?: typeof Webpack;
 }
 
 export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
@@ -80,7 +85,7 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
       }
 
       if (webpackConfig) {
-        const webpack: Webpack.Webpack = require('webpack');
+        const webpack: Webpack.Webpack = this.taskConfig.webpack || require('webpack');
         const gutil = require('gulp-util');
         const startTime = new Date().getTime();
         const outputDir = this.buildConfig.distFolder;
