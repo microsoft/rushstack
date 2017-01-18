@@ -4,7 +4,7 @@ import { assert } from 'chai';
 import * as ts from 'typescript';
 import * as path from 'path';
 import DocElementParser from '../DocElementParser';
-import { IDocElement, IParam, IHrefLinkElement, ICodeLinkElement } from '../IDocElement';
+import { IDocElement, IParam, IHrefLinkElement, ICodeLinkElement, ITextElement, ISeeDocElement } from '../IDocElement';
 import TestFileComparer from '../TestFileComparer';
 import JsonFile from '../JsonFile';
 import ApiStructuredType from '../definitions/ApiStructuredType';
@@ -70,13 +70,13 @@ describe('DocElementParser tests', function (): void {
 
       // Testing Summary Doc Elements
       const expectedSummary: IDocElement[] = [
-          {kind: 'textDocElement', value: 'This function parses docTokens for the apiLint website'},
+          {kind: 'textDocElement', value: 'This function parses docTokens for the apiLint website'} as ITextElement,
           {
               kind: 'linkDocElement',
               referenceType: 'href',
               targetUrl: 'https://github.com/OfficeDev/office-ui-fabric-react',
               value: ''
-        }
+        } as IHrefLinkElement
       ];
       const actualSummary: IDocElement[] = DocElementParser.parse(tokenizer, console.log);
       JsonFile.saveJsonFile('./lib/basicDocExpected.json', JSON.stringify(expectedSummary));
@@ -85,7 +85,7 @@ describe('DocElementParser tests', function (): void {
 
       // Testing Returns Doc Elements
       const expectedReturn: IDocElement[] = [
-          {kind: 'textDocElement', value: 'an object'}
+          {kind: 'textDocElement', value: 'an object'} as ITextElement
       ];
       tokenizer.getToken();
       const actualReturn: IDocElement[] = DocElementParser.parse(tokenizer, console.log);
@@ -98,11 +98,11 @@ describe('DocElementParser tests', function (): void {
           {
               name: 'param1',
               description: [{kind: 'textDocElement', value: 'description of the type param1'}]
-          },
+          } as IParam,
           {
               name: 'param2',
               description: [{kind: 'textDocElement', value: 'description of the type param2'}]
-          }
+          } as IParam
       ];
       const actualParam: IParam[] = [];
       tokenizer.getToken();
@@ -121,7 +121,7 @@ describe('DocElementParser tests', function (): void {
 
       // Testing Deprecated Doc Elements
       const expectedDeprecated: IDocElement[] = [
-          {kind: 'textDocElement', value: '- description of the deprecation'}
+          {kind: 'textDocElement', value: '- description of the deprecation'} as ITextElement
       ];
       tokenizer.getToken();
       const actualDeprecated: IDocElement[] = DocElementParser.parse(tokenizer, console.log);
@@ -137,7 +137,7 @@ describe('DocElementParser tests', function (): void {
 
       // Testing Summary Elements
       const expectedSummary: IDocElement[] = [
-          {kind: 'textDocElement', value: 'Text describing the function’s purpose/nuances/context.'},
+          {kind: 'textDocElement', value: 'Text describing the function’s purpose/nuances/context.'} as ITextElement,
           {
               kind: 'seeDocElement',
               seeElements: [
@@ -146,9 +146,9 @@ describe('DocElementParser tests', function (): void {
                       referenceType: 'href',
                       targetUrl: 'https://github.com/OfficeDev/office-ui-fabric-react',
                       value: 'The link will provide context'
-                  }
+                  } as IHrefLinkElement
               ]
-          }
+          } as ISeeDocElement
       ];
       const actualSummary: IDocElement[] = DocElementParser.parse(tokenizer, console.log);
       JsonFile.saveJsonFile('./lib/seeDocExpected.json', JSON.stringify(expectedSummary));
@@ -166,18 +166,18 @@ describe('DocElementParser tests', function (): void {
 
       // Testing Param Doc Elements
       const description: IDocElement[] = [
-        {kind: 'textDocElement', value: 'The height in'},
+        {kind: 'textDocElement', value: 'The height in'} as ITextElement,
           {
               kind: 'linkDocElement',
               referenceType: 'href',
               targetUrl: 'http://wikipedia.org/pixel_units',
               value: ''
-          }
+          } as IHrefLinkElement
       ];
       const expectedParam: IParam = {
           name: 'x',
           description: description
-      };
+      } as IParam;
       const actualParam: IParam = apiDoc.parseParam(tokenizer);
 
       JsonFile.saveJsonFile('./lib/nestedParamDocExpected.json', JSON.stringify(expectedParam));
