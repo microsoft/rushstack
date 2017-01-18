@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Updating API Extractor to work with TypeScript 2.1",
+      "type": "minor"
+    }
+  ],
+  "email": "nickpape@microsoft.com"
+}
