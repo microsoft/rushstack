@@ -57,6 +57,8 @@ export default class PrettyPrinter {
 
     for (const childNode of node.getChildren()) {
       switch (childNode.kind) {
+        case ts.SyntaxKind.JSDocComment:
+          break;
         case ts.SyntaxKind.Block:
           result += ';';
           break;

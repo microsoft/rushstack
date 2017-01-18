@@ -1,0 +1,15 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Refactor the API-Extractor to use the same config as the TypeScriptTask",
+      "type": "minor"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build",
+      "comment": "Export the SchemaValidator",
+      "type": "minor"
+    }
+  ],
+  "email": "nickpape@microsoft.com"
+}
