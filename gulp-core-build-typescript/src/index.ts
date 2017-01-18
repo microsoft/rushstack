@@ -5,6 +5,7 @@ import { RemoveTripleSlashReferenceTask } from './RemoveTripleSlashReferenceTask
 import { IExecutable, parallel, serial } from '@microsoft/gulp-core-build';
 import { ApiExtractorTask } from './ApiExtractorTask';
 
+export * from './TypeScriptConfiguration';
 export { TypeScriptTask } from './TypeScriptTask';
 export { ApiExtractorTask } from './ApiExtractorTask';
 
