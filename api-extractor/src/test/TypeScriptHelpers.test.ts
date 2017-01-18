@@ -37,7 +37,7 @@ describe('TypeScriptHelpers tests', () => {
       assert.equal(
         TypeScriptHelpers.removeJsDocSequences(
         ['/**', '* degenerate comment', 'star missing here', '* end of comment', '*/']),
-        ' degenerate comment\nstar missing here\n end of comment');
+        'degenerate comment\nstar missing here\nend of comment');
     });
   });
 
