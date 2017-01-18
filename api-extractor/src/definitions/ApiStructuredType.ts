@@ -158,12 +158,9 @@ export default class ApiStructuredType extends ApiItemContainer {
 
   private _processMember(memberSymbol: ts.Symbol, memberDeclaration: ts.Declaration): void {
     if (memberDeclaration.modifiers) {
-      // tslint:disable-next-line:no-any
       for (let i: number = 0; i < memberDeclaration.modifiers.length; i++ ) {
-        // tslint:disable-next-line:no-any
-        const modifier: any = memberDeclaration.modifiers[0];
-        // tslint:disable-next-line:no-any
-        if ((modifier as any).kind === ts.SyntaxKind.PrivateKeyword) {
+        const modifier: ts.Modifier = memberDeclaration.modifiers[i];
+        if (modifier.kind === ts.SyntaxKind.PrivateKeyword) {
           return;
         }
       }
