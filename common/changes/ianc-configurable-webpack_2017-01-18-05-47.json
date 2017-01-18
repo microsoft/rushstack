@@ -3,7 +3,7 @@
     {
       "packageName": "@microsoft/gulp-core-build-webpack",
       "comment": "Including an option to pass in the webpack compiler object to the GCB-webpack task.",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "email": "ianc@microsoft.com"
