@@ -37,25 +37,6 @@ class TestApiDocumentation extends ApiDocumentation {
   }
 }
 
-analyzer.analyze({
-  compilerOptions: {
-    target: ts.ScriptTarget.ES5,
-    module: ts.ModuleKind.CommonJS,
-    moduleResolution: ts.ModuleResolutionKind.NodeJs,
-    experimentalDecorators: true,
-    jsx: ts.JsxEmit.React,
-    rootDir: '../../spfx-core/sp-client-base'
-  },
-  entryPointFile: '../../spfx-core/sp-client-base/src/index.ts', // local/bundles/platform-exports.ts',
-  otherFiles: ['../../spfx-core/sp-client-base/typings/tsd.d.ts']
-});
-
-const apiFileGenerator: ApiFileGenerator = new ApiFileGenerator();
-apiFileGenerator.writeApiFile('./lib/DebugRun.api.ts', analyzer);
-
-const apiJsonGenerator: ApiJsonGenerator = new ApiJsonGenerator();
-apiJsonGenerator.writeJsonFile('./lib/DebugRun.json', analyzer);
-
 /**
  * Debugging inheritdoc expression parser. 
  * Analyzer on example2 is needed for testing the parser.
@@ -72,6 +53,12 @@ analyzer.analyze({
   entryPointFile: './testInputs/example2/index.ts', // local/bundles/platform-exports.ts',
   otherFiles: []
 });
+
+const apiFileGenerator: ApiFileGenerator = new ApiFileGenerator();
+apiFileGenerator.writeApiFile('./lib/DebugRun.api.ts', analyzer);
+
+const apiJsonGenerator: ApiJsonGenerator = new ApiJsonGenerator();
+apiJsonGenerator.writeJsonFile('./lib/DebugRun.json', analyzer);
 
 myDocumentedClass = analyzer.package.getSortedMemberItems()
   .filter(apiItem => apiItem.name === 'MyDocumentedClass')[0] as ApiStructuredType;

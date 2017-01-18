@@ -1,6 +1,6 @@
 /**
- * The following interfaces represent Doc Elements of a 
- * documentation block. 
+ * The following interfaces represent Doc Elements of a
+ * documentation block.
  */
 export interface IBaseDocElement {
   kind: string;
@@ -16,10 +16,10 @@ export interface ITextElement extends IBaseDocElement {
 
 /**
  * A link that was specified as \{@link http://url | optional display text\}.
- * The alternative to the IHrefLinkElement is ICodeLinkElement, where instead 
+ * The alternative to the IHrefLinkElement is ICodeLinkElement, where instead
  * of a href the reference is to an API definition.
- * 
- * Examples: 
+ *
+ * Examples:
  * \{@link http://microsoft.com | Microsoft \}
  * \{@link http://microsoft.com \}
  */
@@ -78,20 +78,20 @@ export interface ICodeLinkElement extends IBaseDocElement {
 }
 
 /**
- * An element that denotes one of more elements to see for reference. 
- * 
+ * An element that denotes one of more elements to see for reference.
+ *
  * Example:
- * @see 
+ * @see
  * {@link http://microsoft.com | Microsoft}
- * This is a description of the link. 
+ * This is a description of the link.
  * ->
  * {
- *  kind: 'seeDocElement, 
+ *  kind: 'seeDocElement,
  *  seeElements: [
- *      {kind: 'linkDocElement', targetUrl: http://microsoft.com, value: Microsoft}, 
+ *      {kind: 'linkDocElement', targetUrl: http://microsoft.com, value: Microsoft},
  *      {kind: 'textDocElement', value: 'This is a description of the link.'}
  *  ]
- * } 
+ * }
  */
 export interface ISeeDocElement extends IBaseDocElement {
   kind: 'seeDocElement';
@@ -103,9 +103,9 @@ export type ILinkDocElement = IHrefLinkElement | ICodeLinkElement;
 export type IDocElement = ITextElement | ILinkDocElement | ISeeDocElement;
 
 /**
- * An element that represents a param and relevant information to its use. 
- * 
- * Example: 
+ * An element that represents a param and relevant information to its use.
+ *
+ * Example:
  * @param1 httpClient - description of httpClient {@link http://website.com}
  * ->
  * {
@@ -115,7 +115,7 @@ export type IDocElement = ITextElement | ILinkDocElement | ISeeDocElement;
  *      {kind: 'linkDocElement', targetUrl: 'http://website.com}
  *   ]
  * }
- * 
+ *
  */
 export interface IParam {
   name: string;
@@ -126,8 +126,8 @@ export interface IParam {
 }
 
 /**
- * Describes a return type and description of the return type 
- * that is given in documentation comments.   
+ * Describes a return type and description of the return type
+ * that is given in documentation comments.
  */
 export interface IReturn {
   type: string;
