@@ -135,7 +135,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     }
 
     // tslint:disable-next-line:no-any
-    let compilerOptions: ICompilerOptions =
+    const compilerOptions: ICompilerOptions =
       TypeScriptConfiguration.getGulpTypescriptOptions(this.buildConfig).compilerOptions;
 
     if (compilerOptions.module !== 'commonjs' && compilerOptions.module) {
