@@ -3,11 +3,12 @@ import * as gulp from 'gulp';
 import * as mkdirp from 'mkdirp';
 import * as os from 'os';
 import * as path from 'path';
-import * as typescript from 'typescript';
 import * as through from 'through2';
 import * as gulpUtil from 'gulp-util';
 import { GulpTask } from '@microsoft/gulp-core-build';
 import { Analyzer, IApiAnalyzerOptions, ApiFileGenerator, ApiJsonGenerator } from '@microsoft/api-extractor';
+import { TypeScriptConfiguration } from './TypeScriptConfiguration';
+import * as typescript from 'typescript'; /* tslint:disable-line */
 
 function writeStringToGulpUtilFile(content: string, filename: string = 'tempfile'): gulpUtil.File {
   return new gulpUtil.File({
@@ -86,27 +87,15 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
     const typingsFilePath: string = path.join(this.buildConfig.rootPath, 'typings/tsd.d.ts');
     const otherFiles: string[] = fsx.existsSync(typingsFilePath) ? [typingsFilePath] : [];
 
+    // tslint:disable-next-line:no-any
+    const compilerOptions: typescript.CompilerOptions =
+      TypeScriptConfiguration.getTypescriptOptions(this.buildConfig).compilerOptions;
+
     const analyzerOptions: IApiAnalyzerOptions = {
       entryPointFile,
-      // NOTE: Ideally these should be the same options from @microsoft/gulp-core-build-typescript,
-      // however those options are generated at runtime by analyzing project files,
-      // so some work would be required to export them.  Also, the analyzer would run
-      // faster if it could reuse the @microsoft/gulp-core-build-typescript AST rather than starting
-      // from scratch.  These are all reasons why it would be a good idea for api-extractor
-      // to be integrated into @microsoft/gulp-core-build-typescript just like tslint.  Unfortunately
-      // @microsoft/gulp-core-build-typescript was moved to a Git repository that makes this impractical.
-      compilerOptions: {
-        target: typescript.ScriptTarget.ES5,
-        module: typescript.ModuleKind.CommonJS,
-        moduleResolution: typescript.ModuleResolutionKind.NodeJs,
-        rootDir: this.buildConfig.rootPath,
-        declaration: true,
-        experimentalDecorators: true,
-        jsx: typescript.JsxEmit.React,
-        sourceMap: true
-      },
-      otherFiles: otherFiles
-  } as any; /* tslint:disable-line:no-any */
+      compilerOptions,
+      otherFiles
+    } as any; /* tslint:disable-line:no-any */
 
     const analyzer: Analyzer = new Analyzer(
       (message: string, fileName: string, lineNumber: number): void => {

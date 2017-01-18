@@ -22,6 +22,7 @@ export * from './tasks/GenerateShrinkwrapTask';
 export * from './tasks/GulpTask';
 export * from './tasks/CleanTask';
 export * from './tasks/ValidateShrinkwrapTask';
+export * from './jsonUtilities/SchemaValidator';
 
 /* tslint:disable:variable-name */
 require('es6-promise').polyfill();

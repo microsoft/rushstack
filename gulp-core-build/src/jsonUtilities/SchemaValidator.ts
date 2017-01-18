@@ -1,4 +1,5 @@
 /// <reference types="jju" />
+/// <reference types="z-schema" />
 
 import * as os from 'os';
 import * as fs from 'fs';
