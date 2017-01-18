@@ -36,13 +36,18 @@ export class TsConfigProvider {
    * Gets the `typescript` version of the config (used by ApiExtractorTask)
    * Note: these differ slightly from the values in the tsconfig.json
    * Returns a new object each time.
+   *
+   * Specifically, the issue in the difference between:
+   *    typescript.CompilerOptions
+   *               &
+   *          ts.Settings
+   *
+   * Insofar as `ts.Settings` accepts (and requires) enums for certain options, rather than strings.
+   * The clearest example is `moduleResolution` below.
    */
   public static getTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<typescript.CompilerOptions> {
     const oldConfig: ITsConfigFile<ts.Settings> = this.getGulpTypescriptOptions(buildConfig);
     const newConfig: ITsConfigFile<typescript.CompilerOptions> = oldConfig as any;
-
-    delete oldConfig.compilerOptions.typescript;
-    console.log(JSON.stringify(newConfig, undefined, 2));
 
     newConfig.compilerOptions.moduleResolution =
       oldConfig.compilerOptions.moduleResolution === 'node' ?
