@@ -134,7 +134,8 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       this.log(`TypeScript version: ${typescript.version}`);
     }
 
-    let compilerOptions: ICompilerOptions = TsConfigProvider.getConfig(this.buildConfig).compilerOptions;
+    // tslint:disable-next-line:no-any
+    let compilerOptions: ICompilerOptions = TsConfigProvider.getConfig(this.buildConfig).compilerOptions as any;
 
     this._tsProject = this._tsProject || ts.createProject(compilerOptions);
 
