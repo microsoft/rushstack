@@ -13,7 +13,7 @@ export default class TypeScriptHelpers {
   /**
    * Start sequence is '/**'.
    */
-  public static jsDocStartRegEx: RegExp = /^\s*\/\*\*/g;
+  public static jsDocStartRegEx: RegExp = /^\s*\/\*\*\s?/g;
 
   /**
    * End sequence is '*\/'.
@@ -23,7 +23,7 @@ export default class TypeScriptHelpers {
   /**
    * Intermediate lines of JSDoc comment character.
    */
-  public static jsDocIntermediateRegEx: RegExp = /^\s*[*]/g;
+  public static jsDocIntermediateRegEx: RegExp = /^\s*[*]\s?/g;
 
   /**
    * Returns the Symbol for the provided Declaration.  This is a workaround for a missing
