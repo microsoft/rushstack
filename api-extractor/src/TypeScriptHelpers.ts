@@ -55,44 +55,60 @@ export default class TypeScriptHelpers {
 
   /**
    * Returns the JSDoc comments associated with the specified node, if any.
+   *
+   * Example:
+   * "This \n is \n a comment" from "\/** This\r\n* is\r\n* a comment *\/
    */
-  public static getJsDocComments(node: ts.Node,
-    sourceFile: ts.SourceFile,
-    errorLogger: (message: string) => void): string {
+  public static getJsDocComments(node: ts.Node, errorLogger: (message: string) => void): string {
     let jsDoc: string = '';
     // tslint:disable-next-line:no-any
-    if ((node as any).jsDoc && (node as any).jsDoc.length > 0) {
-      // tslint:disable-next-line:no-any
-      for (let i: number = 0; i <  (node as any).jsDoc.length; i++) {
-        // tslint:disable-next-line:no-any
-        const jsDocFullText: string = (node as any).jsDoc[i].getText();
-        const jsDocLines: string[] = jsDocFullText.split(TypeScriptHelpers.newLineRegEx);
-        const jsDocStartSeqExists: boolean = TypeScriptHelpers.jsDocStartRegEx.test(jsDocLines[0]);
-        const jsDocEndSeqExists: boolean = TypeScriptHelpers.jsDocEndRegEx.test(jsDocLines[jsDocLines.length - 1]);
-        if (!(jsDocStartSeqExists && jsDocEndSeqExists)) {
-          errorLogger('JsDoc comment must begin with \"/**\" sequence and end with \"*/\" sequence.');
-          return '';
-        }
-
-        // Remove '/**'
-        jsDocLines[0] = jsDocLines[0].replace(TypeScriptHelpers.jsDocStartRegEx, '');
-        // Remove '*/'
-        jsDocLines[jsDocLines.length - 1] = jsDocLines[jsDocLines.length - 1].replace(
-          TypeScriptHelpers.jsDocEndRegEx,
-          '');
-
-        // Remove the leading '*' from any intermediate lines
-        if (jsDocLines.length > 1) {
-          for (let i: number = 1; i < jsDocLines.length - 1; i++) {
-            jsDocLines[i] = jsDocLines[i].replace(TypeScriptHelpers.jsDocIntermediateRegEx, '');
-          }
-        }
-
-        jsDoc += jsDocLines.join('\n').trim() + '\n';
+    const nodeJsDocObjects: any = (node as any).jsDoc;
+    if (nodeJsDocObjects && nodeJsDocObjects.length > 0) {
+      // Use the JSDoc closest to the declaration
+      const lastJsDocIndex: number = nodeJsDocObjects.length - 1;
+      const jsDocFullText: string = nodeJsDocObjects[lastJsDocIndex].getText();
+      const jsDocLines: string[] = jsDocFullText.split(TypeScriptHelpers.newLineRegEx);
+      const jsDocStartSeqExists: boolean = TypeScriptHelpers.jsDocStartRegEx.test(jsDocLines[0]);
+      const jsDocEndSeqExists: boolean = TypeScriptHelpers.jsDocEndRegEx.test(jsDocLines[jsDocLines.length - 1]);
+      if (!(jsDocStartSeqExists && jsDocEndSeqExists)) {
+        errorLogger('JsDoc comment must begin with \"/**\" sequence and end with \"*/\" sequence.');
+        return '';
       }
+
+      jsDoc = TypeScriptHelpers.removeJsDocSequences(jsDocLines);
     }
 
     return jsDoc;
+  }
+
+  /**
+   * Helper function to remove the comment stars ('/**'. '*', '/*) from lines of comment text.
+   * 
+   * Example:
+   * ["\/**", "*This \n", "*is \n", "*a comment", "*\/"] to "This \n is \n a comment"
+   */
+  public static removeJsDocSequences(textLines: string[]): string {
+  // Remove '/**'
+    textLines[0] = textLines[0].replace(TypeScriptHelpers.jsDocStartRegEx, '');
+    if (textLines[0] === '') {
+      textLines.shift();
+    }
+    // Remove '*/'
+    textLines[textLines.length - 1] = textLines[textLines.length - 1].replace(
+      TypeScriptHelpers.jsDocEndRegEx,
+      '');
+    if (textLines[textLines.length - 1] === '') {
+      textLines.pop();
+    }
+
+    // Remove the leading '*' from any intermediate lines
+    if (textLines.length > 0) {
+      for (let i: number = 0; i < textLines.length; i++) {
+        textLines[i] = textLines[i].replace(TypeScriptHelpers.jsDocIntermediateRegEx, '');
+      }
+    }
+
+    return textLines.join('\n');
   }
 
   /**
