@@ -4,7 +4,7 @@ import ts = require('gulp-typescript');
 import * as path from 'path';
 
 import { IBuildConfig } from '@microsoft/gulp-core-build';
-import { TsConfigProvider } from './TsConfigProvider';
+import { TypeScriptConfiguration } from './TypeScriptConfiguration';
 
 interface ITypeScriptErrorObject {
   diagnostic: {
@@ -129,13 +129,20 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     this._normalizeConfig();
 
     // Log the compiler version for custom verisons.
-    const typescript: any = TsConfigProvider.getTypescriptCompiler(); // tslint:disable-line:no-any
+    const typescript: any = TypeScriptConfiguration.getTypescriptCompiler(); // tslint:disable-line:no-any
     if (typescript && typescript.version) {
       this.log(`TypeScript version: ${typescript.version}`);
     }
 
     // tslint:disable-next-line:no-any
-    let compilerOptions: ICompilerOptions = TsConfigProvider.getGulpTypescriptOptions(this.buildConfig).compilerOptions;
+    let compilerOptions: ICompilerOptions =
+      TypeScriptConfiguration.getGulpTypescriptOptions(this.buildConfig).compilerOptions;
+
+    if (compilerOptions.module !== 'commonjs') {
+      this.logWarning(`Your tsconfig.json file specifies a different "target" than expected. `
+        + `Expected: "commonjs". Actual: "${compilerOptions.module}". Using "commonjs" instead.`);
+      compilerOptions.module = 'commonjs';
+    }
 
     this._tsProject = this._tsProject || ts.createProject(compilerOptions);
 
