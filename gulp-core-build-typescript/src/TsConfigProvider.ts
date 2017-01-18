@@ -9,14 +9,20 @@ export interface ITsConfigFile<T> {
 }
 
 /* tslint:disable:no-any */
+/*
+ * A helper class which provides access to the TSConfig.json file for a particular project.
+ * It also is a central place for managing the version of typescript which this project
+ * should be built with.
+ */
 export class TsConfigProvider {
   private static _baseTsConfig: ITsConfigFile<ts.Settings>;
   private static _typescript: any = require('typescript');
 
   /**
-   * Gets the tsconfig file, used by TypeScriptTask
+   * Gets `gulp-typescript` version of the config (used by TypeScriptTask)
+   * Returns a new object each time.
    */
-  public static getConfig(buildConfig: IBuildConfig): ITsConfigFile<ts.Settings> {
+  public static getGulpTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<ts.Settings> {
     const file: ITsConfigFile<ts.Settings> = assign({}, this._getTsConfigFile(buildConfig));
     assign(file.compilerOptions, {
       rootDir: buildConfig.rootPath,
@@ -27,12 +33,12 @@ export class TsConfigProvider {
   }
 
   /*
-   * Gets the typescript compiler options, used by ApiExtractorTask
-   * These differ slightly from the values in the tsconfig, so this function exists
-   * to translate the types of configs
+   * Gets the `typescript` version of the config (used by ApiExtractorTask)
+   * Note: these differ slightly from the values in the tsconfig.json
+   * Returns a new object each time.
    */
   public static getTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<typescript.CompilerOptions> {
-    const oldConfig: ITsConfigFile<ts.Settings> = this.getConfig(buildConfig);
+    const oldConfig: ITsConfigFile<ts.Settings> = this.getGulpTypescriptOptions(buildConfig);
     const newConfig: ITsConfigFile<typescript.CompilerOptions> = oldConfig as any;
 
     delete oldConfig.compilerOptions.typescript;
@@ -46,7 +52,7 @@ export class TsConfigProvider {
   }
 
   /**
-   * Override the version of the typescript compiler used
+   * Override the version of the typescript compiler
    */
   public static setTypescriptCompiler(typescript: any): void {
     if (this._typescript) {
@@ -58,6 +64,9 @@ export class TsConfigProvider {
     this._typescript = typescript;
   }
 
+  /**
+   * Get the version of the typescript compiler which is to be used
+   */
   public static getTypescriptCompiler(): any {
     if (!this._typescript) {
       return require('typescript');
@@ -65,6 +74,9 @@ export class TsConfigProvider {
     return this._typescript;
   }
 
+  /**
+   * Helper function which reads the tsconfig.json (or provides one), and memoizes it
+   */
   private static _getTsConfigFile(config: IBuildConfig): ITsConfigFile<ts.Settings> {
     if (!this._baseTsConfig) {
       try {
@@ -93,6 +105,9 @@ export class TsConfigProvider {
     return this._baseTsConfig;
   }
 
+  /**
+   * Extracts the path to the tsconfig.json based on the buildConfiguration
+   */
   private static _getConfigPath(buildConfig: IBuildConfig): string {
     return path.resolve(path.join(buildConfig.rootPath, 'tsconfig.json'));
   }
