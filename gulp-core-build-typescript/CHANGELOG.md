@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Wed, 18 Jan 2017 21:40:58 GMT and should not be manually modified.
+This log was last generated on Thu, 19 Jan 2017 02:37:34 GMT and should not be manually modified.
+
+## 2.2.1
+Thu, 19 Jan 2017 02:37:34 GMT
+
+### Patches
+
+- Updating the tsconfig to give compiler options as enums.
 
 ## 2.2.0
 Wed, 18 Jan 2017 21:40:58 GMT
