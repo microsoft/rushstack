@@ -3,6 +3,7 @@ interface IWebpackTaskConfig {
   config?: Webpack.Configuration;
   configPath: string;
   suppressWarnings?: (string | RegExp)[];
+  webpack?: typeof Webpack;
 }
 
 // (undocumented)
