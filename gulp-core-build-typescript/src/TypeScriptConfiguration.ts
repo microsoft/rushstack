@@ -56,7 +56,7 @@ export class TypeScriptConfiguration {
       newConfig.compilerOptions.target = typescript.ScriptTarget[target];
     }
 
-    const moduleKind = {
+    const moduleKind: { [module: string]: typescript.ModuleKind } = {
       'commonjs': typescript.ModuleKind.CommonJS,
       'amd': typescript.ModuleKind.AMD,
       'es2015': typescript.ModuleKind.ES2015,
