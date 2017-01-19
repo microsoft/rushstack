@@ -97,6 +97,8 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
       otherFiles
     } as any; /* tslint:disable-line:no-any */
 
+    console.log(JSON.stringify(analyzerOptions, undefined, 2));
+
     const analyzer: Analyzer = new Analyzer(
       (message: string, fileName: string, lineNumber: number): void => {
         this.logWarning(`TypeScript error: ${message}` + os.EOL
