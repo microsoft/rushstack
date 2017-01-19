@@ -69,7 +69,7 @@ export default class TypeScriptHelpers {
       const jsDocFullText: string = nodeJsDocObjects[lastJsDocIndex].getText();
       const jsDocLines: string[] = jsDocFullText.split(TypeScriptHelpers.newLineRegEx);
       const jsDocStartSeqExists: boolean = TypeScriptHelpers.jsDocStartRegEx.test(jsDocLines[0].toString());
-      
+
       // Report error for each missing sequence seperately
       if (!jsDocStartSeqExists) {
         errorLogger('JsDoc comment must begin with a \"/**\" sequence.');
@@ -91,7 +91,7 @@ export default class TypeScriptHelpers {
 
   /**
    * Helper function to remove the comment stars ('/**'. '*', '/*) from lines of comment text.
-   * 
+   *
    * Example:
    * ["\/**", "*This \n", "*is \n", "*a comment", "*\/"] to "This \n is \n a comment"
    */
