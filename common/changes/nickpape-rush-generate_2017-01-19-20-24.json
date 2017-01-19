@@ -1,9 +1,9 @@
 {
   "changes": [
     {
-      "comment": "",
+      "comment": "Run the api-extractor task during the default build.",
       "packageName": "@microsoft/web-library-build",
-      "type": "none"
+      "type": "minor"
     },
     {
       "comment": "",
