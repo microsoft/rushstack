@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Updating the tsconfig to give compiler options as enums.",
+      "type": "patch"
+    }
+  ],
+  "email": "nickpape@microsoft.com"
+}
