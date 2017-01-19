@@ -1,7 +1,7 @@
 import { ITextElement, IDocElement, IHrefLinkElement, ICodeLinkElement, ISeeDocElement } from './IDocElement';
 import { IApiDefinitionReference } from './IApiDefinitionReference';
 import ApiDocumentation from './definitions/ApiDocumentation';
-import Token from './Token';
+import Token, { TokenType } from './Token';
 import Tokenizer from './Tokenizer';
 
 export default class DocElementParser {
@@ -47,7 +47,7 @@ export default class DocElementParser {
         break;
       }
 
-      if (token.type === 'Tag') {
+      if (token.type === TokenType.Tag) {
         switch (token.tag) {
           case '@see':
             tokenizer.getToken();
@@ -60,7 +60,7 @@ export default class DocElementParser {
             parsing = false; // end of summary tokens
             break;
         }
-      } else if (token.type === 'Inline') {
+      } else if (token.type === TokenType.Inline) {
         switch (token.tag) {
           case '@link' :
             const linkDocElement: ICodeLinkElement | IHrefLinkElement = this.parseLinkTag(token, reportError);
@@ -73,7 +73,7 @@ export default class DocElementParser {
             parsing = false;
             break;
         }
-      } else if (token.type === 'Text') {
+      } else if (token.type === TokenType.Text) {
         docElements.push({kind: 'textDocElement', value: token.text} as ITextElement);
           tokenizer.getToken();
       } else {

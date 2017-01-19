@@ -8,7 +8,7 @@ import { IDocElement, IParam, IHrefLinkElement, ICodeLinkElement, ITextElement }
 import { IDocItem, IDocFunction } from '../IDocItem';
 import DocItemLoader from '../DocItemLoader';
 import { IApiDefinitionReference } from '../IApiDefinitionReference';
-import Token from '../Token';
+import Token, { TokenType } from '../Token';
 import Tokenizer from '../Tokenizer';
 
 /**
@@ -291,7 +291,7 @@ export default class ApiDocumentation {
         break;
       }
 
-      if (token.type === 'Tag') {
+      if (token.type === TokenType.Tag) {
         switch (token.tag) {
           case '@remarks':
             tokenizer.getToken();
@@ -359,7 +359,7 @@ export default class ApiDocumentation {
             tokenizer.getToken();
             this._reportBadJSDocTag(token);
         }
-      } else if (token.type === 'Inline') {
+      } else if (token.type === TokenType.Inline) {
         switch (token.tag) {
           case '@inheritdoc':
             tokenizer.getToken();
@@ -382,7 +382,7 @@ export default class ApiDocumentation {
             this._reportBadJSDocTag(token);
             break;
         }
-      } else if (token.type === 'Text')  {
+      } else if (token.type === TokenType.Text)  {
         tokenizer.getToken();
         // Shorten "This is too long text" to "This is..."
         const MAX_LENGTH: number = 40;
@@ -517,11 +517,11 @@ export default class ApiDocumentation {
       return;
     }
 
-    if (token.type === 'Inline' && !supportsInline) {
+    if (token.type === TokenType.Inline && !supportsInline) {
       this.reportError(`The JSDoc tag \"${token.tag}\" must not use the non-inline syntax (no curly braces)`);
       return;
     }
-    if (token.type === 'Tag' && !supportsRegular) {
+    if (token.type === TokenType.Tag && !supportsRegular) {
       this.reportError(`The JSDoc tag \"${token.tag}\" must use the inline syntax (with curly braces)`);
       return;
     }
