@@ -3,7 +3,7 @@
 import { assert } from 'chai';
 import JsonFile from '../JsonFile';
 import TestFileComparer from '../TestFileComparer';
-import Token from '../Token';
+import Token, { TokenType } from '../Token';
 import Tokenizer from '../Tokenizer';
 
 /* tslint:disable:no-function-expression - Mocha uses a poorly scoped "this" pointer */
@@ -36,14 +36,14 @@ describe('Tokenizer tests', function (): void {
         @tagc this is {   @inlineTag param1  param2   } and this is {just curly braces}`;
 
       const expectedTokens: Token[] = [
-        new Token('Text', '', 'this is a mock documentation'),
-        new Token('Tag', '@taga'),
-        new Token('Text', '', 'hi'),
-        new Token('Tag', '@tagb'),
-        new Token('Text', '', 'hello @invalid@tag email@domain.com'),
-        new Token('Tag', '@tagc'),
-        new Token('Text', '', 'this is'),
-        new Token('Text', '', 'and this is {just curly braces}')
+        new Token(TokenType.Text, '', 'this is a mock documentation'),
+        new Token(TokenType.Tag, '@taga'),
+        new Token(TokenType.Text, '', 'hi'),
+        new Token(TokenType.Tag, '@tagb'),
+        new Token(TokenType.Text, '', 'hello @invalid@tag email@domain.com'),
+        new Token(TokenType.Tag, '@tagc'),
+        new Token(TokenType.Text, '', 'this is'),
+        new Token(TokenType.Text, '', 'and this is {just curly braces}')
       ];
 
       const actualTokens: Token[] = testTokenizer.tokenizeDocs(docs);
@@ -54,7 +54,7 @@ describe('Tokenizer tests', function (): void {
 
     it('tokenizeInline()', function (): void {
       const token: string = '{    @link   https://bing.com  |  Bing  }';
-      const expectedToken: Token = new Token('Inline', '@link', 'https://bing.com | Bing');
+      const expectedToken: Token = new Token(TokenType.Inline, '@link', 'https://bing.com | Bing');
       const actualToken: Token = testTokenizer.tokenizeInline(token);
       assert.equal(expectedToken.type, actualToken.type);
       assert.equal(expectedToken.tag, actualToken.tag);

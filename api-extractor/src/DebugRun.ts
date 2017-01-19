@@ -36,3 +36,5 @@ apiFileGenerator.writeApiFile('./lib/DebugRun.api.ts', analyzer);
 
 const apiJsonGenerator: ApiJsonGenerator = new ApiJsonGenerator();
 apiJsonGenerator.writeJsonFile('./lib/DebugRun.json', analyzer);
+
+console.log('DebugRun completed.');
