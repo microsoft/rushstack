@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Improved error messages",
+      "type": "patch"
+    }
+  ],
+  "email": "pgonzal"
+}
