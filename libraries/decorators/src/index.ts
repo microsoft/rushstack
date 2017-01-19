@@ -1,4 +1,4 @@
-require('set-webpack-public-path!');
+require('@microsoft/set-webpack-public-path');
 
 export { virtual } from './virtual';
 export { sealed } from './sealed';
