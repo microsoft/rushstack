@@ -1,4 +1,4 @@
-import Token from './Token';
+import Token, { TokenType } from './Token';
 import TypeScriptHelpers from './TypeScriptHelpers';
 
 /**
@@ -29,7 +29,7 @@ export default class Tokenizer {
    * can be processed more strictly.
    * Example: "This is a JsDoc description with a {@link URL} and more text. \@summary example \@public"
    * => [
-   *  {tokenType: 'text', parameter: 'This is a JsDoc description with a'}, 
+   *  {tokenType: 'text', parameter: 'This is a JsDoc description with a'},
    *  {tokenType: '@link', parameter: 'URL'},
    *  {tokenType: '\@summary', parameter: ''},
    *  {tokenType: 'text', parameter: 'example'},
@@ -41,7 +41,7 @@ export default class Tokenizer {
       return;
     }
     const docEntries: string[] = TypeScriptHelpers.splitStringWithRegEx(docs, Tokenizer._jsdocTagsRegex);
-    const sanitizedTokens: string[] =  this._sanitizeDocEntries(docEntries); // remove white space and empty entries 
+    const sanitizedTokens: string[] =  this._sanitizeDocEntries(docEntries); // remove white space and empty entries
 
     // process each sanitized doc string to a Token object
     const tokens: Token[] = [];
@@ -50,11 +50,11 @@ export default class Tokenizer {
       let token: Token;
       value = sanitizedTokens[i];
       if (value.charAt(0) === '@') {
-       token = new Token('Tag', value);
+       token = new Token(TokenType.Tag, value);
       } else if (value.charAt(0) === '{' && value.charAt(value.length - 1) === '}') {
         token = this._tokenizeInline(value); // Can return undefined if invalid inline tag
       } else {
-        token = new Token('Text', '', value);
+        token = new Token(TokenType.Text, '', value);
       }
 
       if (token) {
@@ -66,7 +66,7 @@ export default class Tokenizer {
   }
 
   /**
-   * Parse an inline tag and returns the Token for it if itis a valid inline tag. 
+   * Parse an inline tag and returns the Token for it if itis a valid inline tag.
    * Example '{@link https://bing.com | Bing}' => '{type: 'Inline', tag: '@link', text: 'https://bing.com  | Bing'}'
    */
   protected _tokenizeInline(docEntry: string): Token {
@@ -98,11 +98,11 @@ export default class Tokenizer {
       }
 
       tokenChunks.shift(); // Gets rid of '@link'
-      const token: Token = new Token('Inline', '@link', tokenChunks.join(' '));
+      const token: Token = new Token(TokenType.Inline, '@link', tokenChunks.join(' '));
       return token;
     } else if (tokenChunks[0] === '@inheritdoc') {
       tokenChunks.shift(); // Gets rid of '@inheritdoc'
-      const token: Token = new Token('Inline', '@inheritdoc', tokenChunks.join(' '));
+      const token: Token = new Token(TokenType.Inline, '@inheritdoc', tokenChunks.join(' '));
       return token;
     }
 
@@ -119,7 +119,7 @@ export default class Tokenizer {
   }
 
   /**
-   * Trims whitespaces on either end of the entry (which is just a string within the doc comments), 
+   * Trims whitespaces on either end of the entry (which is just a string within the doc comments),
    * replaces \r and \n's with single whitespace, and removes empty entries.
    *
    * @param docEntries - Array of doc strings to be santitized
