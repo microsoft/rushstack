@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
-    "@microsoft/node-library-build": ">=1.0.0 <2.0.0",
+    "@microsoft/node-library-build": ">=2.1.0 <3.0.0",
     "@types/chalk": "^0.4.31",
     "@types/express": "^4.0.33",
     "@types/express-serve-static-core": "^4.0.38",
@@ -29,6 +29,6 @@
     "sudo": "~1.0.3"
   },
   "rushDependencies": {
-    "@microsoft/gulp-core-build": ">=2.0.0 <3.0.0"
+    "@microsoft/gulp-core-build": ">=2.1.0 <3.0.0"
   }
 }

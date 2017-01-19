@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
-    "@microsoft/node-library-build": ">=1.0.0 <2.0.0",
+    "@microsoft/node-library-build": ">=2.1.0 <3.0.0",
     "@types/chalk": "^0.4.31",
     "@types/orchestrator": "0.0.30",
     "@types/q": "0.0.32",
@@ -22,6 +22,6 @@
     "fsevents": "*"
   },
   "rushDependencies": {
-    "@microsoft/gulp-core-build": ">=2.0.0 <3.0.0"
+    "@microsoft/gulp-core-build": ">=2.1.0 <3.0.0"
   }
 }
