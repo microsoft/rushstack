@@ -50,7 +50,7 @@ let wiredUpErrorHandling: boolean = false;
 let duringFastExit: boolean = false;
 
 /* tslint:disable:no-any */
-let globalInstance: any = global as any;
+const globalInstance: any = global as any;
 /* tslint:enable:no-any */
 
 const localCache: ILocalCache = globalInstance.__loggingCache = globalInstance.__loggingCache || {
@@ -198,17 +198,17 @@ function writeSummary(callback: () => void): void {
       }
 
       if (shouldRelogIssues && (localCache.taskErrors > 0 || getErrors().length)) {
-        let errors: string[] = getErrors();
+        const errors: string[] = getErrors();
         for (let x: number = 0; x < errors.length; x++) {
           console.error(gutil.colors.red(errors[x]));
         }
       }
 
       afterStreamsFlushed(() => {
-        for (let writeSummaryString of localCache.writeSummaryLogs) {
+        for (const writeSummaryString of localCache.writeSummaryLogs) {
           log(writeSummaryString);
         }
-        let totalDuration: [number, number] = process.hrtime(getStart());
+        const totalDuration: [number, number] = process.hrtime(getStart());
 
         log(`Project ${state.builtPackage.name} version:`, gutil.colors.yellow(state.builtPackage.version));
         log('Build tools version:', gutil.colors.yellow(state.coreBuildPackage.version));
@@ -248,7 +248,7 @@ function writeSummary(callback: () => void): void {
         localCache.wroteSummary = true;
         const callbacks: (() => void)[] = localCache.writeSummaryCallbacks;
         localCache.writeSummaryCallbacks = [];
-        for (let writeSummaryCallback of callbacks) {
+        for (const writeSummaryCallback of callbacks) {
           writeSummaryCallback();
         }
       });
@@ -256,7 +256,7 @@ function writeSummary(callback: () => void): void {
   } else if (localCache.wroteSummary) {
     const callbacks: (() => void)[] = localCache.writeSummaryCallbacks;
     localCache.writeSummaryCallbacks = [];
-    for (let writeSummaryCallback of callbacks) {
+    for (const writeSummaryCallback of callbacks) {
       writeSummaryCallback();
     }
   }

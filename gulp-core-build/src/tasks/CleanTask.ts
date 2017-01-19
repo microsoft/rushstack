@@ -34,7 +34,7 @@ export class CleanTask extends GulpTask<ICleanConfig> {
       }
     }
 
-    let uniquePaths: { [key: string]: string } = {};
+    const uniquePaths: { [key: string]: string } = {};
 
     // Create dictionary of unique paths. (Could be replaced with ES6 set.)
     cleanPaths.forEach(path => {
@@ -45,7 +45,7 @@ export class CleanTask extends GulpTask<ICleanConfig> {
 
     // Reset cleanPaths to only unique non-empty paths.
     cleanPaths = [];
-    for (let path in uniquePaths) {
+    for (const path in uniquePaths) {
       if (uniquePaths.hasOwnProperty(path)) {
         cleanPaths.push(path);
       }
