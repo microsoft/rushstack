@@ -1,0 +1,60 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "packageName": "@microsoft/web-library-build",
+      "type": "none"
+    },
+    {
+      "comment": "",
+      "packageName": "@microsoft/package-deps-hash",
+      "type": "none"
+    },
+    {
+      "packageName": "@microsoft/node-library-build",
+      "comment": "Run the api-extractor task during the default build.",
+      "type": "minor"
+    },
+    {
+      "comment": "",
+      "packageName": "@microsoft/gulp-core-build-webpack",
+      "type": "none"
+    },
+    {
+      "comment": "",
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "type": "none"
+    },
+    {
+      "comment": "",
+      "packageName": "@microsoft/gulp-core-build-serve",
+      "type": "none"
+    },
+    {
+      "comment": "",
+      "packageName": "@microsoft/gulp-core-build-sass",
+      "type": "none"
+    },
+    {
+      "comment": "",
+      "packageName": "@microsoft/gulp-core-build-mocha",
+      "type": "none"
+    },
+    {
+      "comment": "",
+      "packageName": "@microsoft/gulp-core-build-karma",
+      "type": "none"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build",
+      "comment": "Update documentation.",
+      "type": "patch"
+    },
+    {
+      "comment": "",
+      "packageName": "@microsoft/api-extractor",
+      "type": "none"
+    }
+  ],
+  "email": "nickpape@microsoft.com"
+}
