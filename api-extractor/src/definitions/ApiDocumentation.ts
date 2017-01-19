@@ -250,7 +250,7 @@ export default class ApiDocumentation {
 
   protected _getJsDocs(apiItem: ApiItem): string {
     const sourceFile: ts.SourceFile = apiItem.getDeclaration().getSourceFile();
-    let jsDoc: string = TypeScriptHelpers.getJsDocComments(apiItem.getDeclaration(), this.reportError);
+    const jsDoc: string = TypeScriptHelpers.getJsDocComments(apiItem.getDeclaration(), this.reportError);
 
     // Eliminate tags and then count the English letters.  Are there at least 10 letters of text?
     // If not, we consider the definition to be "missingDocumentation".
