@@ -67,7 +67,7 @@ export class TypeScriptConfiguration {
 
     if (typeof oldConfig.compilerOptions.module === 'string') {
       const module: string = oldConfig.compilerOptions.module as string;
-      newConfig.compilerOptions.module = moduleKind[module] || 'commonjs';
+      newConfig.compilerOptions.module = moduleKind[(module || 'commonjs').toLowerCase()];
     }
 
     return newConfig;
