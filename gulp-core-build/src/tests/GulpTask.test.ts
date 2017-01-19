@@ -47,7 +47,7 @@ class StreamTask extends GulpTask<IConfig> {
 
     setTimeout(() => {
 
-      let file: gutil.File = new gutil.File({
+      const file: gutil.File = new gutil.File({
         path: 'test.js',
         contents: new Buffer('test')
       });
@@ -117,7 +117,7 @@ class SchemaTask extends GulpTask<ISimpleConfig> {
   }
 }
 
-let tasks: GulpTask<IConfig>[] = [
+const tasks: GulpTask<IConfig>[] = [
 ];
 
 tasks.push(new PromiseTask());

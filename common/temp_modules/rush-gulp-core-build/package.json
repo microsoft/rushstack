@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
-    "@microsoft/node-library-build": ">=1.0.0 <2.0.0",
+    "@microsoft/node-library-build": ">=2.1.0 <3.0.0",
     "chai": "~3.5.0",
     "typescript": "~2.1.4",
     "@types/assertion-error": "^1.0.30",

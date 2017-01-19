@@ -16,7 +16,7 @@ export interface IBuildConfig {
 
   /**
    * Package output folder in which publishable output should be dropped.
-   * @default package.json directories/packagePath value.
+   * Defaults to package.json directories/packagePath value.
    */
   packageFolder?: string;
 
