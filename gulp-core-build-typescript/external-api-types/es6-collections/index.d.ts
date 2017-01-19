@@ -1,4 +1,3 @@
-/// <reference path="es6-collections.d.ts" />
 
 // Type definitions for es6-collections v0.5.1
 // Project: https://github.com/WebReflection/es6-collections/
