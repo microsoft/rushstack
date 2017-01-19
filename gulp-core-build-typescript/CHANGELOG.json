@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "2.2.1",
+      "tag": "@microsoft/gulp-core-build-typescript_v2.2.1",
+      "date": "Thu, 19 Jan 2017 02:37:34 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updating the tsconfig to give compiler options as enums."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.0",
       "tag": "@microsoft/gulp-core-build-typescript_v2.2.0",
       "date": "Wed, 18 Jan 2017 21:40:58 GMT",

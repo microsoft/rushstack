@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-webpack",
   "entries": [
     {
+      "version": "1.1.0",
+      "tag": "@microsoft/gulp-core-build-webpack_v1.1.0",
+      "date": "Thu, 19 Jan 2017 02:37:34 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Including an option to pass in the webpack compiler object to the GCB-webpack task."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.4",
       "tag": "@microsoft/gulp-core-build-webpack_v1.0.4",
       "date": "Fri, 13 Jan 2017 06:46:05 GMT",
