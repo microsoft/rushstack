@@ -9,7 +9,7 @@ import ApiJsonGenerator from './generators/ApiJsonGenerator';
 
 const analyzer: Analyzer = new Analyzer(
   (message: string, fileName: string, lineNumber: number): void => {
-    console.log(`TypeScript error: ${message}` + os.EOL
+    console.log(`ErrorHandler: ${message}` + os.EOL
       + `  ${fileName}#${lineNumber}`);
   }
 );
@@ -25,9 +25,9 @@ analyzer.analyze({
     moduleResolution: ts.ModuleResolutionKind.NodeJs,
     experimentalDecorators: true,
     jsx: ts.JsxEmit.React,
-    rootDir: ''
+    rootDir: 'D:/GitRepos/sp-client/spfx-core/sp-codepart-base'
   },
-  entryPointFile: '',
+  entryPointFile: 'D:/GitRepos/sp-client/spfx-core/sp-codepart-base/src/index.ts',
   otherFiles: []
 });
 
