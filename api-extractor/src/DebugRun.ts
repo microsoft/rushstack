@@ -27,7 +27,7 @@ analyzer.analyze({
     jsx: ts.JsxEmit.React,
     rootDir: ''
   },
-  entryPointFile: '', // local/bundles/platform-exports.ts',
+  entryPointFile: '',
   otherFiles: []
 });
 

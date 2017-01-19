@@ -1,4 +1,5 @@
 export {
+    TestMissingCommentStar,
     inheritDisplayMode,
     inheritCorrectlyButNotFound,
     inheritDisplayModeError,

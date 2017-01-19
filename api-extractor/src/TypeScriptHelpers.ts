@@ -18,7 +18,7 @@ export default class TypeScriptHelpers {
   /**
    * End sequence is '*\/'.
    */
-  public static jsDocEndRegEx: RegExp = /\s*\*\//g;
+  public static jsDocEndRegEx: RegExp = /\s*\*\/\s*$/g;
 
   /**
    * Intermediate lines of JSDoc comment character.
