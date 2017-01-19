@@ -1,5 +1,3 @@
-/// <reference path="../es6-promise/es6-promise.d.ts" />
-
 // Type definitions for fetch API
 // Project: https://github.com/github/fetch
 // Definitions by: Ryan Graham <https://github.com/ryan-codingintrigue>
