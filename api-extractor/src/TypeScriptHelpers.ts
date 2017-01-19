@@ -18,7 +18,7 @@ export default class TypeScriptHelpers {
   /**
    * End sequence is '*\/'.
    */
-  public static jsDocEndRegEx: RegExp = /^\s*\*\//g;
+  public static jsDocEndRegEx: RegExp = /\s*\*\/\s*$/g;
 
   /**
    * Intermediate lines of JSDoc comment character.
@@ -68,10 +68,16 @@ export default class TypeScriptHelpers {
       const lastJsDocIndex: number = nodeJsDocObjects.length - 1;
       const jsDocFullText: string = nodeJsDocObjects[lastJsDocIndex].getText();
       const jsDocLines: string[] = jsDocFullText.split(TypeScriptHelpers.newLineRegEx);
-      const jsDocStartSeqExists: boolean = TypeScriptHelpers.jsDocStartRegEx.test(jsDocLines[0]);
-      const jsDocEndSeqExists: boolean = TypeScriptHelpers.jsDocEndRegEx.test(jsDocLines[jsDocLines.length - 1]);
-      if (!(jsDocStartSeqExists && jsDocEndSeqExists)) {
-        errorLogger('JsDoc comment must begin with \"/**\" sequence and end with \"*/\" sequence.');
+      const jsDocStartSeqExists: boolean = TypeScriptHelpers.jsDocStartRegEx.test(jsDocLines[0].toString());
+      if (!jsDocStartSeqExists) {
+        errorLogger('JsDoc comment must begin with a \"/**\" sequence.');
+        return '';
+      }
+      const jsDocEndSeqExists: boolean = TypeScriptHelpers.jsDocEndRegEx.test(
+        jsDocLines[jsDocLines.length - 1].toString()
+      );
+      if (!jsDocEndSeqExists) {
+        errorLogger('JsDoc comment must end with a \"*/\" sequence.');
         return '';
       }
 
