@@ -64,15 +64,13 @@ export default class ApiDocumentation {
   // For guidance about using these tags, please see this document:
   // https://onedrive.visualstudio.com/DefaultCollection/SPPPlat/_git/sp-client
   //    ?path=/common/docs/ApiPrinciplesAndProcess.md
-  private static _allowedJsdocTags: string[] = [
+  private static _allowedRegularJsdocTags: string[] = [
     // (alphabetical order)
     '@alpha',
     '@beta',
     '@betadocumentation',
-    '@inheritdoc',
     '@internal',
     '@internalremarks',
-    '@link',
     '@param',
     '@preapproved',
     '@public',
@@ -82,6 +80,12 @@ export default class ApiDocumentation {
     '@deprecated',
     '@readonly',
     '@remarks'
+  ];
+
+  private static _allowedInlineJsdocTags: string[] = [
+    // (alphabetical order)
+    '@inheritdoc',
+    '@link'
   ];
 
   /**
@@ -282,9 +286,7 @@ export default class ApiDocumentation {
           // if this documentation inherits docs from a deprecated API item, then
           // this documentation must either have a deprecated message or it must
           // not use the @inheritdoc and copy+paste the documentation
-          this.reportError(`Use of @inheritdoc API item reference that is deprecated. ` +
-          'Either include @deprecated JSDoc with message on this item or remove the @inheritdoc tag ' +
-          'and copy+paste the documentation.');
+          this.reportError(`A deprecation message must be included after the @deprecated tag.`);
         }
         break;
       }
@@ -355,13 +357,7 @@ export default class ApiDocumentation {
             break;
           default:
             tokenizer.getToken();
-            if (ApiDocumentation._allowedJsdocTags.indexOf(token.tag) < 0) {
-              this.reportError(`The JSDoc tag \"${token.tag}\" is not allowed`);
-              break;
-            } else {
-              this.reportError(`Error formatting token tag: ${token.tag}`);
-              break;
-            }
+            this._reportBadJSDocTag(token);
         }
       } else if (token.type === 'Inline') {
         switch (token.tag) {
@@ -383,15 +379,21 @@ export default class ApiDocumentation {
             break;
           default:
             tokenizer.getToken();
-            this.reportError(`Unidentifiable inline token ${token.tag}`);
+            this._reportBadJSDocTag(token);
             break;
         }
       } else if (token.type === 'Text')  {
         tokenizer.getToken();
-        this.reportError('Unexpected text. Text must either be the first sentences of the JSDoc, or if too long for ' +
-        'the first 2-3 sentences the text must be preceded by a @internalremarks tag.');
+        // Shorten "This is too long text" to "This is..."
+        const MAX_LENGTH: number = 40;
+        let problemText: string = token.text.trim();
+        if (problemText.length > MAX_LENGTH) {
+          problemText = problemText.substr(0, MAX_LENGTH - 3).trim() + '...';
+        }
+        this.reportError(`Unexpected text in JSDoc comment: "${problemText}"`);
       } else {
         tokenizer.getToken();
+        // This would be a program bug
         this.reportError(`Unexpected token: ${token.type} ${token.tag} ${token.text}`);
       }
     }
@@ -474,37 +476,59 @@ export default class ApiDocumentation {
   }
 
   protected _parseParam(tokenizer: Tokenizer): IParam {
-        const paramDescriptionToken: Token = tokenizer.getToken();
-        if (!paramDescriptionToken) {
-          this.reportError('@param tag missing required description');
-          return;
-        }
-        const hyphenIndex: number = paramDescriptionToken ? paramDescriptionToken.text.indexOf('-') : -1;
-        if (hyphenIndex < 0) {
-          this.reportError('No hyphens found in the @param line. ' +
-              'There should be a hyphen between the parameter name and its description.');
-          return;
-        } else {
-          const name: string = paramDescriptionToken.text.slice(0, hyphenIndex).trim();
-          const comment: string = paramDescriptionToken.text.substr(hyphenIndex + 1).trim();
-
-          if (!comment) {
-            this.reportError('@param tag requires a description following the hyphen');
-            return;
-          }
-
-          const commentTextElement: IDocElement = DocElementParser.makeTextElement(comment);
-          // Full param description may contain additional Tokens (Ex: @link)
-          const remainingElements: IDocElement[] = DocElementParser.parse(tokenizer, this.reportError);
-          const descriptionElements: IDocElement[] = [commentTextElement].concat(remainingElements);
-
-          const paramDocElement: IParam = {
-              name: name,
-              description: descriptionElements
-          };
-          return paramDocElement;
-        }
+    const paramDescriptionToken: Token = tokenizer.getToken();
+    if (!paramDescriptionToken) {
+      this.reportError('@param tag missing required description');
+      return;
     }
+    const hyphenIndex: number = paramDescriptionToken ? paramDescriptionToken.text.indexOf('-') : -1;
+    if (hyphenIndex < 0) {
+      this.reportError('No hyphens found in the @param line. ' +
+          'There should be a hyphen between the parameter name and its description.');
+      return;
+    } else {
+      const name: string = paramDescriptionToken.text.slice(0, hyphenIndex).trim();
+      const comment: string = paramDescriptionToken.text.substr(hyphenIndex + 1).trim();
+
+      if (!comment) {
+        this.reportError('@param tag requires a description following the hyphen');
+        return;
+      }
+
+      const commentTextElement: IDocElement = DocElementParser.makeTextElement(comment);
+      // Full param description may contain additional Tokens (Ex: @link)
+      const remainingElements: IDocElement[] = DocElementParser.parse(tokenizer, this.reportError);
+      const descriptionElements: IDocElement[] = [commentTextElement].concat(remainingElements);
+
+      const paramDocElement: IParam = {
+        name: name,
+        description: descriptionElements
+      };
+      return paramDocElement;
+      }
+  }
+
+  private _reportBadJSDocTag(token: Token): void {
+    const supportsRegular: boolean = ApiDocumentation._allowedRegularJsdocTags.indexOf(token.tag) >= 0;
+    const supportsInline: boolean = ApiDocumentation._allowedInlineJsdocTags.indexOf(token.tag) >= 0;
+
+    if (!supportsRegular && !supportsInline) {
+      this.reportError(`Unknown JSDoc tag \"${token.tag}\"`);
+      return;
+    }
+
+    if (token.type === 'Inline' && !supportsInline) {
+      this.reportError(`The JSDoc tag \"${token.tag}\" must not use the non-inline syntax (no curly braces)`);
+      return;
+    }
+    if (token.type === 'Tag' && !supportsRegular) {
+      this.reportError(`The JSDoc tag \"${token.tag}\" must use the inline syntax (with curly braces)`);
+      return;
+    }
+
+    this.reportError(`The JSDoc tag \"${token.tag}\" is not supported in this context`);
+    return;
+  }
 
   private _checkInheritDocStatus(): void {
     if (this.isDocInherited) {
