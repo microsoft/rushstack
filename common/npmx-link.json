@@ -1,0 +1,41 @@
+{
+  "localLinks": {
+    "@microsoft/gulp-core-build-karma": [
+      "@microsoft/gulp-core-build"
+    ],
+    "@microsoft/gulp-core-build-mocha": [
+      "@microsoft/gulp-core-build"
+    ],
+    "@microsoft/gulp-core-build-sass": [
+      "@microsoft/gulp-core-build"
+    ],
+    "@microsoft/gulp-core-build-serve": [
+      "@microsoft/gulp-core-build"
+    ],
+    "@microsoft/gulp-core-build-typescript": [
+      "@microsoft/gulp-core-build"
+    ],
+    "@microsoft/gulp-core-build-webpack": [
+      "@microsoft/gulp-core-build"
+    ],
+    "@microsoft/node-library-build": [
+      "@microsoft/gulp-core-build",
+      "@microsoft/gulp-core-build-mocha",
+      "@microsoft/gulp-core-build-typescript"
+    ],
+    "@microsoft/package-deps-hash": [
+      "@microsoft/node-library-build"
+    ],
+    "@microsoft/web-library-build": [
+      "@microsoft/gulp-core-build",
+      "@microsoft/gulp-core-build-karma",
+      "@microsoft/gulp-core-build-sass",
+      "@microsoft/gulp-core-build-serve",
+      "@microsoft/gulp-core-build-typescript",
+      "@microsoft/gulp-core-build-webpack"
+    ],
+    "test-web-library-build": [
+      "@microsoft/web-library-build"
+    ]
+  }
+}
