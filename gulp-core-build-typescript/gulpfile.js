@@ -3,6 +3,7 @@
 const tslint = require('tslint');
 const build = require('@microsoft/node-library-build');
 const path = require('path');
+const fs = require('fs');
 
 build.tslint.setConfig({
   lintConfig: require('./src/defaultTslint.json'),
@@ -13,21 +14,12 @@ build.typescript.setConfig({
   typescript: require('typescript')
 });
 
-build.task('default', build.serial(build.defaultTasks, build.subTask('runApiExtractor', (gulp, buildConfig, done) => {
-  const apiExtractor = require('@microsoft/api-extractor');
+// We need to wrap this class in a getter because it hasn't been compiled by the time this file is executed
+const taskWrapper = {};
+Object.defineProperty(taskWrapper, "default", {
+  get: () => require('./lib/RunApiExtractorOnExternalApiTypes.js').default
+});
 
-  const files = ['external-api-types/es6-collections/index.d.ts',
-                 'external-api-types/es6-collections/index.d.ts',
-                 'external-api-types/es6-promise/index.d.ts'];
-
-  files.forEach((filePath) => {
-    const rootDir = path.dirname(filePath);
-    const outputApiJsonFilePath = path.join(buildConfig.distFolder,
-                                            'external-api-json',
-                                            `${path.basename(rootDir)}.json`);
-    const entryPointFile = path.join(buildConfig.rootDir, filePath);
-    apiExtractor.ExternalApiHelper.generateApiJson(rootDir, entryPointFile, outputApiJsonFilePath);
-  });
-})));
+build.task('default', build.serial(build.defaultTasks, taskWrapper));
 
 build.initialize(require('gulp'));
