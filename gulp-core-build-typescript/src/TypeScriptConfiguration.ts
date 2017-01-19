@@ -48,9 +48,27 @@ export class TypeScriptConfiguration {
     const oldConfig: ITsConfigFile<ts.Settings> = this.getGulpTypescriptOptions(buildConfig);
     const newConfig: ITsConfigFile<typescript.CompilerOptions> = oldConfig as any;
 
-    newConfig.compilerOptions.moduleResolution =
-      oldConfig.compilerOptions.moduleResolution === 'node' ?
-        typescript.ModuleResolutionKind.NodeJs : typescript.ModuleResolutionKind.Classic;
+    delete newConfig.compilerOptions.moduleResolution;
+
+    if (typeof oldConfig.compilerOptions.target === 'string') {
+      const target: string =
+        (oldConfig.compilerOptions.target as string).toUpperCase();
+      newConfig.compilerOptions.target = typescript.ScriptTarget[target];
+    }
+
+    const moduleKind = {
+      'commonjs': typescript.ModuleKind.CommonJS,
+      'amd': typescript.ModuleKind.AMD,
+      'es2015': typescript.ModuleKind.ES2015,
+      'none': typescript.ModuleKind.None,
+      'system': typescript.ModuleKind.System,
+      'umd': typescript.ModuleKind.UMD
+    };
+
+    if (typeof oldConfig.compilerOptions.module === 'string') {
+      const module: string = oldConfig.compilerOptions.module as string;
+      newConfig.compilerOptions.module = moduleKind[module] || 'commonjs';
+    }
 
     return newConfig;
   }
