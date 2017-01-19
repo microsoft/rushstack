@@ -48,9 +48,51 @@ export class TypeScriptConfiguration {
     const oldConfig: ITsConfigFile<ts.Settings> = this.getGulpTypescriptOptions(buildConfig);
     const newConfig: ITsConfigFile<typescript.CompilerOptions> = oldConfig as any;
 
-    newConfig.compilerOptions.moduleResolution =
-      oldConfig.compilerOptions.moduleResolution === 'node' ?
-        typescript.ModuleResolutionKind.NodeJs : typescript.ModuleResolutionKind.Classic;
+    delete newConfig.compilerOptions.moduleResolution;
+
+    /**
+     * Attempt to index into the enum to determine which target.
+     */
+    const scriptTarget: { [module: string]: typescript.ScriptTarget } = {
+      'es2015': typescript.ScriptTarget.ES2015,
+      'es2016': typescript.ScriptTarget.ES2016,
+      'es2017': typescript.ScriptTarget.ES2017,
+      'es3': typescript.ScriptTarget.ES3,
+      'es5': typescript.ScriptTarget.ES5,
+      'exnext': typescript.ScriptTarget.ESNext,
+      'latest': typescript.ScriptTarget.Latest
+    };
+    if (typeof oldConfig.compilerOptions.target === 'string') {
+      const target: string = oldConfig.compilerOptions.target.toLowerCase();
+      newConfig.compilerOptions.target = scriptTarget[target];
+
+      if (!newConfig.compilerOptions.target) {
+        throw new Error(`Invalid setting found in tsconfig.json: target: '${target}' to be one of: `
+         + Object.keys(scriptTarget).toString());
+      }
+    }
+
+    /**
+     * Map the string in the tsconfig.json file to an enum for the typescript API
+     */
+    const moduleKind: { [module: string]: typescript.ModuleKind } = {
+      'commonjs': typescript.ModuleKind.CommonJS,
+      'amd': typescript.ModuleKind.AMD,
+      'es2015': typescript.ModuleKind.ES2015,
+      'none': typescript.ModuleKind.None,
+      'system': typescript.ModuleKind.System,
+      'umd': typescript.ModuleKind.UMD
+    };
+
+    if (typeof oldConfig.compilerOptions.module === 'string') {
+      const module: string = oldConfig.compilerOptions.module as string;
+      newConfig.compilerOptions.module = moduleKind[module.toLowerCase()];
+
+      if (!newConfig.compilerOptions.module) {
+        throw new Error(`Invalid setting found in tsconfig.json: Expected module: '${module}' to be one of: `
+          + Object.keys(moduleKind).toString());
+      }
+    }
 
     return newConfig;
   }
