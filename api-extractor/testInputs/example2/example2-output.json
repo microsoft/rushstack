@@ -327,6 +327,19 @@
           "isBeta": false
         }
       }
+    },
+    "TestMissingCommentStar": {
+      "kind": "enum",
+      "values": {},
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "Degenerate comment star missing here end of comment"
+        }
+      ],
+      "remarks": [],
+      "isBeta": false
     }
   }
 }
