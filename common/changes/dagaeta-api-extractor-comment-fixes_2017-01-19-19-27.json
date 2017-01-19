@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Check for missing JsDoc sequences changed.",
+      "type": "patch"
+    }
+  ],
+  "email": "dgaeta@users.noreply.github.com"
+}
