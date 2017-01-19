@@ -10,6 +10,21 @@ class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig> {
 }
 
 // (undocumented)
+interface ITsConfigFile<T> {
+  // (undocumented)
+  compilerOptions: T;
+}
+
+// (undocumented)
+class TypeScriptConfiguration {
+  public static getGulpTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<ts.Settings>;
+  public static getTypescriptCompiler(): any;
+  // (undocumented)
+  public static getTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<typescript.CompilerOptions>;
+  public static setTypescriptCompiler(typescript: any): void;
+}
+
+// (undocumented)
 class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   // (undocumented)
   public executeTask(gulp: gulpType.Gulp, completeCallback: (result?: string) => void): void;

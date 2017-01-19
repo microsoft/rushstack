@@ -177,6 +177,16 @@ interface IExecutable {
 export function initialize(gulp: gulp.Gulp): void;
 
 // (undocumented)
+interface ISchemaValidatorResult {
+  // (undocumented)
+  details?: ZSchema.SchemaError[];
+  // (undocumented)
+  message?: string;
+  // (undocumented)
+  name?: string;
+}
+
+// (undocumented)
 export function log(...args: Array<string | Chalk.ChalkChain>): void;
 
 // (undocumented)
@@ -199,6 +209,15 @@ export function replaceConfig(config: IBuildConfig): void;
 
 // (undocumented)
 export function reset(): void;
+
+class SchemaValidator {
+  // (undocumented)
+  public static getFormattedErrorMessage(error: ISchemaValidatorResult, dataFilePath?: string): string;
+  public static readAndValidateJson < TResult >(dataFilePath: string, schemaFilePath: string): TResult;
+  // (undocumented)
+  public static readCommentedJsonFile < TResult >(filename: string): TResult;
+  public static validate(data: Object, schema: Object, dataFilePath?: string): void;
+}
 
 export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutable;
 

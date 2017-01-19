@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "dependencies": {
     "@microsoft/api-extractor": {
-      "version": "1.1.0",
+      "version": "1.1.1",
       "from": "@microsoft/api-extractor@>=1.1.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/@microsoft/api-extractor/-/api-extractor-1.1.0.tgz"
+      "resolved": "https://registry.npmjs.org/@microsoft/api-extractor/-/api-extractor-1.1.1.tgz"
     },
     "@microsoft/gulp-core-build": {
       "version": "2.2.0",
@@ -18,9 +18,9 @@
       "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-mocha/-/gulp-core-build-mocha-2.0.1.tgz"
     },
     "@microsoft/gulp-core-build-typescript": {
-      "version": "2.2.0",
+      "version": "2.2.1",
       "from": "@microsoft/gulp-core-build-typescript@>=2.1.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-typescript/-/gulp-core-build-typescript-2.2.0.tgz",
+      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-typescript/-/gulp-core-build-typescript-2.2.1.tgz",
       "dependencies": {
         "lodash": {
           "version": "4.15.0",
@@ -5251,9 +5251,9 @@
       "resolved": "https://registry.npmjs.org/user-home/-/user-home-1.1.1.tgz"
     },
     "useragent": {
-      "version": "2.1.10",
+      "version": "2.1.11",
       "from": "useragent@>=2.1.6 <3.0.0",
-      "resolved": "https://registry.npmjs.org/useragent/-/useragent-2.1.10.tgz",
+      "resolved": "https://registry.npmjs.org/useragent/-/useragent-2.1.11.tgz",
       "dependencies": {
         "lru-cache": {
           "version": "2.2.4",
