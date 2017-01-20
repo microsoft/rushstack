@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-karma",
+      "comment": "Upgrading webpack-karma to support webpack 2.X",
+      "type": "patch"
+    }
+  ],
+  "email": "ianc@microsoft.com"
+}
