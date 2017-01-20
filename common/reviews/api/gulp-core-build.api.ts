@@ -1,4 +1,3 @@
-// (undocumented)
 export function addSuppression(str: string): void;
 
 class CleanTask extends GulpTask<void> {
@@ -15,10 +14,16 @@ class CopyTask extends GulpTask<ICopyConfig> {
   public loadSchema(): Object;
 }
 
-// (undocumented)
 export function coverageData(coverage: number, threshold: number, filePath: string): void;
 
-// (undocumented)
+export function error(...args: Array<string | Chalk.ChalkChain>): void;
+
+export function fileError(taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
+
+export function fileLog(write: (text: string) => void, taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
+
+export function fileWarning(taskName: string, filePath: string, line: number, column: number, errorCode: string,  message: string): void;
+
 export function functionalTestRun(name: string, result: TestResultState, duration: number): void;
 
 class GenerateShrinkwrapTask extends GulpTask<void> {
@@ -28,10 +33,8 @@ class GenerateShrinkwrapTask extends GulpTask<void> {
 
 export function getConfig(): IBuildConfig;
 
-// (undocumented)
 export function getErrors(): string[];
 
-// (undocumented)
 export function getWarnings(): string[];
 
 class GulpTask<TASK_CONFIG> implements IExecutable {
@@ -54,7 +57,6 @@ class GulpTask<TASK_CONFIG> implements IExecutable {
   public mergeConfig(taskConfig: TASK_CONFIG): void;
   public name: string;
   public onRegister(): void;
-  // (undocumented)
   public readJSONSync(localPath: string): Object;
   public replaceConfig(taskConfig: TASK_CONFIG): void;
   public resolvePath(localPath: string): string;
@@ -128,11 +130,16 @@ interface ISchemaValidatorResult {
   name?: string;
 }
 
+export function logSummary(value: string): void;
+
 export function mergeConfig(config: IBuildConfig): void;
 
 export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecutable;
 
 export function replaceConfig(config: IBuildConfig): void;
+
+// @internal
+export function reset(): void;
 
 class SchemaValidator {
   // (undocumented)
@@ -151,7 +158,6 @@ export function subTask(taskName: string, fn: ICustomGulpTask): IExecutable;
 
 export function task(taskName: string, task: IExecutable): IExecutable;
 
-// (undocumented)
 enum TestResultState {
   // (undocumented)
   Failed,
@@ -167,6 +173,10 @@ class ValidateShrinkwrapTask extends GulpTask<void> {
   constructor();
   public executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream;
 }
+
+export function verbose(...args: Array<string | Chalk.ChalkChain>): void;
+
+export function warn(...args: Array<string | Chalk.ChalkChain>): void;
 
 export function watch(watchMatch: string | string[], task: IExecutable): IExecutable;
 

@@ -22,7 +22,15 @@ export {
   functionalTestRun,
   getErrors,
   getWarnings,
-  TestResultState
+  TestResultState,
+  warn,
+  verbose,
+  error,
+  fileError,
+  fileLog,
+  fileWarning,
+  reset,
+  logSummary
 } from './logging';
 export * from './tasks/CopyTask';
 export * from './tasks/GenerateShrinkwrapTask';

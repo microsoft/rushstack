@@ -331,6 +331,10 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
     fs.copySync(fullSourcePath, fullDestPath);
   }
 
+  /**
+   * Read a JSON file into an object
+   * @param localPath - the path to the JSON file
+   */
   public readJSONSync(localPath: string): Object {
     const fullPath: string = this.resolvePath(localPath);
     let result: Object = undefined;
