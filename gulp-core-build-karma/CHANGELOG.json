@@ -2,6 +2,26 @@
   "name": "@microsoft/gulp-core-build-karma",
   "entries": [
     {
+      "version": "2.0.2",
+      "tag": "@microsoft/gulp-core-build-karma_v2.0.2",
+      "date": "Fri, 20 Jan 2017 01:46:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrading webpack-karma to support webpack 2.X"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `>=2.1.0 <3.0.0` to `>=2.1.0 <3.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `>=2.1.0 <3.0.0` to `>=2.2.0 <3.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.1",
       "tag": "@microsoft/gulp-core-build-karma_v2.0.1",
       "date": "Fri, 13 Jan 2017 06:46:05 GMT",
