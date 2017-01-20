@@ -130,16 +130,6 @@ interface IExecutable {
 export declare function initialize(gulp: gulp.Gulp): void;
 
 // (undocumented)
-interface ISchemaValidatorResult {
-  // (undocumented)
-  details?: ZSchema.SchemaError[];
-  // (undocumented)
-  message?: string;
-  // (undocumented)
-  name?: string;
-}
-
-// (undocumented)
 interface ITsConfigFile<T> {
   // (undocumented)
   compilerOptions: T;
@@ -166,7 +156,7 @@ export declare function reset(): void;
 
 class SchemaValidator {
   // (undocumented)
-  static getFormattedErrorMessage(error: ISchemaValidatorResult, dataFilePath?: string): string;
+  static getFormattedErrorMessage(errors: Validator.SchemaErrorDetail[], dataFilePath?: string): string;
   static readAndValidateJson < TResult >(dataFilePath: string, schemaFilePath: string): TResult;
   // (undocumented)
   static readCommentedJsonFile < TResult >(filename: string): TResult;

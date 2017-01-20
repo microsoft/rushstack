@@ -3,17 +3,7 @@ import * as os from 'os';
 import * as jju from 'jju';
 import Validator = require('z-schema');
 
-export type ValidateErrorCallback = (errorDetail: string) => void;
-
-interface ISchemaError extends ZSchema.SchemaError {
-  // Ex. "z-schema validation error"
-  name: string;
-  details: Array<IErrorDetail>;
-}
-
-interface IErrorDetail extends ZSchema.SchemaError {
-  inner?: IErrorDetail[];
-}
+export type ValidateErrorCallback = (errorDescription: string) => void;
 
 /**
  * Utilities for reading/writing JSON files.
@@ -30,18 +20,18 @@ export default class JsonFile {
     // tslint:disable-next-line:no-string-literal
     delete jsonSchemaObject['$schema'];
 
-    const validator: ZSchema.Validator = new Validator({
+    const validator: Validator = new Validator({
       breakOnFirstError: false,
       noTypeless: true
     });
 
     if (!validator.validate(jsonObject, jsonSchemaObject)) {
-      const error: ISchemaError = validator.getLastError() as ISchemaError;
+      const errorDetails: Validator.SchemaErrorDetail[] = validator.getLastErrors();
 
-      let errorDetail: string = 'JSON schema validation failed:';
+      let buffer: string = 'JSON schema validation failed:';
 
-      errorDetail = JsonFile._formatErrorDetails(error.details, '  ', errorDetail);
-      errorCallback(errorDetail);
+      buffer = JsonFile._formatErrorDetails(errorDetails, '  ', buffer);
+      errorCallback(buffer);
     }
   }
 
@@ -87,18 +77,17 @@ export default class JsonFile {
 
   }
 
-  private static _formatErrorDetails(errorDetails: IErrorDetail[], indent: string,
-    result: string): string {
-    for (const detail of errorDetails) {
-      result += os.EOL + indent + `Error: ${detail.path}`;
-      // result += os.EOL + indent + `       ${detail.code}`;
-      result += os.EOL + indent + `       ${detail.message}`;
+  private static _formatErrorDetails(errorDetails: Validator.SchemaErrorDetail[], indent: string,
+    buffer: string): string {
+    for (const errorDetail of errorDetails) {
+      buffer += os.EOL + indent + `Error: ${errorDetail.path}`;
+      buffer += os.EOL + indent + `       ${errorDetail.message}`;
 
-      if (detail.inner) {
-        result = JsonFile._formatErrorDetails(detail.inner, indent + '  ', result);
+      if (errorDetail.inner) {
+        buffer = JsonFile._formatErrorDetails(errorDetail.inner, indent + '  ', buffer);
       }
     }
-    return result;
+    return buffer;
   }
 
   /**
