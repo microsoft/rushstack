@@ -26,7 +26,7 @@
     "karma-mocha-clean-reporter": "~0.0.1",
     "karma-phantomjs-launcher": "~1.0.0",
     "karma-sinon-chai": "~1.2.0",
-    "karma-webpack": "~1.7.0",
+    "karma-webpack": "~2.0.1",
     "lolex": "~1.4.0",
     "mocha": "~2.5.3",
     "phantomjs-polyfill": "~0.0.2",
