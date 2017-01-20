@@ -1,0 +1,15 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "packageName": "@microsoft/gulp-core-build",
+      "type": "none"
+    },
+    {
+      "comment": "",
+      "packageName": "@microsoft/api-extractor",
+      "type": "none"
+    }
+  ],
+  "email": "pgonzal@microsoft.com"
+}
