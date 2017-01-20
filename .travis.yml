@@ -4,6 +4,10 @@ node_js:
 before_script:
   - npm install -g gulp
 script:
+  - echo 'Checking change file...' && echo -en 'travis_fold:start:check\\r'
+  - git fetch origin master:refs/remotes/origin/master -a
+  - node node_modules/@microsoft/rush/lib/rush.js change -v
+  - echo -en 'travis_fold:end:check\\r'
   - echo 'Installing...' && echo -en 'travis_fold:start:install\\r'
   - node node_modules/@microsoft/rush/lib/rush.js install
   - echo -en 'travis_fold:end:install\\r'
