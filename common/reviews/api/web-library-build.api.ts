@@ -1,4 +1,3 @@
-// (undocumented)
 export declare function addSuppression(str: string): void;
 
 class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig> {
@@ -12,116 +11,66 @@ class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig> {
   taskConfig: IApiExtractorTaskConfig;
 }
 
-// (undocumented)
-class CleanTask extends GulpTask<ICleanConfig> {
-  // (undocumented)
+class CleanTask extends GulpTask<void> {
+  constructor();
   executeTask(gulp: gulp.Gulp, completeCallback: (result?: Object) => void): void;
-  // (undocumented)
-  name: string;
-  // (undocumented)
-  taskConfig: ICleanConfig;
 }
 
 class CopyTask extends GulpTask<ICopyConfig> {
-  // (undocumented)
+  constructor();
   executeTask(gulp: gulp.Gulp, completeCallback: (result?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
-  // (undocumented)
+  // @internal
   loadSchema(): Object;
-  // (undocumented)
-  taskConfig: ICopyConfig;
 }
 
-// (undocumented)
 export declare function coverageData(coverage: number, threshold: number, filePath: string): void;
 
-// (undocumented)
-export declare function endTaskSrc(taskName: string, startHrtime: [number, number], fileCount: number): void;
-
-// (undocumented)
 export declare function error(...args: Array<string | Chalk.ChalkChain>): void;
 
-// (undocumented)
 export declare function fileError(taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
 
-// (undocumented)
 export declare function fileLog(write: (text: string) => void, taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
 
-// (undocumented)
 export declare function fileWarning(taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
 
-// (undocumented)
 export declare function functionalTestRun(name: string, result: TestResultState, duration: number): void;
 
-// (undocumented)
-export declare function generateGulpError(error: Object): Object;
-
-class GenerateShrinkwrapTask extends GulpTask<{}> {
-  // (undocumented)
-  executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream;
-  // (undocumented)
-  name: string;
+class GenerateShrinkwrapTask extends GulpTask<void> {
+  constructor();
+  executeTask(gulp: gulpType.Gulp, completeCallback: (result?: Object) => void): NodeJS.ReadWriteStream;
 }
 
 export declare function getConfig(): IBuildConfig;
 
-// (undocumented)
 export declare function getErrors(): string[];
 
-// (undocumented)
-export declare function getStart(): [number, number];
-
-// (undocumented)
 export declare function getWarnings(): string[];
 
-// (undocumented)
-export declare function getWatchMode(): boolean;
-
-// (undocumented)
 class GulpTask<TASK_CONFIG> implements IExecutable {
   protected _getConfigFilePath(): string;
-  protected _readCommentedJsonFile(filename: string): TASK_CONFIG;
-  // (undocumented)
   buildConfig: IBuildConfig;
-  // (undocumented)
   cleanMatch: string[];
-  // (undocumented)
   copyFile(localSourcePath: string, localDestPath?: string): void;
-  // (undocumented)
   execute(config: IBuildConfig): Promise<void>;
-  // (undocumented)
   abstract executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (result?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
-  // (undocumented)
   fileError(filePath: string, line: number, column: number, errorCode: string, message: string): void;
-  // (undocumented)
   fileExists(localPath: string): boolean;
-  // (undocumented)
-  fileWarning(filePath: string, line: number, column: number, errorCode: string, message: string): void;
-  // (undocumented)
+  fileWarning(filePath: string, line: number, column: number, warningCode: string, message: string): void;
   getCleanMatch(buildConfig: IBuildConfig, taskConfig?: TASK_CONFIG): string[];
-  // (undocumented)
   isEnabled(buildConfig: IBuildConfig): boolean;
-  loadSchema(): Object;
-  // (undocumented)
+  protected loadSchema(): Object;
   log(message: string): void;
-  // (undocumented)
   logError(message: string): void;
-  // (undocumented)
   logVerbose(message: string): void;
-  // (undocumented)
   logWarning(message: string): void;
   mergeConfig(taskConfig: TASK_CONFIG): void;
-  // (undocumented)
   name: string;
-  // (undocumented)
   onRegister(): void;
-  // (undocumented)
   readJSONSync(localPath: string): Object;
   replaceConfig(taskConfig: TASK_CONFIG): void;
-  // (undocumented)
   resolvePath(localPath: string): string;
   schema: Object;
   setConfig(taskConfig: TASK_CONFIG): void;
-  // (undocumented)
   taskConfig: TASK_CONFIG;
 }
 
@@ -156,11 +105,6 @@ interface IBuildConfig {
   verbose?: boolean;
 }
 
-// (undocumented)
-interface ICleanConfig {
-}
-
-// (undocumented)
 interface ICopyConfig {
   copyTo: {
     // (undocumented)
@@ -209,20 +153,7 @@ interface IWebpackTaskConfig {
   webpack?: typeof Webpack;
 }
 
-// (undocumented)
-export declare function log(...args: Array<string | Chalk.ChalkChain>): void;
-
-// (undocumented)
-export declare function logEndSubtask(name: string, startTime: [number, number], errorObject?: Error): void;
-
-// (undocumented)
-export declare function logStartSubtask(name: string): void;
-
-// (undocumented)
 export declare function logSummary(value: string): void;
-
-// (undocumented)
-export declare function markTaskCreationTime(): void;
 
 export declare function mergeConfig(config: IBuildConfig): void;
 
@@ -230,7 +161,7 @@ export declare function parallel(...tasks: Array<IExecutable[] | IExecutable>): 
 
 export declare function replaceConfig(config: IBuildConfig): void;
 
-// (undocumented)
+// @internal
 export declare function reset(): void;
 
 class SchemaValidator {
@@ -246,17 +177,10 @@ export declare function serial(...tasks: Array<IExecutable[] | IExecutable>): IE
 
 export declare function setConfig(config: IBuildConfig): void;
 
-// (undocumented)
-export declare function setExitCode(exitCode: number): void;
-
-// (undocumented)
-export declare function setWatchMode(): void;
-
 export declare function subTask(taskName: string, fn: ICustomGulpTask): IExecutable;
 
 export declare function task(taskName: string, task: IExecutable): IExecutable;
 
-// (undocumented)
 enum TestResultState {
   // (undocumented)
   Failed = 1,
@@ -290,17 +214,13 @@ class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   taskConfig: ITypeScriptTaskConfig;
 }
 
-class ValidateShrinkwrapTask extends GulpTask<{}> {
-  // (undocumented)
+class ValidateShrinkwrapTask extends GulpTask<void> {
+  constructor();
   executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream;
-  // (undocumented)
-  name: string;
 }
 
-// (undocumented)
 export declare function verbose(...args: Array<string | Chalk.ChalkChain>): void;
 
-// (undocumented)
 export declare function warn(...args: Array<string | Chalk.ChalkChain>): void;
 
 export declare function watch(watchMatch: string | string[], task: IExecutable): IExecutable;
@@ -318,9 +238,6 @@ class WebpackTask extends GulpTask<IWebpackTaskConfig> {
   // (undocumented)
   taskConfig: IWebpackTaskConfig;
 }
-
-// (undocumented)
-export declare function writeError(e: any): void;
 
 // WARNING: Unsupported export: preCopy
 // WARNING: Unsupported export: postCopy
