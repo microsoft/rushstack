@@ -23,7 +23,7 @@ export class GulpProxy extends Orchestrator implements gulp.Gulp {
   /* tslint:disable-next-line:no-any */
   public task(): any {
     throw new Error(
-      'You should not define gulp tasks directly, but instead subclass the GulpTask and register it to gulp-core-build.'
+      'You should not define gulp tasks directly, but instead subclass the GulpTask or call subTask(), and register it to gulp-core-build.'
     );
   }
 }

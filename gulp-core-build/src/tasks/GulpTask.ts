@@ -196,7 +196,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
   }
 
   /**
-   * This function is once to execute the task. It calls executeTask() and handles the return
+   * This function is called once to execute the task. It calls executeTask() and handles the return
    * value from that function. It also provides some utilities such as logging how long each
    * task takes to execute.
    * @param config - the buildConfig which is applied to the task instance before execution\
