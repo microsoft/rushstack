@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
-    "@microsoft/node-library-build": ">=2.1.0 <3.0.0",
+    "@microsoft/node-library-build": ">=2.2.0 <3.0.0",
     "chai": "~3.5.0",
     "typescript": "~2.1.4",
     "@types/assertion-error": "^1.0.30",
@@ -21,7 +21,7 @@
     "@types/through2": "^2.0.31",
     "@types/vinyl": "^1.2.30",
     "@types/yargs": "0.0.34",
-    "@types/z-schema": "3.16.20-alpha",
+    "@types/z-schema": "~3.16.31",
     "del": "^2.2.2",
     "end-of-stream": "~1.1.0",
     "es6-promise": "~3.1.2",

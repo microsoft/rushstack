@@ -3,11 +3,8 @@
 import * as path from 'path';
 import { assert } from 'chai';
 import { EOL } from 'os';
-
-import {
-  SchemaValidator,
-  ISchemaValidatorResult
-} from '../SchemaValidator';
+import Validator = require('z-schema');
+import { SchemaValidator } from '../SchemaValidator';
 
 const nonexistentFile: string = path.join(__dirname, 'thisfileshouldneverexist.json');
 const basicSchema: string = path.join(__dirname, 'basicSchema.json');
@@ -47,7 +44,7 @@ describe('SchemaValidator', () => {
 
   describe('getFormattedErrorMessage', () => {
     it('can properly format a simple error', (done: MochaDone) => {
-      const error: ISchemaValidatorResult = {
+      const error: Validator.SchemaError = {
         'name': 'z-schema validation error',
         'message': 'JSON_OBJECT_VALIDATION_FAILED',
         'details': [
@@ -58,12 +55,13 @@ describe('SchemaValidator', () => {
             ],
             'message': 'Missing required property: bar',
             'path': '#/',
-            'description': 'An example schema with 2 properties'
+            'description': 'An example schema with 2 properties',
+            'inner': []
           }
         ]
       };
       assert.equal(
-        SchemaValidator.getFormattedErrorMessage(error),
+        SchemaValidator.getFormattedErrorMessage(error.details),
         ['',
           'ERROR: (#/) Missing required property: bar',
           '',
