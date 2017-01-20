@@ -16,7 +16,22 @@ import { getFlagValue, setConfigDefaults } from './config';
 import * as gulp from 'gulp';
 
 export * from './IBuildConfig';
-export * from './logging';
+export {
+  addSuppression,
+  coverageData,
+  functionalTestRun,
+  getErrors,
+  getWarnings,
+  TestResultState,
+  warn,
+  verbose,
+  error,
+  fileError,
+  fileLog,
+  fileWarning,
+  reset,
+  logSummary
+} from './logging';
 export * from './tasks/CopyTask';
 export * from './tasks/GenerateShrinkwrapTask';
 export * from './tasks/GulpTask';
@@ -92,13 +107,17 @@ export function replaceConfig(config: IBuildConfig): void {
 
 /**
  * Gets the current config.
+ * @returns the current build configuration
  */
 export function getConfig(): IBuildConfig {
   return _buildConfig;
 }
 
 /**
- * Defines a gulp task and maps it to a given IExecutable.
+ * Registers an IExecutable to gulp so that it can be called from the command line
+ * @param taskName - the name of the task, can be called from the command line (e.g. "gulp <taskName>")
+ * @param task - the executable to execute when the task is invoked
+ * @returns the task parameter
  */
 export function task(taskName: string, task: IExecutable): IExecutable {
   _taskMap[taskName] = task;
@@ -138,6 +157,7 @@ class CustomTask extends GulpTask<void> {
  *
  * @param taskName - the name of the task, appearing in build logs
  * @param fn - the callback function to execute when this task runs
+ * @returns an IExecutable which can be registered to the command line with task()
  */
 export function subTask(taskName: string, fn: ICustomGulpTask): IExecutable {
   const customTask: CustomTask = new CustomTask(taskName, fn);
