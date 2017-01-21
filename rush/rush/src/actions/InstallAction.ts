@@ -18,6 +18,7 @@ import {
 } from '@microsoft/rush-lib';
 
 import RushCommandLineParser from './RushCommandLineParser';
+import GitPolicy from './GitPolicy';
 
 const MAX_INSTALL_ATTEMPTS: number = 5;
 
@@ -115,6 +116,10 @@ export default class InstallAction extends CommandLineAction {
 
   protected onExecute(): void {
     this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
+
+    if (!GitPolicy.check(this._rushConfiguration)) {
+      return;
+    }
 
     const stopwatch: Stopwatch = Stopwatch.start();
 

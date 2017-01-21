@@ -1,10 +1,11 @@
 import * as os from 'os';
+import * as colors from 'colors';
 import { RushConfiguration, Utilities } from '@microsoft/rush-lib';
 
 export default class GitPolicy {
-  public static check(rushConfiguration: RushConfiguration): void {
+  public static check(rushConfiguration: RushConfiguration): boolean {
     if (rushConfiguration.gitAllowedEmailPatterns.length === 0) {
-      return;
+      return true;
     }
 
     // Determine the user's account
@@ -33,6 +34,33 @@ export default class GitPolicy {
       }
     }
 
-    console.log('Bad=' + userEmail);
+    let message: string = 'Uh oh!  To keep things tidy, this repository asks that you submit'
+      + ' your Git commmits using an e-mail like ';
+    if (rushConfiguration.gitAllowedEmailPatterns.length > 1) {
+      message += 'one of these patterns:';
+    } else {
+      message += 'this pattern:';
+    }
+
+    message += os.EOL + os.EOL + rushConfiguration.gitAllowedEmailPatterns
+      .map(
+        (x: string) => '    ' + colors.cyan(x)
+      ).join(os.EOL);
+
+    message += os.EOL + os.EOL + '...but yours looks like this:'
+      + os.EOL + os.EOL + '    Address: '
+      + colors.cyan(`"${userEmail}"`)
+      + os.EOL + '    Source: '
+      + colors.cyan(userEmailSource);
+
+    message += os.EOL + os.EOL + 'To change it, you can use these commands:' + os.EOL + os.EOL
+      + colors.cyan('    git config --local user.name "John Doe"') + os.EOL
+      + colors.cyan('    git config --local user.email john@example.com') + os.EOL;
+
+    console.log(message);
+
+    console.log(colors.red('Aborting, so you can go fix the problem.'));
+
+    return false;
   }
 }
