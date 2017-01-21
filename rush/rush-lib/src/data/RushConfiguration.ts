@@ -14,6 +14,13 @@ import RushConfigurationProject, { IRushConfigurationProjectJson } from './RushC
 import Utilities from '../utilities/Utilities';
 
 /**
+ * Part of IRushConfigurationJson.
+ */
+export interface IRushGitPolicyJson {
+  allowedEmailPatterns?: string[];
+}
+
+/**
  * This represents the JSON data structure for the "rush.json" configuration file.
  * See rush-schema.json for documentation.
  */
@@ -28,6 +35,7 @@ export interface IRushConfigurationJson {
   packageReviewFile?: string;
   reviewCategories?: string[];
   useLocalNpmCache?: boolean;
+  gitPolicy?: IRushGitPolicyJson;
   projects: IRushConfigurationProjectJson[];
 }
 
@@ -59,6 +67,7 @@ export default class RushConfiguration {
   private _projectFolderMaxDepth: number;
   private _packageReviewFile: string;
   private _reviewCategories: Set<string>;
+  private _gitAllowedEmailPatterns: string[];
   private _projects: RushConfigurationProject[];
   private _projectsByName: Map<string, RushConfigurationProject>;
 
@@ -228,6 +237,11 @@ export default class RushConfiguration {
 
     this._reviewCategories = new Set<string>(rushConfigurationJson.reviewCategories);
 
+    this._gitAllowedEmailPatterns = [];
+    if (rushConfigurationJson.gitPolicy && rushConfigurationJson.gitPolicy.allowedEmailPatterns) {
+      this._gitAllowedEmailPatterns = rushConfigurationJson.gitPolicy.allowedEmailPatterns;
+    }
+
     this._projects = [];
     this._projectsByName = new Map<string, RushConfigurationProject>();
 
@@ -394,6 +408,16 @@ export default class RushConfiguration {
    */
   public get reviewCategories(): Set<string> {
     return this._reviewCategories;
+  }
+
+  /**
+   * A list of regular expressions describing allowable e-mail patterns for Git commits.
+   * The expressions are case insensitive and anchored.
+   * Example: ".*@example\.com"
+   * This array will never be undefined.
+   */
+  public get gitAllowedEmailPatterns(): string[] {
+    return this._gitAllowedEmailPatterns;
   }
 
   public get projects(): RushConfigurationProject[] {
