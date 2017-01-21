@@ -4,7 +4,6 @@
 /// <reference path="git-repo-info/git-repo-info.d.ts" />
 /// <reference path="glob-escape/glob-escape.d.ts" />
 /// <reference path="read-package-tree/read-package-tree.d.ts" />
-/// <reference path="semver/semver.d.ts" />
 /// <reference path="wordwrap/wordwrap.d.ts" />
 /// <reference path="inquirer/inquirer.d.ts" />
 /// <reference path="mkdirp/mkdirp.d.ts" />

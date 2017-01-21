@@ -66,7 +66,7 @@ export default class PackageReviewConfiguration {
     // to a public web server where Visual Studio can find it.
     delete packageReviewJson.$schema;
 
-    const validator: ZSchema.Validator = new Validator({
+    const validator: Validator = new Validator({
       breakOnFirstError: true,
       noTypeless: true
     });
@@ -75,9 +75,9 @@ export default class PackageReviewConfiguration {
       path.join(__dirname, '../packagereview-schema.json'));
 
     if (!validator.validate(packageReviewJson, packageReviewSchema)) {
-      const error: ZSchema.Error = validator.getLastError();
+      const error: Validator.SchemaError = validator.getLastError();
 
-      const detail: ZSchema.ErrorDetail = error.details[0];
+      const detail: Validator.SchemaErrorDetail = error.details[0];
       const errorMessage: string = `Error parsing file '${path.basename(jsonFilename)}',`
         + `section[${detail.path}]:${os.EOL}(${detail.code}) ${detail.message}`;
 
