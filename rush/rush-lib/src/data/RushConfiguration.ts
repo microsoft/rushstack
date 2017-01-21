@@ -96,7 +96,7 @@ export default class RushConfiguration {
     // to a public web server where Visual Studio can find it.
     delete rushConfigurationJson.$schema;
 
-    const validator: ZSchema.Validator = new Validator({
+    const validator: Validator = new Validator({
       breakOnFirstError: true,
       noTypeless: true
     });
@@ -104,9 +104,9 @@ export default class RushConfiguration {
     const rushSchema: Object = JsonFile.loadJsonFile(path.join(__dirname, '../rush-schema.json'));
 
     if (!validator.validate(rushConfigurationJson, rushSchema)) {
-      const error: ZSchema.Error = validator.getLastError();
+      const error: Validator.SchemaError = validator.getLastError();
 
-      const detail: ZSchema.ErrorDetail = error.details[0];
+      const detail: Validator.SchemaErrorDetail = error.details[0];
       const errorMessage: string = `Error parsing file '${path.basename(rushJsonFilename)}',`
         + `section[${detail.path}]:${os.EOL}(${detail.code}) ${detail.message}`;
 
