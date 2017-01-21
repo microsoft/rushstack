@@ -18,6 +18,7 @@ import Utilities from '../utilities/Utilities';
  */
 export interface IRushGitPolicyJson {
   allowedEmailPatterns?: string[];
+  sampleEmail?: string;
 }
 
 /**
@@ -68,6 +69,7 @@ export default class RushConfiguration {
   private _packageReviewFile: string;
   private _reviewCategories: Set<string>;
   private _gitAllowedEmailPatterns: string[];
+  private _gitSampleEmail: string;
   private _projects: RushConfigurationProject[];
   private _projectsByName: Map<string, RushConfigurationProject>;
 
@@ -238,8 +240,14 @@ export default class RushConfiguration {
     this._reviewCategories = new Set<string>(rushConfigurationJson.reviewCategories);
 
     this._gitAllowedEmailPatterns = [];
-    if (rushConfigurationJson.gitPolicy && rushConfigurationJson.gitPolicy.allowedEmailPatterns) {
-      this._gitAllowedEmailPatterns = rushConfigurationJson.gitPolicy.allowedEmailPatterns;
+    this._gitSampleEmail = 'example@users.noreply.github.com';
+    if (rushConfigurationJson.gitPolicy) {
+      if (rushConfigurationJson.gitPolicy.allowedEmailPatterns) {
+        this._gitAllowedEmailPatterns = rushConfigurationJson.gitPolicy.allowedEmailPatterns;
+      }
+      if (rushConfigurationJson.gitPolicy.sampleEmail) {
+        this._gitSampleEmail = rushConfigurationJson.gitPolicy.sampleEmail;
+      }
     }
 
     this._projects = [];
@@ -418,6 +426,15 @@ export default class RushConfiguration {
    */
   public get gitAllowedEmailPatterns(): string[] {
     return this._gitAllowedEmailPatterns;
+  }
+
+  /**
+   * An example valid e-mail address that conforms to one of the allowedEmailPatterns.
+   * Example: "foxtrot@example\.com"
+   * This will never be undefined.
+   */
+  public get gitSampleEmail(): string {
+    return this._gitSampleEmail;
   }
 
   public get projects(): RushConfigurationProject[] {
