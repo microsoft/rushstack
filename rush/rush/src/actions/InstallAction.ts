@@ -27,6 +27,7 @@ export default class InstallAction extends CommandLineAction {
   private _rushConfiguration: RushConfiguration;
   private _cleanInstall: CommandLineFlagParameter;
   private _cleanInstallFull: CommandLineFlagParameter;
+  private _bypassPolicy: CommandLineFlagParameter;
 
   public static ensureLocalNpmTool(rushConfiguration: RushConfiguration, cleanInstall: boolean): void {
     // Example: "C:\Users\YourName\.rush"
@@ -112,13 +113,19 @@ export default class InstallAction extends CommandLineAction {
       parameterShortName: '-C',
       description: 'Like "--clean", but also deletes and reinstalls the NPM tool itself'
     });
+    this._bypassPolicy = this.defineFlagParameter({
+      parameterLongName: '--bypass-policy',
+      description: 'Overrides gitPolicy enforcement (use honorably!)'
+    });
   }
 
   protected onExecute(): void {
     this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
 
-    if (!GitPolicy.check(this._rushConfiguration)) {
-      return;
+    if (!this._bypassPolicy.value) {
+      if (!GitPolicy.check(this._rushConfiguration)) {
+        return;
+      }
     }
 
     const stopwatch: Stopwatch = Stopwatch.start();
