@@ -8,13 +8,29 @@ export default class GitPolicy {
       return true;
     }
 
+    console.log('Checking Git policy for this repository.' + os.EOL);
+
     // Determine the user's account
     // Ex: "file:C:/Users/Bob/.gitconfig        bob@example.com"
-    const output: string = Utilities.executeCommandAndCaptureOutput('git',
-      ['config', '--show-origin', 'user.email'], '.');
+    let output: string;
+    try {
+      output = Utilities.executeCommandAndCaptureOutput('git',
+        ['config', '--show-origin', 'user.email'], '.');
+    } catch (e) {
+      const message: string = 'Error: ' + e.message + os.EOL
+        + 'Unable to determine your Git configuration using this command:'
+        + os.EOL + os.EOL + '    git config --show-origin user.email' + os.EOL
+        + os.EOL + 'If you didn\'t configure your e-mail yet, try something like this:'
+        + os.EOL + os.EOL
+        + colors.cyan('    git config --local user.name "Mr. Example"') + os.EOL
+        + colors.cyan(`    git config --local user.email "${rushConfiguration.gitSampleEmail}"`) + os.EOL;
+      console.log(message);
+
+      console.log(colors.red('Aborting, so you can go fix your settings.  (Or use --bypass-policy to skip.)'));
+      return false;
+    }
 
     const parts: string[] = output.split('\t');
-
     if (parts.length !== 2) {
       throw new Error('The gitPolicy check failed because "git config" returned unexpected output:'
         + os.EOL + '"' + output + '"');
@@ -28,14 +44,14 @@ export default class GitPolicy {
     for (const pattern of rushConfiguration.gitAllowedEmailPatterns) {
       const regex: RegExp = new RegExp('^' + pattern + '$', 'i');
       if (userEmail.match(regex)) {
-        // We are cool
-        console.log(`${userEmail} matched pattern: "${pattern}"`);
+        // For debugging:
+        // console.log(`${userEmail} matched pattern: "${pattern}"`);
         return;
       }
     }
 
-    let message: string = 'Uh oh!  To keep things tidy, this repository asks that you submit'
-      + ' your Git commmits using an e-mail like ';
+    let message: string = 'Hey there!  To keep things tidy, this repo asks you '
+      + 'to submit your Git commmits using an e-mail like ';
     if (rushConfiguration.gitAllowedEmailPatterns.length > 1) {
       message += 'one of these patterns:';
     } else {
@@ -47,20 +63,17 @@ export default class GitPolicy {
         (x: string) => '    ' + colors.cyan(x)
       ).join(os.EOL);
 
-    message += os.EOL + os.EOL + '...but yours looks like this:'
-      + os.EOL + os.EOL + '    Address: '
-      + colors.cyan(`"${userEmail}"`)
-      + os.EOL + '    Source: '
-      + colors.cyan(userEmailSource);
+    message += os.EOL + os.EOL + '...but yours is configured like this:' + os.EOL
+      + os.EOL + '    ' + colors.cyan(`"${userEmail}"`) + os.EOL
+      + os.EOL + 'The setting came from here: ' + userEmailSource;
 
-    message += os.EOL + os.EOL + 'To change it, you can use these commands:' + os.EOL + os.EOL
-      + colors.cyan('    git config --local user.name "John Doe"') + os.EOL
-      + colors.cyan('    git config --local user.email john@example.com') + os.EOL;
+    message += os.EOL + os.EOL + 'To fix it, you can use commands like this:' + os.EOL + os.EOL
+      + colors.cyan('    git config --local user.name "Mr. Example"') + os.EOL
+      + colors.cyan(`    git config --local user.email "${rushConfiguration.gitSampleEmail}"`) + os.EOL;
 
     console.log(message);
 
-    console.log(colors.red('Aborting, so you can go fix the problem.'));
-
+    console.log(colors.red('Aborting, so you can go fix your settings.  (Or use --bypass-policy to skip.)'));
     return false;
   }
 }

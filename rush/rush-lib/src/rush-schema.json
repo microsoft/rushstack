@@ -59,6 +59,10 @@
           "items": {
             "type": "string"
           }
+        },
+        "sampleEmail": {
+          "description": "An example valid e-mail address that conforms to one of the allowedEmailPatterns.  Example: \"foxtrot@example\\.com\"",
+          "type": "string"
         }
       },
       "additionalProperties": false
