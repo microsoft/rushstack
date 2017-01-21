@@ -49,6 +49,20 @@
       "description": "If true, use repository-scoped NPM cache and tmp folders",
       "type": "boolean"
     },
+    "gitPolicy": {
+      "description": "If the project is stored in a Git repository, additional settings related to Git",
+      "type": "object",
+      "properties": {
+        "allowedEmailPatterns": {
+          "description": "A list of regular expressions describing allowable e-mail patterns for Git commits.  The expressions are case insensitive and anchored.  Example: \".*@example\\.com\"",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
     "projects": {
       "description": "A list of projects managed by this tool.",
       "type": "array",
