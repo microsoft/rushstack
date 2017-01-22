@@ -242,14 +242,17 @@ export default class RushConfiguration {
     this._gitAllowedEmailPatterns = [];
     this._gitSampleEmail = '';
     if (rushConfigurationJson.gitPolicy) {
-      if (rushConfigurationJson.gitPolicy.allowedEmailPatterns) {
-        this._gitAllowedEmailPatterns = rushConfigurationJson.gitPolicy.allowedEmailPatterns;
-      }
       if (rushConfigurationJson.gitPolicy.sampleEmail) {
         this._gitSampleEmail = rushConfigurationJson.gitPolicy.sampleEmail;
-      } else {
-        throw new Error('The rush.json file is missing the "sampleEmail" option, ' +
-          'which is required when using "allowedEmailPatterns"');
+      }
+
+      if (rushConfigurationJson.gitPolicy.allowedEmailPatterns) {
+        this._gitAllowedEmailPatterns = rushConfigurationJson.gitPolicy.allowedEmailPatterns;
+
+        if (this._gitSampleEmail.trim().length < 1) {
+          throw new Error('The rush.json file is missing the "sampleEmail" option, ' +
+            'which is required when using "allowedEmailPatterns"');
+        }
       }
     }
 
