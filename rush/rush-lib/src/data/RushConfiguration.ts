@@ -240,13 +240,16 @@ export default class RushConfiguration {
     this._reviewCategories = new Set<string>(rushConfigurationJson.reviewCategories);
 
     this._gitAllowedEmailPatterns = [];
-    this._gitSampleEmail = 'example@users.noreply.github.com';
+    this._gitSampleEmail = '';
     if (rushConfigurationJson.gitPolicy) {
       if (rushConfigurationJson.gitPolicy.allowedEmailPatterns) {
         this._gitAllowedEmailPatterns = rushConfigurationJson.gitPolicy.allowedEmailPatterns;
       }
       if (rushConfigurationJson.gitPolicy.sampleEmail) {
         this._gitSampleEmail = rushConfigurationJson.gitPolicy.sampleEmail;
+      } else {
+        throw new Error('The rush.json file is missing the "sampleEmail" option, ' +
+          'which is required when using "allowedEmailPatterns"');
       }
     }
 
@@ -420,7 +423,7 @@ export default class RushConfiguration {
 
   /**
    * A list of regular expressions describing allowable e-mail patterns for Git commits.
-   * The expressions are case insensitive and anchored.
+   * They are case-insensitive anchored JavaScript RegExps.
    * Example: ".*@example\.com"
    * This array will never be undefined.
    */
@@ -431,7 +434,7 @@ export default class RushConfiguration {
   /**
    * An example valid e-mail address that conforms to one of the allowedEmailPatterns.
    * Example: "foxtrot@example\.com"
-   * This will never be undefined.
+   * This will never be undefined, and will always be nonempty if gitAllowedEmailPatterns is used.
    */
   public get gitSampleEmail(): string {
     return this._gitSampleEmail;
