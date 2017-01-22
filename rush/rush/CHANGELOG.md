@@ -1,6 +1,17 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 03 Jan 2017 22:53:56 GMT and should not be manually modified.
+This log was last generated on Sun, 22 Jan 2017 02:04:57 GMT and should not be manually modified.
+
+## 1.5.0
+Sun, 22 Jan 2017 02:04:57 GMT
+
+### Minor changes
+
+- Implemented a new rush.json option "gitPolicy" to avoid incorrect commit e-mails
+
+### Patches
+
+- Update temp_modules when versions are bumped. 
 
 ## 1.4.1
 Tue, 03 Jan 2017 21:52:49 GMT
