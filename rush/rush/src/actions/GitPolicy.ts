@@ -56,6 +56,23 @@ If you didn't configure your e-mail yet, try something like this:`);
       }
     }
 
+    // Show the user's name as well.
+    // Ex. "Mr. Example <mr@example.com>"
+    let fancyEmail: string = colors.cyan(userEmail);
+    try {
+      const nameParts: string[] = Utilities.executeCommandAndCaptureOutput('git',
+        ['config', '--show-origin', 'user.name'], '.')
+        .split('\t');
+      if (nameParts.length === 2) {
+        const userName: string = nameParts[1].trim();
+        if (userName) {
+          fancyEmail = `${userName} <${fancyEmail}>`;
+        }
+      }
+    } catch (e) {
+      // but if it fails, this isn't critical, so don't bother them about it
+    }
+
     let message: string = 'Hey there!  To keep things tidy, this repo asks you '
       + 'to submit your Git commmits using an e-mail like ';
     if (rushConfiguration.gitAllowedEmailPatterns.length > 1) {
@@ -73,7 +90,7 @@ If you didn't configure your e-mail yet, try something like this:`);
 `
 ...but yours is configured like this:
 
-    ` + colors.cyan(`"${userEmail}"`) + `
+    ${fancyEmail}
 
 (The setting came from here: ${userEmailSource})
 
