@@ -39,7 +39,7 @@ If you didn't configure your e-mail yet, try something like this:`);
     const parts: string[] = output.split('\t');
     if (parts.length !== 2) {
       throw new Error('The gitPolicy check failed because "git config" returned unexpected output:'
-        + os.EOL + '"' + output + '"');
+        + os.EOL + `"${output}"`);
     }
 
     // Ex: "file:C:/Users/Bob/.gitconfig"
@@ -52,7 +52,7 @@ If you didn't configure your e-mail yet, try something like this:`);
       if (userEmail.match(regex)) {
         // For debugging:
         // console.log(`${userEmail} matched pattern: "${pattern}"`);
-        return;
+        return true;
       }
     }
 
