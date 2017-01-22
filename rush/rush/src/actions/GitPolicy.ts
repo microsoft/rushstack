@@ -4,7 +4,7 @@ import { RushConfiguration, Utilities } from '@microsoft/rush-lib';
 
 export default class GitPolicy {
   public static check(rushConfiguration: RushConfiguration): boolean {
-    if (rushConfiguration.gitAllowedEmailPatterns.length === 0) {
+    if (rushConfiguration.gitAllowedEmailRegExps.length === 0) {
       return true;
     }
 
@@ -47,7 +47,7 @@ If you didn't configure your e-mail yet, try something like this:`);
     // Ex: "bob@example.com"
     const userEmail: string = parts[1].trim();
 
-    for (const pattern of rushConfiguration.gitAllowedEmailPatterns) {
+    for (const pattern of rushConfiguration.gitAllowedEmailRegExps) {
       const regex: RegExp = new RegExp('^' + pattern + '$', 'i');
       if (userEmail.match(regex)) {
         // For debugging:
@@ -75,14 +75,14 @@ If you didn't configure your e-mail yet, try something like this:`);
 
     let message: string = 'Hey there!  To keep things tidy, this repo asks you '
       + 'to submit your Git commmits using an e-mail like ';
-    if (rushConfiguration.gitAllowedEmailPatterns.length > 1) {
+    if (rushConfiguration.gitAllowedEmailRegExps.length > 1) {
       message += 'one of these patterns:';
     } else {
       message += 'this pattern:';
     }
     console.log(message + os.EOL);
 
-    for (const pattern of  rushConfiguration.gitAllowedEmailPatterns) {
+    for (const pattern of  rushConfiguration.gitAllowedEmailRegExps) {
       console.log('    ' + colors.cyan(pattern));
     }
 

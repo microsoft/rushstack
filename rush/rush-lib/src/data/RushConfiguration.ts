@@ -17,7 +17,7 @@ import Utilities from '../utilities/Utilities';
  * Part of IRushConfigurationJson.
  */
 export interface IRushGitPolicyJson {
-  allowedEmailPatterns?: string[];
+  allowedEmailRegExps?: string[];
   sampleEmail?: string;
 }
 
@@ -68,7 +68,7 @@ export default class RushConfiguration {
   private _projectFolderMaxDepth: number;
   private _packageReviewFile: string;
   private _reviewCategories: Set<string>;
-  private _gitAllowedEmailPatterns: string[];
+  private _gitAllowedEmailRegExps: string[];
   private _gitSampleEmail: string;
   private _projects: RushConfigurationProject[];
   private _projectsByName: Map<string, RushConfigurationProject>;
@@ -239,19 +239,19 @@ export default class RushConfiguration {
 
     this._reviewCategories = new Set<string>(rushConfigurationJson.reviewCategories);
 
-    this._gitAllowedEmailPatterns = [];
+    this._gitAllowedEmailRegExps = [];
     this._gitSampleEmail = '';
     if (rushConfigurationJson.gitPolicy) {
       if (rushConfigurationJson.gitPolicy.sampleEmail) {
         this._gitSampleEmail = rushConfigurationJson.gitPolicy.sampleEmail;
       }
 
-      if (rushConfigurationJson.gitPolicy.allowedEmailPatterns) {
-        this._gitAllowedEmailPatterns = rushConfigurationJson.gitPolicy.allowedEmailPatterns;
+      if (rushConfigurationJson.gitPolicy.allowedEmailRegExps) {
+        this._gitAllowedEmailRegExps = rushConfigurationJson.gitPolicy.allowedEmailRegExps;
 
         if (this._gitSampleEmail.trim().length < 1) {
           throw new Error('The rush.json file is missing the "sampleEmail" option, ' +
-            'which is required when using "allowedEmailPatterns"');
+            'which is required when using "allowedEmailRegExps"');
         }
       }
     }
@@ -430,14 +430,14 @@ export default class RushConfiguration {
    * Example: ".*@example\.com"
    * This array will never be undefined.
    */
-  public get gitAllowedEmailPatterns(): string[] {
-    return this._gitAllowedEmailPatterns;
+  public get gitAllowedEmailRegExps(): string[] {
+    return this._gitAllowedEmailRegExps;
   }
 
   /**
-   * An example valid e-mail address that conforms to one of the allowedEmailPatterns.
+   * An example valid e-mail address that conforms to one of the allowedEmailRegExps.
    * Example: "foxtrot@example\.com"
-   * This will never be undefined, and will always be nonempty if gitAllowedEmailPatterns is used.
+   * This will never be undefined, and will always be nonempty if gitAllowedEmailRegExps is used.
    */
   public get gitSampleEmail(): string {
     return this._gitSampleEmail;
