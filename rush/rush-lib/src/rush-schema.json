@@ -53,7 +53,7 @@
       "description": "If the project is stored in a Git repository, additional settings related to Git",
       "type": "object",
       "properties": {
-        "allowedEmailPatterns": {
+        "allowedEmailRegExps": {
           "description": "A list of regular expressions describing allowable e-mail patterns for Git commits.  They are case-insensitive anchored JavaScript RegExps.  Example: \".*@example\\.com\"",
           "type": "array",
           "items": {
@@ -61,7 +61,7 @@
           }
         },
         "sampleEmail": {
-          "description": "An example valid e-mail address for \"Mr. Example\" that conforms to one of the allowedEmailPatterns.  Example: \"mr-example@contoso\\.com\"",
+          "description": "An example valid e-mail address for \"Mr. Example\" that conforms to one of the allowedEmailRegExps.  Example: \"mr-example@contoso\\.com\"",
           "type": "string"
         }
       },
