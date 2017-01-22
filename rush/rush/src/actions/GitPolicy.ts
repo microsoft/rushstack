@@ -17,16 +17,22 @@ export default class GitPolicy {
       output = Utilities.executeCommandAndCaptureOutput('git',
         ['config', '--show-origin', 'user.email'], '.');
     } catch (e) {
-      const message: string = 'Error: ' + e.message + os.EOL
-        + 'Unable to determine your Git configuration using this command:'
-        + os.EOL + os.EOL + '    git config --show-origin user.email' + os.EOL
-        + os.EOL + 'If you didn\'t configure your e-mail yet, try something like this:'
-        + os.EOL + os.EOL
-        + colors.cyan('    git config --local user.name "Mr. Example"') + os.EOL
-        + colors.cyan(`    git config --local user.email "${rushConfiguration.gitSampleEmail}"`) + os.EOL;
-      console.log(message);
+      console.log(
+`Error: ${e.message}
+Unable to determine your Git configuration using this command:
+
+    git config --show-origin user.email
+
+If you didn't configure your e-mail yet, try something like this:`);
+
+      console.log(colors.cyan(
+`
+    git config --local user.name "Mr. Example"
+    git config --local user.email "${rushConfiguration.gitSampleEmail}"
+`));
 
       console.log(colors.red('Aborting, so you can go fix your settings.  (Or use --bypass-policy to skip.)'));
+
       return false;
     }
 
@@ -57,21 +63,27 @@ export default class GitPolicy {
     } else {
       message += 'this pattern:';
     }
+    console.log(message + os.EOL);
 
-    message += os.EOL + os.EOL + rushConfiguration.gitAllowedEmailPatterns
-      .map(
-        (x: string) => '    ' + colors.cyan(x)
-      ).join(os.EOL);
+    for (const pattern of  rushConfiguration.gitAllowedEmailPatterns) {
+      console.log('    ' + colors.cyan(pattern));
+    }
 
-    message += os.EOL + os.EOL + '...but yours is configured like this:' + os.EOL
-      + os.EOL + '    ' + colors.cyan(`"${userEmail}"`) + os.EOL
-      + os.EOL + 'The setting came from here: ' + userEmailSource;
+    console.log(
+`
+...but yours is configured like this:
 
-    message += os.EOL + os.EOL + 'To fix it, you can use commands like this:' + os.EOL + os.EOL
-      + colors.cyan('    git config --local user.name "Mr. Example"') + os.EOL
-      + colors.cyan(`    git config --local user.email "${rushConfiguration.gitSampleEmail}"`) + os.EOL;
+    ` + colors.cyan(`"${userEmail}"`) + `
 
-    console.log(message);
+(The setting came from here: ${userEmailSource})
+
+To fix it, you can use commands like this:`);
+
+    console.log(colors.cyan(
+`
+    git config --local user.name "Mr. Example"
+    git config --local user.email "${rushConfiguration.gitSampleEmail}"
+`));
 
     console.log(colors.red('Aborting, so you can go fix your settings.  (Or use --bypass-policy to skip.)'));
     return false;
