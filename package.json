@@ -4,6 +4,6 @@
   "description": "Web build tools",
 
   "devDependencies": {
-    "@microsoft/rush": "~1.4.0"
+    "@microsoft/rush": "~1.5.0"
   }
 }
