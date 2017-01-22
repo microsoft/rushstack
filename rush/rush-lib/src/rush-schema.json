@@ -54,14 +54,14 @@
       "type": "object",
       "properties": {
         "allowedEmailPatterns": {
-          "description": "A list of regular expressions describing allowable e-mail patterns for Git commits.  The expressions are case insensitive and anchored.  Example: \".*@example\\.com\"",
+          "description": "A list of regular expressions describing allowable e-mail patterns for Git commits.  They are case-insensitive anchored JavaScript RegExps.  Example: \".*@example\\.com\"",
           "type": "array",
           "items": {
             "type": "string"
           }
         },
         "sampleEmail": {
-          "description": "An example valid e-mail address that conforms to one of the allowedEmailPatterns.  Example: \"foxtrot@example\\.com\"",
+          "description": "An example valid e-mail address for \"Mr. Example\" that conforms to one of the allowedEmailPatterns.  Example: \"mr-example@contoso\\.com\"",
           "type": "string"
         }
       },
