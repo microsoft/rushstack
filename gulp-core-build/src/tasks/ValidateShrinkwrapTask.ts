@@ -6,11 +6,17 @@ import * as semver from 'semver';
 type ShrinkwrapDep = { [name: string]: { version: string } };
 type PackageDep = { [name: string]: string };
 
+/**
+ * Partial representation of the contents of a `package.json` file
+ */
 interface INpmPackage {
   dependencies: PackageDep;
   devDependencies: PackageDep;
 }
 
+/**
+ * Partial representation of the contents of an `npm-shrinkwrap.json` file
+ */
 interface INpmShrinkwrap {
   dependencies: ShrinkwrapDep;
 }
@@ -23,9 +29,17 @@ interface INpmShrinkwrap {
  * shrinkwrap file and that the version in the shrinkwrap file satisfies what is
  * defined in the package.json file.
  */
-export class ValidateShrinkwrapTask extends GulpTask<{}> {
-  public name: string = 'Validate Shrinkwrap Freshness';
+export class ValidateShrinkwrapTask extends GulpTask<void> {
+  /** Instantiates an instance of the ValidateShrinkwrap task */
+  constructor() {
+    super();
+    this.name = 'validate-shrinkwrap';
+  }
 
+  /**
+   * Iterates through dependencies listed in a project's package.json and ensures that they are all
+   * resolvable in the npm-shrinkwrap file.
+   */
   public executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream {
     const pathToPackageJson: string = path.join(this.buildConfig.rootPath, 'package.json');
     const pathToShrinkwrap: string = path.join(this.buildConfig.rootPath, 'npm-shrinkwrap.json');
@@ -48,7 +62,7 @@ export class ValidateShrinkwrapTask extends GulpTask<{}> {
   }
 
   private _validate(packageDep: PackageDep, shrinkwrapDep: ShrinkwrapDep): void {
-    for (let pkg in packageDep) {
+    for (const pkg in packageDep) {
       if (!shrinkwrapDep.hasOwnProperty(pkg)) {
         this.logError(`Failed to find package ${pkg} in shrinkwrap file`);
       } else if (!semver.satisfies(shrinkwrapDep[pkg].version, packageDep[pkg])) {
