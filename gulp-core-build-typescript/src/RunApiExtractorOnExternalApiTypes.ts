@@ -5,15 +5,15 @@ import * as fs from 'fs';
 import { GulpTask } from '@microsoft/gulp-core-build';
 import { ExternalApiHelper } from '@microsoft/api-extractor';
 
-const files: string[] = ['external-api-types/es6-collections/index.d.ts',
-                         'external-api-types/es6-promise/index.d.ts',
-                         'external-api-types/whatwg-fetch/index.d.ts'];
+const files: string[] = ['resources/external-api-types/es6-collections/index.d.ts',
+                         'resources/external-api-types/es6-promise/index.d.ts',
+                         'resources/external-api-types/whatwg-fetch/index.d.ts'];
 
 export class RunApiExtractorOnExternalApiTypes extends GulpTask<void> {
   public name: string = 'run-api-extractor';
 
   public executeTask(gulp: gulp.Gulp, completeCallback?: (result?: Object) => void): void {
-    let outputPath: string = path.join(this.buildConfig.rootPath, this.buildConfig.distFolder);
+    let outputPath: string = path.join(this.buildConfig.rootPath, this.buildConfig.libFolder);
     if (!fs.existsSync(outputPath)) {
       fs.mkdirSync(outputPath);
     }
