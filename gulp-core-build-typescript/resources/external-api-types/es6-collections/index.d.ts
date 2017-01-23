@@ -1,23 +1,5 @@
 
-// Type definitions for es6-collections v0.5.1
-// Project: https://github.com/WebReflection/es6-collections/
-// Definitions by: Ron Buckton <http://github.com/rbuckton>
-// Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
-
-/* *****************************************************************************
-Copyright (c) Microsoft Corporation. All rights reserved.
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-this file except in compliance with the License. You may obtain a copy of the
-License at http://www.apache.org/licenses/LICENSE-2.0
-
-THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-MERCHANTABLITY OR NON-INFRINGEMENT.
-
-See the Apache Version 2.0 License for specific language governing permissions
-and limitations under the License.
-***************************************************************************** */
+// Typings based on DefinitelyTyped definitions from es6-collections@0.5.1
 
 /* tslint:disable: interface-name */
 /* tslint:disable: no-any */
@@ -66,8 +48,6 @@ export interface MapConstructor {
     prototype: Map<any, any>;
 }
 
-// declare var Map: MapConstructor;
-
 export interface Set<T> {
     add(value: T): Set<T>;
     clear(): void;
@@ -86,8 +66,6 @@ export interface SetConstructor {
     prototype: Set<any>;
 }
 
-// declare var Set: SetConstructor;
-
 export interface WeakMap <K, V> {
     delete(key: K): boolean;
 	clear(): void;
@@ -102,8 +80,6 @@ export interface WeakMapConstructor {
     prototype: WeakMap<any, any>;
 }
 
-// declare var WeakMap: WeakMapConstructor;
-
 export interface WeakSet <T> {
     delete(value: T): boolean;
 	clear(): void;
@@ -116,12 +92,3 @@ export interface WeakSetConstructor {
     new <T>(iterable: ForEachable<T>): WeakSet<T>;
     prototype: WeakSet<any>;
 }
-
-// declare var WeakSet: WeakSetConstructor;
-
-// declare module "es6-collections" {
-//     var Map: MapConstructor;
-//     var Set: SetConstructor;
-//     var WeakMap: WeakMapConstructor;
-//     var WeakSet: WeakSetConstructor;
-// }

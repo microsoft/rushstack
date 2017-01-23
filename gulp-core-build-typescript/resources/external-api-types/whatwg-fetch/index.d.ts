@@ -1,7 +1,4 @@
-// Type definitions for fetch API
-// Project: https://github.com/github/fetch
-// Definitions by: Ryan Graham <https://github.com/ryan-codingintrigue>
-// Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
+// Typings based on DefinitelyTyped definitions from whatwg-fetch
 
 /* tslint:disable: interface-name */
 /* tslint:disable: no-any */
@@ -107,5 +104,3 @@ export type RequestInfo = Request|string;
 export interface Window {
 	fetch(url: string|Request, init?: RequestInit): Promise<Response>;
 }
-
-// declare var fetch: typeof window.fetch;
