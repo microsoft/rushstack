@@ -62,7 +62,7 @@ export class UpdateBuildReceiptTask extends GulpTask<IBuildReceiptTask> {
     completeCallback: (result?: Object) => void
   ): Promise<Object> | NodeJS.ReadWriteStream | void {
 
-    let packageHashPath: string = path.join(process.cwd(), this.buildConfig.packageFolder, 'build.json');
+    const packageHashPath: string = path.join(process.cwd(), this.buildConfig.packageFolder, 'build.json');
 
     fs.writeFile(packageHashPath, JSON.stringify(_lastLocalHashes, undefined, 2), completeCallback);
   }
@@ -119,11 +119,11 @@ function _readPackageHashes(receiptPath: string): Promise<{ [path: string]: stri
 }
 
 function _areObjectsEqual(obj1: Object, obj2: Object): boolean {
-  let obj1Keys: string[] = Object.keys(obj1);
-  let obj2Keys: string[] = Object.keys(obj2);
+  const obj1Keys: string[] = Object.keys(obj1);
+  const obj2Keys: string[] = Object.keys(obj2);
 
   if (obj1Keys.length === obj2Keys.length) {
-    for (let key of obj1Keys) {
+    for (const key of obj1Keys) {
       if (obj1[key] !== obj2[key]) {
         return false;
       }

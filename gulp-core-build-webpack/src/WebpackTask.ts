@@ -53,10 +53,10 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
   }
 
   public executeTask(gulp: gulp.Gulp, completeCallback: (result?: Object) => void): void {
-    let shouldInitWebpack: boolean = (process.argv.indexOf('--initwebpack') > -1);
+    const shouldInitWebpack: boolean = (process.argv.indexOf('--initwebpack') > -1);
 
     /* tslint:disable:typedef */
-    let path = require('path');
+    const path = require('path');
     /* tslint:enabled:typedef */
 
     if (shouldInitWebpack) {
@@ -85,10 +85,10 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
       }
 
       if (webpackConfig) {
-        let webpack: Webpack.Webpack = this.taskConfig.webpack || require('webpack');
-        let gutil = require('gulp-util');
-        let startTime = new Date().getTime();
-        let outputDir = this.buildConfig.distFolder;
+        const webpack: Webpack.Webpack = this.taskConfig.webpack || require('webpack');
+        const gutil = require('gulp-util');
+        const startTime = new Date().getTime();
+        const outputDir = this.buildConfig.distFolder;
 
         webpack(
           webpackConfig,
@@ -101,7 +101,7 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
             this.buildConfig.properties['webpackStats'] = stats;
             /* tslint:enable:no-string-literal */
 
-            let statsResult = stats.toJson({
+            const statsResult = stats.toJson({
               hash: false,
               source: false
             });
@@ -136,8 +136,8 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
               }
             }
 
-            let duration = (new Date().getTime() - startTime);
-            let statsResultChildren = statsResult.children ? statsResult.children : [statsResult];
+            const duration = (new Date().getTime() - startTime);
+            const statsResultChildren = statsResult.children ? statsResult.children : [statsResult];
 
             statsResultChildren.forEach(child => {
               if (child.chunks) {

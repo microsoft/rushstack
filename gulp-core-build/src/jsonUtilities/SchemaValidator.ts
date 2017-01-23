@@ -1,5 +1,4 @@
 /// <reference types="jju" />
-/// <reference types="z-schema" />
 
 import * as os from 'os';
 import * as fs from 'fs';
@@ -10,17 +9,11 @@ import jju = require('jju');
 
 const schemaKey: string = '$schema';
 
-export interface ISchemaValidatorResult {
-  details?: ZSchema.SchemaError[];
-  name?: string;
-  message?: string;
-}
-
 /**
  * Wrapper functions around z-schema which help improve ease of use
  */
 export class SchemaValidator {
-  private static _schemaValidator: ZSchema.Validator = new Validator({
+  private static _schemaValidator: Validator = new Validator({
     breakOnFirstError: true,
     noExtraKeywords: true,
     noTypeless: true
@@ -45,16 +38,16 @@ export class SchemaValidator {
    */
   public static validate(data: Object, schema: Object, dataFilePath?: string): void {
     if (!this._schemaValidator.validate(data, schema)) {
-      const error: ISchemaValidatorResult = this._schemaValidator.getLastError();
-      throw this.getFormattedErrorMessage(error, dataFilePath);
+      const errors: Validator.SchemaErrorDetail[] = this._schemaValidator.getLastErrors();
+      throw this.getFormattedErrorMessage(errors, dataFilePath);
     }
     return undefined;
   }
 
-  public static getFormattedErrorMessage(error: ISchemaValidatorResult, dataFilePath?: string): string {
+  public static getFormattedErrorMessage(errors: Validator.SchemaErrorDetail[], dataFilePath?: string): string {
     const errorMessage: string =
       (dataFilePath ? `Error parsing file '${path.basename(dataFilePath)}'${os.EOL}` : '') +
-      this._extractInnerErrorMessages(error.details).join(os.EOL);
+      this._extractInnerErrorMessages(errors).join(os.EOL);
 
     return os.EOL + 'ERROR: ' + errorMessage + os.EOL + os.EOL;
   }
@@ -73,17 +66,16 @@ export class SchemaValidator {
     return rawConfig as TResult;
   }
 
-  private static _extractInnerErrorMessages(errors: ZSchema.SchemaError[]): string[] {
+  private static _extractInnerErrorMessages(errors: Validator.SchemaErrorDetail[]): string[] {
     const errorList: string[] = [];
     errors.map((error) => { errorList.push(...this._formatZSchemaError(error)); });
     return errorList;
   }
 
-  private static _formatZSchemaError(error: ZSchema.SchemaError): string[] {
+  private static _formatZSchemaError(error: Validator.SchemaErrorDetail): string[] {
     const innerErrors: string[] = [];
 
-    /* tslint:disable-next-line:no-any */
-    ((error as any).details as ZSchema.SchemaError[] || []).forEach((innerErr) => {
+    error.inner.forEach((innerErr: Validator.SchemaErrorDetail) => {
       innerErrors.push(...this._formatZSchemaError(innerErr));
     });
 

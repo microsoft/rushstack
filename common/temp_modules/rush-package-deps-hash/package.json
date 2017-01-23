@@ -12,6 +12,6 @@
     "@types/node": "^6.0.46"
   },
   "rushDependencies": {
-    "@microsoft/node-library-build": ">=2.1.0 <3.0.0"
+    "@microsoft/node-library-build": ">=2.2.0 <3.0.0"
   }
 }
