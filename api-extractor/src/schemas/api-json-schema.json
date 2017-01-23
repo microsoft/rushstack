@@ -28,7 +28,7 @@
     },
 
     //---------------------------------------------------------------------------------------------
-     "linkDocElement": {
+    "linkDocElement": {
       "description": "A documentation element representing a hyperlink",
       "type": "object",
 
@@ -70,7 +70,7 @@
       },
       "additionalProperties": false,
       "required": [ "kind", "referenceType" ]
-    }, 
+    },
 
     //---------------------------------------------------------------------------------------------
     "seeDocElement": {
