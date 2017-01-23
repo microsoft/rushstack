@@ -1,15 +1,23 @@
 import { GulpTask } from './GulpTask';
 import gulp = require('gulp');
 
-export interface ICleanConfig {
-}
+/**
+ * The clean task is a special task which iterates through all registered
+ * tasks and subtasks, collecting a list of patterns which should be deleted.
+ * An instance of this task is automatically registered to the 'clean' command.
+ */
+export class CleanTask extends GulpTask<void> {
+  /** Instantiates a new CleanTask with the name 'clean' */
+  constructor() {
+    super();
+    this.name = 'clean';
+  }
 
-export class CleanTask extends GulpTask<ICleanConfig> {
-  public name: string = 'clean';
-
-  public taskConfig: ICleanConfig = {
-  };
-
+  /**
+   * The main function, which iterates through all uniqueTasks registered
+   * to the build, and by calling the getCleanMatch() function, collects a list of
+   * glob patterns which are then passed to the `del` plugin to delete them from disk.
+   */
   public executeTask(
     gulp: gulp.Gulp,
     completeCallback: (result?: Object) => void
@@ -34,7 +42,7 @@ export class CleanTask extends GulpTask<ICleanConfig> {
       }
     }
 
-    let uniquePaths: { [key: string]: string } = {};
+    const uniquePaths: { [key: string]: string } = {};
 
     // Create dictionary of unique paths. (Could be replaced with ES6 set.)
     cleanPaths.forEach(path => {
@@ -45,7 +53,7 @@ export class CleanTask extends GulpTask<ICleanConfig> {
 
     // Reset cleanPaths to only unique non-empty paths.
     cleanPaths = [];
-    for (let path in uniquePaths) {
+    for (const path in uniquePaths) {
       if (uniquePaths.hasOwnProperty(path)) {
         cleanPaths.push(path);
       }

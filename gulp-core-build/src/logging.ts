@@ -50,7 +50,7 @@ let wiredUpErrorHandling: boolean = false;
 let duringFastExit: boolean = false;
 
 /* tslint:disable:no-any */
-let globalInstance: any = global as any;
+const globalInstance: any = global as any;
 /* tslint:enable:no-any */
 
 const localCache: ILocalCache = globalInstance.__loggingCache = globalInstance.__loggingCache || {
@@ -198,17 +198,17 @@ function writeSummary(callback: () => void): void {
       }
 
       if (shouldRelogIssues && (localCache.taskErrors > 0 || getErrors().length)) {
-        let errors: string[] = getErrors();
+        const errors: string[] = getErrors();
         for (let x: number = 0; x < errors.length; x++) {
           console.error(gutil.colors.red(errors[x]));
         }
       }
 
       afterStreamsFlushed(() => {
-        for (let writeSummaryString of localCache.writeSummaryLogs) {
+        for (const writeSummaryString of localCache.writeSummaryLogs) {
           log(writeSummaryString);
         }
-        let totalDuration: [number, number] = process.hrtime(getStart());
+        const totalDuration: [number, number] = process.hrtime(getStart());
 
         log(`Project ${state.builtPackage.name} version:`, gutil.colors.yellow(state.builtPackage.version));
         log('Build tools version:', gutil.colors.yellow(state.coreBuildPackage.version));
@@ -248,7 +248,7 @@ function writeSummary(callback: () => void): void {
         localCache.wroteSummary = true;
         const callbacks: (() => void)[] = localCache.writeSummaryCallbacks;
         localCache.writeSummaryCallbacks = [];
-        for (let writeSummaryCallback of callbacks) {
+        for (const writeSummaryCallback of callbacks) {
           writeSummaryCallback();
         }
       });
@@ -256,7 +256,7 @@ function writeSummary(callback: () => void): void {
   } else if (localCache.wroteSummary) {
     const callbacks: (() => void)[] = localCache.writeSummaryCallbacks;
     localCache.writeSummaryCallbacks = [];
-    for (let writeSummaryCallback of callbacks) {
+    for (const writeSummaryCallback of callbacks) {
       writeSummaryCallback();
     }
   }
@@ -335,16 +335,28 @@ function markErrorAsWritten(error: Error): void {
   }
 }
 
+/**
+ * Adds a message to be displayed in the summary after execution is complete.
+ * @param value - the message to display
+ */
 export function logSummary(value: string): void {
   'use strict';
   localCache.writeSummaryLogs.push(value);
 }
 
+/**
+ * Log a message to the console
+ * @param args... - the messages to log to the console
+ */
 export function log(...args: Array<string | Chalk.ChalkChain>): void {
   'use strict';
   gutil.log.apply(this, args);
 }
 
+/**
+ * Resets the state of the logging cache
+ * @internal
+ */
 export function reset(): void {
   'use strict';
   localCache.start = process.hrtime();
@@ -369,6 +381,7 @@ export function reset(): void {
   localCache.writeSummaryLogs = [];
 }
 
+/** The result of a functional test run */
 export enum TestResultState {
   Passed,
   Failed,
@@ -376,6 +389,12 @@ export enum TestResultState {
   Skipped
 }
 
+/**
+ * Store a single functional test run's information
+ * @param name - the name of the test
+ * @param result - the result of the test
+ * @param duration - the length of time it took for the test to execute
+ */
 export function functionalTestRun(name: string, result: TestResultState, duration: number): void {
   'use strict';
   localCache.testsRun++;
@@ -416,6 +435,12 @@ export function endTaskSrc(taskName: string, startHrtime: [number, number], file
   log(taskName, 'read src task duration:', gutil.colors.yellow(prettyTime(taskDuration)), `- ${fileCount} files`);
 }
 
+/**
+ * Store coverage information, potentially logging an error if the coverage is below the threshold
+ * @param coverage - the coverage of the file as a percentage
+ * @param threshold - the minimum coverage for the file as a percentage, an error will be logged if coverage is below the threshold
+ * @param filePath - the path to the file whose coverage is being measured
+ */
 export function coverageData(coverage: number, threshold: number, filePath: string): void {
   'use strict';
   localCache.coverageResults++;
@@ -431,6 +456,10 @@ export function coverageData(coverage: number, threshold: number, filePath: stri
 
 const colorCodeRegex: RegExp = /\x1B[[(?);]{0,2}(;?\d)*./g;
 
+/**
+ * Adds a suppression for an error or warning
+ * @param str - the error or warning as a string
+ */
 export function addSuppression(str: string): void {
   'use strict';
 
@@ -442,6 +471,11 @@ export function addSuppression(str: string): void {
   logSummary(`${gutil.colors.yellow('Supressing')} - ${str}`);
 }
 
+/**
+ * Logs a warning. It will be logged to standard error and cause the build to fail
+ * if buildConfig.shouldWarningsFailBuild is true, otherwise it will be logged to standard output.
+ * @param message - the warning description
+ */
 export function warn(...args: Array<string | Chalk.ChalkChain>): void {
   'use strict';
   args.splice(0, 0, 'Warning -');
@@ -454,6 +488,10 @@ export function warn(...args: Array<string | Chalk.ChalkChain>): void {
   }
 }
 
+/**
+ * Logs an error to standard error and causes the build to fail.
+ * @param message - the error description
+ */
 export function error(...args: Array<string | Chalk.ChalkChain>): void {
   'use strict';
   args.splice(0, 0, 'Error -');
@@ -466,6 +504,16 @@ export function error(...args: Array<string | Chalk.ChalkChain>): void {
   }
 }
 
+/**
+ * Logs a message about a particular file
+ * @param write - the function which will write message
+ * @param taskName - the name of the task which is doing the logging
+ * @param filePath - the path to the file which encountered an issue
+ * @param line - the line in the file which had an issue
+ * @param column - the column in the file which had an issue
+ * @param errorCode - the custom error code representing this error
+ * @param message - a description of the error
+ */
 export function fileLog(write: (text: string) => void, taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void {
   'use strict';
 
@@ -478,14 +526,34 @@ export function fileLog(write: (text: string) => void, taskName: string, filePat
   write(`${gutil.colors.cyan(taskName)} - ${filePath}(${line},${column}): error ${errorCode}: ${message}`);
 }
 
+/**
+ * Logs a warning regarding a specific file.
+ * @param filePath - the path to the file which encountered an issue
+ * @param line - the line in the file which had an issue
+ * @param column - the column in the file which had an issue
+ * @param warningCode - the custom warning code representing this warning
+ * @param message - a description of the warning
+ */
 export function fileWarning(taskName: string, filePath: string, line: number, column: number, errorCode: string,  message: string): void {
   fileLog(warn, taskName, filePath, line, column, errorCode, message);
 }
 
+/**
+ * Logs an error regarding a specific file to standard error and causes the build to fail.
+ * @param filePath - the path to the file which encountered an issue
+ * @param line - the line in the file which had an issue
+ * @param column - the column in the file which had an issue
+ * @param errorCode - the custom error code representing this error
+ * @param message - a description of the error
+ */
 export function fileError(taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void {
   fileLog(error, taskName, filePath, line, column, errorCode, message);
 }
 
+/**
+ * Logs a message to standard output if the verbose flag is specified.
+ * @param messargsage - the messages to log when in verbose mode
+ */
 export function verbose(...args: Array<string | Chalk.ChalkChain>): void {
   'use strict';
 
@@ -514,6 +582,10 @@ export function generateGulpError(error: Object): Object {
 }
 
 /* tslint:disable:no-any */
+/**
+ * Logs an error to standard error and causes the build to fail.
+ * @param e - the error (can be a string or Error object)
+ */
 export function writeError(e: any): void {
 /* tslint:enable:no-any */
   'use strict';
@@ -572,11 +644,15 @@ export function writeError(e: any): void {
   }
 }
 
+/**
+ * Returns the list of warnings which have been logged
+ */
 export function getWarnings(): string[] {
   'use strict';
   return localCache.warnings;
 }
 
+/** Returns the list of errors which have been logged */
 export function getErrors(): string[] {
   'use strict';
   return localCache.errors;

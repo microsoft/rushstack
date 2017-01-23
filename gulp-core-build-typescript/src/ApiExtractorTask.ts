@@ -99,7 +99,7 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
 
     const analyzer: Analyzer = new Analyzer(
       (message: string, fileName: string, lineNumber: number): void => {
-        this.logWarning(`TypeScript error: ${message}` + os.EOL
+        this.logWarning(`${message}` + os.EOL
           + `  ${fileName}#${lineNumber}`);
       }
     );
