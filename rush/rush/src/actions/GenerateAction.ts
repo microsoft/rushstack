@@ -30,18 +30,6 @@ export default class GenerateAction extends CommandLineAction {
   private _packageReviewChecker: PackageReviewChecker;
   private _lazyParameter: CommandLineFlagParameter;
 
-  /**  TODO: VSO 296929 move those static methods to rush-lib.
-   * Updates the temporary projects data this rush project relies on.
-   */
-  public static updateTempModules(): void {
-    const rushConfiguration: RushConfiguration = RushConfiguration.loadFromDefaultLocation();
-    // Delete "common\temp_modules"
-    GenerateAction._deleteCommonTempModules(rushConfiguration);
-
-    // Construct common\package.json and common\temp_modules
-    GenerateAction._createCommonTempModulesAndPackageJson(rushConfiguration);
-  }
-
   private static _deleteCommonNodeModules(rushConfiguration: RushConfiguration, isLazy: boolean): void {
     const nodeModulesPath: string = path.join(rushConfiguration.commonFolder, 'node_modules');
 

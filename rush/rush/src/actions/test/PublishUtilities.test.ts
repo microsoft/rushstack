@@ -180,6 +180,89 @@ describe('updatePackages', () => {
       '1.0.1',
       'the "c" dependency in "d" was not updated');
   });
+
+  it('can update root with patch change for prerelease', () => {
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const prereleaseName: string = 'alpha.1';
+    const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
+      allPackages,
+      path.join(__dirname, 'rootPatchChange'),
+      false,
+      prereleaseName);
+    PublishUtilities.updatePackages(allChanges, allPackages, false, prereleaseName);
+
+    expect(allPackages.get('a').packageJson.version).equals(
+      '1.0.1-' + prereleaseName,
+      'a should have the prereleased version');
+    expect(allPackages.get('b').packageJson.version).equals(
+      '1.0.1-' + prereleaseName,
+      'b should have the prereleased version');
+    expect(allPackages.get('b').packageJson.dependencies['a']).equals(
+      '1.0.1-' + prereleaseName,
+      'the "a" dependency in "b" should be updated');
+    expect(allPackages.get('c').packageJson.version).equals('1.0.1-' + prereleaseName,
+      'c should have the prereleased version');
+    expect(allPackages.get('d').packageJson.version).equals('1.0.1-' + prereleaseName,
+      'd should have the prereleased version');
+    expect(allPackages.get('d').packageJson.dependencies['c']).equals(
+      '1.0.1-' + prereleaseName,
+      'the "c" dependency in "d" should be updated');
+  });
+
+  it('can update non-root with patch change for prerelease', () => {
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const prereleaseName: string = 'beta.1';
+    const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
+      allPackages,
+      path.join(__dirname, 'explicitVersionChange'),
+      false,
+      prereleaseName);
+    PublishUtilities.updatePackages(allChanges, allPackages, false, prereleaseName);
+
+    expect(allPackages.get('a').packageJson.version).equals(
+      '1.0.0',
+      'a version should not be changed.');
+    expect(allPackages.get('b').packageJson.version).equals(
+      '1.0.0',
+      'b version should not be changed.');
+    expect(allPackages.get('b').packageJson.dependencies['a']).equals(
+      '>=1.0.0 <2.0.0',
+      'the "a" dependency in "b" should not be changed.');
+    expect(allPackages.get('c').packageJson.version).equals('1.0.1-' + prereleaseName,
+      'c should have the prereleased version');
+    expect(allPackages.get('d').packageJson.version).equals('1.0.1-' + prereleaseName,
+      'd should have the prereleased version');
+    expect(allPackages.get('d').packageJson.dependencies['c']).equals(
+      '1.0.1-' + prereleaseName,
+      'the "c" dependency in "d" should be updated');
+  });
+
+  it('can update cyclic dependency for prerelease', () => {
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const prereleaseName: string = 'beta.1';
+    const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
+      allPackages,
+      path.join(__dirname, 'cyclicDeps'),
+      false,
+      prereleaseName);
+    PublishUtilities.updatePackages(allChanges, allPackages, false, prereleaseName);
+
+    expect(allPackages.get('cyclic-dep-1').packageJson.version).equals(
+      '2.0.0-' + prereleaseName,
+      'cyclic-dep-1 should have prerelease version.');
+    expect(allPackages.get('cyclic-dep-1').packageJson.dependencies['cyclic-dep-2']).equals(
+      '1.0.1-' + prereleaseName,
+      'the "cyclic-dep-2" dependency in "cyclic-dep-1" should be updated');
+    expect(allPackages.get('cyclic-dep-2').packageJson.version).equals(
+      '1.0.1-' + prereleaseName,
+      'cyclic-dep-2 should have prerelease version.');
+    expect(allPackages.get('cyclic-dep-2').packageJson.dependencies['cyclic-dep-1']).equals(
+      '2.0.0-' + prereleaseName,
+      'the "cyclic-dep-1" dependency in "cyclic-dep-2" should be updated');
+  });
 });
 
 describe('isRangeDependency', () => {
