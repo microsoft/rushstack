@@ -25,7 +25,7 @@ export class RunApiExtractorOnExternalApiTypes extends GulpTask<void> {
 
     for (const filePath of files) {
       const rootDir: string = path.dirname(filePath);
-      const outputApiJsonFilePath: string = path.join(outputPath, `${path.basename(rootDir)}.json`);
+      const outputApiJsonFilePath: string = path.join(outputPath, `${path.basename(rootDir)}.api.json`);
       const entryPointFile: string = path.join(this.buildConfig.rootPath, filePath);
       ExternalApiHelper.generateApiJson(this.buildConfig.rootPath, entryPointFile, outputApiJsonFilePath);
     }
