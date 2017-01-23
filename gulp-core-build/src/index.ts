@@ -16,7 +16,22 @@ import { getFlagValue, setConfigDefaults } from './config';
 import * as gulp from 'gulp';
 
 export * from './IBuildConfig';
-export * from './logging';
+export {
+  addSuppression,
+  coverageData,
+  functionalTestRun,
+  getErrors,
+  getWarnings,
+  TestResultState,
+  warn,
+  verbose,
+  error,
+  fileError,
+  fileLog,
+  fileWarning,
+  reset,
+  logSummary
+} from './logging';
 export * from './tasks/CopyTask';
 export * from './tasks/GenerateShrinkwrapTask';
 export * from './tasks/GulpTask';
@@ -58,7 +73,7 @@ let _buildConfig: IBuildConfig = {
 /**
  * Merges the given build config settings into existing settings.
  *
- * @param  {IBuildConfig} The build config settings.
+ * @param config - The build config settings.
  */
 export function setConfig(config: IBuildConfig): void {
   /* tslint:disable:typedef */
@@ -71,7 +86,7 @@ export function setConfig(config: IBuildConfig): void {
 /**
  * Merges the given build config settings into existing settings.
  *
- * @param  {IBuildConfig} The build config settings.
+ * @param  config - The build config settings.
  */
 export function mergeConfig(config: IBuildConfig): void {
   /* tslint:disable:typedef */
@@ -84,7 +99,7 @@ export function mergeConfig(config: IBuildConfig): void {
 /**
  * Replaces the build config.
  *
- * @param  {IBuildConfig} config
+ * @param  config - The build config settings.
  */
 export function replaceConfig(config: IBuildConfig): void {
   _buildConfig = config;
@@ -92,19 +107,17 @@ export function replaceConfig(config: IBuildConfig): void {
 
 /**
  * Gets the current config.
- *
- * @returns IBuildConfig
+ * @returns the current build configuration
  */
 export function getConfig(): IBuildConfig {
   return _buildConfig;
 }
 
 /**
- * Defines a gulp task and maps it to a given IExecutable.
- *
- * @param  {string} taskName
- * @param  {IExecutable} task
- * @returns IExecutable
+ * Registers an IExecutable to gulp so that it can be called from the command line
+ * @param taskName - the name of the task, can be called from the command line (e.g. "gulp <taskName>")
+ * @param task - the executable to execute when the task is invoked
+ * @returns the task parameter
  */
 export function task(taskName: string, task: IExecutable): IExecutable {
   _taskMap[taskName] = task;
@@ -142,9 +155,9 @@ class CustomTask extends GulpTask<void> {
  * Creates a new subtask from a function callback. Useful as a shorthand way
  * of defining tasks directly in a gulpfile.
  *
- * @param {string} taskName - the name of the task, appearing in build logs
- * @param {boolean} addCommandLine - true if this task should be registered to the command line
- * @param {ICustomGulpTask} fn - the callback function to execute when this task runs
+ * @param taskName - the name of the task, appearing in build logs
+ * @param fn - the callback function to execute when this task runs
+ * @returns an IExecutable which can be registered to the command line with task()
  */
 export function subTask(taskName: string, fn: ICustomGulpTask): IExecutable {
   const customTask: CustomTask = new CustomTask(taskName, fn);
@@ -154,8 +167,8 @@ export function subTask(taskName: string, fn: ICustomGulpTask): IExecutable {
 /**
  * Defines a gulp watch and maps it to a given IExecutable.
  *
- * @param  {string} watchMatch
- * @param  {IExecutable} task
+ * @param watrchMatch - the list of files patterns to watch
+ * @param task - the task to execute when a file changes
  * @returns IExecutable
  */
 export function watch(watchMatch: string | string[], task: IExecutable): IExecutable {
@@ -226,9 +239,6 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
 
 /**
  * Takes in IExecutables as arguments and returns an IExecutable that will execute them in serial.
- *
- * @param  {IExecutable[]} ...tasks
- * @returns IExecutable
  */
 export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutable {
   const flatTasks: IExecutable[] = <IExecutable[]>_flatten(tasks);
@@ -241,7 +251,7 @@ export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutabl
     execute: (buildConfig: IBuildConfig): Promise<void> => {
       let output: Promise<void> = Promise.resolve<void>();
 
-      for (let task of flatTasks) {
+      for (const task of flatTasks) {
         output = output.then(() => _executeTask(task, buildConfig));
       }
 
@@ -252,9 +262,6 @@ export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutabl
 
 /**
  * Takes in IExecutables as arguments and returns an IExecutable that will execute them in parallel.
- *
- * @param  {IExecutable[]} ...tasks
- * @returns IExecutable
  */
 export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecutable {
   const flattenTasks: IExecutable[] = _flatten<IExecutable>(tasks);
@@ -281,8 +288,6 @@ export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecuta
 
 /**
  * Initializes the gulp tasks.
- *
- * @param  {any} gulp
  */
 export function initialize(gulp: gulp.Gulp): void {
   _buildConfig.rootPath = process.cwd();
@@ -308,10 +313,6 @@ export function initialize(gulp: gulp.Gulp): void {
 
 /**
  * Registers a given gulp task given a name and an IExecutable.
- *
- * @param  {any} gulp
- * @param  {string} taskName
- * @param  {IExecutable} task
  */
 function _registerTask(gulp: gulp.Gulp, taskName: string, task: IExecutable): void {
   gulp.task(taskName, (cb) => {
@@ -327,10 +328,6 @@ function _registerTask(gulp: gulp.Gulp, taskName: string, task: IExecutable): vo
 
 /**
  * Executes a given IExecutable.
- *
- * @param  {IExecutable} task
- * @param  {IBuildConfig} buildConfig
- * @returns Promise
  */
 function _executeTask(task: IExecutable, buildConfig: IBuildConfig): Promise<void> {
   // Try to fallback to the default task if provided.
@@ -384,13 +381,11 @@ function _trackTask(task: IExecutable): void {
 
 /**
  * Flattens a set of arrays into a single array.
- *
- * @param  {T} arr
  */
 function _flatten<T>(arr: Array<T | T[]>): T[] {
   let output: T[] = [];
 
-  for (let toFlatten of arr) {
+  for (const toFlatten of arr) {
     if (Array.isArray(toFlatten)) {
       output = output.concat(toFlatten);
     } else {

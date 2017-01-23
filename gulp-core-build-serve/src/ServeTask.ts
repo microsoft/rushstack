@@ -96,7 +96,8 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
     const path: typeof pathType = require('path');
     const openBrowser: boolean = (process.argv.indexOf('--nobrowser') === -1);
     const portArgumentIndex: number = process.argv.indexOf('--port');
-    let { port, initialPage, api }: IServeTaskConfig = this.taskConfig;
+    let { port, initialPage }: IServeTaskConfig = this.taskConfig;
+    const { api }: IServeTaskConfig = this.taskConfig;
     const { rootPath }: IBuildConfig = this.buildConfig;
     const httpsServerOptions: HttpsType.ServerOptions = this._loadHttpsServerOptions();
 
@@ -252,7 +253,7 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
         }
       } else {
         const { ensureCertificate } = require('./certificates'); // tslint:disable-line
-        let devCertificate: ICertificate = ensureCertificate(this.taskConfig.tryCreateDevCertificate, this);
+        const devCertificate: ICertificate = ensureCertificate(this.taskConfig.tryCreateDevCertificate, this);
         if (devCertificate.pemCertificate && devCertificate.pemKey) {
           result.cert = devCertificate.pemCertificate;
           result.key = devCertificate.pemKey;

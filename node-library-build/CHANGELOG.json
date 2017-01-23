@@ -2,6 +2,23 @@
   "name": "@microsoft/node-library-build",
   "entries": [
     {
+      "version": "2.2.0",
+      "tag": "@microsoft/node-library-build_v2.2.0",
+      "date": "Fri, 20 Jan 2017 01:46:41 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Run the api-extractor task during the default build."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `>=2.1.0 <3.0.0` to `>=2.1.0 <3.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.1.0",
       "tag": "@microsoft/node-library-build_v2.1.0",
       "date": "Fri, 13 Jan 2017 06:46:05 GMT",

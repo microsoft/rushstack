@@ -133,7 +133,6 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     if (typescript && typescript.version) {
       this.log(`TypeScript version: ${typescript.version}`);
     }
-
     // tslint:disable-next-line:no-any
     const compilerOptions: ICompilerOptions =
       TypeScriptConfiguration.getGulpTypescriptOptions(this.buildConfig).compilerOptions;

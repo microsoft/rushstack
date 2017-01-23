@@ -1,16 +1,21 @@
 import { GulpTask } from './GulpTask';
 import gulp = require('gulp');
 
+/** Configuration for CopyTask */
 export interface ICopyConfig {
   /**
-   * Object of dest: [source] for the copy task.
+   * The list of patterns and the destination which where they should be copied
    */
   copyTo: {
+    /**
+     * A mapping of destination paths (absolute or relative) to a list of glob pattern matches
+     */
     [destPath: string]: string[];
   };
 
   /**
-   * Whether to remove or replace relative path for files. True by default.
+   * If true, the files will be copied into a flattened folder. If false, they will retain the original
+   * folder structure. True by default.
    */
   shouldFlatten?: boolean;
 }
@@ -19,15 +24,31 @@ export interface ICopyConfig {
  * This task takes in a map of dest: [sources], and copies items from one place to another.
  */
 export class CopyTask extends GulpTask<ICopyConfig> {
-  public taskConfig: ICopyConfig = {
-    copyTo: {},
-    shouldFlatten: true
-  };
+  /**
+   * Instantiates a CopyTask with an empty configuration
+   */
+  constructor() {
+    super();
 
+    this.name = 'copy';
+
+    this.taskConfig = {
+      copyTo: {},
+      shouldFlatten: true
+    };
+  }
+
+  /**
+   * Loads the z-schema object for this task
+   * @internal
+   */
   public loadSchema(): Object {
     return require('./copy.schema.json');
   };
 
+  /**
+   * Executes the copy task, which copy files based on the task's Configuration
+   */
   public executeTask(
     gulp: gulp.Gulp,
     completeCallback: (result?: Object) => void
