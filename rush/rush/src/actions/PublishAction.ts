@@ -24,7 +24,6 @@ import PublishUtilities, {
   IChangeInfoHash
 } from './PublishUtilities';
 import ChangelogGenerator from './ChangelogGenerator';
-import GenerateAction from './GenerateAction';
 
 export default class PublishAction extends CommandLineAction {
   private _addCommitDetails: CommandLineFlagParameter;
@@ -37,6 +36,7 @@ export default class PublishAction extends CommandLineAction {
   private _regenerateChangelogs: CommandLineFlagParameter;
   private _registryUrl: CommandLineStringParameter;
   private _targetBranch: CommandLineStringParameter;
+  private _prereleaseName: CommandLineStringParameter;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -98,6 +98,11 @@ export default class PublishAction extends CommandLineAction {
       description: 'If this flag is specified with --publish, all packages with ShouldPublish being true ' +
         'will be published if their version is newer than published version.'
     });
+    this._prereleaseName = this.defineStringParameter({
+      parameterLongName: '--prerelease-name',
+      parameterShortName: '-pn',
+      description: 'Bump up to a prerelease version with the provided prerelease name.'
+    });
   }
 
   /**
@@ -129,7 +134,8 @@ export default class PublishAction extends CommandLineAction {
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
       changesPath,
-      this._addCommitDetails.value);
+      this._addCommitDetails.value,
+      this._prereleaseName.value);
     const orderedChanges: IChangeInfo[] = PublishUtilities.sortChangeRequests(allChanges);
 
     if (orderedChanges.length > 0) {
@@ -139,16 +145,18 @@ export default class PublishAction extends CommandLineAction {
       this._gitCheckout(tempBranch, true);
 
       // Apply all changes to package.json files.
-      PublishUtilities.updatePackages(allChanges, allPackages, this._apply.value);
-      if (this._apply.value) {
-        GenerateAction.updateTempModules();
+      PublishUtilities.updatePackages(allChanges, allPackages, this._apply.value,
+        this._prereleaseName.value);
+
+      // Do not update changelog or delete the change files for prerelease.
+      // Save them for the official release.
+      if (!this._prereleaseName.value) {
+        // Update changelogs.
+        ChangelogGenerator.updateChangelogs(allChanges, allPackages, this._apply.value);
+
+        // Remove the change request files.
+        this._deleteChangeFiles(changesPath);
       }
-
-      // Update changelogs.
-      ChangelogGenerator.updateChangelogs(allChanges, allPackages, this._apply.value);
-
-      // Remove the change request files.
-      this._deleteChangeFiles(changesPath);
 
       // Stage, commit, and push the changes to remote temp branch.
       this._gitAddChanges();
