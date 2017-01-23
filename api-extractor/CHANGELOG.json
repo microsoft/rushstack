@@ -2,6 +2,33 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "1.1.2",
+      "tag": "@microsoft/api-extractor_v1.1.2",
+      "date": "Fri, 20 Jan 2017 01:46:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `~2.1.0` to `~2.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.1",
+      "tag": "@microsoft/api-extractor_v1.1.1",
+      "date": "Thu, 19 Jan 2017 20:04:40 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Check for missing JsDoc sequences changed."
+          },
+          {
+            "comment": "Improved error messages"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.0",
       "tag": "@microsoft/api-extractor_v1.1.0",
       "date": "Wed, 18 Jan 2017 20:04:29 GMT",

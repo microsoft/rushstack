@@ -2,6 +2,23 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "2.1.1",
+      "tag": "@microsoft/gulp-core-build_v2.1.1",
+      "date": "Fri, 20 Jan 2017 01:46:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update documentation."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `>=2.1.0 <3.0.0` to `>=2.2.0 <3.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.1.0",
       "tag": "@microsoft/gulp-core-build_v2.1.0",
       "date": "Wed, 18 Jan 2017 21:40:58 GMT",

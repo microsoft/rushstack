@@ -1,7 +1,7 @@
 /**
  * Allowed Token types.
  */
-export enum TokenTypes {
+export enum TokenType {
   /**
    * A Token that contains only text.
    */
@@ -14,10 +14,10 @@ export enum TokenTypes {
   Tag,
 
   /**
-   * This is a specific kind of Tag that is important to 
+   * This is a specific kind of Tag that is important to
    * distinguish because it contains additional parameters.
-   * 
-   * Example: 
+   *
+   * Example:
    * \{@link http://microosft.com | microsoft home \}
    * \{@inheritdoc  @ microsoft/sp-core-library:Guid.newGuid \}
    */
@@ -30,10 +30,9 @@ export enum TokenTypes {
 export default class Token {
 
   /**
-   * The type of the token. 
-   * Possible options: Text, Tag, Inline.
+   * The type of the token.
    */
-  private _type: string;
+  private _type: TokenType;
 
   /**
    * This is not used for Text.
@@ -46,7 +45,7 @@ export default class Token {
    */
   private _text: string;
 
-  constructor(type: string, tag?: string, text?: string) {
+  constructor(type: TokenType, tag?: string, text?: string) {
     this._type = type;
     this._tag = tag ? tag : '';
     this._text = text ? this._unescape(text) : '';
@@ -56,13 +55,13 @@ export default class Token {
   /**
    * Determines if the type is not what we expect.
    */
-  public requireType(type: string): void {
+  public requireType(type: TokenType): void {
     if (this._type !== type) {
-      throw new Error('Token of type \"${this._type}\" is not of required type \"${type}\"');
+      throw new Error(`Encountered a token of type \"${this._type}\" when expecting \"${type}\"`);
     }
   }
 
-  public get type(): string {
+  public get type(): TokenType {
     return this._type;
   }
 

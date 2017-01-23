@@ -10,10 +10,19 @@ import * as path from 'path';
  * a desired manner as a gulp task, as there are many consistency issues with just
  * running npm-shrinkwrap directly.
  */
-export class GenerateShrinkwrapTask extends GulpTask<{}> {
-  public name: string = 'generate-shrinkwrap';
+export class GenerateShrinkwrapTask extends GulpTask<void> {
+  /**
+   * Instantiates a GenerateShrinkwrap task which will regenerate the shrinkwrap for a particular project
+   */
+  constructor() {
+    super();
+    this.name = 'generate-shrinkwrap';
+  }
 
-  public executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream {
+  /**
+   * Runs npm `prune` and `update` on a package before running `shrinkwrap --dev`
+   */
+  public executeTask(gulp: gulpType.Gulp, completeCallback: (result?: Object) => void): NodeJS.ReadWriteStream {
     const pathToShrinkwrap: string = path.join(this.buildConfig.rootPath, 'npm-shrinkwrap.json');
 
     if (this.fileExists(pathToShrinkwrap)) {
@@ -30,6 +39,7 @@ export class GenerateShrinkwrapTask extends GulpTask<{}> {
     this.log(`Running npm shrinkwrap --dev`);
     child_process.execSync('npm shrinkwrap --dev');
 
+    completeCallback();
     return;
   }
 
