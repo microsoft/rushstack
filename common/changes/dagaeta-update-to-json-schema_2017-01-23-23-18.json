@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Json schema was updated to reflect feature additions to linkDocElement. The linkDocElement can now be of type 'code' which refers to an API definition reference.",
+      "type": "patch"
+    }
+  ],
+  "email": "dgaeta@users.noreply.github.com"
+}

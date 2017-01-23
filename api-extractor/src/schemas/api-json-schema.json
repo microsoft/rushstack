@@ -50,10 +50,26 @@
         "value": {
           "description": "An optional display name to show for a link",
           "type": "string"
+        },
+        "memberName": {
+          "description": "An optional name that specifies the export item",
+          "type": "string"
+        },
+        "exportName": {
+          "description": "A name that is required if the referenceType is code",
+          "type": "string"
+        },
+        "packageName": {
+          "description": "An optional name of the package where an export is located",
+          "type": "string"
+        },
+        "scopeName": {
+          "description": "An optional name that scopes the package name",
+          "type": "string"
         }
       },
       "additionalProperties": false,
-      "required": [ "kind", "referenceType", "targetUrl" ]
+      "required": [ "kind", "referenceType" ]
     },
 
     //---------------------------------------------------------------------------------------------
