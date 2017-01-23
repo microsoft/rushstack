@@ -20,6 +20,6 @@ Object.defineProperty(taskWrapper, "default", {
   get: () => require('./lib/RunApiExtractorOnExternalApiTypes.js').default
 });
 
-build.task('default', build.serial(build.defaultTasks, taskWrapper));
+build.task('default', build.serial(build.tslint, build.typescript, build.instrument, build.mocha, taskWrapper));
 
 build.initialize(require('gulp'));
