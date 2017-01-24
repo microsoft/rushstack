@@ -1,11 +1,18 @@
 {
   "npmVersion": "3.10.9",
-  "rushMinimumVersion": "1.4.0",
+  "rushMinimumVersion": "1.5.1",
   "nodeSupportedVersionRange": ">=4.3.0",
   "commonFolder": "common",
   "projectFolderMinDepth": 1,
   "reviewCategories": [ "libraries", "other" ],
   "packageReviewFile": "common/reviews/PackageDependencies.json",
+  "gitPolicy": {
+    // Require GitHub scrubbed e-mails
+    "allowedEmailRegExps": [
+      "[^@]+@users\.noreply\.github\.com"
+    ],
+    "sampleEmail": "mrexample@users.noreply.github.com"
+  },
   "projects": [
     {
       "packageName": "@microsoft/gulp-core-build",
