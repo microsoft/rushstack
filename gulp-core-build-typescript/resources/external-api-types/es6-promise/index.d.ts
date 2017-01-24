@@ -1,21 +1,5 @@
 // Typings based on DefinitelyTyped definitions from es6-promise
 
-/* tslint:disable: interface-name */
-/* tslint:disable: no-any */
-/* tslint:disable: no-shadowed-variable */
-/* tslint:disable: no-var-keyword */
-/* tslint:disable: variable-name */
-/* tslint:disable: member-ordering */
-/* tslint:disable: no-unused-variable */
-/* tslint:disable: quotemark */
-/* tslint:disable: indent */
-/* tslint:disable: max-line-length */
-/* tslint:disable: member-access */
-/* tslint:disable: whitespace */
-/* tslint:disable: whitespace */
-/* tslint:disable: typedef-whitespace */
-/* tslint:disable: export-name */
-
 export interface Thenable<T> {
     then<U>(onFulfilled?: (value: T) => U | Thenable<U>, onRejected?: (error: any) => U | Thenable<U>): Thenable<U>;
     then<U>(onFulfilled?: (value: T) => U | Thenable<U>, onRejected?: (error: any) => void): Thenable<U>;

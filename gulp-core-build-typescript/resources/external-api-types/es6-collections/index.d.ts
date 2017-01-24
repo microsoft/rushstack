@@ -1,18 +1,4 @@
-
 // Typings based on DefinitelyTyped definitions from es6-collections@0.5.1
-
-/* tslint:disable: interface-name */
-/* tslint:disable: no-any */
-/* tslint:disable: no-shadowed-variable */
-/* tslint:disable: no-var-keyword */
-/* tslint:disable: variable-name */
-/* tslint:disable: member-ordering */
-/* tslint:disable: no-unused-variable */
-/* tslint:disable: quotemark */
-/* tslint:disable: indent */
-/* tslint:disable: max-line-length */
-/* tslint:disable: member-access */
-/* tslint:disable: whitespace */
 
 export interface IteratorResult<T> {
     done: boolean;
