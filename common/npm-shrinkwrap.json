@@ -144,9 +144,9 @@
       "resolved": "https://registry.npmjs.org/@types/mocha/-/mocha-2.2.38.tgz"
     },
     "@types/node": {
-      "version": "6.0.60",
+      "version": "6.0.61",
       "from": "@types/node@>=6.0.51 <6.9.1",
-      "resolved": "https://registry.npmjs.org/@types/node/-/node-6.0.60.tgz"
+      "resolved": "https://registry.npmjs.org/@types/node/-/node-6.0.61.tgz"
     },
     "@types/node-forge": {
       "version": "0.6.5",
@@ -649,9 +649,9 @@
       "resolved": "https://registry.npmjs.org/chokidar/-/chokidar-1.6.1.tgz"
     },
     "clean-css": {
-      "version": "3.4.23",
+      "version": "3.4.24",
       "from": "clean-css@>=3.4.20 <4.0.0",
-      "resolved": "https://registry.npmjs.org/clean-css/-/clean-css-3.4.23.tgz",
+      "resolved": "https://registry.npmjs.org/clean-css/-/clean-css-3.4.24.tgz",
       "dependencies": {
         "commander": {
           "version": "2.8.1",
@@ -3722,9 +3722,9 @@
       "resolved": "https://registry.npmjs.org/mute-stream/-/mute-stream-0.0.7.tgz"
     },
     "nan": {
-      "version": "2.5.0",
+      "version": "2.5.1",
       "from": "nan@>=2.3.2 <3.0.0",
-      "resolved": "https://registry.npmjs.org/nan/-/nan-2.5.0.tgz"
+      "resolved": "https://registry.npmjs.org/nan/-/nan-2.5.1.tgz"
     },
     "natives": {
       "version": "1.1.0",
@@ -4125,9 +4125,9 @@
       "resolved": "https://registry.npmjs.org/plur/-/plur-2.1.2.tgz"
     },
     "postcss": {
-      "version": "5.2.10",
+      "version": "5.2.11",
       "from": "postcss@>=5.0.21 <6.0.0",
-      "resolved": "https://registry.npmjs.org/postcss/-/postcss-5.2.10.tgz",
+      "resolved": "https://registry.npmjs.org/postcss/-/postcss-5.2.11.tgz",
       "dependencies": {
         "source-map": {
           "version": "0.5.6",
@@ -4136,7 +4136,7 @@
         },
         "supports-color": {
           "version": "3.2.3",
-          "from": "supports-color@>=3.1.2 <4.0.0",
+          "from": "supports-color@>=3.2.3 <4.0.0",
           "resolved": "https://registry.npmjs.org/supports-color/-/supports-color-3.2.3.tgz"
         }
       }
@@ -4623,9 +4623,21 @@
       }
     },
     "serve-static": {
-      "version": "1.11.1",
+      "version": "1.11.2",
       "from": "serve-static@>=1.11.1 <1.12.0",
-      "resolved": "https://registry.npmjs.org/serve-static/-/serve-static-1.11.1.tgz"
+      "resolved": "https://registry.npmjs.org/serve-static/-/serve-static-1.11.2.tgz",
+      "dependencies": {
+        "ms": {
+          "version": "0.7.2",
+          "from": "ms@0.7.2",
+          "resolved": "https://registry.npmjs.org/ms/-/ms-0.7.2.tgz"
+        },
+        "send": {
+          "version": "0.14.2",
+          "from": "send@0.14.2",
+          "resolved": "https://registry.npmjs.org/send/-/send-0.14.2.tgz"
+        }
+      }
     },
     "set-blocking": {
       "version": "2.0.0",
