@@ -14,15 +14,14 @@ build.typescript.setConfig({
   typescript: require('typescript')
 });
 
-build.task('default', build.serial(build.defaultTasks, build.subTask('run-api-extractor', () => {
+build.task('default', build.serial(build.tslint, build.typescript, build.instrument, build.mocha, build.subTask('run-api-extractor', () => {
   const externalApiHelper = require('@microsoft/api-extractor').ExternalApiHelper;
-  const files = ['external-api-types/es6-collections/index.d.ts',
-                 'external-api-types/es6-promise/index.d.ts',
-                 'external-api-types/whatwg-fetch/index.d.ts'];
+  const files = ['resources/external-api-types/es6-collections/index.d.ts',
+                 'resources/external-api-types/es6-promise/index.d.ts',
+                 'resources/external-api-types/whatwg-fetch/index.d.ts'];
 
   for (const filePath of files) {
-    /* todo: fix these parameters: ... */
-    externalApiHelper.generateApiJson(this.buildConfig.rootPath, entryPointFile, outputApiJsonFilePath);
+    externalApiHelper.generateApiJson(build.getConfig().rootPath, build.getConfig().libFolder, filePath);
   }
 })));
 
