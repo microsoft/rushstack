@@ -18,7 +18,6 @@ build.task('default', build.serial(build.parallel(build.tslint,
                                                   build.typescript),
                                    build.parallel(build.serial(build.instrument,
                                                                build.mocha),
-                                                  build.ApiExtractorTask,
                                                   build.subTask('run-api-extractor',
                                                                 (gulp, buildConfig, callback) => {
   const externalApiHelper = require('@microsoft/api-extractor').ExternalApiHelper;
