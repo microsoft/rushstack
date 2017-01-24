@@ -14,12 +14,16 @@ build.typescript.setConfig({
   typescript: require('typescript')
 });
 
-// We need to wrap this class in a getter because it hasn't been compiled by the time this file is executed
-const taskWrapper = {};
-Object.defineProperty(taskWrapper, "default", {
-  get: () => require('./lib/RunApiExtractorOnExternalApiTypes.js').default
-});
+build.task('default', build.serial(build.defaultTasks, build.subTask('run-api-extractor', () => {
+  const externalApiHelper = require('@microsoft/api-extractor').ExternalApiHelper;
+  const files = ['external-api-types/es6-collections/index.d.ts',
+                 'external-api-types/es6-promise/index.d.ts',
+                 'external-api-types/whatwg-fetch/index.d.ts'];
 
-build.task('default', build.serial(build.tslint, build.typescript, build.instrument, build.mocha, taskWrapper));
+  for (const filePath of files) {
+    /* todo: fix these parameters: ... */
+    externalApiHelper.generateApiJson(this.buildConfig.rootPath, entryPointFile, outputApiJsonFilePath);
+  }
+})));
 
 build.initialize(require('gulp'));
