@@ -1,21 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 24 Jan 2017 03:26:05 GMT and should not be manually modified.
+This log was last generated on Tue, 24 Jan 2017 03:36:19 GMT and should not be manually modified.
 
-## 1.6.0
+## 1.5.1
 Tue, 24 Jan 2017 03:26:05 GMT
-
-### Minor changes
-
-- Implemented a new rush.json option "gitPolicy" to avoid incorrect commit e-mails
-- Add support for pre-release build
 
 ### Patches
 
 - The 'link' command should display elapsed time when finished executing.
 - Minor fix so "allowedEmailRegExps" works on Mac/Linux
 - Fixed a small bug where "rush publish -a" was not deleting changelog files
-- Update temp_modules when versions are bumped. 
 
 ## 1.5.0
 Sun, 22 Jan 2017 02:04:57 GMT
