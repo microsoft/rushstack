@@ -264,7 +264,8 @@ export default class PublishAction extends CommandLineAction {
   }
 
   private _deleteChangeFiles(changesPath: string): void {
-    const shouldDelete: boolean = !!this._targetBranch.value;
+    // Delete the change files only if "-a" or "-b" was provided
+    const shouldDelete: boolean = this._apply.value || !!this._targetBranch.value;
     let changeFiles: string[] = [];
 
     try {
