@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 20 Jan 2017 01:46:41 GMT and should not be manually modified.
+This log was last generated on Tue, 24 Jan 2017 01:36:35 GMT and should not be manually modified.
+
+## 1.1.3
+Tue, 24 Jan 2017 01:36:35 GMT
+
+### Patches
+
+- Json schema was updated to reflect feature additions to linkDocElement. The linkDocElement can now be of type 'code' which refers to an API definition reference.
 
 ## 1.1.2
 Fri, 20 Jan 2017 01:46:41 GMT
