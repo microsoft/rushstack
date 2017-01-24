@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Manage building/installing of multiple NPM package folders",
   "scripts": {
     "build": "gulp",
@@ -13,7 +13,7 @@
   "license": "SEE LICENSE IN LICENSE.docx",
   "dependencies": {
     "@microsoft/package-deps-hash": "~0.0.4",
-    "@microsoft/rush-lib": "1.5.0",
+    "@microsoft/rush-lib": "1.5.1",
     "@microsoft/stream-collator": "~1.0.2",
     "@microsoft/ts-command-line": "~1.1.1",
     "builtins": "~1.0.3",

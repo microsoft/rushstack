@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush-lib
 
-This log was last generated on Sun, 22 Jan 2017 02:04:57 GMT and should not be manually modified.
+This log was last generated on Tue, 24 Jan 2017 03:26:06 GMT and should not be manually modified.
+
+## 1.6.0
+Tue, 24 Jan 2017 03:26:06 GMT
+
+### Minor changes
+
+- Update to TypeScript 2.1
+- Added new rush.json settings under "gitPolicy"
 
 ## 1.5.0
 Sun, 22 Jan 2017 02:04:57 GMT
