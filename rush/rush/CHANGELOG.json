@@ -2,36 +2,46 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "1.5.1",
+      "tag": "@microsoft/rush_v1.5.1",
+      "date": "Tue, 24 Jan 2017 03:26:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "The 'link' command should display elapsed time when finished executing."
+          },
+          {
+            "comment": "Minor fix so \"allowedEmailRegExps\" works on Mac/Linux"
+          },
+          {
+            "comment": "Fixed a small bug where \"rush publish -a\" was not deleting changelog files"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-lib\" from `1.5.0` to `1.5.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.5.0",
       "tag": "@microsoft/rush_v1.5.0",
       "date": "Sun, 22 Jan 2017 02:04:57 GMT",
       "comments": {
         "minor": [
           {
-            "author": "Pete Gonzalez del Solar <pgonzal@microsoft.com>",
-            "commit": "1ac4c2f45ac15e0ff3779b372884382fbc8eb3d6",
             "comment": "Implemented a new rush.json option \"gitPolicy\" to avoid incorrect commit e-mails"
           }
         ],
         "patch": [
           {
-            "author": "Qinwei Zhu <qinweiz@exchange.microsoft.com>",
-            "commit": "315822f0d88549eed1b33965f31d67d5ef2bc368",
             "comment": "Update temp_modules when versions are bumped. "
           }
         ],
         "dependency": [
           {
             "comment": "Updating dependency \"@microsoft/rush-lib\" from `1.4.1` to `1.5.0`"
-          },
-          {
-            "comment": "Updating dependency \"@microsoft/stream-collator\" from `~1.0.2` to `~1.0.3`"
-          },
-          {
-            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `~1.1.1` to `~1.1.2`"
-          },
-          {
-            "comment": "Updating dependency \"@microsoft/sp-build-node\" from `~0.2.1` to `~0.3.0`"
           }
         ]
       }

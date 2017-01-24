@@ -2,28 +2,23 @@
   "name": "@microsoft/rush-lib",
   "entries": [
     {
+      "version": "1.5.1",
+      "tag": "@microsoft/rush-lib_v1.5.1",
+      "date": "Tue, 24 Jan 2017 03:26:06 GMT",
+      "comments": {
+      }
+    },
+    {
       "version": "1.5.0",
       "tag": "@microsoft/rush-lib_v1.5.0",
       "date": "Sun, 22 Jan 2017 02:04:57 GMT",
       "comments": {
         "minor": [
           {
-            "author": "Nick Pape <nickpape@microsoft.com>",
-            "commit": "23bad7e3014f7aa11a46f8993086c7d3fd2d704b",
             "comment": "Update to TypeScript 2.1"
           },
           {
-            "author": "Pete Gonzalez del Solar <pgonzal@microsoft.com>",
-            "commit": "1ac4c2f45ac15e0ff3779b372884382fbc8eb3d6",
             "comment": "Added new rush.json settings under \"gitPolicy\""
-          }
-        ],
-        "dependency": [
-          {
-            "comment": "Updating dependency \"@microsoft/stream-collator\" from `~1.0.2` to `~1.0.3`"
-          },
-          {
-            "comment": "Updating dependency \"@microsoft/sp-build-node\" from `~0.2.1` to `~0.3.0`"
           }
         ]
       }
