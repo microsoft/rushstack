@@ -11,17 +11,17 @@ export default class GitPolicy {
     console.log('Checking Git policy for this repository.' + os.EOL);
 
     // Determine the user's account
-    // Ex: "file:C:/Users/Bob/.gitconfig        bob@example.com"
-    let output: string;
+    // Ex: "bob@example.com"
+    let userEmail: string;
     try {
-      output = Utilities.executeCommandAndCaptureOutput('git',
-        ['config', '--show-origin', 'user.email'], '.');
+      userEmail = Utilities.executeCommandAndCaptureOutput('git',
+        ['config', 'user.email'], '.').trim();
     } catch (e) {
       console.log(
 `Error: ${e.message}
 Unable to determine your Git configuration using this command:
 
-    git config --show-origin user.email
+    git config user.email
 
 If you didn't configure your e-mail yet, try something like this:`);
 
@@ -36,16 +36,11 @@ If you didn't configure your e-mail yet, try something like this:`);
       return false;
     }
 
-    const parts: string[] = output.split('\t');
-    if (parts.length !== 2) {
+    // sanity check; a valid e-mail should not contain any whitespace
+    if (!userEmail.match(/^\S+$/g)) {
       throw new Error('The gitPolicy check failed because "git config" returned unexpected output:'
-        + os.EOL + `"${output}"`);
+        + os.EOL + `"${userEmail}"`);
     }
-
-    // Ex: "file:C:/Users/Bob/.gitconfig"
-    const userEmailSource: string = parts[0].trim();
-    // Ex: "bob@example.com"
-    const userEmail: string = parts[1].trim();
 
     for (const pattern of rushConfiguration.gitAllowedEmailRegExps) {
       const regex: RegExp = new RegExp('^' + pattern + '$', 'i');
@@ -60,14 +55,10 @@ If you didn't configure your e-mail yet, try something like this:`);
     // Ex. "Mr. Example <mr@example.com>"
     let fancyEmail: string = colors.cyan(userEmail);
     try {
-      const nameParts: string[] = Utilities.executeCommandAndCaptureOutput('git',
-        ['config', '--show-origin', 'user.name'], '.')
-        .split('\t');
-      if (nameParts.length === 2) {
-        const userName: string = nameParts[1].trim();
-        if (userName) {
-          fancyEmail = `${userName} <${fancyEmail}>`;
-        }
+      const userName: string = Utilities.executeCommandAndCaptureOutput('git',
+        ['config', 'user.name'], '.').trim();
+      if (userName) {
+        fancyEmail = `${userName} <${fancyEmail}>`;
       }
     } catch (e) {
       // but if it fails, this isn't critical, so don't bother them about it
@@ -91,8 +82,6 @@ If you didn't configure your e-mail yet, try something like this:`);
 ...but yours is configured like this:
 
     ${fancyEmail}
-
-(The setting came from here: ${userEmailSource})
 
 To fix it, you can use commands like this:`);
 
