@@ -1,18 +1,5 @@
 // Typings based on DefinitelyTyped definitions from whatwg-fetch
 
-/* tslint:disable: interface-name */
-/* tslint:disable: no-any */
-/* tslint:disable: no-shadowed-variable */
-/* tslint:disable: no-var-keyword */
-/* tslint:disable: variable-name */
-/* tslint:disable: member-ordering */
-/* tslint:disable: no-unused-variable */
-/* tslint:disable: quotemark */
-/* tslint:disable: indent */
-/* tslint:disable: max-line-length */
-/* tslint:disable: member-access */
-/* tslint:disable: whitespace */
-
 export class Request extends Body {
 	constructor(input: string|Request, init?:RequestInit);
 	method: string;
