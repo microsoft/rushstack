@@ -17,7 +17,8 @@ import {
   Package,
   IResolveOrCreateResult,
   PackageDependencyKind,
-  Utilities
+  Utilities,
+  Stopwatch
 } from '@microsoft/rush-lib';
 
 import PackageLookup from './PackageLookup';
@@ -44,6 +45,7 @@ export default class LinkAction extends CommandLineAction {
     this._rushConfiguration = this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
 
     console.log('Starting "rush link"');
+    const stopwatch: Stopwatch = Stopwatch.start();
 
     readPackageTree(this._rushConfiguration.commonFolder, (error: Error, npmPackage: PackageNode) => {
       this._parser.trapErrors(() => {
@@ -65,7 +67,8 @@ export default class LinkAction extends CommandLineAction {
           console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
           JsonFile.saveJsonFile(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
 
-          console.log(os.EOL + colors.green('Rush link finished successfully.'));
+          stopwatch.stop();
+          console.log(os.EOL + colors.green(`Rush link finished successfully. (${stopwatch.toString()})`));
           console.log(os.EOL + 'Next you should probably run: "rush rebuild -q"');
         }
       });
