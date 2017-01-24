@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "2.2.0",
+      "tag": "@microsoft/gulp-core-build_v2.2.0",
+      "date": "Mon, 23 Jan 2017 20:07:59 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Remove several logging utilities from the public API and improve documentation in other places."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.1.1",
       "tag": "@microsoft/gulp-core-build_v2.1.1",
       "date": "Fri, 20 Jan 2017 01:46:41 GMT",
