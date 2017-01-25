@@ -1,7 +1,6 @@
 /* tslint:disable:no-bitwise */
 
 import * as ts from 'typescript';
-import TypeScriptHelpers from './TypeScriptHelpers';
 /**
   * Some helper functions for formatting certain TypeScript Compiler API expressions.
   */
