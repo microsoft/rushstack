@@ -1,5 +1,17 @@
 {
   "kind": "package",
+  "summary": [
+    {
+      "kind": "textDocElement",
+      "value": "Here is some documentation for example2."
+    }
+  ],
+  "remarks": [
+    {
+      "kind": "textDocElement",
+      "value": "These are additional remarks that may be too long for the summary. They should appear in the remarks of the json generated file for this package."
+    }
+  ],
   "exports": {
     "inheritCorrectlyButNotFound": {
       "kind": "enum",
