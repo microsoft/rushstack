@@ -408,7 +408,7 @@ export default class ApiDocumentation {
     if (this.apiItem instanceof ApiPackage) {
       if (apiTagCount > 0) {
         const tag: string = '@' + ApiTag[this.apiTag].toLowerCase();
-        this.reportError(`The ${tag} tag is not allowed on the package`);
+        this.reportError(`The ${tag} tag is not allowed on the package, which is always public`);
       }
       this.apiTag = ApiTag.Public;
     }

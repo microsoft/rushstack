@@ -161,6 +161,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
   protected visitApiPackage(apiPackage: ApiPackage, refObject?: Object): void {
     refObject['kind'] = ApiJsonGenerator._KIND_PACKAGE; /* tslint:disable-line:no-string-literal */
     refObject['summary'] = apiPackage.documentation.summary; /* tslint:disable-line:no-string-literal */
+    refObject['remarks'] = apiPackage.documentation.remarks; /* tslint:disable-line:no-string-literal */
 
     const membersNode: Object = {};
     refObject[ApiJsonGenerator._EXPORTS_KEY] = membersNode;

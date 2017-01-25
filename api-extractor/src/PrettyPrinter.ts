@@ -12,9 +12,6 @@ export default class PrettyPrinter {
   public static dumpTree(node: ts.Node, indent: string = ''): void {
     try {
       const jsdoc: string = TypeScriptHelpers.getJsDocComments(node, console.log);
-      if (jsdoc && jsdoc.trim()) {
-        console.log('COMMENT=' + jsdoc);
-      }
     } catch (e) {} /* tslint:disable-line:no-empty */
 
     const kindName: string = ts.SyntaxKind[node.kind];
@@ -33,7 +30,6 @@ export default class PrettyPrinter {
       trimmedText = '(error getting text)';
     }
 
-    console.log(`${indent}${kindName}: [${trimmedText}]`);
     try {
       for (const childNode of node.getChildren()) {
         PrettyPrinter.dumpTree(childNode, indent + '  ');
