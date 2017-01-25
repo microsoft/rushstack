@@ -140,40 +140,44 @@ export default class ApiFileGenerator extends ApiItemVisitor {
   private _writeJsdocSynopsis(apiItem: ApiItem): void {
     const lines: string[] = apiItem.warnings.map((x: string) => 'WARNING: ' + x);
 
-    let footer: string = '';
-    switch (apiItem.documentation.apiTag) {
-      case ApiTag.Internal:
-        footer += '@internal';
-        break;
-      case ApiTag.Alpha:
-        footer += '@alpha';
-        break;
-      case ApiTag.Beta:
-        footer += '@beta';
-        break;
-      case ApiTag.Public:
-        footer += '@public';
-        break;
-    }
-
-    // deprecatedMessage is initialized by default,
-    // this ensures it has contents before adding '@deprecated'
-    if (apiItem.documentation.deprecatedMessage.length > 0) {
-      if (footer) {
-        footer += ' ';
+    if (apiItem instanceof ApiPackage && !apiItem.documentation.summary.length) {
+      lines.push('(No packageDescription for this package)');
+    } else {
+      let footer: string = '';
+      switch (apiItem.documentation.apiTag) {
+        case ApiTag.Internal:
+          footer += '@internal';
+          break;
+        case ApiTag.Alpha:
+          footer += '@alpha';
+          break;
+        case ApiTag.Beta:
+          footer += '@beta';
+          break;
+        case ApiTag.Public:
+          footer += '@public';
+          break;
       }
-      footer += '@deprecated';
-    }
 
-    if (apiItem.documentation.isMissing) {
-      if (footer) {
-        footer += ' ';
+      // deprecatedMessage is initialized by default,
+      // this ensures it has contents before adding '@deprecated'
+      if (apiItem.documentation.deprecatedMessage.length > 0) {
+        if (footer) {
+          footer += ' ';
+        }
+        footer += '@deprecated';
       }
-      footer += '(undocumented)';
-    }
 
-    if (footer) {
-      lines.push(footer);
+      if (apiItem.documentation.isMissing) {
+        if (footer) {
+          footer += ' ';
+        }
+        footer += '(undocumented)';
+      }
+
+      if (footer) {
+        lines.push(footer);
+      }
     }
 
     if (lines.length) {

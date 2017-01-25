@@ -17,7 +17,8 @@ export default class ApiEnum extends ApiItemContainer {
       const memberOptions: IApiItemOptions = {
         analyzer: this.analyzer,
         declaration: memberDeclaration,
-        declarationSymbol: memberSymbol
+        declarationSymbol: memberSymbol,
+        jsdocNode: memberDeclaration
       };
 
       this.addMemberItem(new ApiEnumValue(memberOptions));

@@ -522,6 +522,12 @@
       "type": "string",
       "enum": [ "package" ]
     },
+    "summary": {
+          "$ref": "#/definitions/docElementCollection"
+    },
+    "remarks": {
+          "$ref": "#/definitions/docElementCollection"
+    },
     "exports": {
       "description": "The exported definitions for this API package",
       "type": "object",
