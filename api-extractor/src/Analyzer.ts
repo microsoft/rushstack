@@ -1,6 +1,5 @@
 import * as ts from 'typescript';
 import ApiPackage from './definitions/ApiPackage';
-import TypeScriptHelpers from './TypeScriptHelpers';
 import DocItemLoader from './DocItemLoader';
 
 export type ApiErrorHandler = (message: string, fileName: string, lineNumber: number) => void;
