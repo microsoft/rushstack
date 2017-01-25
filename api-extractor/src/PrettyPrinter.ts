@@ -10,10 +10,6 @@ export default class PrettyPrinter {
     * Used for debugging only.  This dumps the TypeScript Compiler's abstract syntax tree.
     */
   public static dumpTree(node: ts.Node, indent: string = ''): void {
-    try {
-      const jsdoc: string = TypeScriptHelpers.getJsDocComments(node, console.log);
-    } catch (e) {} /* tslint:disable-line:no-empty */
-
     const kindName: string = ts.SyntaxKind[node.kind];
     let trimmedText: string;
 
