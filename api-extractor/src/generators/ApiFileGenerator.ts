@@ -138,6 +138,9 @@ export default class ApiFileGenerator extends ApiItemVisitor {
    * by the Analzer.
    */
   private _writeJsdocSynopsis(apiItem: ApiItem): void {
+    if (apiItem instanceof ApiPackage) {
+      return;
+    }
     const lines: string[] = apiItem.warnings.map((x: string) => 'WARNING: ' + x);
 
     let footer: string = '';

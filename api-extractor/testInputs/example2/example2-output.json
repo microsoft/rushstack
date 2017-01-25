@@ -1,5 +1,11 @@
 {
   "kind": "package",
+  "summary": [
+    {
+      "kind": "textDocElement",
+      "value": "Here is some documentation for example2."
+    }
+  ],
   "exports": {
     "inheritCorrectlyButNotFound": {
       "kind": "enum",
