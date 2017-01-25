@@ -10,6 +10,7 @@ import DocItemLoader from '../DocItemLoader';
 import { IApiDefinitionReference } from '../IApiDefinitionReference';
 import Token, { TokenType } from '../Token';
 import Tokenizer from '../Tokenizer';
+import ApiPackage from './ApiPackage';
 
 /**
   * An "API Tag" is a custom JSDoc tag which indicates whether an ApiItem definition
@@ -22,27 +23,27 @@ export enum ApiTag {
   /**
    * No API Tag was specified in the JSDoc summary.
    */
-  None,
+  None = 0,
   /**
    * The API was documented as internal, i.e. not callable by third party developers.
    */
-  Internal,
+  Internal = 1,
   /**
    * The API was documented as "alpha."  This status is not generally used.  See the
    * ApiPrinciplesAndProcess.md for details.
    */
-  Alpha,
+  Alpha = 2,
   /**
    * The API was documented as callable by third party developers, but at their own risk.
    * Web parts that call beta APIs should only be used for experimentation, because the Web Part
    * will break if Microsoft changes the API signature later.
    */
-  Beta,
+  Beta = 3,
   /**
    * The API was documented as callable by third party developers, with a guarantee that Microsoft will
    * never make any breaking changes once the API is published.
    */
-  Public
+  Public = 4
 }
 
 /**
@@ -253,8 +254,10 @@ export default class ApiDocumentation {
   }
 
   protected _getJsDocs(apiItem: ApiItem): string {
-    const sourceFile: ts.SourceFile = apiItem.getDeclaration().getSourceFile();
-    const jsDoc: string = TypeScriptHelpers.getJsDocComments(apiItem.getDeclaration(), this.reportError);
+    if (!apiItem.jsdocNode) {
+      return '';
+    }
+    const jsDoc: string = TypeScriptHelpers.getJsDocComments(apiItem.jsdocNode, this.reportError);
 
     // Eliminate tags and then count the English letters.  Are there at least 10 letters of text?
     // If not, we consider the definition to be "missingDocumentation".
@@ -400,6 +403,14 @@ export default class ApiDocumentation {
 
     if (apiTagCount > 1) {
       this.reportError('More than one API Tag was specified');
+    }
+
+    if (this.apiItem instanceof ApiPackage) {
+      if (apiTagCount > 0) {
+        const tag: string = '@' + ApiTag[this.apiTag].toLowerCase();
+        this.reportError(`The ${tag} tag is not allowed on the package, which is always public`);
+      }
+      this.apiTag = ApiTag.Public;
     }
 
     if (this.preapproved) {

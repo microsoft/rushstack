@@ -66,7 +66,8 @@ export default class ApiMember extends ApiItem {
       const typeLiteralOptions: IApiItemOptions = {
         analyzer: this.analyzer,
         declaration: propertyTypeDeclaration,
-        declarationSymbol: propertyTypeSymbol
+        declarationSymbol: propertyTypeSymbol,
+        jsdocNode: propertyTypeDeclaration
       };
 
       this.typeLiteral = new ApiStructuredType(typeLiteralOptions);

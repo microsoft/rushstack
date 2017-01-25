@@ -7,20 +7,40 @@ import ApiEnum from './ApiEnum';
 import ApiFunction from './ApiFunction';
 import { IApiItemOptions } from './ApiItem';
 import ApiItemContainer from './ApiItemContainer';
+import TypeScriptHelpers from '../TypeScriptHelpers';
 
 /**
   * This class is part of the ApiItem abstract syntax tree.  It represents the top-level
   * exports for an Rush package.  This object acts as the root of the Analyzer's tree.
   */
 export default class ApiPackage extends ApiItemContainer {
-  constructor(analyzer: Analyzer, rootFileSymbol: ts.Symbol) {
-    super({
+  private static _getOptions(analyzer: Analyzer, rootFile: ts.SourceFile): IApiItemOptions {
+    const rootFileSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(rootFile);
+    let statement: ts.VariableStatement;
+    let foundDescription: ts.Node = undefined;
+
+    for (const statementNode of rootFile.statements) {
+      if (statementNode.kind === ts.SyntaxKind.VariableStatement) {
+        statement = statementNode as ts.VariableStatement;
+        for (const statementDeclaration of statement.declarationList.declarations) {
+          if (statementDeclaration.name.getText() === 'packageDescription') {
+            foundDescription = statement;
+          }
+        }
+      }
+    }
+
+    return {
       analyzer,
       declaration: rootFileSymbol.declarations[0],
-      declarationSymbol: rootFileSymbol
-    });
+      declarationSymbol: rootFileSymbol,
+      jsdocNode: foundDescription
+    };
+  }
+  constructor(analyzer: Analyzer, rootFile: ts.SourceFile) {
+    super(ApiPackage._getOptions(analyzer, rootFile));
 
-    const exportSymbols: ts.Symbol[] = this.typeChecker.getExportsOfModule(rootFileSymbol);
+    const exportSymbols: ts.Symbol[] = this.typeChecker.getExportsOfModule(this.declarationSymbol);
     if (exportSymbols) {
       for (const exportSymbol of exportSymbols) {
         const followedSymbol: ts.Symbol = this.followAliases(exportSymbol);
@@ -35,6 +55,7 @@ export default class ApiPackage extends ApiItemContainer {
             analyzer: this.analyzer,
             declaration,
             declarationSymbol: followedSymbol,
+            jsdocNode: declaration,
             exportSymbol
           };
 
