@@ -83,9 +83,6 @@ export default class Analyzer {
     if (!rootFile) {
       throw new Error('Unable to load file: ' + options.entryPointFile);
     }
-    // const rootFileSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(rootFile);
-
-    // this.package = new ApiPackage(this, rootFileSymbol);
 
     this.package = new ApiPackage(this, rootFile);
   }
