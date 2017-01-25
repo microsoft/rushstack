@@ -25,9 +25,9 @@ analyzer.analyze({
     moduleResolution: ts.ModuleResolutionKind.NodeJs,
     experimentalDecorators: true,
     jsx: ts.JsxEmit.React,
-    rootDir: 'D:/GitRepos/sp-client/spfx-core/sp-codepart-base'
+    rootDir: './testInputs/example2' //'D:/GitRepos/sp-client/spfx-core/sp-codepart-base'
   },
-  entryPointFile: 'D:/GitRepos/sp-client/spfx-core/sp-codepart-base/src/index.ts',
+  entryPointFile: './testInputs/example2/index.ts', // 'D:/GitRepos/sp-client/spfx-core/sp-codepart-base/src/index.ts',
   otherFiles: []
 });
 

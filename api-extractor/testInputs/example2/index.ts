@@ -1,3 +1,8 @@
+/**
+ * Here is some documentation for example2.
+ */
+declare const packageDescription: void;
+
 export {
     TestMissingCommentStar,
     inheritDisplayMode,
