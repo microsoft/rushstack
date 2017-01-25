@@ -31,3 +31,4 @@ class PreapprovedInternalClass {
 // (undocumented)
 export function publicFunction(param: number): string;
 
+// (No packageDescription for this package)

@@ -14,16 +14,16 @@ import TypeScriptHelpers from '../TypeScriptHelpers';
   * exports for an Rush package.  This object acts as the root of the Analyzer's tree.
   */
 export default class ApiPackage extends ApiItemContainer {
-  private static _getOptions(analyzer: Analyzer, rootFileSymbol: ts.Symbol): IApiItemOptions {
+  private static _getOptions(analyzer: Analyzer, rootFile: ts.SourceFile): IApiItemOptions {
+    const rootFileSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(rootFile);
     let statement: ts.VariableStatement;
     let foundDescription: ts.Node = undefined;
-    for (const statementNode of (rootFileSymbol.declarations[0] as ts.SourceFile).statements) {
+
+    for (const statementNode of rootFile.statements) {
       if (statementNode.kind === ts.SyntaxKind.VariableStatement) {
         statement = statementNode as ts.VariableStatement;
         for (const statementDeclaration of statement.declarationList.declarations) {
           if (statementDeclaration.name.getText() === 'packageDescription') {
-            // The following line is useful for debugging
-            // console.log('FOUND: ' + TypeScriptHelpers.getJsDocComments(statement, console.log));
             foundDescription = statement;
           }
         }
@@ -37,10 +37,10 @@ export default class ApiPackage extends ApiItemContainer {
       jsdocNode: foundDescription
     };
   }
-  constructor(analyzer: Analyzer, rootFileSymbol: ts.Symbol) {
-    super(ApiPackage._getOptions(analyzer, rootFileSymbol));
+  constructor(analyzer: Analyzer, rootFile: ts.SourceFile) {
+    super(ApiPackage._getOptions(analyzer, rootFile));
 
-    const exportSymbols: ts.Symbol[] = this.typeChecker.getExportsOfModule(rootFileSymbol);
+    const exportSymbols: ts.Symbol[] = this.typeChecker.getExportsOfModule(this.declarationSymbol);
     if (exportSymbols) {
       for (const exportSymbol of exportSymbols) {
         const followedSymbol: ts.Symbol = this.followAliases(exportSymbol);
