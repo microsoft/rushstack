@@ -9,9 +9,27 @@ import ApiDocumentation from './ApiDocumentation';
   * This interface is used to pass options between constructors for ApiItem child classes.
   */
 export interface IApiItemOptions {
+  /**
+   * The associated Analyzer object for this ApiItem
+   */
   analyzer: Analyzer;
+  /**
+   * The declaration node for the main syntax item that this ApiItem is associated with. 
+   */
   declaration: ts.Declaration;
+  /**
+   * The semantic information for the declaration.
+   */
   declarationSymbol: ts.Symbol;
+  /**
+   * The declaration node that contains the JSDoc comments for this ApiItem.
+   * In most cases this is the same as `declaration`, but for ApiPackage it will be
+   * a separate node under the root.
+   */
+  jsdocNode: ts.Node;
+  /**
+   * The symbol used to export this ApiItem from the ApiPackage.
+   */
   exportSymbol?: ts.Symbol;
 }
 
@@ -40,6 +58,13 @@ abstract class ApiItem {
    * the API file produced by ApiFileGenerator.
    */
   public warnings: string[];
+
+  /**
+   * The declaration node that contains the JSDoc comments for this ApiItem.
+   * In most cases this is the same as `declaration`, but for ApiPackage it will be
+   * a separate node under the root.
+   */
+  public jsdocNode: ts.Node;
 
   public documentation: ApiDocumentation;
 
@@ -79,6 +104,7 @@ abstract class ApiItem {
     this.reportError = this.reportError.bind(this);
 
     this.declaration = options.declaration;
+    this.jsdocNode = options.jsdocNode;
     this._errorNode = options.declaration;
     this.warnings = [];
 

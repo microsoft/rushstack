@@ -30,7 +30,8 @@ export default class ApiMethod extends ApiMember {
         this.params.push(new ApiParameter({
           analyzer: this.analyzer,
           declaration: param,
-          declarationSymbol: declarationSymbol
+          declarationSymbol: declarationSymbol,
+          jsdocNode: param
         }, docComment));
       }
     }

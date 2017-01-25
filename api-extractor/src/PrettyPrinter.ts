@@ -1,7 +1,7 @@
 /* tslint:disable:no-bitwise */
 
 import * as ts from 'typescript';
-
+import TypeScriptHelpers from './TypeScriptHelpers';
 /**
   * Some helper functions for formatting certain TypeScript Compiler API expressions.
   */
@@ -10,23 +10,36 @@ export default class PrettyPrinter {
     * Used for debugging only.  This dumps the TypeScript Compiler's abstract syntax tree.
     */
   public static dumpTree(node: ts.Node, indent: string = ''): void {
-    if (node.kind === ts.SyntaxKind.FromKeyword) {
-      console.log('**');
-    }
+    try {
+      const jsdoc: string = TypeScriptHelpers.getJsDocComments(node, console.log);
+      if (jsdoc && jsdoc.trim()) {
+        console.log('COMMENT=' + jsdoc);
+      }
+    } catch (e) {} /* tslint:disable-line:no-empty */
 
     const kindName: string = ts.SyntaxKind[node.kind];
-    let trimmedText: string = node.getText()
-      .replace(/[\r\n]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
+    let trimmedText: string;
 
-    if (trimmedText.length > 100) {
-      trimmedText = trimmedText.substr(0, 97) + '...';
+    try {
+      trimmedText = node.getText()
+        .replace(/[\r\n]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      if (trimmedText.length > 100) {
+        trimmedText = trimmedText.substr(0, 97) + '...';
+      }
+    } catch (e) {
+      trimmedText = '(error getting text)';
     }
 
     console.log(`${indent}${kindName}: [${trimmedText}]`);
-    for (const childNode of node.getChildren()) {
-      PrettyPrinter.dumpTree(childNode, indent + '  ');
+    try {
+      for (const childNode of node.getChildren()) {
+        PrettyPrinter.dumpTree(childNode, indent + '  ');
+      }
+    } catch (e) {
+      // sometimes getChildren() throws an exception
     }
   }
 
