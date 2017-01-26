@@ -1,24 +1,9 @@
-class Analyzer {
-  // (undocumented)
-  constructor(errorHandler?: ApiErrorHandler);
-  public analyze(options: IApiAnalyzerOptions): void;
-  public static defaultErrorHandler(message: string, fileName: string, lineNumber: number): void;
-  public docItemLoader: DocItemLoader;
-  // (undocumented)
-  public errorHandler: ApiErrorHandler;
-  // (undocumented)
-  public package: ApiPackage;
-  public reportError(message: string, sourceFile: ts.SourceFile, start: number): void;
-  // (undocumented)
-  public typeChecker: ts.TypeChecker;
-}
-
 class ApiFileGenerator extends ApiItemVisitor {
   // (undocumented)
   protected _indentedWriter: IndentedWriter;
   public static areEquivalentApiFileContents(actualFileContent: string, expectedFileContent: string): boolean;
   // (undocumented)
-  public generateApiFileContent(analyzer: Analyzer): string;
+  public generateApiFileContent(extractor: Extractor): string;
   // (undocumented)
   protected visitApiEnum(apiEnum: ApiEnum): void;
   // (undocumented)
@@ -33,7 +18,7 @@ class ApiFileGenerator extends ApiItemVisitor {
   protected visitApiParam(apiParam: ApiParameter): void;
   // (undocumented)
   protected visitApiStructuredType(apiStructuredType: ApiStructuredType): void;
-  public writeApiFile(reportFilename: string, analyzer: Analyzer): void;
+  public writeApiFile(reportFilename: string, extractor: Extractor): void;
 }
 
 class ApiJsonGenerator extends ApiItemVisitor {
@@ -60,17 +45,38 @@ class ApiJsonGenerator extends ApiItemVisitor {
   // (undocumented)
   protected visitApiStructuredType(apiStructuredType: ApiStructuredType, refObject?: Object): void;
   // (undocumented)
-  public writeJsonFile(reportFilename: string, analyzer: Analyzer): void;
+  public writeJsonFile(reportFilename: string, extractor: Extractor): void;
 }
 
 class ExternalApiHelper {
   public static generateApiJson(rootDir: string, libFolder: string, externalPackageFilePath: string): void;
 }
 
+class Extractor {
+  // (undocumented)
+  constructor(options: IExtractorOptions);
+  public analyze(options: IApiAnalyzerOptions): void;
+  public static defaultErrorHandler(message: string, fileName: string, lineNumber: number): void;
+  public docItemLoader: DocItemLoader;
+  // (undocumented)
+  public errorHandler: ApiErrorHandler;
+  public loadExternalPackages(externalJsonCollectionPath: string): void;
+  // (undocumented)
+  public package: ApiPackage;
+  public reportError(message: string, sourceFile: ts.SourceFile, start: number): void;
+  // (undocumented)
+  public typeChecker: ts.TypeChecker;
+}
+
 interface IApiAnalyzerOptions {
-  compilerOptions: ts.CompilerOptions;
   entryPointFile: string;
   otherFiles?: string[];
+}
+
+interface IExtractorOptions {
+  compilerOptions: ts.CompilerOptions;
+  // (undocumented)
+  errorHandler?: ApiErrorHandler;
 }
 
 // WARNING: Unsupported export: ApiErrorHandler
