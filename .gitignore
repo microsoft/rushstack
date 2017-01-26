@@ -1,19 +1,63 @@
-*.build.error.log
-*.build.log
+# Windows OS Files
+$RECYCLE.BIN/
+Desktop.ini
+Thumbs.db
+ehthumbs.db
+
+# Mac OSX Files
+.AppleDouble
 .DS_Store
-.vscode/launch.json
-/common/last-install.*
-/common/npm-local
-/common/local-npm
-/common/rush-link.json
-/common/rush-recycler
+.LSOverride
+.Spotlight-V100
+.Trashes
+._*
+
+# Package files
+app
+app-min
+bower_components
 coverage
 dist
+jspm_packages
+lib
 lib
 lib-amd
 node_modules
-npm*.log
+npm-debug.log
+npminstall-log.txt
 temp
-package
-*.scss.ts
+
+# Rush files
+**/*.build.error.log
+**/*.build.log
+/common/apiDocs/json/**
+/common/last-install.flag
+/common/last-install.log
+/common/local-npm
+/common/local-npm/**
+/common/local-rush
+/common/local-rush/**
+/common/npm-cache
+/common/npm-cache/**
+/common/npm-local
+/common/npm-local/**
+/common/npm-tmp
+/common/npm-tmp/**
+/common/rush-link.json
+/common/rush-recycler
 package-deps.json
+
+# IDE files
+*.bak
+*.csproj.user
+*.sublime-project
+*.sublime-workspace
+*.suo
+*.userosscache
+.idea
+.vs/
+/.settings/
+bin/
+
+# Ignore VS Code personal settings, but keep a root-level setting
+/*/**/.vscode/
