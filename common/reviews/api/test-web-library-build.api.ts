@@ -7,3 +7,4 @@ export function log(message: string): void;
 // (undocumented)
 export function logClass(): void;
 
+// (No packageDescription for this package)
