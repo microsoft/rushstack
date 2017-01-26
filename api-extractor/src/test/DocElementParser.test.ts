@@ -9,7 +9,7 @@ import TestFileComparer from '../TestFileComparer';
 import JsonFile from '../JsonFile';
 import ApiStructuredType from '../definitions/ApiStructuredType';
 import ApiDocumentation from '../definitions/ApiDocumentation';
-import Analyzer from './../Analyzer';
+import Extractor from './../Extractor';
 import Tokenizer from './../Tokenizer';
 
 const capturedErrors: {
@@ -22,16 +22,27 @@ function testErrorHandler(message: string, fileName: string, lineNumber: number)
   capturedErrors.push({ message, fileName, lineNumber });
 }
 
-const analyzer: Analyzer = new Analyzer(testErrorHandler);
 const inputFolder: string = './testInputs/example2';
 let myDocumentedClass: ApiStructuredType;
+
+const compilerOptions: ts.CompilerOptions = {
+  target: ts.ScriptTarget.ES5,
+  module: ts.ModuleKind.CommonJS,
+  moduleResolution: ts.ModuleResolutionKind.NodeJs,
+  rootDir: inputFolder
+};
+
+const extractor: Extractor = new Extractor({
+  compilerOptions: compilerOptions,
+  errorHandler: testErrorHandler
+});
 
 /**
  * Dummy class wrapping ApiDocumentation to test its protected methods
  */
 class TestApiDocumentation extends ApiDocumentation {
   constructor() {
-    super(myDocumentedClass, analyzer.docItemLoader, (msg: string) => { return; });
+    super(myDocumentedClass, extractor.docItemLoader, (msg: string) => { return; });
   }
 
   public parseParam(tokenizer: Tokenizer): IParam {
@@ -39,18 +50,12 @@ class TestApiDocumentation extends ApiDocumentation {
   }
 }
 
-// Run the analyzer once to be used by unit tests
-analyzer.analyze({
-  compilerOptions: {
-    target: ts.ScriptTarget.ES5,
-    module: ts.ModuleKind.CommonJS,
-    moduleResolution: ts.ModuleResolutionKind.NodeJs,
-    rootDir: inputFolder
-  },
+// Run the analyze method once to be used by unit tests
+extractor.analyze({
   entryPointFile: path.join(inputFolder, 'index.ts')
 });
 
-myDocumentedClass = analyzer.package.getSortedMemberItems()
+myDocumentedClass = extractor.package.getSortedMemberItems()
   .filter(apiItem => apiItem.name === 'MyDocumentedClass')[0] as ApiStructuredType;
 
 describe('DocElementParser tests', function (): void {

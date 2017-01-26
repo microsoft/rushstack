@@ -4,7 +4,7 @@ import { assert } from 'chai';
 import * as ts from 'typescript';
 import * as fsx from 'fs-extra';
 import * as path from 'path';
-import Analyzer from '../../Analyzer';
+import Extractor from '../../Extractor';
 import ApiFileGenerator from '../../generators/ApiFileGenerator';
 
 /* tslint:disable:no-function-expression - Mocha uses a poorly scoped "this" pointer */
@@ -34,24 +34,27 @@ describe('ApiFileGenerator tests', function (): void {
 
   describe('Basic Tests', function (): void {
     it('Example 1', function (): void {
-      const analyzer: Analyzer = new Analyzer(testErrorHandler);
-
       const inputFolder: string = './testInputs/example1';
       const outputFile: string = './lib/example1-output.ts';
       const expectedFile: string = path.join(inputFolder, 'example1-output.ts');
 
-      analyzer.analyze({
-        compilerOptions: {
-          target: ts.ScriptTarget.ES5,
-          module: ts.ModuleKind.CommonJS,
-          moduleResolution: ts.ModuleResolutionKind.NodeJs,
-          rootDir: inputFolder
-        },
+      const compilerOptions: ts.CompilerOptions = {
+        target: ts.ScriptTarget.ES5,
+        module: ts.ModuleKind.CommonJS,
+        moduleResolution: ts.ModuleResolutionKind.NodeJs,
+        rootDir: inputFolder
+      };
+      const extractor: Extractor = new Extractor({
+        compilerOptions: compilerOptions,
+        errorHandler: testErrorHandler
+      });
+
+      extractor.analyze({
         entryPointFile: path.join(inputFolder, 'index.ts')
       });
 
       const apiFileGenerator: ApiFileGenerator = new ApiFileGenerator();
-      apiFileGenerator.writeApiFile(outputFile, analyzer);
+      apiFileGenerator.writeApiFile(outputFile, extractor);
 
       assertFileMatchesExpected(outputFile, expectedFile);
 
