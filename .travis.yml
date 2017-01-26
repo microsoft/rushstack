@@ -15,6 +15,6 @@ script:
   - node node_modules/@microsoft/rush/lib/rush.js link
   - echo -en 'travis_fold:end:link\\r'
   - echo 'Building...' && echo -en 'travis_fold:start:build\\r'
-  - node node_modules/@microsoft/rush/lib/rush.js rebuild
+  - node node_modules/@microsoft/rush/lib/rush.js rebuild --production
   - echo -en 'travis_fold:end:build\\r'
 
