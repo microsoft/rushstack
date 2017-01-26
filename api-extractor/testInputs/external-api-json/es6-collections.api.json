@@ -1,0 +1,40 @@
+{
+  "kind": "package",
+  "exports": {
+    "ForEachable": {
+      "kind": "interface",
+      "extends": "",
+      "implements": "",
+      "typeParameters": [
+        "T"
+      ],
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "this summary description has been added manually. It does not actually exist in the json documentation but it was added to demonstate the external packages loader is working."
+        }
+      ],
+      "remarks": [],
+      "isBeta": false,
+      "members": {
+        "forEach": {
+          "kind": "method",
+          "signature": "forEach(callbackfn: (value: T) => void): void;",
+          "accessModifier": "",
+          "isOptional": false,
+          "isStatic": false,
+          "returnValue": {
+            "type": "void",
+            "description": []
+          },
+          "parameters": {},
+          "deprecatedMessage": [],
+          "summary": [],
+          "remarks": [],
+          "isBeta": false
+        }
+      }
+    }
+  }
+}
