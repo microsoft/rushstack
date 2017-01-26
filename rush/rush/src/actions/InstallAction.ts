@@ -124,6 +124,7 @@ export default class InstallAction extends CommandLineAction {
 
     if (!this._bypassPolicy.value) {
       if (!GitPolicy.check(this._rushConfiguration)) {
+        process.exit(1);
         return;
       }
     }
