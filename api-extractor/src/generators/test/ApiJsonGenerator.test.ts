@@ -37,8 +37,7 @@ describe('ApiJsonGenerator tests', function (): void {
         errorHandler: testErrorHandler
       });
 
-      // This file is in lib/generators/tests/, we need to be in /lib
-      extractor.loadExternalPackages(path.join(__dirname, '/../../external-api-json'));
+      extractor.loadExternalPackages('./testInputs/external-api-json');
       extractor.analyze({
         entryPointFile: path.join(inputFolder, 'index.ts')
       });
