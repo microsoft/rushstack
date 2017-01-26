@@ -100,8 +100,8 @@ export default class DocItemLoader {
       cachePackageName = apiDefinitionRef.packageName;
     }
     // Check if package exists in cache
-    if (cachePackageName in this.cache) {
-        return this.cache[cachePackageName];
+    if (this.cache.has(cachePackageName)) {
+        return this.cache.get(cachePackageName);
     }
 
     // Doesn't exist in cache, attempt to load the json file
@@ -113,6 +113,14 @@ export default class DocItemLoader {
       `dist/${apiDefinitionRef.packageName}.api.json`
     );
 
+    return this.loadPackageIntoCache(packageJsonFilePath);
+  }
+
+  /**
+   * Loads the API documentation json file and validates that it conforms to our schema. If it does, 
+   * then the json file is saved in the cache and returned.
+   */
+  public loadPackageIntoCache(packageJsonFilePath: string): IDocPackage {
     if (!fsx.existsSync(path.join(packageJsonFilePath))) {
       return undefined;
     }
@@ -132,8 +140,8 @@ export default class DocItemLoader {
       }
     );
 
-    // JSON schema has been found and validated
-    this.cache[cachePackageName] = apiPackage;
+    const packageName: string = path.basename(packageJsonFilePath).split('.').shift();
+    this.cache.set(packageName, apiPackage);
     return apiPackage;
   }
 }
