@@ -252,3 +252,4 @@ class WebpackTask extends GulpTask<IWebpackTaskConfig> {
 // WARNING: Unsupported export: reload
 // WARNING: Unsupported export: trustDevCert
 // WARNING: Unsupported export: untrustDevCert
+// (No packageDescription for this package)
