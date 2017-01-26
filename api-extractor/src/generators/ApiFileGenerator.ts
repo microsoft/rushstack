@@ -40,8 +40,9 @@ export default class ApiFileGenerator extends ApiItemVisitor {
 
   /**
    * Generates the report and writes it to disk.
-   * @param reportFilename -  The output filename
-   * @param extractor -       An Analyzer object representing the input project.
+   * 
+   * @param reportFilename - The output filename
+   * @param analyzer       - An Analyzer object representing the input project.
    */
   public writeApiFile(reportFilename: string, extractor: Extractor): void {
     const fileContent: string = this.generateApiFileContent(extractor);
