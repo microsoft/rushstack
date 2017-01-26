@@ -9,7 +9,7 @@
   "gitPolicy": {
     // Require GitHub scrubbed e-mails
     "allowedEmailRegExps": [
-      "[^@]+@users\.noreply\.github\.com"
+      "[^@]+@users\\.noreply\\.github\\.com"
     ],
     "sampleEmail": "mrexample@users.noreply.github.com"
   },
