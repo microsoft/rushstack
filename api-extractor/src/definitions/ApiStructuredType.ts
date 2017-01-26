@@ -180,7 +180,7 @@ export default class ApiStructuredType extends ApiItemContainer {
     this._processedMemberNames.add(memberSymbol.name);
 
     const memberOptions: IApiItemOptions = {
-      analyzer: this.analyzer,
+      extractor: this.extractor,
       declaration: memberDeclaration,
       declarationSymbol: memberSymbol,
       jsdocNode: memberDeclaration

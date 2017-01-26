@@ -28,7 +28,7 @@ export default class ApiMethod extends ApiMember {
         const docComment: string = declarationSymbol && this.documentation && this.documentation.paramDocs ?
           this.documentation.paramDocs.get(declarationSymbol.name) : '';
         this.params.push(new ApiParameter({
-          analyzer: this.analyzer,
+          extractor: this.extractor,
           declaration: param,
           declarationSymbol: declarationSymbol,
           jsdocNode: param
