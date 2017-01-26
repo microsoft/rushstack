@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import Analyzer from '../Analyzer';
+import Extractor from '../Extractor';
 import ApiStructuredType, { ApiStructuredTypeKind } from '../definitions/ApiStructuredType';
 import ApiEnum from '../definitions/ApiEnum';
 import ApiEnumValue from '../definitions/ApiEnumValue';
@@ -40,17 +40,17 @@ export default class ApiFileGenerator extends ApiItemVisitor {
 
   /**
    * Generates the report and writes it to disk.
-   * @param reportFilename   The output filename
-   * @param analyzer         An Analyzer object representing the input project.
+   * @param reportFilename -  The output filename
+   * @param extractor -       An Analyzer object representing the input project.
    */
-  public writeApiFile(reportFilename: string, analyzer: Analyzer): void {
-    const fileContent: string = this.generateApiFileContent(analyzer);
+  public writeApiFile(reportFilename: string, extractor: Extractor): void {
+    const fileContent: string = this.generateApiFileContent(extractor);
     fs.writeFileSync(reportFilename, fileContent);
   }
 
-  public generateApiFileContent(analyzer: Analyzer): string {
+  public generateApiFileContent(extractor: Extractor): string {
     // Normalize to CRLF
-    this.visit(analyzer.package);
+    this.visit(extractor.package);
     const fileContent: string = this._indentedWriter.toString().replace(/\r?\n/g, '\r\n');
     return fileContent;
   }

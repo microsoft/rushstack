@@ -7,6 +7,12 @@ export enum TestMissingCommentStar {
 }
 
 /**
+ * {@inheritdoc es6-collections:ForEachable}
+ */
+export interface IExternalPackageLookup {
+}
+
+/**
  * {@inheritdoc @microsoft/sp-core-library:DisplayMode}
  */
 export enum inheritDisplayMode {
