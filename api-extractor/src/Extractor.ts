@@ -122,8 +122,10 @@ export default class Extractor {
 
     const files: string[] = fsx.readdirSync(externalJsonCollectionPath);
     files.forEach(file => {
-      const externalJsonFilePath: string = path.join(externalJsonCollectionPath, file);
-      this.docItemLoader.loadPackageIntoCache(externalJsonFilePath);
+      if (path.extname(file) === '.json') {
+        const externalJsonFilePath: string = path.join(externalJsonCollectionPath, file);
+        this.docItemLoader.loadPackageIntoCache(externalJsonFilePath);
+      }
     });
   }
 }
