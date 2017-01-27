@@ -44,7 +44,7 @@ export const postProcessSourceMapsTask: PostProcessSourceMaps = new PostProcessS
 export const validateShrinkwrapTask: ValidateShrinkwrapTask = new ValidateShrinkwrapTask();
 export const generateShrinkwrapTask: GenerateShrinkwrapTask = new GenerateShrinkwrapTask();
 
-karma.isEnabled = () => { return true; };
+// karma.isEnabled = () => { return true; };
 
 task('validate-shrinkwrap', validateShrinkwrapTask);
 task('generate', generateShrinkwrapTask);
