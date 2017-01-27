@@ -1,19 +1,20 @@
+// Place your settings in this file to overwrite default and user settings.
 {
   // Controls the rendering size of tabs in characters. Accepted values: "auto", 2, 4, 6, etc. If set to "auto", the value will be guessed when a file is opened.
   "editor.tabSize": 2,
+  // Controls after how many characters the editor will wrap to the next line. Setting this to 0 turns on viewport width wrapping
   // When enabled, will trim trailing whitespace when you save a file.
   "files.trimTrailingWhitespace": true,
-  // Controls whether the editor should render whitespace characters
-  "editor.renderWhitespace": true,
-  "editor.insertSpaces": true,
+  // Controls if the editor should automatically close brackets after opening them
+  "editor.autoClosingBrackets": false,
   // Configure glob patterns for excluding files and folders in searches. Inherits all glob patterns from the file.exclude setting.
-  "files.exclude": {
-    "**/.git": true,
-    "**/.DS_Store": true
-  },
-	// Configure glob patterns for excluding files and folders in searches. Inherits all glob patterns from the file.exclude setting.
   "search.exclude": {
     "**/node_modules": true,
-    "**/lib": true
+    "**/bower_components": true,
+    "dist": true,
+    "lib": true,
+    "lib-amd": true,
+    "temp": true,
+    "coverage": true
   }
 }
