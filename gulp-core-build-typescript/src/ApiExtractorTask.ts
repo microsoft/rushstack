@@ -8,7 +8,7 @@ import * as gulpUtil from 'gulp-util';
 import { GulpTask } from '@microsoft/gulp-core-build';
 import { Extractor,
   IExtractorOptions,
-  IApiAnalyzerOptions,
+  IExtractorAnalyzeOptions,
   ApiFileGenerator,
   ApiJsonGenerator } from '@microsoft/api-extractor';
 import { TypeScriptConfiguration } from './TypeScriptConfiguration';
@@ -103,14 +103,14 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
       }
     };
 
-    const analyzerOptions: IApiAnalyzerOptions = {
+    const analyzeOptions: IExtractorAnalyzeOptions = {
       entryPointFile,
       otherFiles
     } as any; /* tslint:disable-line:no-any */
 
     const extractor: Extractor = new Extractor(extractorOptions);
     extractor.loadExternalPackages(path.join(__dirname, 'external-api-json'));
-    extractor.analyze(analyzerOptions);
+    extractor.analyze(analyzeOptions);
 
     const jsonGenerator: ApiJsonGenerator = new ApiJsonGenerator();
     // const jsonContent: string = generator.generateJsonFileContent(analyzer);

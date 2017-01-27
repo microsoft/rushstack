@@ -122,7 +122,7 @@ export default class DocItemLoader {
    */
   public loadPackageIntoCache(packageJsonFilePath: string): IDocPackage {
     if (!fsx.existsSync(path.join(packageJsonFilePath))) {
-      return undefined;
+      throw new Error(`External json package file does not exist: ${packageJsonFilePath}`);
     }
 
     const apiPackage: IDocPackage = JsonFile.loadJsonFile(packageJsonFilePath) as IDocPackage;
