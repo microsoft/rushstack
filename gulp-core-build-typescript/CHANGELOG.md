@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Thu, 19 Jan 2017 02:37:34 GMT and should not be manually modified.
+This log was last generated on Fri, 27 Jan 2017 02:35:10 GMT and should not be manually modified.
+
+## 2.2.2
+Fri, 27 Jan 2017 02:35:10 GMT
+
+### Patches
+
+- Added external-api-json folder with external types definitions. Added gulp task to run ApiExtractor on external types defintions.
 
 ## 2.2.1
 Thu, 19 Jan 2017 02:37:34 GMT
