@@ -36,19 +36,18 @@ const sourceMatch: string[] = [
 
 // Define default task groups.
 export const compileTsTasks: IExecutable = parallel(typescript, text, apiExtractor);
-export const buildTasks: IExecutable = task('build', serial(preCopy, sass, parallel(compileTsTasks, text), postCopy));
+export const buildTasks: IExecutable = task('build', serial(preCopy, sass, compileTsTasks, postCopy));
 export const bundleTasks: IExecutable = task('bundle', serial(buildTasks, webpack));
-export const testTasks: IExecutable = serial(sass, compileTsTasks, karma);
+export const testTasks: IExecutable = task('test', serial(buildTasks, karma));
 export const defaultTasks: IExecutable = serial(bundleTasks, karma);
 export const postProcessSourceMapsTask: PostProcessSourceMaps = new PostProcessSourceMaps();
 export const validateShrinkwrapTask: ValidateShrinkwrapTask = new ValidateShrinkwrapTask();
 export const generateShrinkwrapTask: GenerateShrinkwrapTask = new GenerateShrinkwrapTask();
 
+karma.isEnabled = () => { return true; };
+
 task('validate-shrinkwrap', validateShrinkwrapTask);
 task('generate', generateShrinkwrapTask);
-
-task('test', testTasks);
-
 task('test-watch', watch(sourceMatch, testTasks));
 
 // For watch scenarios like serve, make sure to exclude generated files from src (like *.scss.ts.)

@@ -61,7 +61,7 @@
     },
     {
       "name": "chai",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "other" ]
     },
     {
       "name": "deasync",

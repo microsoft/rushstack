@@ -74,3 +74,4 @@ interface IApiAnalyzerOptions {
 }
 
 // WARNING: Unsupported export: ApiErrorHandler
+// @public

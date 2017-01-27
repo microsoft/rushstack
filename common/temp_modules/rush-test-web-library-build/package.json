@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
+    "@types/chai": ">=3.4.34 <3.6.0",
+    "@types/mocha": ">=2.2.33 <2.6.0",
+    "chai": "~3.5.0",
     "@microsoft/load-themed-styles": "^1.2.2",
     "gulp": "~3.9.1"
   },

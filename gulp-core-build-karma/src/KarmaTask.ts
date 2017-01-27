@@ -15,6 +15,8 @@ export interface IKarmaTaskConfig {
 }
 
 export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
+  public name: string = 'karma';
+
   public taskConfig: IKarmaTaskConfig = {
     configPath: './karma.config.js',
     testMatch: /.+\.test\.js?$/
@@ -41,11 +43,6 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
 
   private _resources: Object;
 
-  constructor() {
-    super();
-    this.name = 'karma';
-  }
-
   public getCleanMatch(buildConfig: IBuildConfig, taskConfig: IKarmaTaskConfig = this.taskConfig): string[] {
     return [
       path.join(buildConfig.tempFolder, 'tests.js')
@@ -62,7 +59,7 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
   public executeTask(gulp: gulp.Gulp, completeCallback: (error?: Error | string) => void): void {
     const { configPath }: IKarmaTaskConfig = this.taskConfig;
 
-    if (!this.fileExists(configPath)) {
+    if (configPath && !this.fileExists(configPath)) {
       const shouldInitKarma: boolean = (process.argv.indexOf('--initkarma') > -1);
 
       if (!shouldInitKarma) {
@@ -94,11 +91,13 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
           return;
         }
 
+        // tslint:disable:max-line-length
         const testsJsFileContents: string = [
-          `var context = require.context('${this.buildConfig.libFolder}', true, ${normalizedMatch.toString()});`,
+          `var context = require.context('${path.posix.join('..', this.buildConfig.libFolder)}', true, ${normalizedMatch.toString()});`,
           `context.keys().forEach(context);`,
           `module.exports = context;`
         ].join(os.EOL);
+        // tslint:enable:max-line-length
 
         fs.writeFileSync(path.join(this.buildConfig.tempFolder, 'tests.js'), testsJsFileContents);
       }
