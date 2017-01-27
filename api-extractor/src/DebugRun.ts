@@ -3,7 +3,6 @@
 
 import * as ts from 'typescript';
 import * as os from 'os';
-import * as path from 'path';
 import Extractor from './Extractor';
 import ApiFileGenerator from './generators/ApiFileGenerator';
 import ApiJsonGenerator from './generators/ApiJsonGenerator';
@@ -27,7 +26,7 @@ const extractor: Extractor = new Extractor( {
     }
 });
 
-extractor.loadExternalPackages(path.join(__dirname, '/external-api-json'));
+extractor.loadExternalPackages('./testInputs/external-api-json');
 
 extractor.analyze({entryPointFile: './testInputs/example2/index.ts',
   otherFiles: []});
