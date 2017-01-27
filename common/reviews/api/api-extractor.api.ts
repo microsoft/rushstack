@@ -80,3 +80,4 @@ interface IExtractorOptions {
 }
 
 // WARNING: Unsupported export: ApiErrorHandler
+// @public

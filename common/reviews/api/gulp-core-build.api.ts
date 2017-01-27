@@ -171,3 +171,4 @@ export function warn(...args: Array<string | Chalk.ChalkChain>): void;
 export function watch(watchMatch: string | string[], task: IExecutable): IExecutable;
 
 // WARNING: Unsupported export: clean
+// (No packageDescription for this package)
