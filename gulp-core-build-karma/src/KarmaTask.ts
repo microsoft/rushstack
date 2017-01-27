@@ -82,8 +82,14 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
       const { testMatch } = this.taskConfig; // tslint:disable-line:typedef
       if (testMatch) {
         let normalizedMatch: RegExp;
+
         if (typeof testMatch === 'string') {
-          normalizedMatch = new RegExp(testMatch as string);
+          try {
+            normalizedMatch = new RegExp(testMatch as string);
+          } catch (error) {
+            completeCallback('There was an issue parsing your testMatch regular expression: ' + error.toString());
+            return;
+          }
         } else if (testMatch instanceof RegExp) {
           normalizedMatch = testMatch;
         } else {
