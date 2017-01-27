@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 27 Jan 2017 02:35:10 GMT and should not be manually modified.
+This log was last generated on Fri, 27 Jan 2017 20:04:15 GMT and should not be manually modified.
+
+## 1.1.5
+Fri, 27 Jan 2017 20:04:15 GMT
+
+### Patches
+
+- Changed name of Analyzer to Extractor, added support for external api json doc loading.
 
 ## 1.1.4
 Fri, 27 Jan 2017 02:35:10 GMT
