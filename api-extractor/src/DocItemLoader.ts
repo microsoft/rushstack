@@ -120,6 +120,12 @@ export default class DocItemLoader {
       `dist/${apiDefinitionRef.packageName}.api.json`
     );
 
+    if (!fsx.existsSync(path.join(packageJsonFilePath))) {
+      // package not found in node_modules
+      reportError(`@inheritdoc referenced package ("${apiDefinitionRef.packageName}") not found in node modules.`);
+      return;
+    }
+
     return this.loadPackageIntoCache(packageJsonFilePath);
   }
 
@@ -128,10 +134,6 @@ export default class DocItemLoader {
    * then the json file is saved in the cache and returned.
    */
   public loadPackageIntoCache(packageJsonFilePath: string): IDocPackage {
-    if (!fsx.existsSync(path.join(packageJsonFilePath))) {
-      throw new Error(`External json package file does not exist: ${packageJsonFilePath}`);
-    }
-
     const apiPackage: IDocPackage = JsonFile.loadJsonFile(packageJsonFilePath) as IDocPackage;
 
     // Validate that the output conforms to our JSON schema
