@@ -1,6 +1,5 @@
 /// <reference types="mocha" />
 
-import { assert } from 'chai';
 import { IDocItem } from '../IDocItem';
 import DocItemLoader from '../DocItemLoader';
 import TestFileComparer from '../TestFileComparer';
@@ -28,19 +27,6 @@ describe('DocItemLoader tests', function (): void {
         './lib/inheritedDoc-output.json',
         './testInputs/inheritedDoc-output.json'
       );
-    });
-
-    it('Should not raise error without scope and not found', (): void => {
-      const apiDefRef: IApiDefinitionReference = {
-        scopeName: '',
-        packageName: 'sp-core-libarary',
-        exportName: 'DisplayMode',
-        memberName: ''
-      };
-      const docItemLoader: DocItemLoader = new DocItemLoader('./testInputs/example2');
-
-      const apiDocItem: IDocItem = docItemLoader.getItem(apiDefRef);
-      assert.equal(apiDocItem, undefined);
     });
   });
 });

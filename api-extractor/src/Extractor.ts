@@ -26,11 +26,11 @@ export interface IExtractorOptions {
 /**
   * Options for Extractor.analyze()
   */
-export interface IApiAnalyzerOptions {
+export interface IExtractorAnalyzeOptions {
   /**
     * The entry point for the project.  This should correspond to the "main" field
     * from NPM's package.json file.  If it is a relative path, it will be relative to
-    * the project folder described by IApiAnalyzerOptions.compilerOptions.
+    * the project folder described by IExtractorAnalyzeOptions.compilerOptions.
     */
   entryPointFile: string;
 
@@ -76,7 +76,7 @@ export default class Extractor {
   /**
     * Analyzes the specified project.
     */
-  public analyze(options: IApiAnalyzerOptions): void {
+  public analyze(options: IExtractorAnalyzeOptions): void {
     const rootFiles: string[] = [options.entryPointFile].concat(options.otherFiles || []);
 
     const program: ts.Program = ts.createProgram(rootFiles, this._compilerOptions);

@@ -55,7 +55,7 @@ class ExternalApiHelper {
 class Extractor {
   // (undocumented)
   constructor(options: IExtractorOptions);
-  public analyze(options: IApiAnalyzerOptions): void;
+  public analyze(options: IExtractorAnalyzeOptions): void;
   public static defaultErrorHandler(message: string, fileName: string, lineNumber: number): void;
   public docItemLoader: DocItemLoader;
   // (undocumented)
@@ -68,7 +68,7 @@ class Extractor {
   public typeChecker: ts.TypeChecker;
 }
 
-interface IApiAnalyzerOptions {
+interface IExtractorAnalyzeOptions {
   entryPointFile: string;
   otherFiles?: string[];
 }

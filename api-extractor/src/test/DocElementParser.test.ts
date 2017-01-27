@@ -50,6 +50,7 @@ class TestApiDocumentation extends ApiDocumentation {
   }
 }
 
+extractor.loadExternalPackages('./testInputs/external-api-json');
 // Run the analyze method once to be used by unit tests
 extractor.analyze({
   entryPointFile: path.join(inputFolder, 'index.ts')
