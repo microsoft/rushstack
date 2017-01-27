@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-karma",
   "entries": [
     {
+      "version": "2.1.0",
+      "tag": "@microsoft/gulp-core-build-karma_v2.1.0",
+      "date": "Fri, 27 Jan 2017 23:27:42 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add an additional configuration option (testMatch) to the KarmaTask configuration. If this option is specified, the KarmaTask will create a tests.js file in the temp folder which uses the testMatch regular expression to  locate test files."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.2",
       "tag": "@microsoft/gulp-core-build-karma_v2.0.2",
       "date": "Fri, 20 Jan 2017 01:46:41 GMT",
