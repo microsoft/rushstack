@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Fri, 27 Jan 2017 02:35:10 GMT and should not be manually modified.
+This log was last generated on Fri, 27 Jan 2017 20:04:15 GMT and should not be manually modified.
+
+## 2.2.3
+Fri, 27 Jan 2017 20:04:15 GMT
+
+### Patches
+
+- Added external json docs loading before analyzing API
 
 ## 2.2.2
 Fri, 27 Jan 2017 02:35:10 GMT
