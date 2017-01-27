@@ -2,6 +2,23 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "2.2.2",
+      "tag": "@microsoft/gulp-core-build-typescript_v2.2.2",
+      "date": "Fri, 27 Jan 2017 02:35:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added external-api-json folder with external types definitions. Added gulp task to run ApiExtractor on external types defintions."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `>=1.1.3 <2.0.0` to `>=1.1.4 <2.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.1",
       "tag": "@microsoft/gulp-core-build-typescript_v2.2.1",
       "date": "Thu, 19 Jan 2017 02:37:34 GMT",

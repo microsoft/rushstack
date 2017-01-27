@@ -1,6 +1,15 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 24 Jan 2017 01:36:35 GMT and should not be manually modified.
+This log was last generated on Fri, 27 Jan 2017 02:35:10 GMT and should not be manually modified.
+
+## 1.1.4
+Fri, 27 Jan 2017 02:35:10 GMT
+
+### Patches
+
+- Added ExternalApiHelper class to be used in generating api documentation json files for external types.
+- Added description for packages implementation.
+- Added config folder with file to enable api-extractor on itself. rebuild project on previous build.
 
 ## 1.1.3
 Tue, 24 Jan 2017 01:36:35 GMT
