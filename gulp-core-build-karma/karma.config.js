@@ -4,6 +4,8 @@
 // Generated on Thu Oct 08 2015 18:13:05 GMT-0700 (PDT)
 
 let path = require('path');
+let build = require('@microsoft/gulp-core-build');
+let build = require('@microsoft/gulp-core-build');
 let configResources = require('@microsoft/gulp-core-build-karma').configResources;
 
 let bindPolyfillPath = configResources.bindPolyfillPath;
@@ -21,7 +23,7 @@ module.exports = function(config) {
 
 
     // list of files / patterns to load in the browser
-      files: [bindPolyfillPath].concat(['lib/tests.js']),
+    files: [bindPolyfillPath].concat([path.join(build.getConfig().tempFolder, 'tests.js')]),
 
 
     // list of files to exclude

@@ -1,19 +1,23 @@
 import { GulpTask, IBuildConfig } from '@microsoft/gulp-core-build';
 
+import * as os from 'os';
+import * as fs from 'fs';
 import * as gulp from 'gulp';
 import * as path from 'path';
 import * as KarmaType from 'karma';
 
 export interface IKarmaTaskConfig {
   configPath: string;
+  /** If specified, a "tests.js" file will be created in the temp folder using
+   * this RegExp to locate test files.
+   */
+  testMatch: RegExp | string;
 }
 
 export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
-
-  public name: string = 'karma';
-
   public taskConfig: IKarmaTaskConfig = {
-    configPath: './karma.config.js'
+    configPath: './karma.config.js',
+    testMatch: /.+\.test\.js?$/
   };
 
   public get resources(): Object {
@@ -37,6 +41,17 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
 
   private _resources: Object;
 
+  constructor() {
+    super();
+    this.name = 'karma';
+  }
+
+  public getCleanMatch(buildConfig: IBuildConfig, taskConfig: IKarmaTaskConfig = this.taskConfig): string[] {
+    return [
+      path.join(buildConfig.tempFolder, 'tests.js')
+    ];
+  }
+
   public isEnabled(buildConfig: IBuildConfig): boolean {
     return (
       super.isEnabled(buildConfig) &&
@@ -57,7 +72,6 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
           ` karma.setConfig({ configPath: null }) in your gulpfile.`);
       } else {
         this.copyFile(path.resolve(__dirname, '../karma.config.js'));
-        this.copyFile(path.resolve(__dirname, '../tests.js'), 'src/tests.js');
 
         // install dev dependencies?
         // phantomjs-polyfill?
@@ -67,6 +81,28 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
 
       completeCallback();
     } else {
+      // Normalize the match expression if one was specified
+      const { testMatch } = this.taskConfig; // tslint:disable-line:typedef
+      if (testMatch) {
+        let normalizedMatch: RegExp;
+        if (typeof testMatch === 'string') {
+          normalizedMatch = new RegExp(testMatch as string);
+        } else if (testMatch instanceof RegExp) {
+          normalizedMatch = testMatch;
+        } else {
+          completeCallback('The testMatch regular expression is invalid');
+          return;
+        }
+
+        const testsJsFileContents: string = [
+          `var context = require.context('${this.buildConfig.libFolder}', true, ${normalizedMatch.toString()});`,
+          `context.keys().forEach(context);`,
+          `module.exports = context;`
+        ].join(os.EOL);
+
+        fs.writeFileSync(path.join(this.buildConfig.tempFolder, 'tests.js'), testsJsFileContents);
+      }
+
       const karma: typeof KarmaType = require('karma'); // tslint:disable-line
       const server: KarmaType.Server = karma.Server;
       const singleRun: boolean = (process.argv.indexOf('--debug') === -1);
