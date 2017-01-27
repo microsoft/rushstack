@@ -6,7 +6,11 @@ import * as path from 'path';
 import * as through from 'through2';
 import * as gulpUtil from 'gulp-util';
 import { GulpTask } from '@microsoft/gulp-core-build';
-import { Analyzer, IApiAnalyzerOptions, ApiFileGenerator, ApiJsonGenerator } from '@microsoft/api-extractor';
+import { Extractor,
+  IExtractorOptions,
+  IExtractorAnalyzeOptions,
+  ApiFileGenerator,
+  ApiJsonGenerator } from '@microsoft/api-extractor';
 import { TypeScriptConfiguration } from './TypeScriptConfiguration';
 import * as typescript from 'typescript'; /* tslint:disable-line */
 
@@ -91,19 +95,22 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
     const compilerOptions: typescript.CompilerOptions =
       TypeScriptConfiguration.getTypescriptOptions(this.buildConfig).compilerOptions;
 
-    const analyzerOptions: IApiAnalyzerOptions = {
-      entryPointFile,
-      compilerOptions,
-      otherFiles
-    } as any; /* tslint:disable-line:no-any */
-
-    const analyzer: Analyzer = new Analyzer(
-      (message: string, fileName: string, lineNumber: number): void => {
+    const extractorOptions: IExtractorOptions = {
+      compilerOptions: compilerOptions,
+      errorHandler: (message: string, fileName: string, lineNumber: number): void => {
         this.logWarning(`${message}` + os.EOL
           + `  ${fileName}#${lineNumber}`);
       }
-    );
-    analyzer.analyze(analyzerOptions);
+    };
+
+    const analyzeOptions: IExtractorAnalyzeOptions = {
+      entryPointFile,
+      otherFiles
+    } as any; /* tslint:disable-line:no-any */
+
+    const extractor: Extractor = new Extractor(extractorOptions);
+    extractor.loadExternalPackages(path.join(__dirname, 'external-api-json'));
+    extractor.analyze(analyzeOptions);
 
     const jsonGenerator: ApiJsonGenerator = new ApiJsonGenerator();
     // const jsonContent: string = generator.generateJsonFileContent(analyzer);
@@ -120,11 +127,11 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
     if (fsx.existsSync(this.taskConfig.apiJsonFolder)) {
       const jsonFilePath: string = path.join(this.taskConfig.apiJsonFolder, jsonFileName);
       this.logVerbose(`Writing Api JSON file to ${jsonFilePath}`);
-      jsonGenerator.writeJsonFile(jsonFilePath, analyzer);
+      jsonGenerator.writeJsonFile(jsonFilePath, extractor);
     }
 
     const generator: ApiFileGenerator = new ApiFileGenerator();
-    const actualApiFileContent: string = generator.generateApiFileContent(analyzer);
+    const actualApiFileContent: string = generator.generateApiFileContent(extractor);
 
     // Ex: "project.api.ts"
     const apiFileName: string = path.basename(this.buildConfig.rootPath) + '.api.ts';

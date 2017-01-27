@@ -1,7 +1,7 @@
 /* tslint:disable:no-bitwise */
 
 import * as ts from 'typescript';
-import Analyzer from '../Analyzer';
+import Extractor from '../Extractor';
 import ApiStructuredType from './ApiStructuredType';
 import ApiEnum from './ApiEnum';
 import ApiFunction from './ApiFunction';
@@ -11,10 +11,10 @@ import TypeScriptHelpers from '../TypeScriptHelpers';
 
 /**
   * This class is part of the ApiItem abstract syntax tree.  It represents the top-level
-  * exports for an Rush package.  This object acts as the root of the Analyzer's tree.
+  * exports for an Rush package.  This object acts as the root of the Extractor's tree.
   */
 export default class ApiPackage extends ApiItemContainer {
-  private static _getOptions(analyzer: Analyzer, rootFile: ts.SourceFile): IApiItemOptions {
+  private static _getOptions(extractor: Extractor, rootFile: ts.SourceFile): IApiItemOptions {
     const rootFileSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(rootFile);
     let statement: ts.VariableStatement;
     let foundDescription: ts.Node = undefined;
@@ -31,14 +31,14 @@ export default class ApiPackage extends ApiItemContainer {
     }
 
     return {
-      analyzer,
+      extractor,
       declaration: rootFileSymbol.declarations[0],
       declarationSymbol: rootFileSymbol,
       jsdocNode: foundDescription
     };
   }
-  constructor(analyzer: Analyzer, rootFile: ts.SourceFile) {
-    super(ApiPackage._getOptions(analyzer, rootFile));
+  constructor(extractor: Extractor, rootFile: ts.SourceFile) {
+    super(ApiPackage._getOptions(extractor, rootFile));
 
     const exportSymbols: ts.Symbol[] = this.typeChecker.getExportsOfModule(this.declarationSymbol);
     if (exportSymbols) {
@@ -52,7 +52,7 @@ export default class ApiPackage extends ApiItemContainer {
 
         for (const declaration of followedSymbol.declarations) {
           const options: IApiItemOptions = {
-            analyzer: this.analyzer,
+            extractor: this.extractor,
             declaration,
             declarationSymbol: followedSymbol,
             jsdocNode: declaration,

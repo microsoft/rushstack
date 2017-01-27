@@ -2,7 +2,7 @@
 /* tslint:disable:no-constant-condition */
 
 import * as ts from 'typescript';
-import Analyzer from '../Analyzer';
+import Extractor from '../Extractor';
 import ApiDocumentation from './ApiDocumentation';
 
 /**
@@ -10,9 +10,9 @@ import ApiDocumentation from './ApiDocumentation';
   */
 export interface IApiItemOptions {
   /**
-   * The associated Analyzer object for this ApiItem
+   * The associated Extractor object for this ApiItem
    */
-  analyzer: Analyzer;
+  extractor: Extractor;
   /**
    * The declaration node for the main syntax item that this ApiItem is associated with. 
    */
@@ -53,7 +53,7 @@ abstract class ApiItem {
   public name: string;
 
   /**
-   * A list of analyzer warnings that were reported using ApiItem.reportWarning().
+   * A list of extractor warnings that were reported using ApiItem.reportWarning().
    * Whereas an "error" will break the build, a "warning" will merely be tracked in
    * the API file produced by ApiFileGenerator.
    */
@@ -69,9 +69,9 @@ abstract class ApiItem {
   public documentation: ApiDocumentation;
 
   /**
-   * The Analyzer object that acts as the root of the abstract syntax tree that this item belongs to.
+   * The Extractor object that acts as the root of the abstract syntax tree that this item belongs to.
    */
-  protected analyzer: Analyzer;
+  protected extractor: Extractor;
 
   /**
    * Syntax information from the TypeScript Compiler API, corresponding to the place
@@ -108,14 +108,14 @@ abstract class ApiItem {
     this._errorNode = options.declaration;
     this.warnings = [];
 
-    this.analyzer = options.analyzer;
+    this.extractor = options.extractor;
     this.declarationSymbol = options.declarationSymbol;
     this.exportSymbol = options.exportSymbol || this.declarationSymbol;
 
     this.name = this.exportSymbol.name || '???';
-    this.typeChecker = this.analyzer.typeChecker;
+    this.typeChecker = this.extractor.typeChecker;
 
-    this.documentation = new ApiDocumentation(this, options.analyzer.docItemLoader, this.reportError);
+    this.documentation = new ApiDocumentation(this, options.extractor.docItemLoader, this.reportError);
   }
 
   /**
@@ -172,11 +172,11 @@ abstract class ApiItem {
   }
 
   /**
-   * Reports an error through the ApiErrorHandler interface that was registered with the Analyzer,
+   * Reports an error through the ApiErrorHandler interface that was registered with the Extractor,
    * adding the filename and line number information for the declaration of this ApiItem.
    */
   protected reportError(message: string): void {
-    this.analyzer.reportError(message, this._errorNode.getSourceFile(), this._errorNode.getStart());
+    this.extractor.reportError(message, this._errorNode.getSourceFile(), this._errorNode.getStart());
   }
 
  /**

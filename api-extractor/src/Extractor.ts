@@ -1,13 +1,15 @@
 import * as ts from 'typescript';
+import * as fsx from 'fs-extra';
+import * as path from 'path';
 import ApiPackage from './definitions/ApiPackage';
 import DocItemLoader from './DocItemLoader';
 
 export type ApiErrorHandler = (message: string, fileName: string, lineNumber: number) => void;
 
 /**
-  * Options for Analyzer.analyze()
-  */
-export interface IApiAnalyzerOptions {
+ * Options for Extractor contructor.
+ */
+export interface IExtractorOptions {
   /**
     * Configuration for the TypeScript compiler.  The most important options to set are:
     *
@@ -18,10 +20,17 @@ export interface IApiAnalyzerOptions {
     */
   compilerOptions: ts.CompilerOptions;
 
+  errorHandler?: ApiErrorHandler;
+}
+
+/**
+  * Options for Extractor.analyze()
+  */
+export interface IExtractorAnalyzeOptions {
   /**
     * The entry point for the project.  This should correspond to the "main" field
     * from NPM's package.json file.  If it is a relative path, it will be relative to
-    * the project folder described by IApiAnalyzerOptions.compilerOptions.
+    * the project folder described by IExtractorAnalyzeOptions.compilerOptions.
     */
   entryPointFile: string;
 
@@ -39,7 +48,7 @@ export interface IApiAnalyzerOptions {
   * TypeScript Compiler API to analyze a project, and constructs the ApiItem
   * abstract syntax tree.
   */
-export default class Analyzer {
+export default class Extractor {
   public errorHandler: ApiErrorHandler;
   public typeChecker: ts.TypeChecker;
   public package: ApiPackage;
@@ -49,6 +58,8 @@ export default class Analyzer {
    */
   public docItemLoader: DocItemLoader;
 
+  private _compilerOptions: ts.CompilerOptions;
+
   /**
     * The default implementation of ApiErrorHandler, which merely writes to console.log().
     */
@@ -56,18 +67,19 @@ export default class Analyzer {
     console.log(`ERROR: [${fileName}:${lineNumber}] ${message}`);
   }
 
-  constructor(errorHandler?: ApiErrorHandler) {
-    this.errorHandler = errorHandler || Analyzer.defaultErrorHandler;
+  constructor(options: IExtractorOptions) {
+    this._compilerOptions = options.compilerOptions;
+    this.docItemLoader = new DocItemLoader(options.compilerOptions.rootDir);
+    this.errorHandler = options.errorHandler || Extractor.defaultErrorHandler;
   }
 
   /**
     * Analyzes the specified project.
     */
-  public analyze(options: IApiAnalyzerOptions): void {
-    this.docItemLoader = new DocItemLoader(options.compilerOptions.rootDir);
+  public analyze(options: IExtractorAnalyzeOptions): void {
     const rootFiles: string[] = [options.entryPointFile].concat(options.otherFiles || []);
 
-    const program: ts.Program = ts.createProgram(rootFiles, options.compilerOptions);
+    const program: ts.Program = ts.createProgram(rootFiles, this._compilerOptions);
 
     // This runs a full type analysis, and then augments the Abstract Syntax Tree (i.e. declarations)
     // with semantic information (i.e. symbols).  The "diagnostics" are a subset of the everyday
@@ -92,5 +104,28 @@ export default class Analyzer {
   public reportError(message: string, sourceFile: ts.SourceFile, start: number): void {
     const lineNumber: number = sourceFile.getLineAndCharacterOfPosition(start).line;
     this.errorHandler(message, sourceFile.fileName, lineNumber);
+  }
+
+  /**
+   * Scans for external package api files and loads them into the docItemLoader member before 
+   * any API analyzation begins.
+   * 
+   * @param externalJsonCollectionPath - an absolute path to to the folder that contains all the external 
+   * api json files. 
+   * Ex: if externalJsonPath is './resources', then in that folder
+   * are 'es6-collections.api.json', 'es6-promise.api.json', etc.
+   */
+  public loadExternalPackages(externalJsonCollectionPath: string): void {
+    if (!externalJsonCollectionPath) {
+      return;
+    }
+
+    const files: string[] = fsx.readdirSync(externalJsonCollectionPath);
+    files.forEach(file => {
+      if (path.extname(file) === '.json') {
+        const externalJsonFilePath: string = path.join(externalJsonCollectionPath, file);
+        this.docItemLoader.loadPackageIntoCache(externalJsonFilePath);
+      }
+    });
   }
 }

@@ -1,0 +1,15 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Added external json docs loading before analyzing API",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Changed name of Analyzer to Extractor, added support for external api json doc loading.",
+      "type": "patch"
+    }
+  ],
+  "email": "dgaeta@users.noreply.github.com"
+}

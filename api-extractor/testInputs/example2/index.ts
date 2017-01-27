@@ -7,6 +7,7 @@ declare const packageDescription: void;
 
 export {
     TestMissingCommentStar,
+    IExternalPackageLookup,
     inheritDisplayMode,
     inheritCorrectlyButNotFound,
     inheritDisplayModeError,
