@@ -3,7 +3,7 @@
 import { assert } from 'chai';
 import * as ts from 'typescript';
 import * as path from 'path';
-import Analyzer from '../../Analyzer';
+import Extractor from '../../Extractor';
 import ApiStructuredType from '../ApiStructuredType';
 import ApiDocumentation, { ApiTag } from '../ApiDocumentation';
 import { IApiDefinitionReference } from '../../IApiDefinitionReference';
@@ -20,8 +20,17 @@ function testErrorHandler(message: string, fileName: string, lineNumber: number)
   capturedErrors.push({ message, fileName, lineNumber });
 }
 
-const analyzer: Analyzer = new Analyzer(testErrorHandler);
 const inputFolder: string = './testInputs/example2';
+const compilerOptions: ts.CompilerOptions = {
+  target: ts.ScriptTarget.ES5,
+  module: ts.ModuleKind.CommonJS,
+  moduleResolution: ts.ModuleResolutionKind.NodeJs,
+  rootDir: inputFolder
+};
+const extractor: Extractor = new Extractor({
+  compilerOptions: compilerOptions,
+  errorHandler: testErrorHandler
+});
 let myDocumentedClass: ApiStructuredType;
 
 /**
@@ -29,22 +38,17 @@ let myDocumentedClass: ApiStructuredType;
  */
 class TestApiDocumentation extends ApiDocumentation {
   constructor() {
-    super(myDocumentedClass, analyzer.docItemLoader, (msg: string) => { return; });
+    super(myDocumentedClass, extractor.docItemLoader, (msg: string) => { return; });
   }
 }
 
+extractor.loadExternalPackages('./testInputs/external-api-json');
 // Run the analyzer once to be used by unit tests
-analyzer.analyze({
-  compilerOptions: {
-    target: ts.ScriptTarget.ES5,
-    module: ts.ModuleKind.CommonJS,
-    moduleResolution: ts.ModuleResolutionKind.NodeJs,
-    rootDir: inputFolder
-  },
+extractor.analyze({
   entryPointFile: path.join(inputFolder, 'index.ts')
 });
 
-myDocumentedClass = analyzer.package.getSortedMemberItems()
+myDocumentedClass = extractor.package.getSortedMemberItems()
   .filter(apiItem => apiItem.name === 'MyDocumentedClass')[0] as ApiStructuredType;
 
 describe('ApiDocumentation tests', function (): void {

@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 import * as os from 'os';
 import * as path from 'path';
 import * as fs from 'fs';
-import Analyzer from './Analyzer';
+import Extractor from './Extractor';
 import ApiJsonGenerator from './generators/ApiJsonGenerator';
 
 /**
@@ -23,12 +23,22 @@ export default class ExternalApiHelper {
    * Ex: 'resources/external-api-json/es6-promise/index.t.ds'
    */
   public static generateApiJson(rootDir: string, libFolder: string, externalPackageFilePath: string): void {
-    const analyzer: Analyzer = new Analyzer(
+    const compilerOptions: ts.CompilerOptions = {
+      target: ts.ScriptTarget.ES5,
+      module: ts.ModuleKind.CommonJS,
+      moduleResolution: ts.ModuleResolutionKind.NodeJs,
+      experimentalDecorators: true,
+      jsx: ts.JsxEmit.React,
+      rootDir: rootDir
+    };
+    const extractor: Extractor = new Extractor( {
+      compilerOptions: compilerOptions,
+      errorHandler:
         (message: string, fileName: string, lineNumber: number): void => {
           console.log(`TypeScript error: ${message}` + os.EOL
             + `  ${fileName}#${lineNumber}`);
         }
-      );
+    });
 
     let outputPath: string = path.join(rootDir, libFolder);
     if (!fs.existsSync(outputPath)) {
@@ -44,21 +54,13 @@ export default class ExternalApiHelper {
     const outputApiJsonFilePath: string = path.join(outputPath, `${path.basename(externalPackageRootDir)}.api.json`);
     const entryPointFile: string = path.join(rootDir, externalPackageFilePath);
 
-    analyzer.analyze({
-      compilerOptions: {
-        target: ts.ScriptTarget.ES5,
-        module: ts.ModuleKind.CommonJS,
-        moduleResolution: ts.ModuleResolutionKind.NodeJs,
-        experimentalDecorators: true,
-        jsx: ts.JsxEmit.React,
-        rootDir: rootDir
-      },
+    extractor.analyze({
       entryPointFile: entryPointFile, // local/bundles/platform-exports.ts',
       otherFiles: []
     });
 
     const apiJsonGenerator: ApiJsonGenerator = new ApiJsonGenerator();
-    apiJsonGenerator.writeJsonFile(outputApiJsonFilePath, analyzer);
+    apiJsonGenerator.writeJsonFile(outputApiJsonFilePath, extractor);
 
   }
 }

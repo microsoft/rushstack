@@ -64,7 +64,7 @@ export default class ApiMember extends ApiItem {
       const propertyTypeSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(propertyTypeDeclaration);
 
       const typeLiteralOptions: IApiItemOptions = {
-        analyzer: this.analyzer,
+        extractor: this.extractor,
         declaration: propertyTypeDeclaration,
         declarationSymbol: propertyTypeSymbol,
         jsdocNode: propertyTypeDeclaration

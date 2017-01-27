@@ -29,8 +29,9 @@ export interface IParsedScopeName {
  * then use DocItemLoader.getItem to retrieve the IDocItem of a particular API item.
  */
 export default class DocItemLoader {
-  private cache: Map<string, IDocPackage>;
-  private projectFolder: string; // Root directory to check for node modules
+  private _cache: Map<string, IDocPackage>;
+  private _projectFolder: string; // Root directory to check for node modules
+  private _errorHandler: (message: string) => void;
 
   /**
    * The projectFolder is the top-level folder containing package.json for a project
@@ -41,8 +42,8 @@ export default class DocItemLoader {
       throw new Error(`An NPM project was not found in the specified folder: ${projectFolder}`);
     }
 
-    this.projectFolder = projectFolder;
-    this.cache = new Map<string, IDocPackage>();
+    this._projectFolder = projectFolder;
+    this._cache = new Map<string, IDocPackage>();
   }
 
   /**
@@ -51,12 +52,13 @@ export default class DocItemLoader {
    * will attempt to the locate the associated json file to load the package and
    * check there. If the API item can not be found the method will return undefined.
    */
-  public getItem(apiDefinitionRef: IApiDefinitionReference): IDocItem {
+  public getItem(apiDefinitionRef: IApiDefinitionReference, reportError: (message: string) => void): IDocItem {
     if (!apiDefinitionRef) {
-      throw new Error('Expected param to DocItemLoader.getItem() to be defined');
+      reportError('Expected reference within {@inheritdoc} tag');
+      return undefined;
     }
     // Try to load the package given the provided packageName into the cache
-    const docPackage: IDocPackage =  this.getPackage(apiDefinitionRef);
+    const docPackage: IDocPackage =  this.getPackage(apiDefinitionRef, reportError);
 
     // Check if package was not found
     if (!docPackage) {
@@ -90,7 +92,7 @@ export default class DocItemLoader {
    *
    * @param apiDefinitionRef - interface with propropties pertaining to the API definition reference
    */
-  public getPackage(apiDefinitionRef: IApiDefinitionReference): IDocPackage {
+  public getPackage(apiDefinitionRef: IApiDefinitionReference, reportError: (message: string) => void): IDocPackage {
     let cachePackageName: string = '';
 
     // We concatenate the scopeName and packageName in case there are packageName conflicts
@@ -100,13 +102,18 @@ export default class DocItemLoader {
       cachePackageName = apiDefinitionRef.packageName;
     }
     // Check if package exists in cache
-    if (cachePackageName in this.cache) {
-        return this.cache[cachePackageName];
+    if (this._cache.has(cachePackageName)) {
+        return this._cache.get(cachePackageName);
+    }
+
+    if (!apiDefinitionRef.packageName) {
+      // Local export resolution is currently not supported yet
+      return;
     }
 
     // Doesn't exist in cache, attempt to load the json file
     const packageJsonFilePath: string =  path.join(
-      this.projectFolder,
+      this._projectFolder,
       'node_modules',
       apiDefinitionRef.scopeName,
       apiDefinitionRef.packageName,
@@ -114,9 +121,19 @@ export default class DocItemLoader {
     );
 
     if (!fsx.existsSync(path.join(packageJsonFilePath))) {
-      return undefined;
+      // package not found in node_modules
+      reportError(`@inheritdoc referenced package ("${apiDefinitionRef.packageName}") not found in node modules.`);
+      return;
     }
 
+    return this.loadPackageIntoCache(packageJsonFilePath);
+  }
+
+  /**
+   * Loads the API documentation json file and validates that it conforms to our schema. If it does, 
+   * then the json file is saved in the cache and returned.
+   */
+  public loadPackageIntoCache(packageJsonFilePath: string): IDocPackage {
     const apiPackage: IDocPackage = JsonFile.loadJsonFile(packageJsonFilePath) as IDocPackage;
 
     // Validate that the output conforms to our JSON schema
@@ -132,8 +149,8 @@ export default class DocItemLoader {
       }
     );
 
-    // JSON schema has been found and validated
-    this.cache[cachePackageName] = apiPackage;
+    const packageName: string = path.basename(packageJsonFilePath).split('.').shift();
+    this._cache.set(packageName, apiPackage);
     return apiPackage;
   }
 }

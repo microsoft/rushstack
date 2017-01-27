@@ -454,7 +454,7 @@ export default class ApiDocumentation {
     }
 
     // Atempt to locate the apiDefinitionRef
-    const inheritedDoc: IDocItem = this.docItemLoader.getItem(apiDefinitionRef);
+    const inheritedDoc: IDocItem = this.docItemLoader.getItem(apiDefinitionRef, this.reportError);
 
     // If no IDocItem found then nothing to inherit
     // But for the time being set the summary to a text object
