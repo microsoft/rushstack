@@ -8,6 +8,11 @@
     "clean": "gulp clean",
     "test": "gulp"
   },
+  "devDependencies": {
+    "@types/chai": ">=3.4.34 <3.6.0",
+    "@types/mocha": ">=2.2.33 <2.6.0",
+    "chai": "~3.5.0"
+  },
   "dependencies": {
     "@microsoft/load-themed-styles": "^1.2.2",
     "@microsoft/web-library-build": ">=2.1.0 <3.0.0",

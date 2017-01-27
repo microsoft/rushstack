@@ -22,3 +22,4 @@ class WebpackTask extends GulpTask<IWebpackTaskConfig> {
 
 // WARNING: Unsupported export: webpack
 // WARNING: Unsupported export: default
+// (No packageDescription for this package)
