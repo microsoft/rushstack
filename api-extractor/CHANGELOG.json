@@ -2,6 +2,24 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "1.1.4",
+      "tag": "@microsoft/api-extractor_v1.1.4",
+      "date": "Fri, 27 Jan 2017 02:35:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added ExternalApiHelper class to be used in generating api documentation json files for external types."
+          },
+          {
+            "comment": "Added description for packages implementation."
+          },
+          {
+            "comment": "Added config folder with file to enable api-extractor on itself. rebuild project on previous build."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.3",
       "tag": "@microsoft/api-extractor_v1.1.3",
       "date": "Tue, 24 Jan 2017 01:36:35 GMT",
