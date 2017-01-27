@@ -1,0 +1,20 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "packageName": "@microsoft/package-deps-hash",
+      "type": "none"
+    },
+    {
+      "comment": "",
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "type": "none"
+    },
+    {
+      "comment": "",
+      "packageName": "@microsoft/api-extractor",
+      "type": "none"
+    }
+  ],
+  "email": "pgonzal@users.noreply.github.com"
+}
