@@ -13,6 +13,21 @@
     }
   ],
   "exports": {
+    "IExternalPackageLookup": {
+      "kind": "interface",
+      "extends": "",
+      "implements": "",
+      "typeParameters": [],
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "this summary description has been added manually. It does not actually exist in the json documentation but it was added to demonstate the external packages loader is working."
+        }
+      ],
+      "remarks": [],
+      "isBeta": false
+    },
     "inheritCorrectlyButNotFound": {
       "kind": "enum",
       "values": {},

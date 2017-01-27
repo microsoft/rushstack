@@ -3,23 +3,26 @@
 
 import * as ts from 'typescript';
 import * as path from 'path';
-import Analyzer from './Analyzer';
+import Extractor from './Extractor';
 import ApiFileGenerator from './generators/ApiFileGenerator';
-
-const analyzer: Analyzer = new Analyzer();
 
 const inputFolder: string = './testInputs/example1';
 const outputFile: string = './lib/example1-output.ts';
 
-analyzer.analyze({
-compilerOptions: {
-    target: ts.ScriptTarget.ES5,
-    module: ts.ModuleKind.CommonJS,
-    moduleResolution: ts.ModuleResolutionKind.NodeJs,
-    rootDir: inputFolder
-},
+const compilerOptions: ts.CompilerOptions = {
+  target: ts.ScriptTarget.ES5,
+  module: ts.ModuleKind.CommonJS,
+  moduleResolution: ts.ModuleResolutionKind.NodeJs,
+  rootDir: inputFolder
+};
+const extractor: Extractor = new Extractor({
+  compilerOptions: compilerOptions,
+  errorHandler: console.log
+});
+
+extractor.analyze({
 entryPointFile: path.join(inputFolder, 'index.ts')
 });
 
 const apiFileGenerator: ApiFileGenerator = new ApiFileGenerator();
-apiFileGenerator.writeApiFile(outputFile, analyzer);
+apiFileGenerator.writeApiFile(outputFile, extractor);

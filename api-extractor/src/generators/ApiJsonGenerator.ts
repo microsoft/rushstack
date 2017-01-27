@@ -2,7 +2,7 @@ import * as os  from 'os';
 import * as path from 'path';
 import * as ts from 'typescript';
 
-import Analyzer from '../Analyzer';
+import Extractor from '../Extractor';
 import ApiStructuredType, { ApiStructuredTypeKind } from '../definitions/ApiStructuredType';
 import ApiEnum from '../definitions/ApiEnum';
 import ApiEnumValue from '../definitions/ApiEnumValue';
@@ -49,8 +49,8 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
 
   protected jsonOutput: Object = {};
 
-  public writeJsonFile(reportFilename: string, analyzer: Analyzer): void {
-    this.visit(analyzer.package, this.jsonOutput);
+  public writeJsonFile(reportFilename: string, extractor: Extractor): void {
+    this.visit(extractor.package, this.jsonOutput);
 
     // Write the output before validating the schema, so we can debug it
     JsonFile.saveJsonFile(reportFilename, this.jsonOutput);

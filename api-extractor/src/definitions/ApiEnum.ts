@@ -15,7 +15,7 @@ export default class ApiEnum extends ApiItemContainer {
       const memberSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(memberDeclaration);
 
       const memberOptions: IApiItemOptions = {
-        analyzer: this.analyzer,
+        extractor: this.extractor,
         declaration: memberDeclaration,
         declarationSymbol: memberSymbol,
         jsdocNode: memberDeclaration
