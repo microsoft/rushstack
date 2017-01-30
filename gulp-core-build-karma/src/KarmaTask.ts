@@ -8,10 +8,12 @@ import * as KarmaType from 'karma';
 
 export interface IKarmaTaskConfig {
   configPath: string;
-  /** If specified, a "tests.js" file will be created in the temp folder using
-   * this RegExp to locate test files.
+
+  /**
+   * If specified, a "tests.js" file will be created in the temp folder using
+   *  this RegExp to locate test files.
    */
-  testMatch: RegExp | string;
+  testMatch?: RegExp | string;
 }
 
 export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
@@ -66,7 +68,7 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
         this.logWarning(
           `No karma config has been provided. ` +
           `Run again using --initkarma to create a default config, or call ` +
-          ` karma.setConfig({ configPath: null }) in your gulpfile.`);
+          `karma.setConfig({ configPath: null }) in your gulpfile.`);
       } else {
         this.copyFile(path.resolve(__dirname, '../karma.config.js'));
 
@@ -79,7 +81,7 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
       completeCallback();
     } else {
       // Normalize the match expression if one was specified
-      const { testMatch } = this.taskConfig; // tslint:disable-line:typedef
+      const { testMatch }: IKarmaTaskConfig = this.taskConfig;
       if (testMatch) {
         let normalizedMatch: RegExp;
 
