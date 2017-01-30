@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-karma",
   "entries": [
     {
+      "version": "2.1.1",
+      "tag": "@microsoft/gulp-core-build-karma_v2.1.1",
+      "date": "Mon, 30 Jan 2017 20:03:56 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Making the \"testMatch\" property of \"IKarmaTaskConfig\" optional."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.1.0",
       "tag": "@microsoft/gulp-core-build-karma_v2.1.0",
       "date": "Fri, 27 Jan 2017 23:27:42 GMT",
