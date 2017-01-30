@@ -27,13 +27,12 @@ export function getPackageDeps(packagePath: string = process.cwd(), excludedPath
 
     if (line) {
       // Take everything after the "100644 blob", which is just the hash and filename
-      const [hash, filename] = line.substr(line.indexOf('blob ') + 5).split('\t');
+      const [hash, filename]: string[] = line.substr(line.indexOf('blob ') + 5).split('\t');
       if (!excludedHashes[filename]) {
         changes.files[filename] = hash;
       }
     }
   });
-
 
   // If there was an issue with `git ls-tree`, or there are no current changes, processOutputBlocks[1]
   // will be empty or undefined
@@ -51,7 +50,7 @@ export function getPackageDeps(packagePath: string = process.cwd(), excludedPath
       .trim()
       .split('\n')
       .forEach(line => {
-        const [changeType, filename] = line.trim().split(' ');
+        const [changeType, filename]: string[] = line.trim().split(' ');
         /*
          * parts[1] == 'D' or 'M' or 'A'
          * parts[2] == filename
