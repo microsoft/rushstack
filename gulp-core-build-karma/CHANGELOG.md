@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-karma
 
-This log was last generated on Fri, 27 Jan 2017 23:27:42 GMT and should not be manually modified.
+This log was last generated on Mon, 30 Jan 2017 20:03:56 GMT and should not be manually modified.
+
+## 2.1.1
+Mon, 30 Jan 2017 20:03:56 GMT
+
+### Patches
+
+- Making the "testMatch" property of "IKarmaTaskConfig" optional.
 
 ## 2.1.0
 Fri, 27 Jan 2017 23:27:42 GMT
