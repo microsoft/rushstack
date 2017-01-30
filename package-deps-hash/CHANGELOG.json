@@ -2,6 +2,18 @@
   "name": "@microsoft/package-deps-hash",
   "entries": [
     {
+      "version": "2.0.0",
+      "tag": "@microsoft/package-deps-hash_v2.0.0",
+      "date": "Mon, 30 Jan 2017 21:37:27 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Update package-deps-hash to not be asynchronous, and fixes a bug where not all changes were reported."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.1",
       "tag": "@microsoft/package-deps-hash_v1.0.1",
       "date": "Fri, 13 Jan 2017 06:46:05 GMT",
