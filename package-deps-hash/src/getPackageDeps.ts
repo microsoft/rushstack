@@ -52,8 +52,8 @@ export function getPackageDeps(packagePath: string = process.cwd(), excludedPath
       .forEach(line => {
         const [changeType, filename]: string[] = line.trim().split(' ');
         /*
-         * parts[1] == 'D' or 'M' or 'A'
-         * parts[2] == filename
+         * changeType == 'D' or 'M' or 'A'
+         * filename == path to the file
          */
 
         if (changeType && filename) {
