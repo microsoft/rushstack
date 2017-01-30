@@ -27,9 +27,9 @@ export function getPackageDeps(packagePath: string = process.cwd(), excludedPath
 
     if (line) {
       // Take everything after the "100644 blob", which is just the hash and filename
-      const parts: string[] = line.substr(line.indexOf('blob ') + 5).split('\t');
-      if (!excludedHashes[parts[1]]) {
-        changes.files[parts[1]] = parts[0];
+      const [hash, filename] = line.substr(line.indexOf('blob ') + 5).split('\t');
+      if (!excludedHashes[filename]) {
+        changes.files[filename] = hash;
       }
     }
   });
@@ -51,20 +51,20 @@ export function getPackageDeps(packagePath: string = process.cwd(), excludedPath
       .trim()
       .split('\n')
       .forEach(line => {
-        const parts: string[] = line.trim().split(' ');
+        const [changeType, filename] = line.trim().split(' ');
         /*
          * parts[1] == 'D' or 'M' or 'A'
          * parts[2] == filename
          */
 
-        if (parts.length === 2) {
+        if (changeType && filename) {
           // If the file is currently deleted, then it will have a 'D'
-          if (parts[0] === 'D') {
-            delete changes.files[parts[1]];
+          if (changeType === 'D') {
+            delete changes.files[filename];
           } else {
             // Otherwise the file was changed or added and we should get the current hash
-            if (!excludedHashes[parts[1]]) {
-              filesToHash.push(parts[1]);
+            if (!excludedHashes[filename]) {
+              filesToHash.push(filename);
             }
           }
         }
