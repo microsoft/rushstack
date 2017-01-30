@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-karma",
+      "comment": "Making the \"testMatch\" property of \"IKarmaTaskConfig\" optional.",
+      "type": "patch"
+    }
+  ],
+  "email": "iclanton@users.noreply.github.com"
+}
