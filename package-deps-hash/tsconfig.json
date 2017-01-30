@@ -6,7 +6,6 @@
     "sourceMap": true,
     "moduleResolution": "node",
     "types": [
-      "es6-promise",
       "node",
       "mocha"
     ],

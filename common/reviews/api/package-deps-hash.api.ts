@@ -1,5 +1,5 @@
 // (undocumented)
-export function getPackageDeps(packagePath: string = process.cwd(), excludedPaths?: string[]): Promise<IPackageDeps>;
+export function getPackageDeps(packagePath: string = process.cwd(), excludedPaths?: string[]): IPackageDeps;
 
 // (undocumented)
 interface IPackageDeps {
