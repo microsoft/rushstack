@@ -52,6 +52,10 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
     );
   }
 
+  protected loadSchema(): Object {
+    return require('./webpack.schema.json');
+  }
+
   public executeTask(gulp: gulp.Gulp, completeCallback: (result?: Object) => void): void {
     const shouldInitWebpack: boolean = (process.argv.indexOf('--initwebpack') > -1);
 

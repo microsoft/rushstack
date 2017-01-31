@@ -84,6 +84,10 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
     tryCreateDevCertificate: false
   };
 
+  protected loadSchema(): Object {
+    return require('./serve.schema.json');
+  }
+
   public executeTask(gulp: gulp.Gulp, completeCallback?: (error?: string) => void): void {
     /* tslint:disable:typedef */
     const gulpConnect = require('gulp-connect');

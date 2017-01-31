@@ -114,6 +114,10 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   private _tsProject: ts.Project;
   private _tsAMDProject: ts.Project;
 
+  protected loadSchema(): Object {
+    return require('./schemas/typescript.schema.json');
+  }
+
   public executeTask(gulp: gulpType.Gulp, completeCallback: (result?: string) => void): void {
     /* tslint:disable:typedef */
     const assign = require('object-assign');

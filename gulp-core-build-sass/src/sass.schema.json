@@ -1,0 +1,38 @@
+{
+  "title": "SASS Task Configuration",
+  "description": "Defines configuration for the SASS compilation task",
+
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "preamble": {
+      "title": "Preamble Text",
+      "description": "An optional parameter for text to include in the generated typescript file.",
+      "type": "string"
+    },
+
+    "postamble": {
+      "title": "Postamble Text",
+      "description": "An optional parameter for text to include at the end of the generated typescript file.",
+      "type": "string"
+    },
+
+    "sassMatch": {
+      "title": "Sass File Glob Pattern",
+      "description": "An array of glob patterns for locating SASS files.",
+      "type": "string"
+    },
+
+    "useCSSModules": {
+      "title": "Use CSS Modules",
+      "description": "If this option is specified, files ending with .module.scss extension will automatically generate a corresponding TypeScript file. All classes will be appended with a hash to help ensure uniqueness on a page. This file can be imported directly, and will contain an object describing the mangled class names.",
+      "type": "boolean"
+    },
+
+    "dropCssFiles": {
+      "title": "Create CSS Files",
+      "description": "If true, we will generate a CSS in the lib folder. If false, the CSS is directly embedded into the TypeScript file",
+      "type": "boolean"
+    }
+  }
+}
