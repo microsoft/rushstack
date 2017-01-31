@@ -45,6 +45,10 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
 
   private _resources: Object;
 
+  public loadSchema(): Object {
+    return require('./karma.schema.json');
+  }
+
   public getCleanMatch(buildConfig: IBuildConfig, taskConfig: IKarmaTaskConfig = this.taskConfig): string[] {
     return [
       path.join(buildConfig.tempFolder, 'tests.js')

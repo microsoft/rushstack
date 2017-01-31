@@ -1,0 +1,30 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-webpack",
+      "comment": "Introduce schema for WebpackTask",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Introduce schema for TsLintTask, TypeScriptTask",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-serve",
+      "comment": "Introduce schema for ServeTask",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-sass",
+      "comment": "Introduce schema for SassTask",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-karma",
+      "comment": "Introduce schema for KarmaTask",
+      "type": "patch"
+    }
+  ],
+  "email": "nickpape-msft@users.noreply.github.com"
+}

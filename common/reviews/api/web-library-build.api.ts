@@ -197,6 +197,8 @@ class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   executeTask(gulp: gulpType.Gulp, completeCallback: (result?: string) => void): void;
   // (undocumented)
   getCleanMatch(buildConfig: IBuildConfig, taskConfig?: ITypeScriptTaskConfig): string[];
+  // (undocumented)
+  protected loadSchema(): Object;
   mergeConfig(config: ITypeScriptTaskConfig): void;
   // (undocumented)
   name: string;
@@ -221,6 +223,8 @@ class WebpackTask extends GulpTask<IWebpackTaskConfig> {
   executeTask(gulp: gulp.Gulp, completeCallback: (result?: Object) => void): void;
   // (undocumented)
   isEnabled(buildConfig: IBuildConfig): boolean;
+  // (undocumented)
+  protected loadSchema(): Object;
   // (undocumented)
   name: string;
   // (undocumented)

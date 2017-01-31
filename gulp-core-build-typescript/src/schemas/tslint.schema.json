@@ -1,0 +1,51 @@
+{
+  "title": "Typescript Linter Task configuration",
+  "description": "Defines configuration options for the tslint tool",
+
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "lintConfig": {
+      "description": "A TsLint configuration object, options are from https://github.com/palantir/tslint#configuration",
+      "type": "object"
+    },
+    "rulesDirectory": {
+      "description": "Directories to search for custom linter rules",
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        }
+      ]
+    },
+    "sourceMatch": {
+      "description": "An array of file selectors (glob syntax) which the linter should analyze",
+       "type": "array",
+       "items": {
+         "type": "string",
+         "minLength": 1
+       },
+       "minItems": 1
+    },
+    "displayAsWarning": {
+      "description": "If true, displays warnings as errors. If the reporter function is overwritten, it should reference this flag. Defaults to `false`.",
+      "type": "boolean"
+    },
+    "removeExistingRules": {
+      "description": "If true, the lintConfig rules which were previously set will be removed. This flag is useful for ensuring that there are no rules activated from previous calls to setConfig(). Default is 'false'.",
+      "type": "boolean"
+    },
+    "useDefaultConfigAsBase": {
+      "description": "If false, does not use a default tslint configuration as the basis for creating the list of active rules. Defaults to 'true'",
+      "type": "boolean"
+    }
+  }
+}
