@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-serve",
   "entries": [
     {
+      "version": "2.0.2",
+      "tag": "@microsoft/gulp-core-build-serve_v2.0.2",
+      "date": "Tue, 31 Jan 2017 01:55:09 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Introduce schema for ServeTask"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.1",
       "tag": "@microsoft/gulp-core-build-serve_v2.0.1",
       "date": "Fri, 13 Jan 2017 06:46:05 GMT",
