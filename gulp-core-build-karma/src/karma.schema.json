@@ -1,0 +1,14 @@
+{
+  "title": "Karma Tester Task Configuration",
+  "description": "Defines parameters for the Karma testing utility",
+
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "karmaConfigPath": {
+      "title": "Path to the karma config file",
+      "description": "Sets the path to the Karma Configuration file to use. If one has not been created, this task will prompt the user to run it again with the --initkarma flag.",
+      "type": "string"
+    }
+  }
+}

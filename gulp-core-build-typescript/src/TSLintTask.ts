@@ -107,6 +107,10 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
     super.setConfig(config);
   }
 
+  public loadSchema(): Object {
+    return require('./schemas/tslint.schema.json');
+  }
+
   public executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream {
     const taskScope: TSLintTask = this;
 

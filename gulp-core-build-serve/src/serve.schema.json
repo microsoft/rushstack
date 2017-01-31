@@ -1,0 +1,71 @@
+{
+  "title": "Serve Task Configuration",
+  "description": "Defines parameters for the webserver which is spun up by the Serve Task",
+
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "api": {
+      "title": "API server configuration",
+      "description": "Parameters which configure the API server, which runs simultaneously and allows for mock testing",
+
+      "type": "object",
+      "additionalProperties": false,
+      "required": [ "port", "entryPath" ],
+      "properties": {
+        "port": {
+          "title": "API Port",
+          "description": "The port which the API server listens on",
+          "type": "number"
+        },
+        "entryPath": {
+          "title": "API Entry Point Path",
+          "description": "The path to the script to run as the API server",
+          "type": "string"
+        }
+      }
+    },
+
+    "initialPage": {
+      "title": "Initial Page",
+      "description": "The path to the page which should open automatically after this task completes",
+      "type": "string"
+    },
+
+    "port": {
+      "title": "Port",
+      "description": "The port on which to host the file server.",
+      "type": "number"
+    },
+
+    "https": {
+      "title": "HTTPS Mode",
+      "description": "If true, the server should run on HTTPS",
+      "type": "boolean"
+    },
+
+    "keyPath": {
+      "title": "HTTPS Key Path",
+      "description": "Path to the HTTPS key",
+      "type": "string"
+    },
+
+    "certPath": {
+      "title": "HTTPS Cert Path",
+      "description": "Path to the HTTPS cert",
+      "type": "string"
+    },
+
+    "pfxPath": {
+      "title": "HTTPS PFX Path",
+      "description": "Path to the HTTPS PFX cert",
+      "type": "string"
+    },
+
+    "tryCreateDevCertificate": {
+      "title": "Should Create Dev Certificate",
+      "description": "If true, when gulp-core-build-serve is initialized and a dev certificate doesn't already exist and hasn't been specified, attempt to generate one and trust it automatically.",
+      "type": "boolean"
+    }
+  }
+}
