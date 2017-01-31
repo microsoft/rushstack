@@ -78,7 +78,7 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
   };
 
   public loadSchema(): Object {
-    return require('./api-extractor.schema.json');
+    return require('./schemas/api-extractor.schema.json');
   };
 
   public executeTask(gulp: gulp.Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream {

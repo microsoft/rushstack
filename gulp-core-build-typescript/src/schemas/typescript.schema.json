@@ -1,0 +1,31 @@
+{
+  "title": "Typescript Task configuration",
+  "description": "Defines configuration options for the typescript compilation task",
+
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "failBuildOnErrors": {
+      "description": "Fails the build when errors occur",
+      "type": "boolean"
+    },
+    "sourceMatch": {
+      "description": "An array of file selectors (glob syntax) which should be compiled by Typescript",
+       "type": "array",
+       "items": {
+         "type": "string",
+         "minLength": 1
+       },
+       "minItems": 1
+    },
+    "staticMatch": {
+      "description": "Glob matches for files to be passed through the build",
+      "type": "array",
+       "items": {
+         "type": "string",
+         "minLength": 1
+       },
+       "minItems": 1
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "title": "Webpack Task Configuration",
+  "description": "Defines parameters for the webpack bundler",
+
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "config": {
+      "title": "WebPack configuration object.",
+      "description": "If a path is specified by `configPath,` and it is valid, this option is ignored.",
+
+      "type": "object",
+      "additionalProperties": true
+    },
+
+    "configPath": {
+      "title": "Path to a webpack config",
+      "description": "A path to a config takes precedence over the `config` option.",
+      "type": "string"
+    },
+
+    "suppressWarnings": {
+      "title": "Warnings To Suppress",
+      "description": "If a warning matches any of these, it will not be logged.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
