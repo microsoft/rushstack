@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-webpack
 
-This log was last generated on Tue, 31 Jan 2017 01:55:09 GMT and should not be manually modified.
+This log was last generated on Tue, 31 Jan 2017 20:32:37 GMT and should not be manually modified.
+
+## 1.1.2
+Tue, 31 Jan 2017 20:32:37 GMT
+
+### Patches
+
+- Make loadSchema public instead of protected.
 
 ## 1.1.1
 Tue, 31 Jan 2017 01:55:09 GMT

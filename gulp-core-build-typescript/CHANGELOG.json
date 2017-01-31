@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "2.2.5",
+      "tag": "@microsoft/gulp-core-build-typescript_v2.2.5",
+      "date": "Tue, 31 Jan 2017 20:32:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Make loadSchema public instead of protected."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.4",
       "tag": "@microsoft/gulp-core-build-typescript_v2.2.4",
       "date": "Tue, 31 Jan 2017 01:55:09 GMT",
