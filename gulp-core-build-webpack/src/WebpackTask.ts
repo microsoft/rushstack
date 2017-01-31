@@ -52,7 +52,7 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
     );
   }
 
-  protected loadSchema(): Object {
+  public loadSchema(): Object {
     return require('./webpack.schema.json');
   }
 
