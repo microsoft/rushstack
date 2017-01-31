@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "2.0.3",
+      "tag": "@microsoft/gulp-core-build-sass_v2.0.3",
+      "date": "Tue, 31 Jan 2017 20:32:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Make loadSchema public instead of protected."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.2",
       "tag": "@microsoft/gulp-core-build-sass_v2.0.2",
       "date": "Tue, 31 Jan 2017 01:55:09 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Tue, 31 Jan 2017 01:55:09 GMT and should not be manually modified.
+This log was last generated on Tue, 31 Jan 2017 20:32:37 GMT and should not be manually modified.
+
+## 2.2.5
+Tue, 31 Jan 2017 20:32:37 GMT
+
+### Patches
+
+- Make loadSchema public instead of protected.
 
 ## 2.2.4
 Tue, 31 Jan 2017 01:55:09 GMT
