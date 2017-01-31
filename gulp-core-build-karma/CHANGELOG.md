@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-karma
 
-This log was last generated on Mon, 30 Jan 2017 20:03:56 GMT and should not be manually modified.
+This log was last generated on Tue, 31 Jan 2017 01:55:09 GMT and should not be manually modified.
+
+## 2.1.2
+Tue, 31 Jan 2017 01:55:09 GMT
+
+### Patches
+
+- Introduce schema for KarmaTask
 
 ## 2.1.1
 Mon, 30 Jan 2017 20:03:56 GMT
