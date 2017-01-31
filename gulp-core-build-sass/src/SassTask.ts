@@ -56,7 +56,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     'src/**/*.scss.ts'
   ];
 
-  protected loadSchema(): Object {
+  public loadSchema(): Object {
     return require('./sass.schema.json');
   }
 
