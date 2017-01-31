@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-serve
 
-This log was last generated on Tue, 31 Jan 2017 01:55:09 GMT and should not be manually modified.
+This log was last generated on Tue, 31 Jan 2017 20:32:37 GMT and should not be manually modified.
+
+## 2.0.3
+Tue, 31 Jan 2017 20:32:37 GMT
+
+### Patches
+
+- Make loadSchema public instead of protected.
 
 ## 2.0.2
 Tue, 31 Jan 2017 01:55:09 GMT
