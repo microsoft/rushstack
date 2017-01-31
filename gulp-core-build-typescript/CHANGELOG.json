@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "2.2.4",
+      "tag": "@microsoft/gulp-core-build-typescript_v2.2.4",
+      "date": "Tue, 31 Jan 2017 01:55:09 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Introduce schema for TsLintTask, TypeScriptTask"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.3",
       "tag": "@microsoft/gulp-core-build-typescript_v2.2.3",
       "date": "Fri, 27 Jan 2017 20:04:15 GMT",

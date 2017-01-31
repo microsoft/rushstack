@@ -2,10 +2,10 @@
 import { loadStyles } from '@microsoft/load-themed-styles';
 
 const styles = {
-  foo: 'foo_fe5c604d',
+  foo: 'foo_ce757c35',
 };
 
 export default styles;
 
-loadStyles([{"rawString":"body{background:red}.foo_fe5c604d{border:1px solid red}"}]);
+loadStyles([{"rawString":"body{background:red}.foo_ce757c35{border:1px solid red}"}]);
 /* tslint:enable */

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-webpack
 
-This log was last generated on Thu, 19 Jan 2017 02:37:34 GMT and should not be manually modified.
+This log was last generated on Tue, 31 Jan 2017 01:55:09 GMT and should not be manually modified.
+
+## 1.1.1
+Tue, 31 Jan 2017 01:55:09 GMT
+
+### Patches
+
+- Introduce schema for WebpackTask
 
 ## 1.1.0
 Thu, 19 Jan 2017 02:37:34 GMT

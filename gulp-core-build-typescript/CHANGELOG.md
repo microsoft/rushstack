@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Fri, 27 Jan 2017 20:04:15 GMT and should not be manually modified.
+This log was last generated on Tue, 31 Jan 2017 01:55:09 GMT and should not be manually modified.
+
+## 2.2.4
+Tue, 31 Jan 2017 01:55:09 GMT
+
+### Patches
+
+- Introduce schema for TsLintTask, TypeScriptTask
 
 ## 2.2.3
 Fri, 27 Jan 2017 20:04:15 GMT
