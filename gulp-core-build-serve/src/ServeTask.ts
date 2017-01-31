@@ -84,7 +84,7 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
     tryCreateDevCertificate: false
   };
 
-  protected loadSchema(): Object {
+  public loadSchema(): Object {
     return require('./serve.schema.json');
   }
 
