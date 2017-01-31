@@ -61,3 +61,6 @@ bin/
 
 # Ignore VS Code personal settings, but keep a root-level setting
 /*/**/.vscode/
+
+# Build artifacts
+**/*.scss.ts
