@@ -150,8 +150,8 @@ An example configuration is below:
   "name": "my-project",
   "version": "1.0.0",
   "scripts": {
-    "clean": "gulp nuke",
-    "build": "echo",
+    "clean": "gulp clean",
+    "build": "gulp",
     "test": "/usr/bin/testcommand --compile --things"
   }
 }
@@ -227,7 +227,7 @@ This file should be added to Git.  It might look like this:
       "allowedCategories": [ "published", "internal", "experiment" ]
     },
     {
-      "name": "some-crazy-tool",
+      "name": "some-tool",
       "allowedCategories": [ "experiment" ]
     }
   ]
@@ -235,7 +235,7 @@ This file should be added to Git.  It might look like this:
 ```
 
 Above, we specified that only our internal projects and experiments are allowed
-to use "lodash", whereas "gulp" is allowed everywhere.  The "some-crazy-tool" library
+to use "lodash", whereas "gulp" is allowed everywhere.  The "some-tool" library
 is being used by an experimental prototype, but should never be used in real projects.
 
 Note that Rush distinguishes "**browserPackages**" from "**nonBrowserPackages**",
