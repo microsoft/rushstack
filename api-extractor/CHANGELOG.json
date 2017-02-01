@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "1.1.6",
+      "tag": "@microsoft/api-extractor_v1.1.6",
+      "date": "Wed, 01 Feb 2017 20:09:30 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added ApiItemKind enum and refactored child classes."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.5",
       "tag": "@microsoft/api-extractor_v1.1.5",
       "date": "Fri, 27 Jan 2017 20:04:15 GMT",
