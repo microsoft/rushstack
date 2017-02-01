@@ -1,4 +1,5 @@
 import * as ts from 'typescript';
+import { override } from '@microsoft/decorators/lib/override';
 import ApiItem, { IApiItemOptions } from './ApiItem';
 import ApiStructuredType from './ApiStructuredType';
 import PrettyPrinter from '../PrettyPrinter';
@@ -71,6 +72,19 @@ export default class ApiMember extends ApiItem {
       };
 
       this.typeLiteral = new ApiStructuredType(typeLiteralOptions);
+    }
+  }
+
+  /**
+   * {@inheritdoc ApiItem.onResolveReferences }
+   */
+  @override
+  protected onResolveReferences(): void {
+    super.onResolveReferences();
+    if (this.typeLiteral) {
+      this.typeLiteral.memberItems.forEach(apiItem => {
+        apiItem.resolveReferences();
+      });
     }
   }
 
