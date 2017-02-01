@@ -8,8 +8,8 @@
   ],
   "properties": {
     "foo": {
-      "title": "A list of foo",
-      "description": "list of foo strings",
+      "title": "A list of strings",
+      "description": "list of strings",
 
       "type": "array",
       "uniqueItems": true,
