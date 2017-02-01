@@ -82,6 +82,7 @@ export default class ApiMember extends ApiItem {
   protected onResolveReferences(): void {
     super.onResolveReferences();
     if (this.typeLiteral) {
+      this.typeLiteral.resolveReferences();
       this.typeLiteral.memberItems.forEach(apiItem => {
         apiItem.resolveReferences();
       });
