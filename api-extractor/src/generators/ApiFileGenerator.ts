@@ -1,10 +1,10 @@
 import * as fs from 'fs';
 import Extractor from '../Extractor';
-import ApiStructuredType, { ApiStructuredTypeKind } from '../definitions/ApiStructuredType';
+import ApiStructuredType from '../definitions/ApiStructuredType';
 import ApiEnum from '../definitions/ApiEnum';
 import ApiEnumValue from '../definitions/ApiEnumValue';
 import ApiFunction from '../definitions/ApiFunction';
-import ApiItem from '../definitions/ApiItem';
+import ApiItem, { ApiItemKind } from '../definitions/ApiItem';
 import ApiItemVisitor from '../ApiItemVisitor';
 import ApiPackage from '../definitions/ApiPackage';
 import ApiParameter from '../definitions/ApiParameter';
@@ -66,7 +66,7 @@ export default class ApiFileGenerator extends ApiItemVisitor {
       return;
     }
 
-    if (apiStructuredType.kind !== ApiStructuredTypeKind.TypeLiteral) {
+    if (apiStructuredType.kind !== ApiItemKind.TypeLiteral) {
       this._writeJsdocSynopsis(apiStructuredType);
     }
 

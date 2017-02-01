@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import ApiItem, { IApiItemOptions } from './ApiItem';
+import ApiItem, { ApiItemKind, IApiItemOptions } from './ApiItem';
 import ApiParameter from './ApiParameter';
 import TypeScriptHelpers from '../TypeScriptHelpers';
 import PrettyPrinter from '../PrettyPrinter';
@@ -16,6 +16,7 @@ class ApiFunction extends ApiItem {
 
   constructor(options: IApiItemOptions) {
     super(options);
+    this.kind = ApiItemKind.Function;
 
     const methodDeclaration: ts.FunctionDeclaration = options.declaration as ts.FunctionDeclaration;
 
