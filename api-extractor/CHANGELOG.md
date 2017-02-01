@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 27 Jan 2017 20:04:15 GMT and should not be manually modified.
+This log was last generated on Wed, 01 Feb 2017 20:09:30 GMT and should not be manually modified.
+
+## 1.1.6
+Wed, 01 Feb 2017 20:09:30 GMT
+
+### Patches
+
+- Added ApiItemKind enum and refactored child classes.
 
 ## 1.1.5
 Fri, 27 Jan 2017 20:04:15 GMT
