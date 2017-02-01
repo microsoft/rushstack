@@ -1,4 +1,3 @@
-import { override } from '@microsoft/decorators/lib/override';
 import ApiItem, { IApiItemOptions } from './ApiItem';
 
 /**
@@ -30,7 +29,6 @@ abstract class ApiItemContainer extends ApiItem {
   /**
    * {@inheritdoc ApiItem.onResolveReferences }
    */
-  @override
   protected onResolveReferences(): void {
     super.onResolveReferences();
     this.memberItems.forEach(apiItem => {

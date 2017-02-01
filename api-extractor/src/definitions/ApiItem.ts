@@ -2,7 +2,6 @@
 /* tslint:disable:no-constant-condition */
 
 import * as ts from 'typescript';
-import { virtual } from '@microsoft/decorators/lib/virtual';
 import Extractor from '../Extractor';
 import ApiDocumentation from './ApiDocumentation';
 
@@ -269,7 +268,6 @@ abstract class ApiItem {
    * This function assumes all references from this ApiItem have been resolved and we can now safely create 
    * the documentation.
    */
-  @virtual
   protected onResolveReferences(): void {
     this.documentation = new ApiDocumentation(this, this.extractor.docItemLoader, this.extractor, this.reportError);
     // TODO: this.collectTypeReferences(this); 

@@ -9,7 +9,6 @@
     "gulp": "~3.9.1",
     "mocha": "~2.5.3",
     "@microsoft/node-library-build": "~2.2.0",
-    "@microsoft/decorators": "~0.2.1",
     "@types/es6-collections": "^0.5.29",
     "@types/fs-extra": "~0.0.34",
     "@types/node": ">=6.0.51 <6.9.1",
