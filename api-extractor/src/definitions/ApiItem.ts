@@ -53,7 +53,7 @@ export enum ApiItemKind {
 }
 
 /**
- * The state of resolving the ApiItem's doc comment references.
+ * The state of resolving the ApiItem's doc comment references inside a recursive call to ApiItem.resolveReferences().
  */
 enum ResolveState {
   /**
@@ -272,13 +272,14 @@ abstract class ApiItem {
   @virtual
   protected onResolveReferences(): void {
     this.documentation = new ApiDocumentation(this, this.extractor.docItemLoader, this.extractor, this.reportError);
-    // this.collectTypeReferences(this); 
+    // TODO: this.collectTypeReferences(this); 
   }
 
   /**
-   * Some ApiItems refer to the documentation of other ApiItems that are within the same package. To do that, 
-   * we have to make sure that the documentation is resolved for the reffered to ApiItem before we can 
-   * refer to it. This function makes sure we create the documentation for each ApiItem in the correct order.
+   * This function is a second stage that happens after Extractor.analyze() calls ApiItem constructor to build up 
+   * the abstract syntax tree. In this second stage, we are creating the documentation for each ApiItem.
+   * 
+   * This function makes sure we create the documentation for each ApiItem in the correct order.
    * In the event that a circular dependency occurs, an error is reported. For example, if ApiItemOne has 
    * an \@inheritdoc referencing ApiItemTwo, and ApiItemTwo has an \@inheritdoc refercing ApiItemOne then 
    * we have a circular dependency and an error will be reported.
@@ -293,7 +294,7 @@ abstract class ApiItem {
         this._state = ResolveState.Resolved;
         return;
       case ResolveState.Resolving:
-        this.reportError('@inheritdoc has a circular reference');
+        this.reportError('circular reference');
         return;
       default:
         throw new Error('ApiItem state is invalid');
