@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Added ApiItemKind enum and refactored child classes.",
+      "type": "patch"
+    }
+  ],
+  "email": "dagaeta@users.noreply.github.com"
+}
