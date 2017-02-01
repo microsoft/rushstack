@@ -73,8 +73,8 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
 
   protected visitApiStructuredType(apiStructuredType: ApiStructuredType, refObject?: Object): void {
     const kind: string =
-      apiStructuredType.kind === ApiItemKind.class ? ApiJsonGenerator._KIND_CLASS :
-      apiStructuredType.kind === ApiItemKind.interface ? ApiJsonGenerator._KIND_INTERFACE :
+      apiStructuredType.kind === ApiItemKind.Class ? ApiJsonGenerator._KIND_CLASS :
+      apiStructuredType.kind === ApiItemKind.Interface ? ApiJsonGenerator._KIND_INTERFACE :
       '';
 
     const structureNode: Object = {

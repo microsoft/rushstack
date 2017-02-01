@@ -12,43 +12,43 @@ export enum ApiItemKind {
   /**
     * A TypeScript class.
     */
-  class = 0,
+  Class = 0,
   /**
     * A TypeScript enum.
     */
-  enum = 1,
+  Enum = 1,
   /**
     * A TypeScript value on an enum.
     */
-  enumValue = 2,
+  EnumValue = 2,
   /**
     * A TypeScript function.
     */
-  function = 3,
+  Function = 3,
   /**
     * A TypeScript interface.
     */
-  interface = 4,
+  Interface = 4,
   /**
     * A TypeScript method.
     */
-  method = 5,
+  Method = 5,
   /**
     * A TypeScript package.
     */
-  package = 6,
+  Package = 6,
   /**
     * A TypeScript parameter.
     */
-  parameter = 7,
+  Parameter = 7,
   /**
     * A TypeScript property.
     */
-  property = 8,
+  Property = 8,
   /**
     * A TypeScript type literal expression, i.e. which defines an anonymous interface.
     */
-  typeLiteral = 9
+  TypeLiteral = 9
 }
 
 /**

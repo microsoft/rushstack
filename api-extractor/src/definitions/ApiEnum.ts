@@ -12,7 +12,7 @@ import TypeScriptHelpers from '../TypeScriptHelpers';
 export default class ApiEnum extends ApiItemContainer {
   constructor(options: IApiItemOptions) {
     super(options);
-    this.kind = ApiItemKind.enum;
+    this.kind = ApiItemKind.Enum;
 
     for (const memberDeclaration of (options.declaration as ts.EnumDeclaration).members) {
       const memberSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(memberDeclaration);

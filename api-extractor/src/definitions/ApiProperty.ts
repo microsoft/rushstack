@@ -12,7 +12,7 @@ class ApiProperty extends ApiMember {
 
   constructor(options: IApiItemOptions) {
     super(options);
-    this.kind = ApiItemKind.property;
+    this.kind = ApiItemKind.Property;
 
     this.isReadOnly = this.documentation.readonly ? this.documentation.readonly : false;
 

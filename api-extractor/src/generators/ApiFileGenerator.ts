@@ -66,7 +66,7 @@ export default class ApiFileGenerator extends ApiItemVisitor {
       return;
     }
 
-    if (apiStructuredType.kind !== ApiItemKind.typeLiteral) {
+    if (apiStructuredType.kind !== ApiItemKind.TypeLiteral) {
       this._writeJsdocSynopsis(apiStructuredType);
     }
 
