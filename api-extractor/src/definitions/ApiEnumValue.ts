@@ -1,4 +1,4 @@
-import ApiItem, { IApiItemOptions } from './ApiItem';
+import ApiItem, { ApiItemKind, IApiItemOptions } from './ApiItem';
 import PrettyPrinter from '../PrettyPrinter';
 
 /**
@@ -8,6 +8,7 @@ import PrettyPrinter from '../PrettyPrinter';
 export default class ApiEnumValue extends ApiItem {
   constructor(options: IApiItemOptions) {
     super(options);
+    this.kind = ApiItemKind.enumValue;
   }
 
   /**

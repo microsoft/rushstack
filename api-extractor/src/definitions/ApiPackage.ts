@@ -5,7 +5,7 @@ import Extractor from '../Extractor';
 import ApiStructuredType from './ApiStructuredType';
 import ApiEnum from './ApiEnum';
 import ApiFunction from './ApiFunction';
-import { IApiItemOptions } from './ApiItem';
+import { ApiItemKind, IApiItemOptions } from './ApiItem';
 import ApiItemContainer from './ApiItemContainer';
 import TypeScriptHelpers from '../TypeScriptHelpers';
 
@@ -39,6 +39,7 @@ export default class ApiPackage extends ApiItemContainer {
   }
   constructor(extractor: Extractor, rootFile: ts.SourceFile) {
     super(ApiPackage._getOptions(extractor, rootFile));
+    this.kind = ApiItemKind.package;
 
     const exportSymbols: ts.Symbol[] = this.typeChecker.getExportsOfModule(this.declarationSymbol);
     if (exportSymbols) {

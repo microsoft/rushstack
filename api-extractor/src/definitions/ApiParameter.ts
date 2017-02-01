@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import ApiItem, { IApiItemOptions } from './ApiItem';
+import ApiItem, { ApiItemKind, IApiItemOptions } from './ApiItem';
 
 /**
  * This class is part of the ApiItem abstract syntax tree. It represents parameters of a function declaration
@@ -16,6 +16,7 @@ class ApiParameter extends ApiItem {
 
   constructor(options: IApiItemOptions, docComment?: string) {
     super(options);
+    this.kind = ApiItemKind.parameter;
 
     this.documentation.docComment = docComment;
 

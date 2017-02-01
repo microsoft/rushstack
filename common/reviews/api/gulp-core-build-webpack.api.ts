@@ -13,7 +13,7 @@ class WebpackTask extends GulpTask<IWebpackTaskConfig> {
   // (undocumented)
   public isEnabled(buildConfig: IBuildConfig): boolean;
   // (undocumented)
-  protected loadSchema(): Object;
+  public loadSchema(): Object;
   // (undocumented)
   public name: string;
   // (undocumented)
