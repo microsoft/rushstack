@@ -2,6 +2,7 @@
 /* tslint:disable:no-constant-condition */
 
 import * as ts from 'typescript';
+import { virtual } from '@microsoft/decorators/lib/virtual';
 import Extractor from '../Extractor';
 import ApiDocumentation from './ApiDocumentation';
 
@@ -49,6 +50,27 @@ export enum ApiItemKind {
     * A TypeScript type literal expression, i.e. which defines an anonymous interface.
     */
   TypeLiteral = 9
+}
+
+/**
+ * The state of resolving the ApiItem's doc comment references.
+ */
+enum ResolveState {
+  /**
+   * The references of this ApiItem have not begun to be resolved.
+   */
+  Unresolved = 0,
+  /**
+   * The refernces of this ApiItem are in the process of being resolved.
+   * If we encounter this state again during resolution, a circular dependency is
+   * has occured.
+   */
+  Resolving = 1,
+  /**
+   * The references of this ApiItem have all been resolved and the documentation can 
+   * now safely be created.
+   */
+  Resolved = 2
 }
 
 /**
@@ -151,12 +173,19 @@ abstract class ApiItem {
    */
   private _errorNode: ts.Node;
 
+  /**
+   * The state of this ApiItems references. These references could include \@inheritdoc references 
+   * or type references.
+   */
+  private _state: ResolveState;
+
   constructor(options: IApiItemOptions) {
     this.reportError = this.reportError.bind(this);
 
     this.declaration = options.declaration;
     this.jsdocNode = options.jsdocNode;
     this._errorNode = options.declaration;
+    this._state = ResolveState.Unresolved;
     this.warnings = [];
 
     this.extractor = options.extractor;
@@ -165,8 +194,6 @@ abstract class ApiItem {
 
     this.name = this.exportSymbol.name || '???';
     this.typeChecker = this.extractor.typeChecker;
-
-    this.documentation = new ApiDocumentation(this, options.extractor.docItemLoader, this.reportError);
   }
 
   /**
@@ -236,6 +263,41 @@ abstract class ApiItem {
    */
   protected reportWarning(message: string): void {
     this.warnings.push(message);
+  }
+
+  /**
+   * This function assumes all references from this ApiItem have been resolved and we can now safely create 
+   * the documentation.
+   */
+  @virtual
+  protected onResolveReferences(): void {
+    this.documentation = new ApiDocumentation(this, this.extractor.docItemLoader, this.extractor, this.reportError);
+    // this.collectTypeReferences(this); 
+  }
+
+  /**
+   * Some ApiItems refer to the documentation of other ApiItems that are within the same package. To do that, 
+   * we have to make sure that the documentation is resolved for the reffered to ApiItem before we can 
+   * refer to it. This function makes sure we create the documentation for each ApiItem in the correct order.
+   * In the event that a circular dependency occurs, an error is reported. For example, if ApiItemOne has 
+   * an \@inheritdoc referencing ApiItemTwo, and ApiItemTwo has an \@inheritdoc refercing ApiItemOne then 
+   * we have a circular dependency and an error will be reported.
+   */
+  public resolveReferences(): void {
+    switch (this._state) {
+      case ResolveState.Resolved:
+        return;
+      case ResolveState.Unresolved:
+        this._state = ResolveState.Resolving;
+        this.onResolveReferences();
+        this._state = ResolveState.Resolved;
+        return;
+      case ResolveState.Resolving:
+        this.reportError('@inheritdoc has a circular reference');
+        return;
+      default:
+        throw new Error('ApiItem state is invalid');
+    }
   }
 }
 

@@ -1,3 +1,4 @@
+import { override } from '@microsoft/decorators/lib/override';
 import ApiItem, { IApiItemOptions } from './ApiItem';
 
 /**
@@ -24,6 +25,17 @@ abstract class ApiItemContainer extends ApiItem {
    */
   protected addMemberItem(apiItem: ApiItem): void {
     this.memberItems.push(apiItem);
+  }
+
+  /**
+   * Crawls the abstract syntax tree to resolve references.
+   */
+  @override
+  protected onResolveReferences(): void {
+    super.onResolveReferences();
+    this.memberItems.forEach(apiItem => {
+      apiItem.resolveReferences();  // <====  crawling tree
+    });
   }
 }
 

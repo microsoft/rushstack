@@ -19,6 +19,7 @@
     "@microsoft/node-library-build": "~2.2.0"
   },
   "dependencies": {
+    "@microsoft/decorators": "~0.2.1",
     "@types/es6-collections": "^0.5.29",
     "@types/fs-extra": "~0.0.34",
     "@types/node": ">=6.0.51 <6.9.1",

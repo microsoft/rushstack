@@ -12,6 +12,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@microsoft/decorators",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@microsoft/gulp-core-build",
       "allowedCategories": [ "libraries" ]
     },
