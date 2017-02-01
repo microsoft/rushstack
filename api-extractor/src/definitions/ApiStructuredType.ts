@@ -3,35 +3,16 @@
 import * as ts from 'typescript';
 import ApiMethod from './ApiMethod';
 import ApiProperty from './ApiProperty';
-import ApiItem, { IApiItemOptions } from './ApiItem';
+import ApiItem, { ApiItemKind, IApiItemOptions } from './ApiItem';
 import ApiItemContainer from './ApiItemContainer';
 import TypeScriptHelpers from '../TypeScriptHelpers';
 import PrettyPrinter from '../PrettyPrinter';
-
-/**
-  * Indicates the type of definition represented by a ApiStructuredType object.
-  */
-export enum ApiStructuredTypeKind {
-  /**
-    * A TypeScript class.
-    */
-  Class,
-  /**
-    * A TypeScript interface.
-    */
-  Interface,
-  /**
-    * A TypeScript type literal expression, i.e. which defines an anonymous interface.
-    */
-  TypeLiteral
-}
 
 /**
   * This class is part of the ApiItem abstract syntax tree.  It represents a class,
   * interface, or type literal expression.
   */
 export default class ApiStructuredType extends ApiItemContainer {
-  public kind: ApiStructuredTypeKind;
   public implements?: string;
   public extends?: string;
 
@@ -58,11 +39,11 @@ export default class ApiStructuredType extends ApiItemContainer {
     this.type = this.typeChecker.getDeclaredTypeOfSymbol(this.declarationSymbol);
 
     if (this.declarationSymbol.flags & ts.SymbolFlags.Interface) {
-      this.kind = ApiStructuredTypeKind.Interface;
+      this.kind = ApiItemKind.Interface;
     } else if (this.declarationSymbol.flags & ts.SymbolFlags.TypeLiteral) {
-      this.kind = ApiStructuredTypeKind.TypeLiteral;
+      this.kind = ApiItemKind.TypeLiteral;
     } else {
-      this.kind = ApiStructuredTypeKind.Class;
+      this.kind = ApiItemKind.Class;
     }
 
     for (const memberDeclaration of this._classLikeDeclaration.members) {
@@ -130,7 +111,7 @@ export default class ApiStructuredType extends ApiItemContainer {
   public getDeclarationLine(): string {
     let result: string = '';
 
-    if (this.kind !== ApiStructuredTypeKind.TypeLiteral) {
+    if (this.kind !== ApiItemKind.TypeLiteral) {
       result += (this.declarationSymbol.flags & ts.SymbolFlags.Interface)
         ? 'interface ' : 'class ';
 
