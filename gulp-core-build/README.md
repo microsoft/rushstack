@@ -148,7 +148,7 @@ build.initializeTasks(
     bundle: { /* bundle options */ },
     test: { /* test options */ },
     serve: { /* serve options */ },
-    nuke: { /* nuke options */ }
+    clean: { /* clean options */ }
   });
 ```
 # Building gulp-core-build
