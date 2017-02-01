@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-karma",
+      "comment": "Fixes a bug where the tests.js would not be written if the temp folder did not exist.",
+      "type": "patch"
+    }
+  ],
+  "email": "nickpape-msft@users.noreply.github.com"
+}
