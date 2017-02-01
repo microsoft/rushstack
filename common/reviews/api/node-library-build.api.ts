@@ -190,7 +190,7 @@ class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   // (undocumented)
   getCleanMatch(buildConfig: IBuildConfig, taskConfig?: ITypeScriptTaskConfig): string[];
   // (undocumented)
-  protected loadSchema(): Object;
+  loadSchema(): Object;
   mergeConfig(config: ITypeScriptTaskConfig): void;
   // (undocumented)
   name: string;

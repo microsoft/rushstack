@@ -6,6 +6,52 @@ import Extractor from '../Extractor';
 import ApiDocumentation from './ApiDocumentation';
 
 /**
+ * Indicates the type of definition represented by a ApiItem object.
+ */
+export enum ApiItemKind {
+  /**
+    * A TypeScript class.
+    */
+  class = 0,
+  /**
+    * A TypeScript enum.
+    */
+  enum = 1,
+  /**
+    * A TypeScript value on an enum.
+    */
+  enumValue = 2,
+  /**
+    * A TypeScript function.
+    */
+  function = 3,
+  /**
+    * A TypeScript interface.
+    */
+  interface = 4,
+  /**
+    * A TypeScript method.
+    */
+  method = 5,
+  /**
+    * A TypeScript package.
+    */
+  package = 6,
+  /**
+    * A TypeScript parameter.
+    */
+  parameter = 7,
+  /**
+    * A TypeScript property.
+    */
+  property = 8,
+  /**
+    * A TypeScript type literal expression, i.e. which defines an anonymous interface.
+    */
+  typeLiteral = 9
+}
+
+/**
   * This interface is used to pass options between constructors for ApiItem child classes.
   */
 export interface IApiItemOptions {
@@ -51,6 +97,11 @@ abstract class ApiItem {
    * from the top-level ApiPackage, not "MyClass" from the original definition.
    */
   public name: string;
+
+  /**
+   * Indicates the type of definition represented by this ApiItem instance.
+   */
+  public kind: ApiItemKind;
 
   /**
    * A list of extractor warnings that were reported using ApiItem.reportWarning().
