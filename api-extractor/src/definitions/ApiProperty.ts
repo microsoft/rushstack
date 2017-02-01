@@ -1,4 +1,4 @@
-import { IApiItemOptions } from './ApiItem';
+import { ApiItemKind, IApiItemOptions } from './ApiItem';
 import ApiMember from './ApiMember';
 
 /**
@@ -12,6 +12,7 @@ class ApiProperty extends ApiMember {
 
   constructor(options: IApiItemOptions) {
     super(options);
+    this.kind = ApiItemKind.property;
 
     this.isReadOnly = this.documentation.readonly ? this.documentation.readonly : false;
 

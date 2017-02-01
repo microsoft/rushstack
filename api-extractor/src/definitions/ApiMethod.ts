@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { IApiItemOptions } from './ApiItem';
+import { ApiItemKind, IApiItemOptions } from './ApiItem';
 import ApiMember from './ApiMember';
 import ApiParameter from './ApiParameter';
 import TypeScriptHelpers from '../TypeScriptHelpers';
@@ -17,6 +17,7 @@ export default class ApiMethod extends ApiMember {
 
   constructor(options: IApiItemOptions) {
     super(options);
+    this.kind = ApiItemKind.method;
 
     const methodDeclaration: ts.MethodDeclaration = options.declaration as ts.MethodDeclaration;
 
