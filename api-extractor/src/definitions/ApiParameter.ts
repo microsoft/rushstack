@@ -16,7 +16,7 @@ class ApiParameter extends ApiItem {
 
   constructor(options: IApiItemOptions, docComment?: string) {
     super(options);
-    this.kind = ApiItemKind.parameter;
+    this.kind = ApiItemKind.Parameter;
 
     this.documentation.docComment = docComment;
 

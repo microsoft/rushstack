@@ -8,7 +8,7 @@ import PrettyPrinter from '../PrettyPrinter';
 export default class ApiEnumValue extends ApiItem {
   constructor(options: IApiItemOptions) {
     super(options);
-    this.kind = ApiItemKind.enumValue;
+    this.kind = ApiItemKind.EnumValue;
   }
 
   /**

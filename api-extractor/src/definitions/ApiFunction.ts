@@ -16,7 +16,7 @@ class ApiFunction extends ApiItem {
 
   constructor(options: IApiItemOptions) {
     super(options);
-    this.kind = ApiItemKind.function;
+    this.kind = ApiItemKind.Function;
 
     const methodDeclaration: ts.FunctionDeclaration = options.declaration as ts.FunctionDeclaration;
 

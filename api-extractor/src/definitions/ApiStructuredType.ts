@@ -39,11 +39,11 @@ export default class ApiStructuredType extends ApiItemContainer {
     this.type = this.typeChecker.getDeclaredTypeOfSymbol(this.declarationSymbol);
 
     if (this.declarationSymbol.flags & ts.SymbolFlags.Interface) {
-      this.kind = ApiItemKind.interface;
+      this.kind = ApiItemKind.Interface;
     } else if (this.declarationSymbol.flags & ts.SymbolFlags.TypeLiteral) {
-      this.kind = ApiItemKind.typeLiteral;
+      this.kind = ApiItemKind.TypeLiteral;
     } else {
-      this.kind = ApiItemKind.class;
+      this.kind = ApiItemKind.Class;
     }
 
     for (const memberDeclaration of this._classLikeDeclaration.members) {
@@ -111,7 +111,7 @@ export default class ApiStructuredType extends ApiItemContainer {
   public getDeclarationLine(): string {
     let result: string = '';
 
-    if (this.kind !== ApiItemKind.typeLiteral) {
+    if (this.kind !== ApiItemKind.TypeLiteral) {
       result += (this.declarationSymbol.flags & ts.SymbolFlags.Interface)
         ? 'interface ' : 'class ';
 

@@ -39,7 +39,7 @@ export default class ApiPackage extends ApiItemContainer {
   }
   constructor(extractor: Extractor, rootFile: ts.SourceFile) {
     super(ApiPackage._getOptions(extractor, rootFile));
-    this.kind = ApiItemKind.package;
+    this.kind = ApiItemKind.Package;
 
     const exportSymbols: ts.Symbol[] = this.typeChecker.getExportsOfModule(this.declarationSymbol);
     if (exportSymbols) {
