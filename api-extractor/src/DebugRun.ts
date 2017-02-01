@@ -14,7 +14,8 @@ const compilerOptions: ts.CompilerOptions = {
   moduleResolution: ts.ModuleResolutionKind.NodeJs,
   experimentalDecorators: true,
   jsx: ts.JsxEmit.React,
-  rootDir: './testInputs/example2'
+  rootDir: './testInputs/example2',
+  typeRoots: ['./'] // We need to ignore @types in these tests
 };
 
 const extractor: Extractor = new Extractor( {

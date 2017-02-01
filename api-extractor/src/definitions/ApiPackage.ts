@@ -5,7 +5,7 @@ import Extractor from '../Extractor';
 import ApiStructuredType from './ApiStructuredType';
 import ApiEnum from './ApiEnum';
 import ApiFunction from './ApiFunction';
-import { ApiItemKind, IApiItemOptions } from './ApiItem';
+import ApiItem, { ApiItemKind, IApiItemOptions } from './ApiItem';
 import ApiItemContainer from './ApiItemContainer';
 import TypeScriptHelpers from '../TypeScriptHelpers';
 
@@ -74,8 +74,43 @@ export default class ApiPackage extends ApiItemContainer {
     }
   }
 
+  /**
+   * Find a member in this package by name and return it if found.
+   * 
+   * @param memberName - the name of the member ApiItem
+   */
+  protected getMemberItem(memberName: string): ApiItem {
+    let matchedApiItem: ApiItem = undefined;
+    this.memberItems.forEach(apiItem => {
+      if (apiItem.name === memberName) {
+        matchedApiItem = apiItem;
+      }
+    });
+    return matchedApiItem;
+  }
+
   public shouldHaveDocumentation(): boolean {
     // We don't write JSDoc for the ApiPackage object
     return false;
+  }
+
+  /**
+   * Ensures the documentation for the member name supplied has been created. In order to 
+   * do so, we need to resolve any references this member refers to.  
+   *
+   * Example, if an ApiItem 'A' references the documentation of ApiItem 'B' but 
+   * 'B' does not have documentation created yet, we need to create the documentation
+   * for 'B' first. So we would call this function and provided the name of ApiItem 'B'
+   * to ensure its documentation is created first.
+   * 
+   * @param memberName - the name of the member we want to ensure has documentation created.
+   */
+  public resolveReferencesOnItem(memberName: string): ApiItem {
+    const matchedApiItem: ApiItem = this.getMemberItem(memberName);
+
+    if (matchedApiItem) {
+      matchedApiItem.resolveReferences();
+    }
+    return matchedApiItem;
   }
 }
