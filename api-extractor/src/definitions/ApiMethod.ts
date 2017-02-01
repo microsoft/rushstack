@@ -17,7 +17,7 @@ export default class ApiMethod extends ApiMember {
 
   constructor(options: IApiItemOptions) {
     super(options);
-    this.kind = ApiItemKind.method;
+    this.kind = ApiItemKind.Method;
 
     const methodDeclaration: ts.MethodDeclaration = options.declaration as ts.MethodDeclaration;
 
