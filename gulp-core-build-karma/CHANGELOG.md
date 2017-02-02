@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-karma
 
-This log was last generated on Tue, 31 Jan 2017 01:55:09 GMT and should not be manually modified.
+This log was last generated on Wed, 01 Feb 2017 02:32:46 GMT and should not be manually modified.
+
+## 2.1.3
+Wed, 01 Feb 2017 02:32:46 GMT
+
+### Patches
+
+- Fixes a bug where the tests.js would not be written if the temp folder did not exist.
 
 ## 2.1.2
 Tue, 31 Jan 2017 01:55:09 GMT
