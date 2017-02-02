@@ -169,7 +169,7 @@ export default class ApiFileGenerator extends ApiItemVisitor {
         footer += '@deprecated';
       }
 
-      if (apiItem.documentation.isMissing) {
+      if (apiItem.isMissingDocs) {
         if (footer) {
           footer += ' ';
         }
