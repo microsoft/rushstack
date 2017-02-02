@@ -25,14 +25,12 @@ class ApiFunction extends ApiItem {
       this.params = [];
       for (const param of methodDeclaration.parameters) {
         const declarationSymbol: ts.Symbol = TypeScriptHelpers.tryGetSymbolForDeclaration(param);
-        const docComment: string = declarationSymbol && this.documentation && this.documentation.paramDocs ?
-          this.documentation.paramDocs.get(declarationSymbol.name) : '';
         this.params.push(new ApiParameter({
           extractor: this.extractor,
           declaration: param,
           declarationSymbol: declarationSymbol,
           jsdocNode: param
-        }, docComment));
+        }));
       }
     }
 

@@ -36,8 +36,6 @@ abstract class ApiItemVisitor {
       this.visitApiProperty(apiItem as ApiProperty, refObject);
     } else if (apiItem instanceof ApiMethod) {
       this.visitApiMethod(apiItem as ApiMethod, refObject);
-    } else if (apiItem instanceof ApiMember) {
-      this.visitApiMember(apiItem as ApiMember, refObject);
     } else {
       throw new Error('Not implemented');
     }
