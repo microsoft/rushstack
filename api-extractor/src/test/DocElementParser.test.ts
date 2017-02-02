@@ -42,7 +42,7 @@ const extractor: Extractor = new Extractor({
  */
 class TestApiDocumentation extends ApiDocumentation {
   constructor() {
-    super(myDocumentedClass, extractor.docItemLoader, (msg: string) => { return; });
+    super(myDocumentedClass, extractor.docItemLoader, extractor, console.log);
   }
 
   public parseParam(tokenizer: Tokenizer): IParam {

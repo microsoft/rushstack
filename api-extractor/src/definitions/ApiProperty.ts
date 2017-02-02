@@ -14,8 +14,6 @@ class ApiProperty extends ApiMember {
     super(options);
     this.kind = ApiItemKind.Property;
 
-    this.isReadOnly = this.documentation.readonly ? this.documentation.readonly : false;
-
     const declaration: any = options.declaration as any; /* tslint:disable-line:no-any */
     if (declaration && declaration.type) {
       this.type = declaration.type.getText();
