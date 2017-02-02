@@ -32,16 +32,6 @@ const extractor: Extractor = new Extractor({
   compilerOptions: compilerOptions,
   errorHandler: testErrorHandler
 });
-let myDocumentedClass: ApiStructuredType;
-
-/**
- * Dummy class wrapping ApiDocumentation to test its protected methods
- */
-class TestApiDocumentation extends ApiDocumentation {
-  constructor() {
-    super(myDocumentedClass, extractor.docItemLoader, extractor, console.log);
-  }
-}
 
 extractor.loadExternalPackages('./testInputs/external-api-json');
 // Run the analyzer once to be used by unit tests
@@ -49,14 +39,19 @@ extractor.analyze({
   entryPointFile: path.join(inputFolder, 'index.ts')
 });
 
-myDocumentedClass = extractor.package.getSortedMemberItems()
-  .filter(apiItem => apiItem.name === 'MyDocumentedClass')[0] as ApiStructuredType;
+const myDocumentedClass: ApiStructuredType = extractor.package.getSortedMemberItems()
+.filter(apiItem => apiItem.name === 'MyDocumentedClass')[0] as ApiStructuredType;
 
 describe('ApiDocumentation tests', function (): void {
   this.timeout(10000);
 
   describe('ApiDocumentation internal methods', function (): void {
-    const apiDoc: TestApiDocumentation = new TestApiDocumentation();
+    const apiDoc: ApiDocumentation = new ApiDocumentation(
+      myDocumentedClass.getJsDocs(),
+      extractor.docItemLoader,
+      extractor,
+      console.log
+    );
     let apiReferenceExpr: string;
     let expected: IApiDefinitionReference;
     let actual: IApiDefinitionReference;

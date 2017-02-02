@@ -1,7 +1,5 @@
 /* tslint:disable:no-bitwise */
 
-import * as ts from 'typescript';
-import TypeScriptHelpers from '../TypeScriptHelpers';
 import ApiItem from './ApiItem';
 import DocElementParser from '../DocElementParser';
 import { IDocElement, IParam, IHrefLinkElement, ICodeLinkElement, ITextElement } from '../IDocElement';
@@ -10,7 +8,6 @@ import DocItemLoader from '../DocItemLoader';
 import { IApiDefinitionReference } from '../IApiDefinitionReference';
 import Token, { TokenType } from '../Token';
 import Tokenizer from '../Tokenizer';
-import ApiPackage from './ApiPackage';
 import Extractor from '../Extractor';
 
 /**
@@ -113,11 +110,6 @@ export default class ApiDocumentation {
   private static _exportRegEx: RegExp =  /^\w+/;
 
   /**
-   * Corresponding ApiItem for this documentation object
-   */
-  public apiItem: ApiItem;
-
-  /**
    * This returns the JSDoc comment block for the given item (without "/**" characters),
    * or an empty string if there is no comment.  This propery will never be undefined.
    *
@@ -165,6 +157,11 @@ export default class ApiDocumentation {
   public apiTag: ApiTag;
 
   /**
+   * The number of times an "API Tag" was encountered in the JSDoc.
+   */
+  public apiTagCount: number;
+
+  /**
    * True if the "@preapproved" tag was specified.
    * Indicates that this internal API is exempt from further reviews.
    */
@@ -183,12 +180,16 @@ export default class ApiDocumentation {
   public docItemLoader: DocItemLoader;
 
   /**
-   * We need the extractor to access the package that this ApiItem 
+   * We need the extractor to access the package that this ApiItem
    * belongs to in order to resolve references.
    */
   public extractor: Extractor;
 
   public reportError: (message: string) => void;
+
+  public static get jsDocTagsRegex(): RegExp {
+    return ApiDocumentation._jsdocTagsRegex;
+  }
 
   /**
    * Takes an API reference expression of the form '@scopeName/packageName:exportName.memberName'
@@ -252,33 +253,16 @@ export default class ApiDocumentation {
     }
   }
 
-  constructor(apiItem: ApiItem,
+  constructor(docComment: string,
     docItemLoader: DocItemLoader,
     extractor: Extractor,
     errorLogger: (message: string) => void) {
-    this.apiItem = apiItem;
+    this.docComment = docComment;
     this.docItemLoader = docItemLoader;
     this.extractor = extractor;
     this.reportError = errorLogger;
-    this.docComment = this._getJsDocs(apiItem);
     this.parameters = new Map<string, IParam>();
     this._parseDocs();
-  }
-
-  protected _getJsDocs(apiItem: ApiItem): string {
-    if (!apiItem.jsdocNode) {
-      return '';
-    }
-    const jsDoc: string = TypeScriptHelpers.getJsDocComments(apiItem.jsdocNode, this.reportError);
-
-    // Eliminate tags and then count the English letters.  Are there at least 10 letters of text?
-    // If not, we consider the definition to be "missingDocumentation".
-    const condensedDocs: string = jsDoc
-      .replace(ApiDocumentation._jsdocTagsRegex, '')
-      .replace(/[^a-z]/gi, '');
-    this.isMissing = apiItem.shouldHaveDocumentation() && condensedDocs.length <= 10;
-
-    return jsDoc;
   }
 
   protected _parseDocs(): void {
@@ -288,8 +272,8 @@ export default class ApiDocumentation {
     this.deprecatedMessage = [];
     this.remarks = [];
     this.apiTag = ApiTag.None;
+    this.apiTagCount = 0;
 
-    let apiTagCount: number = 0;
     let parsing: boolean = true;
 
     while (parsing) {
@@ -341,22 +325,22 @@ export default class ApiDocumentation {
           case '@public':
             tokenizer.getToken();
             this.apiTag = ApiTag.Public;
-            ++apiTagCount;
+            ++this.apiTagCount;
             break;
           case '@internal':
             tokenizer.getToken();
             this.apiTag = ApiTag.Internal;
-            ++apiTagCount;
+            ++this.apiTagCount;
             break;
           case '@alpha':
             tokenizer.getToken();
             this.apiTag = ApiTag.Alpha;
-            ++apiTagCount;
+            ++this.apiTagCount;
             break;
           case '@beta':
             tokenizer.getToken();
             this.apiTag = ApiTag.Beta;
-            ++apiTagCount;
+            ++this.apiTagCount;
             break;
           case '@preapproved':
             tokenizer.getToken();
@@ -410,28 +394,6 @@ export default class ApiDocumentation {
         tokenizer.getToken();
         // This would be a program bug
         this.reportError(`Unexpected token: ${token.type} ${token.tag} ${token.text}`);
-      }
-    }
-
-    if (apiTagCount > 1) {
-      this.reportError('More than one API Tag was specified');
-    }
-
-    if (this.apiItem instanceof ApiPackage) {
-      if (apiTagCount > 0) {
-        const tag: string = '@' + ApiTag[this.apiTag].toLowerCase();
-        this.reportError(`The ${tag} tag is not allowed on the package, which is always public`);
-      }
-      this.apiTag = ApiTag.Public;
-    }
-
-    if (this.preapproved) {
-      if (this.apiTag !== ApiTag.Internal) {
-        this.reportError('The @preapproved tag may only be applied to @internal defintions');
-        this.preapproved = false;
-      } else if (!(this.apiItem.getDeclarationSymbol().flags & (ts.SymbolFlags.Interface | ts.SymbolFlags.Class))) {
-        this.reportError('The @preapproved tag may only be applied to classes and interfaces');
-        this.preapproved = false;
       }
     }
   }
