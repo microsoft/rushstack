@@ -4,6 +4,11 @@
 # Use negative patterns to bring back the specific things we want to publish
 !/bin/**
 !/lib/**
+!/dist/**
+!ThirdPartyNotice.txt
+
+# Ignore certain files in the above folder
+/dist/*.stats.*
 
 # NOTE: These don't need to be specified, because NPM includes them automatically.
 #
@@ -12,5 +17,7 @@
 # CHANGELOG (and its variants)
 # LICENSE / LICENCE
 
-# But don't publish the CHANGELOG.json because it contains author e-mails
-/CHANGELOG.json
+## Project specific definitions
+# -----------------------------
+
+# (Add your exceptions here)
