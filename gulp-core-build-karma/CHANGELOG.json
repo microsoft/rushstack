@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-karma",
   "entries": [
     {
+      "version": "2.1.3",
+      "tag": "@microsoft/gulp-core-build-karma_v2.1.3",
+      "date": "Wed, 01 Feb 2017 02:32:46 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixes a bug where the tests.js would not be written if the temp folder did not exist."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.1.2",
       "tag": "@microsoft/gulp-core-build-karma_v2.1.2",
       "date": "Tue, 31 Jan 2017 01:55:09 GMT",
