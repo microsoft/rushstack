@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Added support for ApiProperty to detect readonly from documentation object.",
+      "type": "patch"
+    }
+  ],
+  "email": "dagaeta@users.noreply.github.com"
+}
