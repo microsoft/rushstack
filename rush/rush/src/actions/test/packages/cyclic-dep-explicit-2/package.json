@@ -1,0 +1,8 @@
+{
+  "name": "cyclic-dep-explicit-2",
+  "version": "1.0.0",
+  "description": "cyclic-dep-explicit-2",
+  "dependencies": {
+    "cyclic-dep-explicit-1": ">=1.0.0 <2.0.0"
+  }
+}

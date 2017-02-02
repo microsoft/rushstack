@@ -181,6 +181,29 @@ describe('updatePackages', () => {
       'the "c" dependency in "d" was not updated');
   });
 
+  it('can update explicit cyclic dependency', () => {
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
+      allPackages,
+      path.join(__dirname, 'cyclicDepsExplicit'),
+      false);
+    PublishUtilities.updatePackages(allChanges, allPackages, false);
+
+    expect(allPackages.get('cyclic-dep-explicit-1').packageJson.version).equals(
+      '2.0.0',
+      'cyclic-dep-explicit-1 should have been updated.');
+    expect(allPackages.get('cyclic-dep-explicit-1').packageJson.dependencies['cyclic-dep-explicit-2']).equals(
+      '>=1.0.1 <2.0.0',
+      'the "cyclic-dep-explicit-2" dependency in "cyclic-dep-explicit-1" should be updated');
+    expect(allPackages.get('cyclic-dep-explicit-2').packageJson.version).equals(
+      '1.0.1',
+      'cyclic-dep-explicit-2 should have patch version update.');
+    expect(allPackages.get('cyclic-dep-explicit-2').packageJson.dependencies['cyclic-dep-explicit-1']).equals(
+      '>=1.0.0 <2.0.0',
+      'the "cyclic-dep-explicit-1" dependency in "cyclic-dep-explicit-2" should not be updated');
+  });
+
   it('can update root with patch change for prerelease', () => {
     const allPackages: Map<string, RushConfigurationProject> =
       RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
@@ -239,7 +262,7 @@ describe('updatePackages', () => {
       'the "c" dependency in "d" should be updated');
   });
 
-  it('can update cyclic dependency for prerelease', () => {
+  it('can update cyclic dependency for non-explicit prerelease', () => {
     const allPackages: Map<string, RushConfigurationProject> =
       RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const prereleaseName: string = 'beta.1';

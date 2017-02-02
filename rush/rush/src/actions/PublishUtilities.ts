@@ -209,6 +209,15 @@ export default class PublishUtilities {
     }
   }
 
+  private static _isCyclicDependency(
+    allPackages: Map<string, RushConfigurationProject>,
+    packageName: string,
+    dependencyName: string
+  ): boolean {
+    const packageConfig: RushConfigurationProject = allPackages.get(packageName);
+    return !!packageConfig && packageConfig.cyclicDependencyProjects.has(dependencyName);
+  }
+
   private static _updateDependencies(
     packageName: string,
     dependencies: { [key: string]: string; },
@@ -218,23 +227,25 @@ export default class PublishUtilities {
   ): void {
 
     if (dependencies) {
-    Object.keys(dependencies).forEach(depName => {
-      const depChange: IChangeInfo = allChanges[depName];
+      Object.keys(dependencies).forEach(depName => {
+        if (!PublishUtilities._isCyclicDependency(allPackages, packageName, depName)) {
+          const depChange: IChangeInfo = allChanges[depName];
 
-      if (depChange && prereleaseName) {
-        // For prelease, the newVersion needs to be appended with prerelease name.
-        // And dependency should specify the specific prerelease version.
-        dependencies[depName] = PublishUtilities._getChangeInfoNewVersion(depChange, prereleaseName);
-      } else if (depChange && depChange.changeType >= ChangeType.patch) {
-        PublishUtilities._updateDependencyVersion(
-          packageName,
-          dependencies,
-          depName,
-          depChange,
-          allChanges,
-          allPackages);
-      }
-    });
+          if (depChange && prereleaseName) {
+            // For prelease, the newVersion needs to be appended with prerelease name.
+            // And dependency should specify the specific prerelease version.
+            dependencies[depName] = PublishUtilities._getChangeInfoNewVersion(depChange, prereleaseName);
+          } else if (depChange && depChange.changeType >= ChangeType.patch) {
+            PublishUtilities._updateDependencyVersion(
+              packageName,
+              dependencies,
+              depName,
+              depChange,
+              allChanges,
+              allPackages);
+          }
+        }
+      });
     }
   }
 
