@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 01 Feb 2017 20:09:30 GMT and should not be manually modified.
+This log was last generated on Thu, 02 Feb 2017 14:05:53 GMT and should not be manually modified.
+
+## 1.1.7
+Thu, 02 Feb 2017 14:05:53 GMT
+
+### Patches
+
+- Refactored ApiDocumentation creation to resolve references method.
 
 ## 1.1.6
 Wed, 01 Feb 2017 20:09:30 GMT
