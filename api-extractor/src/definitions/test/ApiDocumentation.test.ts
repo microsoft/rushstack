@@ -25,7 +25,8 @@ const compilerOptions: ts.CompilerOptions = {
   target: ts.ScriptTarget.ES5,
   module: ts.ModuleKind.CommonJS,
   moduleResolution: ts.ModuleResolutionKind.NodeJs,
-  rootDir: inputFolder
+  rootDir: inputFolder,
+  typeRoots: ['./'] // We need to ignore @types in these tests
 };
 const extractor: Extractor = new Extractor({
   compilerOptions: compilerOptions,
@@ -38,7 +39,7 @@ let myDocumentedClass: ApiStructuredType;
  */
 class TestApiDocumentation extends ApiDocumentation {
   constructor() {
-    super(myDocumentedClass, extractor.docItemLoader, (msg: string) => { return; });
+    super(myDocumentedClass, extractor.docItemLoader, extractor, console.log);
   }
 }
 

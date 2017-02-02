@@ -18,8 +18,6 @@ class ApiParameter extends ApiItem {
     super(options);
     this.kind = ApiItemKind.Parameter;
 
-    this.documentation.docComment = docComment;
-
     const parameterDeclaration: ts.ParameterDeclaration = options.declaration as ts.ParameterDeclaration;
     this.isOptional = !!parameterDeclaration.questionToken || !!parameterDeclaration.initializer;
     this.type = parameterDeclaration.type.getText();

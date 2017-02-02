@@ -5,7 +5,7 @@ import ApiItem, { IApiItemOptions } from './ApiItem';
   * which all act as containers for other ApiItem definitions.
   */
 abstract class ApiItemContainer extends ApiItem {
-  protected memberItems: ApiItem[] = [];
+  public memberItems: ApiItem[] = [];
 
   constructor(options: IApiItemOptions) {
     super(options);
@@ -24,6 +24,16 @@ abstract class ApiItemContainer extends ApiItem {
    */
   protected addMemberItem(apiItem: ApiItem): void {
     this.memberItems.push(apiItem);
+  }
+
+  /**
+   * {@inheritdoc ApiItem.onResolveReferences }
+   */
+  protected onResolveReferences(): void {
+    super.onResolveReferences();
+    this.memberItems.forEach(apiItem => {
+      apiItem.resolveReferences();
+    });
   }
 }
 

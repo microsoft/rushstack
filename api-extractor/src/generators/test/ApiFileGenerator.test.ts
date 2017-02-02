@@ -42,7 +42,8 @@ describe('ApiFileGenerator tests', function (): void {
         target: ts.ScriptTarget.ES5,
         module: ts.ModuleKind.CommonJS,
         moduleResolution: ts.ModuleResolutionKind.NodeJs,
-        rootDir: inputFolder
+        rootDir: inputFolder,
+        typeRoots: ['./'] // We need to ignore @types in these tests
       };
       const extractor: Extractor = new Extractor({
         compilerOptions: compilerOptions,

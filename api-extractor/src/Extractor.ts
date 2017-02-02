@@ -95,7 +95,8 @@ export default class Extractor {
       throw new Error('Unable to load file: ' + options.entryPointFile);
     }
 
-    this.package = new ApiPackage(this, rootFile);
+    this.package = new ApiPackage(this, rootFile); // construct members
+    this.package.resolveReferences(); // creates ApiDocumentation
   }
 
   /**
