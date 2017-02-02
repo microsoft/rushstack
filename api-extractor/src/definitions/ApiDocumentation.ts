@@ -11,6 +11,7 @@ import { IApiDefinitionReference } from '../IApiDefinitionReference';
 import Token, { TokenType } from '../Token';
 import Tokenizer from '../Tokenizer';
 import ApiPackage from './ApiPackage';
+import Extractor from '../Extractor';
 
 /**
   * An "API Tag" is a custom JSDoc tag which indicates whether an ApiItem definition
@@ -180,6 +181,13 @@ export default class ApiDocumentation {
   public readonly?: boolean;
 
   public docItemLoader: DocItemLoader;
+
+  /**
+   * We need the extractor to access the package that this ApiItem 
+   * belongs to in order to resolve references.
+   */
+  public extractor: Extractor;
+
   public reportError: (message: string) => void;
 
   /**
@@ -244,9 +252,13 @@ export default class ApiDocumentation {
     }
   }
 
-  constructor(apiItem: ApiItem, docItemLoader: DocItemLoader, errorLogger: (message: string) => void) {
+  constructor(apiItem: ApiItem,
+    docItemLoader: DocItemLoader,
+    extractor: Extractor,
+    errorLogger: (message: string) => void) {
     this.apiItem = apiItem;
     this.docItemLoader = docItemLoader;
+    this.extractor = extractor;
     this.reportError = errorLogger;
     this.docComment = this._getJsDocs(apiItem);
     this.parameters = new Map<string, IParam>();
