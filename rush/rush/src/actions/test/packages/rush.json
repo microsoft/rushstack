@@ -35,6 +35,19 @@
       "packageName": "cyclic-dep-2",
       "projectFolder": "cyclic-dep-2",
       "reviewCategory": "third-party"
+    },
+    {
+      "packageName": "cyclic-dep-explicit-1",
+      "projectFolder": "cyclic-dep-explicit-1",
+      "reviewCategory": "third-party"
+    },
+    {
+      "packageName": "cyclic-dep-explicit-2",
+      "projectFolder": "cyclic-dep-explicit-2",
+      "reviewCategory": "third-party",
+      "cyclicDependencyProjects": [
+        "cyclic-dep-explicit-1"
+      ]
     }
   ]
 }
