@@ -23,7 +23,7 @@ class ApiProperty extends ApiMember {
   public getDeclarationLine(): string {
     return super.getDeclarationLine({
       type: this.type,
-      readonly: this.isReadOnly || this.documentation.readonly
+      readonly: this.isReadOnly
     });
   }
 }

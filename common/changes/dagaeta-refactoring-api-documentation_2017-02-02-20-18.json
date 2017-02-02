@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Refactored ApiDocumentation creation to resolve references method.",
+      "comment": "Moved ApiItem references within ApiDocumentation, to ApiItem caller.",
       "type": "patch"
     }
   ],
