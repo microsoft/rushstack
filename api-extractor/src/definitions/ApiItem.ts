@@ -52,6 +52,27 @@ export enum ApiItemKind {
 }
 
 /**
+ * The state of resolving the ApiItem's doc comment references inside a recursive call to ApiItem.resolveReferences().
+ */
+enum ResolveState {
+  /**
+   * The references of this ApiItem have not begun to be resolved.
+   */
+  Unresolved = 0,
+  /**
+   * The refernces of this ApiItem are in the process of being resolved.
+   * If we encounter this state again during resolution, a circular dependency is
+   * has occured.
+   */
+  Resolving = 1,
+  /**
+   * The references of this ApiItem have all been resolved and the documentation can 
+   * now safely be created.
+   */
+  Resolved = 2
+}
+
+/**
   * This interface is used to pass options between constructors for ApiItem child classes.
   */
 export interface IApiItemOptions {
@@ -151,12 +172,19 @@ abstract class ApiItem {
    */
   private _errorNode: ts.Node;
 
+  /**
+   * The state of this ApiItems references. These references could include \@inheritdoc references 
+   * or type references.
+   */
+  private _state: ResolveState;
+
   constructor(options: IApiItemOptions) {
     this.reportError = this.reportError.bind(this);
 
     this.declaration = options.declaration;
     this.jsdocNode = options.jsdocNode;
     this._errorNode = options.declaration;
+    this._state = ResolveState.Unresolved;
     this.warnings = [];
 
     this.extractor = options.extractor;
@@ -165,8 +193,6 @@ abstract class ApiItem {
 
     this.name = this.exportSymbol.name || '???';
     this.typeChecker = this.extractor.typeChecker;
-
-    this.documentation = new ApiDocumentation(this, options.extractor.docItemLoader, this.reportError);
   }
 
   /**
@@ -236,6 +262,41 @@ abstract class ApiItem {
    */
   protected reportWarning(message: string): void {
     this.warnings.push(message);
+  }
+
+  /**
+   * This function assumes all references from this ApiItem have been resolved and we can now safely create 
+   * the documentation.
+   */
+  protected onResolveReferences(): void {
+    this.documentation = new ApiDocumentation(this, this.extractor.docItemLoader, this.extractor, this.reportError);
+    // TODO: this.collectTypeReferences(this); 
+  }
+
+  /**
+   * This function is a second stage that happens after Extractor.analyze() calls ApiItem constructor to build up 
+   * the abstract syntax tree. In this second stage, we are creating the documentation for each ApiItem.
+   * 
+   * This function makes sure we create the documentation for each ApiItem in the correct order.
+   * In the event that a circular dependency occurs, an error is reported. For example, if ApiItemOne has 
+   * an \@inheritdoc referencing ApiItemTwo, and ApiItemTwo has an \@inheritdoc refercing ApiItemOne then 
+   * we have a circular dependency and an error will be reported.
+   */
+  public resolveReferences(): void {
+    switch (this._state) {
+      case ResolveState.Resolved:
+        return;
+      case ResolveState.Unresolved:
+        this._state = ResolveState.Resolving;
+        this.onResolveReferences();
+        this._state = ResolveState.Resolved;
+        return;
+      case ResolveState.Resolving:
+        this.reportError('circular reference');
+        return;
+      default:
+        throw new Error('ApiItem state is invalid');
+    }
   }
 }
 
