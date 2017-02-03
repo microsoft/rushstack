@@ -143,11 +143,12 @@ export default class RebuildAction extends CommandLineAction {
 
   private _registerToFlags(taskRunner: TaskRunner, toFlags: string[]): void {
     for (const toFlag of toFlags) {
-      if (!this._rushConfiguration.getProjectByName(toFlag)) {
+      const toProject: RushConfigurationProject = this._rushConfiguration.findProjectByShorthandName(toFlag);
+      if (!toProject) {
         throw new Error(`The project '${toFlag}' does not exist in rush.json`);
       }
 
-      const deps: Set<string> = this._collectAllDependencies(toFlag);
+      const deps: Set<string> = this._collectAllDependencies(toProject.packageName);
 
       // Register any dependencies it may have
       deps.forEach(dep => this._registerTask(taskRunner, this._rushConfiguration.getProjectByName(dep)));
@@ -159,7 +160,8 @@ export default class RebuildAction extends CommandLineAction {
 
   private _registerFromFlags(taskRunner: TaskRunner, fromFlags: string[]): void {
     for (const fromFlag of fromFlags) {
-      if (!this._rushConfiguration.getProjectByName(fromFlag)) {
+      const fromProject: RushConfigurationProject = this._rushConfiguration.findProjectByShorthandName(fromFlag);
+      if (!fromProject) {
         throw new Error(`The project '${fromFlag}' does not exist in rush.json`);
       }
 
@@ -167,7 +169,7 @@ export default class RebuildAction extends CommandLineAction {
       this._buildDependentGraph();
 
       // We will assume this project will be built, but act like it has no dependencies
-      const dependents: Set<string> = this._collectAllDependents(fromFlag);
+      const dependents: Set<string> = this._collectAllDependents(fromProject.packageName);
       dependents.add(fromFlag);
 
       // Register all downstream dependents
