@@ -451,8 +451,39 @@ export default class RushConfiguration {
     return this._projectsByName;
   }
 
+  /**
+   * Looks up a project in the projectsByName map.  If the project is not found,
+   * then undefined is returned.
+   */
   public getProjectByName(projectName: string): RushConfigurationProject {
     return this._projectsByName.get(projectName);
+  }
+
+  /**
+   * This is used e.g. by command-line interfaces such as "rush build --to example".
+   * If "example" is not a project name, then it also looks for a scoped name
+   * like "@something/example".  If exactly one project matches this heuristic, it
+   * is returned.  Otherwise, undefined is returned.
+   */
+  public findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject {
+    // Is there an exact match?
+    let result: RushConfigurationProject = this._projectsByName.get(shorthandProjectName);
+    if (result) {
+      return result;
+    }
+
+    // Is there an approximate match?
+    for (const project of this._projects) {
+      if (Utilities.parseScopedPackageName(project.packageName).name === shorthandProjectName) {
+        if (result) {
+          // Ambiguous -- there is more than one match
+          return undefined;
+        } else {
+          result = project;
+        }
+      }
+    }
+    return result;
   }
 
   private _populateDownstreamDependencies(dependencies: { [key: string]: string }, packageName: string): void {
