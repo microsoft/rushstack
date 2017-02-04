@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 02 Feb 2017 14:05:53 GMT and should not be manually modified.
+This log was last generated on Sat, 04 Feb 2017 02:32:05 GMT and should not be manually modified.
+
+## 1.1.8
+Sat, 04 Feb 2017 02:32:05 GMT
+
+### Patches
+
+- Moved ApiItem references within ApiDocumentation, to ApiItem caller.
 
 ## 1.1.7
 Thu, 02 Feb 2017 14:05:53 GMT
