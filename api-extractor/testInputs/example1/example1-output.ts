@@ -14,6 +14,7 @@ class InternalClass {
   public test(): void;
 }
 
+// (undocumented)
 class MyClass {
   // (undocumented)
   public field: number;
