@@ -28,6 +28,29 @@ export default class DocElementParser {
    */
   private static _hrefRegEx: RegExp = /^[a-z]+:\/\//;
 
+  public static getAsText(collection: IDocElement[], reportError: (message: string) => void): string {
+    let text: string = '';
+
+    collection.forEach(docElement => {
+      switch (docElement.kind) {
+        case 'textDocElement':
+          text += `${(docElement as ITextElement).value} `;
+          break;
+        case 'linkDocElement':
+          // links don't count towards the summary
+          break;
+        case 'seeDocElement':
+          // see doesn't count towards the summary
+          break;
+        default:
+          reportError('Unexpected item in JsDoc collection');
+          break;
+      }
+    });
+
+    return text.trim();
+  }
+
   public static makeTextElement(text: string): IDocElement {
     if (!text) {
       return;
