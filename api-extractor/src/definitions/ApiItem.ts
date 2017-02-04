@@ -143,9 +143,9 @@ abstract class ApiItem {
   public documentation: ApiDocumentation;
 
   /**
-   * Indicates that this ApiItem does not have adequate JSDoc comments.  If needsDocumentation=true,
-   * and there is less than 10 characters of summary text in the JSDoc, then this will be noted in
-   * the API file produced by ApiFileGenerator.  
+   * Indicates that this ApiItem does not have adequate JSDoc comments. If shouldHaveDocumentation()=true,
+   * and there is less than 10 characters of summary text in the JSDoc, then this will be set to true and 
+   * noted in the API file produced by ApiFileGenerator.  
    * (The JSDoc text itself is not included in that report, because documentation
    * changes do not require an API review, and thus should not cause a diff for that report.)
    */
@@ -295,7 +295,7 @@ abstract class ApiItem {
 
     const summaryTextCondensed: string = DocElementParser.getAsText(
       this.documentation.summary,
-      this.reportError).replace('  ', ' ');
+      this.reportError).replace(/\s\s/g, ' ');
     this.needsDocumentation = this.shouldHaveDocumentation() && summaryTextCondensed.length <= 10;
 
     if (this.kind === ApiItemKind.Package) {
@@ -307,7 +307,7 @@ abstract class ApiItem {
     }
 
     if (this.documentation.preapproved) {
-      if (!(this.getDeclarationSymbol().flags & (ts.SymbolFlags.Interface | ts.SymbolFlags.Class))) {
+      if (!(this.getDeclaration().kind & (ts.SyntaxKind.InterfaceDeclaration | ts.SyntaxKind.ClassDeclaration))) {
         this.reportError('The @preapproved tag may only be applied to classes and interfaces');
         this.documentation.preapproved = false;
       }
