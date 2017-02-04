@@ -7,14 +7,14 @@
   "typings": "lib/index.d.ts",
   "devDependencies": {
     "@ms/sp-build-internal-web": "~0.5.0",
-    "@types/chai": ">=3.4.34 <3.6.0",
-    "@types/mocha": ">=2.2.33 <2.6.0",
+    "@types/chai": "3.4.34",
+    "@types/mocha": "2.2.38",
     "chai": "~3.5.0",
     "gulp": "~3.9.1"
   },
   "dependencies": {
     "@microsoft/sp-loader": "~0.7.0",
-    "@types/webpack-env": ">=1.12.1 <1.14.0"
+    "@types/webpack-env": "1.13.0"
   },
   "scripts": {
     "build": "gulp bundle",
