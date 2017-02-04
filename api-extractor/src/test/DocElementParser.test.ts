@@ -42,7 +42,7 @@ const extractor: Extractor = new Extractor({
  */
 class TestApiDocumentation extends ApiDocumentation {
   constructor() {
-    super(myDocumentedClass, extractor.docItemLoader, extractor, console.log);
+    super('Some summary\n@remarks and some remarks\n@public', extractor.docItemLoader, extractor, console.log);
   }
 
   public parseParam(tokenizer: Tokenizer): IParam {
@@ -165,7 +165,7 @@ describe('DocElementParser tests', function (): void {
     it('Should parse @param with nested link and/or text', (): void => {
       const apiDoc: TestApiDocumentation = new TestApiDocumentation();
 
-      // Don't include the "@param" in the doc string, parseParam() expects this to be processed in a 
+      // Don't include the "@param" in the doc string, parseParam() expects this to be processed in a
       // previous step.
       const docs: string = 'x - The height in {@link http://wikipedia.org/pixel_units}';
       const tokenizer: Tokenizer = new Tokenizer(docs, console.log);
