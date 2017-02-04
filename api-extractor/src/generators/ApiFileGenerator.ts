@@ -23,12 +23,13 @@ import { ApiTag } from '../definitions/ApiDocumentation';
   */
 export default class ApiFileGenerator extends ApiItemVisitor {
   protected _indentedWriter: IndentedWriter = new IndentedWriter();
+
   /**
    * We don't want to require documentation for any properties that occur
    * anywhere within a TypeLiteral. If this value is above 0, then we are 
    * visiting something within a TypeLiteral. 
    */
-  protected _insideTypeLiteral: number;
+  private _insideTypeLiteral: number;
 
   /**
    * Compares the contents of two API files that were created using ApiFileGenerator,
@@ -178,14 +179,12 @@ export default class ApiFileGenerator extends ApiItemVisitor {
         footer += '@deprecated';
       }
 
-      // If we are anywhere inside a TypeLiteral this will be greater than 0
-      if (this._insideTypeLiteral === 0) {
-        if (apiItem.needsDocumentation) {
-          if (footer) {
-            footer += ' ';
-          }
-          footer += '(undocumented)';
+      // If we are anywhere inside a TypeLiteral, _insideTypeLiteral is greater than 0
+      if (this._insideTypeLiteral === 0 && apiItem.needsDocumentation) {
+        if (footer) {
+          footer += ' ';
         }
+        footer += '(undocumented)';
       }
 
       if (footer) {
