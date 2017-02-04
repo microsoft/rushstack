@@ -31,14 +31,14 @@
   },
   "devDependencies": {
     "@microsoft/sp-build-node": "~0.2.1",
-    "@types/chai": "^3.4.34",
-    "@types/es6-collections": "^0.5.29",
+    "@types/chai": "3.4.34",
+    "@types/es6-collections": "0.5.29",
     "@types/es6-promise": "0.0.32",
-    "@types/fs-extra": ">=0.0.34, <0.27.0",
-    "@types/glob": ">=5.0.30 <7.1.0",
-    "@types/minimatch": ">=2.0.29 <3.1.0",
-    "@types/mocha": "^2.2.32",
-    "@types/node": ">=6.0.51 <7.0.0",
+    "@types/fs-extra": "0.0.37",
+    "@types/glob": "5.0.30",
+    "@types/minimatch": "2.0.29",
+    "@types/mocha": "2.2.38",
+    "@types/node": "6.0.62",
     "chai": "~3.5.0",
     "gulp": "~3.9.1"
   }
