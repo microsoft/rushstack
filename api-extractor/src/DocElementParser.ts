@@ -43,7 +43,7 @@ export default class DocElementParser {
           // see doesn't count towards the summary
           break;
         default:
-          reportError('Unexpected item in JsDoc collection');
+          reportError('Unexpected item in IDocElement collection');
           break;
       }
     });
