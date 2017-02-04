@@ -23,6 +23,12 @@ import { ApiTag } from '../definitions/ApiDocumentation';
   */
 export default class ApiFileGenerator extends ApiItemVisitor {
   protected _indentedWriter: IndentedWriter = new IndentedWriter();
+  /**
+   * We don't want to require documentation for any properties that occur
+   * anywhere within a TypeLiteral. If this value is above 0, then we are 
+   * visiting something within a TypeLiteral. 
+   */
+  protected _insideTypeLiteral: number;
 
   /**
    * Compares the contents of two API files that were created using ApiFileGenerator,
@@ -40,11 +46,12 @@ export default class ApiFileGenerator extends ApiItemVisitor {
 
   /**
    * Generates the report and writes it to disk.
-   * 
+   *
    * @param reportFilename - The output filename
    * @param analyzer       - An Analyzer object representing the input project.
    */
   public writeApiFile(reportFilename: string, extractor: Extractor): void {
+    this._insideTypeLiteral = 0;
     const fileContent: string = this.generateApiFileContent(extractor);
     fs.writeFileSync(reportFilename, fileContent);
   }
@@ -120,7 +127,9 @@ export default class ApiFileGenerator extends ApiItemVisitor {
     this._indentedWriter.write(apiMember.getDeclarationLine());
 
     if (apiMember.typeLiteral) {
+      this._insideTypeLiteral += 1;
       this.visit(apiMember.typeLiteral);
+      this._insideTypeLiteral -= 1;
     }
   }
 
@@ -169,11 +178,14 @@ export default class ApiFileGenerator extends ApiItemVisitor {
         footer += '@deprecated';
       }
 
-      if (apiItem.isMissingDocs) {
-        if (footer) {
-          footer += ' ';
+      // If we are anywhere inside a TypeLiteral this will be greater than 0
+      if (this._insideTypeLiteral === 0) {
+        if (apiItem.needsDocumentation) {
+          if (footer) {
+            footer += ' ';
+          }
+          footer += '(undocumented)';
         }
-        footer += '(undocumented)';
       }
 
       if (footer) {

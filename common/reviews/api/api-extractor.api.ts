@@ -1,6 +1,7 @@
 class ApiFileGenerator extends ApiItemVisitor {
   // (undocumented)
   protected _indentedWriter: IndentedWriter;
+  protected _insideTypeLiteral: number;
   public static areEquivalentApiFileContents(actualFileContent: string, expectedFileContent: string): boolean;
   // (undocumented)
   public generateApiFileContent(extractor: Extractor): string;
