@@ -42,7 +42,7 @@ const extractor: Extractor = new Extractor({
  */
 class TestApiDocumentation extends ApiDocumentation {
   constructor() {
-    super(myDocumentedClass.docComment, extractor.docItemLoader, extractor, console.log);
+    super('Some summary\n@remarks and some remarks\n@public', extractor.docItemLoader, extractor, console.log);
   }
 
   public parseParam(tokenizer: Tokenizer): IParam {

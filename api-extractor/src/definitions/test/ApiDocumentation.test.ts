@@ -47,7 +47,7 @@ describe('ApiDocumentation tests', function (): void {
 
   describe('ApiDocumentation internal methods', function (): void {
     const apiDoc: ApiDocumentation = new ApiDocumentation(
-      myDocumentedClass.getJsDocs(),
+      'Some summary\n@remarks and some remarks\n@public',
       extractor.docItemLoader,
       extractor,
       console.log
