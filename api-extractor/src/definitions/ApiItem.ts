@@ -5,6 +5,7 @@ import * as ts from 'typescript';
 import Extractor from '../Extractor';
 import ApiDocumentation, { ApiTag } from './ApiDocumentation';
 import TypeScriptHelpers from '../TypeScriptHelpers';
+import DocElementParser from '../DocElementParser';
 
 /**
  * Indicates the type of definition represented by a ApiItem object.
@@ -139,11 +140,16 @@ abstract class ApiItem {
    */
   public jsdocNode: ts.Node;
 
-  public docComment: string;
-
   public documentation: ApiDocumentation;
 
-  public isMissingDocs: boolean;
+  /**
+   * Indicates that this ApiItem does not have adequate JSDoc comments.  If needsDocumentation=true,
+   * and there is less than 10 characters of summary text in the JSDoc, then this will be noted in
+   * the API file produced by ApiFileGenerator.  
+   * (The JSDoc text itself is not included in that report, because documentation
+   * changes do not require an API review, and thus should not cause a diff for that report.)
+   */
+  public needsDocumentation: boolean;
 
   /**
    * The Extractor object that acts as the root of the abstract syntax tree that this item belongs to.
@@ -187,7 +193,6 @@ abstract class ApiItem {
     this.reportError = this.reportError.bind(this);
 
     this.jsdocNode = options.jsdocNode;
-    this.docComment = this.getJsDocs();
     this.declaration = options.declaration;
     this._errorNode = options.declaration;
     this._state = ResolveState.Unresolved;
@@ -225,22 +230,6 @@ abstract class ApiItem {
    */
   public shouldHaveDocumentation(): boolean {
     return true;
-  }
-
-  public getJsDocs(): string {
-    if (!this.jsdocNode) {
-      return '';
-    }
-    const docComment: string = TypeScriptHelpers.getJsDocComments(this.jsdocNode, this.reportError);
-
-    // Eliminate tags and then count the English letters.  Are there at least 10 letters of text?
-    // If not, we consider the definition to be "missingDocumentation".
-    const condensedDocs: string = docComment
-      .replace(ApiDocumentation.jsDocTagsRegex, '')
-      .replace(/[^a-z]/gi, '');
-    this.isMissingDocs = this.shouldHaveDocumentation() && condensedDocs.length <= 10;
-
-    return docComment;
   }
 
   /**
@@ -291,20 +280,26 @@ abstract class ApiItem {
    * the documentation.
    */
   protected onResolveReferences(): void {
+    let originalJsDoc: string = '';
+    if (this.jsdocNode) {
+      originalJsDoc = TypeScriptHelpers.getJsDocComments(this.jsdocNode, this.reportError);
+    }
+
     this.documentation = new ApiDocumentation(
-      this.docComment,
+      originalJsDoc,
       this.extractor.docItemLoader,
       this.extractor,
       this.reportError
     );
     // TODO: this.collectTypeReferences(this);
 
-    if (this.documentation.apiTagCount > 1) {
-      this.reportError('More than one API Tag was specified');
-    }
+    const summaryTextCondensed: string = DocElementParser.getAsText(
+      this.documentation.summary,
+      this.reportError).replace('  ', ' ');
+    this.needsDocumentation = this.shouldHaveDocumentation() && summaryTextCondensed.length <= 10;
 
     if (this.kind === ApiItemKind.Package) {
-      if (this.documentation.apiTagCount > 0) {
+      if (this.documentation.apiTag !== ApiTag.None) {
         const tag: string = '@' + ApiTag[this.documentation.apiTag].toLowerCase();
         this.reportError(`The ${tag} tag is not allowed on the package, which is always public`);
       }
@@ -312,10 +307,7 @@ abstract class ApiItem {
     }
 
     if (this.documentation.preapproved) {
-      if (this.documentation.apiTag !== ApiTag.Internal) {
-        this.reportError('The @preapproved tag may only be applied to @internal defintions');
-        this.documentation.preapproved = false;
-      } else if (!(this.getDeclarationSymbol().flags & (ts.SymbolFlags.Interface | ts.SymbolFlags.Class))) {
+      if (!(this.getDeclarationSymbol().flags & (ts.SymbolFlags.Interface | ts.SymbolFlags.Class))) {
         this.reportError('The @preapproved tag may only be applied to classes and interfaces');
         this.documentation.preapproved = false;
       }

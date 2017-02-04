@@ -60,6 +60,12 @@ export interface IScopePackageName {
 }
 
 export default class ApiDocumentation {
+  /**
+   * Match JsDoc block tags and inline tags
+   * Example "@a @b@c d@e @f {whatever} {@link a} { @something } \@g" => ["@a", "@f", "{@link a}", "{ @something }"]
+   */
+  public static readonly _jsdocTagsRegex: RegExp = /{\s*@(\\{|\\}|[^{}])*}|(?:^|\s)(\@[a-z_]+)(?=\s|$)/gi;
+
   // For guidance about using these tags, please see this document:
   // https://onedrive.visualstudio.com/DefaultCollection/SPPPlat/_git/sp-client
   //    ?path=/common/docs/ApiPrinciplesAndProcess.md
@@ -88,12 +94,6 @@ export default class ApiDocumentation {
   ];
 
   /**
-   * Match JsDoc block tags and inline tags
-   * Example "@a @b@c d@e @f {whatever} {@link a} { @something } \@g" => ["@a", "@f", "{@link a}", "{ @something }"]
-   */
-  private static _jsdocTagsRegex: RegExp = /{\s*@(\\{|\\}|[^{}])*}|(?:^|\s)(\@[a-z_]+)(?=\s|$)/gi;
-
-  /**
    * Splits an API reference expression into two parts, first part is the scopename/packageName and
    * the second part is the exportName.memberName.
    */
@@ -110,12 +110,11 @@ export default class ApiDocumentation {
   private static _exportRegEx: RegExp =  /^\w+/;
 
   /**
-   * This returns the JSDoc comment block for the given item (without "/**" characters),
-   * or an empty string if there is no comment.  This propery will never be undefined.
+   * The original JsDoc comment.
    *
-   * Example: "Example Function\n@returns the number of items\n@internal"
+   * Example: "This is a summary. \{\@link a\} \@remarks These are remarks."
    */
-  public docComment: string;
+  public originalJsDoc: string;
 
   /**
    * The docComment text string split into an array of ITokenItems.  The tokens are essentially either
@@ -142,24 +141,11 @@ export default class ApiDocumentation {
   public parameters: Map<string, IParam>;
 
   /**
-   * Indicates that this definition does not have adequate JSDoc comments.  If isMissing=true,
-   * then this will be noted in the API file produced by ApiFileGenerator.  (The JSDoc
-   * text itself is not included in that report, because documentation changes do not
-   * require an API review, and thus should not cause a diff for that report.)
-   */
-  public isMissing: boolean;
-
-  /**
    * An "API Tag" is a custom JSDoc tag which indicates whether this definition
    * is considered Public API for third party developers, as well as its release
    * stage (alpha, beta, etc).
    */
   public apiTag: ApiTag;
-
-  /**
-   * The number of times an "API Tag" was encountered in the JSDoc.
-   */
-  public apiTagCount: number;
 
   /**
    * True if the "@preapproved" tag was specified.
@@ -175,7 +161,7 @@ export default class ApiDocumentation {
   public isDocInherited?: boolean;
   public isDocInheritedDeprecated?: boolean;
   public isOverride?: boolean;
-  public readonly?: boolean;
+  public hasReadOnlyTag?: boolean;
 
   public docItemLoader: DocItemLoader;
 
@@ -186,10 +172,6 @@ export default class ApiDocumentation {
   public extractor: Extractor;
 
   public reportError: (message: string) => void;
-
-  public static get jsDocTagsRegex(): RegExp {
-    return ApiDocumentation._jsdocTagsRegex;
-  }
 
   /**
    * Takes an API reference expression of the form '@scopeName/packageName:exportName.memberName'
@@ -257,7 +239,7 @@ export default class ApiDocumentation {
     docItemLoader: DocItemLoader,
     extractor: Extractor,
     errorLogger: (message: string) => void) {
-    this.docComment = docComment;
+    this.originalJsDoc = docComment;
     this.docItemLoader = docItemLoader;
     this.extractor = extractor;
     this.reportError = errorLogger;
@@ -266,14 +248,14 @@ export default class ApiDocumentation {
   }
 
   protected _parseDocs(): void {
-    const tokenizer: Tokenizer = new Tokenizer(this.docComment, this.reportError);
+    const tokenizer: Tokenizer = new Tokenizer(this.originalJsDoc, this.reportError);
     this.summary = DocElementParser.parse(tokenizer, this.reportError);
     this.returnsMessage = [];
     this.deprecatedMessage = [];
     this.remarks = [];
     this.apiTag = ApiTag.None;
-    this.apiTagCount = 0;
 
+    let apiTagCount: number = 0;
     let parsing: boolean = true;
 
     while (parsing) {
@@ -325,22 +307,22 @@ export default class ApiDocumentation {
           case '@public':
             tokenizer.getToken();
             this.apiTag = ApiTag.Public;
-            ++this.apiTagCount;
+            ++apiTagCount;
             break;
           case '@internal':
             tokenizer.getToken();
             this.apiTag = ApiTag.Internal;
-            ++this.apiTagCount;
+            ++apiTagCount;
             break;
           case '@alpha':
             tokenizer.getToken();
             this.apiTag = ApiTag.Alpha;
-            ++this.apiTagCount;
+            ++apiTagCount;
             break;
           case '@beta':
             tokenizer.getToken();
             this.apiTag = ApiTag.Beta;
-            ++this.apiTagCount;
+            ++apiTagCount;
             break;
           case '@preapproved':
             tokenizer.getToken();
@@ -348,7 +330,7 @@ export default class ApiDocumentation {
             break;
           case '@readonly':
             tokenizer.getToken();
-            this.readonly = true;
+            this.hasReadOnlyTag = true;
             break;
           case '@betadocumentation':
             tokenizer.getToken();
@@ -395,6 +377,15 @@ export default class ApiDocumentation {
         // This would be a program bug
         this.reportError(`Unexpected token: ${token.type} ${token.tag} ${token.text}`);
       }
+    }
+
+    if (apiTagCount > 1) {
+      this.reportError('More than one API Tag was specified');
+    }
+
+    if (this.preapproved && this.apiTag !== ApiTag.Internal) {
+      this.reportError('The @preapproved tag may only be applied to @internal defintions');
+      this.preapproved = false;
     }
   }
 
