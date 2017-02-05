@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/gulp-core-build",
-      "comment": "\"\"Fix _flatten and make serial/parallel more robust\"",
+      "comment": "Fix _flatten and make serial/parallel more robust",
       "type": "patch"
     }
   ],
