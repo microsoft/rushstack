@@ -241,7 +241,8 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
  * Takes in IExecutables as arguments and returns an IExecutable that will execute them in serial.
  */
 export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutable {
-  const flatTasks: IExecutable[] = <IExecutable[]>_flatten(tasks);
+  // tslint:disable-next-line:no-null-keyword
+  const flatTasks: IExecutable[] = <IExecutable[]>_flatten(tasks).filter(task => task !== null && task !== undefined);
 
   for (const task of flatTasks) {
     _trackTask(task);
@@ -264,7 +265,8 @@ export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutabl
  * Takes in IExecutables as arguments and returns an IExecutable that will execute them in parallel.
  */
 export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecutable {
-  const flattenTasks: IExecutable[] = _flatten<IExecutable>(tasks);
+  // tslint:disable-next-line:no-null-keyword
+  const flattenTasks: IExecutable[] = _flatten<IExecutable>(tasks).filter(task => task !== null && task !== undefined);
 
   for (const task of flattenTasks) {
     _trackTask(task);
@@ -382,16 +384,20 @@ function _trackTask(task: IExecutable): void {
 /**
  * Flattens a set of arrays into a single array.
  */
-function _flatten<T>(arr: Array<T | T[]>): T[] {
-  let output: T[] = [];
+function _flatten<T>(oArr: Array<T | T[]>): T[] {
+  const output: T[] = [];
 
-  for (const toFlatten of arr) {
-    if (Array.isArray(toFlatten)) {
-      output = output.concat(toFlatten);
-    } else {
-      output.push(toFlatten);
+  function traverse(arr: Array<T | T[]>): void {
+    for (let i: number = 0; i < arr.length; ++i) {
+      if (Array.isArray(arr[i])) {
+        traverse(arr[i] as T[]);
+      } else {
+        output.push(arr[i] as T);
+      }
     }
   }
+
+  traverse(oArr);
 
   return output;
 }
