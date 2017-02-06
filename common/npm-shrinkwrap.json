@@ -146,6 +146,11 @@
       "from": "@types/node-forge@>=0.6.4 <0.7.0",
       "resolved": "https://registry.npmjs.org/@types/node-forge/-/node-forge-0.6.5.tgz"
     },
+    "@types/node-notifier": {
+      "version": "0.0.28",
+      "from": "@types/node-notifier@0.0.28",
+      "resolved": "https://registry.npmjs.org/@types/node-notifier/-/node-notifier-0.0.28.tgz"
+    },
     "@types/orchestrator": {
       "version": "0.0.30",
       "from": "@types/orchestrator@0.0.30",
@@ -4478,7 +4483,14 @@
     "rush-gulp-core-build": {
       "version": "0.0.0",
       "from": "temp_modules\\rush-gulp-core-build",
-      "resolved": "file:temp_modules\\rush-gulp-core-build"
+      "resolved": "file:temp_modules\\rush-gulp-core-build",
+      "dependencies": {
+        "node-notifier": {
+          "version": "5.0.2",
+          "from": "node-notifier@>=5.0.2 <5.1.0",
+          "resolved": "https://registry.npmjs.org/node-notifier/-/node-notifier-5.0.2.tgz"
+        }
+      }
     },
     "rush-gulp-core-build-karma": {
       "version": "0.0.0",
@@ -4535,14 +4547,7 @@
     "rush-web-library-build": {
       "version": "0.0.0",
       "from": "temp_modules\\rush-web-library-build",
-      "resolved": "file:temp_modules\\rush-web-library-build",
-      "dependencies": {
-        "node-notifier": {
-          "version": "4.6.1",
-          "from": "node-notifier@>=4.6.1 <4.7.0",
-          "resolved": "https://registry.npmjs.org/node-notifier/-/node-notifier-4.6.1.tgz"
-        }
-      }
+      "resolved": "file:temp_modules\\rush-web-library-build"
     },
     "samsam": {
       "version": "1.1.2",
