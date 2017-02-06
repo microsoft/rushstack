@@ -2,6 +2,49 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "1.6.0",
+      "tag": "@microsoft/rush_v1.6.0",
+      "date": "Sun, 05 Feb 2017 01:21:30 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "When the git policy fails, rush should return a non-zero error code."
+          },
+          {
+            "comment": "Lock version numbers for @types packages"
+          },
+          {
+            "comment": "Ensure world readiness"
+          },
+          {
+            "comment": "Update .npmignore"
+          },
+          {
+            "comment": "Cyclic dependency should not have version bumped when changes are applied."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add support for pre-release build"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-lib\" from `1.5.1` to `1.5.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/stream-collator\" from `~1.0.2` to `~1.0.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `~1.1.1` to `~1.1.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/sp-build-node\" from `~0.2.1` to `~0.3.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.5.1",
       "tag": "@microsoft/rush_v1.5.1",
       "date": "Tue, 24 Jan 2017 03:26:05 GMT",

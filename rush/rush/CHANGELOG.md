@@ -1,6 +1,21 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 24 Jan 2017 03:36:19 GMT and should not be manually modified.
+This log was last generated on Sun, 05 Feb 2017 01:21:30 GMT and should not be manually modified.
+
+## 1.6.0
+Sun, 05 Feb 2017 01:21:30 GMT
+
+### Minor changes
+
+- Add support for pre-release build
+
+### Patches
+
+- When the git policy fails, rush should return a non-zero error code.
+- Lock version numbers for @types packages
+- Ensure world readiness
+- Update .npmignore
+- Cyclic dependency should not have version bumped when changes are applied.
 
 ## 1.5.1
 Tue, 24 Jan 2017 03:26:05 GMT
