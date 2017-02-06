@@ -63,8 +63,9 @@ describe('ApiFileGenerator tests', function (): void {
        * Errors can be found in testInputs/folder/MyClass
        */
       assert.equal(capturedErrors.length, 3);
-      assert.equal(capturedErrors[0].message, 'Unknown JSDoc tag "@badjsdoctag"');
-      assert.equal(capturedErrors[1].message, 'Unexpected text in JSDoc comment: '
+      assert.equal(capturedErrors[0].message, 'Property type not declared');
+      assert.equal(capturedErrors[1].message, 'Unknown JSDoc tag "@badjsdoctag"');
+      assert.equal(capturedErrors[2].message, 'Unexpected text in JSDoc comment: '
         + '"(Error #1 is the bad tag) Text can no..."');
     });
   });
