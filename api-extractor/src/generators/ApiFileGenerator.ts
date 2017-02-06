@@ -26,8 +26,8 @@ export default class ApiFileGenerator extends ApiItemVisitor {
 
   /**
    * We don't want to require documentation for any properties that occur
-   * anywhere within a TypeLiteral. If this value is above 0, then we are 
-   * visiting something within a TypeLiteral. 
+   * anywhere within a TypeLiteral. If this value is above 0, then we are
+   * visiting something within a TypeLiteral.
    */
   private _insideTypeLiteral: number;
 
@@ -180,7 +180,7 @@ export default class ApiFileGenerator extends ApiItemVisitor {
       }
 
       // If we are anywhere inside a TypeLiteral, _insideTypeLiteral is greater than 0
-      if (this._insideTypeLiteral === 0 && apiItem.needsDocumentation) {
+      if (!this._insideTypeLiteral && apiItem.needsDocumentation) {
         if (footer) {
           footer += ' ';
         }
