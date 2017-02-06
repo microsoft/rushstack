@@ -27,8 +27,7 @@
     "@types/gulp": "^3.8.32",
     "@types/node": "^6.0.46",
     "gulp": "~3.9.1",
-    "gulp-replace": "^0.5.4",
-    "node-notifier": "~4.6.1"
+    "gulp-replace": "^0.5.4"
   },
   "devDependencies": {
     "typescript": "~2.1.4"
