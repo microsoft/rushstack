@@ -2,11 +2,33 @@
   "name": "@microsoft/rush-lib",
   "entries": [
     {
+      "version": "1.5.2",
+      "tag": "@microsoft/rush-lib_v1.5.2",
+      "date": "Sun, 05 Feb 2017 01:21:30 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Lock version numbers for @types packages"
+          },
+          {
+            "comment": "Update .npmignore"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/stream-collator\" from `~1.0.2` to `~1.0.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/sp-build-node\" from `~0.2.1` to `~0.3.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.5.1",
       "tag": "@microsoft/rush-lib_v1.5.1",
       "date": "Tue, 24 Jan 2017 03:26:06 GMT",
-      "comments": {
-      }
+      "comments": {}
     },
     {
       "version": "1.5.0",

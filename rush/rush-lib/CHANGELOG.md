@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush-lib
 
-This log was last generated on Tue, 24 Jan 2017 03:36:19 GMT and should not be manually modified.
+This log was last generated on Sun, 05 Feb 2017 01:21:30 GMT and should not be manually modified.
+
+## 1.5.2
+Sun, 05 Feb 2017 01:21:30 GMT
+
+### Patches
+
+- Lock version numbers for @types packages
+- Update .npmignore
 
 ## 1.5.1
 Tue, 24 Jan 2017 03:26:06 GMT
