@@ -31,6 +31,8 @@ class PrivateClass {
  * @internal
  */
 export class InternalClass {
+  public static propertyWithNoType;
+
   /**
    * Comment 1
    */

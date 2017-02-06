@@ -11,6 +11,8 @@ class AliasClass4 {
 // @internal
 class InternalClass {
   // (undocumented)
+  public static propertyWithNoType: any;
+  // (undocumented)
   public test(): void;
 }
 
