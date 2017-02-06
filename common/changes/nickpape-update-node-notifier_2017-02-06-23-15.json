@@ -1,0 +1,15 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/web-library-build",
+      "comment": "Remove unused dependency",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build",
+      "comment": "Update node-notifier to remove SNYK warning about marked package having a vulnerability (although this vulnerability should not affect us)",
+      "type": "patch"
+    }
+  ],
+  "email": "nickpape-msft@users.noreply.github.com"
+}
