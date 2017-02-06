@@ -62,7 +62,7 @@ describe('ApiFileGenerator tests', function (): void {
       /**
        * Errors can be found in testInputs/folder/MyClass
        */
-      assert.equal(capturedErrors.length, 2);
+      assert.equal(capturedErrors.length, 3);
       assert.equal(capturedErrors[0].message, 'Unknown JSDoc tag "@badjsdoctag"');
       assert.equal(capturedErrors[1].message, 'Unexpected text in JSDoc comment: '
         + '"(Error #1 is the bad tag) Text can no..."');

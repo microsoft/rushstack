@@ -31,6 +31,9 @@ class PrivateClass {
  * @internal
  */
 export class InternalClass {
+  /**
+   * (Error) occurs here because there is no type declared.
+   */
   public static propertyWithNoType;
 
   /**
