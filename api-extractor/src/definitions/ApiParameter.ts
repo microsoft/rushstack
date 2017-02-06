@@ -20,9 +20,11 @@ class ApiParameter extends ApiItem {
 
     const parameterDeclaration: ts.ParameterDeclaration = options.declaration as ts.ParameterDeclaration;
     this.isOptional = !!parameterDeclaration.questionToken || !!parameterDeclaration.initializer;
-    this.type = parameterDeclaration.type ? parameterDeclaration.type.getText() : 'any';
-    if (!parameterDeclaration.type) {
+    if (parameterDeclaration.type) {
+      this.type = parameterDeclaration.type.getText();
+    } else {
       this.reportError(`Variable type not declared`);
+      this.type = 'any';
     }
 
     this.isSpread = !!parameterDeclaration.dotDotDotToken;
