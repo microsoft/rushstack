@@ -2,6 +2,32 @@
   "name": "@microsoft/decorators",
   "entries": [
     {
+      "version": "0.2.2",
+      "tag": "@microsoft/decorators_v0.2.2",
+      "date": "Sun, 05 Feb 2017 01:21:30 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Removed set-webpack-public-path from decorators\""
+          },
+          {
+            "comment": "Lock version numbers for @types packages"
+          },
+          {
+            "comment": "Update .npmignore"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/sp-loader\" from `~0.7.0` to `~0.8.0`"
+          },
+          {
+            "comment": "Updating dependency \"@ms/sp-build-internal-web\" from `~0.5.0` to `~0.5.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.1",
       "tag": "@microsoft/decorators_v0.2.1",
       "date": "Tue, 03 Jan 2017 21:52:49 GMT",

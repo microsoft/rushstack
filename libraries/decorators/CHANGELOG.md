@@ -1,6 +1,15 @@
 # Change Log - @microsoft/decorators
 
-This log was last generated on Tue, 03 Jan 2017 22:53:56 GMT and should not be manually modified.
+This log was last generated on Sun, 05 Feb 2017 01:21:30 GMT and should not be manually modified.
+
+## 0.2.2
+Sun, 05 Feb 2017 01:21:30 GMT
+
+### Patches
+
+- Removed set-webpack-public-path from decorators"
+- Lock version numbers for @types packages
+- Update .npmignore
 
 ## 0.2.1
 Tue, 03 Jan 2017 21:52:49 GMT

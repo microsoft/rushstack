@@ -2,6 +2,26 @@
   "name": "@microsoft/stream-collator",
   "entries": [
     {
+      "version": "1.0.3",
+      "tag": "@microsoft/stream-collator_v1.0.3",
+      "date": "Sun, 05 Feb 2017 01:21:30 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Lock version numbers for @types packages"
+          },
+          {
+            "comment": "Update .npmignore"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/sp-build-node\" from `~0.2.1` to `~0.3.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.2",
       "tag": "@microsoft/stream-collator_v1.0.2",
       "date": "Tue, 06 Dec 2016 20:44:26 GMT",

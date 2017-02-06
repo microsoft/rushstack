@@ -1,19 +1,19 @@
 {
   "name": "@microsoft/decorators",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A very conservative set of decorators for TypeScript projects",
   "license": "SEE LICENSE IN LICENSE.docx",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "devDependencies": {
-    "@ms/sp-build-internal-web": "~0.5.0",
+    "@ms/sp-build-internal-web": "~0.5.2",
     "@types/chai": "3.4.34",
     "@types/mocha": "2.2.38",
     "chai": "~3.5.0",
     "gulp": "~3.9.1"
   },
   "dependencies": {
-    "@microsoft/sp-loader": "~0.7.0",
+    "@microsoft/sp-loader": "~0.8.0",
     "@types/webpack-env": "1.13.0"
   },
   "scripts": {
