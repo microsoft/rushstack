@@ -147,7 +147,7 @@ export default class ApiDocumentation {
   public deprecatedMessage: IDocElement[];
   public remarks: IDocElement[];
   public returnsMessage: IDocElement[];
-  public parameters: Map<string, IParam>;
+  public parameters: { [name: string]: IParam; };
 
   /**
    * Indicates that this definition does not have adequate JSDoc comments.  If isMissing=true,
@@ -261,7 +261,7 @@ export default class ApiDocumentation {
     this.extractor = extractor;
     this.reportError = errorLogger;
     this.docComment = this._getJsDocs(apiItem);
-    this.parameters = new Map<string, IParam>();
+    this.parameters = {};
     this._parseDocs();
   }
 

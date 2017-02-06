@@ -15,8 +15,15 @@ class ApiProperty extends ApiMember {
     this.kind = ApiItemKind.Property;
 
     const declaration: any = options.declaration as any; /* tslint:disable-line:no-any */
-    if (declaration && declaration.type) {
-      this.type = declaration.type.getText();
+    if (declaration) {
+      if (declaration.type) {
+        this.type = declaration.type.getText();
+      } else {
+        this.reportError('Property type not declared');
+        this.type = 'any';
+      }
+    } else {
+      new Error('No declaration provided');
     }
   }
 
