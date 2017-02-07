@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Fixing issue where undocumented comment was not being emitted.",
+      "type": "patch"
+    }
+  ],
+  "email": "dgaeta@users.noreply.github.com"
+}
