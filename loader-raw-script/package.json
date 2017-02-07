@@ -5,14 +5,19 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
-  "repository": "github:microsoft/loader-raw-script",
+  "repository": "github:microsoft/webpack-loaders",
+  "scripts": {
+    "build": "gulp",
+    "clean": "gulp clean",
+    "test": "gulp test"
+  },
   "dependencies": {
-    "loader-utils": "^0.2.15"
+    "loader-utils": "~0.2.16"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
-    "gulp": "^3.9.1",
-    "mocha": "^3.0.2",
-    "node-library-build": "^0.2.0"
+    "chai": "~3.5.0",
+    "gulp": "~3.9.1",
+    "mocha": "~3.2.0",
+    "@microsoft/node-library-build": "~2.2.0"
   }
 }

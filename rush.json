@@ -27,6 +27,12 @@
       "projectFolder": "loader-set-webpack-public-path",
       "reviewCategory": "libraries",
       "shouldPublish": true
+    },
+    {
+      "packageName": "@microsoft/loader-raw-script",
+      "projectFolder": "loader-raw-script",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
     }
   ]
 }
