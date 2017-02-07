@@ -22,6 +22,6 @@
     "fsevents": "*"
   },
   "rushDependencies": {
-    "@microsoft/gulp-core-build": ">=2.1.1 <3.0.0"
+    "@microsoft/gulp-core-build": ">=2.2.1 <3.0.0"
   }
 }
