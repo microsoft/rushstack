@@ -1,4 +1,4 @@
-# web-build-tools
+# webpack-loaders
 
 [![Build Status](https://travis-ci.org/Microsoft/webpack-loaders.svg?branch=master)](https://travis-ci.org/Microsoft/webpack-loaders)
 
