@@ -1,24 +1,22 @@
-/lib/**/*.test.js
-/lib/**/*.test.d.ts
+# Ignore everything by default
+**
 
-/src
-/node_modules
-/coverage
-/gulpfile.js
-/temp
+# Use negative patterns to bring back the specific things we want to publish
+!/bin/**
+!/lib/**
+!/dist/**
 
-/ext
+# Ignore certain files in the above folder
 /dist/*.stats.*
-/config
-/*.log
-/tsconfig.json
-/tsd.json
-/typings
-/.npmignore
-/jsconfig.json
-/.editorconfig
-/.vscode
-/*.csproj
-/*.sln
-/.gitignore
-/.gitattributes
+
+# NOTE: These don't need to be specified, because NPM includes them automatically.
+#
+# package.json
+# README (and its variants)
+# CHANGELOG (and its variants)
+# LICENSE / LICENCE
+
+## Project specific definitions
+# -----------------------------
+
+# (Add your exceptions here)
