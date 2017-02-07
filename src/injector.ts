@@ -17,4 +17,4 @@ export = function(source: string): string { // tslint:disable-line:export-name n
     '',
     source
   ].join(EOL);
-}
+};
