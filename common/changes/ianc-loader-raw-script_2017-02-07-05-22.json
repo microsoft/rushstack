@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/loader-raw-script",
+      "comment": "Setting up loader-raw-script.",
+      "type": "major"
+    }
+  ],
+  "email": "iclanton@users.noreply.github.com"
+}

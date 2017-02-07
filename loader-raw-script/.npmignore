@@ -1,0 +1,10 @@
+.vscode
+src
+node_modules
+
+.gitignore
+.gitattributes
+.editorconfig
+gulpfile.js
+lib/**/*.test.js
+lib/**/*.test.d.ts
