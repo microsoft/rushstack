@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Changed the check for being within a type literal for the ApiFileGenerator",
+      "comment": "fixed initialization of ApiFileGenerator._insideTypeLiteral",
       "type": "patch"
     }
   ],
