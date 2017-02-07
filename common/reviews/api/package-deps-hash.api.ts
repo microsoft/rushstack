@@ -5,7 +5,6 @@ export function getPackageDeps(packagePath: string = process.cwd(), excludedPath
 interface IPackageDeps {
   // (undocumented)
   files: {
-    // (undocumented)
     [ key: string ]: string
   }
 }

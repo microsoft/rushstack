@@ -77,7 +77,6 @@ class GulpTask<TASK_CONFIG> implements IExecutable {
 // (undocumented)
 interface IBuildConfig {
   args?: {
-    // (undocumented)
     [ name: string ]: string | boolean;
   }
   buildErrorIconPath?: string;
@@ -92,7 +91,6 @@ interface IBuildConfig {
   packageFolder?: string;
   production?: boolean;
   properties?: {
-    // (undocumented)
     [ key: string ]: any;
   }
   relogIssues?: boolean;
@@ -107,7 +105,6 @@ interface IBuildConfig {
 
 interface ICopyConfig {
   copyTo: {
-    // (undocumented)
     [ destPath: string ]: string[];
   }
   shouldFlatten?: boolean;
