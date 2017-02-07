@@ -1,21 +1,21 @@
-# raw-script loader for webpack
+# webpack-loaders
 
-## Installation
+[![Build Status](https://travis-ci.org/Microsoft/webpack-loaders.svg?branch=master)](https://travis-ci.org/Microsoft/webpack-loaders)
 
-`npm @microsoft/loader-raw-script --save-dev`
+A collection of webpack loader npm packages.
 
-## Overview
+See individual projects for details:
 
-This simple loader loads a script file's contents directly in a webpack bundle using an `eval(...)`.
+### [@microsoft/loader-set-webpack-public-path](./loader-set-webpack-public-path/README.md)
 
-## Usage
+`loader-set-webpack-public-path` is a loader used to set the webpack public path variable.
 
-[Documentation: Using loaders](http://webpack.github.io/docs/using-loaders.html)
+[![npm version](https://badge.fury.io/js/%40microsoft%2Floader-set-webpack-public-path.svg)](https://badge.fury.io/js/%40microsoft%2Floader-set-webpack-public-path)
+[![Dependencies](https://david-dm.org/Microsoft/loader-set-webpack-public-path.svg)](https://david-dm.org/Microsoft/loader-set-webpack-public-path)
 
-``` javascript
-require("@microsoft/loader-raw-script!path/to/script.js");
-```
+### [@microsoft/loader-load-themed-styles](./loader-load-themed-styles/README.md)
 
-## License
+`loader-load-themed-styles` is a loader used for loading themed CSS styles.
 
-MIT (http://www.opensource.org/licenses/mit-license.php)
+[![npm version](https://badge.fury.io/js/%40microsoft%2Floader-load-themed-styles.svg)](https://badge.fury.io/js/%40microsoft%2Floader-load-themed-styles)
+[![Dependencies](https://david-dm.org/Microsoft/loader-load-themed-styles.svg)](https://david-dm.org/Microsoft/loader-load-themed-styles)

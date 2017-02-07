@@ -1,18 +1,9 @@
 {
-  "name": "@microsoft/loader-raw-script",
-  "version": "0.0.5",
-  "description": "",
-  "main": "lib/index.js",
-  "typings": "lib/index.d.ts",
-  "license": "MIT",
-  "repository": "github:microsoft/loader-raw-script",
-  "dependencies": {
-    "loader-utils": "^0.2.15"
-  },
+  "name": "webpack-loaders",
+  "version": "0.0.0",
+  "description": "Webpack loaders",
+
   "devDependencies": {
-    "chai": "^3.5.0",
-    "gulp": "^3.9.1",
-    "mocha": "^3.0.2",
-    "node-library-build": "^0.2.0"
+    "@microsoft/rush": "~1.5.1"
   }
 }
