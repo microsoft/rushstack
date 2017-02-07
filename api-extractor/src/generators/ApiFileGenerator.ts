@@ -52,12 +52,12 @@ export default class ApiFileGenerator extends ApiItemVisitor {
    * @param analyzer       - An Analyzer object representing the input project.
    */
   public writeApiFile(reportFilename: string, extractor: Extractor): void {
-    this._insideTypeLiteral = 0;
     const fileContent: string = this.generateApiFileContent(extractor);
     fs.writeFileSync(reportFilename, fileContent);
   }
 
   public generateApiFileContent(extractor: Extractor): string {
+    this._insideTypeLiteral = 0;
     // Normalize to CRLF
     this.visit(extractor.package);
     const fileContent: string = this._indentedWriter.toString().replace(/\r?\n/g, '\r\n');
@@ -180,7 +180,7 @@ export default class ApiFileGenerator extends ApiItemVisitor {
       }
 
       // If we are anywhere inside a TypeLiteral, _insideTypeLiteral is greater than 0
-      if (!this._insideTypeLiteral && apiItem.needsDocumentation) {
+      if (this._insideTypeLiteral === 0 && apiItem.needsDocumentation) {
         if (footer) {
           footer += ' ';
         }
