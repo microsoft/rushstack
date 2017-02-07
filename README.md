@@ -18,6 +18,57 @@ property.
 require("@microsoft/loader-set-webpack-public-path!");
 ```
 
+### Important note about Webpack 2.X
+
+Webpack's `resolveLoader.root` propery was [removed](https://webpack.js.org/guides/migrating/#loaders-in-configuration-resolve-relative-to-context)
+in webpack 2.X. This has an unfortunate side-effect for standardardized build configurations like
+[gulp-core-build](https://github.com/Microsoft/web-build-tools) build rigs with loaders in the rig's
+`package.json`, but not in the `package.json` of the project being built. This side-effect causes these
+loaders to not be resolved under some circumstances. In order to work around this, a secondary loader
+exists in this package solely to inject the `require("@microsoft/loader-set-webpack-public-path!")`
+script at the beginning of a JavaScript file.
+
+The recommended Webpack configuration to use this functionality is:
+
+```JavaScript
+{
+  entry: [
+    "entry/path/1.js",
+    "entry/path/2.js"
+  ],
+  module: {
+    rules: [
+      {
+        test:   /(entry\/path\/1\.js|entry\/path\/2\.js)/,
+        enforce: "pre",
+        use: `${require.resolve("@microsoft/loader-set-webpack-public-path")}/lib/injector.js`
+      }
+    ]
+  }
+}
+```
+
+or
+
+```JavaScript
+{
+  entry: [
+    "entry/path/1.js",
+    "entry/path/2.js"
+  ],
+  module: {
+    rules: [
+      {
+        test:   /(entry\/path\/1\.js|entry\/path\/2\.js)/,
+        enforce: "pre",
+        loader: `${require.resolve("@microsoft/loader-set-webpack-public-path")}/lib/injector.js`,
+        options: /* options object */
+      }
+    ]
+  }
+}
+```
+
 ## Options
 
 ### Inline Loader Options

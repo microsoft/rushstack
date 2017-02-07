@@ -3,7 +3,6 @@
  * See LICENSE in the project root for license information.
  */
 
-import { merge } from 'lodash';
 import { EOL } from 'os';
 import * as uglify from 'uglify-js';
 
@@ -20,13 +19,6 @@ export interface ISetWebpackPublicPathLoaderOptions {
 
 export class SetWebpackPublicPathLoader {
   public static registryVarName: string = 'window.__setWebpackPublicPathLoaderSrcRegistry__';
-
-  private static defaultOptions: ISetWebpackPublicPathLoaderOptions = {
-    systemJs: false,
-    scriptPath: undefined,
-    urlPrefix: undefined,
-    publicPath: undefined
-  };
 
   public static getGlobalRegisterCode(debug: boolean = false): string {
     const lines: string[] = [
@@ -59,10 +51,6 @@ export class SetWebpackPublicPathLoader {
       compressed.mangle_names();
       return `${EOL}${compressed.print_to_string()}`;
     }
-  }
-
-  public static setOptions(options: ISetWebpackPublicPathLoaderOptions): void {
-    this.defaultOptions = options || {};
   }
 
   public static pitch(remainingRequest: string): string {
@@ -156,20 +144,13 @@ export class SetWebpackPublicPathLoader {
   }
 
   private static getOptions(query: string): ISetWebpackPublicPathLoaderOptions {
-    const options: ISetWebpackPublicPathLoaderOptions = {
-      systemJs: SetWebpackPublicPathLoader.defaultOptions.systemJs,
-      scriptPath: SetWebpackPublicPathLoader.defaultOptions.scriptPath,
-      urlPrefix: SetWebpackPublicPathLoader.defaultOptions.urlPrefix,
-      publicPath: SetWebpackPublicPathLoader.defaultOptions.publicPath
-    };
-
-    const queryOptions: ISetWebpackPublicPathLoaderOptions = loaderUtils.parseQuery(query);
-    if (queryOptions.systemJs || queryOptions.publicPath) {
+    const options: ISetWebpackPublicPathLoaderOptions = loaderUtils.parseQuery(query);
+    if (options.systemJs || options.publicPath) {
       // If ?systemJs or ?publicPath=... is set inline, override scriptPath
       options.scriptPath = undefined;
     }
 
-    return merge(options, queryOptions);
+    return options;
   }
 
   constructor() {
