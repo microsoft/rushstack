@@ -1,13 +1,22 @@
-*.build.error.log
-*.build.log
-.editorconfig
-.gitattributes
-.gitignore
-.vscode
-coverage
-gulpfile.js
-lib/**/*.test.d.ts
-lib/**/*.test.js
-node_modules
-npm-shrinkwrap.json
-src
+# Ignore everything by default
+**
+
+# Use negative patterns to bring back the specific things we want to publish
+!/bin/**
+!/lib/**
+!/dist/**
+
+# Ignore certain files in the above folder
+/dist/*.stats.*
+
+# NOTE: These don't need to be specified, because NPM includes them automatically.
+#
+# package.json
+# README (and its variants)
+# CHANGELOG (and its variants)
+# LICENSE / LICENCE
+
+## Project specific definitions
+# -----------------------------
+
+!webpack.config.js
