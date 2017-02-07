@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sat, 04 Feb 2017 02:32:05 GMT and should not be manually modified.
+This log was last generated on Tue, 07 Feb 2017 20:37:06 GMT and should not be manually modified.
+
+## 1.1.9
+Tue, 07 Feb 2017 20:37:06 GMT
+
+### Patches
+
+- Fixing issue where undocumented comment was not being emitted.
 
 ## 1.1.8
 Sat, 04 Feb 2017 02:32:05 GMT
