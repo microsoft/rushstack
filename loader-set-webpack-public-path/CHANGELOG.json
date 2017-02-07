@@ -2,6 +2,18 @@
   "name": "@microsoft/loader-set-webpack-public-path",
   "entries": [
     {
+      "version": "1.0.1",
+      "tag": "@microsoft/loader-set-webpack-public-path_v1.0.1",
+      "date": "Tue, 07 Feb 2017 14:32:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updating npmignore."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.0",
       "tag": "@microsoft/loader-set-webpack-public-path_v1.0.0",
       "date": "Tue, 07 Feb 2017 05:26:57 GMT",
