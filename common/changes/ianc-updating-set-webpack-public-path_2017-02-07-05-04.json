@@ -1,0 +1,15 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/loader-set-webpack-public-path",
+      "comment": "Updating set-webpack-public-path to support webpack 2.X.",
+      "type": "major"
+    },
+    {
+      "packageName": "@microsoft/loader-load-themed-styles",
+      "comment": "Releasing major version.",
+      "type": "major"
+    }
+  ],
+  "email": "iclanton@users.noreply.github.com"
+}
