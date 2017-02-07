@@ -1,0 +1,17 @@
+{
+  "name": "@microsoft/loader-load-themed-styles",
+  "entries": [
+    {
+      "version": "1.0.0",
+      "tag": "@microsoft/loader-load-themed-styles_v1.0.0",
+      "date": "Tue, 07 Feb 2017 05:26:57 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Releasing major version."
+          }
+        ]
+      }
+    }
+  ]
+}
