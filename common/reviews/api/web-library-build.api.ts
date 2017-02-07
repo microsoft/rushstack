@@ -1,9 +1,13 @@
 export declare function addSuppression(str: string): void;
 
 class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig> {
+  // (undocumented)
   executeTask(gulp: gulp.Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream;
+  // (undocumented)
   loadSchema(): Object;
+  // (undocumented)
   name: string;
+  // (undocumented)
   taskConfig: IApiExtractorTaskConfig;
 }
 
@@ -70,6 +74,7 @@ class GulpTask<TASK_CONFIG> implements IExecutable {
   taskConfig: TASK_CONFIG;
 }
 
+// (undocumented)
 interface IBuildConfig {
   args?: {
     [ name: string ]: string | boolean;
@@ -106,9 +111,11 @@ interface ICopyConfig {
 }
 
 interface ICustomGulpTask {
+  // (undocumented)
   (gulp: gulp.Gulp | GulpProxy, buildConfig: IBuildConfig, done: (failure?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
 }
 
+// (undocumented)
 interface IExecutable {
   execute: (config: IBuildConfig) => Promise<void>;
   getCleanMatch?: (config: IBuildConfig, taskConfig?: any) => string[];
@@ -119,10 +126,13 @@ interface IExecutable {
 
 export declare function initialize(gulp: gulp.Gulp): void;
 
+// (undocumented)
 interface ITsConfigFile<T> {
+  // (undocumented)
   compilerOptions: T;
 }
 
+// (undocumented)
 interface IWebpackTaskConfig {
   config?: Webpack.Configuration;
   configPath: string;
@@ -142,8 +152,10 @@ export declare function replaceConfig(config: IBuildConfig): void;
 export declare function reset(): void;
 
 class SchemaValidator {
+  // (undocumented)
   static getFormattedErrorMessage(errors: Validator.SchemaErrorDetail[], dataFilePath?: string): string;
   static readAndValidateJson < TResult >(dataFilePath: string, schemaFilePath: string): TResult;
+  // (undocumented)
   static readCommentedJsonFile < TResult >(filename: string): TResult;
   static validate(data: Object, schema: Object, dataFilePath?: string): void;
 }
@@ -157,25 +169,37 @@ export declare function subTask(taskName: string, fn: ICustomGulpTask): IExecuta
 export declare function task(taskName: string, task: IExecutable): IExecutable;
 
 enum TestResultState {
+  // (undocumented)
   Failed = 1,
+  // (undocumented)
   FlakyFailed = 2,
+  // (undocumented)
   Passed = 0,
+  // (undocumented)
   Skipped = 3
 }
 
+// (undocumented)
 class TypeScriptConfiguration {
   static getGulpTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<ts.Settings>;
   static getTypescriptCompiler(): any;
+  // (undocumented)
   static getTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<typescript.CompilerOptions>;
   static setTypescriptCompiler(typescript: any): void;
 }
 
+// (undocumented)
 class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
+  // (undocumented)
   executeTask(gulp: gulpType.Gulp, completeCallback: (result?: string) => void): void;
+  // (undocumented)
   getCleanMatch(buildConfig: IBuildConfig, taskConfig?: ITypeScriptTaskConfig): string[];
+  // (undocumented)
   loadSchema(): Object;
   mergeConfig(config: ITypeScriptTaskConfig): void;
+  // (undocumented)
   name: string;
+  // (undocumented)
   taskConfig: ITypeScriptTaskConfig;
 }
 
@@ -190,12 +214,19 @@ export declare function warn(...args: Array<string | Chalk.ChalkChain>): void;
 
 export declare function watch(watchMatch: string | string[], task: IExecutable): IExecutable;
 
+// (undocumented)
 class WebpackTask extends GulpTask<IWebpackTaskConfig> {
+  // (undocumented)
   executeTask(gulp: gulp.Gulp, completeCallback: (result?: Object) => void): void;
+  // (undocumented)
   isEnabled(buildConfig: IBuildConfig): boolean;
+  // (undocumented)
   loadSchema(): Object;
+  // (undocumented)
   name: string;
+  // (undocumented)
   resources: Object;
+  // (undocumented)
   taskConfig: IWebpackTaskConfig;
 }
 
