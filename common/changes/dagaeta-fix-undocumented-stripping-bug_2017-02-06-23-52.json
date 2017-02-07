@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Changed the check for being within a type literal for the ApiFileGenerator",
+      "type": "patch"
+    }
+  ],
+  "email": "dgaeta@users.noreply.github.com"
+}
