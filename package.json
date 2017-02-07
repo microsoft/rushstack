@@ -1,20 +1,19 @@
 {
   "name": "@microsoft/loader-set-webpack-public-path",
-  "version": "0.1.7",
+  "version": "0.2.0",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "repository": "github:microsoft/loader-set-webpack-public-path",
   "dependencies": {
-    "loader-utils": "^0.2.15",
-    "lodash": "^4.13.1",
-    "uglify-js": "^2.6.4"
+    "loader-utils": "~0.2.16",
+    "uglify-js": "~2.7.5"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
-    "gulp": "^3.9.1",
-    "mocha": "^3.0.2",
-    "node-library-build": "^0.2.0"
+    "chai": "~3.5.0",
+    "gulp": "~3.9.1",
+    "mocha": "~3.2.0",
+    "@microsoft/node-library-build": "~2.2.0"
   }
 }
