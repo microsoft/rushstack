@@ -1,3 +1,21 @@
-# Contributing
+# web-build-tools
 
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+[![Build Status](https://travis-ci.org/Microsoft/webpack-loaders.svg?branch=master)](https://travis-ci.org/Microsoft/webpack-loaders)
+
+A collection of webpack loader npm packages.
+
+See individual projects for details:
+
+### [@microsoft/loader-set-webpack-public-path](./loader-set-webpack-public-path/README.md)
+
+`loader-set-webpack-public-path` is a loader used to set the webpack public path variable.
+
+[![npm version](https://badge.fury.io/js/%40microsoft%2Floader-set-webpack-public-path.svg)](https://badge.fury.io/js/%40microsoft%2Floader-set-webpack-public-path)
+[![Dependencies](https://david-dm.org/Microsoft/loader-set-webpack-public-path.svg)](https://david-dm.org/Microsoft/loader-set-webpack-public-path)
+
+### [@microsoft/loader-load-themed-styles](./loader-load-themed-styles/README.md)
+
+`loader-load-themed-styles` is a loader used for loading themed CSS styles.
+
+[![npm version](https://badge.fury.io/js/%40microsoft%2Floader-load-themed-styles.svg)](https://badge.fury.io/js/%40microsoft%2Floader-load-themed-styles)
+[![Dependencies](https://david-dm.org/Microsoft/loader-load-themed-styles.svg)](https://david-dm.org/Microsoft/loader-load-themed-styles)

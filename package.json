@@ -1,0 +1,9 @@
+{
+  "name": "webpack-loaders",
+  "version": "0.0.0",
+  "description": "Webpack loaders",
+
+  "devDependencies": {
+    "@microsoft/rush": "~1.5.1"
+  }
+}
