@@ -1,6 +1,13 @@
 # Change Log - @microsoft/web-library-build
 
-This log was last generated on Fri, 27 Jan 2017 23:27:42 GMT and should not be manually modified.
+This log was last generated on Tue, 07 Feb 2017 02:33:34 GMT and should not be manually modified.
+
+## 2.2.2
+Tue, 07 Feb 2017 02:33:34 GMT
+
+### Patches
+
+- Remove unused dependency
 
 ## 2.2.1
 Fri, 27 Jan 2017 23:27:42 GMT
