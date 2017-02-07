@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "fixed initialization of ApiFileGenerator._insideTypeLiteral",
+      "comment": "Fixing issue where undocumented comment was not being emitted.",
       "type": "patch"
     }
   ],
