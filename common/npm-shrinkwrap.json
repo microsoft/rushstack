@@ -2393,6 +2393,28 @@
       "from": "temp_modules\\rush-loader-load-themed-styles",
       "resolved": "file:temp_modules\\rush-loader-load-themed-styles"
     },
+    "rush-loader-raw-script": {
+      "version": "0.0.0",
+      "from": "temp_modules\\rush-loader-raw-script",
+      "resolved": "file:temp_modules\\rush-loader-raw-script",
+      "dependencies": {
+        "glob": {
+          "version": "7.0.5",
+          "from": "glob@7.0.5",
+          "resolved": "https://registry.npmjs.org/glob/-/glob-7.0.5.tgz"
+        },
+        "mocha": {
+          "version": "3.2.0",
+          "from": "mocha@>=3.2.0 <3.3.0",
+          "resolved": "https://registry.npmjs.org/mocha/-/mocha-3.2.0.tgz"
+        },
+        "supports-color": {
+          "version": "3.1.2",
+          "from": "supports-color@3.1.2",
+          "resolved": "https://registry.npmjs.org/supports-color/-/supports-color-3.1.2.tgz"
+        }
+      }
+    },
     "rush-loader-set-webpack-public-path": {
       "version": "0.0.0",
       "from": "temp_modules\\rush-loader-set-webpack-public-path",
