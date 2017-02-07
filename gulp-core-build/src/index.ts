@@ -14,6 +14,7 @@ export { IExecutable } from './IExecutable';
 import { initialize as initializeLogging, markTaskCreationTime, generateGulpError, setWatchMode } from './logging';
 import { getFlagValue, setConfigDefaults } from './config';
 import * as gulp from 'gulp';
+import * as notifier from 'node-notifier';
 
 export * from './IBuildConfig';
 export {
@@ -172,10 +173,6 @@ export function subTask(taskName: string, fn: ICustomGulpTask): IExecutable {
  * @returns IExecutable
  */
 export function watch(watchMatch: string | string[], task: IExecutable): IExecutable {
-  /* tslint:disable:typedef */
-  const notifier = require('node-notifier');
-  /* tslint:enable:typedef */
-
   _trackTask(task);
 
   let isWatchRunning: boolean = false;
