@@ -1,0 +1,13 @@
+{
+  "name": "rush-loader-set-webpack-public-path",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "chai": "~3.5.0",
+    "gulp": "~3.9.1",
+    "mocha": "~3.2.0",
+    "@microsoft/node-library-build": "~2.2.0",
+    "loader-utils": "~0.2.16",
+    "uglify-js": "~2.7.5"
+  }
+}

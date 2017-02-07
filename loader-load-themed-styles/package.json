@@ -5,7 +5,12 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
-  "repository": "github:microsoft/loader-load-themed-styles",
+  "repository": "github:microsoft/webpack-loaders",
+  "scripts": {
+    "build": "gulp",
+    "clean": "gulp clean",
+    "test": "gulp test"
+  },
   "dependencies": {
     "loader-utils": "~0.2.16",
     "@microsoft/load-themed-styles": "~1.2.2"

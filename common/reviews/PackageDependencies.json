@@ -1,0 +1,39 @@
+// DO NOT ADD COMMENTS IN THIS FILE.  They will be lost when the Rush tool resaves it.
+{
+  "settings": {
+    "ignoredNpmScopes": [
+      "@types"
+    ]
+  },
+  "browserPackages": [],
+  "nonBrowserPackages": [
+    {
+      "name": "@microsoft/load-themed-styles",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@microsoft/node-library-build",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "chai",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "gulp",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "loader-utils",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "mocha",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "uglify-js",
+      "allowedCategories": [ "libraries" ]
+    }
+  ]
+}
