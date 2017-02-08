@@ -6,7 +6,9 @@ import {
   parallel,
   serial,
   task,
-  watch
+  watch,
+  setConfig,
+
 } from '@microsoft/gulp-core-build';
 import { apiExtractor, typescript, tslint, text } from '@microsoft/gulp-core-build-typescript';
 import { sass } from '@microsoft/gulp-core-build-sass';
@@ -33,6 +35,12 @@ const sourceMatch: string[] = [
   'src/**/*.{ts,tsx,scss,js,txt,html}',
   '!src/**/*.scss.ts'
 ];
+
+
+const PRODUCTION = process.argv.indexOf('--production') !== -1 || process.argv.indexOf('--ship') !== -1;
+setConfig({
+  shouldWarningsFailBuild: PRODUCTION
+});
 
 // Define default task groups.
 export const compileTsTasks: IExecutable = parallel(typescript, text, apiExtractor);
