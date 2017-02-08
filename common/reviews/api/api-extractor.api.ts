@@ -49,7 +49,6 @@ class ApiJsonGenerator extends ApiItemVisitor {
 }
 
 class ExternalApiHelper {
-  // (undocumented)
   public static generateApiJson(rootDir: string, libFolder: string, externalPackageFilePath: string): void;
 }
 
