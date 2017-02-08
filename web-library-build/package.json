@@ -17,7 +17,7 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "dependencies": {
-    "@microsoft/gulp-core-build": ">=2.2.2 <3.0.0",
+    "@microsoft/gulp-core-build": ">=2.2.3 <3.0.0",
     "@microsoft/gulp-core-build-karma": ">=2.1.3 <3.0.0",
     "@microsoft/gulp-core-build-sass": ">=2.0.4 <3.0.0",
     "@microsoft/gulp-core-build-serve": ">=2.0.3 <3.0.0",
