@@ -30,7 +30,6 @@
     "gulp-replace": "^0.5.4"
   },
   "devDependencies": {
-    "typescript": "~2.1.4"
   },
   "optionalDependencies": {
     "fsevents": "*"
