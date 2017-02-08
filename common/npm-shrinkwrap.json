@@ -8,9 +8,9 @@
       "resolved": "https://registry.npmjs.org/@microsoft/api-extractor/-/api-extractor-1.1.9.tgz"
     },
     "@microsoft/gulp-core-build": {
-      "version": "2.2.3",
+      "version": "2.3.0",
       "from": "@microsoft/gulp-core-build@>=2.1.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build/-/gulp-core-build-2.2.3.tgz"
+      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build/-/gulp-core-build-2.3.0.tgz"
     },
     "@microsoft/gulp-core-build-mocha": {
       "version": "2.0.1",
