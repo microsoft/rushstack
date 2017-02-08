@@ -5,6 +5,7 @@ import { assert } from 'chai';
 import { EOL } from 'os';
 import Validator = require('z-schema');
 import { SchemaValidator } from '../SchemaValidator';
+import { GetFormattedErrorMessage } from '../GetFormattedErrorMessage';
 
 const nonexistentFile: string = path.join(__dirname, 'thisfileshouldneverexist.json');
 const basicSchema: string = path.join(__dirname, 'basicSchema.json');
@@ -61,8 +62,7 @@ describe('SchemaValidator', () => {
         ]
       };
       assert.equal(
-        // tslint:disable-next-line:no-any
-        (SchemaValidator as any).getFormattedErrorMessage(error.details),
+        GetFormattedErrorMessage(error.details),
         ['',
           'ERROR: (#/) Missing required property: bar',
           '',
