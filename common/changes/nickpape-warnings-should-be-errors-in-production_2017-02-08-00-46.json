@@ -1,0 +1,15 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/web-library-build",
+      "comment": "Treat warnings as errors in production. Treat tslint errors as warnings.",
+      "type": "minor"
+    },
+    {
+      "packageName": "@microsoft/node-library-build",
+      "comment": "Treat warnings as errors in production. Treat tsli nt errors as warnings.",
+      "type": "minor"
+    }
+  ],
+  "email": "nickpape@users.noreply.github.com"
+}
