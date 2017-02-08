@@ -2,6 +2,23 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "2.3.0",
+      "tag": "@microsoft/gulp-core-build_v2.3.0",
+      "date": "Wed, 08 Feb 2017 01:41:58 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Remove a function which was exposing z-schema and causing issues."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `>=2.2.0 <3.0.0` to `>=2.2.0 <3.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.3",
       "tag": "@microsoft/gulp-core-build_v2.2.3",
       "date": "Wed, 08 Feb 2017 01:05:47 GMT",
