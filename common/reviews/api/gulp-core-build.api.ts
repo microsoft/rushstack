@@ -131,8 +131,6 @@ export function replaceConfig(config: IBuildConfig): void;
 export function reset(): void;
 
 class SchemaValidator {
-  // (undocumented)
-  public static getFormattedErrorMessage(errors: Validator.SchemaErrorDetail[], dataFilePath?: string): string;
   public static readAndValidateJson < TResult >(dataFilePath: string, schemaFilePath: string): TResult;
   // (undocumented)
   public static readCommentedJsonFile < TResult >(filename: string): TResult;
