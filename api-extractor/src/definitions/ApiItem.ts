@@ -3,7 +3,9 @@
 
 import * as ts from 'typescript';
 import Extractor from '../Extractor';
-import ApiDocumentation from './ApiDocumentation';
+import ApiDocumentation, { ApiTag } from './ApiDocumentation';
+import TypeScriptHelpers from '../TypeScriptHelpers';
+import DocElementParser from '../DocElementParser';
 
 /**
  * Indicates the type of definition represented by a ApiItem object.
@@ -66,7 +68,7 @@ enum ResolveState {
    */
   Resolving = 1,
   /**
-   * The references of this ApiItem have all been resolved and the documentation can 
+   * The references of this ApiItem have all been resolved and the documentation can
    * now safely be created.
    */
   Resolved = 2
@@ -81,7 +83,7 @@ export interface IApiItemOptions {
    */
   extractor: Extractor;
   /**
-   * The declaration node for the main syntax item that this ApiItem is associated with. 
+   * The declaration node for the main syntax item that this ApiItem is associated with.
    */
   declaration: ts.Declaration;
   /**
@@ -141,6 +143,15 @@ abstract class ApiItem {
   public documentation: ApiDocumentation;
 
   /**
+   * Indicates that this ApiItem does not have adequate JSDoc comments. If shouldHaveDocumentation()=true,
+   * and there is less than 10 characters of summary text in the JSDoc, then this will be set to true and 
+   * noted in the API file produced by ApiFileGenerator.  
+   * (The JSDoc text itself is not included in that report, because documentation
+   * changes do not require an API review, and thus should not cause a diff for that report.)
+   */
+  public needsDocumentation: boolean;
+
+  /**
    * The Extractor object that acts as the root of the abstract syntax tree that this item belongs to.
    */
   protected extractor: Extractor;
@@ -173,7 +184,7 @@ abstract class ApiItem {
   private _errorNode: ts.Node;
 
   /**
-   * The state of this ApiItems references. These references could include \@inheritdoc references 
+   * The state of this ApiItems references. These references could include \@inheritdoc references
    * or type references.
    */
   private _state: ResolveState;
@@ -181,8 +192,8 @@ abstract class ApiItem {
   constructor(options: IApiItemOptions) {
     this.reportError = this.reportError.bind(this);
 
-    this.declaration = options.declaration;
     this.jsdocNode = options.jsdocNode;
+    this.declaration = options.declaration;
     this._errorNode = options.declaration;
     this._state = ResolveState.Unresolved;
     this.warnings = [];
@@ -265,21 +276,51 @@ abstract class ApiItem {
   }
 
   /**
-   * This function assumes all references from this ApiItem have been resolved and we can now safely create 
+   * This function assumes all references from this ApiItem have been resolved and we can now safely create
    * the documentation.
    */
   protected onResolveReferences(): void {
-    this.documentation = new ApiDocumentation(this, this.extractor.docItemLoader, this.extractor, this.reportError);
-    // TODO: this.collectTypeReferences(this); 
+    let originalJsDoc: string = '';
+    if (this.jsdocNode) {
+      originalJsDoc = TypeScriptHelpers.getJsDocComments(this.jsdocNode, this.reportError);
+    }
+
+    this.documentation = new ApiDocumentation(
+      originalJsDoc,
+      this.extractor.docItemLoader,
+      this.extractor,
+      this.reportError
+    );
+    // TODO: this.collectTypeReferences(this);
+
+    const summaryTextCondensed: string = DocElementParser.getAsText(
+      this.documentation.summary,
+      this.reportError).replace(/\s\s/g, ' ');
+    this.needsDocumentation = this.shouldHaveDocumentation() && summaryTextCondensed.length <= 10;
+
+    if (this.kind === ApiItemKind.Package) {
+      if (this.documentation.apiTag !== ApiTag.None) {
+        const tag: string = '@' + ApiTag[this.documentation.apiTag].toLowerCase();
+        this.reportError(`The ${tag} tag is not allowed on the package, which is always public`);
+      }
+      this.documentation.apiTag = ApiTag.Public;
+    }
+
+    if (this.documentation.preapproved) {
+      if (!(this.getDeclaration().kind & (ts.SyntaxKind.InterfaceDeclaration | ts.SyntaxKind.ClassDeclaration))) {
+        this.reportError('The @preapproved tag may only be applied to classes and interfaces');
+        this.documentation.preapproved = false;
+      }
+    }
   }
 
   /**
-   * This function is a second stage that happens after Extractor.analyze() calls ApiItem constructor to build up 
+   * This function is a second stage that happens after Extractor.analyze() calls ApiItem constructor to build up
    * the abstract syntax tree. In this second stage, we are creating the documentation for each ApiItem.
-   * 
+   *
    * This function makes sure we create the documentation for each ApiItem in the correct order.
-   * In the event that a circular dependency occurs, an error is reported. For example, if ApiItemOne has 
-   * an \@inheritdoc referencing ApiItemTwo, and ApiItemTwo has an \@inheritdoc refercing ApiItemOne then 
+   * In the event that a circular dependency occurs, an error is reported. For example, if ApiItemOne has
+   * an \@inheritdoc referencing ApiItemTwo, and ApiItemTwo has an \@inheritdoc refercing ApiItemOne then
    * we have a circular dependency and an error will be reported.
    */
   public resolveReferences(): void {

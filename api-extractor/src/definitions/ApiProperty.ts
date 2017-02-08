@@ -27,6 +27,17 @@ class ApiProperty extends ApiMember {
     }
   }
 
+  /**
+   * {@inheritdoc ApiItem.onResolveReferences }
+   */
+  protected onResolveReferences(): void {
+    super.onResolveReferences();
+
+    if (this.documentation.hasReadOnlyTag) {
+      this.isReadOnly = true;
+    }
+  }
+
   public getDeclarationLine(): string {
     return super.getDeclarationLine({
       type: this.type,

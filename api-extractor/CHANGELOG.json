@@ -2,6 +2,30 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "1.1.9",
+      "tag": "@microsoft/api-extractor_v1.1.9",
+      "date": "Tue, 07 Feb 2017 20:37:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixing issue where undocumented comment was not being emitted."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.8",
+      "tag": "@microsoft/api-extractor_v1.1.8",
+      "date": "Sat, 04 Feb 2017 02:32:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Moved ApiItem references within ApiDocumentation, to ApiItem caller."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.7",
       "tag": "@microsoft/api-extractor_v1.1.7",
       "date": "Thu, 02 Feb 2017 14:05:53 GMT",

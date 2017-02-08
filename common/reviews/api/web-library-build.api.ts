@@ -77,7 +77,6 @@ class GulpTask<TASK_CONFIG> implements IExecutable {
 // (undocumented)
 interface IBuildConfig {
   args?: {
-    // (undocumented)
     [ name: string ]: string | boolean;
   }
   buildErrorIconPath?: string;
@@ -92,7 +91,6 @@ interface IBuildConfig {
   packageFolder?: string;
   production?: boolean;
   properties?: {
-    // (undocumented)
     [ key: string ]: any;
   }
   relogIssues?: boolean;
@@ -107,7 +105,6 @@ interface IBuildConfig {
 
 interface ICopyConfig {
   copyTo: {
-    // (undocumented)
     [ destPath: string ]: string[];
   }
   shouldFlatten?: boolean;
@@ -143,6 +140,8 @@ interface IWebpackTaskConfig {
   webpack?: typeof Webpack;
 }
 
+export declare function log(...args: Array<string | Chalk.ChalkChain>): void;
+
 export declare function logSummary(value: string): void;
 
 export declare function mergeConfig(config: IBuildConfig): void;
@@ -155,8 +154,6 @@ export declare function replaceConfig(config: IBuildConfig): void;
 export declare function reset(): void;
 
 class SchemaValidator {
-  // (undocumented)
-  static getFormattedErrorMessage(errors: Validator.SchemaErrorDetail[], dataFilePath?: string): string;
   static readAndValidateJson < TResult >(dataFilePath: string, schemaFilePath: string): TResult;
   // (undocumented)
   static readCommentedJsonFile < TResult >(filename: string): TResult;

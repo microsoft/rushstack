@@ -208,7 +208,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
 
           if (this.taskConfig.dropCssFiles) {
             lines = lines.concat([
-              `require('${path.basename(file.path, scssTsExtName)}.css');`,
+              `require('./${path.basename(file.path, scssTsExtName)}.css');`,
               exportClassNames
             ]);
           } else if (!!content) {

@@ -25,6 +25,13 @@ export default class ApiFileGenerator extends ApiItemVisitor {
   protected _indentedWriter: IndentedWriter = new IndentedWriter();
 
   /**
+   * We don't want to require documentation for any properties that occur
+   * anywhere within a TypeLiteral. If this value is above 0, then we are
+   * visiting something within a TypeLiteral.
+   */
+  private _insideTypeLiteral: number;
+
+  /**
    * Compares the contents of two API files that were created using ApiFileGenerator,
    * and returns true if they are equivalent.  Note that these files are not normally edited
    * by a human; the "equivalence" comparison here is intended to ignore spurious changes that
@@ -40,7 +47,7 @@ export default class ApiFileGenerator extends ApiItemVisitor {
 
   /**
    * Generates the report and writes it to disk.
-   * 
+   *
    * @param reportFilename - The output filename
    * @param analyzer       - An Analyzer object representing the input project.
    */
@@ -50,6 +57,7 @@ export default class ApiFileGenerator extends ApiItemVisitor {
   }
 
   public generateApiFileContent(extractor: Extractor): string {
+    this._insideTypeLiteral = 0;
     // Normalize to CRLF
     this.visit(extractor.package);
     const fileContent: string = this._indentedWriter.toString().replace(/\r?\n/g, '\r\n');
@@ -120,7 +128,9 @@ export default class ApiFileGenerator extends ApiItemVisitor {
     this._indentedWriter.write(apiMember.getDeclarationLine());
 
     if (apiMember.typeLiteral) {
+      this._insideTypeLiteral += 1;
       this.visit(apiMember.typeLiteral);
+      this._insideTypeLiteral -= 1;
     }
   }
 
@@ -169,7 +179,8 @@ export default class ApiFileGenerator extends ApiItemVisitor {
         footer += '@deprecated';
       }
 
-      if (apiItem.documentation.isMissing) {
+      // If we are anywhere inside a TypeLiteral, _insideTypeLiteral is greater than 0
+      if (this._insideTypeLiteral === 0 && apiItem.needsDocumentation) {
         if (footer) {
           footer += ' ';
         }

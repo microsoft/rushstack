@@ -1,6 +1,34 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Mon, 23 Jan 2017 20:07:59 GMT and should not be manually modified.
+This log was last generated on Wed, 08 Feb 2017 01:41:58 GMT and should not be manually modified.
+
+## 2.3.0
+Wed, 08 Feb 2017 01:41:58 GMT
+
+### Minor changes
+
+- Remove a function which was exposing z-schema and causing issues.
+
+## 2.2.3
+Wed, 08 Feb 2017 01:05:47 GMT
+
+### Patches
+
+- Ensure the log function is exported
+
+## 2.2.2
+Wed, 08 Feb 2017 00:23:01 GMT
+
+### Patches
+
+- Fix _flatten and make serial/parallel more robust
+
+## 2.2.1
+Tue, 07 Feb 2017 02:33:34 GMT
+
+### Patches
+
+- Update node-notifier to remove SNYK warning about marked package having a vulnerability (although this vulnerability should not affect us)
 
 ## 2.2.0
 Mon, 23 Jan 2017 20:07:59 GMT

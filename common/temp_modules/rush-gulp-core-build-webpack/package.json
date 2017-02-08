@@ -3,14 +3,13 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
-    "@microsoft/node-library-build": ">=2.2.0 <3.0.0",
+    "@microsoft/node-library-build": ">=2.3.0 <3.0.0",
     "@types/chalk": "^0.4.31",
     "@types/orchestrator": "0.0.30",
     "@types/q": "0.0.32",
     "@types/source-map": "^0.1.28",
     "@types/uglify-js": "^2.6.28",
     "@types/webpack": "^1.12.35",
-    "typescript": "~2.1.4",
     "@types/es6-promise": "0.0.32",
     "@types/gulp": "^3.8.32",
     "@types/node": "^6.0.46",
@@ -22,6 +21,6 @@
     "fsevents": "*"
   },
   "rushDependencies": {
-    "@microsoft/gulp-core-build": ">=2.1.1 <3.0.0"
+    "@microsoft/gulp-core-build": ">=2.3.0 <3.0.0"
   }
 }

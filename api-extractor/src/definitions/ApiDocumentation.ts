@@ -1,7 +1,5 @@
 /* tslint:disable:no-bitwise */
 
-import * as ts from 'typescript';
-import TypeScriptHelpers from '../TypeScriptHelpers';
 import ApiItem from './ApiItem';
 import DocElementParser from '../DocElementParser';
 import { IDocElement, IParam, IHrefLinkElement, ICodeLinkElement, ITextElement } from '../IDocElement';
@@ -10,7 +8,6 @@ import DocItemLoader from '../DocItemLoader';
 import { IApiDefinitionReference } from '../IApiDefinitionReference';
 import Token, { TokenType } from '../Token';
 import Tokenizer from '../Tokenizer';
-import ApiPackage from './ApiPackage';
 import Extractor from '../Extractor';
 
 /**
@@ -63,6 +60,12 @@ export interface IScopePackageName {
 }
 
 export default class ApiDocumentation {
+  /**
+   * Match JsDoc block tags and inline tags
+   * Example "@a @b@c d@e @f {whatever} {@link a} { @something } \@g" => ["@a", "@f", "{@link a}", "{ @something }"]
+   */
+  public static readonly _jsdocTagsRegex: RegExp = /{\s*@(\\{|\\}|[^{}])*}|(?:^|\s)(\@[a-z_]+)(?=\s|$)/gi;
+
   // For guidance about using these tags, please see this document:
   // https://onedrive.visualstudio.com/DefaultCollection/SPPPlat/_git/sp-client
   //    ?path=/common/docs/ApiPrinciplesAndProcess.md
@@ -91,12 +94,6 @@ export default class ApiDocumentation {
   ];
 
   /**
-   * Match JsDoc block tags and inline tags
-   * Example "@a @b@c d@e @f {whatever} {@link a} { @something } \@g" => ["@a", "@f", "{@link a}", "{ @something }"]
-   */
-  private static _jsdocTagsRegex: RegExp = /{\s*@(\\{|\\}|[^{}])*}|(?:^|\s)(\@[a-z_]+)(?=\s|$)/gi;
-
-  /**
    * Splits an API reference expression into two parts, first part is the scopename/packageName and
    * the second part is the exportName.memberName.
    */
@@ -113,17 +110,11 @@ export default class ApiDocumentation {
   private static _exportRegEx: RegExp =  /^\w+/;
 
   /**
-   * Corresponding ApiItem for this documentation object
-   */
-  public apiItem: ApiItem;
-
-  /**
-   * This returns the JSDoc comment block for the given item (without "/**" characters),
-   * or an empty string if there is no comment.  This propery will never be undefined.
+   * The original JsDoc comment.
    *
-   * Example: "Example Function\n@returns the number of items\n@internal"
+   * Example: "This is a summary. \{\@link a\} \@remarks These are remarks."
    */
-  public docComment: string;
+  public originalJsDoc: string;
 
   /**
    * The docComment text string split into an array of ITokenItems.  The tokens are essentially either
@@ -150,14 +141,6 @@ export default class ApiDocumentation {
   public parameters: { [name: string]: IParam; };
 
   /**
-   * Indicates that this definition does not have adequate JSDoc comments.  If isMissing=true,
-   * then this will be noted in the API file produced by ApiFileGenerator.  (The JSDoc
-   * text itself is not included in that report, because documentation changes do not
-   * require an API review, and thus should not cause a diff for that report.)
-   */
-  public isMissing: boolean;
-
-  /**
    * An "API Tag" is a custom JSDoc tag which indicates whether this definition
    * is considered Public API for third party developers, as well as its release
    * stage (alpha, beta, etc).
@@ -178,12 +161,12 @@ export default class ApiDocumentation {
   public isDocInherited?: boolean;
   public isDocInheritedDeprecated?: boolean;
   public isOverride?: boolean;
-  public readonly?: boolean;
+  public hasReadOnlyTag?: boolean;
 
   public docItemLoader: DocItemLoader;
 
   /**
-   * We need the extractor to access the package that this ApiItem 
+   * We need the extractor to access the package that this ApiItem
    * belongs to in order to resolve references.
    */
   public extractor: Extractor;
@@ -252,37 +235,20 @@ export default class ApiDocumentation {
     }
   }
 
-  constructor(apiItem: ApiItem,
+  constructor(docComment: string,
     docItemLoader: DocItemLoader,
     extractor: Extractor,
     errorLogger: (message: string) => void) {
-    this.apiItem = apiItem;
+    this.originalJsDoc = docComment;
     this.docItemLoader = docItemLoader;
     this.extractor = extractor;
     this.reportError = errorLogger;
-    this.docComment = this._getJsDocs(apiItem);
     this.parameters = {};
     this._parseDocs();
   }
 
-  protected _getJsDocs(apiItem: ApiItem): string {
-    if (!apiItem.jsdocNode) {
-      return '';
-    }
-    const jsDoc: string = TypeScriptHelpers.getJsDocComments(apiItem.jsdocNode, this.reportError);
-
-    // Eliminate tags and then count the English letters.  Are there at least 10 letters of text?
-    // If not, we consider the definition to be "missingDocumentation".
-    const condensedDocs: string = jsDoc
-      .replace(ApiDocumentation._jsdocTagsRegex, '')
-      .replace(/[^a-z]/gi, '');
-    this.isMissing = apiItem.shouldHaveDocumentation() && condensedDocs.length <= 10;
-
-    return jsDoc;
-  }
-
   protected _parseDocs(): void {
-    const tokenizer: Tokenizer = new Tokenizer(this.docComment, this.reportError);
+    const tokenizer: Tokenizer = new Tokenizer(this.originalJsDoc, this.reportError);
     this.summary = DocElementParser.parse(tokenizer, this.reportError);
     this.returnsMessage = [];
     this.deprecatedMessage = [];
@@ -364,7 +330,7 @@ export default class ApiDocumentation {
             break;
           case '@readonly':
             tokenizer.getToken();
-            this.readonly = true;
+            this.hasReadOnlyTag = true;
             break;
           case '@betadocumentation':
             tokenizer.getToken();
@@ -417,22 +383,9 @@ export default class ApiDocumentation {
       this.reportError('More than one API Tag was specified');
     }
 
-    if (this.apiItem instanceof ApiPackage) {
-      if (apiTagCount > 0) {
-        const tag: string = '@' + ApiTag[this.apiTag].toLowerCase();
-        this.reportError(`The ${tag} tag is not allowed on the package, which is always public`);
-      }
-      this.apiTag = ApiTag.Public;
-    }
-
-    if (this.preapproved) {
-      if (this.apiTag !== ApiTag.Internal) {
-        this.reportError('The @preapproved tag may only be applied to @internal defintions');
-        this.preapproved = false;
-      } else if (!(this.apiItem.getDeclarationSymbol().flags & (ts.SymbolFlags.Interface | ts.SymbolFlags.Class))) {
-        this.reportError('The @preapproved tag may only be applied to classes and interfaces');
-        this.preapproved = false;
-      }
+    if (this.preapproved && this.apiTag !== ApiTag.Internal) {
+      this.reportError('The @preapproved tag may only be applied to @internal defintions');
+      this.preapproved = false;
     }
   }
 
