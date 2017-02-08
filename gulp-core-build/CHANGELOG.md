@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Tue, 07 Feb 2017 02:33:34 GMT and should not be manually modified.
+This log was last generated on Wed, 08 Feb 2017 00:23:01 GMT and should not be manually modified.
+
+## 2.2.2
+Wed, 08 Feb 2017 00:23:01 GMT
+
+### Patches
+
+- Fix _flatten and make serial/parallel more robust
 
 ## 2.2.1
 Tue, 07 Feb 2017 02:33:34 GMT
