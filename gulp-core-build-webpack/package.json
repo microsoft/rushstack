@@ -15,7 +15,7 @@
     "test": "gulp"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": ">=2.2.3 <3.0.0",
+    "@microsoft/gulp-core-build": ">=2.3.0 <3.0.0",
     "@types/es6-promise": "0.0.32",
     "@types/gulp": "^3.8.32",
     "@types/node": "^6.0.46",
@@ -24,7 +24,7 @@
     "webpack": "~1.13.0"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": ">=2.2.0 <3.0.0",
+    "@microsoft/node-library-build": ">=2.3.0 <3.0.0",
     "@types/chalk": "^0.4.31",
     "@types/orchestrator": "0.0.30",
     "@types/q": "0.0.32",
