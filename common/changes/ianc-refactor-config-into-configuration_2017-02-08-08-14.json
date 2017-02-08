@@ -1,0 +1,60 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/web-library-build",
+      "comment": "Refactoring \"config\" into \"configuration.\"",
+      "type": "major"
+    },
+    {
+      "packageName": "@microsoft/package-deps-hash",
+      "comment": "Refactoring \"config\" into \"configuration.\"",
+      "type": "major"
+    },
+    {
+      "packageName": "@microsoft/node-library-build",
+      "comment": "Refactoring \"config\" into \"configuration.\"",
+      "type": "major"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-webpack",
+      "comment": "Refactoring \"config\" into \"configuration.\"",
+      "type": "major"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Refactoring \"config\" into \"configuration.\"",
+      "type": "major"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-serve",
+      "comment": "Refactoring \"config\" into \"configuration.\"",
+      "type": "major"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-sass",
+      "comment": "Refactoring \"config\" into \"configuration.\"",
+      "type": "major"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-mocha",
+      "comment": "Refactoring \"config\" into \"configuration.\"",
+      "type": "major"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-karma",
+      "comment": "Refactoring \"config\" into \"configuration.\"",
+      "type": "major"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build",
+      "comment": "Refactoring \"config\" into \"configuration.\"",
+      "type": "major"
+    },
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Refactoring \"config\" into \"configuration.\"",
+      "type": "major"
+    }
+  ],
+  "email": "iclanton@users.noreply.github.com"
+}
