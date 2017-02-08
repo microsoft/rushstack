@@ -346,7 +346,7 @@ export function logSummary(value: string): void {
 
 /**
  * Log a message to the console
- * @param args... - the messages to log to the console
+ * @param args - the messages to log to the console
  */
 export function log(...args: Array<string | Chalk.ChalkChain>): void {
   'use strict';
