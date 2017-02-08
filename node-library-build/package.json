@@ -24,6 +24,5 @@
     "gulp": "~3.9.1"
   },
   "devDependencies": {
-    "typescript": "~2.1.4"
   }
 }

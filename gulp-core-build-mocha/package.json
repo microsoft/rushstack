@@ -30,7 +30,6 @@
     "@types/gulp-mocha": "0.0.29",
     "@types/mocha": "^2.2.32",
     "@types/orchestrator": "0.0.30",
-    "@types/q": "0.0.32",
-    "typescript": "~2.1.4"
+    "@types/q": "0.0.32"
   }
 }

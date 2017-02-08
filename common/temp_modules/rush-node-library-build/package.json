@@ -3,14 +3,13 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
-    "typescript": "~2.1.4",
     "@types/es6-promise": "0.0.32",
     "@types/gulp": "^3.8.32",
     "@types/node": "^6.0.46",
     "gulp": "~3.9.1"
   },
   "rushDependencies": {
-    "@microsoft/gulp-core-build": ">=2.2.3 <3.0.0",
+    "@microsoft/gulp-core-build": ">=2.3.0 <3.0.0",
     "@microsoft/gulp-core-build-mocha": ">=2.0.0 <3.0.0",
     "@microsoft/gulp-core-build-typescript": ">=2.2.5 <3.0.0"
   }
