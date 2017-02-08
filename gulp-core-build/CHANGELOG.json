@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "2.2.3",
+      "tag": "@microsoft/gulp-core-build_v2.2.3",
+      "date": "Wed, 08 Feb 2017 01:05:47 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Ensure the log function is exported"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.2",
       "tag": "@microsoft/gulp-core-build_v2.2.2",
       "date": "Wed, 08 Feb 2017 00:23:01 GMT",
