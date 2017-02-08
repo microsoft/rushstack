@@ -7,6 +7,8 @@ import * as path from 'path';
 import Validator = require('z-schema');
 import jju = require('jju');
 
+import { GetFormattedErrorMessage } from './GetFormattedErrorMessage';
+
 const schemaKey: string = '$schema';
 
 /**
@@ -39,7 +41,7 @@ export class SchemaValidator {
   public static validate(data: Object, schema: Object, dataFilePath?: string): void {
     if (!this._schemaValidator.validate(data, schema)) {
       const errors: Validator.SchemaErrorDetail[] = this._schemaValidator.getLastErrors();
-      throw this.getFormattedErrorMessage(errors, dataFilePath);
+      throw GetFormattedErrorMessage(errors, dataFilePath);
     }
     return undefined;
   }
@@ -56,20 +58,6 @@ export class SchemaValidator {
     // it would eventually be nice to infer the schema based on this value
     delete rawConfig[schemaKey];
     return rawConfig as TResult;
-  }
-
-  private static getFormattedErrorMessage(errors: Validator.SchemaErrorDetail[], dataFilePath?: string): string {
-    const errorMessage: string =
-      (dataFilePath ? `Error parsing file '${path.basename(dataFilePath)}'${os.EOL}` : '') +
-      this._extractInnerErrorMessages(errors).join(os.EOL);
-
-    return os.EOL + 'ERROR: ' + errorMessage + os.EOL + os.EOL;
-  }
-
-  private static _extractInnerErrorMessages(errors: Validator.SchemaErrorDetail[]): string[] {
-    const errorList: string[] = [];
-    errors.map((error) => { errorList.push(...this._formatZSchemaError(error)); });
-    return errorList;
   }
 
   private static _formatZSchemaError(error: Validator.SchemaErrorDetail): string[] {
