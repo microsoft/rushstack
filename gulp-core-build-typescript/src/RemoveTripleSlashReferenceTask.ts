@@ -9,19 +9,19 @@ const md5 = require('md5');
 
 import { GulpTask } from '@microsoft/gulp-core-build';
 
-export interface IRemoveTripleSlashReferenceTaskConfig {
+export interface IRemoveTripleSlashReferenceTaskConfiguration {
 }
 
-export class RemoveTripleSlashReferenceTask extends GulpTask<IRemoveTripleSlashReferenceTaskConfig> {
+export class RemoveTripleSlashReferenceTask extends GulpTask<IRemoveTripleSlashReferenceTaskConfiguration> {
   public name: string = 'ts-npm-lint';
 
-  public taskConfig: IRemoveTripleSlashReferenceTaskConfig = {
+  public taskConfiguration: IRemoveTripleSlashReferenceTaskConfiguration = {
   };
 
   public executeTask(gulp: gulp.Gulp): void {
     const taskScope: RemoveTripleSlashReferenceTask = this;
 
-    const filePattern: string = path.join(taskScope.buildConfig.libFolder, '**', '*.d.ts');
+    const filePattern: string = path.join(taskScope.buildConfiguration.libFolder, '**', '*.d.ts');
 
     /**
      * Matches:
@@ -41,7 +41,7 @@ export class RemoveTripleSlashReferenceTask extends GulpTask<IRemoveTripleSlashR
 
           try {
             const rawContents: string = file.contents.toString();
-            const relativePathToCurrentFile: string = path.relative(taskScope.buildConfig.rootPath, file.path);
+            const relativePathToCurrentFile: string = path.relative(taskScope.buildConfiguration.rootPath, file.path);
             taskScope.logVerbose(relativePathToCurrentFile);
 
             file[taskScope.name] = {
@@ -65,7 +65,7 @@ export class RemoveTripleSlashReferenceTask extends GulpTask<IRemoveTripleSlashR
           }
         }),
         {
-          name: md5(taskScope.name + taskScope.buildConfig.rootPath),
+          name: md5(taskScope.name + taskScope.buildConfiguration.rootPath),
           // What on the result indicates it was successful
           success: (jshintedFile: gulpUtil.File): boolean => {
             /* tslint:disable:no-string-literal */
@@ -81,6 +81,6 @@ export class RemoveTripleSlashReferenceTask extends GulpTask<IRemoveTripleSlashR
           }
         }
       ))
-      .pipe(gulp.dest(taskScope.buildConfig.libFolder));
+      .pipe(gulp.dest(taskScope.buildConfiguration.libFolder));
   }
 }

@@ -6,7 +6,7 @@ class CleanTask extends GulpTask<void> {
       completeCallback: (result?: Object) => void): void;
 }
 
-class CopyTask extends GulpTask<ICopyConfig> {
+class CopyTask extends GulpTask<ICopyConfiguration> {
   constructor();
   public executeTask(gulp: gulp.Gulp,
       completeCallback: (result?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
@@ -31,42 +31,43 @@ class GenerateShrinkwrapTask extends GulpTask<void> {
   public executeTask(gulp: gulpType.Gulp, completeCallback: (result?: Object) => void): NodeJS.ReadWriteStream;
 }
 
-export function getConfig(): IBuildConfig;
+export function getConfiguration(): IBuildConfiguration;
 
 export function getErrors(): string[];
 
 export function getWarnings(): string[];
 
-class GulpTask<TASK_CONFIG> implements IExecutable {
-  protected _getConfigFilePath(): string;
-  public buildConfig: IBuildConfig;
+class GulpTask<TASK_CONFIGURATION> implements IExecutable {
+  protected _getConfigurationFilePath(): string;
+  public buildConfiguration: IBuildConfiguration;
   public cleanMatch: string[];
   public copyFile(localSourcePath: string, localDestPath?: string): void;
-  public execute(config: IBuildConfig): Promise<void>;
+  public execute(configuration: IBuildConfiguration): Promise<void>;
   public abstract executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (result?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
   public fileError(filePath: string, line: number, column: number, errorCode: string, message: string): void;
   public fileExists(localPath: string): boolean;
   public fileWarning(filePath: string, line: number, column: number, warningCode: string, message: string): void;
-  public getCleanMatch(buildConfig: IBuildConfig, taskConfig: TASK_CONFIG = this.taskConfig): string[];
-  public isEnabled(buildConfig: IBuildConfig): boolean;
+  public getCleanMatch(buildConfiguration: IBuildConfiguration,
+                         taskConfiguration: TASK_CONFIGURATION = this.taskConfiguration): string[];
+  public isEnabled(buildConfiguration: IBuildConfiguration): boolean;
   protected loadSchema(): Object;
   public log(message: string): void;
   public logError(message: string): void;
   public logVerbose(message: string): void;
   public logWarning(message: string): void;
-  public mergeConfig(taskConfig: TASK_CONFIG): void;
+  public mergeConfiguration(taskConfiguration: TASK_CONFIGURATION): void;
   public name: string;
   public onRegister(): void;
   public readJSONSync(localPath: string): Object;
-  public replaceConfig(taskConfig: TASK_CONFIG): void;
+  public replaceConfiguration(taskConfiguration: TASK_CONFIGURATION): void;
   public resolvePath(localPath: string): string;
   public readonly schema: Object;
-  public setConfig(taskConfig: TASK_CONFIG): void;
-  public taskConfig: TASK_CONFIG;
+  public setConfiguration(taskConfiguration: TASK_CONFIGURATION): void;
+  public taskConfiguration: TASK_CONFIGURATION;
 }
 
 // (undocumented)
-interface IBuildConfig {
+interface IBuildConfiguration {
   args?: {
     [ name: string ]: string | boolean
   }
@@ -94,7 +95,7 @@ interface IBuildConfig {
   verbose?: boolean;
 }
 
-interface ICopyConfig {
+interface ICopyConfiguration {
   copyTo: {
     [ destPath: string ]: string[];
   }
@@ -103,14 +104,14 @@ interface ICopyConfig {
 
 interface ICustomGulpTask {
   // (undocumented)
-  (gulp: gulp.Gulp | GulpProxy, buildConfig: IBuildConfig, done: (failure?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
+  (gulp: gulp.Gulp | GulpProxy, buildConfiguration: IBuildConfiguration, done: (failure?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
 }
 
 // (undocumented)
 interface IExecutable {
-  execute: (config: IBuildConfig) => Promise<void>;
-  getCleanMatch?: (config: IBuildConfig, taskConfig?: any) => string[];
-  isEnabled?: (config?: IBuildConfig) => boolean;
+  execute: (configuration: IBuildConfiguration) => Promise<void>;
+  getCleanMatch?: (configuration: IBuildConfiguration, taskConfiguration?: any) => string[];
+  isEnabled?: (configuration?: IBuildConfiguration) => boolean;
   name?: string;
   onRegister?: () => void;
 }
@@ -121,11 +122,11 @@ export function log(...args: Array<string | Chalk.ChalkChain>): void;
 
 export function logSummary(value: string): void;
 
-export function mergeConfig(config: IBuildConfig): void;
+export function mergeConfiguration(configuration: IBuildConfiguration): void;
 
 export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecutable;
 
-export function replaceConfig(config: IBuildConfig): void;
+export function replaceConfiguration(configuration: IBuildConfiguration): void;
 
 // @internal
 export function reset(): void;
@@ -139,7 +140,7 @@ class SchemaValidator {
 
 export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutable;
 
-export function setConfig(config: IBuildConfig): void;
+export function setConfiguration(configuration: IBuildConfiguration): void;
 
 export function subTask(taskName: string, fn: ICustomGulpTask): IExecutable;
 

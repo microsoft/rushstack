@@ -5,7 +5,7 @@ export class PostProcessSourceMaps extends GulpTask<{}> {
   public name: string = 'post-process';
 
   public executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream {
-    if (this.buildConfig.args.hasOwnProperty('vscode')) {
+    if (this.buildConfiguration.args.hasOwnProperty('vscode')) {
 
       /* tslint:disable:typedef */
       const replace = require('gulp-replace');

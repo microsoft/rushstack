@@ -30,7 +30,9 @@ interface INpmShrinkwrap {
  * defined in the package.json file.
  */
 export class ValidateShrinkwrapTask extends GulpTask<void> {
-  /** Instantiates an instance of the ValidateShrinkwrap task */
+  /**
+   * Instantiates an instance of the ValidateShrinkwrap task
+   */
   constructor() {
     super();
     this.name = 'validate-shrinkwrap';
@@ -41,8 +43,8 @@ export class ValidateShrinkwrapTask extends GulpTask<void> {
    * resolvable in the npm-shrinkwrap file.
    */
   public executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream {
-    const pathToPackageJson: string = path.join(this.buildConfig.rootPath, 'package.json');
-    const pathToShrinkwrap: string = path.join(this.buildConfig.rootPath, 'npm-shrinkwrap.json');
+    const pathToPackageJson: string = path.join(this.buildConfiguration.rootPath, 'package.json');
+    const pathToShrinkwrap: string = path.join(this.buildConfiguration.rootPath, 'npm-shrinkwrap.json');
 
     if (!this.fileExists(pathToPackageJson)) {
       this.logError('Failed to find package.json at ' + pathToPackageJson);

@@ -1,8 +1,10 @@
 import { GulpTask } from './GulpTask';
 import gulp = require('gulp');
 
-/** Configuration for CopyTask */
-export interface ICopyConfig {
+/**
+ * Configuration for CopyTask
+ */
+export interface ICopyConfiguration {
   /**
    * The list of patterns and the destination which where they should be copied
    */
@@ -23,7 +25,7 @@ export interface ICopyConfig {
 /**
  * This task takes in a map of dest: [sources], and copies items from one place to another.
  */
-export class CopyTask extends GulpTask<ICopyConfig> {
+export class CopyTask extends GulpTask<ICopyConfiguration> {
   /**
    * Instantiates a CopyTask with an empty configuration
    */
@@ -32,7 +34,7 @@ export class CopyTask extends GulpTask<ICopyConfig> {
 
     this.name = 'copy';
 
-    this.taskConfig = {
+    this.taskConfiguration = {
       copyTo: {},
       shouldFlatten: true
     };
@@ -58,7 +60,7 @@ export class CopyTask extends GulpTask<ICopyConfig> {
     const flatten = require('gulp-flatten');
     const gulpif = require('gulp-if');
     const merge = require('merge2');
-    const { copyTo, shouldFlatten } = this.taskConfig;
+    const { copyTo, shouldFlatten } = this.taskConfiguration;
     /* tslint:enable:typedef */
 
     const allStreams: NodeJS.ReadWriteStream[] = [];

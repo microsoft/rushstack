@@ -23,7 +23,7 @@ export class GenerateShrinkwrapTask extends GulpTask<void> {
    * Runs npm `prune` and `update` on a package before running `shrinkwrap --dev`
    */
   public executeTask(gulp: gulpType.Gulp, completeCallback: (result?: Object) => void): NodeJS.ReadWriteStream {
-    const pathToShrinkwrap: string = path.join(this.buildConfig.rootPath, 'npm-shrinkwrap.json');
+    const pathToShrinkwrap: string = path.join(this.buildConfiguration.rootPath, 'npm-shrinkwrap.json');
 
     if (this.fileExists(pathToShrinkwrap)) {
       this.log(`Remove existing shrinkwrap file.`);

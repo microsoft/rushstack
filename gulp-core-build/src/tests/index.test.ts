@@ -3,8 +3,8 @@
 
 import 'es6-promise';
 import { expect } from 'chai';
-import { serial, parallel, getConfig, setConfig, IExecutable } from '../index';
-import { IBuildConfig } from './../IBuildConfig';
+import { serial, parallel, getConfiguration, setConfiguration, IExecutable } from '../index';
+import { IBuildConfiguration } from './../IBuildConfiguration';
 
 // disable the exit watching
 global['dontWatchExit'] = true; // tslint:disable-line:no-string-literal
@@ -101,20 +101,20 @@ describe('parallel', () => {
 
   });
 
-  it('can read the current config', (done) => {
-    const config: IBuildConfig = getConfig();
-    expect(config).to.be.not.null;
+  it('can read the current configuration', (done) => {
+    const configuration: IBuildConfiguration = getConfiguration();
+    expect(configuration).to.be.not.null;
     done();
   });
 
-  it('can set the config', (done) => {
+  it('can set the configuration', (done) => {
     const distFolder: string = 'testFolder';
-    const newConfig: IBuildConfig = {
+    const newConfiguration: IBuildConfiguration = {
       distFolder: distFolder
     };
 
-    setConfig(newConfig);
-    expect(getConfig().distFolder).to.eq(distFolder);
+    setConfiguration(newConfiguration);
+    expect(getConfiguration().distFolder).to.eq(distFolder);
     done();
   });
 });
@@ -132,7 +132,7 @@ function createTask(
   executionCallback: (message: string) => void,
   shouldFail?: boolean): IExecutable {
   return {
-    execute: (buildConfig): Promise<void> => new Promise<void>((done, error) => {
+    execute: (buildConfiguration): Promise<void> => new Promise<void>((done, error) => {
       executionCallback(`executing ${name}`);
 
       setTimeout(() => {

@@ -46,16 +46,16 @@ export class SchemaValidator {
 
   public static readCommentedJsonFile<TResult>(filename: string): TResult {
     const contents: Buffer = fs.readFileSync(filename);
-    let rawConfig: Object;
+    let rawConfiguration: Object;
     try {
-       rawConfig = jju.parse(contents.toString());
+       rawConfiguration = jju.parse(contents.toString());
     } catch (error) {
       throw new Error(`Error reading '${filename}':` + os.EOL + `  ${error.message}`);
     }
 
     // it would eventually be nice to infer the schema based on this value
-    delete rawConfig[schemaKey];
-    return rawConfig as TResult;
+    delete rawConfiguration[schemaKey];
+    return rawConfiguration as TResult;
   }
 
   private static getFormattedErrorMessage(errors: Validator.SchemaErrorDetail[], dataFilePath?: string): string {

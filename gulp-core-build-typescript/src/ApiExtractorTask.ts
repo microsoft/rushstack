@@ -21,7 +21,7 @@ function writeStringToGulpUtilFile(content: string, filename: string = 'tempfile
   });
 }
 
-export interface IApiExtractorTaskConfig {
+export interface IApiExtractorTaskConfiguration {
   /**
    * Indicates whether the task should be run.
    */
@@ -67,10 +67,10 @@ export interface IApiExtractorTaskConfig {
  * common problems and generate a report of the exported public API. The task uses the entry point of a project to
  * find the aliased exports of the project. An api-extractor.ts file is generated for the project in the temp folder.
  */
-export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
+export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfiguration>  {
   public name: string = 'api-extractor';
 
-  public taskConfig: IApiExtractorTaskConfig = {
+  public taskConfiguration: IApiExtractorTaskConfiguration = {
     enabled: false,
     entry: undefined,
     apiReviewFolder: undefined,
@@ -82,18 +82,18 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
   };
 
   public executeTask(gulp: gulp.Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream {
-    if (!this.taskConfig.enabled || !this._validateConfiguration()) {
+    if (!this.taskConfiguration.enabled || !this._validateConfiguration()) {
       completeCallback();
       return;
     }
 
-    const entryPointFile: string = path.join(this.buildConfig.rootPath, this.taskConfig.entry);
-    const typingsFilePath: string = path.join(this.buildConfig.rootPath, 'typings/tsd.d.ts');
+    const entryPointFile: string = path.join(this.buildConfiguration.rootPath, this.taskConfiguration.entry);
+    const typingsFilePath: string = path.join(this.buildConfiguration.rootPath, 'typings/tsd.d.ts');
     const otherFiles: string[] = fsx.existsSync(typingsFilePath) ? [typingsFilePath] : [];
 
     // tslint:disable-next-line:no-any
     const compilerOptions: typescript.CompilerOptions =
-      TypeScriptConfiguration.getTypescriptOptions(this.buildConfig).compilerOptions;
+      TypeScriptConfiguration.getTypescriptOptions(this.buildConfiguration).compilerOptions;
 
     const extractorOptions: IExtractorOptions = {
       compilerOptions: compilerOptions,
@@ -114,18 +114,18 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
 
     const jsonGenerator: ApiJsonGenerator = new ApiJsonGenerator();
     // const jsonContent: string = generator.generateJsonFileContent(analyzer);
-    const jsonFileName: string = path.basename(this.buildConfig.rootPath) + '.api.json';
+    const jsonFileName: string = path.basename(this.buildConfiguration.rootPath) + '.api.json';
 
-    if (!fsx.existsSync(this.taskConfig.apiJsonFolder)) {
-      mkdirp.sync(this.taskConfig.apiJsonFolder, (err) => {
+    if (!fsx.existsSync(this.taskConfiguration.apiJsonFolder)) {
+      mkdirp.sync(this.taskConfiguration.apiJsonFolder, (err) => {
         if (err) {
-          this.logError(`Could not create directory ${this.taskConfig.apiJsonFolder}`);
+          this.logError(`Could not create directory ${this.taskConfiguration.apiJsonFolder}`);
         }
       });
     }
 
-    if (fsx.existsSync(this.taskConfig.apiJsonFolder)) {
-      const jsonFilePath: string = path.join(this.taskConfig.apiJsonFolder, jsonFileName);
+    if (fsx.existsSync(this.taskConfiguration.apiJsonFolder)) {
+      const jsonFilePath: string = path.join(this.taskConfiguration.apiJsonFolder, jsonFileName);
       this.logVerbose(`Writing Api JSON file to ${jsonFilePath}`);
       jsonGenerator.writeJsonFile(jsonFilePath, extractor);
     }
@@ -134,14 +134,14 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
     const actualApiFileContent: string = generator.generateApiFileContent(extractor);
 
     // Ex: "project.api.ts"
-    const apiFileName: string = path.basename(this.buildConfig.rootPath) + '.api.ts';
+    const apiFileName: string = path.basename(this.buildConfiguration.rootPath) + '.api.ts';
     this.logVerbose(`Output filename is "${apiFileName}"`);
 
-    const actualApiFilePath: string = path.join(this.buildConfig.tempFolder, apiFileName);
+    const actualApiFilePath: string = path.join(this.buildConfiguration.tempFolder, apiFileName);
 
     let foundSourceFiles: number = 0;
     const self: ApiExtractorTask = this;
-    const expectedApiFilePath: string = path.join(this.taskConfig.apiReviewFolder, apiFileName);
+    const expectedApiFilePath: string = path.join(this.taskConfiguration.apiReviewFolder, apiFileName);
     return gulp.src(expectedApiFilePath)
       /* tslint:disable-next-line:no-function-expression */
       .pipe(through.obj(function (file: gulpUtil.File, enc: string, callback: () => void): void {
@@ -149,7 +149,7 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
         foundSourceFiles++;
 
         if (!ApiFileGenerator.areEquivalentApiFileContents(actualApiFileContent, expectedApiFileContent)) {
-          if (self.buildConfig.production) {
+          if (self.buildConfiguration.production) {
             // For production, issue a warning that will break the CI build.
             self.logWarning('You have changed the Public API signature for this project.  Please overwrite '
               // @microsoft/gulp-core-build seems to run JSON.stringify() on the error messages for some reason,
@@ -177,22 +177,22 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
 
         callback();
       }))
-      .pipe(gulp.dest(this.buildConfig.tempFolder))
+      .pipe(gulp.dest(this.buildConfiguration.tempFolder))
       .on('finish', () => completeCallback());
   }
 
   private _validateConfiguration(): boolean {
-    if (!this.taskConfig.entry) {
+    if (!this.taskConfiguration.entry) {
       this.logError('Missing or empty "entry" field in api-extractor.json');
       return false;
     }
-    if (!this.taskConfig.apiReviewFolder) {
+    if (!this.taskConfiguration.apiReviewFolder) {
       this.logError('Missing or empty "apiReviewFolder" field in api-extractor.json');
       return false;
     }
 
-    if (!fsx.existsSync(this.taskConfig.entry)) {
-      this.logError(`Entry file ${this.taskConfig.entry} does not exist.`);
+    if (!fsx.existsSync(this.taskConfiguration.entry)) {
+      this.logError(`Entry file ${this.taskConfiguration.entry} does not exist.`);
       return false;
     }
 

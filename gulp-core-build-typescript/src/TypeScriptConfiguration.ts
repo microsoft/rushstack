@@ -1,10 +1,10 @@
 import * as path from 'path';
 import assign = require('object-assign');
-import { SchemaValidator, IBuildConfig } from '@microsoft/gulp-core-build';
+import { SchemaValidator, IBuildConfiguration } from '@microsoft/gulp-core-build';
 import ts = require('gulp-typescript');
 import * as typescript from 'typescript';
 
-export interface ITsConfigFile<T> {
+export interface ITsConfigurationFile<T> {
   compilerOptions: T;
 }
 
@@ -15,24 +15,24 @@ export interface ITsConfigFile<T> {
  * should be built with.
  */
 export class TypeScriptConfiguration {
-  private static _baseTsConfig: ITsConfigFile<ts.Settings>;
+  private static _baseTsConfiguration: ITsConfigurationFile<ts.Settings>;
   private static _typescript: any = require('typescript');
 
   /**
-   * Gets `gulp-typescript` version of the config (used by TypeScriptTask)
+   * Gets `gulp-typescript` version of the configuration (used by TypeScriptTask)
    * Returns a new object each time.
    */
-  public static getGulpTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<ts.Settings> {
-    const file: ITsConfigFile<ts.Settings> = assign({}, this._getTsConfigFile(buildConfig));
+  public static getGulpTypescriptOptions(buildConfiguration: IBuildConfiguration): ITsConfigurationFile<ts.Settings> {
+    const file: ITsConfigurationFile<ts.Settings> = assign({}, this._getTsConfigurationFile(buildConfiguration));
     assign(file.compilerOptions, {
-      rootDir: buildConfig.rootPath,
+      rootDir: buildConfiguration.rootPath,
       typescript: this.getTypescriptCompiler()
     });
     return file;
   }
 
   /*
-   * Gets the `typescript` version of the config (used by ApiExtractorTask)
+   * Gets the `typescript` version of the configuration (used by ApiExtractorTask)
    * Note: these differ slightly from the values in the tsconfig.json
    * Returns a new object each time.
    *
@@ -44,11 +44,12 @@ export class TypeScriptConfiguration {
    * Insofar as `ts.Settings` accepts (and requires) enums for certain options, rather than strings.
    * The clearest example is `moduleResolution` below.
    */
-  public static getTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<typescript.CompilerOptions> {
-    const oldConfig: ITsConfigFile<ts.Settings> = this.getGulpTypescriptOptions(buildConfig);
-    const newConfig: ITsConfigFile<typescript.CompilerOptions> = oldConfig as any;
+  public static getTypescriptOptions(buildConfiguration: IBuildConfiguration):
+      ITsConfigurationFile<typescript.CompilerOptions> {
+    const oldConfiguration: ITsConfigurationFile<ts.Settings> = this.getGulpTypescriptOptions(buildConfiguration);
+    const newConfiguration: ITsConfigurationFile<typescript.CompilerOptions> = oldConfiguration as any;
 
-    delete newConfig.compilerOptions.moduleResolution;
+    delete newConfiguration.compilerOptions.moduleResolution;
 
     /**
      * Attempt to index into the enum to determine which target.
@@ -62,11 +63,11 @@ export class TypeScriptConfiguration {
       'exnext': typescript.ScriptTarget.ESNext,
       'latest': typescript.ScriptTarget.Latest
     };
-    if (typeof oldConfig.compilerOptions.target === 'string') {
-      const target: string = oldConfig.compilerOptions.target.toLowerCase();
-      newConfig.compilerOptions.target = scriptTarget[target];
+    if (typeof oldConfiguration.compilerOptions.target === 'string') {
+      const target: string = oldConfiguration.compilerOptions.target.toLowerCase();
+      newConfiguration.compilerOptions.target = scriptTarget[target];
 
-      if (!newConfig.compilerOptions.target) {
+      if (!newConfiguration.compilerOptions.target) {
         throw new Error(`Invalid setting found in tsconfig.json: target: '${target}' to be one of: `
          + Object.keys(scriptTarget).toString());
       }
@@ -84,17 +85,17 @@ export class TypeScriptConfiguration {
       'umd': typescript.ModuleKind.UMD
     };
 
-    if (typeof oldConfig.compilerOptions.module === 'string') {
-      const module: string = oldConfig.compilerOptions.module as string;
-      newConfig.compilerOptions.module = moduleKind[module.toLowerCase()];
+    if (typeof oldConfiguration.compilerOptions.module === 'string') {
+      const module: string = oldConfiguration.compilerOptions.module as string;
+      newConfiguration.compilerOptions.module = moduleKind[module.toLowerCase()];
 
-      if (!newConfig.compilerOptions.module) {
+      if (!newConfiguration.compilerOptions.module) {
         throw new Error(`Invalid setting found in tsconfig.json: Expected module: '${module}' to be one of: `
           + Object.keys(moduleKind).toString());
       }
     }
 
-    return newConfig;
+    return newConfiguration;
   }
 
   /**
@@ -104,7 +105,7 @@ export class TypeScriptConfiguration {
     if (this._typescript) {
       throw new Error('The version of the typescript compiler should only be set once.');
     }
-    if (this._baseTsConfig) {
+    if (this._baseTsConfiguration) {
       throw new Error('Set the version of the typescript compiler before tasks call getConfig()');
     }
     this._typescript = typescript;
@@ -123,18 +124,18 @@ export class TypeScriptConfiguration {
   /**
    * Helper function which reads the tsconfig.json (or provides one), and memoizes it
    */
-  private static _getTsConfigFile(config: IBuildConfig): ITsConfigFile<ts.Settings> {
-    if (!this._baseTsConfig) {
+  private static _getTsConfigurationFile(configuration: IBuildConfiguration): ITsConfigurationFile<ts.Settings> {
+    if (!this._baseTsConfiguration) {
       try {
-        this._baseTsConfig = SchemaValidator.readCommentedJsonFile<any>(
-          this._getConfigPath(config)
+        this._baseTsConfiguration = SchemaValidator.readCommentedJsonFile<any>(
+          this._getConfigurationPath(configuration)
         );
       } catch (e) {
         /* no-op */
       }
 
-      if (!this._baseTsConfig) {
-        this._baseTsConfig = {
+      if (!this._baseTsConfiguration) {
+        this._baseTsConfiguration = {
           compilerOptions: {
             declaration: true,
             experimentalDecorators: true,
@@ -148,13 +149,13 @@ export class TypeScriptConfiguration {
         };
       }
     }
-    return this._baseTsConfig;
+    return this._baseTsConfiguration;
   }
 
   /**
    * Extracts the path to the tsconfig.json based on the buildConfiguration
    */
-  private static _getConfigPath(buildConfig: IBuildConfig): string {
-    return path.resolve(path.join(buildConfig.rootPath, 'tsconfig.json'));
+  private static _getConfigurationPath(buildConfiguration: IBuildConfiguration): string {
+    return path.resolve(path.join(buildConfiguration.rootPath, 'tsconfig.json'));
   }
 }

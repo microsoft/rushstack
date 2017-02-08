@@ -7,8 +7,7 @@ import {
   serial,
   task,
   watch,
-  setConfig,
-
+  setConfiguration
 } from '@microsoft/gulp-core-build';
 import { apiExtractor, typescript, tslint, text } from '@microsoft/gulp-core-build-typescript';
 import { sass } from '@microsoft/gulp-core-build-sass';
@@ -37,12 +36,12 @@ const sourceMatch: string[] = [
 ];
 
 const PRODUCTION = process.argv.indexOf('--production') !== -1 || process.argv.indexOf('--ship') !== -1;
-setConfig({
+setConfiguration({
   production: PRODUCTION,
   shouldWarningsFailBuild: PRODUCTION
 });
 
-tslint.mergeConfig({
+tslint.mergeConfiguration({
   displayAsWarning: true
 });
 

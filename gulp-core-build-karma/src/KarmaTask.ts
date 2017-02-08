@@ -1,4 +1,4 @@
-import { GulpTask, IBuildConfig } from '@microsoft/gulp-core-build';
+import { GulpTask, IBuildConfiguration } from '@microsoft/gulp-core-build';
 
 import * as os from 'os';
 import * as fs from 'fs';
@@ -6,8 +6,8 @@ import * as gulp from 'gulp';
 import * as path from 'path';
 import * as KarmaType from 'karma';
 
-export interface IKarmaTaskConfig {
-  configPath: string;
+export interface IKarmaTaskConfiguration {
+  configurationPath: string;
 
   /**
    * If specified, a "tests.js" file will be created in the temp folder using
@@ -16,11 +16,11 @@ export interface IKarmaTaskConfig {
   testMatch?: RegExp | string;
 }
 
-export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
+export class KarmaTask extends GulpTask<IKarmaTaskConfiguration> {
   public name: string = 'karma';
 
-  public taskConfig: IKarmaTaskConfig = {
-    configPath: './karma.config.js',
+  public taskConfiguration: IKarmaTaskConfiguration = {
+    configurationPath: './karma.config.js',
     testMatch: /.+\.test\.js?$/
   };
 
@@ -49,30 +49,31 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
     return require('./karma.schema.json');
   }
 
-  public getCleanMatch(buildConfig: IBuildConfig, taskConfig: IKarmaTaskConfig = this.taskConfig): string[] {
+  public getCleanMatch(buildConfiguration: IBuildConfiguration,
+                       taskConfiguration: IKarmaTaskConfiguration = this.taskConfiguration): string[] {
     return [
-      path.join(buildConfig.tempFolder, 'tests.js')
+      path.join(buildConfiguration.tempFolder, 'tests.js')
     ];
   }
 
-  public isEnabled(buildConfig: IBuildConfig): boolean {
+  public isEnabled(buildConfiguration: IBuildConfiguration): boolean {
     return (
-      super.isEnabled(buildConfig) &&
-      this.taskConfig.configPath !== null // tslint:disable-line:no-null-keyword
+      super.isEnabled(buildConfiguration) &&
+      this.taskConfiguration.configurationPath !== null // tslint:disable-line:no-null-keyword
     );
   }
 
   public executeTask(gulp: gulp.Gulp, completeCallback: (error?: Error | string) => void): void {
-    const { configPath }: IKarmaTaskConfig = this.taskConfig;
+    const { configurationPath }: IKarmaTaskConfiguration = this.taskConfiguration;
 
-    if (configPath && !this.fileExists(configPath)) {
+    if (configurationPath && !this.fileExists(configurationPath)) {
       const shouldInitKarma: boolean = (process.argv.indexOf('--initkarma') > -1);
 
       if (!shouldInitKarma) {
         this.logWarning(
-          `No karma config has been provided. ` +
-          `Run again using --initkarma to create a default config, or call ` +
-          `karma.setConfig({ configPath: null }) in your gulpfile.`);
+          `No karma configuration has been provided. ` +
+          `Run again using --initkarma to create a default configuration, or call ` +
+          `karma.setConfiguration({ configurationPath: null }) in your gulpfile.`);
       } else {
         this.copyFile(path.resolve(__dirname, '../karma.config.js'));
 
@@ -85,7 +86,7 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
       completeCallback();
     } else {
       // Normalize the match expression if one was specified
-      const { testMatch }: IKarmaTaskConfig = this.taskConfig;
+      const { testMatch }: IKarmaTaskConfiguration = this.taskConfiguration;
       if (testMatch) {
         let normalizedMatch: RegExp;
 
@@ -105,13 +106,13 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
 
         // tslint:disable:max-line-length
         const testsJsFileContents: string = [
-          `var context = require.context('${path.posix.join('..', this.buildConfig.libFolder)}', true, ${normalizedMatch.toString()});`,
+          `var context = require.context('${path.posix.join('..', this.buildConfiguration.libFolder)}', true, ${normalizedMatch.toString()});`,
           `context.keys().forEach(context);`,
           `module.exports = context;`
         ].join(os.EOL);
         // tslint:enable:max-line-length
 
-        const tempFolder: string = path.join(this.buildConfig.rootPath, this.buildConfig.tempFolder);
+        const tempFolder: string = path.join(this.buildConfiguration.rootPath, this.buildConfiguration.tempFolder);
         if (!fs.existsSync(tempFolder)) {
           fs.mkdirSync(tempFolder);
         }
@@ -130,7 +131,7 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
             grep: matchString
           }
         },
-        configFile: this.resolvePath(configPath),
+        configFile: this.resolvePath(configurationPath),
         singleRun: singleRun
       }, (exitCode) => {
         if (exitCode) {

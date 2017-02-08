@@ -3,11 +3,11 @@
 let path = require('path');
 let build = require('@microsoft/web-library-build');
 
-build.sass.setConfig({ useCSSModules: true });
-build.webpack.setConfig({ configPath: null });
+build.sass.setConfiguration({ useCSSModules: true });
+build.webpack.setConfiguration({ configurationPath: null });
 
-build.setConfig({
-  libAMDFolder: path.join(build.getConfig().packageFolder, 'lib-amd')
+build.setConfiguration({
+  libAMDFolder: path.join(build.getConfiguration().packageFolder, 'lib-amd')
 });
 
 build.preCopy.cleanMatch = ['src/pre-copy-test.ts'];

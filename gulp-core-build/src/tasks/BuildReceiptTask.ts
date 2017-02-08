@@ -13,9 +13,9 @@ let _lastLocalHashes: { [path: string]: string } = {};
 
 /**
  * This task is responsible for generating a build receipt, which is a hash of filePath to sha1 git hash,
- * based on the current folder's content. If a {buildConfig.packagePath}/build.json file exists, it will
+ * based on the current folder's content. If a {buildConfiguration.packagePath}/build.json file exists, it will
  * parse it and object compare the computed build receipt with the contents. If everything is the same, it
- * will set buildConfig.isRedundantBuild flag to true, which can be used in task isEnabled methods to skip
+ * will set buildConfiguration.isRedundantBuild flag to true, which can be used in task isEnabled methods to skip
  * unnecessary work.
  *
  * The utility function "_getLocalHashes" will use the git.exe process to get the hashes from the git
@@ -34,10 +34,12 @@ export class CheckBuildReceiptTask extends GulpTask<IBuildReceiptTask> {
 
     _getLocalHashes().then(localHashes => {
       _lastLocalHashes = localHashes;
-      _readPackageHashes(path.join(process.cwd(), this.buildConfig.packageFolder, 'build.json')).then(packageHashes => {
+      _readPackageHashes(path.join(process.cwd(),
+                                   this.buildConfiguration.packageFolder,
+                                   'build.json')).then(packageHashes => {
         if (packageHashes) {
           if (_areObjectsEqual(localHashes, packageHashes)) {
-            this.buildConfig.isRedundantBuild = true;
+            this.buildConfiguration.isRedundantBuild = true;
             this.log('Build is redundant. Skipping steps.');
           } else {
             _areObjectsEqual(localHashes, packageHashes);
@@ -62,7 +64,7 @@ export class UpdateBuildReceiptTask extends GulpTask<IBuildReceiptTask> {
     completeCallback: (result?: Object) => void
   ): Promise<Object> | NodeJS.ReadWriteStream | void {
 
-    const packageHashPath: string = path.join(process.cwd(), this.buildConfig.packageFolder, 'build.json');
+    const packageHashPath: string = path.join(process.cwd(), this.buildConfiguration.packageFolder, 'build.json');
 
     fs.writeFile(packageHashPath, JSON.stringify(_lastLocalHashes, undefined, 2), completeCallback);
   }

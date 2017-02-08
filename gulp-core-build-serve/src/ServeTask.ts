@@ -1,5 +1,5 @@
 import { GulpTask } from '@microsoft/gulp-core-build';
-import { IBuildConfig } from '@microsoft/gulp-core-build/lib/IBuildConfig';
+import { IBuildConfiguration } from '@microsoft/gulp-core-build/lib/IBuildConfiguration';
 import * as gulp from 'gulp';
 import * as fs from 'fs';
 import * as ChalkType from 'chalk';
@@ -13,7 +13,7 @@ import {
   ICertificate
 } from './certificates';
 
-export interface IServeTaskConfig {
+export interface IServeTaskConfiguration {
   /**
    * API server configuration
    */
@@ -73,10 +73,10 @@ interface IApiMap {
   [ route: string ]: Function;
 }
 
-export class ServeTask extends GulpTask<IServeTaskConfig> {
+export class ServeTask extends GulpTask<IServeTaskConfiguration> {
   public name: string = 'serve';
 
-  public taskConfig: IServeTaskConfig = {
+  public taskConfiguration: IServeTaskConfiguration = {
     api: undefined,
     https: false,
     initialPage: '/index.html',
@@ -100,9 +100,9 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
     const path: typeof pathType = require('path');
     const openBrowser: boolean = (process.argv.indexOf('--nobrowser') === -1);
     const portArgumentIndex: number = process.argv.indexOf('--port');
-    let { port, initialPage }: IServeTaskConfig = this.taskConfig;
-    const { api }: IServeTaskConfig = this.taskConfig;
-    const { rootPath }: IBuildConfig = this.buildConfig;
+    let { port, initialPage }: IServeTaskConfiguration = this.taskConfiguration;
+    const { api }: IServeTaskConfiguration = this.taskConfiguration;
+    const { rootPath }: IBuildConfiguration = this.buildConfiguration;
     const httpsServerOptions: HttpsType.ServerOptions = this._loadHttpsServerOptions();
 
     if (portArgumentIndex >= 0 && process.argv.length > (portArgumentIndex + 1)) {
@@ -151,7 +151,7 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
         }
 
         const apiPort: number = api.port || 5432;
-        if (this.taskConfig.https) {
+        if (this.taskConfiguration.https) {
           https.createServer(httpsServerOptions, app).listen(apiPort);
         } else {
           http.createServer(app).listen(apiPort);
@@ -167,7 +167,7 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
           initialPage = `/${initialPage}`;
         }
 
-        uri = `${this.taskConfig.https ? 'https' : 'http'}://localhost:${port}${initialPage}`;
+        uri = `${this.taskConfiguration.https ? 'https' : 'http'}://localhost:${port}${initialPage}`;
       }
 
       gulp.src('')
@@ -217,47 +217,48 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
   }
 
   private _loadHttpsServerOptions(): HttpsType.ServerOptions {
-    if (this.taskConfig.https) {
+    if (this.taskConfiguration.https) {
       const result: HttpsType.ServerOptions = {};
 
       // We're configuring an HTTPS server, so we need a certificate
-      if (this.taskConfig.pfxPath) {
-        // There's a PFX path in the config, so try that
-        this.logVerbose(`Trying PFX path: ${this.taskConfig.pfxPath}`);
-        if (fs.existsSync(this.taskConfig.pfxPath)) {
+      if (this.taskConfiguration.pfxPath) {
+        // There's a PFX path in the configuration, so try that
+        this.logVerbose(`Trying PFX path: ${this.taskConfiguration.pfxPath}`);
+        if (fs.existsSync(this.taskConfiguration.pfxPath)) {
           try {
-            result.pfx = fs.readFileSync(this.taskConfig.pfxPath);
+            result.pfx = fs.readFileSync(this.taskConfiguration.pfxPath);
             this.logVerbose(`Loaded PFX certificate.`);
           } catch (e) {
             this.logError(`Error loading PFX file: ${e}`);
           }
         } else {
-          this.logError(`PFX file not found at path "${this.taskConfig.pfxPath}"`);
+          this.logError(`PFX file not found at path "${this.taskConfiguration.pfxPath}"`);
         }
-      } else if (this.taskConfig.keyPath && this.taskConfig.certPath) {
-        this.logVerbose(`Trying key path "${this.taskConfig.keyPath}" and cert path "${this.taskConfig.certPath}".`);
-        const certExists: boolean = fs.existsSync(this.taskConfig.certPath);
-        const keyExists: boolean = fs.existsSync(this.taskConfig.keyPath);
+      } else if (this.taskConfiguration.keyPath && this.taskConfiguration.certPath) {
+        this.logVerbose(`Trying key path "${this.taskConfiguration.keyPath}" and cert ` +
+                        `path "${this.taskConfiguration.certPath}".`);
+        const certExists: boolean = fs.existsSync(this.taskConfiguration.certPath);
+        const keyExists: boolean = fs.existsSync(this.taskConfiguration.keyPath);
 
         if (keyExists && certExists) {
           try {
-            result.cert = fs.readFileSync(this.taskConfig.certPath);
-            result.key = fs.readFileSync(this.taskConfig.keyPath);
+            result.cert = fs.readFileSync(this.taskConfiguration.certPath);
+            result.key = fs.readFileSync(this.taskConfiguration.keyPath);
           } catch (e) {
             this.logError(`Error loading key or cert file: ${e}`);
           }
         } else {
           if (!keyExists) {
-            this.logError(`Key file not found at path "${this.taskConfig.keyPath}`);
+            this.logError(`Key file not found at path "${this.taskConfiguration.keyPath}`);
           }
 
           if (!certExists) {
-            this.logError(`Cert file not found at path "${this.taskConfig.certPath}`);
+            this.logError(`Cert file not found at path "${this.taskConfiguration.certPath}`);
           }
         }
       } else {
         const { ensureCertificate } = require('./certificates'); // tslint:disable-line
-        const devCertificate: ICertificate = ensureCertificate(this.taskConfig.tryCreateDevCertificate, this);
+        const devCertificate: ICertificate = ensureCertificate(this.taskConfiguration.tryCreateDevCertificate, this);
         if (devCertificate.pemCertificate && devCertificate.pemKey) {
           result.cert = devCertificate.pemCertificate;
           result.key = devCertificate.pemKey;

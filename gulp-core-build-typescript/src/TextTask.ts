@@ -1,16 +1,16 @@
 import { GulpTask } from '@microsoft/gulp-core-build';
 import gulpType = require('gulp');
 
-export interface ITextTaskConfig {
+export interface ITextTaskConfiguration {
   /**
    * Glob matches for files that should be converted into modules.
    */
   textMatch?: string[];
 }
 
-export class TextTask extends GulpTask<ITextTaskConfig> {
+export class TextTask extends GulpTask<ITextTaskConfiguration> {
   public name: string = 'text';
-  public taskConfig: ITextTaskConfig = {
+  public taskConfiguration: ITextTaskConfiguration = {
     textMatch: ['src/**/*.txt']
   };
 
@@ -18,8 +18,8 @@ export class TextTask extends GulpTask<ITextTaskConfig> {
     /* tslint:disable:typedef */
     const merge = require('merge2');
     const texttojs = require('gulp-texttojs');
-    const { textMatch } = this.taskConfig;
-    const { libFolder, libAMDFolder } = this.buildConfig;
+    const { textMatch } = this.taskConfiguration;
+    const { libFolder, libAMDFolder } = this.buildConfiguration;
     /* tslint:enable:typedef */
 
     if (textMatch) {
