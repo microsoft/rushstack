@@ -10,10 +10,6 @@ build.tslint.setConfig({
   rulesDirectory: tslint.Configuration.getRulesDirectories(tslint.Configuration.getRulesDirectories([ './node_modules/tslint-microsoft-contrib' ], __dirname))
 });
 
-build.typescript.setConfig({
-  typescript: require('typescript')
-});
-
 build.task('default', build.serial(build.parallel(build.tslint,
                                                   build.typescript),
                                    build.parallel(build.serial(build.instrument,
