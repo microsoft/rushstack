@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-library-build
 
-This log was last generated on Fri, 20 Jan 2017 01:46:41 GMT and should not be manually modified.
+This log was last generated on Wed, 08 Feb 2017 01:41:58 GMT and should not be manually modified.
+
+## 2.3.0
+Wed, 08 Feb 2017 01:41:58 GMT
+
+### Minor changes
+
+- Treat warnings as errors in production. Treat tsli nt errors as warnings.
 
 ## 2.2.0
 Fri, 20 Jan 2017 01:46:41 GMT
