@@ -44,14 +44,6 @@ export class SchemaValidator {
     return undefined;
   }
 
-  public static getFormattedErrorMessage(errors: Validator.SchemaErrorDetail[], dataFilePath?: string): string {
-    const errorMessage: string =
-      (dataFilePath ? `Error parsing file '${path.basename(dataFilePath)}'${os.EOL}` : '') +
-      this._extractInnerErrorMessages(errors).join(os.EOL);
-
-    return os.EOL + 'ERROR: ' + errorMessage + os.EOL + os.EOL;
-  }
-
   public static readCommentedJsonFile<TResult>(filename: string): TResult {
     const contents: Buffer = fs.readFileSync(filename);
     let rawConfig: Object;
@@ -64,6 +56,14 @@ export class SchemaValidator {
     // it would eventually be nice to infer the schema based on this value
     delete rawConfig[schemaKey];
     return rawConfig as TResult;
+  }
+
+  private static getFormattedErrorMessage(errors: Validator.SchemaErrorDetail[], dataFilePath?: string): string {
+    const errorMessage: string =
+      (dataFilePath ? `Error parsing file '${path.basename(dataFilePath)}'${os.EOL}` : '') +
+      this._extractInnerErrorMessages(errors).join(os.EOL);
+
+    return os.EOL + 'ERROR: ' + errorMessage + os.EOL + os.EOL;
   }
 
   private static _extractInnerErrorMessages(errors: Validator.SchemaErrorDetail[]): string[] {

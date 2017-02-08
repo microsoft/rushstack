@@ -61,7 +61,8 @@ describe('SchemaValidator', () => {
         ]
       };
       assert.equal(
-        SchemaValidator.getFormattedErrorMessage(error.details),
+        // tslint:disable-next-line:no-any
+        (SchemaValidator as any).getFormattedErrorMessage(error.details),
         ['',
           'ERROR: (#/) Missing required property: bar',
           '',
