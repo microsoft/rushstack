@@ -36,10 +36,14 @@ const sourceMatch: string[] = [
   '!src/**/*.scss.ts'
 ];
 
-
 const PRODUCTION = process.argv.indexOf('--production') !== -1 || process.argv.indexOf('--ship') !== -1;
 setConfig({
+  production: PRODUCTION,
   shouldWarningsFailBuild: PRODUCTION
+});
+
+tslint.mergeConfig({
+  displayAsWarning: true
 });
 
 // Define default task groups.
