@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Wed, 08 Feb 2017 01:05:47 GMT and should not be manually modified.
+This log was last generated on Wed, 08 Feb 2017 01:41:58 GMT and should not be manually modified.
+
+## 2.3.0
+Wed, 08 Feb 2017 01:41:58 GMT
+
+### Minor changes
+
+- Remove a function which was exposing z-schema and causing issues.
 
 ## 2.2.3
 Wed, 08 Feb 2017 01:05:47 GMT

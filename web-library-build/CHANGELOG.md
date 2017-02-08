@@ -1,6 +1,13 @@
 # Change Log - @microsoft/web-library-build
 
-This log was last generated on Tue, 07 Feb 2017 02:33:34 GMT and should not be manually modified.
+This log was last generated on Wed, 08 Feb 2017 01:41:58 GMT and should not be manually modified.
+
+## 2.3.0
+Wed, 08 Feb 2017 01:41:58 GMT
+
+### Minor changes
+
+- Treat warnings as errors in production. Treat tslint errors as warnings.
 
 ## 2.2.2
 Tue, 07 Feb 2017 02:33:34 GMT
