@@ -31,6 +31,7 @@ export {
   fileLog,
   fileWarning,
   reset,
+  log,
   logSummary
 } from './logging';
 export * from './tasks/CopyTask';
