@@ -1,12 +1,22 @@
-.vscode
-src
-node_modules
+# Ignore everything by default
+**
 
-.gitignore
-.gitattributes
-.editorconfig
-gulpfile.js
-lib/**/*.test.js
-lib/**/*.test.d.ts
-npm-shrinkwrap.json
-coverage
+# Use negative patterns to bring back the specific things we want to publish
+!/bin/**
+!/lib/**
+!/dist/**
+
+# Ignore certain files in the above folder
+/dist/*.stats.*
+
+# NOTE: These don't need to be specified, because NPM includes them automatically.
+#
+# package.json
+# README (and its variants)
+# CHANGELOG (and its variants)
+# LICENSE / LICENCE
+
+## Project specific definitions
+# -----------------------------
+
+# (Add your exceptions here)
