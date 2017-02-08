@@ -120,6 +120,8 @@ interface IExecutable {
 
 export function initialize(gulp: gulp.Gulp): void;
 
+export function log(...args: Array<string | Chalk.ChalkChain>): void;
+
 export function logSummary(value: string): void;
 
 export function mergeConfig(config: IBuildConfig): void;
