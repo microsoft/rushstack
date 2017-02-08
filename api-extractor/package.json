@@ -16,7 +16,7 @@
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "mocha": "~2.5.3",
-    "@microsoft/node-library-build": "~2.2.0"
+    "@microsoft/node-library-build": "~2.3.0"
   },
   "dependencies": {
     "@types/es6-collections": "^0.5.29",
