@@ -3,9 +3,8 @@
  * See LICENSE in the project root for license information.
  */
 
-/* tslint:disable:typedef */
-const loaderUtils = require('loader-utils');
-/* tslint:enable:typedef */
+import { merge } from 'lodash';
+const loaderUtils = require('loader-utils'); // tslint:disable-line:typedef
 
 import {
   IInternalOptions,
@@ -26,8 +25,19 @@ export interface ISetWebpackPublicPathOptions {
 export class SetWebpackPublicPathLoader {
   public static registryVarName: string = 'window.__setWebpackPublicPathLoaderSrcRegistry__';
 
+  private static staticOptions: ISetWebpackPublicPathLoaderOptions = {
+    systemJs: false,
+    scriptName: undefined,
+    urlPrefix: undefined,
+    publicPath: undefined
+  };
+
   public static getGlobalRegisterCode(debug: boolean = false): string {
     return getGlobalRegisterCode(debug);
+  }
+
+  public static setOptions(options: ISetWebpackPublicPathLoaderOptions): void {
+    this.staticOptions = options || {};
   }
 
   public static pitch(remainingRequest: string): string {
@@ -40,7 +50,11 @@ export class SetWebpackPublicPathLoader {
   }
 
   private static getOptions(query: string): IInternalOptions {
-    const options: IInternalOptions & ISetWebpackPublicPathLoaderOptions = loaderUtils.parseQuery(query);
+    const queryOptions: ISetWebpackPublicPathLoaderOptions = loaderUtils.parseQuery(query);
+
+    const options: ISetWebpackPublicPathLoaderOptions & IInternalOptions =
+      merge(merge({}, SetWebpackPublicPathLoader.staticOptions), queryOptions)
+
     if (options.systemJs || options.publicPath) {
       // If ?systemJs or ?publicPath=... is set inline, override regexName
       options.regexName = undefined;
