@@ -53,7 +53,7 @@ export class SetWebpackPublicPathLoader {
     const queryOptions: ISetWebpackPublicPathLoaderOptions = loaderUtils.parseQuery(query);
 
     const options: ISetWebpackPublicPathLoaderOptions & IInternalOptions =
-      merge(merge({}, SetWebpackPublicPathLoader.staticOptions), queryOptions)
+      merge(merge({}, SetWebpackPublicPathLoader.staticOptions), queryOptions);
 
     if (options.systemJs || options.publicPath) {
       // If ?systemJs or ?publicPath=... is set inline, override regexName
