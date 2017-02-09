@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "2.3.1",
+      "tag": "@microsoft/gulp-core-build_v2.3.1",
+      "date": "Thu, 09 Feb 2017 02:35:45 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Don't watch process exit if user passed in the -h flag."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.3.0",
       "tag": "@microsoft/gulp-core-build_v2.3.0",
       "date": "Wed, 08 Feb 2017 01:41:58 GMT",
