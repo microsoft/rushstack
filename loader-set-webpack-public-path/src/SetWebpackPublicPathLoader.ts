@@ -13,9 +13,12 @@ import {
   getGlobalRegisterCode
 } from './codeGenerator';
 
-export interface ISetWebpackPublicPathLoaderOptions {
+export interface ISetWebpackPublicPathLoaderOptions extends ISetWebpackPublicPathOptions {
+  scriptName?: string;
+}
+
+export interface ISetWebpackPublicPathOptions {
   systemJs?: boolean;
-  scriptPath?: string;
   urlPrefix?: string;
   publicPath?: string;
 }
@@ -37,10 +40,12 @@ export class SetWebpackPublicPathLoader {
   }
 
   private static getOptions(query: string): IInternalOptions {
-    const options: IInternalOptions = loaderUtils.parseQuery(query);
+    const options: IInternalOptions & ISetWebpackPublicPathLoaderOptions = loaderUtils.parseQuery(query);
     if (options.systemJs || options.publicPath) {
-      // If ?systemJs or ?publicPath=... is set inline, override scriptPath
-      options.scriptPath = undefined;
+      // If ?systemJs or ?publicPath=... is set inline, override regexName
+      options.regexName = undefined;
+    } else {
+      options.regexName = options.scriptName;
     }
 
     if (!options.webpackPublicPathVariable) {

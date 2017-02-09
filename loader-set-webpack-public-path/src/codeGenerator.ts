@@ -5,14 +5,15 @@
 
 import { EOL } from 'os';
 import {
-  ISetWebpackPublicPathLoaderOptions,
+  ISetWebpackPublicPathOptions,
   SetWebpackPublicPathLoader
 } from './SetWebpackPublicPathLoader';
 import * as uglify from 'uglify-js';
 
-export interface IInternalOptions extends ISetWebpackPublicPathLoaderOptions {
-  webpackPublicPathVariable: string;
-  linePrefix: string;
+export interface IInternalOptions extends ISetWebpackPublicPathOptions {
+  webpackPublicPathVariable?: string;
+  regexName?: string;
+  linePrefix?: string;
 }
 
 export function getSetPublicPathCode(options: IInternalOptions, emitWarning: (warning: string) => void): string {
@@ -21,10 +22,10 @@ export function getSetPublicPathCode(options: IInternalOptions, emitWarning: (wa
   }
 
   let lines: string[] = [];
-  if (options.scriptPath) {
+  if (options.regexName) {
     lines = [
       `var scripts = document.getElementsByTagName('script');`,
-      `var regex = new RegExp('${escapeSingleQuotes(options.scriptPath)}', 'i');`,
+      `var regex = new RegExp('${escapeSingleQuotes(options.regexName)}', 'i');`,
       'var found = false;',
       '',
       'if (scripts && scripts.length) {',
