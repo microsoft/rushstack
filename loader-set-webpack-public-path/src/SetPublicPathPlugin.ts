@@ -33,14 +33,14 @@ interface IAsset {
 }
 
 interface IChunk {
-}
-
-interface IModule {
   modules: IModule[];
-  assets: IAsset[];
   chunks: IChunk[];
   name: string;
   renderedHash: string;
+}
+
+interface IModule {
+  assets: IAsset[];
 }
 
 interface IMainTemplate extends ITapable {
@@ -61,10 +61,10 @@ export default class SetPublicPathPlugin implements Plugin {
   public apply(compiler: Compiler): void {
     const self: SetPublicPathPlugin = this;
     compiler.plugin('compilation', (compilation: ICompilation, params: Object): void => {
-      compilation.mainTemplate.plugin('startup', (source: string, module: IModule, hash: string) => {
-        let assetOrChunkFound: boolean = module.chunks.length > 0;
+      compilation.mainTemplate.plugin('startup', (source: string, chunk: IChunk, hash: string) => {
+        let assetOrChunkFound: boolean = chunk.chunks.length > 0;
         if (!assetOrChunkFound) {
-          for (const innerModule of module.modules) {
+          for (const innerModule of chunk.modules) {
             if (innerModule.assets && Object.keys(innerModule.assets).length > 0) {
               assetOrChunkFound = true;
               break;
@@ -82,8 +82,8 @@ export default class SetPublicPathPlugin implements Plugin {
           if (this._options.scriptName) {
             moduleOptions.regexName = this._options.scriptName.name;
             if (this._options.scriptName.isTokenized) {
-              moduleOptions.regexName = moduleOptions.regexName.replace(/\[name\]/g, escapeRegExp(module.name))
-                                                           .replace(/\[hash\]/g, module.renderedHash);
+              moduleOptions.regexName = moduleOptions.regexName.replace(/\[name\]/g, escapeRegExp(chunk.name))
+                                                           .replace(/\[hash\]/g, chunk.renderedHash);
             }
           }
 
