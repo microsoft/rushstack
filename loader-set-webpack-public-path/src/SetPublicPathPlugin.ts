@@ -83,7 +83,7 @@ export default class SetPublicPathPlugin implements Plugin {
             moduleOptions.regexName = this._options.scriptName.name;
             if (this._options.scriptName.isTokenized) {
               moduleOptions.regexName = moduleOptions.regexName.replace(/\[name\]/g, escapeRegExp(chunk.name))
-                                                           .replace(/\[hash\]/g, chunk.renderedHash);
+                                                               .replace(/\[hash\]/g, chunk.renderedHash);
             }
           }
 
