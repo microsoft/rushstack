@@ -13,7 +13,8 @@
   },
   "dependencies": {
     "loader-utils": "~0.2.16",
-    "uglify-js": "~2.7.5"
+    "uglify-js": "~2.7.5",
+    "@types/webpack": "2.2.5"
   },
   "devDependencies": {
     "chai": "~3.5.0",
