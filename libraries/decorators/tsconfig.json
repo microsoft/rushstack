@@ -9,6 +9,7 @@
     "experimentalDecorators": true,
     "types": [
       "webpack-env"
-    ]
+    ],
+    "strictNullChecks": true
   }
 }
