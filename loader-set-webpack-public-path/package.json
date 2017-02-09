@@ -15,7 +15,9 @@
     "loader-utils": "~0.2.16",
     "uglify-js": "~2.7.5",
     "@types/webpack": "2.2.5",
-    "@types/tapable": "0.2.3"
+    "@types/tapable": "0.2.3",
+    "lodash": "~4.15.0",
+    "@types/lodash": "4.14.52"
   },
   "devDependencies": {
     "chai": "~3.5.0",
