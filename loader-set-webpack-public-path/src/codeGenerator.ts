@@ -12,6 +12,7 @@ import * as uglify from 'uglify-js';
 
 export interface IInternalOptions extends ISetWebpackPublicPathLoaderOptions {
   webpackPublicPathVariable: string;
+  linePrefix: string;
 }
 
 export function getSetPublicPathCode(options: IInternalOptions, emitWarning: (warning: string) => void): string {
@@ -75,7 +76,7 @@ export function getSetPublicPathCode(options: IInternalOptions, emitWarning: (wa
     );
   }
 
-  return joinLines(lines);
+  return joinLines(lines, options.linePrefix);
 }
 
 export function getGlobalRegisterCode(debug: boolean = false): string {
@@ -111,8 +112,14 @@ export function getGlobalRegisterCode(debug: boolean = false): string {
     }
   }
 
-function joinLines(lines: string[]): string {
-  return lines.join(EOL).replace(new RegExp(`${EOL}${EOL}+`, 'g'), `${EOL}${EOL}`);
+function joinLines(lines: string[], linePrefix?: string): string {
+  return lines.map((line: string) => {
+    if (!!line) {
+      return `${linePrefix || ''}${line}`;
+    } else {
+      return line;
+    }
+  }).join(EOL).replace(new RegExp(`${EOL}${EOL}+`, 'g'), `${EOL}${EOL}`);
 }
 
 function escapeSingleQuotes(str: string): string {
