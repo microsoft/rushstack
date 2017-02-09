@@ -3,14 +3,14 @@
   "version": "0.0.0",
   "dependencies": {
     "@microsoft/api-extractor": {
-      "version": "1.1.8",
+      "version": "1.1.9",
       "from": "@microsoft/api-extractor@>=1.1.4 <2.0.0",
-      "resolved": "https://registry.npmjs.org/@microsoft/api-extractor/-/api-extractor-1.1.8.tgz"
+      "resolved": "https://registry.npmjs.org/@microsoft/api-extractor/-/api-extractor-1.1.9.tgz"
     },
     "@microsoft/gulp-core-build": {
-      "version": "2.2.1",
+      "version": "2.3.1",
       "from": "@microsoft/gulp-core-build@>=2.1.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build/-/gulp-core-build-2.2.1.tgz"
+      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build/-/gulp-core-build-2.3.1.tgz"
     },
     "@microsoft/gulp-core-build-mocha": {
       "version": "2.0.1",
@@ -79,6 +79,11 @@
       "from": "@types/gulp-util@>=3.0.29 <4.0.0",
       "resolved": "https://registry.npmjs.org/@types/gulp-util/-/gulp-util-3.0.30.tgz"
     },
+    "@types/lodash": {
+      "version": "4.14.52",
+      "from": "@types/lodash@4.14.52",
+      "resolved": "https://registry.npmjs.org/@types/lodash/-/lodash-4.14.52.tgz"
+    },
     "@types/mkdirp": {
       "version": "0.3.29",
       "from": "@types/mkdirp@>=0.3.29 <0.6.0",
@@ -90,9 +95,9 @@
       "resolved": "https://registry.npmjs.org/@types/mocha/-/mocha-2.2.39.tgz"
     },
     "@types/node": {
-      "version": "6.0.62",
+      "version": "6.0.63",
       "from": "@types/node@>=6.0.46 <7.0.0",
-      "resolved": "https://registry.npmjs.org/@types/node/-/node-6.0.62.tgz"
+      "resolved": "https://registry.npmjs.org/@types/node/-/node-6.0.63.tgz"
     },
     "@types/node-notifier": {
       "version": "0.0.28",
@@ -119,15 +124,35 @@
       "from": "@types/semver@>=5.3.30 <6.0.0",
       "resolved": "https://registry.npmjs.org/@types/semver/-/semver-5.3.30.tgz"
     },
+    "@types/source-map": {
+      "version": "0.5.0",
+      "from": "@types/source-map@*",
+      "resolved": "https://registry.npmjs.org/@types/source-map/-/source-map-0.5.0.tgz"
+    },
+    "@types/tapable": {
+      "version": "0.2.3",
+      "from": "@types/tapable@0.2.3",
+      "resolved": "https://registry.npmjs.org/@types/tapable/-/tapable-0.2.3.tgz"
+    },
     "@types/through2": {
       "version": "2.0.32",
       "from": "@types/through2@>=2.0.31 <3.0.0",
       "resolved": "https://registry.npmjs.org/@types/through2/-/through2-2.0.32.tgz"
     },
+    "@types/uglify-js": {
+      "version": "2.6.28",
+      "from": "@types/uglify-js@*",
+      "resolved": "https://registry.npmjs.org/@types/uglify-js/-/uglify-js-2.6.28.tgz"
+    },
     "@types/vinyl": {
       "version": "1.2.30",
       "from": "@types/vinyl@>=1.2.30 <2.0.0",
       "resolved": "https://registry.npmjs.org/@types/vinyl/-/vinyl-1.2.30.tgz"
+    },
+    "@types/webpack": {
+      "version": "2.2.5",
+      "from": "@types/webpack@2.2.5",
+      "resolved": "https://registry.npmjs.org/@types/webpack/-/webpack-2.2.5.tgz"
     },
     "@types/yargs": {
       "version": "0.0.34",
@@ -249,9 +274,9 @@
       "optional": true
     },
     "aws4": {
-      "version": "1.5.0",
+      "version": "1.6.0",
       "from": "aws4@>=1.2.1 <2.0.0",
-      "resolved": "https://registry.npmjs.org/aws4/-/aws4-1.5.0.tgz",
+      "resolved": "https://registry.npmjs.org/aws4/-/aws4-1.6.0.tgz",
       "optional": true
     },
     "balanced-match": {
@@ -2425,6 +2450,11 @@
           "from": "glob@7.0.5",
           "resolved": "https://registry.npmjs.org/glob/-/glob-7.0.5.tgz"
         },
+        "lodash": {
+          "version": "4.15.0",
+          "from": "lodash@>=4.15.0 <4.16.0",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.15.0.tgz"
+        },
         "mocha": {
           "version": "3.2.0",
           "from": "mocha@>=3.2.0 <3.3.0",
@@ -2713,9 +2743,9 @@
       "resolved": "https://registry.npmjs.org/type-detect/-/type-detect-1.0.0.tgz"
     },
     "typescript": {
-      "version": "2.1.5",
+      "version": "2.1.6",
       "from": "typescript@>=2.1.4 <2.2.0",
-      "resolved": "https://registry.npmjs.org/typescript/-/typescript-2.1.5.tgz"
+      "resolved": "https://registry.npmjs.org/typescript/-/typescript-2.1.6.tgz"
     },
     "uglify-js": {
       "version": "2.7.5",

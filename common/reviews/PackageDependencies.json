@@ -28,6 +28,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "lodash",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "mocha",
       "allowedCategories": [ "libraries" ]
     },

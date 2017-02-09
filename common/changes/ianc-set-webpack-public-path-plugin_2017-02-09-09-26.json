@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/loader-set-webpack-public-path",
+      "comment": "Major refactor. Removing the injector loader, including a plugin, and renaming several parameters.",
+      "type": "major"
+    }
+  ],
+  "email": "iclanton@users.noreply.github.com"
+}
