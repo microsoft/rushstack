@@ -1,6 +1,13 @@
 # Change Log - @microsoft/loader-set-webpack-public-path
 
-This log was last generated on Tue, 07 Feb 2017 14:32:21 GMT and should not be manually modified.
+This log was last generated on Thu, 09 Feb 2017 14:31:39 GMT and should not be manually modified.
+
+## 2.0.0
+Thu, 09 Feb 2017 14:31:39 GMT
+
+### Breaking changes
+
+- Major refactor. Removing the injector loader, including a plugin, and renaming several parameters.
 
 ## 1.0.1
 Tue, 07 Feb 2017 14:32:21 GMT
