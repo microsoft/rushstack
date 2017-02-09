@@ -409,6 +409,10 @@ function _handleTasksListArguments(): void {
   if (args['tasks'] || args['tasks-simple'] || args['T']) {
     global['dontWatchExit'] = true; // tslint:disable-line:no-string-literal
   }
+  if (args['h']) {
+    // we are showing a help command prompt via yargs or ts-command-line
+    global['dontWatchExit'] = true; // tslint:disable-line:no-string-literal
+  }
 }
 
 export const clean: IExecutable = new CleanTask();
