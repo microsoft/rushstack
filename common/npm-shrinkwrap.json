@@ -126,7 +126,7 @@
     },
     "@types/tapable": {
       "version": "0.2.3",
-      "from": "@types/tapable@*",
+      "from": "@types/tapable@0.2.3",
       "resolved": "https://registry.npmjs.org/@types/tapable/-/tapable-0.2.3.tgz"
     },
     "@types/through2": {
