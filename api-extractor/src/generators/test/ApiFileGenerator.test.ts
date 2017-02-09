@@ -62,11 +62,37 @@ describe('ApiFileGenerator tests', function (): void {
       /**
        * Errors can be found in testInputs/folder/MyClass
        */
-      assert.equal(capturedErrors.length, 3);
-      assert.equal(capturedErrors[0].message, 'Property type not declared');
-      assert.equal(capturedErrors[1].message, 'Unknown JSDoc tag "@badjsdoctag"');
-      assert.equal(capturedErrors[2].message, 'Unexpected text in JSDoc comment: '
+      assert.equal(capturedErrors.length, 2);
+      assert.equal(capturedErrors[0].message, 'Unknown JSDoc tag "@badjsdoctag"');
+      assert.equal(capturedErrors[1].message, 'Unexpected text in JSDoc comment: '
         + '"(Error #1 is the bad tag) Text can no..."');
+    });
+
+    it('Example 2', function (): void {
+      const inputFolder: string = './testInputs/example2';
+      const outputFile: string = './lib/example2-output.ts';
+      const expectedFile: string = path.join(inputFolder, 'example2-output.ts');
+
+      const compilerOptions: ts.CompilerOptions = {
+        target: ts.ScriptTarget.ES5,
+        module: ts.ModuleKind.CommonJS,
+        moduleResolution: ts.ModuleResolutionKind.NodeJs,
+        rootDir: inputFolder,
+        typeRoots: ['./'] // We need to ignore @types in these tests
+      };
+      const extractor: Extractor = new Extractor({
+        compilerOptions: compilerOptions,
+        errorHandler: testErrorHandler
+      });
+
+      extractor.analyze({
+        entryPointFile: path.join(inputFolder, 'index.ts')
+      });
+
+      const apiFileGenerator: ApiFileGenerator = new ApiFileGenerator();
+      apiFileGenerator.writeApiFile(outputFile, extractor);
+
+      assertFileMatchesExpected(outputFile, expectedFile);
     });
   });
 });

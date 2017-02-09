@@ -126,6 +126,11 @@ abstract class ApiItem {
    */
   public kind: ApiItemKind;
 
+  public innerItems: ApiItem[] = [];
+
+  // True if this ApiItem is missing something
+  public hasIncompleteTypes: boolean = false;
+
   /**
    * A list of extractor warnings that were reported using ApiItem.reportWarning().
    * Whereas an "error" will break the build, a "warning" will merely be tracked in
@@ -329,7 +334,12 @@ abstract class ApiItem {
         return;
       case ResolveState.Unresolved:
         this._state = ResolveState.Resolving;
+
+        for (const innerItem of this.innerItems) {
+          innerItem.resolveReferences();
+        }
         this.onResolveReferences();
+
         this._state = ResolveState.Resolved;
         return;
       case ResolveState.Resolving:

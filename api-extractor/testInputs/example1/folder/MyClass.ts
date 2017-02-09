@@ -32,7 +32,9 @@ class PrivateClass {
  */
 export class InternalClass {
   /**
-   * (Error) occurs here because there is no type declared.
+   * This will not report an error, instead a 'WARNING' comment will 
+   * appear above this class declaration in the API file as a result of 
+   * no type declaration.
    */
   public static propertyWithNoType;
 

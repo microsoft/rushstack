@@ -52,6 +52,24 @@ export enum inheritDisplayModeNoErrorDeprecated {
 }
 
 /**
+ * This function has incomplete type information on the return value and should not 
+ * be printed to the API file, instead a warning comment should be present
+ * at the bottom of the API file.
+ */
+export function functionWithIncompleteReturnType(param1: string, param2: string) {
+  return false;
+}
+
+/**
+ * This function has incomplete type information on a parameter and should not 
+ * be printed to the API file, instead a warning comment should be present at the 
+ * bottom of the API file. 
+ */
+export function functionWithIncompleteParameterType(param1, param2: string): boolean {
+  return false;
+}
+
+/**
  * This is a class to test JsDoc parser and this is description that can
  * span to multiple lines and we need to make sure we parse this block
  * correctly. It can contain a {@link https://bing.com/ | bing home}. This block is entirely
@@ -94,6 +112,18 @@ export default class MyDocumentedClass {
   public fieldWithValidEscapedBraces: string;
 
   /**
+   * This property has no type information. It should not be printed to the API 
+   * file, instead a warning comment should be printed above the class declaration.
+   */
+  public propertyWithIncompleteType;
+
+  /**
+   * This type literal has incomplete type information. It should not be printed to the API 
+   * file, instead a warning comment should be printed above the class declaration.
+   */
+  public propertyTypeLiteralIncompleteTypes: {name, address: string};
+
+  /**
    * This method has two params with docs.
    *
    * @param param1 - First parameter that can have a long and multi-
@@ -126,6 +156,24 @@ export default class MyDocumentedClass {
     obj: MyDocumentedClass 
   } {
     return undefined;
+  }
+
+  /**
+   * This method has incomplete type information on the parameters and should not 
+   * be printed to the API file, instead a warning comment should be printed 
+   * above the class declaration.
+   */
+  public methodWithIncompleteParamTypes(param1, param2): boolean {
+    return false;
+  }
+
+  /**
+   * This method has incomplete type information on the return value and should not 
+   * be printed to the API file, instead a warning comment should be printed above
+   * the class declaration.
+   */
+  public methodWithIncompleteReturnType(param1: string, param2: string) {
+    return false;
   }
 
 }

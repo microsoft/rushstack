@@ -23,7 +23,7 @@ class ApiParameter extends ApiItem {
     if (parameterDeclaration.type) {
       this.type = parameterDeclaration.type.getText();
     } else {
-      this.reportError(`Variable type not declared`);
+      this.hasIncompleteTypes = true;
       this.type = 'any';
     }
 

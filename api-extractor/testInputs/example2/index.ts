@@ -12,6 +12,8 @@ export {
     inheritCorrectlyButNotFound,
     inheritDisplayModeError,
     inheritDisplayModeErrorDeprecated,
-    inheritDisplayModeNoErrorDeprecated
+    inheritDisplayModeNoErrorDeprecated,
+    functionWithIncompleteReturnType,
+    functionWithIncompleteParameterType
 } from './folder/MyDocumentedClass';
 export { default as MyDocumentedClass } from './folder/MyDocumentedClass';

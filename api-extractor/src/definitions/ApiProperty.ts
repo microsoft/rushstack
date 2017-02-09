@@ -19,7 +19,7 @@ class ApiProperty extends ApiMember {
       if (declaration.type) {
         this.type = declaration.type.getText();
       } else {
-        this.reportError('Property type not declared');
+        this.hasIncompleteTypes = true;
         this.type = 'any';
       }
     } else {

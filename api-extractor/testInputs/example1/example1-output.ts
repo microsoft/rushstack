@@ -27,9 +27,9 @@ interface hasOwnProperty {
   ___lookupSetter__: __proto__;
 }
 
+// WARNING: propertyWithNoType has incomplete type information
 // @internal
 class InternalClass {
-  public static propertyWithNoType: any;
   // (undocumented)
   public test(): void;
 }

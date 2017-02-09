@@ -25,16 +25,27 @@ class ApiFunction extends ApiItem {
       this.params = [];
       for (const param of methodDeclaration.parameters) {
         const declarationSymbol: ts.Symbol = TypeScriptHelpers.tryGetSymbolForDeclaration(param);
-        this.params.push(new ApiParameter({
+        const apiParameter: ApiParameter = new ApiParameter({
           extractor: this.extractor,
           declaration: param,
           declarationSymbol: declarationSymbol,
           jsdocNode: param
-        }));
+        });
+
+        if (apiParameter.hasIncompleteTypes) {
+          this.hasIncompleteTypes = true;
+        }
+        this.params.push(apiParameter);
       }
     }
 
-    this.returnType = methodDeclaration.type ? methodDeclaration.type.getText() : '';
+    // Return type
+    if (methodDeclaration.type) {
+      this.returnType = methodDeclaration.type.getText();
+    } else {
+      this.hasIncompleteTypes = true;
+      this.returnType = 'any';
+    }
   }
 
   /**
