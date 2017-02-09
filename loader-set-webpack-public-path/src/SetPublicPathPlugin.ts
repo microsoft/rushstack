@@ -5,13 +5,24 @@
 
 import { EOL } from 'os';
 import {
+  cloneDeep,
+  escapeRegExp
+} from 'lodash';
+import {
   Plugin,
   Compiler,
   compiler
 } from 'webpack';
 import * as ITapable from 'tapable';
 
-import { ISetWebpackPublicPathLoaderOptions } from './SetWebpackPublicPathLoader';
+import { ISetWebpackPublicPathOptions } from './SetWebpackPublicPathLoader';
+
+export interface ISetWebpackPublicPathPluginOptions extends ISetWebpackPublicPathOptions {
+  scriptName?: {
+    name: string;
+    isTokenized: boolean;
+  };
+}
 
 import {
   IInternalOptions,
@@ -28,6 +39,8 @@ interface IModule {
   modules: IModule[];
   assets: IAsset[];
   chunks: IChunk[];
+  name: string;
+  renderedHash: string;
 }
 
 interface IMainTemplate extends ITapable {
@@ -39,10 +52,10 @@ interface ICompilation {
 }
 
 export default class SetPublicPathPlugin implements Plugin {
-  private _options: IInternalOptions;
+  private _options: ISetWebpackPublicPathPluginOptions;
 
-  constructor(options: ISetWebpackPublicPathLoaderOptions) {
-    this._options = options as IInternalOptions;
+  constructor(options: ISetWebpackPublicPathPluginOptions) {
+    this._options = options;
   }
 
   public apply(compiler: Compiler): void {
@@ -60,14 +73,24 @@ export default class SetPublicPathPlugin implements Plugin {
         }
 
         if (assetOrChunkFound) {
+          const moduleOptions: IInternalOptions = cloneDeep(this._options);
+
           // If this module has ownership over any chunks or assets, inject the public path code
-          self._options.webpackPublicPathVariable = `${compilation.mainTemplate.requireFn}.p`;
-          self._options.linePrefix = '  ';
+          moduleOptions.webpackPublicPathVariable = `${compilation.mainTemplate.requireFn}.p`;
+          moduleOptions.linePrefix = '  ';
+
+          if (this._options.scriptName) {
+            moduleOptions.regexName = this._options.scriptName.name;
+            if (this._options.scriptName.isTokenized) {
+              moduleOptions.regexName = moduleOptions.regexName.replace(/\[name\]/g, escapeRegExp(module.name))
+                                                           .replace(/\[hash\]/g, module.renderedHash);
+            }
+          }
 
           return [
             '// Set the webpack public path',
             '(function () {',
-              getSetPublicPathCode(self._options, console.error),
+              getSetPublicPathCode(moduleOptions, console.error),
             '})();',
             '',
             source
