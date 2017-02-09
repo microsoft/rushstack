@@ -405,10 +405,15 @@ function _handleCommandLineArguments(): void {
 }
 
 function _handleTasksListArguments(): void {
-  /* tslint:disable-next-line:no-string-literal */
+  /* tslint:disable:no-string-literal */
   if (args['tasks'] || args['tasks-simple'] || args['T']) {
-    global['dontWatchExit'] = true; // tslint:disable-line:no-string-literal
+    global['dontWatchExit'] = true;
   }
+  if (args['h']) {
+    // we are showing a help command prompt via yargs or ts-command-line
+    global['dontWatchExit'] = true;
+  }
+  /* tslint:enable:no-string-literal */
 }
 
 export const clean: IExecutable = new CleanTask();
