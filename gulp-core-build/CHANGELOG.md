@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Wed, 08 Feb 2017 01:41:58 GMT and should not be manually modified.
+This log was last generated on Thu, 09 Feb 2017 02:35:45 GMT and should not be manually modified.
+
+## 2.3.1
+Thu, 09 Feb 2017 02:35:45 GMT
+
+### Patches
+
+- Don't watch process exit if user passed in the -h flag.
 
 ## 2.3.0
 Wed, 08 Feb 2017 01:41:58 GMT
