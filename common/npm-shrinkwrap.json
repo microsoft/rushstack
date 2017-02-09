@@ -150,9 +150,9 @@
       "resolved": "https://registry.npmjs.org/@types/vinyl/-/vinyl-1.2.30.tgz"
     },
     "@types/webpack": {
-      "version": "2.2.5",
-      "from": "@types/webpack@2.2.5",
-      "resolved": "https://registry.npmjs.org/@types/webpack/-/webpack-2.2.5.tgz"
+      "version": "2.2.4",
+      "from": "@types/webpack@2.2.4",
+      "resolved": "https://registry.npmjs.org/@types/webpack/-/webpack-2.2.4.tgz"
     },
     "@types/yargs": {
       "version": "0.0.34",

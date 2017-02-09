@@ -10,8 +10,7 @@ import {
 } from 'lodash';
 import {
   Plugin,
-  Compiler,
-  compiler
+  Webpack
 } from 'webpack';
 import * as ITapable from 'tapable';
 
@@ -58,7 +57,9 @@ export default class SetPublicPathPlugin implements Plugin {
     this._options = options;
   }
 
-  public apply(compiler: Compiler): void {
+  // This type should be "compiler," but there's another type mismatch issue so we have to stay on
+  //  @types/webpack@2.2.4 for now.
+  public apply(compiler: Webpack & ITapable): void {
     const self: SetPublicPathPlugin = this;
     compiler.plugin('compilation', (compilation: ICompilation, params: Object): void => {
       compilation.mainTemplate.plugin('startup', (source: string, chunk: IChunk, hash: string) => {

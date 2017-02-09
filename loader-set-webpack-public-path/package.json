@@ -14,10 +14,10 @@
   "dependencies": {
     "loader-utils": "~0.2.16",
     "uglify-js": "~2.7.5",
-    "lodash": "~4.15.0"
+    "lodash": "~4.15.0",
+    "@types/webpack": "2.2.4"
   },
   "devDependencies": {
-    "@types/webpack": "2.2.5",
     "@types/tapable": "0.2.3",
     "@types/lodash": "4.14.52",
     "chai": "~3.5.0",
