@@ -49,6 +49,7 @@ export default class RebuildAction extends CommandLineAction {
   private _quietParameter: CommandLineFlagParameter;
   private _toFlag: CommandLineStringListParameter;
   private _vsoParameter: CommandLineFlagParameter;
+  private _minimalParameter: CommandLineFlagParameter;
 
   constructor(parser: RushCommandLineParser, options?: ICommandLineActionOptions) {
     super(options || {
@@ -98,6 +99,12 @@ export default class RebuildAction extends CommandLineAction {
       parameterLongName: '--from',
       parameterShortName: '-f',
       description: 'Build all projects which are downstream from the listed project'
+    });
+    this._minimalParameter = this.defineFlagParameter({
+      parameterLongName: '--minimal',
+      parameterShortName: '-m',
+      description: 'Invokes gulp with the "--minimal" option, which speeds up the build by running the minimal set ' +
+        'of tasks required to produce an executable output'
     });
   }
 
@@ -250,6 +257,7 @@ export default class RebuildAction extends CommandLineAction {
       errorMode,
       this._productionParameter.value,
       this._npmParameter.value,
+      this._minimalParameter.value,
       this._isIncrementalBuildAllowed);
 
     if (!taskRunner.hasTask(projectTask.name)) {

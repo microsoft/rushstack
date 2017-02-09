@@ -1,5 +1,6 @@
 # rush
 
+## Why Rush?
 A typical web project may consume hundreds of NPM packages, each developed
 independently by a random stranger somewhere on the internet.  Each project
 has its own Git repository, is conceptually self-contained, and tries to
@@ -71,13 +72,21 @@ But when you use Rush, you get some big improvements:
 
 - Use a single command to run "npm publish" for many packages
 
+- Git-based incremental builds, so you only rebuild a project if a source file
+  in that project folder has changed.
+
 - Support for cyclic dependencies:  For example, suppose that **my-gulp-task**
   depends on **my-library**, but **my-library**'s Gulpfile has a devDependency
   on **my-gulp-task**.  Rush can install the last published version of these
   packages for the Gulpfile, while still creating local links for other
   projects outside the cyclic dependency.
 
+- Support for enforcing certain Git policies, such as enforcing that Git committer
+  email addresses conform to a well-defined pattern.
+
 # Usage
+
+At any time, you can see the `--help` flag to find command-line usage information.
 
 ## Building a repo that is configured for Rush
 
