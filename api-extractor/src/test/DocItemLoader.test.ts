@@ -20,7 +20,7 @@ describe('DocItemLoader tests', function (): void {
       };
       const docItemLoader: DocItemLoader = new DocItemLoader('./testInputs/example2');
       /* ts-lint:diasble:no-unused-variable */
-      const apiDocItem: IDocItem = docItemLoader.getItem(apiDefRef, console.log);
+      const apiDocItem: IDocItem = docItemLoader.resolve(apiDefRef, console.log);
 
       JsonFile.saveJsonFile('./lib/inheritedDoc-output.json', JSON.stringify(apiDocItem));
       TestFileComparer.assertFileMatchesExpected(
