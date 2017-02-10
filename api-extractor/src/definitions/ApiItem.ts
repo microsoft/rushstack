@@ -127,6 +127,30 @@ abstract class ApiItem {
   public kind: ApiItemKind;
 
   /**
+   * A superset of memberItems. Includes memberItems and also other ApiItems that 
+   * comprise this ApiItem. 
+   * 
+   * Ex: if this ApiItem is an ApiFunction, then in it's innerItems would
+   * consist of ApiParameters. 
+   * Ex: if this ApiItem is an ApiMember that is a type literal, then it's 
+   * innerItems would contain ApiProperties. 
+   */
+  public innerItems: ApiItem[] = [];
+
+  /**
+   * True if this ApiItem either itself has missing type information or one 
+   * of it's innerItems is missing type information. 
+   * 
+   * Ex: if this ApiItem is an ApiMethod and has no type on the return value, then 
+   * we consider the ApiItem as 'itself' missing type informations and this property 
+   * is set to true. 
+   * Ex: If this ApiItem is an ApiMethod and one of its innerItems is an ApiParameter 
+   * that has no type specified, then we say an innerItem of this ApiMethod is missing
+   * type information and this property is set to true.
+   */
+  public hasIncompleteTypes: boolean = false;
+
+  /**
    * A list of extractor warnings that were reported using ApiItem.reportWarning().
    * Whereas an "error" will break the build, a "warning" will merely be tracked in
    * the API file produced by ApiFileGenerator.
@@ -329,7 +353,12 @@ abstract class ApiItem {
         return;
       case ResolveState.Unresolved:
         this._state = ResolveState.Resolving;
+
+        for (const innerItem of this.innerItems) {
+          innerItem.resolveReferences();
+        }
         this.onResolveReferences();
+
         this._state = ResolveState.Resolved;
         return;
       case ResolveState.Resolving:
@@ -338,6 +367,31 @@ abstract class ApiItem {
       default:
         throw new Error('ApiItem state is invalid');
     }
+  }
+
+  /**
+   * A procedure for determining if this ApiItem is missing type 
+   * information. We first check if the ApiItem itself is missing 
+   * any type information and if not then we check each of it's 
+   * innerItems for missing types. 
+   * 
+   * Ex: On the ApiItem itself, there may be missing type information 
+   * on the return value or missing type declaration of itself 
+   * (const name;).
+   * Ex: For each innerItem, there may be an ApiParameter that is missing 
+   * a type. Or for an ApiMember that is a type literal, there may be an 
+   * ApiProperty that is missing type information. 
+   */
+  public hasAnyIncompleteTypes(): boolean {
+    if (this.hasIncompleteTypes) {
+      return true;
+    }
+    for (const innerItem of this.innerItems) {
+      if (innerItem.hasIncompleteTypes) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 

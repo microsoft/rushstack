@@ -15,10 +15,13 @@ class ApiProperty extends ApiMember {
     this.kind = ApiItemKind.Property;
 
     const declaration: any = options.declaration as any; /* tslint:disable-line:no-any */
-    if (declaration && declaration.type) {
+    if (declaration.type) {
       this.type = declaration.type.getText();
+    } else {
+      this.hasIncompleteTypes = true;
+      this.type = 'any';
     }
-  }
+}
 
   /**
    * {@inheritdoc ApiItem.onResolveReferences }

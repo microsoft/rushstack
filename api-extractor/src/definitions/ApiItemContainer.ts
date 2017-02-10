@@ -23,17 +23,12 @@ abstract class ApiItemContainer extends ApiItem {
    * Add a child item to the container.
    */
   protected addMemberItem(apiItem: ApiItem): void {
-    this.memberItems.push(apiItem);
-  }
-
-  /**
-   * {@inheritdoc ApiItem.onResolveReferences }
-   */
-  protected onResolveReferences(): void {
-    super.onResolveReferences();
-    this.memberItems.forEach(apiItem => {
-      apiItem.resolveReferences();
-    });
+    if (apiItem.hasAnyIncompleteTypes()) {
+      this.reportWarning(`${apiItem.name} has incomplete type information`);
+    } else {
+      this.innerItems.push(apiItem);
+      this.memberItems.push(apiItem);
+    }
   }
 }
 
