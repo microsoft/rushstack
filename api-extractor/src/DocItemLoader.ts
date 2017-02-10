@@ -47,12 +47,12 @@ export default class DocItemLoader {
   }
 
   /**
-   * Attempts to retrieve an API item from the provided apiDefinitionRef.
+   * Attempts to resolve an API item from the provided apiDefinitionRef.
    * First checks the cache for the package, if not in the cache then the method
    * will attempt to the locate the associated json file to load the package and
    * check there. If the API item can not be found the method will return undefined.
    */
-  public getItem(apiDefinitionRef: IApiDefinitionReference, reportError: (message: string) => void): IDocItem {
+  public resolve(apiDefinitionRef: IApiDefinitionReference, reportError: (message: string) => void): IDocItem {
     if (!apiDefinitionRef) {
       reportError('Expected reference within {@inheritdoc} tag');
       return undefined;
