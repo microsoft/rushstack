@@ -67,7 +67,7 @@ export default class ApiFileGenerator extends ApiItemVisitor {
   protected visitApiStructuredType(apiStructuredType: ApiStructuredType): void {
     const declarationLine: string = apiStructuredType.getDeclarationLine();
 
-    if (apiStructuredType.documentation && apiStructuredType.documentation.preapproved) {
+    if (apiStructuredType.documentation.preapproved) {
       this._indentedWriter.writeLine('// @internal (preapproved)');
       this._indentedWriter.writeLine(declarationLine + ' {');
       this._indentedWriter.writeLine('}');
