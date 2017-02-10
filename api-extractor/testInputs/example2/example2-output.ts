@@ -22,7 +22,6 @@ enum inheritDisplayModeNoErrorDeprecated {
 }
 
 // WARNING: propertyWithIncompleteType has incomplete type information
-// WARNING: propertyTypeLiteralIncompleteTypes has incomplete type information
 // WARNING: methodWithIncompleteParamTypes has incomplete type information
 // WARNING: methodWithIncompleteReturnType has incomplete type information
 // @public
@@ -42,6 +41,10 @@ class MyDocumentedClass {
     obj: MyDocumentedClass;
   }
   public methodWithTypeReferences(param: MyDocumentedClass[]): MyDocumentedClass;
+  public propertyTypeLiteralIncompleteTypes: {
+    // WARNING: name has incomplete type information
+    address: string;
+  }
 }
 
 enum TestMissingCommentStar {

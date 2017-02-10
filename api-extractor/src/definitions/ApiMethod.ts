@@ -33,9 +33,7 @@ export default class ApiMethod extends ApiMember {
           jsdocNode: param
         });
 
-        if (apiParameter.hasIncompleteTypes) {
-          this.hasIncompleteTypes = true;
-        }
+        this.innerItems.push(apiParameter);
         this.params.push(apiParameter);
       }
     }

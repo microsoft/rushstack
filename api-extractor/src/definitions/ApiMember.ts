@@ -71,12 +71,7 @@ export default class ApiMember extends ApiItem {
       };
 
       this.typeLiteral = new ApiStructuredType(typeLiteralOptions);
-      for (const inner of this.typeLiteral.innerItems) {
-        if (inner.hasIncompleteTypes) {
-          this.hasIncompleteTypes = true;
-          return;
-        }
-      }
+      this.innerItems.push(this.typeLiteral);
     }
   }
 

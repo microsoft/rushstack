@@ -375,6 +375,22 @@
           ],
           "remarks": [],
           "isBeta": false
+        },
+        "propertyTypeLiteralIncompleteTypes": {
+          "kind": "property",
+          "isOptional": false,
+          "isReadOnly": false,
+          "isStatic": false,
+          "type": "{name, address: string}",
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "This type literal has incomplete type information. It should not be printed to the API file, instead a warning comment should be printed above the class declaration."
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
         }
       }
     },

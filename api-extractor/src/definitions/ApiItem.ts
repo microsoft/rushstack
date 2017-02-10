@@ -349,6 +349,18 @@ abstract class ApiItem {
         throw new Error('ApiItem state is invalid');
     }
   }
+
+  public hasAnyIncompleteTypes(): boolean {
+    if (this.hasIncompleteTypes) {
+      return true;
+    }
+    for (const innerItem of this.innerItems) {
+      if (innerItem.hasIncompleteTypes) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 export default ApiItem;
