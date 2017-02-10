@@ -1,3 +1,16 @@
+class ___proto__ {
+  // (undocumented)
+  public propertyIsEnumerable: string;
+}
+
+// (undocumented)
+class A extends __proto__, implements hasOwnProperty {
+  // (undocumented)
+  ___lookupSetter__: __proto__;
+  // (undocumented)
+  public __proto__(__proto__: string): __proto__;
+}
+
 // @public
 class AliasClass4 {
   // (undocumented)
@@ -8,6 +21,13 @@ class AliasClass4 {
   public readonly shouldBeReadOnly: number;
 }
 
+// (undocumented)
+interface hasOwnProperty {
+  // (undocumented)
+  ___lookupSetter__: __proto__;
+}
+
+// WARNING: propertyWithNoType has incomplete type information
 // @internal
 class InternalClass {
   // (undocumented)

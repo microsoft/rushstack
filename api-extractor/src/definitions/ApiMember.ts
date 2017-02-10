@@ -71,19 +71,7 @@ export default class ApiMember extends ApiItem {
       };
 
       this.typeLiteral = new ApiStructuredType(typeLiteralOptions);
-    }
-  }
-
-  /**
-   * {@inheritdoc ApiItem.onResolveReferences }
-   */
-  protected onResolveReferences(): void {
-    super.onResolveReferences();
-    if (this.typeLiteral) {
-      this.typeLiteral.resolveReferences();
-      this.typeLiteral.memberItems.forEach(apiItem => {
-        apiItem.resolveReferences();
-      });
+      this.innerItems.push(this.typeLiteral);
     }
   }
 
