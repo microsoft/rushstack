@@ -152,13 +152,8 @@ export default class TaskRunner {
    * It calls the complete callback when all tasks are completed, or rejects if any task fails.
    */
   private _startAvailableTasks(complete: () => void, reject: (err?: Object) => void): void {
-    if (!this._areAnyTasksReadyOrExecuting()) {
-      this._printTaskStatus();
-      if (this._hasAnyFailures) {
-        reject();
-      } else {
-        complete();
-      }
+    if (this._checkForEndCondition()) {
+      return;
     }
 
     let ctask: ITask;
@@ -205,6 +200,20 @@ export default class TaskRunner {
           this._startAvailableTasks(complete, reject);
         }
       );
+    }
+
+    this._checkForEndCondition();
+  }
+
+  private _checkForEndCondition(): boolean {
+    if (!this._areAnyTasksReadyOrExecuting()) {
+      this._printTaskStatus();
+      if (this._hasAnyFailures) {
+        reject();
+      } else {
+        complete();
+      }
+      return true;
     }
   }
 
