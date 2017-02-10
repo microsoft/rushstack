@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/ts-command-line",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "An object-oriented command-line parser for TypeScript",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -19,6 +19,6 @@
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "mocha": "~2.5.3",
-    "@microsoft/sp-build-node": "~0.2.1"
+    "@microsoft/sp-build-node": "~0.3.0"
   }
 }

@@ -2,6 +2,26 @@
   "name": "@microsoft/ts-command-line",
   "entries": [
     {
+      "version": "1.1.2",
+      "tag": "@microsoft/ts-command-line_v1.1.2",
+      "date": "Sun, 05 Feb 2017 01:21:30 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Lock version numbers for @types packages"
+          },
+          {
+            "comment": "Update .npmignore"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/sp-build-node\" from `~0.2.1` to `~0.3.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.1",
       "tag": "@microsoft/ts-command-line_v1.1.1",
       "date": "Tue, 06 Dec 2016 20:44:26 GMT",
