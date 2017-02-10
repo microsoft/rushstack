@@ -26,15 +26,26 @@ export default class ApiMethod extends ApiMember {
       this.params = [];
       for (const param of methodDeclaration.parameters) {
         const declarationSymbol: ts.Symbol = TypeScriptHelpers.tryGetSymbolForDeclaration(param);
-        this.params.push(new ApiParameter({
+        const apiParameter: ApiParameter = new ApiParameter({
           extractor: this.extractor,
           declaration: param,
           declarationSymbol: declarationSymbol,
           jsdocNode: param
-        }));
+        });
+
+        this.innerItems.push(apiParameter);
+        this.params.push(apiParameter);
       }
     }
 
-    this.returnType = methodDeclaration.type ? methodDeclaration.type.getText() : '';
+    // Return type
+    if (!(this.name === '__constructor')) {
+      if (methodDeclaration.type) {
+        this.returnType = methodDeclaration.type.getText();
+      } else {
+        this.returnType = 'any';
+        this.hasIncompleteTypes = true;
+      }
+    }
   }
 }

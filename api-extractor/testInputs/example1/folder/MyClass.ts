@@ -32,6 +32,13 @@ class PrivateClass {
  */
 export class InternalClass {
   /**
+   * This will not report an error, instead a 'WARNING' comment will 
+   * appear above this class declaration in the API file as a result of 
+   * no type declaration.
+   */
+  public static propertyWithNoType;
+
+  /**
    * Comment 1
    */
   public test(): void {
@@ -63,3 +70,22 @@ export class PreapprovedInternalClass {
 }
 
 const privateField = 123;
+
+/**
+ * This is testing identifiers whose name is the same as the 
+ * members of the object prototype.
+ */
+export class __proto__ {
+    public propertyIsEnumerable: string;
+}
+
+export interface hasOwnProperty {
+    __lookupSetter__: __proto__;
+}
+
+export class A extends __proto__ implements hasOwnProperty {
+    __lookupSetter__: __proto__;
+    public __proto__(__proto__: string): __proto__ {
+        return undefined;   
+    }
+}

@@ -20,7 +20,13 @@ class ApiParameter extends ApiItem {
 
     const parameterDeclaration: ts.ParameterDeclaration = options.declaration as ts.ParameterDeclaration;
     this.isOptional = !!parameterDeclaration.questionToken || !!parameterDeclaration.initializer;
-    this.type = parameterDeclaration.type.getText();
+    if (parameterDeclaration.type) {
+      this.type = parameterDeclaration.type.getText();
+    } else {
+      this.hasIncompleteTypes = true;
+      this.type = 'any';
+    }
+
     this.isSpread = !!parameterDeclaration.dotDotDotToken;
   }
 }

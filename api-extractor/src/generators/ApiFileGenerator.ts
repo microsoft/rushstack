@@ -81,6 +81,12 @@ export default class ApiFileGenerator extends ApiItemVisitor {
     this._indentedWriter.writeLine(declarationLine + ' {');
 
     this._indentedWriter.indentScope(() => {
+      if (apiStructuredType.kind === ApiItemKind.TypeLiteral) {
+        // Type literals don't have normal JSDoc.  Write only the warnings,
+        // and put them after the '{' since the declaration is nested. 
+        this._writeWarnings(apiStructuredType);
+      }
+
       for (const member of apiStructuredType.getSortedMemberItems()) {
         this.visit(member);
         this._indentedWriter.writeLine();
@@ -123,7 +129,9 @@ export default class ApiFileGenerator extends ApiItemVisitor {
   }
 
   protected visitApiMember(apiMember: ApiMember): void {
-    this._writeJsdocSynopsis(apiMember);
+    if (apiMember.documentation) {
+      this._writeJsdocSynopsis(apiMember);
+    }
 
     this._indentedWriter.write(apiMember.getDeclarationLine());
 
@@ -149,7 +157,8 @@ export default class ApiFileGenerator extends ApiItemVisitor {
    * by the Analzer.
    */
   private _writeJsdocSynopsis(apiItem: ApiItem): void {
-    const lines: string[] = apiItem.warnings.map((x: string) => 'WARNING: ' + x);
+    this._writeWarnings(apiItem);
+    const lines: string[] = [];
 
     if (apiItem instanceof ApiPackage && !apiItem.documentation.summary.length) {
       lines.push('(No packageDescription for this package)');
@@ -192,6 +201,15 @@ export default class ApiFileGenerator extends ApiItemVisitor {
       }
     }
 
+    this._writeLinesAsComments(lines);
+  }
+
+  private _writeWarnings(apiItem: ApiItem): void {
+    const lines: string[] = apiItem.warnings.map((x: string) => 'WARNING: ' + x);
+    this._writeLinesAsComments(lines);
+  }
+
+  private _writeLinesAsComments(lines: string[]): void {
     if (lines.length) {
       // Write the lines prefixed by slashes.  If there  are multiple lines, add "//" to each line
       this._indentedWriter.write('// ');
@@ -199,5 +217,4 @@ export default class ApiFileGenerator extends ApiItemVisitor {
       this._indentedWriter.writeLine();
     }
   }
-
 }

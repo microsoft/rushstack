@@ -141,7 +141,8 @@ export interface IDocMethod extends IDocBase {
   /**
    * a mapping of parameter name to IDocParam
    */
-  parameters: Map<string, IDocParam>;
+
+  parameters: { [name: string]: IDocParam};
 
   /**
    * describes the return value of the method
@@ -156,7 +157,7 @@ export interface IDocFunction extends IDocBase {
   /**
    * parameters of the function
    */
-  parameters: Map<string, IDocParam>;
+  parameters: { [name: string]: IDocParam};
 
   /**
    * a description of the return value
@@ -172,7 +173,7 @@ export interface IDocClass extends IDocBase {
   /**
    * Can be a combination of methods and/or properties
    */
-  members: Map<string, IDocMember>;
+  members: { [name: string]: IDocMember};
 
   /**
    * Interfaces implemented by this class
@@ -204,7 +205,7 @@ export interface IDocInterface extends IDocBase {
   /**
    * A mapping from the name of a member API to its IDocMember
    */
-  members: Map<string, IDocMember>;
+  members: { [name: string]: IDocMember};
 
   /**
    * Interfaces implemented by this interface
@@ -236,7 +237,7 @@ export interface IDocPackage {
   /**
    * IDocItems of exported API items
    */
-  exports: Map<string, IDocItem>;
+  exports: { [name: string]: IDocItem};
 
   /**
    * The following are needed so that this interface and can share

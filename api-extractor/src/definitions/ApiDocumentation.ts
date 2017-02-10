@@ -138,7 +138,7 @@ export default class ApiDocumentation {
   public deprecatedMessage: IDocElement[];
   public remarks: IDocElement[];
   public returnsMessage: IDocElement[];
-  public parameters: Map<string, IParam>;
+  public parameters: { [name: string]: IParam; };
 
   /**
    * An "API Tag" is a custom JSDoc tag which indicates whether this definition
@@ -243,7 +243,7 @@ export default class ApiDocumentation {
     this.docItemLoader = docItemLoader;
     this.extractor = extractor;
     this.reportError = errorLogger;
-    this.parameters = new Map<string, IParam>();
+    this.parameters = {};
     this._parseDocs();
   }
 
