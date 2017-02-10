@@ -176,8 +176,8 @@ export default class ApiDocumentation {
    * assessible ApiItem properties. 
    * 
    * Ex: this is useful in the case of parsing inheritdoc expressions,
-   * in the sense that we do not know if we the IInherited documentation 
-   * is coming from an ApiItem or from an IDocItem.
+   * in the sense that we do not know if we the inherited documentation 
+   * is coming from an ApiItem or a IDocItem.
    */
   public referenceResolver: IReferenceResolver;
 
