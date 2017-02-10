@@ -69,9 +69,7 @@ export default class JsonFile {
         // tslint:disable-next-line:no-any
         const value: any = json[key];
         if (value === undefined) {
-          if (key !== 'type') {
-            throw new Error(`The key "${key}" is undefined`);
-          }
+          throw new Error(`The key "${key}" is undefined`);
         }
         JsonFile._validateNoUndefinedMembers(value);
       }
