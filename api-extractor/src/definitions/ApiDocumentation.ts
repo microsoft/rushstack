@@ -61,6 +61,13 @@ export interface IScopePackageName {
 /**
  * A dependency for ApiDocumentation constructor that abstracts away the function 
  * of resolving an API definition reference.
+ * 
+ * @internalremarks reportError() will be called if the apiDefinitionRef is to a non local 
+ * item and the package of that non local item can not be found. 
+ * If there is no package given and an  item can not be found we will return undefined. 
+ * Once we support local references, we can be sure that reportError will only be 
+ * called once if the item can not be found (and undefined will be retured by the reference 
+ * function).
  */
 export interface IReferenceResolver {
   resolve(apiDefinitionRef: IApiDefinitionReference, reportError: (message: string) => void): IDocItem;
