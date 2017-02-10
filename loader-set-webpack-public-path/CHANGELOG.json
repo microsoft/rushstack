@@ -2,6 +2,18 @@
   "name": "@microsoft/loader-set-webpack-public-path",
   "entries": [
     {
+      "version": "2.0.1",
+      "tag": "@microsoft/loader-set-webpack-public-path_v2.0.1",
+      "date": "Fri, 10 Feb 2017 14:31:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixing an issue where a regex may not be escaped correctly."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.0",
       "tag": "@microsoft/loader-set-webpack-public-path_v2.0.0",
       "date": "Thu, 09 Feb 2017 14:31:39 GMT",

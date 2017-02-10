@@ -1,6 +1,13 @@
 # Change Log - @microsoft/loader-set-webpack-public-path
 
-This log was last generated on Thu, 09 Feb 2017 14:31:39 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Feb 2017 14:31:26 GMT and should not be manually modified.
+
+## 2.0.1
+Fri, 10 Feb 2017 14:31:26 GMT
+
+### Patches
+
+- Fixing an issue where a regex may not be escaped correctly.
 
 ## 2.0.0
 Thu, 09 Feb 2017 14:31:39 GMT
