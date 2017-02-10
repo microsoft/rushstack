@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "1.1.10",
+      "tag": "@microsoft/api-extractor_v1.1.10",
+      "date": "Fri, 10 Feb 2017 20:01:30 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": " Added support to not throw error, instead report error if no type is declared on properties and parameters"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.9",
       "tag": "@microsoft/api-extractor_v1.1.9",
       "date": "Tue, 07 Feb 2017 20:37:06 GMT",
