@@ -4,7 +4,6 @@ import ApiItem from './ApiItem';
 import DocElementParser from '../DocElementParser';
 import { IDocElement, IParam, IHrefLinkElement, ICodeLinkElement, ITextElement } from '../IDocElement';
 import { IDocItem, IDocFunction } from '../IDocItem';
-import DocItemLoader from '../DocItemLoader';
 import { IApiDefinitionReference } from '../IApiDefinitionReference';
 import Token, { TokenType } from '../Token';
 import Tokenizer from '../Tokenizer';
@@ -57,6 +56,21 @@ export interface IScopePackageName {
    * The package name of an API reference expression.
    */
   package: string;
+}
+
+/**
+ * A dependency for ApiDocumentation constructor that abstracts away the function 
+ * of resolving an API definition reference.
+ * 
+ * @internalremarks reportError() will be called if the apiDefinitionRef is to a non local 
+ * item and the package of that non local item can not be found. 
+ * If there is no package given and an  item can not be found we will return undefined. 
+ * Once we support local references, we can be sure that reportError will only be 
+ * called once if the item can not be found (and undefined will be retured by the reference 
+ * function).
+ */
+export interface IReferenceResolver {
+  resolve(apiDefinitionRef: IApiDefinitionReference, reportError: (message: string) => void): IDocItem;
 }
 
 export default class ApiDocumentation {
@@ -163,7 +177,16 @@ export default class ApiDocumentation {
   public isOverride?: boolean;
   public hasReadOnlyTag?: boolean;
 
-  public docItemLoader: DocItemLoader;
+  /**
+   * A function type interface that abstracts away resolving 
+   * an API definition reference to an item that has friendly 
+   * assessible ApiItem properties. 
+   * 
+   * Ex: this is useful in the case of parsing inheritdoc expressions,
+   * in the sense that we do not know if we the inherited documentation 
+   * is coming from an ApiItem or a IDocItem.
+   */
+  public referenceResolver: IReferenceResolver;
 
   /**
    * We need the extractor to access the package that this ApiItem
@@ -236,11 +259,11 @@ export default class ApiDocumentation {
   }
 
   constructor(docComment: string,
-    docItemLoader: DocItemLoader,
+    referenceResolver: IReferenceResolver,
     extractor: Extractor,
     errorLogger: (message: string) => void) {
     this.originalJsDoc = docComment;
-    this.docItemLoader = docItemLoader;
+    this.referenceResolver = referenceResolver;
     this.extractor = extractor;
     this.reportError = errorLogger;
     this.parameters = {};
@@ -419,7 +442,7 @@ export default class ApiDocumentation {
     }
 
     // Atempt to locate the apiDefinitionRef
-    const inheritedDoc: IDocItem = this.docItemLoader.getItem(apiDefinitionRef, this.reportError);
+    const inheritedDoc: IDocItem = this.referenceResolver.resolve(apiDefinitionRef, this.reportError);
 
     // If no IDocItem found then nothing to inherit
     // But for the time being set the summary to a text object
