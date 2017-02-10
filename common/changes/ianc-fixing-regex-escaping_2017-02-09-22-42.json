@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/loader-set-webpack-public-path",
+      "comment": "Fixing an issue where a regex may not be escaped correctly.",
+      "type": "patch"
+    }
+  ],
+  "email": "iclanton@users.noreply.github.com"
+}
