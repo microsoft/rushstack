@@ -28,6 +28,21 @@
       "remarks": [],
       "isBeta": false
     },
+    "IncompleteTypeConstructor": {
+      "kind": "class",
+      "extends": "",
+      "implements": "",
+      "typeParameters": [],
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "This class tests a constructor with incomplete type information. The constructor should not appear in the API file, instead a warning comment should be printed about this class declaration. The constructor will not appear in the json file because the type information is incomplete."
+        }
+      ],
+      "remarks": [],
+      "isBeta": false
+    },
     "inheritCorrectlyButNotFound": {
       "kind": "enum",
       "values": {},
@@ -143,6 +158,14 @@
       "remarks": [],
       "isBeta": false,
       "members": {
+        "__constructor": {
+          "kind": "constructor",
+          "signature": "constructor();",
+          "parameters": {},
+          "deprecatedMessage": [],
+          "summary": [],
+          "remarks": []
+        },
         "fieldWithBadTag": {
           "kind": "property",
           "isOptional": false,

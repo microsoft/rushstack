@@ -116,6 +116,70 @@
     //=============================================================================================
 
     //---------------------------------------------------------------------------------------------
+    "constructorApiItem": {
+      "description": "A constructor of a TypeScript class",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of documentation element",
+          "type": "string",
+          "enum": [ "constructor" ]
+        },
+        "summary": {
+          "$ref": "#/definitions/docElementCollection"
+        },
+        "signature": {
+          "description": "A text summary of the method definition",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "The list of function parameters",
+          "type": "object",
+          "patternProperties": {
+            "^[a-zA-Z_]+[a-zA-Z_0-9]*$": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The parameter name",
+                  "type": "string"
+                },
+                "description": {
+                  "$ref": "#/definitions/docElementCollection"
+                },
+                "isOptional": {
+                  "description": "Whether the parameter is optional",
+                  "type": "boolean"
+                },
+                "isSpread": {
+                  "description": "Whether the parameter has the '...' spread suffix",
+                  "type": "boolean"
+                },
+                "type": {
+                  "description": "The data type of the parameter",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+
+        // Optional properties:
+        "remarks": {
+          "$ref": "#/definitions/docElementCollection"
+        },
+        "deprecatedMessage": {
+          "$ref": "#/definitions/docElementCollection"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["summary"]
+    },
+
+    //---------------------------------------------------------------------------------------------
+
+    //---------------------------------------------------------------------------------------------
     "propertyApiItem": {
       "description": "A property of a TypeScript class or interface",
       "type": "object",
@@ -198,7 +262,7 @@
           "description": "The list of function parameters",
           "type": "object",
           "patternProperties": {
-            "^[a-zA-Z_][a-zA-Z_0-9]+$": {
+            "^[a-zA-Z_]+[a-zA-Z_0-9]*$": {
               "type": "object",
               "properties": {
                 "name": {
@@ -271,7 +335,7 @@
           "description": "The list of function parameters",
           "type": "object",
           "patternProperties": {
-            "^[a-zA-Z_][a-zA-Z_0-9]+$": {
+            "^[a-zA-Z_]+[a-zA-Z_0-9]*$": {
               "type": "object",
               "properties": {
                 "name": {
@@ -354,6 +418,7 @@
             "^[a-zA-Z_]+[a-zA-Z_0-9]*$": {
               "oneOf": [
                 { "$ref": "#/definitions/propertyApiItem" },
+                { "$ref": "#/definitions/constructorApiItem" },
                 { "$ref": "#/definitions/methodApiItem" }
               ]
             }
@@ -414,7 +479,7 @@
         "values": {
           "type": "object",
           "patternProperties": {
-            "^[a-zA-Z_]|[a-zA-Z_0-9]+$": {
+            "^[a-zA-Z_]+[a-zA-Z_0-9]*$": {
               "type": "object",
               "properties": {
                 "value": {
@@ -465,7 +530,7 @@
         "members": {
           "type": "object",
           "patternProperties": {
-            "^[a-zA-Z_]*[a-zA-Z_0-9]+$": {
+            "^[a-zA-Z_]+[a-zA-Z_0-9]*$": {
               "oneOf": [
                 { "$ref": "#/definitions/propertyApiItem" },
                 { "$ref": "#/definitions/methodApiItem" }
@@ -533,7 +598,7 @@
       "type": "object",
 
       "patternProperties": {
-         "^[a-zA-Z_]*[a-zA-Z_0-9]+$": {
+         "^[a-zA-Z_]+[a-zA-Z_0-9]*$": {
            "oneOf": [
              { "$ref": "#/definitions/classApiItem" },
              { "$ref": "#/definitions/interfaceApiItem" },

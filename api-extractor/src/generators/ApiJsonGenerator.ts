@@ -30,6 +30,7 @@ import JsonFile from '../JsonFile';
 export default class ApiJsonGenerator extends ApiItemVisitor {
   private static _methodCounter: number = 0;
 
+  private static _KIND_CONSTRUCTOR: string = 'constructor';
   private static _KIND_CLASS: string = 'class';
   private static _KIND_ENUM: string = 'enum';
   private static _KIND_INTERFACE: string = 'interface';
@@ -199,24 +200,37 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
     for (const param of apiMethod.params) {
       this.visitApiParam(param, apiMethod.documentation.parameters[param.name]);
     }
-    const returnValueNode: IReturn = {
-      type: apiMethod.returnType,
-      description: apiMethod.documentation.returnsMessage
-    };
 
-    const newNode: Object = {
-      kind: ApiJsonGenerator._KIND_METHOD,
-      signature: apiMethod.getDeclarationLine(),
-      accessModifier: apiMethod.accessModifier ? AccessModifier[apiMethod.accessModifier].toLowerCase() : '',
-      isOptional: !!apiMethod.isOptional,
-      isStatic: !!apiMethod.isStatic,
-      returnValue: returnValueNode,
-      parameters: apiMethod.documentation.parameters,
-      deprecatedMessage: apiMethod.documentation.deprecatedMessage || [],
-      summary: apiMethod.documentation.summary || [],
-      remarks: apiMethod.documentation.remarks || [],
-      isBeta: apiMethod.documentation.apiTag === ApiTag.Beta
-    };
+    let newNode: Object;
+    if (apiMethod.name === '__constructor') {
+      newNode = {
+        kind: ApiJsonGenerator._KIND_CONSTRUCTOR,
+        signature: apiMethod.getDeclarationLine(),
+        parameters: apiMethod.documentation.parameters,
+        deprecatedMessage: apiMethod.documentation.deprecatedMessage || [],
+        summary: apiMethod.documentation.summary || [],
+        remarks: apiMethod.documentation.remarks || []
+      };
+    } else {
+      const returnValueNode: IReturn = {
+        type: apiMethod.returnType,
+        description: apiMethod.documentation.returnsMessage
+      };
+
+      newNode = {
+        kind: ApiJsonGenerator._KIND_METHOD,
+        signature: apiMethod.getDeclarationLine(),
+        accessModifier: apiMethod.accessModifier ? AccessModifier[apiMethod.accessModifier].toLowerCase() : '',
+        isOptional: !!apiMethod.isOptional,
+        isStatic: !!apiMethod.isStatic,
+        returnValue: returnValueNode,
+        parameters: apiMethod.documentation.parameters,
+        deprecatedMessage: apiMethod.documentation.deprecatedMessage || [],
+        summary: apiMethod.documentation.summary || [],
+        remarks: apiMethod.documentation.remarks || [],
+        isBeta: apiMethod.documentation.apiTag === ApiTag.Beta
+      };
+    }
 
     refObject[apiMethod.name] = newNode;
   }

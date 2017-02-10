@@ -41,11 +41,13 @@ export default class ApiMethod extends ApiMember {
     }
 
     // Return type
-    if (methodDeclaration.type) {
-      this.returnType = methodDeclaration.type.getText();
-    } else {
-      this.hasIncompleteTypes = true;
-      this.returnType = 'any';
+    if (!(this.name === '__constructor')) {
+      if (methodDeclaration.type) {
+        this.returnType = methodDeclaration.type.getText();
+      } else {
+        this.returnType = 'any';
+        this.hasIncompleteTypes = true;
+      }
     }
   }
 }

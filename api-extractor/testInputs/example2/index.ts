@@ -14,6 +14,7 @@ export {
     inheritDisplayModeErrorDeprecated,
     inheritDisplayModeNoErrorDeprecated,
     functionWithIncompleteReturnType,
-    functionWithIncompleteParameterType
+    functionWithIncompleteParameterType,
+    IncompleteTypeConstructor
 } from './folder/MyDocumentedClass';
 export { default as MyDocumentedClass } from './folder/MyDocumentedClass';

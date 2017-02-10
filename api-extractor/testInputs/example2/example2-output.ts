@@ -1,6 +1,10 @@
 interface IExternalPackageLookup {
 }
 
+// WARNING: __constructor has incomplete type information
+class IncompleteTypeConstructor {
+}
+
 enum inheritCorrectlyButNotFound {
 }
 
@@ -23,6 +27,8 @@ enum inheritDisplayModeNoErrorDeprecated {
 // WARNING: methodWithIncompleteReturnType has incomplete type information
 // @public
 class MyDocumentedClass {
+  // (undocumented)
+  constructor();
   // @beta (undocumented)
   public betaTagmissingParam: string;
   public fieldWithBadTag: string;

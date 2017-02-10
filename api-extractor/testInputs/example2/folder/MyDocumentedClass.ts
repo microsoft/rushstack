@@ -81,6 +81,10 @@ export function functionWithIncompleteParameterType(param1, param2: string): boo
  */
 export default class MyDocumentedClass {
   private _privateTest: number = 123;
+
+  constructor() {
+  }
+
   /**
    * This doc has an invalid tag that should throw an error (Error #5)
    * @badJsDocTag
@@ -176,4 +180,17 @@ export default class MyDocumentedClass {
     return false;
   }
 
+}
+
+/**
+ * This class tests a constructor with incomplete type information.
+ * The constructor should not appear in the API file, instead a warning 
+ * comment should be printed about this class declaration. The constructor 
+ * will not appear in the json file because the type information is 
+ * incomplete.
+ */
+export class IncompleteTypeConstructor {
+  constructor(name, age: number) {
+
+  }
 }
