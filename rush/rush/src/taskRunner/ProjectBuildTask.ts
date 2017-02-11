@@ -113,12 +113,12 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
         if (!clean) {
           // tslint:disable-next-line:max-line-length
-          throw new Error(`The project [${this._rushProject.packageName}] does not define a 'clean' command in it's package.json`);
+          throw new Error(`The project [${this._rushProject.packageName}] does not define a 'clean' command in the 'scripts' section of its package.json`);
         }
 
         if (!build) {
           // tslint:disable-next-line:max-line-length
-          throw new Error(`The project [${this._rushProject.packageName}] does not define a 'test' or 'build' command in it's package.json`);
+          throw new Error(`The project [${this._rushProject.packageName}] does not define a 'test' or 'build' command in the 'scripts' section of its package.json`);
         }
 
         // Run the clean step
@@ -214,6 +214,10 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
   private _getScriptCommand(script: string): { command: string, args: string[] } {
     // tslint:disable-next-line:no-string-literal
+    if (!this._rushProject.packageJson.scripts) {
+      return undefined;
+    }
+
     const rawCommand: string = this._rushProject.packageJson.scripts[script];
 
     // tslint:disable-next-line:no-null-keyword
