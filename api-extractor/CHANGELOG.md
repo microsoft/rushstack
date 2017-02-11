@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 10 Feb 2017 20:01:30 GMT and should not be manually modified.
+This log was last generated on Sat, 11 Feb 2017 02:32:35 GMT and should not be manually modified.
+
+## 1.1.11
+Sat, 11 Feb 2017 02:32:35 GMT
+
+### Patches
+
+- Changed dependency for ApiDocumentation to abstract the resolving of API definition references.
 
 ## 1.1.10
 Fri, 10 Feb 2017 20:01:30 GMT
