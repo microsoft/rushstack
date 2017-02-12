@@ -1,0 +1,78 @@
+{
+  "name": "@microsoft/rush-lib",
+  "entries": [
+    {
+      "version": "1.5.2",
+      "tag": "@microsoft/rush-lib_v1.5.2",
+      "date": "Sun, 05 Feb 2017 01:21:30 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Lock version numbers for @types packages"
+          },
+          {
+            "comment": "Update .npmignore"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/stream-collator\" from `~1.0.2` to `~1.0.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/sp-build-node\" from `~0.2.1` to `~0.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.5.1",
+      "tag": "@microsoft/rush-lib_v1.5.1",
+      "date": "Tue, 24 Jan 2017 03:26:06 GMT",
+      "comments": {}
+    },
+    {
+      "version": "1.5.0",
+      "tag": "@microsoft/rush-lib_v1.5.0",
+      "date": "Sun, 22 Jan 2017 02:04:57 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update to TypeScript 2.1"
+          },
+          {
+            "comment": "Added new rush.json settings under \"gitPolicy\""
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.4.1",
+      "tag": "@microsoft/rush-lib_v1.4.1",
+      "date": "Tue, 03 Jan 2017 20:44:26 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "More changes for RC0 release."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.4.0",
+      "tag": "@microsoft/rush-lib_v1.4.0",
+      "date": "Tue, 06 Dec 2016 20:44:26 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Changes for RC0 release."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/stream-collator\" from `~1.0.1` to `~1.0.2`"
+          }
+        ]
+      }
+    }
+  ]
+}
