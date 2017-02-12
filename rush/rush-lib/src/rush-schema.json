@@ -1,0 +1,107 @@
+{
+  "title": "Rush Configuration",
+  "description": "Configuration file for the Rush multi-package build tool",
+
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "The metadata to indicate the JSON schema, required by some editors such as VS2015",
+      "type": "string"
+    },
+    "commonFolder": {
+      "description": "Specifies the name of a top-level global folder containing a package.json file with a superset of all dependencies for all projects in the repository.  Example: \"common\"",
+      "type": "string"
+    },
+    "npmVersion": {
+      "description": "The version of the NPM tool to install.",
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "rushMinimumVersion": {
+      "description": "The minimum version of the Rush tool that must be installed in order to build this repository.",
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "nodeSupportedVersionRange": {
+      "description": "A node-semver expression (e.g. \">=1.2.3 <2.0.0\", see https://github.com/npm/node-semver) indicating which versions of Node.js can safely be used to build this repository.  If omitted, no validation is performed.",
+      "type": "string"
+    },
+    "projectFolderMinDepth": {
+      "description": "The minimum folder depth for the projectFolder field.  The default value is 1, i.e. no slashes in the path name.",
+      "type": "number"
+    },
+    "projectFolderMaxDepth": {
+      "description": "The maximum folder depth for the projectFolder field.  The default value is 2, i.e. a single slash in the path name.",
+      "type": "number"
+    },
+    "packageReviewFile": {
+      "description": "The filename of a JSON file that tracks which NPM packages have been approved for usage in this repo.  Example: \"common/reviews/PackageDependencies.json\"",
+      "type": "string"
+    },
+    "reviewCategories": {
+      "description": "A list of category names that can be applied to each project, for usage in the packageReviewFile",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "useLocalNpmCache": {
+      "description": "If true, use repository-scoped NPM cache and tmp folders",
+      "type": "boolean"
+    },
+    "gitPolicy": {
+      "description": "If the project is stored in a Git repository, additional settings related to Git",
+      "type": "object",
+      "properties": {
+        "allowedEmailRegExps": {
+          "description": "A list of regular expressions describing allowable e-mail patterns for Git commits.  They are case-insensitive anchored JavaScript RegExps.  Example: \".*@example\\.com\"",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sampleEmail": {
+          "description": "An example valid e-mail address for \"Mr. Example\" that conforms to one of the allowedEmailRegExps.  Example: \"mr-example@contoso\\.com\"",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "projects": {
+      "description": "A list of projects managed by this tool.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "packageName": {
+            "description": "The NPM package name of the project.",
+            "type": "string"
+          },
+          "projectFolder": {
+            "description": "The path to the project folder relative to the Rush config file.",
+            "type": "string"
+          },
+          "reviewCategory": {
+            "description": "An optional category for usage in the packageReviewFile.  Only strings from reviewCategories are allowed here.",
+            "type": "string"
+          },
+          "cyclicDependencyProjects": {
+            "description": "A list of local projects that appear as devDependencies for this project, but cannot be locally linked because it would create a cyclic dependency; instead, the last published version will be installed in the Common folder.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "shouldPublish": {
+            "description": "A flag indicating that changes to this project will be published to npm, which affects the Rush change and publish workflows.",
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false,
+        "required": [ "packageName", "projectFolder" ]
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": [ "commonFolder", "npmVersion", "rushMinimumVersion", "projects" ]
+}

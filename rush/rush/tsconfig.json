@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "forceConsistentCasingInFileNames": true,
+    "module": "commonjs",
+    "jsx": "react",
+    "declaration": true,
+    "sourceMap": true,
+    "outDir": "lib",
+    "listFiles": false,
+    "types": [
+      "es6-collections",
+      "es6-promise",
+      "mocha"
+    ]
+  }
+}

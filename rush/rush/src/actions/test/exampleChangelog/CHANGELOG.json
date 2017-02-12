@@ -1,0 +1,17 @@
+{
+      "name": "a",
+      "entries": [
+        {
+          "version": "0.0.1",
+          "tag": "a_v0.0.1",
+          "date": "Wed, 30 Nov 2016 18:37:45 GMT",
+          "comments": {
+            "patch": [
+              {
+                "comment": "Patching a"
+              }
+            ]
+          }
+        }
+      ]
+    }
