@@ -4,13 +4,13 @@ const ENVIRONMENT_VARIABLE_PREFIX: string = 'GCB_';
 
 let _defaultValues: Object = {};
 
-export function setConfigDefaults(defaultValues: Object): void {
+export function setConfigurationDefaults(defaultValues: Object): void {
   _defaultValues = defaultValues;
 }
 
-export function getConfigValue(name: string, defaultValue?: string | boolean): string | boolean {
+export function getConfigurationValue(name: string, defaultValue?: string | boolean): string | boolean {
 
-  // Try to get config value from environment variable.
+  // Try to get configuration value from environment variable.
   const envVariable: string = ENVIRONMENT_VARIABLE_PREFIX + name.toUpperCase();
   const envValue: string = process.env[envVariable];
   const argsValue: string | boolean = args[name.toLowerCase()];
@@ -19,9 +19,9 @@ export function getConfigValue(name: string, defaultValue?: string | boolean): s
 }
 
 export function getFlagValue(name: string, defaultValue?: boolean): boolean {
-  const configValue: string | boolean = getConfigValue(name, defaultValue);
+  const configurationValue: string | boolean = getConfigurationValue(name, defaultValue);
 
-  return configValue === 'true' || configValue === true;
+  return configurationValue === 'true' || configurationValue === true;
 }
 
 /* tslint:disable:no-any */

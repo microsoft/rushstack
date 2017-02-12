@@ -1,6 +1,6 @@
 export declare function addSuppression(str: string): void;
 
-class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig> {
+class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfiguration> {
   // (undocumented)
   executeTask(gulp: gulp.Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream;
   // (undocumented)
@@ -8,7 +8,7 @@ class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig> {
   // (undocumented)
   name: string;
   // (undocumented)
-  taskConfig: IApiExtractorTaskConfig;
+  taskConfiguration: IApiExtractorTaskConfiguration;
 }
 
 class CleanTask extends GulpTask<void> {
@@ -16,7 +16,7 @@ class CleanTask extends GulpTask<void> {
   executeTask(gulp: gulp.Gulp, completeCallback: (result?: Object) => void): void;
 }
 
-class CopyTask extends GulpTask<ICopyConfig> {
+class CopyTask extends GulpTask<ICopyConfiguration> {
   constructor();
   executeTask(gulp: gulp.Gulp, completeCallback: (result?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
   // @internal
@@ -40,42 +40,42 @@ class GenerateShrinkwrapTask extends GulpTask<void> {
   executeTask(gulp: gulpType.Gulp, completeCallback: (result?: Object) => void): NodeJS.ReadWriteStream;
 }
 
-export declare function getConfig(): IBuildConfig;
+export declare function getConfiguration(): IBuildConfiguration;
 
 export declare function getErrors(): string[];
 
 export declare function getWarnings(): string[];
 
-class GulpTask<TASK_CONFIG> implements IExecutable {
-  protected _getConfigFilePath(): string;
-  buildConfig: IBuildConfig;
+class GulpTask<TASK_CONFIGURATION> implements IExecutable {
+  protected _getConfigurationFilePath(): string;
+  buildConfiguration: IBuildConfiguration;
   cleanMatch: string[];
   copyFile(localSourcePath: string, localDestPath?: string): void;
-  execute(config: IBuildConfig): Promise<void>;
+  execute(configuration: IBuildConfiguration): Promise<void>;
   abstract executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (result?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
   fileError(filePath: string, line: number, column: number, errorCode: string, message: string): void;
   fileExists(localPath: string): boolean;
   fileWarning(filePath: string, line: number, column: number, warningCode: string, message: string): void;
-  getCleanMatch(buildConfig: IBuildConfig, taskConfig?: TASK_CONFIG): string[];
-  isEnabled(buildConfig: IBuildConfig): boolean;
+  getCleanMatch(buildConfiguration: IBuildConfiguration, taskConfiguration?: TASK_CONFIGURATION): string[];
+  isEnabled(buildConfiguration: IBuildConfiguration): boolean;
   protected loadSchema(): Object;
   log(message: string): void;
   logError(message: string): void;
   logVerbose(message: string): void;
   logWarning(message: string): void;
-  mergeConfig(taskConfig: TASK_CONFIG): void;
+  mergeConfiguration(taskConfiguration: TASK_CONFIGURATION): void;
   name: string;
   onRegister(): void;
   readJSONSync(localPath: string): Object;
-  replaceConfig(taskConfig: TASK_CONFIG): void;
+  replaceConfiguration(taskConfiguration: TASK_CONFIGURATION): void;
   resolvePath(localPath: string): string;
   schema: Object;
-  setConfig(taskConfig: TASK_CONFIG): void;
-  taskConfig: TASK_CONFIG;
+  setConfiguration(taskConfiguration: TASK_CONFIGURATION): void;
+  taskConfiguration: TASK_CONFIGURATION;
 }
 
 // (undocumented)
-interface IBuildConfig {
+interface IBuildConfiguration {
   args?: {
     [ name: string ]: string | boolean;
   }
@@ -103,7 +103,7 @@ interface IBuildConfig {
   verbose?: boolean;
 }
 
-interface ICopyConfig {
+interface ICopyConfiguration {
   copyTo: {
     [ destPath: string ]: string[];
   }
@@ -112,14 +112,14 @@ interface ICopyConfig {
 
 interface ICustomGulpTask {
   // (undocumented)
-  (gulp: gulp.Gulp | GulpProxy, buildConfig: IBuildConfig, done: (failure?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
+  (gulp: gulp.Gulp | GulpProxy, buildConfiguration: IBuildConfiguration, done: (failure?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
 }
 
 // (undocumented)
 interface IExecutable {
-  execute: (config: IBuildConfig) => Promise<void>;
-  getCleanMatch?: (config: IBuildConfig, taskConfig?: any) => string[];
-  isEnabled?: (config?: IBuildConfig) => boolean;
+  execute: (configuration: IBuildConfiguration) => Promise<void>;
+  getCleanMatch?: (configuration: IBuildConfiguration, taskConfiguration?: any) => string[];
+  isEnabled?: (configuration?: IBuildConfiguration) => boolean;
   name?: string;
   onRegister?: () => void;
 }
@@ -127,15 +127,15 @@ interface IExecutable {
 export declare function initialize(gulp: gulp.Gulp): void;
 
 // (undocumented)
-interface ITsConfigFile<T> {
+interface ITsConfigurationFile<T> {
   // (undocumented)
   compilerOptions: T;
 }
 
 // (undocumented)
-interface IWebpackTaskConfig {
-  config?: Webpack.Configuration;
-  configPath: string;
+interface IWebpackTaskConfiguration {
+  configuration?: Webpack.Configuration;
+  configurationPath: string;
   suppressWarnings?: (string | RegExp)[];
   webpack?: typeof Webpack;
 }
@@ -144,11 +144,11 @@ export declare function log(...args: Array<string | Chalk.ChalkChain>): void;
 
 export declare function logSummary(value: string): void;
 
-export declare function mergeConfig(config: IBuildConfig): void;
+export declare function mergeConfiguration(configuration: IBuildConfiguration): void;
 
 export declare function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecutable;
 
-export declare function replaceConfig(config: IBuildConfig): void;
+export declare function replaceConfiguration(configuration: IBuildConfiguration): void;
 
 // @internal
 export declare function reset(): void;
@@ -162,7 +162,7 @@ class SchemaValidator {
 
 export declare function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutable;
 
-export declare function setConfig(config: IBuildConfig): void;
+export declare function setConfiguration(configuration: IBuildConfiguration): void;
 
 export declare function subTask(taskName: string, fn: ICustomGulpTask): IExecutable;
 
@@ -181,26 +181,26 @@ enum TestResultState {
 
 // (undocumented)
 class TypeScriptConfiguration {
-  static getGulpTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<ts.Settings>;
+  static getGulpTypescriptOptions(buildConfiguration: IBuildConfiguration): ITsConfigurationFile<ts.Settings>;
   static getTypescriptCompiler(): any;
   // (undocumented)
-  static getTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<typescript.CompilerOptions>;
+  static getTypescriptOptions(buildConfiguration: IBuildConfiguration): ITsConfigurationFile<typescript.CompilerOptions>;
   static setTypescriptCompiler(typescript: any): void;
 }
 
 // (undocumented)
-class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
+class TypeScriptTask extends GulpTask<ITypeScriptTaskConfiguration> {
   // (undocumented)
   executeTask(gulp: gulpType.Gulp, completeCallback: (result?: string) => void): void;
   // (undocumented)
-  getCleanMatch(buildConfig: IBuildConfig, taskConfig?: ITypeScriptTaskConfig): string[];
+  getCleanMatch(buildConfiguration: IBuildConfiguration, taskConfiguration?: ITypeScriptTaskConfiguration): string[];
   // (undocumented)
   loadSchema(): Object;
-  mergeConfig(config: ITypeScriptTaskConfig): void;
+  mergeConfiguration(configuration: ITypeScriptTaskConfiguration): void;
   // (undocumented)
   name: string;
   // (undocumented)
-  taskConfig: ITypeScriptTaskConfig;
+  taskConfiguration: ITypeScriptTaskConfiguration;
 }
 
 class ValidateShrinkwrapTask extends GulpTask<void> {
@@ -215,11 +215,11 @@ export declare function warn(...args: Array<string | Chalk.ChalkChain>): void;
 export declare function watch(watchMatch: string | string[], task: IExecutable): IExecutable;
 
 // (undocumented)
-class WebpackTask extends GulpTask<IWebpackTaskConfig> {
+class WebpackTask extends GulpTask<IWebpackTaskConfiguration> {
   // (undocumented)
   executeTask(gulp: gulp.Gulp, completeCallback: (result?: Object) => void): void;
   // (undocumented)
-  isEnabled(buildConfig: IBuildConfig): boolean;
+  isEnabled(buildConfiguration: IBuildConfiguration): boolean;
   // (undocumented)
   loadSchema(): Object;
   // (undocumented)
@@ -227,7 +227,7 @@ class WebpackTask extends GulpTask<IWebpackTaskConfig> {
   // (undocumented)
   resources: Object;
   // (undocumented)
-  taskConfig: IWebpackTaskConfig;
+  taskConfiguration: IWebpackTaskConfiguration;
 }
 
 // WARNING: Unsupported export: preCopy

@@ -1,17 +1,17 @@
 // (undocumented)
-interface IWebpackTaskConfig {
-  config?: Webpack.Configuration;
-  configPath: string;
+interface IWebpackTaskConfiguration {
+  configuration?: Webpack.Configuration;
+  configurationPath: string;
   suppressWarnings?: (string | RegExp)[];
   webpack?: typeof Webpack;
 }
 
 // (undocumented)
-class WebpackTask extends GulpTask<IWebpackTaskConfig> {
+class WebpackTask extends GulpTask<IWebpackTaskConfiguration> {
   // (undocumented)
   public executeTask(gulp: gulp.Gulp, completeCallback: (result?: Object) => void): void;
   // (undocumented)
-  public isEnabled(buildConfig: IBuildConfig): boolean;
+  public isEnabled(buildConfiguration: IBuildConfiguration): boolean;
   // (undocumented)
   public loadSchema(): Object;
   // (undocumented)
@@ -19,7 +19,7 @@ class WebpackTask extends GulpTask<IWebpackTaskConfig> {
   // (undocumented)
   public readonly resources: Object;
   // (undocumented)
-  public taskConfig: IWebpackTaskConfig;
+  public taskConfiguration: IWebpackTaskConfiguration;
 }
 
 // WARNING: Unsupported export: webpack

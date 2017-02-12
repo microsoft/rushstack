@@ -3,7 +3,7 @@ import gulpType = require('gulp');
 import ts = require('gulp-typescript');
 import * as path from 'path';
 
-import { IBuildConfig } from '@microsoft/gulp-core-build';
+import { IBuildConfiguration } from '@microsoft/gulp-core-build';
 import { TypeScriptConfiguration } from './TypeScriptConfiguration';
 
 interface ITypeScriptErrorObject {
@@ -25,7 +25,7 @@ export interface ICompilerOptions extends ts.Settings {
   stripInternal?: boolean;
 }
 
-export interface ITypeScriptTaskConfig {
+export interface ITypeScriptTaskConfiguration {
   /**
    * Fails the build when errors occur.
    * @default true
@@ -59,20 +59,20 @@ export interface ITypeScriptTaskConfig {
   emitSourceMaps?: boolean;
 
   /**
-   * The directory to write the compiled javascript and typings files to. Defaults to buildConfig.libFolder
+   * The directory to write the compiled javascript and typings files to. Defaults to buildConfiguration.libFolder
    */
   libDir?: string;
 
   /**
-   * If defined, drop typescript files from an AMD build here. Defaults to buildConfig.libAMDFolder
+   * If defined, drop typescript files from an AMD build here. Defaults to buildConfiguration.libAMDFolder
    */
   libAMDDir?: string;
 }
 
-export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
+export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfiguration> {
   public name: string = 'typescript';
 
-  public taskConfig: ITypeScriptTaskConfig = {
+  public taskConfiguration: ITypeScriptTaskConfiguration = {
     failBuildOnErrors: true,
     reporter: {
       error: (error: ts.reporter.TypeScriptError): void => {
@@ -130,7 +130,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       errorCount: 0
     };
 
-    this._normalizeConfig();
+    this._normalizeConfiguration();
 
     // Log the compiler version for custom verisons.
     const typescript: any = TypeScriptConfiguration.getTypescriptCompiler(); // tslint:disable-line:no-any
@@ -139,7 +139,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     }
     // tslint:disable-next-line:no-any
     const compilerOptions: ICompilerOptions =
-      TypeScriptConfiguration.getGulpTypescriptOptions(this.buildConfig).compilerOptions;
+      TypeScriptConfiguration.getGulpTypescriptOptions(this.buildConfiguration).compilerOptions;
 
     if (compilerOptions.module !== 'commonjs' && compilerOptions.module) {
       this.logWarning(`Your tsconfig.json file specifies a different "target" than expected. `
@@ -149,27 +149,27 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
 
     this._tsProject = this._tsProject || ts.createProject(compilerOptions);
 
-    this._compileProject(gulp, this._tsProject, this.taskConfig.libDir, allStreams, result);
+    this._compileProject(gulp, this._tsProject, this.taskConfiguration.libDir, allStreams, result);
 
     // Static passthrough files.
-    const staticSrc: NodeJS.ReadWriteStream = gulp.src(this.taskConfig.staticMatch);
+    const staticSrc: NodeJS.ReadWriteStream = gulp.src(this.taskConfiguration.staticMatch);
 
     allStreams.push(
-      staticSrc.pipe(gulp.dest(this.taskConfig.libDir)));
+      staticSrc.pipe(gulp.dest(this.taskConfiguration.libDir)));
 
     // If AMD modules are required, also build that.
-    if (this.taskConfig.libAMDDir) {
+    if (this.taskConfiguration.libAMDDir) {
       allStreams.push(
-        staticSrc.pipe(gulp.dest(this.taskConfig.libAMDDir)));
+        staticSrc.pipe(gulp.dest(this.taskConfiguration.libAMDDir)));
 
       this._tsAMDProject = this._tsAMDProject || ts.createProject(assign({}, compilerOptions, { module: 'amd' }));
-      this._compileProject(gulp, this._tsAMDProject, this.taskConfig.libAMDDir, allStreams, result);
+      this._compileProject(gulp, this._tsAMDProject, this.taskConfiguration.libAMDDir, allStreams, result);
     }
 
     // Listen for pass/fail, and ensure that the task passes/fails appropriately.
     merge(allStreams)
       .on('queueDrain', () => {
-        if (this.taskConfig.failBuildOnErrors && result.errorCount) {
+        if (this.taskConfiguration.failBuildOnErrors && result.errorCount) {
           completeCallback('TypeScript error(s) occurred.');
         } else {
           completeCallback();
@@ -178,29 +178,30 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       .on('error', completeCallback);
   }
 
-  public getCleanMatch(buildConfig: IBuildConfig, taskConfig: ITypeScriptTaskConfig = this.taskConfig): string[] {
-    this._normalizeConfig(buildConfig);
+  public getCleanMatch(buildConfiguration: IBuildConfiguration,
+                       taskConfiguration: ITypeScriptTaskConfiguration = this.taskConfiguration): string[] {
+    this._normalizeConfiguration(buildConfiguration);
     const cleanMatch: string[] = [
-      this.taskConfig.libDir
+      this.taskConfiguration.libDir
     ];
-    if (this.taskConfig.libAMDDir) {
-      cleanMatch.push(this.taskConfig.libAMDDir);
+    if (this.taskConfiguration.libAMDDir) {
+      cleanMatch.push(this.taskConfiguration.libAMDDir);
     }
     return cleanMatch;
   }
 
-  /** Override the new mergeConfig API */
-  public mergeConfig(config: ITypeScriptTaskConfig): void {
-    throw 'Do not use mergeConfig with gulp-core-build-typescript';
+  /** Override the new mergeConfiguration API */
+  public mergeConfiguration(configuration: ITypeScriptTaskConfiguration): void {
+    throw 'Do not use mergeConfiguration with gulp-core-build-typescript';
   }
 
-  private _normalizeConfig(buildConfig: IBuildConfig = this.buildConfig): void {
-    if (!this.taskConfig.libDir) {
-      this.taskConfig.libDir = buildConfig.libFolder;
+  private _normalizeConfiguration(buildConfiguration: IBuildConfiguration = this.buildConfiguration): void {
+    if (!this.taskConfiguration.libDir) {
+      this.taskConfiguration.libDir = buildConfiguration.libFolder;
     }
 
-    if (!this.taskConfig.libAMDDir) {
-      this.taskConfig.libAMDDir = buildConfig.libAMDFolder;
+    if (!this.taskConfiguration.libAMDDir) {
+      this.taskConfiguration.libAMDDir = buildConfiguration.libAMDFolder;
     }
   }
 
@@ -212,28 +213,28 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     /* tslint:enable:typedef */
 
     // tslint:disable-next-line:no-any
-    let tsResult: any = gulp.src(this.taskConfig.sourceMatch)
+    let tsResult: any = gulp.src(this.taskConfiguration.sourceMatch)
       .pipe(plumber({
         errorHandler: (): void => {
           result.errorCount++;
         }
       }));
 
-    if (this.taskConfig.emitSourceMaps) {
+    if (this.taskConfiguration.emitSourceMaps) {
       tsResult = tsResult.pipe(sourcemaps.init());
     }
 
     tsResult = tsResult
-      .pipe(tsProject(this.taskConfig.reporter));
+      .pipe(tsProject(this.taskConfiguration.reporter));
 
     // tslint:disable-next-line:typedef
-    let jsResult = (this.taskConfig.removeCommentsFromJavaScript
+    let jsResult = (this.taskConfiguration.removeCommentsFromJavaScript
       ? tsResult.js.pipe(require('gulp-decomment')({
-        space: !!this.taskConfig.emitSourceMaps /* turn comments into spaces to preserve sourcemaps */
+        space: !!this.taskConfiguration.emitSourceMaps /* turn comments into spaces to preserve sourcemaps */
       }))
       : tsResult.js);
 
-    if (this.taskConfig.emitSourceMaps) {
+    if (this.taskConfiguration.emitSourceMaps) {
       jsResult = jsResult.pipe(sourcemaps.write('.', { sourceRoot: this._resolveSourceMapRoot }));
     }
 

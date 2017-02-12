@@ -8,7 +8,7 @@ let path = require('path');
 let isProduction = process.argv.indexOf('--production') > -1;
 let packageJSON = require('./package.json');
 
-let webpackConfig = {
+let webpackConfiguration = {
   context: path.join(__dirname, 'lib/'),
 
   entry: {
@@ -53,7 +53,7 @@ let webpackConfig = {
 };
 
 if (isProduction) {
-  webpackConfig.plugins.push(new webpack.optimize.UglifyJsPlugin({
+  webpackConfiguration.plugins.push(new webpack.optimize.UglifyJsPlugin({
     minimize: true,
     compress: {
       warnings: false
@@ -61,4 +61,4 @@ if (isProduction) {
   }));
 }
 
-module.exports = webpackConfig;
+module.exports = webpackConfiguration;

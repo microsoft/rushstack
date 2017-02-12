@@ -8,15 +8,15 @@ import gulp = require('gulp');
 import { Readable } from 'stream';
 import * as path from 'path';
 
-interface IConfig {
+interface IConfiguration {
 }
 
 let testArray: string[] = [];
 
-class PromiseTask extends GulpTask<IConfig> {
+class PromiseTask extends GulpTask<IConfiguration> {
   public name: string = 'promise';
 
-  public taskConfig: IConfig = {
+  public taskConfiguration: IConfiguration = {
   };
 
   /* tslint:disable:no-any */
@@ -29,10 +29,10 @@ class PromiseTask extends GulpTask<IConfig> {
   }
 }
 
-class StreamTask extends GulpTask<IConfig> {
+class StreamTask extends GulpTask<IConfiguration> {
   public name: string = 'stream';
 
-  public taskConfig: IConfig = {
+  public taskConfiguration: IConfiguration = {
   };
 
   /* tslint:disable:no-any */
@@ -63,10 +63,10 @@ class StreamTask extends GulpTask<IConfig> {
   }
 }
 
-class SyncTask extends GulpTask<IConfig> {
+class SyncTask extends GulpTask<IConfiguration> {
   public name: string = 'sync';
 
-  public taskConfig: IConfig = {
+  public taskConfiguration: IConfiguration = {
   };
 
   public executeTask(gulp: gulp.Gulp): void {
@@ -74,10 +74,10 @@ class SyncTask extends GulpTask<IConfig> {
   }
 }
 
-class SyncWithReturnTask extends GulpTask<IConfig> {
+class SyncWithReturnTask extends GulpTask<IConfiguration> {
   public name: string = 'sync-with-return';
 
-  public taskConfig: IConfig = {
+  public taskConfiguration: IConfiguration = {
   };
 
   public executeTask(gulp: gulp.Gulp): void {
@@ -85,10 +85,10 @@ class SyncWithReturnTask extends GulpTask<IConfig> {
   }
 }
 
-class CallbackTask extends GulpTask<IConfig> {
+class CallbackTask extends GulpTask<IConfiguration> {
   public name: string = 'callback';
 
-  public taskConfig: IConfig = {
+  public taskConfiguration: IConfiguration = {
   };
 
   public executeTask(gulp: gulp.Gulp, callback: (result?: Object) => void): void {
@@ -97,14 +97,14 @@ class CallbackTask extends GulpTask<IConfig> {
   }
 }
 
-interface ISimpleConfig {
+interface ISimpleConfiguration {
   shouldDoThings: boolean;
 }
 
-class SchemaTask extends GulpTask<ISimpleConfig> {
+class SchemaTask extends GulpTask<ISimpleConfiguration> {
   public name: string = 'schema-task';
 
-  public taskConfig: ISimpleConfig = {
+  public taskConfiguration: ISimpleConfiguration = {
     shouldDoThings: false
   };
 
@@ -112,12 +112,12 @@ class SchemaTask extends GulpTask<ISimpleConfig> {
     callback();
   }
 
-  protected _getConfigFilePath(): string {
+  protected _getConfigurationFilePath(): string {
     return path.join(__dirname, 'schema-task.config.json');
   }
 }
 
-const tasks: GulpTask<IConfig>[] = [
+const tasks: GulpTask<IConfiguration>[] = [
 ];
 
 tasks.push(new PromiseTask());
@@ -130,7 +130,7 @@ describe('GulpTask', () => {
   for (const task of tasks) {
     it(`${task.name} serial`, (done) => {
       testArray = [];
-      task.setConfig({ addToMe: testArray });
+      task.setConfiguration({ addToMe: testArray });
       serial(task).execute({}).then(() => {
         expect(testArray).to.deep.equal([task.name]);
         done();
@@ -139,7 +139,7 @@ describe('GulpTask', () => {
 
     it(`${task.name} parallel`, (done) => {
       testArray = [];
-      task.setConfig({ addToMe: testArray });
+      task.setConfiguration({ addToMe: testArray });
       parallel(task).execute({}).then(() => {
         expect(testArray).to.deep.equal([task.name]);
         done();
@@ -150,7 +150,7 @@ describe('GulpTask', () => {
   it(`all tasks serial`, (done) => {
     testArray = [];
     for (const task of tasks) {
-      task.setConfig({ addToMe: testArray });
+      task.setConfiguration({ addToMe: testArray });
     }
     serial(tasks).execute({}).then(() => {
       for (const task of tasks) {
@@ -163,7 +163,7 @@ describe('GulpTask', () => {
   it(`all tasks parallel`, (done) => {
     testArray = [];
     for (const task of tasks) {
-      task.setConfig({ addToMe: testArray });
+      task.setConfiguration({ addToMe: testArray });
     }
     parallel(tasks).execute({}).then(() => {
       for (const task of tasks) {
@@ -175,21 +175,21 @@ describe('GulpTask', () => {
 
   it(`reads schema file if loadSchema is implemented`, (done) => {
     const schemaTask: SchemaTask = new SchemaTask();
-    assert.isFalse(schemaTask.taskConfig.shouldDoThings);
+    assert.isFalse(schemaTask.taskConfiguration.shouldDoThings);
     schemaTask.onRegister();
-    assert.isTrue(schemaTask.taskConfig.shouldDoThings);
+    assert.isTrue(schemaTask.taskConfiguration.shouldDoThings);
     done();
   });
 
-  it(`throws validation error is config does not conform to schema file`, (done) => {
+  it(`throws validation error is configuration does not conform to schema file`, (done) => {
     const schemaTask: SchemaTask = new SchemaTask();
 
     // tslint:disable-next-line:no-any
-    (schemaTask as any)._getConfigFilePath = (): string => {
+    (schemaTask as any)._getConfigurationFilePath = (): string => {
       return path.join(__dirname, 'other-schema-task.config.json');
     };
 
-    assert.isFalse(schemaTask.taskConfig.shouldDoThings);
+    assert.isFalse(schemaTask.taskConfiguration.shouldDoThings);
     assert.throws(schemaTask.onRegister);
     done();
   });

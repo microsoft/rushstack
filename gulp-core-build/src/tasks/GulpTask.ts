@@ -4,7 +4,7 @@ import * as fs from 'fs';
 
 import { GulpProxy } from '../GulpProxy';
 import { IExecutable } from '../IExecutable';
-import { IBuildConfig } from '../IBuildConfig';
+import { IBuildConfiguration } from '../IBuildConfiguration';
 import { log, verbose, error, fileError, fileWarning,
   warn, logEndSubtask, logStartSubtask } from '../logging';
 import gutil = require('gulp-util');
@@ -23,13 +23,22 @@ import { SchemaValidator } from '../jsonUtilities/SchemaValidator';
  * It provides convenient mechanisms for reading configuration files, validating their schema,
  * etc. It also provides convenient utility and logging functions.
  */
-export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
-  /** The name of the task. The configuration file with this name will be loaded and applied to the task. */
+export abstract class GulpTask<TASK_CONFIGURATION> implements IExecutable {
+  /**
+   * The name of the task. The configuration file with this name will be loaded and applied to the task.
+   */
   public name: string;
-  /** The global build configuration object. Will be the same for all task instances. */
-  public buildConfig: IBuildConfig;
-  /** The configuration for this task instance. */
-  public taskConfig: TASK_CONFIG;
+
+  /**
+   * The global build configuration object. Will be the same for all task instances.
+   */
+  public buildConfiguration: IBuildConfiguration;
+
+  /**
+   * The configuration for this task instance.
+   */
+  public taskConfiguration: TASK_CONFIGURATION;
+
   /**
    * An overridable array of file patterns which will be utilized by the CleanTask to
    * determine which files to delete. Unless overridden, the getCleanMatch() function
@@ -62,37 +71,37 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
   };
 
   /**
-   * Shallow merges config settings into the task config.
+   * Shallow merges configuration settings into the task configuration.
    * Note this will override configuration options for those which are objects.
-   * @param taskConfig - configuration settings which should be applied
+   * @param taskConfiguration - configuration settings which should be applied
    */
-  public setConfig(taskConfig: TASK_CONFIG): void {
+  public setConfiguration(taskConfiguration: TASK_CONFIGURATION): void {
     /* tslint:disable:typedef */
     const objectAssign = require('object-assign');
     /* tslint:enable:typedef */
 
-    this.taskConfig = objectAssign({}, this.taskConfig, taskConfig);
+    this.taskConfiguration = objectAssign({}, this.taskConfiguration, taskConfiguration);
   }
 
   /**
-   * Deep merges config settings into task config.
+   * Deep merges configuration settings into task configuration.
    * Do not use this function if the configuration contains complex objects that cannot be merged.
-   * @param taskConfig - configuration settings which should be applied
+   * @param taskConfiguration - configuration settings which should be applied
    */
-  public mergeConfig(taskConfig: TASK_CONFIG): void {
+  public mergeConfiguration(taskConfiguration: TASK_CONFIGURATION): void {
     /* tslint:disable:typedef */
     const merge = require('lodash.merge');
     /* tslint:enable:typedef */
 
-    this.taskConfig = merge({}, this.taskConfig, taskConfig);
+    this.taskConfiguration = merge({}, this.taskConfiguration, taskConfiguration);
   }
 
   /**
-   * Replaces all of the task config settings with new settings.
-   * @param taskConfig - the new task configuration
+   * Replaces all of the task configuration settings with new settings.
+   * @param taskConfiguration - the new task configuration
    */
-  public replaceConfig(taskConfig: TASK_CONFIG): void {
-    this.taskConfig = taskConfig;
+  public replaceConfiguration(taskConfiguration: TASK_CONFIGURATION): void {
+    this.taskConfiguration = taskConfiguration;
   }
 
   /**
@@ -100,23 +109,23 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
    * the configuration file, validates it against the schema, then applies it to the task instance's configuration.
    */
   public onRegister(): void {
-    const configFilename: string = this._getConfigFilePath();
+    const configurationFilename: string = this._getConfigurationFilePath();
     const schema: Object = this.schema;
 
-    const rawConfig: TASK_CONFIG = this._readConfigFile(configFilename, schema);
+    const rawConfiguration: TASK_CONFIGURATION = this._readConfigurationFile(configurationFilename, schema);
 
-    if (rawConfig) {
-      this.mergeConfig(rawConfig);
+    if (rawConfiguration) {
+      this.mergeConfiguration(rawConfiguration);
     }
   }
 
   /**
    * Overridable function which returns true if this task should be executed, or false if it should be skipped.
-   * @param buildConfig - the build configuration which should be used when determining if the task is enabled
+   * @param buildConfiguration - the build configuration which should be used when determining if the task is enabled
    * @returns true if the build is not redundant
    */
-  public isEnabled(buildConfig: IBuildConfig): boolean {
-    return (!buildConfig || !buildConfig.isRedundantBuild);
+  public isEnabled(buildConfiguration: IBuildConfiguration): boolean {
+    return (!buildConfiguration || !buildConfiguration.isRedundantBuild);
   }
 
   /**
@@ -146,7 +155,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
 
   /**
    * Logs a warning. It will be logged to standard error and cause the build to fail
-   * if buildConfig.shouldWarningsFailBuild is true, otherwise it will be logged to standard output.
+   * if buildConfiguration.shouldWarningsFailBuild is true, otherwise it will be logged to standard output.
    * @param message - the warning description
    */
   public logWarning(message: string): void {
@@ -188,10 +197,11 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
   /**
    * An overridable function which returns a list of glob patterns representing files that should be deleted
    * by the CleanTask.
-   * @param buildConfig - the current build configuration
-   * @param taskConfig - a task instance's configuration
+   * @param buildConfiguration - the current build configuration
+   * @param taskConfiguration - a task instance's configuration
    */
-  public getCleanMatch(buildConfig: IBuildConfig, taskConfig: TASK_CONFIG = this.taskConfig): string[] {
+  public getCleanMatch(buildConfiguration: IBuildConfiguration,
+                       taskConfiguration: TASK_CONFIGURATION = this.taskConfiguration): string[] {
     return this.cleanMatch;
   }
 
@@ -199,11 +209,11 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
    * This function is called once to execute the task. It calls executeTask() and handles the return
    * value from that function. It also provides some utilities such as logging how long each
    * task takes to execute.
-   * @param config - the buildConfig which is applied to the task instance before execution\
+   * @param configuration - the buildConfiguration which is applied to the task instance before execution\
    * @returns a Promise which is completed when the task is finished executing
    */
-  public execute(config: IBuildConfig): Promise<void> {
-    this.buildConfig = config;
+  public execute(configuration: IBuildConfiguration): Promise<void> {
+    this.buildConfiguration = configuration;
 
     const startTime: [number, number] = process.hrtime();
 
@@ -219,7 +229,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
           throw new Error('The task subclass is missing the "executeTask" method.');
         }
 
-        stream = this.executeTask(this.buildConfig.gulp, (result?: Object) => {
+        stream = this.executeTask(this.buildConfiguration.gulp, (result?: Object) => {
           if (!result) {
             resolve();
           } else {
@@ -279,7 +289,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
   }
 
   /**
-   * Resolves a path relative to the buildConfig.rootPath.
+   * Resolves a path relative to the buildConfiguration.rootPath.
    * @param localPath - a relative or absolute path
    * @returns If localPath is relative, returns an absolute path relative to the rootPath. Otherwise, returns localPath.
    */
@@ -290,7 +300,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
     if (path.isAbsolute(localPath)) {
       return path.resolve(localPath);
     }
-    return path.resolve(path.join(this.buildConfig.rootPath, localPath));
+    return path.resolve(path.join(this.buildConfiguration.rootPath, localPath));
   }
 
   /**
@@ -325,7 +335,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
 
     const fullSourcePath: string = path.resolve(__dirname, localSourcePath);
     const fullDestPath: string = path.resolve(
-      this.buildConfig.rootPath,
+      this.buildConfiguration.rootPath,
       (localDestPath || path.basename(localSourcePath)));
 
     fs.copySync(fullSourcePath, fullDestPath);
@@ -352,9 +362,9 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
   }
 
   /**
-   * Returns the path to the config file used to configure this task
+   * Returns the path to the configuration file used to configure this task
    */
-  protected _getConfigFilePath(): string {
+  protected _getConfigurationFilePath(): string {
     return path.join(process.cwd(), 'config', `${this.name}.json`);
   }
 
@@ -364,15 +374,15 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
    * @param schema - the z-schema schema object used to validate the configuration file
    * @returns If the configuration file is valid, returns the configuration as an object.
    */
-  private _readConfigFile(filePath: string, schema?: Object): TASK_CONFIG {
+  private _readConfigurationFile(filePath: string, schema?: Object): TASK_CONFIGURATION {
     if (!fs.existsSync(filePath)) {
       return undefined;
     } else {
       if (args['verbose']) { // tslint:disable-line:no-string-literal
-        console.log(`Found config file: ${path.basename(filePath)}`);
+        console.log(`Found configuration file: ${path.basename(filePath)}`);
       }
 
-      const rawData: TASK_CONFIG = SchemaValidator.readCommentedJsonFile<TASK_CONFIG>(filePath);
+      const rawData: TASK_CONFIGURATION = SchemaValidator.readCommentedJsonFile<TASK_CONFIGURATION>(filePath);
 
       if (schema) {
         SchemaValidator.validate(rawData, schema, filePath);

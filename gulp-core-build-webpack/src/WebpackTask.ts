@@ -1,18 +1,19 @@
 import * as Webpack from 'webpack';
-import { GulpTask, IBuildConfig } from '@microsoft/gulp-core-build';
+import { GulpTask, IBuildConfiguration } from '@microsoft/gulp-core-build';
 import gulp = require('gulp');
 import { EOL } from 'os';
 
-export interface IWebpackTaskConfig {
+export interface IWebpackTaskConfiguration {
   /**
-   * Path to a webpack config. A path to a config takes precidence over the "config" option.
+   * Path to a webpack configuration. A path to a configuration takes precidence over the "configuration" option.
    */
-  configPath: string;
+  configurationPath: string;
 
   /**
-   * Webpack config object. If a path is specified by "configPath," and it is valid, this option is ignored.
+   * Webpack configuration object. If a path is specified by "configurationPath," and it is valid, this option is
+   *  ignored.
    */
-  config?: Webpack.Configuration;
+  configuration?: Webpack.Configuration;
 
   /**
    * An array of regular expressions or regular expression strings. If a warning matches any of them, it
@@ -26,11 +27,11 @@ export interface IWebpackTaskConfig {
   webpack?: typeof Webpack;
 }
 
-export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
+export class WebpackTask extends GulpTask<IWebpackTaskConfiguration> {
   public name: string = 'webpack';
 
-  public taskConfig: IWebpackTaskConfig = {
-    configPath: './webpack.config.js',
+  public taskConfiguration: IWebpackTaskConfiguration = {
+    configurationPath: './webpack.config.js',
     suppressWarnings: []
   };
 
@@ -45,10 +46,10 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
 
   private _resources: Object;
 
-  public isEnabled(buildConfig: IBuildConfig): boolean {
+  public isEnabled(buildConfiguration: IBuildConfiguration): boolean {
     return (
-      super.isEnabled(buildConfig) &&
-      this.taskConfig.configPath !== null // tslint:disable-line:no-null-keyword
+      super.isEnabled(buildConfiguration) &&
+      this.taskConfiguration.configurationPath !== null // tslint:disable-line:no-null-keyword
     );
   }
 
@@ -71,38 +72,38 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
       this.copyFile(path.resolve(__dirname, '..', 'webpack.config.js'));
       completeCallback();
     } else {
-      let webpackConfig: Object;
+      let webpackConfiguration: Object;
 
-      if (this.taskConfig.configPath && this.fileExists(this.taskConfig.configPath)) {
+      if (this.taskConfiguration.configurationPath && this.fileExists(this.taskConfiguration.configurationPath)) {
         try {
-          webpackConfig = require(this.resolvePath(this.taskConfig.configPath));
+          webpackConfiguration = require(this.resolvePath(this.taskConfiguration.configurationPath));
         } catch (err) {
-          completeCallback(`Error parsing webpack config: ${this.taskConfig.configPath}: ${err}`);
+          completeCallback(`Error parsing webpack configuration: ${this.taskConfiguration.configurationPath}: ${err}`);
           return;
         }
-      } else if (this.taskConfig.config) {
-        webpackConfig = this.taskConfig.config;
+      } else if (this.taskConfiguration.configuration) {
+        webpackConfiguration = this.taskConfiguration.configuration;
       } else {
-        this._logMissingConfigWarning();
+        this._logMissingConfigurationWarning();
         completeCallback();
         return;
       }
 
-      if (webpackConfig) {
-        const webpack: Webpack.Webpack = this.taskConfig.webpack || require('webpack');
+      if (webpackConfiguration) {
+        const webpack: Webpack.Webpack = this.taskConfiguration.webpack || require('webpack');
         const gutil = require('gulp-util');
         const startTime = new Date().getTime();
-        const outputDir = this.buildConfig.distFolder;
+        const outputDir = this.buildConfiguration.distFolder;
 
         webpack(
-          webpackConfig,
+          webpackConfiguration,
           (error, stats) => {
-            if (!this.buildConfig.properties) {
-              this.buildConfig.properties = {};
+            if (!this.buildConfiguration.properties) {
+              this.buildConfiguration.properties = {};
             }
 
             /* tslint:disable:no-string-literal */
-            this.buildConfig.properties['webpackStats'] = stats;
+            this.buildConfiguration.properties['webpackStats'] = stats;
             /* tslint:enable:no-string-literal */
 
             const statsResult = stats.toJson({
@@ -116,7 +117,7 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
 
             if (statsResult.warnings && statsResult.warnings.length) {
               const unsuppressedWarnings: string[] = [];
-              const warningSuppressonRegexes = (this.taskConfig.suppressWarnings || []).map((regex: string) => {
+              const warningSuppressonRegexes = (this.taskConfiguration.suppressWarnings || []).map((regex: string) => {
                 return new RegExp(regex);
               });
 
@@ -163,10 +164,10 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
     }
   }
 
-  private _logMissingConfigWarning() {
+  private _logMissingConfigurationWarning() {
     this.logWarning(
-      'No webpack config has been provided. ' +
-      'Run again using --initwebpack to create a default config, ' +
-      `or call webpack.setConfig({ configPath: null }) in your gulpfile.`);
+      'No webpack configuration has been provided. ' +
+      'Run again using --initwebpack to create a default configuration, ' +
+      `or call webpack.setConfiguration({ configurationPath: null }) in your gulpfile.`);
   }
 }

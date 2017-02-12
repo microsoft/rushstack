@@ -15,14 +15,14 @@ build.task('default', build.serial(build.parallel(build.tslint,
                                    build.parallel(build.serial(build.instrument,
                                                                build.mocha),
                                                   build.subTask('run-api-extractor',
-                                                                (gulp, buildConfig, callback) => {
+                                                                (gulp, buildConfiguration, callback) => {
   const externalApiHelper = require('@microsoft/api-extractor').ExternalApiHelper;
   const files = ['resources/external-api-types/es6-collections/index.d.ts',
                  'resources/external-api-types/es6-promise/index.d.ts',
                  'resources/external-api-types/whatwg-fetch/index.d.ts'];
 
   for (const filePath of files) {
-    externalApiHelper.generateApiJson(buildConfig.rootPath, buildConfig.libFolder, filePath);
+    externalApiHelper.generateApiJson(buildConfiguration.rootPath, buildConfiguration.libFolder, filePath);
   }
 
   callback();

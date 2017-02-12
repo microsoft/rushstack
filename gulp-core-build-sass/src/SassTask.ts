@@ -11,7 +11,7 @@ const merge = require('merge2');
 
 const scssTsExtName: string = '.scss.ts';
 
-export interface ISassTaskConfig {
+export interface ISassTaskConfiguration {
   /** An optional parameter for text to include in the generated typescript file. */
   preamble?: string;
   /** An optional parameter for text to include at the end of the generated typescript file. */
@@ -38,10 +38,10 @@ export interface ISassTaskConfig {
 
 const _classMaps: { [file: string]: Object } = {};
 
-export class SassTask extends GulpTask<ISassTaskConfig> {
+export class SassTask extends GulpTask<ISassTaskConfiguration> {
   public name: string = 'sass';
 
-  public taskConfig: ISassTaskConfig = {
+  public taskConfiguration: ISassTaskConfiguration = {
     preamble: '/* tslint:disable */',
     postamble: '/* tslint:enable */',
     sassMatch: [
@@ -82,17 +82,17 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       generateScopedName: this.generateScopedName.bind(this)
     }));
 
-    const srcPattern: string[] = this.taskConfig.sassMatch.slice(0);
+    const srcPattern: string[] = this.taskConfiguration.sassMatch.slice(0);
 
     const checkFilenameForCSSModule: (file: gulpUtil.File) => void = (file: gulpUtil.File) => {
       if (!path.basename(file.path).match(/module\.scss$/)) {
 
-        const filepath: string = path.relative(this.buildConfig.rootPath, file.path);
+        const filepath: string = path.relative(this.buildConfiguration.rootPath, file.path);
         this.logWarning(`${filepath}: filename should end with module.scss`);
       }
     };
 
-    if (this.taskConfig.useCSSModules) {
+    if (this.taskConfiguration.useCSSModules) {
       this.logVerbose('Generating css modules.');
       return this._processFiles(gulp, srcPattern, completeCallback, modulePostCssPlugins);
     } else {
@@ -100,7 +100,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       moduleSrcPattern.forEach((value: string) => srcPattern.push(`!${value}`));
 
       return merge(this._processFiles(gulp, srcPattern, completeCallback, postCSSPlugins,
-                     this.taskConfig.warnOnNonCSSModules ? checkFilenameForCSSModule : undefined),
+                     this.taskConfiguration.warnOnNonCSSModules ? checkFilenameForCSSModule : undefined),
                    this._processFiles(gulp, moduleSrcPattern, completeCallback, modulePostCssPlugins));
     }
   }
@@ -156,9 +156,9 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       }))
       .pipe(clipEmptyFiles());
 
-    if (this.taskConfig.dropCssFiles) {
+    if (this.taskConfiguration.dropCssFiles) {
       tasks.push(baseTask.pipe(clone())
-        .pipe(gulp.dest(this.buildConfig.libFolder)));
+        .pipe(gulp.dest(this.buildConfiguration.libFolder)));
     }
 
     tasks.push(baseTask.pipe(clone())
@@ -204,9 +204,9 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
 
           let lines: string[] = [];
 
-          lines.push(this.taskConfig.preamble || '');
+          lines.push(this.taskConfiguration.preamble || '');
 
-          if (this.taskConfig.dropCssFiles) {
+          if (this.taskConfiguration.dropCssFiles) {
             lines = lines.concat([
               `require('./${path.basename(file.path, scssTsExtName)}.css');`,
               exportClassNames
@@ -221,7 +221,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
             ]);
           }
 
-          lines.push(this.taskConfig.postamble || '');
+          lines.push(this.taskConfiguration.postamble || '');
 
           return (
             lines

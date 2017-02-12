@@ -7,7 +7,9 @@ import gulp = require('gulp');
  * An instance of this task is automatically registered to the 'clean' command.
  */
 export class CleanTask extends GulpTask<void> {
-  /** Instantiates a new CleanTask with the name 'clean' */
+  /**
+   * Instantiates a new CleanTask with the name 'clean'
+   */
   constructor() {
     super();
     this.name = 'clean';
@@ -26,7 +28,7 @@ export class CleanTask extends GulpTask<void> {
     const del = require('del');
     /* tslint:disable:typedef */
 
-    const { distFolder, libFolder, libAMDFolder, tempFolder } = this.buildConfig;
+    const { distFolder, libFolder, libAMDFolder, tempFolder } = this.buildConfiguration;
     let cleanPaths = [
       distFolder,
       libAMDFolder,
@@ -35,10 +37,10 @@ export class CleanTask extends GulpTask<void> {
     ];
 
     // Give each registered task an opportunity to add their own clean paths.
-    for (const executable of this.buildConfig.uniqueTasks) {
+    for (const executable of this.buildConfiguration.uniqueTasks) {
       if (executable.getCleanMatch) {
-        // Set the build config, as tasks need this to build up paths
-        cleanPaths = cleanPaths.concat(executable.getCleanMatch(this.buildConfig));
+        // Set the build configuration, as tasks need this to build up paths
+        cleanPaths = cleanPaths.concat(executable.getCleanMatch(this.buildConfiguration));
       }
     }
 

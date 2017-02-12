@@ -5,15 +5,15 @@
 
 let path = require('path');
 let build = require('@microsoft/web-library-build');
-let configResources = build.karma.resources;
+let configurationResources = build.karma.resources;
 
-let bindPolyfillPath = configResources.bindPolyfillPath;
+let bindPolyfillPath = configurationResources.bindPolyfillPath;
 let debugRun = (process.argv.indexOf('--debug') > -1);
 
-let testsFilePath = path.join(build.getConfig().tempFolder, 'tests.js');
+let testsFilePath = path.join(build.getConfiguraton().tempFolder, 'tests.js');
 
-module.exports = function(config) {
-  let karmaConfig = {
+module.exports = function(configuration) {
+  let karmaConfiguration = {
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: '.',
@@ -31,7 +31,7 @@ module.exports = function(config) {
     exclude: [],
 
 
-    // webpack config for bundling tests.
+    // webpack configuration for bundling tests.
     webpack: {
       module: {
         loaders: [
@@ -43,7 +43,7 @@ module.exports = function(config) {
         postLoaders: debugRun ? null : [{
           test: /\.js/,
           exclude: /(test|node_modules|bower_components)/,
-          loader: configResources.istanbulInstrumenterLoaderPath
+          loader: configurationResources.istanbulInstrumenterLoaderPath
         }]
       },
       resolve: {
@@ -66,7 +66,7 @@ module.exports = function(config) {
       'lib/**/*.js': ['webpack']
     },
 
-    plugins: configResources.plugins.concat([
+    plugins: configurationResources.plugins.concat([
     ]),
 
     // test results reporter to use
@@ -84,8 +84,8 @@ module.exports = function(config) {
 
 
     // level of logging
-    // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-    logLevel: config.LOG_INFO,
+    // possible values: configuration.LOG_DISABLE || configuration.LOG_ERROR || configuration.LOG_WARN || configuration.LOG_INFO || configuration.LOG_DEBUG
+    logLevel: configuration.LOG_INFO,
 
 
     // enable / disable watching file and executing tests whenever any file changes
@@ -102,5 +102,5 @@ module.exports = function(config) {
     singleRun: true
   };
 
-  config.set(karmaConfig);
+  configuration.set(karmaConfiguration);
 };

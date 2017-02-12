@@ -7,8 +7,8 @@ import * as path from 'path';
 const prettyTime = require('pretty-hrtime');
 /* tslint:enable:typedef */
 import * as state from './State';
-import { getFlagValue } from './config';
-import { getConfig } from './index';
+import { getFlagValue } from './configuration';
+import { getConfiguration } from './index';
 import * as Chalk from 'chalk';
 
 const WROTE_ERROR_KEY: string = '__gulpCoreBuildWroteError';
@@ -381,7 +381,9 @@ export function reset(): void {
   localCache.writeSummaryLogs = [];
 }
 
-/** The result of a functional test run */
+/**
+ * The result of a functional test run.
+ */
 export enum TestResultState {
   Passed,
   Failed,
@@ -473,7 +475,7 @@ export function addSuppression(str: string): void {
 
 /**
  * Logs a warning. It will be logged to standard error and cause the build to fail
- * if buildConfig.shouldWarningsFailBuild is true, otherwise it will be logged to standard output.
+ * if buildConfiguration.shouldWarningsFailBuild is true, otherwise it will be logged to standard output.
  * @param message - the warning description
  */
 export function warn(...args: Array<string | Chalk.ChalkChain>): void {
@@ -652,7 +654,9 @@ export function getWarnings(): string[] {
   return localCache.warnings;
 }
 
-/** Returns the list of errors which have been logged */
+/**
+ * Returns the list of errors which have been logged
+ */
 export function getErrors(): string[] {
   'use strict';
   return localCache.errors;
@@ -729,7 +733,7 @@ export function initialize(gulp: gulp.Gulp, gulpErrorCallback?: (err: Error) => 
     writeSummary(() => {
       // error if we have any errors
       if (localCache.taskErrors > 0 ||
-        (getWarnings().length && getConfig().shouldWarningsFailBuild) ||
+        (getWarnings().length && getConfiguration().shouldWarningsFailBuild) ||
         getErrors().length ||
         localCache.testsFailed > 0) {
         exitProcess(1);

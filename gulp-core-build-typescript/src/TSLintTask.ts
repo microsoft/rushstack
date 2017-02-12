@@ -10,11 +10,11 @@ import * as TSLint from 'tslint';
 import * as path from 'path';
 import * as ts from 'typescript';
 
-export interface ITSLintTaskConfig {
+export interface ITSLintTaskConfiguration {
   /**
    * A TsLint configuration objects
    */
-  lintConfig?: any; /* tslint:disable-line:no-any */
+  lintConfiguration?: any; /* tslint:disable-line:no-any */
 
   /**
    * Directories to search for custom linter rules
@@ -30,7 +30,7 @@ export interface ITSLintTaskConfig {
    * A function which reports errors to the proper location. Defaults to using the base GulpTask's
    * this.fileError() function.
     */
-  reporter?: (result: TSLint.LintResult, file: gutil.File, options: ITSLintTaskConfig) => void;
+  reporter?: (result: TSLint.LintResult, file: gutil.File, options: ITSLintTaskConfiguration) => void;
 
   /**
    * If true, displays warnings as errors. If the reporter function is overwritten, it should reference
@@ -39,8 +39,8 @@ export interface ITSLintTaskConfig {
   displayAsWarning?: boolean;
 
   /**
-   * If true, the lintConfig rules which were previously set will be removed. This flag is useful
-   * for ensuring that there are no rules activated from previous calls to setConfig(). Default is 'false'.
+   * If true, the lintConfiguration rules which were previously set will be removed. This flag is useful
+   * for ensuring that there are no rules activated from previous calls to setConfiguration(). Default is 'false'.
    */
   removeExistingRules?: boolean;
 
@@ -48,20 +48,20 @@ export interface ITSLintTaskConfig {
    * If false, does not use a default tslint configuration as the basis for creating the list of active rules.
    * Defaults to 'true'
    */
-  useDefaultConfigAsBase?: boolean;
+  useDefaultConfigurationAsBase?: boolean;
 }
 
-export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
+export class TSLintTask extends GulpTask<ITSLintTaskConfiguration> {
   public name: string = 'tslint';
-  public taskConfig: ITSLintTaskConfig = {
-    // lintConfig: require('../lib/defaultTslint.json'),
-    lintConfig: {},
-    reporter: (result: TSLint.LintResult, file: gutil.File, options: ITSLintTaskConfig): void => {
+  public taskConfiguration: ITSLintTaskConfiguration = {
+    // lintConfiguration: require('../lib/defaultTslint.json'),
+    lintConfiguration: {},
+    reporter: (result: TSLint.LintResult, file: gutil.File, options: ITSLintTaskConfiguration): void => {
       for (const failure of result.failures) {
-        const pathFromRoot: string = path.relative(this.buildConfig.rootPath, file.path);
+        const pathFromRoot: string = path.relative(this.buildConfiguration.rootPath, file.path);
 
         const start: ts.LineAndCharacter = failure.getStartPosition().getLineAndCharacter();
-        if (this.taskConfig.displayAsWarning) {
+        if (this.taskConfiguration.displayAsWarning) {
           this.fileWarning(
             pathFromRoot,
             start.line + 1,
@@ -88,23 +88,23 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
       'src/**/*.tsx'
     ],
     removeExistingRules: false,
-    useDefaultConfigAsBase: true
+    useDefaultConfigurationAsBase: true
   };
 
   /* tslint:disable:no-any */
   private _defaultLintRules: any = undefined;
   /* tslint:enable:no-any */
 
-  public setConfig(config: ITSLintTaskConfig): void {
+  public setConfiguration(configuration: ITSLintTaskConfiguration): void {
     // If the removeExistingRules flag is set, clear out any existing rules
-    if (config.removeExistingRules &&
-        this.taskConfig &&
-        this.taskConfig.lintConfig) {
-      delete this.taskConfig.lintConfig.rules;
-      delete config.removeExistingRules;
+    if (configuration.removeExistingRules &&
+        this.taskConfiguration &&
+        this.taskConfiguration.lintConfiguration) {
+      delete this.taskConfiguration.lintConfiguration.rules;
+      delete configuration.removeExistingRules;
     }
 
-    super.setConfig(config);
+    super.setConfiguration(configuration);
   }
 
   public loadSchema(): Object {
@@ -117,7 +117,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
     const activeLintRules: any = taskScope._loadLintRules(); // tslint:disable-line:no-any
     const cached = require('gulp-cache'); // tslint:disable-line
 
-    return gulp.src(this.taskConfig.sourceMatch)
+    return gulp.src(this.taskConfiguration.sourceMatch)
       .pipe(cached(
         through2.obj(function(
           file: gutil.File,
@@ -140,7 +140,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
             fix: false,
             formatter: 'json',
             formattersDirectory: undefined, // not used, use reporters instead
-            rulesDirectory: taskScope.taskConfig.rulesDirectory || []
+            rulesDirectory: taskScope.taskConfiguration.rulesDirectory || []
           };
 
           const linter: TSLint.Linter = new TSLint.Linter(options);
@@ -154,7 +154,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
           /* tslint:enable:no-string-literal */
 
           if (result.failureCount > 0) {
-            taskScope.taskConfig.reporter(result, file, taskScope.taskConfig);
+            taskScope.taskConfiguration.reporter(result, file, taskScope.taskConfiguration);
           }
 
           this.push(file);
@@ -163,7 +163,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
           // Scope the cache to a combination of the lint rules and the build path
           name: md5(
             TSLint.Linter.VERSION + JSON.stringify(activeLintRules) +
-            taskScope.name + taskScope.buildConfig.rootPath),
+            taskScope.name + taskScope.buildConfiguration.rootPath),
           // What on the result indicates it was successful
           success: (jshintedFile: gutil.File): boolean => {
             /* tslint:disable:no-string-literal */
@@ -186,7 +186,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
       this._defaultLintRules = require('./defaultTslint.json');
     }
     return merge(
-      (this.taskConfig.useDefaultConfigAsBase ? this._defaultLintRules : {}),
-      this.taskConfig.lintConfig || {});
+      (this.taskConfiguration.useDefaultConfigurationAsBase ? this._defaultLintRules : {}),
+      this.taskConfiguration.lintConfiguration || {});
   }
 }

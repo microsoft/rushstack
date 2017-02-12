@@ -7,16 +7,16 @@ import * as path from 'path';
 import { GulpTask } from './tasks/GulpTask';
 import { GulpProxy } from './GulpProxy';
 import { IExecutable } from './IExecutable';
-import { IBuildConfig } from './IBuildConfig';
+import { IBuildConfiguration } from './IBuildConfiguration';
 import { CleanTask } from './tasks/CleanTask';
 import { args } from './State';
 export { IExecutable } from './IExecutable';
 import { initialize as initializeLogging, markTaskCreationTime, generateGulpError, setWatchMode } from './logging';
-import { getFlagValue, setConfigDefaults } from './config';
+import { getFlagValue, setConfigurationDefaults } from './configuration';
 import * as gulp from 'gulp';
 import * as notifier from 'node-notifier';
 
-export * from './IBuildConfig';
+export * from './IBuildConfiguration';
 export {
   addSuppression,
   coverageData,
@@ -54,7 +54,7 @@ const packageFolder: string =
   (packageJSON.directories && packageJSON.directories.packagePath) ?
   packageJSON.directories.packagePath : '';
 
-let _buildConfig: IBuildConfig = {
+let _buildConfiguration: IBuildConfiguration = {
   packageFolder,
   srcFolder: 'src',
   distFolder: path.join(packageFolder, 'dist'),
@@ -73,46 +73,46 @@ let _buildConfig: IBuildConfig = {
 };
 
 /**
- * Merges the given build config settings into existing settings.
+ * Merges the given build configuration settings into existing settings.
  *
- * @param config - The build config settings.
+ * @param configuration - The build configuration settings.
  */
-export function setConfig(config: IBuildConfig): void {
+export function setConfiguration(configuration: IBuildConfiguration): void {
   /* tslint:disable:typedef */
   const objectAssign = require('object-assign');
   /* tslint:enable:typedef */
 
-  _buildConfig = objectAssign({}, _buildConfig, config);
+  _buildConfiguration = objectAssign({}, _buildConfiguration, configuration);
 }
 
 /**
- * Merges the given build config settings into existing settings.
+ * Merges the given build configuration settings into existing settings.
  *
- * @param  config - The build config settings.
+ * @param configuration - The build configuration settings.
  */
-export function mergeConfig(config: IBuildConfig): void {
+export function mergeConfiguration(configuration: IBuildConfiguration): void {
   /* tslint:disable:typedef */
   const merge = require('lodash.merge');
   /* tslint:enable:typedef */
 
-  _buildConfig = merge({}, _buildConfig, config);
+  _buildConfiguration = merge({}, _buildConfiguration, configuration);
 }
 
 /**
- * Replaces the build config.
+ * Replaces the build configuration.
  *
- * @param  config - The build config settings.
+ * @param configuration - The build configuration settings.
  */
-export function replaceConfig(config: IBuildConfig): void {
-  _buildConfig = config;
+export function replaceConfiguration(configuration: IBuildConfiguration): void {
+  _buildConfiguration = configuration;
 }
 
 /**
- * Gets the current config.
+ * Gets the current configuration.
  * @returns the current build configuration
  */
-export function getConfig(): IBuildConfig {
-  return _buildConfig;
+export function getConfiguration(): IBuildConfiguration {
+  return _buildConfiguration;
 }
 
 /**
@@ -135,7 +135,7 @@ export function task(taskName: string, task: IExecutable): IExecutable {
  * callback function (passing in an object value if there was an error).
  */
 export interface ICustomGulpTask {
-  (gulp: gulp.Gulp | GulpProxy, buildConfig: IBuildConfig, done: (failure?: Object) => void):
+  (gulp: gulp.Gulp | GulpProxy, buildConfiguration: IBuildConfiguration, done: (failure?: Object) => void):
     Promise<Object> | NodeJS.ReadWriteStream | void;
 }
 
@@ -149,7 +149,7 @@ class CustomTask extends GulpTask<void> {
 
   public executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (failure?: Object) => void):
     Promise<Object> | NodeJS.ReadWriteStream | void {
-    return this._fn(gulp, getConfig(), completeCallback);
+    return this._fn(gulp, getConfiguration(), completeCallback);
   }
 }
 
@@ -181,10 +181,9 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
   let lastError: boolean = undefined;
 
   return {
-    execute: (buildConfig: IBuildConfig): Promise<void> => {
-
+    execute: (buildConfiguration: IBuildConfiguration): Promise<void> => {
       setWatchMode();
-      buildConfig.gulp.watch(watchMatch, _runWatch);
+      buildConfiguration.gulp.watch(watchMatch, _runWatch);
 
       function _runWatch(): void {
         if (isWatchRunning) {
@@ -192,27 +191,27 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
         } else {
           isWatchRunning = true;
 
-          _executeTask(task, buildConfig)
+          _executeTask(task, buildConfiguration)
             .then(() => {
-              if (buildConfig.showToast && lastError) {
+              if (buildConfiguration.showToast && lastError) {
                 lastError = undefined;
 
                 notifier.notify({
                   title: 'Build succeeded',
                   message: packageJSON.name,
-                  icon: buildConfig.buildSuccessIconPath
+                  icon: buildConfiguration.buildSuccessIconPath
                 });
               }
               _finalizeWatch();
             })
             .catch((error) => {
-              if (buildConfig.showToast) {
+              if (buildConfiguration.showToast) {
                 if (!lastError || lastError !== error) {
                   lastError = error;
                   notifier.notify({
                     title: 'Build failed',
                     message: error,
-                    icon: buildConfig.buildErrorIconPath
+                    icon: buildConfiguration.buildErrorIconPath
                   });
                 }
               }
@@ -247,11 +246,11 @@ export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutabl
   }
 
   return {
-    execute: (buildConfig: IBuildConfig): Promise<void> => {
+    execute: (buildConfiguration: IBuildConfiguration): Promise<void> => {
       let output: Promise<void> = Promise.resolve<void>();
 
       for (const task of flatTasks) {
-        output = output.then(() => _executeTask(task, buildConfig));
+        output = output.then(() => _executeTask(task, buildConfiguration));
       }
 
       return output;
@@ -272,11 +271,11 @@ export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecuta
 
   return {
     // tslint:disable-next-line:no-any
-    execute: (buildConfig: IBuildConfig): Promise<any> => {
+    execute: (buildConfiguration: IBuildConfiguration): Promise<any> => {
       return new Promise<void[]>((resolve, reject) => {
         const promises: Promise<void>[] = [];
         for (const task of flattenTasks) {
-          promises.push(_executeTask(task, buildConfig));
+          promises.push(_executeTask(task, buildConfiguration));
         }
 
         // Use promise all to make sure errors are propagated correctly
@@ -290,15 +289,15 @@ export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecuta
  * Initializes the gulp tasks.
  */
 export function initialize(gulp: gulp.Gulp): void {
-  _buildConfig.rootPath = process.cwd();
-  _buildConfig.gulp = new GulpProxy(gulp);
-  _buildConfig.uniqueTasks = _uniqueTasks;
+  _buildConfiguration.rootPath = process.cwd();
+  _buildConfiguration.gulp = new GulpProxy(gulp);
+  _buildConfiguration.uniqueTasks = _uniqueTasks;
 
   _handleCommandLineArguments();
 
-  setConfigDefaults(_buildConfig);
+  setConfigurationDefaults(_buildConfiguration);
 
-  for (const task of _buildConfig.uniqueTasks) {
+  for (const task of _buildConfiguration.uniqueTasks) {
     if (task.onRegister) {
       task.onRegister();
     }
@@ -316,7 +315,7 @@ export function initialize(gulp: gulp.Gulp): void {
  */
 function _registerTask(gulp: gulp.Gulp, taskName: string, task: IExecutable): void {
   gulp.task(taskName, (cb) => {
-    _executeTask(task, _buildConfig)
+    _executeTask(task, _buildConfiguration)
       .then(() => {
         cb();
       },
@@ -329,7 +328,7 @@ function _registerTask(gulp: gulp.Gulp, taskName: string, task: IExecutable): vo
 /**
  * Executes a given IExecutable.
  */
-function _executeTask(task: IExecutable, buildConfig: IBuildConfig): Promise<void> {
+function _executeTask(task: IExecutable, buildConfiguration: IBuildConfiguration): Promise<void> {
   // Try to fallback to the default task if provided.
   if (task && !task.execute) {
     /* tslint:disable:no-any */
@@ -344,23 +343,23 @@ function _executeTask(task: IExecutable, buildConfig: IBuildConfig): Promise<voi
     return Promise.reject(new Error(`A task was scheduled, but the task was null. This probably means the task wasn't imported correctly.`));
   }
 
-  if (task.isEnabled === undefined || task.isEnabled(buildConfig)) {
+  if (task.isEnabled === undefined || task.isEnabled(buildConfiguration)) {
     const startTime: [number, number] = process.hrtime();
 
-    if (buildConfig.onTaskStart && task.name) {
-      buildConfig.onTaskStart(task.name);
+    if (buildConfiguration.onTaskStart && task.name) {
+      buildConfiguration.onTaskStart(task.name);
     }
 
-    const taskPromise: Promise<void> = task.execute(buildConfig)
+    const taskPromise: Promise<void> = task.execute(buildConfiguration)
       .then(() => {
-        if (buildConfig.onTaskEnd && task.name) {
-          buildConfig.onTaskEnd(task.name, process.hrtime(startTime));
+        if (buildConfiguration.onTaskEnd && task.name) {
+          buildConfiguration.onTaskEnd(task.name, process.hrtime(startTime));
         }
       },
       // tslint:disable-next-line:no-any
       (error: any) => {
-        if (buildConfig.onTaskEnd && task.name) {
-          buildConfig.onTaskEnd(task.name, process.hrtime(startTime), error);
+        if (buildConfiguration.onTaskEnd && task.name) {
+          buildConfiguration.onTaskEnd(task.name, process.hrtime(startTime), error);
         }
 
         return Promise.reject(error);

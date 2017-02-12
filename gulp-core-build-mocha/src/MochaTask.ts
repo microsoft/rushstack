@@ -3,15 +3,15 @@ import gulp = require('gulp');
 import * as gulpMocha from 'gulp-mocha';
 import * as gulpIstanbul from 'gulp-istanbul';
 
-export interface IMochaTaskConfig {
+export interface IMochaTaskConfiguration {
   testMatch: string[];
   reportDir: string;
 }
 
-export class MochaTask extends GulpTask<IMochaTaskConfig> {
+export class MochaTask extends GulpTask<IMochaTaskConfiguration> {
   public name: string = 'mocha';
 
-  public taskConfig: IMochaTaskConfig = {
+  public taskConfiguration: IMochaTaskConfiguration = {
     testMatch: ['lib/**/*.test.js'],
     reportDir: 'coverage'
   };
@@ -21,15 +21,15 @@ export class MochaTask extends GulpTask<IMochaTaskConfig> {
     const mocha: typeof gulpMocha = require('gulp-mocha');
 
     /* tslint:disable:no-string-literal */
-    const matchString: string = this.buildConfig.args['match'] as string;
+    const matchString: string = this.buildConfiguration.args['match'] as string;
     /* tslint:enable:no-string-literal */
 
-    return gulp.src(this.taskConfig.testMatch, { read: false })
+    return gulp.src(this.taskConfiguration.testMatch, { read: false })
       .pipe(mocha({
         grep: matchString
       }))
       .pipe(istanbul.writeReports({
-        dir: this.taskConfig.reportDir
+        dir: this.taskConfiguration.reportDir
       }));
   }
 }
