@@ -19,6 +19,7 @@ import LinkAction from './LinkAction';
 import PublishAction from './PublishAction';
 import RebuildAction from './RebuildAction';
 import UnlinkAction from './UnlinkAction';
+import CheckVersionsAction from './CheckVersionsAction';
 
 export default class RushCommandLineParser extends CommandLineParser {
   public rushConfiguration: RushConfiguration;
@@ -45,6 +46,7 @@ export default class RushCommandLineParser extends CommandLineParser {
     this.addAction(new PublishAction(this));
     this.addAction(new RebuildAction(this));
     this.addAction(new UnlinkAction(this));
+    this.addAction(new CheckVersionsAction(this));
   }
 
   protected onDefineParameters(): void {

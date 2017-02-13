@@ -40,6 +40,7 @@ interface PackageJson {
   description?: string;
   devDependencies?: { [key: string]: string };
   optionalDependencies?: { [key: string]: string };
+  peerDependencies?: { [key: string]: string };
   private?: boolean;
   scripts?: { [key: string]: string };
 

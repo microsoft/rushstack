@@ -114,13 +114,13 @@
       "packageName": "@microsoft/rush",
       "projectFolder": "rush/rush",
       "reviewCategory": "libraries",
-      "shouldPublish": false
+      "shouldPublish": true
     },
     {
       "packageName": "@microsoft/rush-lib",
       "projectFolder": "rush/rush-lib",
       "reviewCategory": "libraries",
-      "shouldPublish": false
+      "shouldPublish": true
     }
   ]
 }
