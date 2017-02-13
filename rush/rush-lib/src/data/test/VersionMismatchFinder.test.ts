@@ -1,8 +1,11 @@
 /// <reference types='mocha' />
+
 import { assert } from 'chai';
 import RushConfigurationProject from '../RushConfigurationProject';
 import { VersionMismatchFinder } from '../VersionMismatchFinder';
+
 describe('VersionMismatchFinder', () => {
+
   it('finds no mismatches if there are none', (done: MochaDone) => {
     const projects: RushConfigurationProject[] = [
       {
@@ -31,6 +34,7 @@ describe('VersionMismatchFinder', () => {
     assert.equal(mismatchFinder.getMismatches().length, 0);
     done();
   });
+
   it('finds a mismatch in two packages', (done: MochaDone) => {
     const projects: RushConfigurationProject[] = [
       {
@@ -62,6 +66,7 @@ describe('VersionMismatchFinder', () => {
     assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '1.2.3'), 'A');
     done();
   });
+
   it('won\'t let you access mismatches that don\t exist', (done: MochaDone) => {
     const projects: RushConfigurationProject[] = [
       {
@@ -89,6 +94,7 @@ describe('VersionMismatchFinder', () => {
     assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '9.9.9'), undefined);
     done();
   });
+
   it('finds two mismatches in two different pairs of projects', (done: MochaDone) => {
     const projects: RushConfigurationProject[] = [
       {
@@ -141,6 +147,7 @@ describe('VersionMismatchFinder', () => {
     assert.equal(mismatchFinder.getConsumersOfMismatch('mocha', '2.0.0'), 'D');
     done();
   });
+
   it('finds three mismatches in three projects', (done: MochaDone) => {
       const projects: RushConfigurationProject[] = [
       {
@@ -182,6 +189,7 @@ describe('VersionMismatchFinder', () => {
     assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '9.9.9'), 'C');
     done();
   });
+
   it('checks dev dependencies', (done: MochaDone) => {
     const projects: RushConfigurationProject[] = [
       {
@@ -213,6 +221,7 @@ describe('VersionMismatchFinder', () => {
     assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '1.2.3'), 'A');
     done();
   });
+
   it('checks peer dependencies', (done: MochaDone) => {
     const projects: RushConfigurationProject[] = [
       {
@@ -244,6 +253,7 @@ describe('VersionMismatchFinder', () => {
     assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '1.2.3'), 'A');
     done();
   });
+
   it('checks optional dependencies', (done: MochaDone) => {
     const projects: RushConfigurationProject[] = [
       {
