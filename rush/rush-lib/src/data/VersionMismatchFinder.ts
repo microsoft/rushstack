@@ -46,8 +46,8 @@ export class VersionMismatchFinder {
       this._addDependenciesToList(project.packageName, project.packageJson.dependencies);
       this._addDependenciesToList(project.packageName, project.packageJson.devDependencies);
       // tslint:disable:no-any
-      this._addDependenciesToList(project.packageName, (project.packageJson as any).peerDependencies);
-      this._addDependenciesToList(project.packageName, (project.packageJson as any).optionalDependencies);
+      this._addDependenciesToList(project.packageName, project.packageJson.peerDependencies);
+      this._addDependenciesToList(project.packageName, project.packageJson.optionalDependencies);
       // tslint:enable:no-any
     });
 
