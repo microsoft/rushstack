@@ -1,4 +1,3 @@
-/// <reference path="argparse/argparse.d.ts" />
 /// <reference path="builtins/builtins.d.ts" />
 /// <reference path="colors/colors.d.ts" />
 /// <reference path="git-repo-info/git-repo-info.d.ts" />
