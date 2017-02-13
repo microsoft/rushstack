@@ -1,15 +1,14 @@
-/**
- * @file TsLintErrorDetector.ts
- * @Copyright (c) Microsoft Corporation.  All rights reserved.
- *
- * Detects an error from TypeScript Linter
- */
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
 
 // tslint:disable:export-name
 
 import { IErrorDetectionRule, RegexErrorDetector } from '../ErrorDetector';
 import { BuildTaskError } from '../TaskError';
 
+/**
+ * Detects an error from TypeScript Linter
+ */
 // Example: "[20:22:07] Error - tslint - src\Cache.ts(5,8): error no-any: 'any' is not allowed"
 // 0: input
 // 1: "[20:22:07]"

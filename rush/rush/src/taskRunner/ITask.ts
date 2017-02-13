@@ -1,9 +1,5 @@
-﻿/**
- * @file ITask.ts
- * @Copyright (c) Microsoft Corporation.  All rights reserved.
- *
- * The definition of a task as used by the TaskRunner
- */
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
 
 import { ITaskWriter } from '@microsoft/stream-collator';
 import { TaskError, Stopwatch } from '@microsoft/rush-lib';

@@ -1,10 +1,5 @@
-/**
- * @file ErrorDetector.ts
- * @Copyright (c) Microsoft Corporation.  All rights reserved.
- *
- * Defines a utility which registers a set of error detection rules that can be executed against
- * the output of an application.
- */
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
 
 import TaskError from './TaskError';
 

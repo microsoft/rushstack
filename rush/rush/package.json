@@ -10,7 +10,7 @@
   "bin": {
     "rush": "./bin/rush"
   },
-  "license": "SEE LICENSE IN LICENSE.docx",
+  "license": "MIT",
   "dependencies": {
     "@microsoft/package-deps-hash": "~0.0.4",
     "@microsoft/rush-lib": "1.6.0",

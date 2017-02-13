@@ -9,7 +9,7 @@
     "test": "gulp test",
     "clean": "gulp clean"
   },
-  "license": "SEE LICENSE IN LICENSE.docx",
+  "license": "MIT",
   "dependencies": {
     "@microsoft/stream-collator": "~1.0.2",
     "@types/chai": "3.4.34",

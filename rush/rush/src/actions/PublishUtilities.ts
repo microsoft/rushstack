@@ -1,6 +1,5 @@
-/**
- * @Copyright (c) Microsoft Corporation.  All rights reserved.
- */
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
 
 /**
  * This file contains a set of helper functions that are unit tested and used with the PublishAction,
