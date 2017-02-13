@@ -1,15 +1,14 @@
-/**
- * @file TsErrorDetector.ts
- * @Copyright (c) Microsoft Corporation.  All rights reserved.
- *
- * Detects a TypeScript compiler error
- */
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
 
 // tslint:disable:export-name
 
 import { IErrorDetectionRule, RegexErrorDetector } from '../ErrorDetector';
 import { BuildTaskError } from '../TaskError';
 
+/**
+ * Detects a TypeScript compiler error
+ */
 // Example: "[20:22:07] Error - typescript - src\Cache.ts(5,8): error TS2322: 'A' is not 'B'"
 // 0: input
 // 1: "[20:22:07]"

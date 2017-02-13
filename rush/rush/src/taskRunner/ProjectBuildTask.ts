@@ -1,9 +1,5 @@
-﻿/**
- * @file ProjectBuildTask.ts
- * @Copyright (c) Microsoft Corporation.  All rights reserved.
- *
- * A TaskRunner task which cleans and builds a project
- */
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
 
 import * as child_process from 'child_process';
 import * as fsx from 'fs-extra';
@@ -28,6 +24,9 @@ import { ITaskDefinition } from '../taskRunner/ITask';
 
 const PACKAGE_DEPS_FILENAME: string = 'package-deps.json';
 
+/**
+ * A TaskRunner task which cleans and builds a project
+ */
 export default class ProjectBuildTask implements ITaskDefinition {
   public name: string;
   public isIncrementalBuildAllowed: boolean;

@@ -1,9 +1,5 @@
-﻿/**
- * @file TaskRunner.ts
- * @Copyright (c) Microsoft Corporation.  All rights reserved.
- *
- * Executes an arbitrary sequence of tasks based on their dependency graph
- */
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
 
 import * as colors from 'colors';
 import * as os from 'os';

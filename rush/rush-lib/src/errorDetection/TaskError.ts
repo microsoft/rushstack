@@ -1,12 +1,11 @@
-/**
- * @file TaskError.ts
- * @Copyright (c) Microsoft Corporation.  All rights reserved.
- *
- * Encapsulates information about an error
- */
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
 
 import { ErrorDetectionMode } from './ErrorDetector';
 
+/**
+ * Encapsulates information about an error
+ */
 export default class TaskError {
   protected _type: string;
   protected _message: string;
