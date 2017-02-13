@@ -1,0 +1,15 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-lib",
+      "comment": "Adds an extra utility (VersionMismatchFinder), which can locate inconsistencies in versions of dependencies across the repo.",
+      "type": "minor"
+    },
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Adds an extra command (rush check-versions), which can find inconsistencies in package.json dependency versions across a repository.",
+      "type": "minor"
+    }
+  ],
+  "email": "nickpape@users.noreply.github.com"
+}

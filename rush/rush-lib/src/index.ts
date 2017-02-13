@@ -32,6 +32,10 @@ export {
 } from './data/ChangeManagement';
 
 export {
+  VersionMismatchFinder
+} from './data/VersionMismatchFinder'
+
+export {
   ErrorDetectionMode,
   IErrorDetectionRule,
   RegexErrorDetector,
