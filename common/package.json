@@ -10,6 +10,8 @@
     "rush-gulp-core-build-webpack": "file:./temp_modules/rush-gulp-core-build-webpack",
     "rush-node-library-build": "file:./temp_modules/rush-node-library-build",
     "rush-package-deps-hash": "file:./temp_modules/rush-package-deps-hash",
+    "rush-rush": "file:./temp_modules/rush-rush",
+    "rush-rush-lib": "file:./temp_modules/rush-rush-lib",
     "rush-test-web-library-build": "file:./temp_modules/rush-test-web-library-build",
     "rush-web-library-build": "file:./temp_modules/rush-web-library-build"
   },

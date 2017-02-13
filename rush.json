@@ -109,6 +109,18 @@
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
       ]
+    },
+    {
+      "packageName": "@microsoft/rush",
+      "projectFolder": "rush/rush",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "@microsoft/rush-lib",
+      "projectFolder": "rush/rush-lib",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
     }
   ]
 }

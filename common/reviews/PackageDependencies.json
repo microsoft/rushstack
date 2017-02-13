@@ -52,7 +52,23 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@microsoft/package-deps-hash",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@microsoft/rush-lib",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@microsoft/sp-tslint-rules",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@microsoft/stream-collator",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@microsoft/ts-command-line",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -64,8 +80,16 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "builtins",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "chai",
       "allowedCategories": [ "libraries", "other" ]
+    },
+    {
+      "name": "colors",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "deasync",
@@ -93,6 +117,18 @@
     },
     {
       "name": "fsevents",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "git-repo-info",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "glob",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "glob-escape",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -184,6 +220,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "inquirer",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "istanbul-instrumenter-loader",
       "allowedCategories": [ "libraries" ]
     },
@@ -240,6 +280,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "minimatch",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "mkdirp",
       "allowedCategories": [ "libraries" ]
     },
@@ -273,6 +317,10 @@
     },
     {
       "name": "pretty-hrtime",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "read-package-tree",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -313,6 +361,10 @@
     },
     {
       "name": "webpack",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "wordwrap",
       "allowedCategories": [ "libraries" ]
     },
     {
