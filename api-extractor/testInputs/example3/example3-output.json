@@ -1,0 +1,96 @@
+{
+  "kind": "package",
+  "summary": [
+    {
+      "kind": "textDocElement",
+      "value": "This example folder is used to test the functionality of DocItemLoader and API reference resolution."
+    }
+  ],
+  "remarks": [],
+  "exports": {
+    "inheritLocalCircularDependencyOne": {
+      "kind": "enum",
+      "values": {},
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "See documentation for inheritLocalCircularDependencyOne"
+        }
+      ],
+      "remarks": [],
+      "isBeta": false
+    },
+    "inheritLocalCircularDependencyTwo": {
+      "kind": "enum",
+      "values": {},
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "See documentation for inheritLocalCircularDependencyOne"
+        }
+      ],
+      "remarks": [],
+      "isBeta": false
+    },
+    "inheritLocalOptionOne": {
+      "kind": "enum",
+      "values": {},
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "This is the summary for MyClass."
+        }
+      ],
+      "remarks": [],
+      "isBeta": false
+    },
+    "inheritLocalOptionThreeFunction": {
+      "kind": "function",
+      "returnValue": {
+        "type": "void",
+        "description": []
+      },
+      "parameters": {},
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "See documentation for MyClass.methodWithTwoParams"
+        }
+      ],
+      "remarks": [],
+      "isBeta": false
+    },
+    "inheritLocalOptionTwo": {
+      "kind": "enum",
+      "values": {},
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "This is the summary for MyClass."
+        }
+      ],
+      "remarks": [],
+      "isBeta": false
+    },
+    "MyClass": {
+      "kind": "class",
+      "extends": "",
+      "implements": "",
+      "typeParameters": [],
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "This is the summary for MyClass."
+        }
+      ],
+      "remarks": [],
+      "isBeta": false
+    }
+  }
+}

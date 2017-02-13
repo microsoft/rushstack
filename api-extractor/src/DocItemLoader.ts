@@ -1,8 +1,11 @@
 import * as fsx from 'fs-extra';
 import * as os  from 'os';
 import * as path from 'path';
-import { IDocItem, IDocPackage, IDocClass } from './IDocItem';
+import { IDocItem, IDocPackage, IDocClass, IDocMember } from './IDocItem';
 import { IApiDefinitionReference } from './IApiDefinitionReference';
+import ApiItem from './definitions/ApiItem';
+import ApiPackage from './definitions/ApiPackage';
+import ResolvedApiItem from './ResolvedApiItem';
 import JsonFile from './JsonFile';
 
 /**
@@ -31,7 +34,6 @@ export interface IParsedScopeName {
 export default class DocItemLoader {
   private _cache: Map<string, IDocPackage>;
   private _projectFolder: string; // Root directory to check for node modules
-  private _errorHandler: (message: string) => void;
 
   /**
    * The projectFolder is the top-level folder containing package.json for a project
@@ -49,36 +51,87 @@ export default class DocItemLoader {
   /**
    * {@inheritdoc ApiDocumentation.IReferenceResolver}
    */
-  public resolve(apiDefinitionRef: IApiDefinitionReference, reportError: (message: string) => void): IDocItem {
-    if (!apiDefinitionRef) {
-      reportError('Expected reference within {@inheritdoc} tag');
-      return undefined;
+  public resolve(apiDefinitionRef: IApiDefinitionReference,
+    apiPackage: ApiPackage,
+    reportError: (message: string) => void): ResolvedApiItem {
+
+    const packageName: string = path.dirname(apiPackage.name).split('/').pop();
+
+    // Resolution for local references 
+    if (packageName === apiDefinitionRef.packageName || !apiDefinitionRef.packageName) {
+      return this.resolveLocalReference(apiDefinitionRef, apiPackage, reportError);
     }
-    // Try to load the package given the provided packageName into the cache
+
+    // Resolution for references in JSON files
     const docPackage: IDocPackage =  this.getPackage(apiDefinitionRef, reportError);
 
     // Check if package was not found
     if (!docPackage) {
+      reportError('API definition was not found in JSON files');
       return undefined;
     }
+
+    return this.resolveJsonReference(apiDefinitionRef, docPackage, reportError);
+  }
+
+  /**
+   * 
+   */
+  public resolveLocalReference(apiDefinitionRef: IApiDefinitionReference,
+    apiPackage: ApiPackage,
+    reportError: (message: string) => void): ResolvedApiItem {
+
+    const apiItem: ApiItem = apiPackage.getMemberItem(apiDefinitionRef.exportName);
+    if (apiItem) {
+      let resolvedApiItem: ResolvedApiItem = ResolvedApiItem.createFromApiItem(apiItem);
+
+      // If memberName exists then check for the existense of the name
+      if (apiDefinitionRef.memberName) {
+        if (apiDefinitionRef.memberName in resolvedApiItem.members) {
+
+          // We are certain the return type will be ApiItem
+          const member: ApiItem | IDocMember = resolvedApiItem.members[apiDefinitionRef.memberName];
+          if (member && member instanceof ApiItem) {
+            member.canResolveReferences();
+            resolvedApiItem = ResolvedApiItem.createFromApiItem(member);
+          }
+        } else {
+          // member name was not found, apiDefinitionRef is invalid
+          reportError(`\"${apiDefinitionRef.memberName}\",` +
+            ` not found as member of \"${apiDefinitionRef.exportName}\"`);
+          return undefined;
+        }
+      }
+      return resolvedApiItem;
+    } else {
+      reportError(`Unable to resolve ApiItem: "${apiDefinitionRef.exportName}"`);
+      return undefined;
+    }
+  }
+
+  public resolveJsonReference(apiDefinitionRef: IApiDefinitionReference,
+    docPackage: IDocPackage,
+    reportError: (message: string) => void): ResolvedApiItem {
 
     if (apiDefinitionRef.exportName in docPackage.exports) {
       let docItem: IDocItem = docPackage.exports[apiDefinitionRef.exportName];
 
       // If memberName exists then check for the existense of the name
       if (apiDefinitionRef.memberName) {
-        if ( apiDefinitionRef.memberName in (docItem as IDocClass).members) {
+        if (apiDefinitionRef.memberName in (docItem as IDocClass).members) {
           docItem = (docItem as IDocClass).members[apiDefinitionRef.memberName];
         } else {
           // member name was not found, apiDefinitionRef is invalid
+          reportError('API member name was not found on the export item');
           return undefined;
         }
       }
 
       // Correct doc item was found
-      return docItem;
+      return ResolvedApiItem.createFromJson(docItem);
     } else {
       // Not found
+      reportError('API export item was not found in the package');
       return undefined;
     }
   }
@@ -101,11 +154,6 @@ export default class DocItemLoader {
     // Check if package exists in cache
     if (this._cache.has(cachePackageName)) {
         return this._cache.get(cachePackageName);
-    }
-
-    if (!apiDefinitionRef.packageName) {
-      // Local export resolution is currently not supported yet
-      return;
     }
 
     // Doesn't exist in cache, attempt to load the json file

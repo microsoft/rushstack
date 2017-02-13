@@ -80,7 +80,7 @@ export interface IDocReturnValue {
  */
 export interface IDocBase {
   /**
-   * kind of DocItem. Ex: 'class', 'Enum', 'Function'
+   * kind of DocItem. Ex: 'class', 'Enum', 'Function', etc.
    */
   kind: string;
   isBeta: boolean;
@@ -93,6 +93,11 @@ export interface IDocBase {
  * A property of a TypeScript class or interface
  */
 export interface IDocProperty extends IDocBase {
+
+  /**
+   * {@inheritdoc IDocBase.kind}
+   */
+  kind: 'IDocProperty';
   /**
    * For an interface member, whether it is optional
    */
@@ -118,6 +123,10 @@ export interface IDocProperty extends IDocBase {
  * A member function of a typescript class or interface.
  */
 export interface IDocMethod extends IDocBase {
+  /**
+   * {@inheritdoc IDocBase.kind}
+   */
+  kind: 'IDocMethod';
   /**
    * a text summary of the method definition
    */
@@ -155,6 +164,10 @@ export interface IDocMethod extends IDocBase {
  */
 export interface IDocFunction extends IDocBase {
   /**
+   * {@inheritdoc IDocBase.kind}
+   */
+  kind: 'IDocFunction';
+  /**
    * parameters of the function
    */
   parameters: { [name: string]: IDocParam};
@@ -170,6 +183,10 @@ export interface IDocFunction extends IDocBase {
  * 
  */
 export interface IDocClass extends IDocBase {
+  /**
+   * {@inheritdoc IDocBase.kind}
+   */
+  kind: 'IDocClass';
   /**
    * Can be a combination of methods and/or properties
    */
@@ -195,6 +212,11 @@ export interface IDocClass extends IDocBase {
  * IDocEnum represents an exported enum.
  */
 export interface IDocEnum extends IDocBase {
+  /**
+   * {@inheritdoc IDocBase.kind}
+   */
+  kind: 'IDocEnum';
+
   values: IDocEnumValue[];
 }
 
@@ -202,6 +224,10 @@ export interface IDocEnum extends IDocBase {
  * IDocInterface represents an exported interface.
  */
 export interface IDocInterface extends IDocBase {
+  /**
+   * {@inheritdoc IDocBase.kind}
+   */
+  kind: 'IDocInterface';
   /**
    * A mapping from the name of a member API to its IDocMember
    */
@@ -229,10 +255,10 @@ export interface IDocInterface extends IDocBase {
  * classes, interfaces, enums, functions.
  */
 export interface IDocPackage {
-  /**
-   * Always should be 'package'
+   /**
+   * {@inheritdoc IDocBase.kind}
    */
-  kind: string;
+  kind: 'IDocPackage';
 
   /**
    * IDocItems of exported API items

@@ -8,6 +8,7 @@ import ApiFunction from './ApiFunction';
 import ApiItem, { ApiItemKind, IApiItemOptions } from './ApiItem';
 import ApiItemContainer from './ApiItemContainer';
 import TypeScriptHelpers from '../TypeScriptHelpers';
+import ResolvedApiItem from '../ResolvedApiItem';
 
 /**
   * This class is part of the ApiItem abstract syntax tree.  It represents the top-level
@@ -72,6 +73,23 @@ export default class ApiPackage extends ApiItemContainer {
         }
       }
     }
+  }
+
+  /**
+   * Find a member in this package by name and return it if found.
+   * 
+   * @param memberName - the name of the member ApiItem
+   */
+  public getMemberItem(memberName: string): ApiItem {
+    let matchedApiItem: ApiItem = undefined;
+    this.memberItems.forEach(apiItem => {
+      if (apiItem.name === memberName) {
+        matchedApiItem = apiItem;
+      }
+    });
+
+    const resolvedApiItem: ResolvedApiItem = ResolvedApiItem.createFromApiItem(matchedApiItem);
+    return matchedApiItem;
   }
 
   public shouldHaveDocumentation(): boolean {

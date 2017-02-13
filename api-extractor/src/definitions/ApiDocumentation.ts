@@ -1,13 +1,15 @@
 /* tslint:disable:no-bitwise */
 
-import ApiItem from './ApiItem';
+import ApiItem, { ApiItemKind } from './ApiItem';
+import ApiPackage from './ApiPackage';
 import DocElementParser from '../DocElementParser';
 import { IDocElement, IParam, IHrefLinkElement, ICodeLinkElement, ITextElement } from '../IDocElement';
-import { IDocItem, IDocFunction } from '../IDocItem';
+import { IDocItem } from '../IDocItem';
 import { IApiDefinitionReference } from '../IApiDefinitionReference';
 import Token, { TokenType } from '../Token';
 import Tokenizer from '../Tokenizer';
 import Extractor from '../Extractor';
+import ResolvedApiItem from '../ResolvedApiItem';
 
 /**
   * An "API Tag" is a custom JSDoc tag which indicates whether an ApiItem definition
@@ -70,7 +72,10 @@ export interface IScopePackageName {
  * function).
  */
 export interface IReferenceResolver {
-  resolve(apiDefinitionRef: IApiDefinitionReference, reportError: (message: string) => void): IDocItem;
+  resolve(
+    apiDefinitionRef: IApiDefinitionReference,
+    apiPackage: ApiPackage,
+    reportError: (message: string) => void): ResolvedApiItem;
 }
 
 export default class ApiDocumentation {
@@ -438,15 +443,19 @@ export default class ApiDocumentation {
     );
     // if API reference expression is formatted incorrectly then apiDefinitionRef will be undefined
     if (!apiDefinitionRef) {
+      this.reportError('Incorrecty formatted API definition reference');
       return;
     }
 
     // Atempt to locate the apiDefinitionRef
-    const inheritedDoc: IDocItem = this.referenceResolver.resolve(apiDefinitionRef, this.reportError);
+    const resolvedApiItem: ResolvedApiItem = this.referenceResolver.resolve(
+      apiDefinitionRef,
+      this.extractor.package,
+      this.reportError);
 
     // If no IDocItem found then nothing to inherit
     // But for the time being set the summary to a text object
-    if (!inheritedDoc) {
+    if (!resolvedApiItem) {
       const textDocItem: IDocElement = {
         kind: 'textDocElement',
         value: `See documentation for ${tokenChunks[0]}`
@@ -456,22 +465,24 @@ export default class ApiDocumentation {
     }
 
     // inheritdoc found, copy over IDocBase properties
-    this.summary =  inheritedDoc.summary;
-    this.remarks = inheritedDoc.remarks;
+    this.summary =  resolvedApiItem.summary;
+    this.remarks = resolvedApiItem.remarks;
 
     // Copy over detailed properties if neccessary
     // Add additional cases if needed
-    switch (inheritedDoc.kind) {
-      case 'function':
-        this.parameters = (inheritedDoc as IDocFunction).parameters;
-        this.returnsMessage = (inheritedDoc as IDocFunction).returnValue.description;
+    switch (resolvedApiItem.kind) {
+      case ApiItemKind.Function:
+        this.parameters = resolvedApiItem.params;
+        this.returnsMessage = resolvedApiItem.returnsMessage;
         break;
     }
 
     // Check if inheritdoc is depreacted
     // We need to check if this documentation has a deprecated message
     // but it may not appear until after this token.
-    this.isDocInheritedDeprecated = inheritedDoc.deprecatedMessage.length > 0 ? true : false;
+    if (resolvedApiItem.deprecatedMessage) {
+      this.isDocInheritedDeprecated = true;
+    }
   }
 
   protected _parseParam(tokenizer: Tokenizer): IParam {
