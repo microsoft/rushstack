@@ -1,10 +1,13 @@
-// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
-// See LICENSE in the project root for license information.
+/**
+ * @Copyright (c) Microsoft Corporation.  All rights reserved.
+ */
 
 import * as path from 'path';
 import * as fsx from 'fs-extra';
+import * as semver from 'semver';
 import JsonFile from '../utilities/JsonFile';
 import RushConfiguration from '../data/RushConfiguration';
+import { IPackageJson } from '../data/Package';
 
 /**
  * This represents the JSON data object for a project entry in the rush.json configuration file.
@@ -94,6 +97,75 @@ export default class RushConfigurationProject {
     }
     this._downstreamDependencyProjects = [];
     this._shouldPublish = !!projectJson.shouldPublish;
+  }
+
+  /**
+   * Generate a temp_module package.json for this project based on an overall configuration
+   */
+  public generateTempModule(rushConfiguration: RushConfiguration): IPackageJson {
+     const tempPackageJson: IPackageJson = {
+      name: this.tempProjectName,
+      version: '0.0.0',
+      private: true,
+      dependencies: {}
+    };
+
+    // If there are any optional dependencies, copy them over directly
+    if (this.packageJson.optionalDependencies) {
+      tempPackageJson.optionalDependencies = this.packageJson.optionalDependencies;
+    }
+
+    // Collect pairs of (packageName, packageVersion) to be added as temp package dependencies
+    const pairs: { packageName: string, packageVersion: string }[] = [];
+
+    // If there are devDependencies, we need to merge them with the regular
+    // dependencies.  If the same library appears in both places, then the
+    // regular dependency takes precedence over the devDependency.
+    // It also takes precedence over a duplicate in optionalDependencies,
+    // but NPM will take care of that for us.  (Frankly any kind of duplicate
+    // should be an error, but NPM is pretty lax about this.)
+    if (this.packageJson.devDependencies) {
+      for (const packageName of Object.keys(this.packageJson.devDependencies)) {
+        pairs.push({ packageName: packageName, packageVersion: this.packageJson.devDependencies[packageName] });
+      }
+    }
+
+    if (this.packageJson.dependencies) {
+      for (const packageName of Object.keys(this.packageJson.dependencies)) {
+        pairs.push({ packageName: packageName, packageVersion: this.packageJson.dependencies[packageName] });
+      }
+    }
+
+    for (const pair of pairs) {
+      // Is there a locally built Rush project that could satisfy this dependency?
+      // If so, then we will symlink to the project folder rather than to common/node_modules.
+      // In this case, we don't want "npm install" to process this package, but we do need
+      // to record this decision for "rush link" later, so we add it to a special 'rushDependencies' field.
+      const localProject: RushConfigurationProject = rushConfiguration.getProjectByName(pair.packageName);
+      if (localProject) {
+
+        // Don't locally link if it's listed in the cyclicDependencyProjects
+        if (!this.cyclicDependencyProjects.has(pair.packageName)) {
+
+          // Also, don't locally link if the SemVer doesn't match
+          const localProjectVersion: string = localProject.packageJson.version;
+          if (semver.satisfies(localProjectVersion, pair.packageVersion)) {
+
+            // We will locally link this package
+            if (!tempPackageJson.rushDependencies) {
+              tempPackageJson.rushDependencies = {};
+            }
+            tempPackageJson.rushDependencies[pair.packageName] = pair.packageVersion;
+            continue;
+          }
+        }
+      }
+
+      // We will NOT locally link this package; add it as a regular dependency.
+      tempPackageJson.dependencies[pair.packageName] = pair.packageVersion;
+    }
+
+    return tempPackageJson;
   }
 
   /**
