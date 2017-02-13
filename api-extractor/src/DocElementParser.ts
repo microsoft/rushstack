@@ -135,7 +135,7 @@ export default class DocElementParser {
       }
     });
     if (pipeSplitContent.length > 2) {
-      reportError('Invalid @link parameters, at most pipe character allowed.');
+      reportError('Invalid @link parameters, at most one pipe character allowed.');
       return;
     }
 
