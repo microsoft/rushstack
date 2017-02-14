@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-sass",
+      "comment": "Updating SASS hash generation for css modules to consider css content in addition to filename.",
+      "type": "patch"
+    }
+  ],
+  "email": "dzearing@users.noreply.github.com"
+}
