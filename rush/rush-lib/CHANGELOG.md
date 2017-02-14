@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush-lib
 
-This log was last generated on Tue, 14 Feb 2017 02:31:40 GMT and should not be manually modified.
+This log was last generated on Tue, 14 Feb 2017 22:53:30 GMT and should not be manually modified.
+
+## 1.8.0
+Tue, 14 Feb 2017 22:53:30 GMT
+
+### Minor changes
+
+- Install will error if the temp_modules have drifted out of sync with the package's package.json files
 
 ## 1.7.0
 Tue, 14 Feb 2017 02:31:40 GMT

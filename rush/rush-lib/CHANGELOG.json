@@ -2,6 +2,18 @@
   "name": "@microsoft/rush-lib",
   "entries": [
     {
+      "version": "1.8.0",
+      "tag": "@microsoft/rush-lib_v1.8.0",
+      "date": "Tue, 14 Feb 2017 22:53:30 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Install will error if the temp_modules have drifted out of sync with the package's package.json files"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.7.0",
       "tag": "@microsoft/rush-lib_v1.7.0",
       "date": "Tue, 14 Feb 2017 02:31:40 GMT",
