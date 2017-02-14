@@ -8,6 +8,46 @@
   ],
   "remarks": [],
   "exports": {
+    "inheritEnumValues": {
+      "kind": "enum",
+      "values": {
+        "index_one": {
+          "kind": "enum value",
+          "value": "1",
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "We will also try to inherit this."
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        },
+        "index_zero": {
+          "kind": "enum value",
+          "value": "0",
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "This is documentation that we will try to inherit."
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        }
+      },
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "We will try to inherit the documentation for the enum's values."
+        }
+      ],
+      "remarks": [],
+      "isBeta": false
+    },
     "inheritLocalCircularDependencyOne": {
       "kind": "enum",
       "values": {},
@@ -76,6 +116,72 @@
       ],
       "remarks": [],
       "isBeta": false
+    },
+    "IStructuredTypeInherit": {
+      "kind": "interface",
+      "extends": "",
+      "implements": "",
+      "typeParameters": [],
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "This is a summary on the interface API item."
+        }
+      ],
+      "remarks": [],
+      "isBeta": false,
+      "members": {
+        "thisIsTypeLiteral": {
+          "kind": "property",
+          "isOptional": false,
+          "isReadOnly": false,
+          "isStatic": false,
+          "type": "[{name: string, age: number}]",
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "This is the summary on an API item that is a type literal."
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        }
+      }
+    },
+    "IStructuredTypeSource": {
+      "kind": "interface",
+      "extends": "",
+      "implements": "",
+      "typeParameters": [],
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "This is a summary on the interface API item."
+        }
+      ],
+      "remarks": [],
+      "isBeta": false,
+      "members": {
+        "thisIsTypeLiteral": {
+          "kind": "property",
+          "isOptional": false,
+          "isReadOnly": false,
+          "isStatic": false,
+          "type": "{\r\n    [ key: string ]: string;\r\n    renderingArea: string;\r\n  }",
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "This is the summary on an API item that is a type literal."
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        }
+      }
     },
     "jsonResolutionClass": {
       "kind": "class",
@@ -188,6 +294,46 @@
         {
           "kind": "textDocElement",
           "value": "This is the summary for MyClass."
+        }
+      ],
+      "remarks": [],
+      "isBeta": false
+    },
+    "sourceEnumValuesDoc": {
+      "kind": "enum",
+      "values": {
+        "one": {
+          "kind": "enum value",
+          "value": "1",
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "We will also try to inherit this."
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        },
+        "zero": {
+          "kind": "enum value",
+          "value": "0",
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "This is documentation that we will try to inherit."
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        }
+      },
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "We will try to inheritdoc the documentation for one of the enum value's documentation."
         }
       ],
       "remarks": [],
