@@ -241,12 +241,12 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     _classMaps[cssFileName] = json;
   }
 
-  private generateScopedName(name: string, fileName: string, css: string): string {
+  private generateScopedName(name: string, fileName: string): string {
     /* tslint:disable:typedef */
     const crypto = require('crypto');
     /* tslint:enable:typedef */
 
-    return name + '_' + crypto.createHmac('sha1', fileName).update(css).digest('hex').substring(0, 8);
+    return name + '_' + crypto.createHmac('sha1', fileName).update(name).digest('hex').substring(0, 8);
   }
 }
 
