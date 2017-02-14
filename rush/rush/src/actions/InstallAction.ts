@@ -206,8 +206,10 @@ export default class InstallAction extends CommandLineAction {
       const expectedTempModule: IPackageJson = project.generateTempModule(this._rushConfiguration);
 
       if (!_.isEqual(expectedTempModule, tempModule.packageJson)) {
-        // this is a workaround for the wordwrap trimming
-        const delimiter: string = String.fromCharCode(129) + String.fromCharCode(129);
+        // wordwrap attempts to remove any leading spaces, however, we are attempting to serialize
+        // some JSON information into the error, and therefore we want to maintain proper spacing.
+        // the workaround is to wrap our spaces in the non-breaking character
+        const delimiter: string = String.fromCharCode(131) + String.fromCharCode(130);
 
         const errorText: string[] = [];
 
@@ -218,9 +220,12 @@ export default class InstallAction extends CommandLineAction {
         throw new Error(`The project ${project.packageName}'s ` +
           `temp_module is outdated:\n` +
           errorText.join('\n') +
-        `\n\nDid you forget to run 'rush generate'?`);
+        `\n\nDid you forget to run "rush generate"?`);
       }
     });
+
+    console.log('ALL DONE!');
+    process.exit(1);
   }
 
   private _installCommonModules(): void {
