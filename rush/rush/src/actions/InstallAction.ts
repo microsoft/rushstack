@@ -21,7 +21,8 @@ import {
 } from '@microsoft/rush-lib';
 
 import RushCommandLineParser from './RushCommandLineParser';
-import GitPolicy from './GitPolicy';
+import GitPolicy from '../utilities/GitPolicy';
+import { TempModuleGenerator } from '../utilities/TempModuleGenerator';
 
 const MAX_INSTALL_ATTEMPTS: number = 5;
 
@@ -190,6 +191,8 @@ export default class InstallAction extends CommandLineAction {
       }
     });
 
+    const expectedTempModules: Map<string, IPackageJson> = new TempModuleGenerator(this._rushConfiguration).tempModules;
+
     // 2nd ensure that each config project has a temp_module which matches the expected value
     this._rushConfiguration.projects.forEach((project: RushConfigurationProject) => {
       //   if no temp_module, throw
@@ -203,7 +206,7 @@ export default class InstallAction extends CommandLineAction {
       }
 
       // Generate an expected temp_modules package.json & compare
-      const expectedTempModule: IPackageJson = project.generateTempModule(this._rushConfiguration);
+      const expectedTempModule: IPackageJson = expectedTempModules.get(project.packageName);
 
       if (!_.isEqual(expectedTempModule, tempModule.packageJson)) {
         // wordwrap attempts to remove any leading spaces, however, we are attempting to serialize

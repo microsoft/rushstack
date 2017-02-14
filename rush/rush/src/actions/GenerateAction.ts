@@ -20,7 +20,8 @@ import {
 
 import InstallAction from './InstallAction';
 import RushCommandLineParser from './RushCommandLineParser';
-import PackageReviewChecker from './PackageReviewChecker';
+import PackageReviewChecker from '../utilities/PackageReviewChecker';
+import { TempModuleGenerator } from '../utilities/TempModuleGenerator';
 
 export default class GenerateAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
@@ -84,6 +85,9 @@ export default class GenerateAction extends CommandLineAction {
     sortedRushProjects.sort(
       (a: RushConfigurationProject, b: RushConfigurationProject) => a.tempProjectName.localeCompare(b.tempProjectName)
     );
+
+    const tempModules: Map<string, IPackageJson> = new TempModuleGenerator(rushConfiguration).tempModules;
+
     for (const rushProject of sortedRushProjects) {
       const packageJson: PackageJson = rushProject.packageJson;
 
@@ -96,9 +100,7 @@ export default class GenerateAction extends CommandLineAction {
 
       const tempPackageJsonFilename: string = path.join(tempProjectFolder, 'package.json');
 
-      const tempPackageJson: IPackageJson = rushProject.generateTempModule(rushConfiguration);
-
-      JsonFile.saveJsonFile(tempPackageJson, tempPackageJsonFilename);
+      JsonFile.saveJsonFile(tempModules.get(rushProject.packageName), tempPackageJsonFilename);
     }
 
     console.log('Writing common/package.json');
