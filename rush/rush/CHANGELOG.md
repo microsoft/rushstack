@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sun, 05 Feb 2017 01:21:30 GMT and should not be manually modified.
+This log was last generated on Tue, 14 Feb 2017 02:31:40 GMT and should not be manually modified.
+
+## 1.7.0
+Tue, 14 Feb 2017 02:31:40 GMT
+
+### Minor changes
+
+- Adds an extra command (rush check-versions), which can find inconsistencies in package.json dependency versions across a repository.
 
 ## 1.6.0
 Sun, 05 Feb 2017 01:21:30 GMT
