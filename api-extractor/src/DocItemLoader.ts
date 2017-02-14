@@ -91,7 +91,7 @@ export default class DocItemLoader {
 
     // If memberName exists then check for the existense of the name
     if (apiDefinitionRef.memberName) {
-      if (apiDefinitionRef.memberName in resolvedApiItem.members) {
+      if (resolvedApiItem.members && apiDefinitionRef.memberName in resolvedApiItem.members) {
         const memberItem: ApiItem | IDocItem = resolvedApiItem.members[apiDefinitionRef.memberName];
 
         if (memberItem instanceof ApiItem) {
