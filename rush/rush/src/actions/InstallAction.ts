@@ -212,18 +212,15 @@ export default class InstallAction extends CommandLineAction {
         // wordwrap attempts to remove any leading spaces, however, we are attempting to serialize
         // some JSON information into the error, and therefore we want to maintain proper spacing.
         // the workaround is to wrap our spaces in the non-breaking character
-        const delimiter: string = String.fromCharCode(131) + String.fromCharCode(130);
 
-        const errorText: string[] = [];
+        const errorMsg: string = `The project ${project.packageName}'s temp_module is outdated`;
+        const rerunGenerate: string = '\nDid you forget to run rush generate?';
 
-        errorText.push(``);
-        errorText.push(`EXPECTED:\n${JSON.stringify(expectedTempModule, undefined, delimiter)}`);
-        errorText.push(`ACTUAL: \n${JSON.stringify(tempModule.packageJson, undefined, delimiter)}`);
+        console.log(colors.red(`${errorMsg}:\n`));
+        console.log(colors.red(`EXPECTED:\n${JSON.stringify(expectedTempModule, undefined, 2)}\n`));
+        console.log(colors.red(`ACTUAL: \n${JSON.stringify(tempModule.packageJson, undefined, 2)}`));
 
-        throw new Error(`The project ${project.packageName}'s ` +
-          `temp_module is outdated:\n` +
-          errorText.join('\n') +
-        `\n\nDid you forget to run "rush generate"?`);
+        throw new Error(errorMsg + '\n' + rerunGenerate);
       }
     });
 
