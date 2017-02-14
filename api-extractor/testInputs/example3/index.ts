@@ -7,9 +7,13 @@ export {
     inheritLocalOptionOne,
     inheritLocalOptionTwo,
     inheritLocalOptionThreeFunction,
+    inheritEnumValues,
+    sourceEnumValuesDoc,
     inheritLocalCircularDependencyOne,
     inheritLocalCircularDependencyTwo,
     jsonResolutionFunction,
-    jsonResolutionClass
+    jsonResolutionClass,
+    IStructuredTypeInherit,
+    IStructuredTypeSource
 } from './folder/MyClass';
 export { default as MyClass } from './folder/MyClass';

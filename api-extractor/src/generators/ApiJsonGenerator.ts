@@ -121,6 +121,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
     const value: string = lastToken && lastToken !== firstToken ? lastToken.getText() : '';
 
     refObject[apiEnumValue.name] = {
+      kind: ApiJsonFile.convertKindToJson(apiEnumValue.kind),
       value: value,
       deprecatedMessage: apiEnumValue.documentation.deprecatedMessage || [],
       summary: apiEnumValue.documentation.summary || [],
