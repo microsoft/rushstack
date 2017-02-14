@@ -55,10 +55,17 @@ export default class DocItemLoader {
     apiPackage: ApiPackage,
     reportError: (message: string) => void): ResolvedApiItem {
 
-    const packageName: string = path.dirname(apiPackage.name).split('/').pop();
+    const dirName: string[] = path.dirname(apiPackage.name).split('/');
+    const currentPackageName: string = dirName.pop();
+    const currentScopeName: string = dirName.pop();
+
+    const scopeNameMatch: boolean = apiDefinitionRef.scopeName ?
+      apiDefinitionRef.scopeName === currentScopeName : true;
+    const packageNameMatch: boolean = apiDefinitionRef.packageName ?
+      apiDefinitionRef.packageName === currentPackageName : true;
 
     let resolvedApiItem: ResolvedApiItem;
-    if (packageName === apiDefinitionRef.packageName || !apiDefinitionRef.packageName) {
+    if (scopeNameMatch && packageNameMatch) {
       // Resolution for local references 
       const apiItem: ApiItem = apiPackage.getMemberItem(apiDefinitionRef.exportName);
       // Check if export name was not found
