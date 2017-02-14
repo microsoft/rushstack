@@ -94,9 +94,8 @@ export default class ApiStructuredType extends ApiItemContainer {
     }
 
     // Throw errors for setters that don't have a corresponding getter
-    const memberNames: string[] = this.memberItems.map((apiItem: ApiItem) => { return apiItem.name; });
     this._setterNames.forEach((setterName: string) => {
-      if (memberNames.indexOf(setterName) < 0) {
+      if (!this.memberItems.has(setterName)) {
         this.reportError(`Found setter named ${setterName} with no corresponding getter. \
           WriteOnly properties are prohibited.`);
       }

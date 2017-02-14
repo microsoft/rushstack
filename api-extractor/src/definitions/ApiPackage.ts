@@ -80,14 +80,10 @@ export default class ApiPackage extends ApiItemContainer {
    * @param memberName - the name of the member ApiItem
    */
   public getMemberItem(memberName: string): ApiItem {
-    let matchedApiItem: ApiItem = undefined;
-    this.memberItems.forEach(apiItem => {
-      if (apiItem.name === memberName) {
-        matchedApiItem = apiItem;
-      }
-    });
-
-    return matchedApiItem;
+    if (this.memberItems.has(memberName)) {
+      return this.memberItems.get(memberName);
+    }
+    return undefined;
   }
 
   public shouldHaveDocumentation(): boolean {
