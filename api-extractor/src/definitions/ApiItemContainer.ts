@@ -5,7 +5,7 @@ import ApiItem, { IApiItemOptions } from './ApiItem';
   * which all act as containers for other ApiItem definitions.
   */
 abstract class ApiItemContainer extends ApiItem {
-  public memberItems: ApiItem[] = [];
+  public memberItems: Map<string, ApiItem> = new Map<string, ApiItem>();
 
   constructor(options: IApiItemOptions) {
     super(options);
@@ -15,7 +15,12 @@ abstract class ApiItemContainer extends ApiItem {
    * Return a list of the child items for this container, sorted alphabetically.
    */
   public getSortedMemberItems(): ApiItem[] {
-    return this.memberItems
+    const apiItems: ApiItem[] = [];
+    this.memberItems.forEach((apiItem: ApiItem) => {
+      apiItems.push(apiItem);
+    });
+
+    return apiItems
       .sort((a: ApiItem, b: ApiItem) => a.name.localeCompare(b.name));
   }
 
@@ -27,7 +32,7 @@ abstract class ApiItemContainer extends ApiItem {
       this.reportWarning(`${apiItem.name} has incomplete type information`);
     } else {
       this.innerItems.push(apiItem);
-      this.memberItems.push(apiItem);
+      this.memberItems.set(apiItem.name, apiItem);
     }
   }
 }
