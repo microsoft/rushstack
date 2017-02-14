@@ -3,6 +3,7 @@ import ApiItemContainer from './definitions/ApiItemContainer';
 import { ApiTag } from './definitions/ApiDocumentation';
 import { IDocElement, IParam } from './IDocElement';
 import { IDocItem } from './IDocItem';
+import ApiJsonFile from './generators/ApiJsonFile';
 
 /**
  * A class to abstract away the difference between an item from our public API that could be 
@@ -55,26 +56,26 @@ export default class ResolvedApiItem {
     let returnsMessage: IDocElement[] = undefined;
     let members: { [name: string]: IDocItem} = undefined;
     switch (docItem.kind) {
-      case 'IDocFunction':
+      case 'function':
         parameters = docItem.parameters;
         returnsMessage = docItem.returnValue.description;
         break;
-      case 'IDocMethod':
+      case 'method':
         parameters = docItem.parameters;
         returnsMessage = docItem.returnValue.description;
         break;
-      case 'IDocClass':
+      case 'class':
         members = docItem.members;
         break;
-      case 'IDocPackage':
-        members = docItem.exports;
+      case 'interface':
+        members = docItem.members;
         break;
       default:
         break;
     }
 
     return new ResolvedApiItem(
-      ApiItemKind[docItem.kind],
+      ApiJsonFile.convertJsonToKind(docItem.kind),
       docItem.summary,
       docItem.remarks,
       docItem.deprecatedMessage,
