@@ -50,7 +50,11 @@ export enum ApiItemKind {
   /**
     * A TypeScript type literal expression, i.e. which defines an anonymous interface.
     */
-  TypeLiteral = 9
+  TypeLiteral = 9,
+  /**
+   * A Typescript class constructor function.
+   */
+  Constructor = 10
 }
 
 /**

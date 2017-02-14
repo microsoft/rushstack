@@ -475,6 +475,10 @@ export default class ApiDocumentation {
         this.parameters = resolvedApiItem.params;
         this.returnsMessage = resolvedApiItem.returnsMessage;
         break;
+      case ApiItemKind.Method:
+        this.parameters = resolvedApiItem.params;
+        this.returnsMessage = resolvedApiItem.returnsMessage;
+        break;
     }
 
     // Check if inheritdoc is depreacted
