@@ -31,6 +31,33 @@ export enum inheritLocalCircularDependencyTwo {
 }
 
 /**
+ * {@inheritdoc es6-collections:ForEachable }
+ */
+export interface IJsonResolutionInterface {
+}
+
+
+/**
+ * {@inheritdoc es6-collections:aFunction }
+ */
+export function jsonResolutionFunction(): boolean {
+    return true;
+}
+
+/**
+ * {@inheritdoc es6-collections:aClass }
+ */
+export class jsonResolutionClass {
+    /**
+     * {@inheritdoc es6-collections:ForEachable.aMethod }
+     */
+    public jsonResolutionMethod(): boolean {
+        return true;
+    }
+}
+
+
+/**
  * This is the summary for MyClass.
  */
 export default class MyClass {
