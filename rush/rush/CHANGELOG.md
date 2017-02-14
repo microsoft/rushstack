@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 14 Feb 2017 22:53:30 GMT and should not be manually modified.
+This log was last generated on Tue, 14 Feb 2017 23:40:44 GMT and should not be manually modified.
+
+## 1.8.1
+Tue, 14 Feb 2017 23:40:44 GMT
+
+### Patches
+
+- Fixing a bug with install where it preemptively returned before installing.
 
 ## 1.8.0
 Tue, 14 Feb 2017 22:53:30 GMT

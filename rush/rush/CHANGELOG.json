@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "1.8.1",
+      "tag": "@microsoft/rush_v1.8.1",
+      "date": "Tue, 14 Feb 2017 23:40:44 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixing a bug with install where it preemptively returned before installing."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.8.0",
       "tag": "@microsoft/rush_v1.8.0",
       "date": "Tue, 14 Feb 2017 22:53:30 GMT",
