@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fixing a bug with install where it preemptively returned before installing.",
+      "type": "patch"
+    }
+  ],
+  "email": "nickpape@users.noreply.github.com"
+}

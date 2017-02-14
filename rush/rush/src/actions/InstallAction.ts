@@ -223,9 +223,6 @@ export default class InstallAction extends CommandLineAction {
         throw new Error(errorMsg + '\n' + rerunGenerate);
       }
     });
-
-    console.log('ALL DONE!');
-    process.exit(1);
   }
 
   private _installCommonModules(): void {
