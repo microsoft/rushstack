@@ -8,6 +8,7 @@ export default class ApiJsonFile {
   private static _KIND_CONSTRUCTOR: string = 'constructor';
   private static _KIND_CLASS: string = 'class';
   private static _KIND_ENUM: string = 'enum';
+  private static _KIND_ENUM_VALUE: string = 'enum value';
   private static _KIND_INTERFACE: string = 'interface';
   private static _KIND_FUNCTION: string = 'function';
   private static _KIND_PACKAGE: string = 'package';
@@ -17,6 +18,9 @@ export default class ApiJsonFile {
   /**
    * Uses the lowercase string that represents 'kind' in an API JSON file, and
    * converts it to an ApiItemKind enum value.
+   * There are two cases we do not include here, (Parameter and StructuredType),
+   * this is intential as we do not expect to be loading these kind of JSON object 
+   * from file.
    */
   public static convertJsonToKind(jsonItemKind: string): ApiItemKind {
     switch (jsonItemKind) {
@@ -26,6 +30,8 @@ export default class ApiJsonFile {
         return ApiItemKind.Class;
       case (this._KIND_ENUM):
         return ApiItemKind.Enum;
+      case (this._KIND_ENUM_VALUE):
+        return ApiItemKind.EnumValue;
       case (this._KIND_INTERFACE):
         return ApiItemKind.Interface;
       case (this._KIND_FUNCTION):
@@ -37,8 +43,7 @@ export default class ApiJsonFile {
       case (this._KIND_METHOD):
         return ApiItemKind.Method;
       default:
-        new Error('Unsupported kind when converting JSON item kind to API item kind.');
-        break;
+        throw new Error('Unsupported kind when converting JSON item kind to API item kind.');
     }
   }
 
@@ -53,6 +58,8 @@ export default class ApiJsonFile {
         return this._KIND_CLASS;
       case (ApiItemKind.Enum):
         return this._KIND_ENUM;
+      case (ApiItemKind.EnumValue):
+        return this._KIND_ENUM_VALUE;
       case (ApiItemKind.Interface):
         return this._KIND_INTERFACE;
       case (ApiItemKind.Function):
@@ -64,8 +71,7 @@ export default class ApiJsonFile {
       case (ApiItemKind.Method):
         return this._KIND_METHOD;
       default:
-        new Error('Unsupported API item kind when converting to string used in API JSON file.');
-        break;
+        throw new Error('Unsupported API item kind when converting to string used in API JSON file.');
     }
   }
 }
