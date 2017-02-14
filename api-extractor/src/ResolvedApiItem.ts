@@ -2,7 +2,7 @@ import ApiItem, { ApiItemKind } from './definitions/ApiItem';
 import ApiItemContainer from './definitions/ApiItemContainer';
 import { ApiTag } from './definitions/ApiDocumentation';
 import { IDocElement, IParam } from './IDocElement';
-import { IDocItem, IDocFunction, IDocMember } from './IDocItem';
+import { IDocItem } from './IDocItem';
 
 /**
  * A class to abstract away the difference between an item from our public API that could be 
@@ -13,13 +13,14 @@ export default class ResolvedApiItem {
   public summary: IDocElement[];
   public remarks: IDocElement[];
   public deprecatedMessage: IDocElement[];
-  public apiTag: ApiTag;
+  public isBeta: boolean;
   public params: {[name: string]: IParam};
   public returnsMessage: IDocElement[];
-  public members: { [name: string]: ApiItem | IDocMember};
+  public members: { [name: string]: ApiItem | IDocItem};
 
   /**
-   * 
+   * A function to abstract the construction of a ResolvedApiItem instance
+   * from an ApiItem. 
    */
   public static createFromApiItem(apiItem: ApiItem): ResolvedApiItem {
     const canResolveRefs: boolean = apiItem.canResolveReferences();
@@ -38,7 +39,7 @@ export default class ResolvedApiItem {
       apiItem.documentation.summary,
       apiItem.documentation.remarks,
       apiItem.documentation.deprecatedMessage,
-      apiItem.documentation.apiTag,
+      apiItem.documentation.apiTag === ApiTag.Beta,
       apiItem.documentation.parameters,
       apiItem.documentation.returnsMessage,
       members
@@ -46,12 +47,13 @@ export default class ResolvedApiItem {
   }
 
   /**
-   * 
+   * A function to abstract the construction of a ResolvedApiItem instance
+   * from a JSON object that symbolizes an IDocItem. 
    */
   public static createFromJson(docItem: IDocItem): ResolvedApiItem {
     let parameters: {[name: string]: IParam} = undefined;
     let returnsMessage: IDocElement[] = undefined;
-    let members: { [name: string]: IDocMember} = undefined;
+    let members: { [name: string]: IDocItem} = undefined;
     switch (docItem.kind) {
       case 'IDocFunction':
         parameters = docItem.parameters;
@@ -64,6 +66,9 @@ export default class ResolvedApiItem {
       case 'IDocClass':
         members = docItem.members;
         break;
+      case 'IDocPackage':
+        members = docItem.exports;
+        break;
       default:
         break;
     }
@@ -73,7 +78,7 @@ export default class ResolvedApiItem {
       docItem.summary,
       docItem.remarks,
       docItem.deprecatedMessage,
-      undefined,
+      docItem.isBeta,
       parameters,
       returnsMessage,
       members
@@ -86,14 +91,14 @@ export default class ResolvedApiItem {
     summary: IDocElement[],
     remarks: IDocElement[],
     deprecatedMessage: IDocElement[],
-    apiTag?: ApiTag,
+    isBeta?: boolean,
     params?:  {[name: string]: IParam},
     returnsMessage?: IDocElement[],
-    members?: { [name: string]: ApiItem | IDocMember} ) {
+    members?: { [name: string]: ApiItem | IDocItem} ) {
     this.kind = kind;
     this.summary = summary;
     this.remarks = remarks;
-    this.apiTag = apiTag;
+    this.isBeta = isBeta;
     this.params = params;
     this.returnsMessage = returnsMessage;
     this.members = members;
