@@ -2,6 +2,18 @@
   "name": "@microsoft/rush-lib",
   "entries": [
     {
+      "version": "1.7.0",
+      "tag": "@microsoft/rush-lib_v1.7.0",
+      "date": "Tue, 14 Feb 2017 02:31:40 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Adds an extra utility (VersionMismatchFinder), which can locate inconsistencies in versions of dependencies across the repo."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.5.2",
       "tag": "@microsoft/rush-lib_v1.5.2",
       "date": "Sun, 05 Feb 2017 01:21:30 GMT",
