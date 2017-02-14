@@ -17,6 +17,7 @@ import ApiMethod from '../definitions/ApiMethod';
 import { ApiTag } from '../definitions/ApiDocumentation';
 import { IReturn, IParam }from '../IDocElement';
 import JsonFile from '../JsonFile';
+import ApiJsonFile from './ApiJsonFile';
 
 /**
   * For a library such as "example-package", ApiFileGenerator generates the "example-package.api.ts"
@@ -29,15 +30,6 @@ import JsonFile from '../JsonFile';
   */
 export default class ApiJsonGenerator extends ApiItemVisitor {
   private static _methodCounter: number = 0;
-
-  private static _KIND_CONSTRUCTOR: string = 'constructor';
-  private static _KIND_CLASS: string = 'class';
-  private static _KIND_ENUM: string = 'enum';
-  private static _KIND_INTERFACE: string = 'interface';
-  private static _KIND_FUNCTION: string = 'function';
-  private static _KIND_PACKAGE: string = 'package';
-  private static _KIND_PROPERTY: string = 'property';
-  private static _KIND_METHOD: string = 'method';
   private static _MEMBERS_KEY: string = 'members';
   private static _EXPORTS_KEY: string = 'exports';
 
@@ -74,9 +66,9 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
 
   protected visitApiStructuredType(apiStructuredType: ApiStructuredType, refObject?: Object): void {
     const kind: string =
-      apiStructuredType.kind === ApiItemKind.Class ? ApiJsonGenerator._KIND_CLASS :
-      apiStructuredType.kind === ApiItemKind.Interface ? ApiJsonGenerator._KIND_INTERFACE :
-      '';
+      apiStructuredType.kind === ApiItemKind.Class ? ApiJsonFile.convertKindToJson(ApiItemKind.Class) :
+      apiStructuredType.kind === ApiItemKind.Interface ?
+        ApiJsonFile.convertKindToJson(ApiItemKind.Interface) : '';
 
     const structureNode: Object = {
       kind: kind,
@@ -107,7 +99,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
   protected visitApiEnum(apiEnum: ApiEnum, refObject?: Object): void {
     const valuesNode: Object = {};
     const enumNode: Object = {
-      kind: ApiJsonGenerator._KIND_ENUM,
+      kind: ApiJsonFile.convertKindToJson(apiEnum.kind),
       values: valuesNode,
       deprecatedMessage: apiEnum.documentation.deprecatedMessage || [],
       summary: apiEnum.documentation.summary || [],
@@ -147,7 +139,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
     };
 
     const newNode: Object = {
-      kind: ApiJsonGenerator._KIND_FUNCTION,
+      kind: ApiJsonFile.convertKindToJson(apiFunction.kind),
       returnValue: returnValueNode,
       parameters: apiFunction.documentation.parameters,
       deprecatedMessage: apiFunction.documentation.deprecatedMessage || [],
@@ -160,9 +152,11 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
   }
 
   protected visitApiPackage(apiPackage: ApiPackage, refObject?: Object): void {
-    refObject['kind'] = ApiJsonGenerator._KIND_PACKAGE; /* tslint:disable-line:no-string-literal */
-    refObject['summary'] = apiPackage.documentation.summary; /* tslint:disable-line:no-string-literal */
-    refObject['remarks'] = apiPackage.documentation.remarks; /* tslint:disable-line:no-string-literal */
+    /* tslint:disable:no-string-literal */
+    refObject['kind'] = ApiJsonFile.convertKindToJson(apiPackage.kind);
+    refObject['summary'] = apiPackage.documentation.summary;
+    refObject['remarks'] = apiPackage.documentation.remarks;
+    /* tslint:enable:no-string-literal */
 
     const membersNode: Object = {};
     refObject[ApiJsonGenerator._EXPORTS_KEY] = membersNode;
@@ -182,7 +176,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
     }
 
     const newNode: Object = {
-      kind: ApiJsonGenerator._KIND_PROPERTY,
+      kind: ApiJsonFile.convertKindToJson(apiProperty.kind),
       isOptional: !!apiProperty.isOptional,
       isReadOnly: !!apiProperty.isReadOnly,
       isStatic: !!apiProperty.isStatic,
@@ -204,7 +198,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
     let newNode: Object;
     if (apiMethod.name === '__constructor') {
       newNode = {
-        kind: ApiJsonGenerator._KIND_CONSTRUCTOR,
+        kind: ApiJsonFile.convertKindToJson(ApiItemKind.Constructor),
         signature: apiMethod.getDeclarationLine(),
         parameters: apiMethod.documentation.parameters,
         deprecatedMessage: apiMethod.documentation.deprecatedMessage || [],
@@ -218,7 +212,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
       };
 
       newNode = {
-        kind: ApiJsonGenerator._KIND_METHOD,
+        kind: ApiJsonFile.convertKindToJson(apiMethod.kind),
         signature: apiMethod.getDeclarationLine(),
         accessModifier: apiMethod.accessModifier ? AccessModifier[apiMethod.accessModifier].toLowerCase() : '',
         isOptional: !!apiMethod.isOptional,
