@@ -8,6 +8,8 @@ export {
     inheritLocalOptionTwo,
     inheritLocalOptionThreeFunction,
     inheritLocalCircularDependencyOne,
-    inheritLocalCircularDependencyTwo
+    inheritLocalCircularDependencyTwo,
+    jsonResolutionFunction,
+    jsonResolutionClass
 } from './folder/MyClass';
 export { default as MyClass } from './folder/MyClass';
