@@ -8,6 +8,7 @@
     "@types/es6-promise": "0.0.32",
     "@types/fs-extra": "0.0.37",
     "@types/glob": "5.0.30",
+    "@types/lodash": "4.14.52",
     "@types/minimatch": "2.0.29",
     "@types/mocha": "2.2.38",
     "@types/node": "6.0.62",
@@ -23,6 +24,7 @@
     "glob": "~7.0.5",
     "glob-escape": "~0.0.1",
     "inquirer": "~1.2.1",
+    "lodash": "~4.15.0",
     "minimatch": "~3.0.2",
     "mkdirp": "~0.5.1",
     "read-package-tree": "~5.1.5",
@@ -31,6 +33,6 @@
   },
   "rushDependencies": {
     "@microsoft/node-library-build": "~2.3.0",
-    "@microsoft/rush-lib": "1.6.0"
+    "@microsoft/rush-lib": "1.8.0"
   }
 }
