@@ -8,7 +8,6 @@ import ApiFunction from './ApiFunction';
 import ApiItem, { ApiItemKind, IApiItemOptions } from './ApiItem';
 import ApiItemContainer from './ApiItemContainer';
 import TypeScriptHelpers from '../TypeScriptHelpers';
-import ResolvedApiItem from '../ResolvedApiItem';
 
 /**
   * This class is part of the ApiItem abstract syntax tree.  It represents the top-level
@@ -88,7 +87,6 @@ export default class ApiPackage extends ApiItemContainer {
       }
     });
 
-    const resolvedApiItem: ResolvedApiItem = ResolvedApiItem.createFromApiItem(matchedApiItem);
     return matchedApiItem;
   }
 

@@ -47,10 +47,9 @@ describe('DocItemLoader tests', function (): void {
       const apiJsonGenerator: ApiJsonGenerator = new ApiJsonGenerator();
       apiJsonGenerator.writeJsonFile(outputFile, extractor);
 
-      assert.equal(capturedErrors.length, 3);
-      assert.equal(capturedErrors[0].message, '\"methodWithTwoParams\", not found as member of \"MyClass\"');
+      assert.equal(capturedErrors.length, 2);
+      assert.equal(capturedErrors[0].message, 'API member name was not found on the export item');
       assert.equal(capturedErrors[1].message, 'circular reference');
-      assert.equal(capturedErrors[2].message, 'circular reference');
       TestFileComparer.assertFileMatchesExpected(outputFile, expectedFile);
     });
   });

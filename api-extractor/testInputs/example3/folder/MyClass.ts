@@ -13,13 +13,14 @@ export enum inheritLocalOptionTwo {
 /** 
  * {@inheritdoc MyClass.methodWithTwoParams }
  */
+// (Error #1) methodWithTwoParams not a member of MyClass
 export function inheritLocalOptionThreeFunction(): void {
 }
 
 /**
  * {@inheritdoc inheritLocalCircularDependencyTwo }
  */
-// (Error #1) Circular reference
+// (Error #2) Circular reference
 export enum inheritLocalCircularDependencyOne {
 }
 
