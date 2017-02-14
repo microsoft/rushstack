@@ -1,0 +1,15 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-lib",
+      "comment": "Install will error if the temp_modules have drifted out of sync with the package's package.json files",
+      "type": "minor"
+    },
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Install will error if the temp_modules have drifted out of sync with the package's package.json files",
+      "type": "minor"
+    }
+  ],
+  "email": "nickpape@users.noreply.github.com"
+}

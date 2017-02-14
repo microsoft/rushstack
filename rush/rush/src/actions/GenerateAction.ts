@@ -6,7 +6,6 @@ import * as glob from 'glob';
 import globEscape = require('glob-escape');
 import * as os from 'os';
 import * as path from 'path';
-import * as semver from 'semver';
 import * as fsx from 'fs-extra';
 import { CommandLineAction, CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import {
@@ -21,7 +20,8 @@ import {
 
 import InstallAction from './InstallAction';
 import RushCommandLineParser from './RushCommandLineParser';
-import PackageReviewChecker from './PackageReviewChecker';
+import PackageReviewChecker from '../utilities/PackageReviewChecker';
+import { TempModuleGenerator } from '../utilities/TempModuleGenerator';
 
 export default class GenerateAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
@@ -85,6 +85,9 @@ export default class GenerateAction extends CommandLineAction {
     sortedRushProjects.sort(
       (a: RushConfigurationProject, b: RushConfigurationProject) => a.tempProjectName.localeCompare(b.tempProjectName)
     );
+
+    const tempModules: Map<string, IPackageJson> = new TempModuleGenerator(rushConfiguration).tempModules;
+
     for (const rushProject of sortedRushProjects) {
       const packageJson: PackageJson = rushProject.packageJson;
 
@@ -97,69 +100,7 @@ export default class GenerateAction extends CommandLineAction {
 
       const tempPackageJsonFilename: string = path.join(tempProjectFolder, 'package.json');
 
-      const tempPackageJson: IPackageJson = {
-        name: tempProjectName,
-        version: '0.0.0',
-        private: true,
-        dependencies: {}
-      };
-
-      // If there are any optional dependencies, copy them over directly
-      if (packageJson.optionalDependencies) {
-        tempPackageJson.optionalDependencies = packageJson.optionalDependencies;
-      }
-
-      // Collect pairs of (packageName, packageVersion) to be added as temp package dependencies
-      const pairs: { packageName: string, packageVersion: string }[] = [];
-
-      // If there are devDependencies, we need to merge them with the regular
-      // dependencies.  If the same library appears in both places, then the
-      // regular dependency takes precedence over the devDependency.
-      // It also takes precedence over a duplicate in optionalDependencies,
-      // but NPM will take care of that for us.  (Frankly any kind of duplicate
-      // should be an error, but NPM is pretty lax about this.)
-      if (packageJson.devDependencies) {
-        for (const packageName of Object.keys(packageJson.devDependencies)) {
-          pairs.push({ packageName: packageName, packageVersion: packageJson.devDependencies[packageName] });
-        }
-      }
-
-      if (packageJson.dependencies) {
-        for (const packageName of Object.keys(packageJson.dependencies)) {
-          pairs.push({ packageName: packageName, packageVersion: packageJson.dependencies[packageName] });
-        }
-      }
-
-      for (const pair of pairs) {
-        // Is there a locally built Rush project that could satisfy this dependency?
-        // If so, then we will symlink to the project folder rather than to common/node_modules.
-        // In this case, we don't want "npm install" to process this package, but we do need
-        // to record this decision for "rush link" later, so we add it to a special 'rushDependencies' field.
-        const localProject: RushConfigurationProject = rushConfiguration.getProjectByName(pair.packageName);
-        if (localProject) {
-
-          // Don't locally link if it's listed in the cyclicDependencyProjects
-          if (!rushProject.cyclicDependencyProjects.has(pair.packageName)) {
-
-            // Also, don't locally link if the SemVer doesn't match
-            const localProjectVersion: string = localProject.packageJson.version;
-            if (semver.satisfies(localProjectVersion, pair.packageVersion)) {
-
-              // We will locally link this package
-              if (!tempPackageJson.rushDependencies) {
-                tempPackageJson.rushDependencies = {};
-              }
-              tempPackageJson.rushDependencies[pair.packageName] = pair.packageVersion;
-              continue;
-            }
-          }
-        }
-
-        // We will NOT locally link this package; add it as a regular dependency.
-        tempPackageJson.dependencies[pair.packageName] = pair.packageVersion;
-      }
-
-      JsonFile.saveJsonFile(tempPackageJson, tempPackageJsonFilename);
+      JsonFile.saveJsonFile(tempModules.get(rushProject.packageName), tempPackageJsonFilename);
     }
 
     console.log('Writing common/package.json');

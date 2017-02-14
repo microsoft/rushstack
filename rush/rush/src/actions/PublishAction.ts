@@ -22,8 +22,8 @@ import {
 import RushCommandLineParser from './RushCommandLineParser';
 import PublishUtilities, {
   IChangeInfoHash
-} from './PublishUtilities';
-import ChangelogGenerator from './ChangelogGenerator';
+} from '../utilities/PublishUtilities';
+import ChangelogGenerator from '../utilities/ChangelogGenerator';
 
 export default class PublishAction extends CommandLineAction {
   private _addCommitDetails: CommandLineFlagParameter;

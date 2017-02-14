@@ -24,7 +24,7 @@ import {
 } from '@microsoft/rush-lib';
 
 import RushCommandLineParser from './RushCommandLineParser';
-import PublishUtilities from './PublishUtilities';
+import PublishUtilities from '../utilities/PublishUtilities';
 
 const BUMP_OPTIONS: { [type: string]: string } = {
   'major': 'major - for breaking changes (ex: renaming a file)',
