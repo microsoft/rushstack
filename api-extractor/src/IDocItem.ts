@@ -97,7 +97,7 @@ export interface IDocProperty extends IDocBase {
   /**
    * {@inheritdoc IDocBase.kind}
    */
-  kind: 'IDocProperty';
+  kind: 'property';
   /**
    * For an interface member, whether it is optional
    */
@@ -126,7 +126,7 @@ export interface IDocMethod extends IDocBase {
   /**
    * {@inheritdoc IDocBase.kind}
    */
-  kind: 'IDocMethod';
+  kind: 'method';
   /**
    * a text summary of the method definition
    */
@@ -166,7 +166,7 @@ export interface IDocFunction extends IDocBase {
   /**
    * {@inheritdoc IDocBase.kind}
    */
-  kind: 'IDocFunction';
+  kind: 'function';
   /**
    * parameters of the function
    */
@@ -186,7 +186,7 @@ export interface IDocClass extends IDocBase {
   /**
    * {@inheritdoc IDocBase.kind}
    */
-  kind: 'IDocClass';
+  kind: 'class';
   /**
    * Can be a combination of methods and/or properties
    */
@@ -215,7 +215,7 @@ export interface IDocEnum extends IDocBase {
   /**
    * {@inheritdoc IDocBase.kind}
    */
-  kind: 'IDocEnum';
+  kind: 'enum';
 
   values: IDocEnumValue[];
 }
@@ -227,7 +227,7 @@ export interface IDocInterface extends IDocBase {
   /**
    * {@inheritdoc IDocBase.kind}
    */
-  kind: 'IDocInterface';
+  kind: 'interface';
   /**
    * A mapping from the name of a member API to its IDocMember
    */
@@ -258,7 +258,7 @@ export interface IDocPackage {
    /**
    * {@inheritdoc IDocBase.kind}
    */
-  kind: 'IDocPackage';
+  kind: 'package';
 
   /**
    * IDocItems of exported API items
