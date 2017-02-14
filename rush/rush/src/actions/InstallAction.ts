@@ -7,19 +7,30 @@ import * as glob from 'glob';
 import globEscape = require('glob-escape');
 import * as os from 'os';
 import * as path from 'path';
+import * as _ from 'lodash';
+
 import { CommandLineAction, CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import {
   JsonFile,
   RushConfiguration,
+  RushConfigurationProject,
   Utilities,
   Stopwatch,
-  AsyncRecycle
+  AsyncRecycle,
+  IPackageJson
 } from '@microsoft/rush-lib';
 
 import RushCommandLineParser from './RushCommandLineParser';
-import GitPolicy from './GitPolicy';
+import GitPolicy from '../utilities/GitPolicy';
+import { TempModuleGenerator } from '../utilities/TempModuleGenerator';
 
 const MAX_INSTALL_ATTEMPTS: number = 5;
+
+interface ITempModuleInformation {
+  packageJson: IPackageJson;
+  existsInProjectConfiguration: boolean;
+  filename: string;
+}
 
 export default class InstallAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
@@ -27,6 +38,8 @@ export default class InstallAction extends CommandLineAction {
   private _cleanInstall: CommandLineFlagParameter;
   private _cleanInstallFull: CommandLineFlagParameter;
   private _bypassPolicy: CommandLineFlagParameter;
+
+  private _tempModulesFiles: string[] = [];
 
   public static ensureLocalNpmTool(rushConfiguration: RushConfiguration, cleanInstall: boolean): void {
     // Example: "C:\Users\YourName\.rush"
@@ -132,12 +145,87 @@ export default class InstallAction extends CommandLineAction {
 
     console.log('Starting "rush install"' + os.EOL);
 
+    // Example: "C:\MyRepo\common\temp_modules\rush-example-project\package.json"
+    const normalizedPath: string = Utilities.getAllReplaced(this._rushConfiguration.tempModulesFolder, '\\', '/');
+    const globPattern: string = `${globEscape(normalizedPath)}/rush-*/package.json`;
+    this._tempModulesFiles = glob.sync(globPattern, { nodir: true });
+
+    this._checkThatTempModulesMatch();
+
     InstallAction.ensureLocalNpmTool(this._rushConfiguration, this._cleanInstallFull.value);
     this._installCommonModules();
 
     stopwatch.stop();
     console.log(colors.green(`The common NPM packages are up to date. (${stopwatch.toString()})`));
     console.log(os.EOL + 'Next you should probably run: "rush link"');
+  }
+
+  private _checkThatTempModulesMatch(): void {
+    // read all temp_modules
+    const tempModules: { [packageName: string]: ITempModuleInformation } = {};
+
+    this._tempModulesFiles.forEach((filename) => {
+      const contents: IPackageJson = require(filename);
+      tempModules[contents.name] = {
+        packageJson: contents,
+        existsInProjectConfiguration: false,
+        filename: filename
+      };
+    });
+
+    // 1st ensure that every temp_module exists in the configuration
+    Object.keys(tempModules).forEach((tempModuleName: string) => {
+      const tempModule: ITempModuleInformation = tempModules[tempModuleName];
+
+      let foundMatchingProject: boolean;
+      this._rushConfiguration.projects.forEach((project: RushConfigurationProject) => {
+        if (project.tempProjectName === tempModuleName) {
+          foundMatchingProject = true;
+        }
+      });
+
+      if (!foundMatchingProject) {
+        throw new Error(`The file "${tempModule.filename}" exists in the temp_modules folder ` +
+          `but we could not find a matching project for it. This file may need to be deleted.` +
+          `\n\nDid you forget to run 'rush generate'?`);
+      }
+    });
+
+    const expectedTempModules: Map<string, IPackageJson> = new TempModuleGenerator(this._rushConfiguration).tempModules;
+
+    // 2nd ensure that each config project has a temp_module which matches the expected value
+    this._rushConfiguration.projects.forEach((project: RushConfigurationProject) => {
+      //   if no temp_module, throw
+
+      const tempModule: ITempModuleInformation
+        = tempModules[project.tempProjectName];
+      if (!tempModule) {
+        throw new Error(`The project ${project.packageName} is missing a corresponding ` +
+          `file in the temp_modules folder.` +
+          `\n\nDid you forget to run 'rush generate'?`);
+      }
+
+      // Generate an expected temp_modules package.json & compare
+      const expectedTempModule: IPackageJson = expectedTempModules.get(project.packageName);
+
+      if (!_.isEqual(expectedTempModule, tempModule.packageJson)) {
+        // wordwrap attempts to remove any leading spaces, however, we are attempting to serialize
+        // some JSON information into the error, and therefore we want to maintain proper spacing.
+        // the workaround is to wrap our spaces in the non-breaking character
+
+        const errorMsg: string = `The project ${project.packageName}'s temp_module is outdated`;
+        const rerunGenerate: string = '\nDid you forget to run rush generate?';
+
+        console.log(colors.red(`${errorMsg}:\n`));
+        console.log(colors.red(`EXPECTED:\n${JSON.stringify(expectedTempModule, undefined, 2)}\n`));
+        console.log(colors.red(`ACTUAL: \n${JSON.stringify(tempModule.packageJson, undefined, 2)}`));
+
+        throw new Error(errorMsg + '\n' + rerunGenerate);
+      }
+    });
+
+    console.log('ALL DONE!');
+    process.exit(1);
   }
 
   private _installCommonModules(): void {
@@ -196,10 +284,8 @@ export default class InstallAction extends CommandLineAction {
       // or deleted it entirely, then isFileTimestampCurrent() will cause us to redo "npm install".
       packageJsonFilenames.push(commonNodeModulesFolder);
 
-      // Example: "C:\MyRepo\common\temp_modules\rush-example-project\package.json"
-      const normalizedPath: string = Utilities.getAllReplaced(this._rushConfiguration.tempModulesFolder, '\\', '/');
-      const globPattern: string = `${globEscape(normalizedPath)}/rush-*/package.json`;
-      packageJsonFilenames.push(...glob.sync(globPattern, { nodir: true }));
+      // Make sure we look at all the temp_modules/*/package.json files as well
+      packageJsonFilenames.push(...this._tempModulesFiles);
 
       if (!Utilities.isFileTimestampCurrent(commonNodeModulesMarkerFilename, packageJsonFilenames)) {
         needToInstall = true;

@@ -28,7 +28,6 @@ describe('VersionMismatchFinder', () => {
       }
     ] as any as RushConfigurationProject[]; // tslint:disable-line:no-any
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(projects);
-    console.log(mismatchFinder.getMismatches());
     assert.isNumber(mismatchFinder.numberOfMismatches);
     assert.equal(mismatchFinder.numberOfMismatches, 0);
     assert.equal(mismatchFinder.getMismatches().length, 0);

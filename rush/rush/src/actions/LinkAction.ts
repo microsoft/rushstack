@@ -20,7 +20,7 @@ import {
   Stopwatch
 } from '@microsoft/rush-lib';
 
-import PackageLookup from './PackageLookup';
+import PackageLookup from '../utilities/PackageLookup';
 import RushCommandLineParser from './RushCommandLineParser';
 
 export default class LinkAction extends CommandLineAction {
