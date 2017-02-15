@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "1.8.2",
+      "tag": "@microsoft/rush_v1.8.2",
+      "date": "Wed, 15 Feb 2017 08:54:44 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Temporarily reverting the new temp_modules validation feature, because it is incompatible with some usage scenarios"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.8.1",
       "tag": "@microsoft/rush_v1.8.1",
       "date": "Tue, 14 Feb 2017 23:40:44 GMT",
