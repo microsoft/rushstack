@@ -1,7 +1,12 @@
 {
   "name": "@microsoft/rush",
   "version": "1.8.3",
-  "description": "Manage building/installing of multiple NPM package folders",
+  "description": "A fast solution for building/publishing many NPM packages",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/web-build-tools"
+  },
+  "homepage": "http://aka.ms/rush",
   "scripts": {
     "build": "gulp",
     "clean": "gulp clean",

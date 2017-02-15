@@ -8,7 +8,7 @@ import { rushVersion } from '@microsoft/rush-lib';
 import RushCommandLineParser from './actions/RushCommandLineParser';
 
 console.log(os.EOL + colors.bold(`Rush Multi-Package Build Tool ${rushVersion}`)
-  + os.EOL);
+  + colors.cyan(' - http://aka.ms/rush') + os.EOL);
 
 const parser: RushCommandLineParser = new RushCommandLineParser();
 
