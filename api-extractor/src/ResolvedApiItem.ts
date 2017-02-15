@@ -1,5 +1,4 @@
 import ApiItem, { ApiItemKind } from './definitions/ApiItem';
-import ApiItemContainer from './definitions/ApiItemContainer';
 import { ApiTag } from './definitions/ApiDocumentation';
 import { IDocElement, IParam } from './IDocElement';
 import { IDocItem } from './IDocItem';
@@ -17,8 +16,6 @@ export default class ResolvedApiItem {
   public isBeta: boolean;
   public params: {[name: string]: IParam};
   public returnsMessage: IDocElement[];
-  public members: { [name: string]: ApiItem | IDocItem};
-
   /**
    * A function to abstract the construction of a ResolvedApiItem instance
    * from an ApiItem. 
@@ -29,12 +26,6 @@ export default class ResolvedApiItem {
       return undefined;
     }
 
-    const members: { [name: string]: ApiItem} = {};
-    if (apiItem instanceof ApiItemContainer) {
-      apiItem.memberItems.forEach(value => {
-        members[value.name] = value;
-      });
-    }
     return new ResolvedApiItem(
       apiItem.kind,
       apiItem.documentation.summary,
@@ -42,8 +33,7 @@ export default class ResolvedApiItem {
       apiItem.documentation.deprecatedMessage,
       apiItem.documentation.apiTag === ApiTag.Beta,
       apiItem.documentation.parameters,
-      apiItem.documentation.returnsMessage,
-      members
+      apiItem.documentation.returnsMessage
     );
   }
 
@@ -54,7 +44,6 @@ export default class ResolvedApiItem {
   public static createFromJson(docItem: IDocItem): ResolvedApiItem {
     let parameters: {[name: string]: IParam} = undefined;
     let returnsMessage: IDocElement[] = undefined;
-    let members: { [name: string]: IDocItem} = undefined;
     switch (docItem.kind) {
       case 'function':
         parameters = docItem.parameters;
@@ -63,12 +52,6 @@ export default class ResolvedApiItem {
       case 'method':
         parameters = docItem.parameters;
         returnsMessage = docItem.returnValue.description;
-        break;
-      case 'class':
-        members = docItem.members;
-        break;
-      case 'interface':
-        members = docItem.members;
         break;
       default:
         break;
@@ -81,9 +64,7 @@ export default class ResolvedApiItem {
       docItem.deprecatedMessage,
       docItem.isBeta,
       parameters,
-      returnsMessage,
-      members
-
+      returnsMessage
     );
   }
 
@@ -94,14 +75,12 @@ export default class ResolvedApiItem {
     deprecatedMessage: IDocElement[],
     isBeta?: boolean,
     params?:  {[name: string]: IParam},
-    returnsMessage?: IDocElement[],
-    members?: { [name: string]: ApiItem | IDocItem} ) {
+    returnsMessage?: IDocElement[]) {
     this.kind = kind;
     this.summary = summary;
     this.remarks = remarks;
     this.isBeta = isBeta;
     this.params = params;
     this.returnsMessage = returnsMessage;
-    this.members = members;
   }
 }
