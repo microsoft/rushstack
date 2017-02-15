@@ -1,6 +1,6 @@
 /* tslint:disable:max-line-length */
 import * as path from 'path';
-import * as fs from 'fs';
+import * as fsx from 'fs-extras';
 
 import { GulpProxy } from '../GulpProxy';
 import { IExecutable } from '../IExecutable';

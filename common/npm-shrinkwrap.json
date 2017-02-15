@@ -4593,7 +4593,7 @@
         },
         "lodash": {
           "version": "4.15.0",
-          "from": "lodash@>=4.15.0 <4.16.0",
+          "from": "lodash@~4.15.0",
           "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.15.0.tgz"
         },
         "semver": {
@@ -4625,7 +4625,7 @@
         },
         "semver": {
           "version": "5.2.0",
-          "from": "semver@>=5.2.0 <5.3.0",
+          "from": "semver@~5.2.0",
           "resolved": "https://registry.npmjs.org/semver/-/semver-5.2.0.tgz"
         }
       }
