@@ -150,7 +150,8 @@ export default class InstallAction extends CommandLineAction {
     const globPattern: string = `${globEscape(normalizedPath)}/rush-*/package.json`;
     this._tempModulesFiles = glob.sync(globPattern, { nodir: true });
 
-    this._checkThatTempModulesMatch();
+    // TEMPORARILY DISABLED DUE TO REGRESSION (VSO 313164)
+    // this._checkThatTempModulesMatch();
 
     InstallAction.ensureLocalNpmTool(this._rushConfiguration, this._cleanInstallFull.value);
     this._installCommonModules();
