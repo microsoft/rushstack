@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 14 Feb 2017 23:40:44 GMT and should not be manually modified.
+This log was last generated on Wed, 15 Feb 2017 08:54:44 GMT and should not be manually modified.
+
+## 1.8.2
+Wed, 15 Feb 2017 08:54:44 GMT
+
+### Patches
+
+- Temporarily reverting the new temp_modules validation feature, because it is incompatible with some usage scenarios
 
 ## 1.8.1
 Tue, 14 Feb 2017 23:40:44 GMT
