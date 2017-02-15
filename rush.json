@@ -110,17 +110,23 @@
         "@microsoft/node-library-build"
       ]
     },
+
+    // Rush is published manually for two reasons:
+    // 1. We need to do proper validation before pushing out a new release
+    //    that potentially could screw up everyone's daily work.
+    // 2. The "rush" and "rush-lib" packages need to have identical versions,
+    //    which is currently not supported by the automatic publishing system.
     {
       "packageName": "@microsoft/rush",
       "projectFolder": "rush/rush",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "shouldPublish": false
     },
     {
       "packageName": "@microsoft/rush-lib",
       "projectFolder": "rush/rush-lib",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "shouldPublish": false
     }
   ]
 }
