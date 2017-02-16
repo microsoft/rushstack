@@ -21,7 +21,7 @@ export default class ResolvedApiItem {
    * from an ApiItem. 
    */
   public static createFromApiItem(apiItem: ApiItem): ResolvedApiItem {
-    const canResolveRefs: boolean = apiItem.canResolveReferences();
+    const canResolveRefs: boolean = apiItem.tryResolveReferences();
     if (!canResolveRefs) {
       return undefined;
     }
@@ -68,14 +68,14 @@ export default class ResolvedApiItem {
     );
   }
 
-  constructor(
+  private constructor(
     kind: ApiItemKind,
     summary: IDocElement[],
     remarks: IDocElement[],
     deprecatedMessage: IDocElement[],
-    isBeta?: boolean,
-    params?:  {[name: string]: IParam},
-    returnsMessage?: IDocElement[]) {
+    isBeta: boolean,
+    params:  {[name: string]: IParam},
+    returnsMessage: IDocElement[]) {
     this.kind = kind;
     this.summary = summary;
     this.remarks = remarks;
