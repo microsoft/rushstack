@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 16 Feb 2017 18:56:57 GMT and should not be manually modified.
+This log was last generated on Thu, 16 Feb 2017 22:10:39 GMT and should not be manually modified.
+
+## 1.1.13
+Thu, 16 Feb 2017 22:10:39 GMT
+
+### Patches
+
+- Fixed Api-Extractor error message, changed apostrophe to backtick.
 
 ## 1.1.12
 Thu, 16 Feb 2017 18:56:57 GMT
