@@ -2,6 +2,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 
+import { getConfig } from '../index';
 import { GulpProxy } from '../GulpProxy';
 import { IExecutable } from '../IExecutable';
 import { IBuildConfig } from '../IBuildConfig';
@@ -36,11 +37,26 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
    * will return this value.
    */
   public cleanMatch: string[];
+  /**
+   * Indicates whether this task should be executed or not. This toggle is used by isEnabled() to determine
+   * if the task should run. Since some tasks have more complex logic to determine if they should run or
+   * not, the isEnabled() function can be overriden.
+   */
+  public enabled: boolean = true;
 
   /**
    * The memoized schema for this task. Should not be utilized by child classes, use schema property instead.
    */
   private _schema: Object;
+
+  /**
+   * Overridable function which returns true if this task should be executed, or false if it should be skipped.
+   * @param buildConfig - the build configuration which should be used when determining if the task is enabled
+   * @returns true if the build is not redundant and the enabled toggle is true
+   */
+  public isEnabled(config?: IBuildConfig): boolean {
+    return (!config || !config.isRedundantBuild) && this.enabled;
+  };
 
   /**
    * A JSON Schema object which will be used to validate this task's configuration file.
@@ -108,15 +124,6 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
     if (rawConfig) {
       this.mergeConfig(rawConfig);
     }
-  }
-
-  /**
-   * Overridable function which returns true if this task should be executed, or false if it should be skipped.
-   * @param buildConfig - the build configuration which should be used when determining if the task is enabled
-   * @returns true if the build is not redundant
-   */
-  public isEnabled(buildConfig: IBuildConfig): boolean {
-    return (!buildConfig || !buildConfig.isRedundantBuild);
   }
 
   /**
