@@ -5,8 +5,7 @@ declare const packageDescription: void;
 
 export {
     inheritLocalOptionOne,
-    inheritLocalOptionTwo,
-    inheritLocalOptionThreeFunction,
+    inheritLocalOptionTwoFunction,
     inheritEnumValues,
     sourceEnumValuesDoc,
     inheritLocalCircularDependencyOne,

@@ -87,7 +87,7 @@
       "remarks": [],
       "isBeta": false
     },
-    "inheritLocalOptionThreeFunction": {
+    "inheritLocalOptionTwoFunction": {
       "kind": "function",
       "returnValue": {
         "type": "void",
@@ -99,19 +99,6 @@
         {
           "kind": "textDocElement",
           "value": "See documentation for MyClass.methodWithTwoParams"
-        }
-      ],
-      "remarks": [],
-      "isBeta": false
-    },
-    "inheritLocalOptionTwo": {
-      "kind": "enum",
-      "values": {},
-      "deprecatedMessage": [],
-      "summary": [
-        {
-          "kind": "textDocElement",
-          "value": "This is the summary for MyClass."
         }
       ],
       "remarks": [],
