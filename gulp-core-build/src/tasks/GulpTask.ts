@@ -2,7 +2,6 @@
 import * as path from 'path';
 import * as fs from 'fs';
 
-import { getConfig } from '../index';
 import { GulpProxy } from '../GulpProxy';
 import { IExecutable } from '../IExecutable';
 import { IBuildConfig } from '../IBuildConfig';
