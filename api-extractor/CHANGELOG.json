@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "1.1.12",
+      "tag": "@microsoft/api-extractor_v1.1.12",
+      "date": "Thu, 16 Feb 2017 18:56:57 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added support for local API definition resolution\""
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.11",
       "tag": "@microsoft/api-extractor_v1.1.11",
       "date": "Sat, 11 Feb 2017 02:32:35 GMT",
