@@ -160,7 +160,7 @@ export default class DocItemLoader {
         docItem = member;
       } else {
         // member name was not found, apiDefinitionRef is invalid
-        reportError('Unable to find referenced member \"${apiDefinitionRef.toMemberString()}\"');
+        reportError(`Unable to find referenced member \"${apiDefinitionRef.toMemberString()}\"`);
         return undefined;
       }
     }
