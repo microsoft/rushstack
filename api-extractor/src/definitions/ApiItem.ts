@@ -351,19 +351,18 @@ abstract class ApiItem {
    * an \@inheritdoc referencing ApiItemTwo, and ApiItemTwo has an \@inheritdoc refercing ApiItemOne then
    * we have a circular dependency and an error will be reported.
    */
-  public canResolveReferences(): boolean {
+  public tryResolveReferences(): boolean {
     switch (this._state) {
       case ResolveState.Resolved:
         return true;
       case ResolveState.Unresolved:
         this._state = ResolveState.Resolving;
+        this.onResolveReferences();
+        this._state = ResolveState.Resolved;
 
         for (const innerItem of this.innerItems) {
-          innerItem.canResolveReferences();
+          innerItem.tryResolveReferences();
         }
-        this.onResolveReferences();
-
-        this._state = ResolveState.Resolved;
         return true;
       case ResolveState.Resolving:
         this.reportError('circular reference');
