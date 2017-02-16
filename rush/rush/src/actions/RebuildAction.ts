@@ -104,8 +104,8 @@ export default class RebuildAction extends CommandLineAction {
     this._minimalParameter = this.defineFlagParameter({
       parameterLongName: '--minimal',
       parameterShortName: '-m',
-      description: 'Invokes the build script with the "--minimal" option, which speeds up the build by running the minimal set ' +
-        'of tasks required to produce an executable output'
+      description: 'Invokes the build script with the "--minimal" option, which speeds up the build by running the ' +
+        'minimal set of tasks required to produce an executable output'
     });
     this._verboseParameter = this.defineFlagParameter({
       parameterLongName: '--verbose',
@@ -115,7 +115,8 @@ export default class RebuildAction extends CommandLineAction {
     this._veryVerboseParameter = this.defineFlagParameter({
       parameterLongName: '--very-verbose',
       parameterShortName: '-vv',
-      description: 'Invokes the build script with the "--verbose" parameter. This implicity enables the "--verbose" flag which displays the build logs.'
+      description: 'Invokes the build script with the "--verbose" parameter. This implicity enables the "--verbose" ' +
+        'flag which displays the build logs'
     });
   }
 
