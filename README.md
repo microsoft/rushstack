@@ -84,3 +84,17 @@ See individual projects for details:
 
 [![npm version](https://badge.fury.io/js/%40microsoft%2Fapi-extractor.svg)](https://badge.fury.io/js/%40microsoft%2Fapi-extractor)
 [![Dependencies](https://david-dm.org/Microsoft/api-extractor.svg)](https://david-dm.org/Microsoft/api-extractor)
+
+### [@microsoft/rush](./rush/rush/README.md)
+
+`rush` is a utility for cross-linking, building, and releasing multiple NPM packages.
+
+[![npm version](https://badge.fury.io/js/%40microsoft%2Frush.svg)](https://badge.fury.io/js/%40microsoft%2Frush)
+[![Dependencies](https://david-dm.org/Microsoft/rush.svg)](https://david-dm.org/Microsoft/rush)
+
+### [@microsoft/rush-lib](./rush-lib/README.md)
+
+`rush-lib` is a library for interacting with a repository which is using `rush`.
+
+[![npm version](https://badge.fury.io/js/%40microsoft%2Frush-lib.svg)](https://badge.fury.io/js/%40microsoft%2Frush-lib)
+[![Dependencies](https://david-dm.org/Microsoft/rush-lib.svg)](https://david-dm.org/Microsoft/rush-lib)
