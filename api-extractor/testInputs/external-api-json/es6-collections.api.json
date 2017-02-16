@@ -18,17 +18,134 @@
       "remarks": [],
       "isBeta": false,
       "members": {
-        "forEach": {
+        "aMethod": {
           "kind": "method",
-          "signature": "forEach(callbackfn: (value: T) => void): void;",
+          "signature": "aMethod(callbackfn: (value: T) => void): boolean;",
           "accessModifier": "",
           "isOptional": false,
           "isStatic": false,
           "returnValue": {
-            "type": "void",
-            "description": []
+            "type": "boolean",
+            "description": [
+              {
+                  "kind": "textDocElement",
+                  "value": "A description for the return value, even though it's void."
+                }
+            ]
           },
-          "parameters": {},
+          "parameters": {
+            "param1": {
+              "name": "param1",
+              "description": [
+                {
+                  "kind": "textDocElement",
+                  "value": "A description for param1."
+                }
+              ],
+              "isOptional": false,
+              "isSpread": false,
+              "type": "string"
+            }
+          },
+          "deprecatedMessage": [
+            {
+              "kind": "textDocElement",
+              "value": "A deprecated message for forEach()."
+            }
+          ],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "A summary message for forEach()."
+            }
+          ],
+          "remarks": [
+            {
+              "kind": "textDocElement",
+              "value": "A remarks message for forEach()."
+            }
+          ],
+          "isBeta": false
+        }
+      }
+    },
+    "aFunction": {
+      "kind": "function",
+      "returnValue": {
+        "type": "boolean",
+        "description": [
+          {
+              "kind": "textDocElement",
+              "value": "A description for the return value, even though it's void."
+            }
+        ]
+      },
+      "parameters": {
+        "param1": {
+          "name": "param1",
+          "description": [
+            {
+              "kind": "textDocElement",
+              "value": "A description for param1."
+            }
+          ],
+          "isOptional": false,
+          "isSpread": false,
+          "type": "string"
+        }
+      },
+      "deprecatedMessage": [
+        {
+          "kind": "textDocElement",
+          "value": "A deprecated message for forEach()."
+        }
+      ],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "A summary message for forEach()."
+        }
+      ],
+      "remarks": [
+        {
+          "kind": "textDocElement",
+          "value": "A remarks message for forEach()."
+        }
+      ],
+      "isBeta": false
+    },
+    "aClass": {
+      "kind": "class",
+      "extends": "",
+      "implements": "",
+      "typeParameters": [],
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "For a library such as \"example-package\", ApiFileGenerator generates the \"example-package.api.ts\" report which is used to detect API changes. The output is pseudocode whose syntax is similar but not identical to a \"*.d.ts\" typings file. The output file is designed to be committed to Git with a branch policy that will trigger an API review workflow whenever the file contents have changed. For example, the API file indicates *whether* a class has been documented, but it does not include the documentation text (since minor text changes should not require an API review)."
+        }
+      ],
+      "remarks": [],
+      "isBeta": false,
+      "members": {
+        "aMember1": {
+          "kind": "property",
+          "isOptional": false,
+          "isReadOnly": false,
+          "isStatic": false,
+          "type": "ApiTag[]",
+          "deprecatedMessage": [],
+          "summary": [],
+          "remarks": [],
+          "isBeta": false
+        },
+        "aMember2": {
+          "kind": "property",
+          "isOptional": false,
+          "isReadOnly": false,
+          "isStatic": false,
+          "type": "Object",
           "deprecatedMessage": [],
           "summary": [],
           "remarks": [],

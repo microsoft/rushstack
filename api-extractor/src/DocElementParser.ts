@@ -1,6 +1,5 @@
 import { ITextElement, IDocElement, IHrefLinkElement, ICodeLinkElement, ISeeDocElement } from './IDocElement';
-import { IApiDefinitionReference } from './IApiDefinitionReference';
-import ApiDocumentation from './definitions/ApiDocumentation';
+import ApiDefinitionReference from './ApiDefinitionReference';
 import Token, { TokenType } from './Token';
 import Tokenizer from './Tokenizer';
 
@@ -135,7 +134,7 @@ export default class DocElementParser {
       }
     });
     if (pipeSplitContent.length > 2) {
-      reportError('Invalid @link parameters, at most pipe character allowed.');
+      reportError('Invalid @link parameters, at most one pipe character allowed.');
       return;
     }
 
@@ -159,8 +158,10 @@ export default class DocElementParser {
 
     } else {
       // we are processing an API definition reference
-      const apiDefitionRef: IApiDefinitionReference = ApiDocumentation.parseApiReferenceExpression(
-        pipeSplitContent[0], reportError);
+      const apiDefitionRef: ApiDefinitionReference = ApiDefinitionReference.createFromString(
+        pipeSplitContent[0],
+        reportError
+      );
 
       // Once we can locate local API definitions, an error should be reported here if not found.
       if (apiDefitionRef) {
