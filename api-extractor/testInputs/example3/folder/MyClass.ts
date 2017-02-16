@@ -4,17 +4,11 @@
 export enum inheritLocalOptionOne {
 }
 
-/**
- * {@inheritdoc example3:MyClass }
- */
-export enum inheritLocalOptionTwo {
-}
-
 /** 
  * {@inheritdoc MyClass.methodWithTwoParams }
  */
 // (Error #1) methodWithTwoParams not a member of MyClass
-export function inheritLocalOptionThreeFunction(): void {
+export function inheritLocalOptionTwoFunction(): void {
 }
 
 /**

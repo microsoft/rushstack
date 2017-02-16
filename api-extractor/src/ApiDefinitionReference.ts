@@ -1,7 +1,45 @@
 /**
- * A scope and package name are semantic information within an API reference expression.
+ * An API definition reference that is used to locate the documentation of exported 
+ * API items that may or may not belong to an external package. 
+ * 
+ * The format of the API definition reference is: 
+ * scopeName/packageName:exportName.memberName
+ * 
+ * The following are valid API definition references: 
+ * \@microsoft/sp-core-library:DisplayMode
+ * \@microsoft/sp-core-library:Guid
+ * \@microsoft/sp-core-library:Guid.equals
+ * es6-collections:Map
  */
-export interface IScopePackageName {
+export interface IApiDefinintionReferenceParts {
+  /**
+   * This is an optional property to denote that a package name is scoped under this name.
+   * For example, a common case is when having the '@microsoft' scope name in the 
+   * API definition reference: '\@microsoft/sp-core-library'.
+   */
+  scopeName: string;
+  /**
+   * The name of the package that the exportName belongs to.
+   */
+  packageName: string;
+  /**
+   * The name of the export API item.
+   */
+  exportName: string;
+  /**
+   * The name of the member API item. 
+   */
+  memberName: string;
+}
+
+/**
+ * A scope and package name are semantic information within an API reference expression.
+ * If there is no scope or package, then the corresponding values will be an empty string.
+ * 
+ * Example: '@microsoft/Utilities' -> \{ scope: '@microsoft', package: 'Utilities' \}
+ * Example: 'Utilities' -> \{ scope: '', package: 'Utilities' \}
+ */
+export interface IScopedPackageName {
   /**
    * The scope name of an API reference expression.
    */
@@ -14,17 +52,7 @@ export interface IScopePackageName {
 }
 
 /**
- * An API definition reference that is used to locate the documentation of exported 
- * API items that may or may not belong to an external package. 
- * 
- * The format of the API definition reference is: 
- * scopeName/packageName:exportName.memberName
- * 
- * The following are valid API definition references: 
- * \@microsoft/sp-core-library:DisplayMode
- * \@microsoft/sp-core-library:Guid
- * \@microsoft/sp-core-library:Guid.equals
- * es6-collections:Map
+ * {@inheritdoc IApiDefinintionReferenceParts}
  */
 export default class ApiDefinitionReference {
   /**
@@ -44,21 +72,19 @@ export default class ApiDefinitionReference {
   private static _exportRegEx: RegExp =  /^\w+/;
 
   /**
-   * This is an optional property to denote that a package name is scoped under this name.
-   * For example, a common case is when having the '@microsoft' scope name in the 
-   * API definition reference: '\@microsoft/sp-core-library'.
+   * {@inheritdoc IApiDefinintionReferenceParts.scopeName}
    */
   public scopeName: string;
   /**
-   * The name of the package that the exportName belongs to.
+   * {@inheritdoc IApiDefinintionReferenceParts.packageName}
    */
   public packageName: string;
   /**
-   * The name of the export API item.
+   * {@inheritdoc IApiDefinintionReferenceParts.exportName}
    */
   public exportName: string;
   /**
-   * The name of the member API item. 
+   * {@inheritdoc IApiDefinintionReferenceParts.memberName}
    */
   public memberName: string;
 
@@ -66,11 +92,8 @@ export default class ApiDefinitionReference {
    * Creates an ApiDefinitionReference instance given strings that symbolize the public
    * properties of ApiDefinitionReference.
    */
-  public static createFromParts(scopeName: string,
-    packageName: string,
-    exportName: string,
-    memberName: string): ApiDefinitionReference {
-    return new ApiDefinitionReference(scopeName, packageName, exportName, memberName);
+  public static createFromParts(parts: IApiDefinintionReferenceParts): ApiDefinitionReference {
+    return new ApiDefinitionReference(parts);
   }
 
   /**
@@ -86,26 +109,28 @@ export default class ApiDefinitionReference {
       return;
     }
 
-    let scopeName: string = '';
-    let packageName: string = '';
-    let exportName: string = '';
-    let memberName: string = '';
+    const apiDefRefParts: IApiDefinintionReferenceParts = {
+      scopeName: '',
+      packageName: '',
+      exportName: '',
+      memberName: ''
+    };
 
     // E.g. @microsoft/sp-core-library:Guid.equals
     let parts: string[] = apiReferenceExpr.match(ApiDefinitionReference._packageRegEx);
     if (parts) {
       // parts[1] is of the form ‘@microsoft/sp-core-library’ or ‘sp-core-library’
-      const scopePackageName: IScopePackageName = ApiDefinitionReference.parseScopedPackageName(parts[1]);
-      scopeName = scopePackageName.scope;
-      packageName = scopePackageName.package;
+      const scopePackageName: IScopedPackageName = ApiDefinitionReference.parseScopedPackageName(parts[1]);
+      apiDefRefParts.scopeName = scopePackageName.scope;
+      apiDefRefParts.packageName = scopePackageName.package;
       apiReferenceExpr = parts[2]; // e.g. Guid.equals
     }
 
     // E.g. Guid.equals
     parts = apiReferenceExpr.match(ApiDefinitionReference._memberRegEx);
     if (parts) {
-      exportName = parts[1]; // e.g. Guid, can never be undefined
-      memberName = parts[2] ? parts[2] : ''; // e.g. equals
+      apiDefRefParts.exportName = parts[1]; // e.g. Guid, can never be undefined
+      apiDefRefParts.memberName = parts[2] ? parts[2] : ''; // e.g. equals
     } else {
       // the export name is required
        throw reportError(`Api reference expression contains invalid characters: ${apiReferenceExpr}`);
@@ -115,7 +140,7 @@ export default class ApiDefinitionReference {
       throw reportError(`Api reference expression contains invalid characters: ${apiReferenceExpr}`);
     }
 
-    return ApiDefinitionReference.createFromParts(scopeName, packageName, exportName, memberName);
+    return ApiDefinitionReference.createFromParts(apiDefRefParts);
   }
 
   /**
@@ -123,7 +148,7 @@ export default class ApiDefinitionReference {
    * parseScopedPackageName('@my-scope/myproject') = { scope: '@my-scope', package: 'myproject' }
    * parseScopedPackageName('myproject') = { scope: '', package: 'myproject' }
    */
-  public static parseScopedPackageName(scopedName: string): IScopePackageName {
+  public static parseScopedPackageName(scopedName: string): IScopedPackageName {
     if (scopedName.substr(0, 1) !== '@') {
       return { scope: '', package: scopedName };
     }
@@ -137,24 +162,10 @@ export default class ApiDefinitionReference {
   }
 
   /**
-   * Seperates the name property of an ApiPackage into a scope name and the actual 
-   * name of the package.
-   */
-  public static parseApiPackageName(apiPackageName: string): IScopePackageName {
-    const slashIndex: number = apiPackageName.indexOf('/');
-    if (slashIndex >= 0) {
-      return {
-        scope: apiPackageName.substr(0, slashIndex),
-        package: apiPackageName.substr(slashIndex + 1)
-      };
-    } else {
-      return { scope: '', package: apiPackageName.substr(slashIndex + 1) };
-    }
-  }
-
-  /**
    * Stringifies the ApiDefinitionReferenceOptions up and including the
    * scope and package name.
+   * 
+   * Example output: '@microsoft/Utilities'
    */
   public toScopePackageString(): string {
     let result: string = '';
@@ -169,6 +180,8 @@ export default class ApiDefinitionReference {
   /**
    * Stringifies the ApiDefinitionReferenceOptions up and including the
    * scope, package and export name.
+   * 
+   * Example output: '@microsoft/Utilities.Parse'
    */
   public toExportString(): string {
     let result: string = this.toScopePackageString();
@@ -181,15 +194,17 @@ export default class ApiDefinitionReference {
   /**
    * Stringifies the ApiDefinitionReferenceOptions up and including the
    * scope, package, export and member name.
+   * 
+   * Example output: '@microsoft/Utilities.Parse.parseJsonToString'
    */
   public toMemberString(): string {
     return this.toExportString() + `.${this.memberName}`;
   }
 
-  private constructor(scopeName: string, packageName: string, exportName: string, memberName: string) {
-    this.scopeName = scopeName;
-    this.packageName = packageName;
-    this.exportName = exportName;
-    this.memberName = memberName;
+  private constructor(parts: IApiDefinintionReferenceParts) {
+    this.scopeName = parts.scopeName;
+    this.packageName = parts.packageName;
+    this.exportName = parts.exportName;
+    this.memberName = parts.memberName;
   }
 }

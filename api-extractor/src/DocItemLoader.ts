@@ -2,7 +2,7 @@ import * as fsx from 'fs-extra';
 import * as os  from 'os';
 import * as path from 'path';
 import { IDocItem, IDocPackage, IDocMember } from './IDocItem';
-import ApiDefinitionReference, { IScopePackageName } from './ApiDefinitionReference';
+import ApiDefinitionReference, { IScopedPackageName, IApiDefinintionReferenceParts } from './ApiDefinitionReference';
 import ApiItem from './definitions/ApiItem';
 import ApiItemContainer from './definitions/ApiItemContainer';
 import ApiPackage from './definitions/ApiPackage';
@@ -56,21 +56,10 @@ export default class DocItemLoader {
     apiPackage: ApiPackage,
     reportError: (message: string) => void): ResolvedApiItem {
 
-    const scopePackageName: IScopePackageName = ApiDefinitionReference.parseApiPackageName(
-      path.dirname(apiPackage.name)
-    );
-    const currentScopeName: string = scopePackageName.scope;
-    const currentPackageName: string = scopePackageName.package;
-
-    const packageNameMatch: boolean = apiDefinitionRef.packageName ?
-      apiDefinitionRef.packageName === currentPackageName : true;
-    const scopeNameMatch: boolean = apiDefinitionRef.scopeName ?
-      apiDefinitionRef.scopeName === currentScopeName : true;
-
     // If there is a packageName then there must be a scopeName, and they 
     // both must match the current scope and package we are in.
-    // We can take advantage of '&&' being evaluated left to right. 
-    if (packageNameMatch && scopeNameMatch) {
+    // We can take advantage of '&&' being evaluated left to right.
+    if (!apiDefinitionRef.packageName && !apiDefinitionRef.scopeName) {
       // Resolution for local references 
       return this.resolveLocalReferences(apiDefinitionRef, apiPackage, reportError);
     } else {
