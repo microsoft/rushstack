@@ -38,6 +38,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
   private _production: boolean;
   private _npmMode: boolean;
   private _minimalMode: boolean;
+  private _verbose: boolean;
 
   private _hasWarningOrError: boolean;
 
@@ -49,7 +50,8 @@ export default class ProjectBuildTask implements ITaskDefinition {
     production: boolean,
     npmMode: boolean,
     minimalMode: boolean,
-    isIncrementalBuildAllowed: boolean
+    isIncrementalBuildAllowed: boolean,
+    verbose: boolean
   ) {
     this.name = rushProject.packageName;
     this._errorDetector = errorDetector;
@@ -59,6 +61,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
     this._rushProject = rushProject;
     this._rushConfiguration = rushConfiguration;
     this._minimalMode = minimalMode;
+    this._verbose = verbose;
     this.isIncrementalBuildAllowed = isIncrementalBuildAllowed;
   }
 
@@ -152,6 +155,9 @@ export default class ProjectBuildTask implements ITaskDefinition {
         }
         if (this._minimalMode) {
           build.args.push('--minimal');
+        }
+        if (this._verbose) {
+          build.args.push('--verbose');
         }
 
         const actualBuildCommand: string = `${build.command} ${build.args.join(' ')}`;
