@@ -8,7 +8,8 @@ import {
   ICommandLineFlagDefinition,
   ICommandLineStringDefinition,
   ICommandLineStringListDefinition,
-  ICommandLineIntegerDefinition
+  ICommandLineIntegerDefinition,
+  ICommandLineOptionDefinition
 } from './CommandLineDefinition';
 
 import {
@@ -18,7 +19,8 @@ import {
   CommandLineFlagParameter,
   CommandLineStringParameter,
   CommandLineStringListParameter,
-  CommandLineIntegerParameter
+  CommandLineIntegerParameter,
+  CommandLineOptionParameter
 } from './CommandLineParameter';
 
 /**
@@ -74,6 +76,12 @@ abstract class CommandLineParameterProvider {
     return this._createParameter(options, {
       type: 'int'
     }) as CommandLineIntegerParameter;
+  }
+
+  protected defineOptionParameter(options: ICommandLineOptionDefinition): CommandLineOptionParameter {
+    return this._createParameter(options, {
+      choices: options.options
+    }) as CommandLineOptionParameter;
   }
 
   protected processParsedData(data: ICommandLineParserData): void {

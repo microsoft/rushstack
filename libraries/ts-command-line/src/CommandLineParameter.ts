@@ -33,6 +33,8 @@ export class CommandLineParameter<T> {
   }
 }
 
+export class CommandLineOptionParameter extends CommandLineParameter<string> { }
+
 export class CommandLineStringParameter extends CommandLineParameter<string> { }
 
 export class CommandLineStringListParameter extends CommandLineParameter<string[]> { }
