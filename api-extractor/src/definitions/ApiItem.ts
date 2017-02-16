@@ -50,7 +50,11 @@ export enum ApiItemKind {
   /**
     * A TypeScript type literal expression, i.e. which defines an anonymous interface.
     */
-  TypeLiteral = 9
+  TypeLiteral = 9,
+  /**
+   * A Typescript class constructor function.
+   */
+  Constructor = 10
 }
 
 /**
@@ -347,23 +351,22 @@ abstract class ApiItem {
    * an \@inheritdoc referencing ApiItemTwo, and ApiItemTwo has an \@inheritdoc refercing ApiItemOne then
    * we have a circular dependency and an error will be reported.
    */
-  public resolveReferences(): void {
+  public tryResolveReferences(): boolean {
     switch (this._state) {
       case ResolveState.Resolved:
-        return;
+        return true;
       case ResolveState.Unresolved:
         this._state = ResolveState.Resolving;
+        this.onResolveReferences();
+        this._state = ResolveState.Resolved;
 
         for (const innerItem of this.innerItems) {
-          innerItem.resolveReferences();
+          innerItem.tryResolveReferences();
         }
-        this.onResolveReferences();
-
-        this._state = ResolveState.Resolved;
-        return;
+        return true;
       case ResolveState.Resolving:
         this.reportError('circular reference');
-        return;
+        return false;
       default:
         throw new Error('ApiItem state is invalid');
     }

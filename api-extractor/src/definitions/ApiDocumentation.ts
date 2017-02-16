@@ -1,13 +1,15 @@
 /* tslint:disable:no-bitwise */
 
-import ApiItem from './ApiItem';
+import ApiItem, { ApiItemKind } from './ApiItem';
+import ApiPackage from './ApiPackage';
 import DocElementParser from '../DocElementParser';
 import { IDocElement, IParam, IHrefLinkElement, ICodeLinkElement, ITextElement } from '../IDocElement';
-import { IDocItem, IDocFunction } from '../IDocItem';
-import { IApiDefinitionReference } from '../IApiDefinitionReference';
+import { IDocItem } from '../IDocItem';
+import ApiDefinitionReference from '../ApiDefinitionReference';
 import Token, { TokenType } from '../Token';
 import Tokenizer from '../Tokenizer';
 import Extractor from '../Extractor';
+import ResolvedApiItem from '../ResolvedApiItem';
 
 /**
   * An "API Tag" is a custom JSDoc tag which indicates whether an ApiItem definition
@@ -44,21 +46,6 @@ export enum ApiTag {
 }
 
 /**
- * A scope and package name are semantic information within an API reference expression.
- */
-export interface IScopePackageName {
-  /**
-   * The scope name of an API reference expression.
-   */
-  scope: string;
-
-  /**
-   * The package name of an API reference expression.
-   */
-  package: string;
-}
-
-/**
  * A dependency for ApiDocumentation constructor that abstracts away the function 
  * of resolving an API definition reference.
  * 
@@ -70,7 +57,10 @@ export interface IScopePackageName {
  * function).
  */
 export interface IReferenceResolver {
-  resolve(apiDefinitionRef: IApiDefinitionReference, reportError: (message: string) => void): IDocItem;
+  resolve(
+    apiDefinitionRef: ApiDefinitionReference,
+    apiPackage: ApiPackage,
+    reportError: (message: string) => void): ResolvedApiItem;
 }
 
 export default class ApiDocumentation {
@@ -106,22 +96,6 @@ export default class ApiDocumentation {
     '@inheritdoc',
     '@link'
   ];
-
-  /**
-   * Splits an API reference expression into two parts, first part is the scopename/packageName and
-   * the second part is the exportName.memberName.
-   */
-  private static _packageRegEx: RegExp = /^([^:]*)\:(.*)$/;
-
-  /**
-   * Splits the exportName.memberName into two respective parts.
-   */
-  private static _memberRegEx: RegExp = /^([^.|:]*)(?:\.(\w+))?$/;
-
-  /**
-   * Used to ensure that the export name contains only text characters.
-   */
-  private static _exportRegEx: RegExp =  /^\w+/;
 
   /**
    * The original JsDoc comment.
@@ -195,68 +169,6 @@ export default class ApiDocumentation {
   public extractor: Extractor;
 
   public reportError: (message: string) => void;
-
-  /**
-   * Takes an API reference expression of the form '@scopeName/packageName:exportName.memberName'
-   * and deconstructs it into an IApiDefinitionReference interface object.
-   */
-  public static parseApiReferenceExpression(
-    apiReferenceExpr: string,
-    reportError: (message: string) => void): IApiDefinitionReference {
-    if (!apiReferenceExpr || apiReferenceExpr.split(' ').length > 1) {
-      reportError('API reference expression must be of the form: ' +
-        '\'scopeName/packageName:exportName.memberName | display text\'' +
-        'where the \'|\' is required if a display text is provided');
-      return;
-    }
-
-    const apiDefitionRef: IApiDefinitionReference = { scopeName: '', packageName: '', exportName: '', memberName: ''};
-    let parts: string[];
-
-    // E.g. @microsoft/sp-core-library:Guid.equals
-    parts = apiReferenceExpr.match(ApiDocumentation._packageRegEx);
-    if (parts) {
-      // parts[1] is of the form ‘@microsoft/sp-core-library’ or ‘sp-core-library’
-      const scopePackageName: IScopePackageName = ApiDocumentation.parseScopedPackageName(parts[1]);
-      apiDefitionRef.scopeName = scopePackageName.scope;
-      apiDefitionRef.packageName = scopePackageName.package;
-      apiReferenceExpr = parts[2]; // e.g. Guid.equals
-    }
-
-    // E.g. Guid.equals
-    parts = apiReferenceExpr.match(ApiDocumentation._memberRegEx);
-    if (parts) {
-      apiDefitionRef.exportName = parts[1]; // e.g. Guid, can never be undefined
-      apiDefitionRef.memberName = parts[2] ? parts[2] : ''; // e.g. equals
-    } else {
-      // the export name is required
-       throw reportError(`Api reference expression contains invalid characters: ${apiReferenceExpr}`);
-    }
-
-    if (!apiReferenceExpr.match(ApiDocumentation._exportRegEx)) {
-      throw reportError(`Api reference expression contains invalid characters: ${apiReferenceExpr}`);
-    }
-
-    return apiDefitionRef;
-  }
-
-  /**
-   * For a scoped NPM package name this separates the scope and package parts.  For example:
-   * parseScopedPackageName('@my-scope/myproject') = { scope: '@my-scope', package: 'myproject' }
-   * parseScopedPackageName('myproject') = { scope: '', package: 'myproject' }
-   */
-  private static parseScopedPackageName(scopedName: string): IScopePackageName {
-    if (scopedName.substr(0, 1) !== '@') {
-      return { scope: '', package: scopedName };
-    }
-
-    const slashIndex: number = scopedName.indexOf('/');
-    if (slashIndex >= 0) {
-      return { scope: scopedName.substr(0, slashIndex), package: scopedName.substr(slashIndex + 1) };
-    } else {
-      throw new Error('Invalid scoped name: ' + scopedName);
-    }
-  }
 
   constructor(docComment: string,
     referenceResolver: IReferenceResolver,
@@ -432,21 +344,25 @@ export default class ApiDocumentation {
 
     // Create the IApiDefinitionReference object
     // Deconstruct the API reference expression 'scopeName/packageName:exportName.memberName'
-    const apiDefinitionRef: IApiDefinitionReference = ApiDocumentation.parseApiReferenceExpression(
+    const apiDefinitionRef: ApiDefinitionReference = ApiDefinitionReference.createFromString(
       token.text,
       this.reportError
     );
     // if API reference expression is formatted incorrectly then apiDefinitionRef will be undefined
     if (!apiDefinitionRef) {
+      this.reportError('Incorrecty formatted API definition reference');
       return;
     }
 
     // Atempt to locate the apiDefinitionRef
-    const inheritedDoc: IDocItem = this.referenceResolver.resolve(apiDefinitionRef, this.reportError);
+    const resolvedApiItem: ResolvedApiItem = this.referenceResolver.resolve(
+      apiDefinitionRef,
+      this.extractor.package,
+      this.reportError);
 
     // If no IDocItem found then nothing to inherit
     // But for the time being set the summary to a text object
-    if (!inheritedDoc) {
+    if (!resolvedApiItem) {
       const textDocItem: IDocElement = {
         kind: 'textDocElement',
         value: `See documentation for ${tokenChunks[0]}`
@@ -456,22 +372,28 @@ export default class ApiDocumentation {
     }
 
     // inheritdoc found, copy over IDocBase properties
-    this.summary =  inheritedDoc.summary;
-    this.remarks = inheritedDoc.remarks;
+    this.summary =  resolvedApiItem.summary;
+    this.remarks = resolvedApiItem.remarks;
 
     // Copy over detailed properties if neccessary
     // Add additional cases if needed
-    switch (inheritedDoc.kind) {
-      case 'function':
-        this.parameters = (inheritedDoc as IDocFunction).parameters;
-        this.returnsMessage = (inheritedDoc as IDocFunction).returnValue.description;
+    switch (resolvedApiItem.kind) {
+      case ApiItemKind.Function:
+        this.parameters = resolvedApiItem.params;
+        this.returnsMessage = resolvedApiItem.returnsMessage;
+        break;
+      case ApiItemKind.Method:
+        this.parameters = resolvedApiItem.params;
+        this.returnsMessage = resolvedApiItem.returnsMessage;
         break;
     }
 
     // Check if inheritdoc is depreacted
     // We need to check if this documentation has a deprecated message
     // but it may not appear until after this token.
-    this.isDocInheritedDeprecated = inheritedDoc.deprecatedMessage.length > 0 ? true : false;
+    if (resolvedApiItem.deprecatedMessage) {
+      this.isDocInheritedDeprecated = true;
+    }
   }
 
   protected _parseParam(tokenizer: Tokenizer): IParam {

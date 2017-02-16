@@ -74,6 +74,18 @@ export default class ApiPackage extends ApiItemContainer {
     }
   }
 
+  /**
+   * Find a member in this package by name and return it if found.
+   * 
+   * @param memberName - the name of the member ApiItem
+   */
+  public getMemberItem(memberName: string): ApiItem {
+    if (this.memberItems.has(memberName)) {
+      return this.memberItems.get(memberName);
+    }
+    return undefined;
+  }
+
   public shouldHaveDocumentation(): boolean {
     // We don't write JSDoc for the ApiPackage object
     return false;

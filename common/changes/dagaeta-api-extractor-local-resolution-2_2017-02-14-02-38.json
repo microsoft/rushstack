@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Added support for local API definition resolution\"",
+      "type": "patch"
+    }
+  ],
+  "email": "dgaeta@users.noreply.github.com"
+}
