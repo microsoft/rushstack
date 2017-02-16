@@ -134,7 +134,8 @@ export default class DocItemLoader {
     }
 
     // found JSON package, now ensure export name is there 
-    if (!(Object.prototype.hasOwnProperty.call(docPackage.exports, apiDefinitionRef.exportName))) {
+    // hasOwnProperty() not needed for JJU objects
+    if (!(apiDefinitionRef.exportName in docPackage.exports)) {
       reportError(`Unable to find referenced export \"${apiDefinitionRef.toExportString()}\""`);
       return undefined;
     }
@@ -146,15 +147,19 @@ export default class DocItemLoader {
       let member: IDocMember = undefined;
       switch (docItem.kind) {
         case 'class':
-          member = Object.prototype.hasOwnProperty.call(docItem.members, apiDefinitionRef.memberName) ?
+
+          // hasOwnProperty() not needed for JJU objects
+          member = apiDefinitionRef.memberName in docItem.members ?
             docItem.members[apiDefinitionRef.memberName] : undefined;
           break;
         case 'interface':
+          // hasOwnProperty() not needed for JJU objects
           member = apiDefinitionRef.memberName in docItem.members ?
             docItem.members[apiDefinitionRef.memberName] : undefined;
           break;
         case 'enum':
-          member = Object.prototype.hasOwnProperty.call(docItem.values, apiDefinitionRef.memberName) ?
+        // hasOwnProperty() not needed for JJU objects
+          member = apiDefinitionRef.memberName in docItem.values ?
             docItem.values[apiDefinitionRef.memberName] : undefined;
           break;
         default:
