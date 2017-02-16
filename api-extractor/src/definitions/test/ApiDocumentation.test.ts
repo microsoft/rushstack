@@ -6,7 +6,6 @@ import * as path from 'path';
 import Extractor from '../../Extractor';
 import ApiStructuredType from '../ApiStructuredType';
 import ApiDocumentation, { ApiTag } from '../ApiDocumentation';
-import { IApiDefinitionReference } from '../../IApiDefinitionReference';
 
 /* tslint:disable:no-function-expression - Mocha uses a poorly scoped "this" pointer */
 
@@ -52,56 +51,6 @@ describe('ApiDocumentation tests', function (): void {
       extractor,
       console.log
     );
-    let apiReferenceExpr: string;
-    let expected: IApiDefinitionReference;
-    let actual: IApiDefinitionReference;
-
-    it('_parseApiReferenceExpression() with scope name', function (): void {
-      apiReferenceExpr = '@microsoft/sp-core-library:Guid';
-      expected = {
-        scopeName: '@microsoft',
-        packageName: 'sp-core-library',
-        exportName: 'Guid',
-        memberName: ''
-      };
-      actual = ApiDocumentation.parseApiReferenceExpression(apiReferenceExpr, apiDoc.reportError);
-      assert.equal(expected.scopeName, actual.scopeName);
-      assert.equal(expected.packageName, actual.packageName);
-      assert.equal(expected.exportName, actual.exportName);
-      assert.equal(expected.memberName, actual.memberName);
-    });
-
-    it('_parseApiReferenceExpression() without scope name', function (): void {
-      apiReferenceExpr = 'sp-core-library:Guid';
-      expected = {scopeName: '', packageName: 'sp-core-library', exportName: 'Guid', memberName: ''};
-      actual = ApiDocumentation.parseApiReferenceExpression(apiReferenceExpr, apiDoc.reportError);
-      assert.equal(expected.scopeName, actual.scopeName);
-      assert.equal(expected.packageName, actual.packageName);
-      assert.equal(expected.exportName, actual.exportName);
-      assert.equal(expected.memberName, actual.memberName);
-    });
-
-    it('_parseApiReferenceExpression() without scope name and with member name', function (): void {
-      apiReferenceExpr = 'sp-core-library:Guid.equals';
-      expected = {scopeName: '', packageName: 'sp-core-library', exportName: 'Guid', memberName: 'equals'};
-      actual = ApiDocumentation.parseApiReferenceExpression(apiReferenceExpr, apiDoc.reportError);
-      assert.equal(expected.scopeName, actual.scopeName);
-      assert.equal(expected.packageName, actual.packageName);
-      assert.equal(expected.exportName, actual.exportName);
-      assert.equal(expected.memberName, actual.memberName);
-    });
-
-    it('_parseApiReferenceExpression() without scope name and invalid memberName', function (): void {
-      // (Error #6)
-      apiReferenceExpr = 'sp-core-library:Guid:equals';
-      let caughtError: boolean = false;
-      try {
-        actual = ApiDocumentation.parseApiReferenceExpression(apiReferenceExpr, apiDoc.reportError);
-      } catch (error) {
-        caughtError = true;
-      }
-      assert.equal(caughtError, true);
-    });
   });
 
   describe('Documentation Parser Tests', function (): void {

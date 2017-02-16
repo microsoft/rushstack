@@ -2,7 +2,7 @@ import * as fsx from 'fs-extra';
 import * as os  from 'os';
 import * as path from 'path';
 import { IDocItem, IDocPackage, IDocMember } from './IDocItem';
-import { IApiDefinitionReference } from './IApiDefinitionReference';
+import ApiDefinitionReference, { IScopePackageName } from './ApiDefinitionReference';
 import ApiItem from './definitions/ApiItem';
 import ApiItemContainer from './definitions/ApiItemContainer';
 import ApiPackage from './definitions/ApiPackage';
@@ -52,20 +52,25 @@ export default class DocItemLoader {
   /**
    * {@inheritdoc IReferenceResolver.resolve}
    */
-  public resolve(apiDefinitionRef: IApiDefinitionReference,
+  public resolve(apiDefinitionRef: ApiDefinitionReference,
     apiPackage: ApiPackage,
     reportError: (message: string) => void): ResolvedApiItem {
 
-    const dirName: string[] = path.dirname(apiPackage.name).split('/');
-    const currentPackageName: string = dirName.pop();
-    const currentScopeName: string = dirName.pop();
+    const scopePackageName: IScopePackageName = ApiDefinitionReference.parseApiPackageName(
+      path.dirname(apiPackage.name)
+    );
+    const currentScopeName: string = scopePackageName.scope;
+    const currentPackageName: string = scopePackageName.package;
 
-    const scopeNameMatch: boolean = apiDefinitionRef.scopeName ?
-      apiDefinitionRef.scopeName === currentScopeName : true;
     const packageNameMatch: boolean = apiDefinitionRef.packageName ?
       apiDefinitionRef.packageName === currentPackageName : true;
+    const scopeNameMatch: boolean = apiDefinitionRef.scopeName ?
+      apiDefinitionRef.scopeName === currentScopeName : true;
 
-    if (scopeNameMatch && packageNameMatch) {
+    // If there is a packageName then there must be a scopeName, and they 
+    // both must match the current scope and package we are in.
+    // We can take advantage of '&&' being evaluated left to right. 
+    if (packageNameMatch && scopeNameMatch) {
       // Resolution for local references 
       return this.resolveLocalReferences(apiDefinitionRef, apiPackage, reportError);
     } else {
@@ -78,14 +83,14 @@ export default class DocItemLoader {
    * Resolution of API definition references in the scenario that the reference given indicates 
    * that we should search within the current ApiPackage to resolve. 
    */
-  public resolveLocalReferences(apiDefinitionRef: IApiDefinitionReference,
+  public resolveLocalReferences(apiDefinitionRef: ApiDefinitionReference,
     apiPackage: ApiPackage,
     reportError: (message: string) => void): ResolvedApiItem {
 
     let apiItem: ApiItem = apiPackage.getMemberItem(apiDefinitionRef.exportName);
     // Check if export name was not found
     if (!apiItem) {
-      reportError(`Unable to resolve ApiItem with export name: "${apiDefinitionRef.exportName}"`);
+      reportError(`Unable to find referenced export \"${apiDefinitionRef.toExportString()}\"`);
       return undefined;
     }
 
@@ -93,13 +98,8 @@ export default class DocItemLoader {
     if (apiDefinitionRef.memberName) {
       if (apiItem instanceof ApiItemContainer) {
         const apiItemContainer: ApiItemContainer = (apiItem as ApiItemContainer);
-        if (apiItemContainer.memberItems.has(apiDefinitionRef.memberName)) {
-          apiItem = apiItemContainer.memberItems.get(apiDefinitionRef.memberName);
-          apiItem.canResolveReferences();
-        } else {
-          // member name was not found, apiDefinitionRef is invalid
-          apiItem = undefined;
-        }
+        // get() returns undefined if there is no match
+        apiItem = apiItemContainer.memberItems.get(apiDefinitionRef.memberName);
       } else {
         // There are no other instances of apiItem that has members,
         // thus there must be a mistake with the apiDefinitionRef.
@@ -110,10 +110,11 @@ export default class DocItemLoader {
     if (!apiItem) {
       // If we are here, we can be sure there was a problem with the memberName.
       // memberName was not found, apiDefinitionRef is invalid
-      reportError('API member name was not found on the export item');
+      reportError(`Unable to find referenced member \"${apiDefinitionRef.toMemberString()}\"`);
       return undefined;
     }
 
+    apiItem.tryResolveReferences();
     return ResolvedApiItem.createFromApiItem(apiItem);
   }
 
@@ -122,19 +123,19 @@ export default class DocItemLoader {
    * that we should search outside of this ApiPackage and instead search within the JSON API file
    * that is associated with the apiDefinitionRef. 
    */
-  public resolveJsonReferences(apiDefinitionRef: IApiDefinitionReference,
+  public resolveJsonReferences(apiDefinitionRef: ApiDefinitionReference,
     reportError: (message: string) => void): ResolvedApiItem {
 
     // Check if package can be not found
     const docPackage: IDocPackage =  this.getPackage(apiDefinitionRef, reportError);
     if (!docPackage) {
-      reportError(`Package "${apiDefinitionRef.packageName}" not found`);
+      // Error is reported in this.getPackage()
       return undefined;
     }
 
     // found JSON package, now ensure export name is there 
-    if (!(apiDefinitionRef.exportName in docPackage.exports)) {
-      reportError(`Unable to resolve ApiItem with export name: "${apiDefinitionRef.exportName}"`);
+    if (!(Object.prototype.hasOwnProperty.call(docPackage.exports, apiDefinitionRef.exportName))) {
+      reportError(`Unable to find referenced export \"${apiDefinitionRef.toExportString()}\""`);
       return undefined;
     }
 
@@ -145,7 +146,7 @@ export default class DocItemLoader {
       let member: IDocMember = undefined;
       switch (docItem.kind) {
         case 'class':
-          member = apiDefinitionRef.memberName in docItem.members ?
+          member = Object.prototype.hasOwnProperty.call(docItem.members, apiDefinitionRef.memberName) ?
             docItem.members[apiDefinitionRef.memberName] : undefined;
           break;
         case 'interface':
@@ -153,7 +154,7 @@ export default class DocItemLoader {
             docItem.members[apiDefinitionRef.memberName] : undefined;
           break;
         case 'enum':
-          member = apiDefinitionRef.memberName in docItem.values ?
+          member = Object.prototype.hasOwnProperty.call(docItem.values, apiDefinitionRef.memberName) ?
             docItem.values[apiDefinitionRef.memberName] : undefined;
           break;
         default:
@@ -165,7 +166,7 @@ export default class DocItemLoader {
         docItem = member;
       } else {
         // member name was not found, apiDefinitionRef is invalid
-        reportError('API member name was not found on the export item');
+        reportError('Unable to find referenced member \"${apiDefinitionRef.toMemberString()}\"');
         return undefined;
       }
     }
@@ -179,7 +180,7 @@ export default class DocItemLoader {
    *
    * @param apiDefinitionRef - interface with propropties pertaining to the API definition reference
    */
-  public getPackage(apiDefinitionRef: IApiDefinitionReference, reportError: (message: string) => void): IDocPackage {
+  public getPackage(apiDefinitionRef: ApiDefinitionReference, reportError: (message: string) => void): IDocPackage {
     let cachePackageName: string = '';
 
     // We concatenate the scopeName and packageName in case there are packageName conflicts
@@ -204,7 +205,7 @@ export default class DocItemLoader {
 
     if (!fsx.existsSync(path.join(packageJsonFilePath))) {
       // package not found in node_modules
-      reportError(`@inheritdoc referenced package ("${apiDefinitionRef.packageName}") not found in node modules.`);
+      reportError(`Unable to find referenced package \"${apiDefinitionRef.toScopePackageString()}\"`);
       return;
     }
 

@@ -5,7 +5,7 @@ import ApiPackage from './ApiPackage';
 import DocElementParser from '../DocElementParser';
 import { IDocElement, IParam, IHrefLinkElement, ICodeLinkElement, ITextElement } from '../IDocElement';
 import { IDocItem } from '../IDocItem';
-import { IApiDefinitionReference } from '../IApiDefinitionReference';
+import ApiDefinitionReference from '../ApiDefinitionReference';
 import Token, { TokenType } from '../Token';
 import Tokenizer from '../Tokenizer';
 import Extractor from '../Extractor';
@@ -46,21 +46,6 @@ export enum ApiTag {
 }
 
 /**
- * A scope and package name are semantic information within an API reference expression.
- */
-export interface IScopePackageName {
-  /**
-   * The scope name of an API reference expression.
-   */
-  scope: string;
-
-  /**
-   * The package name of an API reference expression.
-   */
-  package: string;
-}
-
-/**
  * A dependency for ApiDocumentation constructor that abstracts away the function 
  * of resolving an API definition reference.
  * 
@@ -73,7 +58,7 @@ export interface IScopePackageName {
  */
 export interface IReferenceResolver {
   resolve(
-    apiDefinitionRef: IApiDefinitionReference,
+    apiDefinitionRef: ApiDefinitionReference,
     apiPackage: ApiPackage,
     reportError: (message: string) => void): ResolvedApiItem;
 }
@@ -111,22 +96,6 @@ export default class ApiDocumentation {
     '@inheritdoc',
     '@link'
   ];
-
-  /**
-   * Splits an API reference expression into two parts, first part is the scopename/packageName and
-   * the second part is the exportName.memberName.
-   */
-  private static _packageRegEx: RegExp = /^([^:]*)\:(.*)$/;
-
-  /**
-   * Splits the exportName.memberName into two respective parts.
-   */
-  private static _memberRegEx: RegExp = /^([^.|:]*)(?:\.(\w+))?$/;
-
-  /**
-   * Used to ensure that the export name contains only text characters.
-   */
-  private static _exportRegEx: RegExp =  /^\w+/;
 
   /**
    * The original JsDoc comment.
@@ -200,68 +169,6 @@ export default class ApiDocumentation {
   public extractor: Extractor;
 
   public reportError: (message: string) => void;
-
-  /**
-   * Takes an API reference expression of the form '@scopeName/packageName:exportName.memberName'
-   * and deconstructs it into an IApiDefinitionReference interface object.
-   */
-  public static parseApiReferenceExpression(
-    apiReferenceExpr: string,
-    reportError: (message: string) => void): IApiDefinitionReference {
-    if (!apiReferenceExpr || apiReferenceExpr.split(' ').length > 1) {
-      reportError('API reference expression must be of the form: ' +
-        '\'scopeName/packageName:exportName.memberName | display text\'' +
-        'where the \'|\' is required if a display text is provided');
-      return;
-    }
-
-    const apiDefitionRef: IApiDefinitionReference = { scopeName: '', packageName: '', exportName: '', memberName: ''};
-    let parts: string[];
-
-    // E.g. @microsoft/sp-core-library:Guid.equals
-    parts = apiReferenceExpr.match(ApiDocumentation._packageRegEx);
-    if (parts) {
-      // parts[1] is of the form ‘@microsoft/sp-core-library’ or ‘sp-core-library’
-      const scopePackageName: IScopePackageName = ApiDocumentation.parseScopedPackageName(parts[1]);
-      apiDefitionRef.scopeName = scopePackageName.scope;
-      apiDefitionRef.packageName = scopePackageName.package;
-      apiReferenceExpr = parts[2]; // e.g. Guid.equals
-    }
-
-    // E.g. Guid.equals
-    parts = apiReferenceExpr.match(ApiDocumentation._memberRegEx);
-    if (parts) {
-      apiDefitionRef.exportName = parts[1]; // e.g. Guid, can never be undefined
-      apiDefitionRef.memberName = parts[2] ? parts[2] : ''; // e.g. equals
-    } else {
-      // the export name is required
-       throw reportError(`Api reference expression contains invalid characters: ${apiReferenceExpr}`);
-    }
-
-    if (!apiReferenceExpr.match(ApiDocumentation._exportRegEx)) {
-      throw reportError(`Api reference expression contains invalid characters: ${apiReferenceExpr}`);
-    }
-
-    return apiDefitionRef;
-  }
-
-  /**
-   * For a scoped NPM package name this separates the scope and package parts.  For example:
-   * parseScopedPackageName('@my-scope/myproject') = { scope: '@my-scope', package: 'myproject' }
-   * parseScopedPackageName('myproject') = { scope: '', package: 'myproject' }
-   */
-  private static parseScopedPackageName(scopedName: string): IScopePackageName {
-    if (scopedName.substr(0, 1) !== '@') {
-      return { scope: '', package: scopedName };
-    }
-
-    const slashIndex: number = scopedName.indexOf('/');
-    if (slashIndex >= 0) {
-      return { scope: scopedName.substr(0, slashIndex), package: scopedName.substr(slashIndex + 1) };
-    } else {
-      throw new Error('Invalid scoped name: ' + scopedName);
-    }
-  }
 
   constructor(docComment: string,
     referenceResolver: IReferenceResolver,
@@ -437,7 +344,7 @@ export default class ApiDocumentation {
 
     // Create the IApiDefinitionReference object
     // Deconstruct the API reference expression 'scopeName/packageName:exportName.memberName'
-    const apiDefinitionRef: IApiDefinitionReference = ApiDocumentation.parseApiReferenceExpression(
+    const apiDefinitionRef: ApiDefinitionReference = ApiDefinitionReference.createFromString(
       token.text,
       this.reportError
     );

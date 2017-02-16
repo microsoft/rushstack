@@ -6,7 +6,7 @@ import * as os from 'os';
 import Extractor from './Extractor';
 import ApiFileGenerator from './generators/ApiFileGenerator';
 import ApiJsonGenerator from './generators/ApiJsonGenerator';
-import { IApiDefinitionReference } from './IApiDefinitionReference';
+import ApiDefinitionReference from './ApiDefinitionReference';
 
 const compilerOptions: ts.CompilerOptions = {
   target: ts.ScriptTarget.ES5,
@@ -32,12 +32,12 @@ extractor.loadExternalPackages('./testInputs/external-api-json');
 extractor.analyze({entryPointFile: './testInputs/example2/index.ts',
   otherFiles: []});
 
-const externalPackageApiRef: IApiDefinitionReference = {
-  scopeName: '',
-  packageName: 'es6-collections',
-  exportName: '',
-  memberName: ''
-};
+const externalPackageApiRef: ApiDefinitionReference = ApiDefinitionReference.createFromParts(
+  '',
+  'es6-collections',
+  '',
+  ''
+);
 console.log(extractor.docItemLoader.getPackage(externalPackageApiRef, console.log));
 
 const apiFileGenerator: ApiFileGenerator = new ApiFileGenerator();
