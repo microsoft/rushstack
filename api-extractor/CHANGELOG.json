@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "1.1.13",
+      "tag": "@microsoft/api-extractor_v1.1.13",
+      "date": "Thu, 16 Feb 2017 22:10:39 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixed Api-Extractor error message, changed apostrophe to backtick."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.12",
       "tag": "@microsoft/api-extractor_v1.1.12",
       "date": "Thu, 16 Feb 2017 18:56:57 GMT",
