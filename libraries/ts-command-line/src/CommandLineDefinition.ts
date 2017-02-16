@@ -38,6 +38,17 @@ export interface ICommandLineStringDefinition extends IBaseCommandLineDefinition
 export interface ICommandLineStringListDefinition extends IBaseCommandLineDefinition { }
 
 /**
+ * For use with CommandLineParser, this interface represents a parameter which is constrained to
+ * a list of possible options
+ */
+export interface ICommandLineOptionDefinition extends IBaseCommandLineDefinition {
+  /**
+   * A list of strings (which contain no spaces), of possible options which can be selected
+   */
+  options: string[];
+}
+
+/**
  * For use with CommandLineParser, this interface represents an integer command line parameter
  */
 export interface ICommandLineIntegerDefinition extends IBaseCommandLineDefinition { }
