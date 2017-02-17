@@ -92,7 +92,7 @@ export default class DocElementParser {
             if (docElements.length > 0 ||  documentation.summary.length > 0) {
               documentation.reportError('Cannot provide summary in JsDoc if @inheritdoc tag is given');
             }
-            documentation.inheritdocs.push(token);
+            documentation.incompleteInheritdocs.push(token);
             documentation.isDocInherited = true;
             break;
           case '@link' :
@@ -101,7 +101,7 @@ export default class DocElementParser {
               // Push to docElements to retain position in the documentation
               docElements.push(linkDocElement);
               if (linkDocElement.referenceType === 'code') {
-                documentation.links.push(linkDocElement);
+                documentation.incompleteLinks.push(linkDocElement);
               }
             }
             tokenizer.getToken(); // get the link token
@@ -260,7 +260,7 @@ export default class DocElementParser {
     // ApiItem. Resolutions from JSON will have an undefined 'apiItem' property.
     // Example: a circular reference will report an error. 
     if (resolvedApiItem.apiItem) {
-      resolvedApiItem.apiItem.tryCompletingReferences();
+      resolvedApiItem.apiItem.completeInitialization();
     }
 
     // inheritdoc found, copy over IDocBase properties
