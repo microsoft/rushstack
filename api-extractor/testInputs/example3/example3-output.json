@@ -52,12 +52,7 @@
       "kind": "enum",
       "values": {},
       "deprecatedMessage": [],
-      "summary": [
-        {
-          "kind": "textDocElement",
-          "value": "See documentation for inheritLocalCircularDependencyOne"
-        }
-      ],
+      "summary": [],
       "remarks": [],
       "isBeta": false
     },
@@ -65,12 +60,7 @@
       "kind": "enum",
       "values": {},
       "deprecatedMessage": [],
-      "summary": [
-        {
-          "kind": "textDocElement",
-          "value": "See documentation for inheritLocalCircularDependencyOne"
-        }
-      ],
+      "summary": [],
       "remarks": [],
       "isBeta": false
     },
@@ -286,6 +276,19 @@
       "remarks": [],
       "isBeta": false
     },
+    "publicEnum": {
+      "kind": "enum",
+      "values": {},
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "This enum is public and any API items can safely inherit documentation or link to this item."
+        }
+      ],
+      "remarks": [],
+      "isBeta": false
+    },
     "sourceEnumValuesDoc": {
       "kind": "enum",
       "values": {
@@ -321,6 +324,35 @@
         {
           "kind": "textDocElement",
           "value": "We will try to inheritdoc the documentation for one of the enum value's documentation."
+        }
+      ],
+      "remarks": [],
+      "isBeta": false
+    },
+    "testingLinks": {
+      "kind": "enum",
+      "values": {},
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "Here we test that an error is reported when attempting to link to an internal API item."
+        },
+        {
+          "kind": "linkDocElement",
+          "referenceType": "code",
+          "scopeName": "",
+          "packageName": "",
+          "exportName": "publicEnum",
+          "memberName": ""
+        },
+        {
+          "kind": "linkDocElement",
+          "referenceType": "code",
+          "scopeName": "",
+          "packageName": "",
+          "exportName": "internalEnum",
+          "memberName": ""
         }
       ],
       "remarks": [],

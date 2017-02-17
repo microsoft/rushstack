@@ -13,6 +13,9 @@ export {
     jsonResolutionFunction,
     jsonResolutionClass,
     IStructuredTypeInherit,
-    IStructuredTypeSource
+    IStructuredTypeSource,
+    testingLinks,
+    publicEnum,
+    internalEnum
 } from './folder/MyClass';
 export { default as MyClass } from './folder/MyClass';
