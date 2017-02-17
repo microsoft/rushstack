@@ -112,12 +112,6 @@ export default class RebuildAction extends CommandLineAction {
       parameterShortName: '-v',
       description: 'Display the logs during the build, rather than just displaying the build status summary'
     });
-    this._veryVerboseParameter = this.defineFlagParameter({
-      parameterLongName: '--very-verbose',
-      parameterShortName: '-vv',
-      description: 'Invokes the build script with the "--verbose" parameter. This implicity enables the "--verbose" ' +
-        'flag which displays the build logs'
-    });
   }
 
   protected onExecute(): void {
@@ -132,7 +126,7 @@ export default class RebuildAction extends CommandLineAction {
     console.log(`Starting "rush ${this.options.actionVerb}"` + os.EOL);
     const stopwatch: Stopwatch = Stopwatch.start();
 
-    const isQuietmode: boolean = !(this._verboseParameter.value || this._veryVerboseParameter.value);
+    const isQuietmode: boolean = !(this._verboseParameter.value)
 
     const taskRunner: TaskRunner = new TaskRunner(isQuietmode, this._parallelismParameter.value);
 
@@ -272,8 +266,7 @@ export default class RebuildAction extends CommandLineAction {
       this._productionParameter.value,
       this._npmParameter.value,
       this._minimalParameter.value,
-      this._isIncrementalBuildAllowed,
-      this._veryVerboseParameter.value);
+      this._isIncrementalBuildAllowed);
 
     if (!taskRunner.hasTask(projectTask.name)) {
       taskRunner.addTask(projectTask);
