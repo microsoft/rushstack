@@ -211,13 +211,17 @@ export default class ApiDocumentation {
         exportName: codeLink.exportName,
         memberName: codeLink.memberName
       };
+      
       const apiDefinitionRef: ApiDefinitionReference = ApiDefinitionReference.createFromParts(parts);
       const resolvedApiItem: ResolvedApiItem =  this.referenceResolver.resolve(
         apiDefinitionRef,
         this.extractor.package,
         this.reportError
       );
-      if (resolvedApiItem.apiTag === ApiTag.Internal) {
+
+      // If the apiDefinitionRef can not be found the resolcedApiItem will be
+      // undefined and an error will have been reported via this.reportError
+      if (resolvedApiItem && resolvedApiItem.apiTag === ApiTag.Internal) {
         this.reportError('Unable to link to \"Internal\" API item');
       }
     }
