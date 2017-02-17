@@ -135,14 +135,14 @@ export default class ApiDocumentation {
    * Example: If API item A has a link in it's documentation to API item B, then B must not
    * have ApiTag.Internal. 
    */
-  public links: ICodeLinkElement[];
+  public incompleteLinks: ICodeLinkElement[];
 
   /**
    * A list of 'Tokens' that have been recognized as inheritdoc tokens that will be processed 
    * after the basic documentation for all API items is complete. We save the processing for after 
    * because we need ApiTag information before we can deem an inheritdoc token as valid.
    */
-  public inheritdocs: Token[];
+  public incompleteInheritdocs: Token[];
 
   /**
    * An "API Tag" is a custom JSDoc tag which indicates whether this definition
@@ -199,43 +199,14 @@ export default class ApiDocumentation {
   }
 
   /**
-   * A processing of linkDocElements that refer to an ApiDefinitionReference. This method 
-   * ensures that the reference is to an API item that is not 'Internal'.
+   * Executes the implementation details involved in completing the documentation initialization.
+   * Currently completes link and inheritdocs.
    */
-  public completeLinks(): void {
-    for (let i: number = 0; i < this.links.length; i++) {
-      const codeLink: ICodeLinkElement = this.links[i];
-      const parts: IApiDefinintionReferenceParts = {
-        scopeName: codeLink.scopeName,
-        packageName: codeLink.packageName,
-        exportName: codeLink.exportName,
-        memberName: codeLink.memberName
-      };
-      
-      const apiDefinitionRef: ApiDefinitionReference = ApiDefinitionReference.createFromParts(parts);
-      const resolvedApiItem: ResolvedApiItem =  this.referenceResolver.resolve(
-        apiDefinitionRef,
-        this.extractor.package,
-        this.reportError
-      );
-
-      // If the apiDefinitionRef can not be found the resolcedApiItem will be
-      // undefined and an error will have been reported via this.reportError
-      if (resolvedApiItem && resolvedApiItem.apiTag === ApiTag.Internal) {
-        this.reportError('Unable to link to \"Internal\" API item');
-      }
-    }
-  }
-
-  /**
-   * A processing of inheritdoc 'Tokens'. This processing occurs after we have created documentation 
-   * for all API items. 
-   */
-  public completeInheritdocs(): void {
-    for (let i: number  = 0; i < this.inheritdocs.length; i++) {
-      const token: Token = this.inheritdocs[i];
-      DocElementParser.parseInheritDoc(this, token);
-    }
+  public completeInitialization(): void {
+    // Ensure links are valid
+    this._completeLinks();
+    // Ensure inheritdocs are valid
+    this._completeInheritdocs();
   }
 
   protected _parseDocs(): void {
@@ -243,8 +214,8 @@ export default class ApiDocumentation {
     this.returnsMessage = [];
     this.deprecatedMessage = [];
     this.remarks = [];
-    this.links = [];
-    this.inheritdocs = [];
+    this.incompleteLinks = [];
+    this.incompleteInheritdocs = [];
     this.apiTag = ApiTag.None;
     const tokenizer: Tokenizer = new Tokenizer(this.originalJsDoc, this.reportError);
     this.summary = DocElementParser.parse(this, tokenizer);
@@ -404,6 +375,46 @@ export default class ApiDocumentation {
       };
       return paramDocElement;
       }
+  }
+
+    /**
+   * A processing of linkDocElements that refer to an ApiDefinitionReference. This method 
+   * ensures that the reference is to an API item that is not 'Internal'.
+   */
+  private _completeLinks(): void {
+    while (this.incompleteLinks.length) {
+      const codeLink: ICodeLinkElement = this.incompleteLinks.pop();
+      const parts: IApiDefinintionReferenceParts = {
+        scopeName: codeLink.scopeName,
+        packageName: codeLink.packageName,
+        exportName: codeLink.exportName,
+        memberName: codeLink.memberName
+      };
+
+      const apiDefinitionRef: ApiDefinitionReference = ApiDefinitionReference.createFromParts(parts);
+      const resolvedApiItem: ResolvedApiItem =  this.referenceResolver.resolve(
+        apiDefinitionRef,
+        this.extractor.package,
+        this.reportError
+      );
+
+      // If the apiDefinitionRef can not be found the resolcedApiItem will be
+      // undefined and an error will have been reported via this.reportError
+      if (resolvedApiItem && resolvedApiItem.apiTag === ApiTag.Internal) {
+        this.reportError('Unable to link to \"Internal\" API item');
+      }
+    }
+  }
+
+  /**
+   * A processing of inheritdoc 'Tokens'. This processing occurs after we have created documentation 
+   * for all API items. 
+   */
+  private _completeInheritdocs(): void {
+    while (this.incompleteInheritdocs.length) {
+      const token: Token = this.incompleteInheritdocs.pop();
+      DocElementParser.parseInheritDoc(this, token);
+    }
   }
 
   private _reportBadJSDocTag(token: Token): void {

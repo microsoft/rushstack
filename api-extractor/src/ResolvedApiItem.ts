@@ -68,7 +68,8 @@ export default class ResolvedApiItem {
       docItem.isBeta,
       parameters,
       returnsMessage,
-      ApiTag.Public
+      ApiTag.Public,
+      undefined
     );
   }
 
@@ -81,7 +82,7 @@ export default class ResolvedApiItem {
     params:  {[name: string]: IParam},
     returnsMessage: IDocElement[],
     apiTag: ApiTag,
-    apiItem?: ApiItem) {
+    apiItem: ApiItem) {
     this.kind = kind;
     this.summary = summary;
     this.remarks = remarks;

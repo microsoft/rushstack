@@ -60,7 +60,7 @@ export enum ApiItemKind {
 /**
  * The state of completing the ApiItem's doc comment references inside a recursive call to ApiItem.resolveReferences().
  */
-enum CompleteState {
+enum InitializationState {
   /**
    * The references of this ApiItem have not begun to be completed.
    */
@@ -215,7 +215,7 @@ abstract class ApiItem {
    * The state of this ApiItems references. These references could include \@inheritdoc references
    * or type references.
    */
-  private _state: CompleteState;
+  private _state: InitializationState;
 
   constructor(options: IApiItemOptions) {
     this.reportError = this.reportError.bind(this);
@@ -223,7 +223,7 @@ abstract class ApiItem {
     this.jsdocNode = options.jsdocNode;
     this.declaration = options.declaration;
     this._errorNode = options.declaration;
-    this._state = CompleteState.Incomplete;
+    this._state = InitializationState.Incomplete;
     this.warnings = [];
 
     this.extractor = options.extractor;
@@ -319,12 +319,9 @@ abstract class ApiItem {
    * This function assumes all references from this ApiItem have been resolved and we can now safely create
    * the documentation.
    */
-  protected onCompleteReferences(): void {
+  protected onCompleteInitialization(): void {
 
-    // Ensure links are valid
-    this.documentation.completeLinks();
-    // Ensure inheritdocs are valid
-    this.documentation.completeInheritdocs();
+    this.documentation.completeInitialization();
     // TODO: this.collectTypeReferences(this);
 
     const summaryTextCondensed: string = DocElementParser.getAsText(
@@ -357,22 +354,22 @@ abstract class ApiItem {
    * an \@inheritdoc referencing ApiItemTwo, and ApiItemTwo has an \@inheritdoc refercing ApiItemOne then
    * we have a circular dependency and an error will be reported.
    */
-  public tryCompletingReferences(): boolean {
+  public completeInitialization(): void {
     switch (this._state) {
-      case CompleteState.Completed:
-        return true;
-      case CompleteState.Incomplete:
-        this._state = CompleteState.Completing;
-        this.onCompleteReferences();
-        this._state = CompleteState.Completed;
+      case InitializationState.Completed:
+        return;
+      case InitializationState.Incomplete:
+        this._state = InitializationState.Completing;
+        this.onCompleteInitialization();
+        this._state = InitializationState.Completed;
 
         for (const innerItem of this.innerItems) {
-          innerItem.tryCompletingReferences();
+          innerItem.completeInitialization();
         }
-        return true;
-      case CompleteState.Completing:
+        return;
+      case InitializationState.Completing:
         this.reportError('circular reference');
-        return false;
+        return;
       default:
         throw new Error('ApiItem state is invalid');
     }
