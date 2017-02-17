@@ -126,7 +126,7 @@ export default class RebuildAction extends CommandLineAction {
     console.log(`Starting "rush ${this.options.actionVerb}"` + os.EOL);
     const stopwatch: Stopwatch = Stopwatch.start();
 
-    const isQuietmode: boolean = !(this._verboseParameter.value)
+    const isQuietmode: boolean = !(this._verboseParameter.value);
 
     const taskRunner: TaskRunner = new TaskRunner(isQuietmode, this._parallelismParameter.value);
 
