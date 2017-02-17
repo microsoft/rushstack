@@ -42,13 +42,14 @@ class GulpTask<TASK_CONFIG> implements IExecutable {
   public buildConfig: IBuildConfig;
   public cleanMatch: string[];
   public copyFile(localSourcePath: string, localDestPath?: string): void;
+  public enabled: boolean;
   public execute(config: IBuildConfig): Promise<void>;
   public abstract executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (result?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
   public fileError(filePath: string, line: number, column: number, errorCode: string, message: string): void;
   public fileExists(localPath: string): boolean;
   public fileWarning(filePath: string, line: number, column: number, warningCode: string, message: string): void;
   public getCleanMatch(buildConfig: IBuildConfig, taskConfig: TASK_CONFIG = this.taskConfig): string[];
-  public isEnabled(buildConfig: IBuildConfig): boolean;
+  public isEnabled(config?: IBuildConfig): boolean;
   protected loadSchema(): Object;
   public log(message: string): void;
   public logError(message: string): void;
@@ -108,6 +109,8 @@ interface ICustomGulpTask {
 
 // (undocumented)
 interface IExecutable {
+  // (undocumented)
+  enabled?: boolean;
   execute: (config: IBuildConfig) => Promise<void>;
   getCleanMatch?: (config: IBuildConfig, taskConfig?: any) => string[];
   isEnabled?: (config?: IBuildConfig) => boolean;
