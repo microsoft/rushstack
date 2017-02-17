@@ -16,6 +16,7 @@
     "@types/node": "6.0.62"
   },
   "devDependencies": {
+    "@types/es6-collections": "0.5.29",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "mocha": "~2.5.3",

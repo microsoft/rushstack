@@ -3,6 +3,7 @@
  */
 
 import * as argparse from 'argparse';
+import * as colors from 'colors';
 import {
   IBaseCommandLineDefinition,
   ICommandLineFlagDefinition,
@@ -33,9 +34,11 @@ abstract class CommandLineParameterProvider {
   protected argumentParser: argparse.ArgumentParser;
   /* tslint:disable-next-line:no-any */
   private _parameters: CommandLineParameter<any>[];
+  private _keys: Map<string, string>;
 
   constructor() {
     this._parameters = [];
+    this._keys = new Map<string, string>();
   }
 
   /**
@@ -57,7 +60,7 @@ abstract class CommandLineParameterProvider {
    * Defines a string parameter.
    */
   protected defineStringParameter(options: ICommandLineStringDefinition): CommandLineStringParameter {
-    return this._createParameter(options) as CommandLineStringParameter;
+    return this._createParameter(options, undefined, options.key) as CommandLineStringParameter;
   }
 
   /**
@@ -66,7 +69,7 @@ abstract class CommandLineParameterProvider {
   protected defineStringListParameter(options: ICommandLineStringListDefinition): CommandLineStringListParameter {
     return this._createParameter(options, {
       action: 'append'
-    }) as CommandLineStringListParameter;
+    }, options.key) as CommandLineStringListParameter;
   }
 
   /**
@@ -75,7 +78,7 @@ abstract class CommandLineParameterProvider {
   protected defineIntegerParameter(options: ICommandLineIntegerDefinition): CommandLineIntegerParameter {
     return this._createParameter(options, {
       type: 'int'
-    }) as CommandLineIntegerParameter;
+    }, options.key) as CommandLineIntegerParameter;
   }
 
   protected defineOptionParameter(options: ICommandLineOptionDefinition): CommandLineOptionParameter {
@@ -91,12 +94,23 @@ abstract class CommandLineParameterProvider {
     }
   }
 
-  private _createKeyName(): string {
-    return 'key_' + (CommandLineParameterProvider._keyCounter++).toString();
+  private _getKey(
+    parameterLongName: string,
+    key: string = 'key_' + (CommandLineParameterProvider._keyCounter++).toString()): string {
+
+    if (this._keys.has(key)) {
+      const otherParam: string = this._keys.get(key);
+      throw colors.red(`The parameter "${parameterLongName}" tried to define a key which was already ` +
+        `defined by the "${otherParam}" parameter. Ensure that the keys values are unique.`);
+    }
+
+    this._keys.set(key, parameterLongName);
+    return key;
   }
 
   private _createParameter(definition: IBaseCommandLineDefinition,
                            argparseOptions?: argparse.ArgumentOptions,
+                           key?: string,
                            /* tslint:disable-next-line:no-any */
                            converter?: IConverterFunction<any>): CommandLineParameter<any> {
     const names: string[] = [];
@@ -105,8 +119,10 @@ abstract class CommandLineParameterProvider {
     }
     names.push(definition.parameterLongName);
 
-    /* tslint:disable-next-line:no-any */
-    const result: CommandLineParameter<any> = new CommandLineParameter<any>(this._createKeyName(), converter);
+    /* tslint:disable:no-any */
+    const result: CommandLineParameter<any> =
+      new CommandLineParameter<any>(this._getKey(definition.parameterLongName, key), converter);
+    /* tslint:enable:no-any */
 
     this._parameters.push(result);
 
@@ -115,8 +131,8 @@ abstract class CommandLineParameterProvider {
       dest: result.key
     };
 
-    Object.keys(argparseOptions || {}).forEach((key: string) => {
-      baseArgparseOptions[key] = argparseOptions[key];
+    Object.keys(argparseOptions || {}).forEach((keyVal: string) => {
+      baseArgparseOptions[keyVal] = argparseOptions[keyVal];
     });
 
     this.argumentParser.addArgument(names, baseArgparseOptions);

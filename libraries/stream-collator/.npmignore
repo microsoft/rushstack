@@ -7,9 +7,6 @@
 !/dist/**
 !ThirdPartyNotice.txt
 
-# Ignore certain files in the above folder
-/dist/*.stats.*
-
 # NOTE: These don't need to be specified, because NPM includes them automatically.
 #
 # package.json
