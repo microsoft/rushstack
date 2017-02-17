@@ -45,10 +45,10 @@ export default class RebuildAction extends CommandLineAction {
   private _parallelismParameter: CommandLineIntegerParameter;
   private _parser: RushCommandLineParser;
   private _productionParameter: CommandLineFlagParameter;
-  private _quietParameter: CommandLineFlagParameter;
   private _toFlag: CommandLineStringListParameter;
   private _vsoParameter: CommandLineFlagParameter;
   private _minimalParameter: CommandLineFlagParameter;
+  private _verboseParameter: CommandLineFlagParameter;
 
   constructor(parser: RushCommandLineParser, options?: ICommandLineActionOptions) {
     super(options || {
@@ -66,11 +66,6 @@ export default class RebuildAction extends CommandLineAction {
   }
 
   protected onDefineParameters(): void {
-    this._quietParameter = this.defineFlagParameter({
-      parameterLongName: '--quiet',
-      parameterShortName: '-q',
-      description: 'Only show errors and overall build status'
-    });
     this._productionParameter = this.defineFlagParameter({
       parameterLongName: '--production',
       description: 'Perform a production build'
@@ -102,8 +97,13 @@ export default class RebuildAction extends CommandLineAction {
     this._minimalParameter = this.defineFlagParameter({
       parameterLongName: '--minimal',
       parameterShortName: '-m',
-      description: 'Invokes gulp with the "--minimal" option, which speeds up the build by running the minimal set ' +
-        'of tasks required to produce an executable output'
+      description: 'Invokes the build script with the "--minimal" option, which speeds up the build by running the ' +
+        'minimal set of tasks required to produce an executable output'
+    });
+    this._verboseParameter = this.defineFlagParameter({
+      parameterLongName: '--verbose',
+      parameterShortName: '-v',
+      description: 'Display the logs during the build, rather than just displaying the build status summary'
     });
   }
 
@@ -119,7 +119,9 @@ export default class RebuildAction extends CommandLineAction {
     console.log(`Starting "rush ${this.options.actionVerb}"` + os.EOL);
     const stopwatch: Stopwatch = Stopwatch.start();
 
-    const taskRunner: TaskRunner = new TaskRunner(this._quietParameter.value, this._parallelismParameter.value);
+    const isQuietmode: boolean = !(this._verboseParameter.value);
+
+    const taskRunner: TaskRunner = new TaskRunner(isQuietmode, this._parallelismParameter.value);
 
     const toFlags: string[] = this._toFlag.value;
     const fromFlags: string[] = this._fromFlag.value;
