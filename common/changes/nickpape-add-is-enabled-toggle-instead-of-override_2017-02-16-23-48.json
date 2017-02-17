@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build",
+      "comment": "Add an enabled toggle to IExecutable and GulpTask. Using this toggle is now preferred to overriding the isEnabled function.",
+      "type": "minor"
+    }
+  ],
+  "email": "nickpape@users.noreply.github.com"
+}
