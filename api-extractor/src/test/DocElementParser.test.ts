@@ -84,7 +84,7 @@ describe('DocElementParser tests', function (): void {
               value: ''
         } as IHrefLinkElement
       ];
-      const actualSummary: IDocElement[] = DocElementParser.parse(tokenizer, console.log);
+      const actualSummary: IDocElement[] = DocElementParser.parse(myDocumentedClass.documentation, tokenizer);
       JsonFile.saveJsonFile('./lib/basicDocExpected.json', JSON.stringify(expectedSummary));
       JsonFile.saveJsonFile('./lib/basicDocActual.json', JSON.stringify(actualSummary));
       TestFileComparer.assertFileMatchesExpected('./lib/basicDocActual.json', './lib/basicDocExpected.json');
@@ -94,7 +94,7 @@ describe('DocElementParser tests', function (): void {
           {kind: 'textDocElement', value: 'an object'} as ITextElement
       ];
       tokenizer.getToken();
-      const actualReturn: IDocElement[] = DocElementParser.parse(tokenizer, console.log);
+      const actualReturn: IDocElement[] = DocElementParser.parse(myDocumentedClass.documentation, tokenizer);
       JsonFile.saveJsonFile('./lib/returnDocExpected.json', JSON.stringify(expectedReturn));
       JsonFile.saveJsonFile('./lib/returnDocActual.json', JSON.stringify(actualReturn));
       TestFileComparer.assertFileMatchesExpected('./lib/returnDocActual.json', './lib/returnDocExpected.json');
@@ -130,7 +130,7 @@ describe('DocElementParser tests', function (): void {
           {kind: 'textDocElement', value: '- description of the deprecation'} as ITextElement
       ];
       tokenizer.getToken();
-      const actualDeprecated: IDocElement[] = DocElementParser.parse(tokenizer, console.log);
+      const actualDeprecated: IDocElement[] = DocElementParser.parse(myDocumentedClass.documentation, tokenizer);
       JsonFile.saveJsonFile('./lib/deprecatedDocExpected.json', JSON.stringify(expectedDeprecated));
       JsonFile.saveJsonFile('./lib/deprecatedDocActual.json', JSON.stringify(actualDeprecated));
       TestFileComparer.assertFileMatchesExpected('./lib/deprecatedDocActual.json', './lib/deprecatedDocExpected.json');
@@ -156,7 +156,7 @@ describe('DocElementParser tests', function (): void {
               ]
           } as ISeeDocElement
       ];
-      const actualSummary: IDocElement[] = DocElementParser.parse(tokenizer, console.log);
+      const actualSummary: IDocElement[] = DocElementParser.parse(myDocumentedClass.documentation, tokenizer);
       JsonFile.saveJsonFile('./lib/seeDocExpected.json', JSON.stringify(expectedSummary));
       JsonFile.saveJsonFile('./lib/seeDocActual.json', JSON.stringify(actualSummary));
       TestFileComparer.assertFileMatchesExpected('./lib/seeDocExpected.json', './lib/seeDocActual.json');
@@ -202,7 +202,7 @@ describe('DocElementParser tests', function (): void {
       /* tslint:disable-next-line:no-any */
       let errorMessage: any;
       try {
-        docElements = DocElementParser.parse(tokenizer, console.log);
+        docElements = DocElementParser.parse(myDocumentedClass.documentation, tokenizer);
       } catch (error) {
         errorMessage = error;
       }
@@ -222,7 +222,7 @@ describe('DocElementParser tests', function (): void {
       /* tslint:disable-next-line:no-any */
       let errorMessage: any;
       try {
-        docElements = DocElementParser.parse(tokenizer, console.log);
+        docElements = DocElementParser.parse(myDocumentedClass.documentation, tokenizer);
       } catch (error) {
         errorMessage = error;
       }
@@ -242,7 +242,7 @@ describe('DocElementParser tests', function (): void {
       /* tslint:disable-next-line:no-any */
       let errorMessage: any;
       try {
-        docElements = DocElementParser.parse(tokenizer, console.log);
+        docElements = DocElementParser.parse(myDocumentedClass.documentation, tokenizer);
       } catch (error) {
         errorMessage = error;
       }
@@ -264,7 +264,7 @@ describe('DocElementParser tests', function (): void {
       /* tslint:disable-next-line:no-any */
       let errorMessage: any;
       try {
-        docElements = DocElementParser.parse(tokenizer, console.log);
+        docElements = DocElementParser.parse(myDocumentedClass.documentation, tokenizer);
       } catch (error) {
         errorMessage = error;
       }
@@ -287,7 +287,7 @@ describe('DocElementParser tests', function (): void {
       /* tslint:disable-next-line:no-any */
       let errorMessage: any;
       try {
-        docElements = DocElementParser.parse(tokenizer, console.log);
+        docElements = DocElementParser.parse(myDocumentedClass.documentation, tokenizer);
       } catch (error) {
         errorMessage = error;
       }

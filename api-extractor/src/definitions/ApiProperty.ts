@@ -26,8 +26,8 @@ class ApiProperty extends ApiMember {
   /**
    * {@inheritdoc ApiItem.onResolveReferences }
    */
-  protected onResolveReferences(): void {
-    super.onResolveReferences();
+  protected onCompleteeReferences(): void {
+    super.onCompleteReferences();
 
     if (this.documentation.hasReadOnlyTag) {
       this.isReadOnly = true;
