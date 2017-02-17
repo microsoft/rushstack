@@ -194,7 +194,7 @@ export default class RushConfiguration {
     this._rushJsonFolder = path.dirname(rushJsonFilename);
     this._commonFolder = path.resolve(path.join(this._rushJsonFolder, rushConfigurationJson.commonFolder));
     if (!fsx.existsSync(this._commonFolder)) {
-      throw new Error(`Rush common folder does not exist: ${rushConfigurationJson.commonFolder}`);
+      throw new Error(`No common folder detected.${os.EOL}You should probably run "rush generate"`);
     }
     this._commonFolderName = path.basename(this._commonFolder);
 

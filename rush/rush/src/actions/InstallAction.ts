@@ -150,6 +150,13 @@ export default class InstallAction extends CommandLineAction {
     const globPattern: string = `${globEscape(normalizedPath)}/rush-*/package.json`;
     this._tempModulesFiles = glob.sync(globPattern, { nodir: true });
 
+    // Ensure that the common/package.json exists
+    const commonPackageJson: string = path.join(this._rushConfiguration.commonFolder, 'package.json');
+    if (!fsx.existsSync(commonPackageJson)) {
+      throw new Error(`"${commonPackageJson}" was not found.${os.EOL}Did you forget to run "rush generate" ?`);
+    }
+
+
     // TEMPORARILY DISABLED DUE TO REGRESSION (VSO 313164)
     // this._checkThatTempModulesMatch();
 
