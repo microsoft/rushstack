@@ -156,7 +156,6 @@ export default class InstallAction extends CommandLineAction {
       throw new Error(`"${commonPackageJson}" was not found.${os.EOL}Did you forget to run "rush generate" ?`);
     }
 
-
     // TEMPORARILY DISABLED DUE TO REGRESSION (VSO 313164)
     // this._checkThatTempModulesMatch();
 
