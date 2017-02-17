@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Make --quiet builds the default. Remove the --quiet parameter. Add a --verbose parameter which displays the build logs. Add a --very-verbose parameter to dinvoke the build step with the --verbose flag for enhanced debugging.",
+      "comment": "Make --quiet builds the default. Remove the --quiet parameter. Add a --verbose parameter which displays the build logs.",
       "type": "major"
     }
   ],
