@@ -45,12 +45,10 @@ export default class RebuildAction extends CommandLineAction {
   private _parallelismParameter: CommandLineIntegerParameter;
   private _parser: RushCommandLineParser;
   private _productionParameter: CommandLineFlagParameter;
-  private _quietParameter: CommandLineFlagParameter;
   private _toFlag: CommandLineStringListParameter;
   private _vsoParameter: CommandLineFlagParameter;
   private _minimalParameter: CommandLineFlagParameter;
   private _verboseParameter: CommandLineFlagParameter;
-  private _veryVerboseParameter: CommandLineFlagParameter;
 
   constructor(parser: RushCommandLineParser, options?: ICommandLineActionOptions) {
     super(options || {
@@ -68,11 +66,6 @@ export default class RebuildAction extends CommandLineAction {
   }
 
   protected onDefineParameters(): void {
-    this._quietParameter = this.defineFlagParameter({
-      parameterLongName: '--quiet',
-      parameterShortName: '-q',
-      description: 'Only show errors and overall build status'
-    });
     this._productionParameter = this.defineFlagParameter({
       parameterLongName: '--production',
       description: 'Perform a production build'
