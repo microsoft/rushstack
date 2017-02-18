@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Thu, 09 Feb 2017 02:35:45 GMT and should not be manually modified.
+This log was last generated on Sat, 18 Feb 2017 02:32:06 GMT and should not be manually modified.
+
+## 2.4.0
+Sat, 18 Feb 2017 02:32:06 GMT
+
+### Minor changes
+
+- Add an enabled toggle to IExecutable and GulpTask. Using this toggle is now preferred to overriding the isEnabled function.
 
 ## 2.3.1
 Thu, 09 Feb 2017 02:35:45 GMT
