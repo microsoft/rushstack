@@ -2,6 +2,31 @@
   "name": "@microsoft/decorators",
   "entries": [
     {
+      "version": "1.0.0",
+      "tag": "@microsoft/decorators_v1.0.0",
+      "date": "Fri, 17 Feb 2017 23:09:23 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": ": Enabled strictNullChecks compiler flag."
+          }
+        ],
+        "major": [
+          {
+            "comment": "GA build"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/sp-loader\" from `~0.8.1` to `~1.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@ms/sp-build-internal-web\" from `~0.5.2` to `~0.5.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.2",
       "tag": "@microsoft/decorators_v0.2.2",
       "date": "Sun, 05 Feb 2017 01:21:30 GMT",
