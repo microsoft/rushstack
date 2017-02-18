@@ -58,24 +58,24 @@ export enum ApiItemKind {
 }
 
 /**
- * The state of resolving the ApiItem's doc comment references inside a recursive call to ApiItem.resolveReferences().
+ * The state of completing the ApiItem's doc comment references inside a recursive call to ApiItem.resolveReferences().
  */
-enum ResolveState {
+enum InitializationState {
   /**
-   * The references of this ApiItem have not begun to be resolved.
+   * The references of this ApiItem have not begun to be completed.
    */
-  Unresolved = 0,
+  Incomplete = 0,
   /**
-   * The refernces of this ApiItem are in the process of being resolved.
-   * If we encounter this state again during resolution, a circular dependency is
+   * The refernces of this ApiItem are in the process of being completed.
+   * If we encounter this state again during completing, a circular dependency
    * has occured.
    */
-  Resolving = 1,
+  Completing = 1,
   /**
-   * The references of this ApiItem have all been resolved and the documentation can
+   * The references of this ApiItem have all been completed and the documentation can
    * now safely be created.
    */
-  Resolved = 2
+  Completed = 2
 }
 
 /**
@@ -215,7 +215,7 @@ abstract class ApiItem {
    * The state of this ApiItems references. These references could include \@inheritdoc references
    * or type references.
    */
-  private _state: ResolveState;
+  private _state: InitializationState;
 
   constructor(options: IApiItemOptions) {
     this.reportError = this.reportError.bind(this);
@@ -223,7 +223,7 @@ abstract class ApiItem {
     this.jsdocNode = options.jsdocNode;
     this.declaration = options.declaration;
     this._errorNode = options.declaration;
-    this._state = ResolveState.Unresolved;
+    this._state = InitializationState.Incomplete;
     this.warnings = [];
 
     this.extractor = options.extractor;
@@ -232,6 +232,18 @@ abstract class ApiItem {
 
     this.name = this.exportSymbol.name || '???';
     this.typeChecker = this.extractor.typeChecker;
+
+    let originalJsDoc: string = '';
+    if (this.jsdocNode) {
+      originalJsDoc = TypeScriptHelpers.getJsDocComments(this.jsdocNode, this.reportError);
+    }
+
+    this.documentation = new ApiDocumentation(
+      originalJsDoc,
+      this.extractor.docItemLoader,
+      this.extractor,
+      this.reportError
+    );
   }
 
   /**
@@ -307,18 +319,9 @@ abstract class ApiItem {
    * This function assumes all references from this ApiItem have been resolved and we can now safely create
    * the documentation.
    */
-  protected onResolveReferences(): void {
-    let originalJsDoc: string = '';
-    if (this.jsdocNode) {
-      originalJsDoc = TypeScriptHelpers.getJsDocComments(this.jsdocNode, this.reportError);
-    }
+  protected onCompleteInitialization(): void {
 
-    this.documentation = new ApiDocumentation(
-      originalJsDoc,
-      this.extractor.docItemLoader,
-      this.extractor,
-      this.reportError
-    );
+    this.documentation.completeInitialization();
     // TODO: this.collectTypeReferences(this);
 
     const summaryTextCondensed: string = DocElementParser.getAsText(
@@ -351,22 +354,22 @@ abstract class ApiItem {
    * an \@inheritdoc referencing ApiItemTwo, and ApiItemTwo has an \@inheritdoc refercing ApiItemOne then
    * we have a circular dependency and an error will be reported.
    */
-  public tryResolveReferences(): boolean {
+  public completeInitialization(): void {
     switch (this._state) {
-      case ResolveState.Resolved:
-        return true;
-      case ResolveState.Unresolved:
-        this._state = ResolveState.Resolving;
-        this.onResolveReferences();
-        this._state = ResolveState.Resolved;
+      case InitializationState.Completed:
+        return;
+      case InitializationState.Incomplete:
+        this._state = InitializationState.Completing;
+        this.onCompleteInitialization();
+        this._state = InitializationState.Completed;
 
         for (const innerItem of this.innerItems) {
-          innerItem.tryResolveReferences();
+          innerItem.completeInitialization();
         }
-        return true;
-      case ResolveState.Resolving:
+        return;
+      case InitializationState.Completing:
         this.reportError('circular reference');
-        return false;
+        return;
       default:
         throw new Error('ApiItem state is invalid');
     }

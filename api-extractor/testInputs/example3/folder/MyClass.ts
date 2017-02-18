@@ -112,3 +112,30 @@ export interface IStructuredTypeSource {
     renderingArea: string;
   }
 }
+
+/**
+ * Here we test that an error is reported when attempting to link to an 
+ * internal API item.
+ * {@link publicEnum}
+ * {@link internalEnum}
+ */
+export enum testingLinks {
+}
+
+/**
+ * This enum is public and any API items can safely inherit documentation
+ * or link to this item.
+ * 
+ * @public
+ */
+export enum publicEnum {
+}
+
+/**
+ * This enum is internal and an error should be reported 
+ * if any API items inherit or link to this item.
+ * 
+ * @internal
+ */
+export enum internalEnum {
+}

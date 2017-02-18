@@ -50,7 +50,7 @@ describe('DocItemLoader tests', function (): void {
       assert.equal(capturedErrors.length, 3);
       assert.equal(capturedErrors[0].message, 'Unable to find referenced member \"MyClass.methodWithTwoParams\"');
       assert.equal(capturedErrors[1].message, 'circular reference');
-      assert.equal(capturedErrors[2].message, 'circular reference');
+      assert.equal(capturedErrors[2].message, 'Unable to link to "Internal" API item');
       TestFileComparer.assertFileMatchesExpected(outputFile, expectedFile);
     });
   });
