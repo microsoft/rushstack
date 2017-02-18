@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/stream-collator",
-  "version": "1.0.3",
+  "version": "2.0.0",
   "description": "Display intelligible realtime output from your asynchronous streams",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -21,6 +21,6 @@
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "mocha": "~2.5.3",
-    "@microsoft/sp-build-node": "~0.3.0"
+    "@microsoft/sp-build-node": "~1.0.0"
   }
 }

@@ -1,6 +1,18 @@
 # Change Log - @microsoft/ts-command-line
 
-This log was last generated on Sun, 05 Feb 2017 01:21:30 GMT and should not be manually modified.
+This log was last generated on Fri, 17 Feb 2017 23:09:23 GMT and should not be manually modified.
+
+## 2.0.0
+Fri, 17 Feb 2017 23:09:23 GMT
+
+### Breaking changes
+
+- GA build
+
+### Minor changes
+
+- Add a "option" parameter, which can limit the input to a list of possible strings.
+- Add the ability to give custom names to keys in the help menu.
 
 ## 1.1.2
 Sun, 05 Feb 2017 01:21:30 GMT
