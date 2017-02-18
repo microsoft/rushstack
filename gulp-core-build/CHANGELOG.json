@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "2.4.0",
+      "tag": "@microsoft/gulp-core-build_v2.4.0",
+      "date": "Sat, 18 Feb 2017 02:32:06 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add an enabled toggle to IExecutable and GulpTask. Using this toggle is now preferred to overriding the isEnabled function."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.3.1",
       "tag": "@microsoft/gulp-core-build_v2.3.1",
       "date": "Thu, 09 Feb 2017 02:35:45 GMT",

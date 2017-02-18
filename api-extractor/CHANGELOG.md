@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 16 Feb 2017 22:10:39 GMT and should not be manually modified.
+This log was last generated on Sat, 18 Feb 2017 02:32:06 GMT and should not be manually modified.
+
+## 1.1.14
+Sat, 18 Feb 2017 02:32:06 GMT
+
+### Patches
+
+- Seperated the ApiItem initialization into 3 stages: create documentation that doesn't require resolution, then complete initialization by resolving links and inheritdocs. This allows us to ignore harmless cycles like type references"
 
 ## 1.1.13
 Thu, 16 Feb 2017 22:10:39 GMT
