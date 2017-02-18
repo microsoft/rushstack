@@ -96,7 +96,7 @@ export default class Extractor {
     }
 
     this.package = new ApiPackage(this, rootFile); // construct members
-    this.package.tryResolveReferences(); // creates ApiDocumentation
+    this.package.completeInitialization(); // creates ApiDocumentation
   }
 
   /**

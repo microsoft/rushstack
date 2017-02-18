@@ -13,19 +13,20 @@ export default class ResolvedApiItem {
   public summary: IDocElement[];
   public remarks: IDocElement[];
   public deprecatedMessage: IDocElement[];
+  public apiTag: ApiTag;
   public isBeta: boolean;
   public params: {[name: string]: IParam};
   public returnsMessage: IDocElement[];
+  /**
+   * This property will either be an ApiItem or undefined.
+   */
+  public apiItem: ApiItem;
+
   /**
    * A function to abstract the construction of a ResolvedApiItem instance
    * from an ApiItem. 
    */
   public static createFromApiItem(apiItem: ApiItem): ResolvedApiItem {
-    const canResolveRefs: boolean = apiItem.tryResolveReferences();
-    if (!canResolveRefs) {
-      return undefined;
-    }
-
     return new ResolvedApiItem(
       apiItem.kind,
       apiItem.documentation.summary,
@@ -33,7 +34,9 @@ export default class ResolvedApiItem {
       apiItem.documentation.deprecatedMessage,
       apiItem.documentation.apiTag === ApiTag.Beta,
       apiItem.documentation.parameters,
-      apiItem.documentation.returnsMessage
+      apiItem.documentation.returnsMessage,
+      apiItem.documentation.apiTag,
+      apiItem
     );
   }
 
@@ -64,7 +67,9 @@ export default class ResolvedApiItem {
       docItem.deprecatedMessage,
       docItem.isBeta,
       parameters,
-      returnsMessage
+      returnsMessage,
+      ApiTag.Public,
+      undefined
     );
   }
 
@@ -75,12 +80,16 @@ export default class ResolvedApiItem {
     deprecatedMessage: IDocElement[],
     isBeta: boolean,
     params:  {[name: string]: IParam},
-    returnsMessage: IDocElement[]) {
+    returnsMessage: IDocElement[],
+    apiTag: ApiTag,
+    apiItem: ApiItem) {
     this.kind = kind;
     this.summary = summary;
     this.remarks = remarks;
     this.isBeta = isBeta;
     this.params = params;
     this.returnsMessage = returnsMessage;
+    this.apiTag = apiTag;
+    this.apiItem = apiItem;
   }
 }
