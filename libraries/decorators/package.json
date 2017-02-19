@@ -12,10 +12,6 @@
     "chai": "~3.5.0",
     "gulp": "~3.9.1"
   },
-  "dependencies": {
-    "@microsoft/sp-loader": "~1.0.0",
-    "@types/webpack-env": "1.13.0"
-  },
   "scripts": {
     "build": "gulp bundle",
     "clean": "gulp clean",
