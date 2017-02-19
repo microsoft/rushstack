@@ -8,7 +8,6 @@
     "sourceMap": true,
     "experimentalDecorators": true,
     "types": [
-      "webpack-env"
     ],
     "strictNullChecks": true
   }
