@@ -6,6 +6,7 @@
 !/lib/**
 !/dist/**
 !ThirdPartyNotice.txt
+!/EULA/**
 
 # NOTE: These don't need to be specified, because NPM includes them automatically.
 #
