@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-karma",
+      "comment": "The KarmaTask should only cause the build to fail if we are in production, otherwise treat failing tests as a warning.",
+      "type": "patch"
+    }
+  ],
+  "email": "nickpape@users.noreply.github.com"
+}
