@@ -9,7 +9,8 @@
     "test": "gulp test",
     "clean": "gulp clean"
   },
-  "license": "SEE LICENSE IN LICENSE.docx",
+  "license": "SEE LICENSE IN \"EULA\" FOLDER",
+  "homepage": "http://aka.ms/spfx",
   "dependencies": {
     "argparse": "~1.0.7",
     "colors": "~1.1.2",
