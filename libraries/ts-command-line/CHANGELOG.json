@@ -6,42 +6,25 @@
       "tag": "@microsoft/ts-command-line_v2.0.0",
       "date": "Fri, 17 Feb 2017 23:09:23 GMT",
       "comments": {
-        "minor": [
+        "patch": [
           {
-            "comment": "Add a \"option\" parameter, which can limit the input to a list of possible strings."
+            "comment": "Locked version numbers for @types packages"
           },
           {
-            "comment": "Add the ability to give custom names to keys in the help menu."
+            "comment": "Updated .npmignore"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Added a \"option\" parameter, which can limit the input to a list of possible strings."
+          },
+          {
+            "comment": "Added the ability to give custom names to keys in the help menu."
           }
         ],
         "major": [
           {
-            "comment": "GA build"
-          }
-        ],
-        "dependency": [
-          {
-            "comment": "Updating dependency \"@microsoft/sp-build-node\" from `~0.3.0` to `~1.0.0`"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.1.2",
-      "tag": "@microsoft/ts-command-line_v1.1.2",
-      "date": "Sun, 05 Feb 2017 01:21:30 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "Lock version numbers for @types packages"
-          },
-          {
-            "comment": "Update .npmignore"
-          }
-        ],
-        "dependency": [
-          {
-            "comment": "Updating dependency \"@microsoft/sp-build-node\" from `~0.2.1` to `~0.3.0`"
+            "comment": "General availability"
           }
         ]
       }
