@@ -17,7 +17,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@microsoft/package-deps-hash": "~0.0.4",
+    "@microsoft/package-deps-hash": "~2.0.0",
     "@microsoft/rush-lib": "1.8.3",
     "@microsoft/stream-collator": "~1.0.2",
     "@microsoft/ts-command-line": "~1.1.1",
