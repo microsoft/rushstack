@@ -171,26 +171,35 @@ export default class GenerateAction extends CommandLineAction {
         this._packageReviewChecker.saveCurrentDependencies();
     }
 
-    // 1. Delete "common\node_modules"
-    GenerateAction._deleteCommonNodeModules(this._rushConfiguration, this._lazyParameter.value);
+    // 0. Detect if we need to do a full rebuild, or if the shrinkwrap already contains the
+    //    necessary dependencies. This will happen if someone is adding a new rush dependency,
+    //    or if someone is adding a dependency which already exists in another project
+    const shouldRegenerateShrinkwrap: boolean = GenerateAction._shouldRegenerateShrinkwrap();
 
-    // 2. Delete the previous npm-shrinkwrap.json
-    GenerateAction._deleteShrinkwrapFile(this._rushConfiguration);
+    if (shouldRegenerateShrinkwrap) {
+      // 1. Delete "common\node_modules"
+      GenerateAction._deleteCommonNodeModules(this._rushConfiguration, this._lazyParameter.value);
 
-    // 3. Delete "common\temp_modules"
-    GenerateAction._deleteCommonTempModules(this._rushConfiguration);
+      // 2. Delete the previous npm-shrinkwrap.json
+      GenerateAction._deleteShrinkwrapFile(this._rushConfiguration);
+
+      // 3. Delete "common\temp_modules"
+      GenerateAction._deleteCommonTempModules(this._rushConfiguration);
+    }
 
     // 4. Construct common\package.json and common\temp_modules
     GenerateAction._createCommonTempModulesAndPackageJson(this._rushConfiguration);
 
-    // 5. Make sure the NPM tool is set up properly.  Usually "rush install" should have
-    //    already done this, but not if they just cloned the repo
-    console.log('');
-    InstallAction.ensureLocalNpmTool(this._rushConfiguration, false);
+    if (shouldRegenerateShrinkwrap) {
+      // 5. Make sure the NPM tool is set up properly.  Usually "rush install" should have
+      //    already done this, but not if they just cloned the repo
+      console.log('');
+      InstallAction.ensureLocalNpmTool(this._rushConfiguration, false);
 
-    // 6. Run "npm install" and "npm shrinkwrap"
-    GenerateAction._runNpmInstall(this._rushConfiguration);
-    GenerateAction._runNpmShrinkWrap(this._rushConfiguration, this._lazyParameter.value);
+      // 6. Run "npm install" and "npm shrinkwrap"
+      GenerateAction._runNpmInstall(this._rushConfiguration);
+      GenerateAction._runNpmShrinkWrap(this._rushConfiguration, this._lazyParameter.value);
+    }
 
     stopwatch.stop();
     console.log(os.EOL + colors.green(`Rush generate finished successfully. (${stopwatch.toString()})`));
