@@ -2,33 +2,6 @@
   "name": "@microsoft/rush",
   "entries": [
     {
-      "version": "3.0.0",
-      "tag": "@microsoft/rush_v3.0.0",
-      "date": "Fri, 24 Feb 2017 19:59:12 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "Rush install checks to ensure that generate has been run."
-          }
-        ],
-        "minor": [
-          {
-            "comment": "Add a \"pinnedVersions\" option to rush.json, which will add dependencies to the common package.json. Since these dependencies are installed first, this mechanism can be used to control versions of unconstrained second-level dependencies."
-          }
-        ],
-        "major": [
-          {
-            "comment": "Make --quiet builds the default. Remove the --quiet parameter. Add a --verbose parameter which displays the build logs."
-          }
-        ],
-        "dependency": [
-          {
-            "comment": "Updating dependency \"@microsoft/rush-lib\" from `1.9.0` to `1.10.0`"
-          }
-        ]
-      }
-    },
-    {
       "version": "1.8.2",
       "tag": "@microsoft/rush_v1.8.2",
       "date": "Wed, 15 Feb 2017 08:54:44 GMT",
