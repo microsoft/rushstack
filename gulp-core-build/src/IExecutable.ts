@@ -10,10 +10,8 @@ export interface IExecutable {
   /** Optional name to give the task. If no name is provided, the "Running subtask" logging will be silent. */
   name?: string;
 
-  enabled?: boolean;
-
   /** Optional callback to indicate if the task is enabled or not. */
-  isEnabled?: (config?: IBuildConfig) => boolean;
+  isEnabled?: (buildConfig: IBuildConfig) => boolean;
 
   /** Optional method to indicate directory matches to clean up when the clean task is run. */
   getCleanMatch?: (config: IBuildConfig, taskConfig?: any) => string[]; /* tslint:disable-line:no-any */
