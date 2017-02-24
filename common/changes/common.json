@@ -1,0 +1,15 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-lib",
+      "comment": "Rush will automatically create the common folder.",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Rush install checks to ensure that generate has been run.",
+      "type": "patch"
+    }
+  ],
+  "email": "nickpape@users.noreply.github.com"
+}
