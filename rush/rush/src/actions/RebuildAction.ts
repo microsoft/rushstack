@@ -123,7 +123,8 @@ export default class RebuildAction extends CommandLineAction {
     this._rushLinkJson = JsonFile.loadJsonFile(this._rushConfiguration.rushLinkJsonFilename);
 
     if (this._quietParameter.value) {
-      console.log(colors.yellow(`DEPRECATED: The --quiet parameter will be removed soon, because builds are now quiet by default`));
+      console.log(colors.yellow(`DEPRECATED: The --quiet parameter will be removed soon, ` +
+        `because builds are now quiet by default`));
     }
 
     console.log(`Starting "rush ${this.options.actionVerb}"` + os.EOL);
