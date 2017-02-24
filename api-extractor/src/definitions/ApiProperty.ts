@@ -14,6 +14,10 @@ class ApiProperty extends ApiMember {
     super(options);
     this.kind = ApiItemKind.Property;
 
+    if (this.documentation.hasReadOnlyTag) {
+      this.isReadOnly = true;
+    }
+
     const declaration: any = options.declaration as any; /* tslint:disable-line:no-any */
     if (declaration.type) {
       this.type = declaration.type.getText();
@@ -22,17 +26,6 @@ class ApiProperty extends ApiMember {
       this.type = 'any';
     }
 }
-
-  /**
-   * {@inheritdoc ApiItem.onResolveReferences }
-   */
-  protected onResolveReferences(): void {
-    super.onResolveReferences();
-
-    if (this.documentation.hasReadOnlyTag) {
-      this.isReadOnly = true;
-    }
-  }
 
   public getDeclarationLine(): string {
     return super.getDeclarationLine({

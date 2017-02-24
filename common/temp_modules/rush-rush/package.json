@@ -33,6 +33,6 @@
   },
   "rushDependencies": {
     "@microsoft/node-library-build": "~2.3.0",
-    "@microsoft/rush-lib": "1.8.0"
+    "@microsoft/rush-lib": "2.3.0"
   }
 }

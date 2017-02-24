@@ -1,6 +1,30 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 15 Feb 2017 08:54:44 GMT and should not be manually modified.
+This log was last generated on Fri, 24 Feb 2017 22:54:16 GMT and should not be manually modified.
+
+## 2.3.0
+Fri, 24 Feb 2017 22:54:16 GMT
+
+### Minor changes
+
+- Minor version
+
+## 2.2.1
+Fri, 24 Feb 2017 22:53:18 GMT
+
+*Changes not tracked*
+
+## 2.2.0
+Fri, 24 Feb 2017 22:44:31 GMT
+
+### Minor changes
+
+- Add a "pinnedVersions" option to rush.json, which will add dependencies to the common package.json. Since these dependencies are installed first, this mechanism can be used to control versions of unconstrained second-level dependencies.
+- Make --quiet builds the default. Deprecate the --quiet parameter. Add a --verbose parameter which displays the build logs.
+
+### Patches
+
+- Rush install checks to ensure that generate has been run.
 
 ## 1.8.2
 Wed, 15 Feb 2017 08:54:44 GMT

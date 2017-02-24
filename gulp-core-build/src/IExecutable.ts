@@ -11,7 +11,7 @@ export interface IExecutable {
   name?: string;
 
   /** Optional callback to indicate if the task is enabled or not. */
-  isEnabled?: (config?: IBuildConfig) => boolean;
+  isEnabled?: (buildConfig: IBuildConfig) => boolean;
 
   /** Optional method to indicate directory matches to clean up when the clean task is run. */
   getCleanMatch?: (config: IBuildConfig, taskConfig?: any) => string[]; /* tslint:disable-line:no-any */

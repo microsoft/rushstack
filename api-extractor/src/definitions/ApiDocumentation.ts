@@ -3,9 +3,9 @@
 import ApiItem, { ApiItemKind } from './ApiItem';
 import ApiPackage from './ApiPackage';
 import DocElementParser from '../DocElementParser';
-import { IDocElement, IParam, IHrefLinkElement, ICodeLinkElement, ITextElement } from '../IDocElement';
+import { IDocElement, IParam, ICodeLinkElement } from '../IDocElement';
 import { IDocItem } from '../IDocItem';
-import ApiDefinitionReference from '../ApiDefinitionReference';
+import ApiDefinitionReference, { IApiDefinintionReferenceParts } from '../ApiDefinitionReference';
 import Token, { TokenType } from '../Token';
 import Tokenizer from '../Tokenizer';
 import Extractor from '../Extractor';
@@ -129,6 +129,22 @@ export default class ApiDocumentation {
   public parameters: { [name: string]: IParam; };
 
   /**
+   * A list of link elements to be processed after all basic documentation has been created 
+   * for all items in the project. We save the processing for later because we need ApiTag 
+   * information before we can deem a link element is valid.
+   * Example: If API item A has a link in it's documentation to API item B, then B must not
+   * have ApiTag.Internal. 
+   */
+  public incompleteLinks: ICodeLinkElement[];
+
+  /**
+   * A list of 'Tokens' that have been recognized as inheritdoc tokens that will be processed 
+   * after the basic documentation for all API items is complete. We save the processing for after 
+   * because we need ApiTag information before we can deem an inheritdoc token as valid.
+   */
+  public incompleteInheritdocs: Token[];
+
+  /**
    * An "API Tag" is a custom JSDoc tag which indicates whether this definition
    * is considered Public API for third party developers, as well as its release
    * stage (alpha, beta, etc).
@@ -182,18 +198,32 @@ export default class ApiDocumentation {
     this._parseDocs();
   }
 
+  /**
+   * Executes the implementation details involved in completing the documentation initialization.
+   * Currently completes link and inheritdocs.
+   */
+  public completeInitialization(): void {
+    // Ensure links are valid
+    this._completeLinks();
+    // Ensure inheritdocs are valid
+    this._completeInheritdocs();
+  }
+
   protected _parseDocs(): void {
-    const tokenizer: Tokenizer = new Tokenizer(this.originalJsDoc, this.reportError);
-    this.summary = DocElementParser.parse(tokenizer, this.reportError);
+    this.summary = [];
     this.returnsMessage = [];
     this.deprecatedMessage = [];
     this.remarks = [];
+    this.incompleteLinks = [];
+    this.incompleteInheritdocs = [];
     this.apiTag = ApiTag.None;
+    const tokenizer: Tokenizer = new Tokenizer(this.originalJsDoc, this.reportError);
+    this.summary = DocElementParser.parse(this, tokenizer);
 
     let apiTagCount: number = 0;
     let parsing: boolean = true;
 
-    while (parsing) {
+      while (parsing) {
       const token: Token = tokenizer.peekToken();
       if (!token) {
         parsing = false; // end of stream
@@ -212,12 +242,12 @@ export default class ApiDocumentation {
           case '@remarks':
             tokenizer.getToken();
             this._checkInheritDocStatus();
-            this.remarks = DocElementParser.parse(tokenizer, this.reportError);
+            this.remarks = DocElementParser.parse(this, tokenizer);
             break;
           case '@returns':
             tokenizer.getToken();
             this._checkInheritDocStatus();
-            this.returnsMessage = DocElementParser.parse(tokenizer, this.reportError);
+            this.returnsMessage = DocElementParser.parse(this, tokenizer);
             break;
           case '@param':
             tokenizer.getToken();
@@ -229,7 +259,7 @@ export default class ApiDocumentation {
             break;
           case '@deprecated':
             tokenizer.getToken();
-            this.deprecatedMessage = DocElementParser.parse(tokenizer, this.reportError);
+            this.deprecatedMessage = DocElementParser.parse(this, tokenizer);
             if (!this.deprecatedMessage || this.deprecatedMessage.length === 0) {
               this.reportError(`deprecated description required after @deprecated JSDoc tag.`);
             }
@@ -237,7 +267,7 @@ export default class ApiDocumentation {
           case '@internalremarks':
             // parse but discard
             tokenizer.getToken();
-            DocElementParser.parse(tokenizer, this.reportError);
+            DocElementParser.parse(this, tokenizer);
             break;
           case '@public':
             tokenizer.getToken();
@@ -278,20 +308,10 @@ export default class ApiDocumentation {
       } else if (token.type === TokenType.Inline) {
         switch (token.tag) {
           case '@inheritdoc':
-            tokenizer.getToken();
-            if (this.summary.length > 0) {
-              this.reportError('Cannot provide summary in JsDoc if @inheritdoc tag is given');
-            }
-            this._parseInheritDoc(token);
-            this.isDocInherited = true;
+            DocElementParser.parse(this, tokenizer);
             break;
           case '@link':
-            const linkDocElement: IHrefLinkElement | ICodeLinkElement = DocElementParser.parseLinkTag(
-            tokenizer.getToken(),
-            this.reportError);
-            if (linkDocElement) {
-              this.summary.push(linkDocElement);
-            }
+            DocElementParser.parse(this, tokenizer);
             break;
           default:
             tokenizer.getToken();
@@ -324,78 +344,6 @@ export default class ApiDocumentation {
     }
   }
 
-  /**
-   * This method parses the semantic information in an \@inheritdoc JSDoc tag and sets
-   * all the relevant documenation properties from the inherited doc onto the documenation
-   * of the current api item.
-   *
-   * The format for the \@inheritdoc tag is {\@inheritdoc scopeName/packageName:exportName.memberName}.
-   * For more information on the format see IInheritdocRef.
-   */
-  protected _parseInheritDoc(token: Token): void {
-
-    // Check to make sure the API definition reference is at most one string
-    const tokenChunks: string[] = token.text.split(' ');
-    if (tokenChunks.length > 1) {
-      this.reportError('Too many parameters for @inheritdoc inline tag.' +
-        'The format should be {@inheritdoc scopeName/packageName:exportName}. Extra parameters are ignored');
-      return;
-    }
-
-    // Create the IApiDefinitionReference object
-    // Deconstruct the API reference expression 'scopeName/packageName:exportName.memberName'
-    const apiDefinitionRef: ApiDefinitionReference = ApiDefinitionReference.createFromString(
-      token.text,
-      this.reportError
-    );
-    // if API reference expression is formatted incorrectly then apiDefinitionRef will be undefined
-    if (!apiDefinitionRef) {
-      this.reportError('Incorrecty formatted API definition reference');
-      return;
-    }
-
-    // Atempt to locate the apiDefinitionRef
-    const resolvedApiItem: ResolvedApiItem = this.referenceResolver.resolve(
-      apiDefinitionRef,
-      this.extractor.package,
-      this.reportError);
-
-    // If no IDocItem found then nothing to inherit
-    // But for the time being set the summary to a text object
-    if (!resolvedApiItem) {
-      const textDocItem: IDocElement = {
-        kind: 'textDocElement',
-        value: `See documentation for ${tokenChunks[0]}`
-      } as ITextElement;
-      this.summary = [textDocItem];
-      return;
-    }
-
-    // inheritdoc found, copy over IDocBase properties
-    this.summary =  resolvedApiItem.summary;
-    this.remarks = resolvedApiItem.remarks;
-
-    // Copy over detailed properties if neccessary
-    // Add additional cases if needed
-    switch (resolvedApiItem.kind) {
-      case ApiItemKind.Function:
-        this.parameters = resolvedApiItem.params;
-        this.returnsMessage = resolvedApiItem.returnsMessage;
-        break;
-      case ApiItemKind.Method:
-        this.parameters = resolvedApiItem.params;
-        this.returnsMessage = resolvedApiItem.returnsMessage;
-        break;
-    }
-
-    // Check if inheritdoc is depreacted
-    // We need to check if this documentation has a deprecated message
-    // but it may not appear until after this token.
-    if (resolvedApiItem.deprecatedMessage) {
-      this.isDocInheritedDeprecated = true;
-    }
-  }
-
   protected _parseParam(tokenizer: Tokenizer): IParam {
     const paramDescriptionToken: Token = tokenizer.getToken();
     if (!paramDescriptionToken) {
@@ -418,7 +366,7 @@ export default class ApiDocumentation {
 
       const commentTextElement: IDocElement = DocElementParser.makeTextElement(comment);
       // Full param description may contain additional Tokens (Ex: @link)
-      const remainingElements: IDocElement[] = DocElementParser.parse(tokenizer, this.reportError);
+      const remainingElements: IDocElement[] = DocElementParser.parse(this, tokenizer);
       const descriptionElements: IDocElement[] = [commentTextElement].concat(remainingElements);
 
       const paramDocElement: IParam = {
@@ -427,6 +375,46 @@ export default class ApiDocumentation {
       };
       return paramDocElement;
       }
+  }
+
+    /**
+   * A processing of linkDocElements that refer to an ApiDefinitionReference. This method 
+   * ensures that the reference is to an API item that is not 'Internal'.
+   */
+  private _completeLinks(): void {
+    while (this.incompleteLinks.length) {
+      const codeLink: ICodeLinkElement = this.incompleteLinks.pop();
+      const parts: IApiDefinintionReferenceParts = {
+        scopeName: codeLink.scopeName,
+        packageName: codeLink.packageName,
+        exportName: codeLink.exportName,
+        memberName: codeLink.memberName
+      };
+
+      const apiDefinitionRef: ApiDefinitionReference = ApiDefinitionReference.createFromParts(parts);
+      const resolvedApiItem: ResolvedApiItem =  this.referenceResolver.resolve(
+        apiDefinitionRef,
+        this.extractor.package,
+        this.reportError
+      );
+
+      // If the apiDefinitionRef can not be found the resolcedApiItem will be
+      // undefined and an error will have been reported via this.reportError
+      if (resolvedApiItem && resolvedApiItem.apiTag === ApiTag.Internal) {
+        this.reportError('Unable to link to \"Internal\" API item');
+      }
+    }
+  }
+
+  /**
+   * A processing of inheritdoc 'Tokens'. This processing occurs after we have created documentation 
+   * for all API items. 
+   */
+  private _completeInheritdocs(): void {
+    while (this.incompleteInheritdocs.length) {
+      const token: Token = this.incompleteInheritdocs.pop();
+      DocElementParser.parseInheritDoc(this, token);
+    }
   }
 
   private _reportBadJSDocTag(token: Token): void {
