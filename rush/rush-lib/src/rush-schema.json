@@ -100,6 +100,16 @@
         "additionalProperties": false,
         "required": [ "packageName", "projectFolder" ]
       }
+    },
+    "pinnedVersions": {
+      "description": "A mapping of dependency package names to a semantic version. These are included in the common package.json and is used to control versions of second-level dependencies.",
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z0-9_@/-]+$": {
+          "type": "string",
+          "description": "A semantic version specifier"
+        }
+      }
     }
   },
   "additionalProperties": false,

@@ -37,6 +37,7 @@ export interface IRushConfigurationJson {
   useLocalNpmCache?: boolean;
   gitPolicy?: IRushGitPolicyJson;
   projects: IRushConfigurationProjectJson[];
+  pinnedVersions: { [dependency: string]: string };
 }
 
 /**
@@ -71,6 +72,7 @@ export default class RushConfiguration {
   private _gitSampleEmail: string;
   private _projects: RushConfigurationProject[];
   private _projectsByName: Map<string, RushConfigurationProject>;
+  private _pinnedVersions: Map<string, string>;
 
   /**
    * Loads the configuration data from an Rush.json configuration file and returns
@@ -295,6 +297,25 @@ export default class RushConfiguration {
       this._populateDownstreamDependencies(project.packageJson.dependencies, project.packageName);
       this._populateDownstreamDependencies(project.packageJson.devDependencies, project.packageName);
     }
+
+    this._pinnedVersions = new Map<string, string>();
+    if (rushConfigurationJson.pinnedVersions) {
+      Object.keys(rushConfigurationJson.pinnedVersions).forEach((dependency: string) => {
+        const pinnedVersion: string = rushConfigurationJson.pinnedVersions[dependency];
+
+        if (!semver.valid(pinnedVersion)) {
+          throw new Error(`In rush.json, the pinned version "${pinnedVersion}" for "${dependency}"` +
+            ` project is not a valid semantic version`);
+        }
+
+        if (this._projectsByName.has(dependency)) {
+          throw new Error(`In rush.json, cannot add a pinned version ` +
+            `for a rush-ified project: "${dependency}"`);
+        }
+
+        this._pinnedVersions.set(dependency, pinnedVersion);
+      });
+    }
   }
 
   /**
@@ -452,6 +473,10 @@ export default class RushConfiguration {
 
   public get projectsByName(): Map<string, RushConfigurationProject> {
     return this._projectsByName;
+  }
+
+  public get pinnedVersions(): Map<string, string> {
+    return this._pinnedVersions;
   }
 
   /**
