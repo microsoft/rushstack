@@ -136,6 +136,7 @@ export default class InstallAction extends CommandLineAction {
     });
     this._checkTempModules = this.defineOptionParameter({
       parameterLongName: '--temp-modules',
+      parameterShortName: '-t',
       description: 'A flag controlling whether Rush should check that the temp_modules are up to date or not' +
       '. Defaults to "warn"',
       options: ['none', 'warn', 'err']
@@ -254,9 +255,11 @@ export default class InstallAction extends CommandLineAction {
           const errorMsg: string = `The project ${project.packageName}'s temp_module is outdated`;
           const rerunGenerate: string = '\nDid you forget to run rush generate?';
 
-          console.log(colors.red(`${errorMsg}:\n`));
-          console.log(colors.red(`EXPECTED:\n${JSON.stringify(expectedTempModule, undefined, 2)}\n`));
-          console.log(colors.red(`ACTUAL: \n${JSON.stringify(tempModule.packageJson, undefined, 2)}`));
+          const color: (msg: string) => string = shouldWarn ? colors.yellow : colors.red;
+
+          console.log(color(`${errorMsg}:\n`));
+          console.log(color(`EXPECTED:\n${JSON.stringify(expectedTempModule, undefined, 2)}\n`));
+          console.log(color(`ACTUAL: \n${JSON.stringify(tempModule.packageJson, undefined, 2)}`));
 
           const message: string = errorMsg + '\n' + rerunGenerate;
           if (shouldWarn) {
