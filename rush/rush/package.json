@@ -20,7 +20,7 @@
     "@microsoft/package-deps-hash": "~0.0.4",
     "@microsoft/rush-lib": "1.9.0",
     "@microsoft/stream-collator": "~1.0.2",
-    "@microsoft/ts-command-line": "~1.1.1",
+    "@microsoft/ts-command-line": "~2.0.0",
     "builtins": "~1.0.3",
     "colors": "~1.1.2",
     "fs-extra": "~0.26.0",
