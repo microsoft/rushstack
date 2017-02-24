@@ -16,7 +16,7 @@
     "gulp": "~3.9.1",
     "@microsoft/package-deps-hash": "~0.0.4",
     "@microsoft/stream-collator": "~1.0.2",
-    "@microsoft/ts-command-line": "~1.1.1",
+    "@microsoft/ts-command-line": "~2.0.0",
     "builtins": "~1.0.3",
     "colors": "~1.1.2",
     "fs-extra": "~0.26.0",
@@ -33,6 +33,6 @@
   },
   "rushDependencies": {
     "@microsoft/node-library-build": "~2.3.0",
-    "@microsoft/rush-lib": "1.8.0"
+    "@microsoft/rush-lib": "1.9.0"
   }
 }
