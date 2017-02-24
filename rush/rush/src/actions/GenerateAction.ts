@@ -77,6 +77,11 @@ export default class GenerateAction extends CommandLineAction {
       version: '0.0.0'
     };
 
+    // Add any pinned versions to the top of the commonPackageJson
+    rushConfiguration.pinnedVersions.forEach((version: string, dependency: string) => {
+      commonPackageJson.dependencies[dependency] = version;
+    });
+
     console.log('Creating temp projects...');
 
     // To make the common/package.json file more readable, sort alphabetically
