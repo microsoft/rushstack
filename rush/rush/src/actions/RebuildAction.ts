@@ -45,6 +45,7 @@ export default class RebuildAction extends CommandLineAction {
   private _parallelismParameter: CommandLineIntegerParameter;
   private _parser: RushCommandLineParser;
   private _productionParameter: CommandLineFlagParameter;
+  private _quietParameter: CommandLineFlagParameter;
   private _toFlag: CommandLineStringListParameter;
   private _vsoParameter: CommandLineFlagParameter;
   private _minimalParameter: CommandLineFlagParameter;
@@ -105,6 +106,11 @@ export default class RebuildAction extends CommandLineAction {
       parameterShortName: '-v',
       description: 'Display the logs during the build, rather than just displaying the build status summary'
     });
+    this._quietParameter = this.defineFlagParameter({
+      parameterLongName: '--quiet',
+      parameterShortName: '-q',
+      description: 'Only show errors and overall build status'
+    });
   }
 
   protected onExecute(): void {
@@ -115,6 +121,10 @@ export default class RebuildAction extends CommandLineAction {
         + os.EOL + 'Did you run "rush link"?');
     }
     this._rushLinkJson = JsonFile.loadJsonFile(this._rushConfiguration.rushLinkJsonFilename);
+
+    if (this._quietParameter.value) {
+      console.log(colors.yellow(`DEPRECATED: the --quiet parameter is deprecated, as builds are quiet by default`));
+    }
 
     console.log(`Starting "rush ${this.options.actionVerb}"` + os.EOL);
     const stopwatch: Stopwatch = Stopwatch.start();

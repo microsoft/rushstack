@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Make --quiet builds the default. Deprecate the --quiet parameter. Add a --verbose parameter which displays the build logs.",
+      "type": "minor"
+    }
+  ],
+  "email": "nickpape@users.noreply.github.com"
+}
