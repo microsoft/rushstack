@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Added the --temp-modules flag, which controls if rush will treat out of date temp_modules as an error, a warning, or if it will ignore them entirely.",
+      "type": "minor"
+    }
+  ],
+  "email": "nickpape@users.noreply.github.com"
+}
