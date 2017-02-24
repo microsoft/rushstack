@@ -2,12 +2,12 @@
   "changes": [
     {
       "packageName": "@microsoft/rush-lib",
-      "comment": "Add a \"pinnedVersions\" option to rush.json, which will add dependencies to the top-level package.json. These dependencies are resolved first, and thus this mechanism can be used to control versions of second-level dependencies.",
+      "comment": "Add a \"pinnedVersions\" option to rush.json, which will add dependencies to the common package.json. Since these dependencies are installed first, this mechanism can be used to control versions of unconstrained second-level dependencies.",
       "type": "minor"
     },
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add a \"pinnedVersions\" option to rush.json, which will add dependencies to the top-level package.json. These dependencies are resolved first, and thus this mechanism can be used to control versions of second-level dependencies.",
+      "comment": "Add a \"pinnedVersions\" option to rush.json, which will add dependencies to the common package.json. Since these dependencies are installed first, this mechanism can be used to control versions of unconstrained second-level dependencies.",
       "type": "minor"
     }
   ],

@@ -102,10 +102,10 @@
       }
     },
     "pinnedVersions": {
-      "description": "A mapping of dependency package names to a semantic version. These are included in the common package.json and is used to control versions of second-level dependencies.",
+      "description": "A mapping of dependency package names to a semantic version. These are included in the common package.json and are used to control versions of second-level dependencies.",
       "type": "object",
       "patternProperties": {
-        "^[a-zA-Z0-9_@/-]+$": {
+        "^\\S+$": {
           "type": "string",
           "description": "A semantic version specifier"
         }

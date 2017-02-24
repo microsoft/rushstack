@@ -310,7 +310,7 @@ export default class RushConfiguration {
 
         if (this._projectsByName.has(dependency)) {
           throw new Error(`In rush.json, cannot add a pinned version ` +
-            `for a rush-ified project: "${dependency}"`);
+            `for local project: "${dependency}"`);
         }
 
         this._pinnedVersions.set(dependency, pinnedVersion);
