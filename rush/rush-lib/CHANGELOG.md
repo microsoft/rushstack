@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush-lib
 
-This log was last generated on Fri, 24 Feb 2017 22:44:31 GMT and should not be manually modified.
+This log was last generated on Fri, 24 Feb 2017 22:53:18 GMT and should not be manually modified.
+
+## 2.3.0
+Fri, 24 Feb 2017 22:53:18 GMT
+
+### Minor changes
+
+- Get package versions aligned with @microsoft/rush-lib
+- Get package versions aligned with @microsoft/rush
 
 ## 1.10.0
 Fri, 24 Feb 2017 22:44:31 GMT

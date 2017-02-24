@@ -1,6 +1,18 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 24 Feb 2017 22:44:31 GMT and should not be manually modified.
+This log was last generated on Fri, 24 Feb 2017 22:54:16 GMT and should not be manually modified.
+
+## 2.3.0
+Fri, 24 Feb 2017 22:54:16 GMT
+
+### Minor changes
+
+- Minor version
+
+## 2.2.1
+Fri, 24 Feb 2017 22:53:18 GMT
+
+*Changes not tracked*
 
 ## 2.2.0
 Fri, 24 Feb 2017 22:44:31 GMT
