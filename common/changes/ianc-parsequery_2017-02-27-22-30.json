@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/loader-set-webpack-public-path",
+      "comment": "Removing call to the deprecated parseQuery function. Using getOptions instead.",
+      "type": "patch"
+    }
+  ],
+  "email": "iclanton@users.noreply.github.com"
+}
