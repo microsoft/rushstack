@@ -94,7 +94,7 @@ describe('ApiFileGenerator tests', function (): void {
 
       assertFileMatchesExpected(outputFile, expectedFile);
     });
-    
+
     it('Example 4', function (): void {
       capturedErrors = [];
 
