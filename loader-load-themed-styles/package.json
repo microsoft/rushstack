@@ -12,7 +12,7 @@
     "test": "gulp test"
   },
   "dependencies": {
-    "loader-utils": "~0.2.16",
+    "loader-utils": "~1.0.2",
     "@microsoft/load-themed-styles": "~1.2.2"
   },
   "devDependencies": {

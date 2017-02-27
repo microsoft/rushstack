@@ -6,7 +6,7 @@
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "@microsoft/node-library-build": "~2.2.0",
-    "loader-utils": "~0.2.16",
+    "loader-utils": "~1.0.2",
     "@microsoft/load-themed-styles": "~1.2.2"
   }
 }
