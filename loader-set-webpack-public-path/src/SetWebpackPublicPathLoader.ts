@@ -50,7 +50,7 @@ export class SetWebpackPublicPathLoader {
   }
 
   private static getOptions(query: string): IInternalOptions {
-    const queryOptions: ISetWebpackPublicPathLoaderOptions = loaderUtils.parseQuery(query);
+    const queryOptions: ISetWebpackPublicPathLoaderOptions = loaderUtils.getOptions(query);
 
     const options: ISetWebpackPublicPathLoaderOptions & IInternalOptions =
       merge(merge({}, SetWebpackPublicPathLoader.staticOptions), queryOptions);
