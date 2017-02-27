@@ -107,6 +107,19 @@ export interface IApiItemOptions {
 }
 
 /**
+ * Attributes of an import reference.
+ * 
+ * Example: 
+ * "import { MyClass as MyClass2, MyEnum } from '@ms/blah'", this is formatted in
+ * the interface as: 
+ * {packageName: "@ms/blah", exportedName "MyClass"}
+ */
+interface IImportTypeReference {
+  packageName: string;
+  exportedName: string;
+}
+
+/**
  * ApiItem is an abstract base that represents TypeScript API definitions such as classes,
  * interfaces, enums, properties, functions, and variables.  Rather than directly using the
  * abstract syntax tree from the TypeScript Compiler API, we use ApiItem to extract a
@@ -244,6 +257,13 @@ abstract class ApiItem {
       this.extractor,
       this.reportError
     );
+  }
+
+  /**
+   * Called after the constructor to finish the analysis.
+   */
+  public resolveReferences(): void {
+    // (virtual)
   }
 
   /**
@@ -398,6 +418,150 @@ abstract class ApiItem {
       }
     }
     return false;
+  }
+
+  /**
+   * This is called by ApiItems to analyze the types that appear in an expression.  For example,
+   * if a Public API function returns a class that is defined in this package, but not exported,
+   * this is a problem. collectTypeReferences() finds all TypeReference child nodes under the
+   * specified node and analyzes each one.
+   */
+  protected collectTypeReferences(node: ts.Node): void {
+    if (node.kind === ts.SyntaxKind.Block || (node.kind >= 262 && node.kind <= 291)) {
+      // Don't traverse into code blocks or JSDoc items; we only care about the function signature
+      return;
+    }
+
+    if (node.kind === ts.SyntaxKind.TypeReference) {
+      const typeReference: ts.TypeReferenceNode = node as ts.TypeReferenceNode;
+      this._processTypeReference(typeReference);
+    }
+
+    // Recurse the tree
+    for (const childNode of node.getChildren()) {
+      this.collectTypeReferences(childNode);
+    }
+  }
+
+  /**
+   * This is a helper for collectTypeReferences().  It analyzes a single TypeReferenceNode.
+   */
+  private _processTypeReference(typeReferenceNode: ts.TypeReferenceNode): void {
+    const symbol: ts.Symbol = this.extractor.typeChecker.getSymbolAtLocation(typeReferenceNode.typeName);
+    if (!symbol) {
+      // Is this bad?
+      return;
+    }
+
+    if (symbol.flags & ts.SymbolFlags.TypeParameter) {
+      // Don't analyze e.g. "T" in "Set<T>"
+      return;
+    }
+
+    const typeName: string = typeReferenceNode.typeName.getText();
+
+    let currentSymbol: ts.Symbol = symbol;
+    while (true) {
+      const importTypeReference: IImportTypeReference = this._parseImportStatement(currentSymbol);
+      if (importTypeReference) {
+        if (importTypeReference.packageName.substr(0, 2) !== './') {
+          // [CASE 1] External/Resolved
+          // This is a reference to a type from an external package, and it was resolved.
+          return;
+        }
+      }
+
+      if (!(currentSymbol.flags & ts.SymbolFlags.Alias)) {
+        break;
+      }
+      const currentAlias: ts.Symbol = this.typeChecker.getAliasedSymbol(currentSymbol);
+      if (!currentAlias || currentAlias === currentSymbol) {
+        break;
+      }
+      currentSymbol = currentAlias;
+    }
+
+    if (!currentSymbol.declarations || !currentSymbol.declarations.length) {
+      // This is a degenerate case that happens sometimes
+      return;
+    }
+
+    // We reached the actual type declaration without tracing into an external package
+    const sourceFile: ts.SourceFile = currentSymbol.declarations[0].getSourceFile();
+
+    // Is the type from a location that we don't care about?
+    if (/[\\/]node_modules[\\/]typescript[\\/]/i.test(sourceFile.fileName)
+      || /[\\/]typings[\\/]/i.test(sourceFile.fileName)) {
+      // Yes, ignore this
+      return;
+    }
+
+    if (!this.extractor.isLocalSourceFile(sourceFile)) {
+      // [CASE 2] External/Unresolved
+      // The type is apparently from an external package, however our heuristic above
+      // wasn't able to find the import statement.  This happens due to limitations of
+      // the typeChecker.getAliasedSymbol() API; we should try to improve it.
+      this.reportWarning(`Unable to resolve external type reference for "${typeName}"`);
+    } else {
+      // The type is defined in this project.  Did the person remember to export it?
+      const exportedLocalName: string = this.extractor.package.getExportedSymbolName(currentSymbol);
+      if (exportedLocalName) {
+        // [CASE 3] Local/Exported
+        // Yes; the type is properly exported.
+        // TODO: In the future, here we can check for issues such as a @public type
+        // referencing an @internal type.
+        return;
+      } else {
+        // [CASE 4] Local/Unexported
+        // No; issue a warning
+        this.reportWarning(`The type "${typeName}" needs to be exported by the package`
+          + ` (e.g. added to index.ts)`);
+      }
+    }
+  }
+
+  /**
+   * Given a symbol that appears in an import clause "MyClass" inside
+   * "import { MyClass as MyClass2, MyEnum } from '@ms/blah'", this returns the
+   * packageName ("@ms/blah") and exported name ("MyClass").
+   * For an
+   */
+  private _parseImportStatement(importSymbol: ts.Symbol): IImportTypeReference {
+    if (!importSymbol.declarations || !importSymbol.declarations.length) {
+      return undefined;
+    }
+
+    const declaration: ts.Declaration = importSymbol.declarations[0];
+    if (!declaration) {
+      return undefined;
+    }
+
+    let exportedName: string;
+    switch (declaration.kind) {
+      case ts.SyntaxKind.ImportClause:
+        exportedName = (declaration as ts.ImportClause).name.text;
+        break;
+      case ts.SyntaxKind.ImportSpecifier:
+        const declaration2: ts.ImportSpecifier = declaration as ts.ImportSpecifier;
+        if (!declaration2.propertyName) {
+          return undefined;
+        }
+        exportedName = declaration2.propertyName.text;
+        break;
+      default:
+        return undefined;
+    }
+
+    for (let current: ts.Node = declaration; current; current = current.parent) {
+      if (current.kind === ts.SyntaxKind.ImportDeclaration) {
+        const importDeclaration: ts.ImportDeclaration = current as ts.ImportDeclaration;
+        let packageName: string = importDeclaration.moduleSpecifier.getText();
+        // If the string is quoted, then strip the quotes
+        packageName = packageName.replace(/^['"]/, '').replace(/['"]$/, '');
+        return { packageName, exportedName };
+      }
+    }
+    return undefined;
   }
 }
 

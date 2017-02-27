@@ -61,6 +61,8 @@ class Extractor {
   public docItemLoader: DocItemLoader;
   // (undocumented)
   public errorHandler: ApiErrorHandler;
+  // (undocumented)
+  public isLocalSourceFile(sourceFile: ts.SourceFile): boolean;
   public loadExternalPackages(externalJsonCollectionPath: string): void;
   // (undocumented)
   public package: ApiPackage;

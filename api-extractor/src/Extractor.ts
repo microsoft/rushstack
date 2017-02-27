@@ -1,3 +1,5 @@
+/* tslint:disable:no-constant-condition */
+
 import * as ts from 'typescript';
 import * as fsx from 'fs-extra';
 import * as path from 'path';
@@ -60,6 +62,10 @@ export default class Extractor {
 
   private _compilerOptions: ts.CompilerOptions;
 
+  // If the entry point is "C:\Folder\project\src\index.ts" and the nearest package.json
+  // is "C:\Folder\project\package.json", then the packageFolder is "C:\Folder\project"
+  private _packageFolder: string;
+
   /**
     * The default implementation of ApiErrorHandler, which merely writes to console.log().
     */
@@ -95,8 +101,47 @@ export default class Extractor {
       throw new Error('Unable to load file: ' + options.entryPointFile);
     }
 
+    // Assign _packageFolder by probing upwards from entryPointFile until we find a package.json
+    let currentPath: string = path.resolve(options.entryPointFile);
+
+    // no-constant-condition
+    while (true) {
+      const folder: string = path.dirname(currentPath);
+      if (folder === currentPath || !folder) {
+        throw new Error('Unable to determine package folder for entryPointFile');
+      }
+      currentPath = folder;
+      if (fsx.existsSync(path.join(currentPath, 'package.json'))) {
+        this._packageFolder = path.normalize(currentPath);
+        break;
+      }
+    }
+
     this.package = new ApiPackage(this, rootFile); // construct members
     this.package.completeInitialization(); // creates ApiDocumentation
+    this.package.resolveReferences();
+  }
+
+  /**
+   * Determines if a sourceFile was exported locally. If false, then the sourceFile
+   * was exported from an external package, in relation to the package currently being
+   * analyzing by the Extractor class.
+   */
+  public isLocalSourceFile(sourceFile: ts.SourceFile): boolean {
+    const fileName: string = path.normalize(sourceFile.fileName);
+    // If it's in a node_modules folder, then it's not part of this project
+    if (/[\\/]node_modules[\\/]/i.test(fileName)) {
+      return false;
+    }
+
+    // If it's not under this project's packageFolder, then it's not part of this project
+    if (fileName.substr(0, this._packageFolder.length).toUpperCase()
+      !== this._packageFolder.toUpperCase()) {
+      return false;
+    }
+
+    // Otherewise, heuristically assume that it is part of this project.
+    return true;
   }
 
   /**

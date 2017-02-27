@@ -35,6 +35,17 @@ abstract class ApiItemContainer extends ApiItem {
       this.memberItems.set(apiItem.name, apiItem);
     }
   }
+
+  /**
+   * @virtual
+   */
+  public resolveReferences(): void {
+    super.resolveReferences();
+
+    this.memberItems.forEach((apiItem) => {
+      apiItem.resolveReferences();
+    });
+  }
 }
 
 export default ApiItemContainer;

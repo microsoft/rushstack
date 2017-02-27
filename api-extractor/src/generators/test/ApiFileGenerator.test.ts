@@ -19,7 +19,7 @@ function assertFileMatchesExpected(actualFilename: string, expectedFilename: str
     + '\nACTUAL: ' + actualFilename);
 }
 
-const capturedErrors: {
+let capturedErrors: {
   message: string;
   fileName: string;
   lineNumber: number;
@@ -93,6 +93,36 @@ describe('ApiFileGenerator tests', function (): void {
       apiFileGenerator.writeApiFile(outputFile, extractor);
 
       assertFileMatchesExpected(outputFile, expectedFile);
+    });
+    
+    it('Example 4', function (): void {
+      capturedErrors = [];
+
+      const inputFolder: string = './testInputs/example4';
+      const outputFile: string = './lib/example4-output.api.ts';
+      const expectedFile: string = path.join(inputFolder, 'example4-output.api.ts');
+
+      const compilerOptions: ts.CompilerOptions = {
+        target: ts.ScriptTarget.ES5,
+        module: ts.ModuleKind.CommonJS,
+        moduleResolution: ts.ModuleResolutionKind.NodeJs,
+        rootDir: inputFolder,
+        typeRoots: ['./'] // We need to ignore @types in these tests
+      };
+      const extractor: Extractor = new Extractor({
+        compilerOptions: compilerOptions,
+        errorHandler: testErrorHandler
+      });
+
+      extractor.analyze({
+        entryPointFile: path.join(inputFolder, 'src/index.ts')
+      });
+
+      const apiFileGenerator: ApiFileGenerator = new ApiFileGenerator();
+      apiFileGenerator.writeApiFile(outputFile, extractor);
+
+      assertFileMatchesExpected(outputFile, expectedFile);
+      assert.equal(capturedErrors.length, 0);
     });
   });
 });
