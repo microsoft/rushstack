@@ -1,5 +1,6 @@
 import * as _ from 'lodash';
 import * as semver from 'semver';
+import * as colors from 'colors';
 
 export interface IPackage {
   [dependency: string]: string;
@@ -8,11 +9,21 @@ export interface IPackage {
 export class EvergreenVersioner {
   private _evergreenPackages: Map<string, string>;
   private _packageInfo: Map<string, Map<string, IPackage>>;
+  private _writer: (text?: string) => void;
+  private _spacing: number;
+  private _spacingStr: string;
 
   constructor(evergreenPackages: Map<string, string>,
-              packageInfo: Map<string, Map<string, IPackage>>) {
+    packageInfo: Map<string, Map<string, IPackage>>,
+    writer: (text?: string) => void = console.log) {
     this._evergreenPackages = evergreenPackages;
     this._packageInfo = packageInfo;
+
+    this._spacing = 0;
+    this._spacingStr = '';
+    this._writer = (text?: string) => {
+      writer(this._spacingStr + (text || ''));
+    };
   }
 
   public solve(packages: string[]): Map<string, string> {
@@ -26,77 +37,100 @@ export class EvergreenVersioner {
       }
     });
 
-    for (const dependency of packages) {
-
-      if (!(context = this._addDependency(context, dependency))) {
+    for (const packageName of packages) {
+      if (!(context = this._tryAddPackage(context, packageName))) {
         return undefined;
       }
     }
     return context;
   }
 
-  private _addDependency(context: Map<string, string>, dependency: string, tryVersion?: string): Map<string, string> {
-    console.log(`Adding dependency: "${dependency}"`);
-    console.log(`Context: `);
-    context.forEach((version: string, dep: string) => {
-      console.log(`   - ${dep}@${version}`);
-    });
+  private _tryAddPackage(context: Map<string, string>, packageName: string, lockedVersion?: string):
+    Map<string, string> {
+    this._writer(`Adding ${packageName}@${lockedVersion || 'latest'}`);
 
-    if (context.has(dependency)) {
-      if (tryVersion) {
-        if (context.get(dependency) !== tryVersion) {
-          console.log(`"${dependency}" version "${context.get(dependency)}" exists. Rejecting "${tryVersion}"`);
+    if (context.size) {
+      this._writer(`  Context: `);
+      context.forEach((version: string, dep: string) => {
+        this._writer(`    - ${dep}@${version}`);
+      });
+    } else {
+      this._writer(`  (empty context)`);
+    }
+    this._writer();
+
+    if (context.has(packageName)) {
+      const contextPackageVersion: string = context.get(packageName);
+
+      if (lockedVersion) {
+        if (contextPackageVersion !== lockedVersion) {
+          this._writer(colors.red(
+            `${packageName}@${contextPackageVersion} exists. Rejecting "${lockedVersion}"`
+          ));
           return undefined;
         }
       }
-      console.log(`Found "${dependency}" in context w/ ${(tryVersion ? 'matching' : '')} version "${context.get(dependency)}"`);
-
+      this._writer(colors.green(
+        `${(lockedVersion ? 'Matched' : 'Found')} "${packageName}@${contextPackageVersion}" in context`
+      ));
       return context;
     } else {
 
-      if (!tryVersion) {
-        console.log(`Unlocked version for "${dependency}"`);
+      if (!lockedVersion) {
         // Find a version that will work!
-        const possibleVersions: string[] = this._sortVersions(this._getKeys(this._packageInfo.get(dependency)));
+        const possibleVersions: string[] = this._sortVersions(this._getKeys(this._packageInfo.get(packageName)));
 
         for (const version of possibleVersions) {
-          const newContext: Map<string, string> = this._add(context, dependency, version);
+          this._increment();
+          const newContext: Map<string, string> = this._checkDependencies(context, packageName, version);
           if (newContext) {
+            this._decrement();
+            this._writer(colors.green(`Accepted ${packageName}@latest\n`));
             return newContext;
           }
+          this._decrement();
         }
+        this._writer(colors.red(`Rejected ${packageName}@latest\n`));
+        return undefined;
       } else {
-        console.log(`Locked version "${tryVersion}" for "${dependency}"`);
-        return this._add(context, dependency, tryVersion);
+        const newContext: Map<string, string> = this._checkDependencies(context, packageName, lockedVersion);
+        return newContext;
       }
     }
-    return undefined;
   }
 
-  private _add(context, dependency, version) {
+  private _checkDependencies(context: Map<string, string>, packageName: string, version: string): Map<string, string> {
     // Create a new context assuming we are using this version
-    let newContext = _.cloneDeep(context);
-    console.log(`Trying ${dependency}@${version}`);
-    newContext.set(dependency, version);
+    let newContext: Map<string, string> = _.cloneDeep(context);
 
-    const dependencies: IPackage = this._packageInfo.get(dependency).get(version);
+    this._writer(colors.yellow(`Checking ${packageName}@${version}`));
+    newContext.set(packageName, version);
+
+    const dependencies: IPackage = this._packageInfo.get(packageName).get(version);
     // Iterate through each dependency
-    for (const dep in dependencies) {
-      const depVersion: string = dependencies[dep];
-
-      if (this._isEvergreen(dep)) {
-        // if the dependency has a bad version then fail
-        if (!(newContext = this._addDependency(newContext, dep, depVersion))) {
-          return undefined;
+    for (const dependency in dependencies) {
+      if (dependencies.hasOwnProperty(dependency)) {
+        const dependencyVersion: string = dependencies[dependency];
+        this._increment();
+        this._writer(colors.yellow(`-> ${dependency}@${dependencyVersion}`));
+        if (this._isEvergreen(dependency)) {
+          // Try adding the dependency to the fake context and see that happens
+          newContext = this._tryAddPackage(newContext, dependency, dependencyVersion);
+          if (!newContext) {
+            this._decrement();
+            break;
+          }
         }
       }
     }
 
     if (newContext) {
-      console.log(`Accepted ${dependency}@${version}`);
+      this._writer(colors.green(`Accepted ${packageName}@${version}\n`));
+      this._decrement();
       return newContext;
     } else {
-      console.log(`Rejected ${dependency}@${version}`);
+      this._writer(colors.red(`Rejected ${packageName}@${version}\n`));
+      this._decrement();
       return undefined;
     }
   }
@@ -115,5 +149,23 @@ export class EvergreenVersioner {
       newArray.push(key);
     });
     return newArray;
+  }
+
+  private _increment(): void {
+    this._spacing = Math.max(this._spacing + 1, 0);
+    this._calculateSpacing();
+  }
+
+  private _decrement(): void {
+    this._spacing = Math.max(this._spacing - 1, 0);
+    this._calculateSpacing();
+  }
+
+  private _calculateSpacing(): void {
+    const a: string[] = [];
+    for (let i: number = 0; i < this._spacing; i++) {
+      a.push('  ');
+    }
+    this._spacingStr = a.join('');
   }
 }

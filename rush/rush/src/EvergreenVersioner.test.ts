@@ -3,8 +3,10 @@
 import { assert } from 'chai';
 import { EvergreenVersioner } from './EvergreenVersioner';
 
+/* tslint:disable:max-line-length */
 
-function convertProjectInfoToMap(object: { [project: string]: { [version: string]: { [dependency: string]: string } } }) {
+function convertProjectInfoToMap(object: { [project: string]: { [version: string]: { [dependency: string]: string } } }):
+  Map<string, Map<string, { [dependency: string]: string }>> {
   const map: Map<string, Map<string, { [dependency: string]: string }>> = new Map<string, Map<string, { [dependency: string]: string }>>();
   Object.keys(object).forEach((project: string) => {
     map.set(project, new Map<string, { [dependency: string]: string }>());
@@ -14,7 +16,6 @@ function convertProjectInfoToMap(object: { [project: string]: { [version: string
   });
   return map;
 }
-
 
 describe('EvergreenVersioner', () => {
   it('will update in simple case', () => {
@@ -192,7 +193,7 @@ describe('EvergreenVersioner', () => {
     assert.equal(newVersions.get('C'), '99.0.0', 'Evergreen package "C" was unchanged');
   });
 
-  it('will bump not bump interdependent packages if it causes mismatch', () => {
+  it('will not bump interdependent packages if it causes mismatch', () => {
     const evergreenPackages: Map<string, string> = new Map<string, string>();
     evergreenPackages.set('B', '0.0.1');
     evergreenPackages.set('C', '99.0.0');
@@ -209,10 +210,12 @@ describe('EvergreenVersioner', () => {
         },
         'B': {
           '0.0.1': {
-            'D': '0.42.0'
+            'D': '0.42.0',
+            'Z': '1.0.0'
           },
           '0.0.2': {
-            'D': '0.42.0'
+            'D': '0.42.0',
+            'Z': '1.0.0'
           }
         },
         'C': {
@@ -239,5 +242,47 @@ describe('EvergreenVersioner', () => {
     assert.equal(newVersions.get('C'), '99.0.0', 'Evergreen package "C" kept at 99.0.0');
     assert.isTrue(newVersions.has('D'), 'Evergreen package "D" was solved');
     assert.equal(newVersions.get('D'), '0.42.0', 'Evergreen package "D" was kept at 0.42.0');
+  });
+
+  it('will not find a fallback if it doesn\'t exist', () => {
+    const evergreenPackages: Map<string, string> = new Map<string, string>();
+    evergreenPackages.set('B', '0.0.1');
+    evergreenPackages.set('C', '99.0.0');
+    evergreenPackages.set('D', '0.42.0');
+
+    const versioner: EvergreenVersioner = new EvergreenVersioner(
+      evergreenPackages,
+      convertProjectInfoToMap({
+        'A': {
+          '1.0.0': {
+            B: '0.0.1',
+            C: '99.0.0'
+          }
+        },
+        'B': {
+          '0.0.1': {
+            'D': '0.42.0'
+          },
+          '0.0.2': {
+            'D': '0.42.0'
+          }
+        },
+        'C': {
+          '99.0.0': {
+            'D': '0.42.1'
+          },
+          '100.0.0': {
+            'D': '0.42.1'
+          }
+        },
+        'D': {
+          '0.42.0': {},
+          '0.42.1': {}
+        }
+      })
+    );
+
+    const newVersions: Map<string, string> = versioner.solve(['B', 'C', 'D']);
+    assert.isUndefined(newVersions);
   });
 });
