@@ -1,0 +1,20 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/loader-set-webpack-public-path",
+      "comment": "Updating loader-utils to 1.0.2",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/loader-raw-script",
+      "comment": "Updating loader-utils to 1.0.2",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/loader-load-themed-styles",
+      "comment": "Updating loader-utils to 1.0.2",
+      "type": "patch"
+    }
+  ],
+  "email": "iclanton@users.noreply.github.com"
+}

@@ -45,12 +45,12 @@ export class SetWebpackPublicPathLoader {
     const self: any = this;
     /* tslint:enable:no-any */
 
-    const options: IInternalOptions = SetWebpackPublicPathLoader.getOptions(self.query);
+    const options: IInternalOptions = SetWebpackPublicPathLoader.getOptions(self);
     return getSetPublicPathCode(options, self.emitWarning);
   }
 
-  private static getOptions(query: string): IInternalOptions {
-    const queryOptions: ISetWebpackPublicPathLoaderOptions = loaderUtils.getOptions(query);
+  private static getOptions(context: any): IInternalOptions { // tslint:disable-line:no-any
+    const queryOptions: ISetWebpackPublicPathLoaderOptions = loaderUtils.getOptions(context);
 
     const options: ISetWebpackPublicPathLoaderOptions & IInternalOptions =
       merge(merge({}, SetWebpackPublicPathLoader.staticOptions), queryOptions);

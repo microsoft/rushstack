@@ -12,7 +12,7 @@
     "test": "gulp test"
   },
   "dependencies": {
-    "loader-utils": "~0.2.16",
+    "loader-utils": "~1.0.2",
     "uglify-js": "~2.7.5",
     "lodash": "~4.15.0",
     "@types/webpack": "2.2.4"

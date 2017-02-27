@@ -7,6 +7,6 @@
     "gulp": "~3.9.1",
     "mocha": "~3.2.0",
     "@microsoft/node-library-build": "~2.2.0",
-    "loader-utils": "~0.2.16"
+    "loader-utils": "~1.0.2"
   }
 }

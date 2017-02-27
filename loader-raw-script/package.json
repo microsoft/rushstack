@@ -12,7 +12,7 @@
     "test": "gulp test"
   },
   "dependencies": {
-    "loader-utils": "~0.2.16"
+    "loader-utils": "~1.0.2"
   },
   "devDependencies": {
     "chai": "~3.5.0",
