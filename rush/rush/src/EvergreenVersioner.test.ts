@@ -236,7 +236,7 @@ describe('EvergreenVersioner', () => {
     assert.isTrue(newVersions.has('B'), 'Evergreen package "B" was solved');
     assert.equal(newVersions.get('B'), '0.0.2', 'Evergreen package "B" was bumped to 0.0.2');
     assert.isTrue(newVersions.has('C'), 'Evergreen package "C" was solved');
-    assert.equal(newVersions.get('C'), '0.0.2', 'Evergreen package "C" kept at 99.0.0');
+    assert.equal(newVersions.get('C'), '99.0.0', 'Evergreen package "C" kept at 99.0.0');
     assert.isTrue(newVersions.has('D'), 'Evergreen package "D" was solved');
     assert.equal(newVersions.get('D'), '0.42.0', 'Evergreen package "D" was kept at 0.42.0');
   });

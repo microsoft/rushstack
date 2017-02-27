@@ -17,7 +17,6 @@ export class EvergreenVersioner {
 
   public solve(packages: string[]): Map<string, string> {
     // @todo ensure all packages are in evergreen list
-
     let context: Map<string, string> = new Map<string, string>();
 
     // add all the evergreen versions which we are not changing (these are locked)
@@ -28,14 +27,15 @@ export class EvergreenVersioner {
     });
 
     for (const dependency of packages) {
-      if (!(context = this._addDependency(context, dependency))) {
+
+      if (!(context = this._addEvergreenDependency(context, dependency))) {
         return undefined;
       }
     }
     return context;
   }
 
-  private _addDependency(context: Map<string, string>, dependency: string): Map<string, string> {
+  private _addEvergreenDependency(context: Map<string, string>, dependency: string): Map<string, string> {
     console.log(`Adding dependency: "${dependency}"`);
     console.log(`Context: `);
     context.forEach((version: string, dep: string) => {
@@ -63,14 +63,16 @@ export class EvergreenVersioner {
     return undefined;
   }
 
-  private _tryAddVersion(context: Map<string, string>, dependency: string, version: string): Map<string, string> {
+  private _tryAddVersion(context: Map<string, string>, packageName: string, version: string): Map<string, string> {
     // Create a new context assuming we are using this version
     let newContext = _.cloneDeep(context);
-    newContext.set(dependency, version);
+    newContext.set(packageName, version);
 
-    const dependencies: IPackage = this._packageInfo.get(dependency).get(version);
+    const dependencies: IPackage = this._packageInfo.get(packageName).get(version);
     // Iterate through each dependency
     for (const dep in dependencies) {
+      const depVersion: string = dependencies[dep];
+
       if (this._isEvergreen(dep)) {
         // if the dependency has a bad version then fail
         if (newContext.has(dep)) {
@@ -80,7 +82,7 @@ export class EvergreenVersioner {
             return undefined;
           }
         } else {
-          if (!(newContext = this._addDependency(newContext, dep))) {
+          if (!(newContext = this._tryAddVersion(newContext, dep, depVersion))) {
             return undefined;
           }
         }
