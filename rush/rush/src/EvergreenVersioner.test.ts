@@ -195,7 +195,8 @@ describe('EvergreenVersioner', () => {
   it('will bump not bump interdependent packages if it causes mismatch', () => {
     const evergreenPackages: Map<string, string> = new Map<string, string>();
     evergreenPackages.set('B', '0.0.1');
-    evergreenPackages.set('C', )
+    evergreenPackages.set('C', '99.0.0');
+    evergreenPackages.set('D', '0.42.0');
 
     const versioner: EvergreenVersioner = new EvergreenVersioner(
       evergreenPackages,
@@ -207,19 +208,36 @@ describe('EvergreenVersioner', () => {
           }
         },
         'B': {
-          '0.0.1': {},
-          '0.0.2': {}
+          '0.0.1': {
+            'D': '0.42.0'
+          },
+          '0.0.2': {
+            'D': '0.42.0'
+          }
         },
-        'C'
-      })
-    );
+        'C': {
+          '99.0.0': {
+            'D': '0.42.0'
+          },
+          '100.0.0': {
+            'D': '0.42.1'
+          }
+        },
+        'D': {
+          '0.42.0': {},
+          '0.42.1': {}
+        }
+      }));
 
-    const newVersions: Map<string, string> = versioner.solve(['B']);
+    const newVersions: Map<string, string> = versioner.solve(['B', 'C', 'D']);
 
     assert.notEqual(newVersions, undefined);
-    assert.equal(newVersions.size, 1, 'There should be 1 updated version');
+    assert.equal(newVersions.size, 3, 'There should be 3 updated versions');
     assert.isTrue(newVersions.has('B'), 'Evergreen package "B" was solved');
     assert.equal(newVersions.get('B'), '0.0.2', 'Evergreen package "B" was bumped to 0.0.2');
+    assert.isTrue(newVersions.has('C'), 'Evergreen package "C" was solved');
+    assert.equal(newVersions.get('C'), '0.0.2', 'Evergreen package "C" kept at 99.0.0');
+    assert.isTrue(newVersions.has('D'), 'Evergreen package "D" was solved');
+    assert.equal(newVersions.get('D'), '0.42.0', 'Evergreen package "D" was kept at 0.42.0');
   });
-  */
 });
