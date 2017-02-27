@@ -28,14 +28,14 @@ export class EvergreenVersioner {
 
     for (const dependency of packages) {
 
-      if (!(context = this._addEvergreenDependency(context, dependency))) {
+      if (!(context = this._addDependency(context, dependency))) {
         return undefined;
       }
     }
     return context;
   }
 
-  private _addEvergreenDependency(context: Map<string, string>, dependency: string): Map<string, string> {
+  private _addDependency(context: Map<string, string>, dependency: string, tryVersion?: string): Map<string, string> {
     console.log(`Adding dependency: "${dependency}"`);
     console.log(`Context: `);
     context.forEach((version: string, dep: string) => {
@@ -43,52 +43,62 @@ export class EvergreenVersioner {
     });
 
     if (context.has(dependency)) {
-      console.log(`Found "${dependency}" in context w/ version "${context.get(dependency)}"`);
+      if (tryVersion) {
+        if (context.get(dependency) !== tryVersion) {
+          console.log(`"${dependency}" version "${context.get(dependency)}" exists. Rejecting "${tryVersion}"`);
+          return undefined;
+        }
+      }
+      console.log(`Found "${dependency}" in context w/ ${(tryVersion ? 'matching' : '')} version "${context.get(dependency)}"`);
+
       return context;
     } else {
-      // Find a version that will work!
-      const possibleVersions: string[] = this._sortVersions(this._getKeys(this._packageInfo.get(dependency)));
 
-      for (const version of possibleVersions) {
-        console.log(`Trying version: ${version}`);
-        const newContext: Map<string, string> = this._tryAddVersion(context, dependency, version);
-        if (newContext) {
-          console.log(`Accepted ${dependency}@${version}`);
-          return newContext;
-        } else {
-          console.log(`Rejected ${dependency}@${version}`);
+      if (!tryVersion) {
+        console.log(`Unlocked version for "${dependency}"`);
+        // Find a version that will work!
+        const possibleVersions: string[] = this._sortVersions(this._getKeys(this._packageInfo.get(dependency)));
+
+        for (const version of possibleVersions) {
+          const newContext: Map<string, string> = this._add(context, dependency, version);
+          if (newContext) {
+            return newContext;
+          }
         }
+      } else {
+        console.log(`Locked version "${tryVersion}" for "${dependency}"`);
+        return this._add(context, dependency, tryVersion);
       }
     }
     return undefined;
   }
 
-  private _tryAddVersion(context: Map<string, string>, packageName: string, version: string): Map<string, string> {
+  private _add(context, dependency, version) {
     // Create a new context assuming we are using this version
     let newContext = _.cloneDeep(context);
-    newContext.set(packageName, version);
+    console.log(`Trying ${dependency}@${version}`);
+    newContext.set(dependency, version);
 
-    const dependencies: IPackage = this._packageInfo.get(packageName).get(version);
+    const dependencies: IPackage = this._packageInfo.get(dependency).get(version);
     // Iterate through each dependency
     for (const dep in dependencies) {
       const depVersion: string = dependencies[dep];
 
       if (this._isEvergreen(dep)) {
         // if the dependency has a bad version then fail
-        if (newContext.has(dep)) {
-          if (newContext.get(dep) === dependencies[dep]) {
-            return newContext;
-          } else {
-            return undefined;
-          }
-        } else {
-          if (!(newContext = this._tryAddVersion(newContext, dep, depVersion))) {
-            return undefined;
-          }
+        if (!(newContext = this._addDependency(newContext, dep, depVersion))) {
+          return undefined;
         }
       }
     }
-    return newContext;
+
+    if (newContext) {
+      console.log(`Accepted ${dependency}@${version}`);
+      return newContext;
+    } else {
+      console.log(`Rejected ${dependency}@${version}`);
+      return undefined;
+    }
   }
 
   private _sortVersions(versions: string[]): string[] {
