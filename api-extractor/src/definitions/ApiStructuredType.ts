@@ -105,13 +105,13 @@ export default class ApiStructuredType extends ApiItemContainer {
   /**
    * @virtual
    */
-  public resolveReferences(): void {
-    super.resolveReferences();
+  public visitTypeReferencesForApiItem(): void {
+    super.visitTypeReferencesForApiItem();
 
     // Collect type references from the base classes
     if (this._classLikeDeclaration && this._classLikeDeclaration.heritageClauses) {
       for (const clause of this._classLikeDeclaration.heritageClauses) {
-        this.collectTypeReferences(clause);
+        this.visitTypeReferencesForNode(clause);
       }
     }
   }
