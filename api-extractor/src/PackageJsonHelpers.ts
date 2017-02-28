@@ -4,6 +4,13 @@ import * as fsx from 'fs-extra';
 import * as path from 'path';
 
 /**
+ * Represents a package.json file.
+ */
+export interface IPackageJson {
+  name: string;
+}
+
+/**
  * Utilities for navigating packages.
  */
 export default class PackageJsonHelpers {
@@ -13,8 +20,8 @@ export default class PackageJsonHelpers {
    * upwards from the currentPath until a package.json file is found. 
    * If no package.json can be found, an error is raised.
    * 
-   * @param currentPath - an absolute path of the current location
-   * @returns an absolute path to the package folder
+   * @param currentPath - a path (relative or absolute) of the current location
+   * @returns a relative path to the package folder
    */
   public static findPackagePathUpwards(currentPath: string): string {
     let packageFolder: string = '';
@@ -32,5 +39,17 @@ export default class PackageJsonHelpers {
       }
     }
     return packageFolder;
+  }
+
+  /**
+   * Loads the package.json file and returns the name of the package.
+   * 
+   * @param packageJsonPath - an absolute path to the folder containing the 
+   * package.json file, it does not include the 'package.json' suffix.
+   * @returns the name of the package (E.g. @microsoft/api-extractor)
+   */
+  public static getPackageName(packageJsonPath: string): string {
+    const packageJson: IPackageJson = require(path.join(packageJsonPath, 'package.json'));
+    return packageJson.name;
   }
 }

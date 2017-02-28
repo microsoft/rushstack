@@ -149,15 +149,12 @@ export default class ApiDefinitionReference {
    * parseScopedPackageName('myproject') = { scope: '', package: 'myproject' }
    */
   public static parseScopedPackageName(scopedName: string): IScopedPackageName {
-    if (scopedName.substr(0, 1) !== '@') {
-      return { scope: '', package: scopedName };
-    }
 
     const slashIndex: number = scopedName.indexOf('/');
     if (slashIndex >= 0) {
       return { scope: scopedName.substr(0, slashIndex), package: scopedName.substr(slashIndex + 1) };
     } else {
-      throw new Error('Invalid scoped name: ' + scopedName);
+      return { scope: '', package: scopedName };
     }
   }
 
@@ -172,7 +169,7 @@ export default class ApiDefinitionReference {
     if (this.scopeName) {
       result += `${this.scopeName}/${this.packageName}`;
     } else if (this.packageName) {
-      result += `$this.packageName`;
+      result += `${this.packageName}`;
     }
     return result;
   }
