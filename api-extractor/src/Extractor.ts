@@ -79,6 +79,13 @@ export default class Extractor {
   }
 
   /**
+   * Getter for the package folder that Extractor is analyzing.
+   */
+  public get packageFolder(): string {
+    return this._packageFolder;
+  }
+
+  /**
     * Analyzes the specified project.
     */
   public analyze(options: IExtractorAnalyzeOptions): void {
