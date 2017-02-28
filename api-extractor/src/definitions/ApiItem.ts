@@ -427,7 +427,8 @@ abstract class ApiItem {
    * specified node and analyzes each one.
    */
   protected collectTypeReferences(node: ts.Node): void {
-    if (node.kind === ts.SyntaxKind.Block || (node.kind >= 262 && node.kind <= 291)) {
+    if (node.kind === ts.SyntaxKind.Block ||
+      (node.kind >= ts.SyntaxKind.JSDocTypeExpression && node.kind <= ts.SyntaxKind.JSDocNeverKeyword)) {
       // Don't traverse into code blocks or JSDoc items; we only care about the function signature
       return;
     }
