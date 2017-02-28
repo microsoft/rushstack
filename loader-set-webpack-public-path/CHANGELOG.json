@@ -2,6 +2,21 @@
   "name": "@microsoft/loader-set-webpack-public-path",
   "entries": [
     {
+      "version": "2.0.2",
+      "tag": "@microsoft/loader-set-webpack-public-path_v2.0.2",
+      "date": "Tue, 28 Feb 2017 02:01:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Removing call to the deprecated parseQuery function. Using getOptions instead."
+          },
+          {
+            "comment": "Updating loader-utils to 1.0.2"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.1",
       "tag": "@microsoft/loader-set-webpack-public-path_v2.0.1",
       "date": "Fri, 10 Feb 2017 14:31:26 GMT",

@@ -1,6 +1,14 @@
 # Change Log - @microsoft/loader-set-webpack-public-path
 
-This log was last generated on Fri, 10 Feb 2017 14:31:26 GMT and should not be manually modified.
+This log was last generated on Tue, 28 Feb 2017 02:01:29 GMT and should not be manually modified.
+
+## 2.0.2
+Tue, 28 Feb 2017 02:01:29 GMT
+
+### Patches
+
+- Removing call to the deprecated parseQuery function. Using getOptions instead.
+- Updating loader-utils to 1.0.2
 
 ## 2.0.1
 Fri, 10 Feb 2017 14:31:26 GMT
