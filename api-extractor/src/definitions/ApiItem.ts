@@ -2,10 +2,15 @@
 /* tslint:disable:no-constant-condition */
 
 import * as ts from 'typescript';
+import * as path from 'path';
 import Extractor from '../Extractor';
 import ApiDocumentation, { ApiTag } from './ApiDocumentation';
 import TypeScriptHelpers from '../TypeScriptHelpers';
 import DocElementParser from '../DocElementParser';
+import PackageJsonHelpers from '../PackageJsonHelpers';
+import ResolvedApiItem from '../ResolvedApiItem';
+import ApiDefinitionReference,
+  { IScopedPackageName, IApiDefinintionReferenceParts } from '../ApiDefinitionReference';
 
 /**
  * Indicates the type of definition represented by a ApiItem object.
@@ -104,19 +109,6 @@ export interface IApiItemOptions {
    * The symbol used to export this ApiItem from the ApiPackage.
    */
   exportSymbol?: ts.Symbol;
-}
-
-/**
- * Attributes of an import reference.
- * 
- * Example: 
- * "import { MyClass as MyClass2, MyEnum } from '@ms/blah'", this is formatted in
- * the interface as: 
- * {packageName: "@ms/blah", exportedName "MyClass"}
- */
-interface IImportTypeReference {
-  packageName: string;
-  exportedName: string;
 }
 
 /**
@@ -461,17 +453,9 @@ abstract class ApiItem {
 
     const typeName: string = typeReferenceNode.typeName.getText();
 
+    // Use the while loop to follow the aliases all the way to the ending SourceFile
     let currentSymbol: ts.Symbol = symbol;
     while (true) {
-      const importTypeReference: IImportTypeReference = this._parseImportStatement(currentSymbol);
-      if (importTypeReference) {
-        if (importTypeReference.packageName.substr(0, 2) !== './') {
-          // [CASE 1] External/Resolved
-          // This is a reference to a type from an external package, and it was resolved.
-          return;
-        }
-      }
-
       if (!(currentSymbol.flags & ts.SymbolFlags.Alias)) {
         break;
       }
@@ -486,8 +470,6 @@ abstract class ApiItem {
       // This is a degenerate case that happens sometimes
       return;
     }
-
-    // We reached the actual type declaration without tracing into an external package
     const sourceFile: ts.SourceFile = currentSymbol.declarations[0].getSourceFile();
 
     // Is the type from a location that we don't care about?
@@ -497,72 +479,74 @@ abstract class ApiItem {
       return;
     }
 
-    if (!this.extractor.isLocalSourceFile(sourceFile)) {
-      // [CASE 2] External/Unresolved
-      // The type is apparently from an external package, however our heuristic above
-      // wasn't able to find the import statement.  This happens due to limitations of
-      // the typeChecker.getAliasedSymbol() API; we should try to improve it.
-      this.reportWarning(`Unable to resolve external type reference for "${typeName}"`);
-    } else {
+    // Walk upwards from that directory until you find a directory containing package.json
+    const typeReferencePackagePath: string = PackageJsonHelpers.findPackagePathUpwards(sourceFile.path);
+    const typeReferencePackageName: string = PackageJsonHelpers.getPackageName(typeReferencePackagePath);
+
+    // Read the name/version from package.json -- that tells you what package the symbol
+    // belongs to. If it is your own ApiPackage.name/version, then you know it's a local symbol.
+    const currentPackageName: string = PackageJsonHelpers.getPackageName(this.extractor.packageFolder);
+
+    if (typeReferencePackageName === currentPackageName) {
       // The type is defined in this project.  Did the person remember to export it?
       const exportedLocalName: string = this.extractor.package.getExportedSymbolName(currentSymbol);
       if (exportedLocalName) {
-        // [CASE 3] Local/Exported
+        // [CASE 1] Local/Exported
         // Yes; the type is properly exported.
         // TODO: In the future, here we can check for issues such as a @public type
         // referencing an @internal type.
         return;
       } else {
-        // [CASE 4] Local/Unexported
+        // [CASE 2] Local/Unexported
         // No; issue a warning
         this.reportWarning(`The type "${typeName}" needs to be exported by the package`
           + ` (e.g. added to index.ts)`);
       }
     }
-  }
 
-  /**
-   * Given a symbol that appears in an import clause "MyClass" inside
-   * "import { MyClass as MyClass2, MyEnum } from '@ms/blah'", this returns the
-   * packageName ("@ms/blah") and exported name ("MyClass").
-   * For an
-   */
-  private _parseImportStatement(importSymbol: ts.Symbol): IImportTypeReference {
-    if (!importSymbol.declarations || !importSymbol.declarations.length) {
-      return undefined;
+    // External 
+    // Attempt to load from docItemLoader
+    const scopedPackageName: IScopedPackageName = ApiDefinitionReference.parseScopedPackageName(
+      typeReferencePackageName
+    );
+    const apiDefinitionRefParts: IApiDefinintionReferenceParts = {
+      scopeName: scopedPackageName.scope,
+      packageName: scopedPackageName.package,
+      exportName: '',
+      memberName: ''
+    };
+
+    // the typeName is the name of an export, if it contains a '.' then the substring 
+    // after the period is the member name
+    if (typeName.indexOf('.') > -1) {
+      const exportMemberName: string[] = typeName.split('.');
+      apiDefinitionRefParts.exportName = exportMemberName.pop();
+      apiDefinitionRefParts.memberName = exportMemberName.pop();
+    } else {
+      apiDefinitionRefParts.exportName = typeName;
     }
 
-    const declaration: ts.Declaration = importSymbol.declarations[0];
-    if (!declaration) {
-      return undefined;
-    }
+    const apiDefinitionRef: ApiDefinitionReference = ApiDefinitionReference.createFromParts(
+      apiDefinitionRefParts
+    );
 
-    let exportedName: string;
-    switch (declaration.kind) {
-      case ts.SyntaxKind.ImportClause:
-        exportedName = (declaration as ts.ImportClause).name.text;
-        break;
-      case ts.SyntaxKind.ImportSpecifier:
-        const declaration2: ts.ImportSpecifier = declaration as ts.ImportSpecifier;
-        if (!declaration2.propertyName) {
-          return undefined;
-        }
-        exportedName = declaration2.propertyName.text;
-        break;
-      default:
-        return undefined;
-    }
+    // Attempt to resolve the type by checking the node modules
+    const resolvedApiItem: ResolvedApiItem = this.extractor.docItemLoader.resolveJsonReferences(
+      apiDefinitionRef,
+      this.reportError
+    );
 
-    for (let current: ts.Node = declaration; current; current = current.parent) {
-      if (current.kind === ts.SyntaxKind.ImportDeclaration) {
-        const importDeclaration: ts.ImportDeclaration = current as ts.ImportDeclaration;
-        let packageName: string = importDeclaration.moduleSpecifier.getText();
-        // If the string is quoted, then strip the quotes
-        packageName = packageName.replace(/^['"]/, '').replace(/['"]$/, '');
-        return { packageName, exportedName };
-      }
+    if (resolvedApiItem) {
+      // [CASE 3] External/Resolved
+      // This is a reference to a type from an external package, and it was resolved.
+      return;
+    } else {
+      // [CASE 4] External/Unresolved
+      // The type is apparently from an external package, however our heuristic above
+      // wasn't able to resolve the API item. This happens due to limitations of
+      // the typeChecker.getAliasedSymbol() API; we should try to improve it.
+      this.reportWarning(`Unable to resolve external type reference for "${typeName}"`);
     }
-    return undefined;
   }
 }
 
