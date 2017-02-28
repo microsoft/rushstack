@@ -1,5 +1,5 @@
 {
-  "name": "@ms/example4",
+  "name": "example4",
   "version": "1.0.0",
   "typings": "src/index.ts",
   "dependencies": {
