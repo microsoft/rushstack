@@ -262,7 +262,7 @@ abstract class ApiItem {
   /**
    * Called after the constructor to finish the analysis.
    */
-  public resolveReferences(): void {
+  public visitTypeReferencesForApiItem(): void {
     // (virtual)
   }
 
@@ -342,7 +342,7 @@ abstract class ApiItem {
   protected onCompleteInitialization(): void {
 
     this.documentation.completeInitialization();
-    // TODO: this.collectTypeReferences(this);
+    // TODO: this.visitTypeReferencesForNode(this);
 
     const summaryTextCondensed: string = DocElementParser.getAsText(
       this.documentation.summary,
@@ -421,12 +421,12 @@ abstract class ApiItem {
   }
 
   /**
-   * This is called by ApiItems to analyze the types that appear in an expression.  For example,
+   * This is called by ApiItems to visit the types that appear in an expression.  For example,
    * if a Public API function returns a class that is defined in this package, but not exported,
-   * this is a problem. collectTypeReferences() finds all TypeReference child nodes under the
+   * this is a problem. visitTypeReferencesForNode() finds all TypeReference child nodes under the
    * specified node and analyzes each one.
    */
-  protected collectTypeReferences(node: ts.Node): void {
+  protected visitTypeReferencesForNode(node: ts.Node): void {
     if (node.kind === ts.SyntaxKind.Block ||
       (node.kind >= ts.SyntaxKind.JSDocTypeExpression && node.kind <= ts.SyntaxKind.JSDocNeverKeyword)) {
       // Don't traverse into code blocks or JSDoc items; we only care about the function signature
@@ -435,19 +435,19 @@ abstract class ApiItem {
 
     if (node.kind === ts.SyntaxKind.TypeReference) {
       const typeReference: ts.TypeReferenceNode = node as ts.TypeReferenceNode;
-      this._processTypeReference(typeReference);
+      this._analyzeTypeReference(typeReference);
     }
 
     // Recurse the tree
     for (const childNode of node.getChildren()) {
-      this.collectTypeReferences(childNode);
+      this.visitTypeReferencesForNode(childNode);
     }
   }
 
   /**
-   * This is a helper for collectTypeReferences().  It analyzes a single TypeReferenceNode.
+   * This is a helper for visitTypeReferencesForNode().  It analyzes a single TypeReferenceNode.
    */
-  private _processTypeReference(typeReferenceNode: ts.TypeReferenceNode): void {
+  private _analyzeTypeReference(typeReferenceNode: ts.TypeReferenceNode): void {
     const symbol: ts.Symbol = this.extractor.typeChecker.getSymbolAtLocation(typeReferenceNode.typeName);
     if (!symbol) {
       // Is this bad?

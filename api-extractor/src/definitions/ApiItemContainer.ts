@@ -39,11 +39,11 @@ abstract class ApiItemContainer extends ApiItem {
   /**
    * @virtual
    */
-  public resolveReferences(): void {
-    super.resolveReferences();
+  public visitTypeReferencesForApiItem(): void {
+    super.visitTypeReferencesForApiItem();
 
     this.memberItems.forEach((apiItem) => {
-      apiItem.resolveReferences();
+      apiItem.visitTypeReferencesForApiItem();
     });
   }
 }

@@ -78,11 +78,11 @@ export default class ApiMember extends ApiItem {
   /**
    * @virtual
    */
-  public resolveReferences(): void {
-    super.resolveReferences();
+  public visitTypeReferencesForApiItem(): void {
+    super.visitTypeReferencesForApiItem();
 
     if (this.declaration.kind !== ts.SyntaxKind.PropertySignature) {
-      this.collectTypeReferences(this.declaration);
+      this.visitTypeReferencesForNode(this.declaration);
     }
   }
 
