@@ -1,10 +1,9 @@
-/* tslint:disable:no-constant-condition */
-
 import * as ts from 'typescript';
 import * as fsx from 'fs-extra';
 import * as path from 'path';
 import ApiPackage from './definitions/ApiPackage';
 import DocItemLoader from './DocItemLoader';
+import PackageJsonHelpers from './PackageJsonHelpers';
 
 export type ApiErrorHandler = (message: string, fileName: string, lineNumber: number) => void;
 
@@ -102,20 +101,8 @@ export default class Extractor {
     }
 
     // Assign _packageFolder by probing upwards from entryPointFile until we find a package.json
-    let currentPath: string = path.resolve(options.entryPointFile);
-
-    // no-constant-condition
-    while (true) {
-      const folder: string = path.dirname(currentPath);
-      if (folder === currentPath || !folder) {
-        throw new Error('Unable to determine package folder for entryPointFile');
-      }
-      currentPath = folder;
-      if (fsx.existsSync(path.join(currentPath, 'package.json'))) {
-        this._packageFolder = path.normalize(currentPath);
-        break;
-      }
-    }
+    const currentPath: string = path.resolve(options.entryPointFile);
+    this._packageFolder = PackageJsonHelpers.findPackagePathUpwards(currentPath);
 
     this.package = new ApiPackage(this, rootFile); // construct members
     this.package.completeInitialization(); // creates ApiDocumentation
