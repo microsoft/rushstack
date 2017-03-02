@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/web-library-build",
+      "comment": "Restore TS Lint task in gulp build",
+      "type": "patch"
+    }
+  ],
+  "email": "cliffkoh@users.noreply.github.com"
+}
