@@ -48,7 +48,7 @@ tslint.mergeConfig({
 
 // Define default task groups.
 export const compileTsTasks: IExecutable = parallel(typescript, text, apiExtractor);
-export const buildTasks: IExecutable = task('build', serial(preCopy, sass, compileTsTasks, postCopy));
+export const buildTasks: IExecutable = task('build', serial(preCopy, sass, parallel(tslint, compileTsTasks), postCopy));
 export const bundleTasks: IExecutable = task('bundle', serial(buildTasks, webpack));
 export const testTasks: IExecutable = task('test', serial(buildTasks, karma));
 export const defaultTasks: IExecutable = serial(bundleTasks, karma);
