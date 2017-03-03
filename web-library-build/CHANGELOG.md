@@ -1,6 +1,13 @@
 # Change Log - @microsoft/web-library-build
 
-This log was last generated on Wed, 08 Feb 2017 01:41:58 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Mar 2017 02:31:24 GMT and should not be manually modified.
+
+## 2.3.1
+Fri, 03 Mar 2017 02:31:24 GMT
+
+### Patches
+
+- Restore TS Lint task in gulp build
 
 ## 2.3.0
 Wed, 08 Feb 2017 01:41:58 GMT
