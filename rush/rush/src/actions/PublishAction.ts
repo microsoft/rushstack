@@ -337,12 +337,15 @@ export default class PublishAction extends CommandLineAction {
     const args: string[] = ['publish'];
 
     if (this._rushConfiguration.projectsByName.get(packageName).shouldPublish) {
+      let registry: string = '//registry.npmjs.org/';
       if (this._registryUrl.value) {
-        env['npm_config_registry'] = this._registryUrl.value; // tslint:disable-line:no-string-literal
+        const registryUrl: string = this._registryUrl.value;
+        env['npm_config_registry'] = registryUrl; // tslint:disable-line:no-string-literal
+        registry = registryUrl.substring(registryUrl.indexOf('//'));
       }
 
       if (this._npmAuthToken.value) {
-        args.push(`--//registry.npmjs.org/:_authToken=${this._npmAuthToken.value}`);
+        args.push(`--${registry}:_authToken=${this._npmAuthToken.value}`);
       }
 
       if (this._force.value) {
