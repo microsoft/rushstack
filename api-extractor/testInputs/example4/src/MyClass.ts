@@ -9,6 +9,39 @@ import MyOtherClass from './MyOtherClass';
  */
 export default class MyClass {
   /**
+   * This is a property that is used to test the 
+   * collection of type references on getters and 
+   * setters. The API file should show an unresolved
+   * type warning.
+   */
+  private _propOne: MyLibrary3;
+
+  /**
+   * Here we are testing if type collection is being 
+   * executed for type literals. The API file should show 
+   * an unresolved type warning.
+   */
+  public typeLiteralProp: [MyLibrary3];
+  
+  /**
+   * This is a getter to test if the type reference is
+   * collected. The API file should show an unresolved
+   * type warning.
+   */
+  public get propOne(): MyLibrary3 {
+    return this._propOne;
+  }
+
+  /**
+   * This is a setter to test if the type reference is
+   * collected. The API file should show an unresolved
+   * type warning.
+   */
+  public set propOne(value: MyLibrary3) {
+    this._propOne = value;
+  }
+
+  /**
    * Here is some sample documentation for test().
    */
   public test(library: MyLibrary3): MissingExport {
