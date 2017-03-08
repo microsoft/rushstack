@@ -65,7 +65,6 @@ class Extractor {
   public loadExternalPackages(externalJsonCollectionPath: string): void;
   // (undocumented)
   public package: ApiPackage;
-  // (undocumented)
   public readonly packageFolder: string;
   public reportError(message: string, sourceFile: ts.SourceFile, start: number): void;
   // (undocumented)

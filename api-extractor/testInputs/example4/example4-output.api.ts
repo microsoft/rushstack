@@ -7,7 +7,6 @@ class MyClass2 {
   public renamed(): RenamedExport2;
   // WARNING: Unable to resolve external type reference for "MyLibrary3"
   // WARNING: The type "MissingExport" needs to be exported by the package (e.g. added to index.ts)
-  // WARNING: Unable to resolve external type reference for "MissingExport"
   public test(library: MyLibrary3): MissingExport;
 }
 

@@ -122,7 +122,7 @@ describe('ApiFileGenerator tests', function (): void {
       apiFileGenerator.writeApiFile(outputFile, extractor);
 
       assertFileMatchesExpected(outputFile, expectedFile);
-      assert.equal(capturedErrors.length, 0);
+      assert.equal(capturedErrors.length, 2);
     });
   });
 });
