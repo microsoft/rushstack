@@ -501,6 +501,7 @@ abstract class ApiItem {
         // No; issue a warning
         this.reportWarning(`The type "${typeName}" needs to be exported by the package`
           + ` (e.g. added to index.ts)`);
+          return;
       }
     }
 
