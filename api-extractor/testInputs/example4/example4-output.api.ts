@@ -2,12 +2,16 @@
 class MyClass2 {
   // (undocumented)
   public otherTest(): MyOtherClass;
+  // WARNING: Unable to resolve external type reference for "MyLibrary3"
+  public propOne: MyLibrary3;
   // WARNING: Unable to resolve external type reference for "RenamedExport2"
   // (undocumented)
   public renamed(): RenamedExport2;
   // WARNING: Unable to resolve external type reference for "MyLibrary3"
   // WARNING: The type "MissingExport" needs to be exported by the package (e.g. added to index.ts)
   public test(library: MyLibrary3): MissingExport;
+  // WARNING: Unable to resolve external type reference for "MyLibrary3"
+  public typeLiteralProp: [MyLibrary3];
 }
 
 // @public
