@@ -150,7 +150,7 @@ export default class ApiDefinitionReference {
    */
   public static parseScopedPackageName(scopedName: string): IScopedPackageName {
     if (scopedName.substr(0, 1) !== '@') {
-       return { scope: '', package: scopedName };
+      return { scope: '', package: scopedName };
     }
 
     const slashIndex: number = scopedName.indexOf('/');
