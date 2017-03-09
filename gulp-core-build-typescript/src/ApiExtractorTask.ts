@@ -109,7 +109,7 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
     } as any; /* tslint:disable-line:no-any */
 
     const extractor: Extractor = new Extractor(extractorOptions);
-    extractor.loadExternalPackages(path.join(__dirname, 'lib/external-api-json'));
+    extractor.loadExternalPackages(path.join(__dirname, 'external-api-json'));
     extractor.analyze(analyzeOptions);
 
     const jsonGenerator: ApiJsonGenerator = new ApiJsonGenerator();
