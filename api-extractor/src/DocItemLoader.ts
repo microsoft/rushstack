@@ -232,7 +232,7 @@ export default class DocItemLoader {
     // Include the scope name in the cache key
     // For out test cases, the will be no searching the alias path, 
     // so we manually include the '@types' scope name
-    let scopeName: string = packageJsonFilePath.match(/@\w+/) ? 
+    const scopeName: string = packageJsonFilePath.match(/@\w+/) ?
       packageJsonFilePath.match(/@\w+/).toString() : '@types';
 
     const packageName: string = `${scopeName}/${path.basename(packageJsonFilePath).split('.').shift()}`;
