@@ -229,7 +229,13 @@ export default class DocItemLoader {
       }
     );
 
-    const packageName: string = path.basename(packageJsonFilePath).split('.').shift();
+    // Include the scope name in the cache key
+    // For out test cases, the will be no searching the alias path, 
+    // so we manually include the '@types' scope name
+    let scopeName: string = packageJsonFilePath.match(/@\w+/) ? 
+      packageJsonFilePath.match(/@\w+/).toString() : '@types';
+
+    const packageName: string = `${scopeName}/${path.basename(packageJsonFilePath).split('.').shift()}`;
     this._cache.set(packageName, apiPackage);
     return apiPackage;
   }
