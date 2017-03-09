@@ -14,21 +14,21 @@ export default class MyClass {
    * setters. The API file should show an unresolved
    * type warning.
    */
-  private _propOne: MyLibrary3;
+  private _propOne: MissingExport;
 
   /**
    * Here we are testing if type collection is being 
    * executed for type literals. The API file should show 
    * an unresolved type warning.
    */
-  public typeLiteralProp: [MyLibrary3];
+  public typeLiteralProp: [MissingExport];
   
   /**
    * This is a getter to test if the type reference is
    * collected. The API file should show an unresolved
    * type warning.
    */
-  public get propOne(): MyLibrary3 {
+  public get propOne(): MissingExport {
     return this._propOne;
   }
 
@@ -37,8 +37,16 @@ export default class MyClass {
    * collected. The API file should show an unresolved
    * type warning.
    */
-  public set propOne(value: MyLibrary3) {
+  public set propOne(value: MissingExport) {
     this._propOne = value;
+  }
+
+  /**
+   * This function should show a warning in the API file 
+   * as a result of the parameter type.
+   */
+  public testParameterType(missing: MissingExport): void {
+    return;
   }
 
   /**
