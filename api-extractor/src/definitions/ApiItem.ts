@@ -517,14 +517,14 @@ abstract class ApiItem {
       memberName: ''
     };
 
-    // the typeName is the name of an export, if it contains a '.' then the substring 
+    // the currentSymbol.name is the name of an export, if it contains a '.' then the substring 
     // after the period is the member name
-    if (typeName.indexOf('.') > -1) {
-      const exportMemberName: string[] = typeName.split('.');
+    if (currentSymbol.name.indexOf('.') > -1) {
+      const exportMemberName: string[] = currentSymbol.name.split('.');
       apiDefinitionRefParts.exportName = exportMemberName.pop();
       apiDefinitionRefParts.memberName = exportMemberName.pop();
     } else {
-      apiDefinitionRefParts.exportName = typeName;
+      apiDefinitionRefParts.exportName = currentSymbol.name;
     }
 
     const apiDefinitionRef: ApiDefinitionReference = ApiDefinitionReference.createFromParts(
