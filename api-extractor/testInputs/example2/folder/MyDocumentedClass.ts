@@ -7,7 +7,7 @@ export enum TestMissingCommentStar {
 }
 
 /**
- * {@inheritdoc es6-collections:ForEachable}
+ * {@inheritdoc @types/es6-collections:ForEachable}
  */
 export interface IExternalPackageLookup {
 }
