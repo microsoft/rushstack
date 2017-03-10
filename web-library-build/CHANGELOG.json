@@ -2,6 +2,18 @@
   "name": "@microsoft/web-library-build",
   "entries": [
     {
+      "version": "2.3.1",
+      "tag": "@microsoft/web-library-build_v2.3.1",
+      "date": "Fri, 03 Mar 2017 02:31:24 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Restore TS Lint task in gulp build"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.3.0",
       "tag": "@microsoft/web-library-build_v2.3.0",
       "date": "Wed, 08 Feb 2017 01:41:58 GMT",
