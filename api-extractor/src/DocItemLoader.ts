@@ -206,14 +206,14 @@ export default class DocItemLoader {
       return;
     }
 
-    return this.loadPackageIntoCache(packageJsonFilePath);
+    return this.loadPackageIntoCache(packageJsonFilePath, false);
   }
 
   /**
    * Loads the API documentation json file and validates that it conforms to our schema. If it does, 
    * then the json file is saved in the cache and returned.
    */
-  public loadPackageIntoCache(packageJsonFilePath: string): IDocPackage {
+  public loadPackageIntoCache(packageJsonFilePath: string, isTypes: boolean): IDocPackage {
     const apiPackage: IDocPackage = JsonFile.loadJsonFile(packageJsonFilePath) as IDocPackage;
 
     // Validate that the output conforms to our JSON schema
@@ -232,8 +232,8 @@ export default class DocItemLoader {
     // Include the scope name in the cache key
     // For out test cases, the will be no searching the alias path, 
     // so we manually include the '@types' scope name
-    const scopeName: string = packageJsonFilePath.match(/@\w+/) ?
-      packageJsonFilePath.match(/@\w+/).toString() : '@types';
+    const scopeName: string = isTypes ?
+      '@types' : packageJsonFilePath.match(/@\w+/).toString() ;
 
     const packageName: string = `${scopeName}/${path.basename(packageJsonFilePath).split('.').shift()}`;
     this._cache.set(packageName, apiPackage);
