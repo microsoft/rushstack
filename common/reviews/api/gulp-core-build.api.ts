@@ -49,7 +49,7 @@ class GulpTask<TASK_CONFIG> implements IExecutable {
   public fileExists(localPath: string): boolean;
   public fileWarning(filePath: string, line: number, column: number, warningCode: string, message: string): void;
   public getCleanMatch(buildConfig: IBuildConfig, taskConfig: TASK_CONFIG = this.taskConfig): string[];
-  public isEnabled(config?: IBuildConfig): boolean;
+  public isEnabled(buildConfig: IBuildConfig): boolean;
   protected loadSchema(): Object;
   public log(message: string): void;
   public logError(message: string): void;
@@ -109,11 +109,9 @@ interface ICustomGulpTask {
 
 // (undocumented)
 interface IExecutable {
-  // (undocumented)
-  enabled?: boolean;
   execute: (config: IBuildConfig) => Promise<void>;
   getCleanMatch?: (config: IBuildConfig, taskConfig?: any) => string[];
-  isEnabled?: (config?: IBuildConfig) => boolean;
+  isEnabled?: (buildConfig: IBuildConfig) => boolean;
   name?: string;
   onRegister?: () => void;
 }

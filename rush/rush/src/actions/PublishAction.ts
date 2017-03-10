@@ -37,6 +37,7 @@ export default class PublishAction extends CommandLineAction {
   private _registryUrl: CommandLineStringParameter;
   private _targetBranch: CommandLineStringParameter;
   private _prereleaseName: CommandLineStringParameter;
+  private _force: CommandLineFlagParameter;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -102,6 +103,11 @@ export default class PublishAction extends CommandLineAction {
       parameterLongName: '--prerelease-name',
       parameterShortName: '-pn',
       description: 'Bump up to a prerelease version with the provided prerelease name.'
+    });
+    this._force = this.defineFlagParameter({
+      parameterLongName: '--force',
+      parameterShortName: undefined,
+      description: 'If this flag is specified with --publish, packages will be published with --force on npm'
     });
   }
 
@@ -187,7 +193,7 @@ export default class PublishAction extends CommandLineAction {
     let updated: boolean = false;
     allPackages.forEach((packageConfig, packageName) => {
       if (packageConfig.shouldPublish) {
-        if (this._isNewerThanPublished(packageConfig)) {
+        if (this._force.value || this._isNewerThanPublished(packageConfig)) {
           this._npmPublish(packageName, packageConfig.projectFolder);
           this._gitAddTag(packageName, packageConfig.packageJson.version);
           updated = true;
@@ -331,12 +337,19 @@ export default class PublishAction extends CommandLineAction {
     const args: string[] = ['publish'];
 
     if (this._rushConfiguration.projectsByName.get(packageName).shouldPublish) {
+      let registry: string = '//registry.npmjs.org/';
       if (this._registryUrl.value) {
-        env['npm_config_registry'] = this._registryUrl.value; // tslint:disable-line:no-string-literal
+        const registryUrl: string = this._registryUrl.value;
+        env['npm_config_registry'] = registryUrl; // tslint:disable-line:no-string-literal
+        registry = registryUrl.substring(registryUrl.indexOf('//'));
       }
 
       if (this._npmAuthToken.value) {
-        args.push(`--//registry.npmjs.org/:_authToken=${this._npmAuthToken.value}`);
+        args.push(`--${registry}:_authToken=${this._npmAuthToken.value}`);
+      }
+
+      if (this._force.value) {
+        args.push(`--force`);
       }
 
       this._execCommand(

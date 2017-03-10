@@ -143,7 +143,7 @@ interface IExecutable {
   enabled?: boolean;
   execute: (config: IBuildConfig) => Promise<void>;
   getCleanMatch?: (config: IBuildConfig, taskConfig?: any) => string[];
-  isEnabled?: (config?: IBuildConfig) => boolean;
+  isEnabled?: (buildConfig: IBuildConfig) => boolean;
   name?: string;
   onRegister?: () => void;
 }

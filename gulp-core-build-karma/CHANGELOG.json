@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-karma",
   "entries": [
     {
+      "version": "2.2.0",
+      "tag": "@microsoft/gulp-core-build-karma_v2.2.0",
+      "date": "Fri, 24 Feb 2017 14:01:38 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "The KarmaTask should only cause the build to fail if we are in production, otherwise treat failing tests as a warning."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.1.3",
       "tag": "@microsoft/gulp-core-build-karma_v2.1.3",
       "date": "Wed, 01 Feb 2017 02:32:46 GMT",
