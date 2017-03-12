@@ -6,6 +6,8 @@ const merge = require('lodash').merge;
 /* tslint:enable:typedef */
 import through2 = require('through2');
 import gutil = require('gulp-util');
+import { Readable } from 'stream';
+import * as fs from 'fs';
 import * as TSLint from 'tslint';
 import * as path from 'path';
 import * as ts from 'typescript';
@@ -115,6 +117,10 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
     const taskScope: TSLintTask = this;
 
     const activeLintRules: any = taskScope._loadLintRules(); // tslint:disable-line:no-any
+
+    // @todo This stream is not piped to returned value. Find a way to block the execute flow.
+    this._writeLintRules(activeLintRules);
+
     const cached = require('gulp-cache'); // tslint:disable-line
 
     return gulp.src(this.taskConfig.sourceMatch)
@@ -188,5 +194,18 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
     return merge(
       (this.taskConfig.useDefaultConfigAsBase ? this._defaultLintRules : {}),
       this.taskConfig.lintConfig || {});
+  }
+
+  private _writeLintRules(lintRules: any): fs.WriteStream { // tslint:disable-line:no-any
+    const tslintFilePath: string = path.resolve(this.buildConfig.rootPath, this.buildConfig.tempFolder, 'tslint.json');
+    const tslintFileStream: fs.WriteStream = fs.createWriteStream(tslintFilePath);
+
+    const readable: Readable = new Readable();
+    const pipe: fs.WriteStream = readable.pipe(tslintFileStream);
+
+    readable.push(JSON.stringify(lintRules, undefined, 2));
+    readable.push(null); // tslint:disable-line:no-null-keyword
+
+    return pipe;
   }
 }
