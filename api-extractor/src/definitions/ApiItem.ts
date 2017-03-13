@@ -539,7 +539,12 @@ abstract class ApiItem {
       // The type is apparently from an external package, however our heuristic above
       // wasn't able to resolve the API item. This happens due to limitations of
       // the typeChecker.getAliasedSymbol() API; we should try to improve it.
-      this.reportWarning(`Unable to resolve external type reference for "${typeName}"`);
+      // We will miss cases here where a member is renamed and we don't handle those 
+      // cases at this moment. 
+      // We ignore these cases for now and reserve the warning for testing
+      
+      // this.reportWarning(`Unable to resolve external type reference for "${typeName}"`);
+      return; 
     }
   }
 }
