@@ -460,8 +460,11 @@ abstract class ApiItem {
     }
     const sourceFile: ts.SourceFile = currentSymbol.declarations[0].getSourceFile();
 
-    // Walk upwards from that directory until you find a directory containing package.json
+    // Walk upwards from that directory until you find a directory containing package.json,
+    // this is where the referenced type is located.
+    // Example: "c:\users\<username>\sp-client\spfx-core\sp-core-library"
     const typeReferencePackagePath: string = PackageJsonHelpers.findPackagePathUpwards(sourceFile.path);
+    // Example: "@microsoft/sp-core-library"
     const typeReferencePackageName: string = PackageJsonHelpers.getPackageName(typeReferencePackagePath);
 
     // Read the name/version from package.json -- that tells you what package the symbol
