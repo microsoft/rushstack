@@ -2,6 +2,7 @@
 
 import * as fsx from 'fs-extra';
 import * as path from 'path';
+import JsonFile from './JsonFile';
 
 /**
  * Represents a package.json file.
@@ -29,7 +30,7 @@ export default class PackageJsonHelpers {
     // no-constant-condition
     while (true) {
       const folder: string = path.dirname(currentPath);
-      if (folder === currentPath || !folder) {
+      if (!folder || folder === currentPath) {
         throw new Error('Unable to determine package folder for entryPointFile');
       }
       currentPath = folder;
@@ -48,8 +49,8 @@ export default class PackageJsonHelpers {
    * package.json file, it does not include the 'package.json' suffix.
    * @returns the name of the package (E.g. @microsoft/api-extractor)
    */
-  public static getPackageName(packageJsonPath: string): string {
-    const packageJson: IPackageJson = require(path.join(packageJsonPath, 'package.json'));
+  public static readPackageName(packageJsonPath: string): string {
+    const packageJson: IPackageJson = JsonFile.loadJsonFile(path.join(packageJsonPath, 'package.json')) as IPackageJson;
     return packageJson.name;
   }
 }
