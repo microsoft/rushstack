@@ -117,28 +117,6 @@ export default class Extractor {
   }
 
   /**
-   * Determines if a sourceFile was exported locally. If false, then the sourceFile
-   * was exported from an external package, in relation to the package currently being
-   * analyzing by the Extractor class.
-   */
-  public isLocalSourceFile(sourceFile: ts.SourceFile): boolean {
-    const fileName: string = path.normalize(sourceFile.fileName);
-    // If it's in a node_modules folder, then it's not part of this project
-    if (/[\\/]node_modules[\\/]/i.test(fileName)) {
-      return false;
-    }
-
-    // If it's not under this project's packageFolder, then it's not part of this project
-    if (fileName.substr(0, this._packageFolder.length).toUpperCase()
-      !== this._packageFolder.toUpperCase()) {
-      return false;
-    }
-
-    // Otherewise, heuristically assume that it is part of this project.
-    return true;
-  }
-
-  /**
     * Reports an error message to the registered ApiErrorHandler.
     */
   public reportError(message: string, sourceFile: ts.SourceFile, start: number): void {
