@@ -469,7 +469,7 @@ abstract class ApiItem {
 
     // Read the name/version from package.json -- that tells you what package the symbol
     // belongs to. If it is your own ApiPackage.name/version, then you know it's a local symbol.
-    const currentPackageName: string = PackageJsonHelpers.getPackageName(this.extractor.packageFolder);
+    const currentPackageName: string = this.extractor.package.name;
 
     const typeName: string = typeReferenceNode.typeName.getText();
     if (typeReferencePackageName === currentPackageName) {
