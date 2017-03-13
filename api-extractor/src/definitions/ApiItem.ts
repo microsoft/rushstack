@@ -465,7 +465,7 @@ abstract class ApiItem {
     // Example: "c:\users\<username>\sp-client\spfx-core\sp-core-library"
     const typeReferencePackagePath: string = PackageJsonHelpers.findPackagePathUpwards(sourceFile.path);
     // Example: "@microsoft/sp-core-library"
-    const typeReferencePackageName: string = PackageJsonHelpers.getPackageName(typeReferencePackagePath);
+    const typeReferencePackageName: string = PackageJsonHelpers.readPackageName(typeReferencePackagePath);
 
     // Read the name/version from package.json -- that tells you what package the symbol
     // belongs to. If it is your own ApiPackage.name/version, then you know it's a local symbol.
