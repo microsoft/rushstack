@@ -463,9 +463,17 @@ abstract class ApiItem {
     // Walk upwards from that directory until you find a directory containing package.json,
     // this is where the referenced type is located.
     // Example: "c:\users\<username>\sp-client\spfx-core\sp-core-library"
-    const typeReferencePackagePath: string = PackageJsonHelpers.findPackagePathUpwards(sourceFile.path);
+    const typeReferencePackagePath: string = PackageJsonHelpers.tryFindPackagePathUpwards(sourceFile.path);
     // Example: "@microsoft/sp-core-library"
-    const typeReferencePackageName: string = PackageJsonHelpers.readPackageName(typeReferencePackagePath);
+    let typeReferencePackageName: string = '';
+
+    // If we can not find a package path, we consider the type to be part of the current project's package. 
+    // One case where this happens is when looking for a type that is a symlink
+    if (!typeReferencePackagePath) {
+      typeReferencePackageName = this.extractor.package.name;
+    } else {
+      typeReferencePackageName = PackageJsonHelpers.readPackageName(typeReferencePackagePath);
+    }
 
     // Read the name/version from package.json -- that tells you what package the symbol
     // belongs to. If it is your own ApiPackage.name/version, then you know it's a local symbol.
