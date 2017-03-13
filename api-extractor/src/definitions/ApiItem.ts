@@ -474,7 +474,7 @@ abstract class ApiItem {
     const typeName: string = typeReferenceNode.typeName.getText();
     if (!typeReferencePackagePath || typeReferencePackageName === currentPackageName) {
       // The type is defined in this project.  Did the person remember to export it?
-      const exportedLocalName: string = this.extractor.package.getExportedSymbolName(currentSymbol);
+      const exportedLocalName: string = this.extractor.package.tryGetExportedSymbolName(currentSymbol);
       if (exportedLocalName) {
         // [CASE 1] Local/Exported
         // Yes; the type is properly exported.
