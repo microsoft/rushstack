@@ -451,18 +451,8 @@ abstract class ApiItem {
       return;
     }
 
-    // Use the while loop to follow the aliases all the way to the ending SourceFile
-    let currentSymbol: ts.Symbol = symbol;
-    while (true) {
-      if (!(currentSymbol.flags & ts.SymbolFlags.Alias)) {
-        break;
-      }
-      const currentAlias: ts.Symbol = this.typeChecker.getAliasedSymbol(currentSymbol);
-      if (!currentAlias || currentAlias === currentSymbol) {
-        break;
-      }
-      currentSymbol = currentAlias;
-    }
+    // Follow the aliases all the way to the ending SourceFile
+    const currentSymbol: ts.Symbol = this.followAliases(symbol);
 
     if (!currentSymbol.declarations || !currentSymbol.declarations.length) {
       // This is a degenerate case that happens sometimes
