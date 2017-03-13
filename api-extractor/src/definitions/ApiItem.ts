@@ -542,9 +542,9 @@ abstract class ApiItem {
       // We will miss cases here where a member is renamed and we don't handle those 
       // cases at this moment. 
       // We ignore these cases for now and reserve the warning for testing
-      
+
       // this.reportWarning(`Unable to resolve external type reference for "${typeName}"`);
-      return; 
+      return;
     }
   }
 }
