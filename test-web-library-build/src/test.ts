@@ -1,5 +1,5 @@
 import test from './test.scss';
-import testFunction from './pre-copy-test';
+import testFunction from './preCopyTest';
 
 export function log(message: string): void {
   console.log(message);

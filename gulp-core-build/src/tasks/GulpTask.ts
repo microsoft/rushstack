@@ -53,9 +53,9 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
    * @param buildConfig - the build configuration which should be used when determining if the task is enabled
    * @returns true if the build is not redundant and the enabled toggle is true
    */
-  public isEnabled(config?: IBuildConfig): boolean {
-    return (!config || !config.isRedundantBuild) && this.enabled;
-  };
+  public isEnabled(buildConfig: IBuildConfig): boolean {
+    return (!buildConfig || !buildConfig.isRedundantBuild) && this.enabled;
+  }
 
   /**
    * A JSON Schema object which will be used to validate this task's configuration file.

@@ -2,6 +2,38 @@
   "name": "@microsoft/rush-lib",
   "entries": [
     {
+      "version": "2.3.0",
+      "tag": "@microsoft/rush-lib_v2.3.0",
+      "date": "Fri, 24 Feb 2017 22:53:18 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Get package versions aligned with @microsoft/rush-lib"
+          },
+          {
+            "comment": "Get package versions aligned with @microsoft/rush"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.0",
+      "tag": "@microsoft/rush-lib_v1.10.0",
+      "date": "Fri, 24 Feb 2017 22:44:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Rush will automatically create the common folder."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add a \"pinnedVersions\" option to rush.json, which will add dependencies to the common package.json. Since these dependencies are installed first, this mechanism can be used to control versions of unconstrained second-level dependencies."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.8.0",
       "tag": "@microsoft/rush-lib_v1.8.0",
       "date": "Tue, 14 Feb 2017 22:53:30 GMT",
