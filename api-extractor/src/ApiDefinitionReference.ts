@@ -172,7 +172,7 @@ export default class ApiDefinitionReference {
     if (this.scopeName) {
       result += `${this.scopeName}/${this.packageName}`;
     } else if (this.packageName) {
-      result += `${this.packageName}`;
+      result += this.packageName;
     }
     return result;
   }
