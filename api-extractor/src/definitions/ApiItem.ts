@@ -472,7 +472,7 @@ abstract class ApiItem {
     const currentPackageName: string = this.extractor.package.name;
 
     const typeName: string = typeReferenceNode.typeName.getText();
-    if (typeReferencePackageName === currentPackageName) {
+    if (!typeReferencePackagePath || typeReferencePackageName === currentPackageName) {
       // The type is defined in this project.  Did the person remember to export it?
       const exportedLocalName: string = this.extractor.package.getExportedSymbolName(currentSymbol);
       if (exportedLocalName) {
