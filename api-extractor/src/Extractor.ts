@@ -109,7 +109,8 @@ export default class Extractor {
 
     // Assign _packageFolder by probing upwards from entryPointFile until we find a package.json
     const currentPath: string = path.resolve(options.entryPointFile);
-    this._packageFolder = PackageJsonHelpers.findPackagePathUpwards(currentPath);
+    // This is guaranteed to succeed since we do check prior to this point
+    this._packageFolder = PackageJsonHelpers.tryFindPackagePathUpwards(currentPath);
 
     this.package = new ApiPackage(this, rootFile); // construct members
     this.package.completeInitialization(); // creates ApiDocumentation
