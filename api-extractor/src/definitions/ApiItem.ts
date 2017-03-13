@@ -451,8 +451,6 @@ abstract class ApiItem {
       return;
     }
 
-    const typeName: string = typeReferenceNode.typeName.getText();
-
     // Use the while loop to follow the aliases all the way to the ending SourceFile
     let currentSymbol: ts.Symbol = symbol;
     while (true) {
@@ -487,6 +485,7 @@ abstract class ApiItem {
     // belongs to. If it is your own ApiPackage.name/version, then you know it's a local symbol.
     const currentPackageName: string = PackageJsonHelpers.getPackageName(this.extractor.packageFolder);
 
+    const typeName: string = typeReferenceNode.typeName.getText();
     if (typeReferencePackageName === currentPackageName) {
       // The type is defined in this project.  Did the person remember to export it?
       const exportedLocalName: string = this.extractor.package.getExportedSymbolName(currentSymbol);
