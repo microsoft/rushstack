@@ -460,13 +460,6 @@ abstract class ApiItem {
     }
     const sourceFile: ts.SourceFile = currentSymbol.declarations[0].getSourceFile();
 
-    // Is the type from a location that we don't care about?
-    if (/[\\/]node_modules[\\/]typescript[\\/]/i.test(sourceFile.fileName)
-      || /[\\/]typings[\\/]/i.test(sourceFile.fileName)) {
-      // Yes, ignore this
-      return;
-    }
-
     // Walk upwards from that directory until you find a directory containing package.json
     const typeReferencePackagePath: string = PackageJsonHelpers.findPackagePathUpwards(sourceFile.path);
     const typeReferencePackageName: string = PackageJsonHelpers.getPackageName(typeReferencePackagePath);
