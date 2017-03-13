@@ -110,7 +110,7 @@ export default class ApiPackage extends ApiItemContainer {
    * In this example, given the symbol for _MyClass, getExportedSymbolName() will return 
    * the string "MyClass".
    */
-  public getExportedSymbolName(symbol: ts.Symbol): string {
+  public tryGetExportedSymbolName(symbol: ts.Symbol): string {
     const followedSymbol: ts.Symbol = this.followAliases(symbol);
     for (const exportedSymbol of this._exportedNormalizedSymbols) {
       if (exportedSymbol.followedSymbol === followedSymbol) {
