@@ -8,6 +8,7 @@ import ApiFunction from './ApiFunction';
 import ApiItem, { ApiItemKind, IApiItemOptions } from './ApiItem';
 import ApiItemContainer from './ApiItemContainer';
 import TypeScriptHelpers from '../TypeScriptHelpers';
+import PackageJsonHelpers from '../PackageJsonHelpers';
 
 /**
  * An export name and the symbol from which the export was originally defined.
@@ -58,6 +59,8 @@ export default class ApiPackage extends ApiItemContainer {
   constructor(extractor: Extractor, rootFile: ts.SourceFile) {
     super(ApiPackage._getOptions(extractor, rootFile));
     this.kind = ApiItemKind.Package;
+    // The scoped package name. (E.g. "@microsoft/api-extractor")
+    this.name = PackageJsonHelpers.getPackageName(this.extractor.packageFolder);
 
     const exportSymbols: ts.Symbol[] = this.typeChecker.getExportsOfModule(this.declarationSymbol);
     if (exportSymbols) {
