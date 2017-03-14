@@ -177,19 +177,24 @@ export default class GenerateAction extends CommandLineAction {
 
     const shrinkwrap: IShrinkwrapFile = JSON.parse( fsx.readFileSync(shrinkwrapFile).toString() );
 
-    tempModules.forEach((project: IPackageJson, tempProjectName: string) => {
+    let hasFoundMissingDependency: boolean = false;
+
+    tempModules.forEach((project: IPackageJson, projectName: string) => {
+      const tempProjectName: string = rushConfiguration.projectsByName.get(projectName).tempProjectName;
       Object.keys(project.dependencies).forEach((dependency: string) => {
         // technically we need to look at the temp_modules dependencies
         const version: string = project.dependencies[dependency];
         if (!GenerateAction._canFindDependencyInShrinkwrap(shrinkwrap, dependency, version, tempProjectName)) {
-          console.log(colors.yellow(`Could not find version for "${dependency}@${version}" in shrinkwrap.${os.EOL}` +
-            `Rush must regenerate the shrinkwrap file. This may take some time...`));
-          return true;
+          console.log(colors.yellow(`Could not find "${tempProjectName}" dependency "${dependency}@${version}" ` +
+            `in shrinkwrap.${os.EOL}Rush must regenerate the shrinkwrap file. This may take some time...${os.EOL}`));
+          hasFoundMissingDependency = true;
         }
       });
     });
-    console.log(colors.green(`Rush found all dependencies in the shrinkwrap! Rush now running in "fast" mode.`));
-    return false;
+    if (!hasFoundMissingDependency) {
+      console.log(colors.green(`Rush found all dependencies in the shrinkwrap! Rush now running in "fast" mode.`));
+    }
+    return hasFoundMissingDependency;
   }
 
   private static _canFindDependencyInShrinkwrap(
@@ -197,9 +202,19 @@ export default class GenerateAction extends CommandLineAction {
     dependency: string,
     version: string,
     rushPackageName: string): boolean {
+
+    let shrinkwrapDependency: IShrinkwrapDependency;
+
     // The dependency will either be directly under the rushPackageName, or it will be in the root
-    return semver.satisfies(shrinkwrap.dependencies[rushPackageName].dependencies[dependency].version, version) ||
-           semver.satisfies(shrinkwrap.dependencies[dependency].version, version);
+    if (shrinkwrap.dependencies[rushPackageName]) {
+      if (shrinkwrap.dependencies[rushPackageName].dependencies) {
+        shrinkwrapDependency = shrinkwrap.dependencies[rushPackageName].dependencies[dependency];
+      }
+    }
+
+    shrinkwrapDependency = shrinkwrapDependency || shrinkwrap.dependencies[dependency];
+
+    return shrinkwrapDependency && semver.satisfies(shrinkwrapDependency.version, version);
   }
 
   constructor(parser: RushCommandLineParser) {
@@ -253,6 +268,7 @@ export default class GenerateAction extends CommandLineAction {
 
     const shouldDeleteNodeModules: boolean =
       GenerateAction._shouldDeleteNodeModules(this._rushConfiguration, tempModules);
+    process.exit(1);
 
     // 4. Delete "common\node_modules"
     GenerateAction._deleteCommonNodeModules(this._rushConfiguration,
