@@ -36,7 +36,7 @@
     },
     "@microsoft/node-library-build": {
       "version": "2.3.0",
-      "from": "@microsoft/node-library-build@>=2.3.0 <2.4.0",
+      "from": "@microsoft/node-library-build@>=2.3.0 <3.0.0",
       "resolved": "https://registry.npmjs.org/@microsoft/node-library-build/-/node-library-build-2.3.0.tgz"
     },
     "@microsoft/package-deps-hash": {
@@ -65,9 +65,9 @@
       "resolved": "https://registry.npmjs.org/@types/bluebird/-/bluebird-3.5.0.tgz"
     },
     "@types/chai": {
-      "version": "3.4.35",
-      "from": "@types/chai@>=3.4.34 <3.6.0",
-      "resolved": "https://registry.npmjs.org/@types/chai/-/chai-3.4.35.tgz"
+      "version": "3.4.34",
+      "from": "@types/chai@3.4.34",
+      "resolved": "https://registry.npmjs.org/@types/chai/-/chai-3.4.34.tgz"
     },
     "@types/chalk": {
       "version": "0.4.31",
@@ -76,7 +76,7 @@
     },
     "@types/es6-collections": {
       "version": "0.5.29",
-      "from": "@types/es6-collections@>=0.5.29 <0.6.0",
+      "from": "@types/es6-collections@0.5.29",
       "resolved": "https://registry.npmjs.org/@types/es6-collections/-/es6-collections-0.5.29.tgz"
     },
     "@types/es6-promise": {
@@ -96,7 +96,7 @@
     },
     "@types/fs-extra": {
       "version": "0.0.37",
-      "from": "@types/fs-extra@>=0.0.34 <0.1.0",
+      "from": "@types/fs-extra@0.0.37",
       "resolved": "https://registry.npmjs.org/@types/fs-extra/-/fs-extra-0.0.37.tgz"
     },
     "@types/glob": {
@@ -111,7 +111,7 @@
     },
     "@types/gulp-istanbul": {
       "version": "0.9.30",
-      "from": "@types/gulp-istanbul@>=0.9.30 <0.10.0",
+      "from": "@types/gulp-istanbul@0.9.30",
       "resolved": "https://registry.npmjs.org/@types/gulp-istanbul/-/gulp-istanbul-0.9.30.tgz"
     },
     "@types/gulp-mocha": {
@@ -126,7 +126,7 @@
     },
     "@types/karma": {
       "version": "0.13.33",
-      "from": "@types/karma@>=0.13.33 <0.14.0",
+      "from": "@types/karma@0.13.33",
       "resolved": "https://registry.npmjs.org/@types/karma/-/karma-0.13.33.tgz"
     },
     "@types/lodash": {
@@ -155,19 +155,19 @@
       "resolved": "https://registry.npmjs.org/@types/mkdirp/-/mkdirp-0.3.29.tgz"
     },
     "@types/mocha": {
-      "version": "2.2.40",
-      "from": "@types/mocha@>=2.2.33 <2.6.0",
-      "resolved": "https://registry.npmjs.org/@types/mocha/-/mocha-2.2.40.tgz"
+      "version": "2.2.38",
+      "from": "@types/mocha@2.2.38",
+      "resolved": "https://registry.npmjs.org/@types/mocha/-/mocha-2.2.38.tgz"
     },
     "@types/node": {
-      "version": "6.0.65",
-      "from": "@types/node@>=6.0.51 <6.9.1",
-      "resolved": "https://registry.npmjs.org/@types/node/-/node-6.0.65.tgz"
+      "version": "6.0.62",
+      "from": "@types/node@6.0.62",
+      "resolved": "https://registry.npmjs.org/@types/node/-/node-6.0.62.tgz"
     },
     "@types/node-forge": {
-      "version": "0.6.7",
-      "from": "@types/node-forge@>=0.6.4 <0.7.0",
-      "resolved": "https://registry.npmjs.org/@types/node-forge/-/node-forge-0.6.7.tgz"
+      "version": "0.6.5",
+      "from": "@types/node-forge@0.6.5",
+      "resolved": "https://registry.npmjs.org/@types/node-forge/-/node-forge-0.6.5.tgz"
     },
     "@types/node-notifier": {
       "version": "0.0.28",
@@ -200,9 +200,9 @@
       "resolved": "https://registry.npmjs.org/@types/serve-static/-/serve-static-1.7.31.tgz"
     },
     "@types/source-map": {
-      "version": "0.1.29",
-      "from": "@types/source-map@>=0.1.28 <0.2.0",
-      "resolved": "https://registry.npmjs.org/@types/source-map/-/source-map-0.1.29.tgz"
+      "version": "0.5.0",
+      "from": "@types/source-map@0.5.0",
+      "resolved": "https://registry.npmjs.org/@types/source-map/-/source-map-0.5.0.tgz"
     },
     "@types/through2": {
       "version": "2.0.32",
@@ -211,7 +211,7 @@
     },
     "@types/uglify-js": {
       "version": "2.6.28",
-      "from": "@types/uglify-js@>=2.6.28 <3.0.0",
+      "from": "@types/uglify-js@2.6.28",
       "resolved": "https://registry.npmjs.org/@types/uglify-js/-/uglify-js-2.6.28.tgz"
     },
     "@types/vinyl": {
@@ -221,7 +221,7 @@
     },
     "@types/webpack": {
       "version": "1.12.36",
-      "from": "@types/webpack@>=1.12.35 <2.0.0",
+      "from": "@types/webpack@1.12.36",
       "resolved": "https://registry.npmjs.org/@types/webpack/-/webpack-1.12.36.tgz"
     },
     "@types/yargs": {
@@ -231,7 +231,7 @@
     },
     "@types/z-schema": {
       "version": "3.16.31",
-      "from": "@types/z-schema@>=3.16.31 <3.17.0",
+      "from": "@types/z-schema@3.16.31",
       "resolved": "https://registry.npmjs.org/@types/z-schema/-/z-schema-3.16.31.tgz"
     },
     "abbrev": {
@@ -1677,7 +1677,7 @@
     },
     "fs-extra": {
       "version": "0.26.7",
-      "from": "fs-extra@>=0.26.0 <0.27.0",
+      "from": "fs-extra@>=0.26.7 <0.27.0",
       "resolved": "https://registry.npmjs.org/fs-extra/-/fs-extra-0.26.7.tgz"
     },
     "fs.realpath": {
@@ -4596,7 +4596,14 @@
     "rush-gulp-core-build": {
       "version": "0.0.0",
       "from": "temp_modules\\rush-gulp-core-build",
-      "resolved": "file:temp_modules\\rush-gulp-core-build"
+      "resolved": "file:temp_modules\\rush-gulp-core-build",
+      "dependencies": {
+        "@types/semver": {
+          "version": "5.3.30",
+          "from": "@types/semver@5.3.30",
+          "resolved": "https://registry.npmjs.org/@types/semver/-/semver-5.3.30.tgz"
+        }
+      }
     },
     "rush-gulp-core-build-karma": {
       "version": "0.0.0",
@@ -4650,21 +4657,6 @@
       "from": "temp_modules\\rush-rush",
       "resolved": "file:temp_modules\\rush-rush",
       "dependencies": {
-        "@types/chai": {
-          "version": "3.4.34",
-          "from": "@types/chai@3.4.34",
-          "resolved": "https://registry.npmjs.org/@types/chai/-/chai-3.4.34.tgz"
-        },
-        "@types/mocha": {
-          "version": "2.2.38",
-          "from": "@types/mocha@2.2.38",
-          "resolved": "https://registry.npmjs.org/@types/mocha/-/mocha-2.2.38.tgz"
-        },
-        "@types/node": {
-          "version": "6.0.62",
-          "from": "@types/node@6.0.62",
-          "resolved": "https://registry.npmjs.org/@types/node/-/node-6.0.62.tgz"
-        },
         "@types/semver": {
           "version": "5.3.30",
           "from": "@types/semver@5.3.30",
@@ -4679,45 +4671,13 @@
           "version": "4.15.0",
           "from": "lodash@>=4.15.0 <4.16.0",
           "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.15.0.tgz"
-        },
-        "semver": {
-          "version": "5.2.0",
-          "from": "semver@>=5.2.0 <5.3.0",
-          "resolved": "https://registry.npmjs.org/semver/-/semver-5.2.0.tgz"
         }
       }
     },
     "rush-rush-lib": {
       "version": "0.0.0",
       "from": "temp_modules\\rush-rush-lib",
-      "resolved": "file:temp_modules\\rush-rush-lib",
-      "dependencies": {
-        "@types/chai": {
-          "version": "3.4.34",
-          "from": "@types/chai@3.4.34",
-          "resolved": "https://registry.npmjs.org/@types/chai/-/chai-3.4.34.tgz"
-        },
-        "@types/fs-extra": {
-          "version": "0.0.34",
-          "from": "@types/fs-extra@0.0.34",
-          "resolved": "https://registry.npmjs.org/@types/fs-extra/-/fs-extra-0.0.34.tgz"
-        },
-        "@types/mocha": {
-          "version": "2.2.38",
-          "from": "@types/mocha@2.2.38",
-          "resolved": "https://registry.npmjs.org/@types/mocha/-/mocha-2.2.38.tgz"
-        },
-        "@types/node": {
-          "version": "6.0.62",
-          "from": "@types/node@6.0.62",
-          "resolved": "https://registry.npmjs.org/@types/node/-/node-6.0.62.tgz"
-        },
-        "semver": {
-          "version": "5.2.0",
-          "from": "semver@>=5.2.0 <5.3.0",
-          "resolved": "https://registry.npmjs.org/semver/-/semver-5.2.0.tgz"
-        }
-      }
+      "resolved": "file:temp_modules\\rush-rush-lib"
     },
     "rush-test-web-library-build": {
       "version": "0.0.0",
