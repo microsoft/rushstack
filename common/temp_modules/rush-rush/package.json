@@ -12,6 +12,7 @@
     "@types/minimatch": "2.0.29",
     "@types/mocha": "2.2.38",
     "@types/node": "6.0.62",
+    "@types/semver": "5.3.30",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "@microsoft/package-deps-hash": "~0.0.4",
@@ -33,6 +34,6 @@
   },
   "rushDependencies": {
     "@microsoft/node-library-build": "~2.3.0",
-    "@microsoft/rush-lib": "1.8.0"
+    "@microsoft/rush-lib": "1.8.4"
   }
 }
