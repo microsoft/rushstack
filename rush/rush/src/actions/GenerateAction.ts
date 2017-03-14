@@ -6,6 +6,7 @@ import * as glob from 'glob';
 import globEscape = require('glob-escape');
 import * as os from 'os';
 import * as path from 'path';
+import * as semver from 'semver';
 import * as fsx from 'fs-extra';
 import { CommandLineAction, CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import {
@@ -23,11 +24,25 @@ import RushCommandLineParser from './RushCommandLineParser';
 import PackageReviewChecker from '../utilities/PackageReviewChecker';
 import { TempModuleGenerator } from '../utilities/TempModuleGenerator';
 
+interface IShrinkwrapFile {
+  name: string;
+  version: string;
+  dependencies: {[ dependency: string ]: IShrinkwrapDependency }
+}
+
+interface IShrinkwrapDependency {
+  version: string;
+  from: string;
+  resolved: string;
+  dependencies: {[ dependency: string ]: IShrinkwrapDependency }
+}
+
 export default class GenerateAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
   private _rushConfiguration: RushConfiguration;
   private _packageReviewChecker: PackageReviewChecker;
   private _lazyParameter: CommandLineFlagParameter;
+  private _forceParameter: CommandLineFlagParameter;
 
   private static _deleteCommonNodeModules(rushConfiguration: RushConfiguration, isLazy: boolean): void {
     const nodeModulesPath: string = path.join(rushConfiguration.commonFolder, 'node_modules');
@@ -65,7 +80,7 @@ export default class GenerateAction extends CommandLineAction {
     }
   }
 
-  private static _createCommonTempModulesAndPackageJson(rushConfiguration: RushConfiguration): void {
+  private static _createCommonTempModulesAndPackageJson(rushConfiguration: RushConfiguration): Map<string, IPackageJson> {
     console.log('Creating a clean common/temp_modules folder');
     Utilities.createFolderWithRetry(rushConfiguration.tempModulesFolder);
 
@@ -106,6 +121,7 @@ export default class GenerateAction extends CommandLineAction {
     console.log('Writing common/package.json');
     const commonPackageJsonFilename: string = path.join(rushConfiguration.commonFolder, 'package.json');
     JsonFile.saveJsonFile(commonPackageJson, commonPackageJsonFilename);
+    return tempModules;
   }
 
   private static _runNpmInstall(rushConfiguration: RushConfiguration): void {
@@ -138,6 +154,37 @@ export default class GenerateAction extends CommandLineAction {
     }
   }
 
+  private static _shouldDeleteNodeModules(rushConfiguration: RushConfiguration, tempModules: Map<string, IPackageJson>): boolean {
+    /* check against the temp_modules: are any regular dependencies in temp_modules missing from the shrinkwrap?
+     * note that we will not regenerate the shrinkwrap if they are REMOVING dependencies,
+     * we assume they will use --force to remove those from shrinkwrap
+     */
+
+    const shrinkwrapFile: string = path.join(rushConfiguration.commonFolder, 'npm-shrinkwrap.json');
+    if (!fsx.existsSync(shrinkwrapFile)) {
+      return true;
+    }
+
+    const shrinkwrap: IShrinkwrapFile = JSON.parse( fsx.readFileSync(shrinkwrapFile).toString() );
+
+    tempModules.forEach((project: IPackageJson, tempProjectName: string) => {
+      Object.keys(project.dependencies).forEach((dependency: string) => {
+        // technically we need to look at the temp_modules dependencies
+        const version: string = project.dependencies[dependency];
+        if (!GenerateAction._canFindDependencyInShrinkwrap(shrinkwrap, dependency, version, tempProjectName)) {
+          return false;
+        }
+      });
+    });
+    return true;
+  }
+
+  private static _canFindDependencyInShrinkwrap(shrinkwrap: IShrinkwrapFile, dependency: string, version: string, rushPackageName: string) {
+    // The dependency will either be directly under the rushPackageName, or it will be in the root
+    return semver.satisfies(shrinkwrap.dependencies[rushPackageName].dependencies[dependency].version), version ||
+           semver.satisfies(shrinkwrap.dependencies[dependency].version, version);
+  }
+
   constructor(parser: RushCommandLineParser) {
     super({
       actionVerb: 'generate',
@@ -157,6 +204,11 @@ export default class GenerateAction extends CommandLineAction {
       description: 'Do not clean the "node_modules" folder before running "npm install".'
         + ' This is faster, but less correct, so only use it for debugging.'
     });
+    this._forceParameter = this.defineFlagParameter({
+      parameterLongName: '--force',
+      parameterShortName: '-f',
+      description: 'Forces cleaning of the node_modules folder before running "npm install".'
+    });
   }
 
   protected onExecute(): void {
@@ -171,33 +223,36 @@ export default class GenerateAction extends CommandLineAction {
         this._packageReviewChecker.saveCurrentDependencies();
     }
 
-    // 0. Detect if we need to do a full rebuild, or if the shrinkwrap already contains the
+    // 1. Delete "common\temp_modules"
+    GenerateAction._deleteCommonTempModules(this._rushConfiguration);
+
+    // 2. Construct common\package.json and common\temp_modules
+    const tempModules: Map<string, IPackageJson> = GenerateAction._createCommonTempModulesAndPackageJson(this._rushConfiguration);
+
+    // 3. Detect if we need to do a full rebuild, or if the shrinkwrap already contains the
     //    necessary dependencies. This will happen if someone is adding a new rush dependency,
     //    or if someone is adding a dependency which already exists in another project
-    const shouldRegenerateShrinkwrap: boolean = GenerateAction._shouldRegenerateShrinkwrap();
 
-    if (shouldRegenerateShrinkwrap) {
-      // 1. Delete "common\node_modules"
-      GenerateAction._deleteCommonNodeModules(this._rushConfiguration, this._lazyParameter.value);
+    const shouldDeleteNodeModules: boolean = GenerateAction._shouldDeleteNodeModules(this._rushConfiguration, tempModules);
 
-      // 2. Delete the previous npm-shrinkwrap.json
+    // 4. Delete "common\node_modules"
+    GenerateAction._deleteCommonNodeModules(this._rushConfiguration, this._lazyParameter.value || !shouldDeleteNodeModules);
+
+    if (shouldDeleteNodeModules || this._lazyParameter.value) {
+      // 5. Delete the previous npm-shrinkwrap.json
       GenerateAction._deleteShrinkwrapFile(this._rushConfiguration);
-
-      // 3. Delete "common\temp_modules"
-      GenerateAction._deleteCommonTempModules(this._rushConfiguration);
     }
 
-    // 4. Construct common\package.json and common\temp_modules
-    GenerateAction._createCommonTempModulesAndPackageJson(this._rushConfiguration);
+    // 6. Make sure the NPM tool is set up properly.  Usually "rush install" should have
+    //    already done this, but not if they just cloned the repo
+    console.log('');
+    InstallAction.ensureLocalNpmTool(this._rushConfiguration, false);
 
-    if (shouldRegenerateShrinkwrap) {
-      // 5. Make sure the NPM tool is set up properly.  Usually "rush install" should have
-      //    already done this, but not if they just cloned the repo
-      console.log('');
-      InstallAction.ensureLocalNpmTool(this._rushConfiguration, false);
+    // 7. Run "npm install" and "npm shrinkwrap"
+    // (always run, installing based on old shrinkwrap if temp_modules has changed but no need to create new shrinkwrap
+    GenerateAction._runNpmInstall(this._rushConfiguration);
 
-      // 6. Run "npm install" and "npm shrinkwrap"
-      GenerateAction._runNpmInstall(this._rushConfiguration);
+    if (shouldDeleteNodeModules) {
       GenerateAction._runNpmShrinkWrap(this._rushConfiguration, this._lazyParameter.value);
     }
 
