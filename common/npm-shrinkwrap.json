@@ -4596,14 +4596,7 @@
     "rush-gulp-core-build": {
       "version": "0.0.0",
       "from": "temp_modules\\rush-gulp-core-build",
-      "resolved": "file:temp_modules\\rush-gulp-core-build",
-      "dependencies": {
-        "@types/semver": {
-          "version": "5.3.30",
-          "from": "@types/semver@5.3.30",
-          "resolved": "https://registry.npmjs.org/@types/semver/-/semver-5.3.30.tgz"
-        }
-      }
+      "resolved": "file:temp_modules\\rush-gulp-core-build"
     },
     "rush-gulp-core-build-karma": {
       "version": "0.0.0",
@@ -4657,11 +4650,6 @@
       "from": "temp_modules\\rush-rush",
       "resolved": "file:temp_modules\\rush-rush",
       "dependencies": {
-        "@types/semver": {
-          "version": "5.3.30",
-          "from": "@types/semver@5.3.30",
-          "resolved": "https://registry.npmjs.org/@types/semver/-/semver-5.3.30.tgz"
-        },
         "glob": {
           "version": "7.0.6",
           "from": "glob@>=7.0.5 <7.1.0",
