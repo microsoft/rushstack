@@ -23,7 +23,7 @@
     "@microsoft/ts-command-line": "~1.1.1",
     "builtins": "~1.0.3",
     "colors": "~1.1.2",
-    "fs-extra": "~0.26.0",
+    "fs-extra": "~0.26.7",
     "git-repo-info": "~1.1.4",
     "glob": "~7.0.5",
     "glob-escape": "~0.0.1",
@@ -32,11 +32,11 @@
     "minimatch": "~3.0.2",
     "mkdirp": "~0.5.1",
     "read-package-tree": "~5.1.5",
-    "semver": "~5.2.0",
+    "semver": "~5.3.0",
     "wordwrap": "~1.0.0"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "~2.3.0",
+    "@microsoft/node-library-build": ">=2.3.0 <3.0.0",
     "@types/chai": "3.4.34",
     "@types/es6-collections": "0.5.29",
     "@types/es6-promise": "0.0.32",
