@@ -272,7 +272,6 @@ export default class GenerateAction extends CommandLineAction {
 
     const shouldDeleteNodeModules: boolean =
       GenerateAction._shouldDeleteNodeModules(this._rushConfiguration, tempModules);
-    process.exit(1);
 
     // 4. Delete "common\node_modules"
     GenerateAction._deleteCommonNodeModules(this._rushConfiguration,
