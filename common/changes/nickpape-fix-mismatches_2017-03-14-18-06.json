@@ -1,0 +1,60 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/web-library-build",
+      "comment": "Locking `@types` packages. Synchronizing version specifiers for dependencies with other `web-build-tools` projects.",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/package-deps-hash",
+      "comment": "Locking `@types` packages. Synchronizing version specifiers for dependencies with other `web-build-tools` projects.",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/node-library-build",
+      "comment": "Locking `@types` packages. Synchronizing version specifiers for dependencies with other `web-build-tools` projects.",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-webpack",
+      "comment": "Locking `@types` packages. Synchronizing version specifiers for dependencies with other `web-build-tools` projects.",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Locking `@types` packages. Synchronizing version specifiers for dependencies with other `web-build-tools` projects.",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-serve",
+      "comment": "Locking `@types` packages. Synchronizing version specifiers for dependencies with other `web-build-tools` projects.",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-sass",
+      "comment": "Locking `@types` packages. Synchronizing version specifiers for dependencies with other `web-build-tools` projects.",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-mocha",
+      "comment": "Locking `@types` packages. Synchronizing version specifiers for dependencies with other `web-build-tools` projects.",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-karma",
+      "comment": "Locking `@types` packages. Synchronizing version specifiers for dependencies with other `web-build-tools` projects.",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build",
+      "comment": "Locking `@types` packages. Synchronizing version specifiers for dependencies with other `web-build-tools` projects.",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Locking `@types` packages. Synchronizing version specifiers for dependencies with other `web-build-tools` projects.",
+      "type": "patch"
+    }
+  ],
+  "email": "nickpape@users.noreply.github.com"
+}
