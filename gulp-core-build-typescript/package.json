@@ -18,7 +18,7 @@
     "@microsoft/gulp-core-build": ">=2.4.0 <3.0.0",
     "@microsoft/api-extractor": ">=1.1.14 <2.0.0",
     "@types/es6-promise": "0.0.32",
-    "@types/gulp": "^3.8.32",
+    "@types/gulp": "3.8.32",
     "@types/node": "6.0.62",
     "fs-extra": "~0.26.7",
     "@types/fs-extra": "0.0.37",
@@ -35,7 +35,7 @@
     "md5": "~2.2.1",
     "merge2": "~1.0.2",
     "mkdirp": "~0.5.1",
-    "@types/mkdirp": ">=0.3.29 <0.6.0",
+    "@types/mkdirp": "0.3.29",
     "object-assign": "~4.1.0",
     "through2": "~2.0.1",
     "tslint": "~4.0.2",
@@ -44,11 +44,11 @@
   },
   "devDependencies": {
     "@microsoft/node-library-build": ">=2.3.0 <3.0.0",
-    "@types/chalk": "^0.4.31",
-    "@types/gulp-util": "^3.0.29",
+    "@types/chalk": "0.4.31",
+    "@types/gulp-util": "3.0.30",
     "@types/orchestrator": "0.0.30",
     "@types/q": "0.0.32",
-    "@types/through2": "^2.0.31",
-    "@types/vinyl": "^1.2.30"
+    "@types/through2": "2.0.32",
+    "@types/vinyl": "1.2.30"
   }
 }

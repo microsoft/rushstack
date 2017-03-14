@@ -24,9 +24,9 @@
   },
   "devDependencies": {
     "@microsoft/node-library-build": ">=2.3.0 <3.0.0",
-    "@types/chalk": "^0.4.31",
-    "@types/gulp": "^3.8.32",
-    "@types/gulp-istanbul": "^0.9.30",
+    "@types/chalk": "0.4.31",
+    "@types/gulp": "3.8.32",
+    "@types/gulp-istanbul": "0.9.30",
     "@types/gulp-mocha": "0.0.29",
     "@types/mocha": "2.2.38",
     "@types/orchestrator": "0.0.30",
