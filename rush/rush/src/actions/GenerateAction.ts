@@ -185,14 +185,18 @@ export default class GenerateAction extends CommandLineAction {
         // technically we need to look at the temp_modules dependencies
         const version: string = project.dependencies[dependency];
         if (!GenerateAction._canFindDependencyInShrinkwrap(shrinkwrap, dependency, version, tempProjectName)) {
-          console.log(colors.yellow(`Could not find "${projectName}" dependency "${dependency}@${version}" ` +
-            `in shrinkwrap.${os.EOL}Rush must regenerate the shrinkwrap file. This may take some time...${os.EOL}`));
+          console.log(colors.yellow(
+            `${os.EOL}Could not find "${projectName}" dependency "${dependency}@${version}" in shrinkwrap.`));
           hasFoundMissingDependency = true;
         }
       });
     });
     if (!hasFoundMissingDependency) {
-      console.log(colors.green(`Rush found all dependencies in the shrinkwrap! Rush now running in "fast" mode.`));
+      console.log(colors.green(
+        `${os.EOL}Rush found all dependencies in the shrinkwrap! Rush now running in "fast" mode.`));
+    } else {
+      console.log(colors.yellow(`${os.EOL}The shrinkwrap file was missing one or more dependencies. ` +
+        `Rush must delete and replace the node_modules folder. This may take some time...`));
     }
     return hasFoundMissingDependency;
   }
