@@ -9,8 +9,8 @@
     "test": "gulp"
   },
   "devDependencies": {
-    "@types/chai": ">=3.4.34 <3.6.0",
-    "@types/mocha": ">=2.2.33 <2.6.0",
+    "@types/chai": "3.4.34",
+    "@types/mocha": "2.2.38",
     "chai": "~3.5.0"
   },
   "dependencies": {
