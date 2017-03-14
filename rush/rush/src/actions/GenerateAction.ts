@@ -162,6 +162,8 @@ export default class GenerateAction extends CommandLineAction {
 
     const shrinkwrapFile: string = path.join(rushConfiguration.commonFolder, 'npm-shrinkwrap.json');
     if (!fsx.existsSync(shrinkwrapFile)) {
+      console.log(colors.yellow(`Could not find previous shrinkwrap file.${os.EOL}` +
+            `Rush must regenerate the shrinkwrap file. This may take some time...`));
       return true;
     }
 
@@ -172,11 +174,14 @@ export default class GenerateAction extends CommandLineAction {
         // technically we need to look at the temp_modules dependencies
         const version: string = project.dependencies[dependency];
         if (!GenerateAction._canFindDependencyInShrinkwrap(shrinkwrap, dependency, version, tempProjectName)) {
-          return false;
+          console.log(colors.yellow(`Could not find version for "${dependency}@${version}" in shrinkwrap.${os.EOL}` +
+            `Rush must regenerate the shrinkwrap file. This may take some time...`));
+          return true;
         }
       });
     });
-    return true;
+    console.log(colors.green(`Rush found all dependencies in the shrinkwrap! Rush now running in "fast" mode.`));
+    return false;
   }
 
   private static _canFindDependencyInShrinkwrap(shrinkwrap: IShrinkwrapFile, dependency: string, version: string, rushPackageName: string) {
