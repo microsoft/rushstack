@@ -264,6 +264,7 @@ export default class GenerateAction extends CommandLineAction {
     this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
 
     const stopwatch: Stopwatch = Stopwatch.start();
+    const isLazy: boolean = this._lazyParameter.value;
 
     console.log('Starting "rush generate"' + os.EOL);
 
@@ -288,9 +289,9 @@ export default class GenerateAction extends CommandLineAction {
 
     // 4. Delete "common\node_modules"
     GenerateAction._deleteCommonNodeModules(this._rushConfiguration,
-      this._lazyParameter.value || !shouldDeleteNodeModules);
+      isLazy || !shouldDeleteNodeModules);
 
-    if (shouldDeleteNodeModules || this._lazyParameter.value) {
+    if (shouldDeleteNodeModules || isLazy) {
       // 5. Delete the previous npm-shrinkwrap.json
       GenerateAction._deleteShrinkwrapFile(this._rushConfiguration);
     }
@@ -312,7 +313,7 @@ export default class GenerateAction extends CommandLineAction {
       GenerateAction._runNpmDedupe(this._rushConfiguration);
     }
 
-    GenerateAction._runNpmShrinkWrap(this._rushConfiguration, this._lazyParameter.value);
+    GenerateAction._runNpmShrinkWrap(this._rushConfiguration, isLazy);
 
     stopwatch.stop();
     console.log(os.EOL + colors.green(`Rush generate finished successfully. (${stopwatch.toString()})`));
