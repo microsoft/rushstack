@@ -1,6 +1,25 @@
 # Change Log - @microsoft/rush-lib
 
-This log was last generated on Tue, 14 Feb 2017 22:53:30 GMT and should not be manually modified.
+This log was last generated on Fri, 24 Feb 2017 22:53:18 GMT and should not be manually modified.
+
+## 2.3.0
+Fri, 24 Feb 2017 22:53:18 GMT
+
+### Minor changes
+
+- Get package versions aligned with @microsoft/rush-lib
+- Get package versions aligned with @microsoft/rush
+
+## 1.10.0
+Fri, 24 Feb 2017 22:44:31 GMT
+
+### Minor changes
+
+- Add a "pinnedVersions" option to rush.json, which will add dependencies to the common package.json. Since these dependencies are installed first, this mechanism can be used to control versions of unconstrained second-level dependencies.
+
+### Patches
+
+- Rush will automatically create the common folder.
 
 ## 1.8.0
 Tue, 14 Feb 2017 22:53:30 GMT

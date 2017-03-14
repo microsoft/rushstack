@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-karma
 
-This log was last generated on Wed, 01 Feb 2017 02:32:46 GMT and should not be manually modified.
+This log was last generated on Fri, 24 Feb 2017 14:01:38 GMT and should not be manually modified.
+
+## 2.2.0
+Fri, 24 Feb 2017 14:01:38 GMT
+
+### Minor changes
+
+- The KarmaTask should only cause the build to fail if we are in production, otherwise treat failing tests as a warning.
 
 ## 2.1.3
 Wed, 01 Feb 2017 02:32:46 GMT
