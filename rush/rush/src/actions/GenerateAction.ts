@@ -27,14 +27,14 @@ import { TempModuleGenerator } from '../utilities/TempModuleGenerator';
 interface IShrinkwrapFile {
   name: string;
   version: string;
-  dependencies: {[ dependency: string ]: IShrinkwrapDependency }
+  dependencies: { [dependency: string]: IShrinkwrapDependency };
 }
 
 interface IShrinkwrapDependency {
   version: string;
   from: string;
   resolved: string;
-  dependencies: {[ dependency: string ]: IShrinkwrapDependency }
+  dependencies: { [dependency: string]: IShrinkwrapDependency };
 }
 
 export default class GenerateAction extends CommandLineAction {
@@ -80,7 +80,8 @@ export default class GenerateAction extends CommandLineAction {
     }
   }
 
-  private static _createCommonTempModulesAndPackageJson(rushConfiguration: RushConfiguration): Map<string, IPackageJson> {
+  private static _createCommonTempModulesAndPackageJson(rushConfiguration: RushConfiguration):
+    Map<string, IPackageJson> {
     console.log('Creating a clean common/temp_modules folder');
     Utilities.createFolderWithRetry(rushConfiguration.tempModulesFolder);
 
@@ -154,7 +155,9 @@ export default class GenerateAction extends CommandLineAction {
     }
   }
 
-  private static _shouldDeleteNodeModules(rushConfiguration: RushConfiguration, tempModules: Map<string, IPackageJson>): boolean {
+  private static _shouldDeleteNodeModules(
+    rushConfiguration: RushConfiguration,
+    tempModules: Map<string, IPackageJson>): boolean {
     /* check against the temp_modules: are any regular dependencies in temp_modules missing from the shrinkwrap?
      * note that we will not regenerate the shrinkwrap if they are REMOVING dependencies,
      * we assume they will use --force to remove those from shrinkwrap
@@ -184,9 +187,13 @@ export default class GenerateAction extends CommandLineAction {
     return false;
   }
 
-  private static _canFindDependencyInShrinkwrap(shrinkwrap: IShrinkwrapFile, dependency: string, version: string, rushPackageName: string) {
+  private static _canFindDependencyInShrinkwrap(
+    shrinkwrap: IShrinkwrapFile,
+    dependency: string,
+    version: string,
+    rushPackageName: string): boolean {
     // The dependency will either be directly under the rushPackageName, or it will be in the root
-    return semver.satisfies(shrinkwrap.dependencies[rushPackageName].dependencies[dependency].version), version ||
+    return semver.satisfies(shrinkwrap.dependencies[rushPackageName].dependencies[dependency].version, version) ||
            semver.satisfies(shrinkwrap.dependencies[dependency].version, version);
   }
 
@@ -232,16 +239,19 @@ export default class GenerateAction extends CommandLineAction {
     GenerateAction._deleteCommonTempModules(this._rushConfiguration);
 
     // 2. Construct common\package.json and common\temp_modules
-    const tempModules: Map<string, IPackageJson> = GenerateAction._createCommonTempModulesAndPackageJson(this._rushConfiguration);
+    const tempModules: Map<string, IPackageJson> =
+      GenerateAction._createCommonTempModulesAndPackageJson(this._rushConfiguration);
 
     // 3. Detect if we need to do a full rebuild, or if the shrinkwrap already contains the
     //    necessary dependencies. This will happen if someone is adding a new rush dependency,
     //    or if someone is adding a dependency which already exists in another project
 
-    const shouldDeleteNodeModules: boolean = GenerateAction._shouldDeleteNodeModules(this._rushConfiguration, tempModules);
+    const shouldDeleteNodeModules: boolean =
+      GenerateAction._shouldDeleteNodeModules(this._rushConfiguration, tempModules);
 
     // 4. Delete "common\node_modules"
-    GenerateAction._deleteCommonNodeModules(this._rushConfiguration, this._lazyParameter.value || !shouldDeleteNodeModules);
+    GenerateAction._deleteCommonNodeModules(this._rushConfiguration,
+      this._lazyParameter.value || !shouldDeleteNodeModules);
 
     if (shouldDeleteNodeModules || this._lazyParameter.value) {
       // 5. Delete the previous npm-shrinkwrap.json
