@@ -131,20 +131,33 @@ export default class GenerateAction extends CommandLineAction {
   }
 
   private static _runNpmInstall(rushConfiguration: RushConfiguration): void {
-    const npmInstallArgs: string[] = ['install'];
+    this._runNpm(rushConfiguration, ['install']);
+    console.log('"npm install" completed');
+  }
+
+  private static _runNpmDedupe(rushConfiguration: RushConfiguration): void {
+    this._runNpm(rushConfiguration, ['dedupe']);
+    console.log('"npm dedupe" completed');
+  }
+
+  private static _runNpmPrune(rushConfiguration: RushConfiguration): void {
+    this._runNpm(rushConfiguration, ['prune']);
+    console.log('"npm prune" completed');
+  }
+
+  private static _runNpm(rushConfiguration: RushConfiguration, args: string[]): void {
     if (rushConfiguration.cacheFolder) {
-      npmInstallArgs.push('--cache', rushConfiguration.cacheFolder);
+      args.push('--cache', rushConfiguration.cacheFolder);
     }
 
     if (rushConfiguration.tmpFolder) {
-      npmInstallArgs.push('--tmp', rushConfiguration.tmpFolder);
+      args.push('--tmp', rushConfiguration.tmpFolder);
     }
 
-    console.log(os.EOL + colors.bold(`Running "npm ${npmInstallArgs.join(' ')}"...`));
+    console.log(os.EOL + colors.bold(`Running "npm ${args.join(' ')}"...`));
     Utilities.executeCommand(rushConfiguration.npmToolFilename,
-                             npmInstallArgs,
+                             args,
                              rushConfiguration.commonFolder);
-    console.log('"npm install" completed' + os.EOL);
   }
 
   private static _runNpmShrinkWrap(rushConfiguration: RushConfiguration, isLazy: boolean): void {
@@ -291,9 +304,15 @@ export default class GenerateAction extends CommandLineAction {
     // (always run, installing based on old shrinkwrap if temp_modules has changed but no need to create new shrinkwrap
     GenerateAction._runNpmInstall(this._rushConfiguration);
 
-    if (shouldDeleteNodeModules) {
-      GenerateAction._runNpmShrinkWrap(this._rushConfiguration, this._lazyParameter.value);
+    // 8. If we are doing a "fast" generate, then we need to make sure anything that was removed gets deleted from n_m
+    if (!shouldDeleteNodeModules) {
+      // delete the shrinkwrap
+      GenerateAction._deleteShrinkwrapFile(this._rushConfiguration);
+      GenerateAction._runNpmPrune(this._rushConfiguration);
+      GenerateAction._runNpmDedupe(this._rushConfiguration);
     }
+
+    GenerateAction._runNpmShrinkWrap(this._rushConfiguration, this._lazyParameter.value);
 
     stopwatch.stop();
     console.log(os.EOL + colors.green(`Rush generate finished successfully. (${stopwatch.toString()})`));
