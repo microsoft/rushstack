@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-karma
 
-This log was last generated on Fri, 24 Feb 2017 14:01:38 GMT and should not be manually modified.
+This log was last generated on Wed, 15 Mar 2017 01:32:09 GMT and should not be manually modified.
+
+## 2.2.1
+Wed, 15 Mar 2017 01:32:09 GMT
+
+### Patches
+
+- Locking `@types` packages. Synchronizing version specifiers for dependencies with other `web-build-tools` projects.
 
 ## 2.2.0
 Fri, 24 Feb 2017 14:01:38 GMT

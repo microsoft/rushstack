@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sat, 18 Feb 2017 02:32:06 GMT and should not be manually modified.
+This log was last generated on Wed, 15 Mar 2017 01:32:09 GMT and should not be manually modified.
+
+## 1.1.15
+Wed, 15 Mar 2017 01:32:09 GMT
+
+### Patches
+
+- Locking `@types` packages. Synchronizing version specifiers for dependencies with other `web-build-tools` projects.
 
 ## 1.1.14
 Sat, 18 Feb 2017 02:32:06 GMT

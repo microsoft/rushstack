@@ -2,6 +2,26 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "2.2.6",
+      "tag": "@microsoft/gulp-core-build-typescript_v2.2.6",
+      "date": "Wed, 15 Mar 2017 01:32:09 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Locking `@types` packages. Synchronizing version specifiers for dependencies with other `web-build-tools` projects."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `>=2.4.0 <3.0.0` to `>=2.4.0 <3.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `>=1.1.14 <2.0.0` to `>=1.1.14 <2.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.5",
       "tag": "@microsoft/gulp-core-build-typescript_v2.2.5",
       "date": "Tue, 31 Jan 2017 20:32:37 GMT",
