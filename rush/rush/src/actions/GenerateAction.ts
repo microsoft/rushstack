@@ -175,6 +175,7 @@ export default class GenerateAction extends CommandLineAction {
 
   private static _shouldDeleteNodeModules(
     rushConfiguration: RushConfiguration,
+    isLazy: boolean,
     tempModules: Map<string, IPackageJson>): boolean {
     /* check against the temp_modules: are any regular dependencies in temp_modules missing from the shrinkwrap?
      * note that we will not regenerate the shrinkwrap if they are REMOVING dependencies,
@@ -204,7 +205,10 @@ export default class GenerateAction extends CommandLineAction {
         }
       });
     });
-    if (!hasFoundMissingDependency) {
+    if (isLazy) {
+      console.log(colors.green(
+        `${os.EOL}Rush generate in lazy mode. You will need to run a regular rush generate.`));
+    } else if (!hasFoundMissingDependency) {
       console.log(colors.green(
         `${os.EOL}Rush found all dependencies in the shrinkwrap! Rush now running in "fast" mode.`));
     } else {
@@ -285,7 +289,7 @@ export default class GenerateAction extends CommandLineAction {
     //    or if someone is adding a dependency which already exists in another project
 
     const shouldDeleteNodeModules: boolean =
-      GenerateAction._shouldDeleteNodeModules(this._rushConfiguration, tempModules);
+      GenerateAction._shouldDeleteNodeModules(this._rushConfiguration, isLazy, tempModules);
 
     // 4. Delete "common\node_modules"
     GenerateAction._deleteCommonNodeModules(this._rushConfiguration,
