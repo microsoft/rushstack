@@ -284,9 +284,10 @@ export default class GenerateAction extends CommandLineAction {
     const tempModules: Map<string, IPackageJson> =
       GenerateAction._createCommonTempModulesAndPackageJson(this._rushConfiguration);
 
-    // 3. Detect if we need to do a full rebuild, or if the shrinkwrap already contains the
+    // 3. Detect if we need to do a full rebuild or if the shrinkwrap already contains the
     //    necessary dependencies. This will happen if someone is adding a new rush dependency,
-    //    or if someone is adding a dependency which already exists in another project
+    //    or if someone is adding a dependency which already exists in another project or exists
+    //    as an indirect dependency at the root of the common/node_modules
     const shouldClean: boolean =
       GenerateAction._shouldDeleteNodeModules(this._rushConfiguration, tempModules);
 
