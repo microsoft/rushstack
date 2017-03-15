@@ -119,4 +119,4 @@ export class CleanTask extends GulpTask<void> {
     }
     return true;
   }
-};
+}

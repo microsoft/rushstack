@@ -132,6 +132,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "globby",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "gulp",
       "allowedCategories": [ "libraries", "other" ]
     },
