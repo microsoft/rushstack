@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-library-build
 
-This log was last generated on Wed, 08 Feb 2017 01:41:58 GMT and should not be manually modified.
+This log was last generated on Wed, 15 Mar 2017 01:32:09 GMT and should not be manually modified.
+
+## 2.3.1
+Wed, 15 Mar 2017 01:32:09 GMT
+
+### Patches
+
+- Locking `@types` packages. Synchronizing version specifiers for dependencies with other `web-build-tools` projects.
 
 ## 2.3.0
 Wed, 08 Feb 2017 01:41:58 GMT

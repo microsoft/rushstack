@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "1.1.15",
+      "tag": "@microsoft/api-extractor_v1.1.15",
+      "date": "Wed, 15 Mar 2017 01:32:09 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Locking `@types` packages. Synchronizing version specifiers for dependencies with other `web-build-tools` projects."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.14",
       "tag": "@microsoft/api-extractor_v1.1.14",
       "date": "Sat, 18 Feb 2017 02:32:06 GMT",
