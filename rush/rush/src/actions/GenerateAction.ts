@@ -42,25 +42,26 @@ export default class GenerateAction extends CommandLineAction {
   private _rushConfiguration: RushConfiguration;
   private _packageReviewChecker: PackageReviewChecker;
   private _lazyParameter: CommandLineFlagParameter;
-  private _forceParameter: CommandLineFlagParameter;
+  private _cleanParameter: CommandLineFlagParameter;
 
-  private static _deleteCommonNodeModules(rushConfiguration: RushConfiguration, isLazy: boolean): void {
+  private static _deleteCommonNodeModules(rushConfiguration: RushConfiguration): void {
+    const nodeModulesPath: string = path.join(rushConfiguration.commonFolder, 'node_modules');
+    if (fsx.existsSync(nodeModulesPath)) {
+      console.log('Deleting common/node_modules folder...');
+      AsyncRecycle.recycleDirectory(rushConfiguration, nodeModulesPath);
+    }
+  }
+
+  private static _deleteCommonRushModules(rushConfiguration: RushConfiguration): void {
     const nodeModulesPath: string = path.join(rushConfiguration.commonFolder, 'node_modules');
 
-    if (isLazy) {
-      // In the lazy case, we keep the existing common/node_modules.  However, we need to delete
-      // the temp projects (that were copied from common/temp_modules into common/node_modules).
-      // We can recognize them because their names start with "rush-"
-      console.log('Deleting common/node_modules/rush-*');
-      const normalizedPath: string = Utilities.getAllReplaced(nodeModulesPath, '\\', '/');
-      for (const tempModulePath of glob.sync(globEscape(normalizedPath) + '/rush-*')) {
-        AsyncRecycle.recycleDirectory(rushConfiguration, tempModulePath);
-      }
-    } else {
-      if (fsx.existsSync(nodeModulesPath)) {
-        console.log('Deleting common/node_modules folder...');
-        AsyncRecycle.recycleDirectory(rushConfiguration, nodeModulesPath);
-      }
+    // In the lazy case, we keep the existing common/node_modules.  However, we need to delete
+    // the temp projects (that were copied from common/temp_modules into common/node_modules).
+    // We can recognize them because their names start with "rush-"
+    console.log('Deleting common/node_modules/rush-*');
+    const normalizedPath: string = Utilities.getAllReplaced(nodeModulesPath, '\\', '/');
+    for (const tempModulePath of glob.sync(globEscape(normalizedPath) + '/rush-*')) {
+      AsyncRecycle.recycleDirectory(rushConfiguration, tempModulePath);
     }
   }
 
@@ -160,22 +161,16 @@ export default class GenerateAction extends CommandLineAction {
                              rushConfiguration.commonFolder);
   }
 
-  private static _runNpmShrinkWrap(rushConfiguration: RushConfiguration, isLazy: boolean): void {
-    if (isLazy) {
-      // If we're not doing it for real, then don't bother with "npm shrinkwrap"
-      console.log(os.EOL + colors.bold('(Skipping "npm shrinkwrap")') + os.EOL);
-    } else {
-      console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
-      Utilities.executeCommand(rushConfiguration.npmToolFilename,
-                               ['shrinkwrap' ],
-                               rushConfiguration.commonFolder);
-      console.log('"npm shrinkwrap" completed' + os.EOL);
-    }
+  private static _runNpmShrinkWrap(rushConfiguration: RushConfiguration): void {
+    console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
+    Utilities.executeCommand(rushConfiguration.npmToolFilename,
+                              ['shrinkwrap' ],
+                              rushConfiguration.commonFolder);
+    console.log('"npm shrinkwrap" completed' + os.EOL);
   }
 
   private static _shouldDeleteNodeModules(
     rushConfiguration: RushConfiguration,
-    isLazy: boolean,
     tempModules: Map<string, IPackageJson>): boolean {
     /* check against the temp_modules: are any regular dependencies in temp_modules missing from the shrinkwrap?
      * note that we will not regenerate the shrinkwrap if they are REMOVING dependencies,
@@ -185,7 +180,7 @@ export default class GenerateAction extends CommandLineAction {
     let shrinkwrap: IShrinkwrapFile;
     try {
       const shrinkwrapFile: string = path.join(rushConfiguration.commonFolder, 'npm-shrinkwrap.json');
-      const shrinkwrap: IShrinkwrapFile = JSON.parse(fsx.readFileSync(shrinkwrapFile).toString());
+      shrinkwrap = JSON.parse(fsx.readFileSync(shrinkwrapFile).toString());
     } catch (e) {
       /* no-op */
     }
@@ -209,18 +204,6 @@ export default class GenerateAction extends CommandLineAction {
         }
       });
     });
-    if (isLazy) {
-      console.log(colors.green(
-        `${os.EOL}Rush is running in "--lazy" mode. ` +
-        `You will need to run "rush generate" before committing.`));
-    } else if (!hasFoundMissingDependency) {
-      console.log(colors.green(
-        `${os.EOL}Rush found all dependencies in the shrinkwrap. Skipping some expensive steps!`));
-    } else {
-      console.log(colors.yellow(`${os.EOL}The shrinkwrap file was missing one or more dependencies. ` +
-        `Rush must run in "--clean" mode, which deletes and replaces the node_modules folder.${os.EOL}` +
-        `This operation may take some time...`));
-    }
     return hasFoundMissingDependency;
   }
 
@@ -269,14 +252,19 @@ export default class GenerateAction extends CommandLineAction {
       description: 'Do not clean the "node_modules" folder before running "npm install".'
         + ' This is faster, but less correct, so only use it for debugging.'
     });
-    this._forceParameter = this.defineFlagParameter({
-      parameterLongName: '--force',
-      parameterShortName: '-f',
-      description: 'Forces cleaning of the node_modules folder before running "npm install".'
+    this._cleanParameter = this.defineFlagParameter({
+      parameterLongName: '--clean',
+      parameterShortName: '-c',
+      description: 'Force cleaning of the node_modules folder before running "npm install".'
+        + 'This is slower, but more correct.'
     });
   }
 
   protected onExecute(): void {
+    if (this._lazyParameter.value && this._cleanParameter.value) {
+      throw `Cannot simultaneously specify both "--lazy" and "--clean" parameters`;
+    }
+
     this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
 
     const stopwatch: Stopwatch = Stopwatch.start();
@@ -299,15 +287,30 @@ export default class GenerateAction extends CommandLineAction {
     // 3. Detect if we need to do a full rebuild, or if the shrinkwrap already contains the
     //    necessary dependencies. This will happen if someone is adding a new rush dependency,
     //    or if someone is adding a dependency which already exists in another project
+    const shouldClean: boolean =
+      GenerateAction._shouldDeleteNodeModules(this._rushConfiguration, tempModules);
 
-    const shouldDeleteNodeModules: boolean =
-      GenerateAction._shouldDeleteNodeModules(this._rushConfiguration, isLazy, tempModules);
+    if (isLazy) {
+      console.log(colors.green(
+        `${os.EOL}Rush is running in "--lazy" mode. ` +
+        `You will need to run "rush generate" before committing.`));
+    } else if (!shouldClean) {
+      console.log(colors.green(
+        `${os.EOL}Rush found all dependencies in the shrinkwrap. Skipping some expensive steps!`));
+    } else {
+      console.log(colors.yellow(`${os.EOL}The shrinkwrap file was missing one or more dependencies. ` +
+        `Rush must run in "--clean" mode, which deletes and replaces the node_modules folder.${os.EOL}` +
+        `This operation may take some time...`));
+    }
 
-    // 4. Delete "common\node_modules"
-    GenerateAction._deleteCommonNodeModules(this._rushConfiguration,
-      isLazy || !shouldDeleteNodeModules);
+    // 4. Delete "common\node_modules" or "common\node_modules\rush-*"
+    if (isLazy || !shouldClean) {
+      GenerateAction._deleteCommonRushModules(this._rushConfiguration);
+    } else {
+      GenerateAction._deleteCommonNodeModules(this._rushConfiguration);
+    }
 
-    if (shouldDeleteNodeModules || isLazy) {
+    if (isLazy || shouldClean) {
       // 5. Delete the previous npm-shrinkwrap.json
       GenerateAction._deleteShrinkwrapFile(this._rushConfiguration);
     }
@@ -322,14 +325,18 @@ export default class GenerateAction extends CommandLineAction {
     GenerateAction._runNpmInstall(this._rushConfiguration);
 
     // 8. If we are doing a "fast" generate, then we need to make sure anything that was removed gets deleted from n_m
-    if (!shouldDeleteNodeModules) {
-      // delete the shrinkwrap
+    if (!shouldClean) {
       GenerateAction._deleteShrinkwrapFile(this._rushConfiguration);
       GenerateAction._runNpmPrune(this._rushConfiguration);
       GenerateAction._runNpmDedupe(this._rushConfiguration);
     }
 
-    GenerateAction._runNpmShrinkWrap(this._rushConfiguration, isLazy);
+    if (isLazy) {
+      // Don't shrinkwrap the --lazy generate to remind the user they should run a regular generate
+      console.log(os.EOL + colors.bold('(Skipping "npm shrinkwrap")') + os.EOL);
+    } else {
+      GenerateAction._runNpmShrinkWrap(this._rushConfiguration);
+    }
 
     stopwatch.stop();
     console.log(os.EOL + colors.green(`Rush generate finished successfully. (${stopwatch.toString()})`));
