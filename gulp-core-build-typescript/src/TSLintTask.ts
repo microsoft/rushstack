@@ -117,8 +117,6 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
     const taskScope: TSLintTask = this;
 
     const activeLintRules: any = taskScope._loadLintRules(); // tslint:disable-line:no-any
-
-    // @todo This stream is not piped to returned value. Find a way to block the execute flow.
     this._writeLintRules(activeLintRules);
 
     const cached = require('gulp-cache'); // tslint:disable-line
@@ -196,16 +194,11 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
       this.taskConfig.lintConfig || {});
   }
 
-  private _writeLintRules(lintRules: any): fs.WriteStream { // tslint:disable-line:no-any
-    const tslintFilePath: string = path.resolve(this.buildConfig.rootPath, this.buildConfig.tempFolder, 'tslint.json');
-    const tslintFileStream: fs.WriteStream = fs.createWriteStream(tslintFilePath);
+  private _writeLintRules(lintRules: any): void { // tslint:disable-line:no-any
+    const filePath: string = path.resolve(this.buildConfig.rootPath, this.buildConfig.tempFolder, 'tslint.json');
+    const content: string = JSON.stringify(lintRules, undefined, 2);
 
-    const readable: Readable = new Readable();
-    const pipe: fs.WriteStream = readable.pipe(tslintFileStream);
-
-    readable.push(JSON.stringify(lintRules, undefined, 2));
-    readable.push(null); // tslint:disable-line:no-null-keyword
-
-    return pipe;
+    // @todo Improve the performance with async and stream.
+    fs.writeFileSync(filePath, content);
   }
 }
