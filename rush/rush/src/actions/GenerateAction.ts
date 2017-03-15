@@ -182,21 +182,25 @@ export default class GenerateAction extends CommandLineAction {
      * we assume they will use --force to remove those from shrinkwrap
      */
 
-    const shrinkwrapFile: string = path.join(rushConfiguration.commonFolder, 'npm-shrinkwrap.json');
-    if (!fsx.existsSync(shrinkwrapFile)) {
+    let shrinkwrap: IShrinkwrapFile;
+    try {
+      const shrinkwrapFile: string = path.join(rushConfiguration.commonFolder, 'npm-shrinkwrap.json');
+      const shrinkwrap: IShrinkwrapFile = JSON.parse(fsx.readFileSync(shrinkwrapFile).toString());
+    } catch (e) {
+      /* no-op */
+    }
+    if (!shrinkwrap) {
       console.log(colors.yellow(`Could not find previous shrinkwrap file.${os.EOL}` +
-            `Rush must regenerate the shrinkwrap file. This may take some time...`));
+        `Rush must regenerate the shrinkwrap file. This may take some time...`));
       return true;
     }
-
-    const shrinkwrap: IShrinkwrapFile = JSON.parse( fsx.readFileSync(shrinkwrapFile).toString() );
 
     let hasFoundMissingDependency: boolean = false;
 
     tempModules.forEach((project: IPackageJson, projectName: string) => {
       const tempProjectName: string = rushConfiguration.projectsByName.get(projectName).tempProjectName;
       Object.keys(project.dependencies).forEach((dependency: string) => {
-        // technically we need to look at the temp_modules dependencies
+        // we need to look at the temp_modules dependencies, we don't care about "rushDependencies"
         const version: string = project.dependencies[dependency];
         if (!GenerateAction._canFindDependencyInShrinkwrap(shrinkwrap, dependency, version, tempProjectName)) {
           console.log(colors.yellow(
@@ -207,13 +211,15 @@ export default class GenerateAction extends CommandLineAction {
     });
     if (isLazy) {
       console.log(colors.green(
-        `${os.EOL}Rush generate in lazy mode. You will need to run a regular rush generate.`));
+        `${os.EOL}Rush is running in "--lazy" mode. ` +
+        `You will need to run "rush generate" before committing.`));
     } else if (!hasFoundMissingDependency) {
       console.log(colors.green(
-        `${os.EOL}Rush found all dependencies in the shrinkwrap! Rush now running in "fast" mode.`));
+        `${os.EOL}Rush found all dependencies in the shrinkwrap. Skipping some expensive steps!`));
     } else {
       console.log(colors.yellow(`${os.EOL}The shrinkwrap file was missing one or more dependencies. ` +
-        `Rush must delete and replace the node_modules folder. This may take some time...`));
+        `Rush must run in "--clean" mode, which deletes and replaces the node_modules folder.${os.EOL}` +
+        `This operation may take some time...`));
     }
     return hasFoundMissingDependency;
   }
@@ -222,20 +228,26 @@ export default class GenerateAction extends CommandLineAction {
     shrinkwrap: IShrinkwrapFile,
     dependency: string,
     version: string,
-    rushPackageName: string): boolean {
+    tempProjectName: string): boolean {
 
     let shrinkwrapDependency: IShrinkwrapDependency;
 
-    // The dependency will either be directly under the rushPackageName, or it will be in the root
-    if (shrinkwrap.dependencies[rushPackageName]) {
-      if (shrinkwrap.dependencies[rushPackageName].dependencies) {
-        shrinkwrapDependency = shrinkwrap.dependencies[rushPackageName].dependencies[dependency];
+    // First, check under tempProjectName, as this is the first place NPM looks
+    // The dependency will either be directly under the tempProjectName, or it will be in the root
+    if (shrinkwrap.dependencies[tempProjectName]) {
+      if (shrinkwrap.dependencies[tempProjectName].dependencies) {
+        shrinkwrapDependency = shrinkwrap.dependencies[tempProjectName].dependencies[dependency];
       }
     }
 
-    shrinkwrapDependency = shrinkwrapDependency || shrinkwrap.dependencies[dependency];
-
-    return shrinkwrapDependency && semver.satisfies(shrinkwrapDependency.version, version);
+    if (shrinkwrapDependency) {
+      // If we found it under the project, the version must conform
+      return semver.satisfies(shrinkwrapDependency.version, version);
+    } else {
+      // Check under the root
+      shrinkwrapDependency = shrinkwrap.dependencies[dependency];
+      return shrinkwrapDependency && semver.satisfies(shrinkwrapDependency.version, version);
+    }
   }
 
   constructor(parser: RushCommandLineParser) {
