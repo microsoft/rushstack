@@ -180,7 +180,7 @@ export default class GenerateAction extends CommandLineAction {
     let shrinkwrap: IShrinkwrapFile;
     try {
       const shrinkwrapFile: string = path.join(rushConfiguration.commonFolder, 'npm-shrinkwrap.json');
-      shrinkwrap = JSON.parse(fsx.readFileSync(shrinkwrapFile).toString());
+      shrinkwrap = require(shrinkwrapFile);
     } catch (e) {
       /* no-op */
     }
