@@ -23,6 +23,7 @@ import {
 import RushCommandLineParser from './RushCommandLineParser';
 import GitPolicy from '../utilities/GitPolicy';
 import { TempModuleGenerator } from '../utilities/TempModuleGenerator';
+import LinkAction from './LinkAction';
 
 const MAX_INSTALL_ATTEMPTS: number = 5;
 
@@ -164,7 +165,9 @@ export default class InstallAction extends CommandLineAction {
 
     stopwatch.stop();
     console.log(colors.green(`The common NPM packages are up to date. (${stopwatch.toString()})`));
-    console.log(os.EOL + 'Next you should probably run: "rush link"');
+
+    const linker: LinkAction = new LinkAction(this._parser);
+    linker.execute();
   }
 
   private _checkThatTempModulesMatch(): void {

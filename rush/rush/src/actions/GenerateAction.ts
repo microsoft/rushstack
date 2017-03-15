@@ -18,6 +18,7 @@ import {
   Stopwatch
 } from '@microsoft/rush-lib';
 
+import LinkAction from './LinkAction';
 import InstallAction from './InstallAction';
 import RushCommandLineParser from './RushCommandLineParser';
 import PackageReviewChecker from '../utilities/PackageReviewChecker';
@@ -199,6 +200,8 @@ export default class GenerateAction extends CommandLineAction {
 
     stopwatch.stop();
     console.log(os.EOL + colors.green(`Rush generate finished successfully. (${stopwatch.toString()})`));
-    console.log(os.EOL + 'Next you should probably run: "rush link"');
+
+    const linker: LinkAction = new LinkAction(this._parser);
+    linker.execute();
   }
 }
