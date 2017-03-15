@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/gulp-core-build-typescript",
-      "comment": "Write the TSLint configuration file when execute.",
+      "comment": "Write the TSLint configuration file after executing the task.",
       "type": "minor"
     }
   ],
