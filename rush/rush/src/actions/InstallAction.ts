@@ -39,6 +39,7 @@ export default class InstallAction extends CommandLineAction {
   private _cleanInstall: CommandLineFlagParameter;
   private _cleanInstallFull: CommandLineFlagParameter;
   private _bypassPolicy: CommandLineFlagParameter;
+  private _noLinkParameter: CommandLineFlagParameter;
 
   private _tempModulesFiles: string[] = [];
 
@@ -130,6 +131,10 @@ export default class InstallAction extends CommandLineAction {
       parameterLongName: '--bypass-policy',
       description: 'Overrides gitPolicy enforcement (use honorably!)'
     });
+    this._noLinkParameter = this.defineFlagParameter({
+      parameterLongName: '--no-link',
+      description: 'Do not automatically run the Link action after completing Generate action'
+    });
   }
 
   protected onExecute(): void {
@@ -166,8 +171,12 @@ export default class InstallAction extends CommandLineAction {
     stopwatch.stop();
     console.log(colors.green(`The common NPM packages are up to date. (${stopwatch.toString()})`));
 
-    const linker: LinkAction = new LinkAction(this._parser);
-    linker.execute();
+    if (!this._noLinkParameter.value) {
+      const linkAction: LinkAction = new LinkAction(this._parser);
+      linkAction.execute();
+    } else {
+      console.log(os.EOL + 'Next you should probably run: "rush link"');
+    }
   }
 
   private _checkThatTempModulesMatch(): void {
