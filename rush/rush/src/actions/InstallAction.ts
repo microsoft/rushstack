@@ -23,6 +23,7 @@ import {
 import RushCommandLineParser from './RushCommandLineParser';
 import GitPolicy from '../utilities/GitPolicy';
 import { TempModuleGenerator } from '../utilities/TempModuleGenerator';
+import LinkAction from './LinkAction';
 
 const MAX_INSTALL_ATTEMPTS: number = 5;
 
@@ -38,6 +39,7 @@ export default class InstallAction extends CommandLineAction {
   private _cleanInstall: CommandLineFlagParameter;
   private _cleanInstallFull: CommandLineFlagParameter;
   private _bypassPolicy: CommandLineFlagParameter;
+  private _noLinkParameter: CommandLineFlagParameter;
 
   private _tempModulesFiles: string[] = [];
 
@@ -129,6 +131,10 @@ export default class InstallAction extends CommandLineAction {
       parameterLongName: '--bypass-policy',
       description: 'Overrides gitPolicy enforcement (use honorably!)'
     });
+    this._noLinkParameter = this.defineFlagParameter({
+      parameterLongName: '--no-link',
+      description: 'Do not automatically run the Link action after completing Generate action'
+    });
   }
 
   protected onExecute(): void {
@@ -164,7 +170,13 @@ export default class InstallAction extends CommandLineAction {
 
     stopwatch.stop();
     console.log(colors.green(`The common NPM packages are up to date. (${stopwatch.toString()})`));
-    console.log(os.EOL + 'Next you should probably run: "rush link"');
+
+    if (!this._noLinkParameter.value) {
+      const linkAction: LinkAction = new LinkAction(this._parser);
+      linkAction.execute();
+    } else {
+      console.log(os.EOL + 'Next you should probably run: "rush link"');
+    }
   }
 
   private _checkThatTempModulesMatch(): void {
