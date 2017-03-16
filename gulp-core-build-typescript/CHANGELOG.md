@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Wed, 15 Mar 2017 01:32:09 GMT and should not be manually modified.
+This log was last generated on Thu, 16 Mar 2017 19:02:22 GMT and should not be manually modified.
+
+## 2.3.0
+Thu, 16 Mar 2017 19:02:22 GMT
+
+### Minor changes
+
+- Write the TSLint configuration file after executing the task.
 
 ## 2.2.6
 Wed, 15 Mar 2017 01:32:09 GMT
