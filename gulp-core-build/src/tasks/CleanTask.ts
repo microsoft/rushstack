@@ -62,7 +62,7 @@ export class CleanTask extends GulpTask<void> {
       }
     }
 
-    // Apparently there is a wonderful bug with del whereby
+    // Appears to be a known issue with `del` whereby
     // if you ask to delete both a folder, and something in the folder,
     // it randomly chooses which one to delete first, which can cause
     // the function to fail sporadically. The fix for this is simple:
