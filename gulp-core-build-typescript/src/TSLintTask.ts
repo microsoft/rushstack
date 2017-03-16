@@ -1,4 +1,4 @@
-import { GulpTask } from '@microsoft/gulp-core-build';
+import { GulpTask, IBuildConfig } from '@microsoft/gulp-core-build';
 import gulpType = require('gulp');
 /* tslint:disable:typedef */
 const md5 = require('md5');
@@ -6,6 +6,7 @@ const merge = require('lodash').merge;
 /* tslint:enable:typedef */
 import through2 = require('through2');
 import gutil = require('gulp-util');
+import * as fs from 'fs';
 import * as TSLint from 'tslint';
 import * as path from 'path';
 import * as ts from 'typescript';
@@ -115,6 +116,13 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
     const taskScope: TSLintTask = this;
 
     const activeLintRules: any = taskScope._loadLintRules(); // tslint:disable-line:no-any
+
+    // Write out the active lint rules for easier debugging
+    if (!fs.existsSync(path.dirname(this._getTsLintFilepath()))) {
+      fs.mkdirSync(path.dirname(this._getTsLintFilepath()));
+    }
+    fs.writeFileSync(this._getTsLintFilepath(), JSON.stringify(activeLintRules, undefined, 2));
+
     const cached = require('gulp-cache'); // tslint:disable-line
 
     return gulp.src(this.taskConfig.sourceMatch)
@@ -179,6 +187,14 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
           }
         }
       ));
+  }
+
+  public getCleanMatch(buildConfig: IBuildConfig, taskConfig: ITSLintTaskConfig = this.taskConfig): string[] {
+    return [path.join(buildConfig.rootPath, buildConfig.tempFolder)];
+  }
+
+  private _getTsLintFilepath(): string {
+    return path.join(this.buildConfig.rootPath, this.buildConfig.tempFolder, 'tslint.json');
   }
 
   private _loadLintRules(): any { // tslint:disable-line:no-any
