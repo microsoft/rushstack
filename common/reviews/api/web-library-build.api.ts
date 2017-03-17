@@ -13,7 +13,7 @@ class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig> {
 
 class CleanTask extends GulpTask<void> {
   constructor();
-  executeTask(gulp: gulp.Gulp, completeCallback: (result?: Object) => void): void;
+  executeTask(gulp: gulp.Gulp, completeCallback: (result?: Object) => void): Promise<any>;
 }
 
 class CopyTask extends GulpTask<ICopyConfig> {
