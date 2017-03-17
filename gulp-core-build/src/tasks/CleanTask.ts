@@ -1,5 +1,8 @@
 import { GulpTask } from './GulpTask';
 import gulp = require('gulp');
+import * as path from 'path';
+
+import { FileDeletionUtility } from '../utilities/FileDeletionUtility';
 
 /**
  * The clean task is a special task which iterates through all registered
@@ -22,10 +25,8 @@ export class CleanTask extends GulpTask<void> {
     gulp: gulp.Gulp,
     completeCallback: (result?: Object) => void
   ): void {
-    /* tslint:disable:typedef */
-    const del = require('del');
-    /* tslint:disable:typedef */
 
+    // tslint:disable:typedef
     const { distFolder, libFolder, libAMDFolder, tempFolder } = this.buildConfig;
     let cleanPaths = [
       distFolder,
@@ -59,8 +60,11 @@ export class CleanTask extends GulpTask<void> {
       }
     }
 
-    del(cleanPaths)
-      .then(() => completeCallback())
-      .catch((error) => completeCallback(error));
+    try {
+      FileDeletionUtility.deletePatterns(cleanPaths);
+      completeCallback();
+    } catch (e) {
+      completeCallback(e);
+    }
   }
 }
