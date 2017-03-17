@@ -103,7 +103,7 @@ export default class Interleaver {
   }
 
   /**
-   * Adds the text to the tasks's buffer, and writes it to the console if it is the active task
+   * Adds the text to the task's buffer, and writes it to the console if it is the active task
    */
   private static _writeTaskOutput(taskName: string, data: string,
     stream: ITaskOutputStream = ITaskOutputStream.stdout): void {
