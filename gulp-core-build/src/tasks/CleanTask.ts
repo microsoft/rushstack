@@ -1,5 +1,6 @@
 import { GulpTask } from './GulpTask';
 import gulp = require('gulp');
+import * as rimraf from 'rimraf';
 
 /**
  * The clean task is a special task which iterates through all registered
@@ -16,18 +17,16 @@ export class CleanTask extends GulpTask<void> {
   /**
    * The main function, which iterates through all uniqueTasks registered
    * to the build, and by calling the getCleanMatch() function, collects a list of
-   * glob patterns which are then passed to the `del` plugin to delete them from disk.
+   * glob patterns which are then passed to the rimraf to delete them from disk.
    */
   public executeTask(
     gulp: gulp.Gulp,
     completeCallback: (result?: Object) => void
-  ): void {
-    /* tslint:disable:typedef */
-    const del = require('del');
-    /* tslint:disable:typedef */
+  ): Promise<any> { // tslint:disable-line:no-any
 
+    // tslint:disable-next-line:typedef
     const { distFolder, libFolder, libAMDFolder, tempFolder } = this.buildConfig;
-    let cleanPaths = [
+    let cleanPaths: string[] = [
       distFolder,
       libAMDFolder,
       libFolder,
@@ -59,8 +58,17 @@ export class CleanTask extends GulpTask<void> {
       }
     }
 
-    del(cleanPaths)
-      .then(() => completeCallback())
-      .catch((error) => completeCallback(error));
+    return Promise.all(
+      cleanPaths.map((cleanPath) => {
+        return new Promise<void>((complete: () => void, reject: (err: Error) => void) => {
+          rimraf(cleanPath, (error?: Error) => {
+            if (error) {
+              reject(error);
+            }
+            complete();
+          });
+        });
+      })
+    ).then(() => completeCallback(), completeCallback);
   }
 }

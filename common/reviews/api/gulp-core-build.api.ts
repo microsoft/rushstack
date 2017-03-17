@@ -3,7 +3,7 @@ export function addSuppression(str: string): void;
 class CleanTask extends GulpTask<void> {
   constructor();
   public executeTask(gulp: gulp.Gulp,
-      completeCallback: (result?: Object) => void): void;
+      completeCallback: (result?: Object) => void): Promise<any>;
 }
 
 class CopyTask extends GulpTask<ICopyConfig> {
