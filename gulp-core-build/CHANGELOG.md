@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Wed, 15 Mar 2017 01:32:09 GMT and should not be manually modified.
+This log was last generated on Sat, 18 Mar 2017 01:31:49 GMT and should not be manually modified.
+
+## 2.4.2
+Sat, 18 Mar 2017 01:31:49 GMT
+
+### Patches
+
+- Fixes an issue with the clean command, which causes builds to spuriously fail.
 
 ## 2.4.1
 Wed, 15 Mar 2017 01:32:09 GMT
