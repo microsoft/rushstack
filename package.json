@@ -4,7 +4,6 @@
   "description": "Web build tools",
   "scripts": {
     "test": "rush build --production",
-    "start": "gulp --gulpfile apps/fabric-examples/gulpfile.js serve",
     "build": "rush build --production --clean",
     "change": "rush change"
   },
