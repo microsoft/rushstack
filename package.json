@@ -2,8 +2,14 @@
   "name": "web-build-tools",
   "version": "0.0.0",
   "description": "Web build tools",
-
+  "scripts": {
+    "postinstall": "rush install && rush link",
+    "test": "rush build --production",
+    "start": "gulp --gulpfile apps/fabric-examples/gulpfile.js serve",
+    "build": "rush build --production --clean",
+    "change": "rush change"
+  },
   "devDependencies": {
-    "@microsoft/rush": "~1.8.2"
+    "@microsoft/rush": "~2.3.1"
   }
 }
