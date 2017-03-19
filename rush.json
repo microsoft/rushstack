@@ -13,6 +13,9 @@
     ],
     "sampleEmail": "mrexample@users.noreply.github.com"
   },
+  "pinnedVersions": {
+    "tslint": "4.5.1"
+  },
   "projects": [
     {
       "packageName": "@microsoft/gulp-core-build",
