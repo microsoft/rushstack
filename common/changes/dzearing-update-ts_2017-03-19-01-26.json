@@ -1,0 +1,15 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Updating typescript, gulp-typescript, and tslint.",
+      "type": "minor"
+    },
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Fixing variable that was shadowing another variable.",
+      "type": "patch"
+    }
+  ],
+  "email": "dzearing@microsoft.com"
+}
