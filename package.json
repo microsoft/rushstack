@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "description": "Web build tools",
   "scripts": {
-    "postinstall": "rush install && rush link",
     "test": "rush build --production",
     "start": "gulp --gulpfile apps/fabric-examples/gulpfile.js serve",
     "build": "rush build --production --clean",
