@@ -2,6 +2,28 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "3.0.0",
+      "tag": "@microsoft/gulp-core-build-sass_v3.0.0",
+      "date": "Mon, 20 Mar 2017 21:52:20 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Adding moduleExportName option to sass task, so that we can optionally export to something other than \"default\"."
+          }
+        ],
+        "major": [
+          {
+            "comment": "Updating gulp-sass and related package version dependencies."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `>=2.4.2 <3.0.0` to `>=2.4.3 <3.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.8",
       "tag": "@microsoft/gulp-core-build-sass_v2.0.8",
       "date": "Mon, 20 Mar 2017 03:50:55 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Mon, 20 Mar 2017 04:20:13 GMT and should not be manually modified.
+This log was last generated on Mon, 20 Mar 2017 21:52:20 GMT and should not be manually modified.
+
+## 3.0.0
+Mon, 20 Mar 2017 21:52:20 GMT
+
+### Breaking changes
+
+- Updating typescript, gulp-typescript, and tslint.
 
 ## 2.4.1
 Mon, 20 Mar 2017 04:20:13 GMT

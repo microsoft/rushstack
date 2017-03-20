@@ -2,6 +2,26 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "3.0.0",
+      "tag": "@microsoft/gulp-core-build-typescript_v3.0.0",
+      "date": "Mon, 20 Mar 2017 21:52:20 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Updating typescript, gulp-typescript, and tslint."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `>=2.4.2 <3.0.0` to `>=2.4.3 <3.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `>=1.1.19 <2.0.0` to `>=2.0.0 <3.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.4.1",
       "tag": "@microsoft/gulp-core-build-typescript_v2.4.1",
       "date": "Mon, 20 Mar 2017 04:20:13 GMT",

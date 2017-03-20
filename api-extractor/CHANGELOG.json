@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "2.0.0",
+      "tag": "@microsoft/api-extractor_v2.0.0",
+      "date": "Mon, 20 Mar 2017 21:52:20 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Fixing whitespace, also a variable that was shadowing another variable."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.19",
       "tag": "@microsoft/api-extractor_v1.1.19",
       "date": "Mon, 20 Mar 2017 04:20:13 GMT",
