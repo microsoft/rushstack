@@ -203,7 +203,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
 
             if (this.taskConfig.moduleExportName === '') {
               exportString = 'export = styles;';
-            } else if (!!exportString) {
+            } else if (!!this.taskConfig.moduleExportName) {
               exportString = `export const ${ this.taskConfig.moduleExportName } = styles;`;
             }
 
