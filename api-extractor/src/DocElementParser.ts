@@ -253,12 +253,12 @@ export default class DocElementParser {
       return;
     }
 
-    // We are going to copy the resolvedApiItem's documentation
+    // We are going to copy the resolvedApiItem's documentation 
     // We must make sure it's documentation can be completed,
-    // if we cannot, an error will be reported viathe documentation error handler.
-    // This will only be the case our resolvedApiItem was created from a local
+    // if we cannot, an error will be reported viathe documentation error handler. 
+    // This will only be the case our resolvedApiItem was created from a local 
     // ApiItem. Resolutions from JSON will have an undefined 'apiItem' property.
-    // Example: a circular reference will report an error.
+    // Example: a circular reference will report an error. 
     if (resolvedApiItem.apiItem) {
       resolvedApiItem.apiItem.completeInitialization();
     }

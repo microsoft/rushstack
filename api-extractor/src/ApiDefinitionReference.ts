@@ -1,11 +1,11 @@
 /**
- * An API definition reference that is used to locate the documentation of exported
- * API items that may or may not belong to an external package.
- *
- * The format of the API definition reference is:
+ * An API definition reference that is used to locate the documentation of exported 
+ * API items that may or may not belong to an external package. 
+ * 
+ * The format of the API definition reference is: 
  * scopeName/packageName:exportName.memberName
- *
- * The following are valid API definition references:
+ * 
+ * The following are valid API definition references: 
  * \@microsoft/sp-core-library:DisplayMode
  * \@microsoft/sp-core-library:Guid
  * \@microsoft/sp-core-library:Guid.equals
@@ -14,7 +14,7 @@
 export interface IApiDefinintionReferenceParts {
   /**
    * This is an optional property to denote that a package name is scoped under this name.
-   * For example, a common case is when having the '@microsoft' scope name in the
+   * For example, a common case is when having the '@microsoft' scope name in the 
    * API definition reference: '\@microsoft/sp-core-library'.
    */
   scopeName: string;
@@ -27,7 +27,7 @@ export interface IApiDefinintionReferenceParts {
    */
   exportName: string;
   /**
-   * The name of the member API item.
+   * The name of the member API item. 
    */
   memberName: string;
 }
@@ -35,7 +35,7 @@ export interface IApiDefinintionReferenceParts {
 /**
  * A scope and package name are semantic information within an API reference expression.
  * If there is no scope or package, then the corresponding values will be an empty string.
- *
+ * 
  * Example: '@microsoft/Utilities' -> \{ scope: '@microsoft', package: 'Utilities' \}
  * Example: 'Utilities' -> \{ scope: '', package: 'Utilities' \}
  */
@@ -164,7 +164,7 @@ export default class ApiDefinitionReference {
   /**
    * Stringifies the ApiDefinitionReferenceOptions up and including the
    * scope and package name.
-   *
+   * 
    * Example output: '@microsoft/Utilities'
    */
   public toScopePackageString(): string {
@@ -180,7 +180,7 @@ export default class ApiDefinitionReference {
   /**
    * Stringifies the ApiDefinitionReferenceOptions up and including the
    * scope, package and export name.
-   *
+   * 
    * Example output: '@microsoft/Utilities.Parse'
    */
   public toExportString(): string {
@@ -194,7 +194,7 @@ export default class ApiDefinitionReference {
   /**
    * Stringifies the ApiDefinitionReferenceOptions up and including the
    * scope, package, export and member name.
-   *
+   * 
    * Example output: '@microsoft/Utilities.Parse.parseJsonToString'
    */
   public toMemberString(): string {
