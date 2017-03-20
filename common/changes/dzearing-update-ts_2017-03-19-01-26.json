@@ -1,0 +1,30 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/web-library-build",
+      "comment": "Updating build task dependencies.",
+      "type": "major"
+    },
+    {
+      "packageName": "@microsoft/node-library-build",
+      "comment": "Updating build task dependencies.",
+      "type": "major"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Updating typescript, gulp-typescript, and tslint.",
+      "type": "major"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-sass",
+      "comment": "Updating gulp-sass and related package version dependencies.",
+      "type": "major"
+    },
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Fixing whitespace, also a variable that was shadowing another variable.",
+      "type": "major"
+    }
+  ],
+  "email": "dzearing@microsoft.com"
+}

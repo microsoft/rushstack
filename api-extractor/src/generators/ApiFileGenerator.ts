@@ -83,7 +83,7 @@ export default class ApiFileGenerator extends ApiItemVisitor {
     this._indentedWriter.indentScope(() => {
       if (apiStructuredType.kind === ApiItemKind.TypeLiteral) {
         // Type literals don't have normal JSDoc.  Write only the warnings,
-        // and put them after the '{' since the declaration is nested. 
+        // and put them after the '{' since the declaration is nested.
         this._writeWarnings(apiStructuredType);
       }
 
