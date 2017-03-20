@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-sass",
+      "comment": "Adding moduleExportName option to sass task, so that we can optionally export to something other than \"default\".",
+      "type": "minor"
+    }
+  ],
+  "email": "dzearing@microsoft.com"
+}
