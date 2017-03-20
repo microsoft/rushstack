@@ -19,7 +19,7 @@ export default class ApiJsonFile {
    * Uses the lowercase string that represents 'kind' in an API JSON file, and
    * converts it to an ApiItemKind enum value.
    * There are two cases we do not include here, (Parameter and StructuredType),
-   * this is intential as we do not expect to be loading these kind of JSON object
+   * this is intential as we do not expect to be loading these kind of JSON object 
    * from file.
    */
   public static convertJsonToKind(jsonItemKind: string): ApiItemKind {
