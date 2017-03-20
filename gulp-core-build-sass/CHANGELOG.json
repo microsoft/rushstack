@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "2.0.7",
+      "tag": "@microsoft/gulp-core-build-sass_v2.0.7",
+      "date": "Mon, 20 Mar 2017 00:54:03 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updating gulp-sass and related package version dependencies."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.6",
       "tag": "@microsoft/gulp-core-build-sass_v2.0.6",
       "date": "Wed, 15 Mar 2017 01:32:09 GMT",

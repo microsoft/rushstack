@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-sass
 
-This log was last generated on Wed, 15 Mar 2017 01:32:09 GMT and should not be manually modified.
+This log was last generated on Mon, 20 Mar 2017 00:54:03 GMT and should not be manually modified.
+
+## 2.0.7
+Mon, 20 Mar 2017 00:54:03 GMT
+
+### Patches
+
+- Updating gulp-sass and related package version dependencies.
 
 ## 2.0.6
 Wed, 15 Mar 2017 01:32:09 GMT
