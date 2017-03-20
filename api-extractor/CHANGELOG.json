@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "1.1.19",
+      "tag": "@microsoft/api-extractor_v1.1.19",
+      "date": "Mon, 20 Mar 2017 04:20:13 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Reverting change."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.18",
       "tag": "@microsoft/api-extractor_v1.1.18",
       "date": "Mon, 20 Mar 2017 03:50:55 GMT",
