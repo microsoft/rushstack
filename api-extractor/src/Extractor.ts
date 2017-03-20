@@ -108,11 +108,11 @@ export default class Extractor {
   }
 
   /**
-   * Scans for external package api files and loads them into the docItemLoader member before
+   * Scans for external package api files and loads them into the docItemLoader member before 
    * any API analyzation begins.
-   *
-   * @param externalJsonCollectionPath - an absolute path to to the folder that contains all the external
-   * api json files.
+   * 
+   * @param externalJsonCollectionPath - an absolute path to to the folder that contains all the external 
+   * api json files. 
    * Ex: if externalJsonPath is './resources', then in that folder
    * are 'es6-collections.api.json', 'es6-promise.api.json', etc.
    */
