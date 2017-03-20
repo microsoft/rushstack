@@ -46,14 +46,14 @@ export enum ApiTag {
 }
 
 /**
- * A dependency for ApiDocumentation constructor that abstracts away the function 
+ * A dependency for ApiDocumentation constructor that abstracts away the function
  * of resolving an API definition reference.
- * 
- * @internalremarks reportError() will be called if the apiDefinitionRef is to a non local 
- * item and the package of that non local item can not be found. 
- * If there is no package given and an  item can not be found we will return undefined. 
- * Once we support local references, we can be sure that reportError will only be 
- * called once if the item can not be found (and undefined will be retured by the reference 
+ *
+ * @internalremarks reportError() will be called if the apiDefinitionRef is to a non local
+ * item and the package of that non local item can not be found.
+ * If there is no package given and an  item can not be found we will return undefined.
+ * Once we support local references, we can be sure that reportError will only be
+ * called once if the item can not be found (and undefined will be retured by the reference
  * function).
  */
 export interface IReferenceResolver {
@@ -129,17 +129,17 @@ export default class ApiDocumentation {
   public parameters: { [name: string]: IParam; };
 
   /**
-   * A list of link elements to be processed after all basic documentation has been created 
-   * for all items in the project. We save the processing for later because we need ApiTag 
+   * A list of link elements to be processed after all basic documentation has been created
+   * for all items in the project. We save the processing for later because we need ApiTag
    * information before we can deem a link element is valid.
    * Example: If API item A has a link in it's documentation to API item B, then B must not
-   * have ApiTag.Internal. 
+   * have ApiTag.Internal.
    */
   public incompleteLinks: ICodeLinkElement[];
 
   /**
-   * A list of 'Tokens' that have been recognized as inheritdoc tokens that will be processed 
-   * after the basic documentation for all API items is complete. We save the processing for after 
+   * A list of 'Tokens' that have been recognized as inheritdoc tokens that will be processed
+   * after the basic documentation for all API items is complete. We save the processing for after
    * because we need ApiTag information before we can deem an inheritdoc token as valid.
    */
   public incompleteInheritdocs: Token[];
@@ -168,12 +168,12 @@ export default class ApiDocumentation {
   public hasReadOnlyTag?: boolean;
 
   /**
-   * A function type interface that abstracts away resolving 
-   * an API definition reference to an item that has friendly 
-   * assessible ApiItem properties. 
-   * 
+   * A function type interface that abstracts away resolving
+   * an API definition reference to an item that has friendly
+   * assessible ApiItem properties.
+   *
    * Ex: this is useful in the case of parsing inheritdoc expressions,
-   * in the sense that we do not know if we the inherited documentation 
+   * in the sense that we do not know if we the inherited documentation
    * is coming from an ApiItem or a IDocItem.
    */
   public referenceResolver: IReferenceResolver;
@@ -378,7 +378,7 @@ export default class ApiDocumentation {
   }
 
     /**
-   * A processing of linkDocElements that refer to an ApiDefinitionReference. This method 
+   * A processing of linkDocElements that refer to an ApiDefinitionReference. This method
    * ensures that the reference is to an API item that is not 'Internal'.
    */
   private _completeLinks(): void {
@@ -407,8 +407,8 @@ export default class ApiDocumentation {
   }
 
   /**
-   * A processing of inheritdoc 'Tokens'. This processing occurs after we have created documentation 
-   * for all API items. 
+   * A processing of inheritdoc 'Tokens'. This processing occurs after we have created documentation
+   * for all API items.
    */
   private _completeInheritdocs(): void {
     while (this.incompleteInheritdocs.length) {
