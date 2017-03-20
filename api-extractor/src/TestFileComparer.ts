@@ -16,9 +16,9 @@ export default class TestFileComparer {
   }
 
   /**
-   * Compares the contents of two files, and returns true if they are equivalent.
-   * Note that these files are not normally edited by a human; the "equivalence"
-   * comparison here is intended to ignore spurious changes that might be introduced
+   * Compares the contents of two files, and returns true if they are equivalent.  
+   * Note that these files are not normally edited by a human; the "equivalence" 
+   * comparison here is intended to ignore spurious changes that might be introduced 
    * by a tool, e.g. Git newline normalization or an editor that strips
    * whitespace when saving.
    */

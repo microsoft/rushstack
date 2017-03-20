@@ -131,24 +131,24 @@ abstract class ApiItem {
   public kind: ApiItemKind;
 
   /**
-   * A superset of memberItems. Includes memberItems and also other ApiItems that
-   * comprise this ApiItem.
-   *
+   * A superset of memberItems. Includes memberItems and also other ApiItems that 
+   * comprise this ApiItem. 
+   * 
    * Ex: if this ApiItem is an ApiFunction, then in it's innerItems would
-   * consist of ApiParameters.
-   * Ex: if this ApiItem is an ApiMember that is a type literal, then it's
-   * innerItems would contain ApiProperties.
+   * consist of ApiParameters. 
+   * Ex: if this ApiItem is an ApiMember that is a type literal, then it's 
+   * innerItems would contain ApiProperties. 
    */
   public innerItems: ApiItem[] = [];
 
   /**
-   * True if this ApiItem either itself has missing type information or one
-   * of it's innerItems is missing type information.
-   *
-   * Ex: if this ApiItem is an ApiMethod and has no type on the return value, then
-   * we consider the ApiItem as 'itself' missing type informations and this property
-   * is set to true.
-   * Ex: If this ApiItem is an ApiMethod and one of its innerItems is an ApiParameter
+   * True if this ApiItem either itself has missing type information or one 
+   * of it's innerItems is missing type information. 
+   * 
+   * Ex: if this ApiItem is an ApiMethod and has no type on the return value, then 
+   * we consider the ApiItem as 'itself' missing type informations and this property 
+   * is set to true. 
+   * Ex: If this ApiItem is an ApiMethod and one of its innerItems is an ApiParameter 
    * that has no type specified, then we say an innerItem of this ApiMethod is missing
    * type information and this property is set to true.
    */
@@ -172,8 +172,8 @@ abstract class ApiItem {
 
   /**
    * Indicates that this ApiItem does not have adequate JSDoc comments. If shouldHaveDocumentation()=true,
-   * and there is less than 10 characters of summary text in the JSDoc, then this will be set to true and
-   * noted in the API file produced by ApiFileGenerator.
+   * and there is less than 10 characters of summary text in the JSDoc, then this will be set to true and 
+   * noted in the API file produced by ApiFileGenerator.  
    * (The JSDoc text itself is not included in that report, because documentation
    * changes do not require an API review, and thus should not cause a diff for that report.)
    */
@@ -376,17 +376,17 @@ abstract class ApiItem {
   }
 
   /**
-   * A procedure for determining if this ApiItem is missing type
-   * information. We first check if the ApiItem itself is missing
-   * any type information and if not then we check each of it's
-   * innerItems for missing types.
-   *
-   * Ex: On the ApiItem itself, there may be missing type information
-   * on the return value or missing type declaration of itself
+   * A procedure for determining if this ApiItem is missing type 
+   * information. We first check if the ApiItem itself is missing 
+   * any type information and if not then we check each of it's 
+   * innerItems for missing types. 
+   * 
+   * Ex: On the ApiItem itself, there may be missing type information 
+   * on the return value or missing type declaration of itself 
    * (const name;).
-   * Ex: For each innerItem, there may be an ApiParameter that is missing
-   * a type. Or for an ApiMember that is a type literal, there may be an
-   * ApiProperty that is missing type information.
+   * Ex: For each innerItem, there may be an ApiParameter that is missing 
+   * a type. Or for an ApiMember that is a type literal, there may be an 
+   * ApiProperty that is missing type information. 
    */
   public hasAnyIncompleteTypes(): boolean {
     if (this.hasIncompleteTypes) {

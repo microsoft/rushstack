@@ -76,7 +76,7 @@ export default class ApiPackage extends ApiItemContainer {
 
   /**
    * Find a member in this package by name and return it if found.
-   *
+   * 
    * @param memberName - the name of the member ApiItem
    */
   public getMemberItem(memberName: string): ApiItem {
