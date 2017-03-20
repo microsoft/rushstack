@@ -369,12 +369,12 @@ function linkProject(
             newLocalFolderPath
           );
 
-          const commonPackageFromLookup: Package = commonPackageLookup.getPackage(newLocalPackage.nameAndVersion);
-          if (!commonPackageFromLookup) {
+          const commonPackage: Package = commonPackageLookup.getPackage(newLocalPackage.nameAndVersion);
+          if (!commonPackage) {
             throw Error(`The ${localPackage.name}@${localPackage.version} package was not found`
               + ` in the ${rushConfiguration.commonFolderName} folder`);
           }
-          newLocalPackage.symlinkTargetFolderPath = commonPackageFromLookup.folderPath;
+          newLocalPackage.symlinkTargetFolderPath = commonPackage.folderPath;
 
           let newCyclicSubtreeRoot: Package = cyclicSubtreeRoot;
           if (startingCyclicSubtree) {
