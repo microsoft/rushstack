@@ -23,7 +23,7 @@
     {
       "packageName": "@microsoft/api-extractor",
       "comment": "Fixing whitespace, also a variable that was shadowing another variable.",
-      "type": "patch"
+      "type": "major"
     }
   ],
   "email": "dzearing@microsoft.com"
