@@ -34,6 +34,12 @@ export interface ISassTaskConfig {
    * If files are matched by sassMatch which do not end in .module.scss, log a warning.
    */
   warnOnNonCSSModules?: boolean;
+  /**
+   * If this option is specified, module css will be exported using the name provided. If an
+   * empty value is specified, the styles will be exported using 'export =', rather than a
+   * named export. By default we use the 'default' export name.
+   */
+  moduleExportName?: string;
 }
 
 const _classMaps: { [file: string]: Object } = {};
@@ -193,10 +199,18 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
               classNamesLines.push(line);
             });
 
+            let exportString: string = 'export default styles;';
+
+            if (this.taskConfig.moduleExportName === '') {
+              exportString = 'export = styles;';
+            } else if (!!exportString) {
+              exportString = `export const ${ this.taskConfig.moduleExportName } = styles;`;
+            }
+
             classNamesLines.push(
               '};',
               '',
-              'export default styles;'
+              exportString
             );
 
             exportClassNames = classNamesLines.join(EOL);
