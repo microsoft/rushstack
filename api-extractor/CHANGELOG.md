@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 20 Mar 2017 00:54:03 GMT and should not be manually modified.
+This log was last generated on Mon, 20 Mar 2017 03:50:55 GMT and should not be manually modified.
+
+## 1.1.18
+Mon, 20 Mar 2017 03:50:55 GMT
+
+### Patches
+
+- Reverting previous change, which causes a regression in SPFx yeoman sc enario.
 
 ## 1.1.17
 Mon, 20 Mar 2017 00:54:03 GMT

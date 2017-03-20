@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "1.1.18",
+      "tag": "@microsoft/api-extractor_v1.1.18",
+      "date": "Mon, 20 Mar 2017 03:50:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Reverting previous change, which causes a regression in SPFx yeoman sc enario."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.17",
       "tag": "@microsoft/api-extractor_v1.1.17",
       "date": "Mon, 20 Mar 2017 00:54:03 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-sass
 
-This log was last generated on Mon, 20 Mar 2017 00:54:03 GMT and should not be manually modified.
+This log was last generated on Mon, 20 Mar 2017 03:50:55 GMT and should not be manually modified.
+
+## 2.0.8
+Mon, 20 Mar 2017 03:50:55 GMT
+
+### Patches
+
+- Reverting previous change, which causes a regression in SPFx yeoman scenario.
 
 ## 2.0.7
 Mon, 20 Mar 2017 00:54:03 GMT

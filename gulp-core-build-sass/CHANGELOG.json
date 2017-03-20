@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "2.0.8",
+      "tag": "@microsoft/gulp-core-build-sass_v2.0.8",
+      "date": "Mon, 20 Mar 2017 03:50:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Reverting previous change, which causes a regression in SPFx yeoman scenario."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.7",
       "tag": "@microsoft/gulp-core-build-sass_v2.0.7",
       "date": "Mon, 20 Mar 2017 00:54:03 GMT",
