@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sun, 19 Mar 2017 19:10:30 GMT and should not be manually modified.
+This log was last generated on Mon, 20 Mar 2017 00:54:03 GMT and should not be manually modified.
+
+## 1.1.17
+Mon, 20 Mar 2017 00:54:03 GMT
+
+### Patches
+
+- Fixing lint whitespace issues.
 
 ## 1.1.16
 Sun, 19 Mar 2017 19:10:30 GMT
