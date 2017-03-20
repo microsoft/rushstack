@@ -32,7 +32,8 @@
     "moduleExportName": {
       "title": "Defines the export name for the styles",
       "description": "If this option is specified, module css will be exported using the name provided. If an empty value is specified, the styles will be exported using 'export =', rather than a named export. By default we use the 'default' export name.",
-      "type": "string"
+      "type": "string",
+      "pattern": "^[a-zA-Z][a-zA-Z0-9]*$"
     },
 
     "dropCssFiles": {
