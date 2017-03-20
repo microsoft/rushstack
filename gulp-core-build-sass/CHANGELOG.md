@@ -1,6 +1,17 @@
 # Change Log - @microsoft/gulp-core-build-sass
 
-This log was last generated on Mon, 20 Mar 2017 03:50:55 GMT and should not be manually modified.
+This log was last generated on Mon, 20 Mar 2017 21:52:20 GMT and should not be manually modified.
+
+## 3.0.0
+Mon, 20 Mar 2017 21:52:20 GMT
+
+### Breaking changes
+
+- Updating gulp-sass and related package version dependencies.
+
+### Minor changes
+
+- Adding moduleExportName option to sass task, so that we can optionally export to something other than "default".
 
 ## 2.0.8
 Mon, 20 Mar 2017 03:50:55 GMT

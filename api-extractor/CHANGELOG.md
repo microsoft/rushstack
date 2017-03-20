@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 20 Mar 2017 04:20:13 GMT and should not be manually modified.
+This log was last generated on Mon, 20 Mar 2017 21:52:20 GMT and should not be manually modified.
+
+## 2.0.0
+Mon, 20 Mar 2017 21:52:20 GMT
+
+### Breaking changes
+
+- Fixing whitespace, also a variable that was shadowing another variable.
 
 ## 1.1.19
 Mon, 20 Mar 2017 04:20:13 GMT

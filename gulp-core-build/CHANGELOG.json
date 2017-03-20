@@ -2,6 +2,12 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "2.4.3",
+      "tag": "@microsoft/gulp-core-build_v2.4.3",
+      "date": "Mon, 20 Mar 2017 21:52:20 GMT",
+      "comments": {}
+    },
+    {
       "version": "2.4.2",
       "tag": "@microsoft/gulp-core-build_v2.4.2",
       "date": "Sat, 18 Mar 2017 01:31:49 GMT",
