@@ -78,9 +78,13 @@ export default class PublishUtilities {
         const deps: string[] = project.downstreamDependencyProjects;
 
         // Write the new version expected for the change.
-        change.newVersion = (change.changeType >= ChangeType.patch) ?
-          semver.inc(pkg.version, ChangeType[change.changeType]) :
-          pkg.version;
+        if (prereleaseName) {
+          change.newVersion = pkg.version;
+        } else {
+          change.newVersion = (change.changeType >= ChangeType.patch) ?
+            semver.inc(pkg.version, ChangeType[change.changeType]) :
+            pkg.version;
+        }
 
         if (deps) {
           for (const depName of deps) {
@@ -241,7 +245,8 @@ export default class PublishUtilities {
               depName,
               depChange,
               allChanges,
-              allPackages);
+              allPackages,
+              prereleaseName);
           }
         }
       });
@@ -258,11 +263,11 @@ export default class PublishUtilities {
     change: IChangeInfo,
     prereleaseName: string
   ): string {
-    let newVersion: string = change.newVersion;
+    const newVersion: string = change.newVersion;
     if (prereleaseName) {
-      if (change.changeType === ChangeType.dependency) {
-        newVersion = semver.inc(newVersion, 'patch');
-      }
+      // if (change.changeType === ChangeType.dependency) {
+      //   newVersion = semver.inc(newVersion, 'patch');
+      // }
       return `${newVersion}-${prereleaseName}`;
     } else {
       return newVersion;
@@ -277,7 +282,8 @@ export default class PublishUtilities {
   private static _addChange(
     change: IChangeInfo,
     allChanges: IChangeInfoHash,
-    allPackages: Map<string, RushConfigurationProject>
+    allPackages: Map<string, RushConfigurationProject>,
+    prereleaseName?: string
   ): boolean {
     let hasChanged: boolean = false;
     const packageName: string = change.packageName;
@@ -316,9 +322,13 @@ export default class PublishUtilities {
       hasChanged = hasChanged || (oldChangeType !== currentChange.changeType);
     }
 
-    currentChange.newVersion = change.changeType >= ChangeType.patch ?
-      semver.inc(pkg.version, ChangeType[currentChange.changeType]) :
-      pkg.version;
+    if (prereleaseName) {
+      currentChange.newVersion = pkg.version;
+    } else {
+      currentChange.newVersion = change.changeType >= ChangeType.patch ?
+        semver.inc(pkg.version, ChangeType[currentChange.changeType]) :
+        pkg.version;
+    }
 
     currentChange.newRangeDependency =
       `>=${currentChange.newVersion} <${semver.inc(currentChange.newVersion, 'major')}`;
@@ -377,7 +387,7 @@ export default class PublishUtilities {
         const hasChanged: boolean = PublishUtilities._addChange({
           packageName: parentPackageName,
           changeType
-        }, allChanges, allPackages);
+        }, allChanges, allPackages, prereleaseName);
 
         if (hasChanged || alwaysUpdate) {
           // Only re-evaluate downstream dependencies if updating the parent package's dependency
@@ -399,7 +409,8 @@ export default class PublishUtilities {
     dependencyName: string,
     dependencyChange: IChangeInfo,
     allChanges: IChangeInfoHash,
-    allPackages: Map<string, RushConfigurationProject>
+    allPackages: Map<string, RushConfigurationProject>,
+    prereleaseName?: string
   ): void {
     const currentDependencyVersion: string = dependencies[dependencyName];
 
@@ -423,7 +434,8 @@ export default class PublishUtilities {
           ` to \`${dependencies[dependencyName]}\``
       },
       allChanges,
-      allPackages
+      allPackages,
+      prereleaseName
     );
   }
 }
