@@ -24,6 +24,7 @@ import PublishUtilities, {
   IChangeInfoHash
 } from '../utilities/PublishUtilities';
 import ChangelogGenerator from '../utilities/ChangelogGenerator';
+import PrereleaseToken from '../utilities/PrereleaseToken';
 
 export default class PublishAction extends CommandLineAction {
   private _addCommitDetails: CommandLineFlagParameter;
@@ -37,7 +38,9 @@ export default class PublishAction extends CommandLineAction {
   private _registryUrl: CommandLineStringParameter;
   private _targetBranch: CommandLineStringParameter;
   private _prereleaseName: CommandLineStringParameter;
+  private _suffix: CommandLineStringParameter;
   private _force: CommandLineFlagParameter;
+  private _prereleaseToken: PrereleaseToken;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -104,6 +107,10 @@ export default class PublishAction extends CommandLineAction {
       parameterShortName: '-pn',
       description: 'Bump up to a prerelease version with the provided prerelease name.'
     });
+    this._suffix = this.defineStringParameter({
+      parameterLongName: '--suffix',
+      description: 'Append a suffix to all changed versions. Cannot use with prerelease-name at the same time.'
+    });
     this._force = this.defineFlagParameter({
       parameterLongName: '--force',
       parameterShortName: undefined,
@@ -129,6 +136,7 @@ export default class PublishAction extends CommandLineAction {
     if (this._includeAll.value && this._publish.value) {
       this._publishAll(allPackages);
     } else {
+      this._prereleaseToken = new PrereleaseToken(this._prereleaseName.value, this._suffix.value);
       this._publishChanges(allPackages);
     }
 
@@ -141,7 +149,7 @@ export default class PublishAction extends CommandLineAction {
       allPackages,
       changesPath,
       this._addCommitDetails.value,
-      this._prereleaseName.value);
+      this._prereleaseToken);
     const orderedChanges: IChangeInfo[] = PublishUtilities.sortChangeRequests(allChanges);
 
     if (orderedChanges.length > 0) {
@@ -152,11 +160,11 @@ export default class PublishAction extends CommandLineAction {
 
       // Apply all changes to package.json files.
       PublishUtilities.updatePackages(allChanges, allPackages, this._apply.value,
-        this._prereleaseName.value);
+        this._prereleaseToken);
 
       // Do not update changelog or delete the change files for prerelease.
       // Save them for the official release.
-      if (!this._prereleaseName.value) {
+      if (!this._prereleaseToken.hasValue()) {
         // Update changelogs.
         ChangelogGenerator.updateChangelogs(allChanges, allPackages, this._apply.value);
 

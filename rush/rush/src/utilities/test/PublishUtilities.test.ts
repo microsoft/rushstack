@@ -12,6 +12,7 @@ import * as path from 'path';
 import PublishUtilities, {
   IChangeInfoHash
 } from '../PublishUtilities';
+import PrereleaseToken from '../PrereleaseToken';
 
 /* tslint:disable:no-string-literal */
 
@@ -211,12 +212,13 @@ describe('updatePackages', () => {
     const allPackages: Map<string, RushConfigurationProject> =
       RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const prereleaseName: string = 'alpha.1';
+    const prereleaseToken: PrereleaseToken = new PrereleaseToken(prereleaseName);
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
       path.join(__dirname, 'rootPatchChange'),
       false,
-      prereleaseName);
-    PublishUtilities.updatePackages(allChanges, allPackages, false, prereleaseName);
+      prereleaseToken);
+    PublishUtilities.updatePackages(allChanges, allPackages, false, prereleaseToken);
 
     expect(allPackages.get('a').packageJson.version).equals(
       '1.0.1-' + prereleaseName,
@@ -240,12 +242,13 @@ describe('updatePackages', () => {
     const allPackages: Map<string, RushConfigurationProject> =
       RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const prereleaseName: string = 'beta.1';
+    const prereleaseToken: PrereleaseToken = new PrereleaseToken(prereleaseName);
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
       path.join(__dirname, 'explicitVersionChange'),
       false,
-      prereleaseName);
-    PublishUtilities.updatePackages(allChanges, allPackages, false, prereleaseName);
+      prereleaseToken);
+    PublishUtilities.updatePackages(allChanges, allPackages, false, prereleaseToken);
 
     expect(allPackages.get('a').packageJson.version).equals(
       '1.0.0',
@@ -269,12 +272,13 @@ describe('updatePackages', () => {
     const allPackages: Map<string, RushConfigurationProject> =
       RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const prereleaseName: string = 'beta.1';
+    const prereleaseToken: PrereleaseToken = new PrereleaseToken(prereleaseName);
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
       path.join(__dirname, 'cyclicDeps'),
       false,
-      prereleaseName);
-    PublishUtilities.updatePackages(allChanges, allPackages, false, prereleaseName);
+      prereleaseToken);
+    PublishUtilities.updatePackages(allChanges, allPackages, false, prereleaseToken);
 
     expect(allPackages.get('cyclic-dep-1').packageJson.version).equals(
       '2.0.0-' + prereleaseName,
@@ -287,6 +291,92 @@ describe('updatePackages', () => {
       'cyclic-dep-2 should have prerelease version.');
     expect(allPackages.get('cyclic-dep-2').packageJson.dependencies['cyclic-dep-1']).equals(
       '2.0.0-' + prereleaseName,
+      'the "cyclic-dep-1" dependency in "cyclic-dep-2" should be updated');
+  });
+
+    it('can update root with patch change for adding version suffix', () => {
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const suffix: string = 'dk.1';
+    const prereleaseToken: PrereleaseToken = new PrereleaseToken(undefined, suffix);
+    const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
+      allPackages,
+      path.join(__dirname, 'rootPatchChange'),
+      false,
+      prereleaseToken);
+    PublishUtilities.updatePackages(allChanges, allPackages, false, prereleaseToken);
+
+    expect(allPackages.get('a').packageJson.version).equals(
+      '1.0.0-' + suffix,
+      'a should have the suffix version');
+    expect(allPackages.get('b').packageJson.version).equals(
+      '1.0.0-' + suffix,
+      'b should have the suffix version');
+    expect(allPackages.get('b').packageJson.dependencies['a']).equals(
+      '1.0.0-' + suffix,
+      'the "a" dependency in "b" should be updated');
+    expect(allPackages.get('c').packageJson.version).equals('1.0.0-' + suffix,
+      'c should have the suffix version');
+    expect(allPackages.get('d').packageJson.version).equals('1.0.0-' + suffix,
+      'd should have the suffix version');
+    expect(allPackages.get('d').packageJson.dependencies['c']).equals(
+      '1.0.0-' + suffix,
+      'the "c" dependency in "d" should be updated');
+  });
+
+  it('can update non-root with patch change for version suffix', () => {
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const suffix: string = 'dk.1';
+    const prereleaseToken: PrereleaseToken = new PrereleaseToken(undefined, suffix);
+    const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
+      allPackages,
+      path.join(__dirname, 'explicitVersionChange'),
+      false,
+      prereleaseToken);
+    PublishUtilities.updatePackages(allChanges, allPackages, false, prereleaseToken);
+
+    expect(allPackages.get('a').packageJson.version).equals(
+      '1.0.0',
+      'a version should not be changed.');
+    expect(allPackages.get('b').packageJson.version).equals(
+      '1.0.0',
+      'b version should not be changed.');
+    expect(allPackages.get('b').packageJson.dependencies['a']).equals(
+      '>=1.0.0 <2.0.0',
+      'the "a" dependency in "b" should not be changed.');
+    expect(allPackages.get('c').packageJson.version).equals('1.0.0-' + suffix,
+      'c should have the suffix version');
+    expect(allPackages.get('d').packageJson.version).equals('1.0.0-' + suffix,
+      'd should have the suffix version');
+    expect(allPackages.get('d').packageJson.dependencies['c']).equals(
+      '1.0.0-' + suffix,
+      'the "c" dependency in "d" should be updated');
+  });
+
+  it('can update cyclic dependency for non-explicit suffix', () => {
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const suffix: string = 'dk.1';
+    const prereleaseToken: PrereleaseToken = new PrereleaseToken(undefined, suffix);
+    const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
+      allPackages,
+      path.join(__dirname, 'cyclicDeps'),
+      false,
+      prereleaseToken);
+    PublishUtilities.updatePackages(allChanges, allPackages, false, prereleaseToken);
+
+    expect(allPackages.get('cyclic-dep-1').packageJson.version).equals(
+      '1.0.0-' + suffix,
+      'cyclic-dep-1 should have suffix version.');
+    expect(allPackages.get('cyclic-dep-1').packageJson.dependencies['cyclic-dep-2']).equals(
+      '1.0.0-' + suffix,
+      'the "cyclic-dep-2" dependency in "cyclic-dep-1" should be updated');
+    expect(allPackages.get('cyclic-dep-2').packageJson.version).equals(
+      '1.0.0-' + suffix,
+      'cyclic-dep-2 should have prerelease version.');
+    expect(allPackages.get('cyclic-dep-2').packageJson.dependencies['cyclic-dep-1']).equals(
+      '1.0.0-' + suffix,
       'the "cyclic-dep-1" dependency in "cyclic-dep-2" should be updated');
   });
 });
