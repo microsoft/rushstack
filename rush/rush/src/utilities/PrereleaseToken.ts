@@ -5,18 +5,18 @@ export default class PrereleaseToken {
     if (_prereleaseName && _suffixName) {
       throw new Error('Pre-release name and suffix cannot be provided at the same time.');
     }
-    this._name = !!_prereleaseName ? _prereleaseName : _suffixName;
+    this._name = _prereleaseName || _suffixName;
   }
 
-  public hasValue(): boolean {
+  public get hasValue(): boolean {
     return !!this._prereleaseName || !!this._suffixName;
   }
 
-  public isPrerelease(): boolean {
+  public get isPrerelease(): boolean {
     return !!this._prereleaseName;
   }
 
-  public isSuffix(): boolean {
+  public get isSuffix(): boolean {
     return !!this._suffixName;
   }
 

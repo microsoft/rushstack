@@ -294,7 +294,7 @@ describe('updatePackages', () => {
       'the "cyclic-dep-1" dependency in "cyclic-dep-2" should be updated');
   });
 
-    it('can update root with patch change for adding version suffix', () => {
+  it('can update root with patch change for adding version suffix', () => {
     const allPackages: Map<string, RushConfigurationProject> =
       RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const suffix: string = 'dk.1';

@@ -79,7 +79,7 @@ export default class PublishUtilities {
         const deps: string[] = project.downstreamDependencyProjects;
 
         // Write the new version expected for the change.
-        if (prereleaseToken && prereleaseToken.isSuffix()) {
+        if (prereleaseToken && prereleaseToken.isSuffix) {
           // Suffix does not bump up the version.
           change.newVersion = pkg.version;
         } else {
@@ -152,7 +152,7 @@ export default class PublishUtilities {
   public static findMissingChangedPackages(
     changeFileFullPath: string,
     changedPackages: string[]
-    ): string[] {
+  ): string[] {
     const changeRequest: IChangeInfo = JSON.parse(fsx.readFileSync(changeFileFullPath, 'utf8'));
     const requiredSet: Set<string> = new Set(changedPackages);
     changeRequest.changes.forEach(change => {
@@ -236,7 +236,7 @@ export default class PublishUtilities {
         if (!PublishUtilities._isCyclicDependency(allPackages, packageName, depName)) {
           const depChange: IChangeInfo = allChanges[depName];
 
-          if (depChange && prereleaseToken && prereleaseToken.hasValue()) {
+          if (depChange && prereleaseToken && prereleaseToken.hasValue) {
             // For prelease, the newVersion needs to be appended with prerelease name.
             // And dependency should specify the specific prerelease version.
             dependencies[depName] = PublishUtilities._getChangeInfoNewVersion(depChange, prereleaseToken);
@@ -265,8 +265,8 @@ export default class PublishUtilities {
     prereleaseToken: PrereleaseToken
   ): string {
     let newVersion: string = change.newVersion;
-    if (prereleaseToken && prereleaseToken.hasValue()) {
-      if (prereleaseToken.isPrerelease() && change.changeType === ChangeType.dependency) {
+    if (prereleaseToken && prereleaseToken.hasValue) {
+      if (prereleaseToken.isPrerelease && change.changeType === ChangeType.dependency) {
         newVersion = semver.inc(newVersion, 'patch');
       }
       return `${newVersion}-${prereleaseToken.name}`;
@@ -323,7 +323,7 @@ export default class PublishUtilities {
       hasChanged = hasChanged || (oldChangeType !== currentChange.changeType);
     }
 
-    if (prereleaseToken && prereleaseToken.isSuffix()) {
+    if (prereleaseToken && prereleaseToken.isSuffix) {
       currentChange.newVersion = pkg.version;
     } else {
       currentChange.newVersion = change.changeType >= ChangeType.patch ?
@@ -350,7 +350,7 @@ export default class PublishUtilities {
     // Iterate through all downstream dependencies for the package.
     if (downstreamNames) {
       if ((change.changeType >= ChangeType.patch) ||
-        (prereleaseToken && prereleaseToken.hasValue() && change.changeType === ChangeType.dependency)) {
+        (prereleaseToken && prereleaseToken.hasValue && change.changeType === ChangeType.dependency)) {
         for (const depName of downstreamNames) {
           const pkg: IPackageJson = allPackages.get(depName).packageJson;
 
@@ -370,12 +370,12 @@ export default class PublishUtilities {
     allChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
     prereleaseToken: PrereleaseToken
-    ): void {
+  ): void {
 
     if (dependencies && dependencies[change.packageName]) {
       const requiredVersion: string = dependencies[change.packageName];
-      const alwaysUpdate: boolean = prereleaseToken && prereleaseToken.hasValue() &&
-       !allChanges.hasOwnProperty(parentPackageName);
+      const alwaysUpdate: boolean = prereleaseToken && prereleaseToken.hasValue &&
+        !allChanges.hasOwnProperty(parentPackageName);
 
       // If the version range exists and has not yet been updated to this version, update it.
       if (requiredVersion !== change.newRangeDependency || alwaysUpdate) {
@@ -431,8 +431,8 @@ export default class PublishUtilities {
         packageName: packageName,
         changeType: ChangeType.dependency,
         comment:
-          `Updating dependency "${dependencyName}" from \`${currentDependencyVersion}\`` +
-          ` to \`${dependencies[dependencyName]}\``
+        `Updating dependency "${dependencyName}" from \`${currentDependencyVersion}\`` +
+        ` to \`${dependencies[dependencyName]}\``
       },
       allChanges,
       allPackages
