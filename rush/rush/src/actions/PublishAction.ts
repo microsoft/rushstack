@@ -100,7 +100,7 @@ export default class PublishAction extends CommandLineAction {
       parameterLongName: '--include-all',
       parameterShortName: undefined,
       description: 'If this flag is specified with --publish, all packages with ShouldPublish being true ' +
-        'will be published if their version is newer than published version.'
+      'will be published if their version is newer than published version.'
     });
     this._prereleaseName = this.defineStringParameter({
       parameterLongName: '--prerelease-name',
@@ -164,7 +164,7 @@ export default class PublishAction extends CommandLineAction {
 
       // Do not update changelog or delete the change files for prerelease.
       // Save them for the official release.
-      if (!this._prereleaseToken.hasValue()) {
+      if (!this._prereleaseToken.hasValue) {
         // Update changelogs.
         ChangelogGenerator.updateChangelogs(allChanges, allPackages, this._apply.value);
 
@@ -373,8 +373,8 @@ export default class PublishAction extends CommandLineAction {
     let isNewer: boolean = false;
     const env: { [key: string]: string } = this._getEnvArgs();
     if (this._registryUrl.value) {
-        env['npm_config_registry'] = this._registryUrl.value; // tslint:disable-line:no-string-literal
-      }
+      env['npm_config_registry'] = this._registryUrl.value; // tslint:disable-line:no-string-literal
+    }
     try {
       const publishedVersion: string = child_process.execSync(
         `npm view ${packageConfig.packageName} version`,
@@ -387,7 +387,7 @@ export default class PublishAction extends CommandLineAction {
     } catch (error) {
       if (error.message.indexOf('npm ERR! 404') >= 0) {
         console.log(`Package ${packageConfig.packageName} does not have published version.`
-        + ` New version is ${packageConfig.packageJson.version}`);
+          + ` New version is ${packageConfig.packageJson.version}`);
         isNewer = true;
       } else {
         throw error;
