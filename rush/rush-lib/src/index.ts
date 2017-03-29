@@ -68,6 +68,10 @@ export {
   default as rushVersion
 } from './rushVersion';
 
+export {
+  default as Npm
+} from './utilities/npm';
+
 export { default as TestErrorDetector } from './errorDetection/rules/TestErrorDetector';
 export { default as TsErrorDetector } from './errorDetection/rules/TsErrorDetector';
 export { default as TsLintErrorDetector } from './errorDetection/rules/TsLintErrorDetector';

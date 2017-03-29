@@ -5,8 +5,6 @@ import * as colors from 'colors';
 import * as path from 'path';
 import * as fsx from 'fs-extra';
 import { EOL } from 'os';
-import * as child_process from 'child_process';
-import * as semver from 'semver';
 import {
   CommandLineAction,
   CommandLineFlagParameter,
@@ -17,7 +15,8 @@ import {
   ChangeType,
   RushConfiguration,
   RushConfigurationProject,
-  Utilities
+  Utilities,
+  Npm
 } from '@microsoft/rush-lib';
 import RushCommandLineParser from './RushCommandLineParser';
 import PublishUtilities, {
@@ -201,7 +200,7 @@ export default class PublishAction extends CommandLineAction {
     let updated: boolean = false;
     allPackages.forEach((packageConfig, packageName) => {
       if (packageConfig.shouldPublish) {
-        if (this._force.value || this._isNewerThanPublished(packageConfig)) {
+        if (this._force.value || !this._packageExists(packageConfig)) {
           this._npmPublish(packageName, packageConfig.projectFolder);
           this._gitAddTag(packageName, packageConfig.packageJson.version);
           updated = true;
@@ -369,30 +368,14 @@ export default class PublishAction extends CommandLineAction {
     }
   }
 
-  private _isNewerThanPublished(packageConfig: RushConfigurationProject): boolean {
-    let isNewer: boolean = false;
+  private _packageExists(packageConfig: RushConfigurationProject): boolean {
     const env: { [key: string]: string } = this._getEnvArgs();
     if (this._registryUrl.value) {
       env['npm_config_registry'] = this._registryUrl.value; // tslint:disable-line:no-string-literal
     }
-    try {
-      const publishedVersion: string = child_process.execSync(
-        `npm view ${packageConfig.packageName} version`,
-        {
-          cwd: packageConfig.projectFolder,
-          env: env,
-          stdio: ['inherit']
-        }).toString();
-      isNewer = semver.gt(packageConfig.packageJson.version, publishedVersion);
-    } catch (error) {
-      if (error.message.indexOf('npm ERR! 404') >= 0) {
-        console.log(`Package ${packageConfig.packageName} does not have published version.`
-          + ` New version is ${packageConfig.packageJson.version}`);
-        isNewer = true;
-      } else {
-        throw error;
-      }
-    }
-    return isNewer;
+    const publishedVersions: string[] = Npm.publishedVersions(packageConfig.packageName,
+      packageConfig.projectFolder,
+      env);
+    return publishedVersions.indexOf(packageConfig.packageJson.version) >= 0;
   }
 }
