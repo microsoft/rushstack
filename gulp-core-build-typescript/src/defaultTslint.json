@@ -75,6 +75,7 @@
       "single",
       "avoid-escape"
     ],
+    "prefer-const": true,
     "radix": true,
     "semicolon": true,
     "trailing-comma": [
