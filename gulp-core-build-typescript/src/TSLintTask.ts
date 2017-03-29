@@ -82,7 +82,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
     rulesDirectory: ((): string[] => {
       const msCustomRulesMain: string = require.resolve('tslint-microsoft-contrib');
       const msCustomRulesDirectory: string = path.dirname(msCustomRulesMain);
-      return TSLint.Configuration.getRulesDirectories([ msCustomRulesDirectory ], __dirname);
+      return TSLint.Configuration.getRulesDirectories([msCustomRulesDirectory], __dirname);
     })(),
     sourceMatch: [
       'src/**/*.ts',
@@ -99,8 +99,8 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
   public setConfig(config: ITSLintTaskConfig): void {
     // If the removeExistingRules flag is set, clear out any existing rules
     if (config.removeExistingRules &&
-        this.taskConfig &&
-        this.taskConfig.lintConfig) {
+      this.taskConfig &&
+      this.taskConfig.lintConfig) {
       delete this.taskConfig.lintConfig.rules;
       delete config.removeExistingRules;
     }
@@ -127,7 +127,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
 
     return gulp.src(this.taskConfig.sourceMatch)
       .pipe(cached(
-        through2.obj(function(
+        through2.obj(function (
           file: gutil.File,
           encoding: string,
           callback: (encoding?: string, file?: gutil.File) => void): void {
@@ -161,7 +161,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
           file['tslint'] = result;
           /* tslint:enable:no-string-literal */
 
-          if (result.failureCount > 0) {
+          if (result.failures.length > 0) {
             taskScope.taskConfig.reporter(result, file, taskScope.taskConfig);
           }
 
