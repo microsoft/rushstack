@@ -68,7 +68,7 @@ export default class LinkAction extends CommandLineAction {
 
           stopwatch.stop();
           console.log(os.EOL + colors.green(`Rush link finished successfully. (${stopwatch.toString()})`));
-          console.log(os.EOL + 'Next you should probably run: "rush rebuild -q"');
+          console.log(os.EOL + 'Next you should probably run: "rush rebuild"');
         }
       });
     });
