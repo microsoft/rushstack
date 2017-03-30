@@ -1,0 +1,15 @@
+{
+  "changes": [
+    {
+      "comment": "Fixing an issue where install was not detecting changes to the shrinkwrap",
+      "packageName": "@microsoft/rush",
+      "type": "patch"
+    },
+    {
+      "comment": "Fixing an issue where install was not detecting changes to the shrinkwrap",
+      "packageName": "@microsoft/rush-lib",
+      "type": "patch"
+    }
+  ],
+  "email": "nickpape-msft@noreply.users.github.com"
+}
