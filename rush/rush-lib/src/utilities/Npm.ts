@@ -1,4 +1,5 @@
 import Utilities from './Utilities';
+import * as semver from 'semver';
 
 export default class Npm {
   public static publishedVersions(
@@ -13,7 +14,9 @@ export default class Npm {
         cwd,
         env);
       Object.keys(JSON.parse(packageTime)).forEach(v => {
-        versions.push(v);
+        if (semver.valid(v)) {
+          versions.push(v);
+        }
       });
     } catch (error) {
       if (error.message.indexOf('npm ERR! 404') >= 0) {

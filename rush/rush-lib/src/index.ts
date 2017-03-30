@@ -70,7 +70,7 @@ export {
 
 export {
   default as Npm
-} from './utilities/npm';
+} from './utilities/Npm';
 
 export { default as TestErrorDetector } from './errorDetection/rules/TestErrorDetector';
 export { default as TsErrorDetector } from './errorDetection/rules/TsErrorDetector';
