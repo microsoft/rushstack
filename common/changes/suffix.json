@@ -1,0 +1,15 @@
+{
+  "changes": [
+    {
+      "comment": "Support adding a suffix during rush generate",
+      "packageName": "@microsoft/rush",
+      "type": "minor"
+    },
+    {
+      "comment": "Support adding a suffix during rush generate",
+      "packageName": "@microsoft/rush-lib",
+      "type": "minor"
+    }
+  ],
+  "email": "qinweiz@noreply.users.github.com"
+}
