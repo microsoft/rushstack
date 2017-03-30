@@ -2,6 +2,29 @@
   "name": "@microsoft/rush-lib",
   "entries": [
     {
+      "version": "2.4.0",
+      "tag": "@microsoft/rush-lib_v2.4.0",
+      "date": "Thu, 30 Mar 2017 18:25:38 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "The 'link' action will be automatically ran after 'install' or 'generate'."
+          },
+          {
+            "comment": "Support adding a suffix during rush generate"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Fixing an issue where install was not detecting changes to the shrinkwrap"
+          },
+          {
+            "comment": "Registry should not be hardcoded when auth token is provided"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.3.0",
       "tag": "@microsoft/rush-lib_v2.3.0",
       "date": "Fri, 24 Feb 2017 22:53:18 GMT",
