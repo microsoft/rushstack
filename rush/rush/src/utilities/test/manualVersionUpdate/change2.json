@@ -1,0 +1,7 @@
+{
+  "changes": [{
+    "packageName": "mv2",
+    "type": "patch",
+    "comment": "Patch version update for mv2"
+  }]
+}
