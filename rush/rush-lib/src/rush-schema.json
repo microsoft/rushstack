@@ -95,6 +95,10 @@
           "shouldPublish": {
             "description": "A flag indicating that changes to this project will be published to npm, which affects the Rush change and publish workflows.",
             "type": "boolean"
+          },
+          "manualVersionUpdate": {
+            "description": "A flag indicating that changes to this project will not cause version bump. It is used when the project version needs to be updated manually.",
+            "type": "boolean"
           }
         },
         "additionalProperties": false,

@@ -15,6 +15,7 @@ export interface IRushConfigurationProjectJson {
   reviewCategory?: string;
   cyclicDependencyProjects: string[];
   shouldPublish?: boolean;
+  manualVersionUpdate?: boolean;
 }
 
 /**
@@ -31,6 +32,7 @@ export default class RushConfigurationProject {
   private _cyclicDependencyProjects: Set<string>;
   private _shouldPublish: boolean;
   private _downstreamDependencyProjects: string[];
+  private _manualVersionUpdate: boolean;
 
   constructor(projectJson: IRushConfigurationProjectJson,
               rushConfiguration: RushConfiguration,
@@ -94,6 +96,7 @@ export default class RushConfigurationProject {
     }
     this._downstreamDependencyProjects = [];
     this._shouldPublish = !!projectJson.shouldPublish;
+    this._manualVersionUpdate = !!projectJson.manualVersionUpdate;
   }
 
   /**
@@ -167,5 +170,17 @@ export default class RushConfigurationProject {
    */
   public get shouldPublish(): boolean {
     return this._shouldPublish;
+  }
+
+  /**
+   * A flag which indicates whether changes to this project should cause version bump during
+   * `rush publish`.
+   * When manualVersionUpdate is true, this project won't get version bumped during `rush publish` and
+   * won't get published.
+   * When manualVersionUpdate is false (which is the default value), this project will get version bumped
+   * during `rush publish` if the project has changes. And as such, this project will get published.
+   */
+  public get manualVersionUpdate(): boolean {
+    return this._manualVersionUpdate;
   }
 }

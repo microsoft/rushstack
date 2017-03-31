@@ -1,0 +1,8 @@
+{
+  "name": "mv3",
+  "version": "1.0.0",
+  "description": "Test package mv3",
+  "dependencies": {
+    "mv2": "1.0.0"
+  }
+}
