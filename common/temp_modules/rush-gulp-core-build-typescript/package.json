@@ -11,6 +11,7 @@
     "@types/through2": "2.0.32",
     "@types/vinyl": "1.2.30",
     "@types/es6-promise": "0.0.32",
+    "@types/es6-collections": "0.5.29",
     "@types/gulp": "3.8.32",
     "@types/node": "6.0.62",
     "fs-extra": "~0.26.7",
@@ -31,8 +32,8 @@
     "@types/mkdirp": "0.3.29",
     "object-assign": "~4.1.0",
     "through2": "~2.0.1",
-    "tslint": "~4.5.1",
-    "tslint-microsoft-contrib": "~4.0.0",
+    "tslint": "~5.0.0",
+    "tslint-microsoft-contrib": "~4.0.1",
     "typescript": "~2.2.1"
   },
   "rushDependencies": {
