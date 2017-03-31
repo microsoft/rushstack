@@ -350,7 +350,7 @@ export default class PublishUtilities {
     // Iterate through all downstream dependencies for the package.
     if (downstreamNames) {
       if ((change.changeType >= ChangeType.patch) ||
-        (prereleaseToken && prereleaseToken.hasValue && change.changeType === ChangeType.dependency)) {
+        (prereleaseToken && prereleaseToken.hasValue)) {
         for (const depName of downstreamNames) {
           const pkg: IPackageJson = allPackages.get(depName).packageJson;
 
