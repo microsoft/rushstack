@@ -82,7 +82,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
     rulesDirectory: ((): string[] => {
       const msCustomRulesMain: string = require.resolve('tslint-microsoft-contrib');
       const msCustomRulesDirectory: string = path.dirname(msCustomRulesMain);
-      return TSLint.Configuration.getRulesDirectories([ msCustomRulesDirectory ], __dirname);
+      return TSLint.Configuration.getRulesDirectories([msCustomRulesDirectory], __dirname);
     })(),
     sourceMatch: [
       'src/**/*.ts',
@@ -96,7 +96,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
   private _defaultLintRules: any = undefined;
   /* tslint:enable:no-any */
 
-  public setConfig(config: ITSLintTaskConfig): void {
+  public mergeConfig(config: ITSLintTaskConfig): void {
     // If the removeExistingRules flag is set, clear out any existing rules
     if (config.removeExistingRules &&
         this.taskConfig &&
@@ -105,7 +105,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
       delete config.removeExistingRules;
     }
 
-    super.setConfig(config);
+    super.mergeConfig(config);
   }
 
   public loadSchema(): Object {
@@ -127,7 +127,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
 
     return gulp.src(this.taskConfig.sourceMatch)
       .pipe(cached(
-        through2.obj(function(
+        through2.obj(function (
           file: gutil.File,
           encoding: string,
           callback: (encoding?: string, file?: gutil.File) => void): void {
@@ -201,6 +201,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
     if (!this._defaultLintRules) {
       this._defaultLintRules = require('./defaultTslint.json');
     }
+
     return merge(
       (this.taskConfig.useDefaultConfigAsBase ? this._defaultLintRules : {}),
       this.taskConfig.lintConfig || {});
