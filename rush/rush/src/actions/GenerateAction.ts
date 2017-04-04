@@ -19,6 +19,7 @@ import {
   Stopwatch
 } from '@microsoft/rush-lib';
 
+import LinkAction from './LinkAction';
 import InstallAction from './InstallAction';
 import RushCommandLineParser from './RushCommandLineParser';
 import PackageReviewChecker from '../utilities/PackageReviewChecker';
@@ -42,7 +43,8 @@ export default class GenerateAction extends CommandLineAction {
   private _rushConfiguration: RushConfiguration;
   private _packageReviewChecker: PackageReviewChecker;
   private _lazyParameter: CommandLineFlagParameter;
-  private _cleanParameter: CommandLineFlagParameter;
+  private _cleanParameter: CommandLineFlagParameter
+  private _noLinkParameter: CommandLineFlagParameter;
 
   private static _deleteCommonNodeModules(rushConfiguration: RushConfiguration): void {
     const nodeModulesPath: string = path.join(rushConfiguration.commonFolder, 'node_modules');
@@ -157,15 +159,15 @@ export default class GenerateAction extends CommandLineAction {
 
     console.log(os.EOL + colors.bold(`Running "npm ${args.join(' ')}"...`));
     Utilities.executeCommand(rushConfiguration.npmToolFilename,
-                             args,
-                             rushConfiguration.commonFolder);
+      args,
+      rushConfiguration.commonFolder);
   }
 
   private static _runNpmShrinkWrap(rushConfiguration: RushConfiguration): void {
     console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
     Utilities.executeCommand(rushConfiguration.npmToolFilename,
-                              ['shrinkwrap' ],
-                              rushConfiguration.commonFolder);
+      ['shrinkwrap'],
+      rushConfiguration.commonFolder);
     console.log('"npm shrinkwrap" completed' + os.EOL);
   }
 
@@ -250,13 +252,17 @@ export default class GenerateAction extends CommandLineAction {
       parameterLongName: '--lazy',
       parameterShortName: '-l',
       description: 'Do not clean the "node_modules" folder before running "npm install".'
-        + ' This is faster, but less correct, so only use it for debugging.'
+      + ' This is faster, but less correct, so only use it for debugging.'
     });
     this._cleanParameter = this.defineFlagParameter({
       parameterLongName: '--clean',
       parameterShortName: '-c',
       description: 'Force cleaning of the node_modules folder before running "npm install".'
-        + 'This is slower, but more correct.'
+      + 'This is slower, but more correct.'
+    });
+    this._noLinkParameter = this.defineFlagParameter({
+      parameterLongName: '--no-link',
+      description: 'Do not automatically run the Link action after completing Generate action'
     });
   }
 
@@ -273,8 +279,8 @@ export default class GenerateAction extends CommandLineAction {
     console.log('Starting "rush generate"' + os.EOL);
 
     if (this._rushConfiguration.packageReviewFile) {
-        this._packageReviewChecker = new PackageReviewChecker(this._rushConfiguration);
-        this._packageReviewChecker.saveCurrentDependencies();
+      this._packageReviewChecker = new PackageReviewChecker(this._rushConfiguration);
+      this._packageReviewChecker.saveCurrentDependencies();
     }
 
     // 1. Delete "common\temp_modules"
@@ -341,6 +347,12 @@ export default class GenerateAction extends CommandLineAction {
 
     stopwatch.stop();
     console.log(os.EOL + colors.green(`Rush generate finished successfully. (${stopwatch.toString()})`));
-    console.log(os.EOL + 'Next you should probably run: "rush link"');
+
+    if (!this._noLinkParameter.value) {
+      const linkAction: LinkAction = new LinkAction(this._parser);
+      linkAction.execute();
+    } else {
+      console.log(os.EOL + 'Next you should probably run: "rush link"');
+    }
   }
 }

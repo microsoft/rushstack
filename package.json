@@ -2,8 +2,12 @@
   "name": "web-build-tools",
   "version": "0.0.0",
   "description": "Web build tools",
-
+  "scripts": {
+    "test": "rush build --production",
+    "build": "rush build --production --clean",
+    "change": "rush change"
+  },
   "devDependencies": {
-    "@microsoft/rush": "~1.8.2"
+    "@microsoft/rush": "~2.3.1"
   }
 }

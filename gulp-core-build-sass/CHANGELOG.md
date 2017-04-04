@@ -1,6 +1,38 @@
 # Change Log - @microsoft/gulp-core-build-sass
 
-This log was last generated on Tue, 14 Feb 2017 20:03:00 GMT and should not be manually modified.
+This log was last generated on Mon, 20 Mar 2017 21:52:20 GMT and should not be manually modified.
+
+## 3.0.0
+Mon, 20 Mar 2017 21:52:20 GMT
+
+### Breaking changes
+
+- Updating gulp-sass and related package version dependencies.
+
+### Minor changes
+
+- Adding moduleExportName option to sass task, so that we can optionally export to something other than "default".
+
+## 2.0.8
+Mon, 20 Mar 2017 03:50:55 GMT
+
+### Patches
+
+- Reverting previous change, which causes a regression in SPFx yeoman scenario.
+
+## 2.0.7
+Mon, 20 Mar 2017 00:54:03 GMT
+
+### Patches
+
+- Updating gulp-sass and related package version dependencies.
+
+## 2.0.6
+Wed, 15 Mar 2017 01:32:09 GMT
+
+### Patches
+
+- Locking `@types` packages. Synchronizing version specifiers for dependencies with other `web-build-tools` projects.
 
 ## 2.0.5
 Tue, 14 Feb 2017 20:03:00 GMT

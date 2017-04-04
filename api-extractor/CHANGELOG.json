@@ -2,6 +2,78 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "2.0.0",
+      "tag": "@microsoft/api-extractor_v2.0.0",
+      "date": "Mon, 20 Mar 2017 21:52:20 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Fixing whitespace, also a variable that was shadowing another variable."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.19",
+      "tag": "@microsoft/api-extractor_v1.1.19",
+      "date": "Mon, 20 Mar 2017 04:20:13 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Reverting change."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.18",
+      "tag": "@microsoft/api-extractor_v1.1.18",
+      "date": "Mon, 20 Mar 2017 03:50:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Reverting previous change, which causes a regression in SPFx yeoman sc enario."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.17",
+      "tag": "@microsoft/api-extractor_v1.1.17",
+      "date": "Mon, 20 Mar 2017 00:54:03 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixing lint whitespace issues."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.16",
+      "tag": "@microsoft/api-extractor_v1.1.16",
+      "date": "Sun, 19 Mar 2017 19:10:30 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixing variable that was shadowing another variable."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.15",
+      "tag": "@microsoft/api-extractor_v1.1.15",
+      "date": "Wed, 15 Mar 2017 01:32:09 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Locking `@types` packages. Synchronizing version specifiers for dependencies with other `web-build-tools` projects."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.14",
       "tag": "@microsoft/api-extractor_v1.1.14",
       "date": "Sat, 18 Feb 2017 02:32:06 GMT",

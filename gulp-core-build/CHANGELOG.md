@@ -1,6 +1,25 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Sat, 18 Feb 2017 02:32:06 GMT and should not be manually modified.
+This log was last generated on Mon, 20 Mar 2017 21:52:20 GMT and should not be manually modified.
+
+## 2.4.3
+Mon, 20 Mar 2017 21:52:20 GMT
+
+*Changes not tracked*
+
+## 2.4.2
+Sat, 18 Mar 2017 01:31:49 GMT
+
+### Patches
+
+- Fixes an issue with the clean command, which causes builds to spuriously fail.
+
+## 2.4.1
+Wed, 15 Mar 2017 01:32:09 GMT
+
+### Patches
+
+- Locking `@types` packages. Synchronizing version specifiers for dependencies with other `web-build-tools` projects.
 
 ## 2.4.0
 Sat, 18 Feb 2017 02:32:06 GMT

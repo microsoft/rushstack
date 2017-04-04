@@ -1,6 +1,48 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sat, 18 Feb 2017 02:32:06 GMT and should not be manually modified.
+This log was last generated on Mon, 20 Mar 2017 21:52:20 GMT and should not be manually modified.
+
+## 2.0.0
+Mon, 20 Mar 2017 21:52:20 GMT
+
+### Breaking changes
+
+- Fixing whitespace, also a variable that was shadowing another variable.
+
+## 1.1.19
+Mon, 20 Mar 2017 04:20:13 GMT
+
+### Patches
+
+- Reverting change.
+
+## 1.1.18
+Mon, 20 Mar 2017 03:50:55 GMT
+
+### Patches
+
+- Reverting previous change, which causes a regression in SPFx yeoman sc enario.
+
+## 1.1.17
+Mon, 20 Mar 2017 00:54:03 GMT
+
+### Patches
+
+- Fixing lint whitespace issues.
+
+## 1.1.16
+Sun, 19 Mar 2017 19:10:30 GMT
+
+### Patches
+
+- Fixing variable that was shadowing another variable.
+
+## 1.1.15
+Wed, 15 Mar 2017 01:32:09 GMT
+
+### Patches
+
+- Locking `@types` packages. Synchronizing version specifiers for dependencies with other `web-build-tools` projects.
 
 ## 1.1.14
 Sat, 18 Feb 2017 02:32:06 GMT

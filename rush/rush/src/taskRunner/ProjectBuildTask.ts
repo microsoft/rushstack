@@ -64,10 +64,12 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
   public execute(writer: ITaskWriter): Promise<TaskStatus> {
     return new Promise<TaskStatus>((resolve: (status: TaskStatus) => void, reject: (errors: TaskError[]) => void) => {
-      getPackageDeps(this._rushProject.projectFolder, [PACKAGE_DEPS_FILENAME]).then(
-        (deps: IPackageDeps) => { this._executeTask(writer, deps, resolve, reject); },
-        (error: Error) => { this._executeTask(writer, undefined, resolve, reject); }
-      );
+      try {
+        const deps: IPackageDeps = getPackageDeps(this._rushProject.projectFolder, [PACKAGE_DEPS_FILENAME]);
+        this._executeTask(writer, deps, resolve, reject);
+      } catch (error) {
+        this._executeTask(writer, undefined, resolve, reject);
+      }
     });
   }
 

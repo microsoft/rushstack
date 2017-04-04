@@ -26,7 +26,7 @@ export interface IParsedScopeName {
 }
 
 /**
- * A loader for locating the IDocItem associated with a given project and API item, or 
+ * A loader for locating the IDocItem associated with a given project and API item, or
  * for locating an ApiItem  locally.
  * No processing on the IDocItem orApiItem  should be done in this class, this class is only
  * concerned with communicating state.
@@ -58,11 +58,11 @@ export default class DocItemLoader {
     apiPackage: ApiPackage,
     reportError: (message: string) => void): ResolvedApiItem {
 
-    // If there is a packageName then there must be a scopeName, and they 
+    // If there is a packageName then there must be a scopeName, and they
     // both must match the current scope and package we are in.
     // We can take advantage of '&&' being evaluated left to right.
     if (!apiDefinitionRef.packageName && !apiDefinitionRef.scopeName) {
-      // Resolution for local references 
+      // Resolution for local references
       return this.resolveLocalReferences(apiDefinitionRef, apiPackage, reportError);
     } else {
        // Resolution for references in JSON files
@@ -71,7 +71,7 @@ export default class DocItemLoader {
   }
 
   /**
-   * Resolution of API definition references in the scenario that the reference given indicates 
+   * Resolution of API definition references in the scenario that the reference given indicates
    * that we should search within the current ApiPackage to resolve.
    * No processing on the ApiItem should be done here, this class is only concerned
    * with communicating state.
@@ -111,9 +111,9 @@ export default class DocItemLoader {
   }
 
   /**
-   * Resolution of API definition references in the scenario that the reference given indicates 
+   * Resolution of API definition references in the scenario that the reference given indicates
    * that we should search outside of this ApiPackage and instead search within the JSON API file
-   * that is associated with the apiDefinitionRef. 
+   * that is associated with the apiDefinitionRef.
    */
   public resolveJsonReferences(apiDefinitionRef: ApiDefinitionReference,
     reportError: (message: string) => void): ResolvedApiItem {
@@ -125,7 +125,7 @@ export default class DocItemLoader {
       return undefined;
     }
 
-    // found JSON package, now ensure export name is there 
+    // found JSON package, now ensure export name is there
     // hasOwnProperty() not needed for JJU objects
     if (!(apiDefinitionRef.exportName in docPackage.exports)) {
       reportError(`Unable to find referenced export \"${apiDefinitionRef.toExportString()}\""`);
@@ -210,7 +210,7 @@ export default class DocItemLoader {
   }
 
   /**
-   * Loads the API documentation json file and validates that it conforms to our schema. If it does, 
+   * Loads the API documentation json file and validates that it conforms to our schema. If it does,
    * then the json file is saved in the cache and returned.
    */
   public loadPackageIntoCache(packageJsonFilePath: string): IDocPackage {
