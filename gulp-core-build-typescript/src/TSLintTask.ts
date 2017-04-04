@@ -97,15 +97,13 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
   /* tslint:enable:no-any */
 
   public mergeConfig(config: ITSLintTaskConfig): void {
-    // If the removeExistingRules flag is set, clear out any existing rules
-    if (config.removeExistingRules &&
-        this.taskConfig &&
-        this.taskConfig.lintConfig) {
-      delete this.taskConfig.lintConfig.rules;
-      delete config.removeExistingRules;
-    }
-
+    this._prepareUpdateConfig(config);
     super.mergeConfig(config);
+  }
+
+  public setConfig(config: ITSLintTaskConfig): void {
+    this._prepareUpdateConfig(config);
+    super.setConfig(config);
   }
 
   public loadSchema(): Object {
@@ -191,6 +189,16 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
 
   public getCleanMatch(buildConfig: IBuildConfig, taskConfig: ITSLintTaskConfig = this.taskConfig): string[] {
     return [path.join(buildConfig.rootPath, buildConfig.tempFolder)];
+  }
+
+  private _prepareUpdateConfig(newConfig: ITSLintTaskConfig): void {
+    // If the removeExistingRules flag is set, clear out any existing rules
+    if (newConfig.removeExistingRules &&
+        this.taskConfig &&
+        this.taskConfig.lintConfig) {
+      delete this.taskConfig.lintConfig.rules;
+      delete newConfig.removeExistingRules;
+    }
   }
 
   private _getTsLintFilepath(): string {
