@@ -1,6 +1,19 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 24 Feb 2017 22:54:16 GMT and should not be manually modified.
+This log was last generated on Thu, 30 Mar 2017 18:25:38 GMT and should not be manually modified.
+
+## 2.4.0
+Thu, 30 Mar 2017 18:25:38 GMT
+
+### Minor changes
+
+- The 'link' action will be automatically ran after 'install' or 'generate'.
+- Support adding a suffix during rush generate
+
+### Patches
+
+- Fixing an issue where install was not detecting changes to the shrinkwrap
+- Registry should not be hardcoded when auth token is provided
 
 ## 2.3.0
 Fri, 24 Feb 2017 22:54:16 GMT

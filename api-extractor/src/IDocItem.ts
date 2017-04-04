@@ -15,9 +15,9 @@ export enum AccessModifier {
 
 /**
  * The enum value of an IDocEnum.
- * 
+ *
  * IDocEnumValue does not extend the IDocITem base class
- * because the summary is not required. 
+ * because the summary is not required.
  */
 export interface IDocEnumValue {
   value: string;
@@ -36,7 +36,7 @@ export interface IDocParam {
   name: string;
 
   /**
-   * describes the parameter 
+   * describes the parameter
    */
   description: IDocElement[];
 
@@ -72,10 +72,10 @@ export interface IDocReturnValue {
 }
 
 /**
- * DocItems are the typescript adaption of the json schemas 
+ * DocItems are the typescript adaption of the json schemas
  * defined in API-json-schema.json. IDocElement is a component
- * for IDocItems because they represent formated rich text. 
- * 
+ * for IDocItems because they represent formated rich text.
+ *
  * This is the base class for other DocItem types.
  */
 export interface IDocBase {
@@ -133,7 +133,7 @@ export interface IDocMethod extends IDocBase {
   signature: string;
 
   /**
-   * the access modifier of the method 
+   * the access modifier of the method
    */
   accessModifier: AccessModifier;
 
@@ -180,7 +180,7 @@ export interface IDocFunction extends IDocBase {
 
 /**
  * IDocClass represetns an exported class.
- * 
+ *
  */
 export interface IDocClass extends IDocBase {
   /**
@@ -250,7 +250,7 @@ export interface IDocInterface extends IDocBase {
 }
 
 /**
- * IDocPackage is an object contaning the exported 
+ * IDocPackage is an object contaning the exported
  * definions of this API package. The exports can include:
  * classes, interfaces, enums, functions.
  */
@@ -267,8 +267,8 @@ export interface IDocPackage {
 
   /**
    * The following are needed so that this interface and can share
-   * common properties with others that extend IDocBase. The IDocPackage 
-   * does not extend the IDocBase because a summary is not required for 
+   * common properties with others that extend IDocBase. The IDocPackage
+   * does not extend the IDocBase because a summary is not required for
    * a package.
    */
   isBeta?: boolean;

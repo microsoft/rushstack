@@ -1,8 +1,8 @@
 /**
  * The following interfaces represent Doc Elements of a
  * documentation block.
- * 
- * @remarks if adding a new 'kind', then it is essential that you update the 
+ *
+ * @remarks if adding a new 'kind', then it is essential that you update the
  * methods within DocElementParser (getasText() and parse()).
  */
 export interface IBaseDocElement {

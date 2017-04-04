@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-webpack
 
-This log was last generated on Tue, 31 Jan 2017 20:32:37 GMT and should not be manually modified.
+This log was last generated on Wed, 15 Mar 2017 01:32:09 GMT and should not be manually modified.
+
+## 1.1.3
+Wed, 15 Mar 2017 01:32:09 GMT
+
+### Patches
+
+- Locking `@types` packages. Synchronizing version specifiers for dependencies with other `web-build-tools` projects.
 
 ## 1.1.2
 Tue, 31 Jan 2017 20:32:37 GMT

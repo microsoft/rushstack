@@ -5,8 +5,6 @@ import * as colors from 'colors';
 import * as path from 'path';
 import * as fsx from 'fs-extra';
 import { EOL } from 'os';
-import * as child_process from 'child_process';
-import * as semver from 'semver';
 import {
   CommandLineAction,
   CommandLineFlagParameter,
@@ -17,13 +15,15 @@ import {
   ChangeType,
   RushConfiguration,
   RushConfigurationProject,
-  Utilities
+  Utilities,
+  Npm
 } from '@microsoft/rush-lib';
 import RushCommandLineParser from './RushCommandLineParser';
 import PublishUtilities, {
   IChangeInfoHash
 } from '../utilities/PublishUtilities';
 import ChangelogGenerator from '../utilities/ChangelogGenerator';
+import PrereleaseToken from '../utilities/PrereleaseToken';
 
 export default class PublishAction extends CommandLineAction {
   private _addCommitDetails: CommandLineFlagParameter;
@@ -37,7 +37,9 @@ export default class PublishAction extends CommandLineAction {
   private _registryUrl: CommandLineStringParameter;
   private _targetBranch: CommandLineStringParameter;
   private _prereleaseName: CommandLineStringParameter;
+  private _suffix: CommandLineStringParameter;
   private _force: CommandLineFlagParameter;
+  private _prereleaseToken: PrereleaseToken;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -97,12 +99,16 @@ export default class PublishAction extends CommandLineAction {
       parameterLongName: '--include-all',
       parameterShortName: undefined,
       description: 'If this flag is specified with --publish, all packages with ShouldPublish being true ' +
-        'will be published if their version is newer than published version.'
+      'will be published if their version is newer than published version.'
     });
     this._prereleaseName = this.defineStringParameter({
       parameterLongName: '--prerelease-name',
       parameterShortName: '-pn',
       description: 'Bump up to a prerelease version with the provided prerelease name.'
+    });
+    this._suffix = this.defineStringParameter({
+      parameterLongName: '--suffix',
+      description: 'Append a suffix to all changed versions. Cannot use with prerelease-name at the same time.'
     });
     this._force = this.defineFlagParameter({
       parameterLongName: '--force',
@@ -129,6 +135,7 @@ export default class PublishAction extends CommandLineAction {
     if (this._includeAll.value && this._publish.value) {
       this._publishAll(allPackages);
     } else {
+      this._prereleaseToken = new PrereleaseToken(this._prereleaseName.value, this._suffix.value);
       this._publishChanges(allPackages);
     }
 
@@ -141,7 +148,7 @@ export default class PublishAction extends CommandLineAction {
       allPackages,
       changesPath,
       this._addCommitDetails.value,
-      this._prereleaseName.value);
+      this._prereleaseToken);
     const orderedChanges: IChangeInfo[] = PublishUtilities.sortChangeRequests(allChanges);
 
     if (orderedChanges.length > 0) {
@@ -152,11 +159,11 @@ export default class PublishAction extends CommandLineAction {
 
       // Apply all changes to package.json files.
       PublishUtilities.updatePackages(allChanges, allPackages, this._apply.value,
-        this._prereleaseName.value);
+        this._prereleaseToken);
 
       // Do not update changelog or delete the change files for prerelease.
       // Save them for the official release.
-      if (!this._prereleaseName.value) {
+      if (!this._prereleaseToken.hasValue) {
         // Update changelogs.
         ChangelogGenerator.updateChangelogs(allChanges, allPackages, this._apply.value);
 
@@ -193,7 +200,7 @@ export default class PublishAction extends CommandLineAction {
     let updated: boolean = false;
     allPackages.forEach((packageConfig, packageName) => {
       if (packageConfig.shouldPublish) {
-        if (this._force.value || this._isNewerThanPublished(packageConfig)) {
+        if (this._force.value || !this._packageExists(packageConfig)) {
           this._npmPublish(packageName, packageConfig.projectFolder);
           this._gitAddTag(packageName, packageConfig.packageJson.version);
           updated = true;
@@ -361,30 +368,14 @@ export default class PublishAction extends CommandLineAction {
     }
   }
 
-  private _isNewerThanPublished(packageConfig: RushConfigurationProject): boolean {
-    let isNewer: boolean = false;
+  private _packageExists(packageConfig: RushConfigurationProject): boolean {
     const env: { [key: string]: string } = this._getEnvArgs();
     if (this._registryUrl.value) {
-        env['npm_config_registry'] = this._registryUrl.value; // tslint:disable-line:no-string-literal
-      }
-    try {
-      const publishedVersion: string = child_process.execSync(
-        `npm view ${packageConfig.packageName} version`,
-        {
-          cwd: packageConfig.projectFolder,
-          env: env,
-          stdio: ['inherit']
-        }).toString();
-      isNewer = semver.gt(packageConfig.packageJson.version, publishedVersion);
-    } catch (error) {
-      if (error.message.indexOf('npm ERR! 404') >= 0) {
-        console.log(`Package ${packageConfig.packageName} does not have published version.`
-        + ` New version is ${packageConfig.packageJson.version}`);
-        isNewer = true;
-      } else {
-        throw error;
-      }
+      env['npm_config_registry'] = this._registryUrl.value; // tslint:disable-line:no-string-literal
     }
-    return isNewer;
+    const publishedVersions: string[] = Npm.publishedVersions(packageConfig.packageName,
+      packageConfig.projectFolder,
+      env);
+    return publishedVersions.indexOf(packageConfig.packageJson.version) >= 0;
   }
 }

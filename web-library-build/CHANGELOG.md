@@ -1,6 +1,20 @@
 # Change Log - @microsoft/web-library-build
 
-This log was last generated on Fri, 03 Mar 2017 02:31:24 GMT and should not be manually modified.
+This log was last generated on Mon, 20 Mar 2017 21:52:20 GMT and should not be manually modified.
+
+## 3.0.0
+Mon, 20 Mar 2017 21:52:20 GMT
+
+### Breaking changes
+
+- Updating build task dependencies.
+
+## 2.3.2
+Wed, 15 Mar 2017 01:32:09 GMT
+
+### Patches
+
+- Locking `@types` packages. Synchronizing version specifiers for dependencies with other `web-build-tools` projects.
 
 ## 2.3.1
 Fri, 03 Mar 2017 02:31:24 GMT
