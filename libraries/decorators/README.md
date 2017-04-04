@@ -24,9 +24,8 @@ for that, there are many other options, for example the
 [core-decorators](https://www.npmjs.com/package/core-decorators) project.)
 
 
-*This package is part of the [SharePoint Framework](https://github.com/SharePoint/sp-dev-docs/wiki),
+*This package is part of the [SharePoint Framework](http://aka.ms/spfx),
 which is a collection of NPM packages that empower developers to create client-side experiences
 for [Microsoft SharePoint](https://products.office.com/en-us/sharepoint/collaboration).
-The SharePoint Framework is currently in Preview, and is subject to change based on customer feedback.
-For more information, including API documentation and code samples, please visit the
-[SharePoint Framework Developer Preview](https://github.com/SharePoint/sp-dev-docs/wiki) web site.*
+For more information, including complete API documentation and code samples, please visit
+the [SharePoint Framework](http://aka.ms/spfx) web site.*

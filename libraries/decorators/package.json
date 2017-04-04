@@ -2,7 +2,8 @@
   "name": "@microsoft/decorators",
   "version": "1.0.0",
   "description": "A very conservative set of decorators for TypeScript projects",
-  "license": "SEE LICENSE IN LICENSE.docx",
+  "license": "SEE LICENSE IN \"EULA\" FOLDER",
+  "homepage": "http://aka.ms/spfx",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "devDependencies": {

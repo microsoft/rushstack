@@ -9,11 +9,12 @@
     "test": "gulp test",
     "clean": "gulp clean"
   },
-  "license": "SEE LICENSE IN LICENSE.docx",
+  "license": "SEE LICENSE IN \"EULA\" FOLDER",
+  "homepage": "http://aka.ms/spfx",
   "dependencies": {
     "argparse": "~1.0.7",
     "colors": "~1.1.2",
-    "@types/node": "6.0.62"
+    "@types/node": "6.0.64"
   },
   "devDependencies": {
     "@types/es6-collections": "0.5.29",

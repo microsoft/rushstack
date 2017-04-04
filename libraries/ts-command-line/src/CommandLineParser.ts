@@ -64,7 +64,7 @@ abstract class CommandLineParser extends CommandLineParameterProvider {
    * This is the main entry point to begin parsing command-line arguments
    * and executing the corresponding action.
    *
-   * @param args   the command-line arugments to be parsed; if omitted, then
+   * @param args   the command-line arguments to be parsed; if omitted, then
    *               the process.argv will be used
    */
   public execute(args?: string[]): void {
