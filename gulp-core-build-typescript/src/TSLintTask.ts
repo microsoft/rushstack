@@ -82,7 +82,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
     rulesDirectory: ((): string[] => {
       const msCustomRulesMain: string = require.resolve('tslint-microsoft-contrib');
       const msCustomRulesDirectory: string = path.dirname(msCustomRulesMain);
-      return TSLint.Configuration.getRulesDirectories([ msCustomRulesDirectory ], __dirname);
+      return TSLint.Configuration.getRulesDirectories([msCustomRulesDirectory], __dirname);
     })(),
     sourceMatch: [
       'src/**/*.ts',
@@ -96,15 +96,13 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
   private _defaultLintRules: any = undefined;
   /* tslint:enable:no-any */
 
-  public setConfig(config: ITSLintTaskConfig): void {
-    // If the removeExistingRules flag is set, clear out any existing rules
-    if (config.removeExistingRules &&
-        this.taskConfig &&
-        this.taskConfig.lintConfig) {
-      delete this.taskConfig.lintConfig.rules;
-      delete config.removeExistingRules;
-    }
+  public mergeConfig(config: ITSLintTaskConfig): void {
+    this._prepareUpdateConfig(config);
+    super.mergeConfig(config);
+  }
 
+  public setConfig(config: ITSLintTaskConfig): void {
+    this._prepareUpdateConfig(config);
     super.setConfig(config);
   }
 
@@ -127,7 +125,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
 
     return gulp.src(this.taskConfig.sourceMatch)
       .pipe(cached(
-        through2.obj(function(
+        through2.obj(function (
           file: gutil.File,
           encoding: string,
           callback: (encoding?: string, file?: gutil.File) => void): void {
@@ -193,6 +191,16 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
     return [path.join(buildConfig.rootPath, buildConfig.tempFolder)];
   }
 
+  private _prepareUpdateConfig(newConfig: ITSLintTaskConfig): void {
+    // If the removeExistingRules flag is set, clear out any existing rules
+    if (newConfig.removeExistingRules &&
+        this.taskConfig &&
+        this.taskConfig.lintConfig) {
+      delete this.taskConfig.lintConfig.rules;
+      delete newConfig.removeExistingRules;
+    }
+  }
+
   private _getTsLintFilepath(): string {
     return path.join(this.buildConfig.rootPath, this.buildConfig.tempFolder, 'tslint.json');
   }
@@ -201,6 +209,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
     if (!this._defaultLintRules) {
       this._defaultLintRules = require('./defaultTslint.json');
     }
+
     return merge(
       (this.taskConfig.useDefaultConfigAsBase ? this._defaultLintRules : {}),
       this.taskConfig.lintConfig || {});
