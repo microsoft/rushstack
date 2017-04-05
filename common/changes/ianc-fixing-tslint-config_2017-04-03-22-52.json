@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Fixing the way the TSLint task is configured to allow removal of existing rules.",
+      "type": "patch"
+    }
+  ],
+  "email": "iclanton@users.noreply.github.com"
+}
