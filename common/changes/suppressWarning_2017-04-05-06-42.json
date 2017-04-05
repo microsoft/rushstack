@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-sass",
+      "comment": "Add verboseCSSModuleWarning switch to output CSS module generation warning from type warning to verbose",
+      "type": "minor"
+    }
+  ],
+  "email": "timto@microsoft.com"
+}
