@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "2.4.2",
+      "tag": "@microsoft/gulp-core-build-typescript_v2.4.2",
+      "date": "Wed, 05 Apr 2017 19:21:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixing the way the TSLint task is configured to allow removal of existing rules."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.4.1",
       "tag": "@microsoft/gulp-core-build-typescript_v2.4.1",
       "date": "Mon, 20 Mar 2017 04:20:13 GMT",
