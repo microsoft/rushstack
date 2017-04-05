@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Mon, 20 Mar 2017 21:52:20 GMT and should not be manually modified.
+This log was last generated on Wed, 05 Apr 2017 13:01:40 GMT and should not be manually modified.
+
+## 3.0.1
+Wed, 05 Apr 2017 13:01:40 GMT
+
+### Patches
+
+- Fixing the way the TSLint task is configured to allow removal of existing rules.
 
 ## 3.0.0
 Mon, 20 Mar 2017 21:52:20 GMT
