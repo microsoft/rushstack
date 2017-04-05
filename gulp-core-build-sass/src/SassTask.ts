@@ -26,6 +26,11 @@ export interface ISassTaskConfig {
    */
   useCSSModules?: boolean;
   /**
+   * If true, we will set the CSS property naming warning to verbose message while the module is generating
+   * to prevent task exit with exitcode: 1.
+   */
+  verboseCSSModuleWarning?: boolean;
+  /**
    * If true, we will generate a CSS in the lib folder. If false, the CSS is directly embedded
    * into the TypeScript file
    */
@@ -54,6 +59,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       'src/**/*.scss'
     ],
     useCSSModules: false,
+    verboseCSSModuleWarning: false,
     dropCssFiles: false,
     warnOnNonCSSModules: false
   };
@@ -106,8 +112,8 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       moduleSrcPattern.forEach((value: string) => srcPattern.push(`!${value}`));
 
       return merge(this._processFiles(gulp, srcPattern, completeCallback, postCSSPlugins,
-                     this.taskConfig.warnOnNonCSSModules ? checkFilenameForCSSModule : undefined),
-                   this._processFiles(gulp, moduleSrcPattern, completeCallback, modulePostCssPlugins));
+        this.taskConfig.warnOnNonCSSModules ? checkFilenameForCSSModule : undefined),
+        this._processFiles(gulp, moduleSrcPattern, completeCallback, modulePostCssPlugins));
     }
   }
 
@@ -152,7 +158,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       .pipe(changed('src', { extension: scssTsExtName }))
       .pipe(sass.sync({
         importer: (url: string, prev: string, done: boolean): Object => ({ file: _patchSassUrl(url) })
-      }).on('error', function(error: Error): void {
+      }).on('error', function (error: Error): void {
         sass.logError.call(this, error);
         completeCallback('Errors found in sass file(s).');
       }))
@@ -186,7 +192,10 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
               const value: string = classNames[key];
               let line: string = '';
               if (key.indexOf('-') !== -1) {
-                this.logWarning(`The local CSS class '${key}' is not camelCase and will not be type-safe.`);
+                let message: string = `The local CSS class '${key}' is not camelCase and will not be type-safe.`;
+                this.taskConfig.verboseCSSModuleWarning ?
+                  this.logVerbose(message) :
+                  this.logWarning(message);
                 line = `  '${key}': '${value}'`;
               } else {
                 line = `  ${key}: '${value}'`;
@@ -204,7 +213,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
             if (this.taskConfig.moduleExportName === '') {
               exportString = 'export = styles;';
             } else if (!!this.taskConfig.moduleExportName) {
-              exportString = `export const ${ this.taskConfig.moduleExportName } = styles;`;
+              exportString = `export const ${this.taskConfig.moduleExportName} = styles;`;
             }
 
             classNamesLines.push(
@@ -242,7 +251,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
               .join(EOL)
               .replace(new RegExp(`(${EOL}){3,}`, 'g'), `${EOL}${EOL}`)
               .replace(new RegExp(`(${EOL})+$`, 'm'), EOL)
-            );
+          );
         }
       }))
       .pipe(gulp.dest('src')));
