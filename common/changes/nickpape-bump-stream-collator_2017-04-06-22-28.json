@@ -1,0 +1,45 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "packageName": "@microsoft/gulp-core-build-webpack",
+      "type": "none"
+    },
+    {
+      "comment": "",
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "type": "none"
+    },
+    {
+      "comment": "",
+      "packageName": "@microsoft/gulp-core-build-serve",
+      "type": "none"
+    },
+    {
+      "comment": "",
+      "packageName": "@microsoft/gulp-core-build-sass",
+      "type": "none"
+    },
+    {
+      "comment": "",
+      "packageName": "@microsoft/gulp-core-build-mocha",
+      "type": "none"
+    },
+    {
+      "comment": "",
+      "packageName": "@microsoft/gulp-core-build-karma",
+      "type": "none"
+    },
+    {
+      "comment": "",
+      "packageName": "@microsoft/gulp-core-build",
+      "type": "none"
+    },
+    {
+      "comment": "",
+      "packageName": "@microsoft/api-extractor",
+      "type": "none"
+    }
+  ],
+  "email": "nickpape-msft@users.noreply.github.com"
+}
