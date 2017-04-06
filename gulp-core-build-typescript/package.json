@@ -43,7 +43,7 @@
     "typescript": "~2.2.1"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": ">=2.3.0 <3.0.0",
+    "@microsoft/node-library-build": ">=3.0.0 <4.0.0",
     "@types/chalk": "0.4.31",
     "@types/gulp-util": "3.0.30",
     "@types/orchestrator": "0.0.30",
