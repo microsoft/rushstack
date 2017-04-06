@@ -192,7 +192,7 @@ export default class DocItemLoader {
     }
 
     // Doesn't exist in cache, attempt to load the json file
-    const packageJsonFilePath: string =  path.join(
+    const apiJsonFilePath: string =  path.join(
       this._projectFolder,
       'node_modules',
       apiDefinitionRef.scopeName,
@@ -200,21 +200,21 @@ export default class DocItemLoader {
       `dist/${apiDefinitionRef.packageName}.api.json`
     );
 
-    if (!fsx.existsSync(path.join(packageJsonFilePath))) {
+    if (!fsx.existsSync(path.join(apiJsonFilePath))) {
       // package not found in node_modules
       reportError(`Unable to find referenced package \"${apiDefinitionRef.toScopePackageString()}\"`);
       return;
     }
 
-    return this.loadPackageIntoCache(packageJsonFilePath, false);
+    return this.loadPackageIntoCache(apiJsonFilePath, false);
   }
 
   /**
    * Loads the API documentation json file and validates that it conforms to our schema. If it does, 
    * then the json file is saved in the cache and returned.
    */
-  public loadPackageIntoCache(packageJsonFilePath: string, isTypes: boolean): IDocPackage {
-    const apiPackage: IDocPackage = JsonFile.loadJsonFile(packageJsonFilePath) as IDocPackage;
+  public loadPackageIntoCache(apiJsonFilePath: string, isTypes: boolean): IDocPackage {
+    const apiPackage: IDocPackage = JsonFile.loadJsonFile(apiJsonFilePath) as IDocPackage;
 
     // Validate that the output conforms to our JSON schema
     const apiJsonSchema: { } = JsonFile.loadJsonFile(path.join(__dirname, './schemas/api-json-schema.json'));
@@ -233,9 +233,9 @@ export default class DocItemLoader {
     // For out test cases, the will be no searching the alias path, 
     // so we manually include the '@types' scope name
     const scopeName: string = isTypes ?
-      '@types' : packageJsonFilePath.match(/@\w+/).toString() ;
+      '@types' : apiJsonFilePath.match(/@\w+/).toString() ;
 
-    const packageName: string = `${scopeName}/${path.basename(packageJsonFilePath).split('.').shift()}`;
+    const packageName: string = `${scopeName}/${path.basename(apiJsonFilePath).split('.').shift()}`;
     this._cache.set(packageName, apiPackage);
     return apiPackage;
   }
