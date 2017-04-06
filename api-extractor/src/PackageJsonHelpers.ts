@@ -7,7 +7,7 @@ import JsonFile from './JsonFile';
 /**
  * Represents a package.json file.
  */
-export interface IPackageJson {
+interface IPackageJson {
   name: string;
 }
 
