@@ -14,7 +14,7 @@
     "@types/node": "6.0.62",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
-    "@microsoft/stream-collator": "~1.0.2",
+    "@microsoft/stream-collator": "~2.0.0",
     "@microsoft/ts-command-line": "~1.1.1",
     "builtins": "~1.0.3",
     "colors": "~1.1.2",

@@ -11,7 +11,7 @@
     "@types/mocha": "2.2.38",
     "@types/chai": "3.4.34",
     "@types/semver": "5.3.30",
-    "@microsoft/stream-collator": "~1.0.2",
+    "@microsoft/stream-collator": "~2.0.0",
     "@types/es6-collections": "0.5.29",
     "@types/fs-extra": "0.0.37",
     "@types/node": "6.0.62",
