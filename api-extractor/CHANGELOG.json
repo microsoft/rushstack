@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "2.0.1",
+      "tag": "@microsoft/api-extractor_v2.0.1",
+      "date": "Thu, 06 Apr 2017 01:32:23 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Removed hard coding of @public for ApiPackage"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.0",
       "tag": "@microsoft/api-extractor_v2.0.0",
       "date": "Mon, 20 Mar 2017 21:52:20 GMT",
