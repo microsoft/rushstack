@@ -29,9 +29,9 @@
       "type": "boolean"
     },
 
-    "verboseCSSModuleWarning": {
-      "title": "Set CSS module warning message to verbose",
-      "description": "If true, we will generate a CSS in the lib folder. If false, the CSS is directly embedded into the TypeScript file",
+    "warnOnCssTypeSafety ": {
+      "title": "Safety delver the CSS module compile warning",
+      "description": "If true, CSS module compile warning will be change verbose type to avoid build task exit with exitcode:1",
       "type": "boolean"
     },
 
