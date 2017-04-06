@@ -32,7 +32,7 @@
     "postcss-modules": "~0.6.4"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": ">=2.3.0 <3.0.0",
+    "@microsoft/node-library-build": ">=3.0.0 <4.0.0",
     "@types/chalk": "0.4.31",
     "@types/express": "4.0.35",
     "@types/express-serve-static-core": "4.0.41",
