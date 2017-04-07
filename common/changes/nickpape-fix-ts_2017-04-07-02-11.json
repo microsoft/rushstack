@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Adjust the SemVer specifier for the TypeScript dependency to be looser.",
+      "type": "patch"
+    }
+  ],
+  "email": "nickpape-msft@users.noreply.github.com"
+}
