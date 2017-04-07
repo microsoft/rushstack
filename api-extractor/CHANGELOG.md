@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 06 Apr 2017 01:32:23 GMT and should not be manually modified.
+This log was last generated on Fri, 07 Apr 2017 21:43:16 GMT and should not be manually modified.
+
+## 2.0.2
+Fri, 07 Apr 2017 21:43:16 GMT
+
+### Patches
+
+- Adjusted the version specifier for typescript to ~2.2.2
 
 ## 2.0.1
 Thu, 06 Apr 2017 01:32:23 GMT
