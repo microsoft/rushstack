@@ -1,0 +1,15 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Adjusted the version specifier for typescript to ~2.2.2",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Adjusted the version specifier for typescript to ~2.2.2",
+      "type": "patch"
+    }
+  ],
+  "email": "nickpape-msft@users.noreply.github.com"
+}
