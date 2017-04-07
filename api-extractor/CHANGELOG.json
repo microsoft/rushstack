@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "2.0.2",
+      "tag": "@microsoft/api-extractor_v2.0.2",
+      "date": "Fri, 07 Apr 2017 21:43:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Adjusted the version specifier for typescript to ~2.2.2"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.1",
       "tag": "@microsoft/api-extractor_v2.0.1",
       "date": "Thu, 06 Apr 2017 01:32:23 GMT",
