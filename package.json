@@ -8,6 +8,6 @@
     "change": "rush change"
   },
   "devDependencies": {
-    "@microsoft/rush": "~2.3.1"
+    "@microsoft/rush": "~2.4.0"
   }
 }
