@@ -29,6 +29,12 @@
       "type": "boolean"
     },
 
+    "warnOnCssInvalidPropertyName ": {
+      "title": "Safety delver the CSS module compile warning",
+      "description": "If false, CSS module compile warning will be change verbose type to avoid build task exit with exitcode:1",
+      "type": "boolean"
+    },
+
     "moduleExportName": {
       "title": "Defines the export name for the styles",
       "description": "If this option is specified, module css will be exported using the name provided. If an empty value is specified, the styles will be exported using 'export =', rather than a named export. By default we use the 'default' export name.",
