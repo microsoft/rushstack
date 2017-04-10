@@ -1,7 +1,7 @@
 {
   "changes": [{
     "packageName": "@microsoft/gulp-core-build-sass",
-    "comment": "Add task config property: warnOnCssTypeSafety to gulp-core-build-sass. if set to true, CSS module compile warning message will changed to verbose message",
+    "comment": "Add task config property: warnOnCssInvalidPropertyName to gulp-core-build-sass. if set to false, CSS module compile warning message will changed to verbose message",
     "type": "minor"
   }],
   "email": "timto@microsoft.com"

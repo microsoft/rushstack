@@ -26,10 +26,11 @@ export interface ISassTaskConfig {
    */
   useCSSModules?: boolean;
   /**
-   * If true, we will set the CSS property naming warning to verbose message while the module is generating
+   * If false, we will set the CSS property naming warning to verbose message while the module is generating
    * to prevent task exit with exitcode: 1.
+   * Default value is true
    */
-  warnOnCssTypeSafety?: boolean;
+  warnOnCssInvalidPropertyName?: boolean;
   /**
    * If true, we will generate a CSS in the lib folder. If false, the CSS is directly embedded
    * into the TypeScript file
@@ -59,7 +60,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       'src/**/*.scss'
     ],
     useCSSModules: false,
-    warnOnCssTypeSafety: true,
+    warnOnCssInvalidPropertyName: true,
     dropCssFiles: false,
     warnOnNonCSSModules: false
   };
@@ -193,9 +194,9 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
               let line: string = '';
               if (key.indexOf('-') !== -1) {
                 let message: string = `The local CSS class '${key}' is not camelCase and will not be type-safe.`;
-                this.taskConfig.warnOnCssTypeSafety ?
-                  this.logVerbose(message) :
-                  this.logWarning(message);
+                this.taskConfig.warnOnCssInvalidPropertyName ?
+                  this.logWarning(message) :
+                  this.logVerbose(message);
                 line = `  '${key}': '${value}'`;
               } else {
                 line = `  ${key}: '${value}'`;

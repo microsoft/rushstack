@@ -29,9 +29,9 @@
       "type": "boolean"
     },
 
-    "warnOnCssTypeSafety ": {
+    "warnOnCssInvalidPropertyName ": {
       "title": "Safety delver the CSS module compile warning",
-      "description": "If true, CSS module compile warning will be change verbose type to avoid build task exit with exitcode:1",
+      "description": "If false, CSS module compile warning will be change verbose type to avoid build task exit with exitcode:1",
       "type": "boolean"
     },
 
