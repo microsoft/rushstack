@@ -59,7 +59,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       'src/**/*.scss'
     ],
     useCSSModules: false,
-    warnOnCssTypeSafety: false,
+    warnOnCssTypeSafety: true,
     dropCssFiles: false,
     warnOnNonCSSModules: false
   };
