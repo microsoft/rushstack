@@ -37,7 +37,7 @@ export interface IRushConfigurationJson {
   useLocalNpmCache?: boolean;
   gitPolicy?: IRushGitPolicyJson;
   projects: IRushConfigurationProjectJson[];
-  pinnedVersions: { [dependency: string]: string };
+  pinnedVersions?: { [dependency: string]: string };
 }
 
 /**
@@ -73,6 +73,9 @@ export default class RushConfiguration {
   private _projects: RushConfigurationProject[];
   private _projectsByName: Map<string, RushConfigurationProject>;
   private _pinnedVersions: Map<string, string>;
+  private _rushMinimumVersion: string;
+  private _nodeSupportedVersionRange: string;
+  private _schema: string;
 
   /**
    * Loads the configuration data from an Rush.json configuration file and returns
@@ -97,6 +100,7 @@ export default class RushConfiguration {
     // since we are replacing it with the precompiled version.  The validator.setRemoteReference()
     // API is a better way to handle this, but we'd first need to publish the schema file
     // to a public web server where Visual Studio can find it.
+    const schema: string = rushConfigurationJson.$schema;
     delete rushConfigurationJson.$schema;
 
     const validator: Validator = new Validator({
@@ -116,6 +120,8 @@ export default class RushConfiguration {
       console.log(os.EOL + 'ERROR: ' + errorMessage + os.EOL + os.EOL);
       throw new Error(errorMessage);
     }
+
+    rushConfigurationJson.$schema = schema;
 
     return new RushConfiguration(rushConfigurationJson, rushJsonFilename);
   }
@@ -192,6 +198,10 @@ export default class RushConfiguration {
           + ` requires nodeSupportedVersionRange="${rushConfigurationJson.nodeSupportedVersionRange}")`);
       }
     }
+
+    this._rushMinimumVersion = rushConfigurationJson.rushMinimumVersion;
+    this._nodeSupportedVersionRange = rushConfigurationJson.nodeSupportedVersionRange;
+    this._schema = rushConfigurationJson.$schema;
 
     this._rushJsonFolder = path.dirname(rushJsonFilename);
     this._commonFolder = path.resolve(path.join(this._rushJsonFolder, rushConfigurationJson.commonFolder));
@@ -477,6 +487,49 @@ export default class RushConfiguration {
 
   public get pinnedVersions(): Map<string, string> {
     return this._pinnedVersions;
+  }
+
+  public serialize(): IRushConfigurationJson {
+    const data: IRushConfigurationJson = {
+      $schema: this._schema,
+      commonFolder: this._commonFolder,
+      npmVersion: this._npmToolVersion,
+      rushMinimumVersion: this._rushMinimumVersion,
+      nodeSupportedVersionRange: this._nodeSupportedVersionRange,
+      projectFolderMinDepth: this._projectFolderMinDepth,
+      projectFolderMaxDepth: this._projectFolderMaxDepth,
+      packageReviewFile: this._packageReviewFile,
+      useLocalNpmCache: !!this._cacheFolder,
+      projects: this._projects.map((project: RushConfigurationProject) => {
+        return project.serialize();
+      })
+    };
+
+    if (this._gitSampleEmail || this._gitAllowedEmailRegExps) {
+      data.gitPolicy = {};
+      if (this._gitSampleEmail) {
+        data.gitPolicy.sampleEmail = this._gitSampleEmail;
+      }
+      if (this._gitAllowedEmailRegExps) {
+        data.gitPolicy.allowedEmailRegExps = this._gitAllowedEmailRegExps;
+      }
+    }
+
+    if (this._reviewCategories.size) {
+      data.reviewCategories = [];
+      this.reviewCategories.forEach((category: string) => {
+        data.reviewCategories.push(category);
+      });
+    }
+
+    if (this._pinnedVersions.size) {
+      data.pinnedVersions = {};
+      this._pinnedVersions.forEach((version: string, dep: string) => {
+        data.pinnedVersions[dep] = version;
+      });
+    }
+
+    return data;
   }
 
   /**
