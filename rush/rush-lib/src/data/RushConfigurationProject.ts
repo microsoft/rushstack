@@ -31,10 +31,11 @@ export default class RushConfigurationProject {
   private _cyclicDependencyProjects: Set<string>;
   private _shouldPublish: boolean;
   private _downstreamDependencyProjects: string[];
+  private _rushConfiguration: RushConfiguration;
 
   constructor(projectJson: IRushConfigurationProjectJson,
-              rushConfiguration: RushConfiguration,
-              tempProjectName: string) {
+    rushConfiguration: RushConfiguration,
+    tempProjectName: string) {
     this._packageName = projectJson.packageName;
     this._projectRelativeFolder = projectJson.projectFolder;
 
@@ -51,6 +52,7 @@ export default class RushConfigurationProject {
         + `  Problem folder:  "${projectJson.projectFolder}"`);
     }
 
+    this._rushConfiguration = rushConfiguration;
     this._projectFolder = path.join(rushConfiguration.rushJsonFolder, projectJson.projectFolder);
 
     if (!fsx.existsSync(this._projectFolder)) {
@@ -167,5 +169,33 @@ export default class RushConfigurationProject {
    */
   public get shouldPublish(): boolean {
     return this._shouldPublish;
+  }
+
+  public serialize(): IRushConfigurationProjectJson {
+    const data: IRushConfigurationProjectJson = {
+      packageName: this._packageName,
+      projectFolder: path.relative(this._rushConfiguration.rushJsonFolder, this._projectFolder),
+      cyclicDependencyProjects: []
+      // shouldPublish
+      // reviewCategory
+    };
+
+    if (this._cyclicDependencyProjects.size) {
+      data.cyclicDependencyProjects = [];
+      this._cyclicDependencyProjects.forEach((cyclicDep: string) => {
+        data.cyclicDependencyProjects.push(cyclicDep);
+      });
+    } else {
+      delete data.cyclicDependencyProjects;
+    }
+
+    if (this._shouldPublish) {
+      data.shouldPublish = this._shouldPublish;
+    }
+
+    if (this._rushConfiguration.packageReviewFile && this._reviewCategory) {
+      data.reviewCategory = this._reviewCategory;
+    }
+    return data;
   }
 }
