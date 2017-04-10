@@ -193,7 +193,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
               const value: string = classNames[key];
               let line: string = '';
               if (key.indexOf('-') !== -1) {
-                let message: string = `The local CSS class '${key}' is not camelCase and will not be type-safe.`;
+                const message: string = `The local CSS class '${key}' is not camelCase and will not be type-safe.`;
                 this.taskConfig.warnOnCssInvalidPropertyName ?
                   this.logWarning(message) :
                   this.logVerbose(message);
