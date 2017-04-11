@@ -299,12 +299,13 @@ export default class RushConfiguration {
       this._populateDownstreamDependencies(project.packageJson.devDependencies, project.packageName);
     }
 
-    const pinnedVersionsFile: string = path.join(rushConfigurationJson.commonFolder, 'pinnedVersions.json');
+    const pinnedVersionsFile: string = path.join(this.commonFolder, 'pinnedVersions.json');
     this._pinnedVersions = PinnedVersionsConfiguration.tryLoadFromFile(pinnedVersionsFile);
 
     if (rushConfigurationJson.pinnedVersions) {
-      console.log(`DEPRECATED: the "pinnedVersions" field in "rush.json" is deprecated. Please move the contents ` +
-        `of this field to the following file: "${pinnedVersionsFile}".`);
+      console.log(`DEPRECATED: the "pinnedVersions" field in "rush.json" is deprecated.${os.EOL}` +
+        `Please move the contents of this field to the following file:${os.EOL}  "${pinnedVersionsFile}"`);
+      console.log();
 
       Object.keys(rushConfigurationJson.pinnedVersions).forEach((dependency: string) => {
         const pinnedVersion: string = rushConfigurationJson.pinnedVersions[dependency];
@@ -317,9 +318,9 @@ export default class RushConfiguration {
         if (this._pinnedVersions.has(dependency)) {
           const preferredVersion: string = this._pinnedVersions.get(dependency);
           if (preferredVersion !== pinnedVersion) {
-            console.log(`A pinned version for ${dependency}@${pinnedVersion} in "rush.json" ` +
-              `is conflicting with pinned version ${dependency}@${preferredVersion} in "pinnedVersions.json", ` +
-              `using ${dependency}@${preferredVersion}`);
+            console.log(`Pinned version "${dependency}@${pinnedVersion}" defined in "rush.json" ` +
+              `is conflicting with pinned version "${dependency}@${preferredVersion}" in "pinnedVersions.json".` +
+              `${os.EOL}  Using ${dependency}@${preferredVersion}!${os.EOL}`);
           }
         } else {
           this._pinnedVersions.set(dependency, pinnedVersion);
