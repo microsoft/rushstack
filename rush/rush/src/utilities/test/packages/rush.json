@@ -27,6 +27,22 @@
       "reviewCategory": "third-party"
     },
     {
+      "packageName": "mv1",
+      "projectFolder": "mv1",
+      "reviewCategory": "third-party"
+    },
+    {
+      "packageName": "mv2",
+      "projectFolder": "mv2",
+      "reviewCategory": "third-party",
+      "manualVersionUpdate": true
+    },
+    {
+      "packageName": "mv3",
+      "projectFolder": "mv3",
+      "reviewCategory": "third-party"
+    },
+    {
       "packageName": "cyclic-dep-1",
       "projectFolder": "cyclic-dep-1",
       "reviewCategory": "third-party"
