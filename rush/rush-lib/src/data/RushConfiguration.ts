@@ -10,6 +10,7 @@ import rushVersion from '../rushVersion';
 import Validator = require('z-schema');
 import JsonFile from '../utilities/JsonFile';
 import RushConfigurationProject, { IRushConfigurationProjectJson } from './RushConfigurationProject';
+import { PinnedVersionsConfiguration } from './PinnedVersionsConfiguration';
 import Utilities from '../utilities/Utilities';
 
 /**
@@ -37,7 +38,7 @@ export interface IRushConfigurationJson {
   useLocalNpmCache?: boolean;
   gitPolicy?: IRushGitPolicyJson;
   projects: IRushConfigurationProjectJson[];
-  pinnedVersions: { [dependency: string]: string };
+  pinnedVersions: { [dependency: string]: string }; // deprecated
 }
 
 /**
@@ -72,7 +73,7 @@ export default class RushConfiguration {
   private _gitSampleEmail: string;
   private _projects: RushConfigurationProject[];
   private _projectsByName: Map<string, RushConfigurationProject>;
-  private _pinnedVersions: Map<string, string>;
+  private _pinnedVersions: PinnedVersionsConfiguration;
 
   /**
    * Loads the configuration data from an Rush.json configuration file and returns
@@ -298,15 +299,15 @@ export default class RushConfiguration {
       this._populateDownstreamDependencies(project.packageJson.devDependencies, project.packageName);
     }
 
-    this._pinnedVersions = new Map<string, string>();
+    const pinnedVersionsFile: string = path.join(rushConfigurationJson.commonFolder, 'pinnedVersions.json');
+    this._pinnedVersions = PinnedVersionsConfiguration.tryLoadFromFile(pinnedVersionsFile);
+
     if (rushConfigurationJson.pinnedVersions) {
+      console.log(`DEPRECATED: the "pinnedVersions" field in "rush.json" is deprecated. Please move the contents ` +
+        `of this field to the following file: "${pinnedVersionsFile}".`);
+
       Object.keys(rushConfigurationJson.pinnedVersions).forEach((dependency: string) => {
         const pinnedVersion: string = rushConfigurationJson.pinnedVersions[dependency];
-
-        if (!semver.valid(pinnedVersion)) {
-          throw new Error(`In rush.json, the pinned version "${pinnedVersion}" for "${dependency}"` +
-            ` project is not a valid semantic version`);
-        }
 
         if (this._projectsByName.has(dependency)) {
           throw new Error(`In rush.json, cannot add a pinned version ` +
@@ -475,7 +476,7 @@ export default class RushConfiguration {
     return this._projectsByName;
   }
 
-  public get pinnedVersions(): Map<string, string> {
+  public get pinnedVersions(): PinnedVersionsConfiguration {
     return this._pinnedVersions;
   }
 
