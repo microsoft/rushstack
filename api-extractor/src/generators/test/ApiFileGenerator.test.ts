@@ -70,8 +70,8 @@ describe('ApiFileGenerator tests', function (): void {
 
     it('Example 2', function (): void {
       const inputFolder: string = './testInputs/example2';
-      const outputFile: string = './lib/example2-output.ts';
-      const expectedFile: string = path.join(inputFolder, 'example2-output.ts');
+      const outputFile: string = './lib/example2-output.api.ts';
+      const expectedFile: string = path.join(inputFolder, 'example2-output.api.ts');
 
       const compilerOptions: ts.CompilerOptions = {
         target: ts.ScriptTarget.ES5,
@@ -86,7 +86,7 @@ describe('ApiFileGenerator tests', function (): void {
       });
 
       extractor.analyze({
-        entryPointFile: path.join(inputFolder, 'index.ts')
+        entryPointFile: path.join(inputFolder, 'src/index.ts')
       });
 
       const apiFileGenerator: ApiFileGenerator = new ApiFileGenerator();

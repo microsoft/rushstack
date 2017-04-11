@@ -37,12 +37,22 @@ const extractor: Extractor = new Extractor({
   errorHandler: testErrorHandler
 });
 
+// These warnings would normally be printed at the bottom 
+// of the source package's '*.api.ts' file.
+const warnings: string[] = [];
+
 /**
  * Dummy class wrapping ApiDocumentation to test its protected methods
  */
 class TestApiDocumentation extends ApiDocumentation {
   constructor() {
-    super('Some summary\n@remarks and some remarks\n@public', extractor.docItemLoader, extractor, console.log);
+    super(
+      'Some summary\n@remarks and some remarks\n@public',
+      extractor.docItemLoader,
+      extractor,
+      console.log,
+      warnings
+    );
   }
 
   public parseParam(tokenizer: Tokenizer): IParam {
@@ -53,7 +63,7 @@ class TestApiDocumentation extends ApiDocumentation {
 extractor.loadExternalPackages('./testInputs/external-api-json');
 // Run the analyze method once to be used by unit tests
 extractor.analyze({
-  entryPointFile: path.join(inputFolder, 'index.ts')
+  entryPointFile: path.join(inputFolder, 'src/index.ts')
 });
 
 myDocumentedClass = extractor.package.getSortedMemberItems()
