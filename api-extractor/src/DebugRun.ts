@@ -38,8 +38,13 @@ const externalPackageApiRef: IApiDefinintionReferenceParts = {
   exportName: '',
   memberName: ''
 };
+
+// Normally warnings are kept by the ApiItem data structure,
+// and written to the '*.api.ts' file.
+const warnings: string[] = [];
+
 const apiDefinitionRef: ApiDefinitionReference = ApiDefinitionReference.createFromParts(externalPackageApiRef);
-console.log(extractor.docItemLoader.getPackage(apiDefinitionRef, console.log));
+console.log(extractor.docItemLoader.getPackage(apiDefinitionRef, warnings));
 
 const apiFileGenerator: ApiFileGenerator = new ApiFileGenerator();
 apiFileGenerator.writeApiFile('./lib/DebugRun.api.ts', extractor);
