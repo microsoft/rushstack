@@ -34,8 +34,7 @@ export class PinnedVersionsConfiguration {
 
   public set(dependency: string, version: string): this {
     if (!semver.valid(version)) {
-      throw new Error(`In rush.json, the pinned version "${version}" for "${dependency}"` +
-        ` project is not a valid semantic version`);
+      throw new Error(`The pinned version "${version}" for "${dependency}" project is not a valid semantic version.`);
     }
     this._data.set(dependency, version);
     return this;
