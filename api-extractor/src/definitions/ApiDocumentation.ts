@@ -60,7 +60,7 @@ export interface IReferenceResolver {
   resolve(
     apiDefinitionRef: ApiDefinitionReference,
     apiPackage: ApiPackage,
-    reportError: (message: string) => void): ResolvedApiItem;
+    warnings: string[]): ResolvedApiItem;
 }
 
 export default class ApiDocumentation {
@@ -166,6 +166,7 @@ export default class ApiDocumentation {
   public isDocInheritedDeprecated?: boolean;
   public isOverride?: boolean;
   public hasReadOnlyTag?: boolean;
+  public warnings: string[];
 
   /**
    * A function type interface that abstracts away resolving 
@@ -189,12 +190,14 @@ export default class ApiDocumentation {
   constructor(docComment: string,
     referenceResolver: IReferenceResolver,
     extractor: Extractor,
-    errorLogger: (message: string) => void) {
+    errorLogger: (message: string) => void,
+    warnings: string[]) {
     this.originalJsDoc = docComment;
     this.referenceResolver = referenceResolver;
     this.extractor = extractor;
     this.reportError = errorLogger;
     this.parameters = {};
+    this.warnings = warnings;
     this._parseDocs();
   }
 
@@ -202,11 +205,11 @@ export default class ApiDocumentation {
    * Executes the implementation details involved in completing the documentation initialization.
    * Currently completes link and inheritdocs.
    */
-  public completeInitialization(): void {
+  public completeInitialization(warnings: string[]): void {
     // Ensure links are valid
     this._completeLinks();
     // Ensure inheritdocs are valid
-    this._completeInheritdocs();
+    this._completeInheritdocs(warnings);
   }
 
   protected _parseDocs(): void {
@@ -395,7 +398,7 @@ export default class ApiDocumentation {
       const resolvedApiItem: ResolvedApiItem =  this.referenceResolver.resolve(
         apiDefinitionRef,
         this.extractor.package,
-        this.reportError
+        this.warnings
       );
 
       // If the apiDefinitionRef can not be found the resolcedApiItem will be
@@ -410,10 +413,10 @@ export default class ApiDocumentation {
    * A processing of inheritdoc 'Tokens'. This processing occurs after we have created documentation 
    * for all API items. 
    */
-  private _completeInheritdocs(): void {
+  private _completeInheritdocs(warnings: string[]): void {
     while (this.incompleteInheritdocs.length) {
       const token: Token = this.incompleteInheritdocs.pop();
-      DocElementParser.parseInheritDoc(this, token);
+      DocElementParser.parseInheritDoc(this, token, warnings);
     }
   }
 

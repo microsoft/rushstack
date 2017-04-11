@@ -86,6 +86,7 @@ export default class ResolvedApiItem {
     this.kind = kind;
     this.summary = summary;
     this.remarks = remarks;
+    this.deprecatedMessage = deprecatedMessage;
     this.isBeta = isBeta;
     this.params = params;
     this.returnsMessage = returnsMessage;

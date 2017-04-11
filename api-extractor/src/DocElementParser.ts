@@ -213,7 +213,7 @@ export default class DocElementParser {
    * The format for the \@inheritdoc tag is {\@inheritdoc scopeName/packageName:exportName.memberName}.
    * For more information on the format see IInheritdocRef.
    */
-  public static parseInheritDoc(documentation: ApiDocumentation, token: Token): void {
+  public static parseInheritDoc(documentation: ApiDocumentation, token: Token, warnings: string[]): void {
 
     // Check to make sure the API definition reference is at most one string
     const tokenChunks: string[] = token.text.split(' ');
@@ -239,7 +239,7 @@ export default class DocElementParser {
     const resolvedApiItem: ResolvedApiItem = documentation.referenceResolver.resolve(
       apiDefinitionRef,
       documentation.extractor.package,
-      documentation.reportError
+      warnings
     );
 
     // If no resolvedApiItem found then nothing to inherit
@@ -283,7 +283,7 @@ export default class DocElementParser {
     // Check if inheritdoc is depreacted
     // We need to check if this documentation has a deprecated message
     // but it may not appear until after this token.
-    if (resolvedApiItem.deprecatedMessage) {
+    if (resolvedApiItem.deprecatedMessage.length > 0) {
       documentation.isDocInheritedDeprecated = true;
     }
   }
