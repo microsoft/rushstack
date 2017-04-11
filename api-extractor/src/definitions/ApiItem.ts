@@ -247,7 +247,8 @@ abstract class ApiItem {
       originalJsDoc,
       this.extractor.docItemLoader,
       this.extractor,
-      this.reportError
+      this.reportError,
+      this.warnings
     );
   }
 
@@ -333,7 +334,7 @@ abstract class ApiItem {
    */
   protected onCompleteInitialization(): void {
 
-    this.documentation.completeInitialization();
+    this.documentation.completeInitialization(this.warnings);
     // TODO: this.visitTypeReferencesForNode(this);
 
     const summaryTextCondensed: string = DocElementParser.getAsText(
@@ -354,6 +355,11 @@ abstract class ApiItem {
         this.reportError('The @preapproved tag may only be applied to classes and interfaces');
         this.documentation.preapproved = false;
       }
+    }
+
+    if (this.documentation.isDocInheritedDeprecated && this.documentation.deprecatedMessage.length === 0) {
+      this.reportError('inheritdoc source item is deprecated. ' +
+        'Must provide @deprecated message or remove @inheritdoc inline tag.');
     }
   }
 
@@ -527,7 +533,7 @@ abstract class ApiItem {
     // Attempt to resolve the type by checking the node modules
     const resolvedApiItem: ResolvedApiItem = this.extractor.docItemLoader.resolveJsonReferences(
       apiDefinitionRef,
-      this.reportError
+      this.warnings
     );
 
     if (resolvedApiItem) {
@@ -536,13 +542,10 @@ abstract class ApiItem {
       return;
     } else {
       // [CASE 4] External/Unresolved
-      // The type is apparently from an external package, however our heuristic above
-      // wasn't able to resolve the API item. This happens due to limitations of
-      // the typeChecker.getAliasedSymbol() API; we should try to improve it.
-      // We will miss cases here where a member is renamed and we don't handle those 
-      // cases at this moment. 
-      // We ignore these cases for now and reserve the warning for testing
-
+      // For cases when we can't find the external package, we are going to write a summary 
+      // at the bottom of the *api.ts file. We do this because we do not yet support references
+      // to items like react:Component.
+      this.warnings.push(`Unable to resolve external type reference for "${typeName}"`);
       // this.reportWarning(`Unable to resolve external type reference for "${typeName}"`);
       return;
     }

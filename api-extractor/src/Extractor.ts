@@ -143,7 +143,7 @@ export default class Extractor {
     files.forEach(file => {
       if (path.extname(file) === '.json') {
         const externalJsonFilePath: string = path.join(externalJsonCollectionPath, file);
-        this.docItemLoader.loadPackageIntoCache(externalJsonFilePath, true);
+        this.docItemLoader.loadPackageIntoCache(externalJsonFilePath, path.parse(file).name.split('.').shift());
       }
     });
   }
