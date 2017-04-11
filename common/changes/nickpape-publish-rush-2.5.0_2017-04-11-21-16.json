@@ -1,0 +1,15 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-lib",
+      "comment": "Deprecate the pinnedVersions field of rush.json in favor of a standalone pinnedVersions.json",
+      "type": "minor"
+    },
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Deprecate the pinnedVersions field of rush.json in favor of a standalone pinnedVer sions.json",
+      "type": "minor"
+    }
+  ],
+  "email": "nickpape-msft@users.noreply.github.com"
+}

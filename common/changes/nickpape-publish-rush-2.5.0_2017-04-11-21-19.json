@@ -1,0 +1,15 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "packageName": "@microsoft/rush-lib",
+      "type": "none"
+    },
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Publish: Fix a bug where not all project versions get updated for prerelease",
+      "type": "patch"
+    }
+  ],
+  "email": "nickpape-msft@users.noreply.github.com"
+}

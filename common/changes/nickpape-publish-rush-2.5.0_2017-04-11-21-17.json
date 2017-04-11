@@ -1,0 +1,15 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-lib",
+      "comment": "Bump stream-collator to 2.0.0",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Bump stream-collator to 2.0.0",
+      "type": "patch"
+    }
+  ],
+  "email": "nickpape-msft@users.noreply.github.com"
+}

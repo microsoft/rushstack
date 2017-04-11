@@ -1,0 +1,15 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "packageName": "@microsoft/rush-lib",
+      "type": "none"
+    },
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Publish: Improve detection of already published package versions",
+      "type": "patch"
+    }
+  ],
+  "email": "nickpape-msft@users.noreply.github.com"
+}
