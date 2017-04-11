@@ -9,12 +9,12 @@ export {
     TestMissingCommentStar,
     IExternalPackageLookup,
     inheritDisplayMode,
-    inheritCorrectlyButNotFound,
+    packageLocatedButExportNotFound,
     inheritDisplayModeError,
     inheritDisplayModeErrorDeprecated,
     inheritDisplayModeNoErrorDeprecated,
     functionWithIncompleteReturnType,
     functionWithIncompleteParameterType,
     IncompleteTypeConstructor
-} from './folder/MyDocumentedClass';
-export { default as MyDocumentedClass } from './folder/MyDocumentedClass';
+} from './MyDocumentedClass';
+export { default as MyDocumentedClass } from './MyDocumentedClass';
