@@ -4,7 +4,10 @@
   "nodeSupportedVersionRange": ">=4.3.0",
   "commonFolder": "common",
   "projectFolderMinDepth": 1,
-  "reviewCategories": [ "libraries", "other" ],
+  "reviewCategories": [
+    "libraries",
+    "other"
+  ],
   "packageReviewFile": "common/reviews/PackageDependencies.json",
   "gitPolicy": {
     // Require GitHub scrubbed e-mails
@@ -18,7 +21,7 @@
       "packageName": "@microsoft/gulp-core-build",
       "projectFolder": "gulp-core-build",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
+      "shouldPublish": false,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
       ]
@@ -27,7 +30,7 @@
       "packageName": "@microsoft/gulp-core-build-karma",
       "projectFolder": "gulp-core-build-karma",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
+      "shouldPublish": false,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
       ]
@@ -36,7 +39,7 @@
       "packageName": "@microsoft/gulp-core-build-mocha",
       "projectFolder": "gulp-core-build-mocha",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
+      "shouldPublish": false,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
       ]
@@ -45,7 +48,7 @@
       "packageName": "@microsoft/gulp-core-build-sass",
       "projectFolder": "gulp-core-build-sass",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
+      "shouldPublish": false,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
       ]
@@ -54,7 +57,7 @@
       "packageName": "@microsoft/gulp-core-build-serve",
       "projectFolder": "gulp-core-build-serve",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
+      "shouldPublish": false,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
       ]
@@ -63,7 +66,7 @@
       "packageName": "@microsoft/gulp-core-build-typescript",
       "projectFolder": "gulp-core-build-typescript",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
+      "shouldPublish": false,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
       ]
@@ -72,7 +75,7 @@
       "packageName": "@microsoft/gulp-core-build-webpack",
       "projectFolder": "gulp-core-build-webpack",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
+      "shouldPublish": false,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
       ]
@@ -81,19 +84,19 @@
       "packageName": "@microsoft/package-deps-hash",
       "projectFolder": "package-deps-hash",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "shouldPublish": false
     },
     {
       "packageName": "@microsoft/node-library-build",
       "projectFolder": "node-library-build",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "shouldPublish": false
     },
     {
       "packageName": "@microsoft/web-library-build",
       "projectFolder": "web-library-build",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "shouldPublish": false
     },
     {
       "packageName": "test-web-library-build",
@@ -105,12 +108,11 @@
       "packageName": "@microsoft/api-extractor",
       "projectFolder": "api-extractor",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
+      "shouldPublish": false,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
       ]
     },
-
     // Rush is published manually for two reasons:
     // 1. We need to do proper validation before pushing out a new release
     //    that potentially could screw up everyone's daily work.
@@ -120,13 +122,13 @@
       "packageName": "@microsoft/rush",
       "projectFolder": "rush/rush",
       "reviewCategory": "libraries",
-      "shouldPublish": false
+      "shouldPublish": true
     },
     {
       "packageName": "@microsoft/rush-lib",
       "projectFolder": "rush/rush-lib",
       "reviewCategory": "libraries",
-      "shouldPublish": false
+      "shouldPublish": true
     }
   ]
 }
