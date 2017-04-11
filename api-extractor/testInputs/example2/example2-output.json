@@ -43,19 +43,6 @@
       "remarks": [],
       "isBeta": false
     },
-    "inheritCorrectlyButNotFound": {
-      "kind": "enum",
-      "values": {},
-      "deprecatedMessage": [],
-      "summary": [
-        {
-          "kind": "textDocElement",
-          "value": "See documentation for @microsoft/sp-core-library:Display"
-        }
-      ],
-      "remarks": [],
-      "isBeta": false
-    },
     "inheritDisplayMode": {
       "kind": "enum",
       "values": {},
@@ -176,7 +163,7 @@
           "summary": [
             {
               "kind": "textDocElement",
-              "value": "This doc has an invalid tag that should throw an error (Error #5)"
+              "value": "This doc has an invalid tag that should throw an error"
             }
           ],
           "remarks": [],
@@ -198,10 +185,6 @@
             {
               "kind": "textDocElement",
               "value": "This doc has an unknown inline tag"
-            },
-            {
-              "kind": "textDocElement",
-              "value": "(Error #6)"
             }
           ],
           "remarks": [],
@@ -221,7 +204,7 @@
             },
             {
               "kind": "textDocElement",
-              "value": "(Error #9). The displayName is not allowed to have non word characters."
+              "value": "The displayName is not allowed to have non word characters."
             }
           ],
           "remarks": [],
@@ -238,10 +221,6 @@
             {
               "kind": "textDocElement",
               "value": "This doc has too few params for link tag"
-            },
-            {
-              "kind": "textDocElement",
-              "value": "(Error #7)"
             }
           ],
           "remarks": [],
@@ -393,6 +372,19 @@
           "isBeta": false
         }
       }
+    },
+    "packageLocatedButExportNotFound": {
+      "kind": "enum",
+      "values": {},
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "See documentation for @microsoft/sp-core-library:Display"
+        }
+      ],
+      "remarks": [],
+      "isBeta": false
     },
     "TestMissingCommentStar": {
       "kind": "enum",

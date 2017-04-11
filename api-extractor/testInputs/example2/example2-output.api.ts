@@ -1,11 +1,9 @@
+// WARNING: Unable to find referenced package "es6-collections"
 interface IExternalPackageLookup {
 }
 
 // WARNING: __constructor has incomplete type information
 class IncompleteTypeConstructor {
-}
-
-enum inheritCorrectlyButNotFound {
 }
 
 enum inheritDisplayMode {
@@ -45,6 +43,10 @@ class MyDocumentedClass {
     // WARNING: name has incomplete type information
     address: string;
   }
+}
+
+// WARNING: Unable to find referenced export "@microsoft/sp-core-library:Display""
+enum packageLocatedButExportNotFound {
 }
 
 enum TestMissingCommentStar {
