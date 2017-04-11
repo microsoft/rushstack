@@ -314,7 +314,16 @@ export default class RushConfiguration {
             `for local project: "${dependency}"`);
         }
 
-        this._pinnedVersions.set(dependency, pinnedVersion);
+        if (this._pinnedVersions.has(dependency)) {
+          const preferredVersion: string = this._pinnedVersions.get(dependency);
+          if (preferredVersion !== pinnedVersion) {
+            console.log(`A pinned version for ${dependency}@${pinnedVersion} in "rush.json" ` +
+              `is conflicting with pinned version ${dependency}@${preferredVersion} in "pinnedVersions.json", ` +
+              `using ${dependency}@${preferredVersion}`);
+          }
+        } else {
+          this._pinnedVersions.set(dependency, pinnedVersion);
+        }
       });
     }
   }
