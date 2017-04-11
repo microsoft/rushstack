@@ -7,7 +7,7 @@ export enum TestMissingCommentStar {
 }
 
 /**
- * {@inheritdoc @types/es6-collections:ForEachable}
+ * {@inheritdoc es6-collections:ForEachable}
  */
 export interface IExternalPackageLookup {
 }
@@ -21,26 +21,29 @@ export enum inheritDisplayMode {
 /**
  * {@inheritdoc @microsoft/sp-core-library:Display}
  */
-export enum inheritCorrectlyButNotFound {
+export enum packageLocatedButExportNotFound {
 }
 
 /**
- * (Error #1) This JsDoc should raise an error since a summary is provided along 
+ * This JsDoc should raise an error since a summary is provided along 
  * with an \@inheritdoc tag. We do not allow summary, remarks or param JsDocs
  * to be given since the inheritdoc information will overwrite it. 
  * It will not appear in the output json files because of the error.
  * 
  * {@inheritdoc @microsoft/sp-core-library:DisplayMode}
  */
+// (Error #1)
+// Error: Cannot provide summary in JsDoc if @inheritdoc tag is given
 export enum inheritDisplayModeError {
+  
 }
 
 /** 
  * {@inheritdoc @microsoft/sp-core-library:DisplayModeDeprecated}
+ * 
  */
 export enum inheritDisplayModeErrorDeprecated {
-  // (Error #2) Testing because the inherited API item is deprecated but this 
-  // documentation does not have its own @deprecated tag and message
+  
 }
 
 /** 
@@ -75,44 +78,63 @@ export function functionWithIncompleteParameterType(param1, param2: string): boo
  * correctly. It can contain a {@link https://bing.com/ | bing home}. This block is entirely
  * valid and a correct documentation object should be built for this ApiItem.
  *
- * @summary Mock class for testing JsDoc parser (Error #3 and #4 - \@summary not allowed and text 
- * should be marked with \@internal.)
+ * @summary Mock class for testing JsDoc parser
  * @public
  */
+// (Error #2)
+// Error: The JSDoc tag "@summary" is not supported in this context
+// (Error #4)
+// Error: Unexpected text in JSDoc comment: "Mock class for testing JsDoc parser"
 export default class MyDocumentedClass {
+  
+
   private _privateTest: number = 123;
 
   constructor() {
   }
 
   /**
-   * This doc has an invalid tag that should throw an error (Error #5)
+   * This doc has an invalid tag that should throw an error
    * @badJsDocTag
    */
+  // (Error #4) 
+  // Error: Unknown tag name for inline tag.
   public fieldWithBadTag: string;
 
   /**
-   * This doc has an unknown inline tag {@badTag} (Error #6)
+   * This doc has an unknown inline tag {@badTag}
    * @deprecated - see next version.
    */
+  // (Error #5) 
+  // Error: Unknown tag name for inline tag.
   public fieldWithInvalidInlineTag: string;
 
   /**
-   * This doc has too few params for link tag {@link } (Error #7)
+   * This doc has too few params for link tag {@link }
    */
+  // (Error #6)
+  // Error: Too few parameters for @link inline tag.
   public linkTagMissingParam: string;
 
   /**
    * @beta
-   * @internalremarks these remarks @beta can not contain a tag (Error #8)
+   * @internalremarks these remarks @beta can not contain a tag
    */
+  // (Error #7)
+  // Unexpected text in JSDoc comment: "can not contain a tag"
+  // (Error #8)
+  // Error: More than one API Tag was specified
   public betaTagmissingParam: string;
 
   /**
    * This doc has {curly braces} which is valid but the inline \@link token is missing a
-   * pipe between the url and the display text {@link validURL \{text\}} (Error #9).
+   * pipe between the url and the display text {@link validURL \{text\}}
    * The displayName is not allowed to have non word characters.
    */
+  // (Error #9)
+  // Error: API reference expression must be of the form: 
+  // 'scopeName/packageName:exportName.memberName | display text'where the '|' is required if 
+  // a display text is provided
   public fieldWithValidEscapedBraces: string;
 
   /**
