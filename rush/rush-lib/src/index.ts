@@ -18,6 +18,11 @@ export {
 } from './data/PackageReviewConfiguration';
 
 export {
+  IPinnedVersionsJson,
+  PinnedVersionsConfiguration
+} from './data/PinnedVersionsConfiguration';
+
+export {
   PackageDependencyKind,
   IPackageDependency,
   IPackageJson,
