@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "A fast solution for building/publishing many NPM packages",
   "repository": {
     "type": "git",
@@ -18,7 +18,7 @@
   "license": "MIT",
   "dependencies": {
     "@microsoft/package-deps-hash": "~2.0.1",
-    "@microsoft/rush-lib": "2.4.0",
+    "@microsoft/rush-lib": "2.5.0",
     "@microsoft/stream-collator": "~2.0.0",
     "@microsoft/ts-command-line": "~1.1.1",
     "builtins": "~1.0.3",
