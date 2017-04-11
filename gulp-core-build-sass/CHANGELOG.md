@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-sass
 
-This log was last generated on Mon, 20 Mar 2017 21:52:20 GMT and should not be manually modified.
+This log was last generated on Tue, 11 Apr 2017 01:33:59 GMT and should not be manually modified.
+
+## 3.1.0
+Tue, 11 Apr 2017 01:33:59 GMT
+
+### Minor changes
+
+- Add task config property: warnOnCssInvalidPropertyName to gulp-core-build-sass. if set to false, CSS module compile warning message will changed to verbose message
 
 ## 3.0.0
 Mon, 20 Mar 2017 21:52:20 GMT
