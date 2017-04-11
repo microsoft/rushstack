@@ -94,12 +94,7 @@
           "type": "string"
         }
       },
-      "deprecatedMessage": [
-        {
-          "kind": "textDocElement",
-          "value": "A deprecated message for forEach()."
-        }
-      ],
+      "deprecatedMessage": [],
       "summary": [
         {
           "kind": "textDocElement",
