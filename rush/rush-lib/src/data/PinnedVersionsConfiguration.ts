@@ -44,6 +44,10 @@ export class PinnedVersionsConfiguration {
     return this._data.get(dependency);
   }
 
+  public has(dependency: string): boolean {
+    return this._data.has(dependency);
+  }
+
   public forEach(cb: (version: string, dependency: string) => void): this {
     this._data.forEach(cb);
     return this;
@@ -52,6 +56,19 @@ export class PinnedVersionsConfiguration {
   public save(): this {
     JsonFile.saveJsonFile(this._serialize(), this._filename);
     return this;
+  }
+
+  public delete(dependency: string): boolean {
+    return this._data.delete(dependency);
+  }
+
+  public clear(): this {
+    this._data.clear();
+    return this;
+  }
+
+  public get size(): number {
+    return this._data.size;
   }
 
   private _serialize(): IPinnedVersionsJson {
