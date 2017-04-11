@@ -2,6 +2,34 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "2.5.0",
+      "tag": "@microsoft/rush_v2.5.0",
+      "date": "Tue, 11 Apr 2017 21:20:58 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Deprecate the pinnedVersions field of rush.json in favor of a standalone pinnedVer sions.json"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Bump stream-collator to 2.0.0"
+          },
+          {
+            "comment": "Publish: Improve detection of already published package versions"
+          },
+          {
+            "comment": "Publish: Fix a bug where not all project versions get updated for prerelease"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-lib\" from `2.4.0` to `2.5.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.4.0",
       "tag": "@microsoft/rush_v2.4.0",
       "date": "Thu, 30 Mar 2017 18:25:38 GMT",
