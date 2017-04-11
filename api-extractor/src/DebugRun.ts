@@ -29,7 +29,7 @@ const extractor: Extractor = new Extractor( {
 
 extractor.loadExternalPackages('./testInputs/external-api-json');
 
-extractor.analyze({entryPointFile: './testInputs/example2/index.ts',
+extractor.analyze({entryPointFile: './testInputs/example2/src/index.ts',
   otherFiles: []});
 
 const externalPackageApiRef: IApiDefinintionReferenceParts = {
