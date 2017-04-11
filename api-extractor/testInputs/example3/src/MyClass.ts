@@ -55,25 +55,25 @@ export enum inheritLocalCircularDependencyTwo {
 }
 
 /**
- * {@inheritdoc @types/es6-collections:ForEachable }
+ * {@inheritdoc es6-collections:ForEachable }
  */
 export interface IJsonResolutionInterface {
 }
 
 
 /**
- * {@inheritdoc @types/es6-collections:aFunction }
+ * {@inheritdoc es6-collections:aFunction }
  */
 export function jsonResolutionFunction(): boolean {
   return true;
 }
 
 /**
- * {@inheritdoc @types/es6-collections:aClass }
+ * {@inheritdoc es6-collections:aClass }
  */
 export class jsonResolutionClass {
   /**
-   * {@inheritdoc @types/es6-collections:ForEachable.aMethod }
+   * {@inheritdoc es6-collections:aFunction }
    */
   public jsonResolutionMethod(): boolean {
       return true;
