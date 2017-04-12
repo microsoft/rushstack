@@ -1,10 +1,13 @@
 {
   "npmVersion": "3.10.9",
-  "rushMinimumVersion": "2.4.0",
+  "rushMinimumVersion": "2.5.0",
   "nodeSupportedVersionRange": ">=4.3.0",
   "commonFolder": "common",
   "projectFolderMinDepth": 1,
-  "reviewCategories": [ "libraries", "other" ],
+  "reviewCategories": [
+    "libraries",
+    "other"
+  ],
   "packageReviewFile": "common/reviews/PackageDependencies.json",
   "gitPolicy": {
     // Require GitHub scrubbed e-mails
@@ -110,7 +113,6 @@
         "@microsoft/node-library-build"
       ]
     },
-
     // Rush is published manually for two reasons:
     // 1. We need to do proper validation before pushing out a new release
     //    that potentially could screw up everyone's daily work.
