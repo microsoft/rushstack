@@ -48,17 +48,17 @@ export default class GenerateAction extends CommandLineAction {
         console.log('Deleting common/node_modules folder...');
         AsyncRecycle.recycleDirectory(rushConfiguration, nodeModulesPath);
       }
-    }
 
-    if (rushConfiguration.cacheFolder) {
-      const cacheCleanArgs: string[] = ['cache', 'clean', '--cache', `"${rushConfiguration.cacheFolder}"`];
-      console.log(os.EOL + `Running "npm ${cacheCleanArgs.join(' ')}"`);
-      Utilities.executeCommand(rushConfiguration.npmToolFilename, cacheCleanArgs, rushConfiguration.commonFolder);
-    } else {
-      // Ideally we should clean the global cache here.  However, the global NPM cache
-      // is (inexplicably) not threadsafe, so if there are any concurrent "npm install"
-      // processes running this would cause them to crash.
-      console.log(os.EOL + 'Skipping "npm cache clean" because the cache is global.');
+      if (rushConfiguration.cacheFolder) {
+        const cacheCleanArgs: string[] = ['cache', 'clean', '--cache', `"${rushConfiguration.cacheFolder}"`];
+        console.log(os.EOL + `Running "npm ${cacheCleanArgs.join(' ')}"`);
+        Utilities.executeCommand(rushConfiguration.npmToolFilename, cacheCleanArgs, rushConfiguration.commonFolder);
+      } else {
+        // Ideally we should clean the global cache here.  However, the global NPM cache
+        // is (inexplicably) not threadsafe, so if there are any concurrent "npm install"
+        // processes running this would cause them to crash.
+        console.log(os.EOL + 'Skipping "npm cache clean" because the cache is global.');
+      }
     }
   }
 
