@@ -40,6 +40,7 @@ export default class InstallAction extends CommandLineAction {
   private _cleanInstallFull: CommandLineFlagParameter;
   private _bypassPolicy: CommandLineFlagParameter;
   private _noLinkParameter: CommandLineFlagParameter;
+  private _cleanCache: CommandLineFlagParameter;
 
   private _tempModulesFiles: string[] = [];
 
@@ -134,6 +135,10 @@ export default class InstallAction extends CommandLineAction {
     this._noLinkParameter = this.defineFlagParameter({
       parameterLongName: '--no-link',
       description: 'Do not automatically run the Link action after completing Generate action'
+    });
+    this._cleanCache = this.defineFlagParameter({
+      parameterLongName: '--clean-cache',
+      description: 'If a local cache is specified, cleans the local cache before the install'
     });
   }
 
@@ -262,6 +267,19 @@ export default class InstallAction extends CommandLineAction {
     let needToInstall: boolean = false;
     let skipPrune: boolean = false;
 
+    if (this._cleanInstall.value || this._cleanInstallFull.value || this._cleanCache.value) {
+      if (this._rushConfiguration.cacheFolder) {
+        const cacheCleanArgs: string[] = ['cache', 'clean', '--cache', `"${this._rushConfiguration.cacheFolder}"`];
+        console.log(os.EOL + `Running "npm ${cacheCleanArgs.join(' ')}"`);
+        Utilities.executeCommand(npmToolFilename, cacheCleanArgs, this._rushConfiguration.commonFolder);
+      } else {
+        // Ideally we should clean the global cache here.  However, the global NPM cache
+        // is (inexplicably) not threadsafe, so if there are any concurrent "npm install"
+        // processes running this would cause them to crash.
+        console.log(os.EOL + 'Skipping "npm cache clean" because the cache is global.');
+      }
+    }
+
     if (this._cleanInstall.value || this._cleanInstallFull.value) {
       if (fsx.existsSync(commonNodeModulesMarkerFilename)) {
         // If we are cleaning the node_modules folder, then also delete the flag file
@@ -274,17 +292,6 @@ export default class InstallAction extends CommandLineAction {
         console.log('Deleting old files from ' + commonNodeModulesFolder);
         Utilities.dangerouslyDeletePath(commonNodeModulesFolder);
         Utilities.createFolderWithRetry(commonNodeModulesFolder);
-      }
-
-      if (this._rushConfiguration.cacheFolder) {
-        const cacheCleanArgs: string[] = ['cache', 'clean', this._rushConfiguration.cacheFolder];
-        console.log(os.EOL + `Running "npm ${cacheCleanArgs.join(' ')}"`);
-        Utilities.executeCommand(npmToolFilename, cacheCleanArgs, this._rushConfiguration.commonFolder);
-      } else {
-        // Ideally we should clean the global cache here.  However, the global NPM cache
-        // is (inexplicably) not threadsafe, so if there are any concurrent "npm install"
-        // processes running this would cause them to crash.
-        console.log(os.EOL + 'Skipping "npm cache clean" because the cache is global.');
       }
 
       needToInstall = true;
