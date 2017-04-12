@@ -22,6 +22,12 @@ export default class MyClass {
    * an unresolved type warning.
    */
   public typeLiteralProp: [MissingExport];
+
+  /**
+   * Testing the type resolution of external API types.
+   */
+  public functionWithExternalType(promise: Promise<void>): void {
+  }
   
   /**
    * This is a getter to test if the type reference is
