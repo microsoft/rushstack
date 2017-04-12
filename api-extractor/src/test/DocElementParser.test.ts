@@ -37,7 +37,7 @@ const extractor: Extractor = new Extractor({
   errorHandler: testErrorHandler
 });
 
-// These warnings would normally be printed at the bottom 
+// These warnings would normally be printed at the bottom
 // of the source package's '*.api.ts' file.
 const warnings: string[] = [];
 

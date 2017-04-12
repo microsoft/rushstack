@@ -12,7 +12,7 @@ import PackageJsonHelpers from '../PackageJsonHelpers';
 
 /**
  * An export name and the symbol from which the export was originally defined.
- * 
+ *
  * For example, suppose a class is defined as "export default class MyClass { }"
  * but exported from the package's index.ts like this:
  *
@@ -101,13 +101,13 @@ export default class ApiPackage extends ApiItemContainer {
 
   /**
    * Finds and returns the original symbol name.
-   * 
+   *
    * For example, suppose a class is defined as "export default class MyClass { }"
    * but exported from the package's index.ts like this:
    *
    *    export { default as _MyClass } from './MyClass';
    *
-   * In this example, given the symbol for _MyClass, getExportedSymbolName() will return 
+   * In this example, given the symbol for _MyClass, getExportedSymbolName() will return
    * the string "MyClass".
    */
   public tryGetExportedSymbolName(symbol: ts.Symbol): string {
