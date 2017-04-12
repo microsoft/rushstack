@@ -44,7 +44,6 @@ const externalPackageApiRef: IApiDefinintionReferenceParts = {
 const warnings: string[] = [];
 
 const apiDefinitionRef: ApiDefinitionReference = ApiDefinitionReference.createFromParts(externalPackageApiRef);
-console.log(extractor.docItemLoader.getPackage(apiDefinitionRef, warnings));
 
 const apiFileGenerator: ApiFileGenerator = new ApiFileGenerator();
 apiFileGenerator.writeApiFile('./lib/DebugRun.api.ts', extractor);
