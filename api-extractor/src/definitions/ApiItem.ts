@@ -111,6 +111,16 @@ export interface IApiItemOptions {
   exportSymbol?: ts.Symbol;
 }
 
+// Names of NPM scopes that contain packages that provide typings for the real package.
+// The TypeScript compiler's typings design doesn't seem to handle scoped NPM packages,
+// so the transformation will always be simple, like this:
+// "@types/example" --> "example"
+// NOT like this:
+// "@types/@contoso/example" --> "@contoso/example"
+// "@contosotypes/example" --> "@contoso/example"
+// Eventually this constant should be provided by the gulp task that invokes the compiler.
+const typingsScopeNames: string[] = [ '@types' ];
+
 /**
  * ApiItem is an abstract base that represents TypeScript API definitions such as classes,
  * interfaces, enums, properties, functions, and variables.  Rather than directly using the
@@ -472,12 +482,20 @@ abstract class ApiItem {
     // Example: "@microsoft/sp-core-library"
     let typeReferencePackageName: string = '';
 
-    // If we can not find a package path, we consider the type to be part of the current project's package. 
+    // If we can not find a package path, we consider the type to be part of the current project's package.
     // One case where this happens is when looking for a type that is a symlink
     if (!typeReferencePackagePath) {
       typeReferencePackageName = this.extractor.package.name;
     } else {
       typeReferencePackageName = PackageJsonHelpers.readPackageName(typeReferencePackagePath);
+
+      typingsScopeNames.every(typingScopeName => {
+        if (typeReferencePackageName.indexOf(typingScopeName) > -1) {
+          typeReferencePackageName = typeReferencePackageName.replace(typingScopeName + '/', '');
+          // returning true breaks the every loop
+          return true;
+        }
+      });
     }
 
     // Read the name/version from package.json -- that tells you what package the symbol
@@ -503,7 +521,7 @@ abstract class ApiItem {
       }
     }
 
-    // External 
+    // External
     // Attempt to load from docItemLoader
     const scopedPackageName: IScopedPackageName = ApiDefinitionReference.parseScopedPackageName(
       typeReferencePackageName
@@ -515,7 +533,7 @@ abstract class ApiItem {
       memberName: ''
     };
 
-    // the currentSymbol.name is the name of an export, if it contains a '.' then the substring 
+    // the currentSymbol.name is the name of an export, if it contains a '.' then the substring
     // after the period is the member name
     if (currentSymbol.name.indexOf('.') > -1) {
       const exportMemberName: string[] = currentSymbol.name.split('.');
@@ -530,9 +548,10 @@ abstract class ApiItem {
     );
 
     // Attempt to resolve the type by checking the node modules
+    const referenceResolutionWarnings: string[] = [];
     const resolvedApiItem: ResolvedApiItem = this.extractor.docItemLoader.resolveJsonReferences(
       apiDefinitionRef,
-      this.warnings
+      referenceResolutionWarnings
     );
 
     if (resolvedApiItem) {
@@ -541,11 +560,10 @@ abstract class ApiItem {
       return;
     } else {
       // [CASE 4] External/Unresolved
-      // For cases when we can't find the external package, we are going to write a summary 
+      // For cases when we can't find the external package, we are going to write a report
       // at the bottom of the *api.ts file. We do this because we do not yet support references
       // to items like react:Component.
-      this.warnings.push(`Unable to resolve external type reference for "${typeName}"`);
-      // this.reportWarning(`Unable to resolve external type reference for "${typeName}"`);
+      // For now we are going to silently ignore these errors.
       return;
     }
   }

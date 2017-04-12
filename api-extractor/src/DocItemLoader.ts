@@ -58,9 +58,10 @@ export default class DocItemLoader {
     apiPackage: ApiPackage,
     warnings: string[]): ResolvedApiItem {
 
-    // TODO comment  
+    // We determine if an 'apiDfefinitionRef' is local if it has no package name or if the scoped
+    // package name is equal to the current package's scoped package name.
     if (!apiDefinitionRef.packageName || apiDefinitionRef.toScopePackageString() === apiPackage.name) {
-      // Resolution for local references 
+      // Resolution for local references
       return this.resolveLocalReferences(apiDefinitionRef, apiPackage, warnings);
 
     } else {
@@ -119,9 +120,11 @@ export default class DocItemLoader {
     warnings: string[]): ResolvedApiItem {
 
     // Check if package can be not found
-    const docPackage: IDocPackage =  this.getPackage(apiDefinitionRef, warnings);
+    const docPackage: IDocPackage =  this.getPackage(apiDefinitionRef);
     if (!docPackage) {
-      // Error is reported in this.getPackage()
+      // package not found in node_modules
+      warnings.push(`Unable to find a documentation file (\"${apiDefinitionRef.packageName}.api.json\")` +
+        ' for the referenced package');
       return undefined;
     }
 
@@ -177,7 +180,7 @@ export default class DocItemLoader {
    *
    * @param apiDefinitionRef - interface with propropties pertaining to the API definition reference
    */
-  public getPackage(apiDefinitionRef: ApiDefinitionReference, warnings: string[]): IDocPackage {
+  public getPackage(apiDefinitionRef: ApiDefinitionReference): IDocPackage {
     let cachePackageName: string = '';
 
     // We concatenate the scopeName and packageName in case there are packageName conflicts
@@ -201,10 +204,8 @@ export default class DocItemLoader {
     );
 
     if (!fsx.existsSync(path.join(apiJsonFilePath))) {
-      // package not found in node_modules
-      warnings.push(`Unable to find a documentation file (\"${apiDefinitionRef.packageName}.api.json\")` +
-        'for the referenced package');
-      return;
+      // Error should be handled by the caller
+      return undefined;
     }
 
     return this.loadPackageIntoCache(apiJsonFilePath, cachePackageName);
