@@ -37,8 +37,6 @@ export interface IParsedScopeName {
 export default class DocItemLoader {
   private _cache: Map<string, IDocPackage>;
   private _projectFolder: string; // Root directory to check for node modules
-  private _rootTypes: string[]; // Root directory to check for packages
-  private _rootSuffixes: string[];
 
   /**
    * The projectFolder is the top-level folder containing package.json for a project
@@ -50,8 +48,6 @@ export default class DocItemLoader {
     }
 
     this._projectFolder = projectFolder;
-    this._rootTypes = ['lib/external-api-json/'];
-    this._rootSuffixes = ['es6-collections', 'es6-promise', 'whatwg-fetch'];
     this._cache = new Map<string, IDocPackage>();
   }
 
@@ -62,17 +58,8 @@ export default class DocItemLoader {
     apiPackage: ApiPackage,
     warnings: string[]): ResolvedApiItem {
 
-    // We first check if the export name matches any of our 
-    // special cases package for external package (es6-collections, es6-promise, etc)
-    // these special cases are hard coded in this package.
-    // We do this because the presense or absense of a field in the apiDefinitionRef
-    // is not a definititive way to infer the location of the package and 
-    // we do not want to falsely report an error for looking in the
-    // wrong place.
-    if (apiDefinitionRef.exportName in this._rootSuffixes) {
-      return this.resolveJsonReferences(apiDefinitionRef, warnings);
-
-    } else if (!apiDefinitionRef.packageName && !apiDefinitionRef.scopeName) {
+    // TODO comment  
+    if (!apiDefinitionRef.packageName || apiDefinitionRef.toScopePackageString() === apiPackage.name) {
       // Resolution for local references 
       return this.resolveLocalReferences(apiDefinitionRef, apiPackage, warnings);
 
@@ -215,14 +202,8 @@ export default class DocItemLoader {
 
     if (!fsx.existsSync(path.join(apiJsonFilePath))) {
       // package not found in node_modules
-      // Try to locate the package in our rootTypes
-      for (const rootTypePath of this._rootTypes) {
-        if (fsx.existsSync(path.join(this._projectFolder, rootTypePath, cachePackageName))) {
-          return this.loadPackageIntoCache(
-            path.join(this._projectFolder, rootTypePath, cachePackageName), cachePackageName);
-        }
-      }
-      warnings.push(`Unable to find referenced package \"${apiDefinitionRef.toScopePackageString()}\"`);
+      warnings.push(`Unable to find a documentation file (\"${apiDefinitionRef.packageName}.api.json\")` +
+        'for the referenced package');
       return;
     }
 

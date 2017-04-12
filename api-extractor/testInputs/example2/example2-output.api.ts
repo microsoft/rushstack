@@ -1,4 +1,4 @@
-// WARNING: Unable to find referenced package "es6-collections"
+// WARNING: Unable to find a documentation file ("es6-collections.api.json")for the referenced package
 interface IExternalPackageLookup {
 }
 

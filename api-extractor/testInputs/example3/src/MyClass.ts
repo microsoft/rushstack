@@ -21,7 +21,7 @@ export enum inheritEnumValues {
    */
   index_zero = 0,
   /**
-   * {@inheritdoc sourceEnumValuesDoc.one}
+   * {@inheritdoc @scope/example3:sourceEnumValuesDoc.one}
    */
   index_one = 1,
 }
