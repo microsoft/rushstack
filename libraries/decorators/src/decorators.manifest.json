@@ -4,6 +4,6 @@
   "id": "f97266fb-ccb7-430e-9384-4124d05295d3",
   "alias": "Decorators",
   "componentType": "Library",
-  "version": "0.1.0",
+  "version": "*",
   "manifestVersion": 2
 }
