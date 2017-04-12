@@ -254,7 +254,7 @@ export default class InstallAction extends CommandLineAction {
     const npmToolFilename: string = this._rushConfiguration.npmToolFilename;
     if (!fsx.existsSync(npmToolFilename)) {
       // This is a sanity check.  It should never happen if the above logic worked correctly.
-      throw new Error('Failed to create "' + npmToolFilename + '"');
+      throw new Error('Failed to find "' + npmToolFilename + '"');
     }
 
     console.log(os.EOL + colors.bold('Checking modules in ' + this._rushConfiguration.commonFolder) + os.EOL);
@@ -266,19 +266,6 @@ export default class InstallAction extends CommandLineAction {
 
     let needToInstall: boolean = false;
     let skipPrune: boolean = false;
-
-    if (this._cleanInstall.value || this._cleanInstallFull.value || this._cleanCache.value) {
-      if (this._rushConfiguration.cacheFolder) {
-        const cacheCleanArgs: string[] = ['cache', 'clean', '--cache', `"${this._rushConfiguration.cacheFolder}"`];
-        console.log(os.EOL + `Running "npm ${cacheCleanArgs.join(' ')}"`);
-        Utilities.executeCommand(npmToolFilename, cacheCleanArgs, this._rushConfiguration.commonFolder);
-      } else {
-        // Ideally we should clean the global cache here.  However, the global NPM cache
-        // is (inexplicably) not threadsafe, so if there are any concurrent "npm install"
-        // processes running this would cause them to crash.
-        console.log(os.EOL + 'Skipping "npm cache clean" because the cache is global.');
-      }
-    }
 
     if (this._cleanInstall.value || this._cleanInstallFull.value) {
       if (fsx.existsSync(commonNodeModulesMarkerFilename)) {
@@ -319,7 +306,9 @@ export default class InstallAction extends CommandLineAction {
       }
     }
 
-    if (needToInstall) {
+    const shouldCleanCache: boolean = (this._cleanInstall.value || this._cleanInstallFull.value || this._cleanCache.value);
+
+    if (needToInstall || shouldCleanCache) {
       // The "npm install" command is not transactional; if it is killed, then the "node_modules"
       // folder may be in a corrupted state (e.g. because a postinstall script only executed partially).
       // Rush works around this using a marker file "last-install.flag".  We delete this file
@@ -338,6 +327,19 @@ export default class InstallAction extends CommandLineAction {
       } else {
         // Delete the successful install file to indicate the install has started
         fsx.unlinkSync(commonNodeModulesMarkerFilename);
+      }
+
+      if (shouldCleanCache) {
+        if (this._rushConfiguration.cacheFolder) {
+          const cacheCleanArgs: string[] = ['cache', 'clean', '--cache', `"${this._rushConfiguration.cacheFolder}"`];
+          console.log(os.EOL + `Running "npm ${cacheCleanArgs.join(' ')}"`);
+          Utilities.executeCommand(npmToolFilename, cacheCleanArgs, this._rushConfiguration.commonFolder);
+        } else {
+          // Ideally we should clean the global cache here.  However, the global NPM cache
+          // is (inexplicably) not threadsafe, so if there are any concurrent "npm install"
+          // processes running this would cause them to crash.
+          console.log(os.EOL + 'Skipping "npm cache clean" because the cache is global.');
+        }
       }
 
       if (!skipPrune) {
