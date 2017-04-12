@@ -1,6 +1,55 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Tue, 31 Jan 2017 20:32:37 GMT and should not be manually modified.
+This log was last generated on Fri, 07 Apr 2017 21:43:16 GMT and should not be manually modified.
+
+## 3.0.2
+Fri, 07 Apr 2017 21:43:16 GMT
+
+### Patches
+
+- Adjusted the version specifier for typescript to ~2.2.2
+
+## 3.0.1
+Wed, 05 Apr 2017 13:01:40 GMT
+
+### Patches
+
+- Fixing the way the TSLint task is configured to allow removal of existing rules.
+
+## 3.0.0
+Mon, 20 Mar 2017 21:52:20 GMT
+
+### Breaking changes
+
+- Updating typescript, gulp-typescript, and tslint.
+
+## 2.4.1
+Mon, 20 Mar 2017 04:20:13 GMT
+
+### Patches
+
+- Reverting change.
+
+## 2.4.0
+Sun, 19 Mar 2017 19:10:30 GMT
+
+### Minor changes
+
+- Updating typescript, gulp-typescript, and tslint.
+
+## 2.3.0
+Thu, 16 Mar 2017 19:02:22 GMT
+
+### Minor changes
+
+- Write the TSLint configuration file after executing the task.
+
+## 2.2.6
+Wed, 15 Mar 2017 01:32:09 GMT
+
+### Patches
+
+- Locking `@types` packages. Synchronizing version specifiers for dependencies with other `web-build-tools` projects.
 
 ## 2.2.5
 Tue, 31 Jan 2017 20:32:37 GMT

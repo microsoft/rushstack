@@ -21,6 +21,7 @@ export interface IChangeInfoHash {
   [key: string]: IChangeInfo;
 }
 import { execSync } from 'child_process';
+import PrereleaseToken from './PrereleaseToken';
 
 export default class PublishUtilities {
   /**
@@ -32,7 +33,7 @@ export default class PublishUtilities {
     allPackages: Map<string, RushConfigurationProject>,
     changesPath: string,
     includeCommitDetails?: boolean,
-    prereleaseName?: string
+    prereleaseToken?: PrereleaseToken
   ): IChangeInfoHash {
 
     let changeFiles: string[] = [];
@@ -64,7 +65,7 @@ export default class PublishUtilities {
           allChanges[packageName],
           allChanges,
           allPackages,
-          prereleaseName
+          prereleaseToken
         );
       }
     }
@@ -78,9 +79,14 @@ export default class PublishUtilities {
         const deps: string[] = project.downstreamDependencyProjects;
 
         // Write the new version expected for the change.
-        change.newVersion = (change.changeType >= ChangeType.patch) ?
-          semver.inc(pkg.version, ChangeType[change.changeType]) :
-          pkg.version;
+        if (prereleaseToken && prereleaseToken.isSuffix) {
+          // Suffix does not bump up the version.
+          change.newVersion = pkg.version;
+        } else {
+          change.newVersion = (change.changeType >= ChangeType.patch) ?
+            semver.inc(pkg.version, ChangeType[change.changeType]) :
+            pkg.version;
+        }
 
         if (deps) {
           for (const depName of deps) {
@@ -116,7 +122,7 @@ export default class PublishUtilities {
     allChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
     shouldCommit: boolean,
-    prereleaseName?: string
+    prereleaseToken?: PrereleaseToken
   ): void {
 
     Object.keys(allChanges).forEach(packageName => PublishUtilities._writePackageChanges(
@@ -124,7 +130,7 @@ export default class PublishUtilities {
       allChanges,
       allPackages,
       shouldCommit,
-      prereleaseName));
+      prereleaseToken));
   }
 
   /**
@@ -146,7 +152,7 @@ export default class PublishUtilities {
   public static findMissingChangedPackages(
     changeFileFullPath: string,
     changedPackages: string[]
-    ): string[] {
+  ): string[] {
     const changeRequest: IChangeInfo = JSON.parse(fsx.readFileSync(changeFileFullPath, 'utf8'));
     const requiredSet: Set<string> = new Set(changedPackages);
     changeRequest.changes.forEach(change => {
@@ -177,9 +183,9 @@ export default class PublishUtilities {
     allChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
     shouldCommit: boolean,
-    prereleaseName?: string
+    prereleaseToken?: PrereleaseToken
   ): void {
-    const newVersion: string = PublishUtilities._getChangeInfoNewVersion(change, prereleaseName);
+    const newVersion: string = PublishUtilities._getChangeInfoNewVersion(change, prereleaseToken);
 
     console.log(
       `${EOL}* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: ${ChangeType[change.changeType]} update ` +
@@ -193,9 +199,9 @@ export default class PublishUtilities {
     pkg.version = newVersion;
 
     // Update the package's dependencies.
-    PublishUtilities._updateDependencies(pkg.name, pkg.dependencies, allChanges, allPackages, prereleaseName);
+    PublishUtilities._updateDependencies(pkg.name, pkg.dependencies, allChanges, allPackages, prereleaseToken);
     // Update the package's dev dependencies.
-    PublishUtilities._updateDependencies(pkg.name, pkg.devDependencies, allChanges, allPackages, prereleaseName);
+    PublishUtilities._updateDependencies(pkg.name, pkg.devDependencies, allChanges, allPackages, prereleaseToken);
 
     change.changes.forEach(subChange => {
       if (subChange.comment) {
@@ -222,7 +228,7 @@ export default class PublishUtilities {
     dependencies: { [key: string]: string; },
     allChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
-    prereleaseName: string
+    prereleaseToken: PrereleaseToken
   ): void {
 
     if (dependencies) {
@@ -230,10 +236,10 @@ export default class PublishUtilities {
         if (!PublishUtilities._isCyclicDependency(allPackages, packageName, depName)) {
           const depChange: IChangeInfo = allChanges[depName];
 
-          if (depChange && prereleaseName) {
+          if (depChange && prereleaseToken && prereleaseToken.hasValue) {
             // For prelease, the newVersion needs to be appended with prerelease name.
             // And dependency should specify the specific prerelease version.
-            dependencies[depName] = PublishUtilities._getChangeInfoNewVersion(depChange, prereleaseName);
+            dependencies[depName] = PublishUtilities._getChangeInfoNewVersion(depChange, prereleaseToken);
           } else if (depChange && depChange.changeType >= ChangeType.patch) {
             PublishUtilities._updateDependencyVersion(
               packageName,
@@ -256,14 +262,14 @@ export default class PublishUtilities {
    */
   private static _getChangeInfoNewVersion(
     change: IChangeInfo,
-    prereleaseName: string
+    prereleaseToken: PrereleaseToken
   ): string {
     let newVersion: string = change.newVersion;
-    if (prereleaseName) {
-      if (change.changeType === ChangeType.dependency) {
+    if (prereleaseToken && prereleaseToken.hasValue) {
+      if (prereleaseToken.isPrerelease && change.changeType === ChangeType.dependency) {
         newVersion = semver.inc(newVersion, 'patch');
       }
-      return `${newVersion}-${prereleaseName}`;
+      return `${newVersion}-${prereleaseToken.name}`;
     } else {
       return newVersion;
     }
@@ -277,7 +283,8 @@ export default class PublishUtilities {
   private static _addChange(
     change: IChangeInfo,
     allChanges: IChangeInfoHash,
-    allPackages: Map<string, RushConfigurationProject>
+    allPackages: Map<string, RushConfigurationProject>,
+    prereleaseToken?: PrereleaseToken
   ): boolean {
     let hasChanged: boolean = false;
     const packageName: string = change.packageName;
@@ -316,9 +323,13 @@ export default class PublishUtilities {
       hasChanged = hasChanged || (oldChangeType !== currentChange.changeType);
     }
 
-    currentChange.newVersion = change.changeType >= ChangeType.patch ?
-      semver.inc(pkg.version, ChangeType[currentChange.changeType]) :
-      pkg.version;
+    if (prereleaseToken && prereleaseToken.isSuffix) {
+      currentChange.newVersion = pkg.version;
+    } else {
+      currentChange.newVersion = change.changeType >= ChangeType.patch ?
+        semver.inc(pkg.version, ChangeType[currentChange.changeType]) :
+        pkg.version;
+    }
 
     currentChange.newRangeDependency =
       `>=${currentChange.newVersion} <${semver.inc(currentChange.newVersion, 'major')}`;
@@ -330,7 +341,7 @@ export default class PublishUtilities {
     change: IChangeInfo,
     allChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
-    prereleaseName: string
+    prereleaseToken: PrereleaseToken
   ): void {
 
     const packageName: string = change.packageName;
@@ -339,14 +350,14 @@ export default class PublishUtilities {
     // Iterate through all downstream dependencies for the package.
     if (downstreamNames) {
       if ((change.changeType >= ChangeType.patch) ||
-        (prereleaseName && change.changeType === ChangeType.dependency)) {
+        (prereleaseToken && prereleaseToken.hasValue)) {
         for (const depName of downstreamNames) {
           const pkg: IPackageJson = allPackages.get(depName).packageJson;
 
           PublishUtilities._updateDownstreamDependency(pkg.name, pkg.dependencies, change, allChanges, allPackages,
-            prereleaseName);
+            prereleaseToken);
           PublishUtilities._updateDownstreamDependency(pkg.name, pkg.devDependencies, change, allChanges, allPackages,
-            prereleaseName);
+            prereleaseToken);
         }
       }
     }
@@ -358,12 +369,13 @@ export default class PublishUtilities {
     change: IChangeInfo,
     allChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
-    prereleaseName: string
-    ): void {
+    prereleaseToken: PrereleaseToken
+  ): void {
 
     if (dependencies && dependencies[change.packageName]) {
       const requiredVersion: string = dependencies[change.packageName];
-      const alwaysUpdate: boolean = prereleaseName && !allChanges.hasOwnProperty(parentPackageName);
+      const alwaysUpdate: boolean = prereleaseToken && prereleaseToken.hasValue &&
+        !allChanges.hasOwnProperty(parentPackageName);
 
       // If the version range exists and has not yet been updated to this version, update it.
       if (requiredVersion !== change.newRangeDependency || alwaysUpdate) {
@@ -377,7 +389,7 @@ export default class PublishUtilities {
         const hasChanged: boolean = PublishUtilities._addChange({
           packageName: parentPackageName,
           changeType
-        }, allChanges, allPackages);
+        }, allChanges, allPackages, prereleaseToken);
 
         if (hasChanged || alwaysUpdate) {
           // Only re-evaluate downstream dependencies if updating the parent package's dependency
@@ -386,7 +398,7 @@ export default class PublishUtilities {
             allChanges[parentPackageName],
             allChanges,
             allPackages,
-            prereleaseName
+            prereleaseToken
           );
         }
       }
@@ -419,8 +431,8 @@ export default class PublishUtilities {
         packageName: packageName,
         changeType: ChangeType.dependency,
         comment:
-          `Updating dependency "${dependencyName}" from \`${currentDependencyVersion}\`` +
-          ` to \`${dependencies[dependencyName]}\``
+        `Updating dependency "${dependencyName}" from \`${currentDependencyVersion}\`` +
+        ` to \`${dependencies[dependencyName]}\``
       },
       allChanges,
       allPackages

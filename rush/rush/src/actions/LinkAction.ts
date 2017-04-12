@@ -68,7 +68,7 @@ export default class LinkAction extends CommandLineAction {
 
           stopwatch.stop();
           console.log(os.EOL + colors.green(`Rush link finished successfully. (${stopwatch.toString()})`));
-          console.log(os.EOL + 'Next you should probably run: "rush rebuild -q"');
+          console.log(os.EOL + 'Next you should probably run: "rush rebuild"');
         }
       });
     });
@@ -369,12 +369,12 @@ function linkProject(
             newLocalFolderPath
           );
 
-          const commonPackage: Package = commonPackageLookup.getPackage(newLocalPackage.nameAndVersion);
-          if (!commonPackage) {
+          const commonPackageFromLookup: Package = commonPackageLookup.getPackage(newLocalPackage.nameAndVersion);
+          if (!commonPackageFromLookup) {
             throw Error(`The ${localPackage.name}@${localPackage.version} package was not found`
               + ` in the ${rushConfiguration.commonFolderName} folder`);
           }
-          newLocalPackage.symlinkTargetFolderPath = commonPackage.folderPath;
+          newLocalPackage.symlinkTargetFolderPath = commonPackageFromLookup.folderPath;
 
           let newCyclicSubtreeRoot: Package = cyclicSubtreeRoot;
           if (startingCyclicSubtree) {
