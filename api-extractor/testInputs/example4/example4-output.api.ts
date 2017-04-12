@@ -1,5 +1,6 @@
 // @public
 class MyClass2 {
+  public functionWithExternalType(promise: Promise<void>): void;
   // (undocumented)
   public otherTest(): MyOtherClass;
   // WARNING: The type "MissingExport" needs to be exported by the package (e.g. added to index.ts)
