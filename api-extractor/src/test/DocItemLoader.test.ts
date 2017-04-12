@@ -19,7 +19,7 @@ function testErrorHandler(message: string, fileName: string, lineNumber: number)
   capturedErrors.push({ message, fileName, lineNumber });
 }
 
-// These warnings would normally be printed at the bottom 
+// These warnings would normally be printed at the bottom
 // of the source package's '*.api.ts' file.
 const warnings: string[] = [];
 
@@ -54,8 +54,8 @@ describe('DocItemLoader tests', function (): void {
       const apiJsonGenerator: ApiJsonGenerator = new ApiJsonGenerator();
       apiJsonGenerator.writeJsonFile(outputJsonFile, extractor);
 
-      // This is one error whose output is only visible in the form 
-      // of a 'warning' message in the 'example3-output.api.ts' file. 
+      // This is one error whose output is only visible in the form
+      // of a 'warning' message in the 'example3-output.api.ts' file.
       // 'Unable to find referenced member \"MyClass.methodWithTwoParams\"' is the message
       // that should appear.
       const apiFileGenerator: ApiFileGenerator = new ApiFileGenerator();

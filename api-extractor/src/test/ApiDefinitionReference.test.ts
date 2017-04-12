@@ -52,7 +52,7 @@ describe('ApiDocumentation tests', function (): void {
     });
 
     it('_parseApiReferenceExpression() without scope name and invalid memberName', function (): void {
-      // This won't raise an error (based on our current decision to only show warnings in the *.api.ts 
+      // This won't raise an error (based on our current decision to only show warnings in the *.api.ts
       // files if we can't find a reference)
       apiReferenceExpr = 'sp-core-library:Guid:equals';
       let caughtError: boolean = false;

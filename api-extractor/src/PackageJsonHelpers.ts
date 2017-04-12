@@ -17,10 +17,10 @@ interface IPackageJson {
 export default class PackageJsonHelpers {
 
   /**
-   * Finds the path to the package folder of a given currentPath, by probing 
-   * upwards from the currentPath until a package.json file is found. 
+   * Finds the path to the package folder of a given currentPath, by probing
+   * upwards from the currentPath until a package.json file is found.
    * If no package.json can be found, undefined is returned.
-   * 
+   *
    * @param currentPath - a path (relative or absolute) of the current location
    * @returns a relative path to the package folder
    */
@@ -44,8 +44,8 @@ export default class PackageJsonHelpers {
 
   /**
    * Loads the package.json file and returns the name of the package.
-   * 
-   * @param packageJsonPath - an absolute path to the folder containing the 
+   *
+   * @param packageJsonPath - an absolute path to the folder containing the
    * package.json file, it does not include the 'package.json' suffix.
    * @returns the name of the package (E.g. @microsoft/api-extractor)
    */

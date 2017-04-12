@@ -38,7 +38,7 @@ extractor.analyze({
   entryPointFile: path.join(inputFolder, 'src/index.ts')
 });
 
-// These warnings would normally be printed at the bottom 
+// These warnings would normally be printed at the bottom
 // of the source package's '*.api.ts' file.
 const warnings: string[] = [];
 
