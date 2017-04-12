@@ -1,5 +1,5 @@
-// WARNING: Unable to find a documentation file ("es6-collections.api.json")for the referenced package
-interface IExternalPackageLookup {
+// WARNING: Unable to find a documentation file ("es6-collections.api.json") for the referenced package
+interface IExternalPackageLookupInheritDoc {
 }
 
 // WARNING: __constructor has incomplete type information
