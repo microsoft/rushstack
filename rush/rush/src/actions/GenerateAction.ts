@@ -49,6 +49,17 @@ export default class GenerateAction extends CommandLineAction {
         AsyncRecycle.recycleDirectory(rushConfiguration, nodeModulesPath);
       }
     }
+
+    if (rushConfiguration.cacheFolder) {
+      const cacheCleanArgs: string[] = ['cache', 'clean', '--cache', `"${rushConfiguration.cacheFolder}"`];
+      console.log(os.EOL + `Running "npm ${cacheCleanArgs.join(' ')}"`);
+      Utilities.executeCommand(rushConfiguration.npmToolFilename, cacheCleanArgs, rushConfiguration.commonFolder);
+    } else {
+      // Ideally we should clean the global cache here.  However, the global NPM cache
+      // is (inexplicably) not threadsafe, so if there are any concurrent "npm install"
+      // processes running this would cause them to crash.
+      console.log(os.EOL + 'Skipping "npm cache clean" because the cache is global.');
+    }
   }
 
   private static _deleteCommonTempModules(rushConfiguration: RushConfiguration): void {
@@ -127,8 +138,8 @@ export default class GenerateAction extends CommandLineAction {
 
     console.log(os.EOL + colors.bold(`Running "npm ${npmInstallArgs.join(' ')}"...`));
     Utilities.executeCommand(rushConfiguration.npmToolFilename,
-                             npmInstallArgs,
-                             rushConfiguration.commonFolder);
+      npmInstallArgs,
+      rushConfiguration.commonFolder);
     console.log('"npm install" completed' + os.EOL);
   }
 
@@ -139,8 +150,8 @@ export default class GenerateAction extends CommandLineAction {
     } else {
       console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
       Utilities.executeCommand(rushConfiguration.npmToolFilename,
-                               ['shrinkwrap' ],
-                               rushConfiguration.commonFolder);
+        ['shrinkwrap'],
+        rushConfiguration.commonFolder);
       console.log('"npm shrinkwrap" completed' + os.EOL);
     }
   }
@@ -162,7 +173,7 @@ export default class GenerateAction extends CommandLineAction {
       parameterLongName: '--lazy',
       parameterShortName: '-l',
       description: 'Do not clean the "node_modules" folder before running "npm install".'
-        + ' This is faster, but less correct, so only use it for debugging.'
+      + ' This is faster, but less correct, so only use it for debugging.'
     });
     this._noLinkParameter = this.defineFlagParameter({
       parameterLongName: '--no-link',
@@ -178,8 +189,8 @@ export default class GenerateAction extends CommandLineAction {
     console.log('Starting "rush generate"' + os.EOL);
 
     if (this._rushConfiguration.packageReviewFile) {
-        this._packageReviewChecker = new PackageReviewChecker(this._rushConfiguration);
-        this._packageReviewChecker.saveCurrentDependencies();
+      this._packageReviewChecker = new PackageReviewChecker(this._rushConfiguration);
+      this._packageReviewChecker.saveCurrentDependencies();
     }
 
     // 1. Delete "common\node_modules"
