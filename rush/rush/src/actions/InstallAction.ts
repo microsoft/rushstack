@@ -306,7 +306,8 @@ export default class InstallAction extends CommandLineAction {
       }
     }
 
-    const shouldCleanCache: boolean = (this._cleanInstall.value || this._cleanInstallFull.value || this._cleanCache.value);
+    const shouldCleanCache: boolean =
+      this._cleanInstall.value || this._cleanInstallFull.value || this._cleanCache.value;
 
     if (needToInstall || shouldCleanCache) {
       // The "npm install" command is not transactional; if it is killed, then the "node_modules"
