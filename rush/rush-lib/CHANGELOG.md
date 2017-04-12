@@ -1,6 +1,30 @@
 # Change Log - @microsoft/rush-lib
 
-This log was last generated on Fri, 24 Feb 2017 22:53:18 GMT and should not be manually modified.
+This log was last generated on Tue, 11 Apr 2017 21:20:58 GMT and should not be manually modified.
+
+## 2.5.0
+Tue, 11 Apr 2017 21:20:58 GMT
+
+### Minor changes
+
+- Deprecate the pinnedVersions field of rush.json in favor of a standalone pinnedVersions.json
+
+### Patches
+
+- Bump stream-collator to 2.0.0
+
+## 2.4.0
+Thu, 30 Mar 2017 18:25:38 GMT
+
+### Minor changes
+
+- The 'link' action will be automatically ran after 'install' or 'generate'.
+- Support adding a suffix during rush generate
+
+### Patches
+
+- Fixing an issue where install was not detecting changes to the shrinkwrap
+- Registry should not be hardcoded when auth token is provided
 
 ## 2.3.0
 Fri, 24 Feb 2017 22:53:18 GMT

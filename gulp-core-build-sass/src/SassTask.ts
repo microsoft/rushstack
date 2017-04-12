@@ -26,6 +26,12 @@ export interface ISassTaskConfig {
    */
   useCSSModules?: boolean;
   /**
+   * If false, we will set the CSS property naming warning to verbose message while the module is generating
+   * to prevent task exit with exitcode: 1.
+   * Default value is true
+   */
+  warnOnCssInvalidPropertyName?: boolean;
+  /**
    * If true, we will generate a CSS in the lib folder. If false, the CSS is directly embedded
    * into the TypeScript file
    */
@@ -34,6 +40,12 @@ export interface ISassTaskConfig {
    * If files are matched by sassMatch which do not end in .module.scss, log a warning.
    */
   warnOnNonCSSModules?: boolean;
+  /**
+   * If this option is specified, module css will be exported using the name provided. If an
+   * empty value is specified, the styles will be exported using 'export =', rather than a
+   * named export. By default we use the 'default' export name.
+   */
+  moduleExportName?: string;
 }
 
 const _classMaps: { [file: string]: Object } = {};
@@ -48,6 +60,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       'src/**/*.scss'
     ],
     useCSSModules: false,
+    warnOnCssInvalidPropertyName: true,
     dropCssFiles: false,
     warnOnNonCSSModules: false
   };
@@ -100,8 +113,8 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       moduleSrcPattern.forEach((value: string) => srcPattern.push(`!${value}`));
 
       return merge(this._processFiles(gulp, srcPattern, completeCallback, postCSSPlugins,
-                     this.taskConfig.warnOnNonCSSModules ? checkFilenameForCSSModule : undefined),
-                   this._processFiles(gulp, moduleSrcPattern, completeCallback, modulePostCssPlugins));
+        this.taskConfig.warnOnNonCSSModules ? checkFilenameForCSSModule : undefined),
+        this._processFiles(gulp, moduleSrcPattern, completeCallback, modulePostCssPlugins));
     }
   }
 
@@ -146,7 +159,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       .pipe(changed('src', { extension: scssTsExtName }))
       .pipe(sass.sync({
         importer: (url: string, prev: string, done: boolean): Object => ({ file: _patchSassUrl(url) })
-      }).on('error', function(error: Error): void {
+      }).on('error', function (error: Error): void {
         sass.logError.call(this, error);
         completeCallback('Errors found in sass file(s).');
       }))
@@ -180,7 +193,10 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
               const value: string = classNames[key];
               let line: string = '';
               if (key.indexOf('-') !== -1) {
-                this.logWarning(`The local CSS class '${key}' is not camelCase and will not be type-safe.`);
+                const message: string = `The local CSS class '${key}' is not camelCase and will not be type-safe.`;
+                this.taskConfig.warnOnCssInvalidPropertyName ?
+                  this.logWarning(message) :
+                  this.logVerbose(message);
                 line = `  '${key}': '${value}'`;
               } else {
                 line = `  ${key}: '${value}'`;
@@ -193,10 +209,18 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
               classNamesLines.push(line);
             });
 
+            let exportString: string = 'export default styles;';
+
+            if (this.taskConfig.moduleExportName === '') {
+              exportString = 'export = styles;';
+            } else if (!!this.taskConfig.moduleExportName) {
+              exportString = `export const ${this.taskConfig.moduleExportName} = styles;`;
+            }
+
             classNamesLines.push(
               '};',
               '',
-              'export default styles;'
+              exportString
             );
 
             exportClassNames = classNamesLines.join(EOL);
@@ -228,7 +252,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
               .join(EOL)
               .replace(new RegExp(`(${EOL}){3,}`, 'g'), `${EOL}${EOL}`)
               .replace(new RegExp(`(${EOL})+$`, 'm'), EOL)
-            );
+          );
         }
       }))
       .pipe(gulp.dest('src')));

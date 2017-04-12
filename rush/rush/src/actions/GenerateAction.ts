@@ -18,6 +18,7 @@ import {
   Stopwatch
 } from '@microsoft/rush-lib';
 
+import LinkAction from './LinkAction';
 import InstallAction from './InstallAction';
 import RushCommandLineParser from './RushCommandLineParser';
 import PackageReviewChecker from '../utilities/PackageReviewChecker';
@@ -28,6 +29,7 @@ export default class GenerateAction extends CommandLineAction {
   private _rushConfiguration: RushConfiguration;
   private _packageReviewChecker: PackageReviewChecker;
   private _lazyParameter: CommandLineFlagParameter;
+  private _noLinkParameter: CommandLineFlagParameter;
 
   private static _deleteCommonNodeModules(rushConfiguration: RushConfiguration, isLazy: boolean): void {
     const nodeModulesPath: string = path.join(rushConfiguration.commonFolder, 'node_modules');
@@ -162,6 +164,10 @@ export default class GenerateAction extends CommandLineAction {
       description: 'Do not clean the "node_modules" folder before running "npm install".'
         + ' This is faster, but less correct, so only use it for debugging.'
     });
+    this._noLinkParameter = this.defineFlagParameter({
+      parameterLongName: '--no-link',
+      description: 'Do not automatically run the Link action after completing Generate action'
+    });
   }
 
   protected onExecute(): void {
@@ -199,6 +205,12 @@ export default class GenerateAction extends CommandLineAction {
 
     stopwatch.stop();
     console.log(os.EOL + colors.green(`Rush generate finished successfully. (${stopwatch.toString()})`));
-    console.log(os.EOL + 'Next you should probably run: "rush link"');
+
+    if (!this._noLinkParameter.value) {
+      const linkAction: LinkAction = new LinkAction(this._parser);
+      linkAction.execute();
+    } else {
+      console.log(os.EOL + 'Next you should probably run: "rush link"');
+    }
   }
 }

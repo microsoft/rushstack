@@ -52,5 +52,3 @@ enum sourceEnumValuesDoc {
 
 enum testingLinks {
 }
-
-// @public

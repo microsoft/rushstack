@@ -2,6 +2,36 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "2.4.3",
+      "tag": "@microsoft/gulp-core-build_v2.4.3",
+      "date": "Mon, 20 Mar 2017 21:52:20 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.4.2",
+      "tag": "@microsoft/gulp-core-build_v2.4.2",
+      "date": "Sat, 18 Mar 2017 01:31:49 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixes an issue with the clean command, which causes builds to spuriously fail."
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.4.1",
+      "tag": "@microsoft/gulp-core-build_v2.4.1",
+      "date": "Wed, 15 Mar 2017 01:32:09 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Locking `@types` packages. Synchronizing version specifiers for dependencies with other `web-build-tools` projects."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.4.0",
       "tag": "@microsoft/gulp-core-build_v2.4.0",
       "date": "Sat, 18 Feb 2017 02:32:06 GMT",

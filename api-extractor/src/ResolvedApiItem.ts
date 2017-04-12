@@ -5,7 +5,7 @@ import { IDocItem } from './IDocItem';
 import ApiJsonFile from './generators/ApiJsonFile';
 
 /**
- * A class to abstract away the difference between an item from our public API that could be 
+ * A class to abstract away the difference between an item from our public API that could be
  * represented by either an ApiItem or an IDocItem that is retrieved from a JSON file.
  */
 export default class ResolvedApiItem {
@@ -24,7 +24,7 @@ export default class ResolvedApiItem {
 
   /**
    * A function to abstract the construction of a ResolvedApiItem instance
-   * from an ApiItem. 
+   * from an ApiItem.
    */
   public static createFromApiItem(apiItem: ApiItem): ResolvedApiItem {
     return new ResolvedApiItem(
@@ -42,7 +42,7 @@ export default class ResolvedApiItem {
 
   /**
    * A function to abstract the construction of a ResolvedApiItem instance
-   * from a JSON object that symbolizes an IDocItem. 
+   * from a JSON object that symbolizes an IDocItem.
    */
   public static createFromJson(docItem: IDocItem): ResolvedApiItem {
     let parameters: {[name: string]: IParam} = undefined;

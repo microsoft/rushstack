@@ -23,6 +23,7 @@ import {
 import RushCommandLineParser from './RushCommandLineParser';
 import GitPolicy from '../utilities/GitPolicy';
 import { TempModuleGenerator } from '../utilities/TempModuleGenerator';
+import LinkAction from './LinkAction';
 
 const MAX_INSTALL_ATTEMPTS: number = 5;
 
@@ -38,6 +39,7 @@ export default class InstallAction extends CommandLineAction {
   private _cleanInstall: CommandLineFlagParameter;
   private _cleanInstallFull: CommandLineFlagParameter;
   private _bypassPolicy: CommandLineFlagParameter;
+  private _noLinkParameter: CommandLineFlagParameter;
 
   private _tempModulesFiles: string[] = [];
 
@@ -102,12 +104,12 @@ export default class InstallAction extends CommandLineAction {
       actionVerb: 'install',
       summary: 'Install NPM packages as specified by the configuration files in the Rush "common" folder',
       documentation: 'Use this command after pulling new changes from git into your working folder.'
-        + ' It will download and install the appropriate NPM packages needed to build your projects.'
-        + ' The complete sequence is as follows:  1. If not already installed, install the'
-        + ' version of the NPM tool that is specified in the rush.json configuration file.  2. Create the'
-        + ' common/npm-local symlink, which points to the folder from #1.  3. If necessary, run'
-        + ' "npm prune" in the Rush common folder.  4. If necessary, run "npm install" in the'
-        + ' Rush common folder.'
+      + ' It will download and install the appropriate NPM packages needed to build your projects.'
+      + ' The complete sequence is as follows:  1. If not already installed, install the'
+      + ' version of the NPM tool that is specified in the rush.json configuration file.  2. Create the'
+      + ' common/npm-local symlink, which points to the folder from #1.  3. If necessary, run'
+      + ' "npm prune" in the Rush common folder.  4. If necessary, run "npm install" in the'
+      + ' Rush common folder.'
     });
     this._parser = parser;
   }
@@ -128,6 +130,10 @@ export default class InstallAction extends CommandLineAction {
     this._bypassPolicy = this.defineFlagParameter({
       parameterLongName: '--bypass-policy',
       description: 'Overrides gitPolicy enforcement (use honorably!)'
+    });
+    this._noLinkParameter = this.defineFlagParameter({
+      parameterLongName: '--no-link',
+      description: 'Do not automatically run the Link action after completing Generate action'
     });
   }
 
@@ -164,7 +170,13 @@ export default class InstallAction extends CommandLineAction {
 
     stopwatch.stop();
     console.log(colors.green(`The common NPM packages are up to date. (${stopwatch.toString()})`));
-    console.log(os.EOL + 'Next you should probably run: "rush link"');
+
+    if (!this._noLinkParameter.value) {
+      const linkAction: LinkAction = new LinkAction(this._parser);
+      linkAction.execute();
+    } else {
+      console.log(os.EOL + 'Next you should probably run: "rush link"');
+    }
   }
 
   private _checkThatTempModulesMatch(): void {
@@ -278,20 +290,24 @@ export default class InstallAction extends CommandLineAction {
       needToInstall = true;
       skipPrune = true;
     } else {
-      // Compare the timestamps last-install.flag and package.json to see if our install is outdated
-      const packageJsonFilenames: string[] = [];
+      // Compare the timestamps last-install.flag, npm-shrinkwrap, and package.json to see if our install is outdated
+      const potentiallyChangedFiles: string[] = [];
 
       // Example: "C:\MyRepo\common\package.json"
-      packageJsonFilenames.push(path.join(this._rushConfiguration.commonFolder, 'package.json'));
+      potentiallyChangedFiles.push(path.join(this._rushConfiguration.commonFolder, 'package.json'));
 
       // Also consider the timestamp on the node_modules folder; if someone tampered with it
       // or deleted it entirely, then isFileTimestampCurrent() will cause us to redo "npm install".
-      packageJsonFilenames.push(commonNodeModulesFolder);
+      potentiallyChangedFiles.push(commonNodeModulesFolder);
+
+      // Additionally, someone could have run generate without changing a package.json, in this case
+      // only the shrinkwrap would have changed, so if the shrinkwrap is newer we will want to install as well
+      potentiallyChangedFiles.push(path.join(this._rushConfiguration.commonFolder, 'npm-shrinkwrap.json'));
 
       // Make sure we look at all the temp_modules/*/package.json files as well
-      packageJsonFilenames.push(...this._tempModulesFiles);
+      potentiallyChangedFiles.push(...this._tempModulesFiles);
 
-      if (!Utilities.isFileTimestampCurrent(commonNodeModulesMarkerFilename, packageJsonFilenames)) {
+      if (!Utilities.isFileTimestampCurrent(commonNodeModulesMarkerFilename, potentiallyChangedFiles)) {
         needToInstall = true;
       }
     }
@@ -306,7 +322,7 @@ export default class InstallAction extends CommandLineAction {
         if (fsx.existsSync(commonNodeModulesFolder)) {
           // If an "npm install" is interrupted,
           console.log('Deleting the "node_modules" folder because the previous Rush install' +
-                      ' did not complete successfully.');
+            ' did not complete successfully.');
 
           AsyncRecycle.recycleDirectory(this._rushConfiguration, commonNodeModulesFolder);
         }
@@ -336,7 +352,7 @@ export default class InstallAction extends CommandLineAction {
         }
       }
 
-      const npmInstallArgs: string[] = [ 'install' ];
+      const npmInstallArgs: string[] = ['install'];
       if (this._rushConfiguration.cacheFolder) {
         npmInstallArgs.push('--cache', this._rushConfiguration.cacheFolder);
       }
@@ -348,9 +364,9 @@ export default class InstallAction extends CommandLineAction {
       // Next, run "npm install" in the common folder
       console.log(os.EOL + `Running "npm ${npmInstallArgs.join(' ')}" in ${this._rushConfiguration.commonFolder}`);
       Utilities.executeCommandWithRetry(npmToolFilename,
-                                        npmInstallArgs,
-                                        MAX_INSTALL_ATTEMPTS,
-                                        this._rushConfiguration.commonFolder);
+        npmInstallArgs,
+        MAX_INSTALL_ATTEMPTS,
+        this._rushConfiguration.commonFolder);
 
       // Create the marker file to indicate a successful install
       fsx.createFileSync(commonNodeModulesMarkerFilename);

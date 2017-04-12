@@ -18,6 +18,11 @@ export {
 } from './data/PackageReviewConfiguration';
 
 export {
+  IPinnedVersionsJson,
+  PinnedVersionsConfiguration
+} from './data/PinnedVersionsConfiguration';
+
+export {
   PackageDependencyKind,
   IPackageDependency,
   IPackageJson,
@@ -67,6 +72,10 @@ export {
 export {
   default as rushVersion
 } from './rushVersion';
+
+export {
+  default as Npm
+} from './utilities/Npm';
 
 export { default as TestErrorDetector } from './errorDetection/rules/TestErrorDetector';
 export { default as TsErrorDetector } from './errorDetection/rules/TsErrorDetector';

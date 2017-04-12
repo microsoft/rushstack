@@ -2,6 +2,23 @@
   "name": "@microsoft/package-deps-hash",
   "entries": [
     {
+      "version": "2.0.1",
+      "tag": "@microsoft/package-deps-hash_v2.0.1",
+      "date": "Wed, 15 Mar 2017 01:32:09 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Locking `@types` packages. Synchronizing version specifiers for dependencies with other `web-build-tools` projects."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `>=2.3.0 <3.0.0` to `>=2.3.0 <3.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.0",
       "tag": "@microsoft/package-deps-hash_v2.0.0",
       "date": "Mon, 30 Jan 2017 21:37:27 GMT",
