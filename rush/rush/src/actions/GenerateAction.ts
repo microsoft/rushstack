@@ -59,6 +59,12 @@ export default class GenerateAction extends CommandLineAction {
         // processes running this would cause them to crash.
         console.log(os.EOL + 'Skipping "npm cache clean" because the cache is global.');
       }
+
+      // Also clean the npm-tmp folder
+      if (rushConfiguration.tmpFolder) {
+        console.log(`Remove the "npm-tmp" directory`);
+        AsyncRecycle.recycleDirectory(rushConfiguration, rushConfiguration.tmpFolder);
+      }
     }
   }
 

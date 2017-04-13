@@ -40,7 +40,6 @@ export default class InstallAction extends CommandLineAction {
   private _cleanInstallFull: CommandLineFlagParameter;
   private _bypassPolicy: CommandLineFlagParameter;
   private _noLinkParameter: CommandLineFlagParameter;
-  private _cleanCache: CommandLineFlagParameter;
 
   private _tempModulesFiles: string[] = [];
 
@@ -121,12 +120,15 @@ export default class InstallAction extends CommandLineAction {
       parameterShortName: '-c',
       description: 'Delete any previously installed files before installing;'
       + ' this takes longer but will resolve data corruption that is often'
-      + ' encountered with the NPM tool'
+      + ' encountered with the NPM tool. A relatively quick option that gets you into a good state.'
     });
     this._cleanInstallFull = this.defineFlagParameter({
       parameterLongName: '--full-clean',
       parameterShortName: '-C',
-      description: 'Like "--clean", but also deletes and reinstalls the NPM tool itself'
+      description: 'A less commonly used option, that you use only if “–clean” didn’t work. '
+      + 'Because this reinstalls the NPM tool, it creates a race condition that can break other installs. '
+      + 'Thus a CI definition should never need to rely on this. Like "--clean", but also deletes and '
+      + 'reinstalls the NPM tool itself'
     });
     this._bypassPolicy = this.defineFlagParameter({
       parameterLongName: '--bypass-policy',
@@ -135,10 +137,6 @@ export default class InstallAction extends CommandLineAction {
     this._noLinkParameter = this.defineFlagParameter({
       parameterLongName: '--no-link',
       description: 'Do not automatically run the Link action after completing Generate action'
-    });
-    this._cleanCache = this.defineFlagParameter({
-      parameterLongName: '--clean-cache',
-      description: 'If a local cache is specified, cleans the local cache before the install'
     });
   }
 
@@ -306,8 +304,7 @@ export default class InstallAction extends CommandLineAction {
       }
     }
 
-    const shouldCleanCache: boolean =
-      this._cleanInstall.value || this._cleanInstallFull.value || this._cleanCache.value;
+    const shouldCleanCache: boolean = this._cleanInstall.value || this._cleanInstallFull.value;
 
     if (needToInstall || shouldCleanCache) {
       // The "npm install" command is not transactional; if it is killed, then the "node_modules"
@@ -341,6 +338,12 @@ export default class InstallAction extends CommandLineAction {
           // processes running this would cause them to crash.
           console.log(os.EOL + 'Skipping "npm cache clean" because the cache is global.');
         }
+
+        // Also clean the npm-tmp folder
+        if (this._rushConfiguration.tmpFolder) {
+          console.log(`Remove the "npm-tmp" directory`);
+          AsyncRecycle.recycleDirectory(this._rushConfiguration, this._rushConfiguration.tmpFolder);
+        }
       }
 
       if (!skipPrune) {
@@ -364,11 +367,11 @@ export default class InstallAction extends CommandLineAction {
 
       const npmInstallArgs: string[] = ['install'];
       if (this._rushConfiguration.cacheFolder) {
-        npmInstallArgs.push('--cache', this._rushConfiguration.cacheFolder);
+        npmInstallArgs.push('--cache', `"${this._rushConfiguration.cacheFolder}"`);
       }
 
       if (this._rushConfiguration.tmpFolder) {
-        npmInstallArgs.push('--tmp', this._rushConfiguration.tmpFolder);
+        npmInstallArgs.push('--tmp', `"${this._rushConfiguration.tmpFolder}"`);
       }
 
       // Next, run "npm install" in the common folder
