@@ -6,7 +6,6 @@ import * as glob from 'glob';
 import globEscape = require('glob-escape');
 import * as os from 'os';
 import * as path from 'path';
-import * as semver from 'semver';
 import * as fsx from 'fs-extra';
 import { CommandLineAction, CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import {
@@ -23,20 +22,8 @@ import LinkAction from './LinkAction';
 import InstallAction from './InstallAction';
 import RushCommandLineParser from './RushCommandLineParser';
 import PackageReviewChecker from '../utilities/PackageReviewChecker';
+import NpmShrinkwrap from '../utilities/NpmShrinkwrap';
 import { TempModuleGenerator } from '../utilities/TempModuleGenerator';
-
-interface IShrinkwrapFile {
-  name: string;
-  version: string;
-  dependencies: { [dependency: string]: IShrinkwrapDependency };
-}
-
-interface IShrinkwrapDependency {
-  version: string;
-  from: string;
-  resolved: string;
-  dependencies: { [dependency: string]: IShrinkwrapDependency };
-}
 
 export default class GenerateAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
@@ -173,18 +160,12 @@ export default class GenerateAction extends CommandLineAction {
   private static _shouldDeleteNodeModules(
     rushConfiguration: RushConfiguration,
     tempModules: Map<string, IPackageJson>): boolean {
-    /* check against the temp_modules: are any regular dependencies in temp_modules missing from the shrinkwrap?
-     * note that we will not regenerate the shrinkwrap if they are REMOVING dependencies,
-     * we assume they will use --force to remove those from shrinkwrap
-     */
 
-    let shrinkwrap: IShrinkwrapFile;
-    try {
-      const shrinkwrapFile: string = path.join(rushConfiguration.commonFolder, 'npm-shrinkwrap.json');
-      shrinkwrap = require(shrinkwrapFile);
-    } catch (e) {
-      /* no-op */
-    }
+    // check against the temp_modules: are any regular dependencies in temp_modules missing from the shrinkwrap?
+    // note that we will not regenerate the shrinkwrap if they are REMOVING dependencies
+
+    const shrinkwrapFilename: string = path.join(rushConfiguration.commonFolder, 'npm-shrinkwrap.json');
+    const shrinkwrap: NpmShrinkwrap | undefined = NpmShrinkwrap.loadFromFile(shrinkwrapFilename);
     if (!shrinkwrap) {
       console.log(colors.yellow(`Could not find previous shrinkwrap file.${os.EOL}` +
         `Rush must regenerate the shrinkwrap file. This may take some time...`));
@@ -198,7 +179,7 @@ export default class GenerateAction extends CommandLineAction {
       Object.keys(project.dependencies).forEach((dependency: string) => {
         // we need to look at the temp_modules dependencies, we don't care about "rushDependencies"
         const version: string = project.dependencies[dependency];
-        if (!GenerateAction._canFindDependencyInShrinkwrap(shrinkwrap, dependency, version, tempProjectName)) {
+        if (!shrinkwrap.hasCompatibleDependency(dependency, version, tempProjectName)) {
           console.log(colors.yellow(
             `${os.EOL}Could not find "${projectName}" dependency "${dependency}@${version}" in shrinkwrap.`));
           hasFoundMissingDependency = true;
@@ -206,32 +187,6 @@ export default class GenerateAction extends CommandLineAction {
       });
     });
     return hasFoundMissingDependency;
-  }
-
-  private static _canFindDependencyInShrinkwrap(
-    shrinkwrap: IShrinkwrapFile,
-    dependency: string,
-    version: string,
-    tempProjectName: string): boolean {
-
-    let shrinkwrapDependency: IShrinkwrapDependency;
-
-    // First, check under tempProjectName, as this is the first place NPM looks
-    // The dependency will either be directly under the tempProjectName, or it will be in the root
-    if (shrinkwrap.dependencies[tempProjectName]) {
-      if (shrinkwrap.dependencies[tempProjectName].dependencies) {
-        shrinkwrapDependency = shrinkwrap.dependencies[tempProjectName].dependencies[dependency];
-      }
-    }
-
-    if (shrinkwrapDependency) {
-      // If we found it under the project, the version must conform
-      return semver.satisfies(shrinkwrapDependency.version, version);
-    } else {
-      // Check under the root
-      shrinkwrapDependency = shrinkwrap.dependencies[dependency];
-      return shrinkwrapDependency && semver.satisfies(shrinkwrapDependency.version, version);
-    }
   }
 
   constructor(parser: RushCommandLineParser) {
