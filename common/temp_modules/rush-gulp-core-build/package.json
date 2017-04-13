@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@types/z-schema": "3.16.31",
-    "@microsoft/node-library-build": ">=2.3.0 <3.0.0",
+    "@microsoft/node-library-build": ">=3.0.0 <4.0.0",
     "chai": "~3.5.0",
     "@types/assertion-error": "1.0.30",
     "@types/chai": "3.4.34",
@@ -17,7 +17,7 @@
     "@types/orchestrator": "0.0.30",
     "@types/q": "0.0.32",
     "@types/rimraf": "0.0.28",
-    "@types/semver": "5.3.31",
+    "@types/semver": "5.3.30",
     "@types/through2": "2.0.32",
     "@types/vinyl": "1.2.30",
     "@types/yargs": "0.0.34",
