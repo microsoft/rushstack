@@ -43,7 +43,6 @@ export default class GenerateAction extends CommandLineAction {
   private _rushConfiguration: RushConfiguration;
   private _packageReviewChecker: PackageReviewChecker;
   private _lazyParameter: CommandLineFlagParameter;
-  private _cleanParameter: CommandLineFlagParameter
   private _noLinkParameter: CommandLineFlagParameter;
 
   private static _deleteCommonNodeModules(rushConfiguration: RushConfiguration): void {
@@ -254,12 +253,6 @@ export default class GenerateAction extends CommandLineAction {
       description: 'Do not clean the "node_modules" folder before running "npm install".'
       + ' This is faster, but less correct, so only use it for debugging.'
     });
-    this._cleanParameter = this.defineFlagParameter({
-      parameterLongName: '--clean',
-      parameterShortName: '-c',
-      description: 'Force cleaning of the node_modules folder before running "npm install".'
-      + 'This is slower, but more correct.'
-    });
     this._noLinkParameter = this.defineFlagParameter({
       parameterLongName: '--no-link',
       description: 'Do not automatically run the Link action after completing Generate action'
@@ -267,10 +260,6 @@ export default class GenerateAction extends CommandLineAction {
   }
 
   protected onExecute(): void {
-    if (this._lazyParameter.value && this._cleanParameter.value) {
-      throw `Cannot simultaneously specify both "--lazy" and "--clean" parameters`;
-    }
-
     this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
 
     const stopwatch: Stopwatch = Stopwatch.start();
