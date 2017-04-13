@@ -52,4 +52,3 @@ enum TestMissingCommentStar {
 
 // WARNING: functionWithIncompleteReturnType has incomplete type information
 // WARNING: functionWithIncompleteParameterType has incomplete type information
-// @public

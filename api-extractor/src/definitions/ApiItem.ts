@@ -334,7 +334,6 @@ abstract class ApiItem {
         const tag: string = '@' + ApiTag[this.documentation.apiTag].toLowerCase();
         this.reportError(`The ${tag} tag is not allowed on the package, which is always public`);
       }
-      this.documentation.apiTag = ApiTag.Public;
     }
 
     if (this.documentation.preapproved) {

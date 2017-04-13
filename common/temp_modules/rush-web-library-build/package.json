@@ -17,7 +17,7 @@
     "@microsoft/gulp-core-build-karma": ">=2.2.0 <3.0.0",
     "@microsoft/gulp-core-build-sass": ">=3.0.0 <4.0.0",
     "@microsoft/gulp-core-build-serve": ">=2.0.3 <3.0.0",
-    "@microsoft/gulp-core-build-typescript": ">=3.0.0 <4.0.0",
+    "@microsoft/gulp-core-build-typescript": ">=3.0.1 <4.0.0",
     "@microsoft/gulp-core-build-webpack": ">=1.1.2 <2.0.0"
   }
 }

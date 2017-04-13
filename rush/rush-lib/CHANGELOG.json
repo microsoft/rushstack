@@ -2,6 +2,23 @@
   "name": "@microsoft/rush-lib",
   "entries": [
     {
+      "version": "2.5.0",
+      "tag": "@microsoft/rush-lib_v2.5.0",
+      "date": "Tue, 11 Apr 2017 21:20:58 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Deprecate the pinnedVersions field of rush.json in favor of a standalone pinnedVersions.json"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Bump stream-collator to 2.0.0"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.4.0",
       "tag": "@microsoft/rush-lib_v2.4.0",
       "date": "Thu, 30 Mar 2017 18:25:38 GMT",

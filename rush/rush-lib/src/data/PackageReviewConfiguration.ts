@@ -54,7 +54,7 @@ export default class PackageReviewConfiguration {
 
   /**
    * Loads the configuration data from PackageDependencies.json and returns
-   * an PackageReviewFile object.
+   * an PackageReviewConfiguration object.
    */
   public static loadFromFile(jsonFilename: string): PackageReviewConfiguration {
     const packageReviewJson: IPackageReviewJson = JsonFile.loadJsonFile(jsonFilename);
@@ -88,7 +88,7 @@ export default class PackageReviewConfiguration {
   }
 
   /**
-   * DO NOT CALL -- Use PackageReviewFile.loadFromFile() instead.
+   * DO NOT CALL -- Use PackageReviewConfiguration.loadFromFile() instead.
    */
   constructor(packageReviewJson: IPackageReviewJson, jsonFilename: string) {
     this._loadedJson = packageReviewJson;

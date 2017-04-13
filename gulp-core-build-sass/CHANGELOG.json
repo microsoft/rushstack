@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "3.1.0",
+      "tag": "@microsoft/gulp-core-build-sass_v3.1.0",
+      "date": "Tue, 11 Apr 2017 01:33:59 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add task config property: warnOnCssInvalidPropertyName to gulp-core-build-sass. if set to false, CSS module compile warning message will changed to verbose message"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.0",
       "tag": "@microsoft/gulp-core-build-sass_v3.0.0",
       "date": "Mon, 20 Mar 2017 21:52:20 GMT",
