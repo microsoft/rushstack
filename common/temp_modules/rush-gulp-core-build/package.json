@@ -17,7 +17,7 @@
     "@types/orchestrator": "0.0.30",
     "@types/q": "0.0.32",
     "@types/rimraf": "0.0.28",
-    "@types/semver": "5.3.30",
+    "@types/semver": "5.3.31",
     "@types/through2": "2.0.32",
     "@types/vinyl": "1.2.30",
     "@types/yargs": "0.0.34",
