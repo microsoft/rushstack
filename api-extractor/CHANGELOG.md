@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 07 Apr 2017 21:43:16 GMT and should not be manually modified.
+This log was last generated on Fri, 14 Apr 2017 17:44:08 GMT and should not be manually modified.
+
+## 2.0.3
+Fri, 14 Apr 2017 17:44:08 GMT
+
+### Patches
+
+- Added collect references ability to detect determine type information of return types and parameter types.
 
 ## 2.0.2
 Fri, 07 Apr 2017 21:43:16 GMT
