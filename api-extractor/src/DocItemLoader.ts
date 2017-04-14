@@ -56,17 +56,18 @@ export default class DocItemLoader {
    */
   public resolve(apiDefinitionRef: ApiDefinitionReference,
     apiPackage: ApiPackage,
-    reportError: (message: string) => void): ResolvedApiItem {
+    warnings: string[]): ResolvedApiItem {
 
-    // If there is a packageName then there must be a scopeName, and they
-    // both must match the current scope and package we are in.
-    // We can take advantage of '&&' being evaluated left to right.
-    if (!apiDefinitionRef.packageName && !apiDefinitionRef.scopeName) {
+    // We determine if an 'apiDfefinitionRef' is local if it has no package name or if the scoped
+    // package name is equal to the current package's scoped package name.
+    if (!apiDefinitionRef.packageName || apiDefinitionRef.toScopePackageString() === apiPackage.name) {
       // Resolution for local references
-      return this.resolveLocalReferences(apiDefinitionRef, apiPackage, reportError);
+      return this.resolveLocalReferences(apiDefinitionRef, apiPackage, warnings);
+
     } else {
-       // Resolution for references in JSON files
-       return this.resolveJsonReferences(apiDefinitionRef, reportError);
+
+      // If there was no resolved apiItem then try loading from JSON
+      return this.resolveJsonReferences(apiDefinitionRef, warnings);
     }
   }
 
@@ -78,12 +79,12 @@ export default class DocItemLoader {
    */
   public resolveLocalReferences(apiDefinitionRef: ApiDefinitionReference,
     apiPackage: ApiPackage,
-    reportError: (message: string) => void): ResolvedApiItem {
+    warnings: string[]): ResolvedApiItem {
 
     let apiItem: ApiItem = apiPackage.getMemberItem(apiDefinitionRef.exportName);
     // Check if export name was not found
     if (!apiItem) {
-      reportError(`Unable to find referenced export \"${apiDefinitionRef.toExportString()}\"`);
+      warnings.push(`Unable to find referenced export \"${apiDefinitionRef.toExportString()}\"`);
       return undefined;
     }
 
@@ -103,7 +104,7 @@ export default class DocItemLoader {
     if (!apiItem) {
       // If we are here, we can be sure there was a problem with the memberName.
       // memberName was not found, apiDefinitionRef is invalid
-      reportError(`Unable to find referenced member \"${apiDefinitionRef.toMemberString()}\"`);
+      warnings.push(`Unable to find referenced member \"${apiDefinitionRef.toMemberString()}\"`);
       return undefined;
     }
 
@@ -116,19 +117,21 @@ export default class DocItemLoader {
    * that is associated with the apiDefinitionRef.
    */
   public resolveJsonReferences(apiDefinitionRef: ApiDefinitionReference,
-    reportError: (message: string) => void): ResolvedApiItem {
+    warnings: string[]): ResolvedApiItem {
 
     // Check if package can be not found
-    const docPackage: IDocPackage =  this.getPackage(apiDefinitionRef, reportError);
+    const docPackage: IDocPackage =  this.getPackage(apiDefinitionRef);
     if (!docPackage) {
-      // Error is reported in this.getPackage()
+      // package not found in node_modules
+      warnings.push(`Unable to find a documentation file (\"${apiDefinitionRef.packageName}.api.json\")` +
+        ' for the referenced package');
       return undefined;
     }
 
     // found JSON package, now ensure export name is there
     // hasOwnProperty() not needed for JJU objects
     if (!(apiDefinitionRef.exportName in docPackage.exports)) {
-      reportError(`Unable to find referenced export \"${apiDefinitionRef.toExportString()}\""`);
+      warnings.push(`Unable to find referenced export \"${apiDefinitionRef.toExportString()}\""`);
       return undefined;
     }
 
@@ -163,7 +166,7 @@ export default class DocItemLoader {
         docItem = member;
       } else {
         // member name was not found, apiDefinitionRef is invalid
-        reportError(`Unable to find referenced member \"${apiDefinitionRef.toMemberString()}\"`);
+        warnings.push(`Unable to find referenced member \"${apiDefinitionRef.toMemberString()}\"`);
         return undefined;
       }
     }
@@ -177,7 +180,7 @@ export default class DocItemLoader {
    *
    * @param apiDefinitionRef - interface with propropties pertaining to the API definition reference
    */
-  public getPackage(apiDefinitionRef: ApiDefinitionReference, reportError: (message: string) => void): IDocPackage {
+  public getPackage(apiDefinitionRef: ApiDefinitionReference): IDocPackage {
     let cachePackageName: string = '';
 
     // We concatenate the scopeName and packageName in case there are packageName conflicts
@@ -192,7 +195,7 @@ export default class DocItemLoader {
     }
 
     // Doesn't exist in cache, attempt to load the json file
-    const packageJsonFilePath: string =  path.join(
+    const apiJsonFilePath: string =  path.join(
       this._projectFolder,
       'node_modules',
       apiDefinitionRef.scopeName,
@@ -200,21 +203,20 @@ export default class DocItemLoader {
       `dist/${apiDefinitionRef.packageName}.api.json`
     );
 
-    if (!fsx.existsSync(path.join(packageJsonFilePath))) {
-      // package not found in node_modules
-      reportError(`Unable to find referenced package \"${apiDefinitionRef.toScopePackageString()}\"`);
-      return;
+    if (!fsx.existsSync(path.join(apiJsonFilePath))) {
+      // Error should be handled by the caller
+      return undefined;
     }
 
-    return this.loadPackageIntoCache(packageJsonFilePath);
+    return this.loadPackageIntoCache(apiJsonFilePath, cachePackageName);
   }
 
   /**
    * Loads the API documentation json file and validates that it conforms to our schema. If it does,
    * then the json file is saved in the cache and returned.
    */
-  public loadPackageIntoCache(packageJsonFilePath: string): IDocPackage {
-    const apiPackage: IDocPackage = JsonFile.loadJsonFile(packageJsonFilePath) as IDocPackage;
+  public loadPackageIntoCache(apiJsonFilePath: string, cachePackageName: string): IDocPackage {
+    const apiPackage: IDocPackage = JsonFile.loadJsonFile(apiJsonFilePath) as IDocPackage;
 
     // Validate that the output conforms to our JSON schema
     const apiJsonSchema: { } = JsonFile.loadJsonFile(path.join(__dirname, './schemas/api-json-schema.json'));
@@ -229,8 +231,7 @@ export default class DocItemLoader {
       }
     );
 
-    const packageName: string = path.basename(packageJsonFilePath).split('.').shift();
-    this._cache.set(packageName, apiPackage);
+    this._cache.set(cachePackageName, apiPackage);
     return apiPackage;
   }
 }

@@ -35,6 +35,17 @@ abstract class ApiItemContainer extends ApiItem {
       this.memberItems.set(apiItem.name, apiItem);
     }
   }
+
+  /**
+   * @virtual
+   */
+  public visitTypeReferencesForApiItem(): void {
+    super.visitTypeReferencesForApiItem();
+
+    this.memberItems.forEach((apiItem) => {
+      apiItem.visitTypeReferencesForApiItem();
+    });
+  }
 }
 
 export default ApiItemContainer;

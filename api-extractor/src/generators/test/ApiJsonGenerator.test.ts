@@ -40,7 +40,7 @@ describe('ApiJsonGenerator tests', function (): void {
 
       extractor.loadExternalPackages('./testInputs/external-api-json');
       extractor.analyze({
-        entryPointFile: path.join(inputFolder, 'index.ts')
+        entryPointFile: path.join(inputFolder, 'src/index.ts')
       });
 
       const apiJsonGenerator: ApiJsonGenerator = new ApiJsonGenerator();
