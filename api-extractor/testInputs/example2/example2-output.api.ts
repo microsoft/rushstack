@@ -1,11 +1,9 @@
-interface IExternalPackageLookup {
+// WARNING: Unable to find a documentation file ("es6-collections.api.json") for the referenced package
+interface IExternalPackageLookupInheritDoc {
 }
 
 // WARNING: __constructor has incomplete type information
 class IncompleteTypeConstructor {
-}
-
-enum inheritCorrectlyButNotFound {
 }
 
 enum inheritDisplayMode {
@@ -45,6 +43,10 @@ class MyDocumentedClass {
     // WARNING: name has incomplete type information
     address: string;
   }
+}
+
+// WARNING: Unable to find referenced export "@microsoft/sp-core-library:Display""
+enum packageLocatedButExportNotFound {
 }
 
 enum TestMissingCommentStar {
