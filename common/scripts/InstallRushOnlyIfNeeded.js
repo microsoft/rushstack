@@ -14,7 +14,6 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-debugger;
 const rushJsonContents = fs.readFileSync(path.join(__dirname, '..', '..', 'rush.json'), 'UTF-8');
 const rushJsonMatches = rushJsonContents.match(/\"rushMinimumVersion\"\s*\:\s*\"([0-9\.]+)\"/);
 const expectedVersion = rushJsonMatches[1];
