@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-serve",
+      "comment": "Allowing the hostname to be configured in gulp-core-build-serve.",
+      "type": "minor"
+    }
+  ],
+  "email": "iclanton@users.noreply.github.com"
+}
