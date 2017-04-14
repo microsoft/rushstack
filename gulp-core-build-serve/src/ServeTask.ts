@@ -41,6 +41,11 @@ export interface IServeTaskConfig {
   port?: number;
 
   /**
+   * The name of the host on which serve is running. Defaults to 'localhost'
+   */
+  hostname?: string;
+
+  /**
    * If true, the server should run on HTTPS
    */
   https?: boolean;
@@ -81,6 +86,7 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
     https: false,
     initialPage: '/index.html',
     port: 4321,
+    hostname: 'localhost',
     tryCreateDevCertificate: false
   };
 
@@ -167,7 +173,7 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
           initialPage = `/${initialPage}`;
         }
 
-        uri = `${this.taskConfig.https ? 'https' : 'http'}://localhost:${port}${initialPage}`;
+        uri = `${this.taskConfig.https ? 'https' : 'http'}://${this.taskConfig.hostname}:${port}${initialPage}`;
       }
 
       gulp.src('')
