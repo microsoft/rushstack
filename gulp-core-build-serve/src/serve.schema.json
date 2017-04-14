@@ -38,6 +38,12 @@
       "type": "number"
     },
 
+    "hostname": {
+      "title": "Hostname",
+      "description": "The name of the host on which serve is running. Defaults to 'localhost'",
+      "type": "string"
+    },
+
     "https": {
       "title": "HTTPS Mode",
       "description": "If true, the server should run on HTTPS",
