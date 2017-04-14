@@ -14,23 +14,40 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-const rushJsonContents = fs.readFileSync(path.join(__dirname, '..', '..', 'rush.json'), 'UTF-8');
-const rushJsonMatches = rushJsonContents.match(/\"rushMinimumVersion\"\s*\:\s*\"([0-9\.]+)\"/);
-const expectedVersion = rushJsonMatches[1];
 const packageName = "@microsoft/rush";
 
+const rushJsonPath = path.join(__dirname, '..', '..', 'rush.json');
+let expectedVersion;
+try {
+  const rushJsonContents = fs.readFileSync(rushJsonPath, 'UTF-8');
+  // Use a regular expression to parse out the rushMinimumVersion value because rush.json supports comments,
+  //  but JSON.parse does not and we don't want to pull in more dependencies than we need to in this script.
+  const rushJsonMatches = rushJsonContents.match(/\"rushMinimumVersion\"\s*\:\s*\"([0-9\.]+)\"/);
+  expectedVersion = rushJsonMatches[1];
+} catch (e) {
+  console.error(`Unable to determine the required version of Rush from rush.json (${rushJsonPath}). ` +
+                'The "rushMinimumVersion" field is either not assigned in rush.json or was specified ' +
+                'using an unexpected syntax.');
+  return;
+}
+
 let npmPath;
-if (process.env.NODIST_PREFIX) {
-  // Nodist is installed
-  npmPath = path.join(process.env.NODIST_PREFIX, 'bin', 'npm.exe');
-} else if (os.platform() === 'win32') {
-  // We're on Windows
-  const whereOutput = child_process.execSync('where npm', { stdio: [] }).toString();
-  const lines = whereOutput.split(os.EOL).filter((line) => !!line);
-  npmPath = lines[lines.length - 1];
-} else {
-  // We aren't on Windows - assume we're on 'NIX or Darwin
-  npmPath = child_process.execSync('which npm', { stdio: [] }).toString();
+try {
+  if (process.env.NODIST_PREFIX) {
+    // Nodist is installed
+    npmPath = path.join(process.env.NODIST_PREFIX, 'bin', 'npm.exe');
+  } else if (os.platform() === 'win32') {
+    // We're on Windows
+    const whereOutput = child_process.execSync('where npm', { stdio: [] }).toString();
+    const lines = whereOutput.split(os.EOL).filter((line) => !!line);
+    npmPath = lines[lines.length - 1];
+  } else {
+    // We aren't on Windows - assume we're on 'NIX or Darwin
+    npmPath = child_process.execSync('which npm', { stdio: [] }).toString();
+  }
+} catch (e) {
+  console.error(`Unable to determine the path to the NPM tool: ${e}`);
+  return;
 }
 
 npmPath = npmPath.trim();
