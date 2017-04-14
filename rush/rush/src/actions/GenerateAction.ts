@@ -22,7 +22,7 @@ import LinkAction from './LinkAction';
 import InstallAction from './InstallAction';
 import RushCommandLineParser from './RushCommandLineParser';
 import PackageReviewChecker from '../utilities/PackageReviewChecker';
-import NpmShrinkwrap from '../utilities/NpmShrinkwrap';
+import ShrinkwrapFile from '../utilities/ShrinkwrapFile';
 import { TempModuleGenerator } from '../utilities/TempModuleGenerator';
 
 export default class GenerateAction extends CommandLineAction {
@@ -165,7 +165,7 @@ export default class GenerateAction extends CommandLineAction {
     // note that we will not regenerate the shrinkwrap if they are REMOVING dependencies
 
     const shrinkwrapFilename: string = path.join(rushConfiguration.commonFolder, 'npm-shrinkwrap.json');
-    const shrinkwrap: NpmShrinkwrap | undefined = NpmShrinkwrap.loadFromFile(shrinkwrapFilename);
+    const shrinkwrap: ShrinkwrapFile | undefined = ShrinkwrapFile.loadFromFile(shrinkwrapFilename);
     if (!shrinkwrap) {
       console.log(colors.yellow(`Could not find previous shrinkwrap file.${os.EOL}` +
         `Rush must regenerate the shrinkwrap file. This may take some time...`));

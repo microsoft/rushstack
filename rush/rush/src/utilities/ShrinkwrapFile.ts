@@ -18,10 +18,10 @@ interface IShrinkwrapJson {
   dependencies: { [dependency: string]: IShrinkwrapDependencyJson };
 }
 
-export default class NpmShrinkwrap {
+export default class ShrinkwrapFile {
   private _shrinkwrapJson: IShrinkwrapJson;
 
-  public static loadFromFile(shrinkwrapJsonFilename: string): NpmShrinkwrap | undefined {
+  public static loadFromFile(shrinkwrapJsonFilename: string): ShrinkwrapFile | undefined {
     let data: string = undefined;
     try {
       if (!fsx.existsSync(shrinkwrapJsonFilename)) {
@@ -36,7 +36,7 @@ export default class NpmShrinkwrap {
         data = data.slice(1);
       }
 
-      return new NpmShrinkwrap(JSON.parse(data));
+      return new ShrinkwrapFile(JSON.parse(data));
     } catch (error) {
       throw new Error(`Error reading "${shrinkwrapJsonFilename}":` + os.EOL + `  ${error.message}`);
     }
@@ -56,16 +56,16 @@ export default class NpmShrinkwrap {
     let dependencyJson: IShrinkwrapDependencyJson = undefined;
 
     if (tempProjectName) {
-      const tempDependency: IShrinkwrapDependencyJson = NpmShrinkwrap.tryGetValue(
+      const tempDependency: IShrinkwrapDependencyJson = ShrinkwrapFile.tryGetValue(
         this._shrinkwrapJson.dependencies, tempProjectName);
       if (tempDependency) {
-        dependencyJson = NpmShrinkwrap.tryGetValue(tempDependency.dependencies, dependencyName);
+        dependencyJson = ShrinkwrapFile.tryGetValue(tempDependency.dependencies, dependencyName);
       }
     }
 
     // Otherwise look at the root of the shrinkwrap file
     if (!dependencyJson) {
-      dependencyJson = NpmShrinkwrap.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
+      dependencyJson = ShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
     }
 
     if (!dependencyJson) {
