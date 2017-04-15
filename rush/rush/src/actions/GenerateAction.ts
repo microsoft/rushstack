@@ -12,10 +12,9 @@ import {
 } from '@microsoft/rush-lib';
 
 import LinkAction from './LinkAction';
-import { InstallHelpers } from './InstallAction';
+import InstallManager from '../utilities/InstallManager';
 import RushCommandLineParser from './RushCommandLineParser';
 import PackageReviewChecker from '../utilities/PackageReviewChecker';
-import { TempModuleGenerator } from '../utilities/TempModuleGenerator';
 
 export default class GenerateAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
@@ -23,21 +22,6 @@ export default class GenerateAction extends CommandLineAction {
   private _packageReviewChecker: PackageReviewChecker;
   private _lazyParameter: CommandLineFlagParameter;
   private _noLinkParameter: CommandLineFlagParameter;
-
-  private static _deleteShrinkwrapFile(rushConfiguration: RushConfiguration): void {
-    if (fsx.existsSync(rushConfiguration.shrinkwrapFilename)) {
-      console.log('Deleting npm-shrinkwrap.json');
-      Utilities.dangerouslyDeletePath(rushConfiguration.shrinkwrapFilename);
-    }
-  }
-
-  private static _runNpmShrinkWrap(rushConfiguration: RushConfiguration): void {
-    console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
-    Utilities.executeCommand(rushConfiguration.npmToolFilename,
-      ['shrinkwrap'],
-      rushConfiguration.commonFolder);
-    console.log('"npm shrinkwrap" completed' + os.EOL);
-  }
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -77,12 +61,16 @@ export default class GenerateAction extends CommandLineAction {
       this._packageReviewChecker.saveCurrentDependencies();
     }
 
-    InstallHelpers.ensureLocalNpmTool(this._rushConfiguration, false);
+    const installManager: InstallManager = new InstallManager(this._rushConfiguration);
 
-    const tempModuleGenerator: TempModuleGenerator = new TempModuleGenerator(this._rushConfiguration);
-    tempModuleGenerator.regenerate();
+    installManager.ensureLocalNpmTool(false);
 
-    GenerateAction._deleteShrinkwrapFile(this._rushConfiguration);
+    installManager.regenerate();
+
+    if (fsx.existsSync(this._rushConfiguration.shrinkwrapFilename)) {
+      console.log('Deleting npm-shrinkwrap.json');
+      Utilities.dangerouslyDeletePath(this._rushConfiguration.shrinkwrapFilename);
+    }
 
     if (isLazy) {
       console.log(colors.green(
@@ -90,14 +78,17 @@ export default class GenerateAction extends CommandLineAction {
         `You will need to run a normal "rush generate" before committing.`));
 
       // Do an incremental install
-      InstallHelpers.installCommonModules(this._rushConfiguration, false);
+      installManager.installCommonModules(false);
 
       console.log(os.EOL + colors.bold('(Skipping "npm shrinkwrap")') + os.EOL);
     } else {
       // Do a clean install
-      InstallHelpers.installCommonModules(this._rushConfiguration, true);
+      installManager.installCommonModules(true);
 
-      GenerateAction._runNpmShrinkWrap(this._rushConfiguration);
+      console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
+      Utilities.executeCommand(this._rushConfiguration.npmToolFilename,
+        ['shrinkwrap'], this._rushConfiguration.commonFolder);
+      console.log('"npm shrinkwrap" completed' + os.EOL);
     }
 
     stopwatch.stop();
