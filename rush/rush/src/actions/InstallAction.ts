@@ -34,14 +34,12 @@ export default class InstallAction extends CommandLineAction {
   constructor(parser: RushCommandLineParser) {
     super({
       actionVerb: 'install',
-      summary: 'Install NPM packages as specified by the configuration files in the Rush "common" folder',
-      documentation: 'Use this command after pulling new changes from git into your working folder.'
-      + ' It will download and install the appropriate NPM packages needed to build your projects.'
-      + ' The complete sequence is as follows:  1. If not already installed, install the'
-      + ' version of the NPM tool that is specified in the rush.json configuration file.  2. Create the'
-      + ' common/npm-local symlink, which points to the folder from #1.  3. If necessary, run'
-      + ' "npm prune" in the Rush common folder.  4. If necessary, run "npm install" in the'
-      + ' Rush common folder.'
+      summary: 'Install NPM packages in the Rush "common" folder, as specified by your shrinkwrap file.',
+      documentation: 'Use this command after cloning a repo or pulling new changes from Git.'
+      + ' The "rush install" command will install NPM packages into your Rush "common" folder.'
+      + ' It will install the exact versions specified in your shrinkwrap file (without upgrading'
+      + ' anything).'
+      + ' Finally, it will run "rush link" to create symlinks for all your projects.'
     });
     this._parser = parser;
   }
@@ -51,7 +49,7 @@ export default class InstallAction extends CommandLineAction {
       parameterLongName: '--clean',
       parameterShortName: '-c',
       description: 'Delete any previously installed files before installing;'
-      + ' this takes longer but will resolve data corruption that is often'
+      + ' this takes longer but will resolve data corruption that is sometimes'
       + ' encountered with the NPM tool'
     });
     this._cleanInstallFull = this.defineFlagParameter({
@@ -99,11 +97,9 @@ export default class InstallAction extends CommandLineAction {
       return;
     }
 
-    if (!installManager.regenerateAndValidateShrinkwrap(shrinkwrapFile)) {
+    if (!installManager.createTempModulesAndCheckShrinkwrap(shrinkwrapFile)) {
       console.log('');
-      console.log(colors.red('Unable to proceed:  A required dependency was not found in the common folder.'));
-      console.log('');
-      console.log('You need to run "rush generate" to update the common folder.');
+      console.log(colors.red('You need to run "rush generate" to update your NPM shrinkwrap file.'));
       process.exit(1);
       return;
     }
@@ -111,7 +107,7 @@ export default class InstallAction extends CommandLineAction {
     installManager.installCommonModules(this._cleanInstall.value || this._cleanInstallFull.value);
 
     stopwatch.stop();
-    console.log(colors.green(`The common NPM packages are up to date. (${stopwatch.toString()})`));
+    console.log(colors.green(`Done. (${stopwatch.toString()})`));
 
     if (!this._noLinkParameter.value) {
       const linkAction: LinkAction = new LinkAction(this._parser);

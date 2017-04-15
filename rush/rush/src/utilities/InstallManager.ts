@@ -4,6 +4,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as fsx from 'fs-extra';
 import * as semver from 'semver';
+import * as wordwrap from 'wordwrap';
 import globEscape = require('glob-escape');
 
 import {
@@ -18,6 +19,8 @@ import {
 import ShrinkwrapFile from '../utilities/ShrinkwrapFile';
 
 const MAX_INSTALL_ATTEMPTS: number = 5;
+
+const wrap: (textToWrap: string) => string = wordwrap.soft(Utilities.getConsoleWidth());
 
 /**
  * This class implements common logic between "rush install" and "rush generate".
@@ -92,8 +95,8 @@ export default class InstallManager {
   /**
    * Regenerates the common/package.json and all temp_modules projects.
    */
-  public regenerate(): void {
-    this.regenerateAndValidateShrinkwrap(undefined);
+  public createTempModules(): void {
+    this.createTempModulesAndCheckShrinkwrap(undefined);
   }
 
   /**
@@ -102,8 +105,9 @@ export default class InstallManager {
    * everything we need to install and returns true if so; in all other cases,
    * the return value is false.
    */
-  public regenerateAndValidateShrinkwrap(shrinkwrapFile: ShrinkwrapFile|undefined): boolean {
-    console.log('Creating temp projects...');
+  public createTempModulesAndCheckShrinkwrap(shrinkwrapFile: ShrinkwrapFile|undefined): boolean {
+    console.log(os.EOL + colors.bold('Updating temp_modules in ' + this._rushConfiguration.commonFolder));
+
     if (fsx.existsSync(this._rushConfiguration.tempModulesFolder)) {
       Utilities.dangerouslyDeletePath(this._rushConfiguration.tempModulesFolder);
     }
@@ -116,9 +120,9 @@ export default class InstallManager {
       // Check any pinned dependencies first
       this._rushConfiguration.pinnedVersions.forEach((version: string, dependency: string) => {
         if (!shrinkwrapFile.hasCompatibleDependency(dependency, version)) {
-          console.log(colors.yellow(
-            `${os.EOL}The NPM shrinkwrap file does satisfy pinned version ${dependency}`
-            + ` ("${version}").`));
+          console.log(colors.yellow(wrap(
+            `${os.EOL}The NPM shrinkwrap file does satisfy "${dependency}"`
+            + ` (${version}) from pinnedVersions.json.`)));
           shrinkwrapIsValid = false;
         }
       });
@@ -216,8 +220,8 @@ export default class InstallManager {
         if (shrinkwrapFile) {
           if (!shrinkwrapFile.hasCompatibleDependency(pair.packageName, pair.packageVersion, tempProjectName)) {
             console.log(colors.yellow(
-              `${os.EOL}The NPM shrinkwrap file does not provide dependency ${pair.packageName}`
-              + ` ("${pair.packageVersion}") required by "${rushProject.packageName}".`));
+              wrap(`${os.EOL}The NPM shrinkwrap file is missing "${pair.packageName}"`
+              + ` (${pair.packageVersion}) required by "${rushProject.packageName}".`)));
             shrinkwrapIsValid = false;
           }
         }
@@ -226,7 +230,6 @@ export default class InstallManager {
       JsonFile.saveJsonFile(tempPackageJson, tempPackageJsonFilename);
     }
 
-    console.log('Writing common/package.json');
     const commonPackageJsonFilename: string = path.join(this._rushConfiguration.commonFolder, 'package.json');
     JsonFile.saveJsonFile(commonPackageJson, commonPackageJsonFilename);
 
@@ -247,7 +250,7 @@ export default class InstallManager {
       throw new Error('Failed to create "' + npmToolFilename + '"');
     }
 
-    console.log(os.EOL + colors.bold('Checking modules in ' + this._rushConfiguration.commonFolder) + os.EOL);
+    console.log(os.EOL + colors.bold('Checking node_modules in ' + this._rushConfiguration.commonFolder) + os.EOL);
 
     // Example: "C:\MyRepo\common\last-install.flag"
     const commonNodeModulesMarkerFilename: string =
@@ -350,7 +353,8 @@ export default class InstallManager {
       }
 
       // Next, run "npm install" in the common folder
-      console.log(os.EOL + `Running "npm ${npmInstallArgs.join(' ')}" in ${this._rushConfiguration.commonFolder}`);
+      console.log(os.EOL + `Running "npm ${npmInstallArgs.join(' ')}" in ${this._rushConfiguration.commonFolder}`
+        + os.EOL);
       Utilities.executeCommandWithRetry(npmToolFilename,
         npmInstallArgs,
         MAX_INSTALL_ATTEMPTS,

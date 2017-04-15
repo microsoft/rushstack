@@ -26,11 +26,14 @@ export default class GenerateAction extends CommandLineAction {
   constructor(parser: RushCommandLineParser) {
     super({
       actionVerb: 'generate',
-      summary: 'Run this command after changing any project\'s package.json.',
-      documentation: 'Run "rush regenerate" after changing any project\'s package.json.'
-      + ' It scans the dependencies for all projects referenced in "rush.json", and then'
-      + ' constructs a superset package.json in the Rush common folder.'
-      + ' After running this command, you will need to commit your changes to git.'
+      summary: 'Generate a new shrinkwrap file containing the latest semver-compatible versions.',
+      documentation: 'Run this command if: (1) you are setting up a new repo, or'
+      + ' (2) you want to upgrade to new versions of your dependencies, or (3)'
+      + ' you modified a package.json file and "rush install" can\'t find what it needs.'
+      + ' The "rush generate" command will do a clean install of your Rush "common" folder,'
+      + ' upgrading you to the latest semver-compatible versions of all dependencies.'
+      + ' Then it will create a new shrinkwrap file, which you should commit to Git.'
+      + ' Finally, it will run "rush link" to create symlinks for all your projects.'
     });
     this._parser = parser;
   }
@@ -40,7 +43,7 @@ export default class GenerateAction extends CommandLineAction {
       parameterLongName: '--lazy',
       parameterShortName: '-l',
       description: 'Do not clean the "node_modules" folder before running "npm install".'
-      + ' This is faster, but less correct, so only use it for debugging.'
+      + ' This is faster, but less correct, so only use it for debugging dependency problems.'
     });
     this._noLinkParameter = this.defineFlagParameter({
       parameterLongName: '--no-link',
@@ -65,10 +68,10 @@ export default class GenerateAction extends CommandLineAction {
 
     installManager.ensureLocalNpmTool(false);
 
-    installManager.regenerate();
+    installManager.createTempModules();
 
     if (fsx.existsSync(this._rushConfiguration.shrinkwrapFilename)) {
-      console.log('Deleting npm-shrinkwrap.json');
+      console.log(os.EOL + 'Deleting npm-shrinkwrap.json');
       Utilities.dangerouslyDeletePath(this._rushConfiguration.shrinkwrapFilename);
     }
 
