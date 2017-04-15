@@ -4767,7 +4767,14 @@
     "rush-rush-lib": {
       "version": "0.0.0",
       "from": "temp_modules\\rush-rush-lib",
-      "resolved": "file:temp_modules\\rush-rush-lib"
+      "resolved": "file:temp_modules\\rush-rush-lib",
+      "dependencies": {
+        "@types/semver": {
+          "version": "5.3.31",
+          "from": "@types/semver@5.3.31",
+          "resolved": "https://registry.npmjs.org/@types/semver/-/semver-5.3.31.tgz"
+        }
+      }
     },
     "rush-test-web-library-build": {
       "version": "0.0.0",
