@@ -9,7 +9,7 @@
   "scripts": {
     "test": "rush build --production",
     "build": "rush build --production --clean",
-    "postinstall": "rush install",
+    "postinstall": "rush install -c",
     "change": "rush change"
   }
 }
