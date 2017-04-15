@@ -138,6 +138,11 @@ export default class InstallManager {
       version: '0.0.0'
     };
 
+    // Add any pinned versions to the top of the commonPackageJson
+    this._rushConfiguration.pinnedVersions.forEach((version: string, dependency: string) => {
+      commonPackageJson.dependencies[dependency] = version;
+    });
+
     // To make the common/package.json file more readable, sort alphabetically
     // according to rushProject.tempProjectName instead of packageName.
     const sortedRushProjects: RushConfigurationProject[] = this._rushConfiguration.projects.slice(0);
