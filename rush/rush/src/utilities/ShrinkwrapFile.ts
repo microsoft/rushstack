@@ -58,13 +58,13 @@ export default class ShrinkwrapFile {
     if (tempProjectName) {
       const tempDependency: IShrinkwrapDependencyJson = ShrinkwrapFile.tryGetValue(
         this._shrinkwrapJson.dependencies, tempProjectName);
-      if (tempDependency) {
+      if (tempDependency && tempDependency.dependencies) {
         dependencyJson = ShrinkwrapFile.tryGetValue(tempDependency.dependencies, dependencyName);
       }
     }
 
     // Otherwise look at the root of the shrinkwrap file
-    if (!dependencyJson) {
+    if (!dependencyJson && this._shrinkwrapJson.dependencies) {
       dependencyJson = ShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
     }
 
