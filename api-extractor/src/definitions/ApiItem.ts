@@ -2,10 +2,15 @@
 /* tslint:disable:no-constant-condition */
 
 import * as ts from 'typescript';
+import * as path from 'path';
 import Extractor from '../Extractor';
 import ApiDocumentation, { ApiTag } from './ApiDocumentation';
 import TypeScriptHelpers from '../TypeScriptHelpers';
 import DocElementParser from '../DocElementParser';
+import PackageJsonHelpers from '../PackageJsonHelpers';
+import ResolvedApiItem from '../ResolvedApiItem';
+import ApiDefinitionReference,
+  { IScopedPackageName, IApiDefinintionReferenceParts } from '../ApiDefinitionReference';
 
 /**
  * Indicates the type of definition represented by a ApiItem object.
@@ -105,6 +110,16 @@ export interface IApiItemOptions {
    */
   exportSymbol?: ts.Symbol;
 }
+
+// Names of NPM scopes that contain packages that provide typings for the real package.
+// The TypeScript compiler's typings design doesn't seem to handle scoped NPM packages,
+// so the transformation will always be simple, like this:
+// "@types/example" --> "example"
+// NOT like this:
+// "@types/@contoso/example" --> "@contoso/example"
+// "@contosotypes/example" --> "@contoso/example"
+// Eventually this constant should be provided by the gulp task that invokes the compiler.
+const typingsScopeNames: string[] = [ '@types' ];
 
 /**
  * ApiItem is an abstract base that represents TypeScript API definitions such as classes,
@@ -242,8 +257,16 @@ abstract class ApiItem {
       originalJsDoc,
       this.extractor.docItemLoader,
       this.extractor,
-      this.reportError
+      this.reportError,
+      this.warnings
     );
+  }
+
+  /**
+   * Called after the constructor to finish the analysis.
+   */
+  public visitTypeReferencesForApiItem(): void {
+    // (virtual)
   }
 
   /**
@@ -321,8 +344,8 @@ abstract class ApiItem {
    */
   protected onCompleteInitialization(): void {
 
-    this.documentation.completeInitialization();
-    // TODO: this.collectTypeReferences(this);
+    this.documentation.completeInitialization(this.warnings);
+    // TODO: this.visitTypeReferencesForNode(this);
 
     const summaryTextCondensed: string = DocElementParser.getAsText(
       this.documentation.summary,
@@ -341,6 +364,11 @@ abstract class ApiItem {
         this.reportError('The @preapproved tag may only be applied to classes and interfaces');
         this.documentation.preapproved = false;
       }
+    }
+
+    if (this.documentation.isDocInheritedDeprecated && this.documentation.deprecatedMessage.length === 0) {
+      this.reportError('inheritdoc source item is deprecated. ' +
+        'Must provide @deprecated message or remove @inheritdoc inline tag.');
     }
   }
 
@@ -397,6 +425,147 @@ abstract class ApiItem {
       }
     }
     return false;
+  }
+
+  /**
+   * This is called by ApiItems to visit the types that appear in an expression.  For example,
+   * if a Public API function returns a class that is defined in this package, but not exported,
+   * this is a problem. visitTypeReferencesForNode() finds all TypeReference child nodes under the
+   * specified node and analyzes each one.
+   */
+  protected visitTypeReferencesForNode(node: ts.Node): void {
+    if (node.kind === ts.SyntaxKind.Block ||
+      (node.kind >= ts.SyntaxKind.JSDocTypeExpression && node.kind <= ts.SyntaxKind.JSDocNeverKeyword)) {
+      // Don't traverse into code blocks or JSDoc items; we only care about the function signature
+      return;
+    }
+
+    if (node.kind === ts.SyntaxKind.TypeReference) {
+      const typeReference: ts.TypeReferenceNode = node as ts.TypeReferenceNode;
+      this._analyzeTypeReference(typeReference);
+    }
+
+    // Recurse the tree
+    for (const childNode of node.getChildren()) {
+      this.visitTypeReferencesForNode(childNode);
+    }
+  }
+
+  /**
+   * This is a helper for visitTypeReferencesForNode().  It analyzes a single TypeReferenceNode.
+   */
+  private _analyzeTypeReference(typeReferenceNode: ts.TypeReferenceNode): void {
+    const symbol: ts.Symbol = this.extractor.typeChecker.getSymbolAtLocation(typeReferenceNode.typeName);
+    if (!symbol) {
+      // Is this bad?
+      return;
+    }
+
+    if (symbol.flags & ts.SymbolFlags.TypeParameter) {
+      // Don't analyze e.g. "T" in "Set<T>"
+      return;
+    }
+
+    // Follow the aliases all the way to the ending SourceFile
+    const currentSymbol: ts.Symbol = this.followAliases(symbol);
+
+    if (!currentSymbol.declarations || !currentSymbol.declarations.length) {
+      // This is a degenerate case that happens sometimes
+      return;
+    }
+    const sourceFile: ts.SourceFile = currentSymbol.declarations[0].getSourceFile();
+
+    // Walk upwards from that directory until you find a directory containing package.json,
+    // this is where the referenced type is located.
+    // Example: "c:\users\<username>\sp-client\spfx-core\sp-core-library"
+    const typeReferencePackagePath: string = PackageJsonHelpers.tryFindPackagePathUpwards(sourceFile.path);
+    // Example: "@microsoft/sp-core-library"
+    let typeReferencePackageName: string = '';
+
+    // If we can not find a package path, we consider the type to be part of the current project's package.
+    // One case where this happens is when looking for a type that is a symlink
+    if (!typeReferencePackagePath) {
+      typeReferencePackageName = this.extractor.package.name;
+    } else {
+      typeReferencePackageName = PackageJsonHelpers.readPackageName(typeReferencePackagePath);
+
+      typingsScopeNames.every(typingScopeName => {
+        if (typeReferencePackageName.indexOf(typingScopeName) > -1) {
+          typeReferencePackageName = typeReferencePackageName.replace(typingScopeName + '/', '');
+          // returning true breaks the every loop
+          return true;
+        }
+      });
+    }
+
+    // Read the name/version from package.json -- that tells you what package the symbol
+    // belongs to. If it is your own ApiPackage.name/version, then you know it's a local symbol.
+    const currentPackageName: string = this.extractor.package.name;
+
+    const typeName: string = typeReferenceNode.typeName.getText();
+    if (!typeReferencePackagePath || typeReferencePackageName === currentPackageName) {
+      // The type is defined in this project.  Did the person remember to export it?
+      const exportedLocalName: string = this.extractor.package.tryGetExportedSymbolName(currentSymbol);
+      if (exportedLocalName) {
+        // [CASE 1] Local/Exported
+        // Yes; the type is properly exported.
+        // TODO: In the future, here we can check for issues such as a @public type
+        // referencing an @internal type.
+        return;
+      } else {
+        // [CASE 2] Local/Unexported
+        // No; issue a warning
+        this.reportWarning(`The type "${typeName}" needs to be exported by the package`
+          + ` (e.g. added to index.ts)`);
+          return;
+      }
+    }
+
+    // External
+    // Attempt to load from docItemLoader
+    const scopedPackageName: IScopedPackageName = ApiDefinitionReference.parseScopedPackageName(
+      typeReferencePackageName
+    );
+    const apiDefinitionRefParts: IApiDefinintionReferenceParts = {
+      scopeName: scopedPackageName.scope,
+      packageName: scopedPackageName.package,
+      exportName: '',
+      memberName: ''
+    };
+
+    // the currentSymbol.name is the name of an export, if it contains a '.' then the substring
+    // after the period is the member name
+    if (currentSymbol.name.indexOf('.') > -1) {
+      const exportMemberName: string[] = currentSymbol.name.split('.');
+      apiDefinitionRefParts.exportName = exportMemberName.pop();
+      apiDefinitionRefParts.memberName = exportMemberName.pop();
+    } else {
+      apiDefinitionRefParts.exportName = currentSymbol.name;
+    }
+
+    const apiDefinitionRef: ApiDefinitionReference = ApiDefinitionReference.createFromParts(
+      apiDefinitionRefParts
+    );
+
+    // Attempt to resolve the type by checking the node modules
+    const referenceResolutionWarnings: string[] = [];
+    const resolvedApiItem: ResolvedApiItem = this.extractor.docItemLoader.resolveJsonReferences(
+      apiDefinitionRef,
+      referenceResolutionWarnings
+    );
+
+    if (resolvedApiItem) {
+      // [CASE 3] External/Resolved
+      // This is a reference to a type from an external package, and it was resolved.
+      return;
+    } else {
+      // [CASE 4] External/Unresolved
+      // For cases when we can't find the external package, we are going to write a report
+      // at the bottom of the *api.ts file. We do this because we do not yet support references
+      // to items like react:Component.
+      // For now we are going to silently ignore these errors.
+      return;
+    }
   }
 }
 
