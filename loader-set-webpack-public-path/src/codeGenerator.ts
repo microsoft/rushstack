@@ -23,7 +23,7 @@ export function getSetPublicPathCode(options: IInternalOptions, emitWarning: (wa
 
   let lines: string[] = [];
   if (options.regexName) {
-    // Double-escape backslashes to make them show up as single backslashes in regexes.
+    // Double-escape backslashes to make them show up as single backslashes in regexps.
     const escapedRegex: string = options.regexName.replace(/\\/, '\\\\');
 
     lines = [
