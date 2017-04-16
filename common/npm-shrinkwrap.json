@@ -80,9 +80,9 @@
       "resolved": "https://registry.npmjs.org/@types/gulp-util/-/gulp-util-3.0.30.tgz"
     },
     "@types/lodash": {
-      "version": "4.14.62",
-      "from": "@types/lodash@4.14.62",
-      "resolved": "https://onedrive.pkgs.visualstudio.com/_packaging/odsp-npm/npm/registry/@types/lodash/-/lodash-4.14.62.tgz"
+      "version": "4.14.52",
+      "from": "@types/lodash@4.14.52",
+      "resolved": "https://registry.npmjs.org/@types/lodash/-/lodash-4.14.52.tgz"
     },
     "@types/mkdirp": {
       "version": "0.3.29",
@@ -2506,9 +2506,9 @@
           "resolved": "https://onedrive.pkgs.visualstudio.com/_packaging/odsp-npm/npm/registry/glob/upstream/glob-7.0.5.tgz"
         },
         "lodash": {
-          "version": "4.17.4",
-          "from": "lodash@>=4.17.4 <4.18.0",
-          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.4.tgz"
+          "version": "4.15.0",
+          "from": "lodash@>=4.15.0 <4.16.0",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.15.0.tgz"
         },
         "mocha": {
           "version": "3.2.0",

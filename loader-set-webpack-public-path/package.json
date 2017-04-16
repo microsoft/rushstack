@@ -14,12 +14,12 @@
   "dependencies": {
     "loader-utils": "~1.1.0",
     "uglify-js": "~2.8.22",
-    "lodash": "~4.17.4",
+    "lodash": "~4.15.0",
     "@types/webpack": "2.2.4"
   },
   "devDependencies": {
     "@types/tapable": "0.2.3",
-    "@types/lodash": "4.14.62",
+    "@types/lodash": "4.14.52",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "mocha": "~3.2.0",
