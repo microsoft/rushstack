@@ -1,0 +1,20 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "packageName": "@microsoft/loader-set-webpack-public-path",
+      "type": "none"
+    },
+    {
+      "comment": "",
+      "packageName": "@microsoft/loader-raw-script",
+      "type": "none"
+    },
+    {
+      "comment": "",
+      "packageName": "@microsoft/loader-load-themed-styles",
+      "type": "none"
+    }
+  ],
+  "email": "iclanton@users.noreply.github.com"
+}
