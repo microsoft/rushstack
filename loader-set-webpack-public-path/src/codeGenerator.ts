@@ -27,8 +27,22 @@ export function getSetPublicPathCode(options: IInternalOptions, emitWarning: (wa
     const escapedRegex: string = options.regexName.replace(/\\/, '\\\\');
 
     lines = [
-      `var scripts = document.getElementsByTagName('script');`,
-      `var regex = new RegExp('${escapeSingleQuotes(escapedRegex)}', 'i');`,
+      `var scripts = document.getElementsByTagName('script');`
+    ];
+
+    const regexInitializationSnippet: string = `new RegExp('${escapeSingleQuotes(escapedRegex)}', 'i')`;
+    const regexVarName: string | undefined = options.regexVariable;
+    if (options.regexVariable) {
+      lines.push(...[
+        `var regex = (typeof ${regexVarName} !== 'undefined') ? ${regexVarName} : ${regexInitializationSnippet};`
+      ]);
+    } else {
+      lines.push(...[
+        `var regex = ${regexInitializationSnippet};`
+      ]);
+    }
+
+    lines.push(...[
       'var found = false;',
       '',
       'if (scripts && scripts.length) {',
@@ -51,7 +65,7 @@ export function getSetPublicPathCode(options: IInternalOptions, emitWarning: (wa
       '    }',
       '  }',
       '}'
-    ];
+    ]);
   } else {
     if (options.publicPath) {
       lines = [
