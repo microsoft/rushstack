@@ -126,7 +126,7 @@ function joinLines(lines: string[], linePrefix?: string): string {
   }).join(EOL).replace(new RegExp(`${EOL}${EOL}+`, 'g'), `${EOL}${EOL}`);
 }
 
-function escapeSingleQuotes(str: string): string {
+function escapeSingleQuotes(str: string): string | undefined {
   if (str) {
     return str.replace('\'', '\\\'');
   } else {
@@ -134,7 +134,7 @@ function escapeSingleQuotes(str: string): string {
   }
 }
 
-function appendSlashAndEscapeSingleQuotes(str: string): string {
+function appendSlashAndEscapeSingleQuotes(str: string): string | undefined {
   if (str && str.substr(-1) !== '/') {
     str = str + '/';
   }
