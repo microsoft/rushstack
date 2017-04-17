@@ -122,6 +122,19 @@ export function loadTheme(theme: ITheme): void {
 }
 
 /**
+ * Clear already registerd style elements and style records in theme_State object
+ */
+export function clearStyles(): void {
+  _themeState.registeredStyles.forEach((styleRecord: IStyleRecord) => {
+    const styleElement: HTMLStyleElement = styleRecord && styleRecord.styleElement as HTMLStyleElement;
+    if (styleElement && styleElement.parentElement) {
+      styleElement.parentElement.removeChild(styleElement);
+    }
+  });
+  _themeState.registeredStyles = [];
+}
+
+/**
  * Reloads styles.
  */
 function reloadStyles(): void {
