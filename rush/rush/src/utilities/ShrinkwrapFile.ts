@@ -30,8 +30,7 @@ export default class ShrinkwrapFile {
 
       // We don't use JsonFile/jju here because shrinkwrap.json is a special NPM file format
       // and typically very large, so we want to load it the same way that NPM does.
-      const buffer: Buffer = fsx.readFileSync(shrinkwrapJsonFilename);
-      data = buffer.toString();
+      data = fsx.readFileSync(shrinkwrapJsonFilename).toString();
       if (data.charCodeAt(0) === 0xFEFF) {  // strip BOM
         data = data.slice(1);
       }
@@ -64,7 +63,7 @@ export default class ShrinkwrapFile {
     }
 
     // Otherwise look at the root of the shrinkwrap file
-    if (!dependencyJson && this._shrinkwrapJson.dependencies) {
+    if (!dependencyJson) {
       dependencyJson = ShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
     }
 

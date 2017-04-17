@@ -105,7 +105,7 @@ export default class InstallManager {
    * everything we need to install and returns true if so; in all other cases,
    * the return value is false.
    */
-  public createTempModulesAndCheckShrinkwrap(shrinkwrapFile: ShrinkwrapFile|undefined): boolean {
+  public createTempModulesAndCheckShrinkwrap(shrinkwrapFile: ShrinkwrapFile | undefined): boolean {
     console.log(os.EOL + colors.bold('Updating temp_modules in ' + this._rushConfiguration.commonFolder));
 
     if (fsx.existsSync(this._rushConfiguration.tempModulesFolder)) {
@@ -251,8 +251,9 @@ export default class InstallManager {
     // Example: "C:\MyRepo\common\npm-local\node_modules\.bin\npm"
     const npmToolFilename: string = this._rushConfiguration.npmToolFilename;
     if (!fsx.existsSync(npmToolFilename)) {
-      // This is a sanity check.  It should never happen if the above logic worked correctly.
-      throw new Error('Failed to create "' + npmToolFilename + '"');
+      // This normally should never occur -- it indicates that some code path forgot to call
+      // InstallManager.ensureLocalNpmTool().
+      throw new Error('Expected to find local NPM here: "' + npmToolFilename + '"');
     }
 
     console.log(os.EOL + colors.bold('Checking node_modules in ' + this._rushConfiguration.commonFolder) + os.EOL);
