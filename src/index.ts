@@ -31,7 +31,8 @@ interface IThemeState {
   theme: ITheme;
   lastStyleElement: IExtendedHtmlStyleElement;
   registeredStyles: IStyleRecord[];
-  loadStyles: (styles: string) => void;
+  loadStyles: (styles: string | ThemableArray) => void;
+  takeRawStylesWhenOverload?: boolean;
 }
 
 interface IStyleRecord {
@@ -82,8 +83,9 @@ export function loadStyles(styles: string | ThemableArray): void {
  * Allows for customizable loadStyles logic. e.g. for server side rendering application
  * @param {(styles: string) => void} a loadStyles callback that gets called when styles are loaded or reloaded
  */
-export function configureLoadStyles(callback: (styles: string) => void): void {
+export function configureLoadStyles(callback: (styles: string) => void, takeRawStylesWhenOverload?: boolean): void {
   _themeState.loadStyles = callback;
+  _themeState.takeRawStylesWhenOverload = !!takeRawStylesWhenOverload;
 }
 
 /**
@@ -94,8 +96,12 @@ export function configureLoadStyles(callback: (styles: string) => void): void {
  */
 function applyThemableStyles(stylesArray: ThemableArray, styleRecord?: IStyleRecord): void {
   if (_themeState.loadStyles) {
-    const styles: string = resolveThemableArray(stylesArray);
-    _themeState.loadStyles(styles);
+    if (_themeState.takeRawStylesWhenOverload) {
+      _themeState.loadStyles(stylesArray);
+    } else {
+      const styles: string = resolveThemableArray(stylesArray);
+      _themeState.loadStyles(styles);
+    }
   } else {
     _injectStylesWithCssText ?
       registerStylesIE(stylesArray, styleRecord) :
