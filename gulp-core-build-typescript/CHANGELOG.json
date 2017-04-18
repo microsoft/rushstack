@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "3.0.3",
+      "tag": "@microsoft/gulp-core-build-typescript_v3.0.3",
+      "date": "Tue, 18 Apr 2017 23:41:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "API Extractor now uses Gulp-Typescript to generate compiler options."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.2",
       "tag": "@microsoft/gulp-core-build-typescript_v3.0.2",
       "date": "Fri, 07 Apr 2017 21:43:16 GMT",
