@@ -263,23 +263,31 @@ export default class InstallManager {
       path.join(this._rushConfiguration.commonFolder, 'last-install.flag');
     const commonNodeModulesFolder: string = path.join(this._rushConfiguration.commonFolder, 'node_modules');
 
-    let needToInstall: boolean = false;
-    let skipPrune: boolean = false;
+    // This marker file indicates that the last "rush install" completed successfully
+    const markerFileExistedAtStart: boolean = fsx.existsSync(commonNodeModulesMarkerFilename);
 
+    // Based on timestamps, can we skip this install entirely?
+    if (!cleanInstall && markerFileExistedAtStart) {
+      const potentiallyChangedFiles: string[] = [];
+
+      // Consider the timestamp on the node_modules folder; if someone tampered with it
+      // or deleted it entirely, then we can't skip this install
+      potentiallyChangedFiles.push(commonNodeModulesFolder);
+
+      // Additionally, if they pulled an updated npm-shrinkwrap.json file from Git,
+      // then we can't skip this install
+      potentiallyChangedFiles.push(this._rushConfiguration.shrinkwrapFilename);
+
+      // NOTE: If commonNodeModulesMarkerFilename (or any of the potentiallyChangedFiles) does not
+      // exist, then isFileTimestampCurrent() returns false.
+      if (Utilities.isFileTimestampCurrent(commonNodeModulesMarkerFilename, potentiallyChangedFiles)) {
+        // Nothing to do, because everything is up to date according to time stamps
+        return;
+      }
+    }
+
+    // Before we invoke NPM, clean the cache if requested
     if (cleanInstall) {
-      if (fsx.existsSync(commonNodeModulesMarkerFilename)) {
-        // If we are cleaning the node_modules folder, then also delete the flag file
-        // to force a reinstall
-        fsx.unlinkSync(commonNodeModulesMarkerFilename);
-      }
-
-      // Example: "C:\MyRepo\common\node_modules"
-      if (fsx.existsSync(commonNodeModulesFolder)) {
-        console.log('Deleting old files from ' + commonNodeModulesFolder);
-        Utilities.dangerouslyDeletePath(commonNodeModulesFolder);
-        Utilities.createFolderWithRetry(commonNodeModulesFolder);
-      }
-
       if (this._rushConfiguration.cacheFolder) {
         const cacheCleanArgs: string[] = ['cache', 'clean', this._rushConfiguration.cacheFolder];
         console.log(os.EOL + `Running "npm ${cacheCleanArgs.join(' ')}"`);
@@ -290,53 +298,42 @@ export default class InstallManager {
         // processes running this would cause them to crash.
         console.log(os.EOL + 'Skipping "npm cache clean" because the cache is global.');
       }
-
-      needToInstall = true;
-      skipPrune = true;
-    } else {
-      // Compare the timestamps last-install.flag, npm-shrinkwrap, and package.json to see if our install is outdated
-      const potentiallyChangedFiles: string[] = [];
-
-      // Consider the timestamp on the node_modules folder; if someone tampered with it
-      // or deleted it entirely, then isFileTimestampCurrent() will cause us to redo "npm install".
-      potentiallyChangedFiles.push(commonNodeModulesFolder);
-
-      // Additionally, if they pulled an updated shrinkwrap file from Git, we need to install as well
-      potentiallyChangedFiles.push(this._rushConfiguration.shrinkwrapFilename);
-
-      if (!Utilities.isFileTimestampCurrent(commonNodeModulesMarkerFilename, potentiallyChangedFiles)) {
-        needToInstall = true;
-      }
     }
 
-    if (needToInstall) {
-      // The "npm install" command is not transactional; if it is killed, then the "node_modules"
-      // folder may be in a corrupted state (e.g. because a postinstall script only executed partially).
-      // Rush works around this using a marker file "last-install.flag".  We delete this file
-      // before installing, and then create it again after a successful "npm install".  Thus,
-      // if this file exists, it guarantees we are in a good state.  If not, we must do a clean intall.
-      if (!fsx.existsSync(commonNodeModulesMarkerFilename)) {
-        if (fsx.existsSync(commonNodeModulesFolder)) {
-          // If an "npm install" is interrupted,
+    if (markerFileExistedAtStart) {
+      // Delete the successful install file to indicate the install transaction has started
+      fsx.unlinkSync(commonNodeModulesMarkerFilename);
+    }
+
+    // Is there an existing "node_modules" folder to consider?
+    if (fsx.existsSync(commonNodeModulesFolder)) {
+      // Should we delete the entire "node_modules" folder?
+      if (cleanInstall || !markerFileExistedAtStart) {
+        // YES: Delete "node_modules"
+
+        // Explain to the user why we are hosing their node_modules folder
+        if (!cleanInstall) {
           console.log('Deleting the "node_modules" folder because the previous Rush install' +
             ' did not complete successfully.');
-
-          AsyncRecycle.recycleDirectory(this._rushConfiguration, commonNodeModulesFolder);
+        } else {
+          console.log('Deleting old files from ' + commonNodeModulesFolder);
         }
 
-        skipPrune = true;
-      } else {
-        // Delete the successful install file to indicate the install has started
-        fsx.unlinkSync(commonNodeModulesMarkerFilename);
-      }
+        AsyncRecycle.recycleDirectory(this._rushConfiguration, commonNodeModulesFolder);
 
-      if (!skipPrune) {
+        // Since it may be a while before NPM gets around to creating the "node_modules" folder,
+        // create an empty folder so that the above warning will be shown if we get interrupted.
+        Utilities.createFolderWithRetry(commonNodeModulesFolder);
+      } else {
+        // NO: Do an incremental install in the "node_modules" folder
+
         console.log(`Running "npm prune" in ${this._rushConfiguration.commonFolder}`);
         Utilities.executeCommandWithRetry(npmToolFilename, ['prune'], MAX_INSTALL_ATTEMPTS,
           this._rushConfiguration.commonFolder);
 
-        // Delete the temp projects because NPM will not notice when they are changed.
-        // We can recognize them because their names start with "rush-"
+        // Delete the (installed image of) the temp projects, since "npm install" does not
+        // detect changes for "file:./" references.
+        // We recognize the temp projects by their names, which always start with "rush-".
 
         // Example: "C:\MyRepo\common\node_modules\rush-"
         const pathToDeleteWithoutStar: string = path.join(commonNodeModulesFolder, 'rush-');
@@ -348,27 +345,27 @@ export default class InstallManager {
           Utilities.dangerouslyDeletePath(tempModulePath);
         }
       }
-
-      const npmInstallArgs: string[] = ['install'];
-      if (this._rushConfiguration.cacheFolder) {
-        npmInstallArgs.push('--cache', this._rushConfiguration.cacheFolder);
-      }
-
-      if (this._rushConfiguration.tmpFolder) {
-        npmInstallArgs.push('--tmp', this._rushConfiguration.tmpFolder);
-      }
-
-      // Next, run "npm install" in the common folder
-      console.log(os.EOL + `Running "npm ${npmInstallArgs.join(' ')}" in ${this._rushConfiguration.commonFolder}`
-        + os.EOL);
-      Utilities.executeCommandWithRetry(npmToolFilename,
-        npmInstallArgs,
-        MAX_INSTALL_ATTEMPTS,
-        this._rushConfiguration.commonFolder);
-
-      // Create the marker file to indicate a successful install
-      fsx.createFileSync(commonNodeModulesMarkerFilename);
-      console.log('');
     }
+
+    // Run "npm install" in the common folder
+    const npmInstallArgs: string[] = ['install'];
+    if (this._rushConfiguration.cacheFolder) {
+      npmInstallArgs.push('--cache', this._rushConfiguration.cacheFolder);
+    }
+
+    if (this._rushConfiguration.tmpFolder) {
+      npmInstallArgs.push('--tmp', this._rushConfiguration.tmpFolder);
+    }
+
+    console.log(os.EOL + `Running "npm ${npmInstallArgs.join(' ')}" in ${this._rushConfiguration.commonFolder}`
+      + os.EOL);
+    Utilities.executeCommandWithRetry(npmToolFilename,
+      npmInstallArgs,
+      MAX_INSTALL_ATTEMPTS,
+      this._rushConfiguration.commonFolder);
+
+    // Finally, create the marker file to indicate a successful install
+    fsx.createFileSync(commonNodeModulesMarkerFilename);
+    console.log('');
   }
 }
