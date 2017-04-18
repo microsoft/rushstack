@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "API Extractor now uses Gulp-Typescript to generate compiler options.",
+      "type": "patch"
+    }
+  ],
+  "email": "lahuey@microsoft.com"
+}
