@@ -121,8 +121,8 @@ export default class InstallManager {
       this._rushConfiguration.pinnedVersions.forEach((version: string, dependency: string) => {
         if (!shrinkwrapFile.hasCompatibleDependency(dependency, version)) {
           console.log(colors.yellow(wrap(
-            `${os.EOL}The NPM shrinkwrap file does satisfy "${dependency}"`
-            + ` (${version}) from pinnedVersions.json.`)));
+            `${os.EOL}The NPM shrinkwrap file does not provide "${dependency}"`
+            + ` (${version}) required by pinnedVersions.json.`)));
           shrinkwrapIsValid = false;
         }
       });
