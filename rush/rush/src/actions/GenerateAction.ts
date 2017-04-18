@@ -27,13 +27,13 @@ export default class GenerateAction extends CommandLineAction {
     super({
       actionVerb: 'generate',
       summary: 'Generate a new shrinkwrap file containing the latest semver-compatible versions.',
-      documentation: 'Run this command if: (1) you are setting up a new repo, or'
-      + ' (2) you want to upgrade to new versions of your dependencies, or (3)'
+      documentation: 'Run "rush generate" command if: (1) you are setting up a new repo, or'
+      + ' (2) you want to upgrade to the latest versions of your dependencies, or (3)'
       + ' you modified a package.json file and "rush install" can\'t find what it needs.'
       + ' The "rush generate" command will do a clean install of your Rush "common" folder,'
       + ' upgrading you to the latest semver-compatible versions of all dependencies.'
       + ' Then it will create a new shrinkwrap file, which you should commit to Git.'
-      + ' Finally, it will run "rush link" to create symlinks for all your projects.'
+      + ' Afterwards, it will run "rush link" to create symlinks for all your projects.'
     });
     this._parser = parser;
   }
@@ -42,8 +42,10 @@ export default class GenerateAction extends CommandLineAction {
     this._lazyParameter = this.defineFlagParameter({
       parameterLongName: '--lazy',
       parameterShortName: '-l',
-      description: 'Do not clean the "node_modules" folder before running "npm install".'
-      + ' This is faster, but less correct, so only use it for debugging dependency problems.'
+      description: 'Use this in situations where you need to run "rush generate" repeatedly'
+      + ' while editing package.json files.  It performs a much quicker incremental install,'
+      + ' but does not generate a shrinkwrap file; you will still need to run a full "rush generate"'
+      + ' (without --lazy) before commiting your changes.'
     });
     this._noLinkParameter = this.defineFlagParameter({
       parameterLongName: '--no-link',

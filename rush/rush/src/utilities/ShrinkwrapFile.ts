@@ -48,8 +48,7 @@ export default class ShrinkwrapFile {
     return undefined;
   }
 
-  public hasCompatibleDependency(dependencyName: string, version: string,
-    tempProjectName?: string): boolean {
+  public hasCompatibleDependency(dependencyName: string, version: string, tempProjectName?: string): boolean {
 
     // First, check under tempProjectName, as this is the first place "rush link" looks.
     let dependencyJson: IShrinkwrapDependencyJson = undefined;
@@ -68,7 +67,7 @@ export default class ShrinkwrapFile {
     }
 
     if (!dependencyJson) {
-      return undefined;
+      return false;
     }
 
     // If we found it, the version must be compatible

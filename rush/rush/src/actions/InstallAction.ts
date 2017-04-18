@@ -35,11 +35,12 @@ export default class InstallAction extends CommandLineAction {
     super({
       actionVerb: 'install',
       summary: 'Install NPM packages in the Rush "common" folder, as specified by your shrinkwrap file.',
-      documentation: 'Use this command after cloning a repo or pulling new changes from Git.'
-      + ' The "rush install" command will install NPM packages into your Rush "common" folder.'
-      + ' It will install the exact versions specified in your shrinkwrap file (without upgrading'
-      + ' anything).'
-      + ' Finally, it will run "rush link" to create symlinks for all your projects.'
+      documentation: 'Always run "rush install" if you: (1) cloned a new repo, or (2) pulled new changes from Git,'
+      + ' or (3) edited any package.json file.  The "rush install" command installs NPM packages into your'
+      + ' Rush "common" folder, using the exact versions specified in your npm-shrinkwrap.json file.'
+      + ' (It also makes sure these versions are adequate; if not, it will ask you to run "rush generate".)'
+      + ' If there is nothing to do, then "rush install" won\'t take any time.'
+      + ' Afterwards, it will run "rush link" to create symlinks for all your projects.'
     });
     this._parser = parser;
   }
