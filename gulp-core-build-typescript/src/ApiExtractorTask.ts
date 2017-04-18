@@ -6,13 +6,15 @@ import * as path from 'path';
 import * as through from 'through2';
 import * as gulpUtil from 'gulp-util';
 import { GulpTask } from '@microsoft/gulp-core-build';
-import { Extractor,
+import {
+  Extractor,
   IExtractorOptions,
   IExtractorAnalyzeOptions,
   ApiFileGenerator,
-  ApiJsonGenerator } from '@microsoft/api-extractor';
+  ApiJsonGenerator
+} from '@microsoft/api-extractor';
 import { TypeScriptConfiguration } from './TypeScriptConfiguration';
-import * as typescript from 'typescript'; /* tslint:disable-line */
+import ts = require('gulp-typescript');
 
 function writeStringToGulpUtilFile(content: string, filename: string = 'tempfile'): gulpUtil.File {
   return new gulpUtil.File({
@@ -92,11 +94,17 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
     const otherFiles: string[] = fsx.existsSync(typingsFilePath) ? [typingsFilePath] : [];
 
     // tslint:disable-next-line:no-any
-    const compilerOptions: typescript.CompilerOptions =
-      TypeScriptConfiguration.getTypescriptOptions(this.buildConfig).compilerOptions;
+    const compilerOptions: ts.Settings =
+      TypeScriptConfiguration.getGulpTypescriptOptions(this.buildConfig).compilerOptions;
+
+    if (compilerOptions.module !== 'commonjs' && compilerOptions.module) {
+      this.logWarning(`Your tsconfig.json file specifies a different "target" than expected. `
+        + `Expected: "commonjs". Actual: "${compilerOptions.module}". Using "commonjs" instead.`);
+      compilerOptions.module = 'commonjs';
+    }
 
     const extractorOptions: IExtractorOptions = {
-      compilerOptions: compilerOptions,
+      compilerOptions: ts.createProject(compilerOptions).options,
       errorHandler: (message: string, fileName: string, lineNumber: number): void => {
         this.logWarning(`${message}` + os.EOL
           + `  ${fileName}#${lineNumber}`);
@@ -159,7 +167,7 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
           } else {
             // For a local build, just copy the file automatically.
             self.log('You have changed the Public API signature for this project.  Updating '
-              +  `'${expectedApiFilePath}'`);
+              + `'${expectedApiFilePath}'`);
             fsx.writeFileSync(expectedApiFilePath, actualApiFileContent);
           }
         }
