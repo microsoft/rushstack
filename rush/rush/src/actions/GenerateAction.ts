@@ -12,7 +12,7 @@ import {
 } from '@microsoft/rush-lib';
 
 import LinkAction from './LinkAction';
-import InstallManager from '../utilities/InstallManager';
+import InstallManager, { InstallType } from '../utilities/InstallManager';
 import RushCommandLineParser from './RushCommandLineParser';
 import PackageReviewChecker from '../utilities/PackageReviewChecker';
 
@@ -83,12 +83,12 @@ export default class GenerateAction extends CommandLineAction {
         `You will need to run a normal "rush generate" before committing.`));
 
       // Do an incremental install
-      installManager.installCommonModules(false);
+      installManager.installCommonModules(InstallType.Normal);
 
       console.log(os.EOL + colors.bold('(Skipping "npm shrinkwrap")') + os.EOL);
     } else {
       // Do a clean install
-      installManager.installCommonModules(true);
+      installManager.installCommonModules(InstallType.Clean);
 
       console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
       Utilities.executeCommand(this._rushConfiguration.npmToolFilename,
