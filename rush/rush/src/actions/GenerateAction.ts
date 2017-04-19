@@ -42,7 +42,7 @@ export default class GenerateAction extends CommandLineAction {
     this._lazyParameter = this.defineFlagParameter({
       parameterLongName: '--lazy',
       parameterShortName: '-l',
-      description: 'Use this in situations where you need to run "rush generate" repeatedly'
+      description: 'Use this to save time in situations where you need to run "rush generate" repeatedly'
       + ' while editing package.json files.  It performs a much quicker incremental install,'
       + ' but does not generate a shrinkwrap file; you will still need to run a full "rush generate"'
       + ' (without --lazy) before commiting your changes.'
