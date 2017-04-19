@@ -13,6 +13,7 @@ import {
   RushConfiguration,
   RushConfigurationProject,
   IPackageJson,
+  RushConstants,
   Utilities
 } from '@microsoft/rush-lib';
 
@@ -145,13 +146,16 @@ export default class InstallManager {
    * the return value is false.
    */
   public createTempModulesAndCheckShrinkwrap(shrinkwrapFile: ShrinkwrapFile | undefined): boolean {
-    console.log(os.EOL + colors.bold('Updating temp_modules in ' + this._rushConfiguration.commonFolder));
+    // Example: "C:\MyRepo\common\temp\projects"
+    const tempProjectsFolder: string = path.join(this._rushConfiguration.commonTempFolder,
+      RushConstants.rushTempProjectsFolderName);
 
-    if (fsx.existsSync(this._rushConfiguration.tempModulesFolder)) {
-      Utilities.dangerouslyDeletePath(this._rushConfiguration.tempModulesFolder);
+    console.log(os.EOL + colors.bold('Updating temp projects in ' + tempProjectsFolder));
+
+    if (fsx.existsSync(tempProjectsFolder)) {
+      Utilities.dangerouslyDeletePath(tempProjectsFolder);
     }
-
-    Utilities.createFolderWithRetry(this._rushConfiguration.tempModulesFolder);
+    fsx.mkdirsSync(tempProjectsFolder);
 
     let shrinkwrapIsValid: boolean = true;
 
@@ -191,12 +195,20 @@ export default class InstallManager {
     for (const rushProject of sortedRushProjects) {
       const packageJson: PackageJson = rushProject.packageJson;
 
+      // Example: "@rush-temp/my-project"
       const tempProjectName: string = rushProject.tempProjectName;
 
-      const tempProjectFolder: string = path.join(this._rushConfiguration.tempModulesFolder, tempProjectName);
-      fsx.mkdirSync(tempProjectFolder);
+      // Example: "my-project-2" (unique, regardless of original NPM scope)
+      const unscopedTempProjectName: string = Utilities.parseScopedPackageName(tempProjectName).name;
 
-      commonPackageJson.dependencies[tempProjectName] = 'file:./temp_modules/' + tempProjectName;
+      // Example: "C:\MyRepo\common\temp\projects\my-project-2"
+      const tempProjectFolder: string = path.join(tempProjectsFolder, unscopedTempProjectName);
+      fsx.mkdirsSync(tempProjectFolder);
+
+      // Example: "file:./temp/projects/my-project"
+      commonPackageJson.dependencies[tempProjectName]
+        = `file:./${RushConstants.rushTempFolderName}/${RushConstants.rushTempProjectsFolderName}`
+          + `/${unscopedTempProjectName}`;
 
       const tempPackageJsonFilename: string = path.join(tempProjectFolder, 'package.json');
 
@@ -385,12 +397,14 @@ export default class InstallManager {
         // detect changes for "file:./" references.
         // We recognize the temp projects by their names, which always start with "rush-".
 
-        // Example: "C:\MyRepo\common\node_modules\rush-"
-        const pathToDeleteWithoutStar: string = path.join(commonNodeModulesFolder, 'rush-');
+        // Example: "C:\MyRepo\common\node_modules\@rush-temp\"
+        const pathToDeleteWithoutStar: string = path.join(commonNodeModulesFolder, RushConstants.rushTempNpmScope);
         console.log(`Deleting ${pathToDeleteWithoutStar}*`);
         // Glob can't handle Windows paths
         const normalizedpathToDeleteWithoutStar: string
           = Utilities.getAllReplaced(pathToDeleteWithoutStar, '\\', '/');
+
+        // Example: "C:/MyRepo/common/node_modules/@rush-temp/*"
         for (const tempModulePath of glob.sync(globEscape(normalizedpathToDeleteWithoutStar) + '*')) {
           // We could potentially use AsyncRecycler here, but in practice these folders tend
           // to be very small

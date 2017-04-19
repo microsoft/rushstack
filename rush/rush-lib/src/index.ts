@@ -66,6 +66,8 @@ export {
   StopwatchState
 } from './utilities/Stopwatch';
 
+export { RushConstants } from './RushConstants';
+
 export {
   default as rushVersion
 } from './rushVersion';
