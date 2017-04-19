@@ -132,7 +132,7 @@ export default class Extractor {
    * @param externalJsonCollectionPath - an absolute path to to the folder that contains all the external
    * api json files.
    * Ex: if externalJsonPath is './resources', then in that folder
-   * are 'es6-collections.api.json', 'es6-promise.api.json', etc.
+   * are 'es6-collections.api.json', etc.
    */
   public loadExternalPackages(externalJsonCollectionPath: string): void {
     if (!externalJsonCollectionPath) {

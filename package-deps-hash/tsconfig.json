@@ -8,9 +8,6 @@
     "types": [
       "node",
       "mocha"
-    ],
-    "typeRoots": [
-      "../common/node_modules/@types"
     ]
   }
 }

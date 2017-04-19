@@ -5,14 +5,18 @@
     "declaration": true,
     "sourceMap": true,
     "types": [
-      "es6-promise",
       "mocha",
       "node"
     ],
     "typeRoots": [
-      "../common/node_modules/@types",
+      "node_modules",
       "typings-custom"
+    ],
+    "lib": [
+      "es5",
+      "scripthost",
+      "es2015.promise",
+      "dom"
     ]
-
   }
 }

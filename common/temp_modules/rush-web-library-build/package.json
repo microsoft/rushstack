@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
-    "@types/es6-promise": "0.0.32",
     "@types/gulp": "3.8.32",
     "@types/node": "6.0.62",
     "gulp": "~3.9.1",
@@ -17,7 +16,7 @@
     "@microsoft/gulp-core-build-karma": ">=2.2.0 <3.0.0",
     "@microsoft/gulp-core-build-sass": ">=3.1.0 <4.0.0",
     "@microsoft/gulp-core-build-serve": ">=2.1.0 <3.0.0",
-    "@microsoft/gulp-core-build-typescript": ">=3.0.2 <4.0.0",
+    "@microsoft/gulp-core-build-typescript": ">=3.0.3 <4.0.0",
     "@microsoft/gulp-core-build-webpack": ">=1.1.2 <2.0.0"
   }
 }

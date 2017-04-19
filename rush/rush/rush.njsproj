@@ -51,7 +51,6 @@
     <Folder Include="typings\builtins\" />
     <Folder Include="typings\colors\" />
     <Folder Include="typings\es6-collections\" />
-    <Folder Include="typings\es6-promise\" />
     <Folder Include="typings\glob-escape\" />
     <Folder Include="typings\glob\" />
     <Folder Include="typings\minimatch\" />
