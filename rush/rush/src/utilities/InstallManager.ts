@@ -8,7 +8,7 @@ import * as wordwrap from 'wordwrap';
 import globEscape = require('glob-escape');
 
 import {
-  AsyncRecycle,
+  AsyncRecycler,
   JsonFile,
   RushConfiguration,
   RushConfigurationProject,
@@ -23,11 +23,33 @@ const MAX_INSTALL_ATTEMPTS: number = 5;
 const wrap: (textToWrap: string) => string = wordwrap.soft(Utilities.getConsoleWidth());
 
 /**
+ * Controls the behavior of InstallManager.installCommonModules()
+ */
+export enum InstallType {
+  /**
+   * The default behavior: (1) If the timestamps are up to date, don't do anything.
+   * (2) Otherwise, if the common folder is in a good state, do an incremental install.
+   * (3) Otherwise, delete everything, clear the cache, and do a clean install.
+   */
+  Normal,
+  /**
+   * Force a clean install, i.e. delete "common\node_modules", clear the cache,
+   * and then install.
+   */
+  ForceClean,
+  /**
+   * Same as ForceClean, but also clears the global NPM cache (which is not threadsafe).
+   */
+  UnsafePurge
+}
+
+/**
  * This class implements common logic between "rush install" and "rush generate".
  */
 export default class InstallManager {
   private _rushConfiguration: RushConfiguration;
   private _commonNodeModulesMarkerFilename: string;
+  private _asyncRecycler: AsyncRecycler;
 
   constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
@@ -35,6 +57,8 @@ export default class InstallManager {
     // Example: "C:\MyRepo\common\last-install.flag"
     this._commonNodeModulesMarkerFilename = path.join(this._rushConfiguration.commonFolder,
       'last-install.flag');
+
+    this._asyncRecycler = new AsyncRecycler(this._rushConfiguration);
   }
 
   /**
@@ -262,7 +286,7 @@ export default class InstallManager {
    * 2. Incremental action ("npm prune", "npm install", etc).
    * 3. Full clean and "npm install"
    */
-  public installCommonModules(cleanInstall: boolean): void {
+  public installCommonModules(installType: InstallType): void {
     // Example: "C:\MyRepo\common\npm-local\node_modules\.bin\npm"
     const npmToolFilename: string = this._rushConfiguration.npmToolFilename;
     if (!fsx.existsSync(npmToolFilename)) {
@@ -278,8 +302,13 @@ export default class InstallManager {
     // This marker file indicates that the last "rush install" completed successfully
     const markerFileExistedAtStart: boolean = fsx.existsSync(this.commonNodeModulesMarkerFilename);
 
+    // If "--clean" or "--full-clean" was specified, or if the last install was interrupted,
+    // then we will need to delete the node_modules folder.  Otherwise, we can do an incremental
+    // install.
+    const deletingNodeModules: boolean = installType !== InstallType.Normal || !markerFileExistedAtStart;
+
     // Based on timestamps, can we skip this install entirely?
-    if (!cleanInstall && markerFileExistedAtStart) {
+    if (!deletingNodeModules) {
       const potentiallyChangedFiles: string[] = [];
 
       // Consider the timestamp on the node_modules folder; if someone tampered with it
@@ -296,19 +325,26 @@ export default class InstallManager {
         // Nothing to do, because everything is up to date according to time stamps
         return;
       }
-    }
-
-    // Before we invoke NPM, clean the cache if requested
-    if (cleanInstall) {
+    } else {
+      // Since cleanInstall=true, we need to start by cleaning the cache
       if (this._rushConfiguration.cacheFolder) {
-        const cacheCleanArgs: string[] = ['cache', 'clean', this._rushConfiguration.cacheFolder];
-        console.log(os.EOL + `Running "npm ${cacheCleanArgs.join(' ')}"`);
-        Utilities.executeCommand(npmToolFilename, cacheCleanArgs, this._rushConfiguration.commonFolder);
+        console.log(`Deleting the NPM cache folder`);
+        // This is faster and more thorough than "npm cache clean"
+        this._asyncRecycler.moveFolder(this._rushConfiguration.cacheFolder);
+      } else if (installType === InstallType.UnsafePurge) {
+        console.log(os.EOL + `Running "npm cache clean" to clean the global cache`);
+        const npmArgs: string[] = ['cache', 'clean'];
+        this.pushConfigurationNpmArgs(npmArgs);
+        Utilities.executeCommand(npmToolFilename, npmArgs, this._rushConfiguration.commonFolder);
       } else {
-        // Ideally we should clean the global cache here.  However, the global NPM cache
-        // is (inexplicably) not threadsafe, so if there are any concurrent "npm install"
-        // processes running this would cause them to crash.
+        // The global NPM cache is (inexplicably) not threadsafe, so if there are any
+        // concurrent "npm install" processes running this would cause them to crash.
         console.log(os.EOL + 'Skipping "npm cache clean" because the cache is global.');
+      }
+
+      if (this._rushConfiguration.tmpFolder) {
+        console.log(`Deleting the "npm-tmp" folder`);
+        this._asyncRecycler.moveFolder(this._rushConfiguration.tmpFolder);
       }
     }
 
@@ -320,18 +356,18 @@ export default class InstallManager {
     // Is there an existing "node_modules" folder to consider?
     if (fsx.existsSync(commonNodeModulesFolder)) {
       // Should we delete the entire "node_modules" folder?
-      if (cleanInstall || !markerFileExistedAtStart) {
+      if (deletingNodeModules) {
         // YES: Delete "node_modules"
 
         // Explain to the user why we are hosing their node_modules folder
-        if (!cleanInstall) {
+        if (installType === InstallType.Normal) {
           console.log('Deleting the "node_modules" folder because the previous Rush install' +
             ' did not complete successfully.');
         } else {
           console.log('Deleting old files from ' + commonNodeModulesFolder);
         }
 
-        AsyncRecycle.recycleDirectory(this._rushConfiguration, commonNodeModulesFolder);
+        this._asyncRecycler.moveFolder(commonNodeModulesFolder);
 
         // Since it may be a while before NPM gets around to creating the "node_modules" folder,
         // create an empty folder so that the above warning will be shown if we get interrupted.
@@ -340,7 +376,9 @@ export default class InstallManager {
         // NO: Do an incremental install in the "node_modules" folder
 
         console.log(`Running "npm prune" in ${this._rushConfiguration.commonFolder}`);
-        Utilities.executeCommandWithRetry(npmToolFilename, ['prune'], MAX_INSTALL_ATTEMPTS,
+        const npmArgs: string[] = ['prune'];
+        this.pushConfigurationNpmArgs(npmArgs);
+        Utilities.executeCommandWithRetry(npmToolFilename, npmArgs, MAX_INSTALL_ATTEMPTS,
           this._rushConfiguration.commonFolder);
 
         // Delete the (installed image of) the temp projects, since "npm install" does not
@@ -354,20 +392,20 @@ export default class InstallManager {
         const normalizedpathToDeleteWithoutStar: string
           = Utilities.getAllReplaced(pathToDeleteWithoutStar, '\\', '/');
         for (const tempModulePath of glob.sync(globEscape(normalizedpathToDeleteWithoutStar) + '*')) {
+          // We could potentially use AsyncRecycler here, but in practice these folders tend
+          // to be very small
           Utilities.dangerouslyDeletePath(tempModulePath);
         }
       }
     }
 
+    // If any folders were moved into the AsyncRecycler, get that going before we start
+    // the expensive "npm install" operation.
+    this._asyncRecycler.deleteAll();
+
     // Run "npm install" in the common folder
     const npmInstallArgs: string[] = ['install'];
-    if (this._rushConfiguration.cacheFolder) {
-      npmInstallArgs.push('--cache', this._rushConfiguration.cacheFolder);
-    }
-
-    if (this._rushConfiguration.tmpFolder) {
-      npmInstallArgs.push('--tmp', this._rushConfiguration.tmpFolder);
-    }
+    this.pushConfigurationNpmArgs(npmInstallArgs);
 
     console.log(os.EOL + `Running "npm ${npmInstallArgs.join(' ')}" in ${this._rushConfiguration.commonFolder}`
       + os.EOL);
@@ -379,5 +417,19 @@ export default class InstallManager {
     // Finally, create the marker file to indicate a successful install
     fsx.createFileSync(this.commonNodeModulesMarkerFilename);
     console.log('');
+  }
+
+  /**
+   * Used when invoking the NPM tool.  Appends the common configuration options
+   * to the command-line.
+   */
+  public pushConfigurationNpmArgs(npmArgs: string[]): void {
+    if (this._rushConfiguration.cacheFolder) {
+      npmArgs.push('--cache', this._rushConfiguration.cacheFolder);
+    }
+
+    if (this._rushConfiguration.tmpFolder) {
+      npmArgs.push('--tmp', this._rushConfiguration.tmpFolder);
+    }
   }
 }

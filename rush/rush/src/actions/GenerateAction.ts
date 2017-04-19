@@ -12,7 +12,7 @@ import {
 } from '@microsoft/rush-lib';
 
 import LinkAction from './LinkAction';
-import InstallManager from '../utilities/InstallManager';
+import InstallManager, { InstallType } from '../utilities/InstallManager';
 import RushCommandLineParser from './RushCommandLineParser';
 import PackageReviewChecker from '../utilities/PackageReviewChecker';
 
@@ -27,7 +27,7 @@ export default class GenerateAction extends CommandLineAction {
     super({
       actionVerb: 'generate',
       summary: 'Generate a new shrinkwrap file containing the latest semver-compatible versions.',
-      documentation: 'Run "rush generate" command if: (1) you are setting up a new repo, or'
+      documentation: 'Run the "rush generate" command only if: (1) you are setting up a new repo, or'
       + ' (2) you want to upgrade to the latest versions of your dependencies, or (3)'
       + ' you modified a package.json file and "rush install" can\'t find what it needs.'
       + ' The "rush generate" command will do a clean install of your Rush "common" folder,'
@@ -83,16 +83,18 @@ export default class GenerateAction extends CommandLineAction {
         `You will need to run a normal "rush generate" before committing.`));
 
       // Do an incremental install
-      installManager.installCommonModules(false);
+      installManager.installCommonModules(InstallType.Normal);
 
       console.log(os.EOL + colors.bold('(Skipping "npm shrinkwrap")') + os.EOL);
     } else {
       // Do a clean install
-      installManager.installCommonModules(true);
+      installManager.installCommonModules(InstallType.ForceClean);
 
       console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
+      const npmArgs: string [] = ['shrinkwrap'];
+      installManager.pushConfigurationNpmArgs(npmArgs);
       Utilities.executeCommand(this._rushConfiguration.npmToolFilename,
-        ['shrinkwrap'], this._rushConfiguration.commonFolder);
+        npmArgs, this._rushConfiguration.commonFolder);
       console.log('"npm shrinkwrap" completed' + os.EOL);
 
       // The flag file is normally created by installCommonModules(), but "rush install" will
