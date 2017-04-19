@@ -22,9 +22,24 @@ const MAX_INSTALL_ATTEMPTS: number = 5;
 
 const wrap: (textToWrap: string) => string = wordwrap.soft(Utilities.getConsoleWidth());
 
+/**
+ * Controls the behavior of InstallManager.installCommonModules()
+ */
 export enum InstallType {
+  /**
+   * The default behavior: (1) If the timestamps are up to date, don't do anything.
+   * (2) Otherwise, if the folder is in a good state, do an incremental install.
+   * (3) Otherwise, delete everything, clear the cache, and do a clean install.
+   */
   Normal,
-  Clean,
+  /**
+   * Force a clean install, i.e. delete "common\node_modules", clear the cache,
+   * and then install.
+   */
+  ForceClean,
+  /**
+   * Same as ForceClean, but also clears the global NPM cache (which is not threadsafe).
+   */
   UnsafePurge
 }
 
@@ -307,8 +322,10 @@ export default class InstallManager {
       }
     }
 
+    const cleanInstall: boolean = installType !== InstallType.Normal || !markerFileExistedAtStart;
+
     // Before we invoke NPM, clean the cache if requested
-    if (installType !== InstallType.Normal) {
+    if (cleanInstall) {
       if (this._rushConfiguration.cacheFolder) {
         console.log(`Deleting the NPM cache folder`);
         // This is faster and more thorough than "npm cache clean"
@@ -336,7 +353,7 @@ export default class InstallManager {
     // Is there an existing "node_modules" folder to consider?
     if (fsx.existsSync(commonNodeModulesFolder)) {
       // Should we delete the entire "node_modules" folder?
-      if (installType !== InstallType.Normal || !markerFileExistedAtStart) {
+      if (cleanInstall) {
         // YES: Delete "node_modules"
 
         // Explain to the user why we are hosing their node_modules folder

@@ -49,14 +49,17 @@ export default class InstallAction extends CommandLineAction {
     this._cleanInstall = this.defineFlagParameter({
       parameterLongName: '--clean',
       parameterShortName: '-c',
-      description: 'Delete any previously installed files before installing;'
-      + ' this takes longer but will resolve data corruption that is sometimes'
-      + ' encountered with the NPM tool'
+      description: 'Deletes the common "node_modules" folder and NPM cache before installing.'
+        + ' Use this option if you suspect that your package folder has become corrupted.'
+        + ' (This occurs sometimes due to bugs in the NPM tool, or if you upgraded your'
+        + ' Node.js engine.)"'
     });
     this._cleanInstallFull = this.defineFlagParameter({
       parameterLongName: '--full-clean',
       parameterShortName: '-C',
-      description: 'Like "--clean", but also deletes and reinstalls the NPM tool itself'
+      description: '(UNSAFE!) Similar to "--clean", but also deletes and reinstalls shared files'
+        + ' such as the NPM tool itself. This is a more aggressive fix that is NOT SAFE to run'
+        + ' regularly because it may cause other Rush or NPM processes to fail.'
     });
     this._bypassPolicy = this.defineFlagParameter({
       parameterLongName: '--bypass-policy',
@@ -109,7 +112,7 @@ export default class InstallAction extends CommandLineAction {
     if (this._cleanInstallFull.value) {
       installType = InstallType.UnsafePurge;
     } else if (this._cleanInstall.value) {
-      installType = InstallType.Clean;
+      installType = InstallType.ForceClean;
     }
 
     installManager.installCommonModules(installType);
