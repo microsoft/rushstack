@@ -28,7 +28,7 @@ const wrap: (textToWrap: string) => string = wordwrap.soft(Utilities.getConsoleW
 export enum InstallType {
   /**
    * The default behavior: (1) If the timestamps are up to date, don't do anything.
-   * (2) Otherwise, if the folder is in a good state, do an incremental install.
+   * (2) Otherwise, if the common folder is in a good state, do an incremental install.
    * (3) Otherwise, delete everything, clear the cache, and do a clean install.
    */
   Normal,
@@ -302,8 +302,10 @@ export default class InstallManager {
     // This marker file indicates that the last "rush install" completed successfully
     const markerFileExistedAtStart: boolean = fsx.existsSync(this.commonNodeModulesMarkerFilename);
 
+    const cleanInstall: boolean = installType !== InstallType.Normal || !markerFileExistedAtStart;
+
     // Based on timestamps, can we skip this install entirely?
-    if (installType === InstallType.Normal && markerFileExistedAtStart) {
+    if (!cleanInstall) {
       const potentiallyChangedFiles: string[] = [];
 
       // Consider the timestamp on the node_modules folder; if someone tampered with it
@@ -320,12 +322,8 @@ export default class InstallManager {
         // Nothing to do, because everything is up to date according to time stamps
         return;
       }
-    }
-
-    const cleanInstall: boolean = installType !== InstallType.Normal || !markerFileExistedAtStart;
-
-    // Before we invoke NPM, clean the cache if requested
-    if (cleanInstall) {
+    } else {
+      // Since cleanInstall=true, we need to start by cleaning the cache
       if (this._rushConfiguration.cacheFolder) {
         console.log(`Deleting the NPM cache folder`);
         // This is faster and more thorough than "npm cache clean"
