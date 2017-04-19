@@ -13,7 +13,7 @@ import {
 
 import RushCommandLineParser from './RushCommandLineParser';
 import GitPolicy from '../utilities/GitPolicy';
-import InstallManager from '../utilities/InstallManager';
+import InstallManager, { InstallType } from '../utilities/InstallManager';
 import LinkAction from './LinkAction';
 import ShrinkwrapFile from '../utilities/ShrinkwrapFile';
 
@@ -105,7 +105,14 @@ export default class InstallAction extends CommandLineAction {
       return;
     }
 
-    installManager.installCommonModules(this._cleanInstall.value || this._cleanInstallFull.value);
+    let installType: InstallType = InstallType.Normal;
+    if (this._cleanInstallFull.value) {
+      installType = InstallType.UnsafePurge;
+    } else if (this._cleanInstall.value) {
+      installType = InstallType.Clean;
+    }
+
+    installManager.installCommonModules(installType);
 
     stopwatch.stop();
     console.log(colors.green(`Done. (${stopwatch.toString()})`));
