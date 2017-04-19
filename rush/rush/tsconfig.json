@@ -10,8 +10,13 @@
     "listFiles": false,
     "types": [
       "es6-collections",
-      "es6-promise",
       "mocha"
+    ],
+    "lib": [
+      "es5",
+      "scripthost",
+      "es2015.promise",
+      "dom"
     ]
   }
 }

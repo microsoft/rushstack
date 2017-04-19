@@ -11,7 +11,6 @@
     "@types/mocha": "2.2.38",
     "@types/orchestrator": "0.0.30",
     "@types/q": "0.0.32",
-    "@types/es6-promise": "0.0.32",
     "@types/node": "6.0.62",
     "gulp": "~3.9.1",
     "gulp-istanbul": "~0.10.3",

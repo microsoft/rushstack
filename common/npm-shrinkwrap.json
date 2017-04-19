@@ -4,7 +4,7 @@
   "dependencies": {
     "@microsoft/api-extractor": {
       "version": "2.0.3",
-      "from": "@microsoft/api-extractor@>=2.0.2 <3.0.0",
+      "from": "@microsoft/api-extractor@>=2.0.3 <3.0.0",
       "resolved": "https://registry.npmjs.org/@microsoft/api-extractor/-/api-extractor-2.0.3.tgz"
     },
     "@microsoft/gulp-core-build": {
@@ -18,9 +18,9 @@
       "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-mocha/-/gulp-core-build-mocha-2.0.2.tgz"
     },
     "@microsoft/gulp-core-build-typescript": {
-      "version": "3.0.2",
+      "version": "3.0.3",
       "from": "@microsoft/gulp-core-build-typescript@>=3.0.0 <4.0.0",
-      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-typescript/-/gulp-core-build-typescript-3.0.2.tgz",
+      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-typescript/-/gulp-core-build-typescript-3.0.3.tgz",
       "dependencies": {
         "lodash": {
           "version": "4.15.0",
@@ -255,9 +255,9 @@
       "resolved": "https://registry.npmjs.org/after/-/after-0.8.2.tgz"
     },
     "ajv": {
-      "version": "4.11.6",
+      "version": "4.11.7",
       "from": "ajv@>=4.9.1 <5.0.0",
-      "resolved": "https://registry.npmjs.org/ajv/-/ajv-4.11.6.tgz"
+      "resolved": "https://registry.npmjs.org/ajv/-/ajv-4.11.7.tgz"
     },
     "align-text": {
       "version": "0.1.4",
@@ -320,9 +320,9 @@
       "resolved": "https://registry.npmjs.org/arr-diff/-/arr-diff-2.0.0.tgz"
     },
     "arr-flatten": {
-      "version": "1.0.2",
+      "version": "1.0.3",
       "from": "arr-flatten@>=1.0.1 <2.0.0",
-      "resolved": "https://registry.npmjs.org/arr-flatten/-/arr-flatten-1.0.2.tgz"
+      "resolved": "https://registry.npmjs.org/arr-flatten/-/arr-flatten-1.0.3.tgz"
     },
     "array-differ": {
       "version": "1.0.0",
@@ -2719,9 +2719,9 @@
       }
     },
     "interpret": {
-      "version": "1.0.2",
+      "version": "1.0.3",
       "from": "interpret@>=1.0.0 <2.0.0",
-      "resolved": "http://registry.npmjs.org/interpret/-/interpret-1.0.2.tgz"
+      "resolved": "https://registry.npmjs.org/interpret/-/interpret-1.0.3.tgz"
     },
     "invert-kv": {
       "version": "1.0.0",
@@ -4072,9 +4072,9 @@
       "resolved": "https://registry.npmjs.org/osenv/-/osenv-0.1.4.tgz"
     },
     "package-json": {
-      "version": "4.0.0",
+      "version": "4.0.1",
       "from": "package-json@>=4.0.0 <5.0.0",
-      "resolved": "http://registry.npmjs.org/package-json/-/package-json-4.0.0.tgz"
+      "resolved": "https://registry.npmjs.org/package-json/-/package-json-4.0.1.tgz"
     },
     "pako": {
       "version": "0.2.9",
@@ -5419,9 +5419,9 @@
       "resolved": "https://registry.npmjs.org/tsscmp/-/tsscmp-1.0.5.tgz"
     },
     "tsutils": {
-      "version": "1.6.0",
+      "version": "1.7.0",
       "from": "tsutils@>=1.1.0 <2.0.0",
-      "resolved": "http://registry.npmjs.org/tsutils/-/tsutils-1.6.0.tgz"
+      "resolved": "https://registry.npmjs.org/tsutils/-/tsutils-1.7.0.tgz"
     },
     "tty-browserify": {
       "version": "0.0.0",
@@ -5615,9 +5615,9 @@
       "resolved": "https://registry.npmjs.org/uuid/-/uuid-3.0.1.tgz"
     },
     "v8flags": {
-      "version": "2.0.12",
+      "version": "2.1.1",
       "from": "v8flags@>=2.0.2 <3.0.0",
-      "resolved": "http://registry.npmjs.org/v8flags/-/v8flags-2.0.12.tgz"
+      "resolved": "https://registry.npmjs.org/v8flags/-/v8flags-2.1.1.tgz"
     },
     "vali-date": {
       "version": "1.0.0",
