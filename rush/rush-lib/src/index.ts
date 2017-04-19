@@ -2,13 +2,11 @@
 // See LICENSE in the project root for license information.
 
 export {
-  IRushConfigurationJson,
   IRushLinkJson,
   default as RushConfiguration
 } from './data/RushConfiguration';
 
 export {
-  IRushConfigurationProjectJson,
   default as RushConfigurationProject
 } from './data/RushConfigurationProject';
 
@@ -18,7 +16,6 @@ export {
 } from './data/PackageReviewConfiguration';
 
 export {
-  IPinnedVersionsJson,
   PinnedVersionsConfiguration
 } from './data/PinnedVersionsConfiguration';
 
