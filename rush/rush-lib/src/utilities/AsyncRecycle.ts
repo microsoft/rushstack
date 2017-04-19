@@ -11,8 +11,9 @@ import Utilities from './Utilities';
 
 export default class AsyncRecycle {
   /**
-   * Moves the specified directory into the recycler directory and asynchronously deletes the recycler directory.
-   *  Delete will continue even if the node process is killed.
+   * Synchronously moves the specified directory into the recycler directory,
+   * then starts an asynchronous task to delete the recycler directory.  Delete will continue
+   * even if the node process is killed.
    */
   public static recycleDirectory(rushConfiguration: RushConfiguration, directoryPath: string): void {
     // We need to do a simple "fs.renameSync" here, however if the folder we're trying to rename

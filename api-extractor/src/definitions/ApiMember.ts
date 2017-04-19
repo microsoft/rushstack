@@ -76,6 +76,17 @@ export default class ApiMember extends ApiItem {
   }
 
   /**
+   * @virtual
+   */
+  public visitTypeReferencesForApiItem(): void {
+    super.visitTypeReferencesForApiItem();
+
+    if (this.declaration.kind !== ts.SyntaxKind.PropertySignature) {
+      this.visitTypeReferencesForNode(this.declaration);
+    }
+  }
+
+  /**
    * Returns a text string such as "someName?: SomeTypeName;", or in the case of a type
    * literal expression, returns a text string such as "someName?:".
    */

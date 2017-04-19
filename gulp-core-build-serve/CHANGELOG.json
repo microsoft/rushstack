@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-serve",
   "entries": [
     {
+      "version": "2.1.0",
+      "tag": "@microsoft/gulp-core-build-serve_v2.1.0",
+      "date": "Sat, 15 Apr 2017 01:03:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Allowing the hostname to be configured in gulp-core-build-serve."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.4",
       "tag": "@microsoft/gulp-core-build-serve_v2.0.4",
       "date": "Wed, 15 Mar 2017 01:32:09 GMT",

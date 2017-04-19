@@ -17,5 +17,5 @@ export {
     testingLinks,
     publicEnum,
     internalEnum
-} from './folder/MyClass';
-export { default as MyClass } from './folder/MyClass';
+} from './MyClass';
+export { default as MyClass } from './MyClass';

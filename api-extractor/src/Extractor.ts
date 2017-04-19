@@ -3,6 +3,7 @@ import * as fsx from 'fs-extra';
 import * as path from 'path';
 import ApiPackage from './definitions/ApiPackage';
 import DocItemLoader from './DocItemLoader';
+import PackageJsonHelpers from './PackageJsonHelpers';
 
 export type ApiErrorHandler = (message: string, fileName: string, lineNumber: number) => void;
 
@@ -60,6 +61,10 @@ export default class Extractor {
 
   private _compilerOptions: ts.CompilerOptions;
 
+  // If the entry point is "C:\Folder\project\src\index.ts" and the nearest package.json
+  // is "C:\Folder\project\package.json", then the packageFolder is "C:\Folder\project"
+  private _packageFolder: string;
+
   /**
     * The default implementation of ApiErrorHandler, which merely writes to console.log().
     */
@@ -71,6 +76,13 @@ export default class Extractor {
     this._compilerOptions = options.compilerOptions;
     this.docItemLoader = new DocItemLoader(options.compilerOptions.rootDir);
     this.errorHandler = options.errorHandler || Extractor.defaultErrorHandler;
+  }
+
+  /**
+   * Getter for the package folder that Extractor is analyzing.
+   */
+  public get packageFolder(): string {
+    return this._packageFolder;
   }
 
   /**
@@ -95,8 +107,14 @@ export default class Extractor {
       throw new Error('Unable to load file: ' + options.entryPointFile);
     }
 
+    // Assign _packageFolder by probing upwards from entryPointFile until we find a package.json
+    const currentPath: string = path.resolve(options.entryPointFile);
+    // This is guaranteed to succeed since we do check prior to this point
+    this._packageFolder = PackageJsonHelpers.tryFindPackagePathUpwards(currentPath);
+
     this.package = new ApiPackage(this, rootFile); // construct members
     this.package.completeInitialization(); // creates ApiDocumentation
+    this.package.visitTypeReferencesForApiItem();
   }
 
   /**
@@ -125,7 +143,7 @@ export default class Extractor {
     files.forEach(file => {
       if (path.extname(file) === '.json') {
         const externalJsonFilePath: string = path.join(externalJsonCollectionPath, file);
-        this.docItemLoader.loadPackageIntoCache(externalJsonFilePath);
+        this.docItemLoader.loadPackageIntoCache(externalJsonFilePath, path.parse(file).name.split('.').shift());
       }
     });
   }
