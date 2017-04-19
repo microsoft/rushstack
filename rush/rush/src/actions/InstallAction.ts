@@ -52,7 +52,7 @@ export default class InstallAction extends CommandLineAction {
       description: 'Deletes the common "node_modules" folder and NPM cache before installing.'
         + ' Use this option if you suspect that your package folder has become corrupted.'
         + ' (This occurs sometimes due to bugs in the NPM tool, or if you upgraded your'
-        + ' Node.js engine.)"'
+        + ' Node.js engine.)'
     });
     this._cleanInstallFull = this.defineFlagParameter({
       parameterLongName: '--full-clean',
