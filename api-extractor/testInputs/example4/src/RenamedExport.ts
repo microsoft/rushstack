@@ -1,0 +1,1 @@
+export { MyLibrary2 as RenamedExport } from '@ms/library';

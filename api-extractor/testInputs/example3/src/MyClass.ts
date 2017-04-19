@@ -21,7 +21,7 @@ export enum inheritEnumValues {
    */
   index_zero = 0,
   /**
-   * {@inheritdoc sourceEnumValuesDoc.one}
+   * {@inheritdoc @scope/example3:sourceEnumValuesDoc.one}
    */
   index_one = 1,
 }
@@ -73,7 +73,7 @@ export function jsonResolutionFunction(): boolean {
  */
 export class jsonResolutionClass {
   /**
-   * {@inheritdoc es6-collections:ForEachable.aMethod }
+   * {@inheritdoc es6-collections:aFunction }
    */
   public jsonResolutionMethod(): boolean {
       return true;
