@@ -43,6 +43,7 @@ export interface IRushConfigurationJson {
 
 /**
  * This represents the JSON data structure for the "rush-link.json" data file.
+ * @public
  */
 export interface IRushLinkJson {
   localLinks: {
@@ -53,6 +54,7 @@ export interface IRushLinkJson {
 /**
  * This represents the Rush configuration for a repository, based on the Rush.json
  * configuration file.
+ * @public
  */
 export default class RushConfiguration {
   private _rushJsonFolder: string;

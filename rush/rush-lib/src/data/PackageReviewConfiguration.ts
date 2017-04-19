@@ -35,14 +35,28 @@ export interface IPackageReviewJson {
   nonBrowserPackages: IPackageReviewItemJson[];
 }
 
+/**
+ * An item returned by PackageReviewConfiguration
+ * @public
+ */
 export class PackageReviewItem {
+  /**
+   * The NPM package name
+   */
   public packageName: string;
+  /**
+   * Whether it is allowed for web browser projects, or only tooling projects
+   */
   public allowedInBrowser: boolean;
+  /**
+   * The project categories that are allowed to use this package.
+   */
   public allowedCategories: Set<string> = new Set<string>();
 }
 
 /**
  * This represents the JSON file specified via the "packageReviewFile" option in rush.json.
+ * @public
  */
 export default class PackageReviewConfiguration {
   public items: PackageReviewItem[] = [];
