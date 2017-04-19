@@ -155,7 +155,9 @@ export default class RushConfigurationProject {
   /**
    * The unique name for the temporary project that will be generated in the Common folder.
    * For example, if the project name is "@ms/MyProject", the temporary project name
-   * might be "rush-MyProject-2".
+   * might be "@rush-temp/MyProject-2".
+   *
+   * Example: "@rush-temp/MyProject-2"
    */
   public get tempProjectName(): string {
     return this._tempProjectName;
