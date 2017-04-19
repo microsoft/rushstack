@@ -8,15 +8,16 @@ import { BuildTaskError } from '../TaskError';
 
 /**
  * Detects a TypeScript compiler error
+ *
+ * Example: "[20:22:07] Error - typescript - src\Cache.ts(5,8): error TS2322: 'A' is not 'B'"
+ * 0: input
+ * 1: "[20:22:07]"
+ * 2: "src\Cache.ts"
+ * 3: "5"
+ * 4: "8"
+ * 5: "error TS2322: 'A' is not 'B'"
  * @public
  */
-// Example: "[20:22:07] Error - typescript - src\Cache.ts(5,8): error TS2322: 'A' is not 'B'"
-// 0: input
-// 1: "[20:22:07]"
-// 2: "src\Cache.ts"
-// 3: "5"
-// 4: "8"
-// 5: "error TS2322: 'A' is not 'B'"
 const tsErrorDetector: IErrorDetectionRule = RegexErrorDetector(
   /^\s*(\[[^\]]+\])\s*Error\s*-\s*typescript\s*-\s*([^(]+)\(([0-9]+)\s*,\s*([0-9]+)\):\s*(.*)\s*$/,
   (match: RegExpExecArray) => {
