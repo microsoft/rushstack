@@ -18,6 +18,9 @@ interface IShrinkwrapJson {
   dependencies: { [dependency: string]: IShrinkwrapDependencyJson };
 }
 
+/**
+ * This class is a parser for NPM's npm-shrinkwrap.json file format.
+ */
 export default class ShrinkwrapFile {
   private _shrinkwrapJson: IShrinkwrapJson;
 
@@ -48,7 +51,24 @@ export default class ShrinkwrapFile {
     return undefined;
   }
 
-  public hasCompatibleDependency(dependencyName: string, version: string, tempProjectName?: string): boolean {
+  /**
+   * Returns true if the shrinkwrap file includes a package that would satisfiying the specified
+   * package name and SemVer version range.  By default, the dependencies are resolved by looking
+   * at the root of the node_modules folder described by the shrinkwrap file.  However, if
+   * tempProjectName is specified, then the resolution will start in that subfolder.
+   *
+   * Consider this example:
+   *
+   * - node_modules\
+   *   - temp-project\
+   *     - lib-a@1.2.3
+   *     - lib-b@1.0.0
+   *   - lib-b@2.0.0
+   *
+   * In this example, hasCompatibleDependency("lib-b", ">= 1.1.0", "temp-project") would fail
+   * because it finds lib-b@1.0.0 which does not satisfy the pattern ">= 1.1.0".
+   */
+  public hasCompatibleDependency(dependencyName: string, versionRange: string, tempProjectName?: string): boolean {
 
     // First, check under tempProjectName, as this is the first place "rush link" looks.
     let dependencyJson: IShrinkwrapDependencyJson = undefined;
@@ -71,7 +91,7 @@ export default class ShrinkwrapFile {
     }
 
     // If we found it, the version must be compatible
-    return semver.satisfies(dependencyJson.version, version);
+    return semver.satisfies(dependencyJson.version, versionRange);
   }
 
   private constructor(shrinkwrapJson: IShrinkwrapJson) {
