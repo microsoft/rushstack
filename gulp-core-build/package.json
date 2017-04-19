@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build",
-  "version": "2.4.3",
+  "version": "2.4.4",
   "description": "Core gulp build tasks for building typescript, html, less, etc.",
   "repository": {
     "type": "git",
