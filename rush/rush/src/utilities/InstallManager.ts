@@ -27,9 +27,24 @@ const wrap: (textToWrap: string) => string = wordwrap.soft(Utilities.getConsoleW
  */
 export default class InstallManager {
   private _rushConfiguration: RushConfiguration;
+  private _commonNodeModulesMarkerFilename: string;
 
   constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
+
+    // Example: "C:\MyRepo\common\last-install.flag"
+    this._commonNodeModulesMarkerFilename = path.join(this._rushConfiguration.commonFolder,
+      'last-install.flag');
+  }
+
+  /**
+   * Returns the filename of the flag file used to detect invalid installations.
+   * The file itself may not actually exist.  If the file exists, it means an "npm install"
+   * was successfully completed for the "common/node_modules" folder.
+   * Example: "C:\MyRepo\common\last-install.flag"
+   */
+  public get commonNodeModulesMarkerFilename(): string {
+    return this._commonNodeModulesMarkerFilename;
   }
 
   /**
@@ -258,13 +273,10 @@ export default class InstallManager {
 
     console.log(os.EOL + colors.bold('Checking node_modules in ' + this._rushConfiguration.commonFolder) + os.EOL);
 
-    // Example: "C:\MyRepo\common\last-install.flag"
-    const commonNodeModulesMarkerFilename: string =
-      path.join(this._rushConfiguration.commonFolder, 'last-install.flag');
     const commonNodeModulesFolder: string = path.join(this._rushConfiguration.commonFolder, 'node_modules');
 
     // This marker file indicates that the last "rush install" completed successfully
-    const markerFileExistedAtStart: boolean = fsx.existsSync(commonNodeModulesMarkerFilename);
+    const markerFileExistedAtStart: boolean = fsx.existsSync(this.commonNodeModulesMarkerFilename);
 
     // Based on timestamps, can we skip this install entirely?
     if (!cleanInstall && markerFileExistedAtStart) {
@@ -280,7 +292,7 @@ export default class InstallManager {
 
       // NOTE: If commonNodeModulesMarkerFilename (or any of the potentiallyChangedFiles) does not
       // exist, then isFileTimestampCurrent() returns false.
-      if (Utilities.isFileTimestampCurrent(commonNodeModulesMarkerFilename, potentiallyChangedFiles)) {
+      if (Utilities.isFileTimestampCurrent(this.commonNodeModulesMarkerFilename, potentiallyChangedFiles)) {
         // Nothing to do, because everything is up to date according to time stamps
         return;
       }
@@ -302,7 +314,7 @@ export default class InstallManager {
 
     if (markerFileExistedAtStart) {
       // Delete the successful install file to indicate the install transaction has started
-      fsx.unlinkSync(commonNodeModulesMarkerFilename);
+      fsx.unlinkSync(this.commonNodeModulesMarkerFilename);
     }
 
     // Is there an existing "node_modules" folder to consider?
@@ -365,7 +377,7 @@ export default class InstallManager {
       this._rushConfiguration.commonFolder);
 
     // Finally, create the marker file to indicate a successful install
-    fsx.createFileSync(commonNodeModulesMarkerFilename);
+    fsx.createFileSync(this.commonNodeModulesMarkerFilename);
     console.log('');
   }
 }
