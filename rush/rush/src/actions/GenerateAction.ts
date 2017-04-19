@@ -94,6 +94,18 @@ export default class GenerateAction extends CommandLineAction {
       Utilities.executeCommand(this._rushConfiguration.npmToolFilename,
         ['shrinkwrap'], this._rushConfiguration.commonFolder);
       console.log('"npm shrinkwrap" completed' + os.EOL);
+
+      // The flag file is normally created by installCommonModules(), but "rush install" will
+      // compare its timestamp against the shrinkwrap file.  Since we just generated a new
+      // npm-shrinkwrap file, it's safe to bump the timestamp, which ensures that "rush install"
+      // won't do anything immediately after "rush generate".  This is a minor performance
+      // optimization, but it helps people to understand the semantics of the commands.
+      if (fsx.existsSync(installManager.commonNodeModulesMarkerFilename)) {
+        fsx.writeFileSync(installManager.commonNodeModulesMarkerFilename, '');
+      } else {
+        // Sanity check -- since we requested a clean install above, this should never occur
+        throw new Error('The install flag file is missing');
+      }
     }
 
     stopwatch.stop();
