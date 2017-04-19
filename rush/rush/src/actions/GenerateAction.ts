@@ -88,7 +88,7 @@ export default class GenerateAction extends CommandLineAction {
       console.log(os.EOL + colors.bold('(Skipping "npm shrinkwrap")') + os.EOL);
     } else {
       // Do a clean install
-      installManager.installCommonModules(InstallType.Clean);
+      installManager.installCommonModules(InstallType.ForceClean);
 
       console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
       Utilities.executeCommand(this._rushConfiguration.npmToolFilename,
