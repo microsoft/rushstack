@@ -272,9 +272,9 @@ export default class Utilities {
   /**
    * Returns the same thing as targetString.replace(searchValue, replaceValue), except that
    * all matches are replaced, rather than just the first match.
-   * @param targetString  The string to be modified
-   * @param searchValue   The value to search for
-   * @param replaceValue  The replacement text
+   * @param targetString  - The string to be modified
+   * @param searchValue   - The value to search for
+   * @param replaceValue  - The replacement text
    */
   public static getAllReplaced(targetString: string, searchValue: string, replaceValue: string): string {
     return targetString.split(searchValue).join(replaceValue);

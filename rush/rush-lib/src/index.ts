@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 export {
-  IRushConfigurationJson,
   IRushLinkJson,
   default as RushConfiguration
 } from './data/RushConfiguration';
