@@ -5,6 +5,7 @@ import { ErrorDetectionMode } from './ErrorDetector';
 
 /**
  * Encapsulates information about an error
+ * @public
  */
 export default class TaskError {
   protected _type: string;
@@ -30,6 +31,7 @@ export default class TaskError {
 
 /**
  * TestTaskError extends TaskError
+ * @public
  */
 export class BuildTaskError extends TaskError {
   protected _file: string;

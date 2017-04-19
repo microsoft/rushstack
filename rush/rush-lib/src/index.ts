@@ -7,7 +7,6 @@ export {
 } from './data/RushConfiguration';
 
 export {
-  IRushConfigurationProjectJson,
   default as RushConfigurationProject
 } from './data/RushConfigurationProject';
 
@@ -17,7 +16,6 @@ export {
 } from './data/PackageReviewConfiguration';
 
 export {
-  IPinnedVersionsJson,
   PinnedVersionsConfiguration
 } from './data/PinnedVersionsConfiguration';
 

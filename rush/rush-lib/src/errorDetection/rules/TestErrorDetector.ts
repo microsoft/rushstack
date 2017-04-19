@@ -8,6 +8,7 @@ import TaskError from '../TaskError';
 
 /**
  * Detects an error that occurs while running tests from sp-build-internal-web
+ * @public
  */
 // Example: "       × This Test Failed"
 // 0: This Test Failed

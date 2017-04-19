@@ -1,6 +1,9 @@
 import Utilities from './Utilities';
 import * as semver from 'semver';
 
+/**
+ * @public
+ */
 export default class Npm {
   public static publishedVersions(
     packageName: string,

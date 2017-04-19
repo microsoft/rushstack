@@ -1,3 +1,4 @@
+// @public
 class AsyncRecycler {
   // (undocumented)
   constructor(rushConfiguration: RushConfiguration);
@@ -6,6 +7,7 @@ class AsyncRecycler {
   public readonly recyclerFolder: string;
 }
 
+// @public
 class BuildTaskError extends TaskError {
   // (undocumented)
   constructor(type: string, message: string, file: string, line: number, offset: number);
@@ -19,6 +21,7 @@ class BuildTaskError extends TaskError {
   public toString(mode: ErrorDetectionMode): string;
 }
 
+// @public
 enum ChangeType {
   // (undocumented)
   dependency = 1,
@@ -32,7 +35,7 @@ enum ChangeType {
   patch = 2
 }
 
-// (undocumented)
+// @public (undocumented)
 enum ErrorDetectionMode {
   // (undocumented)
   LocalBuild = 1,
@@ -42,6 +45,7 @@ enum ErrorDetectionMode {
   VisualStudioOnline = 3
 }
 
+// @public
 class ErrorDetector {
   // (undocumented)
   constructor(rules: IErrorDetectionRule[]);
@@ -49,6 +53,7 @@ class ErrorDetector {
   public execute(data: string): TaskError[];
 }
 
+// @public
 interface IChangeFile {
   // (undocumented)
   changes: IChangeInfo[];
@@ -56,6 +61,7 @@ interface IChangeFile {
   email: string;
 }
 
+// @public
 interface IChangeInfo {
   author?: string;
   changes?: IChangeInfo[];
@@ -69,33 +75,27 @@ interface IChangeInfo {
   type?: string;
 }
 
-// (undocumented)
+// @public (undocumented)
 interface IErrorDetectionRule {
   // (undocumented)
   (line: string): TaskError;
 }
 
-// (undocumented)
+// @public (undocumented)
 interface IPackageDependency {
   kind: PackageDependencyKind;
   name: string;
   versionRange: string;
 }
 
-// (undocumented)
+// @public (undocumented)
 interface IPackageJson extends PackageJson {
   rushDependencies?: {
     [ key: string ]: string
   }
 }
 
-// (undocumented)
-interface IPinnedVersionsJson {
-  // (undocumented)
-  [ dependency: string ]: string;
-}
-
-// (undocumented)
+// @public (undocumented)
 interface IResolveOrCreateResult {
   // (undocumented)
   found: Package;
@@ -103,19 +103,7 @@ interface IResolveOrCreateResult {
   parentForCreate: Package;
 }
 
-interface IRushConfigurationProjectJson {
-  // (undocumented)
-  cyclicDependencyProjects: string[];
-  // (undocumented)
-  packageName: string;
-  // (undocumented)
-  projectFolder: string;
-  // (undocumented)
-  reviewCategory?: string;
-  // (undocumented)
-  shouldPublish?: boolean;
-}
-
+// @public
 interface IRushLinkJson {
   // (undocumented)
   localLinks: {
@@ -123,6 +111,7 @@ interface IRushLinkJson {
   }
 }
 
+// @public
 class JsonFile {
   // (undocumented)
   public static loadJsonFile(jsonFilename: string): any;
@@ -130,7 +119,7 @@ class JsonFile {
   public static saveJsonFile(jsonData: any, jsonFilename: string): void;
 }
 
-// (undocumented)
+// @public (undocumented)
 class Npm {
   // (undocumented)
   public static publishedVersions(packageName: string,
@@ -138,7 +127,7 @@ class Npm {
       env: { [key: string]: string }): string[];
 }
 
-// (undocumented)
+// @public (undocumented)
 class Package {
   // (undocumented)
   constructor(name: string, version: string, dependencies: IPackageDependency[], folderPath: string);
@@ -165,7 +154,7 @@ class Package {
   public version: string;
 }
 
-// (undocumented)
+// @public
 enum PackageDependencyKind {
   LocalLink,
   // (undocumented)
@@ -173,6 +162,7 @@ enum PackageDependencyKind {
   Optional
 }
 
+// @public
 class PackageReviewConfiguration {
   // WARNING: The type "IPackageReviewJson" needs to be exported by the package (e.g. added to index.ts)
   constructor(packageReviewJson: IPackageReviewJson, jsonFilename: string);
@@ -188,19 +178,15 @@ class PackageReviewConfiguration {
   public saveFile(jsonFilename: string): void;
 }
 
-// (undocumented)
+// @public
 class PackageReviewItem {
-  // (undocumented)
   public allowedCategories: Set<string>;
-  // (undocumented)
   public allowedInBrowser: boolean;
-  // (undocumented)
   public packageName: string;
 }
 
-// (undocumented)
+// @public (undocumented)
 class PinnedVersionsConfiguration {
-  constructor(pinnedVersionJson: IPinnedVersionsJson, private _filename: string);
   // (undocumented)
   public clear(): this;
   // (undocumented)
@@ -221,9 +207,11 @@ class PinnedVersionsConfiguration {
   public static tryLoadFromFile(jsonFilename: string): PinnedVersionsConfiguration;
 }
 
+// @public
 export function RegexErrorDetector(regex: RegExp,
     getError: (match: RegExpExecArray) => TaskError): IErrorDetectionRule;
 
+// @public
 class RushConfiguration {
   // WARNING: The type "IRushConfigurationJson" needs to be exported by the package (e.g. added to index.ts)
   constructor(rushConfigurationJson: IRushConfigurationJson, rushJsonFilename: string);
@@ -257,7 +245,9 @@ class RushConfiguration {
   public readonly tmpFolder: string;
 }
 
+// @public
 class RushConfigurationProject {
+  // WARNING: The type "IRushConfigurationProjectJson" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   constructor(projectJson: IRushConfigurationProjectJson,
                 rushConfiguration: RushConfiguration,
@@ -274,6 +264,7 @@ class RushConfigurationProject {
   public readonly tempProjectName: string;
 }
 
+// @public
 class Stopwatch {
   // (undocumented)
   constructor(getTime: () => number = Utilities.getTimeInMs);
@@ -285,7 +276,7 @@ class Stopwatch {
   public toString(): string;
 }
 
-// (undocumented)
+// @public
 enum StopwatchState {
   // (undocumented)
   Started = 2,
@@ -293,6 +284,7 @@ enum StopwatchState {
   Stopped = 1
 }
 
+// @public
 class TaskError {
   // (undocumented)
   constructor(type: string, message: string);
@@ -306,7 +298,7 @@ class TaskError {
   public toString(mode: ErrorDetectionMode): string;
 }
 
-// (undocumented)
+// @public (undocumented)
 class Utilities {
   // (undocumented)
   public static createFolderWithRetry(folderName: string): void;
@@ -338,7 +330,7 @@ class Utilities {
                                              fnName: string): TResult;
 }
 
-// (undocumented)
+// @public (undocumented)
 class VersionControl {
   // (undocumented)
   public static getChangedFiles(prefix?: string, targetBranch?: string): string[];
@@ -346,7 +338,7 @@ class VersionControl {
   public static getChangedFolders(targetBranch?: string): string[];
 }
 
-// (undocumented)
+// @public (undocumented)
 class VersionMismatchFinder {
   // (undocumented)
   constructor(projects: RushConfigurationProject[]);

@@ -6,10 +6,13 @@ import * as semver from 'semver';
 
 import JsonFile from '../utilities/JsonFile';
 
-export interface IPinnedVersionsJson {
+interface IPinnedVersionsJson {
   [dependency: string]: string;
 }
 
+/**
+ * @public
+ */
 export class PinnedVersionsConfiguration {
   private _data: Map<string, string>;
 
@@ -20,16 +23,6 @@ export class PinnedVersionsConfiguration {
     }
 
     return new PinnedVersionsConfiguration(pinnedVersionJson, jsonFilename);
-  }
-
-  /**
-   * Preferred to use PinnedVersionsConfiguration.loadFromFile()
-   */
-  constructor(pinnedVersionJson: IPinnedVersionsJson, private _filename: string) {
-    this._data = new Map<string, string>();
-    Object.keys(pinnedVersionJson || {}).forEach((dep: string) => {
-      this.set(dep, pinnedVersionJson[dep]);
-    });
   }
 
   public set(dependency: string, version: string): this {
@@ -77,5 +70,15 @@ export class PinnedVersionsConfiguration {
       rawJson[dependency] = version;
     });
     return rawJson;
+  }
+
+  /**
+   * Preferred to use PinnedVersionsConfiguration.loadFromFile()
+   */
+  private constructor(pinnedVersionJson: IPinnedVersionsJson, private _filename: string) {
+    this._data = new Map<string, string>();
+    Object.keys(pinnedVersionJson || {}).forEach((dep: string) => {
+      this.set(dep, pinnedVersionJson[dep]);
+    });
   }
 }

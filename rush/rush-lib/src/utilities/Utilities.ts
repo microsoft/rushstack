@@ -7,6 +7,9 @@ import * as os from 'os';
 import * as rimraf from 'rimraf';
 import * as tty from 'tty';
 
+/**
+ * @public
+ */
 export default class Utilities {
   /**
    * For a scoped NPM package name this separates the scope and name parts.  For example:
