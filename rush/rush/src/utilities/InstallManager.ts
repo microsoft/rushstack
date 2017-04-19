@@ -302,10 +302,13 @@ export default class InstallManager {
     // This marker file indicates that the last "rush install" completed successfully
     const markerFileExistedAtStart: boolean = fsx.existsSync(this.commonNodeModulesMarkerFilename);
 
-    const cleanInstall: boolean = installType !== InstallType.Normal || !markerFileExistedAtStart;
+    // If "--clean" or "--full-clean" was specified, or if the last install was interrupted,
+    // then we will need to delete the node_modules folder.  Otherwise, we can do an incremental
+    // install.
+    const deletingNodeModules: boolean = installType !== InstallType.Normal || !markerFileExistedAtStart;
 
     // Based on timestamps, can we skip this install entirely?
-    if (!cleanInstall) {
+    if (!deletingNodeModules) {
       const potentiallyChangedFiles: string[] = [];
 
       // Consider the timestamp on the node_modules folder; if someone tampered with it
@@ -353,7 +356,7 @@ export default class InstallManager {
     // Is there an existing "node_modules" folder to consider?
     if (fsx.existsSync(commonNodeModulesFolder)) {
       // Should we delete the entire "node_modules" folder?
-      if (cleanInstall) {
+      if (deletingNodeModules) {
         // YES: Delete "node_modules"
 
         // Explain to the user why we are hosing their node_modules folder
