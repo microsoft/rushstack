@@ -1,5 +1,8 @@
 import RushConfigurationProject from './RushConfigurationProject';
 
+/**
+ * @public
+ */
 export class VersionMismatchFinder {
   private _projects: RushConfigurationProject[];
  /* store it like this:

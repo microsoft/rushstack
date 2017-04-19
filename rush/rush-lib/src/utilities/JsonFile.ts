@@ -8,6 +8,7 @@ import Utilities from './Utilities';
 
 /**
  * Utilities for reading/writing JSON files.
+ * @public
  */
 export default class JsonFile {
 

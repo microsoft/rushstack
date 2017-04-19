@@ -8,6 +8,7 @@ import { BuildTaskError } from '../TaskError';
 
 /**
  * Detects a TypeScript compiler error
+ * @public
  */
 // Example: "[20:22:07] Error - typescript - src\Cache.ts(5,8): error TS2322: 'A' is not 'B'"
 // 0: input

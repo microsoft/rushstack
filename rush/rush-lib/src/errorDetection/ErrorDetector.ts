@@ -3,18 +3,25 @@
 
 import TaskError from './TaskError';
 
+/**
+ * @public
+ */
 export enum ErrorDetectionMode {
   LocalBuild = 1,
   VisualStudio = 2,
   VisualStudioOnline = 3
 }
 
+/**
+ * @public
+ */
 export interface IErrorDetectionRule {
   (line: string): TaskError;
 }
 
 /**
  * Creates an Error Detection Rule based on a regex and a function which converts a regex match to a TaskError
+ * @public
  */
 export function RegexErrorDetector(regex: RegExp,
     getError: (match: RegExpExecArray) => TaskError): IErrorDetectionRule {
@@ -31,6 +38,7 @@ export function RegexErrorDetector(regex: RegExp,
 /**
  * The error detector will find all errors in a chunk of text by running a number
  * of error detection rules against each line of text.
+ * @public
  */
 export default class ErrorDetector {
   private _rules: IErrorDetectionRule[];

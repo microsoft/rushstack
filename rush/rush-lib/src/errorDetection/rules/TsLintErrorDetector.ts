@@ -8,6 +8,7 @@ import { BuildTaskError } from '../TaskError';
 
 /**
  * Detects an error from TypeScript Linter
+ * @public
  */
 // Example: "[20:22:07] Error - tslint - src\Cache.ts(5,8): error no-any: 'any' is not allowed"
 // 0: input
