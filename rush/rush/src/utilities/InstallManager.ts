@@ -332,7 +332,9 @@ export default class InstallManager {
         this._asyncRecycler.moveFolder(this._rushConfiguration.cacheFolder);
       } else if (installType === InstallType.UnsafePurge) {
         console.log(os.EOL + `Running "npm cache clean" to clean the global cache`);
-        Utilities.executeCommand(npmToolFilename, ['cache', 'clean'], this._rushConfiguration.commonFolder);
+        const npmArgs: string[] = ['cache', 'clean'];
+        this.pushConfigurationNpmArgs(npmArgs);
+        Utilities.executeCommand(npmToolFilename, npmArgs, this._rushConfiguration.commonFolder);
       } else {
         // The global NPM cache is (inexplicably) not threadsafe, so if there are any
         // concurrent "npm install" processes running this would cause them to crash.
@@ -373,7 +375,9 @@ export default class InstallManager {
         // NO: Do an incremental install in the "node_modules" folder
 
         console.log(`Running "npm prune" in ${this._rushConfiguration.commonFolder}`);
-        Utilities.executeCommandWithRetry(npmToolFilename, ['prune'], MAX_INSTALL_ATTEMPTS,
+        const npmArgs: string[] = ['prune'];
+        this.pushConfigurationNpmArgs(npmArgs);
+        Utilities.executeCommandWithRetry(npmToolFilename, npmArgs, MAX_INSTALL_ATTEMPTS,
           this._rushConfiguration.commonFolder);
 
         // Delete the (installed image of) the temp projects, since "npm install" does not
@@ -400,13 +404,7 @@ export default class InstallManager {
 
     // Run "npm install" in the common folder
     const npmInstallArgs: string[] = ['install'];
-    if (this._rushConfiguration.cacheFolder) {
-      npmInstallArgs.push('--cache', this._rushConfiguration.cacheFolder);
-    }
-
-    if (this._rushConfiguration.tmpFolder) {
-      npmInstallArgs.push('--tmp', this._rushConfiguration.tmpFolder);
-    }
+    this.pushConfigurationNpmArgs(npmInstallArgs);
 
     console.log(os.EOL + `Running "npm ${npmInstallArgs.join(' ')}" in ${this._rushConfiguration.commonFolder}`
       + os.EOL);
@@ -418,5 +416,19 @@ export default class InstallManager {
     // Finally, create the marker file to indicate a successful install
     fsx.createFileSync(this.commonNodeModulesMarkerFilename);
     console.log('');
+  }
+
+  /**
+   * Used when invoking the NPM tool.  Appends the common configuration options
+   * to the command-line.
+   */
+  public pushConfigurationNpmArgs(npmArgs: string[]): void {
+    if (this._rushConfiguration.cacheFolder) {
+      npmArgs.push('--cache', this._rushConfiguration.cacheFolder);
+    }
+
+    if (this._rushConfiguration.tmpFolder) {
+      npmArgs.push('--tmp', this._rushConfiguration.tmpFolder);
+    }
   }
 }

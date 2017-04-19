@@ -91,8 +91,10 @@ export default class GenerateAction extends CommandLineAction {
       installManager.installCommonModules(InstallType.ForceClean);
 
       console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
+      const npmArgs: string [] = ['shrinkwrap'];
+      installManager.pushConfigurationNpmArgs(npmArgs);
       Utilities.executeCommand(this._rushConfiguration.npmToolFilename,
-        ['shrinkwrap'], this._rushConfiguration.commonFolder);
+        npmArgs, this._rushConfiguration.commonFolder);
       console.log('"npm shrinkwrap" completed' + os.EOL);
 
       // The flag file is normally created by installCommonModules(), but "rush install" will
