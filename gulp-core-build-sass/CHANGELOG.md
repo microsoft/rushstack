@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-sass
 
-This log was last generated on Tue, 11 Apr 2017 01:33:59 GMT and should not be manually modified.
+This log was last generated on Wed, 19 Apr 2017 20:18:06 GMT and should not be manually modified.
+
+## 3.1.1
+Wed, 19 Apr 2017 20:18:06 GMT
+
+### Patches
+
+- Remove ES6 Promise & @types/es6-promise typings
 
 ## 3.1.0
 Tue, 11 Apr 2017 01:33:59 GMT

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Tue, 18 Apr 2017 23:41:42 GMT and should not be manually modified.
+This log was last generated on Wed, 19 Apr 2017 20:18:06 GMT and should not be manually modified.
+
+## 3.0.4
+Wed, 19 Apr 2017 20:18:06 GMT
+
+### Patches
+
+- Remove ES6 Promise & @types/es6-promise typings
 
 ## 3.0.3
 Tue, 18 Apr 2017 23:41:42 GMT

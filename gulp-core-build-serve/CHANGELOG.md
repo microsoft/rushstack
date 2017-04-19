@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-serve
 
-This log was last generated on Sat, 15 Apr 2017 01:03:33 GMT and should not be manually modified.
+This log was last generated on Wed, 19 Apr 2017 20:18:06 GMT and should not be manually modified.
+
+## 2.1.1
+Wed, 19 Apr 2017 20:18:06 GMT
+
+### Patches
+
+- Remove ES6 Promise & @types/es6-promise typings
 
 ## 2.1.0
 Sat, 15 Apr 2017 01:03:33 GMT
