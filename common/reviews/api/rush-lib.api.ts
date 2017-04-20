@@ -218,10 +218,12 @@ class RushConfiguration {
   public readonly cacheFolder: string;
   public readonly commonFolder: string;
   public readonly commonFolderName: string;
+  public readonly commonTempFolder: string;
   public findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject;
   public getProjectByName(projectName: string): RushConfigurationProject;
   public readonly gitAllowedEmailRegExps: string[];
   public readonly gitSampleEmail: string;
+  public readonly gitShrinkwrapFilename: string;
   public readonly homeFolder: string;
   public static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
   // (undocumented)
@@ -240,8 +242,7 @@ class RushConfiguration {
   public readonly reviewCategories: Set<string>;
   public readonly rushJsonFolder: string;
   public readonly rushLinkJsonFilename: string;
-  public readonly shrinkwrapFilename: string;
-  public readonly tempModulesFolder: string;
+  public readonly tempShrinkwrapFilename: string;
   public readonly tmpFolder: string;
 }
 
@@ -262,6 +263,14 @@ class RushConfigurationProject {
   public readonly reviewCategory: string;
   public readonly shouldPublish: boolean;
   public readonly tempProjectName: string;
+}
+
+// @public
+class RushConstants {
+  public static npmShrinkwrapFilename: string;
+  public static rushTempFolderName: string;
+  public static rushTempNpmScope: string;
+  public static rushTempProjectsFolderName: string;
 }
 
 // @public

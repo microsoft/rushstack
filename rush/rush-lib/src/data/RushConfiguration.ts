@@ -64,7 +64,8 @@ export default class RushConfiguration {
   private _commonTempFolder: string;
   private _cacheFolder: string;
   private _tmpFolder: string;
-  private _shrinkwrapFilename: string;
+  private _gitShrinkwrapFilename: string;
+  private _tempShrinkwrapFilename: string;
   private _homeFolder: string;
   private _rushLinkJsonFilename: string;
   private _npmToolVersion: string;
@@ -215,7 +216,8 @@ export default class RushConfiguration {
       this._tmpFolder = path.resolve(path.join(this._commonFolder, 'npm-tmp'));
     }
 
-    this._shrinkwrapFilename = path.join(this._commonFolder, 'npm-shrinkwrap.json');
+    this._gitShrinkwrapFilename = path.join(this._commonFolder, RushConstants.npmShrinkwrapFilename);
+    this._tempShrinkwrapFilename = path.join(this._commonTempFolder, RushConstants.npmShrinkwrapFilename);
 
     const unresolvedUserFolder: string = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
     this._homeFolder = path.resolve(unresolvedUserFolder);
@@ -387,11 +389,23 @@ export default class RushConfiguration {
   }
 
   /**
-   * The filename of the NPM shrinkwrap file.  The file itself may not actually exist.
+   * The filename of the NPM shrinkwrap file that is tracked by Git.  (The "rush install"
+   * command uses a temporary copy, whose path is tempShrinkwrapFilename.)
+   * This property merely reports the filename; the file itself may not actually exist.
    * Example: "C:\MyRepo\common\npm-shrinkwrap.json"
    */
-  public get shrinkwrapFilename(): string {
-    return this._shrinkwrapFilename;
+  public get gitShrinkwrapFilename(): string {
+    return this._gitShrinkwrapFilename;
+  }
+
+  /**
+   * The filename of the temporary NPM shrinkwrap file that is used by "rush isntall".
+   * (The master copy is tempShrinkwrapFilename.)
+   * This property merely reports the filename; the file itself may not actually exist.
+   * Example: "C:\MyRepo\common\temp\npm-shrinkwrap.json"
+   */
+  public get tempShrinkwrapFilename(): string {
+    return this._tempShrinkwrapFilename;
   }
 
   /**
