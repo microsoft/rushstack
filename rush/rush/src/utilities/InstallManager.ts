@@ -348,10 +348,10 @@ export default class InstallManager {
       }
     } else {
       // Since cleanInstall=true, we need to start by cleaning the cache
-      if (this._rushConfiguration.cacheFolder) {
+      if (this._rushConfiguration.npmCacheFolder) {
         console.log(`Deleting the NPM cache folder`);
         // This is faster and more thorough than "npm cache clean"
-        this._asyncRecycler.moveFolder(this._rushConfiguration.cacheFolder);
+        this._asyncRecycler.moveFolder(this._rushConfiguration.npmCacheFolder);
       } else if (installType === InstallType.UnsafePurge) {
         console.log(os.EOL + `Running "npm cache clean" to clean the global cache`);
         const npmArgs: string[] = ['cache', 'clean'];
@@ -363,9 +363,9 @@ export default class InstallManager {
         console.log(os.EOL + 'Skipping "npm cache clean" because the cache is global.');
       }
 
-      if (this._rushConfiguration.tmpFolder) {
+      if (this._rushConfiguration.npmTmpFolder) {
         console.log(`Deleting the "npm-tmp" folder`);
-        this._asyncRecycler.moveFolder(this._rushConfiguration.tmpFolder);
+        this._asyncRecycler.moveFolder(this._rushConfiguration.npmTmpFolder);
       }
     }
 
@@ -447,12 +447,12 @@ export default class InstallManager {
    * to the command-line.
    */
   public pushConfigurationNpmArgs(npmArgs: string[]): void {
-    if (this._rushConfiguration.cacheFolder) {
-      npmArgs.push('--cache', this._rushConfiguration.cacheFolder);
+    if (this._rushConfiguration.npmCacheFolder) {
+      npmArgs.push('--cache', this._rushConfiguration.npmCacheFolder);
     }
 
-    if (this._rushConfiguration.tmpFolder) {
-      npmArgs.push('--tmp', this._rushConfiguration.tmpFolder);
+    if (this._rushConfiguration.npmTmpFolder) {
+      npmArgs.push('--tmp', this._rushConfiguration.npmTmpFolder);
     }
   }
 

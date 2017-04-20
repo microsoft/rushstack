@@ -215,7 +215,6 @@ export function RegexErrorDetector(regex: RegExp,
 class RushConfiguration {
   // WARNING: The type "IRushConfigurationJson" needs to be exported by the package (e.g. added to index.ts)
   constructor(rushConfigurationJson: IRushConfigurationJson, rushJsonFilename: string);
-  public readonly cacheFolder: string;
   public readonly commonFolder: string;
   public readonly commonFolderName: string;
   public readonly commonTempFolder: string;
@@ -228,6 +227,8 @@ class RushConfiguration {
   public static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
   // (undocumented)
   public static loadFromDefaultLocation(): RushConfiguration;
+  public readonly npmCacheFolder: string;
+  public readonly npmTmpFolder: string;
   public readonly npmToolFilename: string;
   public readonly npmToolVersion: string;
   public readonly packageReviewFile: string;
@@ -243,7 +244,6 @@ class RushConfiguration {
   public readonly rushJsonFolder: string;
   public readonly rushLinkJsonFilename: string;
   public readonly tempShrinkwrapFilename: string;
-  public readonly tmpFolder: string;
 }
 
 // @public

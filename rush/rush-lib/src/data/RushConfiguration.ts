@@ -62,8 +62,8 @@ export default class RushConfiguration {
   private _commonFolder: string;
   private _commonFolderName: string;
   private _commonTempFolder: string;
-  private _cacheFolder: string;
-  private _tmpFolder: string;
+  private _npmCacheFolder: string;
+  private _npmTmpFolder: string;
   private _gitShrinkwrapFilename: string;
   private _tempShrinkwrapFilename: string;
   private _homeFolder: string;
@@ -212,8 +212,8 @@ export default class RushConfiguration {
     this._commonTempFolder = path.join(this._commonFolderName, RushConstants.rushTempFolderName);
 
     if (rushConfigurationJson.useLocalNpmCache) {
-      this._cacheFolder = path.resolve(path.join(this._commonFolder, 'npm-cache'));
-      this._tmpFolder = path.resolve(path.join(this._commonFolder, 'npm-tmp'));
+      this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
+      this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));
     }
 
     this._gitShrinkwrapFilename = path.join(this._commonFolder, RushConstants.npmShrinkwrapFilename);
@@ -371,21 +371,23 @@ export default class RushConfiguration {
   }
 
   /**
-   * The cache folder specified in rush.json. If no folder is specified, this
-   * value is undefined.
-   * Example: "C:\MyRepo\common\npm-cache"
+   * If rush.json requested useLocalNpmCache=true, then this will specify a local folder
+   * for the NPM cache; otherwise, the value is undefined.
+   *
+   * Example: "C:\MyRepo\common\temp\npm-cache"
    */
-  public get cacheFolder(): string {
-    return this._cacheFolder;
+  public get npmCacheFolder(): string {
+    return this._npmCacheFolder;
   }
 
   /**
-   * The tmp folder specified in rush.json. If no folder is specified, this
-   * value is undefined.
-   * Example: "C:\MyRepo\common\npm-tmp"
+   * If rush.json requested useLocalNpmCache=true, then this will specify a local folder
+   * for the NPM temporary storage; otherwise, the value is undefined.
+   *
+   * Example: "C:\MyRepo\common\temp\npm-tmp"
    */
-  public get tmpFolder(): string {
-    return this._tmpFolder;
+  public get npmTmpFolder(): string {
+    return this._npmTmpFolder;
   }
 
   /**
