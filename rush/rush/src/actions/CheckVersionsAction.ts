@@ -10,6 +10,7 @@ import RushCommandLineParser from './RushCommandLineParser';
 
 import {
   RushConfiguration,
+  RushConfigurationProject,
   VersionMismatchFinder
 } from '@microsoft/rush-lib';
 
@@ -35,6 +36,16 @@ export default class CheckVersionsAction extends CommandLineAction {
     console.log(`Starting "rush check-versions"${os.EOL}`);
 
     const config: RushConfiguration = RushConfiguration.loadFromDefaultLocation();
+
+    const pinnedVersions: { [dependency: string]: string } = {};
+    config.pinnedVersions.forEach((version: string, dependency: string) => {
+      pinnedVersions[dependency] = version;
+    });
+
+    config.projects.push({
+      packageName: 'pinnedVersions.json',
+      packageJson: { dependencies: pinnedVersions }
+    } as RushConfigurationProject);
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(config.projects);
 
