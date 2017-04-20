@@ -80,9 +80,12 @@ export function loadStyles(styles: string | ThemableArray): void {
 
 /**
  * Allows for customizable loadStyles logic. e.g. for server side rendering application
- * @param {(processedStyles: string, rawStyles?: string | ThemableArray) => void} a loadStyles callback that gets called when styles are loaded or reloaded
+ * @param {(processedStyles: string, rawStyles?: string | ThemableArray) => void} 
+ * a loadStyles callback that gets called when styles are loaded or reloaded
  */
-export function configureLoadStyles(loadStyles: (processedStyles: string, rawStyles?: string | ThemableArray) => void): void {
+export function configureLoadStyles(
+    loadStyles: (processedStyles: string, rawStyles?: string | ThemableArray) => void
+  ): void {
   _themeState.loadStyles = loadStyles;
 }
 
