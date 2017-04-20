@@ -56,8 +56,8 @@ export default class InstallManager {
     this._rushConfiguration = rushConfiguration;
 
     // Example: "C:\MyRepo\common\last-install.flag"
-    this._commonNodeModulesMarkerFilename = path.join(this._rushConfiguration.commonFolder,
-      'last-install.flag');
+    this._commonNodeModulesMarkerFilename = path.join(
+      this._rushConfiguration.commonTempFolder, 'last-install.flag');
 
     this._asyncRecycler = new AsyncRecycler(this._rushConfiguration);
   }
@@ -155,7 +155,9 @@ export default class InstallManager {
     if (fsx.existsSync(tempProjectsFolder)) {
       Utilities.dangerouslyDeletePath(tempProjectsFolder);
     }
-    fsx.mkdirsSync(tempProjectsFolder);
+    if (!fsx.existsSync(tempProjectsFolder)) {
+      fsx.mkdirsSync(tempProjectsFolder);
+    }
 
     let shrinkwrapIsValid: boolean = true;
 
@@ -172,6 +174,9 @@ export default class InstallManager {
     } else {
       shrinkwrapIsValid = false;
     }
+
+    // Either way, resync the shrinkwrap file
+    this._resyncTempShrinkwrapFile();
 
     const commonPackageJson: PackageJson = {
       dependencies: {},
@@ -205,11 +210,11 @@ export default class InstallManager {
       const tempProjectFolder: string = path.join(tempProjectsFolder, unscopedTempProjectName);
       fsx.mkdirsSync(tempProjectFolder);
 
-      // Example: "file:./temp/projects/my-project"
+      // Example: "file:./projects/my-project"
       commonPackageJson.dependencies[tempProjectName]
-        = `file:./${RushConstants.rushTempFolderName}/${RushConstants.rushTempProjectsFolderName}`
-          + `/${unscopedTempProjectName}`;
+        = `file:./${RushConstants.rushTempProjectsFolderName}/${unscopedTempProjectName}`;
 
+      // Example: "C:\MyRepo\common\temp\projects\my-project-2\package.json"
       const tempPackageJsonFilename: string = path.join(tempProjectFolder, 'package.json');
 
       const tempPackageJson: IPackageJson = {
@@ -286,7 +291,9 @@ export default class InstallManager {
       JsonFile.saveJsonFile(tempPackageJson, tempPackageJsonFilename);
     }
 
-    const commonPackageJsonFilename: string = path.join(this._rushConfiguration.commonFolder, 'package.json');
+    // Example: "C:\MyRepo\common\temp\package.json"
+    const commonPackageJsonFilename: string = path.join(this._rushConfiguration.commonTempFolder,
+      'package.json');
     JsonFile.saveJsonFile(commonPackageJson, commonPackageJsonFilename);
 
     return shrinkwrapIsValid;
@@ -307,9 +314,11 @@ export default class InstallManager {
       throw new Error('Expected to find local NPM here: "' + npmToolFilename + '"');
     }
 
-    console.log(os.EOL + colors.bold('Checking node_modules in ' + this._rushConfiguration.commonFolder) + os.EOL);
+    console.log(os.EOL + colors.bold('Checking node_modules in ' + this._rushConfiguration.commonTempFolder)
+      + os.EOL);
 
-    const commonNodeModulesFolder: string = path.join(this._rushConfiguration.commonFolder, 'node_modules');
+    const commonNodeModulesFolder: string = path.join(this._rushConfiguration.commonTempFolder,
+      'node_modules');
 
     // This marker file indicates that the last "rush install" completed successfully
     const markerFileExistedAtStart: boolean = fsx.existsSync(this.commonNodeModulesMarkerFilename);
@@ -329,7 +338,7 @@ export default class InstallManager {
 
       // Additionally, if they pulled an updated npm-shrinkwrap.json file from Git,
       // then we can't skip this install
-      potentiallyChangedFiles.push(this._rushConfiguration.shrinkwrapFilename);
+      potentiallyChangedFiles.push(this._rushConfiguration.gitShrinkwrapFilename);
 
       // NOTE: If commonNodeModulesMarkerFilename (or any of the potentiallyChangedFiles) does not
       // exist, then isFileTimestampCurrent() returns false.
@@ -347,7 +356,7 @@ export default class InstallManager {
         console.log(os.EOL + `Running "npm cache clean" to clean the global cache`);
         const npmArgs: string[] = ['cache', 'clean'];
         this.pushConfigurationNpmArgs(npmArgs);
-        Utilities.executeCommand(npmToolFilename, npmArgs, this._rushConfiguration.commonFolder);
+        Utilities.executeCommand(npmToolFilename, npmArgs, this._rushConfiguration.commonTempFolder);
       } else {
         // The global NPM cache is (inexplicably) not threadsafe, so if there are any
         // concurrent "npm install" processes running this would cause them to crash.
@@ -387,17 +396,17 @@ export default class InstallManager {
       } else {
         // NO: Do an incremental install in the "node_modules" folder
 
-        console.log(`Running "npm prune" in ${this._rushConfiguration.commonFolder}`);
+        console.log(`Running "npm prune" in ${this._rushConfiguration.commonTempFolder}`);
         const npmArgs: string[] = ['prune'];
         this.pushConfigurationNpmArgs(npmArgs);
         Utilities.executeCommandWithRetry(npmToolFilename, npmArgs, MAX_INSTALL_ATTEMPTS,
-          this._rushConfiguration.commonFolder);
+          this._rushConfiguration.commonTempFolder);
 
         // Delete the (installed image of) the temp projects, since "npm install" does not
         // detect changes for "file:./" references.
         // We recognize the temp projects by their names, which always start with "rush-".
 
-        // Example: "C:\MyRepo\common\node_modules\@rush-temp\"
+        // Example: "C:\MyRepo\common\temp\node_modules\@rush-temp\"
         const pathToDeleteWithoutStar: string = path.join(commonNodeModulesFolder, RushConstants.rushTempNpmScope);
         console.log(`Deleting ${pathToDeleteWithoutStar}*`);
         // Glob can't handle Windows paths
@@ -421,12 +430,12 @@ export default class InstallManager {
     const npmInstallArgs: string[] = ['install'];
     this.pushConfigurationNpmArgs(npmInstallArgs);
 
-    console.log(os.EOL + `Running "npm ${npmInstallArgs.join(' ')}" in ${this._rushConfiguration.commonFolder}`
+    console.log(os.EOL + `Running "npm ${npmInstallArgs.join(' ')}" in ${this._rushConfiguration.commonTempFolder}`
       + os.EOL);
     Utilities.executeCommandWithRetry(npmToolFilename,
       npmInstallArgs,
       MAX_INSTALL_ATTEMPTS,
-      this._rushConfiguration.commonFolder);
+      this._rushConfiguration.commonTempFolder);
 
     // Finally, create the marker file to indicate a successful install
     fsx.createFileSync(this.commonNodeModulesMarkerFilename);
@@ -444,6 +453,22 @@ export default class InstallManager {
 
     if (this._rushConfiguration.tmpFolder) {
       npmArgs.push('--tmp', this._rushConfiguration.tmpFolder);
+    }
+  }
+
+  /**
+   * This syncs common\temp\npm-shrinkwrap.json to match common\npm-shrinkwrap.json from Git.
+   * If the Git copy doesn't exist, then the temp copy is deleted.
+   */
+  private _resyncTempShrinkwrapFile(): void {
+    if (fsx.existsSync(this._rushConfiguration.gitShrinkwrapFilename)) {
+      console.log('Updating ' + this._rushConfiguration.tempShrinkwrapFilename);
+      fsx.copySync(this._rushConfiguration.gitShrinkwrapFilename, this._rushConfiguration.tempShrinkwrapFilename);
+    } else {
+      if (fsx.existsSync(this._rushConfiguration.tempShrinkwrapFilename)) {
+        console.log('Deleting ' + this._rushConfiguration.tempShrinkwrapFilename);
+        fsx.unlinkSync(this._rushConfiguration.tempShrinkwrapFilename);
+      }
     }
   }
 }

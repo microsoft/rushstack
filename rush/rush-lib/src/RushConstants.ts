@@ -23,4 +23,10 @@ export class RushConstants {
    * Example: "C:\MyRepo\common\temp\projects"
    */
   public static readonly rushTempProjectsFolderName: string = 'projects';
+
+  /**
+   * The filename ("npm-shrinkwrap.json") used to store state for the "npm shrinkwrap"
+   * command.
+   */
+  public static readonly npmShrinkwrapFilename: string = 'npm-shrinkwrap.json';
 }
