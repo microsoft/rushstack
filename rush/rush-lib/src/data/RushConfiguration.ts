@@ -225,10 +225,11 @@ export default class RushConfiguration {
       throw new Error('Unable to determine the current user\'s home directory');
     }
 
-    this._rushLinkJsonFilename = path.join(this._commonFolder, 'rush-link.json');
+    this._rushLinkJsonFilename = path.join(this._commonTempFolder, 'rush-link.json');
 
     this._npmToolVersion = rushConfigurationJson.npmVersion;
-    this._npmToolFilename = path.join(this._commonFolder, 'npm-local', 'node_modules', '.bin', 'npm');
+    this._npmToolFilename = path.resolve(path.join(this._commonTempFolder,
+      'npm-local', 'node_modules', '.bin', 'npm'));
 
     this._projectFolderMinDepth = rushConfigurationJson.projectFolderMinDepth !== undefined
       ? rushConfigurationJson.projectFolderMinDepth : 1;
@@ -422,6 +423,8 @@ export default class RushConfiguration {
    * The filename of the build dependency data file.  By default this is
    * called 'rush-link.json' resides in the Rush common folder.
    * Its data structure is defined by IRushLinkJson.
+   *
+   * Example: "C:\MyRepo\common\temp\rush-link.json"
    */
   public get rushLinkJsonFilename(): string {
     return this._rushLinkJsonFilename;
