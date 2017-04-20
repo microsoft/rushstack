@@ -334,6 +334,8 @@ class VersionControl {
   public static getChangedFiles(prefix?: string, targetBranch?: string): string[];
   // (undocumented)
   public static getChangedFolders(targetBranch?: string): string[];
+  // (undocumented)
+  public static hasUncommitedChanges(): boolean;
 }
 
 // @public (undocumented)
