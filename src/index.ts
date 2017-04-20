@@ -118,7 +118,7 @@ export function loadTheme(theme: ITheme): void {
 }
 
 /**
- * Clear already registerd style elements and style records in theme_State object
+ * Clear already registered style elements and style records in theme_State object
  */
 export function clearStyles(): void {
   _themeState.registeredStyles.forEach((styleRecord: IStyleRecord) => {
