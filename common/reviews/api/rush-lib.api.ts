@@ -309,7 +309,6 @@ class TaskError {
 
 // @public (undocumented)
 class Utilities {
-  // (undocumented)
   public static createFolderWithRetry(folderName: string): void;
   public static dangerouslyDeletePath(folderPath: string): void;
   public static deleteFile(filePath: string): void;

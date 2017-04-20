@@ -122,8 +122,13 @@ export default class InstallManager {
       console.log('Found NPM version ' + this._rushConfiguration.npmToolVersion + ' in ' + npmToolFolder);
     }
 
-    // Example: "C:\MyRepo\common\npm-local"
-    const localNpmToolFolder: string = path.join(this._rushConfiguration.commonFolder, 'npm-local');
+    // Example: "C:\MyRepo\common\temp"
+    if (!fsx.existsSync(this._rushConfiguration.commonTempFolder)) {
+      fsx.mkdirsSync(this._rushConfiguration.commonTempFolder);
+    }
+
+    // Example: "C:\MyRepo\common\temp\npm-local"
+    const localNpmToolFolder: string = path.join(this._rushConfiguration.commonTempFolder, 'npm-local');
     if (fsx.existsSync(localNpmToolFolder)) {
       fsx.unlinkSync(localNpmToolFolder);
     }

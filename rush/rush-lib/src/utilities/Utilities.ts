@@ -86,6 +86,10 @@ export default class Utilities {
     return result;
   }
 
+  /**
+   * Creates the specified folder by calling fsx.mkdirSync(), but using a
+   * retry loop to recover from temporary locks that may be held by other processes.
+   */
   public static createFolderWithRetry(folderName: string): void {
     // We need to do a simple "fs.mkdirSync(localModulesFolder)" here,
     // however if the folder we deleted above happened to contain any files,

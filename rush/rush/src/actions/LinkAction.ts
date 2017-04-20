@@ -46,7 +46,7 @@ export default class LinkAction extends CommandLineAction {
     console.log('Starting "rush link"');
     const stopwatch: Stopwatch = Stopwatch.start();
 
-    readPackageTree(this._rushConfiguration.commonFolder, (error: Error, npmPackage: PackageNode) => {
+    readPackageTree(this._rushConfiguration.commonTempFolder, (error: Error, npmPackage: PackageNode) => {
       this._parser.trapErrors(() => {
         if (error) {
           throw error;
@@ -76,7 +76,7 @@ export default class LinkAction extends CommandLineAction {
 }
 
 interface IQueueItem {
-  // A project from somewhere under "common/node_modules"
+  // A project from somewhere under "common/temp/node_modules"
   commonPackage: Package;
 
   // A symlinked virtual package that we will create somewhere under "this-project/node_modules"
