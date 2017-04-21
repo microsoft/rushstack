@@ -128,6 +128,12 @@ const typingsScopeNames: string[] = [ '@types' ];
  * simplified tree which correponds to the major topics for our API documentation.
  */
 abstract class ApiItem {
+
+  /**
+   * Names of API items should only contain letters, numbers and underscores.
+   */
+  private static _allowedNameRegex: RegExp = /^[a-zA-Z_]+[a-zA-Z_0-9]*$/;
+
   /**
    * The name of the definition, as seen by external consumers of the Public API.
    * For example, suppose a class is defined as "export default class MyClass { }"
@@ -139,6 +145,11 @@ abstract class ApiItem {
    * from the top-level ApiPackage, not "MyClass" from the original definition.
    */
   public name: string;
+
+  /**
+   * The name of an API item should be readable and not contain any special characters.
+   */
+  public supportedName: boolean;
 
   /**
    * Indicates the type of definition represented by this ApiItem instance.
@@ -242,11 +253,11 @@ abstract class ApiItem {
     this.warnings = [];
 
     this.extractor = options.extractor;
+    this.typeChecker = this.extractor.typeChecker;
     this.declarationSymbol = options.declarationSymbol;
     this.exportSymbol = options.exportSymbol || this.declarationSymbol;
 
     this.name = this.exportSymbol.name || '???';
-    this.typeChecker = this.extractor.typeChecker;
 
     let originalJsDoc: string = '';
     if (this.jsdocNode) {
@@ -351,6 +362,12 @@ abstract class ApiItem {
       this.documentation.summary,
       this.reportError).replace(/\s\s/g, ' ');
     this.needsDocumentation = this.shouldHaveDocumentation() && summaryTextCondensed.length <= 10;
+
+    this.supportedName =  (this.kind === ApiItemKind.Package) || ApiItem._allowedNameRegex.test(this.name);
+    if (!this.supportedName) {
+      this.warnings.push(`The name "${this.name}" contains unsupported characters; ` +
+        'API names should use only letters, numbers, and underscores');
+    }
 
     if (this.kind === ApiItemKind.Package) {
       if (this.documentation.apiTag !== ApiTag.None) {
