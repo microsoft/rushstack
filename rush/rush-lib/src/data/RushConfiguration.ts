@@ -167,7 +167,7 @@ export default class RushConfiguration {
       // If the name is "@ms/MyProject", extract the "MyProject" part
       const unscopedName: string = Utilities.parseScopedPackageName(projectJson.packageName).name;
 
-      // Generate a unique like name "MyProject", or "MyProject-2" if
+      // Generate a unique like name "@rush-temp/MyProject", or "@rush-temp/MyProject-2" if
       // there is a naming conflict
       let counter: number = 0;
       let tempProjectName: string = `${RushConstants.rushTempNpmScope}/${unscopedName}`;
@@ -183,10 +183,10 @@ export default class RushConfiguration {
   }
 
   /**
-   * DO NOT CALL -- Use RushConfiguration.loadFromConfigurationFile() or Use RushConfiguration.loadFromDefaultLocation()
+   * Use RushConfiguration.loadFromConfigurationFile() or Use RushConfiguration.loadFromDefaultLocation()
    * instead.
    */
-  constructor(rushConfigurationJson: IRushConfigurationJson, rushJsonFilename: string) {
+  private constructor(rushConfigurationJson: IRushConfigurationJson, rushJsonFilename: string) {
     if (rushConfigurationJson.nodeSupportedVersionRange) {
       if (!semver.validRange(rushConfigurationJson.nodeSupportedVersionRange)) {
         throw new Error('Error parsing the node-semver expression in the "nodeSupportedVersionRange"'

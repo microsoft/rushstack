@@ -285,17 +285,19 @@ export default class InstallManager {
     for (const rushProject of sortedRushProjects) {
       const packageJson: PackageJson = rushProject.packageJson;
 
-      // Example: "@rush-temp/my-project"
+      // Example: "@rush-temp/my-project-2"
       const tempProjectName: string = rushProject.tempProjectName;
 
-      // Example: "my-project-2" (unique, regardless of original NPM scope)
+      // The "rushProject.tempProjectName" is guaranteed to be unique name (e.g. by adding the "-2"
+      // suffix).  Even after we strip the NPM scope, it will still be unique.
+      // Example: "my-project-2"
       const unscopedTempProjectName: string = Utilities.parseScopedPackageName(tempProjectName).name;
 
       // Example: "C:\MyRepo\common\temp\projects\my-project-2"
       const tempProjectFolder: string = path.join(tempProjectsFolder, unscopedTempProjectName);
       fsx.mkdirsSync(tempProjectFolder);
 
-      // Example: "file:./projects/my-project"
+      // Example: "file:./projects/my-project-2"
       commonPackageJson.dependencies[tempProjectName]
         = `file:./${RushConstants.rushTempProjectsFolderName}/${unscopedTempProjectName}`;
 
