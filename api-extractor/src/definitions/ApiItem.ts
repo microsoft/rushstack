@@ -128,6 +128,12 @@ const typingsScopeNames: string[] = [ '@types' ];
  * simplified tree which correponds to the major topics for our API documentation.
  */
 abstract class ApiItem {
+
+  /**
+   * Names of API items should only contain letters, numbers and underscores.
+   */
+  private static _allowedNameRegex: RegExp = /^[a-zA-Z_]+[a-zA-Z_0-9]*$/;
+
   /**
    * The name of the definition, as seen by external consumers of the Public API.
    * For example, suppose a class is defined as "export default class MyClass { }"
@@ -236,11 +242,6 @@ abstract class ApiItem {
    * or type references.
    */
   private _state: InitializationState;
-
-  /**
-   * Names of API items should not contain any special characters.
-   */
-  private _allowedNameRegex: RegExp = /^[a-zA-Z_]+[a-zA-Z_0-9]*$/;
 
   constructor(options: IApiItemOptions) {
     this.reportError = this.reportError.bind(this);
@@ -362,9 +363,10 @@ abstract class ApiItem {
       this.reportError).replace(/\s\s/g, ' ');
     this.needsDocumentation = this.shouldHaveDocumentation() && summaryTextCondensed.length <= 10;
 
-    this.supportedName =  (this.kind === ApiItemKind.Package) || this._allowedNameRegex.test(this.name);
+    this.supportedName =  (this.kind === ApiItemKind.Package) || ApiItem._allowedNameRegex.test(this.name);
     if (!this.supportedName) {
-      this.warnings.push(`Names can only contain letters and numbers to be supported: ${this.name}`);
+      this.warnings.push(`The name "${this.name}" contains unsupported characters; ` +
+        'API names should use only letters, numbers, and underscores');
     }
 
     if (this.kind === ApiItemKind.Package) {

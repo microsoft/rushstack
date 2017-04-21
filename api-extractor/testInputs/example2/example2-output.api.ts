@@ -26,7 +26,7 @@ enum inheritDisplayModeNoErrorDeprecated {
 class MyDocumentedClass {
   // (undocumented)
   constructor();
-  // WARNING: Names can only contain letters and numbers to be supported: $unallowedName
+  // WARNING: The name "$unallowedName" contains unsupported characters; API names should use only letters, numbers, and underscores
   public $unallowedName: string;
   // @beta (undocumented)
   public betaTagmissingParam: string;
