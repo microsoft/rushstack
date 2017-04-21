@@ -90,7 +90,7 @@ export default class InstallAction extends CommandLineAction {
     installManager.ensureLocalNpmTool(this._cleanInstallFull.value);
 
     const shrinkwrapFile: ShrinkwrapFile | undefined
-      = ShrinkwrapFile.loadFromFile(this._rushConfiguration.gitShrinkwrapFilename);
+      = ShrinkwrapFile.loadFromFile(this._rushConfiguration.committedShrinkwrapFilename);
 
     if (!shrinkwrapFile) {
       console.log('');

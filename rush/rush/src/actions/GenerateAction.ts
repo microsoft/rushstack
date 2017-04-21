@@ -72,9 +72,9 @@ export default class GenerateAction extends CommandLineAction {
 
     installManager.createTempModules();
 
-    if (fsx.existsSync(this._rushConfiguration.gitShrinkwrapFilename)) {
-      console.log(os.EOL + 'Deleting ' + this._rushConfiguration.gitShrinkwrapFilename);
-      fsx.unlinkSync(this._rushConfiguration.gitShrinkwrapFilename);
+    if (fsx.existsSync(this._rushConfiguration.committedShrinkwrapFilename)) {
+      console.log(os.EOL + 'Deleting ' + this._rushConfiguration.committedShrinkwrapFilename);
+      fsx.unlinkSync(this._rushConfiguration.committedShrinkwrapFilename);
     }
 
     if (isLazy) {
@@ -99,9 +99,9 @@ export default class GenerateAction extends CommandLineAction {
 
       // Copy the common\temp\npm-shrinkwrap.json file to common\npm-shrinkwrap.json
       // so that it can be committed to Git.
-      console.log(`Copying to ${this._rushConfiguration.gitShrinkwrapFilename}`);
+      console.log(`Copying to ${this._rushConfiguration.committedShrinkwrapFilename}`);
       fsx.copySync(this._rushConfiguration.tempShrinkwrapFilename,
-        this._rushConfiguration.gitShrinkwrapFilename);
+        this._rushConfiguration.committedShrinkwrapFilename);
 
       // The flag file is normally created by installCommonModules(), but "rush install" will
       // compare its timestamp against the shrinkwrap file.  Since we just generated a new

@@ -211,8 +211,7 @@ export function RegexErrorDetector(regex: RegExp,
 
 // @public
 class RushConfiguration {
-  // WARNING: The type "IRushConfigurationJson" needs to be exported by the package (e.g. added to index.ts)
-  constructor(rushConfigurationJson: IRushConfigurationJson, rushJsonFilename: string);
+  public readonly committedShrinkwrapFilename: string;
   public readonly commonFolder: string;
   public readonly commonFolderName: string;
   public readonly commonTempFolder: string;
@@ -220,7 +219,6 @@ class RushConfiguration {
   public getProjectByName(projectName: string): RushConfigurationProject;
   public readonly gitAllowedEmailRegExps: string[];
   public readonly gitSampleEmail: string;
-  public readonly gitShrinkwrapFilename: string;
   public readonly homeFolder: string;
   public static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
   // (undocumented)

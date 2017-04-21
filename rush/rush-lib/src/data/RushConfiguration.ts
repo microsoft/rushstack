@@ -64,7 +64,7 @@ export default class RushConfiguration {
   private _commonTempFolder: string;
   private _npmCacheFolder: string;
   private _npmTmpFolder: string;
-  private _gitShrinkwrapFilename: string;
+  private _committedShrinkwrapFilename: string;
   private _tempShrinkwrapFilename: string;
   private _homeFolder: string;
   private _rushLinkJsonFilename: string;
@@ -216,7 +216,7 @@ export default class RushConfiguration {
       this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));
     }
 
-    this._gitShrinkwrapFilename = path.join(this._commonFolder, RushConstants.npmShrinkwrapFilename);
+    this._committedShrinkwrapFilename = path.join(this._commonFolder, RushConstants.npmShrinkwrapFilename);
     this._tempShrinkwrapFilename = path.join(this._commonTempFolder, RushConstants.npmShrinkwrapFilename);
 
     const unresolvedUserFolder: string = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
@@ -392,13 +392,13 @@ export default class RushConfiguration {
   }
 
   /**
-   * The filename of the NPM shrinkwrap file that is tracked by Git.  (The "rush install"
+   * The filename of the NPM shrinkwrap file that is tracked e.g. by Git.  (The "rush install"
    * command uses a temporary copy, whose path is tempShrinkwrapFilename.)
    * This property merely reports the filename; the file itself may not actually exist.
    * Example: "C:\MyRepo\common\npm-shrinkwrap.json"
    */
-  public get gitShrinkwrapFilename(): string {
-    return this._gitShrinkwrapFilename;
+  public get committedShrinkwrapFilename(): string {
+    return this._committedShrinkwrapFilename;
   }
 
   /**
