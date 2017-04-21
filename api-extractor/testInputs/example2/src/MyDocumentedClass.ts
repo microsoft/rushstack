@@ -94,6 +94,13 @@ export default class MyDocumentedClass {
   }
 
   /**
+   * Testing if a warning is raised for an unallowed name.
+   * A name for an API item is unallowed if it contains special
+   * characters.
+   */
+  public $unallowedName: string;
+
+  /**
    * This doc has an invalid tag that should throw an error
    * @badJsDocTag
    */

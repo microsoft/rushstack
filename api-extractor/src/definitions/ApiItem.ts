@@ -141,6 +141,11 @@ abstract class ApiItem {
   public name: string;
 
   /**
+   * The name of an API item should be readable and not contain any special characters.
+   */
+  public supportedName: boolean;
+
+  /**
    * Indicates the type of definition represented by this ApiItem instance.
    */
   public kind: ApiItemKind;
@@ -232,6 +237,11 @@ abstract class ApiItem {
    */
   private _state: InitializationState;
 
+  /**
+   * Names of API items should not contain any special characters.
+   */
+  private _allowedNameRegex: RegExp = /^[a-zA-Z_]+[a-zA-Z_0-9]*$/;
+
   constructor(options: IApiItemOptions) {
     this.reportError = this.reportError.bind(this);
 
@@ -242,11 +252,11 @@ abstract class ApiItem {
     this.warnings = [];
 
     this.extractor = options.extractor;
+    this.typeChecker = this.extractor.typeChecker;
     this.declarationSymbol = options.declarationSymbol;
     this.exportSymbol = options.exportSymbol || this.declarationSymbol;
 
     this.name = this.exportSymbol.name || '???';
-    this.typeChecker = this.extractor.typeChecker;
 
     let originalJsDoc: string = '';
     if (this.jsdocNode) {
@@ -351,6 +361,11 @@ abstract class ApiItem {
       this.documentation.summary,
       this.reportError).replace(/\s\s/g, ' ');
     this.needsDocumentation = this.shouldHaveDocumentation() && summaryTextCondensed.length <= 10;
+
+    this.supportedName =  (this.kind === ApiItemKind.Package) || this._allowedNameRegex.test(this.name);
+    if (!this.supportedName) {
+      this.warnings.push(`Names can only contain letters and numbers to be supported: ${this.name}`);
+    }
 
     if (this.kind === ApiItemKind.Package) {
       if (this.documentation.apiTag !== ApiTag.None) {
