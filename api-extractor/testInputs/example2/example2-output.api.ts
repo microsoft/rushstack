@@ -26,6 +26,8 @@ enum inheritDisplayModeNoErrorDeprecated {
 class MyDocumentedClass {
   // (undocumented)
   constructor();
+  // WARNING: Names can only contain letters and numbers to be supported: $unallowedName
+  public $unallowedName: string;
   // @beta (undocumented)
   public betaTagmissingParam: string;
   public fieldWithBadTag: string;

@@ -65,6 +65,10 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
   }
 
   protected visitApiStructuredType(apiStructuredType: ApiStructuredType, refObject?: Object): void {
+    if (!apiStructuredType.supportedName) {
+      return;
+    }
+
     const kind: string =
       apiStructuredType.kind === ApiItemKind.Class ? ApiJsonFile.convertKindToJson(ApiItemKind.Class) :
       apiStructuredType.kind === ApiItemKind.Interface ?
@@ -97,6 +101,10 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
   }
 
   protected visitApiEnum(apiEnum: ApiEnum, refObject?: Object): void {
+    if (!apiEnum.supportedName) {
+      return;
+    }
+
     const valuesNode: Object = {};
     const enumNode: Object = {
       kind: ApiJsonFile.convertKindToJson(apiEnum.kind),
@@ -114,6 +122,10 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
   }
 
   protected visitApiEnumValue(apiEnumValue: ApiEnumValue, refObject?: Object): void {
+    if (!apiEnumValue.supportedName) {
+      return;
+    }
+
     const declaration: ts.Declaration = apiEnumValue.getDeclaration();
     const firstToken: ts.Node = declaration ? declaration.getFirstToken() : undefined;
     const lastToken: ts.Node = declaration ? declaration.getLastToken() : undefined;
@@ -131,6 +143,10 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
   }
 
   protected visitApiFunction(apiFunction: ApiFunction, refObject?: Object): void {
+    if (!apiFunction.supportedName) {
+      return;
+    }
+
     for (const param of apiFunction.params) {
       this.visitApiParam(param, apiFunction.documentation.parameters[param.name]);
     }
@@ -168,10 +184,18 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
   }
 
   protected visitApiMember(apiMember: ApiMember, refObject?: Object): void {
+    if (!apiMember.supportedName) {
+      return;
+    }
+
     refObject[apiMember.name] = 'apiMember-' + apiMember.getDeclaration().kind;
   }
 
   protected visitApiProperty(apiProperty: ApiProperty, refObject?: Object): void {
+    if (!apiProperty.supportedName) {
+      return;
+    }
+
     if (apiProperty.getDeclaration().kind === ts.SyntaxKind.SetAccessor) {
       return;
     }
@@ -192,6 +216,10 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
   }
 
   protected visitApiMethod(apiMethod: ApiMethod, refObject?: Object): void {
+    if (!apiMethod.supportedName) {
+      return;
+    }
+
     for (const param of apiMethod.params) {
       this.visitApiParam(param, apiMethod.documentation.parameters[param.name]);
     }
@@ -231,6 +259,10 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
   }
 
   protected visitApiParam(apiParam: ApiParameter, refObject?: Object): void {
+    if (!apiParam.supportedName) {
+      return;
+    }
+
     if (refObject) {
       (refObject as IParam).isOptional = apiParam.isOptional;
       (refObject as IParam).isSpread = apiParam.isSpread;
