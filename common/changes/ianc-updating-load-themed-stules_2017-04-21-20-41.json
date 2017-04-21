@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/loader-load-themed-styles",
+      "comment": "Updating to load-themed-styles version 1.3.0",
+      "type": "minor"
+    }
+  ],
+  "email": "iclanton@users.noreply.github.com"
+}
