@@ -200,8 +200,7 @@ export default class RushConfiguration {
 
   /**
    * This is how we refer to the common folder, e.g. in error messages.
-   * For example if commonFolder is "C:\MyRepo\common" then
-   * commonFolderName="common".
+   * Example: "common"
    */
   public get commonFolderName(): string {
     return this._commonFolderName;
@@ -285,7 +284,7 @@ export default class RushConfiguration {
   /**
    * The absolute path to the locally installed NPM tool.  If "rush install" has not
    * been run, then this file may not exist yet.
-   * Example: "C:\MyRepo\common\npm-local\node_modules\.bin\npm"
+   * Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
    */
   public get npmToolFilename(): string {
     return this._npmToolFilename;
