@@ -425,7 +425,7 @@ export default class InstallManager {
 
       // Additionally, if they pulled an updated npm-shrinkwrap.json file from Git,
       // then we can't skip this install
-      potentiallyChangedFiles.push(this._rushConfiguration.gitShrinkwrapFilename);
+      potentiallyChangedFiles.push(this._rushConfiguration.committedShrinkwrapFilename);
 
       // NOTE: If commonNodeModulesMarkerFilename (or any of the potentiallyChangedFiles) does not
       // exist, then isFileTimestampCurrent() returns false.
@@ -548,9 +548,9 @@ export default class InstallManager {
    * If the Git copy doesn't exist, then the temp copy is deleted.
    */
   private _resyncTempShrinkwrapFile(): void {
-    if (fsx.existsSync(this._rushConfiguration.gitShrinkwrapFilename)) {
+    if (fsx.existsSync(this._rushConfiguration.committedShrinkwrapFilename)) {
       console.log('Updating ' + this._rushConfiguration.tempShrinkwrapFilename);
-      fsx.copySync(this._rushConfiguration.gitShrinkwrapFilename, this._rushConfiguration.tempShrinkwrapFilename);
+      fsx.copySync(this._rushConfiguration.committedShrinkwrapFilename, this._rushConfiguration.tempShrinkwrapFilename);
     } else {
       if (fsx.existsSync(this._rushConfiguration.tempShrinkwrapFilename)) {
         console.log('Deleting ' + this._rushConfiguration.tempShrinkwrapFilename);
