@@ -7,10 +7,12 @@ import * as path from 'path';
 import * as mkdirp from 'mkdirp';
 import * as child_process from 'child_process';
 import gitInfo = require('git-repo-info');
+import * as colors from 'colors';
 
 import inquirer = require('inquirer');
 
-import { CommandLineAction,
+import {
+  CommandLineAction,
   CommandLineFlagParameter,
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
@@ -52,18 +54,18 @@ export default class ChangeAction extends CommandLineAction {
         '',
         'Here\'s some help in figuring out what kind of change you are making: ',
         '',
-        'MAJOR - these are breaking changes that are not backwards compatible. ' +
-        'Examples are: renaming a class, adding/removing a non-optional ' +
-        'parameter from a public API, or renaming an variable or function that ' +
-        'is exported.',
+      'MAJOR - these are breaking changes that are not backwards compatible. ' +
+      'Examples are: renaming a class, adding/removing a non-optional ' +
+      'parameter from a public API, or renaming an variable or function that ' +
+      'is exported.',
         '',
-        'MINOR - these are changes that are backwards compatible (but not ' +
-        'forwards compatible). Examples are: adding a new public API or adding an ' +
-        'optional parameter to a public API',
+      'MINOR - these are changes that are backwards compatible (but not ' +
+      'forwards compatible). Examples are: adding a new public API or adding an ' +
+      'optional parameter to a public API',
         '',
-        'PATCH - these are changes that are backwards and forwards compatible. ' +
-        'Examples are: Modifying a private API or fixing a bug in the logic ' +
-        'of how an existing API works.',
+      'PATCH - these are changes that are backwards and forwards compatible. ' +
+      'Examples are: Modifying a private API or fixing a bug in the logic ' +
+      'of how an existing API works.',
         ''].join(os.EOL)
     });
     this._parser = parser;
@@ -89,10 +91,11 @@ export default class ChangeAction extends CommandLineAction {
       return this._verify();
     }
     this._sortedProjectList = this._getChangedPackageNames()
-       .sort();
+      .sort();
 
     if (this._sortedProjectList.length === 0) {
       console.log('No change file is needed.');
+      this._warnUncommitedChanges();
       return;
     }
 
@@ -186,6 +189,7 @@ export default class ChangeAction extends CommandLineAction {
 
         });
     } else {
+      this._warnUncommitedChanges();
       // We are done, collect their e-mail
       return this._detectOrAskForEmail().then((email: string) => {
         this._changeFileData.email = email;
@@ -201,10 +205,10 @@ export default class ChangeAction extends CommandLineAction {
     console.log(`${os.EOL}${packageName}`);
 
     return this._prompt({
-        name: 'comment',
-        type: 'input',
-        message: `Describe changes, or ENTER if no changes:`
-      })
+      name: 'comment',
+      type: 'input',
+      message: `Describe changes, or ENTER if no changes:`
+    })
       .then(({ comment }: { comment: string }) => {
         if (comment) {
           return this._prompt({
@@ -296,9 +300,20 @@ export default class ChangeAction extends CommandLineAction {
         }
       }
     ])
-    .then((answers) => {
-      return answers.email;
-    });
+      .then((answers) => {
+        return answers.email;
+      });
+  }
+
+  private _warnUncommitedChanges(): void {
+    try {
+      if (VersionControl.hasUncommitedChanges()) {
+        console.log(os.EOL +
+          colors.yellow('Warning: You have uncommitted changes, which do not trigger a change entry.'));
+      }
+    } catch (error) {
+      console.log('Ignore the failure of checking uncommited changes');
+    }
   }
 
   /**

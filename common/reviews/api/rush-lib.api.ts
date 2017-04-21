@@ -185,7 +185,7 @@ class PackageReviewItem {
   public packageName: string;
 }
 
-// @public (undocumented)
+// @public
 class PinnedVersionsConfiguration {
   // (undocumented)
   public clear(): this;
@@ -199,11 +199,9 @@ class PinnedVersionsConfiguration {
   public has(dependency: string): boolean;
   // (undocumented)
   public save(): this;
-  // (undocumented)
   public set(dependency: string, version: string): this;
   // (undocumented)
   public readonly size: number;
-  // (undocumented)
   public static tryLoadFromFile(jsonFilename: string): PinnedVersionsConfiguration;
 }
 
@@ -344,12 +342,14 @@ class VersionControl {
   public static getChangedFiles(prefix?: string, targetBranch?: string): string[];
   // (undocumented)
   public static getChangedFolders(targetBranch?: string): string[];
+  // (undocumented)
+  public static hasUncommitedChanges(): boolean;
 }
 
 // @public (undocumented)
 class VersionMismatchFinder {
   // (undocumented)
-  constructor(projects: RushConfigurationProject[]);
+  constructor(private _projects: RushConfigurationProject[]);
   // (undocumented)
   public getConsumersOfMismatch(mismatch: string, version: string): Array<string>;
   // (undocumented)
