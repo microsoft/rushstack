@@ -20,6 +20,7 @@ export interface IRushConfigurationProjectJson {
 /**
  * This represents the configuration of a project that is built by Rush, based on
  * the Rush.json configuration file.
+ * @public
  */
 export default class RushConfigurationProject {
   private _packageName: string;

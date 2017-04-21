@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-mocha
 
-This log was last generated on Wed, 15 Mar 2017 01:32:09 GMT and should not be manually modified.
+This log was last generated on Wed, 19 Apr 2017 20:18:06 GMT and should not be manually modified.
+
+## 2.0.3
+Wed, 19 Apr 2017 20:18:06 GMT
+
+### Patches
+
+- Remove ES6 Promise & @types/es6-promise typings
 
 ## 2.0.2
 Wed, 15 Mar 2017 01:32:09 GMT

@@ -3,6 +3,10 @@
 
 import * as path from 'path';
 
+/**
+ * The type of dependency; used by IPackageDependency.
+ * @public
+ */
 export enum PackageDependencyKind {
   Normal,
   /**
@@ -16,6 +20,9 @@ export enum PackageDependencyKind {
   LocalLink
 }
 
+/**
+ * @public
+ */
 export interface IPackageDependency {
   /**
    * The name of the dependency
@@ -32,6 +39,9 @@ export interface IPackageDependency {
   kind: PackageDependencyKind;
 }
 
+/**
+ * @public
+ */
 export interface IPackageJson extends PackageJson {
   /**
    * An extra setting written into package.json for temp packages, to track
@@ -40,6 +50,9 @@ export interface IPackageJson extends PackageJson {
   rushDependencies?: { [key: string]: string };
 }
 
+/**
+ * @public
+ */
 export default class Package {
   /**
    * The "name" field from package.json
@@ -269,6 +282,9 @@ export default class Package {
   }
 }
 
+/**
+ * @public
+ */
 export interface IResolveOrCreateResult {
   found: Package;
   parentForCreate: Package;

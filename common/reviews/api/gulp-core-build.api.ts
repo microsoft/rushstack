@@ -44,6 +44,7 @@ class GulpTask<TASK_CONFIG> implements IExecutable {
   public copyFile(localSourcePath: string, localDestPath?: string): void;
   public enabled: boolean;
   public execute(config: IBuildConfig): Promise<void>;
+  // WARNING: The type "GulpProxy" needs to be exported by the package (e.g. added to index.ts)
   public abstract executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (result?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
   public fileError(filePath: string, line: number, column: number, errorCode: string, message: string): void;
   public fileExists(localPath: string): boolean;
@@ -103,6 +104,7 @@ interface ICopyConfig {
 }
 
 interface ICustomGulpTask {
+  // WARNING: The type "GulpProxy" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   (gulp: gulp.Gulp | GulpProxy, buildConfig: IBuildConfig, done: (failure?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
 }

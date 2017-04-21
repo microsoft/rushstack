@@ -2,13 +2,11 @@
 // See LICENSE in the project root for license information.
 
 export {
-  IRushConfigurationJson,
   IRushLinkJson,
   default as RushConfiguration
 } from './data/RushConfiguration';
 
 export {
-  IRushConfigurationProjectJson,
   default as RushConfigurationProject
 } from './data/RushConfigurationProject';
 
@@ -18,7 +16,6 @@ export {
 } from './data/PackageReviewConfiguration';
 
 export {
-  IPinnedVersionsJson,
   PinnedVersionsConfiguration
 } from './data/PinnedVersionsConfiguration';
 
@@ -80,4 +77,4 @@ export {
 export { default as TestErrorDetector } from './errorDetection/rules/TestErrorDetector';
 export { default as TsErrorDetector } from './errorDetection/rules/TsErrorDetector';
 export { default as TsLintErrorDetector } from './errorDetection/rules/TsLintErrorDetector';
-export { default as AsyncRecycle } from './utilities/AsyncRecycle';
+export { default as AsyncRecycler } from './utilities/AsyncRecycler';

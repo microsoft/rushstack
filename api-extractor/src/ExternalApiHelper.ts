@@ -20,7 +20,7 @@ export default class ExternalApiHelper {
    * @param libFolder - the path to the lib folder relative to the rootDir, this is where
    * 'external-api-json/external_package.api.json' file will be written. Ex: 'lib'.
    * @param externalPackageFilePath - the path to the '*.d.ts' file of the external package relative to the rootDir.
-   * Ex: 'resources/external-api-json/es6-promise/index.t.ds'
+   * Ex: 'resources/external-api-json/es6-collection/index.t.ds'
    */
   public static generateApiJson(rootDir: string, libFolder: string, externalPackageFilePath: string): void {
     const compilerOptions: ts.CompilerOptions = {
@@ -31,13 +31,13 @@ export default class ExternalApiHelper {
       jsx: ts.JsxEmit.React,
       rootDir: rootDir
     };
-    const extractor: Extractor = new Extractor( {
+    const extractor: Extractor = new Extractor({
       compilerOptions: compilerOptions,
       errorHandler:
-        (message: string, fileName: string, lineNumber: number): void => {
-          console.log(`TypeScript error: ${message}` + os.EOL
-            + `  ${fileName}#${lineNumber}`);
-        }
+      (message: string, fileName: string, lineNumber: number): void => {
+        console.log(`TypeScript error: ${message}` + os.EOL
+          + `  ${fileName}#${lineNumber}`);
+      }
     });
 
     let outputPath: string = path.join(rootDir, libFolder);
