@@ -237,7 +237,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
     const commandArgs: string[] = command.splice(1);
 
     if (command[0] === 'gulp') {
-      command[0] = path.join(this._rushConfiguration.commonFolder, 'node_modules', '.bin', command[0]);
+      command[0] = path.join(this._rushConfiguration.commonTempFolder, 'node_modules', '.bin', command[0]);
     }
 
     return {

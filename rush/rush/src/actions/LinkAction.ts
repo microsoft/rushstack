@@ -208,10 +208,10 @@ function createSymlinksForTopLevelProject(localPackage: Package): void {
 /**
  * This is called once for each local project from Rush.json.
  * @param project             The local project that we will create symlinks for
- * @param commonRootPackage   The common/package.json package
- * @param commonPackageLookup A dictionary for finding packages under common/node_modules
+ * @param commonRootPackage   The common/temp/package.json package
+ * @param commonPackageLookup A dictionary for finding packages under common/temp/node_modules
  * @param rushConfiguration   The rush.json file contents
- * @param rushLinkJson        The common/rush-link.json output file
+ * @param rushLinkJson        The common/temp/rush-link.json output file
  * @param options             Command line options for "rush link"
  */
 function linkProject(
@@ -249,7 +249,7 @@ function linkProject(
       break;
     }
 
-    // A project from somewhere under "common/node_modules"
+    // A project from somewhere under "common/temp/node_modules"
     const commonPackage: Package = queueItem.commonPackage;
 
     // A symlinked virtual package somewhere under "this-project/node_modules",
@@ -410,7 +410,7 @@ function linkProject(
 
   // Also symlink the ".bin" folder
   if (localProjectPackage.children.length > 0) {
-    const commonBinFolder: string = path.join(rushConfiguration.commonFolder, 'node_modules', '.bin');
+    const commonBinFolder: string = path.join(rushConfiguration.commonTempFolder, 'node_modules', '.bin');
     const projectBinFolder: string = path.join(localProjectPackage.folderPath, 'node_modules', '.bin');
 
     if (fsx.existsSync(commonBinFolder)) {
