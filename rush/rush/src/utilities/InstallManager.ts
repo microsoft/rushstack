@@ -337,7 +337,7 @@ export default class InstallManager {
 
       for (const pair of pairs) {
         // Is there a locally built Rush project that could satisfy this dependency?
-        // If so, then we will symlink to the project folder rather than to common/node_modules.
+        // If so, then we will symlink to the project folder rather than to common/temp/node_modules.
         // In this case, we don't want "npm install" to process this package, but we do need
         // to record this decision for "rush link" later, so we add it to a special 'rushDependencies' field.
         const localProject: RushConfigurationProject = this._rushConfiguration.getProjectByName(pair.packageName);
@@ -391,7 +391,7 @@ export default class InstallManager {
    * 3. Full clean and "npm install"
    */
   public installCommonModules(installType: InstallType): void {
-    // Example: "C:\MyRepo\common\npm-local\node_modules\.bin\npm"
+    // Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
     const npmToolFilename: string = this._rushConfiguration.npmToolFilename;
     if (!fsx.existsSync(npmToolFilename)) {
       // This normally should never occur -- it indicates that some code path forgot to call
@@ -498,7 +498,7 @@ export default class InstallManager {
         const normalizedpathToDeleteWithoutStar: string
           = Utilities.getAllReplaced(pathToDeleteWithoutStar, '\\', '/');
 
-        // Example: "C:/MyRepo/common/node_modules/@rush-temp/*"
+        // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/*"
         for (const tempModulePath of glob.sync(globEscape(normalizedpathToDeleteWithoutStar) + '*')) {
           // We could potentially use AsyncRecycler here, but in practice these folders tend
           // to be very small
