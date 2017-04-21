@@ -5,8 +5,6 @@
   // Controls after how many characters the editor will wrap to the next line. Setting this to 0 turns on viewport width wrapping
   // When enabled, will trim trailing whitespace when you save a file.
   "files.trimTrailingWhitespace": true,
-  // Auto formats on save
-  "editor.formatOnSave": true,
   // Controls if the editor should automatically close brackets after opening them
   "editor.autoClosingBrackets": false,
   // Configure glob patterns for excluding files and folders in searches. Inherits all glob patterns from the file.exclude setting.
