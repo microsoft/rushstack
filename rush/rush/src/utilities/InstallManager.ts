@@ -52,6 +52,70 @@ export default class InstallManager {
   private _commonNodeModulesMarkerFilename: string;
   private _asyncRecycler: AsyncRecycler;
 
+  /**
+   * Returns a map of all direct dependencies that only have a single semantic version specifier
+   */
+  public static collectImplicitlyPinnedVersions(rushConfiguration: RushConfiguration): Map<string, string> {
+    const directDependencies: Map<string, Set<string>> = new Map<string, Set<string>>();
+
+    rushConfiguration.projects.forEach((project: RushConfigurationProject) => {
+      InstallManager._addDependenciesToMap(rushConfiguration, directDependencies,
+        project.cyclicDependencyProjects, project.packageJson.dependencies);
+      InstallManager._addDependenciesToMap(rushConfiguration, directDependencies,
+        project.cyclicDependencyProjects, project.packageJson.devDependencies);
+      InstallManager._addDependenciesToMap(rushConfiguration, directDependencies,
+        project.cyclicDependencyProjects, project.packageJson.optionalDependencies);
+    });
+
+    const implicitlyPinned: Map<string, string> = new Map<string, string>();
+    directDependencies.forEach((versions: Set<string>, dep: string) => {
+      if (versions.size === 1) {
+        const version: string = versions.values().next().value;
+        implicitlyPinned.set(dep, version);
+      }
+    });
+    return implicitlyPinned;
+  }
+
+  // tslint:disable-next-line:no-any
+  public static _keys<T>(data: Map<T, any>): Array<T> {
+    const keys: Array<T> = new Array<T>();
+
+    const iterator: Iterator<T> = data.keys();
+    let current: IteratorResult<T> = iterator.next();
+    while (!current.done) {
+      keys.push(current.value);
+      current = iterator.next();
+    }
+    return keys;
+  }
+
+  private static _addDependencyToMap(directDependencies: Map<string, Set<string>>,
+    dependency: string, version: string): void {
+    if (!directDependencies.has(dependency)) {
+      directDependencies.set(dependency, new Set<string>());
+    }
+    directDependencies.get(dependency).add(version);
+  }
+
+  private static _addDependenciesToMap(
+    rushConfiguration: RushConfiguration,
+    directDependencies: Map<string, Set<string>>,
+    cyclicDeps: Set<string>, deps: { [dep: string]: string }): void {
+
+    Object.keys(deps || {}).forEach((dependency: string) => {
+      const version: string = deps[dependency];
+
+      // If the dependency is not a local project OR
+      //    the dependency is a cyclic dependency OR
+      //    we depend on a different version than the one locally
+      if (!rushConfiguration.getProjectByName(dependency) || cyclicDeps.has(dependency) ||
+          !semver.satisfies(rushConfiguration.getProjectByName(dependency).packageJson.version, version)) {
+        InstallManager._addDependencyToMap(directDependencies, dependency, version);
+      }
+    });
+  }
+
   constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
 
@@ -166,13 +230,28 @@ export default class InstallManager {
 
     let shrinkwrapIsValid: boolean = true;
 
+    // Find the implicitly pinnedVersions
+    // These are any first-level dependencies for which we only consume a single version range
+    // (e.g. every package that depends on react uses an identical specifier)
+    const implicitlyPinned: Map<string, string> =
+      InstallManager.collectImplicitlyPinnedVersions(this._rushConfiguration);
+    const pinnedVersions: Map<string, string> = new Map<string, string>();
+
+    implicitlyPinned.forEach((version: string, dependency: string) => {
+      pinnedVersions.set(dependency, version);
+    });
+
+    this._rushConfiguration.pinnedVersions.forEach((version: string, dependency: string) => {
+      pinnedVersions.set(dependency, version);
+    });
+
     if (shrinkwrapFile) {
       // Check any pinned dependencies first
-      this._rushConfiguration.pinnedVersions.forEach((version: string, dependency: string) => {
+      pinnedVersions.forEach((version: string, dependency: string) => {
         if (!shrinkwrapFile.hasCompatibleDependency(dependency, version)) {
           console.log(colors.yellow(wrap(
             `${os.EOL}The NPM shrinkwrap file does not provide "${dependency}"`
-            + ` (${version}) required by pinnedVersions.json.`)));
+            + ` (${version}) required by pinned versions`)));
           shrinkwrapIsValid = false;
         }
       });
@@ -192,8 +271,9 @@ export default class InstallManager {
     };
 
     // Add any pinned versions to the top of the commonPackageJson
-    this._rushConfiguration.pinnedVersions.forEach((version: string, dependency: string) => {
-      commonPackageJson.dependencies[dependency] = version;
+    // do this in alphabetical order for simpler debugging
+    InstallManager._keys(pinnedVersions).sort().forEach((dependency: string) => {
+      commonPackageJson.dependencies[dependency] = pinnedVersions.get(dependency);
     });
 
     // To make the common/package.json file more readable, sort alphabetically
@@ -287,7 +367,7 @@ export default class InstallManager {
           if (!shrinkwrapFile.hasCompatibleDependency(pair.packageName, pair.packageVersion, tempProjectName)) {
             console.log(colors.yellow(
               wrap(`${os.EOL}The NPM shrinkwrap file is missing "${pair.packageName}"`
-              + ` (${pair.packageVersion}) required by "${rushProject.packageName}".`)));
+                + ` (${pair.packageVersion}) required by "${rushProject.packageName}".`)));
             shrinkwrapIsValid = false;
           }
         }
