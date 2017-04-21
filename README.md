@@ -10,15 +10,15 @@
 Install with [npm](https://www.npmjs.com/)
 
 ```
-$ npm install --save load-themed-styles
+$ npm install --save @microsoft/load-themed-styles
 ```
 
 ## Usage
 
-To load a given string of styles, you can do this:
+To load a given string of styles, you can do this in TypeScript or ES6:
 
-```js
-import { loadStyles } from 'load-themed-styles';
+```TypeScript
+import { loadStyles } from '@microsoft/load-themed-styles';
 
 loadStyles('body { background: red; }');
 ```
@@ -38,7 +38,7 @@ loadStyles('body { background: "[theme:primaryBackgroundColor, default: blue]"')
 When loading, the background will use the default value, blue. Providing your own theme values using the `loadTheme` function:
 
 ```js
-import { loadStyles, loadTheme } from 'load-themed-styles';
+import { loadStyles, loadTheme } from '@microsoft/load-themed-styles';
 
 loadTheme({
   primaryBackgroundColor: "#EAEAEA"
