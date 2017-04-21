@@ -438,7 +438,7 @@ export default class RushConfiguration {
     if (!fsx.existsSync(this._commonFolder)) {
       console.log(`No common folder was detected.`);
       console.log(`Creating folder: ${this._commonFolder}`);
-      fsx.mkdirpSync(this._commonFolder);
+      fsx.mkdirsSync(this._commonFolder);
       console.log(`Next, you should probably run "rush generate"`);
       process.exit(1);
     }

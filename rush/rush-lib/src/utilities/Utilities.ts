@@ -87,10 +87,17 @@ export default class Utilities {
   }
 
   /**
-   * Creates the specified folder by calling fsx.mkdirSync(), but using a
+   * Creates the specified folder by calling fsx.mkdirsSync(), but using a
    * retry loop to recover from temporary locks that may be held by other processes.
+   * If the folder already exists, no error occurs.
    */
   public static createFolderWithRetry(folderName: string): void {
+    // Note: If a file exists with the same name, then we fall through and report
+    // an error.
+    if (Utilities.directoryExists(folderName)) {
+      return;
+    }
+
     // We need to do a simple "fs.mkdirSync(localModulesFolder)" here,
     // however if the folder we deleted above happened to contain any files,
     // then there seems to be some OS process (virus scanner?) that holds
