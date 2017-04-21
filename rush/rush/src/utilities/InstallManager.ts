@@ -224,9 +224,7 @@ export default class InstallManager {
     if (fsx.existsSync(tempProjectsFolder)) {
       Utilities.dangerouslyDeletePath(tempProjectsFolder);
     }
-    if (!fsx.existsSync(tempProjectsFolder)) {
-      fsx.mkdirsSync(tempProjectsFolder);
-    }
+    Utilities.createFolderWithRetry(tempProjectsFolder);
 
     let shrinkwrapIsValid: boolean = true;
 
