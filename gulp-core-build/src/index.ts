@@ -41,10 +41,6 @@ export * from './tasks/CleanTask';
 export * from './tasks/ValidateShrinkwrapTask';
 export * from './jsonUtilities/SchemaValidator';
 
-/* tslint:disable:variable-name */
-require('es6-promise').polyfill();
-/* tslint:enable:variable-name */
-
 // tslint:disable-next-line:no-any
 const packageJSON: any = require(path.resolve(process.cwd(), 'package.json'));
 const _taskMap: { [key: string]: IExecutable } = {};
@@ -52,7 +48,7 @@ const _uniqueTasks: IExecutable[] = [];
 
 const packageFolder: string =
   (packageJSON.directories && packageJSON.directories.packagePath) ?
-  packageJSON.directories.packagePath : '';
+    packageJSON.directories.packagePath : '';
 
 let _buildConfig: IBuildConfig = {
   packageFolder,
@@ -230,7 +226,7 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
         }
       }
 
-      return Promise.resolve<void>();
+      return Promise.resolve();
     }
   };
 }
@@ -248,7 +244,7 @@ export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutabl
 
   return {
     execute: (buildConfig: IBuildConfig): Promise<void> => {
-      let output: Promise<void> = Promise.resolve<void>();
+      let output: Promise<void> = Promise.resolve();
 
       for (const task of flatTasks) {
         output = output.then(() => _executeTask(task, buildConfig));
@@ -280,7 +276,7 @@ export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecuta
         }
 
         // Use promise all to make sure errors are propagated correctly
-      Promise.all<void>(promises).then(resolve, reject);
+        Promise.all<void>(promises).then(resolve, reject);
       });
     }
   };
@@ -370,7 +366,7 @@ function _executeTask(task: IExecutable, buildConfig: IBuildConfig): Promise<voi
   }
 
   // No-op otherwise.
-  return Promise.resolve<void>();
+  return Promise.resolve();
 }
 
 function _trackTask(task: IExecutable): void {

@@ -49,7 +49,6 @@
     <Folder Include="src\utilities\" />
     <Folder Include="typings\" />
     <Folder Include="typings\es6-collections\" />
-    <Folder Include="typings\es6-promise\" />
     <Folder Include="typings\node\" />
     <Folder Include="typings\read-package-tree\" />
     <Folder Include="typings\rimraf\" />

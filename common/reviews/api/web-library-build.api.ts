@@ -184,8 +184,6 @@ enum TestResultState {
 class TypeScriptConfiguration {
   static getGulpTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<ts.Settings>;
   static getTypescriptCompiler(): any;
-  // (undocumented)
-  static getTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<typescript.CompilerOptions>;
   static setTypescriptCompiler(typescript: any): void;
 }
 

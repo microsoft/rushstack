@@ -1,6 +1,5 @@
 'use strict';
 
-import 'es6-promise';
 import { assert, expect } from 'chai';
 import { serial, parallel, GulpTask } from '../index';
 import gutil = require('gulp-util');
@@ -21,7 +20,7 @@ class PromiseTask extends GulpTask<IConfig> {
 
   /* tslint:disable:no-any */
   public executeTask(gulp: gulp.Gulp): Promise<any> {
-  /* tslint:enable:no-any */
+    /* tslint:enable:no-any */
     return new Promise<void>((resolve: () => void, reject: () => void) => {
       testArray.push(this.name);
       resolve();
@@ -37,13 +36,13 @@ class StreamTask extends GulpTask<IConfig> {
 
   /* tslint:disable:no-any */
   public executeTask(gulp: gulp.Gulp): any {
-  /* tslint:enable:no-any */
+    /* tslint:enable:no-any */
     const stream: Readable = new Readable({ objectMode: true });
 
     // Add no opt function to make it compat with through
     stream['_read'] = () => { // tslint:disable-line:no-string-literal
       // Do Nothing
-     };
+    };
 
     setTimeout(() => {
 

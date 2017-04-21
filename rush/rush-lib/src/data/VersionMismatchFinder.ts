@@ -1,7 +1,9 @@
 import RushConfigurationProject from './RushConfigurationProject';
 
+/**
+ * @public
+ */
 export class VersionMismatchFinder {
-  private _projects: RushConfigurationProject[];
  /* store it like this:
   * {
   *   "@types/node": {
@@ -11,8 +13,7 @@ export class VersionMismatchFinder {
   */
   private _mismatches: Map<string, Map<string, string[]>>;
 
-  constructor(projects: RushConfigurationProject[]) {
-    this._projects = projects;
+  constructor(private _projects: RushConfigurationProject[]) {
     this._mismatches = new Map<string, Map<string, string[]>>();
     this._analyze();
   }
@@ -58,9 +59,9 @@ export class VersionMismatchFinder {
     });
   }
 
-  private _addDependenciesToList(project: string, depMap: { [dependency: string]: string }): void {
-    Object.keys(depMap || {}).forEach((dependency: string) => {
-      const version: string = depMap[dependency];
+  private _addDependenciesToList(project: string, dependencyMap: { [dependency: string]: string }): void {
+    Object.keys(dependencyMap || {}).forEach((dependency: string) => {
+      const version: string = dependencyMap[dependency];
       if (!this._mismatches.has(dependency)) {
         this._mismatches.set(dependency, new Map<string, string[]>());
       }

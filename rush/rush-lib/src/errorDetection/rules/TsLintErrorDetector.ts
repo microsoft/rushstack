@@ -8,14 +8,16 @@ import { BuildTaskError } from '../TaskError';
 
 /**
  * Detects an error from TypeScript Linter
+ *
+ * Example: "[20:22:07] Error - tslint - src\Cache.ts(5,8): error no-any: 'any' is not allowed"
+ * 0: input
+ * 1: "[20:22:07]"
+ * 2: "src\Cache.ts"
+ * 3: "5"
+ * 4: "8"
+ * 5: "error no-any: 'any' is not allowed"
+ * @public
  */
-// Example: "[20:22:07] Error - tslint - src\Cache.ts(5,8): error no-any: 'any' is not allowed"
-// 0: input
-// 1: "[20:22:07]"
-// 2: "src\Cache.ts"
-// 3: "5"
-// 4: "8"
-// 5: "error no-any: 'any' is not allowed"
 const tsLintErrorDetector: IErrorDetectionRule = RegexErrorDetector(
   /^\s*(\[[^\]]+\])\s*Error\s*-\s*tslint\s*-\s*([^(]+)\(([0-9]+)\s*,\s*([0-9]+)\):\s*(.*)\s*$/,
   (match: RegExpExecArray) => {

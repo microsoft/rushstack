@@ -3,6 +3,7 @@
 
 /**
  * Representation for a changes file
+ * @public
  */
 export interface IChangeFile {
   changes: IChangeInfo[];
@@ -11,6 +12,7 @@ export interface IChangeFile {
 
 /**
  * Represents all of the types of change requests.
+ * @public
  */
 export enum ChangeType {
   none = 0,
@@ -20,7 +22,10 @@ export enum ChangeType {
   major = 4
 }
 
-/** Defines an IChangeInfo object. */
+/**
+ * Defines an IChangeInfo object.
+ * @public
+ */
 export interface IChangeInfo {
   /**
    * Defines the type of change. This is not expected to exist within the JSON file definition as we

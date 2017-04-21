@@ -10,7 +10,7 @@
     "@types/sinon": "1.16.34",
     "@types/mocha": "2.2.38",
     "@types/chai": "3.4.34",
-    "@types/semver": "5.3.30",
+    "@types/semver": "5.3.31",
     "@microsoft/stream-collator": "~2.0.0",
     "@types/es6-collections": "0.5.29",
     "@types/fs-extra": "0.0.37",
@@ -23,6 +23,6 @@
     "z-schema": "~3.17.0"
   },
   "rushDependencies": {
-    "@microsoft/node-library-build": ">=3.0.0 <4.0.0"
+    "@microsoft/node-library-build": ">=3.0.1 <4.0.0"
   }
 }

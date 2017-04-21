@@ -1,6 +1,20 @@
 # Change Log - @microsoft/gulp-core-build-serve
 
-This log was last generated on Wed, 15 Mar 2017 01:32:09 GMT and should not be manually modified.
+This log was last generated on Wed, 19 Apr 2017 20:18:06 GMT and should not be manually modified.
+
+## 2.1.1
+Wed, 19 Apr 2017 20:18:06 GMT
+
+### Patches
+
+- Remove ES6 Promise & @types/es6-promise typings
+
+## 2.1.0
+Sat, 15 Apr 2017 01:03:33 GMT
+
+### Minor changes
+
+- Allowing the hostname to be configured in gulp-core-build-serve.
 
 ## 2.0.4
 Wed, 15 Mar 2017 01:32:09 GMT

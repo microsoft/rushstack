@@ -43,6 +43,7 @@ export interface IRushConfigurationJson {
 
 /**
  * This represents the JSON data structure for the "rush-link.json" data file.
+ * @public
  */
 export interface IRushLinkJson {
   localLinks: {
@@ -53,6 +54,7 @@ export interface IRushLinkJson {
 /**
  * This represents the Rush configuration for a repository, based on the Rush.json
  * configuration file.
+ * @public
  */
 export default class RushConfiguration {
   private _rushJsonFolder: string;
@@ -60,6 +62,7 @@ export default class RushConfiguration {
   private _commonFolderName: string;
   private _cacheFolder: string;
   private _tmpFolder: string;
+  private _shrinkwrapFilename: string;
   private _tempModulesFolder: string;
   private _homeFolder: string;
   private _rushLinkJsonFilename: string;
@@ -210,6 +213,7 @@ export default class RushConfiguration {
       this._tmpFolder = path.resolve(path.join(this._commonFolder, 'npm-tmp'));
     }
 
+    this._shrinkwrapFilename = path.join(this._commonFolder, 'npm-shrinkwrap.json');
     this._tempModulesFolder = path.join(this._commonFolder, 'temp_modules');
 
     const unresolvedUserFolder: string = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
@@ -370,6 +374,14 @@ export default class RushConfiguration {
    */
   public get tmpFolder(): string {
     return this._tmpFolder;
+  }
+
+  /**
+   * The filename of the NPM shrinkwrap file.  The file itself may not actually exist.
+   * Example: "C:\MyRepo\common\npm-shrinkwrap.json"
+   */
+  public get shrinkwrapFilename(): string {
+    return this._shrinkwrapFilename;
   }
 
   /**

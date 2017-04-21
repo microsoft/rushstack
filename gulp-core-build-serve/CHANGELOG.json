@@ -2,6 +2,35 @@
   "name": "@microsoft/gulp-core-build-serve",
   "entries": [
     {
+      "version": "2.1.1",
+      "tag": "@microsoft/gulp-core-build-serve_v2.1.1",
+      "date": "Wed, 19 Apr 2017 20:18:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove ES6 Promise & @types/es6-promise typings"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `>=2.4.3 <3.0.0` to `>=2.4.3 <3.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.0",
+      "tag": "@microsoft/gulp-core-build-serve_v2.1.0",
+      "date": "Sat, 15 Apr 2017 01:03:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Allowing the hostname to be configured in gulp-core-build-serve."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.4",
       "tag": "@microsoft/gulp-core-build-serve_v2.0.4",
       "date": "Wed, 15 Mar 2017 01:32:09 GMT",

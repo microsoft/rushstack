@@ -6,11 +6,7 @@
     "sourceMap": true,
     "moduleResolution": "node",
     "types": [
-      "es6-promise",
       "node"
-    ],
-    "typeRoots": [
-      "../common/node_modules/@types"
     ]
   }
 }
