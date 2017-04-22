@@ -493,15 +493,15 @@ export default class InstallManager {
         // detect changes for "file:./" references.
         // We recognize the temp projects by their names, which always start with "rush-".
 
-        // Example: "C:\MyRepo\common\temp\node_modules\@rush-temp\"
+        // Example: "C:\MyRepo\common\temp\node_modules\@rush-temp"
         const pathToDeleteWithoutStar: string = path.join(commonNodeModulesFolder, RushConstants.rushTempNpmScope);
-        console.log(`Deleting ${pathToDeleteWithoutStar}*`);
+        console.log(`Deleting ${pathToDeleteWithoutStar}\\*`);
         // Glob can't handle Windows paths
         const normalizedpathToDeleteWithoutStar: string
           = Utilities.getAllReplaced(pathToDeleteWithoutStar, '\\', '/');
 
         // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/*"
-        for (const tempModulePath of glob.sync(globEscape(normalizedpathToDeleteWithoutStar) + '*')) {
+        for (const tempModulePath of glob.sync(globEscape(normalizedpathToDeleteWithoutStar) + '/*')) {
           // We could potentially use AsyncRecycler here, but in practice these folders tend
           // to be very small
           Utilities.dangerouslyDeletePath(tempModulePath);
