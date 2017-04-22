@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 19 Apr 2017 20:18:06 GMT and should not be manually modified.
+This log was last generated on Sat, 22 Apr 2017 01:02:03 GMT and should not be manually modified.
+
+## 2.0.5
+Sat, 22 Apr 2017 01:02:03 GMT
+
+### Patches
+
+- Added check for API names that are not supported (only letters and numbers supported)
 
 ## 2.0.4
 Wed, 19 Apr 2017 20:18:06 GMT
