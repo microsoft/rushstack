@@ -308,6 +308,7 @@ class Utilities {
   public static dangerouslyDeletePath(folderPath: string): void;
   public static deleteFile(filePath: string): void;
   public static directoryExists(path: string): boolean;
+  public static escapeShellParameter(parameter: string): string;
   public static executeCommand(command: string, args: string[], workingDirectory: string,
       suppressOutput: boolean = false, environmentVariables?: { [key: string]: string }): void;
   public static executeCommandAndCaptureOutput(command: string, args: string[], workingDirectory: string,
