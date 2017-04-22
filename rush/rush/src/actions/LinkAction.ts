@@ -372,7 +372,7 @@ function linkProject(
           const commonPackageFromLookup: Package = commonPackageLookup.getPackage(newLocalPackage.nameAndVersion);
           if (!commonPackageFromLookup) {
             throw Error(`The ${localPackage.name}@${localPackage.version} package was not found`
-              + ` in the ${rushConfiguration.commonFolderName} folder`);
+              + ` in the common folder`);
           }
           newLocalPackage.symlinkTargetFolderPath = commonPackageFromLookup.folderPath;
 
@@ -394,7 +394,7 @@ function linkProject(
       } else {
         if (dependency.kind !== PackageDependencyKind.Optional) {
           throw Error(`The dependency "${dependency.name}" needed by "${localPackage.name}"`
-            + ` was not found the ${rushConfiguration.commonFolderName} folder -- do you need to run "rush generate"?`);
+            + ` was not found the common folder -- do you need to run "rush generate"?`);
         } else {
           console.log(colors.yellow('Skipping optional dependency: ' + dependency.name));
         }

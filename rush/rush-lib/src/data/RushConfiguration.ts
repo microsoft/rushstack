@@ -60,7 +60,6 @@ export interface IRushLinkJson {
 export default class RushConfiguration {
   private _rushJsonFolder: string;
   private _commonFolder: string;
-  private _commonFolderName: string;
   private _commonTempFolder: string;
   private _npmCacheFolder: string;
   private _npmTmpFolder: string;
@@ -196,14 +195,6 @@ export default class RushConfiguration {
    */
   public get commonFolder(): string {
     return this._commonFolder;
-  }
-
-  /**
-   * This is how we refer to the common folder, e.g. in error messages.
-   * Example: "common"
-   */
-  public get commonFolderName(): string {
-    return this._commonFolderName;
   }
 
   /**
@@ -441,7 +432,6 @@ export default class RushConfiguration {
       console.log(`Next, you should probably run "rush generate"`);
       process.exit(1);
     }
-    this._commonFolderName = path.basename(this._commonFolder);
     this._commonTempFolder = path.join(this._commonFolder, RushConstants.rushTempFolderName);
 
     if (rushConfigurationJson.useLocalNpmCache) {
