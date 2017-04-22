@@ -97,10 +97,8 @@ export default class GenerateAction extends CommandLineAction {
         npmArgs, this._rushConfiguration.commonTempFolder);
       console.log('"npm shrinkwrap" completed' + os.EOL);
 
-      // Copy the common\temp\npm-shrinkwrap.json file to common\npm-shrinkwrap.json
-      // so that it can be committed to Git.
-      console.log(`Copying to ${this._rushConfiguration.committedShrinkwrapFilename}`);
-      fsx.copySync(this._rushConfiguration.tempShrinkwrapFilename,
+      // Copy (or delete) common\temp\npm-shrinkwrap.json --> common\npm-shrinkwrap.json
+      installManager.syncFile(this._rushConfiguration.tempShrinkwrapFilename,
         this._rushConfiguration.committedShrinkwrapFilename);
 
       // The flag file is normally created by installCommonModules(), but "rush install" will
