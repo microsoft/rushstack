@@ -517,7 +517,7 @@ export default class InstallManager {
     const npmInstallArgs: string[] = ['install'];
     this.pushConfigurationNpmArgs(npmInstallArgs);
 
-    console.log(os.EOL + `Running "npm ${npmInstallArgs.join(' ')}" in ${this._rushConfiguration.commonTempFolder}`
+    console.log(os.EOL + colors.bold(`Running "npm install" in ${this._rushConfiguration.commonTempFolder}`)
       + os.EOL);
     Utilities.executeCommandWithRetry(npmToolFilename,
       npmInstallArgs,
