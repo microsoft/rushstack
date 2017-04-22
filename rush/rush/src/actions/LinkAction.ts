@@ -46,7 +46,7 @@ export default class LinkAction extends CommandLineAction {
     console.log('Starting "rush link"');
     const stopwatch: Stopwatch = Stopwatch.start();
 
-    readPackageTree(this._rushConfiguration.commonFolder, (error: Error, npmPackage: PackageNode) => {
+    readPackageTree(this._rushConfiguration.commonTempFolder, (error: Error, npmPackage: PackageNode) => {
       this._parser.trapErrors(() => {
         if (error) {
           throw error;
@@ -76,7 +76,7 @@ export default class LinkAction extends CommandLineAction {
 }
 
 interface IQueueItem {
-  // A project from somewhere under "common/node_modules"
+  // A project from somewhere under "common/temp/node_modules"
   commonPackage: Package;
 
   // A symlinked virtual package that we will create somewhere under "this-project/node_modules"
@@ -208,10 +208,10 @@ function createSymlinksForTopLevelProject(localPackage: Package): void {
 /**
  * This is called once for each local project from Rush.json.
  * @param project             The local project that we will create symlinks for
- * @param commonRootPackage   The common/package.json package
- * @param commonPackageLookup A dictionary for finding packages under common/node_modules
+ * @param commonRootPackage   The common/temp/package.json package
+ * @param commonPackageLookup A dictionary for finding packages under common/temp/node_modules
  * @param rushConfiguration   The rush.json file contents
- * @param rushLinkJson        The common/rush-link.json output file
+ * @param rushLinkJson        The common/temp/rush-link.json output file
  * @param options             Command line options for "rush link"
  */
 function linkProject(
@@ -249,7 +249,7 @@ function linkProject(
       break;
     }
 
-    // A project from somewhere under "common/node_modules"
+    // A project from somewhere under "common/temp/node_modules"
     const commonPackage: Package = queueItem.commonPackage;
 
     // A symlinked virtual package somewhere under "this-project/node_modules",
@@ -372,7 +372,7 @@ function linkProject(
           const commonPackageFromLookup: Package = commonPackageLookup.getPackage(newLocalPackage.nameAndVersion);
           if (!commonPackageFromLookup) {
             throw Error(`The ${localPackage.name}@${localPackage.version} package was not found`
-              + ` in the ${rushConfiguration.commonFolderName} folder`);
+              + ` in the common folder`);
           }
           newLocalPackage.symlinkTargetFolderPath = commonPackageFromLookup.folderPath;
 
@@ -394,7 +394,7 @@ function linkProject(
       } else {
         if (dependency.kind !== PackageDependencyKind.Optional) {
           throw Error(`The dependency "${dependency.name}" needed by "${localPackage.name}"`
-            + ` was not found the ${rushConfiguration.commonFolderName} folder -- do you need to run "rush generate"?`);
+            + ` was not found the common folder -- do you need to run "rush generate"?`);
         } else {
           console.log(colors.yellow('Skipping optional dependency: ' + dependency.name));
         }
@@ -410,7 +410,7 @@ function linkProject(
 
   // Also symlink the ".bin" folder
   if (localProjectPackage.children.length > 0) {
-    const commonBinFolder: string = path.join(rushConfiguration.commonFolder, 'node_modules', '.bin');
+    const commonBinFolder: string = path.join(rushConfiguration.commonTempFolder, 'node_modules', '.bin');
     const projectBinFolder: string = path.join(localProjectPackage.folderPath, 'node_modules', '.bin');
 
     if (fsx.existsSync(commonBinFolder)) {
