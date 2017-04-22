@@ -63,8 +63,10 @@ export default class InstallManager {
         project.cyclicDependencyProjects, project.packageJson.dependencies);
       InstallManager._addDependenciesToMap(rushConfiguration, directDependencies,
         project.cyclicDependencyProjects, project.packageJson.devDependencies);
-      InstallManager._addDependenciesToMap(rushConfiguration, directDependencies,
-        project.cyclicDependencyProjects, project.packageJson.optionalDependencies);
+
+      // TODO: VSO 346348 - implement this correctly:
+      // InstallManager._addDependenciesToMap(rushConfiguration, directDependencies,
+      //  project.cyclicDependencyProjects, project.packageJson.optionalDependencies);
     });
 
     const implicitlyPinned: Map<string, string> = new Map<string, string>();
