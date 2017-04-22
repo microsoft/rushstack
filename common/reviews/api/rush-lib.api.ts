@@ -213,7 +213,6 @@ export function RegexErrorDetector(regex: RegExp,
 class RushConfiguration {
   public readonly committedShrinkwrapFilename: string;
   public readonly commonFolder: string;
-  public readonly commonFolderName: string;
   public readonly commonTempFolder: string;
   public findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject;
   public getProjectByName(projectName: string): RushConfigurationProject;
