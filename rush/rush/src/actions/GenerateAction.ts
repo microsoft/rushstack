@@ -72,9 +72,13 @@ export default class GenerateAction extends CommandLineAction {
 
     installManager.createTempModules();
 
+    // Delete both copies of the shrinkwrap file
     if (fsx.existsSync(this._rushConfiguration.committedShrinkwrapFilename)) {
       console.log(os.EOL + 'Deleting ' + this._rushConfiguration.committedShrinkwrapFilename);
       fsx.unlinkSync(this._rushConfiguration.committedShrinkwrapFilename);
+    }
+    if (fsx.existsSync(this._rushConfiguration.tempShrinkwrapFilename)) {
+      fsx.unlinkSync(this._rushConfiguration.tempShrinkwrapFilename);
     }
 
     if (isLazy) {
