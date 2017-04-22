@@ -4,6 +4,8 @@
   "nodeSupportedVersionRange": ">=6.9.0 <7.0.0",
   "commonFolder": "common",
   "projectFolderMinDepth": 1,
+  "useLocalNpmCache": true,
+  
   "reviewCategories": [
     "libraries",
     "other"
