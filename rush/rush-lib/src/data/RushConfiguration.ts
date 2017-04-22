@@ -442,7 +442,7 @@ export default class RushConfiguration {
       process.exit(1);
     }
     this._commonFolderName = path.basename(this._commonFolder);
-    this._commonTempFolder = path.join(this._commonFolderName, RushConstants.rushTempFolderName);
+    this._commonTempFolder = path.join(this._commonFolder, RushConstants.rushTempFolderName);
 
     if (rushConfigurationJson.useLocalNpmCache) {
       this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
