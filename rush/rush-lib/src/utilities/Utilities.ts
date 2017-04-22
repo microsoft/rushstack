@@ -86,7 +86,18 @@ export default class Utilities {
     return result;
   }
 
+  /**
+   * Creates the specified folder by calling fsx.mkdirsSync(), but using a
+   * retry loop to recover from temporary locks that may be held by other processes.
+   * If the folder already exists, no error occurs.
+   */
   public static createFolderWithRetry(folderName: string): void {
+    // Note: If a file exists with the same name, then we fall through and report
+    // an error.
+    if (Utilities.directoryExists(folderName)) {
+      return;
+    }
+
     // We need to do a simple "fs.mkdirSync(localModulesFolder)" here,
     // however if the folder we deleted above happened to contain any files,
     // then there seems to be some OS process (virus scanner?) that holds
@@ -265,7 +276,11 @@ export default class Utilities {
       command += '.cmd';
     }
 
-    return child_process.spawn(command, args, {
+    // This is needed since we specify shell=true below:
+    const escapedCommand: string = Utilities.escapeShellParameter(command);
+    const escapedArgs: string[] = args.map((x) => Utilities.escapeShellParameter(x));
+
+    return child_process.spawn(escapedCommand, escapedArgs, {
       cwd: workingDirectory,
       shell: true,
       env: environmentVariables
@@ -284,6 +299,16 @@ export default class Utilities {
   }
 
   /**
+   * For strings passed to a shell command, this adds appropriate escaping
+   * to avoid misinterpretation of spaces or special characters.
+   *
+   * Example: 'hello there' --> '"hello there"'
+   */
+  public static escapeShellParameter(parameter: string): string {
+    return '"' + parameter + '"';
+  }
+
+  /**
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
    */
@@ -299,7 +324,12 @@ export default class Utilities {
       env: environmentVariables
     };
 
-    let result: child_process.SpawnSyncReturns<Buffer> = child_process.spawnSync(command, args, options);
+    // This is needed since we specify shell=true below:
+    const escapedCommand: string = Utilities.escapeShellParameter(command);
+    const escapedArgs: string[] = args.map((x) => Utilities.escapeShellParameter(x));
+
+    let result: child_process.SpawnSyncReturns<Buffer> = child_process.spawnSync(escapedCommand,
+      escapedArgs, options);
 
     /* tslint:disable:no-any */
     if (result.error && (result.error as any).errno === 'ENOENT') {

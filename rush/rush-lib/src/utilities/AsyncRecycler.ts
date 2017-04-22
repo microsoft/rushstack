@@ -23,7 +23,7 @@ export default class AsyncRecycler {
 
   constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
-    this._recyclerFolder = path.join(rushConfiguration.commonFolder, 'rush-recycler');
+    this._recyclerFolder = path.join(rushConfiguration.commonTempFolder, 'rush-recycler');
     this._movedFolderCount = 0;
     this._deleting = false;
   }
@@ -37,14 +37,19 @@ export default class AsyncRecycler {
   }
 
   /**
-   * Synchronously moves the specified folder into the recycler folder.
-   * After calling this function one or more times, deleteAll() must be called to delete
-   * the contents of the recycler folder.
+   * Synchronously moves the specified folder into the recycler folder.  If the specified folder
+   * does not exist, then no operation is performed.  After calling this function one or more times,
+   * deleteAll() must be called to actually delete the contents of the recycler folder.
    */
   public moveFolder(folderPath: string): void {
     if (this._deleting) {
       throw new Error('AsyncRecycler.moveFolder() must not be called after deleteAll() has started');
     }
+
+    if (!fsx.existsSync(folderPath)) {
+      return;
+    }
+
     ++this._movedFolderCount;
 
     // We need to do a simple "fs.renameSync" here, however if the folder we're trying to rename

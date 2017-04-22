@@ -211,11 +211,9 @@ export function RegexErrorDetector(regex: RegExp,
 
 // @public
 class RushConfiguration {
-  // WARNING: The type "IRushConfigurationJson" needs to be exported by the package (e.g. added to index.ts)
-  constructor(rushConfigurationJson: IRushConfigurationJson, rushJsonFilename: string);
-  public readonly cacheFolder: string;
+  public readonly committedShrinkwrapFilename: string;
   public readonly commonFolder: string;
-  public readonly commonFolderName: string;
+  public readonly commonTempFolder: string;
   public findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject;
   public getProjectByName(projectName: string): RushConfigurationProject;
   public readonly gitAllowedEmailRegExps: string[];
@@ -224,6 +222,8 @@ class RushConfiguration {
   public static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
   // (undocumented)
   public static loadFromDefaultLocation(): RushConfiguration;
+  public readonly npmCacheFolder: string;
+  public readonly npmTmpFolder: string;
   public readonly npmToolFilename: string;
   public readonly npmToolVersion: string;
   public readonly packageReviewFile: string;
@@ -238,9 +238,7 @@ class RushConfiguration {
   public readonly reviewCategories: Set<string>;
   public readonly rushJsonFolder: string;
   public readonly rushLinkJsonFilename: string;
-  public readonly shrinkwrapFilename: string;
-  public readonly tempModulesFolder: string;
-  public readonly tmpFolder: string;
+  public readonly tempShrinkwrapFilename: string;
 }
 
 // @public
@@ -260,6 +258,14 @@ class RushConfigurationProject {
   public readonly reviewCategory: string;
   public readonly shouldPublish: boolean;
   public readonly tempProjectName: string;
+}
+
+// @public
+class RushConstants {
+  public static npmShrinkwrapFilename: string;
+  public static rushTempFolderName: string;
+  public static rushTempNpmScope: string;
+  public static rushTempProjectsFolderName: string;
 }
 
 // @public
@@ -298,11 +304,11 @@ class TaskError {
 
 // @public (undocumented)
 class Utilities {
-  // (undocumented)
   public static createFolderWithRetry(folderName: string): void;
   public static dangerouslyDeletePath(folderPath: string): void;
   public static deleteFile(filePath: string): void;
   public static directoryExists(path: string): boolean;
+  public static escapeShellParameter(parameter: string): string;
   public static executeCommand(command: string, args: string[], workingDirectory: string,
       suppressOutput: boolean = false, environmentVariables?: { [key: string]: string }): void;
   public static executeCommandAndCaptureOutput(command: string, args: string[], workingDirectory: string,
