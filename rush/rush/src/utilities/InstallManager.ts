@@ -257,8 +257,10 @@ export default class InstallManager {
       shrinkwrapIsValid = false;
     }
 
-    // Either way, resync the shrinkwrap file
-    this._resyncTempShrinkwrapFile();
+    // Either way, resync the temporary shrinkwrap file.
+    // Copy (or delete) common\npm-shrinkwrap.json --> common\temp\npm-shrinkwrap.json
+    this.syncFile(this._rushConfiguration.committedShrinkwrapFilename,
+      this._rushConfiguration.tempShrinkwrapFilename);
 
     const commonPackageJson: PackageJson = {
       dependencies: {},
@@ -542,17 +544,17 @@ export default class InstallManager {
   }
 
   /**
-   * This syncs common\temp\npm-shrinkwrap.json to match common\npm-shrinkwrap.json from Git.
-   * If the Git copy doesn't exist, then the temp copy is deleted.
+   * Copies the file "sourcePath" to "targetPath", overwriting the target file location.
+   * If the source file does not exist, then the target file is deleted.
    */
-  private _resyncTempShrinkwrapFile(): void {
-    if (fsx.existsSync(this._rushConfiguration.committedShrinkwrapFilename)) {
-      console.log('Updating ' + this._rushConfiguration.tempShrinkwrapFilename);
-      fsx.copySync(this._rushConfiguration.committedShrinkwrapFilename, this._rushConfiguration.tempShrinkwrapFilename);
+  public syncFile(sourcePath: string, targetPath: string): void {
+    if (fsx.existsSync(sourcePath)) {
+      console.log('Updating ' + targetPath);
+      fsx.copySync(sourcePath, targetPath);
     } else {
-      if (fsx.existsSync(this._rushConfiguration.tempShrinkwrapFilename)) {
-        console.log('Deleting ' + this._rushConfiguration.tempShrinkwrapFilename);
-        fsx.unlinkSync(this._rushConfiguration.tempShrinkwrapFilename);
+      if (fsx.existsSync(targetPath)) {
+        console.log('Deleting ' + targetPath);
+        fsx.unlinkSync(targetPath);
       }
     }
   }
