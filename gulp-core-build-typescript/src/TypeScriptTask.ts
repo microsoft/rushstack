@@ -67,6 +67,11 @@ export interface ITypeScriptTaskConfig {
    * If defined, drop typescript files from an AMD build here. Defaults to buildConfig.libAMDFolder
    */
   libAMDDir?: string;
+
+  /**
+   * If defined, drop typescript files build using modules=ES6.
+   */
+  libES6Dir?: string;
 }
 
 export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
@@ -108,11 +113,13 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     removeCommentsFromJavaScript: false,
     emitSourceMaps: true,
     libDir: undefined,
-    libAMDDir: undefined
+    libAMDDir: undefined,
+    libES6Dir: undefined
   };
 
   private _tsProject: ts.Project;
   private _tsAMDProject: ts.Project;
+  private _tsES6Project: ts.Project;
 
   public loadSchema(): Object {
     return require('./schemas/typescript.schema.json');
@@ -166,6 +173,15 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       this._compileProject(gulp, this._tsAMDProject, this.taskConfig.libAMDDir, allStreams, result);
     }
 
+    // If es6 modules are required, also build that.
+    if (this.taskConfig.libES6Dir) {
+      allStreams.push(
+        staticSrc.pipe(gulp.dest(this.taskConfig.libES6Dir)));
+
+      this._tsES6Project = this._tsES6Project || ts.createProject(assign({}, compilerOptions, { module: 'es6' }));
+      this._compileProject(gulp, this._tsES6Project, this.taskConfig.libES6Dir, allStreams, result);
+    }
+
     // Listen for pass/fail, and ensure that the task passes/fails appropriately.
     merge(allStreams)
       .on('queueDrain', () => {
@@ -186,6 +202,10 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     if (this.taskConfig.libAMDDir) {
       cleanMatch.push(this.taskConfig.libAMDDir);
     }
+    if (this.taskConfig.libES6Dir) {
+      cleanMatch.push(this.taskConfig.libES6Dir);
+    }
+
     return cleanMatch;
   }
 
@@ -201,6 +221,10 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
 
     if (!this.taskConfig.libAMDDir) {
       this.taskConfig.libAMDDir = buildConfig.libAMDFolder;
+    }
+
+    if (!this.taskConfig.libES6Dir) {
+      this.taskConfig.libES6Dir = buildConfig.libES6Folder;
     }
   }
 
