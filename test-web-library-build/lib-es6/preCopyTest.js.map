@@ -1,1 +1,0 @@
-{"version":3,"sources":["preCopyTest.ts"],"names":[],"mappings":"AAAA,MAAM,CAAC,OAAO;IACZ,WAAW;AACb,CAAC","file":"preCopyTest.js","sourcesContent":["export default function preCopyTest(): void {\r\n  /* no-op */\r\n}\r\n"],"sourceRoot":"../src"}
