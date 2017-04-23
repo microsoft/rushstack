@@ -20,8 +20,8 @@ coverage
 dist
 jspm_packages
 lib
-lib
 lib-amd
+lib-es6
 node_modules
 npm-debug.log
 npminstall-log.txt
