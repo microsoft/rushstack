@@ -77,6 +77,7 @@ interface IBuildConfig {
   gulp?: GulpProxy | gulp.Gulp;
   isRedundantBuild?: boolean;
   libAMDFolder?: string;
+  libES6Folder?: string;
   libFolder?: string;
   onTaskEnd?: (taskName: string, duration: number[], error?: any) => void;
   onTaskStart?: (taskName: string) => void;

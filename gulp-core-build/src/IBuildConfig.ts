@@ -31,6 +31,10 @@ export interface IBuildConfig {
    * ouput AMD modules if required for legacy reasons. */
   libAMDFolder?: string;
 
+  /** Unbundled es6 modules folder,
+   * which can be optionally set to cause build tasks to output es6 modules. */
+  libES6Folder?: string;
+
   /** Dist folder, which includes all bundled resources which would be copied to a CDN for the project. */
   distFolder?: string;
 
@@ -62,7 +66,7 @@ export interface IBuildConfig {
   args?: { [name: string]: string | boolean };
 
   /** Arbitrary property bag for a task to store environment values in. */
-  properties?: { [ key: string]: any };
+  properties?: { [key: string]: any };
 
   /** Optional callback to be executed when a task starts. */
   onTaskStart?: (taskName: string) => void;
