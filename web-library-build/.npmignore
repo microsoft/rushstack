@@ -4,6 +4,8 @@
 # Use negative patterns to bring back the specific things we want to publish
 !/bin/**
 !/lib/**
+!/lib-es6/**
+!/lib-amd/**
 !/dist/**
 
 # Ignore certain files in the above folder
