@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Wed, 19 Apr 2017 20:18:06 GMT and should not be manually modified.
+This log was last generated on Mon, 24 Apr 2017 22:01:17 GMT and should not be manually modified.
+
+## 3.1.0
+Mon, 24 Apr 2017 22:01:17 GMT
+
+### Minor changes
+
+- Adding `libES6Dir` setting to taskConfig to optionally output es6 modules.
 
 ## 3.0.4
 Wed, 19 Apr 2017 20:18:06 GMT
