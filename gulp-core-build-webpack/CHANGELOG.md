@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-webpack
 
-This log was last generated on Wed, 19 Apr 2017 20:18:06 GMT and should not be manually modified.
+This log was last generated on Mon, 24 Apr 2017 22:01:17 GMT and should not be manually modified.
+
+## 1.1.5
+Mon, 24 Apr 2017 22:01:17 GMT
+
+### Patches
+
+- Updating --initwebpack to contain the proper namespace.
 
 ## 1.1.4
 Wed, 19 Apr 2017 20:18:06 GMT

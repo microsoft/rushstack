@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "2.5.0",
+      "tag": "@microsoft/gulp-core-build_v2.5.0",
+      "date": "Mon, 24 Apr 2017 22:01:17 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Adding `libES6Folder` setting to build config to optionally instruct tasks to output es6 modules."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.4.4",
       "tag": "@microsoft/gulp-core-build_v2.4.4",
       "date": "Wed, 19 Apr 2017 20:18:06 GMT",
