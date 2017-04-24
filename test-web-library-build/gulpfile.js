@@ -7,7 +7,8 @@ build.sass.setConfig({ useCSSModules: true });
 build.webpack.setConfig({ configPath: null });
 
 build.setConfig({
-  libAMDFolder: path.join(build.getConfig().packageFolder, 'lib-amd')
+  libAMDFolder: path.join(build.getConfig().packageFolder, 'lib-amd'),
+  libES6Folder: path.join(build.getConfig().packageFolder, 'lib-es6')
 });
 
 build.preCopy.cleanMatch = ['src/preCopyTest.ts'];

@@ -1,0 +1,20 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Adding `libES6Dir` setting to taskConfig to optionally output es6 modules.",
+      "type": "minor"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build-webpack",
+      "comment": "Updating --initwebpack to contain the proper namespace.",
+      "type": "patch"
+    },
+    {
+      "packageName": "@microsoft/gulp-core-build",
+      "comment": "Adding `libES6Folder` setting to build config to optionally instruct tasks to output es6 modules.",
+      "type": "minor"
+    }
+  ],
+  "email": "dzearing@microsoft.com"
+}

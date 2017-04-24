@@ -2,7 +2,8 @@
   "name": "test-web-library-build",
   "version": "1.0.3",
   "description": "",
-  "main": "index.js",
+  "main": "lib/test.js",
+  "module": "lib-es6/test.js",
   "scripts": {
     "build": "gulp",
     "clean": "gulp clean",
