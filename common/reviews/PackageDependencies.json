@@ -288,10 +288,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "mkdirp",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "mocha",
       "allowedCategories": [ "libraries" ]
     },
