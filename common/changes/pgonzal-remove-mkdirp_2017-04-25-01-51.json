@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "type": "none"
+    }
+  ],
+  "email": "pgonzal@users.noreply.github.com"
+}

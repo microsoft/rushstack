@@ -33,8 +33,6 @@
     "lodash": "~4.15.0",
     "md5": "~2.2.1",
     "merge2": "~1.0.2",
-    "mkdirp": "~0.5.1",
-    "@types/mkdirp": "0.3.29",
     "object-assign": "~4.1.0",
     "through2": "~2.0.1",
     "tslint": "~4.5.1",
