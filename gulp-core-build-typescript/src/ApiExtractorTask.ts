@@ -1,6 +1,5 @@
 import * as fsx from 'fs-extra';
 import * as gulp from 'gulp';
-import * as mkdirp from 'mkdirp';
 import * as os from 'os';
 import * as path from 'path';
 import * as through from 'through2';
@@ -125,7 +124,7 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
     const jsonFileName: string = path.basename(this.buildConfig.rootPath) + '.api.json';
 
     if (!fsx.existsSync(this.taskConfig.apiJsonFolder)) {
-      mkdirp.sync(this.taskConfig.apiJsonFolder, (err) => {
+      fsx.mkdirsSync(this.taskConfig.apiJsonFolder, (err) => {
         if (err) {
           this.logError(`Could not create directory ${this.taskConfig.apiJsonFolder}`);
         }

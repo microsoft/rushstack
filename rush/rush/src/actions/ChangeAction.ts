@@ -4,7 +4,6 @@
 import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
-import * as mkdirp from 'mkdirp';
 import * as child_process from 'child_process';
 import gitInfo = require('git-repo-info');
 import * as colors from 'colors';
@@ -361,9 +360,9 @@ export default class ChangeAction extends CommandLineAction {
    */
   private _writeFile(fileName: string, output: string): Promise<void> {
     return new Promise<void>((resolve: () => void, reject: (err: Error) => void) => {
-      // We need mkdirp because writeFile will error if the dir doesn't exist
+      // We need mkdirsSync() because writeFile() will error if the dir doesn't exist
       // tslint:disable-next-line:no-any
-      mkdirp(path.dirname(fileName), (err: any) => {
+      fsx.mkdirsSync(path.dirname(fileName), (err: any) => {
         if (err) {
           reject(err);
         }
