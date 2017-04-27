@@ -291,22 +291,6 @@
           "remarks": [],
           "isBeta": false,
           "members": {
-            "getNumber": {
-              "kind": "property",
-              "isOptional": false,
-              "isReadOnly": true,
-              "isStatic": false,
-              "type": "number",
-              "deprecatedMessage": [],
-              "summary": [
-                {
-                  "kind": "textDocElement",
-                  "value": "Testing a getter."
-                }
-              ],
-              "remarks": [],
-              "isBeta": false
-            },
             "isReal": {
               "kind": "property",
               "isOptional": false,
@@ -339,6 +323,22 @@
                 {
                   "kind": "textDocElement",
                   "value": "Testing a method."
+                }
+              ],
+              "remarks": [],
+              "isBeta": false
+            },
+            "value": {
+              "kind": "property",
+              "isOptional": false,
+              "isReadOnly": false,
+              "isStatic": false,
+              "type": "number",
+              "deprecatedMessage": [],
+              "summary": [
+                {
+                  "kind": "textDocElement",
+                  "value": "Testing a getter."
                 }
               ],
               "remarks": [],

@@ -40,11 +40,10 @@ namespace NamespaceExport {
     real: RealNumber;
   }
 
-  // WARNING: Unsupported member: setNumber
   class RealNumber {
-    public readonly getNumber: number;
     public isReal: boolean;
     public squared(): number;
+    public value: number;
   }
 
 }
