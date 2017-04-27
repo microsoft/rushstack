@@ -19,6 +19,8 @@ interface IForgeCertificate {
 
   setExtensions(extensions: any[]): void; // tslint:disable-line:no-any
 
+  getExtension(extensionName: string): any; // tslint:disable-line:no-any
+
   sign(privateKey: string, algorithm: IForgeSignatureAlgorithm): void; // tslint:disable-line:no-any
 }
 
@@ -29,6 +31,7 @@ interface IForgeExtensions {
   pki: {
     createCertificate(): IForgeCertificate;
     certificateToPem(certificate: IForgeCertificate): string;
+    certificateFromPem(certificateData: string): IForgeCertificate;
   };
 
   md: {
