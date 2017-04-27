@@ -10,7 +10,6 @@
     "@types/gulp": "3.8.32",
     "@types/gulp-util": "3.0.30",
     "@types/mime": "0.0.29",
-    "@types/node-forge": "0.6.5",
     "@types/orchestrator": "0.0.30",
     "@types/q": "0.0.32",
     "@types/serve-static": "1.7.31",
@@ -31,6 +30,6 @@
     "postcss-modules": "~0.6.4"
   },
   "rushDependencies": {
-    "@microsoft/gulp-core-build": ">=2.4.3 <3.0.0"
+    "@microsoft/gulp-core-build": ">=2.5.0 <3.0.0"
   }
 }
