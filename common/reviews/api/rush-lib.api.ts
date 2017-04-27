@@ -215,6 +215,7 @@ class RushConfiguration {
   public readonly commonFolder: string;
   public readonly commonTempFolder: string;
   public findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject;
+  public findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
   public getProjectByName(projectName: string): RushConfigurationProject;
   public readonly gitAllowedEmailRegExps: string[];
   public readonly gitSampleEmail: string;
