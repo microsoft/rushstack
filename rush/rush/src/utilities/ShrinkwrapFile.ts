@@ -4,6 +4,7 @@
 import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as semver from 'semver';
+import { Utilities, RushConstants } from '@microsoft/rush-lib';
 
 interface IShrinkwrapDependencyJson {
   version: string;
@@ -49,6 +50,22 @@ export default class ShrinkwrapFile {
       return dictionary[key];
     }
     return undefined;
+  }
+
+  /**
+   * Returns the list of temp projects defined in this file.
+   * Example: [ '@rush-temp/project1', '@rush-temp/project2' ]
+   */
+  public getTempProjectNames(): ReadonlyArray<string> {
+    const result: string[] = [];
+    for (const key of Object.keys(this._shrinkwrapJson.dependencies)) {
+      // If it starts with @rush-temp, then include it:
+      if (Utilities.parseScopedPackageName(key).scope === RushConstants.rushTempNpmScope) {
+        result.push(key);
+      }
+    }
+    result.sort();  // make the result deterministic
+    return result;
   }
 
   /**
