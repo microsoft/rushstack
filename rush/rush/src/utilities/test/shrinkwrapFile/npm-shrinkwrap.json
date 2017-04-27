@@ -1,0 +1,60 @@
+{
+  "name": "example-file",
+  "version": "1.0.0",
+  "dependencies": {
+    "@rush-temp/project1": {
+      "version": "0.0.0",
+      "from": "projects\\project1",
+      "resolved": "file:projects\\project1"
+    },
+    "@rush-temp/project2": {
+      "version": "0.0.0",
+      "from": "projects\\project2",
+      "resolved": "file:projects\\project2",
+      "dependencies": {
+        "fbjs": {
+          "version": "0.8.12",
+          "from": "fbjs@>=0.8.9 <0.9.0",
+          "resolved": "https://onedrive.pkgs.visualstudio.com/_packaging/odsp-npm/npm/registry/fbjs/-/fbjs-0.8.12.tgz"
+        },
+        "jquery": {
+          "version": "2.2.4",
+          "from": "jquery@>=2.2.4 <3.0.0",
+          "resolved": "https://onedrive.pkgs.visualstudio.com/_packaging/odsp-npm/npm/registry/jquery/-/jquery-2.2.4.tgz"
+        },
+        "object-assign": {
+          "version": "4.1.1",
+          "from": "object-assign@>=4.1.0 <5.0.0",
+          "resolved": "https://onedrive.pkgs.visualstudio.com/_packaging/odsp-npm/npm/registry/object-assign/-/object-assign-4.1.1.tgz"
+        },
+        "react": {
+          "version": "15.5.4",
+          "from": "react@>=15.5.4 <16.0.0",
+          "resolved": "https://onedrive.pkgs.visualstudio.com/_packaging/odsp-npm/npm/registry/react/-/react-15.5.4.tgz"
+        }
+      }
+    },
+    "prop-types": {
+      "version": "15.5.8",
+      "from": "prop-types@>=15.5.7 <16.0.0",
+      "resolved": "https://onedrive.pkgs.visualstudio.com/_packaging/odsp-npm/npm/registry/prop-types/-/prop-types-15.5.8.tgz",
+      "dependencies": {
+        "fbjs": {
+          "version": "0.8.12",
+          "from": "fbjs@>=0.8.9 <0.9.0",
+          "resolved": "https://onedrive.pkgs.visualstudio.com/_packaging/odsp-npm/npm/registry/fbjs/-/fbjs-0.8.12.tgz"
+        },
+        "object-assign": {
+          "version": "4.1.1",
+          "from": "object-assign@>=4.1.0 <5.0.0",
+          "resolved": "https://onedrive.pkgs.visualstudio.com/_packaging/odsp-npm/npm/registry/object-assign/-/object-assign-4.1.1.tgz"
+        }
+      }
+    },
+    "q": {
+      "version": "1.5.0",
+      "from": "q@>=1.1.2 <2.0.0",
+      "resolved": "https://onedrive.pkgs.visualstudio.com/_packaging/odsp-npm/npm/registry/q/-/q-1.5.0.tgz"
+    }
+  }
+}
