@@ -14,6 +14,7 @@ export default class ApiJsonFile {
   private static _KIND_PACKAGE: string = 'package';
   private static _KIND_PROPERTY: string = 'property';
   private static _KIND_METHOD: string = 'method';
+  private static _KIND_NAMESPACE: string = 'namespace';
 
   /**
    * Uses the lowercase string that represents 'kind' in an API JSON file, and
@@ -70,6 +71,8 @@ export default class ApiJsonFile {
         return this._KIND_PROPERTY;
       case (ApiItemKind.Method):
         return this._KIND_METHOD;
+      case (ApiItemKind.Namespace):
+        return this._KIND_NAMESPACE;
       default:
         throw new Error('Unsupported API item kind when converting to string used in API JSON file.');
     }

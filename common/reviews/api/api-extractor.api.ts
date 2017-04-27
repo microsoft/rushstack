@@ -17,6 +17,9 @@ class ApiFileGenerator extends ApiItemVisitor {
   // WARNING: The type "ApiMember" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   protected visitApiMember(apiMember: ApiMember): void;
+  // WARNING: The type "ApiNamespace" needs to be exported by the package (e.g. added to index.ts)
+  // (undocumented)
+  protected visitApiNamespace(apiNamespace: ApiNamespace): void;
   // WARNING: The type "ApiPackage" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   protected visitApiPackage(apiPackage: ApiPackage): void;
@@ -50,6 +53,9 @@ class ApiJsonGenerator extends ApiItemVisitor {
   // WARNING: The type "ApiMethod" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   protected visitApiMethod(apiMethod: ApiMethod, refObject?: Object): void;
+  // WARNING: The type "ApiNamespace" needs to be exported by the package (e.g. added to index.ts)
+  // (undocumented)
+  protected visitApiNamespace(apiNamespace: ApiNamespace, refObject?: Object): void;
   // WARNING: The type "ApiPackage" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   protected visitApiPackage(apiPackage: ApiPackage, refObject?: Object): void;

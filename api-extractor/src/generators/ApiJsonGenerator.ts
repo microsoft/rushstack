@@ -13,6 +13,7 @@ import ApiPackage from '../definitions/ApiPackage';
 import ApiParameter from '../definitions/ApiParameter';
 import ApiProperty from '../definitions/ApiProperty';
 import ApiMember, { AccessModifier } from '../definitions/ApiMember';
+import ApiNamespace from '../definitions/ApiNamespace';
 import ApiMethod from '../definitions/ApiMethod';
 import { ApiTag } from '../definitions/ApiDocumentation';
 import { IReturn, IParam }from '../IDocElement';
@@ -181,6 +182,28 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
     for (const apiItem of apiPackage.getSortedMemberItems()) {
       this.visit(apiItem, membersNode);
     }
+  }
+
+  protected visitApiNamespace(apiNamespace: ApiNamespace, refObject?: Object): void {
+    if (!apiNamespace.supportedName) {
+      return;
+    }
+
+    const membersNode: Object = {};
+    for (const apiItem of apiNamespace.getSortedMemberItems()) {
+      this.visit(apiItem, membersNode);
+    }
+
+    const newNode: Object = {
+      kind: ApiJsonFile.convertKindToJson(apiNamespace.kind),
+      deprecatedMessage: apiNamespace.documentation.deprecatedMessage || [],
+      summary: apiNamespace.documentation.summary || [],
+      remarks: apiNamespace.documentation.remarks || [],
+      isBeta: apiNamespace.documentation.apiTag === ApiTag.Beta,
+      exports: membersNode
+    };
+
+    refObject[apiNamespace.name] = newNode;
   }
 
   protected visitApiMember(apiMember: ApiMember, refObject?: Object): void {

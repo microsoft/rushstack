@@ -1,52 +1,26 @@
 /* tslint:disable:no-bitwise */
 
 import * as ts from 'typescript';
-import Extractor from '../Extractor';
 import ApiStructuredType from './ApiStructuredType';
 import ApiEnum from './ApiEnum';
 import ApiFunction from './ApiFunction';
+import ApiProperty from './ApiProperty';
 import ApiItem, { ApiItemKind, IApiItemOptions } from './ApiItem';
 import ApiItemContainer from './ApiItemContainer';
-import ApiNamespace from './ApiNamespace';
-import TypeScriptHelpers from '../TypeScriptHelpers';
-import PackageJsonHelpers from '../PackageJsonHelpers';
 import { IExportedSymbol } from '../IExportedSymbol';
 
 /**
-  * This class is part of the ApiItem abstract syntax tree.  It represents the top-level
-  * exports for an Rush package.  This object acts as the root of the Extractor's tree.
+  * This class is part of the ApiItem abstract syntax tree. It represents exports of
+  * a namespace, the exports can be classes, interfaces, type literals, enums, functions,
+  * and properties.
   */
-export default class ApiPackage extends ApiItemContainer {
+export default class ApiNamespace extends ApiItemContainer {
   private _exportedNormalizedSymbols: IExportedSymbol[] = [];
 
-  private static _getOptions(extractor: Extractor, rootFile: ts.SourceFile): IApiItemOptions {
-    const rootFileSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(rootFile);
-    let statement: ts.VariableStatement;
-    let foundDescription: ts.Node = undefined;
-
-    for (const statementNode of rootFile.statements) {
-      if (statementNode.kind === ts.SyntaxKind.VariableStatement) {
-        statement = statementNode as ts.VariableStatement;
-        for (const statementDeclaration of statement.declarationList.declarations) {
-          if (statementDeclaration.name.getText() === 'packageDescription') {
-            foundDescription = statement;
-          }
-        }
-      }
-    }
-
-    return {
-      extractor,
-      declaration: rootFileSymbol.declarations[0],
-      declarationSymbol: rootFileSymbol,
-      jsdocNode: foundDescription
-    };
-  }
-  constructor(extractor: Extractor, rootFile: ts.SourceFile) {
-    super(ApiPackage._getOptions(extractor, rootFile));
-    this.kind = ApiItemKind.Package;
-    // The scoped package name. (E.g. "@microsoft/api-extractor")
-    this.name = PackageJsonHelpers.readPackageName(this.extractor.packageFolder);
+  constructor(options: IApiItemOptions) {
+    super(options);
+    this.kind = ApiItemKind.Namespace;
+    this.name = options.declarationSymbol.name;
 
     const exportSymbols: ts.Symbol[] = this.typeChecker.getExportsOfModule(this.declarationSymbol);
     if (exportSymbols) {
@@ -59,7 +33,7 @@ export default class ApiPackage extends ApiItemContainer {
         }
 
         for (const declaration of followedSymbol.declarations) {
-          const options: IApiItemOptions = {
+          const exportMemberOptions: IApiItemOptions = {
             extractor: this.extractor,
             declaration,
             declarationSymbol: followedSymbol,
@@ -68,13 +42,13 @@ export default class ApiPackage extends ApiItemContainer {
           };
 
           if (followedSymbol.flags & (ts.SymbolFlags.Class | ts.SymbolFlags.Interface)) {
-            this.addMemberItem(new ApiStructuredType(options));
-          } else if (followedSymbol.flags & ts.SymbolFlags.ValueModule) {
-            this.addMemberItem(new ApiNamespace(options));
+            this.addMemberItem(new ApiStructuredType(exportMemberOptions));
           } else if (followedSymbol.flags & ts.SymbolFlags.Function) {
-            this.addMemberItem(new ApiFunction(options));
+            this.addMemberItem(new ApiFunction(exportMemberOptions));
           } else if (followedSymbol.flags & ts.SymbolFlags.Enum) {
-            this.addMemberItem(new ApiEnum(options));
+            this.addMemberItem(new ApiEnum(exportMemberOptions));
+          } else if (followedSymbol.flags & ts.SymbolFlags.BlockScopedVariable) {
+            this.addMemberItem(new ApiProperty(exportMemberOptions));
           } else {
             this.reportWarning(`Unsupported export: ${exportSymbol.name}`);
           }
@@ -109,19 +83,14 @@ export default class ApiPackage extends ApiItemContainer {
   }
 
   /**
-   * Find a member in this package by name and return it if found.
+   * Find a member in this namespace by name and return it if found.
    *
-   * @param memberName - the name of the member ApiItem
+   * @param memberName - the name of the exported ApiItem
    */
   public getMemberItem(memberName: string): ApiItem {
     if (this.memberItems.has(memberName)) {
       return this.memberItems.get(memberName);
     }
     return undefined;
-  }
-
-  public shouldHaveDocumentation(): boolean {
-    // We don't write JSDoc for the ApiPackage object
-    return false;
   }
 }

@@ -9,6 +9,7 @@ import ApiItemVisitor from '../ApiItemVisitor';
 import ApiPackage from '../definitions/ApiPackage';
 import ApiParameter from '../definitions/ApiParameter';
 import ApiMember from '../definitions/ApiMember';
+import ApiNamespace from '../definitions/ApiNamespace';
 import IndentedWriter from '../IndentedWriter';
 import { ApiTag } from '../definitions/ApiDocumentation';
 
@@ -126,6 +127,22 @@ export default class ApiFileGenerator extends ApiItemVisitor {
     }
 
     this._writeJsdocSynopsis(apiPackage);
+  }
+
+  protected visitApiNamespace(apiNamespace: ApiNamespace): void {
+    this._writeJsdocSynopsis(apiNamespace);
+
+    this._indentedWriter.writeLine(`namespace ${apiNamespace.name} {`);
+
+    this._indentedWriter.indentScope(() => {
+      for (const apiItem of apiNamespace.getSortedMemberItems()) {
+        this.visit(apiItem);
+        this._indentedWriter.writeLine();
+        this._indentedWriter.writeLine();
+      }
+    });
+
+    this._indentedWriter.write('}');
   }
 
   protected visitApiMember(apiMember: ApiMember): void {

@@ -19,4 +19,37 @@ class MyClass2 {
 class MyOtherClass2 {
 }
 
+// @public
+namespace NamespaceExport {
+  // (undocumented)
+  aadLogo: string;
+
+  // (undocumented)
+  accept: string;
+
+  // (undocumented)
+  accessLogo: string;
+
+  // (undocumented)
+  accounts: string;
+
+  // (undocumented)
+  interface Number {
+    // (undocumented)
+    real: RealNumber;
+  }
+
+  // WARNING: Unsupported member: setNumber
+  // (undocumented)
+  class RealNumber {
+    // (undocumented)
+    public readonly getNumber: number;
+    // (undocumented)
+    public isReal: boolean;
+    // (undocumented)
+    public squared(): number;
+  }
+
+}
+
 // (No packageDescription for this package)
