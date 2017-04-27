@@ -30,14 +30,14 @@ export namespace NamespaceExport {
     /**
      * Testing a getter.
      */
-    public get getNumber(): number {
+    public get value(): number {
       return this._value;
     }
 
     /**
      * Testing a setter.
      */
-    public set setNumber(value: number) {
+    public set value(value: number) {
       this._value = value;
     }
 
