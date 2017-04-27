@@ -23,7 +23,7 @@
     "gulp-connect": "~5.0.0",
     "gulp-open": "~2.0.0",
     "gulp-util": "~3.0.7",
-    "node-forge": "~0.6.42",
+    "node-forge": "~0.7.1",
     "sudo": "~1.0.3"
   },
   "devDependencies": {
@@ -34,7 +34,7 @@
     "@types/gulp": "3.8.32",
     "@types/gulp-util": "3.0.30",
     "@types/mime": "0.0.29",
-    "@types/node-forge": "0.6.5",
+    "@types/node-forge": "0.6.8",
     "@types/orchestrator": "0.0.30",
     "@types/q": "0.0.32",
     "@types/serve-static": "1.7.31",
