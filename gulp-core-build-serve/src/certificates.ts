@@ -44,6 +44,13 @@ function createDevelopmentCertificate(): ICertificate {
 
   certificate.setExtensions([
     {
+      name: 'subjectAltName',
+      altNames: [{
+        type: 2, // DNS
+        value: 'localhost'
+      }]
+    },
+    {
       name: 'keyUsage',
       digitalSignature: true,
       keyEncipherment: true,
