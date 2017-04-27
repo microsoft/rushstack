@@ -33,20 +33,17 @@ namespace NamespaceExport {
   // (undocumented)
   accounts: string;
 
-  // (undocumented)
+  export function aFunction(value: number): void;
+
   interface Number {
     // (undocumented)
     real: RealNumber;
   }
 
   // WARNING: Unsupported member: setNumber
-  // (undocumented)
   class RealNumber {
-    // (undocumented)
     public readonly getNumber: number;
-    // (undocumented)
     public isReal: boolean;
-    // (undocumented)
     public squared(): number;
   }
 

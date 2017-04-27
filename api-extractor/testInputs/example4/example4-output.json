@@ -218,13 +218,48 @@
           "remarks": [],
           "isBeta": false
         },
+        "aFunction": {
+          "kind": "function",
+          "returnValue": {
+            "type": "void",
+            "description": []
+          },
+          "parameters": {
+            "value": {
+              "name": "value",
+              "description": [
+                {
+                  "kind": "textDocElement",
+                  "value": "this is a description for the param."
+                }
+              ],
+              "isOptional": false,
+              "isSpread": false,
+              "type": "number"
+            }
+          },
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "This is a test for a function in a namespace."
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        },
         "Number": {
           "kind": "interface",
           "extends": "",
           "implements": "",
           "typeParameters": [],
           "deprecatedMessage": [],
-          "summary": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "This is a test for interfaces in a namespace."
+            }
+          ],
           "remarks": [],
           "isBeta": false,
           "members": {
@@ -247,7 +282,12 @@
           "implements": "",
           "typeParameters": [],
           "deprecatedMessage": [],
-          "summary": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "Testing a structured type in a namespace."
+            }
+          ],
           "remarks": [],
           "isBeta": false,
           "members": {
@@ -258,7 +298,12 @@
               "isStatic": false,
               "type": "number",
               "deprecatedMessage": [],
-              "summary": [],
+              "summary": [
+                {
+                  "kind": "textDocElement",
+                  "value": "Testing a getter."
+                }
+              ],
               "remarks": [],
               "isBeta": false
             },
@@ -269,7 +314,12 @@
               "isStatic": false,
               "type": "boolean",
               "deprecatedMessage": [],
-              "summary": [],
+              "summary": [
+                {
+                  "kind": "textDocElement",
+                  "value": "Testing a public property."
+                }
+              ],
               "remarks": [],
               "isBeta": false
             },
@@ -285,7 +335,12 @@
               },
               "parameters": {},
               "deprecatedMessage": [],
-              "summary": [],
+              "summary": [
+                {
+                  "kind": "textDocElement",
+                  "value": "Testing a method."
+                }
+              ],
               "remarks": [],
               "isBeta": false
             }
