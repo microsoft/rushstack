@@ -7,7 +7,6 @@ import { IPackageJson } from '@microsoft/rush-lib';
 
 /**
  * The type of dependency; used by IPackageDependency.
- * @public
  */
 export enum PackageDependencyKind {
   Normal,
@@ -22,9 +21,6 @@ export enum PackageDependencyKind {
   LocalLink
 }
 
-/**
- * @public
- */
 export interface IPackageDependency {
   /**
    * The name of the dependency
@@ -42,7 +38,8 @@ export interface IPackageDependency {
 }
 
 /**
- * @public
+ * Represents a "@rush-temp" scoped package, which has our additional custom field
+ * for tracking the dependency graph.
  */
 export interface IRushTempPackageJson extends IPackageJson {
   /**
@@ -53,7 +50,7 @@ export interface IRushTempPackageJson extends IPackageJson {
 }
 
 /**
- * @public
+ * Represents an NPM package being processed by the "rush link" algorithm.
  */
 export default class Package {
   /**
@@ -285,7 +282,7 @@ export default class Package {
 }
 
 /**
- * @public
+ * Used by the "rush link" algorithm when doing NPM package resolution.
  */
 export interface IResolveOrCreateResult {
   found: Package;
