@@ -155,9 +155,9 @@
       "resolved": "https://registry.npmjs.org/@types/node/-/node-6.0.62.tgz"
     },
     "@types/node-forge": {
-      "version": "0.6.5",
-      "from": "@types/node-forge@0.6.5",
-      "resolved": "https://registry.npmjs.org/@types/node-forge/-/node-forge-0.6.5.tgz"
+      "version": "0.6.8",
+      "from": "@types/node-forge@0.6.8",
+      "resolved": "https://registry.npmjs.org/@types/node-forge/-/node-forge-0.6.8.tgz"
     },
     "@types/node-notifier": {
       "version": "0.0.28",
@@ -4717,11 +4717,6 @@
           "version": "4.0.41",
           "from": "@types/express-serve-static-core@4.0.41",
           "resolved": "https://registry.npmjs.org/@types/express-serve-static-core/-/express-serve-static-core-4.0.41.tgz"
-        },
-        "@types/node-forge": {
-          "version": "0.6.8",
-          "from": "@types/node-forge@0.6.8",
-          "resolved": "https://registry.npmjs.org/@types/node-forge/-/node-forge-0.6.8.tgz"
         }
       }
     },
