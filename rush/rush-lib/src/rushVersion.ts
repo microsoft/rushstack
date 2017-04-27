@@ -2,11 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import IPackageJson from './utilities/IPackageJson';
 
 const myPackageJsonFilename: string = path.resolve(path.join(
   module.filename, '..', '..', 'package.json')
 );
-const myPackageJson: PackageJson = require(myPackageJsonFilename);
+const myPackageJson: IPackageJson = require(myPackageJsonFilename);
 
 /**
  * The currently executing version of the "rush-lib" library.

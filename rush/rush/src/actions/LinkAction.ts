@@ -13,13 +13,11 @@ import {
   RushConfiguration,
   IRushLinkJson,
   RushConfigurationProject,
-  Package,
-  IResolveOrCreateResult,
-  PackageDependencyKind,
   Utilities,
   Stopwatch
 } from '@microsoft/rush-lib';
 
+import Package, { IResolveOrCreateResult, PackageDependencyKind } from '../utilities/Package';
 import PackageLookup from '../utilities/PackageLookup';
 import RushCommandLineParser from './RushCommandLineParser';
 
