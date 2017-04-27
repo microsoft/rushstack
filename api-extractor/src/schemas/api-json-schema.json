@@ -594,7 +594,7 @@
                 { "$ref": "#/definitions/classApiItem" },
                 { "$ref": "#/definitions/interfaceApiItem" },
                 { "$ref": "#/definitions/propertyApiItem" },
-                { "$ref": "#/definitions/methodApiItem" }
+                { "$ref": "#/definitions/functionApiItem" }
               ]
             }
           },
