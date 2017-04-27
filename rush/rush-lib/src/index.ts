@@ -20,14 +20,6 @@ export {
 } from './data/PinnedVersionsConfiguration';
 
 export {
-  PackageDependencyKind,
-  IPackageDependency,
-  IPackageJson,
-  IResolveOrCreateResult,
-  default as Package
-} from './data/Package';
-
-export {
   ChangeType,
   IChangeFile,
   IChangeInfo
@@ -48,6 +40,10 @@ export {
   default as TaskError,
   BuildTaskError
 } from './errorDetection/TaskError';
+
+export {
+  default as IPackageJson
+} from './utilities/IPackageJson';
 
 export {
   default as JsonFile

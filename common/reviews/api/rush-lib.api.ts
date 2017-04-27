@@ -81,26 +81,26 @@ interface IErrorDetectionRule {
   (line: string): TaskError;
 }
 
-// @public (undocumented)
-interface IPackageDependency {
-  kind: PackageDependencyKind;
-  name: string;
-  versionRange: string;
-}
-
-// @public (undocumented)
-interface IPackageJson extends PackageJson {
-  rushDependencies?: {
+// @public
+interface IPackageJson {
+  // (undocumented)
+  [ key: string ]: any;
+  dependencies?: {
     [ key: string ]: string
   }
-}
-
-// @public (undocumented)
-interface IResolveOrCreateResult {
-  // (undocumented)
-  found: Package;
-  // (undocumented)
-  parentForCreate: Package;
+  description?: string;
+  devDependencies?: {
+    [ key: string ]: string
+  }
+  name: string;
+  optionalDependencies?: {
+    [ key: string ]: string
+  }
+  private?: boolean;
+  scripts?: {
+    [ key: string ]: string
+  }
+  version: string;
 }
 
 // @public
@@ -125,41 +125,6 @@ class Npm {
   public static publishedVersions(packageName: string,
       cwd: string,
       env: { [key: string]: string }): string[];
-}
-
-// @public (undocumented)
-class Package {
-  // (undocumented)
-  constructor(name: string, version: string, dependencies: IPackageDependency[], folderPath: string);
-  // (undocumented)
-  public addChild(child: Package): void;
-  public children: Package[];
-  // WARNING: The type "PackageNode" needs to be exported by the package (e.g. added to index.ts)
-  public static createFromNpm(npmPackage: PackageNode): Package;
-  public dependencies: IPackageDependency[];
-  public folderPath: string;
-  // (undocumented)
-  public getChildByName(childPackageName: string): Package;
-  public name: string;
-  // (undocumented)
-  public readonly nameAndVersion: string;
-  // WARNING: The type "PackageJson" needs to be exported by the package (e.g. added to index.ts)
-  public originalPackageJson: PackageJson;
-  public parent: Package;
-  // (undocumented)
-  public printTree(indent?: string): void;
-  public resolve(dependencyName: string): Package;
-  public resolveOrCreate(dependencyName: string, cyclicSubtreeRoot?: Package): IResolveOrCreateResult;
-  public symlinkTargetFolderPath: string;
-  public version: string;
-}
-
-// @public
-enum PackageDependencyKind {
-  LocalLink,
-  // (undocumented)
-  Normal,
-  Optional
 }
 
 // @public
@@ -250,8 +215,7 @@ class RushConfigurationProject {
                 tempProjectName: string);
   public readonly cyclicDependencyProjects: Set<string>;
   public readonly downstreamDependencyProjects: string[];
-  // WARNING: The type "PackageJson" needs to be exported by the package (e.g. added to index.ts)
-  public readonly packageJson: PackageJson;
+  public readonly packageJson: IPackageJson;
   public readonly packageName: string;
   public readonly projectFolder: string;
   public readonly projectRelativeFolder: string;
