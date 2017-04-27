@@ -16,7 +16,7 @@ export interface ITsConfigFile<T> {
  */
 export class TypeScriptConfiguration {
   private static _baseTsConfig: ITsConfigFile<ts.Settings>;
-  private static _typescript: any = require('typescript');
+  private static _typescript: any = undefined;
 
   /**
    * Gets `gulp-typescript` version of the config (used by TypeScriptTask)
@@ -115,7 +115,7 @@ export class TypeScriptConfiguration {
    */
   public static getTypescriptCompiler(): any {
     if (!this._typescript) {
-      return require('typescript');
+      this._typescript = require('typescript');
     }
     return this._typescript;
   }

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Bugfix: Update TypeScriptConfiguration to allow setting a custom version of typescript compiler.",
+      "type": "patch"
+    }
+  ],
+  "email": "nickpape-msft@users.noreply.github.com"
+}
