@@ -44,7 +44,8 @@ export default class LinkAction extends CommandLineAction {
     console.log('Starting "rush link"');
     const stopwatch: Stopwatch = Stopwatch.start();
 
-    readPackageTree(this._rushConfiguration.commonTempFolder, (error: Error, npmPackage: PackageNode) => {
+    readPackageTree(this._rushConfiguration.commonTempFolder,
+      (error: Error, npmPackage: readPackageTree.PackageNode) => {
       this._parser.trapErrors(() => {
         if (error) {
           throw error;
