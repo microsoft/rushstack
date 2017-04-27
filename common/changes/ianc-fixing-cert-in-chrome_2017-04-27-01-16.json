@@ -4,6 +4,11 @@
       "packageName": "@microsoft/gulp-core-build-serve",
       "comment": "Fixing the development certificate to have the subjectAltName property to work with new versions of browsers.",
       "type": "patch"
+    },
+    {
+      "comment": "",
+      "packageName": "@microsoft/gulp-core-build-sass",
+      "type": "none"
     }
   ],
   "email": "iclanton@users.noreply.github.com"
