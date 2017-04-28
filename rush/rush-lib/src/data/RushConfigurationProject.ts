@@ -3,6 +3,7 @@
 
 import * as path from 'path';
 import * as fsx from 'fs-extra';
+import IPackageJson from '../utilities/IPackageJson';
 import JsonFile from '../utilities/JsonFile';
 import RushConfiguration from '../data/RushConfiguration';
 
@@ -27,7 +28,7 @@ export default class RushConfigurationProject {
   private _projectFolder: string;
   private _projectRelativeFolder: string;
   private _reviewCategory: string;
-  private _packageJson: PackageJson;
+  private _packageJson: IPackageJson;
   private _tempProjectName: string;
   private _cyclicDependencyProjects: Set<string>;
   private _shouldPublish: boolean;
@@ -148,7 +149,7 @@ export default class RushConfigurationProject {
   /**
    * The parsed NPM "package.json" file from projectFolder.
    */
-  public get packageJson(): PackageJson {
+  public get packageJson(): IPackageJson {
     return this._packageJson;
   }
 
