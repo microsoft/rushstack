@@ -2,10 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import readPackageTree = require('read-package-tree');
+import { IPackageJson } from '@microsoft/rush-lib';
 
 /**
  * The type of dependency; used by IPackageDependency.
- * @public
  */
 export enum PackageDependencyKind {
   Normal,
@@ -20,9 +21,6 @@ export enum PackageDependencyKind {
   LocalLink
 }
 
-/**
- * @public
- */
 export interface IPackageDependency {
   /**
    * The name of the dependency
@@ -40,9 +38,10 @@ export interface IPackageDependency {
 }
 
 /**
- * @public
+ * Represents a "@rush-temp" scoped package, which has our additional custom field
+ * for tracking the dependency graph.
  */
-export interface IPackageJson extends PackageJson {
+export interface IRushTempPackageJson extends IPackageJson {
   /**
    * An extra setting written into package.json for temp packages, to track
    * references to locally built projects.
@@ -51,7 +50,7 @@ export interface IPackageJson extends PackageJson {
 }
 
 /**
- * @public
+ * Represents an NPM package being processed by the "rush link" algorithm.
  */
 export default class Package {
   /**
@@ -93,7 +92,7 @@ export default class Package {
   /**
    * If this was loaded using createFromNpm(), then the parsed package.json is stored here.
    */
-  public originalPackageJson: PackageJson = undefined;
+  public originalPackageJson: IPackageJson = undefined;
 
   /**
    * Packages that were placed in node_modules subfolders of this package.
@@ -106,7 +105,7 @@ export default class Package {
    * Recursive constructs a tree of Package objects using information returned
    * by the "read-package-tree" library.
    */
-  public static createFromNpm(npmPackage: PackageNode): Package {
+  public static createFromNpm(npmPackage: readPackageTree.PackageNode): Package {
     if (npmPackage.error) {
       throw Error(`Failed to parse package.json for ${path.basename(npmPackage.path)}: `
         + npmPackage.error.message);
@@ -114,7 +113,7 @@ export default class Package {
 
     let dependencies: IPackageDependency[] = [];
     const dependencyNames: Set<string> = new Set<string>();
-    const packageJson: IPackageJson = npmPackage.package;
+    const packageJson: IRushTempPackageJson = npmPackage.package;
 
     if (packageJson.optionalDependencies) {
       for (const dependencyName of Object.keys(packageJson.optionalDependencies)) {
@@ -283,7 +282,7 @@ export default class Package {
 }
 
 /**
- * @public
+ * Used by the "rush link" algorithm when doing NPM package resolution.
  */
 export interface IResolveOrCreateResult {
   found: Package;
