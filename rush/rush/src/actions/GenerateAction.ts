@@ -11,8 +11,8 @@ import {
   Stopwatch
 } from '@microsoft/rush-lib';
 
-import LinkAction from './LinkAction';
 import InstallManager, { InstallType } from '../utilities/InstallManager';
+import LinkManager from '../utilities/LinkManager';
 import RushCommandLineParser from './RushCommandLineParser';
 import PackageReviewChecker from '../utilities/PackageReviewChecker';
 
@@ -121,11 +121,11 @@ export default class GenerateAction extends CommandLineAction {
     stopwatch.stop();
     console.log(os.EOL + colors.green(`Rush generate finished successfully. (${stopwatch.toString()})`));
 
-    // if (!this._noLinkParameter.value) {
-    //   const linkAction: LinkAction = this._parser.getActionByVerb('link') as LinkAction;
-    //   linkAction.execute();
-    // } else {
+    if (!this._noLinkParameter.value) {
+      const linkManager: LinkManager = new LinkManager(this._rushConfiguration);
+      linkManager.execute(false);
+    } else {
       console.log(os.EOL + 'Next you should probably run: "rush link"');
-    // }
+    }
   }
 }
