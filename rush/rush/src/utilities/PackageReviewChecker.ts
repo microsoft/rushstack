@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import {
+  IPackageJson,
   RushConfiguration,
   RushConfigurationProject,
   PackageReviewConfiguration,
@@ -19,7 +20,7 @@ export default class PackageReviewChecker {
 
   public saveCurrentDependencies(): void {
     for (const rushProject of this._rushConfiguration.projects) {
-      const packageJson: PackageJson = rushProject.packageJson;
+      const packageJson: IPackageJson = rushProject.packageJson;
 
       this._collectDependencies(packageJson.dependencies, rushProject);
       this._collectDependencies(packageJson.optionalDependencies, rushProject);
