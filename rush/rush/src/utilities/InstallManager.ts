@@ -229,7 +229,13 @@ export default class InstallManager {
     }
     Utilities.createFolderWithRetry(tempProjectsFolder);
 
+    // We will start with the assumption that it's valid, and then set it to false if
+    // any of the checks fail
     let shrinkwrapIsValid: boolean = true;
+
+    if (!shrinkwrapFile) {
+      shrinkwrapIsValid = false;
+    }
 
     // Find the implicitly pinnedVersions
     // These are any first-level dependencies for which we only consume a single version range
@@ -256,8 +262,13 @@ export default class InstallManager {
           shrinkwrapIsValid = false;
         }
       });
-    } else {
-      shrinkwrapIsValid = false;
+
+      if (this._findOrphanedTempProjects(shrinkwrapFile)) {
+        // If there are any orphaned projects, then "npm install" would fail because the shrinkwrap
+        // contains references such as "resolved": "file:projects\\project1" that refer to nonexistent
+        // file paths.
+        shrinkwrapIsValid = false;
+      }
     }
 
     // Either way, resync the temporary shrinkwrap file.
@@ -566,5 +577,26 @@ export default class InstallManager {
         fsx.unlinkSync(targetPath);
       }
     }
+  }
+
+  /**
+   * Checks for temp projects that exist in the shrinkwrap file, but don't exist
+   * in rush.json.  This might occur, e.g. if a project was recently deleted or renamed.
+   *
+   * @returns true if orphans were found, or false if everything is okay
+   */
+  private _findOrphanedTempProjects(shrinkwrapFile: ShrinkwrapFile): boolean {
+
+    // We can recognize temp projects because they are under the "@rush-temp" NPM scope.
+    for (const tempProjectName of shrinkwrapFile.getTempProjectNames()) {
+      if (!this._rushConfiguration.findProjectByTempName(tempProjectName)) {
+        console.log(os.EOL + colors.yellow(wrap(
+          `Your NPM shrinkwrap file references a project "${tempProjectName}" which no longer exists.`))
+          + os.EOL);
+        return true;  // found one
+      }
+    }
+
+    return false;  // none found
   }
 }
