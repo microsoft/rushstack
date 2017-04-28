@@ -227,7 +227,7 @@ function linkProject(
   }
 
   // TODO: Validate that the project's package.json still matches the common folder
-  const localProjectPackage: Package = new Package(
+  const localProjectPackage: Package = Package.createLinkedPackage(
     project.packageJson.name,
     commonProjectPackage.version,
     commonProjectPackage.dependencies,
@@ -315,7 +315,7 @@ function linkProject(
             const newLocalFolderPath: string = path.join(
               resolution.parentForCreate.folderPath, 'node_modules', dependency.name);
 
-            const newLocalPackage: Package = new Package(
+            const newLocalPackage: Package = Package.createLinkedPackage(
               dependency.name,
               matchedVersion,
               // Since matchingRushProject does not have a parent, its dependencies are
@@ -361,7 +361,7 @@ function linkProject(
           const newLocalFolderPath: string = path.join(
             resolution.parentForCreate.folderPath, 'node_modules', commonDependencyPackage.name);
 
-          const newLocalPackage: Package = new Package(
+          const newLocalPackage: Package = Package.createLinkedPackage(
             commonDependencyPackage.name,
             commonDependencyPackage.version,
             commonDependencyPackage.dependencies,
