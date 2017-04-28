@@ -60,7 +60,6 @@ export default class LinkAction extends CommandLineAction {
 
     // Delete the flag file if it exists; if we get interrupted, this will ensure that
     // a full "rush link" is required next time
-    console.log('hey;' + this._rushConfiguration.rushLinkJsonFilename);
     Utilities.deleteFile(this._rushConfiguration.rushLinkJsonFilename);
 
     readPackageTree(this._rushConfiguration.commonTempFolder,
