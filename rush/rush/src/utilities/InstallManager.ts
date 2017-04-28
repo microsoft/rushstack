@@ -263,8 +263,10 @@ export default class InstallManager {
         }
       });
 
-      // If there are any orphaned projects, then the shrinkwrap file is invalid
       if (this._findOrphanedTempProjects(shrinkwrapFile)) {
+        // If there are any orphaned projects, then "npm install" would fail because the shrinkwrap
+        // contains references such as "resolved": "file:projects\\project1" that refer to nonexistent
+        // file paths.
         shrinkwrapIsValid = false;
       }
     }
