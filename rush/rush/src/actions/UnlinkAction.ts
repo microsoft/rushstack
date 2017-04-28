@@ -35,6 +35,10 @@ export default class UnlinkAction extends CommandLineAction {
 
     console.log('Starting "rush unlink"' + os.EOL);
 
+    // Delete the flag file if it exists; this will ensure that
+    // a full "rush link" is required next time
+    Utilities.deleteFile(this._rushConfiguration.rushLinkJsonFilename);
+
     let didAnything: boolean = false;
     for (const rushProject of this._rushConfiguration.projects) {
       const localModuleFolder: string = path.join(rushProject.projectFolder, 'node_modules');
