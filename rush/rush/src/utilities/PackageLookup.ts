@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Package } from '@microsoft/rush-lib';
+import Package from './Package';
 
 export default class PackageLookup {
   private _packageMap: Map<string, Package>;

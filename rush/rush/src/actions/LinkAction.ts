@@ -13,13 +13,11 @@ import {
   RushConfiguration,
   IRushLinkJson,
   RushConfigurationProject,
-  Package,
-  IResolveOrCreateResult,
-  PackageDependencyKind,
   Utilities,
   Stopwatch
 } from '@microsoft/rush-lib';
 
+import Package, { IResolveOrCreateResult, PackageDependencyKind } from '../utilities/Package';
 import PackageLookup from '../utilities/PackageLookup';
 import RushCommandLineParser from './RushCommandLineParser';
 
@@ -46,7 +44,8 @@ export default class LinkAction extends CommandLineAction {
     console.log('Starting "rush link"');
     const stopwatch: Stopwatch = Stopwatch.start();
 
-    readPackageTree(this._rushConfiguration.commonTempFolder, (error: Error, npmPackage: PackageNode) => {
+    readPackageTree(this._rushConfiguration.commonTempFolder,
+      (error: Error, npmPackage: readPackageTree.PackageNode) => {
       this._parser.trapErrors(() => {
         if (error) {
           throw error;

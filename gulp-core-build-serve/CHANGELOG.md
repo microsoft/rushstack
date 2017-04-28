@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-serve
 
-This log was last generated on Wed, 19 Apr 2017 20:18:06 GMT and should not be manually modified.
+This log was last generated on Thu, 27 Apr 2017 13:03:03 GMT and should not be manually modified.
+
+## 2.1.2
+Thu, 27 Apr 2017 13:03:03 GMT
+
+### Patches
+
+- Fixing the development certificate to have the subjectAltName property to work with new versions of browsers.
 
 ## 2.1.1
 Wed, 19 Apr 2017 20:18:06 GMT
