@@ -393,6 +393,20 @@ export default class RushConfiguration {
     return result;
   }
 
+  /**
+   * Looks up a project by its RushConfigurationProject.tempProjectName field.
+   * @returns The found project, or undefined if no match was found.
+   */
+  public findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined {
+    // Is there an approximate match?
+    for (const project of this._projects) {
+      if (project.tempProjectName === tempProjectName) {
+        return project;
+      }
+    }
+    return undefined;
+  }
+
   private _populateDownstreamDependencies(dependencies: { [key: string]: string }, packageName: string): void {
     if (!dependencies) {
       return;

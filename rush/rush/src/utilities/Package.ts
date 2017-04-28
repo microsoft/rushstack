@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import readPackageTree = require('read-package-tree');
-import { IPackageJson } from '@microsoft/rush-lib';
+import { IPackageJson, JsonFile } from '@microsoft/rush-lib';
 
 /**
  * The type of dependency; used by IPackageDependency.
@@ -90,11 +90,6 @@ export default class Package {
   public symlinkTargetFolderPath: string = undefined;
 
   /**
-   * If this was loaded using createFromNpm(), then the parsed package.json is stored here.
-   */
-  public originalPackageJson: IPackageJson = undefined;
-
-  /**
    * Packages that were placed in node_modules subfolders of this package.
    * The child packages are not necessarily dependencies of this package.
    */
@@ -164,8 +159,6 @@ export default class Package {
       npmPackage.path
     );
 
-    newPackage.originalPackageJson = packageJson;
-
     for (const child of npmPackage.children) {
       newPackage.addChild(Package.createFromNpm(child));
     }
@@ -173,15 +166,35 @@ export default class Package {
     return newPackage;
   }
 
-  constructor(name: string, version: string, dependencies: IPackageDependency[], folderPath: string) {
+  /**
+   * Used by "npm link" when creating a Package object that represents symbolic links to be created.
+   */
+  public static createLinkedPackage(name: string, version: string, dependencies: IPackageDependency[],
+    folderPath: string): Package {
+    return new Package(name, version, dependencies, folderPath);
+  }
 
-    this.name = name;
-    this.version = version;
-    this.dependencies = dependencies.slice(0); // clone the array
-    this.folderPath = folderPath;
-    this.parent = undefined;
-    this.children = [];
-    this._childrenByName = new Map<string, Package>();
+  /**
+   * Used by "npm link" to simulate a temp project that is missing from the common/node_modules
+   * folder (e.g. because it was added after the shrinkwrap file was regenerated).
+   * @param packageJsonFilename - Filename of the source package.json
+   *        Example: c:\MyRepo\common\temp\projects\project1\package.json
+   * @param targetFolderName - Filename where it should have been installed
+   *        Example: c:\MyRepo\common\temp\node_modules\@rush-temp\project1
+   */
+  public static createVirtualTempPackage(packageJsonFilename: string, installFolderName: string): Package {
+    const packageJson: IPackageJson = JsonFile.loadJsonFile(packageJsonFilename);
+    const npmPackage: readPackageTree.PackageNode = {
+      children: [],
+      error: undefined,
+      id: 0,
+      isLink: false,
+      package: packageJson,
+      parent: undefined,
+      path: installFolderName,
+      realpath: installFolderName
+    };
+    return Package.createFromNpm(npmPackage);
   }
 
   public get nameAndVersion(): string {
@@ -278,6 +291,16 @@ export default class Package {
     for (const child of this.children) {
       child.printTree(indent + '  ');
     }
+  }
+
+  private constructor(name: string, version: string, dependencies: IPackageDependency[], folderPath: string) {
+    this.name = name;
+    this.version = version;
+    this.dependencies = dependencies.slice(0); // clone the array
+    this.folderPath = folderPath;
+    this.parent = undefined;
+    this.children = [];
+    this._childrenByName = new Map<string, Package>();
   }
 }
 

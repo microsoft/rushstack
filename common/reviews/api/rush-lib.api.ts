@@ -180,6 +180,7 @@ class RushConfiguration {
   public readonly commonFolder: string;
   public readonly commonTempFolder: string;
   public findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject;
+  public findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
   public getProjectByName(projectName: string): RushConfigurationProject;
   public readonly gitAllowedEmailRegExps: string[];
   public readonly gitSampleEmail: string;
@@ -226,6 +227,7 @@ class RushConfigurationProject {
 
 // @public
 class RushConstants {
+  public static nodeModulesFolderName: string;
   public static npmShrinkwrapFilename: string;
   public static rushTempFolderName: string;
   public static rushTempNpmScope: string;
