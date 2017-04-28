@@ -481,6 +481,10 @@ export default class InstallManager {
       fsx.unlinkSync(this.commonNodeModulesMarkerFilename);
     }
 
+    // Since we're tampering with common/node_modules, delete the "rush link" flag file if it exists;
+    // this ensures that a full "rush link" is required next time
+    Utilities.deleteFile(this._rushConfiguration.rushLinkJsonFilename);
+
     // Is there an existing "node_modules" folder to consider?
     if (fsx.existsSync(commonNodeModulesFolder)) {
       // Should we delete the entire "node_modules" folder?
