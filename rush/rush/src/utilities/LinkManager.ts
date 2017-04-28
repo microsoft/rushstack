@@ -157,7 +157,12 @@ export default class LinkManager {
     this._rushConfiguration = rushConfiguration;
   }
 
-  public execute(force: boolean): Promise<void> {
+  /**
+   * Creates node_modules symlinks for all Rush projects defined in the RushConfiguration.
+   * @param force - Normally the operation will be skipped if the links are already up to date;
+   *   if true, this option forces the links to be recreated.
+   */
+  public createSymlinksForProjects(force: boolean): Promise<void> {
     if (!force) {
       if (fsx.existsSync(this._rushConfiguration.rushLinkJsonFilename)) {
         console.log(colors.green(`Skipping "rush link" -- everything is already up to date.`));
