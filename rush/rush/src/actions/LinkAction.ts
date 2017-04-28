@@ -7,7 +7,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import readPackageTree = require('read-package-tree');
-import { CommandLineAction } from '@microsoft/ts-command-line';
+import { CommandLineAction, CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import {
   JsonFile,
   RushConstants,
@@ -25,6 +25,7 @@ import RushCommandLineParser from './RushCommandLineParser';
 export default class LinkAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
   private _rushConfiguration: RushConfiguration;
+  private _force: CommandLineFlagParameter;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -36,14 +37,30 @@ export default class LinkAction extends CommandLineAction {
   }
 
   protected onDefineParameters(): void {
-    // abstract
+    this._force = this.defineFlagParameter({
+      parameterLongName: '--force',
+      parameterShortName: '-f',
+      description: 'Forces deleting and recreating links, even if the filesystem'
+        + ' state seems to indicate that this is unnecessary.'
+    });
   }
 
   protected onExecute(): void {
     this._rushConfiguration = this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
 
+    if (!this._force.value) {
+      if (fsx.existsSync(this._rushConfiguration.rushLinkJsonFilename)) {
+        console.log(colors.green(`Skipping "rush link" -- everything is already up to date.`));
+        return;
+      }
+    }
+
     console.log('Starting "rush link"');
     const stopwatch: Stopwatch = Stopwatch.start();
+
+    // Delete the flag file if it exists; if we get interrupted, this will ensure that
+    // a full "rush link" is required next time
+    Utilities.deleteFile(this._rushConfiguration.rushLinkJsonFilename);
 
     readPackageTree(this._rushConfiguration.commonTempFolder,
       (error: Error, npmPackage: readPackageTree.PackageNode) => {
