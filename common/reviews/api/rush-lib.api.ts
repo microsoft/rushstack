@@ -227,6 +227,7 @@ class RushConfigurationProject {
 
 // @public
 class RushConstants {
+  public static nodeModulesFolderName: string;
   public static npmShrinkwrapFilename: string;
   public static rushTempFolderName: string;
   public static rushTempNpmScope: string;
