@@ -90,11 +90,6 @@ export default class Package {
   public symlinkTargetFolderPath: string = undefined;
 
   /**
-   * If this was loaded using createFromNpm(), then the parsed package.json is stored here.
-   */
-  public readonly originalPackageJson: IPackageJson = undefined;
-
-  /**
    * Packages that were placed in node_modules subfolders of this package.
    * The child packages are not necessarily dependencies of this package.
    */
@@ -161,8 +156,7 @@ export default class Package {
       // NOTE: We don't use packageNode.realpath here, because if "npm unlink" was
       // performed without redoing "rush link", then a broken symlink is better than
       // a symlink to the wrong thing.
-      npmPackage.path,
-      packageJson
+      npmPackage.path
     );
 
     for (const child of npmPackage.children) {
@@ -177,7 +171,7 @@ export default class Package {
    */
   public static createLinkedPackage(name: string, version: string, dependencies: IPackageDependency[],
     folderPath: string): Package {
-    return new Package(name, version, dependencies, folderPath, undefined);
+    return new Package(name, version, dependencies, folderPath);
   }
 
   /**
@@ -299,9 +293,7 @@ export default class Package {
     }
   }
 
-  private constructor(name: string, version: string, dependencies: IPackageDependency[], folderPath: string,
-    originalPackageJson: IPackageJson) {
-
+  private constructor(name: string, version: string, dependencies: IPackageDependency[], folderPath: string) {
     this.name = name;
     this.version = version;
     this.dependencies = dependencies.slice(0); // clone the array
