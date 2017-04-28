@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import readPackageTree = require('read-package-tree');
-import { IPackageJson } from '@microsoft/rush-lib';
+import { IPackageJson, JsonFile } from '@microsoft/rush-lib';
 
 /**
  * The type of dependency; used by IPackageDependency.
@@ -178,6 +178,29 @@ export default class Package {
   public static createLinkedPackage(name: string, version: string, dependencies: IPackageDependency[],
     folderPath: string): Package {
     return new Package(name, version, dependencies, folderPath, undefined);
+  }
+
+  /**
+   * Used by "npm link" to simulate a temp project that is missing from the common/node_modules
+   * folder (e.g. because it was added after the shrinkwrap file was regenerated).
+   * @param packageJsonFilename - Filename of the source package.json
+   *        Example: c:\MyRepo\common\temp\projects\project1\package.json
+   * @param targetFolderName - Filename where it should have been installed
+   *        Example: c:\MyRepo\common\temp\node_modules\@rush-temp\project1
+   */
+  public static createVirtualTempPackage(packageJsonFilename: string, installFolderName: string): Package {
+    const packageJson: IPackageJson = JsonFile.loadJsonFile(packageJsonFilename);
+    const npmPackage: readPackageTree.PackageNode = {
+      children: [],
+      error: undefined,
+      id: 0,
+      isLink: false,
+      package: packageJson,
+      parent: undefined,
+      path: installFolderName,
+      realpath: installFolderName
+    };
+    return Package.createFromNpm(npmPackage);
   }
 
   public get nameAndVersion(): string {

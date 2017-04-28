@@ -29,4 +29,9 @@ export class RushConstants {
    * command.
    */
   public static readonly npmShrinkwrapFilename: string = 'npm-shrinkwrap.json';
+
+  /**
+   * The filename ("node_modules") where NPM installs its packages.
+   */
+  public static readonly nodeModulesFolderName: string = 'node_modules';
 }

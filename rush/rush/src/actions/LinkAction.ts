@@ -10,6 +10,7 @@ import readPackageTree = require('read-package-tree');
 import { CommandLineAction } from '@microsoft/ts-command-line';
 import {
   JsonFile,
+  RushConstants,
   RushConfiguration,
   IRushLinkJson,
   RushConfigurationProject,
@@ -220,10 +221,26 @@ function linkProject(
   rushConfiguration: RushConfiguration,
   rushLinkJson: IRushLinkJson): void {
 
-  const commonProjectPackage: Package = commonRootPackage.getChildByName(project.tempProjectName);
+  let commonProjectPackage: Package = commonRootPackage.getChildByName(project.tempProjectName);
   if (!commonProjectPackage) {
-    throw new Error(`Unable to find a temp package for ${project.packageName} `
-      + `-- you may need to run "rush generate" again`);
+    // Normally we would expect the temp project to have been installed into the common\node_modules
+    // folder.  However, if it was recently added, "rush install" doesn't technically require
+    // this, as long as its dependencies can be found at the root of the NPM shrinkwrap file.
+    // This avoids the need to run "rush generate" unnecessarily.
+
+    // Example: "project1"
+    const unscopedTempProjectName: string = Utilities.parseScopedPackageName(project.tempProjectName).name;
+
+    // Example: "C:\MyRepo\common\temp\projects\project1\package.json"
+    const packageJsonFilename: string = path.join(rushConfiguration.commonTempFolder,
+      RushConstants.rushTempProjectsFolderName, unscopedTempProjectName, 'package.json');
+
+    // Example: "C:\MyRepo\common\temp\node_modules\@rush-temp\project1"
+    const installFolderName: string = path.join(rushConfiguration.commonTempFolder,
+      RushConstants.nodeModulesFolderName, RushConstants.rushTempNpmScope, unscopedTempProjectName);
+
+    commonProjectPackage = Package.createVirtualTempPackage(packageJsonFilename, installFolderName);
+    commonRootPackage.addChild(commonProjectPackage);
   }
 
   // TODO: Validate that the project's package.json still matches the common folder
