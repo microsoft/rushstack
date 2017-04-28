@@ -122,7 +122,7 @@ export default class GenerateAction extends CommandLineAction {
     console.log(os.EOL + colors.green(`Rush generate finished successfully. (${stopwatch.toString()})`));
 
     if (!this._noLinkParameter.value) {
-      const linkAction: LinkAction = new LinkAction(this._parser);
+      const linkAction: LinkAction = this._parser.getActionByVerb('link') as LinkAction;
       linkAction.execute();
     } else {
       console.log(os.EOL + 'Next you should probably run: "rush link"');
