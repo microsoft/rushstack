@@ -122,7 +122,7 @@ export default class InstallAction extends CommandLineAction {
 
     if (!this._noLinkParameter.value) {
       const linkManager: LinkManager = new LinkManager(this._rushConfiguration);
-      linkManager.createSymlinksForProjects(false);
+      this._parser.catchSyncErrors(linkManager.createSymlinksForProjects(false));
     } else {
       console.log(os.EOL + 'Next you should probably run: "rush link"');
     }
