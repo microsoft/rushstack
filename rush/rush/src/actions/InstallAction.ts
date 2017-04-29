@@ -14,7 +14,7 @@ import {
 import RushCommandLineParser from './RushCommandLineParser';
 import GitPolicy from '../utilities/GitPolicy';
 import InstallManager, { InstallType } from '../utilities/InstallManager';
-import LinkAction from './LinkAction';
+import LinkManager from '../utilities/LinkManager';
 import ShrinkwrapFile from '../utilities/ShrinkwrapFile';
 
 interface ITempModuleInformation {
@@ -120,11 +120,11 @@ export default class InstallAction extends CommandLineAction {
     stopwatch.stop();
     console.log(colors.green(`Done. (${stopwatch.toString()})`));
 
-    // if (!this._noLinkParameter.value) {
-    //   const linkAction: LinkAction = this._parser.getActionByVerb('link') as LinkAction;
-    //   linkAction.execute();
-    // } else {
+    if (!this._noLinkParameter.value) {
+      const linkManager: LinkManager = new LinkManager(this._rushConfiguration);
+      this._parser.catchSyncErrors(linkManager.createSymlinksForProjects(false));
+    } else {
       console.log(os.EOL + 'Next you should probably run: "rush link"');
-    // }
+    }
   }
 }

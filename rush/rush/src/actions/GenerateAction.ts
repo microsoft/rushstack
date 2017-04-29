@@ -11,8 +11,8 @@ import {
   Stopwatch
 } from '@microsoft/rush-lib';
 
-import LinkAction from './LinkAction';
 import InstallManager, { InstallType } from '../utilities/InstallManager';
+import LinkManager from '../utilities/LinkManager';
 import RushCommandLineParser from './RushCommandLineParser';
 import PackageReviewChecker from '../utilities/PackageReviewChecker';
 
@@ -121,11 +121,13 @@ export default class GenerateAction extends CommandLineAction {
     stopwatch.stop();
     console.log(os.EOL + colors.green(`Rush generate finished successfully. (${stopwatch.toString()})`));
 
-    // if (!this._noLinkParameter.value) {
-    //   const linkAction: LinkAction = this._parser.getActionByVerb('link') as LinkAction;
-    //   linkAction.execute();
-    // } else {
+    if (!this._noLinkParameter.value) {
+      const linkManager: LinkManager = new LinkManager(this._rushConfiguration);
+      // NOTE: Setting force=true here shouldn't be strictly necessary, since installCommonModules()
+      // above should have already deleted the marker file, but it doesn't hurt to be explicit.
+      this._parser.catchSyncErrors(linkManager.createSymlinksForProjects(true));
+    } else {
       console.log(os.EOL + 'Next you should probably run: "rush link"');
-    // }
+    }
   }
 }

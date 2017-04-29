@@ -48,6 +48,12 @@ export default class RushCommandLineParser extends CommandLineParser {
     this.addAction(new UnlinkAction(this));
   }
 
+  public catchSyncErrors(promise: Promise<void>): void {
+    promise.catch((error: Error) => {
+      this._exitAndReportError(error);
+    });
+  }
+
   protected onDefineParameters(): void {
     this._debugParameter = this.defineFlagParameter({
       parameterLongName: '--debug',
@@ -57,25 +63,28 @@ export default class RushCommandLineParser extends CommandLineParser {
   }
 
   protected onExecute(): void {
-    this.trapErrors(() => {
-      super.onExecute();
-    });
-  }
-
-  public trapErrors(action: () => void): void {
     if (this._debugParameter.value) {
-      action();
+      // For debugging, don't catch any exceptions; show the full call stack
+      super.onExecute();
     } else {
       try {
-        action();
+        super.onExecute();
       } catch (error) {
-
-        const prefix: string = 'ERROR: ';
-        const wrap: (textToWrap: string) => string = wordwrap.soft(prefix.length, Utilities.getConsoleWidth());
-        console.error(os.EOL + colors.red(prefix + wrap(error.message).trim()));
-        process.exit(1);
+        this._exitAndReportError(error);
       }
     }
   }
 
+  private _exitAndReportError(error: Error): void {
+    if (this._debugParameter.value) {
+      // If catchSyncErrors() called this, then show a call stack similar to what NodeJS
+      // would show for an uncaught error
+      console.error(os.EOL + error.stack);
+    } else {
+      const prefix: string = 'ERROR: ';
+      const wrap: (textToWrap: string) => string = wordwrap.soft(prefix.length, Utilities.getConsoleWidth());
+      console.error(os.EOL + colors.red(prefix + wrap(error.message).trim()));
+    }
+    process.exit(1);
+  }
 }
