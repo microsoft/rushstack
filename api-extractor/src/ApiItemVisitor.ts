@@ -9,6 +9,7 @@ import ApiMethod from './definitions/ApiMethod';
 import ApiNamespace from './definitions/ApiNamespace';
 import ApiParameter from './definitions/ApiParameter';
 import ApiProperty from './definitions/ApiProperty';
+import ApiField from './definitions/ApiField';
 import { ApiTag } from './definitions/ApiDocumentation';
 
 /**
@@ -39,6 +40,8 @@ abstract class ApiItemVisitor {
       this.visitApiMethod(apiItem as ApiMethod, refObject);
     } else if (apiItem instanceof ApiNamespace) {
       this.visitApiNamespace(apiItem as ApiNamespace, refObject);
+    } else if (apiItem instanceof ApiField) {
+      this.visitApiField(apiItem as ApiField, refObject);
     } else {
       throw new Error('Not implemented');
     }
@@ -57,6 +60,8 @@ abstract class ApiItemVisitor {
   protected abstract visitApiMember(apiMember: ApiMember, refObject?: Object): void;
 
   protected abstract visitApiNamespace(apiNamespace: ApiNamespace, refObject?: Object): void;
+
+  protected abstract visitApiField(apiField: ApiField, refObject?: Object): void;
 
   protected visitApiMethod(apiMethod: ApiMethod, refObject?: Object): void {
     this.visitApiMember(apiMethod, refObject);

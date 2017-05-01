@@ -10,6 +10,7 @@ import ApiPackage from '../definitions/ApiPackage';
 import ApiParameter from '../definitions/ApiParameter';
 import ApiMember from '../definitions/ApiMember';
 import ApiNamespace from '../definitions/ApiNamespace';
+import ApiField from '../definitions/ApiField';
 import IndentedWriter from '../IndentedWriter';
 import { ApiTag } from '../definitions/ApiDocumentation';
 
@@ -132,7 +133,9 @@ export default class ApiFileGenerator extends ApiItemVisitor {
   protected visitApiNamespace(apiNamespace: ApiNamespace): void {
     this._writeJsdocSynopsis(apiNamespace);
 
-    this._indentedWriter.writeLine(`namespace ${apiNamespace.name} {`);
+    // We have decided to call the apiNamespace a 'module' in our
+    // public API documentation.
+    this._indentedWriter.writeLine(`module ${apiNamespace.name} {`);
 
     this._indentedWriter.indentScope(() => {
       for (const apiItem of apiNamespace.getSortedMemberItems()) {
@@ -143,6 +146,12 @@ export default class ApiFileGenerator extends ApiItemVisitor {
     });
 
     this._indentedWriter.write('}');
+  }
+
+  protected visitApiField(apiField: ApiField): void {
+    this._writeJsdocSynopsis(apiField);
+
+    this._indentedWriter.write(`${apiField.name}: ${apiField.type} = ${apiField.value};`);
   }
 
   protected visitApiMember(apiMember: ApiMember): void {

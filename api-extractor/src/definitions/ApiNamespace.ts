@@ -1,13 +1,12 @@
 /* tslint:disable:no-bitwise */
 
 import * as ts from 'typescript';
-import ApiStructuredType from './ApiStructuredType';
-import ApiEnum from './ApiEnum';
-import ApiFunction from './ApiFunction';
-import ApiProperty from './ApiProperty';
+import ApiField from './ApiField';
 import ApiItem, { ApiItemKind, IApiItemOptions } from './ApiItem';
 import ApiItemContainer from './ApiItemContainer';
 import { IExportedSymbol } from '../IExportedSymbol';
+
+const allowedTypes: string[] = ['string', 'number', 'boolean'];
 
 /**
   * This class is part of the ApiItem abstract syntax tree. It represents exports of
@@ -32,27 +31,40 @@ export default class ApiNamespace extends ApiItemContainer {
           continue;
         }
 
-        for (const declaration of followedSymbol.declarations) {
-          const exportMemberOptions: IApiItemOptions = {
-            extractor: this.extractor,
-            declaration,
-            declarationSymbol: followedSymbol,
-            jsdocNode: declaration,
-            exportSymbol
-          };
-
-          if (followedSymbol.flags & (ts.SymbolFlags.Class | ts.SymbolFlags.Interface)) {
-            this.addMemberItem(new ApiStructuredType(exportMemberOptions));
-          } else if (followedSymbol.flags & ts.SymbolFlags.Function) {
-            this.addMemberItem(new ApiFunction(exportMemberOptions));
-          } else if (followedSymbol.flags & ts.SymbolFlags.Enum) {
-            this.addMemberItem(new ApiEnum(exportMemberOptions));
-          } else if (followedSymbol.flags & ts.SymbolFlags.BlockScopedVariable) {
-            this.addMemberItem(new ApiProperty(exportMemberOptions));
-          } else {
-            this.reportWarning(`Unsupported export: ${exportSymbol.name}`);
-          }
+        if (!(followedSymbol.flags === ts.SymbolFlags.BlockScopedVariable)) {
+          this.reportWarning(`Unsupported export "${exportSymbol.name}" ` +
+            'ApiNamespace only supports properties.');
+          continue;
         }
+
+        // Since we are imposing that the items within a namespace be
+        // const properties we are only taking the first declaration.
+        // If we decide to add support for other types within a namespace
+        // we will have for evaluate each declaration.
+        const declaration: ts.Declaration = followedSymbol.getDeclarations()[0];
+
+        if (declaration.parent.flags !== ts.NodeFlags.Const) {
+          this.reportWarning(`Export "${exportSymbol.name}" must possess the "const" modifier`);
+          continue;
+        }
+
+        const propertySignature: ts.PropertySignature = declaration as ts.PropertySignature;
+        const type: string = propertySignature.type.getText();
+        if (allowedTypes.indexOf(type) < 0) {
+          this.reportWarning(`Export "${exportSymbol.name}" must of type "string", "number" or "boolean"`);
+          continue;
+        }
+
+        const exportMemberOptions: IApiItemOptions = {
+          extractor: this.extractor,
+          declaration,
+          declarationSymbol: followedSymbol,
+          jsdocNode: declaration,
+          exportSymbol
+        };
+
+        this.addMemberItem(new ApiField(exportMemberOptions));
+
         this._exportedNormalizedSymbols.push({
           exportedName: exportSymbol.name,
           followedSymbol: followedSymbol
