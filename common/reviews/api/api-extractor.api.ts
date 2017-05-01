@@ -11,6 +11,9 @@ class ApiFileGenerator extends ApiItemVisitor {
   // WARNING: The type "ApiEnumValue" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   protected visitApiEnumValue(apiEnumValue: ApiEnumValue): void;
+  // WARNING: The type "ApiField" needs to be exported by the package (e.g. added to index.ts)
+  // (undocumented)
+  protected visitApiField(apiField: ApiField): void;
   // WARNING: The type "ApiFunction" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   protected visitApiFunction(apiFunction: ApiFunction): void;
@@ -44,6 +47,9 @@ class ApiJsonGenerator extends ApiItemVisitor {
   // WARNING: The type "ApiEnumValue" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   protected visitApiEnumValue(apiEnumValue: ApiEnumValue, refObject?: Object): void;
+  // WARNING: The type "ApiField" needs to be exported by the package (e.g. added to index.ts)
+  // (undocumented)
+  protected visitApiField(apiField: ApiField, refObject?: Object): void;
   // WARNING: The type "ApiFunction" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   protected visitApiFunction(apiFunction: ApiFunction, refObject?: Object): void;

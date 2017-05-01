@@ -19,32 +19,21 @@ class MyClass2 {
 class MyOtherClass2 {
 }
 
+// WARNING: Export "complexType1" must of type "string", "number" or "boolean"
+// WARNING: Export "propTwo" must possess the "const" modifier
+// WARNING: Unsupported export "ClassesNotAllowed" ApiNamespace only supports properties.
+// WARNING: Unsupported export "InterfacesNotAllowed" ApiNamespace only supports properties.
+// WARNING: Unsupported export "aFunctionNotAllowed" ApiNamespace only supports properties.
 // @public
-namespace NamespaceExport {
+module NamespaceExport {
   // (undocumented)
-  aadLogo: string;
-
-  // (undocumented)
-  accept: string;
+  booleanConstant1: boolean = true;
 
   // (undocumented)
-  accessLogo: string;
+  numberConstant1: number = 24;
 
   // (undocumented)
-  accounts: string;
-
-  export function aFunction(value: number): void;
-
-  interface Number {
-    // (undocumented)
-    real: RealNumber;
-  }
-
-  class RealNumber {
-    public isReal: boolean;
-    public squared(): number;
-    public value: number;
-  }
+  stringConstant1: string = '\uED68';
 
 }
 

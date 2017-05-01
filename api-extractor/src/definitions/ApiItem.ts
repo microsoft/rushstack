@@ -63,7 +63,11 @@ export enum ApiItemKind {
   /**
    * A Typescript namespace.
    */
-  Namespace = 11
+  Namespace = 11,
+  /**
+   * An abstract type field.
+   */
+  Field = 12
 }
 
 /**

@@ -168,183 +168,38 @@
       "summary": [
         {
           "kind": "textDocElement",
-          "value": "This is a test for the namespace API type. It should be supported and appear in the *api.ts file."
+          "value": "This is a test for the namespace API type. It should be supported and appear in the *api.ts file. At the moment we only support a table of primitive types."
         }
       ],
       "remarks": [],
       "isBeta": false,
       "exports": {
-        "aadLogo": {
-          "kind": "property",
-          "isOptional": false,
-          "isReadOnly": false,
-          "isStatic": false,
-          "type": "string",
+        "booleanConstant1": {
+          "kind": "field",
+          "type": "boolean",
+          "value": "true",
           "deprecatedMessage": [],
           "summary": [],
           "remarks": [],
           "isBeta": false
         },
-        "accept": {
-          "kind": "property",
-          "isOptional": false,
-          "isReadOnly": false,
-          "isStatic": false,
-          "type": "string",
+        "numberConstant1": {
+          "kind": "field",
+          "type": "number",
+          "value": "24",
           "deprecatedMessage": [],
           "summary": [],
           "remarks": [],
           "isBeta": false
         },
-        "accessLogo": {
-          "kind": "property",
-          "isOptional": false,
-          "isReadOnly": false,
-          "isStatic": false,
+        "stringConstant1": {
+          "kind": "field",
           "type": "string",
+          "value": "'\\uED68'",
           "deprecatedMessage": [],
           "summary": [],
           "remarks": [],
           "isBeta": false
-        },
-        "accounts": {
-          "kind": "property",
-          "isOptional": false,
-          "isReadOnly": false,
-          "isStatic": false,
-          "type": "string",
-          "deprecatedMessage": [],
-          "summary": [],
-          "remarks": [],
-          "isBeta": false
-        },
-        "aFunction": {
-          "kind": "function",
-          "returnValue": {
-            "type": "void",
-            "description": []
-          },
-          "parameters": {
-            "value": {
-              "name": "value",
-              "description": [
-                {
-                  "kind": "textDocElement",
-                  "value": "this is a description for the param."
-                }
-              ],
-              "isOptional": false,
-              "isSpread": false,
-              "type": "number"
-            }
-          },
-          "deprecatedMessage": [],
-          "summary": [
-            {
-              "kind": "textDocElement",
-              "value": "This is a test for a function in a namespace."
-            }
-          ],
-          "remarks": [],
-          "isBeta": false
-        },
-        "Number": {
-          "kind": "interface",
-          "extends": "",
-          "implements": "",
-          "typeParameters": [],
-          "deprecatedMessage": [],
-          "summary": [
-            {
-              "kind": "textDocElement",
-              "value": "This is a test for interfaces in a namespace."
-            }
-          ],
-          "remarks": [],
-          "isBeta": false,
-          "members": {
-            "real": {
-              "kind": "property",
-              "isOptional": false,
-              "isReadOnly": false,
-              "isStatic": false,
-              "type": "RealNumber",
-              "deprecatedMessage": [],
-              "summary": [],
-              "remarks": [],
-              "isBeta": false
-            }
-          }
-        },
-        "RealNumber": {
-          "kind": "class",
-          "extends": "",
-          "implements": "",
-          "typeParameters": [],
-          "deprecatedMessage": [],
-          "summary": [
-            {
-              "kind": "textDocElement",
-              "value": "Testing a structured type in a namespace."
-            }
-          ],
-          "remarks": [],
-          "isBeta": false,
-          "members": {
-            "isReal": {
-              "kind": "property",
-              "isOptional": false,
-              "isReadOnly": false,
-              "isStatic": false,
-              "type": "boolean",
-              "deprecatedMessage": [],
-              "summary": [
-                {
-                  "kind": "textDocElement",
-                  "value": "Testing a public property."
-                }
-              ],
-              "remarks": [],
-              "isBeta": false
-            },
-            "squared": {
-              "kind": "method",
-              "signature": "public squared(): number;",
-              "accessModifier": "public",
-              "isOptional": false,
-              "isStatic": false,
-              "returnValue": {
-                "type": "number",
-                "description": []
-              },
-              "parameters": {},
-              "deprecatedMessage": [],
-              "summary": [
-                {
-                  "kind": "textDocElement",
-                  "value": "Testing a method."
-                }
-              ],
-              "remarks": [],
-              "isBeta": false
-            },
-            "value": {
-              "kind": "property",
-              "isOptional": false,
-              "isReadOnly": false,
-              "isStatic": false,
-              "type": "number",
-              "deprecatedMessage": [],
-              "summary": [
-                {
-                  "kind": "textDocElement",
-                  "value": "Testing a getter."
-                }
-              ],
-              "remarks": [],
-              "isBeta": false
-            }
-          }
         }
       }
     }

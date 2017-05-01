@@ -14,7 +14,7 @@ const compilerOptions: ts.CompilerOptions = {
   moduleResolution: ts.ModuleResolutionKind.NodeJs,
   experimentalDecorators: true,
   jsx: ts.JsxEmit.React,
-  rootDir: './testInputs/example2',
+  rootDir: './testInputs/example4',
   typeRoots: ['./'] // We need to ignore @types in these tests
 };
 
@@ -29,7 +29,7 @@ const extractor: Extractor = new Extractor( {
 
 extractor.loadExternalPackages('./testInputs/external-api-json');
 
-extractor.analyze({entryPointFile: './testInputs/example2/src/index.ts',
+extractor.analyze({entryPointFile: './testInputs/example4/src/index.ts',
   otherFiles: []});
 
 const externalPackageApiRef: IApiDefinintionReferenceParts = {

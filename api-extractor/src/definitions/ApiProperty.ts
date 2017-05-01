@@ -1,4 +1,3 @@
-import * as ts from 'typescript';
 import { ApiItemKind, IApiItemOptions } from './ApiItem';
 import ApiMember from './ApiMember';
 

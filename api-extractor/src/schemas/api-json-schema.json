@@ -227,6 +227,45 @@
     },
 
     //---------------------------------------------------------------------------------------------
+    "fieldApiItem": {
+      "description": "A field of a TypeScript namespace",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of API definition",
+          "type": "string",
+          "enum": [ "field" ]
+        },
+        "type": {
+          "description": "The data type of this field",
+          "type": "string"
+        },
+        "value": {
+          "description": "The value of this field",
+          "type": "string"
+        },
+        "summary": {
+          "$ref": "#/definitions/docElementCollection"
+        },
+        "isBeta": {
+          "description": "Whether the API method is beta",
+          "type": "boolean"
+        },
+
+        // Optional properties:
+        "remarks": {
+          "$ref": "#/definitions/docElementCollection"
+        },
+        "deprecatedMessage": {
+          "$ref": "#/definitions/docElementCollection"
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "type", "value", "summary", "isBeta"]
+    },
+
+    //---------------------------------------------------------------------------------------------
     "methodApiItem": {
       "description": "A member function of a TypeScript class or interface",
       "type": "object",
@@ -591,10 +630,7 @@
           "patternProperties": {
             "^[a-zA-Z_]+[a-zA-Z_0-9]*$": {
               "oneOf": [
-                { "$ref": "#/definitions/classApiItem" },
-                { "$ref": "#/definitions/interfaceApiItem" },
-                { "$ref": "#/definitions/propertyApiItem" },
-                { "$ref": "#/definitions/functionApiItem" }
+                { "$ref": "#/definitions/fieldApiItem" }
               ]
             }
           },
