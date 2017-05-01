@@ -22,8 +22,6 @@ class ApiProperty extends ApiMember {
     const declaration: any = options.declaration as any; /* tslint:disable-line:no-any */
     if (declaration.type) {
       this.type = declaration.type.getText();
-    } else if (this.declaration.kind === ts.SyntaxKind.SetAccessor) {
-      this.type = 'void';
     } else {
       this.hasIncompleteTypes = true;
       this.type = 'any';

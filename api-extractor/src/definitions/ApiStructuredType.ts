@@ -189,8 +189,7 @@ export default class ApiStructuredType extends ApiItemContainer {
       this.addMemberItem(new ApiMethod(memberOptions));
     } else if (memberSymbol.flags & (
       ts.SymbolFlags.Property |
-      ts.SymbolFlags.GetAccessor |
-      ts.SymbolFlags.SetAccessor
+      ts.SymbolFlags.GetAccessor
     )) {
       this.addMemberItem(new ApiProperty(memberOptions));
     } else {
