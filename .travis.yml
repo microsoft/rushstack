@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-  - '4.6'
+  - '6.9'
 before_script:
   - node common/scripts/InstallRushOnlyIfNeeded.js
 script:
