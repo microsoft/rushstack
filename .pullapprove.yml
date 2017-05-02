@@ -1,4 +1,14 @@
 version: 2
+
+# Group settings to apply to all groups by default, optionally being overridden later
+group_defaults:
+  approve_by_comment:
+    enabled: true
+    approve_regex: '^(Approved|:shipit:|:\+1:)'
+    reject_regex: '^(Rejected|:-1:)'
+  github_reviews:
+    enabled: true
+
 groups:
   pullapprove-admins:
     conditions:
