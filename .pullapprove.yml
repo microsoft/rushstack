@@ -10,6 +10,7 @@ groups:
       - nickpape-msft
       - pgonzal
       - qz2017
+      - patmill
 
   rush-approvers:
     conditions:
