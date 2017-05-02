@@ -1,0 +1,50 @@
+version: 2
+groups:
+  pullapprove-admins:
+    conditions:
+      files:
+        - ".pullapprove.yml"
+    required: 1
+    users:
+      - iclanton
+      - nickpape-msft
+      - pgonzal
+      - qz2017
+
+  rush-approvers:
+    conditions:
+      files:
+        - "rush/*"
+    required: 1
+    users:
+      - iclanton
+      - nickpape-msft
+      - pgonzal
+      - qz2017
+
+  api-extractor-approvers:
+    conditions:
+      files:
+        - "api-extractor/*"
+    required: 1
+    users:
+      - pgonzal
+      - dgaeta
+
+  gcb-approvers:
+    conditions:
+      files:
+        - "gulp-core-build/*"
+        - "gulp-core-build-karma/*"
+        - "gulp-core-build-mocha/*"
+        - "gulp-core-build-sass/*"
+        - "gulp-core-build-serve/*"
+        - "gulp-core-build-typescript/*"
+        - "gulp-core-build-webpack/*"
+    required: 2
+    users:
+      - iclanton
+      - nickpape-msft
+      - pgonzal
+      - qz2017
+      - dzearing
