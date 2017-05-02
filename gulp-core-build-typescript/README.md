@@ -154,12 +154,19 @@ Some examples of build packages that use this task:
 
 Use the standard "setConfig" method on task instances to set their configuration options. Example:
 
+typescript
 ```typescript
-import { typescript } from '@microsoft/gulp-core-build-typescript';
+import { typescript, TypeScriptConfiguration } from '@microsoft/gulp-core-build-typescript';
 
-typescript.setConfig({
-  typescript: require('typescript')
-});
+TypeScriptConfiguration.setTypescriptCompiler(require('typescript'));
+```
+
+javascript
+```javascript
+var typescript = require('@microsoft/gulp-core-build-typescript');
+var typescriptCompiler = require('typescript');
+
+typescript.TypeScriptConfiguration.setTypescriptCompiler(typescriptCompiler);
 ```
 
 # Related projects
