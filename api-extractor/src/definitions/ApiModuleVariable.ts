@@ -6,14 +6,14 @@ import ApiMember from './ApiMember';
  * This class is part of the ApiItem abstract syntax tree. It represents fields of
  * an ApiNamespace.
  */
-class ApiField extends ApiMember {
+class ApiModuleVariable extends ApiMember {
   public type: string;
   public name: string;
   public value: string;
 
   constructor(options: IApiItemOptions) {
     super(options);
-    this.kind = ApiItemKind.Field;
+    this.kind = ApiItemKind.ModuleVariable;
 
     const propertySignature: ts.PropertySignature = options.declaration as ts.PropertySignature;
     this.type = propertySignature.type.getText();
@@ -22,4 +22,4 @@ class ApiField extends ApiMember {
   }
 }
 
-export default ApiField;
+export default ApiModuleVariable;

@@ -26,13 +26,19 @@ export namespace NamespaceExport {
   export const complexType1: {} = {key1: 'value1', key2: 'value2'};
 
   /**
-   * This field should be const but it is not exported 
+   * This module variable should be const but it is not exported 
    * so it should not raise a warning. 
    */
   let _prop: string = 'will not incur warning';
 
   /**
-   * This field should incur a warning because it does 
+   * This variable should raise a warning for not 
+   * declaring a type.
+   */
+  export const missingType = 'will incur warning';
+
+  /**
+   * This module variable should incur a warning because it does 
    * not have the const modifier.
    */
   export let propTwo: string = 'warning missing const';

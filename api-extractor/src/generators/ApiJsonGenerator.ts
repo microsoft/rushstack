@@ -14,7 +14,7 @@ import ApiParameter from '../definitions/ApiParameter';
 import ApiProperty from '../definitions/ApiProperty';
 import ApiMember, { AccessModifier } from '../definitions/ApiMember';
 import ApiNamespace from '../definitions/ApiNamespace';
-import ApiField from '../definitions/ApiField';
+import ApiModuleVariable from '../definitions/ApiModuleVariable';
 import ApiMethod from '../definitions/ApiMethod';
 import { ApiTag } from '../definitions/ApiDocumentation';
 import { IReturn, IParam }from '../IDocElement';
@@ -239,18 +239,18 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
     refObject[apiProperty.name] = newNode;
   }
 
-  protected visitApiField(apiField: ApiField, refObject?: Object): void {
+  protected visitApiModuleVariable(apiModuleVariable: ApiModuleVariable, refObject?: Object): void {
     const newNode: Object = {
-      kind: ApiJsonFile.convertKindToJson(apiField.kind),
-      type: apiField.type,
-      value: apiField.value,
-      deprecatedMessage: apiField.documentation.deprecatedMessage || [],
-      summary: apiField.documentation.summary || [],
-      remarks: apiField.documentation.remarks || [],
-      isBeta: apiField.documentation.apiTag === ApiTag.Beta
+      kind: ApiJsonFile.convertKindToJson(apiModuleVariable.kind),
+      type: apiModuleVariable.type,
+      value: apiModuleVariable.value,
+      deprecatedMessage: apiModuleVariable.documentation.deprecatedMessage || [],
+      summary: apiModuleVariable.documentation.summary || [],
+      remarks: apiModuleVariable.documentation.remarks || [],
+      isBeta: apiModuleVariable.documentation.apiTag === ApiTag.Beta
     };
 
-    refObject[apiField.name] = newNode;
+    refObject[apiModuleVariable.name] = newNode;
   }
 
   protected visitApiMethod(apiMethod: ApiMethod, refObject?: Object): void {

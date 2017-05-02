@@ -11,15 +11,15 @@ class ApiFileGenerator extends ApiItemVisitor {
   // WARNING: The type "ApiEnumValue" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   protected visitApiEnumValue(apiEnumValue: ApiEnumValue): void;
-  // WARNING: The type "ApiField" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitApiField(apiField: ApiField): void;
   // WARNING: The type "ApiFunction" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   protected visitApiFunction(apiFunction: ApiFunction): void;
   // WARNING: The type "ApiMember" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   protected visitApiMember(apiMember: ApiMember): void;
+  // WARNING: The type "ApiModuleVariable" needs to be exported by the package (e.g. added to index.ts)
+  // (undocumented)
+  protected visitApiModuleVariable(apiModuleVariable: ApiModuleVariable): void;
   // WARNING: The type "ApiNamespace" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   protected visitApiNamespace(apiNamespace: ApiNamespace): void;
@@ -47,9 +47,6 @@ class ApiJsonGenerator extends ApiItemVisitor {
   // WARNING: The type "ApiEnumValue" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   protected visitApiEnumValue(apiEnumValue: ApiEnumValue, refObject?: Object): void;
-  // WARNING: The type "ApiField" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitApiField(apiField: ApiField, refObject?: Object): void;
   // WARNING: The type "ApiFunction" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   protected visitApiFunction(apiFunction: ApiFunction, refObject?: Object): void;
@@ -59,6 +56,9 @@ class ApiJsonGenerator extends ApiItemVisitor {
   // WARNING: The type "ApiMethod" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   protected visitApiMethod(apiMethod: ApiMethod, refObject?: Object): void;
+  // WARNING: The type "ApiModuleVariable" needs to be exported by the package (e.g. added to index.ts)
+  // (undocumented)
+  protected visitApiModuleVariable(apiModuleVariable: ApiModuleVariable, refObject?: Object): void;
   // WARNING: The type "ApiNamespace" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   protected visitApiNamespace(apiNamespace: ApiNamespace, refObject?: Object): void;

@@ -19,11 +19,12 @@ class MyClass2 {
 class MyOtherClass2 {
 }
 
-// WARNING: Export "complexType1" must of type "string", "number" or "boolean"
-// WARNING: Export "propTwo" must possess the "const" modifier
-// WARNING: Unsupported export "ClassesNotAllowed" ApiNamespace only supports properties.
-// WARNING: Unsupported export "InterfacesNotAllowed" ApiNamespace only supports properties.
-// WARNING: Unsupported export "aFunctionNotAllowed" ApiNamespace only supports properties.
+// WARNING: Export "complexType1" must specify and be of type"string", "number" or "boolean"
+// WARNING: Export "missingType" must specify and be of type"string", "number" or "boolean"
+// WARNING: Export "propTwo" is missing the "const" modifier. Currently the "namespace" block only supports constant variables.
+// WARNING: Unsupported export "ClassesNotAllowed" Currently the "namespace" block only supports constant variables.
+// WARNING: Unsupported export "InterfacesNotAllowed" Currently the "namespace" block only supports constant variables.
+// WARNING: Unsupported export "aFunctionNotAllowed" Currently the "namespace" block only supports constant variables.
 // @public
 module NamespaceExport {
   // (undocumented)

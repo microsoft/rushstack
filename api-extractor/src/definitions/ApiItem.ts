@@ -65,9 +65,9 @@ export enum ApiItemKind {
    */
   Namespace = 11,
   /**
-   * An abstract type field.
+   * A Typescript BlockScopedVariable.
    */
-  Field = 12
+  ModuleVariable = 12
 }
 
 /**

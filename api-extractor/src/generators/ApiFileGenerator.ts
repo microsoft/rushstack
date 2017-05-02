@@ -10,7 +10,7 @@ import ApiPackage from '../definitions/ApiPackage';
 import ApiParameter from '../definitions/ApiParameter';
 import ApiMember from '../definitions/ApiMember';
 import ApiNamespace from '../definitions/ApiNamespace';
-import ApiField from '../definitions/ApiField';
+import ApiModuleVariable from '../definitions/ApiModuleVariable';
 import IndentedWriter from '../IndentedWriter';
 import { ApiTag } from '../definitions/ApiDocumentation';
 
@@ -148,10 +148,10 @@ export default class ApiFileGenerator extends ApiItemVisitor {
     this._indentedWriter.write('}');
   }
 
-  protected visitApiField(apiField: ApiField): void {
-    this._writeJsdocSynopsis(apiField);
+  protected visitApiModuleVariable(apiModuleVariable: ApiModuleVariable): void {
+    this._writeJsdocSynopsis(apiModuleVariable);
 
-    this._indentedWriter.write(`${apiField.name}: ${apiField.type} = ${apiField.value};`);
+    this._indentedWriter.write(`${apiModuleVariable.name}: ${apiModuleVariable.type} = ${apiModuleVariable.value};`);
   }
 
   protected visitApiMember(apiMember: ApiMember): void {

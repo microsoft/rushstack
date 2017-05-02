@@ -227,22 +227,22 @@
     },
 
     //---------------------------------------------------------------------------------------------
-    "fieldApiItem": {
-      "description": "A field of a TypeScript namespace",
+    "moduleVariableApiItem": {
+      "description": "A TypeScript BlockScopedVariable",
       "type": "object",
 
       "properties": {
         "kind": {
           "description": "The kind of API definition",
           "type": "string",
-          "enum": [ "field" ]
+          "enum": [ "module variable" ]
         },
         "type": {
-          "description": "The data type of this field",
+          "description": "The data type of this module variable",
           "type": "string"
         },
         "value": {
-          "description": "The value of this field",
+          "description": "The value of this module variable",
           "type": "string"
         },
         "summary": {
@@ -630,7 +630,7 @@
           "patternProperties": {
             "^[a-zA-Z_]+[a-zA-Z_0-9]*$": {
               "oneOf": [
-                { "$ref": "#/definitions/fieldApiItem" }
+                { "$ref": "#/definitions/moduleVariableApiItem" }
               ]
             }
           },

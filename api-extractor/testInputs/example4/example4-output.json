@@ -175,7 +175,7 @@
       "isBeta": false,
       "exports": {
         "booleanConstant1": {
-          "kind": "field",
+          "kind": "module variable",
           "type": "boolean",
           "value": "true",
           "deprecatedMessage": [],
@@ -184,7 +184,7 @@
           "isBeta": false
         },
         "numberConstant1": {
-          "kind": "field",
+          "kind": "module variable",
           "type": "number",
           "value": "24",
           "deprecatedMessage": [],
@@ -193,7 +193,7 @@
           "isBeta": false
         },
         "stringConstant1": {
-          "kind": "field",
+          "kind": "module variable",
           "type": "string",
           "value": "'\\uED68'",
           "deprecatedMessage": [],
