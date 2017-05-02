@@ -41,10 +41,9 @@ groups:
         - "gulp-core-build-serve/*"
         - "gulp-core-build-typescript/*"
         - "gulp-core-build-webpack/*"
-    required: 2
+    required: 1
     users:
       - iclanton
       - nickpape-msft
       - pgonzal
       - qz2017
-      - dzearing
