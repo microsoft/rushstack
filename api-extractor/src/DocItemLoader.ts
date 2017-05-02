@@ -93,7 +93,7 @@ export default class DocItemLoader {
       if (apiItem instanceof ApiItemContainer) {
         const apiItemContainer: ApiItemContainer = (apiItem as ApiItemContainer);
         // get() returns undefined if there is no match
-        apiItem = apiItemContainer.memberItems.get(apiDefinitionRef.memberName);
+        apiItem = apiItemContainer.getMemberItem(apiDefinitionRef.memberName);
       } else {
         // There are no other instances of apiItem that has members,
         // thus there must be a mistake with the apiDefinitionRef.

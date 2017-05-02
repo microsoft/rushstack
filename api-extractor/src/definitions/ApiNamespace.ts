@@ -10,10 +10,10 @@ const allowedTypes: string[] = ['string', 'number', 'boolean'];
 
 /**
   * This class is part of the ApiItem abstract syntax tree. It represents exports of
-  * a namespace, the exports can be module variable constants of type "string", "boolean" or "number.
+  * a namespace, the exports can be module variable constants of type "string", "boolean" or "number".
   * An ApiNamespace is defined using TypeScript's "namespace" keyword.
   *
-  * A note about terminology:
+  * @remarks A note about terminology:
   * - EcmaScript "namespace modules" are not conventional namespaces; their semantics are
   * more like static classes in C# or Java.
   * - API Extractor's support for namespaces is currently limited to representing tables of
@@ -85,14 +85,5 @@ export default class ApiNamespace extends ApiItemContainer {
         });
       }
     }
-  }
-
-  /**
-   * Find a member in this namespace by name and return it if found.
-   *
-   * @param memberName - the name of the exported ApiItem
-   */
-  public getMemberItem(memberName: string): ApiItem {
-    return this.memberItems.get(memberName);
   }
 }
