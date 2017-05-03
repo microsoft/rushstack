@@ -30,10 +30,8 @@ module NamespaceExport {
   // (undocumented)
   booleanConstant1: boolean = true;
 
-  // (undocumented)
   numberConstant1: number = 24;
 
-  // (undocumented)
   stringConstant1: string = '\uED68';
 
 }

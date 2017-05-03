@@ -5,7 +5,6 @@ import ApiModuleVariable from './ApiModuleVariable';
 import ApiItem, { ApiItemKind, IApiItemOptions } from './ApiItem';
 import ApiItemContainer from './ApiItemContainer';
 import { IExportedSymbol } from '../IExportedSymbol';
-
 const allowedTypes: string[] = ['string', 'number', 'boolean'];
 
 /**
@@ -69,11 +68,24 @@ export default class ApiNamespace extends ApiItemContainer {
           continue;
         }
 
+        // Typescript VariableDeclaration exist within a VariableDeclarationList,
+        // the VariableDeclarationList exists within a VariableStatement and
+        // this is where the JsDoc comment Node exists.
+        // If there is no parent or grandparent of this VariableDeclartion then
+        // we do not know how to obtain the JsDoc comment.
+        let jsDocNode: ts.Node;
+        if (!declaration.parent || !declaration.parent.parent) {
+          this.reportWarning(`Export "${exportSymbol.name}" expected to have a 'grand' parent ` +
+            '"VariableStatement" in order to obtain JsDoc comment');
+        } else {
+          jsDocNode = declaration.parent.parent;
+        }
+
         const exportMemberOptions: IApiItemOptions = {
           extractor: this.extractor,
           declaration,
           declarationSymbol: followedSymbol,
-          jsdocNode: declaration,
+          jsdocNode: jsDocNode,
           exportSymbol
         };
 

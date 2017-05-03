@@ -188,7 +188,12 @@
           "type": "number",
           "value": "24",
           "deprecatedMessage": [],
-          "summary": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "Number constants are supported"
+            }
+          ],
           "remarks": [],
           "isBeta": false
         },
@@ -197,7 +202,12 @@
           "type": "string",
           "value": "'\\uED68'",
           "deprecatedMessage": [],
-          "summary": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "String constants are supported"
+            }
+          ],
           "remarks": [],
           "isBeta": false
         }

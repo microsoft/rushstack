@@ -16,9 +16,8 @@ export namespace NamespaceExport {
    * Number constants are supported
    */
   export const numberConstant1: number = 24;
-  /**
-   * Boolean constants are supported
-   */
+
+  // Intential absent JsDoc
   export const booleanConstant1: boolean = true;
   /**
    * Complex types are not supported
