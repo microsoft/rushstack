@@ -314,10 +314,11 @@ export default class InstallManager {
     // do this in alphabetical order for simpler debugging
     InstallManager._keys(pinnedVersions).sort().forEach((dependency: string) => {
       const info: IImplicitVersion = pinnedVersions.get(dependency);
+      const version: string = info.versions.values().next().value;
       if (info.optional) {
-        commonPackageJson.optionalDependencies[dependency] = info.version;
+        commonPackageJson.optionalDependencies[dependency] = version;
       } else {
-        commonPackageJson.dependencies[dependency] = info.version;
+        commonPackageJson.dependencies[dependency] = version;
       }
     });
 
