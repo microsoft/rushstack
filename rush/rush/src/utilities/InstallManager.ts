@@ -45,14 +45,16 @@ export enum InstallType {
   UnsafePurge
 }
 
-interface IImplicitVersionList {
-  versions: Set<string>;
-  optional: boolean;
-}
-
+/**
+ * Used when determining which versions should be implicitly pinned,
+ * this interface records all version specifiers as well as whether
+ * all versions were optional or not.
+ */
 export interface IImplicitVersion {
+  /** A set of all the different version specifiers used in this repo for this package */
+  versions: Set<string>;
+  /** If all instances of this dependency are optional, this is true */
   optional: boolean;
-  version: string;
 }
 
 /**
@@ -67,7 +69,7 @@ export default class InstallManager {
    * Returns a map of all direct dependencies that only have a single semantic version specifier
    */
   public static collectImplicitlyPinnedVersions(rushConfiguration: RushConfiguration): Map<string, IImplicitVersion> {
-    const directDependencies: Map<string, IImplicitVersionList> = new Map<string, IImplicitVersionList>();
+    const directDependencies: Map<string, IImplicitVersion> = new Map<string, IImplicitVersion>();
 
     rushConfiguration.projects.forEach((project: RushConfigurationProject) => {
       InstallManager._addDependenciesToMap(rushConfiguration, directDependencies,
@@ -79,13 +81,9 @@ export default class InstallManager {
     });
 
     const implicitlyPinned: Map<string, IImplicitVersion> = new Map<string, IImplicitVersion>();
-    directDependencies.forEach((info: IImplicitVersionList, dep: string) => {
+    directDependencies.forEach((info: IImplicitVersion, dep: string) => {
       if (info.versions.size === 1) {
-        const version: string = info.versions.values().next().value;
-        implicitlyPinned.set(dep, {
-          version,
-          optional: info.optional
-        });
+        implicitlyPinned.set(dep, info);
       }
     });
     return implicitlyPinned;
@@ -104,7 +102,7 @@ export default class InstallManager {
     return keys;
   }
 
-  private static _addDependencyToMap(directDependencies: Map<string, IImplicitVersionList>,
+  private static _addDependencyToMap(directDependencies: Map<string, IImplicitVersion>,
     dependency: string, version: string, optional: boolean): void {
     if (!directDependencies.has(dependency)) {
       directDependencies.set(dependency, {
@@ -112,14 +110,14 @@ export default class InstallManager {
         optional
       });
     }
-    const info: IImplicitVersionList = directDependencies.get(dependency);
+    const info: IImplicitVersion = directDependencies.get(dependency);
     info.versions.add(version);
     info.optional = info.optional && info.optional;
   }
 
   private static _addDependenciesToMap(
     rushConfiguration: RushConfiguration,
-    directDependencies: Map<string, IImplicitVersionList>,
+    directDependencies: Map<string, IImplicitVersion>,
     cyclicDeps: Set<string>, deps: { [dep: string]: string },
     optional: boolean = false): void {
 
@@ -267,7 +265,7 @@ export default class InstallManager {
 
     this._rushConfiguration.pinnedVersions.forEach((version: string, dependency: string) => {
       pinnedVersions.set(dependency, {
-        version,
+        versions: new Set<string>().add(version),
         optional: false
       });
     });
@@ -275,10 +273,12 @@ export default class InstallManager {
     if (shrinkwrapFile) {
       // Check any pinned dependencies first
       pinnedVersions.forEach((info: IImplicitVersion, dependency: string) => {
-        if (!info.optional && !shrinkwrapFile.hasCompatibleDependency(dependency, info.version)) {
+        const version: string = info.versions.values().next().value;
+
+        if (!info.optional && !shrinkwrapFile.hasCompatibleDependency(dependency, version)) {
           console.log(colors.yellow(wrap(
             `${os.EOL}The NPM shrinkwrap file does not provide "${dependency}"`
-            + ` (${info.version}) required by pinned versions`)));
+            + ` (${version}) required by pinned versions`)));
           shrinkwrapIsValid = false;
         }
       });
