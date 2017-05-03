@@ -6,8 +6,6 @@ group_defaults:
     enabled: true
     approve_regex: '^(Approved|:shipit:|:\+1:)'
     reject_regex: '^(Rejected|:-1:)'
-  github_reviews:
-    enabled: true
 
 groups:
   pullapprove-admins:
