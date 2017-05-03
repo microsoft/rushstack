@@ -45,6 +45,16 @@ export enum InstallType {
   UnsafePurge
 }
 
+interface IImplicitVersionList {
+  versions: Set<string>;
+  optional: boolean;
+}
+
+export interface IImplicitVersion {
+  optional: boolean;
+  version: string;
+}
+
 /**
  * This class implements common logic between "rush install" and "rush generate".
  */
@@ -56,25 +66,26 @@ export default class InstallManager {
   /**
    * Returns a map of all direct dependencies that only have a single semantic version specifier
    */
-  public static collectImplicitlyPinnedVersions(rushConfiguration: RushConfiguration): Map<string, string> {
-    const directDependencies: Map<string, Set<string>> = new Map<string, Set<string>>();
+  public static collectImplicitlyPinnedVersions(rushConfiguration: RushConfiguration): Map<string, IImplicitVersion> {
+    const directDependencies: Map<string, IImplicitVersionList> = new Map<string, IImplicitVersionList>();
 
     rushConfiguration.projects.forEach((project: RushConfigurationProject) => {
       InstallManager._addDependenciesToMap(rushConfiguration, directDependencies,
         project.cyclicDependencyProjects, project.packageJson.dependencies);
       InstallManager._addDependenciesToMap(rushConfiguration, directDependencies,
         project.cyclicDependencyProjects, project.packageJson.devDependencies);
-
-      // TODO: VSO 346348 - implement this correctly:
-      // InstallManager._addDependenciesToMap(rushConfiguration, directDependencies,
-      //  project.cyclicDependencyProjects, project.packageJson.optionalDependencies);
+      InstallManager._addDependenciesToMap(rushConfiguration, directDependencies,
+        project.cyclicDependencyProjects, project.packageJson.optionalDependencies, true);
     });
 
-    const implicitlyPinned: Map<string, string> = new Map<string, string>();
-    directDependencies.forEach((versions: Set<string>, dep: string) => {
-      if (versions.size === 1) {
-        const version: string = versions.values().next().value;
-        implicitlyPinned.set(dep, version);
+    const implicitlyPinned: Map<string, IImplicitVersion> = new Map<string, IImplicitVersion>();
+    directDependencies.forEach((info: IImplicitVersionList, dep: string) => {
+      if (info.versions.size === 1) {
+        const version: string = info.versions.values().next().value;
+        implicitlyPinned.set(dep, {
+          version,
+          optional: info.optional
+        });
       }
     });
     return implicitlyPinned;
@@ -93,18 +104,24 @@ export default class InstallManager {
     return keys;
   }
 
-  private static _addDependencyToMap(directDependencies: Map<string, Set<string>>,
-    dependency: string, version: string): void {
+  private static _addDependencyToMap(directDependencies: Map<string, IImplicitVersionList>,
+    dependency: string, version: string, optional: boolean): void {
     if (!directDependencies.has(dependency)) {
-      directDependencies.set(dependency, new Set<string>());
+      directDependencies.set(dependency, {
+        versions: new Set<string>(),
+        optional
+      });
     }
-    directDependencies.get(dependency).add(version);
+    const info: IImplicitVersionList = directDependencies.get(dependency);
+    info.versions.add(version);
+    info.optional = info.optional && info.optional;
   }
 
   private static _addDependenciesToMap(
     rushConfiguration: RushConfiguration,
-    directDependencies: Map<string, Set<string>>,
-    cyclicDeps: Set<string>, deps: { [dep: string]: string }): void {
+    directDependencies: Map<string, IImplicitVersionList>,
+    cyclicDeps: Set<string>, deps: { [dep: string]: string },
+    optional: boolean = false): void {
 
     Object.keys(deps || {}).forEach((dependency: string) => {
       const version: string = deps[dependency];
@@ -114,7 +131,7 @@ export default class InstallManager {
       //    we depend on a different version than the one locally
       if (!rushConfiguration.getProjectByName(dependency) || cyclicDeps.has(dependency) ||
           !semver.satisfies(rushConfiguration.getProjectByName(dependency).packageJson.version, version)) {
-        InstallManager._addDependencyToMap(directDependencies, dependency, version);
+        InstallManager._addDependencyToMap(directDependencies, dependency, version, optional);
       }
     });
   }
@@ -240,25 +257,28 @@ export default class InstallManager {
     // Find the implicitly pinnedVersions
     // These are any first-level dependencies for which we only consume a single version range
     // (e.g. every package that depends on react uses an identical specifier)
-    const implicitlyPinned: Map<string, string> =
+    const implicitlyPinned: Map<string, IImplicitVersion> =
       InstallManager.collectImplicitlyPinnedVersions(this._rushConfiguration);
-    const pinnedVersions: Map<string, string> = new Map<string, string>();
+    const pinnedVersions: Map<string, IImplicitVersion> = new Map<string, IImplicitVersion>();
 
-    implicitlyPinned.forEach((version: string, dependency: string) => {
-      pinnedVersions.set(dependency, version);
+    implicitlyPinned.forEach((info: IImplicitVersion, dependency: string) => {
+      pinnedVersions.set(dependency, info);
     });
 
     this._rushConfiguration.pinnedVersions.forEach((version: string, dependency: string) => {
-      pinnedVersions.set(dependency, version);
+      pinnedVersions.set(dependency, {
+        version,
+        optional: false
+      });
     });
 
     if (shrinkwrapFile) {
       // Check any pinned dependencies first
-      pinnedVersions.forEach((version: string, dependency: string) => {
-        if (!shrinkwrapFile.hasCompatibleDependency(dependency, version)) {
+      pinnedVersions.forEach((info: IImplicitVersion, dependency: string) => {
+        if (!info.optional && !shrinkwrapFile.hasCompatibleDependency(dependency, info.version)) {
           console.log(colors.yellow(wrap(
             `${os.EOL}The NPM shrinkwrap file does not provide "${dependency}"`
-            + ` (${version}) required by pinned versions`)));
+            + ` (${info.version}) required by pinned versions`)));
           shrinkwrapIsValid = false;
         }
       });
@@ -293,7 +313,12 @@ export default class InstallManager {
     // Add any pinned versions to the top of the commonPackageJson
     // do this in alphabetical order for simpler debugging
     InstallManager._keys(pinnedVersions).sort().forEach((dependency: string) => {
-      commonPackageJson.dependencies[dependency] = pinnedVersions.get(dependency);
+      const info: IImplicitVersion = pinnedVersions.get(dependency);
+      if (info.optional) {
+        commonPackageJson.optionalDependencies[dependency] = info.version;
+      } else {
+        commonPackageJson.dependencies[dependency] = info.version;
+      }
     });
 
     // To make the common/package.json file more readable, sort alphabetically
