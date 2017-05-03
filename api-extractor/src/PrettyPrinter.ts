@@ -25,6 +25,8 @@ export default class PrettyPrinter {
       trimmedText = '(error getting text)';
     }
 
+    console.log(`${indent}${kindName}: [${trimmedText}]`);
+
     try {
       for (const childNode of node.getChildren()) {
         PrettyPrinter.dumpTree(childNode, indent + '  ');
