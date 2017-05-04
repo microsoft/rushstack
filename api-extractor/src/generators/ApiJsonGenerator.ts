@@ -13,6 +13,8 @@ import ApiPackage from '../definitions/ApiPackage';
 import ApiParameter from '../definitions/ApiParameter';
 import ApiProperty from '../definitions/ApiProperty';
 import ApiMember, { AccessModifier } from '../definitions/ApiMember';
+import ApiNamespace from '../definitions/ApiNamespace';
+import ApiModuleVariable from '../definitions/ApiModuleVariable';
 import ApiMethod from '../definitions/ApiMethod';
 import { ApiTag } from '../definitions/ApiDocumentation';
 import { IReturn, IParam }from '../IDocElement';
@@ -183,6 +185,28 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
     }
   }
 
+  protected visitApiNamespace(apiNamespace: ApiNamespace, refObject?: Object): void {
+    if (!apiNamespace.supportedName) {
+      return;
+    }
+
+    const membersNode: Object = {};
+    for (const apiItem of apiNamespace.getSortedMemberItems()) {
+      this.visit(apiItem, membersNode);
+    }
+
+    const newNode: Object = {
+      kind: ApiJsonFile.convertKindToJson(apiNamespace.kind),
+      deprecatedMessage: apiNamespace.documentation.deprecatedMessage || [],
+      summary: apiNamespace.documentation.summary || [],
+      remarks: apiNamespace.documentation.remarks || [],
+      isBeta: apiNamespace.documentation.apiTag === ApiTag.Beta,
+      exports: membersNode
+    };
+
+    refObject[apiNamespace.name] = newNode;
+  }
+
   protected visitApiMember(apiMember: ApiMember, refObject?: Object): void {
     if (!apiMember.supportedName) {
       return;
@@ -213,6 +237,20 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
     };
 
     refObject[apiProperty.name] = newNode;
+  }
+
+  protected visitApiModuleVariable(apiModuleVariable: ApiModuleVariable, refObject?: Object): void {
+    const newNode: Object = {
+      kind: ApiJsonFile.convertKindToJson(apiModuleVariable.kind),
+      type: apiModuleVariable.type,
+      value: apiModuleVariable.value,
+      deprecatedMessage: apiModuleVariable.documentation.deprecatedMessage || [],
+      summary: apiModuleVariable.documentation.summary || [],
+      remarks: apiModuleVariable.documentation.remarks || [],
+      isBeta: apiModuleVariable.documentation.apiTag === ApiTag.Beta
+    };
+
+    refObject[apiModuleVariable.name] = newNode;
   }
 
   protected visitApiMethod(apiMethod: ApiMethod, refObject?: Object): void {

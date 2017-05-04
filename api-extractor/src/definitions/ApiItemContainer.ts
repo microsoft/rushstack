@@ -5,10 +5,19 @@ import ApiItem, { IApiItemOptions } from './ApiItem';
   * which all act as containers for other ApiItem definitions.
   */
 abstract class ApiItemContainer extends ApiItem {
-  public memberItems: Map<string, ApiItem> = new Map<string, ApiItem>();
+  private _memberItems: Map<string, ApiItem> = new Map<string, ApiItem>();
 
   constructor(options: IApiItemOptions) {
     super(options);
+  }
+
+  /**
+   * Find a member in this namespace by name and return it if found.
+   *
+   * @param memberName - the name of the exported ApiItem
+   */
+  public getMemberItem(memberName: string): ApiItem {
+    return this._memberItems.get(memberName);
   }
 
   /**
@@ -16,7 +25,7 @@ abstract class ApiItemContainer extends ApiItem {
    */
   public getSortedMemberItems(): ApiItem[] {
     const apiItems: ApiItem[] = [];
-    this.memberItems.forEach((apiItem: ApiItem) => {
+    this._memberItems.forEach((apiItem: ApiItem) => {
       apiItems.push(apiItem);
     });
 
@@ -32,7 +41,7 @@ abstract class ApiItemContainer extends ApiItem {
       this.reportWarning(`${apiItem.name} has incomplete type information`);
     } else {
       this.innerItems.push(apiItem);
-      this.memberItems.set(apiItem.name, apiItem);
+      this._memberItems.set(apiItem.name, apiItem);
     }
   }
 
@@ -42,7 +51,7 @@ abstract class ApiItemContainer extends ApiItem {
   public visitTypeReferencesForApiItem(): void {
     super.visitTypeReferencesForApiItem();
 
-    this.memberItems.forEach((apiItem) => {
+    this._memberItems.forEach((apiItem) => {
       apiItem.visitTypeReferencesForApiItem();
     });
   }

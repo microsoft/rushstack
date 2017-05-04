@@ -19,4 +19,21 @@ class MyClass2 {
 class MyOtherClass2 {
 }
 
+// WARNING: Export "complexType1" must specify and be of type"string", "number" or "boolean"
+// WARNING: Export "missingType" must specify and be of type"string", "number" or "boolean"
+// WARNING: Export "propTwo" is missing the "const" modifier. Currently the "namespace" block only supports constant variables.
+// WARNING: Unsupported export "ClassesNotAllowed" Currently the "namespace" block only supports constant variables.
+// WARNING: Unsupported export "InterfacesNotAllowed" Currently the "namespace" block only supports constant variables.
+// WARNING: Unsupported export "aFunctionNotAllowed" Currently the "namespace" block only supports constant variables.
+// @public
+module NamespaceExport {
+  // (undocumented)
+  booleanConstant1: boolean = true;
+
+  numberConstant1: number = 24;
+
+  stringConstant1: string = '\uED68';
+
+}
+
 // (No packageDescription for this package)
