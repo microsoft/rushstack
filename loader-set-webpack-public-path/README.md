@@ -69,6 +69,49 @@ This option takes precedence over the `systemJs` option.
 Use the specified string as a URL prefix after the SystemJS path or the `publicPath` option. If neither
 `systemJs` nor `publicPath` is defined, this option will not apply and an exception will be thrown.
 
+#### `regexVariable = '...'`
+
+Check for a variable with name `...` on the page and use its value as a regular expression against script paths to
+the bundle's script. If a value `foo` is passed into `regexVariable`, the produced bundle will look for a variable
+called `foo` during initialization, and if a `foo` variable is found, use its value as a regular expression to
+detect the bundle's script.
+
+For example, if the `regexVariable` option is set to `scriptRegex` and `scriptName` is set to `{ name: 'myscript' }`,
+consider two cases:
+
+##### Case 1
+
+```HTML
+<html>
+  <head>
+    <script>
+      var scriptRegex = /thescript/i;
+    </script>
+    <script src="theScript.js"></script>
+  </head>
+
+  ...
+</html>
+```
+
+In this case, because there is a `scriptRegex` variable defined on the page, the bundle will use its value
+(`/thescript/i`) to find the script.
+
+##### Case 2
+
+```HTML
+<html>
+  <head>
+    <script src="myScript.js"></script>
+  </head>
+
+  ...
+</html>
+```
+
+In this case, because there is not a `scriptRegex` variable defined on the page, the bundle will use the value
+passed into the `scriptName` option to find the script.
+
 # Loader
 
 ## Usage
@@ -109,6 +152,10 @@ This option takes precedence over the `systemJs` option.  Setting this option in
 
 Use the specified string as a URL prefix after the SystemJS path or the `publicPath` option. If neither
 `systemJs` nor `publicPath` is defined, this option will not apply and a warning will be emitted.
+
+#### `regexVariable = '...'`
+
+This has the same behavior as the plugin's `regexVariable` option.
 
 ### Config, pre-bundle options
 

@@ -20,6 +20,7 @@ export interface ISetWebpackPublicPathOptions {
   systemJs?: boolean;
   urlPrefix?: string;
   publicPath?: string;
+  regexVariable?: string;
 }
 
 export class SetWebpackPublicPathLoader {

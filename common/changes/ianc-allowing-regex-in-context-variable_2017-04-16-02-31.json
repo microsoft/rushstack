@@ -1,0 +1,20 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/loader-set-webpack-public-path",
+      "comment": "Allowing the regular expression that is used to find the script to be provided by a named variable in-context.",
+      "type": "minor"
+    },
+    {
+      "comment": "",
+      "packageName": "@microsoft/loader-raw-script",
+      "type": "none"
+    },
+    {
+      "comment": "",
+      "packageName": "@microsoft/loader-load-themed-styles",
+      "type": "none"
+    }
+  ],
+  "email": "iclanton@users.noreply.github.com"
+}

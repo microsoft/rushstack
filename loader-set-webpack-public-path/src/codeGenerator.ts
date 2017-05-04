@@ -23,12 +23,26 @@ export function getSetPublicPathCode(options: IInternalOptions, emitWarning: (wa
 
   let lines: string[] = [];
   if (options.regexName) {
-    // Double-escape backslashes to make them show up as single backslashes in regexes.
+    // Double-escape backslashes to make them show up as single backslashes in regexps.
     const escapedRegex: string = options.regexName.replace(/\\/, '\\\\');
 
     lines = [
-      `var scripts = document.getElementsByTagName('script');`,
-      `var regex = new RegExp('${escapeSingleQuotes(escapedRegex)}', 'i');`,
+      `var scripts = document.getElementsByTagName('script');`
+    ];
+
+    const regexInitializationSnippet: string = `new RegExp('${escapeSingleQuotes(escapedRegex)}', 'i')`;
+    const regexVarName: string | undefined = options.regexVariable;
+    if (options.regexVariable) {
+      lines.push(...[
+        `var regex = (typeof ${regexVarName} !== 'undefined') ? ${regexVarName} : ${regexInitializationSnippet};`
+      ]);
+    } else {
+      lines.push(...[
+        `var regex = ${regexInitializationSnippet};`
+      ]);
+    }
+
+    lines.push(...[
       'var found = false;',
       '',
       'if (scripts && scripts.length) {',
@@ -51,7 +65,7 @@ export function getSetPublicPathCode(options: IInternalOptions, emitWarning: (wa
       '    }',
       '  }',
       '}'
-    ];
+    ]);
   } else {
     if (options.publicPath) {
       lines = [
@@ -126,7 +140,7 @@ function joinLines(lines: string[], linePrefix?: string): string {
   }).join(EOL).replace(new RegExp(`${EOL}${EOL}+`, 'g'), `${EOL}${EOL}`);
 }
 
-function escapeSingleQuotes(str: string): string {
+function escapeSingleQuotes(str: string): string | undefined {
   if (str) {
     return str.replace('\'', '\\\'');
   } else {
@@ -134,7 +148,7 @@ function escapeSingleQuotes(str: string): string {
   }
 }
 
-function appendSlashAndEscapeSingleQuotes(str: string): string {
+function appendSlashAndEscapeSingleQuotes(str: string): string | undefined {
   if (str && str.substr(-1) !== '/') {
     str = str + '/';
   }

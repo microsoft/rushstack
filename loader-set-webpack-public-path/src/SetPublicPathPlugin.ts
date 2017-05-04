@@ -51,10 +51,10 @@ interface ICompilation {
 }
 
 export default class SetPublicPathPlugin implements Plugin {
-  private _options: ISetWebpackPublicPathPluginOptions;
+  public options: ISetWebpackPublicPathPluginOptions;
 
   constructor(options: ISetWebpackPublicPathPluginOptions) {
-    this._options = options;
+    this.options = options;
   }
 
   // This type should be "compiler," but there's another type mismatch issue so we have to stay on
@@ -74,15 +74,15 @@ export default class SetPublicPathPlugin implements Plugin {
         }
 
         if (assetOrChunkFound) {
-          const moduleOptions: IInternalOptions = cloneDeep(this._options);
+          const moduleOptions: IInternalOptions = cloneDeep(this.options);
 
           // If this module has ownership over any chunks or assets, inject the public path code
           moduleOptions.webpackPublicPathVariable = `${compilation.mainTemplate.requireFn}.p`;
           moduleOptions.linePrefix = '  ';
 
-          if (this._options.scriptName) {
-            moduleOptions.regexName = this._options.scriptName.name;
-            if (this._options.scriptName.isTokenized) {
+          if (this.options.scriptName) {
+            moduleOptions.regexName = this.options.scriptName.name;
+            if (this.options.scriptName.isTokenized) {
               moduleOptions.regexName = moduleOptions.regexName.replace(/\[name\]/g, escapeRegExp(chunk.name))
                                                                .replace(/\[hash\]/g, chunk.renderedHash);
             }
