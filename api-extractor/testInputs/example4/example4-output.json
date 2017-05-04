@@ -1,0 +1,217 @@
+{
+  "kind": "package",
+  "summary": [],
+  "remarks": [],
+  "exports": {
+    "MyClass2": {
+      "kind": "class",
+      "extends": "",
+      "implements": "",
+      "typeParameters": [],
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "Here is some sample documentation for this class."
+        }
+      ],
+      "remarks": [],
+      "isBeta": false,
+      "members": {
+        "functionWithExternalType": {
+          "kind": "method",
+          "signature": "public functionWithExternalType(promise: Promise<void>): void;",
+          "accessModifier": "public",
+          "isOptional": false,
+          "isStatic": false,
+          "returnValue": {
+            "type": "void",
+            "description": []
+          },
+          "parameters": {},
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "Testing the type resolution of external API types."
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        },
+        "otherTest": {
+          "kind": "method",
+          "signature": "public otherTest(): MyOtherClass;",
+          "accessModifier": "public",
+          "isOptional": false,
+          "isStatic": false,
+          "returnValue": {
+            "type": "MyOtherClass",
+            "description": []
+          },
+          "parameters": {},
+          "deprecatedMessage": [],
+          "summary": [],
+          "remarks": [],
+          "isBeta": false
+        },
+        "propOne": {
+          "kind": "property",
+          "isOptional": false,
+          "isReadOnly": false,
+          "isStatic": false,
+          "type": "MissingExport",
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "This is a getter to test if the type reference is collected. The API file should show an unresolved type warning."
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        },
+        "renamed": {
+          "kind": "method",
+          "signature": "public renamed(): RenamedExport2;",
+          "accessModifier": "public",
+          "isOptional": false,
+          "isStatic": false,
+          "returnValue": {
+            "type": "RenamedExport2",
+            "description": []
+          },
+          "parameters": {},
+          "deprecatedMessage": [],
+          "summary": [],
+          "remarks": [],
+          "isBeta": false
+        },
+        "test": {
+          "kind": "method",
+          "signature": "public test(library: MyLibrary3): MissingExport;",
+          "accessModifier": "public",
+          "isOptional": false,
+          "isStatic": false,
+          "returnValue": {
+            "type": "MissingExport",
+            "description": []
+          },
+          "parameters": {},
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "Here is some sample documentation for test()."
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        },
+        "testParameterType": {
+          "kind": "method",
+          "signature": "public testParameterType(missing: MissingExport): void;",
+          "accessModifier": "public",
+          "isOptional": false,
+          "isStatic": false,
+          "returnValue": {
+            "type": "void",
+            "description": []
+          },
+          "parameters": {},
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "This function should show a warning in the API file as a result of the parameter type."
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        },
+        "typeLiteralProp": {
+          "kind": "property",
+          "isOptional": false,
+          "isReadOnly": false,
+          "isStatic": false,
+          "type": "[MissingExport]",
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "Here we are testing if type collection is being executed for type literals. The API file should show an unresolved type warning."
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        }
+      }
+    },
+    "MyOtherClass2": {
+      "kind": "class",
+      "extends": "",
+      "implements": "",
+      "typeParameters": [],
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "Here is some sample documentation for this class."
+        }
+      ],
+      "remarks": [],
+      "isBeta": false
+    },
+    "NamespaceExport": {
+      "kind": "namespace",
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "This is a test for the namespace API type. It should be supported and appear in the *api.ts file. At the moment we only support a table of primitive types."
+        }
+      ],
+      "remarks": [],
+      "isBeta": false,
+      "exports": {
+        "booleanConstant1": {
+          "kind": "module variable",
+          "type": "boolean",
+          "value": "true",
+          "deprecatedMessage": [],
+          "summary": [],
+          "remarks": [],
+          "isBeta": false
+        },
+        "numberConstant1": {
+          "kind": "module variable",
+          "type": "number",
+          "value": "24",
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "Number constants are supported"
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        },
+        "stringConstant1": {
+          "kind": "module variable",
+          "type": "string",
+          "value": "'\\uED68'",
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "String constants are supported"
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        }
+      }
+    }
+  }
+}

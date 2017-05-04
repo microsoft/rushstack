@@ -7,24 +7,10 @@ import ApiEnum from './ApiEnum';
 import ApiFunction from './ApiFunction';
 import ApiItem, { ApiItemKind, IApiItemOptions } from './ApiItem';
 import ApiItemContainer from './ApiItemContainer';
+import ApiNamespace from './ApiNamespace';
 import TypeScriptHelpers from '../TypeScriptHelpers';
 import PackageJsonHelpers from '../PackageJsonHelpers';
-
-/**
- * An export name and the symbol from which the export was originally defined.
- *
- * For example, suppose a class is defined as "export default class MyClass { }"
- * but exported from the package's index.ts like this:
- *
- *    export { default as _MyClass } from './MyClass';
- *
- * In this example, the exportedName is _MyClass and the followed symbol will be the
- * original definition of MyClass.
- */
-interface IExportedSymbol {
-  exportedName: string;
-  followedSymbol: ts.Symbol;
-}
+import { IExportedSymbol } from '../IExportedSymbol';
 
 /**
   * This class is part of the ApiItem abstract syntax tree.  It represents the top-level
@@ -83,6 +69,8 @@ export default class ApiPackage extends ApiItemContainer {
 
           if (followedSymbol.flags & (ts.SymbolFlags.Class | ts.SymbolFlags.Interface)) {
             this.addMemberItem(new ApiStructuredType(options));
+          } else if (followedSymbol.flags & ts.SymbolFlags.ValueModule) {
+            this.addMemberItem(new ApiNamespace(options));
           } else if (followedSymbol.flags & ts.SymbolFlags.Function) {
             this.addMemberItem(new ApiFunction(options));
           } else if (followedSymbol.flags & ts.SymbolFlags.Enum) {
@@ -116,18 +104,6 @@ export default class ApiPackage extends ApiItemContainer {
       if (exportedSymbol.followedSymbol === followedSymbol) {
         return exportedSymbol.exportedName;
       }
-    }
-    return undefined;
-  }
-
-  /**
-   * Find a member in this package by name and return it if found.
-   *
-   * @param memberName - the name of the member ApiItem
-   */
-  public getMemberItem(memberName: string): ApiItem {
-    if (this.memberItems.has(memberName)) {
-      return this.memberItems.get(memberName);
     }
     return undefined;
   }

@@ -227,6 +227,45 @@
     },
 
     //---------------------------------------------------------------------------------------------
+    "moduleVariableApiItem": {
+      "description": "A TypeScript BlockScopedVariable",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of API definition",
+          "type": "string",
+          "enum": [ "module variable" ]
+        },
+        "type": {
+          "description": "The data type of this module variable",
+          "type": "string"
+        },
+        "value": {
+          "description": "The value of this module variable",
+          "type": "string"
+        },
+        "summary": {
+          "$ref": "#/definitions/docElementCollection"
+        },
+        "isBeta": {
+          "description": "Whether the API method is beta",
+          "type": "boolean"
+        },
+
+        // Optional properties:
+        "remarks": {
+          "$ref": "#/definitions/docElementCollection"
+        },
+        "deprecatedMessage": {
+          "$ref": "#/definitions/docElementCollection"
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "type", "value", "summary", "isBeta"]
+    },
+
+    //---------------------------------------------------------------------------------------------
     "methodApiItem": {
       "description": "A member function of a TypeScript class or interface",
       "type": "object",
@@ -570,6 +609,48 @@
       },
       "additionalProperties": false,
       "required": [ "kind", "summary", "isBeta" ]
+    },
+
+  //---------------------------------------------------------------------------------------------
+  "namespaceApiItem": {
+      "description": "A TypeScript namespace definition",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of API definition",
+          "type": "string",
+          "enum": [ "namespace" ]
+        },
+        "summary": {
+          "$ref": "#/definitions/docElementCollection"
+        },
+        "exports": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-zA-Z_]+[a-zA-Z_0-9]*$": {
+              "oneOf": [
+                { "$ref": "#/definitions/moduleVariableApiItem" }
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "isBeta": {
+          "description": "Whether the API interface is beta",
+          "type": "boolean"
+        },
+
+        // Optional properties:
+        "remarks": {
+          "$ref": "#/definitions/docElementCollection"
+        },
+        "deprecatedMessage": {
+          "$ref": "#/definitions/docElementCollection"
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "exports", "summary", "isBeta" ]
     }
   },
 
@@ -602,6 +683,7 @@
            "oneOf": [
              { "$ref": "#/definitions/classApiItem" },
              { "$ref": "#/definitions/interfaceApiItem" },
+             { "$ref": "#/definitions/namespaceApiItem" },
              { "$ref": "#/definitions/enumApiItem" },
              { "$ref": "#/definitions/functionApiItem" }
            ]

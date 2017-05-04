@@ -59,7 +59,15 @@ export enum ApiItemKind {
   /**
    * A Typescript class constructor function.
    */
-  Constructor = 10
+  Constructor = 10,
+  /**
+   * A Typescript namespace.
+   */
+  Namespace = 11,
+  /**
+   * A Typescript BlockScopedVariable.
+   */
+  ModuleVariable = 12
 }
 
 /**
