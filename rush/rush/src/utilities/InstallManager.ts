@@ -64,10 +64,6 @@ export default class InstallManager {
         project.cyclicDependencyProjects, project.packageJson.dependencies);
       InstallManager._addDependenciesToMap(rushConfiguration, directDependencies,
         project.cyclicDependencyProjects, project.packageJson.devDependencies);
-
-      // TODO: VSO 346348 - implement this correctly:
-      // InstallManager._addDependenciesToMap(rushConfiguration, directDependencies,
-      //  project.cyclicDependencyProjects, project.packageJson.optionalDependencies);
     });
 
     const implicitlyPinned: Map<string, string> = new Map<string, string>();
@@ -180,7 +176,7 @@ export default class InstallManager {
       console.log(os.EOL + 'Running "npm install" in ' + npmToolFolder);
 
       // NOTE: Here we use whatever version of NPM we happen to find in the PATH
-      Utilities.executeCommandWithRetry('npm', ['install'], MAX_INSTALL_ATTEMPTS, npmToolFolder);
+      Utilities.executeCommandWithRetry('npm', ['install', '--no-optional'], MAX_INSTALL_ATTEMPTS, npmToolFolder);
 
       // Create the marker file to indicate a successful install
       fsx.writeFileSync(npmToolFlagFile, '');
