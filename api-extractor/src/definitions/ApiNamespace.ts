@@ -75,7 +75,7 @@ export default class ApiNamespace extends ApiItemContainer {
         // we do not know how to obtain the JsDoc comment.
         let jsDocNode: ts.Node;
         if (!declaration.parent || !declaration.parent.parent ||
-          !(declaration.parent.parent.kind === ts.SyntaxKind.VariableStatement)) {
+          declaration.parent.parent.kind !== ts.SyntaxKind.VariableStatement) {
           this.reportWarning(`Export "${exportSymbol.name}" expected to have a 'grand' parent ` +
             '"VariableStatement" in order to obtain JsDoc comment');
         } else {
