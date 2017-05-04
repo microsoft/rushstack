@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Wed, 05 Apr 2017 19:21:55 GMT and should not be manually modified.
+This log was last generated on Thu, 04 May 2017 17:45:33 GMT and should not be manually modified.
+
+## 2.4.3
+Thu, 04 May 2017 17:45:33 GMT
+
+### Patches
+
+- Bugfix: Update TypeScriptConfiguration to allow setting a custom version of typescript compiler.
 
 ## 2.4.2
 Wed, 05 Apr 2017 19:21:55 GMT

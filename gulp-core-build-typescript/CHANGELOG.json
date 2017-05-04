@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "2.4.3",
+      "tag": "@microsoft/gulp-core-build-typescript_v2.4.3",
+      "date": "Thu, 04 May 2017 17:45:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bugfix: Update TypeScriptConfiguration to allow setting a custom version of typescript compiler."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.4.2",
       "tag": "@microsoft/gulp-core-build-typescript_v2.4.2",
       "date": "Wed, 05 Apr 2017 19:21:55 GMT",
