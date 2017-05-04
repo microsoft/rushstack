@@ -128,7 +128,6 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     checkFile?: (file: gulpUtil.File) => void
   ): NodeJS.ReadWriteStream {
     /* tslint:disable:typedef */
-    const changed = require('gulp-changed');
     const cleancss = require('gulp-clean-css');
     const clipEmptyFiles = require('gulp-clip-empty-files');
     const clone = require('gulp-clone');
@@ -156,7 +155,6 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       : srcStream);
 
     const baseTask: NodeJS.ReadWriteStream = checkedStream
-      .pipe(changed('src', { extension: scssTsExtName }))
       .pipe(sass.sync({
         importer: (url: string, prev: string, done: boolean): Object => ({ file: _patchSassUrl(url) })
       }).on('error', function (error: Error): void {
