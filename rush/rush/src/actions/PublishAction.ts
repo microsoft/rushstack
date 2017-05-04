@@ -23,6 +23,7 @@ import PublishUtilities, {
   IChangeInfoHash
 } from '../utilities/PublishUtilities';
 import ChangelogGenerator from '../utilities/ChangelogGenerator';
+import GitPolicy from '../utilities/GitPolicy';
 import PrereleaseToken from '../utilities/PrereleaseToken';
 
 export default class PublishAction extends CommandLineAction {
@@ -121,6 +122,11 @@ export default class PublishAction extends CommandLineAction {
    * Executes the publish action, which will read change request files, apply changes to package.jsons,
    */
   protected onExecute(): void {
+    if (!GitPolicy.check(this._rushConfiguration)) {
+      process.exit(1);
+      return;
+    }
+
     console.log(`Starting "rush publish" ${EOL}`);
 
     this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
