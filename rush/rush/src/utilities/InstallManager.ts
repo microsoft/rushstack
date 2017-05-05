@@ -176,6 +176,21 @@ export default class InstallManager {
       console.log(os.EOL + 'Running "npm install" in ' + npmToolFolder);
 
       // NOTE: Here we use whatever version of NPM we happen to find in the PATH
+
+      // NOTE: we do NOT install optional dependencies for Rush, as it seems that optional dependencies do not
+      //       work properly with shrinkwrap. Consider the "fsevents" package. This is a Mac specific package
+      //       which is an optional second-order dependency. Optional dependencies work by attempting to install
+      //       the package, but removes the package if the install failed.
+      //       This means that someone running generate on a Mac WILL have fsevents included in their shrinkwrap.
+      //       When someone using Windows attempts to install from the shrinkwrap, the install will fail.
+      //
+      //       If someone generates the shrinkwrap using Windows, then fsevents will NOT be listed in the shrinkwrap.
+      //       When someone using Mac attempts to install from the shrinkwrap, (as of NPM 4), they will NOT have the
+      //       optional dependency installed.
+      //
+      //       One possible solution would be to have the shrinkwrap include information about whether the dependency
+      //       is optional or not, but it does not appear to do so. Also, this would result in strange behavior where
+      //       people would have different node_modules based on their system.
       Utilities.executeCommandWithRetry('npm', ['install', '--no-optional'], MAX_INSTALL_ATTEMPTS, npmToolFolder);
 
       // Create the marker file to indicate a successful install
