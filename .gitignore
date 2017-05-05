@@ -39,3 +39,4 @@ node_modules
 lib
 lib-amd
 coverage
+temp
