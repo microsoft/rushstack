@@ -1,3 +1,5 @@
+/// <reference types="mocha" />
+
 import { expect } from 'chai';
 import {
   detokenize,
@@ -6,7 +8,7 @@ import {
   loadStyles,
   configureLoadStyles,
   IThemingInstruction
-} from './index';
+} from './../index';
 
 describe('detokenize', () => {
   it('handles colors', () => {
@@ -67,7 +69,7 @@ describe('detokenize', () => {
 
   it('passes the styles to loadStyles override callback', () => {
     const expected: string = 'xxx.foo { color: #FFF }xxx';
-    let subject: string;
+    let subject: string | undefined = undefined;
 
     const callback: (str: string) => void = (str: string) => {
       subject = 'xxx' + str + 'xxx';
