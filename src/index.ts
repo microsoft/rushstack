@@ -28,10 +28,10 @@ interface IExtendedHtmlStyleElement extends HTMLStyleElement {
 }
 
 interface IThemeState {
-  theme: ITheme;
+  theme: ITheme | undefined;
   lastStyleElement: IExtendedHtmlStyleElement;
   registeredStyles: IStyleRecord[];
-  loadStyles: (processedStyles: string, rawStyles?: string | ThemableArray) => void;
+  loadStyles: ((processedStyles: string, rawStyles?: string | ThemableArray) => void) | undefined;
 }
 
 interface IStyleRecord {
@@ -56,9 +56,8 @@ const _themeState: IThemeState = _root.__themeState__ = _root.__themeState__ || 
 /**
  * Matches theming tokens. For example, "[theme: themeSlotName, default: #FFF]" (including the quotes).
  */
-/* tslint:disable: max-line-length */
+// tslint:disable-next-line:max-line-length
 const _themeTokenRegex: RegExp = /[\'\"]\[theme:\s*(\w+)\s*(?:\,\s*default:\s*([\\"\']?[\.\,\(\)\#\-\s\w]*[\.\,\(\)\#\-\w][\"\']?))?\s*\][\'\"]/g;
-/* tslint:enable: max-line-length */
 
 /** Maximum style text length, for supporting IE style restrictions. */
 const MAX_STYLE_CONTENT_SIZE: number = 10000;
@@ -80,11 +79,11 @@ export function loadStyles(styles: string | ThemableArray): void {
 
 /**
  * Allows for customizable loadStyles logic. e.g. for server side rendering application
- * @param {(processedStyles: string, rawStyles?: string | ThemableArray) => void} 
+ * @param {(processedStyles: string, rawStyles?: string | ThemableArray) => void}
  * a loadStyles callback that gets called when styles are loaded or reloaded
  */
 export function configureLoadStyles(
-    loadStyles: (processedStyles: string, rawStyles?: string | ThemableArray) => void
+    loadStyles: ((processedStyles: string, rawStyles?: string | ThemableArray) => void) | undefined
   ): void {
   _themeState.loadStyles = loadStyles;
 }
@@ -110,7 +109,7 @@ function applyThemableStyles(stylesArray: ThemableArray, styleRecord?: IStyleRec
  * replaced.
  * @param {theme} theme JSON object of theme tokens to values.
  */
-export function loadTheme(theme: ITheme): void {
+export function loadTheme(theme: ITheme | undefined): void {
   _themeState.theme = theme;
 
   // reload styles.
@@ -145,7 +144,7 @@ function reloadStyles(): void {
  * Find theme tokens and replaces them with provided theme values.
  * @param {string} styles Tokenized styles to fix.
  */
-export function detokenize(styles: string): string {
+export function detokenize(styles: string | undefined): string | undefined {
   if (styles) {
     styles = resolveThemableArray(splitStyles(styles));
   }
@@ -159,23 +158,22 @@ export function detokenize(styles: string): string {
  */
 function resolveThemableArray(splitStyleArray: ThemableArray): string {
   const { theme }: IThemeState = _themeState;
-  let resolvedCss: string;
   if (splitStyleArray) {
     // Resolve the array of theming instructions to an array of strings.
     // Then join the array to produce the final CSS string.
-    const resolvedArray: string[] = splitStyleArray.map((currentValue: IThemingInstruction) => {
-      const themeSlot: string = currentValue.theme;
+    const resolvedArray: (string | undefined)[] = splitStyleArray.map((currentValue: IThemingInstruction) => {
+      const themeSlot: string | undefined = currentValue.theme;
       if (themeSlot) {
         // A theming annotation. Resolve it.
-        const themedValue: string = theme ? theme[themeSlot] : undefined;
-        const defaultValue: string = currentValue.defaultValue;
+        const themedValue: string | undefined = theme ? theme[themeSlot] : undefined;
+        const defaultValue: string | undefined = currentValue.defaultValue;
 
-        // Warn to console if we hit an unthemed value even when themes are provided.
+        // Warn to console if we hit an unthemed value even when themes are provided, unless "DEBUG" is false or
+        //  isn't present.
         // Allow the themedValue to be undefined to explicitly request the default value.
-        if (theme && !themedValue && console && !(themeSlot in theme)) {
-          /* tslint:disable: max-line-length */
+        if (theme && !themedValue && console && !(themeSlot in theme) && (typeof DEBUG === 'undefined' || DEBUG)) {
+          // tslint:disable-next-line:max-line-length
           console.warn(`Theming value not provided for "${themeSlot}". Falling back to "${defaultValue || 'inherit'}".`);
-          /* tslint:enable: max-line-length */
         }
 
         return themedValue || defaultValue || 'inherit';
@@ -185,10 +183,10 @@ function resolveThemableArray(splitStyleArray: ThemableArray): string {
       }
     });
 
-    resolvedCss = resolvedArray.join('');
+    return resolvedArray.join('');
+  } else {
+    return '';
   }
-
-  return resolvedCss;
 }
 
 /**
@@ -199,7 +197,7 @@ export function splitStyles(styles: string): ThemableArray {
   const result: ThemableArray = [];
   if (styles) {
     let pos: number = 0; // Current position in styles.
-    let tokenMatch: RegExpExecArray;
+    let tokenMatch: RegExpExecArray | null; // tslint:disable-line:no-null-keyword
     while (tokenMatch = _themeTokenRegex.exec(styles)) {
       const matchIndex: number = tokenMatch.index;
       if (matchIndex > pos) {
@@ -262,9 +260,10 @@ function registerStyles(styleArray: ThemableArray, styleRecord?: IStyleRecord): 
  */
 function registerStylesIE(styleArray: ThemableArray, styleRecord?: IStyleRecord): void {
   const head: HTMLHeadElement = document.getElementsByTagName('head')[0];
-  let { lastStyleElement, registeredStyles }: IThemeState = _themeState;
+  const registeredStyles: IStyleRecord[] = _themeState.registeredStyles;
+  let lastStyleElement: IExtendedHtmlStyleElement = _themeState.lastStyleElement;
 
-  const stylesheet: IStyleSheet = lastStyleElement ? lastStyleElement.styleSheet : undefined;
+  const stylesheet: IStyleSheet | undefined = lastStyleElement ? lastStyleElement.styleSheet : undefined;
   const lastStyleContent: string = stylesheet ? stylesheet.cssText : '';
   let lastRegisteredStyle: IStyleRecord = registeredStyles[registeredStyles.length - 1];
   const resolvedStyleText: string = resolveThemableArray(styleArray);
