@@ -1,6 +1,13 @@
 # Change Log - @microsoft/loader-set-webpack-public-path
 
-This log was last generated on Tue, 28 Feb 2017 02:01:29 GMT and should not be manually modified.
+This log was last generated on Fri, 05 May 2017 01:02:35 GMT and should not be manually modified.
+
+## 2.1.0
+Fri, 05 May 2017 01:02:35 GMT
+
+### Minor changes
+
+- Allowing the regular expression that is used to find the script to be provided by a named variable in-context.
 
 ## 2.0.2
 Tue, 28 Feb 2017 02:01:29 GMT
