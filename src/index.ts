@@ -158,35 +158,30 @@ export function detokenize(styles: string | undefined): string | undefined {
  */
 function resolveThemableArray(splitStyleArray: ThemableArray): string {
   const { theme }: IThemeState = _themeState;
-  if (splitStyleArray) {
-    // Resolve the array of theming instructions to an array of strings.
-    // Then join the array to produce the final CSS string.
-    const resolvedArray: (string | undefined)[] = splitStyleArray.map((currentValue: IThemingInstruction) => {
-      const themeSlot: string | undefined = currentValue.theme;
-      if (themeSlot) {
-        // A theming annotation. Resolve it.
-        const themedValue: string | undefined = theme ? theme[themeSlot] : undefined;
-        const defaultValue: string | undefined = currentValue.defaultValue;
+  // Resolve the array of theming instructions to an array of strings.
+  // Then join the array to produce the final CSS string.
+  const resolvedArray: (string | undefined)[] = (splitStyleArray || []).map((currentValue: IThemingInstruction) => {
+    const themeSlot: string | undefined = currentValue.theme;
+    if (themeSlot) {
+      // A theming annotation. Resolve it.
+      const themedValue: string | undefined = theme ? theme[themeSlot] : undefined;
+      const defaultValue: string = currentValue.defaultValue || 'inherit';
 
-        // Warn to console if we hit an unthemed value even when themes are provided, unless "DEBUG" is false or
-        //  isn't present.
-        // Allow the themedValue to be undefined to explicitly request the default value.
-        if (theme && !themedValue && console && !(themeSlot in theme) && (typeof DEBUG === 'undefined' || DEBUG)) {
-          // tslint:disable-next-line:max-line-length
-          console.warn(`Theming value not provided for "${themeSlot}". Falling back to "${defaultValue || 'inherit'}".`);
-        }
-
-        return themedValue || defaultValue || 'inherit';
-      } else {
-        // A non-themable string. Preserve it.
-        return currentValue.rawString;
+      // Warn to console if we hit an unthemed value even when themes are provided, unless "DEBUG" is false or
+      //  isn't present.
+      // Allow the themedValue to be undefined to explicitly request the default value.
+      if (theme && !themedValue && console && !(themeSlot in theme) && (typeof DEBUG === 'undefined' || DEBUG)) {
+        console.warn(`Theming value not provided for "${themeSlot}". Falling back to "${defaultValue}".`);
       }
-    });
 
-    return resolvedArray.join('');
-  } else {
-    return '';
-  }
+      return themedValue || defaultValue;
+    } else {
+      // A non-themable string. Preserve it.
+      return currentValue.rawString;
+    }
+  });
+
+  return resolvedArray.join('');
 }
 
 /**
