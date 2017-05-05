@@ -3,14 +3,14 @@
   "version": "0.0.0",
   "dependencies": {
     "@microsoft/api-extractor": {
-      "version": "2.0.4",
-      "from": "@microsoft/api-extractor@>=2.0.3 <3.0.0",
-      "resolved": "https://registry.npmjs.org/@microsoft/api-extractor/-/api-extractor-2.0.4.tgz"
+      "version": "2.0.6",
+      "from": "@microsoft/api-extractor@>=2.0.5 <3.0.0",
+      "resolved": "https://registry.npmjs.org/@microsoft/api-extractor/-/api-extractor-2.0.6.tgz"
     },
     "@microsoft/gulp-core-build": {
-      "version": "2.4.4",
+      "version": "2.5.0",
       "from": "@microsoft/gulp-core-build@>=2.4.3 <3.0.0",
-      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build/-/gulp-core-build-2.4.4.tgz"
+      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build/-/gulp-core-build-2.5.0.tgz"
     },
     "@microsoft/gulp-core-build-mocha": {
       "version": "2.0.3",
@@ -18,9 +18,9 @@
       "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-mocha/-/gulp-core-build-mocha-2.0.3.tgz"
     },
     "@microsoft/gulp-core-build-typescript": {
-      "version": "3.0.4",
+      "version": "3.1.1",
       "from": "@microsoft/gulp-core-build-typescript@>=3.0.3 <4.0.0",
-      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-typescript/-/gulp-core-build-typescript-3.0.4.tgz",
+      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-typescript/-/gulp-core-build-typescript-3.1.1.tgz",
       "dependencies": {
         "lodash": {
           "version": "4.15.0",
@@ -30,9 +30,9 @@
       }
     },
     "@microsoft/load-themed-styles": {
-      "version": "1.3.0",
-      "from": "@microsoft/load-themed-styles@>=1.3.0 <1.4.0",
-      "resolved": "https://registry.npmjs.org/@microsoft/load-themed-styles/-/load-themed-styles-1.3.0.tgz"
+      "version": "1.4.0",
+      "from": "@microsoft/load-themed-styles@>=1.4.0 <1.5.0",
+      "resolved": "https://registry.npmjs.org/@microsoft/load-themed-styles/-/load-themed-styles-1.4.0.tgz"
     },
     "@microsoft/node-library-build": {
       "version": "3.0.1",
@@ -78,11 +78,6 @@
       "version": "4.14.52",
       "from": "@types/lodash@4.14.52",
       "resolved": "https://registry.npmjs.org/@types/lodash/-/lodash-4.14.52.tgz"
-    },
-    "@types/mkdirp": {
-      "version": "0.3.29",
-      "from": "@types/mkdirp@0.3.29",
-      "resolved": "https://registry.npmjs.org/@types/mkdirp/-/mkdirp-0.3.29.tgz"
     },
     "@types/mocha": {
       "version": "2.2.38",
@@ -165,9 +160,9 @@
       "resolved": "https://registry.npmjs.org/abbrev/-/abbrev-1.0.9.tgz"
     },
     "ajv": {
-      "version": "4.11.7",
+      "version": "4.11.8",
       "from": "ajv@>=4.9.1 <5.0.0",
-      "resolved": "https://registry.npmjs.org/ajv/-/ajv-4.11.7.tgz",
+      "resolved": "https://registry.npmjs.org/ajv/-/ajv-4.11.8.tgz",
       "optional": true
     },
     "align-text": {
@@ -181,9 +176,21 @@
       "resolved": "https://registry.npmjs.org/amdefine/-/amdefine-1.0.1.tgz"
     },
     "ansi-align": {
-      "version": "1.1.0",
-      "from": "ansi-align@>=1.1.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/ansi-align/-/ansi-align-1.1.0.tgz"
+      "version": "2.0.0",
+      "from": "ansi-align@>=2.0.0 <3.0.0",
+      "resolved": "https://registry.npmjs.org/ansi-align/-/ansi-align-2.0.0.tgz",
+      "dependencies": {
+        "is-fullwidth-code-point": {
+          "version": "2.0.0",
+          "from": "is-fullwidth-code-point@>=2.0.0 <3.0.0",
+          "resolved": "https://registry.npmjs.org/is-fullwidth-code-point/-/is-fullwidth-code-point-2.0.0.tgz"
+        },
+        "string-width": {
+          "version": "2.0.0",
+          "from": "string-width@>=2.0.0 <3.0.0",
+          "resolved": "https://registry.npmjs.org/string-width/-/string-width-2.0.0.tgz"
+        }
+      }
     },
     "ansi-regex": {
       "version": "2.1.1",
@@ -317,9 +324,9 @@
       "resolved": "https://registry.npmjs.org/boom/-/boom-2.10.1.tgz"
     },
     "boxen": {
-      "version": "1.0.0",
+      "version": "1.1.0",
       "from": "boxen@>=1.0.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/boxen/-/boxen-1.0.0.tgz",
+      "resolved": "https://registry.npmjs.org/boxen/-/boxen-1.1.0.tgz",
       "dependencies": {
         "camelcase": {
           "version": "4.1.0",
@@ -717,9 +724,9 @@
       "resolved": "https://registry.npmjs.org/expand-tilde/-/expand-tilde-1.2.2.tgz"
     },
     "extend": {
-      "version": "3.0.0",
+      "version": "3.0.1",
       "from": "extend@>=3.0.0 <4.0.0",
-      "resolved": "https://registry.npmjs.org/extend/-/extend-3.0.0.tgz"
+      "resolved": "https://registry.npmjs.org/extend/-/extend-3.0.1.tgz"
     },
     "extend-shallow": {
       "version": "2.0.1",
@@ -747,9 +754,9 @@
       "resolved": "https://registry.npmjs.org/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz"
     },
     "filename-regex": {
-      "version": "2.0.0",
+      "version": "2.0.1",
       "from": "filename-regex@>=2.0.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/filename-regex/-/filename-regex-2.0.0.tgz"
+      "resolved": "https://registry.npmjs.org/filename-regex/-/filename-regex-2.0.1.tgz"
     },
     "fileset": {
       "version": "0.2.1",
@@ -856,9 +863,9 @@
       "resolved": "https://registry.npmjs.org/get-stream/-/get-stream-3.0.0.tgz"
     },
     "getpass": {
-      "version": "0.1.6",
+      "version": "0.1.7",
       "from": "getpass@>=0.1.1 <0.2.0",
-      "resolved": "https://registry.npmjs.org/getpass/-/getpass-0.1.6.tgz",
+      "resolved": "https://registry.npmjs.org/getpass/-/getpass-0.1.7.tgz",
       "optional": true,
       "dependencies": {
         "assert-plus": {
@@ -1245,9 +1252,9 @@
       "resolved": "https://registry.npmjs.org/gulplog/-/gulplog-1.0.0.tgz"
     },
     "handlebars": {
-      "version": "4.0.6",
+      "version": "4.0.8",
       "from": "handlebars@>=4.0.1 <5.0.0",
-      "resolved": "https://registry.npmjs.org/handlebars/-/handlebars-4.0.6.tgz",
+      "resolved": "https://registry.npmjs.org/handlebars/-/handlebars-4.0.8.tgz",
       "dependencies": {
         "source-map": {
           "version": "0.4.4",
@@ -1362,7 +1369,7 @@
     },
     "is-buffer": {
       "version": "1.1.5",
-      "from": "is-buffer@>=1.0.2 <2.0.0",
+      "from": "is-buffer@>=1.1.5 <2.0.0",
       "resolved": "https://registry.npmjs.org/is-buffer/-/is-buffer-1.1.5.tgz"
     },
     "is-builtin-module": {
@@ -1705,9 +1712,9 @@
       }
     },
     "kind-of": {
-      "version": "3.1.0",
+      "version": "3.2.0",
       "from": "kind-of@>=3.0.2 <4.0.0",
-      "resolved": "https://registry.npmjs.org/kind-of/-/kind-of-3.1.0.tgz"
+      "resolved": "https://registry.npmjs.org/kind-of/-/kind-of-3.2.0.tgz"
     },
     "klaw": {
       "version": "1.3.1",
@@ -2393,9 +2400,9 @@
       "resolved": "https://registry.npmjs.org/regex-cache/-/regex-cache-0.4.3.tgz"
     },
     "registry-auth-token": {
-      "version": "3.2.0",
+      "version": "3.3.1",
       "from": "registry-auth-token@>=3.0.1 <4.0.0",
-      "resolved": "https://registry.npmjs.org/registry-auth-token/-/registry-auth-token-3.2.0.tgz"
+      "resolved": "https://registry.npmjs.org/registry-auth-token/-/registry-auth-token-3.3.1.tgz"
     },
     "registry-url": {
       "version": "3.1.0",
@@ -2786,9 +2793,9 @@
       "resolved": "https://registry.npmjs.org/tslint-microsoft-contrib/-/tslint-microsoft-contrib-4.0.1.tgz"
     },
     "tsutils": {
-      "version": "1.7.0",
+      "version": "1.8.0",
       "from": "tsutils@>=1.1.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/tsutils/-/tsutils-1.7.0.tgz"
+      "resolved": "https://registry.npmjs.org/tsutils/-/tsutils-1.8.0.tgz"
     },
     "tunnel-agent": {
       "version": "0.6.0",
@@ -3000,9 +3007,9 @@
       "resolved": "https://registry.npmjs.org/wrappy/-/wrappy-1.0.2.tgz"
     },
     "write-file-atomic": {
-      "version": "1.3.2",
+      "version": "1.3.4",
       "from": "write-file-atomic@>=1.1.2 <2.0.0",
-      "resolved": "https://registry.npmjs.org/write-file-atomic/-/write-file-atomic-1.3.2.tgz"
+      "resolved": "https://registry.npmjs.org/write-file-atomic/-/write-file-atomic-1.3.4.tgz"
     },
     "xdg-basedir": {
       "version": "3.0.0",
