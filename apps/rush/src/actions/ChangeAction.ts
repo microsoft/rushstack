@@ -37,7 +37,7 @@ export default class ChangeAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
   private _rushConfiguration: RushConfiguration;
   private _sortedProjectList: string[];
-  private _changeFileData: IChangeFile;
+  private _changeFileData: Map<string, IChangeFile>;
   private _verifyParameter: CommandLineFlagParameter;
   private _targetBranch: CommandLineStringParameter;
 
@@ -99,10 +99,7 @@ export default class ChangeAction extends CommandLineAction {
     }
 
     this._prompt = inquirer.createPromptModule();
-    this._changeFileData = {
-      changes: [],
-      email: undefined
-    };
+    this._changeFileData = new Map<string, IChangeFile>();
 
     // We should consider making onExecute either be an async/await or have it return a promise
     this._promptLoop()
@@ -181,7 +178,16 @@ export default class ChangeAction extends CommandLineAction {
         .then((answers: IChangeInfo) => {
 
           // Save the info into the changefile
-          this._changeFileData.changes.push(answers);
+          let changeFile: IChangeFile = this._changeFileData.get(answers.packageName);
+          if (!changeFile) {
+            changeFile = {
+              changes: [],
+              packageName: answers.packageName,
+              email: undefined
+            };
+            this._changeFileData.set(answers.packageName, changeFile);
+          }
+          changeFile.changes.push(answers);
 
           // Continue to loop
           return this._promptLoop();
@@ -191,8 +197,10 @@ export default class ChangeAction extends CommandLineAction {
       this._warnUncommitedChanges();
       // We are done, collect their e-mail
       return this._detectOrAskForEmail().then((email: string) => {
-        this._changeFileData.email = email;
-        return this._writeChangeFile();
+        this._changeFileData.forEach((changeFile: IChangeFile) => {
+          changeFile.email = email;
+        });
+        return this._writeChangeFiles();
       });
     }
   }
@@ -318,8 +326,24 @@ export default class ChangeAction extends CommandLineAction {
   /**
    * Writes changefile to the common/changes folder. Will prompt for overwrite if file already exists.
    */
-  private _writeChangeFile(): Promise<void> {
-    const output: string = JSON.stringify(this._changeFileData, undefined, 2);
+  private _writeChangeFiles(): Promise<void> {
+    const promises: Promise<void>[] = [];
+    this._changeFileData.forEach((changeFile: IChangeFile) => {
+      promises.push(this._writeChangeFile(changeFile));
+    });
+
+    return new Promise<void>((resolve, reject) => {
+      Promise.all(promises).then(() => {
+        resolve();
+      })
+      .catch(e => {
+        reject(e);
+      });
+    });
+  }
+
+  private _writeChangeFile(changeFile: IChangeFile): Promise<void> {
+    const output: string = JSON.stringify(changeFile, undefined, 2);
 
     let branch: string = undefined;
     try {
@@ -332,7 +356,10 @@ export default class ChangeAction extends CommandLineAction {
       this._escapeFilename(`${branch}_${this._getTimestamp()}.json`) :
       `${this._getTimestamp()}.json`);
 
-    const filepath: string = path.join(this._rushConfiguration.commonFolder, 'changes', filename);
+    const filepath: string = path.join(this._rushConfiguration.commonFolder,
+      'changes',
+      changeFile.packageName,
+      filename);
 
     if (fsx.existsSync(filepath)) {
       // prompt about overwrite

@@ -7,6 +7,7 @@
  */
 export interface IChangeFile {
   changes: IChangeInfo[];
+  packageName: string;
   email: string;
 }
 

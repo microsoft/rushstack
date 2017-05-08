@@ -59,6 +59,8 @@ interface IChangeFile {
   changes: IChangeInfo[];
   // (undocumented)
   email: string;
+  // (undocumented)
+  packageName: string;
 }
 
 // @public
