@@ -144,25 +144,6 @@ export default class PublishUtilities {
     return LOOSE_PKG_REGEX.test(version);
   }
 
-  /**
-   * Find changed packages that are not included in the provided change file.
-   */
-  public static findMissingChangedPackages(
-    changeFileFullPath: string,
-    changedPackages: string[]
-  ): string[] {
-    const changeRequest: IChangeInfo = JSON.parse(fsx.readFileSync(changeFileFullPath, 'utf8'));
-    const requiredSet: Set<string> = new Set(changedPackages);
-    changeRequest.changes.forEach(change => {
-      requiredSet.delete(change.packageName);
-    });
-    const missingProjects: string[] = [];
-    requiredSet.forEach(name => {
-      missingProjects.push(name);
-    });
-    return missingProjects;
-  }
-
   private static _updateCommitDetails(filename: string, changes: IChangeInfo[]): void {
     try {
       const fileLog: string = execSync('git log -n 1 ' + filename, { cwd: path.dirname(filename) }).toString();

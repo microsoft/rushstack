@@ -25,7 +25,7 @@ import {
 } from '@microsoft/rush-lib';
 
 import RushCommandLineParser from './RushCommandLineParser';
-import PublishUtilities from '../utilities/PublishUtilities';
+import ChangeFiles from '../utilities/ChangeFiles';
 
 const BUMP_OPTIONS: { [type: string]: string } = {
   'major': 'major - for breaking changes (ex: renaming a file)',
@@ -127,24 +127,10 @@ export default class ChangeAction extends CommandLineAction {
   }
 
   private _validateChangeFile(changedPackages: string[]): void {
-    const changeFiles: string[] = this._getChangeFiles();
-    if (changeFiles.length === 1) {
-      console.log('Found one change file: ' + changeFiles[0]);
-      this._validateChangedProjects(changeFiles[0], changedPackages);
-    } else if (changeFiles.length === 0) {
-      throw new Error(`No change file is found. Run 'rush change' to generate a change file.`);
-    } else {
-      throw new Error('More than one change file was found. Delete and only keep one.');
-    }
-  }
-
-  private _validateChangedProjects(changeFile: string,
-    changedPackages: string[]): void {
-    const fileFullPath: string = path.join(this._rushConfiguration.rushJsonFolder, changeFile);
-    const missingPackages: string[] = PublishUtilities.findMissingChangedPackages(fileFullPath, changedPackages);
-    if (missingPackages.length > 0) {
-      throw new Error(`Change file does not contain ${missingPackages.join(',')}.`);
-    }
+    const files: string[] = this._getChangeFiles().map(relativePath => {
+      return path.join(this._rushConfiguration.rushJsonFolder, relativePath);
+    });
+    ChangeFiles.validate(files, changedPackages);
   }
 
   private _getChangeFiles(): string[] {
