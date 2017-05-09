@@ -22,6 +22,7 @@ export interface IChangeInfoHash {
 }
 import { execSync } from 'child_process';
 import PrereleaseToken from './PrereleaseToken';
+import ChangeFiles from './ChangeFiles';
 
 export default class PublishUtilities {
   /**
@@ -31,22 +32,19 @@ export default class PublishUtilities {
    */
   public static findChangeRequests(
     allPackages: Map<string, RushConfigurationProject>,
-    changesPath: string,
+    changeFiles: ChangeFiles,
     includeCommitDetails?: boolean,
     prereleaseToken?: PrereleaseToken
   ): IChangeInfoHash {
 
-    let changeFiles: string[] = [];
     const allChanges: IChangeInfoHash = {};
-    console.log(`Finding changes in: ${changesPath}`);
+    console.log(`Finding changes in: ${changeFiles.getChangesPath()}`);
 
-    try {
-      changeFiles = fsx.readdirSync(changesPath).filter(filename => path.extname(filename) === '.json');
-    } catch (e) { /* no-op */ }
+    const files: string[] = changeFiles.getFiles();
 
     // Add the minimum changes defined by the change descriptions.
-    changeFiles.forEach((file: string) => {
-      const fullPath: string = path.resolve(changesPath, file);
+    files.forEach((file: string) => {
+      const fullPath: string = path.resolve(changeFiles.getChangesPath(), file);
       const changeRequest: IChangeInfo = JSON.parse(fsx.readFileSync(fullPath, 'utf8'));
 
       if (includeCommitDetails) {
