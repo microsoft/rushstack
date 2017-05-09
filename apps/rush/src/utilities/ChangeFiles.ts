@@ -8,16 +8,20 @@ import {
 
 export default class ChangeFiles {
 
+  // Change file path relative to changes folder.
   private _files: string[];
 
+  /**
+   * Validate if the newly added change files match the changed packages.
+   */
   public static validate(
-    newChangeFilesPaths: string[],
+    newChangeFilePaths: string[],
     changedPackages: string[]
   ): void {
-    if (newChangeFilesPaths.length === 1) {
-      console.log('Found one change file: ' + newChangeFilesPaths[0]);
-      this._validateChangedProjects(newChangeFilesPaths[0], changedPackages);
-    } else if (newChangeFilesPaths.length === 0) {
+    if (newChangeFilePaths.length === 1) {
+      console.log('Found one change file: ' + newChangeFilePaths[0]);
+      this._validateChangedProjects(newChangeFilePaths[0], changedPackages);
+    } else if (newChangeFilePaths.length === 0) {
       throw new Error(`No change file is found. Run 'rush change' to generate a change file.`);
     } else {
       throw new Error('More than one change file was found. Delete and only keep one.');
@@ -73,6 +77,9 @@ export default class ChangeFiles {
     return this._changesPath;
   }
 
+  /**
+   * Delete all change files
+   */
   public deleteAll(shouldDelete: boolean): void {
     if (this._files.length) {
       console.log(
