@@ -178,6 +178,7 @@ export function RegexErrorDetector(regex: RegExp,
 class RushConfiguration {
   public readonly committedShrinkwrapFilename: string;
   public readonly commonFolder: string;
+  public readonly commonRushConfigFolder: string;
   public readonly commonTempFolder: string;
   public findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject;
   public findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
@@ -193,7 +194,6 @@ class RushConfiguration {
   public readonly npmToolFilename: string;
   public readonly npmToolVersion: string;
   public readonly packageReviewFile: string;
-  // (undocumented)
   public readonly pinnedVersions: PinnedVersionsConfiguration;
   public readonly projectFolderMaxDepth: number;
   public readonly projectFolderMinDepth: number;
@@ -226,12 +226,21 @@ class RushConfigurationProject {
 }
 
 // @public
-class RushConstants {
-  public static nodeModulesFolderName: string;
-  public static npmShrinkwrapFilename: string;
-  public static rushTempFolderName: string;
-  public static rushTempNpmScope: string;
-  public static rushTempProjectsFolderName: string;
+module RushConstants {
+  commonFolderName: string = 'common';
+
+  nodeModulesFolderName: string = 'node_modules';
+
+  npmShrinkwrapFilename: string = 'npm-shrinkwrap.json';
+
+  pinnedVersionsFilename: string = 'pinnedVersions.json';
+
+  rushTempFolderName: string = 'temp';
+
+  rushTempNpmScope: string = '@rush-temp';
+
+  rushTempProjectsFolderName: string = 'projects';
+
 }
 
 // @public

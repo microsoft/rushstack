@@ -1,0 +1,21 @@
+{
+  "rushMinimumVersion": "2.5.0",
+  "npmVersion": "4.5.0",
+  "projects": [
+
+    {
+      "packageName": "project1",
+      "projectFolder": "project1"
+    },
+
+    {
+      "packageName": "project2",
+      "projectFolder": "project2"
+    },
+
+    {
+      "packageName": "project3",
+      "projectFolder": "project3"
+    }
+  ]
+}

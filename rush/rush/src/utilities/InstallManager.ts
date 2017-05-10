@@ -289,7 +289,7 @@ export default class InstallManager {
 
     // Also copy down the committed .npmrc file, if there is one
     // "common\.npmrc" --> "common\temp\.npmrc"
-    const committedNpmrcPath: string = path.join(this._rushConfiguration.commonFolder, '.npmrc');
+    const committedNpmrcPath: string = path.join(this._rushConfiguration.commonRushConfigFolder, '.npmrc');
     const tempNpmrcPath: string = path.join(this._rushConfiguration.commonTempFolder, '.npmrc');
     this.syncFile(committedNpmrcPath, tempNpmrcPath);
 
@@ -465,26 +465,12 @@ export default class InstallManager {
         return;
       }
     } else {
-      // Since cleanInstall=true, we need to start by cleaning the cache
-      if (this._rushConfiguration.npmCacheFolder) {
-        console.log(`Deleting the NPM cache folder`);
-        // This is faster and more thorough than "npm cache clean"
-        this._asyncRecycler.moveFolder(this._rushConfiguration.npmCacheFolder);
-      } else if (installType === InstallType.UnsafePurge) {
-        console.log(os.EOL + `Running "npm cache clean" to clean the global cache`);
-        const npmArgs: string[] = ['cache', 'clean'];
-        this.pushConfigurationNpmArgs(npmArgs);
-        Utilities.executeCommand(npmToolFilename, npmArgs, this._rushConfiguration.commonTempFolder);
-      } else {
-        // The global NPM cache is (inexplicably) not threadsafe, so if there are any
-        // concurrent "npm install" processes running this would cause them to crash.
-        console.log(os.EOL + 'Skipping "npm cache clean" because the cache is global.');
-      }
+      console.log(`Deleting the NPM cache folder`);
+      // This is faster and more thorough than "npm cache clean"
+      this._asyncRecycler.moveFolder(this._rushConfiguration.npmCacheFolder);
 
-      if (this._rushConfiguration.npmTmpFolder) {
-        console.log(`Deleting the "npm-tmp" folder`);
-        this._asyncRecycler.moveFolder(this._rushConfiguration.npmTmpFolder);
-      }
+      console.log(`Deleting the "npm-tmp" folder`);
+      this._asyncRecycler.moveFolder(this._rushConfiguration.npmTmpFolder);
     }
 
     if (markerFileExistedAtStart) {
@@ -569,13 +555,8 @@ export default class InstallManager {
    * to the command-line.
    */
   public pushConfigurationNpmArgs(npmArgs: string[]): void {
-    if (this._rushConfiguration.npmCacheFolder) {
-      npmArgs.push('--cache', this._rushConfiguration.npmCacheFolder);
-    }
-
-    if (this._rushConfiguration.npmTmpFolder) {
-      npmArgs.push('--tmp', this._rushConfiguration.npmTmpFolder);
-    }
+    npmArgs.push('--cache', this._rushConfiguration.npmCacheFolder);
+    npmArgs.push('--tmp', this._rushConfiguration.npmTmpFolder);
   }
 
   /**

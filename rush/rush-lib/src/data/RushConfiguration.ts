@@ -15,6 +15,16 @@ import Utilities from '../utilities/Utilities';
 import { RushConstants } from '../RushConstants';
 
 /**
+ * A list of known config filenames that are expected to appear in the "./common/config/rush" folder.
+ * To avoid confusion/mistakes, any extra files will be reported as an error.
+ */
+const knownRushConfigFilenames: string[] = [
+  '.npmrc',
+  RushConstants.npmShrinkwrapFilename,
+  RushConstants.pinnedVersionsFilename
+];
+
+/**
  * Part of IRushConfigurationJson.
  */
 export interface IRushGitPolicyJson {
@@ -28,7 +38,6 @@ export interface IRushGitPolicyJson {
  */
 export interface IRushConfigurationJson {
   $schema: string;
-  commonFolder: string;
   npmVersion: string;
   rushMinimumVersion: string;
   nodeSupportedVersionRange?: string;
@@ -36,10 +45,8 @@ export interface IRushConfigurationJson {
   projectFolderMaxDepth?: number;
   packageReviewFile?: string;
   reviewCategories?: string[];
-  useLocalNpmCache?: boolean;
   gitPolicy?: IRushGitPolicyJson;
   projects: IRushConfigurationProjectJson[];
-  pinnedVersions: { [dependency: string]: string }; // deprecated
 }
 
 /**
@@ -61,6 +68,7 @@ export default class RushConfiguration {
   private _rushJsonFolder: string;
   private _commonFolder: string;
   private _commonTempFolder: string;
+  private _commonRushConfigFolder: string;
   private _npmCacheFolder: string;
   private _npmTmpFolder: string;
   private _committedShrinkwrapFilename: string;
@@ -182,6 +190,46 @@ export default class RushConfiguration {
   }
 
   /**
+   * If someone adds a config file in the "common/rush/config" folder, it would be a bad
+   * experience for Rush to silently ignore their file simply because they mispelled the
+   * filename, or maybe it's an old format that's no longer supported.  The
+   * _validateCommonRushConfigFolder() function makes sure that this folder only contains
+   * recognized config files.
+   */
+  private static _validateCommonRushConfigFolder(commonRushConfigFolder: string): void {
+    if (!fsx.existsSync(commonRushConfigFolder)) {
+      console.log(`Creating folder: ${commonRushConfigFolder}`);
+      fsx.mkdirsSync(commonRushConfigFolder);
+      return;
+    }
+
+    const filenames: string[] = fsx.readdirSync(commonRushConfigFolder);
+    for (const filename of filenames) {
+      const resolvedFilename: string = path.resolve(commonRushConfigFolder, filename);
+
+      // Ignore things that aren't actual files
+      const stat: fsx.Stats = fsx.statSync(resolvedFilename);
+      if (!stat.isFile() && !stat.isSymbolicLink) {
+        continue;
+      }
+
+      // Ignore harmless file extensions
+      const fileExtension: string = path.extname(filename);
+      if (['.bak', '.disabled', '.md', '.old', '.orig'].indexOf(fileExtension) >= 0) {
+        continue;
+      }
+
+      const knownSet: Set<string> = new Set<string>(knownRushConfigFilenames.map(x => x.toUpperCase()));
+
+      // Is the filename something we know?  If not, report an error.
+      if (!knownSet.has(filename.toUpperCase())) {
+        throw new Error(`An unrecognized file "${filename}" was found in the Rush config folder:`
+          + ` ${commonRushConfigFolder}`);
+      }
+    }
+  }
+
+  /**
    * The folder that contains rush.json for this project.
    */
   public get rushJsonFolder(): string {
@@ -189,12 +237,24 @@ export default class RushConfiguration {
   }
 
   /**
-   * The common folder specified in rush.json.  By default, this is the fully
-   * resolved path for a subfolder of rushJsonFolder whose name is "common".
+   * The fully resolved path for the "common" folder where Rush will store settings that
+   * affect all Rush projects.  This is always a subfolder of the folder containing "rush.json".
    * Example: "C:\MyRepo\common"
    */
   public get commonFolder(): string {
     return this._commonFolder;
+  }
+
+  /**
+   * The folder where Rush's additional config files are stored.  This folder is always a
+   * subfolder called "config\rush" inside the common folder.  (The "common\config" folder
+   * is reserved for configuration files used by other tools.)  To avoid confusion or mistakes,
+   * Rush will report an error if this this folder contains any unrecognized files.
+   *
+   * Example: "C:\MyRepo\common\config\rush"
+   */
+  public get commonRushConfigFolder(): string {
+    return this._commonRushConfigFolder;
   }
 
   /**
@@ -207,8 +267,10 @@ export default class RushConfiguration {
   }
 
   /**
-   * If rush.json requested useLocalNpmCache=true, then this will specify a local folder
-   * for the NPM cache; otherwise, the value is undefined.
+   * The local folder that will store the NPM package cache.  Rush does not rely on the
+   * NPM's default global cache folder, because NPM's caching implementation does not
+   * reliably handle multiple processes.  (For example, if a build box is running
+   * "rush install" simultaneoulsy for two different working folders, it may fail randomly.)
    *
    * Example: "C:\MyRepo\common\temp\npm-cache"
    */
@@ -217,8 +279,9 @@ export default class RushConfiguration {
   }
 
   /**
-   * If rush.json requested useLocalNpmCache=true, then this will specify a local folder
-   * for the NPM temporary storage; otherwise, the value is undefined.
+   * The local folder where NPM's temporary files will be written during installation.
+   * Rush does not rely on the global default folder, because it may be on a different
+   * hard disk.
    *
    * Example: "C:\MyRepo\common\temp\npm-tmp"
    */
@@ -354,6 +417,11 @@ export default class RushConfiguration {
     return this._projectsByName;
   }
 
+  /**
+   * The PinnedVersionsConfiguration object.  If the pinnedVersions.json file is missing,
+   * this property will NOT be undefined.  Instead it will be initialized in an empty state,
+   * and calling PinnedVersionsConfiguration.save() will create the file.
+   */
   public get pinnedVersions(): PinnedVersionsConfiguration {
     return this._pinnedVersions;
   }
@@ -438,22 +506,17 @@ export default class RushConfiguration {
     }
 
     this._rushJsonFolder = path.dirname(rushJsonFilename);
-    this._commonFolder = path.resolve(path.join(this._rushJsonFolder, rushConfigurationJson.commonFolder));
-    if (!fsx.existsSync(this._commonFolder)) {
-      console.log(`No common folder was detected.`);
-      console.log(`Creating folder: ${this._commonFolder}`);
-      fsx.mkdirsSync(this._commonFolder);
-      console.log(`Next, you should probably run "rush generate"`);
-      process.exit(1);
-    }
+
+    this._commonFolder = path.resolve(path.join(this._rushJsonFolder, RushConstants.commonFolderName));
+
+    this._commonRushConfigFolder = path.join(this._commonFolder, 'config', 'rush');
+    RushConfiguration._validateCommonRushConfigFolder(this._commonRushConfigFolder);
+
     this._commonTempFolder = path.join(this._commonFolder, RushConstants.rushTempFolderName);
+    this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
+    this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));
 
-    if (rushConfigurationJson.useLocalNpmCache) {
-      this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
-      this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));
-    }
-
-    this._committedShrinkwrapFilename = path.join(this._commonFolder, RushConstants.npmShrinkwrapFilename);
+    this._committedShrinkwrapFilename = path.join(this._commonRushConfigFolder, RushConstants.npmShrinkwrapFilename);
     this._tempShrinkwrapFilename = path.join(this._commonTempFolder, RushConstants.npmShrinkwrapFilename);
 
     const unresolvedUserFolder: string = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
@@ -544,33 +607,8 @@ export default class RushConfiguration {
       this._populateDownstreamDependencies(project.packageJson.devDependencies, project.packageName);
     }
 
-    const pinnedVersionsFile: string = path.join(this.commonFolder, 'pinnedVersions.json');
+    // Example: "./common/config/rush/pinnedVersions.json"
+    const pinnedVersionsFile: string = path.join(this.commonRushConfigFolder, RushConstants.pinnedVersionsFilename);
     this._pinnedVersions = PinnedVersionsConfiguration.tryLoadFromFile(pinnedVersionsFile);
-
-    if (rushConfigurationJson.pinnedVersions) {
-      console.log(`DEPRECATED: the "pinnedVersions" field in "rush.json" is deprecated.${os.EOL}` +
-        `Please move the contents of this field to the following file:${os.EOL}  "${pinnedVersionsFile}"`);
-      console.log();
-
-      Object.keys(rushConfigurationJson.pinnedVersions).forEach((dependency: string) => {
-        const pinnedVersion: string = rushConfigurationJson.pinnedVersions[dependency];
-
-        if (this._projectsByName.has(dependency)) {
-          throw new Error(`In rush.json, cannot add a pinned version ` +
-            `for local project: "${dependency}"`);
-        }
-
-        if (this._pinnedVersions.has(dependency)) {
-          const preferredVersion: string = this._pinnedVersions.get(dependency);
-          if (preferredVersion !== pinnedVersion) {
-            console.log(`Pinned version "${dependency}@${pinnedVersion}" defined in "rush.json" ` +
-              `is conflicting with pinned version "${dependency}@${preferredVersion}" in "pinnedVersions.json".` +
-              `${os.EOL}  Using ${dependency}@${preferredVersion}!${os.EOL}`);
-          }
-        } else {
-          this._pinnedVersions.set(dependency, pinnedVersion);
-        }
-      });
-    }
   }
 }

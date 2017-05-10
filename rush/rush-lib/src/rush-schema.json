@@ -8,10 +8,6 @@
       "description": "The metadata to indicate the JSON schema, required by some editors such as VS2015",
       "type": "string"
     },
-    "commonFolder": {
-      "description": "Specifies the name of a top-level global folder containing a package.json file with a superset of all dependencies for all projects in the repository.  Example: \"common\"",
-      "type": "string"
-    },
     "npmVersion": {
       "description": "The version of the NPM tool to install.",
       "type": "string",
@@ -44,10 +40,6 @@
       "items": {
         "type": "string"
       }
-    },
-    "useLocalNpmCache": {
-      "description": "If true, use repository-scoped NPM cache and tmp folders",
-      "type": "boolean"
     },
     "gitPolicy": {
       "description": "If the project is stored in a Git repository, additional settings related to Git",
@@ -100,18 +92,8 @@
         "additionalProperties": false,
         "required": [ "packageName", "projectFolder" ]
       }
-    },
-    "pinnedVersions": {
-      "description": "A mapping of dependency package names to a semantic version. These are included in the common package.json and are used to control versions of second-level dependencies.",
-      "type": "object",
-      "patternProperties": {
-        "^\\S+$": {
-          "type": "string",
-          "description": "A semantic version specifier"
-        }
-      }
     }
   },
   "additionalProperties": false,
-  "required": [ "commonFolder", "npmVersion", "rushMinimumVersion", "projects" ]
+  "required": [ "npmVersion", "rushMinimumVersion", "projects" ]
 }
