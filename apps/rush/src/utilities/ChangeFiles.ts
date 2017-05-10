@@ -18,43 +18,26 @@ export default class ChangeFiles {
     newChangeFilePaths: string[],
     changedPackages: string[]
   ): void {
-    if (newChangeFilePaths.length === 1) {
-      console.log('Found one change file: ' + newChangeFilePaths[0]);
-      this._validateChangedProjects(newChangeFilePaths[0], changedPackages);
-    } else if (newChangeFilePaths.length === 0) {
-      throw new Error(`No change file is found. Run 'rush change' to generate a change file.`);
-    } else {
-      throw new Error('More than one change file was found. Delete and only keep one.');
-    }
-  }
+    const changedSet: Set<string> = new Set<string>();
+    newChangeFilePaths.forEach((filePath) => {
+      console.log(`Found change file: ${filePath}`);
+      const changeRequest: IChangeInfo = JSON.parse(fsx.readFileSync(filePath, 'utf8'));
+      changeRequest.changes.forEach(change => {
+        changedSet.add(change.packageName);
+      });
+    });
 
-  private static _validateChangedProjects(
-    newChangeFilesPath: string,
-    changedPackages: string[]
-  ): void {
-    const missingPackages: string[] = ChangeFiles._findMissingChangedPackages(newChangeFilesPath, changedPackages);
-    if (missingPackages.length > 0) {
-      throw new Error(`Change file does not contain ${missingPackages.join(',')}.`);
-    }
-  }
-
-  /**
-   * Find changed packages that are not included in the provided change file.
-   */
-  private static _findMissingChangedPackages(
-    changeFileFullPath: string,
-    changedPackages: string[]
-  ): string[] {
-    const changeRequest: IChangeInfo = JSON.parse(fsx.readFileSync(changeFileFullPath, 'utf8'));
     const requiredSet: Set<string> = new Set(changedPackages);
-    changeRequest.changes.forEach(change => {
-      requiredSet.delete(change.packageName);
+    changedSet.forEach((name) => {
+      requiredSet.delete(name);
     });
-    const missingProjects: string[] = [];
-    requiredSet.forEach(name => {
-      missingProjects.push(name);
-    });
-    return missingProjects;
+    if (requiredSet.size > 0) {
+      const missingProjects: string[] = [];
+      requiredSet.forEach(name => {
+        missingProjects.push(name);
+      });
+      throw new Error(`Change file does not contain ${missingProjects.join(',')}.`);
+    }
   }
 
   constructor(private _changesPath: string) {

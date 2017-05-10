@@ -46,5 +46,24 @@ describe('ChangeFiles', () => {
         ChangeFiles.validate([changeFile], changedPackages);
       }).not.to.throw();
     });
+
+    it('throws when missing packages from categorized changes', () => {
+      const changeFileA: string = path.join(__dirname, 'categorizedChanges', '@ms', 'a', 'changeA.json');
+      const changeFileB: string = path.join(__dirname, 'categorizedChanges', '@ms', 'b', 'changeB.json');
+      const changedPackages: string[] = ['@ms/a', '@ms/b', 'c'];
+      expect(() => {
+        ChangeFiles.validate([changeFileA, changeFileB], changedPackages);
+      }).to.throw(Error);
+    });
+
+    it('does not throw when no missing packages from categorized changes', () => {
+      const changeFileA: string = path.join(__dirname, 'categorizedChanges', '@ms', 'a', 'changeA.json');
+      const changeFileB: string = path.join(__dirname, 'categorizedChanges', '@ms', 'b', 'changeB.json');
+      const changeFileC: string = path.join(__dirname, 'categorizedChanges', 'changeC.json');
+      const changedPackages: string[] = ['@ms/a', '@ms/b', 'c'];
+      expect(() => {
+        ChangeFiles.validate([changeFileA, changeFileB, changeFileC], changedPackages);
+      }).not.to.throw(Error);
+    });
   });
 });

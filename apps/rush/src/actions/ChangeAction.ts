@@ -130,6 +130,9 @@ export default class ChangeAction extends CommandLineAction {
     const files: string[] = this._getChangeFiles().map(relativePath => {
       return path.join(this._rushConfiguration.rushJsonFolder, relativePath);
     });
+    if (files.length === 0) {
+      throw new Error(`No change file is found. Run 'rush change' to generate a change file.`);
+    }
     ChangeFiles.validate(files, changedPackages);
   }
 
@@ -377,9 +380,8 @@ export default class ChangeAction extends CommandLineAction {
    */
   private _writeFile(fileName: string, output: string): Promise<void> {
     return new Promise<void>((resolve: () => void, reject: (err: Error) => void) => {
-      // We need mkdirsSync() because writeFile() will error if the dir doesn't exist
       // tslint:disable-next-line:no-any
-      fsx.mkdirsSync(path.dirname(fileName), (err: any) => {
+      fsx.mkdirs(path.dirname(fileName), (err: any) => {
         if (err) {
           reject(err);
         }
