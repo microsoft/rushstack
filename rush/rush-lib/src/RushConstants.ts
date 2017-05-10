@@ -6,32 +6,37 @@
  *
  * @public
  */
-export class RushConstants {
+export namespace RushConstants {
+  /**
+   * The folder name ("common") where Rush's common data will be stored.
+   */
+  export const commonFolderName: string = 'common';
+
   /**
    * The NPM scope ("@rush-temp") that is used for Rush's temporary projects.
    */
-  public static readonly rushTempNpmScope: string = '@rush-temp';
+  export const rushTempNpmScope: string = '@rush-temp';
 
   /**
    * The folder name ("temp") under the common folder where temporary files will be stored.
    * Example: "C:\MyRepo\common\temp"
    */
-  public static readonly rushTempFolderName: string = 'temp';
+  export const rushTempFolderName: string = 'temp';
 
   /**
    * The folder name ("projects") where temporary projects will be stored.
    * Example: "C:\MyRepo\common\temp\projects"
    */
-  public static readonly rushTempProjectsFolderName: string = 'projects';
+  export const rushTempProjectsFolderName: string = 'projects';
 
   /**
    * The filename ("npm-shrinkwrap.json") used to store state for the "npm shrinkwrap"
    * command.
    */
-  public static readonly npmShrinkwrapFilename: string = 'npm-shrinkwrap.json';
+  export const npmShrinkwrapFilename: string = 'npm-shrinkwrap.json';
 
   /**
    * The filename ("node_modules") where NPM installs its packages.
    */
-  public static readonly nodeModulesFolderName: string = 'node_modules';
+  export const nodeModulesFolderName: string = 'node_modules';
 }

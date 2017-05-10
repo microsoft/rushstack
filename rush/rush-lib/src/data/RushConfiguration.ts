@@ -28,7 +28,6 @@ export interface IRushGitPolicyJson {
  */
 export interface IRushConfigurationJson {
   $schema: string;
-  commonFolder: string;
   npmVersion: string;
   rushMinimumVersion: string;
   nodeSupportedVersionRange?: string;
@@ -189,8 +188,8 @@ export default class RushConfiguration {
   }
 
   /**
-   * The common folder specified in rush.json.  By default, this is the fully
-   * resolved path for a subfolder of rushJsonFolder whose name is "common".
+   * The fully resolved path for the "common" folder where Rush will store settings that
+   * affect all Rush projects.  This is always a subfolder of the folder containing "rush.json".
    * Example: "C:\MyRepo\common"
    */
   public get commonFolder(): string {
@@ -438,7 +437,7 @@ export default class RushConfiguration {
     }
 
     this._rushJsonFolder = path.dirname(rushJsonFilename);
-    this._commonFolder = path.resolve(path.join(this._rushJsonFolder, rushConfigurationJson.commonFolder));
+    this._commonFolder = path.resolve(path.join(this._rushJsonFolder, RushConstants.commonFolderName));
     if (!fsx.existsSync(this._commonFolder)) {
       console.log(`No common folder was detected.`);
       console.log(`Creating folder: ${this._commonFolder}`);

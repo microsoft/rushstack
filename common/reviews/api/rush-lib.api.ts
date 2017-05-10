@@ -226,12 +226,19 @@ class RushConfigurationProject {
 }
 
 // @public
-class RushConstants {
-  public static nodeModulesFolderName: string;
-  public static npmShrinkwrapFilename: string;
-  public static rushTempFolderName: string;
-  public static rushTempNpmScope: string;
-  public static rushTempProjectsFolderName: string;
+module RushConstants {
+  commonFolderName: string = 'common';
+
+  nodeModulesFolderName: string = 'node_modules';
+
+  npmShrinkwrapFilename: string = 'npm-shrinkwrap.json';
+
+  rushTempFolderName: string = 'temp';
+
+  rushTempNpmScope: string = '@rush-temp';
+
+  rushTempProjectsFolderName: string = 'projects';
+
 }
 
 // @public
