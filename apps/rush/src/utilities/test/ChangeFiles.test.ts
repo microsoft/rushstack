@@ -7,20 +7,26 @@ describe('ChangeFiles', () => {
     it('returns correctly when there is one change file', () => {
       const changesPath: string = path.join(__dirname, 'leafChange');
       const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
-      expect(changeFiles.getFiles()).to.be.eql(['change1.json']);
+      expect(changeFiles.getFiles()).to.eql([path.join(changesPath, 'change1.json')]);
     });
 
     it('returns empty array when no change files', () => {
       const changesPath: string = path.join(__dirname, 'noChange');
       const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
-      expect(changeFiles.getFiles().length).to.be.equal(0);
+      expect(changeFiles.getFiles().length).to.equal(0);
     });
 
     it('returns correctly when change files are categorized', () => {
       const changesPath: string = path.join(__dirname, 'categorizedChanges');
       const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
-      expect(changeFiles.getFiles()).to.contains(path.join('@ms', 'a', 'changeA.json'));
-      expect(changeFiles.getFiles()).to.contains(path.join('@ms', 'b', 'changeB.json'));
+      const files: string[] = changeFiles.getFiles();
+      expect(files.length).to.equal(3);
+      expect(files).to.contains(path.join(changesPath, '@ms', 'a', 'changeA.json'),
+        'changeA is missing');
+      expect(files).to.contains(path.join(changesPath, '@ms', 'b', 'changeB.json'),
+        'changeB is missing');
+      expect(files).to.contains(path.join(changesPath, 'changeC.json'),
+        'changeC is missing');
     });
   });
 

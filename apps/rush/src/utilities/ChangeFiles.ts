@@ -64,12 +64,9 @@ export default class ChangeFiles {
     if (this._files) {
       return this._files;
     }
-    try {
-      this._files = fsx.readdirSync(this._changesPath).filter(filename => path.extname(filename) === '.json');
-    } catch (e) {
-      /* no-op when empty folder */
-      this._files = [];
-    }
+    this._files = Utilities.readdirSyncRecursively(this._changesPath)
+      .filter(filename => path.extname(filename) === '.json');
+
     return this._files;
   }
 

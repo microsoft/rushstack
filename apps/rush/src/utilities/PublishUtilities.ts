@@ -43,8 +43,7 @@ export default class PublishUtilities {
     const files: string[] = changeFiles.getFiles();
 
     // Add the minimum changes defined by the change descriptions.
-    files.forEach((file: string) => {
-      const fullPath: string = path.resolve(changeFiles.getChangesPath(), file);
+    files.forEach((fullPath: string) => {
       const changeRequest: IChangeInfo = JSON.parse(fsx.readFileSync(fullPath, 'utf8'));
 
       if (includeCommitDetails) {

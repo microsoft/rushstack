@@ -331,21 +331,7 @@ export default class ChangeAction extends CommandLineAction {
   private _writeChangeFile(changeFile: IChangeFile): Promise<void> {
     const output: string = JSON.stringify(changeFile, undefined, 2);
 
-    let branch: string = undefined;
-    try {
-      branch = gitInfo().branch;
-    } catch (error) {
-      console.log('Could not automatically detect git branch name, using timestamps instead.');
-    }
-
-    const filename: string = (branch ?
-      this._escapeFilename(`${branch}_${this._getTimestamp()}.json`) :
-      `${this._getTimestamp()}.json`);
-
-    const filepath: string = path.join(this._rushConfiguration.commonFolder,
-      'changes',
-      changeFile.packageName,
-      filename);
+    const filepath: string = this._generateChangeFilePath(changeFile.packageName);
 
     if (fsx.existsSync(filepath)) {
       // prompt about overwrite
@@ -366,6 +352,24 @@ export default class ChangeAction extends CommandLineAction {
     } else {
       return this._writeFile(filepath, output);
     }
+  }
+
+  private _generateChangeFilePath(packageName: string): string {
+    let branch: string = undefined;
+    try {
+      branch = gitInfo().branch;
+    } catch (error) {
+      console.log('Could not automatically detect git branch name, using timestamps instead.');
+    }
+
+    const filename: string = (branch ?
+      this._escapeFilename(`${branch}_${this._getTimestamp()}.json`) :
+      `${this._getTimestamp()}.json`);
+    const filepath: string = path.join(this._rushConfiguration.commonFolder,
+      'changes',
+      ...packageName.split('/'),
+      filename);
+    return filepath;
   }
 
   /**

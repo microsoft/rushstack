@@ -6,6 +6,7 @@ import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as rimraf from 'rimraf';
 import * as tty from 'tty';
+import * as path from 'path';
 
 /**
  * @public
@@ -139,6 +140,16 @@ export default class Utilities {
     } catch (e) { /* no-op */ }
 
     return exists;
+  }
+
+  /**
+   * return all files in the folder recursively through all sub-directories.
+   * folder: absolute path of a folder
+   */
+  public static readdirSyncRecursively(folder: string): string[] {
+    const files: string[] = [];
+    Utilities._getFiles(folder, files);
+    return files;
   }
 
   /**
@@ -350,5 +361,21 @@ export default class Utilities {
     }
 
     return result;
+  }
+
+  private static _getFiles(folder: string, files: string[]): void {
+    try {
+      fsx.readdirSync(folder).forEach((file: string) => {
+        const fullSubPath: string = path.join(folder, file);
+        const lstat: fsx.Stats = fsx.lstatSync(fullSubPath);
+        if (lstat.isDirectory()) {
+          Utilities._getFiles(fullSubPath, files);
+        } else if (lstat.isFile()) {
+          files.push(fullSubPath);
+        }
+      });
+    } catch (e) {
+      /* no-op when empty folder */
+    }
   }
 }
