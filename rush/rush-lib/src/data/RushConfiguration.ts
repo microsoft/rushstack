@@ -15,6 +15,16 @@ import Utilities from '../utilities/Utilities';
 import { RushConstants } from '../RushConstants';
 
 /**
+ * A list of known config filenames that are expected to appear in the "./common/rush/config" folder.
+ * To avoid confusion/mistakes, any extra files will be reported as an error.
+ */
+const knownRushConfigFilenames: string[] = [
+  '.npmrc',
+  RushConstants.npmShrinkwrapFilename,
+  RushConstants.pinnedVersionsFilename
+];
+
+/**
  * Part of IRushConfigurationJson.
  */
 export interface IRushGitPolicyJson {
@@ -177,6 +187,39 @@ export default class RushConfiguration {
     }
 
     return tempNamesByProject;
+  }
+
+  private static _validateCommonRushConfigFolder(commonRushConfigFolder: string): void {
+    if (!fsx.existsSync(commonRushConfigFolder)) {
+      console.log(`Creating folder: ${commonRushConfigFolder}`);
+      fsx.mkdirsSync(commonRushConfigFolder);
+      return;
+    }
+
+    const filenames: string[] = fsx.readdirSync(commonRushConfigFolder);
+    for (const filename of filenames) {
+      const resolvedFilename: string = path.resolve(commonRushConfigFolder, filename);
+
+      // Ignore things that aren't actual files
+      const stat: fsx.Stats = fsx.statSync(resolvedFilename);
+      if (!stat.isFile() && !stat.isSymbolicLink) {
+        continue;
+      }
+
+      // Ignore harmless file extensions
+      const fileExtension: string = path.extname(filename);
+      if (['.bak', '.md', '.old', '.disabled'].indexOf(fileExtension) >= 0) {
+        continue;
+      }
+
+      const knownSet: Set<string> = new Set<string>(knownRushConfigFilenames.map(x => x.toUpperCase()));
+
+      // Is the filename something we know?
+      if (!knownSet.has(filename.toUpperCase())) {
+        throw new Error(`An unrecognized file "${filename}" was found in the Rush config folder:`
+          + ` ${commonRushConfigFolder}`);
+      }
+    }
   }
 
   /**
@@ -460,16 +503,13 @@ export default class RushConfiguration {
     this._commonFolder = path.resolve(path.join(this._rushJsonFolder, RushConstants.commonFolderName));
 
     this._commonRushConfigFolder = path.join(this._commonFolder, 'config/rush');
-    if (!fsx.existsSync(this._commonRushConfigFolder)) {
-      console.log(`Creating folder: ${this._commonRushConfigFolder}`);
-      fsx.mkdirsSync(this._commonRushConfigFolder);
-    }
+    RushConfiguration._validateCommonRushConfigFolder(this._commonRushConfigFolder);
 
     this._commonTempFolder = path.join(this._commonFolder, RushConstants.rushTempFolderName);
     this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
     this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));
 
-    this._committedShrinkwrapFilename = path.join(this._commonFolder, RushConstants.npmShrinkwrapFilename);
+    this._committedShrinkwrapFilename = path.join(this._commonRushConfigFolder, RushConstants.npmShrinkwrapFilename);
     this._tempShrinkwrapFilename = path.join(this._commonTempFolder, RushConstants.npmShrinkwrapFilename);
 
     const unresolvedUserFolder: string = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];

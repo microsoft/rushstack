@@ -289,7 +289,7 @@ export default class InstallManager {
 
     // Also copy down the committed .npmrc file, if there is one
     // "common\.npmrc" --> "common\temp\.npmrc"
-    const committedNpmrcPath: string = path.join(this._rushConfiguration.commonFolder, '.npmrc');
+    const committedNpmrcPath: string = path.join(this._rushConfiguration.commonRushConfigFolder, '.npmrc');
     const tempNpmrcPath: string = path.join(this._rushConfiguration.commonTempFolder, '.npmrc');
     this.syncFile(committedNpmrcPath, tempNpmrcPath);
 
