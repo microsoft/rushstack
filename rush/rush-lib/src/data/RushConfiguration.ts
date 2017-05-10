@@ -440,11 +440,8 @@ export default class RushConfiguration {
     this._rushJsonFolder = path.dirname(rushJsonFilename);
     this._commonFolder = path.resolve(path.join(this._rushJsonFolder, RushConstants.commonFolderName));
     if (!fsx.existsSync(this._commonFolder)) {
-      console.log(`No common folder was detected.`);
       console.log(`Creating folder: ${this._commonFolder}`);
       fsx.mkdirsSync(this._commonFolder);
-      console.log(`Next, you should probably run "rush generate"`);
-      process.exit(1);
     }
     this._commonTempFolder = path.join(this._commonFolder, RushConstants.rushTempFolderName);
 
