@@ -11,7 +11,7 @@ interface IPinnedVersionsJson {
 }
 
 /**
- * Pinned Versions is a rush feature designed to mimic the behavior of NPM
+ * Pinned Versions is a Rush feature designed to mimic the behavior of NPM
  * when performing an install. Essentially, for a project, NPM installs all of
  * the first level dependencies before starting any second-level dependencies.
  * This means that you can control the specific version of a second-level dependency

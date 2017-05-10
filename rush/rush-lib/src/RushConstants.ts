@@ -39,4 +39,12 @@ export namespace RushConstants {
    * The filename ("node_modules") where NPM installs its packages.
    */
   export const nodeModulesFolderName: string = 'node_modules';
+
+  /**
+   * The filename ("pinnedVersions.json") for an optional configuration file
+   * that stores a table of dependencies that should be pinned to a specific
+   * version for all projects.  This configuration file should go in the
+   * "common/config/rush" folder.
+   */
+  export const pinnedVersionsFilename: string = 'pinnedVersions.json';
 }

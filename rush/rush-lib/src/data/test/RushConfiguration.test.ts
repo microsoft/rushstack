@@ -26,6 +26,8 @@ describe('RushConfiguration', () => {
       rushConfiguration.committedShrinkwrapFilename, './repo/common/npm-shrinkwrap.json');
     assertPathProperty('commonFolder',
       rushConfiguration.commonFolder, './repo/common');
+    assertPathProperty('commonRushConfigFolder',
+      rushConfiguration.commonRushConfigFolder, './repo/common/config/rush');
     assertPathProperty('commonTempFolder',
       rushConfiguration.commonTempFolder, './repo/common/temp');
     assertPathProperty('npmCacheFolder',
