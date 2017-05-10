@@ -37,7 +37,6 @@ export interface IRushConfigurationJson {
   reviewCategories?: string[];
   gitPolicy?: IRushGitPolicyJson;
   projects: IRushConfigurationProjectJson[];
-  pinnedVersions: { [dependency: string]: string }; // deprecated
 }
 
 /**
@@ -545,31 +544,5 @@ export default class RushConfiguration {
 
     const pinnedVersionsFile: string = path.join(this.commonFolder, 'pinnedVersions.json');
     this._pinnedVersions = PinnedVersionsConfiguration.tryLoadFromFile(pinnedVersionsFile);
-
-    if (rushConfigurationJson.pinnedVersions) {
-      console.log(`DEPRECATED: the "pinnedVersions" field in "rush.json" is deprecated.${os.EOL}` +
-        `Please move the contents of this field to the following file:${os.EOL}  "${pinnedVersionsFile}"`);
-      console.log();
-
-      Object.keys(rushConfigurationJson.pinnedVersions).forEach((dependency: string) => {
-        const pinnedVersion: string = rushConfigurationJson.pinnedVersions[dependency];
-
-        if (this._projectsByName.has(dependency)) {
-          throw new Error(`In rush.json, cannot add a pinned version ` +
-            `for local project: "${dependency}"`);
-        }
-
-        if (this._pinnedVersions.has(dependency)) {
-          const preferredVersion: string = this._pinnedVersions.get(dependency);
-          if (preferredVersion !== pinnedVersion) {
-            console.log(`Pinned version "${dependency}@${pinnedVersion}" defined in "rush.json" ` +
-              `is conflicting with pinned version "${dependency}@${preferredVersion}" in "pinnedVersions.json".` +
-              `${os.EOL}  Using ${dependency}@${preferredVersion}!${os.EOL}`);
-          }
-        } else {
-          this._pinnedVersions.set(dependency, pinnedVersion);
-        }
-      });
-    }
   }
 }
