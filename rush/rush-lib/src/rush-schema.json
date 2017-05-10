@@ -41,10 +41,6 @@
         "type": "string"
       }
     },
-    "useLocalNpmCache": {
-      "description": "If true, use repository-scoped NPM cache and tmp folders",
-      "type": "boolean"
-    },
     "gitPolicy": {
       "description": "If the project is stored in a Git repository, additional settings related to Git",
       "type": "object",

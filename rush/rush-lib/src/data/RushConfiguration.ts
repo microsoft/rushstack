@@ -35,7 +35,6 @@ export interface IRushConfigurationJson {
   projectFolderMaxDepth?: number;
   packageReviewFile?: string;
   reviewCategories?: string[];
-  useLocalNpmCache?: boolean;
   gitPolicy?: IRushGitPolicyJson;
   projects: IRushConfigurationProjectJson[];
   pinnedVersions: { [dependency: string]: string }; // deprecated
@@ -206,8 +205,10 @@ export default class RushConfiguration {
   }
 
   /**
-   * If rush.json requested useLocalNpmCache=true, then this will specify a local folder
-   * for the NPM cache; otherwise, the value is undefined.
+   * The local folder that will store the NPM package cache.  Rush does not rely on the
+   * NPM's default global cache folder, because NPM's caching implementation does not
+   * reliably handle multiple processes.  (For example, if a build box is running
+   * "rush install" simultaneoulsy for two different working folders, it may fail randomly.)
    *
    * Example: "C:\MyRepo\common\temp\npm-cache"
    */
@@ -216,8 +217,9 @@ export default class RushConfiguration {
   }
 
   /**
-   * If rush.json requested useLocalNpmCache=true, then this will specify a local folder
-   * for the NPM temporary storage; otherwise, the value is undefined.
+   * The local folder where NPM's temporary files will be written during installation.
+   * Rush does not rely on the global default folder, because it may be on a different
+   * hard disk.
    *
    * Example: "C:\MyRepo\common\temp\npm-tmp"
    */
@@ -447,10 +449,8 @@ export default class RushConfiguration {
     }
     this._commonTempFolder = path.join(this._commonFolder, RushConstants.rushTempFolderName);
 
-    if (rushConfigurationJson.useLocalNpmCache) {
-      this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
-      this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));
-    }
+    this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
+    this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));
 
     this._committedShrinkwrapFilename = path.join(this._commonFolder, RushConstants.npmShrinkwrapFilename);
     this._tempShrinkwrapFilename = path.join(this._commonTempFolder, RushConstants.npmShrinkwrapFilename);
