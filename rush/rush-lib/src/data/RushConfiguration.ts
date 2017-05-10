@@ -15,7 +15,7 @@ import Utilities from '../utilities/Utilities';
 import { RushConstants } from '../RushConstants';
 
 /**
- * A list of known config filenames that are expected to appear in the "./common/rush/config" folder.
+ * A list of known config filenames that are expected to appear in the "./common/config/rush" folder.
  * To avoid confusion/mistakes, any extra files will be reported as an error.
  */
 const knownRushConfigFilenames: string[] = [
@@ -189,6 +189,13 @@ export default class RushConfiguration {
     return tempNamesByProject;
   }
 
+  /**
+   * If someone adds a config file in the "common/rush/config" folder, it would be a bad
+   * experience for Rush to silently ignore their file simply because they mispelled the
+   * filename, or maybe it's an old format that's no longer supported.  The
+   * _validateCommonRushConfigFolder() function makes sure that this folder only contains
+   * recognized config files.
+   */
   private static _validateCommonRushConfigFolder(commonRushConfigFolder: string): void {
     if (!fsx.existsSync(commonRushConfigFolder)) {
       console.log(`Creating folder: ${commonRushConfigFolder}`);
@@ -208,13 +215,13 @@ export default class RushConfiguration {
 
       // Ignore harmless file extensions
       const fileExtension: string = path.extname(filename);
-      if (['.bak', '.md', '.old', '.disabled'].indexOf(fileExtension) >= 0) {
+      if (['.bak', '.disabled', '.md', '.old', '.orig'].indexOf(fileExtension) >= 0) {
         continue;
       }
 
       const knownSet: Set<string> = new Set<string>(knownRushConfigFilenames.map(x => x.toUpperCase()));
 
-      // Is the filename something we know?
+      // Is the filename something we know?  If not, report an error.
       if (!knownSet.has(filename.toUpperCase())) {
         throw new Error(`An unrecognized file "${filename}" was found in the Rush config folder:`
           + ` ${commonRushConfigFolder}`);
@@ -502,7 +509,7 @@ export default class RushConfiguration {
 
     this._commonFolder = path.resolve(path.join(this._rushJsonFolder, RushConstants.commonFolderName));
 
-    this._commonRushConfigFolder = path.join(this._commonFolder, 'config/rush');
+    this._commonRushConfigFolder = path.join(this._commonFolder, 'config', 'rush');
     RushConfiguration._validateCommonRushConfigFolder(this._commonRushConfigFolder);
 
     this._commonTempFolder = path.join(this._commonFolder, RushConstants.rushTempFolderName);
