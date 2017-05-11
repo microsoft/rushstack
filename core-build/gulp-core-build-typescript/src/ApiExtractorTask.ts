@@ -174,6 +174,9 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
         callback();
       }, function (callback: () => void): void {
         if (foundSourceFiles === 0) {
+          // NOTE: This warning seems like a nuisance, but it has caught genuine mistakes.
+          // For example, when projects were moved into category folders, the relative path for
+          // the API review files ended up in the wrong place.
           self.logError(`This file is missing from the "apiReviewFolder": "${expectedApiFilePath}"`
             + ` Please copy it from the project's "temp" folder and commit it.`);
         } else if (foundSourceFiles > 1) {
