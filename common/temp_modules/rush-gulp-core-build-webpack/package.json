@@ -16,9 +16,6 @@
     "gulp-util": "~3.0.7",
     "webpack": "~1.13.0"
   },
-  "optionalDependencies": {
-    "fsevents": "*"
-  },
   "rushDependencies": {
     "@microsoft/gulp-core-build": ">=2.5.0 <3.0.0"
   }

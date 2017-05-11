@@ -23,7 +23,8 @@ groups:
   rush-approvers:
     conditions:
       files:
-        - "rush/*"
+        - "apps/rush/*"
+        - "apps/rush-lib/*"
     required: 1
     users:
       - iclanton
@@ -34,7 +35,7 @@ groups:
   api-extractor-approvers:
     conditions:
       files:
-        - "api-extractor/*"
+        - "libraries/api-extractor/*"
     required: 1
     users:
       - pgonzal
@@ -43,13 +44,9 @@ groups:
   gcb-approvers:
     conditions:
       files:
-        - "gulp-core-build/*"
-        - "gulp-core-build-karma/*"
-        - "gulp-core-build-mocha/*"
-        - "gulp-core-build-sass/*"
-        - "gulp-core-build-serve/*"
-        - "gulp-core-build-typescript/*"
-        - "gulp-core-build-webpack/*"
+        - "core-build/*"
+        - "libraries/*"
+        - "webpack/*"
     required: 1
     users:
       - iclanton
