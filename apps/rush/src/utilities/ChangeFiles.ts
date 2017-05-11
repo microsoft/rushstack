@@ -85,9 +85,7 @@ export default class ChangeFiles {
         `${this._files.length} change file(s).`
       );
 
-      for (const fileName of this._files) {
-        const filePath: string = path.join(this._changesPath, fileName);
-
+      for (const filePath of this._files) {
         console.log(` - ${filePath}`);
 
         if (shouldDelete) {
