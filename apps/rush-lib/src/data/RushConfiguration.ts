@@ -614,7 +614,7 @@ export default class RushConfiguration {
       this._browserApprovedPackages.loadFromFile();
 
       if (!this._approvedPackagesPolicyEnabled) {
-        console.log(`Warning: Ignoring ${RushConstants.browserApprovedPackagesFilename} because the `
+        console.log(`Warning: Ignoring "${RushConstants.browserApprovedPackagesFilename}" because the`
           + ` "approvedPackagesPolicy" setting was not specified in rush.json`);
       }
     }
@@ -627,7 +627,7 @@ export default class RushConfiguration {
       this._nonbrowserApprovedPackages.loadFromFile();
 
       if (!this._approvedPackagesPolicyEnabled) {
-        console.log(`Warning: Ignoring ${RushConstants.nonbrowserApprovedPackagesFilename} because the `
+        console.log(`Warning: Ignoring "${RushConstants.nonbrowserApprovedPackagesFilename}" because the`
           + ` "approvedPackagesPolicy" setting was not specified in rush.json`);
       }
     }

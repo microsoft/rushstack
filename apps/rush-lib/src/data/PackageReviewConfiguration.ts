@@ -22,7 +22,7 @@ export interface IPackageReviewItemJson {
  * See packagereview-schema.json for documentation.
  */
 export interface IPackageReviewJson {
-  $schema: string;
+  $schema?: string;
   packages: IPackageReviewItemJson[];
 }
 
@@ -66,7 +66,9 @@ export class PackageReviewConfiguration {
    */
   public clear(): void {
     this._itemsByName.clear();
-    this._loadedJson = undefined;
+    this._loadedJson = {
+      packages: []
+    };
   }
 
   public getItemByName(packageName: string): PackageReviewItem {
