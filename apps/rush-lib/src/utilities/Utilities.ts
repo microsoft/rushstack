@@ -6,7 +6,6 @@ import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as rimraf from 'rimraf';
 import * as tty from 'tty';
-import * as path from 'path';
 
 /**
  * @public
