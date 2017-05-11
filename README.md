@@ -34,7 +34,7 @@ _**For documentation, see the [web-build-tools wiki](https://github.com/Microsof
 
 
 
-### [@microsoft/gulp-core-build-karma](.core-build/gulp-core-build-karma/README.md)
+### [@microsoft/gulp-core-build-karma](./core-build/gulp-core-build-karma/README.md)
 
 `gulp-core-build-karma` is a `gulp-core-build` subtask for running unit tests using karma/phantomjs/mocha/chai. This setup allows you to run browser based testing.
 

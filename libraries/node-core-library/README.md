@@ -1,4 +1,4 @@
-# node-core-library
+# @microsoft/node-core-library
 
 This library provides a conservative set of "core" NodeJS utilities whose
 purpose is to standardize how we solve common problems across our tooling
@@ -14,7 +14,7 @@ these criteria:
   nearly every NodeJS project
 
 - code is design reviewed, API approved, and documented
-  
+
 Examples of "core" functionality that meets this criteria:
 
 - basic file/folder manipulation

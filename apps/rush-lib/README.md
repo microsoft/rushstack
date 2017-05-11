@@ -1,4 +1,4 @@
-## rush-lib
+## @microsoft/rush-lib
 
 This is a companion package for the Rush tool.  See the
 [@microsoft/rush](https://www.npmjs.com/package/@microsoft/rush)
