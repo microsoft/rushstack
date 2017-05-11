@@ -6,13 +6,14 @@ import * as colors from 'colors';
 import * as os from 'os';
 import { CommandLineAction } from '@microsoft/ts-command-line';
 
-import RushCommandLineParser from './RushCommandLineParser';
-
 import {
   RushConfiguration,
   RushConfigurationProject,
   VersionMismatchFinder
 } from '@microsoft/rush-lib';
+
+import RushCommandLineParser from './RushCommandLineParser';
+import PackageReviewChecker from '../utilities/PackageReviewChecker';
 
 export default class CheckVersionsAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
@@ -36,6 +37,11 @@ export default class CheckVersionsAction extends CommandLineAction {
     console.log(`Starting "rush check-versions"${os.EOL}`);
 
     const config: RushConfiguration = RushConfiguration.loadFromDefaultLocation();
+
+    if (config.approvedPackagesPolicyEnabled) {
+      const packageReviewChecker: PackageReviewChecker = new PackageReviewChecker(config);
+      packageReviewChecker.saveCurrentDependencies();
+    }
 
     const pinnedVersions: { [dependency: string]: string } = {};
     config.pinnedVersions.forEach((version: string, dependency: string) => {

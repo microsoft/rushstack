@@ -19,7 +19,6 @@ import PackageReviewChecker from '../utilities/PackageReviewChecker';
 export default class GenerateAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
   private _rushConfiguration: RushConfiguration;
-  private _packageReviewChecker: PackageReviewChecker;
   private _lazyParameter: CommandLineFlagParameter;
   private _noLinkParameter: CommandLineFlagParameter;
 
@@ -59,12 +58,12 @@ export default class GenerateAction extends CommandLineAction {
     const stopwatch: Stopwatch = Stopwatch.start();
     const isLazy: boolean = this._lazyParameter.value;
 
-    console.log('Starting "rush generate"' + os.EOL);
-
     if (this._rushConfiguration.approvedPackagesPolicyEnabled) {
-      this._packageReviewChecker = new PackageReviewChecker(this._rushConfiguration);
-      this._packageReviewChecker.saveCurrentDependencies();
+      const packageReviewChecker: PackageReviewChecker = new PackageReviewChecker(this._rushConfiguration);
+      packageReviewChecker.saveCurrentDependencies();
     }
+
+    console.log('Starting "rush generate"' + os.EOL);
 
     const installManager: InstallManager = new InstallManager(this._rushConfiguration);
 
