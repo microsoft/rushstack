@@ -31,6 +31,11 @@ export default class ChangeFiles {
       console.log(`Found change file: ${filePath}`);
       const changeRequest: IChangeInfo = JSON.parse(fsx.readFileSync(filePath, 'utf8'));
       changeRequest.changes.forEach(change => {
+        if (changedSet.has(change.packageName)) {
+          const duplicateError: string = `Project ${change.packageName} has more than one entries. ` +
+            `Delete the duplicate change file and commit.`;
+          throw new Error(duplicateError);
+        }
         changedSet.add(change.packageName);
       });
     });
