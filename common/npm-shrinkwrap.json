@@ -4754,6 +4754,11 @@
       "from": "temp_modules\\rush-gulp-core-build-webpack",
       "resolved": "file:temp_modules\\rush-gulp-core-build-webpack"
     },
+    "rush-node-core-library": {
+      "version": "0.0.0",
+      "from": "temp_modules\\rush-node-core-library",
+      "resolved": "file:temp_modules\\rush-node-core-library"
+    },
     "rush-node-library-build": {
       "version": "0.0.0",
       "from": "temp_modules\\rush-node-library-build",
