@@ -6,4 +6,4 @@
  */
 declare const packageDescription: void;
 
-export { JsonFile } from './src/JsonFile';
+export { JsonFile } from './JsonFile';
