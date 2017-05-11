@@ -61,7 +61,7 @@ export default class GenerateAction extends CommandLineAction {
 
     console.log('Starting "rush generate"' + os.EOL);
 
-    if (this._rushConfiguration.packageReviewFile) {
+    if (this._rushConfiguration.approvedPackagesPolicyEnabled) {
       this._packageReviewChecker = new PackageReviewChecker(this._rushConfiguration);
       this._packageReviewChecker.saveCurrentDependencies();
     }

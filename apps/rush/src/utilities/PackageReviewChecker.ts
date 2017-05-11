@@ -5,17 +5,14 @@ import {
   IPackageJson,
   RushConfiguration,
   RushConfigurationProject,
-  PackageReviewConfiguration,
   Utilities
 } from '@microsoft/rush-lib';
 
 export default class PackageReviewChecker {
   private _rushConfiguration: RushConfiguration;
-  private _packageReviewConfiguration: PackageReviewConfiguration;
 
   constructor(rushConfiguraton: RushConfiguration) {
     this._rushConfiguration = rushConfiguraton;
-    this._packageReviewConfiguration = PackageReviewConfiguration.loadFromFile(rushConfiguraton.packageReviewFile);
   }
 
   public saveCurrentDependencies(): void {
@@ -30,7 +27,8 @@ export default class PackageReviewChecker {
   }
 
   public saveFile(): void {
-    this._packageReviewConfiguration.saveFile(this._rushConfiguration.packageReviewFile);
+    this._rushConfiguration.browserApprovedPackages.saveToFile();
+    this._rushConfiguration.nonbrowserApprovedPackages.saveToFile();
   }
 
   private _collectDependencies(dependencies: { [key: string]: string },
@@ -41,9 +39,18 @@ export default class PackageReviewChecker {
         const scope: string = Utilities.parseScopedPackageName(packageName).scope;
 
         // Make sure the scope isn't something like "@types" which should be ignored
-        if (!this._packageReviewConfiguration.ignoredNpmScopes.has(scope)) {
+        if (!this._rushConfiguration.approvedPackagesIgnoredNpmScopes.has(scope)) {
           // Yes, add it to the list if it's not already there
-          this._packageReviewConfiguration.addOrUpdatePackage(packageName, false, rushProject.reviewCategory);
+
+          // By default we put everything in the browser file.  But if it already appears in the
+          // non-browser file, then use that instead.
+          if (this._rushConfiguration.nonbrowserApprovedPackages.getItemByName(packageName)) {
+            this._rushConfiguration.nonbrowserApprovedPackages
+              .addOrUpdatePackage(packageName, rushProject.reviewCategory);
+          } else {
+            this._rushConfiguration.browserApprovedPackages
+              .addOrUpdatePackage(packageName, rushProject.reviewCategory);
+          }
         }
       }
     }
