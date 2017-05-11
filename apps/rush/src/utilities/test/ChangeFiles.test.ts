@@ -7,7 +7,8 @@ describe('ChangeFiles', () => {
     it('returns correctly when there is one change file', () => {
       const changesPath: string = path.join(__dirname, 'leafChange');
       const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
-      expect(changeFiles.getFiles()).to.eql([path.join(changesPath, 'change1.json')]);
+      const expectedPath: string = path.join(changesPath, 'change1.json').replace(/\\/g, '/');
+      expect(changeFiles.getFiles()).to.eql([expectedPath]);
     });
 
     it('returns empty array when no change files', () => {
@@ -21,12 +22,13 @@ describe('ChangeFiles', () => {
       const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
       const files: string[] = changeFiles.getFiles();
       expect(files.length).to.equal(3);
-      expect(files).to.contains(path.join(changesPath, '@ms', 'a', 'changeA.json'),
-        'changeA is missing');
-      expect(files).to.contains(path.join(changesPath, '@ms', 'b', 'changeB.json'),
-        'changeB is missing');
-      expect(files).to.contains(path.join(changesPath, 'changeC.json'),
-        'changeC is missing');
+
+      const expectedPathA: string = path.join(changesPath, '@ms', 'a', 'changeA.json').replace(/\\/g, '/');
+      const expectedPathB: string = path.join(changesPath, '@ms', 'b', 'changeB.json').replace(/\\/g, '/');
+      const expectedPathC: string = path.join(changesPath, 'changeC.json').replace(/\\/g, '/');
+      expect(files).to.contains(expectedPathA, 'changeA is missing');
+      expect(files).to.contains(expectedPathB, 'changeB is missing');
+      expect(files).to.contains(expectedPathC, 'changeC is missing');
     });
   });
 

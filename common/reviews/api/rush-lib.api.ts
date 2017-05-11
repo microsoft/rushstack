@@ -305,7 +305,6 @@ class Utilities {
     name: string;
     scope: string;
   }
-  public static readdirSyncRecursively(folder: string): string[];
   public static retryUntilTimeout < TResult >(fn: () => TResult,
                                              maxWaitTimeMs: number,
                                              getTimeoutError: (innerError: Error) => Error,

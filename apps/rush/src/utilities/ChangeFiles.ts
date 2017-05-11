@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import * as fsx from 'fs-extra';
 import * as path from 'path';
 import { EOL } from 'os';
@@ -5,7 +8,12 @@ import {
   Utilities,
   IChangeInfo
 } from '@microsoft/rush-lib';
+import * as glob from 'glob';
 
+/**
+ * This class represents the collection of change files existing in the repo and provides operations
+ * for those change files.
+ */
 export default class ChangeFiles {
 
   // Change file path relative to changes folder.
@@ -43,16 +51,20 @@ export default class ChangeFiles {
   constructor(private _changesPath: string) {
   }
 
+  /**
+   * Get the array of absolute paths of change files.
+   */
   public getFiles(): string[] {
     if (this._files) {
       return this._files;
     }
-    this._files = Utilities.readdirSyncRecursively(this._changesPath)
-      .filter(filename => path.extname(filename) === '.json');
-
+    this._files = glob.sync(`${this._changesPath}/**/*.json`);
     return this._files;
   }
 
+  /**
+   * Get the path of changes folder.
+   */
   public getChangesPath(): string {
     return this._changesPath;
   }

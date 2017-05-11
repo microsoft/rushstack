@@ -365,6 +365,7 @@ export default class ChangeAction extends CommandLineAction {
       console.log('Could not automatically detect git branch name, using timestamps instead.');
     }
 
+    // example filename: yourbranchname_2017-05-01-20-20.json
     const filename: string = (branch ?
       this._escapeFilename(`${branch}_${this._getTimestamp()}.json`) :
       `${this._getTimestamp()}.json`);

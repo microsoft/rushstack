@@ -143,16 +143,6 @@ export default class Utilities {
   }
 
   /**
-   * return all files in the folder recursively through all sub-directories.
-   * folder: absolute path of a folder
-   */
-  public static readdirSyncRecursively(folder: string): string[] {
-    const files: string[] = [];
-    Utilities._getFiles(folder, files);
-    return files;
-  }
-
-  /**
    * BE VERY CAREFUL CALLING THIS FUNCTION!
    * If you specify the wrong folderPath (e.g. "/"), it could potentially delete your entire
    * hard disk.
@@ -361,21 +351,5 @@ export default class Utilities {
     }
 
     return result;
-  }
-
-  private static _getFiles(folder: string, files: string[]): void {
-    try {
-      fsx.readdirSync(folder).forEach((file: string) => {
-        const fullSubPath: string = path.join(folder, file);
-        const lstat: fsx.Stats = fsx.lstatSync(fullSubPath);
-        if (lstat.isDirectory()) {
-          Utilities._getFiles(fullSubPath, files);
-        } else if (lstat.isFile()) {
-          files.push(fullSubPath);
-        }
-      });
-    } catch (e) {
-      /* no-op when empty folder */
-    }
   }
 }
