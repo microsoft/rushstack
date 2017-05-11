@@ -30,16 +30,27 @@
       "description": "The maximum folder depth for the projectFolder field.  The default value is 2, i.e. a single slash in the path name.",
       "type": "number"
     },
-    "packageReviewFile": {
-      "description": "The filename of a JSON file that tracks which NPM packages have been approved for usage in this repo.  Example: \"common/reviews/PackageDependencies.json\"",
-      "type": "string"
-    },
-    "reviewCategories": {
-      "description": "A list of category names that can be applied to each project, for usage in the packageReviewFile",
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
+    "approvedPackagesPolicy": {
+      "description": "Controls a package review workflow driven by the two config files \"browser-approved-packages.json\" and \"nonbrowser-approved-packages.json\"",
+      "type": "object",
+      "properties": {
+        "reviewCategories": {
+          "description": "A list of category names that can be applied to each project, and then referenced in \"browser-approved-packages.json\" and \"nonbrowser-approved-packages.json\"",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ignoredNpmScopes": {
+          "description": "A list of NPM package scopes that will be excluded from review (e.g. \"@types\")",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^@"
+          }
+        }
+      },
+      "additionalProperties": false
     },
     "gitPolicy": {
       "description": "If the project is stored in a Git repository, additional settings related to Git",
