@@ -379,6 +379,21 @@ describe('updatePackages', () => {
       '1.0.0-' + suffix,
       'the "cyclic-dep-1" dependency in "cyclic-dep-2" should be updated');
   });
+
+  it('does not update version for project that needs manual version update.', () => {
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
+      allPackages,
+      path.join(__dirname, 'manualVersionUpdate'),
+      false);
+    PublishUtilities.updatePackages(allChanges, allPackages, false);
+    expect(allPackages.get('mv1').packageJson.version).equals('1.1.0', 'mv1 version should be updated.');
+    expect(allPackages.get('mv2').packageJson.version).equals('1.0.0', 'mv2 version not be updated');
+    expect(allPackages.get('mv2').packageJson.dependencies['mv1']).equals('~1.1.0',
+      'mv2 dependency version should be updated.');
+    expect(allPackages.get('mv3').packageJson.version).equals('1.0.0', 'mv3 version should not be updated');
+  });
 });
 
 describe('isRangeDependency', () => {

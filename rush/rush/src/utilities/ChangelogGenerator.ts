@@ -11,6 +11,7 @@ import {
 } from '@microsoft/rush-lib';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as _ from 'lodash';
 
 /**
  * Interface respresenting a changelog json object for a package used to represent the parsed
@@ -142,9 +143,7 @@ export default class ChangelogGenerator {
   ): IChangelog {
     const changelog: IChangelog = ChangelogGenerator._getChangelog(change.packageName, projectFolder);
 
-    if (
-      change.changeType > ChangeType.none &&
-      !changelog.entries.some(entry => entry.version === change.newVersion)) {
+    if (change.changeType > ChangeType.none) {
 
       const changelogEntry: IChangeLogEntry = {
         version: change.newVersion,
@@ -153,6 +152,14 @@ export default class ChangelogGenerator {
         comments: {}
       };
 
+      // Add existing comments.
+      const existingEntries: IChangeLogEntry[] =
+        changelog.entries.filter(entry => entry.version === change.newVersion);
+      existingEntries.forEach(entry => {
+        _.merge(changelogEntry.comments, entry.comments);
+      });
+
+      // Add new comments
       change.changes.forEach(individualChange => {
         if (individualChange.comment) {
 
@@ -169,6 +176,9 @@ export default class ChangelogGenerator {
           });
         }
       });
+
+      // Remove existing entries
+      changelog.entries = changelog.entries.filter(entry => entry.version !== change.newVersion);
 
       // Add the changelog entry to the start of the list.
       changelog.entries.unshift(changelogEntry);

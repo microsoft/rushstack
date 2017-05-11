@@ -79,8 +79,9 @@ export default class PublishUtilities {
         const deps: string[] = project.downstreamDependencyProjects;
 
         // Write the new version expected for the change.
-        if (prereleaseToken && prereleaseToken.isSuffix) {
+        if (prereleaseToken && prereleaseToken.isSuffix || project.manualVersionUpdate) {
           // Suffix does not bump up the version.
+          // Projects that need manual version bumping should be skipped too.
           change.newVersion = pkg.version;
         } else {
           change.newVersion = (change.changeType >= ChangeType.patch) ?
@@ -185,14 +186,14 @@ export default class PublishUtilities {
     shouldCommit: boolean,
     prereleaseToken?: PrereleaseToken
   ): void {
-    const newVersion: string = PublishUtilities._getChangeInfoNewVersion(change, prereleaseToken);
+    const project: RushConfigurationProject = allPackages.get(change.packageName);
+    const newVersion: string = PublishUtilities._getChangeInfoNewVersion(change, project, prereleaseToken);
 
     console.log(
       `${EOL}* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: ${ChangeType[change.changeType]} update ` +
       `for ${change.packageName} to ${newVersion}`
     );
 
-    const project: RushConfigurationProject = allPackages.get(change.packageName);
     const pkg: IPackageJson = project.packageJson;
     const packagePath: string = path.join(project.projectFolder, 'package.json');
 
@@ -239,7 +240,10 @@ export default class PublishUtilities {
           if (depChange && prereleaseToken && prereleaseToken.hasValue) {
             // For prelease, the newVersion needs to be appended with prerelease name.
             // And dependency should specify the specific prerelease version.
-            dependencies[depName] = PublishUtilities._getChangeInfoNewVersion(depChange, prereleaseToken);
+            dependencies[depName] = PublishUtilities._getChangeInfoNewVersion(
+              depChange,
+              allPackages.get(depName),
+              prereleaseToken);
           } else if (depChange && depChange.changeType >= ChangeType.patch) {
             PublishUtilities._updateDependencyVersion(
               packageName,
@@ -256,16 +260,19 @@ export default class PublishUtilities {
 
   /**
    * Gets the new version from the ChangeInfo.
-   * The value of newVersion in ChangeInfo remains unchanged when the change type is dependency,
-   * However, for pre-release build, it won't pick up the updated pre-released dependencies. That is why
-   * this function should return a pre-released patch for that case.
+   * The value of newVersion in ChangeInfo remains unchanged when the change type is dependency, or
+   * when the package needs manual version update.
+   * For pre-release build, dependency also gets version changed, except for manual version update case.
    */
   private static _getChangeInfoNewVersion(
     change: IChangeInfo,
+    project: RushConfigurationProject,
     prereleaseToken: PrereleaseToken
   ): string {
     let newVersion: string = change.newVersion;
-    if (prereleaseToken && prereleaseToken.hasValue) {
+    if (project.manualVersionUpdate) {
+      return newVersion;
+    } else if (prereleaseToken && prereleaseToken.hasValue) {
       if (prereleaseToken.isPrerelease && change.changeType === ChangeType.dependency) {
         newVersion = semver.inc(newVersion, 'patch');
       }
@@ -323,7 +330,7 @@ export default class PublishUtilities {
       hasChanged = hasChanged || (oldChangeType !== currentChange.changeType);
     }
 
-    if (prereleaseToken && prereleaseToken.isSuffix) {
+    if (prereleaseToken && prereleaseToken.isSuffix || project.manualVersionUpdate) {
       currentChange.newVersion = pkg.version;
     } else {
       currentChange.newVersion = change.changeType >= ChangeType.patch ?

@@ -109,7 +109,7 @@ describe('updateIndividualChangelog', () => {
     expect(actualResult).eql(expectedResult);
   });
 
-  it('can avoid adding duplicate entries', () => {
+  it('can merge duplicate entries', () => {
     const actualResult: IChangelog = ChangelogGenerator.updateIndividualChangelog(
       {
         packageName: 'a',
@@ -119,7 +119,7 @@ describe('updateIndividualChangelog', () => {
           packageName: 'a',
           type: 'patch',
           changeType: ChangeType.patch,
-          comment: 'Patching a'
+          comment: 'Patching a again'
         }]
       },
       path.resolve(__dirname, 'exampleChangelog'),
@@ -137,12 +137,19 @@ describe('updateIndividualChangelog', () => {
             patch: [
               {
                 comment: 'Patching a'
+              },
+              {
+                author: undefined,
+                comment: 'Patching a again',
+                commit: undefined
               }
             ]
           }
         }
       ]
     };
+    // Ignore comparing date.
+    expectedResult.entries[0].date = actualResult.entries[0].date;
 
     expect(actualResult).eql(expectedResult);
   });
