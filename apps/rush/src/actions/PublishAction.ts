@@ -122,14 +122,14 @@ export default class PublishAction extends CommandLineAction {
    * Executes the publish action, which will read change request files, apply changes to package.jsons,
    */
   protected onExecute(): void {
+    console.log(`Starting "rush publish" ${EOL}`);
+
+    this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
+
     if (!GitPolicy.check(this._rushConfiguration)) {
       process.exit(1);
       return;
     }
-
-    console.log(`Starting "rush publish" ${EOL}`);
-
-    this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
     const allPackages: Map<string, RushConfigurationProject> = this._rushConfiguration.projectsByName;
 
     if (this._regenerateChangelogs.value) {
