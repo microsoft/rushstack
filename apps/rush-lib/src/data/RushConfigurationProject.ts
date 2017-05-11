@@ -60,18 +60,18 @@ export default class RushConfigurationProject {
     }
 
     // Are we using a package review file?
-    if (rushConfiguration.packageReviewFile) {
+    if (rushConfiguration.approvedPackagesPolicyEnabled) {
       // If so, then every project needs to have a reviewCategory that was defined
       // by the reviewCategories array.
-      if (!rushConfiguration.reviewCategories.size) {
-        throw new Error(`The rush.json file specifies a packageReviewFile, but the reviewCategories`
+      if (!rushConfiguration.approvedPackagesReviewCategories.size) {
+        throw new Error(`The "approvedPackagesPolicy" feature is enabled rush.json, but the reviewCategories`
           + ` list is not configured.`);
       }
       if (!projectJson.reviewCategory) {
-        throw new Error(`The rush.json file configures a packageReviewFile, but a reviewCategory` +
+        throw new Error(`The "approvedPackagesPolicy" feature is enabled rush.json, but a reviewCategory` +
           ` was not specified for the project "${projectJson.packageName}".`);
       }
-      if (!rushConfiguration.reviewCategories.has(projectJson.reviewCategory)) {
+      if (!rushConfiguration.approvedPackagesReviewCategories.has(projectJson.reviewCategory)) {
         throw new Error(`The project "${projectJson.packageName}" specifies its reviewCategory as`
           + `"${projectJson.reviewCategory}" which is not one of the defined reviewCategories.`);
       }

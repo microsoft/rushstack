@@ -129,24 +129,22 @@ class Npm {
 
 // @public
 class PackageReviewConfiguration {
-  // WARNING: The type "IPackageReviewJson" needs to be exported by the package (e.g. added to index.ts)
-  constructor(packageReviewJson: IPackageReviewJson, jsonFilename: string);
   // (undocumented)
-  public addOrUpdatePackage(packageName: string, allowedInBrowser: boolean, reviewCategory: string): void;
+  public constructor(jsonFilename: string);
+  // (undocumented)
+  public addOrUpdatePackage(packageName: string, reviewCategory: string): void;
+  public clear(): void;
   // (undocumented)
   public getItemByName(packageName: string): PackageReviewItem;
-  public readonly ignoredNpmScopes: Set<string>;
   // (undocumented)
   public items: PackageReviewItem[];
-  public static loadFromFile(jsonFilename: string): PackageReviewConfiguration;
-  // (undocumented)
-  public saveFile(jsonFilename: string): void;
+  public loadFromFile(): void;
+  public saveToFile(): void;
 }
 
 // @public
 class PackageReviewItem {
   public allowedCategories: Set<string>;
-  public allowedInBrowser: boolean;
   public packageName: string;
 }
 
@@ -176,6 +174,10 @@ export function RegexErrorDetector(regex: RegExp,
 
 // @public
 class RushConfiguration {
+  public readonly approvedPackagesIgnoredNpmScopes: Set<string>;
+  public readonly approvedPackagesPolicyEnabled: boolean;
+  public readonly approvedPackagesReviewCategories: Set<string>;
+  public readonly browserApprovedPackages: PackageReviewConfiguration;
   public readonly committedShrinkwrapFilename: string;
   public readonly commonFolder: string;
   public readonly commonRushConfigFolder: string;
@@ -189,11 +191,11 @@ class RushConfiguration {
   public static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
   // (undocumented)
   public static loadFromDefaultLocation(): RushConfiguration;
+  public readonly nonbrowserApprovedPackages: PackageReviewConfiguration;
   public readonly npmCacheFolder: string;
   public readonly npmTmpFolder: string;
   public readonly npmToolFilename: string;
   public readonly npmToolVersion: string;
-  public readonly packageReviewFile: string;
   public readonly pinnedVersions: PinnedVersionsConfiguration;
   public readonly projectFolderMaxDepth: number;
   public readonly projectFolderMinDepth: number;
@@ -201,7 +203,6 @@ class RushConfiguration {
   public readonly projects: RushConfigurationProject[];
   // (undocumented)
   public readonly projectsByName: Map<string, RushConfigurationProject>;
-  public readonly reviewCategories: Set<string>;
   public readonly rushJsonFolder: string;
   public readonly rushLinkJsonFilename: string;
   public readonly tempShrinkwrapFilename: string;
@@ -227,9 +228,13 @@ class RushConfigurationProject {
 
 // @public
 module RushConstants {
+  browserApprovedPackagesFilename: string = 'browser-approved-packages.json';
+
   commonFolderName: string = 'common';
 
   nodeModulesFolderName: string = 'node_modules';
+
+  nonbrowserApprovedPackagesFilename: string = 'nonbrowser-approved-packages.json';
 
   npmShrinkwrapFilename: string = 'npm-shrinkwrap.json';
 

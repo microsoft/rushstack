@@ -12,7 +12,7 @@ export {
 
 export {
   PackageReviewItem,
-  default as PackageReviewConfiguration
+  PackageReviewConfiguration
 } from './data/PackageReviewConfiguration';
 
 export {

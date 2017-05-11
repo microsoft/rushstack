@@ -11,6 +11,7 @@ import Validator = require('z-schema');
 import JsonFile from '../utilities/JsonFile';
 import RushConfigurationProject, { IRushConfigurationProjectJson } from './RushConfigurationProject';
 import { PinnedVersionsConfiguration } from './PinnedVersionsConfiguration';
+import { PackageReviewConfiguration } from './PackageReviewConfiguration';
 import Utilities from '../utilities/Utilities';
 import { RushConstants } from '../RushConstants';
 
@@ -21,8 +22,18 @@ import { RushConstants } from '../RushConstants';
 const knownRushConfigFilenames: string[] = [
   '.npmrc',
   RushConstants.npmShrinkwrapFilename,
-  RushConstants.pinnedVersionsFilename
+  RushConstants.pinnedVersionsFilename,
+  RushConstants.browserApprovedPackagesFilename,
+  RushConstants.nonbrowserApprovedPackagesFilename
 ];
+
+/**
+ * Part of IRushConfigurationJson.
+ */
+export interface IApprovedPackagesPolicyJson {
+  reviewCategories?: string[];
+  ignoredNpmScopes?: string[];
+}
 
 /**
  * Part of IRushConfigurationJson.
@@ -43,8 +54,7 @@ export interface IRushConfigurationJson {
   nodeSupportedVersionRange?: string;
   projectFolderMinDepth?: number;
   projectFolderMaxDepth?: number;
-  packageReviewFile?: string;
-  reviewCategories?: string[];
+  approvedPackagesPolicy?: IApprovedPackagesPolicyJson;
   gitPolicy?: IRushGitPolicyJson;
   projects: IRushConfigurationProjectJson[];
 }
@@ -79,13 +89,22 @@ export default class RushConfiguration {
   private _npmToolFilename: string;
   private _projectFolderMinDepth: number;
   private _projectFolderMaxDepth: number;
-  private _packageReviewFile: string;
-  private _reviewCategories: Set<string>;
+
+  // "approvedPackagesPolicy" feature
+  private _approvedPackagesPolicyEnabled: boolean;
+  private _approvedPackagesIgnoredNpmScopes: Set<string>;
+  private _approvedPackagesReviewCategories: Set<string>;
+  private _browserApprovedPackages: PackageReviewConfiguration;
+  private _nonbrowserApprovedPackages: PackageReviewConfiguration;
+
+  // "gitPolicy" feature
   private _gitAllowedEmailRegExps: string[];
   private _gitSampleEmail: string;
+
+  private _pinnedVersions: PinnedVersionsConfiguration;
+
   private _projects: RushConfigurationProject[];
   private _projectsByName: Map<string, RushConfigurationProject>;
-  private _pinnedVersions: PinnedVersionsConfiguration;
 
   /**
    * Loads the configuration data from an Rush.json configuration file and returns
@@ -365,32 +384,69 @@ export default class RushConfiguration {
   }
 
   /**
-   * The absolute path to a JSON file that tracks the NPM packages that were approved for usage
-   * in this repository.  This is part of an optional approval workflow, whose purpose is to
-   * review any new dependencies that are introduced (e.g. maybe a legal review is required, or
-   * maybe we are trying to minimize bloat).  When "rush generate" is run, any new
-   * package.json dependencies will be appended to this file.  When "rush install" is run
-   * (e.g. as part of a PR build), an error will be reported if the file is not up to date.
-   * The intent is that this file will be stored in Git and tracked by a branch policy which
-   * notifies reviewers whenever a PR attempts to modify the file.
-   *
-   * The PackageReviewConfiguration class can load/save this file format.
-   *
-   * Example: "C:\MyRepo\common\reviews\PackageDependenies.json"
+   * [Part of the "approvedPackagesPolicy" feature.]
+   * Whether the feature is enabled.  The feature is enabled if the "approvedPackagesPolicy"
+   * field is assigned in rush.json.
    */
-  public get packageReviewFile(): string {
-    return this._packageReviewFile;
+  public get approvedPackagesPolicyEnabled(): boolean {
+    return this._approvedPackagesPolicyEnabled;
   }
 
   /**
+   * [Part of the "approvedPackagesPolicy" feature.]
+   * A list of NPM package scopes that will be excluded from review (e.g. \"@types\")
+   */
+  public get approvedPackagesIgnoredNpmScopes(): Set<string> {
+    return this._approvedPackagesIgnoredNpmScopes;
+  }
+
+  /**
+   * [Part of the "approvedPackagesPolicy" feature.]
    * A list of category names that are valid for usage as the RushConfigurationProject.reviewCategory field.
    * This array will never be undefined.
    */
-  public get reviewCategories(): Set<string> {
-    return this._reviewCategories;
+  public get approvedPackagesReviewCategories(): Set<string> {
+    return this._approvedPackagesReviewCategories;
   }
 
   /**
+   * [Part of the "approvedPackagesPolicy" feature.]
+   * Packages approved for usage in a web browser.  This is the stricter of the two types, so by default
+   * all new packages are added to this file.
+   *
+   * @remarks
+   *
+   * This is part of an optional approval workflow, whose purpose is to review any new dependencies
+   * that are introduced (e.g. maybe a legal review is required, or maybe we are trying to minimize bloat).
+   * When Rush discovers a new dependency has been added to package.json, it will update the file.
+   * The intent is that the file will be stored in Git and tracked by a branch policy that notifies
+   * reviewers when a PR attempts to modify the file.
+   *
+   * Example filename: "C:\MyRepo\common\config\rush\browser-approved-packages.json"
+   */
+  public get browserApprovedPackages(): PackageReviewConfiguration {
+    return this._browserApprovedPackages;
+  }
+
+  /**
+   * [Part of the "approvedPackagesPolicy" feature.]
+   * Packages approved for usage everywhere *except* in a web browser.
+   *
+   * @remarks
+   *
+   * This is part of an optional approval workflow, whose purpose is to review any new dependencies
+   * that are introduced (e.g. maybe a legal review is required, or maybe we are trying to minimize bloat).
+   * The intent is that the file will be stored in Git and tracked by a branch policy that notifies
+   * reviewers when a PR attempts to modify the file.
+   *
+   * Example filename: "C:\MyRepo\common\config\rush\browser-approved-packages.json"
+   */
+  public get nonbrowserApprovedPackages(): PackageReviewConfiguration {
+    return this._nonbrowserApprovedPackages;
+  }
+
+  /**
+   * [Part of the "gitPolicy" feature.]
    * A list of regular expressions describing allowable e-mail patterns for Git commits.
    * They are case-insensitive anchored JavaScript RegExps.
    * Example: ".*@example\.com"
@@ -401,6 +457,7 @@ export default class RushConfiguration {
   }
 
   /**
+   * [Part of the "gitPolicy" feature.]
    * An example valid e-mail address that conforms to one of the allowedEmailRegExps.
    * Example: "foxtrot@example\.com"
    * This will never be undefined, and will always be nonempty if gitAllowedEmailRegExps is used.
@@ -543,15 +600,37 @@ export default class RushConfiguration {
       throw new Error('The projectFolderMaxDepth cannot be smaller than the projectFolderMinDepth');
     }
 
-    this._packageReviewFile = undefined;
-    if (rushConfigurationJson.packageReviewFile) {
-      this._packageReviewFile = path.resolve(path.join(this._rushJsonFolder, rushConfigurationJson.packageReviewFile));
-      if (!fsx.existsSync(this._packageReviewFile)) {
-        throw new Error('The packageReviewFile file was not found: "' + this._packageReviewFile + '"');
+    const approvedPackagesPolicy: IApprovedPackagesPolicyJson = rushConfigurationJson.approvedPackagesPolicy || {};
+
+    this._approvedPackagesPolicyEnabled = !!rushConfigurationJson.approvedPackagesPolicy;
+    this._approvedPackagesIgnoredNpmScopes = new Set<string>(approvedPackagesPolicy.ignoredNpmScopes);
+    this._approvedPackagesReviewCategories = new Set<string>(approvedPackagesPolicy.reviewCategories);
+
+    // Load browser-approved-packages.json
+    const browserApprovedPackagesPath: string = path.join(this.commonRushConfigFolder,
+      RushConstants.browserApprovedPackagesFilename);
+    this._browserApprovedPackages = new PackageReviewConfiguration(browserApprovedPackagesPath);
+    if (fsx.existsSync(browserApprovedPackagesPath)) {
+      this._browserApprovedPackages.loadFromFile();
+
+      if (!this._approvedPackagesPolicyEnabled) {
+        console.log(`Warning: Ignoring ${RushConstants.browserApprovedPackagesFilename} because the `
+          + ` "approvedPackagesPolicy" setting was not specified in rush.json`);
       }
     }
 
-    this._reviewCategories = new Set<string>(rushConfigurationJson.reviewCategories);
+    // Load nonbrowser-approved-packages.json
+    const nonbrowserApprovedPackagesPath: string = path.join(this.commonRushConfigFolder,
+      RushConstants.nonbrowserApprovedPackagesFilename);
+    this._nonbrowserApprovedPackages = new PackageReviewConfiguration(nonbrowserApprovedPackagesPath);
+    if (fsx.existsSync(nonbrowserApprovedPackagesPath)) {
+      this._nonbrowserApprovedPackages.loadFromFile();
+
+      if (!this._approvedPackagesPolicyEnabled) {
+        console.log(`Warning: Ignoring ${RushConstants.nonbrowserApprovedPackagesFilename} because the `
+          + ` "approvedPackagesPolicy" setting was not specified in rush.json`);
+      }
+    }
 
     this._gitAllowedEmailRegExps = [];
     this._gitSampleEmail = '';
