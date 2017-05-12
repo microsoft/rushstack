@@ -8,7 +8,7 @@
  */
 export namespace RushConstants {
   /**
-   * The filename ("approved-packages-browser.json") for an optional policy configuration file
+   * The filename ("browser-approved-packages.json") for an optional policy configuration file
    * that stores a list of NPM packages that have been approved for usage by Rush projects.
    * This is part of a pair of config files, one for projects that run in a web browser
    * (e.g. whose approval criteria mostly focuses on licensing and code size), and one for everywhere else
@@ -17,7 +17,7 @@ export namespace RushConstants {
   export const browserApprovedPackagesFilename: string = 'browser-approved-packages.json';
 
   /**
-   * The filename ("approved-packages-nonbrowser.json") for an optional policy configuration file
+   * The filename ("nonbrowser-approved-packages.json") for an optional policy configuration file
    * that stores a list of NPM packages that have been approved for usage by Rush projects.
    * This is part of a pair of config files, one for projects that run in a web browser
    * (e.g. whose approval criteria mostly focuses on licensing and code size), and one for everywhere else

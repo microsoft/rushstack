@@ -15,9 +15,9 @@ export {
 } from './data/RushConfigurationProject';
 
 export {
-  PackageReviewItem,
-  PackageReviewConfiguration
-} from './data/PackageReviewConfiguration';
+  ApprovedPackagesItem,
+  ApprovedPackagesConfiguration
+} from './data/ApprovedPackagesConfiguration';
 
 export {
   PinnedVersionsConfiguration

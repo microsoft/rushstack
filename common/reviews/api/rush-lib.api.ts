@@ -1,11 +1,33 @@
+// @public
+class ApprovedPackagesConfiguration {
+  // (undocumented)
+  public constructor(jsonFilename: string);
+  // (undocumented)
+  public addOrUpdatePackage(packageName: string, reviewCategory: string): void;
+  public clear(): void;
+  // (undocumented)
+  public getItemByName(packageName: string): ApprovedPackagesItem;
+  // (undocumented)
+  public items: ApprovedPackagesItem[];
+  public loadFromFile(): void;
+  public saveToFile(): void;
+  public tryLoadFromFile(approvedPackagesPolicyEnabled: boolean): boolean;
+}
+
+// @public
+class ApprovedPackagesItem {
+  public allowedCategories: Set<string>;
+  public packageName: string;
+}
+
 class ApprovedPackagesPolicy {
   // WARNING: The type "IRushConfigurationJson" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   public constructor(rushConfiguration: RushConfiguration, rushConfigurationJson: IRushConfigurationJson);
-  public readonly browserApprovedPackages: PackageReviewConfiguration;
+  public readonly browserApprovedPackages: ApprovedPackagesConfiguration;
   public readonly enabled: boolean;
   public readonly ignoredNpmScopes: Set<string>;
-  public readonly nonbrowserApprovedPackages: PackageReviewConfiguration;
+  public readonly nonbrowserApprovedPackages: ApprovedPackagesConfiguration;
   public readonly reviewCategories: Set<string>;
 }
 
@@ -138,28 +160,6 @@ class Npm {
   public static publishedVersions(packageName: string,
       cwd: string,
       env: { [key: string]: string }): string[];
-}
-
-// @public
-class PackageReviewConfiguration {
-  // (undocumented)
-  public constructor(jsonFilename: string);
-  // (undocumented)
-  public addOrUpdatePackage(packageName: string, reviewCategory: string): void;
-  public clear(): void;
-  // (undocumented)
-  public getItemByName(packageName: string): PackageReviewItem;
-  // (undocumented)
-  public items: PackageReviewItem[];
-  public loadFromFile(): void;
-  public saveToFile(): void;
-  public tryLoadFromFile(approvedPackagesPolicyEnabled: boolean): boolean;
-}
-
-// @public
-class PackageReviewItem {
-  public allowedCategories: Set<string>;
-  public packageName: string;
 }
 
 // @public
