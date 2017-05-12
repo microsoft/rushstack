@@ -44,18 +44,37 @@ export default class ScanAction extends CommandLineAction {
     }
 
     const requireRegExps: RegExp[] = [
+      // Example: require('someting')
       /\brequire\s*\(\s*[']([^']+\s*)[']\)/,
       /\brequire\s*\(\s*["]([^"]+)["]\s*\)/,
+
+      // Example: require.ensure('someting')
       /\brequire.ensure\s*\(\s*[']([^']+\s*)[']\)/,
       /\brequire.ensure\s*\(\s*["]([^"]+)["]\s*\)/,
+
+      // Example: require.resolve('someting')
       /\brequire.resolve\s*\(\s*[']([^']+\s*)[']\)/,
       /\brequire.resolve\s*\(\s*["]([^"]+)["]\s*\)/,
+
+      // Example: System.import('someting')
       /\bSystem.import\s*\(\s*[']([^']+\s*)[']\)/,
       /\bSystem.import\s*\(\s*["]([^"]+)["]\s*\)/,
+
+      // Example:
+      //
+      // import {
+      //   A, B
+      // } from 'something';
       /\bfrom\s*[']([^']+)[']/,
       /\bfrom\s*["]([^"]+)["]/,
+
+      // Example:  import 'something';
       /\bimport\s*[']([^']+)[']\s*\;/,
-      /\bimport\s*["]([^"]+)["]\s*\;/
+      /\bimport\s*["]([^"]+)["]\s*\;/,
+
+      // Example:
+      // /// <reference types="something" />
+      /\/\/\/\s*<\s*reference\s+types\s*=\s*["]([^"]+)["]\s*\/>/
     ];
 
     // Example: "my-package/lad/dee/dah" --> "my-package"
