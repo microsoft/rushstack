@@ -19,6 +19,7 @@ export class ApprovedPackagesPolicy {
   private _browserApprovedPackages: ApprovedPackagesConfiguration;
   private _nonbrowserApprovedPackages: ApprovedPackagesConfiguration;
 
+  /** @internal */
   public constructor(rushConfiguration: RushConfiguration, rushConfigurationJson: IRushConfigurationJson) {
     const approvedPackagesPolicy: IApprovedPackagesPolicyJson = rushConfigurationJson.approvedPackagesPolicy || {};
 

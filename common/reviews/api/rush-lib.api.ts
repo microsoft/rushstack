@@ -22,7 +22,7 @@ class ApprovedPackagesItem {
 
 class ApprovedPackagesPolicy {
   // WARNING: The type "IRushConfigurationJson" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
+  // @internal (undocumented)
   public constructor(rushConfiguration: RushConfiguration, rushConfigurationJson: IRushConfigurationJson);
   public readonly browserApprovedPackages: ApprovedPackagesConfiguration;
   public readonly enabled: boolean;
@@ -221,7 +221,7 @@ class RushConfiguration {
 // @public
 class RushConfigurationProject {
   // WARNING: The type "IRushConfigurationProjectJson" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
+  // @internal (undocumented)
   constructor(projectJson: IRushConfigurationProjectJson,
                 rushConfiguration: RushConfiguration,
                 tempProjectName: string);
