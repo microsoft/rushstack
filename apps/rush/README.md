@@ -175,7 +175,7 @@ regenerate the files in the common folder.  Use these commands:
 >
 > C:\MyRepo> **rush link**
 
-This will change various generated files in common folder.  You shuld include these
+This will change various generated files in common folder.  You should include these
 changes in your Pull Request.
 
 The "**rush generate**" command takes a long time.  To speed up debugging, you can use
