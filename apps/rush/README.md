@@ -1,4 +1,4 @@
-# rush
+# @microsoft/rush
 
 ## Why Rush?
 A typical web project may consume hundreds of NPM packages, each developed

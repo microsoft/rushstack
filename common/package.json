@@ -8,6 +8,7 @@
     "rush-gulp-core-build-serve": "file:./temp_modules/rush-gulp-core-build-serve",
     "rush-gulp-core-build-typescript": "file:./temp_modules/rush-gulp-core-build-typescript",
     "rush-gulp-core-build-webpack": "file:./temp_modules/rush-gulp-core-build-webpack",
+    "rush-node-core-library": "file:./temp_modules/rush-node-core-library",
     "rush-node-library-build": "file:./temp_modules/rush-node-library-build",
     "rush-package-deps-hash": "file:./temp_modules/rush-package-deps-hash",
     "rush-rush": "file:./temp_modules/rush-rush",
