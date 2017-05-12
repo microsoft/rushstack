@@ -22,6 +22,7 @@ export interface IChangeInfoHash {
 }
 import { execSync } from 'child_process';
 import PrereleaseToken from './PrereleaseToken';
+import ChangeFiles from './ChangeFiles';
 
 export default class PublishUtilities {
   /**
@@ -31,22 +32,18 @@ export default class PublishUtilities {
    */
   public static findChangeRequests(
     allPackages: Map<string, RushConfigurationProject>,
-    changesPath: string,
+    changeFiles: ChangeFiles,
     includeCommitDetails?: boolean,
     prereleaseToken?: PrereleaseToken
   ): IChangeInfoHash {
 
-    let changeFiles: string[] = [];
     const allChanges: IChangeInfoHash = {};
-    console.log(`Finding changes in: ${changesPath}`);
+    console.log(`Finding changes in: ${changeFiles.getChangesPath()}`);
 
-    try {
-      changeFiles = fsx.readdirSync(changesPath).filter(filename => path.extname(filename) === '.json');
-    } catch (e) { /* no-op */ }
+    const files: string[] = changeFiles.getFiles();
 
     // Add the minimum changes defined by the change descriptions.
-    changeFiles.forEach((file: string) => {
-      const fullPath: string = path.resolve(changesPath, file);
+    files.forEach((fullPath: string) => {
       const changeRequest: IChangeInfo = JSON.parse(fsx.readFileSync(fullPath, 'utf8'));
 
       if (includeCommitDetails) {
@@ -144,25 +141,6 @@ export default class PublishUtilities {
     const LOOSE_PKG_REGEX: RegExp = />=?(?:\d+\.){2}\d+\s+<(?:\d+\.){2}\d+/;
 
     return LOOSE_PKG_REGEX.test(version);
-  }
-
-  /**
-   * Find changed packages that are not included in the provided change file.
-   */
-  public static findMissingChangedPackages(
-    changeFileFullPath: string,
-    changedPackages: string[]
-  ): string[] {
-    const changeRequest: IChangeInfo = JSON.parse(fsx.readFileSync(changeFileFullPath, 'utf8'));
-    const requiredSet: Set<string> = new Set(changedPackages);
-    changeRequest.changes.forEach(change => {
-      requiredSet.delete(change.packageName);
-    });
-    const missingProjects: string[] = [];
-    requiredSet.forEach(name => {
-      missingProjects.push(name);
-    });
-    return missingProjects;
   }
 
   private static _updateCommitDetails(filename: string, changes: IChangeInfo[]): void {

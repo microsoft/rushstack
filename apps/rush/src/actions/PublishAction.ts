@@ -3,7 +3,6 @@
 
 import * as colors from 'colors';
 import * as path from 'path';
-import * as fsx from 'fs-extra';
 import { EOL } from 'os';
 import {
   CommandLineAction,
@@ -25,6 +24,7 @@ import PublishUtilities, {
 import ChangelogGenerator from '../utilities/ChangelogGenerator';
 import GitPolicy from '../utilities/GitPolicy';
 import PrereleaseToken from '../utilities/PrereleaseToken';
+import ChangeFiles from '../utilities/ChangeFiles';
 
 export default class PublishAction extends CommandLineAction {
   private _addCommitDetails: CommandLineFlagParameter;
@@ -122,14 +122,13 @@ export default class PublishAction extends CommandLineAction {
    * Executes the publish action, which will read change request files, apply changes to package.jsons,
    */
   protected onExecute(): void {
+    console.log(`Starting "rush publish" ${EOL}`);
+
+    this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
     if (!GitPolicy.check(this._rushConfiguration)) {
       process.exit(1);
       return;
     }
-
-    console.log(`Starting "rush publish" ${EOL}`);
-
-    this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
     const allPackages: Map<string, RushConfigurationProject> = this._rushConfiguration.projectsByName;
 
     if (this._regenerateChangelogs.value) {
@@ -150,9 +149,10 @@ export default class PublishAction extends CommandLineAction {
 
   private _publishChanges(allPackages: Map<string, RushConfigurationProject>): void {
     const changesPath: string = path.join(this._rushConfiguration.commonFolder, 'changes');
+    const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
-      changesPath,
+      changeFiles,
       this._addCommitDetails.value,
       this._prereleaseToken);
     const orderedChanges: IChangeInfo[] = PublishUtilities.sortChangeRequests(allChanges);
@@ -173,8 +173,8 @@ export default class PublishAction extends CommandLineAction {
         // Update changelogs.
         ChangelogGenerator.updateChangelogs(allChanges, allPackages, this._apply.value);
 
-        // Remove the change request files.
-        this._deleteChangeFiles(changesPath);
+        // Remove the change request files only if "-a" or "-b" was provided
+        changeFiles.deleteAll(this._apply.value || !!this._targetBranch.value);
       }
 
       // Stage, commit, and push the changes to remote temp branch.
@@ -280,34 +280,6 @@ export default class PublishAction extends CommandLineAction {
 
   private _gitPull(): void {
     this._execCommand(!!this._targetBranch.value, 'git', `pull origin ${this._targetBranch.value}`.split(' '));
-  }
-
-  private _deleteChangeFiles(changesPath: string): void {
-    // Delete the change files only if "-a" or "-b" was provided
-    const shouldDelete: boolean = this._apply.value || !!this._targetBranch.value;
-    let changeFiles: string[] = [];
-
-    try {
-      changeFiles = fsx.readdirSync(changesPath).filter(fileName => path.extname(fileName) === '.json');
-    } catch (e) { /* no-op */ }
-
-    if (changeFiles.length) {
-      console.log(
-        `${EOL}* ` +
-        `${shouldDelete ? 'DELETING:' : 'DRYRUN: Deleting'} ` +
-        `${changeFiles.length} change file(s).`
-      );
-
-      for (const fileName of changeFiles) {
-        const filePath: string = path.join(changesPath, fileName);
-
-        console.log(` - ${filePath}`);
-
-        if (shouldDelete) {
-          Utilities.deleteFile(filePath);
-        }
-      }
-    }
   }
 
   private _gitAddChanges(): void {

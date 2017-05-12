@@ -13,6 +13,7 @@ import PublishUtilities, {
   IChangeInfoHash
 } from '../PublishUtilities';
 import PrereleaseToken from '../PrereleaseToken';
+import ChangeFiles from '../ChangeFiles';
 
 /* tslint:disable:no-string-literal */
 
@@ -23,7 +24,7 @@ describe('findChangeRequests', () => {
       RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
-      path.join(__dirname, 'noChange'));
+      new ChangeFiles(path.join(__dirname, 'noChange')));
 
     expect(Object.keys(allChanges).length).to.equal(0);
   });
@@ -33,7 +34,7 @@ describe('findChangeRequests', () => {
       RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
-      path.join(__dirname, 'leafChange'));
+      new ChangeFiles(path.join(__dirname, 'leafChange')));
 
     expect(Object.keys(allChanges).length).to.equal(1);
     expect(allChanges).has.property('d');
@@ -45,7 +46,7 @@ describe('findChangeRequests', () => {
       RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
-      path.join(__dirname, 'rootPatchChange'));
+      new ChangeFiles(path.join(__dirname, 'rootPatchChange')));
 
     expect(Object.keys(allChanges).length).to.equal(2);
 
@@ -64,7 +65,7 @@ describe('findChangeRequests', () => {
       RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
-      path.join(__dirname, 'rootMajorChange'));
+      new ChangeFiles(path.join(__dirname, 'rootMajorChange')));
 
     expect(Object.keys(allChanges).length).to.equal(3);
 
@@ -86,7 +87,7 @@ describe('findChangeRequests', () => {
       RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
-      path.join(__dirname, 'cyclicDeps'));
+      new ChangeFiles(path.join(__dirname, 'cyclicDeps')));
 
     expect(Object.keys(allChanges).length).to.equal(2);
 
@@ -102,7 +103,7 @@ describe('findChangeRequests', () => {
       RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
-      path.join(__dirname, 'multipleChanges'));
+      new ChangeFiles(path.join(__dirname, 'multipleChanges')));
 
     expect(Object.keys(allChanges).length).to.equal(3);
     expect(allChanges).has.property('a');
@@ -121,7 +122,7 @@ describe('findChangeRequests', () => {
       RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
-      path.join(__dirname, 'explicitVersionChange'));
+      new ChangeFiles(path.join(__dirname, 'explicitVersionChange')));
 
     expect(Object.keys(allChanges).length).to.equal(2);
     expect(allChanges).has.property('c');
@@ -138,7 +139,7 @@ describe('sortChangeRequests', () => {
       RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
-      path.join(__dirname, 'multipleChanges'));
+      new ChangeFiles(path.join(__dirname, 'multipleChanges')));
     const orderedChanges: IChangeInfo[] = PublishUtilities.sortChangeRequests(allChanges);
 
     expect(orderedChanges.length).equals(3, 'there was not 3 changes');
@@ -154,7 +155,7 @@ describe('updatePackages', () => {
       RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
-      path.join(__dirname, 'multipleChanges'));
+      new ChangeFiles(path.join(__dirname, 'multipleChanges')));
 
     PublishUtilities.updatePackages(allChanges, allPackages, false);
 
@@ -174,7 +175,7 @@ describe('updatePackages', () => {
       RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
-      path.join(__dirname, 'explicitVersionChange'));
+      new ChangeFiles(path.join(__dirname, 'explicitVersionChange')));
 
     PublishUtilities.updatePackages(allChanges, allPackages, false);
 
@@ -190,7 +191,7 @@ describe('updatePackages', () => {
       RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
-      path.join(__dirname, 'cyclicDepsExplicit'),
+      new ChangeFiles(path.join(__dirname, 'cyclicDepsExplicit')),
       false);
     PublishUtilities.updatePackages(allChanges, allPackages, false);
 
@@ -215,7 +216,7 @@ describe('updatePackages', () => {
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(prereleaseName);
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
-      path.join(__dirname, 'rootPatchChange'),
+      new ChangeFiles(path.join(__dirname, 'rootPatchChange')),
       false,
       prereleaseToken);
     PublishUtilities.updatePackages(allChanges, allPackages, false, prereleaseToken);
@@ -245,7 +246,7 @@ describe('updatePackages', () => {
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(prereleaseName);
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
-      path.join(__dirname, 'explicitVersionChange'),
+      new ChangeFiles(path.join(__dirname, 'explicitVersionChange')),
       false,
       prereleaseToken);
     PublishUtilities.updatePackages(allChanges, allPackages, false, prereleaseToken);
@@ -275,7 +276,7 @@ describe('updatePackages', () => {
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(prereleaseName);
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
-      path.join(__dirname, 'cyclicDeps'),
+      new ChangeFiles(path.join(__dirname, 'cyclicDeps')),
       false,
       prereleaseToken);
     PublishUtilities.updatePackages(allChanges, allPackages, false, prereleaseToken);
@@ -301,7 +302,7 @@ describe('updatePackages', () => {
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(undefined, suffix);
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
-      path.join(__dirname, 'rootPatchChange'),
+      new ChangeFiles(path.join(__dirname, 'rootPatchChange')),
       false,
       prereleaseToken);
     PublishUtilities.updatePackages(allChanges, allPackages, false, prereleaseToken);
@@ -331,7 +332,7 @@ describe('updatePackages', () => {
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(undefined, suffix);
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
-      path.join(__dirname, 'explicitVersionChange'),
+      new ChangeFiles(path.join(__dirname, 'explicitVersionChange')),
       false,
       prereleaseToken);
     PublishUtilities.updatePackages(allChanges, allPackages, false, prereleaseToken);
@@ -361,7 +362,7 @@ describe('updatePackages', () => {
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(undefined, suffix);
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
-      path.join(__dirname, 'cyclicDeps'),
+      new ChangeFiles(path.join(__dirname, 'cyclicDeps')),
       false,
       prereleaseToken);
     PublishUtilities.updatePackages(allChanges, allPackages, false, prereleaseToken);
@@ -387,26 +388,5 @@ describe('isRangeDependency', () => {
     expect(PublishUtilities.isRangeDependency('1.0.0')).is.false;
     expect(PublishUtilities.isRangeDependency('^1.0.0')).is.false;
     expect(PublishUtilities.isRangeDependency('~1.0.0')).is.false;
-  });
-});
-
-describe('findMissingChangedPackages', () => {
-  it('finds the missing package.', () => {
-    const changeFile: string = path.join(__dirname, 'verifyChanges', 'changes.json');
-    const changedPackages: string[] = ['a', 'b', 'c'];
-    expect(PublishUtilities.findMissingChangedPackages(changeFile, changedPackages)).to.contain(
-      'c',
-      'c should be missing');
-    expect(PublishUtilities.findMissingChangedPackages(changeFile, changedPackages)).to.have.lengthOf(
-      1,
-      'only c is missing');
-  });
-
-  it('finds nothing when no missing packages', () => {
-    const changeFile: string = path.join(__dirname, 'verifyChanges', 'changes.json');
-    const changedPackages: string[] = ['a'];
-    expect(PublishUtilities.findMissingChangedPackages(changeFile, changedPackages)).to.have.lengthOf(
-      0,
-      'nothing is missing');
   });
 });

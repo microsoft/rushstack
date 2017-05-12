@@ -25,7 +25,7 @@ import {
 } from '@microsoft/rush-lib';
 
 import RushCommandLineParser from './RushCommandLineParser';
-import PublishUtilities from '../utilities/PublishUtilities';
+import ChangeFiles from '../utilities/ChangeFiles';
 
 const BUMP_OPTIONS: { [type: string]: string } = {
   'major': 'major - for breaking changes (ex: renaming a file)',
@@ -37,7 +37,7 @@ export default class ChangeAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
   private _rushConfiguration: RushConfiguration;
   private _sortedProjectList: string[];
-  private _changeFileData: IChangeFile;
+  private _changeFileData: Map<string, IChangeFile>;
   private _verifyParameter: CommandLineFlagParameter;
   private _targetBranch: CommandLineStringParameter;
 
@@ -99,10 +99,7 @@ export default class ChangeAction extends CommandLineAction {
     }
 
     this._prompt = inquirer.createPromptModule();
-    this._changeFileData = {
-      changes: [],
-      email: undefined
-    };
+    this._changeFileData = new Map<string, IChangeFile>();
 
     // We should consider making onExecute either be an async/await or have it return a promise
     this._promptLoop()
@@ -130,24 +127,13 @@ export default class ChangeAction extends CommandLineAction {
   }
 
   private _validateChangeFile(changedPackages: string[]): void {
-    const changeFiles: string[] = this._getChangeFiles();
-    if (changeFiles.length === 1) {
-      console.log('Found one change file: ' + changeFiles[0]);
-      this._validateChangedProjects(changeFiles[0], changedPackages);
-    } else if (changeFiles.length === 0) {
+    const files: string[] = this._getChangeFiles().map(relativePath => {
+      return path.join(this._rushConfiguration.rushJsonFolder, relativePath);
+    });
+    if (files.length === 0) {
       throw new Error(`No change file is found. Run 'rush change' to generate a change file.`);
-    } else {
-      throw new Error('More than one change file was found. Delete and only keep one.');
     }
-  }
-
-  private _validateChangedProjects(changeFile: string,
-    changedPackages: string[]): void {
-    const fileFullPath: string = path.join(this._rushConfiguration.rushJsonFolder, changeFile);
-    const missingPackages: string[] = PublishUtilities.findMissingChangedPackages(fileFullPath, changedPackages);
-    if (missingPackages.length > 0) {
-      throw new Error(`Change file does not contain ${missingPackages.join(',')}.`);
-    }
+    ChangeFiles.validate(files, changedPackages);
   }
 
   private _getChangeFiles(): string[] {
@@ -181,7 +167,16 @@ export default class ChangeAction extends CommandLineAction {
         .then((answers: IChangeInfo) => {
 
           // Save the info into the changefile
-          this._changeFileData.changes.push(answers);
+          let changeFile: IChangeFile = this._changeFileData.get(answers.packageName);
+          if (!changeFile) {
+            changeFile = {
+              changes: [],
+              packageName: answers.packageName,
+              email: undefined
+            };
+            this._changeFileData.set(answers.packageName, changeFile);
+          }
+          changeFile.changes.push(answers);
 
           // Continue to loop
           return this._promptLoop();
@@ -191,8 +186,10 @@ export default class ChangeAction extends CommandLineAction {
       this._warnUncommitedChanges();
       // We are done, collect their e-mail
       return this._detectOrAskForEmail().then((email: string) => {
-        this._changeFileData.email = email;
-        return this._writeChangeFile();
+        this._changeFileData.forEach((changeFile: IChangeFile) => {
+          changeFile.email = email;
+        });
+        return this._writeChangeFiles();
       });
     }
   }
@@ -318,21 +315,26 @@ export default class ChangeAction extends CommandLineAction {
   /**
    * Writes changefile to the common/changes folder. Will prompt for overwrite if file already exists.
    */
-  private _writeChangeFile(): Promise<void> {
-    const output: string = JSON.stringify(this._changeFileData, undefined, 2);
+  private _writeChangeFiles(): Promise<void> {
+    const promises: Promise<void>[] = [];
+    this._changeFileData.forEach((changeFile: IChangeFile) => {
+      promises.push(this._writeChangeFile(changeFile));
+    });
 
-    let branch: string = undefined;
-    try {
-      branch = gitInfo().branch;
-    } catch (error) {
-      console.log('Could not automatically detect git branch name, using timestamps instead.');
-    }
+    return new Promise<void>((resolve, reject) => {
+      Promise.all(promises).then(() => {
+        resolve();
+      })
+      .catch(e => {
+        reject(e);
+      });
+    });
+  }
 
-    const filename: string = (branch ?
-      this._escapeFilename(`${branch}_${this._getTimestamp()}.json`) :
-      `${this._getTimestamp()}.json`);
+  private _writeChangeFile(changeFile: IChangeFile): Promise<void> {
+    const output: string = JSON.stringify(changeFile, undefined, 2);
 
-    const filepath: string = path.join(this._rushConfiguration.commonFolder, 'changes', filename);
+    const filepath: string = this._generateChangeFilePath(changeFile.packageName);
 
     if (fsx.existsSync(filepath)) {
       // prompt about overwrite
@@ -355,14 +357,32 @@ export default class ChangeAction extends CommandLineAction {
     }
   }
 
+  private _generateChangeFilePath(packageName: string): string {
+    let branch: string = undefined;
+    try {
+      branch = gitInfo().branch;
+    } catch (error) {
+      console.log('Could not automatically detect git branch name, using timestamps instead.');
+    }
+
+    // example filename: yourbranchname_2017-05-01-20-20.json
+    const filename: string = (branch ?
+      this._escapeFilename(`${branch}_${this._getTimestamp()}.json`) :
+      `${this._getTimestamp()}.json`);
+    const filepath: string = path.join(this._rushConfiguration.commonFolder,
+      'changes',
+      ...packageName.split('/'),
+      filename);
+    return filepath;
+  }
+
   /**
    * Writes a file to disk, ensuring the directory structure up to that point exists
    */
   private _writeFile(fileName: string, output: string): Promise<void> {
     return new Promise<void>((resolve: () => void, reject: (err: Error) => void) => {
-      // We need mkdirsSync() because writeFile() will error if the dir doesn't exist
       // tslint:disable-next-line:no-any
-      fsx.mkdirsSync(path.dirname(fileName), (err: any) => {
+      fsx.mkdirs(path.dirname(fileName), (err: any) => {
         if (err) {
           reject(err);
         }

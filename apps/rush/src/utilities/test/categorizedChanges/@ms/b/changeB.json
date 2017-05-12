@@ -1,0 +1,7 @@
+{
+  "changes": [{
+    "packageName": "@ms/b",
+    "type": "patch",
+    "comment": "Patching b"
+  }]
+}
