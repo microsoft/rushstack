@@ -151,6 +151,7 @@ class PackageReviewConfiguration {
   public items: PackageReviewItem[];
   public loadFromFile(): void;
   public saveToFile(): void;
+  public tryLoadFromFile(approvedPackagesPolicyEnabled: boolean): boolean;
 }
 
 // @public

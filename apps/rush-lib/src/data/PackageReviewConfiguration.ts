@@ -89,9 +89,28 @@ export class PackageReviewConfiguration {
   }
 
   /**
+   * If the file exists, calls loadFromFile().
+   */
+  public tryLoadFromFile(approvedPackagesPolicyEnabled: boolean): boolean {
+    if (!fsx.existsSync(this._jsonFilename)) {
+      return false;
+    }
+
+    this.loadFromFile();
+
+    if (!approvedPackagesPolicyEnabled) {
+      console.log(`Warning: Ignoring "${path.basename(this._jsonFilename)}" because the`
+        + ` "approvedPackagesPolicy" setting was not specified in rush.json`);
+    }
+
+    return false;
+  }
+
+  /**
    * Loads the configuration data from the filename that was passed to the constructor.
    */
   public loadFromFile(): void {
+
     if (!PackageReviewConfiguration._validator) {
       const schemaFilename: string = path.join(__dirname, '../approved-packages-schema.json');
       PackageReviewConfiguration._validator = JsonSchemaValidator.loadFromFile(schemaFilename);

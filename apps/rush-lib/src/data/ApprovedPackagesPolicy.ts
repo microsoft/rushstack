@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as fsx from 'fs-extra';
 
 import RushConfigurationProject, { IRushConfigurationProjectJson } from './RushConfigurationProject';
 import { PackageReviewConfiguration } from './PackageReviewConfiguration';
@@ -27,31 +26,24 @@ export class ApprovedPackagesPolicy {
     this._ignoredNpmScopes = new Set<string>(approvedPackagesPolicy.ignoredNpmScopes);
     this._reviewCategories = new Set<string>(approvedPackagesPolicy.reviewCategories);
 
+    if (this._enabled) {
+      if (!this.reviewCategories.size) {
+        throw new Error(`The "approvedPackagesPolicy" feature is enabled rush.json, but the reviewCategories`
+          + ` list is not configured.`);
+      }
+    }
+
     // Load browser-approved-packages.json
     const browserApprovedPackagesPath: string = path.join(rushConfiguration.commonRushConfigFolder,
       RushConstants.browserApprovedPackagesFilename);
     this._browserApprovedPackages = new PackageReviewConfiguration(browserApprovedPackagesPath);
-    if (fsx.existsSync(browserApprovedPackagesPath)) {
-      this._browserApprovedPackages.loadFromFile();
-
-      if (!this._enabled) {
-        console.log(`Warning: Ignoring "${RushConstants.browserApprovedPackagesFilename}" because the`
-          + ` "approvedPackagesPolicy" setting was not specified in rush.json`);
-      }
-    }
+    this._browserApprovedPackages.tryLoadFromFile(this._enabled);
 
     // Load nonbrowser-approved-packages.json
     const nonbrowserApprovedPackagesPath: string = path.join(rushConfiguration.commonRushConfigFolder,
       RushConstants.nonbrowserApprovedPackagesFilename);
     this._nonbrowserApprovedPackages = new PackageReviewConfiguration(nonbrowserApprovedPackagesPath);
-    if (fsx.existsSync(nonbrowserApprovedPackagesPath)) {
-      this._nonbrowserApprovedPackages.loadFromFile();
-
-      if (!this._enabled) {
-        console.log(`Warning: Ignoring "${RushConstants.nonbrowserApprovedPackagesFilename}" because the`
-          + ` "approvedPackagesPolicy" setting was not specified in rush.json`);
-      }
-    }
+    this._nonbrowserApprovedPackages.tryLoadFromFile(this._enabled);
   }
 
   /**

@@ -63,10 +63,6 @@ export default class RushConfigurationProject {
     if (rushConfiguration.approvedPackagesPolicy.enabled) {
       // If so, then every project needs to have a reviewCategory that was defined
       // by the reviewCategories array.
-      if (!rushConfiguration.approvedPackagesPolicy.reviewCategories.size) {
-        throw new Error(`The "approvedPackagesPolicy" feature is enabled rush.json, but the reviewCategories`
-          + ` list is not configured.`);
-      }
       if (!projectJson.reviewCategory) {
         throw new Error(`The "approvedPackagesPolicy" feature is enabled rush.json, but a reviewCategory` +
           ` was not specified for the project "${projectJson.packageName}".`);
