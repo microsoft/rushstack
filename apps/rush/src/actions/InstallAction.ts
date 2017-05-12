@@ -16,7 +16,7 @@ import GitPolicy from '../utilities/GitPolicy';
 import InstallManager, { InstallType } from '../utilities/InstallManager';
 import LinkManager from '../utilities/LinkManager';
 import ShrinkwrapFile from '../utilities/ShrinkwrapFile';
-import PackageReviewChecker from '../utilities/PackageReviewChecker';
+import { PackageReviewChecker } from '../utilities/PackageReviewChecker';
 
 interface ITempModuleInformation {
   packageJson: IPackageJson;
@@ -81,10 +81,7 @@ export default class InstallAction extends CommandLineAction {
         return;
       }
 
-      if (this._rushConfiguration.approvedPackagesPolicyEnabled) {
-        const packageReviewChecker: PackageReviewChecker = new PackageReviewChecker(this._rushConfiguration);
-        packageReviewChecker.saveCurrentDependencies();
-      }
+      PackageReviewChecker.rewriteConfigFiles(this._rushConfiguration);
     }
 
     const stopwatch: Stopwatch = Stopwatch.start();

@@ -13,7 +13,7 @@ import {
 } from '@microsoft/rush-lib';
 
 import RushCommandLineParser from './RushCommandLineParser';
-import PackageReviewChecker from '../utilities/PackageReviewChecker';
+import { PackageReviewChecker } from '../utilities/PackageReviewChecker';
 
 export default class CheckVersionsAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
@@ -38,10 +38,7 @@ export default class CheckVersionsAction extends CommandLineAction {
 
     const config: RushConfiguration = RushConfiguration.loadFromDefaultLocation();
 
-    if (config.approvedPackagesPolicyEnabled) {
-      const packageReviewChecker: PackageReviewChecker = new PackageReviewChecker(config);
-      packageReviewChecker.saveCurrentDependencies();
-    }
+    PackageReviewChecker.rewriteConfigFiles(config);
 
     const pinnedVersions: { [dependency: string]: string } = {};
     config.pinnedVersions.forEach((version: string, dependency: string) => {
