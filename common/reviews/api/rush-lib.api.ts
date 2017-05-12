@@ -248,7 +248,7 @@ module RushConstants {
 
   npmShrinkwrapFilename: string = 'npm-shrinkwrap.json';
 
-  pinnedVersionsFilename: string = 'pinnedVersions.json';
+  pinnedVersionsFilename: string = 'pinned-versions.json';
 
   rushTempFolderName: string = 'temp';
 

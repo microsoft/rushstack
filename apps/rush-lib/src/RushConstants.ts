@@ -64,5 +64,5 @@ export namespace RushConstants {
    * version for all projects.  This configuration file should go in the
    * "common/config/rush" folder.
    */
-  export const pinnedVersionsFilename: string = 'pinnedVersions.json';
+  export const pinnedVersionsFilename: string = 'pinned-versions.json';
 }
