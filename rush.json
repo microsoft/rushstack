@@ -2,15 +2,16 @@
   "npmVersion": "4.5.0",
   "rushMinimumVersion": "2.5.0",
   "nodeSupportedVersionRange": ">=6.9.0 <7.0.0",
-  "commonFolder": "common",
   "projectFolderMinDepth": 1,
-  "useLocalNpmCache": true,
-  
-  "reviewCategories": [
-    "libraries",
-    "other"
-  ],
-  "packageReviewFile": "common/reviews/PackageDependencies.json",
+
+  "approvedPackagesPolicy": {
+    "reviewCategories": [
+      "libraries",
+      "other"
+    ],
+    "ignoredNpmScopes": [ "@types" ]
+  },
+
   "gitPolicy": {
     // Require GitHub scrubbed e-mails
     "allowedEmailRegExps": [
@@ -23,12 +24,12 @@
   // in Windows Explorer
   "projects": [
     // "apps" folder (alphabetical order)
-    
+
     {
       "packageName": "@microsoft/rush",
       "projectFolder": "apps/rush",
       "reviewCategory": "libraries",
-      
+
       // Rush is published manually for two reasons:
       // 1. We need to do proper validation before pushing out a new release
       //    that potentially could screw up everyone's daily work.
@@ -42,7 +43,7 @@
       "reviewCategory": "libraries",
       "shouldPublish": false
     },
- 
+
     // "core-build" folder (alphabetical order)
     {
       "packageName": "@microsoft/gulp-core-build",
@@ -152,6 +153,6 @@
     // "webpack" folder (alphabetical order)
 
     // (coming soon: loader-cased-file, load-themed-styles, etc.)
-    
+
   ]
 }
