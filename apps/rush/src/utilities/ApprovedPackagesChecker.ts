@@ -27,9 +27,12 @@ export class ApprovedPackagesChecker {
     for (const rushProject of rushConfiguration.projects) {
       const packageJson: IPackageJson = rushProject.packageJson;
 
-      ApprovedPackagesChecker._collectDependencies(packageJson.dependencies, approvedPackagesPolicy, rushProject);
-      ApprovedPackagesChecker._collectDependencies(packageJson.optionalDependencies, approvedPackagesPolicy, rushProject);
-      ApprovedPackagesChecker._collectDependencies(packageJson.devDependencies, approvedPackagesPolicy, rushProject);
+      ApprovedPackagesChecker._collectDependencies(packageJson.dependencies,
+        approvedPackagesPolicy, rushProject);
+      ApprovedPackagesChecker._collectDependencies(packageJson.optionalDependencies,
+        approvedPackagesPolicy, rushProject);
+      ApprovedPackagesChecker._collectDependencies(packageJson.devDependencies,
+        approvedPackagesPolicy, rushProject);
     }
 
     approvedPackagesPolicy.browserApprovedPackages.saveToFile();
