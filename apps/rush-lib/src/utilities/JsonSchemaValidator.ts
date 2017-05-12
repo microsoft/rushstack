@@ -20,7 +20,20 @@ export default class JsonSchemaValidator {
   private static _formatErrorDetails(errorDetails: Validator.SchemaErrorDetail[], indent: string,
     buffer: string): string {
     for (const errorDetail of errorDetails) {
+
       buffer += os.EOL + indent + `Error: ${errorDetail.path}`;
+
+      if (errorDetail.description) {
+        const MAX_LENGTH: number = 40;
+        let truncatedDescription: string = errorDetail.description.trim();
+        if (truncatedDescription.length > MAX_LENGTH) {
+          truncatedDescription = truncatedDescription.substr(0, MAX_LENGTH - 3)
+            + '...';
+        }
+
+        buffer += ` (${truncatedDescription})`;
+      }
+
       buffer += os.EOL + indent + `       ${errorDetail.message}`;
 
       if (errorDetail.inner) {
