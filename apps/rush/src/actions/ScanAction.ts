@@ -11,14 +11,14 @@ import { CommandLineAction } from '@microsoft/ts-command-line';
 
 import RushCommandLineParser from './RushCommandLineParser';
 
-export default class CheckAction extends CommandLineAction {
+export default class ScanAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
 
   constructor(parser: RushCommandLineParser) {
     super({
-      actionVerb: 'check',
-      summary: 'Check for imports that are missing from a project\'s package.json file',
-      documentation: 'Check for imports that are missing from a project\'s package.json file.'
+      actionVerb: 'scan',
+      summary: 'Scan for imports that are missing from a project\'s package.json file',
+      documentation: 'Scan for imports that are missing from a project\'s package.json file.'
     });
     this._parser = parser;
   }
@@ -28,7 +28,7 @@ export default class CheckAction extends CommandLineAction {
   }
 
   protected onExecute(): void {
-    console.log('Starting "rush check"' + os.EOL);
+    console.log('Starting "rush scan"' + os.EOL);
 
     const packageJsonFilename: string = path.resolve('./package.json');
 

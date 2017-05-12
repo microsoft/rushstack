@@ -14,12 +14,12 @@ import {
 
 import RushCommandLineParser from './RushCommandLineParser';
 
-export default class CheckVersionsAction extends CommandLineAction {
+export default class CheckAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
 
   constructor(parser: RushCommandLineParser) {
     super({
-      actionVerb: 'check-versions',
+      actionVerb: 'check',
       summary: 'Checks each project\'s package.json files and ensures that all dependencies are of the same ' +
         'version throughout the repository.',
       documentation: 'Checks each project\'s package.json files and ensures that all dependencies are of the ' +
@@ -33,7 +33,7 @@ export default class CheckVersionsAction extends CommandLineAction {
   }
 
   protected onExecute(): void {
-    console.log(`Starting "rush check-versions"${os.EOL}`);
+    console.log(`Starting "rush check"${os.EOL}`);
 
     const config: RushConfiguration = RushConfiguration.loadFromDefaultLocation();
 
