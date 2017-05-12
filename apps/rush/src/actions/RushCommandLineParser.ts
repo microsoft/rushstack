@@ -19,7 +19,7 @@ import LinkAction from './LinkAction';
 import PublishAction from './PublishAction';
 import RebuildAction from './RebuildAction';
 import UnlinkAction from './UnlinkAction';
-import CheckVersionsAction from './CheckVersionsAction';
+import ScanAction from './ScanAction';
 
 export default class RushCommandLineParser extends CommandLineParser {
   public rushConfiguration: RushConfiguration;
@@ -39,12 +39,12 @@ export default class RushCommandLineParser extends CommandLineParser {
     this.addAction(new BuildAction(this));
     this.addAction(new ChangeAction(this));
     this.addAction(new CheckAction(this));
-    this.addAction(new CheckVersionsAction(this));
     this.addAction(new GenerateAction(this));
     this.addAction(new InstallAction(this));
     this.addAction(new LinkAction(this));
     this.addAction(new PublishAction(this));
     this.addAction(new RebuildAction(this));
+    this.addAction(new ScanAction(this));
     this.addAction(new UnlinkAction(this));
   }
 
