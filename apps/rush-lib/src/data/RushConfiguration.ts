@@ -7,13 +7,13 @@ import * as os from 'os';
 import * as semver from 'semver';
 
 import rushVersion from '../rushVersion';
-import Validator = require('z-schema');
 import JsonFile from '../utilities/JsonFile';
 import RushConfigurationProject, { IRushConfigurationProjectJson } from './RushConfigurationProject';
 import { PinnedVersionsConfiguration } from './PinnedVersionsConfiguration';
 import Utilities from '../utilities/Utilities';
 import { RushConstants } from '../RushConstants';
 import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
+import JsonSchemaValidator from '../utilities/JsonSchemaValidator';
 
 /**
  * A list of known config filenames that are expected to appear in the "./common/config/rush" folder.
@@ -121,29 +121,15 @@ export default class RushConfiguration {
       }
     }
 
-    // Remove the $schema reference that appears in the configuration object (used for IntelliSense),
-    // since we are replacing it with the precompiled version.  The validator.setRemoteReference()
-    // API is a better way to handle this, but we'd first need to publish the schema file
-    // to a public web server where Visual Studio can find it.
-    delete rushConfigurationJson.$schema;
+    const rushSchemaFilename: string = path.join(__dirname, '../rush-schema.json');
+    const validator: JsonSchemaValidator = JsonSchemaValidator.loadFromFile(rushSchemaFilename);
 
-    const validator: Validator = new Validator({
-      breakOnFirstError: true,
-      noTypeless: true
-    });
+    validator.validateObject(rushConfigurationJson, (errorDescription: string) => {
+      const errorMessage: string = `Error parsing file '${rushJsonFilename}':`
+        + os.EOL + errorDescription;
 
-    const rushSchema: Object = JsonFile.loadJsonFile(path.join(__dirname, '../rush-schema.json'));
-
-    if (!validator.validate(rushConfigurationJson, rushSchema)) {
-      const error: Validator.SchemaError = validator.getLastError();
-
-      const detail: Validator.SchemaErrorDetail = error.details[0];
-      const errorMessage: string = `Error parsing file '${path.basename(rushJsonFilename)}',`
-        + `section[${detail.path}]:${os.EOL}(${detail.code}) ${detail.message}`;
-
-      console.log(os.EOL + 'ERROR: ' + errorMessage + os.EOL + os.EOL);
       throw new Error(errorMessage);
-    }
+    });
 
     return new RushConfiguration(rushConfigurationJson, rushJsonFilename);
   }
