@@ -16,7 +16,7 @@ import GitPolicy from '../utilities/GitPolicy';
 import InstallManager, { InstallType } from '../utilities/InstallManager';
 import LinkManager from '../utilities/LinkManager';
 import ShrinkwrapFile from '../utilities/ShrinkwrapFile';
-import { PackageReviewChecker } from '../utilities/PackageReviewChecker';
+import { ApprovedPackagesChecker } from '../utilities/ApprovedPackagesChecker';
 
 interface ITempModuleInformation {
   packageJson: IPackageJson;
@@ -81,7 +81,7 @@ export default class InstallAction extends CommandLineAction {
         return;
       }
 
-      PackageReviewChecker.rewriteConfigFiles(this._rushConfiguration);
+      ApprovedPackagesChecker.rewriteConfigFiles(this._rushConfiguration);
     }
 
     const stopwatch: Stopwatch = Stopwatch.start();
