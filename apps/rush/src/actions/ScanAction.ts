@@ -17,8 +17,15 @@ export default class ScanAction extends CommandLineAction {
   constructor(parser: RushCommandLineParser) {
     super({
       actionVerb: 'scan',
-      summary: 'Scan for imports that are missing from a project\'s package.json file',
-      documentation: 'Scan for imports that are missing from a project\'s package.json file.'
+      summary: 'Scan a project folder and display a report of imported packages.',
+      documentation: `The NPM system allows a project to import dependencies without explicitly`
+        + ` listing them in its package.json file. This is a dangerous practice, because`
+        + ` there is no guarantee you will get a compatible version. The "rush scan" command`
+        + ` reports a list of packages that are actually imported by your code, which you can`
+        + ` compare against your package.json file to find mistakes. It searches the "./src"`
+        + ` and "./lib" folders for typical import syntaxes such as "import __ from '__'",`
+        + ` "require('__')", "System.import('__'), etc.  The results are only approximate,`
+        + ` but generally pretty accurate.`
     });
     this._parser = parser;
   }
@@ -33,7 +40,7 @@ export default class ScanAction extends CommandLineAction {
     const packageJsonFilename: string = path.resolve('./package.json');
 
     if (!fsx.existsSync(packageJsonFilename)) {
-      throw new Error('You must run this project from the top-level folder that contains a package.json file');
+      throw new Error('You must run "rush scan" in a project folder containing a package.json file.');
     }
 
     const requireRegExps: RegExp[] = [
