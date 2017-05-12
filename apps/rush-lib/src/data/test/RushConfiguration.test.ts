@@ -2,6 +2,7 @@
 
 import { assert } from 'chai';
 import RushConfiguration from '../RushConfiguration';
+import { ApprovedPackagesPolicy } from '../ApprovedPackagesPolicy';
 import RushConfigurationProject from '../RushConfigurationProject';
 import * as path from 'path';
 import Utilities from '../../utilities/Utilities';
@@ -49,17 +50,18 @@ describe('RushConfiguration', () => {
     assert.equal(rushConfiguration.projects.length, 3);
 
     // "approvedPackagesPolicy" feature
-    assert.isTrue(rushConfiguration.approvedPackagesPolicyEnabled, 'Failed to validate approvedPackagesPolicyEnabled');
-    assert.deepEqual(Utilities.getSetAsArray(rushConfiguration.approvedPackagesReviewCategories),
+    const approvedPackagesPolicy: ApprovedPackagesPolicy = rushConfiguration.approvedPackagesPolicy;
+    assert.isTrue(approvedPackagesPolicy.enabled, 'Failed to validate approvedPackagesPolicy.enabled');
+    assert.deepEqual(Utilities.getSetAsArray(approvedPackagesPolicy.reviewCategories),
       [ 'first-party', 'third-party', 'prototype' ],
-      'Failed to validate approvedPackagesReviewCategories');
-    assert.deepEqual(Utilities.getSetAsArray(rushConfiguration.approvedPackagesIgnoredNpmScopes),
+      'Failed to validate approvedPackagesPolicy.reviewCategories');
+    assert.deepEqual(Utilities.getSetAsArray(approvedPackagesPolicy.ignoredNpmScopes),
       [ '@types', '@internal' ],
-      'Failed to validate approvedPackagesIgnoredNpmScopes');
+      'Failed to validate approvedPackagesPolicy.ignoredNpmScopes');
 
-    assert.equal(rushConfiguration.browserApprovedPackages.items[0].packageName, 'example',
+    assert.equal(approvedPackagesPolicy.browserApprovedPackages.items[0].packageName, 'example',
        'Failed to validate browserApprovedPackages.items[0]');
-    assert.equal(rushConfiguration.browserApprovedPackages.items[0].allowedCategories.size, 3,
+    assert.equal(approvedPackagesPolicy.browserApprovedPackages.items[0].allowedCategories.size, 3,
        'Failed to validate browserApprovedPackages.items[0]');
 
     // Validate project1 settings

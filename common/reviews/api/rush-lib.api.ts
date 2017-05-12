@@ -1,3 +1,14 @@
+class ApprovedPackagesPolicy {
+  // WARNING: The type "IRushConfigurationJson" needs to be exported by the package (e.g. added to index.ts)
+  // (undocumented)
+  public constructor(rushConfiguration: RushConfiguration, rushConfigurationJson: IRushConfigurationJson);
+  public readonly browserApprovedPackages: PackageReviewConfiguration;
+  public readonly enabled: boolean;
+  public readonly ignoredNpmScopes: Set<string>;
+  public readonly nonbrowserApprovedPackages: PackageReviewConfiguration;
+  public readonly reviewCategories: Set<string>;
+}
+
 // @public
 class AsyncRecycler {
   // (undocumented)
@@ -174,10 +185,7 @@ export function RegexErrorDetector(regex: RegExp,
 
 // @public
 class RushConfiguration {
-  public readonly approvedPackagesIgnoredNpmScopes: Set<string>;
-  public readonly approvedPackagesPolicyEnabled: boolean;
-  public readonly approvedPackagesReviewCategories: Set<string>;
-  public readonly browserApprovedPackages: PackageReviewConfiguration;
+  public readonly approvedPackagesPolicy: ApprovedPackagesPolicy;
   public readonly committedShrinkwrapFilename: string;
   public readonly commonFolder: string;
   public readonly commonRushConfigFolder: string;
@@ -191,7 +199,6 @@ class RushConfiguration {
   public static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
   // (undocumented)
   public static loadFromDefaultLocation(): RushConfiguration;
-  public readonly nonbrowserApprovedPackages: PackageReviewConfiguration;
   public readonly npmCacheFolder: string;
   public readonly npmTmpFolder: string;
   public readonly npmToolFilename: string;

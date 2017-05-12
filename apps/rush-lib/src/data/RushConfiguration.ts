@@ -11,9 +11,9 @@ import Validator = require('z-schema');
 import JsonFile from '../utilities/JsonFile';
 import RushConfigurationProject, { IRushConfigurationProjectJson } from './RushConfigurationProject';
 import { PinnedVersionsConfiguration } from './PinnedVersionsConfiguration';
-import { PackageReviewConfiguration } from './PackageReviewConfiguration';
 import Utilities from '../utilities/Utilities';
 import { RushConstants } from '../RushConstants';
+import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
 
 /**
  * A list of known config filenames that are expected to appear in the "./common/config/rush" folder.
@@ -91,11 +91,7 @@ export default class RushConfiguration {
   private _projectFolderMaxDepth: number;
 
   // "approvedPackagesPolicy" feature
-  private _approvedPackagesPolicyEnabled: boolean;
-  private _approvedPackagesIgnoredNpmScopes: Set<string>;
-  private _approvedPackagesReviewCategories: Set<string>;
-  private _browserApprovedPackages: PackageReviewConfiguration;
-  private _nonbrowserApprovedPackages: PackageReviewConfiguration;
+  private _approvedPackagesPolicy: ApprovedPackagesPolicy;
 
   // "gitPolicy" feature
   private _gitAllowedEmailRegExps: string[];
@@ -384,65 +380,10 @@ export default class RushConfiguration {
   }
 
   /**
-   * [Part of the "approvedPackagesPolicy" feature.]
-   * Whether the feature is enabled.  The feature is enabled if the "approvedPackagesPolicy"
-   * field is assigned in rush.json.
+   * The "approvedPackagesPolicy" settings.
    */
-  public get approvedPackagesPolicyEnabled(): boolean {
-    return this._approvedPackagesPolicyEnabled;
-  }
-
-  /**
-   * [Part of the "approvedPackagesPolicy" feature.]
-   * A list of NPM package scopes that will be excluded from review (e.g. \"@types\")
-   */
-  public get approvedPackagesIgnoredNpmScopes(): Set<string> {
-    return this._approvedPackagesIgnoredNpmScopes;
-  }
-
-  /**
-   * [Part of the "approvedPackagesPolicy" feature.]
-   * A list of category names that are valid for usage as the RushConfigurationProject.reviewCategory field.
-   * This array will never be undefined.
-   */
-  public get approvedPackagesReviewCategories(): Set<string> {
-    return this._approvedPackagesReviewCategories;
-  }
-
-  /**
-   * [Part of the "approvedPackagesPolicy" feature.]
-   * Packages approved for usage in a web browser.  This is the stricter of the two types, so by default
-   * all new packages are added to this file.
-   *
-   * @remarks
-   *
-   * This is part of an optional approval workflow, whose purpose is to review any new dependencies
-   * that are introduced (e.g. maybe a legal review is required, or maybe we are trying to minimize bloat).
-   * When Rush discovers a new dependency has been added to package.json, it will update the file.
-   * The intent is that the file will be stored in Git and tracked by a branch policy that notifies
-   * reviewers when a PR attempts to modify the file.
-   *
-   * Example filename: "C:\MyRepo\common\config\rush\browser-approved-packages.json"
-   */
-  public get browserApprovedPackages(): PackageReviewConfiguration {
-    return this._browserApprovedPackages;
-  }
-
-  /**
-   * [Part of the "approvedPackagesPolicy" feature.]
-   * Packages approved for usage everywhere *except* in a web browser.
-   *
-   * @remarks
-   *
-   * This is part of an optional approval workflow, whose purpose is to review any new dependencies
-   * that are introduced (e.g. maybe a legal review is required, or maybe we are trying to minimize bloat).
-   * The intent is that the file will be stored in Git and tracked by a branch policy that notifies
-   * reviewers when a PR attempts to modify the file.
-   *
-   * Example filename: "C:\MyRepo\common\config\rush\browser-approved-packages.json"
-   */
-  public get nonbrowserApprovedPackages(): PackageReviewConfiguration {
-    return this._nonbrowserApprovedPackages;
+  public get approvedPackagesPolicy(): ApprovedPackagesPolicy {
+    return this._approvedPackagesPolicy;
   }
 
   /**
@@ -600,37 +541,7 @@ export default class RushConfiguration {
       throw new Error('The projectFolderMaxDepth cannot be smaller than the projectFolderMinDepth');
     }
 
-    const approvedPackagesPolicy: IApprovedPackagesPolicyJson = rushConfigurationJson.approvedPackagesPolicy || {};
-
-    this._approvedPackagesPolicyEnabled = !!rushConfigurationJson.approvedPackagesPolicy;
-    this._approvedPackagesIgnoredNpmScopes = new Set<string>(approvedPackagesPolicy.ignoredNpmScopes);
-    this._approvedPackagesReviewCategories = new Set<string>(approvedPackagesPolicy.reviewCategories);
-
-    // Load browser-approved-packages.json
-    const browserApprovedPackagesPath: string = path.join(this.commonRushConfigFolder,
-      RushConstants.browserApprovedPackagesFilename);
-    this._browserApprovedPackages = new PackageReviewConfiguration(browserApprovedPackagesPath);
-    if (fsx.existsSync(browserApprovedPackagesPath)) {
-      this._browserApprovedPackages.loadFromFile();
-
-      if (!this._approvedPackagesPolicyEnabled) {
-        console.log(`Warning: Ignoring "${RushConstants.browserApprovedPackagesFilename}" because the`
-          + ` "approvedPackagesPolicy" setting was not specified in rush.json`);
-      }
-    }
-
-    // Load nonbrowser-approved-packages.json
-    const nonbrowserApprovedPackagesPath: string = path.join(this.commonRushConfigFolder,
-      RushConstants.nonbrowserApprovedPackagesFilename);
-    this._nonbrowserApprovedPackages = new PackageReviewConfiguration(nonbrowserApprovedPackagesPath);
-    if (fsx.existsSync(nonbrowserApprovedPackagesPath)) {
-      this._nonbrowserApprovedPackages.loadFromFile();
-
-      if (!this._approvedPackagesPolicyEnabled) {
-        console.log(`Warning: Ignoring "${RushConstants.nonbrowserApprovedPackagesFilename}" because the`
-          + ` "approvedPackagesPolicy" setting was not specified in rush.json`);
-      }
-    }
+    this._approvedPackagesPolicy = new ApprovedPackagesPolicy(this, rushConfigurationJson);
 
     this._gitAllowedEmailRegExps = [];
     this._gitSampleEmail = '';

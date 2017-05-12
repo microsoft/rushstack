@@ -3,6 +3,7 @@
 
 import {
   IPackageJson,
+  ApprovedPackagesPolicy,
   RushConfiguration,
   RushConfigurationProject,
   Utilities
@@ -18,40 +19,41 @@ export class PackageReviewChecker {
    * If the "approvedPackagesPolicy" feature is not enabled, then no action is taken.
    */
   public static rewriteConfigFiles(rushConfiguration: RushConfiguration): void {
-    if (!rushConfiguration.approvedPackagesPolicyEnabled) {
+    const approvedPackagesPolicy: ApprovedPackagesPolicy = rushConfiguration.approvedPackagesPolicy;
+    if (!approvedPackagesPolicy.enabled) {
       return;
     }
 
     for (const rushProject of rushConfiguration.projects) {
       const packageJson: IPackageJson = rushProject.packageJson;
 
-      PackageReviewChecker._collectDependencies(packageJson.dependencies, rushConfiguration, rushProject);
-      PackageReviewChecker._collectDependencies(packageJson.optionalDependencies, rushConfiguration, rushProject);
-      PackageReviewChecker._collectDependencies(packageJson.devDependencies, rushConfiguration, rushProject);
+      PackageReviewChecker._collectDependencies(packageJson.dependencies, approvedPackagesPolicy, rushProject);
+      PackageReviewChecker._collectDependencies(packageJson.optionalDependencies, approvedPackagesPolicy, rushProject);
+      PackageReviewChecker._collectDependencies(packageJson.devDependencies, approvedPackagesPolicy, rushProject);
     }
 
-    rushConfiguration.browserApprovedPackages.saveToFile();
-    rushConfiguration.nonbrowserApprovedPackages.saveToFile();
+    approvedPackagesPolicy.browserApprovedPackages.saveToFile();
+    approvedPackagesPolicy.nonbrowserApprovedPackages.saveToFile();
   }
 
   private static _collectDependencies(dependencies: { [key: string]: string },
-    rushConfiguration: RushConfiguration, rushProject: RushConfigurationProject): void {
+    approvedPackagesPolicy: ApprovedPackagesPolicy, rushProject: RushConfigurationProject): void {
 
     if (dependencies) {
       for (const packageName of Object.keys(dependencies)) {
         const scope: string = Utilities.parseScopedPackageName(packageName).scope;
 
         // Make sure the scope isn't something like "@types" which should be ignored
-        if (!rushConfiguration.approvedPackagesIgnoredNpmScopes.has(scope)) {
+        if (!approvedPackagesPolicy.ignoredNpmScopes.has(scope)) {
           // Yes, add it to the list if it's not already there
 
           // By default we put everything in the browser file.  But if it already appears in the
           // non-browser file, then use that instead.
-          if (rushConfiguration.nonbrowserApprovedPackages.getItemByName(packageName)) {
-            rushConfiguration.nonbrowserApprovedPackages
+          if (approvedPackagesPolicy.nonbrowserApprovedPackages.getItemByName(packageName)) {
+            approvedPackagesPolicy.nonbrowserApprovedPackages
               .addOrUpdatePackage(packageName, rushProject.reviewCategory);
           } else {
-            rushConfiguration.browserApprovedPackages
+            approvedPackagesPolicy.browserApprovedPackages
               .addOrUpdatePackage(packageName, rushProject.reviewCategory);
           }
         }
