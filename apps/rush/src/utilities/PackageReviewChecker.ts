@@ -3,47 +3,59 @@
 
 import {
   IPackageJson,
+  ApprovedPackagesPolicy,
   RushConfiguration,
   RushConfigurationProject,
-  PackageReviewConfiguration,
   Utilities
 } from '@microsoft/rush-lib';
 
-export default class PackageReviewChecker {
-  private _rushConfiguration: RushConfiguration;
-  private _packageReviewConfiguration: PackageReviewConfiguration;
+export class PackageReviewChecker {
+  /**
+   * Examines the current dependencies for the projects specified in RushConfiguration,
+   * and then adds them to the 'browser-approved-packages.json' and
+   * 'nonbrowser-approved-packages.json' config files.  If these files don't exist,
+   * they will be created.
+   *
+   * If the "approvedPackagesPolicy" feature is not enabled, then no action is taken.
+   */
+  public static rewriteConfigFiles(rushConfiguration: RushConfiguration): void {
+    const approvedPackagesPolicy: ApprovedPackagesPolicy = rushConfiguration.approvedPackagesPolicy;
+    if (!approvedPackagesPolicy.enabled) {
+      return;
+    }
 
-  constructor(rushConfiguraton: RushConfiguration) {
-    this._rushConfiguration = rushConfiguraton;
-    this._packageReviewConfiguration = PackageReviewConfiguration.loadFromFile(rushConfiguraton.packageReviewFile);
-  }
-
-  public saveCurrentDependencies(): void {
-    for (const rushProject of this._rushConfiguration.projects) {
+    for (const rushProject of rushConfiguration.projects) {
       const packageJson: IPackageJson = rushProject.packageJson;
 
-      this._collectDependencies(packageJson.dependencies, rushProject);
-      this._collectDependencies(packageJson.optionalDependencies, rushProject);
-      this._collectDependencies(packageJson.devDependencies, rushProject);
+      PackageReviewChecker._collectDependencies(packageJson.dependencies, approvedPackagesPolicy, rushProject);
+      PackageReviewChecker._collectDependencies(packageJson.optionalDependencies, approvedPackagesPolicy, rushProject);
+      PackageReviewChecker._collectDependencies(packageJson.devDependencies, approvedPackagesPolicy, rushProject);
     }
-    this.saveFile();
+
+    approvedPackagesPolicy.browserApprovedPackages.saveToFile();
+    approvedPackagesPolicy.nonbrowserApprovedPackages.saveToFile();
   }
 
-  public saveFile(): void {
-    this._packageReviewConfiguration.saveFile(this._rushConfiguration.packageReviewFile);
-  }
-
-  private _collectDependencies(dependencies: { [key: string]: string },
-    rushProject: RushConfigurationProject): void {
+  private static _collectDependencies(dependencies: { [key: string]: string },
+    approvedPackagesPolicy: ApprovedPackagesPolicy, rushProject: RushConfigurationProject): void {
 
     if (dependencies) {
       for (const packageName of Object.keys(dependencies)) {
         const scope: string = Utilities.parseScopedPackageName(packageName).scope;
 
         // Make sure the scope isn't something like "@types" which should be ignored
-        if (!this._packageReviewConfiguration.ignoredNpmScopes.has(scope)) {
+        if (!approvedPackagesPolicy.ignoredNpmScopes.has(scope)) {
           // Yes, add it to the list if it's not already there
-          this._packageReviewConfiguration.addOrUpdatePackage(packageName, false, rushProject.reviewCategory);
+
+          // By default we put everything in the browser file.  But if it already appears in the
+          // non-browser file, then use that instead.
+          if (approvedPackagesPolicy.nonbrowserApprovedPackages.getItemByName(packageName)) {
+            approvedPackagesPolicy.nonbrowserApprovedPackages
+              .addOrUpdatePackage(packageName, rushProject.reviewCategory);
+          } else {
+            approvedPackagesPolicy.browserApprovedPackages
+              .addOrUpdatePackage(packageName, rushProject.reviewCategory);
+          }
         }
       }
     }

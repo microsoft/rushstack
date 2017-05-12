@@ -2,6 +2,10 @@
 // See LICENSE in the project root for license information.
 
 export {
+  ApprovedPackagesPolicy
+} from './data/ApprovedPackagesPolicy';
+
+export {
   IRushLinkJson,
   default as RushConfiguration
 } from './data/RushConfiguration';
@@ -12,7 +16,7 @@ export {
 
 export {
   PackageReviewItem,
-  default as PackageReviewConfiguration
+  PackageReviewConfiguration
 } from './data/PackageReviewConfiguration';
 
 export {

@@ -13,6 +13,7 @@ import RushConfigurationProject, { IRushConfigurationProjectJson } from './RushC
 import { PinnedVersionsConfiguration } from './PinnedVersionsConfiguration';
 import Utilities from '../utilities/Utilities';
 import { RushConstants } from '../RushConstants';
+import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
 
 /**
  * A list of known config filenames that are expected to appear in the "./common/config/rush" folder.
@@ -21,8 +22,18 @@ import { RushConstants } from '../RushConstants';
 const knownRushConfigFilenames: string[] = [
   '.npmrc',
   RushConstants.npmShrinkwrapFilename,
-  RushConstants.pinnedVersionsFilename
+  RushConstants.pinnedVersionsFilename,
+  RushConstants.browserApprovedPackagesFilename,
+  RushConstants.nonbrowserApprovedPackagesFilename
 ];
+
+/**
+ * Part of IRushConfigurationJson.
+ */
+export interface IApprovedPackagesPolicyJson {
+  reviewCategories?: string[];
+  ignoredNpmScopes?: string[];
+}
 
 /**
  * Part of IRushConfigurationJson.
@@ -43,8 +54,7 @@ export interface IRushConfigurationJson {
   nodeSupportedVersionRange?: string;
   projectFolderMinDepth?: number;
   projectFolderMaxDepth?: number;
-  packageReviewFile?: string;
-  reviewCategories?: string[];
+  approvedPackagesPolicy?: IApprovedPackagesPolicyJson;
   gitPolicy?: IRushGitPolicyJson;
   projects: IRushConfigurationProjectJson[];
 }
@@ -79,13 +89,18 @@ export default class RushConfiguration {
   private _npmToolFilename: string;
   private _projectFolderMinDepth: number;
   private _projectFolderMaxDepth: number;
-  private _packageReviewFile: string;
-  private _reviewCategories: Set<string>;
+
+  // "approvedPackagesPolicy" feature
+  private _approvedPackagesPolicy: ApprovedPackagesPolicy;
+
+  // "gitPolicy" feature
   private _gitAllowedEmailRegExps: string[];
   private _gitSampleEmail: string;
+
+  private _pinnedVersions: PinnedVersionsConfiguration;
+
   private _projects: RushConfigurationProject[];
   private _projectsByName: Map<string, RushConfigurationProject>;
-  private _pinnedVersions: PinnedVersionsConfiguration;
 
   /**
    * Loads the configuration data from an Rush.json configuration file and returns
@@ -365,32 +380,14 @@ export default class RushConfiguration {
   }
 
   /**
-   * The absolute path to a JSON file that tracks the NPM packages that were approved for usage
-   * in this repository.  This is part of an optional approval workflow, whose purpose is to
-   * review any new dependencies that are introduced (e.g. maybe a legal review is required, or
-   * maybe we are trying to minimize bloat).  When "rush generate" is run, any new
-   * package.json dependencies will be appended to this file.  When "rush install" is run
-   * (e.g. as part of a PR build), an error will be reported if the file is not up to date.
-   * The intent is that this file will be stored in Git and tracked by a branch policy which
-   * notifies reviewers whenever a PR attempts to modify the file.
-   *
-   * The PackageReviewConfiguration class can load/save this file format.
-   *
-   * Example: "C:\MyRepo\common\reviews\PackageDependenies.json"
+   * The "approvedPackagesPolicy" settings.
    */
-  public get packageReviewFile(): string {
-    return this._packageReviewFile;
+  public get approvedPackagesPolicy(): ApprovedPackagesPolicy {
+    return this._approvedPackagesPolicy;
   }
 
   /**
-   * A list of category names that are valid for usage as the RushConfigurationProject.reviewCategory field.
-   * This array will never be undefined.
-   */
-  public get reviewCategories(): Set<string> {
-    return this._reviewCategories;
-  }
-
-  /**
+   * [Part of the "gitPolicy" feature.]
    * A list of regular expressions describing allowable e-mail patterns for Git commits.
    * They are case-insensitive anchored JavaScript RegExps.
    * Example: ".*@example\.com"
@@ -401,6 +398,7 @@ export default class RushConfiguration {
   }
 
   /**
+   * [Part of the "gitPolicy" feature.]
    * An example valid e-mail address that conforms to one of the allowedEmailRegExps.
    * Example: "foxtrot@example\.com"
    * This will never be undefined, and will always be nonempty if gitAllowedEmailRegExps is used.
@@ -543,15 +541,7 @@ export default class RushConfiguration {
       throw new Error('The projectFolderMaxDepth cannot be smaller than the projectFolderMinDepth');
     }
 
-    this._packageReviewFile = undefined;
-    if (rushConfigurationJson.packageReviewFile) {
-      this._packageReviewFile = path.resolve(path.join(this._rushJsonFolder, rushConfigurationJson.packageReviewFile));
-      if (!fsx.existsSync(this._packageReviewFile)) {
-        throw new Error('The packageReviewFile file was not found: "' + this._packageReviewFile + '"');
-      }
-    }
-
-    this._reviewCategories = new Set<string>(rushConfigurationJson.reviewCategories);
+    this._approvedPackagesPolicy = new ApprovedPackagesPolicy(this, rushConfigurationJson);
 
     this._gitAllowedEmailRegExps = [];
     this._gitSampleEmail = '';

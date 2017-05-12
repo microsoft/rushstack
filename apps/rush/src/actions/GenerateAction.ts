@@ -14,12 +14,11 @@ import {
 import InstallManager, { InstallType } from '../utilities/InstallManager';
 import LinkManager from '../utilities/LinkManager';
 import RushCommandLineParser from './RushCommandLineParser';
-import PackageReviewChecker from '../utilities/PackageReviewChecker';
+import { PackageReviewChecker } from '../utilities/PackageReviewChecker';
 
 export default class GenerateAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
   private _rushConfiguration: RushConfiguration;
-  private _packageReviewChecker: PackageReviewChecker;
   private _lazyParameter: CommandLineFlagParameter;
   private _noLinkParameter: CommandLineFlagParameter;
 
@@ -59,12 +58,9 @@ export default class GenerateAction extends CommandLineAction {
     const stopwatch: Stopwatch = Stopwatch.start();
     const isLazy: boolean = this._lazyParameter.value;
 
-    console.log('Starting "rush generate"' + os.EOL);
+    PackageReviewChecker.rewriteConfigFiles(this._rushConfiguration);
 
-    if (this._rushConfiguration.packageReviewFile) {
-      this._packageReviewChecker = new PackageReviewChecker(this._rushConfiguration);
-      this._packageReviewChecker.saveCurrentDependencies();
-    }
+    console.log('Starting "rush generate"' + os.EOL);
 
     const installManager: InstallManager = new InstallManager(this._rushConfiguration);
 

@@ -2,6 +2,7 @@
 
 import { assert } from 'chai';
 import RushConfiguration from '../RushConfiguration';
+import { ApprovedPackagesPolicy } from '../ApprovedPackagesPolicy';
 import RushConfigurationProject from '../RushConfigurationProject';
 import * as path from 'path';
 import Utilities from '../../utilities/Utilities';
@@ -43,10 +44,25 @@ describe('RushConfiguration', () => {
 
     assert.equal(rushConfiguration.npmToolVersion, '4.5.0', 'Failed to validate npmToolVersion');
 
-    assert.equal(rushConfiguration.projectFolderMaxDepth, 2, 'Failed to validate projectFolderMaxDepth');
+    assert.equal(rushConfiguration.projectFolderMaxDepth, 99, 'Failed to validate projectFolderMaxDepth');
     assert.equal(rushConfiguration.projectFolderMinDepth, 1, 'Failed to validate projectFolderMinDepth');
 
     assert.equal(rushConfiguration.projects.length, 3);
+
+    // "approvedPackagesPolicy" feature
+    const approvedPackagesPolicy: ApprovedPackagesPolicy = rushConfiguration.approvedPackagesPolicy;
+    assert.isTrue(approvedPackagesPolicy.enabled, 'Failed to validate approvedPackagesPolicy.enabled');
+    assert.deepEqual(Utilities.getSetAsArray(approvedPackagesPolicy.reviewCategories),
+      [ 'first-party', 'third-party', 'prototype' ],
+      'Failed to validate approvedPackagesPolicy.reviewCategories');
+    assert.deepEqual(Utilities.getSetAsArray(approvedPackagesPolicy.ignoredNpmScopes),
+      [ '@types', '@internal' ],
+      'Failed to validate approvedPackagesPolicy.ignoredNpmScopes');
+
+    assert.equal(approvedPackagesPolicy.browserApprovedPackages.items[0].packageName, 'example',
+       'Failed to validate browserApprovedPackages.items[0]');
+    assert.equal(approvedPackagesPolicy.browserApprovedPackages.items[0].allowedCategories.size, 3,
+       'Failed to validate browserApprovedPackages.items[0]');
 
     // Validate project1 settings
     const project1: RushConfigurationProject = rushConfiguration.getProjectByName('project1');

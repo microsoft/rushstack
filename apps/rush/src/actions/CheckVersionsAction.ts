@@ -6,13 +6,13 @@ import * as colors from 'colors';
 import * as os from 'os';
 import { CommandLineAction } from '@microsoft/ts-command-line';
 
-import RushCommandLineParser from './RushCommandLineParser';
-
 import {
   RushConfiguration,
   RushConfigurationProject,
   VersionMismatchFinder
 } from '@microsoft/rush-lib';
+
+import RushCommandLineParser from './RushCommandLineParser';
 
 export default class CheckVersionsAction extends CommandLineAction {
   private _parser: RushCommandLineParser;

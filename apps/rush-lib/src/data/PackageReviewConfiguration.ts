@@ -5,7 +5,7 @@ import * as fsx from 'fs-extra';
 import * as path from 'path';
 import * as os from 'os';
 
-import Validator = require('z-schema');
+import JsonSchemaValidator from '../utilities/JsonSchemaValidator';
 import JsonFile from '../utilities/JsonFile';
 import Utilities from '../utilities/Utilities';
 
@@ -18,21 +18,12 @@ export interface IPackageReviewItemJson {
 }
 
 /**
- * Part of IPackageReviewJson.
- */
-export interface IPackageReviewSettingsJson {
-  ignoredNpmScopes?: string[];
-}
-
-/**
  * This represents the JSON data structure for the "PackageDependencies.json" configuration file.
  * See packagereview-schema.json for documentation.
  */
 export interface IPackageReviewJson {
-  $schema: string;
-  settings?: IPackageReviewSettingsJson;
-  browserPackages: IPackageReviewItemJson[];
-  nonBrowserPackages: IPackageReviewItemJson[];
+  $schema?: string;
+  packages: IPackageReviewItemJson[];
 }
 
 /**
@@ -44,10 +35,7 @@ export class PackageReviewItem {
    * The NPM package name
    */
   public packageName: string;
-  /**
-   * Whether it is allowed for web browser projects, or only tooling projects
-   */
-  public allowedInBrowser: boolean;
+
   /**
    * The project categories that are allowed to use this package.
    */
@@ -58,95 +46,41 @@ export class PackageReviewItem {
  * This represents the JSON file specified via the "packageReviewFile" option in rush.json.
  * @public
  */
-export default class PackageReviewConfiguration {
+export class PackageReviewConfiguration {
+  private static _validator: JsonSchemaValidator = undefined;
+
   public items: PackageReviewItem[] = [];
+
   private _itemsByName: Map<string, PackageReviewItem> = new Map<string, PackageReviewItem>();
 
-  private _ignoredNpmScopes: Set<string> = new Set<string>();
-
   private _loadedJson: IPackageReviewJson;
+  private _jsonFilename: string;
 
-  /**
-   * Loads the configuration data from PackageDependencies.json and returns
-   * an PackageReviewConfiguration object.
-   */
-  public static loadFromFile(jsonFilename: string): PackageReviewConfiguration {
-    const packageReviewJson: IPackageReviewJson = JsonFile.loadJsonFile(jsonFilename);
-
-    // Remove the $schema reference that appears in the configuration object (used for IntelliSense),
-    // since we are replacing it with the precompiled version.  The validator.setRemoteReference()
-    // API is a better way to handle this, but we'd first need to publish the schema file
-    // to a public web server where Visual Studio can find it.
-    delete packageReviewJson.$schema;
-
-    const validator: Validator = new Validator({
-      breakOnFirstError: true,
-      noTypeless: true
-    });
-
-    const packageReviewSchema: Object = JsonFile.loadJsonFile(
-      path.join(__dirname, '../packagereview-schema.json'));
-
-    if (!validator.validate(packageReviewJson, packageReviewSchema)) {
-      const error: Validator.SchemaError = validator.getLastError();
-
-      const detail: Validator.SchemaErrorDetail = error.details[0];
-      const errorMessage: string = `Error parsing file '${path.basename(jsonFilename)}',`
-        + `section[${detail.path}]:${os.EOL}(${detail.code}) ${detail.message}`;
-
-      console.log(os.EOL + 'ERROR: ' + errorMessage + os.EOL + os.EOL);
-      throw new Error(errorMessage);
-    }
-
-    return new PackageReviewConfiguration(packageReviewJson, jsonFilename);
+  public constructor(jsonFilename: string) {
+    this._jsonFilename = jsonFilename;
+    this.clear();
   }
 
   /**
-   * DO NOT CALL -- Use PackageReviewConfiguration.loadFromFile() instead.
+   * Clears all the settings, returning to an empty state.
    */
-  constructor(packageReviewJson: IPackageReviewJson, jsonFilename: string) {
-    this._loadedJson = packageReviewJson;
-
-    this._ignoredNpmScopes.clear();
-    if (packageReviewJson.settings) {
-      if (packageReviewJson.settings.ignoredNpmScopes) {
-        for (const ignoredNpmScope of packageReviewJson.settings.ignoredNpmScopes) {
-          this._ignoredNpmScopes.add(ignoredNpmScope);
-        }
-      }
-    }
-
-    for (const browserPackage of packageReviewJson.browserPackages) {
-      this._addItemJson(browserPackage, jsonFilename, true);
-    }
-    for (const nonBrowserPackage of packageReviewJson.nonBrowserPackages) {
-      this._addItemJson(nonBrowserPackage, jsonFilename, false);
-    }
-  }
-
-  /**
-   * A list of NPM package scopes that will be excluded from review (e.g. \"@types\")
-   */
-  public get ignoredNpmScopes(): Set<string> {
-    return this._ignoredNpmScopes;
+  public clear(): void {
+    this._itemsByName.clear();
+    this._loadedJson = {
+      packages: []
+    };
   }
 
   public getItemByName(packageName: string): PackageReviewItem {
     return this._itemsByName.get(packageName);
   }
 
-  public addOrUpdatePackage(packageName: string, allowedInBrowser: boolean, reviewCategory: string): void {
+  public addOrUpdatePackage(packageName: string, reviewCategory: string): void {
     let item: PackageReviewItem = this._itemsByName.get(packageName);
     if (!item) {
       item = new PackageReviewItem();
       item.packageName = packageName;
-      item.allowedInBrowser = false;
       this._addItem(item);
-    }
-
-    // Broaden (but do not narrow) the approval
-    if (allowedInBrowser) {
-      item.allowedInBrowser = true;
     }
 
     if (reviewCategory) {
@@ -154,24 +88,56 @@ export default class PackageReviewConfiguration {
     }
   }
 
-  public saveFile(jsonFilename: string): void {
+  /**
+   * If the file exists, calls loadFromFile().
+   */
+  public tryLoadFromFile(approvedPackagesPolicyEnabled: boolean): boolean {
+    if (!fsx.existsSync(this._jsonFilename)) {
+      return false;
+    }
+
+    this.loadFromFile();
+
+    if (!approvedPackagesPolicyEnabled) {
+      console.log(`Warning: Ignoring "${path.basename(this._jsonFilename)}" because the`
+        + ` "approvedPackagesPolicy" setting was not specified in rush.json`);
+    }
+
+    return false;
+  }
+
+  /**
+   * Loads the configuration data from the filename that was passed to the constructor.
+   */
+  public loadFromFile(): void {
+
+    if (!PackageReviewConfiguration._validator) {
+      const schemaFilename: string = path.join(__dirname, '../approved-packages-schema.json');
+      PackageReviewConfiguration._validator = JsonSchemaValidator.loadFromFile(schemaFilename);
+    }
+
+    const packageReviewJson: IPackageReviewJson = JsonFile.loadJsonFile(this._jsonFilename);
+
+    PackageReviewConfiguration._validator.validateObject(packageReviewJson, (errorDescription: string) => {
+      throw new Error(`Error parsing file '${path.basename(this._jsonFilename)}':\n`
+        + errorDescription);
+    });
+
+    this.clear();
+
+    for (const browserPackage of packageReviewJson.packages) {
+      this._addItemJson(browserPackage, this._jsonFilename);
+    }
+  }
+
+  /**
+   * Loads the configuration data to the filename that was passed to the constructor.
+   */
+  public saveToFile(): void {
     // Update the JSON structure that we already loaded, preserving any existing state
     // (which passed schema validation).
 
-    // Only write settings if was there before, or if we have some settings
-    const writeSettings: boolean = this._loadedJson.settings !== undefined
-      || this._ignoredNpmScopes.size > 0;
-
-    if (writeSettings) {
-      if (!this._loadedJson.settings) {
-        this._loadedJson.settings = {};
-      }
-      this._loadedJson.settings.ignoredNpmScopes = Utilities.getSetAsArray(this._ignoredNpmScopes)
-        .sort();
-    }
-
-    this._loadedJson.browserPackages = [];
-    this._loadedJson.nonBrowserPackages = [];
+    this._loadedJson.packages = [];
 
     this.items.sort((a: PackageReviewItem, b: PackageReviewItem) => {
       return a.packageName.localeCompare(b.packageName);
@@ -186,11 +152,8 @@ export default class PackageReviewConfiguration {
         name: item.packageName,
         allowedCategories: allowedCategories
       };
-      if (item.allowedInBrowser) {
-        this._loadedJson.browserPackages.push(itemJson);
-      } else {
-        this._loadedJson.nonBrowserPackages.push(itemJson);
-      }
+
+      this._loadedJson.packages.push(itemJson);
     }
 
     // Save the file
@@ -209,13 +172,13 @@ export default class PackageReviewConfiguration {
       + '  They will be lost when the Rush tool resaves it.\n' + body;
 
     body = Utilities.getAllReplaced(body, '\n', '\r\n');
-    fsx.writeFileSync(jsonFilename, body);
+    fsx.writeFileSync(this._jsonFilename, body);
   }
 
   /**
    * Helper function only used by the constructor when loading the file.
    */
-  private _addItemJson(itemJson: IPackageReviewItemJson, jsonFilename: string, allowedInBrowser: boolean): void {
+  private _addItemJson(itemJson: IPackageReviewItemJson, jsonFilename: string): void {
     if (this._itemsByName.has(itemJson.name)) {
       throw new Error(`Error loading package review file ${jsonFilename}:` + os.EOL
         + ` the name "${itemJson.name}" appears more than once`);
@@ -223,7 +186,6 @@ export default class PackageReviewConfiguration {
 
     const item: PackageReviewItem = new PackageReviewItem();
     item.packageName = itemJson.name;
-    item.allowedInBrowser = allowedInBrowser;
     if (itemJson.allowedCategories) {
       for (const allowedCategory of itemJson.allowedCategories) {
         item.allowedCategories.add(allowedCategory);
