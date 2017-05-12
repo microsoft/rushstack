@@ -4,7 +4,7 @@
 import * as path from 'path';
 
 import RushConfigurationProject, { IRushConfigurationProjectJson } from './RushConfigurationProject';
-import { PackageReviewConfiguration } from './PackageReviewConfiguration';
+import { ApprovedPackagesConfiguration } from './ApprovedPackagesConfiguration';
 import { RushConstants } from '../RushConstants';
 import RushConfiguration, { IRushConfigurationJson, IApprovedPackagesPolicyJson } from './RushConfiguration';
 
@@ -16,9 +16,10 @@ export class ApprovedPackagesPolicy {
   private _enabled: boolean;
   private _ignoredNpmScopes: Set<string>;
   private _reviewCategories: Set<string>;
-  private _browserApprovedPackages: PackageReviewConfiguration;
-  private _nonbrowserApprovedPackages: PackageReviewConfiguration;
+  private _browserApprovedPackages: ApprovedPackagesConfiguration;
+  private _nonbrowserApprovedPackages: ApprovedPackagesConfiguration;
 
+  /** @internal */
   public constructor(rushConfiguration: RushConfiguration, rushConfigurationJson: IRushConfigurationJson) {
     const approvedPackagesPolicy: IApprovedPackagesPolicyJson = rushConfigurationJson.approvedPackagesPolicy || {};
 
@@ -36,13 +37,13 @@ export class ApprovedPackagesPolicy {
     // Load browser-approved-packages.json
     const browserApprovedPackagesPath: string = path.join(rushConfiguration.commonRushConfigFolder,
       RushConstants.browserApprovedPackagesFilename);
-    this._browserApprovedPackages = new PackageReviewConfiguration(browserApprovedPackagesPath);
+    this._browserApprovedPackages = new ApprovedPackagesConfiguration(browserApprovedPackagesPath);
     this._browserApprovedPackages.tryLoadFromFile(this._enabled);
 
     // Load nonbrowser-approved-packages.json
     const nonbrowserApprovedPackagesPath: string = path.join(rushConfiguration.commonRushConfigFolder,
       RushConstants.nonbrowserApprovedPackagesFilename);
-    this._nonbrowserApprovedPackages = new PackageReviewConfiguration(nonbrowserApprovedPackagesPath);
+    this._nonbrowserApprovedPackages = new ApprovedPackagesConfiguration(nonbrowserApprovedPackagesPath);
     this._nonbrowserApprovedPackages.tryLoadFromFile(this._enabled);
   }
 
@@ -83,7 +84,7 @@ export class ApprovedPackagesPolicy {
    *
    * Example filename: "C:\MyRepo\common\config\rush\browser-approved-packages.json"
    */
-  public get browserApprovedPackages(): PackageReviewConfiguration {
+  public get browserApprovedPackages(): ApprovedPackagesConfiguration {
     return this._browserApprovedPackages;
   }
 
@@ -99,7 +100,7 @@ export class ApprovedPackagesPolicy {
    *
    * Example filename: "C:\MyRepo\common\config\rush\browser-approved-packages.json"
    */
-  public get nonbrowserApprovedPackages(): PackageReviewConfiguration {
+  public get nonbrowserApprovedPackages(): ApprovedPackagesConfiguration {
     return this._nonbrowserApprovedPackages;
   }
 }

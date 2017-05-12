@@ -85,7 +85,7 @@
             "type": "string"
           },
           "reviewCategory": {
-            "description": "An optional category for usage in the packageReviewFile.  Only strings from reviewCategories are allowed here.",
+            "description": "An optional category for usage in the \"browser-approved-packages.json\" and \"nonbrowser-approved-packages.json\" files.  Only strings from reviewCategories are allowed here.",
             "type": "string"
           },
           "cyclicDependencyProjects": {

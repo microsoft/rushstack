@@ -9,7 +9,7 @@ import {
   Utilities
 } from '@microsoft/rush-lib';
 
-export class PackageReviewChecker {
+export class ApprovedPackagesChecker {
   /**
    * Examines the current dependencies for the projects specified in RushConfiguration,
    * and then adds them to the 'browser-approved-packages.json' and
@@ -27,9 +27,12 @@ export class PackageReviewChecker {
     for (const rushProject of rushConfiguration.projects) {
       const packageJson: IPackageJson = rushProject.packageJson;
 
-      PackageReviewChecker._collectDependencies(packageJson.dependencies, approvedPackagesPolicy, rushProject);
-      PackageReviewChecker._collectDependencies(packageJson.optionalDependencies, approvedPackagesPolicy, rushProject);
-      PackageReviewChecker._collectDependencies(packageJson.devDependencies, approvedPackagesPolicy, rushProject);
+      ApprovedPackagesChecker._collectDependencies(packageJson.dependencies,
+        approvedPackagesPolicy, rushProject);
+      ApprovedPackagesChecker._collectDependencies(packageJson.optionalDependencies,
+        approvedPackagesPolicy, rushProject);
+      ApprovedPackagesChecker._collectDependencies(packageJson.devDependencies,
+        approvedPackagesPolicy, rushProject);
     }
 
     approvedPackagesPolicy.browserApprovedPackages.saveToFile();

@@ -34,6 +34,7 @@ export default class RushConfigurationProject {
   private _shouldPublish: boolean;
   private _downstreamDependencyProjects: string[];
 
+  /** @internal */
   constructor(projectJson: IRushConfigurationProjectJson,
               rushConfiguration: RushConfiguration,
               tempProjectName: string) {

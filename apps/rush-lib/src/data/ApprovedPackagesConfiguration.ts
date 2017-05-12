@@ -10,27 +10,28 @@ import JsonFile from '../utilities/JsonFile';
 import Utilities from '../utilities/Utilities';
 
 /**
- * Part of IPackageReviewJson.
+ * Part of IApprovedPackagesJson.
  */
-export interface IPackageReviewItemJson {
+export interface IApprovedPackagesItemJson {
   name: string;
   allowedCategories: string[];
 }
 
 /**
- * This represents the JSON data structure for the "PackageDependencies.json" configuration file.
- * See packagereview-schema.json for documentation.
+ * This represents the JSON data structure for the "browser-approved-packages.json"
+ * and "nonbrowser-approved-packages.json" configuration files.  See "approved-packages-schema.json"
+ * for documentation.
  */
-export interface IPackageReviewJson {
+export interface IApprovedPackagesJson {
   $schema?: string;
-  packages: IPackageReviewItemJson[];
+  packages: IApprovedPackagesItemJson[];
 }
 
 /**
- * An item returned by PackageReviewConfiguration
+ * An item returned by ApprovedPackagesConfiguration
  * @public
  */
-export class PackageReviewItem {
+export class ApprovedPackagesItem {
   /**
    * The NPM package name
    */
@@ -43,17 +44,17 @@ export class PackageReviewItem {
 }
 
 /**
- * This represents the JSON file specified via the "packageReviewFile" option in rush.json.
+ * This represents the JSON file specified via the "approvedPackagesFile" option in rush.json.
  * @public
  */
-export class PackageReviewConfiguration {
+export class ApprovedPackagesConfiguration {
   private static _validator: JsonSchemaValidator = undefined;
 
-  public items: PackageReviewItem[] = [];
+  public items: ApprovedPackagesItem[] = [];
 
-  private _itemsByName: Map<string, PackageReviewItem> = new Map<string, PackageReviewItem>();
+  private _itemsByName: Map<string, ApprovedPackagesItem> = new Map<string, ApprovedPackagesItem>();
 
-  private _loadedJson: IPackageReviewJson;
+  private _loadedJson: IApprovedPackagesJson;
   private _jsonFilename: string;
 
   public constructor(jsonFilename: string) {
@@ -71,14 +72,14 @@ export class PackageReviewConfiguration {
     };
   }
 
-  public getItemByName(packageName: string): PackageReviewItem {
+  public getItemByName(packageName: string): ApprovedPackagesItem {
     return this._itemsByName.get(packageName);
   }
 
   public addOrUpdatePackage(packageName: string, reviewCategory: string): void {
-    let item: PackageReviewItem = this._itemsByName.get(packageName);
+    let item: ApprovedPackagesItem = this._itemsByName.get(packageName);
     if (!item) {
-      item = new PackageReviewItem();
+      item = new ApprovedPackagesItem();
       item.packageName = packageName;
       this._addItem(item);
     }
@@ -111,21 +112,21 @@ export class PackageReviewConfiguration {
    */
   public loadFromFile(): void {
 
-    if (!PackageReviewConfiguration._validator) {
+    if (!ApprovedPackagesConfiguration._validator) {
       const schemaFilename: string = path.join(__dirname, '../approved-packages-schema.json');
-      PackageReviewConfiguration._validator = JsonSchemaValidator.loadFromFile(schemaFilename);
+      ApprovedPackagesConfiguration._validator = JsonSchemaValidator.loadFromFile(schemaFilename);
     }
 
-    const packageReviewJson: IPackageReviewJson = JsonFile.loadJsonFile(this._jsonFilename);
+    const approvedPackagesJson: IApprovedPackagesJson = JsonFile.loadJsonFile(this._jsonFilename);
 
-    PackageReviewConfiguration._validator.validateObject(packageReviewJson, (errorDescription: string) => {
+    ApprovedPackagesConfiguration._validator.validateObject(approvedPackagesJson, (errorDescription: string) => {
       throw new Error(`Error parsing file '${path.basename(this._jsonFilename)}':\n`
         + errorDescription);
     });
 
     this.clear();
 
-    for (const browserPackage of packageReviewJson.packages) {
+    for (const browserPackage of approvedPackagesJson.packages) {
       this._addItemJson(browserPackage, this._jsonFilename);
     }
   }
@@ -139,7 +140,7 @@ export class PackageReviewConfiguration {
 
     this._loadedJson.packages = [];
 
-    this.items.sort((a: PackageReviewItem, b: PackageReviewItem) => {
+    this.items.sort((a: ApprovedPackagesItem, b: ApprovedPackagesItem) => {
       return a.packageName.localeCompare(b.packageName);
     });
 
@@ -148,7 +149,7 @@ export class PackageReviewConfiguration {
       const allowedCategories: string[] = Utilities.getSetAsArray(item.allowedCategories);
       allowedCategories.sort();
 
-      const itemJson: IPackageReviewItemJson = {
+      const itemJson: IApprovedPackagesItemJson = {
         name: item.packageName,
         allowedCategories: allowedCategories
       };
@@ -178,13 +179,13 @@ export class PackageReviewConfiguration {
   /**
    * Helper function only used by the constructor when loading the file.
    */
-  private _addItemJson(itemJson: IPackageReviewItemJson, jsonFilename: string): void {
+  private _addItemJson(itemJson: IApprovedPackagesItemJson, jsonFilename: string): void {
     if (this._itemsByName.has(itemJson.name)) {
       throw new Error(`Error loading package review file ${jsonFilename}:` + os.EOL
         + ` the name "${itemJson.name}" appears more than once`);
     }
 
-    const item: PackageReviewItem = new PackageReviewItem();
+    const item: ApprovedPackagesItem = new ApprovedPackagesItem();
     item.packageName = itemJson.name;
     if (itemJson.allowedCategories) {
       for (const allowedCategory of itemJson.allowedCategories) {
@@ -195,10 +196,10 @@ export class PackageReviewConfiguration {
   }
 
   /**
-   * Helper function that adds an already created PackageReviewItem to the
+   * Helper function that adds an already created ApprovedPackagesItem to the
    * list and set.
    */
-  private _addItem(item: PackageReviewItem): void {
+  private _addItem(item: ApprovedPackagesItem): void {
     if (this._itemsByName.has(item.packageName)) {
       throw new Error('Duplicate key'); // this is a program bug
     }
