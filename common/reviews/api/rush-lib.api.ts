@@ -147,11 +147,14 @@ interface IRushLinkJson {
 }
 
 // @public
+interface ISaveJsonFileOptions {
+  onlyIfChanged?: boolean;
+}
+
+// @public
 class JsonFile {
-  // (undocumented)
   public static loadJsonFile(jsonFilename: string): any;
-  // (undocumented)
-  public static saveJsonFile(jsonData: any, jsonFilename: string): void;
+  public static saveJsonFile(jsonData: any, jsonFilename: string, options: ISaveJsonFileOptions = {}): boolean;
 }
 
 // @public (undocumented)
@@ -233,6 +236,7 @@ class RushConfigurationProject {
   public readonly projectRelativeFolder: string;
   public readonly reviewCategory: string;
   public readonly shouldPublish: boolean;
+  public readonly tempPackageJsonFilename: string;
   public readonly tempProjectName: string;
 }
 
@@ -247,6 +251,8 @@ module RushConstants {
   nonbrowserApprovedPackagesFilename: string = 'nonbrowser-approved-packages.json';
 
   npmShrinkwrapFilename: string = 'npm-shrinkwrap.json';
+
+  packageJsonFilename: string = 'package.json';
 
   pinnedVersionsFilename: string = 'pinned-versions.json';
 
