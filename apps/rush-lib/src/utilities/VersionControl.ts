@@ -41,7 +41,7 @@ export default class VersionControl {
     });
   }
 
-  public static hasUncommitedChanges(): boolean {
+  public static hasUncommittedChanges(): boolean {
     return VersionControl._hasUntrackedChanges() || VersionControl._hasDiffOnHEAD();
   }
 
