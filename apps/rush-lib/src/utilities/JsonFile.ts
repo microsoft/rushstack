@@ -50,12 +50,14 @@ export default class JsonFile {
     const stringified: string = JSON.stringify(jsonData, undefined, 2) + '\n';
     const normalized: string = Utilities.getAllReplaced(stringified, '\n', '\r\n');
 
+    const buffer: Buffer = new Buffer(normalized); // utf8 encoding happens here
+
     if (options.onlyIfChanged) {
       // Has the file changed?
       if (fsx.existsSync(jsonFilename)) {
         try {
-          const existingContent: string = fsx.readFileSync(jsonFilename).toString();
-          if (existingContent === normalized) {
+          const oldBuffer: Buffer = fsx.readFileSync(jsonFilename);
+          if (Buffer.compare(buffer, oldBuffer) === 0) {
             // Nothing has changed, so don't touch the file
             return false;
           }
@@ -66,12 +68,18 @@ export default class JsonFile {
       }
     }
 
-    fsx.writeFileSync(jsonFilename, normalized);
+    fsx.writeFileSync(jsonFilename, buffer);
 
-    const existingContent: string = fsx.readFileSync(jsonFilename).toString();
-    if (existingContent !== normalized) {
+    // TEST CODE: Used to verify that onlyIfChanged isn't broken by a hidden transformation during saving.
+    /*
+    const oldBuffer2: Buffer = fsx.readFileSync(jsonFilename);
+    if (Buffer.compare(buffer, oldBuffer2) !== 0) {
+      console.log('new:' + buffer.toString('hex'));
+      console.log('old:' + oldBuffer2.toString('hex'));
+
       throw new Error('onlyIfChanged logic is broken');
     }
+    */
 
     return true;
   }
