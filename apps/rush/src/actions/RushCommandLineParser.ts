@@ -28,9 +28,9 @@ export default class RushCommandLineParser extends CommandLineParser {
   constructor() {
     super({
       toolFilename: 'rush',
-      toolDescription: 'Rush helps you to manage a collection of Node Package Manager'
-      + ' projects.  Rush collects the dependencies for all projects into a "common" folder,'
-      + ' detects which projects can be locally linked, and then performs a fast parallel'
+      toolDescription: 'Rush helps you to manage a collection of NPM'
+      + ' projects.  Rush collects the dependencies for all projects to perform a minimal install,'
+      + ' detects which projects can be locally linked, and performs a fast parallel'
       + ' build according to the detected dependency graph.  If you want to decompose'
       + ' your monolithic project into many small packages but are afraid of the dreaded'
       + ' NPM progress bar, Rush is for you.'

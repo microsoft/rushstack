@@ -36,11 +36,11 @@ export default class InstallAction extends CommandLineAction {
     super({
       actionVerb: 'install',
       summary: 'Install NPM packages in the Rush "common" folder, as specified by your shrinkwrap file.',
-      documentation: 'Always run "rush install" whenever you: (1) clone a repo, or (2) pull new changes from Git,'
-      + ' or (3) edit any package.json file.  The "rush install" command installs NPM packages into your'
+      documentation: 'Always run "rush install" whenever you: (1) clone a repo, or (2) pull new changes from source'
+      + ' control, or (3) edit any package.json file.  The "rush install" command installs NPM packages into your'
       + ' Rush "common" folder, using the exact versions specified in your npm-shrinkwrap.json file.'
-      + ' (It also makes sure these versions satisfy your dependencies; if not, it will ask you to run'
-      + ' "rush generate".) If there is nothing to do, then "rush install" won\'t take any time.'
+      + ' It also makes sure these versions satisfy your dependencies; if not, it will ask you to run'
+      + ' "rush generate". If there is nothing to do, then "rush install" won\'t take any time.'
       + ' Afterwards, it will run "rush link" to create symlinks for all your projects.'
     });
     this._parser = parser;
@@ -52,8 +52,8 @@ export default class InstallAction extends CommandLineAction {
       parameterShortName: '-c',
       description: 'Deletes the common "node_modules" folder and NPM cache before installing.'
         + ' Use this option if you suspect that your package folder has become corrupted.'
-        + ' (This occurs sometimes due to bugs in the NPM tool, or if you upgraded your'
-        + ' Node.js engine.)'
+        + ' This occurs sometimes due to bugs in the NPM tool, or if you upgraded your'
+        + ' Node.js engine.'
     });
     this._cleanInstallFull = this.defineFlagParameter({
       parameterLongName: '--full-clean',
@@ -64,7 +64,7 @@ export default class InstallAction extends CommandLineAction {
     });
     this._bypassPolicy = this.defineFlagParameter({
       parameterLongName: '--bypass-policy',
-      description: 'Overrides "gitPolicy" enforcement (use honorably!)'
+      description: 'Overrides "gitPolicy" enforcement'
     });
     this._noLinkParameter = this.defineFlagParameter({
       parameterLongName: '--no-link',
@@ -97,7 +97,7 @@ export default class InstallAction extends CommandLineAction {
 
     if (!shrinkwrapFile) {
       console.log('');
-      console.log(colors.red('Unable to proceed:  The NPM shrinkwrap file is missing.'));
+      console.log(colors.red('Unable to proceed: The NPM shrinkwrap file is missing.'));
       console.log('');
       console.log('You need to run "rush generate" first.');
       process.exit(1);

@@ -31,7 +31,7 @@ export default class GenerateAction extends CommandLineAction {
       + ' you modified a package.json file and "rush install" can\'t find what it needs.'
       + ' The "rush generate" command will do a clean install of your Rush "common" folder,'
       + ' upgrading you to the latest semver-compatible versions of all dependencies.'
-      + ' Then it will create a new shrinkwrap file, which you should commit to Git.'
+      + ' Then, it will create a new shrinkwrap file, which you should commit to source control.'
       + ' Afterwards, it will run "rush link" to create symlinks for all your projects.'
     });
     this._parser = parser;
@@ -44,7 +44,7 @@ export default class GenerateAction extends CommandLineAction {
       description: 'Use this to save time in situations where you need to run "rush generate" repeatedly'
       + ' while editing package.json files.  It performs a much quicker incremental install,'
       + ' but does not generate a shrinkwrap file; you will still need to run a full "rush generate"'
-      + ' (without --lazy) before commiting your changes.'
+      + ' (without --lazy) before committing your changes.'
     });
     this._noLinkParameter = this.defineFlagParameter({
       parameterLongName: '--no-link',
