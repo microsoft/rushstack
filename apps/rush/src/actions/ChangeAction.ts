@@ -30,7 +30,7 @@ import ChangeFiles from '../utilities/ChangeFiles';
 const BUMP_OPTIONS: { [type: string]: string } = {
   'major': 'major - for breaking changes (ex: renaming a file)',
   'minor': 'minor - for adding new features (ex: exposing a new public API)',
-  'patch': 'patch - for fixes (ex: updating how an API works w/o touching its signature)'
+  'patch': 'patch - for fixes (ex: updating how an API works without touching its signature)'
 };
 
 export default class ChangeAction extends CommandLineAction {
@@ -46,25 +46,26 @@ export default class ChangeAction extends CommandLineAction {
   constructor(parser: RushCommandLineParser) {
     super({
       actionVerb: 'change',
-      summary: 'Record a change made to a package which indicate how the package version number should be bumped.',
-      documentation: ['Asks a series of questions and then generates a <branchname>-<timstamp>.json file which is ' +
-        ' stored in the common folder. Later, run the `version-bump` command to actually perform the proper ' +
-        ' version bumps. Note these changes will eventually be published in the packages\' changelog.md files.',
+      summary: 'Records changes made to projects, indicating how the package version number should be bumped ' +
+        'for the next publish.',
+      documentation: ['Asks a series of questions and then generates a <branchname>-<timstamp>.json file ' +
+        'in the common folder. The `publish` command will consume these files and perform the proper ' +
+        'version bumps. Note these changes will eventually be published in a changelog.md file in each package.',
         '',
-        'Here\'s some help in figuring out what kind of change you are making: ',
+        'The possible types of changes are: ',
         '',
-      'MAJOR - these are breaking changes that are not backwards compatible. ' +
-      'Examples are: renaming a class, adding/removing a non-optional ' +
-      'parameter from a public API, or renaming an variable or function that ' +
-      'is exported.',
+        'MAJOR - these are breaking changes that are not backwards compatible. ' +
+        'Examples are: renaming a public class, adding/removing a non-optional ' +
+        'parameter from a public API, or renaming an variable or function that ' +
+        'is exported.',
         '',
-      'MINOR - these are changes that are backwards compatible (but not ' +
-      'forwards compatible). Examples are: adding a new public API or adding an ' +
-      'optional parameter to a public API',
+        'MINOR - these are changes that are backwards compatible (but not ' +
+        'forwards compatible). Examples are: adding a new public API or adding an ' +
+        'optional parameter to a public API',
         '',
-      'PATCH - these are changes that are backwards and forwards compatible. ' +
-      'Examples are: Modifying a private API or fixing a bug in the logic ' +
-      'of how an existing API works.',
+        'PATCH - these are changes that are backwards and forwards compatible. ' +
+        'Examples are: Modifying a private API or fixing a bug in the logic ' +
+        'of how an existing API works.',
         ''].join(os.EOL)
     });
     this._parser = parser;
@@ -74,13 +75,13 @@ export default class ChangeAction extends CommandLineAction {
     this._verifyParameter = this.defineFlagParameter({
       parameterLongName: '--verify',
       parameterShortName: '-v',
-      description: 'Verify the change log file is generated and is a valid JSON file'
+      description: 'Verify the change file has been generated and that it is a valid JSON file'
     });
     this._targetBranch = this.defineStringParameter({
       parameterLongName: '--target-branch',
       parameterShortName: '-b',
-      description:
-      'If this flag is specified, compare current branch with the target branch to get changes.'
+      description: 'If this parameter is specified, compare current branch with the target branch to get changes. ' +
+        'If this parameter is not specified, the current branch is compared against the "master" branch.'
     });
   }
 
@@ -94,7 +95,7 @@ export default class ChangeAction extends CommandLineAction {
 
     if (this._sortedProjectList.length === 0) {
       console.log('No change file is needed.');
-      this._warnUncommitedChanges();
+      this._warnUncommittedChanges();
       return;
     }
 
@@ -104,7 +105,7 @@ export default class ChangeAction extends CommandLineAction {
     // We should consider making onExecute either be an async/await or have it return a promise
     this._promptLoop()
       .catch((error: Error) => {
-        console.error('There was an issue creating the changefile:' + os.EOL + error.toString());
+        console.error('There was an error creating the changefile:' + os.EOL + error.toString());
       });
   }
 
@@ -183,7 +184,7 @@ export default class ChangeAction extends CommandLineAction {
 
         });
     } else {
-      this._warnUncommitedChanges();
+      this._warnUncommittedChanges();
       // We are done, collect their e-mail
       return this._detectOrAskForEmail().then((email: string) => {
         this._changeFileData.forEach((changeFile: IChangeFile) => {
@@ -301,14 +302,14 @@ export default class ChangeAction extends CommandLineAction {
       });
   }
 
-  private _warnUncommitedChanges(): void {
+  private _warnUncommittedChanges(): void {
     try {
-      if (VersionControl.hasUncommitedChanges()) {
+      if (VersionControl.hasUncommittedChanges()) {
         console.log(os.EOL +
           colors.yellow('Warning: You have uncommitted changes, which do not trigger a change entry.'));
       }
     } catch (error) {
-      console.log('Ignore the failure of checking uncommited changes');
+      console.log('Ignore the failure of checking uncommitted changes');
     }
   }
 
@@ -334,26 +335,26 @@ export default class ChangeAction extends CommandLineAction {
   private _writeChangeFile(changeFile: IChangeFile): Promise<void> {
     const output: string = JSON.stringify(changeFile, undefined, 2);
 
-    const filepath: string = this._generateChangeFilePath(changeFile.packageName);
+    const filePath: string = this._generateChangeFilePath(changeFile.packageName);
 
-    if (fsx.existsSync(filepath)) {
+    if (fsx.existsSync(filePath)) {
       // prompt about overwrite
       this._prompt([
         {
           name: 'overwrite',
           type: 'confirm',
-          message: `Overwrite ${filepath} ?`
+          message: `Overwrite ${filePath} ?`
         }
       ]).then(({ overwrite }: { overwrite: string }) => {
         if (overwrite) {
-          return this._writeFile(filepath, output);
+          return this._writeFile(filePath, output);
         } else {
-          console.log(`Not overwriting ${filepath}...`);
+          console.log(`Not overwriting ${filePath}...`);
           return Promise.resolve(undefined);
         }
       });
     } else {
-      return this._writeFile(filepath, output);
+      return this._writeFile(filePath, output);
     }
   }
 
@@ -362,18 +363,18 @@ export default class ChangeAction extends CommandLineAction {
     try {
       branch = gitInfo().branch;
     } catch (error) {
-      console.log('Could not automatically detect git branch name, using timestamps instead.');
+      console.log('Could not automatically detect git branch name, using timestamp instead.');
     }
 
     // example filename: yourbranchname_2017-05-01-20-20.json
     const filename: string = (branch ?
       this._escapeFilename(`${branch}_${this._getTimestamp()}.json`) :
       `${this._getTimestamp()}.json`);
-    const filepath: string = path.join(this._rushConfiguration.commonFolder,
+    const filePath: string = path.join(this._rushConfiguration.commonFolder,
       'changes',
       ...packageName.split('/'),
       filename);
-    return filepath;
+    return filePath;
   }
 
   /**
@@ -424,8 +425,8 @@ export default class ChangeAction extends CommandLineAction {
       formattedTime = matches[2].replace(':', '-');
     } else {
       // formattedTime === "22-47"
-      const timeparts: string[] = matches[2].split(':');
-      formattedTime = `${timeparts[0]}-${timeparts[1]}`;
+      const timeParts: string[] = matches[2].split(':');
+      formattedTime = `${timeParts[0]}-${timeParts[1]}`;
     }
 
     return `${formattedDate}-${formattedTime}`;

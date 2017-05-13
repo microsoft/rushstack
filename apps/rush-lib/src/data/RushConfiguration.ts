@@ -192,7 +192,7 @@ export default class RushConfiguration {
 
   /**
    * If someone adds a config file in the "common/rush/config" folder, it would be a bad
-   * experience for Rush to silently ignore their file simply because they mispelled the
+   * experience for Rush to silently ignore their file simply because they misspelled the
    * filename, or maybe it's an old format that's no longer supported.  The
    * _validateCommonRushConfigFolder() function makes sure that this folder only contains
    * recognized config files.
@@ -271,7 +271,7 @@ export default class RushConfiguration {
    * The local folder that will store the NPM package cache.  Rush does not rely on the
    * NPM's default global cache folder, because NPM's caching implementation does not
    * reliably handle multiple processes.  (For example, if a build box is running
-   * "rush install" simultaneoulsy for two different working folders, it may fail randomly.)
+   * "rush install" simultaneously for two different working folders, it may fail randomly.)
    *
    * Example: "C:\MyRepo\common\temp\npm-cache"
    */
@@ -301,7 +301,7 @@ export default class RushConfiguration {
   }
 
   /**
-   * The filename of the temporary NPM shrinkwrap file that is used by "rush isntall".
+   * The filename of the temporary NPM shrinkwrap file that is used by "rush install".
    * (The master copy is tempShrinkwrapFilename.)
    * This property merely reports the filename; the file itself may not actually exist.
    * Example: "C:\MyRepo\common\temp\npm-shrinkwrap.json"
