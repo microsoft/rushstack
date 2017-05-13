@@ -306,7 +306,7 @@ export default class PublishAction extends CommandLineAction {
   }
 
   private _gitCommit(): void {
-    this._execCommand(!!this._targetBranch.value, 'git', ['commit', '-m', '"Applying package updates."']);
+    this._execCommand(!!this._targetBranch.value, 'git', ['commit', '-m', 'Applying package updates.']);
   }
 
   private _gitPush(branchName: string): void {
