@@ -46,11 +46,11 @@ export default class JsonFile {
    * Saves the file to disk.  Returns false if nothing was written due to options.onlyIfChanged.
    */
   // tslint:disable-next-line:no-any
-  public static saveJsonFile(jsonData: any, jsonFilename: string, options?: ISaveJsonFileOptions): boolean {
+  public static saveJsonFile(jsonData: any, jsonFilename: string, options: ISaveJsonFileOptions = {}): boolean {
     const stringified: string = JSON.stringify(jsonData, undefined, 2) + '\n';
     const normalized: string = Utilities.getAllReplaced(stringified, '\n', '\r\n');
 
-    if (options && options.onlyIfChanged) {
+    if (options.onlyIfChanged) {
       // Has the file changed?
       if (fsx.existsSync(jsonFilename)) {
         try {

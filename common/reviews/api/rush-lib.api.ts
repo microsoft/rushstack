@@ -154,7 +154,7 @@ interface ISaveJsonFileOptions {
 // @public
 class JsonFile {
   public static loadJsonFile(jsonFilename: string): any;
-  public static saveJsonFile(jsonData: any, jsonFilename: string, options?: ISaveJsonFileOptions): boolean;
+  public static saveJsonFile(jsonData: any, jsonFilename: string, options: ISaveJsonFileOptions = {}): boolean;
 }
 
 // @public (undocumented)
