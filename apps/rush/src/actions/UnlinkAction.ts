@@ -21,7 +21,7 @@ export default class UnlinkAction extends CommandLineAction {
       actionVerb: 'unlink',
       summary: 'Delete node_modules symlinks for all projects',
       documentation: 'This removes the symlinks created by the "rush link" command. This is useful for'
-       + ' cleaning a repo using "git clean" without accidentally deleting source files, or for using standard npm'
+       + ' cleaning a repo using "git clean" without accidentally deleting source files, or for using standard NPM'
        + ' commands on a project.'
     });
     this._parser = parser;

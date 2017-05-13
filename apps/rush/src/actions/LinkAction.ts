@@ -25,7 +25,8 @@ export default class LinkAction extends CommandLineAction {
     this._force = this.defineFlagParameter({
       parameterLongName: '--force',
       parameterShortName: '-f',
-      description: 'Deletes and recreates all links, even if the repo state seems to indicate that this is unnecessary.'
+      description: 'Deletes and recreates all links, even if the filesystem state seems to indicate that this is ' +
+        'unnecessary.'
     });
   }
 

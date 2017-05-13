@@ -73,7 +73,7 @@ export default class RebuildAction extends CommandLineAction {
     });
     this._vsoParameter = this.defineFlagParameter({
       parameterLongName: '--vso',
-      description: 'Display error messages in the format expected by the Visual Studio Team Services CI log interface'
+      description: 'Display error messages in the format expected by the Visual Studio Team Services build interface'
     });
     this._npmParameter = this.defineFlagParameter({
       parameterLongName: '--npm',

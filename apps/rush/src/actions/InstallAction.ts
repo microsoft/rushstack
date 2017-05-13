@@ -64,7 +64,7 @@ export default class InstallAction extends CommandLineAction {
     });
     this._bypassPolicy = this.defineFlagParameter({
       parameterLongName: '--bypass-policy',
-      description: 'Overrides "gitPolicy" enforcement'
+      description: 'Overrides "gitPolicy" enforcement (use honorably!)'
     });
     this._noLinkParameter = this.defineFlagParameter({
       parameterLongName: '--no-link',
