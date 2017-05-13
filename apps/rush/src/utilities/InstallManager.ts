@@ -235,9 +235,6 @@ export default class InstallManager {
 
     console.log(os.EOL + colors.bold('Updating temp projects in ' + tempProjectsFolder));
 
-    if (fsx.existsSync(tempProjectsFolder)) {
-      Utilities.dangerouslyDeletePath(tempProjectsFolder);
-    }
     Utilities.createFolderWithRetry(tempProjectsFolder);
 
     // We will start with the assumption that it's valid, and then set it to false if
@@ -316,27 +313,19 @@ export default class InstallManager {
     for (const rushProject of sortedRushProjects) {
       const packageJson: IPackageJson = rushProject.packageJson;
 
-      // Example: "@rush-temp/my-project-2"
-      const tempProjectName: string = rushProject.tempProjectName;
-
-      // The "rushProject.tempProjectName" is guaranteed to be unique name (e.g. by adding the "-2"
-      // suffix).  Even after we strip the NPM scope, it will still be unique.
-      // Example: "my-project-2"
-      const unscopedTempProjectName: string = Utilities.parseScopedPackageName(tempProjectName).name;
-
       // Example: "C:\MyRepo\common\temp\projects\my-project-2"
-      const tempProjectFolder: string = path.join(tempProjectsFolder, unscopedTempProjectName);
+      const tempProjectFolder: string = path.dirname(rushProject.tempPackageJsonFilename);
       fsx.mkdirsSync(tempProjectFolder);
 
-      // Example: "file:./projects/my-project-2"
-      commonPackageJson.dependencies[tempProjectName]
-        = `file:./${RushConstants.rushTempProjectsFolderName}/${unscopedTempProjectName}`;
+      // Example: dependencies["@rush-temp/my-project-2"] = "file:./projects/my-project-2"
+      commonPackageJson.dependencies[rushProject.tempProjectName]
+        = `file:./${RushConstants.rushTempProjectsFolderName}/${path.basename(tempProjectFolder)}`;
 
       // Example: "C:\MyRepo\common\temp\projects\my-project-2\package.json"
       const tempPackageJsonFilename: string = path.join(tempProjectFolder, 'package.json');
 
       const tempPackageJson: IRushTempPackageJson = {
-        name: tempProjectName,
+        name: rushProject.tempProjectName,
         version: '0.0.0',
         private: true,
         dependencies: {}
@@ -397,7 +386,8 @@ export default class InstallManager {
         tempPackageJson.dependencies[pair.packageName] = pair.packageVersion;
 
         if (shrinkwrapFile) {
-          if (!shrinkwrapFile.hasCompatibleDependency(pair.packageName, pair.packageVersion, tempProjectName)) {
+          if (!shrinkwrapFile.hasCompatibleDependency(pair.packageName, pair.packageVersion,
+            rushProject.tempProjectName)) {
             console.log(colors.yellow(
               wrap(`${os.EOL}The NPM shrinkwrap file is missing "${pair.packageName}"`
                 + ` (${pair.packageVersion}) required by "${rushProject.packageName}".`)));
@@ -406,13 +396,18 @@ export default class InstallManager {
         }
       }
 
-      JsonFile.saveJsonFile(tempPackageJson, tempPackageJsonFilename);
+      // Don't update the file timestamp unless the content has changed, since "rush install"
+      // will consider this timestamp
+      JsonFile.saveJsonFile(tempPackageJson, tempPackageJsonFilename, { onlyIfChanged: true });
     }
 
     // Example: "C:\MyRepo\common\temp\package.json"
     const commonPackageJsonFilename: string = path.join(this._rushConfiguration.commonTempFolder,
-      'package.json');
-    JsonFile.saveJsonFile(commonPackageJson, commonPackageJsonFilename);
+      RushConstants.packageJsonFilename);
+
+    // Don't update the file timestamp unless the content has changed, since "rush install"
+    // will consider this timestamp
+    JsonFile.saveJsonFile(commonPackageJson, commonPackageJsonFilename, { onlyIfChanged: true });
 
     return shrinkwrapIsValid;
   }
@@ -457,6 +452,11 @@ export default class InstallManager {
       // Additionally, if they pulled an updated npm-shrinkwrap.json file from Git,
       // then we can't skip this install
       potentiallyChangedFiles.push(this._rushConfiguration.committedShrinkwrapFilename);
+
+      // Also consider timestamps for all the temp package.json files. (createTempModulesAndCheckShrinkwrap() will
+      // carefully preserve these timestamps unless something has changed.)
+      // Example: "C:\MyRepo\common\temp\projects\my-project-2\package.json"
+      potentiallyChangedFiles.push(...this._rushConfiguration.projects.map(x => x.tempPackageJsonFilename));
 
       // NOTE: If commonNodeModulesMarkerFilename (or any of the potentiallyChangedFiles) does not
       // exist, then isFileTimestampCurrent() returns false.
