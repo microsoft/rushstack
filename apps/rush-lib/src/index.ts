@@ -50,7 +50,8 @@ export {
 } from './utilities/IPackageJson';
 
 export {
-  default as JsonFile
+  default as JsonFile,
+  ISaveJsonFileOptions
 } from './utilities/JsonFile';
 
 export {
