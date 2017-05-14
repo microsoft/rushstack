@@ -63,6 +63,7 @@ export default class PublishAction extends CommandLineAction {
     this._targetBranch = this.defineStringParameter({
       parameterLongName: '--target-branch',
       parameterShortName: '-b',
+      key: 'BRANCH',
       description:
       'If this flag is specified, applied changes and deleted change requests will be' +
       'committed and merged into the target branch.'
@@ -85,6 +86,7 @@ export default class PublishAction extends CommandLineAction {
     this._registryUrl = this.defineStringParameter({
       parameterLongName: '--registry',
       parameterShortName: '-r',
+      key: 'REGISTRY',
       description:
       `Publishes to a specified NPM registry. If this is specified, it will prevent the current commit will not be ` +
       'tagged.'
@@ -92,6 +94,7 @@ export default class PublishAction extends CommandLineAction {
     this._npmAuthToken = this.defineStringParameter({
       parameterLongName: '--npm-auth-token',
       parameterShortName: '-n',
+      key: 'TOKEN',
       description:
       'Provide the default scope npm auth token to be passed into npm publish for global package publishing.'
     });
@@ -104,10 +107,12 @@ export default class PublishAction extends CommandLineAction {
     this._prereleaseName = this.defineStringParameter({
       parameterLongName: '--prerelease-name',
       parameterShortName: '-pn',
+      key: 'NAME',
       description: 'Bump up to a prerelease version with the provided prerelease name. Cannot be used with --suffix'
     });
     this._suffix = this.defineStringParameter({
       parameterLongName: '--suffix',
+      key: 'SUFFIX',
       description: 'Append a suffix to all changed versions. Cannot be used with --prerelease-name.'
     });
     this._force = this.defineFlagParameter({

@@ -80,6 +80,7 @@ export default class ChangeAction extends CommandLineAction {
     this._targetBranch = this.defineStringParameter({
       parameterLongName: '--target-branch',
       parameterShortName: '-b',
+      key: 'BRANCH',
       description: 'If this parameter is specified, compare current branch with the target branch to get changes. ' +
         'If this parameter is not specified, the current branch is compared against the "master" branch.'
     });

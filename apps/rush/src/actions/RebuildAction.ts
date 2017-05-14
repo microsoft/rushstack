@@ -82,16 +82,19 @@ export default class RebuildAction extends CommandLineAction {
     this._parallelismParameter = this.defineIntegerParameter({
       parameterLongName: '--parallelism',
       parameterShortName: '-p',
+      key: 'COUNT',
       description: 'Change limit the number of simultaneous builds. This value defaults to the number of CPU cores'
     });
     this._toFlag = this.defineStringListParameter({
       parameterLongName: '--to',
       parameterShortName: '-t',
+      key: 'PROJECT1',
       description: 'Build the specified project and all of its dependencies'
     });
     this._fromFlag = this.defineStringListParameter({
       parameterLongName: '--from',
       parameterShortName: '-f',
+      key: 'PROJECT2',
       description: 'Build all projects that directly or indirectly depend on the specified project'
     });
     this._minimalParameter = this.defineFlagParameter({
