@@ -15,7 +15,7 @@
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "@microsoft/stream-collator": "~2.0.0",
-    "@microsoft/ts-command-line": "~1.1.1",
+    "@microsoft/ts-command-line": "~2.0.0",
     "builtins": "~1.0.3",
     "colors": "~1.1.2",
     "fs-extra": "~0.26.7",

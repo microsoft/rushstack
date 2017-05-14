@@ -56,11 +56,11 @@ export default class RebuildAction extends CommandLineAction {
       actionVerb: 'rebuild',
       summary: 'Clean and rebuild the entire set of projects',
       documentation: 'The Rush rebuild command assumes that the package.json file for each'
-      + ' project will contain scripts for "npm run clean" and "npm run test".  It invokes'
+      + ' project contains scripts for "npm run clean" and "npm run test".  It invokes'
       + ' these commands to build each project.  Projects are built in parallel where'
       + ' possible, but always respecting the dependency graph for locally linked projects.'
       + ' The number of simultaneous processes will be equal to the number of machine cores.'
-      + ' unless overriden by the --parallelism flag.'
+      + ' unless overridden by the --parallelism flag.'
     });
     this._parser = parser;
     this._isIncrementalBuildAllowed = false;
@@ -73,7 +73,7 @@ export default class RebuildAction extends CommandLineAction {
     });
     this._vsoParameter = this.defineFlagParameter({
       parameterLongName: '--vso',
-      description: 'Display error messages in the format expected by Visual Studio Online'
+      description: 'Display error messages in the format expected by the Visual Studio Team Services build interface'
     });
     this._npmParameter = this.defineFlagParameter({
       parameterLongName: '--npm',
@@ -82,34 +82,31 @@ export default class RebuildAction extends CommandLineAction {
     this._parallelismParameter = this.defineIntegerParameter({
       parameterLongName: '--parallelism',
       parameterShortName: '-p',
-      description: 'Change the limit the number of active builds from number of machine cores'
-      + ' to N simultaneous processes'
+      key: 'COUNT',
+      description: 'Change limit the number of simultaneous builds. This value defaults to the number of CPU cores'
     });
     this._toFlag = this.defineStringListParameter({
       parameterLongName: '--to',
       parameterShortName: '-t',
-      description: 'Build all dependencies of the listed project'
+      key: 'PROJECT1',
+      description: 'Build the specified project and all of its dependencies'
     });
     this._fromFlag = this.defineStringListParameter({
       parameterLongName: '--from',
       parameterShortName: '-f',
-      description: 'Build all projects which are downstream from the listed project'
+      key: 'PROJECT2',
+      description: 'Build all projects that directly or indirectly depend on the specified project'
     });
     this._minimalParameter = this.defineFlagParameter({
       parameterLongName: '--minimal',
       parameterShortName: '-m',
       description: 'Invokes the build script with the "--minimal" option, which speeds up the build by running the ' +
-        'minimal set of tasks required to produce an executable output'
+        'minimal set of tasks required to produce executable output'
     });
     this._verboseParameter = this.defineFlagParameter({
       parameterLongName: '--verbose',
       parameterShortName: '-v',
       description: 'Display the logs during the build, rather than just displaying the build status summary'
-    });
-    this._quietParameter = this.defineFlagParameter({
-      parameterLongName: '--quiet',
-      parameterShortName: '-q',
-      description: 'Only show errors and overall build status'
     });
   }
 
@@ -122,17 +119,12 @@ export default class RebuildAction extends CommandLineAction {
     }
     this._rushLinkJson = JsonFile.loadJsonFile(this._rushConfiguration.rushLinkJsonFilename);
 
-    if (this._quietParameter.value) {
-      console.log(colors.yellow(`DEPRECATED: The --quiet parameter will be removed soon, ` +
-        `because builds are now quiet by default`));
-    }
-
     console.log(`Starting "rush ${this.options.actionVerb}"` + os.EOL);
     const stopwatch: Stopwatch = Stopwatch.start();
 
-    const isQuietmode: boolean = !(this._verboseParameter.value);
+    const isQuietMode: boolean = !(this._verboseParameter.value);
 
-    const taskRunner: TaskRunner = new TaskRunner(isQuietmode, this._parallelismParameter.value);
+    const taskRunner: TaskRunner = new TaskRunner(isQuietMode, this._parallelismParameter.value);
 
     const toFlags: string[] = this._toFlag.value;
     const fromFlags: string[] = this._fromFlag.value;

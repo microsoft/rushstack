@@ -25,8 +25,8 @@ export default class LinkAction extends CommandLineAction {
     this._force = this.defineFlagParameter({
       parameterLongName: '--force',
       parameterShortName: '-f',
-      description: 'Forces deleting and recreating links, even if the filesystem'
-        + ' state seems to indicate that this is unnecessary.'
+      description: 'Deletes and recreates all links, even if the filesystem state seems to indicate that this is ' +
+        'unnecessary.'
     });
   }
 
@@ -34,6 +34,6 @@ export default class LinkAction extends CommandLineAction {
     this._rushConfiguration = this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
 
     const linkManager: LinkManager = new LinkManager(this._rushConfiguration);
-    this._parser.catchSyncErrors(linkManager.createSymlinksForProjects(false));
+    this._parser.catchSyncErrors(linkManager.createSymlinksForProjects(this._force.value));
   }
 }

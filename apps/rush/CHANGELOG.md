@@ -1,6 +1,29 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 11 Apr 2017 21:20:58 GMT and should not be manually modified.
+This log was last generated on Sun, 14 May 2017 18:48:12 GMT and should not be manually modified.
+
+## 3.0.0
+Sun, May 14, 2017 18:30:35 GMT
+
+### Breaking changes
+
+- THIS IS A BREAKING CHANGE - see the web-build-tools news page for migration instructions
+- The "rush install" now automatically detects when you need to run "rush generate", and the algorithm has been redesigned so that many package.json updates can skip "rush generate" entirely - hurray!
+- Major restructing of common folder; the "temp_modules" folder is no longer tracked by Git
+- Greatly simplified .gitignore; all of Rush's temporary files are now under common/temp
+- The rush.json file format has been simplified, and auxiliary config files are now consolidated in common/config/rush
+- The "packageReviewFile" feature has been overhauled - see wiki documentation on GitHub
+- The "rush check" command was renamed to "rush scan", and "rush check-versions" was shortened to "rush check"
+
+### Minor changes
+
+- The change log file format was expanded to support subset publishing (coming soon!)
+- More operations now use the AsyncRecycleBin feature
+- The "rush link" command now skips if nothing has changed
+
+### Patches
+
+- Numerous small fixes and enhancments
 
 ## 2.5.0
 Tue, 11 Apr 2017 21:20:58 GMT

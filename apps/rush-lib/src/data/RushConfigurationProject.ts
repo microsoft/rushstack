@@ -5,7 +5,9 @@ import * as path from 'path';
 import * as fsx from 'fs-extra';
 import IPackageJson from '../utilities/IPackageJson';
 import JsonFile from '../utilities/JsonFile';
+import Utilities from '../utilities/Utilities';
 import RushConfiguration from '../data/RushConfiguration';
+import { RushConstants } from '../RushConstants';
 
 /**
  * This represents the JSON data object for a project entry in the rush.json configuration file.
@@ -30,6 +32,7 @@ export default class RushConfigurationProject {
   private _reviewCategory: string;
   private _packageJson: IPackageJson;
   private _tempProjectName: string;
+  private _tempPackageJsonFilename: string;
   private _cyclicDependencyProjects: Set<string>;
   private _shouldPublish: boolean;
   private _downstreamDependencyProjects: string[];
@@ -85,6 +88,16 @@ export default class RushConfigurationProject {
 
     this._tempProjectName = tempProjectName;
 
+    // The "rushProject.tempProjectName" is guaranteed to be unique name (e.g. by adding the "-2"
+    // suffix).  Even after we strip the NPM scope, it will still be unique.
+    // Example: "my-project-2"
+    const unscopedTempProjectName: string = Utilities.parseScopedPackageName(tempProjectName).name;
+
+    // Example: "C:\MyRepo\common\temp\projects\my-project-2\package.json"
+    this._tempPackageJsonFilename = path.join(rushConfiguration.commonTempFolder,
+      RushConstants.rushTempProjectsFolderName, unscopedTempProjectName,
+      RushConstants.packageJsonFilename);
+
     this._cyclicDependencyProjects = new Set<string>();
     if (projectJson.cyclicDependencyProjects) {
       for (const cyclicDependencyProject of projectJson.cyclicDependencyProjects) {
@@ -98,6 +111,8 @@ export default class RushConfigurationProject {
   /**
    * The name of the NPM package.  An error is reported if this name is not
    * identical to packageJson.name.
+   *
+   * Example: "@scope/MyProject"
    */
   public get packageName(): string {
     return this._packageName;
@@ -105,6 +120,8 @@ export default class RushConfigurationProject {
 
   /**
    * The full path of the folder that contains the project to be built by Rush.
+   *
+   * Example: "C:\MyRepo\libraries\my-project"
    */
   public get projectFolder(): string {
     return this._projectFolder;
@@ -112,6 +129,8 @@ export default class RushConfigurationProject {
 
   /**
    * The relative path of the folder that contains the project to be built by Rush.
+   *
+   * Example: "libraries\my-project"
    */
   public get projectRelativeFolder(): string {
     return this._projectRelativeFolder;
@@ -152,13 +171,22 @@ export default class RushConfigurationProject {
 
   /**
    * The unique name for the temporary project that will be generated in the Common folder.
-   * For example, if the project name is "@ms/MyProject", the temporary project name
+   * For example, if the project name is "@scope/MyProject", the temporary project name
    * might be "@rush-temp/MyProject-2".
    *
    * Example: "@rush-temp/MyProject-2"
    */
   public get tempProjectName(): string {
     return this._tempProjectName;
+  }
+
+  /**
+   * The absolute path of the package.json file for the temp project.
+   *
+   * Example: "C:\MyRepo\common\temp\projects\my-project-2\package.json"
+   */
+  public get tempPackageJsonFilename(): string {
+    return this._tempPackageJsonFilename;
   }
 
   /**

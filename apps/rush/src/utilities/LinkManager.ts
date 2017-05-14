@@ -166,7 +166,7 @@ export default class LinkManager {
     if (!force) {
       if (fsx.existsSync(this._rushConfiguration.rushLinkJsonFilename)) {
         console.log(colors.green(`Skipping "rush link" -- everything is already up to date.`));
-        return;
+        return Promise.resolve();
       }
     }
 

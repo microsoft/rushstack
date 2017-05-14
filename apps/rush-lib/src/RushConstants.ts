@@ -54,9 +54,14 @@ export namespace RushConstants {
   export const npmShrinkwrapFilename: string = 'npm-shrinkwrap.json';
 
   /**
-   * The filename ("node_modules") where NPM installs its packages.
+   * The folder name ("node_modules") where NPM installs its packages.
    */
   export const nodeModulesFolderName: string = 'node_modules';
+
+  /**
+   * The filename ("package.json") used by NPM to define a package.
+   */
+  export const packageJsonFilename: string = 'package.json';
 
   /**
    * The filename ("pinnedVersions.json") for an optional configuration file
@@ -64,5 +69,5 @@ export namespace RushConstants {
    * version for all projects.  This configuration file should go in the
    * "common/config/rush" folder.
    */
-  export const pinnedVersionsFilename: string = 'pinnedVersions.json';
+  export const pinnedVersionsFilename: string = 'pinned-versions.json';
 }

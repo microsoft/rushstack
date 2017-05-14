@@ -147,11 +147,14 @@ interface IRushLinkJson {
 }
 
 // @public
+interface ISaveJsonFileOptions {
+  onlyIfChanged?: boolean;
+}
+
+// @public
 class JsonFile {
-  // (undocumented)
   public static loadJsonFile(jsonFilename: string): any;
-  // (undocumented)
-  public static saveJsonFile(jsonData: any, jsonFilename: string): void;
+  public static saveJsonFile(jsonData: any, jsonFilename: string, options: ISaveJsonFileOptions = {}): boolean;
 }
 
 // @public (undocumented)
@@ -233,6 +236,7 @@ class RushConfigurationProject {
   public readonly projectRelativeFolder: string;
   public readonly reviewCategory: string;
   public readonly shouldPublish: boolean;
+  public readonly tempPackageJsonFilename: string;
   public readonly tempProjectName: string;
 }
 
@@ -248,7 +252,9 @@ module RushConstants {
 
   npmShrinkwrapFilename: string = 'npm-shrinkwrap.json';
 
-  pinnedVersionsFilename: string = 'pinnedVersions.json';
+  packageJsonFilename: string = 'package.json';
+
+  pinnedVersionsFilename: string = 'pinned-versions.json';
 
   rushTempFolderName: string = 'temp';
 
@@ -331,7 +337,7 @@ class VersionControl {
   // (undocumented)
   public static getChangedFolders(targetBranch?: string): string[];
   // (undocumented)
-  public static hasUncommitedChanges(): boolean;
+  public static hasUncommittedChanges(): boolean;
 }
 
 // @public (undocumented)

@@ -1,7 +1,18 @@
 {
   "name": "@microsoft/rush",
-  "version": "2.5.0",
-  "description": "A fast solution for building/publishing many NPM packages",
+  "version": "3.0.0",
+  "description": "The professional solution for consolidating all your JavaScript projects in one Git repo",
+  "keywords": [
+    "install",
+    "build",
+    "publish",
+    "fast",
+    "incremental",
+    "package manager",
+    "monorepo",
+    "package.json"
+  ],
+  "preferGlobal": true,
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/web-build-tools"
@@ -20,7 +31,7 @@
     "@microsoft/package-deps-hash": "~2.0.2",
     "@microsoft/rush-lib": "2.5.0",
     "@microsoft/stream-collator": "~2.0.0",
-    "@microsoft/ts-command-line": "~1.1.1",
+    "@microsoft/ts-command-line": "~2.0.0",
     "builtins": "~1.0.3",
     "colors": "~1.1.2",
     "fs-extra": "~0.26.7",

@@ -17,11 +17,11 @@ export default class ScanAction extends CommandLineAction {
   constructor(parser: RushCommandLineParser) {
     super({
       actionVerb: 'scan',
-      summary: 'Scan a project folder and display a report of imported packages.',
+      summary: 'Scan the current project folder and display a report of imported packages.',
       documentation: `The NPM system allows a project to import dependencies without explicitly`
         + ` listing them in its package.json file. This is a dangerous practice, because`
         + ` there is no guarantee you will get a compatible version. The "rush scan" command`
-        + ` reports a list of packages that are actually imported by your code, which you can`
+        + ` reports a list of packages that are imported by your code, which you can`
         + ` compare against your package.json file to find mistakes. It searches the "./src"`
         + ` and "./lib" folders for typical import syntaxes such as "import __ from '__'",`
         + ` "require('__')", "System.import('__'), etc.  The results are only approximate,`
@@ -44,18 +44,37 @@ export default class ScanAction extends CommandLineAction {
     }
 
     const requireRegExps: RegExp[] = [
+      // Example: require('someting')
       /\brequire\s*\(\s*[']([^']+\s*)[']\)/,
       /\brequire\s*\(\s*["]([^"]+)["]\s*\)/,
+
+      // Example: require.ensure('someting')
       /\brequire.ensure\s*\(\s*[']([^']+\s*)[']\)/,
       /\brequire.ensure\s*\(\s*["]([^"]+)["]\s*\)/,
+
+      // Example: require.resolve('someting')
       /\brequire.resolve\s*\(\s*[']([^']+\s*)[']\)/,
       /\brequire.resolve\s*\(\s*["]([^"]+)["]\s*\)/,
+
+      // Example: System.import('someting')
       /\bSystem.import\s*\(\s*[']([^']+\s*)[']\)/,
       /\bSystem.import\s*\(\s*["]([^"]+)["]\s*\)/,
+
+      // Example:
+      //
+      // import {
+      //   A, B
+      // } from 'something';
       /\bfrom\s*[']([^']+)[']/,
       /\bfrom\s*["]([^"]+)["]/,
+
+      // Example:  import 'something';
       /\bimport\s*[']([^']+)[']\s*\;/,
-      /\bimport\s*["]([^"]+)["]\s*\;/
+      /\bimport\s*["]([^"]+)["]\s*\;/,
+
+      // Example:
+      // /// <reference types="something" />
+      /\/\/\/\s*<\s*reference\s+types\s*=\s*["]([^"]+)["]\s*\/>/
     ];
 
     // Example: "my-package/lad/dee/dah" --> "my-package"
