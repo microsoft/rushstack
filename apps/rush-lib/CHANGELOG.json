@@ -2,6 +2,18 @@
   "name": "@microsoft/rush-lib",
   "entries": [
     {
+      "version": "3.0.2",
+      "tag": "@microsoft/rush-lib_v3.0.2",
+      "date": "Sun, May 14, 2017 19:22:16 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Rush 3.0.2 was released."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.1",
       "tag": "@microsoft/rush-lib_v3.0.1",
       "date": "Sun, May 14, 2017 18:30:35 GMT",
