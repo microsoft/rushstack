@@ -20,14 +20,7 @@
     "@microsoft/gulp-core-build-typescript": {
       "version": "3.1.1",
       "from": "@microsoft/gulp-core-build-typescript@>=3.0.3 <4.0.0",
-      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-typescript/-/gulp-core-build-typescript-3.1.1.tgz",
-      "dependencies": {
-        "lodash": {
-          "version": "4.15.0",
-          "from": "lodash@>=4.15.0 <4.16.0",
-          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.15.0.tgz"
-        }
-      }
+      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-typescript/-/gulp-core-build-typescript-3.1.1.tgz"
     },
     "@microsoft/load-themed-styles": {
       "version": "1.4.0",
@@ -48,6 +41,81 @@
       "version": "2.0.0",
       "from": "@microsoft/ts-command-line@>=2.0.0 <2.1.0",
       "resolved": "https://registry.npmjs.org/@microsoft/ts-command-line/-/ts-command-line-2.0.0.tgz"
+    },
+    "@rush-temp/api-extractor": {
+      "version": "0.0.0",
+      "from": "projects\\api-extractor",
+      "resolved": "file:projects\\api-extractor"
+    },
+    "@rush-temp/gulp-core-build": {
+      "version": "0.0.0",
+      "from": "projects\\gulp-core-build",
+      "resolved": "file:projects\\gulp-core-build"
+    },
+    "@rush-temp/gulp-core-build-karma": {
+      "version": "0.0.0",
+      "from": "projects\\gulp-core-build-karma",
+      "resolved": "file:projects\\gulp-core-build-karma"
+    },
+    "@rush-temp/gulp-core-build-mocha": {
+      "version": "0.0.0",
+      "from": "projects\\gulp-core-build-mocha",
+      "resolved": "file:projects\\gulp-core-build-mocha"
+    },
+    "@rush-temp/gulp-core-build-sass": {
+      "version": "0.0.0",
+      "from": "projects\\gulp-core-build-sass",
+      "resolved": "file:projects\\gulp-core-build-sass"
+    },
+    "@rush-temp/gulp-core-build-serve": {
+      "version": "0.0.0",
+      "from": "projects\\gulp-core-build-serve",
+      "resolved": "file:projects\\gulp-core-build-serve"
+    },
+    "@rush-temp/gulp-core-build-typescript": {
+      "version": "0.0.0",
+      "from": "projects\\gulp-core-build-typescript",
+      "resolved": "file:projects\\gulp-core-build-typescript"
+    },
+    "@rush-temp/gulp-core-build-webpack": {
+      "version": "0.0.0",
+      "from": "projects\\gulp-core-build-webpack",
+      "resolved": "file:projects\\gulp-core-build-webpack"
+    },
+    "@rush-temp/node-core-library": {
+      "version": "0.0.0",
+      "from": "projects\\node-core-library",
+      "resolved": "file:projects\\node-core-library"
+    },
+    "@rush-temp/node-library-build": {
+      "version": "0.0.0",
+      "from": "projects\\node-library-build",
+      "resolved": "file:projects\\node-library-build"
+    },
+    "@rush-temp/package-deps-hash": {
+      "version": "0.0.0",
+      "from": "projects\\package-deps-hash",
+      "resolved": "file:projects\\package-deps-hash"
+    },
+    "@rush-temp/rush": {
+      "version": "0.0.0",
+      "from": "projects\\rush",
+      "resolved": "file:projects\\rush"
+    },
+    "@rush-temp/rush-lib": {
+      "version": "0.0.0",
+      "from": "projects\\rush-lib",
+      "resolved": "file:projects\\rush-lib"
+    },
+    "@rush-temp/test-web-library-build": {
+      "version": "0.0.0",
+      "from": "projects\\test-web-library-build",
+      "resolved": "file:projects\\test-web-library-build"
+    },
+    "@rush-temp/web-library-build": {
+      "version": "0.0.0",
+      "from": "projects\\web-library-build",
+      "resolved": "file:projects\\web-library-build"
     },
     "@types/assertion-error": {
       "version": "1.0.30",
@@ -76,13 +144,13 @@
     },
     "@types/express": {
       "version": "4.0.35",
-      "from": "@types/express@*",
+      "from": "@types/express@4.0.35",
       "resolved": "https://registry.npmjs.org/@types/express/-/express-4.0.35.tgz"
     },
     "@types/express-serve-static-core": {
-      "version": "4.0.44",
-      "from": "@types/express-serve-static-core@*",
-      "resolved": "https://registry.npmjs.org/@types/express-serve-static-core/-/express-serve-static-core-4.0.44.tgz"
+      "version": "4.0.41",
+      "from": "@types/express-serve-static-core@4.0.41",
+      "resolved": "https://registry.npmjs.org/@types/express-serve-static-core/-/express-serve-static-core-4.0.41.tgz"
     },
     "@types/fs-extra": {
       "version": "0.0.37",
@@ -131,7 +199,7 @@
     },
     "@types/mime": {
       "version": "0.0.29",
-      "from": "@types/mime@*",
+      "from": "@types/mime@0.0.29",
       "resolved": "https://registry.npmjs.org/@types/mime/-/mime-0.0.29.tgz"
     },
     "@types/minimatch": {
@@ -181,7 +249,7 @@
     },
     "@types/serve-static": {
       "version": "1.7.31",
-      "from": "@types/serve-static@*",
+      "from": "@types/serve-static@1.7.31",
       "resolved": "https://registry.npmjs.org/@types/serve-static/-/serve-static-1.7.31.tgz"
     },
     "@types/sinon": {
@@ -764,7 +832,7 @@
     },
     "colors": {
       "version": "1.1.2",
-      "from": "colors@>=1.1.2 <2.0.0",
+      "from": "colors@>=1.1.2 <1.2.0",
       "resolved": "https://registry.npmjs.org/colors/-/colors-1.1.2.tgz"
     },
     "combined-stream": {
@@ -1804,9 +1872,9 @@
       "resolved": "https://registry.npmjs.org/git-repo-info/-/git-repo-info-1.1.4.tgz"
     },
     "glob": {
-      "version": "7.1.1",
-      "from": "glob@>=7.0.3 <8.0.0",
-      "resolved": "https://registry.npmjs.org/glob/-/glob-7.1.1.tgz"
+      "version": "7.0.6",
+      "from": "glob@>=7.0.5 <7.1.0",
+      "resolved": "https://registry.npmjs.org/glob/-/glob-7.0.6.tgz"
     },
     "glob-base": {
       "version": "0.3.0",
@@ -1894,6 +1962,11 @@
           "version": "1.0.2",
           "from": "inherits@>=1.0.0 <2.0.0",
           "resolved": "https://registry.npmjs.org/inherits/-/inherits-1.0.2.tgz"
+        },
+        "lodash": {
+          "version": "1.0.2",
+          "from": "lodash@>=1.0.1 <1.1.0",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-1.0.2.tgz"
         },
         "minimatch": {
           "version": "0.2.14",
@@ -2248,14 +2321,7 @@
     "gulp-istanbul": {
       "version": "0.10.4",
       "from": "gulp-istanbul@>=0.10.3 <0.11.0",
-      "resolved": "https://registry.npmjs.org/gulp-istanbul/-/gulp-istanbul-0.10.4.tgz",
-      "dependencies": {
-        "lodash": {
-          "version": "4.17.4",
-          "from": "lodash@>=4.0.0 <5.0.0",
-          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.4.tgz"
-        }
-      }
+      "resolved": "https://registry.npmjs.org/gulp-istanbul/-/gulp-istanbul-0.10.4.tgz"
     },
     "gulp-karma": {
       "version": "0.0.5",
@@ -2735,11 +2801,6 @@
       "from": "inquirer@>=1.2.1 <1.3.0",
       "resolved": "https://registry.npmjs.org/inquirer/-/inquirer-1.2.3.tgz",
       "dependencies": {
-        "lodash": {
-          "version": "4.17.4",
-          "from": "lodash@>=4.3.0 <5.0.0",
-          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.4.tgz"
-        },
         "mute-stream": {
           "version": "0.0.6",
           "from": "mute-stream@0.0.6",
@@ -3237,14 +3298,7 @@
     "karma-phantomjs-launcher": {
       "version": "1.0.4",
       "from": "karma-phantomjs-launcher@>=1.0.0 <1.1.0",
-      "resolved": "https://registry.npmjs.org/karma-phantomjs-launcher/-/karma-phantomjs-launcher-1.0.4.tgz",
-      "dependencies": {
-        "lodash": {
-          "version": "4.17.4",
-          "from": "lodash@>=4.0.1 <5.0.0",
-          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.4.tgz"
-        }
-      }
+      "resolved": "https://registry.npmjs.org/karma-phantomjs-launcher/-/karma-phantomjs-launcher-1.0.4.tgz"
     },
     "karma-sinon-chai": {
       "version": "1.2.4",
@@ -3370,9 +3424,9 @@
       "resolved": "https://registry.npmjs.org/loader-utils/-/loader-utils-0.2.17.tgz"
     },
     "lodash": {
-      "version": "1.0.2",
-      "from": "lodash@>=1.0.1 <1.1.0",
-      "resolved": "https://registry.npmjs.org/lodash/-/lodash-1.0.2.tgz"
+      "version": "4.15.0",
+      "from": "lodash@>=4.15.0 <4.16.0",
+      "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.15.0.tgz"
     },
     "lodash._baseclone": {
       "version": "4.5.7",
@@ -3785,7 +3839,7 @@
     },
     "minimatch": {
       "version": "3.0.4",
-      "from": "minimatch@>=3.0.2 <4.0.0",
+      "from": "minimatch@>=3.0.2 <3.1.0",
       "resolved": "https://registry.npmjs.org/minimatch/-/minimatch-3.0.4.tgz"
     },
     "minimist": {
@@ -3922,7 +3976,14 @@
         "globule": {
           "version": "1.1.0",
           "from": "globule@>=1.0.0 <2.0.0",
-          "resolved": "https://registry.npmjs.org/globule/-/globule-1.1.0.tgz"
+          "resolved": "https://registry.npmjs.org/globule/-/globule-1.1.0.tgz",
+          "dependencies": {
+            "glob": {
+              "version": "7.1.1",
+              "from": "glob@>=7.1.1 <7.2.0",
+              "resolved": "https://registry.npmjs.org/glob/-/glob-7.1.1.tgz"
+            }
+          }
         },
         "lodash": {
           "version": "4.16.6",
@@ -4477,7 +4538,14 @@
     "read-package-json": {
       "version": "2.0.5",
       "from": "read-package-json@>=2.0.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/read-package-json/-/read-package-json-2.0.5.tgz"
+      "resolved": "https://registry.npmjs.org/read-package-json/-/read-package-json-2.0.5.tgz",
+      "dependencies": {
+        "glob": {
+          "version": "7.1.1",
+          "from": "glob@>=7.1.1 <8.0.0",
+          "resolved": "https://registry.npmjs.org/glob/-/glob-7.1.1.tgz"
+        }
+      }
     },
     "read-package-tree": {
       "version": "5.1.5",
@@ -4698,114 +4766,6 @@
       "from": "run-async@>=2.2.0 <3.0.0",
       "resolved": "https://registry.npmjs.org/run-async/-/run-async-2.3.0.tgz"
     },
-    "rush-api-extractor": {
-      "version": "0.0.0",
-      "from": "temp_modules\\rush-api-extractor",
-      "resolved": "file:temp_modules\\rush-api-extractor"
-    },
-    "rush-gulp-core-build": {
-      "version": "0.0.0",
-      "from": "temp_modules\\rush-gulp-core-build",
-      "resolved": "file:temp_modules\\rush-gulp-core-build"
-    },
-    "rush-gulp-core-build-karma": {
-      "version": "0.0.0",
-      "from": "temp_modules\\rush-gulp-core-build-karma",
-      "resolved": "file:temp_modules\\rush-gulp-core-build-karma"
-    },
-    "rush-gulp-core-build-mocha": {
-      "version": "0.0.0",
-      "from": "temp_modules\\rush-gulp-core-build-mocha",
-      "resolved": "file:temp_modules\\rush-gulp-core-build-mocha"
-    },
-    "rush-gulp-core-build-sass": {
-      "version": "0.0.0",
-      "from": "temp_modules\\rush-gulp-core-build-sass",
-      "resolved": "file:temp_modules\\rush-gulp-core-build-sass",
-      "dependencies": {
-        "@types/express-serve-static-core": {
-          "version": "4.0.41",
-          "from": "@types/express-serve-static-core@4.0.41",
-          "resolved": "https://registry.npmjs.org/@types/express-serve-static-core/-/express-serve-static-core-4.0.41.tgz"
-        }
-      }
-    },
-    "rush-gulp-core-build-serve": {
-      "version": "0.0.0",
-      "from": "temp_modules\\rush-gulp-core-build-serve",
-      "resolved": "file:temp_modules\\rush-gulp-core-build-serve",
-      "dependencies": {
-        "@types/express-serve-static-core": {
-          "version": "4.0.41",
-          "from": "@types/express-serve-static-core@4.0.41",
-          "resolved": "https://registry.npmjs.org/@types/express-serve-static-core/-/express-serve-static-core-4.0.41.tgz"
-        }
-      }
-    },
-    "rush-gulp-core-build-typescript": {
-      "version": "0.0.0",
-      "from": "temp_modules\\rush-gulp-core-build-typescript",
-      "resolved": "file:temp_modules\\rush-gulp-core-build-typescript",
-      "dependencies": {
-        "lodash": {
-          "version": "4.15.0",
-          "from": "lodash@>=4.15.0 <4.16.0",
-          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.15.0.tgz"
-        }
-      }
-    },
-    "rush-gulp-core-build-webpack": {
-      "version": "0.0.0",
-      "from": "temp_modules\\rush-gulp-core-build-webpack",
-      "resolved": "file:temp_modules\\rush-gulp-core-build-webpack"
-    },
-    "rush-node-core-library": {
-      "version": "0.0.0",
-      "from": "temp_modules\\rush-node-core-library",
-      "resolved": "file:temp_modules\\rush-node-core-library"
-    },
-    "rush-node-library-build": {
-      "version": "0.0.0",
-      "from": "temp_modules\\rush-node-library-build",
-      "resolved": "file:temp_modules\\rush-node-library-build"
-    },
-    "rush-package-deps-hash": {
-      "version": "0.0.0",
-      "from": "temp_modules\\rush-package-deps-hash",
-      "resolved": "file:temp_modules\\rush-package-deps-hash"
-    },
-    "rush-rush": {
-      "version": "0.0.0",
-      "from": "temp_modules\\rush-rush",
-      "resolved": "file:temp_modules\\rush-rush",
-      "dependencies": {
-        "glob": {
-          "version": "7.0.6",
-          "from": "glob@>=7.0.5 <7.1.0",
-          "resolved": "https://registry.npmjs.org/glob/-/glob-7.0.6.tgz"
-        },
-        "lodash": {
-          "version": "4.15.0",
-          "from": "lodash@>=4.15.0 <4.16.0",
-          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.15.0.tgz"
-        }
-      }
-    },
-    "rush-rush-lib": {
-      "version": "0.0.0",
-      "from": "temp_modules\\rush-rush-lib",
-      "resolved": "file:temp_modules\\rush-rush-lib"
-    },
-    "rush-test-web-library-build": {
-      "version": "0.0.0",
-      "from": "temp_modules\\rush-test-web-library-build",
-      "resolved": "file:temp_modules\\rush-test-web-library-build"
-    },
-    "rush-web-library-build": {
-      "version": "0.0.0",
-      "from": "temp_modules\\rush-web-library-build",
-      "resolved": "file:temp_modules\\rush-web-library-build"
-    },
     "rx": {
       "version": "4.1.0",
       "from": "rx@>=4.1.0 <5.0.0",
@@ -4830,11 +4790,6 @@
           "version": "3.0.0",
           "from": "camelcase@>=3.0.0 <4.0.0",
           "resolved": "https://registry.npmjs.org/camelcase/-/camelcase-3.0.0.tgz"
-        },
-        "lodash": {
-          "version": "4.17.4",
-          "from": "lodash@>=4.0.0 <5.0.0",
-          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.4.tgz"
         },
         "yargs": {
           "version": "6.6.0",
@@ -5452,6 +5407,11 @@
               "resolved": "https://registry.npmjs.org/glob/-/glob-5.0.15.tgz"
             }
           }
+        },
+        "glob": {
+          "version": "7.1.1",
+          "from": "glob@>=7.1.1 <8.0.0",
+          "resolved": "https://registry.npmjs.org/glob/-/glob-7.1.1.tgz"
         }
       }
     },
@@ -5466,9 +5426,9 @@
       "resolved": "https://registry.npmjs.org/tsscmp/-/tsscmp-1.0.5.tgz"
     },
     "tsutils": {
-      "version": "1.8.0",
+      "version": "1.9.1",
       "from": "tsutils@>=1.1.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/tsutils/-/tsutils-1.8.0.tgz"
+      "resolved": "https://registry.npmjs.org/tsutils/-/tsutils-1.9.1.tgz"
     },
     "tty-browserify": {
       "version": "0.0.0",
@@ -5900,7 +5860,7 @@
     },
     "wordwrap": {
       "version": "1.0.0",
-      "from": "wordwrap@>=1.0.0 <2.0.0",
+      "from": "wordwrap@>=1.0.0 <1.1.0",
       "resolved": "https://registry.npmjs.org/wordwrap/-/wordwrap-1.0.0.tgz"
     },
     "wrap-ansi": {
