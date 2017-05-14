@@ -9,6 +9,7 @@ import { CommandLineAction } from '@microsoft/ts-command-line';
 import {
   RushConfiguration,
   RushConfigurationProject,
+  RushConstants,
   VersionMismatchFinder
 } from '@microsoft/rush-lib';
 
@@ -43,7 +44,7 @@ export default class CheckAction extends CommandLineAction {
     });
 
     config.projects.push({
-      packageName: 'pinnedVersions.json',
+      packageName: RushConstants.pinnedVersionsFilename,
       packageJson: { dependencies: pinnedVersions }
     } as RushConfigurationProject);
 

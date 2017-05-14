@@ -64,7 +64,7 @@ export namespace RushConstants {
   export const packageJsonFilename: string = 'package.json';
 
   /**
-   * The filename ("pinnedVersions.json") for an optional configuration file
+   * The filename ("pinned-versions.json") for an optional configuration file
    * that stores a table of dependencies that should be pinned to a specific
    * version for all projects.  This configuration file should go in the
    * "common/config/rush" folder.
