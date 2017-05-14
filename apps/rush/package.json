@@ -1,7 +1,18 @@
 {
   "name": "@microsoft/rush",
   "version": "2.5.0",
-  "description": "A fast solution for building/publishing many NPM packages",
+  "description": "The professional solution for consolidating all your JavaScript projects in one Git repo",
+  "keywords": [
+    "install",
+    "build",
+    "publish",
+    "fast",
+    "incremental",
+    "package manager",
+    "monorepo",
+    "package.json"
+  ],
+  "preferGlobal": true,
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/web-build-tools"

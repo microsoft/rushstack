@@ -1,7 +1,7 @@
 {
   "name": "@microsoft/rush-lib",
   "version": "2.5.0",
-  "description": "Library support for the Rush tool",
+  "description": "A library for scripts that interact with the Rush tool",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/web-build-tools"

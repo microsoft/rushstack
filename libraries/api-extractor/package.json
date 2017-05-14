@@ -1,7 +1,7 @@
 {
   "name": "@microsoft/api-extractor",
   "version": "2.0.5",
-  "description": "Validatation, documentation, and auditing for the exported API of a TypeScript package",
+  "description": "Validate, document, and review the exported API for a TypeScript library",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
