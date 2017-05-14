@@ -1,12 +1,6 @@
 // DO NOT ADD COMMENTS IN THIS FILE.  They will be lost when the Rush tool resaves it.
 {
-  "settings": {
-    "ignoredNpmScopes": [
-      "@types"
-    ]
-  },
-  "browserPackages": [],
-  "nonBrowserPackages": [
+  "packages": [
     {
       "name": "@microsoft/api-extractor",
       "allowedCategories": [ "libraries" ]
