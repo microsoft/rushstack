@@ -1,7 +1,7 @@
 # @microsoft/rush
 
 
-![rush](https://github.com/Microsoft/web-build-tools/blob/master/common/wiki-images/rush-logo.png)
+![rush](https://github.com/Microsoft/web-build-tools/blob/master/common/wiki-images/rush-logo.png?raw=true)
 <br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; https://aka.ms/rush
 

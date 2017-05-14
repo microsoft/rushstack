@@ -2,7 +2,7 @@
 
 This log was last generated on Sun, 14 May 2017 18:48:12 GMT and should not be manually modified.
 
-## 3.0.0
+## 3.0.1
 Sun, May 14, 2017 18:30:35 GMT
 
 ### Breaking changes
