@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sun, 14 May 2017 18:48:12 GMT and should not be manually modified.
+This log was last generated on Sun, 14 May 2017 22:28:58 GMT and should not be manually modified.
+
+## 3.0.2
+Sun, May 14, 2017 19:22:16 GMT
+
+### Patches
+
+- Fix some minor documentation issues
 
 ## 3.0.1
 Sun, May 14, 2017 18:30:35 GMT
