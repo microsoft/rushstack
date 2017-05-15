@@ -85,7 +85,8 @@ function _ensureCertUtilExePath(parentTask: GulpTask<{}>): string {
       parentTask.logError(`Error finding certUtil command: "${whereErr}"`);
       _certutilExePath = undefined;
     } else {
-      _certutilExePath = where.stdout.toString().trim();
+      const lines: string[] = where.stdout.toString().trim().split(EOL);
+      _certutilExePath = lines[0].trim();
     }
   }
 
