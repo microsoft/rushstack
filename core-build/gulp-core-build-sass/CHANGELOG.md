@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-sass
 
-This log was last generated on Wed, 19 Apr 2017 20:18:06 GMT and should not be manually modified.
+This log was last generated on Mon, 15 May 2017 21:59:43 GMT and should not be manually modified.
+
+## 3.1.2
+Mon, 15 May 2017 21:59:43 GMT
+
+### Patches
+
+- Remove incremental builds, which cause incorrect behavior when dealing with imports.
 
 ## 3.1.1
 Wed, 19 Apr 2017 20:18:06 GMT

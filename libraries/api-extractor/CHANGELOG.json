@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "2.0.6",
+      "tag": "@microsoft/api-extractor_v2.0.6",
+      "date": "Mon, 15 May 2017 21:59:43 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added support for Namespace with ApiNamespace"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.5",
       "tag": "@microsoft/api-extractor_v2.0.5",
       "date": "Sat, 22 Apr 2017 01:02:03 GMT",

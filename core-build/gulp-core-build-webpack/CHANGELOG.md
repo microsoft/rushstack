@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-webpack
 
-This log was last generated on Mon, 24 Apr 2017 22:01:17 GMT and should not be manually modified.
+This log was last generated on Mon, 15 May 2017 21:59:43 GMT and should not be manually modified.
+
+## 1.1.6
+Mon, 15 May 2017 21:59:43 GMT
+
+### Patches
+
+- Remove unnecessary fsevents optional dependency
 
 ## 1.1.5
 Mon, 24 Apr 2017 22:01:17 GMT
