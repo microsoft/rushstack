@@ -4,11 +4,6 @@
       "packageName": "@microsoft/web-library-build",
       "comment": "Remove unnecessary fsevents optional dependency",
       "type": "patch"
-    },
-    {
-      "packageName": "@microsoft/gulp-core-build-webpack",
-      "comment": "Remove unnecessary fsevents optional dependency",
-      "type": "patch"
     }
   ],
   "email": "nickpape@microsoft.com"
