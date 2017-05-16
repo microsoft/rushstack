@@ -4,6 +4,7 @@ node_js:
 before_script:
   - node common/scripts/InstallRushOnlyIfNeeded.js
 script:
+  - set -e
   - echo 'Checking change file...' && echo -en 'travis_fold:start:check\\r'
   - git fetch origin master:refs/remotes/origin/master -a
   - node common/local-rush/node_modules/@microsoft/rush/lib/rush.js change -v
