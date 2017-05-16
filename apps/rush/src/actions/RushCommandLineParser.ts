@@ -73,6 +73,7 @@ export default class RushCommandLineParser extends CommandLineParser {
         this._exitAndReportError(error);
       }
     }
+    this.rushConfiguration.rushHooks.onPostCommand();
   }
 
   private _exitAndReportError(error: Error): void {

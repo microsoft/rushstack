@@ -17,6 +17,12 @@
     "sampleEmail": "mrexample@contoso.com"
   },
 
+  "rushHooks": {
+    "postCommand": [
+      "do something"
+    ]
+  },
+
   "projects": [
 
     {

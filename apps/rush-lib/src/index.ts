@@ -24,6 +24,10 @@ export {
 } from './data/PinnedVersionsConfiguration';
 
 export {
+  default as RushHooks
+} from './data/RushHooks';
+
+export {
   ChangeType,
   IChangeFile,
   IChangeInfo

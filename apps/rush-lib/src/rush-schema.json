@@ -103,6 +103,20 @@
         "additionalProperties": false,
         "required": [ "packageName", "projectFolder" ]
       }
+    },
+    "rushHooks": {
+      "description": "Hooks allow to a customized script to run at a specified time.",
+      "type": "object",
+      "properties": {
+        "postCommand": {
+          "description": "The list of scripts to run after every Rush command.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false,

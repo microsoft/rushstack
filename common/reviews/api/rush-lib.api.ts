@@ -216,6 +216,8 @@ class RushConfiguration {
   public readonly projects: RushConfigurationProject[];
   // (undocumented)
   public readonly projectsByName: Map<string, RushConfigurationProject>;
+  // (undocumented)
+  public readonly rushHooks: RushHooks;
   public readonly rushJsonFolder: string;
   public readonly rushLinkJsonFilename: string;
   public readonly tempShrinkwrapFilename: string;
@@ -244,6 +246,8 @@ class RushConfigurationProject {
 module RushConstants {
   browserApprovedPackagesFilename: string = 'browser-approved-packages.json';
 
+  changeFilesFolderName: string = 'changes';
+
   commonFolderName: string = 'common';
 
   nodeModulesFolderName: string = 'node_modules';
@@ -262,6 +266,17 @@ module RushConstants {
 
   rushTempProjectsFolderName: string = 'projects';
 
+}
+
+// (undocumented)
+class RushHooks {
+  // WARNING: The type "IRushHooksJson" needs to be exported by the package (e.g. added to index.ts)
+  // (undocumented)
+  public constructor(rushHooksJson: IRushHooksJson);
+  // (undocumented)
+  public onPostCommand(): void;
+  // (undocumented)
+  public readonly postCommandHooks: string[];
 }
 
 // @public

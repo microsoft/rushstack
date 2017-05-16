@@ -14,6 +14,7 @@ import Utilities from '../utilities/Utilities';
 import { RushConstants } from '../RushConstants';
 import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
 import JsonSchemaValidator from '../utilities/JsonSchemaValidator';
+import RushHooks from './RushHooks';
 
 /**
  * A list of known config filenames that are expected to appear in the "./common/config/rush" folder.
@@ -44,6 +45,13 @@ export interface IRushGitPolicyJson {
 }
 
 /**
+ * Part of IRushConfigurationJson.
+ */
+export interface IRushHooksJson {
+  postCommand: string[];
+}
+
+/**
  * This represents the JSON data structure for the "rush.json" configuration file.
  * See rush-schema.json for documentation.
  */
@@ -57,6 +65,7 @@ export interface IRushConfigurationJson {
   approvedPackagesPolicy?: IApprovedPackagesPolicyJson;
   gitPolicy?: IRushGitPolicyJson;
   projects: IRushConfigurationProjectJson[];
+  rushHooks?: IRushHooksJson;
 }
 
 /**
@@ -96,6 +105,9 @@ export default class RushConfiguration {
   // "gitPolicy" feature
   private _gitAllowedEmailRegExps: string[];
   private _gitSampleEmail: string;
+
+  // Rush hooks
+  private _rushHooks: RushHooks;
 
   private _pinnedVersions: PinnedVersionsConfiguration;
 
@@ -410,6 +422,10 @@ export default class RushConfiguration {
     return this._pinnedVersions;
   }
 
+  public get rushHooks(): RushHooks {
+    return this._rushHooks;
+  }
+
   /**
    * Looks up a project in the projectsByName map.  If the project is not found,
    * then undefined is returned.
@@ -544,6 +560,10 @@ export default class RushConfiguration {
             'which is required when using "allowedEmailRegExps"');
         }
       }
+    }
+
+    if (rushConfigurationJson.rushHooks) {
+      this._rushHooks = new RushHooks(rushConfigurationJson.rushHooks);
     }
 
     this._projects = [];
