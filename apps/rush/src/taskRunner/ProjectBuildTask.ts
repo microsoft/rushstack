@@ -3,26 +3,29 @@
 
 import * as child_process from 'child_process';
 import * as fsx from 'fs-extra';
-
 import * as os from 'os';
 import * as path from 'path';
+
 import { ITaskWriter } from '@microsoft/stream-collator';
 import {
   RushConfiguration,
   RushConfigurationProject,
+  RushConstants,
   ErrorDetector,
   ErrorDetectionMode,
   TaskError,
   Utilities
 } from '@microsoft/rush-lib';
-import TaskStatus from './TaskStatus';
+
 import {
-  getPackageDeps,
   IPackageDeps
 } from '@microsoft/package-deps-hash';
-import { ITaskDefinition } from '../taskRunner/ITask';
 
-const PACKAGE_DEPS_FILENAME: string = 'package-deps.json';
+import TaskStatus from './TaskStatus';
+import { ITaskDefinition } from '../taskRunner/ITask';
+import {
+  PackageChangeAnalyzer
+} from '../utilities/PackageChangeAnalyzer';
 
 /**
  * A TaskRunner task which cleans and builds a project
@@ -64,12 +67,16 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
   public execute(writer: ITaskWriter): Promise<TaskStatus> {
     return new Promise<TaskStatus>((resolve: (status: TaskStatus) => void, reject: (errors: TaskError[]) => void) => {
+      let deps: IPackageDeps;
+      PackageChangeAnalyzer.rushConfig = this._rushConfiguration;
       try {
-        const deps: IPackageDeps = getPackageDeps(this._rushProject.projectFolder, [PACKAGE_DEPS_FILENAME]);
-        this._executeTask(writer, deps, resolve, reject);
+        deps = PackageChangeAnalyzer.instance.getPackageDepsHash(this._rushProject.packageName);
       } catch (error) {
-        this._executeTask(writer, undefined, resolve, reject);
+        writer.writeLine('Unable to calculate incremental build state. ' +
+          'Instead running full rebuild. ' + error.toString());
+        deps = undefined;
       }
+      this._executeTask(writer, deps, resolve, reject);
     });
   }
 
@@ -82,7 +89,8 @@ export default class ProjectBuildTask implements ITaskDefinition {
     this._hasWarningOrError = false;
 
     const projectFolder: string = this._rushProject.projectFolder;
-    const currentDepsPath: string = path.join(this._rushProject.projectFolder, PACKAGE_DEPS_FILENAME);
+    const currentDepsPath: string =
+      path.join(this._rushProject.projectFolder, RushConstants.packageDepsFilename);
     let lastPackageDeps: IPackageDeps;
 
     try {

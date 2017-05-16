@@ -70,4 +70,10 @@ export namespace RushConstants {
    * "common/config/rush" folder.
    */
   export const pinnedVersionsFilename: string = 'pinned-versions.json';
+
+  /**
+   * The name of the package-deps.json file, which is used by the "rush build"
+   * command to determine if a particular project needs to be rebuilt.
+   */
+  export const packageDepsFilename: string = 'package-deps.json';
 }

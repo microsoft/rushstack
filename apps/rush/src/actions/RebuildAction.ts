@@ -114,12 +114,12 @@ export default class RebuildAction extends CommandLineAction {
     this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
 
     if (!fsx.existsSync(this._rushConfiguration.rushLinkJsonFilename)) {
-      throw new Error('File not found: ' + this._rushConfiguration.rushLinkJsonFilename
-        + os.EOL + 'Did you run "rush link"?');
+      throw new Error(`File not found: ${this._rushConfiguration.rushLinkJsonFilename}` +
+        `${os.EOL}Did you run "rush link"?`);
     }
     this._rushLinkJson = JsonFile.loadJsonFile(this._rushConfiguration.rushLinkJsonFilename);
 
-    console.log(`Starting "rush ${this.options.actionVerb}"` + os.EOL);
+    console.log(`Starting "rush ${this.options.actionVerb}"${os.EOL}`);
     const stopwatch: Stopwatch = Stopwatch.start();
 
     const isQuietMode: boolean = !(this._verboseParameter.value);
@@ -181,11 +181,12 @@ export default class RebuildAction extends CommandLineAction {
 
       // We will assume this project will be built, but act like it has no dependencies
       const dependents: Set<string> = this._collectAllDependents(fromProject.packageName);
-      dependents.add(fromFlag);
+      dependents.add(fromProject.packageName);
 
       // Register all downstream dependents
-      dependents.forEach(dependent => this._registerTask(taskRunner,
-                                                         this._rushConfiguration.getProjectByName(dependent)));
+      dependents.forEach(dependent => {
+        this._registerTask(taskRunner, this._rushConfiguration.getProjectByName(dependent));
+      });
 
       // Only register dependencies graph for projects which have been registered
       // e.g. package C may depend on A & B, but if we are only building A's downstream, we will ignore B
