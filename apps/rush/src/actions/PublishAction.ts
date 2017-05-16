@@ -53,6 +53,7 @@ export default class PublishAction extends CommandLineAction {
       'changes and publish packages, you must use the --commit flag and/or the --publish flag.'
     });
     this._parser = parser;
+    this._rushConfiguration = parser.rushConfiguration;
   }
 
   protected onDefineParameters(): void {
@@ -129,7 +130,6 @@ export default class PublishAction extends CommandLineAction {
   protected onExecute(): void {
     console.log(`Starting "rush publish" ${EOL}`);
 
-    this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
     if (!GitPolicy.check(this._rushConfiguration)) {
       process.exit(1);
       return;

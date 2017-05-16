@@ -64,6 +64,7 @@ export default class RebuildAction extends CommandLineAction {
     });
     this._parser = parser;
     this._isIncrementalBuildAllowed = false;
+    this._rushConfiguration = parser.rushConfiguration;
   }
 
   protected onDefineParameters(): void {
@@ -111,8 +112,6 @@ export default class RebuildAction extends CommandLineAction {
   }
 
   protected onExecute(): void {
-    this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
-
     if (!fsx.existsSync(this._rushConfiguration.rushLinkJsonFilename)) {
       throw new Error('File not found: ' + this._rushConfiguration.rushLinkJsonFilename
         + os.EOL + 'Did you run "rush link"?');

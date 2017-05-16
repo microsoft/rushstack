@@ -44,6 +44,7 @@ export default class InstallAction extends CommandLineAction {
       + ' Afterwards, it will run "rush link" to create symlinks for all your projects.'
     });
     this._parser = parser;
+    this._rushConfiguration = parser.rushConfiguration;
   }
 
   protected onDefineParameters(): void {
@@ -73,8 +74,6 @@ export default class InstallAction extends CommandLineAction {
   }
 
   protected onExecute(): void {
-    this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
-
     if (!this._bypassPolicy.value) {
       if (!GitPolicy.check(this._rushConfiguration)) {
         process.exit(1);

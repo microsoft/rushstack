@@ -70,6 +70,7 @@ export default class ChangeAction extends CommandLineAction {
         ''].join(os.EOL)
     });
     this._parser = parser;
+    this._rushConfiguration = parser.rushConfiguration;
   }
 
   public onDefineParameters(): void {
@@ -88,7 +89,6 @@ export default class ChangeAction extends CommandLineAction {
   }
 
   public onExecute(): void {
-    this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
     if (this._verifyParameter.value) {
       return this._verify();
     }
