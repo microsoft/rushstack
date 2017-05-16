@@ -162,7 +162,7 @@ export default class RebuildAction extends CommandLineAction {
       const deps: Set<string> = this._collectAllDependencies(toProject.packageName);
 
       // Register any dependencies it may have
-      deps.forEach(dep => this._registerTask(taskRunner, this._rushConfiguration.getProjectByName(dep)));
+      deps.forEach(dep => this._registerTask(taskRunner, this._rushConfiguration.findProjectByShorthandName(dep)));
 
       // Register the dependency graph to the TaskRunner
       deps.forEach(dep => taskRunner.addDependencies(dep, this._rushLinkJson.localLinks[dep] || []));
@@ -181,11 +181,12 @@ export default class RebuildAction extends CommandLineAction {
 
       // We will assume this project will be built, but act like it has no dependencies
       const dependents: Set<string> = this._collectAllDependents(fromProject.packageName);
-      dependents.add(fromFlag);
+      dependents.add(fromProject.packageName);
 
       // Register all downstream dependents
-      dependents.forEach(dependent => this._registerTask(taskRunner,
-                                                         this._rushConfiguration.getProjectByName(dependent)));
+      dependents.forEach(dependent => {
+        this._registerTask(taskRunner, this._rushConfiguration.getProjectByName(dependent));
+      });
 
       // Only register dependencies graph for projects which have been registered
       // e.g. package C may depend on A & B, but if we are only building A's downstream, we will ignore B

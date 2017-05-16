@@ -71,7 +71,6 @@ export default class ProjectBuildTask implements ITaskDefinition {
       PackageChangeAnalyzer.rushConfig = this._rushConfiguration;
       try {
         deps = PackageChangeAnalyzer.instance.getPackageDepsHash(this._rushProject.packageName);
-        console.log('deps!!!');
       } catch (error) {
         writer.writeLine('Unable to calculate incremental build state. ' +
           'Instead running full rebuild. ' + error.toString());
