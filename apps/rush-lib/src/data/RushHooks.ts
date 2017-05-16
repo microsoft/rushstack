@@ -1,4 +1,5 @@
 import { IRushHooksJson } from './RushConfiguration';
+import Utilities from '../utilities/Utilities';
 
 export default class RushHooks {
   private _postCommandHooks: string[];
@@ -12,8 +13,8 @@ export default class RushHooks {
   }
 
   public onPostCommand(): void {
-    this._postCommandHooks.forEach((action) => {
-      console.log(action);
+    this._postCommandHooks.forEach((script) => {
+      Utilities.executeShellCommand(script);
     });
   }
 }

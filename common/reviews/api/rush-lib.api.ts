@@ -328,6 +328,10 @@ class Utilities {
       environmentVariables?: { [key: string]: string }): child_process.ChildProcess;
   public static executeCommandWithRetry(command: string, args: string[], maxAttempts: number,
       workingDirectory: string, suppressOutput: boolean = false): void;
+  // (undocumented)
+  public static executeShellCommand(command: string,
+      workingDirectory?: string,
+      environmentVariables?: { [key: string]: string }): void;
   public static fileExists(path: string): boolean;
   public static getAllReplaced(targetString: string, searchValue: string, replaceValue: string): string;
   public static getConsoleWidth(): number;
