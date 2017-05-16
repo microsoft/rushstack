@@ -76,14 +76,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
   public execute(writer: ITaskWriter): Promise<TaskStatus> {
     return new Promise<TaskStatus>((resolve: (status: TaskStatus) => void, reject: (errors: TaskError[]) => void) => {
-      let build: IBuildCommand;
-      try {
-         build = this._getBuildCommand();
-      } catch (error) {
-        reject(error);
-        return;
-      }
-
+      const build: IBuildCommand = this._getBuildCommand();
       const deps: IPackageDependencies = this._getPackageDependencies(build, writer);
       this._executeTask(build, writer, deps, resolve, reject);
     });
