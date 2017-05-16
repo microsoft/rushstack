@@ -10,6 +10,7 @@ import { ITaskWriter } from '@microsoft/stream-collator';
 import {
   RushConfiguration,
   RushConfigurationProject,
+  RushConstants,
   ErrorDetector,
   ErrorDetectionMode,
   TaskError,
@@ -23,8 +24,7 @@ import {
 import TaskStatus from './TaskStatus';
 import { ITaskDefinition } from '../taskRunner/ITask';
 import {
-  PackageChangeAnalyzer,
-  PACKAGE_DEPS_FILENAME
+  PackageChangeAnalyzer
 } from '../utilities/PackageChangeAnalyzer';
 
 /**
@@ -89,7 +89,8 @@ export default class ProjectBuildTask implements ITaskDefinition {
     this._hasWarningOrError = false;
 
     const projectFolder: string = this._rushProject.projectFolder;
-    const currentDepsPath: string = path.join(this._rushProject.projectFolder, PACKAGE_DEPS_FILENAME);
+    const currentDepsPath: string =
+      path.join(this._rushProject.projectFolder, RushConstants.packageDepsFilename);
     let lastPackageDeps: IPackageDeps;
 
     try {
