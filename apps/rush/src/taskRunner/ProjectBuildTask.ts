@@ -14,6 +14,7 @@ import {
   ErrorDetector,
   ErrorDetectionMode,
   TaskError,
+  JsonFile,
   Utilities
 } from '@microsoft/rush-lib';
 
@@ -114,7 +115,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
       const currentDepsPath: string = path.join(this._rushProject.projectFolder, RushConstants.packageDepsFilename);
       if (fsx.existsSync(currentDepsPath)) {
-        lastPackageDeps = JSON.parse(fsx.readFileSync(currentDepsPath, 'utf8')) as IPackageDependencies;
+        lastPackageDeps = JsonFile.loadJsonFile(currentDepsPath) as IPackageDependencies;
       }
 
       const isPackageUnchanged: boolean = (
@@ -202,8 +203,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
             resolve(TaskStatus.SuccessWithWarning);
           } else {
             // Write deps on success.
-            fsx.writeFileSync(currentDepsPath, JSON.stringify(currentPackageDeps, undefined, 2));
-
+            JsonFile.saveJsonFile(currentPackageDeps, currentDepsPath);
             resolve(TaskStatus.Success);
           }
         });
