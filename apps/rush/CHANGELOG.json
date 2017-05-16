@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "3.0.3",
+      "tag": "@microsoft/rush_v3.0.3",
+      "date": "Tue, May 16, 2017 00:43:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a regression where \"rush install\" sometimes failed to install the NPM tool"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.2",
       "tag": "@microsoft/rush_v3.0.2",
       "date": "Sun, May 14, 2017 19:22:16 GMT",
