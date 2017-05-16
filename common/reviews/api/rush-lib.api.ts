@@ -252,6 +252,8 @@ module RushConstants {
 
   npmShrinkwrapFilename: string = 'npm-shrinkwrap.json';
 
+  packageDepsFilename: string = 'package-deps.json';
+
   packageJsonFilename: string = 'package.json';
 
   pinnedVersionsFilename: string = 'pinned-versions.json';

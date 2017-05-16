@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Mon, 24 Apr 2017 22:01:17 GMT and should not be manually modified.
+This log was last generated on Tue, 16 May 2017 21:17:17 GMT and should not be manually modified.
+
+## 2.5.1
+Tue, 16 May 2017 21:17:17 GMT
+
+### Patches
+
+- Fixing an issue with how the GCB schema validator handles errors.
 
 ## 2.5.0
 Mon, 24 Apr 2017 22:01:17 GMT

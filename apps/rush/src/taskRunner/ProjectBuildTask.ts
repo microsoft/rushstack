@@ -3,26 +3,29 @@
 
 import * as child_process from 'child_process';
 import * as fsx from 'fs-extra';
-
 import * as os from 'os';
 import * as path from 'path';
+
 import { ITaskWriter } from '@microsoft/stream-collator';
 import {
   RushConfiguration,
   RushConfigurationProject,
+  RushConstants,
   ErrorDetector,
   ErrorDetectionMode,
   TaskError,
   Utilities
 } from '@microsoft/rush-lib';
-import TaskStatus from './TaskStatus';
+
 import {
-  getPackageDeps,
   IPackageDeps
 } from '@microsoft/package-deps-hash';
-import { ITaskDefinition } from '../taskRunner/ITask';
 
-const PACKAGE_DEPS_FILENAME: string = 'package-deps.json';
+import TaskStatus from './TaskStatus';
+import { ITaskDefinition } from '../taskRunner/ITask';
+import {
+  PackageChangeAnalyzer
+} from '../utilities/PackageChangeAnalyzer';
 
 interface IPackageDependencies extends IPackageDeps {
   arguments: string;
@@ -81,17 +84,24 @@ export default class ProjectBuildTask implements ITaskDefinition {
         return;
       }
 
-      try {
-        const deps: IPackageDependencies = {
-          files: getPackageDeps(this._rushProject.projectFolder, [PACKAGE_DEPS_FILENAME]).files,
-          arguments: `${build.command} ${build.args.join(' ')}`
-        };
-
-        this._executeTask(build, writer, deps, resolve, reject);
-      } catch (error) {
-        this._executeTask(build, writer, undefined, resolve, reject);
-      }
+      const deps: IPackageDependencies = this._getPackageDependencies(build, writer);
+      this._executeTask(build, writer, deps, resolve, reject);
     });
+  }
+
+  private _getPackageDependencies(build: IBuildCommand, writer: ITaskWriter): IPackageDependencies {
+    let deps: IPackageDependencies = undefined;
+    PackageChangeAnalyzer.rushConfig = this._rushConfiguration;
+    try {
+      deps = {
+        files: PackageChangeAnalyzer.instance.getPackageDepsHash(this._rushProject.packageName).files,
+        arguments: `${build.command} ${build.args.join(' ')}`
+      };
+    } catch (error) {
+      writer.writeLine('Unable to calculate incremental build state. ' +
+        'Instead running full rebuild. ' + error.toString());
+    }
+    return deps;
   }
 
   private _executeTask(
@@ -104,12 +114,12 @@ export default class ProjectBuildTask implements ITaskDefinition {
     this._hasWarningOrError = false;
 
     const projectFolder: string = this._rushProject.projectFolder;
-    const currentDepsPath: string = path.join(this._rushProject.projectFolder, PACKAGE_DEPS_FILENAME);
     let lastPackageDeps: IPackageDependencies;
 
     try {
       writer.writeLine(`>>> ${this.name}`);
 
+      const currentDepsPath: string = path.join(this._rushProject.projectFolder, RushConstants.packageDepsFilename);
       if (fsx.existsSync(currentDepsPath)) {
         lastPackageDeps = JSON.parse(fsx.readFileSync(currentDepsPath, 'utf8')) as IPackageDependencies;
       }

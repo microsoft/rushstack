@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "2.5.1",
+      "tag": "@microsoft/gulp-core-build_v2.5.1",
+      "date": "Tue, 16 May 2017 21:17:17 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixing an issue with how the GCB schema validator handles errors."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.5.0",
       "tag": "@microsoft/gulp-core-build_v2.5.0",
       "date": "Mon, 24 Apr 2017 22:01:17 GMT",
