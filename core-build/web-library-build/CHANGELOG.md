@@ -1,6 +1,13 @@
 # Change Log - @microsoft/web-library-build
 
-This log was last generated on Wed, 19 Apr 2017 20:18:06 GMT and should not be manually modified.
+This log was last generated on Tue, 16 May 2017 00:01:03 GMT and should not be manually modified.
+
+## 3.0.2
+Tue, 16 May 2017 00:01:03 GMT
+
+### Patches
+
+- Remove unnecessary fsevents optional dependency
 
 ## 3.0.1
 Wed, 19 Apr 2017 20:18:06 GMT

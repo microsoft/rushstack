@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-serve
 
-This log was last generated on Thu, 27 Apr 2017 13:03:03 GMT and should not be manually modified.
+This log was last generated on Tue, 16 May 2017 00:01:03 GMT and should not be manually modified.
+
+## 2.1.3
+Tue, 16 May 2017 00:01:03 GMT
+
+### Patches
+
+- Fixing an issue where the cert utility would fail if two certutils were on the PATH.
 
 ## 2.1.2
 Thu, 27 Apr 2017 13:03:03 GMT

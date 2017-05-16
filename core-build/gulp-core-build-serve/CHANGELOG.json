@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-serve",
   "entries": [
     {
+      "version": "2.1.3",
+      "tag": "@microsoft/gulp-core-build-serve_v2.1.3",
+      "date": "Tue, 16 May 2017 00:01:03 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixing an issue where the cert utility would fail if two certutils were on the PATH."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.1.2",
       "tag": "@microsoft/gulp-core-build-serve_v2.1.2",
       "date": "Thu, 27 Apr 2017 13:03:03 GMT",
