@@ -6,10 +6,9 @@ import {
 } from '@microsoft/package-deps-hash';
 
 import {
-  RushConfiguration
+  RushConfiguration,
+  RushConstants
 } from '@microsoft/rush-lib';
-
-export const PACKAGE_DEPS_FILENAME: string = 'package-deps.json';
 
 export class PackageChangeAnalyzer {
   public static _instance: PackageChangeAnalyzer;
@@ -64,8 +63,8 @@ export class PackageChangeAnalyzer {
     const noProjectHashes: { [key: string]: string } = {};
 
     // Load the package deps hash for the whole repository
-    const repoDeps: IPackageDeps =
-      PackageChangeAnalyzer.getPackageDeps(PackageChangeAnalyzer.rushConfig.rushJsonFolder, [PACKAGE_DEPS_FILENAME]);
+    const repoDeps: IPackageDeps = PackageChangeAnalyzer.getPackageDeps(
+      PackageChangeAnalyzer.rushConfig.rushJsonFolder, [RushConstants.packageDepsFilename]);
 
     // Sort each project folder into its own package deps hash
     Object.keys(repoDeps.files).forEach((filepath: string) => {
