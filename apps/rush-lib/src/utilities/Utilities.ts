@@ -324,8 +324,22 @@ export default class Utilities {
       env: environmentVariables
     };
 
-    // This is needed since we specify shell=true below:
-    const escapedCommand: string = Utilities.escapeShellParameter(command);
+    // This is needed since we specify shell=true below.
+    // NOTE: On Windows if we escape "npm", the spawnSync() function runs something like this:
+    //   [ 'C:\\Windows\\system32\\cmd.exe', '/s', '/c', '""npm" "install""' ]
+    //
+    // Due to a bug with Windows cmd.exe, the npm.cmd batch file's "%~dp0" variable will
+    // return the current working directory instead of the batch file's directory.
+    // The workaround is to not escape, npm, i.e. do this instead:
+    //   [ 'C:\\Windows\\system32\\cmd.exe', '/s', '/c', '"npm "install""' ]
+    //
+    // We will come up with a better solution for this when we promote executeCommand()
+    // into node-core-library, but for now this hack will unblock people:
+
+    // Only escape the command if it actually contains spaces:
+    const escapedCommand: string = command.indexOf(' ') < 0 ? command
+      : Utilities.escapeShellParameter(command);
+
     const escapedArgs: string[] = args.map((x) => Utilities.escapeShellParameter(x));
 
     let result: child_process.SpawnSyncReturns<Buffer> = child_process.spawnSync(escapedCommand,
