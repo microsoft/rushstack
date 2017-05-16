@@ -19,6 +19,7 @@ import {
 import {
   RushConfiguration,
   RushConfigurationProject,
+  RushConstants,
   IChangeFile,
   IChangeInfo,
   VersionControl
@@ -372,7 +373,7 @@ export default class ChangeAction extends CommandLineAction {
       this._escapeFilename(`${branch}_${this._getTimestamp()}.json`) :
       `${this._getTimestamp()}.json`);
     const filePath: string = path.join(this._rushConfiguration.commonFolder,
-      'changes',
+      RushConstants.changeFilesFolderName,
       ...packageName.split('/'),
       filename);
     return filePath;

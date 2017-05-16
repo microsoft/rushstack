@@ -12,6 +12,7 @@ import {
 import {
   IChangeInfo,
   ChangeType,
+  RushConstants,
   RushConfiguration,
   RushConfigurationProject,
   Utilities,
@@ -152,7 +153,7 @@ export default class PublishAction extends CommandLineAction {
   }
 
   private _publishChanges(allPackages: Map<string, RushConfigurationProject>): void {
-    const changesPath: string = path.join(this._rushConfiguration.commonFolder, 'changes');
+    const changesPath: string = path.join(this._rushConfiguration.commonFolder, RushConstants.changeFilesFolderName);
     const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
