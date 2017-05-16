@@ -114,12 +114,12 @@ export default class RebuildAction extends CommandLineAction {
     this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
 
     if (!fsx.existsSync(this._rushConfiguration.rushLinkJsonFilename)) {
-      throw new Error('File not found: ' + this._rushConfiguration.rushLinkJsonFilename
-        + os.EOL + 'Did you run "rush link"?');
+      throw new Error(`File not found: ${this._rushConfiguration.rushLinkJsonFilename}` +
+        `${os.EOL}Did you run "rush link"?`);
     }
     this._rushLinkJson = JsonFile.loadJsonFile(this._rushConfiguration.rushLinkJsonFilename);
 
-    console.log(`Starting "rush ${this.options.actionVerb}"` + os.EOL);
+    console.log(`Starting "rush ${this.options.actionVerb}"${os.EOL}`);
     const stopwatch: Stopwatch = Stopwatch.start();
 
     const isQuietMode: boolean = !(this._verboseParameter.value);
