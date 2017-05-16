@@ -24,6 +24,15 @@ import { ITaskDefinition } from '../taskRunner/ITask';
 
 const PACKAGE_DEPS_FILENAME: string = 'package-deps.json';
 
+interface IPackageDependencies extends IPackageDeps {
+  arguments: string;
+}
+
+interface IBuildCommand {
+  command: string;
+  args: string[];
+}
+
 /**
  * A TaskRunner task which cleans and builds a project
  */
@@ -64,18 +73,31 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
   public execute(writer: ITaskWriter): Promise<TaskStatus> {
     return new Promise<TaskStatus>((resolve: (status: TaskStatus) => void, reject: (errors: TaskError[]) => void) => {
+      let build: IBuildCommand;
       try {
-        const deps: IPackageDeps = getPackageDeps(this._rushProject.projectFolder, [PACKAGE_DEPS_FILENAME]);
-        this._executeTask(writer, deps, resolve, reject);
+         build = this._getBuildCommand();
       } catch (error) {
-        this._executeTask(writer, undefined, resolve, reject);
+        reject(error);
+        return;
+      }
+
+      try {
+        const deps: IPackageDependencies = {
+          files: getPackageDeps(this._rushProject.projectFolder, [PACKAGE_DEPS_FILENAME]).files,
+          arguments: `${build.command} ${build.args.join(' ')}`
+        };
+
+        this._executeTask(build, writer, deps, resolve, reject);
+      } catch (error) {
+        this._executeTask(build, writer, undefined, resolve, reject);
       }
     });
   }
 
   private _executeTask(
+    build: IBuildCommand,
     writer: ITaskWriter,
-    currentPackageDeps: IPackageDeps,
+    currentPackageDeps: IPackageDependencies,
     resolve: (status: TaskStatus) => void,
     reject: (errors: TaskError[]) => void
   ): void {
@@ -83,20 +105,20 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
     const projectFolder: string = this._rushProject.projectFolder;
     const currentDepsPath: string = path.join(this._rushProject.projectFolder, PACKAGE_DEPS_FILENAME);
-    let lastPackageDeps: IPackageDeps;
+    let lastPackageDeps: IPackageDependencies;
 
     try {
       writer.writeLine(`>>> ${this.name}`);
 
       if (fsx.existsSync(currentDepsPath)) {
-        lastPackageDeps = JSON.parse(fsx.readFileSync(currentDepsPath, 'utf8')) as IPackageDeps;
+        lastPackageDeps = JSON.parse(fsx.readFileSync(currentDepsPath, 'utf8')) as IPackageDependencies;
       }
 
       const isPackageUnchanged: boolean = (
         !!(
           lastPackageDeps &&
           currentPackageDeps &&
-          _areShallowEqual(currentPackageDeps.files, lastPackageDeps.files, writer)
+          _areShallowEqual(currentPackageDeps, lastPackageDeps, writer)
         )
       );
 
@@ -108,18 +130,11 @@ export default class ProjectBuildTask implements ITaskDefinition {
           fsx.unlinkSync(currentDepsPath);
         }
 
-        const clean: { command: string, args: string[] } = this._getScriptCommand('clean');
-        const build: { command: string, args: string[] } =
-          this._getScriptCommand('test') || this._getScriptCommand('build');
+        const clean: IBuildCommand = this._getScriptCommand('clean');
 
         if (!clean) {
           // tslint:disable-next-line:max-line-length
           throw new Error(`The project [${this._rushProject.packageName}] does not define a 'clean' command in the 'scripts' section of its package.json`);
-        }
-
-        if (!build) {
-          // tslint:disable-next-line:max-line-length
-          throw new Error(`The project [${this._rushProject.packageName}] does not define a 'test' or 'build' command in the 'scripts' section of its package.json`);
         }
 
         // Run the clean step
@@ -143,22 +158,8 @@ export default class ProjectBuildTask implements ITaskDefinition {
           return;
         }
 
-        // Normalize test command step
-        build.args.push(this._errorDisplayMode === ErrorDetectionMode.VisualStudioOnline ? '--no-color' : '--color');
-
-        if (this._production) {
-          build.args.push('--production');
-        }
-        if (this._npmMode) {
-          build.args.push('--npm');
-        }
-        if (this._minimalMode) {
-          build.args.push('--minimal');
-        }
-
-        const actualBuildCommand: string = `${build.command} ${build.args.join(' ')}`;
-
         // Run the test step
+        const actualBuildCommand: string = `${build.command} ${build.args.join(' ')}`;
         writer.writeLine(actualBuildCommand);
         const buildTask: child_process.ChildProcess = Utilities.executeCommandAsync(
           build.command, build.args, projectFolder, process.env);
@@ -213,7 +214,32 @@ export default class ProjectBuildTask implements ITaskDefinition {
     }
   }
 
-  private _getScriptCommand(script: string): { command: string, args: string[] } {
+  private _getBuildCommand(): IBuildCommand {
+    const build: IBuildCommand =
+      this._getScriptCommand('test') || this._getScriptCommand('build');
+
+    if (!build) {
+      // tslint:disable-next-line:max-line-length
+      throw new Error(`The project [${this._rushProject.packageName}] does not define a 'test' or 'build' command in the 'scripts' section of its package.json`);
+    }
+
+    // Normalize test command step
+    build.args.push(this._errorDisplayMode === ErrorDetectionMode.VisualStudioOnline ? '--no-color' : '--color');
+
+    if (this._production) {
+      build.args.push('--production');
+    }
+    if (this._npmMode) {
+      build.args.push('--npm');
+    }
+    if (this._minimalMode) {
+      build.args.push('--minimal');
+    }
+
+    return build;
+  }
+
+  private _getScriptCommand(script: string): IBuildCommand {
     // tslint:disable-next-line:no-string-literal
     if (!this._rushProject.packageJson.scripts) {
       return undefined;
