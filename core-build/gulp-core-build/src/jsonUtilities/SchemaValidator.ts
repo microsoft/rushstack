@@ -68,16 +68,18 @@ export class SchemaValidator {
 
   private static _extractInnerErrorMessages(errors: Validator.SchemaErrorDetail[]): string[] {
     const errorList: string[] = [];
-    errors.map((error) => { errorList.push(...this._formatZSchemaError(error)); });
+    errors.forEach((error) => errorList.push(...this._formatZSchemaError(error)));
     return errorList;
   }
 
   private static _formatZSchemaError(error: Validator.SchemaErrorDetail): string[] {
     const innerErrors: string[] = [];
 
-    error.inner.forEach((innerErr: Validator.SchemaErrorDetail) => {
-      innerErrors.push(...this._formatZSchemaError(innerErr));
-    });
+    if (error.inner) {
+      error.inner.forEach((innerErr: Validator.SchemaErrorDetail) => {
+        innerErrors.push(...this._formatZSchemaError(innerErr));
+      });
+    }
 
     return [`(${error.path}) ${error.message}`].concat(innerErrors);
   };
