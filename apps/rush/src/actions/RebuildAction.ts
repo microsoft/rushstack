@@ -162,7 +162,7 @@ export default class RebuildAction extends CommandLineAction {
       const deps: Set<string> = this._collectAllDependencies(toProject.packageName);
 
       // Register any dependencies it may have
-      deps.forEach(dep => this._registerTask(taskRunner, this._rushConfiguration.findProjectByShorthandName(dep)));
+      deps.forEach(dep => this._registerTask(taskRunner, this._rushConfiguration.getProjectByName(dep)));
 
       // Register the dependency graph to the TaskRunner
       deps.forEach(dep => taskRunner.addDependencies(dep, this._rushLinkJson.localLinks[dep] || []));
