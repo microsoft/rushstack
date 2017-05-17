@@ -56,6 +56,7 @@ export interface IRushConfigurationJson {
   projectFolderMaxDepth?: number;
   approvedPackagesPolicy?: IApprovedPackagesPolicyJson;
   gitPolicy?: IRushGitPolicyJson;
+  telemetryEnabled?: boolean;
   projects: IRushConfigurationProjectJson[];
 }
 
@@ -98,6 +99,8 @@ export default class RushConfiguration {
   private _gitSampleEmail: string;
 
   private _pinnedVersions: PinnedVersionsConfiguration;
+
+  private _telemetryEnabled: boolean;
 
   private _projects: RushConfigurationProject[];
   private _projectsByName: Map<string, RushConfigurationProject>;
@@ -393,6 +396,13 @@ export default class RushConfiguration {
     return this._gitSampleEmail;
   }
 
+  /**
+   * Indicates whether telemetry collection is enabled for Rush runs.
+   */
+  public get telemetryEnabled(): boolean {
+    return this._telemetryEnabled;
+  }
+
   public get projects(): RushConfigurationProject[] {
     return this._projects;
   }
@@ -545,6 +555,8 @@ export default class RushConfiguration {
         }
       }
     }
+
+    this._telemetryEnabled = !!rushConfigurationJson.telemetryEnabled;
 
     this._projects = [];
     this._projectsByName = new Map<string, RushConfigurationProject>();

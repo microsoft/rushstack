@@ -70,6 +70,10 @@
       },
       "additionalProperties": false
     },
+    "telemetryEnabled": {
+      "description": "Indicates whether telemetry data is collected during Rush runs.",
+      "type": "boolean"
+    },
     "projects": {
       "description": "A list of projects managed by this tool.",
       "type": "array",
