@@ -287,28 +287,6 @@ export default class Utilities {
     });
   }
 
-  public static executeShellCommand(
-    command: string,
-    workingDirectory?: string,
-    environmentVariables?: { [key: string]: string }
-  ): void {
-    const child: child_process.ChildProcess = child_process.exec(
-      command,
-      {
-        cwd: workingDirectory ? workingDirectory : process.cwd(),
-        env: environmentVariables
-      },
-      (error, stdout, stderr) => {
-        if (error) {
-          console.error(`${error}`);
-          return;
-        }
-        if (stdout) {
-          console.log(`${stdout}`);
-        }
-      });
-  }
-
   /**
    * Returns the same thing as targetString.replace(searchValue, replaceValue), except that
    * all matches are replaced, rather than just the first match.

@@ -111,6 +111,7 @@
         "postCommand": {
           "description": "The list of scripts to run after every Rush command.",
           "type": "array",
+          "optional": true,
           "items": {
             "type": "string"
           }

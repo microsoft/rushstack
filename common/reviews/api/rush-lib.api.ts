@@ -138,6 +138,10 @@ interface IPackageJson {
   version: string;
 }
 
+interface IRushHooksJson {
+  postCommand?: string[];
+}
+
 // @public
 interface IRushLinkJson {
   // (undocumented)
@@ -268,15 +272,14 @@ module RushConstants {
 
 }
 
-// (undocumented)
+enum RushHookName {
+  postCommand = 1
+}
+
 class RushHooks {
-  // WARNING: The type "IRushHooksJson" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   public constructor(rushHooksJson: IRushHooksJson);
-  // (undocumented)
-  public onPostCommand(): void;
-  // (undocumented)
-  public readonly postCommandHooks: string[];
+  public get(hookName: RushHookName): string[];
 }
 
 // @public
@@ -328,10 +331,6 @@ class Utilities {
       environmentVariables?: { [key: string]: string }): child_process.ChildProcess;
   public static executeCommandWithRetry(command: string, args: string[], maxAttempts: number,
       workingDirectory: string, suppressOutput: boolean = false): void;
-  // (undocumented)
-  public static executeShellCommand(command: string,
-      workingDirectory?: string,
-      environmentVariables?: { [key: string]: string }): void;
   public static fileExists(path: string): boolean;
   public static getAllReplaced(targetString: string, searchValue: string, replaceValue: string): string;
   public static getConsoleWidth(): number;

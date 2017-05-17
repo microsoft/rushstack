@@ -1,20 +1,46 @@
-import { IRushHooksJson } from './RushConfiguration';
-import Utilities from '../utilities/Utilities';
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
 
+import { IRushHooksJson } from './RushConfiguration';
+
+/**
+ * Rush hook names
+ */
+export enum RushHookName {
+  /**
+   * Hook name for post every rush command.
+   */
+  postCommand = 1
+}
+
+/**
+ * This class represents rush hooks configured for this repo.
+ */
 export default class RushHooks {
+  private _hooks: Map<RushHookName, string[]>;
   private _postCommandHooks: string[];
 
   public constructor(rushHooksJson: IRushHooksJson) {
-    this._postCommandHooks = rushHooksJson.postCommand;
-  }
-
-  public get postCommandHooks(): string[] {
-    return this._postCommandHooks;
-  }
-
-  public onPostCommand(): void {
-    this._postCommandHooks.forEach((script) => {
-      Utilities.executeShellCommand(script);
+    this._hooks = new Map<RushHookName, string[]>();
+    Object.getOwnPropertyNames(rushHooksJson).forEach((name) => {
+      const hookName: RushHookName = RushHookName[name];
+      if (hookName) {
+        const foundHooks: string[] = [];
+        if (rushHooksJson[name]) {
+          rushHooksJson[name].forEach((hook) => {
+            foundHooks.push(hook);
+          });
+        }
+        this._hooks.set(hookName, foundHooks);
+      }
     });
+  }
+
+  /**
+   * Return all the scripts associated with the specified hook name.
+   * @param hookName - Rush hook name
+   */
+  public get(hookName: RushHookName): string[] {
+    return this._hooks.get(hookName) || [];
   }
 }

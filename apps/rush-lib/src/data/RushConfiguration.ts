@@ -48,7 +48,10 @@ export interface IRushGitPolicyJson {
  * Part of IRushConfigurationJson.
  */
 export interface IRushHooksJson {
-  postCommand: string[];
+  /**
+   * The list of scripts to run after every Rush command
+   */
+  postCommand?: string[];
 }
 
 /**

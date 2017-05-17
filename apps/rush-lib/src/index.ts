@@ -7,7 +7,8 @@ export {
 
 export {
   IRushLinkJson,
-  default as RushConfiguration
+  default as RushConfiguration,
+  IRushHooksJson
 } from './data/RushConfiguration';
 
 export {
@@ -24,7 +25,8 @@ export {
 } from './data/PinnedVersionsConfiguration';
 
 export {
-  default as RushHooks
+  default as RushHooks,
+  RushHookName
 } from './data/RushHooks';
 
 export {
