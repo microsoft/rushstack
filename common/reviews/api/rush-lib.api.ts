@@ -274,7 +274,7 @@ module RushConstants {
 }
 
 // @alpha
-enum RushHookName {
+enum RushEvent {
   postBuild = 1
 }
 
@@ -282,7 +282,7 @@ enum RushHookName {
 class RushHooks {
   // (undocumented)
   public constructor(rushHooksJson: IRushHooksJson);
-  public get(hookName: RushHookName): string[];
+  public get(event: RushEvent): string[];
 }
 
 // @public

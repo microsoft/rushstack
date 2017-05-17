@@ -1,15 +1,15 @@
 import {
   RushHooks,
   Utilities,
-  RushHookName
+  RushEvent
 } from '@microsoft/rush-lib';
 
 export default class RushHooksManager {
   public constructor(private _rushHooks: RushHooks) {
   }
 
-  public handle(hookName: RushHookName): void {
-    this._rushHooks.get(hookName).forEach((script) => {
+  public handle(eventName: RushEvent): void {
+    this._rushHooks.get(eventName).forEach((script) => {
       Utilities.executeCommandOnShell(script,
         process.cwd(),
         process.env);

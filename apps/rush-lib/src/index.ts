@@ -26,7 +26,7 @@ export {
 
 export {
   default as RushHooks,
-  RushHookName
+  RushEvent
 } from './data/RushHooks';
 
 export {
