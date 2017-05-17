@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "3.0.4",
+      "tag": "@microsoft/rush_v3.0.4",
+      "date": "Tue, May 16, 2017 00:43:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improved the \"rush build\" change detection: if any file outside a project folder has changed, rebuild all projects."
+          },
+          {
+            "comment": "The \"rush build\" command now stores the command-line options used during a build, and forces a full rebuild if the options have changed."
+          },
+          {
+            "comment": "Fix for a \"rush publish\" bug involving command line option quoting."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.3",
       "tag": "@microsoft/rush_v3.0.3",
       "date": "Tue, May 16, 2017 00:43:27 GMT",
@@ -24,7 +42,7 @@
           }
         ]
       }
-    },  
+    },
     {
       "version": "3.0.1",
       "tag": "@microsoft/rush_v3.0.1",

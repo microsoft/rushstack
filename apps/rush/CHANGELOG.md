@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 16 May 2017 00:45:31 GMT and should not be manually modified.
+This log was last generated on Wed, 17 May 2017 01:49:02 GMT and should not be manually modified.
+
+## 3.0.4
+Tue, May 16, 2017 00:43:27 GMT
+
+### Patches
+
+- Improved the "rush build" change detection: if any file outside a project folder has changed, rebuild all projects.
+- The "rush build" command now stores the command-line options used during a build, and forces a full rebuild if the options have changed.
+- Fix for a "rush publish" bug involving command line option quoting.
 
 ## 3.0.3
 Tue, May 16, 2017 00:43:27 GMT
