@@ -307,7 +307,7 @@ export default class PublishAction extends CommandLineAction {
     this._execCommand(
       !!this._targetBranch.value && !!this._publish.value && !this._registryUrl.value,
       'git',
-      ['tag', '-a', tagName, '-m', `"${packageName} v${packageVersion}"`]);
+      ['tag', '-a', tagName, '-m', `${packageName} v${packageVersion}`]);
   }
 
   private _gitCommit(): void {
