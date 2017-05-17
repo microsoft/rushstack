@@ -265,8 +265,10 @@ export default class ProjectBuildTask implements ITaskDefinition {
     const command: string[] = rawCommand.split(' ');
     const commandArgs: string[] = command.splice(1);
 
-    if (command[0] === 'gulp') {
-      command[0] = path.join(this._rushConfiguration.commonTempFolder, 'node_modules', '.bin', command[0]);
+    const localCommandPath: string =
+      path.join(this._rushConfiguration.commonTempFolder, 'node_modules', '.bin', command[0]);
+    if (fsx.existsSync(localCommandPath)) {
+      command[0] = localCommandPath;
     }
 
     return {
