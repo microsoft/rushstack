@@ -5,20 +5,21 @@ import { IRushHooksJson } from './RushConfiguration';
 
 /**
  * Rush hook names
+ * @alpha
  */
 export enum RushHookName {
   /**
    * Hook name for post every rush command.
    */
-  postCommand = 1
+  postBuild = 1
 }
 
 /**
  * This class represents rush hooks configured for this repo.
+ * @alpha
  */
 export default class RushHooks {
   private _hooks: Map<RushHookName, string[]>;
-  private _postCommandHooks: string[];
 
   public constructor(rushHooksJson: IRushHooksJson) {
     this._hooks = new Map<RushHookName, string[]>();

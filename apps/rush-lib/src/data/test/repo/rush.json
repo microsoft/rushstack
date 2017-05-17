@@ -18,7 +18,7 @@
   },
 
   "rushHooks": {
-    "postCommand": [
+    "postBuild": [
       "do something"
     ]
   },

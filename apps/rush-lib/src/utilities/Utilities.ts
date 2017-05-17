@@ -288,6 +288,33 @@ export default class Utilities {
   }
 
   /**
+   * Executes the command using cmd if running on windows, or using sh if running on a non-windows OS.
+   * @param command - the command to run on shell
+   * @param workingDirectory - working directory for running this command
+   * @param environmentVariables - environment variables for running this command
+   * @alpha
+   */
+  public static executeCommandOnShell(
+    command: string,
+    workingDirectory: string,
+    environmentVariables?: { [key: string]: string }
+  ): void {
+    let shellCommand: string = process.env.comspec || 'cmd';
+    let commandFlags: string = '/d /s /c';
+    if (process.platform !== 'win32') {
+      shellCommand = 'sh';
+      commandFlags = '-c';
+    }
+
+    child_process.spawn(shellCommand, [commandFlags, command],
+      {
+        cwd: workingDirectory,
+        env: environmentVariables,
+        stdio: [0, 1, 2]
+      });
+  }
+
+  /**
    * Returns the same thing as targetString.replace(searchValue, replaceValue), except that
    * all matches are replaced, rather than just the first match.
    * @param targetString  - The string to be modified

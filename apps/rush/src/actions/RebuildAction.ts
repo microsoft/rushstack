@@ -22,12 +22,14 @@ import {
   Stopwatch,
   TestErrorDetector,
   TsErrorDetector,
-  TsLintErrorDetector
+  TsLintErrorDetector,
+  RushHookName
 } from '@microsoft/rush-lib';
 
 import TaskRunner from '../taskRunner/TaskRunner';
 import ProjectBuildTask from '../taskRunner/ProjectBuildTask';
 import RushCommandLineParser from './RushCommandLineParser';
+import RushHooksManager from '../utilities/RushHooksManager';
 
 export default class RebuildAction extends CommandLineAction {
 
@@ -148,6 +150,10 @@ export default class RebuildAction extends CommandLineAction {
         stopwatch.stop();
         console.log(colors.red(`rush ${this.options.actionVerb} - Errors! (${stopwatch.toString()})`));
         process.exit(1);
+      })
+      .then(() => {
+        const rushHooksManager: RushHooksManager = new RushHooksManager(this._rushConfiguration.rushHooks);
+        rushHooksManager.handle(RushHookName.postBuild);
       });
   }
 

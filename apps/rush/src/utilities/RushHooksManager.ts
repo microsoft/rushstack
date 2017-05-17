@@ -10,8 +10,9 @@ export default class RushHooksManager {
 
   public handle(hookName: RushHookName): void {
     this._rushHooks.get(hookName).forEach((script) => {
-      // To be discussed.
-      // Utilities.executeCommand();
+      Utilities.executeCommandOnShell(script,
+        process.cwd(),
+        process.env);
     });
   }
 }

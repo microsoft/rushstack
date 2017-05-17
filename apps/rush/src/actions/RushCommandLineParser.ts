@@ -7,8 +7,7 @@ import * as wordwrap from 'wordwrap';
 import { CommandLineParser, CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import {
   RushConfiguration,
-  Utilities,
-  RushHookName
+  Utilities
 } from '@microsoft/rush-lib';
 
 import BuildAction from './BuildAction';
@@ -22,11 +21,8 @@ import RebuildAction from './RebuildAction';
 import UnlinkAction from './UnlinkAction';
 import ScanAction from './ScanAction';
 
-import RushHooksManager from '../utilities/RushHooksManager';
-
 export default class RushCommandLineParser extends CommandLineParser {
   public rushConfiguration: RushConfiguration;
-  private _rushHooksManager: RushHooksManager;
   private _debugParameter: CommandLineFlagParameter;
 
   constructor() {
@@ -41,7 +37,6 @@ export default class RushCommandLineParser extends CommandLineParser {
     });
 
     this.rushConfiguration = RushConfiguration.loadFromDefaultLocation();
-    this._rushHooksManager = new RushHooksManager(this.rushConfiguration.rushHooks);
     this.addAction(new BuildAction(this));
     this.addAction(new ChangeAction(this));
     this.addAction(new CheckAction(this));
@@ -79,7 +74,6 @@ export default class RushCommandLineParser extends CommandLineParser {
         this._exitAndReportError(error);
       }
     }
-    this._rushHooksManager.handle(RushHookName.postCommand);
   }
 
   private _exitAndReportError(error: Error): void {

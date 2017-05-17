@@ -138,8 +138,9 @@ interface IPackageJson {
   version: string;
 }
 
+// @alpha
 interface IRushHooksJson {
-  postCommand?: string[];
+  postBuild?: string[];
 }
 
 // @public
@@ -220,7 +221,7 @@ class RushConfiguration {
   public readonly projects: RushConfigurationProject[];
   // (undocumented)
   public readonly projectsByName: Map<string, RushConfigurationProject>;
-  // (undocumented)
+  // @alpha
   public readonly rushHooks: RushHooks;
   public readonly rushJsonFolder: string;
   public readonly rushLinkJsonFilename: string;
@@ -272,10 +273,12 @@ module RushConstants {
 
 }
 
+// @alpha
 enum RushHookName {
-  postCommand = 1
+  postBuild = 1
 }
 
+// @alpha
 class RushHooks {
   // (undocumented)
   public constructor(rushHooksJson: IRushHooksJson);
@@ -329,6 +332,10 @@ class Utilities {
       environmentVariables?: { [key: string]: string }): string;
   public static executeCommandAsync(command: string, args: string[], workingDirectory: string,
       environmentVariables?: { [key: string]: string }): child_process.ChildProcess;
+  // @alpha
+  public static executeCommandOnShell(command: string,
+      workingDirectory: string,
+      environmentVariables?: { [key: string]: string }): void;
   public static executeCommandWithRetry(command: string, args: string[], maxAttempts: number,
       workingDirectory: string, suppressOutput: boolean = false): void;
   public static fileExists(path: string): boolean;

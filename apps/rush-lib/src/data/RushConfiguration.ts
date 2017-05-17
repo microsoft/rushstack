@@ -46,12 +46,13 @@ export interface IRushGitPolicyJson {
 
 /**
  * Part of IRushConfigurationJson.
+ * @alpha
  */
 export interface IRushHooksJson {
   /**
-   * The list of scripts to run after every Rush command
+   * The list of scripts to run after every Rush build command
    */
-  postCommand?: string[];
+  postBuild?: string[];
 }
 
 /**
@@ -425,6 +426,10 @@ export default class RushConfiguration {
     return this._pinnedVersions;
   }
 
+  /**
+   * The rush hooks. It allows cusomized scripts to run at the specified point.
+   * @alpha
+   */
   public get rushHooks(): RushHooks {
     return this._rushHooks;
   }
