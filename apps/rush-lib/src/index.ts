@@ -7,7 +7,8 @@ export {
 
 export {
   IRushLinkJson,
-  default as RushConfiguration
+  default as RushConfiguration,
+  IEventHooksJson
 } from './data/RushConfiguration';
 
 export {
@@ -22,6 +23,11 @@ export {
 export {
   PinnedVersionsConfiguration
 } from './data/PinnedVersionsConfiguration';
+
+export {
+  default as EventHooks,
+  Event
+} from './data/EventHooks';
 
 export {
   ChangeType,

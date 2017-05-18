@@ -36,6 +36,7 @@ export default class RushCommandLineParser extends CommandLineParser {
       + ' NPM progress bar, Rush is for you.'
     });
 
+    this.rushConfiguration = RushConfiguration.loadFromDefaultLocation();
     this.addAction(new BuildAction(this));
     this.addAction(new ChangeAction(this));
     this.addAction(new CheckAction(this));

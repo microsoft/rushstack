@@ -103,6 +103,21 @@
         "additionalProperties": false,
         "required": [ "packageName", "projectFolder" ]
       }
+    },
+    "eventHooks": {
+      "description": "Hooks are customized script actions that Rush executes when specific events occur.",
+      "type": "object",
+      "properties": {
+        "postRushBuild": {
+          "description": "The list of scripts to run after the Rush build command finishes.",
+          "type": "array",
+          "optional": true,
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false,

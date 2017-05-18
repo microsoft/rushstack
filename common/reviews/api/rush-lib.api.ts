@@ -86,6 +86,18 @@ class ErrorDetector {
   public execute(data: string): TaskError[];
 }
 
+// @alpha
+enum Event {
+  postRushBuild = 1
+}
+
+// @alpha
+class EventHooks {
+  // (undocumented)
+  public constructor(eventHooksJson: IEventHooksJson);
+  public get(event: Event): string[];
+}
+
 // @public
 interface IChangeFile {
   // (undocumented)
@@ -114,6 +126,11 @@ interface IChangeInfo {
 interface IErrorDetectionRule {
   // (undocumented)
   (line: string): TaskError;
+}
+
+// @alpha
+interface IEventHooksJson {
+  postRushBuild?: string[];
 }
 
 // @public
@@ -196,6 +213,8 @@ class RushConfiguration {
   public readonly commonFolder: string;
   public readonly commonRushConfigFolder: string;
   public readonly commonTempFolder: string;
+  // @alpha
+  public readonly eventHooks: EventHooks;
   public findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject;
   public findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
   public getProjectByName(projectName: string): RushConfigurationProject;
@@ -243,6 +262,8 @@ class RushConfigurationProject {
 // @public
 module RushConstants {
   browserApprovedPackagesFilename: string = 'browser-approved-packages.json';
+
+  changeFilesFolderName: string = 'changes';
 
   commonFolderName: string = 'common';
 
@@ -315,6 +336,10 @@ class Utilities {
       environmentVariables?: { [key: string]: string }): child_process.ChildProcess;
   public static executeCommandWithRetry(command: string, args: string[], maxAttempts: number,
       workingDirectory: string, suppressOutput: boolean = false): void;
+  // @alpha
+  public static executeShellCommand(command: string,
+      workingDirectory: string,
+      environmentVariables?: { [key: string]: string }): void;
   public static fileExists(path: string): boolean;
   public static getAllReplaced(targetString: string, searchValue: string, replaceValue: string): string;
   public static getConsoleWidth(): number;

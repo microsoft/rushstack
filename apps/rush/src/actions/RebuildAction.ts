@@ -22,12 +22,14 @@ import {
   Stopwatch,
   TestErrorDetector,
   TsErrorDetector,
-  TsLintErrorDetector
+  TsLintErrorDetector,
+  Event
 } from '@microsoft/rush-lib';
 
 import TaskRunner from '../taskRunner/TaskRunner';
 import ProjectBuildTask from '../taskRunner/ProjectBuildTask';
 import RushCommandLineParser from './RushCommandLineParser';
+import EventHooksManager from '../utilities/EventHooksManager';
 
 export default class RebuildAction extends CommandLineAction {
 
@@ -64,6 +66,7 @@ export default class RebuildAction extends CommandLineAction {
     });
     this._parser = parser;
     this._isIncrementalBuildAllowed = false;
+    this._rushConfiguration = parser.rushConfiguration;
   }
 
   protected onDefineParameters(): void {
@@ -111,8 +114,6 @@ export default class RebuildAction extends CommandLineAction {
   }
 
   protected onExecute(): void {
-    this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
-
     if (!fsx.existsSync(this._rushConfiguration.rushLinkJsonFilename)) {
       throw new Error(`File not found: ${this._rushConfiguration.rushLinkJsonFilename}` +
         `${os.EOL}Did you run "rush link"?`);
@@ -149,6 +150,10 @@ export default class RebuildAction extends CommandLineAction {
         stopwatch.stop();
         console.log(colors.red(`rush ${this.options.actionVerb} - Errors! (${stopwatch.toString()})`));
         process.exit(1);
+      })
+      .then(() => {
+        const eventHooksManager: EventHooksManager = new EventHooksManager(this._rushConfiguration.eventHooks);
+        eventHooksManager.handle(Event.postRushBuild);
       });
   }
 

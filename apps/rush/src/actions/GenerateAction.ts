@@ -35,6 +35,7 @@ export default class GenerateAction extends CommandLineAction {
       + ' Afterwards, it will run "rush link" to create symlinks for all your projects.'
     });
     this._parser = parser;
+    this._rushConfiguration = parser.rushConfiguration;
   }
 
   protected onDefineParameters(): void {
@@ -53,8 +54,6 @@ export default class GenerateAction extends CommandLineAction {
   }
 
   protected onExecute(): void {
-    this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
-
     const stopwatch: Stopwatch = Stopwatch.start();
     const isLazy: boolean = this._lazyParameter.value;
 

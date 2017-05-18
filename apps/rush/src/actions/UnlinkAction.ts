@@ -25,6 +25,7 @@ export default class UnlinkAction extends CommandLineAction {
        + ' commands on a project.'
     });
     this._parser = parser;
+    this._rushConfiguration = parser.rushConfiguration;
   }
 
   protected onDefineParameters(): void {
@@ -32,8 +33,6 @@ export default class UnlinkAction extends CommandLineAction {
   }
 
   protected onExecute(): void {
-    this._rushConfiguration = this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
-
     console.log('Starting "rush unlink"' + os.EOL);
 
     // Delete the flag file if it exists; this will ensure that
