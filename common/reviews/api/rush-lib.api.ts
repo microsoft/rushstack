@@ -86,6 +86,18 @@ class ErrorDetector {
   public execute(data: string): TaskError[];
 }
 
+// @alpha
+enum Event {
+  postRushBuild = 1
+}
+
+// @alpha
+class EventHooks {
+  // (undocumented)
+  public constructor(eventHooksJson: IEventHooksJson);
+  public get(event: Event): string[];
+}
+
 // @public
 interface IChangeFile {
   // (undocumented)
@@ -116,6 +128,11 @@ interface IErrorDetectionRule {
   (line: string): TaskError;
 }
 
+// @alpha
+interface IEventHooksJson {
+  postRushBuild?: string[];
+}
+
 // @public
 interface IPackageJson {
   // (undocumented)
@@ -136,11 +153,6 @@ interface IPackageJson {
     [ key: string ]: string
   }
   version: string;
-}
-
-// @alpha
-interface IRushHooksJson {
-  postBuild?: string[];
 }
 
 // @public
@@ -201,6 +213,8 @@ class RushConfiguration {
   public readonly commonFolder: string;
   public readonly commonRushConfigFolder: string;
   public readonly commonTempFolder: string;
+  // @alpha
+  public readonly eventHooks: EventHooks;
   public findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject;
   public findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
   public getProjectByName(projectName: string): RushConfigurationProject;
@@ -221,8 +235,6 @@ class RushConfiguration {
   public readonly projects: RushConfigurationProject[];
   // (undocumented)
   public readonly projectsByName: Map<string, RushConfigurationProject>;
-  // @alpha
-  public readonly rushHooks: RushHooks;
   public readonly rushJsonFolder: string;
   public readonly rushLinkJsonFilename: string;
   public readonly tempShrinkwrapFilename: string;
@@ -273,18 +285,6 @@ module RushConstants {
 
 }
 
-// @alpha
-enum RushEvent {
-  postBuild = 1
-}
-
-// @alpha
-class RushHooks {
-  // (undocumented)
-  public constructor(rushHooksJson: IRushHooksJson);
-  public get(event: RushEvent): string[];
-}
-
 // @public
 class Stopwatch {
   // (undocumented)
@@ -332,12 +332,12 @@ class Utilities {
       environmentVariables?: { [key: string]: string }): string;
   public static executeCommandAsync(command: string, args: string[], workingDirectory: string,
       environmentVariables?: { [key: string]: string }): child_process.ChildProcess;
-  // @alpha
-  public static executeCommandOnShell(command: string,
-      workingDirectory: string,
-      environmentVariables?: { [key: string]: string }): void;
   public static executeCommandWithRetry(command: string, args: string[], maxAttempts: number,
       workingDirectory: string, suppressOutput: boolean = false): void;
+  // @alpha
+  public static executeShellCommand(command: string,
+      workingDirectory: string,
+      environmentVariables?: { [key: string]: string }): void;
   public static fileExists(path: string): boolean;
   public static getAllReplaced(targetString: string, searchValue: string, replaceValue: string): string;
   public static getConsoleWidth(): number;

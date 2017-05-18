@@ -3,19 +3,19 @@
 import { assert } from 'chai';
 import * as path from 'path';
 import RushConfiguration from '../RushConfiguration';
-import { RushEvent, default as RushHooks } from '../RushHooks';
+import { Event, default as EventHooks } from '../EventHooks';
 
-describe('RushHooks', () => {
+describe('EventHooks', () => {
   it('loads a post build hook from rush.json', () => {
     const rushFilename: string = path.resolve(__dirname, 'repo', 'rush.json');
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
-    assert.deepEqual(rushConfiguration.rushHooks.get(RushEvent.postBuild), ['do something'],
-      'Failed to get correct post command hooks script');
+    assert.deepEqual(rushConfiguration.eventHooks.get(Event.postRushBuild), ['do something'],
+      'Failed to get the correct post rush build hook');
   });
 
   it('loads empty rush hooks', () => {
-    const rushHooks: RushHooks = new RushHooks({});
-    assert.equal(rushHooks.get(RushEvent.postBuild).length, 0);
+    const eventHooks: EventHooks = new EventHooks({});
+    assert.equal(eventHooks.get(Event.postRushBuild).length, 0);
   });
 
   it('loads two rush hooks', () => {
@@ -23,10 +23,10 @@ describe('RushHooks', () => {
         'do one',
         'do two'
       ];
-    const rushHooks: RushHooks = new RushHooks({
-      postBuild: expectedHooks
+    const eventHooks: EventHooks = new EventHooks({
+      postRushBuild: expectedHooks
     });
-    const resultHooks: string[] = rushHooks.get(RushEvent.postBuild);
+    const resultHooks: string[] = eventHooks.get(Event.postRushBuild);
     assert.deepEqual(resultHooks, expectedHooks);
   });
 

@@ -1,36 +1,36 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IRushHooksJson } from './RushConfiguration';
+import { IEventHooksJson } from './RushConfiguration';
 
 /**
  * Events happen during Rush runs.
  * @alpha
  */
-export enum RushEvent {
+export enum Event {
   /**
    * Post Rush build event.
    */
-  postBuild = 1
+  postRushBuild = 1
 }
 
 /**
- * This class represents Rush hooks configured for this repo.
+ * This class represents Rush event hooks configured for this repo.
  * Hooks are customized script actions that Rush executes when specific events occur.
  * The actions are expressed as a command-line that is executed using the operating system shell.
  * @alpha
  */
-export default class RushHooks {
-  private _hooks: Map<RushEvent, string[]>;
+export default class EventHooks {
+  private _hooks: Map<Event, string[]>;
 
-  public constructor(rushHooksJson: IRushHooksJson) {
-    this._hooks = new Map<RushEvent, string[]>();
-    Object.getOwnPropertyNames(rushHooksJson).forEach((name) => {
-      const eventName: RushEvent = RushEvent[name];
+  public constructor(eventHooksJson: IEventHooksJson) {
+    this._hooks = new Map<Event, string[]>();
+    Object.getOwnPropertyNames(eventHooksJson).forEach((name) => {
+      const eventName: Event = Event[name];
       if (eventName) {
         const foundHooks: string[] = [];
-        if (rushHooksJson[name]) {
-          rushHooksJson[name].forEach((hook) => {
+        if (eventHooksJson[name]) {
+          eventHooksJson[name].forEach((hook) => {
             foundHooks.push(hook);
           });
         }
@@ -43,7 +43,7 @@ export default class RushHooks {
    * Return all the scripts associated with the specified event.
    * @param event - Rush event
    */
-  public get(event: RushEvent): string[] {
+  public get(event: Event): string[] {
     return this._hooks.get(event) || [];
   }
 }

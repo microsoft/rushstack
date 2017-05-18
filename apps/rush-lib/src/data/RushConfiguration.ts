@@ -14,7 +14,7 @@ import Utilities from '../utilities/Utilities';
 import { RushConstants } from '../RushConstants';
 import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
 import JsonSchemaValidator from '../utilities/JsonSchemaValidator';
-import RushHooks from './RushHooks';
+import EventHooks from './EventHooks';
 
 /**
  * A list of known config filenames that are expected to appear in the "./common/config/rush" folder.
@@ -48,11 +48,11 @@ export interface IRushGitPolicyJson {
  * Part of IRushConfigurationJson.
  * @alpha
  */
-export interface IRushHooksJson {
+export interface IEventHooksJson {
   /**
-   * The list of scripts to run after every Rush build command
+   * The list of scripts to run after every Rush build command finishes
    */
-  postBuild?: string[];
+  postRushBuild?: string[];
 }
 
 /**
@@ -69,7 +69,7 @@ export interface IRushConfigurationJson {
   approvedPackagesPolicy?: IApprovedPackagesPolicyJson;
   gitPolicy?: IRushGitPolicyJson;
   projects: IRushConfigurationProjectJson[];
-  rushHooks?: IRushHooksJson;
+  eventHooks?: IEventHooksJson;
 }
 
 /**
@@ -111,7 +111,7 @@ export default class RushConfiguration {
   private _gitSampleEmail: string;
 
   // Rush hooks
-  private _rushHooks: RushHooks;
+  private _eventHooks: EventHooks;
 
   private _pinnedVersions: PinnedVersionsConfiguration;
 
@@ -430,8 +430,8 @@ export default class RushConfiguration {
    * The rush hooks. It allows cusomized scripts to run at the specified point.
    * @alpha
    */
-  public get rushHooks(): RushHooks {
-    return this._rushHooks;
+  public get eventHooks(): EventHooks {
+    return this._eventHooks;
   }
 
   /**
@@ -570,8 +570,8 @@ export default class RushConfiguration {
       }
     }
 
-    if (rushConfigurationJson.rushHooks) {
-      this._rushHooks = new RushHooks(rushConfigurationJson.rushHooks);
+    if (rushConfigurationJson.eventHooks) {
+      this._eventHooks = new EventHooks(rushConfigurationJson.eventHooks);
     }
 
     this._projects = [];

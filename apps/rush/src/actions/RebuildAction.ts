@@ -23,13 +23,13 @@ import {
   TestErrorDetector,
   TsErrorDetector,
   TsLintErrorDetector,
-  RushEvent
+  Event
 } from '@microsoft/rush-lib';
 
 import TaskRunner from '../taskRunner/TaskRunner';
 import ProjectBuildTask from '../taskRunner/ProjectBuildTask';
 import RushCommandLineParser from './RushCommandLineParser';
-import RushHooksManager from '../utilities/RushHooksManager';
+import EventHooksManager from '../utilities/EventHooksManager';
 
 export default class RebuildAction extends CommandLineAction {
 
@@ -152,8 +152,8 @@ export default class RebuildAction extends CommandLineAction {
         process.exit(1);
       })
       .then(() => {
-        const rushHooksManager: RushHooksManager = new RushHooksManager(this._rushConfiguration.rushHooks);
-        rushHooksManager.handle(RushEvent.postBuild);
+        const eventHooksManager: EventHooksManager = new EventHooksManager(this._rushConfiguration.eventHooks);
+        eventHooksManager.handle(Event.postRushBuild);
       });
   }
 

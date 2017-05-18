@@ -294,7 +294,7 @@ export default class Utilities {
    * @param environmentVariables - environment variables for running this command
    * @alpha
    */
-  public static executeCommandOnShell(
+  public static executeShellCommand(
     command: string,
     workingDirectory: string,
     environmentVariables?: { [key: string]: string }

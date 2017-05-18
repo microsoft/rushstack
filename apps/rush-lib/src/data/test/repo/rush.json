@@ -17,8 +17,8 @@
     "sampleEmail": "mrexample@contoso.com"
   },
 
-  "rushHooks": {
-    "postBuild": [
+  "eventHooks": {
+    "postRushBuild": [
       "do something"
     ]
   },
