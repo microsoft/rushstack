@@ -225,8 +225,8 @@ export default class RushConfiguration {
       const resolvedFilename: string = path.resolve(commonRushConfigFolder, filename);
 
       // Ignore things that aren't actual files
-      const stat: fsx.Stats = fsx.statSync(resolvedFilename);
-      if (!stat.isFile() && !stat.isSymbolicLink) {
+      const stat: fsx.Stats = fsx.lstatSync(resolvedFilename);
+      if (!stat.isFile() && !stat.isSymbolicLink()) {
         continue;
       }
 
