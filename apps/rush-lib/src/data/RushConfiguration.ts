@@ -210,7 +210,7 @@ export default class RushConfiguration {
 
       // Ignore things that aren't actual files
       const stat: fsx.Stats = fsx.statSync(resolvedFilename);
-      if (!stat.isFile() && !stat.isSymbolicLink) {
+      if (!stat.isFile() && !stat.isSymbolicLink()) {
         continue;
       }
 
