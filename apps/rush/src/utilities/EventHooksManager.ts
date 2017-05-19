@@ -15,6 +15,9 @@ export default class EventHooksManager {
   }
 
   public handle(event: Event): void {
+    if (!this._eventHooks) {
+      return;
+    }
     const scripts: string[] = this._eventHooks.get(event);
     if (scripts.length > 0) {
       console.log(os.EOL + colors.green(`Executing event hooks for ${Event[event]}`));

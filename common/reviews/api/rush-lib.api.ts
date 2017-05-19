@@ -88,7 +88,10 @@ class ErrorDetector {
 
 // @alpha
 enum Event {
-  postRushBuild = 1
+  postRushBuild = 4,
+  postRushInstall = 2,
+  preRushBuild = 3,
+  preRushInstall = 1
 }
 
 // @alpha

@@ -9,9 +9,21 @@ import { IEventHooksJson } from './RushConfiguration';
  */
 export enum Event {
   /**
-   * Post Rush build event.
+   * Pre Rush install event
    */
-  postRushBuild = 1
+  preRushInstall = 1,
+  /**
+   * Post Rush install event
+   */
+  postRushInstall = 2,
+  /**
+   * Pre Rush build event
+   */
+  preRushBuild = 3,
+  /**
+   * Post Rush build event
+   */
+  postRushBuild = 4
 }
 
 /**
