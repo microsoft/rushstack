@@ -122,7 +122,8 @@ export default class ProjectBuildTask implements ITaskDefinition {
         !!(
           lastPackageDeps &&
           currentPackageDeps &&
-          _areShallowEqual(currentPackageDeps, lastPackageDeps, writer)
+          (currentPackageDeps.arguments === lastPackageDeps.arguments &&
+          _areShallowEqual(currentPackageDeps.files, lastPackageDeps.files, writer))
         )
       );
 
