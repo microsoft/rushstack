@@ -1,9 +1,17 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 17 May 2017 01:49:02 GMT and should not be manually modified.
+This log was last generated on Fri, 19 May 2017 22:01:01 GMT and should not be manually modified.
+
+## 3.0.5
+Fri, May 19, 2017 10:55:27 GMT
+
+### Patches
+
+- Fix the Rush build error due to 'SyntaxError: Unexpected token u in JSON at position 0'
+- Fix a minor bug where Rush complained about extra directories.
 
 ## 3.0.4
-Tue, May 16, 2017 00:43:27 GMT
+Tue, May 17, 2017 01:48:27 GMT
 
 ### Patches
 

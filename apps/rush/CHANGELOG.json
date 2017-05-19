@@ -2,9 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "3.0.5",
+      "tag": "@microsoft/rush_v3.0.5",
+      "date": "Fri, May 19, 2017 10:55:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix the Rush build error due to 'SyntaxError: Unexpected token u in JSON at position 0'"
+          },
+          {
+            "comment": "Fix a minor bug where Rush complained about extra directories."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.4",
       "tag": "@microsoft/rush_v3.0.4",
-      "date": "Tue, May 16, 2017 00:43:27 GMT",
+      "date": "Tue, May 17, 2017 01:48:27 GMT",
       "comments": {
         "patch": [
           {
