@@ -203,7 +203,9 @@ export default class ProjectBuildTask implements ITaskDefinition {
             resolve(TaskStatus.SuccessWithWarning);
           } else {
             // Write deps on success.
-            JsonFile.saveJsonFile(currentPackageDeps, currentDepsPath);
+            if (currentPackageDeps) {
+              JsonFile.saveJsonFile(currentPackageDeps, currentDepsPath);
+            }
             resolve(TaskStatus.Success);
           }
         });
