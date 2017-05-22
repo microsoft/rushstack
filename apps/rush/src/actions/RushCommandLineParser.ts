@@ -21,8 +21,11 @@ import RebuildAction from './RebuildAction';
 import UnlinkAction from './UnlinkAction';
 import ScanAction from './ScanAction';
 
+import Telemetry from '../utilities/Telemetry';
+
 export default class RushCommandLineParser extends CommandLineParser {
   public rushConfiguration: RushConfiguration;
+  public telemetry: Telemetry;
   private _debugParameter: CommandLineFlagParameter;
 
   constructor() {
@@ -35,6 +38,8 @@ export default class RushCommandLineParser extends CommandLineParser {
       + ' your monolithic project into many small packages but are afraid of the dreaded'
       + ' NPM progress bar, Rush is for you.'
     });
+    this.rushConfiguration = RushConfiguration.loadFromDefaultLocation();
+    this.telemetry = new Telemetry(this.rushConfiguration);
 
     this.addAction(new BuildAction(this));
     this.addAction(new ChangeAction(this));
@@ -54,6 +59,14 @@ export default class RushCommandLineParser extends CommandLineParser {
     });
   }
 
+  public exitWithError(): void {
+    try {
+      this.telemetry.flush();
+    } finally {
+      process.exit(1);
+    }
+  }
+
   protected onDefineParameters(): void {
     this._debugParameter = this.defineFlagParameter({
       parameterLongName: '--debug',
@@ -66,9 +79,11 @@ export default class RushCommandLineParser extends CommandLineParser {
     if (this._debugParameter.value) {
       // For debugging, don't catch any exceptions; show the full call stack
       super.onExecute();
+      this.telemetry.flush();
     } else {
       try {
         super.onExecute();
+        this.telemetry.flush();
       } catch (error) {
         this._exitAndReportError(error);
       }
@@ -85,6 +100,6 @@ export default class RushCommandLineParser extends CommandLineParser {
       const wrap: (textToWrap: string) => string = wordwrap.soft(prefix.length, Utilities.getConsoleWidth());
       console.error(os.EOL + colors.red(prefix + wrap(error.message).trim()));
     }
-    process.exit(1);
+    this.exitWithError();
   }
 }

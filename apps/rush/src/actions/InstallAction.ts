@@ -123,11 +123,25 @@ export default class InstallAction extends CommandLineAction {
     stopwatch.stop();
     console.log(colors.green(`Done. (${stopwatch.toString()})`));
 
+    this._collectTelemetry(stopwatch, true);
+
     if (!this._noLinkParameter.value) {
       const linkManager: LinkManager = new LinkManager(this._rushConfiguration);
       this._parser.catchSyncErrors(linkManager.createSymlinksForProjects(false));
     } else {
       console.log(os.EOL + 'Next you should probably run: "rush link"');
     }
+  }
+
+  private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {
+    this._parser.telemetry.log({
+      name: 'install',
+      duration: stopwatch.duration,
+      result: success ? 'Succeeded' : 'Failed',
+      extraData: {
+        clean: (!!this._cleanInstall.value).toString(),
+        fullClean: (!!this._cleanInstallFull.value).toString()
+      }
+    });
   }
 }
