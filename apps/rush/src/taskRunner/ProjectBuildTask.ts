@@ -229,17 +229,19 @@ export default class ProjectBuildTask implements ITaskDefinition {
       throw new Error(`The project [${this._rushProject.packageName}] does not define a 'test' or 'build' command in the 'scripts' section of its package.json`);
     }
 
-    // Normalize test command step
-    build.args.push(this._errorDisplayMode === ErrorDetectionMode.VisualStudioOnline ? '--no-color' : '--color');
+    if (build.args) {
+      // Normalize test command step
+      build.args.push(this._errorDisplayMode === ErrorDetectionMode.VisualStudioOnline ? '--no-color' : '--color');
 
-    if (this._production) {
-      build.args.push('--production');
-    }
-    if (this._npmMode) {
-      build.args.push('--npm');
-    }
-    if (this._minimalMode) {
-      build.args.push('--minimal');
+      if (this._production) {
+        build.args.push('--production');
+      }
+      if (this._npmMode) {
+        build.args.push('--npm');
+      }
+      if (this._minimalMode) {
+        build.args.push('--minimal');
+      }
     }
 
     return build;
