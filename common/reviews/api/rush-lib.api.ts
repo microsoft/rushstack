@@ -271,6 +271,7 @@ module RushConstants {
 class Stopwatch {
   // (undocumented)
   constructor(getTime: () => number = Utilities.getTimeInMs);
+  public readonly duration: number;
   public reset(): Stopwatch;
   public static start(): Stopwatch;
   // (undocumented)

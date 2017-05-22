@@ -81,12 +81,7 @@ export class Stopwatch {
     if (this._state === StopwatchState.Stopped && this._startTime === undefined) {
       return '0.00 seconds (stopped)';
     }
-
-    const curTime: number = this._endTime !== undefined
-      ? this._endTime
-      : this._getTime();
-
-    const totalSeconds: number = ((curTime - this._startTime) / 1000.0);
+    const totalSeconds: number = this._getTotalSeconds();
 
     if (totalSeconds > 60) {
       const minutes: number = Math.floor(totalSeconds / 60);
@@ -97,5 +92,23 @@ export class Stopwatch {
     } else {
       return `${totalSeconds.toFixed(2)} seconds`;
     }
+  }
+
+  /**
+   * Get the duration in seconds.
+   */
+  public get duration(): number {
+    return this._getTotalSeconds();
+  }
+
+  private _getTotalSeconds(): number {
+    if (this._startTime === undefined) {
+      return 0;
+    }
+    const curTime: number = this._endTime !== undefined
+      ? this._endTime
+      : this._getTime();
+
+    return ((curTime - this._startTime) / 1000.0);
   }
 }
