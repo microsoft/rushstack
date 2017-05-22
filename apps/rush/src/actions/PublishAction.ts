@@ -12,6 +12,7 @@ import {
 import {
   IChangeInfo,
   ChangeType,
+  RushConstants,
   RushConfiguration,
   RushConfigurationProject,
   Utilities,
@@ -52,6 +53,7 @@ export default class PublishAction extends CommandLineAction {
       'changes and publish packages, you must use the --commit flag and/or the --publish flag.'
     });
     this._parser = parser;
+    this._rushConfiguration = parser.rushConfiguration;
   }
 
   protected onDefineParameters(): void {
@@ -128,7 +130,6 @@ export default class PublishAction extends CommandLineAction {
   protected onExecute(): void {
     console.log(`Starting "rush publish" ${EOL}`);
 
-    this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
     if (!GitPolicy.check(this._rushConfiguration)) {
       process.exit(1);
       return;
@@ -152,7 +153,7 @@ export default class PublishAction extends CommandLineAction {
   }
 
   private _publishChanges(allPackages: Map<string, RushConfigurationProject>): void {
-    const changesPath: string = path.join(this._rushConfiguration.commonFolder, 'changes');
+    const changesPath: string = path.join(this._rushConfiguration.commonFolder, RushConstants.changeFilesFolderName);
     const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,

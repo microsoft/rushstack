@@ -17,6 +17,7 @@ import RushCommandLineParser from './RushCommandLineParser';
 
 export default class CheckAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
+  private _rushConfiguration: RushConfiguration;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -27,6 +28,7 @@ export default class CheckAction extends CommandLineAction {
         'same version throughout the repository.'
     });
     this._parser = parser;
+    this._rushConfiguration = parser.rushConfiguration;
   }
 
   protected onDefineParameters(): void {
@@ -36,19 +38,17 @@ export default class CheckAction extends CommandLineAction {
   protected onExecute(): void {
     console.log(`Starting "rush check"${os.EOL}`);
 
-    const config: RushConfiguration = RushConfiguration.loadFromDefaultLocation();
-
     const pinnedVersions: { [dependency: string]: string } = {};
-    config.pinnedVersions.forEach((version: string, dependency: string) => {
+    this._rushConfiguration.pinnedVersions.forEach((version: string, dependency: string) => {
       pinnedVersions[dependency] = version;
     });
 
-    config.projects.push({
+    this._rushConfiguration.projects.push({
       packageName: RushConstants.pinnedVersionsFilename,
       packageJson: { dependencies: pinnedVersions }
     } as RushConfigurationProject);
 
-    const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(config.projects);
+    const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(this._rushConfiguration.projects);
 
     // Iterate over the list. For any dependency with mismatching versions, print the projects
     mismatchFinder.getMismatches().forEach((dependency: string) => {

@@ -22,12 +22,14 @@ import {
   Stopwatch,
   TestErrorDetector,
   TsErrorDetector,
-  TsLintErrorDetector
+  TsLintErrorDetector,
+  Event
 } from '@microsoft/rush-lib';
 
 import TaskRunner from '../taskRunner/TaskRunner';
 import ProjectBuildTask from '../taskRunner/ProjectBuildTask';
 import RushCommandLineParser from './RushCommandLineParser';
+import EventHooksManager from '../utilities/EventHooksManager';
 
 export default class RebuildAction extends CommandLineAction {
 
@@ -50,6 +52,7 @@ export default class RebuildAction extends CommandLineAction {
   private _vsoParameter: CommandLineFlagParameter;
   private _minimalParameter: CommandLineFlagParameter;
   private _verboseParameter: CommandLineFlagParameter;
+  private _eventHooksManager: EventHooksManager;
 
   constructor(parser: RushCommandLineParser, options?: ICommandLineActionOptions) {
     super(options || {
@@ -64,6 +67,8 @@ export default class RebuildAction extends CommandLineAction {
     });
     this._parser = parser;
     this._isIncrementalBuildAllowed = false;
+    this._rushConfiguration = parser.rushConfiguration;
+    this._eventHooksManager = new EventHooksManager(this._rushConfiguration.eventHooks);
   }
 
   protected onDefineParameters(): void {
@@ -111,12 +116,11 @@ export default class RebuildAction extends CommandLineAction {
   }
 
   protected onExecute(): void {
-    this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
-
     if (!fsx.existsSync(this._rushConfiguration.rushLinkJsonFilename)) {
       throw new Error(`File not found: ${this._rushConfiguration.rushLinkJsonFilename}` +
         `${os.EOL}Did you run "rush link"?`);
     }
+    this._eventHooksManager.handle(Event.preRushBuild);
     this._rushLinkJson = JsonFile.loadJsonFile(this._rushConfiguration.rushLinkJsonFilename);
 
     console.log(`Starting "rush ${this.options.actionVerb}"${os.EOL}`);
@@ -151,6 +155,9 @@ export default class RebuildAction extends CommandLineAction {
         console.log(colors.red(`rush ${this.options.actionVerb} - Errors! (${stopwatch.toString()})`));
         this._collectTelemetry(stopwatch, false);
         this._parser.exitWithError();
+      })
+      .then(() => {
+        this._eventHooksManager.handle(Event.postRushBuild);
       });
   }
 

@@ -41,6 +41,7 @@ export default class RushCommandLineParser extends CommandLineParser {
     this.rushConfiguration = RushConfiguration.loadFromDefaultLocation();
     this.telemetry = new Telemetry(this.rushConfiguration);
 
+    this.rushConfiguration = RushConfiguration.loadFromDefaultLocation();
     this.addAction(new BuildAction(this));
     this.addAction(new ChangeAction(this));
     this.addAction(new CheckAction(this));

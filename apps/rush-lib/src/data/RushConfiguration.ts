@@ -14,6 +14,7 @@ import Utilities from '../utilities/Utilities';
 import { RushConstants } from '../RushConstants';
 import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
 import JsonSchemaValidator from '../utilities/JsonSchemaValidator';
+import EventHooks from './EventHooks';
 
 /**
  * A list of known config filenames that are expected to appear in the "./common/config/rush" folder.
@@ -44,6 +45,17 @@ export interface IRushGitPolicyJson {
 }
 
 /**
+ * Part of IRushConfigurationJson.
+ * @alpha
+ */
+export interface IEventHooksJson {
+  /**
+   * The list of scripts to run after every Rush build command finishes
+   */
+  postRushBuild?: string[];
+}
+
+/**
  * This represents the JSON data structure for the "rush.json" configuration file.
  * See rush-schema.json for documentation.
  */
@@ -58,6 +70,7 @@ export interface IRushConfigurationJson {
   gitPolicy?: IRushGitPolicyJson;
   telemetryEnabled?: boolean;
   projects: IRushConfigurationProjectJson[];
+  eventHooks?: IEventHooksJson;
 }
 
 /**
@@ -97,6 +110,9 @@ export default class RushConfiguration {
   // "gitPolicy" feature
   private _gitAllowedEmailRegExps: string[];
   private _gitSampleEmail: string;
+
+  // Rush hooks
+  private _eventHooks: EventHooks;
 
   private _pinnedVersions: PinnedVersionsConfiguration;
 
@@ -212,8 +228,8 @@ export default class RushConfiguration {
       const resolvedFilename: string = path.resolve(commonRushConfigFolder, filename);
 
       // Ignore things that aren't actual files
-      const stat: fsx.Stats = fsx.statSync(resolvedFilename);
-      if (!stat.isFile() && !stat.isSymbolicLink) {
+      const stat: fsx.Stats = fsx.lstatSync(resolvedFilename);
+      if (!stat.isFile() && !stat.isSymbolicLink()) {
         continue;
       }
 
@@ -421,6 +437,14 @@ export default class RushConfiguration {
   }
 
   /**
+   * The rush hooks. It allows cusomized scripts to run at the specified point.
+   * @alpha
+   */
+  public get eventHooks(): EventHooks {
+    return this._eventHooks;
+  }
+
+  /**
    * Looks up a project in the projectsByName map.  If the project is not found,
    * then undefined is returned.
    */
@@ -557,6 +581,9 @@ export default class RushConfiguration {
     }
 
     this._telemetryEnabled = !!rushConfigurationJson.telemetryEnabled;
+    if (rushConfigurationJson.eventHooks) {
+      this._eventHooks = new EventHooks(rushConfigurationJson.eventHooks);
+    }
 
     this._projects = [];
     this._projectsByName = new Map<string, RushConfigurationProject>();

@@ -8,7 +8,8 @@ import { CommandLineAction, CommandLineFlagParameter } from '@microsoft/ts-comma
 import {
   RushConfiguration,
   Stopwatch,
-  IPackageJson
+  IPackageJson,
+  Event
 } from '@microsoft/rush-lib';
 
 import RushCommandLineParser from './RushCommandLineParser';
@@ -17,6 +18,7 @@ import InstallManager, { InstallType } from '../utilities/InstallManager';
 import LinkManager from '../utilities/LinkManager';
 import ShrinkwrapFile from '../utilities/ShrinkwrapFile';
 import { ApprovedPackagesChecker } from '../utilities/ApprovedPackagesChecker';
+import EventHooksManager from '../utilities/EventHooksManager';
 
 interface ITempModuleInformation {
   packageJson: IPackageJson;
@@ -31,6 +33,7 @@ export default class InstallAction extends CommandLineAction {
   private _cleanInstallFull: CommandLineFlagParameter;
   private _bypassPolicy: CommandLineFlagParameter;
   private _noLinkParameter: CommandLineFlagParameter;
+  private _eventHooksManager: EventHooksManager;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -44,6 +47,8 @@ export default class InstallAction extends CommandLineAction {
       + ' Afterwards, it will run "rush link" to create symlinks for all your projects.'
     });
     this._parser = parser;
+    this._rushConfiguration = parser.rushConfiguration;
+    this._eventHooksManager = new EventHooksManager(this._rushConfiguration.eventHooks);
   }
 
   protected onDefineParameters(): void {
@@ -73,8 +78,6 @@ export default class InstallAction extends CommandLineAction {
   }
 
   protected onExecute(): void {
-    this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
-
     if (!this._bypassPolicy.value) {
       if (!GitPolicy.check(this._rushConfiguration)) {
         process.exit(1);
@@ -88,6 +91,7 @@ export default class InstallAction extends CommandLineAction {
 
     console.log('Starting "rush install"' + os.EOL);
 
+    this._eventHooksManager.handle(Event.preRushInstall);
     const installManager: InstallManager = new InstallManager(this._rushConfiguration);
 
     installManager.ensureLocalNpmTool(this._cleanInstallFull.value);
@@ -124,6 +128,7 @@ export default class InstallAction extends CommandLineAction {
     console.log(colors.green(`Done. (${stopwatch.toString()})`));
 
     this._collectTelemetry(stopwatch, true);
+    this._eventHooksManager.handle(Event.postRushInstall);
 
     if (!this._noLinkParameter.value) {
       const linkManager: LinkManager = new LinkManager(this._rushConfiguration);
