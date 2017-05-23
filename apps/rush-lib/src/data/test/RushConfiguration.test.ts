@@ -64,6 +64,8 @@ describe('RushConfiguration', () => {
     assert.equal(approvedPackagesPolicy.browserApprovedPackages.items[0].allowedCategories.size, 3,
        'Failed to validate browserApprovedPackages.items[0]');
 
+    assert.isNotTrue(rushConfiguration.telemetryEnabled);
+
     // Validate project1 settings
     const project1: RushConfigurationProject = rushConfiguration.getProjectByName('project1');
     assert.ok(project1, 'Failed to find project1');

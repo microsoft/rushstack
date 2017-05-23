@@ -240,6 +240,8 @@ class RushConfiguration {
   public readonly projectsByName: Map<string, RushConfigurationProject>;
   public readonly rushJsonFolder: string;
   public readonly rushLinkJsonFilename: string;
+  // @alpha
+  public readonly telemetryEnabled: boolean;
   public readonly tempShrinkwrapFilename: string;
 }
 
@@ -294,6 +296,7 @@ module RushConstants {
 class Stopwatch {
   // (undocumented)
   constructor(getTime: () => number = Utilities.getTimeInMs);
+  public readonly duration: number;
   public reset(): Stopwatch;
   public static start(): Stopwatch;
   // (undocumented)

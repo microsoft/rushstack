@@ -54,12 +54,14 @@ describe('Stopwatch', () => {
     watch.start();
     watch.reset();
     assert.equal(watch.toString(), '0.00 seconds (stopped)');
+    assert.equal(watch.duration, 0);
     done();
   });
 
   it('gives 0.00 seconds when not running', (done: MochaDone) => {
     const watch: Stopwatch = new Stopwatch();
     assert.equal(watch.toString(), '0.00 seconds (stopped)');
+    assert.equal(watch.duration, 0);
     done();
   });
 
@@ -102,5 +104,27 @@ describe('Stopwatch', () => {
     watch.stop();
     assert.equal(watch.toString(), '1 minute 1.3 seconds');
     done();
+  });
+
+  it('uses the latest time when the clock is not stopped', (done: MochaDone) => {
+    const watch: Stopwatch = new Stopwatch(pseudoTimeSeconds([0, 1, 2]));
+    watch.start();
+    assert.equal(watch.toString(), '1.00 seconds');
+    assert.equal(watch.toString(), '2.00 seconds');
+    done();
+  });
+
+  it('returns duration when the clock is stopped', () => {
+    const watch: Stopwatch = new Stopwatch(pseudoTimeSeconds([0, 61.25]));
+    watch.start();
+    watch.stop();
+    assert.equal(watch.duration, 61.25);
+  });
+
+  it('returns duration using the latest time when the clock is not stopped', () => {
+    const watch: Stopwatch = new Stopwatch(pseudoTimeSeconds([0, 1, 2]));
+    watch.start();
+    assert.equal(watch.duration, 1);
+    assert.equal(watch.duration, 2);
   });
 });

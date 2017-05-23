@@ -148,15 +148,31 @@ export default class RebuildAction extends CommandLineAction {
       () => {
         stopwatch.stop();
         console.log(colors.green(`rush ${this.options.actionVerb} (${stopwatch.toString()})`));
+        this._collectTelemetry(stopwatch, true);
       },
       () => {
         stopwatch.stop();
         console.log(colors.red(`rush ${this.options.actionVerb} - Errors! (${stopwatch.toString()})`));
-        process.exit(1);
+        this._collectTelemetry(stopwatch, false);
+        this._parser.exitWithError();
       })
       .then(() => {
         this._eventHooksManager.handle(Event.postRushBuild);
       });
+  }
+
+  private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {
+    this._parser.telemetry.log({
+      name: 'build',
+      duration: stopwatch.duration,
+      result: success ? 'Succeeded' : 'Failed',
+      timestamp: new Date().getTime(),
+      extraData: {
+        to: (!!this._toFlag.value).toString(),
+        from: (!!this._fromFlag.value).toString(),
+        min: (!!this._minimalParameter.value).toString()
+      }
+    });
   }
 
   private _registerToFlags(taskRunner: TaskRunner, toFlags: string[]): void {

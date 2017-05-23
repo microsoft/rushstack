@@ -92,40 +92,48 @@ export default class InstallAction extends CommandLineAction {
     console.log('Starting "rush install"' + os.EOL);
 
     this._eventHooksManager.handle(Event.preRushInstall);
-    const installManager: InstallManager = new InstallManager(this._rushConfiguration);
+    try {
+      const installManager: InstallManager = new InstallManager(this._rushConfiguration);
 
-    installManager.ensureLocalNpmTool(this._cleanInstallFull.value);
+      installManager.ensureLocalNpmTool(this._cleanInstallFull.value);
 
-    const shrinkwrapFile: ShrinkwrapFile | undefined
-      = ShrinkwrapFile.loadFromFile(this._rushConfiguration.committedShrinkwrapFilename);
+      const shrinkwrapFile: ShrinkwrapFile | undefined
+        = ShrinkwrapFile.loadFromFile(this._rushConfiguration.committedShrinkwrapFilename);
 
-    if (!shrinkwrapFile) {
-      console.log('');
-      console.log(colors.red('Unable to proceed: The NPM shrinkwrap file is missing.'));
-      console.log('');
-      console.log('You need to run "rush generate" first.');
-      process.exit(1);
-      return;
+      if (!shrinkwrapFile) {
+        console.log('');
+        console.log(colors.red('Unable to proceed: The NPM shrinkwrap file is missing.'));
+        console.log('');
+        console.log('You need to run "rush generate" first.');
+        process.exit(1);
+        return;
+      }
+
+      if (!installManager.createTempModulesAndCheckShrinkwrap(shrinkwrapFile)) {
+        console.log('');
+        console.log(colors.red('You need to run "rush generate" to update your NPM shrinkwrap file.'));
+        process.exit(1);
+        return;
+      }
+
+      let installType: InstallType = InstallType.Normal;
+      if (this._cleanInstallFull.value) {
+        installType = InstallType.UnsafePurge;
+      } else if (this._cleanInstall.value) {
+        installType = InstallType.ForceClean;
+      }
+
+      installManager.installCommonModules(installType);
+
+      stopwatch.stop();
+      console.log(colors.green(`Done. (${stopwatch.toString()})`));
+
+      this._collectTelemetry(stopwatch, true);
+    } catch (error) {
+      stopwatch.stop();
+      this._collectTelemetry(stopwatch, false);
+      throw error;
     }
-
-    if (!installManager.createTempModulesAndCheckShrinkwrap(shrinkwrapFile)) {
-      console.log('');
-      console.log(colors.red('You need to run "rush generate" to update your NPM shrinkwrap file.'));
-      process.exit(1);
-      return;
-    }
-
-    let installType: InstallType = InstallType.Normal;
-    if (this._cleanInstallFull.value) {
-      installType = InstallType.UnsafePurge;
-    } else if (this._cleanInstall.value) {
-      installType = InstallType.ForceClean;
-    }
-
-    installManager.installCommonModules(installType);
-
-    stopwatch.stop();
-    console.log(colors.green(`Done. (${stopwatch.toString()})`));
 
     this._eventHooksManager.handle(Event.postRushInstall);
 
@@ -135,5 +143,18 @@ export default class InstallAction extends CommandLineAction {
     } else {
       console.log(os.EOL + 'Next you should probably run: "rush link"');
     }
+  }
+
+  private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {
+    this._parser.telemetry.log({
+      name: 'install',
+      duration: stopwatch.duration,
+      result: success ? 'Succeeded' : 'Failed',
+      timestamp: new Date().getTime(),
+      extraData: {
+        clean: (!!this._cleanInstall.value).toString(),
+        fullClean: (!!this._cleanInstallFull.value).toString()
+      }
+    });
   }
 }
