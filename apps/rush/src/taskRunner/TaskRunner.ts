@@ -184,7 +184,8 @@ export default class TaskRunner {
               this._markTaskAsSkipped(task);
               break;
             case TaskStatus.Failure:
-              this._markTaskAsSuccess(task);
+              this._hasAnyFailures = true;
+              this._markTaskAsFailed(task);
               break;
           }
 
