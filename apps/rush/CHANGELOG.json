@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "3.0.7",
+      "tag": "@microsoft/rush_v3.0.7",
+      "date": "Tue, May 23, 2017 00:55:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a regression for packages with an empty script (no-op)"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.6",
       "tag": "@microsoft/rush_v3.0.6",
       "date": "Sat, May 20, 2017 00:55:27 GMT",
