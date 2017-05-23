@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 19 May 2017 23:56:49 GMT and should not be manually modified.
+This log was last generated on Tue, 23 May 2017 00:48:55 GMT and should not be manually modified.
+
+## 3.0.7
+Tue, May 23, 2017 00:55:27 GMT
+
+### Patches
+
+- Fix a regression for packages with an empty script (no-op)
 
 ## 3.0.6
 Sat, May 20, 2017 00:55:27 GMT
