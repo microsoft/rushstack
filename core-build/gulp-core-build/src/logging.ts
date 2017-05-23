@@ -468,7 +468,9 @@ export function addSuppression(str: string): void {
     .replace(/\r\n/g, '\n'); // normalize newline
   localCache.errorAndWarningSuppressions[str] = true;
 
-  logSummary(`${gutil.colors.yellow('Supressing')} - ${str}`);
+  if (getConfig().verbose) {
+    logSummary(`${gutil.colors.yellow('Supressing')} - ${str}`);
+  }
 }
 
 /**
