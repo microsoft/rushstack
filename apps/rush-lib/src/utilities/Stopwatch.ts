@@ -81,7 +81,7 @@ export class Stopwatch {
     if (this._state === StopwatchState.Stopped && this._startTime === undefined) {
       return '0.00 seconds (stopped)';
     }
-    const totalSeconds: number = this._getTotalSeconds();
+    const totalSeconds: number = this.duration;
 
     if (totalSeconds > 60) {
       const minutes: number = Math.floor(totalSeconds / 60);
@@ -98,10 +98,6 @@ export class Stopwatch {
    * Get the duration in seconds.
    */
   public get duration(): number {
-    return this._getTotalSeconds();
-  }
-
-  private _getTotalSeconds(): number {
     if (this._startTime === undefined) {
       return 0;
     }

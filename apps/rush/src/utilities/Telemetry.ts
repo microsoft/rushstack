@@ -12,6 +12,7 @@ export interface ITelemetryData {
   name: string;
   duration: number;
   result: string;
+  timestamp: number;
   extraData?: { [key: string]: string };
 }
 

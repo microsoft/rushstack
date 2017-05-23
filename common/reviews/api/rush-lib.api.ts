@@ -240,6 +240,7 @@ class RushConfiguration {
   public readonly projectsByName: Map<string, RushConfigurationProject>;
   public readonly rushJsonFolder: string;
   public readonly rushLinkJsonFilename: string;
+  // @alpha
   public readonly telemetryEnabled: boolean;
   public readonly tempShrinkwrapFilename: string;
 }

@@ -21,13 +21,15 @@ describe('Telemetry', () => {
     const logData1: ITelemetryData = {
       name: 'testData1',
       duration: 100,
-      result: 'Succeeded'
+      result: 'Succeeded',
+      timestamp: new Date().getTime()
     };
 
     const logData2: ITelemetryData = {
       name: 'testData2',
       duration: 100,
-      result: 'Failed'
+      result: 'Failed',
+      timestamp: new Date().getTime()
     };
 
     telemetry.log(logData1);
@@ -42,7 +44,8 @@ describe('Telemetry', () => {
     const logData: ITelemetryData = {
       name: 'testData',
       duration: 100,
-      result: 'Succeeded'
+      result: 'Succeeded',
+      timestamp: new Date().getTime()
     };
 
     telemetry.log(logData);
@@ -56,7 +59,8 @@ describe('Telemetry', () => {
     const logData: ITelemetryData = {
       name: 'testData1',
       duration: 100,
-      result: 'Succeeded'
+      result: 'Succeeded',
+      timestamp: new Date().getTime()
     };
 
     telemetry.log(logData);
@@ -68,5 +72,6 @@ describe('Telemetry', () => {
     });
     assert.isDefined(logFile.match(/telemetry_.*\.json/));
     assert.deepEqual(dataToWrite, JSON.stringify([logData]));
+    assert.deepEqual(telemetry.store, []);
   });
 });

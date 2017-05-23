@@ -414,6 +414,7 @@ export default class RushConfiguration {
 
   /**
    * Indicates whether telemetry collection is enabled for Rush runs.
+   * @alpha
    */
   public get telemetryEnabled(): boolean {
     return this._telemetryEnabled;
