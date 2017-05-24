@@ -463,13 +463,11 @@ const colorCodeRegex: RegExp = /\x1B[[(?);]{0,2}(;?\d)*./g;
 export function addSuppression(str: string): void {
   'use strict';
 
-  str = str
-    .replace(colorCodeRegex, '') // remove colors
-    .replace(/\r\n/g, '\n'); // normalize newline
+  str = normalizeMessage(str);
   localCache.errorAndWarningSuppressions[str] = true;
 
   if (getConfig().verbose) {
-    logSummary(`${gutil.colors.yellow('Supressing')} - ${str}`);
+    logSummary(`${gutil.colors.yellow('Suppressing')} - ${str}`);
   }
 }
 
@@ -484,7 +482,7 @@ export function warn(...args: Array<string | Chalk.ChalkChain>): void {
 
   const stringMessage: string = args.join(' ');
 
-  if (!localCache.errorAndWarningSuppressions[stringMessage.replace(colorCodeRegex, '')]) {
+  if (!messageIsSuppressed(stringMessage)) {
     localCache.warnings.push(stringMessage);
     log(gutil.colors.yellow.apply(undefined, args));
   }
@@ -500,7 +498,7 @@ export function error(...args: Array<string | Chalk.ChalkChain>): void {
 
   const stringMessage: string = args.join(' ');
 
-  if (!localCache.errorAndWarningSuppressions[stringMessage.replace(colorCodeRegex, '')]) {
+  if (!messageIsSuppressed(stringMessage)) {
     localCache.errors.push(stringMessage);
     log(gutil.colors.red.apply(undefined, args));
   }
@@ -554,7 +552,7 @@ export function fileError(taskName: string, filePath: string, line: number, colu
 
 /**
  * Logs a message to standard output if the verbose flag is specified.
- * @param messargsage - the messages to log when in verbose mode
+ * @param args - the messages to log when in verbose mode
  */
 export function verbose(...args: Array<string | Chalk.ChalkChain>): void {
   'use strict';
@@ -801,4 +799,15 @@ export function initialize(gulp: gulp.Gulp, gulpErrorCallback?: (err: Error) => 
 export function markTaskCreationTime(): void {
   'use strict';
   localCache.taskCreationTime = process.hrtime(getStart());
+}
+
+function messageIsSuppressed(message: string): boolean {
+  return localCache.errorAndWarningSuppressions[normalizeMessage(message)];
+}
+
+function normalizeMessage(message: string): string {
+  return message
+    .replace(colorCodeRegex, '') // remove colors
+    .replace(/\r\n/g, '\n') // normalize newline
+    .replace(/\\/g, '/'); // normalize slashes
 }
