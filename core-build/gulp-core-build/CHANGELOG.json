@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "2.5.2",
+      "tag": "@microsoft/gulp-core-build_v2.5.2",
+      "date": "Wed, 24 May 2017 01:27:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Only show overriden errors and warnings when we are in verbose mode."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.5.1",
       "tag": "@microsoft/gulp-core-build_v2.5.1",
       "date": "Tue, 16 May 2017 21:17:17 GMT",
