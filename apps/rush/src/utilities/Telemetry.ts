@@ -3,16 +3,20 @@
 
 import * as path from 'path';
 import * as fsx from 'fs-extra';
+import { cloneDeep } from 'lodash';
 
 import {
-  RushConfiguration
+  RushConfiguration,
+  rushVersion
 } from '@microsoft/rush-lib';
 
 export interface ITelemetryData {
   name: string;
   duration: number;
   result: string;
-  timestamp: number;
+  timestamp?: number;
+  platform?: string;
+  rushVersion?: string;
   extraData?: { [key: string]: string };
 }
 
@@ -24,13 +28,19 @@ export default class Telemetry {
   public constructor(private _rushConfiguration: RushConfiguration) {
     this._enabled = this._rushConfiguration.telemetryEnabled;
     this._store = [];
-    this._dataFolder = path.join(this._rushConfiguration.commonTempFolder, 'telemetry');
+
+    const folderName: string = 'telemetry';
+    this._dataFolder = path.join(this._rushConfiguration.commonTempFolder, folderName);
   }
 
-  public log(data: ITelemetryData): void {
+  public log(telemetryData: ITelemetryData): void {
     if (!this._enabled) {
       return;
     }
+    const data: ITelemetryData = cloneDeep(telemetryData);
+    data.timestamp = data.timestamp || new Date().getTime();
+    data.platform = data.platform || process.platform;
+    data.rushVersion = data.rushVersion || rushVersion;
     this._store.push(data);
   }
 

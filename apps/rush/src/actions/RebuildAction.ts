@@ -166,7 +166,6 @@ export default class RebuildAction extends CommandLineAction {
       name: 'build',
       duration: stopwatch.duration,
       result: success ? 'Succeeded' : 'Failed',
-      timestamp: new Date().getTime(),
       extraData: {
         to: (!!this._toFlag.value).toString(),
         from: (!!this._fromFlag.value).toString(),

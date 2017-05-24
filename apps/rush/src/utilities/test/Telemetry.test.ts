@@ -5,7 +5,8 @@ import { assert } from 'chai';
 import * as path from 'path';
 
 import {
-  RushConfiguration
+  RushConfiguration,
+  rushVersion
 } from '@microsoft/rush-lib';
 
 import {
@@ -22,14 +23,18 @@ describe('Telemetry', () => {
       name: 'testData1',
       duration: 100,
       result: 'Succeeded',
-      timestamp: new Date().getTime()
+      timestamp: new Date().getTime(),
+      platform: process.platform,
+      rushVersion: rushVersion
     };
 
     const logData2: ITelemetryData = {
       name: 'testData2',
       duration: 100,
       result: 'Failed',
-      timestamp: new Date().getTime()
+      timestamp: new Date().getTime(),
+      platform: process.platform,
+      rushVersion: rushVersion
     };
 
     telemetry.log(logData1);
@@ -45,7 +50,9 @@ describe('Telemetry', () => {
       name: 'testData',
       duration: 100,
       result: 'Succeeded',
-      timestamp: new Date().getTime()
+      timestamp: new Date().getTime(),
+      platform: process.platform,
+      rushVersion: rushVersion
     };
 
     telemetry.log(logData);
@@ -60,7 +67,9 @@ describe('Telemetry', () => {
       name: 'testData1',
       duration: 100,
       result: 'Succeeded',
-      timestamp: new Date().getTime()
+      timestamp: new Date().getTime(),
+      platform: process.platform,
+      rushVersion: rushVersion
     };
 
     telemetry.log(logData);
@@ -73,5 +82,22 @@ describe('Telemetry', () => {
     assert.isDefined(logFile.match(/telemetry_.*\.json/));
     assert.deepEqual(dataToWrite, JSON.stringify([logData]));
     assert.deepEqual(telemetry.store, []);
+  });
+
+  it('populates default fields', () => {
+    const filename: string = path.resolve(path.join(__dirname, './telemetry/telemetryEnabled.json'));
+    const rushConfig: RushConfiguration = RushConfiguration.loadFromConfigurationFile(filename);
+    const telemetry: Telemetry = new Telemetry(rushConfig);
+    const logData: ITelemetryData = {
+      name: 'testData1',
+      duration: 100,
+      result: 'Succeeded'
+    };
+
+    telemetry.log(logData);
+    const result: ITelemetryData = telemetry.store[0];
+    assert.equal(result.platform, process.platform);
+    assert.equal(result.rushVersion, rushVersion);
+    assert.isDefined(result.timestamp);
   });
 });

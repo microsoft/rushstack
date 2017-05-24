@@ -150,7 +150,6 @@ export default class InstallAction extends CommandLineAction {
       name: 'install',
       duration: stopwatch.duration,
       result: success ? 'Succeeded' : 'Failed',
-      timestamp: new Date().getTime(),
       extraData: {
         clean: (!!this._cleanInstall.value).toString(),
         fullClean: (!!this._cleanInstallFull.value).toString()
