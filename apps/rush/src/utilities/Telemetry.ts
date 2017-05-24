@@ -21,7 +21,6 @@ export interface ITelemetryData {
 }
 
 export default class Telemetry {
-  private readonly folderName: string = 'telemetry';
   private _enabled: boolean;
   private _store: ITelemetryData[];
   private _dataFolder: string;
@@ -29,7 +28,9 @@ export default class Telemetry {
   public constructor(private _rushConfiguration: RushConfiguration) {
     this._enabled = this._rushConfiguration.telemetryEnabled;
     this._store = [];
-    this._dataFolder = path.join(this._rushConfiguration.commonTempFolder, this.folderName);
+
+    const folderName: string = 'telemetry';
+    this._dataFolder = path.join(this._rushConfiguration.commonTempFolder, folderName);
   }
 
   public log(telemetryData: ITelemetryData): void {
@@ -37,9 +38,9 @@ export default class Telemetry {
       return;
     }
     const data: ITelemetryData = cloneDeep(telemetryData);
-    data.timestamp = data.timestamp ? data.timestamp : new Date().getTime();
-    data.platform = data.platform ? data.platform : process.platform;
-    data.rushVersion = data.rushVersion ? data.rushVersion : rushVersion;
+    data.timestamp = data.timestamp || new Date().getTime();
+    data.platform = data.platform || process.platform;
+    data.rushVersion = data.rushVersion || rushVersion;
     this._store.push(data);
   }
 

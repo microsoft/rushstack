@@ -83,4 +83,21 @@ describe('Telemetry', () => {
     assert.deepEqual(dataToWrite, JSON.stringify([logData]));
     assert.deepEqual(telemetry.store, []);
   });
+
+  it('populates default fields', () => {
+    const filename: string = path.resolve(path.join(__dirname, './telemetry/telemetryEnabled.json'));
+    const rushConfig: RushConfiguration = RushConfiguration.loadFromConfigurationFile(filename);
+    const telemetry: Telemetry = new Telemetry(rushConfig);
+    const logData: ITelemetryData = {
+      name: 'testData1',
+      duration: 100,
+      result: 'Succeeded'
+    };
+
+    telemetry.log(logData);
+    const result: ITelemetryData = telemetry.store[0];
+    assert.equal(result.platform, process.platform);
+    assert.equal(result.rushVersion, rushVersion);
+    assert.isDefined(result.timestamp);
+  });
 });
