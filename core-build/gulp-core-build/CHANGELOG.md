@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Tue, 16 May 2017 21:17:17 GMT and should not be manually modified.
+This log was last generated on Wed, 24 May 2017 01:27:16 GMT and should not be manually modified.
+
+## 2.5.2
+Wed, 24 May 2017 01:27:16 GMT
+
+### Patches
+
+- Only show overriden errors and warnings when we are in verbose mode.
 
 ## 2.5.1
 Tue, 16 May 2017 21:17:17 GMT
