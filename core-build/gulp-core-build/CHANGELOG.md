@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Wed, 24 May 2017 01:27:16 GMT and should not be manually modified.
+This log was last generated on Wed, 31 May 2017 01:08:33 GMT and should not be manually modified.
+
+## 2.5.3
+Wed, 31 May 2017 01:08:33 GMT
+
+### Patches
+
+- Normalizing slashes in warnings suppressions to suppress warnings across windows and 'nix.
 
 ## 2.5.2
 Wed, 24 May 2017 01:27:16 GMT

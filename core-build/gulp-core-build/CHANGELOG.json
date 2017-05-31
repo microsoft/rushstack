@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "2.5.3",
+      "tag": "@microsoft/gulp-core-build_v2.5.3",
+      "date": "Wed, 31 May 2017 01:08:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Normalizing slashes in warnings suppressions to suppress warnings across windows and 'nix."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.5.2",
       "tag": "@microsoft/gulp-core-build_v2.5.2",
       "date": "Wed, 24 May 2017 01:27:16 GMT",
