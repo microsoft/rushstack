@@ -96,7 +96,7 @@ export default class RushCommandLineParser extends CommandLineParser {
     /* tslint:disable-next-line:no-string-literal */
     let environmentPath: string = process.env['PATH'];
     environmentPath = path.join(this.rushConfiguration.commonTempFolder, 'node_modules', '.bin') +
-      ';' + environmentPath;
+      path.delimiter + environmentPath;
     /* tslint:disable-next-line:no-string-literal */
     process.env['PATH'] = environmentPath;
   }
