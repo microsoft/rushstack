@@ -298,7 +298,7 @@ export default class Utilities {
     command: string,
     workingDirectory: string,
     environmentVariables?: { [key: string]: string }
-  ): void {
+  ): child_process.SpawnSyncReturns<Buffer> {
     let shellCommand: string = process.env.comspec || 'cmd';
     let commandFlags: string = '/d /s /c';
     if (process.platform !== 'win32') {
@@ -306,12 +306,18 @@ export default class Utilities {
       commandFlags = '-c';
     }
 
-    child_process.spawn(shellCommand, [commandFlags, command],
+    const result: child_process.SpawnSyncReturns<Buffer> = child_process.spawnSync(
+      shellCommand,
+      [commandFlags, command],
       {
         cwd: workingDirectory,
+        shell: true,
         env: environmentVariables,
         stdio: [0, 1, 2]
       });
+
+    Utilities._processResult(result);
+    return result;
   }
 
   /**
@@ -380,6 +386,11 @@ export default class Utilities {
     }
     /* tslint:enable:no-any */
 
+    Utilities._processResult(result);
+    return result;
+  }
+
+  private static _processResult(result: child_process.SpawnSyncReturns<Buffer>): void {
     if (result.error) {
       result.error.message += os.EOL + (result.stderr ? result.stderr.toString() + os.EOL : '');
       throw result.error;
@@ -389,7 +400,5 @@ export default class Utilities {
       throw new Error('The command failed with exit code ' + result.status + os.EOL +
         (result.stderr ? result.stderr.toString() : ''));
     }
-
-    return result;
   }
 }
