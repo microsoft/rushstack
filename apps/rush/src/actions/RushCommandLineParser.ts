@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
+import * as path from 'path';
 import * as colors from 'colors';
 import * as wordwrap from 'wordwrap';
 import { CommandLineParser, CommandLineFlagParameter } from '@microsoft/ts-command-line';
@@ -40,6 +41,7 @@ export default class RushCommandLineParser extends CommandLineParser {
     });
     this.rushConfiguration = RushConfiguration.loadFromDefaultLocation();
     this.telemetry = new Telemetry(this.rushConfiguration);
+    this._ensureEnvironment();
 
     this.addAction(new BuildAction(this));
     this.addAction(new ChangeAction(this));
@@ -88,6 +90,15 @@ export default class RushCommandLineParser extends CommandLineParser {
         this._exitAndReportError(error);
       }
     }
+  }
+
+  private _ensureEnvironment(): void {
+    /* tslint:disable-next-line:no-string-literal */
+    let environmentPath: string = process.env['PATH'];
+    environmentPath = path.join(this.rushConfiguration.commonTempFolder, 'node_modules', '.bin') +
+      ';' + environmentPath;
+    /* tslint:disable-next-line:no-string-literal */
+    process.env['PATH'] = environmentPath;
   }
 
   private _exitAndReportError(error: Error): void {
