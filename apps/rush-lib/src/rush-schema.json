@@ -112,6 +112,30 @@
       "description": "Hooks are customized script actions that Rush executes when specific events occur.",
       "type": "object",
       "properties": {
+        "preRushInstall": {
+          "description": "The list of scripts to run before the Rush install command starts.",
+          "type": "array",
+          "optional": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "postRushInstall": {
+          "description": "The list of scripts to run after the Rush install command finishes.",
+          "type": "array",
+          "optional": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "preRushBuild": {
+          "description": "The list of scripts to run before the Rush build command starts.",
+          "type": "array",
+          "optional": true,
+          "items": {
+            "type": "string"
+          }
+        },
         "postRushBuild": {
           "description": "The list of scripts to run after the Rush build command finishes.",
           "type": "array",
