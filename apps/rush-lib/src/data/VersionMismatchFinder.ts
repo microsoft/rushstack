@@ -44,12 +44,14 @@ export class VersionMismatchFinder {
 
   private _analyze(): void {
     this._projects.forEach((project: RushConfigurationProject) => {
-      this._addDependenciesToList(project.packageName, project.packageJson.dependencies);
-      this._addDependenciesToList(project.packageName, project.packageJson.devDependencies);
-      // tslint:disable:no-any
-      this._addDependenciesToList(project.packageName, project.packageJson.peerDependencies);
-      this._addDependenciesToList(project.packageName, project.packageJson.optionalDependencies);
-      // tslint:enable:no-any
+      this._addDependenciesToList(project.packageName,
+        project.packageJson.dependencies, project.cyclicDependencyProjects);
+      this._addDependenciesToList(project.packageName,
+        project.packageJson.devDependencies, project.cyclicDependencyProjects);
+      this._addDependenciesToList(project.packageName,
+        project.packageJson.peerDependencies, project.cyclicDependencyProjects);
+      this._addDependenciesToList(project.packageName,
+        project.packageJson.optionalDependencies, project.cyclicDependencyProjects);
     });
 
     this._mismatches.forEach((mismatches: Map<string, string[]>, project: string) => {
@@ -59,16 +61,21 @@ export class VersionMismatchFinder {
     });
   }
 
-  private _addDependenciesToList(project: string, dependencyMap: { [dependency: string]: string }): void {
+  private _addDependenciesToList(
+    project: string,
+    dependencyMap: { [dependency: string]: string },
+    exclude: Set<string>): void {
     Object.keys(dependencyMap || {}).forEach((dependency: string) => {
-      const version: string = dependencyMap[dependency];
-      if (!this._mismatches.has(dependency)) {
-        this._mismatches.set(dependency, new Map<string, string[]>());
+      if (!exclude.has(dependency)) {
+        const version: string = dependencyMap[dependency];
+        if (!this._mismatches.has(dependency)) {
+          this._mismatches.set(dependency, new Map<string, string[]>());
+        }
+        if (!this._mismatches.get(dependency).has(version)) {
+          this._mismatches.get(dependency).set(version, []);
+        }
+        this._mismatches.get(dependency).get(version).push(project);
       }
-      if (!this._mismatches.get(dependency).has(version)) {
-        this._mismatches.get(dependency).set(version, []);
-      }
-      this._mismatches.get(dependency).get(version).push(project);
     });
   }
 

@@ -15,7 +15,8 @@ describe('VersionMismatchFinder', () => {
             '@types/foo': '1.2.3',
             'karma': '0.0.1'
           }
-        }
+        },
+        cyclicDependencyProjects: new Set<string>()
       },
       {
         packageName: 'B',
@@ -24,7 +25,8 @@ describe('VersionMismatchFinder', () => {
             '@types/foo': '1.2.3',
             'karma': '0.0.1'
           }
-        }
+        },
+        cyclicDependencyProjects: new Set<string>()
       }
     ] as any as RushConfigurationProject[]; // tslint:disable-line:no-any
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(projects);
@@ -43,7 +45,8 @@ describe('VersionMismatchFinder', () => {
             '@types/foo': '1.2.3',
             'karma': '0.0.1'
           }
-        }
+        },
+        cyclicDependencyProjects: new Set<string>()
       },
       {
         packageName: 'B',
@@ -52,7 +55,8 @@ describe('VersionMismatchFinder', () => {
             '@types/foo': '2.0.0',
             'karma': '0.0.1'
           }
-        }
+        },
+        cyclicDependencyProjects: new Set<string>()
       }
     ] as any as RushConfigurationProject[]; // tslint:disable-line:no-any
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(projects);
@@ -66,6 +70,36 @@ describe('VersionMismatchFinder', () => {
     done();
   });
 
+  it('ignores cyclic dependencies', (done: MochaDone) => {
+    const projects: RushConfigurationProject[] = [
+      {
+        packageName: 'A',
+        packageJson: {
+          dependencies: {
+            '@types/foo': '1.2.3',
+            'karma': '0.0.1'
+          }
+        },
+        cyclicDependencyProjects: new Set<string>(['@types/foo'])
+      },
+      {
+        packageName: 'B',
+        packageJson: {
+          dependencies: {
+            '@types/foo': '2.0.0',
+            'karma': '0.0.1'
+          }
+        },
+        cyclicDependencyProjects: new Set<string>()
+      }
+    ] as any as RushConfigurationProject[]; // tslint:disable-line:no-any
+    const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(projects);
+    assert.isNumber(mismatchFinder.numberOfMismatches);
+    assert.equal(mismatchFinder.numberOfMismatches, 0);
+    assert.equal(mismatchFinder.getMismatches().length, 0);
+    done();
+  });
+
   it('won\'t let you access mismatches that don\t exist', (done: MochaDone) => {
     const projects: RushConfigurationProject[] = [
       {
@@ -75,7 +109,8 @@ describe('VersionMismatchFinder', () => {
             '@types/foo': '1.2.3',
             'karma': '0.0.1'
           }
-        }
+        },
+        cyclicDependencyProjects: new Set<string>()
       },
       {
         packageName: 'B',
@@ -84,7 +119,8 @@ describe('VersionMismatchFinder', () => {
             '@types/foo': '2.0.0',
             'karma': '0.0.1'
           }
-        }
+        },
+        cyclicDependencyProjects: new Set<string>()
       }
     ] as any as RushConfigurationProject[]; // tslint:disable-line:no-any
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(projects);
@@ -103,7 +139,8 @@ describe('VersionMismatchFinder', () => {
             '@types/foo': '1.2.3',
             'karma': '0.0.1'
           }
-        }
+        },
+        cyclicDependencyProjects: new Set<string>()
       },
       {
         packageName: 'B',
@@ -112,7 +149,8 @@ describe('VersionMismatchFinder', () => {
             '@types/foo': '2.0.0',
             'karma': '0.0.1'
           }
-        }
+        },
+        cyclicDependencyProjects: new Set<string>()
       },
       {
         packageName: 'C',
@@ -121,7 +159,8 @@ describe('VersionMismatchFinder', () => {
             'mocha': '1.2.3',
             'karma': '0.0.1'
           }
-        }
+        },
+        cyclicDependencyProjects: new Set<string>()
       },
       {
         packageName: 'D',
@@ -130,7 +169,8 @@ describe('VersionMismatchFinder', () => {
             'mocha': '2.0.0',
             'karma': '0.0.1'
           }
-        }
+        },
+        cyclicDependencyProjects: new Set<string>()
       }
     ] as any as RushConfigurationProject[]; // tslint:disable-line:no-any
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(projects);
@@ -156,7 +196,8 @@ describe('VersionMismatchFinder', () => {
             '@types/foo': '1.2.3',
             'karma': '0.0.1'
           }
-        }
+        },
+        cyclicDependencyProjects: new Set<string>()
       },
       {
         packageName: 'B',
@@ -165,7 +206,8 @@ describe('VersionMismatchFinder', () => {
             '@types/foo': '2.0.0',
             'karma': '0.0.1'
           }
-        }
+        },
+        cyclicDependencyProjects: new Set<string>()
       },
       {
         packageName: 'C',
@@ -174,7 +216,8 @@ describe('VersionMismatchFinder', () => {
             '@types/foo': '9.9.9',
             'karma': '0.0.1'
           }
-        }
+        },
+        cyclicDependencyProjects: new Set<string>()
       }
     ] as any as RushConfigurationProject[]; // tslint:disable-line:no-any
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(projects);
@@ -198,7 +241,8 @@ describe('VersionMismatchFinder', () => {
             '@types/foo': '1.2.3',
             'karma': '0.0.1'
           }
-        }
+        },
+        cyclicDependencyProjects: new Set<string>()
       },
       {
         packageName: 'B',
@@ -207,7 +251,8 @@ describe('VersionMismatchFinder', () => {
             '@types/foo': '2.0.0',
             'karma': '0.0.1'
           }
-        }
+        },
+        cyclicDependencyProjects: new Set<string>()
       }
     ] as any as RushConfigurationProject[]; // tslint:disable-line:no-any
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(projects);
@@ -230,7 +275,8 @@ describe('VersionMismatchFinder', () => {
             '@types/foo': '1.2.3',
             'karma': '0.0.1'
           }
-        }
+        },
+        cyclicDependencyProjects: new Set<string>()
       },
       {
         packageName: 'B',
@@ -239,7 +285,8 @@ describe('VersionMismatchFinder', () => {
             '@types/foo': '2.0.0',
             'karma': '0.0.1'
           }
-        }
+        },
+        cyclicDependencyProjects: new Set<string>()
       }
     ] as any as RushConfigurationProject[]; // tslint:disable-line:no-any
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(projects);
@@ -262,7 +309,8 @@ describe('VersionMismatchFinder', () => {
             '@types/foo': '1.2.3',
             'karma': '0.0.1'
           }
-        }
+        },
+        cyclicDependencyProjects: new Set<string>()
       },
       {
         packageName: 'B',
@@ -271,7 +319,8 @@ describe('VersionMismatchFinder', () => {
             '@types/foo': '2.0.0',
             'karma': '0.0.1'
           }
-        }
+        },
+        cyclicDependencyProjects: new Set<string>()
       }
     ] as any as RushConfigurationProject[]; // tslint:disable-line:no-any
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(projects);
