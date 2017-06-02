@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 23 May 2017 00:48:55 GMT and should not be manually modified.
+This log was last generated on Fri, 02 Jun 2017 20:29:36 GMT and should not be manually modified.
+
+## 3.0.8
+Fri, June 2, 2017 21:28:27 GMT
+
+### Patches
+
+- Fix issue with 'rush check' so it no longer considers cyclic dependencies as a mismatch.
 
 ## 3.0.7
 Tue, May 23, 2017 00:55:27 GMT
