@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "3.0.8",
+      "tag": "@microsoft/rush_v3.0.8",
+      "date": "Fri, June 2, 2017 21:28:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix issue with 'rush check' so it no longer considers cyclic dependencies as a mismatch."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.7",
       "tag": "@microsoft/rush_v3.0.7",
       "date": "Tue, May 23, 2017 00:55:27 GMT",
