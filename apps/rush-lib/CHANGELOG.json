@@ -2,8 +2,20 @@
   "name": "@microsoft/rush-lib",
   "entries": [
     {
+      "version": "3.0.8",
+      "tag": "@microsoft/rush-lib_v3.0.8",
+      "date": "Fri, June 2, 2017 21:28:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix issue with Version Mismatch Finder (used by 'rush check') so it no longer considers cyclic dependencies as a mismatch."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.7",
-      "tag": "@microsoft/rush_v3.0.7",
+      "tag": "@microsoft/rush-lib_v3.0.7",
       "date": "Tue, May 20, 2017 00:55:27 GMT",
       "comments": {
         "patch": [
@@ -15,7 +27,7 @@
     },
     {
       "version": "3.0.6",
-      "tag": "@microsoft/rush_v3.0.6",
+      "tag": "@microsoft/rush-lib_v3.0.6",
       "date": "Sat, May 20, 2017 00:55:27 GMT",
       "comments": {
         "patch": [
@@ -27,7 +39,7 @@
     },
     {
       "version": "3.0.5",
-      "tag": "@microsoft/rush_v3.0.5",
+      "tag": "@microsoft/rush-lib_v3.0.5",
       "date": "Fri, May 19, 2017 10:55:27 GMT",
       "comments": {
         "patch": [
@@ -39,7 +51,7 @@
     },
     {
       "version": "3.0.4",
-      "tag": "@microsoft/rush_v3.0.4",
+      "tag": "@microsoft/rush-lib_v3.0.4",
       "date": "Tue, May 17, 2017 01:48:27 GMT",
       "comments": {
         "patch": [
@@ -51,7 +63,7 @@
     },
     {
       "version": "3.0.3",
-      "tag": "@microsoft/rush_v3.0.3",
+      "tag": "@microsoft/rush-lib_v3.0.3",
       "date": "Tue, May 16, 2017 00:43:27 GMT",
       "comments": {
         "patch": [
