@@ -8,12 +8,12 @@
       "comments": {
         "patch": [
           {
-            "comment": "Remove extraneous dependency"
+            "comment": "Removed extraneous dependency"
           }
         ],
         "dependency": [
           {
-            "comment": "Updating dependency \"@ms/sp-build-internal-web\" from `~0.5.3` to `~0.6.0`"
+            "comment": "Updated dependency \"@ms/sp-build-internal-web\" from `~0.5.3` to `~0.6.0`"
           }
         ]
       }
