@@ -1,13 +1,13 @@
 # Change Log - @microsoft/decorators
 
-This log was last generated on Mon, 05 Jun 2017 19:04:13 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Jun 2017 01:30:31 GMT and should not be manually modified.
 
 ## 1.0.1
 Thu, 25 May 2017 21:09:42 GMT
 
 ### Patches
 
-- Remove extraneous dependency
+- Removed extraneous dependency
 
 ## 1.0.0
 Fri, 17 Feb 2017 23:09:23 GMT
