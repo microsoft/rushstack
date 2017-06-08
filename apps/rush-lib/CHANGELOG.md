@@ -1,9 +1,16 @@
 # Change Log - @microsoft/rush-lib
 
-This log was last generated on Fri, 02 Jun 2017 20:29:36 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Jun 2017 03:22:14 GMT and should not be manually modified.
+
+## 3.0.9
+Thu, June 8, 2017 03:30:27 GMT
+
+### Patches
+
+- Fix issue with Version Mismatch Finder (used by 'rush check') where it sometimes threw exceptions
 
 ## 3.0.8
-Fri, June 2, 2017 21:28:27 GMT
+Thu, June 8, 2017 03:00:27 GMT
 
 ### Patches
 
