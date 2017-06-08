@@ -8,7 +8,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "Fix issue with 'rush check'where it sometimes threw exceptions."
+            "comment": "Fix issue with 'rush check' where it sometimes threw exceptions."
           }
         ]
       }
