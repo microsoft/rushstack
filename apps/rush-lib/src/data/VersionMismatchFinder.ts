@@ -66,7 +66,7 @@ export class VersionMismatchFinder {
     dependencyMap: { [dependency: string]: string },
     exclude: Set<string>): void {
     Object.keys(dependencyMap || {}).forEach((dependency: string) => {
-      if (!exclude.has(dependency)) {
+      if (!exclude || !exclude.has(dependency)) {
         const version: string = dependencyMap[dependency];
         if (!this._mismatches.has(dependency)) {
           this._mismatches.set(dependency, new Map<string, string[]>());
