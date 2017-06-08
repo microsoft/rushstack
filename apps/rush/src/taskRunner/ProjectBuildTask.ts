@@ -32,11 +32,6 @@ interface IPackageDependencies extends IPackageDeps {
   arguments: string;
 }
 
-interface IBuildCommand {
-  command: string;
-  args: string[];
-}
-
 /**
  * A TaskRunner task which cleans and builds a project
  */
@@ -77,19 +72,19 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
   public execute(writer: ITaskWriter): Promise<TaskStatus> {
     return new Promise<TaskStatus>((resolve: (status: TaskStatus) => void, reject: (errors: TaskError[]) => void) => {
-      const build: IBuildCommand = this._getBuildCommand();
+      const build: string = this._getBuildCommand();
       const deps: IPackageDependencies = this._getPackageDependencies(build, writer);
       this._executeTask(build, writer, deps, resolve, reject);
     });
   }
 
-  private _getPackageDependencies(build: IBuildCommand, writer: ITaskWriter): IPackageDependencies {
+  private _getPackageDependencies(buildCommand: string, writer: ITaskWriter): IPackageDependencies {
     let deps: IPackageDependencies = undefined;
     PackageChangeAnalyzer.rushConfig = this._rushConfiguration;
     try {
       deps = {
         files: PackageChangeAnalyzer.instance.getPackageDepsHash(this._rushProject.packageName).files,
-        arguments: `${build.command} ${build.args.join(' ')}`
+        arguments: buildCommand
       };
     } catch (error) {
       writer.writeLine('Unable to calculate incremental build state. ' +
@@ -99,7 +94,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
   }
 
   private _executeTask(
-    build: IBuildCommand,
+    buildCommand: string,
     writer: ITaskWriter,
     currentPackageDeps: IPackageDependencies,
     resolve: (status: TaskStatus) => void,
@@ -135,28 +130,27 @@ export default class ProjectBuildTask implements ITaskDefinition {
           fsx.unlinkSync(currentDepsPath);
         }
 
-        const clean: IBuildCommand = this._getScriptCommand('clean');
+        const cleanCommand: string = this._getScriptCommand('clean');
 
-        if (!clean) {
+        if (cleanCommand === undefined) {
           // tslint:disable-next-line:max-line-length
           throw new Error(`The project [${this._rushProject.packageName}] does not define a 'clean' command in the 'scripts' section of its package.json`);
         }
 
         // Run the clean step
-        if (!clean.command) {
+        if (!cleanCommand) {
           // tslint:disable-next-line:max-line-length
           writer.writeLine(`The clean command was registered in the package.json but is blank. Skipping 'clean' step...`);
         } else {
-          const actualCleanCommand: string = `${clean.command} ${clean.args.join(' ')}`;
-          writer.writeLine(actualCleanCommand);
+          writer.writeLine(cleanCommand);
           try {
-            Utilities.executeCommand(clean.command, clean.args, projectFolder, true, process.env);
+            Utilities.executeShellCommand(cleanCommand, projectFolder, process.env, true);
           } catch (error) {
             throw new Error(`There was a problem running the 'clean' script: ${os.EOL} ${error.toString()}`);
           }
         }
 
-        if (!build.command) {
+        if (!buildCommand) {
           // tslint:disable-next-line:max-line-length
           writer.writeLine(`The 'build' or 'test' command was registered in the package.json but is blank. Skipping 'clean' step...`);
           resolve(TaskStatus.Success);
@@ -164,10 +158,9 @@ export default class ProjectBuildTask implements ITaskDefinition {
         }
 
         // Run the test step
-        const actualBuildCommand: string = `${build.command} ${build.args.join(' ')}`;
-        writer.writeLine(actualBuildCommand);
-        const buildTask: child_process.ChildProcess = Utilities.executeCommandAsync(
-          build.command, build.args, projectFolder, process.env);
+        writer.writeLine(buildCommand);
+        const buildTask: child_process.ChildProcess =
+          Utilities.executeShellCommandAsync(buildCommand, projectFolder, process.env, true);
 
         // Hook into events, in order to get live streaming of build log
         buildTask.stdout.on('data', (data: string) => {
@@ -192,7 +185,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
           if (errors.length) {
             writer.writeError(`${errors.length} Error${errors.length > 1 ? 's' : ''}!` + os.EOL);
           } else if (code) {
-            writer.writeError(`${clean.command} returned error code: ${code}${os.EOL}`);
+            writer.writeError(`${cleanCommand} returned error code: ${code}${os.EOL}`);
           }
 
           // Write the logs to disk
@@ -220,34 +213,38 @@ export default class ProjectBuildTask implements ITaskDefinition {
     }
   }
 
-  private _getBuildCommand(): IBuildCommand {
-    const build: IBuildCommand =
+  private _getBuildCommand(): string {
+    const build: string =
       this._getScriptCommand('test') || this._getScriptCommand('build');
 
-    if (!build) {
+    if (build === undefined) {
       // tslint:disable-next-line:max-line-length
       throw new Error(`The project [${this._rushProject.packageName}] does not define a 'test' or 'build' command in the 'scripts' section of its package.json`);
     }
 
-    if (build.args) {
-      // Normalize test command step
-      build.args.push(this._errorDisplayMode === ErrorDetectionMode.VisualStudioOnline ? '--no-color' : '--color');
-
-      if (this._production) {
-        build.args.push('--production');
-      }
-      if (this._npmMode) {
-        build.args.push('--npm');
-      }
-      if (this._minimalMode) {
-        build.args.push('--minimal');
-      }
+    if (build === '') {
+      return build;
     }
 
-    return build;
+    // Normalize test command step
+    const args: string[] = [];
+
+    args.push(this._errorDisplayMode === ErrorDetectionMode.VisualStudioOnline ? '--no-color' : '--color');
+
+    if (this._production) {
+      args.push('--production');
+    }
+    if (this._npmMode) {
+      args.push('--npm');
+    }
+    if (this._minimalMode) {
+      args.push('--minimal');
+    }
+
+    return `${build} ${args.join(' ')}`;
   }
 
-  private _getScriptCommand(script: string): IBuildCommand {
+  private _getScriptCommand(script: string): string {
     // tslint:disable-next-line:no-string-literal
     if (!this._rushProject.packageJson.scripts) {
       return undefined;
@@ -260,26 +257,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
       return undefined;
     }
 
-    if (rawCommand === '') {
-      return {
-        command: undefined,
-        args: undefined
-      };
-    }
-
-    const command: string[] = rawCommand.split(' ');
-    const commandArgs: string[] = command.splice(1);
-
-    const localCommandPath: string =
-      path.join(this._rushConfiguration.commonTempFolder, 'node_modules', '.bin', command[0]);
-    if (fsx.existsSync(localCommandPath)) {
-      command[0] = localCommandPath;
-    }
-
-    return {
-      command: command[0],
-      args: commandArgs
-    };
+    return rawCommand;
   }
 
   // @todo #179371: add log files to list of things that get gulp cleaned

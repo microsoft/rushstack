@@ -345,7 +345,13 @@ class Utilities {
   // @alpha
   public static executeShellCommand(command: string,
       workingDirectory: string,
-      environmentVariables?: { [key: string]: string }): child_process.SpawnSyncReturns<Buffer>;
+      environmentVariables?: { [key: string]: string },
+      captureOutput: boolean = false): child_process.SpawnSyncReturns<Buffer>;
+  // @alpha
+  public static executeShellCommandAsync(command: string,
+      workingDirectory: string,
+      environmentVariables?: { [key: string]: string },
+      captureOutput: boolean = false): child_process.ChildProcess;
   public static fileExists(path: string): boolean;
   public static getAllReplaced(targetString: string, searchValue: string, replaceValue: string): string;
   public static getConsoleWidth(): number;
