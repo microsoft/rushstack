@@ -297,7 +297,8 @@ export default class Utilities {
   public static executeShellCommand(
     command: string,
     workingDirectory: string,
-    environmentVariables?: { [key: string]: string }
+    environmentVariables?: { [key: string]: string },
+    captureOutput: boolean = false
   ): child_process.SpawnSyncReturns<Buffer> {
     let shellCommand: string = process.env.comspec || 'cmd';
     let commandFlags: string = '/d /s /c';
@@ -313,11 +314,42 @@ export default class Utilities {
         cwd: workingDirectory,
         shell: true,
         env: environmentVariables,
-        stdio: [0, 1, 2]
+        stdio: captureOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
       });
 
     Utilities._processResult(result);
     return result;
+  }
+
+  /**
+   * Executes the command using cmd if running on windows, or using sh if running on a non-windows OS.
+   * @param command - the command to run on shell
+   * @param workingDirectory - working directory for running this command
+   * @param environmentVariables - environment variables for running this command
+   * @alpha
+   */
+  public static executeShellCommandAsync(
+    command: string,
+    workingDirectory: string,
+    environmentVariables?: { [key: string]: string },
+    captureOutput: boolean = false
+  ): child_process.ChildProcess {
+    let shellCommand: string = process.env.comspec || 'cmd';
+    let commandFlags: string = '/d /s /c';
+    if (process.platform !== 'win32') {
+      shellCommand = 'sh';
+      commandFlags = '-c';
+    }
+
+    return child_process.spawn(
+      shellCommand,
+      [commandFlags, command],
+      {
+        cwd: workingDirectory,
+        shell: true,
+        env: environmentVariables,
+        stdio: captureOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
+      });
   }
 
   /**
