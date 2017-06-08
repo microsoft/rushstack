@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "2.0.7",
+      "tag": "@microsoft/api-extractor_v2.0.7",
+      "date": "Thu, 08 Jun 2017 05:15:52 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updated README.md"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.6",
       "tag": "@microsoft/api-extractor_v2.0.6",
       "date": "Mon, 15 May 2017 21:59:43 GMT",
