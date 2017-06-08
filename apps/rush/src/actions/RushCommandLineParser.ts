@@ -39,20 +39,8 @@ export default class RushCommandLineParser extends CommandLineParser {
       + ' your monolithic project into many small packages but are afraid of the dreaded'
       + ' NPM progress bar, Rush is for you.'
     });
-    this.rushConfiguration = RushConfiguration.loadFromDefaultLocation();
-    this.telemetry = new Telemetry(this.rushConfiguration);
-    this._ensureEnvironment();
-
-    this.addAction(new BuildAction(this));
-    this.addAction(new ChangeAction(this));
-    this.addAction(new CheckAction(this));
-    this.addAction(new GenerateAction(this));
-    this.addAction(new InstallAction(this));
-    this.addAction(new LinkAction(this));
-    this.addAction(new PublishAction(this));
-    this.addAction(new RebuildAction(this));
-    this.addAction(new ScanAction(this));
-    this.addAction(new UnlinkAction(this));
+    this._initialize();
+    this._populateActions();
   }
 
   public catchSyncErrors(promise: Promise<void>): void {
@@ -89,6 +77,33 @@ export default class RushCommandLineParser extends CommandLineParser {
       } catch (error) {
         this._exitAndReportError(error);
       }
+    }
+  }
+
+  private _initialize(): void {
+    try {
+      this.rushConfiguration = RushConfiguration.loadFromDefaultLocation();
+      this.telemetry = new Telemetry(this.rushConfiguration);
+      this._ensureEnvironment();
+    } catch (error) {
+      this._exitAndReportError(error);
+    }
+  }
+
+  private _populateActions(): void {
+    try {
+      this.addAction(new BuildAction(this));
+      this.addAction(new ChangeAction(this));
+      this.addAction(new CheckAction(this));
+      this.addAction(new GenerateAction(this));
+      this.addAction(new InstallAction(this));
+      this.addAction(new LinkAction(this));
+      this.addAction(new PublishAction(this));
+      this.addAction(new RebuildAction(this));
+      this.addAction(new ScanAction(this));
+      this.addAction(new UnlinkAction(this));
+    } catch (error) {
+      this._exitAndReportError(error);
     }
   }
 
