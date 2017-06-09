@@ -1,6 +1,13 @@
 # Change Log - @microsoft/decorators
 
-This log was last generated on Tue, 06 Jun 2017 01:30:31 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Jun 2017 19:39:03 GMT and should not be manually modified.
+
+## 1.1.0
+Thu, 08 Jun 2017 19:39:03 GMT
+
+### Minor changes
+
+- Force a minor bump.
 
 ## 1.0.1
 Thu, 25 May 2017 21:09:42 GMT
