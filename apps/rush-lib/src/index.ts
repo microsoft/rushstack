@@ -69,7 +69,7 @@ export {
 } from './utilities/Utilities';
   
 export {
-  JsonSchemaValidator
+  default as JsonSchemaValidator
 } from './utilities/JsonSchemaValidator';
 
 export {
