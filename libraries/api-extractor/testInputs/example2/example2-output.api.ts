@@ -29,7 +29,7 @@ class MyDocumentedClass {
   // WARNING: The name "$unallowedName" contains unsupported characters; API names should use only letters, numbers, and underscores
   public $unallowedName: string;
   // @beta (undocumented)
-  public betaTagmissingParam: string;
+  public betaTagMissingParam: string;
   public fieldWithBadTag: string;
   // @deprecated
   public fieldWithInvalidInlineTag: string;

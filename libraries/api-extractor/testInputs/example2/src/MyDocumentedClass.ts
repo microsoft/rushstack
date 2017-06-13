@@ -25,28 +25,28 @@ export enum packageLocatedButExportNotFound {
 }
 
 /**
- * This JsDoc should raise an error since a summary is provided along 
+ * This JsDoc should raise an error since a summary is provided along
  * with an \@inheritdoc tag. We do not allow summary, remarks or param JsDocs
- * to be given since the inheritdoc information will overwrite it. 
+ * to be given since the inheritdoc information will overwrite it.
  * It will not appear in the output json files because of the error.
- * 
+ *
  * {@inheritdoc @microsoft/sp-core-library:DisplayMode}
  */
 // (Error #1)
 // Error: Cannot provide summary in JsDoc if @inheritdoc tag is given
 export enum inheritDisplayModeError {
-  
+
 }
 
-/** 
+/**
  * {@inheritdoc @microsoft/sp-core-library:DisplayModeDeprecated}
- * 
+ *
  */
 export enum inheritDisplayModeErrorDeprecated {
-  
+
 }
 
-/** 
+/**
  * {@inheritdoc @microsoft/sp-core-library:DisplayModeDeprecated}
  * @deprecated - deprecated message must be present if the inherited Api item
  * is deprecated. If not error is reported.
@@ -55,7 +55,7 @@ export enum inheritDisplayModeNoErrorDeprecated {
 }
 
 /**
- * This function has incomplete type information on the return value and should not 
+ * This function has incomplete type information on the return value and should not
  * be printed to the API file, instead a warning comment should be present
  * at the bottom of the API file.
  */
@@ -64,9 +64,9 @@ export function functionWithIncompleteReturnType(param1: string, param2: string)
 }
 
 /**
- * This function has incomplete type information on a parameter and should not 
- * be printed to the API file, instead a warning comment should be present at the 
- * bottom of the API file. 
+ * This function has incomplete type information on a parameter and should not
+ * be printed to the API file, instead a warning comment should be present at the
+ * bottom of the API file.
  */
 export function functionWithIncompleteParameterType(param1, param2: string): boolean {
   return false;
@@ -86,7 +86,7 @@ export function functionWithIncompleteParameterType(param1, param2: string): boo
 // (Error #4)
 // Error: Unexpected text in JSDoc comment: "Mock class for testing JsDoc parser"
 export default class MyDocumentedClass {
-  
+
 
   private _privateTest: number = 123;
 
@@ -104,7 +104,7 @@ export default class MyDocumentedClass {
    * This doc has an invalid tag that should throw an error
    * @badJsDocTag
    */
-  // (Error #4) 
+  // (Error #4)
   // Error: Unknown tag name for inline tag.
   public fieldWithBadTag: string;
 
@@ -112,7 +112,7 @@ export default class MyDocumentedClass {
    * This doc has an unknown inline tag {@badTag}
    * @deprecated - see next version.
    */
-  // (Error #5) 
+  // (Error #5)
   // Error: Unknown tag name for inline tag.
   public fieldWithInvalidInlineTag: string;
 
@@ -131,7 +131,7 @@ export default class MyDocumentedClass {
   // Unexpected text in JSDoc comment: "can not contain a tag"
   // (Error #8)
   // Error: More than one API Tag was specified
-  public betaTagmissingParam: string;
+  public betaTagMissingParam: string;
 
   /**
    * This doc has {curly braces} which is valid but the inline \@link token is missing a
@@ -139,19 +139,19 @@ export default class MyDocumentedClass {
    * The displayName is not allowed to have non word characters.
    */
   // (Error #9)
-  // Error: API reference expression must be of the form: 
-  // 'scopeName/packageName:exportName.memberName | display text'where the '|' is required if 
+  // Error: API reference expression must be of the form:
+  // 'scopeName/packageName:exportName.memberName | display text'where the '|' is required if
   // a display text is provided
   public fieldWithValidEscapedBraces: string;
 
   /**
-   * This property has no type information. It should not be printed to the API 
+   * This property has no type information. It should not be printed to the API
    * file, instead a warning comment should be printed above the class declaration.
    */
   public propertyWithIncompleteType;
 
   /**
-   * This type literal has incomplete type information. It should not be printed to the API 
+   * This type literal has incomplete type information. It should not be printed to the API
    * file, instead a warning comment should be printed above the class declaration.
    */
   public propertyTypeLiteralIncompleteTypes: {name, address: string};
@@ -184,16 +184,16 @@ export default class MyDocumentedClass {
    * @param param - First parameter
    * @returns the result
    */
-  public methodWithTypeLiterals(param: { x: number, y: number}): { 
-    name: string, 
-    obj: MyDocumentedClass 
+  public methodWithTypeLiterals(param: { x: number, y: number}): {
+    name: string,
+    obj: MyDocumentedClass
   } {
     return undefined;
   }
 
   /**
-   * This method has incomplete type information on the parameters and should not 
-   * be printed to the API file, instead a warning comment should be printed 
+   * This method has incomplete type information on the parameters and should not
+   * be printed to the API file, instead a warning comment should be printed
    * above the class declaration.
    */
   public methodWithIncompleteParamTypes(param1, param2): boolean {
@@ -201,7 +201,7 @@ export default class MyDocumentedClass {
   }
 
   /**
-   * This method has incomplete type information on the return value and should not 
+   * This method has incomplete type information on the return value and should not
    * be printed to the API file, instead a warning comment should be printed above
    * the class declaration.
    */
@@ -213,9 +213,9 @@ export default class MyDocumentedClass {
 
 /**
  * This class tests a constructor with incomplete type information.
- * The constructor should not appear in the API file, instead a warning 
- * comment should be printed about this class declaration. The constructor 
- * will not appear in the json file because the type information is 
+ * The constructor should not appear in the API file, instead a warning
+ * comment should be printed about this class declaration. The constructor
+ * will not appear in the json file because the type information is
  * incomplete.
  */
 export class IncompleteTypeConstructor {

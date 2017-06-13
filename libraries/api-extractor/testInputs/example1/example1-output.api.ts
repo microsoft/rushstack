@@ -21,6 +21,22 @@ class AliasClass4 {
   public readonly shouldBeReadOnly: number;
 }
 
+// @alpha
+class AlphaTaggedClass {
+  // @internal
+  public _internalMethod(): void;
+  public plainMethod(): void;
+}
+
+// @beta
+class BetaTaggedClass {
+  // @internal
+  public _internalMethod(): void;
+  // @alpha
+  public alphaMethod(): void;
+  public plainMethod(): void;
+}
+
 // (undocumented)
 interface hasOwnProperty {
   // (undocumented)
@@ -51,5 +67,16 @@ class PreapprovedInternalClass {
 
 // (undocumented)
 export function publicFunction(param: number): string;
+
+// @public
+class PublicTaggedClass {
+  // @internal
+  public _internalMethod(): void;
+  // @alpha
+  public alphaMethod(): void;
+  // @beta
+  public betaMethod(): void;
+  public plainMethod(): void;
+}
 
 // (No packageDescription for this package)

@@ -284,7 +284,7 @@
           "isOptional": false,
           "isStatic": false,
           "returnValue": {
-            "type": "{ \r\n    name: string, \r\n    obj: MyDocumentedClass \r\n  }",
+            "type": "{\r\n    name: string,\r\n    obj: MyDocumentedClass\r\n  }",
             "description": [
               {
                 "kind": "textDocElement",
