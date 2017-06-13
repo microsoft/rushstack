@@ -153,6 +153,17 @@
           "summary": [],
           "remarks": []
         },
+        "betaTagMissingParam": {
+          "kind": "property",
+          "isOptional": false,
+          "isReadOnly": false,
+          "isStatic": false,
+          "type": "string",
+          "deprecatedMessage": [],
+          "summary": [],
+          "remarks": [],
+          "isBeta": true
+        },
         "fieldWithBadTag": {
           "kind": "property",
           "isOptional": false,
@@ -284,7 +295,7 @@
           "isOptional": false,
           "isStatic": false,
           "returnValue": {
-            "type": "{ \r\n    name: string, \r\n    obj: MyDocumentedClass \r\n  }",
+            "type": "{\r\n    name: string,\r\n    obj: MyDocumentedClass\r\n  }",
             "description": [
               {
                 "kind": "textDocElement",

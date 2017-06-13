@@ -36,11 +36,11 @@ class ApiFileGenerator extends ApiItemVisitor {
 }
 
 class ApiJsonGenerator extends ApiItemVisitor {
-  // WARNING: The type "ApiTag" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected apiTagsToSkip: ApiTag[];
   // (undocumented)
   protected jsonOutput: Object;
+  // WARNING: The type "ApiItem" needs to be exported by the package (e.g. added to index.ts)
+  // (undocumented)
+  protected visit(apiItem: ApiItem, refObject?: Object): void;
   // WARNING: The type "ApiEnum" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   protected visitApiEnum(apiEnum: ApiEnum, refObject?: Object): void;

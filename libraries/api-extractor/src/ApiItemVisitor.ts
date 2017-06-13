@@ -10,20 +10,13 @@ import ApiNamespace from './definitions/ApiNamespace';
 import ApiParameter from './definitions/ApiParameter';
 import ApiProperty from './definitions/ApiProperty';
 import ApiModuleVariable from './definitions/ApiModuleVariable';
-import { ApiTag } from './definitions/ApiDocumentation';
 
 /**
   * This is a helper class that provides a standard way to walk the ApiItem
   * abstract syntax tree.
   */
 abstract class ApiItemVisitor {
-  protected apiTagsToSkip: ApiTag[];
-
   protected visit(apiItem: ApiItem, refObject?: Object): void {
-    if (this.apiTagsToSkip && this.apiTagsToSkip.indexOf(apiItem.documentation.apiTag) >= 0) {
-      return;
-    }
-
     if (apiItem instanceof ApiStructuredType) {
       this.visitApiStructuredType(apiItem as ApiStructuredType, refObject);
     } else if (apiItem instanceof ApiEnum) {

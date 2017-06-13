@@ -35,8 +35,8 @@ describe('ApiFileGenerator tests', function (): void {
   describe('Basic Tests', function (): void {
     it('Example 1', function (): void {
       const inputFolder: string = './testInputs/example1';
-      const outputFile: string = './lib/example1-output.ts';
-      const expectedFile: string = path.join(inputFolder, 'example1-output.ts');
+      const outputFile: string = './lib/example1-output.api.ts';
+      const expectedFile: string = path.join(inputFolder, 'example1-output.api.ts');
 
       const compilerOptions: ts.CompilerOptions = {
         target: ts.ScriptTarget.ES5,

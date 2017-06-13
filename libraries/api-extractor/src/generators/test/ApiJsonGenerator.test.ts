@@ -22,6 +22,34 @@ describe('ApiJsonGenerator tests', function (): void {
 
   describe('Basic Tests', function (): void {
     it('Example 1', function (): void {
+      const inputFolder: string = './testInputs/example1';
+      const outputFile: string = './lib/example1-output.json';
+      const expectedFile: string = path.join(inputFolder, 'example1-output.json');
+
+      const compilerOptions: ts.CompilerOptions = {
+        target: ts.ScriptTarget.ES5,
+        module: ts.ModuleKind.CommonJS,
+        moduleResolution: ts.ModuleResolutionKind.NodeJs,
+        rootDir: inputFolder,
+        typeRoots: ['./'] // We need to ignore @types in these tests
+      };
+      const extractor: Extractor = new Extractor({
+        compilerOptions: compilerOptions,
+        errorHandler: testErrorHandler
+      });
+
+      extractor.loadExternalPackages('./testInputs/external-api-json');
+      extractor.analyze({
+        entryPointFile: path.join(inputFolder, 'index.ts')
+      });
+
+      const apiJsonGenerator: ApiJsonGenerator = new ApiJsonGenerator();
+      apiJsonGenerator.writeJsonFile(outputFile, extractor);
+
+      TestFileComparer.assertFileMatchesExpected(outputFile, expectedFile);
+    });
+
+    it('Example 2', function (): void {
       const inputFolder: string = './testInputs/example2';
       const outputFile: string = './lib/example2-output.json';
       const expectedFile: string = path.join(inputFolder, 'example2-output.json');
