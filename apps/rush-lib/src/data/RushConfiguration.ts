@@ -57,7 +57,7 @@ export interface IEventHooksJson {
 
 /**
  * This represents the JSON data structure for the "rush.json" configuration file.
- * See rush-schema.json for documentation.
+ * See rush.schema.json for documentation.
  */
 export interface IRushConfigurationJson {
   $schema: string;
@@ -140,7 +140,7 @@ export default class RushConfiguration {
       }
     }
 
-    const rushSchemaFilename: string = path.join(__dirname, '../rush-schema.json');
+    const rushSchemaFilename: string = path.join(__dirname, '../rush.schema.json');
     const validator: JsonSchemaValidator = JsonSchemaValidator.loadFromFile(rushSchemaFilename);
 
     validator.validateObject(rushConfigurationJson, (errorDescription: string) => {

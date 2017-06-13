@@ -19,7 +19,7 @@ export interface IApprovedPackagesItemJson {
 
 /**
  * This represents the JSON data structure for the "browser-approved-packages.json"
- * and "nonbrowser-approved-packages.json" configuration files.  See "approved-packages-schema.json"
+ * and "nonbrowser-approved-packages.json" configuration files.  See "approved-packages.schema.json"
  * for documentation.
  */
 export interface IApprovedPackagesJson {
@@ -113,7 +113,7 @@ export class ApprovedPackagesConfiguration {
   public loadFromFile(): void {
 
     if (!ApprovedPackagesConfiguration._validator) {
-      const schemaFilename: string = path.join(__dirname, '../approved-packages-schema.json');
+      const schemaFilename: string = path.join(__dirname, '../approved-packages.schema.json');
       ApprovedPackagesConfiguration._validator = JsonSchemaValidator.loadFromFile(schemaFilename);
     }
 
