@@ -67,7 +67,7 @@ export {
 export {
   default as Utilities
 } from './utilities/Utilities';
-  
+
 export {
   default as JsonSchemaValidator
 } from './utilities/JsonSchemaValidator';

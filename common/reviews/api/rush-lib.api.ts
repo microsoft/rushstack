@@ -177,6 +177,15 @@ class JsonFile {
   public static saveJsonFile(jsonData: any, jsonFilename: string, options: ISaveJsonFileOptions = {}): boolean;
 }
 
+// (undocumented)
+class JsonSchemaValidator {
+  // (undocumented)
+  public static loadFromFile(schemaFilename: string): JsonSchemaValidator;
+  // WARNING: The type "ValidateErrorCallback" needs to be exported by the package (e.g. added to index.ts)
+  // (undocumented)
+  public validateObject(jsonObject: Object, errorCallback: ValidateErrorCallback): void;
+}
+
 // @public (undocumented)
 class Npm {
   // (undocumented)
