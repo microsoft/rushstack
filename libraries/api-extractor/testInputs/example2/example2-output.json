@@ -153,6 +153,17 @@
           "summary": [],
           "remarks": []
         },
+        "betaTagMissingParam": {
+          "kind": "property",
+          "isOptional": false,
+          "isReadOnly": false,
+          "isStatic": false,
+          "type": "string",
+          "deprecatedMessage": [],
+          "summary": [],
+          "remarks": [],
+          "isBeta": true
+        },
         "fieldWithBadTag": {
           "kind": "property",
           "isOptional": false,

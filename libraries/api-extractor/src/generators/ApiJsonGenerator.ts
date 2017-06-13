@@ -35,14 +35,21 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
   private static _MEMBERS_KEY: string = 'members';
   private static _EXPORTS_KEY: string = 'exports';
 
-  // Only allow @public
-  protected apiTagsToSkip: ApiTag[] = [
-    ApiTag.Alpha,
-    ApiTag.Beta,
-    ApiTag.Internal
-  ];
-
   protected jsonOutput: Object = {};
+
+  // @override
+  protected visit(apiItem: ApiItem, refObject?: Object): void {
+    switch (apiItem.documentation.apiTag) {
+      case ApiTag.None:
+      case ApiTag.Beta:
+      case ApiTag.Public:
+        break;
+      default:
+        return; // skip @alpha and @internal definitions
+    }
+
+    super.visit(apiItem, refObject);
+  }
 
   public writeJsonFile(reportFilename: string, extractor: Extractor): void {
     this.visit(extractor.package, this.jsonOutput);

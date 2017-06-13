@@ -109,6 +109,44 @@
         }
       }
     },
+    "BetaTaggedClass": {
+      "kind": "class",
+      "extends": "",
+      "implements": "",
+      "typeParameters": [],
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "textDocElement",
+          "value": "This is a beta class."
+        }
+      ],
+      "remarks": [],
+      "isBeta": true,
+      "members": {
+        "plainMethod": {
+          "kind": "method",
+          "signature": "public plainMethod(): void;",
+          "accessModifier": "public",
+          "isOptional": false,
+          "isStatic": false,
+          "returnValue": {
+            "type": "void",
+            "description": []
+          },
+          "parameters": {},
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "This is a plain method."
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        }
+      }
+    },
     "hasOwnProperty": {
       "kind": "interface",
       "extends": "",
@@ -209,6 +247,27 @@
       "remarks": [],
       "isBeta": false,
       "members": {
+        "betaMethod": {
+          "kind": "method",
+          "signature": "public betaMethod(): void;",
+          "accessModifier": "public",
+          "isOptional": false,
+          "isStatic": false,
+          "returnValue": {
+            "type": "void",
+            "description": []
+          },
+          "parameters": {},
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "This is an alpha method."
+            }
+          ],
+          "remarks": [],
+          "isBeta": true
+        },
         "plainMethod": {
           "kind": "method",
           "signature": "public plainMethod(): void;",
