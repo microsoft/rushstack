@@ -69,6 +69,10 @@ export {
 } from './utilities/Utilities';
 
 export {
+  default as JsonSchemaValidator
+} from './utilities/JsonSchemaValidator';
+
+export {
   Stopwatch,
   StopwatchState
 } from './utilities/Stopwatch';
