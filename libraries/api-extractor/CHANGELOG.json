@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "2.0.8",
+      "tag": "@microsoft/api-extractor_v2.0.8",
+      "date": "Wed, 14 Jun 2017 13:03:40 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Definitions marked as @beta are now included in the *.api.json files for documentation"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.7",
       "tag": "@microsoft/api-extractor_v2.0.7",
       "date": "Thu, 08 Jun 2017 05:15:52 GMT",

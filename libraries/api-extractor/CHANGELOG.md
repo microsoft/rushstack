@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 08 Jun 2017 05:15:52 GMT and should not be manually modified.
+This log was last generated on Wed, 14 Jun 2017 13:03:40 GMT and should not be manually modified.
+
+## 2.0.8
+Wed, 14 Jun 2017 13:03:40 GMT
+
+### Patches
+
+- Definitions marked as @beta are now included in the *.api.json files for documentation
 
 ## 2.0.7
 Thu, 08 Jun 2017 05:15:52 GMT
