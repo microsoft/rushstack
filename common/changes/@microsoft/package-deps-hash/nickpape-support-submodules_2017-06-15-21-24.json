@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/package-deps-hash",
+      "comment": "Fix an issue where Git submodules were unable to be hashed",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/package-deps-hash",
+  "email": "nickpape@users.noreply.github.com"
+}
