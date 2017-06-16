@@ -27,11 +27,11 @@ export default class Tokenizer {
   /**
    * Converts a doc comment string into an array of Tokens. This processing is done so that docs
    * can be processed more strictly.
-   * Example: "This is a JsDoc description with a {@link URL} and more text. \@summary example \@public"
+   * Example: "This is a JsDoc description with a {@link URL} and more text. \@remarks example \@public"
    * => [
    *  {tokenType: 'text', parameter: 'This is a JsDoc description with a'},
    *  {tokenType: '@link', parameter: 'URL'},
-   *  {tokenType: '\@summary', parameter: ''},
+   *  {tokenType: '\@remarks', parameter: ''},
    *  {tokenType: 'text', parameter: 'example'},
    *  {tokenType: '\@public', parameter: ''}
    * ]
