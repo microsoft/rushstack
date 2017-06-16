@@ -16,12 +16,17 @@ interface IPackageJson {
  * and retrieving the name of the package.  The results are cached.
  */
 export default class PackageJsonLookup {
-  private _tryFindPackagePathUpwardsCache: Map<string, string | undefined>;
-  private _readPackageNameCache: Map<string, string>;
+  // Cached the return values for tryFindPackagePathUpwards():
+  // sourceFilePath --> packageJsonFolder
+  private _packageFolderCache: Map<string, string | undefined>;
+
+  // Cached the return values for readPackageName():
+  // packageJsonPath --> packageName
+  private _packageNameCache: Map<string, string>;
 
   constructor() {
-    this._tryFindPackagePathUpwardsCache = new Map<string, string>();
-    this._readPackageNameCache = new Map<string, string>();
+    this._packageFolderCache = new Map<string, string | undefined>();
+    this._packageNameCache = new Map<string, string>();
   }
 
   /**
@@ -32,17 +37,17 @@ export default class PackageJsonLookup {
    * @param currentPath - a path (relative or absolute) of the current location
    * @returns a relative path to the package folder
    */
-  public tryFindPackagePathUpwards(currentPath: string): string | undefined {
+  public tryFindPackagePathUpwards(sourceFilePath: string): string | undefined {
     // Two lookups are required, because get() cannot distinguish the undefined value
     // versus a missing key.
-    if (this._tryFindPackagePathUpwardsCache.has(currentPath)) {
-      return this._tryFindPackagePathUpwardsCache.get(currentPath);
+    if (this._packageFolderCache.has(sourceFilePath)) {
+      return this._packageFolderCache.get(sourceFilePath);
     }
 
     let result: string | undefined;
 
-    const parentFolder: string = path.dirname(currentPath);
-    if (!parentFolder || parentFolder === currentPath) {
+    const parentFolder: string = path.dirname(sourceFilePath);
+    if (!parentFolder || parentFolder === sourceFilePath) {
       result = undefined;
     } else if (fsx.existsSync(path.join(parentFolder, 'package.json'))) {
       result = path.normalize(parentFolder);
@@ -50,7 +55,7 @@ export default class PackageJsonLookup {
       result = this.tryFindPackagePathUpwards(parentFolder);
     }
 
-    this._tryFindPackagePathUpwardsCache.set(currentPath, result);
+    this._packageFolderCache.set(sourceFilePath, result);
     return result;
   }
 
@@ -62,7 +67,7 @@ export default class PackageJsonLookup {
    * @returns the name of the package (E.g. @microsoft/api-extractor)
    */
   public readPackageName(packageJsonPath: string): string {
-    let result: string = this._readPackageNameCache.get(packageJsonPath);
+    let result: string = this._packageNameCache.get(packageJsonPath);
     if (result !== undefined) {
       return result;
     }
@@ -70,7 +75,7 @@ export default class PackageJsonLookup {
     const packageJson: IPackageJson = JsonFile.loadJsonFile(path.join(packageJsonPath, 'package.json')) as IPackageJson;
     result = packageJson.name;
 
-    this._readPackageNameCache.set(packageJsonPath, result);
+    this._packageNameCache.set(packageJsonPath, result);
     return result;
   }
 }
