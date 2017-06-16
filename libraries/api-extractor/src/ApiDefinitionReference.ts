@@ -103,9 +103,7 @@ export default class ApiDefinitionReference {
   public static createFromString(apiReferenceExpr: string,
     reportError: (message: string) => void): ApiDefinitionReference {
     if (!apiReferenceExpr || apiReferenceExpr.split(' ').length > 1) {
-      reportError('API reference expression must be of the form: ' +
-        '\'scopeName/packageName:exportName.memberName | display text\'' +
-        'where the \'|\' is required if a display text is provided');
+      reportError('An API item reference must use the notation: "@scopeName/packageName:exportName.memberName"');
       return;
     }
 

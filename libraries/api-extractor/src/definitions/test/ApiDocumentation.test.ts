@@ -65,24 +65,19 @@ describe('ApiDocumentation tests', function (): void {
        * - testInputs/example2/folder/MyDocumentedClass (10  errors)
        */
 
-      assert.equal(capturedErrors.length, 10);
+      assert.equal(capturedErrors.length, 8);
       assert.equal(capturedErrors[0].message, 'Cannot provide summary in AEDoc if @inheritdoc tag is given');
-      assert.equal(capturedErrors[1].message, 'The AEDoc tag "@summary" is not supported in this context');
+      assert.equal(capturedErrors[1].message, 'Unknown AEDoc tag "@badAedocTag"');
+      assert.equal(capturedErrors[2].message, 'Unknown tag name for inline tag.');
+      assert.equal(capturedErrors[3].message, 'Too few parameters for @link inline tag.');
+      assert.equal(capturedErrors[4].message, 'Unexpected text in AEDoc comment: "can not contain a tag"');
+      assert.equal(capturedErrors[5].message, 'More than one release tag was specified');
       assert.equal(
-        capturedErrors[2].message, 'Unexpected text in AEDoc comment: "Mock class for testing AEDoc parser"'
-      );
-      assert.equal(capturedErrors[3].message, 'Unknown AEDoc tag "@badAedocTag"');
-      assert.equal(capturedErrors[4].message, 'Unknown tag name for inline tag.');
-      assert.equal(capturedErrors[5].message, 'Too few parameters for @link inline tag.');
-      assert.equal(capturedErrors[6].message, 'Unexpected text in AEDoc comment: "can not contain a tag"');
-      assert.equal(capturedErrors[7].message, 'More than one release tag was specified');
-      assert.equal(
-        capturedErrors[8].message,
-        'API reference expression must be of the form: \'scopeName/packageName:exportName.memberName ' +
-        '| display text\'where the \'|\' is required if a display text is provided'
+        capturedErrors[6].message,
+        'An API item reference must use the notation: "@scopeName/packageName:exportName.memberName"'
       );
       assert.equal(
-        capturedErrors[9].message,
+        capturedErrors[7].message,
         'inheritdoc source item is deprecated. Must provide @deprecated message or remove @inheritdoc inline tag.');
   });
 

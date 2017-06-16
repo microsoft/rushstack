@@ -86,7 +86,6 @@ export default class ApiDocumentation {
     '@public',
     '@returns',
     '@see',
-    '@summary',
     '@deprecated',
     '@readonly',
     '@remarks'

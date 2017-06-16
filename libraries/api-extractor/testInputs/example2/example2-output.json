@@ -142,7 +142,12 @@
           "value": ". This block is entirely valid and a correct documentation object should be built for this ApiItem."
         }
       ],
-      "remarks": [],
+      "remarks": [
+        {
+          "kind": "textDocElement",
+          "value": "Mock class for testing JsDoc parser"
+        }
+      ],
       "isBeta": false,
       "members": {
         "__constructor": {

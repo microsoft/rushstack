@@ -7,7 +7,6 @@ import Extractor from '../Extractor';
 import ApiDocumentation, { ReleaseTag } from './ApiDocumentation';
 import TypeScriptHelpers from '../TypeScriptHelpers';
 import DocElementParser from '../DocElementParser';
-import PackageJsonHelpers from '../PackageJsonHelpers';
 import ResolvedApiItem from '../ResolvedApiItem';
 import ApiDefinitionReference,
   { IScopedPackageName, IApiDefinintionReferenceParts } from '../ApiDefinitionReference';
@@ -503,7 +502,8 @@ abstract class ApiItem {
     // Walk upwards from that directory until you find a directory containing package.json,
     // this is where the referenced type is located.
     // Example: "c:\users\<username>\sp-client\spfx-core\sp-core-library"
-    const typeReferencePackagePath: string = PackageJsonHelpers.tryFindPackagePathUpwards(sourceFile.path);
+    const typeReferencePackagePath: string = this.extractor.packageJsonLookup
+      .tryFindPackagePathUpwards(sourceFile.path);
     // Example: "@microsoft/sp-core-library"
     let typeReferencePackageName: string = '';
 
@@ -512,7 +512,8 @@ abstract class ApiItem {
     if (!typeReferencePackagePath) {
       typeReferencePackageName = this.extractor.package.name;
     } else {
-      typeReferencePackageName = PackageJsonHelpers.readPackageName(typeReferencePackagePath);
+      typeReferencePackageName = this.extractor.packageJsonLookup
+        .readPackageName(typeReferencePackagePath);
 
       typingsScopeNames.every(typingScopeName => {
         if (typeReferencePackageName.indexOf(typingScopeName) > -1) {
