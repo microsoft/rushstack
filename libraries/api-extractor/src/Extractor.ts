@@ -3,7 +3,7 @@ import * as fsx from 'fs-extra';
 import * as path from 'path';
 import ApiPackage from './definitions/ApiPackage';
 import DocItemLoader from './DocItemLoader';
-import PackageJsonHelpers from './PackageJsonHelpers';
+import PackageJsonLookup from './PackageJsonLookup';
 
 export type ApiErrorHandler = (message: string, fileName: string, lineNumber: number) => void;
 
@@ -50,14 +50,16 @@ export interface IExtractorAnalyzeOptions {
   * abstract syntax tree.
   */
 export default class Extractor {
-  public errorHandler: ApiErrorHandler;
+  public readonly errorHandler: ApiErrorHandler;
   public typeChecker: ts.TypeChecker;
   public package: ApiPackage;
   /**
    * One DocItemLoader is needed per analyzer to look up external API members
    * as needed.
    */
-  public docItemLoader: DocItemLoader;
+  public readonly docItemLoader: DocItemLoader;
+
+  public readonly packageJsonLookup: PackageJsonLookup;
 
   private _compilerOptions: ts.CompilerOptions;
 
@@ -75,6 +77,7 @@ export default class Extractor {
   constructor(options: IExtractorOptions) {
     this._compilerOptions = options.compilerOptions;
     this.docItemLoader = new DocItemLoader(options.compilerOptions.rootDir);
+    this.packageJsonLookup = new PackageJsonLookup();
     this.errorHandler = options.errorHandler || Extractor.defaultErrorHandler;
   }
 
@@ -110,7 +113,7 @@ export default class Extractor {
     // Assign _packageFolder by probing upwards from entryPointFile until we find a package.json
     const currentPath: string = path.resolve(options.entryPointFile);
     // This is guaranteed to succeed since we do check prior to this point
-    this._packageFolder = PackageJsonHelpers.tryFindPackagePathUpwards(currentPath);
+    this._packageFolder = this.packageJsonLookup.tryFindPackagePathUpwards(currentPath);
 
     this.package = new ApiPackage(this, rootFile); // construct members
     this.package.completeInitialization(); // creates ApiDocumentation
