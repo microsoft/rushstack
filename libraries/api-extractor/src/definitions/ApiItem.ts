@@ -379,7 +379,7 @@ abstract class ApiItem {
     if (this.kind === ApiItemKind.Package) {
       if (this.documentation.releaseTag !== ReleaseTag.None) {
         const tag: string = '@' + ReleaseTag[this.documentation.releaseTag].toLowerCase();
-        this.reportError(`The ${tag} tag is not allowed on the package, which is always public`);
+        this.reportError(`The ${tag} tag is not allowed on the package, which is always considered to be @public`);
       }
     }
 
@@ -391,8 +391,8 @@ abstract class ApiItem {
     }
 
     if (this.documentation.isDocInheritedDeprecated && this.documentation.deprecatedMessage.length === 0) {
-      this.reportError('inheritdoc source item is deprecated. ' +
-        'Must provide @deprecated message or remove @inheritdoc inline tag.');
+      this.reportError('The @inheritdoc target has been marked as @deprecated.  ' +
+        'Add a @deprecated message here, or else remove the @inheritdoc relationship.');
     }
   }
 

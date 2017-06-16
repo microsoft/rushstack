@@ -50,7 +50,7 @@ export default class Tokenizer {
       let token: Token;
       value = sanitizedTokens[i];
       if (value.charAt(0) === '@') {
-       token = new Token(TokenType.Tag, value);
+       token = new Token(TokenType.BlockTag, value);
       } else if (value.charAt(0) === '{' && value.charAt(value.length - 1) === '}') {
         token = this._tokenizeInline(value); // Can return undefined if invalid inline tag
       } else {
@@ -71,20 +71,21 @@ export default class Tokenizer {
    */
   protected _tokenizeInline(docEntry: string): Token {
     if (docEntry.charAt(0) !== '{' || docEntry.charAt(docEntry.length - 1) !== '}') {
-      this._reportError('All inline tags should be wrapped inside curly braces.');
-      return;
+      // This is a program bug, since _tokenizeDocs() checks this condition before calling
+      this._reportError('The AEDoc tag is not enclosed in "{" and "}"');
     }
     const tokenContent: string = docEntry.slice(1, docEntry.length - 1).trim();
 
     if (tokenContent.charAt(0) !== '@') {
-      this._reportError('Content of inline tags should start with a leading \'@\'.');
+      // This is a program bug, since it should have already been validated by the Tokenizer
+      this._reportError('The AEDoc tag does not start with "@".');
       return;
     }
 
     const unescapedCurlyBraces: RegExp = /([^\\])({|}[^$])/gi;
     if (unescapedCurlyBraces.test(tokenContent)) {
-      this._reportError(`Unescaped '{' or '}' detected inside an inline tag. ` +
-        'Use \\ to escape curly braces inside inline tags.');
+      this._reportError(`An unescaped "{" or "}" character was found inside an inline tag. ` +
+        'Use a backslash ("\\") to escape curly braces.');
       return;
     }
 
@@ -93,20 +94,21 @@ export default class Tokenizer {
     const tokenChunks: string[] = tokenContent.split(/\s+/gi);
     if (tokenChunks[0] === '@link') {
       if (tokenChunks.length < 2) {
-        this._reportError('Too few parameters for @link inline tag.');
+        this._reportError('The {@link} tag must include a URL or API item reference');
         return;
       }
 
       tokenChunks.shift(); // Gets rid of '@link'
-      const token: Token = new Token(TokenType.Inline, '@link', tokenChunks.join(' '));
+      const token: Token = new Token(TokenType.InlineTag, '@link', tokenChunks.join(' '));
       return token;
     } else if (tokenChunks[0] === '@inheritdoc') {
       tokenChunks.shift(); // Gets rid of '@inheritdoc'
-      const token: Token = new Token(TokenType.Inline, '@inheritdoc', tokenChunks.join(' '));
+      const token: Token = new Token(TokenType.InlineTag, '@inheritdoc', tokenChunks.join(' '));
       return token;
     }
 
-    this._reportError('Unknown tag name for inline tag.');
+    // This is a program bug
+    this._reportError('Invalid call to _tokenizeInline()');
     return;
   }
 

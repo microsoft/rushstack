@@ -72,7 +72,7 @@ export default class DocElementParser {
         break;
       }
 
-      if (token.type === TokenType.Tag) {
+      if (token.type === TokenType.BlockTag) {
         switch (token.tag) {
           case '@see':
             tokenizer.getToken();
@@ -85,12 +85,13 @@ export default class DocElementParser {
             parsing = false; // end of summary tokens
             break;
         }
-      } else if (token.type === TokenType.Inline) {
+      } else if (token.type === TokenType.InlineTag) {
         switch (token.tag) {
           case '@inheritdoc':
             tokenizer.getToken();
             if (docElements.length > 0 ||  documentation.summary.length > 0) {
-              documentation.reportError('Cannot provide summary in AEDoc if @inheritdoc tag is given');
+              documentation.reportError('A summary block is not allowed here,'
+                + ' because the @inheritdoc target provides the summary');
             }
             documentation.incompleteInheritdocs.push(token);
             documentation.isDocInherited = true;
@@ -114,7 +115,7 @@ export default class DocElementParser {
         docElements.push({kind: 'textDocElement', value: token.text} as ITextElement);
           tokenizer.getToken();
       } else {
-        documentation.reportError(`Unidentifiable Token ${token.type} ${token.tag} ${token.text}`);
+        documentation.reportError(`Unidentifiable Token ${token.type} ${token.tag} "${token.text}"`);
       }
     }
     return docElements;
@@ -136,7 +137,7 @@ export default class DocElementParser {
    */
   public static parseLinkTag(documentation: ApiDocumentation, tokenItem: Token): IHrefLinkElement | ICodeLinkElement {
     if (!tokenItem.text) {
-      documentation.reportError('Invalid @link inline token, a url or API definition reference must be given');
+      documentation.reportError('The {@link} tag must include a url or API item reference');
        return;
     }
 
@@ -148,7 +149,7 @@ export default class DocElementParser {
       }
     });
     if (pipeSplitContent.length > 2) {
-      documentation.reportError('Invalid @link parameters, at most one pipe character allowed.');
+      documentation.reportError('The {@link} tag contains more than one pipe character ("|")');
       return;
     }
 
@@ -159,7 +160,8 @@ export default class DocElementParser {
 
       // Make sure only a single url is given
       if (urlContent.length > 1 && urlContent[1] !== '' ) {
-        documentation.reportError('Invalid @link parameter, url must be a single string.');
+        documentation.reportError('The {@link} tag contains additional spaces after the URL;'
+          + ' if the URL contains spaces, encode them using %20; for display text, use a pipe delimiter ("|")');
         return;
       }
 
@@ -195,7 +197,8 @@ export default class DocElementParser {
     if (linkDocElement && pipeSplitContent.length > 1) {
       const displayTextParts: string[] = pipeSplitContent[1].match(this._wordRegEx);
       if (displayTextParts && displayTextParts[0].length !== pipeSplitContent[1].length) {
-        documentation.reportError('Display name in @link token may only contain alphabetic characters.');
+        documentation.reportError(`The {@link} tag\'s display text contains unsupported `
+          + ` symbols: "${pipeSplitContent[1]}"`);
         return;
       }
       // Full match is valid text
@@ -218,8 +221,8 @@ export default class DocElementParser {
     // Check to make sure the API definition reference is at most one string
     const tokenChunks: string[] = token.text.split(' ');
     if (tokenChunks.length > 1) {
-      documentation.reportError('Too many parameters for @inheritdoc inline tag.' +
-        'The format should be {@inheritdoc scopeName/packageName:exportName}. Extra parameters are ignored');
+      documentation.reportError('The {@inheritdoc} tag does not match the expected pattern' +
+        ' "{@inheritdoc @scopeName/packageName:exportName}"');
       return;
     }
 
@@ -231,7 +234,7 @@ export default class DocElementParser {
     );
     // if API reference expression is formatted incorrectly then apiDefinitionRef will be undefined
     if (!apiDefinitionRef) {
-      documentation.reportError('Incorrecty formatted API definition reference');
+      documentation.reportError(`Incorrectly formatted API item reference: "${token.text}"`);
       return;
     }
 

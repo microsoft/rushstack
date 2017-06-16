@@ -129,18 +129,19 @@ export default class ApiDocumentation {
   public parameters: { [name: string]: IParam; };
 
   /**
-   * A list of link elements to be processed after all basic documentation has been created
-   * for all items in the project. We save the processing for later because we need ReleaseTag
-   * information before we can deem a link element is valid.
-   * Example: If API item A has a link in it's documentation to API item B, then B must not
+   * A list of \@link elements to be post-processed after all basic documentation has been created
+   * for all items in the project.  We save the processing for later because we need ReleaseTag
+   * information before we can determine whether a link element is valid.
+   * Example: If API item A has a \@link in its documentation to API item B, then B must not
    * have ReleaseTag.Internal.
    */
   public incompleteLinks: ICodeLinkElement[];
 
   /**
-   * A list of 'Tokens' that have been recognized as inheritdoc tokens that will be processed
-   * after the basic documentation for all API items is complete. We save the processing for after
-   * because we need ReleaseTag information before we can deem an inheritdoc token as valid.
+   * A list of 'Token' objects that have been recognized as \@inheritdoc tokens that will be processed
+   * after the basic documentation for all API items is complete. We postpone the processing
+   * because we need ReleaseTag information before we can determine whether an \@inheritdoc token
+   * is valid.
    */
   public incompleteInheritdocs: Token[];
 
@@ -171,7 +172,7 @@ export default class ApiDocumentation {
   /**
    * A function type interface that abstracts away resolving
    * an API definition reference to an item that has friendly
-   * assessible ApiItem properties.
+   * accessible ApiItem properties.
    *
    * Ex: this is useful in the case of parsing inheritdoc expressions,
    * in the sense that we do not know if we the inherited documentation
@@ -240,21 +241,21 @@ export default class ApiDocumentation {
         break;
       }
 
-      if (token.type === TokenType.Tag) {
+      if (token.type === TokenType.BlockTag) {
         switch (token.tag) {
           case '@remarks':
             tokenizer.getToken();
-            this._checkInheritDocStatus();
+            this._checkInheritDocStatus(token.tag);
             this.remarks = DocElementParser.parse(this, tokenizer);
             break;
           case '@returns':
             tokenizer.getToken();
-            this._checkInheritDocStatus();
+            this._checkInheritDocStatus(token.tag);
             this.returnsMessage = DocElementParser.parse(this, tokenizer);
             break;
           case '@param':
             tokenizer.getToken();
-            this._checkInheritDocStatus();
+            this._checkInheritDocStatus(token.tag);
             const param: IParam = this._parseParam(tokenizer);
             if (param) {
                this.parameters[param.name] = param;
@@ -308,7 +309,7 @@ export default class ApiDocumentation {
             tokenizer.getToken();
             this._reportBadAedocTag(token);
         }
-      } else if (token.type === TokenType.Inline) {
+      } else if (token.type === TokenType.InlineTag) {
         switch (token.tag) {
           case '@inheritdoc':
             DocElementParser.parse(this, tokenizer);
@@ -333,16 +334,16 @@ export default class ApiDocumentation {
       } else {
         tokenizer.getToken();
         // This would be a program bug
-        this.reportError(`Unexpected token: ${token.type} ${token.tag} ${token.text}`);
+        this.reportError(`Unexpected token: ${token.type} ${token.tag} "${token.text}"`);
       }
     }
 
     if (releaseTagCount > 1) {
-      this.reportError('More than one release tag was specified');
+      this.reportError('More than one one release tag (@alpha, @beta, etc) was specified');
     }
 
     if (this.preapproved && this.releaseTag !== ReleaseTag.Internal) {
-      this.reportError('The @preapproved tag may only be applied to @internal defintions');
+      this.reportError('The @preapproved tag may only be applied to @internal definitions');
       this.preapproved = false;
     }
   }
@@ -350,20 +351,20 @@ export default class ApiDocumentation {
   protected _parseParam(tokenizer: Tokenizer): IParam {
     const paramDescriptionToken: Token = tokenizer.getToken();
     if (!paramDescriptionToken) {
-      this.reportError('@param tag missing required description');
+      this.reportError('The @param tag is missing a parameter description');
       return;
     }
     const hyphenIndex: number = paramDescriptionToken ? paramDescriptionToken.text.indexOf('-') : -1;
     if (hyphenIndex < 0) {
-      this.reportError('No hyphens found in the @param line. ' +
-          'There should be a hyphen between the parameter name and its description.');
+      this.reportError('The @param tag is missing the hyphen that delimits the parameter name '
+        + ' and description');
       return;
     } else {
       const name: string = paramDescriptionToken.text.slice(0, hyphenIndex).trim();
       const comment: string = paramDescriptionToken.text.substr(hyphenIndex + 1).trim();
 
       if (!comment) {
-        this.reportError('@param tag requires a description following the hyphen');
+        this.reportError('The @param tag is missing a parameter description');
         return;
       }
 
@@ -401,10 +402,12 @@ export default class ApiDocumentation {
         this.warnings
       );
 
-      // If the apiDefinitionRef can not be found the resolcedApiItem will be
+      // If the apiDefinitionRef can not be found the resolvedApiItem will be
       // undefined and an error will have been reported via this.reportError
-      if (resolvedApiItem && resolvedApiItem.releaseTag === ReleaseTag.Internal) {
-        this.reportError('Unable to link to \"Internal\" API item');
+      if (resolvedApiItem && resolvedApiItem.releaseTag === ReleaseTag.Internal
+        || resolvedApiItem.releaseTag === ReleaseTag.Alpha) {
+        this.reportError('The {@link} tag references an @internal or @alpha API item, '
+          + 'which will not appear in the generated documentation');
       }
     }
   }
@@ -425,16 +428,16 @@ export default class ApiDocumentation {
     const supportsInline: boolean = ApiDocumentation._allowedInlineAedocTags.indexOf(token.tag) >= 0;
 
     if (!supportsRegular && !supportsInline) {
-      this.reportError(`Unknown AEDoc tag \"${token.tag}\"`);
+      this.reportError(`The JSDoc tag \"${token.tag}\" is not supported by AEDoc`);
       return;
     }
 
-    if (token.type === TokenType.Inline && !supportsInline) {
-      this.reportError(`The AEDoc tag \"${token.tag}\" must not use the non-inline syntax (no curly braces)`);
+    if (token.type === TokenType.InlineTag && !supportsInline) {
+      this.reportError(`The AEDoc tag \"${token.tag}\" must use the inline tag notation (i.e. with curly braces)`);
       return;
     }
-    if (token.type === TokenType.Tag && !supportsRegular) {
-      this.reportError(`The AEDoc tag \"${token.tag}\" must use the inline syntax (with curly braces)`);
+    if (token.type === TokenType.BlockTag && !supportsRegular) {
+      this.reportError(`The AEDoc tag \"${token.tag}\" must use the block tag notation (i.e. no curly braces)`);
       return;
     }
 
@@ -442,9 +445,9 @@ export default class ApiDocumentation {
     return;
   }
 
-  private _checkInheritDocStatus(): void {
+  private _checkInheritDocStatus(aedocTag: string): void {
     if (this.isDocInherited) {
-      this.reportError('Cannot provide additional AEDoc tags if @inheritdoc tag is present');
+      this.reportError(`The ${aedocTag} tag may not be used because this state is provided by the @inheritdoc target`);
     }
   }
 }
