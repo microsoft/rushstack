@@ -178,7 +178,7 @@ export default class ApiFileGenerator extends ApiItemVisitor {
   }
 
   /**
-   * Writes a synopsis of the JSDoc comments, which indicates the API tag,
+   * Writes a synopsis of the JSDoc comments, which indicates the release tag,
    * whether the item has been documented, and any warnings that were detected
    * by the Analzer.
    */

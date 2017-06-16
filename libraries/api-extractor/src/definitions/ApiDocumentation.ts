@@ -12,7 +12,7 @@ import Extractor from '../Extractor';
 import ResolvedApiItem from '../ResolvedApiItem';
 
 /**
-  * An "API Tag" is a custom JSDoc tag which indicates whether an ApiItem definition
+  * A "release tag" is a custom JSDoc tag which indicates whether an ApiItem definition
   * is considered Public API for third party developers, as well as its release
   * stage (alpha, beta, etc).
   * @see https://onedrive.visualstudio.com/DefaultCollection/SPPPlat/_git/sp-client
@@ -20,7 +20,7 @@ import ResolvedApiItem from '../ResolvedApiItem';
   */
 export enum ReleaseTag {
   /**
-   * No API Tag was specified in the JSDoc summary.
+   * No release tag was specified in the JSDoc summary.
    */
   None = 0,
   /**
@@ -145,7 +145,7 @@ export default class ApiDocumentation {
   public incompleteInheritdocs: Token[];
 
   /**
-   * An "API Tag" is a custom JSDoc tag which indicates whether this definition
+   * A "release tag" is a custom JSDoc tag which indicates whether this definition
    * is considered Public API for third party developers, as well as its release
    * stage (alpha, beta, etc).
    */
@@ -223,7 +223,7 @@ export default class ApiDocumentation {
     const tokenizer: Tokenizer = new Tokenizer(this.originalJsDoc, this.reportError);
     this.summary = DocElementParser.parse(this, tokenizer);
 
-    let apiTagCount: number = 0;
+    let releaseTagCount: number = 0;
     let parsing: boolean = true;
 
       while (parsing) {
@@ -275,22 +275,22 @@ export default class ApiDocumentation {
           case '@public':
             tokenizer.getToken();
             this.releaseTag = ReleaseTag.Public;
-            ++apiTagCount;
+            ++releaseTagCount;
             break;
           case '@internal':
             tokenizer.getToken();
             this.releaseTag = ReleaseTag.Internal;
-            ++apiTagCount;
+            ++releaseTagCount;
             break;
           case '@alpha':
             tokenizer.getToken();
             this.releaseTag = ReleaseTag.Alpha;
-            ++apiTagCount;
+            ++releaseTagCount;
             break;
           case '@beta':
             tokenizer.getToken();
             this.releaseTag = ReleaseTag.Beta;
-            ++apiTagCount;
+            ++releaseTagCount;
             break;
           case '@preapproved':
             tokenizer.getToken();
@@ -337,8 +337,8 @@ export default class ApiDocumentation {
       }
     }
 
-    if (apiTagCount > 1) {
-      this.reportError('More than one API Tag was specified');
+    if (releaseTagCount > 1) {
+      this.reportError('More than one release tag was specified');
     }
 
     if (this.preapproved && this.releaseTag !== ReleaseTag.Internal) {

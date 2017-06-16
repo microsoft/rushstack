@@ -75,7 +75,7 @@ describe('ApiDocumentation tests', function (): void {
       assert.equal(capturedErrors[4].message, 'Unknown tag name for inline tag.');
       assert.equal(capturedErrors[5].message, 'Too few parameters for @link inline tag.');
       assert.equal(capturedErrors[6].message, 'Unexpected text in JSDoc comment: "can not contain a tag"');
-      assert.equal(capturedErrors[7].message, 'More than one API Tag was specified');
+      assert.equal(capturedErrors[7].message, 'More than one release tag was specified');
       assert.equal(
         capturedErrors[8].message,
         'API reference expression must be of the form: \'scopeName/packageName:exportName.memberName ' +
@@ -86,13 +86,13 @@ describe('ApiDocumentation tests', function (): void {
         'inheritdoc source item is deprecated. Must provide @deprecated message or remove @inheritdoc inline tag.');
   });
 
-    it('Should parse API tag', function (): void {
-      const expecedApiTag: ReleaseTag = ReleaseTag.Public;
+    it('Should parse release tag', function (): void {
+      const expectedReleaseTag: ReleaseTag = ReleaseTag.Public;
 
       const actualDoc: ApiDocumentation = myDocumentedClass ? myDocumentedClass.documentation : undefined;
 
       assert.isObject(actualDoc);
-      assert.equal(actualDoc.releaseTag, expecedApiTag);
+      assert.equal(actualDoc.releaseTag, expectedReleaseTag);
     });
   });
 });

@@ -130,7 +130,7 @@ export default class MyDocumentedClass {
   // (Error #7)
   // Unexpected text in JSDoc comment: "can not contain a tag"
   // (Error #8)
-  // Error: More than one API Tag was specified
+  // Error: More than one release tag was specified
   public betaTagMissingParam: string;
 
   /**
