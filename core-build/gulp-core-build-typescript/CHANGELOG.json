@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "3.1.2",
+      "tag": "@microsoft/gulp-core-build-typescript_v3.1.2",
+      "date": "Fri, 16 Jun 2017 01:04:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix issue where TypeScriptTask did not allow you to set a target other than \"commonjs\""
+          }
+        ]
+      }
+    },
+    {
       "version": "3.1.1",
       "tag": "@microsoft/gulp-core-build-typescript_v3.1.1",
       "date": "Fri, 28 Apr 2017 01:03:54 GMT",

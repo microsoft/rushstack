@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Fri, 28 Apr 2017 01:03:54 GMT and should not be manually modified.
+This log was last generated on Fri, 16 Jun 2017 01:04:08 GMT and should not be manually modified.
+
+## 3.1.2
+Fri, 16 Jun 2017 01:04:08 GMT
+
+### Patches
+
+- Fix issue where TypeScriptTask did not allow you to set a target other than "commonjs"
 
 ## 3.1.1
 Fri, 28 Apr 2017 01:03:54 GMT
