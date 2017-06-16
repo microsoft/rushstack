@@ -16,7 +16,7 @@ interface IPackageJson {
  * and retrieving the name of the package.  The results are cached.
  */
 export default class PackageJsonLookup {
-  private _tryFindPackagePathUpwardsCache: Map<string, string>;
+  private _tryFindPackagePathUpwardsCache: Map<string, string | undefined>;
   private _readPackageNameCache: Map<string, string>;
 
   constructor() {
@@ -32,13 +32,14 @@ export default class PackageJsonLookup {
    * @param currentPath - a path (relative or absolute) of the current location
    * @returns a relative path to the package folder
    */
-  public tryFindPackagePathUpwards(currentPath: string): string {
-    // Since Map cannot store an undefined value, we use the weird "null" object to
-    // represent "undefined".
-    let result: string = this._tryFindPackagePathUpwardsCache.get(currentPath);
-    if (result !== undefined) {
-      return result === null ? undefined : result; // tslint:disable-line: no-null-keyword
+  public tryFindPackagePathUpwards(currentPath: string): string | undefined {
+    // Two lookups are required, because get() cannot distinguish the undefined value
+    // versus a missing key.
+    if (this._tryFindPackagePathUpwardsCache.has(currentPath)) {
+      return this._tryFindPackagePathUpwardsCache.get(currentPath);
     }
+
+    let result: string | undefined;
 
     const parentFolder: string = path.dirname(currentPath);
     if (!parentFolder || parentFolder === currentPath) {
@@ -49,8 +50,7 @@ export default class PackageJsonLookup {
       result = this.tryFindPackagePathUpwards(parentFolder);
     }
 
-     // tslint:disable-next-line: no-null-keyword
-    this._tryFindPackagePathUpwardsCache.set(currentPath, result === undefined ? null : result);
+    this._tryFindPackagePathUpwardsCache.set(currentPath, result);
     return result;
   }
 
