@@ -13,7 +13,7 @@ export default class ResolvedApiItem {
   public summary: IDocElement[];
   public remarks: IDocElement[];
   public deprecatedMessage: IDocElement[];
-  public apiTag: ReleaseTag;
+  public releaseTag: ReleaseTag;
   public isBeta: boolean;
   public params: {[name: string]: IParam};
   public returnsMessage: IDocElement[];
@@ -32,10 +32,10 @@ export default class ResolvedApiItem {
       apiItem.documentation.summary,
       apiItem.documentation.remarks,
       apiItem.documentation.deprecatedMessage,
-      apiItem.documentation.apiTag === ReleaseTag.Beta,
+      apiItem.documentation.releaseTag === ReleaseTag.Beta,
       apiItem.documentation.parameters,
       apiItem.documentation.returnsMessage,
-      apiItem.documentation.apiTag,
+      apiItem.documentation.releaseTag,
       apiItem
     );
   }
@@ -81,7 +81,7 @@ export default class ResolvedApiItem {
     isBeta: boolean,
     params:  {[name: string]: IParam},
     returnsMessage: IDocElement[],
-    apiTag: ReleaseTag,
+    releaseTag: ReleaseTag,
     apiItem: ApiItem) {
     this.kind = kind;
     this.summary = summary;
@@ -90,7 +90,7 @@ export default class ResolvedApiItem {
     this.isBeta = isBeta;
     this.params = params;
     this.returnsMessage = returnsMessage;
-    this.apiTag = apiTag;
+    this.releaseTag = releaseTag;
     this.apiItem = apiItem;
   }
 }

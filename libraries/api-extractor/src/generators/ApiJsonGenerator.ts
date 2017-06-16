@@ -39,7 +39,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
 
   // @override
   protected visit(apiItem: ApiItem, refObject?: Object): void {
-    switch (apiItem.documentation.apiTag) {
+    switch (apiItem.documentation.releaseTag) {
       case ReleaseTag.None:
       case ReleaseTag.Beta:
       case ReleaseTag.Public:
@@ -91,7 +91,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
       deprecatedMessage: apiStructuredType.documentation.deprecatedMessage || [],
       summary: apiStructuredType.documentation.summary || [],
       remarks: apiStructuredType.documentation.remarks || [],
-      isBeta: apiStructuredType.documentation.apiTag === ReleaseTag.Beta
+      isBeta: apiStructuredType.documentation.releaseTag === ReleaseTag.Beta
     };
     refObject[apiStructuredType.name] = structureNode;
 
@@ -121,7 +121,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
       deprecatedMessage: apiEnum.documentation.deprecatedMessage || [],
       summary: apiEnum.documentation.summary || [],
       remarks: apiEnum.documentation.remarks || [],
-      isBeta: apiEnum.documentation.apiTag === ReleaseTag.Beta
+      isBeta: apiEnum.documentation.releaseTag === ReleaseTag.Beta
     };
     refObject[apiEnum.name] = enumNode;
 
@@ -147,7 +147,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
       deprecatedMessage: apiEnumValue.documentation.deprecatedMessage || [],
       summary: apiEnumValue.documentation.summary || [],
       remarks: apiEnumValue.documentation.remarks || [],
-      isBeta: apiEnumValue.documentation.apiTag === ReleaseTag.Beta
+      isBeta: apiEnumValue.documentation.releaseTag === ReleaseTag.Beta
     };
   }
 
@@ -171,7 +171,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
       deprecatedMessage: apiFunction.documentation.deprecatedMessage || [],
       summary: apiFunction.documentation.summary || [],
       remarks: apiFunction.documentation.remarks || [],
-      isBeta: apiFunction.documentation.apiTag === ReleaseTag.Beta
+      isBeta: apiFunction.documentation.releaseTag === ReleaseTag.Beta
     };
 
     refObject[apiFunction.name] = newNode;
@@ -207,7 +207,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
       deprecatedMessage: apiNamespace.documentation.deprecatedMessage || [],
       summary: apiNamespace.documentation.summary || [],
       remarks: apiNamespace.documentation.remarks || [],
-      isBeta: apiNamespace.documentation.apiTag === ReleaseTag.Beta,
+      isBeta: apiNamespace.documentation.releaseTag === ReleaseTag.Beta,
       exports: membersNode
     };
 
@@ -240,7 +240,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
       deprecatedMessage: apiProperty.documentation.deprecatedMessage || [],
       summary: apiProperty.documentation.summary || [],
       remarks: apiProperty.documentation.remarks || [],
-      isBeta: apiProperty.documentation.apiTag === ReleaseTag.Beta
+      isBeta: apiProperty.documentation.releaseTag === ReleaseTag.Beta
     };
 
     refObject[apiProperty.name] = newNode;
@@ -254,7 +254,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
       deprecatedMessage: apiModuleVariable.documentation.deprecatedMessage || [],
       summary: apiModuleVariable.documentation.summary || [],
       remarks: apiModuleVariable.documentation.remarks || [],
-      isBeta: apiModuleVariable.documentation.apiTag === ReleaseTag.Beta
+      isBeta: apiModuleVariable.documentation.releaseTag === ReleaseTag.Beta
     };
 
     refObject[apiModuleVariable.name] = newNode;
@@ -296,7 +296,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
         deprecatedMessage: apiMethod.documentation.deprecatedMessage || [],
         summary: apiMethod.documentation.summary || [],
         remarks: apiMethod.documentation.remarks || [],
-        isBeta: apiMethod.documentation.apiTag === ReleaseTag.Beta
+        isBeta: apiMethod.documentation.releaseTag === ReleaseTag.Beta
       };
     }
 

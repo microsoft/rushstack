@@ -190,7 +190,7 @@ export default class ApiFileGenerator extends ApiItemVisitor {
       lines.push('(No packageDescription for this package)');
     } else {
       let footer: string = '';
-      switch (apiItem.documentation.apiTag) {
+      switch (apiItem.documentation.releaseTag) {
         case ReleaseTag.Internal:
           footer += '@internal';
           break;

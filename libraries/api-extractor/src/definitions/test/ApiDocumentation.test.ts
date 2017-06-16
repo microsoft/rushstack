@@ -92,7 +92,7 @@ describe('ApiDocumentation tests', function (): void {
       const actualDoc: ApiDocumentation = myDocumentedClass ? myDocumentedClass.documentation : undefined;
 
       assert.isObject(actualDoc);
-      assert.equal(actualDoc.apiTag, expecedApiTag);
+      assert.equal(actualDoc.releaseTag, expecedApiTag);
     });
   });
 });

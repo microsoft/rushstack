@@ -149,7 +149,7 @@ export default class ApiDocumentation {
    * is considered Public API for third party developers, as well as its release
    * stage (alpha, beta, etc).
    */
-  public apiTag: ReleaseTag;
+  public releaseTag: ReleaseTag;
 
   /**
    * True if the "@preapproved" tag was specified.
@@ -219,7 +219,7 @@ export default class ApiDocumentation {
     this.remarks = [];
     this.incompleteLinks = [];
     this.incompleteInheritdocs = [];
-    this.apiTag = ReleaseTag.None;
+    this.releaseTag = ReleaseTag.None;
     const tokenizer: Tokenizer = new Tokenizer(this.originalJsDoc, this.reportError);
     this.summary = DocElementParser.parse(this, tokenizer);
 
@@ -274,22 +274,22 @@ export default class ApiDocumentation {
             break;
           case '@public':
             tokenizer.getToken();
-            this.apiTag = ReleaseTag.Public;
+            this.releaseTag = ReleaseTag.Public;
             ++apiTagCount;
             break;
           case '@internal':
             tokenizer.getToken();
-            this.apiTag = ReleaseTag.Internal;
+            this.releaseTag = ReleaseTag.Internal;
             ++apiTagCount;
             break;
           case '@alpha':
             tokenizer.getToken();
-            this.apiTag = ReleaseTag.Alpha;
+            this.releaseTag = ReleaseTag.Alpha;
             ++apiTagCount;
             break;
           case '@beta':
             tokenizer.getToken();
-            this.apiTag = ReleaseTag.Beta;
+            this.releaseTag = ReleaseTag.Beta;
             ++apiTagCount;
             break;
           case '@preapproved':
@@ -341,7 +341,7 @@ export default class ApiDocumentation {
       this.reportError('More than one API Tag was specified');
     }
 
-    if (this.preapproved && this.apiTag !== ReleaseTag.Internal) {
+    if (this.preapproved && this.releaseTag !== ReleaseTag.Internal) {
       this.reportError('The @preapproved tag may only be applied to @internal defintions');
       this.preapproved = false;
     }
@@ -403,7 +403,7 @@ export default class ApiDocumentation {
 
       // If the apiDefinitionRef can not be found the resolcedApiItem will be
       // undefined and an error will have been reported via this.reportError
-      if (resolvedApiItem && resolvedApiItem.apiTag === ReleaseTag.Internal) {
+      if (resolvedApiItem && resolvedApiItem.releaseTag === ReleaseTag.Internal) {
         this.reportError('Unable to link to \"Internal\" API item');
       }
     }

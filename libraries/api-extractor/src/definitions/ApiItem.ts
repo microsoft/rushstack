@@ -378,8 +378,8 @@ abstract class ApiItem {
     }
 
     if (this.kind === ApiItemKind.Package) {
-      if (this.documentation.apiTag !== ReleaseTag.None) {
-        const tag: string = '@' + ReleaseTag[this.documentation.apiTag].toLowerCase();
+      if (this.documentation.releaseTag !== ReleaseTag.None) {
+        const tag: string = '@' + ReleaseTag[this.documentation.releaseTag].toLowerCase();
         this.reportError(`The ${tag} tag is not allowed on the package, which is always public`);
       }
     }
