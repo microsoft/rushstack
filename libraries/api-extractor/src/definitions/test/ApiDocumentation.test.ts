@@ -66,15 +66,15 @@ describe('ApiDocumentation tests', function (): void {
        */
 
       assert.equal(capturedErrors.length, 10);
-      assert.equal(capturedErrors[0].message, 'Cannot provide summary in JsDoc if @inheritdoc tag is given');
-      assert.equal(capturedErrors[1].message, 'The JSDoc tag "@summary" is not supported in this context');
+      assert.equal(capturedErrors[0].message, 'Cannot provide summary in AEDoc if @inheritdoc tag is given');
+      assert.equal(capturedErrors[1].message, 'The AEDoc tag "@summary" is not supported in this context');
       assert.equal(
-        capturedErrors[2].message, 'Unexpected text in JSDoc comment: "Mock class for testing JsDoc parser"'
+        capturedErrors[2].message, 'Unexpected text in AEDoc comment: "Mock class for testing AEDoc parser"'
       );
-      assert.equal(capturedErrors[3].message, 'Unknown JSDoc tag "@badJsDocTag"');
+      assert.equal(capturedErrors[3].message, 'Unknown AEDoc tag "@badAedocTag"');
       assert.equal(capturedErrors[4].message, 'Unknown tag name for inline tag.');
       assert.equal(capturedErrors[5].message, 'Too few parameters for @link inline tag.');
-      assert.equal(capturedErrors[6].message, 'Unexpected text in JSDoc comment: "can not contain a tag"');
+      assert.equal(capturedErrors[6].message, 'Unexpected text in AEDoc comment: "can not contain a tag"');
       assert.equal(capturedErrors[7].message, 'More than one release tag was specified');
       assert.equal(
         capturedErrors[8].message,

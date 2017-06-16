@@ -90,7 +90,7 @@ export default class DocElementParser {
           case '@inheritdoc':
             tokenizer.getToken();
             if (docElements.length > 0 ||  documentation.summary.length > 0) {
-              documentation.reportError('Cannot provide summary in JsDoc if @inheritdoc tag is given');
+              documentation.reportError('Cannot provide summary in AEDoc if @inheritdoc tag is given');
             }
             documentation.incompleteInheritdocs.push(token);
             documentation.isDocInherited = true;

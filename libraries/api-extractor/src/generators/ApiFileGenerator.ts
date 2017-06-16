@@ -77,7 +77,7 @@ export default class ApiFileGenerator extends ApiItemVisitor {
     }
 
     if (apiStructuredType.kind !== ApiItemKind.TypeLiteral) {
-      this._writeJsdocSynopsis(apiStructuredType);
+      this._writeAedocSynopsis(apiStructuredType);
     }
 
     this._indentedWriter.writeLine(declarationLine + ' {');
@@ -99,7 +99,7 @@ export default class ApiFileGenerator extends ApiItemVisitor {
   }
 
   protected visitApiEnum(apiEnum: ApiEnum): void {
-    this._writeJsdocSynopsis(apiEnum);
+    this._writeAedocSynopsis(apiEnum);
 
     this._indentedWriter.writeLine(`enum ${apiEnum.name} {`);
 
@@ -115,7 +115,7 @@ export default class ApiFileGenerator extends ApiItemVisitor {
   }
 
   protected visitApiEnumValue(apiEnumValue: ApiEnumValue): void {
-    this._writeJsdocSynopsis(apiEnumValue);
+    this._writeAedocSynopsis(apiEnumValue);
 
     this._indentedWriter.write(apiEnumValue.getDeclarationLine());
   }
@@ -127,11 +127,11 @@ export default class ApiFileGenerator extends ApiItemVisitor {
       this._indentedWriter.writeLine();
     }
 
-    this._writeJsdocSynopsis(apiPackage);
+    this._writeAedocSynopsis(apiPackage);
   }
 
   protected visitApiNamespace(apiNamespace: ApiNamespace): void {
-    this._writeJsdocSynopsis(apiNamespace);
+    this._writeAedocSynopsis(apiNamespace);
 
     // We have decided to call the apiNamespace a 'module' in our
     // public API documentation.
@@ -149,14 +149,14 @@ export default class ApiFileGenerator extends ApiItemVisitor {
   }
 
   protected visitApiModuleVariable(apiModuleVariable: ApiModuleVariable): void {
-    this._writeJsdocSynopsis(apiModuleVariable);
+    this._writeAedocSynopsis(apiModuleVariable);
 
     this._indentedWriter.write(`${apiModuleVariable.name}: ${apiModuleVariable.type} = ${apiModuleVariable.value};`);
   }
 
   protected visitApiMember(apiMember: ApiMember): void {
     if (apiMember.documentation) {
-      this._writeJsdocSynopsis(apiMember);
+      this._writeAedocSynopsis(apiMember);
     }
 
     this._indentedWriter.write(apiMember.getDeclarationLine());
@@ -169,7 +169,7 @@ export default class ApiFileGenerator extends ApiItemVisitor {
   }
 
   protected visitApiFunction(apiFunction: ApiFunction): void {
-    this._writeJsdocSynopsis(apiFunction);
+    this._writeAedocSynopsis(apiFunction);
     this._indentedWriter.write(apiFunction.getDeclarationLine());
   }
 
@@ -178,11 +178,11 @@ export default class ApiFileGenerator extends ApiItemVisitor {
   }
 
   /**
-   * Writes a synopsis of the JSDoc comments, which indicates the release tag,
+   * Writes a synopsis of the AEDoc comments, which indicates the release tag,
    * whether the item has been documented, and any warnings that were detected
-   * by the Analzer.
+   * by the analysis.
    */
-  private _writeJsdocSynopsis(apiItem: ApiItem): void {
+  private _writeAedocSynopsis(apiItem: ApiItem): void {
     this._writeWarnings(apiItem);
     const lines: string[] = [];
 

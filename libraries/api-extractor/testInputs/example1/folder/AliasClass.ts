@@ -1,13 +1,13 @@
 
 /**
- * JSDOc for AliasClass
+ * AEDoc for AliasClass
  * @public
  */
 export class AliasClass {
   private readOnlyNumber: number;
 
   /**
-   * JSDOc for aliasFunc()
+   * AEDoc for aliasFunc()
    * @internal
    */
   public aliasFunc(): void {

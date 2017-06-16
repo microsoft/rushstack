@@ -1,7 +1,8 @@
 
 /**
- * A utility that analyzes a project, detects common JSDoc problems , and generates
- * a report of the exported Public API.
+ * API Extractor helps you build better TypeScript library packages.
+ * It helps with validation, documentation, and reviewing of the exported API
+ * for a TypeScript library.
  */
 declare const packageDescription: void;
 

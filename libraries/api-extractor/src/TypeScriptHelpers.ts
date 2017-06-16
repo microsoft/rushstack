@@ -13,17 +13,17 @@ export default class TypeScriptHelpers {
   /**
    * Start sequence is '/**'.
    */
-  public static jsDocStartRegEx: RegExp = /^\s*\/\*\*\s?/g;
+  public static jsdocStartRegEx: RegExp = /^\s*\/\*\*\s?/g;
 
   /**
    * End sequence is '*\/'.
    */
-  public static jsDocEndRegEx: RegExp = /\s*\*\/\s*$/g;
+  public static jsdocEndRegEx: RegExp = /\s*\*\/\s*$/g;
 
   /**
    * Intermediate lines of JSDoc comment character.
    */
-  public static jsDocIntermediateRegEx: RegExp = /^\s*[*]\s?/g;
+  public static jsdocIntermediateRegEx: RegExp = /^\s*[*]\s?/g;
 
   /**
    * Returns the Symbol for the provided Declaration.  This is a workaround for a missing
@@ -59,34 +59,34 @@ export default class TypeScriptHelpers {
    * Example:
    * "This \n is \n a comment" from "\/** This\r\n* is\r\n* a comment *\/
    */
-  public static getJsDocComments(node: ts.Node, errorLogger: (message: string) => void): string {
-    let jsDoc: string = '';
+  public static getJsdocComments(node: ts.Node, errorLogger: (message: string) => void): string {
+    let jsdoc: string = '';
     // tslint:disable-next-line:no-any
-    const nodeJsDocObjects: any = (node as any).jsDoc;
-    if (nodeJsDocObjects && nodeJsDocObjects.length > 0) {
+    const nodeJsdocObjects: any = (node as any).jsDoc;
+    if (nodeJsdocObjects && nodeJsdocObjects.length > 0) {
       // Use the JSDoc closest to the declaration
-      const lastJsDocIndex: number = nodeJsDocObjects.length - 1;
-      const jsDocFullText: string = nodeJsDocObjects[lastJsDocIndex].getText();
-      const jsDocLines: string[] = jsDocFullText.split(TypeScriptHelpers.newLineRegEx);
-      const jsDocStartSeqExists: boolean = TypeScriptHelpers.jsDocStartRegEx.test(jsDocLines[0].toString());
+      const lastJsdocIndex: number = nodeJsdocObjects.length - 1;
+      const jsdocFullText: string = nodeJsdocObjects[lastJsdocIndex].getText();
+      const jsdocLines: string[] = jsdocFullText.split(TypeScriptHelpers.newLineRegEx);
+      const jsdocStartSeqExists: boolean = TypeScriptHelpers.jsdocStartRegEx.test(jsdocLines[0].toString());
 
       // Report error for each missing sequence seperately
-      if (!jsDocStartSeqExists) {
-        errorLogger('JsDoc comment must begin with a \"/**\" sequence.');
+      if (!jsdocStartSeqExists) {
+        errorLogger('Jsdoc comment must begin with a \"/**\" sequence.');
         return '';
       }
-      const jsDocEndSeqExists: boolean = TypeScriptHelpers.jsDocEndRegEx.test(
-        jsDocLines[jsDocLines.length - 1].toString()
+      const jsdocEndSeqExists: boolean = TypeScriptHelpers.jsdocEndRegEx.test(
+        jsdocLines[jsdocLines.length - 1].toString()
       );
-      if (!jsDocEndSeqExists) {
-        errorLogger('JsDoc comment must end with a \"*/\" sequence.');
+      if (!jsdocEndSeqExists) {
+        errorLogger('Jsdoc comment must end with a \"*/\" sequence.');
         return '';
       }
 
-      jsDoc = TypeScriptHelpers.removeJsDocSequences(jsDocLines);
+      jsdoc = TypeScriptHelpers.removeJsdocSequences(jsdocLines);
     }
 
-    return jsDoc;
+    return jsdoc;
   }
 
   /**
@@ -95,15 +95,15 @@ export default class TypeScriptHelpers {
    * Example:
    * ["\/**", "*This \n", "*is \n", "*a comment", "*\/"] to "This \n is \n a comment"
    */
-  public static removeJsDocSequences(textLines: string[]): string {
+  public static removeJsdocSequences(textLines: string[]): string {
   // Remove '/**'
-    textLines[0] = textLines[0].replace(TypeScriptHelpers.jsDocStartRegEx, '');
+    textLines[0] = textLines[0].replace(TypeScriptHelpers.jsdocStartRegEx, '');
     if (textLines[0] === '') {
       textLines.shift();
     }
     // Remove '*/'
     textLines[textLines.length - 1] = textLines[textLines.length - 1].replace(
-      TypeScriptHelpers.jsDocEndRegEx,
+      TypeScriptHelpers.jsdocEndRegEx,
       '');
     if (textLines[textLines.length - 1] === '') {
       textLines.pop();
@@ -112,7 +112,7 @@ export default class TypeScriptHelpers {
     // Remove the leading '*' from any intermediate lines
     if (textLines.length > 0) {
       for (let i: number = 0; i < textLines.length; i++) {
-        textLines[i] = textLines[i].replace(TypeScriptHelpers.jsDocIntermediateRegEx, '');
+        textLines[i] = textLines[i].replace(TypeScriptHelpers.jsdocIntermediateRegEx, '');
       }
     }
 

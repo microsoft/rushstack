@@ -205,10 +205,10 @@ abstract class ApiItem {
   public documentation: ApiDocumentation;
 
   /**
-   * Indicates that this ApiItem does not have adequate JSDoc comments. If shouldHaveDocumentation()=true,
-   * and there is less than 10 characters of summary text in the JSDoc, then this will be set to true and
+   * Indicates that this ApiItem does not have adequate AEDoc comments. If shouldHaveDocumentation()=true,
+   * and there is less than 10 characters of summary text in the AEDoc, then this will be set to true and
    * noted in the API file produced by ApiFileGenerator.
-   * (The JSDoc text itself is not included in that report, because documentation
+   * (The AEDoc text itself is not included in that report, because documentation
    * changes do not require an API review, and thus should not cause a diff for that report.)
    */
   public needsDocumentation: boolean;
@@ -267,13 +267,13 @@ abstract class ApiItem {
 
     this.name = this.exportSymbol.name || '???';
 
-    let originalJsDoc: string = '';
+    let originalJsdoc: string = '';
     if (this.jsdocNode) {
-      originalJsDoc = TypeScriptHelpers.getJsDocComments(this.jsdocNode, this.reportError);
+      originalJsdoc = TypeScriptHelpers.getJsdocComments(this.jsdocNode, this.reportError);
     }
 
     this.documentation = new ApiDocumentation(
-      originalJsDoc,
+      originalJsdoc,
       this.extractor.docItemLoader,
       this.extractor,
       this.reportError,

@@ -338,7 +338,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "Check for missing JsDoc sequences changed."
+            "comment": "Check for missing JSDoc sequences changed."
           },
           {
             "comment": "Improved error messages"

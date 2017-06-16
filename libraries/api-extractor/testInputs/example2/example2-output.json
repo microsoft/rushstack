@@ -129,7 +129,7 @@
       "summary": [
         {
           "kind": "textDocElement",
-          "value": "This is a class to test JsDoc parser and this is description that can span to multiple lines and we need to make sure we parse this block correctly. It can contain a"
+          "value": "This is a class to test AEDoc parser and this is description that can span to multiple lines and we need to make sure we parse this block correctly. It can contain a"
         },
         {
           "kind": "linkDocElement",
