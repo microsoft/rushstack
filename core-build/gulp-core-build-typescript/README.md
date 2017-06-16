@@ -171,5 +171,3 @@ typescript.setConfig({
 # License
 
 [MIT](https://github.com/Microsoft/gulp-core-build-typescript/blob/master/LICENSE)
-
-EDITED
