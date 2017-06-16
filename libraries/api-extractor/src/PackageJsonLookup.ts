@@ -12,10 +12,10 @@ interface IPackageJson {
 }
 
 /**
- * Utilities for navigating packages.
+ * This class provides methods for finding the nearest "package.json" for a folder
+ * and retrieving the name of the package.  The results are cached.
  */
-export default class PackageJsonHelpers {
-
+export default class PackageJsonLookup {
   /**
    * Finds the path to the package folder of a given currentPath, by probing
    * upwards from the currentPath until a package.json file is found.
@@ -24,7 +24,7 @@ export default class PackageJsonHelpers {
    * @param currentPath - a path (relative or absolute) of the current location
    * @returns a relative path to the package folder
    */
-  public static tryFindPackagePathUpwards(currentPath: string): string {
+  public tryFindPackagePathUpwards(currentPath: string): string {
     let packageFolder: string = '';
 
     // no-constant-condition
@@ -49,7 +49,7 @@ export default class PackageJsonHelpers {
    * package.json file, it does not include the 'package.json' suffix.
    * @returns the name of the package (E.g. @microsoft/api-extractor)
    */
-  public static readPackageName(packageJsonPath: string): string {
+  public readPackageName(packageJsonPath: string): string {
     const packageJson: IPackageJson = JsonFile.loadJsonFile(path.join(packageJsonPath, 'package.json')) as IPackageJson;
     return packageJson.name;
   }
