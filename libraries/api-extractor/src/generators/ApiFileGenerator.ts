@@ -12,7 +12,7 @@ import ApiMember from '../definitions/ApiMember';
 import ApiNamespace from '../definitions/ApiNamespace';
 import ApiModuleVariable from '../definitions/ApiModuleVariable';
 import IndentedWriter from '../IndentedWriter';
-import { ApiTag } from '../definitions/ApiDocumentation';
+import { ReleaseTag } from '../definitions/ApiDocumentation';
 
 /**
   * For a library such as "example-package", ApiFileGenerator generates the "example-package.api.ts"
@@ -191,16 +191,16 @@ export default class ApiFileGenerator extends ApiItemVisitor {
     } else {
       let footer: string = '';
       switch (apiItem.documentation.apiTag) {
-        case ApiTag.Internal:
+        case ReleaseTag.Internal:
           footer += '@internal';
           break;
-        case ApiTag.Alpha:
+        case ReleaseTag.Alpha:
           footer += '@alpha';
           break;
-        case ApiTag.Beta:
+        case ReleaseTag.Beta:
           footer += '@beta';
           break;
-        case ApiTag.Public:
+        case ReleaseTag.Public:
           footer += '@public';
           break;
       }

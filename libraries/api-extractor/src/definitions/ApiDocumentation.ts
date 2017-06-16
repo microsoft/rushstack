@@ -18,7 +18,7 @@ import ResolvedApiItem from '../ResolvedApiItem';
   * @see https://onedrive.visualstudio.com/DefaultCollection/SPPPlat/_git/sp-client
   *      ?path=/common/docs/ApiPrinciplesAndProcess.md
   */
-export enum ApiTag {
+export enum ReleaseTag {
   /**
    * No API Tag was specified in the JSDoc summary.
    */
@@ -130,17 +130,17 @@ export default class ApiDocumentation {
 
   /**
    * A list of link elements to be processed after all basic documentation has been created
-   * for all items in the project. We save the processing for later because we need ApiTag
+   * for all items in the project. We save the processing for later because we need ReleaseTag
    * information before we can deem a link element is valid.
    * Example: If API item A has a link in it's documentation to API item B, then B must not
-   * have ApiTag.Internal.
+   * have ReleaseTag.Internal.
    */
   public incompleteLinks: ICodeLinkElement[];
 
   /**
    * A list of 'Tokens' that have been recognized as inheritdoc tokens that will be processed
    * after the basic documentation for all API items is complete. We save the processing for after
-   * because we need ApiTag information before we can deem an inheritdoc token as valid.
+   * because we need ReleaseTag information before we can deem an inheritdoc token as valid.
    */
   public incompleteInheritdocs: Token[];
 
@@ -149,7 +149,7 @@ export default class ApiDocumentation {
    * is considered Public API for third party developers, as well as its release
    * stage (alpha, beta, etc).
    */
-  public apiTag: ApiTag;
+  public apiTag: ReleaseTag;
 
   /**
    * True if the "@preapproved" tag was specified.
@@ -219,7 +219,7 @@ export default class ApiDocumentation {
     this.remarks = [];
     this.incompleteLinks = [];
     this.incompleteInheritdocs = [];
-    this.apiTag = ApiTag.None;
+    this.apiTag = ReleaseTag.None;
     const tokenizer: Tokenizer = new Tokenizer(this.originalJsDoc, this.reportError);
     this.summary = DocElementParser.parse(this, tokenizer);
 
@@ -274,22 +274,22 @@ export default class ApiDocumentation {
             break;
           case '@public':
             tokenizer.getToken();
-            this.apiTag = ApiTag.Public;
+            this.apiTag = ReleaseTag.Public;
             ++apiTagCount;
             break;
           case '@internal':
             tokenizer.getToken();
-            this.apiTag = ApiTag.Internal;
+            this.apiTag = ReleaseTag.Internal;
             ++apiTagCount;
             break;
           case '@alpha':
             tokenizer.getToken();
-            this.apiTag = ApiTag.Alpha;
+            this.apiTag = ReleaseTag.Alpha;
             ++apiTagCount;
             break;
           case '@beta':
             tokenizer.getToken();
-            this.apiTag = ApiTag.Beta;
+            this.apiTag = ReleaseTag.Beta;
             ++apiTagCount;
             break;
           case '@preapproved':
@@ -341,7 +341,7 @@ export default class ApiDocumentation {
       this.reportError('More than one API Tag was specified');
     }
 
-    if (this.preapproved && this.apiTag !== ApiTag.Internal) {
+    if (this.preapproved && this.apiTag !== ReleaseTag.Internal) {
       this.reportError('The @preapproved tag may only be applied to @internal defintions');
       this.preapproved = false;
     }
@@ -403,7 +403,7 @@ export default class ApiDocumentation {
 
       // If the apiDefinitionRef can not be found the resolcedApiItem will be
       // undefined and an error will have been reported via this.reportError
-      if (resolvedApiItem && resolvedApiItem.apiTag === ApiTag.Internal) {
+      if (resolvedApiItem && resolvedApiItem.apiTag === ReleaseTag.Internal) {
         this.reportError('Unable to link to \"Internal\" API item');
       }
     }

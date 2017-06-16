@@ -5,7 +5,7 @@ import * as ts from 'typescript';
 import * as path from 'path';
 import Extractor from '../../Extractor';
 import ApiStructuredType from '../ApiStructuredType';
-import ApiDocumentation, { ApiTag } from '../ApiDocumentation';
+import ApiDocumentation, { ReleaseTag } from '../ApiDocumentation';
 
 /* tslint:disable:no-function-expression - Mocha uses a poorly scoped "this" pointer */
 
@@ -87,7 +87,7 @@ describe('ApiDocumentation tests', function (): void {
   });
 
     it('Should parse API tag', function (): void {
-      const expecedApiTag: ApiTag = ApiTag.Public;
+      const expecedApiTag: ReleaseTag = ReleaseTag.Public;
 
       const actualDoc: ApiDocumentation = myDocumentedClass ? myDocumentedClass.documentation : undefined;
 

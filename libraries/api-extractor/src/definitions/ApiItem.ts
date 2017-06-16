@@ -4,7 +4,7 @@
 import * as ts from 'typescript';
 import * as path from 'path';
 import Extractor from '../Extractor';
-import ApiDocumentation, { ApiTag } from './ApiDocumentation';
+import ApiDocumentation, { ReleaseTag } from './ApiDocumentation';
 import TypeScriptHelpers from '../TypeScriptHelpers';
 import DocElementParser from '../DocElementParser';
 import PackageJsonHelpers from '../PackageJsonHelpers';
@@ -378,8 +378,8 @@ abstract class ApiItem {
     }
 
     if (this.kind === ApiItemKind.Package) {
-      if (this.documentation.apiTag !== ApiTag.None) {
-        const tag: string = '@' + ApiTag[this.documentation.apiTag].toLowerCase();
+      if (this.documentation.apiTag !== ReleaseTag.None) {
+        const tag: string = '@' + ReleaseTag[this.documentation.apiTag].toLowerCase();
         this.reportError(`The ${tag} tag is not allowed on the package, which is always public`);
       }
     }

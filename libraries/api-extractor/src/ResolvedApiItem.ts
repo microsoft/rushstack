@@ -1,5 +1,5 @@
 import ApiItem, { ApiItemKind } from './definitions/ApiItem';
-import { ApiTag } from './definitions/ApiDocumentation';
+import { ReleaseTag } from './definitions/ApiDocumentation';
 import { IDocElement, IParam } from './IDocElement';
 import { IDocItem } from './IDocItem';
 import ApiJsonFile from './generators/ApiJsonFile';
@@ -13,7 +13,7 @@ export default class ResolvedApiItem {
   public summary: IDocElement[];
   public remarks: IDocElement[];
   public deprecatedMessage: IDocElement[];
-  public apiTag: ApiTag;
+  public apiTag: ReleaseTag;
   public isBeta: boolean;
   public params: {[name: string]: IParam};
   public returnsMessage: IDocElement[];
@@ -32,7 +32,7 @@ export default class ResolvedApiItem {
       apiItem.documentation.summary,
       apiItem.documentation.remarks,
       apiItem.documentation.deprecatedMessage,
-      apiItem.documentation.apiTag === ApiTag.Beta,
+      apiItem.documentation.apiTag === ReleaseTag.Beta,
       apiItem.documentation.parameters,
       apiItem.documentation.returnsMessage,
       apiItem.documentation.apiTag,
@@ -68,7 +68,7 @@ export default class ResolvedApiItem {
       docItem.isBeta,
       parameters,
       returnsMessage,
-      ApiTag.Public,
+      ReleaseTag.Public,
       undefined
     );
   }
@@ -81,7 +81,7 @@ export default class ResolvedApiItem {
     isBeta: boolean,
     params:  {[name: string]: IParam},
     returnsMessage: IDocElement[],
-    apiTag: ApiTag,
+    apiTag: ReleaseTag,
     apiItem: ApiItem) {
     this.kind = kind;
     this.summary = summary;
