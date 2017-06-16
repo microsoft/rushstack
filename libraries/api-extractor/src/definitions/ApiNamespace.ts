@@ -34,7 +34,10 @@ export default class ApiNamespace extends ApiItemContainer {
         const followedSymbol: ts.Symbol = this.followAliases(exportSymbol);
 
         if (!followedSymbol.declarations) {
-          this.reportWarning(`Definition with no declarations: ${exportSymbol.name}`);
+          // This is an API Extractor bug, but it could happen e.g. if we upgrade to a new
+          // version of the TypeScript compiler that introduces new AST variations that we
+          // haven't tested before.
+          this.reportWarning(`The definition "${exportSymbol.name}" has no declarations`);
           continue;
         }
 
@@ -68,16 +71,16 @@ export default class ApiNamespace extends ApiItemContainer {
           continue;
         }
 
-        // Typescript VariableDeclaration exist within a VariableDeclarationList,
-        // the VariableDeclarationList exists within a VariableStatement and
-        // this is where the JSDoc comment Node exists.
+        // Typescript's VariableDeclaration AST nodes have an VariableDeclarationList parent,
+        // and the VariableDeclarationList exists within a VariableStatement, which is where
+        // the JSDoc comment Node can be found.
         // If there is no parent or grandparent of this VariableDeclartion then
         // we do not know how to obtain the JSDoc comment.
         let jsdocNode: ts.Node;
         if (!declaration.parent || !declaration.parent.parent ||
           declaration.parent.parent.kind !== ts.SyntaxKind.VariableStatement) {
-          this.reportWarning(`Export "${exportSymbol.name}" expected to have a 'grand' parent ` +
-            '"VariableStatement" in order to obtain JSDoc comment');
+          this.reportWarning(`Unable to locate the documentation node for "${exportSymbol.name}"; `
+            + `this may be an API Extractor bug`);
         } else {
           jsdocNode = declaration.parent.parent;
         }

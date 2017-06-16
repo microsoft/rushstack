@@ -53,6 +53,9 @@ export default class ApiPackage extends ApiItemContainer {
         const followedSymbol: ts.Symbol = this.followAliases(exportSymbol);
 
         if (!followedSymbol.declarations) {
+          // This is an API Extractor bug, but it could happen e.g. if we upgrade to a new
+          // version of the TypeScript compiler that introduces new AST variations that we
+          // haven't tested before.
           this.reportWarning(`Definition with no declarations: ${exportSymbol.name}`);
           continue;
         }
