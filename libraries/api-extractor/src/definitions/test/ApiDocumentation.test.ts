@@ -5,7 +5,7 @@ import * as ts from 'typescript';
 import * as path from 'path';
 import Extractor from '../../Extractor';
 import ApiStructuredType from '../ApiStructuredType';
-import ApiDocumentation, { ApiTag } from '../ApiDocumentation';
+import ApiDocumentation, { ReleaseTag } from '../ApiDocumentation';
 
 /* tslint:disable:no-function-expression - Mocha uses a poorly scoped "this" pointer */
 
@@ -66,12 +66,12 @@ describe('ApiDocumentation tests', function (): void {
        */
 
       assert.equal(capturedErrors.length, 8);
-      assert.equal(capturedErrors[0].message, 'Cannot provide summary in JsDoc if @inheritdoc tag is given');
-      assert.equal(capturedErrors[1].message, 'Unknown JSDoc tag "@badJsDocTag"');
+      assert.equal(capturedErrors[0].message, 'Cannot provide summary in AEDoc if @inheritdoc tag is given');
+      assert.equal(capturedErrors[1].message, 'Unknown AEDoc tag "@badAedocTag"');
       assert.equal(capturedErrors[2].message, 'Unknown tag name for inline tag.');
       assert.equal(capturedErrors[3].message, 'Too few parameters for @link inline tag.');
-      assert.equal(capturedErrors[4].message, 'Unexpected text in JSDoc comment: "can not contain a tag"');
-      assert.equal(capturedErrors[5].message, 'More than one API Tag was specified');
+      assert.equal(capturedErrors[4].message, 'Unexpected text in AEDoc comment: "can not contain a tag"');
+      assert.equal(capturedErrors[5].message, 'More than one release tag was specified');
       assert.equal(
         capturedErrors[6].message,
         'An API item reference must use the notation: "@scopeName/packageName:exportName.memberName"'
@@ -81,13 +81,13 @@ describe('ApiDocumentation tests', function (): void {
         'inheritdoc source item is deprecated. Must provide @deprecated message or remove @inheritdoc inline tag.');
   });
 
-    it('Should parse API tag', function (): void {
-      const expecedApiTag: ApiTag = ApiTag.Public;
+    it('Should parse release tag', function (): void {
+      const expectedReleaseTag: ReleaseTag = ReleaseTag.Public;
 
       const actualDoc: ApiDocumentation = myDocumentedClass ? myDocumentedClass.documentation : undefined;
 
       assert.isObject(actualDoc);
-      assert.equal(actualDoc.apiTag, expecedApiTag);
+      assert.equal(actualDoc.releaseTag, expectedReleaseTag);
     });
   });
 });

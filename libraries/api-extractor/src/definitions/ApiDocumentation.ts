@@ -12,35 +12,37 @@ import Extractor from '../Extractor';
 import ResolvedApiItem from '../ResolvedApiItem';
 
 /**
-  * An "API Tag" is a custom JSDoc tag which indicates whether an ApiItem definition
+  * A "release tag" is an AEDoc tag which indicates whether an ApiItem definition
   * is considered Public API for third party developers, as well as its release
   * stage (alpha, beta, etc).
   * @see https://onedrive.visualstudio.com/DefaultCollection/SPPPlat/_git/sp-client
   *      ?path=/common/docs/ApiPrinciplesAndProcess.md
   */
-export enum ApiTag {
+export enum ReleaseTag {
   /**
-   * No API Tag was specified in the JSDoc summary.
+   * No release tag was specified in the AEDoc summary.
    */
   None = 0,
   /**
-   * The API was documented as internal, i.e. not callable by third party developers.
+   * Indicates that an API item is meant only for usage by other NPM packages from the same
+   * maintainer. Third parties should never use "internal" APIs. (To emphasize this, their
+   * names are prefixed by underscores.)
    */
   Internal = 1,
   /**
-   * The API was documented as "alpha."  This status is not generally used.  See the
-   * ApiPrinciplesAndProcess.md for details.
+   * Indicates that an API item is eventually intended to be public, but currently is in an
+   * early stage of development. Third parties should not use "alpha" APIs.
    */
   Alpha = 2,
   /**
-   * The API was documented as callable by third party developers, but at their own risk.
-   * Web parts that call beta APIs should only be used for experimentation, because the Web Part
-   * will break if Microsoft changes the API signature later.
+   * Indicates that an API item has been released in an experimental state. Third parties are
+   * encouraged to try it and provide feedback. However, a "beta" API should NOT be used
+   * in production.
    */
   Beta = 3,
   /**
-   * The API was documented as callable by third party developers, with a guarantee that Microsoft will
-   * never make any breaking changes once the API is published.
+   * Indicates that an API item has been officially released. It is part of the supported
+   * contract (e.g. SemVer) for a package.
    */
   Public = 4
 }
@@ -65,15 +67,14 @@ export interface IReferenceResolver {
 
 export default class ApiDocumentation {
   /**
-   * Match JsDoc block tags and inline tags
+   * Match AEDoc block tags and inline tags
    * Example "@a @b@c d@e @f {whatever} {@link a} { @something } \@g" => ["@a", "@f", "{@link a}", "{ @something }"]
    */
-  public static readonly _jsdocTagsRegex: RegExp = /{\s*@(\\{|\\}|[^{}])*}|(?:^|\s)(\@[a-z_]+)(?=\s|$)/gi;
+  public static readonly _aedocTagsRegex: RegExp = /{\s*@(\\{|\\}|[^{}])*}|(?:^|\s)(\@[a-z_]+)(?=\s|$)/gi;
 
-  // For guidance about using these tags, please see this document:
-  // https://onedrive.visualstudio.com/DefaultCollection/SPPPlat/_git/sp-client
-  //    ?path=/common/docs/ApiPrinciplesAndProcess.md
-  private static _allowedRegularJsdocTags: string[] = [
+  // For guidance about using these tags, please see this documentation:
+  // https://github.com/Microsoft/web-build-tools/wiki/API-Extractor-~-AEDoc-tags
+  private static _allowedRegularAedocTags: string[] = [
     // (alphabetical order)
     '@alpha',
     '@beta',
@@ -90,22 +91,22 @@ export default class ApiDocumentation {
     '@remarks'
   ];
 
-  private static _allowedInlineJsdocTags: string[] = [
+  private static _allowedInlineAedocTags: string[] = [
     // (alphabetical order)
     '@inheritdoc',
     '@link'
   ];
 
   /**
-   * The original JsDoc comment.
+   * The original AEDoc comment.
    *
    * Example: "This is a summary. \{\@link a\} \@remarks These are remarks."
    */
-  public originalJsDoc: string;
+  public originalAedoc: string;
 
   /**
    * The docComment text string split into an array of ITokenItems.  The tokens are essentially either
-   * JSDoc tags (which start with the "@" character) or substrings containing the
+   * AEDoc tags (which start with the "@" character) or substrings containing the
    * remaining text.  The array can be empty, but not undefined.
    * Example:
    * docComment       = "Example Function\n@returns the number of items\n@internal  "
@@ -129,26 +130,26 @@ export default class ApiDocumentation {
 
   /**
    * A list of link elements to be processed after all basic documentation has been created
-   * for all items in the project. We save the processing for later because we need ApiTag
+   * for all items in the project. We save the processing for later because we need ReleaseTag
    * information before we can deem a link element is valid.
    * Example: If API item A has a link in it's documentation to API item B, then B must not
-   * have ApiTag.Internal.
+   * have ReleaseTag.Internal.
    */
   public incompleteLinks: ICodeLinkElement[];
 
   /**
    * A list of 'Tokens' that have been recognized as inheritdoc tokens that will be processed
    * after the basic documentation for all API items is complete. We save the processing for after
-   * because we need ApiTag information before we can deem an inheritdoc token as valid.
+   * because we need ReleaseTag information before we can deem an inheritdoc token as valid.
    */
   public incompleteInheritdocs: Token[];
 
   /**
-   * An "API Tag" is a custom JSDoc tag which indicates whether this definition
+   * A "release tag" is an AEDoc tag which indicates whether this definition
    * is considered Public API for third party developers, as well as its release
    * stage (alpha, beta, etc).
    */
-  public apiTag: ApiTag;
+  public releaseTag: ReleaseTag;
 
   /**
    * True if the "@preapproved" tag was specified.
@@ -191,7 +192,7 @@ export default class ApiDocumentation {
     extractor: Extractor,
     errorLogger: (message: string) => void,
     warnings: string[]) {
-    this.originalJsDoc = docComment;
+    this.originalAedoc = docComment;
     this.referenceResolver = referenceResolver;
     this.extractor = extractor;
     this.reportError = errorLogger;
@@ -218,11 +219,11 @@ export default class ApiDocumentation {
     this.remarks = [];
     this.incompleteLinks = [];
     this.incompleteInheritdocs = [];
-    this.apiTag = ApiTag.None;
-    const tokenizer: Tokenizer = new Tokenizer(this.originalJsDoc, this.reportError);
+    this.releaseTag = ReleaseTag.None;
+    const tokenizer: Tokenizer = new Tokenizer(this.originalAedoc, this.reportError);
     this.summary = DocElementParser.parse(this, tokenizer);
 
-    let apiTagCount: number = 0;
+    let releaseTagCount: number = 0;
     let parsing: boolean = true;
 
       while (parsing) {
@@ -263,7 +264,7 @@ export default class ApiDocumentation {
             tokenizer.getToken();
             this.deprecatedMessage = DocElementParser.parse(this, tokenizer);
             if (!this.deprecatedMessage || this.deprecatedMessage.length === 0) {
-              this.reportError(`deprecated description required after @deprecated JSDoc tag.`);
+              this.reportError(`deprecated description required after @deprecated AEDoc tag.`);
             }
             break;
           case '@internalremarks':
@@ -273,23 +274,23 @@ export default class ApiDocumentation {
             break;
           case '@public':
             tokenizer.getToken();
-            this.apiTag = ApiTag.Public;
-            ++apiTagCount;
+            this.releaseTag = ReleaseTag.Public;
+            ++releaseTagCount;
             break;
           case '@internal':
             tokenizer.getToken();
-            this.apiTag = ApiTag.Internal;
-            ++apiTagCount;
+            this.releaseTag = ReleaseTag.Internal;
+            ++releaseTagCount;
             break;
           case '@alpha':
             tokenizer.getToken();
-            this.apiTag = ApiTag.Alpha;
-            ++apiTagCount;
+            this.releaseTag = ReleaseTag.Alpha;
+            ++releaseTagCount;
             break;
           case '@beta':
             tokenizer.getToken();
-            this.apiTag = ApiTag.Beta;
-            ++apiTagCount;
+            this.releaseTag = ReleaseTag.Beta;
+            ++releaseTagCount;
             break;
           case '@preapproved':
             tokenizer.getToken();
@@ -305,7 +306,7 @@ export default class ApiDocumentation {
             break;
           default:
             tokenizer.getToken();
-            this._reportBadJSDocTag(token);
+            this._reportBadAedocTag(token);
         }
       } else if (token.type === TokenType.Inline) {
         switch (token.tag) {
@@ -317,7 +318,7 @@ export default class ApiDocumentation {
             break;
           default:
             tokenizer.getToken();
-            this._reportBadJSDocTag(token);
+            this._reportBadAedocTag(token);
             break;
         }
       } else if (token.type === TokenType.Text)  {
@@ -328,7 +329,7 @@ export default class ApiDocumentation {
         if (problemText.length > MAX_LENGTH) {
           problemText = problemText.substr(0, MAX_LENGTH - 3).trim() + '...';
         }
-        this.reportError(`Unexpected text in JSDoc comment: "${problemText}"`);
+        this.reportError(`Unexpected text in AEDoc comment: "${problemText}"`);
       } else {
         tokenizer.getToken();
         // This would be a program bug
@@ -336,11 +337,11 @@ export default class ApiDocumentation {
       }
     }
 
-    if (apiTagCount > 1) {
-      this.reportError('More than one API Tag was specified');
+    if (releaseTagCount > 1) {
+      this.reportError('More than one release tag was specified');
     }
 
-    if (this.preapproved && this.apiTag !== ApiTag.Internal) {
+    if (this.preapproved && this.releaseTag !== ReleaseTag.Internal) {
       this.reportError('The @preapproved tag may only be applied to @internal defintions');
       this.preapproved = false;
     }
@@ -402,7 +403,7 @@ export default class ApiDocumentation {
 
       // If the apiDefinitionRef can not be found the resolcedApiItem will be
       // undefined and an error will have been reported via this.reportError
-      if (resolvedApiItem && resolvedApiItem.apiTag === ApiTag.Internal) {
+      if (resolvedApiItem && resolvedApiItem.releaseTag === ReleaseTag.Internal) {
         this.reportError('Unable to link to \"Internal\" API item');
       }
     }
@@ -419,31 +420,31 @@ export default class ApiDocumentation {
     }
   }
 
-  private _reportBadJSDocTag(token: Token): void {
-    const supportsRegular: boolean = ApiDocumentation._allowedRegularJsdocTags.indexOf(token.tag) >= 0;
-    const supportsInline: boolean = ApiDocumentation._allowedInlineJsdocTags.indexOf(token.tag) >= 0;
+  private _reportBadAedocTag(token: Token): void {
+    const supportsRegular: boolean = ApiDocumentation._allowedRegularAedocTags.indexOf(token.tag) >= 0;
+    const supportsInline: boolean = ApiDocumentation._allowedInlineAedocTags.indexOf(token.tag) >= 0;
 
     if (!supportsRegular && !supportsInline) {
-      this.reportError(`Unknown JSDoc tag \"${token.tag}\"`);
+      this.reportError(`Unknown AEDoc tag \"${token.tag}\"`);
       return;
     }
 
     if (token.type === TokenType.Inline && !supportsInline) {
-      this.reportError(`The JSDoc tag \"${token.tag}\" must not use the non-inline syntax (no curly braces)`);
+      this.reportError(`The AEDoc tag \"${token.tag}\" must not use the non-inline syntax (no curly braces)`);
       return;
     }
     if (token.type === TokenType.Tag && !supportsRegular) {
-      this.reportError(`The JSDoc tag \"${token.tag}\" must use the inline syntax (with curly braces)`);
+      this.reportError(`The AEDoc tag \"${token.tag}\" must use the inline syntax (with curly braces)`);
       return;
     }
 
-    this.reportError(`The JSDoc tag \"${token.tag}\" is not supported in this context`);
+    this.reportError(`The AEDoc tag \"${token.tag}\" is not supported in this context`);
     return;
   }
 
   private _checkInheritDocStatus(): void {
     if (this.isDocInherited) {
-      this.reportError('Cannot provide additional JSDoc tags if @inheritdoc tag is present');
+      this.reportError('Cannot provide additional AEDoc tags if @inheritdoc tag is present');
     }
   }
 }

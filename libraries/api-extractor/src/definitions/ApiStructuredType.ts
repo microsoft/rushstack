@@ -166,7 +166,7 @@ export default class ApiStructuredType extends ApiItemContainer {
         this._setterNames.add(memberSymbol.name);
       }
       // Throw an error for duplicate names, because we use names as identifiers
-      // @todo #261549 Define a JsDoc tag to allow defining an identifier for overloaded methods eg. @overload method2
+      // @todo #261549 Define an AEDoc tag to allow defining an identifier for overloaded methods eg. @overload method2
       return;
     }
 

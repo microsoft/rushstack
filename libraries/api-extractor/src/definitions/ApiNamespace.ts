@@ -70,23 +70,23 @@ export default class ApiNamespace extends ApiItemContainer {
 
         // Typescript VariableDeclaration exist within a VariableDeclarationList,
         // the VariableDeclarationList exists within a VariableStatement and
-        // this is where the JsDoc comment Node exists.
+        // this is where the JSDoc comment Node exists.
         // If there is no parent or grandparent of this VariableDeclartion then
-        // we do not know how to obtain the JsDoc comment.
-        let jsDocNode: ts.Node;
+        // we do not know how to obtain the JSDoc comment.
+        let jsdocNode: ts.Node;
         if (!declaration.parent || !declaration.parent.parent ||
           declaration.parent.parent.kind !== ts.SyntaxKind.VariableStatement) {
           this.reportWarning(`Export "${exportSymbol.name}" expected to have a 'grand' parent ` +
-            '"VariableStatement" in order to obtain JsDoc comment');
+            '"VariableStatement" in order to obtain JSDoc comment');
         } else {
-          jsDocNode = declaration.parent.parent;
+          jsdocNode = declaration.parent.parent;
         }
 
         const exportMemberOptions: IApiItemOptions = {
           extractor: this.extractor,
           declaration,
           declarationSymbol: followedSymbol,
-          jsdocNode: jsDocNode,
+          jsdocNode: jsdocNode,
           exportSymbol
         };
 

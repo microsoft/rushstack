@@ -11,4 +11,4 @@ export function publicFunction(param: number): string {
   return 'hi' + param;
 }
 
-export { AlphaTaggedClass, BetaTaggedClass, PublicTaggedClass } from './folder/ApiTagTests';
+export { AlphaTaggedClass, BetaTaggedClass, PublicTaggedClass } from './folder/ReleaseTagTests';

@@ -129,7 +129,7 @@
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
-          "type": "ApiTag[]",
+          "type": "ReleaseTag[]",
           "deprecatedMessage": [],
           "summary": [],
           "remarks": [],

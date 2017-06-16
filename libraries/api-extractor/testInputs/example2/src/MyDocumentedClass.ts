@@ -25,15 +25,15 @@ export enum packageLocatedButExportNotFound {
 }
 
 /**
- * This JsDoc should raise an error since a summary is provided along
- * with an \@inheritdoc tag. We do not allow summary, remarks or param JsDocs
+ * This AEDoc should raise an error since a summary is provided along
+ * with an \@inheritdoc tag. We do not allow summary, remarks or param AEDoc tags
  * to be given since the inheritdoc information will overwrite it.
  * It will not appear in the output json files because of the error.
  *
  * {@inheritdoc @microsoft/sp-core-library:DisplayMode}
  */
 // (Error #1)
-// Error: Cannot provide summary in JsDoc if @inheritdoc tag is given
+// Error: Cannot provide summary in AEDoc if @inheritdoc tag is given
 export enum inheritDisplayModeError {
 
 }
@@ -73,7 +73,7 @@ export function functionWithIncompleteParameterType(param1, param2: string): boo
 }
 
 /**
- * This is a class to test JsDoc parser and this is description that can
+ * This is a class to test AEDoc parser and this is description that can
  * span to multiple lines and we need to make sure we parse this block
  * correctly. It can contain a {@link https://bing.com/ | bing home}. This block is entirely
  * valid and a correct documentation object should be built for this ApiItem.
@@ -98,7 +98,7 @@ export default class MyDocumentedClass {
 
   /**
    * This doc has an invalid tag that should throw an error
-   * @badJsDocTag
+   * @badAedocTag
    */
   // (Error #4)
   // Error: Unknown tag name for inline tag.
@@ -124,9 +124,9 @@ export default class MyDocumentedClass {
    * @internalremarks these remarks @beta can not contain a tag
    */
   // (Error #7)
-  // Unexpected text in JSDoc comment: "can not contain a tag"
+  // Unexpected text in AEDoc comment: "can not contain a tag"
   // (Error #8)
-  // Error: More than one API Tag was specified
+  // Error: More than one release tag was specified
   public betaTagMissingParam: string;
 
   /**

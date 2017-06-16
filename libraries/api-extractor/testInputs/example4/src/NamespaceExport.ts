@@ -1,10 +1,10 @@
 import MyClass from './MyClass';
 
 /**
- * This is a test for the namespace API type. It should be supported 
- * and appear in the *api.ts file. At the moment we only support 
+ * This is a test for the namespace API type. It should be supported
+ * and appear in the *api.ts file. At the moment we only support
  * a table of primitive types.
- * 
+ *
  * @public
  */
 export namespace NamespaceExport {
@@ -17,7 +17,7 @@ export namespace NamespaceExport {
    */
   export const numberConstant1: number = 24;
 
-  // Intential absent JsDoc
+  // Intentionally missing JSDoc
   export const booleanConstant1: boolean = true;
   /**
    * Complex types are not supported
@@ -25,19 +25,19 @@ export namespace NamespaceExport {
   export const complexType1: {} = {key1: 'value1', key2: 'value2'};
 
   /**
-   * This module variable should be const but it is not exported 
-   * so it should not raise a warning. 
+   * This module variable should be const but it is not exported
+   * so it should not raise a warning.
    */
   let _prop: string = 'will not incur warning';
 
   /**
-   * This variable should raise a warning for not 
+   * This variable should raise a warning for not
    * declaring a type.
    */
   export const missingType = 'will incur warning';
 
   /**
-   * This module variable should incur a warning because it does 
+   * This module variable should incur a warning because it does
    * not have the const modifier.
    */
   export let propTwo: string = 'warning missing const';
@@ -49,14 +49,14 @@ export namespace NamespaceExport {
   }
 
   /**
-   * This is a test for interfaces in a namespace. 
+   * This is a test for interfaces in a namespace.
    */
   export interface InterfacesNotAllowed {
   }
 
   /**
    * This is a test for a function in a namespace.
-   * @param value - this is a description for the param. 
+   * @param value - this is a description for the param.
    */
   export function aFunctionNotAllowed(value: number): void {
   }

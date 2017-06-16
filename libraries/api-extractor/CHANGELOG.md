@@ -196,7 +196,7 @@ Thu, 19 Jan 2017 20:04:40 GMT
 
 ### Patches
 
-- Check for missing JsDoc sequences changed.
+- Check for missing JSDoc sequences changed.
 - Improved error messages
 
 ## 1.1.0

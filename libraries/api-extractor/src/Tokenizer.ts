@@ -2,15 +2,15 @@ import Token, { TokenType } from './Token';
 import TypeScriptHelpers from './TypeScriptHelpers';
 
 /**
- * Handles the tokenization of a JSDoc comment.
+ * Handles the tokenization of an AEDoc comment.
  */
 export default class Tokenizer {
 
   /**
-   * Match JsDoc block tags and inline tags
+   * Match AEDoc block tags and inline tags
    * Example "@a @b@c d@e @f {whatever} {@link a} { @something } \@g" => ["@a", "@f", "{@link a}", "{ @something }"]
    */
-  private static _jsdocTagsRegex: RegExp = /{\s*@(\\{|\\}|[^{}])*}|(?:^|\s)(\@[a-z_]+)(?=\s|$)/gi;
+  private static _aedocTagsRegex: RegExp = /{\s*@(\\{|\\}|[^{}])*}|(?:^|\s)(\@[a-z_]+)(?=\s|$)/gi;
 
   /**
    * List of Tokens that have been tokenized.
@@ -27,9 +27,9 @@ export default class Tokenizer {
   /**
    * Converts a doc comment string into an array of Tokens. This processing is done so that docs
    * can be processed more strictly.
-   * Example: "This is a JsDoc description with a {@link URL} and more text. \@remarks example \@public"
+   * Example: "This is an AEDoc description with a {@link URL} and more text. \@remarks example \@public"
    * => [
-   *  {tokenType: 'text', parameter: 'This is a JsDoc description with a'},
+   *  {tokenType: 'text', parameter: 'This is an AEDoc description with a'},
    *  {tokenType: '@link', parameter: 'URL'},
    *  {tokenType: '\@remarks', parameter: ''},
    *  {tokenType: 'text', parameter: 'example'},
@@ -40,7 +40,7 @@ export default class Tokenizer {
     if (!docs) {
       return;
     }
-    const docEntries: string[] = TypeScriptHelpers.splitStringWithRegEx(docs, Tokenizer._jsdocTagsRegex);
+    const docEntries: string[] = TypeScriptHelpers.splitStringWithRegEx(docs, Tokenizer._aedocTagsRegex);
     const sanitizedTokens: string[] =  this._sanitizeDocEntries(docEntries); // remove white space and empty entries
 
     // process each sanitized doc string to a Token object
