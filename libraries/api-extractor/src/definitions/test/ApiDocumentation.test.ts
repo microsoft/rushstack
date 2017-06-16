@@ -65,8 +65,6 @@ describe('ApiDocumentation tests', function (): void {
        * - testInputs/example2/folder/MyDocumentedClass (10  errors)
        */
 
-      console.log(JSON.stringify(capturedErrors));
-
       assert.equal(capturedErrors.length, 8);
       assert.equal(capturedErrors[0].message, 'Cannot provide summary in JsDoc if @inheritdoc tag is given');
       assert.equal(capturedErrors[1].message, 'Unknown JSDoc tag "@badJsDocTag"');

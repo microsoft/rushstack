@@ -12,7 +12,7 @@ import ApiDocumentation from '../definitions/ApiDocumentation';
 import Extractor from './../Extractor';
 import Tokenizer from './../Tokenizer';
 
-const capturedErrors: {
+let capturedErrors: {
   message: string;
   fileName: string;
   lineNumber: number;
@@ -20,6 +20,15 @@ const capturedErrors: {
 
 function testErrorHandler(message: string, fileName: string, lineNumber: number): void {
   capturedErrors.push({ message, fileName, lineNumber });
+}
+
+function clearCapturedErrors(): void {
+  capturedErrors = [];
+}
+
+function assertCapturedErrors(expectedMessages: string[]): void {
+  assert.deepEqual(capturedErrors.map(x => x.message), expectedMessages,
+    'The captured errors did not match the expected output.');
 }
 
 const inputFolder: string = './testInputs/example2';
@@ -74,6 +83,7 @@ describe('DocElementParser tests', function (): void {
 
   describe('Basic Tests', (): void => {
     it('Should parse basic doc comment stream', (): void => {
+      clearCapturedErrors();
       const apiDoc: TestApiDocumentation = new TestApiDocumentation();
 
       const docs: string = 'This function parses docTokens for the apiLint website ' +
@@ -129,9 +139,11 @@ describe('DocElementParser tests', function (): void {
       JsonFile.saveJsonFile('./lib/paramDocExpected.json', JSON.stringify(expectedParam));
       JsonFile.saveJsonFile('./lib/paramDocActual.json', JSON.stringify(actualParam));
       TestFileComparer.assertFileMatchesExpected('./lib/paramDocActual.json', './lib/paramDocExpected.json');
+      assertCapturedErrors([]);
     });
 
     it('Should parse @deprecated correctly', (): void => {
+      clearCapturedErrors();
       const docs: string = '@deprecated - description of the deprecation';
       const tokenizer: Tokenizer = new Tokenizer(docs, console.log);
 
@@ -144,9 +156,11 @@ describe('DocElementParser tests', function (): void {
       JsonFile.saveJsonFile('./lib/deprecatedDocExpected.json', JSON.stringify(expectedDeprecated));
       JsonFile.saveJsonFile('./lib/deprecatedDocActual.json', JSON.stringify(actualDeprecated));
       TestFileComparer.assertFileMatchesExpected('./lib/deprecatedDocActual.json', './lib/deprecatedDocExpected.json');
+      assertCapturedErrors([]);
     });
 
     it('Should parse @see with nested link and/or text', (): void => {
+      clearCapturedErrors();
       const docs: string = 'Text describing the function’s purpose/nuances/context. \n' +
       '@see {@link https://github.com/OfficeDev/office-ui-fabric-react | The link will provide context}';
       const tokenizer: Tokenizer = new Tokenizer(docs, console.log);
@@ -170,9 +184,11 @@ describe('DocElementParser tests', function (): void {
       JsonFile.saveJsonFile('./lib/seeDocExpected.json', JSON.stringify(expectedSummary));
       JsonFile.saveJsonFile('./lib/seeDocActual.json', JSON.stringify(actualSummary));
       TestFileComparer.assertFileMatchesExpected('./lib/seeDocExpected.json', './lib/seeDocActual.json');
+      assertCapturedErrors([]);
     });
 
     it('Should parse @param with nested link and/or text', (): void => {
+      clearCapturedErrors();
       const apiDoc: TestApiDocumentation = new TestApiDocumentation();
 
       // Don't include the "@param" in the doc string, parseParam() expects this to be processed in a
@@ -202,9 +218,11 @@ describe('DocElementParser tests', function (): void {
         './lib/nestedParamDocActual.json',
         './lib/nestedParamDocExpected.json'
       );
+      assertCapturedErrors([]);
     });
 
     it('Should parse @link with url', (): void => {
+      clearCapturedErrors();
       const docs: string = '{@link https://microsoft.com}';
       const tokenizer: Tokenizer = new Tokenizer(docs, console.log);
 
@@ -222,11 +240,13 @@ describe('DocElementParser tests', function (): void {
       assert.equal(linkDocElement.referenceType, 'href');
       assert.equal(linkDocElement.targetUrl, 'https://microsoft.com');
       assert.equal(linkDocElement.value, '');
+      assertCapturedErrors([]);
     });
 
     it('Should parse @link with url and text', (): void => {
-     const docs: string = '{@link https://microsoft.com | microsoft home}';
-     const tokenizer: Tokenizer = new Tokenizer(docs, console.log);
+      clearCapturedErrors();
+      const docs: string = '{@link https://microsoft.com | microsoft home}';
+      const tokenizer: Tokenizer = new Tokenizer(docs, console.log);
 
       let docElements: IDocElement[];
       /* tslint:disable-next-line:no-any */
@@ -242,9 +262,29 @@ describe('DocElementParser tests', function (): void {
       assert.equal(linkDocElement.referenceType, 'href');
       assert.equal(linkDocElement.targetUrl, 'https://microsoft.com');
       assert.equal(linkDocElement.value, 'microsoft home');
+      assertCapturedErrors([]);
+    });
+
+    it('Should reject @link with missing pipe', (): void => {
+      clearCapturedErrors();
+
+      const docs: string = '{@link https://microsoft.com microsoft home}';
+      const tokenizer: Tokenizer = new Tokenizer(docs, console.log);
+
+      let docElements: IDocElement[];
+      /* tslint:disable-next-line:no-any */
+      let errorMessage: any;
+      try {
+        docElements = DocElementParser.parse(myDocumentedClass.documentation, tokenizer);
+      } catch (error) {
+        errorMessage = error;
+      }
+      assert.isUndefined(errorMessage);
+      assertCapturedErrors(['Invalid @link parameter, url must be a single string.']);
     });
 
     it('Should parse @link with API defintion reference', (): void => {
+      clearCapturedErrors();
       const docs: string = '{@link @microsoft/sp-core-library:Guid.equals}';
       const tokenizer: Tokenizer = new Tokenizer(docs, console.log);
 
@@ -264,9 +304,11 @@ describe('DocElementParser tests', function (): void {
       assert.equal(linkDocElement.packageName, 'sp-core-library');
       assert.equal(linkDocElement.exportName, 'Guid');
       assert.equal(linkDocElement.memberName, 'equals');
+      assertCapturedErrors([]);
     });
 
     it('Should parse @link with API defintion reference and text', (): void => {
+      clearCapturedErrors();
       const docs: string = '{@link @microsoft/sp-core-library:Guid.equals | Guid equals}';
       const tokenizer: Tokenizer = new Tokenizer(docs, console.log);
 
@@ -287,9 +329,11 @@ describe('DocElementParser tests', function (): void {
       assert.equal(linkDocElement.exportName, 'Guid');
       assert.equal(linkDocElement.memberName, 'equals');
       assert.equal(linkDocElement.value, 'Guid equals');
+      assertCapturedErrors([]);
     });
 
     it('Should report errors @link', (): void => {
+      clearCapturedErrors();
       const docs: string = '{@link @microsoft/sp-core-library:Guid.equals | Guid equals | something}';
       const tokenizer: Tokenizer = new Tokenizer(docs, console.log);
 
@@ -302,6 +346,7 @@ describe('DocElementParser tests', function (): void {
         errorMessage = error;
       }
       assert.isNotNull(errorMessage);
+      assertCapturedErrors(['Invalid @link parameters, at most one pipe character allowed.']);
     });
   });
 });
