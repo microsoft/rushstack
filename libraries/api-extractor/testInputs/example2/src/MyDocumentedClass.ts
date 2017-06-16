@@ -78,13 +78,9 @@ export function functionWithIncompleteParameterType(param1, param2: string): boo
  * correctly. It can contain a {@link https://bing.com/ | bing home}. This block is entirely
  * valid and a correct documentation object should be built for this ApiItem.
  *
- * @summary Mock class for testing JsDoc parser
  * @public
+ * @remarks Mock class for testing JsDoc parser
  */
-// (Error #2)
-// Error: The JSDoc tag "@summary" is not supported in this context
-// (Error #4)
-// Error: Unexpected text in JSDoc comment: "Mock class for testing JsDoc parser"
 export default class MyDocumentedClass {
 
 
