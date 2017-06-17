@@ -1,6 +1,14 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 14 Jun 2017 13:03:40 GMT and should not be manually modified.
+This log was last generated on Sat, 17 Jun 2017 01:02:59 GMT and should not be manually modified.
+
+## 2.0.9
+Sat, 17 Jun 2017 01:02:59 GMT
+
+### Patches
+
+- The unsupported @summary tag is now reported as an error
+- Use a cache to speed up package.json lookups
 
 ## 2.0.8
 Wed, 14 Jun 2017 13:03:40 GMT

@@ -2,6 +2,21 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "2.0.9",
+      "tag": "@microsoft/api-extractor_v2.0.9",
+      "date": "Sat, 17 Jun 2017 01:02:59 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "The unsupported @summary tag is now reported as an error"
+          },
+          {
+            "comment": "Use a cache to speed up package.json lookups"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.8",
       "tag": "@microsoft/api-extractor_v2.0.8",
       "date": "Wed, 14 Jun 2017 13:03:40 GMT",
