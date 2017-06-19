@@ -101,7 +101,7 @@ describe('DocElementParser tests', function (): void {
               kind: 'linkDocElement',
               referenceType: 'href',
               targetUrl: 'https://github.com/OfficeDev/office-ui-fabric-react',
-              value: ''
+              value: 'https://github.com/OfficeDev/office-ui-fabric-react'
         } as IHrefLinkElement
       ];
       const actualSummary: IDocElement[] = DocElementParser.parse(myDocumentedClass.documentation, tokenizer);
@@ -203,7 +203,7 @@ describe('DocElementParser tests', function (): void {
               kind: 'linkDocElement',
               referenceType: 'href',
               targetUrl: 'http://wikipedia.org/pixel_units',
-              value: ''
+              value: 'http://wikipedia.org/pixel_units'
           } as IHrefLinkElement
       ];
       const expectedParam: IParam = {
@@ -239,7 +239,7 @@ describe('DocElementParser tests', function (): void {
       const linkDocElement: IHrefLinkElement = (docElements[0] as IHrefLinkElement);
       assert.equal(linkDocElement.referenceType, 'href');
       assert.equal(linkDocElement.targetUrl, 'https://microsoft.com');
-      assert.equal(linkDocElement.value, '');
+      assert.equal(linkDocElement.value, 'https://microsoft.com');
       assertCapturedErrors([]);
     });
 
@@ -284,7 +284,25 @@ describe('DocElementParser tests', function (): void {
         +  ' contains spaces, encode them using %20; for display text, use a pipe delimiter ("|")']);
     });
 
-    it('Should parse @link with API defintion reference', (): void => {
+    it('Should reject @link with bad display text character', (): void => {
+      clearCapturedErrors();
+
+      const docs: string = '{@link https://example.com | Ex@ample}';
+      const tokenizer: Tokenizer = new Tokenizer(docs, console.log);
+
+      let docElements: IDocElement[];
+      /* tslint:disable-next-line:no-any */
+      let errorMessage: any;
+      try {
+        docElements = DocElementParser.parse(myDocumentedClass.documentation, tokenizer);
+      } catch (error) {
+        errorMessage = error;
+      }
+      assert.isUndefined(errorMessage);
+      assertCapturedErrors(['The {@link} tag\'s display text contains an unsupported character: "@"']);
+    });
+
+    it('Should parse @link with API definition reference', (): void => {
       clearCapturedErrors();
       const docs: string = '{@link @microsoft/sp-core-library:Guid.equals}';
       const tokenizer: Tokenizer = new Tokenizer(docs, console.log);

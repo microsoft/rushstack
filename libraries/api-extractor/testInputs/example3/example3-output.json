@@ -344,7 +344,8 @@
           "scopeName": "",
           "packageName": "",
           "exportName": "publicEnum",
-          "memberName": ""
+          "memberName": "",
+          "value": "publicEnum"
         },
         {
           "kind": "linkDocElement",
@@ -352,7 +353,8 @@
           "scopeName": "",
           "packageName": "",
           "exportName": "_internalEnum",
-          "memberName": ""
+          "memberName": "",
+          "value": "_internalEnum"
         }
       ],
       "remarks": [],
