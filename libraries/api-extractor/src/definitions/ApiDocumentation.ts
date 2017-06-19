@@ -339,7 +339,7 @@ export default class ApiDocumentation {
     }
 
     if (releaseTagCount > 1) {
-      this.reportError('More than one one release tag (@alpha, @beta, etc) was specified');
+      this.reportError('More than one release tag (@alpha, @beta, etc) was specified');
     }
 
     if (this.preapproved && this.releaseTag !== ReleaseTag.Internal) {

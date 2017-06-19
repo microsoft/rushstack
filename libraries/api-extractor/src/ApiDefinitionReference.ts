@@ -136,7 +136,7 @@ export default class ApiDefinitionReference {
     }
 
     if (!apiReferenceExpr.match(ApiDefinitionReference._exportRegEx)) {
-      throw reportError(`API item reference contains invalid characters: "${apiReferenceExpr}"`);
+      throw reportError(`The API item reference contains invalid characters: "${apiReferenceExpr}"`);
     }
 
     return ApiDefinitionReference.createFromParts(apiDefRefParts);
