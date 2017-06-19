@@ -352,9 +352,9 @@
           "referenceType": "code",
           "scopeName": "",
           "packageName": "",
-          "exportName": "internalEnum",
+          "exportName": "_internalEnum",
           "memberName": "",
-          "value": "internalEnum"
+          "value": "_internalEnum"
         }
       ],
       "remarks": [],

@@ -42,6 +42,20 @@ export class BetaTaggedClass {
    */
   public alphaMethod(): void {
   }
+
+  /**
+   * This internal method should have an underscore.
+   * @internal
+   */
+  public internalMethodMissingUnderscore(): void {
+  }
+
+  /**
+   * This alpha method should have an underscore.
+   * @alpha
+   */
+  public _alphaMethodWithBadUnderscore(): void {
+  }
 }
 
 /**
