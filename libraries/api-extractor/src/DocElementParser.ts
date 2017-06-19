@@ -9,7 +9,7 @@ import ResolvedApiItem from './ResolvedApiItem';
 export default class DocElementParser {
   /**
    * Used to validate the display text for an \@link tag.  The display text can contain any
-   * characters except for certain reserved AEDoc delimiters: "@", "|", "{", "}".
+   * characters except for certain AEDoc delimiters: "@", "|", "{", "}".
    * This RegExp matches the first bad character.
    * Example: "Microsoft's {spec}" --> "{"
    */
@@ -152,7 +152,7 @@ export default class DocElementParser {
       return undefined;
     }
 
-    const addressPart: string = pipeSplitContent.length > 0 ? pipeSplitContent[0] : '';
+    const addressPart: string = pipeSplitContent[0];
     const displayTextPart: string = pipeSplitContent.length > 1 ? pipeSplitContent[1] : '';
 
     // Try to guess if the tokenContent is a link or API definition reference
