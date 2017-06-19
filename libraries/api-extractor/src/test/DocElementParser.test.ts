@@ -101,7 +101,7 @@ describe('DocElementParser tests', function (): void {
               kind: 'linkDocElement',
               referenceType: 'href',
               targetUrl: 'https://github.com/OfficeDev/office-ui-fabric-react',
-              value: ''
+              value: 'https://github.com/OfficeDev/office-ui-fabric-react'
         } as IHrefLinkElement
       ];
       const actualSummary: IDocElement[] = DocElementParser.parse(myDocumentedClass.documentation, tokenizer);
@@ -203,7 +203,7 @@ describe('DocElementParser tests', function (): void {
               kind: 'linkDocElement',
               referenceType: 'href',
               targetUrl: 'http://wikipedia.org/pixel_units',
-              value: ''
+              value: 'http://wikipedia.org/pixel_units'
           } as IHrefLinkElement
       ];
       const expectedParam: IParam = {
@@ -239,7 +239,7 @@ describe('DocElementParser tests', function (): void {
       const linkDocElement: IHrefLinkElement = (docElements[0] as IHrefLinkElement);
       assert.equal(linkDocElement.referenceType, 'href');
       assert.equal(linkDocElement.targetUrl, 'https://microsoft.com');
-      assert.equal(linkDocElement.value, '');
+      assert.equal(linkDocElement.value, 'https://microsoft.com');
       assertCapturedErrors([]);
     });
 
