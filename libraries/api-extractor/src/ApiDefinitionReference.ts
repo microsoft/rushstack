@@ -131,11 +131,12 @@ export default class ApiDefinitionReference {
       apiDefRefParts.memberName = parts[2] ? parts[2] : ''; // e.g. equals
     } else {
       // the export name is required
-       throw reportError(`Api reference expression contains invalid characters: ${apiReferenceExpr}`);
+       throw reportError(`The API item reference contains an invalid "exportName.memberName"`
+        + ` expression: "${apiReferenceExpr}"`);
     }
 
     if (!apiReferenceExpr.match(ApiDefinitionReference._exportRegEx)) {
-      throw reportError(`Api reference expression contains invalid characters: ${apiReferenceExpr}`);
+      throw reportError(`The API item reference contains invalid characters: "${apiReferenceExpr}"`);
     }
 
     return ApiDefinitionReference.createFromParts(apiDefRefParts);

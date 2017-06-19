@@ -18,13 +18,13 @@ describe('Token tests', function (): void {
       assert.equal(token.tag, '');
       assert.equal(token.text, 'Some text');
 
-      token = new Token(TokenType.Tag, '@tagA');
-      assert.equal(token.type, TokenType.Tag);
+      token = new Token(TokenType.BlockTag, '@tagA');
+      assert.equal(token.type, TokenType.BlockTag);
       assert.equal(token.tag, '@tagA');
       assert.equal(token.text, '');
 
-      token = new Token(TokenType.Inline, '@link', 'http://www.microsoft.com');
-      assert.equal(token.type, TokenType.Inline);
+      token = new Token(TokenType.InlineTag, '@link', 'http://www.microsoft.com');
+      assert.equal(token.type, TokenType.InlineTag);
       assert.equal(token.tag, '@link');
       assert.equal(token.text, 'http://www.microsoft.com');
     });
@@ -42,7 +42,7 @@ describe('Token tests', function (): void {
       assert.equal(errorThrown, false);
 
       try {
-        token.requireType(TokenType.Tag);
+        token.requireType(TokenType.BlockTag);
       } catch (error) {
         errorThrown = true;
       }

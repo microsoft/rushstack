@@ -37,11 +37,11 @@ describe('Tokenizer tests', function (): void {
 
       const expectedTokens: Token[] = [
         new Token(TokenType.Text, '', 'this is a mock documentation'),
-        new Token(TokenType.Tag, '@taga'),
+        new Token(TokenType.BlockTag, '@taga'),
         new Token(TokenType.Text, '', 'hi'),
-        new Token(TokenType.Tag, '@tagb'),
+        new Token(TokenType.BlockTag, '@tagb'),
         new Token(TokenType.Text, '', 'hello @invalid@tag email@domain.com'),
-        new Token(TokenType.Tag, '@tagc'),
+        new Token(TokenType.BlockTag, '@tagc'),
         new Token(TokenType.Text, '', 'this is'),
         new Token(TokenType.Text, '', 'and this is {just curly braces}')
       ];
@@ -54,7 +54,7 @@ describe('Tokenizer tests', function (): void {
 
     it('tokenizeInline()', function (): void {
       const token: string = '{    @link   https://bing.com  |  Bing  }';
-      const expectedToken: Token = new Token(TokenType.Inline, '@link', 'https://bing.com | Bing');
+      const expectedToken: Token = new Token(TokenType.InlineTag, '@link', 'https://bing.com | Bing');
       const actualToken: Token = testTokenizer.tokenizeInline(token);
       assert.equal(expectedToken.type, actualToken.type);
       assert.equal(expectedToken.tag, actualToken.tag);

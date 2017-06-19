@@ -96,8 +96,10 @@ export default class ApiStructuredType extends ApiItemContainer {
     // Throw errors for setters that don't have a corresponding getter
     this._setterNames.forEach((setterName: string) => {
       if (!this.getMemberItem(setterName)) {
-        this.reportError(`Found setter named ${setterName} with no corresponding getter. \
-          WriteOnly properties are prohibited.`);
+        // Normally we treat API design changes as warnings rather than errors.  However,
+        // a missing getter is bizarre enough that it's reasonable to assume it's a mistake,
+        // not a conscious design choice.
+        this.reportError(`The "${setterName}" property has a setter, but no a getter`);
       }
     });
   }

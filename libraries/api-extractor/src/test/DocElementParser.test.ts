@@ -221,7 +221,7 @@ describe('DocElementParser tests', function (): void {
       assertCapturedErrors([]);
     });
 
-    it('Should parse @link with url', (): void => {
+    it('Should parse @link with URL', (): void => {
       clearCapturedErrors();
       const docs: string = '{@link https://microsoft.com}';
       const tokenizer: Tokenizer = new Tokenizer(docs, console.log);
@@ -243,7 +243,7 @@ describe('DocElementParser tests', function (): void {
       assertCapturedErrors([]);
     });
 
-    it('Should parse @link with url and text', (): void => {
+    it('Should parse @link with URL and text', (): void => {
       clearCapturedErrors();
       const docs: string = '{@link https://microsoft.com | microsoft home}';
       const tokenizer: Tokenizer = new Tokenizer(docs, console.log);
@@ -280,7 +280,8 @@ describe('DocElementParser tests', function (): void {
         errorMessage = error;
       }
       assert.isUndefined(errorMessage);
-      assertCapturedErrors(['Invalid @link parameter, url must be a single string.']);
+      assertCapturedErrors(['The {@link} tag contains additional spaces after the URL; if the URL'
+        +  ' contains spaces, encode them using %20; for display text, use a pipe delimiter ("|")']);
     });
 
     it('Should parse @link with API defintion reference', (): void => {
@@ -346,7 +347,7 @@ describe('DocElementParser tests', function (): void {
         errorMessage = error;
       }
       assert.isNotNull(errorMessage);
-      assertCapturedErrors(['Invalid @link parameters, at most one pipe character allowed.']);
+      assertCapturedErrors(['The {@link} tag contains more than one pipe character ("|")']);
     });
   });
 });

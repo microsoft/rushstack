@@ -66,20 +66,19 @@ describe('ApiDocumentation tests', function (): void {
        */
 
       assert.equal(capturedErrors.length, 8);
-      assert.equal(capturedErrors[0].message, 'Cannot provide summary in AEDoc if @inheritdoc tag is given');
-      assert.equal(capturedErrors[1].message, 'Unknown AEDoc tag "@badAedocTag"');
-      assert.equal(capturedErrors[2].message, 'Unknown tag name for inline tag.');
-      assert.equal(capturedErrors[3].message, 'Too few parameters for @link inline tag.');
+      assert.equal(capturedErrors[0].message, 'A summary block is not allowed here, because the @inheritdoc'
+        + ' target provides the summary');
+      assert.equal(capturedErrors[1].message, 'The JSDoc tag "@badAedocTag" is not supported by AEDoc');
+      assert.equal(capturedErrors[2].message, 'Invalid call to _tokenizeInline()');
+      assert.equal(capturedErrors[3].message, 'The {@link} tag must include a URL or API item reference');
       assert.equal(capturedErrors[4].message, 'Unexpected text in AEDoc comment: "can not contain a tag"');
-      assert.equal(capturedErrors[5].message, 'More than one release tag was specified');
-      assert.equal(
-        capturedErrors[6].message,
-        'An API item reference must use the notation: "@scopeName/packageName:exportName.memberName"'
+      assert.equal(capturedErrors[5].message, 'More than one release tag (@alpha, @beta, etc) was specified');
+      assert.equal(capturedErrors[6].message, 'An API item reference must use the notation:'
+        + ' "@scopeName/packageName:exportName.memberName"'
       );
-      assert.equal(
-        capturedErrors[7].message,
-        'inheritdoc source item is deprecated. Must provide @deprecated message or remove @inheritdoc inline tag.');
-  });
+      assert.equal(capturedErrors[7].message, 'The @inheritdoc target has been marked as @deprecated.  '
+        + 'Add a @deprecated message here, or else remove the @inheritdoc relationship.');
+    });
 
     it('Should parse release tag', function (): void {
       const expectedReleaseTag: ReleaseTag = ReleaseTag.Public;

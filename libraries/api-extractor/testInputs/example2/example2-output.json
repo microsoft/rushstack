@@ -216,7 +216,7 @@
           "summary": [
             {
               "kind": "textDocElement",
-              "value": "This doc has {curly braces} which is valid but the inline @link token is missing a pipe between the url and the display text"
+              "value": "This doc has {curly braces} which is valid but the inline @link token is missing a pipe between the URL and the display text"
             },
             {
               "kind": "textDocElement",

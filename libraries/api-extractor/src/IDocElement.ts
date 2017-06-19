@@ -33,7 +33,7 @@ export interface IHrefLinkElement extends IBaseDocElement {
   referenceType: 'href';
 
   /**
-   * The url that this link element references.
+   * The URL that this link element references.
    */
   targetUrl: string;
 
@@ -74,7 +74,7 @@ export interface ICodeLinkElement extends IBaseDocElement {
   memberName?: string;
 
   /**
-   * Optional text to display in place of the API reference string url that is
+   * Optional text to display in place of the API reference string URL that is
    * constructed from the ts-spec tool.
    */
   value?: string;
