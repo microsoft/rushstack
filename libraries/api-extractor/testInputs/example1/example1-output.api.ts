@@ -6,6 +6,7 @@ class ___proto__ {
 // WARNING: propertyWithNoType has incomplete type information
 // @internal
 class _InternalClass {
+  public _internalMethodWithRedundantUnderscore(): void;
   // (undocumented)
   public test(): void;
 }
@@ -42,10 +43,16 @@ class AlphaTaggedClass {
 
 // @beta
 class BetaTaggedClass {
+  // WARNING: The underscore prefix ("_") should only be used with definitions that are explicitly marked as @internal
+  // @alpha
+  public _alphaMethodWithBadUnderscore(): void;
   // @internal
   public _internalMethod(): void;
   // @alpha
   public alphaMethod(): void;
+  // WARNING: Because this definition is explicitly marked as @internal, an underscore prefix ("_") should be added to its name
+  // @internal
+  public internalMethodMissingUnderscore(): void;
   public plainMethod(): void;
 }
 

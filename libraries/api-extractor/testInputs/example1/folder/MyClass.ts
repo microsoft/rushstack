@@ -44,6 +44,13 @@ export class InternalClass {
   public test(): void {
     console.log('this is a public API');
   }
+
+  /**
+   * This *implicitly* internal method should NOT have an underscore.
+   * API Extractor currently does NOT issue a warning for this case.
+   */
+  public _internalMethodWithRedundantUnderscore(): void {
+  }
 }
 
 /**

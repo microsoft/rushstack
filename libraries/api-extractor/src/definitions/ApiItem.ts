@@ -403,8 +403,8 @@ abstract class ApiItem {
       }
     } else {
       if (this.documentation.releaseTag === ReleaseTag.Internal) {
-        this.reportWarning('Because this definition is marked as @internal, an underscore prefix ("_") should'
-          + ' be added to its name');
+        this.reportWarning('Because this definition is explicitly marked as @internal, an underscore prefix ("_")'
+          + ' should be added to its name');
       }
     }
   }
