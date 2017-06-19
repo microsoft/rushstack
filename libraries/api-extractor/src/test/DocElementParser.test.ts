@@ -284,7 +284,25 @@ describe('DocElementParser tests', function (): void {
         +  ' contains spaces, encode them using %20; for display text, use a pipe delimiter ("|")']);
     });
 
-    it('Should parse @link with API defintion reference', (): void => {
+    it('Should reject @link with bad display text character', (): void => {
+      clearCapturedErrors();
+
+      const docs: string = '{@link https://example.com | Ex@ample}';
+      const tokenizer: Tokenizer = new Tokenizer(docs, console.log);
+
+      let docElements: IDocElement[];
+      /* tslint:disable-next-line:no-any */
+      let errorMessage: any;
+      try {
+        docElements = DocElementParser.parse(myDocumentedClass.documentation, tokenizer);
+      } catch (error) {
+        errorMessage = error;
+      }
+      assert.isUndefined(errorMessage);
+      assertCapturedErrors(['The {@link} tag\'s display text contains an unsupported character: "@"']);
+    });
+
+    it('Should parse @link with API definition reference', (): void => {
       clearCapturedErrors();
       const docs: string = '{@link @microsoft/sp-core-library:Guid.equals}';
       const tokenizer: Tokenizer = new Tokenizer(docs, console.log);

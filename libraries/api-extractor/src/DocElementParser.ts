@@ -199,7 +199,7 @@ export default class DocElementParser {
     if (displayTextPart) {
       const match: RegExpExecArray | undefined = this._displayTextBadCharacterRegEx.exec(displayTextPart);
       if (match) {
-        documentation.reportError(`The {@link} tag\'s display text contains an unsupported `
+        documentation.reportError(`The {@link} tag\'s display text contains an unsupported`
           + ` character: "${match[0]}"`);
         return undefined;
       }
