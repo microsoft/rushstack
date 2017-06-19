@@ -7,13 +7,13 @@ import Tokenizer from './Tokenizer';
 import ResolvedApiItem from './ResolvedApiItem';
 
 export default class DocElementParser {
-
   /**
-   * Matches only strings that contain characters for words.
-   * Any non word characters or spaces, will be present in the third entry in the match results
-   * if they exist.
+   * Used to validate the display text for an \@link tag.  The display text can contain any
+   * characters except for certain reserved AEDoc delimiters: "@", "|", "{", "}".
+   * This RegExp matches the first bad character.
+   * Example: "Microsoft's {spec}" --> "{"
    */
-  private static _wordRegEx: RegExp = /^([\w\s]*)/;
+  private static _displayTextBadCharacterRegEx: RegExp = /[@|{}]/;
 
   /**
    * Matches a href reference. This is used to get an idea whether a given reference is for an href
@@ -142,67 +142,72 @@ export default class DocElementParser {
     }
 
     // Make sure there are no extra pipes
-    let pipeSplitContent: string[] = tokenItem.text.split('|');
-    pipeSplitContent = pipeSplitContent.map( value => {
+    const pipeSplitContent: string[] = tokenItem.text.split('|').map(value => {
       if (value) {
         return value.trim();
       }
     });
     if (pipeSplitContent.length > 2) {
       documentation.reportError('The {@link} tag contains more than one pipe character ("|")');
-      return;
+      return undefined;
     }
+
+    const addressPart: string = pipeSplitContent.length > 0 ? pipeSplitContent[0] : '';
+    const displayTextPart: string = pipeSplitContent.length > 1 ? pipeSplitContent[1] : '';
 
     // Try to guess if the tokenContent is a link or API definition reference
     let linkDocElement: ICodeLinkElement | IHrefLinkElement;
-    if (tokenItem.text.match(this._hrefRegEx)) {
-      const urlContent: string[] = pipeSplitContent[0].split(' ');
-
+    if (this._hrefRegEx.test(addressPart)) {
       // Make sure only a single URL is given
-      if (urlContent.length > 1 && urlContent[1] !== '' ) {
+      if (addressPart.indexOf(' ') >= 0) {
         documentation.reportError('The {@link} tag contains additional spaces after the URL;'
           + ' if the URL contains spaces, encode them using %20; for display text, use a pipe delimiter ("|")');
-        return;
+        return undefined;
       }
 
       linkDocElement = {
         kind: 'linkDocElement',
         referenceType: 'href',
-        targetUrl: urlContent[0],
-        value: ''
+        targetUrl: addressPart
+        // ("value" will be assigned below)
       };
 
     } else {
       // we are processing an API definition reference
       const apiDefitionRef: ApiDefinitionReference = ApiDefinitionReference.createFromString(
-        pipeSplitContent[0],
+        addressPart,
         documentation.reportError
       );
 
       // Once we can locate local API definitions, an error should be reported here if not found.
-      if (apiDefitionRef) {
-
-        linkDocElement = {
-          kind: 'linkDocElement',
-          referenceType: 'code',
-          scopeName: apiDefitionRef.scopeName,
-          packageName: apiDefitionRef.packageName,
-          exportName: apiDefitionRef.exportName,
-          memberName: apiDefitionRef.memberName
-        };
+      if (!apiDefitionRef) {
+        return undefined;
       }
+
+      linkDocElement = {
+        kind: 'linkDocElement',
+        referenceType: 'code',
+        scopeName: apiDefitionRef.scopeName,
+        packageName: apiDefitionRef.packageName,
+        exportName: apiDefitionRef.exportName,
+        memberName: apiDefitionRef.memberName
+        // ("value" will be assigned below)
+      };
     }
 
     // If a display name is given, ensure it only contains characters for words.
-    if (linkDocElement && pipeSplitContent.length > 1) {
-      const displayTextParts: string[] = pipeSplitContent[1].match(this._wordRegEx);
-      if (displayTextParts && displayTextParts[0].length !== pipeSplitContent[1].length) {
-        documentation.reportError(`The {@link} tag\'s display text contains unsupported `
-          + ` symbols: "${pipeSplitContent[1]}"`);
-        return;
+    if (displayTextPart) {
+      const match: RegExpExecArray | undefined = this._displayTextBadCharacterRegEx.exec(displayTextPart);
+      if (match) {
+        documentation.reportError(`The {@link} tag\'s display text contains an unsupported `
+          + ` character: "${match[0]}"`);
+        return undefined;
       }
       // Full match is valid text
-      linkDocElement.value = displayTextParts[0].trim();
+      linkDocElement.value = displayTextPart;
+    } else {
+      // If the display text is not explicitly provided, then use the address as the display text
+      linkDocElement.value = addressPart;
     }
 
     return linkDocElement;
