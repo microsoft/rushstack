@@ -394,6 +394,19 @@ abstract class ApiItem {
       this.reportError('The @inheritdoc target has been marked as @deprecated.  ' +
         'Add a @deprecated message here, or else remove the @inheritdoc relationship.');
     }
+
+    if (this.name.substr(0, 1) === '_') {
+      if (this.documentation.releaseTag !== ReleaseTag.Internal
+        && this.documentation.releaseTag !== ReleaseTag.None) {
+        this.reportWarning('The underscore prefix ("_") should only be used with definitions'
+          + ' that are explicitly marked as @internal');
+      }
+    } else {
+      if (this.documentation.releaseTag === ReleaseTag.Internal) {
+        this.reportWarning('Because this definition is marked as @internal, an underscore prefix ("_") should'
+          + ' be added to its name');
+      }
+    }
   }
 
   /**

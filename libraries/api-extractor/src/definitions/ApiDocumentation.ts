@@ -404,10 +404,13 @@ export default class ApiDocumentation {
 
       // If the apiDefinitionRef can not be found the resolvedApiItem will be
       // undefined and an error will have been reported via this.reportError
-      if (resolvedApiItem && resolvedApiItem.releaseTag === ReleaseTag.Internal
-        || resolvedApiItem.releaseTag === ReleaseTag.Alpha) {
-        this.reportError('The {@link} tag references an @internal or @alpha API item, '
-          + 'which will not appear in the generated documentation');
+      if (resolvedApiItem) {
+        if (resolvedApiItem.releaseTag === ReleaseTag.Internal
+          || resolvedApiItem.releaseTag === ReleaseTag.Alpha) {
+
+          this.reportError('The {@link} tag references an @internal or @alpha API item, '
+            + 'which will not appear in the generated documentation');
+        }
       }
     }
   }
