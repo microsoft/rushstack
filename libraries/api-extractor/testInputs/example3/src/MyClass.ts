@@ -4,7 +4,7 @@
 export enum inheritLocalOptionOne {
 }
 
-/** 
+/**
  * {@inheritdoc MyClass.methodWithTwoParams }
  */
 // (Error #1) methodWithTwoParams not a member of MyClass
@@ -27,7 +27,7 @@ export enum inheritEnumValues {
 }
 
 /**
- * We will try to inheritdoc the documentation for 
+ * We will try to inheritdoc the documentation for
  * one of the enum value's documentation.
  */
 export enum sourceEnumValuesDoc{
@@ -36,7 +36,7 @@ export enum sourceEnumValuesDoc{
    */
   zero = 0,
   /**
-   * We will also try to inherit this. 
+   * We will also try to inherit this.
    */
   one = 1
 }
@@ -114,10 +114,10 @@ export interface IStructuredTypeSource {
 }
 
 /**
- * Here we test that an error is reported when attempting to link to an 
+ * Here we test that an error is reported when attempting to link to an
  * internal API item.
  * {@link publicEnum}
- * {@link internalEnum}
+ * {@link _internalEnum}
  */
 export enum testingLinks {
 }
@@ -125,16 +125,16 @@ export enum testingLinks {
 /**
  * This enum is public and any API items can safely inherit documentation
  * or link to this item.
- * 
+ *
  * @public
  */
 export enum publicEnum {
 }
 
 /**
- * This enum is internal and an error should be reported 
+ * This enum is internal and an error should be reported
  * if any API items inherit or link to this item.
- * 
+ *
  * @internal
  */
 export enum internalEnum {

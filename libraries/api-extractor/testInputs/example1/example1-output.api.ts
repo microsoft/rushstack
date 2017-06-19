@@ -3,6 +3,19 @@ class ___proto__ {
   public propertyIsEnumerable: string;
 }
 
+// WARNING: propertyWithNoType has incomplete type information
+// @internal
+class _InternalClass {
+  public _internalMethodWithRedundantUnderscore(): void;
+  // (undocumented)
+  public test(): void;
+}
+
+// @internal (preapproved)
+class _PreapprovedInternalClass {
+}
+
+
 // (undocumented)
 class A extends __proto__, implements hasOwnProperty {
   // (undocumented)
@@ -13,10 +26,10 @@ class A extends __proto__, implements hasOwnProperty {
 
 // @public
 class AliasClass4 {
+  // @internal
+  public _aliasFunc(): void;
   // (undocumented)
   public aliasField: number;
-  // @internal
-  public aliasFunc(): void;
   // (undocumented)
   public readonly shouldBeReadOnly: number;
 }
@@ -30,10 +43,16 @@ class AlphaTaggedClass {
 
 // @beta
 class BetaTaggedClass {
+  // WARNING: The underscore prefix ("_") should only be used with definitions that are explicitly marked as @internal
+  // @alpha
+  public _alphaMethodWithBadUnderscore(): void;
   // @internal
   public _internalMethod(): void;
   // @alpha
   public alphaMethod(): void;
+  // WARNING: Because this definition is explicitly marked as @internal, an underscore prefix ("_") should be added to its name
+  // @internal
+  public internalMethodMissingUnderscore(): void;
   public plainMethod(): void;
 }
 
@@ -41,13 +60,6 @@ class BetaTaggedClass {
 interface hasOwnProperty {
   // (undocumented)
   ___lookupSetter__: __proto__;
-}
-
-// WARNING: propertyWithNoType has incomplete type information
-// @internal
-class InternalClass {
-  // (undocumented)
-  public test(): void;
 }
 
 // (undocumented)
@@ -59,11 +71,6 @@ class MyClass {
   // (undocumented)
   public test(): void;
 }
-
-// @internal (preapproved)
-class PreapprovedInternalClass {
-}
-
 
 // (undocumented)
 export function publicFunction(param: number): string;
