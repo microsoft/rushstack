@@ -63,7 +63,8 @@ describe('DocItemLoader tests', function (): void {
 
       assert.equal(capturedErrors.length, 2);
       assert.equal(capturedErrors[0].message, 'circular reference');
-      assert.equal(capturedErrors[1].message, 'Unable to link to "Internal" API item');
+      assert.equal(capturedErrors[1].message, 'The {@link} tag references an @internal or @alpha API item,'
+        + ' which will not appear in the generated documentation');
       TestFileComparer.assertFileMatchesExpected(outputJsonFile, expectedJsonFile);
       TestFileComparer.assertFileMatchesExpected(outputApiFile, expectedApiFile);
     });

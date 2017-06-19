@@ -280,7 +280,8 @@ describe('DocElementParser tests', function (): void {
         errorMessage = error;
       }
       assert.isUndefined(errorMessage);
-      assertCapturedErrors(['Invalid @link parameter, URL must be a single string.']);
+      assertCapturedErrors(['The {@link} tag contains additional spaces after the URL; if the URL'
+        +  ' contains spaces, encode them using %20; for display text, use a pipe delimiter ("|")']);
     });
 
     it('Should parse @link with API defintion reference', (): void => {
@@ -346,7 +347,7 @@ describe('DocElementParser tests', function (): void {
         errorMessage = error;
       }
       assert.isNotNull(errorMessage);
-      assertCapturedErrors(['Invalid @link parameters, at most one pipe character allowed.']);
+      assertCapturedErrors(['The {@link} tag contains more than one pipe character ("|")']);
     });
   });
 });
