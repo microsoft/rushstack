@@ -131,7 +131,7 @@ export default class MyDocumentedClass {
 
   /**
    * This doc has {curly braces} which is valid but the inline \@link token is missing a
-   * pipe between the url and the display text {@link validURL \{text\}}
+   * pipe between the URL and the display text {@link validURL \{text\}}
    * The displayName is not allowed to have non word characters.
    */
   // (Error #9)

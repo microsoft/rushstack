@@ -126,7 +126,7 @@ export default class DocElementParser {
    * linkDocElement with the corresponding information. If the corresponding inline tag \@link is
    * not formatted correctly an error will be reported.
    *
-   * The format for the \@link tag is {\@link url or API defintion reference | display text}, where
+   * The format for the \@link tag is {\@link URL or API defintion reference | display text}, where
    * the '|' is only needed if the optional display text is given.
    *
    * Examples:
@@ -137,7 +137,7 @@ export default class DocElementParser {
    */
   public static parseLinkTag(documentation: ApiDocumentation, tokenItem: Token): IHrefLinkElement | ICodeLinkElement {
     if (!tokenItem.text) {
-      documentation.reportError('The {@link} tag must include a url or API item reference');
+      documentation.reportError('The {@link} tag must include a URL or API item reference');
        return;
     }
 
@@ -158,7 +158,7 @@ export default class DocElementParser {
     if (tokenItem.text.match(this._hrefRegEx)) {
       const urlContent: string[] = pipeSplitContent[0].split(' ');
 
-      // Make sure only a single url is given
+      // Make sure only a single URL is given
       if (urlContent.length > 1 && urlContent[1] !== '' ) {
         documentation.reportError('The {@link} tag contains additional spaces after the URL;'
           + ' if the URL contains spaces, encode them using %20; for display text, use a pipe delimiter ("|")');

@@ -221,7 +221,7 @@ describe('DocElementParser tests', function (): void {
       assertCapturedErrors([]);
     });
 
-    it('Should parse @link with url', (): void => {
+    it('Should parse @link with URL', (): void => {
       clearCapturedErrors();
       const docs: string = '{@link https://microsoft.com}';
       const tokenizer: Tokenizer = new Tokenizer(docs, console.log);
@@ -243,7 +243,7 @@ describe('DocElementParser tests', function (): void {
       assertCapturedErrors([]);
     });
 
-    it('Should parse @link with url and text', (): void => {
+    it('Should parse @link with URL and text', (): void => {
       clearCapturedErrors();
       const docs: string = '{@link https://microsoft.com | microsoft home}';
       const tokenizer: Tokenizer = new Tokenizer(docs, console.log);
@@ -280,7 +280,7 @@ describe('DocElementParser tests', function (): void {
         errorMessage = error;
       }
       assert.isUndefined(errorMessage);
-      assertCapturedErrors(['Invalid @link parameter, url must be a single string.']);
+      assertCapturedErrors(['Invalid @link parameter, URL must be a single string.']);
     });
 
     it('Should parse @link with API defintion reference', (): void => {
