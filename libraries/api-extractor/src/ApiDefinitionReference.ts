@@ -99,6 +99,7 @@ export default class ApiDefinitionReference {
   /**
    * Takes an API reference expression of the form '@scopeName/packageName:exportName.memberName'
    * and deconstructs it into an IApiDefinitionReference interface object.
+   * @returns the ApiDefinitionReference, or undefined if an error was reported.
    */
   public static createFromString(apiReferenceExpr: string,
     reportError: (message: string) => void): ApiDefinitionReference | undefined {
