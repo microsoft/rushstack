@@ -11,8 +11,11 @@ import {
   RushConfiguration
 } from '@microsoft/rush-lib';
 
+import EventHooksManager from '../utilities/EventHooksManager';
+
 export abstract class BaseAction extends CommandLineAction {
   protected _rushConfiguration: RushConfiguration;
+  private _eventHooksManager: EventHooksManager;
 
   constructor(options: ICommandLineActionOptions) {
     super(options);
@@ -24,6 +27,13 @@ export abstract class BaseAction extends CommandLineAction {
   }
 
   protected abstract run(): void;
+
+  protected get eventHooksManager(): EventHooksManager {
+    if (!this._eventHooksManager) {
+      this._eventHooksManager = new EventHooksManager(this._rushConfiguration.eventHooks);
+    }
+    return this._eventHooksManager;
+  }
 
   private _initialize(): void {
     this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();

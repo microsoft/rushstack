@@ -17,7 +17,6 @@ import InstallManager, { InstallType } from '../utilities/InstallManager';
 import LinkManager from '../utilities/LinkManager';
 import ShrinkwrapFile from '../utilities/ShrinkwrapFile';
 import { ApprovedPackagesChecker } from '../utilities/ApprovedPackagesChecker';
-import EventHooksManager from '../utilities/EventHooksManager';
 import { BaseAction } from './BaseAction';
 
 interface ITempModuleInformation {
@@ -32,7 +31,6 @@ export default class InstallAction extends BaseAction {
   private _cleanInstallFull: CommandLineFlagParameter;
   private _bypassPolicy: CommandLineFlagParameter;
   private _noLinkParameter: CommandLineFlagParameter;
-  private _eventHooksManager: EventHooksManager;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -46,7 +44,6 @@ export default class InstallAction extends BaseAction {
       + ' Afterwards, it will run "rush link" to create symlinks for all your projects.'
     });
     this._parser = parser;
-    this._eventHooksManager = new EventHooksManager(this._rushConfiguration.eventHooks);
   }
 
   protected onDefineParameters(): void {
@@ -89,7 +86,7 @@ export default class InstallAction extends BaseAction {
 
     console.log('Starting "rush install"' + os.EOL);
 
-    this._eventHooksManager.handle(Event.preRushInstall);
+    this.eventHooksManager.handle(Event.preRushInstall);
     try {
       const installManager: InstallManager = new InstallManager(this._rushConfiguration);
 
@@ -133,7 +130,7 @@ export default class InstallAction extends BaseAction {
       throw error;
     }
 
-    this._eventHooksManager.handle(Event.postRushInstall);
+    this.eventHooksManager.handle(Event.postRushInstall);
 
     if (!this._noLinkParameter.value) {
       const linkManager: LinkManager = new LinkManager(this._rushConfiguration);
