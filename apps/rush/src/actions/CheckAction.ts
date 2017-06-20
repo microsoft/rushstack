@@ -36,16 +36,16 @@ export default class CheckAction extends BaseAction {
     console.log(`Starting "rush check"${os.EOL}`);
 
     const pinnedVersions: { [dependency: string]: string } = {};
-    this._rushConfiguration.pinnedVersions.forEach((version: string, dependency: string) => {
+    this.rushConfiguration.pinnedVersions.forEach((version: string, dependency: string) => {
       pinnedVersions[dependency] = version;
     });
 
-    this._rushConfiguration.projects.push({
+    this.rushConfiguration.projects.push({
       packageName: RushConstants.pinnedVersionsFilename,
       packageJson: { dependencies: pinnedVersions }
     } as RushConfigurationProject);
 
-    const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(this._rushConfiguration.projects);
+    const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(this.rushConfiguration.projects);
 
     // Iterate over the list. For any dependency with mismatching versions, print the projects
     mismatchFinder.getMismatches().forEach((dependency: string) => {

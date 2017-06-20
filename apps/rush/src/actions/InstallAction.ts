@@ -74,12 +74,12 @@ export default class InstallAction extends BaseAction {
 
   protected run(): void {
     if (!this._bypassPolicy.value) {
-      if (!GitPolicy.check(this._rushConfiguration)) {
+      if (!GitPolicy.check(this.rushConfiguration)) {
         process.exit(1);
         return;
       }
 
-      ApprovedPackagesChecker.rewriteConfigFiles(this._rushConfiguration);
+      ApprovedPackagesChecker.rewriteConfigFiles(this.rushConfiguration);
     }
 
     const stopwatch: Stopwatch = Stopwatch.start();
@@ -88,12 +88,12 @@ export default class InstallAction extends BaseAction {
 
     this.eventHooksManager.handle(Event.preRushInstall);
     try {
-      const installManager: InstallManager = new InstallManager(this._rushConfiguration);
+      const installManager: InstallManager = new InstallManager(this.rushConfiguration);
 
       installManager.ensureLocalNpmTool(this._cleanInstallFull.value);
 
       const shrinkwrapFile: ShrinkwrapFile | undefined
-        = ShrinkwrapFile.loadFromFile(this._rushConfiguration.committedShrinkwrapFilename);
+        = ShrinkwrapFile.loadFromFile(this.rushConfiguration.committedShrinkwrapFilename);
 
       if (!shrinkwrapFile) {
         console.log('');
@@ -133,7 +133,7 @@ export default class InstallAction extends BaseAction {
     this.eventHooksManager.handle(Event.postRushInstall);
 
     if (!this._noLinkParameter.value) {
-      const linkManager: LinkManager = new LinkManager(this._rushConfiguration);
+      const linkManager: LinkManager = new LinkManager(this.rushConfiguration);
       this._parser.catchSyncErrors(linkManager.createSymlinksForProjects(false));
     } else {
       console.log(os.EOL + 'Next you should probably run: "rush link"');

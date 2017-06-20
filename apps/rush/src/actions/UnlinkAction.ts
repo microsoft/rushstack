@@ -34,10 +34,10 @@ export default class UnlinkAction extends BaseAction {
 
     // Delete the flag file if it exists; this will ensure that
     // a full "rush link" is required next time
-    Utilities.deleteFile(this._rushConfiguration.rushLinkJsonFilename);
+    Utilities.deleteFile(this.rushConfiguration.rushLinkJsonFilename);
 
     let didAnything: boolean = false;
-    for (const rushProject of this._rushConfiguration.projects) {
+    for (const rushProject of this.rushConfiguration.projects) {
       const localModuleFolder: string = path.join(rushProject.projectFolder, 'node_modules');
       if (fsx.existsSync(localModuleFolder)) {
         console.log('Purging ' + localModuleFolder);

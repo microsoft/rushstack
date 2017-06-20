@@ -127,11 +127,11 @@ export default class PublishAction extends BaseAction {
   protected run(): void {
     console.log(`Starting "rush publish" ${EOL}`);
 
-    if (!GitPolicy.check(this._rushConfiguration)) {
+    if (!GitPolicy.check(this.rushConfiguration)) {
       process.exit(1);
       return;
     }
-    const allPackages: Map<string, RushConfigurationProject> = this._rushConfiguration.projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
 
     if (this._regenerateChangelogs.value) {
       console.log('Regenerating changelogs');
@@ -150,7 +150,7 @@ export default class PublishAction extends BaseAction {
   }
 
   private _publishChanges(allPackages: Map<string, RushConfigurationProject>): void {
-    const changesPath: string = path.join(this._rushConfiguration.commonFolder, RushConstants.changeFilesFolderName);
+    const changesPath: string = path.join(this.rushConfiguration.commonFolder, RushConstants.changeFilesFolderName);
     const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
@@ -292,7 +292,7 @@ export default class PublishAction extends BaseAction {
     for (const change of orderedChanges) {
       if (
         change.changeType > ChangeType.dependency &&
-        this._rushConfiguration.projectsByName.get(change.packageName).shouldPublish
+        this.rushConfiguration.projectsByName.get(change.packageName).shouldPublish
       ) {
         this._gitAddTag(change.packageName, change.newVersion);
       }
@@ -323,7 +323,7 @@ export default class PublishAction extends BaseAction {
     const env: { [key: string]: string } = this._getEnvArgs();
     const args: string[] = ['publish'];
 
-    if (this._rushConfiguration.projectsByName.get(packageName).shouldPublish) {
+    if (this.rushConfiguration.projectsByName.get(packageName).shouldPublish) {
       let registry: string = '//registry.npmjs.org/';
       if (this._registryUrl.value) {
         const registryUrl: string = this._registryUrl.value;
@@ -341,7 +341,7 @@ export default class PublishAction extends BaseAction {
 
       this._execCommand(
         !!this._publish.value,
-        this._rushConfiguration.npmToolFilename,
+        this.rushConfiguration.npmToolFilename,
         args,
         packagePath,
         env);

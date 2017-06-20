@@ -14,7 +14,7 @@ import {
 import EventHooksManager from '../utilities/EventHooksManager';
 
 export abstract class BaseAction extends CommandLineAction {
-  protected _rushConfiguration: RushConfiguration;
+  private _rushConfiguration: RushConfiguration;
   private _eventHooksManager: EventHooksManager;
 
   constructor(options: ICommandLineActionOptions) {
@@ -22,28 +22,30 @@ export abstract class BaseAction extends CommandLineAction {
   }
 
   protected onExecute(): void {
-    this._initialize();
+    this._ensureEnvironment();
     this.run();
   }
 
   protected abstract run(): void;
 
-  protected get eventHooksManager(): EventHooksManager {
-    if (!this._eventHooksManager) {
-      this._eventHooksManager = new EventHooksManager(this._rushConfiguration.eventHooks);
+  protected get rushConfiguration(): RushConfiguration {
+    if (!this._rushConfiguration) {
+      this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
     }
-    return this._eventHooksManager;
+    return this._rushConfiguration;
   }
 
-  private _initialize(): void {
-    this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
-    this._ensureEnvironment();
+  protected get eventHooksManager(): EventHooksManager {
+    if (!this._eventHooksManager) {
+      this._eventHooksManager = new EventHooksManager(this.rushConfiguration.eventHooks);
+    }
+    return this._eventHooksManager;
   }
 
   private _ensureEnvironment(): void {
     /* tslint:disable-next-line:no-string-literal */
     let environmentPath: string = process.env['PATH'];
-    environmentPath = path.join(this._rushConfiguration.commonTempFolder, 'node_modules', '.bin') +
+    environmentPath = path.join(this.rushConfiguration.commonTempFolder, 'node_modules', '.bin') +
       path.delimiter + environmentPath;
     /* tslint:disable-next-line:no-string-literal */
     process.env['PATH'] = environmentPath;

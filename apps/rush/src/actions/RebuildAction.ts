@@ -110,12 +110,12 @@ export default class RebuildAction extends BaseAction {
   }
 
   protected run(): void {
-    if (!fsx.existsSync(this._rushConfiguration.rushLinkJsonFilename)) {
-      throw new Error(`File not found: ${this._rushConfiguration.rushLinkJsonFilename}` +
+    if (!fsx.existsSync(this.rushConfiguration.rushLinkJsonFilename)) {
+      throw new Error(`File not found: ${this.rushConfiguration.rushLinkJsonFilename}` +
         `${os.EOL}Did you run "rush link"?`);
     }
     this.eventHooksManager.handle(Event.preRushBuild);
-    this._rushLinkJson = JsonFile.loadJsonFile(this._rushConfiguration.rushLinkJsonFilename);
+    this._rushLinkJson = JsonFile.loadJsonFile(this.rushConfiguration.rushLinkJsonFilename);
 
     console.log(`Starting "rush ${this.options.actionVerb}"${os.EOL}`);
     const stopwatch: Stopwatch = Stopwatch.start();
@@ -170,7 +170,7 @@ export default class RebuildAction extends BaseAction {
 
   private _registerToFlags(taskRunner: TaskRunner, toFlags: string[]): void {
     for (const toFlag of toFlags) {
-      const toProject: RushConfigurationProject = this._rushConfiguration.findProjectByShorthandName(toFlag);
+      const toProject: RushConfigurationProject = this.rushConfiguration.findProjectByShorthandName(toFlag);
       if (!toProject) {
         throw new Error(`The project '${toFlag}' does not exist in rush.json`);
       }
@@ -178,7 +178,7 @@ export default class RebuildAction extends BaseAction {
       const deps: Set<string> = this._collectAllDependencies(toProject.packageName);
 
       // Register any dependencies it may have
-      deps.forEach(dep => this._registerTask(taskRunner, this._rushConfiguration.getProjectByName(dep)));
+      deps.forEach(dep => this._registerTask(taskRunner, this.rushConfiguration.getProjectByName(dep)));
 
       // Register the dependency graph to the TaskRunner
       deps.forEach(dep => taskRunner.addDependencies(dep, this._rushLinkJson.localLinks[dep] || []));
@@ -187,7 +187,7 @@ export default class RebuildAction extends BaseAction {
 
   private _registerFromFlags(taskRunner: TaskRunner, fromFlags: string[]): void {
     for (const fromFlag of fromFlags) {
-      const fromProject: RushConfigurationProject = this._rushConfiguration.findProjectByShorthandName(fromFlag);
+      const fromProject: RushConfigurationProject = this.rushConfiguration.findProjectByShorthandName(fromFlag);
       if (!fromProject) {
         throw new Error(`The project '${fromFlag}' does not exist in rush.json`);
       }
@@ -201,7 +201,7 @@ export default class RebuildAction extends BaseAction {
 
       // Register all downstream dependents
       dependents.forEach(dependent => {
-        this._registerTask(taskRunner, this._rushConfiguration.getProjectByName(dependent));
+        this._registerTask(taskRunner, this.rushConfiguration.getProjectByName(dependent));
       });
 
       // Only register dependencies graph for projects which have been registered
@@ -214,7 +214,7 @@ export default class RebuildAction extends BaseAction {
 
   private _registerAll(taskRunner: TaskRunner): void {
     // Register all tasks
-    for (const rushProject of this._rushConfiguration.projects) {
+    for (const rushProject of this.rushConfiguration.projects) {
       this._registerTask(taskRunner, rushProject);
     }
 
@@ -273,7 +273,7 @@ export default class RebuildAction extends BaseAction {
     const errorDetector: ErrorDetector = new ErrorDetector(activeRules);
     const projectTask: ProjectBuildTask = new ProjectBuildTask(
       project,
-      this._rushConfiguration,
+      this.rushConfiguration,
       errorDetector,
       errorMode,
       this._productionParameter.value,

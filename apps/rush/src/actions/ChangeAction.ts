@@ -120,7 +120,7 @@ export default class ChangeAction extends BaseAction {
 
   private _getChangedPackageNames(): string[] {
     const changedFolders: string[] = VersionControl.getChangedFolders(this._targetBranch.value);
-    return this._rushConfiguration.projects
+    return this.rushConfiguration.projects
       .filter(project => project.shouldPublish)
       .filter(project => this._hasProjectChanged(changedFolders, project))
       .map(project => project.packageName);
@@ -128,7 +128,7 @@ export default class ChangeAction extends BaseAction {
 
   private _validateChangeFile(changedPackages: string[]): void {
     const files: string[] = this._getChangeFiles().map(relativePath => {
-      return path.join(this._rushConfiguration.rushJsonFolder, relativePath);
+      return path.join(this.rushConfiguration.rushJsonFolder, relativePath);
     });
     if (files.length === 0) {
       throw new Error(`No change file is found. Run 'rush change' to generate a change file.`);
@@ -369,7 +369,7 @@ export default class ChangeAction extends BaseAction {
     const filename: string = (branch ?
       this._escapeFilename(`${branch}_${this._getTimestamp()}.json`) :
       `${this._getTimestamp()}.json`);
-    const filePath: string = path.join(this._rushConfiguration.commonFolder,
+    const filePath: string = path.join(this.rushConfiguration.commonFolder,
       RushConstants.changeFilesFolderName,
       ...packageName.split('/'),
       filename);
