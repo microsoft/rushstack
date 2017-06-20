@@ -4,17 +4,15 @@
 import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
-import { CommandLineAction } from '@microsoft/ts-command-line';
 import {
-  RushConfiguration,
   Utilities
 } from '@microsoft/rush-lib';
 
 import RushCommandLineParser from './RushCommandLineParser';
+import { BaseAction } from './BaseAction';
 
-export default class UnlinkAction extends CommandLineAction {
+export default class UnlinkAction extends BaseAction {
   private _parser: RushCommandLineParser;
-  private _rushConfiguration: RushConfiguration;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -25,14 +23,13 @@ export default class UnlinkAction extends CommandLineAction {
        + ' commands on a project.'
     });
     this._parser = parser;
-    this._rushConfiguration = parser.rushConfiguration;
   }
 
   protected onDefineParameters(): void {
     // No parameters
   }
 
-  protected onExecute(): void {
+  protected run(): void {
     console.log('Starting "rush unlink"' + os.EOL);
 
     // Delete the flag file if it exists; this will ensure that

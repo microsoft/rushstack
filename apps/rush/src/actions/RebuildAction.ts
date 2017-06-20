@@ -5,7 +5,6 @@ import * as colors from 'colors';
 import * as fsx from 'fs-extra';
 import * as os from 'os';
 import {
-  CommandLineAction,
   CommandLineFlagParameter,
   CommandLineIntegerParameter,
   CommandLineStringListParameter,
@@ -17,7 +16,6 @@ import {
   IErrorDetectionRule,
   IRushLinkJson,
   JsonFile,
-  RushConfiguration,
   RushConfigurationProject,
   Stopwatch,
   TestErrorDetector,
@@ -26,12 +24,13 @@ import {
   Event
 } from '@microsoft/rush-lib';
 
+import { BaseAction } from './BaseAction';
 import TaskRunner from '../taskRunner/TaskRunner';
 import ProjectBuildTask from '../taskRunner/ProjectBuildTask';
 import RushCommandLineParser from './RushCommandLineParser';
 import EventHooksManager from '../utilities/EventHooksManager';
 
-export default class RebuildAction extends CommandLineAction {
+export default class RebuildAction extends BaseAction {
 
   /**
    * Defines the default state of forced (aka clean) build, where we do not try and compare
@@ -42,7 +41,6 @@ export default class RebuildAction extends CommandLineAction {
   private _dependentList: Map<string, Set<string>>;
   private _fromFlag: CommandLineStringListParameter;
   private _npmParameter: CommandLineFlagParameter;
-  private _rushConfiguration: RushConfiguration;
   private _rushLinkJson: IRushLinkJson;
   private _parallelismParameter: CommandLineIntegerParameter;
   private _parser: RushCommandLineParser;
@@ -67,7 +65,6 @@ export default class RebuildAction extends CommandLineAction {
     });
     this._parser = parser;
     this._isIncrementalBuildAllowed = false;
-    this._rushConfiguration = parser.rushConfiguration;
     this._eventHooksManager = new EventHooksManager(this._rushConfiguration.eventHooks);
   }
 
@@ -115,7 +112,7 @@ export default class RebuildAction extends CommandLineAction {
     });
   }
 
-  protected onExecute(): void {
+  protected run(): void {
     if (!fsx.existsSync(this._rushConfiguration.rushLinkJsonFilename)) {
       throw new Error(`File not found: ${this._rushConfiguration.rushLinkJsonFilename}` +
         `${os.EOL}Did you run "rush link"?`);

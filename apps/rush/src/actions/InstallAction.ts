@@ -4,9 +4,8 @@
 import * as colors from 'colors';
 import * as os from 'os';
 
-import { CommandLineAction, CommandLineFlagParameter } from '@microsoft/ts-command-line';
+import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import {
-  RushConfiguration,
   Stopwatch,
   IPackageJson,
   Event
@@ -19,6 +18,7 @@ import LinkManager from '../utilities/LinkManager';
 import ShrinkwrapFile from '../utilities/ShrinkwrapFile';
 import { ApprovedPackagesChecker } from '../utilities/ApprovedPackagesChecker';
 import EventHooksManager from '../utilities/EventHooksManager';
+import { BaseAction } from './BaseAction';
 
 interface ITempModuleInformation {
   packageJson: IPackageJson;
@@ -26,9 +26,8 @@ interface ITempModuleInformation {
   filename: string;
 }
 
-export default class InstallAction extends CommandLineAction {
+export default class InstallAction extends BaseAction {
   private _parser: RushCommandLineParser;
-  private _rushConfiguration: RushConfiguration;
   private _cleanInstall: CommandLineFlagParameter;
   private _cleanInstallFull: CommandLineFlagParameter;
   private _bypassPolicy: CommandLineFlagParameter;
@@ -47,7 +46,6 @@ export default class InstallAction extends CommandLineAction {
       + ' Afterwards, it will run "rush link" to create symlinks for all your projects.'
     });
     this._parser = parser;
-    this._rushConfiguration = parser.rushConfiguration;
     this._eventHooksManager = new EventHooksManager(this._rushConfiguration.eventHooks);
   }
 
@@ -77,7 +75,7 @@ export default class InstallAction extends CommandLineAction {
     });
   }
 
-  protected onExecute(): void {
+  protected run(): void {
     if (!this._bypassPolicy.value) {
       if (!GitPolicy.check(this._rushConfiguration)) {
         process.exit(1);

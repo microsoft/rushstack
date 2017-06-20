@@ -4,9 +4,8 @@
 import * as colors from 'colors';
 import * as os from 'os';
 import * as fsx from 'fs-extra';
-import { CommandLineAction, CommandLineFlagParameter } from '@microsoft/ts-command-line';
+import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import {
-  RushConfiguration,
   Utilities,
   Stopwatch
 } from '@microsoft/rush-lib';
@@ -15,10 +14,10 @@ import InstallManager, { InstallType } from '../utilities/InstallManager';
 import LinkManager from '../utilities/LinkManager';
 import RushCommandLineParser from './RushCommandLineParser';
 import { ApprovedPackagesChecker } from '../utilities/ApprovedPackagesChecker';
+import { BaseAction } from './BaseAction';
 
-export default class GenerateAction extends CommandLineAction {
+export default class GenerateAction extends BaseAction {
   private _parser: RushCommandLineParser;
-  private _rushConfiguration: RushConfiguration;
   private _lazyParameter: CommandLineFlagParameter;
   private _noLinkParameter: CommandLineFlagParameter;
 
@@ -35,7 +34,6 @@ export default class GenerateAction extends CommandLineAction {
       + ' Afterwards, it will run "rush link" to create symlinks for all your projects.'
     });
     this._parser = parser;
-    this._rushConfiguration = parser.rushConfiguration;
   }
 
   protected onDefineParameters(): void {
@@ -53,7 +51,7 @@ export default class GenerateAction extends CommandLineAction {
     });
   }
 
-  protected onExecute(): void {
+  protected run(): void {
     const stopwatch: Stopwatch = Stopwatch.start();
     const isLazy: boolean = this._lazyParameter.value;
 

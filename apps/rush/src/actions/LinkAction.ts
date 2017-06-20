@@ -1,15 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineAction, CommandLineFlagParameter } from '@microsoft/ts-command-line';
-import { RushConfiguration } from '@microsoft/rush-lib';
+import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 
 import RushCommandLineParser from './RushCommandLineParser';
 import LinkManager from '../utilities/LinkManager';
+import { BaseAction } from './BaseAction';
 
-export default class LinkAction extends CommandLineAction {
+export default class LinkAction extends BaseAction {
   private _parser: RushCommandLineParser;
-  private _rushConfiguration: RushConfiguration;
   private _force: CommandLineFlagParameter;
 
   constructor(parser: RushCommandLineParser) {
@@ -19,7 +18,6 @@ export default class LinkAction extends CommandLineAction {
       documentation: 'Create node_modules symlinks for all projects'
     });
     this._parser = parser;
-    this._rushConfiguration = parser.rushConfiguration;
   }
 
   protected onDefineParameters(): void {
@@ -31,7 +29,7 @@ export default class LinkAction extends CommandLineAction {
     });
   }
 
-  protected onExecute(): void {
+  protected run(): void {
     const linkManager: LinkManager = new LinkManager(this._rushConfiguration);
     this._parser.catchSyncErrors(linkManager.createSymlinksForProjects(this._force.value));
   }

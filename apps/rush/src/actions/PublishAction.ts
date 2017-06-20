@@ -5,7 +5,6 @@ import * as colors from 'colors';
 import * as path from 'path';
 import { EOL } from 'os';
 import {
-  CommandLineAction,
   CommandLineFlagParameter,
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
@@ -13,7 +12,6 @@ import {
   IChangeInfo,
   ChangeType,
   RushConstants,
-  RushConfiguration,
   RushConfigurationProject,
   Utilities,
   Npm
@@ -26,13 +24,13 @@ import ChangelogGenerator from '../utilities/ChangelogGenerator';
 import GitPolicy from '../utilities/GitPolicy';
 import PrereleaseToken from '../utilities/PrereleaseToken';
 import ChangeFiles from '../utilities/ChangeFiles';
+import { BaseAction } from './BaseAction';
 
-export default class PublishAction extends CommandLineAction {
+export default class PublishAction extends BaseAction {
   private _addCommitDetails: CommandLineFlagParameter;
   private _apply: CommandLineFlagParameter;
   private _includeAll: CommandLineFlagParameter;
   private _npmAuthToken: CommandLineStringParameter;
-  private _rushConfiguration: RushConfiguration;
   private _parser: RushCommandLineParser;
   private _publish: CommandLineFlagParameter;
   private _regenerateChangelogs: CommandLineFlagParameter;
@@ -53,7 +51,6 @@ export default class PublishAction extends CommandLineAction {
       'changes and publish packages, you must use the --commit flag and/or the --publish flag.'
     });
     this._parser = parser;
-    this._rushConfiguration = parser.rushConfiguration;
   }
 
   protected onDefineParameters(): void {
@@ -127,7 +124,7 @@ export default class PublishAction extends CommandLineAction {
   /**
    * Executes the publish action, which will read change request files, apply changes to package.jsons,
    */
-  protected onExecute(): void {
+  protected run(): void {
     console.log(`Starting "rush publish" ${EOL}`);
 
     if (!GitPolicy.check(this._rushConfiguration)) {

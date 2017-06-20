@@ -11,13 +11,11 @@ import * as colors from 'colors';
 import inquirer = require('inquirer');
 
 import {
-  CommandLineAction,
   CommandLineFlagParameter,
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
 
 import {
-  RushConfiguration,
   RushConfigurationProject,
   RushConstants,
   IChangeFile,
@@ -25,6 +23,7 @@ import {
   VersionControl
 } from '@microsoft/rush-lib';
 
+import { BaseAction } from './BaseAction';
 import RushCommandLineParser from './RushCommandLineParser';
 import ChangeFiles from '../utilities/ChangeFiles';
 
@@ -34,9 +33,8 @@ const BUMP_OPTIONS: { [type: string]: string } = {
   'patch': 'patch - for fixes (ex: updating how an API works without touching its signature)'
 };
 
-export default class ChangeAction extends CommandLineAction {
+export default class ChangeAction extends BaseAction {
   private _parser: RushCommandLineParser;
-  private _rushConfiguration: RushConfiguration;
   private _sortedProjectList: string[];
   private _changeFileData: Map<string, IChangeFile>;
   private _verifyParameter: CommandLineFlagParameter;
@@ -70,7 +68,6 @@ export default class ChangeAction extends CommandLineAction {
         ''].join(os.EOL)
     });
     this._parser = parser;
-    this._rushConfiguration = parser.rushConfiguration;
   }
 
   public onDefineParameters(): void {
@@ -88,7 +85,7 @@ export default class ChangeAction extends CommandLineAction {
     });
   }
 
-  public onExecute(): void {
+  public run(): void {
     if (this._verifyParameter.value) {
       return this._verify();
     }
