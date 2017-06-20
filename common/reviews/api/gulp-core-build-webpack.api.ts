@@ -1,4 +1,4 @@
-// (undocumented)
+// @public (undocumented)
 interface IWebpackTaskConfig {
   config?: Webpack.Configuration;
   configPath: string;
@@ -6,7 +6,7 @@ interface IWebpackTaskConfig {
   webpack?: typeof Webpack;
 }
 
-// (undocumented)
+// @public (undocumented)
 class WebpackTask extends GulpTask<IWebpackTaskConfig> {
   // (undocumented)
   public executeTask(gulp: gulp.Gulp, completeCallback: (result?: Object) => void): void;

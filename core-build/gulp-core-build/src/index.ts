@@ -72,6 +72,7 @@ let _buildConfig: IBuildConfig = {
  * Merges the given build config settings into existing settings.
  *
  * @param config - The build config settings.
+ * @public
  */
 export function setConfig(config: IBuildConfig): void {
   /* tslint:disable:typedef */
@@ -85,6 +86,7 @@ export function setConfig(config: IBuildConfig): void {
  * Merges the given build config settings into existing settings.
  *
  * @param  config - The build config settings.
+ * @public
  */
 export function mergeConfig(config: IBuildConfig): void {
   /* tslint:disable:typedef */
@@ -98,6 +100,7 @@ export function mergeConfig(config: IBuildConfig): void {
  * Replaces the build config.
  *
  * @param  config - The build config settings.
+ * @public
  */
 export function replaceConfig(config: IBuildConfig): void {
   _buildConfig = config;
@@ -106,6 +109,7 @@ export function replaceConfig(config: IBuildConfig): void {
 /**
  * Gets the current config.
  * @returns the current build configuration
+ * @public
  */
 export function getConfig(): IBuildConfig {
   return _buildConfig;
@@ -116,6 +120,7 @@ export function getConfig(): IBuildConfig {
  * @param taskName - the name of the task, can be called from the command line (e.g. "gulp <taskName>")
  * @param task - the executable to execute when the task is invoked
  * @returns the task parameter
+ * @public
  */
 export function task(taskName: string, task: IExecutable): IExecutable {
   _taskMap[taskName] = task;
@@ -129,12 +134,14 @@ export function task(taskName: string, task: IExecutable): IExecutable {
  * The callback interface for a custom task definition.
  * The task should either return a Promise, a stream, or call the
  * callback function (passing in an object value if there was an error).
+ * @public
  */
 export interface ICustomGulpTask {
   (gulp: gulp.Gulp | GulpProxy, buildConfig: IBuildConfig, done: (failure?: Object) => void):
     Promise<Object> | NodeJS.ReadWriteStream | void;
 }
 
+/** @public */
 class CustomTask extends GulpTask<void> {
   private _fn: ICustomGulpTask;
   constructor(name: string, fn: ICustomGulpTask) {
@@ -156,6 +163,7 @@ class CustomTask extends GulpTask<void> {
  * @param taskName - the name of the task, appearing in build logs
  * @param fn - the callback function to execute when this task runs
  * @returns an IExecutable which can be registered to the command line with task()
+ * @public
  */
 export function subTask(taskName: string, fn: ICustomGulpTask): IExecutable {
   const customTask: CustomTask = new CustomTask(taskName, fn);
@@ -168,6 +176,7 @@ export function subTask(taskName: string, fn: ICustomGulpTask): IExecutable {
  * @param watrchMatch - the list of files patterns to watch
  * @param task - the task to execute when a file changes
  * @returns IExecutable
+ * @public
  */
 export function watch(watchMatch: string | string[], task: IExecutable): IExecutable {
   _trackTask(task);
@@ -233,6 +242,7 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
 
 /**
  * Takes in IExecutables as arguments and returns an IExecutable that will execute them in serial.
+ * @public
  */
 export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutable {
   // tslint:disable-next-line:no-null-keyword
@@ -257,6 +267,7 @@ export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutabl
 
 /**
  * Takes in IExecutables as arguments and returns an IExecutable that will execute them in parallel.
+ * @public
  */
 export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecutable {
   // tslint:disable-next-line:no-null-keyword
@@ -284,6 +295,7 @@ export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecuta
 
 /**
  * Initializes the gulp tasks.
+ * @public
  */
 export function initialize(gulp: gulp.Gulp): void {
   _buildConfig.rootPath = process.cwd();
@@ -412,6 +424,7 @@ function _handleTasksListArguments(): void {
   /* tslint:enable:no-string-literal */
 }
 
+/** @public */
 export const clean: IExecutable = new CleanTask();
 
 // Register default clean task.

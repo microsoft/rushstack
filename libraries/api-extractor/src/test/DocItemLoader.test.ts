@@ -32,7 +32,7 @@ describe('DocItemLoader tests', function (): void {
   this.timeout(10000);
 
   describe('Basic Tests', function (): void {
-        it('Example 3', function (): void {
+    it('Example 3', function (): void {
       const inputFolder: string = './testInputs/example3';
       const outputJsonFile: string = './lib/example3-output.json';
       const outputApiFile: string = './lib/example3-output.api.ts';

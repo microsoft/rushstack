@@ -3,6 +3,7 @@ import { GulpTask, IBuildConfig } from '@microsoft/gulp-core-build';
 import gulp = require('gulp');
 import { EOL } from 'os';
 
+/** @public */
 export interface IWebpackTaskConfig {
   /**
    * Path to a webpack config. A path to a config takes precidence over the "config" option.
@@ -26,6 +27,7 @@ export interface IWebpackTaskConfig {
   webpack?: typeof Webpack;
 }
 
+/** @public */
 export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
   public name: string = 'webpack';
 

@@ -1,11 +1,13 @@
 /**
  * {@inheritdoc MyClass }
+ * @public
  */
 export enum inheritLocalOptionOne {
 }
 
 /**
  * {@inheritdoc MyClass.methodWithTwoParams }
+ * @public
  */
 // (Error #1) methodWithTwoParams not a member of MyClass
 export function inheritLocalOptionTwoFunction(): void {
@@ -14,6 +16,7 @@ export function inheritLocalOptionTwoFunction(): void {
 /**
  * We will try to inherit the documentation for the enum's
  * values.
+ * @public
  */
 export enum inheritEnumValues {
   /**
@@ -29,6 +32,7 @@ export enum inheritEnumValues {
 /**
  * We will try to inheritdoc the documentation for
  * one of the enum value's documentation.
+ * @public
  */
 export enum sourceEnumValuesDoc{
   /**
@@ -43,6 +47,7 @@ export enum sourceEnumValuesDoc{
 
 /**
  * {@inheritdoc inheritLocalCircularDependencyTwo }
+ * @public
  */
 // (Error #2) Circular reference
 export enum inheritLocalCircularDependencyOne {
@@ -50,12 +55,14 @@ export enum inheritLocalCircularDependencyOne {
 
 /**
  * {@inheritdoc inheritLocalCircularDependencyOne }
+ * @public
  */
 export enum inheritLocalCircularDependencyTwo {
 }
 
 /**
  * {@inheritdoc es6-collections:ForEachable }
+ * @public
  */
 export interface IJsonResolutionInterface {
 }
@@ -63,6 +70,7 @@ export interface IJsonResolutionInterface {
 
 /**
  * {@inheritdoc es6-collections:aFunction }
+ * @public
  */
 export function jsonResolutionFunction(): boolean {
   return true;
@@ -70,6 +78,7 @@ export function jsonResolutionFunction(): boolean {
 
 /**
  * {@inheritdoc es6-collections:aClass }
+ * @public
  */
 export class jsonResolutionClass {
   /**
@@ -83,6 +92,7 @@ export class jsonResolutionClass {
 
 /**
  * This is the summary for MyClass.
+ * @public
  */
 export default class MyClass {
 
@@ -90,8 +100,8 @@ export default class MyClass {
 
 /**
  * {@inheritdoc IStructuredTypeSource}
+ * @public
  */
-
 export interface IStructuredTypeInherit {
   /**
    * {@inheritdoc IStructuredTypeSource.thisIsTypeLiteral}
@@ -101,8 +111,8 @@ export interface IStructuredTypeInherit {
 
 /**
  * This is a summary on the interface API item.
+ * @public
  */
-
 export interface IStructuredTypeSource {
   /**
    * This is the summary on an API item that is a type literal.
@@ -118,6 +128,7 @@ export interface IStructuredTypeSource {
  * internal API item.
  * {@link publicEnum}
  * {@link _internalEnum}
+ * @public
  */
 export enum testingLinks {
 }

@@ -9,6 +9,7 @@ import * as path from 'path';
  * This provides a convenient way to more consistently generate a shrinkwrap file in
  * a desired manner as a gulp task, as there are many consistency issues with just
  * running npm-shrinkwrap directly.
+ * @public
  */
 export class GenerateShrinkwrapTask extends GulpTask<void> {
   /**

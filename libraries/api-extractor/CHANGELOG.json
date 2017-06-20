@@ -8,13 +8,13 @@
       "comments": {
         "patch": [
           {
-            "comment": "Improved the wording of many error messages"
+            "comment": "Improve the wording of many error messages"
           },
           {
             "comment": "Fix a bug with parsing of @link tags"
           },
           {
-            "comment": "API Extractor now issues warnings for @internal definitions that are not prefixed with an underscore"
+            "comment": "Issue warnings for @internal definitions that are not prefixed with an underscore"
           }
         ]
       }

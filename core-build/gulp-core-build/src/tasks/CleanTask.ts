@@ -8,6 +8,7 @@ import { FileDeletionUtility } from '../utilities/FileDeletionUtility';
  * The clean task is a special task which iterates through all registered
  * tasks and subtasks, collecting a list of patterns which should be deleted.
  * An instance of this task is automatically registered to the 'clean' command.
+ * @public
  */
 export class CleanTask extends GulpTask<void> {
   /** Instantiates a new CleanTask with the name 'clean' */

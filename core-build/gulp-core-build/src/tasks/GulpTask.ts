@@ -22,6 +22,7 @@ import { SchemaValidator } from '../jsonUtilities/SchemaValidator';
  * The base GulpTask class, should be extended by any classes which represent build tasks.
  * It provides convenient mechanisms for reading configuration files, validating their schema,
  * etc. It also provides convenient utility and logging functions.
+ * @public
  */
 export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
   /** The name of the task. The configuration file with this name will be loaded and applied to the task. */
