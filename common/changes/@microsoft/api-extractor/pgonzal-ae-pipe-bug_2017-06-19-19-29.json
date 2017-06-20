@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Fix a bug with parsing of @link tags",
+      "comment": "Fix an issue where @link tags were sometimes parsed incorrectly",
       "type": "patch"
     }
   ],

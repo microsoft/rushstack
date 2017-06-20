@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "API Extractor now issues warnings for @internal definitions that are not prefixed with an underscore",
+      "comment": "Report a warning if an @internal definition is not prefixed with an underscore, an if the underscore prefix is used for a non-internal definition",
       "type": "patch"
     }
   ],

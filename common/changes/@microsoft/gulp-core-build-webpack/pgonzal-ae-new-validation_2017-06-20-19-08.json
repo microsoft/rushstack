@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/gulp-core-build-webpack",
-      "comment": "Added missing release tags for API Extractor",
+      "comment": "Add missing API Extractor release tags",
       "type": "patch"
     }
   ],
