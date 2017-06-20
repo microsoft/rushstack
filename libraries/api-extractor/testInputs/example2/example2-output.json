@@ -158,7 +158,19 @@
           "summary": [
             {
               "kind": "textDocElement",
-              "value": "Constructs a new instance of the class"
+              "value": "Constructs a new instance of the "
+            },
+            {
+              "kind": "linkDocElement",
+              "referenceType": "code",
+              "scopeName": "",
+              "packageName": "example2",
+              "exportName": "MyDocumentedClass",
+              "value": "MyDocumentedClass"
+            },
+            {
+              "kind": "textDocElement",
+              "value": " class"
             }
           ],
           "remarks": []
