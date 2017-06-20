@@ -2,24 +2,28 @@
  * Degenerate comment
  star missing here
  * end of comment
+ * @public
  */
 export enum TestMissingCommentStar {
 }
 
 /**
  * {@inheritdoc es6-collections:ForEachable}
+ * @public
  */
 export interface IExternalPackageLookupInheritDoc {
 }
 
 /**
  * {@inheritdoc @microsoft/sp-core-library:DisplayMode}
+ * @public
  */
 export enum inheritDisplayMode {
 }
 
 /**
  * {@inheritdoc @microsoft/sp-core-library:Display}
+ * @public
  */
 export enum packageLocatedButExportNotFound {
 }
@@ -31,6 +35,7 @@ export enum packageLocatedButExportNotFound {
  * It will not appear in the output json files because of the error.
  *
  * {@inheritdoc @microsoft/sp-core-library:DisplayMode}
+ * @public
  */
 // (Error #1)
 // Error: Cannot provide summary in AEDoc if @inheritdoc tag is given
@@ -41,6 +46,8 @@ export enum inheritDisplayModeError {
 /**
  * {@inheritdoc @microsoft/sp-core-library:DisplayModeDeprecated}
  *
+ * @public
+ *
  */
 export enum inheritDisplayModeErrorDeprecated {
 
@@ -50,6 +57,7 @@ export enum inheritDisplayModeErrorDeprecated {
  * {@inheritdoc @microsoft/sp-core-library:DisplayModeDeprecated}
  * @deprecated - deprecated message must be present if the inherited Api item
  * is deprecated. If not error is reported.
+ * @public
  */
 export enum inheritDisplayModeNoErrorDeprecated {
 }
@@ -58,6 +66,7 @@ export enum inheritDisplayModeNoErrorDeprecated {
  * This function has incomplete type information on the return value and should not
  * be printed to the API file, instead a warning comment should be present
  * at the bottom of the API file.
+ * @public
  */
 export function functionWithIncompleteReturnType(param1: string, param2: string) {
   return false;
@@ -67,6 +76,7 @@ export function functionWithIncompleteReturnType(param1: string, param2: string)
  * This function has incomplete type information on a parameter and should not
  * be printed to the API file, instead a warning comment should be present at the
  * bottom of the API file.
+ * @public
  */
 export function functionWithIncompleteParameterType(param1, param2: string): boolean {
   return false;
@@ -78,8 +88,8 @@ export function functionWithIncompleteParameterType(param1, param2: string): boo
  * correctly. It can contain a {@link https://bing.com/ | bing home}. This block is entirely
  * valid and a correct documentation object should be built for this ApiItem.
  *
- * @public
  * @remarks Mock class for testing JsDoc parser
+ * @public
  */
 export default class MyDocumentedClass {
 
@@ -213,6 +223,7 @@ export default class MyDocumentedClass {
  * comment should be printed about this class declaration. The constructor
  * will not appear in the json file because the type information is
  * incomplete.
+ * @public
  */
 export class IncompleteTypeConstructor {
   constructor(name, age: number) {

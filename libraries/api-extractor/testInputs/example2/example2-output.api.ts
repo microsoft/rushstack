@@ -1,21 +1,26 @@
 // WARNING: Unable to find a documentation file ("es6-collections.api.json") for the referenced package
+// @public
 interface IExternalPackageLookupInheritDoc {
 }
 
 // WARNING: __constructor has incomplete type information
+// @public
 class IncompleteTypeConstructor {
 }
 
+// @public
 enum inheritDisplayMode {
 }
 
+// @public
 enum inheritDisplayModeError {
 }
 
+// @public
 enum inheritDisplayModeErrorDeprecated {
 }
 
-// @deprecated
+// @public @deprecated
 enum inheritDisplayModeNoErrorDeprecated {
 }
 
@@ -47,9 +52,11 @@ class MyDocumentedClass {
 }
 
 // WARNING: Unable to find referenced export "@microsoft/sp-core-library:Display""
+// @public
 enum packageLocatedButExportNotFound {
 }
 
+// @public
 enum TestMissingCommentStar {
 }
 

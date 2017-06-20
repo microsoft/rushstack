@@ -1,3 +1,5 @@
+// WARNING: The underscore prefix ("_") should only be used with definitions that are explicitly marked as @internal
+// @public
 class ___proto__ {
   // (undocumented)
   public propertyIsEnumerable: string;
@@ -16,7 +18,7 @@ class _PreapprovedInternalClass {
 }
 
 
-// (undocumented)
+// @public (undocumented)
 class A extends __proto__, implements hasOwnProperty {
   // (undocumented)
   ___lookupSetter__: __proto__;
@@ -56,13 +58,13 @@ class BetaTaggedClass {
   public plainMethod(): void;
 }
 
-// (undocumented)
+// @public (undocumented)
 interface hasOwnProperty {
   // (undocumented)
   ___lookupSetter__: __proto__;
 }
 
-// (undocumented)
+// @public (undocumented)
 class MyClass {
   // (undocumented)
   public field: number;
@@ -72,7 +74,7 @@ class MyClass {
   public test(): void;
 }
 
-// (undocumented)
+// @public (undocumented)
 export function publicFunction(param: number): string;
 
 // @public

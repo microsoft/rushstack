@@ -14,6 +14,7 @@ function privateFunction(): number {
   return 123;
 }
 
+/** @public */
 export function publicFunction(param: number): string {
   return 'hi' + param;
 }
