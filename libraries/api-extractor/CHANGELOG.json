@@ -2,6 +2,24 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "2.0.10",
+      "tag": "@microsoft/api-extractor_v2.0.10",
+      "date": "Tue, 20 Jun 2017 01:04:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve the wording of many error messages"
+          },
+          {
+            "comment": "Fix a bug with parsing of @link tags"
+          },
+          {
+            "comment": "Issue warnings for @internal definitions that are not prefixed with an underscore"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.9",
       "tag": "@microsoft/api-extractor_v2.0.9",
       "date": "Sat, 17 Jun 2017 01:02:59 GMT",
