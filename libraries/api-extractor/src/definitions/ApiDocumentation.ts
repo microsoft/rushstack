@@ -186,13 +186,26 @@ export default class ApiDocumentation {
    */
   public extractor: Extractor;
 
-  public reportError: (message: string) => void;
+  /**
+   * True if any errors were encountered while parsing the AEDoc tokens.
+   * This is used to suppress other "collateral damage" errors, e.g. if "@public" was
+   * misspelled then we shouldn't also complain that the "@public" tag is missing.
+   */
+  public failedToParse: boolean;
+
+  public readonly reportError: (message: string) => void;
 
   constructor(docComment: string,
     referenceResolver: IReferenceResolver,
     extractor: Extractor,
     errorLogger: (message: string) => void,
     warnings: string[]) {
+
+    this.reportError = (message: string) => {
+      errorLogger(message);
+      this.failedToParse = true;
+    };
+
     this.originalAedoc = docComment;
     this.referenceResolver = referenceResolver;
     this.extractor = extractor;
@@ -381,7 +394,7 @@ export default class ApiDocumentation {
       }
   }
 
-    /**
+  /**
    * A processing of linkDocElements that refer to an ApiDefinitionReference. This method
    * ensures that the reference is to an API item that is not 'Internal'.
    */

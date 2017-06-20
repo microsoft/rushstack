@@ -42,7 +42,7 @@ abstract class ApiItemContainer extends ApiItem {
     } else {
       this.innerItems.push(apiItem);
       this._memberItems.set(apiItem.name, apiItem);
-      apiItem.onAddToContainer(this);
+      apiItem.notifyAddedToContainer(this);
     }
   }
 

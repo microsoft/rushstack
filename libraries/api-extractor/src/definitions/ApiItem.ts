@@ -202,6 +202,9 @@ abstract class ApiItem {
    */
   public jsdocNode: ts.Node;
 
+  /**
+   * The parsed AEDoc comment for this item.
+   */
   public documentation: ApiDocumentation;
 
   /**
@@ -283,7 +286,10 @@ abstract class ApiItem {
     );
   }
 
-  public onAddToContainer(parentContainer: ApiItemContainer): void {
+  /**
+   * Called by ApiItemContainer.addMemberItem().  Other code should NOT call this method.
+   */
+  public notifyAddedToContainer(parentContainer: ApiItemContainer): void {
     if (this._parentContainer) {
       // This would indicate a program bug
       throw new Error('The API item has already been added to another container: ' + this._parentContainer.name);
@@ -366,7 +372,7 @@ abstract class ApiItem {
     this.extractor.reportError(message, this._errorNode.getSourceFile(), this._errorNode.getStart());
   }
 
- /**
+  /**
    * Adds a warning to the ApiItem.warnings list.  These warnings will be emtted in the API file
    * produced by ApiFileGenerator.
    */
@@ -423,6 +429,20 @@ abstract class ApiItem {
       if (this.documentation.releaseTag === ReleaseTag.Internal) {
         this.reportWarning('Because this definition is explicitly marked as @internal, an underscore prefix ("_")'
           + ' should be added to its name');
+      }
+    }
+
+    // Is it missing a release tag?
+    if (this.documentation.releaseTag === ReleaseTag.None) {
+      // Only warn about top-level exports
+      if (this.parentContainer && this.parentContainer.kind === ApiItemKind.Package) {
+        // Don't warn about items that failed to parse.
+        if (!this.documentation.failedToParse) {
+          // If there is no release tag, and this is a top-level export of the package, then
+          // report an error
+          this.reportError(`A release tag (@alpha, @beta, @public, @internal) must be specified`
+            + ` for ${this.name}`);
+        }
       }
     }
   }
