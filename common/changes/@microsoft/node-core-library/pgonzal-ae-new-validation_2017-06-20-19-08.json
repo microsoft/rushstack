@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/node-core-library",
+      "comment": "Added missing release tags for API Extractor",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/node-core-library",
+  "email": "pgonzal@users.noreply.github.com"
+}
