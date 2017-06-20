@@ -10,6 +10,7 @@ import DocElementParser from '../DocElementParser';
 import ResolvedApiItem from '../ResolvedApiItem';
 import ApiDefinitionReference,
   { IScopedPackageName, IApiDefinintionReferenceParts } from '../ApiDefinitionReference';
+import ApiItemContainer from './ApiItemContainer';
 
 /**
  * Indicates the type of definition represented by a ApiItem object.
@@ -250,6 +251,8 @@ abstract class ApiItem {
    */
   private _state: InitializationState;
 
+  private _parentContainer: ApiItemContainer | undefined;
+
   constructor(options: IApiItemOptions) {
     this.reportError = this.reportError.bind(this);
 
@@ -278,6 +281,14 @@ abstract class ApiItem {
       this.reportError,
       this.warnings
     );
+  }
+
+  public onAddToContainer(parentContainer: ApiItemContainer): void {
+    if (this._parentContainer) {
+      // This would indicate a program bug
+      throw new Error('The API item has already been added to another container: ' + this._parentContainer.name);
+    }
+    this._parentContainer = parentContainer;
   }
 
   /**
@@ -311,6 +322,13 @@ abstract class ApiItem {
    */
   public shouldHaveDocumentation(): boolean {
     return true;
+  }
+
+  /**
+   * The ApiItemContainer that this member belongs to, or undefined if there is none.
+   */
+  public get parentContainer(): ApiItemContainer|undefined {
+    return this._parentContainer;
   }
 
   /**
