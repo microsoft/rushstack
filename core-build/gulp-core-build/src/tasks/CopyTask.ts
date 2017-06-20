@@ -1,7 +1,10 @@
 import { GulpTask } from './GulpTask';
 import gulp = require('gulp');
 
-/** Configuration for CopyTask */
+/**
+ * Configuration for CopyTask
+ * @public
+ */
 export interface ICopyConfig {
   /**
    * The list of patterns and the destination which where they should be copied
@@ -22,6 +25,7 @@ export interface ICopyConfig {
 
 /**
  * This task takes in a map of dest: [sources], and copies items from one place to another.
+ * @public
  */
 export class CopyTask extends GulpTask<ICopyConfig> {
   /**

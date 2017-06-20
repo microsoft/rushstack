@@ -1,6 +1,5 @@
 // @public
 class ApprovedPackagesConfiguration {
-  // (undocumented)
   public constructor(jsonFilename: string);
   // (undocumented)
   public addOrUpdatePackage(packageName: string, reviewCategory: string): void;
@@ -20,9 +19,10 @@ class ApprovedPackagesItem {
   public packageName: string;
 }
 
+// @public
 class ApprovedPackagesPolicy {
   // WARNING: The type "IRushConfigurationJson" needs to be exported by the package (e.g. added to index.ts)
-  // @internal (undocumented)
+  // @internal
   public constructor(rushConfiguration: RushConfiguration, rushConfigurationJson: IRushConfigurationJson);
   public readonly browserApprovedPackages: ApprovedPackagesConfiguration;
   public readonly enabled: boolean;
@@ -33,7 +33,6 @@ class ApprovedPackagesPolicy {
 
 // @public
 class AsyncRecycler {
-  // (undocumented)
   constructor(rushConfiguration: RushConfiguration);
   public deleteAll(): void;
   public moveFolder(folderPath: string): void;
@@ -42,7 +41,6 @@ class AsyncRecycler {
 
 // @public
 class BuildTaskError extends TaskError {
-  // (undocumented)
   constructor(type: string, message: string, file: string, line: number, offset: number);
   // (undocumented)
   protected _file: string;
@@ -80,7 +78,6 @@ enum ErrorDetectionMode {
 
 // @public
 class ErrorDetector {
-  // (undocumented)
   constructor(rules: IErrorDetectionRule[]);
   // (undocumented)
   public execute(data: string): TaskError[];
@@ -96,7 +93,6 @@ enum Event {
 
 // @alpha
 class EventHooks {
-  // (undocumented)
   public constructor(eventHooksJson: IEventHooksJson);
   public get(event: Event): string[];
 }
@@ -177,7 +173,7 @@ class JsonFile {
   public static saveJsonFile(jsonData: any, jsonFilename: string, options: ISaveJsonFileOptions = {}): boolean;
 }
 
-// (undocumented)
+// @alpha (undocumented)
 class JsonSchemaValidator {
   // (undocumented)
   public static loadFromFile(schemaFilename: string): JsonSchemaValidator;
@@ -257,7 +253,7 @@ class RushConfiguration {
 // @public
 class RushConfigurationProject {
   // WARNING: The type "IRushConfigurationProjectJson" needs to be exported by the package (e.g. added to index.ts)
-  // @internal (undocumented)
+  // @internal
   constructor(projectJson: IRushConfigurationProjectJson,
                 rushConfiguration: RushConfiguration,
                 tempProjectName: string);
@@ -303,7 +299,6 @@ module RushConstants {
 
 // @public
 class Stopwatch {
-  // (undocumented)
   constructor(getTime: () => number = Utilities.getTimeInMs);
   public readonly duration: number;
   public reset(): Stopwatch;
@@ -324,7 +319,6 @@ enum StopwatchState {
 
 // @public
 class TaskError {
-  // (undocumented)
   constructor(type: string, message: string);
   // (undocumented)
   protected _appendPrefix(errorMessage: string, mode: ErrorDetectionMode): string;
@@ -390,7 +384,6 @@ class VersionControl {
 
 // @public (undocumented)
 class VersionMismatchFinder {
-  // (undocumented)
   constructor(private _projects: RushConfigurationProject[]);
   // (undocumented)
   public getConsumersOfMismatch(mismatch: string, version: string): Array<string>;

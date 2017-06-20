@@ -3,6 +3,7 @@ import { IPackageDeps } from './IPackageDeps';
 
 const PROCESS_OUTPUT_DELIMITER: string = '///~X~X~X~X~X~X~///';
 
+/** @public */
 export function getPackageDeps(packagePath: string = process.cwd(), excludedPaths?: string[]): IPackageDeps {
   const excludedHashes: { [key: string]: boolean } = {};
 

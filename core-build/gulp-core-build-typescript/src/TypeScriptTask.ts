@@ -20,11 +20,15 @@ interface ITypeScriptErrorObject {
   };
 }
 
-/** Includes the experimental stripInternal feature */
+/**
+ * Includes the experimental stripInternal feature
+ * @public
+ */
 export interface ICompilerOptions extends ts.Settings {
   stripInternal?: boolean;
 }
 
+/** @public */
 export interface ITypeScriptTaskConfig {
   /**
    * Fails the build when errors occur.
@@ -74,6 +78,7 @@ export interface ITypeScriptTaskConfig {
   libES6Dir?: string;
 }
 
+/** @public */
 export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   public name: string = 'typescript';
 
