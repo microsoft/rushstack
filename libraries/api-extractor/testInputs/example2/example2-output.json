@@ -155,7 +155,12 @@
           "signature": "constructor();",
           "parameters": {},
           "deprecatedMessage": [],
-          "summary": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "Constructs a new instance of the class"
+            }
+          ],
           "remarks": []
         },
         "betaTagMissingParam": {

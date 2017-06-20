@@ -3,6 +3,7 @@ import { ApiItemKind, IApiItemOptions } from './ApiItem';
 import ApiMember from './ApiMember';
 import ApiParameter from './ApiParameter';
 import TypeScriptHelpers from '../TypeScriptHelpers';
+import { ITextElement } from '../IDocElement';
 
 /**
  * This class is part of the ApiItem abstract syntax tree. It represents functions that are members of
@@ -12,8 +13,9 @@ import TypeScriptHelpers from '../TypeScriptHelpers';
  * @see ApiFunction for functions that are defined inside of a package
  */
 export default class ApiMethod extends ApiMember {
-  public returnType: string;
-  public params: ApiParameter[];
+  public readonly returnType: string;
+  public readonly params: ApiParameter[];
+  private readonly _isConstructor: boolean;
 
   constructor(options: IApiItemOptions) {
     super(options);
@@ -38,14 +40,41 @@ export default class ApiMethod extends ApiMember {
       }
     }
 
+    // tslint:disable-next-line:no-bitwise
+    this._isConstructor = (options.declarationSymbol.flags & ts.SymbolFlags.Constructor) !== 0;
+
     // Return type
-    if (!(this.name === '__constructor')) {
+    if (!this.isConstructor) {
       if (methodDeclaration.type) {
         this.returnType = methodDeclaration.type.getText();
       } else {
         this.returnType = 'any';
         this.hasIncompleteTypes = true;
       }
+    }
+  }
+
+  /**
+   * Returns true if this member represents a class constructor.
+   */
+  public get isConstructor(): boolean {
+    return this._isConstructor;
+  }
+
+  protected onCompleteInitialization(): void {
+    super.onCompleteInitialization();
+
+    // If this is a class constructor, and if the documentation summary was omitted, then
+    // we fill in a default summary versus flagging it as "undocumented".
+    // Generally class constructors have uninteresting documentation.
+    if (this.isConstructor) {
+      if (this.documentation.summary.length === 0) {
+        this.documentation.summary.push({
+          kind: 'textDocElement',
+          value: 'Constructs a new instance of the class'
+        } as ITextElement);
+      }
+      this.needsDocumentation = false;
     }
   }
 }

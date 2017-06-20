@@ -24,7 +24,6 @@ enum inheritDisplayModeNoErrorDeprecated {
 // WARNING: methodWithIncompleteReturnType has incomplete type information
 // @public
 class MyDocumentedClass {
-  // (undocumented)
   constructor();
   // WARNING: The name "$unallowedName" contains unsupported characters; API names should use only letters, numbers, and underscores
   public $unallowedName: string;
