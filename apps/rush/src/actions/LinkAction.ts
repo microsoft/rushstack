@@ -5,9 +5,9 @@ import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 
 import RushCommandLineParser from './RushCommandLineParser';
 import LinkManager from '../utilities/LinkManager';
-import { BaseAction } from './BaseAction';
+import { BaseRushAction } from './BaseRushAction';
 
-export default class LinkAction extends BaseAction {
+export default class LinkAction extends BaseRushAction {
   private _parser: RushCommandLineParser;
   private _force: CommandLineFlagParameter;
 

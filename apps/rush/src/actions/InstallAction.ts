@@ -17,7 +17,7 @@ import InstallManager, { InstallType } from '../utilities/InstallManager';
 import LinkManager from '../utilities/LinkManager';
 import ShrinkwrapFile from '../utilities/ShrinkwrapFile';
 import { ApprovedPackagesChecker } from '../utilities/ApprovedPackagesChecker';
-import { BaseAction } from './BaseAction';
+import { BaseRushAction } from './BaseRushAction';
 
 interface ITempModuleInformation {
   packageJson: IPackageJson;
@@ -25,7 +25,7 @@ interface ITempModuleInformation {
   filename: string;
 }
 
-export default class InstallAction extends BaseAction {
+export default class InstallAction extends BaseRushAction {
   private _parser: RushCommandLineParser;
   private _cleanInstall: CommandLineFlagParameter;
   private _cleanInstallFull: CommandLineFlagParameter;

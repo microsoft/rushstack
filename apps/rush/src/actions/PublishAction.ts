@@ -11,7 +11,6 @@ import {
 import {
   IChangeInfo,
   ChangeType,
-  RushConfiguration,
   RushConfigurationProject,
   RushConstants,
   Utilities,
@@ -25,9 +24,9 @@ import ChangelogGenerator from '../utilities/ChangelogGenerator';
 import GitPolicy from '../utilities/GitPolicy';
 import PrereleaseToken from '../utilities/PrereleaseToken';
 import ChangeManager from '../utilities/ChangeManager';
-import { BaseAction } from './BaseAction';
+import { BaseRushAction } from './BaseRushAction';
 
-export default class PublishAction extends BaseAction {
+export default class PublishAction extends BaseRushAction {
   private _addCommitDetails: CommandLineFlagParameter;
   private _apply: CommandLineFlagParameter;
   private _includeAll: CommandLineFlagParameter;

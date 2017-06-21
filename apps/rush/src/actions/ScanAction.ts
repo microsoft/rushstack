@@ -9,9 +9,9 @@ import * as path from 'path';
 import builtinPackageNames = require('builtins');
 
 import RushCommandLineParser from './RushCommandLineParser';
-import { BaseAction } from './BaseAction';
+import { BaseRushAction } from './BaseRushAction';
 
-export default class ScanAction extends BaseAction {
+export default class ScanAction extends BaseRushAction {
   private _parser: RushCommandLineParser;
 
   constructor(parser: RushCommandLineParser) {

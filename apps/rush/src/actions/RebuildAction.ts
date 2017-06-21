@@ -24,12 +24,12 @@ import {
   Event
 } from '@microsoft/rush-lib';
 
-import { BaseAction } from './BaseAction';
+import { BaseRushAction } from './BaseRushAction';
 import TaskRunner from '../taskRunner/TaskRunner';
 import ProjectBuildTask from '../taskRunner/ProjectBuildTask';
 import RushCommandLineParser from './RushCommandLineParser';
 
-export default class RebuildAction extends BaseAction {
+export default class RebuildAction extends BaseRushAction {
 
   /**
    * Defines the default state of forced (aka clean) build, where we do not try and compare

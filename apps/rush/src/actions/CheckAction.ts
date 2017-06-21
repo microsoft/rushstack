@@ -12,9 +12,9 @@ import {
 } from '@microsoft/rush-lib';
 
 import RushCommandLineParser from './RushCommandLineParser';
-import { BaseAction } from './BaseAction';
+import { BaseRushAction } from './BaseRushAction';
 
-export default class CheckAction extends BaseAction {
+export default class CheckAction extends BaseRushAction {
   private _parser: RushCommandLineParser;
 
   constructor(parser: RushCommandLineParser) {

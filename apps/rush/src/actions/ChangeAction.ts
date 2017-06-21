@@ -23,7 +23,7 @@ import {
   VersionControl
 } from '@microsoft/rush-lib';
 
-import { BaseAction } from './BaseAction';
+import { BaseRushAction } from './BaseRushAction';
 import RushCommandLineParser from './RushCommandLineParser';
 import ChangeFiles from '../utilities/ChangeFiles';
 
@@ -33,7 +33,7 @@ const BUMP_OPTIONS: { [type: string]: string } = {
   'patch': 'patch - for fixes (ex: updating how an API works without touching its signature)'
 };
 
-export default class ChangeAction extends BaseAction {
+export default class ChangeAction extends BaseRushAction {
   private _parser: RushCommandLineParser;
   private _sortedProjectList: string[];
   private _changeFileData: Map<string, IChangeFile>;

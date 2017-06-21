@@ -13,7 +13,10 @@ import {
 
 import EventHooksManager from '../utilities/EventHooksManager';
 
-export abstract class BaseAction extends CommandLineAction {
+/**
+ * The base Rush action that all Rush actions should extend.
+ */
+export abstract class BaseRushAction extends CommandLineAction {
   private _rushConfiguration: RushConfiguration;
   private _eventHooksManager: EventHooksManager;
 
@@ -26,6 +29,10 @@ export abstract class BaseAction extends CommandLineAction {
     this.run();
   }
 
+  /**
+   * All Rush actions need to implement this method. This method runs after
+   * environment has been set up by the base class.
+   */
   protected abstract run(): void;
 
   protected get rushConfiguration(): RushConfiguration {
