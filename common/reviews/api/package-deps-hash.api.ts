@@ -1,4 +1,4 @@
-// @public (undocumented)
+// @public
 export function getPackageDeps(packagePath: string = process.cwd(), excludedPaths?: string[]): IPackageDeps;
 
 // @public (undocumented)
