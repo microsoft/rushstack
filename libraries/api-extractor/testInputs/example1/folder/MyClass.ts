@@ -3,6 +3,7 @@
   * @badAedocTag (Error #1 is the bad tag) Text can not come after a tag unless it is a parameter of
   * the tag. It must come in the first few sentences of the AEDoc or come after
   * an \@internalremarks tag. (Error #2 text coming after a tag that is not \@internalremarks)
+  * @public
   */
 export default class MyClass {
   public test(): void {
@@ -44,6 +45,13 @@ export class InternalClass {
   public test(): void {
     console.log('this is a public API');
   }
+
+  /**
+   * This *implicitly* internal method should NOT have an underscore.
+   * API Extractor currently does NOT issue a warning for this case.
+   */
+  public _internalMethodWithRedundantUnderscore(): void {
+  }
 }
 
 /**
@@ -74,18 +82,21 @@ const privateField = 123;
 /**
  * This is testing identifiers whose name is the same as the
  * members of the object prototype.
+ * @public
  */
 export class __proto__ {
     public propertyIsEnumerable: string;
 }
 
+/** @public */
 export interface hasOwnProperty {
     __lookupSetter__: __proto__;
 }
 
+/** @public */
 export class A extends __proto__ implements hasOwnProperty {
-    __lookupSetter__: __proto__;
-    public __proto__(__proto__: string): __proto__ {
-        return undefined;
-    }
+  __lookupSetter__: __proto__;
+  public __proto__(__proto__: string): __proto__ {
+    return undefined;
+  }
 }

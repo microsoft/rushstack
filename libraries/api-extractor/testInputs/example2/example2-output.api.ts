@@ -1,21 +1,26 @@
 // WARNING: Unable to find a documentation file ("es6-collections.api.json") for the referenced package
+// @public
 interface IExternalPackageLookupInheritDoc {
 }
 
 // WARNING: __constructor has incomplete type information
+// @public
 class IncompleteTypeConstructor {
 }
 
+// @public
 enum inheritDisplayMode {
 }
 
+// @public
 enum inheritDisplayModeError {
 }
 
+// @public
 enum inheritDisplayModeErrorDeprecated {
 }
 
-// @deprecated
+// @public @deprecated
 enum inheritDisplayModeNoErrorDeprecated {
 }
 
@@ -24,7 +29,6 @@ enum inheritDisplayModeNoErrorDeprecated {
 // WARNING: methodWithIncompleteReturnType has incomplete type information
 // @public
 class MyDocumentedClass {
-  // (undocumented)
   constructor();
   // WARNING: The name "$unallowedName" contains unsupported characters; API names should use only letters, numbers, and underscores
   public $unallowedName: string;
@@ -48,9 +52,11 @@ class MyDocumentedClass {
 }
 
 // WARNING: Unable to find referenced export "@microsoft/sp-core-library:Display""
+// @public
 enum packageLocatedButExportNotFound {
 }
 
+// @public
 enum TestMissingCommentStar {
 }
 

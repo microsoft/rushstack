@@ -141,7 +141,7 @@
       "packageName": "@microsoft/node-core-library",
       "projectFolder": "libraries/node-core-library",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "shouldPublish": false
     },
     {
       "packageName": "@microsoft/package-deps-hash",

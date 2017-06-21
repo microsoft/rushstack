@@ -4,6 +4,7 @@ import { IExecutable } from './IExecutable';
 
 /* tslint:disable:no-any */
 
+/** @public */
 export interface IBuildConfig {
   /** Proxy gulp instance. */
   gulp?: GulpProxy | gulp.Gulp;

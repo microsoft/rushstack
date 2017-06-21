@@ -11,8 +11,9 @@ import {
 import {
   IChangeInfo,
   ChangeType,
-  RushConstants,
+  RushConfiguration,
   RushConfigurationProject,
+  RushConstants,
   Utilities,
   Npm
 } from '@microsoft/rush-lib';
@@ -23,7 +24,7 @@ import PublishUtilities, {
 import ChangelogGenerator from '../utilities/ChangelogGenerator';
 import GitPolicy from '../utilities/GitPolicy';
 import PrereleaseToken from '../utilities/PrereleaseToken';
-import ChangeFiles from '../utilities/ChangeFiles';
+import ChangeManager from '../utilities/ChangeManager';
 import { BaseAction } from './BaseAction';
 
 export default class PublishAction extends BaseAction {
@@ -150,34 +151,21 @@ export default class PublishAction extends BaseAction {
   }
 
   private _publishChanges(allPackages: Map<string, RushConfigurationProject>): void {
+    const changeManager: ChangeManager = new ChangeManager(this.rushConfiguration);
     const changesPath: string = path.join(this.rushConfiguration.commonFolder, RushConstants.changeFilesFolderName);
-    const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
-    const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
-      allPackages,
-      changeFiles,
-      this._addCommitDetails.value,
-      this._prereleaseToken);
-    const orderedChanges: IChangeInfo[] = PublishUtilities.sortChangeRequests(allChanges);
+    changeManager.load(changesPath,
+      this._prereleaseToken,
+      this._addCommitDetails.value);
 
-    if (orderedChanges.length > 0) {
+    if (changeManager.hasChanges()) {
+      const orderedChanges: IChangeInfo[] = changeManager.changes;
       const tempBranch: string = 'publish-' + new Date().getTime();
 
       // Make changes in temp branch.
       this._gitCheckout(tempBranch, true);
 
-      // Apply all changes to package.json files.
-      PublishUtilities.updatePackages(allChanges, allPackages, this._apply.value,
-        this._prereleaseToken);
-
-      // Do not update changelog or delete the change files for prerelease.
-      // Save them for the official release.
-      if (!this._prereleaseToken.hasValue) {
-        // Update changelogs.
-        ChangelogGenerator.updateChangelogs(allChanges, allPackages, this._apply.value);
-
-        // Remove the change request files only if "-a" or "-b" was provided
-        changeFiles.deleteAll(this._apply.value || !!this._targetBranch.value);
-      }
+      // Make changes to package.json and change logs.
+      changeManager.apply(this._apply.value);
 
       // Stage, commit, and push the changes to remote temp branch.
       this._gitAddChanges();

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Wed, 31 May 2017 01:08:33 GMT and should not be manually modified.
+This log was last generated on Wed, 21 Jun 2017 04:19:35 GMT and should not be manually modified.
+
+## 2.5.5
+Wed, 21 Jun 2017 04:19:35 GMT
+
+### Patches
+
+- Add missing API Extractor release tags
 
 ## 2.5.3
 Wed, 31 May 2017 01:08:33 GMT

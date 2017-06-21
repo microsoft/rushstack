@@ -8,6 +8,9 @@ import JsonFile from './JsonFile';
 
 export type ValidateErrorCallback = (errorDescription: string) => void;
 
+/**
+ * @alpha
+ */
 export default class JsonSchemaValidator {
   private _validator: Validator;
   private _schemaObject: Object;

@@ -344,15 +344,17 @@
           "scopeName": "",
           "packageName": "",
           "exportName": "publicEnum",
-          "memberName": ""
+          "memberName": "",
+          "value": "publicEnum"
         },
         {
           "kind": "linkDocElement",
           "referenceType": "code",
           "scopeName": "",
           "packageName": "",
-          "exportName": "internalEnum",
-          "memberName": ""
+          "exportName": "_internalEnum",
+          "memberName": "",
+          "value": "_internalEnum"
         }
       ],
       "remarks": [],

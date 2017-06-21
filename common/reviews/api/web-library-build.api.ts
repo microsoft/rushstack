@@ -1,5 +1,7 @@
+// @public
 export declare function addSuppression(str: string): void;
 
+// @public
 class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig> {
   // (undocumented)
   executeTask(gulp: gulp.Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream;
@@ -11,41 +13,55 @@ class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig> {
   taskConfig: IApiExtractorTaskConfig;
 }
 
+// @public
 class CleanTask extends GulpTask<void> {
   constructor();
   executeTask(gulp: gulp.Gulp, completeCallback: (result?: Object) => void): void;
 }
 
+// @public
 class CopyTask extends GulpTask<ICopyConfig> {
   constructor();
   executeTask(gulp: gulp.Gulp, completeCallback: (result?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
+  // WARNING: Because this definition is explicitly marked as @internal, an underscore prefix ("_") should be added to its name
   // @internal
   loadSchema(): Object;
 }
 
+// @public
 export declare function coverageData(coverage: number, threshold: number, filePath: string): void;
 
+// @public
 export declare function error(...args: Array<string | Chalk.ChalkChain>): void;
 
+// @public
 export declare function fileError(taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
 
+// @public
 export declare function fileLog(write: (text: string) => void, taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
 
+// @public
 export declare function fileWarning(taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
 
+// @public
 export declare function functionalTestRun(name: string, result: TestResultState, duration: number): void;
 
+// @public
 class GenerateShrinkwrapTask extends GulpTask<void> {
   constructor();
   executeTask(gulp: gulpType.Gulp, completeCallback: (result?: Object) => void): NodeJS.ReadWriteStream;
 }
 
+// @public
 export declare function getConfig(): IBuildConfig;
 
+// @public
 export declare function getErrors(): string[];
 
+// @public
 export declare function getWarnings(): string[];
 
+// @public
 class GulpTask<TASK_CONFIG> implements IExecutable {
   protected _getConfigFilePath(): string;
   buildConfig: IBuildConfig;
@@ -75,7 +91,7 @@ class GulpTask<TASK_CONFIG> implements IExecutable {
   taskConfig: TASK_CONFIG;
 }
 
-// (undocumented)
+// @public (undocumented)
 interface IBuildConfig {
   args?: {
     [ name: string ]: string | boolean;
@@ -105,6 +121,7 @@ interface IBuildConfig {
   verbose?: boolean;
 }
 
+// @public
 interface ICopyConfig {
   copyTo: {
     [ destPath: string ]: string[];
@@ -112,12 +129,13 @@ interface ICopyConfig {
   shouldFlatten?: boolean;
 }
 
+// @public
 interface ICustomGulpTask {
   // (undocumented)
   (gulp: gulp.Gulp | GulpProxy, buildConfig: IBuildConfig, done: (failure?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
 }
 
-// (undocumented)
+// @public (undocumented)
 interface IExecutable {
   execute: (config: IBuildConfig) => Promise<void>;
   getCleanMatch?: (config: IBuildConfig, taskConfig?: any) => string[];
@@ -126,15 +144,16 @@ interface IExecutable {
   onRegister?: () => void;
 }
 
+// @public
 export declare function initialize(gulp: gulp.Gulp): void;
 
-// (undocumented)
+// @public (undocumented)
 interface ITsConfigFile<T> {
   // (undocumented)
   compilerOptions: T;
 }
 
-// (undocumented)
+// @public (undocumented)
 interface IWebpackTaskConfig {
   config?: Webpack.Configuration;
   configPath: string;
@@ -142,19 +161,26 @@ interface IWebpackTaskConfig {
   webpack?: typeof Webpack;
 }
 
+// @public
 export declare function log(...args: Array<string | Chalk.ChalkChain>): void;
 
+// @public
 export declare function logSummary(value: string): void;
 
+// @public
 export declare function mergeConfig(config: IBuildConfig): void;
 
+// @public
 export declare function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecutable;
 
+// @public
 export declare function replaceConfig(config: IBuildConfig): void;
 
+// WARNING: Because this definition is explicitly marked as @internal, an underscore prefix ("_") should be added to its name
 // @internal
 export declare function reset(): void;
 
+// @public
 class SchemaValidator {
   static readAndValidateJson < TResult >(dataFilePath: string, schemaFilePath: string): TResult;
   // (undocumented)
@@ -162,14 +188,19 @@ class SchemaValidator {
   static validate(data: Object, schema: Object, dataFilePath?: string): void;
 }
 
+// @public
 export declare function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutable;
 
+// @public
 export declare function setConfig(config: IBuildConfig): void;
 
+// @public
 export declare function subTask(taskName: string, fn: ICustomGulpTask): IExecutable;
 
+// @public
 export declare function task(taskName: string, task: IExecutable): IExecutable;
 
+// @public
 enum TestResultState {
   // (undocumented)
   Failed = 1,
@@ -181,14 +212,14 @@ enum TestResultState {
   Skipped = 3
 }
 
-// (undocumented)
+// @public
 class TypeScriptConfiguration {
   static getGulpTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<ts.Settings>;
   static getTypescriptCompiler(): any;
   static setTypescriptCompiler(typescript: any): void;
 }
 
-// (undocumented)
+// @public (undocumented)
 class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   // (undocumented)
   executeTask(gulp: gulpType.Gulp, completeCallback: (result?: string) => void): void;
@@ -203,18 +234,22 @@ class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   taskConfig: ITypeScriptTaskConfig;
 }
 
+// @public
 class ValidateShrinkwrapTask extends GulpTask<void> {
   constructor();
   executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream;
 }
 
+// @public
 export declare function verbose(...args: Array<string | Chalk.ChalkChain>): void;
 
+// @public
 export declare function warn(...args: Array<string | Chalk.ChalkChain>): void;
 
+// @public
 export declare function watch(watchMatch: string | string[], task: IExecutable): IExecutable;
 
-// (undocumented)
+// @public (undocumented)
 class WebpackTask extends GulpTask<IWebpackTaskConfig> {
   // (undocumented)
   executeTask(gulp: gulp.Gulp, completeCallback: (result?: Object) => void): void;

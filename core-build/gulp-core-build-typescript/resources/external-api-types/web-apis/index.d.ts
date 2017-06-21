@@ -1,10 +1,16 @@
 // Typings based on DefinitelyTyped definitions from es6-promise
 
+/**
+ * @public
+ */
 export interface Thenable<T> {
     then<U>(onFulfilled?: (value: T) => U | Thenable<U>, onRejected?: (error: any) => U | Thenable<U>): Thenable<U>;
     then<U>(onFulfilled?: (value: T) => U | Thenable<U>, onRejected?: (error: any) => void): Thenable<U>;
 }
 
+/**
+ * @public
+ */
 export class Promise<T> implements Thenable<T> {
 
 	constructor(callback: (resolve: (value?: T | Thenable<T>) => void, reject: (error?: any) => void) => void);
@@ -36,6 +42,9 @@ export class Promise<T> implements Thenable<T> {
 
 // Typings based on DefinitelyTyped definitions from whatwg-fetch
 
+/**
+ * @public
+ */
 export class Request extends Body {
 	constructor(input: string|Request, init?:RequestInit);
 	method: string;
@@ -49,6 +58,9 @@ export class Request extends Body {
 	cache: RequestCache;
 }
 
+/**
+ * @public
+ */
 export interface RequestInit {
 	method?: string;
 	headers?: HeaderInit|{ [index: string]: string };
@@ -59,6 +71,9 @@ export interface RequestInit {
 	cache?: RequestCache;
 }
 
+/**
+ * @public
+ */
 export type RequestContext =
 	"audio" | "beacon" | "cspreport" | "download" | "embed" |
 	"eventsource" | "favicon" | "fetch" | "font" | "form" | "frame" |
@@ -67,17 +82,39 @@ export type RequestContext =
 	"prefetch" | "script" | "serviceworker" | "sharedworker" |
 	"subresource" | "style" | "track" | "video" | "worker" |
 	"xmlhttprequest" | "xslt";
+
+/**
+ * @public
+ */
 export type RequestMode = "same-origin" | "no-cors" | "cors";
+
+/**
+ * @public
+ */
 export type RequestRedirect = "follow" | "error" | "manual";
+
+/**
+ * @public
+ */
 export type RequestCredentials = "omit" | "same-origin" | "include";
+
+/**
+ * @public
+ */
 export type RequestCache =
 	"default" | "no-store" | "reload" | "no-cache" |
 	"force-cache" | "only-if-cached";
 
+/**
+ * @public
+ */
 export interface HeadersMap {
 	[index: string]: string;
 }
 
+/**
+ * @public
+ */
 export class Headers {
 	constructor(headers?:Headers|HeadersMap)
 	append(name: string, value: string): void;
@@ -89,6 +126,9 @@ export class Headers {
 	forEach(callback: (value: string, name: string) => void): void;
 }
 
+/**
+ * @public
+ */
 export class Body {
 	bodyUsed: boolean;
 	arrayBuffer(): Promise<ArrayBuffer>;
@@ -99,6 +139,9 @@ export class Body {
 	text(): Promise<string>;
 }
 
+/**
+ * @public
+ */
 export class Response extends Body {
 	constructor(body?: BodyInit, init?: ResponseInit);
 	static error(): Response;
@@ -112,18 +155,38 @@ export class Response extends Body {
 	clone(): Response;
 }
 
+/**
+ * @public
+ */
 export type ResponseType = "basic" | "cors" | "default" | "error" | "opaque" | "opaqueredirect";
 
+/**
+ * @public
+ */
 export interface ResponseInit {
 	status: number;
 	statusText?: string;
 	headers?: HeaderInit;
 }
 
+/**
+ * @public
+ */
 export type HeaderInit = Headers|Array<string>;
+
+/**
+ * @public
+ */
 export type BodyInit = ArrayBuffer|ArrayBufferView|Blob|FormData|string;
+
+/**
+ * @public
+ */
 export type RequestInfo = Request|string;
 
+/**
+ * @alpha
+ */
 export interface Window {
 	fetch(url: string|Request, init?: RequestInit): Promise<Response>;
 }

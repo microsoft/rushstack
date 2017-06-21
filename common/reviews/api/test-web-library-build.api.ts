@@ -1,10 +1,10 @@
-// (undocumented)
+// @public (undocumented)
 export function add(num1: number, num2: number): number;
 
-// (undocumented)
+// @public (undocumented)
 export function log(message: string): void;
 
-// (undocumented)
+// @public (undocumented)
 export function logClass(): void;
 
 // (No packageDescription for this package)

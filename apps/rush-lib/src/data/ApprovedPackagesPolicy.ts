@@ -11,6 +11,7 @@ import RushConfiguration, { IRushConfigurationJson, IApprovedPackagesPolicyJson 
 /**
  * This is a helper object for RushConfiguration.
  * It exposes the "approvedPackagesPolicy" feature from rush.json.
+ * @public
  */
 export class ApprovedPackagesPolicy {
   private _enabled: boolean;

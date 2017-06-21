@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/package-deps-hash",
-  "version": "2.0.2",
+  "version": "2.0.4",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -13,6 +13,9 @@
     "build": "gulp",
     "clean": "gulp clean",
     "test": "gulp test"
+  },
+  "dependencies": {
+    "@types/es6-collections": "0.5.29"
   },
   "devDependencies": {
     "@microsoft/node-library-build": ">=3.0.1 <4.0.0",

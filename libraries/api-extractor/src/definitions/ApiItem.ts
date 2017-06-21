@@ -10,6 +10,7 @@ import DocElementParser from '../DocElementParser';
 import ResolvedApiItem from '../ResolvedApiItem';
 import ApiDefinitionReference,
   { IScopedPackageName, IApiDefinintionReferenceParts } from '../ApiDefinitionReference';
+import ApiItemContainer from './ApiItemContainer';
 
 /**
  * Indicates the type of definition represented by a ApiItem object.
@@ -201,6 +202,9 @@ abstract class ApiItem {
    */
   public jsdocNode: ts.Node;
 
+  /**
+   * The parsed AEDoc comment for this item.
+   */
   public documentation: ApiDocumentation;
 
   /**
@@ -250,6 +254,8 @@ abstract class ApiItem {
    */
   private _state: InitializationState;
 
+  private _parentContainer: ApiItemContainer | undefined;
+
   constructor(options: IApiItemOptions) {
     this.reportError = this.reportError.bind(this);
 
@@ -278,6 +284,17 @@ abstract class ApiItem {
       this.reportError,
       this.warnings
     );
+  }
+
+  /**
+   * Called by ApiItemContainer.addMemberItem().  Other code should NOT call this method.
+   */
+  public notifyAddedToContainer(parentContainer: ApiItemContainer): void {
+    if (this._parentContainer) {
+      // This would indicate a program bug
+      throw new Error('The API item has already been added to another container: ' + this._parentContainer.name);
+    }
+    this._parentContainer = parentContainer;
   }
 
   /**
@@ -311,6 +328,13 @@ abstract class ApiItem {
    */
   public shouldHaveDocumentation(): boolean {
     return true;
+  }
+
+  /**
+   * The ApiItemContainer that this member belongs to, or undefined if there is none.
+   */
+  public get parentContainer(): ApiItemContainer|undefined {
+    return this._parentContainer;
   }
 
   /**
@@ -348,7 +372,7 @@ abstract class ApiItem {
     this.extractor.reportError(message, this._errorNode.getSourceFile(), this._errorNode.getStart());
   }
 
- /**
+  /**
    * Adds a warning to the ApiItem.warnings list.  These warnings will be emtted in the API file
    * produced by ApiFileGenerator.
    */
@@ -393,6 +417,33 @@ abstract class ApiItem {
     if (this.documentation.isDocInheritedDeprecated && this.documentation.deprecatedMessage.length === 0) {
       this.reportError('The @inheritdoc target has been marked as @deprecated.  ' +
         'Add a @deprecated message here, or else remove the @inheritdoc relationship.');
+    }
+
+    if (this.name.substr(0, 1) === '_') {
+      if (this.documentation.releaseTag !== ReleaseTag.Internal
+        && this.documentation.releaseTag !== ReleaseTag.None) {
+        this.reportWarning('The underscore prefix ("_") should only be used with definitions'
+          + ' that are explicitly marked as @internal');
+      }
+    } else {
+      if (this.documentation.releaseTag === ReleaseTag.Internal) {
+        this.reportWarning('Because this definition is explicitly marked as @internal, an underscore prefix ("_")'
+          + ' should be added to its name');
+      }
+    }
+
+    // Is it missing a release tag?
+    if (this.documentation.releaseTag === ReleaseTag.None) {
+      // Only warn about top-level exports
+      if (this.parentContainer && this.parentContainer.kind === ApiItemKind.Package) {
+        // Don't warn about items that failed to parse.
+        if (!this.documentation.failedToParse) {
+          // If there is no release tag, and this is a top-level export of the package, then
+          // report an error
+          this.reportError(`A release tag (@alpha, @beta, @public, @internal) must be specified`
+            + ` for ${this.name}`);
+        }
+      }
     }
   }
 
