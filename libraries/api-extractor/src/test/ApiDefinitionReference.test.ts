@@ -4,7 +4,7 @@ import { assert } from 'chai';
 import ApiDefinitionReference from '../ApiDefinitionReference';
 
 /* tslint:disable:no-function-expression - Mocha uses a poorly scoped "this" pointer */
-const capturedErrors: {
+let capturedErrors: {
   message: string;
   fileName: string;
   lineNumber: number;
@@ -12,6 +12,15 @@ const capturedErrors: {
 
 function testErrorHandler(message: string, fileName: string, lineNumber: number): void {
   capturedErrors.push({ message, fileName, lineNumber });
+}
+
+function clearCapturedErrors(): void {
+  capturedErrors = [];
+}
+
+function assertCapturedErrors(expectedMessages: string[]): void {
+  assert.deepEqual(capturedErrors.map(x => x.message), expectedMessages,
+    'The captured errors did not match the expected output.');
 }
 
 describe('ApiDocumentation tests', function (): void {
@@ -52,16 +61,12 @@ describe('ApiDocumentation tests', function (): void {
     });
 
     it('_parseApiReferenceExpression() without scope name and invalid memberName', function (): void {
+      clearCapturedErrors();
       // This won't raise an error (based on our current decision to only show warnings in the *.api.ts
       // files if we can't find a reference)
       apiReferenceExpr = 'sp-core-library:Guid:equals';
-      let caughtError: boolean = false;
-      try {
-        actual = ApiDefinitionReference.createFromString(apiReferenceExpr, console.log);
-      } catch (error) {
-        caughtError = true;
-      }
-      assert.equal(caughtError, true);
+      actual = ApiDefinitionReference.createFromString(apiReferenceExpr, console.log);
+      assertCapturedErrors([]);
     });
   });
 });

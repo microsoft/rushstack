@@ -102,6 +102,7 @@ export function gitStatus(path: string): string {
 
 /**
  * Collects the current git filehashes for a directory
+ * @public
  */
 export function getPackageDeps(packagePath: string = process.cwd(), excludedPaths?: string[]): IPackageDeps {
   const excludedHashes: { [key: string]: boolean } = {};

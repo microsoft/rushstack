@@ -1,6 +1,7 @@
+// @public
 export function getPackageDeps(packagePath: string = process.cwd(), excludedPaths?: string[]): IPackageDeps;
 
-// (undocumented)
+// @public (undocumented)
 interface IPackageDeps {
   // (undocumented)
   files: {

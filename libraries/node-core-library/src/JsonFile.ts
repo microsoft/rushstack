@@ -3,6 +3,7 @@
 
 /**
  * Utilities for reading/writing JSON files.
+ * @alpha
  */
 export class JsonFile {
 }

@@ -99,12 +99,13 @@ export default class ApiDefinitionReference {
   /**
    * Takes an API reference expression of the form '@scopeName/packageName:exportName.memberName'
    * and deconstructs it into an IApiDefinitionReference interface object.
+   * @returns the ApiDefinitionReference, or undefined if an error was reported.
    */
   public static createFromString(apiReferenceExpr: string,
-    reportError: (message: string) => void): ApiDefinitionReference {
+    reportError: (message: string) => void): ApiDefinitionReference | undefined {
     if (!apiReferenceExpr || apiReferenceExpr.split(' ').length > 1) {
       reportError('An API item reference must use the notation: "@scopeName/packageName:exportName.memberName"');
-      return;
+      return undefined;
     }
 
     const apiDefRefParts: IApiDefinintionReferenceParts = {
@@ -131,12 +132,14 @@ export default class ApiDefinitionReference {
       apiDefRefParts.memberName = parts[2] ? parts[2] : ''; // e.g. equals
     } else {
       // the export name is required
-       throw reportError(`The API item reference contains an invalid "exportName.memberName"`
+      reportError(`The API item reference contains an invalid "exportName.memberName"`
         + ` expression: "${apiReferenceExpr}"`);
+      return undefined;
     }
 
     if (!apiReferenceExpr.match(ApiDefinitionReference._exportRegEx)) {
-      throw reportError(`The API item reference contains invalid characters: "${apiReferenceExpr}"`);
+      reportError(`The API item reference contains invalid characters: "${apiReferenceExpr}"`);
+      return undefined;
     }
 
     return ApiDefinitionReference.createFromParts(apiDefRefParts);

@@ -1,5 +1,5 @@
 /**
- * This example folder is used to test the functionality of DocItemLoader and API reference resolution. 
+ * This example folder is used to test the functionality of DocItemLoader and API reference resolution.
  */
 declare const packageDescription: void;
 
@@ -16,6 +16,6 @@ export {
     IStructuredTypeSource,
     testingLinks,
     publicEnum,
-    internalEnum
+    internalEnum as _internalEnum
 } from './MyClass';
 export { default as MyClass } from './MyClass';

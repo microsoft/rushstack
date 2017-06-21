@@ -1,6 +1,15 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sat, 17 Jun 2017 01:02:59 GMT and should not be manually modified.
+This log was last generated on Tue, 20 Jun 2017 01:04:54 GMT and should not be manually modified.
+
+## 2.0.10
+Tue, 20 Jun 2017 01:04:54 GMT
+
+### Patches
+
+- Improved the wording of many error messages
+- Fix a bug with parsing of @link tags
+- API Extractor now issues warnings for @internal definitions that are not prefixed with an underscore
 
 ## 2.0.9
 Sat, 17 Jun 2017 01:02:59 GMT

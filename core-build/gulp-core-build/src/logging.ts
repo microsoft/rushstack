@@ -338,6 +338,7 @@ function markErrorAsWritten(error: Error): void {
 /**
  * Adds a message to be displayed in the summary after execution is complete.
  * @param value - the message to display
+ * @public
  */
 export function logSummary(value: string): void {
   'use strict';
@@ -347,6 +348,7 @@ export function logSummary(value: string): void {
 /**
  * Log a message to the console
  * @param args - the messages to log to the console
+ * @public
  */
 export function log(...args: Array<string | Chalk.ChalkChain>): void {
   'use strict';
@@ -381,7 +383,10 @@ export function reset(): void {
   localCache.writeSummaryLogs = [];
 }
 
-/** The result of a functional test run */
+/**
+ * The result of a functional test run
+ * @public
+ */
 export enum TestResultState {
   Passed,
   Failed,
@@ -394,6 +399,7 @@ export enum TestResultState {
  * @param name - the name of the test
  * @param result - the result of the test
  * @param duration - the length of time it took for the test to execute
+ * @public
  */
 export function functionalTestRun(name: string, result: TestResultState, duration: number): void {
   'use strict';
@@ -415,6 +421,7 @@ export function functionalTestRun(name: string, result: TestResultState, duratio
   }
 }
 
+/** @public */
 export function endTaskSrc(taskName: string, startHrtime: [number, number], fileCount: number): void {
   'use strict';
   localCache.totalTaskSrc++;
@@ -440,6 +447,7 @@ export function endTaskSrc(taskName: string, startHrtime: [number, number], file
  * @param coverage - the coverage of the file as a percentage
  * @param threshold - the minimum coverage for the file as a percentage, an error will be logged if coverage is below the threshold
  * @param filePath - the path to the file whose coverage is being measured
+ * @public
  */
 export function coverageData(coverage: number, threshold: number, filePath: string): void {
   'use strict';
@@ -459,6 +467,7 @@ const colorCodeRegex: RegExp = /\x1B[[(?);]{0,2}(;?\d)*./g;
 /**
  * Adds a suppression for an error or warning
  * @param str - the error or warning as a string
+ * @public
  */
 export function addSuppression(str: string): void {
   'use strict';
@@ -475,6 +484,7 @@ export function addSuppression(str: string): void {
  * Logs a warning. It will be logged to standard error and cause the build to fail
  * if buildConfig.shouldWarningsFailBuild is true, otherwise it will be logged to standard output.
  * @param message - the warning description
+ * @public
  */
 export function warn(...args: Array<string | Chalk.ChalkChain>): void {
   'use strict';
@@ -491,6 +501,7 @@ export function warn(...args: Array<string | Chalk.ChalkChain>): void {
 /**
  * Logs an error to standard error and causes the build to fail.
  * @param message - the error description
+ * @public
  */
 export function error(...args: Array<string | Chalk.ChalkChain>): void {
   'use strict';
@@ -513,6 +524,7 @@ export function error(...args: Array<string | Chalk.ChalkChain>): void {
  * @param column - the column in the file which had an issue
  * @param errorCode - the custom error code representing this error
  * @param message - a description of the error
+ * @public
  */
 export function fileLog(write: (text: string) => void, taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void {
   'use strict';
@@ -533,6 +545,7 @@ export function fileLog(write: (text: string) => void, taskName: string, filePat
  * @param column - the column in the file which had an issue
  * @param warningCode - the custom warning code representing this warning
  * @param message - a description of the warning
+ * @public
  */
 export function fileWarning(taskName: string, filePath: string, line: number, column: number, errorCode: string,  message: string): void {
   fileLog(warn, taskName, filePath, line, column, errorCode, message);
@@ -545,6 +558,7 @@ export function fileWarning(taskName: string, filePath: string, line: number, co
  * @param column - the column in the file which had an issue
  * @param errorCode - the custom error code representing this error
  * @param message - a description of the error
+ * @public
  */
 export function fileError(taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void {
   fileLog(error, taskName, filePath, line, column, errorCode, message);
@@ -553,6 +567,7 @@ export function fileError(taskName: string, filePath: string, line: number, colu
 /**
  * Logs a message to standard output if the verbose flag is specified.
  * @param args - the messages to log when in verbose mode
+ * @public
  */
 export function verbose(...args: Array<string | Chalk.ChalkChain>): void {
   'use strict';
@@ -562,6 +577,7 @@ export function verbose(...args: Array<string | Chalk.ChalkChain>): void {
   }
 }
 
+/** @public */
 export function generateGulpError(error: Object): Object {
   if (isVerbose()) {
     return error;
@@ -585,6 +601,7 @@ export function generateGulpError(error: Object): Object {
 /**
  * Logs an error to standard error and causes the build to fail.
  * @param e - the error (can be a string or Error object)
+ * @public
  */
 export function writeError(e: any): void {
 /* tslint:enable:no-any */
@@ -646,45 +663,55 @@ export function writeError(e: any): void {
 
 /**
  * Returns the list of warnings which have been logged
+ * @public
  */
 export function getWarnings(): string[] {
   'use strict';
   return localCache.warnings;
 }
 
-/** Returns the list of errors which have been logged */
+/**
+ * Returns the list of errors which have been logged
+ * @public
+ */
 export function getErrors(): string[] {
   'use strict';
   return localCache.errors;
 }
 
+/** @public */
 export function getStart(): [number, number] {
   'use strict';
   return localCache.start;
 }
 
+/** @public */
 export function setWatchMode(): void {
   'use strict';
   localCache.watchMode = true;
 }
 
+/** @public */
 export function getWatchMode(): boolean {
   'use strict';
   return localCache.watchMode;
 }
 
+/** @public */
 export function setExitCode(exitCode: number): void {
   'use strict';
   localCache.exitCode = exitCode;
 }
 
+/** @public */
 export function logStartSubtask(name: string): void {
   log(`Starting subtask '${gutil.colors.cyan(name)}'...`);
   localCache.subTasksRun++;
 }
 
+/** @public */
 export function logEndSubtask(name: string, startTime: [number, number], errorObject?: Error): void {
-const duration: [number, number] = process.hrtime(startTime);
+  const duration: [number, number] = process.hrtime(startTime);
 
   if (name) {
     if (!errorObject) {
@@ -701,6 +728,7 @@ const duration: [number, number] = process.hrtime(startTime);
   }
 }
 
+/** @public */
 export function initialize(gulp: gulp.Gulp, gulpErrorCallback?: (err: Error) => void, gulpStopCallback?: (err: Error) => void): void {
   'use strict';
   // This will add logging to the gulp execution
@@ -796,6 +824,7 @@ export function initialize(gulp: gulp.Gulp, gulpErrorCallback?: (err: Error) => 
   });
 }
 
+/** @public */
 export function markTaskCreationTime(): void {
   'use strict';
   localCache.taskCreationTime = process.hrtime(getStart());
