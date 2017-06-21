@@ -11,13 +11,11 @@ import * as colors from 'colors';
 import inquirer = require('inquirer');
 
 import {
-  CommandLineAction,
   CommandLineFlagParameter,
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
 
 import {
-  RushConfiguration,
   RushConfigurationProject,
   RushConstants,
   IChangeFile,
@@ -25,6 +23,7 @@ import {
   VersionControl
 } from '@microsoft/rush-lib';
 
+import { BaseRushAction } from './BaseRushAction';
 import RushCommandLineParser from './RushCommandLineParser';
 import ChangeFiles from '../utilities/ChangeFiles';
 
@@ -34,9 +33,8 @@ const BUMP_OPTIONS: { [type: string]: string } = {
   'patch': 'patch - for fixes (ex: updating how an API works without touching its signature)'
 };
 
-export default class ChangeAction extends CommandLineAction {
+export default class ChangeAction extends BaseRushAction {
   private _parser: RushCommandLineParser;
-  private _rushConfiguration: RushConfiguration;
   private _sortedProjectList: string[];
   private _changeFileData: Map<string, IChangeFile>;
   private _verifyParameter: CommandLineFlagParameter;
@@ -70,7 +68,6 @@ export default class ChangeAction extends CommandLineAction {
         ''].join(os.EOL)
     });
     this._parser = parser;
-    this._rushConfiguration = parser.rushConfiguration;
   }
 
   public onDefineParameters(): void {
@@ -88,7 +85,7 @@ export default class ChangeAction extends CommandLineAction {
     });
   }
 
-  public onExecute(): void {
+  public run(): void {
     if (this._verifyParameter.value) {
       return this._verify();
     }
@@ -123,7 +120,7 @@ export default class ChangeAction extends CommandLineAction {
 
   private _getChangedPackageNames(): string[] {
     const changedFolders: string[] = VersionControl.getChangedFolders(this._targetBranch.value);
-    return this._rushConfiguration.projects
+    return this.rushConfiguration.projects
       .filter(project => project.shouldPublish)
       .filter(project => this._hasProjectChanged(changedFolders, project))
       .map(project => project.packageName);
@@ -131,7 +128,7 @@ export default class ChangeAction extends CommandLineAction {
 
   private _validateChangeFile(changedPackages: string[]): void {
     const files: string[] = this._getChangeFiles().map(relativePath => {
-      return path.join(this._rushConfiguration.rushJsonFolder, relativePath);
+      return path.join(this.rushConfiguration.rushJsonFolder, relativePath);
     });
     if (files.length === 0) {
       throw new Error(`No change file is found. Run 'rush change' to generate a change file.`);
@@ -372,7 +369,7 @@ export default class ChangeAction extends CommandLineAction {
     const filename: string = (branch ?
       this._escapeFilename(`${branch}_${this._getTimestamp()}.json`) :
       `${this._getTimestamp()}.json`);
-    const filePath: string = path.join(this._rushConfiguration.commonFolder,
+    const filePath: string = path.join(this.rushConfiguration.commonFolder,
       RushConstants.changeFilesFolderName,
       ...packageName.split('/'),
       filename);

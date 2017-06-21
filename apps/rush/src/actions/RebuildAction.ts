@@ -5,7 +5,6 @@ import * as colors from 'colors';
 import * as fsx from 'fs-extra';
 import * as os from 'os';
 import {
-  CommandLineAction,
   CommandLineFlagParameter,
   CommandLineIntegerParameter,
   CommandLineStringListParameter,
@@ -17,7 +16,6 @@ import {
   IErrorDetectionRule,
   IRushLinkJson,
   JsonFile,
-  RushConfiguration,
   RushConfigurationProject,
   Stopwatch,
   TestErrorDetector,
@@ -26,12 +24,12 @@ import {
   Event
 } from '@microsoft/rush-lib';
 
+import { BaseRushAction } from './BaseRushAction';
 import TaskRunner from '../taskRunner/TaskRunner';
 import ProjectBuildTask from '../taskRunner/ProjectBuildTask';
 import RushCommandLineParser from './RushCommandLineParser';
-import EventHooksManager from '../utilities/EventHooksManager';
 
-export default class RebuildAction extends CommandLineAction {
+export default class RebuildAction extends BaseRushAction {
 
   /**
    * Defines the default state of forced (aka clean) build, where we do not try and compare
@@ -42,7 +40,6 @@ export default class RebuildAction extends CommandLineAction {
   private _dependentList: Map<string, Set<string>>;
   private _fromFlag: CommandLineStringListParameter;
   private _npmParameter: CommandLineFlagParameter;
-  private _rushConfiguration: RushConfiguration;
   private _rushLinkJson: IRushLinkJson;
   private _parallelismParameter: CommandLineIntegerParameter;
   private _parser: RushCommandLineParser;
@@ -52,7 +49,6 @@ export default class RebuildAction extends CommandLineAction {
   private _vsoParameter: CommandLineFlagParameter;
   private _minimalParameter: CommandLineFlagParameter;
   private _verboseParameter: CommandLineFlagParameter;
-  private _eventHooksManager: EventHooksManager;
 
   constructor(parser: RushCommandLineParser, options?: ICommandLineActionOptions) {
     super(options || {
@@ -67,8 +63,6 @@ export default class RebuildAction extends CommandLineAction {
     });
     this._parser = parser;
     this._isIncrementalBuildAllowed = false;
-    this._rushConfiguration = parser.rushConfiguration;
-    this._eventHooksManager = new EventHooksManager(this._rushConfiguration.eventHooks);
   }
 
   protected onDefineParameters(): void {
@@ -115,13 +109,13 @@ export default class RebuildAction extends CommandLineAction {
     });
   }
 
-  protected onExecute(): void {
-    if (!fsx.existsSync(this._rushConfiguration.rushLinkJsonFilename)) {
-      throw new Error(`File not found: ${this._rushConfiguration.rushLinkJsonFilename}` +
+  protected run(): void {
+    if (!fsx.existsSync(this.rushConfiguration.rushLinkJsonFilename)) {
+      throw new Error(`File not found: ${this.rushConfiguration.rushLinkJsonFilename}` +
         `${os.EOL}Did you run "rush link"?`);
     }
-    this._eventHooksManager.handle(Event.preRushBuild);
-    this._rushLinkJson = JsonFile.loadJsonFile(this._rushConfiguration.rushLinkJsonFilename);
+    this.eventHooksManager.handle(Event.preRushBuild);
+    this._rushLinkJson = JsonFile.loadJsonFile(this.rushConfiguration.rushLinkJsonFilename);
 
     console.log(`Starting "rush ${this.options.actionVerb}"${os.EOL}`);
     const stopwatch: Stopwatch = Stopwatch.start();
@@ -157,7 +151,7 @@ export default class RebuildAction extends CommandLineAction {
         this._parser.exitWithError();
       })
       .then(() => {
-        this._eventHooksManager.handle(Event.postRushBuild);
+        this.eventHooksManager.handle(Event.postRushBuild);
       });
   }
 
@@ -176,7 +170,7 @@ export default class RebuildAction extends CommandLineAction {
 
   private _registerToFlags(taskRunner: TaskRunner, toFlags: string[]): void {
     for (const toFlag of toFlags) {
-      const toProject: RushConfigurationProject = this._rushConfiguration.findProjectByShorthandName(toFlag);
+      const toProject: RushConfigurationProject = this.rushConfiguration.findProjectByShorthandName(toFlag);
       if (!toProject) {
         throw new Error(`The project '${toFlag}' does not exist in rush.json`);
       }
@@ -184,7 +178,7 @@ export default class RebuildAction extends CommandLineAction {
       const deps: Set<string> = this._collectAllDependencies(toProject.packageName);
 
       // Register any dependencies it may have
-      deps.forEach(dep => this._registerTask(taskRunner, this._rushConfiguration.getProjectByName(dep)));
+      deps.forEach(dep => this._registerTask(taskRunner, this.rushConfiguration.getProjectByName(dep)));
 
       // Register the dependency graph to the TaskRunner
       deps.forEach(dep => taskRunner.addDependencies(dep, this._rushLinkJson.localLinks[dep] || []));
@@ -193,7 +187,7 @@ export default class RebuildAction extends CommandLineAction {
 
   private _registerFromFlags(taskRunner: TaskRunner, fromFlags: string[]): void {
     for (const fromFlag of fromFlags) {
-      const fromProject: RushConfigurationProject = this._rushConfiguration.findProjectByShorthandName(fromFlag);
+      const fromProject: RushConfigurationProject = this.rushConfiguration.findProjectByShorthandName(fromFlag);
       if (!fromProject) {
         throw new Error(`The project '${fromFlag}' does not exist in rush.json`);
       }
@@ -207,7 +201,7 @@ export default class RebuildAction extends CommandLineAction {
 
       // Register all downstream dependents
       dependents.forEach(dependent => {
-        this._registerTask(taskRunner, this._rushConfiguration.getProjectByName(dependent));
+        this._registerTask(taskRunner, this.rushConfiguration.getProjectByName(dependent));
       });
 
       // Only register dependencies graph for projects which have been registered
@@ -220,7 +214,7 @@ export default class RebuildAction extends CommandLineAction {
 
   private _registerAll(taskRunner: TaskRunner): void {
     // Register all tasks
-    for (const rushProject of this._rushConfiguration.projects) {
+    for (const rushProject of this.rushConfiguration.projects) {
       this._registerTask(taskRunner, rushProject);
     }
 
@@ -279,7 +273,7 @@ export default class RebuildAction extends CommandLineAction {
     const errorDetector: ErrorDetector = new ErrorDetector(activeRules);
     const projectTask: ProjectBuildTask = new ProjectBuildTask(
       project,
-      this._rushConfiguration,
+      this.rushConfiguration,
       errorDetector,
       errorMode,
       this._productionParameter.value,

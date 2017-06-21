@@ -5,14 +5,12 @@ import * as colors from 'colors';
 import * as path from 'path';
 import { EOL } from 'os';
 import {
-  CommandLineAction,
   CommandLineFlagParameter,
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
 import {
   IChangeInfo,
   ChangeType,
-  RushConfiguration,
   RushConfigurationProject,
   RushConstants,
   Utilities,
@@ -26,13 +24,13 @@ import ChangelogGenerator from '../utilities/ChangelogGenerator';
 import GitPolicy from '../utilities/GitPolicy';
 import PrereleaseToken from '../utilities/PrereleaseToken';
 import ChangeManager from '../utilities/ChangeManager';
+import { BaseRushAction } from './BaseRushAction';
 
-export default class PublishAction extends CommandLineAction {
+export default class PublishAction extends BaseRushAction {
   private _addCommitDetails: CommandLineFlagParameter;
   private _apply: CommandLineFlagParameter;
   private _includeAll: CommandLineFlagParameter;
   private _npmAuthToken: CommandLineStringParameter;
-  private _rushConfiguration: RushConfiguration;
   private _parser: RushCommandLineParser;
   private _publish: CommandLineFlagParameter;
   private _regenerateChangelogs: CommandLineFlagParameter;
@@ -53,7 +51,6 @@ export default class PublishAction extends CommandLineAction {
       'changes and publish packages, you must use the --commit flag and/or the --publish flag.'
     });
     this._parser = parser;
-    this._rushConfiguration = parser.rushConfiguration;
   }
 
   protected onDefineParameters(): void {
@@ -127,14 +124,14 @@ export default class PublishAction extends CommandLineAction {
   /**
    * Executes the publish action, which will read change request files, apply changes to package.jsons,
    */
-  protected onExecute(): void {
+  protected run(): void {
     console.log(`Starting "rush publish" ${EOL}`);
 
-    if (!GitPolicy.check(this._rushConfiguration)) {
+    if (!GitPolicy.check(this.rushConfiguration)) {
       process.exit(1);
       return;
     }
-    const allPackages: Map<string, RushConfigurationProject> = this._rushConfiguration.projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
 
     if (this._regenerateChangelogs.value) {
       console.log('Regenerating changelogs');
@@ -153,8 +150,8 @@ export default class PublishAction extends CommandLineAction {
   }
 
   private _publishChanges(allPackages: Map<string, RushConfigurationProject>): void {
-    const changeManager: ChangeManager = new ChangeManager(this._rushConfiguration);
-    const changesPath: string = path.join(this._rushConfiguration.commonFolder, RushConstants.changeFilesFolderName);
+    const changeManager: ChangeManager = new ChangeManager(this.rushConfiguration);
+    const changesPath: string = path.join(this.rushConfiguration.commonFolder, RushConstants.changeFilesFolderName);
     changeManager.load(changesPath,
       this._prereleaseToken,
       this._addCommitDetails.value);
@@ -282,7 +279,7 @@ export default class PublishAction extends CommandLineAction {
     for (const change of orderedChanges) {
       if (
         change.changeType > ChangeType.dependency &&
-        this._rushConfiguration.projectsByName.get(change.packageName).shouldPublish
+        this.rushConfiguration.projectsByName.get(change.packageName).shouldPublish
       ) {
         this._gitAddTag(change.packageName, change.newVersion);
       }
@@ -313,7 +310,7 @@ export default class PublishAction extends CommandLineAction {
     const env: { [key: string]: string } = this._getEnvArgs();
     const args: string[] = ['publish'];
 
-    if (this._rushConfiguration.projectsByName.get(packageName).shouldPublish) {
+    if (this.rushConfiguration.projectsByName.get(packageName).shouldPublish) {
       let registry: string = '//registry.npmjs.org/';
       if (this._registryUrl.value) {
         const registryUrl: string = this._registryUrl.value;
@@ -331,7 +328,7 @@ export default class PublishAction extends CommandLineAction {
 
       this._execCommand(
         !!this._publish.value,
-        this._rushConfiguration.npmToolFilename,
+        this.rushConfiguration.npmToolFilename,
         args,
         packagePath,
         env);

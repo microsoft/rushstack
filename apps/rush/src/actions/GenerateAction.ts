@@ -4,9 +4,8 @@
 import * as colors from 'colors';
 import * as os from 'os';
 import * as fsx from 'fs-extra';
-import { CommandLineAction, CommandLineFlagParameter } from '@microsoft/ts-command-line';
+import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import {
-  RushConfiguration,
   Utilities,
   Stopwatch
 } from '@microsoft/rush-lib';
@@ -15,10 +14,10 @@ import InstallManager, { InstallType } from '../utilities/InstallManager';
 import LinkManager from '../utilities/LinkManager';
 import RushCommandLineParser from './RushCommandLineParser';
 import { ApprovedPackagesChecker } from '../utilities/ApprovedPackagesChecker';
+import { BaseRushAction } from './BaseRushAction';
 
-export default class GenerateAction extends CommandLineAction {
+export default class GenerateAction extends BaseRushAction {
   private _parser: RushCommandLineParser;
-  private _rushConfiguration: RushConfiguration;
   private _lazyParameter: CommandLineFlagParameter;
   private _noLinkParameter: CommandLineFlagParameter;
 
@@ -35,7 +34,6 @@ export default class GenerateAction extends CommandLineAction {
       + ' Afterwards, it will run "rush link" to create symlinks for all your projects.'
     });
     this._parser = parser;
-    this._rushConfiguration = parser.rushConfiguration;
   }
 
   protected onDefineParameters(): void {
@@ -53,27 +51,27 @@ export default class GenerateAction extends CommandLineAction {
     });
   }
 
-  protected onExecute(): void {
+  protected run(): void {
     const stopwatch: Stopwatch = Stopwatch.start();
     const isLazy: boolean = this._lazyParameter.value;
 
-    ApprovedPackagesChecker.rewriteConfigFiles(this._rushConfiguration);
+    ApprovedPackagesChecker.rewriteConfigFiles(this.rushConfiguration);
 
     console.log('Starting "rush generate"' + os.EOL);
 
-    const installManager: InstallManager = new InstallManager(this._rushConfiguration);
+    const installManager: InstallManager = new InstallManager(this.rushConfiguration);
 
     installManager.ensureLocalNpmTool(false);
 
     installManager.createTempModules();
 
     // Delete both copies of the shrinkwrap file
-    if (fsx.existsSync(this._rushConfiguration.committedShrinkwrapFilename)) {
-      console.log(os.EOL + 'Deleting ' + this._rushConfiguration.committedShrinkwrapFilename);
-      fsx.unlinkSync(this._rushConfiguration.committedShrinkwrapFilename);
+    if (fsx.existsSync(this.rushConfiguration.committedShrinkwrapFilename)) {
+      console.log(os.EOL + 'Deleting ' + this.rushConfiguration.committedShrinkwrapFilename);
+      fsx.unlinkSync(this.rushConfiguration.committedShrinkwrapFilename);
     }
-    if (fsx.existsSync(this._rushConfiguration.tempShrinkwrapFilename)) {
-      fsx.unlinkSync(this._rushConfiguration.tempShrinkwrapFilename);
+    if (fsx.existsSync(this.rushConfiguration.tempShrinkwrapFilename)) {
+      fsx.unlinkSync(this.rushConfiguration.tempShrinkwrapFilename);
     }
 
     if (isLazy) {
@@ -92,13 +90,13 @@ export default class GenerateAction extends CommandLineAction {
       console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
       const npmArgs: string [] = ['shrinkwrap'];
       installManager.pushConfigurationNpmArgs(npmArgs);
-      Utilities.executeCommand(this._rushConfiguration.npmToolFilename,
-        npmArgs, this._rushConfiguration.commonTempFolder);
+      Utilities.executeCommand(this.rushConfiguration.npmToolFilename,
+        npmArgs, this.rushConfiguration.commonTempFolder);
       console.log('"npm shrinkwrap" completed' + os.EOL);
 
       // Copy (or delete) common\temp\npm-shrinkwrap.json --> common\npm-shrinkwrap.json
-      installManager.syncFile(this._rushConfiguration.tempShrinkwrapFilename,
-        this._rushConfiguration.committedShrinkwrapFilename);
+      installManager.syncFile(this.rushConfiguration.tempShrinkwrapFilename,
+        this.rushConfiguration.committedShrinkwrapFilename);
 
       // The flag file is normally created by installCommonModules(), but "rush install" will
       // compare its timestamp against the shrinkwrap file.  Since we just generated a new
@@ -117,7 +115,7 @@ export default class GenerateAction extends CommandLineAction {
     console.log(os.EOL + colors.green(`Rush generate finished successfully. (${stopwatch.toString()})`));
 
     if (!this._noLinkParameter.value) {
-      const linkManager: LinkManager = new LinkManager(this._rushConfiguration);
+      const linkManager: LinkManager = new LinkManager(this.rushConfiguration);
       // NOTE: Setting force=true here shouldn't be strictly necessary, since installCommonModules()
       // above should have already deleted the marker file, but it doesn't hurt to be explicit.
       this._parser.catchSyncErrors(linkManager.createSymlinksForProjects(true));

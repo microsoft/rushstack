@@ -4,9 +4,8 @@
 import * as colors from 'colors';
 import * as os from 'os';
 
-import { CommandLineAction, CommandLineFlagParameter } from '@microsoft/ts-command-line';
+import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import {
-  RushConfiguration,
   Stopwatch,
   IPackageJson,
   Event
@@ -18,7 +17,7 @@ import InstallManager, { InstallType } from '../utilities/InstallManager';
 import LinkManager from '../utilities/LinkManager';
 import ShrinkwrapFile from '../utilities/ShrinkwrapFile';
 import { ApprovedPackagesChecker } from '../utilities/ApprovedPackagesChecker';
-import EventHooksManager from '../utilities/EventHooksManager';
+import { BaseRushAction } from './BaseRushAction';
 
 interface ITempModuleInformation {
   packageJson: IPackageJson;
@@ -26,14 +25,12 @@ interface ITempModuleInformation {
   filename: string;
 }
 
-export default class InstallAction extends CommandLineAction {
+export default class InstallAction extends BaseRushAction {
   private _parser: RushCommandLineParser;
-  private _rushConfiguration: RushConfiguration;
   private _cleanInstall: CommandLineFlagParameter;
   private _cleanInstallFull: CommandLineFlagParameter;
   private _bypassPolicy: CommandLineFlagParameter;
   private _noLinkParameter: CommandLineFlagParameter;
-  private _eventHooksManager: EventHooksManager;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -47,8 +44,6 @@ export default class InstallAction extends CommandLineAction {
       + ' Afterwards, it will run "rush link" to create symlinks for all your projects.'
     });
     this._parser = parser;
-    this._rushConfiguration = parser.rushConfiguration;
-    this._eventHooksManager = new EventHooksManager(this._rushConfiguration.eventHooks);
   }
 
   protected onDefineParameters(): void {
@@ -77,28 +72,28 @@ export default class InstallAction extends CommandLineAction {
     });
   }
 
-  protected onExecute(): void {
+  protected run(): void {
     if (!this._bypassPolicy.value) {
-      if (!GitPolicy.check(this._rushConfiguration)) {
+      if (!GitPolicy.check(this.rushConfiguration)) {
         process.exit(1);
         return;
       }
 
-      ApprovedPackagesChecker.rewriteConfigFiles(this._rushConfiguration);
+      ApprovedPackagesChecker.rewriteConfigFiles(this.rushConfiguration);
     }
 
     const stopwatch: Stopwatch = Stopwatch.start();
 
     console.log('Starting "rush install"' + os.EOL);
 
-    this._eventHooksManager.handle(Event.preRushInstall);
+    this.eventHooksManager.handle(Event.preRushInstall);
     try {
-      const installManager: InstallManager = new InstallManager(this._rushConfiguration);
+      const installManager: InstallManager = new InstallManager(this.rushConfiguration);
 
       installManager.ensureLocalNpmTool(this._cleanInstallFull.value);
 
       const shrinkwrapFile: ShrinkwrapFile | undefined
-        = ShrinkwrapFile.loadFromFile(this._rushConfiguration.committedShrinkwrapFilename);
+        = ShrinkwrapFile.loadFromFile(this.rushConfiguration.committedShrinkwrapFilename);
 
       if (!shrinkwrapFile) {
         console.log('');
@@ -135,10 +130,10 @@ export default class InstallAction extends CommandLineAction {
       throw error;
     }
 
-    this._eventHooksManager.handle(Event.postRushInstall);
+    this.eventHooksManager.handle(Event.postRushInstall);
 
     if (!this._noLinkParameter.value) {
-      const linkManager: LinkManager = new LinkManager(this._rushConfiguration);
+      const linkManager: LinkManager = new LinkManager(this.rushConfiguration);
       this._parser.catchSyncErrors(linkManager.createSymlinksForProjects(false));
     } else {
       console.log(os.EOL + 'Next you should probably run: "rush link"');

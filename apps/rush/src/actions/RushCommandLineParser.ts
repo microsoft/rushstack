@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
-import * as path from 'path';
 import * as colors from 'colors';
 import * as wordwrap from 'wordwrap';
 import { CommandLineParser, CommandLineFlagParameter } from '@microsoft/ts-command-line';
@@ -25,8 +24,8 @@ import ScanAction from './ScanAction';
 import Telemetry from '../utilities/Telemetry';
 
 export default class RushCommandLineParser extends CommandLineParser {
-  public rushConfiguration: RushConfiguration;
   public telemetry: Telemetry;
+
   private _debugParameter: CommandLineFlagParameter;
 
   constructor() {
@@ -39,7 +38,6 @@ export default class RushCommandLineParser extends CommandLineParser {
       + ' your monolithic project into many small packages but are afraid of the dreaded'
       + ' NPM progress bar, Rush is for you.'
     });
-    this._initialize();
     this._populateActions();
   }
 
@@ -51,7 +49,7 @@ export default class RushCommandLineParser extends CommandLineParser {
 
   public exitWithError(): void {
     try {
-      this.telemetry.flush();
+      this._flushTelemetry();
     } finally {
       process.exit(1);
     }
@@ -68,25 +66,25 @@ export default class RushCommandLineParser extends CommandLineParser {
   protected onExecute(): void {
     if (this._debugParameter.value) {
       // For debugging, don't catch any exceptions; show the full call stack
-      super.onExecute();
-      this.telemetry.flush();
+      this._execute();
     } else {
       try {
-        super.onExecute();
-        this.telemetry.flush();
+        this._execute();
       } catch (error) {
         this._exitAndReportError(error);
       }
     }
   }
 
-  private _initialize(): void {
-    try {
-      this.rushConfiguration = RushConfiguration.loadFromDefaultLocation();
-      this.telemetry = new Telemetry(this.rushConfiguration);
-      this._ensureEnvironment();
-    } catch (error) {
-      this._exitAndReportError(error);
+  private _execute(): void {
+    this.telemetry = new Telemetry(RushConfiguration.loadFromDefaultLocation());
+    super.onExecute();
+    this._flushTelemetry();
+  }
+
+  private _flushTelemetry(): void {
+    if (this.telemetry) {
+      this.telemetry.flush();
     }
   }
 
@@ -105,15 +103,6 @@ export default class RushCommandLineParser extends CommandLineParser {
     } catch (error) {
       this._exitAndReportError(error);
     }
-  }
-
-  private _ensureEnvironment(): void {
-    /* tslint:disable-next-line:no-string-literal */
-    let environmentPath: string = process.env['PATH'];
-    environmentPath = path.join(this.rushConfiguration.commonTempFolder, 'node_modules', '.bin') +
-      path.delimiter + environmentPath;
-    /* tslint:disable-next-line:no-string-literal */
-    process.env['PATH'] = environmentPath;
   }
 
   private _exitAndReportError(error: Error): void {

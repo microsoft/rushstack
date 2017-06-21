@@ -4,17 +4,15 @@
 import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
-import { CommandLineAction } from '@microsoft/ts-command-line';
 import {
-  RushConfiguration,
   Utilities
 } from '@microsoft/rush-lib';
 
 import RushCommandLineParser from './RushCommandLineParser';
+import { BaseRushAction } from './BaseRushAction';
 
-export default class UnlinkAction extends CommandLineAction {
+export default class UnlinkAction extends BaseRushAction {
   private _parser: RushCommandLineParser;
-  private _rushConfiguration: RushConfiguration;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -25,22 +23,21 @@ export default class UnlinkAction extends CommandLineAction {
        + ' commands on a project.'
     });
     this._parser = parser;
-    this._rushConfiguration = parser.rushConfiguration;
   }
 
   protected onDefineParameters(): void {
     // No parameters
   }
 
-  protected onExecute(): void {
+  protected run(): void {
     console.log('Starting "rush unlink"' + os.EOL);
 
     // Delete the flag file if it exists; this will ensure that
     // a full "rush link" is required next time
-    Utilities.deleteFile(this._rushConfiguration.rushLinkJsonFilename);
+    Utilities.deleteFile(this.rushConfiguration.rushLinkJsonFilename);
 
     let didAnything: boolean = false;
-    for (const rushProject of this._rushConfiguration.projects) {
+    for (const rushProject of this.rushConfiguration.projects) {
       const localModuleFolder: string = path.join(rushProject.projectFolder, 'node_modules');
       if (fsx.existsSync(localModuleFolder)) {
         console.log('Purging ' + localModuleFolder);

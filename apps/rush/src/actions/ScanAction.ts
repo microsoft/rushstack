@@ -7,11 +7,11 @@ import * as glob from 'glob';
 import * as os from 'os';
 import * as path from 'path';
 import builtinPackageNames = require('builtins');
-import { CommandLineAction } from '@microsoft/ts-command-line';
 
 import RushCommandLineParser from './RushCommandLineParser';
+import { BaseRushAction } from './BaseRushAction';
 
-export default class ScanAction extends CommandLineAction {
+export default class ScanAction extends BaseRushAction {
   private _parser: RushCommandLineParser;
 
   constructor(parser: RushCommandLineParser) {
@@ -34,7 +34,7 @@ export default class ScanAction extends CommandLineAction {
     // abstract
   }
 
-  protected onExecute(): void {
+  protected run(): void {
     console.log('Starting "rush scan"' + os.EOL);
 
     const packageJsonFilename: string = path.resolve('./package.json');
