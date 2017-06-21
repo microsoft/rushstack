@@ -21,7 +21,7 @@ export function parseGitLsTree(output: string): Map<string, string> {
       if (line) {
         // Take everything after the "100644 blob", which is just the hash and filename
         const matches: RegExpMatchArray = line.match(gitRegex);
-        if (matches) {
+        if (matches && matches[3] && matches[4]) {
           const hash: string = matches[3];
           const filename: string = matches[4];
 
