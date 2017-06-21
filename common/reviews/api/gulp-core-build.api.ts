@@ -1,11 +1,14 @@
+// @public
 export function addSuppression(str: string): void;
 
+// @public
 class CleanTask extends GulpTask<void> {
   constructor();
   public executeTask(gulp: gulp.Gulp,
       completeCallback: (result?: Object) => void): void;
 }
 
+// @public
 class CopyTask extends GulpTask<ICopyConfig> {
   constructor();
   public executeTask(gulp: gulp.Gulp,
@@ -14,29 +17,40 @@ class CopyTask extends GulpTask<ICopyConfig> {
   public loadSchema(): Object;
 }
 
+// @public
 export function coverageData(coverage: number, threshold: number, filePath: string): void;
 
+// @public
 export function error(...args: Array<string | Chalk.ChalkChain>): void;
 
+// @public
 export function fileError(taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
 
+// @public
 export function fileLog(write: (text: string) => void, taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
 
+// @public
 export function fileWarning(taskName: string, filePath: string, line: number, column: number, errorCode: string,  message: string): void;
 
+// @public
 export function functionalTestRun(name: string, result: TestResultState, duration: number): void;
 
+// @public
 class GenerateShrinkwrapTask extends GulpTask<void> {
   constructor();
   public executeTask(gulp: gulpType.Gulp, completeCallback: (result?: Object) => void): NodeJS.ReadWriteStream;
 }
 
+// @public
 export function getConfig(): IBuildConfig;
 
+// @public
 export function getErrors(): string[];
 
+// @public
 export function getWarnings(): string[];
 
+// @public
 class GulpTask<TASK_CONFIG> implements IExecutable {
   protected _getConfigFilePath(): string;
   public buildConfig: IBuildConfig;
@@ -67,7 +81,7 @@ class GulpTask<TASK_CONFIG> implements IExecutable {
   public taskConfig: TASK_CONFIG;
 }
 
-// (undocumented)
+// @public (undocumented)
 interface IBuildConfig {
   args?: {
     [ name: string ]: string | boolean
@@ -97,6 +111,7 @@ interface IBuildConfig {
   verbose?: boolean;
 }
 
+// @public
 interface ICopyConfig {
   copyTo: {
     [ destPath: string ]: string[];
@@ -104,13 +119,14 @@ interface ICopyConfig {
   shouldFlatten?: boolean;
 }
 
+// @public
 interface ICustomGulpTask {
   // WARNING: The type "GulpProxy" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   (gulp: gulp.Gulp | GulpProxy, buildConfig: IBuildConfig, done: (failure?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
 }
 
-// (undocumented)
+// @public (undocumented)
 interface IExecutable {
   execute: (config: IBuildConfig) => Promise<void>;
   getCleanMatch?: (config: IBuildConfig, taskConfig?: any) => string[];
@@ -119,21 +135,28 @@ interface IExecutable {
   onRegister?: () => void;
 }
 
+// @public
 export function initialize(gulp: gulp.Gulp): void;
 
+// @public
 export function log(...args: Array<string | Chalk.ChalkChain>): void;
 
+// @public
 export function logSummary(value: string): void;
 
+// @public
 export function mergeConfig(config: IBuildConfig): void;
 
+// @public
 export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecutable;
 
+// @public
 export function replaceConfig(config: IBuildConfig): void;
 
 // @internal
 export function reset(): void;
 
+// @public
 class SchemaValidator {
   public static readAndValidateJson < TResult >(dataFilePath: string, schemaFilePath: string): TResult;
   // (undocumented)
@@ -141,14 +164,19 @@ class SchemaValidator {
   public static validate(data: Object, schema: Object, dataFilePath?: string): void;
 }
 
+// @public
 export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutable;
 
+// @public
 export function setConfig(config: IBuildConfig): void;
 
+// @public
 export function subTask(taskName: string, fn: ICustomGulpTask): IExecutable;
 
+// @public
 export function task(taskName: string, task: IExecutable): IExecutable;
 
+// @public
 enum TestResultState {
   // (undocumented)
   Failed,
@@ -160,15 +188,19 @@ enum TestResultState {
   Skipped
 }
 
+// @public
 class ValidateShrinkwrapTask extends GulpTask<void> {
   constructor();
   public executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream;
 }
 
+// @public
 export function verbose(...args: Array<string | Chalk.ChalkChain>): void;
 
+// @public
 export function warn(...args: Array<string | Chalk.ChalkChain>): void;
 
+// @public
 export function watch(watchMatch: string | string[], task: IExecutable): IExecutable;
 
 // WARNING: Unsupported export: clean

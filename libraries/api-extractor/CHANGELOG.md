@@ -1,6 +1,23 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 14 Jun 2017 13:03:40 GMT and should not be manually modified.
+This log was last generated on Tue, 20 Jun 2017 01:04:54 GMT and should not be manually modified.
+
+## 2.0.10
+Tue, 20 Jun 2017 01:04:54 GMT
+
+### Patches
+
+- Improved the wording of many error messages
+- Fix a bug with parsing of @link tags
+- API Extractor now issues warnings for @internal definitions that are not prefixed with an underscore
+
+## 2.0.9
+Sat, 17 Jun 2017 01:02:59 GMT
+
+### Patches
+
+- The unsupported @summary tag is now reported as an error
+- Use a cache to speed up package.json lookups
 
 ## 2.0.8
 Wed, 14 Jun 2017 13:03:40 GMT
@@ -196,7 +213,7 @@ Thu, 19 Jan 2017 20:04:40 GMT
 
 ### Patches
 
-- Check for missing JsDoc sequences changed.
+- Check for missing JSDoc sequences changed.
 - Improved error messages
 
 ## 1.1.0

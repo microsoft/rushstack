@@ -19,6 +19,11 @@ function testErrorHandler(message: string, fileName: string, lineNumber: number)
   capturedErrors.push({ message, fileName, lineNumber });
 }
 
+function assertCapturedErrors(expectedMessages: string[]): void {
+  assert.deepEqual(capturedErrors.map(x => x.message), expectedMessages,
+    'The captured errors did not match the expected output.');
+}
+
 // These warnings would normally be printed at the bottom
 // of the source package's '*.api.ts' file.
 const warnings: string[] = [];
@@ -27,7 +32,7 @@ describe('DocItemLoader tests', function (): void {
   this.timeout(10000);
 
   describe('Basic Tests', function (): void {
-        it('Example 3', function (): void {
+    it('Example 3', function (): void {
       const inputFolder: string = './testInputs/example3';
       const outputJsonFile: string = './lib/example3-output.json';
       const outputApiFile: string = './lib/example3-output.api.ts';
@@ -61,9 +66,11 @@ describe('DocItemLoader tests', function (): void {
       const apiFileGenerator: ApiFileGenerator = new ApiFileGenerator();
       apiFileGenerator.writeApiFile(outputApiFile, extractor);
 
-      assert.equal(capturedErrors.length, 2);
-      assert.equal(capturedErrors[0].message, 'circular reference');
-      assert.equal(capturedErrors[1].message, 'Unable to link to "Internal" API item');
+      assertCapturedErrors([
+        'circular reference',
+        'The {@link} tag references an @internal or @alpha API item,'
+          + ' which will not appear in the generated documentation'
+      ]);
       TestFileComparer.assertFileMatchesExpected(outputJsonFile, expectedJsonFile);
       TestFileComparer.assertFileMatchesExpected(outputApiFile, expectedApiFile);
     });

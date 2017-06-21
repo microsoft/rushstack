@@ -1,6 +1,6 @@
-import { getPackageDeps } from '../getPackageDeps';
+import { getPackageDeps, parseGitLsTree } from '../getPackageDeps';
 import { IPackageDeps } from '../IPackageDeps';
-import { expect } from 'chai';
+import { expect, assert } from 'chai';
 import * as path from 'path';
 import * as fs from 'fs';
 import { execSync } from 'child_process';
@@ -11,6 +11,53 @@ const SOURCE_PATH: string = path.join(__dirname).replace(
 
 const TEST_PROJECT_PATH: string = path.join(SOURCE_PATH, 'testProject');
 const NESTED_TEST_PROJECT_PATH: string = path.join(SOURCE_PATH, 'nestedTestProject');
+
+describe('parseGitLsTree', () => {
+  it('can handle a blob', (done) => {
+    const filename: string = 'src/typings/tsd.d.ts';
+    const hash: string = '3451bccdc831cb43d7a70ed8e628dcf9c7f888c8';
+
+    const output: string = `100644 blob ${hash}\t${filename}`;
+    const changes: Map<string, string> = parseGitLsTree(output);
+
+    assert.equal(changes.size, 1, 'Expect there to be exactly 1 change');
+    assert.equal(changes.get(filename), hash, `Expect the hash to be ${hash}`);
+    done();
+  });
+
+  it('can handle a submodule', (done) => {
+    const filename: string = 'web-build-tools';
+    const hash: string = 'c5880bf5b0c6c1f2e2c43c95beeb8f0a808e8bac';
+
+    const output: string = `160000 commit ${hash}\t${filename}`;
+    const changes: Map<string, string> = parseGitLsTree(output);
+
+    assert.equal(changes.size, 1, 'Expect there to be exactly 1 change');
+    assert.equal(changes.get(filename), hash, `Expect the hash to be ${hash}`);
+    done();
+  });
+
+  it('can handle multiple lines', (done) => {
+    const filename1: string = 'src/typings/tsd.d.ts';
+    const hash1: string = '3451bccdc831cb43d7a70ed8e628dcf9c7f888c8';
+
+    const filename2: string = 'src/foo bar/tsd.d.ts';
+    const hash2: string = '0123456789abcdef1234567890abcdef01234567';
+
+    const output: string = `100644 blob ${hash1}\t${filename1}\n100666 blob ${hash2}\t${filename2}`;
+    const changes: Map<string, string> = parseGitLsTree(output);
+
+    assert.equal(changes.size, 2, 'Expect there to be exactly 2 changes');
+    assert.equal(changes.get(filename1), hash1, `Expect the hash to be ${hash1}`);
+    assert.equal(changes.get(filename2), hash2, `Expect the hash to be ${hash2}`);
+    done();
+  });
+
+  it('throws with malformed input', (done) => {
+    assert.throws(parseGitLsTree.bind(undefined, 'some super malformed input'));
+    done();
+  });
+});
 
 describe('getPackageDeps', () => {
 

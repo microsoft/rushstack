@@ -7,13 +7,13 @@ import Tokenizer from './Tokenizer';
 import ResolvedApiItem from './ResolvedApiItem';
 
 export default class DocElementParser {
-
   /**
-   * Matches only strings that contain characters for words.
-   * Any non word characters or spaces, will be present in the third entry in the match results
-   * if they exist.
+   * Used to validate the display text for an \@link tag.  The display text can contain any
+   * characters except for certain AEDoc delimiters: "@", "|", "{", "}".
+   * This RegExp matches the first bad character.
+   * Example: "Microsoft's {spec}" --> "{"
    */
-  private static _wordRegEx: RegExp = /^([\w\s]*)/;
+  private static _displayTextBadCharacterRegEx: RegExp = /[@|{}]/;
 
   /**
    * Matches a href reference. This is used to get an idea whether a given reference is for an href
@@ -72,7 +72,7 @@ export default class DocElementParser {
         break;
       }
 
-      if (token.type === TokenType.Tag) {
+      if (token.type === TokenType.BlockTag) {
         switch (token.tag) {
           case '@see':
             tokenizer.getToken();
@@ -85,12 +85,13 @@ export default class DocElementParser {
             parsing = false; // end of summary tokens
             break;
         }
-      } else if (token.type === TokenType.Inline) {
+      } else if (token.type === TokenType.InlineTag) {
         switch (token.tag) {
           case '@inheritdoc':
             tokenizer.getToken();
             if (docElements.length > 0 ||  documentation.summary.length > 0) {
-              documentation.reportError('Cannot provide summary in JsDoc if @inheritdoc tag is given');
+              documentation.reportError('A summary block is not allowed here,'
+                + ' because the @inheritdoc target provides the summary');
             }
             documentation.incompleteInheritdocs.push(token);
             documentation.isDocInherited = true;
@@ -114,7 +115,7 @@ export default class DocElementParser {
         docElements.push({kind: 'textDocElement', value: token.text} as ITextElement);
           tokenizer.getToken();
       } else {
-        documentation.reportError(`Unidentifiable Token ${token.type} ${token.tag} ${token.text}`);
+        documentation.reportError(`Unidentifiable Token ${token.type} ${token.tag} "${token.text}"`);
       }
     }
     return docElements;
@@ -125,7 +126,7 @@ export default class DocElementParser {
    * linkDocElement with the corresponding information. If the corresponding inline tag \@link is
    * not formatted correctly an error will be reported.
    *
-   * The format for the \@link tag is {\@link url or API defintion reference | display text}, where
+   * The format for the \@link tag is {\@link URL or API defintion reference | display text}, where
    * the '|' is only needed if the optional display text is given.
    *
    * Examples:
@@ -136,70 +137,77 @@ export default class DocElementParser {
    */
   public static parseLinkTag(documentation: ApiDocumentation, tokenItem: Token): IHrefLinkElement | ICodeLinkElement {
     if (!tokenItem.text) {
-      documentation.reportError('Invalid @link inline token, a url or API definition reference must be given');
+      documentation.reportError('The {@link} tag must include a URL or API item reference');
        return;
     }
 
     // Make sure there are no extra pipes
-    let pipeSplitContent: string[] = tokenItem.text.split('|');
-    pipeSplitContent = pipeSplitContent.map( value => {
+    const pipeSplitContent: string[] = tokenItem.text.split('|').map(value => {
       if (value) {
         return value.trim();
       }
     });
     if (pipeSplitContent.length > 2) {
-      documentation.reportError('Invalid @link parameters, at most one pipe character allowed.');
-      return;
+      documentation.reportError('The {@link} tag contains more than one pipe character ("|")');
+      return undefined;
     }
+
+    const addressPart: string = pipeSplitContent[0];
+    const displayTextPart: string = pipeSplitContent.length > 1 ? pipeSplitContent[1] : '';
 
     // Try to guess if the tokenContent is a link or API definition reference
     let linkDocElement: ICodeLinkElement | IHrefLinkElement;
-    if (tokenItem.text.match(this._hrefRegEx)) {
-      const urlContent: string[] = pipeSplitContent[0].split(' ');
-
-      // Make sure only a single url is given
-      if (urlContent.length > 1 && urlContent[1] !== '' ) {
-        documentation.reportError('Invalid @link parameter, url must be a single string.');
-        return;
+    if (this._hrefRegEx.test(addressPart)) {
+      // Make sure only a single URL is given
+      if (addressPart.indexOf(' ') >= 0) {
+        documentation.reportError('The {@link} tag contains additional spaces after the URL;'
+          + ' if the URL contains spaces, encode them using %20; for display text, use a pipe delimiter ("|")');
+        return undefined;
       }
 
       linkDocElement = {
         kind: 'linkDocElement',
         referenceType: 'href',
-        targetUrl: urlContent[0],
-        value: ''
+        targetUrl: addressPart
+        // ("value" will be assigned below)
       };
 
     } else {
       // we are processing an API definition reference
       const apiDefitionRef: ApiDefinitionReference = ApiDefinitionReference.createFromString(
-        pipeSplitContent[0],
+        addressPart,
         documentation.reportError
       );
 
       // Once we can locate local API definitions, an error should be reported here if not found.
-      if (apiDefitionRef) {
-
-        linkDocElement = {
-          kind: 'linkDocElement',
-          referenceType: 'code',
-          scopeName: apiDefitionRef.scopeName,
-          packageName: apiDefitionRef.packageName,
-          exportName: apiDefitionRef.exportName,
-          memberName: apiDefitionRef.memberName
-        };
+      if (!apiDefitionRef) {
+        return undefined;
       }
+
+      linkDocElement = {
+        kind: 'linkDocElement',
+        referenceType: 'code',
+        scopeName: apiDefitionRef.scopeName,
+        packageName: apiDefitionRef.packageName,
+        exportName: apiDefitionRef.exportName,
+        memberName: apiDefitionRef.memberName
+        // ("value" will be assigned below)
+      };
     }
 
     // If a display name is given, ensure it only contains characters for words.
-    if (linkDocElement && pipeSplitContent.length > 1) {
-      const displayTextParts: string[] = pipeSplitContent[1].match(this._wordRegEx);
-      if (displayTextParts && displayTextParts[0].length !== pipeSplitContent[1].length) {
-        documentation.reportError('Display name in @link token may only contain alphabetic characters.');
-        return;
+    if (displayTextPart) {
+      const match: RegExpExecArray | undefined = this._displayTextBadCharacterRegEx.exec(displayTextPart);
+      if (match) {
+        documentation.reportError(`The {@link} tag\'s display text contains an unsupported`
+          + ` character: "${match[0]}"`);
+        return undefined;
       }
       // Full match is valid text
-      linkDocElement.value = displayTextParts[0].trim();
+      linkDocElement.value = displayTextPart;
+    } else {
+      // If the display text is not explicitly provided, then use the address as the display text
+      linkDocElement.value = addressPart;
     }
 
     return linkDocElement;
@@ -218,8 +226,8 @@ export default class DocElementParser {
     // Check to make sure the API definition reference is at most one string
     const tokenChunks: string[] = token.text.split(' ');
     if (tokenChunks.length > 1) {
-      documentation.reportError('Too many parameters for @inheritdoc inline tag.' +
-        'The format should be {@inheritdoc scopeName/packageName:exportName}. Extra parameters are ignored');
+      documentation.reportError('The {@inheritdoc} tag does not match the expected pattern' +
+        ' "{@inheritdoc @scopeName/packageName:exportName}"');
       return;
     }
 
@@ -231,7 +239,7 @@ export default class DocElementParser {
     );
     // if API reference expression is formatted incorrectly then apiDefinitionRef will be undefined
     if (!apiDefinitionRef) {
-      documentation.reportError('Incorrecty formatted API definition reference');
+      documentation.reportError(`Incorrectly formatted API item reference: "${token.text}"`);
       return;
     }
 

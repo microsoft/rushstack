@@ -9,7 +9,6 @@ import ApiItem, { ApiItemKind, IApiItemOptions } from './ApiItem';
 import ApiItemContainer from './ApiItemContainer';
 import ApiNamespace from './ApiNamespace';
 import TypeScriptHelpers from '../TypeScriptHelpers';
-import PackageJsonHelpers from '../PackageJsonHelpers';
 import { IExportedSymbol } from '../IExportedSymbol';
 
 /**
@@ -46,7 +45,7 @@ export default class ApiPackage extends ApiItemContainer {
     super(ApiPackage._getOptions(extractor, rootFile));
     this.kind = ApiItemKind.Package;
     // The scoped package name. (E.g. "@microsoft/api-extractor")
-    this.name = PackageJsonHelpers.readPackageName(this.extractor.packageFolder);
+    this.name = this.extractor.packageJsonLookup.readPackageName(this.extractor.packageFolder);
 
     const exportSymbols: ts.Symbol[] = this.typeChecker.getExportsOfModule(this.declarationSymbol);
     if (exportSymbols) {
@@ -54,6 +53,9 @@ export default class ApiPackage extends ApiItemContainer {
         const followedSymbol: ts.Symbol = this.followAliases(exportSymbol);
 
         if (!followedSymbol.declarations) {
+          // This is an API Extractor bug, but it could happen e.g. if we upgrade to a new
+          // version of the TypeScript compiler that introduces new AST variations that we
+          // haven't tested before.
           this.reportWarning(`Definition with no declarations: ${exportSymbol.name}`);
           continue;
         }

@@ -29,6 +29,11 @@ function testErrorHandler(message: string, fileName: string, lineNumber: number)
   capturedErrors.push({ message, fileName, lineNumber });
 }
 
+function assertCapturedErrors(expectedMessages: string[]): void {
+  assert.deepEqual(capturedErrors.map(x => x.message), expectedMessages,
+    'The captured errors did not match the expected output.');
+}
+
 describe('ApiFileGenerator tests', function (): void {
   this.timeout(10000);
 
@@ -62,10 +67,10 @@ describe('ApiFileGenerator tests', function (): void {
       /**
        * Errors can be found in testInputs/folder/MyClass
        */
-      assert.equal(capturedErrors.length, 2);
-      assert.equal(capturedErrors[0].message, 'Unknown JSDoc tag "@badjsdoctag"');
-      assert.equal(capturedErrors[1].message, 'Unexpected text in JSDoc comment: '
-        + '"(Error #1 is the bad tag) Text can no..."');
+      assertCapturedErrors([
+        'The JSDoc tag "@badAedocTag" is not supported by AEDoc',
+        'Unexpected text in AEDoc comment: "(Error #1 is the bad tag) Text can no..."'
+      ]);
     });
 
     it('Example 2', function (): void {

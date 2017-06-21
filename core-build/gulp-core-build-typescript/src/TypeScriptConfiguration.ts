@@ -4,15 +4,17 @@ import { SchemaValidator, IBuildConfig } from '@microsoft/gulp-core-build';
 import ts = require('gulp-typescript');
 import * as typescript from 'typescript';
 
+/** @public */
 export interface ITsConfigFile<T> {
   compilerOptions: T;
 }
 
 /* tslint:disable:no-any */
-/*
+/**
  * A helper class which provides access to the TSConfig.json file for a particular project.
  * It also is a central place for managing the version of typescript which this project
  * should be built with.
+ * @public
  */
 export class TypeScriptConfiguration {
   private static _baseTsConfig: ITsConfigFile<ts.Settings>;

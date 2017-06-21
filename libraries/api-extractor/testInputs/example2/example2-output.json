@@ -129,7 +129,7 @@
       "summary": [
         {
           "kind": "textDocElement",
-          "value": "This is a class to test JsDoc parser and this is description that can span to multiple lines and we need to make sure we parse this block correctly. It can contain a"
+          "value": "This is a class to test AEDoc parser and this is description that can span to multiple lines and we need to make sure we parse this block correctly. It can contain a"
         },
         {
           "kind": "linkDocElement",
@@ -142,7 +142,12 @@
           "value": ". This block is entirely valid and a correct documentation object should be built for this ApiItem."
         }
       ],
-      "remarks": [],
+      "remarks": [
+        {
+          "kind": "textDocElement",
+          "value": "Mock class for testing JsDoc parser"
+        }
+      ],
       "isBeta": false,
       "members": {
         "__constructor": {
@@ -150,7 +155,24 @@
           "signature": "constructor();",
           "parameters": {},
           "deprecatedMessage": [],
-          "summary": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "Constructs a new instance of the "
+            },
+            {
+              "kind": "linkDocElement",
+              "referenceType": "code",
+              "scopeName": "",
+              "packageName": "example2",
+              "exportName": "MyDocumentedClass",
+              "value": "MyDocumentedClass"
+            },
+            {
+              "kind": "textDocElement",
+              "value": " class"
+            }
+          ],
           "remarks": []
         },
         "betaTagMissingParam": {
@@ -211,7 +233,7 @@
           "summary": [
             {
               "kind": "textDocElement",
-              "value": "This doc has {curly braces} which is valid but the inline @link token is missing a pipe between the url and the display text"
+              "value": "This doc has {curly braces} which is valid but the inline @link token is missing a pipe between the URL and the display text"
             },
             {
               "kind": "textDocElement",

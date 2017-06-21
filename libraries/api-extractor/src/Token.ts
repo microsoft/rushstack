@@ -8,24 +8,24 @@ export enum TokenType {
   Text,
 
   /**
-   * A Token that specifies a tag.
-   * Example: \@link, \@internal, etc.
+   * A Token representing an AEDoc block tag.
+   * Example: \@public, \@remarks, etc.
    */
-  Tag,
+  BlockTag,
 
   /**
-   * This is a specific kind of Tag that is important to
-   * distinguish because it contains additional parameters.
+   * A Token representing an AEDoc inline tag.  Inline tags must be enclosed in
+   * curly braces, which may include parameters.
    *
    * Example:
    * \{@link http://microosft.com | microsoft home \}
    * \{@inheritdoc  @ microsoft/sp-core-library:Guid.newGuid \}
    */
-  Inline
+  InlineTag
 }
 
 /**
- * A structured object created from a doc comment string within a JSDoc comment block.
+ * A structured object created from a doc comment string within an AEDoc comment block.
  */
 export default class Token {
 

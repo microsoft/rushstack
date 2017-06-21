@@ -1,21 +1,20 @@
 
 /**
- * JSDOc for AliasClass
+ * AEDoc for AliasClass
  * @public
  */
 export class AliasClass {
   private readOnlyNumber: number;
 
   /**
-   * JSDOc for aliasFunc()
+   * AEDoc for aliasFunc()
    * @internal
    */
-  public aliasFunc(): void {
-    console.log('this is a public API');
+  public _aliasFunc(): void {
+    console.log('this is an internal API');
   }
+
   public aliasField: number;
-
-
 
   public get shouldBeReadOnly(): number {
     return this.readOnlyNumber;

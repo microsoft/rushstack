@@ -2,44 +2,51 @@
  * Degenerate comment
  star missing here
  * end of comment
+ * @public
  */
 export enum TestMissingCommentStar {
 }
 
 /**
  * {@inheritdoc es6-collections:ForEachable}
+ * @public
  */
 export interface IExternalPackageLookupInheritDoc {
 }
 
 /**
  * {@inheritdoc @microsoft/sp-core-library:DisplayMode}
+ * @public
  */
 export enum inheritDisplayMode {
 }
 
 /**
  * {@inheritdoc @microsoft/sp-core-library:Display}
+ * @public
  */
 export enum packageLocatedButExportNotFound {
 }
 
 /**
- * This JsDoc should raise an error since a summary is provided along
- * with an \@inheritdoc tag. We do not allow summary, remarks or param JsDocs
+ * This AEDoc should raise an error since a summary is provided along
+ * with an \@inheritdoc tag. We do not allow summary, remarks or param AEDoc tags
  * to be given since the inheritdoc information will overwrite it.
  * It will not appear in the output json files because of the error.
  *
  * {@inheritdoc @microsoft/sp-core-library:DisplayMode}
+ * @public
  */
 // (Error #1)
-// Error: Cannot provide summary in JsDoc if @inheritdoc tag is given
+// Error: Cannot provide summary in AEDoc if @inheritdoc tag is given
 export enum inheritDisplayModeError {
 
 }
 
 /**
  * {@inheritdoc @microsoft/sp-core-library:DisplayModeDeprecated}
+ *
+ * @public
  *
  */
 export enum inheritDisplayModeErrorDeprecated {
@@ -50,6 +57,7 @@ export enum inheritDisplayModeErrorDeprecated {
  * {@inheritdoc @microsoft/sp-core-library:DisplayModeDeprecated}
  * @deprecated - deprecated message must be present if the inherited Api item
  * is deprecated. If not error is reported.
+ * @public
  */
 export enum inheritDisplayModeNoErrorDeprecated {
 }
@@ -58,6 +66,7 @@ export enum inheritDisplayModeNoErrorDeprecated {
  * This function has incomplete type information on the return value and should not
  * be printed to the API file, instead a warning comment should be present
  * at the bottom of the API file.
+ * @public
  */
 export function functionWithIncompleteReturnType(param1: string, param2: string) {
   return false;
@@ -67,24 +76,21 @@ export function functionWithIncompleteReturnType(param1: string, param2: string)
  * This function has incomplete type information on a parameter and should not
  * be printed to the API file, instead a warning comment should be present at the
  * bottom of the API file.
+ * @public
  */
 export function functionWithIncompleteParameterType(param1, param2: string): boolean {
   return false;
 }
 
 /**
- * This is a class to test JsDoc parser and this is description that can
+ * This is a class to test AEDoc parser and this is description that can
  * span to multiple lines and we need to make sure we parse this block
  * correctly. It can contain a {@link https://bing.com/ | bing home}. This block is entirely
  * valid and a correct documentation object should be built for this ApiItem.
  *
- * @summary Mock class for testing JsDoc parser
+ * @remarks Mock class for testing JsDoc parser
  * @public
  */
-// (Error #2)
-// Error: The JSDoc tag "@summary" is not supported in this context
-// (Error #4)
-// Error: Unexpected text in JSDoc comment: "Mock class for testing JsDoc parser"
 export default class MyDocumentedClass {
 
 
@@ -102,7 +108,7 @@ export default class MyDocumentedClass {
 
   /**
    * This doc has an invalid tag that should throw an error
-   * @badJsDocTag
+   * @badAedocTag
    */
   // (Error #4)
   // Error: Unknown tag name for inline tag.
@@ -128,14 +134,14 @@ export default class MyDocumentedClass {
    * @internalremarks these remarks @beta can not contain a tag
    */
   // (Error #7)
-  // Unexpected text in JSDoc comment: "can not contain a tag"
+  // Unexpected text in AEDoc comment: "can not contain a tag"
   // (Error #8)
-  // Error: More than one API Tag was specified
+  // Error: More than one release tag was specified
   public betaTagMissingParam: string;
 
   /**
    * This doc has {curly braces} which is valid but the inline \@link token is missing a
-   * pipe between the url and the display text {@link validURL \{text\}}
+   * pipe between the URL and the display text {@link validURL \{text\}}
    * The displayName is not allowed to have non word characters.
    */
   // (Error #9)
@@ -217,6 +223,7 @@ export default class MyDocumentedClass {
  * comment should be printed about this class declaration. The constructor
  * will not appear in the json file because the type information is
  * incomplete.
+ * @public
  */
 export class IncompleteTypeConstructor {
   constructor(name, age: number) {

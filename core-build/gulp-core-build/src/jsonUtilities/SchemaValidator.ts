@@ -11,6 +11,7 @@ const schemaKey: string = '$schema';
 
 /**
  * Wrapper functions around z-schema which help improve ease of use
+ * @public
  */
 export class SchemaValidator {
   private static _schemaValidator: Validator = new Validator({

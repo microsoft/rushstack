@@ -28,6 +28,7 @@ interface INpmShrinkwrap {
  * It does this by checking that every dependency and dev dependency exists in the
  * shrinkwrap file and that the version in the shrinkwrap file satisfies what is
  * defined in the package.json file.
+ * @public
  */
 export class ValidateShrinkwrapTask extends GulpTask<void> {
   /** Instantiates an instance of the ValidateShrinkwrap task */

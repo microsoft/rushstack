@@ -5,7 +5,7 @@ import * as ts from 'typescript';
 import * as path from 'path';
 import Extractor from '../../Extractor';
 import ApiStructuredType from '../ApiStructuredType';
-import ApiDocumentation, { ApiTag } from '../ApiDocumentation';
+import ApiDocumentation, { ReleaseTag } from '../ApiDocumentation';
 
 /* tslint:disable:no-function-expression - Mocha uses a poorly scoped "this" pointer */
 
@@ -65,34 +65,28 @@ describe('ApiDocumentation tests', function (): void {
        * - testInputs/example2/folder/MyDocumentedClass (10  errors)
        */
 
-      assert.equal(capturedErrors.length, 10);
-      assert.equal(capturedErrors[0].message, 'Cannot provide summary in JsDoc if @inheritdoc tag is given');
-      assert.equal(capturedErrors[1].message, 'The JSDoc tag "@summary" is not supported in this context');
-      assert.equal(
-        capturedErrors[2].message, 'Unexpected text in JSDoc comment: "Mock class for testing JsDoc parser"'
+      assert.equal(capturedErrors.length, 8);
+      assert.equal(capturedErrors[0].message, 'A summary block is not allowed here, because the @inheritdoc'
+        + ' target provides the summary');
+      assert.equal(capturedErrors[1].message, 'The JSDoc tag "@badAedocTag" is not supported by AEDoc');
+      assert.equal(capturedErrors[2].message, 'Invalid call to _tokenizeInline()');
+      assert.equal(capturedErrors[3].message, 'The {@link} tag must include a URL or API item reference');
+      assert.equal(capturedErrors[4].message, 'Unexpected text in AEDoc comment: "can not contain a tag"');
+      assert.equal(capturedErrors[5].message, 'More than one release tag (@alpha, @beta, etc) was specified');
+      assert.equal(capturedErrors[6].message, 'An API item reference must use the notation:'
+        + ' "@scopeName/packageName:exportName.memberName"'
       );
-      assert.equal(capturedErrors[3].message, 'Unknown JSDoc tag "@badJsDocTag"');
-      assert.equal(capturedErrors[4].message, 'Unknown tag name for inline tag.');
-      assert.equal(capturedErrors[5].message, 'Too few parameters for @link inline tag.');
-      assert.equal(capturedErrors[6].message, 'Unexpected text in JSDoc comment: "can not contain a tag"');
-      assert.equal(capturedErrors[7].message, 'More than one API Tag was specified');
-      assert.equal(
-        capturedErrors[8].message,
-        'API reference expression must be of the form: \'scopeName/packageName:exportName.memberName ' +
-        '| display text\'where the \'|\' is required if a display text is provided'
-      );
-      assert.equal(
-        capturedErrors[9].message,
-        'inheritdoc source item is deprecated. Must provide @deprecated message or remove @inheritdoc inline tag.');
-  });
+      assert.equal(capturedErrors[7].message, 'The @inheritdoc target has been marked as @deprecated.  '
+        + 'Add a @deprecated message here, or else remove the @inheritdoc relationship.');
+    });
 
-    it('Should parse API tag', function (): void {
-      const expecedApiTag: ApiTag = ApiTag.Public;
+    it('Should parse release tag', function (): void {
+      const expectedReleaseTag: ReleaseTag = ReleaseTag.Public;
 
       const actualDoc: ApiDocumentation = myDocumentedClass ? myDocumentedClass.documentation : undefined;
 
       assert.isObject(actualDoc);
-      assert.equal(actualDoc.apiTag, expecedApiTag);
+      assert.equal(actualDoc.releaseTag, expectedReleaseTag);
     });
   });
 });

@@ -20,11 +20,15 @@ interface ITypeScriptErrorObject {
   };
 }
 
-/** Includes the experimental stripInternal feature */
+/**
+ * Includes the experimental stripInternal feature
+ * @public
+ */
 export interface ICompilerOptions extends ts.Settings {
   stripInternal?: boolean;
 }
 
+/** @public */
 export interface ITypeScriptTaskConfig {
   /**
    * Fails the build when errors occur.
@@ -74,6 +78,7 @@ export interface ITypeScriptTaskConfig {
   libES6Dir?: string;
 }
 
+/** @public */
 export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   public name: string = 'typescript';
 
@@ -149,8 +154,10 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       TypeScriptConfiguration.getGulpTypescriptOptions(this.buildConfig).compilerOptions;
 
     if (compilerOptions.module !== 'commonjs' && compilerOptions.module) {
-      this.logWarning(`Your tsconfig.json file specifies a different "target" than expected. `
-        + `Expected: "commonjs". Actual: "${compilerOptions.module}". Using "commonjs" instead.`);
+      this.log(`Your tsconfig.json file specifies a different "target" than expected. `
+        + `Expected: "commonjs". Actual: "${compilerOptions.module}".`);
+    } else if (!compilerOptions.module) {
+      this.log(`Your tsconfig.json file does not specify a "target". Using "commonjs" instead.`);
       compilerOptions.module = 'commonjs';
     }
 
