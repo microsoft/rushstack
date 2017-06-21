@@ -2,6 +2,18 @@
   "name": "@microsoft/package-deps-hash",
   "entries": [
     {
+      "version": "2.0.4",
+      "tag": "@microsoft/package-deps-hash_v2.0.4",
+      "date": "Wed, 21 Jun 2017 04:19:35 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add missing API Extractor release tags"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.2",
       "tag": "@microsoft/package-deps-hash_v2.0.2",
       "date": "Wed, 19 Apr 2017 20:18:06 GMT",

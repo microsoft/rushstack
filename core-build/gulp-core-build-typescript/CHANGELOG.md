@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Fri, 16 Jun 2017 01:21:40 GMT and should not be manually modified.
+This log was last generated on Wed, 21 Jun 2017 04:19:35 GMT and should not be manually modified.
+
+## 3.1.5
+Wed, 21 Jun 2017 04:19:35 GMT
+
+### Patches
+
+- Add missing API Extractor release tags
 
 ## 3.1.3
 Fri, 16 Jun 2017 01:21:40 GMT

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-webpack
 
-This log was last generated on Mon, 15 May 2017 21:59:43 GMT and should not be manually modified.
+This log was last generated on Wed, 21 Jun 2017 04:19:35 GMT and should not be manually modified.
+
+## 1.1.8
+Wed, 21 Jun 2017 04:19:35 GMT
+
+### Patches
+
+- Add missing API Extractor release tags
 
 ## 1.1.6
 Mon, 15 May 2017 21:59:43 GMT

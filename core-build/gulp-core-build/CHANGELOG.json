@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "2.5.5",
+      "tag": "@microsoft/gulp-core-build_v2.5.5",
+      "date": "Wed, 21 Jun 2017 04:19:35 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add missing API Extractor release tags"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.5.3",
       "tag": "@microsoft/gulp-core-build_v2.5.3",
       "date": "Wed, 31 May 2017 01:08:33 GMT",
