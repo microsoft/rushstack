@@ -19,6 +19,10 @@ export function parseGitLsTree(output: string): Map<string, string> {
       if (line) {
         // Take everything after the "100644 blob", which is just the hash and filename
         const [hash, filename]: string[] = line.substr(line.indexOf('blob ') + 5).split('\t');
+        if (!filename || !hash) {
+          throw new Error(`Cannot parse git ls-tree input: "${line}"`);
+        }
+
         changes.set(filename, hash);
       }
     });
