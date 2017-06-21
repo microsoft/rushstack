@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import {
   IChangeInfo,
   RushConfiguration,
@@ -11,6 +14,10 @@ import ChangeFiles from './ChangeFiles';
 import PrereleaseToken from './PrereleaseToken';
 import ChangelogGenerator from './ChangelogGenerator';
 
+/**
+ * The class manages change files and controls how changes logged by change files
+ * can be applied to package.json and change logs.
+ */
 export default class ChangeManager {
   private _prereleaseToken: PrereleaseToken;
   private _orderedChanges: IChangeInfo[];
@@ -21,6 +28,12 @@ export default class ChangeManager {
   constructor(private _rushConfiguration: RushConfiguration) {
   }
 
+  /**
+   * Load changes from change files
+   * @param changesPath - location of change files
+   * @param prereleaseToken - prerelease token
+   * @param includeCommitDetails - whether commit details need to be included in changes
+   */
   public load(
     changesPath: string,
     prereleaseToken: PrereleaseToken = new PrereleaseToken(),
@@ -51,6 +64,11 @@ export default class ChangeManager {
     return this._allPackages;
   }
 
+  /**
+   * Apply changes to package.json and change logs
+   * @param shouldCommit - If the value is true, package.json and change logs will be updated.
+   * If the value is false, package.json and change logs will not be updated. It will only do a dry-run.
+   */
   public apply(shouldCommit: boolean): void {
     if (!this.hasChanges()) {
       return;
