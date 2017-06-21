@@ -1,4 +1,3 @@
-// (undocumented)
 export function getPackageDeps(packagePath: string = process.cwd(), excludedPaths?: string[]): IPackageDeps;
 
 // (undocumented)
