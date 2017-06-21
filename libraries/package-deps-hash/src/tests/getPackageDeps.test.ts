@@ -25,6 +25,18 @@ describe('parseGitLsTree', () => {
     done();
   });
 
+  it('can handle a submodule', (done) => {
+    const filename: string = 'web-build-tools';
+    const hash: string = 'c5880bf5b0c6c1f2e2c43c95beeb8f0a808e8bac';
+
+    const output: string = `160000 commit ${hash}\t${filename}`;
+    const changes: Map<string, string> = parseGitLsTree(output);
+
+    assert.equal(changes.size, 1, 'Expect there to be exactly 1 change');
+    assert.equal(changes.get(filename), hash, `Expect the hash to be ${hash}`);
+    done();
+  });
+
   it('can handle multiple lines', (done) => {
     const filename1: string = 'src/typings/tsd.d.ts';
     const hash1: string = '3451bccdc831cb43d7a70ed8e628dcf9c7f888c8';
