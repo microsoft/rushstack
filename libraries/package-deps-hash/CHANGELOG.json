@@ -2,6 +2,18 @@
   "name": "@microsoft/package-deps-hash",
   "entries": [
     {
+      "version": "2.0.5",
+      "tag": "@microsoft/package-deps-hash_v2.0.5",
+      "date": "Thu, 22 Jun 2017 01:03:47 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where Git submodules were unable to be hashed"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.4",
       "tag": "@microsoft/package-deps-hash_v2.0.4",
       "date": "Wed, 21 Jun 2017 04:19:35 GMT",

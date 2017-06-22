@@ -1,6 +1,13 @@
 # Change Log - @microsoft/package-deps-hash
 
-This log was last generated on Wed, 21 Jun 2017 04:19:35 GMT and should not be manually modified.
+This log was last generated on Thu, 22 Jun 2017 01:03:47 GMT and should not be manually modified.
+
+## 2.0.5
+Thu, 22 Jun 2017 01:03:47 GMT
+
+### Patches
+
+- Fix an issue where Git submodules were unable to be hashed
 
 ## 2.0.4
 Wed, 21 Jun 2017 04:19:35 GMT
