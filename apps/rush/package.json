@@ -30,8 +30,8 @@
   "dependencies": {
     "@microsoft/package-deps-hash": "~2.0.5",
     "@microsoft/rush-lib": "3.0.9",
-    "@microsoft/stream-collator": "~2.0.0",
-    "@microsoft/ts-command-line": "~2.0.0",
+    "@microsoft/stream-collator": "~2.0.2",
+    "@microsoft/ts-command-line": "~2.0.2",
     "builtins": "~1.0.3",
     "colors": "~1.1.2",
     "fs-extra": "~0.26.7",

@@ -2,6 +2,18 @@
   "name": "@microsoft/stream-collator",
   "entries": [
     {
+      "version": "2.0.2",
+      "tag": "@microsoft/stream-collator_v2.0.2",
+      "date": "Fri, 23 Jun 2017 20:05:07 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Initial open source release of this library"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.1",
       "tag": "@microsoft/stream-collator_v2.0.1",
       "date": "Thu, 25 May 2017 21:09:42 GMT",
