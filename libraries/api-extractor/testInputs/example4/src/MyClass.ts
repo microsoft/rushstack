@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import { MyLibrary2 as MyLibrary3 } from '@ms/library';
 import MissingExport from './MissingExport';
 import { RenamedExport as RenamedExport2 } from './RenamedExport';
@@ -9,16 +12,16 @@ import MyOtherClass from './MyOtherClass';
  */
 export default class MyClass {
   /**
-   * This is a property that is used to test the 
-   * collection of type references on getters and 
+   * This is a property that is used to test the
+   * collection of type references on getters and
    * setters. The API file should show an unresolved
    * type warning.
    */
   private _propOne: MissingExport;
 
   /**
-   * Here we are testing if type collection is being 
-   * executed for type literals. The API file should show 
+   * Here we are testing if type collection is being
+   * executed for type literals. The API file should show
    * an unresolved type warning.
    */
   public typeLiteralProp: [MissingExport];
@@ -28,7 +31,7 @@ export default class MyClass {
    */
   public functionWithExternalType(promise: Promise<void>): void {
   }
-  
+
   /**
    * This is a getter to test if the type reference is
    * collected. The API file should show an unresolved
@@ -48,7 +51,7 @@ export default class MyClass {
   }
 
   /**
-   * This function should show a warning in the API file 
+   * This function should show a warning in the API file
    * as a result of the parameter type.
    */
   public testParameterType(missing: MissingExport): void {

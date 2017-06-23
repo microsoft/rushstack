@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 /// <reference types="mocha" />
 /* tslint:disable:no-function-expression - Mocha uses a poorly scoped "this" pointer */
 
