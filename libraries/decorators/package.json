@@ -1,11 +1,14 @@
 {
   "name": "@microsoft/decorators",
   "version": "1.1.0",
-  "description": "A very conservative set of decorators for TypeScript projects",
-  "license": "MIT",
-  "homepage": "http://aka.ms/spfx",
+  "description": "A conservative set of decorators for TypeScript projects",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/web-build-tools"
+  },
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
+  "license": "MIT",
   "devDependencies": {
     "@ms/sp-build-internal-web": "~0.6.0",
     "@types/chai": "3.4.34",
