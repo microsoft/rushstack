@@ -1,8 +1,5 @@
 'use strict';
 
-let path = require('path');
-let build = require('@microsoft/web-library-build');
-
-build.webpack.setConfig({ configPath: null });
+const build = require('@microsoft/node-library-build');
 
 build.initialize(require('gulp'));

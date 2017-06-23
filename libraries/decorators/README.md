@@ -22,10 +22,3 @@ The intent is to document API contracts more clearly and catch common mistakes,
 NOT to provide an open-ended toolkit of creative macros.  (If you are looking
 for that, there are many other options, for example the
 [core-decorators](https://www.npmjs.com/package/core-decorators) project.)
-
-
-*This package is part of the [SharePoint Framework](http://aka.ms/spfx),
-which is a collection of NPM packages that empower developers to create client-side experiences
-for [Microsoft SharePoint](https://products.office.com/en-us/sharepoint/collaboration).
-For more information, including complete API documentation and code samples, please visit
-the [SharePoint Framework](http://aka.ms/spfx) web site.*
