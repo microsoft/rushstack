@@ -9,7 +9,7 @@
     "test": "gulp test",
     "clean": "gulp clean"
   },
-  "license": "SEE LICENSE IN \"EULA\" FOLDER",
+  "license": "MIT",
   "homepage": "http://aka.ms/spfx",
   "dependencies": {
     "argparse": "~1.0.7",
