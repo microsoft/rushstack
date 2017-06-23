@@ -1,0 +1,54 @@
+{
+  "name": "@microsoft/stream-collator",
+  "entries": [
+    {
+      "version": "2.0.1",
+      "tag": "@microsoft/stream-collator_v2.0.1",
+      "date": "Thu, 25 May 2017 21:09:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Dependency version change"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/sp-build-node\" from `~1.0.0` to `~1.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.0",
+      "tag": "@microsoft/stream-collator_v2.0.0",
+      "date": "Fri, 17 Feb 2017 23:09:23 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Locked version numbers for @types packages"
+          },
+          {
+            "comment": "Updated .npmignore"
+          }
+        ],
+        "major": [
+          {
+            "comment": "General availability"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.2",
+      "tag": "@microsoft/stream-collator_v1.0.2",
+      "date": "Tue, 06 Dec 2016 20:44:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Changes for RC0 release."
+          }
+        ]
+      }
+    }
+  ]
+}

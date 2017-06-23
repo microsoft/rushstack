@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
 
 /**
   * @badAedocTag (Error #1 is the bad tag) Text can not come after a tag unless it is a parameter of

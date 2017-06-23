@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import ApiPackage from './definitions/ApiPackage';
 import ApiItem from './definitions/ApiItem';
 import ApiEnum from './definitions/ApiEnum';

@@ -1,4 +1,7 @@
-// Typings based on DefinitelyTyped definitions from es6-promise
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+// Type signatures based on DefinitelyTyped definitions from es6-promise
 
 /**
  * @public

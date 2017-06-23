@@ -70,6 +70,10 @@
       "allowedCategories": [ "libraries", "other" ]
     },
     {
+      "name": "argparse",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "autoprefixer",
       "allowedCategories": [ "libraries" ]
     },

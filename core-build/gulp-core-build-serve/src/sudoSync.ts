@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import * as child_process from 'child_process';
 const sudo: (args: string[], options: Object) => child_process.ChildProcess = require('sudo');
 const deasync: { sleep: (ms: number) => void } = require('deasync');

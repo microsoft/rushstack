@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import { getPackageDeps, parseGitLsTree } from '../getPackageDeps';
 import { IPackageDeps } from '../IPackageDeps';
 import { expect, assert } from 'chai';

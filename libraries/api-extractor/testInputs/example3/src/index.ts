@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 /**
  * This example folder is used to test the functionality of DocItemLoader and API reference resolution.
  */

@@ -1,0 +1,86 @@
+{
+  "name": "@microsoft/ts-command-line",
+  "entries": [
+    {
+      "version": "2.0.1",
+      "tag": "@microsoft/ts-command-line_v2.0.1",
+      "date": "Thu, 25 May 2017 21:09:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Dependency version change"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/sp-build-node\" from `~1.0.0` to `~1.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.0",
+      "tag": "@microsoft/ts-command-line_v2.0.0",
+      "date": "Fri, 17 Feb 2017 23:09:23 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Locked version numbers for @types packages"
+          },
+          {
+            "comment": "Updated .npmignore"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Added a \"option\" parameter, which can limit the input to a list of possible strings."
+          },
+          {
+            "comment": "Added the ability to give custom names to keys in the help menu."
+          }
+        ],
+        "major": [
+          {
+            "comment": "General availability"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.1",
+      "tag": "@microsoft/ts-command-line_v1.1.1",
+      "date": "Tue, 06 Dec 2016 20:44:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Changes for RC0 release."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.0",
+      "tag": "@microsoft/ts-command-line_v1.2.0",
+      "comments": {}
+    },
+    {
+      "version": "1.1.0",
+      "tag": "@microsoft/ts-command-line_v1.1.0",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Introduces a new command line argument type for a list of strings"
+          },
+          {
+            "comment": "Introduces a new command line argument type for integers"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.1",
+      "tag": "@microsoft/ts-command-line_v1.0.1",
+      "comments": {}
+    }
+  ]
+}
