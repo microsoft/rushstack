@@ -16,7 +16,7 @@
   "license": "MIT",
   "dependencies": {
     "colors": "~1.1.2",
-    "@types/node": "6.0.64"
+    "@types/node": "6.0.62"
   },
   "devDependencies": {
     "@types/chai": "3.4.34",
@@ -25,6 +25,6 @@
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "mocha": "~2.5.3",
-    "@microsoft/sp-build-node": "~1.1.0"
-  }
+     "@microsoft/node-library-build": ">=3.0.1 <4.0.0"
+ }
 }
