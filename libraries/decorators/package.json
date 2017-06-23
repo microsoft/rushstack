@@ -1,0 +1,21 @@
+{
+  "name": "@microsoft/decorators",
+  "version": "1.1.0",
+  "description": "A very conservative set of decorators for TypeScript projects",
+  "license": "SEE LICENSE IN \"EULA\" FOLDER",
+  "homepage": "http://aka.ms/spfx",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "devDependencies": {
+    "@ms/sp-build-internal-web": "~0.6.0",
+    "@types/chai": "3.4.34",
+    "@types/mocha": "2.2.38",
+    "chai": "~3.5.0",
+    "gulp": "~3.9.1"
+  },
+  "scripts": {
+    "build": "gulp bundle",
+    "clean": "gulp clean",
+    "test": "gulp test"
+  }
+}

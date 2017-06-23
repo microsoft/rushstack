@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "forceConsistentCasingInFileNames": true,
+    "module": "commonjs",
+    "jsx": "react",
+    "declaration": true,
+    "sourceMap": true,
+    "types": [
+      "es6-collections",
+      "node"
+    ]
+  },
+  "files": ["typings/tsd.d.ts"]
+}

@@ -1,0 +1,9 @@
+{
+  "$schema": "../node_modules/@microsoft/sp-module-interfaces/lib/manifestSchemas/jsonSchemas/clientSideComponentManifestSchema.json",
+
+  "id": "f97266fb-ccb7-430e-9384-4124d05295d3",
+  "alias": "Decorators",
+  "componentType": "Library",
+  "version": "*",
+  "manifestVersion": 2
+}

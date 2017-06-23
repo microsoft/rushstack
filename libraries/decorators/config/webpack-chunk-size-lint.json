@@ -1,0 +1,4 @@
+{
+  "enabled": true,
+  "chunkSizeReviewFolder": "../../common/reviews/webpack-chunk-sizes"
+}

@@ -1,0 +1,5 @@
+{
+  "port": 4321,
+  "https": true,
+  "tryCreateDevCertificate": true
+}
