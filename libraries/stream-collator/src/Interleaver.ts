@@ -1,13 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/**
- * @file Interleaver.ts
- * @Copyright (c) Microsoft Corporation.  All rights reserved.
- *
- * A factory which creates streams designed for processes running in parallel to write their output to.
- */
-
 import * as colors from 'colors';
 import * as os from 'os';
 

@@ -1,13 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/**
- * @file StreamCollator.ts
- * @Copyright (c) Microsoft Corporation.  All rights reserved.
- *
- * A special stream which will manage the output of multiple parallel streams,
- * ensuring that only 1 stream is writing to the console at a given time.
- */
 /* istanbul ignore next */
 
 import * as stream from 'stream';
