@@ -302,9 +302,11 @@ export default class Utilities {
   ): child_process.SpawnSyncReturns<Buffer> {
     let shellCommand: string = process.env.comspec || 'cmd';
     let commandFlags: string = '/d /s /c';
+    let useShell: boolean = true;
     if (process.platform !== 'win32') {
       shellCommand = 'sh';
       commandFlags = '-c';
+      useShell = false;
     }
 
     const result: child_process.SpawnSyncReturns<Buffer> = child_process.spawnSync(
@@ -312,7 +314,7 @@ export default class Utilities {
       [commandFlags, command],
       {
         cwd: workingDirectory,
-        shell: false,
+        shell: useShell,
         env: environmentVariables,
         stdio: captureOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
       });
@@ -336,9 +338,11 @@ export default class Utilities {
   ): child_process.ChildProcess {
     let shellCommand: string = process.env.comspec || 'cmd';
     let commandFlags: string = '/d /s /c';
+    let useShell: boolean = true;
     if (process.platform !== 'win32') {
       shellCommand = 'sh';
       commandFlags = '-c';
+      useShell = false;
     }
 
     return child_process.spawn(
@@ -346,7 +350,7 @@ export default class Utilities {
       [commandFlags, command],
       {
         cwd: workingDirectory,
-        shell: false,
+        shell: useShell,
         env: environmentVariables,
         stdio: captureOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
       });
