@@ -312,7 +312,7 @@ export default class Utilities {
       [commandFlags, command],
       {
         cwd: workingDirectory,
-        shell: true,
+        shell: false,
         env: environmentVariables,
         stdio: captureOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
       });
@@ -346,7 +346,7 @@ export default class Utilities {
       [commandFlags, command],
       {
         cwd: workingDirectory,
-        shell: true,
+        shell: false,
         env: environmentVariables,
         stdio: captureOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
       });
