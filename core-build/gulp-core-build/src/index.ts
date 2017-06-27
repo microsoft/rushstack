@@ -246,6 +246,7 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
             shouldRerunWatch = false;
             return _runWatch();
           }
+          return Promise.resolve();
         }
 
         setWatchMode();
