@@ -14,6 +14,7 @@ import { IBuildConfig } from './IBuildConfig';
 import { CleanTask } from './tasks/CleanTask';
 import { args } from './State';
 export { IExecutable } from './IExecutable';
+import { log } from './logging';
 import { initialize as initializeLogging, markTaskCreationTime, generateGulpError, setWatchMode } from './logging';
 import { getFlagValue, setConfigDefaults } from './config';
 import * as gulp from 'gulp';
@@ -190,61 +191,66 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
 
   return {
     execute: (buildConfig: IBuildConfig): Promise<void> => {
+      return new Promise<void>((resolve: () => void, reject: () => void) => {
 
-      function _runWatch(): Promise<void> {
-        if (isWatchRunning) {
-          shouldRerunWatch = true;
-          console.log('Watch is already running!');
-          return Promise.resolve();
-        } else {
-          isWatchRunning = true;
+        function _runWatch(): Promise<void> {
+          if (isWatchRunning) {
+            shouldRerunWatch = true;
+            console.log('Watch is already running!');
+          } else {
+            isWatchRunning = true;
 
-          return _executeTask(task, buildConfig)
-            .then(() => {
-              console.log('Success!');
-              if (buildConfig.showToast && lastError) {
-                lastError = undefined;
+            return _executeTask(task, buildConfig)
+              .then(() => {
+                if (lastError) {
+                  lastError = undefined;
 
-                notifier.notify({
-                  title: 'Build succeeded',
-                  message: packageJSON.name,
-                  icon: buildConfig.buildSuccessIconPath
-                });
-              }
-              return _finalizeWatch();
-            })
-            .catch((error) => {
-              console.log('Failure!');
-              if (buildConfig.showToast) {
+                  if (buildConfig.showToast) {
+                    notifier.notify({
+                      title: 'Build succeeded',
+                      message: packageJSON.name,
+                      icon: buildConfig.buildSuccessIconPath
+                    });
+                  } else {
+                    log('Build succeeded');
+                  }
+                }
+                return _finalizeWatch();
+              })
+              .catch((error) => {
                 if (!lastError || lastError !== error) {
                   lastError = error;
-                  notifier.notify({
-                    title: 'Build failed',
-                    message: error,
-                    icon: buildConfig.buildErrorIconPath
-                  });
+
+                  if (buildConfig.showToast) {
+                    notifier.notify({
+                      title: 'Build failed',
+                      message: error,
+                      icon: buildConfig.buildErrorIconPath
+                    });
+                  } else {
+                    log('Build failure!');
+                  }
                 }
-              }
-              return _finalizeWatch();
-            });
+
+                return _finalizeWatch();
+              });
+          }
         }
-      }
 
-      function _finalizeWatch(): Promise<void> {
-        isWatchRunning = false;
+        function _finalizeWatch(): Promise<void> {
+          isWatchRunning = false;
 
-        if (shouldRerunWatch) {
-          shouldRerunWatch = false;
-          console.log('Restarting!');
-          return _runWatch();
+          if (shouldRerunWatch) {
+            shouldRerunWatch = false;
+            return _runWatch();
+          }
         }
-        return Promise.resolve();
-      }
 
-      setWatchMode();
-      buildConfig.gulp.watch(watchMatch, _runWatch);
+        setWatchMode();
+        buildConfig.gulp.watch(watchMatch, _runWatch);
 
-      return _runWatch();
+        _runWatch();
+      });
     }
   };
 }
