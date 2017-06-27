@@ -2,6 +2,26 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "3.0.10",
+      "tag": "@microsoft/rush_v3.0.10",
+      "date": "Tue, 27 Jun 2017 21:44:50 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue with 'rush rebuild' where it fails on non-windows platforms"
+          },
+          {
+            "comment": "Fix an issue with 'rush -help' where it throws if rush.json is not available."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-lib\" from `3.0.9` to `3.0.10`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.9",
       "tag": "@microsoft/rush_v3.0.9",
       "date": "Thu, June 8, 2017 03:30:27 GMT",
