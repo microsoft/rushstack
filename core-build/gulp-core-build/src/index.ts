@@ -189,6 +189,9 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
   let shouldRerunWatch: boolean = false;
   let lastError: boolean = undefined;
 
+  const successMessage: string = 'Build succeeded';
+  const failureMessage: string = 'Build failed';
+
   return {
     execute: (buildConfig: IBuildConfig): Promise<void> => {
       return new Promise<void>((resolve: () => void, reject: () => void) => {
@@ -196,7 +199,6 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
         function _runWatch(): Promise<void> {
           if (isWatchRunning) {
             shouldRerunWatch = true;
-            console.log('Watch is already running!');
           } else {
             isWatchRunning = true;
 
@@ -207,12 +209,12 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
 
                   if (buildConfig.showToast) {
                     notifier.notify({
-                      title: 'Build succeeded',
+                      title: successMessage,
                       message: packageJSON.name,
                       icon: buildConfig.buildSuccessIconPath
                     });
                   } else {
-                    log('Build succeeded');
+                    log(successMessage);
                   }
                 }
                 return _finalizeWatch();
@@ -223,12 +225,12 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
 
                   if (buildConfig.showToast) {
                     notifier.notify({
-                      title: 'Build failed',
+                      title: failureMessage,
                       message: error,
                       icon: buildConfig.buildErrorIconPath
                     });
                   } else {
-                    log('Build failure!');
+                    log(failureMessage);
                   }
                 }
 
