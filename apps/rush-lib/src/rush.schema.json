@@ -74,6 +74,17 @@
       "description": "Indicates whether telemetry data should be collected and stored in the Rush temp folder during Rush runs.",
       "type": "boolean"
     },
+    "versionPolicies": {
+      "description": "A list of version policies used by projects",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "oneOf": [
+          { "#ref": "#/definitions/lockStepVersion" },
+          { "#ref": "#/definitions/individualVersion" }
+        ]
+      }
+    },
     "projects": {
       "description": "A list of projects managed by this tool.",
       "type": "array",
@@ -149,5 +160,54 @@
     }
   },
   "additionalProperties": false,
-  "required": [ "npmVersion", "rushMinimumVersion", "projects" ]
+  "required": [ "npmVersion", "rushMinimumVersion", "projects" ],
+  "definitions": {
+    "lockStepVersion": {
+      "type":"object",
+      "description": "Lockstep version policy",
+      "properties": {
+        "policyName": {
+          "description": "The name of the version policy",
+          "type": "string"
+        },
+        "baseType": {
+          "description": "The name of base version policy",
+          "type": "string",
+          "enum": [ "lockStepVersion" ]
+        },
+        "version": {
+          "description": "Current version for projects with lockStepVersion policy",
+          "type":"string",
+          "pattern": "todo"
+        },
+        "nextBump": {
+          "description": "Type of next version bump",
+          "enum": [ "prerelease", "release", "minor", "patch", "major" ]
+        }
+      },
+      "required": [ "policyName", "baseType", "version", "nextBump" ],
+      "additionalProperties": false
+    },
+    "individualVersion": {
+      "type":"object",
+      "description": "Lockstep version policy",
+      "properties": {
+        "policyName": {
+          "description": "The name of the version policy",
+          "type": "string"
+        },
+        "baseType": {
+          "description": "The name of base version policy",
+          "type": "string",
+          "enum": [ "individualVersion" ]
+        },
+        "lockedMajor": {
+          "description": "The locked major version",
+          "type": "number"
+        }
+      },
+      "required": [ "policyName", "baseType" ],
+      "additionalProperties": false
+    }
+  }
 }
