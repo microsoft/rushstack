@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush-lib
 
-This log was last generated on Thu, 08 Jun 2017 03:22:14 GMT and should not be manually modified.
+This log was last generated on Tue, 27 Jun 2017 21:49:51 GMT and should not be manually modified.
+
+## 3.0.10
+Tue, 27 Jun 2017 21:44:50 GMT
+
+### Patches
+
+- Fix an issue with 'rush rebuild' where it fails on non-windows platforms
+- Fix an issue with 'rush -help' where it throws if rush.json is not available.
 
 ## 3.0.9
 Thu, June 8, 2017 03:30:27 GMT
