@@ -104,6 +104,13 @@ A **Gulp Core Build** rig for building web libraries. It includes build tasks fo
 
 ## Libraries
 
+### [@microsoft/decorators](./libraries/decorators/README.md)
+
+A conservative set of decorators intended for use in both NodeJS and web browser projects.
+
+[![npm version](https://badge.fury.io/js/%40microsoft%2Fdecorators.svg)](https://badge.fury.io/js/%40microsoft%2Fdecorators)
+[![Dependencies](https://david-dm.org/Microsoft/decorators.svg)](https://david-dm.org/Microsoft/decorators)
+
 ### [@microsoft/api-extractor](./libraries/api-extractor/README.md)
 
 Validate, document, and review the exported API for a TypeScript library.
@@ -124,3 +131,17 @@ Essential libraries that every NodeJS toolchain project should use.
 
 [![npm version](https://badge.fury.io/js/%40microsoft%2Fpackage-deps-hash.svg)](https://badge.fury.io/js/%40microsoft%2Fpackage-deps-hash)
 [![Dependencies](https://david-dm.org/Microsoft/package-deps-hash.svg)](https://david-dm.org/Microsoft/package-deps-hash)
+
+### [@microsoft/stream-collator](./libraries/stream-collator/README.md)
+
+An object-oriented command-line parser for TypeScript projects, based on the [argparse](https://www.npmjs.com/package/argparse) engine.
+
+[![npm version](https://badge.fury.io/js/%40microsoft%2Fstream-collator.svg)](https://badge.fury.io/js/%40microsoft%2Fstream-collator)
+[![Dependencies](https://david-dm.org/Microsoft/stream-collator.svg)](https://david-dm.org/Microsoft/stream-collator)
+
+### [@microsoft/ts-command-line](./libraries/ts-command-line/README.md)
+
+An object-oriented command-line parser for TypeScript projects, based on the [argparse](https://www.npmjs.com/package/argparse) engine.
+
+[![npm version](https://badge.fury.io/js/%40microsoft%2Fts-command-line.svg)](https://badge.fury.io/js/%40microsoft%2Fts-command-line)
+[![Dependencies](https://david-dm.org/Microsoft/ts-command-line.svg)](https://david-dm.org/Microsoft/ts-command-line)
