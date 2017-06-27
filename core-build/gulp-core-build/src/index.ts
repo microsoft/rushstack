@@ -191,17 +191,17 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
   return {
     execute: (buildConfig: IBuildConfig): Promise<void> => {
 
-      setWatchMode();
-      buildConfig.gulp.watch(watchMatch, _runWatch);
-
-      function _runWatch(): void {
+      function _runWatch(): Promise<void> {
         if (isWatchRunning) {
           shouldRerunWatch = true;
+          console.log('Watch is already running!');
+          return Promise.resolve();
         } else {
           isWatchRunning = true;
 
-          _executeTask(task, buildConfig)
+          return _executeTask(task, buildConfig)
             .then(() => {
+              console.log('Success!');
               if (buildConfig.showToast && lastError) {
                 lastError = undefined;
 
@@ -211,9 +211,10 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
                   icon: buildConfig.buildSuccessIconPath
                 });
               }
-              _finalizeWatch();
+              return _finalizeWatch();
             })
             .catch((error) => {
+              console.log('Failure!');
               if (buildConfig.showToast) {
                 if (!lastError || lastError !== error) {
                   lastError = error;
@@ -224,21 +225,26 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
                   });
                 }
               }
-              _finalizeWatch();
+              return _finalizeWatch();
             });
         }
       }
 
-      function _finalizeWatch(): void {
+      function _finalizeWatch(): Promise<void> {
         isWatchRunning = false;
 
         if (shouldRerunWatch) {
           shouldRerunWatch = false;
-          _runWatch();
+          console.log('Restarting!');
+          return _runWatch();
         }
+        return Promise.resolve();
       }
 
-      return Promise.resolve();
+      setWatchMode();
+      buildConfig.gulp.watch(watchMatch, _runWatch);
+
+      return _runWatch();
     }
   };
 }
