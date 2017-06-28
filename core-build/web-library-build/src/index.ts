@@ -11,7 +11,7 @@ import {
   task,
   watch,
   setConfig,
-
+  getConfig
 } from '@microsoft/gulp-core-build';
 import { apiExtractor, typescript, tslint, text } from '@microsoft/gulp-core-build-typescript';
 import { sass } from '@microsoft/gulp-core-build-sass';
@@ -39,7 +39,7 @@ const sourceMatch: string[] = [
   '!src/**/*.scss.ts'
 ];
 
-const PRODUCTION = process.argv.indexOf('--production') !== -1 || process.argv.indexOf('--ship') !== -1;
+const PRODUCTION = !!getConfig().args['production'] || !!getConfig().args['ship'];
 setConfig({
   production: PRODUCTION,
   shouldWarningsFailBuild: PRODUCTION
@@ -65,14 +65,9 @@ task('test-watch', watch(sourceMatch, testTasks));
 
 // For watch scenarios like serve, make sure to exclude generated files from src (like *.scss.ts.)
 task('serve',
-  serial(
-    bundleTasks,
-    serve,
-    postProcessSourceMapsTask,
-    watch(
-      sourceMatch, serial(preCopy, sass, compileTsTasks,
-        postCopy, webpack, postProcessSourceMapsTask, reload)
-    )
+  watch(
+    sourceMatch, serial(preCopy, sass, compileTsTasks,
+      postCopy, webpack, postProcessSourceMapsTask, reload)
   )
 );
 
