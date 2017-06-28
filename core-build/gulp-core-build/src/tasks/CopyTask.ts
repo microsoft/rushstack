@@ -47,7 +47,6 @@ export class CopyTask extends GulpTask<ICopyConfig> {
 
   /**
    * Loads the z-schema object for this task
-   * @internal
    */
   public loadSchema(): Object {
     return require('./copy.schema.json');
