@@ -1,3 +1,4 @@
+// @public
 class ApiFileGenerator extends ApiItemVisitor {
   // WARNING: The type "IndentedWriter" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
@@ -35,6 +36,7 @@ class ApiFileGenerator extends ApiItemVisitor {
   public writeApiFile(reportFilename: string, extractor: Extractor): void;
 }
 
+// @public
 class ApiJsonGenerator extends ApiItemVisitor {
   // (undocumented)
   protected jsonOutput: Object;
@@ -78,13 +80,14 @@ class ApiJsonGenerator extends ApiItemVisitor {
   public writeJsonFile(reportFilename: string, extractor: Extractor): void;
 }
 
+// @public
 class ExternalApiHelper {
   // (undocumented)
   public static generateApiJson(rootDir: string, libFolder: string, externalPackageFilePath: string): void;
 }
 
+// @public
 class Extractor {
-  // (undocumented)
   constructor(options: IExtractorOptions);
   public analyze(options: IExtractorAnalyzeOptions): void;
   public static defaultErrorHandler(message: string, fileName: string, lineNumber: number): void;
@@ -105,11 +108,13 @@ class Extractor {
   public typeChecker: ts.TypeChecker;
 }
 
+// @public
 interface IExtractorAnalyzeOptions {
   entryPointFile: string;
   otherFiles?: string[];
 }
 
+// @public
 interface IExtractorOptions {
   compilerOptions: ts.CompilerOptions;
   // (undocumented)

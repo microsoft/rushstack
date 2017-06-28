@@ -18,14 +18,16 @@ import IndentedWriter from '../IndentedWriter';
 import { ReleaseTag } from '../definitions/ApiDocumentation';
 
 /**
-  * For a library such as "example-package", ApiFileGenerator generates the "example-package.api.ts"
-  * report which is used to detect API changes.  The output is pseudocode whose syntax is similar
-  * but not identical to a "*.d.ts" typings file.  The output file is designed to be committed to
-  * Git with a branch policy that will trigger an API review workflow whenever the file contents
-  * have changed.  For example, the API file indicates *whether* a class has been documented,
-  * but it does not include the documentation text (since minor text changes should not require
-  * an API review).
-  */
+ * For a library such as "example-package", ApiFileGenerator generates the "example-package.api.ts"
+ * report which is used to detect API changes.  The output is pseudocode whose syntax is similar
+ * but not identical to a "*.d.ts" typings file.  The output file is designed to be committed to
+ * Git with a branch policy that will trigger an API review workflow whenever the file contents
+ * have changed.  For example, the API file indicates *whether* a class has been documented,
+ * but it does not include the documentation text (since minor text changes should not require
+ * an API review).
+ *
+ * @public
+ */
 export default class ApiFileGenerator extends ApiItemVisitor {
   protected _indentedWriter: IndentedWriter = new IndentedWriter();
 
