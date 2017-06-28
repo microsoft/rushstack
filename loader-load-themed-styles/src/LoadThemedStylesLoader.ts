@@ -9,6 +9,9 @@ const loaderUtils = require('loader-utils');
 
 const loadedThemedStylesPath: string = require.resolve('@microsoft/load-themed-styles');
 
+interface ILoadThemedStylesLoaderOptions {
+  namedExport?: string;
+}
 export class LoadThemedStylesLoader {
   private static _loadedThemedStylesPath: string = loadedThemedStylesPath;
 
@@ -25,6 +28,13 @@ export class LoadThemedStylesLoader {
   }
 
   public static pitch(remainingRequest: string): string {
+    const options: ILoadThemedStylesLoaderOptions = loaderUtils.getOptions(this) || {};
+    let exportName: string = 'module.exports';
+
+    if (!!options.namedExport) {
+      exportName += '.' + options.namedExport;
+    }
+
     return [
       `var content = require(${loaderUtils.stringifyRequest(this, '!!' + remainingRequest)});`,
       `var loader = require(${JSON.stringify(LoadThemedStylesLoader._loadedThemedStylesPath)});`,
@@ -34,7 +44,7 @@ export class LoadThemedStylesLoader {
       '// add the styles to the DOM',
       'for (var i = 0; i < content.length; i++) loader.loadStyles(content[i][1]);',
       '',
-      'if(content.locals) module.exports = content.locals;'
+      `if(content.locals) ${exportName} = content.locals;`
     ].join('\n');
   }
 
