@@ -30,21 +30,7 @@ temp
 # Rush files
 **/*.build.error.log
 **/*.build.log
-/common/apiDocs/json/**
-/common/last-install.flag
-/common/last-install.log
-/common/local-npm
-/common/local-npm/**
-/common/local-rush
-/common/local-rush/**
-/common/npm-cache
-/common/npm-cache/**
-/common/npm-local
-/common/npm-local/**
-/common/npm-tmp
-/common/npm-tmp/**
-/common/rush-link.json
-/common/rush-recycler
+common/temp
 package-deps.json
 
 # IDE files

@@ -2,8 +2,16 @@
   "name": "webpack-loaders",
   "version": "0.0.0",
   "description": "Webpack loaders",
-
+  "scripts": {
+    "_rushInstall": "node node_modules/@microsoft/rush/bin/rush install -c",
+    "_rushBuild": "node node_modules/@microsoft/rush/bin/rush build",
+    "_rushRebuild": "node node_modules/@microsoft/rush/bin/rush rebuild --production --verbose",
+    "postinstall": "npm run _rushInstall --bypass-policy",
+    "change": "node node_modules/@microsoft/rush/bin/rush change",
+    "rebuild": "npm run _rushRebuild",
+    "build": "npm run _rushBuild"
+  },
   "devDependencies": {
-    "@microsoft/rush": "~2.5.0"
+    "@microsoft/rush": "3.0.10"
   }
 }

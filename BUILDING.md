@@ -1,22 +1,14 @@
-## Install Rush
-
-```
-npm install -g @microsoft/rush
-```
-
 ## Install dependencies
 
 ```
-rush install
+npm install
 ```
 
-## Link projects and dependencies
+## Build all things (with incremental skipping on unchanged things)
 
 ```
-rush link
+npm run build
 ```
-
-## Build
 
 ### Full rebuild
 
@@ -24,8 +16,3 @@ rush link
 rush rebuild -q
 ```
 
-### Incremental Build
-
-```
-rush build -q
-```
