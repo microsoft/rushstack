@@ -23,8 +23,6 @@ class CleanTask extends GulpTask<void> {
 class CopyTask extends GulpTask<ICopyConfig> {
   constructor();
   executeTask(gulp: gulp.Gulp, completeCallback: (result?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
-  // WARNING: Because this definition is explicitly marked as @internal, an underscore prefix ("_") should be added to its name
-  // @internal
   loadSchema(): Object;
 }
 
@@ -176,8 +174,7 @@ export declare function parallel(...tasks: Array<IExecutable[] | IExecutable>): 
 // @public
 export declare function replaceConfig(config: IBuildConfig): void;
 
-// WARNING: Because this definition is explicitly marked as @internal, an underscore prefix ("_") should be added to its name
-// @internal
+// @public
 export declare function reset(): void;
 
 // @public

@@ -152,6 +152,7 @@ export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecuta
 // @public
 export function replaceConfig(config: IBuildConfig): void;
 
+// @public
 export function reset(): void;
 
 // @public
