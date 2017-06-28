@@ -2,6 +2,18 @@
   "name": "@microsoft/loader-load-themed-styles",
   "entries": [
     {
+      "version": "1.3.0",
+      "tag": "@microsoft/loader-load-themed-styles_v1.3.0",
+      "date": "Wed, 28 Jun 2017 22:32:16 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Adding `namedExport` option to allow css modules to be exported under a named export (such as \"default\")"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.0",
       "tag": "@microsoft/loader-load-themed-styles_v1.2.0",
       "date": "Fri, 05 May 2017 22:42:12 GMT",

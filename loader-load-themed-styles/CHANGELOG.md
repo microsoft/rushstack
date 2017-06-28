@@ -1,6 +1,13 @@
 # Change Log - @microsoft/loader-load-themed-styles
 
-This log was last generated on Fri, 05 May 2017 22:42:12 GMT and should not be manually modified.
+This log was last generated on Wed, 28 Jun 2017 22:32:16 GMT and should not be manually modified.
+
+## 1.3.0
+Wed, 28 Jun 2017 22:32:16 GMT
+
+### Minor changes
+
+- Adding `namedExport` option to allow css modules to be exported under a named export (such as "default")
 
 ## 1.2.0
 Fri, 05 May 2017 22:42:12 GMT
