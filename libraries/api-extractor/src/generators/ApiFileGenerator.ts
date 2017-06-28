@@ -25,6 +25,7 @@ import { ReleaseTag } from '../definitions/ApiDocumentation';
   * have changed.  For example, the API file indicates *whether* a class has been documented,
   * but it does not include the documentation text (since minor text changes should not require
   * an API review).
+  * @public
   */
 export default class ApiFileGenerator extends ApiItemVisitor {
   protected _indentedWriter: IndentedWriter = new IndentedWriter();

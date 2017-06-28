@@ -12,6 +12,7 @@ export type ApiErrorHandler = (message: string, fileName: string, lineNumber: nu
 
 /**
  * Options for Extractor contructor.
+ * @public
  */
 export interface IExtractorOptions {
   /**
@@ -28,30 +29,32 @@ export interface IExtractorOptions {
 }
 
 /**
-  * Options for Extractor.analyze()
-  */
+ * Options for Extractor.analyze()
+ * @public
+ */
 export interface IExtractorAnalyzeOptions {
   /**
-    * The entry point for the project.  This should correspond to the "main" field
-    * from NPM's package.json file.  If it is a relative path, it will be relative to
-    * the project folder described by IExtractorAnalyzeOptions.compilerOptions.
-    */
+   * The entry point for the project.  This should correspond to the "main" field
+   * from NPM's package.json file.  If it is a relative path, it will be relative to
+   * the project folder described by IExtractorAnalyzeOptions.compilerOptions.
+   */
   entryPointFile: string;
 
   /**
-    * This can be used to specify other files that should be processed by the TypeScript compiler
-    * for some reason, e.g. a "typings/tsd.d.ts" file.  It is NOT necessary to specify files that
-    * are explicitly imported/required by the entryPointFile, since the compiler will trace
-    * (the transitive closure of) ordinary dependencies.
-    */
+   * This can be used to specify other files that should be processed by the TypeScript compiler
+   * for some reason, e.g. a "typings/tsd.d.ts" file.  It is NOT necessary to specify files that
+   * are explicitly imported/required by the entryPointFile, since the compiler will trace
+   * (the transitive closure of) ordinary dependencies.
+   */
   otherFiles?: string[];
 }
 
 /**
-  * The main entry point for the "api-extractor" utility.  The Analyzer object invokes the
-  * TypeScript Compiler API to analyze a project, and constructs the ApiItem
-  * abstract syntax tree.
-  */
+ * The main entry point for the "api-extractor" utility.  The Analyzer object invokes the
+ * TypeScript Compiler API to analyze a project, and constructs the ApiItem
+ * abstract syntax tree.
+ * @public
+ */
 export default class Extractor {
   public readonly errorHandler: ApiErrorHandler;
   public typeChecker: ts.TypeChecker;
@@ -71,8 +74,8 @@ export default class Extractor {
   private _packageFolder: string;
 
   /**
-    * The default implementation of ApiErrorHandler, which merely writes to console.log().
-    */
+   * The default implementation of ApiErrorHandler, which merely writes to console.log().
+   */
   public static defaultErrorHandler(message: string, fileName: string, lineNumber: number): void {
     console.log(`ERROR: [${fileName}:${lineNumber}] ${message}`);
   }
@@ -92,8 +95,8 @@ export default class Extractor {
   }
 
   /**
-    * Analyzes the specified project.
-    */
+   * Analyzes the specified project.
+   */
   public analyze(options: IExtractorAnalyzeOptions): void {
     const rootFiles: string[] = [options.entryPointFile].concat(options.otherFiles || []);
 

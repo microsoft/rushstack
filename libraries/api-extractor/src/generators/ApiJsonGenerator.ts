@@ -32,6 +32,7 @@ import ApiJsonFile from './ApiJsonFile';
   * have changed.  For example, the API file indicates *whether* a class has been documented,
   * but it does not include the documentation text (since minor text changes should not require
   * an API review).
+  * @public
   */
 export default class ApiJsonGenerator extends ApiItemVisitor {
   private static _methodCounter: number = 0;
