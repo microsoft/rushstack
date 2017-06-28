@@ -24,18 +24,55 @@ var css = require("@microsoft/loader-load-themed-styles!css!./file.css");
 ### Example config
 
 ``` javascript
-module.exports = {
-  module: {
-    loaders: [
-      { test: /\.css$/, loader: "@microsoft/loader-load-themed-styles!css-loader" }
-    ]
-  }
-};
+        use: [
+          {
+            loader: "@microsoft/loader-load-themed-styles",  // creates style nodes from JS strings
+            options: {
+              namedExport: 'default'
+            }
+          },
+          {
+            loader: "css-loader", // translates CSS into CommonJS
+            options: {
+              modules: true,
+              importLoaders: 2,
+              localIdentName: '[name]_[local]_[hash:base64:5]',
+              minimize: false
+            }
+          },
+          {
+            loader: 'postcss-loader',
+            options: {
+              plugins: function () {
+                return [
+                  require('autoprefixer')
+                ];
+              }
+            }
+          },
+          {
+            loader: "sass-loader",
+          }
+        ]
+
 ```
 
 ## Options
 
-Ths loader does not take any options at present.
+
+### namedExport (string, defaults to `undefined`)
+
+By default, css modules will be exported as a commonjs export:
+
+```js
+module.exports = { ... };
+```
+
+To override this, you may provide a named export to export to a specificly named thing. This is useful in exporting as the default in es6 module import scenarios. For example, providing "default" for the named export will output this:
+
+```js
+module.exports.default = { ... };
+```
 
 ## License
 
