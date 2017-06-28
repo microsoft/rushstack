@@ -10,7 +10,7 @@ Highlighted projects:
 
 - **[API Extractor](https://github.com/Microsoft/web-build-tools/wiki/API-Extractor)** helps you build better TypeScript libraries.  It standardizes your exported API surface, generates your online API reference, and makes it easy to detect and review changes that will impact your API contract.
 
-- **[Gulp Core Build](https://github.com/Microsoft/web-build-tools/wiki/Gulp-Core-Build)**: If you maintain lots of projects, **gulp-core-build** gets you out of the business of maintaining lots of Gulpfiles.  It defines reusable "rigs" that you customize using simple config files with well-defined JSON schemas. 
+- **[Gulp Core Build](https://github.com/Microsoft/web-build-tools/wiki/Gulp-Core-Build)**: If you maintain lots of projects, **gulp-core-build** gets you out of the business of maintaining lots of Gulpfiles.  It defines reusable "rigs" that you customize using simple config files with well-defined JSON schemas.
 
 - **[Rush](https://github.com/Microsoft/web-build-tools/wiki/Rush)**: Want to consolidate all your web projects in one big repo?  Rush is a fast and reliable solution for installing, linking, building, publishing, checking, change log authoring, and anything else that involves a "package.json" file.
 
@@ -38,7 +38,7 @@ A library for scripts that interact with the Rush tool.
 
 ### [@microsoft/gulp-core-build](./core-build/gulp-core-build/README.md)
 
-Defines the build task model, config file parser, and rig framework for the **Gulp Core Build** system, along with some essential build tasks. 
+Defines the build task model, config file parser, and rig framework for the **Gulp Core Build** system, along with some essential build tasks.
 
 [![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build)
 [![Dependencies](https://david-dm.org/Microsoft/gulp-core-build.svg)](https://david-dm.org/Microsoft/gulp-core-build)
@@ -111,6 +111,21 @@ Validate, document, and review the exported API for a TypeScript library.
 [![npm version](https://badge.fury.io/js/%40microsoft%2Fapi-extractor.svg)](https://badge.fury.io/js/%40microsoft%2Fapi-extractor)
 [![Dependencies](https://david-dm.org/Microsoft/api-extractor.svg)](https://david-dm.org/Microsoft/api-extractor)
 
+### [@microsoft/decorators](./libraries/decorators/README.md)
+
+A conservative set of decorators intended for use in both NodeJS and web browser projects.
+
+[![npm version](https://badge.fury.io/js/%40microsoft%2Fdecorators.svg)](https://badge.fury.io/js/%40microsoft%2Fdecorators)
+[![Dependencies](https://david-dm.org/Microsoft/decorators.svg)](https://david-dm.org/Microsoft/decorators)
+
+### [@microsoft/load-themed-styles](./libraries/load-themed-styles/README.md)
+
+Loads a string of style rules, but supports detokenizing theme constants built within it.
+
+[![npm version](https://badge.fury.io/js/%40microsoft%2Fload-themed-styles.svg)](https://badge.fury.io/js/%40microsoft%2Fload-themed-styles)
+[![Dependencies](https://david-dm.org/Microsoft/load-themed-styles.svg)](https://david-dm.org/Microsoft/load-themed-styles)
+
+
 ### [@microsoft/node-core-library](./libraries/node-core-library/README.md)
 
 Essential libraries that every NodeJS toolchain project should use.
@@ -124,3 +139,22 @@ Essential libraries that every NodeJS toolchain project should use.
 
 [![npm version](https://badge.fury.io/js/%40microsoft%2Fpackage-deps-hash.svg)](https://badge.fury.io/js/%40microsoft%2Fpackage-deps-hash)
 [![Dependencies](https://david-dm.org/Microsoft/package-deps-hash.svg)](https://david-dm.org/Microsoft/package-deps-hash)
+
+### [@microsoft/stream-collator](./libraries/stream-collator/README.md)
+
+Oftentimes, when working with multiple parallel asynchronous processes, it is helpful to ensure that their
+outputs are not mixed together, as this can cause readability issues in the console or log. The
+stream-collator manages the output of these streams carefully, such that no two streams are writing
+at the same time.
+
+[![npm version](https://badge.fury.io/js/%40microsoft%2Fstream-collator.svg)](https://badge.fury.io/js/%40microsoft%2Fstream-collator)
+[![Dependencies](https://david-dm.org/Microsoft/stream-collator.svg)](https://david-dm.org/Microsoft/stream-collator)
+
+### [@microsoft/ts-command-line](./libraries/ts-command-line/README.md)
+
+An object-oriented command-line parser for TypeScript projects,
+based on the [argparse](https://www.npmjs.com/package/argparse)
+engine.
+
+[![npm version](https://badge.fury.io/js/%40microsoft%2Fts-command-line.svg)](https://badge.fury.io/js/%40microsoft%2Fts-command-line)
+[![Dependencies](https://david-dm.org/Microsoft/ts-command-line.svg)](https://david-dm.org/Microsoft/ts-command-line)
