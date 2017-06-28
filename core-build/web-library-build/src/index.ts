@@ -39,7 +39,7 @@ const sourceMatch: string[] = [
   '!src/**/*.scss.ts'
 ];
 
-const PRODUCTION = !!getConfig().args['--production'] || !!getConfig().args['--ship'];
+const PRODUCTION = !!getConfig().args['production'] || !!getConfig().args['ship'];
 setConfig({
   production: PRODUCTION,
   shouldWarningsFailBuild: PRODUCTION

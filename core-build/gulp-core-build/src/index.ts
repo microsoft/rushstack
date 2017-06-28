@@ -194,7 +194,7 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
 
   return {
     execute: (buildConfig: IBuildConfig): Promise<void> => {
-      return new Promise<void>((resolve: () => void, reject: () => void) => {
+      return new Promise<void>(() => {
 
         function _runWatch(): Promise<void> {
           if (isWatchRunning) {
