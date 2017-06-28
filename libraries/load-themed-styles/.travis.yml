@@ -1,0 +1,15 @@
+language: node_js
+node_js:
+- '6.9'
+before_script:
+- npm install -g gulp
+script: gulp
+deploy:
+  skip_cleanup: true
+  provider: npm
+  email: odspnpm@microsoft.com
+  api_key:
+    secure: An2gTrJ70beptZPnISICwvzqqut9y5wXOhSwXGecpNw9gj835af5a212v0fBxNkMdgWWCQ1YobEyaUk79HeEKc3M0acsSvMbqBQtye7rZ+5PiiGT7ofhw82sAE2a6uDIXOPI4FAjC8s9Wm2GyHVbYFa5s121OFov+YxoXh+EHG8D/c9rwmF5nCi25xR2/AyJbA8r7824bdNHj981D7YttbXXppv6swd2hX1ywA5Trd4Rr8+23WKcUBA0u2deOztv3RL3BFNJKhAVWl49mrmIK430iGu8sFNug3OQb03lhqkLcsmKRluVMW+lT+DUvAnb6ZKlmh48tUujbIeXljVXOFrTFhNbo5TBi46+I13jSE8L4/ZgY6CLMaPCbQTVfIA2vBFdEHxh+IaXFTpia34CC09Ue9t8aBSs5rX3/JA25Tf+pzo6F8YMLhj/sKGkMQFWaqLYUHO6NAL0iF1vPvoQ8eya/4X38fsRfqO+FYREsEvT3FPHmM32O6ts7+8ELE492lLYQUC0N/aX8nuf3Q0wGV/5STQfW/vP+RKx1Bxa9Okhlv6L/2WyrianzfzkYnBwT3ZkjX3lVLu2t+rh8kslIrHQr8/oHfhG6MSEBMv/6AwqZPIJGFui06aIGFP/p87GX1Kf+mGAJ1vl6+5lXARcdal2qdaBgPE/wbH3DikeOTU=
+  on:
+    tags: true
+    repo: Microsoft/load-themed-styles

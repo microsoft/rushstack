@@ -1,0 +1,5 @@
+coverage
+node_modules
+gulpfile.js
+*.test.js
+*.test.d.ts
