@@ -42,7 +42,6 @@ var css = require("@microsoft/loader-load-themed-styles!css!./file.css");
           },
           {
             loader: 'postcss-loader',
-
             options: {
               plugins: function () {
                 return [
@@ -61,7 +60,7 @@ var css = require("@microsoft/loader-load-themed-styles!css!./file.css");
 ## Options
 
 
-### namedExport (string, defaults to undefined)
+### namedExport (string, defaults to `undefined`)
 
 By default, css modules will be exported as a commonjs export:
 

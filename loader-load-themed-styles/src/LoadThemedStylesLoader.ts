@@ -31,7 +31,7 @@ export class LoadThemedStylesLoader {
     const options: ILoadThemedStylesLoaderOptions = loaderUtils.getOptions(this) || {};
     let exportName: string = 'module.exports';
 
-    if (!!options.namedExport) {
+    if (options.namedExport) {
       exportName += '.' + options.namedExport;
     }
 
