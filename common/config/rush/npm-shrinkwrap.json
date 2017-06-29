@@ -143,9 +143,9 @@
       "resolved": "https://registry.npmjs.org/@types/assertion-error/-/assertion-error-1.0.30.tgz"
     },
     "@types/bluebird": {
-      "version": "3.5.8",
+      "version": "3.5.3",
       "from": "@types/bluebird@*",
-      "resolved": "https://registry.npmjs.org/@types/bluebird/-/bluebird-3.5.8.tgz"
+      "resolved": "https://registry.npmjs.org/@types/bluebird/-/bluebird-3.5.3.tgz"
     },
     "@types/chai": {
       "version": "3.4.34",
