@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Wed, 21 Jun 2017 04:19:35 GMT and should not be manually modified.
+This log was last generated on Thu, 29 Jun 2017 01:05:37 GMT and should not be manually modified.
+
+## 2.5.6
+Thu, 29 Jun 2017 01:05:37 GMT
+
+### Patches
+
+- Improve watch() so that it will automatically begin excecuting and it will not exit if there is a failure on the initial build
 
 ## 2.5.5
 Wed, 21 Jun 2017 04:19:35 GMT
