@@ -15,6 +15,7 @@ import { RushConstants } from '../RushConstants';
 import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
 import JsonSchemaValidator from '../utilities/JsonSchemaValidator';
 import EventHooks from './EventHooks';
+import { VersionPolicy } from './VersionPolicy';
 
 /**
  * A list of known config filenames that are expected to appear in the "./common/config/rush" folder.
@@ -56,6 +57,29 @@ export interface IEventHooksJson {
 }
 
 /**
+ * Part of IRushConfigurationJson.
+ */
+export interface IVersionPolicyJson {
+  policyName: string;
+  baseType: string;
+}
+
+/**
+ * Part of IRushConfigurationJson.
+ */
+export interface ILockStepVersionJson extends IVersionPolicyJson {
+  version: string;
+  nextBump: string;
+}
+
+/**
+ * Part of IRushConfigurationJson.
+ */
+export interface IIndividualVersionJson extends IVersionPolicyJson {
+  lockedMajor?: number;
+}
+
+/**
  * This represents the JSON data structure for the "rush.json" configuration file.
  * See rush.schema.json for documentation.
  */
@@ -71,6 +95,7 @@ export interface IRushConfigurationJson {
   telemetryEnabled?: boolean;
   projects: IRushConfigurationProjectJson[];
   eventHooks?: IEventHooksJson;
+  versionPolicies: IVersionPolicyJson[];
 }
 
 /**
@@ -117,6 +142,8 @@ export default class RushConfiguration {
   private _pinnedVersions: PinnedVersionsConfiguration;
 
   private _telemetryEnabled: boolean;
+
+  private _versionPolicies: Map<string, VersionPolicy>;
 
   private _projects: RushConfigurationProject[];
   private _projectsByName: Map<string, RushConfigurationProject>;
@@ -494,6 +521,14 @@ export default class RushConfiguration {
     return undefined;
   }
 
+  /**
+   * Gets the version policy by its name.
+   * @param policyName - Name of the version policy
+   */
+  public getVersionPolicy(policyName: string): VersionPolicy {
+    return this._versionPolicies.get(policyName);
+  }
+
   private _populateDownstreamDependencies(dependencies: { [key: string]: string }, packageName: string): void {
     if (!dependencies) {
       return;
@@ -584,6 +619,16 @@ export default class RushConfiguration {
     this._telemetryEnabled = !!rushConfigurationJson.telemetryEnabled;
     if (rushConfigurationJson.eventHooks) {
       this._eventHooks = new EventHooks(rushConfigurationJson.eventHooks);
+    }
+
+    this._versionPolicies = new Map<string, VersionPolicy>();
+    if (rushConfigurationJson.versionPolicies) {
+      rushConfigurationJson.versionPolicies.forEach(policyJson => {
+        const policy: VersionPolicy = VersionPolicy.load(policyJson);
+        if (policy) {
+          this._versionPolicies.set(policy.policyName, policy);
+        }
+      });
     }
 
     this._projects = [];

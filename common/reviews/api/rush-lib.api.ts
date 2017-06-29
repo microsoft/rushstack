@@ -226,6 +226,8 @@ class RushConfiguration {
   public findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject;
   public findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
   public getProjectByName(projectName: string): RushConfigurationProject;
+  // WARNING: The type "VersionPolicy" needs to be exported by the package (e.g. added to index.ts)
+  public getVersionPolicy(policyName: string): VersionPolicy;
   public readonly gitAllowedEmailRegExps: string[];
   public readonly gitSampleEmail: string;
   public readonly homeFolder: string;

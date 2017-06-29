@@ -1,0 +1,17 @@
+{
+  "npmVersion": "4.5.0",
+  "rushMinimumVersion": "2.5.0",
+  "nodeSupportedVersionRange": ">=6.9.0 <7.0.0",
+  "projectFolderMinDepth": 1,
+  "projectFolderMaxDepth": 99,
+
+  "versionPolicies": [
+    {
+      "policyName": "testPolicy2",
+      "baseType": "individualVersion",
+      "lockedMajor": 2
+    }
+  ],
+
+  "projects": [ ]
+}

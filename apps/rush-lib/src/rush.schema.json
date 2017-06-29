@@ -80,8 +80,8 @@
       "items": {
         "type": "object",
         "oneOf": [
-          { "#ref": "#/definitions/lockStepVersion" },
-          { "#ref": "#/definitions/individualVersion" }
+          { "$ref": "#/definitions/lockStepVersion" },
+          { "$ref": "#/definitions/individualVersion" }
         ]
       }
     },
@@ -177,8 +177,7 @@
         },
         "version": {
           "description": "Current version for projects with lockStepVersion policy",
-          "type":"string",
-          "pattern": "todo"
+          "type":"string"
         },
         "nextBump": {
           "description": "Type of next version bump",
