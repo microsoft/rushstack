@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "2.5.6",
+      "tag": "@microsoft/gulp-core-build_v2.5.6",
+      "date": "Thu, 29 Jun 2017 01:05:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve watch() so that it will automatically begin excecuting and it will not exit if there is a failure on the initial build"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.5.5",
       "tag": "@microsoft/gulp-core-build_v2.5.5",
       "date": "Wed, 21 Jun 2017 04:19:35 GMT",
