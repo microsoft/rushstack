@@ -1,6 +1,6 @@
 {
   "npmVersion": "4.5.0",
-  "rushMinimumVersion": "3.0.7",
+  "rushMinimumVersion": "3.0.10",
   "nodeSupportedVersionRange": ">=6.9.0 <7.0.0",
   "projectFolderMinDepth": 1,
 
@@ -142,6 +142,12 @@
       "projectFolder": "libraries/decorators",
       "reviewCategory": "libraries",
       "shouldPublish": false
+    },
+    {
+      "packageName": "@microsoft/load-themed-styles",
+      "projectFolder": "libraries/load-themed-styles",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
     },
     {
       "packageName": "@microsoft/node-core-library",

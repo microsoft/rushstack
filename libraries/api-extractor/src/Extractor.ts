@@ -11,47 +11,53 @@ import PackageJsonLookup from './PackageJsonLookup';
 export type ApiErrorHandler = (message: string, fileName: string, lineNumber: number) => void;
 
 /**
- * Options for Extractor contructor.
+ * Options for Extractor constructor.
+ *
+ * @public
  */
 export interface IExtractorOptions {
   /**
-    * Configuration for the TypeScript compiler.  The most important options to set are:
-    *
-    * - target: ts.ScriptTarget.ES5
-    * - module: ts.ModuleKind.CommonJS
-    * - moduleResolution: ts.ModuleResolutionKind.NodeJs
-    * - rootDir: inputFolder
-    */
+   * Configuration for the TypeScript compiler.  The most important options to set are:
+   *
+   * - target: ts.ScriptTarget.ES5
+   * - module: ts.ModuleKind.CommonJS
+   * - moduleResolution: ts.ModuleResolutionKind.NodeJs
+   * - rootDir: inputFolder
+   */
   compilerOptions: ts.CompilerOptions;
 
   errorHandler?: ApiErrorHandler;
 }
 
 /**
-  * Options for Extractor.analyze()
-  */
+ * Options for Extractor.analyze()
+ *
+ * @public
+ */
 export interface IExtractorAnalyzeOptions {
   /**
-    * The entry point for the project.  This should correspond to the "main" field
-    * from NPM's package.json file.  If it is a relative path, it will be relative to
-    * the project folder described by IExtractorAnalyzeOptions.compilerOptions.
-    */
+   * The entry point for the project.  This should correspond to the "main" field
+   * from NPM's package.json file.  If it is a relative path, it will be relative to
+   * the project folder described by IExtractorAnalyzeOptions.compilerOptions.
+   */
   entryPointFile: string;
 
   /**
-    * This can be used to specify other files that should be processed by the TypeScript compiler
-    * for some reason, e.g. a "typings/tsd.d.ts" file.  It is NOT necessary to specify files that
-    * are explicitly imported/required by the entryPointFile, since the compiler will trace
-    * (the transitive closure of) ordinary dependencies.
-    */
+   * This can be used to specify other files that should be processed by the TypeScript compiler
+   * for some reason, e.g. a "typings/tsd.d.ts" file.  It is NOT necessary to specify files that
+   * are explicitly imported/required by the entryPointFile, since the compiler will trace
+   * (the transitive closure of) ordinary dependencies.
+   */
   otherFiles?: string[];
 }
 
 /**
-  * The main entry point for the "api-extractor" utility.  The Analyzer object invokes the
-  * TypeScript Compiler API to analyze a project, and constructs the ApiItem
-  * abstract syntax tree.
-  */
+ * The main entry point for the "api-extractor" utility.  The Analyzer object invokes the
+ * TypeScript Compiler API to analyze a project, and constructs the ApiItem
+ * abstract syntax tree.
+ *
+ * @public
+ */
 export default class Extractor {
   public readonly errorHandler: ApiErrorHandler;
   public typeChecker: ts.TypeChecker;
@@ -71,8 +77,8 @@ export default class Extractor {
   private _packageFolder: string;
 
   /**
-    * The default implementation of ApiErrorHandler, which merely writes to console.log().
-    */
+   * The default implementation of ApiErrorHandler, which merely writes to console.log().
+   */
   public static defaultErrorHandler(message: string, fileName: string, lineNumber: number): void {
     console.log(`ERROR: [${fileName}:${lineNumber}] ${message}`);
   }
@@ -92,8 +98,8 @@ export default class Extractor {
   }
 
   /**
-    * Analyzes the specified project.
-    */
+   * Analyzes the specified project.
+   */
   public analyze(options: IExtractorAnalyzeOptions): void {
     const rootFiles: string[] = [options.entryPointFile].concat(options.otherFiles || []);
 
@@ -124,8 +130,8 @@ export default class Extractor {
   }
 
   /**
-    * Reports an error message to the registered ApiErrorHandler.
-    */
+   * Reports an error message to the registered ApiErrorHandler.
+   */
   public reportError(message: string, sourceFile: ts.SourceFile, start: number): void {
     const lineNumber: number = sourceFile.getLineAndCharacterOfPosition(start).line;
     this.errorHandler(message, sourceFile.fileName, lineNumber);
@@ -133,7 +139,7 @@ export default class Extractor {
 
   /**
    * Scans for external package api files and loads them into the docItemLoader member before
-   * any API analyzation begins.
+   * any API analysis begins.
    *
    * @param externalJsonCollectionPath - an absolute path to to the folder that contains all the external
    * api json files.

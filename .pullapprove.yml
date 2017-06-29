@@ -53,3 +53,15 @@ groups:
       - nickpape-msft
       - pgonzal
       - qz2017
+
+  load-themed-styles-approvers:
+    conditions:
+      files:
+        - "libraries/load-themed-styles/*"
+    required: 1
+    users:
+      - iclanton
+      - nickpape-msft
+      - pgonzal
+      - qz2017
+      - dzearing
