@@ -234,8 +234,10 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
         stream = this.executeTask(this.buildConfig.gulp, (error?: string) => {
           if (!error) {
             resolve();
-          } else {
+          } else if (typeof error === 'string') {
             reject(new Error(error));
+          } else {
+            reject(error);
           }
         });
       } catch (e) {

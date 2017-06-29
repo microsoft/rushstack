@@ -7,7 +7,7 @@ import gulpType = require('gulp');
 export class PostProcessSourceMaps extends GulpTask<{}> {
   public name: string = 'post-process';
 
-  public executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream {
+  public executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream | void {
     if (this.buildConfig.args.hasOwnProperty('vscode')) {
 
       /* tslint:disable:typedef */

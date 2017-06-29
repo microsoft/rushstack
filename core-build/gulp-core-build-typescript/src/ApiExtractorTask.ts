@@ -87,9 +87,24 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
     return require('./schemas/api-extractor.schema.json');
   };
 
-  public executeTask(gulp: gulp.Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream {
+  public executeTask(gulp: gulp.Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream | void {
     if (!this.taskConfig.enabled || !this._validateConfiguration()) {
       completeCallback();
+      return;
+    }
+
+    if (!this.taskConfig.entry) {
+      completeCallback('taskConfig.entry must be defined');
+      return;
+    }
+
+    if (!this.taskConfig.apiJsonFolder) {
+      completeCallback('taskConfig.apiJsonFolder must be defined');
+      return;
+    }
+
+    if (!this.taskConfig.apiReviewFolder) {
+      completeCallback('taskConfig.apiReviewFolder must be defined');
       return;
     }
 

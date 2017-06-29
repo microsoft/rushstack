@@ -78,8 +78,13 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
 
   public executeTask(
     gulp: gulp.Gulp,
-    completeCallback?: (result?: string) => void
+    completeCallback: (error?: string) => void
   ): Promise<{}> | NodeJS.ReadWriteStream | void {
+
+    if (!this.taskConfig.sassMatch) {
+      completeCallback('taskConfig.sassMatch must be defined');
+      return;
+    }
 
     /* tslint:disable:typedef */
     const autoprefixer = require('autoprefixer');
@@ -125,7 +130,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     gulp: gulp.Gulp,
     srcPattern: string[],
     /* tslint:disable:no-any */
-    completeCallback: (result?: any) => void,
+    completeCallback: (error?: string) => void,
     postCSSPlugins: any[],
     /* tslint:enable:no-any */
     checkFile?: (file: gulpUtil.File) => void

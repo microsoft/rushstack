@@ -4,7 +4,7 @@ export declare function addSuppression(str: string): void;
 // @public
 class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig> {
   // (undocumented)
-  executeTask(gulp: gulp.Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream;
+  executeTask(gulp: gulp.Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream | void;
   // (undocumented)
   loadSchema(): Object;
   // (undocumented)
@@ -16,13 +16,13 @@ class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig> {
 // @public
 class CleanTask extends GulpTask<void> {
   constructor();
-  executeTask(gulp: gulp.Gulp, completeCallback: (result?: Object) => void): void;
+  executeTask(gulp: gulp.Gulp, completeCallback: (error?: string) => void): void;
 }
 
 // @public
 class CopyTask extends GulpTask<ICopyConfig> {
   constructor();
-  executeTask(gulp: gulp.Gulp, completeCallback: (result?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
+  executeTask(gulp: gulp.Gulp, completeCallback: (error?: string) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
   loadSchema(): Object;
 }
 
@@ -47,7 +47,7 @@ export declare function functionalTestRun(name: string, result: TestResultState,
 // @public
 class GenerateShrinkwrapTask extends GulpTask<void> {
   constructor();
-  executeTask(gulp: gulpType.Gulp, completeCallback: (result?: Object) => void): NodeJS.ReadWriteStream;
+  executeTask(gulp: gulpType.Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream | void;
 }
 
 // @public
@@ -67,13 +67,13 @@ class GulpTask<TASK_CONFIG> implements IExecutable {
   copyFile(localSourcePath: string, localDestPath?: string): void;
   enabled: boolean;
   execute(config: IBuildConfig): Promise<void>;
-  abstract executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (result?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
+  abstract executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (error?: string) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
   fileError(filePath: string, line: number, column: number, errorCode: string, message: string): void;
   fileExists(localPath: string): boolean;
   fileWarning(filePath: string, line: number, column: number, warningCode: string, message: string): void;
   getCleanMatch(buildConfig: IBuildConfig, taskConfig?: TASK_CONFIG): string[];
   isEnabled(buildConfig: IBuildConfig): boolean;
-  protected loadSchema(): Object;
+  protected loadSchema(): Object | undefined;
   log(message: string): void;
   logError(message: string): void;
   logVerbose(message: string): void;
@@ -81,42 +81,42 @@ class GulpTask<TASK_CONFIG> implements IExecutable {
   mergeConfig(taskConfig: TASK_CONFIG): void;
   name: string;
   onRegister(): void;
-  readJSONSync(localPath: string): Object;
+  readJSONSync(localPath: string): Object | undefined;
   replaceConfig(taskConfig: TASK_CONFIG): void;
   resolvePath(localPath: string): string;
-  schema: Object;
+  schema: Object | undefined;
   setConfig(taskConfig: TASK_CONFIG): void;
   taskConfig: TASK_CONFIG;
 }
 
 // @public (undocumented)
 interface IBuildConfig {
-  args?: {
+  args: {
     [ name: string ]: string | boolean;
   }
   buildErrorIconPath?: string;
   buildSuccessIconPath?: string;
-  distFolder?: string;
-  gulp?: GulpProxy | gulp.Gulp;
+  distFolder: string;
+  gulp: GulpProxy | gulp.Gulp;
   isRedundantBuild?: boolean;
   libAMDFolder?: string;
   libES6Folder?: string;
-  libFolder?: string;
+  libFolder: string;
   onTaskEnd?: (taskName: string, duration: number[], error?: any) => void;
   onTaskStart?: (taskName: string) => void;
-  packageFolder?: string;
-  production?: boolean;
+  packageFolder: string;
+  production: boolean;
   properties?: {
     [ key: string ]: any;
   }
   relogIssues?: boolean;
-  rootPath?: string;
+  rootPath: string;
   shouldWarningsFailBuild?: boolean;
   showToast?: boolean;
-  srcFolder?: string;
-  tempFolder?: string;
+  srcFolder: string;
+  tempFolder: string;
   uniqueTasks?: IExecutable[];
-  verbose?: boolean;
+  verbose: boolean;
 }
 
 // @public
@@ -130,7 +130,7 @@ interface ICopyConfig {
 // @public
 interface ICustomGulpTask {
   // (undocumented)
-  (gulp: gulp.Gulp | GulpProxy, buildConfig: IBuildConfig, done: (failure?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
+  (gulp: gulp.Gulp | GulpProxy, buildConfig: IBuildConfig, done?: (failure?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
 }
 
 // @public (undocumented)
@@ -211,7 +211,7 @@ class TypeScriptConfiguration {
 // @public (undocumented)
 class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   // (undocumented)
-  executeTask(gulp: gulpType.Gulp, completeCallback: (result?: string) => void): void;
+  executeTask(gulp: gulpType.Gulp, completeCallback: (error?: string) => void): void;
   // (undocumented)
   getCleanMatch(buildConfig: IBuildConfig, taskConfig?: ITypeScriptTaskConfig): string[];
   // (undocumented)
@@ -226,7 +226,7 @@ class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
 // @public
 class ValidateShrinkwrapTask extends GulpTask<void> {
   constructor();
-  executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream;
+  executeTask(gulp: gulpType.Gulp, completeCallback: (error: string) => void): NodeJS.ReadWriteStream | void;
 }
 
 // @public

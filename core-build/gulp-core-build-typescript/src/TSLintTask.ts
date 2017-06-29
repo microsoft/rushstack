@@ -113,8 +113,18 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
     return require('./schemas/tslint.schema.json');
   }
 
-  public executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream {
+  public executeTask(gulp: gulpType.Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream | void {
     const taskScope: TSLintTask = this;
+
+    if (!this.taskConfig.sourceMatch) {
+      completeCallback('taskConfig.sourceMatch must be defined');
+      return;
+    }
+
+    if (!this.taskConfig.reporter) {
+      completeCallback('taskConfig.reporter must be defined');
+      return;
+    }
 
     const activeLintRules: any = taskScope._loadLintRules(); // tslint:disable-line:no-any
 
@@ -122,6 +132,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
     if (!fs.existsSync(path.dirname(this._getTsLintFilepath()))) {
       fs.mkdirSync(path.dirname(this._getTsLintFilepath()));
     }
+
     fs.writeFileSync(this._getTsLintFilepath(), JSON.stringify(activeLintRules, undefined, 2));
 
     const cached = require('gulp-cache'); // tslint:disable-line
@@ -162,7 +173,8 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
           file['tslint'] = result;
           /* tslint:enable:no-string-literal */
 
-          if (result.failureCount > 0) {
+          // We can't get here if reporter is undefined
+          if (result.failureCount > 0 && taskScope.taskConfig.reporter) {
             taskScope.taskConfig.reporter(result, file, taskScope.taskConfig);
           }
 

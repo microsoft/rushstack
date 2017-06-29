@@ -11,7 +11,8 @@ import {
   task,
   watch,
   setConfig,
-  getConfig
+  getConfig,
+  IBuildConfig
 } from '@microsoft/gulp-core-build';
 import { apiExtractor, typescript, tslint, text } from '@microsoft/gulp-core-build-typescript';
 import { sass } from '@microsoft/gulp-core-build-sass';
@@ -43,7 +44,7 @@ const PRODUCTION = !!getConfig().args['production'] || !!getConfig().args['ship'
 setConfig({
   production: PRODUCTION,
   shouldWarningsFailBuild: PRODUCTION
-});
+} as IBuildConfig);
 
 tslint.mergeConfig({
   displayAsWarning: true

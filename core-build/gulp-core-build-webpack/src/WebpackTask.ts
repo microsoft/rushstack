@@ -61,7 +61,7 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
     return require('./webpack.schema.json');
   }
 
-  public executeTask(gulp: gulp.Gulp, completeCallback: (result?: Object) => void): void {
+  public executeTask(gulp: gulp.Gulp, completeCallback: (error?: string) => void): void {
     const shouldInitWebpack: boolean = (process.argv.indexOf('--initwebpack') > -1);
 
     /* tslint:disable:typedef */
