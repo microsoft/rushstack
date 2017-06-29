@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* tslint:disable:max-line-length */
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -136,7 +135,10 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
    * @param completeCallback - a callback which should be called if the function is non-value returning
    * @returns a Promise, a Stream or undefined if completeCallback() is called
    */
-  public abstract executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (result?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
+  public abstract executeTask(
+    gulp: gulp.Gulp | GulpProxy,
+    completeCallback?: (error?: string) => void
+  ): Promise<Object> | NodeJS.ReadWriteStream | void;
 
   /**
    * Logs a message to standard output.
@@ -229,15 +231,11 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
           throw new Error('The task subclass is missing the "executeTask" method.');
         }
 
-        if (!this.buildConfig.gulp) {
-          throw new error('Gulp is undefined');
-        }
-
-        stream = this.executeTask(this.buildConfig.gulp, (result?: Object) => {
-          if (!result) {
+        stream = this.executeTask(this.buildConfig.gulp || gulp, (error?: string) => {
+          if (!error) {
             resolve();
           } else {
-            reject(result);
+            reject(new Error(error));
           }
         });
       } catch (e) {
@@ -263,7 +261,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
             }
           });
 
-          // Make sure the stream is completly read
+          // Make sure the stream is completely read
           stream.pipe(through2.obj(
             (file: gutil.File,
               encoding: string,

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as globEscape from 'glob-escape';
+import globEscape = require('glob-escape');
 import globby = require('globby');
 
 /* tslint:disable:typedef */

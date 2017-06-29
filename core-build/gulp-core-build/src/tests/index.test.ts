@@ -16,7 +16,7 @@ describe('serial', () => {
     const execution: string[] = [];
     const tasks: IExecutable[] = createTasks('task', 3, command => execution.push(command));
 
-    serial(tasks).execute({}).then(() => {
+    serial(tasks).execute({} as IBuildConfig).then(() => {
       expect(execution).to.deep.equal([
         'executing task 0',
         'complete task 0',
@@ -36,7 +36,7 @@ describe('parallel', () => {
     const execution: string[] = [];
     const tasks: IExecutable[] = createTasks('task', 3, command => execution.push(command));
 
-    parallel(tasks).execute({}).then(() => {
+    parallel(tasks).execute({} as IBuildConfig).then(() => {
       expect(execution).to.deep.equal([
         'executing task 0',
         'executing task 1',
@@ -59,7 +59,7 @@ describe('parallel', () => {
       serial1Tasks,
       parallelTasks,
       serial2Tasks
-    ]).execute({})
+    ]).execute({} as IBuildConfig)
       .then(() => {
         expect(execution).to.deep.equal([
           'executing serial set 1 - 0',
@@ -87,7 +87,7 @@ describe('parallel', () => {
     tasks.push(createTask('fail task', command => execution.push(command), true));
     tasks.push(createTask('should not run task', command => execution.push(command), false));
 
-    serial(tasks).execute({}).then(
+    serial(tasks).execute({} as IBuildConfig).then(
       () => {
         done('The task returned success unexpectedly.');
       }).catch((error) => {
@@ -113,7 +113,7 @@ describe('parallel', () => {
     const distFolder: string = 'testFolder';
     const newConfig: IBuildConfig = {
       distFolder: distFolder
-    };
+    } as IBuildConfig;
 
     setConfig(newConfig);
     expect(getConfig().distFolder).to.eq(distFolder);

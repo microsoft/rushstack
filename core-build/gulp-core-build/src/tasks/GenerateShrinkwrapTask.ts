@@ -26,7 +26,15 @@ export class GenerateShrinkwrapTask extends GulpTask<void> {
   /**
    * Runs npm `prune` and `update` on a package before running `shrinkwrap --dev`
    */
-  public executeTask(gulp: gulpType.Gulp, completeCallback: (result?: Object) => void): NodeJS.ReadWriteStream {
+  public executeTask(
+    gulp: gulpType.Gulp,
+    completeCallback: (error?: string) => void
+  ): NodeJS.ReadWriteStream | void {
+    if (!this.buildConfig.rootPath) {
+      completeCallback('buildConfig.rootPath must be defined');
+      return;
+    }
+
     const pathToShrinkwrap: string = path.join(this.buildConfig.rootPath, 'npm-shrinkwrap.json');
 
     if (this.fileExists(pathToShrinkwrap)) {

@@ -48,7 +48,7 @@ export * from './jsonUtilities/SchemaValidator';
 const _taskMap: { [key: string]: IExecutable } = {};
 const _uniqueTasks: IExecutable[] = [];
 
-const packageFolder: string = (builtPackage && builtPackage.directories && builtPackage.directories.packagePath)
+const packageFolder: string = (builtPackage.directories && builtPackage.directories.packagePath)
   ? builtPackage.directories.packagePath
   : '';
 

@@ -4,11 +4,17 @@
 'use strict';
 
 import { assert, expect } from 'chai';
-import { serial, parallel, GulpTask } from '../index';
 import gutil = require('gulp-util');
 import gulp = require('gulp');
 import { Readable } from 'stream';
 import * as path from 'path';
+
+import {
+  serial,
+  parallel,
+  GulpTask,
+  IBuildConfig
+} from '../index';
 
 interface IConfig {
 }
@@ -93,7 +99,7 @@ class CallbackTask extends GulpTask<IConfig> {
   public taskConfig: IConfig = {
   };
 
-  public executeTask(gulp: gulp.Gulp, callback: (result?: Object) => void): void {
+  public executeTask(gulp: gulp.Gulp, callback: (error?: string) => void): void {
     testArray.push(this.name);
     callback();
   }
@@ -110,7 +116,7 @@ class SchemaTask extends GulpTask<ISimpleConfig> {
     shouldDoThings: false
   };
 
-  public executeTask(gulp: gulp.Gulp, callback: (result?: Object) => void): void {
+  public executeTask(gulp: gulp.Gulp, callback: (error?: string) => void): void {
     callback();
   }
 
@@ -133,19 +139,19 @@ describe('GulpTask', () => {
     it(`${task.name} serial`, (done) => {
       testArray = [];
       task.setConfig({ addToMe: testArray });
-      serial(task).execute({}).then(() => {
+      serial(task).execute({} as IBuildConfig).then(() => {
         expect(testArray).to.deep.equal([task.name]);
         done();
-      }).catch(error => done(error));
+      }).catch(done);
     });
 
     it(`${task.name} parallel`, (done) => {
       testArray = [];
       task.setConfig({ addToMe: testArray });
-      parallel(task).execute({}).then(() => {
+      parallel(task).execute({} as IBuildConfig).then(() => {
         expect(testArray).to.deep.equal([task.name]);
         done();
-      }).catch(error => done(error));
+      }).catch(done);
     });
   }
 
@@ -154,12 +160,12 @@ describe('GulpTask', () => {
     for (const task of tasks) {
       task.setConfig({ addToMe: testArray });
     }
-    serial(tasks).execute({}).then(() => {
+    serial(tasks).execute({} as IBuildConfig).then(() => {
       for (const task of tasks) {
         expect(testArray.indexOf(task.name)).to.be.greaterThan(-1);
       }
       done();
-    }).catch(error => done(error));
+    }).catch(done);
   });
 
   it(`all tasks parallel`, (done) => {
@@ -167,12 +173,12 @@ describe('GulpTask', () => {
     for (const task of tasks) {
       task.setConfig({ addToMe: testArray });
     }
-    parallel(tasks).execute({}).then(() => {
+    parallel(tasks).execute({} as IBuildConfig).then(() => {
       for (const task of tasks) {
         expect(testArray.indexOf(task.name)).to.be.greaterThan(-1);
       }
       done();
-    }).catch(error => done(error));
+    }).catch(done);
   });
 
   it(`reads schema file if loadSchema is implemented`, (done) => {

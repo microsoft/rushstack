@@ -5,14 +5,14 @@ export function addSuppression(str: string): void;
 class CleanTask extends GulpTask<void> {
   constructor();
   public executeTask(gulp: gulp.Gulp,
-      completeCallback: (result?: Object) => void): void;
+      completeCallback: (error?: string) => void): void;
 }
 
 // @public
 class CopyTask extends GulpTask<ICopyConfig> {
   constructor();
   public executeTask(gulp: gulp.Gulp,
-      completeCallback: (result?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
+      completeCallback: (error?: string) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
   public loadSchema(): Object;
 }
 
@@ -37,7 +37,8 @@ export function functionalTestRun(name: string, result: TestResultState, duratio
 // @public
 class GenerateShrinkwrapTask extends GulpTask<void> {
   constructor();
-  public executeTask(gulp: gulpType.Gulp, completeCallback: (result?: Object) => void): NodeJS.ReadWriteStream;
+  public executeTask(gulp: gulpType.Gulp,
+      completeCallback: (error?: string) => void): NodeJS.ReadWriteStream | void;
 }
 
 // @public
@@ -58,13 +59,14 @@ class GulpTask<TASK_CONFIG> implements IExecutable {
   public enabled: boolean;
   public execute(config: IBuildConfig): Promise<void>;
   // WARNING: The type "GulpProxy" needs to be exported by the package (e.g. added to index.ts)
-  public abstract executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (result?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
+  public abstract executeTask(gulp: gulp.Gulp | GulpProxy,
+      completeCallback?: (error?: string) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
   public fileError(filePath: string, line: number, column: number, errorCode: string, message: string): void;
   public fileExists(localPath: string): boolean;
   public fileWarning(filePath: string, line: number, column: number, warningCode: string, message: string): void;
   public getCleanMatch(buildConfig: IBuildConfig, taskConfig: TASK_CONFIG = this.taskConfig): string[];
   public isEnabled(buildConfig: IBuildConfig): boolean;
-  protected loadSchema(): Object;
+  protected loadSchema(): Object | undefined;
   public log(message: string): void;
   public logError(message: string): void;
   public logVerbose(message: string): void;
@@ -72,10 +74,10 @@ class GulpTask<TASK_CONFIG> implements IExecutable {
   public mergeConfig(taskConfig: TASK_CONFIG): void;
   public name: string;
   public onRegister(): void;
-  public readJSONSync(localPath: string): Object;
+  public readJSONSync(localPath: string): Object | undefined;
   public replaceConfig(taskConfig: TASK_CONFIG): void;
   public resolvePath(localPath: string): string;
-  public readonly schema: Object;
+  public readonly schema: Object | undefined;
   public setConfig(taskConfig: TASK_CONFIG): void;
   public taskConfig: TASK_CONFIG;
 }
@@ -122,7 +124,7 @@ interface ICopyConfig {
 interface ICustomGulpTask {
   // WARNING: The type "GulpProxy" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
-  (gulp: gulp.Gulp | GulpProxy, buildConfig: IBuildConfig, done: (failure?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
+  (gulp: gulp.Gulp | GulpProxy, buildConfig: IBuildConfig, done?: (failure?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
 }
 
 // @public (undocumented)
@@ -190,7 +192,7 @@ enum TestResultState {
 // @public
 class ValidateShrinkwrapTask extends GulpTask<void> {
   constructor();
-  public executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream;
+  public executeTask(gulp: gulpType.Gulp, completeCallback: (error: string) => void): NodeJS.ReadWriteStream | void;
 }
 
 // @public

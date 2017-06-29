@@ -213,10 +213,10 @@ function writeSummary(callback: () => void): void {
         }
         const totalDuration: [number, number] = process.hrtime(getStart());
 
-        const name: string = state.builtPackage ? state.builtPackage.name : 'with unknown name';
-        const version: string = state.builtPackage ? state.builtPackage.version : 'unknown';
+        const name: string = state.builtPackage.name || 'with unknown name';
+        const version: string = state.builtPackage.version || 'unknown';
         log(`Project ${name} version:`, gutil.colors.yellow(version));
-        log('Build tools version:', gutil.colors.yellow(state.coreBuildPackage.version));
+        log('Build tools version:', gutil.colors.yellow(state.coreBuildPackage.version || ''));
         log('Node version:', gutil.colors.yellow(process.version));
         // log('Create tasks duration:', gutil.colors.yellow(prettyTime(localCache.taskCreationTime)));
         // log('Read src tasks duration:', gutil.colors.yellow(prettyTime(localCache.totalTaskHrTime)));
