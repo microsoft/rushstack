@@ -20,6 +20,7 @@
   "devDependencies": {
     "@types/tapable": "0.2.3",
     "@types/lodash": "4.14.52",
+    "@types/mocha": "2.2.38",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "mocha": "~3.4.2",

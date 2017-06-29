@@ -3,6 +3,8 @@
  * See LICENSE in the project root for license information.
  */
 
+/// <reference types="mocha" />
+
 import { assert } from 'chai';
 import { LoadThemedStylesLoader } from './LoadThemedStylesLoader';
 import LoadThemedStylesMock = require('./testData/LoadThemedStylesMock');
