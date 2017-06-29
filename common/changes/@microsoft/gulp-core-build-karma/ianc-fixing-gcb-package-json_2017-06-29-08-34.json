@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-karma",
+      "comment": "Enable StrictNullChecks.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-karma",
+  "email": "iclanton@users.noreply.github.com"
+}

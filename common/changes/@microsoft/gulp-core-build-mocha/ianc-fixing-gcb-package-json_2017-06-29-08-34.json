@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-mocha",
+      "comment": "Enable StrictNullChecks.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-mocha",
+  "email": "iclanton@users.noreply.github.com"
+}

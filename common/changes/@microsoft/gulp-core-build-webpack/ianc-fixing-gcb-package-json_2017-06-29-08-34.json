@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-webpack",
+      "comment": "Enable StrictNullChecks.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-webpack",
+  "email": "iclanton@users.noreply.github.com"
+}
