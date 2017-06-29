@@ -53,6 +53,8 @@ const packageFolder: string = (builtPackage.directories && builtPackage.director
   : '';
 
 let _buildConfig: IBuildConfig = {
+  gulp: undefined as any, // tslint:disable-line:no-any
+  rootPath: undefined as any, // tslint:disable-line:no-any
   packageFolder,
   srcFolder: 'src',
   distFolder: path.join(packageFolder, 'dist'),
@@ -249,9 +251,7 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
         }
 
         setWatchMode();
-        if (buildConfig.gulp) {
-          buildConfig.gulp.watch(watchMatch, _runWatch);
-        }
+        buildConfig.gulp.watch(watchMatch, _runWatch);
 
         _runWatch();
       });

@@ -5,8 +5,16 @@
 /// <reference path='../../typings/main.d.ts' />
 
 import { expect } from 'chai';
-import { serial, parallel, getConfig, setConfig, IExecutable } from '../index';
-import { IBuildConfig } from './../IBuildConfig';
+
+import {
+  serial,
+  parallel,
+  getConfig,
+  setConfig,
+  IExecutable,
+  IBuildConfig
+} from '../index';
+import { mockBuildConfig } from './mockBuildConfig';
 
 // disable the exit watching
 global['dontWatchExit'] = true; // tslint:disable-line:no-string-literal
@@ -16,7 +24,7 @@ describe('serial', () => {
     const execution: string[] = [];
     const tasks: IExecutable[] = createTasks('task', 3, command => execution.push(command));
 
-    serial(tasks).execute({} as IBuildConfig).then(() => {
+    serial(tasks).execute(mockBuildConfig).then(() => {
       expect(execution).to.deep.equal([
         'executing task 0',
         'complete task 0',
@@ -36,7 +44,7 @@ describe('parallel', () => {
     const execution: string[] = [];
     const tasks: IExecutable[] = createTasks('task', 3, command => execution.push(command));
 
-    parallel(tasks).execute({} as IBuildConfig).then(() => {
+    parallel(tasks).execute(mockBuildConfig).then(() => {
       expect(execution).to.deep.equal([
         'executing task 0',
         'executing task 1',
@@ -59,7 +67,7 @@ describe('parallel', () => {
       serial1Tasks,
       parallelTasks,
       serial2Tasks
-    ]).execute({} as IBuildConfig)
+    ]).execute(mockBuildConfig)
       .then(() => {
         expect(execution).to.deep.equal([
           'executing serial set 1 - 0',
@@ -87,7 +95,7 @@ describe('parallel', () => {
     tasks.push(createTask('fail task', command => execution.push(command), true));
     tasks.push(createTask('should not run task', command => execution.push(command), false));
 
-    serial(tasks).execute({} as IBuildConfig).then(
+    serial(tasks).execute(mockBuildConfig).then(
       () => {
         done('The task returned success unexpectedly.');
       }).catch((error) => {

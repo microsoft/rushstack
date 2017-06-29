@@ -84,32 +84,32 @@ class GulpTask<TASK_CONFIG> implements IExecutable {
 
 // @public (undocumented)
 interface IBuildConfig {
-  args?: {
+  args: {
     [ name: string ]: string | boolean
   }
   buildErrorIconPath?: string;
   buildSuccessIconPath?: string;
-  distFolder?: string;
-  gulp?: GulpProxy | gulp.Gulp;
+  distFolder: string;
+  gulp: GulpProxy | gulp.Gulp;
   isRedundantBuild?: boolean;
   libAMDFolder?: string;
   libES6Folder?: string;
-  libFolder?: string;
+  libFolder: string;
   onTaskEnd?: (taskName: string, duration: number[], error?: any) => void;
   onTaskStart?: (taskName: string) => void;
-  packageFolder?: string;
-  production?: boolean;
+  packageFolder: string;
+  production: boolean;
   properties?: {
     [ key: string ]: any
   }
   relogIssues?: boolean;
-  rootPath?: string;
+  rootPath: string;
   shouldWarningsFailBuild?: boolean;
   showToast?: boolean;
-  srcFolder?: string;
-  tempFolder?: string;
+  srcFolder: string;
+  tempFolder: string;
   uniqueTasks?: IExecutable[];
-  verbose?: boolean;
+  verbose: boolean;
 }
 
 // @public

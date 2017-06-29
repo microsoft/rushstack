@@ -36,23 +36,18 @@ export class CheckBuildReceiptTask extends GulpTask<IBuildReceiptTask> {
   ): Promise<Object> | NodeJS.ReadWriteStream | void {
     _getLocalHashes().then(localHashes => {
       _lastLocalHashes = localHashes;
-      if (this.buildConfig.packageFolder) {
-        _readPackageHashes(path.join(process.cwd(), this.buildConfig.packageFolder, 'build.json')).then(pkgHashes => {
-          if (pkgHashes) {
-            if (_areObjectsEqual(localHashes, pkgHashes)) {
-              this.buildConfig.isRedundantBuild = true;
-              this.log('Build is redundant. Skipping steps.');
-            } else {
-              _areObjectsEqual(localHashes, pkgHashes);
-              this.log('Build has new content, continuing execution.');
-            }
+      _readPackageHashes(path.join(process.cwd(), this.buildConfig.packageFolder, 'build.json')).then(packageHashes => {
+        if (packageHashes) {
+          if (_areObjectsEqual(localHashes, packageHashes)) {
+            this.buildConfig.isRedundantBuild = true;
+            this.log('Build is redundant. Skipping steps.');
+          } else {
+            _areObjectsEqual(localHashes, packageHashes);
+            this.log('Build has new content, continuing execution.');
           }
-
-          completeCallback();
-        });
-      } else {
+        }
         completeCallback();
-      }
+      });
     });
   }
 }
@@ -68,10 +63,6 @@ export class UpdateBuildReceiptTask extends GulpTask<IBuildReceiptTask> {
     gulp: gulp.Gulp,
     completeCallback: (error?: string) => void
   ): Promise<Object> | NodeJS.ReadWriteStream | void {
-    if (!this.buildConfig.packageFolder) {
-      completeCallback('buildConfig.packageFolder must be defined');
-      return;
-    }
 
     const packageHashPath: string = path.join(process.cwd(), this.buildConfig.packageFolder, 'build.json');
 

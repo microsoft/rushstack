@@ -30,11 +30,6 @@ export class GenerateShrinkwrapTask extends GulpTask<void> {
     gulp: gulpType.Gulp,
     completeCallback: (error?: string) => void
   ): NodeJS.ReadWriteStream | void {
-    if (!this.buildConfig.rootPath) {
-      completeCallback('buildConfig.rootPath must be defined');
-      return;
-    }
-
     const pathToShrinkwrap: string = path.join(this.buildConfig.rootPath, 'npm-shrinkwrap.json');
 
     if (this.fileExists(pathToShrinkwrap)) {

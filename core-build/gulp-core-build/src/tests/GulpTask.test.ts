@@ -12,9 +12,9 @@ import * as path from 'path';
 import {
   serial,
   parallel,
-  GulpTask,
-  IBuildConfig
+  GulpTask
 } from '../index';
+import { mockBuildConfig } from './mockBuildConfig';
 
 interface IConfig {
 }
@@ -139,7 +139,7 @@ describe('GulpTask', () => {
     it(`${task.name} serial`, (done) => {
       testArray = [];
       task.setConfig({ addToMe: testArray });
-      serial(task).execute({} as IBuildConfig).then(() => {
+      serial(task).execute(mockBuildConfig).then(() => {
         expect(testArray).to.deep.equal([task.name]);
         done();
       }).catch(done);
@@ -148,7 +148,7 @@ describe('GulpTask', () => {
     it(`${task.name} parallel`, (done) => {
       testArray = [];
       task.setConfig({ addToMe: testArray });
-      parallel(task).execute({} as IBuildConfig).then(() => {
+      parallel(task).execute(mockBuildConfig).then(() => {
         expect(testArray).to.deep.equal([task.name]);
         done();
       }).catch(done);
@@ -160,7 +160,7 @@ describe('GulpTask', () => {
     for (const task of tasks) {
       task.setConfig({ addToMe: testArray });
     }
-    serial(tasks).execute({} as IBuildConfig).then(() => {
+    serial(tasks).execute(mockBuildConfig).then(() => {
       for (const task of tasks) {
         expect(testArray.indexOf(task.name)).to.be.greaterThan(-1);
       }
@@ -173,7 +173,7 @@ describe('GulpTask', () => {
     for (const task of tasks) {
       task.setConfig({ addToMe: testArray });
     }
-    parallel(tasks).execute({} as IBuildConfig).then(() => {
+    parallel(tasks).execute(mockBuildConfig).then(() => {
       for (const task of tasks) {
         expect(testArray.indexOf(task.name)).to.be.greaterThan(-1);
       }

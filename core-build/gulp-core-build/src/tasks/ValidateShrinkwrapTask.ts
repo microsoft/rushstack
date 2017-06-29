@@ -45,11 +45,6 @@ export class ValidateShrinkwrapTask extends GulpTask<void> {
    * resolvable in the npm-shrinkwrap file.
    */
   public executeTask(gulp: gulpType.Gulp, completeCallback: (error: string) => void): NodeJS.ReadWriteStream | void {
-    if (!this.buildConfig.rootPath) {
-      completeCallback('buildConfig.rootPath must be defined');
-      return;
-    }
-
     const pathToPackageJson: string = path.join(this.buildConfig.rootPath, 'package.json');
     const pathToShrinkwrap: string = path.join(this.buildConfig.rootPath, 'npm-shrinkwrap.json');
 

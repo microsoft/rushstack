@@ -231,7 +231,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
           throw new Error('The task subclass is missing the "executeTask" method.');
         }
 
-        stream = this.executeTask(this.buildConfig.gulp || gulp, (error?: string) => {
+        stream = this.executeTask(this.buildConfig.gulp, (error?: string) => {
           if (!error) {
             resolve();
           } else {
