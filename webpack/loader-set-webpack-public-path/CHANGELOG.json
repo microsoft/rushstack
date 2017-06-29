@@ -1,0 +1,80 @@
+{
+  "name": "@microsoft/loader-set-webpack-public-path",
+  "entries": [
+    {
+      "version": "2.1.0",
+      "tag": "@microsoft/loader-set-webpack-public-path_v2.1.0",
+      "date": "Fri, 05 May 2017 01:02:35 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Allowing the regular expression that is used to find the script to be provided by a named variable in-context."
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.2",
+      "tag": "@microsoft/loader-set-webpack-public-path_v2.0.2",
+      "date": "Tue, 28 Feb 2017 02:01:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Removing call to the deprecated parseQuery function. Using getOptions instead."
+          },
+          {
+            "comment": "Updating loader-utils to 1.0.2"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.1",
+      "tag": "@microsoft/loader-set-webpack-public-path_v2.0.1",
+      "date": "Fri, 10 Feb 2017 14:31:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixing an issue where a regex may not be escaped correctly."
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.0",
+      "tag": "@microsoft/loader-set-webpack-public-path_v2.0.0",
+      "date": "Thu, 09 Feb 2017 14:31:39 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Major refactor. Removing the injector loader, including a plugin, and renaming several parameters."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.1",
+      "tag": "@microsoft/loader-set-webpack-public-path_v1.0.1",
+      "date": "Tue, 07 Feb 2017 14:32:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updating npmignore."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.0",
+      "tag": "@microsoft/loader-set-webpack-public-path_v1.0.0",
+      "date": "Tue, 07 Feb 2017 05:26:57 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Updating set-webpack-public-path to support webpack 2.X."
+          }
+        ]
+      }
+    }
+  ]
+}

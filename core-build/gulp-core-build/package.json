@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build",
-  "version": "2.5.5",
+  "version": "2.5.6",
   "description": "Core gulp build tasks for building typescript, html, less, etc.",
   "repository": {
     "type": "git",
@@ -52,7 +52,7 @@
   },
   "devDependencies": {
     "@types/z-schema": "3.16.31",
-    "@microsoft/node-library-build": ">=3.0.1 <4.0.0",
+    "@microsoft/node-library-build": "~3.0.1",
     "chai": "~3.5.0"
   }
 }

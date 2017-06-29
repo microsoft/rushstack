@@ -262,6 +262,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "loader-utils",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "lodash",
       "allowedCategories": [ "libraries" ]
     },
@@ -355,6 +359,10 @@
     },
     {
       "name": "typescript",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "uglify-js",
       "allowedCategories": [ "libraries" ]
     },
     {

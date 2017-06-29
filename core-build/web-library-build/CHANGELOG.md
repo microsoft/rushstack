@@ -1,6 +1,13 @@
 # Change Log - @microsoft/web-library-build
 
-This log was last generated on Tue, 16 May 2017 00:01:03 GMT and should not be manually modified.
+This log was last generated on Thu, 29 Jun 2017 01:05:37 GMT and should not be manually modified.
+
+## 3.0.3
+Thu, 29 Jun 2017 01:05:37 GMT
+
+### Patches
+
+- Fix an issue with 'gulp serve' where an initial build error would stop  watch from continuing
 
 ## 3.0.2
 Tue, 16 May 2017 00:01:03 GMT
