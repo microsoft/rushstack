@@ -22,7 +22,7 @@
     "@types/lodash": "4.14.52",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
-    "mocha": "~3.2.0",
+    "mocha": "~3.4.2",
     "@microsoft/node-library-build": "~3.0.1"
   }
 }
