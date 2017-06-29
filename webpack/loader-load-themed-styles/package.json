@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
-  "repository": "github:microsoft/webpack-loaders",
+  "repository": "github:microsoft/web-build-tools",
   "scripts": {
     "build": "gulp",
     "clean": "gulp clean",
