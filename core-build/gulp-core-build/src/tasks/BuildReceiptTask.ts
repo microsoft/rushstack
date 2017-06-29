@@ -32,7 +32,7 @@ export class CheckBuildReceiptTask extends GulpTask<IBuildReceiptTask> {
   public name: string = 'check-for-changes';
   public executeTask(
     gulp: gulp.Gulp,
-    completeCallback: (error?: string) => void
+    completeCallback: (error?: string | Error) => void
   ): Promise<Object> | NodeJS.ReadWriteStream | void {
     _getLocalHashes().then(localHashes => {
       _lastLocalHashes = localHashes;
@@ -61,7 +61,7 @@ export class UpdateBuildReceiptTask extends GulpTask<IBuildReceiptTask> {
   public name: string = 'mark-changes';
   public executeTask(
     gulp: gulp.Gulp,
-    completeCallback: (error?: string) => void
+    completeCallback: (error?: string | Error) => void
   ): Promise<Object> | NodeJS.ReadWriteStream | void {
 
     const packageHashPath: string = path.join(process.cwd(), this.buildConfig.packageFolder, 'build.json');

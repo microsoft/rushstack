@@ -57,7 +57,7 @@ export class CopyTask extends GulpTask<ICopyConfig> {
    */
   public executeTask(
     gulp: gulp.Gulp,
-    completeCallback: (error?: string) => void
+    completeCallback: (error?: string | Error) => void
   ): Promise<Object> | NodeJS.ReadWriteStream | void {
     /* tslint:disable:typedef */
     const flatten = require('gulp-flatten');

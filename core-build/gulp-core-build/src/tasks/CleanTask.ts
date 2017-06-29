@@ -28,15 +28,18 @@ export class CleanTask extends GulpTask<void> {
    */
   public executeTask(
     gulp: gulp.Gulp,
-    completeCallback: (error?: string) => void
+    completeCallback: (error?: string | Error) => void
   ): void {
     const { distFolder, libFolder, libAMDFolder, tempFolder }: IBuildConfig = this.buildConfig;
-    let cleanPaths: (string | undefined)[] = [
+    let cleanPaths: string[] = [
       distFolder,
-      libAMDFolder,
       libFolder,
       tempFolder
     ];
+
+    if (libAMDFolder) {
+      cleanPaths.push(libAMDFolder);
+    }
 
     // Give each registered task an opportunity to add their own clean paths.
     for (const executable of this.buildConfig.uniqueTasks || []) {
@@ -64,7 +67,7 @@ export class CleanTask extends GulpTask<void> {
     }
 
     try {
-      FileDeletionUtility.deletePatterns(cleanPaths.filter((cleanPath: string | undefined) => !!cleanPath) as string[]);
+      FileDeletionUtility.deletePatterns(cleanPaths);
       completeCallback();
     } catch (e) {
       completeCallback(e);

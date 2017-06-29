@@ -16,13 +16,13 @@ class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig> {
 // @public
 class CleanTask extends GulpTask<void> {
   constructor();
-  executeTask(gulp: gulp.Gulp, completeCallback: (error?: string) => void): void;
+  executeTask(gulp: gulp.Gulp, completeCallback: (error?: string | Error) => void): void;
 }
 
 // @public
 class CopyTask extends GulpTask<ICopyConfig> {
   constructor();
-  executeTask(gulp: gulp.Gulp, completeCallback: (error?: string) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
+  executeTask(gulp: gulp.Gulp, completeCallback: (error?: string | Error) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
   loadSchema(): Object;
 }
 
@@ -47,7 +47,7 @@ export declare function functionalTestRun(name: string, result: TestResultState,
 // @public
 class GenerateShrinkwrapTask extends GulpTask<void> {
   constructor();
-  executeTask(gulp: gulpType.Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream | void;
+  executeTask(gulp: gulpType.Gulp, completeCallback: (error?: string | Error) => void): NodeJS.ReadWriteStream | void;
 }
 
 // @public
@@ -67,7 +67,7 @@ class GulpTask<TASK_CONFIG> implements IExecutable {
   copyFile(localSourcePath: string, localDestPath?: string): void;
   enabled: boolean;
   execute(config: IBuildConfig): Promise<void>;
-  abstract executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (error?: string) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
+  abstract executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (error?: string | Error) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
   fileError(filePath: string, line: number, column: number, errorCode: string, message: string): void;
   fileExists(localPath: string): boolean;
   fileWarning(filePath: string, line: number, column: number, warningCode: string, message: string): void;

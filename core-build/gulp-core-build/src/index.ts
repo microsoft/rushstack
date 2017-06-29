@@ -154,7 +154,7 @@ class CustomTask extends GulpTask<void> {
     this._fn = fn.bind(this);
   }
 
-  public executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (error?: string) => void):
+  public executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (error?: string | Error) => void):
     Promise<Object> | NodeJS.ReadWriteStream | void {
     return this._fn(gulp, getConfig(), completeCallback);
   }

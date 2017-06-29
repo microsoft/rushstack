@@ -137,7 +137,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
    */
   public abstract executeTask(
     gulp: gulp.Gulp | GulpProxy,
-    completeCallback?: (error?: string) => void
+    completeCallback?: (error?: string | Error) => void
   ): Promise<Object> | NodeJS.ReadWriteStream | void;
 
   /**
@@ -231,7 +231,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
           throw new Error('The task subclass is missing the "executeTask" method.');
         }
 
-        stream = this.executeTask(this.buildConfig.gulp, (error?: string) => {
+        stream = this.executeTask(this.buildConfig.gulp, (error?: string | Error) => {
           if (!error) {
             resolve();
           } else if (typeof error === 'string') {

@@ -28,7 +28,7 @@ export class GenerateShrinkwrapTask extends GulpTask<void> {
    */
   public executeTask(
     gulp: gulpType.Gulp,
-    completeCallback: (error?: string) => void
+    completeCallback: (error?: string | Error) => void
   ): NodeJS.ReadWriteStream | void {
     const pathToShrinkwrap: string = path.join(this.buildConfig.rootPath, 'npm-shrinkwrap.json');
 

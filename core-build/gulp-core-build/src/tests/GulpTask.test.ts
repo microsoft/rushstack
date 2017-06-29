@@ -99,7 +99,7 @@ class CallbackTask extends GulpTask<IConfig> {
   public taskConfig: IConfig = {
   };
 
-  public executeTask(gulp: gulp.Gulp, callback: (error?: string) => void): void {
+  public executeTask(gulp: gulp.Gulp, callback: (error?: string | Error) => void): void {
     testArray.push(this.name);
     callback();
   }
@@ -116,7 +116,7 @@ class SchemaTask extends GulpTask<ISimpleConfig> {
     shouldDoThings: false
   };
 
-  public executeTask(gulp: gulp.Gulp, callback: (error?: string) => void): void {
+  public executeTask(gulp: gulp.Gulp, callback: (error?: string | Error) => void): void {
     callback();
   }
 
