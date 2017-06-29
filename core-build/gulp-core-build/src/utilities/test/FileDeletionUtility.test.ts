@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { assert } from 'chai';
-import { FileDeletionUtility } from './FileDeletionUtility';
+import { FileDeletionUtility } from './../FileDeletionUtility';
 
 describe('FileDeletionUtility', () => {
   describe('constructor', () => {
@@ -72,7 +72,7 @@ describe('FileDeletionUtility', () => {
         FileDeletionUtility.isParentDirectory(undefined, '/a/b.txt')
       );
       assert.isFalse(
-        FileDeletionUtility.isParentDirectory(null, '/a/b/c/d.txt')
+        FileDeletionUtility.isParentDirectory(null as any, '/a/b/c/d.txt') // tslint:disable-line:no-any
       );
       assert.isFalse(
         FileDeletionUtility.isParentDirectory('/A/b.txt', '')
@@ -81,7 +81,7 @@ describe('FileDeletionUtility', () => {
         FileDeletionUtility.isParentDirectory('/a/b.txt', undefined)
       );
       assert.isFalse(
-        FileDeletionUtility.isParentDirectory('/a/b/c/d.txt', null)
+        FileDeletionUtility.isParentDirectory('/a/b/c/d.txt', null as any) // tslint:disable-line:no-any
       );
       /* tslint:enable:no-null-keyword */
     });

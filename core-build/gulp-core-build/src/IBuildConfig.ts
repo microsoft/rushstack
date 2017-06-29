@@ -32,7 +32,7 @@ export interface IBuildConfig {
 
   /** Unbundled amd modules folder,
    * which can be optionally set to cause build tasks to
-   * ouput AMD modules if required for legacy reasons. */
+   * output AMD modules if required for legacy reasons. */
   libAMDFolder?: string;
 
   /** Unbundled es6 modules folder,

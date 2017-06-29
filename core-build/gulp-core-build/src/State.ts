@@ -10,8 +10,18 @@ export const args: { [flat: string]: boolean | string} = clArgs;
 export interface IPackageJSON {
   name: string;
   version: string;
+  directories: {
+    packagePath: string | undefined;
+  } | undefined;
 }
 
-export const builtPackage: IPackageJSON = require(path.join(root, 'package.json'));
+let packageJson: IPackageJSON | undefined;
+try {
+  packageJson = require(path.join(root, 'package.json'));
+} catch (e) {
+  // Package.json probably doesn't exit
+}
+
+export const builtPackage: IPackageJSON | undefined = packageJson;
 export const coreBuildPackage: IPackageJSON = require('../package.json');
 export const nodeVersion: string = process.version;

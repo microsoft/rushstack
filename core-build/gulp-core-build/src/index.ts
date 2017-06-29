@@ -12,7 +12,7 @@ import { GulpProxy } from './GulpProxy';
 import { IExecutable } from './IExecutable';
 import { IBuildConfig } from './IBuildConfig';
 import { CleanTask } from './tasks/CleanTask';
-import { args } from './State';
+import { args, builtPackage } from './State';
 export { IExecutable } from './IExecutable';
 import { log } from './logging';
 import { initialize as initializeLogging, markTaskCreationTime, generateGulpError, setWatchMode } from './logging';
@@ -45,14 +45,12 @@ export * from './tasks/CleanTask';
 export * from './tasks/ValidateShrinkwrapTask';
 export * from './jsonUtilities/SchemaValidator';
 
-// tslint:disable-next-line:no-any
-const packageJSON: any = require(path.resolve(process.cwd(), 'package.json'));
 const _taskMap: { [key: string]: IExecutable } = {};
 const _uniqueTasks: IExecutable[] = [];
 
-const packageFolder: string =
-  (packageJSON.directories && packageJSON.directories.packagePath) ?
-    packageJSON.directories.packagePath : '';
+const packageFolder: string = (builtPackage && builtPackage.directories && builtPackage.directories.packagePath)
+  ? builtPackage.directories.packagePath
+  : '';
 
 let _buildConfig: IBuildConfig = {
   packageFolder,
@@ -141,7 +139,7 @@ export function task(taskName: string, task: IExecutable): IExecutable {
  * @public
  */
 export interface ICustomGulpTask {
-  (gulp: gulp.Gulp | GulpProxy, buildConfig: IBuildConfig, done: (failure?: Object) => void):
+  (gulp: gulp.Gulp | GulpProxy, buildConfig: IBuildConfig, done?: (failure?: Object) => void):
     Promise<Object> | NodeJS.ReadWriteStream | void;
 }
 
@@ -177,7 +175,7 @@ export function subTask(taskName: string, fn: ICustomGulpTask): IExecutable {
 /**
  * Defines a gulp watch and maps it to a given IExecutable.
  *
- * @param watrchMatch - the list of files patterns to watch
+ * @param watchMatch - the list of files patterns to watch
  * @param task - the task to execute when a file changes
  * @returns IExecutable
  * @public
@@ -187,7 +185,7 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
 
   let isWatchRunning: boolean = false;
   let shouldRerunWatch: boolean = false;
-  let lastError: boolean = undefined;
+  let lastError: boolean | undefined = undefined;
 
   const successMessage: string = 'Build succeeded';
   const failureMessage: string = 'Build failed';
@@ -199,6 +197,7 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
         function _runWatch(): Promise<void> {
           if (isWatchRunning) {
             shouldRerunWatch = true;
+            return Promise.resolve();
           } else {
             isWatchRunning = true;
 
@@ -210,7 +209,7 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
                   if (buildConfig.showToast) {
                     notifier.notify({
                       title: successMessage,
-                      message: packageJSON.name,
+                      message: (builtPackage ? builtPackage.name : ''),
                       icon: buildConfig.buildSuccessIconPath
                     });
                   } else {
@@ -250,7 +249,9 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
         }
 
         setWatchMode();
-        buildConfig.gulp.watch(watchMatch, _runWatch);
+        if (buildConfig.gulp) {
+          buildConfig.gulp.watch(watchMatch, _runWatch);
+        }
 
         _runWatch();
       });
