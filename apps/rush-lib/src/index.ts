@@ -84,6 +84,14 @@ export {
 } from './rushVersion';
 
 export {
+  BaseTypeName,
+  BumpType,
+  LockStepVersionPolicy,
+  IndividualVersionPolicy,
+  VersionPolicy
+} from './data/VersionPolicy';
+
+export {
   default as Npm
 } from './utilities/Npm';
 

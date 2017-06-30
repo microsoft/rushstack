@@ -523,10 +523,24 @@ export default class RushConfiguration {
 
   /**
    * Gets the version policy by its name.
+   * Throws error if the version policy is not found.
    * @param policyName - Name of the version policy
+   * @alpha
    */
   public getVersionPolicy(policyName: string): VersionPolicy {
-    return this._versionPolicies.get(policyName);
+    const policy: VersionPolicy = this._versionPolicies.get(policyName);
+    if (!policy) {
+      throw new Error('Failed to find version policy by name \'${policyName}\'');
+    }
+    return policy;
+  }
+
+  /**
+   * Gets all the version policies
+   * @alpha
+   */
+  public get versionPolicies(): Map<string, VersionPolicy> {
+    return this._versionPolicies;
   }
 
   private _populateDownstreamDependencies(dependencies: { [key: string]: string }, packageName: string): void {

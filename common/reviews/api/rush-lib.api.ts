@@ -39,6 +39,14 @@ class AsyncRecycler {
   public readonly recyclerFolder: string;
 }
 
+// @alpha
+enum BaseTypeName {
+  // (undocumented)
+  'individualVersion',
+  // (undocumented)
+  'lockStepVersion'
+}
+
 // @public
 class BuildTaskError extends TaskError {
   constructor(type: string, message: string, file: string, line: number, offset: number);
@@ -50,6 +58,20 @@ class BuildTaskError extends TaskError {
   protected _offset: number;
   // (undocumented)
   public toString(mode: ErrorDetectionMode): string;
+}
+
+// @alpha
+enum BumpType {
+  // (undocumented)
+  'major',
+  // (undocumented)
+  'minor',
+  // (undocumented)
+  'patch',
+  // (undocumented)
+  'prerelease',
+  // (undocumented)
+  'release'
 }
 
 // @public
@@ -132,6 +154,16 @@ interface IEventHooksJson {
   postRushBuild?: string[];
 }
 
+// @alpha
+class IndividualVersionPolicy extends VersionPolicy {
+  // WARNING: The type "IIndividualVersionJson" needs to be exported by the package (e.g. added to index.ts)
+  constructor(versionPolicyJson: IIndividualVersionJson);
+  // (undocumented)
+  public ensure(project: RushConfigurationProject): IPackageJson | undefined;
+  // (undocumented)
+  public readonly lockedMajor: number | undefined;
+}
+
 // @public
 interface IPackageJson {
   // (undocumented)
@@ -182,6 +214,18 @@ class JsonSchemaValidator {
   public validateObject(jsonObject: Object, errorCallback: ValidateErrorCallback): void;
 }
 
+// @alpha
+class LockStepVersionPolicy extends VersionPolicy {
+  // WARNING: The type "ILockStepVersionJson" needs to be exported by the package (e.g. added to index.ts)
+  constructor(versionPolicyJson: ILockStepVersionJson);
+  // (undocumented)
+  public ensure(project: RushConfigurationProject): IPackageJson | undefined;
+  // (undocumented)
+  public readonly nextBump: BumpType;
+  // (undocumented)
+  public readonly version: SemVer;
+}
+
 // @public (undocumented)
 class Npm {
   // (undocumented)
@@ -226,7 +270,7 @@ class RushConfiguration {
   public findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject;
   public findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
   public getProjectByName(projectName: string): RushConfigurationProject;
-  // WARNING: The type "VersionPolicy" needs to be exported by the package (e.g. added to index.ts)
+  // @alpha
   public getVersionPolicy(policyName: string): VersionPolicy;
   public readonly gitAllowedEmailRegExps: string[];
   public readonly gitSampleEmail: string;
@@ -250,6 +294,8 @@ class RushConfiguration {
   // @alpha
   public readonly telemetryEnabled: boolean;
   public readonly tempShrinkwrapFilename: string;
+  // @alpha
+  public readonly versionPolicies: Map<string, VersionPolicy>;
 }
 
 // @public
@@ -269,6 +315,8 @@ class RushConfigurationProject {
   public readonly shouldPublish: boolean;
   public readonly tempPackageJsonFilename: string;
   public readonly tempProjectName: string;
+  // @alpha
+  public readonly versionPolicy: VersionPolicy;
 }
 
 // @public
@@ -395,6 +443,21 @@ class VersionMismatchFinder {
   public getVersionsOfMismatch(mismatch: string): Array<string>;
   // (undocumented)
   public readonly numberOfMismatches: number;
+}
+
+// @alpha
+class VersionPolicy {
+  // WARNING: The type "IVersionPolicyJson" needs to be exported by the package (e.g. added to index.ts)
+  constructor(versionPolicyJson: IVersionPolicyJson);
+  // (undocumented)
+  public readonly baseType: BaseTypeName;
+  // (undocumented)
+  public abstract ensure(project: RushConfigurationProject): IPackageJson | undefined;
+  // WARNING: The type "IVersionPolicyJson" needs to be exported by the package (e.g. added to index.ts)
+  // (undocumented)
+  public static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy;
+  // (undocumented)
+  public readonly policyName: string;
 }
 
 // WARNING: Unsupported export: rushVersion
