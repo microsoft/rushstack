@@ -6,6 +6,7 @@
 import * as path from 'path';
 import { assert } from 'chai';
 import RushConfiguration from '../RushConfiguration';
+import IPackageJson from '../../utilities/IPackageJson';
 
 import {
   VersionPolicy,
@@ -15,22 +16,92 @@ import {
 } from '../VersionPolicy';
 
 describe('VersionPolicy', () => {
-  it('can load lockStepVersion.', () => {
+  describe('LockStepVersion', () => {
     const rushFilename: string = path.resolve(__dirname, 'jsonFiles', 'rushWithLockVersion.json');
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
     const versionPolicy: VersionPolicy = rushConfiguration.getVersionPolicy('testPolicy1');
-    assert.isTrue(versionPolicy instanceof LockStepVersionPolicy, 'versionPolicy is a LockStepVersionPolicy');
-    const lockStepVersionPolicy: LockStepVersionPolicy = versionPolicy as LockStepVersionPolicy;
-    assert.equal(lockStepVersionPolicy.version, '1.1.0');
-    assert.equal(lockStepVersionPolicy.nextBump, BumpType.patch);
+
+    it('loads configuration.', () => {
+      assert.isTrue(versionPolicy instanceof LockStepVersionPolicy, 'versionPolicy is a LockStepVersionPolicy');
+      const lockStepVersionPolicy: LockStepVersionPolicy = versionPolicy as LockStepVersionPolicy;
+      assert.equal(lockStepVersionPolicy.version, '1.1.0');
+      assert.equal(lockStepVersionPolicy.nextBump, BumpType.patch);
+    });
+
+    it('skips packageJson if version is already the locked step version', () => {
+      const lockStepVersionPolicy: LockStepVersionPolicy = versionPolicy as LockStepVersionPolicy;
+      assert.isUndefined(lockStepVersionPolicy.ensure({
+        name: 'a',
+        version: '1.1.0'
+      }), 'PackageJson does not get changed and is not returned.');
+    });
+
+    it('updates packageJson if version is lower than the locked step version', () => {
+      const lockStepVersionPolicy: LockStepVersionPolicy = versionPolicy as LockStepVersionPolicy;
+      const expectedPackageJson: IPackageJson = {
+        name: 'a',
+        version: '1.1.0'
+      };
+      const originalPackageJson: IPackageJson = {
+        name: 'a',
+        version: '1.0.1'
+      };
+      assert.deepEqual(lockStepVersionPolicy.ensure(originalPackageJson), expectedPackageJson);
+    });
+
+    it('throws exception if version is higher than the locked step version', () => {
+      const lockStepVersionPolicy: LockStepVersionPolicy = versionPolicy as LockStepVersionPolicy;
+      const originalPackageJson: IPackageJson = {
+        name: 'a',
+        version: '2.1.0'
+      };
+      assert.throw(() => {
+        lockStepVersionPolicy.ensure(originalPackageJson);
+      });
+    });
   });
 
-  it('can load lockStepVersion.', () => {
+  describe('IndividualVersionPolicy', () => {
     const rushFilename: string = path.resolve(__dirname, 'jsonFiles', 'rushWithIndividualVersion.json');
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
     const versionPolicy: VersionPolicy = rushConfiguration.getVersionPolicy('testPolicy2');
-    assert.isTrue(versionPolicy instanceof IndividualVersionPolicy, 'versionPolicy is a IndividualVersionPolicy');
-    const individualVersionPolicy: IndividualVersionPolicy = versionPolicy as IndividualVersionPolicy;
-    assert.equal(individualVersionPolicy.lockedMajor, 2);
+
+    it('loads configuration', () => {
+      assert.isTrue(versionPolicy instanceof IndividualVersionPolicy, 'versionPolicy is a IndividualVersionPolicy');
+      const individualVersionPolicy: IndividualVersionPolicy = versionPolicy as IndividualVersionPolicy;
+      assert.equal(individualVersionPolicy.lockedMajor, 2);
+    });
+
+    it('skips packageJson if no need to change', () => {
+      const individualVersionPolicy: IndividualVersionPolicy = versionPolicy as IndividualVersionPolicy;
+      assert.isUndefined(individualVersionPolicy.ensure({
+        name: 'a',
+        version: '2.1.0'
+      }), 'PackageJson does not get changed and is not returned.');
+    });
+
+    it('updates packageJson if version is lower than the locked major', () => {
+      const individualVersionPolicy: IndividualVersionPolicy = versionPolicy as IndividualVersionPolicy;
+      const expectedPackageJson: IPackageJson = {
+        name: 'a',
+        version: '2.0.0'
+      };
+      const originalPackageJson: IPackageJson = {
+        name: 'a',
+        version: '1.0.1'
+      };
+      assert.deepEqual(individualVersionPolicy.ensure(originalPackageJson), expectedPackageJson);
+    });
+
+    it('throws exception if version is higher than the locked step version', () => {
+      const individualVersionPolicy: IndividualVersionPolicy = versionPolicy as IndividualVersionPolicy;
+      const originalPackageJson: IPackageJson = {
+        name: 'a',
+        version: '3.1.0'
+      };
+      assert.throw(() => {
+        individualVersionPolicy.ensure(originalPackageJson);
+      });
+    });
   });
 });

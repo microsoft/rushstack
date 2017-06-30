@@ -159,7 +159,7 @@ class IndividualVersionPolicy extends VersionPolicy {
   // WARNING: The type "IIndividualVersionJson" needs to be exported by the package (e.g. added to index.ts)
   constructor(versionPolicyJson: IIndividualVersionJson);
   // (undocumented)
-  public ensure(project: RushConfigurationProject): IPackageJson | undefined;
+  public ensure(project: IPackageJson): IPackageJson | undefined;
   // (undocumented)
   public readonly lockedMajor: number | undefined;
 }
@@ -219,11 +219,11 @@ class LockStepVersionPolicy extends VersionPolicy {
   // WARNING: The type "ILockStepVersionJson" needs to be exported by the package (e.g. added to index.ts)
   constructor(versionPolicyJson: ILockStepVersionJson);
   // (undocumented)
-  public ensure(project: RushConfigurationProject): IPackageJson | undefined;
+  public ensure(project: IPackageJson): IPackageJson | undefined;
   // (undocumented)
   public readonly nextBump: BumpType;
   // (undocumented)
-  public readonly version: SemVer;
+  public readonly version: semver.SemVer;
 }
 
 // @public (undocumented)
@@ -452,7 +452,7 @@ class VersionPolicy {
   // (undocumented)
   public readonly baseType: BaseTypeName;
   // (undocumented)
-  public abstract ensure(project: RushConfigurationProject): IPackageJson | undefined;
+  public abstract ensure(project: IPackageJson): IPackageJson | undefined;
   // WARNING: The type "IVersionPolicyJson" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   public static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy;

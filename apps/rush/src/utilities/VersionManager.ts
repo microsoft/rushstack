@@ -32,7 +32,7 @@ export class VersionManager {
       const versionPolicy: VersionPolicy = rushProject.versionPolicy;
       if (versionPolicy &&
         (!versionPolicyName || versionPolicy.policyName === versionPolicyName)) {
-        const updatedProject: IPackageJson = versionPolicy.ensure(rushProject);
+        const updatedProject: IPackageJson = versionPolicy.ensure(rushProject.packageJson);
         if (updatedProject) {
           updatedProjects.set(updatedProject.name, updatedProject);
         }
@@ -54,8 +54,11 @@ export class VersionManager {
   private _updateDependencies(clonedProject: IPackageJson,
     updatedProjects: Map<string, IPackageJson>
   ): void {
-    let needToUpdate: boolean = false;
+    if (!clonedProject.dependencies) {
+      return;
+    }
     const dependencies: { [key: string]: string; } = clonedProject.dependencies;
+    let needToUpdate: boolean = false;
 
     updatedProjects.forEach((updatedProject, updatedProjectName) => {
       if (dependencies[updatedProjectName]) {

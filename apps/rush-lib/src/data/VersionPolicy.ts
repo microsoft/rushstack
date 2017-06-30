@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { cloneDeep } from 'lodash';
-import { SemVer } from 'semver';
+import * as semver from 'semver';
 
 import {
   IVersionPolicyJson,
@@ -11,8 +11,6 @@ import {
 } from './RushConfiguration';
 
 import IPackageJson from '../utilities/IPackageJson';
-
-import RushConfigurationProject from './RushConfigurationProject';
 
 /**
  * Type of version bumps
@@ -66,7 +64,7 @@ export abstract class VersionPolicy {
     return this._baseType;
   }
 
-  public abstract ensure(project: RushConfigurationProject): IPackageJson | undefined;
+  public abstract ensure(project: IPackageJson): IPackageJson | undefined;
 }
 
 /**
@@ -74,16 +72,16 @@ export abstract class VersionPolicy {
  * @alpha
  */
 export class LockStepVersionPolicy extends VersionPolicy {
-  private _version: SemVer;
+  private _version: semver.SemVer;
   private _nextBump: BumpType;
 
   constructor(versionPolicyJson: ILockStepVersionJson) {
     super(versionPolicyJson);
-    this._version = new SemVer(versionPolicyJson.version);
+    this._version = new semver.SemVer(versionPolicyJson.version);
     this._nextBump = BumpType[versionPolicyJson.nextBump];
   }
 
-  public get version(): SemVer {
+  public get version(): semver.SemVer {
     return this._version;
   }
 
@@ -91,13 +89,17 @@ export class LockStepVersionPolicy extends VersionPolicy {
     return this._nextBump;
   }
 
-  public ensure(project: RushConfigurationProject): IPackageJson | undefined {
-    const packageVersion: SemVer = new SemVer(project.packageJson.version);
-    if (packageVersion.format() === this._version.format()) {
-      // No need to update the project
+  public ensure(project: IPackageJson): IPackageJson | undefined {
+    const packageVersion: semver.SemVer = new semver.SemVer(project.version);
+    const compareResult: number = packageVersion.compare(this._version);
+    if (compareResult === 0) {
       return undefined;
+    } else if (compareResult > 0) {
+      const errorMessage: string = `Version ${project.version} in package ${project.name}`
+        + ` is higher than locked version ${this._version.format()}.`;
+      throw new Error(errorMessage);
     }
-    const updatedProject: IPackageJson = cloneDeep(project.packageJson);
+    const updatedProject: IPackageJson = cloneDeep(project);
     updatedProject.version = this._version.format();
     return updatedProject;
   }
@@ -119,14 +121,17 @@ export class IndividualVersionPolicy extends VersionPolicy {
     return this._lockedMajor;
   }
 
-  public ensure(project: RushConfigurationProject): IPackageJson | undefined {
+  public ensure(project: IPackageJson): IPackageJson | undefined {
     if (this.lockedMajor) {
-      const version: SemVer = new SemVer(project.packageJson.version);
-      if (version.major !== this._lockedMajor) {
-        const updatedProject: IPackageJson = cloneDeep(project.packageJson);
-        version.major = this._lockedMajor;
-        updatedProject.version = version.format();
+      const version: semver.SemVer = new semver.SemVer(project.version);
+      if (version.major < this._lockedMajor) {
+        const updatedProject: IPackageJson = cloneDeep(project);
+        updatedProject.version = `${this._lockedMajor}.0.0`;
         return updatedProject;
+      } else if (version.major > this._lockedMajor) {
+        const errorMessage: string = `Version ${project.version} in package ${project.name}`
+          + ` is higher than locked major version ${this._lockedMajor}.`;
+        throw new Error(errorMessage);
       }
     }
     return undefined;

@@ -14,6 +14,10 @@
       "policyName": "testPolicy2",
       "baseType": "individualVersion",
       "lockedMajor": 5
+    },
+    {
+      "policyName": "testPolicy3",
+      "baseType": "individualVersion"
     }
   ],
 
@@ -35,6 +39,12 @@
       "projectFolder": "c",
       "reviewCategory": "third-party",
       "versionPolicyName": "testPolicy2"
+    },
+    {
+      "packageName": "d",
+      "projectFolder": "d",
+      "reviewCategory": "third-party",
+      "versionPolicyName": "testPolicy3"
     }
   ]
 }

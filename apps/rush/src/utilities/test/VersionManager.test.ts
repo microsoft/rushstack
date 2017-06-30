@@ -22,15 +22,33 @@ describe('VersionManager', () => {
 
   /* tslint:disable:no-string-literal */
   describe('ensure', () => {
-    it('ensures lock step version', () => {
+    it('fixes lock step versions', () => {
       const updatedPackages: Map<string, IPackageJson> = versionManager.ensure('testPolicy1');
       const expectedVersion: string = '10.10.0';
-      assert.equal(updatedPackages.size, 2);
+      assert.equal(updatedPackages.size, 4);
       assert.equal(updatedPackages.get('a').version, expectedVersion);
       assert.equal(updatedPackages.get('b').version, expectedVersion);
       assert.equal(updatedPackages.get('b').dependencies['a'], `~${expectedVersion}`);
-      assert.equal(updatedPackages.get('c').version, '3.0.0', 'c version should not change');
+      assert.equal(updatedPackages.get('c').version, '3.1.1', 'c version should not change');
       assert.equal(updatedPackages.get('c').dependencies['b'], `>=10.10.0 <11.0.0`);
+      assert.equal(updatedPackages.get('d').version, '4.1.1', 'd version should not change');
+      assert.equal(updatedPackages.get('d').dependencies['b'], `>=10.10.0 <11.0.0`);
+    });
+  });
+
+  describe('ensure', () => {
+    it('fixes major version for individual version policy', () => {
+      const updatedPackages: Map<string, IPackageJson> = versionManager.ensure('testPolicy2');
+      assert.equal(updatedPackages.size, 1);
+      assert.equal(updatedPackages.get('c').version, '5.0.0');
+      assert.equal(updatedPackages.get('c').dependencies['b'], `>=2.0.0 <3.0.0`);
+    });
+  });
+
+  describe('ensure', () => {
+    it('does not change packageJson if not needed by individual version policy', () => {
+      const updatedPackages: Map<string, IPackageJson> = versionManager.ensure('testPolicy3');
+      assert.equal(updatedPackages.size, 0);
     });
   });
   /* tslint:enable:no-string-literal */
