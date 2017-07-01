@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import { cloneDeep } from 'lodash';
-import * as semver from 'semver';
 
 import {
   RushConfiguration,
@@ -62,7 +61,7 @@ export class VersionManager {
 
     updatedProjects.forEach((updatedProject, updatedProjectName) => {
       if (dependencies[updatedProjectName]) {
-        const newDependencyVersion: string = this._getNewDependencyVersion(
+        const newDependencyVersion: string = PublishUtilities.getNewDependencyVersion(
           dependencies,
           updatedProjectName,
           updatedProject.version
@@ -76,28 +75,5 @@ export class VersionManager {
     if (needToUpdate) {
       updatedProjects.set(clonedProject.name, clonedProject);
     }
-  }
-
-  private _getNewDependencyVersion(dependencies: { [key: string]: string; },
-    dependencyName: string,
-    newProjectVersion: string
-  ): string {
-    const currentDependencyVersion: string = dependencies[dependencyName];
-    let newDependencyVersion: string;
-
-    if (PublishUtilities.isRangeDependency(currentDependencyVersion)) {
-      newDependencyVersion = this._getNewRangeDependency(newProjectVersion);
-    } else if (currentDependencyVersion.lastIndexOf('~', 0) === 0) {
-      newDependencyVersion = '~' + newProjectVersion;
-    } else if (currentDependencyVersion.lastIndexOf('^', 0) === 0) {
-      newDependencyVersion = '^' + newProjectVersion;
-    } else {
-      newDependencyVersion = newProjectVersion;
-    }
-    return newDependencyVersion;
-  }
-
-  private _getNewRangeDependency(newVersion: string): string {
-    return `>=${newVersion} <${semver.inc(newVersion, 'major')}`;
   }
 }

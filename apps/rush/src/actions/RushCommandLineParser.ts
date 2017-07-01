@@ -20,6 +20,7 @@ import PublishAction from './PublishAction';
 import RebuildAction from './RebuildAction';
 import UnlinkAction from './UnlinkAction';
 import ScanAction from './ScanAction';
+import VersionAction from './VersionAction';
 
 import Telemetry from '../utilities/Telemetry';
 
@@ -100,6 +101,7 @@ export default class RushCommandLineParser extends CommandLineParser {
       this.addAction(new RebuildAction(this));
       this.addAction(new ScanAction(this));
       this.addAction(new UnlinkAction(this));
+      this.addAction(new VersionAction(this));
     } catch (error) {
       this._exitAndReportError(error);
     }
