@@ -13,7 +13,6 @@ class CopyTask extends GulpTask<ICopyConfig> {
   constructor();
   public executeTask(gulp: gulp.Gulp,
       completeCallback: (result?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
-  // @internal
   public loadSchema(): Object;
 }
 
@@ -153,7 +152,7 @@ export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecuta
 // @public
 export function replaceConfig(config: IBuildConfig): void;
 
-// @internal
+// @public
 export function reset(): void;
 
 // @public

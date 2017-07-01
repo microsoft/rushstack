@@ -12,8 +12,10 @@ import ApiJsonGenerator from './generators/ApiJsonGenerator';
  * ExternalApiHelper has the specific use case of generating an API json file from third party definition files.
  * This class is invoked by the gulp-core-build-typescript gulpfile, where the external package names are
  * hard wired.
- * The job of this method is almost the same as the API Exactractor task that is executed on first party packages,
+ * The job of this method is almost the same as the API Extractor task that is executed on first party packages,
  * with the exception that all packages analyzed here are external packages with definition files.
+ *
+ * @public
  */
 export default class ExternalApiHelper {
 

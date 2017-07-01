@@ -360,7 +360,7 @@ export function log(...args: Array<string | Chalk.ChalkChain>): void {
 
 /**
  * Resets the state of the logging cache
- * @internal
+ * @public
  */
 export function reset(): void {
   'use strict';

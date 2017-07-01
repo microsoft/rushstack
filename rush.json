@@ -1,6 +1,6 @@
 {
   "npmVersion": "4.5.0",
-  "rushMinimumVersion": "3.0.7",
+  "rushMinimumVersion": "3.0.10",
   "nodeSupportedVersionRange": ">=6.9.0 <7.0.0",
   "projectFolderMinDepth": 1,
 
@@ -144,6 +144,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "@microsoft/load-themed-styles",
+      "projectFolder": "libraries/load-themed-styles",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@microsoft/node-core-library",
       "projectFolder": "libraries/node-core-library",
       "reviewCategory": "libraries",
@@ -166,11 +172,26 @@
       "projectFolder": "libraries/ts-command-line",
       "reviewCategory": "libraries",
       "shouldPublish": true
-    }
+    },
 
     // "webpack" folder (alphabetical order)
-
-    // (coming soon: loader-cased-file, load-themed-styles, etc.)
-
+    {
+      "packageName": "@microsoft/loader-load-themed-styles",
+      "projectFolder": "webpack/loader-load-themed-styles",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@microsoft/loader-set-webpack-public-path",
+      "projectFolder": "webpack/loader-set-webpack-public-path",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@microsoft/loader-raw-script",
+      "projectFolder": "webpack/loader-raw-script",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    }
   ]
 }
