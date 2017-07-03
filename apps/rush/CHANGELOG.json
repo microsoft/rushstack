@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "3.0.11",
+      "tag": "@microsoft/rush_v3.0.11",
+      "date": "Mon, Jul  3, 2017 10:53:12 PM",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add support for non-SemVer dependency specifiers in package.json; for example, \"github:gulpjs/gulp#4.0\" or \"git://github.com/user/project.git#commit-ish\""
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.10",
       "tag": "@microsoft/rush_v3.0.10",
       "date": "Tue, 27 Jun 2017 21:44:50 GMT",

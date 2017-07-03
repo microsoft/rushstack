@@ -2,6 +2,18 @@
   "name": "@microsoft/rush-lib",
   "entries": [
     {
+      "version": "3.0.11",
+      "tag": "@microsoft/rush-lib_v3.0.11",
+      "date": "Mon, Jul  3, 2017 10:53:12 PM",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Rush 3.0.11 was released."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.10",
       "tag": "@microsoft/rush-lib_v3.0.10",
       "date": "Tue, 27 Jun 2017 21:44:50 GMT",
