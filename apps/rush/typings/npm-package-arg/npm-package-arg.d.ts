@@ -8,6 +8,14 @@ declare module 'npm-package-arg' {
       /**
        * Indicates the type of dependency reference.  For example 'version' indicates
        * a normal SemVer pattern.  See the package README.md for full docs.
+       *
+       * git - a git repository
+       * tag - a tagged version, e.g. "example@latest"
+       * version - A specific version number, e.g. "example@1.2.3"
+       * range - A version range, e.g. "example@2.x"
+       * file - A local .tar.gz, .tar or .tgz file
+       * directory - A local directory
+       * remote - An HTTP url to a .tar.gz, .tar or .tgz file
        */
       type: 'git' | 'tag' | 'version' | 'range' | 'file' | 'directory' | 'remote';
       /**

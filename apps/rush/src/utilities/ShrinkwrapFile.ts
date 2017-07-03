@@ -1,9 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as colors from 'colors';
 import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as semver from 'semver';
+import npmPackageArg = require('npm-package-arg');
+
 import { Utilities, RushConstants } from '@microsoft/rush-lib';
 
 interface IShrinkwrapDependencyJson {
@@ -24,6 +27,7 @@ interface IShrinkwrapJson {
  */
 export default class ShrinkwrapFile {
   private _shrinkwrapJson: IShrinkwrapJson;
+  private _alreadyWarnedSpecs: Set<string> = new Set<string>();
 
   public static loadFromFile(shrinkwrapJsonFilename: string): ShrinkwrapFile | undefined {
     let data: string = undefined;
@@ -107,8 +111,20 @@ export default class ShrinkwrapFile {
       return false;
     }
 
-    // If we found it, the version must be compatible
-    return semver.satisfies(dependencyJson.version, versionRange);
+    const result: npmPackageArg.IResult = npmPackageArg.resolve(dependencyName, versionRange);
+    switch (result.type) {
+      case 'version':
+      case 'range':
+        // If it's a SemVer pattern, then require that the shrinkwrapped version must be compatible
+        return semver.satisfies(dependencyJson.version, versionRange);
+      default:
+        // Only warn once for each spec
+        if (!this._alreadyWarnedSpecs.has(result.rawSpec)) {
+          this._alreadyWarnedSpecs.add(result.rawSpec);
+          console.log(colors.yellow(`WARNING: Not validating ${result.type}-based spec: "${result.rawSpec}"`));
+        }
+        return true;
+    }
   }
 
   private constructor(shrinkwrapJson: IShrinkwrapJson) {
