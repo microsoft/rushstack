@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-karma",
   "entries": [
     {
+      "version": "2.2.3",
+      "tag": "@microsoft/gulp-core-build-karma_v2.2.3",
+      "date": "Mon, 03 Jul 2017 13:04:18 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix build break caused by @types/bluebird"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.2",
       "tag": "@microsoft/gulp-core-build-karma_v2.2.2",
       "date": "Wed, 19 Apr 2017 20:18:06 GMT",
