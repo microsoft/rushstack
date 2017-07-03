@@ -4156,6 +4156,11 @@
       "from": "normalize-range@>=0.1.2 <0.2.0",
       "resolved": "https://registry.npmjs.org/normalize-range/-/normalize-range-0.1.2.tgz"
     },
+    "npm-package-arg": {
+      "version": "5.1.2",
+      "from": "npm-package-arg@>=5.1.2 <5.2.0",
+      "resolved": "https://registry.npmjs.org/npm-package-arg/-/npm-package-arg-5.1.2.tgz"
+    },
     "npm-run-path": {
       "version": "1.0.0",
       "from": "npm-run-path@>=1.0.0 <2.0.0",
@@ -5931,6 +5936,11 @@
       "version": "3.0.1",
       "from": "validate-npm-package-license@>=3.0.1 <4.0.0",
       "resolved": "https://registry.npmjs.org/validate-npm-package-license/-/validate-npm-package-license-3.0.1.tgz"
+    },
+    "validate-npm-package-name": {
+      "version": "3.0.0",
+      "from": "validate-npm-package-name@>=3.0.0 <4.0.0",
+      "resolved": "https://registry.npmjs.org/validate-npm-package-name/-/validate-npm-package-name-3.0.0.tgz"
     },
     "validator": {
       "version": "5.7.0",

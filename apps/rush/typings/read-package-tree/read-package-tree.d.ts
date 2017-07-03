@@ -1,6 +1,6 @@
 // Type definitions for read-package-tree 5.1.2
 // Project: https://github.com/npm/read-package-tree
-// Definitions by: Pete Gonzalez
+// Definitions by: pgonzal
 
 declare module 'read-package-tree' {
   namespace readPackageTree {
