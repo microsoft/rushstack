@@ -121,7 +121,7 @@ export default class ShrinkwrapFile {
         // Only warn once for each spec
         if (!this._alreadyWarnedSpecs.has(result.rawSpec)) {
           this._alreadyWarnedSpecs.add(result.rawSpec);
-          console.log(colors.yellow(`WARNING: Not validating ${result.type}-based spec: "${result.rawSpec}"`));
+          console.log(colors.yellow(`WARNING: Not validating ${result.type}-based specifier: "${result.rawSpec}"`));
         }
         return true;
     }

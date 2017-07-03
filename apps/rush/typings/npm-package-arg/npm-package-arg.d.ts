@@ -18,19 +18,25 @@ declare module 'npm-package-arg' {
        * remote - An HTTP url to a .tar.gz, .tar or .tgz file
        */
       type: 'git' | 'tag' | 'version' | 'range' | 'file' | 'directory' | 'remote';
+
       /**
        * True for tag, version and range types.
        */
-      registry: boolean;
+      registry: boolean | undefined;
+
       /**
-       * If known, the "name" field expected in the resulting package.
+       * If known, the "name" field expected in the package.
        */
       name: string | null;
-      /**
-       * For scoped NPM packages, the scope name.
-       */
-      scope: string | null;
 
+      /**
+       * For scoped NPM packages, the scope name; otherwise the value will be null.
+       */
+      scope: string | null | undefined;
+
+      /**
+       * An escaped name for use when making requests to the NPM registry.
+       */
       escapedName: string | null;
 
       /**
@@ -40,25 +46,34 @@ declare module 'npm-package-arg' {
       rawSpec: string;
 
       /**
-       * The normalized specifier.
+       * The specifier, as normalized by NPM for saving in a package.json file.
        */
       saveSpec: string | null;
 
+      /**
+       * The specifier, as normalized by NPM for fetching a resource.  For example, a "directory"
+       * type dependency, this will be the folder path.
+       */
       fetchSpec: string | null;
 
       /**
-       * If set, this is a semver specifier to match against git tags with
+       * For Git dependencies, if the committish includes a "semver:" prefix, then this is
+       * the range part.
+       * Example: For "mochajs/mocha#semver:1.2.3", the value would be "1.2.3"
        */
-      gitRange: string | null;
+      gitRange: string | null | undefined;
 
       /**
-       * If set, this is the specific committish to use with a git dependency.
+       * For Git dependencies, the committish part of the specifier, or "master" if omitted.
+       * Example: For "mochajs/mocha#4727d357ea", the value would be "4727d357ea"
        */
-      gitCommittish: string | null;
+      gitCommittish: string | null | undefined;
 
-      hosted: string | null;
-
-      raw: string | null;
+      /**
+       * The original input that was provided.  For npmPackageArg.resolve(), the name and
+       * spec parameters will be combined, e.g. "example" and "1.2" will be combined as "example@1.2".
+       */
+      raw: string;
     }
 
     /**
