@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush-lib
 
-This log was last generated on Tue, 27 Jun 2017 21:49:51 GMT and should not be manually modified.
+This log was last generated on Mon, 03 Jul 2017 22:58:11 GMT and should not be manually modified.
+
+## 3.0.11
+Mon, Jul  3, 2017 10:53:12 PM
+
+### Patches
+
+- Rush 3.0.11 was released.
 
 ## 3.0.10
 Tue, 27 Jun 2017 21:44:50 GMT
