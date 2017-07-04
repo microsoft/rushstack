@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-karma
 
-This log was last generated on Wed, 19 Apr 2017 20:18:06 GMT and should not be manually modified.
+This log was last generated on Mon, 03 Jul 2017 13:04:18 GMT and should not be manually modified.
+
+## 2.2.3
+Mon, 03 Jul 2017 13:04:18 GMT
+
+### Patches
+
+- Fix build break caused by @types/bluebird
 
 ## 2.2.2
 Wed, 19 Apr 2017 20:18:06 GMT

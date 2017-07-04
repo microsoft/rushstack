@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-karma",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -38,6 +38,7 @@
   "devDependencies": {
     "@microsoft/node-library-build": "~3.0.1",
     "@types/gulp": "3.8.32",
-    "@types/karma": "0.13.33"
+    "@types/karma": "0.13.33",
+    "@types/bluebird": "3.5.3"
   }
 }

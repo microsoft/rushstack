@@ -302,6 +302,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "npm-package-arg",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "object-assign",
       "allowedCategories": [ "libraries" ]
     },
