@@ -247,6 +247,7 @@ export declare function watch(watchMatch: string | string[], task: IExecutable):
 // WARNING: Unsupported export: tslint
 // WARNING: Unsupported export: text
 // WARNING: Unsupported export: removeTripleSlash
+// WARNING: Unsupported export: jsonSchemaToTs
 // WARNING: Unsupported export: instrument
 // WARNING: Unsupported export: mocha
 // (No packageDescription for this package)
