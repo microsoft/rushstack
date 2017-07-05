@@ -119,9 +119,9 @@ describe('parallel', () => {
 
   it('can set the config', (done) => {
     const distFolder: string = 'testFolder';
-    const newConfig: IBuildConfig = {
+    const newConfig: Partial<IBuildConfig> = {
       distFolder: distFolder
-    } as IBuildConfig;
+    };
 
     setConfig(newConfig);
     expect(getConfig().distFolder).to.eq(distFolder);

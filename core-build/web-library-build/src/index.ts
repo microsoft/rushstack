@@ -44,7 +44,7 @@ const PRODUCTION = !!getConfig().args['production'] || !!getConfig().args['ship'
 setConfig({
   production: PRODUCTION,
   shouldWarningsFailBuild: PRODUCTION
-} as IBuildConfig);
+});
 
 tslint.mergeConfig({
   displayAsWarning: true

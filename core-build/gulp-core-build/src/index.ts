@@ -81,7 +81,7 @@ let _buildConfig: IBuildConfig = {
  * @param config - The build config settings.
  * @public
  */
-export function setConfig(config: IBuildConfig): void {
+export function setConfig(config: Partial<IBuildConfig>): void {
   /* tslint:disable:typedef */
   const objectAssign = require('object-assign');
   /* tslint:enable:typedef */
@@ -95,7 +95,7 @@ export function setConfig(config: IBuildConfig): void {
  * @param  config - The build config settings.
  * @public
  */
-export function mergeConfig(config: IBuildConfig): void {
+export function mergeConfig(config: Partial<IBuildConfig>): void {
   /* tslint:disable:typedef */
   const merge = require('lodash.merge');
   /* tslint:enable:typedef */

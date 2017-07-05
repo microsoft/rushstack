@@ -15,7 +15,7 @@ const PRODUCTION = process.argv.indexOf('--production') !== -1 || process.argv.i
 setConfig({
   production: PRODUCTION,
   shouldWarningsFailBuild: PRODUCTION
-} as IBuildConfig);
+});
 
 tslint.mergeConfig({
   displayAsWarning: true

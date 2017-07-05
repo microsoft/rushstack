@@ -146,7 +146,7 @@ export function log(...args: Array<string | Chalk.ChalkChain>): void;
 export function logSummary(value: string): void;
 
 // @public
-export function mergeConfig(config: IBuildConfig): void;
+export function mergeConfig(config: Partial<IBuildConfig>): void;
 
 // @public
 export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecutable;
@@ -169,7 +169,7 @@ class SchemaValidator {
 export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutable;
 
 // @public
-export function setConfig(config: IBuildConfig): void;
+export function setConfig(config: Partial<IBuildConfig>): void;
 
 // @public
 export function subTask(taskName: string, fn: ICustomGulpTask): IExecutable;
