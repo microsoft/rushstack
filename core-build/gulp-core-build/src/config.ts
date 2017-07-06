@@ -28,7 +28,7 @@ export function getFlagValue(name: string, defaultValue?: boolean): boolean {
 }
 
 /* tslint:disable:no-any */
-function _firstDefinedValue(...args: (string | boolean)[]): any {
+function _firstDefinedValue(...args: (string | boolean | undefined)[]): any {
 /* tslint:enable:no-any */
   for (const arg of args) {
     if (arg !== undefined) {

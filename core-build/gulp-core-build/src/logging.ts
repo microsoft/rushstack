@@ -30,7 +30,7 @@ interface ILocalCache {
   coverageResults: number;
   coveragePass: number;
   coverageTotal: number;
-  totalTaskHrTime: [number, number];
+  totalTaskHrTime: [number, number] | undefined;
   start?: [number, number];
   taskCreationTime?: [number, number];
   totalTaskSrc: number;
@@ -96,7 +96,7 @@ function isVerbose(): boolean {
 }
 
 /* tslint:disable:no-any */
-function formatError(e: any): string {
+function formatError(e: any): string | undefined {
 /* tslint:enable:no-any */
   'use strict';
 
@@ -213,8 +213,10 @@ function writeSummary(callback: () => void): void {
         }
         const totalDuration: [number, number] = process.hrtime(getStart());
 
-        log(`Project ${state.builtPackage.name} version:`, gutil.colors.yellow(state.builtPackage.version));
-        log('Build tools version:', gutil.colors.yellow(state.coreBuildPackage.version));
+        const name: string = state.builtPackage.name || 'with unknown name';
+        const version: string = state.builtPackage.version || 'unknown';
+        log(`Project ${name} version:`, gutil.colors.yellow(version));
+        log('Build tools version:', gutil.colors.yellow(state.coreBuildPackage.version || ''));
         log('Node version:', gutil.colors.yellow(process.version));
         // log('Create tasks duration:', gutil.colors.yellow(prettyTime(localCache.taskCreationTime)));
         // log('Read src tasks duration:', gutil.colors.yellow(prettyTime(localCache.totalTaskHrTime)));
@@ -225,7 +227,7 @@ function writeSummary(callback: () => void): void {
           log('Tests results -',
             'Passed:', gutil.colors.green(localCache.testsPassed + ''),
             'Failed:', gutil.colors.red(localCache.testsFailed + ''),
-            // 'Flakey:', gutil.colors.yellow(localCache.testsFlakyFailed + ''),
+            // 'Flaky:', gutil.colors.yellow(localCache.testsFlakyFailed + ''),
             'Skipped:', gutil.colors.yellow(localCache.testsSkipped + ''));
         }
 
@@ -613,7 +615,7 @@ export function writeError(e: any): void {
     if (!e[WROTE_ERROR_KEY]) {
       if (e.err) {
         if (!e.err[WROTE_ERROR_KEY]) {
-          const msg: string = formatError(e);
+          const msg: string | undefined = formatError(e);
           const time: string = prettyTime(e.hrDuration);
 
           error(
@@ -621,7 +623,7 @@ export function writeError(e: any): void {
             gutil.colors.red(e.subTask ? 'sub task errored after' : 'errored after'),
             gutil.colors.magenta(time),
             '\r\n',
-            msg
+            msg || ''
           );
           markErrorAsWritten(e.err[WROTE_ERROR_KEY]);
         }
@@ -683,7 +685,7 @@ export function getErrors(): string[] {
 }
 
 /** @public */
-export function getStart(): [number, number] {
+export function getStart(): [number, number] | undefined {
   'use strict';
   return localCache.start;
 }
@@ -695,7 +697,7 @@ export function setWatchMode(): void {
 }
 
 /** @public */
-export function getWatchMode(): boolean {
+export function getWatchMode(): boolean | undefined {
   'use strict';
   return localCache.watchMode;
 }

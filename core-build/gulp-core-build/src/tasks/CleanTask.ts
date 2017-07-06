@@ -6,6 +6,7 @@ import gulp = require('gulp');
 import * as path from 'path';
 
 import { FileDeletionUtility } from '../utilities/FileDeletionUtility';
+import { IBuildConfig } from './../IBuildConfig';
 
 /**
  * The clean task is a special task which iterates through all registered
@@ -27,20 +28,21 @@ export class CleanTask extends GulpTask<void> {
    */
   public executeTask(
     gulp: gulp.Gulp,
-    completeCallback: (result?: Object) => void
+    completeCallback: (error?: string | Error) => void
   ): void {
-
-    // tslint:disable:typedef
-    const { distFolder, libFolder, libAMDFolder, tempFolder } = this.buildConfig;
-    let cleanPaths = [
+    const { distFolder, libFolder, libAMDFolder, tempFolder }: IBuildConfig = this.buildConfig;
+    let cleanPaths: string[] = [
       distFolder,
-      libAMDFolder,
       libFolder,
       tempFolder
     ];
 
+    if (libAMDFolder) {
+      cleanPaths.push(libAMDFolder);
+    }
+
     // Give each registered task an opportunity to add their own clean paths.
-    for (const executable of this.buildConfig.uniqueTasks) {
+    for (const executable of this.buildConfig.uniqueTasks || []) {
       if (executable.getCleanMatch) {
         // Set the build config, as tasks need this to build up paths
         cleanPaths = cleanPaths.concat(executable.getCleanMatch(this.buildConfig));

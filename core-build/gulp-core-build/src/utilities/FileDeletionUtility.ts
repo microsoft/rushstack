@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as globEscape from 'glob-escape';
+import globEscape = require('glob-escape');
 import globby = require('globby');
 
 /* tslint:disable:typedef */
@@ -42,7 +42,7 @@ export class FileDeletionUtility {
     const filesToDelete: string[] = [];
 
     // current working directory
-    let currentParent = undefined;
+    let currentParent: string | undefined = undefined;
 
     for (let i: number = 0; i < filenames.length; i++) {
       const curFile: string = filenames[i];
@@ -56,7 +56,7 @@ export class FileDeletionUtility {
     return filesToDelete;
   }
 
-  public static isParentDirectory(directory: string, filepath: string): boolean {
+  public static isParentDirectory(directory: string | undefined, filepath: string | undefined): boolean {
     if (!directory || !filepath) {
       return false;
     }

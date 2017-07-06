@@ -25,16 +25,15 @@ let _lastLocalHashes: { [path: string]: string } = {};
  * cache. It also asks for git status, which will tell us what has been changed since. It uses this info
  * to build the hash.
  *
- * The utility funciton "_readPackageHashes" will read the local build.json file from the packagePath
+ * The utility function "_readPackageHashes" will read the local build.json file from the packagePath
  * folder.
  */
 export class CheckBuildReceiptTask extends GulpTask<IBuildReceiptTask> {
   public name: string = 'check-for-changes';
   public executeTask(
     gulp: gulp.Gulp,
-    completeCallback: (result?: Object) => void
+    completeCallback: (error?: string | Error) => void
   ): Promise<Object> | NodeJS.ReadWriteStream | void {
-
     _getLocalHashes().then(localHashes => {
       _lastLocalHashes = localHashes;
       _readPackageHashes(path.join(process.cwd(), this.buildConfig.packageFolder, 'build.json')).then(packageHashes => {
@@ -62,7 +61,7 @@ export class UpdateBuildReceiptTask extends GulpTask<IBuildReceiptTask> {
   public name: string = 'mark-changes';
   public executeTask(
     gulp: gulp.Gulp,
-    completeCallback: (result?: Object) => void
+    completeCallback: (error?: string | Error) => void
   ): Promise<Object> | NodeJS.ReadWriteStream | void {
 
     const packageHashPath: string = path.join(process.cwd(), this.buildConfig.packageFolder, 'build.json');

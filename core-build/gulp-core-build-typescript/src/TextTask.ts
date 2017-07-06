@@ -17,7 +17,7 @@ export class TextTask extends GulpTask<ITextTaskConfig> {
     textMatch: ['src/**/*.txt']
   };
 
-  public executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream {
+  public executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream | void {
     /* tslint:disable:typedef */
     const merge = require('merge2');
     const texttojs = require('gulp-texttojs');

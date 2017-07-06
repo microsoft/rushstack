@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* tslint:disable:max-line-length */
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -43,14 +42,14 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
   /**
    * Indicates whether this task should be executed or not. This toggle is used by isEnabled() to determine
    * if the task should run. Since some tasks have more complex logic to determine if they should run or
-   * not, the isEnabled() function can be overriden.
+   * not, the isEnabled() function can be overridden.
    */
   public enabled: boolean = true;
 
   /**
    * The memoized schema for this task. Should not be utilized by child classes, use schema property instead.
    */
-  private _schema: Object;
+  private _schema: Object | undefined;
 
   /**
    * Overridable function which returns true if this task should be executed, or false if it should be skipped.
@@ -65,7 +64,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
    * A JSON Schema object which will be used to validate this task's configuration file.
    * @returns a z-schema schema definition
    */
-  public get schema(): Object {
+  public get schema(): Object | undefined {
     return this._schema ?
       this._schema :
       this._schema = this.loadSchema();
@@ -76,7 +75,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
    * the task's configuration file. This function is called once per task instance.
    * @returns a z-schema schema definition
    */
-  protected loadSchema(): Object {
+  protected loadSchema(): Object | undefined {
     return undefined;
   };
 
@@ -120,9 +119,9 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
    */
   public onRegister(): void {
     const configFilename: string = this._getConfigFilePath();
-    const schema: Object = this.schema;
+    const schema: Object | undefined = this.schema;
 
-    const rawConfig: TASK_CONFIG = this._readConfigFile(configFilename, schema);
+    const rawConfig: TASK_CONFIG | undefined = this._readConfigFile(configFilename, schema);
 
     if (rawConfig) {
       this.mergeConfig(rawConfig);
@@ -136,7 +135,10 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
    * @param completeCallback - a callback which should be called if the function is non-value returning
    * @returns a Promise, a Stream or undefined if completeCallback() is called
    */
-  public abstract executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (result?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
+  public abstract executeTask(
+    gulp: gulp.Gulp | GulpProxy,
+    completeCallback?: (error?: string | Error) => void
+  ): Promise<Object> | NodeJS.ReadWriteStream | void;
 
   /**
    * Logs a message to standard output.
@@ -229,11 +231,13 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
           throw new Error('The task subclass is missing the "executeTask" method.');
         }
 
-        stream = this.executeTask(this.buildConfig.gulp, (result?: Object) => {
-          if (!result) {
+        stream = this.executeTask(this.buildConfig.gulp, (error?: string | Error) => {
+          if (!error) {
             resolve();
+          } else if (typeof error === 'string') {
+            reject(new Error(error));
           } else {
-            reject(result);
+            reject(error);
           }
         });
       } catch (e) {
@@ -259,7 +263,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
             }
           });
 
-          // Make sure the stream is completly read
+          // Make sure the stream is completely read
           stream.pipe(through2.obj(
             (file: gutil.File,
               encoding: string,
@@ -345,9 +349,9 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
    * Read a JSON file into an object
    * @param localPath - the path to the JSON file
    */
-  public readJSONSync(localPath: string): Object {
+  public readJSONSync(localPath: string): Object | undefined {
     const fullPath: string = this.resolvePath(localPath);
-    let result: Object = undefined;
+    let result: Object | undefined = undefined;
 
     /* tslint:disable:typedef */
     const fs = require('fs');
@@ -374,7 +378,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
    * @param schema - the z-schema schema object used to validate the configuration file
    * @returns If the configuration file is valid, returns the configuration as an object.
    */
-  private _readConfigFile(filePath: string, schema?: Object): TASK_CONFIG {
+  private _readConfigFile(filePath: string, schema?: Object): TASK_CONFIG | undefined {
     if (!fs.existsSync(filePath)) {
       return undefined;
     } else {

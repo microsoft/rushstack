@@ -5,6 +5,7 @@
     "declaration": true,
     "sourceMap": true,
     "moduleResolution": "node",
+    "strictNullChecks": true,
     "types": [
       "node"
     ]

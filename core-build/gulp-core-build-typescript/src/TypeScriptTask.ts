@@ -89,7 +89,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     failBuildOnErrors: true,
     reporter: {
       error: (error: ts.reporter.TypeScriptError): void => {
-        const filename: string = error.relativeFilename || error.fullFilename;
+        const filename: string = error.relativeFilename || error.fullFilename || 'unknown filename';
         const line: number = error.startPosition ? error.startPosition.line : 0;
         const character: number = error.startPosition ? error.startPosition.character : 0;
         const code: number = error.diagnostic.code;
@@ -133,7 +133,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     return require('./schemas/typescript.schema.json');
   }
 
-  public executeTask(gulp: gulpType.Gulp, completeCallback: (result?: string) => void): void {
+  public executeTask(gulp: gulpType.Gulp, completeCallback: (error?: string) => void): void {
     /* tslint:disable:typedef */
     const assign = require('object-assign');
     const merge = require('merge2');
@@ -166,13 +166,18 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
 
     this._tsProject = this._tsProject || ts.createProject(compilerOptions);
 
-    this._compileProject(gulp, this._tsProject, this.taskConfig.libDir, allStreams, result);
+    this._compileProject(gulp,
+      this._tsProject,
+      this.taskConfig.libDir || this.buildConfig.libFolder,
+      allStreams,
+      result
+    );
 
     // Static passthrough files.
-    const staticSrc: NodeJS.ReadWriteStream = gulp.src(this.taskConfig.staticMatch);
+    const staticSrc: NodeJS.ReadWriteStream = gulp.src(this.taskConfig.staticMatch || []);
 
     allStreams.push(
-      staticSrc.pipe(gulp.dest(this.taskConfig.libDir)));
+      staticSrc.pipe(gulp.dest(this.taskConfig.libDir || this.buildConfig.libFolder)));
 
     // If AMD modules are required, also build that.
     if (this.taskConfig.libAMDDir) {
@@ -206,12 +211,16 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
 
   public getCleanMatch(buildConfig: IBuildConfig, taskConfig: ITypeScriptTaskConfig = this.taskConfig): string[] {
     this._normalizeConfig(buildConfig);
-    const cleanMatch: string[] = [
-      this.taskConfig.libDir
-    ];
+    const cleanMatch: string[] = [];
+
+    if (this.taskConfig.libDir) {
+      cleanMatch.push(this.taskConfig.libDir);
+    }
+
     if (this.taskConfig.libAMDDir) {
       cleanMatch.push(this.taskConfig.libAMDDir);
     }
+
     if (this.taskConfig.libES6Dir) {
       cleanMatch.push(this.taskConfig.libES6Dir);
     }
@@ -246,7 +255,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     /* tslint:enable:typedef */
 
     // tslint:disable-next-line:no-any
-    let tsResult: any = gulp.src(this.taskConfig.sourceMatch)
+    let tsResult: any = gulp.src(this.taskConfig.sourceMatch || [])
       .pipe(plumber({
         errorHandler: (): void => {
           result.errorCount++;

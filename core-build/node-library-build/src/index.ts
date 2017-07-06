@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { task, watch, serial, parallel, IExecutable, setConfig } from '@microsoft/gulp-core-build';
+import { task, watch, serial, parallel, IExecutable, setConfig, IBuildConfig } from '@microsoft/gulp-core-build';
 import { typescript, tslint, apiExtractor } from '@microsoft/gulp-core-build-typescript';
 import { instrument, mocha } from '@microsoft/gulp-core-build-mocha';
 
