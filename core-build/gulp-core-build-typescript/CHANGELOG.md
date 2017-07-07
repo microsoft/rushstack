@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Wed, 21 Jun 2017 04:19:35 GMT and should not be manually modified.
+This log was last generated on Fri, 07 Jul 2017 01:02:28 GMT and should not be manually modified.
+
+## 3.2.0
+Fri, 07 Jul 2017 01:02:28 GMT
+
+### Minor changes
+
+- Enable StrictNullChecks.
 
 ## 3.1.5
 Wed, 21 Jun 2017 04:19:35 GMT

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/web-library-build
 
-This log was last generated on Thu, 29 Jun 2017 01:05:37 GMT and should not be manually modified.
+This log was last generated on Fri, 07 Jul 2017 01:02:28 GMT and should not be manually modified.
+
+## 3.1.0
+Fri, 07 Jul 2017 01:02:28 GMT
+
+### Minor changes
+
+- Enable StrictNullChecks.
 
 ## 3.0.3
 Thu, 29 Jun 2017 01:05:37 GMT

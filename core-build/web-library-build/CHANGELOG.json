@@ -2,6 +2,35 @@
   "name": "@microsoft/web-library-build",
   "entries": [
     {
+      "version": "3.1.0",
+      "tag": "@microsoft/web-library-build_v3.1.0",
+      "date": "Fri, 07 Jul 2017 01:02:28 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Enable StrictNullChecks."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `>=2.5.6 <3.0.0` to `>=2.5.6 <3.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-karma\" from `>=2.2.3 <3.0.0` to `>=2.3.0 <3.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `>=3.1.0 <4.0.0` to `>=3.2.0 <4.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `>=3.1.5 <4.0.0` to `>=3.2.0 <4.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `>=1.1.8 <2.0.0` to `>=1.2.0 <2.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.3",
       "tag": "@microsoft/web-library-build_v3.0.3",
       "date": "Thu, 29 Jun 2017 01:05:37 GMT",

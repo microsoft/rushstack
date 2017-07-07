@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-mocha
 
-This log was last generated on Wed, 19 Apr 2017 20:18:06 GMT and should not be manually modified.
+This log was last generated on Fri, 07 Jul 2017 01:02:28 GMT and should not be manually modified.
+
+## 2.1.0
+Fri, 07 Jul 2017 01:02:28 GMT
+
+### Minor changes
+
+- Enable StrictNullChecks.
 
 ## 2.0.3
 Wed, 19 Apr 2017 20:18:06 GMT

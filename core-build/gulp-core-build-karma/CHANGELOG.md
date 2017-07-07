@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-karma
 
-This log was last generated on Mon, 03 Jul 2017 13:04:18 GMT and should not be manually modified.
+This log was last generated on Fri, 07 Jul 2017 01:02:28 GMT and should not be manually modified.
+
+## 2.3.0
+Fri, 07 Jul 2017 01:02:28 GMT
+
+### Minor changes
+
+- Enable StrictNullChecks.
 
 ## 2.2.3
 Mon, 03 Jul 2017 13:04:18 GMT

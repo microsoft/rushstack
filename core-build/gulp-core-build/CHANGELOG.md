@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Thu, 29 Jun 2017 01:05:37 GMT and should not be manually modified.
+This log was last generated on Fri, 07 Jul 2017 01:02:28 GMT and should not be manually modified.
+
+## 2.6.0
+Fri, 07 Jul 2017 01:02:28 GMT
+
+### Minor changes
+
+- Enable StrictNullChecks.
 
 ## 2.5.6
 Thu, 29 Jun 2017 01:05:37 GMT

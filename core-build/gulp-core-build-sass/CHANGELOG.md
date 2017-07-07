@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-sass
 
-This log was last generated on Mon, 15 May 2017 21:59:43 GMT and should not be manually modified.
+This log was last generated on Fri, 07 Jul 2017 01:02:28 GMT and should not be manually modified.
+
+## 3.2.0
+Fri, 07 Jul 2017 01:02:28 GMT
+
+### Minor changes
+
+- Enable StrictNullChecks.
 
 ## 3.1.2
 Mon, 15 May 2017 21:59:43 GMT
