@@ -32,7 +32,9 @@ export {
 export {
   ChangeType,
   IChangeFile,
-  IChangeInfo
+  IChangeInfo,
+  _writeChangeFileSync,
+  _generateChangeFilePath
 } from './data/ChangeManagement';
 
 export {
