@@ -3,24 +3,6 @@
   "rushMinimumVersion": "1.0.5",
   "nodeSupportedVersionRange": ">=4.3.0 <7.0.0",
 
-  "versionPolicies": [
-    {
-      "policyName": "testPolicy1",
-      "baseType": "lockStepVersion",
-      "version": "10.10.0",
-      "nextBump": "patch"
-    },
-    {
-      "policyName": "testPolicy2",
-      "baseType": "individualVersion",
-      "lockedMajor": 5
-    },
-    {
-      "policyName": "testPolicy3",
-      "baseType": "individualVersion"
-    }
-  ],
-
   "projects": [
     {
       "packageName": "a",

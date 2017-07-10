@@ -15,7 +15,7 @@ import { RushConstants } from '../RushConstants';
 import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
 import JsonSchemaValidator from '../utilities/JsonSchemaValidator';
 import EventHooks from './EventHooks';
-import { VersionPolicy } from './VersionPolicy';
+import { VersionPolicyConfiguration } from './VersionPolicyConfiguration';
 
 /**
  * A list of known config filenames that are expected to appear in the "./common/config/rush" folder.
@@ -57,29 +57,6 @@ export interface IEventHooksJson {
 }
 
 /**
- * Part of IRushConfigurationJson.
- */
-export interface IVersionPolicyJson {
-  policyName: string;
-  baseType: string;
-}
-
-/**
- * Part of IRushConfigurationJson.
- */
-export interface ILockStepVersionJson extends IVersionPolicyJson {
-  version: string;
-  nextBump: string;
-}
-
-/**
- * Part of IRushConfigurationJson.
- */
-export interface IIndividualVersionJson extends IVersionPolicyJson {
-  lockedMajor?: number;
-}
-
-/**
  * This represents the JSON data structure for the "rush.json" configuration file.
  * See rush.schema.json for documentation.
  */
@@ -95,7 +72,6 @@ export interface IRushConfigurationJson {
   telemetryEnabled?: boolean;
   projects: IRushConfigurationProjectJson[];
   eventHooks?: IEventHooksJson;
-  versionPolicies: IVersionPolicyJson[];
 }
 
 /**
@@ -143,10 +119,10 @@ export default class RushConfiguration {
 
   private _telemetryEnabled: boolean;
 
-  private _versionPolicies: Map<string, VersionPolicy>;
-
   private _projects: RushConfigurationProject[];
   private _projectsByName: Map<string, RushConfigurationProject>;
+
+  private _versionPolicyConfiguration: VersionPolicyConfiguration;
 
   /**
    * Loads the configuration data from an Rush.json configuration file and returns
@@ -522,25 +498,10 @@ export default class RushConfiguration {
   }
 
   /**
-   * Gets the version policy by its name.
-   * Throws error if the version policy is not found.
-   * @param policyName - Name of the version policy
    * @alpha
    */
-  public getVersionPolicy(policyName: string): VersionPolicy {
-    const policy: VersionPolicy = this._versionPolicies.get(policyName);
-    if (!policy) {
-      throw new Error('Failed to find version policy by name \'${policyName}\'');
-    }
-    return policy;
-  }
-
-  /**
-   * Gets all the version policies
-   * @alpha
-   */
-  public get versionPolicies(): Map<string, VersionPolicy> {
-    return this._versionPolicies;
+  public get versionPolicyConfiguration(): VersionPolicyConfiguration {
+    return this._versionPolicyConfiguration;
   }
 
   private _populateDownstreamDependencies(dependencies: { [key: string]: string }, packageName: string): void {
@@ -635,15 +596,8 @@ export default class RushConfiguration {
       this._eventHooks = new EventHooks(rushConfigurationJson.eventHooks);
     }
 
-    this._versionPolicies = new Map<string, VersionPolicy>();
-    if (rushConfigurationJson.versionPolicies) {
-      rushConfigurationJson.versionPolicies.forEach(policyJson => {
-        const policy: VersionPolicy = VersionPolicy.load(policyJson);
-        if (policy) {
-          this._versionPolicies.set(policy.policyName, policy);
-        }
-      });
-    }
+    const versionPolicyConfigFile: string = path.join(this._commonRushConfigFolder, 'version-policies.json');
+    this._versionPolicyConfiguration = new VersionPolicyConfiguration(versionPolicyConfigFile);
 
     this._projects = [];
     this._projectsByName = new Map<string, RushConfigurationProject>();

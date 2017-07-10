@@ -5,7 +5,7 @@
 
 import * as path from 'path';
 import { assert } from 'chai';
-import RushConfiguration from '../RushConfiguration';
+import { VersionPolicyConfiguration } from '../VersionPolicyConfiguration';
 import IPackageJson from '../../utilities/IPackageJson';
 
 import {
@@ -17,9 +17,9 @@ import {
 
 describe('VersionPolicy', () => {
   describe('LockStepVersion', () => {
-    const rushFilename: string = path.resolve(__dirname, 'jsonFiles', 'rushWithLockVersion.json');
-    const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
-    const versionPolicy: VersionPolicy = rushConfiguration.getVersionPolicy('testPolicy1');
+    const filename: string = path.resolve(__dirname, 'jsonFiles', 'rushWithLockVersion.json');
+    const versionPolicyConfig: VersionPolicyConfiguration = new VersionPolicyConfiguration(filename);
+    const versionPolicy: VersionPolicy = versionPolicyConfig.getVersionPolicy('testPolicy1');
 
     it('loads configuration.', () => {
       assert.isTrue(versionPolicy instanceof LockStepVersionPolicy, 'versionPolicy is a LockStepVersionPolicy');
@@ -62,9 +62,9 @@ describe('VersionPolicy', () => {
   });
 
   describe('IndividualVersionPolicy', () => {
-    const rushFilename: string = path.resolve(__dirname, 'jsonFiles', 'rushWithIndividualVersion.json');
-    const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
-    const versionPolicy: VersionPolicy = rushConfiguration.getVersionPolicy('testPolicy2');
+    const fileName: string = path.resolve(__dirname, 'jsonFiles', 'rushWithIndividualVersion.json');
+    const versionPolicyConfig: VersionPolicyConfiguration = new VersionPolicyConfiguration(fileName);
+    const versionPolicy: VersionPolicy = versionPolicyConfig.getVersionPolicy('testPolicy2');
 
     it('loads configuration', () => {
       assert.isTrue(versionPolicy instanceof IndividualVersionPolicy, 'versionPolicy is a IndividualVersionPolicy');

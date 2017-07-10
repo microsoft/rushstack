@@ -84,12 +84,16 @@ export {
 } from './rushVersion';
 
 export {
-  BaseTypeName,
+  VersionPolicyDefinitionName,
   BumpType,
   LockStepVersionPolicy,
   IndividualVersionPolicy,
   VersionPolicy
 } from './data/VersionPolicy';
+
+export {
+  VersionPolicyConfiguration
+} from './data/VersionPolicyConfiguration';
 
 export {
   default as Npm

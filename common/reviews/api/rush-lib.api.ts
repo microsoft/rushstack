@@ -39,14 +39,6 @@ class AsyncRecycler {
   public readonly recyclerFolder: string;
 }
 
-// @alpha
-enum BaseTypeName {
-  // (undocumented)
-  'individualVersion',
-  // (undocumented)
-  'lockStepVersion'
-}
-
 // @public
 class BuildTaskError extends TaskError {
   constructor(type: string, message: string, file: string, line: number, offset: number);
@@ -270,8 +262,6 @@ class RushConfiguration {
   public findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject;
   public findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
   public getProjectByName(projectName: string): RushConfigurationProject;
-  // @alpha
-  public getVersionPolicy(policyName: string): VersionPolicy;
   public readonly gitAllowedEmailRegExps: string[];
   public readonly gitSampleEmail: string;
   public readonly homeFolder: string;
@@ -294,8 +284,8 @@ class RushConfiguration {
   // @alpha
   public readonly telemetryEnabled: boolean;
   public readonly tempShrinkwrapFilename: string;
-  // @alpha
-  public readonly versionPolicies: Map<string, VersionPolicy>;
+  // @alpha (undocumented)
+  public readonly versionPolicyConfiguration: VersionPolicyConfiguration;
 }
 
 // @public
@@ -316,7 +306,7 @@ class RushConfigurationProject {
   public readonly tempPackageJsonFilename: string;
   public readonly tempProjectName: string;
   // @alpha
-  public readonly versionPolicy: VersionPolicy;
+  public readonly versionPolicyName: string;
 }
 
 // @public
@@ -450,7 +440,7 @@ class VersionPolicy {
   // WARNING: The type "IVersionPolicyJson" needs to be exported by the package (e.g. added to index.ts)
   constructor(versionPolicyJson: IVersionPolicyJson);
   // (undocumented)
-  public readonly baseType: BaseTypeName;
+  public readonly definitionName: VersionPolicyDefinitionName;
   // (undocumented)
   public abstract ensure(project: IPackageJson): IPackageJson | undefined;
   // WARNING: The type "IVersionPolicyJson" needs to be exported by the package (e.g. added to index.ts)
@@ -458,6 +448,23 @@ class VersionPolicy {
   public static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy;
   // (undocumented)
   public readonly policyName: string;
+}
+
+// @alpha (undocumented)
+class VersionPolicyConfiguration {
+  public constructor(private _jsonFileName: string);
+  // @alpha
+  public getVersionPolicy(policyName: string): VersionPolicy;
+  // @alpha
+  public readonly versionPolicies: Map<string, VersionPolicy>;
+}
+
+// @alpha
+enum VersionPolicyDefinitionName {
+  // (undocumented)
+  'individualVersion',
+  // (undocumented)
+  'lockStepVersion'
 }
 
 // WARNING: Unsupported export: rushVersion

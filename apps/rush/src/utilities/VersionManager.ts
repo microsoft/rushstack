@@ -5,6 +5,7 @@ import { cloneDeep } from 'lodash';
 
 import {
   RushConfiguration,
+  VersionPolicyConfiguration,
   IPackageJson,
   VersionPolicy
 } from '@microsoft/rush-lib';
@@ -12,7 +13,13 @@ import {
 import PublishUtilities from './PublishUtilities';
 
 export class VersionManager {
-  constructor(private _rushConfiguration: RushConfiguration) {
+  private _versionPolicyConfiguration: VersionPolicyConfiguration;
+
+  constructor(private _rushConfiguration: RushConfiguration,
+    _versionPolicyConfiguration?: VersionPolicyConfiguration
+  ) {
+    this._versionPolicyConfiguration = _versionPolicyConfiguration?
+      _versionPolicyConfiguration : this._rushConfiguration.versionPolicyConfiguration;
   }
 
   /**
@@ -24,13 +31,14 @@ export class VersionManager {
    */
   public ensure(versionPolicyName?: string): Map<string, IPackageJson> {
     const updatedProjects: Map<string, IPackageJson> = new Map<string, IPackageJson>();
-    const versionPolicies: Map<string, VersionPolicy> = this._rushConfiguration.versionPolicies;
+    const versionPolicies: Map<string, VersionPolicy> = this._versionPolicyConfiguration.versionPolicies;
 
     // Update versions based on version policy
     this._rushConfiguration.projects.forEach(rushProject => {
-      const versionPolicy: VersionPolicy = rushProject.versionPolicy;
-      if (versionPolicy &&
-        (!versionPolicyName || versionPolicy.policyName === versionPolicyName)) {
+      const projectVersionPolicyName: string = rushProject.versionPolicyName;
+      if (!versionPolicyName || projectVersionPolicyName === versionPolicyName) {
+        const versionPolicy: VersionPolicy = this._versionPolicyConfiguration.getVersionPolicy(
+          projectVersionPolicyName);
         const updatedProject: IPackageJson = versionPolicy.ensure(rushProject.packageJson);
         if (updatedProject) {
           updatedProjects.set(updatedProject.name, updatedProject);

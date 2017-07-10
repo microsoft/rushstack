@@ -6,6 +6,7 @@ import * as path from 'path';
 
 import {
   RushConfiguration,
+  VersionPolicyConfiguration,
   IPackageJson
 } from '@microsoft/rush-lib';
 
@@ -14,10 +15,13 @@ import { VersionManager } from '../VersionManager';
 describe('VersionManager', () => {
   const rushJsonFile: string = path.resolve(__dirname, 'repo', 'rush.json');
   const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile);
+  const versionConfigJsonFile: string = path.resolve(__dirname, 'repo', 'version-policies.json');
+  const versionPolicyConfiguration: VersionPolicyConfiguration =
+    new VersionPolicyConfiguration(versionConfigJsonFile);
   let versionManager: VersionManager;
 
   beforeEach(() => {
-    versionManager = new VersionManager(rushConfiguration);
+    versionManager = new VersionManager(rushConfiguration, versionPolicyConfiguration);
   });
 
   /* tslint:disable:no-string-literal */

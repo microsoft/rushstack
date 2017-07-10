@@ -1,0 +1,61 @@
+{
+  "title": "Rush version policy definitions",
+  "description": "For use with the Rush tool, this file defines version policies",
+
+  "type": "array",
+  "items": {
+    "type": "object",
+      "oneOf": [
+        { "$ref": "#/definitions/lockStepVersion" },
+        { "$ref": "#/definitions/individualVersion" }
+      ]
+  },
+  "definitions": {
+    "lockStepVersion": {
+      "type":"object",
+      "description": "Lockstep version policy",
+      "properties": {
+        "policyName": {
+          "description": "The name of the version policy",
+          "type": "string"
+        },
+        "definitionName": {
+          "description": "The name of version policy definition",
+          "type": "string",
+          "enum": [ "lockStepVersion" ]
+        },
+        "version": {
+          "description": "Current version for projects with lockStepVersion policy",
+          "type":"string"
+        },
+        "nextBump": {
+          "description": "Type of next version bump",
+          "enum": [ "prerelease", "release", "minor", "patch", "major" ]
+        }
+      },
+      "required": [ "policyName", "definitionName", "version", "nextBump" ],
+      "additionalProperties": false
+    },
+    "individualVersion": {
+      "type":"object",
+      "description": "Lockstep version policy",
+      "properties": {
+        "policyName": {
+          "description": "The name of the version policy",
+          "type": "string"
+        },
+        "definitionName": {
+          "description": "The name of version policy definition",
+          "type": "string",
+          "enum": [ "individualVersion" ]
+        },
+        "lockedMajor": {
+          "description": "The locked major version",
+          "type": "number"
+        }
+      },
+      "required": [ "policyName", "definitionName" ],
+      "additionalProperties": false
+    }
+  }
+}

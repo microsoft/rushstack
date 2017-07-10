@@ -8,7 +8,7 @@ import {
   IVersionPolicyJson,
   ILockStepVersionJson,
   IIndividualVersionJson
-} from './RushConfiguration';
+} from './VersionPolicyConfiguration';
 
 import IPackageJson from '../utilities/IPackageJson';
 
@@ -28,7 +28,7 @@ export enum BumpType {
  * Version policy base type names
  * @alpha
  */
-export enum BaseTypeName {
+export enum VersionPolicyDefinitionName {
   'lockStepVersion',
   'individualVersion'
 }
@@ -39,13 +39,13 @@ export enum BaseTypeName {
  */
 export abstract class VersionPolicy {
   private _policyName: string;
-  private _baseType: BaseTypeName;
+  private _definitionName: VersionPolicyDefinitionName;
 
   public static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy {
-    const baseTypeName: BaseTypeName = BaseTypeName[versionPolicyJson.baseType];
-    if (baseTypeName === BaseTypeName.lockStepVersion) {
+    const definition: VersionPolicyDefinitionName = VersionPolicyDefinitionName[versionPolicyJson.definitionName];
+    if (definition === VersionPolicyDefinitionName.lockStepVersion) {
       return new LockStepVersionPolicy(versionPolicyJson as ILockStepVersionJson);
-    } else if (baseTypeName === BaseTypeName.individualVersion) {
+    } else if (definition === VersionPolicyDefinitionName.individualVersion) {
       return new IndividualVersionPolicy(versionPolicyJson as IIndividualVersionJson);
     }
     return undefined;
@@ -53,15 +53,15 @@ export abstract class VersionPolicy {
 
   constructor(versionPolicyJson: IVersionPolicyJson) {
     this._policyName = versionPolicyJson.policyName;
-    this._baseType = BaseTypeName[versionPolicyJson.baseType];
+    this._definitionName = VersionPolicyDefinitionName[versionPolicyJson.definitionName];
   }
 
   public get policyName(): string {
     return this._policyName;
   }
 
-  public get baseType(): BaseTypeName {
-    return this._baseType;
+  public get definitionName(): VersionPolicyDefinitionName {
+    return this._definitionName;
   }
 
   public abstract ensure(project: IPackageJson): IPackageJson | undefined;

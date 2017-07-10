@@ -8,7 +8,6 @@ import JsonFile from '../utilities/JsonFile';
 import Utilities from '../utilities/Utilities';
 import RushConfiguration from '../data/RushConfiguration';
 import { RushConstants } from '../RushConstants';
-import { VersionPolicy } from './VersionPolicy';
 
 /**
  * This represents the JSON data object for a project entry in the rush.json configuration file.
@@ -36,7 +35,7 @@ export default class RushConfigurationProject {
   private _tempProjectName: string;
   private _tempPackageJsonFilename: string;
   private _cyclicDependencyProjects: Set<string>;
-  private _verionPolicy: VersionPolicy;
+  private _versionPolicyName: string;
   private _shouldPublish: boolean;
   private _downstreamDependencyProjects: string[];
 
@@ -109,9 +108,7 @@ export default class RushConfigurationProject {
     }
     this._downstreamDependencyProjects = [];
     this._shouldPublish = !!projectJson.shouldPublish;
-    if (projectJson.versionPolicyName) {
-      this._verionPolicy = rushConfiguration.getVersionPolicy(projectJson.versionPolicyName);
-    }
+    this._versionPolicyName = projectJson.versionPolicyName;
   }
 
   /**
@@ -201,14 +198,14 @@ export default class RushConfigurationProject {
    * should be published during `rush publish`.
    */
   public get shouldPublish(): boolean {
-    return this._shouldPublish || !!this._verionPolicy;
+    return this._shouldPublish || !!this._versionPolicyName;
   }
 
   /**
    * The version policy used by this project.
    * @alpha
    */
-  public get versionPolicy(): VersionPolicy {
-    return this._verionPolicy;
+  public get versionPolicyName(): string {
+    return this._versionPolicyName;
   }
 }
