@@ -8,16 +8,25 @@ import JsonFile from '../utilities/JsonFile';
 
 import { VersionPolicy } from './VersionPolicy';
 
+/**
+ * @alpha
+ */
 export interface IVersionPolicyJson {
   policyName: string;
   definitionName: string;
 }
 
+/**
+ * @alpha
+ */
 export interface ILockStepVersionJson extends IVersionPolicyJson {
   version: string;
   nextBump: string;
 }
 
+/**
+ * @alpha
+ */
 export interface IIndividualVersionJson extends IVersionPolicyJson {
   lockedMajor?: number;
 }

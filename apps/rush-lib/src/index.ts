@@ -92,7 +92,10 @@ export {
 } from './data/VersionPolicy';
 
 export {
-  VersionPolicyConfiguration
+  VersionPolicyConfiguration,
+  IVersionPolicyJson,
+  ILockStepVersionJson,
+  IIndividualVersionJson
 } from './data/VersionPolicyConfiguration';
 
 export {

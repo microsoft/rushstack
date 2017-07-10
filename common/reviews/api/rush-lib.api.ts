@@ -146,9 +146,22 @@ interface IEventHooksJson {
   postRushBuild?: string[];
 }
 
+// @alpha (undocumented)
+interface IIndividualVersionJson extends IVersionPolicyJson {
+  // (undocumented)
+  lockedMajor?: number;
+}
+
+// @alpha (undocumented)
+interface ILockStepVersionJson extends IVersionPolicyJson {
+  // (undocumented)
+  nextBump: string;
+  // (undocumented)
+  version: string;
+}
+
 // @alpha
 class IndividualVersionPolicy extends VersionPolicy {
-  // WARNING: The type "IIndividualVersionJson" needs to be exported by the package (e.g. added to index.ts)
   constructor(versionPolicyJson: IIndividualVersionJson);
   // (undocumented)
   public ensure(project: IPackageJson): IPackageJson | undefined;
@@ -191,6 +204,14 @@ interface ISaveJsonFileOptions {
   onlyIfChanged?: boolean;
 }
 
+// @alpha (undocumented)
+interface IVersionPolicyJson {
+  // (undocumented)
+  definitionName: string;
+  // (undocumented)
+  policyName: string;
+}
+
 // @public
 class JsonFile {
   public static loadJsonFile(jsonFilename: string): any;
@@ -208,7 +229,6 @@ class JsonSchemaValidator {
 
 // @alpha
 class LockStepVersionPolicy extends VersionPolicy {
-  // WARNING: The type "ILockStepVersionJson" needs to be exported by the package (e.g. added to index.ts)
   constructor(versionPolicyJson: ILockStepVersionJson);
   // (undocumented)
   public ensure(project: IPackageJson): IPackageJson | undefined;
@@ -437,13 +457,11 @@ class VersionMismatchFinder {
 
 // @alpha
 class VersionPolicy {
-  // WARNING: The type "IVersionPolicyJson" needs to be exported by the package (e.g. added to index.ts)
   constructor(versionPolicyJson: IVersionPolicyJson);
   // (undocumented)
   public readonly definitionName: VersionPolicyDefinitionName;
   // (undocumented)
   public abstract ensure(project: IPackageJson): IPackageJson | undefined;
-  // WARNING: The type "IVersionPolicyJson" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   public static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy;
   // (undocumented)

@@ -18,7 +18,7 @@ export class VersionManager {
   constructor(private _rushConfiguration: RushConfiguration,
     _versionPolicyConfiguration?: VersionPolicyConfiguration
   ) {
-    this._versionPolicyConfiguration = _versionPolicyConfiguration?
+    this._versionPolicyConfiguration = _versionPolicyConfiguration ?
       _versionPolicyConfiguration : this._rushConfiguration.versionPolicyConfiguration;
   }
 
