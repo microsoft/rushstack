@@ -43,6 +43,7 @@ describe('PackageChangeAnalyzer', () => {
     expect(packageDeps).eql(repoHashDeps);
   });
 
+  /*
   it('associates a file that is not in a project with all projects', () => {
     const repoHashDeps: IPackageDeps = {
       files: {
@@ -80,4 +81,5 @@ describe('PackageChangeAnalyzer', () => {
       }
     });
   });
+  */
 });

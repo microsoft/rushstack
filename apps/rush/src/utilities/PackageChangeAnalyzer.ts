@@ -83,13 +83,46 @@ export class PackageChangeAnalyzer {
       }
     });
 
+    /* Incremental Build notes:
+     *
+     * Temporarily revert below code in favor of replacing this solution with something more
+     * flexible. Idea is essentially that we should have gulp-core-build (or other build tool)
+     * create the package-deps.json. The build tool would default to using the 'simple'
+     * algorithm (e.g. only files that are in a project folder are associated with the project), however it would
+     * also provide a hook which would allow certain tasks to modify the package-deps-hash before being written.
+     * At the end of the build, a we would create a package-deps.json file like so:
+     *
+     *  {
+     *    commandLine: ["--production"],
+     *    files: {
+     *      "src/index.ts": "478789a7fs8a78989afd8",
+     *      "src/fileOne.ts": "a8sfa8979871fdjiojlk",
+     *      "common/api/review": "324598afasfdsd",     // this entry was added by the API Extractor task (for example)
+     *      "node_modules.json": "3428789dsafdsfaf"    // this is a file which will be created by rush link describing
+     *                                                 //   the state of the node_modules folder
+     *    }
+     *  }
+     *
+     * Verifying this file should be fairly straightforward, we would simply need to check if:
+     *   A) no files were added or deleted from the current folder
+     *   B) all file hashes match
+     *   C) the node_modules hash/contents match
+     *   D) the command line parameters match or are compatible
+     *
+     *   Notes:
+     *   * We need to store the command line arguments, which is currently done by rush instead of GCB
+     *   * We need to store the hash/text of the a file which describes the state of the node_modules folder
+     *   * The package-deps.json should be a complete list of dependencies, and it should be extremely cheap
+     *       to validate/check the file (even if creating it is more computationally costly).
+     */
+
     // Add the "NO_PROJECT" files to every project's dependencies
-    for (const project of PackageChangeAnalyzer.rushConfig.projects) {
-      Object.keys(noProjectHashes).forEach((filepath: string) => {
-        const fileHash: string = noProjectHashes[filepath];
-        projectHashDeps.get(project.packageName).files[filepath] = fileHash;
-      });
-    }
+    // for (const project of PackageChangeAnalyzer.rushConfig.projects) {
+    //  Object.keys(noProjectHashes).forEach((filepath: string) => {
+    //    const fileHash: string = noProjectHashes[filepath];
+    //    projectHashDeps.get(project.packageName).files[filepath] = fileHash;
+    //  });
+    // }
 
     return projectHashDeps;
   }
