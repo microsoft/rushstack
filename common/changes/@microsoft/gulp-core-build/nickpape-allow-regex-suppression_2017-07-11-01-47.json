@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build",
+      "comment": "Add the ability to suppress warnings and errors via a regular expression",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build",
+  "email": "nickpape@users.noreply.github.com"
+}
