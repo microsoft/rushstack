@@ -41,10 +41,10 @@ interface ILocalCache {
   fromRunGulp?: boolean;
   exitCode: number;
   writeSummaryLogs: string[];
-  gulp: gulp.Gulp | undefined;
-  gulpErrorCallback: undefined | ((err: Object) => void);
-  gulpStopCallback: undefined | ((err: Object) => void);
-  errorAndWarningSuppressions: (string | RegExp)[];
+  gulp: gulp.Gulp;
+  gulpErrorCallback: (err: Object) => void;
+  gulpStopCallback: (err: Object) => void;
+  errorAndWarningSuppressions: { [key: string]: boolean };
   shouldLogWarningsDuringSummary: boolean;
   shouldLogErrorsDuringSummary: boolean;
 }
@@ -77,13 +77,13 @@ const localCache: ILocalCache = globalInstance.__loggingCache = globalInstance._
   writeSummaryCallbacks: [],
   exitCode: 0,
   writeSummaryLogs: [],
-  errorAndWarningSuppressions: [],
+  errorAndWarningSuppressions: {},
   gulp: undefined,
   gulpErrorCallback: undefined,
   gulpStopCallback: undefined,
   shouldLogErrorsDuringSummary: false,
   shouldLogWarningsDuringSummary: false
-} as ILocalCache;
+};
 
 if (!localCache.start) {
   localCache.start = process.hrtime();
@@ -471,20 +471,17 @@ const colorCodeRegex: RegExp = /\x1B[[(?);]{0,2}(;?\d)*./g;
 
 /**
  * Adds a suppression for an error or warning
- * @param str - the error or warning as a string or Regular Expression
+ * @param str - the error or warning as a string
  * @public
  */
-export function addSuppression(str: string | RegExp): void {
+export function addSuppression(str: string): void {
   'use strict';
 
-  if (typeof str === 'string') {
-    str = normalizeMessage(str);
-  }
-
-  localCache.errorAndWarningSuppressions.push(str);
+  str = normalizeMessage(str);
+  localCache.errorAndWarningSuppressions[str] = true;
 
   if (getConfig().verbose) {
-    logSummary(`${gutil.colors.yellow('Suppressing')} - ${str.toString()}`);
+    logSummary(`${gutil.colors.yellow('Suppressing')} - ${str}`);
   }
 }
 
@@ -498,7 +495,7 @@ export function warn(...args: Array<string | Chalk.ChalkChain>): void {
   'use strict';
   args.splice(0, 0, 'Warning -');
 
-  const stringMessage: string = normalizeMessage(args.join(' '));
+  const stringMessage: string = args.join(' ');
 
   if (!messageIsSuppressed(stringMessage)) {
     localCache.warnings.push(stringMessage);
@@ -515,7 +512,7 @@ export function error(...args: Array<string | Chalk.ChalkChain>): void {
   'use strict';
   args.splice(0, 0, 'Error -');
 
-  const stringMessage: string = normalizeMessage(args.join(' '));
+  const stringMessage: string = args.join(' ');
 
   if (!messageIsSuppressed(stringMessage)) {
     localCache.errors.push(stringMessage);
@@ -771,9 +768,7 @@ export function initialize(gulp: gulp.Gulp, gulpErrorCallback?: (err: Error) => 
         exitProcess(1);
       }
 
-      if (localCache.gulpStopCallback) {
-        localCache.gulpStopCallback(err);
-      }
+      localCache.gulpStopCallback(err);
       exitProcess(0);
     });
   });
@@ -783,9 +778,7 @@ export function initialize(gulp: gulp.Gulp, gulpErrorCallback?: (err: Error) => 
     _writeTaskError(err);
     writeSummary(() => {
       exitProcess(1);
-      if (localCache.gulpErrorCallback) {
-        localCache.gulpErrorCallback(err);
-      }
+      localCache.gulpErrorCallback(err);
     });
   });
 
@@ -843,14 +836,7 @@ export function markTaskCreationTime(): void {
 }
 
 function messageIsSuppressed(message: string): boolean {
-  for (const suppression of localCache.errorAndWarningSuppressions) {
-    if (typeof suppression === 'string' && message === suppression) {
-      return true;
-    } else if (suppression instanceof RegExp && message.match(suppression)) {
-      return true;
-    }
-  }
-  return false;
+  return localCache.errorAndWarningSuppressions[normalizeMessage(message)];
 }
 
 function normalizeMessage(message: string): string {
