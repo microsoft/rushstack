@@ -36,7 +36,8 @@ export class VersionManager {
     // Update versions based on version policy
     this._rushConfiguration.projects.forEach(rushProject => {
       const projectVersionPolicyName: string = rushProject.versionPolicyName;
-      if (!versionPolicyName || projectVersionPolicyName === versionPolicyName) {
+      if (projectVersionPolicyName &&
+          (!versionPolicyName || projectVersionPolicyName === versionPolicyName)) {
         const versionPolicy: VersionPolicy = this._versionPolicyConfiguration.getVersionPolicy(
           projectVersionPolicyName);
         const updatedProject: IPackageJson = versionPolicy.ensure(rushProject.packageJson);

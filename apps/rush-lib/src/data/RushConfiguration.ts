@@ -26,7 +26,8 @@ const knownRushConfigFilenames: string[] = [
   RushConstants.npmShrinkwrapFilename,
   RushConstants.pinnedVersionsFilename,
   RushConstants.browserApprovedPackagesFilename,
-  RushConstants.nonbrowserApprovedPackagesFilename
+  RushConstants.nonbrowserApprovedPackagesFilename,
+  RushConstants.versionPoliciesFileName
 ];
 
 /**
@@ -596,7 +597,8 @@ export default class RushConfiguration {
       this._eventHooks = new EventHooks(rushConfigurationJson.eventHooks);
     }
 
-    const versionPolicyConfigFile: string = path.join(this._commonRushConfigFolder, 'version-policies.json');
+    const versionPolicyConfigFile: string = path.join(this._commonRushConfigFolder,
+      RushConstants.versionPoliciesFileName);
     this._versionPolicyConfiguration = new VersionPolicyConfiguration(versionPolicyConfigFile);
 
     this._projects = [];

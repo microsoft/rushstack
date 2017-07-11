@@ -355,6 +355,9 @@ module RushConstants {
 
   rushTempProjectsFolderName: string = 'projects';
 
+  // @alpha (undocumented)
+  versionPoliciesFileName: string = 'version-policies.json';
+
 }
 
 // @public
