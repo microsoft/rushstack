@@ -14,7 +14,8 @@ import {
   IPackageJson,
   IChangeInfo,
   ChangeType,
-  RushConfigurationProject
+  RushConfigurationProject,
+  Utilities
 } from '@microsoft/rush-lib';
 
 export interface IChangeInfoHash {
@@ -141,6 +142,72 @@ export default class PublishUtilities {
     const LOOSE_PKG_REGEX: RegExp = />=?(?:\d+\.){2}\d+\s+<(?:\d+\.){2}\d+/;
 
     return LOOSE_PKG_REGEX.test(version);
+  }
+
+  public static getEnvArgs(): { [key: string]: string } {
+    const env: { [key: string]: string } = {};
+
+    // Copy existing process.env values (for nodist)
+    Object.keys(process.env).forEach((key: string) => {
+      env[key] = process.env[key];
+    });
+    return env;
+  }
+
+  public static execCommand(
+    shouldExecute: boolean,
+    command: string,
+    args: string[] = [],
+    workingDirectory: string = process.cwd(),
+    env?: { [key: string]: string }
+  ): void {
+
+    let relativeDirectory: string = path.relative(process.cwd(), workingDirectory);
+    const envArgs: { [key: string]: string } = PublishUtilities.getEnvArgs();
+
+    if (relativeDirectory) {
+      relativeDirectory = `(${relativeDirectory})`;
+    }
+
+    if (env) {
+      Object.keys(env).forEach((name: string) => envArgs[name] = env[name]);
+    }
+
+    console.log(
+      `${EOL}* ${shouldExecute ? 'EXECUTING' : 'DRYRUN'}: ${command} ${args.join(' ')} ${relativeDirectory}`
+    );
+
+    if (shouldExecute) {
+      Utilities.executeCommand(
+        command,
+        args,
+        workingDirectory,
+        false,
+        env);
+    }
+  }
+
+  public static getNewDependencyVersion(dependencies: { [key: string]: string; },
+    dependencyName: string,
+    newProjectVersion: string
+  ): string {
+    const currentDependencyVersion: string = dependencies[dependencyName];
+    let newDependencyVersion: string;
+
+    if (PublishUtilities.isRangeDependency(currentDependencyVersion)) {
+      newDependencyVersion = PublishUtilities._getNewRangeDependency(newProjectVersion);
+    } else if (currentDependencyVersion.lastIndexOf('~', 0) === 0) {
+      newDependencyVersion = '~' + newProjectVersion;
+    } else if (currentDependencyVersion.lastIndexOf('^', 0) === 0) {
+      newDependencyVersion = '^' + newProjectVersion;
+    } else {
+      newDependencyVersion = newProjectVersion;
+    }
+    return newDependencyVersion;
+  }
+
+  private static _getNewRangeDependency(newVersion: string): string {
+    return `>=${newVersion} <${semver.inc(newVersion, 'major')}`;
   }
 
   private static _updateCommitDetails(filename: string, changes: IChangeInfo[]): void {
@@ -309,8 +376,7 @@ export default class PublishUtilities {
         pkg.version;
     }
 
-    currentChange.newRangeDependency =
-      `>=${currentChange.newVersion} <${semver.inc(currentChange.newVersion, 'major')}`;
+    currentChange.newRangeDependency = PublishUtilities._getNewRangeDependency(currentChange.newVersion);
 
     return hasChanged;
   }
@@ -393,15 +459,11 @@ export default class PublishUtilities {
   ): void {
     const currentDependencyVersion: string = dependencies[dependencyName];
 
-    if (PublishUtilities.isRangeDependency(currentDependencyVersion)) {
-      dependencies[dependencyName] = dependencyChange.newRangeDependency;
-    } else if (currentDependencyVersion.lastIndexOf('~', 0) === 0) {
-      dependencies[dependencyName] = '~' + dependencyChange.newVersion;
-    } else if (currentDependencyVersion.lastIndexOf('^', 0) === 0) {
-      dependencies[dependencyName] = '^' + dependencyChange.newVersion;
-    } else {
-      dependencies[dependencyName] = dependencyChange.newVersion;
-    }
+    dependencies[dependencyName] = PublishUtilities.getNewDependencyVersion(
+      dependencies,
+      dependencyName,
+      dependencyChange.newVersion
+    );
 
     // Add dependency version update comment.
     PublishUtilities._addChange(

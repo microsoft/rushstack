@@ -1,0 +1,7 @@
+[
+  {
+    "policyName": "testPolicy2",
+    "definitionName": "individualVersion",
+    "lockedMajor": 2
+  }
+]

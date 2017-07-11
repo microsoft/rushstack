@@ -13,7 +13,6 @@ import {
   ChangeType,
   RushConfigurationProject,
   RushConstants,
-  Utilities,
   Npm
 } from '@microsoft/rush-lib';
 import RushCommandLineParser from './RushCommandLineParser';
@@ -25,6 +24,7 @@ import GitPolicy from '../utilities/GitPolicy';
 import PrereleaseToken from '../utilities/PrereleaseToken';
 import ChangeManager from '../utilities/ChangeManager';
 import { BaseRushAction } from './BaseRushAction';
+import { Git } from '../utilities/Git';
 
 export default class PublishAction extends BaseRushAction {
   private _addCommitDetails: CommandLineFlagParameter;
@@ -158,18 +158,19 @@ export default class PublishAction extends BaseRushAction {
 
     if (changeManager.hasChanges()) {
       const orderedChanges: IChangeInfo[] = changeManager.changes;
+      const git: Git = new Git(this._targetBranch.value);
       const tempBranch: string = 'publish-' + new Date().getTime();
 
       // Make changes in temp branch.
-      this._gitCheckout(tempBranch, true);
+      git.checkout(tempBranch, true);
 
       // Make changes to package.json and change logs.
       changeManager.apply(this._apply.value);
 
       // Stage, commit, and push the changes to remote temp branch.
-      this._gitAddChanges();
-      this._gitCommit();
-      this._gitPush(tempBranch);
+      git.addChanges();
+      git.commit();
+      git.push(tempBranch);
 
       // NPM publish the things that need publishing.
       for (const change of orderedChanges) {
@@ -179,25 +180,27 @@ export default class PublishAction extends BaseRushAction {
       }
 
       // Create and push appropriate git tags.
-      this._gitAddTags(orderedChanges);
-      this._gitPush(tempBranch);
+      this._gitAddTags(git, orderedChanges);
+      git.push(tempBranch);
 
       // Now merge to target branch.
-      this._gitCheckout(this._targetBranch.value);
-      this._gitPull();
-      this._gitMerge(tempBranch);
-      this._gitPush(this._targetBranch.value);
-      this._gitDeleteBranch(tempBranch);
+      git.checkout(this._targetBranch.value);
+      git.pull();
+      git.merge(tempBranch);
+      git.push(this._targetBranch.value);
+      git.deleteBranch(tempBranch);
     }
   }
 
   private _publishAll(allPackages: Map<string, RushConfigurationProject>): void {
     let updated: boolean = false;
+    const git: Git = new Git(this._targetBranch.value);
+
     allPackages.forEach((packageConfig, packageName) => {
       if (packageConfig.shouldPublish) {
         if (this._force.value || !this._packageExists(packageConfig)) {
           this._npmPublish(packageName, packageConfig.projectFolder);
-          this._gitAddTag(packageName, packageConfig.packageJson.version);
+          git.addTag(!!this._publish.value && !this._registryUrl.value, packageName, packageConfig.packageJson.version);
           updated = true;
         } else {
           console.log(`Skip ${packageName}. Not updated.`);
@@ -205,109 +208,23 @@ export default class PublishAction extends BaseRushAction {
       }
     });
     if (updated) {
-      this._gitPush(this._targetBranch.value);
+      git.push(this._targetBranch.value);
     }
   }
 
-  private _getEnvArgs(): { [key: string]: string } {
-    const env: { [key: string]: string } = {};
-
-    // Copy existing process.env values (for nodist)
-    Object.keys(process.env).forEach((key: string) => {
-      env[key] = process.env[key];
-    });
-    return env;
-  }
-
-  private _execCommand(
-    shouldExecute: boolean,
-    command: string,
-    args: string[] = [],
-    workingDirectory: string = process.cwd(),
-    env?: { [key: string]: string }
-  ): void {
-
-    let relativeDirectory: string = path.relative(process.cwd(), workingDirectory);
-    const envArgs: { [key: string]: string } = this._getEnvArgs();
-
-    if (relativeDirectory) {
-      relativeDirectory = `(${relativeDirectory})`;
-    }
-
-    if (env) {
-      Object.keys(env).forEach((name: string) => envArgs[name] = env[name]);
-    }
-
-    console.log(
-      `${EOL}* ${shouldExecute ? 'EXECUTING' : 'DRYRUN'}: ${command} ${args.join(' ')} ${relativeDirectory}`
-    );
-
-    if (shouldExecute) {
-      Utilities.executeCommand(
-        command,
-        args,
-        workingDirectory,
-        false,
-        env);
-    }
-  }
-
-  private _gitCheckout(branchName: string, createBranch?: boolean): void {
-    const params: string = `checkout ${createBranch ? '-b ' : ''}${branchName}`;
-
-    this._execCommand(!!this._targetBranch.value, 'git', params.split(' '));
-  }
-
-  private _gitMerge(branchName: string): void {
-    this._execCommand(!!this._targetBranch.value, 'git', `merge ${branchName} --no-edit`.split(' '));
-  }
-
-  private _gitDeleteBranch(branchName: string): void {
-    this._execCommand(!!this._targetBranch.value, 'git', `branch -d ${branchName}`.split(' '));
-    this._execCommand(!!this._targetBranch.value, 'git', `push origin --delete ${branchName}`.split(' '));
-  }
-
-  private _gitPull(): void {
-    this._execCommand(!!this._targetBranch.value, 'git', `pull origin ${this._targetBranch.value}`.split(' '));
-  }
-
-  private _gitAddChanges(): void {
-    this._execCommand(!!this._targetBranch.value, 'git', ['add', '.']);
-  }
-
-  private _gitAddTags(orderedChanges: IChangeInfo[]): void {
+  private _gitAddTags(git: Git, orderedChanges: IChangeInfo[]): void {
     for (const change of orderedChanges) {
       if (
         change.changeType > ChangeType.dependency &&
         this.rushConfiguration.projectsByName.get(change.packageName).shouldPublish
       ) {
-        this._gitAddTag(change.packageName, change.newVersion);
+        git.addTag(!!this._publish.value && !this._registryUrl.value, change.packageName, change.newVersion);
       }
     }
   }
 
-  private _gitAddTag(packageName: string, packageVersion: string): void {
-    // Tagging only happens if we're publishing to real NPM and committing to git.
-    const tagName: string = PublishUtilities.createTagname(packageName, packageVersion);
-    this._execCommand(
-      !!this._targetBranch.value && !!this._publish.value && !this._registryUrl.value,
-      'git',
-      ['tag', '-a', tagName, '-m', `${packageName} v${packageVersion}`]);
-  }
-
-  private _gitCommit(): void {
-    this._execCommand(!!this._targetBranch.value, 'git', ['commit', '-m', 'Applying package updates.']);
-  }
-
-  private _gitPush(branchName: string): void {
-    this._execCommand(
-      !!this._targetBranch.value,
-      'git',
-      ['push', 'origin', 'HEAD:' + branchName, '--follow-tags', '--verbose']);
-  }
-
   private _npmPublish(packageName: string, packagePath: string): void {
-    const env: { [key: string]: string } = this._getEnvArgs();
+    const env: { [key: string]: string } = PublishUtilities.getEnvArgs();
     const args: string[] = ['publish'];
 
     if (this.rushConfiguration.projectsByName.get(packageName).shouldPublish) {
@@ -326,7 +243,7 @@ export default class PublishAction extends BaseRushAction {
         args.push(`--force`);
       }
 
-      this._execCommand(
+      PublishUtilities.execCommand(
         !!this._publish.value,
         this.rushConfiguration.npmToolFilename,
         args,
@@ -336,7 +253,7 @@ export default class PublishAction extends BaseRushAction {
   }
 
   private _packageExists(packageConfig: RushConfigurationProject): boolean {
-    const env: { [key: string]: string } = this._getEnvArgs();
+    const env: { [key: string]: string } = PublishUtilities.getEnvArgs();
     if (this._registryUrl.value) {
       env['npm_config_registry'] = this._registryUrl.value; // tslint:disable-line:no-string-literal
     }

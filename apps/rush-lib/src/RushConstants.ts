@@ -81,4 +81,9 @@ export namespace RushConstants {
    * command to determine if a particular project needs to be rebuilt.
    */
   export const packageDepsFilename: string = 'package-deps.json';
+
+  /**
+   * @alpha
+   */
+  export const versionPoliciesFileName: string = 'version-policies.json';
 }

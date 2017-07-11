@@ -84,6 +84,21 @@ export {
 } from './rushVersion';
 
 export {
+  VersionPolicyDefinitionName,
+  BumpType,
+  LockStepVersionPolicy,
+  IndividualVersionPolicy,
+  VersionPolicy
+} from './data/VersionPolicy';
+
+export {
+  VersionPolicyConfiguration,
+  IVersionPolicyJson,
+  ILockStepVersionJson,
+  IIndividualVersionJson
+} from './data/VersionPolicyConfiguration';
+
+export {
   default as Npm
 } from './utilities/Npm';
 

@@ -102,6 +102,10 @@
           "shouldPublish": {
             "description": "A flag indicating that changes to this project will be published to npm, which affects the Rush change and publish workflows.",
             "type": "boolean"
+          },
+          "versionPolicyName": {
+            "description": "An optional version policy associated with the project. Version policies are defined in \"version-policies.json file.",
+            "type": "string"
           }
         },
         "additionalProperties": false,

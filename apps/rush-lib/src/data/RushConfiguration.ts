@@ -15,6 +15,7 @@ import { RushConstants } from '../RushConstants';
 import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
 import JsonSchemaValidator from '../utilities/JsonSchemaValidator';
 import EventHooks from './EventHooks';
+import { VersionPolicyConfiguration } from './VersionPolicyConfiguration';
 
 /**
  * A list of known config filenames that are expected to appear in the "./common/config/rush" folder.
@@ -25,7 +26,8 @@ const knownRushConfigFilenames: string[] = [
   RushConstants.npmShrinkwrapFilename,
   RushConstants.pinnedVersionsFilename,
   RushConstants.browserApprovedPackagesFilename,
-  RushConstants.nonbrowserApprovedPackagesFilename
+  RushConstants.nonbrowserApprovedPackagesFilename,
+  RushConstants.versionPoliciesFileName
 ];
 
 /**
@@ -120,6 +122,8 @@ export default class RushConfiguration {
 
   private _projects: RushConfigurationProject[];
   private _projectsByName: Map<string, RushConfigurationProject>;
+
+  private _versionPolicyConfiguration: VersionPolicyConfiguration;
 
   /**
    * Loads the configuration data from an Rush.json configuration file and returns
@@ -494,6 +498,13 @@ export default class RushConfiguration {
     return undefined;
   }
 
+  /**
+   * @alpha
+   */
+  public get versionPolicyConfiguration(): VersionPolicyConfiguration {
+    return this._versionPolicyConfiguration;
+  }
+
   private _populateDownstreamDependencies(dependencies: { [key: string]: string }, packageName: string): void {
     if (!dependencies) {
       return;
@@ -585,6 +596,10 @@ export default class RushConfiguration {
     if (rushConfigurationJson.eventHooks) {
       this._eventHooks = new EventHooks(rushConfigurationJson.eventHooks);
     }
+
+    const versionPolicyConfigFile: string = path.join(this._commonRushConfigFolder,
+      RushConstants.versionPoliciesFileName);
+    this._versionPolicyConfiguration = new VersionPolicyConfiguration(versionPolicyConfigFile);
 
     this._projects = [];
     this._projectsByName = new Map<string, RushConfigurationProject>();

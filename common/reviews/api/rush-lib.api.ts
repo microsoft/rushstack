@@ -52,6 +52,20 @@ class BuildTaskError extends TaskError {
   public toString(mode: ErrorDetectionMode): string;
 }
 
+// @alpha
+enum BumpType {
+  // (undocumented)
+  'major',
+  // (undocumented)
+  'minor',
+  // (undocumented)
+  'patch',
+  // (undocumented)
+  'prerelease',
+  // (undocumented)
+  'release'
+}
+
 // @public
 enum ChangeType {
   // (undocumented)
@@ -132,6 +146,29 @@ interface IEventHooksJson {
   postRushBuild?: string[];
 }
 
+// @alpha (undocumented)
+interface IIndividualVersionJson extends IVersionPolicyJson {
+  // (undocumented)
+  lockedMajor?: number;
+}
+
+// @alpha (undocumented)
+interface ILockStepVersionJson extends IVersionPolicyJson {
+  // (undocumented)
+  nextBump: string;
+  // (undocumented)
+  version: string;
+}
+
+// @alpha
+class IndividualVersionPolicy extends VersionPolicy {
+  constructor(versionPolicyJson: IIndividualVersionJson);
+  // (undocumented)
+  public ensure(project: IPackageJson): IPackageJson | undefined;
+  // (undocumented)
+  public readonly lockedMajor: number | undefined;
+}
+
 // @public
 interface IPackageJson {
   // (undocumented)
@@ -167,6 +204,14 @@ interface ISaveJsonFileOptions {
   onlyIfChanged?: boolean;
 }
 
+// @alpha (undocumented)
+interface IVersionPolicyJson {
+  // (undocumented)
+  definitionName: string;
+  // (undocumented)
+  policyName: string;
+}
+
 // @public
 class JsonFile {
   public static loadJsonFile(jsonFilename: string): any;
@@ -180,6 +225,17 @@ class JsonSchemaValidator {
   // WARNING: The type "ValidateErrorCallback" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   public validateObject(jsonObject: Object, errorCallback: ValidateErrorCallback): void;
+}
+
+// @alpha
+class LockStepVersionPolicy extends VersionPolicy {
+  constructor(versionPolicyJson: ILockStepVersionJson);
+  // (undocumented)
+  public ensure(project: IPackageJson): IPackageJson | undefined;
+  // (undocumented)
+  public readonly nextBump: BumpType;
+  // (undocumented)
+  public readonly version: semver.SemVer;
 }
 
 // @public (undocumented)
@@ -248,6 +304,8 @@ class RushConfiguration {
   // @alpha
   public readonly telemetryEnabled: boolean;
   public readonly tempShrinkwrapFilename: string;
+  // @alpha (undocumented)
+  public readonly versionPolicyConfiguration: VersionPolicyConfiguration;
 }
 
 // @public
@@ -267,6 +325,8 @@ class RushConfigurationProject {
   public readonly shouldPublish: boolean;
   public readonly tempPackageJsonFilename: string;
   public readonly tempProjectName: string;
+  // @alpha
+  public readonly versionPolicyName: string;
 }
 
 // @public
@@ -294,6 +354,9 @@ module RushConstants {
   rushTempNpmScope: string = '@rush-temp';
 
   rushTempProjectsFolderName: string = 'projects';
+
+  // @alpha (undocumented)
+  versionPoliciesFileName: string = 'version-policies.json';
 
 }
 
@@ -393,6 +456,36 @@ class VersionMismatchFinder {
   public getVersionsOfMismatch(mismatch: string): Array<string>;
   // (undocumented)
   public readonly numberOfMismatches: number;
+}
+
+// @alpha
+class VersionPolicy {
+  constructor(versionPolicyJson: IVersionPolicyJson);
+  // (undocumented)
+  public readonly definitionName: VersionPolicyDefinitionName;
+  // (undocumented)
+  public abstract ensure(project: IPackageJson): IPackageJson | undefined;
+  // (undocumented)
+  public static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy;
+  // (undocumented)
+  public readonly policyName: string;
+}
+
+// @alpha (undocumented)
+class VersionPolicyConfiguration {
+  public constructor(private _jsonFileName: string);
+  // @alpha
+  public getVersionPolicy(policyName: string): VersionPolicy;
+  // @alpha
+  public readonly versionPolicies: Map<string, VersionPolicy>;
+}
+
+// @alpha
+enum VersionPolicyDefinitionName {
+  // (undocumented)
+  'individualVersion',
+  // (undocumented)
+  'lockStepVersion'
 }
 
 // WARNING: Unsupported export: rushVersion

@@ -17,6 +17,7 @@ export interface IRushConfigurationProjectJson {
   projectFolder: string;
   reviewCategory?: string;
   cyclicDependencyProjects: string[];
+  versionPolicyName?: string;
   shouldPublish?: boolean;
 }
 
@@ -34,6 +35,7 @@ export default class RushConfigurationProject {
   private _tempProjectName: string;
   private _tempPackageJsonFilename: string;
   private _cyclicDependencyProjects: Set<string>;
+  private _versionPolicyName: string;
   private _shouldPublish: boolean;
   private _downstreamDependencyProjects: string[];
 
@@ -106,6 +108,7 @@ export default class RushConfigurationProject {
     }
     this._downstreamDependencyProjects = [];
     this._shouldPublish = !!projectJson.shouldPublish;
+    this._versionPolicyName = projectJson.versionPolicyName;
   }
 
   /**
@@ -195,6 +198,14 @@ export default class RushConfigurationProject {
    * should be published during `rush publish`.
    */
   public get shouldPublish(): boolean {
-    return this._shouldPublish;
+    return this._shouldPublish || !!this._versionPolicyName;
+  }
+
+  /**
+   * The version policy used by this project.
+   * @alpha
+   */
+  public get versionPolicyName(): string {
+    return this._versionPolicyName;
   }
 }
