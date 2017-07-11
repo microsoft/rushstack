@@ -1,5 +1,5 @@
 // @public
-export function addSuppression(str: string | RegExp): void;
+export function addSuppression(suppression: string | RegExp): void;
 
 // @public
 class CleanTask extends GulpTask<void> {

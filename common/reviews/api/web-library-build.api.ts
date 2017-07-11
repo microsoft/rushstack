@@ -1,5 +1,5 @@
 // @public
-export declare function addSuppression(str: string | RegExp): void;
+export declare function addSuppression(suppression: string | RegExp): void;
 
 // @public
 class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig> {
