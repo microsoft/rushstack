@@ -83,7 +83,7 @@ const localCache: ILocalCache = globalInstance.__loggingCache = globalInstance._
   gulpStopCallback: undefined,
   shouldLogErrorsDuringSummary: false,
   shouldLogWarningsDuringSummary: false
-} as ILocalCache;
+};
 
 if (!localCache.start) {
   localCache.start = process.hrtime();
@@ -471,20 +471,20 @@ const colorCodeRegex: RegExp = /\x1B[[(?);]{0,2}(;?\d)*./g;
 
 /**
  * Adds a suppression for an error or warning
- * @param str - the error or warning as a string or Regular Expression
+ * @param suppression - the error or warning as a string or Regular Expression
  * @public
  */
-export function addSuppression(str: string | RegExp): void {
+export function addSuppression(suppression: string | RegExp): void {
   'use strict';
 
-  if (typeof str === 'string') {
-    str = normalizeMessage(str);
+  if (typeof suppression === 'string') {
+    suppression = normalizeMessage(suppression);
   }
 
-  localCache.errorAndWarningSuppressions.push(str);
+  localCache.errorAndWarningSuppressions.push(suppression);
 
   if (getConfig().verbose) {
-    logSummary(`${gutil.colors.yellow('Suppressing')} - ${str.toString()}`);
+    logSummary(`${gutil.colors.yellow('Suppressing')} - ${suppression.toString()}`);
   }
 }
 
