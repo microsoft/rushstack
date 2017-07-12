@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "2.7.0",
+      "tag": "@microsoft/gulp-core-build_v2.7.0",
+      "date": "Wed, 12 Jul 2017 01:04:36 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add the ability to suppress warnings and errors via a regular expression"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.6.0",
       "tag": "@microsoft/gulp-core-build_v2.6.0",
       "date": "Fri, 07 Jul 2017 01:02:28 GMT",

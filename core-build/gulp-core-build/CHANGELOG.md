@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Fri, 07 Jul 2017 01:02:28 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Jul 2017 01:04:36 GMT and should not be manually modified.
+
+## 2.7.0
+Wed, 12 Jul 2017 01:04:36 GMT
+
+### Minor changes
+
+- Add the ability to suppress warnings and errors via a regular expression
 
 ## 2.6.0
 Fri, 07 Jul 2017 01:02:28 GMT
