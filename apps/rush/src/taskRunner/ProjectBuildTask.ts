@@ -157,7 +157,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
           return;
         }
 
-        // Run the test step
+        // Run the build step
         writer.writeLine(buildCommand);
         const buildTask: child_process.ChildProcess =
           Utilities.executeShellCommandAsync(buildCommand, projectFolder, process.env, true);
@@ -185,7 +185,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
           if (errors.length) {
             writer.writeError(`${errors.length} Error${errors.length > 1 ? 's' : ''}!` + os.EOL);
           } else if (code) {
-            writer.writeError(`${cleanCommand} returned error code: ${code}${os.EOL}`);
+            writer.writeError(`${buildCommand} returned error code: ${code}${os.EOL}`);
           }
 
           // Write the logs to disk
