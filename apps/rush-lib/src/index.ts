@@ -30,11 +30,13 @@ export {
 } from './data/EventHooks';
 
 export {
+  ChangeFile
+} from './data/ChangeFile';
+
+export {
   ChangeType,
   IChangeFile,
-  IChangeInfo,
-  _writeChangeFileSync,
-  _generateChangeFilePath
+  IChangeInfo
 } from './data/ChangeManagement';
 
 export {

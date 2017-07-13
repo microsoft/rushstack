@@ -1,11 +1,3 @@
-// @internal
-export function _generateChangeFilePath(rushConfiguration: RushConfiguration,
-  packageName: string): string;
-
-// @internal
-export function _writeChangeFileSync(rushConfiguration: RushConfiguration,
-  changeFile: IChangeFile): void;
-
 // @public
 class ApprovedPackagesConfiguration {
   public constructor(jsonFilename: string);
@@ -58,6 +50,14 @@ class BuildTaskError extends TaskError {
   protected _offset: number;
   // (undocumented)
   public toString(mode: ErrorDetectionMode): string;
+}
+
+// @public
+class ChangeFile {
+  public constructor(private _changeFileData: IChangeFile,
+      private _rushConfiguration: RushConfiguration);
+  public generatePath(): string;
+  public writeSync(): void;
 }
 
 // @public

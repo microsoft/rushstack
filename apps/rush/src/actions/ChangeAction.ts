@@ -19,7 +19,7 @@ import {
   IChangeFile,
   IChangeInfo,
   VersionControl,
-  _generateChangeFilePath
+  ChangeFile
 } from '@microsoft/rush-lib';
 
 import { BaseRushAction } from './BaseRushAction';
@@ -330,10 +330,10 @@ export default class ChangeAction extends BaseRushAction {
     });
   }
 
-  private _writeChangeFile(changeFile: IChangeFile): Promise<void> {
-    const output: string = JSON.stringify(changeFile, undefined, 2);
-
-    const filePath: string = _generateChangeFilePath(this.rushConfiguration, changeFile.packageName);
+  private _writeChangeFile(changeFileData: IChangeFile): Promise<void> {
+    const output: string = JSON.stringify(changeFileData, undefined, 2);
+    const changeFile: ChangeFile = new ChangeFile(changeFileData, this.rushConfiguration);
+    const filePath: string = changeFile.generatePath();
 
     if (fsx.existsSync(filePath)) {
       // prompt about overwrite
