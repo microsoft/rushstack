@@ -30,6 +30,10 @@ export {
 } from './data/EventHooks';
 
 export {
+  ChangeFile
+} from './data/ChangeFile';
+
+export {
   ChangeType,
   IChangeFile,
   IChangeInfo

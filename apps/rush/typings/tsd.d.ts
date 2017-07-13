@@ -3,7 +3,6 @@
 
 /// <reference path="builtins/builtins.d.ts" />
 /// <reference path="colors/colors.d.ts" />
-/// <reference path="git-repo-info/git-repo-info.d.ts" />
 /// <reference path="glob-escape/glob-escape.d.ts" />
 /// <reference path="inquirer/inquirer.d.ts" />
 /// <reference path="npm-package-arg/npm-package-arg.d.ts" />
