@@ -209,7 +209,7 @@ class TypeScriptConfiguration {
 }
 
 // @public (undocumented)
-class TypeScriptTask extends TSGulpTask<ITypeScriptTaskConfig> {
+class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   // (undocumented)
   executeTask(gulp: gulpType.Gulp, completeCallback: (error?: string) => void): void;
   // (undocumented)
