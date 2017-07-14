@@ -84,8 +84,6 @@ export default class InstallAction extends BaseRushAction {
 
     const stopwatch: Stopwatch = Stopwatch.start();
 
-    console.log('Starting "rush install"' + os.EOL);
-
     this.eventHooksManager.handle(Event.preRushInstall);
     try {
       const installManager: InstallManager = new InstallManager(this.rushConfiguration);

@@ -4,7 +4,6 @@
 import * as colors from 'colors';
 import * as fsx from 'fs-extra';
 import * as glob from 'glob';
-import * as os from 'os';
 import * as path from 'path';
 import builtinPackageNames = require('builtins');
 
@@ -35,8 +34,6 @@ export default class ScanAction extends BaseRushAction {
   }
 
   protected run(): void {
-    console.log('Starting "rush scan"' + os.EOL);
-
     const packageJsonFilename: string = path.resolve('./package.json');
 
     if (!fsx.existsSync(packageJsonFilename)) {

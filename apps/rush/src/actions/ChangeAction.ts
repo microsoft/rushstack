@@ -5,7 +5,6 @@ import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import * as child_process from 'child_process';
-import gitInfo = require('git-repo-info');
 import * as colors from 'colors';
 
 import inquirer = require('inquirer');
@@ -17,10 +16,10 @@ import {
 
 import {
   RushConfigurationProject,
-  RushConstants,
   IChangeFile,
   IChangeInfo,
-  VersionControl
+  VersionControl,
+  ChangeFile
 } from '@microsoft/rush-lib';
 
 import { BaseRushAction } from './BaseRushAction';
@@ -331,10 +330,10 @@ export default class ChangeAction extends BaseRushAction {
     });
   }
 
-  private _writeChangeFile(changeFile: IChangeFile): Promise<void> {
-    const output: string = JSON.stringify(changeFile, undefined, 2);
-
-    const filePath: string = this._generateChangeFilePath(changeFile.packageName);
+  private _writeChangeFile(changeFileData: IChangeFile): Promise<void> {
+    const output: string = JSON.stringify(changeFileData, undefined, 2);
+    const changeFile: ChangeFile = new ChangeFile(changeFileData, this.rushConfiguration);
+    const filePath: string = changeFile.generatePath();
 
     if (fsx.existsSync(filePath)) {
       // prompt about overwrite
@@ -357,25 +356,6 @@ export default class ChangeAction extends BaseRushAction {
     }
   }
 
-  private _generateChangeFilePath(packageName: string): string {
-    let branch: string = undefined;
-    try {
-      branch = gitInfo().branch;
-    } catch (error) {
-      console.log('Could not automatically detect git branch name, using timestamp instead.');
-    }
-
-    // example filename: yourbranchname_2017-05-01-20-20.json
-    const filename: string = (branch ?
-      this._escapeFilename(`${branch}_${this._getTimestamp()}.json`) :
-      `${this._getTimestamp()}.json`);
-    const filePath: string = path.join(this.rushConfiguration.commonFolder,
-      RushConstants.changeFilesFolderName,
-      ...packageName.split('/'),
-      filename);
-    return filePath;
-  }
-
   /**
    * Writes a file to disk, ensuring the directory structure up to that point exists
    */
@@ -396,44 +376,5 @@ export default class ChangeAction extends BaseRushAction {
         });
       });
     });
-  }
-
-  /**
-  * Gets the current time, formatted as YYYY-MM-DD-HH-MM
-  * Optionally will include seconds
-  */
-  private _getTimestamp(useSeconds: boolean = false): string {
-    // Create a date string with the current time
-
-    // dateString === "2016-10-19T22:47:49.606Z"
-    const dateString: string = new Date().toJSON();
-
-    // Parse out 2 capture groups, the date and the time
-    const dateParseRegex: RegExp = /([0-9]{4}-[0-9]{2}-[0-9]{2}).*([0-9]{2}:[0-9]{2}:[0-9]{2})/;
-
-    // matches[1] === "2016-10-19"
-    // matches[2] === "22:47:49"
-    const matches: RegExpMatchArray = dateString.match(dateParseRegex);
-
-    // formattedDate === "2016-10-19"
-    const formattedDate: string = matches[1];
-
-    let formattedTime: string;
-    if (useSeconds) {
-      // formattedTime === "22-47-49"
-      formattedTime = matches[2].replace(':', '-');
-    } else {
-      // formattedTime === "22-47"
-      const timeParts: string[] = matches[2].split(':');
-      formattedTime = `${timeParts[0]}-${timeParts[1]}`;
-    }
-
-    return `${formattedDate}-${formattedTime}`;
-  }
-
-  private _escapeFilename(filename: string, replacer: string = '-'): string {
-    // Removes / ? < > \ : * | ", really anything that isn't a letter, number, '.' '_' or '-'
-    const badCharacters: RegExp = /[^a-zA-Z0-9._-]/g;
-    return filename.replace(badCharacters, replacer);
   }
 }
