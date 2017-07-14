@@ -513,7 +513,7 @@ abstract class ApiItem {
    */
   protected visitTypeReferencesForNode(node: ts.Node): void {
     if (node.kind === ts.SyntaxKind.Block ||
-      (node.kind >= ts.SyntaxKind.JSDocTypeExpression && node.kind <= ts.SyntaxKind.JSDocNeverKeyword)) {
+      (node.kind >= ts.SyntaxKind.JSDocTypeExpression && node.kind <= ts.SyntaxKind.NeverKeyword)) {
       // Don't traverse into code blocks or JSDoc items; we only care about the function signature
       return;
     }
@@ -557,7 +557,7 @@ abstract class ApiItem {
     // this is where the referenced type is located.
     // Example: "c:\users\<username>\sp-client\spfx-core\sp-core-library"
     const typeReferencePackagePath: string = this.extractor.packageJsonLookup
-      .tryFindPackagePathUpwards(sourceFile.path);
+      .tryFindPackagePathUpwards(sourceFile.fileName);
     // Example: "@microsoft/sp-core-library"
     let typeReferencePackageName: string = '';
 

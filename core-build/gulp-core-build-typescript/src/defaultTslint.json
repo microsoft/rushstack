@@ -3,7 +3,6 @@
     "class-name": true,
     "comment-format": [true, "check-space"],
     "curly": true,
-    "eofline": false,
     "export-name": true,
     "forin": true,
     "indent": [true, "spaces", 2],
@@ -13,9 +12,25 @@
     "member-access": true,
     "member-ordering": [
       true,
-      "public-before-private",
-      "static-before-instance",
-      "variables-before-functions"
+      {
+        "order": [
+          "public-static-field",
+          "public-static-method",
+          "protected-static-field",
+          "protected-static-method",
+          "private-static-field",
+          "private-static-method",
+          "public-instance-field",
+          "protected-instance-field",
+          "private-instance-field",
+          "public-constructor",
+          "protected-constructor",
+          "private-constructor",
+          "public-instance-method",
+          "protected-instance-method",
+          "private-instance-method"
+        ]
+      }
     ],
     "missing-optional-annotation": true,
     "no-arg": true,
@@ -39,7 +54,6 @@
     "no-empty": true,
     "no-eval": true,
     "no-function-expression": true,
-    "no-inferrable-types": false,
     "no-internal-module": true,
     "no-null-keyword": true,
     "no-shadowed-variable": true,
@@ -48,11 +62,9 @@
     "no-trailing-whitespace": true,
     "no-unnecessary-semicolons": true,
     "no-unused-expression": true,
-    "no-unused-imports": true,
     "no-use-before-declare": true,
     "no-with-statement": true,
     "no-var-keyword": true,
-    "object-literal-sort-keys": false,
     "one-line": [
       true,
       "check-open-brace",

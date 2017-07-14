@@ -7,6 +7,7 @@
     "moduleResolution": "node",
     "strictNullChecks": true,
     "types": [
+      "es6-collections",
       "node"
     ]
   }

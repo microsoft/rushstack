@@ -7,7 +7,9 @@ import { SchemaValidator, IBuildConfig } from '@microsoft/gulp-core-build';
 import ts = require('gulp-typescript');
 import * as typescript from 'typescript';
 
-/** @public */
+/**
+ * @public
+ */
 export interface ITsConfigFile<T> {
   compilerOptions: T;
 }
