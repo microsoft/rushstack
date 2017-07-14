@@ -30,8 +30,6 @@ export default class UnlinkAction extends BaseRushAction {
   }
 
   protected run(): void {
-    console.log('Starting "rush unlink"' + os.EOL);
-
     // Delete the flag file if it exists; this will ensure that
     // a full "rush link" is required next time
     Utilities.deleteFile(this.rushConfiguration.rushLinkJsonFilename);
