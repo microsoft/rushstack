@@ -204,6 +204,7 @@ enum TestResultState {
 // @public
 class TypeScriptConfiguration {
   static getGulpTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<ts.Settings>;
+  static getTsConfigFile(config: IBuildConfig): ITsConfigFile<ts.Settings>;
   static getTypescriptCompiler(): any;
   static setTypescriptCompiler(typescript: any): void;
 }
