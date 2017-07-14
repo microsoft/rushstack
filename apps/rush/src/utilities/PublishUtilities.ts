@@ -255,7 +255,7 @@ export default class PublishUtilities {
     });
 
     if (shouldCommit) {
-      fsx.writeFileSync(packagePath, JSON.stringify(pkg, undefined, 2), 'utf8');
+      fsx.writeFileSync(packagePath, JSON.stringify(pkg, undefined, 2), { encoding: 'utf8' });
     }
   }
 
