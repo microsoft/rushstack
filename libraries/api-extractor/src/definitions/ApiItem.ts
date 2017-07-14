@@ -3,6 +3,7 @@
 
 /* tslint:disable:no-bitwise */
 /* tslint:disable:no-constant-condition */
+/* tslint:disable:no-trailing-whitespace */
 
 import * as ts from 'typescript';
 import * as path from 'path';
