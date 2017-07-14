@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/* tslint:disable:no-trailing-whitespace whitespace */
+
 import * as path from 'path';
 import assign = require('object-assign');
 import { SchemaValidator, IBuildConfig } from '@microsoft/gulp-core-build';

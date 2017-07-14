@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/* tslint:disable:no-trailing-whitespace */
+
 import gulpType = require('gulp');
 import ts = require('gulp-typescript');
 import * as Typescript from 'typescript';
@@ -152,7 +154,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
 
     this._normalizeConfig();
 
-    // Log the compiler version for custom verisons.
+    // Log the compiler version for custom versions.
     const typescript: typeof Typescript = TypeScriptConfiguration.getTypescriptCompiler(); // tslint:disable-line:no-any
     if (typescript && typescript.version) {
       this.log(`TypeScript version: ${typescript.version}`);
