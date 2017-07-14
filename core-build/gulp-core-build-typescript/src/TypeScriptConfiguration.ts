@@ -30,7 +30,7 @@ export class TypeScriptConfiguration {
    * Returns a new object each time.
    */
   public static getGulpTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<ts.Settings> {
-    const file: ITsConfigFile<ts.Settings> = assign({}, this._getTsConfigFile(buildConfig));
+    const file: ITsConfigFile<ts.Settings> = assign({}, this.getTsConfigFile(buildConfig));
     assign(file.compilerOptions, {
       rootDir: buildConfig.rootPath,
       typescript: this.getTypescriptCompiler()
@@ -64,7 +64,7 @@ export class TypeScriptConfiguration {
   /**
    * Helper function which reads the tsconfig.json (or provides one), and memoizes it
    */
-  private static _getTsConfigFile(config: IBuildConfig): ITsConfigFile<ts.Settings> {
+  public static getTsConfigFile(config: IBuildConfig): ITsConfigFile<ts.Settings> {
     if (!this._baseTsConfig) {
       try {
         this._baseTsConfig = SchemaValidator.readCommentedJsonFile<any>(

@@ -21,6 +21,7 @@ interface ITsConfigFile<T> {
 // @public
 class TypeScriptConfiguration {
   public static getGulpTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<ts.Settings>;
+  public static getTsConfigFile(config: IBuildConfig): ITsConfigFile<ts.Settings>;
   public static getTypescriptCompiler(): any;
   public static setTypescriptCompiler(typescript: any): void;
 }

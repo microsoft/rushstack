@@ -15,6 +15,11 @@ import * as TSLint from 'tslint';
 import * as path from 'path';
 import * as ts from 'typescript';
 
+import {
+  ITsConfigFile,
+  TypeScriptConfiguration
+} from './TypeScriptConfiguration';
+
 export interface ITSLintRulesFile {
   rules?: { [name: string]: any }; /* tslint:disable-line:no-any */
 }
@@ -142,6 +147,25 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
 
     const cached = require('gulp-cache'); // tslint:disable-line
 
+    let program: ts.Program | undefined = undefined;
+    try {
+      const tsconfigFileData: ITsConfigFile<Object> = TypeScriptConfiguration.getTsConfigFile(this.buildConfig);
+      const tsconfigFilePath: string =
+        path.join(
+          this.buildConfig.rootPath,
+          this.buildConfig.tempFolder,
+          'tslint-tsconfig.json'
+        );
+        fs.writeFileSync(tsconfigFilePath, JSON.stringify(tsconfigFileData, undefined, 2));
+
+      program = TSLint.Linter.createProgram(
+        tsconfigFilePath,
+        path.join(this.buildConfig.rootPath, this.buildConfig.srcFolder)
+      );
+    } catch (e) {
+      this.logWarning(`Unable to create a TS program for TSLint. Some lint rules might not work correctly. Error ${e}`);
+    }
+
     return gulp.src(this.taskConfig.sourceMatch)
       .pipe(cached(
         through2.obj(function (
@@ -172,7 +196,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
 
           const configuration: TSLint.Configuration.IConfigurationFile =
             TSLint.Configuration.parseConfigFile(lintRulesFile);
-          linter.lint(file.relative, file.contents.toString(), configuration);
+          linter.lint(file.path, file.contents.toString(), configuration);
 
           const result: TSLint.LintResult = linter.getResult();
 
