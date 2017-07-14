@@ -168,11 +168,11 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
             rulesDirectory: self.taskConfig.rulesDirectory || []
           };
 
-          const linter: TSLint.Linter = new TSLint.Linter(options);
+          const linter: TSLint.Linter = new TSLint.Linter(options, program);
 
-          const lintConfiguration: TSLint.Configuration.IConfigurationFile =
-            self._convertRulesFileToConfiguration(lintRulesFile);
-          linter.lint(file.relative, file.contents.toString(), lintConfiguration);
+          const configuration: TSLint.Configuration.IConfigurationFile =
+            TSLint.Configuration.parseConfigFile(lintRulesFile);
+          linter.lint(file.relative, file.contents.toString(), configuration);
 
           const result: TSLint.LintResult = linter.getResult();
 
@@ -235,20 +235,5 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
     return merge(
       (this.taskConfig.useDefaultConfigAsBase ? this._defaultLintRules : {}),
       this.taskConfig.lintConfig || {});
-  }
-
-  private _convertRulesFileToConfiguration(rulesFile: ITSLintRulesFile): TSLint.Configuration.IConfigurationFile {
-    const config: TSLint.Configuration.IConfigurationFile = TSLint.Configuration.EMPTY_CONFIG;
-    config.rules.clear();
-
-    if (rulesFile.rules) {
-      for (const ruleName in rulesFile.rules) {
-        if (rulesFile.rules.hasOwnProperty(ruleName)) {
-          config.rules.set(ruleName, rulesFile.rules[ruleName]);
-        }
-      }
-    }
-
-    return config;
   }
 }
