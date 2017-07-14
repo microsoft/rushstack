@@ -138,12 +138,7 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
       }, (exitCode) => {
         if (exitCode) {
           const message: string = 'Error(s) occured during karma.';
-          if (this.buildConfig.production) {
-            completeCallback(message);
-          } else {
-            this.logWarning(message);
-            completeCallback();
-          }
+          completeCallback(message);
         } else {
           completeCallback();
         }
