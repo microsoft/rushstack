@@ -197,6 +197,16 @@ export default class Package {
     return Package.createFromNpm(npmPackage);
   }
 
+  private constructor(name: string, version: string, dependencies: IPackageDependency[], folderPath: string) {
+    this.name = name;
+    this.version = version;
+    this.dependencies = dependencies.slice(0); // clone the array
+    this.folderPath = folderPath;
+    this.parent = undefined;
+    this.children = [];
+    this._childrenByName = new Map<string, Package>();
+  }
+
   public get nameAndVersion(): string {
     let result: string = '';
 
@@ -291,16 +301,6 @@ export default class Package {
     for (const child of this.children) {
       child.printTree(indent + '  ');
     }
-  }
-
-  private constructor(name: string, version: string, dependencies: IPackageDependency[], folderPath: string) {
-    this.name = name;
-    this.version = version;
-    this.dependencies = dependencies.slice(0); // clone the array
-    this.folderPath = folderPath;
-    this.parent = undefined;
-    this.children = [];
-    this._childrenByName = new Map<string, Package>();
   }
 }
 

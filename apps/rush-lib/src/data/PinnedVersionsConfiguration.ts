@@ -37,6 +37,16 @@ export class PinnedVersionsConfiguration {
     return new PinnedVersionsConfiguration(pinnedVersionJson, jsonFilename);
   }
 
+  /**
+   * Preferred to use PinnedVersionsConfiguration.loadFromFile()
+   */
+  private constructor(pinnedVersionJson: IPinnedVersionsJson, private _filename: string) {
+    this._data = new Map<string, string>();
+    Object.keys(pinnedVersionJson || {}).forEach((dep: string) => {
+      this.set(dep, pinnedVersionJson[dep]);
+    });
+  }
+
   /** Set a pinned version. Checks that the version is a valid semver. */
   public set(dependency: string, version: string): this {
     if (!semver.valid(version) && !semver.validRange(version)) {
@@ -83,15 +93,5 @@ export class PinnedVersionsConfiguration {
       rawJson[dependency] = version;
     });
     return rawJson;
-  }
-
-  /**
-   * Preferred to use PinnedVersionsConfiguration.loadFromFile()
-   */
-  private constructor(pinnedVersionJson: IPinnedVersionsJson, private _filename: string) {
-    this._data = new Map<string, string>();
-    Object.keys(pinnedVersionJson || {}).forEach((dep: string) => {
-      this.set(dep, pinnedVersionJson[dep]);
-    });
   }
 }

@@ -83,9 +83,9 @@ export function loadStyles(styles: string | ThemableArray): void {
  * a loadStyles callback that gets called when styles are loaded or reloaded
  */
 export function configureLoadStyles(
-    loadStyles: ((processedStyles: string, rawStyles?: string | ThemableArray) => void) | undefined
-  ): void {
-  _themeState.loadStyles = loadStyles;
+  loadStylesFn: ((processedStyles: string, rawStyles?: string | ThemableArray) => void) | undefined
+): void {
+  _themeState.loadStyles = loadStylesFn;
 }
 
 /**

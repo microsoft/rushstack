@@ -12,15 +12,15 @@ import {
   getGlobalRegisterCode
 } from './codeGenerator';
 
-export interface ISetWebpackPublicPathLoaderOptions extends ISetWebpackPublicPathOptions {
-  scriptName?: string;
-}
-
 export interface ISetWebpackPublicPathOptions {
   systemJs?: boolean;
   urlPrefix?: string;
   publicPath?: string;
   regexVariable?: string;
+}
+
+export interface ISetWebpackPublicPathLoaderOptions extends ISetWebpackPublicPathOptions {
+  scriptName?: string;
 }
 
 export class SetWebpackPublicPathLoader {
