@@ -57,8 +57,6 @@ export default class GenerateAction extends BaseRushAction {
 
     ApprovedPackagesChecker.rewriteConfigFiles(this.rushConfiguration);
 
-    console.log('Starting "rush generate"' + os.EOL);
-
     const installManager: InstallManager = new InstallManager(this.rushConfiguration);
 
     installManager.ensureLocalNpmTool(false);

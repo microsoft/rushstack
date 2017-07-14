@@ -117,7 +117,6 @@ export default class RebuildAction extends BaseRushAction {
     this.eventHooksManager.handle(Event.preRushBuild);
     this._rushLinkJson = JsonFile.loadJsonFile(this.rushConfiguration.rushLinkJsonFilename);
 
-    console.log(`Starting "rush ${this.options.actionVerb}"${os.EOL}`);
     const stopwatch: Stopwatch = Stopwatch.start();
 
     const isQuietMode: boolean = !(this._verboseParameter.value);

@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { EOL } from 'os';
 import * as fsx from 'fs-extra';
 import * as path from 'path';
 import * as semver from 'semver';
@@ -77,7 +76,6 @@ export default class VersionAction extends BaseRushAction {
         return;
       }
     }
-    console.log(`Starting "rush version" ${EOL}`);
 
     this._versionManager = new VersionManager(this.rushConfiguration);
     if (this._ensureVersionPolicy.value) {
