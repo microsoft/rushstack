@@ -47,7 +47,6 @@ export default class JsonSchemaValidator {
     return buffer;
   }
 
-
   public validateObject(jsonObject: Object, errorCallback: ValidateErrorCallback): void {
     // Remove the $schema reference that appears in the configuration object (used for IntelliSense),
     // since we are replacing it with the precompiled version.  The validator.setRemoteReference()
