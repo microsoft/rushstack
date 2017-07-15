@@ -56,21 +56,6 @@ export default class ShrinkwrapFile {
     return undefined;
   }
 
-  private constructor(shrinkwrapJson: IShrinkwrapJson) {
-    this._shrinkwrapJson = shrinkwrapJson;
-
-    // Normalize the data
-    if (!this._shrinkwrapJson.version) {
-      this._shrinkwrapJson.version = '';
-    }
-    if (!this._shrinkwrapJson.name) {
-      this._shrinkwrapJson.name = '';
-    }
-    if (!this._shrinkwrapJson.dependencies) {
-      this._shrinkwrapJson.dependencies = { };
-    }
-  }
-
   /**
    * Returns the list of temp projects defined in this file.
    * Example: [ '@rush-temp/project1', '@rush-temp/project2' ]
@@ -139,6 +124,21 @@ export default class ShrinkwrapFile {
           console.log(colors.yellow(`WARNING: Not validating ${result.type}-based specifier: "${result.rawSpec}"`));
         }
         return true;
+    }
+  }
+
+  private constructor(shrinkwrapJson: IShrinkwrapJson) {
+    this._shrinkwrapJson = shrinkwrapJson;
+
+    // Normalize the data
+    if (!this._shrinkwrapJson.version) {
+      this._shrinkwrapJson.version = '';
+    }
+    if (!this._shrinkwrapJson.name) {
+      this._shrinkwrapJson.name = '';
+    }
+    if (!this._shrinkwrapJson.dependencies) {
+      this._shrinkwrapJson.dependencies = { };
     }
   }
 }

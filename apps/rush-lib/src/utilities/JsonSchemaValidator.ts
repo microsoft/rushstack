@@ -47,13 +47,6 @@ export default class JsonSchemaValidator {
     return buffer;
   }
 
-  private constructor(schemaObject: Object) {
-    this._schemaObject = schemaObject;
-    this._validator = new Validator({
-      breakOnFirstError: true,
-      noTypeless: true
-    });
-  }
 
   public validateObject(jsonObject: Object, errorCallback: ValidateErrorCallback): void {
     // Remove the $schema reference that appears in the configuration object (used for IntelliSense),
@@ -70,5 +63,13 @@ export default class JsonSchemaValidator {
       buffer = JsonSchemaValidator._formatErrorDetails(errorDetails, '  ', buffer);
       errorCallback(buffer);
     }
+  }
+
+  private constructor(schemaObject: Object) {
+    this._schemaObject = schemaObject;
+    this._validator = new Validator({
+      breakOnFirstError: true,
+      noTypeless: true
+    });
   }
 }
