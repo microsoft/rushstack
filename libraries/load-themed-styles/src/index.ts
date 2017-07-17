@@ -136,7 +136,8 @@ export function configureLoadStyles(
 /**
  * Configure run mode of load-themable-styles
  * @param mode load-themable-styles run mode, async or sync
- * @param timeout when running in async mode, the timeout interval to process buffered styles. Default is 0 ms, but you can override here
+ * @param timeout when running in async mode, the timeout interval to process buffered styles.
+ * Default is 0 ms, but you can override here
  */
 export function configureRunMode(mode: Mode, timeout?: number): void {
   _mode = mode;
