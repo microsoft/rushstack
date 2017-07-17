@@ -152,8 +152,10 @@ export function flush(): void {
   measure(() => {
     const styleArrays: ThemableArray[] = _buffer.slice();
     _buffer = [];
-    const merged: ThemableArray[] = [].concat.apply([], styleArrays);
-    applyThemableStyles(merged);
+    const mergedStyleArray: ThemableArray[] = [].concat.apply([], styleArrays);
+    if (mergedStyleArray.length > 0) {
+      applyThemableStyles(mergedStyleArray);
+    }
   });
 }
 
