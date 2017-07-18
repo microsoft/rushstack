@@ -33,9 +33,9 @@ interface IMeasurement {
 }
 
 interface IRunState {
-    mode: Mode;
-    buffer: ThemableArray[];
-    flushTimer: number;
+  mode: Mode;
+  buffer: ThemableArray[];
+  flushTimer: number;
 }
 
 interface IThemeState {
@@ -69,20 +69,7 @@ let _injectStylesWithCssText: boolean;
 // load-themed-styles hosted on the page.
 const _root: any = (typeof window === 'undefined') ? global : window; // tslint:disable-line:no-any
 
-const _themeState: IThemeState = _root.__themeState__ = _root.__themeState__ || {
-  theme: undefined,
-  lastStyleElement: undefined,
-  registeredStyles: [],
-  perf: {
-    count: 0,
-    duration: 0
-  },
-  runState: {
-    flushTimer: 0,
-    mode: Mode.sync,
-    buffer: []
-  }
-};
+const _themeState: IThemeState = initializeThemeState();
 
 /**
  * Matches theming tokens. For example, "[theme: themeSlotName, default: #FFF]" (including the quotes).
@@ -101,6 +88,30 @@ function measure(func: () => void): void {
   func();
   const end: number = now();
   _themeState.perf.duration += end - start;
+}
+
+function initializeThemeState(): IThemeState {
+  _root.__themeState__ = _root.__themeState__ || {
+    theme: undefined,
+    lastStyleElement: undefined,
+    registeredStyles: []
+  };
+
+  if (!_root.__themeState__.runState) {
+    _root.__themeState__ = {
+      ...(_root.__themeState__),
+      perf: {
+        count: 0,
+        duration: 0
+      },
+      runState: {
+        flushTimer: 0,
+        mode: Mode.sync,
+        buffer: []
+      }
+    };
+  }
+  return _root.__themeState__;
 }
 
 /**
