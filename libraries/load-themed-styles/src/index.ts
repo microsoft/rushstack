@@ -32,12 +32,19 @@ interface IMeasurement {
   duration: number;
 }
 
+interface IRunState {
+    mode: Mode;
+    buffer: ThemableArray[];
+    flushTimer: number;
+}
+
 interface IThemeState {
   theme: ITheme | undefined;
   lastStyleElement: IExtendedHtmlStyleElement;
   registeredStyles: IStyleRecord[];
   loadStyles: ((processedStyles: string, rawStyles?: string | ThemableArray) => void) | undefined;
   perf: IMeasurement;
+  runState: IRunState;
 }
 
 interface IStyleRecord {
@@ -69,6 +76,11 @@ const _themeState: IThemeState = _root.__themeState__ = _root.__themeState__ || 
   perf: {
     count: 0,
     duration: 0
+  },
+  runState: {
+    flushTimer: 0,
+    mode: Mode.sync,
+    buffer: []
   }
 };
 
@@ -83,15 +95,6 @@ const MAX_STYLE_CONTENT_SIZE: number = 10000;
 
 const now: () => number =
   () => (typeof performance !== 'undefined' && !!performance.now) ? performance.now() : Date.now();
-
-let _flushTimer: number = 0;
-
-let _mode: Mode = Mode.sync;
-
-let _buffer: ThemableArray[] = [];
-
-// default timer interval 0 ms
-let _timeout: number = 0;
 
 function measure(func: () => void): void {
   const start: number = now();
@@ -111,10 +114,15 @@ export function loadStyles(styles: string | ThemableArray): void {
     if (_injectStylesWithCssText === undefined) {
       _injectStylesWithCssText = shouldUseCssText();
     }
-    if (_mode === Mode.async) {
-      _buffer.push(styleParts);
-      if (!_flushTimer) {
-        _flushTimer = asyncLoadStyles();
+    const {
+      mode,
+      buffer,
+      flushTimer
+    } = _themeState.runState;
+    if (mode === Mode.async) {
+      buffer.push(styleParts);
+      if (!flushTimer) {
+        _themeState.runState.flushTimer = asyncLoadStyles();
       }
     } else {
       applyThemableStyles(styleParts);
@@ -136,14 +144,9 @@ export function configureLoadStyles(
 /**
  * Configure run mode of load-themable-styles
  * @param mode load-themable-styles run mode, async or sync
- * @param timeout when running in async mode, the timeout interval to process buffered styles.
- * Default is 0 ms, but you can override here
  */
-export function configureRunMode(mode: Mode, timeout?: number): void {
-  _mode = mode;
-  if (typeof timeout !== 'undefined') {
-    _timeout = timeout;
-  }
+export function configureRunMode(mode: Mode): void {
+  _themeState.runState.mode = mode;
 }
 
 /**
@@ -151,8 +154,8 @@ export function configureRunMode(mode: Mode, timeout?: number): void {
  */
 export function flush(): void {
   measure(() => {
-    const styleArrays: ThemableArray[] = _buffer.slice();
-    _buffer = [];
+    const styleArrays: ThemableArray[] = _themeState.runState.buffer.slice();
+    _themeState.runState.buffer = [];
     const mergedStyleArray: ThemableArray[] = [].concat.apply([], styleArrays);
     if (mergedStyleArray.length > 0) {
       applyThemableStyles(mergedStyleArray);
@@ -165,9 +168,9 @@ export function flush(): void {
  */
 function asyncLoadStyles(): number {
   return setTimeout(() => {
-    _flushTimer = 0;
+    _themeState.runState.flushTimer = 0;
     flush();
-  }, _timeout);
+  }, 0);
 }
 
 /**
