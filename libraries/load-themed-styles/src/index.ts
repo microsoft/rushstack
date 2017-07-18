@@ -90,16 +90,19 @@ function measure(func: () => void): void {
   _themeState.perf.duration += end - start;
 }
 
+/**
+ * initialize global state object
+ */
 function initializeThemeState(): IThemeState {
-  _root.__themeState__ = _root.__themeState__ || {
+  let state: IThemeState = _root.__themeState__ || {
     theme: undefined,
     lastStyleElement: undefined,
     registeredStyles: []
   };
 
-  if (!_root.__themeState__.runState) {
-    _root.__themeState__ = {
-      ...(_root.__themeState__),
+  if (!state.runState) {
+    state = {
+      ...(state),
       perf: {
         count: 0,
         duration: 0
@@ -111,7 +114,8 @@ function initializeThemeState(): IThemeState {
       }
     };
   }
-  return _root.__themeState__;
+  _root.__themeState__ = state;
+  return state;
 }
 
 /**
