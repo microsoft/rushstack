@@ -61,9 +61,7 @@ enum BumpType {
   // (undocumented)
   'patch',
   // (undocumented)
-  'prerelease',
-  // (undocumented)
-  'release'
+  'prerelease'
 }
 
 // @public
@@ -172,7 +170,11 @@ interface ILockStepVersionJson extends IVersionPolicyJson {
 class IndividualVersionPolicy extends VersionPolicy {
   constructor(versionPolicyJson: IIndividualVersionJson);
   // (undocumented)
+  public bump(): void;
+  // (undocumented)
   public ensure(project: IPackageJson): IPackageJson | undefined;
+  // (undocumented)
+  public readonly json: IIndividualVersionJson;
   // (undocumented)
   public readonly lockedMajor: number | undefined;
 }
@@ -239,7 +241,11 @@ class JsonSchemaValidator {
 class LockStepVersionPolicy extends VersionPolicy {
   constructor(versionPolicyJson: ILockStepVersionJson);
   // (undocumented)
+  public bump(): void;
+  // (undocumented)
   public ensure(project: IPackageJson): IPackageJson | undefined;
+  // (undocumented)
+  public readonly json: ILockStepVersionJson;
   // (undocumented)
   public readonly nextBump: BumpType;
   // (undocumented)
@@ -470,9 +476,13 @@ class VersionMismatchFinder {
 class VersionPolicy {
   constructor(versionPolicyJson: IVersionPolicyJson);
   // (undocumented)
+  public abstract bump(): void;
+  // (undocumented)
   public readonly definitionName: VersionPolicyDefinitionName;
   // (undocumented)
   public abstract ensure(project: IPackageJson): IPackageJson | undefined;
+  // (undocumented)
+  public readonly json: IVersionPolicyJson;
   // (undocumented)
   public static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy;
   // (undocumented)
@@ -482,6 +492,8 @@ class VersionPolicy {
 // @alpha (undocumented)
 class VersionPolicyConfiguration {
   public constructor(private _jsonFileName: string);
+  // @alpha
+  public bump(versionPolicyName?: string, shouldCommit?: boolean): void;
   // @alpha
   public getVersionPolicy(policyName: string): VersionPolicy;
   // @alpha

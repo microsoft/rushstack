@@ -43,9 +43,11 @@ describe('VersionManager', () => {
   describe('ensure', () => {
     it('fixes major version for individual version policy', () => {
       const updatedPackages: Map<string, IPackageJson> = versionManager.ensure('testPolicy2');
-      assert.equal(updatedPackages.size, 1);
+      assert.equal(updatedPackages.size, 2);
       assert.equal(updatedPackages.get('c').version, '5.0.0');
       assert.equal(updatedPackages.get('c').dependencies['b'], `>=2.0.0 <3.0.0`);
+      assert.equal(updatedPackages.get('e').version, '10.10.0');
+      assert.equal(updatedPackages.get('e').dependencies['c'], '~5.0.0');
     });
   });
 

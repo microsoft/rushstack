@@ -64,6 +64,34 @@ export class VersionPolicyConfiguration {
     return this._versionPolicies;
   }
 
+  /**
+   * Bumps up the version in the version policy
+   * @alpha
+   * @param versionPolicyName - version policy name
+   * @param shouldCommit - should save to disk
+   */
+  public bump(versionPolicyName?: string, shouldCommit?: boolean): void {
+    if (versionPolicyName) {
+      const policy: VersionPolicy = this.versionPolicies.get(versionPolicyName);
+      if (policy) {
+        policy.bump();
+      }
+    } else {
+      this.versionPolicies.forEach((versionPolicy) => {
+        if (versionPolicy) {
+          versionPolicy.bump();
+        }
+      });
+    }
+    const versionPolicyJson: IVersionPolicyJson[] = [];
+    this.versionPolicies.forEach((versionPolicy) => {
+      versionPolicyJson.push(versionPolicy.json);
+    });
+    if (shouldCommit) {
+      JsonFile.saveJsonFile(versionPolicyJson, this._jsonFileName);
+    }
+  }
+
   private _loadFile(): void {
     if (!fsx.existsSync(this._jsonFileName)) {
       return;

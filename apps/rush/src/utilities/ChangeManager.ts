@@ -3,8 +3,10 @@
 
 import {
   IChangeInfo,
+  IPackageJson,
   RushConfiguration,
-  RushConfigurationProject
+  RushConfigurationProject,
+  LockStepVersionPolicy
 } from '@microsoft/rush-lib';
 
 import PublishUtilities, {
@@ -25,7 +27,9 @@ export default class ChangeManager {
   private _allChanges: IChangeInfoHash;
   private _changeFiles: ChangeFiles;
 
-  constructor(private _rushConfiguration: RushConfiguration) {
+  constructor(private _rushConfiguration: RushConfiguration,
+    private _includeLockSteProjects: boolean = false
+  ) {
   }
 
   /**
@@ -48,7 +52,9 @@ export default class ChangeManager {
       this._allPackages,
       this._changeFiles,
       includeCommitDetails,
-      this._prereleaseToken);
+      this._prereleaseToken,
+      this._lockStepProjectsToExclude
+      );
     this._orderedChanges = PublishUtilities.sortChangeRequests(this._allChanges);
   }
 
@@ -69,14 +75,18 @@ export default class ChangeManager {
    * @param shouldCommit - If the value is true, package.json and change logs will be updated.
    * If the value is false, package.json and change logs will not be updated. It will only do a dry-run.
    */
-  public apply(shouldCommit: boolean): void {
+  public apply(shouldCommit: boolean): Map<string, IPackageJson> {
     if (!this.hasChanges()) {
       return;
     }
 
     // Apply all changes to package.json files.
-    PublishUtilities.updatePackages(this._allChanges, this._allPackages, shouldCommit,
-      this._prereleaseToken);
+    const updatedPackages: Map<string, IPackageJson> = PublishUtilities.updatePackages(
+      this._allChanges,
+      this._allPackages,
+      shouldCommit,
+      this._prereleaseToken,
+      this._lockStepProjectsToExclude);
 
     // Do not update changelog or delete the change files for prerelease.
     // Save them for the official release.
@@ -87,5 +97,26 @@ export default class ChangeManager {
       // Remove the change request files only if "-a" was provided.
       this._changeFiles.deleteAll(shouldCommit);
     }
+    return updatedPackages;
+  }
+
+  private get _lockStepProjectsToExclude(): Set<string> | undefined {
+    if (this._includeLockSteProjects) {
+      return undefined;
+    }
+    const lockStepVersionPolicyNames: Set<string> = new Set<string>();
+
+    this._rushConfiguration.versionPolicyConfiguration.versionPolicies.forEach((versionPolicy) => {
+      if (versionPolicy instanceof LockStepVersionPolicy) {
+        lockStepVersionPolicyNames.add(versionPolicy.policyName);
+      }
+    });
+    const lockStepProjectNames: Set<string> = new Set<string>();
+    this._rushConfiguration.projects.forEach((rushProject) => {
+      if (lockStepProjectNames.has(rushProject.versionPolicyName)) {
+        lockStepProjectNames.add(rushProject.packageName);
+      }
+    });
+    return lockStepProjectNames;
   }
 }

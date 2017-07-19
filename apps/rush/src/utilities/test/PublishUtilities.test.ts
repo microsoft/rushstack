@@ -130,6 +130,22 @@ describe('findChangeRequests', () => {
     expect(allChanges['d'].changeType).equals(ChangeType.patch, 'd was not a patch');
   });
 
+  it('can exclude lock step projects', () => {
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'repo', 'rush.json')).projectsByName;
+    const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
+      allPackages,
+      new ChangeFiles(path.join(__dirname, 'repo', 'changes')),
+      false,
+      undefined,
+      new Set<string>(['a', 'b', 'e']));
+    expect(Object.keys(allChanges).length).to.equal(3);
+    expect(allChanges['c'].changeType).equals(ChangeType.patch, 'c was not a patch');
+    expect(allChanges['c'].newVersion).equals('3.1.2');
+    expect(allChanges['d'].changeType).equals(ChangeType.patch, 'd was not a patch');
+    expect(allChanges['d'].newVersion).equals('4.1.2');
+    expect(allChanges['e'].newVersion).equals(allPackages.get('e').packageJson.version, 'e version gets changed');
+  });
 });
 
 describe('sortChangeRequests', () => {

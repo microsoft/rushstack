@@ -35,7 +35,8 @@ export default class PublishUtilities {
     allPackages: Map<string, RushConfigurationProject>,
     changeFiles: ChangeFiles,
     includeCommitDetails?: boolean,
-    prereleaseToken?: PrereleaseToken
+    prereleaseToken?: PrereleaseToken,
+    projectsToExclude?: Set<string>
   ): IChangeInfoHash {
 
     const allChanges: IChangeInfoHash = {};
@@ -52,7 +53,9 @@ export default class PublishUtilities {
       }
 
       for (const change of changeRequest.changes) {
-        PublishUtilities._addChange(change, allChanges, allPackages);
+        if (!projectsToExclude || !projectsToExclude.has(change.packageName)) {
+          PublishUtilities._addChange(change, allChanges, allPackages, prereleaseToken, projectsToExclude);
+        }
       }
     });
 
@@ -63,7 +66,8 @@ export default class PublishUtilities {
           allChanges[packageName],
           allChanges,
           allPackages,
-          prereleaseToken
+          prereleaseToken,
+          projectsToExclude
         );
       }
     }
@@ -77,8 +81,9 @@ export default class PublishUtilities {
         const deps: string[] = project.downstreamDependencyProjects;
 
         // Write the new version expected for the change.
-        if (prereleaseToken && prereleaseToken.isSuffix) {
-          // Suffix does not bump up the version.
+        const skipVersionBump: boolean = PublishUtilities._shouldSkipVersionBump(project,
+          prereleaseToken, projectsToExclude);
+        if (skipVersionBump) {
           change.newVersion = pkg.version;
         } else {
           change.newVersion = (change.changeType >= ChangeType.patch) ?
@@ -120,15 +125,23 @@ export default class PublishUtilities {
     allChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
     shouldCommit: boolean,
-    prereleaseToken?: PrereleaseToken
-  ): void {
+    prereleaseToken?: PrereleaseToken,
+    projectsToExclude?: Set<string>
+  ): Map<string, IPackageJson> {
+    const updatedPackages: Map<string, IPackageJson> = new Map<string, IPackageJson>();
 
-    Object.keys(allChanges).forEach(packageName => PublishUtilities._writePackageChanges(
-      allChanges[packageName],
-      allChanges,
-      allPackages,
-      shouldCommit,
-      prereleaseToken));
+    Object.keys(allChanges).forEach(packageName => {
+      const updatedPackage: IPackageJson = PublishUtilities._writePackageChanges(
+        allChanges[packageName],
+        allChanges,
+        allPackages,
+        shouldCommit,
+        prereleaseToken,
+        projectsToExclude);
+      updatedPackages.set(updatedPackage.name, updatedPackage);
+    });
+
+    return updatedPackages;
   }
 
   /**
@@ -210,6 +223,17 @@ export default class PublishUtilities {
     return `>=${newVersion} <${semver.inc(newVersion, 'major')}`;
   }
 
+  private static _shouldSkipVersionBump(project: RushConfigurationProject,
+    prereleaseToken?: PrereleaseToken,
+    projectsToExclude?: Set<string>
+  ): boolean {
+    // Suffix does not bump up the version.
+    // Excluded projects do not bump up version.
+    return prereleaseToken && prereleaseToken.isSuffix ||
+      projectsToExclude && projectsToExclude.has(project.packageName) ||
+      !project.shouldPublish;
+  }
+
   private static _updateCommitDetails(filename: string, changes: IChangeInfo[]): void {
     try {
       const fileLog: string = execSync('git log -n 1 ' + filename, { cwd: path.dirname(filename) }).toString();
@@ -228,25 +252,34 @@ export default class PublishUtilities {
     allChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
     shouldCommit: boolean,
-    prereleaseToken?: PrereleaseToken
-  ): void {
-    const newVersion: string = PublishUtilities._getChangeInfoNewVersion(change, prereleaseToken);
+    prereleaseToken?: PrereleaseToken,
+    projectsToExclude?: Set<string>
+  ): IPackageJson {
+
+    const project: RushConfigurationProject = allPackages.get(change.packageName);
+    const pkg: IPackageJson = project.packageJson;
+
+    const shouldSkipVersionBump: boolean = !project.shouldPublish ||
+      projectsToExclude && projectsToExclude.has(change.packageName);
+
+    const newVersion: string = shouldSkipVersionBump ? pkg.version :
+      PublishUtilities._getChangeInfoNewVersion(change, prereleaseToken);
 
     console.log(
       `${EOL}* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: ${ChangeType[change.changeType]} update ` +
       `for ${change.packageName} to ${newVersion}`
     );
 
-    const project: RushConfigurationProject = allPackages.get(change.packageName);
-    const pkg: IPackageJson = project.packageJson;
     const packagePath: string = path.join(project.projectFolder, 'package.json');
 
     pkg.version = newVersion;
 
     // Update the package's dependencies.
-    PublishUtilities._updateDependencies(pkg.name, pkg.dependencies, allChanges, allPackages, prereleaseToken);
+    PublishUtilities._updateDependencies(pkg.name, pkg.dependencies, allChanges, allPackages,
+      prereleaseToken, projectsToExclude);
     // Update the package's dev dependencies.
-    PublishUtilities._updateDependencies(pkg.name, pkg.devDependencies, allChanges, allPackages, prereleaseToken);
+    PublishUtilities._updateDependencies(pkg.name, pkg.devDependencies, allChanges, allPackages,
+      prereleaseToken, projectsToExclude);
 
     change.changes.forEach(subChange => {
       if (subChange.comment) {
@@ -257,6 +290,7 @@ export default class PublishUtilities {
     if (shouldCommit) {
       fsx.writeFileSync(packagePath, JSON.stringify(pkg, undefined, 2), 'utf8');
     }
+    return pkg;
   }
 
   private static _isCyclicDependency(
@@ -273,15 +307,24 @@ export default class PublishUtilities {
     dependencies: { [key: string]: string; },
     allChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
-    prereleaseToken: PrereleaseToken
+    prereleaseToken: PrereleaseToken,
+    projectsToExclude?: Set<string>
   ): void {
 
     if (dependencies) {
       Object.keys(dependencies).forEach(depName => {
         if (!PublishUtilities._isCyclicDependency(allPackages, packageName, depName)) {
           const depChange: IChangeInfo = allChanges[depName];
+          if (!depChange) {
+            return;
+          }
+          const depProject: RushConfigurationProject = allPackages.get(depName);
 
-          if (depChange && prereleaseToken && prereleaseToken.hasValue) {
+          if (!depProject.shouldPublish || projectsToExclude && projectsToExclude.has(depName)) {
+            // No version change.
+            return;
+          } else if (depChange && prereleaseToken && prereleaseToken.hasValue) {
+            // TODO: treat prerelease version the same as non-prerelease version.
             // For prelease, the newVersion needs to be appended with prerelease name.
             // And dependency should specify the specific prerelease version.
             dependencies[depName] = PublishUtilities._getChangeInfoNewVersion(depChange, prereleaseToken);
@@ -329,7 +372,8 @@ export default class PublishUtilities {
     change: IChangeInfo,
     allChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
-    prereleaseToken?: PrereleaseToken
+    prereleaseToken?: PrereleaseToken,
+    projectsToExclude?: Set<string>
   ): boolean {
     let hasChanged: boolean = false;
     const packageName: string = change.packageName;
@@ -367,8 +411,10 @@ export default class PublishUtilities {
 
       hasChanged = hasChanged || (oldChangeType !== currentChange.changeType);
     }
+    const skipVersionBump: boolean = PublishUtilities._shouldSkipVersionBump(project,
+      prereleaseToken, projectsToExclude);
 
-    if (prereleaseToken && prereleaseToken.isSuffix) {
+    if (skipVersionBump) {
       currentChange.newVersion = pkg.version;
     } else {
       currentChange.newVersion = change.changeType >= ChangeType.patch ?
@@ -385,7 +431,8 @@ export default class PublishUtilities {
     change: IChangeInfo,
     allChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
-    prereleaseToken: PrereleaseToken
+    prereleaseToken: PrereleaseToken,
+    projectsToExclude?: Set<string>
   ): void {
 
     const packageName: string = change.packageName;
@@ -399,9 +446,9 @@ export default class PublishUtilities {
           const pkg: IPackageJson = allPackages.get(depName).packageJson;
 
           PublishUtilities._updateDownstreamDependency(pkg.name, pkg.dependencies, change, allChanges, allPackages,
-            prereleaseToken);
+            prereleaseToken, projectsToExclude);
           PublishUtilities._updateDownstreamDependency(pkg.name, pkg.devDependencies, change, allChanges, allPackages,
-            prereleaseToken);
+            prereleaseToken, projectsToExclude);
         }
       }
     }
@@ -413,7 +460,8 @@ export default class PublishUtilities {
     change: IChangeInfo,
     allChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
-    prereleaseToken: PrereleaseToken
+    prereleaseToken: PrereleaseToken,
+    projectsToExclude?: Set<string>
   ): void {
 
     if (dependencies && dependencies[change.packageName]) {
@@ -433,7 +481,7 @@ export default class PublishUtilities {
         const hasChanged: boolean = PublishUtilities._addChange({
           packageName: parentPackageName,
           changeType
-        }, allChanges, allPackages, prereleaseToken);
+        }, allChanges, allPackages, prereleaseToken, projectsToExclude);
 
         if (hasChanged || alwaysUpdate) {
           // Only re-evaluate downstream dependencies if updating the parent package's dependency
@@ -442,7 +490,8 @@ export default class PublishUtilities {
             allChanges[parentPackageName],
             allChanges,
             allPackages,
-            prereleaseToken
+            prereleaseToken,
+            projectsToExclude
           );
         }
       }

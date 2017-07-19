@@ -18,7 +18,6 @@ import IPackageJson from '../utilities/IPackageJson';
  */
 export enum BumpType {
   'prerelease',
-  'release',
   'patch',
   'minor',
   'major'
@@ -65,6 +64,10 @@ export abstract class VersionPolicy {
   }
 
   public abstract ensure(project: IPackageJson): IPackageJson | undefined;
+
+  public abstract bump(): void;
+
+  public abstract get json(): IVersionPolicyJson;
 }
 
 /**
@@ -73,6 +76,8 @@ export abstract class VersionPolicy {
  */
 export class LockStepVersionPolicy extends VersionPolicy {
   private _version: semver.SemVer;
+  // nextBump is probably not needed. It can be prerelease only.
+  // Other types of bumps can be passed in as a parameter to bump method, so can identifier.
   private _nextBump: BumpType;
 
   constructor(versionPolicyJson: ILockStepVersionJson) {
@@ -89,6 +94,15 @@ export class LockStepVersionPolicy extends VersionPolicy {
     return this._nextBump;
   }
 
+  public get json(): ILockStepVersionJson {
+    return {
+      policyName: this.policyName,
+      definitionName: VersionPolicyDefinitionName[this.definitionName],
+      version: this.version.format(),
+      nextBump: BumpType[this.nextBump]
+    };
+  }
+
   public ensure(project: IPackageJson): IPackageJson | undefined {
     const packageVersion: semver.SemVer = new semver.SemVer(project.version);
     const compareResult: number = packageVersion.compare(this._version);
@@ -99,8 +113,16 @@ export class LockStepVersionPolicy extends VersionPolicy {
         + ` is higher than locked version ${this._version.format()}.`;
       throw new Error(errorMessage);
     }
+    return this._updatePackageVersion(project, this._version);
+  }
+
+  public bump(): void {
+    this.version.inc(BumpType[this._nextBump]);
+  }
+
+  private _updatePackageVersion(project: IPackageJson, newVersion: semver.SemVer): IPackageJson {
     const updatedProject: IPackageJson = cloneDeep(project);
-    updatedProject.version = this._version.format();
+    updatedProject.version = newVersion.format();
     return updatedProject;
   }
 }
@@ -121,6 +143,14 @@ export class IndividualVersionPolicy extends VersionPolicy {
     return this._lockedMajor;
   }
 
+  public get json(): IIndividualVersionJson {
+    return {
+      policyName: this.policyName,
+      definitionName: VersionPolicyDefinitionName[this.definitionName],
+      lockedMajor: this.lockedMajor
+    };
+  }
+
   public ensure(project: IPackageJson): IPackageJson | undefined {
     if (this.lockedMajor) {
       const version: semver.SemVer = new semver.SemVer(project.version);
@@ -135,5 +165,9 @@ export class IndividualVersionPolicy extends VersionPolicy {
       }
     }
     return undefined;
+  }
+
+  public bump(): void {
+    // individual version policy lets change files drive version bump.
   }
 }
