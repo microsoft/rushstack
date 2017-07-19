@@ -68,6 +68,8 @@ export abstract class VersionPolicy {
   public abstract bump(): void;
 
   public abstract get json(): IVersionPolicyJson;
+
+  public abstract validate(versionString: string): void;
 }
 
 /**
@@ -120,6 +122,13 @@ export class LockStepVersionPolicy extends VersionPolicy {
     this.version.inc(BumpType[this._nextBump]);
   }
 
+  public validate(versionString: string): void {
+    const versionToTest: semver.SemVer = new semver.SemVer(versionString, false);
+    if (this.version.compare(versionToTest) !== 0) {
+      throw new Error(`Invalid version ${versionString}`);
+    }
+  }
+
   private _updatePackageVersion(project: IPackageJson, newVersion: semver.SemVer): IPackageJson {
     const updatedProject: IPackageJson = cloneDeep(project);
     updatedProject.version = newVersion.format();
@@ -169,5 +178,14 @@ export class IndividualVersionPolicy extends VersionPolicy {
 
   public bump(): void {
     // individual version policy lets change files drive version bump.
+  }
+
+  public validate(versionString: string): void {
+    const versionToTest: semver.SemVer = new semver.SemVer(versionString, false);
+    if (this._lockedMajor !== undefined) {
+      if (this._lockedMajor !== versionToTest.major) {
+        throw new Error(`Invalid major version ${versionString}`);
+      }
+    }
   }
 }

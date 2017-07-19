@@ -10,6 +10,7 @@ import {
   ChangeFile,
   ChangeType,
   IChangeInfo,
+  LockStepVersionPolicy,
   RushConfiguration,
   RushConfigurationProject,
   RushConstants,
@@ -70,17 +71,38 @@ export class VersionManager {
       });
     }
 
+    // Refresh rush configuration
+    this._rushConfiguration = RushConfiguration.loadFromConfigurationFile(this._rushConfiguration.rushJsonFile);
+
     // Update projects based on individual policies
-    // TODO: make ChangeManager only handles projects that are with individual version policy
-    // const changeManager: ChangeManager = new ChangeManager(this._rushConfiguration);
-    // const changesPath: string = path.join(this._rushConfiguration.commonFolder, RushConstants.changeFilesFolderName);
-    // changeManager.load(changesPath);
-    // if (changeManager.hasChanges()) {
-    //   changeManager.apply(shouldCommit).forEach(packageJson => {
-    //     allUpdatedPackages.set(packageJson.name, packageJson);
-    //   });
-    // }
+    const changeManager: ChangeManager = new ChangeManager(this._rushConfiguration,
+      this._getLockStepProjects());
+    const changesPath: string = path.join(this._rushConfiguration.commonFolder, RushConstants.changeFilesFolderName);
+    changeManager.load(changesPath);
+    if (changeManager.hasChanges()) {
+      changeManager.validateChanges(this._versionPolicyConfiguration);
+      changeManager.apply(shouldCommit).forEach(packageJson => {
+        allUpdatedPackages.set(packageJson.name, packageJson);
+      });
+    }
     return allUpdatedPackages;
+  }
+
+  private _getLockStepProjects(): Set<string> | undefined {
+    const lockStepVersionPolicyNames: Set<string> = new Set<string>();
+
+    this._versionPolicyConfiguration.versionPolicies.forEach((versionPolicy) => {
+      if (versionPolicy instanceof LockStepVersionPolicy) {
+        lockStepVersionPolicyNames.add(versionPolicy.policyName);
+      }
+    });
+    const lockStepProjectNames: Set<string> = new Set<string>();
+    this._rushConfiguration.projects.forEach((rushProject) => {
+      if (lockStepVersionPolicyNames.has(rushProject.versionPolicyName)) {
+        lockStepProjectNames.add(rushProject.packageName);
+      }
+    });
+    return lockStepProjectNames;
   }
 
   private _updateVersionsByPolicy(
@@ -172,7 +194,6 @@ export class VersionManager {
             updatedProject.version
           );
         if (newDependencyVersion !== dependencies[updatedProjectName]) {
-          dependencies[updatedProjectName] = newDependencyVersion;
           changes.push(
             {
               changeType: ChangeType.dependency,
@@ -181,6 +202,7 @@ export class VersionManager {
               packageName: projectName
             }
           );
+          dependencies[updatedProjectName] = newDependencyVersion;
         }
       }
     });

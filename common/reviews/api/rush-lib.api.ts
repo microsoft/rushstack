@@ -177,6 +177,8 @@ class IndividualVersionPolicy extends VersionPolicy {
   public readonly json: IIndividualVersionJson;
   // (undocumented)
   public readonly lockedMajor: number | undefined;
+  // (undocumented)
+  public validate(versionString: string): void;
 }
 
 // @public
@@ -249,6 +251,8 @@ class LockStepVersionPolicy extends VersionPolicy {
   // (undocumented)
   public readonly nextBump: BumpType;
   // (undocumented)
+  public validate(versionString: string): void;
+  // (undocumented)
   public readonly version: semver.SemVer;
 }
 
@@ -313,6 +317,7 @@ class RushConfiguration {
   public readonly projects: RushConfigurationProject[];
   // (undocumented)
   public readonly projectsByName: Map<string, RushConfigurationProject>;
+  public readonly rushJsonFile: string;
   public readonly rushJsonFolder: string;
   public readonly rushLinkJsonFilename: string;
   // @alpha
@@ -487,6 +492,8 @@ class VersionPolicy {
   public static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy;
   // (undocumented)
   public readonly policyName: string;
+  // (undocumented)
+  public abstract validate(versionString: string): void;
 }
 
 // @alpha (undocumented)

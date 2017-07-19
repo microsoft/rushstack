@@ -91,6 +91,7 @@ export interface IRushLinkJson {
  * @public
  */
 export default class RushConfiguration {
+  private _rushJsonFile: string;
   private _rushJsonFolder: string;
   private _commonFolder: string;
   private _commonTempFolder: string;
@@ -251,6 +252,13 @@ export default class RushConfiguration {
           + ` ${commonRushConfigFolder}`);
       }
     }
+  }
+
+  /**
+   * The Rush configuration file
+   */
+  public get rushJsonFile(): string {
+    return this._rushJsonFile;
   }
 
   /**
@@ -534,7 +542,7 @@ export default class RushConfiguration {
           + ` requires nodeSupportedVersionRange="${rushConfigurationJson.nodeSupportedVersionRange}")`);
       }
     }
-
+    this._rushJsonFile = rushJsonFilename;
     this._rushJsonFolder = path.dirname(rushJsonFilename);
 
     this._commonFolder = path.resolve(path.join(this._rushJsonFolder, RushConstants.commonFolderName));

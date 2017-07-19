@@ -6,7 +6,8 @@ import {
   IPackageJson,
   RushConfiguration,
   RushConfigurationProject,
-  LockStepVersionPolicy
+  VersionPolicy,
+  VersionPolicyConfiguration
 } from '@microsoft/rush-lib';
 
 import PublishUtilities, {
@@ -28,7 +29,7 @@ export default class ChangeManager {
   private _changeFiles: ChangeFiles;
 
   constructor(private _rushConfiguration: RushConfiguration,
-    private _includeLockSteProjects: boolean = false
+    private _lockStepProjectsToExclude?: Set<string> | undefined
   ) {
   }
 
@@ -70,6 +71,19 @@ export default class ChangeManager {
     return this._allPackages;
   }
 
+  public validateChanges(versionConfig: VersionPolicyConfiguration): void {
+    Object
+      .keys(this._allChanges)
+      .filter((key) => {
+        const versionPolicyName: string = this._rushConfiguration.getProjectByName(key).versionPolicyName;
+        if (versionPolicyName) {
+          const changeInfo: IChangeInfo = this._allChanges[key];
+          const versionPolicy: VersionPolicy = versionConfig.getVersionPolicy(versionPolicyName);
+          versionPolicy.validate(changeInfo.newVersion);
+        }
+      });
+  }
+
   /**
    * Apply changes to package.json and change logs
    * @param shouldCommit - If the value is true, package.json and change logs will be updated.
@@ -98,25 +112,5 @@ export default class ChangeManager {
       this._changeFiles.deleteAll(shouldCommit);
     }
     return updatedPackages;
-  }
-
-  private get _lockStepProjectsToExclude(): Set<string> | undefined {
-    if (this._includeLockSteProjects) {
-      return undefined;
-    }
-    const lockStepVersionPolicyNames: Set<string> = new Set<string>();
-
-    this._rushConfiguration.versionPolicyConfiguration.versionPolicies.forEach((versionPolicy) => {
-      if (versionPolicy instanceof LockStepVersionPolicy) {
-        lockStepVersionPolicyNames.add(versionPolicy.policyName);
-      }
-    });
-    const lockStepProjectNames: Set<string> = new Set<string>();
-    this._rushConfiguration.projects.forEach((rushProject) => {
-      if (lockStepProjectNames.has(rushProject.versionPolicyName)) {
-        lockStepProjectNames.add(rushProject.packageName);
-      }
-    });
-    return lockStepProjectNames;
   }
 }
