@@ -75,11 +75,11 @@ export default class GenerateAction extends BaseRushAction {
       && installManager.createTempModulesAndCheckShrinkwrap(shrinkwrapFile)) {
       console.log();
       console.log(colors.yellow('"rush generate" is unnecessary, since all' +
-        ' direct dependencies were found in the shrinkwrap file.'));
+        ' direct dependencies already exist in the shrinkwrap file.'));
       console.log(colors.yellow('Did you mean to run "rush install"?'));
       console.log();
-      console.log('You can use the \'--force\' flag to bypass this warning.');
-      process.exit(1);
+      console.log('You can use the \'--force\' flag to bypass this check and forcibly' +
+        ' generate a new shrinkwrap file.');
       return;
     }
 
