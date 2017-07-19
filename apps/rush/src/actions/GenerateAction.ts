@@ -14,12 +14,14 @@ import InstallManager, { InstallType } from '../utilities/InstallManager';
 import LinkManager from '../utilities/LinkManager';
 import RushCommandLineParser from './RushCommandLineParser';
 import { ApprovedPackagesChecker } from '../utilities/ApprovedPackagesChecker';
+import ShrinkwrapFile from '../utilities/ShrinkwrapFile';
 import { BaseRushAction } from './BaseRushAction';
 
 export default class GenerateAction extends BaseRushAction {
   private _parser: RushCommandLineParser;
   private _lazyParameter: CommandLineFlagParameter;
   private _noLinkParameter: CommandLineFlagParameter;
+  private _forceParameter: CommandLineFlagParameter;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -45,6 +47,12 @@ export default class GenerateAction extends BaseRushAction {
       + ' but does not generate a shrinkwrap file; you will still need to run a full "rush generate"'
       + ' (without --lazy) before committing your changes.'
     });
+    this._forceParameter = this.defineFlagParameter({
+      parameterLongName: '--force',
+      parameterShortName: '-f',
+      description: 'Use this to bypass checking the shrinkwrap file, which forces rush generate to run even if all'
+      + ' dependencies already exist in the shrinkwrap file'
+    });
     this._noLinkParameter = this.defineFlagParameter({
       parameterLongName: '--no-link',
       description: 'Do not automatically run the "rush link" action after "rush generate"'
@@ -58,6 +66,23 @@ export default class GenerateAction extends BaseRushAction {
     ApprovedPackagesChecker.rewriteConfigFiles(this.rushConfiguration);
 
     const installManager: InstallManager = new InstallManager(this.rushConfiguration);
+
+    const shrinkwrapFile: ShrinkwrapFile | undefined
+        = ShrinkwrapFile.loadFromFile(this.rushConfiguration.committedShrinkwrapFilename);
+
+    if (shrinkwrapFile
+      && !this._forceParameter.value
+      && installManager.createTempModulesAndCheckShrinkwrap(shrinkwrapFile)) {
+      console.log();
+      console.log(colors.yellow('"rush generate" is unnecessary, since all' +
+        ' direct dependencies were found in the shrinkwrap file.'));
+      console.log();
+      console.log(colors.yellow('Did you mean to run "rush install" ?'));
+      console.log();
+      console.log('You can use the \'--force\' flag to bypass this warning,');
+      process.exit(1);
+      return;
+    }
 
     installManager.ensureLocalNpmTool(false);
 
