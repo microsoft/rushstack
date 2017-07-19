@@ -27,8 +27,17 @@ interface IExtendedHtmlStyleElement extends HTMLStyleElement {
   styleSheet: IStyleSheet;
 }
 
+/**
+ * Performance Measurement of loading styles
+ */
 interface IMeasurement {
+  /**
+   * Count of style element injected, which is the slow operation in IE
+   */
   count: number;
+  /**
+   * Total duration of all loadStyles exections
+   */
   duration: number;
 }
 
