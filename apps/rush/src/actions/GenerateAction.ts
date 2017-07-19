@@ -76,10 +76,9 @@ export default class GenerateAction extends BaseRushAction {
       console.log();
       console.log(colors.yellow('"rush generate" is unnecessary, since all' +
         ' direct dependencies were found in the shrinkwrap file.'));
+      console.log(colors.yellow('Did you mean to run "rush install"?'));
       console.log();
-      console.log(colors.yellow('Did you mean to run "rush install" ?'));
-      console.log();
-      console.log('You can use the \'--force\' flag to bypass this warning,');
+      console.log('You can use the \'--force\' flag to bypass this warning.');
       process.exit(1);
       return;
     }
