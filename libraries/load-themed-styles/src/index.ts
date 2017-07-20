@@ -27,16 +27,47 @@ interface IExtendedHtmlStyleElement extends HTMLStyleElement {
   styleSheet: IStyleSheet;
 }
 
+/**
+ * Performance Measurement of loading styles
+ */
+interface IMeasurement {
+  /**
+   * Count of style element injected, which is the slow operation in IE
+   */
+  count: number;
+  /**
+   * Total duration of all loadStyles exections
+   */
+  duration: number;
+}
+
+interface IRunState {
+  mode: Mode;
+  buffer: ThemableArray[];
+  flushTimer: number;
+}
+
 interface IThemeState {
   theme: ITheme | undefined;
   lastStyleElement: IExtendedHtmlStyleElement;
   registeredStyles: IStyleRecord[];
   loadStyles: ((processedStyles: string, rawStyles?: string | ThemableArray) => void) | undefined;
+  perf: IMeasurement;
+  runState: IRunState;
 }
 
 interface IStyleRecord {
   styleElement: Element;
   themableStyle: ThemableArray;
+}
+
+/**
+ * In sync mode, styles are registered as style elements synchronously with loadStyles() call.
+ * In async mode, styles are buffered and registered as batch in async timer for performance purpose.
+ */
+export const enum Mode {
+  sync,
+  async
 }
 
 // IE needs to inject styles using cssText. However, we need to evaluate this lazily, so this
@@ -47,11 +78,7 @@ let _injectStylesWithCssText: boolean;
 // load-themed-styles hosted on the page.
 const _root: any = (typeof window === 'undefined') ? global : window; // tslint:disable-line:no-any
 
-const _themeState: IThemeState = _root.__themeState__ = _root.__themeState__ || {
-  theme: undefined,
-  lastStyleElement: undefined,
-  registeredStyles: []
-};
+const _themeState: IThemeState = initializeThemeState();
 
 /**
  * Matches theming tokens. For example, "[theme: themeSlotName, default: #FFF]" (including the quotes).
@@ -62,19 +89,69 @@ const _themeTokenRegex: RegExp = /[\'\"]\[theme:\s*(\w+)\s*(?:\,\s*default:\s*([
 /** Maximum style text length, for supporting IE style restrictions. */
 const MAX_STYLE_CONTENT_SIZE: number = 10000;
 
+const now: () => number =
+  () => (typeof performance !== 'undefined' && !!performance.now) ? performance.now() : Date.now();
+
+function measure(func: () => void): void {
+  const start: number = now();
+  func();
+  const end: number = now();
+  _themeState.perf.duration += end - start;
+}
+
+/**
+ * initialize global state object
+ */
+function initializeThemeState(): IThemeState {
+  let state: IThemeState = _root.__themeState__ || {
+    theme: undefined,
+    lastStyleElement: undefined,
+    registeredStyles: []
+  };
+
+  if (!state.runState) {
+    state = {
+      ...(state),
+      perf: {
+        count: 0,
+        duration: 0
+      },
+      runState: {
+        flushTimer: 0,
+        mode: Mode.sync,
+        buffer: []
+      }
+    };
+  }
+  _root.__themeState__ = state;
+  return state;
+}
+
 /**
  * Loads a set of style text. If it is registered too early, we will register it when the window.load
  * event is fired.
  * @param {string | ThemableArray} styles Themable style text to register.
  */
 export function loadStyles(styles: string | ThemableArray): void {
-  const styleParts: ThemableArray = Array.isArray(styles) ? styles : splitStyles(styles);
-
-  if (_injectStylesWithCssText === undefined) {
-    _injectStylesWithCssText = shouldUseCssText();
-  }
-
-  applyThemableStyles(styleParts);
+  measure(() => {
+    const styleParts: ThemableArray = Array.isArray(styles) ? styles : splitStyles(styles);
+    if (_injectStylesWithCssText === undefined) {
+      _injectStylesWithCssText = shouldUseCssText();
+    }
+    const {
+      mode,
+      buffer,
+      flushTimer
+    } = _themeState.runState;
+    if (mode === Mode.async) {
+      buffer.push(styleParts);
+      if (!flushTimer) {
+        _themeState.runState.flushTimer = asyncLoadStyles();
+      }
+    } else {
+      applyThemableStyles(styleParts);
+    }
+  });
 }
 
 /**
@@ -83,9 +160,41 @@ export function loadStyles(styles: string | ThemableArray): void {
  * a loadStyles callback that gets called when styles are loaded or reloaded
  */
 export function configureLoadStyles(
-    loadStyles: ((processedStyles: string, rawStyles?: string | ThemableArray) => void) | undefined
-  ): void {
+  loadStyles: ((processedStyles: string, rawStyles?: string | ThemableArray) => void) | undefined
+): void {
   _themeState.loadStyles = loadStyles;
+}
+
+/**
+ * Configure run mode of load-themable-styles
+ * @param mode load-themable-styles run mode, async or sync
+ */
+export function configureRunMode(mode: Mode): void {
+  _themeState.runState.mode = mode;
+}
+
+/**
+ * external code can call flush to synchronously force processing of currently buffered styles
+ */
+export function flush(): void {
+  measure(() => {
+    const styleArrays: ThemableArray[] = _themeState.runState.buffer.slice();
+    _themeState.runState.buffer = [];
+    const mergedStyleArray: ThemableArray[] = [].concat.apply([], styleArrays);
+    if (mergedStyleArray.length > 0) {
+      applyThemableStyles(mergedStyleArray);
+    }
+  });
+}
+
+/**
+ * register async loadStyles
+ */
+function asyncLoadStyles(): number {
+  return setTimeout(() => {
+    _themeState.runState.flushTimer = 0;
+    flush();
+  }, 0);
 }
 
 /**
@@ -230,6 +339,7 @@ function registerStyles(styleArray: ThemableArray, styleRecord?: IStyleRecord): 
 
   styleElement.type = 'text/css';
   styleElement.appendChild(document.createTextNode(resolveThemableArray(styleArray)));
+  _themeState.perf.count++;
 
   if (styleRecord) {
     head.replaceChild(styleElement, styleRecord.styleElement);
