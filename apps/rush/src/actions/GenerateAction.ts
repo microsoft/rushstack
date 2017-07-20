@@ -74,12 +74,10 @@ export default class GenerateAction extends BaseRushAction {
       && !this._forceParameter.value
       && installManager.createTempModulesAndCheckShrinkwrap(shrinkwrapFile)) {
       console.log();
-      console.log(colors.yellow('"rush generate" is unnecessary, since all' +
-        ' direct dependencies already exist in the shrinkwrap file.'));
-      console.log(colors.yellow('Did you mean to run "rush install"?'));
+      console.log(colors.yellow('Skipping generate, since all project dependencies are already satisfied.'));
       console.log();
-      console.log('You can use the \'--force\' flag to bypass this check and forcibly' +
-        ' generate a new shrinkwrap file.');
+      console.log(`If you want to force an upgrade to the latest compatible versions, use ` +
+        `${colors.yellow('rush generate --force')}. Otherwise, just run ${colors.green('rush install')}.)`);
       return;
     }
 
