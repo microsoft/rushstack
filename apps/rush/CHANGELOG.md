@@ -8,8 +8,6 @@ Fri, Jul 21, 2017 22:30:12 PM
 ### Patches
 
 - Add writeChangeFileSync() and generateChangeFilePath() to rush-lib
-- Move versionPolicy definitions out of rush.config and into version-policies.json to avoid modifying rush.config when versions get changed
-- Add version policy configuration and a Rush action to enforce version policy
 - Temporarily revert Rush incremental build checking files outside of the project's directory
 - Fix error message during build
 - Add a ChangeFile class to rush-lib
@@ -225,7 +223,7 @@ Sun, 22 Jan 2017 02:04:57 GMT
 
 ### Patches
 
-- Update temp_modules when versions are bumped. 
+- Update temp_modules when versions are bumped.
 
 ## 1.4.1
 Tue, 03 Jan 2017 21:52:49 GMT
