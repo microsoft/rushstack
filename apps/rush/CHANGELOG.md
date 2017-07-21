@@ -7,7 +7,6 @@ Fri, Jul 21, 2017 22:30:12 PM
 
 ### Patches
 
-- Add writeChangeFileSync() and generateChangeFilePath() to rush-lib
 - Temporarily revert Rush incremental build checking files outside of the project's directory
 - Fix error message during build
 - Add a ChangeFile class to rush-lib

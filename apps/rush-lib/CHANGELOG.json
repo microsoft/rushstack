@@ -8,9 +8,6 @@
       "comments": {
         "patch": [
           {
-            "comment": "Add writeChangeFileSync() and generateChangeFilePath() to rush-lib"
-          },
-          {
             "comment": "Temporarily revert Rush incremental build checking files outside of the project's directory"
           },
           {
