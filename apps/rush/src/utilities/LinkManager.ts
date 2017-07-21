@@ -166,13 +166,13 @@ export default class LinkManager {
     return new Promise<void>((resolve: () => void, reject: (reason: Error) => void): void => {
       if (!force) {
         if (fsx.existsSync(this._rushConfiguration.rushLinkJsonFilename)) {
-          console.log(colors.green(`Skipping "rush link" -- everything is already up to date.`));
+          console.log(colors.green(`Skipping linking -- everything is already up to date.`));
           resolve();
           return;
         }
       }
 
-      console.log('Starting "rush link"');
+      console.log('Linking projects together...');
       const stopwatch: Stopwatch = Stopwatch.start();
 
       // Delete the flag file if it exists; if we get interrupted, this will ensure that
@@ -201,7 +201,7 @@ export default class LinkManager {
             JsonFile.saveJsonFile(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
 
             stopwatch.stop();
-            console.log(os.EOL + colors.green(`Rush link finished successfully. (${stopwatch.toString()})`));
+            console.log(os.EOL + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));
             console.log(os.EOL + 'Next you should probably run: "rush rebuild"');
 
             resolve();
