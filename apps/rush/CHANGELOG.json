@@ -2,6 +2,33 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "3.0.12",
+      "tag": "@microsoft/rush_v3.0.12",
+      "date": "Fri, Jul 21, 2017 22:30:12 PM",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Temporarily revert Rush incremental build checking files outside of the project's directory"
+          },
+          {
+            "comment": "Fix error message during build"
+          },
+          {
+            "comment": "Add a ChangeFile class to rush-lib"
+          },
+          {
+            "comment": "Fix an issue where rush would crash if it could not find the rush.json"
+          },
+          {
+            "comment": "If \"rush generate\" detects that all dependencies are present, it will do nothing. This is overridable with the \"--force\" flag."
+          },
+          {
+            "comment": "Promote Changelog interfaces to an @alpha API in rush-lib"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.11",
       "tag": "@microsoft/rush_v3.0.11",
       "date": "Mon, Jul  3, 2017 10:53:12 PM",
