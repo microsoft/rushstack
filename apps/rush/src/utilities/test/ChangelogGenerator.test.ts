@@ -2,12 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import { expect } from 'chai';
-import ChangelogGenerator, {
-  IChangelog
-} from '../ChangelogGenerator';
 import {
+  IChangelog,
   ChangeType
 } from '@microsoft/rush-lib';
+import ChangelogGenerator from '../ChangelogGenerator';
 import * as path from 'path';
 
 describe('updateIndividualChangelog', () => {
