@@ -33,6 +33,11 @@
       "projectFolder": "e",
       "reviewCategory": "third-party",
       "versionPolicyName": "testPolicy1"
+    },
+    {
+      "packageName": "f",
+      "projectFolder": "f",
+      "reviewCategory": "third-party"
     }
   ]
 }

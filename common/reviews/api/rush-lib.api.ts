@@ -68,6 +68,10 @@ enum BumpType {
 class ChangeFile {
   public constructor(private _changeFileData: IChangeFile,
       private _rushConfiguration: RushConfiguration);
+  // (undocumented)
+  public addChange(data: IChangeInfo): void;
+  // (undocumented)
+  public readonly data: IChangeFile;
   public generatePath(): string;
   public writeSync(): void;
 }

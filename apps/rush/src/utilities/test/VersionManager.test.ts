@@ -5,6 +5,8 @@ import { assert } from 'chai';
 import * as path from 'path';
 
 import {
+  ChangeFile,
+  ChangeType,
   RushConfiguration,
   VersionPolicyConfiguration,
   IPackageJson
@@ -27,9 +29,10 @@ describe('VersionManager', () => {
   /* tslint:disable:no-string-literal */
   describe('ensure', () => {
     it('fixes lock step versions', () => {
-      const updatedPackages: Map<string, IPackageJson> = versionManager.ensure('testPolicy1');
+      versionManager.ensure('testPolicy1');
+      const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
       const expectedVersion: string = '10.10.0';
-      assert.equal(updatedPackages.size, 4);
+      assert.equal(updatedPackages.size, 5, 'The number of updated packages matches');
       assert.equal(updatedPackages.get('a').version, expectedVersion);
       assert.equal(updatedPackages.get('b').version, expectedVersion);
       assert.equal(updatedPackages.get('b').dependencies['a'], `~${expectedVersion}`);
@@ -37,12 +40,32 @@ describe('VersionManager', () => {
       assert.equal(updatedPackages.get('c').dependencies['b'], `>=10.10.0 <11.0.0`);
       assert.equal(updatedPackages.get('d').version, '4.1.1', 'd version should not change');
       assert.equal(updatedPackages.get('d').dependencies['b'], `>=10.10.0 <11.0.0`);
+      assert.equal(updatedPackages.get('f').version, '1.0.0', 'f version should not change');
+      assert.equal(updatedPackages.get('f').dependencies['a'], `~10.10.0`);
+
+      const changeFiles: Map<string, ChangeFile> = versionManager.changeFiles;
+      assert.equal(changeFiles.size, 4, 'The number of change files matches');
+      assert.equal(changeFiles.get('a').data.changes.length, 1, 'a does not have one change');
+      assert.equal(changeFiles.get('a').data.changes[0].changeType, ChangeType.none,
+        'a does not have a none change');
+      assert.equal(changeFiles.get('b').data.changes.length, 2, 'b does not have two change');
+      assert.equal(changeFiles.get('b').data.changes[0].changeType, ChangeType.none,
+        'b does not have a none change');
+      assert.equal(changeFiles.get('b').data.changes[1].changeType, ChangeType.dependency,
+        'b does not have a dependency change');
+      assert.equal(changeFiles.get('c').data.changes.length, 1, 'c does not have one change');
+      assert.equal(changeFiles.get('c').data.changes[0].changeType, ChangeType.dependency,
+        'c does not have a dependency change');
+      assert.equal(changeFiles.get('d').data.changes.length, 1, 'd does not have one change');
+      assert.equal(changeFiles.get('d').data.changes[0].changeType, ChangeType.dependency,
+        'd does not have a dependency change');
     });
   });
 
   describe('ensure', () => {
     it('fixes major version for individual version policy', () => {
-      const updatedPackages: Map<string, IPackageJson> = versionManager.ensure('testPolicy2');
+      versionManager.ensure('testPolicy2');
+      const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
       assert.equal(updatedPackages.size, 2);
       assert.equal(updatedPackages.get('c').version, '5.0.0');
       assert.equal(updatedPackages.get('c').dependencies['b'], `>=2.0.0 <3.0.0`);
@@ -53,7 +76,8 @@ describe('VersionManager', () => {
 
   describe('ensure', () => {
     it('does not change packageJson if not needed by individual version policy', () => {
-      const updatedPackages: Map<string, IPackageJson> = versionManager.ensure('testPolicy3');
+      versionManager.ensure('testPolicy3');
+      const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
       assert.equal(updatedPackages.size, 0);
     });
   });

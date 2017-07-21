@@ -3,7 +3,6 @@
 
 import * as path from 'path';
 import * as fsx from 'fs-extra';
-import * as semver from 'semver';
 import { cloneDeep } from 'lodash';
 
 import {
@@ -21,16 +20,20 @@ import {
 
 import PublishUtilities from './PublishUtilities';
 import ChangeManager from './ChangeManager';
-import ChangelogGenerator from './ChangelogGenerator';
 
 export class VersionManager {
   private _versionPolicyConfiguration: VersionPolicyConfiguration;
+  private _updatedProjects: Map<string, IPackageJson>;
+  private _changeFiles: Map<string, ChangeFile>;
 
   constructor(private _rushConfiguration: RushConfiguration,
     _versionPolicyConfiguration?: VersionPolicyConfiguration
   ) {
     this._versionPolicyConfiguration = _versionPolicyConfiguration ?
       _versionPolicyConfiguration : this._rushConfiguration.versionPolicyConfiguration;
+
+    this._updatedProjects = new Map<string, IPackageJson>();
+    this._changeFiles = new Map<string, ChangeFile>();
   }
 
   /**
@@ -41,35 +44,16 @@ export class VersionManager {
    * @param versionPolicyName -- version policy name
    * @param shouldCommit -- should update files to disk
    */
-  public ensure(versionPolicyName?: string, shouldCommit?: boolean): Map<string, IPackageJson> {
-    const updatedProjects: Map<string, IPackageJson> = new Map<string, IPackageJson>();
-    this._updateVersionsByPolicy(updatedProjects, versionPolicyName);
-
-    // Update all dependencies if needed.
-    this._updateDependencies(updatedProjects);
-
-    if (shouldCommit) {
-      this._updateFiles(updatedProjects);
-    }
-    return updatedProjects;
+  public ensure(versionPolicyName?: string, shouldCommit?: boolean): void {
+    this._ensure(versionPolicyName, shouldCommit);
   }
 
-  public bump(versionPolicyName?: string, shouldCommit?: boolean): Map<string, IPackageJson> {
+  public bump(versionPolicyName?: string, shouldCommit?: boolean): void {
+    // Bump all the lock step version policies.
     this._versionPolicyConfiguration.bump(versionPolicyName, shouldCommit);
 
-    const allUpdatedPackages: Map<string, IPackageJson> = new Map<string, IPackageJson>();
-    // Update all projects based on lock step policies
-    this._updateVersionsByPolicy(allUpdatedPackages, versionPolicyName);
-
-    // Create change files for other effected projects
-    const changeFiles: ChangeFile[] = this._updateDependencies(allUpdatedPackages);
-
-    if (shouldCommit) {
-      this._updateFiles(allUpdatedPackages);
-      changeFiles.forEach((changeFile) => {
-        changeFile.writeSync();
-      });
-    }
+    // Update packages and generate change files due to lock step bump.
+    this._ensure(versionPolicyName, shouldCommit);
 
     // Refresh rush configuration
     this._rushConfiguration = RushConfiguration.loadFromConfigurationFile(this._rushConfiguration.rushJsonFile);
@@ -82,10 +66,31 @@ export class VersionManager {
     if (changeManager.hasChanges()) {
       changeManager.validateChanges(this._versionPolicyConfiguration);
       changeManager.apply(shouldCommit).forEach(packageJson => {
-        allUpdatedPackages.set(packageJson.name, packageJson);
+        this._updatedProjects.set(packageJson.name, packageJson);
       });
     }
-    return allUpdatedPackages;
+  }
+
+  public get updatedProjects(): Map<string, IPackageJson> {
+    return this._updatedProjects;
+  }
+
+  public get changeFiles(): Map<string, ChangeFile> {
+    return this._changeFiles;
+  }
+
+  private _ensure(versionPolicyName?: string, shouldCommit?: boolean): void {
+    this._updateVersionsByPolicy(versionPolicyName);
+
+    // Update all dependencies if needed.
+    this._updateDependencies();
+
+    if (shouldCommit) {
+      this._updatePackageJsonFiles();
+      this._changeFiles.forEach((changeFile) => {
+        changeFile.writeSync();
+      });
+    }
   }
 
   private _getLockStepProjects(): Set<string> | undefined {
@@ -105,10 +110,7 @@ export class VersionManager {
     return lockStepProjectNames;
   }
 
-  private _updateVersionsByPolicy(
-    updatedProjects: Map<string, IPackageJson>,
-    versionPolicyName?: string
-  ): void {
+  private _updateVersionsByPolicy(versionPolicyName?: string): void {
     const versionPolicies: Map<string, VersionPolicy> = this._versionPolicyConfiguration.versionPolicies;
 
     // Update versions based on version policy
@@ -120,56 +122,70 @@ export class VersionManager {
           projectVersionPolicyName);
         const updatedProject: IPackageJson = versionPolicy.ensure(rushProject.packageJson);
         if (updatedProject) {
-          updatedProjects.set(updatedProject.name, updatedProject);
+          this._updatedProjects.set(updatedProject.name, updatedProject);
+          this._addChangeInfo(updatedProject.name,
+            [this._createChangeInfo(updatedProject, rushProject)]);
         }
       }
     });
   }
 
-  private _updateDependencies(updatedProjects: Map<string, IPackageJson>,
-    createChangeFile?: boolean
-  ): ChangeFile[] {
-    const changeFiles: ChangeFile[] = [];
+  private _addChangeInfo(packageName: string,
+    changeInfos: IChangeInfo[]
+  ): void {
+    if (!changeInfos.length) {
+      return;
+    }
+    let changeFile: ChangeFile = this._changeFiles.get(packageName);
+    if (!changeFile) {
+      changeFile = new ChangeFile({
+        changes: [],
+        packageName: packageName,
+        email: 'version_bump@microsoft.com'
+      }, this._rushConfiguration);
+      this._changeFiles.set(packageName, changeFile);
+    }
+    changeInfos.forEach((changeInfo) => {
+      changeFile.addChange(changeInfo);
+    });
+  }
+
+  private _updateDependencies(): void {
     this._rushConfiguration.projects.forEach(rushProject => {
-      let clonedProject: IPackageJson = updatedProjects.get(rushProject.packageName);
+      let clonedProject: IPackageJson = this._updatedProjects.get(rushProject.packageName);
       if (!clonedProject) {
         clonedProject = cloneDeep(rushProject.packageJson);
       }
-      const changeFile: ChangeFile | undefined = this._updateProjectAllDependencies(rushProject,
-        clonedProject, updatedProjects);
-      if (changeFile) {
-        changeFiles.push(changeFile);
-      }
+      this._updateProjectAllDependencies(rushProject, clonedProject);
     });
-    return changeFiles;
   }
 
   private _updateProjectAllDependencies(
     rushProject: RushConfigurationProject,
-    clonedProject: IPackageJson,
-    updatedProjects: Map<string, IPackageJson>
-  ): ChangeFile | undefined {
+    clonedProject: IPackageJson
+  ): void {
     if (!clonedProject.dependencies) {
       return;
     }
     const dependencies: { [key: string]: string; } = clonedProject.dependencies;
     const changes: IChangeInfo[] = [];
-
-    this._updateProjectDependencies(clonedProject.dependencies, changes,
-      clonedProject.name, updatedProjects, rushProject);
-    this._updateProjectDependencies(clonedProject.devDependencies, changes,
-      clonedProject.name, updatedProjects, rushProject);
-
-    if (changes.length > 0) {
-      updatedProjects.set(clonedProject.name, clonedProject);
-      const changeFile: ChangeFile = new ChangeFile({
-        changes: changes,
-        packageName: clonedProject.name,
-        email: 'version_bump@microsoft.com'
-      }, this._rushConfiguration);
-      return changeFile;
+    let updated: boolean = false;
+    if (this._updateProjectDependencies(clonedProject.dependencies, changes,
+      clonedProject.name, this._updatedProjects, rushProject)
+    ) {
+      updated = true;
     }
-    return undefined;
+    if (this._updateProjectDependencies(clonedProject.devDependencies, changes,
+      clonedProject.name, this._updatedProjects, rushProject)
+    ) {
+      updated = true;
+    }
+
+    if (updated) {
+      this._updatedProjects.set(clonedProject.name, clonedProject);
+
+      this._addChangeInfo(clonedProject.name, changes);
+    }
   }
 
   private _updateProjectDependencies(dependencies: { [key: string]: string; },
@@ -177,10 +193,11 @@ export class VersionManager {
     projectName: string,
     updatedProjects: Map<string, IPackageJson>,
     rushProject: RushConfigurationProject
-  ): void {
+  ): boolean {
     if (!dependencies) {
-      return;
+      return false;
     }
+    let updated: boolean = false;
     updatedProjects.forEach((updatedProject, updatedProjectName) => {
       if (dependencies[updatedProjectName]) {
         if (rushProject.cyclicDependencyProjects.has(updatedProjectName)) {
@@ -188,76 +205,56 @@ export class VersionManager {
           console.log(`Found cyclic ${rushProject.packageName} ${updatedProjectName}`);
           return;
         }
+
         const newDependencyVersion: string = PublishUtilities.getNewDependencyVersion(
             dependencies,
             updatedProjectName,
             updatedProject.version
           );
         if (newDependencyVersion !== dependencies[updatedProjectName]) {
-          changes.push(
-            {
-              changeType: ChangeType.dependency,
-              comment: `Dependency ${updatedProjectName} version bump from ${dependencies[updatedProjectName]}` +
-                ` to ${newDependencyVersion}.`,
-              packageName: projectName
-            }
-          );
+          updated = true;
+          if (rushProject.shouldPublish) {
+            changes.push(
+              {
+                changeType: ChangeType.dependency,
+                comment: `Dependency ${updatedProjectName} version bump from ${dependencies[updatedProjectName]}` +
+                  ` to ${newDependencyVersion}.`,
+                packageName: projectName
+              }
+            );
+          }
           dependencies[updatedProjectName] = newDependencyVersion;
         }
       }
     });
+    return updated;
   }
 
-  private _updateFiles(updatedPackages: Map<string, IPackageJson>): void {
-    updatedPackages.forEach((newPackageJson, packageName) => {
+  private _updatePackageJsonFiles(): void {
+    this._updatedProjects.forEach((newPackageJson, packageName) => {
       const rushProject: RushConfigurationProject = this._rushConfiguration.getProjectByName(packageName);
       // Update package.json
       const packagePath: string = path.join(rushProject.projectFolder, 'package.json');
       fsx.writeFileSync(packagePath, JSON.stringify(newPackageJson, undefined, 2), 'utf8');
-
-      if (newPackageJson.version !== rushProject.packageJson.version) {
-        // If package version changes, add an entry to changelog
-        const change: IChangeInfo = this._createChangeInfo(newPackageJson, rushProject);
-        ChangelogGenerator.updateIndividualChangelog(change,
-          rushProject.projectFolder,
-          true);
-      }
-      // TODO: if only package dependency changes, add change file.
     });
   }
 
   private _createChangeInfo(newPackageJson: IPackageJson,
     rushProject: RushConfigurationProject
   ): IChangeInfo {
-    const changeType: ChangeType = this._getChangeType(rushProject.packageJson.version,
-      newPackageJson.version);
-    // TODO: need to absorb all existing change files
     return {
-      changeType: changeType,
+      changeType: ChangeType.none,
       newVersion: newPackageJson.version,
       packageName: newPackageJson.name,
       changes: [
         {
-          changeType: changeType,
-          comment: `Version bump to ${newPackageJson.version}`,
+          changeType: ChangeType.none,
+          comment: `Package version bump from ${rushProject.packageJson.version} to ${newPackageJson.version}`,
           newVersion: newPackageJson.version,
           packageName: newPackageJson.name
         }
       ]
     };
-  }
-
-  private _getChangeType(oldVersionString: string, newVersionString: string): ChangeType {
-    const diff: string = semver.diff(oldVersionString, newVersionString);
-    let changeType: ChangeType = ChangeType.none;
-    if (diff === 'major') {
-      changeType = ChangeType.major;
-    } else if (diff === 'minor') {
-      changeType = ChangeType.minor;
-    } else if (diff === 'patch') {
-      changeType = ChangeType.patch;
-    }
-    return changeType;
   }
 
 }

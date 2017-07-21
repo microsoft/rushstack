@@ -53,9 +53,7 @@ export default class PublishUtilities {
       }
 
       for (const change of changeRequest.changes) {
-        if (!projectsToExclude || !projectsToExclude.has(change.packageName)) {
-          PublishUtilities._addChange(change, allChanges, allPackages, prereleaseToken, projectsToExclude);
-        }
+        PublishUtilities._addChange(change, allChanges, allPackages, prereleaseToken, projectsToExclude);
       }
     });
 
@@ -416,14 +414,14 @@ export default class PublishUtilities {
 
     if (skipVersionBump) {
       currentChange.newVersion = pkg.version;
+      hasChanged = false;
+      currentChange.changeType = ChangeType.none;
     } else {
       currentChange.newVersion = change.changeType >= ChangeType.patch ?
         semver.inc(pkg.version, ChangeType[currentChange.changeType]) :
         pkg.version;
+      currentChange.newRangeDependency = PublishUtilities._getNewRangeDependency(currentChange.newVersion);
     }
-
-    currentChange.newRangeDependency = PublishUtilities._getNewRangeDependency(currentChange.newVersion);
-
     return hasChanged;
   }
 

@@ -143,7 +143,6 @@ export default class ChangelogGenerator {
     const changelog: IChangelog = ChangelogGenerator._getChangelog(change.packageName, projectFolder);
 
     if (
-      change.changeType > ChangeType.none &&
       !changelog.entries.some(entry => entry.version === change.newVersion)) {
 
       const changelogEntry: IChangeLogEntry = {

@@ -8,7 +8,7 @@ import gitInfo = require('git-repo-info');
 import RushConfiguration from './RushConfiguration';
 import { RushConstants } from '../RushConstants';
 
-import { IChangeFile } from './ChangeManagement';
+import { IChangeFile, IChangeInfo } from './ChangeManagement';
 
 /**
  * This class represents a single change file.
@@ -24,6 +24,14 @@ export class ChangeFile {
     if (!this._rushConfiguration) {
       throw new Error(`_rushConfiguration does not have value`);
     }
+  }
+
+  public addChange(data: IChangeInfo): void {
+    this._changeFileData.changes.push(data);
+  }
+
+  public get data(): IChangeFile {
+    return this._changeFileData;
   }
 
   /**

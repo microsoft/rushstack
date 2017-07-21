@@ -139,7 +139,9 @@ describe('findChangeRequests', () => {
       false,
       undefined,
       new Set<string>(['a', 'b', 'e']));
-    expect(Object.keys(allChanges).length).to.equal(3);
+    expect(Object.keys(allChanges).length).to.equal(5);
+    expect(allChanges['a'].newVersion).equals('1.0.0', 'a version is changed');
+    expect(allChanges['b'].newVersion).equals('2.0.0', 'b version is changed');
     expect(allChanges['c'].changeType).equals(ChangeType.patch, 'c was not a patch');
     expect(allChanges['c'].newVersion).equals('3.1.2');
     expect(allChanges['d'].changeType).equals(ChangeType.patch, 'd was not a patch');

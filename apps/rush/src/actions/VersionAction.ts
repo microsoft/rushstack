@@ -75,8 +75,9 @@ export default class VersionAction extends BaseRushAction {
     this._versionManager = new VersionManager(this.rushConfiguration);
     if (this._ensureVersionPolicy.value) {
       const tempBranch: string = 'version/ensure-' + new Date().getTime();
+      this._versionManager.ensure(this._versionPolicy.value, true);
 
-      const updatedPackages: Map<string, IPackageJson> = this._versionManager.ensure(this._versionPolicy.value, true);
+      const updatedPackages: Map<string, IPackageJson> = this._versionManager.updatedProjects;
       if (updatedPackages.size > 0) {
         console.log(`${updatedPackages.size} packages are getting updated.`);
         this._gitProcess(tempBranch);
