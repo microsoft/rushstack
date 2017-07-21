@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import * as semver from 'semver';
 import * as fsx from 'fs-extra';
 import { cloneDeep } from 'lodash';
 
@@ -214,6 +215,15 @@ export class VersionManager {
         if (newDependencyVersion !== dependencies[updatedProjectName]) {
           updated = true;
           if (rushProject.shouldPublish) {
+            if (!semver.satisfies(updatedProject.version, dependencies[updatedProjectName])) {
+              changes.push(
+                {
+                  changeType: ChangeType.patch,
+                  packageName: projectName
+                }
+              );
+            }
+
             changes.push(
               {
                 changeType: ChangeType.dependency,

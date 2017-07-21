@@ -48,17 +48,23 @@ describe('VersionManager', () => {
       assert.equal(changeFiles.get('a').data.changes.length, 1, 'a does not have one change');
       assert.equal(changeFiles.get('a').data.changes[0].changeType, ChangeType.none,
         'a does not have a none change');
-      assert.equal(changeFiles.get('b').data.changes.length, 2, 'b does not have two change');
+      assert.equal(changeFiles.get('b').data.changes.length, 3, 'b does not have three change');
       assert.equal(changeFiles.get('b').data.changes[0].changeType, ChangeType.none,
         'b does not have a none change');
-      assert.equal(changeFiles.get('b').data.changes[1].changeType, ChangeType.dependency,
-        'b does not have a dependency change');
-      assert.equal(changeFiles.get('c').data.changes.length, 1, 'c does not have one change');
-      assert.equal(changeFiles.get('c').data.changes[0].changeType, ChangeType.dependency,
+      assert.equal(changeFiles.get('b').data.changes[1].changeType, ChangeType.patch,
+        'b does not have a patch change');
+      assert.equal(changeFiles.get('b').data.changes[2].changeType, ChangeType.dependency,
+        'b does not have a dependency update');
+      assert.equal(changeFiles.get('c').data.changes.length, 2, 'c does not have two change');
+      assert.equal(changeFiles.get('c').data.changes[0].changeType, ChangeType.patch,
+        'c does not have a patch change');
+      assert.equal(changeFiles.get('c').data.changes[1].changeType, ChangeType.dependency,
         'c does not have a dependency change');
-      assert.equal(changeFiles.get('d').data.changes.length, 1, 'd does not have one change');
-      assert.equal(changeFiles.get('d').data.changes[0].changeType, ChangeType.dependency,
-        'd does not have a dependency change');
+      assert.equal(changeFiles.get('d').data.changes.length, 2, 'd does not have two change');
+      assert.equal(changeFiles.get('d').data.changes[0].changeType, ChangeType.patch,
+        'd does not have a  patch change');
+      assert.equal(changeFiles.get('d').data.changes[1].changeType, ChangeType.dependency,
+        'd does not have a  patch change');
     });
   });
 
