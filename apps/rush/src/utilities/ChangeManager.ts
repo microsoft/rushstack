@@ -79,7 +79,7 @@ export default class ChangeManager {
         if (versionPolicyName) {
           const changeInfo: IChangeInfo = this._allChanges[key];
           const versionPolicy: VersionPolicy = versionConfig.getVersionPolicy(versionPolicyName);
-          versionPolicy.validate(changeInfo.newVersion);
+          versionPolicy.validate(changeInfo.newVersion, key);
         }
       });
   }

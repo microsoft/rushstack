@@ -182,7 +182,7 @@ class IndividualVersionPolicy extends VersionPolicy {
   // (undocumented)
   public readonly lockedMajor: number | undefined;
   // (undocumented)
-  public validate(versionString: string): void;
+  public validate(versionString: string, packageName: string): void;
 }
 
 // @public
@@ -255,7 +255,7 @@ class LockStepVersionPolicy extends VersionPolicy {
   // (undocumented)
   public readonly nextBump: BumpType;
   // (undocumented)
-  public validate(versionString: string): void;
+  public validate(versionString: string, packageName: string): void;
   // (undocumented)
   public readonly version: semver.SemVer;
 }
@@ -464,6 +464,7 @@ class VersionControl {
   public static getChangedFiles(prefix?: string, targetBranch?: string): string[];
   // (undocumented)
   public static getChangedFolders(targetBranch?: string): string[];
+  public static getUncommittedChanges(): string[];
   // (undocumented)
   public static hasUncommittedChanges(): boolean;
 }
@@ -497,7 +498,7 @@ class VersionPolicy {
   // (undocumented)
   public readonly policyName: string;
   // (undocumented)
-  public abstract validate(versionString: string): void;
+  public abstract validate(versionString: string, packageName: string): void;
 }
 
 // @alpha (undocumented)

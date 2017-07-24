@@ -8,7 +8,8 @@ import {
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
 import {
-  IPackageJson
+  IPackageJson,
+  VersionControl
 } from '@microsoft/rush-lib';
 
 import RushCommandLineParser from './RushCommandLineParser';
@@ -96,6 +97,18 @@ export default class VersionAction extends BaseRushAction {
     git.checkout(tempBranch, true);
 
     // Stage, commit, and push the changes to remote temp branch.
+    // Need to commit the change log updates in its own commit
+    const changeLogUpdated: boolean = VersionControl.getUncommittedChanges().some((changePath) => {
+      return changePath.indexOf('CHANGELOG.json') > 0;
+    });
+
+    if (changeLogUpdated) {
+      git.addChanges('**/CHANGELOG.json');
+      git.addChanges('**/CHANGELOG.md');
+      git.commit('Updating change logs for package updates.');
+    }
+
+    // Commit the package.json and change files updates.
     git.addChanges();
     git.commit();
     git.push(tempBranch);

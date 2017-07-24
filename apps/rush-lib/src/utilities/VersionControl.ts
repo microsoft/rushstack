@@ -46,19 +46,37 @@ export default class VersionControl {
   }
 
   /**
+   * The list of files changed but not commited
+   */
+  public static getUncommittedChanges(): string[] {
+    const changes: string[] = [];
+    changes.push(...VersionControl._getUntrackedChanges());
+    changes.push(...VersionControl._getDiffOnHEAD());
+    return changes;
+  }
+
+  /**
    * This lists files that have not been added/tracked in git.
    */
   private static _hasUntrackedChanges(): boolean {
+    return VersionControl._getUntrackedChanges().length > 0;
+  }
+
+  private static _getUntrackedChanges(): string[] {
     const output: string = child_process
       .execSync(`git ls-files --exclude-standard --others`)
       .toString();
-    return output.trim().length > 0;
+    return output.trim().split('\n');
   }
 
   private static _hasDiffOnHEAD(): boolean {
+    return VersionControl._getDiffOnHEAD().length > 0;
+  }
+
+  private static _getDiffOnHEAD(): string[] {
     const output: string = child_process
       .execSync(`git diff HEAD --shortstat`)
       .toString();
-    return output.trim().length > 0;
+    return output.trim().split('\n');
   }
 }
