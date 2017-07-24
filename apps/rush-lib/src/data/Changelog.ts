@@ -41,7 +41,14 @@ export interface IChangeLogEntry {
    * Comments for the entry, where key respresents the ChangeType string (Example: major)
    */
   comments: {
-    [changeType: string]: IChangeLogComment[];
+    /** Describes changes which cause a patch-level SemVer bump */
+    patch?: IChangeLogComment[];
+    /** Describes changes which cause a minor-level SemVer bump */
+    minor?: IChangeLogComment[];
+    /** Describes changes which cause a major-level SemVer bump */
+    major?: IChangeLogComment[];
+    /** Describes changes to the package's dependencies */
+    dependency?: IChangeLogComment[];
   };
 }
 
