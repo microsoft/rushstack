@@ -159,7 +159,10 @@ interface IChangeLogComment {
 // @alpha
 interface IChangeLogEntry {
   comments: {
-    [ changeType: string ]: IChangeLogComment[];
+    dependency?: IChangeLogComment[];
+    major?: IChangeLogComment[];
+    minor?: IChangeLogComment[];
+    patch?: IChangeLogComment[];
   }
   date: string;
   tag: string;
