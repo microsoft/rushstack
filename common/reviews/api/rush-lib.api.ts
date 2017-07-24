@@ -143,6 +143,29 @@ interface IChangeInfo {
   type?: string;
 }
 
+// @alpha
+interface IChangelog {
+  entries: IChangeLogEntry[];
+  name: string;
+}
+
+// @alpha
+interface IChangeLogComment {
+  author?: string;
+  comment: string;
+  commit?: string;
+}
+
+// @alpha
+interface IChangeLogEntry {
+  comments: {
+    [ changeType: string ]: IChangeLogComment[];
+  }
+  date: string;
+  tag: string;
+  version: string;
+}
+
 // @public (undocumented)
 interface IErrorDetectionRule {
   // (undocumented)

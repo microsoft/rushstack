@@ -163,47 +163,51 @@ export default class LinkManager {
    *   if true, this option forces the links to be recreated.
    */
   public createSymlinksForProjects(force: boolean): Promise<void> {
-    if (!force) {
-      if (fsx.existsSync(this._rushConfiguration.rushLinkJsonFilename)) {
-        console.log(colors.green(`Skipping "rush link" -- everything is already up to date.`));
-        return Promise.resolve();
-      }
-    }
-
-    console.log('Starting "rush link"');
-    const stopwatch: Stopwatch = Stopwatch.start();
-
-    // Delete the flag file if it exists; if we get interrupted, this will ensure that
-    // a full "rush link" is required next time
-    Utilities.deleteFile(this._rushConfiguration.rushLinkJsonFilename);
-
     return new Promise<void>((resolve: () => void, reject: (reason: Error) => void): void => {
+      if (!force) {
+        if (fsx.existsSync(this._rushConfiguration.rushLinkJsonFilename)) {
+          console.log(colors.green(`Skipping linking -- everything is already up to date.`));
+          resolve();
+          return;
+        }
+      }
+
+      console.log('Linking projects together...');
+      const stopwatch: Stopwatch = Stopwatch.start();
+
+      // Delete the flag file if it exists; if we get interrupted, this will ensure that
+      // a full "rush link" is required next time
+      Utilities.deleteFile(this._rushConfiguration.rushLinkJsonFilename);
+
       readPackageTree(this._rushConfiguration.commonTempFolder,
         (error: Error, npmPackage: readPackageTree.PackageNode) => {
-
         if (error) {
           reject(error);
         } else {
-          const commonRootPackage: Package = Package.createFromNpm(npmPackage);
+          try {
+            const commonRootPackage: Package = Package.createFromNpm(npmPackage);
 
-          const commonPackageLookup: PackageLookup = new PackageLookup();
-          commonPackageLookup.loadTree(commonRootPackage);
+            const commonPackageLookup: PackageLookup = new PackageLookup();
+            commonPackageLookup.loadTree(commonRootPackage);
 
-          const rushLinkJson: IRushLinkJson = { localLinks: {} };
+            const rushLinkJson: IRushLinkJson = { localLinks: {} };
 
-          for (const rushProject of this._rushConfiguration.projects) {
-            console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
-            this._linkProject(rushProject, commonRootPackage, commonPackageLookup, rushLinkJson);
+            for (const rushProject of this._rushConfiguration.projects) {
+              console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
+              this._linkProject(rushProject, commonRootPackage, commonPackageLookup, rushLinkJson);
+            }
+
+            console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
+            JsonFile.saveJsonFile(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
+
+            stopwatch.stop();
+            console.log(os.EOL + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));
+            console.log(os.EOL + 'Next you should probably run: "rush rebuild"');
+
+            resolve();
+          } catch (error) {
+            reject(error);
           }
-
-          console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
-          JsonFile.saveJsonFile(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
-
-          stopwatch.stop();
-          console.log(os.EOL + colors.green(`Rush link finished successfully. (${stopwatch.toString()})`));
-          console.log(os.EOL + 'Next you should probably run: "rush rebuild"');
-
-          resolve();
         }
       });
     });

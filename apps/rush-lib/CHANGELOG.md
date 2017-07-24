@@ -1,6 +1,18 @@
 # Change Log - @microsoft/rush-lib
 
-This log was last generated on Mon, 03 Jul 2017 22:58:11 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Jul 2017 22:34:44 GMT and should not be manually modified.
+
+## 3.0.12
+Fri, Jul 21, 2017 22:30:12 GMT
+
+### Patches
+
+- Temporarily revert Rush incremental build checking files outside of the project's directory
+- Fix error message during build
+- Add a ChangeFile class to rush-lib
+- Fix an issue where rush would crash if it could not find the rush.json
+- If "rush generate" detects that all dependencies are present, it will do nothing. This is overridable with the "--force" flag.
+- Promote Changelog interfaces to an @alpha API in rush-lib
 
 ## 3.0.11
 Mon, Jul  3, 2017 10:53:12 PM
