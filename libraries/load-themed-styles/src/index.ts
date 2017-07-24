@@ -180,7 +180,7 @@ export function flush(): void {
   measure(() => {
     const styleArrays: ThemableArray[] = _themeState.runState.buffer.slice();
     _themeState.runState.buffer = [];
-    const mergedStyleArray: ThemableArray[] = [].concat.apply([], styleArrays);
+    const mergedStyleArray: ThemableArray = [].concat.apply([], styleArrays);
     if (mergedStyleArray.length > 0) {
       applyThemableStyles(mergedStyleArray);
     }
