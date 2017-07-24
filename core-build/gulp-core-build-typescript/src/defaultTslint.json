@@ -25,11 +25,11 @@
           "protected-static-method",
           "private-static-method",
           "public-constructor",
-          "protected-constructor",
           "public-instance-method",
+          "protected-constructor",
           "protected-instance-method",
-          "private-instance-method",
-          "private-constructor"
+          "private-constructor",
+          "private-instance-method"
         ]
       }
     ],
