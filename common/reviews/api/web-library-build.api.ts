@@ -278,6 +278,7 @@ class WebpackTask extends GulpTask<IWebpackTaskConfig> {
 // WARNING: Unsupported export: tslint
 // WARNING: Unsupported export: text
 // WARNING: Unsupported export: removeTripleSlash
+// WARNING: Unsupported export: jsonSchemaToTs
 // WARNING: Unsupported export: sass
 // WARNING: Unsupported export: karma
 // WARNING: Unsupported export: webpack

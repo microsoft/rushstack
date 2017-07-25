@@ -234,6 +234,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "json-schema-to-typescript",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "karma",
       "allowedCategories": [ "libraries" ]
     },
