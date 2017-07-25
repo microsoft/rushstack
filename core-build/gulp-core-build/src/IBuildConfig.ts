@@ -1,21 +1,31 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/* tslint:disable:no-trailing-whitespace whitespace */ /* Remove this when GCB-TS is published and upgraded */
+
 import * as gulp from 'gulp';
 import { GulpProxy } from './GulpProxy';
 import { IExecutable } from './IExecutable';
 
 /* tslint:disable:no-any */
 
-/** @public */
+/**
+ * @public
+ */
 export interface IBuildConfig {
-  /** Proxy gulp instance. */
+  /**
+   * Proxy gulp instance.
+   */
   gulp: GulpProxy | gulp.Gulp;
 
-  /** Array of all unique tasks. */
+  /**
+   * Array of all unique tasks.
+   */
   uniqueTasks?: IExecutable[];
 
-  /** Full physical path to the root path directory. */
+  /**
+   * Full physical path to the root path directory.
+   */
   rootPath: string;
 
   /**

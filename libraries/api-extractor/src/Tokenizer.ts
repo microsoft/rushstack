@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/* tslint:disable:no-trailing-whitespace */ /* Remove this when GCB-TS is published and upgraded */
+
 import Token, { TokenType } from './Token';
 import TypeScriptHelpers from './TypeScriptHelpers';
 
@@ -124,10 +126,10 @@ export default class Tokenizer {
   }
 
   /**
-   * Trims whitespaces on either end of the entry (which is just a string within the doc comments),
+   * Trims whitespace on either end of the entry (which is just a string within the doc comments),
    * replaces \r and \n's with single whitespace, and removes empty entries.
    *
-   * @param docEntries - Array of doc strings to be santitized
+   * @param docEntries - Array of doc strings to be sanitized
    */
   private _sanitizeDocEntries(docEntries: string[]): string[] {
     const result: string[] = [];
