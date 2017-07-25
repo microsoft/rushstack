@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/* tslint:disable:no-trailing-whitespace whitespace comment-format */ /* Remove this when GCB-TS is upgraded */
+
 /**
  * The following interfaces represent Doc Elements of a
  * documentation block.

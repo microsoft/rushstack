@@ -3,6 +3,8 @@
 
 /// <reference types="jju" />
 
+/* tslint:disable:no-trailing-whitespace whitespace */ /* Remove this when GCB-TS is published and upgraded */
+
 import * as os from 'os';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -24,7 +26,7 @@ export class SchemaValidator {
   });
 
   /**
-   * A function which validates a dataFile against a schemFile, both specified
+   * A function which validates a dataFile against a schemaFile, both specified
    * as paths. It will throw if there is an issue with the file,
    * otherwise it will return the validated datafile.
    */

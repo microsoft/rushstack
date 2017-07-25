@@ -3,7 +3,7 @@
 
 /* tslint:disable:no-bitwise */
 /* tslint:disable:no-constant-condition */
-/* tslint:disable:no-trailing-whitespace */
+/* tslint:disable:no-trailing-whitespace */ /* Remove this when GCB-TS is published and upgraded */
 
 import * as ts from 'typescript';
 import * as path from 'path';
@@ -13,7 +13,7 @@ import TypeScriptHelpers from '../TypeScriptHelpers';
 import DocElementParser from '../DocElementParser';
 import ResolvedApiItem from '../ResolvedApiItem';
 import ApiDefinitionReference,
-  { IScopedPackageName, IApiDefinintionReferenceParts } from '../ApiDefinitionReference';
+  { IScopedPackageName, IApiDefinitionReferenceParts } from '../ApiDefinitionReference';
 import ApiItemContainer from './ApiItemContainer';
 
 /**
@@ -83,9 +83,9 @@ enum InitializationState {
    */
   Incomplete = 0,
   /**
-   * The refernces of this ApiItem are in the process of being completed.
+   * The references of this ApiItem are in the process of being completed.
    * If we encounter this state again during completing, a circular dependency
-   * has occured.
+   * has occurred.
    */
   Completing = 1,
   /**
@@ -377,7 +377,7 @@ abstract class ApiItem {
   }
 
   /**
-   * Adds a warning to the ApiItem.warnings list.  These warnings will be emtted in the API file
+   * Adds a warning to the ApiItem.warnings list.  These warnings will be emitted in the API file
    * produced by ApiFileGenerator.
    */
   protected reportWarning(message: string): void {
@@ -457,7 +457,7 @@ abstract class ApiItem {
    *
    * This function makes sure we create the documentation for each ApiItem in the correct order.
    * In the event that a circular dependency occurs, an error is reported. For example, if ApiItemOne has
-   * an \@inheritdoc referencing ApiItemTwo, and ApiItemTwo has an \@inheritdoc refercing ApiItemOne then
+   * an \@inheritdoc referencing ApiItemTwo, and ApiItemTwo has an \@inheritdoc referencing ApiItemOne then
    * we have a circular dependency and an error will be reported.
    */
   public completeInitialization(): void {
@@ -607,7 +607,7 @@ abstract class ApiItem {
     const scopedPackageName: IScopedPackageName = ApiDefinitionReference.parseScopedPackageName(
       typeReferencePackageName
     );
-    const apiDefinitionRefParts: IApiDefinintionReferenceParts = {
+    const apiDefinitionRefParts: IApiDefinitionReferenceParts = {
       scopeName: scopedPackageName.scope,
       packageName: scopedPackageName.package,
       exportName: '',

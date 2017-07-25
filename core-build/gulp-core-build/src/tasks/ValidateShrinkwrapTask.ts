@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/* tslint:disable:no-trailing-whitespace */ /* Remove this when GCB-TS is published and upgraded */
+
 import { GulpTask } from './GulpTask';
 import gulpType = require('gulp');
 import * as path from 'path';
@@ -34,7 +36,9 @@ interface INpmShrinkwrap {
  * @public
  */
 export class ValidateShrinkwrapTask extends GulpTask<void> {
-  /** Instantiates an instance of the ValidateShrinkwrap task */
+  /**
+   * Instantiates an instance of the ValidateShrinkwrap task
+   */
   constructor() {
     super();
     this.name = 'validate-shrinkwrap';
@@ -56,11 +60,11 @@ export class ValidateShrinkwrapTask extends GulpTask<void> {
       return;
     }
 
-    const packagejson: INpmPackage = require(pathToPackageJson);
-    const shrinkwrapjson: INpmShrinkwrap = require(pathToShrinkwrap);
+    const packageJson: INpmPackage = require(pathToPackageJson);
+    const shrinkwrapJson: INpmShrinkwrap = require(pathToShrinkwrap);
 
-    this._validate(packagejson.dependencies, shrinkwrapjson.dependencies);
-    this._validate(packagejson.devDependencies, shrinkwrapjson.dependencies);
+    this._validate(packageJson.dependencies, shrinkwrapJson.dependencies);
+    this._validate(packageJson.devDependencies, shrinkwrapJson.dependencies);
 
     return;
   }

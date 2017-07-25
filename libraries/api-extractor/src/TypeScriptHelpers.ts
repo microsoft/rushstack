@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 /* tslint:disable:no-bitwise */
+/* tslint:disable:no-trailing-whitespace whitespace */ /* Remove this when GCB-TS is published and upgraded */
 
 import * as ts from 'typescript';
 import PrettyPrinter from './PrettyPrinter';
@@ -73,7 +74,7 @@ export default class TypeScriptHelpers {
       const jsdocLines: string[] = jsdocFullText.split(TypeScriptHelpers.newLineRegEx);
       const jsdocStartSeqExists: boolean = TypeScriptHelpers.jsdocStartRegEx.test(jsdocLines[0].toString());
 
-      // Report error for each missing sequence seperately
+      // Report error for each missing sequence separately
       if (!jsdocStartSeqExists) {
         errorLogger('Jsdoc comment must begin with a \"/**\" sequence.');
         return '';

@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/* tslint:disable:no-trailing-whitespace */ /* Remove this when GCB-TS is published and upgraded */
+
 /**
  * An API definition reference that is used to locate the documentation of exported
  * API items that may or may not belong to an external package.
@@ -14,7 +16,7 @@
  * \@microsoft/sp-core-library:Guid.equals
  * es6-collections:Map
  */
-export interface IApiDefinintionReferenceParts {
+export interface IApiDefinitionReferenceParts {
   /**
    * This is an optional property to denote that a package name is scoped under this name.
    * For example, a common case is when having the '@microsoft' scope name in the
@@ -55,7 +57,7 @@ export interface IScopedPackageName {
 }
 
 /**
- * {@inheritdoc IApiDefinintionReferenceParts}
+ * {@inheritdoc IApiDefinitionReferenceParts}
  */
 export default class ApiDefinitionReference {
   /**
@@ -75,19 +77,19 @@ export default class ApiDefinitionReference {
   private static _exportRegEx: RegExp =  /^\w+/;
 
   /**
-   * {@inheritdoc IApiDefinintionReferenceParts.scopeName}
+   * {@inheritdoc IApiDefinitionReferenceParts.scopeName}
    */
   public scopeName: string;
   /**
-   * {@inheritdoc IApiDefinintionReferenceParts.packageName}
+   * {@inheritdoc IApiDefinitionReferenceParts.packageName}
    */
   public packageName: string;
   /**
-   * {@inheritdoc IApiDefinintionReferenceParts.exportName}
+   * {@inheritdoc IApiDefinitionReferenceParts.exportName}
    */
   public exportName: string;
   /**
-   * {@inheritdoc IApiDefinintionReferenceParts.memberName}
+   * {@inheritdoc IApiDefinitionReferenceParts.memberName}
    */
   public memberName: string;
 
@@ -95,7 +97,7 @@ export default class ApiDefinitionReference {
    * Creates an ApiDefinitionReference instance given strings that symbolize the public
    * properties of ApiDefinitionReference.
    */
-  public static createFromParts(parts: IApiDefinintionReferenceParts): ApiDefinitionReference {
+  public static createFromParts(parts: IApiDefinitionReferenceParts): ApiDefinitionReference {
     return new ApiDefinitionReference(parts);
   }
 
@@ -111,7 +113,7 @@ export default class ApiDefinitionReference {
       return undefined;
     }
 
-    const apiDefRefParts: IApiDefinintionReferenceParts = {
+    const apiDefRefParts: IApiDefinitionReferenceParts = {
       scopeName: '',
       packageName: '',
       exportName: '',
@@ -206,7 +208,7 @@ export default class ApiDefinitionReference {
     return this.toExportString() + `.${this.memberName}`;
   }
 
-  private constructor(parts: IApiDefinintionReferenceParts) {
+  private constructor(parts: IApiDefinitionReferenceParts) {
     this.scopeName = parts.scopeName;
     this.packageName = parts.packageName;
     this.exportName = parts.exportName;

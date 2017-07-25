@@ -3,6 +3,7 @@
 
 'use strict';
 
+/* tslint:disable:no-trailing-whitespace whitespace */ /* Remove this when GCB-TS is published and upgraded */
 /* tslint:disable:max-line-length */
 
 import * as path from 'path';
