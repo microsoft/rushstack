@@ -1,6 +1,13 @@
 # Change Log - @microsoft/web-library-build
 
-This log was last generated on Fri, 07 Jul 2017 01:02:28 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Jul 2017 20:03:31 GMT and should not be manually modified.
+
+## 3.2.0
+Tue, 25 Jul 2017 20:03:31 GMT
+
+### Minor changes
+
+- Upgrade to TypeScript 2.4
 
 ## 3.1.0
 Fri, 07 Jul 2017 01:02:28 GMT

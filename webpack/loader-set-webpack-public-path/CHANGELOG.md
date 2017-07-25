@@ -1,6 +1,13 @@
 # Change Log - @microsoft/loader-set-webpack-public-path
 
-This log was last generated on Fri, 05 May 2017 01:02:35 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Jul 2017 20:03:31 GMT and should not be manually modified.
+
+## 2.1.1
+Tue, 25 Jul 2017 20:03:31 GMT
+
+### Patches
+
+- Upgrade to TypeScript 2.4
 
 ## 2.1.0
 Fri, 05 May 2017 01:02:35 GMT

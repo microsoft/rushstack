@@ -13,13 +13,13 @@
   },
   "dependencies": {
     "loader-utils": "~1.1.0",
-    "@microsoft/load-themed-styles": "~1.5.0"
+    "@microsoft/load-themed-styles": "~1.5.1"
   },
   "devDependencies": {
     "@types/mocha": "2.2.38",
     "@types/node": "6.0.62",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
-    "@microsoft/node-library-build": "~3.1.0"
+    "@microsoft/node-library-build": "~3.2.0"
   }
 }

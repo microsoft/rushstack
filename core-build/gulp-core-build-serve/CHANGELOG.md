@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-serve
 
-This log was last generated on Tue, 16 May 2017 00:01:03 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Jul 2017 20:03:31 GMT and should not be manually modified.
+
+## 2.1.4
+Tue, 25 Jul 2017 20:03:31 GMT
+
+### Patches
+
+- Upgrade to TypeScript 2.4
 
 ## 2.1.3
 Tue, 16 May 2017 00:01:03 GMT
