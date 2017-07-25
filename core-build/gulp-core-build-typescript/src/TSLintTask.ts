@@ -156,7 +156,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
           this.buildConfig.tempFolder,
           'tslint-tsconfig.json'
         );
-        fs.writeFileSync(tsconfigFilePath, JSON.stringify(tsconfigFileData, undefined, 2));
+      fs.writeFileSync(tsconfigFilePath, JSON.stringify(tsconfigFileData, undefined, 2));
 
       program = TSLint.Linter.createProgram(
         tsconfigFilePath,

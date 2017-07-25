@@ -53,7 +53,7 @@ export interface IApiExtractorTaskConfig {
    * and require signoff from the appropriate reviewers.
    *
    * Example: "config" (for a standalone project)
-   * Example: "../../common/api-review"  (for a Git repoistory with Rush)
+   * Example: "../../common/api-review"  (for a Git repository with Rush)
    */
   apiReviewFolder?: string;
 
