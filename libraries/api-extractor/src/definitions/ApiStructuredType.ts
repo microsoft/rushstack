@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 /* tslint:disable:no-bitwise */
+/* tslint:disable:no-trailing-whitespace */ /* Remove this when GCB-TS is published and upgraded */
 
 import * as ts from 'typescript';
 import ApiMethod from './ApiMethod';
@@ -123,7 +124,7 @@ export default class ApiStructuredType extends ApiItemContainer {
 
   /**
     * Returns a line of text such as "class MyClass extends MyBaseClass", excluding the
-    * curly braces and body.  The name "MyClass" will be the public name seend by external
+    * curly braces and body.  The name "MyClass" will be the public name seen by external
     * callers, not the declared name of the class; @see ApiItem.name documentation for details.
     */
   public getDeclarationLine(): string {

@@ -1,13 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/* tslint:disable:no-trailing-whitespace whitespace */ /* Remove this when GCB-TS is published and upgraded */
+
 import * as path from 'path';
 import assign = require('object-assign');
 import { SchemaValidator, IBuildConfig } from '@microsoft/gulp-core-build';
 import ts = require('gulp-typescript');
 import * as typescript from 'typescript';
 
-/** @public */
+/**
+ * @public
+ */
 export interface ITsConfigFile<T> {
   compilerOptions: T;
 }
@@ -28,7 +32,7 @@ export class TypeScriptConfiguration {
    * Returns a new object each time.
    */
   public static getGulpTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<ts.Settings> {
-    const file: ITsConfigFile<ts.Settings> = assign({}, this._getTsConfigFile(buildConfig));
+    const file: ITsConfigFile<ts.Settings> = assign({}, this.getTsConfigFile(buildConfig));
     assign(file.compilerOptions, {
       rootDir: buildConfig.rootPath,
       typescript: this.getTypescriptCompiler()
@@ -62,7 +66,7 @@ export class TypeScriptConfiguration {
   /**
    * Helper function which reads the tsconfig.json (or provides one), and memoizes it
    */
-  private static _getTsConfigFile(config: IBuildConfig): ITsConfigFile<ts.Settings> {
+  public static getTsConfigFile(config: IBuildConfig): ITsConfigFile<ts.Settings> {
     if (!this._baseTsConfig) {
       try {
         this._baseTsConfig = SchemaValidator.readCommentedJsonFile<any>(

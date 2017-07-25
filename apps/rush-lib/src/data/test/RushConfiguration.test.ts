@@ -10,8 +10,8 @@ import RushConfigurationProject from '../RushConfigurationProject';
 import * as path from 'path';
 import Utilities from '../../utilities/Utilities';
 
-function normalizePathForComparison(path: string): string {
-  return Utilities.getAllReplaced(path, '\\', '/').toUpperCase();
+function normalizePathForComparison(pathToNormalize: string): string {
+  return Utilities.getAllReplaced(pathToNormalize, '\\', '/').toUpperCase();
 }
 
 function assertPathProperty(validatedPropertyName: string, absolutePath: string, relativePath: string): void {

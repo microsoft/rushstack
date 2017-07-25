@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 /* tslint:disable:no-bitwise */
+/* tslint:disable:no-trailing-whitespace whitespace */ /* Remove this when GCB-TS is published and upgraded */
 
 import * as ts from 'typescript';
 import ApiModuleVariable from './ApiModuleVariable';
@@ -77,7 +78,7 @@ export default class ApiNamespace extends ApiItemContainer {
         // Typescript's VariableDeclaration AST nodes have an VariableDeclarationList parent,
         // and the VariableDeclarationList exists within a VariableStatement, which is where
         // the JSDoc comment Node can be found.
-        // If there is no parent or grandparent of this VariableDeclartion then
+        // If there is no parent or grandparent of this VariableDeclaration then
         // we do not know how to obtain the JSDoc comment.
         let jsdocNode: ts.Node;
         if (!declaration.parent || !declaration.parent.parent ||

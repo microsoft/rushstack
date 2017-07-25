@@ -1,12 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { GulpTask } from '@microsoft/gulp-core-build';
+/* tslint:disable:no-trailing-whitespace */ /* Remove this when GCB-TS is published and upgraded */
+
 import gulpType = require('gulp');
 import ts = require('gulp-typescript');
+import * as Typescript from 'typescript';
 import * as path from 'path';
 
-import { IBuildConfig } from '@microsoft/gulp-core-build';
+import { GulpTask, IBuildConfig } from '@microsoft/gulp-core-build';
+
 import { TypeScriptConfiguration } from './TypeScriptConfiguration';
 
 interface ITypeScriptErrorObject {
@@ -31,7 +34,9 @@ export interface ICompilerOptions extends ts.Settings {
   stripInternal?: boolean;
 }
 
-/** @public */
+/**
+ * @public
+ */
 export interface ITypeScriptTaskConfig {
   /**
    * Fails the build when errors occur.
@@ -81,7 +86,9 @@ export interface ITypeScriptTaskConfig {
   libES6Dir?: string;
 }
 
-/** @public */
+/**
+ * @public
+ */
 export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   public name: string = 'typescript';
 
@@ -147,8 +154,8 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
 
     this._normalizeConfig();
 
-    // Log the compiler version for custom verisons.
-    const typescript: any = TypeScriptConfiguration.getTypescriptCompiler(); // tslint:disable-line:no-any
+    // Log the compiler version for custom versions.
+    const typescript: typeof Typescript = TypeScriptConfiguration.getTypescriptCompiler(); // tslint:disable-line:no-any
     if (typescript && typescript.version) {
       this.log(`TypeScript version: ${typescript.version}`);
     }

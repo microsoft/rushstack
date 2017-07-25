@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/* tslint:disable:no-trailing-whitespace */ /* Remove this when GCB-TS is published and upgraded */
+
 import * as fsx from 'fs-extra';
 import * as gulp from 'gulp';
 import * as os from 'os';
@@ -51,7 +53,7 @@ export interface IApiExtractorTaskConfig {
    * and require signoff from the appropriate reviewers.
    *
    * Example: "config" (for a standalone project)
-   * Example: "../../common/api-review"  (for a Git repoistory with Rush)
+   * Example: "../../common/api-review"  (for a Git repository with Rush)
    */
   apiReviewFolder?: string;
 

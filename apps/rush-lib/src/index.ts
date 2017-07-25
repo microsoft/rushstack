@@ -47,7 +47,7 @@ export {
 
 export {
   VersionMismatchFinder
-} from './data/VersionMismatchFinder'
+} from './data/VersionMismatchFinder';
 
 export {
   ErrorDetectionMode,

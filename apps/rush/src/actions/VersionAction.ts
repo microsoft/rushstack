@@ -109,7 +109,7 @@ export default class VersionAction extends BaseRushAction {
       const rushProject: RushConfigurationProject = this.rushConfiguration.getProjectByName(packageName);
       // Update package.json
       const packagePath: string = path.join(rushProject.projectFolder, 'package.json');
-      fsx.writeFileSync(packagePath, JSON.stringify(newPackageJson, undefined, 2), 'utf8');
+      fsx.writeFileSync(packagePath, JSON.stringify(newPackageJson, undefined, 2), { encoding: 'utf8' });
 
       if (newPackageJson.version !== rushProject.packageJson.version) {
         // If package version changes, add an entry to changelog

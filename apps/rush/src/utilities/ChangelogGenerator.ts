@@ -65,7 +65,8 @@ export default class ChangelogGenerator {
         fs.writeFileSync(
           path.join(project.projectFolder, CHANGELOG_MD),
           ChangelogGenerator._translateToMarkdown(changelog),
-          'utf8');
+          { encoding: 'utf8' }
+        );
       }
 
     });
@@ -122,12 +123,13 @@ export default class ChangelogGenerator {
 
       if (shouldCommit) {
         // Write markdown transform.
-        fs.writeFileSync(changelogFilename, JSON.stringify(changelog, undefined, 2), 'utf8');
+        fs.writeFileSync(changelogFilename, JSON.stringify(changelog, undefined, 2), { encoding: 'utf8' });
 
         fs.writeFileSync(
           path.join(projectFolder, CHANGELOG_MD),
           ChangelogGenerator._translateToMarkdown(changelog),
-          'utf8');
+          { encoding: 'utf8' }
+        );
       }
     }
 

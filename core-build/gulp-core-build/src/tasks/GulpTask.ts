@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/* tslint:disable:no-trailing-whitespace whitespace */ /* Remove this when GCB-TS is published and upgraded */
+
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -27,18 +29,28 @@ import { SchemaValidator } from '../jsonUtilities/SchemaValidator';
  * @public
  */
 export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
-  /** The name of the task. The configuration file with this name will be loaded and applied to the task. */
+  /**
+   * The name of the task. The configuration file with this name will be loaded and applied to the task.
+   */
   public name: string;
-  /** The global build configuration object. Will be the same for all task instances. */
+
+  /**
+   * The global build configuration object. Will be the same for all task instances.
+   */
   public buildConfig: IBuildConfig;
-  /** The configuration for this task instance. */
+
+  /**
+   * The configuration for this task instance.
+   */
   public taskConfig: TASK_CONFIG;
+
   /**
    * An overridable array of file patterns which will be utilized by the CleanTask to
    * determine which files to delete. Unless overridden, the getCleanMatch() function
    * will return this value.
    */
   public cleanMatch: string[];
+
   /**
    * Indicates whether this task should be executed or not. This toggle is used by isEnabled() to determine
    * if the task should run. Since some tasks have more complex logic to determine if they should run or

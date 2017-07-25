@@ -160,9 +160,9 @@ export function loadStyles(styles: string | ThemableArray): void {
  * a loadStyles callback that gets called when styles are loaded or reloaded
  */
 export function configureLoadStyles(
-  loadStyles: ((processedStyles: string, rawStyles?: string | ThemableArray) => void) | undefined
+  loadStylesFn: ((processedStyles: string, rawStyles?: string | ThemableArray) => void) | undefined
 ): void {
-  _themeState.loadStyles = loadStyles;
+  _themeState.loadStyles = loadStylesFn;
 }
 
 /**
@@ -180,7 +180,7 @@ export function flush(): void {
   measure(() => {
     const styleArrays: ThemableArray[] = _themeState.runState.buffer.slice();
     _themeState.runState.buffer = [];
-    const mergedStyleArray: ThemableArray[] = [].concat.apply([], styleArrays);
+    const mergedStyleArray: ThemableArray = [].concat.apply([], styleArrays);
     if (mergedStyleArray.length > 0) {
       applyThemableStyles(mergedStyleArray);
     }

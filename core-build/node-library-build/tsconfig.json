@@ -6,6 +6,7 @@
     "sourceMap": true,
     "strictNullChecks": true,
     "types": [
+      "es6-collections",
       "node"
     ]
   }
