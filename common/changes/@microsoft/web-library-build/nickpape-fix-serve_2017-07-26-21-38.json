@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/web-library-build",
+      "comment": "Fix an issue with 'gulp serve' where the server was not being launched.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/web-library-build",
+  "email": "nickpape@users.noreply.github.com"
+}
