@@ -1,11 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* tslint:disable:no-trailing-whitespace whitespace */ /* Remove this when GCB-TS is published and upgraded */
-
 import * as Webpack from 'webpack';
 import { GulpTask, IBuildConfig } from '@microsoft/gulp-core-build';
-import gulp = require('gulp');
+import * as Gulp from 'gulp';
 import { EOL } from 'os';
 
 /**
@@ -65,7 +63,7 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
     return require('./webpack.schema.json');
   }
 
-  public executeTask(gulp: gulp.Gulp, completeCallback: (error?: string) => void): void {
+  public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): void {
     const shouldInitWebpack: boolean = (process.argv.indexOf('--initwebpack') > -1);
 
     /* tslint:disable:typedef */

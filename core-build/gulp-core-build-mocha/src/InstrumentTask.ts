@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { GulpTask } from '@microsoft/gulp-core-build';
-import gulp = require('gulp');
+import * as Gulp from 'gulp';
 import * as gulpIstanbul from 'gulp-istanbul';
 
 export interface IInstrumentTaskConfig {
@@ -16,7 +16,7 @@ export class InstrumentTask extends GulpTask<IInstrumentTaskConfig> {
     coverageMatch: ['lib/**/*.js', '!lib/**/*.test.js']
   };
 
-  public executeTask(gulp: gulp.Gulp, completeCallback?: (error?: string) => void): NodeJS.ReadWriteStream {
+  public executeTask(gulp: typeof Gulp, completeCallback?: (error?: string) => void): NodeJS.ReadWriteStream {
     const istanbul: typeof gulpIstanbul = require('gulp-istanbul');
 
     return gulp.src(this.taskConfig.coverageMatch)

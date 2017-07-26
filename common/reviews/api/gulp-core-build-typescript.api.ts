@@ -2,7 +2,7 @@
 // @public
 class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig> {
   // (undocumented)
-  public executeTask(gulp: gulp.Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream | void;
+  public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream | void;
   // (undocumented)
   public loadSchema(): Object;
   // (undocumented)
@@ -23,7 +23,7 @@ class TypeScriptConfiguration {
   public static getGulpTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<ts.Settings>;
   public static getTsConfigFile(config: IBuildConfig): ITsConfigFile<ts.Settings>;
   public static getTypescriptCompiler(): any;
-  public static setTypescriptCompiler(typescript: any): void;
+  public static setTypescriptCompiler(typescriptOverride: any): void;
 }
 
 // WARNING: The type "ITypeScriptTaskConfig" needs to be exported by the package (e.g. added to index.ts)

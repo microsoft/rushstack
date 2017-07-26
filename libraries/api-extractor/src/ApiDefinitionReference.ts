@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* tslint:disable:no-trailing-whitespace */ /* Remove this when GCB-TS is published and upgraded */
-
 /**
  * An API definition reference that is used to locate the documentation of exported
  * API items that may or may not belong to an external package.

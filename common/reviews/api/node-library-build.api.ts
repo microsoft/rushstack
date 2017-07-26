@@ -4,7 +4,7 @@ export declare function addSuppression(suppression: string | RegExp): void;
 // @public
 class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig> {
   // (undocumented)
-  executeTask(gulp: gulp.Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream | void;
+  executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream | void;
   // (undocumented)
   loadSchema(): Object;
   // (undocumented)
@@ -16,13 +16,13 @@ class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig> {
 // @public
 class CleanTask extends GulpTask<void> {
   constructor();
-  executeTask(gulp: gulp.Gulp, completeCallback: (error?: string | Error) => void): void;
+  executeTask(gulp: typeof Gulp, completeCallback: (error?: string | Error) => void): void;
 }
 
 // @public
 class CopyTask extends GulpTask<ICopyConfig> {
   constructor();
-  executeTask(gulp: gulp.Gulp, completeCallback: (error?: string | Error) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
+  executeTask(gulp: typeof Gulp, completeCallback: (error?: string | Error) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
   loadSchema(): Object;
 }
 
@@ -130,7 +130,7 @@ interface ICopyConfig {
 // @public
 interface ICustomGulpTask {
   // (undocumented)
-  (gulp: gulp.Gulp | GulpProxy, buildConfig: IBuildConfig, done?: (failure?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
+  (gulp: typeof Gulp | GulpProxy, buildConfig: IBuildConfig, done?: (failure?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
 }
 
 // @public (undocumented)
@@ -143,7 +143,7 @@ interface IExecutable {
 }
 
 // @public
-export declare function initialize(gulp: gulp.Gulp): void;
+export declare function initialize(gulp: typeof Gulp): void;
 
 // @public (undocumented)
 interface ITsConfigFile<T> {
@@ -187,7 +187,7 @@ export declare function setConfig(config: Partial<IBuildConfig>): void;
 export declare function subTask(taskName: string, fn: ICustomGulpTask): IExecutable;
 
 // @public
-export declare function task(taskName: string, task: IExecutable): IExecutable;
+export declare function task(taskName: string, taskExecutable: IExecutable): IExecutable;
 
 // @public
 enum TestResultState {
@@ -206,7 +206,7 @@ class TypeScriptConfiguration {
   static getGulpTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<ts.Settings>;
   static getTsConfigFile(config: IBuildConfig): ITsConfigFile<ts.Settings>;
   static getTypescriptCompiler(): any;
-  static setTypescriptCompiler(typescript: any): void;
+  static setTypescriptCompiler(typescriptOverride: any): void;
 }
 
 // @public (undocumented)
@@ -237,7 +237,7 @@ export declare function verbose(...args: Array<string | Chalk.ChalkChain>): void
 export declare function warn(...args: Array<string | Chalk.ChalkChain>): void;
 
 // @public
-export declare function watch(watchMatch: string | string[], task: IExecutable): IExecutable;
+export declare function watch(watchMatch: string | string[], taskExecutable: IExecutable): IExecutable;
 
 // WARNING: Unsupported export: buildTasks
 // WARNING: Unsupported export: testTasks

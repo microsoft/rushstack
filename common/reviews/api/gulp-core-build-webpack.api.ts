@@ -9,7 +9,7 @@ interface IWebpackTaskConfig {
 // @public (undocumented)
 class WebpackTask extends GulpTask<IWebpackTaskConfig> {
   // (undocumented)
-  public executeTask(gulp: gulp.Gulp, completeCallback: (error?: string) => void): void;
+  public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): void;
   // (undocumented)
   public isEnabled(buildConfig: IBuildConfig): boolean;
   // (undocumented)

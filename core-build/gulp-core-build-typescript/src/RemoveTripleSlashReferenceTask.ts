@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import gulp = require('gulp');
+import * as Gulp from 'gulp';
 import gulpUtil = require('gulp-util');
 import * as path from 'path';
 import through2 = require('through2');
@@ -21,7 +21,7 @@ export class RemoveTripleSlashReferenceTask extends GulpTask<IRemoveTripleSlashR
   public taskConfig: IRemoveTripleSlashReferenceTaskConfig = {
   };
 
-  public executeTask(gulp: gulp.Gulp): void {
+  public executeTask(gulp: typeof Gulp): void {
     const taskScope: RemoveTripleSlashReferenceTask = this;
 
     const filePattern: string = path.join(taskScope.buildConfig.libFolder, '**', '*.d.ts');

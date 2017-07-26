@@ -1,10 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* tslint:disable:no-trailing-whitespace whitespace */ /* Remove this when GCB-TS is published and upgraded */
-
 import { GulpTask } from './GulpTask';
-import gulp = require('gulp');
+import * as Gulp from 'gulp';
 
 /**
  * Configuration for CopyTask
@@ -52,13 +50,13 @@ export class CopyTask extends GulpTask<ICopyConfig> {
    */
   public loadSchema(): Object {
     return require('./copy.schema.json');
-  };
+  }
 
   /**
    * Executes the copy task, which copy files based on the task's Configuration
    */
   public executeTask(
-    gulp: gulp.Gulp,
+    gulp: typeof Gulp,
     completeCallback: (error?: string | Error) => void
   ): Promise<Object> | NodeJS.ReadWriteStream | void {
     /* tslint:disable:typedef */

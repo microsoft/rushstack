@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* tslint:disable:no-trailing-whitespace */ /* Remove this when GCB-TS is published and upgraded */
-
 import Token, { TokenType } from './Token';
 import TypeScriptHelpers from './TypeScriptHelpers';
 
@@ -27,6 +25,14 @@ export default class Tokenizer {
   constructor(docs: string, reportError: (message: string) => void) {
     this._reportError = reportError;
     this._tokenStream = this._tokenizeDocs(docs);
+  }
+
+  public peekToken(): Token {
+    return (!this._tokenStream || this._tokenStream.length === 0) ? undefined : this._tokenStream[0];
+  }
+
+  public getToken(): Token {
+    return (!this._tokenStream || this._tokenStream.length === 0) ? undefined : this._tokenStream.shift();
   }
 
   /**
@@ -115,14 +121,6 @@ export default class Tokenizer {
     // This is a program bug
     this._reportError('Invalid call to _tokenizeInline()');
     return;
-  }
-
-  public peekToken(): Token {
-    return (!this._tokenStream || this._tokenStream.length === 0) ? undefined : this._tokenStream[0];
-  }
-
-  public getToken(): Token {
-    return (!this._tokenStream || this._tokenStream.length === 0) ? undefined : this._tokenStream.shift();
   }
 
   /**
