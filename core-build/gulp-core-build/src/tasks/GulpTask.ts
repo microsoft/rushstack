@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* tslint:disable:no-trailing-whitespace whitespace */ /* Remove this when GCB-TS is published and upgraded */
-
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -81,15 +79,6 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
       this._schema :
       this._schema = this.loadSchema();
   }
-
-  /**
-   * Override this function to provide a schema which will be used to validate
-   * the task's configuration file. This function is called once per task instance.
-   * @returns a z-schema schema definition
-   */
-  protected loadSchema(): Object | undefined {
-    return undefined;
-  };
 
   /**
    * Shallow merges config settings into the task config.
@@ -243,13 +232,13 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
           throw new Error('The task subclass is missing the "executeTask" method.');
         }
 
-        stream = this.executeTask(this.buildConfig.gulp, (error?: string | Error) => {
-          if (!error) {
+        stream = this.executeTask(this.buildConfig.gulp, (err?: string | Error) => {
+          if (!err) {
             resolve();
-          } else if (typeof error === 'string') {
-            reject(new Error(error));
+          } else if (typeof err === 'string') {
+            reject(new Error(err));
           } else {
-            reject(error);
+            reject(err);
           }
         });
       } catch (e) {
@@ -310,12 +299,10 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
    * @returns If localPath is relative, returns an absolute path relative to the rootPath. Otherwise, returns localPath.
    */
   public resolvePath(localPath: string): string {
-    /* tslint:disable:typedef */
-    const path = require('path');
-    /* tslint:enable:typedef */
     if (path.isAbsolute(localPath)) {
       return path.resolve(localPath);
     }
+
     return path.resolve(path.join(this.buildConfig.rootPath, localPath));
   }
 
@@ -325,9 +312,6 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
    * @returns true if the file exists, false otherwise
    */
   public fileExists(localPath: string): boolean {
-    /* tslint:disable:typedef */
-    const fs = require('fs');
-    /* tslint:enable:typedef */
     let doesExist: boolean = false;
     const fullPath: string = this.resolvePath(localPath);
 
@@ -345,8 +329,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
    */
   public copyFile(localSourcePath: string, localDestPath?: string): void {
     /* tslint:disable:typedef */
-    const path = require('path');
-    const fs = require('fs-extra');
+    const fsx = require('fs-extra');
     /* tslint:enable:typedef */
 
     const fullSourcePath: string = path.resolve(__dirname, localSourcePath);
@@ -354,7 +337,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
       this.buildConfig.rootPath,
       (localDestPath || path.basename(localSourcePath)));
 
-    fs.copySync(fullSourcePath, fullDestPath);
+    fsx.copySync(fullSourcePath, fullDestPath);
   }
 
   /**
@@ -365,16 +348,21 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
     const fullPath: string = this.resolvePath(localPath);
     let result: Object | undefined = undefined;
 
-    /* tslint:disable:typedef */
-    const fs = require('fs');
-    /* tslint:enable:typedef */
-
     try {
       const content: string = fs.readFileSync(fullPath, 'utf8');
       result = JSON.parse(content);
     } catch (e) { /* no-op */ }
 
     return result;
+  }
+
+  /**
+   * Override this function to provide a schema which will be used to validate
+   * the task's configuration file. This function is called once per task instance.
+   * @returns a z-schema schema definition
+   */
+  protected loadSchema(): Object | undefined {
+    return undefined;
   }
 
   /**

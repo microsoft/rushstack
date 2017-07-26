@@ -1,10 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* tslint:disable:max-line-length no-trailing-whitespace whitespace */ /* Remove this when GCB-TS is upgraded */
-
 import * as gutil from 'gulp-util';
-import * as gulp from 'gulp';
+import * as Gulp from 'gulp';
 import * as path from 'path';
 /* tslint:disable:typedef */
 const prettyTime = require('pretty-hrtime');
@@ -41,7 +39,7 @@ interface ILocalCache {
   fromRunGulp?: boolean;
   exitCode: number;
   writeSummaryLogs: string[];
-  gulp: gulp.Gulp | undefined;
+  gulp: typeof Gulp | undefined;
   gulpErrorCallback: undefined | ((err: Object) => void);
   gulpStopCallback: undefined | ((err: Object) => void);
   errorAndWarningSuppressions: (string | RegExp)[];
@@ -221,7 +219,8 @@ function writeSummary(callback: () => void): void {
         // log('Create tasks duration:', gutil.colors.yellow(prettyTime(localCache.taskCreationTime)));
         // log('Read src tasks duration:', gutil.colors.yellow(prettyTime(localCache.totalTaskHrTime)));
         log('Total duration:', gutil.colors.yellow(prettyTime(totalDuration)));
-        // log(`Tasks run: ${gutil.colors.yellow(localCache.taskRun + '')} Subtasks run: ${gutil.colors.yellow(localCache.subTasksRun + '')}`);
+        // log(`Tasks run: ${gutil.colors.yellow(localCache.taskRun + '')} ` +
+        //     `Subtasks run: ${gutil.colors.yellow(localCache.subTasksRun + '')}`);
 
         if (localCache.testsRun > 0) {
           log('Tests results -',
@@ -299,7 +298,8 @@ function wireUpProcessErrorHandling(): void {
         if (!localCache.wroteSummary) {
           localCache.wroteSummary = true;
           console.log('About to exit with code:', code);
-          console.error('Process terminated before summary could be written, possible error in async code not continuing!');
+          console.error('Process terminated before summary could be written, possible error in async code not ' +
+                        'continuing!');
           console.log('Trying to exit with exit code 1');
           process.exit(1);
         } else {
@@ -332,9 +332,9 @@ function wireUpProcessErrorHandling(): void {
   }
 }
 
-function markErrorAsWritten(error: Error): void {
+function markErrorAsWritten(err: Error): void {
   try {
-    error[WROTE_ERROR_KEY] = true;
+    err[WROTE_ERROR_KEY] = true;
   } catch (e) {
     // Do Nothing
   }
@@ -450,7 +450,8 @@ export function endTaskSrc(taskName: string, startHrtime: [number, number], file
 /**
  * Store coverage information, potentially logging an error if the coverage is below the threshold
  * @param coverage - the coverage of the file as a percentage
- * @param threshold - the minimum coverage for the file as a percentage, an error will be logged if coverage is below the threshold
+ * @param threshold - the minimum coverage for the file as a percentage, an error will be logged if coverage is below
+ *  the threshold
  * @param filePath - the path to the file whose coverage is being measured
  * @public
  */
@@ -534,7 +535,15 @@ export function error(...args: Array<string | Chalk.ChalkChain>): void {
  * @param message - a description of the error
  * @public
  */
-export function fileLog(write: (text: string) => void, taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void {
+export function fileLog(
+  write: (text: string) => void,
+  taskName: string,
+  filePath: string,
+  line: number,
+  column: number,
+  errorCode: string,
+  message: string
+): void {
   'use strict';
 
   if (!filePath) {
@@ -555,7 +564,14 @@ export function fileLog(write: (text: string) => void, taskName: string, filePat
  * @param message - a description of the warning
  * @public
  */
-export function fileWarning(taskName: string, filePath: string, line: number, column: number, errorCode: string,  message: string): void {
+export function fileWarning(
+  taskName: string,
+  filePath: string,
+  line: number,
+  column: number,
+  errorCode: string,
+  message: string
+): void {
   fileLog(warn, taskName, filePath, line, column, errorCode, message);
 }
 
@@ -568,7 +584,14 @@ export function fileWarning(taskName: string, filePath: string, line: number, co
  * @param message - a description of the error
  * @public
  */
-export function fileError(taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void {
+export function fileError(
+  taskName: string,
+  filePath: string,
+  line: number,
+  column: number,
+  errorCode: string,
+  message: string
+): void {
   fileLog(error, taskName, filePath, line, column, errorCode, message);
 }
 
@@ -586,9 +609,9 @@ export function verbose(...args: Array<string | Chalk.ChalkChain>): void {
 }
 
 /** @public */
-export function generateGulpError(error: Object): Object {
+export function generateGulpError(err: Object): Object {
   if (isVerbose()) {
-    return error;
+    return err;
   } else {
     /* tslint:disable:no-any */
     const output: any = {
@@ -693,31 +716,41 @@ export function getStart(): [number, number] | undefined {
   return localCache.start;
 }
 
-/** @public */
+/**
+ * @public
+ */
 export function setWatchMode(): void {
   'use strict';
   localCache.watchMode = true;
 }
 
-/** @public */
+/**
+ * @public
+ */
 export function getWatchMode(): boolean | undefined {
   'use strict';
   return localCache.watchMode;
 }
 
-/** @public */
+/**
+ * @public
+ */
 export function setExitCode(exitCode: number): void {
   'use strict';
   localCache.exitCode = exitCode;
 }
 
-/** @public */
+/**
+ * @public
+ */
 export function logStartSubtask(name: string): void {
   log(`Starting subtask '${gutil.colors.cyan(name)}'...`);
   localCache.subTasksRun++;
 }
 
-/** @public */
+/**
+ * @public
+ */
 export function logEndSubtask(name: string, startTime: [number, number], errorObject?: Error): void {
   const duration: [number, number] = process.hrtime(startTime);
 
@@ -736,8 +769,14 @@ export function logEndSubtask(name: string, startTime: [number, number], errorOb
   }
 }
 
-/** @public */
-export function initialize(gulp: gulp.Gulp, gulpErrorCallback?: (err: Error) => void, gulpStopCallback?: (err: Error) => void): void {
+/**
+ * @public
+ */
+export function initialize(
+  gulp: typeof Gulp,
+  gulpErrorCallback?: (err: Error) => void,
+  gulpStopCallback?: (err: Error) => void
+): void {
   'use strict';
   // This will add logging to the gulp execution
 
@@ -836,7 +875,9 @@ export function initialize(gulp: gulp.Gulp, gulpErrorCallback?: (err: Error) => 
   });
 }
 
-/** @public */
+/**
+ * @public
+ */
 export function markTaskCreationTime(): void {
   'use strict';
   localCache.taskCreationTime = process.hrtime(getStart());

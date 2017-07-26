@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 /* tslint:disable:no-constant-condition */
-/* tslint:disable:no-trailing-whitespace */ /* Remove this when GCB-TS is published and upgraded */
 
 import * as fsx from 'fs-extra';
 import * as path from 'path';

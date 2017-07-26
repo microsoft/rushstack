@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { GulpTask } from '@microsoft/gulp-core-build';
-import * as gulp from 'gulp';
+import * as Gulp from 'gulp';
 import CertificateStoreType from './CertificateStore';
 
 /**
@@ -15,7 +15,7 @@ import CertificateStoreType from './CertificateStore';
 export default class UntrustCertTask extends GulpTask<{}> {
   public name: string = 'untrust-cert';
 
-  public executeTask(gulp: gulp.Gulp, completeCallback: (error?: string) => void): void {
+  public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): void {
     /* tslint:disable */
     const CertificateStore = require('./CertificateStore').default;
     const { untrustCertificate } = require('./certificates');

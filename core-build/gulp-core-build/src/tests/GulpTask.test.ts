@@ -5,7 +5,7 @@
 
 import { assert, expect } from 'chai';
 import gutil = require('gulp-util');
-import gulp = require('gulp');
+import * as Gulp  from 'gulp';
 import { Readable } from 'stream';
 import * as path from 'path';
 
@@ -28,8 +28,8 @@ class PromiseTask extends GulpTask<IConfig> {
   };
 
   /* tslint:disable:no-any */
-  public executeTask(gulp: gulp.Gulp): Promise<any> {
-    /* tslint:enable:no-any */
+  public executeTask(gulp: typeof Gulp): Promise<any> {
+  /* tslint:enable:no-any */
     return new Promise<void>((resolve: () => void, reject: () => void) => {
       testArray.push(this.name);
       resolve();
@@ -44,7 +44,7 @@ class StreamTask extends GulpTask<IConfig> {
   };
 
   /* tslint:disable:no-any */
-  public executeTask(gulp: gulp.Gulp): any {
+  public executeTask(gulp: typeof Gulp): any {
     /* tslint:enable:no-any */
     const stream: Readable = new Readable({ objectMode: true });
 
@@ -77,7 +77,7 @@ class SyncTask extends GulpTask<IConfig> {
   public taskConfig: IConfig = {
   };
 
-  public executeTask(gulp: gulp.Gulp): void {
+  public executeTask(gulp: typeof Gulp): void {
     testArray.push(this.name);
   }
 }
@@ -88,7 +88,7 @@ class SyncWithReturnTask extends GulpTask<IConfig> {
   public taskConfig: IConfig = {
   };
 
-  public executeTask(gulp: gulp.Gulp): void {
+  public executeTask(gulp: typeof Gulp): void {
     testArray.push(this.name);
   }
 }
@@ -99,7 +99,7 @@ class CallbackTask extends GulpTask<IConfig> {
   public taskConfig: IConfig = {
   };
 
-  public executeTask(gulp: gulp.Gulp, callback: (error?: string | Error) => void): void {
+  public executeTask(gulp: typeof Gulp, callback: (error?: string | Error) => void): void {
     testArray.push(this.name);
     callback();
   }
@@ -116,7 +116,7 @@ class SchemaTask extends GulpTask<ISimpleConfig> {
     shouldDoThings: false
   };
 
-  public executeTask(gulp: gulp.Gulp, callback: (error?: string | Error) => void): void {
+  public executeTask(gulp: typeof Gulp, callback: (error?: string | Error) => void): void {
     callback();
   }
 

@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* tslint:disable:no-trailing-whitespace */ /* Remove this when GCB-TS is published and upgraded */
-
 import ApiItem, { IApiItemOptions } from './ApiItem';
 
 /**
@@ -39,6 +37,17 @@ abstract class ApiItemContainer extends ApiItem {
   }
 
   /**
+   * @virtual
+   */
+  public visitTypeReferencesForApiItem(): void {
+    super.visitTypeReferencesForApiItem();
+
+    this._memberItems.forEach((apiItem) => {
+      apiItem.visitTypeReferencesForApiItem();
+    });
+  }
+
+  /**
    * Add a child item to the container.
    */
   protected addMemberItem(apiItem: ApiItem): void {
@@ -49,17 +58,6 @@ abstract class ApiItemContainer extends ApiItem {
       this._memberItems.set(apiItem.name, apiItem);
       apiItem.notifyAddedToContainer(this);
     }
-  }
-
-  /**
-   * @virtual
-   */
-  public visitTypeReferencesForApiItem(): void {
-    super.visitTypeReferencesForApiItem();
-
-    this._memberItems.forEach((apiItem) => {
-      apiItem.visitTypeReferencesForApiItem();
-    });
   }
 }
 

@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 /* tslint:disable:no-bitwise */
-/* tslint:disable:no-trailing-whitespace comment-format whitespace */ /* Remove this when GCB-TS is upgraded */
 
 import ApiItem, { ApiItemKind } from './ApiItem';
 import ApiPackage from './ApiPackage';

@@ -61,11 +61,11 @@ abstract class ApiItemVisitor {
 
   protected visitApiMethod(apiMethod: ApiMethod, refObject?: Object): void {
     this.visitApiMember(apiMethod, refObject);
-  };
+  }
 
   protected visitApiProperty(apiProperty: ApiProperty, refObject?: Object): void {
     this.visitApiMember(apiProperty, refObject);
-  };
+  }
 
   protected abstract visitApiParam(apiParam: ApiParameter, refObject?: Object): void;
 }

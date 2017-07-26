@@ -3,7 +3,6 @@
 
 /* tslint:disable:no-bitwise */
 /* tslint:disable:no-constant-condition */
-/* tslint:disable:no-trailing-whitespace */ /* Remove this when GCB-TS is published and upgraded */
 
 import * as ts from 'typescript';
 import * as path from 'path';
@@ -342,6 +341,63 @@ abstract class ApiItem {
   }
 
   /**
+   * This function is a second stage that happens after Extractor.analyze() calls ApiItem constructor to build up
+   * the abstract syntax tree. In this second stage, we are creating the documentation for each ApiItem.
+   *
+   * This function makes sure we create the documentation for each ApiItem in the correct order.
+   * In the event that a circular dependency occurs, an error is reported. For example, if ApiItemOne has
+   * an \@inheritdoc referencing ApiItemTwo, and ApiItemTwo has an \@inheritdoc referencing ApiItemOne then
+   * we have a circular dependency and an error will be reported.
+   */
+  public completeInitialization(): void {
+    switch (this._state) {
+      case InitializationState.Completed:
+        return;
+      case InitializationState.Incomplete:
+        this._state = InitializationState.Completing;
+        this.onCompleteInitialization();
+        this._state = InitializationState.Completed;
+
+        for (const innerItem of this.innerItems) {
+          innerItem.completeInitialization();
+        }
+        return;
+      case InitializationState.Completing:
+        this.reportError('circular reference');
+        return;
+      default:
+        throw new Error('ApiItem state is invalid');
+    }
+  }
+
+  /**
+   * A procedure for determining if this ApiItem is missing type
+   * information. We first check if the ApiItem itself is missing
+   * any type information and if not then we check each of it's
+   * innerItems for missing types.
+   *
+   * Ex: On the ApiItem itself, there may be missing type information
+   * on the return value or missing type declaration of itself
+   * (const name;).
+   * Ex: For each innerItem, there may be an ApiParameter that is missing
+   * a type. Or for an ApiMember that is a type literal, there may be an
+   * ApiProperty that is missing type information.
+   */
+  public hasAnyIncompleteTypes(): boolean {
+    if (this.hasIncompleteTypes) {
+      return true;
+    }
+
+    for (const innerItem of this.innerItems) {
+      if (innerItem.hasIncompleteTypes) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
    * This traverses any type aliases to find the original place where an item was defined.
    * For example, suppose a class is defined as "export default class MyClass { }"
    * but exported from the package's index.ts like this:
@@ -389,7 +445,6 @@ abstract class ApiItem {
    * the documentation.
    */
   protected onCompleteInitialization(): void {
-
     this.documentation.completeInitialization(this.warnings);
     // TODO: this.visitTypeReferencesForNode(this);
 
@@ -449,61 +504,6 @@ abstract class ApiItem {
         }
       }
     }
-  }
-
-  /**
-   * This function is a second stage that happens after Extractor.analyze() calls ApiItem constructor to build up
-   * the abstract syntax tree. In this second stage, we are creating the documentation for each ApiItem.
-   *
-   * This function makes sure we create the documentation for each ApiItem in the correct order.
-   * In the event that a circular dependency occurs, an error is reported. For example, if ApiItemOne has
-   * an \@inheritdoc referencing ApiItemTwo, and ApiItemTwo has an \@inheritdoc referencing ApiItemOne then
-   * we have a circular dependency and an error will be reported.
-   */
-  public completeInitialization(): void {
-    switch (this._state) {
-      case InitializationState.Completed:
-        return;
-      case InitializationState.Incomplete:
-        this._state = InitializationState.Completing;
-        this.onCompleteInitialization();
-        this._state = InitializationState.Completed;
-
-        for (const innerItem of this.innerItems) {
-          innerItem.completeInitialization();
-        }
-        return;
-      case InitializationState.Completing:
-        this.reportError('circular reference');
-        return;
-      default:
-        throw new Error('ApiItem state is invalid');
-    }
-  }
-
-  /**
-   * A procedure for determining if this ApiItem is missing type
-   * information. We first check if the ApiItem itself is missing
-   * any type information and if not then we check each of it's
-   * innerItems for missing types.
-   *
-   * Ex: On the ApiItem itself, there may be missing type information
-   * on the return value or missing type declaration of itself
-   * (const name;).
-   * Ex: For each innerItem, there may be an ApiParameter that is missing
-   * a type. Or for an ApiMember that is a type literal, there may be an
-   * ApiProperty that is missing type information.
-   */
-  public hasAnyIncompleteTypes(): boolean {
-    if (this.hasIncompleteTypes) {
-      return true;
-    }
-    for (const innerItem of this.innerItems) {
-      if (innerItem.hasIncompleteTypes) {
-        return true;
-      }
-    }
-    return false;
   }
 
   /**

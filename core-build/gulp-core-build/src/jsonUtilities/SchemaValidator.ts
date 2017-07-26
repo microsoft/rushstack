@@ -3,8 +3,6 @@
 
 /// <reference types="jju" />
 
-/* tslint:disable:no-trailing-whitespace whitespace */ /* Remove this when GCB-TS is published and upgraded */
-
 import * as os from 'os';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -88,5 +86,5 @@ export class SchemaValidator {
     }
 
     return [`(${error.path}) ${error.message}`].concat(innerErrors);
-  };
+  }
 }

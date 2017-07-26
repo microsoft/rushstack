@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 /* tslint:disable:no-bitwise */
-/* tslint:disable:no-trailing-whitespace whitespace */ /* Remove this when GCB-TS is published and upgraded */
 
 import * as ts from 'typescript';
 import ApiModuleVariable from './ApiModuleVariable';

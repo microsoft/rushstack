@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* tslint:disable:no-trailing-whitespace whitespace */ /* Remove this when GCB-TS is published and upgraded */
-
 import * as path from 'path';
 import assign = require('object-assign');
 import { SchemaValidator, IBuildConfig } from '@microsoft/gulp-core-build';
@@ -43,14 +41,16 @@ export class TypeScriptConfiguration {
   /**
    * Override the version of the typescript compiler
    */
-  public static setTypescriptCompiler(typescript: any): void {
+  public static setTypescriptCompiler(typescriptOverride: any): void {
     if (this._typescript) {
       throw new Error('The version of the typescript compiler should only be set once.');
     }
+
     if (this._baseTsConfig) {
       throw new Error('Set the version of the typescript compiler before tasks call getConfig()');
     }
-    this._typescript = typescript;
+
+    this._typescript = typescriptOverride;
   }
 
   /**
