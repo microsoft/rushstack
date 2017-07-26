@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-karma",
+      "comment": "Upgrade to the TS2.4 version of the build tools.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-karma",
+  "email": "iclanton@users.noreply.github.com"
+}
