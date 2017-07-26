@@ -66,10 +66,12 @@ task('test-watch', watch(sourceMatch, testTasks));
 
 // For watch scenarios like serve, make sure to exclude generated files from src (like *.scss.ts.)
 task('serve',
+  serial(
+  serve,
   watch(
     sourceMatch, serial(preCopy, sass, compileTsTasks,
       postCopy, webpack, postProcessSourceMapsTask, reload)
-  )
+  ))
 );
 
 task('default', defaultTasks);
