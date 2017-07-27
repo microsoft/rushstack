@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Tue, 25 Jul 2017 20:03:31 GMT and should not be manually modified.
+This log was last generated on Thu, 27 Jul 2017 01:04:48 GMT and should not be manually modified.
+
+## 3.3.1
+Thu, 27 Jul 2017 01:04:48 GMT
+
+### Patches
+
+- Upgrade to the TS2.4 version of the build tools.
 
 ## 3.3.0
 Tue, 25 Jul 2017 20:03:31 GMT

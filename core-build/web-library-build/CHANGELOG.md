@@ -1,6 +1,14 @@
 # Change Log - @microsoft/web-library-build
 
-This log was last generated on Tue, 25 Jul 2017 20:03:31 GMT and should not be manually modified.
+This log was last generated on Thu, 27 Jul 2017 01:04:48 GMT and should not be manually modified.
+
+## 3.2.1
+Thu, 27 Jul 2017 01:04:48 GMT
+
+### Patches
+
+- Upgrade to the TS2.4 version of the build tools and restrict the dependency version requirements.
+- Fix an issue with 'gulp serve' where the server was not being launched.
 
 ## 3.2.0
 Tue, 25 Jul 2017 20:03:31 GMT
