@@ -61,6 +61,8 @@ enum BumpType {
   // (undocumented)
   'patch',
   // (undocumented)
+  'preminor',
+  // (undocumented)
   'prerelease'
 }
 
@@ -70,9 +72,9 @@ class ChangeFile {
       private _rushConfiguration: RushConfiguration);
   // (undocumented)
   public addChange(data: IChangeInfo): void;
-  // (undocumented)
-  public readonly data: IChangeFile;
   public generatePath(): string;
+  // (undocumented)
+  public getChanges(packageName: string): IChangeInfo | undefined;
   public writeSync(): void;
 }
 
@@ -174,7 +176,7 @@ interface ILockStepVersionJson extends IVersionPolicyJson {
 class IndividualVersionPolicy extends VersionPolicy {
   constructor(versionPolicyJson: IIndividualVersionJson);
   // (undocumented)
-  public bump(): void;
+  public bump(bumpType?: BumpType, identifier?: string): void;
   // (undocumented)
   public ensure(project: IPackageJson): IPackageJson | undefined;
   // (undocumented)
@@ -247,7 +249,7 @@ class JsonSchemaValidator {
 class LockStepVersionPolicy extends VersionPolicy {
   constructor(versionPolicyJson: ILockStepVersionJson);
   // (undocumented)
-  public bump(): void;
+  public bump(bumpType?: BumpType, identifier?: string): void;
   // (undocumented)
   public ensure(project: IPackageJson): IPackageJson | undefined;
   // (undocumented)
@@ -486,7 +488,7 @@ class VersionMismatchFinder {
 class VersionPolicy {
   constructor(versionPolicyJson: IVersionPolicyJson);
   // (undocumented)
-  public abstract bump(): void;
+  public abstract bump(bumpType?: BumpType, identifier?: string): void;
   // (undocumented)
   public readonly definitionName: VersionPolicyDefinitionName;
   // (undocumented)
@@ -505,7 +507,10 @@ class VersionPolicy {
 class VersionPolicyConfiguration {
   public constructor(private _jsonFileName: string);
   // @alpha
-  public bump(versionPolicyName?: string, shouldCommit?: boolean): void;
+  public bump(versionPolicyName?: string,
+      bumpType?: BumpType,
+      identifier?: string,
+      shouldCommit?: boolean): void;
   // @alpha
   public getVersionPolicy(policyName: string): VersionPolicy;
   // @alpha

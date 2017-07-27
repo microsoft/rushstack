@@ -150,7 +150,7 @@ export default class PublishUtilities {
   }
 
   public static isRangeDependency(version: string): boolean {
-    const LOOSE_PKG_REGEX: RegExp = />=?(?:\d+\.){2}\d+\s+<(?:\d+\.){2}\d+/;
+    const LOOSE_PKG_REGEX: RegExp = />=?(?:\d+\.){2}\d+(\-[0-9A-Za-z-.]*)?\s+<(?:\d+\.){2}\d+/;
 
     return LOOSE_PKG_REGEX.test(version);
   }
@@ -218,7 +218,14 @@ export default class PublishUtilities {
   }
 
   private static _getNewRangeDependency(newVersion: string): string {
-    return `>=${newVersion} <${semver.inc(newVersion, 'major')}`;
+    let upperLimit: string = newVersion;
+    if (semver.prerelease(newVersion)) {
+      // Remove the prerelease first, then bump major.
+      upperLimit = semver.inc(newVersion, 'patch');
+    }
+    upperLimit = semver.inc(upperLimit, 'major');
+
+    return `>=${newVersion} <${upperLimit}`;
   }
 
   private static _shouldSkipVersionBump(project: RushConfigurationProject,

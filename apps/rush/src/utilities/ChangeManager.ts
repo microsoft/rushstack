@@ -85,8 +85,8 @@ export default class ChangeManager {
   }
 
   /**
-   * Apply changes to package.json and change logs
-   * @param shouldCommit - If the value is true, package.json and change logs will be updated.
+   * Apply changes to package.json
+   * @param shouldCommit - If the value is true, package.json will be updated.
    * If the value is false, package.json and change logs will not be updated. It will only do a dry-run.
    */
   public apply(shouldCommit: boolean): Map<string, IPackageJson> {
@@ -102,6 +102,10 @@ export default class ChangeManager {
       this._prereleaseToken,
       this._lockStepProjectsToExclude);
 
+    return updatedPackages;
+  }
+
+  public updateChangelog(shouldCommit: boolean): void {
     // Do not update changelog or delete the change files for prerelease.
     // Save them for the official release.
     if (!this._prereleaseToken.hasValue) {
@@ -111,6 +115,5 @@ export default class ChangeManager {
       // Remove the change request files only if "-a" was provided.
       this._changeFiles.deleteAll(shouldCommit);
     }
-    return updatedPackages;
   }
 }

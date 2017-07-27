@@ -8,6 +8,7 @@ import {
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
 import {
+  BumpType,
   IPackageJson,
   VersionControl
 } from '@microsoft/rush-lib';
@@ -25,6 +26,9 @@ export default class VersionAction extends BaseRushAction {
   private _versionPolicy: CommandLineStringParameter;
   private _bypassPolicy: CommandLineFlagParameter;
   private _targetBranch: CommandLineStringParameter;
+  private _overwriteBump: CommandLineStringParameter;
+  private _prereleaseIdentifier: CommandLineStringParameter;
+
   private _versionManager: VersionManager;
 
   constructor(parser: RushCommandLineParser) {
@@ -62,6 +66,18 @@ export default class VersionAction extends BaseRushAction {
       parameterShortName: '-p',
       description: 'The name of the version policy'
     });
+    this._overwriteBump = this.defineStringParameter({
+      parameterLongName: '--override-bump',
+      description: 'Overrides the bump type in the version-policy.json for the specifiedd version policy.' +
+        'Valid values include: prerelease, patch, preminor, minor, major. ' +
+        'The setting only works for lock-step version policy in bump action.'
+    });
+    this._prereleaseIdentifier = this.defineStringParameter({
+      parameterLongName: '--override-prerelease-id',
+      description: 'Overrides the prerelease identifier in the version value of version-policy.json ' +
+        'for the specified version policy. ' +
+        'The setting only works for lock-step version policy in bump action.'
+    });
   }
 
   protected run(): void {
@@ -85,7 +101,10 @@ export default class VersionAction extends BaseRushAction {
       }
     } else if (this._bumpVersion.value) {
       const tempBranch: string = 'version/bump-' + new Date().getTime();
-      this._versionManager.bump(this._versionPolicy.value, true);
+      this._versionManager.bump(this._versionPolicy.value,
+        BumpType[this._overwriteBump.value],
+        this._prereleaseIdentifier.value,
+        true);
       this._gitProcess(tempBranch);
     }
   }

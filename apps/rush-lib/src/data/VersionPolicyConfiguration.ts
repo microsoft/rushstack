@@ -6,7 +6,7 @@ import * as fsx from 'fs-extra';
 import JsonSchemaValidator from '../utilities/JsonSchemaValidator';
 import JsonFile from '../utilities/JsonFile';
 
-import { VersionPolicy } from './VersionPolicy';
+import { VersionPolicy, BumpType } from './VersionPolicy';
 
 /**
  * @alpha
@@ -68,18 +68,23 @@ export class VersionPolicyConfiguration {
    * Bumps up the version in the version policy
    * @alpha
    * @param versionPolicyName - version policy name
+   * @param identifier - prerelease identifier
    * @param shouldCommit - should save to disk
    */
-  public bump(versionPolicyName?: string, shouldCommit?: boolean): void {
+  public bump(versionPolicyName?: string,
+    bumpType?: BumpType,
+    identifier?: string,
+    shouldCommit?: boolean
+  ): void {
     if (versionPolicyName) {
       const policy: VersionPolicy = this.versionPolicies.get(versionPolicyName);
       if (policy) {
-        policy.bump();
+        policy.bump(bumpType, identifier);
       }
     } else {
       this.versionPolicies.forEach((versionPolicy) => {
         if (versionPolicy) {
-          versionPolicy.bump();
+          versionPolicy.bump(bumpType, identifier);
         }
       });
     }

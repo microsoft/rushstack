@@ -7,6 +7,7 @@ import * as fsx from 'fs-extra';
 import { cloneDeep } from 'lodash';
 
 import {
+  BumpType,
   ChangeFile,
   ChangeType,
   IChangeInfo,
@@ -49,9 +50,13 @@ export class VersionManager {
     this._ensure(versionPolicyName, shouldCommit);
   }
 
-  public bump(versionPolicyName?: string, shouldCommit?: boolean): void {
+  public bump(versionPolicyName?: string,
+    bumpType?: BumpType,
+    identifier?: string,
+    shouldCommit?: boolean
+  ): void {
     // Bump all the lock step version policies.
-    this._versionPolicyConfiguration.bump(versionPolicyName, shouldCommit);
+    this._versionPolicyConfiguration.bump(versionPolicyName, bumpType, identifier, shouldCommit);
 
     // Update packages and generate change files due to lock step bump.
     this._ensure(versionPolicyName, shouldCommit);
@@ -69,6 +74,7 @@ export class VersionManager {
       changeManager.apply(shouldCommit).forEach(packageJson => {
         this._updatedProjects.set(packageJson.name, packageJson);
       });
+      changeManager.updateChangelog(shouldCommit);
     }
   }
 
@@ -124,11 +130,19 @@ export class VersionManager {
         const updatedProject: IPackageJson = versionPolicy.ensure(rushProject.packageJson);
         if (updatedProject) {
           this._updatedProjects.set(updatedProject.name, updatedProject);
-          this._addChangeInfo(updatedProject.name,
-            [this._createChangeInfo(updatedProject, rushProject)]);
+
+          // No need to create an entry for prerelease version bump.
+          if (!this._isPrerelease(updatedProject.version)) {
+            this._addChangeInfo(updatedProject.name,
+              [this._createChangeInfo(updatedProject, rushProject)]);
+          }
         }
       }
     });
+  }
+
+  private _isPrerelease(version: string): boolean {
+    return !!semver.prerelease(version);
   }
 
   private _addChangeInfo(packageName: string,
@@ -140,7 +154,12 @@ export class VersionManager {
     let changeFile: ChangeFile = this._changeFiles.get(packageName);
     if (!changeFile) {
       changeFile = new ChangeFile({
-        changes: [],
+        changes: [
+          {
+            packageName: packageName,
+            changes: []
+          }
+        ],
         packageName: packageName,
         email: 'version_bump@microsoft.com'
       }, this._rushConfiguration);
@@ -172,12 +191,12 @@ export class VersionManager {
     const changes: IChangeInfo[] = [];
     let updated: boolean = false;
     if (this._updateProjectDependencies(clonedProject.dependencies, changes,
-      clonedProject.name, this._updatedProjects, rushProject)
+      clonedProject, this._updatedProjects, rushProject)
     ) {
       updated = true;
     }
     if (this._updateProjectDependencies(clonedProject.devDependencies, changes,
-      clonedProject.name, this._updatedProjects, rushProject)
+      clonedProject, this._updatedProjects, rushProject)
     ) {
       updated = true;
     }
@@ -191,7 +210,7 @@ export class VersionManager {
 
   private _updateProjectDependencies(dependencies: { [key: string]: string; },
     changes: IChangeInfo[],
-    projectName: string,
+    clonedProject: IPackageJson,
     updatedProjects: Map<string, IPackageJson>,
     rushProject: RushConfigurationProject
   ): boolean {
@@ -219,19 +238,23 @@ export class VersionManager {
               changes.push(
                 {
                   changeType: ChangeType.patch,
-                  packageName: projectName
+                  packageName: clonedProject.name
                 }
               );
             }
 
-            changes.push(
-              {
-                changeType: ChangeType.dependency,
-                comment: `Dependency ${updatedProjectName} version bump from ${dependencies[updatedProjectName]}` +
-                  ` to ${newDependencyVersion}.`,
-                packageName: projectName
-              }
-            );
+            // If current version is a prerelease version and new dependency is also a prerelease version,
+            // skip change entry. Otherwise, too many changes will be created for frequent releases.
+            if (!this._isPrerelease(updatedProject.version) || !this._isPrerelease(clonedProject.version)) {
+              changes.push(
+                {
+                  changeType: ChangeType.dependency,
+                  comment: `Dependency ${updatedProjectName} version bump from ${dependencies[updatedProjectName]}` +
+                    ` to ${newDependencyVersion}.`,
+                  packageName: clonedProject.name
+                }
+              );
+            }
           }
           dependencies[updatedProjectName] = newDependencyVersion;
         }
@@ -256,14 +279,7 @@ export class VersionManager {
       changeType: ChangeType.none,
       newVersion: newPackageJson.version,
       packageName: newPackageJson.name,
-      changes: [
-        {
-          changeType: ChangeType.none,
-          comment: `Package version bump from ${rushProject.packageJson.version} to ${newPackageJson.version}`,
-          newVersion: newPackageJson.version,
-          packageName: newPackageJson.name
-        }
-      ]
+      comment: `Package version bump from ${rushProject.packageJson.version} to ${newPackageJson.version}`
     };
   }
 

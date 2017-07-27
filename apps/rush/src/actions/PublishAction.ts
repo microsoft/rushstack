@@ -166,6 +166,7 @@ export default class PublishAction extends BaseRushAction {
 
       // Make changes to package.json and change logs.
       changeManager.apply(this._apply.value);
+      changeManager.updateChangelog(this._apply.value);
 
       // Stage, commit, and push the changes to remote temp branch.
       git.addChanges();

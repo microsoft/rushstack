@@ -169,8 +169,39 @@ describe('sortChangeRequests', () => {
 describe('isRangeDependency', () => {
   it('can test ranges', () => {
     expect(PublishUtilities.isRangeDependency('>=1.0.0 <2.0.0')).is.true;
+    expect(PublishUtilities.isRangeDependency('>=1.0.0-pr.1 <2.0.0')).is.true;
     expect(PublishUtilities.isRangeDependency('1.0.0')).is.false;
     expect(PublishUtilities.isRangeDependency('^1.0.0')).is.false;
     expect(PublishUtilities.isRangeDependency('~1.0.0')).is.false;
+  });
+});
+
+describe('getNewDependencyVersion', () => {
+  it('can update dependency versions', () => {
+    const dependencies: { [key: string]: string} = {
+      'a': '~1.0.0',
+      'b': '^1.0.0',
+      'c': '>=1.0.0 <2.0.0'
+    };
+    expect(PublishUtilities.getNewDependencyVersion(dependencies,
+      'a', '1.1.0')).equals('~1.1.0');
+    expect(PublishUtilities.getNewDependencyVersion(dependencies,
+      'b', '1.2.0')).equals('^1.2.0');
+    expect(PublishUtilities.getNewDependencyVersion(dependencies,
+      'c', '1.3.0')).equals('>=1.3.0 <2.0.0');
+  });
+
+  it('can update dependency versions with prereleases', () => {
+    const dependencies: { [key: string]: string} = {
+      'a': '~1.0.0-pr.1',
+      'b': '^1.0.0-pr.1',
+      'c': '>=1.0.0-pr.1 <2.0.0'
+    };
+    expect(PublishUtilities.getNewDependencyVersion(dependencies,
+      'a', '1.1.0-pr.1')).equals('~1.1.0-pr.1');
+    expect(PublishUtilities.getNewDependencyVersion(dependencies,
+      'b', '1.2.0-pr.2')).equals('^1.2.0-pr.2');
+    expect(PublishUtilities.getNewDependencyVersion(dependencies,
+      'c', '1.3.0-pr.3')).equals('>=1.3.0-pr.3 <2.0.0');
   });
 });

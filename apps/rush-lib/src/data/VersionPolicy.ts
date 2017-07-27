@@ -19,6 +19,7 @@ import IPackageJson from '../utilities/IPackageJson';
 export enum BumpType {
   'prerelease',
   'patch',
+  'preminor',
   'minor',
   'major'
 }
@@ -65,7 +66,7 @@ export abstract class VersionPolicy {
 
   public abstract ensure(project: IPackageJson): IPackageJson | undefined;
 
-  public abstract bump(): void;
+  public abstract bump(bumpType?: BumpType, identifier?: string): void;
 
   public abstract get json(): IVersionPolicyJson;
 
@@ -118,8 +119,13 @@ export class LockStepVersionPolicy extends VersionPolicy {
     return this._updatePackageVersion(project, this._version);
   }
 
-  public bump(): void {
-    this.version.inc(BumpType[this._nextBump]);
+  /**
+   *
+   * @param bumpType - Overwrite bump type in version-policy.json with the provided value.
+   * @param identifier - Prerelease identifier if bump type is prerelease.
+   */
+  public bump(bumpType?: BumpType, identifier?: string): void {
+    this.version.inc(BumpType[bumpType] || BumpType[this._nextBump], identifier);
   }
 
   public validate(versionString: string, packageName: string): void {
@@ -176,7 +182,7 @@ export class IndividualVersionPolicy extends VersionPolicy {
     return undefined;
   }
 
-  public bump(): void {
+  public bump(bumpType?: BumpType, identifier?: string): void {
     // individual version policy lets change files drive version bump.
   }
 

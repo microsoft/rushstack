@@ -27,11 +27,30 @@ export class ChangeFile {
   }
 
   public addChange(data: IChangeInfo): void {
-    this._changeFileData.changes.push(data);
+    let changeInfo: IChangeInfo = this.getChanges(data.packageName);
+    if (!changeInfo) {
+      changeInfo = {
+        packageName: data.packageName
+      };
+      this._changeFileData.changes.push(changeInfo);
+    }
+
+    if (!changeInfo.changes) {
+      changeInfo.changes = [];
+    }
+    changeInfo.changes.push(data);
+    if (!changeInfo.changeType || (data.changeType && changeInfo.changeType < data.changeType)) {
+      changeInfo.changeType = data.changeType;
+    }
   }
 
-  public get data(): IChangeFile {
-    return this._changeFileData;
+  public getChanges(packageName: string): IChangeInfo | undefined {
+    for (const info of this._changeFileData.changes) {
+      if (info.packageName === packageName) {
+        return info;
+      }
+    }
+    return undefined;
   }
 
   /**
