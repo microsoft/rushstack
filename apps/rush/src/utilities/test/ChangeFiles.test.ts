@@ -3,6 +3,9 @@
 
 import { expect } from 'chai';
 import * as path from 'path';
+
+import { IPackageJson } from '@microsoft/rush-lib';
+
 import ChangeFiles from '../ChangeFiles';
 
 describe('ChangeFiles', () => {
@@ -69,6 +72,25 @@ describe('ChangeFiles', () => {
       expect(() => {
         ChangeFiles.validate([changeFileA, changeFileB, changeFileC], changedPackages);
       }).not.to.throw(Error);
+    });
+  });
+
+  describe('deleteAll', () => {
+    it('delete all files when there are no prerelease packages', () => {
+      const changesPath: string = path.join(__dirname, 'multipleChangeFiles');
+      const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
+      expect(changeFiles.deleteAll(false)).equals(3);
+    });
+
+    it('does not delete change files for prerelease packages ', () => {
+      const changesPath: string = path.join(__dirname, 'multipleChangeFiles');
+      const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
+      const updatedPackages: Map<string, IPackageJson> = new Map<string, IPackageJson>();
+      updatedPackages.set('a', {
+        name: 'a',
+        version: '1.1.0-pr.1'
+      });
+      expect(changeFiles.deleteAll(false, updatedPackages)).equals(2);
     });
   });
 });

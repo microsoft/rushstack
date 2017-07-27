@@ -11,6 +11,7 @@ import {
 } from '@microsoft/rush-lib';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as semver from 'semver';
 
 /**
  * Interface respresenting a changelog json object for a package used to represent the parsed
@@ -94,7 +95,9 @@ export default class ChangelogGenerator {
         const project: RushConfigurationProject = allProjects.get(packageName);
 
         // Changelogs should only be generated for publishable projects.
-        if (project.shouldPublish) {
+        // Do not update changelog or delete the change files for prerelease.
+        // Save them for the official release.
+        if (project.shouldPublish && !semver.prerelease(project.packageJson.version)) {
           ChangelogGenerator.updateIndividualChangelog(
             allChanges[packageName],
             allProjects.get(packageName).projectFolder,

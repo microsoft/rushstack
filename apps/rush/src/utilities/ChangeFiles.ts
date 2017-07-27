@@ -4,9 +4,12 @@
 import * as fsx from 'fs-extra';
 import * as path from 'path';
 import { EOL } from 'os';
+import * as semver from 'semver';
+
 import {
   Utilities,
-  IChangeInfo
+  IChangeInfo,
+  IPackageJson
 } from '@microsoft/rush-lib';
 import * as glob from 'glob';
 
@@ -64,7 +67,7 @@ export default class ChangeFiles {
       return this._files;
     }
     this._files = glob.sync(`${this._changesPath}/**/*.json`);
-    return this._files;
+    return this._files || [];
   }
 
   /**
@@ -77,15 +80,44 @@ export default class ChangeFiles {
   /**
    * Delete all change files
    */
-  public deleteAll(shouldDelete: boolean): void {
-    if (this._files.length) {
+  public deleteAll(shouldDelete: boolean, updatedPackages?: Map<string, IPackageJson>): number {
+    if (updatedPackages) {
+      // If package information is provided, skip changes files for prerelease.
+      const prereleasePackages: Set<string> = new Set<string>();
+      updatedPackages.forEach((packageJson) => {
+        if (semver.prerelease(packageJson.version)) {
+          prereleasePackages.add(packageJson.name);
+        }
+      });
+
+      const filesToDelete: string[] = this.getFiles().filter((filePath) => {
+        const changeRequest: IChangeInfo = JSON.parse(fsx.readFileSync(filePath, 'utf8'));
+        for (const changeInfo of changeRequest.changes) {
+          if (prereleasePackages.has(changeInfo.packageName)) {
+            // Change files for a prerelease version bump do not get deleted.
+            // Those get saved for releases.
+            return false;
+          }
+        }
+        return true;
+      });
+
+      return this._deleteFiles(filesToDelete, shouldDelete);
+    } else {
+      // Delete all change files.
+      return this._deleteFiles(this.getFiles(), shouldDelete);
+    }
+  }
+
+  private _deleteFiles(files: string[], shouldDelete: boolean): number {
+    if (files.length) {
       console.log(
         `${EOL}* ` +
         `${shouldDelete ? 'DELETING:' : 'DRYRUN: Deleting'} ` +
-        `${this._files.length} change file(s).`
+        `${files.length} change file(s).`
       );
 
-      for (const filePath of this._files) {
+      for (const filePath of files) {
         console.log(` - ${filePath}`);
 
         if (shouldDelete) {
@@ -93,5 +125,6 @@ export default class ChangeFiles {
         }
       }
     }
+    return files.length;
   }
 }

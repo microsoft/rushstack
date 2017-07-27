@@ -105,7 +105,7 @@ export default class ChangeManager {
     return updatedPackages;
   }
 
-  public updateChangelog(shouldCommit: boolean): void {
+  public updateChangelog(shouldCommit: boolean, updatedPackages?: Map<string, IPackageJson>): void {
     // Do not update changelog or delete the change files for prerelease.
     // Save them for the official release.
     if (!this._prereleaseToken.hasValue) {
@@ -113,7 +113,7 @@ export default class ChangeManager {
       ChangelogGenerator.updateChangelogs(this._allChanges, this._allPackages, shouldCommit);
 
       // Remove the change request files only if "-a" was provided.
-      this._changeFiles.deleteAll(shouldCommit);
+      this._changeFiles.deleteAll(shouldCommit, updatedPackages);
     }
   }
 }

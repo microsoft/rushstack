@@ -74,7 +74,7 @@ export class VersionManager {
       changeManager.apply(shouldCommit).forEach(packageJson => {
         this._updatedProjects.set(packageJson.name, packageJson);
       });
-      changeManager.updateChangelog(shouldCommit);
+      changeManager.updateChangelog(shouldCommit, this._updatedProjects);
     }
   }
 
