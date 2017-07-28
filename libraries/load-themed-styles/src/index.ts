@@ -276,9 +276,9 @@ function resolveThemableArray(splitStyleArray: ThemableArray): string {
       const themedValue: string | undefined = theme ? theme[themeSlot] : undefined;
       const defaultValue: string = currentValue.defaultValue || 'inherit';
 
-      // Warn to console if we hit an unthemed value even when themes are provided, unless "DEBUG" is false
+      // Warn to console if we hit an unthemed value even when themes are provided, but only if "DEBUG" is true.
       // Allow the themedValue to be undefined to explicitly request the default value.
-      if (theme && !themedValue && console && !(themeSlot in theme) && (typeof DEBUG === 'undefined' || DEBUG)) {
+      if (theme && !themedValue && console && !(themeSlot in theme) && typeof DEBUG !== 'undefined' && DEBUG) {
         console.warn(`Theming value not provided for "${themeSlot}". Falling back to "${defaultValue}".`);
       }
 
