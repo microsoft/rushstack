@@ -4,4 +4,3 @@
 /// <reference path="git-repo-info/git-repo-info.d.ts" />
 /// <reference path="jju/jju.d.ts" />
 /// <reference path="rimraf/rimraf.d.ts" />
-/// <reference path="semver/semver.d.ts" />
