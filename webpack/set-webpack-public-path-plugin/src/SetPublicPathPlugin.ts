@@ -14,7 +14,12 @@ import {
 } from 'webpack';
 import * as ITapable from 'tapable';
 
-import { ISetWebpackPublicPathOptions } from './SetWebpackPublicPathLoader';
+export interface ISetWebpackPublicPathOptions {
+  systemJs?: boolean;
+  urlPrefix?: string;
+  publicPath?: string;
+  regexVariable?: string;
+}
 
 export interface ISetWebpackPublicPathPluginOptions extends ISetWebpackPublicPathOptions {
   scriptName?: {
