@@ -418,33 +418,6 @@ abstract class AstItem {
   }
 
   /**
-   * This traverses any type aliases to find the original place where an item was defined.
-   * For example, suppose a class is defined as "export default class MyClass { }"
-   * but exported from the package's index.ts like this:
-   *
-   *    export { default as _MyClass } from './MyClass';
-   *
-   * In this example, calling followAliases() on the _MyClass symbol will return the
-   * original definition of MyClass, traversing any intermediary places where the
-   * symbol was imported and re-exported.
-   */
-  protected followAliases(symbol: ts.Symbol): ts.Symbol {
-    let current: ts.Symbol = symbol;
-    while (true) {
-      if (!(current.flags & ts.SymbolFlags.Alias)) {
-        break;
-      }
-      const currentAlias: ts.Symbol = this.typeChecker.getAliasedSymbol(current);
-      if (!currentAlias || currentAlias === current) {
-        break;
-      }
-      current = currentAlias;
-    }
-
-    return current;
-  }
-
-  /**
    * Reports an error through the ApiErrorHandler interface that was registered with the Extractor,
    * adding the filename and line number information for the declaration of this AstItem.
    */
@@ -580,7 +553,7 @@ abstract class AstItem {
     }
 
     // Follow the aliases all the way to the ending SourceFile
-    const currentSymbol: ts.Symbol = this.followAliases(symbol);
+    const currentSymbol: ts.Symbol = TypeScriptHelpers.followAliases(symbol, this.typeChecker);
 
     if (!currentSymbol.declarations || !currentSymbol.declarations.length) {
       // This is a degenerate case that happens sometimes

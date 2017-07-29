@@ -29,6 +29,33 @@ export default class TypeScriptHelpers {
   public static jsdocIntermediateRegEx: RegExp = /^\s*[*]\s?/g;
 
   /**
+   * This traverses any type aliases to find the original place where an item was defined.
+   * For example, suppose a class is defined as "export default class MyClass { }"
+   * but exported from the package's index.ts like this:
+   *
+   *    export { default as _MyClass } from './MyClass';
+   *
+   * In this example, calling followAliases() on the _MyClass symbol will return the
+   * original definition of MyClass, traversing any intermediary places where the
+   * symbol was imported and re-exported.
+   */
+  public static followAliases(symbol: ts.Symbol, typeChecker: ts.TypeChecker): ts.Symbol {
+    let current: ts.Symbol = symbol;
+    while (true) { // tslint:disable-line:no-constant-condition
+      if (!(current.flags & ts.SymbolFlags.Alias)) {
+        break;
+      }
+      const currentAlias: ts.Symbol = typeChecker.getAliasedSymbol(current);
+      if (!currentAlias || currentAlias === current) {
+        break;
+      }
+      current = currentAlias;
+    }
+
+    return current;
+  }
+
+  /**
    * Returns the Symbol for the provided Declaration.  This is a workaround for a missing
    * feature of the TypeScript Compiler API.   It is the only apparent way to reach
    * certain data structures, and seems to always work, but is not officially documented.
