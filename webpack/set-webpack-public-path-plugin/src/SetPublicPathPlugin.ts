@@ -14,16 +14,59 @@ import {
 } from 'webpack';
 import * as ITapable from 'tapable';
 
+/**
+ * The base options for setting the webpack public path at runtime.
+ *
+ * @public
+ */
 export interface ISetWebpackPublicPathOptions {
+  /**
+   * Use the System.baseURL property if it is defined.
+   */
   systemJs?: boolean;
+
+  /**
+   * Use the specified string as a URL prefix after the SystemJS path or the publicPath option.
+   * If neither systemJs nor publicPath is defined, this option will not apply and an exception will be thrown.
+   */
   urlPrefix?: string;
+
+  /**
+   * Use the specified path as the base public path.
+   */
   publicPath?: string;
+
+  /**
+   * Check for a variable with this name on the page and use its value as a regular expression against script paths to
+   *  the bundle's script. If a value foo is passed into regexVariable, the produced bundle will look for a variable
+   *  called foo during initialization, and if a foo variable is found, use its value as a regular expression to detect
+   *  the bundle's script.
+   *
+   * See the README for more information.
+   */
   regexVariable?: string;
 }
 
+/**
+ * Options for the set-webpack-public-path plugin.
+ *
+ * @public
+ */
 export interface ISetWebpackPublicPathPluginOptions extends ISetWebpackPublicPathOptions {
+  /**
+   * An object that describes how the public path should be discovered.
+   */
   scriptName?: {
+    /**
+     * A regular expression expressed as a string to be applied to all script paths on the page.
+     */
     name: string;
+
+    /**
+     * If true, the name property is tokenized.
+     *
+     * See the README for more information.
+     */
     isTokenized: boolean;
   };
 }
@@ -55,7 +98,13 @@ interface ICompilation {
   mainTemplate: IMainTemplate;
 }
 
-export default class SetPublicPathPlugin implements Plugin {
+/**
+ * This simple plugin sets the __webpack_public_path__ variable to a value specified in the arguments,
+ *  optionally appended to the SystemJs baseURL property.
+ *
+ * @public
+ */
+export class SetPublicPathPlugin implements Plugin {
   public options: ISetWebpackPublicPathPluginOptions;
 
   constructor(options: ISetWebpackPublicPathPluginOptions) {
