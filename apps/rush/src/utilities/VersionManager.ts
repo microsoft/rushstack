@@ -268,7 +268,7 @@ export class VersionManager {
       const rushProject: RushConfigurationProject = this._rushConfiguration.getProjectByName(packageName);
       // Update package.json
       const packagePath: string = path.join(rushProject.projectFolder, 'package.json');
-      fsx.writeFileSync(packagePath, JSON.stringify(newPackageJson, undefined, 2), 'utf8');
+      fsx.writeFileSync(packagePath, JSON.stringify(newPackageJson, undefined, 2), { encoding: 'utf8' });
     });
   }
 

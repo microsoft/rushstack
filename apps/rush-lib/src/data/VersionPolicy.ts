@@ -128,7 +128,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
    * @param identifier - Prerelease identifier if bump type is prerelease.
    */
   public bump(bumpType?: BumpType, identifier?: string): void {
-    this.version.inc(BumpType[bumpType] || BumpType[this._nextBump], identifier);
+    this.version.inc(this._getReleaseType(bumpType), identifier);
   }
 
   public validate(versionString: string, packageName: string): void {
@@ -142,6 +142,11 @@ export class LockStepVersionPolicy extends VersionPolicy {
     const updatedProject: IPackageJson = cloneDeep(project);
     updatedProject.version = newVersion.format();
     return updatedProject;
+  }
+
+  private _getReleaseType(bumpType: BumpType): semver.ReleaseType {
+    // Eventually we should just use ReleaseType and get rid of bump type.
+    return BumpType[bumpType] as semver.ReleaseType;
   }
 }
 
