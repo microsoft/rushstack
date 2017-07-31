@@ -2,7 +2,7 @@
 
 ## Installation
 
-`npm @microsoft/loader-set-webpack-public-path --save-dev`
+`npm @microsoft/set-webpack-public-path-plugin --save-dev`
 
 ## Overview
 
@@ -15,7 +15,7 @@ property.
 To use the plugin, add it to the `plugins` array of your Webpack config. For example:
 
 ```JavaScript
-import SetPublicPathPlugin from '@microsoft/loader-set-webpack-public-path/lib/SetPublicPathPlugin';
+import { SetPublicPathPlugin } from '@microsoft/set-webpack-public-path-plugin';
 
 {
   plugins: [
@@ -120,7 +120,7 @@ is set to `true`, the code is not minified. By default, it is minified.
 ## Usage
 
 ``` javascript
-var setWebpackPublicPath = require('@microsoft/loader-set-webpack-public-path');
+var setWebpackPublicPath = require('@microsoft/set-webpack-public-path-plugin');
 var gulpInsert = require('gulp-insert');
 
 gulp.src('finizlied/webpack/bundle/path')
