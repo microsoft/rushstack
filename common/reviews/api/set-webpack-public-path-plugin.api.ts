@@ -1,4 +1,7 @@
 // @public
+export function getGlobalRegisterCode(debug: boolean = false): string;
+
+// @public
 interface ISetWebpackPublicPathOptions {
   publicPath?: string;
   regexVariable?: string;

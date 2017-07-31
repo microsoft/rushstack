@@ -11,3 +11,4 @@
 declare const packageDescription: void;
 
 export * from './SetPublicPathPlugin';
+export { getGlobalRegisterCode } from './codeGenerator';
