@@ -8,7 +8,7 @@ import ApiPackage from './ApiPackage';
 import DocElementParser from '../DocElementParser';
 import { IDocElement, IParam, ICodeLinkElement } from '../IDocElement';
 import { IDocItem } from '../IDocItem';
-import ApiDefinitionReference, { IApiDefinintionReferenceParts } from '../ApiDefinitionReference';
+import ApiDefinitionReference, { IApiDefinitionReferenceParts } from '../ApiDefinitionReference';
 import Token, { TokenType } from '../Token';
 import Tokenizer from '../Tokenizer';
 import Extractor from '../Extractor';
@@ -58,7 +58,7 @@ export enum ReleaseTag {
  * item and the package of that non local item can not be found.
  * If there is no package given and an  item can not be found we will return undefined.
  * Once we support local references, we can be sure that reportError will only be
- * called once if the item can not be found (and undefined will be retured by the reference
+ * called once if the item can not be found (and undefined will be returned by the reference
  * function).
  */
 export interface IReferenceResolver {
@@ -404,7 +404,7 @@ export default class ApiDocumentation {
   private _completeLinks(): void {
     while (this.incompleteLinks.length) {
       const codeLink: ICodeLinkElement = this.incompleteLinks.pop();
-      const parts: IApiDefinintionReferenceParts = {
+      const parts: IApiDefinitionReferenceParts = {
         scopeName: codeLink.scopeName,
         packageName: codeLink.packageName,
         exportName: codeLink.exportName,

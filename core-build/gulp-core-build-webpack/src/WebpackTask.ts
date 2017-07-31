@@ -3,13 +3,15 @@
 
 import * as Webpack from 'webpack';
 import { GulpTask, IBuildConfig } from '@microsoft/gulp-core-build';
-import gulp = require('gulp');
+import * as Gulp from 'gulp';
 import { EOL } from 'os';
 
-/** @public */
+/**
+ * @public
+ */
 export interface IWebpackTaskConfig {
   /**
-   * Path to a webpack config. A path to a config takes precidence over the "config" option.
+   * Path to a webpack config. A path to a config takes precedence over the "config" option.
    */
   configPath: string;
 
@@ -61,7 +63,7 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
     return require('./webpack.schema.json');
   }
 
-  public executeTask(gulp: gulp.Gulp, completeCallback: (error?: string) => void): void {
+  public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): void {
     const shouldInitWebpack: boolean = (process.argv.indexOf('--initwebpack') > -1);
 
     /* tslint:disable:typedef */
@@ -121,14 +123,14 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
 
             if (statsResult.warnings && statsResult.warnings.length) {
               const unsuppressedWarnings: string[] = [];
-              const warningSuppressonRegexes = (this.taskConfig.suppressWarnings || []).map((regex: string) => {
+              const warningSuppressionRegexes = (this.taskConfig.suppressWarnings || []).map((regex: string) => {
                 return new RegExp(regex);
               });
 
               statsResult.warnings.forEach((warning: string) => {
                 let suppressed = false;
-                for (let i = 0; i < warningSuppressonRegexes.length; i++) {
-                  const suppressionRegex = warningSuppressonRegexes[i];
+                for (let i = 0; i < warningSuppressionRegexes.length; i++) {
+                  const suppressionRegex = warningSuppressionRegexes[i];
                   if (warning.match(suppressionRegex)) {
                     suppressed = true;
                     break;

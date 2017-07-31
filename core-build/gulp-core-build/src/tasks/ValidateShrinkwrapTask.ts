@@ -34,7 +34,9 @@ interface INpmShrinkwrap {
  * @public
  */
 export class ValidateShrinkwrapTask extends GulpTask<void> {
-  /** Instantiates an instance of the ValidateShrinkwrap task */
+  /**
+   * Instantiates an instance of the ValidateShrinkwrap task
+   */
   constructor() {
     super();
     this.name = 'validate-shrinkwrap';
@@ -56,11 +58,11 @@ export class ValidateShrinkwrapTask extends GulpTask<void> {
       return;
     }
 
-    const packagejson: INpmPackage = require(pathToPackageJson);
-    const shrinkwrapjson: INpmShrinkwrap = require(pathToShrinkwrap);
+    const packageJson: INpmPackage = require(pathToPackageJson);
+    const shrinkwrapJson: INpmShrinkwrap = require(pathToShrinkwrap);
 
-    this._validate(packagejson.dependencies, shrinkwrapjson.dependencies);
-    this._validate(packagejson.devDependencies, shrinkwrapjson.dependencies);
+    this._validate(packageJson.dependencies, shrinkwrapJson.dependencies);
+    this._validate(packageJson.devDependencies, shrinkwrapJson.dependencies);
 
     return;
   }

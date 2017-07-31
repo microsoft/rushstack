@@ -10,6 +10,5 @@
       "es6-collections",
       "node"
     ]
-  },
-  "files": ["typings/tsd.d.ts"]
+  }
 }

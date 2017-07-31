@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
-
+import * as os from 'os';
 import * as path from 'path';
+
 import {
   CommandLineAction,
   ICommandLineActionOptions
@@ -26,6 +27,7 @@ export abstract class BaseRushAction extends CommandLineAction {
 
   protected onExecute(): void {
     this._ensureEnvironment();
+    console.log(`Starting "rush ${this.options.actionVerb}"${os.EOL}`);
     this.run();
   }
 

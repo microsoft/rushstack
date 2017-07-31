@@ -44,10 +44,13 @@ export abstract class VersionPolicy {
   public static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy {
     const definition: VersionPolicyDefinitionName = VersionPolicyDefinitionName[versionPolicyJson.definitionName];
     if (definition === VersionPolicyDefinitionName.lockStepVersion) {
+       // tslint:disable-next-line:no-use-before-declare
       return new LockStepVersionPolicy(versionPolicyJson as ILockStepVersionJson);
     } else if (definition === VersionPolicyDefinitionName.individualVersion) {
+      // tslint:disable-next-line:no-use-before-declare
       return new IndividualVersionPolicy(versionPolicyJson as IIndividualVersionJson);
     }
+
     return undefined;
   }
 

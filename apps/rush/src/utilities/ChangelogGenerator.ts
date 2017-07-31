@@ -6,75 +6,15 @@ import PublishUtilities, {
 } from './PublishUtilities';
 import {
   IChangeInfo,
+  IChangelog,
+  IChangeLogEntry,
+  IChangeLogComment,
   ChangeType,
   RushConfigurationProject
 } from '@microsoft/rush-lib';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as semver from 'semver';
-
-/**
- * Interface respresenting a changelog json object for a package used to represent the parsed
- * content of CHANGELOG.json
- */
-export interface IChangelog {
-  /**
-   * Name of the project
-   */
-  name: string;
-
-  /**
-   * Entries within the changelog corresponding to each published version.
-   */
-  entries: IChangeLogEntry[];
-}
-
-/**
- * Interface representing a single published entry in the changelog.
- */
-export interface IChangeLogEntry {
-  /**
-   * Published version for the entry. (Example: 1.0.0)
-   */
-  version: string;
-
-  /**
-   * Git tag used to identify the published commit. (Example: b7f55611e54910327a206476b185265498c66acf)
-   */
-  tag: string;
-
-  /**
-   * The UTC date when the publish was applied. (Example: Fri, 02 Dec 2016 22:27:16 GMT)
-   */
-  date: string;
-
-  /**
-   * Comments for the entry, where key respresents the ChangeType string (Example: major)
-   */
-  comments: {
-    [changeType: string]: IChangeLogComment[];
-  };
-}
-
-/**
- * Interface representing a single changelog comment within an entry.
- */
-export interface IChangeLogComment {
-  /**
-   * The given comment. (supports markdown.)
-   */
-  comment: string;
-
-  /**
-   * The author, if applicable, that created the change request.
-   */
-  author?: string;
-
-  /**
-   * The commit, if applicable, including the change request.
-   */
-  commit?: string;
-}
 
 const CHANGELOG_JSON: string = 'CHANGELOG.json';
 const CHANGELOG_MD: string = 'CHANGELOG.md';
@@ -128,7 +68,8 @@ export default class ChangelogGenerator {
         fs.writeFileSync(
           path.join(project.projectFolder, CHANGELOG_MD),
           ChangelogGenerator._translateToMarkdown(changelog),
-          'utf8');
+          { encoding: 'utf8' }
+        );
       }
 
     });
@@ -184,12 +125,13 @@ export default class ChangelogGenerator {
 
       if (shouldCommit) {
         // Write markdown transform.
-        fs.writeFileSync(changelogFilename, JSON.stringify(changelog, undefined, 2), 'utf8');
+        fs.writeFileSync(changelogFilename, JSON.stringify(changelog, undefined, 2), { encoding: 'utf8' });
 
         fs.writeFileSync(
           path.join(projectFolder, CHANGELOG_MD),
           ChangelogGenerator._translateToMarkdown(changelog),
-          'utf8');
+          { encoding: 'utf8' }
+        );
       }
     }
 

@@ -27,6 +27,14 @@ export default class Tokenizer {
     this._tokenStream = this._tokenizeDocs(docs);
   }
 
+  public peekToken(): Token {
+    return (!this._tokenStream || this._tokenStream.length === 0) ? undefined : this._tokenStream[0];
+  }
+
+  public getToken(): Token {
+    return (!this._tokenStream || this._tokenStream.length === 0) ? undefined : this._tokenStream.shift();
+  }
+
   /**
    * Converts a doc comment string into an array of Tokens. This processing is done so that docs
    * can be processed more strictly.
@@ -115,19 +123,11 @@ export default class Tokenizer {
     return;
   }
 
-  public peekToken(): Token {
-    return (!this._tokenStream || this._tokenStream.length === 0) ? undefined : this._tokenStream[0];
-  }
-
-  public getToken(): Token {
-    return (!this._tokenStream || this._tokenStream.length === 0) ? undefined : this._tokenStream.shift();
-  }
-
   /**
-   * Trims whitespaces on either end of the entry (which is just a string within the doc comments),
+   * Trims whitespace on either end of the entry (which is just a string within the doc comments),
    * replaces \r and \n's with single whitespace, and removes empty entries.
    *
-   * @param docEntries - Array of doc strings to be santitized
+   * @param docEntries - Array of doc strings to be sanitized
    */
   private _sanitizeDocEntries(docEntries: string[]): string[] {
     const result: string[] = [];

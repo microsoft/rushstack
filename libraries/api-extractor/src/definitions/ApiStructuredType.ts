@@ -123,7 +123,7 @@ export default class ApiStructuredType extends ApiItemContainer {
 
   /**
     * Returns a line of text such as "class MyClass extends MyBaseClass", excluding the
-    * curly braces and body.  The name "MyClass" will be the public name seend by external
+    * curly braces and body.  The name "MyClass" will be the public name seen by external
     * callers, not the declared name of the class; @see ApiItem.name documentation for details.
     */
   public getDeclarationLine(): string {

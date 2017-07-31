@@ -24,7 +24,7 @@ export class SchemaValidator {
   });
 
   /**
-   * A function which validates a dataFile against a schemFile, both specified
+   * A function which validates a dataFile against a schemaFile, both specified
    * as paths. It will throw if there is an issue with the file,
    * otherwise it will return the validated datafile.
    */
@@ -86,5 +86,5 @@ export class SchemaValidator {
     }
 
     return [`(${error.path}) ${error.message}`].concat(innerErrors);
-  };
+  }
 }

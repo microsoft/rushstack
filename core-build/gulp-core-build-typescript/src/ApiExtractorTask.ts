@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as fsx from 'fs-extra';
-import * as gulp from 'gulp';
+import * as Gulp from 'gulp';
 import * as os from 'os';
 import * as path from 'path';
 import * as through from 'through2';
@@ -51,7 +51,7 @@ export interface IApiExtractorTaskConfig {
    * and require signoff from the appropriate reviewers.
    *
    * Example: "config" (for a standalone project)
-   * Example: "../../common/api-review"  (for a Git repoistory with Rush)
+   * Example: "../../common/api-review"  (for a Git repository with Rush)
    */
   apiReviewFolder?: string;
 
@@ -85,9 +85,9 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
 
   public loadSchema(): Object {
     return require('./schemas/api-extractor.schema.json');
-  };
+  }
 
-  public executeTask(gulp: gulp.Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream | void {
+  public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream | void {
     if (!this.taskConfig.enabled || !this._validateConfiguration()) {
       completeCallback();
       return;

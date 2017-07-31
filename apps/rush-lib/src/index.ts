@@ -40,8 +40,14 @@ export {
 } from './data/ChangeManagement';
 
 export {
+  IChangelog,
+  IChangeLogEntry,
+  IChangeLogComment
+} from './data/Changelog';
+
+export {
   VersionMismatchFinder
-} from './data/VersionMismatchFinder'
+} from './data/VersionMismatchFinder';
 
 export {
   ErrorDetectionMode,

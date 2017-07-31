@@ -125,8 +125,6 @@ export default class PublishAction extends BaseRushAction {
    * Executes the publish action, which will read change request files, apply changes to package.jsons,
    */
   protected run(): void {
-    console.log(`Starting "rush publish" ${EOL}`);
-
     if (!GitPolicy.check(this.rushConfiguration)) {
       process.exit(1);
       return;

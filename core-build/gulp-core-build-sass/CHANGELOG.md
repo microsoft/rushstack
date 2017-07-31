@@ -1,6 +1,25 @@
 # Change Log - @microsoft/gulp-core-build-sass
 
-This log was last generated on Fri, 07 Jul 2017 01:02:28 GMT and should not be manually modified.
+This log was last generated on Thu, 27 Jul 2017 01:04:48 GMT and should not be manually modified.
+
+## 3.2.3
+Thu, 27 Jul 2017 01:04:48 GMT
+
+### Patches
+
+- Upgrade to the TS2.4 version of the build tools.
+
+## 3.2.2
+Tue, 25 Jul 2017 20:03:31 GMT
+
+### Patches
+
+- Upgrade to TypeScript 2.4
+
+## 3.2.1
+Fri, 21 Jul 2017 01:02:30 GMT
+
+*Changes not tracked*
 
 ## 3.2.0
 Fri, 07 Jul 2017 01:02:28 GMT

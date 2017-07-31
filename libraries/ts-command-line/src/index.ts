@@ -27,7 +27,7 @@ export {
 
 export {
   default as CommandLineParameterProvider
-} from './CommandLineParameterProvider'
+} from './CommandLineParameterProvider';
 
 export {
   ICommandListParserOptions,

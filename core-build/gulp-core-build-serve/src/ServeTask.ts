@@ -3,7 +3,7 @@
 
 import { GulpTask } from '@microsoft/gulp-core-build';
 import { IBuildConfig } from '@microsoft/gulp-core-build/lib/IBuildConfig';
-import * as gulp from 'gulp';
+import * as Gulp from 'gulp';
 import * as fs from 'fs';
 import * as ChalkType from 'chalk';
 import * as HttpType from 'http';
@@ -97,7 +97,7 @@ export class ServeTask extends GulpTask<IServeTaskConfig> {
     return require('./serve.schema.json');
   }
 
-  public executeTask(gulp: gulp.Gulp, completeCallback?: (error?: string) => void): void {
+  public executeTask(gulp: typeof Gulp, completeCallback?: (error?: string) => void): void {
     /* tslint:disable:typedef */
     const gulpConnect = require('gulp-connect');
     const open = require('gulp-open');

@@ -3,7 +3,7 @@
 
 /* istanbul ignore next */
 
-import * as stream from 'stream';
+import * as Stream from 'stream';
 
 enum StreamState {
   Open,
@@ -34,13 +34,13 @@ class StreamInfo<T extends NodeJS.ReadableStream> {
  * A class which manages the output of multiple threads.
  */
 export default class StreamCollator<T extends NodeJS.ReadableStream>
-  extends stream.Readable implements NodeJS.ReadableStream {
+  extends Stream.Readable implements NodeJS.ReadableStream {
   private _streams: StreamInfo<T>[] = [];
   private _activeStream: StreamInfo<T> = undefined;
 
   public _read(): void {
     /* no-op */
-  };
+  }
 
   /**
    * Registers a stream into the list of active buffers.

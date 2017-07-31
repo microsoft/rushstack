@@ -43,11 +43,11 @@ export default class JsonSchemaValidator {
         buffer = JsonSchemaValidator._formatErrorDetails(errorDetail.inner, indent + '  ', buffer);
       }
     }
+
     return buffer;
   }
 
   public validateObject(jsonObject: Object, errorCallback: ValidateErrorCallback): void {
-
     // Remove the $schema reference that appears in the configuration object (used for IntelliSense),
     // since we are replacing it with the precompiled version.  The validator.setRemoteReference()
     // API is a better way to handle this, but we'd first need to publish the schema file

@@ -513,19 +513,6 @@ export default class RushConfiguration {
     return this._versionPolicyConfiguration;
   }
 
-  private _populateDownstreamDependencies(dependencies: { [key: string]: string }, packageName: string): void {
-    if (!dependencies) {
-      return;
-    }
-    Object.keys(dependencies).forEach(dependencyName => {
-      const depProject: RushConfigurationProject = this._projectsByName.get(dependencyName);
-
-      if (depProject) {
-        depProject.downstreamDependencyProjects.push(packageName);
-      }
-    });
-  }
-
   /**
    * Use RushConfiguration.loadFromConfigurationFile() or Use RushConfiguration.loadFromDefaultLocation()
    * instead.
@@ -649,5 +636,18 @@ export default class RushConfiguration {
     // Example: "./common/config/rush/pinnedVersions.json"
     const pinnedVersionsFile: string = path.join(this.commonRushConfigFolder, RushConstants.pinnedVersionsFilename);
     this._pinnedVersions = PinnedVersionsConfiguration.tryLoadFromFile(pinnedVersionsFile);
+  }
+
+  private _populateDownstreamDependencies(dependencies: { [key: string]: string }, packageName: string): void {
+    if (!dependencies) {
+      return;
+    }
+    Object.keys(dependencies).forEach(dependencyName => {
+      const depProject: RushConfigurationProject = this._projectsByName.get(dependencyName);
+
+      if (depProject) {
+        depProject.downstreamDependencyProjects.push(packageName);
+      }
+    });
   }
 }

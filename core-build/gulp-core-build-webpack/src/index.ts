@@ -3,10 +3,10 @@
 
 import { WebpackTask } from './WebpackTask';
 
-export { IWebpackTaskConfig, WebpackTask } from './WebpackTask'
+export { IWebpackTaskConfig, WebpackTask } from './WebpackTask';
 
-/* tslint:disable:export-name */
-/** @public */
+/**
+ * @public
+ */
 export const webpack: WebpackTask = new WebpackTask();
-export default webpack;
-/* tslint:enable:export-name */
+export default webpack; // tslint:disable-line:export-name

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { GulpTask } from './GulpTask';
-import gulp = require('gulp');
+import * as Gulp from 'gulp';
 import * as path from 'path';
 
 import { FileDeletionUtility } from '../utilities/FileDeletionUtility';
@@ -27,7 +27,7 @@ export class CleanTask extends GulpTask<void> {
    * glob patterns which are then passed to the `del` plugin to delete them from disk.
    */
   public executeTask(
-    gulp: gulp.Gulp,
+    gulp: typeof Gulp,
     completeCallback: (error?: string | Error) => void
   ): void {
     const { distFolder, libFolder, libAMDFolder, tempFolder }: IBuildConfig = this.buildConfig;
@@ -52,17 +52,17 @@ export class CleanTask extends GulpTask<void> {
     const uniquePaths: { [key: string]: string } = {};
 
     // Create dictionary of unique paths. (Could be replaced with ES6 set.)
-    cleanPaths.forEach(path => {
-      if (!!path) {
-        uniquePaths[path] = path;
+    cleanPaths.forEach(cleanPath => {
+      if (!!cleanPath) {
+        uniquePaths[cleanPath] = cleanPath;
       }
     });
 
     // Reset cleanPaths to only unique non-empty paths.
     cleanPaths = [];
-    for (const path in uniquePaths) {
-      if (uniquePaths.hasOwnProperty(path)) {
-        cleanPaths.push(path);
+    for (const uniquePath in uniquePaths) {
+      if (uniquePaths.hasOwnProperty(uniquePath)) {
+        cleanPaths.push(uniquePath);
       }
     }
 

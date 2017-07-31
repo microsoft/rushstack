@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as colors from 'colors';
-import * as os from 'os';
 
 import {
   RushConfigurationProject,
@@ -32,8 +31,6 @@ export default class CheckAction extends BaseRushAction {
   }
 
   protected run(): void {
-    console.log(`Starting "rush check"${os.EOL}`);
-
     const pinnedVersions: { [dependency: string]: string } = {};
     this.rushConfiguration.pinnedVersions.forEach((version: string, dependency: string) => {
       pinnedVersions[dependency] = version;

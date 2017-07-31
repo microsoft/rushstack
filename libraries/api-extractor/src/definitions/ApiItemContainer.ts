@@ -37,6 +37,17 @@ abstract class ApiItemContainer extends ApiItem {
   }
 
   /**
+   * @virtual
+   */
+  public visitTypeReferencesForApiItem(): void {
+    super.visitTypeReferencesForApiItem();
+
+    this._memberItems.forEach((apiItem) => {
+      apiItem.visitTypeReferencesForApiItem();
+    });
+  }
+
+  /**
    * Add a child item to the container.
    */
   protected addMemberItem(apiItem: ApiItem): void {
@@ -47,17 +58,6 @@ abstract class ApiItemContainer extends ApiItem {
       this._memberItems.set(apiItem.name, apiItem);
       apiItem.notifyAddedToContainer(this);
     }
-  }
-
-  /**
-   * @virtual
-   */
-  public visitTypeReferencesForApiItem(): void {
-    super.visitTypeReferencesForApiItem();
-
-    this._memberItems.forEach((apiItem) => {
-      apiItem.visitTypeReferencesForApiItem();
-    });
   }
 }
 

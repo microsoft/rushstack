@@ -2,6 +2,46 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "3.3.1",
+      "tag": "@microsoft/gulp-core-build-typescript_v3.3.1",
+      "date": "Thu, 27 Jul 2017 01:04:48 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade to the TS2.4 version of the build tools."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.7.1` to `2.7.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `2.3.0` to `2.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.0",
+      "tag": "@microsoft/gulp-core-build-typescript_v3.3.0",
+      "date": "Tue, 25 Jul 2017 20:03:31 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade to TypeScript 2.4"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `>=2.7.0 <3.0.0` to `>=2.7.0 <3.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `>=2.2.0 <3.0.0` to `>=2.2.0 <3.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.0",
       "tag": "@microsoft/gulp-core-build-typescript_v3.2.0",
       "date": "Fri, 07 Jul 2017 01:02:28 GMT",

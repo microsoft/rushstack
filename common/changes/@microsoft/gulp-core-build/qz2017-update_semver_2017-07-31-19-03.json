@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build",
+      "comment": "Upgrade @types/semver to 5.3.33",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build",
+  "email": "qz2017@users.noreply.github.com"
+}

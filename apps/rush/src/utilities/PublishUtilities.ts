@@ -85,7 +85,7 @@ export default class PublishUtilities {
           change.newVersion = pkg.version;
         } else {
           change.newVersion = (change.changeType >= ChangeType.patch) ?
-            semver.inc(pkg.version, ChangeType[change.changeType]) :
+            semver.inc(pkg.version, PublishUtilities._getReleaseType(change.changeType)) :
             pkg.version;
         }
 
@@ -217,6 +217,19 @@ export default class PublishUtilities {
     return newDependencyVersion;
   }
 
+  private static _getReleaseType(changeType: ChangeType): semver.ReleaseType {
+    switch (changeType) {
+      case ChangeType.major:
+        return 'major';
+      case ChangeType.minor:
+        return 'minor';
+      case ChangeType.patch:
+        return 'patch';
+      default:
+        throw new Error(`Wrong change type ${changeType}`);
+    }
+  }
+
   private static _getNewRangeDependency(newVersion: string): string {
     let upperLimit: string = newVersion;
     if (semver.prerelease(newVersion)) {
@@ -293,7 +306,7 @@ export default class PublishUtilities {
     });
 
     if (shouldCommit) {
-      fsx.writeFileSync(packagePath, JSON.stringify(pkg, undefined, 2), 'utf8');
+      fsx.writeFileSync(packagePath, JSON.stringify(pkg, undefined, 2), { encoding: 'utf8' });
     }
     return pkg;
   }
@@ -425,7 +438,7 @@ export default class PublishUtilities {
       currentChange.changeType = ChangeType.none;
     } else {
       currentChange.newVersion = change.changeType >= ChangeType.patch ?
-        semver.inc(pkg.version, ChangeType[currentChange.changeType]) :
+        semver.inc(pkg.version, PublishUtilities._getReleaseType(currentChange.changeType)) :
         pkg.version;
       currentChange.newRangeDependency = PublishUtilities._getNewRangeDependency(currentChange.newVersion);
     }

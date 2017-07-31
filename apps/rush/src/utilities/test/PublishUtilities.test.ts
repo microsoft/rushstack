@@ -168,11 +168,13 @@ describe('sortChangeRequests', () => {
 
 describe('isRangeDependency', () => {
   it('can test ranges', () => {
+    /* tslint:disable:no-unused-expression */
     expect(PublishUtilities.isRangeDependency('>=1.0.0 <2.0.0')).is.true;
     expect(PublishUtilities.isRangeDependency('>=1.0.0-pr.1 <2.0.0')).is.true;
     expect(PublishUtilities.isRangeDependency('1.0.0')).is.false;
     expect(PublishUtilities.isRangeDependency('^1.0.0')).is.false;
     expect(PublishUtilities.isRangeDependency('~1.0.0')).is.false;
+    /* tslint:enable:no-unused-expression */
   });
 });
 

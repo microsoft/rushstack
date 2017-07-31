@@ -73,7 +73,7 @@ export default class TypeScriptHelpers {
       const jsdocLines: string[] = jsdocFullText.split(TypeScriptHelpers.newLineRegEx);
       const jsdocStartSeqExists: boolean = TypeScriptHelpers.jsdocStartRegEx.test(jsdocLines[0].toString());
 
-      // Report error for each missing sequence seperately
+      // Report error for each missing sequence separately
       if (!jsdocStartSeqExists) {
         errorLogger('Jsdoc comment must begin with a \"/**\" sequence.');
         return '';

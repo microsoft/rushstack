@@ -5,7 +5,7 @@ import { GulpTask, IBuildConfig } from '@microsoft/gulp-core-build';
 
 import * as os from 'os';
 import * as fs from 'fs';
-import * as gulp from 'gulp';
+import * as Gulp from 'gulp';
 import * as path from 'path';
 import * as KarmaType from 'karma';
 
@@ -65,7 +65,7 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
     );
   }
 
-  public executeTask(gulp: gulp.Gulp, completeCallback: (error?: Error | string) => void): void {
+  public executeTask(gulp: typeof Gulp, completeCallback: (error?: Error | string) => void): void {
     const { configPath }: IKarmaTaskConfig = this.taskConfig;
 
     if (configPath && !this.fileExists(configPath)) {

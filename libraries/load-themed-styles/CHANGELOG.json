@@ -2,6 +2,35 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "1.5.1",
+      "tag": "@microsoft/load-themed-styles_v1.5.1",
+      "date": "Tue, 25 Jul 2017 20:03:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade to TypeScript 2.4"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `~3.1.0` to `~3.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.5.0",
+      "tag": "@microsoft/load-themed-styles_v1.5.0",
+      "date": "Fri, 21 Jul 2017 01:02:30 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "allow to apply styles in batch asynchronously to save the cost of creating styles elements for perf optimization"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.0",
       "tag": "@microsoft/load-themed-styles_v1.4.0",
       "date": "Fri, 07 Jul 2017 01:02:28 GMT",

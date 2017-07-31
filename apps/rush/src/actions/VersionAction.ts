@@ -87,7 +87,6 @@ export default class VersionAction extends BaseRushAction {
         return;
       }
     }
-    console.log(`Starting "rush version" ${EOL}`);
 
     this._versionManager = new VersionManager(this.rushConfiguration);
     if (this._ensureVersionPolicy.value) {

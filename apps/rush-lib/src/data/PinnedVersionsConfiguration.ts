@@ -77,14 +77,6 @@ export class PinnedVersionsConfiguration {
     return this._data.size;
   }
 
-  private _serialize(): IPinnedVersionsJson {
-    const rawJson: IPinnedVersionsJson = {};
-    this._data.forEach((version: string, dependency: string) => {
-      rawJson[dependency] = version;
-    });
-    return rawJson;
-  }
-
   /**
    * Preferred to use PinnedVersionsConfiguration.loadFromFile()
    */
@@ -93,5 +85,13 @@ export class PinnedVersionsConfiguration {
     Object.keys(pinnedVersionJson || {}).forEach((dep: string) => {
       this.set(dep, pinnedVersionJson[dep]);
     });
+  }
+
+  private _serialize(): IPinnedVersionsJson {
+    const rawJson: IPinnedVersionsJson = {};
+    this._data.forEach((version: string, dependency: string) => {
+      rawJson[dependency] = version;
+    });
+    return rawJson;
   }
 }
