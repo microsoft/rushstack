@@ -1,62 +1,63 @@
-# set-webpack-public-path loader for webpack
+# set-webpack-public-path plugin for webpack
 
 ## Installation
 
-`npm @microsoft/loader-set-webpack-public-path --save-dev`
+`npm @microsoft/set-webpack-public-path-plugin --save-dev`
 
 ## Overview
 
-This simple loader sets the `__webpack_public_path__` variable to
+This simple plugin sets the `__webpack_public_path__` variable to
 a value specified in the arguments, optionally appended to the SystemJs baseURL
 property.
 
-### Important note about Webpack 2.X
+# Plugin
 
-Webpack's `resolveLoader.root` property was [removed](https://webpack.js.org/guides/migrating/#loaders-in-configuration-resolve-relative-to-context)
-in webpack 2.X. This has an unfortunate side-effect for standardardized build configurations like
-[gulp-core-build](https://github.com/Microsoft/web-build-tools) build rigs with loaders in the rig's
-`package.json`, but not in the `package.json` of the project being built. This side-effect causes these
-loaders to not be resolved under some circumstances. In order to work around this, we recommend you use the
-[Webpack plugin](https://www.npmjs.com/package/@microsoft/set-webpack-public-path-plugin) instead of this loader.
+To use the plugin, add it to the `plugins` array of your Webpack config. For example:
 
-# Loader
+```JavaScript
+import { SetPublicPathPlugin } from '@microsoft/set-webpack-public-path-plugin';
 
-## Usage
-
-[Documentation: Using loaders](http://webpack.github.io/docs/using-loaders.html)
-
-``` javascript
-require("@microsoft/loader-set-webpack-public-path!");
+{
+  plugins: [
+    new SetPublicPathPlugin( /* webpackPublicPathOptions */ )
+  ]
+}
 ```
 
 ## Options
 
-### Inline Loader Options
+#### `scriptName = { }`
 
-#### `scriptName=...`
-
-This property is a string of a regular expression string that is applied to all script URLs on the page. The last directory
-of the URL that matches the regular expression is used as the public path. For example, if this property
+This parameter is an object that takes two properties: a string property `name`, and a boolean property `isTokenized`.
+The `name` property is a regular expression string that is applied to all script URLs on the page. The last directory
+of the URL that matches the regular expression is used as the public path. For example, if the `name` property
 is set to `my\-bundle_?[a-zA-Z0-9-_]*\.js` and a script's URL is `https://mycdn.net/files/build_id/assets/my-bundle_10fae182eb.js`,
 the public path will be set to `https://mycdn.net/files/build_id/assets/`.
 
+If the `isTokenized` paramter is set to `true`, the regular expression string in `name` is treated as a tokenized
+string. The supported tokens are `[name]` and `[hash]`. Instances of the `[name]` substring are replaced with the
+chunk's name, and instances of the `[hash]` substring are replaced with the chunk's rendered hash. The name
+is regular expression-escaped. For example, if the `name` property is set to `[name]_?[a-zA-Z0-9-_]*\.js`,
+`isTokenized` is set to `true`, and the chunk's name is `my-bundle`, and a script's URL is
+`https://mycdn.net/files/build_id/assets/my-bundle_10fae182eb.js`, the public path will be set to
+`https://mycdn.net/files/build_id/assets/`.
+
 This option is exclusive to other options. If it is set, `systemJs`, `publicPath`, and `urlPrefix` will be ignored.
 
-#### `systemJs`
+#### `systemJs = true`
 
-Use `System.baseURL` if it is defined. Setting this option inline will override `scriptPath` set by `setOptions({ ... })`.
+Use `System.baseURL` if it is defined.
 
-#### `publicPath=...`
+#### `publicPath = '...'`
 
 Use the specified path as the base public path. If `urlPrefix` is also defined, the public path will
 be the concatenation of the two (i.e. - `__webpack_public_path__ = URL.concat({publicPath} + {urlPrefix}`).
-This option takes precedence over the `systemJs` option.  Setting this option inline will override
-`scriptPath` set by `setOptions({ ... })`.
+This option takes precedence over the `systemJs` option.
 
-#### `urlPrefix=...`
+#### `urlPrefix = '...'`
 
 Use the specified string as a URL prefix after the SystemJS path or the `publicPath` option. If neither
-`systemJs` nor `publicPath` is defined, this option will not apply and a warning will be emitted.
+`systemJs` nor `publicPath` is defined, this option will not apply and an exception will be thrown.
 
 #### `regexVariable = '...'`
 
@@ -101,23 +102,6 @@ In this case, because there is a `scriptRegex` variable defined on the page, the
 In this case, because there is not a `scriptRegex` variable defined on the page, the bundle will use the value
 passed into the `scriptName` option to find the script.
 
-### Config, pre-bundle options
-
-Options may also be set before webpack is called. This package returns a singleton,
-so you can require the package in your `webpack.config.js` and call `setOptions({ ... })`
-to set any of the above options. For example:
-
-``` javascript
-var setWebpackPublicPath = require('@microsoft/loader-set-webpack-public-path');
-
-setWebpackPublicPath.setOptions({
-  systemJs: true,
-  urlPrefix: process.env.BUILD_BUILDNUMBER
-});
-```
-
-Inline options override options set in the webpack.config.
-
 # SystemJS Caveat
 
 When modules are loaded with SystemJS (and with the , `scriptLoad: true` meta option) `<script src="..."></script>`
@@ -136,7 +120,7 @@ is set to `true`, the code is not minified. By default, it is minified.
 ## Usage
 
 ``` javascript
-var setWebpackPublicPath = require('@microsoft/loader-set-webpack-public-path');
+var setWebpackPublicPath = require('@microsoft/set-webpack-public-path-plugin');
 var gulpInsert = require('gulp-insert');
 
 gulp.src('finizlied/webpack/bundle/path')

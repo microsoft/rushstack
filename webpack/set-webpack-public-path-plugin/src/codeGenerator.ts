@@ -4,11 +4,13 @@
  */
 
 import { EOL } from 'os';
-import {
-  ISetWebpackPublicPathOptions,
-  SetWebpackPublicPathLoader
-} from './SetWebpackPublicPathLoader';
 import * as uglify from 'uglify-js';
+
+import {
+  ISetWebpackPublicPathOptions
+} from './SetPublicPathPlugin';
+
+export const registryVarName: string = 'window.__setWebpackPublicPathLoaderSrcRegistry__';
 
 export interface IInternalOptions extends ISetWebpackPublicPathOptions {
   webpackPublicPathVariable?: string;
@@ -58,7 +60,7 @@ export function getSetPublicPathCode(options: IInternalOptions, emitWarning: (wa
       '}',
       '',
       'if (!found) {',
-      `  for (var global in ${SetWebpackPublicPathLoader.registryVarName}) {`,
+      `  for (var global in ${registryVarName}) {`,
       '    if (global && global.match(regex)) {',
       `      ${options.webpackPublicPathVariable} = global.substring(0, global.lastIndexOf('/') + 1);`,
       '      break;',
@@ -97,38 +99,46 @@ export function getSetPublicPathCode(options: IInternalOptions, emitWarning: (wa
   return joinLines(lines, options.linePrefix);
 }
 
+/**
+ * /**
+ * This function returns a block of JavaScript that maintains a global register of script tags.
+ *
+ * @param debug - If true, the code returned code is not minified. Defaults to false.
+ *
+ * @public
+ */
 export function getGlobalRegisterCode(debug: boolean = false): string {
-    const lines: string[] = [
-      '(function(){',
-      `if (!${SetWebpackPublicPathLoader.registryVarName}) ${SetWebpackPublicPathLoader.registryVarName}={};`,
-      `var scripts = document.getElementsByTagName('script');`,
-      'if (scripts && scripts.length) {',
-      '  for (var i = 0; i < scripts.length; i++) {',
-      '    if (!scripts[i]) continue;',
-      `    var path = scripts[i].getAttribute('src');`,
-      `    if (path) ${SetWebpackPublicPathLoader.registryVarName}[path]=true;`,
-      '  }',
-      '}',
-      '})();'
-    ];
+  const lines: string[] = [
+    '(function(){',
+    `if (!${registryVarName}) ${registryVarName}={};`,
+    `var scripts = document.getElementsByTagName('script');`,
+    'if (scripts && scripts.length) {',
+    '  for (var i = 0; i < scripts.length; i++) {',
+    '    if (!scripts[i]) continue;',
+    `    var path = scripts[i].getAttribute('src');`,
+    `    if (path) ${registryVarName}[path]=true;`,
+    '  }',
+    '}',
+    '})();'
+  ];
 
-    const joinedScript: string = joinLines(lines);
+  const joinedScript: string = joinLines(lines);
 
-    if (debug) {
-      return `${EOL}${joinedScript}`;
-    } else {
-      const uglified: uglify.AST_Toplevel = uglify.parse(joinedScript);
-      uglified.figure_out_scope();
-      const compressor: uglify.AST_Toplevel = uglify.Compressor({
-        dead_code: true
-      });
-      const compressed: uglify.AST_Toplevel = uglified.transform(compressor);
-      compressed.figure_out_scope();
-      compressed.compute_char_frequency();
-      compressed.mangle_names();
-      return `${EOL}${compressed.print_to_string()}`;
-    }
+  if (debug) {
+    return `${EOL}${joinedScript}`;
+  } else {
+    const uglified: uglify.AST_Toplevel = uglify.parse(joinedScript);
+    uglified.figure_out_scope();
+    const compressor: uglify.AST_Toplevel = uglify.Compressor({
+      dead_code: true
+    });
+    const compressed: uglify.AST_Toplevel = uglified.transform(compressor);
+    compressed.figure_out_scope();
+    compressed.compute_char_frequency();
+    compressed.mangle_names();
+    return `${EOL}${compressed.print_to_string()}`;
   }
+}
 
 function joinLines(lines: string[], linePrefix?: string): string {
   return lines.map((line: string) => {

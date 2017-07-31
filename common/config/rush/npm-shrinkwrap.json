@@ -124,6 +124,11 @@
       "from": "projects\\rush-lib",
       "resolved": "file:projects\\rush-lib"
     },
+    "@rush-temp/set-webpack-public-path-plugin": {
+      "version": "0.0.0",
+      "from": "projects\\set-webpack-public-path-plugin",
+      "resolved": "file:projects\\set-webpack-public-path-plugin"
+    },
     "@rush-temp/stream-collator": {
       "version": "0.0.0",
       "from": "projects\\stream-collator",
