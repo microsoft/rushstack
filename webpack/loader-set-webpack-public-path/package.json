@@ -12,14 +12,11 @@
     "test": "gulp test"
   },
   "dependencies": {
-    "@microsoft/set-webpack-public-path-plugin": "~1.0.0",
+    "@microsoft/set-webpack-public-path-plugin": "~0.0.0",
     "loader-utils": "~1.1.0",
-    "uglify-js": "~2.8.22",
-    "lodash": "~4.15.0",
-    "@types/webpack": "2.2.4"
+    "lodash": "~4.15.0"
   },
   "devDependencies": {
-    "@types/tapable": "0.2.3",
     "@types/lodash": "4.14.52",
     "@types/mocha": "2.2.38",
     "chai": "~3.5.0",
