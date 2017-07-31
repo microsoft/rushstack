@@ -39,6 +39,6 @@
     "@types/sinon": "1.16.34",
     "@types/mocha": "2.2.38",
     "@types/chai": "3.4.34",
-    "@types/semver": "5.3.31"
+    "@types/semver": "5.3.33"
   }
 }
