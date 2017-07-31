@@ -1,6 +1,13 @@
 # Change Log - @microsoft/loader-set-webpack-public-path
 
-This log was last generated on Tue, 25 Jul 2017 20:03:31 GMT and should not be manually modified.
+This log was last generated on Mon, 31 Jul 2017 21:18:26 GMT and should not be manually modified.
+
+## 3.0.0
+Mon, 31 Jul 2017 21:18:26 GMT
+
+### Breaking changes
+
+- Removing the plugin from this package and placing it in @microsoft/set-webpack-public-path-plugin.
 
 ## 2.1.1
 Tue, 25 Jul 2017 20:03:31 GMT
