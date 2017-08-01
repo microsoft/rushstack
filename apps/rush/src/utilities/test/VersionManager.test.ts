@@ -103,9 +103,9 @@ describe('VersionManager', () => {
 
       const changeFiles: Map<string, ChangeFile> = versionManager.changeFiles;
 
-      assert.equal(updatedPackages.get('a').version, expectedVersion);
-      assert.equal(updatedPackages.get('b').version, expectedVersion);
-      assert.equal(updatedPackages.get('e').version, expectedVersion);
+      assert.equal(updatedPackages.get('a').version, expectedVersion, `a version is not expected`);
+      assert.equal(updatedPackages.get('b').version, expectedVersion, `b version is not expected`);
+      assert.equal(updatedPackages.get('e').version, expectedVersion, `e version is not expected`);
       assert.isUndefined(_getChanges(changeFiles, 'a'), 'a has change entry.');
       assert.equal(_getChanges(changeFiles, 'b').length, 1, 'b does not have 1 change entry');
       assert.equal(_getChanges(changeFiles, 'b')[0].changeType, ChangeType.patch, 'b does not have a patch change');

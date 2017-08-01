@@ -17,6 +17,7 @@ import IPackageJson from '../utilities/IPackageJson';
  * @alpha
  */
 export enum BumpType {
+  'none',
   'prerelease',
   'patch',
   'preminor',
@@ -128,7 +129,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
    * @param identifier - Prerelease identifier if bump type is prerelease.
    */
   public bump(bumpType?: BumpType, identifier?: string): void {
-    this.version.inc(this._getReleaseType(bumpType), identifier);
+    this.version.inc(this._getReleaseType(bumpType || this.nextBump), identifier);
   }
 
   public validate(versionString: string, packageName: string): void {

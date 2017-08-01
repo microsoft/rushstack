@@ -59,6 +59,8 @@ enum BumpType {
   // (undocumented)
   'minor',
   // (undocumented)
+  'none',
+  // (undocumented)
   'patch',
   // (undocumented)
   'preminor',
