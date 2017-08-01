@@ -114,10 +114,11 @@ with SystemJS and use the `publicPath=...` option.
 
 ## `getGlobalRegisterCode(bool)`
 
-This function returns a block of JavaScript that maintains a global register of script tags. If the optional boolean paramter
-is set to `true`, the code is not minified. By default, it is minified.
+This function returns a block of JavaScript that maintains a global register of script tags. If the optional boolean parameter
+is set to `true`, the code is not minified. By default, it is minified. You can detect if the plugin may require
+the global register code by searching for the value of the `registryVariableName` field.
 
-## Usage
+## Usage without registryVariableName
 
 ``` javascript
 var setWebpackPublicPath = require('@microsoft/set-webpack-public-path-plugin');
@@ -125,6 +126,22 @@ var gulpInsert = require('gulp-insert');
 
 gulp.src('finizlied/webpack/bundle/path')
   .pipe(gulpInsert.append(setWebpackPublicPath.getGlobalRegisterCode(true)))
+  .pipe(gulp.dest('dest/path'));
+```
+
+## Usage with registryVariableName
+
+``` javascript
+var setWebpackPublicPath = require('@microsoft/set-webpack-public-path-plugin');
+var gulpInsert = require('gulp-insert');
+var gulpIf = require('gulp-if');
+
+var detectRegistryVariableName = function (file) {
+  return file.contents.toString().indexOf(setWebpackPublicPath.registryVariableName) !== -1;
+};
+
+gulp.src('finizlied/webpack/bundle/path')
+  .pipe(gulpIf(detectRegistryVariableName, gulpInsert.append(setWebpackPublicPath.getGlobalRegisterCode(true))))
   .pipe(gulp.dest('dest/path'));
 ```
 
