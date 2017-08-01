@@ -10,7 +10,7 @@ import {
   ISetWebpackPublicPathOptions
 } from './SetPublicPathPlugin';
 
-export const registryVarName: string = 'window.__setWebpackPublicPathLoaderSrcRegistry__';
+export const registryVariableName: string = 'window.__setWebpackPublicPathLoaderSrcRegistry__';
 
 export interface IInternalOptions extends ISetWebpackPublicPathOptions {
   webpackPublicPathVariable?: string;
@@ -60,7 +60,7 @@ export function getSetPublicPathCode(options: IInternalOptions, emitWarning: (wa
       '}',
       '',
       'if (!found) {',
-      `  for (var global in ${registryVarName}) {`,
+      `  for (var global in ${registryVariableName}) {`,
       '    if (global && global.match(regex)) {',
       `      ${options.webpackPublicPathVariable} = global.substring(0, global.lastIndexOf('/') + 1);`,
       '      break;',
@@ -110,13 +110,13 @@ export function getSetPublicPathCode(options: IInternalOptions, emitWarning: (wa
 export function getGlobalRegisterCode(debug: boolean = false): string {
   const lines: string[] = [
     '(function(){',
-    `if (!${registryVarName}) ${registryVarName}={};`,
+    `if (!${registryVariableName}) ${registryVariableName}={};`,
     `var scripts = document.getElementsByTagName('script');`,
     'if (scripts && scripts.length) {',
     '  for (var i = 0; i < scripts.length; i++) {',
     '    if (!scripts[i]) continue;',
     `    var path = scripts[i].getAttribute('src');`,
-    `    if (path) ${registryVarName}[path]=true;`,
+    `    if (path) ${registryVariableName}[path]=true;`,
     '  }',
     '}',
     '})();'

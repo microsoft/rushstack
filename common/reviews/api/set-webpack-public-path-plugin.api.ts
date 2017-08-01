@@ -26,3 +26,4 @@ class SetPublicPathPlugin implements Plugin {
   public options: ISetWebpackPublicPathPluginOptions;
 }
 
+// WARNING: Unsupported export: registryVariableName
