@@ -1,6 +1,13 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Tue, 25 Jul 2017 20:03:31 GMT and should not be manually modified.
+This log was last generated on Tue, 01 Aug 2017 01:03:49 GMT and should not be manually modified.
+
+## 1.5.2
+Tue, 01 Aug 2017 01:03:49 GMT
+
+### Patches
+
+- Only warn for missing theme slots if DEBUG is true
 
 ## 1.5.1
 Tue, 25 Jul 2017 20:03:31 GMT

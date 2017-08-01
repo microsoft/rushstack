@@ -2,6 +2,18 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "1.5.2",
+      "tag": "@microsoft/load-themed-styles_v1.5.2",
+      "date": "Tue, 01 Aug 2017 01:03:49 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Only warn for missing theme slots if DEBUG is true"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.5.1",
       "tag": "@microsoft/load-themed-styles_v1.5.1",
       "date": "Tue, 25 Jul 2017 20:03:31 GMT",
