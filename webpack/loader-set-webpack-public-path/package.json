@@ -12,7 +12,7 @@
     "test": "gulp test"
   },
   "dependencies": {
-    "@microsoft/set-webpack-public-path-plugin": "~1.0.0",
+    "@microsoft/set-webpack-public-path-plugin": "~1.0.1",
     "loader-utils": "~1.1.0",
     "lodash": "~4.15.0"
   },
