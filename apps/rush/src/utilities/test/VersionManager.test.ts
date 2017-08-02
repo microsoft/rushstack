@@ -22,7 +22,7 @@ function _getChanges(changeFiles: Map<string, ChangeFile>,
   if (!changeFile) {
     return undefined;
   }
-  return changeFile.getChanges(packageName).changes;
+  return changeFile.getChanges(packageName);
 }
 
 describe('VersionManager', () => {

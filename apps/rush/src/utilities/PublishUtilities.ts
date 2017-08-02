@@ -283,10 +283,16 @@ export default class PublishUtilities {
     const newVersion: string = shouldSkipVersionBump ? pkg.version :
       PublishUtilities._getChangeInfoNewVersion(change, prereleaseToken);
 
-    console.log(
-      `${EOL}* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: ${ChangeType[change.changeType]} update ` +
-      `for ${change.packageName} to ${newVersion}`
-    );
+    if (!shouldSkipVersionBump) {
+      console.log(
+        `${EOL}* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: ${ChangeType[change.changeType]} update ` +
+        `for ${change.packageName} to ${newVersion}`
+      );
+    } else {
+      console.log(
+        `${EOL}* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: update ` + `for ${change.packageName} at ${newVersion}`
+      );
+    }
 
     const packagePath: string = path.join(project.projectFolder, 'package.json');
 

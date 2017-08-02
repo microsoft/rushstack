@@ -154,12 +154,7 @@ export class VersionManager {
     let changeFile: ChangeFile = this._changeFiles.get(packageName);
     if (!changeFile) {
       changeFile = new ChangeFile({
-        changes: [
-          {
-            packageName: packageName,
-            changes: []
-          }
-        ],
+        changes: [],
         packageName: packageName,
         email: 'version_bump@microsoft.com'
       }, this._rushConfiguration);
@@ -235,7 +230,7 @@ export class VersionManager {
           updated = true;
           if (rushProject.shouldPublish) {
             if (!semver.satisfies(updatedProject.version, dependencies[updatedProjectName])) {
-              changes.push(
+              this._addChange(changes,
                 {
                   changeType: ChangeType.patch,
                   packageName: clonedProject.name
@@ -243,10 +238,10 @@ export class VersionManager {
               );
             }
 
-            // If current version is a prerelease version and new dependency is also a prerelease version,
-            // skip change entry. Otherwise, too many changes will be created for frequent releases.
-            if (!this._isPrerelease(updatedProject.version) || !this._isPrerelease(clonedProject.version)) {
-              changes.push(
+            // If current version is not a prerelease version and new dependency is also not a prerelease version,
+            // add change entry. Otherwise, too many changes will be created for frequent releases.
+            if (!this._isPrerelease(updatedProject.version) && !this._isPrerelease(clonedProject.version)) {
+              this._addChange(changes,
                 {
                   changeType: ChangeType.dependency,
                   comment: `Dependency ${updatedProjectName} version bump from ${dependencies[updatedProjectName]}` +
@@ -261,6 +256,21 @@ export class VersionManager {
       }
     });
     return updated;
+  }
+
+  private _addChange(changes: IChangeInfo[], newChange: IChangeInfo): void {
+    const exists: boolean = changes.some((changeInfo) => {
+      return (changeInfo.author === newChange.author &&
+        changeInfo.changeType === newChange.changeType &&
+        changeInfo.comment === newChange.comment &&
+        changeInfo.commit === newChange.commit &&
+        changeInfo.packageName === newChange.packageName &&
+        changeInfo.type === newChange.type
+      );
+    });
+    if (!exists) {
+      changes.push(newChange);
+    }
   }
 
   private _updatePackageJsonFiles(): void {
@@ -279,7 +289,8 @@ export class VersionManager {
       changeType: ChangeType.none,
       newVersion: newPackageJson.version,
       packageName: newPackageJson.name,
-      comment: `Package version bump from ${rushProject.packageJson.version} to ${newPackageJson.version}`
+      comment: `Package version bump from ${rushProject.packageJson.version} to ${newPackageJson.version}` +
+        ` by version policy`
     };
   }
 

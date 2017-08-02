@@ -76,7 +76,7 @@ class ChangeFile {
   public addChange(data: IChangeInfo): void;
   public generatePath(): string;
   // (undocumented)
-  public getChanges(packageName: string): IChangeInfo | undefined;
+  public getChanges(packageName: string): IChangeInfo[];
   public writeSync(): void;
 }
 

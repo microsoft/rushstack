@@ -32,9 +32,8 @@ describe('ChangeFile', () => {
       comment: 'for patch'
     });
 
-    assert.equal(changeFile.getChanges('a').changeType, ChangeType.minor);
-    assert.equal(changeFile.getChanges('a').changes.length, 2);
-    assert.equal(changeFile.getChanges('a').changes[0].comment, 'for minor');
-    assert.equal(changeFile.getChanges('a').changes[1].comment, 'for patch');
+    assert.equal(changeFile.getChanges('a').length, 2);
+    assert.equal(changeFile.getChanges('a')[0].comment, 'for minor');
+    assert.equal(changeFile.getChanges('a')[1].comment, 'for patch');
   });
 });
