@@ -55,6 +55,10 @@ export default class TypeScriptHelpers {
     return current;
   }
 
+  public static getImmediateAliasedSymbol(symbol: ts.Symbol, typeChecker: ts.TypeChecker): ts.Symbol {
+    return (typeChecker as any).getImmediateAliasedSymbol(symbol); // tslint:disable-line:no-any
+  }
+
   /**
    * Returns the Symbol for the provided Declaration.  This is a workaround for a missing
    * feature of the TypeScript Compiler API.   It is the only apparent way to reach
