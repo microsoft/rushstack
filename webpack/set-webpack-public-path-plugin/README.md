@@ -102,6 +102,25 @@ In this case, because there is a `scriptRegex` variable defined on the page, the
 In this case, because there is not a `scriptRegex` variable defined on the page, the bundle will use the value
 passed into the `scriptName` option to find the script.
 
+#### `getPostProcessScript = (variableName) => { ... }`
+
+A function that returns a snippet of code that manipulates the variable with the name that's specified in the
+parameter. If this parameter isn't provided, no post-processing code is included. The variable must be modified
+in-place - the processed value should not be returned. This is useful when non-entry assets are deployed to
+a parent directory or subdirectory of the directory to which the entry assets are deployed.
+
+For example, if this parameter is set to this function
+
+```JavaScript
+getPostProcessScript = (variableName) => {
+  return `${variableName} = ${variableName} + 'assets/';
+};
+```
+
+the public path variable will have `/assets/` appended to the found path.
+
+Note that the existing value of the variable already ends in a slash (`/`).
+
 # SystemJS Caveat
 
 When modules are loaded with SystemJS (and with the , `scriptLoad: true` meta option) `<script src="..."></script>`

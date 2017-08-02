@@ -45,6 +45,15 @@ export interface ISetWebpackPublicPathOptions {
    * See the README for more information.
    */
   regexVariable?: string;
+
+  /**
+   * A function that returns a snippet of code that manipulates the variable with the name that's specified in the
+   *  parameter. If this parameter isn't provided, no post-processing code is included. The variable must be modified
+   *  in-place - the processed value should not be returned.
+   *
+   * See the README for more information.
+   */
+  getPostProcessScript?: (varName: string) => string;
 }
 
 /**
