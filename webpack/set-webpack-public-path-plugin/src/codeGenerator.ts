@@ -79,47 +79,44 @@ export function getSetPublicPathCode(options: IInternalOptions, emitWarning: (wa
         ''
       ]);
     }
-
-    lines.push(...[
-      `${options.webpackPublicPathVariable} = ${varName};`
-    ]);
   } else {
     if (options.publicPath) {
-      lines = [
-        `var ${varName} = '${appendSlashAndEscapeSingleQuotes(options.publicPath)}';`
-      ];
+      lines.push(...[
+        `var ${varName} = '${appendSlashAndEscapeSingleQuotes(options.publicPath)}';`,
+        ''
+      ]);
     } else if (options.systemJs) {
-      lines = [
+      lines.push(...[
         `var ${varName} = window.System ? window.System.baseURL || '' : '';`,
-        `if (${varName} !== '' && ${varName}.substr(-1) !== '/') ${varName} += '/';`
-      ];
+        `if (${varName} !== '' && ${varName}.substr(-1) !== '/') ${varName} += '/';`,
+        ''
+      ]);
     } else {
       emitWarning(`Neither 'publicPath' nor 'systemJs' is defined, so the public path will not be modified`);
 
       return '';
     }
 
+    if (options.urlPrefix && options.urlPrefix !== '') {
+      lines.push(...[
+        `${varName} += '${appendSlashAndEscapeSingleQuotes(options.urlPrefix)}';`,
+        ''
+      ]);
+    }
+
     if (options.getPostProcessScript) {
       lines.push(...[
-        '',
         `if (${varName}) {`,
         `  ${options.getPostProcessScript(varName)};`,
         '}',
         ''
       ]);
     }
-
-    if (options.urlPrefix && options.urlPrefix !== '') {
-      lines.push(
-        '',
-        `${varName} += '${appendSlashAndEscapeSingleQuotes(options.urlPrefix)}';`);
-    }
-
-    lines.push(
-      '',
-      `${options.webpackPublicPathVariable} = ${varName};`
-    );
   }
+
+  lines.push(
+    `${options.webpackPublicPathVariable} = ${varName};`
+  );
 
   return joinLines(lines, options.linePrefix);
 }
