@@ -16,6 +16,21 @@ class Entry {
   public localName: string;
   public followedSymbol: ts.Symbol;
   public dtsDeclarations: dts.TopLevelDeclaration[] = [];
+  private _sortKey: string|undefined = undefined;
+
+  public getSortKey(): string {
+    if (!this._sortKey) {
+      if (this.localName.substr(0, 1) === '_') {
+        // Removes the leading underscore, for example:  "_example" --> "example*"
+        // This causes internal definitions to sort alphabetically with regular definitions.
+        // The star is appended to preserve uniqueness, since "*" is not a legal  identifier character.
+        this._sortKey = this.localName.substr(1) + ' ';
+      } else {
+        this._sortKey = this.localName;
+      }
+    }
+    return this._sortKey;
+  }
 }
 
 export default class DtsGenerator {
@@ -111,7 +126,7 @@ export default class DtsGenerator {
       }
     }
 
-    this._entries.sort((a, b) => a.localName.localeCompare(b.localName));
+    this._entries.sort((a, b) => a.getSortKey().localeCompare(b.getSortKey()));
 
     let content: string = '';
     for (const entry of this._entries) {
