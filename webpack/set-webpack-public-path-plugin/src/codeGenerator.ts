@@ -67,7 +67,7 @@ export function getSetPublicPathCode(options: IInternalOptions, emitWarning: (wa
       '      break;',
       '    }',
       '  }',
-      '}',
+      '}'
     ]);
 
     if (options.getPostProcessScript) {
