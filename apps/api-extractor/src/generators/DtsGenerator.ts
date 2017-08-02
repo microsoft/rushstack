@@ -128,7 +128,12 @@ export default class DtsGenerator {
   private _fetchEntryForSymbol(symbol: ts.Symbol): Entry {
     const followedSymbol: ts.Symbol = DtsGenerator._followAliases(symbol, this._typeChecker);
 
-    const entry: Entry = this._createEntry(symbol.name, followedSymbol);
+    let entry: Entry = this._entriesBySymbol.get(followedSymbol);
+    if (entry) {
+      return entry;
+    }
+
+    entry = this._createEntry(symbol.name, followedSymbol);
 
     for (const declaration of followedSymbol.declarations) {
       console.log(PrettyPrinter.dumpTree(declaration));
@@ -144,6 +149,7 @@ export default class DtsGenerator {
           this._processInterfaceDeclaration(entry, declaration as ts.InterfaceDeclaration);
           break;
       }
+
     }
 
     return entry;
@@ -158,11 +164,13 @@ export default class DtsGenerator {
     const interfaceDts: dts.InterfaceDeclaration = dts.create.interface(entry.localName);
     entry.dtsDeclarations.push(interfaceDts);
 
-    const type: ts.Type = this._typeChecker.getTypeAtLocation(declaration);
-    const baseTypes: ts.TypeReference[] = type.getBaseTypes() as ts.TypeReference[];
-    for (const baseType of baseTypes) {
-      const baseDts: dts.NamedTypeReference = this._getTypeReferenceDts(baseType);
-      interfaceDts.baseTypes.push(baseDts);
+    for (const heritageClause of declaration.heritageClauses || []) {
+      for (const baseTypeDeclaration of heritageClause.types || []) {
+        const baseType: ts.TypeReference = this._typeChecker.getTypeAtLocation(
+          baseTypeDeclaration) as ts.TypeReference;
+        const baseDts: dts.NamedTypeReference = this._getTypeReferenceDts(baseType);
+        interfaceDts.baseTypes.push(baseDts);
+      }
     }
   }
 
