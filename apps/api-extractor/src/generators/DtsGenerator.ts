@@ -20,6 +20,7 @@ class Entry {
 
 export default class DtsGenerator {
   private _extractor: Extractor;
+  private _typeChecker: ts.TypeChecker;
   private readonly _entriesBySymbol: Map<ts.Symbol, Entry> = new Map<ts.Symbol, Entry>();
   private readonly _entries: Entry[] = [];
 
@@ -84,6 +85,7 @@ export default class DtsGenerator {
 
   public constructor(extractor: Extractor) {
     this._extractor = extractor;
+    this._typeChecker = extractor.typeChecker;
   }
 
   /**
@@ -100,7 +102,7 @@ export default class DtsGenerator {
   public generateDtsFileContent(): string {
     const packageSymbol: ts.Symbol = this._extractor.package.getDeclarationSymbol();
 
-    const exportSymbols: ts.Symbol[] = this._extractor.typeChecker.getExportsOfModule(packageSymbol) || [];
+    const exportSymbols: ts.Symbol[] = this._typeChecker.getExportsOfModule(packageSymbol) || [];
     for (const exportSymbol of exportSymbols) {
 
       const entry: Entry = this._fetchEntryForSymbol(exportSymbol);
@@ -124,7 +126,7 @@ export default class DtsGenerator {
   }
 
   private _fetchEntryForSymbol(symbol: ts.Symbol): Entry {
-    const followedSymbol: ts.Symbol = DtsGenerator._followAliases(symbol, this._extractor.typeChecker);
+    const followedSymbol: ts.Symbol = DtsGenerator._followAliases(symbol, this._typeChecker);
 
     const entry: Entry = this._createEntry(symbol.name, followedSymbol);
 
@@ -137,6 +139,10 @@ export default class DtsGenerator {
       switch (declaration.kind) {
         case ts.SyntaxKind.ClassDeclaration:
           this._processClassDeclaration(entry, declaration as ts.ClassDeclaration);
+          break;
+        case ts.SyntaxKind.InterfaceDeclaration:
+          this._processInterfaceDeclaration(entry, declaration as ts.InterfaceDeclaration);
+          break;
       }
     }
 
@@ -146,7 +152,40 @@ export default class DtsGenerator {
   private _processClassDeclaration(entry: Entry, declaration: ts.ClassDeclaration): void {
     const classDts: dts.ClassDeclaration = dts.create.class(entry.localName);
     entry.dtsDeclarations.push(classDts);
-    // classDts.implements.push(interfaceDts);
+  }
+
+  private _processInterfaceDeclaration(entry: Entry, declaration: ts.InterfaceDeclaration): void {
+    const interfaceDts: dts.InterfaceDeclaration = dts.create.interface(entry.localName);
+    entry.dtsDeclarations.push(interfaceDts);
+
+    const type: ts.Type = this._typeChecker.getTypeAtLocation(declaration);
+    const baseTypes: ts.TypeReference[] = type.getBaseTypes() as ts.TypeReference[];
+    for (const baseType of baseTypes) {
+      const baseDts: dts.NamedTypeReference = this._getTypeReferenceDts(baseType);
+      interfaceDts.baseTypes.push(baseDts);
+    }
+  }
+
+  private _getTypeReferenceDts(typeReference: ts.TypeReference): dts.NamedTypeReference {
+    if (!typeReference.symbol) {
+      const intrinsicName: string = typeReference['intrinsicName']; // tslint:disable-line:no-string-literal
+      if (intrinsicName) {
+        // It is a simple primitive type
+        return dts.create.namedTypeReference(intrinsicName);
+      } else {
+        throw new Error('Unimplemented type reference:\r\n' + this._typeChecker.typeToString(typeReference));
+      }
+    } else {
+      const entry: Entry = this._fetchEntryForSymbol(typeReference.symbol);
+      const referenceDts: dts.NamedTypeReference = dts.create.namedTypeReference(entry.localName);
+
+      for (const argument of typeReference.typeArguments || []) {
+        const renderedArgument: dts.NamedTypeReference = this._getTypeReferenceDts(argument as ts.TypeReference);
+        referenceDts.typeArguments.push(renderedArgument);
+      }
+
+      return referenceDts;
+    }
   }
 
   private _createEntry(localName: string, followedSymbol: ts.Symbol): Entry {
