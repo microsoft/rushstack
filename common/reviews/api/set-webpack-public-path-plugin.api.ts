@@ -3,6 +3,7 @@ export function getGlobalRegisterCode(debug: boolean = false): string;
 
 // @public
 interface ISetWebpackPublicPathOptions {
+  getPostProcessScript?: (varName: string) => string;
   publicPath?: string;
   regexVariable?: string;
   systemJs?: boolean;

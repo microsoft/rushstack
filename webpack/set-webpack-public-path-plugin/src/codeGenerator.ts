@@ -18,6 +18,8 @@ export interface IInternalOptions extends ISetWebpackPublicPathOptions {
   linePrefix?: string;
 }
 
+const varName: string = 'publicPath';
+
 export function getSetPublicPathCode(options: IInternalOptions, emitWarning: (warning: string) => void): string {
   if (!options.webpackPublicPathVariable) {
     throw '"webpackPublicPathVariable" option must be defined.';
@@ -45,39 +47,50 @@ export function getSetPublicPathCode(options: IInternalOptions, emitWarning: (wa
     }
 
     lines.push(...[
-      'var found = false;',
+      `var ${varName};`,
       '',
       'if (scripts && scripts.length) {',
       '  for (var i = 0; i < scripts.length; i++) {',
       '    if (!scripts[i]) continue;',
       `    var path = scripts[i].getAttribute('src');`,
       '    if (path && path.match(regex)) {',
-      `      ${options.webpackPublicPathVariable} = path.substring(0, path.lastIndexOf('/') + 1);`,
-      '      found = true;',
+      `      ${varName} = path.substring(0, path.lastIndexOf('/') + 1);`,
       '      break;',
       '    }',
       '  }',
       '}',
       '',
-      'if (!found) {',
+      `if (!${varName}) {`,
       `  for (var global in ${registryVariableName}) {`,
       '    if (global && global.match(regex)) {',
-      `      ${options.webpackPublicPathVariable} = global.substring(0, global.lastIndexOf('/') + 1);`,
+      `      ${varName} = global.substring(0, global.lastIndexOf('/') + 1);`,
       '      break;',
       '    }',
       '  }',
       '}'
     ]);
+
+    if (options.getPostProcessScript) {
+      lines.push(...[
+        '',
+        `if (${varName}) {`,
+        `  ${options.getPostProcessScript(varName)};`,
+        '}',
+        ''
+      ]);
+    }
   } else {
     if (options.publicPath) {
-      lines = [
-        `var publicPath = '${appendSlashAndEscapeSingleQuotes(options.publicPath)}';`
-      ];
+      lines.push(...[
+        `var ${varName} = '${appendSlashAndEscapeSingleQuotes(options.publicPath)}';`,
+        ''
+      ]);
     } else if (options.systemJs) {
-      lines = [
-        `var publicPath = window.System ? window.System.baseURL || '' : '';`,
-        `if (publicPath !== '' && publicPath.substr(-1) !== '/') publicPath += '/';`
-      ];
+      lines.push(...[
+        `var ${varName} = window.System ? window.System.baseURL || '' : '';`,
+        `if (${varName} !== '' && ${varName}.substr(-1) !== '/') ${varName} += '/';`,
+        ''
+      ]);
     } else {
       emitWarning(`Neither 'publicPath' nor 'systemJs' is defined, so the public path will not be modified`);
 
@@ -85,16 +98,25 @@ export function getSetPublicPathCode(options: IInternalOptions, emitWarning: (wa
     }
 
     if (options.urlPrefix && options.urlPrefix !== '') {
-      lines.push(
-        '',
-        `publicPath += '${appendSlashAndEscapeSingleQuotes(options.urlPrefix)}';`);
+      lines.push(...[
+        `${varName} += '${appendSlashAndEscapeSingleQuotes(options.urlPrefix)}';`,
+        ''
+      ]);
     }
 
-    lines.push(
-      '',
-      `${options.webpackPublicPathVariable} = publicPath;`
-    );
+    if (options.getPostProcessScript) {
+      lines.push(...[
+        `if (${varName}) {`,
+        `  ${options.getPostProcessScript(varName)};`,
+        '}',
+        ''
+      ]);
+    }
   }
+
+  lines.push(
+    `${options.webpackPublicPathVariable} = ${varName};`
+  );
 
   return joinLines(lines, options.linePrefix);
 }

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/set-webpack-public-path-plugin",
+      "comment": "Add a new getPostProcessScript configuration option to allow consumers to do arbitrary post-processing on the webpack public path variable.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/set-webpack-public-path-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}
