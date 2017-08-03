@@ -113,7 +113,7 @@ For example, if this parameter is set to this function
 
 ```JavaScript
 getPostProcessScript = (variableName) => {
-  return `${variableName} = ${variableName} + 'assets/';
+  return `${variableName} = ${variableName} + 'assets/';`;
 };
 ```
 
