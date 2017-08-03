@@ -29,6 +29,7 @@ export class VersionManager {
   private _changeFiles: Map<string, ChangeFile>;
 
   constructor(private _rushConfiguration: RushConfiguration,
+    private _userEmail: string,
     _versionPolicyConfiguration?: VersionPolicyConfiguration
   ) {
     this._versionPolicyConfiguration = _versionPolicyConfiguration ?
@@ -156,7 +157,7 @@ export class VersionManager {
       changeFile = new ChangeFile({
         changes: [],
         packageName: packageName,
-        email: 'version_bump@microsoft.com'
+        email: this._userEmail
       }, this._rushConfiguration);
       this._changeFiles.set(packageName, changeFile);
     }
@@ -168,16 +169,19 @@ export class VersionManager {
   private _updateDependencies(): void {
     this._rushConfiguration.projects.forEach(rushProject => {
       let clonedProject: IPackageJson = this._updatedProjects.get(rushProject.packageName);
+      let projectVersionChanged: boolean = true;
       if (!clonedProject) {
         clonedProject = cloneDeep(rushProject.packageJson);
+        projectVersionChanged = false;
       }
-      this._updateProjectAllDependencies(rushProject, clonedProject);
+      this._updateProjectAllDependencies(rushProject, clonedProject, projectVersionChanged);
     });
   }
 
   private _updateProjectAllDependencies(
     rushProject: RushConfigurationProject,
-    clonedProject: IPackageJson
+    clonedProject: IPackageJson,
+    projectVersionChanged: boolean
   ): void {
     if (!clonedProject.dependencies) {
       return;
@@ -186,12 +190,12 @@ export class VersionManager {
     const changes: IChangeInfo[] = [];
     let updated: boolean = false;
     if (this._updateProjectDependencies(clonedProject.dependencies, changes,
-      clonedProject, this._updatedProjects, rushProject)
+      clonedProject, this._updatedProjects, rushProject, projectVersionChanged)
     ) {
       updated = true;
     }
     if (this._updateProjectDependencies(clonedProject.devDependencies, changes,
-      clonedProject, this._updatedProjects, rushProject)
+      clonedProject, this._updatedProjects, rushProject, projectVersionChanged)
     ) {
       updated = true;
     }
@@ -207,7 +211,8 @@ export class VersionManager {
     changes: IChangeInfo[],
     clonedProject: IPackageJson,
     updatedProjects: Map<string, IPackageJson>,
-    rushProject: RushConfigurationProject
+    rushProject: RushConfigurationProject,
+    projectVersionChanged: boolean
   ): boolean {
     if (!dependencies) {
       return false;
@@ -229,7 +234,7 @@ export class VersionManager {
         if (newDependencyVersion !== dependencies[updatedProjectName]) {
           updated = true;
           if (rushProject.shouldPublish) {
-            if (!semver.satisfies(updatedProject.version, dependencies[updatedProjectName])) {
+            if (!semver.satisfies(updatedProject.version, dependencies[updatedProjectName]) && !projectVersionChanged) {
               this._addChange(changes,
                 {
                   changeType: ChangeType.patch,

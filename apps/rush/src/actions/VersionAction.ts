@@ -10,6 +10,7 @@ import {
 import {
   BumpType,
   IPackageJson,
+  Utilities,
   VersionControl
 } from '@microsoft/rush-lib';
 
@@ -88,7 +89,7 @@ export default class VersionAction extends BaseRushAction {
       }
     }
 
-    this._versionManager = new VersionManager(this.rushConfiguration);
+    this._versionManager = new VersionManager(this.rushConfiguration, this._getUserEmail());
     if (this._ensureVersionPolicy.value) {
       const tempBranch: string = 'version/ensure-' + new Date().getTime();
       this._versionManager.ensure(this._versionPolicy.value, true);
@@ -106,6 +107,11 @@ export default class VersionAction extends BaseRushAction {
         true);
       this._gitProcess(tempBranch);
     }
+  }
+
+  private _getUserEmail(): string {
+    return Utilities.executeCommandAndCaptureOutput('git',
+        ['config', 'user.email'], '.').trim();
   }
 
   private _gitProcess(tempBranch: string): void {

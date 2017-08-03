@@ -34,7 +34,7 @@ describe('VersionManager', () => {
   let versionManager: VersionManager;
 
   beforeEach(() => {
-    versionManager = new VersionManager(rushConfiguration, versionPolicyConfiguration);
+    versionManager = new VersionManager(rushConfiguration, 'test@microsoft.com', versionPolicyConfiguration);
   });
 
   /* tslint:disable:no-string-literal */
@@ -59,12 +59,10 @@ describe('VersionManager', () => {
       assert.equal(_getChanges(changeFiles, 'a').length, 1, 'a does not have one change');
       assert.equal(_getChanges(changeFiles, 'a')[0].changeType, ChangeType.none,
         'a does not have a none change');
-      assert.equal(_getChanges(changeFiles, 'b').length, 3, 'b does not have three change');
+      assert.equal(_getChanges(changeFiles, 'b').length, 2, 'b does not have two change');
       assert.equal(_getChanges(changeFiles, 'b')[0].changeType, ChangeType.none,
         'b does not have a none change');
-      assert.equal(_getChanges(changeFiles, 'b')[1].changeType, ChangeType.patch,
-        'b does not have a patch change');
-      assert.equal(_getChanges(changeFiles, 'b')[2].changeType, ChangeType.dependency,
+      assert.equal(_getChanges(changeFiles, 'b')[1].changeType, ChangeType.dependency,
         'b does not have a dependency update');
       assert.equal(_getChanges(changeFiles, 'c').length, 2, 'c does not have two change');
       assert.equal(_getChanges(changeFiles, 'c')[0].changeType, ChangeType.patch,
@@ -107,8 +105,7 @@ describe('VersionManager', () => {
       assert.equal(updatedPackages.get('b').version, expectedVersion, `b version is not expected`);
       assert.equal(updatedPackages.get('e').version, expectedVersion, `e version is not expected`);
       assert.isUndefined(_getChanges(changeFiles, 'a'), 'a has change entry.');
-      assert.equal(_getChanges(changeFiles, 'b').length, 1, 'b does not have 1 change entry');
-      assert.equal(_getChanges(changeFiles, 'b')[0].changeType, ChangeType.patch, 'b does not have a patch change');
+      assert.isUndefined(_getChanges(changeFiles, 'b'), 'b has change entry');
     });
   });
   /* tslint:enable:no-string-literal */
