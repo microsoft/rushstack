@@ -15,7 +15,6 @@ export class CleanFlagTask extends CleanTask {
 
   constructor() {
     super();
-    this.name = 'clean';
   }
 
   public isEnabled(buildConfig: IBuildConfig): boolean {
