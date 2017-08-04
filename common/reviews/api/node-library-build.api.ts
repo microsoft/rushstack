@@ -14,6 +14,15 @@ class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig> {
 }
 
 // @public
+class CleanFlagTask extends CleanTask {
+  constructor();
+  // (undocumented)
+  executeTask(gulp: typeof Gulp, completeCallback: (error?: string | Error) => void): void;
+  // (undocumented)
+  isEnabled(buildConfig: IBuildConfig): boolean;
+}
+
+// @public
 class CleanTask extends GulpTask<void> {
   constructor();
   executeTask(gulp: typeof Gulp, completeCallback: (error?: string | Error) => void): void;
@@ -242,6 +251,7 @@ export declare function watch(watchMatch: string | string[], taskExecutable: IEx
 // WARNING: Unsupported export: buildTasks
 // WARNING: Unsupported export: testTasks
 // WARNING: Unsupported export: defaultTasks
+// WARNING: Unsupported export: cleanFlag
 // WARNING: Unsupported export: clean
 // WARNING: Unsupported export: apiExtractor
 // WARNING: Unsupported export: typescript

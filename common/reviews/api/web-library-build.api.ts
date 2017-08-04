@@ -14,6 +14,15 @@ class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig> {
 }
 
 // @public
+class CleanFlagTask extends CleanTask {
+  constructor();
+  // (undocumented)
+  executeTask(gulp: typeof Gulp, completeCallback: (error?: string | Error) => void): void;
+  // (undocumented)
+  isEnabled(buildConfig: IBuildConfig): boolean;
+}
+
+// @public
 class CleanTask extends GulpTask<void> {
   constructor();
   executeTask(gulp: typeof Gulp, completeCallback: (error?: string | Error) => void): void;
@@ -273,6 +282,7 @@ class WebpackTask extends GulpTask<IWebpackTaskConfig> {
 // WARNING: Unsupported export: postProcessSourceMapsTask
 // WARNING: Unsupported export: validateShrinkwrapTask
 // WARNING: Unsupported export: generateShrinkwrapTask
+// WARNING: Unsupported export: cleanFlag
 // WARNING: Unsupported export: clean
 // WARNING: Unsupported export: apiExtractor
 // WARNING: Unsupported export: typescript
