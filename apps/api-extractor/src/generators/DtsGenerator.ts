@@ -5,7 +5,6 @@
 
 import * as fs from 'fs';
 import * as ts from 'typescript';
-import * as dts from '../dts-dom';
 
 import Extractor from '../Extractor';
 import IndentedWriter from '../IndentedWriter';
@@ -16,7 +15,8 @@ import { Span } from './Span';
 class Entry {
   public localName: string;
   public followedSymbol: ts.Symbol;
-  public dtsDeclarations: dts.TopLevelDeclaration[] = [];
+  public exported: boolean = false;
+
   private _sortKey: string|undefined = undefined;
 
   public getSortKey(): string {
@@ -32,6 +32,11 @@ class Entry {
     }
     return this._sortKey;
   }
+}
+
+interface IFollowAliasesResult {
+  symbol: ts.Symbol;
+  external: boolean;
 }
 
 export default class DtsGenerator {
@@ -62,7 +67,7 @@ export default class DtsGenerator {
     return current as T;
   }
 
-  private static _followAliases(symbol: ts.Symbol, typeChecker: ts.TypeChecker): ts.Symbol {
+  private static _followAliases(symbol: ts.Symbol, typeChecker: ts.TypeChecker): IFollowAliasesResult {
     let current: ts.Symbol = symbol;
 
     while (true) { // tslint:disable-line:no-constant-condition
@@ -88,7 +93,7 @@ export default class DtsGenerator {
           // Does it start with something like "'./"?
           // If not, then assume it's an import from an external package
           if (!/^['"\s]+\.[\/\\]/.test(moduleSpecifier)) {
-            break;
+            return { symbol: current, external: true };
           }
         }
       }
@@ -96,7 +101,7 @@ export default class DtsGenerator {
       current = currentAlias;
     }
 
-    return current;
+    return { symbol: current, external: false };
   }
 
   public constructor(extractor: Extractor) {
@@ -119,20 +124,23 @@ export default class DtsGenerator {
     const packageSymbol: ts.Symbol = this._extractor.package.getDeclarationSymbol();
 
     const exportSymbols: ts.Symbol[] = this._typeChecker.getExportsOfModule(packageSymbol) || [];
-    for (const exportSymbol of exportSymbols) {
 
-      const entry: Entry = this._fetchEntryForSymbol(exportSymbol);
-      for (const dtsDeclaration of entry.dtsDeclarations) {
-        dtsDeclaration.flags |= dts.DeclarationFlags.Export;
+    for (const exportSymbol of exportSymbols) {
+      const entry: Entry | undefined = this._fetchEntryForSymbol(exportSymbol);
+
+      if (!entry) {
+        throw new Error('Unsupported export type');
       }
+
+      entry.exported = true;
     }
 
     this._entries.sort((a, b) => a.getSortKey().localeCompare(b.getSortKey()));
 
     let content: string = '';
     for (const entry of this._entries) {
-      for (const dtsDeclaration of entry.dtsDeclarations) {
-        content += dts.emit(dtsDeclaration);
+      for (const declaration of entry.followedSymbol.declarations) {
+        content += declaration.getText() + '\n';
       }
     }
 
@@ -141,79 +149,72 @@ export default class DtsGenerator {
     return fileContent;
   }
 
-  private _fetchEntryForSymbol(symbol: ts.Symbol): Entry {
-    const followedSymbol: ts.Symbol = DtsGenerator._followAliases(symbol, this._typeChecker);
+  private _fetchEntryForSymbol(symbol: ts.Symbol): Entry | undefined {
+    const result: IFollowAliasesResult = DtsGenerator._followAliases(symbol, this._typeChecker);
+    if (result.external) {
+      return; // external definition
+    }
 
-    let entry: Entry = this._entriesBySymbol.get(followedSymbol);
+    const followedSymbol: ts.Symbol = result.symbol;
+    if (followedSymbol.flags & (
+      ts.SymbolFlags.TypeParameter | ts.SymbolFlags.TypeLiteral
+      )) {
+      return undefined;
+    }
+
+    let entry: Entry = this._entriesBySymbol.get(result.symbol);
     if (entry) {
       return entry;
     }
 
-    entry = this._createEntry(symbol.name, followedSymbol);
+    entry = this._createEntry(symbol.name, result.symbol);
 
-    for (const declaration of followedSymbol.declarations) {
-      console.log(PrettyPrinter.dumpTree(declaration));
+    for (const declaration of result.symbol.declarations) {
+      // console.log(PrettyPrinter.dumpTree(declaration));
       console.log('-------------------------------------');
       const span: Span = new Span(declaration);
       console.log(span.getText());
       console.log('=====================================');
 
-      switch (declaration.kind) {
-        case ts.SyntaxKind.ClassDeclaration:
-          this._processClassDeclaration(entry, declaration as ts.ClassDeclaration);
-          break;
-        case ts.SyntaxKind.InterfaceDeclaration:
-          this._processInterfaceDeclaration(entry, declaration as ts.InterfaceDeclaration);
-          break;
-      }
-
+      this._collectTypes(declaration);
     }
 
     return entry;
   }
 
-  private _processClassDeclaration(entry: Entry, declaration: ts.ClassDeclaration): void {
-    const classDts: dts.ClassDeclaration = dts.create.class(entry.localName);
-    entry.dtsDeclarations.push(classDts);
-  }
+  private _collectTypes(node: ts.Node): void {
+    switch (node.kind) {
+      case ts.SyntaxKind.Block:
+        // Don't traverse into code
+        return;
 
-  private _processInterfaceDeclaration(entry: Entry, declaration: ts.InterfaceDeclaration): void {
-    const interfaceDts: dts.InterfaceDeclaration = dts.create.interface(entry.localName);
-    entry.dtsDeclarations.push(interfaceDts);
-
-    for (const heritageClause of declaration.heritageClauses || []) {
-      for (const baseTypeDeclaration of heritageClause.types || []) {
-        const baseType: ts.TypeReference = this._typeChecker.getTypeAtLocation(
-          baseTypeDeclaration) as ts.TypeReference;
-        const baseDts: dts.NamedTypeReference = this._getTypeReferenceDts(baseType);
-        interfaceDts.baseTypes.push(baseDts);
-      }
+      case ts.SyntaxKind.Identifier:
+        if (node.parent) {
+          switch (node.parent.kind) {
+            case ts.SyntaxKind.ExpressionWithTypeArguments:
+            case ts.SyntaxKind.TypeReference:
+              this._processTypeReference(node);
+              break;
+          }
+        }
+        return;
+    }
+    for (const child of node.getChildren() || []) {
+      this._collectTypes(child);
     }
   }
 
-  private _getTypeReferenceDts(typeReference: ts.TypeReference): dts.NamedTypeReference {
-    if (!typeReference.symbol) {
-      const intrinsicName: string = typeReference['intrinsicName']; // tslint:disable-line:no-string-literal
-      if (intrinsicName) {
-        // It is a simple primitive type
-        return dts.create.namedTypeReference(intrinsicName);
-      } else {
-        throw new Error('Unimplemented type reference:\r\n' + this._typeChecker.typeToString(typeReference));
-      }
-    } else {
-      const entry: Entry = this._fetchEntryForSymbol(typeReference.symbol);
-      const referenceDts: dts.NamedTypeReference = dts.create.namedTypeReference(entry.localName);
-
-      for (const argument of typeReference.typeArguments || []) {
-        const renderedArgument: dts.NamedTypeReference = this._getTypeReferenceDts(argument as ts.TypeReference);
-        referenceDts.typeArguments.push(renderedArgument);
-      }
-
-      return referenceDts;
+  private _processTypeReference(identifier: ts.Node): void {
+    const symbol: ts.Symbol = this._typeChecker.getSymbolAtLocation(identifier);
+    if (!symbol) {
+      throw new Error('Symbol not found');
     }
+
+    this._fetchEntryForSymbol(symbol);
   }
 
   private _createEntry(localName: string, followedSymbol: ts.Symbol): Entry {
+    console.log('======> ' + localName);
     const entry: Entry = new Entry();
     entry.localName = localName;
     entry.followedSymbol = followedSymbol;
