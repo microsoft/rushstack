@@ -6,9 +6,7 @@ import * as Gulp from 'gulp';
 import { IBuildConfig } from './../IBuildConfig';
 
 /**
- * The clean task is a special task which iterates through all registered
- * tasks and subtasks, collecting a list of patterns which should be deleted.
- * An instance of this task is automatically registered to the 'clean' command.
+ * This task runs at the start of any command if the --clean or -c parameter is specified
  * @public
  */
 export class CleanFlagTask extends CleanTask {
