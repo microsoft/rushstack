@@ -120,6 +120,17 @@ export function getConfig(): IBuildConfig {
   return _buildConfig;
 }
 
+const cleanFlagTask: CleanTask = new CleanTask();
+cleanFlagTask.name = 'clean-flag';
+let hasCleanFlagTaskRun: boolean = false;
+cleanFlagTask.isEnabled = (buildConfig: IBuildConfig) => {
+  // tslint:disable-next-line:no-string-literal
+  const shouldRun: boolean = (!!buildConfig.args['clean'] || !!buildConfig.args['c'])
+    && hasCleanFlagTaskRun === false;
+  hasCleanFlagTaskRun = true;
+  return shouldRun;
+};
+
 /**
  * Registers an IExecutable to gulp so that it can be called from the command line
  * @param taskName - the name of the task, can be called from the command line (e.g. "gulp <taskName>")
@@ -128,6 +139,8 @@ export function getConfig(): IBuildConfig {
  * @public
  */
 export function task(taskName: string, taskExecutable: IExecutable): IExecutable {
+  taskExecutable = serial(cleanFlagTask, taskExecutable);
+
   _taskMap[taskName] = taskExecutable;
 
   _trackTask(taskExecutable);
