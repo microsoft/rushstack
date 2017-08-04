@@ -11,6 +11,7 @@ import Extractor from '../Extractor';
 import IndentedWriter from '../IndentedWriter';
 import PrettyPrinter from '../PrettyPrinter';
 import TypeScriptHelpers from '../TypeScriptHelpers';
+import { Span } from './Span';
 
 class Entry {
   public localName: string;
@@ -153,7 +154,8 @@ export default class DtsGenerator {
     for (const declaration of followedSymbol.declarations) {
       console.log(PrettyPrinter.dumpTree(declaration));
       console.log('-------------------------------------');
-      console.log(declaration.getText());
+      const span: Span = new Span(declaration);
+      console.log(span.getText());
       console.log('=====================================');
 
       switch (declaration.kind) {
