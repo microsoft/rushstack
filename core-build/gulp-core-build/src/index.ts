@@ -10,6 +10,7 @@ import { GulpProxy } from './GulpProxy';
 import { IExecutable } from './IExecutable';
 import { IBuildConfig } from './IBuildConfig';
 import { CleanTask } from './tasks/CleanTask';
+import { CleanFlagTask } from './tasks/CleanFlagTask';
 import { args, builtPackage } from './State';
 export { IExecutable } from './IExecutable';
 import { log } from './logging';
@@ -40,6 +41,7 @@ export * from './tasks/CopyTask';
 export * from './tasks/GenerateShrinkwrapTask';
 export * from './tasks/GulpTask';
 export * from './tasks/CleanTask';
+export * from './tasks/CleanFlagTask';
 export * from './tasks/ValidateShrinkwrapTask';
 export * from './jsonUtilities/SchemaValidator';
 
@@ -120,15 +122,8 @@ export function getConfig(): IBuildConfig {
   return _buildConfig;
 }
 
-const cleanFlagTask: CleanTask = new CleanTask();
-let hasCleanFlagTaskRun: boolean = false;
-cleanFlagTask.isEnabled = (buildConfig: IBuildConfig) => {
-  // tslint:disable-next-line:no-string-literal
-  const shouldRun: boolean = (!!buildConfig.args['clean'] || !!buildConfig.args['c'])
-    && hasCleanFlagTaskRun === false;
-  hasCleanFlagTaskRun = true;
-  return shouldRun;
-};
+/** @public */
+export const cleanFlag: IExecutable = new CleanFlagTask();
 
 /**
  * Registers an IExecutable to gulp so that it can be called from the command line
@@ -138,7 +133,7 @@ cleanFlagTask.isEnabled = (buildConfig: IBuildConfig) => {
  * @public
  */
 export function task(taskName: string, taskExecutable: IExecutable): IExecutable {
-  taskExecutable = serial(cleanFlagTask, taskExecutable);
+  taskExecutable = serial(cleanFlag, taskExecutable);
 
   _taskMap[taskName] = taskExecutable;
 

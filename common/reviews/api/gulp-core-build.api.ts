@@ -2,6 +2,16 @@
 export function addSuppression(suppression: string | RegExp): void;
 
 // @public
+class CleanFlagTask extends CleanTask {
+  constructor();
+  // (undocumented)
+  public executeTask(gulp: typeof Gulp,
+      completeCallback: (error?: string | Error) => void): void;
+  // (undocumented)
+  public isEnabled(buildConfig: IBuildConfig): boolean;
+}
+
+// @public
 class CleanTask extends GulpTask<void> {
   constructor();
   public executeTask(gulp: typeof Gulp,
@@ -220,5 +230,6 @@ export function warn(...args: Array<string | Chalk.ChalkChain>): void;
 // @public
 export function watch(watchMatch: string | string[], taskExecutable: IExecutable): IExecutable;
 
+// WARNING: Unsupported export: cleanFlag
 // WARNING: Unsupported export: clean
 // (No packageDescription for this package)
