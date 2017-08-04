@@ -121,7 +121,6 @@ export function getConfig(): IBuildConfig {
 }
 
 const cleanFlagTask: CleanTask = new CleanTask();
-cleanFlagTask.name = 'clean-flag';
 let hasCleanFlagTaskRun: boolean = false;
 cleanFlagTask.isEnabled = (buildConfig: IBuildConfig) => {
   // tslint:disable-next-line:no-string-literal
