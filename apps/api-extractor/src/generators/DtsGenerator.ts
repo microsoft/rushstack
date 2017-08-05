@@ -14,6 +14,7 @@ import { Span } from './Span';
 
 class Entry {
   public localName: string;
+  public uniqueName: string | undefined = undefined;
   public followedSymbol: ts.Symbol;
   public exported: boolean = false;
 
@@ -135,11 +136,14 @@ export default class DtsGenerator {
       entry.exported = true;
     }
 
+    this._makeUniqueNames();
+
     this._entries.sort((a, b) => a.getSortKey().localeCompare(b.getSortKey()));
 
     let content: string = '';
     for (const entry of this._entries) {
       for (const declaration of entry.followedSymbol.declarations) {
+        content += '// ====> ' + entry.uniqueName + '\n';
         content += declaration.getText() + '\n';
       }
     }
@@ -147,6 +151,18 @@ export default class DtsGenerator {
     // Normalize to CRLF
     const fileContent: string = content.toString().replace(/\r?\n/g, '\r\n');
     return fileContent;
+  }
+
+  private _makeUniqueNames(): void {
+    const usedNames: Set<string> = new Set<string>();
+    for (const entry of this._entries) {
+      let suffix: number = 1;
+      entry.uniqueName = entry.localName;
+      while (usedNames.has(entry.uniqueName)) {
+        entry.uniqueName = entry.localName + '_' + ++suffix;
+      }
+      usedNames.add(entry.uniqueName);
+    }
   }
 
   private _fetchEntryForSymbol(symbol: ts.Symbol): Entry | undefined {
@@ -162,14 +178,19 @@ export default class DtsGenerator {
       return undefined;
     }
 
-    let entry: Entry = this._entriesBySymbol.get(result.symbol);
+    let entry: Entry = this._entriesBySymbol.get(followedSymbol);
     if (entry) {
       return entry;
     }
 
-    entry = this._createEntry(symbol.name, result.symbol);
+    entry = new Entry();
+    entry.localName = symbol.name;
+    entry.followedSymbol = followedSymbol;
+    this._entries.push(entry);
+    this._entriesBySymbol.set(followedSymbol, entry);
+    console.log('======> ' + entry.localName);
 
-    for (const declaration of result.symbol.declarations) {
+    for (const declaration of followedSymbol.declarations) {
       // console.log(PrettyPrinter.dumpTree(declaration));
       console.log('-------------------------------------');
       const span: Span = new Span(declaration);
@@ -211,15 +232,5 @@ export default class DtsGenerator {
     }
 
     this._fetchEntryForSymbol(symbol);
-  }
-
-  private _createEntry(localName: string, followedSymbol: ts.Symbol): Entry {
-    console.log('======> ' + localName);
-    const entry: Entry = new Entry();
-    entry.localName = localName;
-    entry.followedSymbol = followedSymbol;
-    this._entries.push(entry);
-    this._entriesBySymbol.set(followedSymbol, entry);
-    return entry;
   }
 }
