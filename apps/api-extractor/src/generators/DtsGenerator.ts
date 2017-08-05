@@ -40,6 +40,10 @@ interface IFollowAliasesResult {
   external: boolean;
 }
 
+interface IWritingSpanContext {
+  entry: Entry;
+}
+
 interface IWritingSpanArgs {
   readonly span: Span;
   readonly previousSpan: Span | undefined;
@@ -53,6 +57,8 @@ interface IWritingSpanArgs {
   skipSeparatorBefore: boolean;
   skipChildrenAndSuffix: boolean;
   skipSeparatorAfter: boolean;
+
+  context: IWritingSpanContext;
 }
 
 export default class DtsGenerator {
@@ -165,16 +171,21 @@ export default class DtsGenerator {
 
     for (const entry of this._entries) {
       for (const declaration of entry.followedSymbol.declarations) {
-        console.log(PrettyPrinter.dumpTree(declaration));
-        console.log('-------------------------------------');
+        // console.log(PrettyPrinter.dumpTree(declaration));
 
         // console.log(declaration.getText());
         // console.log('=====================================');
 
         const span: Span = new Span(declaration);
+        span.dump();
+        console.log('-------------------------------------');
+
+        const context: IWritingSpanContext = {
+          entry: entry
+        };
 
         this._indentedWriter.writeLine();
-        this._writeSpanTree(span);
+        this._writeSpanTree(span, context);
         this._indentedWriter.writeLine();
       }
     }
@@ -184,11 +195,11 @@ export default class DtsGenerator {
     return fileContent;
   }
 
-  private _writeSpanTree(span: Span): void {
-    this._writeSpanTreeHelper([span], undefined);
+  private _writeSpanTree(span: Span, context: IWritingSpanContext): void {
+    this._writeSpanTreeHelper([span], undefined, context);
   }
 
-  private _writeSpanTreeHelper(children: Span[], parentSpan: Span|undefined): void {
+  private _writeSpanTreeHelper(children: Span[], parentSpan: Span|undefined, context: IWritingSpanContext): void {
     let previousArgs: IWritingSpanArgs | undefined = undefined;
     for (const child of children) {
       const args: IWritingSpanArgs = {
@@ -203,7 +214,9 @@ export default class DtsGenerator {
 
         skipSeparatorBefore: previousArgs ? previousArgs.skipSeparatorAfter : false,
         skipChildrenAndSuffix: false,
-        skipSeparatorAfter: false
+        skipSeparatorAfter: false,
+
+        context: context
       };
 
       this._onWritingSpan(args);
@@ -220,7 +233,7 @@ export default class DtsGenerator {
       this._indentedWriter.write(previousArgs.prefix);
 
       if (!previousArgs.skipChildrenAndSuffix) {
-        this._writeSpanTreeHelper(previousArgs.span.children, previousArgs.span);
+        this._writeSpanTreeHelper(previousArgs.span.children, previousArgs.span, previousArgs.context);
         this._indentedWriter.write(previousArgs.suffix);
       }
 
@@ -239,6 +252,30 @@ export default class DtsGenerator {
         args.skipChildrenAndSuffix = true;
         break;
 
+      case ts.SyntaxKind.ExportKeyword:
+      case ts.SyntaxKind.DefaultKeyword:
+        // Delete any explicit "export" keywords -- we will re-add them based on Entry.exported
+        args.prefix = '';
+        args.skipChildrenAndSuffix = true;
+        args.skipSeparatorAfter = true;
+        break;
+
+      case ts.SyntaxKind.InterfaceKeyword:
+      case ts.SyntaxKind.ClassKeyword:
+      case ts.SyntaxKind.EnumKeyword:
+      case ts.SyntaxKind.NamespaceKeyword:
+      case ts.SyntaxKind.TypeKeyword:
+        if (args.previousSpan && args.previousSpan.node.kind === ts.SyntaxKind.SyntaxList) {
+          args.skipSeparatorBefore = true;
+        }
+
+        args.prefix = 'declare ' + args.prefix;
+
+        if (args.context.entry.exported) {
+          args.prefix = 'export ' + args.prefix;
+        }
+        break;
+
       case ts.SyntaxKind.VariableDeclaration:
         if (!args.parentSpan) {
           // The VariableDeclaration node is part of a VariableDeclarationList, however
@@ -255,7 +292,7 @@ export default class DtsGenerator {
           }
           const listPrefix: string = list.getSourceFile().text
             .substring(list.getStart(), list.declarations[0].getStart());
-          args.prefix = listPrefix + args.prefix;
+          args.prefix = 'declare ' + listPrefix + args.prefix;
           args.suffix = ';';
         }
         break;
