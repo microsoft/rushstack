@@ -79,6 +79,35 @@ export class Span {
     return result;
   }
 
+  public dump(indent: string = ''): void {
+    let line: string = indent + ts.SyntaxKind[this.node.kind] + ': ';
+
+    if (this.prefix) {
+      line += ' pre=[' + this._getTrimmed(this.prefix) + ']';
+    }
+    if (this.suffix) {
+      line += ' suf=[' + this._getTrimmed(this.suffix) + ']';
+    }
+    if (this.separator) {
+      line += ' sep=[' + this._getTrimmed(this.separator) + ']';
+    }
+
+    console.log(line);
+
+    for (const child of this.children) {
+      child.dump(indent + '  ');
+    }
+  }
+
+  private _getTrimmed(text: string): string {
+    const trimmed: string = text.replace(/[\r\n]/g, '\\n');
+
+    if (trimmed.length > 100) {
+      return trimmed.substr(0, 97) + '...';
+    }
+    return trimmed;
+  }
+
   private _getSubstring(startIndex: number, endIndex: number): string {
     return this.node.getSourceFile().text.substring(startIndex, endIndex);
   }
