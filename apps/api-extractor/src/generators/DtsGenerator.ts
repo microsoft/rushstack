@@ -40,9 +40,26 @@ interface IFollowAliasesResult {
   external: boolean;
 }
 
+interface IWritingSpanArgs {
+  readonly span: Span;
+  readonly previousSpan: Span | undefined;
+  readonly parentSpan: Span | undefined;
+  readonly kind: ts.SyntaxKind;
+  readonly parentKind: ts.SyntaxKind;
+
+  prefix: string;
+  suffix: string;
+
+  skipSeparatorBefore: boolean;
+  skipChildrenAndSuffix: boolean;
+  skipSeparatorAfter: boolean;
+}
+
 export default class DtsGenerator {
   private _extractor: Extractor;
   private _typeChecker: ts.TypeChecker;
+  private _indentedWriter: IndentedWriter = new IndentedWriter();
+
   private readonly _entriesBySymbol: Map<ts.Symbol, Entry> = new Map<ts.Symbol, Entry>();
   private readonly _entries: Entry[] = [];
 
@@ -53,15 +70,17 @@ export default class DtsGenerator {
   private static _matchParent<T extends ts.Node>(node: ts.Node, parentKinds: ts.SyntaxKind[]): T {
     let current: ts.Node = node;
 
-    for (let  i: number = 0; ; ++i) {
+    let  i: number = 0;
+    while (true) { // tslint:disable-line:no-constant-condition
       if (!current || current.kind !== parentKinds[i]) {
         return undefined;
       }
 
-      if (i >= parentKinds.length) {
+      if (i >= parentKinds.length - 1) {
         break;
       }
 
+      ++i;
       current = current.parent;
     }
 
@@ -122,6 +141,9 @@ export default class DtsGenerator {
   }
 
   public generateDtsFileContent(): string {
+    this._indentedWriter.spacing = '';
+    this._indentedWriter.clear();
+
     const packageSymbol: ts.Symbol = this._extractor.package.getDeclarationSymbol();
 
     const exportSymbols: ts.Symbol[] = this._typeChecker.getExportsOfModule(packageSymbol) || [];
@@ -130,27 +152,135 @@ export default class DtsGenerator {
       const entry: Entry | undefined = this._fetchEntryForSymbol(exportSymbol);
 
       if (!entry) {
-        throw new Error('Unsupported export type');
+        // We are reexporting an external definition
+        this._indentedWriter.writeLine('// Unsupported re-export: ' + exportSymbol.name);
+      } else {
+        entry.exported = true;
       }
-
-      entry.exported = true;
     }
 
     this._makeUniqueNames();
 
     this._entries.sort((a, b) => a.getSortKey().localeCompare(b.getSortKey()));
 
-    let content: string = '';
     for (const entry of this._entries) {
       for (const declaration of entry.followedSymbol.declarations) {
-        content += '// ====> ' + entry.uniqueName + '\n';
-        content += declaration.getText() + '\n';
+        console.log(PrettyPrinter.dumpTree(declaration));
+        console.log('-------------------------------------');
+
+        // console.log(declaration.getText());
+        // console.log('=====================================');
+
+        const span: Span = new Span(declaration);
+
+        this._indentedWriter.writeLine();
+        this._writeSpanTree(span);
+        this._indentedWriter.writeLine();
       }
     }
 
     // Normalize to CRLF
-    const fileContent: string = content.toString().replace(/\r?\n/g, '\r\n');
+    const fileContent: string = this._indentedWriter.toString().replace(/\r?\n/g, '\r\n');
     return fileContent;
+  }
+
+  private _writeSpanTree(span: Span): void {
+    this._writeSpanTreeHelper([span], undefined);
+  }
+
+  private _writeSpanTreeHelper(children: Span[], parentSpan: Span|undefined): void {
+    let previousArgs: IWritingSpanArgs | undefined = undefined;
+    for (const child of children) {
+      const args: IWritingSpanArgs = {
+        span: child,
+        previousSpan: previousArgs ? previousArgs.span : undefined,
+        parentSpan: parentSpan,
+        kind: child.node.kind,
+        parentKind: child.node.parent ? child.node.parent.kind : ts.SyntaxKind.Unknown,
+
+        prefix: child.prefix,
+        suffix: child.suffix,
+
+        skipSeparatorBefore: previousArgs ? previousArgs.skipSeparatorAfter : false,
+        skipChildrenAndSuffix: false,
+        skipSeparatorAfter: false
+      };
+
+      this._onWritingSpan(args);
+
+      this._writeSpanTreeHelper2(previousArgs, args);
+
+      previousArgs = args;
+    }
+    this._writeSpanTreeHelper2(previousArgs, undefined);
+  }
+
+  private _writeSpanTreeHelper2(previousArgs: IWritingSpanArgs, args: IWritingSpanArgs|undefined): void {
+    if (previousArgs) {
+      this._indentedWriter.write(previousArgs.prefix);
+
+      if (!previousArgs.skipChildrenAndSuffix) {
+        this._writeSpanTreeHelper(previousArgs.span.children, previousArgs.span);
+        this._indentedWriter.write(previousArgs.suffix);
+      }
+
+      if (!args || !args.skipSeparatorBefore) {
+        this._indentedWriter.write(previousArgs.span.separator);
+      }
+    }
+  }
+
+  private _onWritingSpan(args: IWritingSpanArgs): void {
+    switch (args.kind) {
+      case ts.SyntaxKind.Block:
+        // Replace code blocks with a semicolon
+        args.prefix = ';';
+        args.skipSeparatorBefore = true;
+        args.skipChildrenAndSuffix = true;
+        break;
+
+      case ts.SyntaxKind.VariableDeclaration:
+        if (!args.parentSpan) {
+          // The VariableDeclaration node is part of a VariableDeclarationList, however
+          // the Entry.followedSymbol points to the VariableDeclaration part because
+          // multiple definitions might share the same VariableDeclarationList.
+          //
+          // Since we are emitting a separate declaration for each one, we need to look upwards
+          // in the ts.Node tree and write a copy of the enclosing VariableDeclarationList
+          // content (e.g. "var" from "var x=1, y=2").
+          const list: ts.VariableDeclarationList = DtsGenerator._matchParent(args.span.node,
+            [ts.SyntaxKind.VariableDeclaration, ts.SyntaxKind.VariableDeclarationList]);
+          if (!list) {
+            throw new Error('Unsupported variable declaration');
+          }
+          const listPrefix: string = list.getSourceFile().text
+            .substring(list.getStart(), list.declarations[0].getStart());
+          args.prefix = listPrefix + args.prefix;
+          args.suffix = ';';
+        }
+        break;
+
+      case ts.SyntaxKind.Identifier:
+        if (args.parentKind) {
+          switch (args.parentKind) {
+            case ts.SyntaxKind.ExpressionWithTypeArguments:
+            case ts.SyntaxKind.TypeReference:
+              {
+                const symbol: ts.Symbol = this._typeChecker.getSymbolAtLocation(args.span.node);
+                if (!symbol) {
+                  throw new Error('Symbol not found');
+                }
+
+                const entry: Entry = this._fetchEntryForSymbol(symbol);
+                if (entry) {
+                  args.prefix = '/**/' + entry.uniqueName;
+                }
+              }
+              break;
+          }
+        }
+        break;
+    }
   }
 
   private _makeUniqueNames(): void {
@@ -192,10 +322,9 @@ export default class DtsGenerator {
 
     for (const declaration of followedSymbol.declarations) {
       // console.log(PrettyPrinter.dumpTree(declaration));
-      console.log('-------------------------------------');
-      const span: Span = new Span(declaration);
-      console.log(span.getText());
-      console.log('=====================================');
+      // console.log('-------------------------------------');
+      // console.log(declaration.getText());
+      // console.log('=====================================');
 
       this._collectTypes(declaration);
     }
@@ -214,23 +343,22 @@ export default class DtsGenerator {
           switch (node.parent.kind) {
             case ts.SyntaxKind.ExpressionWithTypeArguments:
             case ts.SyntaxKind.TypeReference:
-              this._processTypeReference(node);
+              {
+                const symbol: ts.Symbol = this._typeChecker.getSymbolAtLocation(node);
+                if (!symbol) {
+                  throw new Error('Symbol not found');
+                }
+
+                this._fetchEntryForSymbol(symbol);
+              }
               break;
           }
         }
         return;
     }
+
     for (const child of node.getChildren() || []) {
       this._collectTypes(child);
     }
-  }
-
-  private _processTypeReference(identifier: ts.Node): void {
-    const symbol: ts.Symbol = this._typeChecker.getSymbolAtLocation(identifier);
-    if (!symbol) {
-      throw new Error('Symbol not found');
-    }
-
-    this._fetchEntryForSymbol(symbol);
   }
 }
