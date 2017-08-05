@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "2.8.0",
+      "tag": "@microsoft/gulp-core-build_v2.8.0",
+      "date": "Sat, 05 Aug 2017 01:04:41 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a --clean or -c command line flag which runs the clean task."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.7.3",
       "tag": "@microsoft/gulp-core-build_v2.7.3",
       "date": "Mon, 31 Jul 2017 21:18:26 GMT",

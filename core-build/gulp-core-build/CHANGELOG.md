@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Mon, 31 Jul 2017 21:18:26 GMT and should not be manually modified.
+This log was last generated on Sat, 05 Aug 2017 01:04:41 GMT and should not be manually modified.
+
+## 2.8.0
+Sat, 05 Aug 2017 01:04:41 GMT
+
+### Minor changes
+
+- Add a --clean or -c command line flag which runs the clean task.
 
 ## 2.7.3
 Mon, 31 Jul 2017 21:18:26 GMT

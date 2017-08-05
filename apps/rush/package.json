@@ -46,7 +46,7 @@
     "wordwrap": "~1.0.0"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "~3.2.2",
+    "@microsoft/node-library-build": "~3.2.3",
     "@types/chai": "3.4.34",
     "@types/es6-collections": "0.5.29",
     "@types/fs-extra": "0.0.37",
