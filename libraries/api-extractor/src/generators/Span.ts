@@ -8,7 +8,8 @@ export class Span {
 
   public readonly startIndex: number;
   public readonly endIndex: number;
-  public separatorIndex: number;
+  public separatorStartIndex: number;
+  public separatorEndIndex: number;
 
   public readonly children: Span[];
 
@@ -16,7 +17,8 @@ export class Span {
     this.node = node;
     this.startIndex = node.getStart();
     this.endIndex = node.end;
-    this.separatorIndex = this.endIndex;
+    this.separatorStartIndex = 0;
+    this.separatorEndIndex = 0;
     this.children = [];
 
     let previousChildSpan: Span = undefined;
@@ -36,7 +38,23 @@ export class Span {
       }
 
       if (previousChildSpan) {
-        previousChildSpan.separatorIndex = childSpan.startIndex;
+        if (previousChildSpan.endIndex < childSpan.startIndex) {
+          // There is some leftover text after previous child -- assign it as the separator for
+          // the preceding span.  If the preceding span has no suffix, then assign it to the
+          // deepest preceding span with no suffix.
+          let separatorRecipient: Span = previousChildSpan;
+          while (separatorRecipient.children.length > 0) {
+            const lastChild: Span = separatorRecipient.children[separatorRecipient.children.length - 1];
+            if (lastChild.endIndex !== separatorRecipient.endIndex) {
+              // There is a suffix, so we cannot push the separator any further down, or else
+              // it would get printed before this suffix.
+              break;
+            }
+            separatorRecipient = lastChild;
+          }
+          separatorRecipient.separatorStartIndex = previousChildSpan.endIndex;
+          separatorRecipient.separatorEndIndex = childSpan.startIndex;
+        }
       }
 
       previousChildSpan = childSpan;
@@ -62,7 +80,7 @@ export class Span {
   }
 
   public get separator(): string {
-    return this._getSubstring(this.endIndex, this.separatorIndex);
+    return this._getSubstring(this.separatorStartIndex, this.separatorEndIndex);
   }
 
   public getText(): string {
@@ -109,6 +127,9 @@ export class Span {
   }
 
   private _getSubstring(startIndex: number, endIndex: number): string {
+    if (startIndex === endIndex) {
+      return '';
+    }
     return this.node.getSourceFile().text.substring(startIndex, endIndex);
   }
 }
