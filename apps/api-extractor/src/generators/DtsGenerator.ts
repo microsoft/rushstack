@@ -254,6 +254,7 @@ export default class DtsGenerator {
 
       case ts.SyntaxKind.ExportKeyword:
       case ts.SyntaxKind.DefaultKeyword:
+      case ts.SyntaxKind.DeclareKeyword:
         // Delete any explicit "export" keywords -- we will re-add them based on Entry.exported
         args.prefix = '';
         args.skipChildrenAndSuffix = true;
@@ -265,12 +266,7 @@ export default class DtsGenerator {
       case ts.SyntaxKind.EnumKeyword:
       case ts.SyntaxKind.NamespaceKeyword:
       case ts.SyntaxKind.TypeKeyword:
-        if (args.previousSpan && args.previousSpan.node.kind === ts.SyntaxKind.SyntaxList) {
-          args.skipSeparatorBefore = true;
-        }
-
         args.prefix = 'declare ' + args.prefix;
-
         if (args.context.entry.exported) {
           args.prefix = 'export ' + args.prefix;
         }
