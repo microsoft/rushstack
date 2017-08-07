@@ -265,6 +265,7 @@ export default class DtsGenerator {
       case ts.SyntaxKind.ClassKeyword:
       case ts.SyntaxKind.EnumKeyword:
       case ts.SyntaxKind.NamespaceKeyword:
+      case ts.SyntaxKind.ModuleKeyword:
       case ts.SyntaxKind.TypeKeyword:
         args.prefix = 'declare ' + args.prefix;
         if (args.context.entry.exported) {
@@ -298,6 +299,12 @@ export default class DtsGenerator {
           switch (args.parentKind) {
             case ts.SyntaxKind.ExpressionWithTypeArguments:
             case ts.SyntaxKind.TypeReference:
+
+            case ts.SyntaxKind.ClassDeclaration:
+            case ts.SyntaxKind.InterfaceDeclaration:
+            case ts.SyntaxKind.EnumDeclaration:
+            case ts.SyntaxKind.TypeAliasDeclaration:
+            case ts.SyntaxKind.ModuleDeclaration:  // (namespaces are a type of module declaration)
               {
                 const symbol: ts.Symbol = this._typeChecker.getSymbolAtLocation(args.span.node);
                 if (!symbol) {
