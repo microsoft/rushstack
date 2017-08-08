@@ -18,6 +18,8 @@
   "devDependencies": {
     "@types/mocha": "2.2.38",
     "@types/node": "6.0.62",
+    "@types/loader-utils": "~1.1.0",
+    "@types/webpack": "~2.2.4",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "@microsoft/node-library-build": "~3.2.3"

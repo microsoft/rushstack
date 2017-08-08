@@ -6,7 +6,7 @@
 /// <reference types="mocha" />
 
 import { assert } from 'chai';
-import { LoadThemedStylesLoader } from './LoadThemedStylesLoader';
+import { LoadThemedStylesLoader } from './../LoadThemedStylesLoader';
 import LoadThemedStylesMock = require('./testData/LoadThemedStylesMock');
 
 function wrapResult(loaderResult: string): string {
@@ -35,7 +35,7 @@ describe('LoadThemedStylesLoader', () => {
 
   it('it inserts the resolved load-themed-styles path', () => {
     const expectedPath: string = require.resolve('@microsoft/load-themed-styles');
-    const loaderResult: string = LoadThemedStylesLoader.pitch('');
+    const loaderResult: string = LoadThemedStylesLoader.pitch.call({}, '');
     assert.isNotNull(loaderResult.indexOf(expectedPath));
   });
 
@@ -51,14 +51,14 @@ describe('LoadThemedStylesLoader', () => {
 
   it('it inserts the overridden load-themed-styles path', () => {
     const expectedPath: string = './testData/LoadThemedStylesMock';
-    const loaderResult: string = LoadThemedStylesLoader.pitch('');
+    const loaderResult: string = LoadThemedStylesLoader.pitch.call({}, '');
     assert.isNotNull(loaderResult.indexOf(expectedPath));
   });
 
   it ('correctly calls loadStyles in load-themed-styles with a module reference', () => {
     LoadThemedStylesLoader.loadedThemedStylesPath = './testData/LoadThemedStylesMock';
 
-    let loaderResult: string = LoadThemedStylesLoader.pitch('./testData/MockStyle1');
+    let loaderResult: string = LoadThemedStylesLoader.pitch.call({}, './testData/MockStyle1');
     loaderResult = loaderResult.replace(/require\(\"!!/, 'require("');
     loaderResult = wrapResult(loaderResult);
 
@@ -74,7 +74,7 @@ describe('LoadThemedStylesLoader', () => {
   it ('correctly calls loadStyles in load-themed-styles with a string reference', () => {
     LoadThemedStylesLoader.loadedThemedStylesPath = './testData/LoadThemedStylesMock';
 
-    let loaderResult: string = LoadThemedStylesLoader.pitch('./testData/MockStyle2');
+    let loaderResult: string = LoadThemedStylesLoader.pitch.call({}, './testData/MockStyle2');
     loaderResult = loaderResult.replace(/require\(\"!!/, 'require("');
     loaderResult = wrapResult(loaderResult);
 

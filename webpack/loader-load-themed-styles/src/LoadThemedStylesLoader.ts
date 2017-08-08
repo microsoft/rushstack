@@ -3,15 +3,15 @@
  * See LICENSE in the project root for license information.
  */
 
-/* tslint:disable:typedef */
-const loaderUtils = require('loader-utils');
-/* tslint:enable:typedef */
+import loaderUtils = require('loader-utils');
+import { loader } from 'webpack';
 
 const loadedThemedStylesPath: string = require.resolve('@microsoft/load-themed-styles');
 
 interface ILoadThemedStylesLoaderOptions {
   namedExport?: string;
 }
+
 export class LoadThemedStylesLoader {
   private static _loadedThemedStylesPath: string = loadedThemedStylesPath;
 
@@ -27,7 +27,7 @@ export class LoadThemedStylesLoader {
     LoadThemedStylesLoader._loadedThemedStylesPath = loadedThemedStylesPath;
   }
 
-  public static pitch(remainingRequest: string): string {
+  public static pitch(this: loader.LoaderContext, remainingRequest: string): string {
     const options: ILoadThemedStylesLoaderOptions = loaderUtils.getOptions(this) || {};
     let exportName: string = 'module.exports';
 
