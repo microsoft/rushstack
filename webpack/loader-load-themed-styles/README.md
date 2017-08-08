@@ -28,7 +28,8 @@ var css = require("@microsoft/loader-load-themed-styles!css!./file.css");
           {
             loader: "@microsoft/loader-load-themed-styles",  // creates style nodes from JS strings
             options: {
-              namedExport: 'default'
+              namedExport: 'default',
+              async: false
             }
           },
           {
@@ -74,6 +75,13 @@ is useful in exporting as the default in es6 module import scenarios. For exampl
 ```js
 module.exports.default = { ... };
 ```
+
+### `async` (boolean, defaults to `false`)
+
+By default, `@microsoft/load-themed-styles` loads styles synchronously. This can have adverse performance effects
+if many styles are loaded in quick succession. If the `async` option is set to `true`, the `loadStyles` function
+is called with the second parameter set to `true`, directing the function to debounce style loading causing fewer
+changes to the DOM.
 
 ## License
 
