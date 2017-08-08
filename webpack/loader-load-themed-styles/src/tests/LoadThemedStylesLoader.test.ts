@@ -19,6 +19,7 @@ describe('LoadThemedStylesLoader', () => {
   beforeEach(() => {
     LoadThemedStylesLoader.resetLoadedThemedStylesPath();
     LoadThemedStylesMock.loadedData = [];
+    LoadThemedStylesMock.calledWithAsync = [];
   });
 
   it('follows the Webpack loader interface', () => {
@@ -67,6 +68,9 @@ describe('LoadThemedStylesLoader', () => {
     assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 1') !== -1);
     assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 2') !== -1);
     assert.equal(LoadThemedStylesMock.loadedData.length, 2);
+    assert.isFalse(LoadThemedStylesMock.calledWithAsync[0]);
+    assert.isFalse(LoadThemedStylesMock.calledWithAsync[1]);
+    assert.equal(LoadThemedStylesMock.calledWithAsync.length, 2);
     assert.equal(returnedModule.exports, 'locals');
   });
 
@@ -97,6 +101,47 @@ describe('LoadThemedStylesLoader', () => {
     assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 1') !== -1);
     assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 2') !== -1);
     assert.equal(LoadThemedStylesMock.loadedData.length, 2);
+    assert.isFalse(LoadThemedStylesMock.calledWithAsync[0]);
+    assert.isFalse(LoadThemedStylesMock.calledWithAsync[1]);
+    assert.equal(LoadThemedStylesMock.calledWithAsync.length, 2);
     assert.deepEqual(returnedModule.exports, { default: 'locals' });
+  });
+
+  it('correctly handles the async option set to "true"', () => {
+    LoadThemedStylesLoader.loadedThemedStylesPath = './testData/LoadThemedStylesMock';
+
+    const query: {} = { async: true };
+    let loaderResult: string = LoadThemedStylesLoader.pitch.call({ query }, './testData/MockStyle1');
+    loaderResult = loaderResult.replace(/require\(\"!!/, 'require("');
+    loaderResult = wrapResult(loaderResult);
+
+    const returnedModule: { exports: string } = eval(loaderResult); // tslint:disable-line:no-eval
+
+    assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 1') !== -1);
+    assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 2') !== -1);
+    assert.equal(LoadThemedStylesMock.loadedData.length, 2);
+    assert.isTrue(LoadThemedStylesMock.calledWithAsync[0]);
+    assert.isTrue(LoadThemedStylesMock.calledWithAsync[1]);
+    assert.equal(LoadThemedStylesMock.calledWithAsync.length, 2);
+    assert.equal(returnedModule.exports, 'locals');
+  });
+
+  it('correctly handles the async option set to a non-boolean', () => {
+    LoadThemedStylesLoader.loadedThemedStylesPath = './testData/LoadThemedStylesMock';
+
+    const query: {} = { async: 'asdf' };
+    let loaderResult: string = LoadThemedStylesLoader.pitch.call({}, './testData/MockStyle1');
+    loaderResult = loaderResult.replace(/require\(\"!!/, 'require("');
+    loaderResult = wrapResult(loaderResult);
+
+    const returnedModule: { exports: string } = eval(loaderResult); // tslint:disable-line:no-eval
+
+    assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 1') !== -1);
+    assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 2') !== -1);
+    assert.equal(LoadThemedStylesMock.loadedData.length, 2);
+    assert.isFalse(LoadThemedStylesMock.calledWithAsync[0]);
+    assert.isFalse(LoadThemedStylesMock.calledWithAsync[1]);
+    assert.equal(LoadThemedStylesMock.calledWithAsync.length, 2);
+    assert.equal(returnedModule.exports, 'locals');
   });
 });
