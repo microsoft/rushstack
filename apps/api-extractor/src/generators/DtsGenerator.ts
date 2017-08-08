@@ -40,27 +40,6 @@ interface IFollowAliasesResult {
   external: boolean;
 }
 
-interface IWritingSpanContext {
-  entry: Entry;
-}
-
-interface IWritingSpanArgs {
-  readonly span: Span;
-  readonly previousSpan: Span | undefined;
-  readonly parentSpan: Span | undefined;
-  readonly kind: ts.SyntaxKind;
-  readonly parentKind: ts.SyntaxKind;
-
-  prefix: string;
-  suffix: string;
-
-  skipSeparatorBefore: boolean;
-  skipChildrenAndSuffix: boolean;
-  skipSeparatorAfter: boolean;
-
-  context: IWritingSpanContext;
-}
-
 export default class DtsGenerator {
   private _extractor: Extractor;
   private _typeChecker: ts.TypeChecker;
@@ -180,13 +159,10 @@ export default class DtsGenerator {
         span.dump();
         console.log('-------------------------------------');
 
-        const context: IWritingSpanContext = {
-          entry: entry
-        };
+        this._modifySpan(span, entry);
 
         this._indentedWriter.writeLine();
-        this._writeSpanTree(span, context);
-        this._indentedWriter.writeLine();
+        this._indentedWriter.writeLine(span.getModifiedText());
       }
     }
 
@@ -195,132 +171,88 @@ export default class DtsGenerator {
     return fileContent;
   }
 
-  private _writeSpanTree(span: Span, context: IWritingSpanContext): void {
-    this._writeSpanTreeHelper([span], undefined, context);
-  }
-
-  private _writeSpanTreeHelper(children: Span[], parentSpan: Span|undefined, context: IWritingSpanContext): void {
-    let previousArgs: IWritingSpanArgs | undefined = undefined;
-    for (const child of children) {
-      const args: IWritingSpanArgs = {
-        span: child,
-        previousSpan: previousArgs ? previousArgs.span : undefined,
-        parentSpan: parentSpan,
-        kind: child.node.kind,
-        parentKind: child.node.parent ? child.node.parent.kind : ts.SyntaxKind.Unknown,
-
-        prefix: child.prefix,
-        suffix: child.suffix,
-
-        skipSeparatorBefore: previousArgs ? previousArgs.skipSeparatorAfter : false,
-        skipChildrenAndSuffix: false,
-        skipSeparatorAfter: false,
-
-        context: context
-      };
-
-      this._onWritingSpan(args);
-
-      this._writeSpanTreeHelper2(previousArgs, args);
-
-      previousArgs = args;
-    }
-    this._writeSpanTreeHelper2(previousArgs, undefined);
-  }
-
-  private _writeSpanTreeHelper2(previousArgs: IWritingSpanArgs, args: IWritingSpanArgs|undefined): void {
-    if (previousArgs) {
-      this._indentedWriter.write(previousArgs.prefix);
-
-      if (!previousArgs.skipChildrenAndSuffix) {
-        this._writeSpanTreeHelper(previousArgs.span.children, previousArgs.span, previousArgs.context);
-        this._indentedWriter.write(previousArgs.suffix);
-      }
-
-      if (!args || !args.skipSeparatorBefore) {
-        this._indentedWriter.write(previousArgs.span.separator);
-      }
-    }
-  }
-
-  private _onWritingSpan(args: IWritingSpanArgs): void {
-    switch (args.kind) {
-      case ts.SyntaxKind.Block:
-        // Replace code blocks with a semicolon
-        args.prefix = ';';
-        args.skipSeparatorBefore = true;
-        args.skipChildrenAndSuffix = true;
-        break;
-
-      case ts.SyntaxKind.ExportKeyword:
-      case ts.SyntaxKind.DefaultKeyword:
-      case ts.SyntaxKind.DeclareKeyword:
-        // Delete any explicit "export" keywords -- we will re-add them based on Entry.exported
-        args.prefix = '';
-        args.skipChildrenAndSuffix = true;
-        args.skipSeparatorAfter = true;
-        break;
-
-      case ts.SyntaxKind.InterfaceKeyword:
-      case ts.SyntaxKind.ClassKeyword:
-      case ts.SyntaxKind.EnumKeyword:
-      case ts.SyntaxKind.NamespaceKeyword:
-      case ts.SyntaxKind.ModuleKeyword:
-      case ts.SyntaxKind.TypeKeyword:
-        args.prefix = 'declare ' + args.prefix;
-        if (args.context.entry.exported) {
-          args.prefix = 'export ' + args.prefix;
-        }
-        break;
-
-      case ts.SyntaxKind.VariableDeclaration:
-        if (!args.parentSpan) {
-          // The VariableDeclaration node is part of a VariableDeclarationList, however
-          // the Entry.followedSymbol points to the VariableDeclaration part because
-          // multiple definitions might share the same VariableDeclarationList.
-          //
-          // Since we are emitting a separate declaration for each one, we need to look upwards
-          // in the ts.Node tree and write a copy of the enclosing VariableDeclarationList
-          // content (e.g. "var" from "var x=1, y=2").
-          const list: ts.VariableDeclarationList = DtsGenerator._matchParent(args.span.node,
-            [ts.SyntaxKind.VariableDeclaration, ts.SyntaxKind.VariableDeclarationList]);
-          if (!list) {
-            throw new Error('Unsupported variable declaration');
+  private _modifySpan(rootSpan: Span, entry: Entry): void {
+    rootSpan.modify((span: Span, previousSpan: Span | undefined, parentSpan: Span | undefined) => {
+      switch (span.kind) {
+        case ts.SyntaxKind.Block:
+          // Replace code blocks with a semicolon
+          span.modification.prefix = ';';
+          span.modification.skipChildren = true;
+          span.modification.suffix = span.getLastInnerSeparator();
+          if (previousSpan) {
+            previousSpan.modification.skipSeparatorAfter = true;
           }
-          const listPrefix: string = list.getSourceFile().text
-            .substring(list.getStart(), list.declarations[0].getStart());
-          args.prefix = 'declare ' + listPrefix + args.prefix;
-          args.suffix = ';';
-        }
-        break;
+          break;
 
-      case ts.SyntaxKind.Identifier:
-        if (args.parentKind) {
-          switch (args.parentKind) {
-            case ts.SyntaxKind.ExpressionWithTypeArguments:
-            case ts.SyntaxKind.TypeReference:
+        case ts.SyntaxKind.ExportKeyword:
+        case ts.SyntaxKind.DefaultKeyword:
+        case ts.SyntaxKind.DeclareKeyword:
+          // Delete any explicit "export" keywords -- we will re-add them based on Entry.exported
+          span.modification.skipAll();
+          break;
 
-            case ts.SyntaxKind.ClassDeclaration:
-            case ts.SyntaxKind.InterfaceDeclaration:
-            case ts.SyntaxKind.EnumDeclaration:
-            case ts.SyntaxKind.TypeAliasDeclaration:
-            case ts.SyntaxKind.ModuleDeclaration:  // (namespaces are a type of module declaration)
-              {
-                const symbol: ts.Symbol = this._typeChecker.getSymbolAtLocation(args.span.node);
-                if (!symbol) {
-                  throw new Error('Symbol not found');
-                }
-
-                const entry: Entry = this._fetchEntryForSymbol(symbol);
-                if (entry) {
-                  args.prefix = '/**/' + entry.uniqueName;
-                }
-              }
-              break;
+        case ts.SyntaxKind.InterfaceKeyword:
+        case ts.SyntaxKind.ClassKeyword:
+        case ts.SyntaxKind.EnumKeyword:
+        case ts.SyntaxKind.NamespaceKeyword:
+        case ts.SyntaxKind.ModuleKeyword:
+        case ts.SyntaxKind.TypeKeyword:
+          span.modification.prefix = 'declare ' + span.modification.prefix;
+          if (entry.exported) {
+            span.modification.prefix = 'export ' + span.modification.prefix;
           }
+          break;
+
+        case ts.SyntaxKind.VariableDeclaration:
+          if (!parentSpan) {
+            // The VariableDeclaration node is part of a VariableDeclarationList, however
+            // the Entry.followedSymbol points to the VariableDeclaration part because
+            // multiple definitions might share the same VariableDeclarationList.
+            //
+            // Since we are emitting a separate declaration for each one, we need to look upwards
+            // in the ts.Node tree and write a copy of the enclosing VariableDeclarationList
+            // content (e.g. "var" from "var x=1, y=2").
+            const list: ts.VariableDeclarationList = DtsGenerator._matchParent(span.node,
+              [ts.SyntaxKind.VariableDeclaration, ts.SyntaxKind.VariableDeclarationList]);
+            if (!list) {
+              throw new Error('Unsupported variable declaration');
+            }
+            const listPrefix: string = list.getSourceFile().text
+              .substring(list.getStart(), list.declarations[0].getStart());
+            span.modification.prefix = 'declare ' + listPrefix + span.modification.prefix;
+            span.modification.suffix = ';';
+          }
+          break;
+
+        case ts.SyntaxKind.Identifier:
+          if (parentSpan) {
+            switch (parentSpan.kind) {
+              case ts.SyntaxKind.ExpressionWithTypeArguments:
+              case ts.SyntaxKind.TypeReference:
+
+              case ts.SyntaxKind.ClassDeclaration:
+              case ts.SyntaxKind.InterfaceDeclaration:
+              case ts.SyntaxKind.EnumDeclaration:
+              case ts.SyntaxKind.TypeAliasDeclaration:
+              case ts.SyntaxKind.ModuleDeclaration:  // (namespaces are a type of module declaration)
+                {
+                  const symbol: ts.Symbol = this._typeChecker.getSymbolAtLocation(span.node);
+                  if (!symbol) {
+                    throw new Error('Symbol not found');
+                  }
+
+                  const referencedEntry: Entry = this._fetchEntryForSymbol(symbol);
+                  if (referencedEntry) {
+                    span.modification.prefix = '/**/' + referencedEntry.uniqueName;
+                  }
+                }
+                break;
+            }
+          }
+          break;
         }
-        break;
-    }
+      }
+    );
   }
 
   private _makeUniqueNames(): void {
