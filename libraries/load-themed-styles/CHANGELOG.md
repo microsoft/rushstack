@@ -1,6 +1,13 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Tue, 01 Aug 2017 01:03:49 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Aug 2017 23:10:36 GMT and should not be manually modified.
+
+## 1.6.0
+Tue, 08 Aug 2017 23:10:36 GMT
+
+### Minor changes
+
+- Add option to the loadStyles funciton to load a style in async mode without setting the global execution mode to async.
 
 ## 1.5.2
 Tue, 01 Aug 2017 01:03:49 GMT
