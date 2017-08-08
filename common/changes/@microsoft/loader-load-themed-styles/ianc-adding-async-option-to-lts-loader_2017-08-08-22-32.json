@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/loader-load-themed-styles",
+      "comment": "Add \"async\" configuration option to call loadStyles in async mode.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/loader-load-themed-styles",
+  "email": "iclanton@users.noreply.github.com"
+}
