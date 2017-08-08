@@ -10,7 +10,7 @@ import { LoadThemedStylesLoader } from './../LoadThemedStylesLoader';
 import LoadThemedStylesMock = require('./testData/LoadThemedStylesMock');
 
 function wrapResult(loaderResult: string): string {
-  return `var module = { id: 'testId', exports: undefined };
+  return `var module = { id: 'testId', exports: {} };
   ${loaderResult}
   module;`;
 }
@@ -55,34 +55,48 @@ describe('LoadThemedStylesLoader', () => {
     assert.isNotNull(loaderResult.indexOf(expectedPath));
   });
 
-  it ('correctly calls loadStyles in load-themed-styles with a module reference', () => {
+  it('correctly calls loadStyles in load-themed-styles with a module reference', () => {
     LoadThemedStylesLoader.loadedThemedStylesPath = './testData/LoadThemedStylesMock';
 
     let loaderResult: string = LoadThemedStylesLoader.pitch.call({}, './testData/MockStyle1');
     loaderResult = loaderResult.replace(/require\(\"!!/, 'require("');
     loaderResult = wrapResult(loaderResult);
 
-    /* tslint:disable:no-eval */
-    const returnedModule: {exports: string} = eval(loaderResult);
-    /* tslint:enable:no-eval */
+    const returnedModule: { exports: string } = eval(loaderResult); // tslint:disable-line:no-eval
+
     assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 1') !== -1);
     assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 2') !== -1);
     assert.equal(LoadThemedStylesMock.loadedData.length, 2);
     assert.equal(returnedModule.exports, 'locals');
   });
 
-  it ('correctly calls loadStyles in load-themed-styles with a string reference', () => {
+  it('correctly calls loadStyles in load-themed-styles with a string reference', () => {
     LoadThemedStylesLoader.loadedThemedStylesPath = './testData/LoadThemedStylesMock';
 
     let loaderResult: string = LoadThemedStylesLoader.pitch.call({}, './testData/MockStyle2');
     loaderResult = loaderResult.replace(/require\(\"!!/, 'require("');
     loaderResult = wrapResult(loaderResult);
 
-    /* tslint:disable:no-eval */
-    const returnedModule: {exports: string} = eval(loaderResult);
-    /* tslint:enable:no-eval */
+    const returnedModule: { exports: string } = eval(loaderResult); // tslint:disable-line:no-eval
+
     assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('styles') !== -1);
     assert.equal(LoadThemedStylesMock.loadedData.length, 1);
-    assert.isUndefined(returnedModule.exports);
+    assert.deepEqual(returnedModule.exports, {});
+  });
+
+  it('correctly handles the namedExport option', () => {
+    LoadThemedStylesLoader.loadedThemedStylesPath = './testData/LoadThemedStylesMock';
+
+    const query: {} = { namedExport: 'default' };
+    let loaderResult: string = LoadThemedStylesLoader.pitch.call({ query }, './testData/MockStyle1');
+    loaderResult = loaderResult.replace(/require\(\"!!/, 'require("');
+    loaderResult = wrapResult(loaderResult);
+
+    const returnedModule: { exports: string } = eval(loaderResult); // tslint:disable-line:no-eval
+
+    assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 1') !== -1);
+    assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 2') !== -1);
+    assert.equal(LoadThemedStylesMock.loadedData.length, 2);
+    assert.deepEqual(returnedModule.exports, { default: 'locals' });
   });
 });
