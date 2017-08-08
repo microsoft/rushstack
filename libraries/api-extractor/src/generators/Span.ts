@@ -3,6 +3,52 @@
 
 import * as ts from 'typescript';
 
+export type SpanModifyCallback = (span: Span, previousSpan: Span | undefined, parentSpan: Span | undefined) => void;
+
+export class SpanModification {
+  public skipChildren: boolean;
+  public skipSeparatorAfter: boolean;
+
+  private readonly span: Span;
+  private _prefix: string | undefined;
+  private _suffix: string | undefined;
+
+  public constructor(span: Span) {
+    this.span = span;
+    this.reset();
+  }
+
+  public get prefix(): string {
+    return this._prefix !== undefined ? this._prefix : this.span.prefix;
+  }
+
+  public set prefix(value: string) {
+    this._prefix = value;
+  }
+
+  public get suffix(): string {
+    return this._suffix !== undefined ? this._suffix : this.span.suffix;
+  }
+
+  public set suffix(value: string) {
+    this._suffix = value;
+  }
+
+  public reset(): void {
+    this.skipChildren = false;
+    this.skipSeparatorAfter = false;
+    this._prefix = undefined;
+    this._suffix = undefined;
+  }
+
+  public skipAll(): void {
+    this.prefix = '';
+    this.suffix = '';
+    this.skipChildren = true;
+    this.skipSeparatorAfter = true;
+  }
+}
+
 export class Span {
   public readonly node: ts.Node;
 
@@ -13,6 +59,20 @@ export class Span {
 
   public readonly children: Span[];
 
+  public readonly modification: SpanModification;
+
+  private static _modifyHelper(callback: SpanModifyCallback, spans: Span[], parentSpan: Span|undefined): void {
+    let previousSpan: Span|undefined = undefined;
+
+    for (const span of spans) {
+      callback(span, previousSpan, parentSpan);
+
+      Span._modifyHelper(callback, span.children, span);
+
+      previousSpan = span;
+    }
+  }
+
   public constructor(node: ts.Node) {
     this.node = node;
     this.startIndex = node.getStart();
@@ -20,6 +80,7 @@ export class Span {
     this.separatorStartIndex = 0;
     this.separatorEndIndex = 0;
     this.children = [];
+    this.modification = new SpanModification(this);
 
     let previousChildSpan: Span = undefined;
 
@@ -61,6 +122,10 @@ export class Span {
     }
   }
 
+  public get kind(): ts.SyntaxKind {
+    return this.node.kind;
+  }
+
   public get prefix(): string {
     if (this.children.length) {
       // Everything up to the first child
@@ -83,6 +148,20 @@ export class Span {
     return this._getSubstring(this.separatorStartIndex, this.separatorEndIndex);
   }
 
+  public getLastInnerSeparator(): string {
+    if (this.separator) {
+      return this.separator;
+    }
+    if (this.children.length > 0) {
+      return this.children[this.children.length - 1].getLastInnerSeparator();
+    }
+    return '';
+  }
+
+  public modify(callback: SpanModifyCallback): void {
+    Span._modifyHelper(callback, [this], undefined);
+  }
+
   public getText(): string {
     let result: string = '';
     result += this.prefix;
@@ -93,6 +172,24 @@ export class Span {
 
     result += this.suffix;
     result += this.separator;
+
+    return result;
+  }
+
+  public getModifiedText(): string {
+    let result: string = '';
+    result += this.modification.prefix;
+
+    if (!this.modification.skipChildren) {
+      for (const child of this.children) {
+        result += child.getModifiedText();
+      }
+    }
+
+    result += this.modification.suffix;
+    if (!this.modification.skipSeparatorAfter) {
+      result += this.separator;
+    }
 
     return result;
   }
