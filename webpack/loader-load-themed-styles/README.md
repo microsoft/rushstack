@@ -67,7 +67,9 @@ By default, css modules will be exported as a commonjs export:
 module.exports = { ... };
 ```
 
-To override this, you may provide a named export to export to a specificly named thing. This is useful in exporting as the default in es6 module import scenarios. For example, providing "default" for the named export will output this:
+To override this, you may provide a named export to export to a specifically named thing. This
+is useful in exporting as the default in es6 module import scenarios. For example, providing
+"default" for the named export will output this:
 
 ```js
 module.exports.default = { ... };
