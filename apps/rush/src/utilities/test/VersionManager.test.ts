@@ -32,11 +32,11 @@ describe('VersionManager', () => {
       assert.equal(updatedPackages.size, 4);
       assert.equal(updatedPackages.get('a').version, expectedVersion);
       assert.equal(updatedPackages.get('b').version, expectedVersion);
-      assert.equal(updatedPackages.get('b').dependencies['a'], `~${expectedVersion}`);
+      assert.equal(updatedPackages.get('b').dependencies['a'], `~${expectedVersion}-0`);
       assert.equal(updatedPackages.get('c').version, '3.1.1', 'c version should not change');
-      assert.equal(updatedPackages.get('c').dependencies['b'], `>=10.10.0 <11.0.0`);
+      assert.equal(updatedPackages.get('c').dependencies['b'], `>=10.10.0-0 <11.0.0-0`);
       assert.equal(updatedPackages.get('d').version, '4.1.1', 'd version should not change');
-      assert.equal(updatedPackages.get('d').dependencies['b'], `>=10.10.0 <11.0.0`);
+      assert.equal(updatedPackages.get('d').dependencies['b'], `>=10.10.0-0 <11.0.0-0`);
     });
   });
 

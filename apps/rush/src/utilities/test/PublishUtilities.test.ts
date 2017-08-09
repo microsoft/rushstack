@@ -151,10 +151,51 @@ describe('sortChangeRequests', () => {
 describe('isRangeDependency', () => {
   it('can test ranges', () => {
     /* tslint:disable:no-unused-expression */
+    expect(PublishUtilities.isRangeDependency('>=1.0.0-0 <2.0.0-0')).is.true;
     expect(PublishUtilities.isRangeDependency('>=1.0.0 <2.0.0')).is.true;
     expect(PublishUtilities.isRangeDependency('1.0.0')).is.false;
     expect(PublishUtilities.isRangeDependency('^1.0.0')).is.false;
     expect(PublishUtilities.isRangeDependency('~1.0.0')).is.false;
     /* tslint:enable:no-unused-expression */
   });
+});
+
+describe('getNewDependencyVersion', () => {
+  it('can create new dependency versions', () => {
+
+    expect(
+      PublishUtilities.getNewDependencyVersion({ 'a': '>=1.0.0 <2.0.0' }, 'a', '2.0.0')
+    ).equals('>=2.0.0-0 <3.0.0-0');
+
+    expect(
+      PublishUtilities.getNewDependencyVersion({ 'a': '>=1.0.0-0 <2.0.0-0' }, 'a', '2.0.0')
+    ).equals('>=2.0.0-0 <3.0.0-0');
+
+    expect(
+      PublishUtilities.getNewDependencyVersion({ 'a': '^1.0.0' }, 'a', '2.0.0')
+    ).equals('^2.0.0-0');
+
+    expect(
+      PublishUtilities.getNewDependencyVersion({ 'a': '^1.0.0-0' }, 'a', '2.0.0')
+    ).equals('^2.0.0-0');
+
+    expect(
+      PublishUtilities.getNewDependencyVersion({ 'a': '~1.0.0' }, 'a', '2.0.0')
+    ).equals('~2.0.0-0');
+
+    expect(
+      PublishUtilities.getNewDependencyVersion({ 'a': '~1.0.0' }, 'a', '1.0.1')
+    ).equals('~1.0.1-0');
+
+    // Locked versions stay locked.
+    expect(
+      PublishUtilities.getNewDependencyVersion({ 'a': '1.0.0' }, 'a', '2.0.0')
+    ).equals('2.0.0');
+
+    expect(
+      PublishUtilities.getNewDependencyVersion({ 'a': '1.0.0-hotfix1' }, 'a', '2.0.0')
+    ).equals('2.0.0');
+
+  });
+
 });
