@@ -4,6 +4,7 @@
   "description": "",
   "main": "lib/test.js",
   "module": "lib-es6/test.js",
+  "private": true,
   "scripts": {
     "build": "gulp",
     "clean": "gulp clean",

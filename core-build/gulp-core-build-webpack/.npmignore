@@ -5,9 +5,11 @@
 !/bin/**
 !/lib/**
 !/dist/**
+!ThirdPartyNotice.txt
 
 # Ignore certain files in the above folder
 /dist/*.stats.*
+/lib/*/tests/*
 
 # NOTE: These don't need to be specified, because NPM includes them automatically.
 #
@@ -19,4 +21,4 @@
 ## Project specific definitions
 # -----------------------------
 
-!webpack.config.js
+# (Add your exceptions here)
