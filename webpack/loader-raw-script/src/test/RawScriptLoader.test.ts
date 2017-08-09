@@ -4,7 +4,7 @@
  */
 
 import { assert } from 'chai';
-import RawScriptLoader = require('./RawScriptLoader');
+import RawScriptLoader = require('./../RawScriptLoader');
 
 function wrapResult(result: string): string {
   return `var exports = {};

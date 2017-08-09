@@ -8,12 +8,8 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { execSync } from 'child_process';
 
-const SOURCE_PATH: string = path.join(__dirname).replace(
-  path.join('lib', 'tests'),
-  path.join('src', 'tests'));
-
-const TEST_PROJECT_PATH: string = path.join(SOURCE_PATH, 'testProject');
-const NESTED_TEST_PROJECT_PATH: string = path.join(SOURCE_PATH, 'nestedTestProject');
+const TEST_PROJECT_PATH: string = path.join(__dirname, 'testProject');
+const NESTED_TEST_PROJECT_PATH: string = path.join(__dirname, 'nestedTestProject');
 
 describe('parseGitLsTree', () => {
   it('can handle a blob', (done) => {
