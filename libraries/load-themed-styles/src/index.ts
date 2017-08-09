@@ -131,8 +131,9 @@ function initializeThemeState(): IThemeState {
  * Loads a set of style text. If it is registered too early, we will register it when the window.load
  * event is fired.
  * @param {string | ThemableArray} styles Themable style text to register.
+ * @param {boolean} loadAsync When true, always load styles in async mode, irrespective of current sync mode.
  */
-export function loadStyles(styles: string | ThemableArray): void {
+export function loadStyles(styles: string | ThemableArray, loadAsync: boolean = false): void {
   measure(() => {
     const styleParts: ThemableArray = Array.isArray(styles) ? styles : splitStyles(styles);
     if (_injectStylesWithCssText === undefined) {
@@ -143,7 +144,7 @@ export function loadStyles(styles: string | ThemableArray): void {
       buffer,
       flushTimer
     } = _themeState.runState;
-    if (mode === Mode.async) {
+    if (loadAsync || mode === Mode.async) {
       buffer.push(styleParts);
       if (!flushTimer) {
         _themeState.runState.flushTimer = asyncLoadStyles();
