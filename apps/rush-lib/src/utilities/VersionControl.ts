@@ -25,7 +25,7 @@ export default class VersionControl {
   public static getChangedFiles(prefix?: string, targetBranch?: string): string[] {
     const branchName: string = targetBranch ? targetBranch : 'origin/master';
     const output: string = child_process
-      .execSync(`git diff ${branchName}... --name-only --diff-filter=A`)
+      .execSync(`git diff ${branchName}... --name-only --no-renames --diff-filter=A`)
       .toString();
     const regex: RegExp = prefix ? new RegExp(`^${prefix}`, 'i') : undefined;
     return output.split('\n').map(s => {
