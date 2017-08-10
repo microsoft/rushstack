@@ -3,8 +3,14 @@
 
 import * as ts from 'typescript';
 
+/**
+ * Callback for Span.modify()
+ */
 export type SpanModifyCallback = (span: Span, previousSpan: Span | undefined, parentSpan: Span | undefined) => void;
 
+/**
+ * Specifies various transformations that will be performed by Span.getModifiedText().
+ */
 export class SpanModification {
   public skipChildren: boolean;
   public skipSeparatorAfter: boolean;
@@ -18,6 +24,9 @@ export class SpanModification {
     this.reset();
   }
 
+  /**
+   * Allows the Span.prefix text to be changed.
+   */
   public get prefix(): string {
     return this._prefix !== undefined ? this._prefix : this.span.prefix;
   }
@@ -26,6 +35,9 @@ export class SpanModification {
     this._prefix = value;
   }
 
+  /**
+   * Allows the Span.suffix text to be changed.
+   */
   public get suffix(): string {
     return this._suffix !== undefined ? this._suffix : this.span.suffix;
   }
@@ -34,6 +46,9 @@ export class SpanModification {
     this._suffix = value;
   }
 
+  /**
+   * Reverts any modifications made to this object.
+   */
   public reset(): void {
     this.skipChildren = false;
     this.skipSeparatorAfter = false;
@@ -41,6 +56,10 @@ export class SpanModification {
     this._suffix = undefined;
   }
 
+  /**
+   * Effectively deletes the Span from the tree, by skipping its children, skipping its separator,
+   * and setting its prefix/suffix to the empty string.
+   */
   public skipAll(): void {
     this.prefix = '';
     this.suffix = '';
@@ -49,9 +68,35 @@ export class SpanModification {
   }
 }
 
+/**
+ * The Span class provides a simple way to rewrite TypeScript source files
+ * based on simple syntax transformations, i.e. without having to process deeper aspects
+ * of the underlying grammar.  An example transformation might be deleting JSDoc comments
+ * from a source file.
+ *
+ * @remarks
+ * Technically, TypeScript's abstract syntax tree (AST) is represented using Node objects.
+ * The Node text ignores its surrounding whitespace, and does not have an ordering guarantee.
+ * For example, a JSDocComment node can be a child of a FunctionDeclaration node, even though
+ * the actual comment precedes the function in the input stream.
+ *
+ * The Span class is a wrapper for a single Node, that provides access to every character
+ * in the input stream, such that Span.getText() will exactly reproduce the corresponding
+ * full Node.getText() output.
+ *
+ * A Span is comprised of these parts, which appear in sequential order:
+ * - A prefix
+ * - A collection of child spans
+ * - A suffix
+ * - A separator (e.g. whitespace between this span and the next item in the tree)
+ *
+ * These parts can be modified via Span.modification.  The modification is applied by
+ * calling Span.getModifiedText().
+ */
 export class Span {
   public readonly node: ts.Node;
 
+  // To improve performance, substrings are not allocated until actually needed
   public readonly startIndex: number;
   public readonly endIndex: number;
   public separatorStartIndex: number;
@@ -67,7 +112,9 @@ export class Span {
     for (const span of spans) {
       callback(span, previousSpan, parentSpan);
 
-      Span._modifyHelper(callback, span.children, span);
+      if (!span.modification.skipChildren) {
+        Span._modifyHelper(callback, span.children, span);
+      }
 
       previousSpan = span;
     }
@@ -88,6 +135,7 @@ export class Span {
       const childSpan: Span = new Span(childNode);
       this.children.push(childSpan);
 
+      // Normalize the bounds so that a child is never outside its parent
       if (childSpan.startIndex < this.startIndex) {
         this.startIndex = childSpan.startIndex;
       }
@@ -102,7 +150,8 @@ export class Span {
         if (previousChildSpan.endIndex < childSpan.startIndex) {
           // There is some leftover text after previous child -- assign it as the separator for
           // the preceding span.  If the preceding span has no suffix, then assign it to the
-          // deepest preceding span with no suffix.
+          // deepest preceding span with no suffix.  This heuristic simplifies the most
+          // common transformations, and otherwise it can be fished out using getLastInnerSeparator().
           let separatorRecipient: Span = previousChildSpan;
           while (separatorRecipient.children.length > 0) {
             const lastChild: Span = separatorRecipient.children[separatorRecipient.children.length - 1];
@@ -126,6 +175,9 @@ export class Span {
     return this.node.kind;
   }
 
+  /**
+   * The text associated with the underlying Node, up to its first child.
+   */
   public get prefix(): string {
     if (this.children.length) {
       // Everything up to the first child
@@ -135,6 +187,10 @@ export class Span {
     }
   }
 
+  /**
+   * The text associated with the underlying Node, after its last child.
+   * If there are no children, this is always an empty string.
+   */
   public get suffix(): string {
     if (this.children.length) {
       // Everything after the last child
@@ -144,10 +200,18 @@ export class Span {
     }
   }
 
+  /**
+   * Whitespace that appeared after this node, and before the "next" node in the tree.
+   * Here we mean "next" according to an inorder traversal, not necessarily a sibling.
+   */
   public get separator(): string {
     return this._getSubstring(this.separatorStartIndex, this.separatorEndIndex);
   }
 
+  /**
+   * Returns the separator of this Span, or else recursively calls getLastInnerSeparator()
+   * on the last child.
+   */
   public getLastInnerSeparator(): string {
     if (this.separator) {
       return this.separator;
@@ -158,10 +222,18 @@ export class Span {
     return '';
   }
 
+  /**
+   * Recursively invokes the callback on this Span and all its children.  The callback
+   * can make changes to Span.modification for each node.  If SpanModification.skipChildren
+   * is true, those children will not be processed.
+   */
   public modify(callback: SpanModifyCallback): void {
     Span._modifyHelper(callback, [this], undefined);
   }
 
+  /**
+   * Returns the original unmodified text represented by this Span.
+   */
   public getText(): string {
     let result: string = '';
     result += this.prefix;
@@ -176,6 +248,9 @@ export class Span {
     return result;
   }
 
+  /**
+   * Returns the text represented by this Span, after applying all requested modifications.
+   */
   public getModifiedText(): string {
     let result: string = '';
     result += this.modification.prefix;
@@ -194,6 +269,10 @@ export class Span {
     return result;
   }
 
+  /**
+   * Returns a diagnostic dump of the tree, showing the prefix/suffix/separator for
+   * each node.
+   */
   public getDump(indent: string = ''): string {
     let result: string = indent + ts.SyntaxKind[this.node.kind] + ': ';
 
