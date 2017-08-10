@@ -4,7 +4,7 @@
  */
 
 import { assert } from 'chai';
-import { SetWebpackPublicPathLoader } from './SetWebpackPublicPathLoader';
+import { SetWebpackPublicPathLoader } from './../SetWebpackPublicPathLoader';
 
 describe('SetWebpackPublicPathLoader', () => {
   it('follows the Webpack loader interface', () => {
