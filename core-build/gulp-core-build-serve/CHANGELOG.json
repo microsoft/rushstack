@@ -2,6 +2,23 @@
   "name": "@microsoft/gulp-core-build-serve",
   "entries": [
     {
+      "version": "2.1.6",
+      "tag": "@microsoft/gulp-core-build-serve_v2.1.6",
+      "date": "Fri, 11 Aug 2017 21:44:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Allow the serve task to be extended with new configuration args."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.8.0` to `2.9.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.1.5",
       "tag": "@microsoft/gulp-core-build-serve_v2.1.5",
       "date": "Thu, 27 Jul 2017 01:04:48 GMT",

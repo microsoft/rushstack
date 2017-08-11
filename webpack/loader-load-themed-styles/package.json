@@ -22,6 +22,6 @@
     "@types/webpack": "~2.2.4",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
-    "@microsoft/node-library-build": "~3.2.3"
+    "@microsoft/node-library-build": "~3.2.4"
   }
 }

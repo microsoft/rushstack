@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-webpack
 
-This log was last generated on Thu, 27 Jul 2017 01:04:48 GMT and should not be manually modified.
+This log was last generated on Fri, 11 Aug 2017 21:44:05 GMT and should not be manually modified.
+
+## 1.2.3
+Fri, 11 Aug 2017 21:44:05 GMT
+
+### Patches
+
+- Allow the webpack task to be extended with new configuration args.
 
 ## 1.2.2
 Thu, 27 Jul 2017 01:04:48 GMT

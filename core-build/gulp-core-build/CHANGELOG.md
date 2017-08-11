@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Sat, 05 Aug 2017 01:04:41 GMT and should not be manually modified.
+This log was last generated on Fri, 11 Aug 2017 21:44:05 GMT and should not be manually modified.
+
+## 2.9.0
+Fri, 11 Aug 2017 21:44:05 GMT
+
+### Minor changes
+
+- Refactor GulpTask to support taking the name and initial task configuration through the constructor.
 
 ## 2.8.0
 Sat, 05 Aug 2017 01:04:41 GMT

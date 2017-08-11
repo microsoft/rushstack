@@ -2,6 +2,27 @@
   "name": "@microsoft/web-library-build",
   "entries": [
     {
+      "version": "3.2.5",
+      "tag": "@microsoft/web-library-build_v3.2.5",
+      "date": "Fri, 11 Aug 2017 21:44:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.8.0` to `2.9.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-karma\" from `2.3.4` to `2.3.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `2.1.5` to `2.1.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `1.2.2` to `1.2.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.4",
       "tag": "@microsoft/web-library-build_v3.2.4",
       "date": "Tue, 08 Aug 2017 23:10:36 GMT",
