@@ -12,12 +12,15 @@ export interface IMochaTaskConfig {
 }
 
 export class MochaTask extends GulpTask<IMochaTaskConfig> {
-  public name: string = 'mocha';
-
-  public taskConfig: IMochaTaskConfig = {
-    testMatch: ['lib/**/*.test.js'],
-    reportDir: 'coverage'
-  };
+  constructor() {
+    super(
+      'mocha',
+      {
+        testMatch: ['lib/**/*.test.js'],
+        reportDir: 'coverage'
+      }
+    );
+  }
 
   public executeTask(gulp: typeof Gulp, completeCallback?: (error?: string) => void): NodeJS.ReadWriteStream {
     const istanbul: typeof gulpIstanbul = require('gulp-istanbul');

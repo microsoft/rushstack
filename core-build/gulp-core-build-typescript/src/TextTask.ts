@@ -12,10 +12,14 @@ export interface ITextTaskConfig {
 }
 
 export class TextTask extends GulpTask<ITextTaskConfig> {
-  public name: string = 'text';
-  public taskConfig: ITextTaskConfig = {
-    textMatch: ['src/**/*.txt']
-  };
+  constructor() {
+    super(
+      'text',
+      {
+        textMatch: ['src/**/*.txt']
+      }
+    );
+  }
 
   public executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream | void {
     /* tslint:disable:typedef */

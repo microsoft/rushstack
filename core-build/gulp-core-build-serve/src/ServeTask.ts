@@ -81,17 +81,21 @@ interface IApiMap {
   [ route: string ]: Function;
 }
 
-export class ServeTask extends GulpTask<IServeTaskConfig> {
-  public name: string = 'serve';
-
-  public taskConfig: IServeTaskConfig = {
-    api: undefined,
-    https: false,
-    initialPage: '/index.html',
-    port: 4321,
-    hostname: 'localhost',
-    tryCreateDevCertificate: false
-  };
+export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig & TExtendedConfig> {
+  constructor(extendedName?: string, extendedConfig?: TExtendedConfig) {
+    super(
+      extendedName || 'serve',
+      {
+        api: undefined,
+        https: false,
+        initialPage: '/index.html',
+        port: 4321,
+        hostname: 'localhost',
+        tryCreateDevCertificate: false,
+        ...(extendedConfig as Object)
+      } as IServeTaskConfig & TExtendedConfig
+    );
+  }
 
   public loadSchema(): Object {
     return require('./serve.schema.json');

@@ -74,14 +74,17 @@ export interface IApiExtractorTaskConfig {
  * @public
  */
 export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
-  public name: string = 'api-extractor';
-
-  public taskConfig: IApiExtractorTaskConfig = {
-    enabled: false,
-    entry: undefined,
-    apiReviewFolder: undefined,
-    apiJsonFolder: undefined
-  };
+  constructor() {
+    super(
+      'api-extractor',
+      {
+        enabled: false,
+        entry: undefined,
+        apiReviewFolder: undefined,
+        apiJsonFolder: undefined
+      }
+    );
+  }
 
   public loadSchema(): Object {
     return require('./schemas/api-extractor.schema.json');

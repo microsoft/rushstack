@@ -35,14 +35,13 @@ export class CopyTask extends GulpTask<ICopyConfig> {
    * Instantiates a CopyTask with an empty configuration
    */
   constructor() {
-    super();
-
-    this.name = 'copy';
-
-    this.taskConfig = {
-      copyTo: {},
-      shouldFlatten: true
-    };
+    super(
+      'copy',
+      {
+        copyTo: {},
+        shouldFlatten: true
+      }
+    );
   }
 
   /**

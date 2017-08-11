@@ -16,10 +16,9 @@ export interface IRemoveTripleSlashReferenceTaskConfig {
 }
 
 export class RemoveTripleSlashReferenceTask extends GulpTask<IRemoveTripleSlashReferenceTaskConfig> {
-  public name: string = 'ts-npm-lint';
-
-  public taskConfig: IRemoveTripleSlashReferenceTaskConfig = {
-  };
+  constructor() {
+    super('ts-npm-lint', {});
+  }
 
   public executeTask(gulp: typeof Gulp): void {
     const taskScope: RemoveTripleSlashReferenceTask = this;

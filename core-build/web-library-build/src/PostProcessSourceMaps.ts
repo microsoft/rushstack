@@ -5,7 +5,9 @@ import { GulpTask } from '@microsoft/gulp-core-build';
 import gulpType = require('gulp');
 
 export class PostProcessSourceMaps extends GulpTask<{}> {
-  public name: string = 'post-process';
+  constructor() {
+    super('post-process', {});
+  }
 
   public executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream | void {
     if (this.buildConfig.args.hasOwnProperty('vscode')) {

@@ -154,11 +154,10 @@ export interface ICustomGulpTask {
 }
 
 /** @public */
-class CustomTask extends GulpTask<void> {
+class CustomTask extends GulpTask<{}> {
   private _fn: ICustomGulpTask;
   constructor(name: string, fn: ICustomGulpTask) {
-    super();
-    this.name = name;
+    super(name, {});
     this._fn = fn.bind(this);
   }
 

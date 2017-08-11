@@ -33,13 +33,12 @@ interface INpmShrinkwrap {
  * defined in the package.json file.
  * @public
  */
-export class ValidateShrinkwrapTask extends GulpTask<void> {
+export class ValidateShrinkwrapTask extends GulpTask<{}> {
   /**
    * Instantiates an instance of the ValidateShrinkwrap task
    */
   constructor() {
-    super();
-    this.name = 'validate-shrinkwrap';
+    super('validate-shrinkwrap', {});
   }
 
   /**
