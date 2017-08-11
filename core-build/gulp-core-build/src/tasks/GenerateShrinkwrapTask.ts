@@ -14,12 +14,12 @@ import * as path from 'path';
  * running npm-shrinkwrap directly.
  * @public
  */
-export class GenerateShrinkwrapTask extends GulpTask<{}> {
+export class GenerateShrinkwrapTask extends GulpTask<void> {
   /**
    * Instantiates a GenerateShrinkwrap task which will regenerate the shrinkwrap for a particular project
    */
   constructor() {
-    super('generate-shrinkwrap', {});
+    super('generate-shrinkwrap');
   }
 
   /**

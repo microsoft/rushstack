@@ -4,9 +4,9 @@
 import { GulpTask } from '@microsoft/gulp-core-build';
 import * as Gulp from 'gulp';
 
-export class ReloadTask extends GulpTask<{}> {
+export class ReloadTask extends GulpTask<void> {
   constructor() {
-    super('reload', {});
+    super('reload');
   }
 
   public executeTask(gulp: typeof Gulp, completeCallback?: (error?: string) => void): void {

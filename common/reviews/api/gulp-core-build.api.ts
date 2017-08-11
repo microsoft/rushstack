@@ -12,7 +12,7 @@ class CleanFlagTask extends CleanTask {
 }
 
 // @public
-class CleanTask extends GulpTask<{}> {
+class CleanTask extends GulpTask<void> {
   constructor();
   public executeTask(gulp: typeof Gulp,
       completeCallback: (error?: string | Error) => void): void;
@@ -61,7 +61,7 @@ export function fileWarning(taskName: string,
 export function functionalTestRun(name: string, result: TestResultState, duration: number): void;
 
 // @public
-class GenerateShrinkwrapTask extends GulpTask<{}> {
+class GenerateShrinkwrapTask extends GulpTask<void> {
   constructor();
   public executeTask(gulp: gulpType.Gulp,
       completeCallback: (error?: string | Error) => void): NodeJS.ReadWriteStream | void;
@@ -78,7 +78,7 @@ export function getWarnings(): string[];
 
 // @public
 class GulpTask<TTaskConfig> implements IExecutable {
-  public constructor(name: string, initialTaskConfig: TTaskConfig);
+  public constructor(name: string, initialTaskConfig: Partial<TTaskConfig> = {});
   protected _getConfigFilePath(): string;
   public buildConfig: IBuildConfig;
   public cleanMatch: string[];
@@ -105,7 +105,7 @@ class GulpTask<TTaskConfig> implements IExecutable {
   public replaceConfig(taskConfig: TTaskConfig): void;
   public resolvePath(localPath: string): string;
   public readonly schema: Object | undefined;
-  public setConfig(taskConfig: TTaskConfig): void;
+  public setConfig(taskConfig: Partial<TTaskConfig>): void;
   public taskConfig: TTaskConfig;
 }
 
@@ -217,7 +217,7 @@ enum TestResultState {
 }
 
 // @public
-class ValidateShrinkwrapTask extends GulpTask<{}> {
+class ValidateShrinkwrapTask extends GulpTask<void> {
   constructor();
   public executeTask(gulp: gulpType.Gulp, completeCallback: (error: string) => void): NodeJS.ReadWriteStream | void;
 }

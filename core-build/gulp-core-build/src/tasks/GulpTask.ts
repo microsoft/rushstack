@@ -64,9 +64,9 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
   /**
    * Initializes a new instance of the task with the specified initial task config
    */
-  public constructor(name: string, initialTaskConfig: TTaskConfig) {
+  public constructor(name: string, initialTaskConfig: Partial<TTaskConfig> = {}) {
     this.name = name;
-    this.taskConfig = initialTaskConfig;
+    this.setConfig(initialTaskConfig);
   }
 
   /**
@@ -93,7 +93,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    * Note this will override configuration options for those which are objects.
    * @param taskConfig - configuration settings which should be applied
    */
-  public setConfig(taskConfig: TTaskConfig): void {
+  public setConfig(taskConfig: Partial<TTaskConfig>): void {
     /* tslint:disable:typedef */
     const objectAssign = require('object-assign');
     /* tslint:enable:typedef */

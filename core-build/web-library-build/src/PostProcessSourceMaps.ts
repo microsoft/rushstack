@@ -4,9 +4,9 @@
 import { GulpTask } from '@microsoft/gulp-core-build';
 import gulpType = require('gulp');
 
-export class PostProcessSourceMaps extends GulpTask<{}> {
+export class PostProcessSourceMaps extends GulpTask<void> {
   constructor() {
-    super('post-process', {});
+    super('post-process');
   }
 
   public executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream | void {

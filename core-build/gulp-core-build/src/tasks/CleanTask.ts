@@ -14,12 +14,12 @@ import { IBuildConfig } from './../IBuildConfig';
  * An instance of this task is automatically registered to the 'clean' command.
  * @public
  */
-export class CleanTask extends GulpTask<{}> {
+export class CleanTask extends GulpTask<void> {
   /**
    * Instantiates a new CleanTask with the name 'clean'
    */
   constructor() {
-    super('clean', {});
+    super('clean');
   }
 
   /**
