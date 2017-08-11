@@ -3,7 +3,7 @@
 
 import { GulpTask } from '@microsoft/gulp-core-build';
 import { IBuildConfig } from '@microsoft/gulp-core-build/lib/IBuildConfig';
-import * as gulp from 'gulp';
+import * as Gulp from 'gulp';
 import * as fs from 'fs';
 import * as ChalkType from 'chalk';
 import * as HttpType from 'http';
@@ -81,23 +81,27 @@ interface IApiMap {
   [ route: string ]: Function;
 }
 
-export class ServeTask extends GulpTask<IServeTaskConfig> {
-  public name: string = 'serve';
-
-  public taskConfig: IServeTaskConfig = {
-    api: undefined,
-    https: false,
-    initialPage: '/index.html',
-    port: 4321,
-    hostname: 'localhost',
-    tryCreateDevCertificate: false
-  };
+export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig & TExtendedConfig> {
+  constructor(extendedName?: string, extendedConfig?: TExtendedConfig) {
+    super(
+      extendedName || 'serve',
+      {
+        api: undefined,
+        https: false,
+        initialPage: '/index.html',
+        port: 4321,
+        hostname: 'localhost',
+        tryCreateDevCertificate: false,
+        ...(extendedConfig as Object)
+      } as IServeTaskConfig & TExtendedConfig
+    );
+  }
 
   public loadSchema(): Object {
     return require('./serve.schema.json');
   }
 
-  public executeTask(gulp: gulp.Gulp, completeCallback?: (error?: string) => void): void {
+  public executeTask(gulp: typeof Gulp, completeCallback?: (error?: string) => void): void {
     /* tslint:disable:typedef */
     const gulpConnect = require('gulp-connect');
     const open = require('gulp-open');

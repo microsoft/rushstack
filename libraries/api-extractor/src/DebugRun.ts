@@ -9,7 +9,7 @@ import * as os from 'os';
 import Extractor from './Extractor';
 import ApiFileGenerator from './generators/ApiFileGenerator';
 import ApiJsonGenerator from './generators/ApiJsonGenerator';
-import ApiDefinitionReference, { IApiDefinintionReferenceParts } from './ApiDefinitionReference';
+import ApiDefinitionReference, { IApiDefinitionReferenceParts } from './ApiDefinitionReference';
 
 const compilerOptions: ts.CompilerOptions = {
   target: ts.ScriptTarget.ES5,
@@ -35,7 +35,7 @@ extractor.loadExternalPackages('./testInputs/external-api-json');
 extractor.analyze({entryPointFile: './testInputs/example4/src/index.ts',
   otherFiles: []});
 
-const externalPackageApiRef: IApiDefinintionReferenceParts = {
+const externalPackageApiRef: IApiDefinitionReferenceParts = {
   scopeName: '',
   packageName: 'es6-collections',
   exportName: '',

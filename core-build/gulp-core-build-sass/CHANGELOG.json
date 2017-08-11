@@ -2,6 +2,67 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "3.2.4",
+      "tag": "@microsoft/gulp-core-build-sass_v3.2.4",
+      "date": "Tue, 08 Aug 2017 23:10:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `~1.5.2` to `~1.6.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.3",
+      "tag": "@microsoft/gulp-core-build-sass_v3.2.3",
+      "date": "Thu, 27 Jul 2017 01:04:48 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade to the TS2.4 version of the build tools."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.7.1` to `2.7.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.2",
+      "tag": "@microsoft/gulp-core-build-sass_v3.2.2",
+      "date": "Tue, 25 Jul 2017 20:03:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade to TypeScript 2.4"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `>=2.7.0 <3.0.0` to `>=2.7.0 <3.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `~1.5.0` to `~1.5.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.1",
+      "tag": "@microsoft/gulp-core-build-sass_v3.2.1",
+      "date": "Fri, 21 Jul 2017 01:02:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `~1.4.0` to `~1.5.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.0",
       "tag": "@microsoft/gulp-core-build-sass_v3.2.0",
       "date": "Fri, 07 Jul 2017 01:02:28 GMT",

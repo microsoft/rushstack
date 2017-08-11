@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/loader-set-webpack-public-path",
-  "version": "2.1.0",
+  "version": "3.0.1",
   "description": "This loader sets the webpack public path at runtime.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -12,18 +12,16 @@
     "test": "gulp test"
   },
   "dependencies": {
+    "@microsoft/set-webpack-public-path-plugin": "~1.1.0",
     "loader-utils": "~1.1.0",
-    "uglify-js": "~2.8.22",
-    "lodash": "~4.15.0",
-    "@types/webpack": "2.2.4"
+    "lodash": "~4.15.0"
   },
   "devDependencies": {
-    "@types/tapable": "0.2.3",
     "@types/lodash": "4.14.52",
     "@types/mocha": "2.2.38",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "mocha": "~3.4.2",
-    "@microsoft/node-library-build": "~3.1.0"
+    "@microsoft/node-library-build": "~3.2.4"
   }
 }

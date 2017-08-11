@@ -13,9 +13,25 @@
     "member-access": true,
     "member-ordering": [
       true,
-      "public-before-private",
-      "static-before-instance",
-      "variables-before-functions"
+      {
+        "order": [
+          "public-static-field",
+          "protected-static-field",
+          "private-static-field",
+          "public-instance-field",
+          "protected-instance-field",
+          "private-instance-field",
+          "public-static-method",
+          "protected-static-method",
+          "private-static-method",
+          "public-constructor",
+          "public-instance-method",
+          "protected-constructor",
+          "protected-instance-method",
+          "private-constructor",
+          "private-instance-method"
+        ]
+      }
     ],
     "missing-optional-annotation": true,
     "no-arg": true,
@@ -48,7 +64,6 @@
     "no-trailing-whitespace": true,
     "no-unnecessary-semicolons": true,
     "no-unused-expression": true,
-    "no-unused-imports": true,
     "no-use-before-declare": true,
     "no-with-statement": true,
     "no-var-keyword": true,

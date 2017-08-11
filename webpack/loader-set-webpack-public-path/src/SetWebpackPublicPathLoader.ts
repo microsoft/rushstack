@@ -10,22 +10,15 @@ import {
   IInternalOptions,
   getSetPublicPathCode,
   getGlobalRegisterCode
-} from './codeGenerator';
+} from '@microsoft/set-webpack-public-path-plugin/lib/codeGenerator';
+
+import { ISetWebpackPublicPathOptions } from '@microsoft/set-webpack-public-path-plugin';
 
 export interface ISetWebpackPublicPathLoaderOptions extends ISetWebpackPublicPathOptions {
   scriptName?: string;
 }
 
-export interface ISetWebpackPublicPathOptions {
-  systemJs?: boolean;
-  urlPrefix?: string;
-  publicPath?: string;
-  regexVariable?: string;
-}
-
 export class SetWebpackPublicPathLoader {
-  public static registryVarName: string = 'window.__setWebpackPublicPathLoaderSrcRegistry__';
-
   private static staticOptions: ISetWebpackPublicPathLoaderOptions = {
     systemJs: false,
     scriptName: undefined,

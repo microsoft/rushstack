@@ -5,7 +5,7 @@ import { GulpTask, IBuildConfig } from '@microsoft/gulp-core-build';
 
 import * as os from 'os';
 import * as fs from 'fs';
-import * as gulp from 'gulp';
+import * as Gulp from 'gulp';
 import * as path from 'path';
 import * as KarmaType from 'karma';
 
@@ -26,13 +26,18 @@ export interface IKarmaTaskConfig {
 }
 
 export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
-  public name: string = 'karma';
+  private _resources: Object;
 
-  public taskConfig: IKarmaTaskConfig = {
-    configPath: './karma.config.js',
-    testMatch: /.+\.test\.js?$/,
-    failBuildOnErrors: false
-  };
+  constructor() {
+    super(
+      'karma',
+      {
+        configPath: './karma.config.js',
+        testMatch: /.+\.test\.js?$/,
+        failBuildOnErrors: false
+      }
+    );
+  }
 
   public get resources(): Object {
     if (!this._resources) {
@@ -53,8 +58,6 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
     return this._resources;
   }
 
-  private _resources: Object;
-
   public loadSchema(): Object {
     return require('./karma.schema.json');
   }
@@ -72,7 +75,7 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
     );
   }
 
-  public executeTask(gulp: gulp.Gulp, completeCallback: (error?: Error | string) => void): void {
+  public executeTask(gulp: typeof Gulp, completeCallback: (error?: Error | string) => void): void {
     const { configPath }: IKarmaTaskConfig = this.taskConfig;
 
     if (configPath && !this.fileExists(configPath)) {

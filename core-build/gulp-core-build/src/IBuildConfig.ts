@@ -7,15 +7,23 @@ import { IExecutable } from './IExecutable';
 
 /* tslint:disable:no-any */
 
-/** @public */
+/**
+ * @public
+ */
 export interface IBuildConfig {
-  /** Proxy gulp instance. */
+  /**
+   * Proxy gulp instance.
+   */
   gulp: GulpProxy | gulp.Gulp;
 
-  /** Array of all unique tasks. */
+  /**
+   * Array of all unique tasks.
+   */
   uniqueTasks?: IExecutable[];
 
-  /** Full physical path to the root path directory. */
+  /**
+   * Full physical path to the root path directory.
+   */
   rootPath: string;
 
   /**

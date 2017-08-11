@@ -1,6 +1,27 @@
 # Change Log - @microsoft/gulp-core-build-webpack
 
-This log was last generated on Fri, 07 Jul 2017 01:02:28 GMT and should not be manually modified.
+This log was last generated on Fri, 11 Aug 2017 21:44:05 GMT and should not be manually modified.
+
+## 1.2.3
+Fri, 11 Aug 2017 21:44:05 GMT
+
+### Patches
+
+- Allow the webpack task to be extended with new configuration args.
+
+## 1.2.2
+Thu, 27 Jul 2017 01:04:48 GMT
+
+### Patches
+
+- Upgrade to the TS2.4 version of the build tools.
+
+## 1.2.1
+Tue, 25 Jul 2017 20:03:31 GMT
+
+### Patches
+
+- Upgrade to TypeScript 2.4
 
 ## 1.2.0
 Fri, 07 Jul 2017 01:02:28 GMT

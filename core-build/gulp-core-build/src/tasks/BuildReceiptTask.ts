@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { GulpTask } from './GulpTask';
-import gulp = require('gulp');
+import * as Gulp from 'gulp';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as child_process from 'child_process';
@@ -31,7 +31,7 @@ let _lastLocalHashes: { [path: string]: string } = {};
 export class CheckBuildReceiptTask extends GulpTask<IBuildReceiptTask> {
   public name: string = 'check-for-changes';
   public executeTask(
-    gulp: gulp.Gulp,
+    gulp: typeof Gulp,
     completeCallback: (error?: string | Error) => void
   ): Promise<Object> | NodeJS.ReadWriteStream | void {
     _getLocalHashes().then(localHashes => {
@@ -60,7 +60,7 @@ export class CheckBuildReceiptTask extends GulpTask<IBuildReceiptTask> {
 export class UpdateBuildReceiptTask extends GulpTask<IBuildReceiptTask> {
   public name: string = 'mark-changes';
   public executeTask(
-    gulp: gulp.Gulp,
+    gulp: typeof Gulp,
     completeCallback: (error?: string | Error) => void
   ): Promise<Object> | NodeJS.ReadWriteStream | void {
 

@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-'use strict';
-
 /* tslint:disable:max-line-length */
 
 import * as path from 'path';
@@ -12,12 +10,13 @@ import { GulpProxy } from './GulpProxy';
 import { IExecutable } from './IExecutable';
 import { IBuildConfig } from './IBuildConfig';
 import { CleanTask } from './tasks/CleanTask';
+import { CleanFlagTask } from './tasks/CleanFlagTask';
 import { args, builtPackage } from './State';
 export { IExecutable } from './IExecutable';
 import { log } from './logging';
 import { initialize as initializeLogging, markTaskCreationTime, generateGulpError, setWatchMode } from './logging';
 import { getFlagValue, setConfigDefaults } from './config';
-import * as gulp from 'gulp';
+import * as Gulp from 'gulp';
 import * as notifier from 'node-notifier';
 
 export * from './IBuildConfig';
@@ -42,6 +41,7 @@ export * from './tasks/CopyTask';
 export * from './tasks/GenerateShrinkwrapTask';
 export * from './tasks/GulpTask';
 export * from './tasks/CleanTask';
+export * from './tasks/CleanFlagTask';
 export * from './tasks/ValidateShrinkwrapTask';
 export * from './jsonUtilities/SchemaValidator';
 
@@ -122,19 +122,24 @@ export function getConfig(): IBuildConfig {
   return _buildConfig;
 }
 
+/** @public */
+export const cleanFlag: IExecutable = new CleanFlagTask();
+
 /**
  * Registers an IExecutable to gulp so that it can be called from the command line
  * @param taskName - the name of the task, can be called from the command line (e.g. "gulp <taskName>")
- * @param task - the executable to execute when the task is invoked
+ * @param taskExecutable - the executable to execute when the task is invoked
  * @returns the task parameter
  * @public
  */
-export function task(taskName: string, task: IExecutable): IExecutable {
-  _taskMap[taskName] = task;
+export function task(taskName: string, taskExecutable: IExecutable): IExecutable {
+  taskExecutable = serial(cleanFlag, taskExecutable);
 
-  _trackTask(task);
+  _taskMap[taskName] = taskExecutable;
 
-  return task;
+  _trackTask(taskExecutable);
+
+  return taskExecutable;
 }
 
 /**
@@ -144,7 +149,7 @@ export function task(taskName: string, task: IExecutable): IExecutable {
  * @public
  */
 export interface ICustomGulpTask {
-  (gulp: gulp.Gulp | GulpProxy, buildConfig: IBuildConfig, done?: (failure?: Object) => void):
+  (gulp: typeof Gulp | GulpProxy, buildConfig: IBuildConfig, done?: (failure?: Object) => void):
     Promise<Object> | NodeJS.ReadWriteStream | void;
 }
 
@@ -152,12 +157,11 @@ export interface ICustomGulpTask {
 class CustomTask extends GulpTask<void> {
   private _fn: ICustomGulpTask;
   constructor(name: string, fn: ICustomGulpTask) {
-    super();
-    this.name = name;
+    super(name);
     this._fn = fn.bind(this);
   }
 
-  public executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (error?: string | Error) => void):
+  public executeTask(gulp: typeof Gulp | GulpProxy, completeCallback?: (error?: string | Error) => void):
     Promise<Object> | NodeJS.ReadWriteStream | void {
     return this._fn(gulp, getConfig(), completeCallback);
   }
@@ -181,12 +185,12 @@ export function subTask(taskName: string, fn: ICustomGulpTask): IExecutable {
  * Defines a gulp watch and maps it to a given IExecutable.
  *
  * @param watchMatch - the list of files patterns to watch
- * @param task - the task to execute when a file changes
+ * @param taskExecutable - the task to execute when a file changes
  * @returns IExecutable
  * @public
  */
-export function watch(watchMatch: string | string[], task: IExecutable): IExecutable {
-  _trackTask(task);
+export function watch(watchMatch: string | string[], taskExecutable: IExecutable): IExecutable {
+  _trackTask(taskExecutable);
 
   let isWatchRunning: boolean = false;
   let shouldRerunWatch: boolean = false;
@@ -206,7 +210,7 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
           } else {
             isWatchRunning = true;
 
-            return _executeTask(task, buildConfig)
+            return _executeTask(taskExecutable, buildConfig)
               .then(() => {
                 if (lastError) {
                   lastError = undefined;
@@ -267,19 +271,21 @@ export function watch(watchMatch: string | string[], task: IExecutable): IExecut
  * @public
  */
 export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutable {
-  // tslint:disable-next-line:no-null-keyword
-  const flatTasks: IExecutable[] = <IExecutable[]>_flatten(tasks).filter(task => task !== null && task !== undefined);
+  const flatTasks: IExecutable[] = <IExecutable[]>_flatten(tasks).filter(taskExecutable => {
+    // tslint:disable-next-line:no-null-keyword
+    return taskExecutable !== null && taskExecutable !== undefined;
+  });
 
-  for (const task of flatTasks) {
-    _trackTask(task);
+  for (const flatTask of flatTasks) {
+    _trackTask(flatTask);
   }
 
   return {
     execute: (buildConfig: IBuildConfig): Promise<void> => {
       let output: Promise<void> = Promise.resolve();
 
-      for (const task of flatTasks) {
-        output = output.then(() => _executeTask(task, buildConfig));
+      for (const taskExecutable of flatTasks) {
+        output = output.then(() => _executeTask(taskExecutable, buildConfig));
       }
 
       return output;
@@ -292,11 +298,13 @@ export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutabl
  * @public
  */
 export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecutable {
-  // tslint:disable-next-line:no-null-keyword
-  const flattenTasks: IExecutable[] = _flatten<IExecutable>(tasks).filter(task => task !== null && task !== undefined);
+  const flatTasks: IExecutable[] = _flatten<IExecutable>(tasks).filter(taskExecutable => {
+    // tslint:disable-next-line:no-null-keyword
+    return taskExecutable !== null && taskExecutable !== undefined;
+  });
 
-  for (const task of flattenTasks) {
-    _trackTask(task);
+  for (const flatTask of flatTasks) {
+    _trackTask(flatTask);
   }
 
   return {
@@ -304,8 +312,8 @@ export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecuta
     execute: (buildConfig: IBuildConfig): Promise<any> => {
       return new Promise<void[]>((resolve, reject) => {
         const promises: Promise<void>[] = [];
-        for (const task of flattenTasks) {
-          promises.push(_executeTask(task, buildConfig));
+        for (const taskExecutable of flatTasks) {
+          promises.push(_executeTask(taskExecutable, buildConfig));
         }
 
         // Use promise all to make sure errors are propagated correctly
@@ -319,7 +327,7 @@ export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecuta
  * Initializes the gulp tasks.
  * @public
  */
-export function initialize(gulp: gulp.Gulp): void {
+export function initialize(gulp: typeof Gulp): void {
   _buildConfig.rootPath = process.cwd();
   _buildConfig.gulp = new GulpProxy(gulp);
   _buildConfig.uniqueTasks = _uniqueTasks;
@@ -328,9 +336,9 @@ export function initialize(gulp: gulp.Gulp): void {
 
   setConfigDefaults(_buildConfig);
 
-  for (const task of _buildConfig.uniqueTasks) {
-    if (task.onRegister) {
-      task.onRegister();
+  for (const uniqueTask of _buildConfig.uniqueTasks) {
+    if (uniqueTask.onRegister) {
+      uniqueTask.onRegister();
     }
   }
 
@@ -344,9 +352,9 @@ export function initialize(gulp: gulp.Gulp): void {
 /**
  * Registers a given gulp task given a name and an IExecutable.
  */
-function _registerTask(gulp: gulp.Gulp, taskName: string, task: IExecutable): void {
+function _registerTask(gulp: typeof Gulp, taskName: string, taskExecutable: IExecutable): void {
   gulp.task(taskName, (cb) => {
-    _executeTask(task, _buildConfig)
+    _executeTask(taskExecutable, _buildConfig)
       .then(() => {
         cb();
       },
@@ -359,38 +367,38 @@ function _registerTask(gulp: gulp.Gulp, taskName: string, task: IExecutable): vo
 /**
  * Executes a given IExecutable.
  */
-function _executeTask(task: IExecutable, buildConfig: IBuildConfig): Promise<void> {
+function _executeTask(taskExecutable: IExecutable, buildConfig: IBuildConfig): Promise<void> {
   // Try to fallback to the default task if provided.
-  if (task && !task.execute) {
+  if (taskExecutable && !taskExecutable.execute) {
     /* tslint:disable:no-any */
-    if ((task as any).default) {
-      task = (task as any).default;
+    if ((taskExecutable as any).default) {
+      taskExecutable = (taskExecutable as any).default;
     }
     /* tslint:enable:no-any */
   }
 
   // If the task is missing, throw a meaningful error.
-  if (!task || !task.execute) {
+  if (!taskExecutable || !taskExecutable.execute) {
     return Promise.reject(new Error(`A task was scheduled, but the task was null. This probably means the task wasn't imported correctly.`));
   }
 
-  if (task.isEnabled === undefined || task.isEnabled(buildConfig)) {
+  if (taskExecutable.isEnabled === undefined || taskExecutable.isEnabled(buildConfig)) {
     const startTime: [number, number] = process.hrtime();
 
-    if (buildConfig.onTaskStart && task.name) {
-      buildConfig.onTaskStart(task.name);
+    if (buildConfig.onTaskStart && taskExecutable.name) {
+      buildConfig.onTaskStart(taskExecutable.name);
     }
 
-    const taskPromise: Promise<void> = task.execute(buildConfig)
+    const taskPromise: Promise<void> = taskExecutable.execute(buildConfig)
       .then(() => {
-        if (buildConfig.onTaskEnd && task.name) {
-          buildConfig.onTaskEnd(task.name, process.hrtime(startTime));
+        if (buildConfig.onTaskEnd && taskExecutable.name) {
+          buildConfig.onTaskEnd(taskExecutable.name, process.hrtime(startTime));
         }
       },
       // tslint:disable-next-line:no-any
       (error: any) => {
-        if (buildConfig.onTaskEnd && task.name) {
-          buildConfig.onTaskEnd(task.name, process.hrtime(startTime), error);
+        if (buildConfig.onTaskEnd && taskExecutable.name) {
+          buildConfig.onTaskEnd(taskExecutable.name, process.hrtime(startTime), error);
         }
 
         return Promise.reject(error);
@@ -403,9 +411,9 @@ function _executeTask(task: IExecutable, buildConfig: IBuildConfig): Promise<voi
   return Promise.resolve();
 }
 
-function _trackTask(task: IExecutable): void {
-  if (_uniqueTasks.indexOf(task) < 0) {
-    _uniqueTasks.push(task);
+function _trackTask(taskExecutable: IExecutable): void {
+  if (_uniqueTasks.indexOf(taskExecutable) < 0) {
+    _uniqueTasks.push(taskExecutable);
   }
 }
 

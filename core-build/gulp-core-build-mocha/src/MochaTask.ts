@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { GulpTask } from '@microsoft/gulp-core-build';
-import gulp = require('gulp');
+import * as Gulp from 'gulp';
 import * as gulpMocha from 'gulp-mocha';
 import * as gulpIstanbul from 'gulp-istanbul';
 
@@ -12,14 +12,17 @@ export interface IMochaTaskConfig {
 }
 
 export class MochaTask extends GulpTask<IMochaTaskConfig> {
-  public name: string = 'mocha';
+  constructor() {
+    super(
+      'mocha',
+      {
+        testMatch: ['lib/**/*.test.js'],
+        reportDir: 'coverage'
+      }
+    );
+  }
 
-  public taskConfig: IMochaTaskConfig = {
-    testMatch: ['lib/**/*.test.js'],
-    reportDir: 'coverage'
-  };
-
-  public executeTask(gulp: gulp.Gulp, completeCallback?: (error?: string) => void): NodeJS.ReadWriteStream {
+  public executeTask(gulp: typeof Gulp, completeCallback?: (error?: string) => void): NodeJS.ReadWriteStream {
     const istanbul: typeof gulpIstanbul = require('gulp-istanbul');
     const mocha: typeof gulpMocha = require('gulp-mocha');
 

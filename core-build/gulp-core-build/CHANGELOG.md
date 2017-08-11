@@ -1,6 +1,41 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Wed, 12 Jul 2017 01:04:36 GMT and should not be manually modified.
+This log was last generated on Fri, 11 Aug 2017 21:44:05 GMT and should not be manually modified.
+
+## 2.9.0
+Fri, 11 Aug 2017 21:44:05 GMT
+
+### Minor changes
+
+- Refactor GulpTask to support taking the name and initial task configuration through the constructor.
+
+## 2.8.0
+Sat, 05 Aug 2017 01:04:41 GMT
+
+### Minor changes
+
+- Add a --clean or -c command line flag which runs the clean task.
+
+## 2.7.3
+Mon, 31 Jul 2017 21:18:26 GMT
+
+### Patches
+
+- Upgrade @types/semver to 5.3.33
+
+## 2.7.2
+Thu, 27 Jul 2017 01:04:48 GMT
+
+### Patches
+
+- Upgrade to the TS2.4 version of the build tools.
+
+## 2.7.1
+Tue, 25 Jul 2017 20:03:31 GMT
+
+### Patches
+
+- Upgrade to TypeScript 2.4
 
 ## 2.7.0
 Wed, 12 Jul 2017 01:04:36 GMT

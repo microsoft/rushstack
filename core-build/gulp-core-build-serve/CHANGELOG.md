@@ -1,6 +1,27 @@
 # Change Log - @microsoft/gulp-core-build-serve
 
-This log was last generated on Tue, 16 May 2017 00:01:03 GMT and should not be manually modified.
+This log was last generated on Fri, 11 Aug 2017 21:44:05 GMT and should not be manually modified.
+
+## 2.1.6
+Fri, 11 Aug 2017 21:44:05 GMT
+
+### Patches
+
+- Allow the serve task to be extended with new configuration args.
+
+## 2.1.5
+Thu, 27 Jul 2017 01:04:48 GMT
+
+### Patches
+
+- Upgrade to the TS2.4 version of the build tools.
+
+## 2.1.4
+Tue, 25 Jul 2017 20:03:31 GMT
+
+### Patches
+
+- Upgrade to TypeScript 2.4
 
 ## 2.1.3
 Tue, 16 May 2017 00:01:03 GMT

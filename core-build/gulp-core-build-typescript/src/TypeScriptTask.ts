@@ -1,12 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { GulpTask } from '@microsoft/gulp-core-build';
 import gulpType = require('gulp');
 import ts = require('gulp-typescript');
+import * as Typescript from 'typescript';
 import * as path from 'path';
 
-import { IBuildConfig } from '@microsoft/gulp-core-build';
+import { GulpTask, IBuildConfig } from '@microsoft/gulp-core-build';
+
 import { TypeScriptConfiguration } from './TypeScriptConfiguration';
 
 interface ITypeScriptErrorObject {
@@ -31,7 +32,9 @@ export interface ICompilerOptions extends ts.Settings {
   stripInternal?: boolean;
 }
 
-/** @public */
+/**
+ * @public
+ */
 export interface ITypeScriptTaskConfig {
   /**
    * Fails the build when errors occur.
@@ -81,53 +84,58 @@ export interface ITypeScriptTaskConfig {
   libES6Dir?: string;
 }
 
-/** @public */
+/**
+ * @public
+ */
 export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
-  public name: string = 'typescript';
-
-  public taskConfig: ITypeScriptTaskConfig = {
-    failBuildOnErrors: true,
-    reporter: {
-      error: (error: ts.reporter.TypeScriptError): void => {
-        const filename: string = error.relativeFilename || error.fullFilename || 'unknown filename';
-        const line: number = error.startPosition ? error.startPosition.line : 0;
-        const character: number = error.startPosition ? error.startPosition.character : 0;
-        const code: number = error.diagnostic.code;
-        const errorMessage: string = (typeof error.diagnostic.messageText === 'object') ?
-          (error.diagnostic.messageText as { messageText: string }).messageText :
-          error.diagnostic.messageText as string;
-
-        this.fileError(
-          filename,
-          line,
-          character,
-          'TS' + code,
-          errorMessage);
-      }
-    },
-    sourceMatch: [
-      'src/**/*.ts',
-      'src/**/*.tsx',
-      'typings/main/**/*.ts',
-      'typings/main.d.ts',
-      'typings/tsd.d.ts',
-      'typings/index.d.ts'
-    ],
-    staticMatch: [
-      'src/**/*.js',
-      'src/**/*.json',
-      'src/**/*.jsx'
-    ],
-    removeCommentsFromJavaScript: false,
-    emitSourceMaps: true,
-    libDir: undefined,
-    libAMDDir: undefined,
-    libES6Dir: undefined
-  };
-
   private _tsProject: ts.Project;
   private _tsAMDProject: ts.Project;
   private _tsES6Project: ts.Project;
+
+  constructor() {
+    super(
+      'typescript',
+      {
+        failBuildOnErrors: true,
+        reporter: {
+          error: (error: ts.reporter.TypeScriptError): void => {
+            const filename: string = error.relativeFilename || error.fullFilename || 'unknown filename';
+            const line: number = error.startPosition ? error.startPosition.line : 0;
+            const character: number = error.startPosition ? error.startPosition.character : 0;
+            const code: number = error.diagnostic.code;
+            const errorMessage: string = (typeof error.diagnostic.messageText === 'object') ?
+              (error.diagnostic.messageText as { messageText: string }).messageText :
+              error.diagnostic.messageText as string;
+
+            this.fileError(
+              filename,
+              line,
+              character,
+              'TS' + code,
+              errorMessage);
+          }
+        },
+        sourceMatch: [
+          'src/**/*.ts',
+          'src/**/*.tsx',
+          'typings/main/**/*.ts',
+          'typings/main.d.ts',
+          'typings/tsd.d.ts',
+          'typings/index.d.ts'
+        ],
+        staticMatch: [
+          'src/**/*.js',
+          'src/**/*.json',
+          'src/**/*.jsx'
+        ],
+        removeCommentsFromJavaScript: false,
+        emitSourceMaps: true,
+        libDir: undefined,
+        libAMDDir: undefined,
+        libES6Dir: undefined
+      }
+    );
+  }
 
   public loadSchema(): Object {
     return require('./schemas/typescript.schema.json');
@@ -147,8 +155,8 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
 
     this._normalizeConfig();
 
-    // Log the compiler version for custom verisons.
-    const typescript: any = TypeScriptConfiguration.getTypescriptCompiler(); // tslint:disable-line:no-any
+    // Log the compiler version for custom versions.
+    const typescript: typeof Typescript = TypeScriptConfiguration.getTypescriptCompiler(); // tslint:disable-line:no-any
     if (typescript && typescript.version) {
       this.log(`TypeScript version: ${typescript.version}`);
     }

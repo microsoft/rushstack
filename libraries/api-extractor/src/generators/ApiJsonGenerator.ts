@@ -42,20 +42,6 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
 
   protected jsonOutput: Object = {};
 
-  // @override
-  protected visit(apiItem: ApiItem, refObject?: Object): void {
-    switch (apiItem.documentation.releaseTag) {
-      case ReleaseTag.None:
-      case ReleaseTag.Beta:
-      case ReleaseTag.Public:
-        break;
-      default:
-        return; // skip @alpha and @internal definitions
-    }
-
-    super.visit(apiItem, refObject);
-  }
-
   public writeJsonFile(reportFilename: string, extractor: Extractor): void {
     this.visit(extractor.package, this.jsonOutput);
 
@@ -76,6 +62,20 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
         throw new Error(errorMessage);
       }
     );
+  }
+
+  // @override
+  protected visit(apiItem: ApiItem, refObject?: Object): void {
+    switch (apiItem.documentation.releaseTag) {
+      case ReleaseTag.None:
+      case ReleaseTag.Beta:
+      case ReleaseTag.Public:
+        break;
+      default:
+        return; // skip @alpha and @internal definitions
+    }
+
+    super.visit(apiItem, refObject);
   }
 
   protected visitApiStructuredType(apiStructuredType: ApiStructuredType, refObject?: Object): void {

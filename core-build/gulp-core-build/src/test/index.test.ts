@@ -16,6 +16,8 @@ import {
 } from '../index';
 import { mockBuildConfig } from './mockBuildConfig';
 
+/* tslint:disable:no-unused-expression */
+
 // disable the exit watching
 global['dontWatchExit'] = true; // tslint:disable-line:no-string-literal
 

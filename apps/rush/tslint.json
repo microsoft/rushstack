@@ -50,7 +50,6 @@
     "no-trailing-whitespace": true,
     "no-unnecessary-semicolons": true,
     "no-unused-expression": true,
-    "no-unused-imports": true,
     "no-unused-variable": true,
     "no-unreachable": true,
     "no-use-before-declare": true,
@@ -105,7 +104,7 @@
       "check-separator",
       "check-type"
     ],
-    
+
     "prefer-const": true
   }
 }

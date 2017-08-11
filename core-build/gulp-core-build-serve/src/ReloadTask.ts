@@ -2,12 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import { GulpTask } from '@microsoft/gulp-core-build';
-import gulp = require('gulp');
+import * as Gulp from 'gulp';
 
-export class ReloadTask extends GulpTask<{}> {
-  public name: string = 'reload';
+export class ReloadTask extends GulpTask<void> {
+  constructor() {
+    super('reload');
+  }
 
-  public executeTask(gulp: gulp.Gulp, completeCallback?: (error?: string) => void): void {
+  public executeTask(gulp: typeof Gulp, completeCallback?: (error?: string) => void): void {
     /* tslint:disable:typedef */
     const gulpConnect = require('gulp-connect');
     /* tslint:enable:typedef */

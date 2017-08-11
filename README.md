@@ -162,9 +162,16 @@ engine.
 
 ## Webpack Loaders and Plugins
 
+### [@microsoft/set-webpack-public-path-plugin](./webpack/set-webpack-public-path-plugin/README.md)
+
+`set-webpack-public-path-plugin` is a plugin used to set the webpack public path variable.
+
+[![npm version](https://badge.fury.io/js/%40microsoft%2Fset-webpack-public-path-plugin.svg)](https://badge.fury.io/js/%40microsoft%2Fset-webpack-public-path-plugin)
+[![Dependencies](https://david-dm.org/Microsoft/set-webpack-public-path-plugin.svg)](https://david-dm.org/Microsoft/set-webpack-public-path-plugin)
+
 ### [@microsoft/loader-set-webpack-public-path](./webpack/loader-set-webpack-public-path/README.md)
 
-`loader-set-webpack-public-path` is a loader used to set the webpack public path variable.
+`loader-set-webpack-public-path` is a loader used to set the webpack public path variable. It's similar to `set-webpack-public-path-plugin`.
 
 [![npm version](https://badge.fury.io/js/%40microsoft%2Floader-set-webpack-public-path.svg)](https://badge.fury.io/js/%40microsoft%2Floader-set-webpack-public-path)
 [![Dependencies](https://david-dm.org/Microsoft/loader-set-webpack-public-path.svg)](https://david-dm.org/Microsoft/loader-set-webpack-public-path)

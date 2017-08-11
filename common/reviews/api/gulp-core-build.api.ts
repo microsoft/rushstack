@@ -2,16 +2,26 @@
 export function addSuppression(suppression: string | RegExp): void;
 
 // @public
+class CleanFlagTask extends CleanTask {
+  constructor();
+  // (undocumented)
+  public executeTask(gulp: typeof Gulp,
+      completeCallback: (error?: string | Error) => void): void;
+  // (undocumented)
+  public isEnabled(buildConfig: IBuildConfig): boolean;
+}
+
+// @public
 class CleanTask extends GulpTask<void> {
   constructor();
-  public executeTask(gulp: gulp.Gulp,
+  public executeTask(gulp: typeof Gulp,
       completeCallback: (error?: string | Error) => void): void;
 }
 
 // @public
 class CopyTask extends GulpTask<ICopyConfig> {
   constructor();
-  public executeTask(gulp: gulp.Gulp,
+  public executeTask(gulp: typeof Gulp,
       completeCallback: (error?: string | Error) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
   public loadSchema(): Object;
 }
@@ -23,13 +33,29 @@ export function coverageData(coverage: number, threshold: number, filePath: stri
 export function error(...args: Array<string | Chalk.ChalkChain>): void;
 
 // @public
-export function fileError(taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
+export function fileError(taskName: string,
+  filePath: string,
+  line: number,
+  column: number,
+  errorCode: string,
+  message: string): void;
 
 // @public
-export function fileLog(write: (text: string) => void, taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
+export function fileLog(write: (text: string) => void,
+  taskName: string,
+  filePath: string,
+  line: number,
+  column: number,
+  errorCode: string,
+  message: string): void;
 
 // @public
-export function fileWarning(taskName: string, filePath: string, line: number, column: number, errorCode: string,  message: string): void;
+export function fileWarning(taskName: string,
+  filePath: string,
+  line: number,
+  column: number,
+  errorCode: string,
+  message: string): void;
 
 // @public
 export function functionalTestRun(name: string, result: TestResultState, duration: number): void;
@@ -51,7 +77,8 @@ export function getErrors(): string[];
 export function getWarnings(): string[];
 
 // @public
-class GulpTask<TASK_CONFIG> implements IExecutable {
+class GulpTask<TTaskConfig> implements IExecutable {
+  public constructor(name: string, initialTaskConfig: Partial<TTaskConfig> = {});
   protected _getConfigFilePath(): string;
   public buildConfig: IBuildConfig;
   public cleanMatch: string[];
@@ -60,26 +87,26 @@ class GulpTask<TASK_CONFIG> implements IExecutable {
   public execute(config: IBuildConfig): Promise<void>;
   // WARNING: The type "GulpProxy" needs to be exported by the package (e.g. added to index.ts)
   public abstract executeTask(gulp: gulp.Gulp | GulpProxy,
-      completeCallback?: (error?: string | Error) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
+      completeCallback?: (error?: string | Error) => void): Promise<Object | void> | NodeJS.ReadWriteStream | void;
   public fileError(filePath: string, line: number, column: number, errorCode: string, message: string): void;
   public fileExists(localPath: string): boolean;
   public fileWarning(filePath: string, line: number, column: number, warningCode: string, message: string): void;
-  public getCleanMatch(buildConfig: IBuildConfig, taskConfig: TASK_CONFIG = this.taskConfig): string[];
+  public getCleanMatch(buildConfig: IBuildConfig, taskConfig: TTaskConfig = this.taskConfig): string[];
   public isEnabled(buildConfig: IBuildConfig): boolean;
   protected loadSchema(): Object | undefined;
   public log(message: string): void;
   public logError(message: string): void;
   public logVerbose(message: string): void;
   public logWarning(message: string): void;
-  public mergeConfig(taskConfig: TASK_CONFIG): void;
+  public mergeConfig(taskConfig: TTaskConfig): void;
   public name: string;
   public onRegister(): void;
   public readJSONSync(localPath: string): Object | undefined;
-  public replaceConfig(taskConfig: TASK_CONFIG): void;
+  public replaceConfig(taskConfig: TTaskConfig): void;
   public resolvePath(localPath: string): string;
   public readonly schema: Object | undefined;
-  public setConfig(taskConfig: TASK_CONFIG): void;
-  public taskConfig: TASK_CONFIG;
+  public setConfig(taskConfig: Partial<TTaskConfig>): void;
+  public taskConfig: TTaskConfig;
 }
 
 // @public (undocumented)
@@ -124,7 +151,7 @@ interface ICopyConfig {
 interface ICustomGulpTask {
   // WARNING: The type "GulpProxy" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
-  (gulp: gulp.Gulp | GulpProxy, buildConfig: IBuildConfig, done?: (failure?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
+  (gulp: typeof Gulp | GulpProxy, buildConfig: IBuildConfig, done?: (failure?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
 }
 
 // @public (undocumented)
@@ -137,7 +164,7 @@ interface IExecutable {
 }
 
 // @public
-export function initialize(gulp: gulp.Gulp): void;
+export function initialize(gulp: typeof Gulp): void;
 
 // @public
 export function log(...args: Array<string | Chalk.ChalkChain>): void;
@@ -175,7 +202,7 @@ export function setConfig(config: Partial<IBuildConfig>): void;
 export function subTask(taskName: string, fn: ICustomGulpTask): IExecutable;
 
 // @public
-export function task(taskName: string, task: IExecutable): IExecutable;
+export function task(taskName: string, taskExecutable: IExecutable): IExecutable;
 
 // @public
 enum TestResultState {
@@ -202,7 +229,8 @@ export function verbose(...args: Array<string | Chalk.ChalkChain>): void;
 export function warn(...args: Array<string | Chalk.ChalkChain>): void;
 
 // @public
-export function watch(watchMatch: string | string[], task: IExecutable): IExecutable;
+export function watch(watchMatch: string | string[], taskExecutable: IExecutable): IExecutable;
 
+// WARNING: Unsupported export: cleanFlag
 // WARNING: Unsupported export: clean
 // (No packageDescription for this package)

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { GulpTask } from '@microsoft/gulp-core-build';
-import gulp = require('gulp');
+import * as Gulp from 'gulp';
 import * as gulpUtil from 'gulp-util';
 import { EOL } from 'os';
 import { splitStyles } from '@microsoft/load-themed-styles';
@@ -54,30 +54,33 @@ export interface ISassTaskConfig {
 const _classMaps: { [file: string]: Object } = {};
 
 export class SassTask extends GulpTask<ISassTaskConfig> {
-  public name: string = 'sass';
-
-  public taskConfig: ISassTaskConfig = {
-    preamble: '/* tslint:disable */',
-    postamble: '/* tslint:enable */',
-    sassMatch: [
-      'src/**/*.scss'
-    ],
-    useCSSModules: false,
-    warnOnCssInvalidPropertyName: true,
-    dropCssFiles: false,
-    warnOnNonCSSModules: false
-  };
-
   public cleanMatch: string[] = [
     'src/**/*.scss.ts'
   ];
+
+  constructor() {
+    super(
+      'sass',
+      {
+        preamble: '/* tslint:disable */',
+        postamble: '/* tslint:enable */',
+        sassMatch: [
+          'src/**/*.scss'
+        ],
+        useCSSModules: false,
+        warnOnCssInvalidPropertyName: true,
+        dropCssFiles: false,
+        warnOnNonCSSModules: false
+      }
+    );
+  }
 
   public loadSchema(): Object {
     return require('./sass.schema.json');
   }
 
   public executeTask(
-    gulp: gulp.Gulp,
+    gulp: typeof Gulp,
     completeCallback: (error?: string) => void
   ): Promise<{}> | NodeJS.ReadWriteStream | void {
 
@@ -127,7 +130,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
   }
 
   private _processFiles(
-    gulp: gulp.Gulp,
+    gulp: typeof Gulp,
     srcPattern: string[],
     /* tslint:disable:no-any */
     completeCallback: (error?: string) => void,
@@ -139,7 +142,6 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     const cleancss = require('gulp-clean-css');
     const clipEmptyFiles = require('gulp-clip-empty-files');
     const clone = require('gulp-clone');
-    const path = require('path');
     const postcss = require('gulp-postcss');
     const sass = require('gulp-sass');
     const texttojs = require('gulp-texttojs');

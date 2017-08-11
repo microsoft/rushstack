@@ -5,7 +5,7 @@ import * as fsx from 'fs-extra';
 import * as os  from 'os';
 import * as path from 'path';
 import { IDocItem, IDocPackage, IDocMember } from './IDocItem';
-import ApiDefinitionReference, { IScopedPackageName, IApiDefinintionReferenceParts } from './ApiDefinitionReference';
+import ApiDefinitionReference, { IScopedPackageName, IApiDefinitionReferenceParts } from './ApiDefinitionReference';
 import ApiItem from './definitions/ApiItem';
 import ApiItemContainer from './definitions/ApiItemContainer';
 import ApiPackage from './definitions/ApiPackage';
@@ -61,7 +61,7 @@ export default class DocItemLoader {
     apiPackage: ApiPackage,
     warnings: string[]): ResolvedApiItem {
 
-    // We determine if an 'apiDfefinitionRef' is local if it has no package name or if the scoped
+    // We determine if an 'apiDefinitionRef' is local if it has no package name or if the scoped
     // package name is equal to the current package's scoped package name.
     if (!apiDefinitionRef.packageName || apiDefinitionRef.toScopePackageString() === apiPackage.name) {
       // Resolution for local references
@@ -91,7 +91,7 @@ export default class DocItemLoader {
       return undefined;
     }
 
-    // If memberName exists then check for the existense of the name
+    // If memberName exists then check for the existence of the name
     if (apiDefinitionRef.memberName) {
       if (apiItem instanceof ApiItemContainer) {
         const apiItemContainer: ApiItemContainer = (apiItem as ApiItemContainer);
@@ -140,7 +140,7 @@ export default class DocItemLoader {
 
     let docItem: IDocItem = docPackage.exports[apiDefinitionRef.exportName];
 
-    // If memberName exists then check for the existense of the name
+    // If memberName exists then check for the existence of the name
     if (apiDefinitionRef.memberName) {
       let member: IDocMember = undefined;
       switch (docItem.kind) {
@@ -181,7 +181,7 @@ export default class DocItemLoader {
    * Attempts to locate and load the IDocPackage object from the project folder's
    * node modules. If the package already exists in the cache, nothing is done.
    *
-   * @param apiDefinitionRef - interface with propropties pertaining to the API definition reference
+   * @param apiDefinitionRef - interface with properties pertaining to the API definition reference
    */
   public getPackage(apiDefinitionRef: ApiDefinitionReference): IDocPackage {
     let cachePackageName: string = '';

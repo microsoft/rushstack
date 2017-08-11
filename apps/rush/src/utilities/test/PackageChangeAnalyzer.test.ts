@@ -31,7 +31,7 @@ describe('PackageChangeAnalyzer', () => {
       }
     };
 
-    PackageChangeAnalyzer.getPackageDeps = (path: string, ignored: string[]) => repoHashDeps;
+    PackageChangeAnalyzer.getPackageDeps = (packagePath: string, ignored: string[]) => repoHashDeps;
     PackageChangeAnalyzer.rushConfig = {
       projects: [{
         packageName: packageA,

@@ -7,7 +7,9 @@ import { SchemaValidator, IBuildConfig } from '@microsoft/gulp-core-build';
 import ts = require('gulp-typescript');
 import * as typescript from 'typescript';
 
-/** @public */
+/**
+ * @public
+ */
 export interface ITsConfigFile<T> {
   compilerOptions: T;
 }
@@ -28,7 +30,7 @@ export class TypeScriptConfiguration {
    * Returns a new object each time.
    */
   public static getGulpTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<ts.Settings> {
-    const file: ITsConfigFile<ts.Settings> = assign({}, this._getTsConfigFile(buildConfig));
+    const file: ITsConfigFile<ts.Settings> = assign({}, this.getTsConfigFile(buildConfig));
     assign(file.compilerOptions, {
       rootDir: buildConfig.rootPath,
       typescript: this.getTypescriptCompiler()
@@ -39,14 +41,16 @@ export class TypeScriptConfiguration {
   /**
    * Override the version of the typescript compiler
    */
-  public static setTypescriptCompiler(typescript: any): void {
+  public static setTypescriptCompiler(typescriptOverride: any): void {
     if (this._typescript) {
       throw new Error('The version of the typescript compiler should only be set once.');
     }
+
     if (this._baseTsConfig) {
       throw new Error('Set the version of the typescript compiler before tasks call getConfig()');
     }
-    this._typescript = typescript;
+
+    this._typescript = typescriptOverride;
   }
 
   /**
@@ -62,7 +66,7 @@ export class TypeScriptConfiguration {
   /**
    * Helper function which reads the tsconfig.json (or provides one), and memoizes it
    */
-  private static _getTsConfigFile(config: IBuildConfig): ITsConfigFile<ts.Settings> {
+  public static getTsConfigFile(config: IBuildConfig): ITsConfigFile<ts.Settings> {
     if (!this._baseTsConfig) {
       try {
         this._baseTsConfig = SchemaValidator.readCommentedJsonFile<any>(

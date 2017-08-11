@@ -1,6 +1,35 @@
 # Change Log - @microsoft/gulp-core-build-karma
 
-This log was last generated on Fri, 07 Jul 2017 01:02:28 GMT and should not be manually modified.
+This log was last generated on Fri, 11 Aug 2017 21:44:05 GMT and should not be manually modified.
+
+## 2.3.5
+Fri, 11 Aug 2017 21:44:05 GMT
+
+*Changes not tracked*
+
+## 2.3.4
+Sat, 05 Aug 2017 01:04:41 GMT
+
+*Changes not tracked*
+
+## 2.3.3
+Mon, 31 Jul 2017 21:18:26 GMT
+
+*Changes not tracked*
+
+## 2.3.2
+Thu, 27 Jul 2017 01:04:48 GMT
+
+### Patches
+
+- Upgrade to the TS2.4 version of the build tools.
+
+## 2.3.1
+Tue, 25 Jul 2017 20:03:31 GMT
+
+### Patches
+
+- Upgrade to TypeScript 2.4
 
 ## 2.3.0
 Fri, 07 Jul 2017 01:02:28 GMT

@@ -2,6 +2,66 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "2.9.0",
+      "tag": "@microsoft/gulp-core-build_v2.9.0",
+      "date": "Fri, 11 Aug 2017 21:44:05 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Refactor GulpTask to support taking the name and initial task configuration through the constructor."
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.8.0",
+      "tag": "@microsoft/gulp-core-build_v2.8.0",
+      "date": "Sat, 05 Aug 2017 01:04:41 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a --clean or -c command line flag which runs the clean task."
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.7.3",
+      "tag": "@microsoft/gulp-core-build_v2.7.3",
+      "date": "Mon, 31 Jul 2017 21:18:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade @types/semver to 5.3.33"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.7.2",
+      "tag": "@microsoft/gulp-core-build_v2.7.2",
+      "date": "Thu, 27 Jul 2017 01:04:48 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade to the TS2.4 version of the build tools."
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.7.1",
+      "tag": "@microsoft/gulp-core-build_v2.7.1",
+      "date": "Tue, 25 Jul 2017 20:03:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade to TypeScript 2.4"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.7.0",
       "tag": "@microsoft/gulp-core-build_v2.7.0",
       "date": "Wed, 12 Jul 2017 01:04:36 GMT",

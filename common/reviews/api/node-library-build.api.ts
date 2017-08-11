@@ -3,26 +3,32 @@ export declare function addSuppression(suppression: string | RegExp): void;
 
 // @public
 class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig> {
+  constructor();
   // (undocumented)
-  executeTask(gulp: gulp.Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream | void;
+  executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream | void;
   // (undocumented)
   loadSchema(): Object;
+}
+
+// @public
+class CleanFlagTask extends CleanTask {
+  constructor();
   // (undocumented)
-  name: string;
+  executeTask(gulp: typeof Gulp, completeCallback: (error?: string | Error) => void): void;
   // (undocumented)
-  taskConfig: IApiExtractorTaskConfig;
+  isEnabled(buildConfig: IBuildConfig): boolean;
 }
 
 // @public
 class CleanTask extends GulpTask<void> {
   constructor();
-  executeTask(gulp: gulp.Gulp, completeCallback: (error?: string | Error) => void): void;
+  executeTask(gulp: typeof Gulp, completeCallback: (error?: string | Error) => void): void;
 }
 
 // @public
 class CopyTask extends GulpTask<ICopyConfig> {
   constructor();
-  executeTask(gulp: gulp.Gulp, completeCallback: (error?: string | Error) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
+  executeTask(gulp: typeof Gulp, completeCallback: (error?: string | Error) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
   loadSchema(): Object;
 }
 
@@ -60,33 +66,34 @@ export declare function getErrors(): string[];
 export declare function getWarnings(): string[];
 
 // @public
-class GulpTask<TASK_CONFIG> implements IExecutable {
+class GulpTask<TTaskConfig> implements IExecutable {
+  constructor(name: string, initialTaskConfig?: Partial<TTaskConfig>);
   protected _getConfigFilePath(): string;
   buildConfig: IBuildConfig;
   cleanMatch: string[];
   copyFile(localSourcePath: string, localDestPath?: string): void;
   enabled: boolean;
   execute(config: IBuildConfig): Promise<void>;
-  abstract executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (error?: string | Error) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
+  abstract executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (error?: string | Error) => void): Promise<Object | void> | NodeJS.ReadWriteStream | void;
   fileError(filePath: string, line: number, column: number, errorCode: string, message: string): void;
   fileExists(localPath: string): boolean;
   fileWarning(filePath: string, line: number, column: number, warningCode: string, message: string): void;
-  getCleanMatch(buildConfig: IBuildConfig, taskConfig?: TASK_CONFIG): string[];
+  getCleanMatch(buildConfig: IBuildConfig, taskConfig?: TTaskConfig): string[];
   isEnabled(buildConfig: IBuildConfig): boolean;
   protected loadSchema(): Object | undefined;
   log(message: string): void;
   logError(message: string): void;
   logVerbose(message: string): void;
   logWarning(message: string): void;
-  mergeConfig(taskConfig: TASK_CONFIG): void;
+  mergeConfig(taskConfig: TTaskConfig): void;
   name: string;
   onRegister(): void;
   readJSONSync(localPath: string): Object | undefined;
-  replaceConfig(taskConfig: TASK_CONFIG): void;
+  replaceConfig(taskConfig: TTaskConfig): void;
   resolvePath(localPath: string): string;
   schema: Object | undefined;
-  setConfig(taskConfig: TASK_CONFIG): void;
-  taskConfig: TASK_CONFIG;
+  setConfig(taskConfig: Partial<TTaskConfig>): void;
+  taskConfig: TTaskConfig;
 }
 
 // @public (undocumented)
@@ -130,7 +137,7 @@ interface ICopyConfig {
 // @public
 interface ICustomGulpTask {
   // (undocumented)
-  (gulp: gulp.Gulp | GulpProxy, buildConfig: IBuildConfig, done?: (failure?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
+  (gulp: typeof Gulp | GulpProxy, buildConfig: IBuildConfig, done?: (failure?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
 }
 
 // @public (undocumented)
@@ -143,7 +150,7 @@ interface IExecutable {
 }
 
 // @public
-export declare function initialize(gulp: gulp.Gulp): void;
+export declare function initialize(gulp: typeof Gulp): void;
 
 // @public (undocumented)
 interface ITsConfigFile<T> {
@@ -187,7 +194,7 @@ export declare function setConfig(config: Partial<IBuildConfig>): void;
 export declare function subTask(taskName: string, fn: ICustomGulpTask): IExecutable;
 
 // @public
-export declare function task(taskName: string, task: IExecutable): IExecutable;
+export declare function task(taskName: string, taskExecutable: IExecutable): IExecutable;
 
 // @public
 enum TestResultState {
@@ -204,12 +211,14 @@ enum TestResultState {
 // @public
 class TypeScriptConfiguration {
   static getGulpTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<ts.Settings>;
+  static getTsConfigFile(config: IBuildConfig): ITsConfigFile<ts.Settings>;
   static getTypescriptCompiler(): any;
-  static setTypescriptCompiler(typescript: any): void;
+  static setTypescriptCompiler(typescriptOverride: any): void;
 }
 
 // @public (undocumented)
 class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
+  constructor();
   // (undocumented)
   executeTask(gulp: gulpType.Gulp, completeCallback: (error?: string) => void): void;
   // (undocumented)
@@ -217,10 +226,6 @@ class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   // (undocumented)
   loadSchema(): Object;
   mergeConfig(config: ITypeScriptTaskConfig): void;
-  // (undocumented)
-  name: string;
-  // (undocumented)
-  taskConfig: ITypeScriptTaskConfig;
 }
 
 // @public
@@ -236,11 +241,12 @@ export declare function verbose(...args: Array<string | Chalk.ChalkChain>): void
 export declare function warn(...args: Array<string | Chalk.ChalkChain>): void;
 
 // @public
-export declare function watch(watchMatch: string | string[], task: IExecutable): IExecutable;
+export declare function watch(watchMatch: string | string[], taskExecutable: IExecutable): IExecutable;
 
 // WARNING: Unsupported export: buildTasks
 // WARNING: Unsupported export: testTasks
 // WARNING: Unsupported export: defaultTasks
+// WARNING: Unsupported export: cleanFlag
 // WARNING: Unsupported export: clean
 // WARNING: Unsupported export: apiExtractor
 // WARNING: Unsupported export: typescript

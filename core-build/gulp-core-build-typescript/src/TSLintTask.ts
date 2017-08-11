@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { GulpTask, IBuildConfig } from '@microsoft/gulp-core-build';
+
 import gulpType = require('gulp');
 /* tslint:disable:typedef */
 const md5 = require('md5');
@@ -14,11 +15,20 @@ import * as TSLint from 'tslint';
 import * as path from 'path';
 import * as ts from 'typescript';
 
+import {
+  ITsConfigFile,
+  TypeScriptConfiguration
+} from './TypeScriptConfiguration';
+
+export interface ITSLintRulesFile {
+  rules?: { [name: string]: any }; /* tslint:disable-line:no-any */
+}
+
 export interface ITSLintTaskConfig {
   /**
    * A TsLint configuration objects
    */
-  lintConfig?: any; /* tslint:disable-line:no-any */
+  lintConfig?: ITSLintRulesFile;
 
   /**
    * Directories to search for custom linter rules
@@ -56,48 +66,50 @@ export interface ITSLintTaskConfig {
 }
 
 export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
-  public name: string = 'tslint';
-  public taskConfig: ITSLintTaskConfig = {
-    // lintConfig: require('../lib/defaultTslint.json'),
-    lintConfig: {},
-    reporter: (result: TSLint.LintResult, file: gutil.File, options: ITSLintTaskConfig): void => {
-      for (const failure of result.failures) {
-        const pathFromRoot: string = path.relative(this.buildConfig.rootPath, file.path);
+  private _defaultLintRules: any = undefined; // tslint:disable-line:no-any
 
-        const start: ts.LineAndCharacter = failure.getStartPosition().getLineAndCharacter();
-        if (this.taskConfig.displayAsWarning) {
-          this.fileWarning(
-            pathFromRoot,
-            start.line + 1,
-            start.character + 1,
-            failure.getRuleName(),
-            failure.getFailure());
-        } else {
-          this.fileError(
-            pathFromRoot,
-            start.line + 1,
-            start.character + 1,
-            failure.getRuleName(),
-            failure.getFailure());
-        }
+  constructor() {
+    super(
+      'tslint',
+      {
+        // lintConfig: require('../lib/defaultTslint.json'),
+        lintConfig: {},
+        reporter: (result: TSLint.LintResult, file: gutil.File, options: ITSLintTaskConfig): void => {
+          for (const failure of result.failures) {
+            const pathFromRoot: string = path.relative(this.buildConfig.rootPath, file.path);
+
+            const start: ts.LineAndCharacter = failure.getStartPosition().getLineAndCharacter();
+            if (this.taskConfig.displayAsWarning) {
+              this.fileWarning(
+                pathFromRoot,
+                start.line + 1,
+                start.character + 1,
+                failure.getRuleName(),
+                failure.getFailure());
+            } else {
+              this.fileError(
+                pathFromRoot,
+                start.line + 1,
+                start.character + 1,
+                failure.getRuleName(),
+                failure.getFailure());
+            }
+          }
+        },
+        rulesDirectory: ((): string[] => {
+          const msCustomRulesMain: string = require.resolve('tslint-microsoft-contrib');
+          const msCustomRulesDirectory: string = path.dirname(msCustomRulesMain);
+          return TSLint.Configuration.getRulesDirectories([msCustomRulesDirectory], __dirname);
+        })(),
+        sourceMatch: [
+          'src/**/*.ts',
+          'src/**/*.tsx'
+        ],
+        removeExistingRules: false,
+        useDefaultConfigAsBase: true
       }
-    },
-    rulesDirectory: ((): string[] => {
-      const msCustomRulesMain: string = require.resolve('tslint-microsoft-contrib');
-      const msCustomRulesDirectory: string = path.dirname(msCustomRulesMain);
-      return TSLint.Configuration.getRulesDirectories([msCustomRulesDirectory], __dirname);
-    })(),
-    sourceMatch: [
-      'src/**/*.ts',
-      'src/**/*.tsx'
-    ],
-    removeExistingRules: false,
-    useDefaultConfigAsBase: true
-  };
-
-  /* tslint:disable:no-any */
-  private _defaultLintRules: any = undefined;
-  /* tslint:enable:no-any */
+    );
+  }
 
   public mergeConfig(config: ITSLintTaskConfig): void {
     this._prepareUpdateConfig(config);
@@ -114,7 +126,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
   }
 
   public executeTask(gulp: gulpType.Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream | void {
-    const taskScope: TSLintTask = this;
+    const self: TSLintTask = this;
 
     if (!this.taskConfig.sourceMatch) {
       completeCallback('taskConfig.sourceMatch must be defined');
@@ -126,16 +138,35 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
       return;
     }
 
-    const activeLintRules: any = taskScope._loadLintRules(); // tslint:disable-line:no-any
+    const lintRulesFile: ITSLintRulesFile = self._loadLintConfiguration();
 
     // Write out the active lint rules for easier debugging
     if (!fs.existsSync(path.dirname(this._getTsLintFilepath()))) {
       fs.mkdirSync(path.dirname(this._getTsLintFilepath()));
     }
 
-    fs.writeFileSync(this._getTsLintFilepath(), JSON.stringify(activeLintRules, undefined, 2));
+    fs.writeFileSync(this._getTsLintFilepath(), JSON.stringify(lintRulesFile, undefined, 2));
 
     const cached = require('gulp-cache'); // tslint:disable-line
+
+    let program: ts.Program | undefined = undefined;
+    try {
+      const tsconfigFileData: ITsConfigFile<Object> = TypeScriptConfiguration.getTsConfigFile(this.buildConfig);
+      const tsconfigFilePath: string =
+        path.join(
+          this.buildConfig.rootPath,
+          this.buildConfig.tempFolder,
+          'tslint-tsconfig.json'
+        );
+      fs.writeFileSync(tsconfigFilePath, JSON.stringify(tsconfigFileData, undefined, 2));
+
+      program = TSLint.Linter.createProgram(
+        tsconfigFilePath,
+        path.join(this.buildConfig.rootPath, this.buildConfig.srcFolder)
+      );
+    } catch (e) {
+      this.logWarning(`Unable to create a TS program for TSLint. Some lint rules might not work correctly. Error ${e}`);
+    }
 
     return gulp.src(this.taskConfig.sourceMatch)
       .pipe(cached(
@@ -143,7 +174,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
           file: gutil.File,
           encoding: string,
           callback: (encoding?: string, file?: gutil.File) => void): void {
-          taskScope.logVerbose(file.path);
+          self.logVerbose(file.path);
 
           // Lint the file
           if (file.isNull()) {
@@ -160,12 +191,14 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
             fix: false,
             formatter: 'json',
             formattersDirectory: undefined, // not used, use reporters instead
-            rulesDirectory: taskScope.taskConfig.rulesDirectory || []
+            rulesDirectory: self.taskConfig.rulesDirectory || []
           };
 
-          const linter: TSLint.Linter = new TSLint.Linter(options);
+          const linter: TSLint.Linter = new TSLint.Linter(options, program);
 
-          linter.lint(file.relative, file.contents.toString(), activeLintRules);
+          const configuration: TSLint.Configuration.IConfigurationFile =
+            TSLint.Configuration.parseConfigFile(lintRulesFile);
+          linter.lint(file.path, file.contents.toString(), configuration);
 
           const result: TSLint.LintResult = linter.getResult();
 
@@ -174,8 +207,8 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
           /* tslint:enable:no-string-literal */
 
           // We can't get here if reporter is undefined
-          if (result.failureCount > 0 && taskScope.taskConfig.reporter) {
-            taskScope.taskConfig.reporter(result, file, taskScope.taskConfig);
+          if (result.errorCount > 0 && self.taskConfig.reporter) {
+            self.taskConfig.reporter(result, file, self.taskConfig);
           }
 
           this.push(file);
@@ -183,8 +216,8 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
         }), {
           // Scope the cache to a combination of the lint rules and the build path
           name: md5(
-            TSLint.Linter.VERSION + JSON.stringify(activeLintRules) +
-            taskScope.name + taskScope.buildConfig.rootPath),
+            TSLint.Linter.VERSION + JSON.stringify(lintRulesFile) +
+            self.name + self.buildConfig.rootPath),
           // What on the result indicates it was successful
           success: (jshintedFile: gutil.File): boolean => {
             /* tslint:disable:no-string-literal */
@@ -220,7 +253,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
     return path.join(this.buildConfig.rootPath, this.buildConfig.tempFolder, 'tslint.json');
   }
 
-  private _loadLintRules(): any { // tslint:disable-line:no-any
+  private _loadLintConfiguration(): ITSLintRulesFile { // tslint:disable-line:no-any
     if (!this._defaultLintRules) {
       this._defaultLintRules = require('./defaultTslint.json');
     }

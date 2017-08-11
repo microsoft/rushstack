@@ -1,6 +1,18 @@
 # Change Log - @microsoft/loader-load-themed-styles
 
-This log was last generated on Wed, 28 Jun 2017 22:32:16 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Aug 2017 23:10:36 GMT and should not be manually modified.
+
+## 1.4.0
+Tue, 08 Aug 2017 23:10:36 GMT
+
+### Minor changes
+
+- Add "async" configuration option to call loadStyles in async mode.
+
+## 1.3.1
+Fri, 21 Jul 2017 01:02:30 GMT
+
+*Changes not tracked*
 
 ## 1.3.0
 Wed, 28 Jun 2017 22:32:16 GMT
