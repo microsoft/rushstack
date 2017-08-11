@@ -138,6 +138,12 @@
       ]
     },
     {
+      "packageName": "api-documenter",
+      "projectFolder": "libraries/api-documenter",
+      "reviewCategory": "libraries",
+      "shouldPublish": false  // not published; this is a code sample for api-extractor
+    },
+    {
       "packageName": "@microsoft/decorators",
       "projectFolder": "libraries/decorators",
       "reviewCategory": "libraries",
