@@ -228,6 +228,13 @@ export default class LinkManager {
     commonPackageLookup: PackageLookup,
     rushLinkJson: IRushLinkJson): void {
 
+    // Naively, PNPM creates a directed acyclic graph, rather than a tree
+    // thus if sp-http and sp-core-library both depend on GCB@1.2.3,
+    // and GCB@1.2.3 depends on gulp-typescript, then for both cases it must
+    // be the exact same version of gulp-typescript
+    // thus, we only need to link the direct dependencies of this project to the
+    // common folder
+
     let commonProjectPackage: Package = commonRootPackage.getChildByName(project.tempProjectName);
     if (!commonProjectPackage) {
       // Normally we would expect the temp project to have been installed into the common\node_modules
@@ -258,169 +265,121 @@ export default class LinkManager {
       project.projectFolder
     );
 
-    const queue: IQueueItem[] = [];
-    queue.push({
-      commonPackage: commonProjectPackage,
-      localPackage: localProjectPackage,
-      cyclicSubtreeRoot: undefined
-    });
+    // A project from somewhere under "common/temp/node_modules"
+    const commonPackage: Package = commonProjectPackage;
 
-    // tslint:disable-next-line:no-constant-condition
-    while (true) {
-      const queueItem: IQueueItem = queue.shift();
-      if (!queueItem) {
-        break;
-      }
+    // A symlinked virtual package somewhere under "this-project/node_modules",
+    // where "this-project" corresponds to the "project" parameter for linkProject().
+    const localPackage: Package = localProjectPackage;
 
-      // A project from somewhere under "common/temp/node_modules"
-      const commonPackage: Package = queueItem.commonPackage;
+    // NOTE: It's important that this traversal follows the dependencies in the Common folder,
+    // because for Rush projects this will be the union of
+    // devDependencies / dependencies / optionalDependencies.
+    for (const dependency of commonPackage.dependencies) {
 
-      // A symlinked virtual package somewhere under "this-project/node_modules",
-      // where "this-project" corresponds to the "project" parameter for linkProject().
-      const localPackage: Package = queueItem.localPackage;
+      // Should this be a "local link" to a top-level Rush project (i.e. versus a regular link
+      // into the Common folder)?
+      const matchedRushPackage: RushConfigurationProject = this._rushConfiguration.getProjectByName(dependency.name);
 
-      // If we encounter a dependency listed in cyclicDependencyProjects, this will be set to the root
-      // of the localPackage subtree where we will stop creating local links.
-      const cyclicSubtreeRoot: Package = queueItem.cyclicSubtreeRoot;
+      if (matchedRushPackage) {
+        const matchedVersion: string = matchedRushPackage.packageJson.version;
 
-      // NOTE: It's important that this traversal follows the dependencies in the Common folder,
-      // because for Rush projects this will be the union of
-      // devDependencies / dependencies / optionalDependencies.
-      for (const dependency of commonPackage.dependencies) {
-        let startingCyclicSubtree: boolean;
+        // The dependency name matches an Rush project, but are there any other reasons not
+        // to create a local link?
+        if (project.cyclicDependencyProjects.has(dependency.name)) {
+          // DO NOT create a local link, because we will want to link to the common folder version
+        } else if (dependency.kind !== PackageDependencyKind.LocalLink
+          && !semver.satisfies(matchedVersion, dependency.versionRange)) {
+          // DO NOT create a local link, because the local project's version isn't SemVer compatible.
 
-        // Should this be a "local link" to a top-level Rush project (i.e. versus a regular link
-        // into the Common folder)?
-        const matchedRushPackage: RushConfigurationProject = this._rushConfiguration.getProjectByName(dependency.name);
+          // (Note that in order to make version bumping work as expected, we ignore SemVer for
+          // immediate dependencies of top-level projects, indicated by PackageDependencyKind.LocalLink.
+          // Is this wise?)
 
-        if (matchedRushPackage) {
-          const matchedVersion: string = matchedRushPackage.packageJson.version;
+          console.log(colors.yellow(`Rush will not locally link ${dependency.name} for ${localPackage.name}`
+            + ` because the requested version "${dependency.versionRange}" is incompatible`
+            + ` with the local version ${matchedVersion}`));
+        } else {
+          // Yes, it is compatible, so create a symlink to the Rush project.
 
-          // The dependency name matches an Rush project, but are there any other reasons not
-          // to create a local link?
-          if (cyclicSubtreeRoot) {
-            // DO NOT create a local link, because this is part of an existing
-            // cyclicDependencyProjects subtree
-          } else if (project.cyclicDependencyProjects.has(dependency.name)) {
-            // DO NOT create a local link, because we are starting a new
-            // cyclicDependencyProjects subtree
-            startingCyclicSubtree = true;
-          } else if (dependency.kind !== PackageDependencyKind.LocalLink
-            && !semver.satisfies(matchedVersion, dependency.versionRange)) {
-            // DO NOT create a local link, because the local project's version isn't SemVer compatible.
-
-            // (Note that in order to make version bumping work as expected, we ignore SemVer for
-            // immediate dependencies of top-level projects, indicated by PackageDependencyKind.LocalLink.
-            // Is this wise?)
-
-            console.log(colors.yellow(`Rush will not locally link ${dependency.name} for ${localPackage.name}`
-              + ` because the requested version "${dependency.versionRange}" is incompatible`
-              + ` with the local version ${matchedVersion}`));
-          } else {
-            // Yes, it is compatible, so create a symlink to the Rush project.
-
-            // If the link is coming from our top-level Rush project, then record a
-            // build dependency in rush-link.json:
-            if (localPackage === localProjectPackage) {
-              let localLinks: string[] = rushLinkJson.localLinks[localPackage.name];
-              if (!localLinks) {
-                localLinks = [];
-                rushLinkJson.localLinks[localPackage.name] = localLinks;
-              }
-              localLinks.push(dependency.name);
+          // If the link is coming from our top-level Rush project, then record a
+          // build dependency in rush-link.json:
+          if (localPackage === localProjectPackage) {
+            let localLinks: string[] = rushLinkJson.localLinks[localPackage.name];
+            if (!localLinks) {
+              localLinks = [];
+              rushLinkJson.localLinks[localPackage.name] = localLinks;
             }
-
-            // Is the dependency already resolved?
-            const resolution: IResolveOrCreateResult = localPackage.resolveOrCreate(dependency.name);
-
-            if (!resolution.found || resolution.found.version !== matchedVersion) {
-              // We did not find a suitable match, so place a new local package that
-              // symlinks to the Rush project
-              const newLocalFolderPath: string = path.join(
-                resolution.parentForCreate.folderPath, 'node_modules', dependency.name);
-
-              const newLocalPackage: Package = Package.createLinkedPackage(
-                dependency.name,
-                matchedVersion,
-                // Since matchingRushProject does not have a parent, its dependencies are
-                // guaranteed to be already fully resolved inside its node_modules folder.
-                [],
-                newLocalFolderPath
-              );
-
-              newLocalPackage.symlinkTargetFolderPath = matchedRushPackage.projectFolder;
-
-              resolution.parentForCreate.addChild(newLocalPackage);
-
-              // (There are no dependencies, so we do not need to push it onto the queue.)
-            }
-
-            continue;
+            localLinks.push(dependency.name);
           }
-        }
-
-        // We can't symlink to an Rush project, so instead we will symlink to a folder
-        // under the "Common" folder
-        const commonDependencyPackage: Package = commonPackage.resolve(dependency.name);
-        if (commonDependencyPackage) {
-          // This is the version that was chosen when "npm install" ran in the common folder
-          const effectiveDependencyVersion: string = commonDependencyPackage.version;
 
           // Is the dependency already resolved?
-          let resolution: IResolveOrCreateResult;
-          if (!cyclicSubtreeRoot || !matchedRushPackage) {
-            // Perform normal module resolution.
-            resolution = localPackage.resolveOrCreate(dependency.name);
-          } else {
-            // We are inside a cyclicDependencyProjects subtree (i.e. cyclicSubtreeRoot != undefined),
-            // and the dependency is a local project (i.e. matchedRushPackage != undefined), so
-            // we use a special module resolution strategy that places everything under the
-            // cyclicSubtreeRoot.
-            resolution = localPackage.resolveOrCreate(dependency.name, cyclicSubtreeRoot);
-          }
+          const resolution: IResolveOrCreateResult = localPackage.resolveOrCreate(dependency.name);
 
-          if (!resolution.found || resolution.found.version !== effectiveDependencyVersion) {
-            // We did not find a suitable match, so place a new local package
-
+          if (!resolution.found || resolution.found.version !== matchedVersion) {
+            // We did not find a suitable match, so place a new local package that
+            // symlinks to the Rush project
             const newLocalFolderPath: string = path.join(
-              resolution.parentForCreate.folderPath, 'node_modules', commonDependencyPackage.name);
+              resolution.parentForCreate.folderPath, 'node_modules', dependency.name);
 
             const newLocalPackage: Package = Package.createLinkedPackage(
-              commonDependencyPackage.name,
-              commonDependencyPackage.version,
-              commonDependencyPackage.dependencies,
+              dependency.name,
+              matchedVersion,
+              // Since matchingRushProject does not have a parent, its dependencies are
+              // guaranteed to be already fully resolved inside its node_modules folder.
+              [],
               newLocalFolderPath
             );
 
-            const commonPackageFromLookup: Package = commonPackageLookup.getPackage(newLocalPackage.nameAndVersion);
-            if (!commonPackageFromLookup) {
-              throw Error(`The ${localPackage.name}@${localPackage.version} package was not found`
-                + ` in the common folder`);
-            }
-            newLocalPackage.symlinkTargetFolderPath = commonPackageFromLookup.folderPath;
-
-            let newCyclicSubtreeRoot: Package = cyclicSubtreeRoot;
-            if (startingCyclicSubtree) {
-              // If we are starting a new subtree, then newLocalPackage will be its root
-              // NOTE: cyclicSubtreeRoot is guaranteed to be undefined here, since we never start
-              // a new tree inside an existing tree
-              newCyclicSubtreeRoot = newLocalPackage;
-            }
+            newLocalPackage.symlinkTargetFolderPath = matchedRushPackage.projectFolder;
 
             resolution.parentForCreate.addChild(newLocalPackage);
-            queue.push({
-              commonPackage: commonDependencyPackage,
-              localPackage: newLocalPackage,
-              cyclicSubtreeRoot: newCyclicSubtreeRoot
-            });
+
+            // (There are no dependencies, so we do not need to push it onto the queue.)
           }
+
+          continue;
+        }
+      }
+
+      // We can't symlink to an Rush project, so instead we will symlink to a folder
+      // under the "Common" folder
+      const commonDependencyPackage: Package = commonPackage.resolve(dependency.name);
+      if (commonDependencyPackage) {
+        // This is the version that was chosen when "npm install" ran in the common folder
+        const effectiveDependencyVersion: string = commonDependencyPackage.version;
+
+        // Is the dependency already resolved?
+        const resolution: IResolveOrCreateResult = localPackage.resolveOrCreate(dependency.name);
+
+        if (!resolution.found || resolution.found.version !== effectiveDependencyVersion) {
+          // We did not find a suitable match, so place a new local package
+
+          const newLocalFolderPath: string = path.join(
+            resolution.parentForCreate.folderPath, 'node_modules', commonDependencyPackage.name);
+
+          const newLocalPackage: Package = Package.createLinkedPackage(
+            commonDependencyPackage.name,
+            commonDependencyPackage.version,
+            commonDependencyPackage.dependencies,
+            newLocalFolderPath
+          );
+
+          const commonPackageFromLookup: Package = commonPackageLookup.getPackage(newLocalPackage.nameAndVersion);
+          if (!commonPackageFromLookup) {
+            throw Error(`The ${localPackage.name}@${localPackage.version} package was not found`
+              + ` in the common folder`);
+          }
+          newLocalPackage.symlinkTargetFolderPath = commonPackageFromLookup.folderPath;
+
+          resolution.parentForCreate.addChild(newLocalPackage);
+        }
+      } else {
+        if (dependency.kind !== PackageDependencyKind.Optional) {
+          throw Error(`The dependency "${dependency.name}" needed by "${localPackage.name}"`
+            + ` was not found the common folder -- do you need to run "rush generate"?`);
         } else {
-          if (dependency.kind !== PackageDependencyKind.Optional) {
-            throw Error(`The dependency "${dependency.name}" needed by "${localPackage.name}"`
-              + ` was not found the common folder -- do you need to run "rush generate"?`);
-          } else {
-            console.log(colors.yellow('Skipping optional dependency: ' + dependency.name));
-          }
+          console.log(colors.yellow('Skipping optional dependency: ' + dependency.name));
         }
       }
     }
