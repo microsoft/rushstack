@@ -22,15 +22,12 @@ interface IConfig {
 let testArray: string[] = [];
 
 class PromiseTask extends GulpTask<IConfig> {
-  public name: string = 'promise';
+  constructor() {
+    super('promise', {});
+  }
 
-  public taskConfig: IConfig = {
-  };
-
-  /* tslint:disable:no-any */
-  public executeTask(gulp: typeof Gulp): Promise<any> {
-  /* tslint:enable:no-any */
-    return new Promise<void>((resolve: () => void, reject: () => void) => {
+  public executeTask(gulp: typeof Gulp): Promise<void> {
+    return new Promise<void>((resolve: () => void) => {
       testArray.push(this.name);
       resolve();
     });
@@ -38,14 +35,11 @@ class PromiseTask extends GulpTask<IConfig> {
 }
 
 class StreamTask extends GulpTask<IConfig> {
-  public name: string = 'stream';
+  constructor() {
+    super('stream', {});
+  }
 
-  public taskConfig: IConfig = {
-  };
-
-  /* tslint:disable:no-any */
-  public executeTask(gulp: typeof Gulp): any {
-    /* tslint:enable:no-any */
+  public executeTask(gulp: typeof Gulp): any { // tslint:disable-line:no-any
     const stream: Readable = new Readable({ objectMode: true });
 
     // Add no opt function to make it compat with through
@@ -72,10 +66,9 @@ class StreamTask extends GulpTask<IConfig> {
 }
 
 class SyncTask extends GulpTask<IConfig> {
-  public name: string = 'sync';
-
-  public taskConfig: IConfig = {
-  };
+  constructor() {
+    super('sync', {});
+  }
 
   public executeTask(gulp: typeof Gulp): void {
     testArray.push(this.name);
@@ -83,10 +76,9 @@ class SyncTask extends GulpTask<IConfig> {
 }
 
 class SyncWithReturnTask extends GulpTask<IConfig> {
-  public name: string = 'sync-with-return';
-
-  public taskConfig: IConfig = {
-  };
+  constructor() {
+    super('sync-with-return', {});
+  }
 
   public executeTask(gulp: typeof Gulp): void {
     testArray.push(this.name);
@@ -94,10 +86,9 @@ class SyncWithReturnTask extends GulpTask<IConfig> {
 }
 
 class CallbackTask extends GulpTask<IConfig> {
-  public name: string = 'callback';
-
-  public taskConfig: IConfig = {
-  };
+  constructor() {
+    super('schema-task', {});
+  }
 
   public executeTask(gulp: typeof Gulp, callback: (error?: string | Error) => void): void {
     testArray.push(this.name);
@@ -110,11 +101,16 @@ interface ISimpleConfig {
 }
 
 class SchemaTask extends GulpTask<ISimpleConfig> {
-  public name: string = 'schema-task';
+  public name: string = '';
 
-  public taskConfig: ISimpleConfig = {
-    shouldDoThings: false
-  };
+  constructor() {
+    super(
+      'schema-task',
+      {
+        shouldDoThings: false
+      }
+    );
+  }
 
   public executeTask(gulp: typeof Gulp, callback: (error?: string | Error) => void): void {
     callback();

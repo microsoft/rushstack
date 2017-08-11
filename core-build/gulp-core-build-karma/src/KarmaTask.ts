@@ -20,12 +20,17 @@ export interface IKarmaTaskConfig {
 }
 
 export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
-  public name: string = 'karma';
+  private _resources: Object;
 
-  public taskConfig: IKarmaTaskConfig = {
-    configPath: './karma.config.js',
-    testMatch: /.+\.test\.js?$/
-  };
+  constructor() {
+    super(
+      'karma',
+      {
+        configPath: './karma.config.js',
+        testMatch: /.+\.test\.js?$/
+      }
+    );
+  }
 
   public get resources(): Object {
     if (!this._resources) {
@@ -45,8 +50,6 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
 
     return this._resources;
   }
-
-  private _resources: Object;
 
   public loadSchema(): Object {
     return require('./karma.schema.json');

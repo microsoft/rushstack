@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-serve",
+      "comment": "Allow the serve task to be extended with new configuration args.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-serve",
+  "email": "iclanton@users.noreply.github.com"
+}
