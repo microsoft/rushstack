@@ -88,7 +88,7 @@ export default class InstallAction extends BaseRushAction {
     try {
       const installManager: InstallManager = new InstallManager(this.rushConfiguration);
 
-      installManager.ensureLocalNpmTool(this._cleanInstallFull.value);
+      installManager.ensureLocalPnpmTool(this._cleanInstallFull.value);
 
       const shrinkwrapFile: ShrinkwrapFile | undefined
         = ShrinkwrapFile.loadFromFile(this.rushConfiguration.committedShrinkwrapFilename);

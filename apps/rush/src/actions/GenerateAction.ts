@@ -81,7 +81,7 @@ export default class GenerateAction extends BaseRushAction {
       return;
     }
 
-    installManager.ensureLocalNpmTool(false);
+    installManager.ensureLocalPnpmTool(false);
 
     installManager.createTempModules();
 
