@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "2.9.1",
+      "tag": "@microsoft/gulp-core-build_v2.9.1",
+      "date": "Sat, 12 Aug 2017 01:03:30 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add missing orchestrator dependency."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.9.0",
       "tag": "@microsoft/gulp-core-build_v2.9.0",
       "date": "Fri, 11 Aug 2017 21:44:05 GMT",

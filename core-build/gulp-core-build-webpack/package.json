@@ -15,7 +15,7 @@
     "test": "gulp"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "2.9.0",
+    "@microsoft/gulp-core-build": "2.9.1",
     "@types/gulp": "3.8.32",
     "@types/node": "6.0.62",
     "gulp": "~3.9.1",
