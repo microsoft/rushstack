@@ -423,7 +423,7 @@ export default class InstallManager {
    */
   public installCommonModules(installType: InstallType): void {
     // Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
-    const pnpmToolFilename: string = this._rushConfiguration.npmToolFilename;
+    const pnpmToolFilename: string = this._rushConfiguration.pnpmToolFilename;
     if (!fsx.existsSync(pnpmToolFilename)) {
       // This normally should never occur -- it indicates that some code path forgot to call
       // InstallManager.ensureLocalPnpmTool().
@@ -468,9 +468,11 @@ export default class InstallManager {
         return;
       }
     } else {
-      console.log(`Deleting the PNPM cache folder`);
-      // This is faster and more thorough than "npm cache clean"
-      this._asyncRecycler.moveFolder(this._rushConfiguration.npmCacheFolder);
+      if (installType !== InstallType.Normal) {
+        console.log(`Deleting the PNPM cache folder`);
+        // This is faster and more thorough than "npm cache clean"
+        this._asyncRecycler.moveFolder(this._rushConfiguration.npmCacheFolder);
+      }
 
       console.log(`Deleting the "npm-tmp" folder`);
       this._asyncRecycler.moveFolder(this._rushConfiguration.npmTmpFolder);

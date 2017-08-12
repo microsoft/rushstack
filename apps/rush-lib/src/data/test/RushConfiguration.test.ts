@@ -39,7 +39,7 @@ describe('RushConfiguration', () => {
     assertPathProperty('npmTmpFolder',
       rushConfiguration.npmTmpFolder, './repo/common/temp/npm-tmp');
     assertPathProperty('npmToolFilename',
-      rushConfiguration.npmToolFilename, './repo/common/temp/npm-local/node_modules/.bin/npm');
+      rushConfiguration.pnpmToolFilename, './repo/common/temp/pnpm-local/node_modules/.bin/pnpm');
     assertPathProperty('rushJsonFolder',
       rushConfiguration.rushJsonFolder, './repo');
     assertPathProperty('rushLinkJsonFilename',

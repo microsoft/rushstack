@@ -110,7 +110,7 @@ export default class GenerateAction extends BaseRushAction {
       console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
       const npmArgs: string [] = ['shrinkwrap'];
       installManager.pushConfigurationNpmArgs(npmArgs);
-      Utilities.executeCommand(this.rushConfiguration.npmToolFilename,
+      Utilities.executeCommand(this.rushConfiguration.pnpmToolFilename,
         npmArgs, this.rushConfiguration.commonTempFolder);
       console.log('"npm shrinkwrap" completed' + os.EOL);
 

@@ -102,7 +102,7 @@ export default class RushConfiguration {
   private _homeFolder: string;
   private _rushLinkJsonFilename: string;
   private _npmToolVersion: string;
-  private _npmToolFilename: string;
+  private _pnpmToolFilename: string;
   private _projectFolderMinDepth: number;
   private _projectFolderMaxDepth: number;
 
@@ -364,8 +364,8 @@ export default class RushConfiguration {
    * been run, then this file may not exist yet.
    * Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
    */
-  public get npmToolFilename(): string {
-    return this._npmToolFilename;
+  public get pnpmToolFilename(): string {
+    return this._pnpmToolFilename;
   }
 
   /**
@@ -545,8 +545,8 @@ export default class RushConfiguration {
     this._rushLinkJsonFilename = path.join(this._commonTempFolder, 'rush-link.json');
 
     this._npmToolVersion = rushConfigurationJson.npmVersion;
-    this._npmToolFilename = path.resolve(path.join(this._commonTempFolder,
-      'npm-local', 'node_modules', '.bin', 'npm'));
+    this._pnpmToolFilename = path.resolve(path.join(this._commonTempFolder,
+      'pnpm-local', 'node_modules', '.bin', 'pnpm'));
 
     this._projectFolderMinDepth = rushConfigurationJson.projectFolderMinDepth !== undefined
       ? rushConfigurationJson.projectFolderMinDepth : 1;
