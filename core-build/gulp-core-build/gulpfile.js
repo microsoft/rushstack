@@ -2,4 +2,4 @@
 
 var build = require('@microsoft/node-library-build');
 
-build.initialize(require('gulp'));kokoks
+build.initialize(require('gulp'));

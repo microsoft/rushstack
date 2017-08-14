@@ -24,4 +24,3 @@ build.task(
 );
 
 build.initialize(require('gulp'));
-ojiji
