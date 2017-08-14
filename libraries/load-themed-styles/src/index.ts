@@ -51,6 +51,7 @@ interface IThemeState {
   theme: ITheme | undefined;
   lastStyleElement: IExtendedHtmlStyleElement;
   registeredStyles: IStyleRecord[];
+  registeredThemableStyles: IStyleRecord[];
   loadStyles: ((processedStyles: string, rawStyles?: string | ThemableArray) => void) | undefined;
   perf: IMeasurement;
   runState: IRunState;
@@ -59,6 +60,7 @@ interface IThemeState {
 interface IStyleRecord {
   styleElement: Element;
   themableStyle: ThemableArray;
+  processedStyleString?: string;
 }
 
 /**
@@ -106,7 +108,8 @@ function initializeThemeState(): IThemeState {
   let state: IThemeState = _root.__themeState__ || {
     theme: undefined,
     lastStyleElement: undefined,
-    registeredStyles: []
+    registeredStyles: [],
+    registeredThemableStyles: []
   };
 
   if (!state.runState) {
@@ -188,6 +191,27 @@ export function flush(): void {
   });
 }
 
+function prepareRegisteredThemableStyles(): ThemableArray {
+  const buffer: ThemableArray[] = [];
+  for (let index: number = 0; index < _themeState.registeredStyles.length; index++) {
+    const styleRecord: IStyleRecord = _themeState.registeredStyles[index];
+    const {
+        themableStyle,
+      styleElement
+      } = styleRecord;
+    const styleString: string = resolveThemableArray(themableStyle);
+    if (styleString !== styleElement.textContent) {
+      _themeState.registeredThemableStyles.push(styleRecord);
+      _themeState.registeredStyles.splice(index, 1);
+      buffer.push(themableStyle);
+    }
+  }
+  for (const styleRecord of _themeState.registeredThemableStyles) {
+    buffer.push(styleRecord.themableStyle);
+  }
+  return [].concat.apply([], buffer);
+}
+
 /**
  * register async loadStyles
  */
@@ -204,13 +228,13 @@ function asyncLoadStyles(): number {
  * @param {string} styleText Style to register.
  * @param {IStyleRecord} styleRecord Existing style record to re-apply.
  */
-function applyThemableStyles(stylesArray: ThemableArray, styleRecord?: IStyleRecord): void {
+function applyThemableStyles(stylesArray: ThemableArray, styleRecord?: IStyleRecord, intoRegisteredThemedStyles?: boolean): void {
   if (_themeState.loadStyles) {
     _themeState.loadStyles(resolveThemableArray(stylesArray), stylesArray);
   } else {
     _injectStylesWithCssText ?
       registerStylesIE(stylesArray, styleRecord) :
-      registerStyles(stylesArray, styleRecord);
+      registerStyles(stylesArray, styleRecord, intoRegisteredThemedStyles);
   }
 }
 
@@ -229,14 +253,22 @@ export function loadTheme(theme: ITheme | undefined): void {
 /**
  * Clear already registered style elements and style records in theme_State object
  */
-export function clearStyles(): void {
-  _themeState.registeredStyles.forEach((styleRecord: IStyleRecord) => {
+export function clearStyles(clearOnlyThemable?: boolean): void {
+  if (!clearOnlyThemable) {
+    clearStylesInternal(_themeState.registeredStyles);
+    _themeState.registeredStyles = [];
+  }
+  clearStylesInternal(_themeState.registeredThemableStyles);
+  _themeState.registeredThemableStyles = [];
+}
+
+function clearStylesInternal(records: IStyleRecord[]): void {
+  records.forEach((styleRecord: IStyleRecord) => {
     const styleElement: HTMLStyleElement = styleRecord && styleRecord.styleElement as HTMLStyleElement;
     if (styleElement && styleElement.parentElement) {
       styleElement.parentElement.removeChild(styleElement);
     }
   });
-  _themeState.registeredStyles = [];
 }
 
 /**
@@ -244,9 +276,9 @@ export function clearStyles(): void {
  */
 function reloadStyles(): void {
   if (_themeState.theme) {
-    for (const styleRecord of _themeState.registeredStyles) {
-      applyThemableStyles(styleRecord.themableStyle, styleRecord);
-    }
+    const buffer: ThemableArray = prepareRegisteredThemableStyles();
+    clearStyles(true);
+    applyThemableStyles(buffer, undefined, true);
   }
 }
 
@@ -334,7 +366,7 @@ export function splitStyles(styles: string): ThemableArray {
  * @param {ThemableArray} styleArray Array of IThemingInstruction objects to register.
  * @param {IStyleRecord} styleRecord May specify a style Element to update.
  */
-function registerStyles(styleArray: ThemableArray, styleRecord?: IStyleRecord): void {
+function registerStyles(styleArray: ThemableArray, styleRecord?: IStyleRecord, intoRegisteredThemedStyles?: boolean): void {
   const head: HTMLHeadElement = document.getElementsByTagName('head')[0];
   const styleElement: HTMLStyleElement = document.createElement('style');
 
@@ -350,10 +382,17 @@ function registerStyles(styleArray: ThemableArray, styleRecord?: IStyleRecord): 
   }
 
   if (!styleRecord) {
-    _themeState.registeredStyles.push({
-      styleElement: styleElement,
-      themableStyle: styleArray
-    });
+    if (intoRegisteredThemedStyles) {
+      _themeState.registeredThemableStyles.push({
+        styleElement: styleElement,
+        themableStyle: styleArray
+      });
+    } else {
+      _themeState.registeredStyles.push({
+        styleElement: styleElement,
+        themableStyle: styleArray
+      });
+    }
   }
 }
 
