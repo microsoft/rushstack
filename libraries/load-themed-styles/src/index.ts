@@ -71,6 +71,7 @@ interface IThemableArrayResolveResult {
   styleString: string;
   themable: boolean;
 }
+
 /**
  * In sync mode, styles are registered as style elements synchronously with loadStyles() call.
  * In async mode, styles are buffered and registered as batch in async timer for performance purpose.
@@ -260,8 +261,7 @@ export function loadTheme(theme: ITheme | undefined): void {
  * @option: specify which group of registered styles should be cleared.
  * Default to be both themable and non-themable styles will be cleared
  */
-export function clearStyles(option?: ClearStyleOptions): void {
-  option = option || ClearStyleOptions.all; // default is to clear all registered styles
+export function clearStyles(option: ClearStyleOptions = ClearStyleOptions.all): void {
   if (option === ClearStyleOptions.all || option === ClearStyleOptions.onlyNonThemable) {
     clearStylesInternal(_themeState.registeredStyles);
     _themeState.registeredStyles = [];
