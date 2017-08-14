@@ -276,9 +276,12 @@ function clearStylesInternal(records: IStyleRecord[]): void {
  */
 function reloadStyles(): void {
   if (_themeState.theme) {
-    const buffer: ThemableArray = prepareRegisteredThemableStyles();
-    clearStyles(true);
-    applyThemableStyles(buffer, undefined, true);
+    const buffer: ThemableArray[] = [];
+    for (const styleRecord of _themeState.registeredStyles) {
+      buffer.push(styleRecord.themableStyle);
+    }
+    clearStyles();
+    applyThemableStyles([].concat.apply([], buffer));
   }
 }
 
