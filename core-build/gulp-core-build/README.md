@@ -154,7 +154,7 @@ build.initializeTasks(
 
 ## addSuppression(suppression: string | RegExp)
 
-Suppresses a warning or an error so it is no longer reported, nor will it cause a build to fail.
+Suppresses a warning or an error message. It will no longer be displayed in the build logs, nor will the warning or error cause the build to fail.
 
 ```typescript
 // Suppresses this exact warning
