@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/load-themed-styles",
+      "comment": "improve loadTheme performance",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/load-themed-styles",
+  "email": "zhiliu@microsoft.com"
+}
