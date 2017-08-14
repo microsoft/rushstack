@@ -151,6 +151,19 @@ build.initializeTasks(
     clean: { /* clean options */ }
   });
 ```
+
+## addSuppression(suppression: string | RegExp)
+
+Suppresses a warning or an error so it is no longer reported, nor will it cause a build to fail.
+
+```typescript
+// Suppresses this exact warning
+build.addSuppression("Warning - tslint /foo/bar/test.tsx no-any")
+
+// Suppresses anything with "tslint"
+build.addSuppression(/tslint/)
+```
+
 # Building gulp-core-build
 1. ```npm install --force```
 2. ```gulp```
