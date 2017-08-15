@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import {
+  IDocMethod
+} from '@microsoft/api-extractor/lib/IDocItem';
+
 export class RenderingHelpers {
   /**
    * Used to validate a data structure before writing.  Reports an error if there
@@ -41,5 +45,9 @@ export class RenderingHelpers {
   public static getUnscopedPackageName(packageName: string): string {
     // If there is a "/", return everything after the last "/"
     return packageName.split('/').slice(-1)[0];
+  }
+
+  public static getConciseSignature(methodName: string, method: IDocMethod): string {
+    return methodName + '(' + Object.keys(method.parameters).join(', ') + ')';
   }
 }

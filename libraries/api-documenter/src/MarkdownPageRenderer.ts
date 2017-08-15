@@ -46,7 +46,7 @@ export class MarkdownPageRenderer extends BasePageRenderer {
     console.log('Writing: ' + filename + os.EOL);
 
     const writer: SimpleWriter = new SimpleWriter();
-    writer.writeLine('<!-- ' + domPage.docId + ' -->');
+    writer.writeLine('<!-- docId=' + domPage.docId + ' -->');
     writer.writeLine();
 
     writer.writeLine('# ' + domPage.title);
@@ -86,6 +86,11 @@ export class MarkdownPageRenderer extends BasePageRenderer {
           if (element.bold) {
             writer.write('**');
           }
+          break;
+        case 'code':
+          writer.write('`');
+          writer.write(element.code);
+          writer.write('`');
           break;
         case 'doc-link':
           writer.write('[');

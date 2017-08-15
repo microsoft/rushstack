@@ -49,12 +49,8 @@ export class Documenter {
 
     const docPackage: IDocPackage = apiJsonFile.docPackage;
 
-    const domPage: IDomPage = {
-      kind: 'page',
-      title: `${unscopedPackageName} package`,
-      docId: RenderingHelpers.getDocId(apiJsonFile.packageName),
-      elements: []
-    };
+    const domPage: IDomPage = Domifier.createPage(`${unscopedPackageName} package`,
+      RenderingHelpers.getDocId(apiJsonFile.packageName));
 
     domPage.elements.push(...Domifier.renderDocElements(apiJsonFile.docPackage.summary));
 
@@ -71,27 +67,36 @@ export class Documenter {
     for (const exportName of Object.keys(docPackage.exports)) {
       const docItem: IDocItem = docPackage.exports[exportName];
 
-      const itemName: DomBasicText[] =
-        [ Domifier.createDocLink(exportName, RenderingHelpers.getDocId(apiJsonFile.packageName, exportName)) ];
+      const docItemTitle: DomBasicText[] = [
+        Domifier.createDocLink(
+          [ Domifier.createCode(exportName, 'javascript') ],
+          RenderingHelpers.getDocId(apiJsonFile.packageName, exportName))
+      ];
 
       switch (docItem.kind) {
         case 'class':
           classesTable.rows.push(
             Domifier.createTableRow([
-              itemName,
+              docItemTitle,
               Domifier.renderDocElements(docItem.summary)
             ])
           );
+          this._writeClassPage(docItem, exportName, apiJsonFile, renderer);
           break;
         case 'interface':
           interfacesTable.rows.push(
             Domifier.createTableRow([
-              itemName,
+              docItemTitle,
               Domifier.renderDocElements(docItem.summary)
             ])
           );
           break;
       }
+    }
+
+    if (docPackage.remarks) {
+      domPage.elements.push(Domifier.createHeading1('Remarks'));
+      domPage.elements.push(...Domifier.renderDocElements(docPackage.remarks));
     }
 
     if (classesTable.rows.length > 0) {
@@ -102,6 +107,64 @@ export class Documenter {
     if (interfacesTable.rows.length > 0) {
       domPage.elements.push(Domifier.createHeading1('Interfaces'));
       domPage.elements.push(interfacesTable);
+    }
+
+    renderer.writePage(domPage);
+  }
+
+  private _writeClassPage(docClass: IDocClass, className: string, apiJsonFile: ApiJsonFile,
+    renderer: BasePageRenderer): void {
+
+    // TODO: Show concise generic parameters with class name
+    const domPage: IDomPage = Domifier.createPage(`${className} class`,
+      RenderingHelpers.getDocId(apiJsonFile.packageName, className));
+
+    domPage.elements.push(...Domifier.renderDocElements(apiJsonFile.docPackage.summary));
+
+    domPage.elements.push(Domifier.createHeading1('Constructor'));
+
+    // TODO: pending WBT fix
+    domPage.elements.push(...Domifier.createTextElements('Constructs a new instance of the '));
+    domPage.elements.push(Domifier.createCode(className));
+    domPage.elements.push(...Domifier.createTextElements(' class'));
+
+    const methodsTable: IDomTable = Domifier.createTable([
+      Domifier.createTextElements('Method'),
+      Domifier.createTextElements('Access Modifier'),
+      Domifier.createTextElements('Returns'),
+      Domifier.createTextElements('Description'),
+    ]);
+
+    for (const memberName of Object.keys(docClass.members)) {
+      const member: IDocMember = docClass.members[memberName];
+      switch (member.kind) {
+        case 'method':
+          const methodTitle: DomBasicText[] = [
+            Domifier.createDocLink(
+              [Domifier.createCode(RenderingHelpers.getConciseSignature(memberName, member), 'javascript')],
+              RenderingHelpers.getDocId(apiJsonFile.packageName, className, memberName))
+          ];
+
+          methodsTable.rows.push(
+            Domifier.createTableRow([
+              methodTitle,
+              [Domifier.createCode(member.accessModifier ? member.accessModifier.toString() : '', 'javascript')],
+              [Domifier.createCode(member.returnValue ? member.returnValue.type : '', 'javascript')],
+              Domifier.renderDocElements(member.summary)
+            ])
+          );
+          break;
+      }
+    }
+
+    if (methodsTable.rows.length > 0) {
+      domPage.elements.push(Domifier.createHeading1('Methods'));
+      domPage.elements.push(methodsTable);
+    }
+
+    if (docClass.remarks) {
+      domPage.elements.push(Domifier.createHeading1('Remarks'));
+      domPage.elements.push(...Domifier.renderDocElements(docClass.remarks));
     }
 
     renderer.writePage(domPage);

@@ -24,7 +24,11 @@ import {
   IDomTableRow,
   IDomTableCell,
   IDomHeading1,
-  IDomHeading2
+  IDomHeading2,
+  IDomPage,
+  IDomCode,
+  DomLinkText,
+  DomCodeHighlighter
 } from './SimpleDom';
 
 import { RenderingHelpers } from './RenderingHelpers';
@@ -51,16 +55,32 @@ export class Domifier {
     }
   }
 
-  public static createDocLink(text: string, targetDocId: string): IDomDocLink {
-    if (!text) {
+  public static createDocLink(textElements: DomLinkText[], targetDocId: string): IDomDocLink {
+    if (!textElements.length) {
       throw new Error('Missing text for doc link');
     }
 
     return {
       kind: 'doc-link',
-      elements: Domifier.createTextElements(text),
+      elements: textElements,
       targetDocId: targetDocId
     } as IDomDocLink;
+  }
+
+  public static createDocLinkFromText(text: string, targetDocId: string): IDomDocLink {
+    if (!text) {
+      throw new Error('Missing text for doc link');
+    }
+
+    return Domifier.createDocLink(Domifier.createTextElements(text), targetDocId);
+  }
+
+  public static createCode(code: string, highlighter?: DomCodeHighlighter): IDomCode {
+    return {
+      kind: 'code',
+      code: code,
+      highlighter: highlighter || 'plain'
+    } as IDomCode;
   }
 
   public static createHeading1(text: string): IDomHeading1 {
@@ -108,6 +128,15 @@ export class Domifier {
     } as IDomTable;
   }
 
+  public static createPage(title: string, docId: string): IDomPage {
+    return {
+      kind: 'page',
+      title: title,
+      docId: docId,
+      elements: []
+    } as IDomPage;
+  }
+
   public static renderDocElements(docElements: IDocElement[] | undefined): DomBasicText[] {
     if (!docElements) {
       return [];
@@ -132,7 +161,7 @@ export class Domifier {
               }
             }
             result.push(
-              Domifier.createDocLink(linkText,
+              Domifier.createDocLinkFromText(linkText,
                 RenderingHelpers.getDocId(linkDocElement.packageName || '', linkDocElement.exportName,
                   linkDocElement.memberName)
               )
