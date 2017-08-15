@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "loader-utils": "~1.1.0",
-    "@microsoft/load-themed-styles": "~1.7.0"
+    "@microsoft/load-themed-styles": "~1.7.1"
   },
   "devDependencies": {
     "@types/mocha": "2.2.38",
