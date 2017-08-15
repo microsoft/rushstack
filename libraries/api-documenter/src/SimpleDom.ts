@@ -64,16 +64,6 @@ export interface IDomNoteBox {
   elements: DomBasicText[];
 }
 
-export interface ITableCell {
-  kind: 'table-cell';
-  elements: DomBasicText[];
-}
-
-export interface IDomTableRow {
-  kind: 'table-row';
-  cells: ITableCell[];
-}
-
 export interface IDomTable {
   kind: 'table';
   header?: IDomTableRow;
@@ -84,6 +74,16 @@ export type DomTopLevelElement = DomBasicText | IDomHeading1 | IDomHeading2 | ID
   | IDomNoteBox | IDomTable;
 
 // ----------------------------------------------------------------------------
+export interface IDomTableCell {
+  kind: 'table-cell';
+  elements: DomBasicText[];
+}
+
+export interface IDomTableRow {
+  kind: 'table-row';
+  cells: IDomTableCell[];
+}
+
 export interface IDomPage {
   kind: 'page';
 
@@ -92,3 +92,5 @@ export interface IDomPage {
 
   elements: DomTopLevelElement[];
 }
+
+export type DomElement = DomTopLevelElement | IDomTableCell | IDomTableRow | IDomPage;

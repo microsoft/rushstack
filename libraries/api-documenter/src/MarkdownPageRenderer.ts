@@ -7,7 +7,7 @@ import * as path from 'path';
 
 import {
   IDomPage,
-  DomTopLevelElement
+  DomElement
 } from './SimpleDom';
 
 import { BasePageRenderer } from './BasePageRenderer';
@@ -23,6 +23,13 @@ class SimpleWriter {
     this._buffer += s + '\n';
   }
 
+  // Adds a newline if the file pointer is not already at the start of the line
+  public finishLine(): void {
+    if (this._buffer.substr(-1,1) !== '\n') {
+      this.write('\n');
+    }
+  }
+
   public toString(): string {
     return this._buffer;
   }
@@ -34,7 +41,7 @@ export class MarkdownPageRenderer extends BasePageRenderer {
   }
 
   public writePage(domPage: IDomPage): void { // abstract
-    const filename: string = path.join(this.outputFolder, domPage.docId + this.outputFileExtension);
+    const filename: string = path.join(this.outputFolder, this.getFilenameForDocId(domPage.docId));
 
     console.log('Writing: ' + filename + os.EOL);
 
@@ -53,40 +60,84 @@ export class MarkdownPageRenderer extends BasePageRenderer {
   private _getEscapedText(text: string): string {
     const textWithBackslashes: string = text
       .replace('\\', '\\\\')  // first replace the escape character
-      .replace(/[\*\#\(\)\[\]\_\&]/, (x) => '\\' + x); // then escape any special characters
+      .replace(/[\*\#\[\]\_]/g, (x) => '\\' + x); // then escape any special characters
     return textWithBackslashes
+      .replace('&', '&amp;')
       .replace('<', '&lt;')
       .replace('>', '&gt;');
   }
 
-  private _writeElements(elements: DomTopLevelElement[], writer: SimpleWriter): void {
+  private _writeElements(elements: DomElement[], writer: SimpleWriter): void {
     for (const element of elements) {
       switch (element.kind) {
         case 'text':
-          const escapedText: string = this._getEscapedText(element.content);
-
           if (element.bold) {
-            writer.write('**' + escapedText + '**');
-          } else if (element.italics) {
-            writer.write('_' + escapedText + '_');
-          } else {
-            writer.write(element.content);
+            writer.write('**');
+          }
+          if (element.italics) {
+            writer.write('_');
+          }
+
+          writer.write(this._getEscapedText(element.content));
+
+          if (element.italics) {
+            writer.write('_');
+          }
+          if (element.bold) {
+            writer.write('**');
           }
           break;
+        case 'doc-link':
+          writer.write('[');
+          this._writeElements(element.elements, writer);
+          writer.write(`](./${this.getFilenameForDocId(element.targetDocId)})`);
+          break;
+        case 'web-link':
+          writer.write('[');
+          this._writeElements(element.elements, writer);
+          writer.write(`](${element.targetUrl})`);
+          break;
         case 'paragraph':
-          writer.writeLine();
+          writer.finishLine();
           writer.writeLine();
           break;
         case 'break':
           writer.writeLine('<br/>');
           break;
         case 'heading1':
+          writer.finishLine();
           writer.writeLine();
           writer.writeLine('## ' + this._getEscapedText(element.text));
+          writer.writeLine();
           break;
         case 'heading2':
+          writer.finishLine();
           writer.writeLine();
           writer.writeLine('### ' + this._getEscapedText(element.text));
+          writer.writeLine();
+          break;
+        case 'table':
+          writer.finishLine();
+          writer.writeLine('<table>');
+          if (element.header) {
+            writer.writeLine('  <tr>');
+            for (const cell of element.header.cells) {
+              writer.write('    <th>');
+              this._writeElements(cell.elements, writer);
+              writer.writeLine('</th>');
+            }
+            writer.writeLine('  </tr>');
+          }
+          for (const row of element.rows) {
+            writer.writeLine('  <tr>');
+            for (const cell of row.cells) {
+              writer.write('    <td>');
+              this._writeElements(cell.elements, writer);
+              writer.writeLine('</td>');
+            }
+            writer.writeLine('  </tr>');
+          }
+          writer.writeLine('</table>');
           break;
         default:
           throw new Error('Unsupported element kind: ' + element.kind);

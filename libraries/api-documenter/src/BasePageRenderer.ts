@@ -28,4 +28,8 @@ export abstract class BasePageRenderer {
       }
     }
   }
+
+  protected getFilenameForDocId(docId: string): string {
+    return docId + this.outputFileExtension;
+  }
 }

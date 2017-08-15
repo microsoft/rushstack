@@ -19,7 +19,12 @@ import {
   IDomWebLink,
   IDomText,
   IDomParagraph,
-  IDomLineBreak
+  IDomLineBreak,
+  IDomTable,
+  IDomTableRow,
+  IDomTableCell,
+  IDomHeading1,
+  IDomHeading2
 } from './SimpleDom';
 
 import { RenderingHelpers } from './RenderingHelpers';
@@ -32,31 +37,75 @@ export class Domifier {
     kind: 'paragraph'
   };
 
-  public static createText(text: string): IDomText[] {
-    if (!text) {
+  public static createTextElements(text: string): IDomText[] {
+    const trimmed: string = text;
+    if (!trimmed) {
       return [];
     } else {
       return [
         {
           kind: 'text',
-          content: text
+          content: trimmed
         } as IDomText
       ];
     }
   }
 
-  public static createDocLink(text: string, targetDocId: string): IDomDocLink[] {
+  public static createDocLink(text: string, targetDocId: string): IDomDocLink {
     if (!text) {
       throw new Error('Missing text for doc link');
     }
 
-    return [
-      {
-        kind: 'doc-link',
-        elements: Domifier.createText(text),
-        targetDocId: targetDocId
-      } as IDomDocLink
-    ];
+    return {
+      kind: 'doc-link',
+      elements: Domifier.createTextElements(text),
+      targetDocId: targetDocId
+    } as IDomDocLink;
+  }
+
+  public static createHeading1(text: string): IDomHeading1 {
+    return {
+      kind: 'heading1',
+      text: text
+    };
+  }
+
+  public static createHeading2(text: string): IDomHeading2 {
+    return {
+      kind: 'heading2',
+      text: text
+    };
+  }
+
+  public static createTableRow(cellValues: DomBasicText[][] | undefined = undefined): IDomTableRow {
+    const row: IDomTableRow = {
+      kind: 'table-row',
+      cells: []
+    };
+
+    if (cellValues) {
+      for (const cellValue of cellValues) {
+        const cell: IDomTableCell = {
+          kind: 'table-cell',
+          elements: cellValue
+        };
+        row.cells.push(cell);
+      }
+    }
+
+    return row;
+  }
+
+  public static createTable(headerCellValues: DomBasicText[][] | undefined = undefined): IDomTable {
+    let header: IDomTableRow | undefined = undefined;
+    if (headerCellValues) {
+      header = Domifier.createTableRow(headerCellValues);
+    }
+    return {
+      kind: 'table',
+      header: header,
+      rows: []
+    } as IDomTable;
   }
 
   public static renderDocElements(docElements: IDocElement[] | undefined): DomBasicText[] {
@@ -70,9 +119,7 @@ export class Domifier {
       switch (docElement.kind) {
         case 'textDocElement':
           const textDocElement: ITextElement = docElement as ITextElement;
-          result.push(
-            ...Domifier.createText(textDocElement.value)
-          );
+          result.push(...Domifier.createTextElements(textDocElement.value));
           break;
         case 'linkDocElement':
           const linkDocElement: ILinkDocElement = docElement as ILinkDocElement;
@@ -85,7 +132,7 @@ export class Domifier {
               }
             }
             result.push(
-              ...Domifier.createDocLink(linkText,
+              Domifier.createDocLink(linkText,
                 RenderingHelpers.getDocId(linkDocElement.packageName || '', linkDocElement.exportName,
                   linkDocElement.memberName)
               )
@@ -94,7 +141,7 @@ export class Domifier {
             result.push(
               {
                 kind: 'web-link',
-                elements: Domifier.createText(linkDocElement.value || linkDocElement.targetUrl),
+                elements: Domifier.createTextElements(linkDocElement.value || linkDocElement.targetUrl),
                 targetUrl: linkDocElement.targetUrl
               } as IDomWebLink
             );
@@ -103,7 +150,7 @@ export class Domifier {
         case 'seeDocElement':
           const seeDocElement: ISeeDocElement = docElement as ISeeDocElement;
           result.push(
-            ...Domifier.createText('see ') // @todo
+            ...Domifier.createTextElements('see ') // @todo
           );
           result.push(...Domifier.renderDocElements(seeDocElement.seeElements));
           break;
@@ -112,5 +159,4 @@ export class Domifier {
 
     return result;
   }
-
 }

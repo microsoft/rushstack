@@ -11,7 +11,12 @@ import {
   IDocItem
 } from '@microsoft/api-extractor/lib/IDocItem';
 
-import { IDomPage } from './SimpleDom';
+import {
+  IDomPage,
+  IDomTable,
+  IDomTableRow,
+  DomBasicText
+} from './SimpleDom';
 
 import { ApiJsonFile } from './ApiJsonFile';
 import { BasePageRenderer } from './BasePageRenderer';
@@ -52,7 +57,52 @@ export class Documenter {
     };
 
     domPage.elements.push(...Domifier.renderDocElements(apiJsonFile.docPackage.summary));
-    domPage.elements.push(Domifier.PARAGRAPH);
+
+    const classesTable: IDomTable = Domifier.createTable([
+      Domifier.createTextElements('Class'),
+      Domifier.createTextElements('Description')
+    ]);
+
+    const interfacesTable: IDomTable = Domifier.createTable([
+      Domifier.createTextElements('Interface'),
+      Domifier.createTextElements('Description')
+    ]);
+
+    for (const exportName of Object.keys(docPackage.exports)) {
+      const docItem: IDocItem = docPackage.exports[exportName];
+
+      const itemName: DomBasicText[] =
+        [ Domifier.createDocLink(exportName, RenderingHelpers.getDocId(apiJsonFile.packageName, exportName)) ];
+
+      switch (docItem.kind) {
+        case 'class':
+          classesTable.rows.push(
+            Domifier.createTableRow([
+              itemName,
+              Domifier.renderDocElements(docItem.summary)
+            ])
+          );
+          break;
+        case 'interface':
+          interfacesTable.rows.push(
+            Domifier.createTableRow([
+              itemName,
+              Domifier.renderDocElements(docItem.summary)
+            ])
+          );
+          break;
+      }
+    }
+
+    if (classesTable.rows.length > 0) {
+      domPage.elements.push(Domifier.createHeading1('Classes'));
+      domPage.elements.push(classesTable);
+    }
+
+    if (interfacesTable.rows.length > 0) {
+      domPage.elements.push(Domifier.createHeading1('Interfaces'));
+      domPage.elements.push(interfacesTable);
+    }
 
     renderer.writePage(domPage);
   }
