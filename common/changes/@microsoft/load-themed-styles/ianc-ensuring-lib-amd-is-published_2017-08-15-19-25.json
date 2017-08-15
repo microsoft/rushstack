@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/load-themed-styles",
+      "comment": "Ensuring load-themed-styles publishes a lib-amd directory.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/load-themed-styles",
+  "email": "iclanton@users.noreply.github.com"
+}
