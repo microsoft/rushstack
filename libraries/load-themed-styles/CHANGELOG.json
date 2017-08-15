@@ -2,6 +2,23 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "1.7.0",
+      "tag": "@microsoft/load-themed-styles_v1.7.0",
+      "date": "Tue, 15 Aug 2017 01:29:31 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "improve loadTheme performance"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `~3.2.5` to `~3.2.6`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.6.0",
       "tag": "@microsoft/load-themed-styles_v1.6.0",
       "date": "Tue, 08 Aug 2017 23:10:36 GMT",

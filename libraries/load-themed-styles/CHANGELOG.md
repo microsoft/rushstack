@@ -1,6 +1,13 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Tue, 08 Aug 2017 23:10:36 GMT and should not be manually modified.
+This log was last generated on Tue, 15 Aug 2017 01:29:31 GMT and should not be manually modified.
+
+## 1.7.0
+Tue, 15 Aug 2017 01:29:31 GMT
+
+### Minor changes
+
+- improve loadTheme performance
 
 ## 1.6.0
 Tue, 08 Aug 2017 23:10:36 GMT

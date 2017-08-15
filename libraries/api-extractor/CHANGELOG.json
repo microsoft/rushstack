@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "2.3.2",
+      "tag": "@microsoft/api-extractor_v2.3.2",
+      "date": "Tue, 15 Aug 2017 01:29:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Introduce Span parser for upcoming *.d.ts generator"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.3.1",
       "tag": "@microsoft/api-extractor_v2.3.1",
       "date": "Thu, 27 Jul 2017 01:04:48 GMT",

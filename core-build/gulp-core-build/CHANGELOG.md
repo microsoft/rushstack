@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Sat, 12 Aug 2017 01:03:30 GMT and should not be manually modified.
+This log was last generated on Tue, 15 Aug 2017 01:29:31 GMT and should not be manually modified.
+
+## 2.9.2
+Tue, 15 Aug 2017 01:29:31 GMT
+
+### Patches
+
+- Force a patch bump to ensure everything is published
 
 ## 2.9.1
 Sat, 12 Aug 2017 01:03:30 GMT

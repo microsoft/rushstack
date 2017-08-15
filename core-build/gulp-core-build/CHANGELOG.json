@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "2.9.2",
+      "tag": "@microsoft/gulp-core-build_v2.9.2",
+      "date": "Tue, 15 Aug 2017 01:29:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Force a patch bump to ensure everything is published"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.9.1",
       "tag": "@microsoft/gulp-core-build_v2.9.1",
       "date": "Sat, 12 Aug 2017 01:03:30 GMT",

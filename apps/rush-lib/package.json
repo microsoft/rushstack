@@ -30,7 +30,7 @@
     "z-schema": "~3.17.0"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "~3.2.5",
+    "@microsoft/node-library-build": "~3.2.6",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "mocha": "~3.4.2",
