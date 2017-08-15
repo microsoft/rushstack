@@ -40,7 +40,7 @@ export interface IDomLineBreak {
   kind: 'break';
 }
 
-export type DomBasicText = IDomText | IDomCode | IDomDocLink | IDomWebLink | IDomParagraph | IDomLineBreak;
+export type DomBasicText = DomLinkText | IDomDocLink | IDomWebLink | IDomParagraph | IDomLineBreak;
 
 // ----------------------------------------------------------------------------
 export interface IDomHeading1 {
@@ -80,8 +80,8 @@ export interface IDomTable {
   rows: IDomTableRow[];
 }
 
-export type DomTopLevelElement = IDomText | IDomCode | IDomDocLink | IDomWebLink | IDomParagraph
-  | IDomHeading1 | IDomHeading2 | IDomCodeBox | IDomTableRow | IDomTable;
+export type DomTopLevelElement = DomBasicText | IDomHeading1 | IDomHeading2 | IDomCodeBox
+  | IDomNoteBox | IDomTable;
 
 // ----------------------------------------------------------------------------
 export interface IDomPage {

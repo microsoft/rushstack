@@ -15,6 +15,8 @@ import { IDomPage } from './SimpleDom';
 
 import { ApiJsonFile } from './ApiJsonFile';
 import { BasePageRenderer } from './BasePageRenderer';
+import { RenderingHelpers } from './RenderingHelpers';
+import { Domifier } from './Domifier';
 
 export class Documenter {
   private readonly _apiJsonFiles: ApiJsonFile[] = [];
@@ -38,15 +40,21 @@ export class Documenter {
   private _writePackagePage(apiJsonFile: ApiJsonFile, renderer: BasePageRenderer): void {
     console.log(`Writing ${apiJsonFile.packageName} package`);
 
+    const unscopedPackageName: string = RenderingHelpers.getUnscopedPackageName(apiJsonFile.packageName);
+
+    const docPackage: IDocPackage = apiJsonFile.docPackage;
+
     const domPage: IDomPage = {
       kind: 'page',
-      title: 'Test',
-      docId: 'test',
+      title: `${unscopedPackageName} package`,
+      docId: RenderingHelpers.getDocId(apiJsonFile.packageName),
       elements: []
     };
 
-    renderer.writePage(domPage);
+    domPage.elements.push(...Domifier.renderDocElements(apiJsonFile.docPackage.summary));
+    domPage.elements.push(Domifier.PARAGRAPH);
 
+    renderer.writePage(domPage);
   }
 
 }
