@@ -3,18 +3,9 @@
 
 import * as fsx from 'fs-extra';
 import * as path from 'path';
+import { IDomPage } from './SimpleDom';
 
-export abstract class BasePage {
-  public readonly id: string;
-
-  constructor(id: string) {
-    this.id = id;
-  }
-
-  public abstract writeToFile(): void;
-}
-
-export abstract class BaseRenderer {
+export abstract class BasePageRenderer {
   public readonly outputFolder: string;
 
   /**
@@ -26,7 +17,7 @@ export abstract class BaseRenderer {
     this.outputFolder = outputFolder;
   }
 
-  public abstract createPage(id: string): BasePage;
+  public abstract writePage(domPage: IDomPage): void;
 
   public deleteOutputFiles(): void {
     const extensionRegExp: RegExp = new RegExp(this.outputFileExtension.replace('.', '\\.') + '$', 'i');

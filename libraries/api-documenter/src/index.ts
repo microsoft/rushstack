@@ -6,7 +6,7 @@ import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import { Documenter } from './Documenter';
-import { MarkdownRenderer } from './MarkdownRenderer';
+import { MarkdownPageRenderer } from './MarkdownPageRenderer';
 
 const myPackageJsonFilename: string = path.resolve(path.join(
   __dirname, '..', 'package.json')
@@ -27,6 +27,6 @@ for (const filename of fsx.readdirSync(inputFolder)) {
 
 const outputFolder: string = path.join(__dirname, '../files/output');
 
-const markdownRenderer: MarkdownRenderer = new MarkdownRenderer(outputFolder);
+const markdownPageRenderer: MarkdownPageRenderer = new MarkdownPageRenderer(outputFolder);
 
-documenter.writeDocs(outputFolder, markdownRenderer);
+documenter.writeDocs(outputFolder, markdownPageRenderer);
