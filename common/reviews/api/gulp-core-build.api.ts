@@ -98,7 +98,7 @@ class GulpTask<TTaskConfig> implements IExecutable {
   public logError(message: string): void;
   public logVerbose(message: string): void;
   public logWarning(message: string): void;
-  public mergeConfig(taskConfig: TTaskConfig): void;
+  public mergeConfig(taskConfig: Partial<TTaskConfig>): void;
   public name: string;
   public onRegister(): void;
   public readJSONSync(localPath: string): Object | undefined;
