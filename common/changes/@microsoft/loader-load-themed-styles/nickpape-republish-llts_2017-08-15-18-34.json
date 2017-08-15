@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/loader-load-themed-styles",
+      "comment": "Force a patch bump for publishing",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/loader-load-themed-styles",
+  "email": "nickpape-msft@users.noreply.github.com"
+}
