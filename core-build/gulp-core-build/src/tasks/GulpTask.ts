@@ -106,7 +106,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    * Do not use this function if the configuration contains complex objects that cannot be merged.
    * @param taskConfig - configuration settings which should be applied
    */
-  public mergeConfig(taskConfig: TTaskConfig): void {
+  public mergeConfig(taskConfig: Partial<TTaskConfig>): void {
     /* tslint:disable:typedef */
     const merge = require('lodash.merge');
     /* tslint:enable:typedef */
