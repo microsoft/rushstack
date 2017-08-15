@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Tue, 15 Aug 2017 01:29:31 GMT and should not be manually modified.
+This log was last generated on Tue, 15 Aug 2017 19:04:14 GMT and should not be manually modified.
+
+## 2.9.3
+Tue, 15 Aug 2017 19:04:14 GMT
+
+### Patches
+
+- Allow a partial config to be passed to GulpTask.mergeConfig.
 
 ## 2.9.2
 Tue, 15 Aug 2017 01:29:31 GMT

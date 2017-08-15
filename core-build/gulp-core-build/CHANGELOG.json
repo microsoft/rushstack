@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "2.9.3",
+      "tag": "@microsoft/gulp-core-build_v2.9.3",
+      "date": "Tue, 15 Aug 2017 19:04:14 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Allow a partial config to be passed to GulpTask.mergeConfig."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.9.2",
       "tag": "@microsoft/gulp-core-build_v2.9.2",
       "date": "Tue, 15 Aug 2017 01:29:31 GMT",

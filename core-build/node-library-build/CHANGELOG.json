@@ -2,6 +2,21 @@
   "name": "@microsoft/node-library-build",
   "entries": [
     {
+      "version": "3.2.7",
+      "tag": "@microsoft/node-library-build_v3.2.7",
+      "date": "Tue, 15 Aug 2017 19:04:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.9.2` to `2.9.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" from `2.1.7` to `2.1.8`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.6",
       "tag": "@microsoft/node-library-build_v3.2.6",
       "date": "Tue, 15 Aug 2017 01:29:31 GMT",

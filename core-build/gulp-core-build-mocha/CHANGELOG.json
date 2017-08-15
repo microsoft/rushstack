@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-mocha",
   "entries": [
     {
+      "version": "2.1.8",
+      "tag": "@microsoft/gulp-core-build-mocha_v2.1.8",
+      "date": "Tue, 15 Aug 2017 19:04:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.9.2` to `2.9.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.1.7",
       "tag": "@microsoft/gulp-core-build-mocha_v2.1.7",
       "date": "Tue, 15 Aug 2017 01:29:31 GMT",
