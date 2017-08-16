@@ -82,6 +82,9 @@ export class Domifier {
   }
 
   public static createCode(code: string, highlighter?: DomCodeHighlighter): IDomCode {
+    if (!code) {
+      throw new Error('The code parameter is missing');
+    }
     return {
       kind: 'code',
       code: code,
@@ -104,6 +107,9 @@ export class Domifier {
   }
 
   public static createCodeBox(code: string, highlighter: DomCodeHighlighter): IDomCodeBox {
+    if (!code) {
+      throw new Error('The code parameter is missing');
+    }
     return {
       kind: 'code-box',
       code: code,

@@ -26,15 +26,12 @@ import { Domifier } from './Domifier';
 
 export class Documenter {
   private readonly _apiJsonFiles: ApiJsonFile[] = [];
-  private _outputFolder: string;
 
   public loadApiJsonFile(apiJsonFilePath: string): void {
     this._apiJsonFiles.push(ApiJsonFile.loadFromFile(apiJsonFilePath));
   }
 
-  public writeDocs(outputFolder: string, renderer: BasePageRenderer): void {
-    this._outputFolder = outputFolder;
-
+  public writeDocs(renderer: BasePageRenderer): void {
     console.log(os.EOL + `Deleting old *${renderer.outputFileExtension} files...` + os.EOL);
     renderer.deleteOutputFiles();
 
@@ -161,8 +158,8 @@ export class Documenter {
           methodsTable.rows.push(
             Domifier.createTableRow([
               methodTitle,
-              [Domifier.createCode(member.accessModifier ? member.accessModifier.toString() : '', 'javascript')],
-              [Domifier.createCode(member.returnValue ? member.returnValue.type : '', 'javascript')],
+              member.accessModifier ? [Domifier.createCode(member.accessModifier.toString(), 'javascript')] : [],
+              member.returnValue ? [Domifier.createCode(member.returnValue.type, 'javascript')] : [],
               Domifier.renderDocElements(member.summary)
             ])
           );
@@ -227,7 +224,7 @@ export class Documenter {
       const parameter: IDocParam = docMethod.parameters[parameterName];
         parametersTable.rows.push(Domifier.createTableRow([
           [Domifier.createCode(parameterName, 'javascript')],
-          [Domifier.createCode(parameter.type, 'javascript')],
+          parameter.type ? [Domifier.createCode(parameter.type, 'javascript')] : [],
           Domifier.renderDocElements(parameter.description)
         ])
       );
