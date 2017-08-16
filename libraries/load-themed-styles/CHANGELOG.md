@@ -1,6 +1,13 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Tue, 15 Aug 2017 01:29:31 GMT and should not be manually modified.
+This log was last generated on Tue, 15 Aug 2017 23:48:10 GMT and should not be manually modified.
+
+## 1.7.1
+Tue, 15 Aug 2017 23:48:10 GMT
+
+### Patches
+
+- Ensuring load-themed-styles publishes a lib-amd directory.
 
 ## 1.7.0
 Tue, 15 Aug 2017 01:29:31 GMT
