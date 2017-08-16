@@ -13,11 +13,12 @@ import {
 const packageA: string = 'project-a';
 const packageAPath: string = path.join('tools', packageA);
 const fileA: string = path.join(packageAPath, 'src/index.ts');
-const packageB: string = 'project-b';
-const packageBPath: string = path.join('tools', packageB);
-const fileB: string = path.join(packageBPath, 'src/index.ts');
+// const packageB: string = 'project-b';
+// const packageBPath: string = path.join('tools', packageB);
+// const fileB: string = path.join(packageBPath, 'src/index.ts');
+// const packageBPath: string = path.join('tools', packageB);
 const HASH: string = '12345abcdef';
-const looseFile: string = 'some/other/folder/index.ts';
+// const looseFile: string = 'some/other/folder/index.ts';
 
 describe('PackageChangeAnalyzer', () => {
   afterEach(() => {

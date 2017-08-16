@@ -9,7 +9,7 @@
  * expected behaviors and catch common mistakes.  This package is not intended to be a
  * general toolkit of language extensions or helpful macros.
  */
-declare const packageDescription: void;
+declare const packageDescription: void; // tslint:disable-line:no-unused-variable
 
 export { virtual } from './virtual';
 export { sealed } from './sealed';

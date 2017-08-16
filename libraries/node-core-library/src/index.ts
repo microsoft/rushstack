@@ -4,6 +4,6 @@
 /**
  * Core libraries that every NodeJS toolchain project should use.
  */
-declare const packageDescription: void;
+declare const packageDescription: void; // tslint:disable-line:no-unused-variable
 
 export { JsonFile } from './JsonFile';
