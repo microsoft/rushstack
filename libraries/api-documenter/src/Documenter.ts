@@ -7,14 +7,12 @@ import {
   IDocClass,
   IDocPackage,
   IDocMember,
-  IDocMethod,
   IDocItem
 } from '@microsoft/api-extractor/lib/IDocItem';
 
 import {
   IDomPage,
   IDomTable,
-  IDomTableRow,
   DomBasicText
 } from './SimpleDom';
 
@@ -94,7 +92,7 @@ export class Documenter {
       }
     }
 
-    if (docPackage.remarks) {
+    if (docPackage.remarks && docPackage.remarks.length) {
       domPage.elements.push(Domifier.createHeading1('Remarks'));
       domPage.elements.push(...Domifier.renderDocElements(docPackage.remarks));
     }
@@ -132,7 +130,7 @@ export class Documenter {
       Domifier.createTextElements('Method'),
       Domifier.createTextElements('Access Modifier'),
       Domifier.createTextElements('Returns'),
-      Domifier.createTextElements('Description'),
+      Domifier.createTextElements('Description')
     ]);
 
     for (const memberName of Object.keys(docClass.members)) {
@@ -162,7 +160,7 @@ export class Documenter {
       domPage.elements.push(methodsTable);
     }
 
-    if (docClass.remarks) {
+    if (docClass.remarks && docClass.remarks.length) {
       domPage.elements.push(Domifier.createHeading1('Remarks'));
       domPage.elements.push(...Domifier.renderDocElements(docClass.remarks));
     }

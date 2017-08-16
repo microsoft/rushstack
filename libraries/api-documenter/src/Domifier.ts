@@ -2,11 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import {
-  IDocMethod,
-  IDocItem,
-  IDocParam
-} from '@microsoft/api-extractor/lib/IDocItem';
-import {
   IDocElement,
   ITextElement,
   ILinkDocElement,
