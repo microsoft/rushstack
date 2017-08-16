@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Tue, 15 Aug 2017 01:29:31 GMT and should not be manually modified.
+This log was last generated on Wed, 16 Aug 2017 13:04:08 GMT and should not be manually modified.
+
+## 3.4.0
+Wed, 16 Aug 2017 13:04:08 GMT
+
+### Minor changes
+
+- Include the no-unused-variable TSLint rule to bring back the "no-unused-import" functionality. Remove no-unused-parameters default TSConfig option to be consistent with the TSLint no-unused-variable behavior.
 
 ## 3.3.2
 Tue, 15 Aug 2017 01:29:31 GMT

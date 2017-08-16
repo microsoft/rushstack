@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/node-library-build",
-  "version": "3.2.7",
+  "version": "3.2.8",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -18,7 +18,7 @@
     "@types/es6-collections": "0.5.29",
     "@microsoft/gulp-core-build": "2.9.3",
     "@microsoft/gulp-core-build-mocha": "2.1.8",
-    "@microsoft/gulp-core-build-typescript": "3.3.2",
+    "@microsoft/gulp-core-build-typescript": "3.4.0",
     "@types/gulp": "3.8.32",
     "@types/node": "6.0.62",
     "gulp": "~3.9.1"
