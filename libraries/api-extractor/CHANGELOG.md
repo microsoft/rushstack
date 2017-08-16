@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 27 Jul 2017 01:04:48 GMT and should not be manually modified.
+This log was last generated on Tue, 15 Aug 2017 01:29:31 GMT and should not be manually modified.
+
+## 2.3.2
+Tue, 15 Aug 2017 01:29:31 GMT
+
+### Patches
+
+- Introduce Span parser for upcoming *.d.ts generator
 
 ## 2.3.1
 Thu, 27 Jul 2017 01:04:48 GMT

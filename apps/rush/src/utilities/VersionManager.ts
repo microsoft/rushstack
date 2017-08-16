@@ -119,8 +119,6 @@ export class VersionManager {
   }
 
   private _updateVersionsByPolicy(versionPolicyName?: string): void {
-    const versionPolicies: Map<string, VersionPolicy> = this._versionPolicyConfiguration.versionPolicies;
-
     // Update versions based on version policy
     this._rushConfiguration.projects.forEach(rushProject => {
       const projectVersionPolicyName: string = rushProject.versionPolicyName;

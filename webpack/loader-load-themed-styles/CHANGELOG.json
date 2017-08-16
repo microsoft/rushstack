@@ -2,6 +2,40 @@
   "name": "@microsoft/loader-load-themed-styles",
   "entries": [
     {
+      "version": "1.4.1",
+      "tag": "@microsoft/loader-load-themed-styles_v1.4.1",
+      "date": "Tue, 15 Aug 2017 19:04:14 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Force a patch bump for publishing"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `~3.2.6` to `~3.2.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.4.0",
+      "tag": "@microsoft/loader-load-themed-styles_v1.4.0",
+      "date": "Tue, 08 Aug 2017 23:10:36 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add \"async\" configuration option to call loadStyles in async mode."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `~1.5.2` to `~1.6.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.1",
       "tag": "@microsoft/loader-load-themed-styles_v1.3.1",
       "date": "Fri, 21 Jul 2017 01:02:30 GMT",

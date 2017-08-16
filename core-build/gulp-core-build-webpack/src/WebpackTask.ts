@@ -33,13 +33,19 @@ export interface IWebpackTaskConfig {
 }
 
 /** @public */
-export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
-  public name: string = 'webpack';
+export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConfig & TExtendedConfig> {
+  private _resources: Object;
 
-  public taskConfig: IWebpackTaskConfig = {
-    configPath: './webpack.config.js',
-    suppressWarnings: []
-  };
+  constructor(extendedName?: string, extendedConfig?: TExtendedConfig) {
+    super(
+      extendedName || 'webpack',
+      {
+        configPath: './webpack.config.js',
+        suppressWarnings: [],
+        ...(extendedConfig as Object)
+      } as any // tslint:disable-line:no-any
+    );
+  }
 
   public get resources(): Object {
     if (!this._resources) {
@@ -49,8 +55,6 @@ export class WebpackTask extends GulpTask<IWebpackTaskConfig> {
     }
     return this._resources;
   }
-
-  private _resources: Object;
 
   public isEnabled(buildConfig: IBuildConfig): boolean {
     return (

@@ -3,7 +3,6 @@
 
 import Validator = require('z-schema');
 import * as os from 'os';
-import * as path from 'path';
 import JsonFile from './JsonFile';
 
 export type ValidateErrorCallback = (errorDescription: string) => void;

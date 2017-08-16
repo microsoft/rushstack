@@ -7,7 +7,8 @@ interface IWebpackTaskConfig {
 }
 
 // @public (undocumented)
-class WebpackTask extends GulpTask<IWebpackTaskConfig> {
+class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConfig & TExtendedConfig> {
+  constructor(extendedName?: string, extendedConfig?: TExtendedConfig);
   // (undocumented)
   public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): void;
   // (undocumented)
@@ -15,11 +16,7 @@ class WebpackTask extends GulpTask<IWebpackTaskConfig> {
   // (undocumented)
   public loadSchema(): Object;
   // (undocumented)
-  public name: string;
-  // (undocumented)
   public readonly resources: Object;
-  // (undocumented)
-  public taskConfig: IWebpackTaskConfig;
 }
 
 // WARNING: Unsupported export: webpack

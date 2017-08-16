@@ -3,7 +3,6 @@
 
 import * as path from 'path';
 
-import RushConfigurationProject, { IRushConfigurationProjectJson } from './RushConfigurationProject';
 import { ApprovedPackagesConfiguration } from './ApprovedPackagesConfiguration';
 import { RushConstants } from '../RushConstants';
 import RushConfiguration, { IRushConfigurationJson, IApprovedPackagesPolicyJson } from './RushConfiguration';

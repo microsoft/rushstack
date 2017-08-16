@@ -54,6 +54,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@microsoft/set-webpack-public-path-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@microsoft/sp-tslint-rules",
       "allowedCategories": [ "libraries" ]
     },

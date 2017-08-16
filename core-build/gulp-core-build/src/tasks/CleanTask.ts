@@ -15,10 +15,11 @@ import { IBuildConfig } from './../IBuildConfig';
  * @public
  */
 export class CleanTask extends GulpTask<void> {
-  /** Instantiates a new CleanTask with the name 'clean' */
+  /**
+   * Instantiates a new CleanTask with the name 'clean'
+   */
   constructor() {
-    super();
-    this.name = 'clean';
+    super('clean');
   }
 
   /**

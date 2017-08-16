@@ -44,7 +44,6 @@ export default class RebuildAction extends BaseRushAction {
   private _parallelismParameter: CommandLineIntegerParameter;
   private _parser: RushCommandLineParser;
   private _productionParameter: CommandLineFlagParameter;
-  private _quietParameter: CommandLineFlagParameter;
   private _toFlag: CommandLineStringListParameter;
   private _vsoParameter: CommandLineFlagParameter;
   private _minimalParameter: CommandLineFlagParameter;

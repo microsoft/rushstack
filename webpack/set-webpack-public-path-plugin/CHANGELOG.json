@@ -1,0 +1,46 @@
+{
+  "name": "@microsoft/set-webpack-public-path-plugin",
+  "entries": [
+    {
+      "version": "1.1.0",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v1.1.0",
+      "date": "Thu, 03 Aug 2017 19:16:55 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a new getPostProcessScript configuration option to allow consumers to do arbitrary post-processing on the webpack public path variable."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.1",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v1.0.1",
+      "date": "Tue, 01 Aug 2017 17:42:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Expose registryVariableName field"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.0",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v1.0.0",
+      "date": "Mon, 31 Jul 2017 21:18:26 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Initial commit"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `~3.2.1` to `~3.2.2`"
+          }
+        ]
+      }
+    }
+  ]
+}

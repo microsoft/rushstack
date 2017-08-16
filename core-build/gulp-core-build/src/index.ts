@@ -10,6 +10,7 @@ import { GulpProxy } from './GulpProxy';
 import { IExecutable } from './IExecutable';
 import { IBuildConfig } from './IBuildConfig';
 import { CleanTask } from './tasks/CleanTask';
+import { CleanFlagTask } from './tasks/CleanFlagTask';
 import { args, builtPackage } from './State';
 export { IExecutable } from './IExecutable';
 import { log } from './logging';
@@ -40,6 +41,7 @@ export * from './tasks/CopyTask';
 export * from './tasks/GenerateShrinkwrapTask';
 export * from './tasks/GulpTask';
 export * from './tasks/CleanTask';
+export * from './tasks/CleanFlagTask';
 export * from './tasks/ValidateShrinkwrapTask';
 export * from './jsonUtilities/SchemaValidator';
 
@@ -120,6 +122,9 @@ export function getConfig(): IBuildConfig {
   return _buildConfig;
 }
 
+/** @public */
+export const cleanFlag: IExecutable = new CleanFlagTask();
+
 /**
  * Registers an IExecutable to gulp so that it can be called from the command line
  * @param taskName - the name of the task, can be called from the command line (e.g. "gulp <taskName>")
@@ -128,6 +133,8 @@ export function getConfig(): IBuildConfig {
  * @public
  */
 export function task(taskName: string, taskExecutable: IExecutable): IExecutable {
+  taskExecutable = serial(cleanFlag, taskExecutable);
+
   _taskMap[taskName] = taskExecutable;
 
   _trackTask(taskExecutable);
@@ -150,8 +157,7 @@ export interface ICustomGulpTask {
 class CustomTask extends GulpTask<void> {
   private _fn: ICustomGulpTask;
   constructor(name: string, fn: ICustomGulpTask) {
-    super();
-    this.name = name;
+    super(name);
     this._fn = fn.bind(this);
   }
 

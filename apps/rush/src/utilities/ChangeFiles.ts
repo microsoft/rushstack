@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as fsx from 'fs-extra';
-import * as path from 'path';
 import { EOL } from 'os';
 import * as semver from 'semver';
 

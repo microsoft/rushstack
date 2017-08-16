@@ -13,6 +13,12 @@ export interface IKarmaTaskConfig {
   configPath: string;
 
   /**
+   * By default, test failures generate build warnings in non-production builds. Setting
+   * this value to true ensures all test failures will create build failures.
+   */
+  failBuildOnErrors: boolean;
+
+  /**
    * If specified, a "tests.js" file will be created in the temp folder using
    *  this RegExp to locate test files.
    */
@@ -20,12 +26,18 @@ export interface IKarmaTaskConfig {
 }
 
 export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
-  public name: string = 'karma';
+  private _resources: Object;
 
-  public taskConfig: IKarmaTaskConfig = {
-    configPath: './karma.config.js',
-    testMatch: /.+\.test\.js?$/
-  };
+  constructor() {
+    super(
+      'karma',
+      {
+        configPath: './karma.config.js',
+        testMatch: /.+\.test\.js?$/,
+        failBuildOnErrors: false
+      }
+    );
+  }
 
   public get resources(): Object {
     if (!this._resources) {
@@ -45,8 +57,6 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
 
     return this._resources;
   }
-
-  private _resources: Object;
 
   public loadSchema(): Object {
     return require('./karma.schema.json');
@@ -138,7 +148,7 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
       }, (exitCode) => {
         if (exitCode) {
           const message: string = 'Error(s) occured during karma.';
-          if (this.buildConfig.production) {
+          if (this.buildConfig.production || this.taskConfig.failBuildOnErrors) {
             completeCallback(message);
           } else {
             this.logWarning(message);
