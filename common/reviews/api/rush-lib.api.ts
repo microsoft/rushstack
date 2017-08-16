@@ -325,6 +325,7 @@ export function RegexErrorDetector(regex: RegExp,
 // @public
 class RushConfiguration {
   public readonly approvedPackagesPolicy: ApprovedPackagesPolicy;
+  public readonly changesFolder: string;
   public readonly committedShrinkwrapFilename: string;
   public readonly commonFolder: string;
   public readonly commonRushConfigFolder: string;

@@ -14,7 +14,6 @@ import {
   LockStepVersionPolicy,
   RushConfiguration,
   RushConfigurationProject,
-  RushConstants,
   VersionPolicyConfiguration,
   IPackageJson,
   VersionPolicy
@@ -68,8 +67,7 @@ export class VersionManager {
     // Update projects based on individual policies
     const changeManager: ChangeManager = new ChangeManager(this._rushConfiguration,
       this._getLockStepProjects());
-    const changesPath: string = path.join(this._rushConfiguration.commonFolder, RushConstants.changeFilesFolderName);
-    changeManager.load(changesPath);
+    changeManager.load(this._rushConfiguration.changesFolder);
     if (changeManager.hasChanges()) {
       changeManager.validateChanges(this._versionPolicyConfiguration);
       changeManager.apply(shouldCommit).forEach(packageJson => {

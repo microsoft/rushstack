@@ -93,6 +93,7 @@ export interface IRushLinkJson {
 export default class RushConfiguration {
   private _rushJsonFile: string;
   private _rushJsonFolder: string;
+  private _changesFolder: string;
   private _commonFolder: string;
   private _commonTempFolder: string;
   private _commonRushConfigFolder: string;
@@ -266,6 +267,13 @@ export default class RushConfiguration {
    */
   public get rushJsonFolder(): string {
     return this._rushJsonFolder;
+  }
+
+  /**
+   * The folder that contains all change files.
+   */
+  public get changesFolder(): string {
+    return this._changesFolder;
   }
 
   /**
@@ -540,6 +548,8 @@ export default class RushConfiguration {
     this._commonTempFolder = path.join(this._commonFolder, RushConstants.rushTempFolderName);
     this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
     this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));
+
+    this._changesFolder = path.join(this._commonFolder, RushConstants.changeFilesFolderName);
 
     this._committedShrinkwrapFilename = path.join(this._commonRushConfigFolder, RushConstants.npmShrinkwrapFilename);
     this._tempShrinkwrapFilename = path.join(this._commonTempFolder, RushConstants.npmShrinkwrapFilename);

@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as colors from 'colors';
-import * as path from 'path';
 import { EOL } from 'os';
 import {
   CommandLineFlagParameter,
@@ -12,7 +11,6 @@ import {
   IChangeInfo,
   ChangeType,
   RushConfigurationProject,
-  RushConstants,
   Npm
 } from '@microsoft/rush-lib';
 import RushCommandLineParser from './RushCommandLineParser';
@@ -156,8 +154,7 @@ export default class PublishAction extends BaseRushAction {
 
   private _publishChanges(allPackages: Map<string, RushConfigurationProject>): void {
     const changeManager: ChangeManager = new ChangeManager(this.rushConfiguration);
-    const changesPath: string = path.join(this.rushConfiguration.commonFolder, RushConstants.changeFilesFolderName);
-    changeManager.load(changesPath,
+    changeManager.load(this.rushConfiguration.changesFolder,
       this._prereleaseToken,
       this._addCommitDetails.value);
 

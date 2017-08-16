@@ -6,7 +6,6 @@ import * as path from 'path';
 import gitInfo = require('git-repo-info');
 
 import RushConfiguration from './RushConfiguration';
-import { RushConstants } from '../RushConstants';
 
 import { IChangeFile, IChangeInfo } from './ChangeManagement';
 
@@ -64,8 +63,7 @@ export class ChangeFile {
     const filename: string = (branch ?
       this._escapeFilename(`${branch}_${this._getTimestamp()}.json`) :
       `${this._getTimestamp()}.json`);
-    const filePath: string = path.join(this._rushConfiguration.commonFolder,
-      RushConstants.changeFilesFolderName,
+    const filePath: string = path.join(this._rushConfiguration.changesFolder,
       ...this._changeFileData.packageName.split('/'),
       filename);
     return filePath;
