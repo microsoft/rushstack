@@ -85,7 +85,6 @@ export class TypeScriptConfiguration {
             moduleResolution: 'node',
             sourceMap: true,
             target: 'es5',
-            noUnusedParameters: true,
             noUnusedLocals: true
           }
         };

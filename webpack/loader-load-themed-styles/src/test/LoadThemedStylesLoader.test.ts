@@ -129,7 +129,6 @@ describe('LoadThemedStylesLoader', () => {
   it('correctly handles the async option set to a non-boolean', () => {
     LoadThemedStylesLoader.loadedThemedStylesPath = './testData/LoadThemedStylesMock';
 
-    const query: {} = { async: 'asdf' };
     let loaderResult: string = LoadThemedStylesLoader.pitch.call({}, './testData/MockStyle1');
     loaderResult = loaderResult.replace(/require\(\"!!/, 'require("');
     loaderResult = wrapResult(loaderResult);

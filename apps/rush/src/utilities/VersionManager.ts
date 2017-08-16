@@ -31,7 +31,6 @@ export class VersionManager {
    */
   public ensure(versionPolicyName?: string): Map<string, IPackageJson> {
     const updatedProjects: Map<string, IPackageJson> = new Map<string, IPackageJson>();
-    const versionPolicies: Map<string, VersionPolicy> = this._versionPolicyConfiguration.versionPolicies;
 
     // Update versions based on version policy
     this._rushConfiguration.projects.forEach(rushProject => {
