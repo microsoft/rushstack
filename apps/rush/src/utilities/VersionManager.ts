@@ -184,7 +184,6 @@ export class VersionManager {
     if (!clonedProject.dependencies) {
       return;
     }
-    const dependencies: { [key: string]: string; } = clonedProject.dependencies;
     const changes: IChangeInfo[] = [];
     let updated: boolean = false;
     if (this._updateProjectDependencies(clonedProject.dependencies, changes,
