@@ -142,6 +142,30 @@ export class MarkdownPageRenderer extends BasePageRenderer {
           writer.writeLine('### ' + this._getEscapedText(element.text));
           writer.writeLine();
           break;
+        case 'code-box':
+          writer.finishLine();
+          writer.write('```');
+          switch (element.highlighter) {
+            case 'javascript':
+              writer.write('javascript');
+              break;
+            case 'plain':
+              break;
+            default:
+              throw new Error('Unimplemented highlighter');
+          }
+          writer.writeLine();
+          writer.write(element.code);
+          writer.writeLine();
+          writer.writeLine('```');
+          break;
+        case 'note-box':
+          writer.finishLine();
+          writer.write('> ');
+          this._writeElements(element.elements, context);
+          writer.finishLine();
+          writer.writeLine();
+          break;
         case 'table':
           writer.finishLine();
 

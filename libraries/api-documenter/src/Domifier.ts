@@ -23,6 +23,8 @@ import {
   IDomPage,
   IDomCode,
   DomLinkText,
+  IDomNoteBox,
+  IDomCodeBox,
   DomCodeHighlighter
 } from './SimpleDom';
 
@@ -36,17 +38,26 @@ export class Domifier {
     kind: 'paragraph'
   };
 
-  public static createTextElements(text: string): IDomText[] {
+  public static createTextElements(text: string, options?: { bold?: boolean, italics?: boolean } ): IDomText[] {
     const trimmed: string = text;
     if (!trimmed) {
       return [];
     } else {
-      return [
-        {
-          kind: 'text',
-          content: trimmed
-        } as IDomText
-      ];
+      const result: IDomText = {
+        kind: 'text',
+        content: trimmed
+      } as IDomText;
+
+      if (options) {
+        if (options.bold) {
+          result.bold = true;
+        }
+        if (options.italics) {
+          result.italics = true;
+        }
+      }
+
+      return [ result ];
     }
   }
 
@@ -90,6 +101,25 @@ export class Domifier {
       kind: 'heading2',
       text: text
     };
+  }
+
+  public static createCodeBox(code: string, highlighter: DomCodeHighlighter): IDomCodeBox {
+    return {
+      kind: 'code-box',
+      code: code,
+      highlighter: highlighter
+    } as IDomCodeBox;
+  }
+
+  public static createNoteBox(textElements: DomBasicText[]): IDomNoteBox {
+    return {
+      kind: 'note-box',
+      elements: textElements
+    } as IDomNoteBox;
+  }
+
+  public static createNoteBoxFromText(text: string): IDomNoteBox {
+    return Domifier.createNoteBox(Domifier.createTextElements(text));
   }
 
   public static createTableRow(cellValues: DomBasicText[][] | undefined = undefined): IDomTableRow {

@@ -7,13 +7,16 @@ import {
   IDocClass,
   IDocPackage,
   IDocMember,
-  IDocItem
+  IDocItem,
+  IDocParam,
+  IDocMethod
 } from '@microsoft/api-extractor/lib/IDocItem';
 
 import {
   IDomPage,
   IDomTable,
-  DomBasicText
+  DomBasicText,
+  DomTopLevelElement
 } from './SimpleDom';
 
 import { ApiJsonFile } from './ApiJsonFile';
@@ -71,12 +74,20 @@ export class Documenter {
           RenderingHelpers.getDocId(apiJsonFile.packageName, exportName))
       ];
 
+      const docItemDescription: DomBasicText[] = [];
+
+      if (docItem.isBeta) {
+        docItemDescription.push(...Domifier.createTextElements('(BETA)', { italics: true, bold: true }));
+        docItemDescription.push(...Domifier.createTextElements(' '));
+      }
+      docItemDescription.push(...Domifier.renderDocElements(docItem.summary));
+
       switch (docItem.kind) {
         case 'class':
           classesTable.rows.push(
             Domifier.createTableRow([
               docItemTitle,
-              Domifier.renderDocElements(docItem.summary)
+              docItemDescription
             ])
           );
           this._writeClassPage(docItem, exportName, apiJsonFile, renderer);
@@ -85,7 +96,7 @@ export class Documenter {
           interfacesTable.rows.push(
             Domifier.createTableRow([
               docItemTitle,
-              Domifier.renderDocElements(docItem.summary)
+              docItemDescription
             ])
           );
           break;
@@ -117,7 +128,11 @@ export class Documenter {
     const domPage: IDomPage = Domifier.createPage(`${className} class`,
       RenderingHelpers.getDocId(apiJsonFile.packageName, className));
 
-    domPage.elements.push(...Domifier.renderDocElements(apiJsonFile.docPackage.summary));
+    if (docClass.isBeta) {
+      this._writeBetaWarning(domPage.elements);
+    }
+
+    domPage.elements.push(...Domifier.renderDocElements(docClass.summary));
 
     domPage.elements.push(Domifier.createHeading1('Constructor'));
 
@@ -151,6 +166,7 @@ export class Documenter {
               Domifier.renderDocElements(member.summary)
             ])
           );
+          this._writeMethodPage(member, memberName, className, apiJsonFile, renderer);
           break;
       }
     }
@@ -166,6 +182,66 @@ export class Documenter {
     }
 
     renderer.writePage(domPage);
+  }
+
+  private _writeMethodPage(docMethod: IDocMethod, methodName: string, className: string,
+    apiJsonFile: ApiJsonFile, renderer: BasePageRenderer): void {
+
+    const fullMethodName: string = className + '.' + methodName;
+
+    const domPage: IDomPage = Domifier.createPage(`${fullMethodName} method`,
+      RenderingHelpers.getDocId(apiJsonFile.packageName, className, methodName));
+
+    if (docMethod.isBeta) {
+      this._writeBetaWarning(domPage.elements);
+    }
+
+    domPage.elements.push(...Domifier.renderDocElements(docMethod.summary));
+
+    domPage.elements.push(Domifier.PARAGRAPH);
+    domPage.elements.push(...Domifier.createTextElements('Signature:', { bold: true }));
+    domPage.elements.push(Domifier.createCodeBox(docMethod.signature, 'javascript'));
+
+    if (docMethod.returnValue) {
+      domPage.elements.push(...Domifier.createTextElements('Returns:', { bold: true }));
+      domPage.elements.push(...Domifier.createTextElements(' '));
+      domPage.elements.push(Domifier.createCode(docMethod.returnValue.type, 'javascript'));
+      domPage.elements.push(Domifier.PARAGRAPH);
+      domPage.elements.push(...Domifier.renderDocElements(docMethod.returnValue.description));
+    }
+
+    if (docMethod.remarks && docMethod.remarks.length) {
+      domPage.elements.push(Domifier.createHeading1('Remarks'));
+      domPage.elements.push(...Domifier.renderDocElements(docMethod.remarks));
+    }
+
+    const parametersTable: IDomTable = Domifier.createTable([
+      Domifier.createTextElements('Parameter'),
+      Domifier.createTextElements('Type'),
+      Domifier.createTextElements('Description')
+    ]);
+
+    domPage.elements.push(Domifier.createHeading1('Parameters'));
+    domPage.elements.push(parametersTable);
+    for (const parameterName of Object.keys(docMethod.parameters)) {
+      const parameter: IDocParam = docMethod.parameters[parameterName];
+        parametersTable.rows.push(Domifier.createTableRow([
+          [Domifier.createCode(parameterName, 'javascript')],
+          [Domifier.createCode(parameter.type, 'javascript')],
+          Domifier.renderDocElements(parameter.description)
+        ])
+      );
+    }
+
+    renderer.writePage(domPage);
+  }
+
+  private _writeBetaWarning(elements: DomTopLevelElement[]): void {
+    const betaWarning: string = 'This API is provided as a preview for developers and may change'
+      + ' based on feedback that we receive.  Do not use this API in a production environment.';
+    elements.push(
+      Domifier.createNoteBoxFromText(betaWarning)
+    );
   }
 
 }
