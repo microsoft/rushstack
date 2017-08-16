@@ -4,6 +4,10 @@
     {
       "name": "orchestrator",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "tar",
+      "allowedCategories": [ "libraries" ]
     }
   ]
 }

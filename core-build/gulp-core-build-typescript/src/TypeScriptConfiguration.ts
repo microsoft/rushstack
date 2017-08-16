@@ -5,7 +5,6 @@ import * as path from 'path';
 import assign = require('object-assign');
 import { SchemaValidator, IBuildConfig } from '@microsoft/gulp-core-build';
 import ts = require('gulp-typescript');
-import * as typescript from 'typescript';
 
 /**
  * @public
