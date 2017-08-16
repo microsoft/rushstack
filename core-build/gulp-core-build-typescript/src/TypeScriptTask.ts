@@ -10,20 +10,6 @@ import { GulpTask, IBuildConfig } from '@microsoft/gulp-core-build';
 
 import { TypeScriptConfiguration } from './TypeScriptConfiguration';
 
-interface ITypeScriptErrorObject {
-  diagnostic: {
-    messageText: string | { messageText: string };
-    code: number;
-  };
-  fullFilename: string;
-  relativeFilename: string;
-  message: string;
-  startPosition: {
-    character: number;
-    line: number;
-  };
-}
-
 /**
  * Includes the experimental stripInternal feature
  * @public

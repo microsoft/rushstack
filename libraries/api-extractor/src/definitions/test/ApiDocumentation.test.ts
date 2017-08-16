@@ -52,6 +52,7 @@ describe('ApiDocumentation tests', function (): void {
   this.timeout(10000);
 
   describe('ApiDocumentation internal methods', function (): void {
+    // tslint:disable-next-line:no-unused-variable
     const apiDoc: ApiDocumentation = new ApiDocumentation(
       'Some summary\n@remarks and some remarks\n@public',
       extractor.docItemLoader,
