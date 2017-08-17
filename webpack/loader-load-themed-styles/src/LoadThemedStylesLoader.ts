@@ -7,7 +7,7 @@
  * This simple loader wraps the loading of CSS in script equivalent to
  *  require("load-themed-styles").loadStyles('... css text ...').
  */
-declare const packageDescription: void;
+declare const packageDescription: void; // tslint:disable-line:no-unused-variable
 
 import loaderUtils = require('loader-utils');
 import { loader } from 'webpack';

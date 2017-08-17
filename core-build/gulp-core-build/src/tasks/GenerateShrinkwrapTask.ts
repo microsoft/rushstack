@@ -19,8 +19,7 @@ export class GenerateShrinkwrapTask extends GulpTask<void> {
    * Instantiates a GenerateShrinkwrap task which will regenerate the shrinkwrap for a particular project
    */
   constructor() {
-    super();
-    this.name = 'generate-shrinkwrap';
+    super('generate-shrinkwrap');
   }
 
   /**

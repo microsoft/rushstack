@@ -27,7 +27,7 @@ describe('@virtual tests', () => {
         }
       }
 
-      class ChildClass extends BaseClass {
+      class ChildClass extends BaseClass { // tslint:disable-line:no-unused-variable
         @override
         public test(): void {
           super.test();

@@ -157,8 +157,7 @@ export interface ICustomGulpTask {
 class CustomTask extends GulpTask<void> {
   private _fn: ICustomGulpTask;
   constructor(name: string, fn: ICustomGulpTask) {
-    super();
-    this.name = name;
+    super(name);
     this._fn = fn.bind(this);
   }
 

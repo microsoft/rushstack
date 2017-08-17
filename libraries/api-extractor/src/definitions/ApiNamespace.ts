@@ -5,7 +5,7 @@
 
 import * as ts from 'typescript';
 import ApiModuleVariable from './ApiModuleVariable';
-import ApiItem, { ApiItemKind, IApiItemOptions } from './ApiItem';
+import { ApiItemKind, IApiItemOptions } from './ApiItem';
 import ApiItemContainer from './ApiItemContainer';
 import { IExportedSymbol } from '../IExportedSymbol';
 const allowedTypes: string[] = ['string', 'number', 'boolean'];

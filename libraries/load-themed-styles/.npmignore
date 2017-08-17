@@ -4,6 +4,7 @@
 # Use negative patterns to bring back the specific things we want to publish
 !/bin/**
 !/lib/**
+!/lib-amd/**
 !/dist/**
 !ThirdPartyNotice.txt
 

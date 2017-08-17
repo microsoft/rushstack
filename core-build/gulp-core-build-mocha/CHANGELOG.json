@@ -2,6 +2,59 @@
   "name": "@microsoft/gulp-core-build-mocha",
   "entries": [
     {
+      "version": "2.1.8",
+      "tag": "@microsoft/gulp-core-build-mocha_v2.1.8",
+      "date": "Tue, 15 Aug 2017 19:04:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.9.2` to `2.9.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.7",
+      "tag": "@microsoft/gulp-core-build-mocha_v2.1.7",
+      "date": "Tue, 15 Aug 2017 01:29:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Force a patch bump to ensure everything is published"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.9.1` to `2.9.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.6",
+      "tag": "@microsoft/gulp-core-build-mocha_v2.1.6",
+      "date": "Sat, 12 Aug 2017 01:03:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.9.0` to `2.9.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.5",
+      "tag": "@microsoft/gulp-core-build-mocha_v2.1.5",
+      "date": "Fri, 11 Aug 2017 21:44:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.8.0` to `2.9.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.1.4",
       "tag": "@microsoft/gulp-core-build-mocha_v2.1.4",
       "date": "Sat, 05 Aug 2017 01:04:41 GMT",

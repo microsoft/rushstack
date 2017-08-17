@@ -66,48 +66,50 @@ export interface ITSLintTaskConfig {
 }
 
 export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
-  public name: string = 'tslint';
-  public taskConfig: ITSLintTaskConfig = {
-    // lintConfig: require('../lib/defaultTslint.json'),
-    lintConfig: {},
-    reporter: (result: TSLint.LintResult, file: gutil.File, options: ITSLintTaskConfig): void => {
-      for (const failure of result.failures) {
-        const pathFromRoot: string = path.relative(this.buildConfig.rootPath, file.path);
+  private _defaultLintRules: any = undefined; // tslint:disable-line:no-any
 
-        const start: ts.LineAndCharacter = failure.getStartPosition().getLineAndCharacter();
-        if (this.taskConfig.displayAsWarning) {
-          this.fileWarning(
-            pathFromRoot,
-            start.line + 1,
-            start.character + 1,
-            failure.getRuleName(),
-            failure.getFailure());
-        } else {
-          this.fileError(
-            pathFromRoot,
-            start.line + 1,
-            start.character + 1,
-            failure.getRuleName(),
-            failure.getFailure());
-        }
+  constructor() {
+    super(
+      'tslint',
+      {
+        // lintConfig: require('../lib/defaultTslint.json'),
+        lintConfig: {},
+        reporter: (result: TSLint.LintResult, file: gutil.File, options: ITSLintTaskConfig): void => {
+          for (const failure of result.failures) {
+            const pathFromRoot: string = path.relative(this.buildConfig.rootPath, file.path);
+
+            const start: ts.LineAndCharacter = failure.getStartPosition().getLineAndCharacter();
+            if (this.taskConfig.displayAsWarning) {
+              this.fileWarning(
+                pathFromRoot,
+                start.line + 1,
+                start.character + 1,
+                failure.getRuleName(),
+                failure.getFailure());
+            } else {
+              this.fileError(
+                pathFromRoot,
+                start.line + 1,
+                start.character + 1,
+                failure.getRuleName(),
+                failure.getFailure());
+            }
+          }
+        },
+        rulesDirectory: ((): string[] => {
+          const msCustomRulesMain: string = require.resolve('tslint-microsoft-contrib');
+          const msCustomRulesDirectory: string = path.dirname(msCustomRulesMain);
+          return TSLint.Configuration.getRulesDirectories([msCustomRulesDirectory], __dirname);
+        })(),
+        sourceMatch: [
+          'src/**/*.ts',
+          'src/**/*.tsx'
+        ],
+        removeExistingRules: false,
+        useDefaultConfigAsBase: true
       }
-    },
-    rulesDirectory: ((): string[] => {
-      const msCustomRulesMain: string = require.resolve('tslint-microsoft-contrib');
-      const msCustomRulesDirectory: string = path.dirname(msCustomRulesMain);
-      return TSLint.Configuration.getRulesDirectories([msCustomRulesDirectory], __dirname);
-    })(),
-    sourceMatch: [
-      'src/**/*.ts',
-      'src/**/*.tsx'
-    ],
-    removeExistingRules: false,
-    useDefaultConfigAsBase: true
-  };
-
-  /* tslint:disable:no-any */
-  private _defaultLintRules: any = undefined;
-  /* tslint:enable:no-any */
+    );
+  }
 
   public mergeConfig(config: ITSLintTaskConfig): void {
     this._prepareUpdateConfig(config);

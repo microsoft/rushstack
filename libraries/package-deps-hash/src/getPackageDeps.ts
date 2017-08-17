@@ -45,7 +45,6 @@ export function parseGitLsTree(output: string): Map<string, string> {
  */
 export function parseGitStatus(output: string, packagePath: string): Map<string, GitStatusChangeType> {
   const changes: Map<string, GitStatusChangeType> = new Map<string, GitStatusChangeType>();
-  const filesToHash: string[] = [];
 
   /*
   * Typically, output will look something like:

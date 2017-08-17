@@ -309,6 +309,11 @@
       "from": "@types/tapable@0.2.3",
       "resolved": "https://registry.npmjs.org/@types/tapable/-/tapable-0.2.3.tgz"
     },
+    "@types/tar": {
+      "version": "1.0.29",
+      "from": "@types/tar@1.0.29",
+      "resolved": "https://registry.npmjs.org/@types/tar/-/tar-1.0.29.tgz"
+    },
     "@types/through2": {
       "version": "2.0.32",
       "from": "@types/through2@2.0.32",
@@ -557,9 +562,9 @@
       "resolved": "https://registry.npmjs.org/aws4/-/aws4-1.6.0.tgz"
     },
     "babel-code-frame": {
-      "version": "6.22.0",
+      "version": "6.26.0",
       "from": "babel-code-frame@>=6.22.0 <7.0.0",
-      "resolved": "https://registry.npmjs.org/babel-code-frame/-/babel-code-frame-6.22.0.tgz"
+      "resolved": "https://registry.npmjs.org/babel-code-frame/-/babel-code-frame-6.26.0.tgz"
     },
     "backo2": {
       "version": "1.0.2",
@@ -3133,7 +3138,7 @@
     },
     "js-tokens": {
       "version": "3.0.2",
-      "from": "js-tokens@>=3.0.0 <4.0.0",
+      "from": "js-tokens@>=3.0.2 <4.0.0",
       "resolved": "https://registry.npmjs.org/js-tokens/-/js-tokens-3.0.2.tgz"
     },
     "js-yaml": {
@@ -3159,10 +3164,10 @@
       "from": "jsesc@>=0.5.0 <0.6.0",
       "resolved": "https://registry.npmjs.org/jsesc/-/jsesc-0.5.0.tgz"
     },
-    "json-parse-helpfulerror": {
-      "version": "1.0.3",
-      "from": "json-parse-helpfulerror@>=1.0.2 <2.0.0",
-      "resolved": "https://registry.npmjs.org/json-parse-helpfulerror/-/json-parse-helpfulerror-1.0.3.tgz"
+    "json-parse-better-errors": {
+      "version": "1.0.1",
+      "from": "json-parse-better-errors@>=1.0.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/json-parse-better-errors/-/json-parse-better-errors-1.0.1.tgz"
     },
     "json-schema": {
       "version": "0.2.3",
@@ -3797,6 +3802,23 @@
       "from": "minimist@>=1.1.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/minimist/-/minimist-1.2.0.tgz"
     },
+    "minipass": {
+      "version": "2.2.1",
+      "from": "minipass@>=2.0.2 <3.0.0",
+      "resolved": "https://registry.npmjs.org/minipass/-/minipass-2.2.1.tgz",
+      "dependencies": {
+        "yallist": {
+          "version": "3.0.2",
+          "from": "yallist@>=3.0.0 <4.0.0",
+          "resolved": "https://registry.npmjs.org/yallist/-/yallist-3.0.2.tgz"
+        }
+      }
+    },
+    "minizlib": {
+      "version": "1.0.3",
+      "from": "minizlib@>=1.0.3 <2.0.0",
+      "resolved": "https://registry.npmjs.org/minizlib/-/minizlib-1.0.3.tgz"
+    },
     "mkdirp": {
       "version": "0.5.1",
       "from": "mkdirp@>=0.5.0 <0.6.0",
@@ -3906,7 +3928,14 @@
     "node-gyp": {
       "version": "3.6.2",
       "from": "node-gyp@>=3.3.1 <4.0.0",
-      "resolved": "https://registry.npmjs.org/node-gyp/-/node-gyp-3.6.2.tgz"
+      "resolved": "https://registry.npmjs.org/node-gyp/-/node-gyp-3.6.2.tgz",
+      "dependencies": {
+        "tar": {
+          "version": "2.2.1",
+          "from": "tar@>=2.0.0 <3.0.0",
+          "resolved": "https://registry.npmjs.org/tar/-/tar-2.2.1.tgz"
+        }
+      }
     },
     "node-libs-browser": {
       "version": "0.6.0",
@@ -4615,9 +4644,9 @@
       "resolved": "https://registry.npmjs.org/read/-/read-1.0.7.tgz"
     },
     "read-package-json": {
-      "version": "2.0.10",
+      "version": "2.0.11",
       "from": "read-package-json@>=2.0.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/read-package-json/-/read-package-json-2.0.10.tgz",
+      "resolved": "https://registry.npmjs.org/read-package-json/-/read-package-json-2.0.11.tgz",
       "dependencies": {
         "glob": {
           "version": "7.1.2",
@@ -4709,9 +4738,9 @@
       "resolved": "https://registry.npmjs.org/regjsparser/-/regjsparser-0.1.5.tgz"
     },
     "remove-trailing-separator": {
-      "version": "1.0.2",
+      "version": "1.1.0",
       "from": "remove-trailing-separator@>=1.0.1 <2.0.0",
-      "resolved": "https://registry.npmjs.org/remove-trailing-separator/-/remove-trailing-separator-1.0.2.tgz"
+      "resolved": "https://registry.npmjs.org/remove-trailing-separator/-/remove-trailing-separator-1.1.0.tgz"
     },
     "repeat-element": {
       "version": "1.1.2",
@@ -5261,9 +5290,16 @@
       "resolved": "https://registry.npmjs.org/tapable/-/tapable-0.1.10.tgz"
     },
     "tar": {
-      "version": "2.2.1",
-      "from": "tar@>=2.0.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/tar/-/tar-2.2.1.tgz"
+      "version": "3.1.13",
+      "from": "tar@>=3.1.12 <3.2.0",
+      "resolved": "https://registry.npmjs.org/tar/-/tar-3.1.13.tgz",
+      "dependencies": {
+        "yallist": {
+          "version": "3.0.2",
+          "from": "yallist@>=3.0.2 <4.0.0",
+          "resolved": "https://registry.npmjs.org/yallist/-/yallist-3.0.2.tgz"
+        }
+      }
     },
     "temp": {
       "version": "0.8.3",

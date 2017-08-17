@@ -238,6 +238,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "js-yaml",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "karma",
       "allowedCategories": [ "libraries" ]
     },
@@ -314,6 +318,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "orchestrator",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "phantomjs-polyfill",
       "allowedCategories": [ "libraries" ]
     },
@@ -351,6 +359,10 @@
     },
     {
       "name": "sudo",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "tar",
       "allowedCategories": [ "libraries" ]
     },
     {

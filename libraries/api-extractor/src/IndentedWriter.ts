@@ -25,10 +25,31 @@
   *   end
   */
 export default class IndentedWriter {
-  private _output: string = '';
-  private _indentStack: string[] = [];
-  private _indentText: string = '';
-  private _needsIndent: boolean = true;
+  /**
+   * The text characters used to create one level of indentation.
+   * Two spaces by default.
+   */
+  public spacing: string = '  ';
+
+  private _output: string;
+  private _indentStack: string[];
+  private _indentText: string;
+  private _needsIndent: boolean;
+
+  constructor() {
+    this.clear();
+  }
+
+  /**
+   * Resets the stream, erasing any output and indentation levels.
+   * Does not reset the "spacing" configuration.
+   */
+  public clear(): void {
+    this._output = '';
+    this._indentStack = [];
+    this._indentText = '';
+    this._needsIndent = true;
+  }
 
   /**
    * Retrieves the indented output.
@@ -44,8 +65,8 @@ export default class IndentedWriter {
    * Each call to IndentedWriter.increaseIndent() must be followed by a
    * corresponding call to IndentedWriter.decreaseIndent().
    */
-  public increaseIndent(prefix: string = '  '): void {
-    this._indentStack.push(prefix);
+  public increaseIndent(): void {
+    this._indentStack.push(this.spacing);
     this._updateIndentText();
   }
 

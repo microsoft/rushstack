@@ -12,8 +12,10 @@ import CertificateStoreType from './CertificateStore';
  *  other platforms, the user must untrust the certificate manually. On all platforms,
  *  the certificate and private key are deleted from the user's home directory.
  */
-export default class UntrustCertTask extends GulpTask<{}> {
-  public name: string = 'untrust-cert';
+export default class UntrustCertTask extends GulpTask<void> {
+  constructor() {
+    super('untrust-cert');
+  }
 
   public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): void {
     /* tslint:disable */

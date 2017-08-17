@@ -7,7 +7,6 @@ import * as os from 'os';
 import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import {
   Stopwatch,
-  IPackageJson,
   Event
 } from '@microsoft/rush-lib';
 
@@ -18,12 +17,6 @@ import LinkManager from '../utilities/LinkManager';
 import ShrinkwrapFile from '../utilities/ShrinkwrapFile';
 import { ApprovedPackagesChecker } from '../utilities/ApprovedPackagesChecker';
 import { BaseRushAction } from './BaseRushAction';
-
-interface ITempModuleInformation {
-  packageJson: IPackageJson;
-  existsInProjectConfiguration: boolean;
-  filename: string;
-}
 
 export default class InstallAction extends BaseRushAction {
   private _parser: RushCommandLineParser;

@@ -12,8 +12,10 @@ import { ICertificate } from './certificates';
  *  trusted as a root cert in the keychain. On other platforms, the certificate is generated
  *  and signed, but the user must trust it manually.
  */
-export default class TrustCertTask extends GulpTask<{}> {
-  public name: string = 'trust-cert';
+export default class TrustCertTask extends GulpTask<void> {
+  constructor() {
+    super('trust-cert');
+  }
 
   public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): void {
     const { ensureCertificate } = require('./certificates'); // tslint:disable-line

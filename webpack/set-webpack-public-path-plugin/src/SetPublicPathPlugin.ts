@@ -123,7 +123,6 @@ export class SetPublicPathPlugin implements Plugin {
   // This type should be "compiler," but there's another type mismatch issue so we have to stay on
   //  @types/webpack@2.2.4 for now.
   public apply(compiler: Webpack & ITapable): void {
-    const self: SetPublicPathPlugin = this;
     compiler.plugin('compilation', (compilation: ICompilation, params: Object): void => {
       compilation.mainTemplate.plugin('startup', (source: string, chunk: IChunk, hash: string) => {
         let assetOrChunkFound: boolean = chunk.chunks.length > 0;

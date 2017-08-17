@@ -8,7 +8,7 @@
  *  a value specified in the arguments, optionally appended to the SystemJs baseURL
  *  property.
  */
-declare const packageDescription: void;
+declare const packageDescription: void; // tslint:disable-line:no-unused-variable
 
 export * from './SetPublicPathPlugin';
 export {

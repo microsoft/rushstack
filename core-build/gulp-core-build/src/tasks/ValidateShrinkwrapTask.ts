@@ -38,8 +38,7 @@ export class ValidateShrinkwrapTask extends GulpTask<void> {
    * Instantiates an instance of the ValidateShrinkwrap task
    */
   constructor() {
-    super();
-    this.name = 'validate-shrinkwrap';
+    super('validate-shrinkwrap');
   }
 
   /**

@@ -27,10 +27,6 @@ function assertCapturedErrors(expectedMessages: string[]): void {
     'The captured errors did not match the expected output.');
 }
 
-// These warnings would normally be printed at the bottom
-// of the source package's '*.api.ts' file.
-const warnings: string[] = [];
-
 describe('DocItemLoader tests', function (): void {
   this.timeout(10000);
 

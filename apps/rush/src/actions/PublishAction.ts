@@ -16,9 +16,7 @@ import {
   Npm
 } from '@microsoft/rush-lib';
 import RushCommandLineParser from './RushCommandLineParser';
-import PublishUtilities, {
-  IChangeInfoHash
-} from '../utilities/PublishUtilities';
+import PublishUtilities from '../utilities/PublishUtilities';
 import ChangelogGenerator from '../utilities/ChangelogGenerator';
 import GitPolicy from '../utilities/GitPolicy';
 import PrereleaseToken from '../utilities/PrereleaseToken';

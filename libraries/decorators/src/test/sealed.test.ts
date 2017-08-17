@@ -15,7 +15,7 @@ describe('@sealed tests', () => {
 
     // INCORRECT: If we did runtime validation, this would report an error
     // because the base class is marked as @sealed
-    class BadChildClass extends BaseClass {
+    class BadChildClass extends BaseClass { // tslint:disable-line:no-unused-variable
     }
 
     assert(true);

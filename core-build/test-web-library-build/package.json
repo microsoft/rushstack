@@ -1,6 +1,6 @@
 {
   "name": "test-web-library-build",
-  "version": "1.0.8",
+  "version": "1.0.13",
   "description": "",
   "main": "lib/test.js",
   "module": "lib-es6/test.js",
@@ -16,8 +16,8 @@
     "chai": "~3.5.0"
   },
   "dependencies": {
-    "@microsoft/load-themed-styles": "~1.6.0",
-    "@microsoft/web-library-build": "3.2.4",
+    "@microsoft/load-themed-styles": "~1.7.1",
+    "@microsoft/web-library-build": "3.2.9",
     "gulp": "~3.9.1"
   }
 }

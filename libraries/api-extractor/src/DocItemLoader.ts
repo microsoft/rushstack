@@ -5,7 +5,7 @@ import * as fsx from 'fs-extra';
 import * as os  from 'os';
 import * as path from 'path';
 import { IDocItem, IDocPackage, IDocMember } from './IDocItem';
-import ApiDefinitionReference, { IScopedPackageName, IApiDefinitionReferenceParts } from './ApiDefinitionReference';
+import ApiDefinitionReference from './ApiDefinitionReference';
 import ApiItem from './definitions/ApiItem';
 import ApiItemContainer from './definitions/ApiItemContainer';
 import ApiPackage from './definitions/ApiPackage';

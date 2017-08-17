@@ -8,7 +8,7 @@ import Extractor from '../Extractor';
 import ApiStructuredType from './ApiStructuredType';
 import ApiEnum from './ApiEnum';
 import ApiFunction from './ApiFunction';
-import ApiItem, { ApiItemKind, IApiItemOptions } from './ApiItem';
+import { ApiItemKind, IApiItemOptions } from './ApiItem';
 import ApiItemContainer from './ApiItemContainer';
 import ApiNamespace from './ApiNamespace';
 import TypeScriptHelpers from '../TypeScriptHelpers';
