@@ -33,7 +33,7 @@ export default class RushConfigurationProject {
   private _reviewCategory: string;
   private _packageJson: IPackageJson;
   private _tempProjectName: string;
-  private _tempPackageJsonFilename: string;
+  private _tempPackageTarballFilename: string;
   private _cyclicDependencyProjects: Set<string>;
   private _versionPolicyName: string;
   private _shouldPublish: boolean;
@@ -95,10 +95,10 @@ export default class RushConfigurationProject {
     // Example: "my-project-2"
     const unscopedTempProjectName: string = Utilities.parseScopedPackageName(tempProjectName).name;
 
-    // Example: "C:\MyRepo\common\temp\projects\my-project-2\package.json"
-    this._tempPackageJsonFilename = path.join(rushConfiguration.commonTempFolder,
-      RushConstants.rushTempProjectsFolderName, unscopedTempProjectName,
-      RushConstants.packageJsonFilename);
+    // Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
+    this._tempPackageTarballFilename = path.join(rushConfiguration.commonTempFolder,
+      RushConstants.rushTempProjectsFolderName,
+      `${unscopedTempProjectName}.tgz`);
 
     this._cyclicDependencyProjects = new Set<string>();
     if (projectJson.cyclicDependencyProjects) {
@@ -184,12 +184,12 @@ export default class RushConfigurationProject {
   }
 
   /**
-   * The absolute path of the package.json file for the temp project.
+   * The absolute path of the package tarball file for the temp project.
    *
-   * Example: "C:\MyRepo\common\temp\projects\my-project-2\package.json"
+   * Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
    */
-  public get tempPackageJsonFilename(): string {
-    return this._tempPackageJsonFilename;
+  public get tempPackageTarballFilename(): string {
+    return this._tempPackageTarballFilename;
   }
 
   /**
