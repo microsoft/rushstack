@@ -11,16 +11,22 @@ import npmPackageArg = require('npm-package-arg');
 import { Utilities, RushConstants } from '@microsoft/rush-lib';
 
 interface IShrinkwrapDependencyJson {
-  version: string;
-  from: string;
-  resolved: string;
-  dependencies: { [dependency: string]: IShrinkwrapDependencyJson };
+  resolution: {
+    integrity: string;
+  };
+  dependencies: { [dependency: string]: string };
 }
 
 interface IShrinkwrapJson {
-  name: string;
-  version: string;
-  dependencies: { [dependency: string]: IShrinkwrapDependencyJson };
+  /** The list of resolved direct dependencies */
+  dependencies: { [dependency: string]: string };
+/** The description of the solved DAG */
+  packages: { [dependencyVersion: string]: IShrinkwrapDependencyJson };
+  /** URL of the registry */
+  registry: string;
+  shrinkwrapVersion: number;
+  /** The list of specifiers used to resolve direct dependency versions */
+  specifiers: { [dependency: string]: string };
 }
 
 /**
@@ -31,7 +37,6 @@ export default class ShrinkwrapFile {
   private _alreadyWarnedSpecs: Set<string> = new Set<string>();
 
   public static loadFromFile(shrinkwrapYamlFilename: string): ShrinkwrapFile | undefined {
-    let data: string = undefined;
     try {
       if (!fsx.existsSync(shrinkwrapYamlFilename)) {
         return undefined; // file does not exist
@@ -72,40 +77,12 @@ export default class ShrinkwrapFile {
 
   /**
    * Returns true if the shrinkwrap file includes a package that would satisfiying the specified
-   * package name and SemVer version range.  By default, the dependencies are resolved by looking
-   * at the root of the node_modules folder described by the shrinkwrap file.  However, if
-   * tempProjectName is specified, then the resolution will start in that subfolder.
-   *
-   * Consider this example:
-   *
-   * - node_modules\
-   *   - temp-project\
-   *     - lib-a@1.2.3
-   *     - lib-b@1.0.0
-   *   - lib-b@2.0.0
-   *
-   * In this example, hasCompatibleDependency("lib-b", ">= 1.1.0", "temp-project") would fail
-   * because it finds lib-b@1.0.0 which does not satisfy the pattern ">= 1.1.0".
+   * package name and SemVer version range.
    */
-  public hasCompatibleDependency(dependencyName: string, versionRange: string, tempProjectName?: string): boolean {
+  public hasCompatibleDependency(dependencyName: string, versionRange: string): boolean {
+    const dependencyVersion: string = ShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
 
-    // First, check under tempProjectName, as this is the first place "rush link" looks.
-    let dependencyJson: IShrinkwrapDependencyJson = undefined;
-
-    if (tempProjectName) {
-      const tempDependency: IShrinkwrapDependencyJson = ShrinkwrapFile.tryGetValue(
-        this._shrinkwrapJson.dependencies, tempProjectName);
-      if (tempDependency && tempDependency.dependencies) {
-        dependencyJson = ShrinkwrapFile.tryGetValue(tempDependency.dependencies, dependencyName);
-      }
-    }
-
-    // Otherwise look at the root of the shrinkwrap file
-    if (!dependencyJson) {
-      dependencyJson = ShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
-    }
-
-    if (!dependencyJson) {
+    if (!dependencyVersion) {
       return false;
     }
 
@@ -114,7 +91,7 @@ export default class ShrinkwrapFile {
       case 'version':
       case 'range':
         // If it's a SemVer pattern, then require that the shrinkwrapped version must be compatible
-        return semver.satisfies(dependencyJson.version, versionRange);
+        return semver.satisfies(dependencyVersion, versionRange);
       default:
         // Only warn once for each spec
         if (!this._alreadyWarnedSpecs.has(result.rawSpec)) {
@@ -129,14 +106,20 @@ export default class ShrinkwrapFile {
     this._shrinkwrapJson = shrinkwrapJson;
 
     // Normalize the data
-    if (!this._shrinkwrapJson.version) {
-      this._shrinkwrapJson.version = '';
+    if (!this._shrinkwrapJson.registry) {
+      this._shrinkwrapJson.registry = '';
     }
-    if (!this._shrinkwrapJson.name) {
-      this._shrinkwrapJson.name = '';
+    if (!this._shrinkwrapJson.shrinkwrapVersion) {
+      this._shrinkwrapJson.shrinkwrapVersion = 3; // 3 is the current version for pnpm
     }
     if (!this._shrinkwrapJson.dependencies) {
       this._shrinkwrapJson.dependencies = { };
+    }
+    if (!this._shrinkwrapJson.specifiers) {
+      this._shrinkwrapJson.specifiers = { };
+    }
+    if (!this._shrinkwrapJson.packages) {
+      this._shrinkwrapJson.packages = { };
     }
   }
 }

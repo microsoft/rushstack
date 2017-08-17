@@ -6,7 +6,6 @@ import * as os from 'os';
 import * as fsx from 'fs-extra';
 import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import {
-  Utilities,
   Stopwatch
 } from '@microsoft/rush-lib';
 

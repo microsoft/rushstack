@@ -20,18 +20,6 @@ import {
 import Package, { IResolveOrCreateResult, PackageDependencyKind } from './Package';
 import PackageLookup from './PackageLookup';
 
-interface IQueueItem {
-  // A project from somewhere under "common/temp/node_modules"
-  commonPackage: Package;
-
-  // A symlinked virtual package that we will create somewhere under "this-project/node_modules"
-  localPackage: Package;
-
-  // If we encounter a dependency listed in cyclicDependencyProjects, this will be set to the root
-  // of the localPackage subtree where we will stop creating local links.
-  cyclicSubtreeRoot: Package;
-}
-
 enum SymlinkKind {
   File,
   Directory
