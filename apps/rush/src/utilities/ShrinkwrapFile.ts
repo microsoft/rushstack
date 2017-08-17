@@ -39,9 +39,9 @@ export default class ShrinkwrapFile {
 
       // We don't use JsonFile/jju here because shrinkwrap.json is a special NPM file format
       // and typically very large, so we want to load it the same way that NPM does.
-      const data = yaml.safeLoad(fsx.readFileSync(shrinkwrapYamlFilename).toString());
+      const parsedData: IShrinkwrapJson = yaml.safeLoad(fsx.readFileSync(shrinkwrapYamlFilename).toString());
 
-      return new ShrinkwrapFile(data);
+      return new ShrinkwrapFile(parsedData);
     } catch (error) {
       throw new Error(`Error reading "${shrinkwrapYamlFilename}":` + os.EOL + `  ${error.message}`);
     }

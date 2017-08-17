@@ -194,7 +194,7 @@ export default class InstallManager {
       //       One possible solution would be to have the shrinkwrap include information about whether the dependency
       //       is optional or not, but it does not appear to do so. Also, this would result in strange behavior where
       //       people would have different node_modules based on their system.
-      Utilities.executeCommandWithRetry('npm', ['install', '--no-optional'], MAX_INSTALL_ATTEMPTS, pnpmToolFolder);
+      Utilities.executeCommandWithRetry('npm', ['install'], MAX_INSTALL_ATTEMPTS, pnpmToolFolder);
 
       // Create the marker file to indicate a successful install
       fsx.writeFileSync(pnpmToolFlagFile, '');
