@@ -297,11 +297,6 @@
       "from": "@types/tapable@0.2.3",
       "resolved": "https://registry.npmjs.org/@types/tapable/-/tapable-0.2.3.tgz"
     },
-    "@types/tar": {
-      "version": "1.0.29",
-      "from": "@types/tar@1.0.29",
-      "resolved": "https://registry.npmjs.org/@types/tar/-/tar-1.0.29.tgz"
-    },
     "@types/through2": {
       "version": "2.0.32",
       "from": "@types/through2@2.0.32",
@@ -4998,9 +4993,9 @@
       "resolved": "https://registry.npmjs.org/sha.js/-/sha.js-2.2.6.tgz"
     },
     "shellwords": {
-      "version": "0.1.0",
+      "version": "0.1.1",
       "from": "shellwords@>=0.1.0 <0.2.0",
-      "resolved": "https://registry.npmjs.org/shellwords/-/shellwords-0.1.0.tgz"
+      "resolved": "https://registry.npmjs.org/shellwords/-/shellwords-0.1.1.tgz"
     },
     "sigmund": {
       "version": "1.0.1",
@@ -5278,9 +5273,9 @@
       "resolved": "https://registry.npmjs.org/tapable/-/tapable-0.1.10.tgz"
     },
     "tar": {
-      "version": "3.1.13",
+      "version": "3.1.15",
       "from": "tar@>=3.1.12 <3.2.0",
-      "resolved": "https://registry.npmjs.org/tar/-/tar-3.1.13.tgz",
+      "resolved": "https://registry.npmjs.org/tar/-/tar-3.1.15.tgz",
       "dependencies": {
         "yallist": {
           "version": "3.0.2",
