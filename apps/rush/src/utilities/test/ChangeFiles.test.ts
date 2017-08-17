@@ -85,12 +85,12 @@ describe('ChangeFiles', () => {
     it('does not delete change files for prerelease packages ', () => {
       const changesPath: string = path.join(__dirname, 'multipleChangeFiles');
       const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
-      const updatedPackages: Map<string, IPackageJson> = new Map<string, IPackageJson>();
-      updatedPackages.set('a', {
+      const packagesMap: Map<string, IPackageJson> = new Map<string, IPackageJson>();
+      packagesMap.set('a', {
         name: 'a',
         version: '1.1.0-pr.1'
       });
-      expect(changeFiles.deleteAll(false, updatedPackages)).equals(2);
+      expect(changeFiles.deleteAll(false, packagesMap)).equals(2);
     });
   });
 });

@@ -79,11 +79,11 @@ export default class ChangeFiles {
   /**
    * Delete all change files
    */
-  public deleteAll(shouldDelete: boolean, updatedPackages?: Map<string, IPackageJson>): number {
-    if (updatedPackages) {
+  public deleteAll(shouldDelete: boolean, packagesMap?: Map<string, IPackageJson>): number {
+    if (packagesMap) {
       // If package information is provided, skip changes files for prerelease.
       const prereleasePackages: Set<string> = new Set<string>();
-      updatedPackages.forEach((packageJson) => {
+      packagesMap.forEach((packageJson) => {
         if (semver.prerelease(packageJson.version)) {
           prereleasePackages.add(packageJson.name);
         }

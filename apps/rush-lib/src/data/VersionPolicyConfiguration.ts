@@ -65,7 +65,7 @@ export class VersionPolicyConfiguration {
   }
 
   /**
-   * Bumps up the version in the version policy
+   * Bumps up versions for the specified version policy or all version policies
    * @alpha
    * @param versionPolicyName - version policy name
    * @param identifier - prerelease identifier

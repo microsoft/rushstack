@@ -34,7 +34,7 @@ export default class VersionAction extends BaseRushAction {
     super({
       actionVerb: 'version',
       summary: '(EXPERIMENTAL) Manage package versions in the repo.',
-      documentation: 'use this "rush version" command to ensure version policies and bump versions.'
+      documentation: '(EXPERIMENTAL) use this "rush version" command to ensure version policies and bump versions.'
     });
     this._parser = parser;
   }
@@ -69,13 +69,13 @@ export default class VersionAction extends BaseRushAction {
       parameterLongName: '--override-bump',
       description: 'Overrides the bump type in the version-policy.json for the specifiedd version policy.' +
         'Valid values include: prerelease, patch, preminor, minor, major. ' +
-        'The setting only works for lock-step version policy in bump action.'
+        'This setting only works for lock-step version policy in bump action.'
     });
     this._prereleaseIdentifier = this.defineStringParameter({
       parameterLongName: '--override-prerelease-id',
       description: 'Overrides the prerelease identifier in the version value of version-policy.json ' +
         'for the specified version policy. ' +
-        'The setting only works for lock-step version policy in bump action.'
+        'This setting only works for lock-step version policy in bump action.'
     });
   }
 
@@ -125,9 +125,10 @@ export default class VersionAction extends BaseRushAction {
     });
 
     if (changeLogUpdated) {
+      git.addChanges('*', this.rushConfiguration.changesFolder);
       git.addChanges('**/CHANGELOG.json');
       git.addChanges('**/CHANGELOG.md');
-      git.commit('Updating change logs for package updates.');
+      git.commit('Deleting change files and updating change logs for package updates.');
     }
 
     // Commit the package.json and change files updates.

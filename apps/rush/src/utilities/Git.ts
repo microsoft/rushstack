@@ -27,9 +27,10 @@ export class Git {
     PublishUtilities.execCommand(!!this._targetBranch, 'git', `pull origin ${this._targetBranch}`.split(' '));
   }
 
-  public addChanges(pathspec?: string): void {
+  public addChanges(pathspec?: string, workingDirectory?: string): void {
     const files: string = pathspec ? pathspec : '.';
-    PublishUtilities.execCommand(!!this._targetBranch, 'git', ['add', files]);
+    PublishUtilities.execCommand(!!this._targetBranch, 'git', ['add', files],
+      workingDirectory ? workingDirectory : process.cwd());
   }
 
   public addTag(shouldExecute: boolean, packageName: string, packageVersion: string): void {

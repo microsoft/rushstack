@@ -50,16 +50,26 @@ export class VersionManager {
     this._ensure(versionPolicyName, shouldCommit);
   }
 
-  public bump(versionPolicyName?: string,
+  /**
+   * Bumps sversions following version policies.
+   *
+   * @param lockStepVersionPolicyName - a specified lock step version policy name. Without this value,
+   * versions for all lock step policies and all individual policies will be bumped.
+   * With this value, only the specified lock step policy will be bumped along with all individual policies.
+   * @param bumpType - overrides the default bump type and only works for lock step policy
+   * @param identifier - overrides the prerelease identifier and only works for lock step policy
+   * @param shouldCommit - whether the changes will be written to disk
+   */
+  public bump(lockStepVersionPolicyName?: string,
     bumpType?: BumpType,
     identifier?: string,
     shouldCommit?: boolean
   ): void {
     // Bump all the lock step version policies.
-    this._versionPolicyConfiguration.bump(versionPolicyName, bumpType, identifier, shouldCommit);
+    this._versionPolicyConfiguration.bump(lockStepVersionPolicyName, bumpType, identifier, shouldCommit);
 
     // Update packages and generate change files due to lock step bump.
-    this._ensure(versionPolicyName, shouldCommit);
+    this._ensure(lockStepVersionPolicyName, shouldCommit);
 
     // Refresh rush configuration
     this._rushConfiguration = RushConfiguration.loadFromConfigurationFile(this._rushConfiguration.rushJsonFile);
@@ -185,12 +195,12 @@ export class VersionManager {
     const changes: IChangeInfo[] = [];
     let updated: boolean = false;
     if (this._updateProjectDependencies(clonedProject.dependencies, changes,
-      clonedProject, this._updatedProjects, rushProject, projectVersionChanged)
+      clonedProject, rushProject, projectVersionChanged)
     ) {
       updated = true;
     }
     if (this._updateProjectDependencies(clonedProject.devDependencies, changes,
-      clonedProject, this._updatedProjects, rushProject, projectVersionChanged)
+      clonedProject, rushProject, projectVersionChanged)
     ) {
       updated = true;
     }
@@ -205,7 +215,6 @@ export class VersionManager {
   private _updateProjectDependencies(dependencies: { [key: string]: string; },
     changes: IChangeInfo[],
     clonedProject: IPackageJson,
-    updatedProjects: Map<string, IPackageJson>,
     rushProject: RushConfigurationProject,
     projectVersionChanged: boolean
   ): boolean {
@@ -213,49 +222,68 @@ export class VersionManager {
       return false;
     }
     let updated: boolean = false;
-    updatedProjects.forEach((updatedProject, updatedProjectName) => {
-      if (dependencies[updatedProjectName]) {
-        if (rushProject.cyclicDependencyProjects.has(updatedProjectName)) {
+    this._updatedProjects.forEach((updatedDependentProject, updatedDependentProjectName) => {
+      if (dependencies[updatedDependentProjectName]) {
+        if (rushProject.cyclicDependencyProjects.has(updatedDependentProjectName)) {
           // Skip if cyclic
-          console.log(`Found cyclic ${rushProject.packageName} ${updatedProjectName}`);
+          console.log(`Found cyclic ${rushProject.packageName} ${updatedDependentProjectName}`);
           return;
         }
 
+        const oldDependencyVersion: string = dependencies[updatedDependentProjectName];
         const newDependencyVersion: string = PublishUtilities.getNewDependencyVersion(
             dependencies,
-            updatedProjectName,
-            updatedProject.version
+            updatedDependentProjectName,
+            updatedDependentProject.version
           );
-        if (newDependencyVersion !== dependencies[updatedProjectName]) {
+
+        if (newDependencyVersion !== oldDependencyVersion) {
           updated = true;
           if (rushProject.shouldPublish) {
-            if (!semver.satisfies(updatedProject.version, dependencies[updatedProjectName]) && !projectVersionChanged) {
-              this._addChange(changes,
-                {
-                  changeType: ChangeType.patch,
-                  packageName: clonedProject.name
-                }
-              );
-            }
-
-            // If current version is not a prerelease version and new dependency is also not a prerelease version,
-            // add change entry. Otherwise, too many changes will be created for frequent releases.
-            if (!this._isPrerelease(updatedProject.version) && !this._isPrerelease(clonedProject.version)) {
-              this._addChange(changes,
-                {
-                  changeType: ChangeType.dependency,
-                  comment: `Dependency ${updatedProjectName} version bump from ${dependencies[updatedProjectName]}` +
-                    ` to ${newDependencyVersion}.`,
-                  packageName: clonedProject.name
-                }
-              );
-            }
+            this._trackDependencyChange(changes, clonedProject, projectVersionChanged,
+              updatedDependentProject,
+              updatedDependentProjectName,
+              oldDependencyVersion,
+              newDependencyVersion
+            );
           }
-          dependencies[updatedProjectName] = newDependencyVersion;
+          dependencies[updatedDependentProjectName] = newDependencyVersion;
         }
       }
     });
     return updated;
+  }
+
+  private _trackDependencyChange(
+    changes: IChangeInfo[],
+    clonedProject: IPackageJson,
+    projectVersionChanged: boolean,
+    updatedDependentProject: IPackageJson,
+    updatedDependentProjectName: string,
+    oldDependencyVersion: string,
+    newDependencyVersion: string
+  ): void {
+    if (!semver.satisfies(updatedDependentProject.version, oldDependencyVersion) && !projectVersionChanged) {
+      this._addChange(changes,
+        {
+          changeType: ChangeType.patch,
+          packageName: clonedProject.name
+        }
+      );
+    }
+
+    // If current version is not a prerelease version and new dependency is also not a prerelease version,
+    // add change entry. Otherwise, too many changes will be created for frequent releases.
+    if (!this._isPrerelease(updatedDependentProject.version) && !this._isPrerelease(clonedProject.version)) {
+      this._addChange(changes,
+        {
+          changeType: ChangeType.dependency,
+          comment: `Dependency ${updatedDependentProjectName} version bump from ${oldDependencyVersion}` +
+            ` to ${newDependencyVersion}.`,
+          packageName: clonedProject.name
+        }
+      );
+    }
   }
 
   private _addChange(changes: IChangeInfo[], newChange: IChangeInfo): void {
