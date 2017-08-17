@@ -18,7 +18,8 @@ import {
   RushConfigurationProject,
   IPackageJson,
   RushConstants,
-  Utilities
+  Utilities,
+  Stopwatch
 } from '@microsoft/rush-lib';
 
 import { IRushTempPackageJson } from '../utilities/Package';
@@ -218,6 +219,8 @@ export default class InstallManager {
    * the return value is false.
    */
   public createTempModulesAndCheckShrinkwrap(shrinkwrapFile: ShrinkwrapFile | undefined): boolean {
+    const stopwatch: Stopwatch = Stopwatch.start();
+
     // Example: "C:\MyRepo\common\temp\projects"
     const tempProjectsFolder: string = path.join(this._rushConfiguration.commonTempFolder,
       RushConstants.rushTempProjectsFolderName);
@@ -462,6 +465,9 @@ export default class InstallManager {
     // Don't update the file timestamp unless the content has changed, since "rush install"
     // will consider this timestamp
     JsonFile.saveJsonFile(commonPackageJson, commonPackageJsonFilename, { onlyIfChanged: true });
+
+    stopwatch.stop();
+    console.log(`Finished creating temporary modules (${stopwatch.toString()})`);
 
     return shrinkwrapIsValid;
   }
