@@ -465,8 +465,6 @@ export default class InstallManager {
     // will consider this timestamp
     JsonFile.saveJsonFile(commonPackageJson, commonPackageJsonFilename, { onlyIfChanged: true });
 
-    process.exit(1);
-
     return shrinkwrapIsValid;
   }
 
