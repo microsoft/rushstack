@@ -18,21 +18,14 @@
       "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-mocha/-/gulp-core-build-mocha-2.1.8.tgz"
     },
     "@microsoft/gulp-core-build-typescript": {
-      "version": "3.3.2",
-      "from": "@microsoft/gulp-core-build-typescript@3.3.2",
-      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-typescript/-/gulp-core-build-typescript-3.3.2.tgz",
-      "dependencies": {
-        "@microsoft/gulp-core-build": {
-          "version": "2.9.2",
-          "from": "@microsoft/gulp-core-build@2.9.2",
-          "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build/-/gulp-core-build-2.9.2.tgz"
-        }
-      }
+      "version": "3.4.0",
+      "from": "@microsoft/gulp-core-build-typescript@3.4.0",
+      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-typescript/-/gulp-core-build-typescript-3.4.0.tgz"
     },
     "@microsoft/node-library-build": {
-      "version": "3.2.7",
+      "version": "3.2.8",
       "from": "@microsoft/node-library-build@>=3.2.0 <3.3.0",
-      "resolved": "https://registry.npmjs.org/@microsoft/node-library-build/-/node-library-build-3.2.7.tgz"
+      "resolved": "https://registry.npmjs.org/@microsoft/node-library-build/-/node-library-build-3.2.8.tgz"
     },
     "@rush-temp/api-extractor": {
       "version": "0.0.0",
@@ -5010,9 +5003,9 @@
       "resolved": "https://registry.npmjs.org/sha.js/-/sha.js-2.2.6.tgz"
     },
     "shellwords": {
-      "version": "0.1.0",
+      "version": "0.1.1",
       "from": "shellwords@>=0.1.0 <0.2.0",
-      "resolved": "https://registry.npmjs.org/shellwords/-/shellwords-0.1.0.tgz"
+      "resolved": "https://registry.npmjs.org/shellwords/-/shellwords-0.1.1.tgz"
     },
     "sigmund": {
       "version": "1.0.1",
@@ -5290,9 +5283,9 @@
       "resolved": "https://registry.npmjs.org/tapable/-/tapable-0.1.10.tgz"
     },
     "tar": {
-      "version": "3.1.13",
+      "version": "3.1.15",
       "from": "tar@>=3.1.12 <3.2.0",
-      "resolved": "https://registry.npmjs.org/tar/-/tar-3.1.13.tgz",
+      "resolved": "https://registry.npmjs.org/tar/-/tar-3.1.15.tgz",
       "dependencies": {
         "yallist": {
           "version": "3.0.2",
