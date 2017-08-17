@@ -393,7 +393,7 @@ export default class InstallManager {
       // Example: "C:\MyRepo\common\temp\projects\my-project-2\package.json"
       const tempPackageJsonFilename: string = path.join(tempProjectFolder, RushConstants.packageJsonFilename);
 
-      // Example: "C:\MyRepo\common\temp\projects\my-project-2.gzip"
+      // Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
       const tarballFile: string = rushProject.tempPackageTarballFilename;
 
       // Example: "C:\MyRepo\common\temp\projects\my-project-2.old"
@@ -405,9 +405,8 @@ export default class InstallManager {
         // extract the tarball and compare the package.json directly
         if (fsx.existsSync(tarballFile)) {
 
-          // ensure the folder we are about to extract into is clean
-          fsx.removeSync(extractedFolder);
-          fsx.mkdirpSync(extractedFolder);
+          // ensure the folder we are about to extract into exists
+          Utilities.createFolderWithRetry(extractedFolder);
 
           tar.extract({
             cwd: extractedFolder,
@@ -431,9 +430,8 @@ export default class InstallManager {
       }
 
       if (shouldOverwrite) {
-        // ensure the folder we are about to zip is clean
-        fsx.removeSync(tempProjectFolder);
-        fsx.mkdirpSync(tempProjectFolder);
+        // ensure the folder we are about to zip exists
+        Utilities.createFolderWithRetry(tempProjectFolder);
 
         // write the expected package.json file into the zip staging folder
         JsonFile.saveJsonFile(tempPackageJson, tempPackageJsonFilename);
