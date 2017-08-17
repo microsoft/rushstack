@@ -249,6 +249,8 @@ interface IVersionPolicyJson {
 // @public
 class JsonFile {
   public static loadJsonFile(jsonFilename: string): any;
+  // (undocumented)
+  public static normalize(jsonData: any): string;
   public static saveJsonFile(jsonData: any, jsonFilename: string, options: ISaveJsonFileOptions = {}): boolean;
 }
 
@@ -357,8 +359,8 @@ class RushConfigurationProject {
   public readonly projectRelativeFolder: string;
   public readonly reviewCategory: string;
   public readonly shouldPublish: boolean;
-  public readonly tempPackageJsonFilename: string;
   public readonly tempProjectName: string;
+  public readonly unscopedTempProjectName: string;
   // @alpha
   public readonly versionPolicyName: string;
 }

@@ -302,11 +302,6 @@
       "from": "@types/tapable@0.2.3",
       "resolved": "https://registry.npmjs.org/@types/tapable/-/tapable-0.2.3.tgz"
     },
-    "@types/tar": {
-      "version": "1.0.29",
-      "from": "@types/tar@1.0.29",
-      "resolved": "https://registry.npmjs.org/@types/tar/-/tar-1.0.29.tgz"
-    },
     "@types/through2": {
       "version": "2.0.32",
       "from": "@types/through2@2.0.32",

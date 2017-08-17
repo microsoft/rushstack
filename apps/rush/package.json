@@ -59,7 +59,6 @@
     "@types/mocha": "2.2.38",
     "@types/node": "6.0.62",
     "@types/semver": "5.3.33",
-    "@types/tar": "1.0.29",
     "chai": "~3.5.0",
     "gulp": "~3.9.1"
   }
