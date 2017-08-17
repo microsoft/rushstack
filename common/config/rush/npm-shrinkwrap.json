@@ -29,118 +29,118 @@
     },
     "@rush-temp/api-extractor": {
       "version": "0.0.0",
-      "from": "projects\\api-extractor",
-      "resolved": "file:projects\\api-extractor"
+      "from": "projects\\api-extractor.tgz",
+      "resolved": "file:projects\\api-extractor.tgz"
     },
     "@rush-temp/decorators": {
       "version": "0.0.0",
-      "from": "projects\\decorators",
-      "resolved": "file:projects\\decorators"
+      "from": "projects\\decorators.tgz",
+      "resolved": "file:projects\\decorators.tgz"
     },
     "@rush-temp/gulp-core-build": {
       "version": "0.0.0",
-      "from": "projects\\gulp-core-build",
-      "resolved": "file:projects\\gulp-core-build"
+      "from": "projects\\gulp-core-build.tgz",
+      "resolved": "file:projects\\gulp-core-build.tgz"
     },
     "@rush-temp/gulp-core-build-karma": {
       "version": "0.0.0",
-      "from": "projects\\gulp-core-build-karma",
-      "resolved": "file:projects\\gulp-core-build-karma"
+      "from": "projects\\gulp-core-build-karma.tgz",
+      "resolved": "file:projects\\gulp-core-build-karma.tgz"
     },
     "@rush-temp/gulp-core-build-mocha": {
       "version": "0.0.0",
-      "from": "projects\\gulp-core-build-mocha",
-      "resolved": "file:projects\\gulp-core-build-mocha"
+      "from": "projects\\gulp-core-build-mocha.tgz",
+      "resolved": "file:projects\\gulp-core-build-mocha.tgz"
     },
     "@rush-temp/gulp-core-build-sass": {
       "version": "0.0.0",
-      "from": "projects\\gulp-core-build-sass",
-      "resolved": "file:projects\\gulp-core-build-sass"
+      "from": "projects\\gulp-core-build-sass.tgz",
+      "resolved": "file:projects\\gulp-core-build-sass.tgz"
     },
     "@rush-temp/gulp-core-build-serve": {
       "version": "0.0.0",
-      "from": "projects\\gulp-core-build-serve",
-      "resolved": "file:projects\\gulp-core-build-serve"
+      "from": "projects\\gulp-core-build-serve.tgz",
+      "resolved": "file:projects\\gulp-core-build-serve.tgz"
     },
     "@rush-temp/gulp-core-build-typescript": {
       "version": "0.0.0",
-      "from": "projects\\gulp-core-build-typescript",
-      "resolved": "file:projects\\gulp-core-build-typescript"
+      "from": "projects\\gulp-core-build-typescript.tgz",
+      "resolved": "file:projects\\gulp-core-build-typescript.tgz"
     },
     "@rush-temp/gulp-core-build-webpack": {
       "version": "0.0.0",
-      "from": "projects\\gulp-core-build-webpack",
-      "resolved": "file:projects\\gulp-core-build-webpack"
+      "from": "projects\\gulp-core-build-webpack.tgz",
+      "resolved": "file:projects\\gulp-core-build-webpack.tgz"
     },
     "@rush-temp/load-themed-styles": {
       "version": "0.0.0",
-      "from": "projects\\load-themed-styles",
-      "resolved": "file:projects\\load-themed-styles"
+      "from": "projects\\load-themed-styles.tgz",
+      "resolved": "file:projects\\load-themed-styles.tgz"
     },
     "@rush-temp/loader-load-themed-styles": {
       "version": "0.0.0",
-      "from": "projects\\loader-load-themed-styles",
-      "resolved": "file:projects\\loader-load-themed-styles"
+      "from": "projects\\loader-load-themed-styles.tgz",
+      "resolved": "file:projects\\loader-load-themed-styles.tgz"
     },
     "@rush-temp/loader-raw-script": {
       "version": "0.0.0",
-      "from": "projects\\loader-raw-script",
-      "resolved": "file:projects\\loader-raw-script"
+      "from": "projects\\loader-raw-script.tgz",
+      "resolved": "file:projects\\loader-raw-script.tgz"
     },
     "@rush-temp/loader-set-webpack-public-path": {
       "version": "0.0.0",
-      "from": "projects\\loader-set-webpack-public-path",
-      "resolved": "file:projects\\loader-set-webpack-public-path"
+      "from": "projects\\loader-set-webpack-public-path.tgz",
+      "resolved": "file:projects\\loader-set-webpack-public-path.tgz"
     },
     "@rush-temp/node-core-library": {
       "version": "0.0.0",
-      "from": "projects\\node-core-library",
-      "resolved": "file:projects\\node-core-library"
+      "from": "projects\\node-core-library.tgz",
+      "resolved": "file:projects\\node-core-library.tgz"
     },
     "@rush-temp/node-library-build": {
       "version": "0.0.0",
-      "from": "projects\\node-library-build",
-      "resolved": "file:projects\\node-library-build"
+      "from": "projects\\node-library-build.tgz",
+      "resolved": "file:projects\\node-library-build.tgz"
     },
     "@rush-temp/package-deps-hash": {
       "version": "0.0.0",
-      "from": "projects\\package-deps-hash",
-      "resolved": "file:projects\\package-deps-hash"
+      "from": "projects\\package-deps-hash.tgz",
+      "resolved": "file:projects\\package-deps-hash.tgz"
     },
     "@rush-temp/rush": {
       "version": "0.0.0",
-      "from": "projects\\rush",
-      "resolved": "file:projects\\rush"
+      "from": "projects\\rush.tgz",
+      "resolved": "file:projects\\rush.tgz"
     },
     "@rush-temp/rush-lib": {
       "version": "0.0.0",
-      "from": "projects\\rush-lib",
-      "resolved": "file:projects\\rush-lib"
+      "from": "projects\\rush-lib.tgz",
+      "resolved": "file:projects\\rush-lib.tgz"
     },
     "@rush-temp/set-webpack-public-path-plugin": {
       "version": "0.0.0",
-      "from": "projects\\set-webpack-public-path-plugin",
-      "resolved": "file:projects\\set-webpack-public-path-plugin"
+      "from": "projects\\set-webpack-public-path-plugin.tgz",
+      "resolved": "file:projects\\set-webpack-public-path-plugin.tgz"
     },
     "@rush-temp/stream-collator": {
       "version": "0.0.0",
-      "from": "projects\\stream-collator",
-      "resolved": "file:projects\\stream-collator"
+      "from": "projects\\stream-collator.tgz",
+      "resolved": "file:projects\\stream-collator.tgz"
     },
     "@rush-temp/test-web-library-build": {
       "version": "0.0.0",
-      "from": "projects\\test-web-library-build",
-      "resolved": "file:projects\\test-web-library-build"
+      "from": "projects\\test-web-library-build.tgz",
+      "resolved": "file:projects\\test-web-library-build.tgz"
     },
     "@rush-temp/ts-command-line": {
       "version": "0.0.0",
-      "from": "projects\\ts-command-line",
-      "resolved": "file:projects\\ts-command-line"
+      "from": "projects\\ts-command-line.tgz",
+      "resolved": "file:projects\\ts-command-line.tgz"
     },
     "@rush-temp/web-library-build": {
       "version": "0.0.0",
-      "from": "projects\\web-library-build",
-      "resolved": "file:projects\\web-library-build"
+      "from": "projects\\web-library-build.tgz",
+      "resolved": "file:projects\\web-library-build.tgz"
     },
     "@types/assertion-error": {
       "version": "1.0.30",
@@ -296,11 +296,6 @@
       "version": "0.2.3",
       "from": "@types/tapable@0.2.3",
       "resolved": "https://registry.npmjs.org/@types/tapable/-/tapable-0.2.3.tgz"
-    },
-    "@types/tar": {
-      "version": "1.0.29",
-      "from": "@types/tar@1.0.29",
-      "resolved": "https://registry.npmjs.org/@types/tar/-/tar-1.0.29.tgz"
     },
     "@types/through2": {
       "version": "2.0.32",
@@ -604,12 +599,6 @@
       "from": "batch@>=0.5.3 <0.6.0",
       "resolved": "https://registry.npmjs.org/batch/-/batch-0.5.3.tgz"
     },
-    "bcrypt-pbkdf": {
-      "version": "1.0.1",
-      "from": "bcrypt-pbkdf@>=1.0.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/bcrypt-pbkdf/-/bcrypt-pbkdf-1.0.1.tgz",
-      "optional": true
-    },
     "beeper": {
       "version": "1.1.1",
       "from": "beeper@>=1.0.0 <2.0.0",
@@ -852,9 +841,9 @@
       "resolved": "https://registry.npmjs.org/combined-stream/-/combined-stream-1.0.5.tgz"
     },
     "commander": {
-      "version": "2.11.0",
-      "from": "commander@>=2.7.1 <3.0.0",
-      "resolved": "https://registry.npmjs.org/commander/-/commander-2.11.0.tgz"
+      "version": "2.3.0",
+      "from": "commander@2.3.0",
+      "resolved": "https://registry.npmjs.org/commander/-/commander-2.3.0.tgz"
     },
     "component-bind": {
       "version": "1.0.0",
@@ -1294,12 +1283,6 @@
           "resolved": "https://registry.npmjs.org/string_decoder/-/string_decoder-1.0.3.tgz"
         }
       }
-    },
-    "ecc-jsbn": {
-      "version": "0.1.1",
-      "from": "ecc-jsbn@>=0.1.1 <0.2.0",
-      "resolved": "https://registry.npmjs.org/ecc-jsbn/-/ecc-jsbn-0.1.1.tgz",
-      "optional": true
     },
     "ee-first": {
       "version": "1.1.1",
@@ -2390,11 +2373,6 @@
       "from": "gulp-mocha@>=2.2.0 <2.3.0",
       "resolved": "https://registry.npmjs.org/gulp-mocha/-/gulp-mocha-2.2.0.tgz",
       "dependencies": {
-        "commander": {
-          "version": "2.3.0",
-          "from": "commander@2.3.0",
-          "resolved": "https://registry.npmjs.org/commander/-/commander-2.3.0.tgz"
-        },
         "escape-string-regexp": {
           "version": "1.0.2",
           "from": "escape-string-regexp@1.0.2",
@@ -2627,14 +2605,7 @@
     "handlebars": {
       "version": "4.0.10",
       "from": "handlebars@>=4.0.1 <5.0.0",
-      "resolved": "https://registry.npmjs.org/handlebars/-/handlebars-4.0.10.tgz",
-      "dependencies": {
-        "source-map": {
-          "version": "0.4.4",
-          "from": "source-map@>=0.4.4 <0.5.0",
-          "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.4.4.tgz"
-        }
-      }
+      "resolved": "https://registry.npmjs.org/handlebars/-/handlebars-4.0.10.tgz"
     },
     "har-schema": {
       "version": "1.0.5",
@@ -3141,12 +3112,6 @@
         }
       }
     },
-    "jsbn": {
-      "version": "0.1.1",
-      "from": "jsbn@>=0.1.0 <0.2.0",
-      "resolved": "https://registry.npmjs.org/jsbn/-/jsbn-0.1.1.tgz",
-      "optional": true
-    },
     "jsesc": {
       "version": "0.5.0",
       "from": "jsesc@>=0.5.0 <0.6.0",
@@ -3164,7 +3129,7 @@
     },
     "json-stable-stringify": {
       "version": "1.0.1",
-      "from": "json-stable-stringify@>=1.0.1 <2.0.0",
+      "from": "json-stable-stringify@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/json-stable-stringify/-/json-stable-stringify-1.0.1.tgz"
     },
     "json-stringify-safe": {
@@ -3777,7 +3742,7 @@
     },
     "mime-types": {
       "version": "2.1.16",
-      "from": "mime-types@>=2.1.7 <2.2.0",
+      "from": "mime-types@>=2.1.15 <2.2.0",
       "resolved": "https://registry.npmjs.org/mime-types/-/mime-types-2.1.16.tgz"
     },
     "minimatch": {
@@ -4574,7 +4539,7 @@
     },
     "qs": {
       "version": "6.4.0",
-      "from": "qs@>=6.4.0 <6.5.0",
+      "from": "qs@6.4.0",
       "resolved": "https://registry.npmjs.org/qs/-/qs-6.4.0.tgz"
     },
     "querystring": {
@@ -4774,7 +4739,7 @@
     },
     "request": {
       "version": "2.81.0",
-      "from": "request@>=2.54.0 <3.0.0",
+      "from": "request@>=2.81.0 <2.82.0",
       "resolved": "https://registry.npmjs.org/request/-/request-2.81.0.tgz"
     },
     "request-progress": {
@@ -4892,14 +4857,7 @@
     "scss-tokenizer": {
       "version": "0.2.3",
       "from": "scss-tokenizer@>=0.2.3 <0.3.0",
-      "resolved": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.2.3.tgz",
-      "dependencies": {
-        "source-map": {
-          "version": "0.4.4",
-          "from": "source-map@>=0.4.2 <0.5.0",
-          "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.4.4.tgz"
-        }
-      }
+      "resolved": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.2.3.tgz"
     },
     "semver": {
       "version": "5.3.0",
@@ -5106,10 +5064,9 @@
       "resolved": "https://registry.npmjs.org/source-list-map/-/source-list-map-0.1.8.tgz"
     },
     "source-map": {
-      "version": "0.2.0",
-      "from": "source-map@>=0.2.0 <0.3.0",
-      "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.2.0.tgz",
-      "optional": true
+      "version": "0.4.4",
+      "from": "source-map@>=0.4.4 <0.5.0",
+      "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.4.4.tgz"
     },
     "sparkles": {
       "version": "1.0.0",
@@ -5278,9 +5235,9 @@
       "resolved": "https://registry.npmjs.org/tapable/-/tapable-0.1.10.tgz"
     },
     "tar": {
-      "version": "3.1.13",
+      "version": "3.1.14",
       "from": "tar@>=3.1.12 <3.2.0",
-      "resolved": "https://registry.npmjs.org/tar/-/tar-3.1.13.tgz",
+      "resolved": "https://registry.npmjs.org/tar/-/tar-3.1.14.tgz",
       "dependencies": {
         "yallist": {
           "version": "3.0.2",
@@ -5459,6 +5416,11 @@
       "from": "tslint@>=5.5.0 <5.6.0",
       "resolved": "https://registry.npmjs.org/tslint/-/tslint-5.5.0.tgz",
       "dependencies": {
+        "commander": {
+          "version": "2.11.0",
+          "from": "commander@>=2.9.0 <3.0.0",
+          "resolved": "https://registry.npmjs.org/commander/-/commander-2.11.0.tgz"
+        },
         "diff": {
           "version": "3.3.0",
           "from": "diff@>=3.2.0 <4.0.0",
@@ -5502,12 +5464,6 @@
       "version": "0.6.0",
       "from": "tunnel-agent@>=0.6.0 <0.7.0",
       "resolved": "https://registry.npmjs.org/tunnel-agent/-/tunnel-agent-0.6.0.tgz"
-    },
-    "tweetnacl": {
-      "version": "0.14.5",
-      "from": "tweetnacl@>=0.14.0 <0.15.0",
-      "resolved": "https://registry.npmjs.org/tweetnacl/-/tweetnacl-0.14.5.tgz",
-      "optional": true
     },
     "type-check": {
       "version": "0.3.2",
@@ -5862,14 +5818,7 @@
     "webpack-core": {
       "version": "0.6.9",
       "from": "webpack-core@>=0.6.0 <0.7.0",
-      "resolved": "https://registry.npmjs.org/webpack-core/-/webpack-core-0.6.9.tgz",
-      "dependencies": {
-        "source-map": {
-          "version": "0.4.4",
-          "from": "source-map@>=0.4.1 <0.5.0",
-          "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.4.4.tgz"
-        }
-      }
+      "resolved": "https://registry.npmjs.org/webpack-core/-/webpack-core-0.6.9.tgz"
     },
     "webpack-dev-middleware": {
       "version": "1.12.0",

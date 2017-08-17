@@ -21,8 +21,17 @@ declare module 'tar' {
       noPax?: boolean;
     }
 
+    interface IExtractOptions {
+      cwd?: string;
+      file?: string;
+      sync?: boolean;
+    }
+
     interface Tar {
-       c(opts: NodeTar.ICreateOptions, fileList: string[], cb?: () => void): undefined | NodeJS.ReadableStream;
+      create(opts: NodeTar.ICreateOptions, fileList?: string[], cb?: () => void):
+        undefined | NodeJS.ReadableStream | NodeJS.WritableStream;
+
+      extract(opts: NodeTar.IExtractOptions): void;
     }
   }
 

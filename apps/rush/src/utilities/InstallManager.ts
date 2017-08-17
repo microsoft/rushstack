@@ -306,22 +306,9 @@ export default class InstallManager {
       // Example: "my-project-2"
       const unscopedTempProjectName: string = path.basename(rushProject.tempPackageTarballFilename, '.tgz');
 
-      // Example: "C:\MyRepo\common\temp\projects\my-project-2"
-      const tempProjectContainerFolder: string = path.join(
-        path.dirname(rushProject.tempPackageTarballFilename),
-        unscopedTempProjectName);
-
-      // Example: "C:\MyRepo\common\temp\projects\my-project-2\package
-      const tempProjectFolder: string = path.join(tempProjectContainerFolder, 'package');
-
-      fsx.mkdirsSync(tempProjectFolder);
-
       // Example: dependencies["@rush-temp/my-project-2"] = "file:./projects/my-project-2.tgz"
       commonPackageJson.dependencies[rushProject.tempProjectName]
         = `file:./${RushConstants.rushTempProjectsFolderName}/${path.basename(rushProject.tempPackageTarballFilename)}`;
-
-      // Example: "C:\MyRepo\common\temp\projects\my-project-2\package\package.json"
-      const tempPackageJsonFilename: string = path.join(tempProjectFolder, RushConstants.packageJsonFilename);
 
       const tempPackageJson: IRushTempPackageJson = {
         name: rushProject.tempProjectName,
@@ -395,48 +382,79 @@ export default class InstallManager {
         }
       }
 
-      // Don't update the file timestamp unless the content has changed, since "rush install"
-      // will consider this timestamp. After that, re-tar it.
+      // NPM expects the root of the tarball to have a directory called 'package'
+      const npmPackageFolder: string = 'package';
 
-      JsonFile.saveJsonFile(tempPackageJson, tempPackageJsonFilename);
+      // Example: "C:\MyRepo\common\temp\projects\my-project-2.new"
+      const tempProjectFolder: string = path.join(
+        path.dirname(rushProject.tempPackageTarballFilename),
+        unscopedTempProjectName + '.new');
 
+      // Example: "C:\MyRepo\common\temp\projects\my-project-2\package.json"
+      const tempPackageJsonFilename: string = path.join(tempProjectFolder, RushConstants.packageJsonFilename);
+
+      // Example: "C:\MyRepo\common\temp\projects\my-project-2.gzip"
       const tarballFile: string = rushProject.tempPackageTarballFilename;
-      const tempTarballFile: string = tarballFile + '.tmp';
 
-      tar.c({
-        gzip: true,
-        file: tempTarballFile,
-        cwd: tempProjectContainerFolder,
-        portable: true,
-        sync: true
-      }, ['package']);
+      // Example: "C:\MyRepo\common\temp\projects\my-project-2.old"
+      const extractedFolder: string = tempProjectFolder + '.old';
 
-      // only overwrite if there are difference
+      // we only want to overwrite the package if the existing tarball's package.json is different from tempPackageJson
       let shouldOverwrite: boolean = true;
       try {
-        const oldBuffer: Buffer = fsx.readFileSync(tarballFile);
-        const newBuffer: Buffer = fsx.readFileSync(tempTarballFile);
+        // extract the tarball and compare the package.json directly
+        if (fsx.existsSync(tarballFile)) {
 
-        console.log(oldBuffer);
-        console.log(newBuffer);
+          // ensure the folder we are about to extract into is clean
+          fsx.removeSync(extractedFolder);
+          fsx.mkdirpSync(extractedFolder);
 
-        if (Buffer.compare(oldBuffer, newBuffer) === 0) {
-          shouldOverwrite = false;
+          tar.extract({
+            cwd: extractedFolder,
+            file: tarballFile,
+            sync: true
+          });
+
+          const extractedPackageJsonFilename: string =
+            path.join(extractedFolder, npmPackageFolder, RushConstants.packageJsonFilename);
+
+          // compare the extracted package.json with the one we are about to write
+          const oldBuffer: Buffer = fsx.readFileSync(extractedPackageJsonFilename);
+          const newBuffer: Buffer = new Buffer(JsonFile.normalize(tempPackageJson));
+
+          if (Buffer.compare(oldBuffer, newBuffer) === 0) {
+            shouldOverwrite = false;
+          }
         }
       } catch (error) {
-        // ignore the error and do the overwrite
+        // ignore the error, we will go ahead and create a new tarball
       }
+
       if (shouldOverwrite) {
-        console.log('Overwrite ' + tarballFile);
-        fsx.removeSync(tarballFile);
-        fsx.renameSync(tempTarballFile, tarballFile);
-      } else {
-        console.log('Skipping ' + tarballFile);
+        // ensure the folder we are about to zip is clean
+        fsx.removeSync(tempProjectFolder);
+        fsx.mkdirpSync(tempProjectFolder);
+
+        // write the expected package.json file into the zip staging folder
+        JsonFile.saveJsonFile(tempPackageJson, tempPackageJsonFilename);
+
+        // create the new tarball, this overwrites the existing one
+        tar.create({
+          gzip: true,
+          file: tarballFile,
+          cwd: tempProjectFolder,
+          portable: true,
+          noPax: true,
+          sync: true,
+          prefix: npmPackageFolder
+        }, ['package.json']);
+
+        console.log(`Updating ${tarballFile}`);
       }
 
       // clean up the old tarball & the temp folder
-      fsx.removeSync(tempProjectContainerFolder);
-      fsx.removeSync(tempTarballFile);
+      fsx.removeSync(tempProjectFolder);
+      fsx.removeSync(extractedFolder);
     }
 
     // Example: "C:\MyRepo\common\temp\package.json"
