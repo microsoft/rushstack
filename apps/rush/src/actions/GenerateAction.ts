@@ -67,8 +67,11 @@ export default class GenerateAction extends BaseRushAction {
 
     const installManager: InstallManager = new InstallManager(this.rushConfiguration);
 
+    const committedShrinkwrapFilename: string = this.rushConfiguration.committedShrinkwrapFilename;
+    const tempShrinkwrapFilename: string = this.rushConfiguration.tempShrinkwrapFilename;
+
     const shrinkwrapFile: ShrinkwrapFile | undefined
-        = ShrinkwrapFile.loadFromFile(this.rushConfiguration.committedShrinkwrapFilename);
+      = ShrinkwrapFile.loadFromFile(committedShrinkwrapFilename);
 
     if (shrinkwrapFile
       && !this._forceParameter.value
@@ -86,12 +89,12 @@ export default class GenerateAction extends BaseRushAction {
     installManager.createTempModules();
 
     // Delete both copies of the shrinkwrap file
-    if (fsx.existsSync(this.rushConfiguration.committedShrinkwrapFilename)) {
-      console.log(os.EOL + 'Deleting ' + this.rushConfiguration.committedShrinkwrapFilename);
-      fsx.unlinkSync(this.rushConfiguration.committedShrinkwrapFilename);
+    if (fsx.existsSync(committedShrinkwrapFilename)) {
+      console.log(os.EOL + 'Deleting ' + committedShrinkwrapFilename);
+      fsx.unlinkSync(committedShrinkwrapFilename);
     }
-    if (fsx.existsSync(this.rushConfiguration.tempShrinkwrapFilename)) {
-      fsx.unlinkSync(this.rushConfiguration.tempShrinkwrapFilename);
+    if (fsx.existsSync(tempShrinkwrapFilename)) {
+      fsx.unlinkSync(tempShrinkwrapFilename);
     }
 
     if (isLazy) {
@@ -102,21 +105,16 @@ export default class GenerateAction extends BaseRushAction {
       // Do an incremental install
       installManager.installCommonModules(InstallType.Normal);
 
-      console.log(os.EOL + colors.bold('(Skipping "npm shrinkwrap")') + os.EOL);
+      console.log(os.EOL + colors.bold('(Deleting "shrinkwrap.yaml")') + os.EOL);
+      fsx.unlinkSync(tempShrinkwrapFilename);
+
     } else {
       // Do a clean install
       installManager.installCommonModules(InstallType.ForceClean);
 
-      console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
-      const npmArgs: string [] = ['shrinkwrap'];
-      installManager.pushConfigurationNpmArgs(npmArgs);
-      Utilities.executeCommand(this.rushConfiguration.pnpmToolFilename,
-        npmArgs, this.rushConfiguration.commonTempFolder);
-      console.log('"npm shrinkwrap" completed' + os.EOL);
-
-      // Copy (or delete) common\temp\npm-shrinkwrap.json --> common\npm-shrinkwrap.json
-      installManager.syncFile(this.rushConfiguration.tempShrinkwrapFilename,
-        this.rushConfiguration.committedShrinkwrapFilename);
+      // Copy (or delete) common\temp\shrinkwrap.yaml --> common\shrinkwrap.yaml
+      console.log(`copying "${tempShrinkwrapFilename}" to "${committedShrinkwrapFilename}"` + os.EOL);
+      installManager.syncFile(tempShrinkwrapFilename, committedShrinkwrapFilename);
 
       // The flag file is normally created by installCommonModules(), but "rush install" will
       // compare its timestamp against the shrinkwrap file.  Since we just generated a new

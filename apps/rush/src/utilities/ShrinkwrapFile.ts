@@ -3,6 +3,7 @@
 
 import * as colors from 'colors';
 import * as fsx from 'fs-extra';
+import * as yaml from 'js-yaml';
 import * as os from 'os';
 import * as semver from 'semver';
 import npmPackageArg = require('npm-package-arg');
@@ -23,29 +24,26 @@ interface IShrinkwrapJson {
 }
 
 /**
- * This class is a parser for NPM's npm-shrinkwrap.json file format.
+ * This class is a parser for NPM's shrinkwrap.yaml file format.
  */
 export default class ShrinkwrapFile {
   private _shrinkwrapJson: IShrinkwrapJson;
   private _alreadyWarnedSpecs: Set<string> = new Set<string>();
 
-  public static loadFromFile(shrinkwrapJsonFilename: string): ShrinkwrapFile | undefined {
+  public static loadFromFile(shrinkwrapYamlFilename: string): ShrinkwrapFile | undefined {
     let data: string = undefined;
     try {
-      if (!fsx.existsSync(shrinkwrapJsonFilename)) {
+      if (!fsx.existsSync(shrinkwrapYamlFilename)) {
         return undefined; // file does not exist
       }
 
       // We don't use JsonFile/jju here because shrinkwrap.json is a special NPM file format
       // and typically very large, so we want to load it the same way that NPM does.
-      data = fsx.readFileSync(shrinkwrapJsonFilename).toString();
-      if (data.charCodeAt(0) === 0xFEFF) {  // strip BOM
-        data = data.slice(1);
-      }
+      const data = yaml.safeLoad(fsx.readFileSync(shrinkwrapYamlFilename).toString());
 
-      return new ShrinkwrapFile(JSON.parse(data));
+      return new ShrinkwrapFile(data);
     } catch (error) {
-      throw new Error(`Error reading "${shrinkwrapJsonFilename}":` + os.EOL + `  ${error.message}`);
+      throw new Error(`Error reading "${shrinkwrapYamlFilename}":` + os.EOL + `  ${error.message}`);
     }
   }
 

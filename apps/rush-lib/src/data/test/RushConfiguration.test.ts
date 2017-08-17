@@ -27,7 +27,7 @@ describe('RushConfiguration', () => {
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
 
     assertPathProperty('committedShrinkwrapFilename',
-      rushConfiguration.committedShrinkwrapFilename, './repo/common/config/rush/npm-shrinkwrap.json');
+      rushConfiguration.committedShrinkwrapFilename, './repo/common/config/rush/shrinkwrap.yaml');
     assertPathProperty('commonFolder',
       rushConfiguration.commonFolder, './repo/common');
     assertPathProperty('commonRushConfigFolder',

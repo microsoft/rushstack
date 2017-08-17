@@ -375,7 +375,7 @@ module RushConstants {
 
   nonbrowserApprovedPackagesFilename: string = 'nonbrowser-approved-packages.json';
 
-  npmShrinkwrapFilename: string = 'npm-shrinkwrap.json';
+  npmShrinkwrapFilename: string = 'shrinkwrap.yaml';
 
   packageDepsFilename: string = 'package-deps.json';
 

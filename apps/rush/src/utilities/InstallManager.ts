@@ -283,7 +283,7 @@ export default class InstallManager {
     }
 
     // Either way, resync the temporary shrinkwrap file.
-    // Copy (or delete) common\npm-shrinkwrap.json --> common\temp\npm-shrinkwrap.json
+    // Copy (or delete) common\shrinkwrap.yaml --> common\temp\shrinkwrap.yaml
     this.syncFile(this._rushConfiguration.committedShrinkwrapFilename,
       this._rushConfiguration.tempShrinkwrapFilename);
 
@@ -452,7 +452,7 @@ export default class InstallManager {
       // or deleted it entirely, then we can't skip this install
       potentiallyChangedFiles.push(commonNodeModulesFolder);
 
-      // Additionally, if they pulled an updated npm-shrinkwrap.json file from Git,
+      // Additionally, if they pulled an updated shrinkwrap.yaml file from Git,
       // then we can't skip this install
       potentiallyChangedFiles.push(this._rushConfiguration.committedShrinkwrapFilename);
 

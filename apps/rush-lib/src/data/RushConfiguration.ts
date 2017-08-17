@@ -317,7 +317,7 @@ export default class RushConfiguration {
    * The filename of the NPM shrinkwrap file that is tracked e.g. by Git.  (The "rush install"
    * command uses a temporary copy, whose path is tempShrinkwrapFilename.)
    * This property merely reports the filename; the file itself may not actually exist.
-   * Example: "C:\MyRepo\common\npm-shrinkwrap.json"
+   * Example: "C:\MyRepo\common\shrinkwrap.yaml"
    */
   public get committedShrinkwrapFilename(): string {
     return this._committedShrinkwrapFilename;
@@ -327,7 +327,7 @@ export default class RushConfiguration {
    * The filename of the temporary NPM shrinkwrap file that is used by "rush install".
    * (The master copy is tempShrinkwrapFilename.)
    * This property merely reports the filename; the file itself may not actually exist.
-   * Example: "C:\MyRepo\common\temp\npm-shrinkwrap.json"
+   * Example: "C:\MyRepo\common\temp\shrinkwrap.yaml"
    */
   public get tempShrinkwrapFilename(): string {
     return this._tempShrinkwrapFilename;

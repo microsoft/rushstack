@@ -30,7 +30,7 @@ export class GenerateShrinkwrapTask extends GulpTask<void> {
     gulp: gulpType.Gulp,
     completeCallback: (error?: string | Error) => void
   ): NodeJS.ReadWriteStream | void {
-    const pathToShrinkwrap: string = path.join(this.buildConfig.rootPath, 'npm-shrinkwrap.json');
+    const pathToShrinkwrap: string = path.join(this.buildConfig.rootPath, 'shrinkwrap.yaml');
 
     if (this.fileExists(pathToShrinkwrap)) {
       this.log(`Remove existing shrinkwrap file.`);
