@@ -359,8 +359,8 @@ class RushConfigurationProject {
   public readonly projectRelativeFolder: string;
   public readonly reviewCategory: string;
   public readonly shouldPublish: boolean;
-  public readonly tempPackageTarballFilename: string;
   public readonly tempProjectName: string;
+  public readonly unscopedTempProjectName: string;
   // @alpha
   public readonly versionPolicyName: string;
 }

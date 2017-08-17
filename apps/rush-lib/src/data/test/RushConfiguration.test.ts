@@ -76,8 +76,7 @@ describe('RushConfiguration', () => {
     assert.equal(project1.packageName, 'project1', 'Failed to validate project1.packageName');
     assertPathProperty('project1.projectFolder', project1.projectFolder, './repo/project1');
     assert.equal(project1.tempProjectName, '@rush-temp/project1', 'Failed to validate project1.tempProjectName');
-    assertPathProperty('project1.tempPackageTarballFilename', project1.tempPackageTarballFilename,
-      './repo/common/temp/projects/project1.tgz');
+    assert.equal(project1.unscopedTempProjectName, 'project1');
 
     done();
   });

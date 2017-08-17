@@ -306,12 +306,15 @@ export default class InstallManager {
     for (const rushProject of sortedRushProjects) {
       const packageJson: IPackageJson = rushProject.packageJson;
 
+      // Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
+      const tarballFile: string = this._getTarballFilePath(rushProject);
+
       // Example: "my-project-2"
-      const unscopedTempProjectName: string = path.basename(rushProject.tempPackageTarballFilename, '.tgz');
+      const unscopedTempProjectName: string = rushProject.unscopedTempProjectName;
 
       // Example: dependencies["@rush-temp/my-project-2"] = "file:./projects/my-project-2.tgz"
       commonPackageJson.dependencies[rushProject.tempProjectName]
-        = `file:./${RushConstants.rushTempProjectsFolderName}/${path.basename(rushProject.tempPackageTarballFilename)}`;
+        = `file:./${RushConstants.rushTempProjectsFolderName}/${rushProject.unscopedTempProjectName}.tgz`;
 
       const tempPackageJson: IRushTempPackageJson = {
         name: rushProject.tempProjectName,
@@ -390,14 +393,12 @@ export default class InstallManager {
 
       // Example: "C:\MyRepo\common\temp\projects\my-project-2.new"
       const tempProjectFolder: string = path.join(
-        path.dirname(rushProject.tempPackageTarballFilename),
+        this._rushConfiguration.commonTempFolder,
+        RushConstants.rushTempProjectsFolderName,
         unscopedTempProjectName + '.new');
 
       // Example: "C:\MyRepo\common\temp\projects\my-project-2\package.json"
       const tempPackageJsonFilename: string = path.join(tempProjectFolder, RushConstants.packageJsonFilename);
-
-      // Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
-      const tarballFile: string = rushProject.tempPackageTarballFilename;
 
       // Example: "C:\MyRepo\common\temp\projects\my-project-2.old"
       const extractedFolder: string = tempProjectFolder + '.old';
@@ -516,7 +517,9 @@ export default class InstallManager {
       // Also consider timestamps for all the temp tarballs. (createTempModulesAndCheckShrinkwrap() will
       // carefully preserve these timestamps unless something has changed.)
       // Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
-      potentiallyChangedFiles.push(...this._rushConfiguration.projects.map(x => x.tempPackageTarballFilename));
+      potentiallyChangedFiles.push(...this._rushConfiguration.projects.map(x => {
+        return this._getTarballFilePath(x);
+      }));
 
       // NOTE: If commonNodeModulesMarkerFilename (or any of the potentiallyChangedFiles) does not
       // exist, then isFileTimestampCurrent() returns false.
@@ -649,6 +652,17 @@ export default class InstallManager {
         fsx.unlinkSync(targetPath);
       }
     }
+  }
+
+  /**
+   * Gets the path to the tarball
+   * Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
+   */
+  private _getTarballFilePath(project: RushConfigurationProject): string {
+    return path.join(
+      this._rushConfiguration.commonTempFolder,
+      RushConstants.rushTempProjectsFolderName,
+      `${project.unscopedTempProjectName}.tgz`);
   }
 
   /**

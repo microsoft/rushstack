@@ -7,7 +7,6 @@ import IPackageJson from '../utilities/IPackageJson';
 import JsonFile from '../utilities/JsonFile';
 import Utilities from '../utilities/Utilities';
 import RushConfiguration from '../data/RushConfiguration';
-import { RushConstants } from '../RushConstants';
 
 /**
  * This represents the JSON data object for a project entry in the rush.json configuration file.
@@ -33,7 +32,7 @@ export default class RushConfigurationProject {
   private _reviewCategory: string;
   private _packageJson: IPackageJson;
   private _tempProjectName: string;
-  private _tempPackageTarballFilename: string;
+  private _unscopedTempProjectName: string;
   private _cyclicDependencyProjects: Set<string>;
   private _versionPolicyName: string;
   private _shouldPublish: boolean;
@@ -93,12 +92,7 @@ export default class RushConfigurationProject {
     // The "rushProject.tempProjectName" is guaranteed to be unique name (e.g. by adding the "-2"
     // suffix).  Even after we strip the NPM scope, it will still be unique.
     // Example: "my-project-2"
-    const unscopedTempProjectName: string = Utilities.parseScopedPackageName(tempProjectName).name;
-
-    // Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
-    this._tempPackageTarballFilename = path.join(rushConfiguration.commonTempFolder,
-      RushConstants.rushTempProjectsFolderName,
-      `${unscopedTempProjectName}.tgz`);
+    this._unscopedTempProjectName = Utilities.parseScopedPackageName(tempProjectName).name;
 
     this._cyclicDependencyProjects = new Set<string>();
     if (projectJson.cyclicDependencyProjects) {
@@ -184,12 +178,12 @@ export default class RushConfigurationProject {
   }
 
   /**
-   * The absolute path of the package tarball file for the temp project.
+   * The unscoped temporary project name
    *
-   * Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
+   * Example: "my-project-2"
    */
-  public get tempPackageTarballFilename(): string {
-    return this._tempPackageTarballFilename;
+  public get unscopedTempProjectName(): string {
+    return this._unscopedTempProjectName;
   }
 
   /**
