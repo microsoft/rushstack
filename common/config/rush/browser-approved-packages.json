@@ -2,10 +2,6 @@
 {
   "packages": [
     {
-      "name": "js-yaml",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "orchestrator",
       "allowedCategories": [ "libraries" ]
     },

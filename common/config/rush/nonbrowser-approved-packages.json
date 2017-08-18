@@ -238,6 +238,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "js-yaml",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "karma",
       "allowedCategories": [ "libraries" ]
     },
