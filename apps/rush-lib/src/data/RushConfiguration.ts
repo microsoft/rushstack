@@ -96,7 +96,6 @@ export default class RushConfiguration {
   private _commonTempFolder: string;
   private _commonRushConfigFolder: string;
   private _pnpmStoreFolder: string;
-  private _npmTmpFolder: string;
   private _committedShrinkwrapFilename: string;
   private _tempShrinkwrapFilename: string;
   private _homeFolder: string;
@@ -300,17 +299,6 @@ export default class RushConfiguration {
    */
   public get pnpmStoreFolder(): string {
     return this._pnpmStoreFolder;
-  }
-
-  /**
-   * The local folder where NPM's temporary files will be written during installation.
-   * Rush does not rely on the global default folder, because it may be on a different
-   * hard disk.
-   *
-   * Example: "C:\MyRepo\common\temp\npm-tmp"
-   */
-  public get npmTmpFolder(): string {
-    return this._npmTmpFolder;
   }
 
   /**
@@ -531,7 +519,6 @@ export default class RushConfiguration {
 
     this._commonTempFolder = path.join(this._commonFolder, RushConstants.rushTempFolderName);
     this._pnpmStoreFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
-    this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));
 
     this._committedShrinkwrapFilename = path.join(this._commonRushConfigFolder, RushConstants.npmShrinkwrapFilename);
     this._tempShrinkwrapFilename = path.join(this._commonTempFolder, RushConstants.npmShrinkwrapFilename);

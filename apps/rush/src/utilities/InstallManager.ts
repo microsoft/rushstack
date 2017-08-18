@@ -530,9 +530,6 @@ export default class InstallManager {
         console.log(`Deleting the PNPM store folder`);
         this._asyncRecycler.moveFolder(this._rushConfiguration.pnpmStoreFolder);
       }
-
-      console.log(`Deleting the "npm-tmp" folder`);
-      this._asyncRecycler.moveFolder(this._rushConfiguration.npmTmpFolder);
     }
 
     if (markerFileExistedAtStart) {
@@ -577,7 +574,9 @@ export default class InstallManager {
         // We recognize the temp projects by their names, which always start with "rush-".
 
         // Example: "C:\MyRepo\common\temp\node_modules\@rush-temp"
-        const pathToDeleteWithoutStar: string = path.join(commonNodeModulesFolder, RushConstants.rushTempNpmScope);
+        const pathToDeleteWithoutStar: string = path.join(
+          commonNodeModulesFolder,
+          RushConstants.rushTempNpmScope);
         console.log(`Deleting ${pathToDeleteWithoutStar}\\*`);
         // Glob can't handle Windows paths
         const normalizedpathToDeleteWithoutStar: string
