@@ -36,16 +36,15 @@ export enum InstallType {
   /**
    * The default behavior: (1) If the timestamps are up to date, don't do anything.
    * (2) Otherwise, if the common folder is in a good state, do an incremental install.
-   * (3) Otherwise, delete everything, clear the cache, and do a clean install.
+   * (3) Otherwise, delete everything and do a clean install.
    */
   Normal,
   /**
-   * Force a clean install, i.e. delete "common\node_modules", clear the cache,
-   * and then install.
+   * Force a clean install, i.e. delete "common\node_modules", and then install.
    */
   ForceClean,
   /**
-   * Same as ForceClean, but also clears the global NPM cache (which is not threadsafe).
+   * Same as ForceClean, but also clears the store (which is not threadsafe).
    */
   UnsafePurge
 }
@@ -527,10 +526,9 @@ export default class InstallManager {
         return;
       }
     } else {
-      if (installType !== InstallType.Normal) {
-        console.log(`Deleting the PNPM cache folder`);
-        // This is faster and more thorough than "npm cache clean"
-        this._asyncRecycler.moveFolder(this._rushConfiguration.npmCacheFolder);
+      if (installType === InstallType.UnsafePurge) {
+        console.log(`Deleting the PNPM store folder`);
+        this._asyncRecycler.moveFolder(this._rushConfiguration.pnpmStoreFolder);
       }
 
       console.log(`Deleting the "npm-tmp" folder`);
@@ -635,7 +633,7 @@ export default class InstallManager {
    * to the command-line.
    */
   public pushConfigurationNpmArgs(npmArgs: string[]): void {
-    npmArgs.push('--store', this._rushConfiguration.npmCacheFolder);
+    npmArgs.push('--store', this._rushConfiguration.pnpmStoreFolder);
   }
 
   /**

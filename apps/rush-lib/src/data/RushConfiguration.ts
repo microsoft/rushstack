@@ -95,7 +95,7 @@ export default class RushConfiguration {
   private _commonFolder: string;
   private _commonTempFolder: string;
   private _commonRushConfigFolder: string;
-  private _npmCacheFolder: string;
+  private _pnpmStoreFolder: string;
   private _npmTmpFolder: string;
   private _committedShrinkwrapFilename: string;
   private _tempShrinkwrapFilename: string;
@@ -298,8 +298,8 @@ export default class RushConfiguration {
    *
    * Example: "C:\MyRepo\common\temp\npm-cache"
    */
-  public get npmCacheFolder(): string {
-    return this._npmCacheFolder;
+  public get pnpmStoreFolder(): string {
+    return this._pnpmStoreFolder;
   }
 
   /**
@@ -530,7 +530,7 @@ export default class RushConfiguration {
     RushConfiguration._validateCommonRushConfigFolder(this._commonRushConfigFolder);
 
     this._commonTempFolder = path.join(this._commonFolder, RushConstants.rushTempFolderName);
-    this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
+    this._pnpmStoreFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
     this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));
 
     this._committedShrinkwrapFilename = path.join(this._commonRushConfigFolder, RushConstants.npmShrinkwrapFilename);

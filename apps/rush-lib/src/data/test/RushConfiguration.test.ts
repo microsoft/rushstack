@@ -34,8 +34,8 @@ describe('RushConfiguration', () => {
       rushConfiguration.commonRushConfigFolder, './repo/common/config/rush');
     assertPathProperty('commonTempFolder',
       rushConfiguration.commonTempFolder, './repo/common/temp');
-    assertPathProperty('npmCacheFolder',
-      rushConfiguration.npmCacheFolder, './repo/common/temp/npm-cache');
+    assertPathProperty('pnpmStoreFolder',
+      rushConfiguration.pnpmStoreFolder, './repo/common/temp/npm-cache');
     assertPathProperty('npmTmpFolder',
       rushConfiguration.npmTmpFolder, './repo/common/temp/npm-tmp');
     assertPathProperty('npmToolFilename',

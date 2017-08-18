@@ -3,6 +3,7 @@
 
 /// <reference path="builtins/builtins.d.ts" />
 /// <reference path="colors/colors.d.ts" />
+/// <reference path="encode-registry/encode-registry.d.ts" />
 /// <reference path="glob-escape/glob-escape.d.ts" />
 /// <reference path="inquirer/inquirer.d.ts" />
 /// <reference path="npm-package-arg/npm-package-arg.d.ts" />

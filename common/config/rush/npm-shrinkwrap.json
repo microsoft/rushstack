@@ -1311,6 +1311,11 @@
       "from": "emojis-list@>=2.0.0 <3.0.0",
       "resolved": "https://registry.npmjs.org/emojis-list/-/emojis-list-2.1.0.tgz"
     },
+    "encode-registry": {
+      "version": "1.0.0",
+      "from": "encode-registry@>=1.0.0 <1.1.0",
+      "resolved": "https://registry.npmjs.org/encode-registry/-/encode-registry-1.0.0.tgz"
+    },
     "encodeurl": {
       "version": "1.0.1",
       "from": "encodeurl@>=1.0.1 <1.1.0",
@@ -3679,6 +3684,11 @@
       "from": "media-typer@0.3.0",
       "resolved": "https://registry.npmjs.org/media-typer/-/media-typer-0.3.0.tgz"
     },
+    "mem": {
+      "version": "1.1.0",
+      "from": "mem@>=1.1.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/mem/-/mem-1.1.0.tgz"
+    },
     "memory-fs": {
       "version": "0.4.1",
       "from": "memory-fs@>=0.4.1 <0.5.0",
@@ -3779,6 +3789,11 @@
       "version": "2.1.16",
       "from": "mime-types@>=2.1.7 <2.2.0",
       "resolved": "https://registry.npmjs.org/mime-types/-/mime-types-2.1.16.tgz"
+    },
+    "mimic-fn": {
+      "version": "1.1.0",
+      "from": "mimic-fn@>=1.0.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/mimic-fn/-/mimic-fn-1.1.0.tgz"
     },
     "minimatch": {
       "version": "3.0.4",
