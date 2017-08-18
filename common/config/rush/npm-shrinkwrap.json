@@ -27,6 +27,11 @@
       "from": "@microsoft/node-library-build@>=3.2.0 <3.3.0",
       "resolved": "https://registry.npmjs.org/@microsoft/node-library-build/-/node-library-build-3.2.8.tgz"
     },
+    "@rush-temp/api-documenter": {
+      "version": "0.0.0",
+      "from": "projects\\api-documenter",
+      "resolved": "file:projects\\api-documenter"
+    },
     "@rush-temp/api-extractor": {
       "version": "0.0.0",
       "from": "projects\\api-extractor",
@@ -162,10 +167,20 @@
       "from": "@types/chalk@*",
       "resolved": "https://registry.npmjs.org/@types/chalk/-/chalk-0.4.31.tgz"
     },
+    "@types/colors": {
+      "version": "1.1.1",
+      "from": "@types/colors@1.1.1",
+      "resolved": "https://registry.npmjs.org/@types/colors/-/colors-1.1.1.tgz"
+    },
     "@types/es6-collections": {
       "version": "0.5.29",
       "from": "@types/es6-collections@0.5.29",
       "resolved": "https://registry.npmjs.org/@types/es6-collections/-/es6-collections-0.5.29.tgz"
+    },
+    "@types/es6-promise": {
+      "version": "0.0.32",
+      "from": "@types/es6-promise@0.0.32",
+      "resolved": "https://registry.npmjs.org/@types/es6-promise/-/es6-promise-0.0.32.tgz"
     },
     "@types/express": {
       "version": "4.0.35",
@@ -206,6 +221,11 @@
       "version": "3.0.30",
       "from": "@types/gulp-util@3.0.30",
       "resolved": "https://registry.npmjs.org/@types/gulp-util/-/gulp-util-3.0.30.tgz"
+    },
+    "@types/js-yaml": {
+      "version": "3.5.31",
+      "from": "@types/js-yaml@>=3.5.31 <3.6.0",
+      "resolved": "https://registry.npmjs.org/@types/js-yaml/-/js-yaml-3.5.31.tgz"
     },
     "@types/karma": {
       "version": "0.13.33",
@@ -3125,14 +3145,14 @@
       "resolved": "https://registry.npmjs.org/js-tokens/-/js-tokens-3.0.2.tgz"
     },
     "js-yaml": {
-      "version": "3.9.1",
-      "from": "js-yaml@>=3.0.0 <4.0.0",
-      "resolved": "https://registry.npmjs.org/js-yaml/-/js-yaml-3.9.1.tgz",
+      "version": "3.8.4",
+      "from": "js-yaml@>=3.8.4 <3.9.0",
+      "resolved": "https://registry.npmjs.org/js-yaml/-/js-yaml-3.8.4.tgz",
       "dependencies": {
         "esprima": {
-          "version": "4.0.0",
-          "from": "esprima@>=4.0.0 <5.0.0",
-          "resolved": "https://registry.npmjs.org/esprima/-/esprima-4.0.0.tgz"
+          "version": "3.1.3",
+          "from": "esprima@>=3.1.1 <4.0.0",
+          "resolved": "https://registry.npmjs.org/esprima/-/esprima-3.1.3.tgz"
         }
       }
     },
