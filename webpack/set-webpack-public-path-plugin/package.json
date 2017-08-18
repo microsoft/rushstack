@@ -23,6 +23,6 @@
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "mocha": "~3.4.2",
-    "@microsoft/node-library-build": "~3.2.7"
+    "@microsoft/node-library-build": "~3.2.8"
   }
 }

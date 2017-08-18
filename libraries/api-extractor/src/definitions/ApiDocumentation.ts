@@ -3,11 +3,9 @@
 
 /* tslint:disable:no-bitwise */
 
-import ApiItem, { ApiItemKind } from './ApiItem';
 import ApiPackage from './ApiPackage';
 import DocElementParser from '../DocElementParser';
 import { IDocElement, IParam, ICodeLinkElement } from '../IDocElement';
-import { IDocItem } from '../IDocItem';
 import ApiDefinitionReference, { IApiDefinitionReferenceParts } from '../ApiDefinitionReference';
 import Token, { TokenType } from '../Token';
 import Tokenizer from '../Tokenizer';

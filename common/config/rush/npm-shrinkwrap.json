@@ -18,26 +18,14 @@
       "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-mocha/-/gulp-core-build-mocha-2.1.8.tgz"
     },
     "@microsoft/gulp-core-build-typescript": {
-      "version": "3.3.2",
-      "from": "@microsoft/gulp-core-build-typescript@3.3.2",
-      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-typescript/-/gulp-core-build-typescript-3.3.2.tgz",
-      "dependencies": {
-        "@microsoft/gulp-core-build": {
-          "version": "2.9.2",
-          "from": "@microsoft/gulp-core-build@2.9.2",
-          "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build/-/gulp-core-build-2.9.2.tgz"
-        }
-      }
+      "version": "3.4.0",
+      "from": "@microsoft/gulp-core-build-typescript@3.4.0",
+      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-typescript/-/gulp-core-build-typescript-3.4.0.tgz"
     },
     "@microsoft/node-library-build": {
-      "version": "3.2.7",
+      "version": "3.2.8",
       "from": "@microsoft/node-library-build@>=3.2.0 <3.3.0",
-      "resolved": "https://registry.npmjs.org/@microsoft/node-library-build/-/node-library-build-3.2.7.tgz"
-    },
-    "@rush-temp/api-documenter": {
-      "version": "0.0.0",
-      "from": "projects\\api-documenter",
-      "resolved": "file:projects\\api-documenter"
+      "resolved": "https://registry.npmjs.org/@microsoft/node-library-build/-/node-library-build-3.2.8.tgz"
     },
     "@rush-temp/api-extractor": {
       "version": "0.0.0",
@@ -174,20 +162,10 @@
       "from": "@types/chalk@*",
       "resolved": "https://registry.npmjs.org/@types/chalk/-/chalk-0.4.31.tgz"
     },
-    "@types/colors": {
-      "version": "1.1.1",
-      "from": "@types/colors@1.1.1",
-      "resolved": "https://registry.npmjs.org/@types/colors/-/colors-1.1.1.tgz"
-    },
     "@types/es6-collections": {
       "version": "0.5.29",
       "from": "@types/es6-collections@0.5.29",
       "resolved": "https://registry.npmjs.org/@types/es6-collections/-/es6-collections-0.5.29.tgz"
-    },
-    "@types/es6-promise": {
-      "version": "0.0.32",
-      "from": "@types/es6-promise@0.0.32",
-      "resolved": "https://registry.npmjs.org/@types/es6-promise/-/es6-promise-0.0.32.tgz"
     },
     "@types/express": {
       "version": "4.0.35",
@@ -228,11 +206,6 @@
       "version": "3.0.30",
       "from": "@types/gulp-util@3.0.30",
       "resolved": "https://registry.npmjs.org/@types/gulp-util/-/gulp-util-3.0.30.tgz"
-    },
-    "@types/js-yaml": {
-      "version": "3.5.31",
-      "from": "@types/js-yaml@>=3.5.31 <3.6.0",
-      "resolved": "https://registry.npmjs.org/@types/js-yaml/-/js-yaml-3.5.31.tgz"
     },
     "@types/karma": {
       "version": "0.13.33",
@@ -572,9 +545,9 @@
       "resolved": "https://registry.npmjs.org/aws4/-/aws4-1.6.0.tgz"
     },
     "babel-code-frame": {
-      "version": "6.22.0",
+      "version": "6.26.0",
       "from": "babel-code-frame@>=6.22.0 <7.0.0",
-      "resolved": "https://registry.npmjs.org/babel-code-frame/-/babel-code-frame-6.22.0.tgz"
+      "resolved": "https://registry.npmjs.org/babel-code-frame/-/babel-code-frame-6.26.0.tgz"
     },
     "backo2": {
       "version": "1.0.2",
@@ -3148,18 +3121,18 @@
     },
     "js-tokens": {
       "version": "3.0.2",
-      "from": "js-tokens@>=3.0.0 <4.0.0",
+      "from": "js-tokens@>=3.0.2 <4.0.0",
       "resolved": "https://registry.npmjs.org/js-tokens/-/js-tokens-3.0.2.tgz"
     },
     "js-yaml": {
-      "version": "3.8.4",
-      "from": "js-yaml@>=3.8.4 <3.9.0",
-      "resolved": "https://registry.npmjs.org/js-yaml/-/js-yaml-3.8.4.tgz",
+      "version": "3.9.1",
+      "from": "js-yaml@>=3.0.0 <4.0.0",
+      "resolved": "https://registry.npmjs.org/js-yaml/-/js-yaml-3.9.1.tgz",
       "dependencies": {
         "esprima": {
-          "version": "3.1.3",
-          "from": "esprima@>=3.1.1 <4.0.0",
-          "resolved": "https://registry.npmjs.org/esprima/-/esprima-3.1.3.tgz"
+          "version": "4.0.0",
+          "from": "esprima@>=4.0.0 <5.0.0",
+          "resolved": "https://registry.npmjs.org/esprima/-/esprima-4.0.0.tgz"
         }
       }
     },
@@ -3812,6 +3785,23 @@
       "from": "minimist@>=1.1.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/minimist/-/minimist-1.2.0.tgz"
     },
+    "minipass": {
+      "version": "2.2.1",
+      "from": "minipass@>=2.0.2 <3.0.0",
+      "resolved": "https://registry.npmjs.org/minipass/-/minipass-2.2.1.tgz",
+      "dependencies": {
+        "yallist": {
+          "version": "3.0.2",
+          "from": "yallist@>=3.0.0 <4.0.0",
+          "resolved": "https://registry.npmjs.org/yallist/-/yallist-3.0.2.tgz"
+        }
+      }
+    },
+    "minizlib": {
+      "version": "1.0.3",
+      "from": "minizlib@>=1.0.3 <2.0.0",
+      "resolved": "https://registry.npmjs.org/minizlib/-/minizlib-1.0.3.tgz"
+    },
     "mkdirp": {
       "version": "0.5.1",
       "from": "mkdirp@>=0.5.0 <0.6.0",
@@ -3921,7 +3911,14 @@
     "node-gyp": {
       "version": "3.6.2",
       "from": "node-gyp@>=3.3.1 <4.0.0",
-      "resolved": "https://registry.npmjs.org/node-gyp/-/node-gyp-3.6.2.tgz"
+      "resolved": "https://registry.npmjs.org/node-gyp/-/node-gyp-3.6.2.tgz",
+      "dependencies": {
+        "tar": {
+          "version": "2.2.1",
+          "from": "tar@>=2.0.0 <3.0.0",
+          "resolved": "https://registry.npmjs.org/tar/-/tar-2.2.1.tgz"
+        }
+      }
     },
     "node-libs-browser": {
       "version": "0.6.0",
@@ -4996,9 +4993,9 @@
       "resolved": "https://registry.npmjs.org/sha.js/-/sha.js-2.2.6.tgz"
     },
     "shellwords": {
-      "version": "0.1.0",
+      "version": "0.1.1",
       "from": "shellwords@>=0.1.0 <0.2.0",
-      "resolved": "https://registry.npmjs.org/shellwords/-/shellwords-0.1.0.tgz"
+      "resolved": "https://registry.npmjs.org/shellwords/-/shellwords-0.1.1.tgz"
     },
     "sigmund": {
       "version": "1.0.1",
@@ -5276,9 +5273,16 @@
       "resolved": "https://registry.npmjs.org/tapable/-/tapable-0.1.10.tgz"
     },
     "tar": {
-      "version": "2.2.1",
-      "from": "tar@>=2.0.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/tar/-/tar-2.2.1.tgz"
+      "version": "3.1.15",
+      "from": "tar@>=3.1.12 <3.2.0",
+      "resolved": "https://registry.npmjs.org/tar/-/tar-3.1.15.tgz",
+      "dependencies": {
+        "yallist": {
+          "version": "3.0.2",
+          "from": "yallist@>=3.0.2 <4.0.0",
+          "resolved": "https://registry.npmjs.org/yallist/-/yallist-3.0.2.tgz"
+        }
+      }
     },
     "temp": {
       "version": "0.8.3",

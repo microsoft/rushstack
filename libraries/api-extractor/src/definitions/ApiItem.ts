@@ -5,7 +5,6 @@
 /* tslint:disable:no-constant-condition */
 
 import * as ts from 'typescript';
-import * as path from 'path';
 import Extractor from '../Extractor';
 import ApiDocumentation, { ReleaseTag } from './ApiDocumentation';
 import TypeScriptHelpers from '../TypeScriptHelpers';

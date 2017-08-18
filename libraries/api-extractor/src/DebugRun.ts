@@ -46,10 +46,6 @@ extractor.analyze(
   }
 );
 
-// Normally warnings are kept by the ApiItem data structure,
-// and written to the '*.api.ts' file.
-const warnings: string[] = [];
-
 const apiFileGenerator: ApiFileGenerator = new ApiFileGenerator();
 apiFileGenerator.writeApiFile(path.join(__dirname, './DebugRun-Output.api.ts'), extractor);
 

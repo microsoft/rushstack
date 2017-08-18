@@ -3,7 +3,6 @@
 
 import { GulpTask } from './GulpTask';
 import * as Gulp from 'gulp';
-import * as path from 'path';
 
 import { FileDeletionUtility } from '../utilities/FileDeletionUtility';
 import { IBuildConfig } from './../IBuildConfig';

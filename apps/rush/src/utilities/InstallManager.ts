@@ -7,6 +7,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as fsx from 'fs-extra';
 import * as semver from 'semver';
+import * as tar from 'tar';
 import * as wordwrap from 'wordwrap';
 import globEscape = require('glob-escape');
 
@@ -17,7 +18,8 @@ import {
   RushConfigurationProject,
   IPackageJson,
   RushConstants,
-  Utilities
+  Utilities,
+  Stopwatch
 } from '@microsoft/rush-lib';
 
 import { IRushTempPackageJson } from '../utilities/Package';
@@ -217,6 +219,8 @@ export default class InstallManager {
    * the return value is false.
    */
   public createTempModulesAndCheckShrinkwrap(shrinkwrapFile: ShrinkwrapFile | undefined): boolean {
+    const stopwatch: Stopwatch = Stopwatch.start();
+
     // Example: "C:\MyRepo\common\temp\projects"
     const tempProjectsFolder: string = path.join(this._rushConfiguration.commonTempFolder,
       RushConstants.rushTempProjectsFolderName);
@@ -298,19 +302,19 @@ export default class InstallManager {
     sortedRushProjects.sort(
       (a: RushConfigurationProject, b: RushConfigurationProject) => a.tempProjectName.localeCompare(b.tempProjectName)
     );
+
     for (const rushProject of sortedRushProjects) {
       const packageJson: IPackageJson = rushProject.packageJson;
 
-      // Example: "C:\MyRepo\common\temp\projects\my-project-2"
-      const tempProjectFolder: string = path.dirname(rushProject.tempPackageJsonFilename);
-      fsx.mkdirsSync(tempProjectFolder);
+      // Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
+      const tarballFile: string = this._getTarballFilePath(rushProject);
 
-      // Example: dependencies["@rush-temp/my-project-2"] = "file:./projects/my-project-2"
+      // Example: "my-project-2"
+      const unscopedTempProjectName: string = rushProject.unscopedTempProjectName;
+
+      // Example: dependencies["@rush-temp/my-project-2"] = "file:./projects/my-project-2.tgz"
       commonPackageJson.dependencies[rushProject.tempProjectName]
-        = `file:./${RushConstants.rushTempProjectsFolderName}/${path.basename(tempProjectFolder)}`;
-
-      // Example: "C:\MyRepo\common\temp\projects\my-project-2\package.json"
-      const tempPackageJsonFilename: string = path.join(tempProjectFolder, 'package.json');
+        = `file:./${RushConstants.rushTempProjectsFolderName}/${rushProject.unscopedTempProjectName}.tgz`;
 
       const tempPackageJson: IRushTempPackageJson = {
         name: rushProject.tempProjectName,
@@ -384,9 +388,75 @@ export default class InstallManager {
         }
       }
 
-      // Don't update the file timestamp unless the content has changed, since "rush install"
-      // will consider this timestamp
-      JsonFile.saveJsonFile(tempPackageJson, tempPackageJsonFilename, { onlyIfChanged: true });
+      // NPM expects the root of the tarball to have a directory called 'package'
+      const npmPackageFolder: string = 'package';
+
+      // Example: "C:\MyRepo\common\temp\projects\my-project-2.new"
+      const tempProjectFolder: string = path.join(
+        this._rushConfiguration.commonTempFolder,
+        RushConstants.rushTempProjectsFolderName,
+        unscopedTempProjectName + '.new');
+
+      // Example: "C:\MyRepo\common\temp\projects\my-project-2\package.json"
+      const tempPackageJsonFilename: string = path.join(tempProjectFolder, RushConstants.packageJsonFilename);
+
+      // Example: "C:\MyRepo\common\temp\projects\my-project-2.old"
+      const extractedFolder: string = tempProjectFolder + '.old';
+
+      // we only want to overwrite the package if the existing tarball's package.json is different from tempPackageJson
+      let shouldOverwrite: boolean = true;
+      try {
+        // extract the tarball and compare the package.json directly
+        if (fsx.existsSync(tarballFile)) {
+
+          // ensure the folder we are about to extract into exists
+          Utilities.createFolderWithRetry(extractedFolder);
+
+          tar.extract({
+            cwd: extractedFolder,
+            file: tarballFile,
+            sync: true
+          });
+
+          const extractedPackageJsonFilename: string =
+            path.join(extractedFolder, npmPackageFolder, RushConstants.packageJsonFilename);
+
+          // compare the extracted package.json with the one we are about to write
+          const oldBuffer: Buffer = fsx.readFileSync(extractedPackageJsonFilename);
+          const newBuffer: Buffer = new Buffer(JsonFile.normalize(tempPackageJson));
+
+          if (Buffer.compare(oldBuffer, newBuffer) === 0) {
+            shouldOverwrite = false;
+          }
+        }
+      } catch (error) {
+        // ignore the error, we will go ahead and create a new tarball
+      }
+
+      if (shouldOverwrite) {
+        // ensure the folder we are about to zip exists
+        Utilities.createFolderWithRetry(tempProjectFolder);
+
+        // write the expected package.json file into the zip staging folder
+        JsonFile.saveJsonFile(tempPackageJson, tempPackageJsonFilename);
+
+        // create the new tarball, this overwrites the existing one
+        tar.create({
+          gzip: true,
+          file: tarballFile,
+          cwd: tempProjectFolder,
+          portable: true,
+          noPax: true,
+          sync: true,
+          prefix: npmPackageFolder
+        }, ['package.json']);
+
+        console.log(`Updating ${tarballFile}`);
+      }
+
+      // clean up the old tarball & the temp folder
+      fsx.removeSync(tempProjectFolder);
+      fsx.removeSync(extractedFolder);
     }
 
     // Example: "C:\MyRepo\common\temp\package.json"
@@ -396,6 +466,9 @@ export default class InstallManager {
     // Don't update the file timestamp unless the content has changed, since "rush install"
     // will consider this timestamp
     JsonFile.saveJsonFile(commonPackageJson, commonPackageJsonFilename, { onlyIfChanged: true });
+
+    stopwatch.stop();
+    console.log(`Finished creating temporary modules (${stopwatch.toString()})`);
 
     return shrinkwrapIsValid;
   }
@@ -441,10 +514,12 @@ export default class InstallManager {
       // then we can't skip this install
       potentiallyChangedFiles.push(this._rushConfiguration.committedShrinkwrapFilename);
 
-      // Also consider timestamps for all the temp package.json files. (createTempModulesAndCheckShrinkwrap() will
+      // Also consider timestamps for all the temp tarballs. (createTempModulesAndCheckShrinkwrap() will
       // carefully preserve these timestamps unless something has changed.)
-      // Example: "C:\MyRepo\common\temp\projects\my-project-2\package.json"
-      potentiallyChangedFiles.push(...this._rushConfiguration.projects.map(x => x.tempPackageJsonFilename));
+      // Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
+      potentiallyChangedFiles.push(...this._rushConfiguration.projects.map(x => {
+        return this._getTarballFilePath(x);
+      }));
 
       // NOTE: If commonNodeModulesMarkerFilename (or any of the potentiallyChangedFiles) does not
       // exist, then isFileTimestampCurrent() returns false.
@@ -577,6 +652,17 @@ export default class InstallManager {
         fsx.unlinkSync(targetPath);
       }
     }
+  }
+
+  /**
+   * Gets the path to the tarball
+   * Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
+   */
+  private _getTarballFilePath(project: RushConfigurationProject): string {
+    return path.join(
+      this._rushConfiguration.commonTempFolder,
+      RushConstants.rushTempProjectsFolderName,
+      `${project.unscopedTempProjectName}.tgz`);
   }
 
   /**

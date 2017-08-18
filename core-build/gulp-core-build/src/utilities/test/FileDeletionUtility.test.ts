@@ -7,6 +7,7 @@ import { FileDeletionUtility } from './../FileDeletionUtility';
 describe('FileDeletionUtility', () => {
   describe('constructor', () => {
     it('can be constructed', () => {
+      // tslint:disable-next-line:no-unused-variable
       const test: FileDeletionUtility = new FileDeletionUtility();
     });
   });
