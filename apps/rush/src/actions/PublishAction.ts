@@ -102,7 +102,7 @@ export default class PublishAction extends BaseRushAction {
       'will be published if their version is newer than published version.'
     });
     this._versionPolicy = this.defineStringParameter({
-      parameterLongName: '--versionPolicy',
+      parameterLongName: '--version-policy',
       parameterShortName: '-vp',
       key: 'VERSIONPOLICY',
       description: 'Version policy name. Only projects with this version policy will be published if used ' +
