@@ -37,7 +37,8 @@ export default class ChangeAction extends BaseRushAction {
   private _sortedProjectList: string[];
   private _changeFileData: Map<string, IChangeFile>;
   private _verifyParameter: CommandLineFlagParameter;
-  private _targetBranch: CommandLineStringParameter;
+  private _targetBranchParameter: CommandLineStringParameter;
+  private _targetBranchName: string;
 
   private _prompt: inquirer.PromptModule;
 
@@ -75,7 +76,7 @@ export default class ChangeAction extends BaseRushAction {
       parameterShortName: '-v',
       description: 'Verify the change file has been generated and that it is a valid JSON file'
     });
-    this._targetBranch = this.defineStringParameter({
+    this._targetBranchParameter = this.defineStringParameter({
       parameterLongName: '--target-branch',
       parameterShortName: '-b',
       key: 'BRANCH',
@@ -85,6 +86,7 @@ export default class ChangeAction extends BaseRushAction {
   }
 
   public run(): void {
+    console.log(`Target branch is ${this._targetBranch}`);
     if (this._verifyParameter.value) {
       return this._verify();
     }
@@ -117,8 +119,16 @@ export default class ChangeAction extends BaseRushAction {
     }
   }
 
+  private get _targetBranch(): string {
+    if (!this._targetBranchName) {
+      this._targetBranchName = this._targetBranchParameter.value ||
+        VersionControl.getRemoteMasterBranch(this.rushConfiguration.repositoryUrl);
+    }
+    return this._targetBranchName;
+  }
+
   private _getChangedPackageNames(): string[] {
-    const changedFolders: string[] = VersionControl.getChangedFolders(this._targetBranch.value);
+    const changedFolders: string[] = VersionControl.getChangedFolders(this._targetBranch);
     return this.rushConfiguration.projects
       .filter(project => project.shouldPublish)
       .filter(project => this._hasProjectChanged(changedFolders, project))
@@ -136,8 +146,7 @@ export default class ChangeAction extends BaseRushAction {
   }
 
   private _getChangeFiles(): string[] {
-    return VersionControl.getChangedFiles(`common/changes/`,
-      this._targetBranch.value);
+    return VersionControl.getChangedFiles(`common/changes/`, this._targetBranch);
   }
 
   private _hasProjectChanged(changedFolders: string[],

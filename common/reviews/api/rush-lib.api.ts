@@ -335,6 +335,7 @@ class RushConfiguration {
   public readonly projects: RushConfigurationProject[];
   // (undocumented)
   public readonly projectsByName: Map<string, RushConfigurationProject>;
+  public readonly repositoryUrl: string;
   public readonly rushJsonFolder: string;
   public readonly rushLinkJsonFilename: string;
   // @alpha
@@ -477,6 +478,8 @@ class VersionControl {
   public static getChangedFiles(prefix?: string, targetBranch?: string): string[];
   // (undocumented)
   public static getChangedFolders(targetBranch?: string): string[];
+  // (undocumented)
+  public static getRemoteMasterBranch(repositoryUrl?: string): string | undefined;
   // (undocumented)
   public static hasUncommittedChanges(): boolean;
 }

@@ -41,6 +41,41 @@ export default class VersionControl {
     });
   }
 
+  public static getRemoteMasterBranch(repositoryUrl?: string): string | undefined {
+    const defaultRemote: string = 'origin';
+    const defaultMaster: string = 'origin/master';
+    let useDefault: boolean = false;
+    let matchingRemotes: string[] = [];
+
+    if (!repositoryUrl) {
+      useDefault = true;
+    } else {
+      const output: string = child_process
+      .execSync(`git remote`)
+      .toString();
+      matchingRemotes = output.split('\n').filter(remoteName => {
+        if (remoteName) {
+          const remoteUrl: string = child_process.execSync(`git remote get-url ${remoteName}`)
+            .toString()
+            .trim();
+          if (remoteName === defaultRemote && remoteUrl === repositoryUrl) {
+            useDefault = true;
+          }
+          return remoteUrl === repositoryUrl;
+        }
+        return false;
+      });
+    }
+
+    if (useDefault) {
+      return defaultMaster;
+    } else if (matchingRemotes.length > 0) {
+      return `${matchingRemotes[0]}/master`;
+    }
+    // For backward-compatible
+    return defaultMaster;
+  }
+
   public static hasUncommittedChanges(): boolean {
     return VersionControl._hasUntrackedChanges() || VersionControl._hasDiffOnHEAD();
   }
