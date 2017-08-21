@@ -62,7 +62,7 @@ export interface IEventHooksJson {
  */
 export interface IRushRepositoryJson {
   /**
-   * Url of the repository
+   * The remote url of the repository. It helps 'Rush change' finds the right remote to compare against.
    */
   url: string;
 }

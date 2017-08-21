@@ -46,6 +46,7 @@ export default class VersionControl {
    * This method is used by 'Rush change' to find the default remote branch to compare against.
    * If repository url is not provided or if there is no match, returns the default remote
    * master branch 'origin/master'.
+   * If there are more than one matches, returns the first remote's master branch.
    *
    * @param repositoryUrl - repository url
    */
@@ -78,6 +79,9 @@ export default class VersionControl {
     if (useDefault) {
       return defaultMaster;
     } else if (matchingRemotes.length > 0) {
+      if (matchingRemotes.length > 1) {
+        console.log(`More than one remotes match the repository url. Use the first remote.`);
+      }
       return `${matchingRemotes[0]}/master`;
     }
     // For backward-compatible
