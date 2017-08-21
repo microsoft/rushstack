@@ -43,6 +43,7 @@
     "npm-package-arg": "~5.1.2",
     "read-package-tree": "~5.1.5",
     "semver": "~5.3.0",
+    "tar": "~3.1.12",
     "wordwrap": "~1.0.0"
   },
   "devDependencies": {

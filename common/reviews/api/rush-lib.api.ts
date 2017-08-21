@@ -261,6 +261,8 @@ interface IVersionPolicyJson {
 // @public
 class JsonFile {
   public static loadJsonFile(jsonFilename: string): any;
+  // (undocumented)
+  public static normalize(jsonData: any): string;
   public static saveJsonFile(jsonData: any, jsonFilename: string, options: ISaveJsonFileOptions = {}): boolean;
 }
 
@@ -352,7 +354,11 @@ class RushConfiguration {
   public readonly projects: RushConfigurationProject[];
   // (undocumented)
   public readonly projectsByName: Map<string, RushConfigurationProject>;
+<<<<<<< HEAD
   public readonly rushJsonFile: string;
+=======
+  public readonly repositoryUrl: string;
+>>>>>>> master
   public readonly rushJsonFolder: string;
   public readonly rushLinkJsonFilename: string;
   // @alpha
@@ -377,8 +383,8 @@ class RushConfigurationProject {
   public readonly projectRelativeFolder: string;
   public readonly reviewCategory: string;
   public readonly shouldPublish: boolean;
-  public readonly tempPackageJsonFilename: string;
   public readonly tempProjectName: string;
+  public readonly unscopedTempProjectName: string;
   // @alpha
   public readonly versionPolicyName: string;
 }
@@ -496,6 +502,7 @@ class VersionControl {
   // (undocumented)
   public static getChangedFolders(targetBranch?: string): string[];
   public static getUncommittedChanges(): string[];
+  public static getRemoteMasterBranch(repositoryUrl?: string): string;
   // (undocumented)
   public static hasUncommittedChanges(): boolean;
 }

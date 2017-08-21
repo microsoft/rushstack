@@ -42,14 +42,18 @@ export default class JsonFile {
     }
   }
 
+  // tslint:disable-next-line:no-any
+  public static normalize(jsonData: any): string {
+    const stringified: string = JSON.stringify(jsonData, undefined, 2) + '\n';
+    return Utilities.getAllReplaced(stringified, '\n', '\r\n');
+  }
+
   /**
    * Saves the file to disk.  Returns false if nothing was written due to options.onlyIfChanged.
    */
   // tslint:disable-next-line:no-any
   public static saveJsonFile(jsonData: any, jsonFilename: string, options: ISaveJsonFileOptions = {}): boolean {
-    const stringified: string = JSON.stringify(jsonData, undefined, 2) + '\n';
-    const normalized: string = Utilities.getAllReplaced(stringified, '\n', '\r\n');
-
+    const normalized: string = JsonFile.normalize(jsonData);
     const buffer: Buffer = new Buffer(normalized); // utf8 encoding happens here
 
     if (options.onlyIfChanged) {
