@@ -138,7 +138,7 @@
       ]
     },
     {
-      "packageName": "api-documenter",
+      "packageName": "@microsoft/api-documenter",
       "projectFolder": "libraries/api-documenter",
       "reviewCategory": "libraries",
       "shouldPublish": false  // not published; this is a code sample for api-extractor
