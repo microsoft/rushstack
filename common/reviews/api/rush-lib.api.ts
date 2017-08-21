@@ -478,8 +478,7 @@ class VersionControl {
   public static getChangedFiles(prefix?: string, targetBranch?: string): string[];
   // (undocumented)
   public static getChangedFolders(targetBranch?: string): string[];
-  // (undocumented)
-  public static getRemoteMasterBranch(repositoryUrl?: string): string | undefined;
+  public static getRemoteMasterBranch(repositoryUrl?: string): string;
   // (undocumented)
   public static hasUncommittedChanges(): boolean;
 }

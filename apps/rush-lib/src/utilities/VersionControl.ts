@@ -41,7 +41,15 @@ export default class VersionControl {
     });
   }
 
-  public static getRemoteMasterBranch(repositoryUrl?: string): string | undefined {
+  /**
+   * Gets the remote master branch that maps to the provided repository url.
+   * This method is used by 'Rush change' to find the default remote branch to compare against.
+   * If repository url is not provided or if there is no match, returns the default remote
+   * master branch 'origin/master'.
+   *
+   * @param repositoryUrl - repository url
+   */
+  public static getRemoteMasterBranch(repositoryUrl?: string): string {
     const defaultRemote: string = 'origin';
     const defaultMaster: string = 'origin/master';
     let useDefault: boolean = false;

@@ -431,7 +431,7 @@ export default class RushConfiguration {
   }
 
   /**
-   * The repository url
+   * The remote url of the repository. It helps 'Rush change' finds the right remote to compare against.
    */
   public get repositoryUrl(): string {
     return this._repositoryUrl;
