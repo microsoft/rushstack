@@ -1,5 +1,5 @@
 {
-  "name": "api-documenter",
+  "name": "@microsoft/api-documenter",
   "version": "0.1.0",
   "description": "Read JSON files from api-extractor, generate documentation pages",
   "repository": {
