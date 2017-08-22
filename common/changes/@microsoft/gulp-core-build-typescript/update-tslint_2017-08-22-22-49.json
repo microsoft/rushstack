@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Upgrade to tslint 5.6.0",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-typescript",
+  "email": "christiango@users.noreply.github.com"
+}
