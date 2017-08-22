@@ -2,6 +2,29 @@
   "name": "@microsoft/node-library-build",
   "entries": [
     {
+      "version": "3.3.0",
+      "tag": "@microsoft/node-library-build_v3.3.0",
+      "date": "Tue, 22 Aug 2017 13:04:22 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "node-library-build now supports pre-copy.json and post-copy.json"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.9.3` to `2.9.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" from `2.1.8` to `2.1.9`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `3.4.1` to `3.4.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.8",
       "tag": "@microsoft/node-library-build_v3.2.8",
       "date": "Wed, 16 Aug 2017 13:04:08 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 15 Aug 2017 01:29:31 GMT and should not be manually modified.
+This log was last generated on Tue, 22 Aug 2017 13:04:22 GMT and should not be manually modified.
+
+## 2.3.3
+Tue, 22 Aug 2017 13:04:22 GMT
+
+### Patches
+
+- Added "api-documenter" code sample
 
 ## 2.3.2
 Tue, 15 Aug 2017 01:29:31 GMT
