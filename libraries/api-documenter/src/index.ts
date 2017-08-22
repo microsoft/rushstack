@@ -6,7 +6,7 @@ import * as os from 'os';
 import * as path from 'path';
 
 const myPackageJsonFilename: string = path.resolve(path.join(
-  module.filename, '..', '..', 'package.json')
+  __dirname, '..', 'package.json')
 );
 const myPackageJson: { version: string } = require(myPackageJsonFilename);
 
