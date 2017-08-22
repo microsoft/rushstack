@@ -243,6 +243,8 @@ export declare function warn(...args: Array<string | Chalk.ChalkChain>): void;
 // @public
 export declare function watch(watchMatch: string | string[], taskExecutable: IExecutable): IExecutable;
 
+// WARNING: Unsupported export: preCopy
+// WARNING: Unsupported export: postCopy
 // WARNING: Unsupported export: buildTasks
 // WARNING: Unsupported export: testTasks
 // WARNING: Unsupported export: defaultTasks

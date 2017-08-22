@@ -2,4 +2,3 @@
 // See LICENSE in the project root for license information.
 
 /// <reference path="argparse/argparse.d.ts" />
-/// <reference path="colors/colors.d.ts" />

@@ -138,6 +138,12 @@
       ]
     },
     {
+      "packageName": "@microsoft/api-documenter",
+      "projectFolder": "libraries/api-documenter",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
+    {
       "packageName": "@microsoft/decorators",
       "projectFolder": "libraries/decorators",
       "reviewCategory": "libraries",
