@@ -1,6 +1,7 @@
 {
   "name": "@microsoft/api-documenter",
   "version": "0.1.0",
+  "private": true,
   "description": "Read JSON files from api-extractor, generate documentation pages",
   "repository": {
     "type": "git",
@@ -18,7 +19,7 @@
     "@types/es6-collections": "0.5.29",
     "@types/es6-promise": "0.0.32",
     "@types/fs-extra": "0.0.37",
-    "@types/js-yaml": "~3.5.31",
+    "@types/js-yaml": "~3.9.1",
     "@types/node": "6.0.62",
     "gulp": "~3.9.1"
   },
