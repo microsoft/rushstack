@@ -49,6 +49,7 @@
   "devDependencies": {
     "@microsoft/node-library-build": "~3.2.8",
     "@types/chai": "3.4.34",
+    "@types/colors": "~1.1.3",
     "@types/es6-collections": "0.5.29",
     "@types/fs-extra": "0.0.37",
     "@types/glob": "5.0.30",

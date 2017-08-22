@@ -15,9 +15,8 @@
   },
   "devDependencies": {
     "@microsoft/node-library-build": "~3.2.8",
-    "@types/colors": "1.1.1",
+    "@types/colors": "~1.1.3",
     "@types/es6-collections": "0.5.29",
-    "@types/es6-promise": "0.0.32",
     "@types/fs-extra": "0.0.37",
     "@types/js-yaml": "~3.9.1",
     "@types/node": "6.0.62",
@@ -27,6 +26,6 @@
     "@microsoft/api-extractor": "2.3.2",
     "colors": "~1.1.2",
     "fs-extra": "~0.26.7",
-    "js-yaml": "~3.8.4"
+    "js-yaml": "~3.9.1"
   }
 }
