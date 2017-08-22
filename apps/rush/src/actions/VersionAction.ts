@@ -67,7 +67,7 @@ export default class VersionAction extends BaseRushAction {
     });
     this._overwriteBump = this.defineStringParameter({
       parameterLongName: '--override-bump',
-      description: 'Overrides the bump type in the version-policy.json for the specifiedd version policy.' +
+      description: 'Overrides the bump type in the version-policy.json for the specified version policy.' +
         'Valid values include: prerelease, patch, preminor, minor, major. ' +
         'This setting only works for lock-step version policy in bump action.'
     });
@@ -86,6 +86,7 @@ export default class VersionAction extends BaseRushAction {
         return;
       }
     }
+    this._validate();
 
     this._versionManager = new VersionManager(this.rushConfiguration, this._getUserEmail());
     if (this._ensureVersionPolicy.value) {
@@ -104,6 +105,17 @@ export default class VersionAction extends BaseRushAction {
         this._prereleaseIdentifier.value,
         true);
       this._gitProcess(tempBranch);
+    }
+  }
+
+  private _validate(): void {
+    if (this._bumpVersion.value && this._ensureVersionPolicy.value) {
+      throw new Error('Please choose --bump or --ensure-version-policy but not together.');
+    }
+
+    if (this._overwriteBump.value && !BumpType[this._overwriteBump.value]) {
+      throw new Error('The value of override-bump is not valid.  ' +
+      'Valid values include prerelease, patch, preminor, minor, and major');
     }
   }
 

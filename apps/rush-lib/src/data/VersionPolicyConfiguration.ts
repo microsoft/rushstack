@@ -46,7 +46,6 @@ export class VersionPolicyConfiguration {
    * Gets the version policy by its name.
    * Throws error if the version policy is not found.
    * @param policyName - Name of the version policy
-   * @alpha
    */
   public getVersionPolicy(policyName: string): VersionPolicy {
     const policy: VersionPolicy = this._versionPolicies.get(policyName);
@@ -58,7 +57,6 @@ export class VersionPolicyConfiguration {
 
   /**
    * Gets all the version policies
-   * @alpha
    */
   public get versionPolicies(): Map<string, VersionPolicy> {
     return this._versionPolicies;
@@ -66,9 +64,10 @@ export class VersionPolicyConfiguration {
 
   /**
    * Bumps up versions for the specified version policy or all version policies
-   * @alpha
+   *
    * @param versionPolicyName - version policy name
-   * @param identifier - prerelease identifier
+   * @param bumpType - bump type to override what policy has defined.
+   * @param identifier - prerelease identifier to override what policy has defined.
    * @param shouldCommit - should save to disk
    */
   public bump(versionPolicyName?: string,

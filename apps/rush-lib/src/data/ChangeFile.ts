@@ -25,10 +25,18 @@ export class ChangeFile {
     }
   }
 
+  /**
+   * Adds a change entry into the change file
+   * @param data - change information
+   */
   public addChange(data: IChangeInfo): void {
     this._changeFileData.changes.push(data);
   }
 
+  /**
+   * Gets all the change entries about the specified package from the change file.
+   * @param packageName - package name
+   */
   public getChanges(packageName: string): IChangeInfo[] {
     const changes: IChangeInfo[] = [];
     for (const info of this._changeFileData.changes) {
@@ -40,7 +48,7 @@ export class ChangeFile {
   }
 
   /**
-   * Write the change file to disk in sync mode
+   * Writes the change file to disk in sync mode
    */
   public writeSync(): void {
     const filePath: string = this.generatePath();
@@ -49,7 +57,7 @@ export class ChangeFile {
   }
 
   /**
-   * Generate a file path for storing the change file to disk
+   * Generates a file path for storing the change file to disk
    */
   public generatePath(): string {
     let branch: string = undefined;

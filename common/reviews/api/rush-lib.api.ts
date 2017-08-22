@@ -72,10 +72,8 @@ enum BumpType {
 class ChangeFile {
   public constructor(private _changeFileData: IChangeFile,
       private _rushConfiguration: RushConfiguration);
-  // (undocumented)
   public addChange(data: IChangeInfo): void;
   public generatePath(): string;
-  // (undocumented)
   public getChanges(packageName: string): IChangeInfo[];
   public writeSync(): void;
 }
@@ -203,15 +201,10 @@ interface ILockStepVersionJson extends IVersionPolicyJson {
 // @alpha
 class IndividualVersionPolicy extends VersionPolicy {
   constructor(versionPolicyJson: IIndividualVersionJson);
-  // (undocumented)
   public bump(bumpType?: BumpType, identifier?: string): void;
-  // (undocumented)
   public ensure(project: IPackageJson): IPackageJson | undefined;
-  // (undocumented)
   public readonly json: IIndividualVersionJson;
-  // (undocumented)
   public readonly lockedMajor: number | undefined;
-  // (undocumented)
   public validate(versionString: string, packageName: string): void;
 }
 
@@ -278,17 +271,11 @@ class JsonSchemaValidator {
 // @alpha
 class LockStepVersionPolicy extends VersionPolicy {
   constructor(versionPolicyJson: ILockStepVersionJson);
-  // (undocumented)
   public bump(bumpType?: BumpType, identifier?: string): void;
-  // (undocumented)
   public ensure(project: IPackageJson): IPackageJson | undefined;
-  // (undocumented)
   public readonly json: ILockStepVersionJson;
-  // (undocumented)
   public readonly nextBump: BumpType;
-  // (undocumented)
   public validate(versionString: string, packageName: string): void;
-  // (undocumented)
   public readonly version: semver.SemVer;
 }
 
@@ -499,7 +486,7 @@ class VersionControl {
   // (undocumented)
   public static getChangedFolders(targetBranch?: string): string[];
   public static getRemoteMasterBranch(repositoryUrl?: string): string;
-  public static getUncommittedChanges(): string[];
+  public static getUncommittedChanges(): ReadonlyArray<string>;
   // (undocumented)
   public static hasUncommittedChanges(): boolean;
 }
@@ -520,33 +507,23 @@ class VersionMismatchFinder {
 // @alpha
 class VersionPolicy {
   constructor(versionPolicyJson: IVersionPolicyJson);
-  // (undocumented)
   public abstract bump(bumpType?: BumpType, identifier?: string): void;
-  // (undocumented)
   public readonly definitionName: VersionPolicyDefinitionName;
-  // (undocumented)
   public abstract ensure(project: IPackageJson): IPackageJson | undefined;
-  // (undocumented)
   public readonly json: IVersionPolicyJson;
-  // (undocumented)
   public static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy;
-  // (undocumented)
   public readonly policyName: string;
-  // (undocumented)
   public abstract validate(versionString: string, packageName: string): void;
 }
 
 // @alpha (undocumented)
 class VersionPolicyConfiguration {
   public constructor(private _jsonFileName: string);
-  // @alpha
   public bump(versionPolicyName?: string,
       bumpType?: BumpType,
       identifier?: string,
       shouldCommit?: boolean): void;
-  // @alpha
   public getVersionPolicy(policyName: string): VersionPolicy;
-  // @alpha
   public readonly versionPolicies: Map<string, VersionPolicy>;
 }
 

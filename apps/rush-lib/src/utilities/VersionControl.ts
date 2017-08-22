@@ -95,7 +95,7 @@ export default class VersionControl {
   /**
    * The list of files changed but not commited
    */
-  public static getUncommittedChanges(): string[] {
+  public static getUncommittedChanges(): ReadonlyArray<string> {
     const changes: string[] = [];
     changes.push(...VersionControl._getUntrackedChanges());
     changes.push(...VersionControl._getDiffOnHEAD());
