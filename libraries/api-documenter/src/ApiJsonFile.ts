@@ -11,6 +11,9 @@ const apiJsonSchemaFilename: string = path.join(__dirname,
   '../node_modules/@microsoft/api-extractor/lib/schemas/api-json-schema.json');
 const apiJsonSchema: { } = JsonFile.loadJsonFile(apiJsonSchemaFilename);
 
+/**
+ * TODO: This should be converted into a public API for the API Extractor library.
+ */
 export class ApiJsonFile {
   public readonly docPackage: IDocPackage;
   public readonly packageName: string;

@@ -12,6 +12,9 @@ import {
 
 import { BasePageRenderer } from './BasePageRenderer';
 
+/**
+ * Helper class used by MarkdownPageRenderer
+ */
 class SimpleWriter {
   private _buffer: string = '';
 
@@ -40,6 +43,10 @@ interface IRenderContext {
   insideTable: boolean;
 }
 
+/**
+ * Renders API documentation in the Markdown file format.
+ * For more info:  https://en.wikipedia.org/wiki/Markdown
+ */
 export class MarkdownPageRenderer extends BasePageRenderer {
   public get outputFileExtension(): string { // abstract
     return '.md';

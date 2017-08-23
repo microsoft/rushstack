@@ -24,6 +24,10 @@ import { BasePageRenderer } from './BasePageRenderer';
 import { RenderingHelpers } from './RenderingHelpers';
 import { Domifier } from './Domifier';
 
+/**
+ * This is the main engine that reads *.api.json input files and generates IDomPage data structures,
+ * which are then rendered using an BasePageRenderer subclass.
+ */
 export class Documenter {
   private readonly _apiJsonFiles: ApiJsonFile[] = [];
 

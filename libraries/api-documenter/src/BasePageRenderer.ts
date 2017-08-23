@@ -5,6 +5,10 @@ import * as fsx from 'fs-extra';
 import * as path from 'path';
 import { IDomPage } from './SimpleDom';
 
+/**
+ * This is an abstract base class for plug-ins that convert the IDomPage representation
+ * to various output formats.
+ */
 export abstract class BasePageRenderer {
   public readonly outputFolder: string;
 
@@ -17,8 +21,14 @@ export abstract class BasePageRenderer {
     this.outputFolder = outputFolder;
   }
 
+  /**
+   * Write a file containing a single page of documentation.
+   */
   public abstract writePage(domPage: IDomPage): void;
 
+  /**
+   * Delete all the output files created by this renderer.
+   */
   public deleteOutputFiles(): void {
     const extensionRegExp: RegExp = new RegExp(this.outputFileExtension.replace('.', '\\.') + '$', 'i');
     for (const filename of fsx.readdirSync(this.outputFolder)) {
@@ -29,6 +39,9 @@ export abstract class BasePageRenderer {
     }
   }
 
+  /**
+   * Generate the filename for a given document ID.
+   */
   protected getFilenameForDocId(docId: string): string {
     return docId + this.outputFileExtension;
   }

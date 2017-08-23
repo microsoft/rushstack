@@ -30,6 +30,9 @@ import {
 
 import { RenderingHelpers } from './RenderingHelpers';
 
+/**
+ * A helper class for generating DomElement structures.
+ */
 export class Domifier {
   public static BREAK: IDomLineBreak = {
     kind: 'break'
