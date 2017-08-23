@@ -7,7 +7,6 @@ import * as os from 'os';
 import * as path from 'path';
 import { Documenter } from './Documenter';
 import { MarkdownPageRenderer } from './MarkdownPageRenderer';
-import { YamlPageRenderer } from './YamlPageRenderer';
 
 const myPackageJsonFilename: string = path.resolve(path.join(
   __dirname, '..', 'package.json')
@@ -30,6 +29,3 @@ const dataFolder: string = path.join(__dirname, '../files');
 
 const markdownPageRenderer: MarkdownPageRenderer = new MarkdownPageRenderer(path.join(dataFolder, 'markdown'));
 documenter.writeDocs(markdownPageRenderer);
-
-const yamlPageRenderer: YamlPageRenderer = new YamlPageRenderer(path.join(dataFolder, 'yaml'));
-documenter.writeDocs(yamlPageRenderer);
