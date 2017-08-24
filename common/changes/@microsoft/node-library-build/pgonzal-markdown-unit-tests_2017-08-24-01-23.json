@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/node-library-build",
-      "comment": "Added DiffTest, JsonFile, and PackageJsonLookup",
+      "comment": "node-library-build now supports the CopyStaticAssetsTask",
       "type": "minor"
     }
   ],
