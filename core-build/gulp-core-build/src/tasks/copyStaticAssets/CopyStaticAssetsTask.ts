@@ -1,10 +1,15 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import * as Gulp from 'gulp';
 import * as path from 'path';
-import { fileLoaderExts } from './../configureWebpack/ConfigureWebpackTask';
 import globEscape = require('glob-escape');
+import { GulpTask } from '../GulpTask';
 
-import OdspGulpTask from './../OdspGulpTask';
-
+/**
+ * Configuration for CopyStaticAssetsTask
+ * @public
+ */
 export interface ICopyStaticAssetsTaskConfig {
   includeExtensions?: string[];
   excludeExtensions?: string[];
@@ -14,6 +19,8 @@ export interface ICopyStaticAssetsTaskConfig {
 
 /**
  * Configures the @microsoft/gulp-core-build-webpack task with some smart defaults based on the package configuration.
+ *
+ * @internalremarks
  *
  * Example:
  *  IN:
@@ -32,8 +39,10 @@ export interface ICopyStaticAssetsTaskConfig {
  *      2. excluding specific extensions (i.e. 'png')
  *      3. including specific globs (i.e. '/assets/goodAsset.png')
  *      4. excluding specific globs (i.e. '/assets/badAsset.gif')
+ *
+ * @public
  */
-export class CopyStaticAssetsTask extends OdspGulpTask<ICopyStaticAssetsTaskConfig> {
+export class CopyStaticAssetsTask extends GulpTask<ICopyStaticAssetsTaskConfig> {
   constructor() {
     super(
       'copy-static-assets',
@@ -56,11 +65,13 @@ export class CopyStaticAssetsTask extends OdspGulpTask<ICopyStaticAssetsTaskConf
 
     const globPatterns: string[] = [];
 
-    const allExtensions: string[] = this.taskConfig.includeExtensions.concat(fileLoaderExts, ['json', 'html', 'css']);
+    const allExtensions: string[] = (this.taskConfig.includeExtensions || []).concat(['json', 'html', 'css', 'md']);
 
     for (let ext of allExtensions) {
-      if (this.taskConfig.excludeExtensions.indexOf(ext) !== -1) {
-        return; // Skipping this extension. It's been excluded
+      if (this.taskConfig.excludeExtensions) {
+        if (this.taskConfig.excludeExtensions.indexOf(ext) !== -1) {
+          break; // Skipping this extension. It's been excluded
+        }
       }
 
       if (!ext.match(/^\./)) {
@@ -70,15 +81,17 @@ export class CopyStaticAssetsTask extends OdspGulpTask<ICopyStaticAssetsTaskConf
       globPatterns.push(path.join(rootPath, '**', `*${globEscape(ext)}`));
     }
 
-    for (const file of this.taskConfig.includeFiles) {
-      if (this.taskConfig.excludeFiles.indexOf(file) !== -1) {
-        return; // Skipping this file. It's been excluded
+    for (const file of this.taskConfig.includeFiles || []) {
+      if (this.taskConfig.excludeFiles) {
+        if (this.taskConfig.excludeFiles.indexOf(file) !== -1) {
+          break; // Skipping this file. It's been excluded
+        }
       }
 
       globPatterns.push(path.join(rootPath, file));
     }
 
-    for (const file of this.taskConfig.excludeFiles) {
+    for (const file of this.taskConfig.excludeFiles || []) {
       globPatterns.push(`!${path.join(rootPath, file)}`);
     }
 
