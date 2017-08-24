@@ -52,7 +52,7 @@ export class MarkdownPageRenderer extends BasePageRenderer {
     return '.md';
   }
 
-  public writePage(domPage: IDomPage): void { // override
+  public writePage(domPage: IDomPage): string { // override
     const filename: string = path.join(this.outputFolder, this.getFilenameForDocId(domPage.docId));
 
     console.log('Writing: ' + filename + os.EOL);
@@ -72,6 +72,8 @@ export class MarkdownPageRenderer extends BasePageRenderer {
     this._writeElements(domPage.elements, context);
 
     fsx.writeFileSync(filename, writer.toString());
+
+    return filename;
   }
 
   private _getEscapedText(text: string): string {
