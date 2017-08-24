@@ -2,6 +2,26 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "3.5.0",
+      "tag": "@microsoft/gulp-core-build-typescript_v3.5.0",
+      "date": "Thu, 24 Aug 2017 01:04:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade to tslint 5.6.0"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.9.4` to `2.9.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `2.3.3` to `2.3.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.4.2",
       "tag": "@microsoft/gulp-core-build-typescript_v3.4.2",
       "date": "Tue, 22 Aug 2017 13:04:22 GMT",

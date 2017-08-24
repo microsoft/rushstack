@@ -1,6 +1,11 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 22 Aug 2017 13:04:22 GMT and should not be manually modified.
+This log was last generated on Thu, 24 Aug 2017 01:04:33 GMT and should not be manually modified.
+
+## 2.3.4
+Thu, 24 Aug 2017 01:04:33 GMT
+
+*Changes not tracked*
 
 ## 2.3.3
 Tue, 22 Aug 2017 13:04:22 GMT
