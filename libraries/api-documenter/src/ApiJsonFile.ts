@@ -5,7 +5,7 @@ import * as os from 'os';
 import * as path from 'path';
 
 import { IDocPackage } from '@microsoft/api-extractor/lib/IDocItem';
-import JsonFile from '@microsoft/api-extractor/lib/JsonFile';
+import { JsonFile } from '@microsoft/node-core-library';
 
 const apiJsonSchemaFilename: string = path.join(__dirname,
   '../node_modules/@microsoft/api-extractor/lib/schemas/api-json-schema.json');

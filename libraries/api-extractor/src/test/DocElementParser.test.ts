@@ -6,10 +6,11 @@
 import { assert } from 'chai';
 import * as ts from 'typescript';
 import * as path from 'path';
+import { JsonFile } from '@microsoft/node-core-library';
+
 import DocElementParser from '../DocElementParser';
 import { IDocElement, IParam, IHrefLinkElement, ICodeLinkElement, ITextElement, ISeeDocElement } from '../IDocElement';
 import TestFileComparer from '../TestFileComparer';
-import JsonFile from '../JsonFile';
 import ApiStructuredType from '../definitions/ApiStructuredType';
 import ApiDocumentation from '../definitions/ApiDocumentation';
 import Extractor from './../Extractor';

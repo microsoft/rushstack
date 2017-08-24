@@ -6,7 +6,7 @@
 
 import { assert } from 'chai';
 import * as path from 'path';
-import PackageJsonLookup from '../PackageJsonLookup';
+import { PackageJsonLookup } from '../PackageJsonLookup';
 
 describe('PackageJsonLookup', function (): void {
 
@@ -14,17 +14,17 @@ describe('PackageJsonLookup', function (): void {
 
     it('readPackageName() test', function (): void {
       const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
-      const sourceFilePath: string = path.join(__dirname, '../../testInputs/example1');
-      assert.equal(packageJsonLookup.readPackageName(sourceFilePath), 'example1');
+      const sourceFilePath: string = path.join(__dirname, './example-package');
+      assert.equal(packageJsonLookup.readPackageName(sourceFilePath), 'example-package');
     });
 
     it('tryFindPackagePathUpwards() test', function (): void {
       const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
-      const sourceFilePath: string = path.join(__dirname, '../../testInputs/example1/folder/AliasClass.ts');
+      const sourceFilePath: string = path.join(__dirname, './example-package/src/ExampleFile.txt');
 
-      // Example: C:\web-build-tools\libraries\api-extractor\testInputs\example1
-      const foundPath: string = packageJsonLookup.tryFindPackagePathUpwards(sourceFilePath);
-      assert.isTrue(foundPath.search(/[\\/]example1$/i) >= 0, 'Unexpected result: ' + foundPath);
+      // Example: C:\web-build-tools\libraries\node-core-library\src\test\example-package
+      const foundPath: string | undefined = packageJsonLookup.tryFindPackagePathUpwards(sourceFilePath);
+      assert.isTrue(foundPath && foundPath.search(/[\\/]example-package$/i) >= 0, 'Unexpected result: ' + foundPath);
     });
   });
 });

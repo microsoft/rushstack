@@ -4,6 +4,7 @@
 import * as os  from 'os';
 import * as path from 'path';
 import * as ts from 'typescript';
+import { JsonFile } from '@microsoft/node-core-library';
 
 import Extractor from '../Extractor';
 import ApiStructuredType from '../definitions/ApiStructuredType';
@@ -21,7 +22,6 @@ import ApiModuleVariable from '../definitions/ApiModuleVariable';
 import ApiMethod from '../definitions/ApiMethod';
 import { ReleaseTag } from '../definitions/ApiDocumentation';
 import { IReturn, IParam }from '../IDocElement';
-import JsonFile from '../JsonFile';
 import ApiJsonFile from './ApiJsonFile';
 
 /**

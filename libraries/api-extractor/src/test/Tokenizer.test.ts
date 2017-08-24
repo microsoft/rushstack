@@ -4,7 +4,8 @@
 /// <reference types="mocha" />
 
 import { assert } from 'chai';
-import JsonFile from '../JsonFile';
+import { JsonFile } from '@microsoft/node-core-library';
+
 import TestFileComparer from '../TestFileComparer';
 import Token, { TokenType } from '../Token';
 import Tokenizer from '../Tokenizer';

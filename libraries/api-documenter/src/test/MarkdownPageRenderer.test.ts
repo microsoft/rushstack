@@ -3,9 +3,8 @@
 
 /// <reference types='mocha' />
 
-import { assert } from 'chai';
+// import { assert } from 'chai';
 import * as path from 'path';
-import * as fsx from 'fs-extra';
 import { DiffTest } from '@microsoft/node-core-library';
 
 import { MarkdownPageRenderer } from '../MarkdownPageRenderer';
@@ -17,11 +16,11 @@ describe('MarkdownPageRenderer', () => {
 
     const diffTest: DiffTest = new DiffTest();
 
-    const outputFolder = diffTest.getFolderPath(__dirname, 'MarkdownPageRenderer');
+    const outputFolder: string = diffTest.getFolderPath(__dirname, 'MarkdownPageRenderer');
 
     const renderer: MarkdownPageRenderer = new MarkdownPageRenderer(outputFolder);
     const domPage: IDomPage = Domifier.createPage('Test page', 'test-id');
-    const outputFilename = renderer.writePage(domPage);
+    const outputFilename: string = renderer.writePage(domPage);
 
     diffTest.assertFileMatchesExpected(outputFilename, path.join(__dirname, 'ExpectedOutput.md'));
 

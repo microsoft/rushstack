@@ -4,13 +4,14 @@
 import * as fsx from 'fs-extra';
 import * as os  from 'os';
 import * as path from 'path';
+import { JsonFile } from '@microsoft/node-core-library';
+
 import { IDocItem, IDocPackage, IDocMember } from './IDocItem';
 import ApiDefinitionReference from './ApiDefinitionReference';
 import ApiItem from './definitions/ApiItem';
 import ApiItemContainer from './definitions/ApiItemContainer';
 import ApiPackage from './definitions/ApiPackage';
 import ResolvedApiItem from './ResolvedApiItem';
-import JsonFile from './JsonFile';
 
 /**
  * Used to describe a parsed package name in the form of

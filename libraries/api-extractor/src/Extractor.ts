@@ -4,9 +4,10 @@
 import * as ts from 'typescript';
 import * as fsx from 'fs-extra';
 import * as path from 'path';
+import { PackageJsonLookup } from '@microsoft/node-core-library';
+
 import ApiPackage from './definitions/ApiPackage';
 import DocItemLoader from './DocItemLoader';
-import PackageJsonLookup from './PackageJsonLookup';
 
 export type ApiErrorHandler = (message: string, fileName: string, lineNumber: number) => void;
 
