@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "2.3.5",
+      "tag": "@microsoft/api-extractor_v2.3.5",
+      "date": "Thu, 24 Aug 2017 22:44:12 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update the schema validator."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.3.4",
       "tag": "@microsoft/api-extractor_v2.3.4",
       "date": "Thu, 24 Aug 2017 01:04:33 GMT",

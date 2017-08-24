@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 24 Aug 2017 01:04:33 GMT and should not be manually modified.
+This log was last generated on Thu, 24 Aug 2017 22:44:12 GMT and should not be manually modified.
+
+## 2.3.5
+Thu, 24 Aug 2017 22:44:12 GMT
+
+### Patches
+
+- Update the schema validator.
 
 ## 2.3.4
 Thu, 24 Aug 2017 01:04:33 GMT

@@ -2,6 +2,21 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "3.5.1",
+      "tag": "@microsoft/gulp-core-build-typescript_v3.5.1",
+      "date": "Thu, 24 Aug 2017 22:44:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.9.5` to `2.9.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `2.3.4` to `2.3.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.5.0",
       "tag": "@microsoft/gulp-core-build-typescript_v3.5.0",
       "date": "Thu, 24 Aug 2017 01:04:33 GMT",
