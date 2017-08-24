@@ -10,8 +10,9 @@ export type ValidateErrorCallback = (errorDescription: string) => void;
 
 /**
  * Utilities for reading/writing JSON files.
+ * @public
  */
-export default class JsonFile {
+export class JsonFile {
 
   public static validateSchema(jsonObject: Object, jsonSchemaObject: Object,
     errorCallback: ValidateErrorCallback): void {

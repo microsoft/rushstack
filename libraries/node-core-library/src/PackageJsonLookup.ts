@@ -5,7 +5,7 @@
 
 import * as fsx from 'fs-extra';
 import * as path from 'path';
-import JsonFile from './JsonFile';
+import { JsonFile } from './JsonFile';
 
 /**
  * Represents a package.json file.
@@ -17,8 +17,10 @@ interface IPackageJson {
 /**
  * This class provides methods for finding the nearest "package.json" for a folder
  * and retrieving the name of the package.  The results are cached.
+ *
+ * @alpha
  */
-export default class PackageJsonLookup {
+export class PackageJsonLookup {
   // Cached the return values for tryFindPackagePathUpwards():
   // sourceFilePath --> packageJsonFolder
   private _packageFolderCache: Map<string, string | undefined>;
