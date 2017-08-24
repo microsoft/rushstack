@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Added CopyStaticAssetsTasks",
+      "packageName": "@microsoft/gulp-core-build",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build",
+  "email": "pgonzal@users.noreply.github.com"
+}
