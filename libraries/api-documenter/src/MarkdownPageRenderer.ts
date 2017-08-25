@@ -7,6 +7,7 @@ import * as path from 'path';
 
 import {
   IDomPage,
+  IDomText,
   DomElement
 } from './SimpleDom';
 
@@ -90,12 +91,47 @@ export class MarkdownPageRenderer extends BasePageRenderer {
       .replace('>', '&gt;');
   }
 
+  /**
+   * Merges any IDomText elements with compatible styles; this simplifies the emitted Markdown
+   */
+  private _mergeTextElements(elements: DomElement[]): DomElement[] {
+    const mergedElements: DomElement[] = [];
+    let previousElement: DomElement|undefined;
+
+    for (const element of elements) {
+      if (previousElement) {
+        if (element.kind === 'text' && previousElement.kind === 'text') {
+          if (element.bold === previousElement.bold && element.italics === previousElement.italics) {
+            // merge them
+            mergedElements.pop(); // pop the previous element
+
+            const combinedElement: IDomText = { // push a combined element
+              kind: 'text',
+              content: previousElement.content + element.content,
+              bold: previousElement.bold,
+              italics: previousElement.italics
+            };
+
+            mergedElements.push(combinedElement);
+            previousElement = combinedElement;
+            continue;
+          }
+        }
+      }
+
+      mergedElements.push(element);
+      previousElement = element;
+    }
+
+    return mergedElements;
+  }
+
   private _writeElements(elements: DomElement[], context: IRenderContext): void {
     const writer: SimpleWriter = context.writer;
 
-    let previousElement: DomElement|undefined = undefined;
+    const mergedElements: DomElement[] = this._mergeTextElements(elements);
 
-    for (const element of elements) {
+    for (const element of mergedElements) {
       switch (element.kind) {
         case 'text':
           let normalizedContent: string = element.content;
@@ -263,8 +299,6 @@ export class MarkdownPageRenderer extends BasePageRenderer {
         default:
           throw new Error('Unsupported element kind: ' + element.kind);
       }
-
-      previousElement = element;
     }
   }
 }

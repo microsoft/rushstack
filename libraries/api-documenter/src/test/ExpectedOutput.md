@@ -24,8 +24,8 @@ This is a **bold** word.
 
 ## Adjacent bold regions
 
-**one**<!-- -->**two** **three**<!-- -->**four**<!-- -->nonbold<!-- -->**five**
+**onetwo threefour**<!-- -->nonbold<!-- -->**five**
 
 ## Bad characters
 
-**\*one\*two\***<!-- -->**three\*four**
+**\*one\*two\*three\*four**
