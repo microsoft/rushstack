@@ -48,11 +48,11 @@ interface IRenderContext {
  * For more info:  https://en.wikipedia.org/wiki/Markdown
  */
 export class MarkdownPageRenderer extends BasePageRenderer {
-  public get outputFileExtension(): string { // abstract
+  public get outputFileExtension(): string { // override
     return '.md';
   }
 
-  public writePage(domPage: IDomPage): void { // abstract
+  public writePage(domPage: IDomPage): void { // override
     const filename: string = path.join(this.outputFolder, this.getFilenameForDocId(domPage.docId));
 
     console.log('Writing: ' + filename + os.EOL);

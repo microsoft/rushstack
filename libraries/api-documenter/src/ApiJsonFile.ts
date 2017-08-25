@@ -19,9 +19,9 @@ export class ApiJsonFile {
   public readonly packageName: string;
 
   public static loadFromFile(apiJsonFilePath: string): ApiJsonFile {
-    const apiPackage: IDocPackage = JsonFile.loadJsonFile(apiJsonFilePath) as IDocPackage;
+    const docPackage: IDocPackage = JsonFile.loadJsonFile(apiJsonFilePath) as IDocPackage;
 
-    JsonFile.validateSchema(apiPackage, apiJsonSchema,
+    JsonFile.validateSchema(docPackage, apiJsonSchema,
       (errorDetail: string): void => {
         const errorMessage: string
           = `ApiJsonGenerator validation error - output does not conform to api-json-schema.json:` + os.EOL
@@ -32,7 +32,7 @@ export class ApiJsonFile {
     );
 
     const packageName: string = path.basename(apiJsonFilePath).replace(/\.api\.json$/i, '');
-    return new ApiJsonFile(packageName, apiPackage);
+    return new ApiJsonFile(packageName, docPackage);
   }
 
   private constructor(packageName: string, docPackage: IDocPackage) {

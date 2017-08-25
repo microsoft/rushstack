@@ -17,6 +17,8 @@ export type DomCodeHighlighter = 'javascript' | 'plain';
 
 /**
  * Source code shown in a fixed-width font, with syntax highlighting.
+ * @remarks
+ * NOTE: IDomCode is just a span of text, whereas IDomCodeBox is a box showing a larger code sample.
  */
 export interface IDomCode {
   kind: 'code';
@@ -82,6 +84,8 @@ export interface IDomHeading2 {
 
 /**
  * A box containing source code with syntax highlighting.
+ * @remarks
+ * NOTE: IDomCode is just a span of text, whereas IDomCodeBox is a box showing a larger code sample.
  */
 export interface IDomCodeBox {
   kind: 'code-box';
