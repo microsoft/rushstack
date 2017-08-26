@@ -70,7 +70,7 @@ export class Documenter {
       const docItem: IDocItem = docPackage.exports[exportName];
 
       const docItemTitle: DomBasicText[] = [
-        Domifier.createDocLink(
+        Domifier.createDocumentationLink(
           [ Domifier.createCode(exportName, 'javascript') ],
           RenderingHelpers.getDocId(apiJsonFile.packageName, exportName))
       ];
@@ -154,7 +154,7 @@ export class Documenter {
       switch (member.kind) {
         case 'method':
           const methodTitle: DomBasicText[] = [
-            Domifier.createDocLink(
+            Domifier.createDocumentationLink(
               [Domifier.createCode(RenderingHelpers.getConciseSignature(memberName, member), 'javascript')],
               RenderingHelpers.getDocId(apiJsonFile.packageName, className, memberName))
           ];

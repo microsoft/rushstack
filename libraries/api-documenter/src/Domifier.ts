@@ -10,7 +10,7 @@ import {
 
 import {
   DomBasicText,
-  IDomDocLink,
+  IDomDocumentationLink,
   IDomWebLink,
   IDomText,
   IDomParagraph,
@@ -64,7 +64,7 @@ export class Domifier {
     }
   }
 
-  public static createDocLink(textElements: DomLinkText[], targetDocId: string): IDomDocLink {
+  public static createDocumentationLink(textElements: DomLinkText[], targetDocId: string): IDomDocumentationLink {
     if (!textElements.length) {
       throw new Error('Missing text for doc link');
     }
@@ -73,15 +73,15 @@ export class Domifier {
       kind: 'doc-link',
       elements: textElements,
       targetDocId: targetDocId
-    } as IDomDocLink;
+    } as IDomDocumentationLink;
   }
 
-  public static createDocLinkFromText(text: string, targetDocId: string): IDomDocLink {
+  public static createDocumentationLinkFromText(text: string, targetDocId: string): IDomDocumentationLink {
     if (!text) {
       throw new Error('Missing text for doc link');
     }
 
-    return Domifier.createDocLink(Domifier.createTextElements(text), targetDocId);
+    return Domifier.createDocumentationLink(Domifier.createTextElements(text), targetDocId);
   }
 
   public static createCode(code: string, highlighter?: DomCodeHighlighter): IDomCode {
@@ -195,7 +195,7 @@ export class Domifier {
               }
             }
             result.push(
-              Domifier.createDocLinkFromText(linkText,
+              Domifier.createDocumentationLinkFromText(linkText,
                 RenderingHelpers.getDocId(linkDocElement.packageName || '', linkDocElement.exportName,
                   linkDocElement.memberName)
               )

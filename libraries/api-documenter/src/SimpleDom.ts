@@ -33,7 +33,7 @@ export type DomLinkText = IDomText | IDomCode;
 /**
  * A block of plain text, possibly with simple formatting.
  */
-export interface IDomDocLink {
+export interface IDomDocumentationLink {
   kind: 'doc-link';
   elements: DomLinkText[];
   targetDocId: string;
@@ -62,7 +62,7 @@ export interface IDomLineBreak {
   kind: 'break';
 }
 
-export type DomBasicText = DomLinkText | IDomDocLink | IDomWebLink | IDomParagraph | IDomLineBreak;
+export type DomBasicText = DomLinkText | IDomDocumentationLink | IDomWebLink | IDomParagraph | IDomLineBreak;
 
 // ----------------------------------------------------------------------------
 
