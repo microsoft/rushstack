@@ -14,12 +14,21 @@ import { PackageJsonLookup } from './PackageJsonLookup';
  * @alpha
  */
 export class DiffTest {
-  private _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
+  private static _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
   private static _getNormalizedContent(s: string): string {
     return s.replace(/\r\n/g, '\n').replace(/\r/g, '') // convert to Unix-style newlines
       .replace(/\s+\n/g, '\n') // strip spaces from end of line
       .replace(/\n+$/g, '');  // strip newlines from end of file
+  }
+
+  /**
+   * Clears the internal file cache.
+   * @remarks
+   * Call this method if changes have been made to the package.json files on disk.
+   */
+  public static clearCache(): void {
+    this._packageJsonLookup.clearCache();
   }
 
   /**
@@ -29,7 +38,7 @@ export class DiffTest {
    * @param testModule - the name of the class being unit tested
    * @returns A fully qualified path of the folder where the unit test should write its output
    */
-  public getFolderPath(unitTestDirName: string, testModule: string): string {
+  public static getFolderPath(unitTestDirName: string, testModule: string): string {
     const packageJsonFolderPath: string | undefined
       = this._packageJsonLookup.tryFindPackagePathUpwards(unitTestDirName);
 
@@ -50,7 +59,7 @@ export class DiffTest {
    * by a tool, e.g. Git newline normalization or an editor that strips
    * whitespace when saving.
    */
-  public assertFileMatchesExpected(actualFilePath: string, expectedFilePath: string): void {
+  public static assertEqual(actualFilePath: string, expectedFilePath: string): void {
     const actualContent: string = fsx.readFileSync(actualFilePath).toString('utf8');
     const expectedContent: string = fsx.readFileSync(expectedFilePath).toString('utf8');
 

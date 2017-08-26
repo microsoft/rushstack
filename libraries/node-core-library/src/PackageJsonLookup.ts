@@ -30,6 +30,15 @@ export class PackageJsonLookup {
   private _packageNameCache: Map<string, string>;
 
   constructor() {
+    this.clearCache();
+  }
+
+  /**
+   * Clears the internal file cache.
+   * @remarks
+   * Call this method if changes have been made to the package.json files on disk.
+   */
+  public clearCache(): void {
     this._packageFolderCache = new Map<string, string | undefined>();
     this._packageNameCache = new Map<string, string>();
   }
