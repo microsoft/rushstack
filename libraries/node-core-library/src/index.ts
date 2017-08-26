@@ -6,6 +6,6 @@
  */
 declare const packageDescription: void; // tslint:disable-line:no-unused-variable
 
-export { DiffTest } from './DiffTest';
+export { FileDiffTest } from './FileDiffTest';
 export { JsonFile } from './JsonFile';
 export { PackageJsonLookup } from './PackageJsonLookup';

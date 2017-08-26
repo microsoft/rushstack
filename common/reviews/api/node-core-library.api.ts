@@ -1,7 +1,8 @@
 // @alpha
-class DiffTest {
-  public assertFileMatchesExpected(actualFilePath: string, expectedFilePath: string): void;
-  public getFolderPath(unitTestDirName: string, testModule: string): string;
+class FileDiffTest {
+  public static assertEqual(actualFilePath: string, expectedFilePath: string): void;
+  public static clearCache(): void;
+  public static prepareFolder(unitTestDirName: string, testModule: string): string;
 }
 
 // @public
@@ -20,6 +21,7 @@ class JsonFile {
 // @alpha
 class PackageJsonLookup {
   constructor();
+  public clearCache(): void;
   public readPackageName(packageJsonPath: string): string;
   public tryFindPackagePathUpwards(sourceFilePath: string): string | undefined;
 }

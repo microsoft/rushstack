@@ -16,12 +16,6 @@ import { PackageJsonLookup } from './PackageJsonLookup';
 export class FileDiffTest {
   private static _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
-  private static _getNormalizedContent(s: string): string {
-    return s.replace(/\r\n/g, '\n').replace(/\r/g, '') // convert to Unix-style newlines
-      .replace(/\s+\n/g, '\n') // strip spaces from end of line
-      .replace(/\n+$/g, '');  // strip newlines from end of file
-  }
-
   /**
    * Clears the internal file cache.
    * @remarks
@@ -32,13 +26,14 @@ export class FileDiffTest {
   }
 
   /**
-   * Returns a folder in the temp directory where the unit test should write its output files
-   * to be diffed.
+   * Sets up a folder in the temp directory where the unit test should write its output files
+   * to be diffed.  Any previous contents of the folder will be deleted.
+   *
    * @param unitTestDirName - the "__dirname" variable, evaluated in the context of the unit test
-   * @param testModule - the name of the class being unit tested
+   * @param testModule - the name of the class being unit tested; must contain only letters, numbers, and underscores.
    * @returns A fully qualified path of the folder where the unit test should write its output
    */
-  public static getFolderPath(unitTestDirName: string, testModule: string): string {
+  public static prepareFolder(unitTestDirName: string, testModule: string): string {
     const packageJsonFolderPath: string | undefined
       = this._packageJsonLookup.tryFindPackagePathUpwards(unitTestDirName);
 
@@ -46,8 +41,14 @@ export class FileDiffTest {
       throw new Error('Unable to find a package.json in any parent folder of ' + unitTestDirName);
     }
 
+    if (!/^[a-zA-Z0-9_]+$/.test(testModule)) {
+      throw new Error('Invalid test module name: ' + testModule);
+    }
+
     const diffTestPath: string = path.join(packageJsonFolderPath, 'temp', 'diff-tests', testModule);
     fsx.mkdirsSync(diffTestPath);
+
+    fsx.emptyDirSync(diffTestPath);
 
     return diffTestPath;
   }
@@ -64,12 +65,18 @@ export class FileDiffTest {
     const expectedContent: string = fsx.readFileSync(expectedFilePath).toString('utf8');
 
     // NOTE: "\s" also matches "\r" and "\n"
-    const normalizedActual: string = DiffTest._getNormalizedContent(actualContent);
-    const normalizedExpected: string = DiffTest._getNormalizedContent(expectedContent);
+    const normalizedActual: string = FileDiffTest._getNormalizedContent(actualContent);
+    const normalizedExpected: string = FileDiffTest._getNormalizedContent(expectedContent);
 
     if (normalizedActual !== normalizedExpected) {
       throw new Error('The test output file does not match the expected input:\n'
         + actualFilePath);
     }
+  }
+
+  private static _getNormalizedContent(s: string): string {
+    return s.replace(/\r\n/g, '\n').replace(/\r/g, '') // convert to Unix-style newlines
+      .replace(/\s+\n/g, '\n') // strip spaces from end of line
+      .replace(/\n+$/g, '');  // strip newlines from end of file
   }
 }
