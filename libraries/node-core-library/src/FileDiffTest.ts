@@ -13,7 +13,7 @@ import { PackageJsonLookup } from './PackageJsonLookup';
  *
  * @alpha
  */
-export class DiffTest {
+export class FileDiffTest {
   private static _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
   private static _getNormalizedContent(s: string): string {
