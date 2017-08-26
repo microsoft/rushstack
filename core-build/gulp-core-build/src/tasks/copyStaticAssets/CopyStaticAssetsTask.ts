@@ -18,7 +18,8 @@ export interface ICopyStaticAssetsTaskConfig {
 }
 
 /**
- * Configures the @microsoft/gulp-core-build-webpack task with some smart defaults based on the package configuration.
+ * Copies files from the /src folder into the /lib folder, if they have certain file extensions
+ * or file paths.
  *
  * @internalremarks
  *
