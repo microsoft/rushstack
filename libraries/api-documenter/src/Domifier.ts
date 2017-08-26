@@ -187,7 +187,7 @@ export class Domifier {
         case 'linkDocElement':
           const linkDocElement: ILinkDocElement = docElement as ILinkDocElement;
           if (linkDocElement.referenceType === 'code') {
-            let linkText: string|undefined = linkDocElement.value;
+            let linkText: string | undefined = linkDocElement.value;
             if (!linkText) {
               linkText = linkDocElement.exportName;
               if (linkDocElement.memberName) {
@@ -212,8 +212,9 @@ export class Domifier {
           break;
         case 'seeDocElement':
           const seeDocElement: ISeeDocElement = docElement as ISeeDocElement;
+          // This representation should probably be improved later.
           result.push(
-            ...Domifier.createTextElements('see ') // @todo
+            ...Domifier.createTextElements('see ')
           );
           result.push(...Domifier.renderDocElements(seeDocElement.seeElements));
           break;

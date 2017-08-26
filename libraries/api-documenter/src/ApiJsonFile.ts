@@ -30,7 +30,7 @@ export class ApiJsonFile {
         throw new Error(errorMessage);
       }
     );
-Headers
+
     const packageName: string = path.basename(apiJsonFilePath).replace(/\.api\.json$/i, '');
     return new ApiJsonFile(packageName, docPackage);
   }

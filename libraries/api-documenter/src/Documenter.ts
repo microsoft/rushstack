@@ -216,22 +216,24 @@ export class Documenter {
       domPage.elements.push(...Domifier.renderDocElements(docMethod.remarks));
     }
 
-    const parametersTable: IDomTable = Domifier.createTable([
-      Domifier.createTextElements('Parameter'),
-      Domifier.createTextElements('Type'),
-      Domifier.createTextElements('Description')
-    ]);
+    if (Object.keys(docMethod.parameters).length > 0) {
+      const parametersTable: IDomTable = Domifier.createTable([
+        Domifier.createTextElements('Parameter'),
+        Domifier.createTextElements('Type'),
+        Domifier.createTextElements('Description')
+      ]);
 
-    domPage.elements.push(Domifier.createHeading1('Parameters'));
-    domPage.elements.push(parametersTable);
-    for (const parameterName of Object.keys(docMethod.parameters)) {
-      const parameter: IDocParam = docMethod.parameters[parameterName];
-        parametersTable.rows.push(Domifier.createTableRow([
-          [Domifier.createCode(parameterName, 'javascript')],
-          parameter.type ? [Domifier.createCode(parameter.type, 'javascript')] : [],
-          Domifier.renderDocElements(parameter.description)
-        ])
-      );
+      domPage.elements.push(Domifier.createHeading1('Parameters'));
+      domPage.elements.push(parametersTable);
+      for (const parameterName of Object.keys(docMethod.parameters)) {
+        const parameter: IDocParam = docMethod.parameters[parameterName];
+          parametersTable.rows.push(Domifier.createTableRow([
+            [Domifier.createCode(parameterName, 'javascript')],
+            parameter.type ? [Domifier.createCode(parameter.type, 'javascript')] : [],
+            Domifier.renderDocElements(parameter.description)
+          ])
+        );
+      }
     }
 
     renderer.writePage(domPage);
