@@ -46,17 +46,16 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
     this.visit(extractor.package, this.jsonOutput);
 
     // Write the output before validating the schema, so we can debug it
-    JsonFile.saveJsonFile(reportFilename, this.jsonOutput);
+    JsonFile.save(this.jsonOutput, reportFilename);
 
     // Validate that the output conforms to our JSON schema
-    const apiJsonSchema: { } = JsonFile.loadJsonFile(path.join(__dirname, '../schemas/api-json-schema.json'));
+    const apiJsonSchema: { } = JsonFile.load(path.join(__dirname, '../schemas/api-json-schema.json'));
 
     JsonFile.validateSchema(this.jsonOutput, apiJsonSchema,
       (errorDetail: string): void => {
-        const errorMessage: string
-          = `ApiJsonGenerator validation error - output does not conform to api-json-schema.json:` + os.EOL
-          + reportFilename + os.EOL
-          + errorDetail;
+        const errorMessage: string = path.basename(reportFilename)
+          + ` does not conform to the expected schema -- please report this API Extractor bug:`
+          + os.EOL + errorDetail;
 
         console.log(os.EOL + 'ERROR: ' + errorMessage + os.EOL + os.EOL);
         throw new Error(errorMessage);

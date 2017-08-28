@@ -109,8 +109,8 @@ describe('DocElementParser tests', function (): void {
         } as IHrefLinkElement
       ];
       const actualSummary: IDocElement[] = DocElementParser.parse(myDocumentedClass.documentation, tokenizer);
-      JsonFile.saveJsonFile('./lib/basicDocExpected.json', JSON.stringify(expectedSummary));
-      JsonFile.saveJsonFile('./lib/basicDocActual.json', JSON.stringify(actualSummary));
+      JsonFile.save(JSON.stringify(expectedSummary), './lib/basicDocExpected.json');
+      JsonFile.save(JSON.stringify(actualSummary), './lib/basicDocActual.json');
       TestFileComparer.assertFileMatchesExpected('./lib/basicDocActual.json', './lib/basicDocExpected.json');
 
       // Testing Returns Doc Elements
@@ -119,8 +119,8 @@ describe('DocElementParser tests', function (): void {
       ];
       tokenizer.getToken();
       const actualReturn: IDocElement[] = DocElementParser.parse(myDocumentedClass.documentation, tokenizer);
-      JsonFile.saveJsonFile('./lib/returnDocExpected.json', JSON.stringify(expectedReturn));
-      JsonFile.saveJsonFile('./lib/returnDocActual.json', JSON.stringify(actualReturn));
+      JsonFile.save(JSON.stringify(expectedReturn), './lib/returnDocExpected.json');
+      JsonFile.save(JSON.stringify(actualReturn), './lib/returnDocActual.json');
       TestFileComparer.assertFileMatchesExpected('./lib/returnDocActual.json', './lib/returnDocExpected.json');
 
       // Testing Params Doc Elements
@@ -140,8 +140,8 @@ describe('DocElementParser tests', function (): void {
       tokenizer.getToken();
       actualParam.push(apiDoc.parseParam(tokenizer));
 
-      JsonFile.saveJsonFile('./lib/paramDocExpected.json', JSON.stringify(expectedParam));
-      JsonFile.saveJsonFile('./lib/paramDocActual.json', JSON.stringify(actualParam));
+      JsonFile.save(JSON.stringify(expectedParam), './lib/paramDocExpected.json');
+      JsonFile.save(JSON.stringify(actualParam), './lib/paramDocActual.json');
       TestFileComparer.assertFileMatchesExpected('./lib/paramDocActual.json', './lib/paramDocExpected.json');
       assertCapturedErrors([]);
     });
@@ -157,8 +157,8 @@ describe('DocElementParser tests', function (): void {
       ];
       tokenizer.getToken();
       const actualDeprecated: IDocElement[] = DocElementParser.parse(myDocumentedClass.documentation, tokenizer);
-      JsonFile.saveJsonFile('./lib/deprecatedDocExpected.json', JSON.stringify(expectedDeprecated));
-      JsonFile.saveJsonFile('./lib/deprecatedDocActual.json', JSON.stringify(actualDeprecated));
+      JsonFile.save(JSON.stringify(expectedDeprecated), './lib/deprecatedDocExpected.json');
+      JsonFile.save(JSON.stringify(actualDeprecated), './lib/deprecatedDocActual.json');
       TestFileComparer.assertFileMatchesExpected('./lib/deprecatedDocActual.json', './lib/deprecatedDocExpected.json');
       assertCapturedErrors([]);
     });
@@ -185,8 +185,8 @@ describe('DocElementParser tests', function (): void {
           } as ISeeDocElement
       ];
       const actualSummary: IDocElement[] = DocElementParser.parse(myDocumentedClass.documentation, tokenizer);
-      JsonFile.saveJsonFile('./lib/seeDocExpected.json', JSON.stringify(expectedSummary));
-      JsonFile.saveJsonFile('./lib/seeDocActual.json', JSON.stringify(actualSummary));
+      JsonFile.save(JSON.stringify(expectedSummary), './lib/seeDocExpected.json');
+      JsonFile.save(JSON.stringify(actualSummary), './lib/seeDocActual.json');
       TestFileComparer.assertFileMatchesExpected('./lib/seeDocExpected.json', './lib/seeDocActual.json');
       assertCapturedErrors([]);
     });
@@ -216,8 +216,8 @@ describe('DocElementParser tests', function (): void {
       } as IParam;
       const actualParam: IParam = apiDoc.parseParam(tokenizer);
 
-      JsonFile.saveJsonFile('./lib/nestedParamDocExpected.json', JSON.stringify(expectedParam));
-      JsonFile.saveJsonFile('./lib/nestedParamDocActual.json', JSON.stringify(actualParam));
+      JsonFile.save(JSON.stringify(expectedParam), './lib/nestedParamDocExpected.json');
+      JsonFile.save(JSON.stringify(actualParam), './lib/nestedParamDocActual.json');
       TestFileComparer.assertFileMatchesExpected(
         './lib/nestedParamDocActual.json',
         './lib/nestedParamDocExpected.json'

@@ -220,14 +220,15 @@ export default class DocItemLoader {
    * then the json file is saved in the cache and returned.
    */
   public loadPackageIntoCache(apiJsonFilePath: string, cachePackageName: string): IDocPackage {
-    const apiPackage: IDocPackage = JsonFile.loadJsonFile(apiJsonFilePath) as IDocPackage;
+    const apiPackage: IDocPackage = JsonFile.load(apiJsonFilePath);
 
     // Validate that the output conforms to our JSON schema
-    const apiJsonSchema: { } = JsonFile.loadJsonFile(path.join(__dirname, './schemas/api-json-schema.json'));
+    const apiJsonSchema: { } = JsonFile.load(path.join(__dirname, './schemas/api-json-schema.json'));
     JsonFile.validateSchema(apiPackage, apiJsonSchema,
       (errorDetail: string): void => {
         const errorMessage: string
-          = `ApiJsonGenerator validation error - output does not conform to api-json-schema.json:` + os.EOL
+          = path.basename(apiJsonFilePath) + ' does not conform to the expected schema.' + os.EOL
+          + '(Was it created by an incompatible release of API Extractor?)' + os.EOL
           + errorDetail;
 
         console.log(os.EOL + 'ERROR: ' + errorMessage + os.EOL + os.EOL);

@@ -3,8 +3,9 @@
 
 import * as path from 'path';
 import * as fsx from 'fs-extra';
+import { JsonFile } from '@microsoft/node-core-library';
+
 import IPackageJson from '../utilities/IPackageJson';
-import JsonFile from '../utilities/JsonFile';
 import Utilities from '../utilities/Utilities';
 import RushConfiguration from '../data/RushConfiguration';
 
@@ -80,7 +81,7 @@ export default class RushConfigurationProject {
     }
 
     const packageJsonFilename: string = path.join(this._projectFolder, 'package.json');
-    this._packageJson = JsonFile.loadJsonFile(packageJsonFilename);
+    this._packageJson = JsonFile.load(packageJsonFilename);
 
     if (this._packageJson.name !== this._packageName) {
       throw new Error(`The package name "${this._packageName}" specified in rush.json does not`

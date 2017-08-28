@@ -5,15 +5,14 @@ import * as path from 'path';
 import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as semver from 'semver';
+import { JsonFile } from '@microsoft/node-core-library';
 
 import rushVersion from '../rushVersion';
-import JsonFile from '../utilities/JsonFile';
 import RushConfigurationProject, { IRushConfigurationProjectJson } from './RushConfigurationProject';
 import { PinnedVersionsConfiguration } from './PinnedVersionsConfiguration';
 import Utilities from '../utilities/Utilities';
 import { RushConstants } from '../RushConstants';
 import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
-import JsonSchemaValidator from '../utilities/JsonSchemaValidator';
 import EventHooks from './EventHooks';
 import { VersionPolicyConfiguration } from './VersionPolicyConfiguration';
 
@@ -144,7 +143,7 @@ export default class RushConfiguration {
    * an RushConfiguration object.
    */
   public static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration {
-    const rushConfigurationJson: IRushConfigurationJson = JsonFile.loadJsonFile(rushJsonFilename);
+    const rushConfigurationJson: IRushConfigurationJson = JsonFile.load(rushJsonFilename);
 
     // Check the Rush version *before* we validate the schema, since if the version is outdated
     // then the schema may have changed.
@@ -159,9 +158,10 @@ export default class RushConfiguration {
     }
 
     const rushSchemaFilename: string = path.join(__dirname, '../rush.schema.json');
-    const validator: JsonSchemaValidator = JsonSchemaValidator.loadFromFile(rushSchemaFilename);
 
-    validator.validateObject(rushConfigurationJson, (errorDescription: string) => {
+    const rushSchema: Object = JsonFile.load(rushSchemaFilename);
+
+    JsonFile.validateSchema(rushConfigurationJson, rushSchema, (errorDescription: string) => {
       const errorMessage: string = `Error parsing file '${rushJsonFilename}':`
         + os.EOL + errorDescription;
 

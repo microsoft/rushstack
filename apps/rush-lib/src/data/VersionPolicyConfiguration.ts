@@ -3,8 +3,7 @@
 
 import * as path from 'path';
 import * as fsx from 'fs-extra';
-import JsonSchemaValidator from '../utilities/JsonSchemaValidator';
-import JsonFile from '../utilities/JsonFile';
+import { JsonFile } from '@microsoft/node-core-library';
 
 import { VersionPolicy } from './VersionPolicy';
 
@@ -68,11 +67,11 @@ export class VersionPolicyConfiguration {
     if (!fsx.existsSync(this._jsonFileName)) {
       return;
     }
-    const versionPolicyJson: IVersionPolicyJson[] = JsonFile.loadJsonFile(this._jsonFileName);
+    const versionPolicyJson: IVersionPolicyJson[] = JsonFile.load(this._jsonFileName);
 
     const schemaPath: string = path.join(__dirname, '../version-policies.schema.json');
-    const validator: JsonSchemaValidator = JsonSchemaValidator.loadFromFile(schemaPath);
-    validator.validateObject(versionPolicyJson, (errorDescription: string) => {
+    const schema: Object = JsonFile.load(schemaPath);
+    JsonFile.validateSchema(versionPolicyJson, schema, (errorDescription: string) => {
       throw new Error(`Error parsing file '${path.basename(this._jsonFileName)}':\n`
         + errorDescription);
     });

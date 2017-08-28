@@ -9,7 +9,7 @@ import { JsonFile } from '@microsoft/node-core-library';
 
 const apiJsonSchemaFilename: string = path.join(__dirname,
   '../node_modules/@microsoft/api-extractor/lib/schemas/api-json-schema.json');
-const apiJsonSchema: { } = JsonFile.loadJsonFile(apiJsonSchemaFilename);
+const apiJsonSchema: { } = JsonFile.load(apiJsonSchemaFilename);
 
 /**
  * TODO: This should be converted into a public API for the API Extractor library.
@@ -19,7 +19,7 @@ export class ApiJsonFile {
   public readonly packageName: string;
 
   public static loadFromFile(apiJsonFilePath: string): ApiJsonFile {
-    const docPackage: IDocPackage = JsonFile.loadJsonFile(apiJsonFilePath) as IDocPackage;
+    const docPackage: IDocPackage = JsonFile.load(apiJsonFilePath) as IDocPackage;
 
     JsonFile.validateSchema(docPackage, apiJsonSchema,
       (errorDetail: string): void => {

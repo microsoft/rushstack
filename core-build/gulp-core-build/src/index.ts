@@ -44,7 +44,6 @@ export * from './tasks/GulpTask';
 export * from './tasks/CleanTask';
 export * from './tasks/CleanFlagTask';
 export * from './tasks/ValidateShrinkwrapTask';
-export * from './jsonUtilities/SchemaValidator';
 export * from './tasks/copyStaticAssets/CopyStaticAssetsTask';
 
 const _taskMap: { [key: string]: IExecutable } = {};

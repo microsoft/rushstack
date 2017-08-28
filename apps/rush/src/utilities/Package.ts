@@ -3,7 +3,8 @@
 
 import * as path from 'path';
 import readPackageTree = require('read-package-tree');
-import { IPackageJson, JsonFile } from '@microsoft/rush-lib';
+import { JsonFile } from '@microsoft/node-core-library';
+import { IPackageJson } from '@microsoft/rush-lib';
 
 /**
  * The type of dependency; used by IPackageDependency.
@@ -183,7 +184,7 @@ export default class Package {
    *        Example: c:\MyRepo\common\temp\node_modules\@rush-temp\project1
    */
   public static createVirtualTempPackage(packageJsonFilename: string, installFolderName: string): Package {
-    const packageJson: IPackageJson = JsonFile.loadJsonFile(packageJsonFilename);
+    const packageJson: IPackageJson = JsonFile.load(packageJsonFilename);
     const npmPackage: readPackageTree.PackageNode = {
       children: [],
       error: undefined,

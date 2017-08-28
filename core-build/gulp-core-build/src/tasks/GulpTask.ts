@@ -1,8 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as os from 'os';
 import * as path from 'path';
 import * as fs from 'fs';
+import { JsonFile } from '@microsoft/node-core-library';
 
 import { GulpProxy } from '../GulpProxy';
 import { IExecutable } from '../IExecutable';
@@ -18,7 +20,6 @@ const eos = require('end-of-stream');
 /* tslint:enable:typedef */
 
 import { args } from '../State';
-import { SchemaValidator } from '../jsonUtilities/SchemaValidator';
 
 /**
  * The base GulpTask class, should be extended by any classes which represent build tasks.
@@ -394,10 +395,13 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
         console.log(`Found config file: ${path.basename(filePath)}`);
       }
 
-      const rawData: TTaskConfig = SchemaValidator.readCommentedJsonFile<TTaskConfig>(filePath);
+      const rawData: TTaskConfig = JsonFile.load(filePath);
 
       if (schema) {
-        SchemaValidator.validate(rawData, schema, filePath);
+        JsonFile.validateSchema(rawData, schema, (errorDescription: string) => {
+          throw new Error(`Error parsing file "${path.basename(filePath)}":` + os.EOL
+            + errorDescription);
+        });
       }
 
       return rawData;

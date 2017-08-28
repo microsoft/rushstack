@@ -7,8 +7,8 @@ import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import readPackageTree = require('read-package-tree');
+import { JsonFile } from '@microsoft/node-core-library';
 import {
-  JsonFile,
   RushConstants,
   RushConfiguration,
   IRushLinkJson,
@@ -198,7 +198,7 @@ export default class LinkManager {
             }
 
             console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
-            JsonFile.saveJsonFile(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
+            JsonFile.save(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
 
             stopwatch.stop();
             console.log(os.EOL + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));

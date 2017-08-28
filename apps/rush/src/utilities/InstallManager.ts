@@ -10,10 +10,10 @@ import * as semver from 'semver';
 import * as tar from 'tar';
 import * as wordwrap from 'wordwrap';
 import globEscape = require('glob-escape');
+import { JsonFile } from '@microsoft/node-core-library';
 
 import {
   AsyncRecycler,
-  JsonFile,
   RushConfiguration,
   RushConfigurationProject,
   IPackageJson,
@@ -176,7 +176,7 @@ export default class InstallManager {
         private: true,
         version: '0.0.0'
       };
-      JsonFile.saveJsonFile(npmPackageJson, path.join(npmToolFolder, 'package.json'));
+      JsonFile.save(npmPackageJson, path.join(npmToolFolder, 'package.json'));
 
       console.log(os.EOL + 'Running "npm install" in ' + npmToolFolder);
 
@@ -423,7 +423,7 @@ export default class InstallManager {
 
           // compare the extracted package.json with the one we are about to write
           const oldBuffer: Buffer = fsx.readFileSync(extractedPackageJsonFilename);
-          const newBuffer: Buffer = new Buffer(JsonFile.normalize(tempPackageJson));
+          const newBuffer: Buffer = new Buffer(JsonFile.stringify(tempPackageJson));
 
           if (Buffer.compare(oldBuffer, newBuffer) === 0) {
             shouldOverwrite = false;
@@ -438,7 +438,7 @@ export default class InstallManager {
         Utilities.createFolderWithRetry(tempProjectFolder);
 
         // write the expected package.json file into the zip staging folder
-        JsonFile.saveJsonFile(tempPackageJson, tempPackageJsonFilename);
+        JsonFile.save(tempPackageJson, tempPackageJsonFilename);
 
         // create the new tarball, this overwrites the existing one
         tar.create({
@@ -465,7 +465,7 @@ export default class InstallManager {
 
     // Don't update the file timestamp unless the content has changed, since "rush install"
     // will consider this timestamp
-    JsonFile.saveJsonFile(commonPackageJson, commonPackageJsonFilename, { onlyIfChanged: true });
+    JsonFile.save(commonPackageJson, commonPackageJsonFilename, { onlyIfChanged: true });
 
     stopwatch.stop();
     console.log(`Finished creating temporary modules (${stopwatch.toString()})`);

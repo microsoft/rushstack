@@ -4,9 +4,8 @@
 import * as fsx from 'fs-extra';
 import * as path from 'path';
 import * as os from 'os';
+import { JsonFile } from '@microsoft/node-core-library';
 
-import JsonSchemaValidator from '../utilities/JsonSchemaValidator';
-import JsonFile from '../utilities/JsonFile';
 import Utilities from '../utilities/Utilities';
 
 /**
@@ -48,7 +47,7 @@ export class ApprovedPackagesItem {
  * @public
  */
 export class ApprovedPackagesConfiguration {
-  private static _validator: JsonSchemaValidator = undefined;
+  private static _jsonSchema: { } | undefined = undefined;
 
   public items: ApprovedPackagesItem[] = [];
 
@@ -112,14 +111,15 @@ export class ApprovedPackagesConfiguration {
    */
   public loadFromFile(): void {
 
-    if (!ApprovedPackagesConfiguration._validator) {
+    if (!ApprovedPackagesConfiguration._jsonSchema) {
       const schemaFilename: string = path.join(__dirname, '../approved-packages.schema.json');
-      ApprovedPackagesConfiguration._validator = JsonSchemaValidator.loadFromFile(schemaFilename);
+      ApprovedPackagesConfiguration._jsonSchema = JsonFile.load(schemaFilename);
     }
 
-    const approvedPackagesJson: IApprovedPackagesJson = JsonFile.loadJsonFile(this._jsonFilename);
+    const approvedPackagesJson: IApprovedPackagesJson = JsonFile.load(this._jsonFilename);
 
-    ApprovedPackagesConfiguration._validator.validateObject(approvedPackagesJson, (errorDescription: string) => {
+    JsonFile.validateSchema(approvedPackagesJson, ApprovedPackagesConfiguration._jsonSchema,
+      (errorDescription: string) => {
       throw new Error(`Error parsing file '${path.basename(this._jsonFilename)}':\n`
         + errorDescription);
     });
