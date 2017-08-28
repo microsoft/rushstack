@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-extractor",
-  "version": "2.3.2",
+  "version": "2.3.5",
   "description": "Validate, document, and review the exported API for a TypeScript library",
   "keywords": [
     "typescript",
@@ -42,6 +42,6 @@
     "fs-extra": "~0.26.7",
     "jju": "~1.3.0",
     "typescript": "~2.4.1",
-    "z-schema": "~3.17.0"
+    "z-schema": "~3.18.3"
   }
 }

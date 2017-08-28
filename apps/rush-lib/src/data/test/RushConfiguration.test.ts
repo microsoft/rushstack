@@ -45,6 +45,7 @@ describe('RushConfiguration', () => {
 
     assert.equal(rushConfiguration.npmToolVersion, '4.5.0', 'Failed to validate npmToolVersion');
 
+    assert.equal(rushConfiguration.repositoryUrl, 'someFakeUrl', 'Failed to get repository url');
     assert.equal(rushConfiguration.projectFolderMaxDepth, 99, 'Failed to validate projectFolderMaxDepth');
     assert.equal(rushConfiguration.projectFolderMinDepth, 1, 'Failed to validate projectFolderMinDepth');
 

@@ -1,6 +1,23 @@
 # Change Log - @microsoft/node-library-build
 
-This log was last generated on Wed, 16 Aug 2017 13:04:08 GMT and should not be manually modified.
+This log was last generated on Thu, 24 Aug 2017 22:44:12 GMT and should not be manually modified.
+
+## 3.3.2
+Thu, 24 Aug 2017 22:44:12 GMT
+
+*Changes not tracked*
+
+## 3.3.1
+Thu, 24 Aug 2017 01:04:33 GMT
+
+*Changes not tracked*
+
+## 3.3.0
+Tue, 22 Aug 2017 13:04:22 GMT
+
+### Minor changes
+
+- node-library-build now supports pre-copy.json and post-copy.json
 
 ## 3.2.8
 Wed, 16 Aug 2017 13:04:08 GMT

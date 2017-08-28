@@ -58,6 +58,16 @@ export interface IEventHooksJson {
 }
 
 /**
+ * Part of IRushConfigurationJson.
+ */
+export interface IRushRepositoryJson {
+  /**
+   * The remote url of the repository. It helps 'Rush change' finds the right remote to compare against.
+   */
+  url: string;
+}
+
+/**
  * This represents the JSON data structure for the "rush.json" configuration file.
  * See rush.schema.json for documentation.
  */
@@ -65,6 +75,7 @@ export interface IRushConfigurationJson {
   $schema: string;
   npmVersion: string;
   rushMinimumVersion: string;
+  repository?: IRushRepositoryJson;
   nodeSupportedVersionRange?: string;
   projectFolderMinDepth?: number;
   projectFolderMaxDepth?: number;
@@ -111,6 +122,9 @@ export default class RushConfiguration {
   // "gitPolicy" feature
   private _gitAllowedEmailRegExps: string[];
   private _gitSampleEmail: string;
+
+  // Repository info
+  private _repositoryUrl: string;
 
   // Rush hooks
   private _eventHooks: EventHooks;
@@ -405,6 +419,13 @@ export default class RushConfiguration {
   }
 
   /**
+   * The remote url of the repository. It helps 'Rush change' finds the right remote to compare against.
+   */
+  public get repositoryUrl(): string {
+    return this._repositoryUrl;
+  }
+
+  /**
    * Indicates whether telemetry collection is enabled for Rush runs.
    * @alpha
    */
@@ -564,6 +585,10 @@ export default class RushConfiguration {
             'which is required when using "allowedEmailRegExps"');
         }
       }
+    }
+
+    if (rushConfigurationJson.repository) {
+      this._repositoryUrl = rushConfigurationJson.repository.url;
     }
 
     this._telemetryEnabled = !!rushConfigurationJson.telemetryEnabled;
