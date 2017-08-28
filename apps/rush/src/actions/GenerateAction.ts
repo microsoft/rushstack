@@ -83,7 +83,7 @@ export default class GenerateAction extends BaseRushAction {
       }
     } catch (ex) {
       console.log();
-      console.log(`There was a problem reading the shrinkwrap file. Proceeeding with "rush generate".`);
+      console.log('There was a problem reading the shrinkwrap file. Proceeeding with "rush generate".');
     }
 
     installManager.ensureLocalNpmTool(false);
