@@ -7,11 +7,11 @@ class FileDiffTest {
 
 // @public
 class JsonFile {
-  // (undocumented)
-  public static loadJsonFile: {
-  }
-  // (undocumented)
-  public static saveJsonFile(jsonFilename: string, jsonData: {}): void;
+  public static load(jsonFilename: string): any;
+  // WARNING: The type "ISaveJsonFileOptions" needs to be exported by the package (e.g. added to index.ts)
+  public static save(jsonObject: Object, jsonFilename: string, options: ISaveJsonFileOptions = {}): boolean;
+  public static stringify(jsonObject: Object): string;
+  public static validateNoUndefinedMembers(jsonObject: Object): void;
   // WARNING: The type "ValidateErrorCallback" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   public static validateSchema(jsonObject: Object, jsonSchemaObject: Object,

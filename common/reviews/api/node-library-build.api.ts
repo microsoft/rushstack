@@ -198,14 +198,6 @@ export declare function replaceConfig(config: IBuildConfig): void;
 export declare function reset(): void;
 
 // @public
-class SchemaValidator {
-  static readAndValidateJson < TResult >(dataFilePath: string, schemaFilePath: string): TResult;
-  // (undocumented)
-  static readCommentedJsonFile < TResult >(filename: string): TResult;
-  static validate(data: Object, schema: Object, dataFilePath?: string): void;
-}
-
-// @public
 export declare function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutable;
 
 // @public
