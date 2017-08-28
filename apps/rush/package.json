@@ -29,7 +29,7 @@
   "license": "MIT",
   "dependencies": {
     "@microsoft/package-deps-hash": "~2.0.5",
-    "@microsoft/rush-lib": "3.0.12",
+    "@microsoft/rush-lib": "~3.0.12",
     "@microsoft/stream-collator": "~2.0.3",
     "@microsoft/ts-command-line": "~2.0.3",
     "builtins": "~1.0.3",
