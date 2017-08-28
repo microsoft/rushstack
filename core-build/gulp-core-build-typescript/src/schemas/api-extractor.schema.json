@@ -1,4 +1,6 @@
 {
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
   "title": "api-extractor Configuration",
   "description": "Generates a report of the Public API exports for a project, and detects changes that impact the SemVer contract",
 
