@@ -15,12 +15,13 @@
     "test": "gulp"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "2.9.6",
     "@microsoft/api-extractor": "2.3.5",
+    "@microsoft/gulp-core-build": "2.9.6",
+    "@microsoft/node-core-library": "~0.1.3",
+    "@types/fs-extra": "0.0.37",
     "@types/gulp": "3.8.32",
     "@types/node": "6.0.62",
     "fs-extra": "~0.26.7",
-    "@types/fs-extra": "0.0.37",
     "gulp": "~3.9.1",
     "gulp-cache": "~0.4.5",
     "gulp-changed": "~1.3.2",

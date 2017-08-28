@@ -20,7 +20,7 @@
     "@types/node": "6.0.62"
   },
   "devDependencies": {
-    "@types/colors": "~1.1.3",
+    "@types/colors": "1.1.3",
     "@types/es6-collections": "0.5.29",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
