@@ -86,7 +86,7 @@ export class PackageJsonLookup {
       return result;
     }
 
-    const packageJson: IPackageJson = JsonFile.loadJsonFile(path.join(packageJsonPath, 'package.json')) as IPackageJson;
+    const packageJson: IPackageJson = JsonFile.load(path.join(packageJsonPath, 'package.json')) as IPackageJson;
     result = packageJson.name;
 
     this._packageNameCache.set(packageJsonPath, result);

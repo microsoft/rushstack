@@ -14,13 +14,13 @@ describe('PackageJsonLookup', function (): void {
 
     it('readPackageName() test', function (): void {
       const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
-      const sourceFilePath: string = path.join(__dirname, './example-package');
+      const sourceFilePath: string = path.join(__dirname, './test-data/example-package');
       assert.equal(packageJsonLookup.readPackageName(sourceFilePath), 'example-package');
     });
 
     it('tryFindPackagePathUpwards() test', function (): void {
       const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
-      const sourceFilePath: string = path.join(__dirname, './example-package/src/ExampleFile.txt');
+      const sourceFilePath: string = path.join(__dirname, './test-data/example-package/src/ExampleFile.txt');
 
       // Example: C:\web-build-tools\libraries\node-core-library\src\test\example-package
       const foundPath: string | undefined = packageJsonLookup.tryFindPackagePathUpwards(sourceFilePath);

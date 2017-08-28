@@ -5,23 +5,21 @@
 
 import { assert } from 'chai';
 import * as path from 'path';
-
-import JsonSchemaValidator from '../JsonSchemaValidator';
-import JsonFile from '../JsonFile';
+import { JsonFile } from '../JsonFile';
 
 function normalize(text: string): string {
   return text.replace(/[\r\n ]+/g, ' ')
     .trim();
 }
 
-describe('JsonSchemaValidator', () => {
-  const schemaPath: string = path.resolve(path.join(__dirname, './assets/test-schema.json'));
-  const validator: JsonSchemaValidator = JsonSchemaValidator.loadFromFile(schemaPath);
+describe('JsonFile', () => {
+  const schemaPath: string = path.resolve(path.join(__dirname, './test-data/test-schema.json'));
+  const schema: Object = JsonFile.load(schemaPath);
 
-  it('successfully parses a JSON file', (done: MochaDone) => {
-    const jsonPath: string = path.resolve(path.join(__dirname, './assets/test.json'));
-    const jsonObject: Object = JsonFile.loadJsonFile(jsonPath);
-    validator.validateObject(jsonObject,
+  it('successfully validates a JSON file', (done: MochaDone) => {
+    const jsonPath: string = path.resolve(path.join(__dirname, './test-data/test.json'));
+    const jsonObject: Object = JsonFile.load(jsonPath);
+    JsonFile.validateSchema(jsonObject, schema,
       (errorDescription: string) => {
         throw new Error('Validation failed: ' + errorDescription);
       }
@@ -29,9 +27,9 @@ describe('JsonSchemaValidator', () => {
     done();
   });
 
-  it('successfully reports a compound error', (done: MochaDone) => {
-    const jsonPath2: string = path.resolve(path.join(__dirname, './assets/test2.json'));
-    const jsonObject2: Object = JsonFile.loadJsonFile(jsonPath2);
+  it('successfully reports a compound validation error', (done: MochaDone) => {
+    const jsonPath2: string = path.resolve(path.join(__dirname, './test-data/test2.json'));
+    const jsonObject2: Object = JsonFile.load(jsonPath2);
 
     const expectedError: string = `
 JSON schema validation failed:
@@ -43,10 +41,10 @@ JSON schema validation failed:
            Missing required property: field3`;
 
     let errorCount: number = 0;
-    validator.validateObject(jsonObject2,
+    JsonFile.validateSchema(jsonObject2, schema,
       (errorDescription: string) => {
         ++errorCount;
-        console.log(errorDescription);
+        // console.log(errorDescription);
         assert.equal(normalize(errorDescription), normalize(expectedError),
           'Error #' + errorCount.toString());
       }
