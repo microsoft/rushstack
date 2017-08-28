@@ -25,7 +25,7 @@ import {
 import { IRushTempPackageJson } from '../utilities/Package';
 import ShrinkwrapFile from '../utilities/ShrinkwrapFile';
 
-const MAX_INSTALL_ATTEMPTS: number = 5;
+const MAX_INSTALL_ATTEMPTS: number = 1;
 
 const wrap: (textToWrap: string) => string = wordwrap.soft(Utilities.getConsoleWidth());
 
@@ -264,7 +264,7 @@ export default class InstallManager {
 
       if (this._findOrphanedTempProjects(shrinkwrapFile)) {
         // If there are any orphaned projects, then "npm install" would fail because the shrinkwrap
-        // contains references such as "resolved": "file:projects\\project1" that refer to nonexistent
+        // contains references such as "resolved": "file:file:projects\\project1" that refer to nonexistent
         // file paths.
         shrinkwrapIsValid = false;
       }
@@ -377,7 +377,10 @@ export default class InstallManager {
         tempPackageJson.dependencies[pair.packageName] = pair.packageVersion;
 
         if (shrinkwrapFile) {
-          if (!shrinkwrapFile.hasCompatibleDependency(pair.packageName, pair.packageVersion)) {
+          const tarballFileSpecifier: string = // tslint:disable-next-line:max-line-length
+            `file:${path.basename(RushConstants.rushTempProjectsFolderName)}/${rushProject.unscopedTempProjectName}.tgz`;
+
+          if (!shrinkwrapFile.hasCompatibleDependency(pair.packageName, pair.packageVersion, tarballFileSpecifier)) {
             console.log(colors.yellow(
               wrap(`${os.EOL}The NPM shrinkwrap file is missing "${pair.packageName}"`
                 + ` (${pair.packageVersion}) required by "${rushProject.packageName}".`)));
@@ -633,6 +636,7 @@ export default class InstallManager {
    */
   public pushConfigurationNpmArgs(npmArgs: string[]): void {
     npmArgs.push('--store', this._rushConfiguration.pnpmStoreFolder);
+    npmArgs.push('--no-lock');
   }
 
   /**

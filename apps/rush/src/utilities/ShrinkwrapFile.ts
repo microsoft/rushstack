@@ -14,6 +14,7 @@ import { Utilities, RushConstants } from '@microsoft/rush-lib';
 interface IShrinkwrapDependencyJson {
   resolution: {
     integrity: string;
+    tarball?: string;
   };
   dependencies: { [dependency: string]: string };
 }
@@ -84,14 +85,64 @@ export default class ShrinkwrapFile {
   }
 
   /**
+   * Normalizes the file:/ specifiers in the shrinkwrap file
+   */
+  public normalize(): void {
+    /*
+    Object.keys(this._shrinkwrapJson.dependencies).forEach((key: string) => {
+      if (key.match(/^@rush-temp\//)) {
+        this._shrinkwrapJson.dependencies[key] =
+          this._normalizeFileSpec(this._shrinkwrapJson.dependencies[key]);
+      }
+    });
+
+    Object.keys(this._shrinkwrapJson.packages).forEach((key: string) => {
+      const normalizedKey: string = this._normalizeFileSpec(key);
+      if (normalizedKey !== key) {
+        const info: IShrinkwrapDependencyJson = this._shrinkwrapJson.packages[key];
+        info.resolution.tarball = this._normalizeFileSpec(info.resolution.tarball);
+        delete this._shrinkwrapJson.packages[key];
+        this._shrinkwrapJson.packages[normalizedKey] = info;
+      }
+    });*/
+  }
+
+  /**
+   * Writes the shrinkwrapback to disk
+   */
+  public save(file: string): void {
+    const data: string = yaml.safeDump(this._shrinkwrapJson, {
+      sortKeys: true
+    });
+    fsx.writeFileSync(file, data);
+  }
+
+  /**
    * Returns true if the shrinkwrap file includes a package that would satisfiying the specified
    * package name and SemVer version range.
    */
-  public hasCompatibleDependency(dependencyName: string, versionRange: string): boolean {
-    const dependencyVersion: string = ShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
+  public hasCompatibleDependency(dependencyName: string, versionRange: string, localPackage?: string): boolean {
+    let dependencyVersion: string;
+    let localPackageInformation: IShrinkwrapDependencyJson;
+
+    // prefer to find the version that is being used by the local package, otherwise fall back to root
+    if (localPackage &&
+        (localPackageInformation = ShrinkwrapFile.tryGetValue(this._shrinkwrapJson.packages, localPackage))) {
+      dependencyVersion = ShrinkwrapFile.tryGetValue(localPackageInformation.dependencies, dependencyName);
+    }
+
+    if (!dependencyVersion) {
+      dependencyVersion = ShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
+    }
 
     if (!dependencyVersion) {
       return false;
+    }
+
+    // dependency version can also be a pnpm path such as "/gulp-karma/0.0.5/karma@0.13.22"
+    // in this case we want the first version number that appears. it will be in 3rd spot
+    if (dependencyVersion[0] === '/') {
+      dependencyVersion = dependencyVersion.split('/')[2];
     }
 
     const result: npmPackageArg.IResult = npmPackageArg.resolve(dependencyName, versionRange);
@@ -128,6 +179,15 @@ export default class ShrinkwrapFile {
     }
     if (!this._shrinkwrapJson.packages) {
       this._shrinkwrapJson.packages = { };
+    }
+  }
+
+  private _normalizeFileSpec(spec: string): string {
+    const fileSpec: RegExpMatchArray = spec.match(/file:(.\/)?(.*)/);
+    if (fileSpec) {
+      return `file:./${fileSpec[2]}`;
+    } else {
+      return spec;
     }
   }
 }

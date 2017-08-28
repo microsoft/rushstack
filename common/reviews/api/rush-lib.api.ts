@@ -324,7 +324,6 @@ class RushConfiguration {
   public static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
   // (undocumented)
   public static loadFromDefaultLocation(): RushConfiguration;
-  public readonly npmTmpFolder: string;
   public readonly npmToolVersion: string;
   public readonly pinnedVersions: PinnedVersionsConfiguration;
   public readonly pnpmStoreFolder: string;
