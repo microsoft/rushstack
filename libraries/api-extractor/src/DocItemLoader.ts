@@ -4,13 +4,15 @@
 import * as fsx from 'fs-extra';
 import * as os  from 'os';
 import * as path from 'path';
+import { JsonFile, IJsonSchemaErrorInfo } from '@microsoft/node-core-library';
+
 import { IDocItem, IDocPackage, IDocMember } from './IDocItem';
 import ApiDefinitionReference from './ApiDefinitionReference';
 import ApiItem from './definitions/ApiItem';
 import ApiItemContainer from './definitions/ApiItemContainer';
 import ApiPackage from './definitions/ApiPackage';
 import ResolvedApiItem from './ResolvedApiItem';
-import JsonFile from './JsonFile';
+import ApiJsonGenerator from './generators/ApiJsonGenerator';
 
 /**
  * Used to describe a parsed package name in the form of
@@ -219,15 +221,12 @@ export default class DocItemLoader {
    * then the json file is saved in the cache and returned.
    */
   public loadPackageIntoCache(apiJsonFilePath: string, cachePackageName: string): IDocPackage {
-    const apiPackage: IDocPackage = JsonFile.loadJsonFile(apiJsonFilePath) as IDocPackage;
-
-    // Validate that the output conforms to our JSON schema
-    const apiJsonSchema: { } = JsonFile.loadJsonFile(path.join(__dirname, './schemas/api-json-schema.json'));
-    JsonFile.validateSchema(apiPackage, apiJsonSchema,
-      (errorDetail: string): void => {
+    const apiPackage: IDocPackage = JsonFile.loadAndValidateWithCallback(apiJsonFilePath, ApiJsonGenerator.jsonSchema,
+      (errorInfo: IJsonSchemaErrorInfo) => {
         const errorMessage: string
-          = `ApiJsonGenerator validation error - output does not conform to api-json-schema.json:` + os.EOL
-          + errorDetail;
+          = path.basename(apiJsonFilePath) + ' does not conform to the expected schema.' + os.EOL
+          + '(Was it created by an incompatible release of API Extractor?)' + os.EOL
+          + errorInfo.details;
 
         console.log(os.EOL + 'ERROR: ' + errorMessage + os.EOL + os.EOL);
         throw new Error(errorMessage);

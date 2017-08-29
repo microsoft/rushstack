@@ -1,4 +1,6 @@
 {
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
   "title": "Typescript Linter Task configuration",
   "description": "Defines configuration options for the tslint tool",
 

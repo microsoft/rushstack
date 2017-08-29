@@ -11,6 +11,7 @@ import { IExecutable } from './IExecutable';
 import { IBuildConfig } from './IBuildConfig';
 import { CleanTask } from './tasks/CleanTask';
 import { CleanFlagTask } from './tasks/CleanFlagTask';
+import { CopyStaticAssetsTask } from  './tasks/copyStaticAssets/CopyStaticAssetsTask';
 import { args, builtPackage } from './State';
 export { IExecutable } from './IExecutable';
 import { log } from './logging';
@@ -43,7 +44,7 @@ export * from './tasks/GulpTask';
 export * from './tasks/CleanTask';
 export * from './tasks/CleanFlagTask';
 export * from './tasks/ValidateShrinkwrapTask';
-export * from './jsonUtilities/SchemaValidator';
+export * from './tasks/copyStaticAssets/CopyStaticAssetsTask';
 
 const _taskMap: { [key: string]: IExecutable } = {};
 const _uniqueTasks: IExecutable[] = [];
@@ -456,6 +457,8 @@ function _handleTasksListArguments(): void {
 
 /** @public */
 export const clean: IExecutable = new CleanTask();
+
+export const copyStaticAssets: CopyStaticAssetsTask = new CopyStaticAssetsTask();
 
 // Register default clean task.
 task('clean', clean);

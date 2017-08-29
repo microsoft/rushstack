@@ -3,6 +3,7 @@
 
 import * as path from 'path';
 import * as fs from 'fs';
+import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
 
 import { GulpProxy } from '../GulpProxy';
 import { IExecutable } from '../IExecutable';
@@ -18,7 +19,6 @@ const eos = require('end-of-stream');
 /* tslint:enable:typedef */
 
 import { args } from '../State';
-import { SchemaValidator } from '../jsonUtilities/SchemaValidator';
 
 /**
  * The base GulpTask class, should be extended by any classes which represent build tasks.
@@ -394,10 +394,12 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
         console.log(`Found config file: ${path.basename(filePath)}`);
       }
 
-      const rawData: TTaskConfig = SchemaValidator.readCommentedJsonFile<TTaskConfig>(filePath);
+      const rawData: TTaskConfig = JsonFile.load(filePath);
 
       if (schema) {
-        SchemaValidator.validate(rawData, schema, filePath);
+        // TODO: Convert GulpTask.schema to be a JsonSchema instead of a bare object
+        const jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schema);
+        jsonSchema.validateObject(rawData, filePath);
       }
 
       return rawData;

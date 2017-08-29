@@ -4,12 +4,9 @@
 import * as os from 'os';
 import * as path from 'path';
 
+import { ApiJsonGenerator } from '@microsoft/api-extractor';
 import { IDocPackage } from '@microsoft/api-extractor/lib/IDocItem';
-import JsonFile from '@microsoft/api-extractor/lib/JsonFile';
-
-const apiJsonSchemaFilename: string = path.join(__dirname,
-  '../node_modules/@microsoft/api-extractor/lib/schemas/api-json-schema.json');
-const apiJsonSchema: { } = JsonFile.loadJsonFile(apiJsonSchemaFilename);
+import { JsonFile, IJsonSchemaErrorInfo } from '@microsoft/node-core-library';
 
 /**
  * TODO: This should be converted into a public API for the API Extractor library.
@@ -19,14 +16,14 @@ export class ApiJsonFile {
   public readonly packageName: string;
 
   public static loadFromFile(apiJsonFilePath: string): ApiJsonFile {
-    const docPackage: IDocPackage = JsonFile.loadJsonFile(apiJsonFilePath) as IDocPackage;
-
-    JsonFile.validateSchema(docPackage, apiJsonSchema,
-      (errorDetail: string): void => {
+    const docPackage: IDocPackage = JsonFile.loadAndValidateWithCallback(apiJsonFilePath, ApiJsonGenerator.jsonSchema,
+      (errorInfo: IJsonSchemaErrorInfo) => {
         const errorMessage: string
-          = `ApiJsonGenerator validation error - output does not conform to api-json-schema.json:` + os.EOL
-          + errorDetail;
+          = path.basename(apiJsonFilePath) + ' does not conform to the expected schema.' + os.EOL
+          + '(Was it created by an incompatible release of API Extractor?)' + os.EOL
+          + errorInfo.details;
 
+        console.log(os.EOL + 'ERROR: ' + errorMessage + os.EOL + os.EOL);
         throw new Error(errorMessage);
       }
     );

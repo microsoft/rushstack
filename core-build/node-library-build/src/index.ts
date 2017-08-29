@@ -1,7 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CopyTask, task, watch, serial, parallel, IExecutable, setConfig, IBuildConfig } from '@microsoft/gulp-core-build';
+import {
+  CopyTask,
+  copyStaticAssets,
+  task,
+  watch,
+  serial,
+  parallel,
+  IExecutable,
+  setConfig,
+  IBuildConfig
+} from '@microsoft/gulp-core-build';
 import { typescript, tslint, apiExtractor } from '@microsoft/gulp-core-build-typescript';
 import { instrument, mocha } from '@microsoft/gulp-core-build-mocha';
 
@@ -26,7 +36,7 @@ tslint.mergeConfig({
   displayAsWarning: true
 });
 
-const buildSubtask: IExecutable = serial(preCopy, parallel(tslint, typescript), apiExtractor, postCopy);
+const buildSubtask: IExecutable = serial(preCopy, parallel(tslint, typescript, copyStaticAssets), apiExtractor, postCopy);
 export const buildTasks: IExecutable = task('build', buildSubtask);
 export const testTasks: IExecutable = task('test', serial(buildSubtask, mocha));
 export const defaultTasks: IExecutable = task('default', serial(buildSubtask, instrument, mocha));
