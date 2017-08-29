@@ -4,20 +4,15 @@
 import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as jju from 'jju';
-import Validator = require('z-schema');
 
-/**
- * Callback function for JsonFile.saveJsonFile()
- * @public
- */
-export type ValidateErrorCallback = (errorDescription: string) => void;
+import { JsonSchema, IJsonSchemaErrorInfo, IJsonSchemaValidateOptions } from './JsonSchema';
 
 /**
  * Options for JsonFile.saveJsonFile()
  *
  * @public
  */
-export interface ISaveJsonFileOptions {
+export interface IJsonFileSaveOptions {
   /**
    * If there is an existing file, and the contents have not changed, then
    * don't write anything; this preserves the old timestamp.
@@ -33,8 +28,7 @@ export class JsonFile {
   /**
    * Loads a JSON file.
    */
-  // tslint:disable-next-line:no-any
-  public static load(jsonFilename: string): any {
+  public static load(jsonFilename: string): any { // tslint:disable-line:no-any
     if (!fsx.existsSync(jsonFilename)) {
       throw new Error(`Input file not found: ${jsonFilename}`);
     }
@@ -45,6 +39,32 @@ export class JsonFile {
     } catch (error) {
       throw new Error(`Error reading "${jsonFilename}":` + os.EOL + `  ${error.message}`);
     }
+  }
+
+  /**
+   * Loads a JSON file and validate its schema.
+   */
+  public static loadAndValidate(jsonFilename: string, jsonSchema: JsonSchema,
+    options?: IJsonSchemaValidateOptions): any { // tslint:disable-line:no-any
+
+    const jsonObject: any = JsonFile.load(jsonFilename); // tslint:disable-line:no-any
+    jsonSchema.validateObject(jsonObject, jsonFilename, options);
+
+    return jsonObject;
+  }
+
+  /**
+   * Loads a JSON file and validate its schema, reporting errors using a callback
+   * @remarks
+   * See JsonSchema.validateObjectWithCallback() for more info.
+   */
+  public static loadAndValidateWithCallback(jsonFilename: string, jsonSchema: JsonSchema,
+    errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): any { // tslint:disable-line:no-any
+
+    const jsonObject: any = JsonFile.load(jsonFilename); // tslint:disable-line:no-any
+    jsonSchema.validateObjectWithCallback(jsonObject, errorCallback);
+
+    return jsonObject;
   }
 
   /**
@@ -65,7 +85,7 @@ export class JsonFile {
    * @param options - other settings that control how the file is saved
    * @returns false if ISaveJsonFileOptions.onlyIfChanged didn't save anything; true otherwise
    */
-  public static save(jsonObject: Object, jsonFilename: string, options: ISaveJsonFileOptions = {}): boolean {
+  public static save(jsonObject: Object, jsonFilename: string, options: IJsonFileSaveOptions = {}): boolean {
     const normalized: string = JsonFile.stringify(jsonObject);
 
     const buffer: Buffer = new Buffer(normalized); // utf8 encoding happens here
@@ -120,67 +140,6 @@ export class JsonFile {
         JsonFile.validateNoUndefinedMembers(value);
       }
     }
-  }
-
-  public static validateSchema(jsonObject: Object, jsonSchemaObject: Object,
-    errorCallback: ValidateErrorCallback): void {
-
-    if (typeof jsonSchemaObject !== 'object') {
-      // Catch common problems with wrong function parameters
-      throw new Error('Incorrect jsonSchemaObject parameter type for JsonFile.validateSchema()');
-    }
-
-    // Remove the $schema reference that appears in the configuration object (used for IntelliSense),
-    // since we are replacing it with the precompiled version.  The validator.setRemoteReference()
-    // API is a better way to handle this, but we'd first need to publish the schema file
-    // to a public web server where Visual Studio can find it.
-    // tslint:disable-next-line:no-string-literal
-    delete jsonSchemaObject['$schema'];
-
-    const validator: Validator = new Validator({
-      breakOnFirstError: false,
-      noTypeless: true,
-      noExtraKeywords: true
-    });
-
-    if (!validator.validate(jsonObject, jsonSchemaObject)) {
-      const errorDetails: Validator.SchemaErrorDetail[] = validator.getLastErrors();
-
-      let buffer: string = 'JSON schema validation failed:';
-
-      buffer = JsonFile._formatErrorDetails(errorDetails, '  ', buffer);
-      errorCallback(buffer);
-    }
-  }
-
-  /**
-   * Used by validateSchema() to nicely format the ZSchema error tree.
-   */
-  private static _formatErrorDetails(errorDetails: Validator.SchemaErrorDetail[], indent: string,
-    buffer: string): string {
-    for (const errorDetail of errorDetails) {
-
-      buffer += os.EOL + indent + `Error: ${errorDetail.path}`;
-
-      if (errorDetail.description) {
-        const MAX_LENGTH: number = 40;
-        let truncatedDescription: string = errorDetail.description.trim();
-        if (truncatedDescription.length > MAX_LENGTH) {
-          truncatedDescription = truncatedDescription.substr(0, MAX_LENGTH - 3)
-            + '...';
-        }
-
-        buffer += ` (${truncatedDescription})`;
-      }
-
-      buffer += os.EOL + indent + `       ${errorDetail.message}`;
-
-      if (errorDetail.inner) {
-        buffer = JsonFile._formatErrorDetails(errorDetail.inner, indent + '  ', buffer);
-      }
-    }
-
-    return buffer;
   }
 
   /**
