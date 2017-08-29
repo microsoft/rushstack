@@ -162,6 +162,7 @@ interface ITsConfigFile<T> {
 interface IWebpackTaskConfig {
   config?: Webpack.Configuration;
   configPath: string;
+  printStats?: boolean;
   suppressWarnings?: (string | RegExp)[];
   webpack?: typeof Webpack;
 }
@@ -261,7 +262,7 @@ class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConfig & TE
   // (undocumented)
   loadSchema(): Object;
   // (undocumented)
-  resources: Object;
+  resources: IWebpackResources;
 }
 
 // WARNING: Unsupported export: preCopy
