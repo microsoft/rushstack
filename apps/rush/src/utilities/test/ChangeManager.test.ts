@@ -29,11 +29,11 @@ describe('ChangeManager', () => {
     expect(changeManager.allPackages.get('a').packageJson.version).equals('2.0.0', 'a was not 2.0.0');
     expect(changeManager.allPackages.get('b').packageJson.version).equals('1.0.1', 'b was not patched');
     expect(changeManager.allPackages.get('b').packageJson.dependencies['a']).equals(
-      '>=2.0.0 <3.0.0',
+      '>=2.0.0-0 <3.0.0-0',
       'the "a" dependency in "b" was not updated');
     expect(changeManager.allPackages.get('c').packageJson.version).equals('1.0.0', 'c version was changed');
     expect(changeManager.allPackages.get('c').packageJson.dependencies['b']).equals(
-      '>=1.0.1 <2.0.0',
+      '>=1.0.1-0 <2.0.0-0',
       'the "b" dependency in "c" was not updated');
   });
 
@@ -57,7 +57,7 @@ describe('ChangeManager', () => {
       'cyclic-dep-explicit-1 should have been updated.');
     expect(changeManager.allPackages.get('cyclic-dep-explicit-1').packageJson.dependencies['cyclic-dep-explicit-2'])
       .equals(
-        '>=1.0.1 <2.0.0',
+        '>=1.0.1-0 <2.0.0-0',
         'the "cyclic-dep-explicit-2" dependency in "cyclic-dep-explicit-1" should be updated');
     expect(changeManager.allPackages.get('cyclic-dep-explicit-2').packageJson.version).equals(
       '1.0.1',

@@ -139,7 +139,7 @@ export default class PublishUtilities {
   }
 
   public static isRangeDependency(version: string): boolean {
-    const LOOSE_PKG_REGEX: RegExp = />=?(?:\d+\.){2}\d+\s+<(?:\d+\.){2}\d+/;
+    const LOOSE_PKG_REGEX: RegExp = />=[\d\.\-]+\s<[\d\.\-]+/;
 
     return LOOSE_PKG_REGEX.test(version);
   }
@@ -197,9 +197,9 @@ export default class PublishUtilities {
     if (PublishUtilities.isRangeDependency(currentDependencyVersion)) {
       newDependencyVersion = PublishUtilities._getNewRangeDependency(newProjectVersion);
     } else if (currentDependencyVersion.lastIndexOf('~', 0) === 0) {
-      newDependencyVersion = '~' + newProjectVersion;
+      newDependencyVersion = '~' + newProjectVersion + '-0';
     } else if (currentDependencyVersion.lastIndexOf('^', 0) === 0) {
-      newDependencyVersion = '^' + newProjectVersion;
+      newDependencyVersion = '^' + newProjectVersion + '-0';
     } else {
       newDependencyVersion = newProjectVersion;
     }
@@ -220,7 +220,7 @@ export default class PublishUtilities {
   }
 
   private static _getNewRangeDependency(newVersion: string): string {
-    return `>=${newVersion} <${semver.inc(newVersion, 'major')}`;
+    return `>=${newVersion}-0 <${semver.inc(newVersion, 'major')}-0`;
   }
 
   private static _updateCommitDetails(filename: string, changes: IChangeInfo[]): void {
