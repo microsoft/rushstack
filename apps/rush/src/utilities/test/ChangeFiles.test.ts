@@ -4,7 +4,7 @@
 import { expect } from 'chai';
 import * as path from 'path';
 
-import { IPackageJson } from '@microsoft/rush-lib';
+import { IChangelog } from '@microsoft/rush-lib';
 
 import ChangeFiles from '../ChangeFiles';
 
@@ -82,15 +82,21 @@ describe('ChangeFiles', () => {
       expect(changeFiles.deleteAll(false)).equals(3);
     });
 
-    it('does not delete change files for prerelease packages ', () => {
+    it('does not delete change files for package whose change logs do not get updated. ', () => {
       const changesPath: string = path.join(__dirname, 'multipleChangeFiles');
       const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
-      const packagesMap: Map<string, IPackageJson> = new Map<string, IPackageJson>();
-      packagesMap.set('a', {
-        name: 'a',
-        version: '1.1.0-pr.1'
-      });
-      expect(changeFiles.deleteAll(false, packagesMap)).equals(2);
+      const updatedChangelogs: IChangelog[] = [
+        {
+          name: 'a',
+          entries: []
+        },
+        {
+          name: 'b',
+          entries: []
+        }
+      ];
+      expect(changeFiles.deleteAll(false, updatedChangelogs)).equals(2,
+        'Changes files for a and b should be deleted.');
     });
   });
 });

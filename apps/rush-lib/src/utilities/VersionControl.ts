@@ -89,7 +89,7 @@ export default class VersionControl {
   }
 
   public static hasUncommittedChanges(): boolean {
-    return VersionControl._hasUntrackedChanges() || VersionControl._hasDiffOnHEAD();
+    return VersionControl.getUncommittedChanges().length > 0;
   }
 
   /**
@@ -99,14 +99,10 @@ export default class VersionControl {
     const changes: string[] = [];
     changes.push(...VersionControl._getUntrackedChanges());
     changes.push(...VersionControl._getDiffOnHEAD());
-    return changes;
-  }
 
-  /**
-   * This lists files that have not been added/tracked in git.
-   */
-  private static _hasUntrackedChanges(): boolean {
-    return VersionControl._getUntrackedChanges().length > 0;
+    return changes.filter(change => {
+      return change.trim().length > 0;
+    });
   }
 
   private static _getUntrackedChanges(): string[] {
@@ -116,13 +112,9 @@ export default class VersionControl {
     return output.trim().split('\n');
   }
 
-  private static _hasDiffOnHEAD(): boolean {
-    return VersionControl._getDiffOnHEAD().length > 0;
-  }
-
   private static _getDiffOnHEAD(): string[] {
     const output: string = child_process
-      .execSync(`git diff HEAD --shortstat`)
+      .execSync(`git diff HEAD --name-only`)
       .toString();
     return output.trim().split('\n');
   }

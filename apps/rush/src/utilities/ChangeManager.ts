@@ -3,6 +3,7 @@
 
 import {
   IChangeInfo,
+  IChangelog,
   IPackageJson,
   RushConfiguration,
   RushConfigurationProject,
@@ -110,10 +111,12 @@ export default class ChangeManager {
     // Save them for the official release.
     if (!this._prereleaseToken.hasValue) {
       // Update changelogs.
-      ChangelogGenerator.updateChangelogs(this._allChanges, this._allPackages, shouldCommit);
+      const updatedChangelogs: IChangelog[] = ChangelogGenerator.updateChangelogs(this._allChanges,
+        this._allPackages,
+        shouldCommit);
 
       // Remove the change request files only if "-a" was provided.
-      this._changeFiles.deleteAll(shouldCommit, updatedPackages);
+      this._changeFiles.deleteAll(shouldCommit, updatedChangelogs);
     }
   }
 }

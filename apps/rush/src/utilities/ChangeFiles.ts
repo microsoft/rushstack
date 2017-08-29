@@ -3,12 +3,11 @@
 
 import * as fsx from 'fs-extra';
 import { EOL } from 'os';
-import * as semver from 'semver';
 
 import {
   Utilities,
   IChangeInfo,
-  IPackageJson
+  IChangelog
 } from '@microsoft/rush-lib';
 import * as glob from 'glob';
 
@@ -79,22 +78,18 @@ export default class ChangeFiles {
   /**
    * Delete all change files
    */
-  public deleteAll(shouldDelete: boolean, packagesMap?: Map<string, IPackageJson>): number {
-    if (packagesMap) {
-      // If package information is provided, skip changes files for prerelease.
-      const prereleasePackages: Set<string> = new Set<string>();
-      packagesMap.forEach((packageJson) => {
-        if (semver.prerelease(packageJson.version)) {
-          prereleasePackages.add(packageJson.name);
-        }
+  public deleteAll(shouldDelete: boolean, updatedChangelogs?: IChangelog[]): number {
+    if (updatedChangelogs) {
+      // Skip changes files if the package's change log is not updated.
+      const packagesToInclude: Set<string> = new Set<string>();
+      updatedChangelogs.forEach((changelog) => {
+        packagesToInclude.add(changelog.name);
       });
 
       const filesToDelete: string[] = this.getFiles().filter((filePath) => {
         const changeRequest: IChangeInfo = JSON.parse(fsx.readFileSync(filePath, 'utf8'));
         for (const changeInfo of changeRequest.changes) {
-          if (prereleasePackages.has(changeInfo.packageName)) {
-            // Change files for a prerelease version bump do not get deleted.
-            // Those get saved for releases.
+          if (!packagesToInclude.has(changeInfo.packageName)) {
             return false;
           }
         }

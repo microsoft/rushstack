@@ -29,7 +29,9 @@ export default class ChangelogGenerator {
     allChanges: IChangeInfoHash,
     allProjects: Map<string, RushConfigurationProject>,
     shouldCommit: boolean
-  ): void {
+  ): IChangelog[] {
+    const updatedChangeLogs: IChangelog[] = [];
+
     for (const packageName in allChanges) {
       if (allChanges.hasOwnProperty(packageName)) {
         const project: RushConfigurationProject = allProjects.get(packageName);
@@ -38,13 +40,18 @@ export default class ChangelogGenerator {
         // Do not update changelog or delete the change files for prerelease.
         // Save them for the official release.
         if (project.shouldPublish && !semver.prerelease(project.packageJson.version)) {
-          ChangelogGenerator.updateIndividualChangelog(
+          const changeLog: IChangelog = ChangelogGenerator.updateIndividualChangelog(
             allChanges[packageName],
             allProjects.get(packageName).projectFolder,
             shouldCommit);
+
+            if (changeLog) {
+              updatedChangeLogs.push(changeLog);
+            }
         }
       }
     }
+    return updatedChangeLogs;
   }
 
   /**
@@ -83,7 +90,7 @@ export default class ChangelogGenerator {
     projectFolder: string,
     shouldCommit: boolean,
     forceUpdate?: boolean
-  ): IChangelog {
+  ): IChangelog | undefined {
     const changelog: IChangelog = ChangelogGenerator._getChangelog(change.packageName, projectFolder);
 
     if (
@@ -133,9 +140,10 @@ export default class ChangelogGenerator {
           { encoding: 'utf8' }
         );
       }
+      return changelog;
     }
-
-    return changelog;
+    // change log not updated.
+    return undefined;
   }
 
   /**

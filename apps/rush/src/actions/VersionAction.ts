@@ -137,7 +137,7 @@ export default class VersionAction extends BaseRushAction {
     });
 
     if (changeLogUpdated) {
-      git.addChanges('*', this.rushConfiguration.changesFolder);
+      git.addChanges('.', this.rushConfiguration.changesFolder);
       git.addChanges('**/CHANGELOG.json');
       git.addChanges('**/CHANGELOG.md');
       git.commit('Deleting change files and updating change logs for package updates.');
