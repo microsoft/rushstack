@@ -159,6 +159,12 @@ interface ITsConfigFile<T> {
 }
 
 // @public (undocumented)
+interface IWebpackResources {
+  // (undocumented)
+  webpack: typeof Webpack;
+}
+
+// @public (undocumented)
 interface IWebpackTaskConfig {
   config?: Webpack.Configuration;
   configPath: string;
