@@ -100,9 +100,9 @@ export interface IRushLinkJson {
  * @public
  */
 export default class RushConfiguration {
-  private _rushJsonFile: string;
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(path.join(__dirname, '../rush.schema.json'));
 
+  private _rushJsonFile: string;
   private _rushJsonFolder: string;
   private _changesFolder: string;
   private _commonFolder: string;

@@ -93,7 +93,7 @@ export class VersionPolicyConfiguration {
       versionPolicyJson.push(versionPolicy.json);
     });
     if (shouldCommit) {
-      JsonFile.saveJsonFile(versionPolicyJson, this._jsonFileName);
+      JsonFile.save(versionPolicyJson, this._jsonFileName);
     }
   }
 
