@@ -23,6 +23,7 @@ import { ApiJsonFile } from './ApiJsonFile';
 import { BasePageRenderer } from './BasePageRenderer';
 import { RenderingHelpers } from './RenderingHelpers';
 import { Domifier } from './Domifier';
+import { DocumentationNode } from './DocumentationNode';
 
 /**
  * This is the main engine that reads *.api.json input files and generates IDomPage data structures,
@@ -51,8 +52,9 @@ export class Documenter {
 
     const docPackage: IDocPackage = apiJsonFile.docPackage;
 
-    const domPage: IDomPage = Domifier.createPage(`${unscopedPackageName} package`,
-      RenderingHelpers.getDocId(apiJsonFile.packageName));
+    const packageNode: DocumentationNode = new DocumentationNode(docPackage, unscopedPackageName, undefined);
+
+    const domPage: IDomPage = Domifier.createPage(`${unscopedPackageName} package`, packageNode.docId);
 
     domPage.elements.push(...Domifier.renderDocElements(apiJsonFile.docPackage.summary));
 
@@ -69,10 +71,12 @@ export class Documenter {
     for (const exportName of Object.keys(docPackage.exports)) {
       const docItem: IDocItem = docPackage.exports[exportName];
 
+      const exportNode: DocumentationNode = new DocumentationNode(docItem, exportName, packageNode);
+
       const docItemTitle: DomBasicText[] = [
         Domifier.createDocumentationLink(
           [ Domifier.createCode(exportName, 'javascript') ],
-          RenderingHelpers.getDocId(apiJsonFile.packageName, exportName))
+          exportNode.docId)
       ];
 
       const docItemDescription: DomBasicText[] = [];
@@ -91,7 +95,7 @@ export class Documenter {
               docItemDescription
             ])
           );
-          this._writeClassPage(docItem, exportName, apiJsonFile, renderer);
+          this._writeClassPage(docItem, exportNode, renderer);
           break;
         case 'interface':
           interfacesTable.rows.push(
@@ -122,12 +126,11 @@ export class Documenter {
     renderer.writePage(domPage);
   }
 
-  private _writeClassPage(docClass: IDocClass, className: string, apiJsonFile: ApiJsonFile,
-    renderer: BasePageRenderer): void {
+  private _writeClassPage(docClass: IDocClass, classNode: DocumentationNode, renderer: BasePageRenderer): void {
+    const className: string = classNode.name;
 
     // TODO: Show concise generic parameters with class name
-    const domPage: IDomPage = Domifier.createPage(`${className} class`,
-      RenderingHelpers.getDocId(apiJsonFile.packageName, className));
+    const domPage: IDomPage = Domifier.createPage(`${className} class`, classNode.docId);
 
     if (docClass.isBeta) {
       this._writeBetaWarning(domPage.elements);
@@ -153,10 +156,12 @@ export class Documenter {
       const member: IDocMember = docClass.members[memberName];
       switch (member.kind) {
         case 'method':
+          const methodNode: DocumentationNode = new DocumentationNode(member, memberName, classNode);
+
           const methodTitle: DomBasicText[] = [
             Domifier.createDocumentationLink(
               [Domifier.createCode(RenderingHelpers.getConciseSignature(memberName, member), 'javascript')],
-              RenderingHelpers.getDocId(apiJsonFile.packageName, className, memberName))
+              methodNode.docId)
           ];
 
           methodsTable.rows.push(
@@ -167,7 +172,7 @@ export class Documenter {
               Domifier.renderDocElements(member.summary)
             ])
           );
-          this._writeMethodPage(member, memberName, className, apiJsonFile, renderer);
+          this._writeMethodPage(member, methodNode, renderer);
           break;
       }
     }
@@ -185,13 +190,11 @@ export class Documenter {
     renderer.writePage(domPage);
   }
 
-  private _writeMethodPage(docMethod: IDocMethod, methodName: string, className: string,
-    apiJsonFile: ApiJsonFile, renderer: BasePageRenderer): void {
+  private _writeMethodPage(docMethod: IDocMethod, methodNode: DocumentationNode, renderer: BasePageRenderer): void {
 
-    const fullMethodName: string = className + '.' + methodName;
+    const fullMethodName: string = methodNode.parent!.name + '.' + methodNode.name;
 
-    const domPage: IDomPage = Domifier.createPage(`${fullMethodName} method`,
-      RenderingHelpers.getDocId(apiJsonFile.packageName, className, methodName));
+    const domPage: IDomPage = Domifier.createPage(`${fullMethodName} method`, methodNode.docId);
 
     if (docMethod.isBeta) {
       this._writeBetaWarning(domPage.elements);

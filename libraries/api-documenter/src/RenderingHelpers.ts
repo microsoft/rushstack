@@ -31,24 +31,6 @@ export class RenderingHelpers {
   }
 
   /**
-   * Generates a documentation ID based on the provided scope elements.
-   * A documentation ID is a string that  uniquely identifies an object in
-   * the API documentation web site, and is used e.g. for creating internal hyperlinks.
-   */
-  public static getDocId(packageName: string, exportName?: string, memberName?: string): string {
-    let result: string = RenderingHelpers.getUnscopedPackageName(packageName);
-    if (exportName) {
-      result += '.' + exportName;
-      if (memberName === '__constructor') {
-        result += '.' + '-ctor';
-      } else if (memberName) {
-        result += '.' + memberName;
-      }
-    }
-    return result.toLowerCase();
-  }
-
-  /**
    * Strips the scope from an NPM package name.  For example, given "@microsoft/decorators"
    * this function would return "decorators".
    */
