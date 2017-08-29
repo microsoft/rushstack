@@ -20,7 +20,8 @@
     "@types/node": "6.0.62",
     "gulp": "~3.9.1",
     "gulp-util": "~3.0.7",
-    "webpack": "~1.13.0"
+    "webpack": "~3.5.5",
+    "ajv": "^5.2.2"
   },
   "devDependencies": {
     "@microsoft/node-library-build": "~3.2.0",
@@ -28,6 +29,6 @@
     "@types/q": "0.0.32",
     "@types/source-map": "0.5.0",
     "@types/uglify-js": "2.6.28",
-    "@types/webpack": "2.2.4"
+    "@types/webpack": "3.0.10"
   }
 }

@@ -14,7 +14,7 @@
   "dependencies": {
     "uglify-js": "~2.8.22",
     "lodash": "~4.15.0",
-    "@types/webpack": "2.2.4"
+    "@types/webpack": "3.0.10"
   },
   "devDependencies": {
     "@types/tapable": "0.2.3",
