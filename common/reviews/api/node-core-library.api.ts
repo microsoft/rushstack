@@ -6,8 +6,13 @@ class FileDiffTest {
 }
 
 // @public
-interface IJsonFileSaveOptions {
+interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
   onlyIfChanged?: boolean;
+}
+
+// @public
+interface IJsonFileStringifyOptions {
+  unixNewlines?: boolean;
 }
 
 // @public
@@ -33,7 +38,7 @@ class JsonFile {
   public static loadAndValidateWithCallback(jsonFilename: string, jsonSchema: JsonSchema,
       errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): any;
   public static save(jsonObject: Object, jsonFilename: string, options: IJsonFileSaveOptions = {}): boolean;
-  public static stringify(jsonObject: Object): string;
+  public static stringify(jsonObject: Object, options?: IJsonFileStringifyOptions): string;
   public static validateNoUndefinedMembers(jsonObject: Object): void;
 }
 

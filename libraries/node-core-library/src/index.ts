@@ -7,7 +7,11 @@
 declare const packageDescription: void; // tslint:disable-line:no-unused-variable
 
 export { FileDiffTest } from './FileDiffTest';
-export { JsonFile, IJsonFileSaveOptions } from './JsonFile';
+export {
+  JsonFile,
+  IJsonFileSaveOptions,
+  IJsonFileStringifyOptions
+} from './JsonFile';
 export {
   JsonSchema,
   IJsonSchemaErrorInfo,

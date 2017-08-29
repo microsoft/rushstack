@@ -8,11 +8,23 @@ import * as jju from 'jju';
 import { JsonSchema, IJsonSchemaErrorInfo, IJsonSchemaValidateOptions } from './JsonSchema';
 
 /**
+ * Options for JsonFile.stringify()
+ *
+ * @public
+ */
+export interface IJsonFileStringifyOptions {
+  /**
+   * If true, then "\n" will be used for newlines instead of the default "\r\n".
+   */
+  unixNewlines?: boolean;
+}
+
+/**
  * Options for JsonFile.saveJsonFile()
  *
  * @public
  */
-export interface IJsonFileSaveOptions {
+export interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
   /**
    * If there is an existing file, and the contents have not changed, then
    * don't write anything; this preserves the old timestamp.
@@ -70,12 +82,19 @@ export class JsonFile {
   /**
    * Serializes the specified JSON object to a string buffer.
    * @param jsonObject - the object to be serialized
+   * @param options - other settings that control serialization
    * @returns a JSON string, with newlines, and indented with two spaces
    */
-  public static stringify(jsonObject: Object): string {
+  public static stringify(jsonObject: Object, options?: IJsonFileStringifyOptions): string {
     JsonFile.validateNoUndefinedMembers(jsonObject);
     const stringified: string = JSON.stringify(jsonObject, undefined, 2) + '\n';
-    return JsonFile._getAllReplaced(stringified, '\n', '\r\n');
+
+    if (options && options.unixNewlines) {
+      return stringified;
+    } else {
+      return JsonFile._getAllReplaced(stringified, '\n', '\r\n');
+    }
+
   }
 
   /**
@@ -86,7 +105,7 @@ export class JsonFile {
    * @returns false if ISaveJsonFileOptions.onlyIfChanged didn't save anything; true otherwise
    */
   public static save(jsonObject: Object, jsonFilename: string, options: IJsonFileSaveOptions = {}): boolean {
-    const normalized: string = JsonFile.stringify(jsonObject);
+    const normalized: string = JsonFile.stringify(jsonObject, options);
 
     const buffer: Buffer = new Buffer(normalized); // utf8 encoding happens here
 
