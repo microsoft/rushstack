@@ -34,21 +34,28 @@ module.exports = function(config) {
     // webpack config for bundling tests.
     webpack: {
       module: {
-        loaders: [
+        rules: [
           {
             test: /sinon\.js$/,
-            loader: 'imports?define=>false'
+            use: {
+              loader: 'imports',
+              options: {
+                define: false
+              }
+            }
+          },
+          debugRun ? null : {
+            test: /\.js/,
+            exclude: /(test|node_modules|bower_components)/,
+            enforce: 'post',
+            use: {
+              loader: configResources.istanbulInstrumenterLoaderPath
+            }
           }
         ],
-        postLoaders: debugRun ? null : [{
-          test: /\.js/,
-          exclude: /(test|node_modules|bower_components)/,
-          loader: configResources.istanbulInstrumenterLoaderPath
-        }]
       },
       resolve: {
-        modulesDirectories: [
-          '',
+        modules: [
           'lib',
           'node_modules'
         ]
