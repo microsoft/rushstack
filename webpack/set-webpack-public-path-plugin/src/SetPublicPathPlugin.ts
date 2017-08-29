@@ -86,10 +86,10 @@ interface IAsset {
 }
 
 interface IChunk {
-  modules: IModule[];
   chunks: IChunk[];
   name: string;
   renderedHash: string;
+  forEachModule(iterator: (module: IModule) => void): void;
 }
 
 interface IModule {
@@ -122,12 +122,11 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
       compilation.mainTemplate.plugin('startup', (source: string, chunk: IChunk, hash: string) => {
         let assetOrChunkFound: boolean = chunk.chunks.length > 0;
         if (!assetOrChunkFound) {
-          for (const innerModule of chunk.modules) {
+          chunk.forEachModule((innerModule: IModule) => {
             if (innerModule.assets && Object.keys(innerModule.assets).length > 0) {
               assetOrChunkFound = true;
-              break;
             }
-          }
+          });
         }
 
         if (assetOrChunkFound) {
