@@ -12,18 +12,18 @@ describe('PackageJsonLookup', function (): void {
 
   describe('basic tests', function (): void {
 
-    it('readPackageName() test', function (): void {
+    it('getPackageName() test', function (): void {
       const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
       const sourceFilePath: string = path.join(__dirname, './test-data/example-package');
-      assert.equal(packageJsonLookup.readPackageName(sourceFilePath), 'example-package');
+      assert.equal(packageJsonLookup.getPackageName(sourceFilePath), 'example-package');
     });
 
-    it('tryFindPackagePathUpwards() test', function (): void {
+    it('tryGetPackageFolder() test', function (): void {
       const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
       const sourceFilePath: string = path.join(__dirname, './test-data/example-package/src/ExampleFile.txt');
 
       // Example: C:\web-build-tools\libraries\node-core-library\src\test\example-package
-      const foundPath: string | undefined = packageJsonLookup.tryFindPackagePathUpwards(sourceFilePath);
+      const foundPath: string | undefined = packageJsonLookup.tryGetPackageFolder(sourceFilePath);
       assert.isTrue(foundPath && foundPath.search(/[\\/]example-package$/i) >= 0, 'Unexpected result: ' + foundPath);
     });
   });

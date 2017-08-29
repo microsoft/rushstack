@@ -11,7 +11,7 @@ import { PackageJsonLookup } from './PackageJsonLookup';
  * compares them against the expected input.  If the files are different, then
  * the test fails.
  *
- * @alpha
+ * @public
  */
 export class FileDiffTest {
   private static _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
@@ -35,7 +35,7 @@ export class FileDiffTest {
    */
   public static prepareFolder(unitTestDirName: string, testModule: string): string {
     const packageJsonFolderPath: string | undefined
-      = this._packageJsonLookup.tryFindPackagePathUpwards(unitTestDirName);
+      = this._packageJsonLookup.tryGetPackageFolder(unitTestDirName);
 
     if (packageJsonFolderPath === undefined) {
       throw new Error('Unable to find a package.json in any parent folder of ' + unitTestDirName);

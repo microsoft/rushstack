@@ -18,14 +18,14 @@ interface IPackageJson {
  * This class provides methods for finding the nearest "package.json" for a folder
  * and retrieving the name of the package.  The results are cached.
  *
- * @alpha
+ * @public
  */
 export class PackageJsonLookup {
-  // Cached the return values for tryFindPackagePathUpwards():
+  // Cached the return values for tryGetPackageFolder():
   // sourceFilePath --> packageJsonFolder
   private _packageFolderCache: Map<string, string | undefined>;
 
-  // Cached the return values for readPackageName():
+  // Cached the return values for getPackageName():
   // packageJsonPath --> packageName
   private _packageNameCache: Map<string, string>;
 
@@ -51,7 +51,7 @@ export class PackageJsonLookup {
    * @param currentPath - a path (relative or absolute) of the current location
    * @returns a relative path to the package folder
    */
-  public tryFindPackagePathUpwards(sourceFilePath: string): string | undefined {
+  public tryGetPackageFolder(sourceFilePath: string): string | undefined {
     // Two lookups are required, because get() cannot distinguish the undefined value
     // versus a missing key.
     if (this._packageFolderCache.has(sourceFilePath)) {
@@ -66,7 +66,7 @@ export class PackageJsonLookup {
     } else if (fsx.existsSync(path.join(parentFolder, 'package.json'))) {
       result = path.normalize(parentFolder);
     } else {
-      result = this.tryFindPackagePathUpwards(parentFolder);
+      result = this.tryGetPackageFolder(parentFolder);
     }
 
     this._packageFolderCache.set(sourceFilePath, result);
@@ -80,7 +80,7 @@ export class PackageJsonLookup {
    * package.json file, it does not include the 'package.json' suffix.
    * @returns the name of the package (E.g. @microsoft/api-extractor)
    */
-  public readPackageName(packageJsonPath: string): string {
+  public getPackageName(packageJsonPath: string): string {
     let result: string = this._packageNameCache.get(packageJsonPath);
     if (result !== undefined) {
       return result;

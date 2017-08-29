@@ -1,4 +1,4 @@
-// @alpha
+// @public
 class FileDiffTest {
   public static assertEqual(actualFilePath: string, expectedFilePath: string): void;
   public static clearCache(): void;
@@ -53,11 +53,11 @@ class JsonSchema {
       errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): void;
 }
 
-// @alpha
+// @public
 class PackageJsonLookup {
   constructor();
   public clearCache(): void;
-  public readPackageName(packageJsonPath: string): string;
-  public tryFindPackagePathUpwards(sourceFilePath: string): string | undefined;
+  public getPackageName(packageJsonPath: string): string;
+  public tryGetPackageFolder(sourceFilePath: string): string | undefined;
 }
 

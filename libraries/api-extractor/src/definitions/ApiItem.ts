@@ -557,7 +557,7 @@ abstract class ApiItem {
     // this is where the referenced type is located.
     // Example: "c:\users\<username>\sp-client\spfx-core\sp-core-library"
     const typeReferencePackagePath: string = this.extractor.packageJsonLookup
-      .tryFindPackagePathUpwards(sourceFile.fileName);
+      .tryGetPackageFolder(sourceFile.fileName);
     // Example: "@microsoft/sp-core-library"
     let typeReferencePackageName: string = '';
 
@@ -567,7 +567,7 @@ abstract class ApiItem {
       typeReferencePackageName = this.extractor.package.name;
     } else {
       typeReferencePackageName = this.extractor.packageJsonLookup
-        .readPackageName(typeReferencePackagePath);
+        .getPackageName(typeReferencePackagePath);
 
       typingsScopeNames.every(typingScopeName => {
         if (typeReferencePackageName.indexOf(typingScopeName) > -1) {
