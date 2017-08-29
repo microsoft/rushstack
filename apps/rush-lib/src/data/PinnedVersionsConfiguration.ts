@@ -3,8 +3,7 @@
 
 import * as fs from 'fs';
 import * as semver from 'semver';
-
-import JsonFile from '../utilities/JsonFile';
+import { JsonFile } from '@microsoft/node-core-library';
 
 interface IPinnedVersionsJson {
   [dependency: string]: string;
@@ -31,7 +30,7 @@ export class PinnedVersionsConfiguration {
   public static tryLoadFromFile(jsonFilename: string): PinnedVersionsConfiguration {
     let pinnedVersionJson: IPinnedVersionsJson = undefined;
     if (fs.existsSync(jsonFilename)) {
-      pinnedVersionJson = JsonFile.loadJsonFile(jsonFilename);
+      pinnedVersionJson = JsonFile.load(jsonFilename);
     }
 
     return new PinnedVersionsConfiguration(pinnedVersionJson, jsonFilename);
@@ -60,7 +59,7 @@ export class PinnedVersionsConfiguration {
   }
 
   public save(): this {
-    JsonFile.saveJsonFile(this._serialize(), this._filename);
+    JsonFile.save(this._serialize(), this._filename);
     return this;
   }
 

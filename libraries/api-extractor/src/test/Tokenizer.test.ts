@@ -4,7 +4,8 @@
 /// <reference types="mocha" />
 
 import { assert } from 'chai';
-import JsonFile from '../JsonFile';
+import { JsonFile } from '@microsoft/node-core-library';
+
 import TestFileComparer from '../TestFileComparer';
 import Token, { TokenType } from '../Token';
 import Tokenizer from '../Tokenizer';
@@ -50,8 +51,8 @@ describe('Tokenizer tests', function (): void {
       ];
 
       const actualTokens: Token[] = testTokenizer.tokenizeDocs(docs);
-      JsonFile.saveJsonFile('./lib/tokenizeDocsExpected.json', JSON.stringify(expectedTokens));
-      JsonFile.saveJsonFile('./lib/tokenizeDocsActual.json', JSON.stringify(actualTokens));
+      JsonFile.save(JSON.stringify(expectedTokens), './lib/tokenizeDocsExpected.json');
+      JsonFile.save(JSON.stringify(actualTokens), './lib/tokenizeDocsActual.json');
       TestFileComparer.assertFileMatchesExpected('./lib/tokenizeDocsActual.json', './lib/tokenizeDocsExpected.json');
     });
 

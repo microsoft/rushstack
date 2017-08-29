@@ -2,6 +2,30 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "2.9.6",
+      "tag": "@microsoft/gulp-core-build_v2.9.6",
+      "date": "Thu, 24 Aug 2017 22:44:12 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update the schema validator."
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.9.5",
+      "tag": "@microsoft/gulp-core-build_v2.9.5",
+      "date": "Thu, 24 Aug 2017 01:04:33 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.9.4",
+      "tag": "@microsoft/gulp-core-build_v2.9.4",
+      "date": "Tue, 22 Aug 2017 13:04:22 GMT",
+      "comments": {}
+    },
+    {
       "version": "2.9.3",
       "tag": "@microsoft/gulp-core-build_v2.9.3",
       "date": "Tue, 15 Aug 2017 19:04:14 GMT",

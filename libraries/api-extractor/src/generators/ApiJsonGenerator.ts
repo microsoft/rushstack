@@ -4,6 +4,7 @@
 import * as os  from 'os';
 import * as path from 'path';
 import * as ts from 'typescript';
+import { JsonFile, JsonSchema, IJsonSchemaErrorInfo } from '@microsoft/node-core-library';
 
 import Extractor from '../Extractor';
 import ApiStructuredType from '../definitions/ApiStructuredType';
@@ -21,7 +22,6 @@ import ApiModuleVariable from '../definitions/ApiModuleVariable';
 import ApiMethod from '../definitions/ApiMethod';
 import { ReleaseTag } from '../definitions/ApiDocumentation';
 import { IReturn, IParam }from '../IDocElement';
-import JsonFile from '../JsonFile';
 import ApiJsonFile from './ApiJsonFile';
 
 /**
@@ -39,6 +39,18 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
   private static _methodCounter: number = 0;
   private static _MEMBERS_KEY: string = 'members';
   private static _EXPORTS_KEY: string = 'exports';
+  private static _jsonSchema: JsonSchema | undefined = undefined;
+
+  /**
+   * The JSON schema for the *.api.json file format.
+   */
+  public static get jsonSchema(): JsonSchema {
+    if (!ApiJsonGenerator._jsonSchema) {
+      ApiJsonGenerator._jsonSchema = JsonSchema.fromFile(path.join(__dirname, '../schemas/api-json-schema.json'));
+    }
+
+    return ApiJsonGenerator._jsonSchema;
+  }
 
   protected jsonOutput: Object = {};
 
@@ -46,22 +58,17 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
     this.visit(extractor.package, this.jsonOutput);
 
     // Write the output before validating the schema, so we can debug it
-    JsonFile.saveJsonFile(reportFilename, this.jsonOutput);
+    JsonFile.save(this.jsonOutput, reportFilename);
 
     // Validate that the output conforms to our JSON schema
-    const apiJsonSchema: { } = JsonFile.loadJsonFile(path.join(__dirname, '../schemas/api-json-schema.json'));
+    ApiJsonGenerator.jsonSchema.validateObjectWithCallback(this.jsonOutput, (errorInfo: IJsonSchemaErrorInfo) => {
+      const errorMessage: string = path.basename(reportFilename)
+        + ` does not conform to the expected schema -- please report this API Extractor bug:`
+        + os.EOL + errorInfo.details;
 
-    JsonFile.validateSchema(this.jsonOutput, apiJsonSchema,
-      (errorDetail: string): void => {
-        const errorMessage: string
-          = `ApiJsonGenerator validation error - output does not conform to api-json-schema.json:` + os.EOL
-          + reportFilename + os.EOL
-          + errorDetail;
-
-        console.log(os.EOL + 'ERROR: ' + errorMessage + os.EOL + os.EOL);
-        throw new Error(errorMessage);
-      }
-    );
+      console.log(os.EOL + 'ERROR: ' + errorMessage + os.EOL + os.EOL);
+      throw new Error(errorMessage);
+    });
   }
 
   // @override

@@ -238,34 +238,12 @@ interface IRushLinkJson {
   }
 }
 
-// @public
-interface ISaveJsonFileOptions {
-  onlyIfChanged?: boolean;
-}
-
 // @alpha (undocumented)
 interface IVersionPolicyJson {
   // (undocumented)
   definitionName: string;
   // (undocumented)
   policyName: string;
-}
-
-// @public
-class JsonFile {
-  public static loadJsonFile(jsonFilename: string): any;
-  // (undocumented)
-  public static normalize(jsonData: any): string;
-  public static saveJsonFile(jsonData: any, jsonFilename: string, options: ISaveJsonFileOptions = {}): boolean;
-}
-
-// @alpha (undocumented)
-class JsonSchemaValidator {
-  // (undocumented)
-  public static loadFromFile(schemaFilename: string): JsonSchemaValidator;
-  // WARNING: The type "ValidateErrorCallback" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  public validateObject(jsonObject: Object, errorCallback: ValidateErrorCallback): void;
 }
 
 // @alpha

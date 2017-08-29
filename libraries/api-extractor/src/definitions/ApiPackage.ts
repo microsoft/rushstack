@@ -48,7 +48,7 @@ export default class ApiPackage extends ApiItemContainer {
     super(ApiPackage._getOptions(extractor, rootFile));
     this.kind = ApiItemKind.Package;
     // The scoped package name. (E.g. "@microsoft/api-extractor")
-    this.name = this.extractor.packageJsonLookup.readPackageName(this.extractor.packageFolder);
+    this.name = this.extractor.packageJsonLookup.getPackageName(this.extractor.packageFolder);
 
     const exportSymbols: ts.Symbol[] = this.typeChecker.getExportsOfModule(this.declarationSymbol);
     if (exportSymbols) {

@@ -3,7 +3,8 @@
 
 import * as path from 'path';
 import assign = require('object-assign');
-import { SchemaValidator, IBuildConfig } from '@microsoft/gulp-core-build';
+import { JsonFile } from '@microsoft/node-core-library';
+import { IBuildConfig } from '@microsoft/gulp-core-build';
 import ts = require('gulp-typescript');
 
 /**
@@ -68,7 +69,7 @@ export class TypeScriptConfiguration {
   public static getTsConfigFile(config: IBuildConfig): ITsConfigFile<ts.Settings> {
     if (!this._baseTsConfig) {
       try {
-        this._baseTsConfig = SchemaValidator.readCommentedJsonFile<any>(
+        this._baseTsConfig = JsonFile.load(
           this._getConfigPath(config)
         );
       } catch (e) {

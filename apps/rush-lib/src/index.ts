@@ -66,21 +66,12 @@ export {
 } from './utilities/IPackageJson';
 
 export {
-  default as JsonFile,
-  ISaveJsonFileOptions
-} from './utilities/JsonFile';
-
-export {
   default as VersionControl
 } from './utilities/VersionControl';
 
 export {
   default as Utilities
 } from './utilities/Utilities';
-
-export {
-  default as JsonSchemaValidator
-} from './utilities/JsonSchemaValidator';
 
 export {
   Stopwatch,
