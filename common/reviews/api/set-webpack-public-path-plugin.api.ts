@@ -19,10 +19,10 @@ interface ISetWebpackPublicPathPluginOptions extends ISetWebpackPublicPathOption
 }
 
 // @public
-class SetPublicPathPlugin implements Plugin {
+class SetPublicPathPlugin implements Webpack.Plugin {
   constructor(options: ISetWebpackPublicPathPluginOptions);
   // (undocumented)
-  public apply(compiler: Webpack & ITapable): void;
+  public apply(compiler: Webpack.Compiler): void;
   // (undocumented)
   public options: ISetWebpackPublicPathPluginOptions;
 }
