@@ -7,6 +7,7 @@ import * as path from 'path';
 
 import {
   IDomPage,
+  IDomText,
   DomElement
 } from './SimpleDom';
 
@@ -31,6 +32,10 @@ class SimpleWriter {
     if (this._buffer.substr(-1, 1) !== '\n') {
       this.write('\n');
     }
+  }
+
+  public getLastWrittenCharacter(): string {
+    return this._buffer.substr(-1, 1);
   }
 
   public toString(): string {
@@ -79,38 +84,110 @@ export class MarkdownPageRenderer extends BasePageRenderer {
   private _getEscapedText(text: string): string {
     const textWithBackslashes: string = text
       .replace('\\', '\\\\')  // first replace the escape character
-      .replace(/[\*\#\[\]\_]\|/g, (x) => '\\' + x); // then escape any special characters
+      .replace(/[\*\#\[\]\_\|]/g, (x) => '\\' + x); // then escape any special characters
     return textWithBackslashes
       .replace('&', '&amp;')
       .replace('<', '&lt;')
       .replace('>', '&gt;');
   }
 
+  /**
+   * Merges any IDomText elements with compatible styles; this simplifies the emitted Markdown
+   */
+  private _mergeTextElements(elements: DomElement[]): DomElement[] {
+    const mergedElements: DomElement[] = [];
+    let previousElement: DomElement|undefined;
+
+    for (const element of elements) {
+      if (previousElement) {
+        if (element.kind === 'text' && previousElement.kind === 'text') {
+          if (element.bold === previousElement.bold && element.italics === previousElement.italics) {
+            // merge them
+            mergedElements.pop(); // pop the previous element
+
+            const combinedElement: IDomText = { // push a combined element
+              kind: 'text',
+              content: previousElement.content + element.content,
+              bold: previousElement.bold,
+              italics: previousElement.italics
+            };
+
+            mergedElements.push(combinedElement);
+            previousElement = combinedElement;
+            continue;
+          }
+        }
+      }
+
+      mergedElements.push(element);
+      previousElement = element;
+    }
+
+    return mergedElements;
+  }
+
   private _writeElements(elements: DomElement[], context: IRenderContext): void {
     const writer: SimpleWriter = context.writer;
 
-    for (const element of elements) {
+    const mergedElements: DomElement[] = this._mergeTextElements(elements);
+
+    for (const element of mergedElements) {
       switch (element.kind) {
         case 'text':
-          if (element.bold) {
-            writer.write('**');
-          }
-          if (element.italics) {
-            writer.write('_');
-          }
-
-          let normalizedContent: string = this._getEscapedText(element.content);
+          let normalizedContent: string = element.content;
           if (context.insideTable) {
             normalizedContent = normalizedContent.replace('\n', ' ');
           }
 
-          writer.write(normalizedContent);
+          const lines: string[] = normalizedContent.split('\n');
 
-          if (element.italics) {
-            writer.write('_');
-          }
-          if (element.bold) {
-            writer.write('**');
+          let firstLine: boolean = true;
+
+          for (const line of lines) {
+            if (firstLine) {
+              firstLine = false;
+            } else {
+              writer.writeLine();
+            }
+
+            // split out the [ leading whitespace, content, trailing whitespace ]
+            const parts: string[] = line.match(/^(\s*)(.*?)(\s*)$/) || [];
+
+            writer.write(parts[1]);  // write leading whitespace
+
+            const middle: string = parts[2];
+
+            if (middle !== '') {
+              switch (writer.getLastWrittenCharacter()) {
+                case '':
+                case '\n':
+                case ' ':
+                  // okay to put a symbol
+                  break;
+                default:
+                  // we need a separator
+                  writer.write('<!-- -->');
+                  break;
+              }
+
+              if (element.bold) {
+                writer.write('**');
+              }
+              if (element.italics) {
+                writer.write('_');
+              }
+
+              writer.write(this._getEscapedText(middle));
+
+              if (element.italics) {
+                writer.write('_');
+              }
+              if (element.bold) {
+                writer.write('**');
+              }
+            }
+
+            writer.write(parts[3]);  // write trailing whitespace
           }
           break;
         case 'code':
