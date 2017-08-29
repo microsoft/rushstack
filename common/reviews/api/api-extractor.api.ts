@@ -40,6 +40,7 @@ class ApiFileGenerator extends ApiItemVisitor {
 class ApiJsonGenerator extends ApiItemVisitor {
   // (undocumented)
   protected jsonOutput: Object;
+  public static readonly jsonSchema: JsonSchema;
   // WARNING: The type "ApiItem" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   protected visit(apiItem: ApiItem, refObject?: Object): void;

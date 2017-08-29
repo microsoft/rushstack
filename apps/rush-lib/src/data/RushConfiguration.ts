@@ -3,9 +3,8 @@
 
 import * as path from 'path';
 import * as fsx from 'fs-extra';
-import * as os from 'os';
 import * as semver from 'semver';
-import { JsonFile } from '@microsoft/node-core-library';
+import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
 
 import rushVersion from '../rushVersion';
 import RushConfigurationProject, { IRushConfigurationProjectJson } from './RushConfigurationProject';
@@ -101,6 +100,8 @@ export interface IRushLinkJson {
  * @public
  */
 export default class RushConfiguration {
+  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(path.join(__dirname, '../rush.schema.json'));
+
   private _rushJsonFolder: string;
   private _commonFolder: string;
   private _commonTempFolder: string;
@@ -157,16 +158,7 @@ export default class RushConfiguration {
       }
     }
 
-    const rushSchemaFilename: string = path.join(__dirname, '../rush.schema.json');
-
-    const rushSchema: Object = JsonFile.load(rushSchemaFilename);
-
-    JsonFile.validateSchema(rushConfigurationJson, rushSchema, (errorDescription: string) => {
-      const errorMessage: string = `Error parsing file '${rushJsonFilename}':`
-        + os.EOL + errorDescription;
-
-      throw new Error(errorMessage);
-    });
+    RushConfiguration._jsonSchema.validateObject(rushConfigurationJson, rushJsonFilename);
 
     return new RushConfiguration(rushConfigurationJson, rushJsonFilename);
   }

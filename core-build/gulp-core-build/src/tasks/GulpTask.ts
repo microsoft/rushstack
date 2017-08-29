@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as os from 'os';
 import * as path from 'path';
 import * as fs from 'fs';
-import { JsonFile } from '@microsoft/node-core-library';
+import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
 
 import { GulpProxy } from '../GulpProxy';
 import { IExecutable } from '../IExecutable';
@@ -398,10 +397,9 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
       const rawData: TTaskConfig = JsonFile.load(filePath);
 
       if (schema) {
-        JsonFile.validateSchema(rawData, schema, (errorDescription: string) => {
-          throw new Error(`Error parsing file "${path.basename(filePath)}":` + os.EOL
-            + errorDescription);
-        });
+        // TODO: Convert GulpTask.schema to be a JsonSchema instead of a bare object
+        const jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schema);
+        jsonSchema.validateObject(rawData, filePath);
       }
 
       return rawData;

@@ -4,7 +4,7 @@
 import * as fsx from 'fs-extra';
 import * as path from 'path';
 import * as os from 'os';
-import { JsonFile } from '@microsoft/node-core-library';
+import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
 
 import Utilities from '../utilities/Utilities';
 
@@ -47,7 +47,8 @@ export class ApprovedPackagesItem {
  * @public
  */
 export class ApprovedPackagesConfiguration {
-  private static _jsonSchema: { } | undefined = undefined;
+  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
+    path.join(__dirname, '../approved-packages.schema.json'));
 
   public items: ApprovedPackagesItem[] = [];
 
@@ -110,19 +111,8 @@ export class ApprovedPackagesConfiguration {
    * Loads the configuration data from the filename that was passed to the constructor.
    */
   public loadFromFile(): void {
-
-    if (!ApprovedPackagesConfiguration._jsonSchema) {
-      const schemaFilename: string = path.join(__dirname, '../approved-packages.schema.json');
-      ApprovedPackagesConfiguration._jsonSchema = JsonFile.load(schemaFilename);
-    }
-
-    const approvedPackagesJson: IApprovedPackagesJson = JsonFile.load(this._jsonFilename);
-
-    JsonFile.validateSchema(approvedPackagesJson, ApprovedPackagesConfiguration._jsonSchema,
-      (errorDescription: string) => {
-      throw new Error(`Error parsing file '${path.basename(this._jsonFilename)}':\n`
-        + errorDescription);
-    });
+    const approvedPackagesJson: IApprovedPackagesJson = JsonFile.loadAndValidate(this._jsonFilename,
+      ApprovedPackagesConfiguration._jsonSchema);
 
     this.clear();
 
