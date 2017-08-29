@@ -130,6 +130,24 @@ describe('findChangeRequests', () => {
     expect(allChanges['d'].changeType).equals(ChangeType.patch, 'd was not a patch');
   });
 
+  it('can exclude lock step projects', () => {
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'repo', 'rush.json')).projectsByName;
+    const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
+      allPackages,
+      new ChangeFiles(path.join(__dirname, 'repo', 'changes')),
+      false,
+      undefined,
+      new Set<string>(['a', 'b', 'e']));
+    expect(Object.keys(allChanges).length).to.equal(5);
+    expect(allChanges['a'].newVersion).equals('1.0.0', 'a version is changed');
+    expect(allChanges['b'].newVersion).equals('2.0.0', 'b version is changed');
+    expect(allChanges['c'].changeType).equals(ChangeType.patch, 'c was not a patch');
+    expect(allChanges['c'].newVersion).equals('3.1.2');
+    expect(allChanges['d'].changeType).equals(ChangeType.patch, 'd was not a patch');
+    expect(allChanges['d'].newVersion).equals('4.1.2');
+    expect(allChanges['e'].newVersion).equals(allPackages.get('e').packageJson.version, 'e version gets changed');
+  });
 });
 
 describe('sortChangeRequests', () => {
@@ -152,9 +170,40 @@ describe('isRangeDependency', () => {
   it('can test ranges', () => {
     /* tslint:disable:no-unused-expression */
     expect(PublishUtilities.isRangeDependency('>=1.0.0 <2.0.0')).is.true;
+    expect(PublishUtilities.isRangeDependency('>=1.0.0-pr.1 <2.0.0')).is.true;
     expect(PublishUtilities.isRangeDependency('1.0.0')).is.false;
     expect(PublishUtilities.isRangeDependency('^1.0.0')).is.false;
     expect(PublishUtilities.isRangeDependency('~1.0.0')).is.false;
     /* tslint:enable:no-unused-expression */
+  });
+});
+
+describe('getNewDependencyVersion', () => {
+  it('can update dependency versions', () => {
+    const dependencies: { [key: string]: string} = {
+      'a': '~1.0.0',
+      'b': '^1.0.0',
+      'c': '>=1.0.0 <2.0.0'
+    };
+    expect(PublishUtilities.getNewDependencyVersion(dependencies,
+      'a', '1.1.0')).equals('~1.1.0');
+    expect(PublishUtilities.getNewDependencyVersion(dependencies,
+      'b', '1.2.0')).equals('^1.2.0');
+    expect(PublishUtilities.getNewDependencyVersion(dependencies,
+      'c', '1.3.0')).equals('>=1.3.0 <2.0.0');
+  });
+
+  it('can update dependency versions with prereleases', () => {
+    const dependencies: { [key: string]: string} = {
+      'a': '~1.0.0-pr.1',
+      'b': '^1.0.0-pr.1',
+      'c': '>=1.0.0-pr.1 <2.0.0'
+    };
+    expect(PublishUtilities.getNewDependencyVersion(dependencies,
+      'a', '1.1.0-pr.1')).equals('~1.1.0-pr.1');
+    expect(PublishUtilities.getNewDependencyVersion(dependencies,
+      'b', '1.2.0-pr.2')).equals('^1.2.0-pr.2');
+    expect(PublishUtilities.getNewDependencyVersion(dependencies,
+      'c', '1.3.0-pr.3')).equals('>=1.3.0-pr.3 <2.0.0');
   });
 });

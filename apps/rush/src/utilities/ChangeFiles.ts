@@ -3,9 +3,11 @@
 
 import * as fsx from 'fs-extra';
 import { EOL } from 'os';
+
 import {
   Utilities,
-  IChangeInfo
+  IChangeInfo,
+  IChangelog
 } from '@microsoft/rush-lib';
 import * as glob from 'glob';
 
@@ -63,7 +65,7 @@ export default class ChangeFiles {
       return this._files;
     }
     this._files = glob.sync(`${this._changesPath}/**/*.json`);
-    return this._files;
+    return this._files || [];
   }
 
   /**
@@ -76,15 +78,40 @@ export default class ChangeFiles {
   /**
    * Delete all change files
    */
-  public deleteAll(shouldDelete: boolean): void {
-    if (this._files.length) {
+  public deleteAll(shouldDelete: boolean, updatedChangelogs?: IChangelog[]): number {
+    if (updatedChangelogs) {
+      // Skip changes files if the package's change log is not updated.
+      const packagesToInclude: Set<string> = new Set<string>();
+      updatedChangelogs.forEach((changelog) => {
+        packagesToInclude.add(changelog.name);
+      });
+
+      const filesToDelete: string[] = this.getFiles().filter((filePath) => {
+        const changeRequest: IChangeInfo = JSON.parse(fsx.readFileSync(filePath, 'utf8'));
+        for (const changeInfo of changeRequest.changes) {
+          if (!packagesToInclude.has(changeInfo.packageName)) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      return this._deleteFiles(filesToDelete, shouldDelete);
+    } else {
+      // Delete all change files.
+      return this._deleteFiles(this.getFiles(), shouldDelete);
+    }
+  }
+
+  private _deleteFiles(files: string[], shouldDelete: boolean): number {
+    if (files.length) {
       console.log(
         `${EOL}* ` +
         `${shouldDelete ? 'DELETING:' : 'DRYRUN: Deleting'} ` +
-        `${this._files.length} change file(s).`
+        `${files.length} change file(s).`
       );
 
-      for (const filePath of this._files) {
+      for (const filePath of files) {
         console.log(` - ${filePath}`);
 
         if (shouldDelete) {
@@ -92,5 +119,6 @@ export default class ChangeFiles {
         }
       }
     }
+    return files.length;
   }
 }

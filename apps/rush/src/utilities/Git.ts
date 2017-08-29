@@ -27,8 +27,10 @@ export class Git {
     PublishUtilities.execCommand(!!this._targetBranch, 'git', `pull origin ${this._targetBranch}`.split(' '));
   }
 
-  public addChanges(): void {
-    PublishUtilities.execCommand(!!this._targetBranch, 'git', ['add', '.']);
+  public addChanges(pathspec?: string, workingDirectory?: string): void {
+    const files: string = pathspec ? pathspec : '.';
+    PublishUtilities.execCommand(!!this._targetBranch, 'git', ['add', files],
+      workingDirectory ? workingDirectory : process.cwd());
   }
 
   public addTag(shouldExecute: boolean, packageName: string, packageVersion: string): void {
@@ -40,8 +42,9 @@ export class Git {
       ['tag', '-a', tagName, '-m', `${packageName} v${packageVersion}`]);
   }
 
-  public commit(): void {
-    PublishUtilities.execCommand(!!this._targetBranch, 'git', ['commit', '-m', 'Applying package updates.']);
+  public commit(message?: string): void {
+    const commitMessage: string = message ? message : 'Applying package updates.';
+    PublishUtilities.execCommand(!!this._targetBranch, 'git', ['commit', '-m', commitMessage]);
   }
 
   public push(branchName: string): void {

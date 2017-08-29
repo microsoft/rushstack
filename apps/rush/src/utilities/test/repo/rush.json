@@ -27,6 +27,17 @@
       "projectFolder": "d",
       "reviewCategory": "third-party",
       "versionPolicyName": "testPolicy3"
+    },
+    {
+      "packageName": "e",
+      "projectFolder": "e",
+      "reviewCategory": "third-party",
+      "versionPolicyName": "testPolicy1"
+    },
+    {
+      "packageName": "f",
+      "projectFolder": "f",
+      "reviewCategory": "third-party"
     }
   ]
 }
