@@ -141,15 +141,14 @@ export default class RebuildAction extends BaseRushAction {
         stopwatch.stop();
         console.log(colors.green(`rush ${this.options.actionVerb} (${stopwatch.toString()})`));
         this._collectTelemetry(stopwatch, true);
+        this.eventHooksManager.handle(Event.postRushBuild);
       },
       () => {
         stopwatch.stop();
         console.log(colors.red(`rush ${this.options.actionVerb} - Errors! (${stopwatch.toString()})`));
         this._collectTelemetry(stopwatch, false);
-        this._parser.exitWithError();
-      })
-      .then(() => {
         this.eventHooksManager.handle(Event.postRushBuild);
+        this._parser.exitWithError();
       });
   }
 

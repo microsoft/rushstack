@@ -24,6 +24,7 @@ export default class Telemetry {
   private _enabled: boolean;
   private _store: ITelemetryData[];
   private _dataFolder: string;
+  private readonly _MAX_FILE_COUNT: number = 100;
 
   public constructor(private _rushConfiguration: RushConfiguration) {
     this._enabled = this._rushConfiguration.telemetryEnabled;
@@ -45,9 +46,11 @@ export default class Telemetry {
   }
 
   public flush(writeFile: (file: string, data: string) => void = fsx.writeFileSync): void {
-    if (!this._enabled) {
+    if (!this._enabled || this._store.length === 0) {
       return;
     }
+    this._cleanUp();
+
     const fullPath: string = this._getFilePath();
     fsx.ensureDirSync(this._dataFolder);
     writeFile(fullPath, JSON.stringify(this._store));
@@ -56,6 +59,33 @@ export default class Telemetry {
 
   public get store(): ITelemetryData[] {
     return this._store;
+  }
+
+  /**
+   * When there are too many log files, delete the old ones.
+   */
+  private _cleanUp(): void {
+    if (fsx.exists(this._dataFolder)) {
+      const files: string[] = fsx.readdirSync(this._dataFolder);
+      const filesToDelete: number = files.length - this._MAX_FILE_COUNT + 1;
+      if (filesToDelete > 0) {
+        const sortedFiles: string[] = files.map(filePath => {
+          return {
+            filePath: filePath,
+            modifiedTime: fsx.statSync(filePath).mtime.getTime()
+          };
+        })
+        .sort((a, b) => {
+          return a.modifiedTime - b.modifiedTime;
+        })
+        .map(s => {
+          return s.filePath;
+        });
+        for (let i: number = 0; i < filesToDelete; i++) {
+          fsx.unlinkSync(sortedFiles[i]);
+        }
+      }
+    }
   }
 
   private _getFilePath(): string {
