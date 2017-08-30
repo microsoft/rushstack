@@ -1,0 +1,23 @@
+<!-- docId=node-core-library.jsonschema.validateobject -->
+
+[Home](./index.md) &gt; [node-core-library](./node-core-library.md) &gt; [JsonSchema](./node-core-library.jsonschema.md)
+
+# JsonSchema.validateObject method
+
+Validates the specified JSON object against this JSON schema. If the validation fails, an exception will be thrown.
+
+**Signature:**
+```javascript
+public validateObject(jsonObject: Object, filenameForErrors: string, options?: IJsonSchemaValidateOptions): void;
+```
+**Returns:** `void`
+
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  `jsonObject` | `Object` | The JSON data to be validated |
+|  `filenameForErrors` | `string` | The filename that the JSON data was available, or an empty string if not applicable |
+|  `options` | `IJsonSchemaValidateOptions` | Other options that control the validation |
+
