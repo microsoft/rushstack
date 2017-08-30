@@ -2,6 +2,23 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "2.10.0",
+      "tag": "@microsoft/gulp-core-build_v2.10.0",
+      "date": "Wed, 30 Aug 2017 01:04:34 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "added CopyStaticAssetsTask"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.1.3` to `~0.2.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.9.6",
       "tag": "@microsoft/gulp-core-build_v2.9.6",
       "date": "Thu, 24 Aug 2017 22:44:12 GMT",
