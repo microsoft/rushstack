@@ -7,7 +7,7 @@ Wed, 30 Aug 2017 18:24:39 GMT
 
 ### Patches
 
-- Add tar as a dependency of Rush which is required work for replacing the temp_modules/*/package.json files with TGZ files
+- Replace the temp_modules/*/package.json files with TGZ files
 - Add repositoryUrl to RushConfiguration to track remote repository
 - Use the new Json API from node-core-library
 - Add two new methods to ChangeFile class
@@ -234,7 +234,7 @@ Sun, 22 Jan 2017 02:04:57 GMT
 
 ### Patches
 
-- Update temp_modules when versions are bumped. 
+- Update temp_modules when versions are bumped.
 
 ## 1.4.1
 Tue, 03 Jan 2017 21:52:49 GMT

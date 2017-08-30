@@ -8,7 +8,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "Add tar as a dependency of Rush which is required work for replacing the temp_modules/*/package.json files with TGZ files"
+            "comment": "Replace the temp_modules/*/package.json files with TGZ files"
           },
           {
             "comment": "Add repositoryUrl to RushConfiguration to track remote repository"
