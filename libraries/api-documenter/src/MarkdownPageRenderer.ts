@@ -26,15 +26,31 @@ class SimpleWriter {
     this._buffer += s + '\n';
   }
 
-  // Adds a newline if the file pointer is not already at the start of the line
-  public finishLine(): void {
-    if (this._buffer.substr(-1, 1) !== '\n') {
+  /**
+   * Adds a newline if the file pointer is not already at the start of the line
+   */
+  public ensureNewLine(): void {
+    if (this.peekLastCharacter() !== '\n') {
       this.write('\n');
     }
   }
 
-  public getLastWrittenCharacter(): string {
+  /**
+   * Adds up to two newlines to ensure that there is a blank line above the current line.
+   */
+  public ensureSkippedLine(): void {
+    this.ensureNewLine();
+    if (this.peekSecondLastCharacter() !== '\n') {
+      this.write('\n');
+    }
+  }
+
+  public peekLastCharacter(): string {
     return this._buffer.substr(-1, 1);
+  }
+
+  public peekSecondLastCharacter(): string {
+    return this._buffer.substr(-2, 1);
   }
 
   public toString(): string {
@@ -73,7 +89,7 @@ export class MarkdownPageRenderer extends BasePageRenderer {
     if (domPage.breadcrumb.length) {
       // Write the breadcrumb before the title
       this._writeElements(domPage.breadcrumb, context);
-      writer.finishLine();
+      writer.ensureNewLine();
       writer.writeLine();
     }
 
@@ -81,7 +97,7 @@ export class MarkdownPageRenderer extends BasePageRenderer {
     writer.writeLine();
 
     this._writeElements(domPage.elements, context);
-    writer.finishLine(); // finish the last line
+    writer.ensureNewLine(); // finish the last line
 
     fsx.writeFileSync(filename, writer.toString());
 
@@ -165,7 +181,7 @@ export class MarkdownPageRenderer extends BasePageRenderer {
             const middle: string = parts[2];
 
             if (middle !== '') {
-              switch (writer.getLastWrittenCharacter()) {
+              switch (writer.peekLastCharacter()) {
                 case '':
                 case '\n':
                 case ' ':
@@ -173,7 +189,9 @@ export class MarkdownPageRenderer extends BasePageRenderer {
                   // okay to put a symbol
                   break;
                 default:
-                  // we need a separator
+                  // This is no problem:        "**one** *two* **three**"
+                  // But this is trouble:       "**one***two***three**"
+                  // The most general solution: "**one**<!-- -->*two*<!-- -->**three**"
                   writer.write('<!-- -->');
                   break;
               }
@@ -217,7 +235,7 @@ export class MarkdownPageRenderer extends BasePageRenderer {
           if (context.insideTable) {
             writer.write('<p/>');
           } else {
-            writer.finishLine();
+            writer.ensureNewLine();
             writer.writeLine();
           }
           break;
@@ -225,19 +243,17 @@ export class MarkdownPageRenderer extends BasePageRenderer {
           writer.writeLine('<br/>');
           break;
         case 'heading1':
-          writer.finishLine();
-          writer.writeLine();
+          writer.ensureSkippedLine();
           writer.writeLine('## ' + this._getEscapedText(element.text));
           writer.writeLine();
           break;
         case 'heading2':
-          writer.finishLine();
-          writer.writeLine();
+          writer.ensureSkippedLine();
           writer.writeLine('### ' + this._getEscapedText(element.text));
           writer.writeLine();
           break;
         case 'code-box':
-          writer.finishLine();
+          writer.ensureNewLine();
           writer.write('```');
           switch (element.highlighter) {
             case 'javascript':
@@ -254,14 +270,16 @@ export class MarkdownPageRenderer extends BasePageRenderer {
           writer.writeLine('```');
           break;
         case 'note-box':
-          writer.finishLine();
+          writer.ensureNewLine();
           writer.write('> ');
           this._writeElements(element.elements, context);
-          writer.finishLine();
+          writer.ensureNewLine();
           writer.writeLine();
           break;
         case 'table':
-          writer.finishLine();
+          // GitHub's markdown renderer chokes on tables that don't have a blank line above them,
+          // whereas VS Code's renderer is totally fine with it.
+          writer.ensureSkippedLine();
 
           context.insideTable = true;
 
