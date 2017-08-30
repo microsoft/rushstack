@@ -10,6 +10,13 @@ Represents a JSON schema that can be used to validate JSON data files loaded by 
 
 Constructs a new instance of the `JsonSchema` class
 
+## Properties
+
+|  Property | Access Modifier | Type | Description |
+|  --- | --- | --- | --- |
+|  [`shortName`](./node-core-library.jsonschema.shortname.md) |  | `string` | Returns a short name for this schema, for use in error messages. |
+
+
 ## Methods
 
 |  Method | Access Modifier | Returns | Description |

@@ -9,6 +9,13 @@
 
 Constructs a new instance of the `Body` class
 
+## Properties
+
+|  Property | Access Modifier | Type | Description |
+|  --- | --- | --- | --- |
+|  [`bodyUsed`](./web-apis.body.bodyused.md) |  | `boolean` |  |
+
+
 ## Methods
 
 |  Method | Access Modifier | Returns | Description |
