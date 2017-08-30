@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-webpack",
+      "comment": "Upgrade to webpack 3.X.",
+      "type": "major"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-webpack",
+  "email": "iclanton@users.noreply.github.com"
+}
