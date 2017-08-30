@@ -5,6 +5,7 @@ import * as os from 'os';
 
 import {
   IDocClass,
+  IDocInterface,
   IDocPackage,
   IDocMember,
   IDocProperty,
@@ -46,6 +47,9 @@ export class Documenter {
     }
   }
 
+  /**
+   * GENERATE PAGE: PACKAGE
+   */
   private _writePackagePage(apiJsonFile: ApiJsonFile, renderer: BasePageRenderer): void {
     console.log(`Writing ${apiJsonFile.packageName} package`);
 
@@ -106,6 +110,7 @@ export class Documenter {
               docItemDescription
             ])
           );
+          this._writeInterfacePage(docItem, exportNode, renderer);
           break;
       }
     }
@@ -128,6 +133,9 @@ export class Documenter {
     renderer.writePage(domPage);
   }
 
+  /**
+   * GENERATE PAGE: CLASS
+   */
   private _writeClassPage(docClass: IDocClass, classNode: DocumentationNode, renderer: BasePageRenderer): void {
     const className: string = classNode.name;
 
@@ -223,6 +231,98 @@ export class Documenter {
     renderer.writePage(domPage);
   }
 
+  /**
+   * GENERATE PAGE: INTERFACE
+   */
+  private _writeInterfacePage(docInterface: IDocInterface, interfaceNode: DocumentationNode,
+    renderer: BasePageRenderer): void {
+
+    const interfaceName: string = interfaceNode.name;
+
+    // TODO: Show concise generic parameters with class name
+    const domPage: IDomPage = Domifier.createPage(`${interfaceName} interface`, interfaceNode.docId);
+    this._writeBreadcrumb(domPage, interfaceNode);
+
+    if (docInterface.isBeta) {
+      this._writeBetaWarning(domPage.elements);
+    }
+
+    domPage.elements.push(...Domifier.renderDocElements(docInterface.summary));
+
+    const propertiesTable: IDomTable = Domifier.createTable([
+      Domifier.createTextElements('Property'),
+      Domifier.createTextElements('Type'),
+      Domifier.createTextElements('Description')
+    ]);
+
+    const methodsTable: IDomTable = Domifier.createTable([
+      Domifier.createTextElements('Method'),
+      Domifier.createTextElements('Returns'),
+      Domifier.createTextElements('Description')
+    ]);
+
+    for (const memberName of Object.keys(docInterface.members)) {
+      const member: IDocMember = docInterface.members[memberName];
+      const memberNode: DocumentationNode = new DocumentationNode(member, memberName, interfaceNode);
+
+      switch (member.kind) {
+        case 'property':
+          const propertyTitle: DomBasicText[] = [
+            Domifier.createDocumentationLink(
+              [Domifier.createCode(memberName, 'javascript')],
+              memberNode.docId)
+          ];
+
+          propertiesTable.rows.push(
+            Domifier.createTableRow([
+              propertyTitle,
+              [Domifier.createCode(member.type)],
+              Domifier.renderDocElements(member.summary)
+            ])
+          );
+          this._writePropertyPage(member, memberNode, renderer);
+          break;
+
+        case 'method':
+          const methodTitle: DomBasicText[] = [
+            Domifier.createDocumentationLink(
+              [Domifier.createCode(RenderingHelpers.getConciseSignature(memberName, member), 'javascript')],
+              memberNode.docId)
+          ];
+
+          methodsTable.rows.push(
+            Domifier.createTableRow([
+              methodTitle,
+              member.returnValue ? [Domifier.createCode(member.returnValue.type, 'javascript')] : [],
+              Domifier.renderDocElements(member.summary)
+            ])
+          );
+          this._writeMethodPage(member, memberNode, renderer);
+          break;
+      }
+    }
+
+    if (propertiesTable.rows.length > 0) {
+      domPage.elements.push(Domifier.createHeading1('Properties'));
+      domPage.elements.push(propertiesTable);
+    }
+
+    if (methodsTable.rows.length > 0) {
+      domPage.elements.push(Domifier.createHeading1('Methods'));
+      domPage.elements.push(methodsTable);
+    }
+
+    if (docInterface.remarks && docInterface.remarks.length) {
+      domPage.elements.push(Domifier.createHeading1('Remarks'));
+      domPage.elements.push(...Domifier.renderDocElements(docInterface.remarks));
+    }
+
+    renderer.writePage(domPage);
+  }
+
+  /**
+   * GENERATE PAGE: PROPERTY
+   */
   private _writePropertyPage(docProperty: IDocProperty, propertyNode: DocumentationNode,
     renderer: BasePageRenderer): void {
 
@@ -249,6 +349,9 @@ export class Documenter {
     renderer.writePage(domPage);
   }
 
+  /**
+   * GENERATE PAGE: METHOD
+   */
   private _writeMethodPage(docMethod: IDocMethod, methodNode: DocumentationNode, renderer: BasePageRenderer): void {
 
     const fullMethodName: string = methodNode.parent!.name + '.' + methodNode.name;

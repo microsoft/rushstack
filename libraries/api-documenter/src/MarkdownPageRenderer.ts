@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as fsx from 'fs-extra';
-import * as os from 'os';
 import * as path from 'path';
 
 import {
@@ -60,7 +59,7 @@ export class MarkdownPageRenderer extends BasePageRenderer {
   public writePage(domPage: IDomPage): string { // override
     const filename: string = path.join(this.outputFolder, this.getFilenameForDocId(domPage.docId));
 
-    console.log('Writing: ' + filename + os.EOL);
+    // console.log('Writing: ' + filename);
 
     const writer: SimpleWriter = new SimpleWriter();
     writer.writeLine('<!-- docId=' + domPage.docId + ' -->');
