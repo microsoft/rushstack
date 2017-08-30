@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-karma
 
-This log was last generated on Wed, 30 Aug 2017 01:04:34 GMT and should not be manually modified.
+This log was last generated on Wed, 30 Aug 2017 22:08:21 GMT and should not be manually modified.
+
+## 3.0.0
+Wed, 30 Aug 2017 22:08:21 GMT
+
+### Breaking changes
+
+- Upgrade to webpack 3.X.
 
 ## 2.3.12
 Wed, 30 Aug 2017 01:04:34 GMT
