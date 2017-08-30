@@ -30,11 +30,25 @@ export interface IWebpackTaskConfig {
    * An instance of the webpack compiler object, useful for building with Webpack 2.X while GCB is still on 1.X.
    */
   webpack?: typeof Webpack;
+
+  /**
+   * If true, a summary of the compilation will be printed after it completes. Defaults to true.
+   */
+  printStats?: boolean;
 }
 
-/** @public */
+/**
+ * @public
+ */
+export interface IWebpackResources {
+  webpack: typeof Webpack;
+}
+
+/**
+ * @public
+ */
 export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConfig & TExtendedConfig> {
-  private _resources: Object;
+  private _resources: IWebpackResources;
 
   constructor(extendedName?: string, extendedConfig?: TExtendedConfig) {
     super(
@@ -42,17 +56,19 @@ export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConf
       {
         configPath: './webpack.config.js',
         suppressWarnings: [],
+        printStats: true,
         ...(extendedConfig as Object)
       } as any // tslint:disable-line:no-any
     );
   }
 
-  public get resources(): Object {
+  public get resources(): IWebpackResources {
     if (!this._resources) {
       this._resources = {
-        webpack: require('webpack')
+        webpack: this.taskConfig.webpack || require('webpack')
       };
     }
+
     return this._resources;
   }
 
@@ -79,7 +95,7 @@ export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConf
         'Initializing a webpack.config.js, which bundles lib/index.js ' +
         'into dist/packagename.js into a UMD module.');
 
-      this.copyFile(path.resolve(__dirname, '..', 'webpack.config.js'));
+      this.copyFile(path.resolve(__dirname, 'webpack.config.js'));
       completeCallback();
     } else {
       let webpackConfig: Object;
@@ -100,7 +116,7 @@ export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConf
       }
 
       if (webpackConfig) {
-        const webpack: Webpack.Webpack = this.taskConfig.webpack || require('webpack');
+        const webpack: typeof Webpack = this.taskConfig.webpack || require('webpack');
         const gutil = require('gulp-util');
         const startTime = new Date().getTime();
         const outputDir = this.buildConfig.distFolder;
@@ -157,11 +173,11 @@ export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConf
             statsResultChildren.forEach(child => {
               if (child.chunks) {
                 child.chunks.forEach(chunk => {
-                  if (chunk.files) {
+                  if (chunk.files && this.taskConfig.printStats) {
                     chunk.files.forEach(file => (
                       this.log(`Bundled: '${gutil.colors.cyan(path.basename(file))}', ` +
-                        `size: ${gutil.colors.magenta(chunk.size)} bytes, ` +
-                        `took ${gutil.colors.magenta(duration)} ms.`)
+                                `size: ${gutil.colors.magenta(chunk.size)} bytes, ` +
+                                `took ${gutil.colors.magenta(duration)} ms.`)
                     )); // end file
                   }
                 }); // end chunk

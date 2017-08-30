@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-karma",
-  "version": "2.3.12",
+  "version": "3.0.0",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -33,7 +33,7 @@
     "phantomjs-prebuilt": "~2.1.6",
     "sinon": "~1.17.3",
     "sinon-chai": "~2.8.0",
-    "webpack": "~1.13.0"
+    "webpack": "~3.5.5"
   },
   "devDependencies": {
     "@microsoft/node-library-build": "~3.2.0",

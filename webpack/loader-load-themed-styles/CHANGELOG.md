@@ -1,6 +1,13 @@
 # Change Log - @microsoft/loader-load-themed-styles
 
-This log was last generated on Wed, 30 Aug 2017 01:04:34 GMT and should not be manually modified.
+This log was last generated on Wed, 30 Aug 2017 22:08:21 GMT and should not be manually modified.
+
+## 1.5.0
+Wed, 30 Aug 2017 22:08:21 GMT
+
+### Minor changes
+
+- Upgrade to webpack 3.X.
 
 ## 1.4.3
 Wed, 30 Aug 2017 01:04:34 GMT

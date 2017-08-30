@@ -2,6 +2,18 @@
   "name": "@microsoft/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "1.2.0",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v1.2.0",
+      "date": "Wed, 30 Aug 2017 22:08:21 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade to webpack 3.X."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.2",
       "tag": "@microsoft/set-webpack-public-path-plugin_v1.1.2",
       "date": "Wed, 30 Aug 2017 01:04:34 GMT",
