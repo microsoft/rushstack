@@ -5,6 +5,8 @@ import * as os from 'os';
 
 import {
   IDocClass,
+  IDocEnum,
+  IDocEnumValue,
   IDocInterface,
   IDocPackage,
   IDocMember,
@@ -69,6 +71,11 @@ export class Documenter {
       Domifier.createTextElements('Description')
     ]);
 
+    const enumerationsTable: IDomTable = Domifier.createTable([
+      Domifier.createTextElements('Enumeration'),
+      Domifier.createTextElements('Description')
+    ]);
+
     const interfacesTable: IDomTable = Domifier.createTable([
       Domifier.createTextElements('Interface'),
       Domifier.createTextElements('Description')
@@ -103,6 +110,15 @@ export class Documenter {
           );
           this._writeClassPage(docItem, exportNode, renderer);
           break;
+        case 'enum':
+          enumerationsTable.rows.push(
+            Domifier.createTableRow([
+              docItemTitle,
+              docItemDescription
+            ])
+          );
+          this._writeEnumPage(docItem, exportNode, renderer);
+          break;
         case 'interface':
           interfacesTable.rows.push(
             Domifier.createTableRow([
@@ -123,6 +139,11 @@ export class Documenter {
     if (classesTable.rows.length > 0) {
       domPage.elements.push(Domifier.createHeading1('Classes'));
       domPage.elements.push(classesTable);
+    }
+
+    if (enumerationsTable.rows.length > 0) {
+      domPage.elements.push(Domifier.createHeading1('Enumerations'));
+      domPage.elements.push(enumerationsTable);
     }
 
     if (interfacesTable.rows.length > 0) {
@@ -186,7 +207,7 @@ export class Documenter {
             Domifier.createTableRow([
               propertyTitle,
               [],
-              [Domifier.createCode(member.type)],
+              [Domifier.createCode(member.type, 'javascript')],
               Domifier.renderDocElements(member.summary)
             ])
           );
@@ -226,6 +247,55 @@ export class Documenter {
     if (docClass.remarks && docClass.remarks.length) {
       domPage.elements.push(Domifier.createHeading1('Remarks'));
       domPage.elements.push(...Domifier.renderDocElements(docClass.remarks));
+    }
+
+    renderer.writePage(domPage);
+  }
+
+  /**
+   * GENERATE PAGE: ENUM
+   */
+  private _writeEnumPage(docEnum: IDocEnum, enumNode: DocumentationNode,
+    renderer: BasePageRenderer): void {
+
+    const enumName: string = enumNode.name;
+
+    // TODO: Show concise generic parameters with class name
+    const domPage: IDomPage = Domifier.createPage(`${enumName} enumeration`, enumNode.docId);
+    this._writeBreadcrumb(domPage, enumNode);
+
+    if (docEnum.isBeta) {
+      this._writeBetaWarning(domPage.elements);
+    }
+
+    domPage.elements.push(...Domifier.renderDocElements(docEnum.summary));
+
+    const membersTable: IDomTable = Domifier.createTable([
+      Domifier.createTextElements('Member'),
+      Domifier.createTextElements('Value'),
+      Domifier.createTextElements('Description')
+    ]);
+
+    for (const memberName of Object.keys(docEnum.values)) {
+      const member: IDocEnumValue = (docEnum.values as any)[memberName]; // tslint:disable-line:no-any
+
+      const enumValue: DomBasicText[] = [];
+
+      if (member.value) {
+        enumValue.push(Domifier.createCode('= ' + member.value));
+      }
+
+      membersTable.rows.push(
+        Domifier.createTableRow([
+          Domifier.createTextElements(memberName),
+          enumValue,
+          Domifier.renderDocElements(member.summary)
+        ])
+      );
+    }
+
+    if (membersTable.rows.length > 0) {
+      domPage.elements.push(membersTable);
     }
 
     renderer.writePage(domPage);
