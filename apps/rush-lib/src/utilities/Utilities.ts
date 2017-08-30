@@ -105,7 +105,7 @@ export default class Utilities {
     // fail.  To workaround that, retry for up to 7 seconds before giving up.
     const maxWaitTimeMs: number = 7 * 1000;
 
-    return Utilities.retryUntilTimeout(() => fsx.mkdirSync(folderName),
+    return Utilities.retryUntilTimeout(() => fsx.mkdirsSync(folderName),
                                        maxWaitTimeMs,
                                        (e) => new Error(`Error: ${e}${os.EOL}Often this is caused by a file lock ` +
                                                         'from a process such as your text editor, command prompt, ' +
