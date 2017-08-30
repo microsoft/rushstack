@@ -2,6 +2,33 @@
   "name": "@microsoft/rush-lib",
   "entries": [
     {
+      "version": "3.0.15",
+      "tag": "@microsoft/rush-lib_v3.0.15",
+      "date": "Wed, 30 Aug 2017 18:24:39 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add tar as a dependency of Rush which is required work for replacing the temp_modules/*/package.json files with TGZ files"
+          },
+          {
+            "comment": "Add repositoryUrl to RushConfiguration to track remote repository"
+          },
+          {
+            "comment": "Use the new Json API from node-core-library"
+          },
+          {
+            "comment": "Add two new methods to ChangeFile class"
+          },
+          {
+            "comment": "Introduce an experimental \"rush version\" action to manage project versions based on version policy"
+          },
+          {
+            "comment": "Make \"rush generate\" not throw if there is a problem reading the shrinkwrap file"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.12",
       "tag": "@microsoft/rush-lib_v3.0.12",
       "date": "Fri, Jul 21, 2017 22:30:12 GMT",
