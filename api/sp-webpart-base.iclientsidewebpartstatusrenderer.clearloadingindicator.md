@@ -12,7 +12,6 @@ clearLoadingIndicator(domElement: Element): void;
 ```
 **Returns:** `void`
 
-
 ## Parameters
 
 |  Parameter | Type | Description |

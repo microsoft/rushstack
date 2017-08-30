@@ -12,7 +12,6 @@ clearError(domElement: HTMLElement): void;
 ```
 **Returns:** `void`
 
-
 ## Parameters
 
 |  Parameter | Type | Description |

@@ -30,7 +30,6 @@ Constructs a new instance of the `BaseClientSideWebPart` class
 |  [`renderedOnce`](./sp-webpart-base.baseclientsidewebpart.renderedonce.md) |  | `boolean` | This property indicates whether the web part has been rendered once or not. After the first time rendering, the value of this property is always true. Till a full re-render of the web part happens. |
 |  [`title`](./sp-webpart-base.baseclientsidewebpart.title.md) |  | `string` | Title of the WebPart |
 
-
 ## Methods
 
 |  Method | Access Modifier | Returns | Description |

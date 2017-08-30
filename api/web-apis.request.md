@@ -4,7 +4,6 @@
 
 # Request class
 
-
 ## Constructor
 
 Constructs a new instance of the `Request` class

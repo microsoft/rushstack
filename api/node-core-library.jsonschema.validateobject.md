@@ -12,7 +12,6 @@ public validateObject(jsonObject: Object, filenameForErrors: string, options?: I
 ```
 **Returns:** `void`
 
-
 ## Parameters
 
 |  Parameter | Type | Description |

@@ -16,7 +16,6 @@ Constructs a new instance of the `JsonSchema` class
 |  --- | --- | --- | --- |
 |  [`shortName`](./node-core-library.jsonschema.shortname.md) |  | `string` | Returns a short name for this schema, for use in error messages. |
 
-
 ## Methods
 
 |  Method | Access Modifier | Returns | Description |
@@ -26,7 +25,6 @@ Constructs a new instance of the `JsonSchema` class
 |  [`fromLoadedObject()`](./node-core-library.jsonschema.fromloadedobject.md) | `public` | `JsonSchema` | Registers a JsonSchema that will be loaded from a file on disk. |
 |  [`validateObject(jsonObject, filenameForErrors, options)`](./node-core-library.jsonschema.validateobject.md) | `public` | `void` | Validates the specified JSON object against this JSON schema. If the validation fails, an exception will be thrown. |
 |  [`validateObjectWithCallback()`](./node-core-library.jsonschema.validateobjectwithcallback.md) | `public` | `void` | Validates the specified JSON object against this JSON schema. If the validation fails, a callback is called for each validation error. |
-
 
 ## Remarks
 

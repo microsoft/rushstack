@@ -4,7 +4,6 @@
 
 # ResponseInit interface
 
-
 ## Properties
 
 |  Property | Type | Description |

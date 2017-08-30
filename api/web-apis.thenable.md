@@ -4,7 +4,6 @@
 
 # Thenable interface
 
-
 ## Methods
 
 |  Method | Returns | Description |

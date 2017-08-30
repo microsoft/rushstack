@@ -12,7 +12,6 @@ public static fromFile(filename: string, options?: IJsonSchemaFromFileOptions): 
 ```
 **Returns:** `JsonSchema`
 
-
 ## Remarks
 
 NOTE: An error occurs if the file does not exist; however, the file itself is not loaded or validated until it the schema is actually used.

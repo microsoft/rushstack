@@ -5,6 +5,7 @@
 # PropertyPaneFieldType enumeration
 
 Enum for all the supported PropertyPane field types. Names should be consistent with those in office-ui-fabric-react, be careful to get letter casing correct.
+
 |  Member | Value | Description |
 |  --- | --- | --- |
 |  Button | `= 11` | Button field. |

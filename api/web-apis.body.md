@@ -4,7 +4,6 @@
 
 # Body class
 
-
 ## Constructor
 
 Constructs a new instance of the `Body` class
@@ -14,7 +13,6 @@ Constructs a new instance of the `Body` class
 |  Property | Access Modifier | Type | Description |
 |  --- | --- | --- | --- |
 |  [`bodyUsed`](./web-apis.body.bodyused.md) |  | `boolean` |  |
-
 
 ## Methods
 

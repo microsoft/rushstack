@@ -5,6 +5,7 @@
 # PropertyPaneButtonType enumeration
 
 Enum for all the supported button types.
+
 |  Member | Value | Description |
 |  --- | --- | --- |
 |  Command |  | Optional actions. Typically used in a command bar at the top of a view, panel and inside an inline command bar. Examples: Command bar at the top of OneDrive, Outlook, SharePoint. Inline command bar on the top of SharePoint web parts. |

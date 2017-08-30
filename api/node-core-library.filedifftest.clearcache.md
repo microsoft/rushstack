@@ -12,7 +12,6 @@ public static clearCache(): void;
 ```
 **Returns:** `void`
 
-
 ## Remarks
 
 Call this method if changes have been made to the package.json files on disk.

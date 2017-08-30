@@ -4,7 +4,6 @@
 
 # RequestInit interface
 
-
 ## Properties
 
 |  Property | Type | Description |

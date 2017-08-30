@@ -12,7 +12,6 @@ This API is called when the display mode of a web part is changed. The default i
 ```
 **Returns:** `void`
 
-
 ## Parameters
 
 |  Parameter | Type | Description |

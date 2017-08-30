@@ -12,7 +12,6 @@ This API is invoked after updating the new value of the property in the property
 ```
 **Returns:** `void`
 
-
 ## Parameters
 
 |  Parameter | Type | Description |

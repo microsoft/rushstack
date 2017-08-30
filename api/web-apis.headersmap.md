@@ -4,7 +4,6 @@
 
 # HeadersMap interface
 
-
 ## Methods
 
 |  Method | Returns | Description |

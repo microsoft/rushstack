@@ -12,7 +12,6 @@ displayLoadingIndicator(domElement: Element, loadingMessage: string, timeout?: n
 ```
 **Returns:** `void`
 
-
 ## Parameters
 
 |  Parameter | Type | Description |

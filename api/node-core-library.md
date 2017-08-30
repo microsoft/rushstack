@@ -15,7 +15,6 @@ Core libraries that every NodeJS toolchain project should use.
 |  [`JsonSchema`](./node-core-library.jsonschema.md) | Represents a JSON schema that can be used to validate JSON data files loaded by the JsonFile class. |
 |  [`PackageJsonLookup`](./node-core-library.packagejsonlookup.md) | This class provides methods for finding the nearest "package.json" for a folder and retrieving the name of the package. The results are cached. |
 
-
 ## Interfaces
 
 |  Interface | Description |

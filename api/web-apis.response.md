@@ -4,7 +4,6 @@
 
 # Response class
 
-
 ## Constructor
 
 Constructs a new instance of the `Response` class
@@ -19,7 +18,6 @@ Constructs a new instance of the `Response` class
 |  [`statusText`](./web-apis.response.statustext.md) |  | `string` |  |
 |  [`type`](./web-apis.response.type.md) |  | `ResponseType` |  |
 |  [`url`](./web-apis.response.url.md) |  | `string` |  |
-
 
 ## Methods
 

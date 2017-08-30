@@ -21,7 +21,6 @@ The base context interface for client-side web parts.
 |  [`statusRenderer`](./sp-webpart-base.iwebpartcontext.statusrenderer.md) | `IClientSideWebPartStatusRenderer` | Web part status renderer. |
 |  [`webPartTag`](./sp-webpart-base.iwebpartcontext.webparttag.md) | `string` | Web part tag to be used for logging and telemetry. |
 
-
 ## Remarks
 
 A "context" object is a collection of well-known services and other objects that are likely to be needed by any business logic working with a component. Each component type has its own specialized extension of this interface, e.g. IWebPartContext for web parts, IExtensionContext for client-side extensions, etc.

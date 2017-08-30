@@ -4,7 +4,6 @@
 
 # web-apis package
 
-
 ## Classes
 
 |  Class | Description |
@@ -14,7 +13,6 @@
 |  [`Promise`](./web-apis.promise.md) |  |
 |  [`Request`](./web-apis.request.md) |  |
 |  [`Response`](./web-apis.response.md) |  |
-
 
 ## Interfaces
 

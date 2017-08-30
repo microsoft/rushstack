@@ -13,7 +13,6 @@ public static loadAndValidateWithCallback(jsonFilename: string, jsonSchema: Json
 ```
 **Returns:** `any`
 
-
 ## Remarks
 
 See JsonSchema.validateObjectWithCallback() for more info.

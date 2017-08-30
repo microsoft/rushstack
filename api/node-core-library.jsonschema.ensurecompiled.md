@@ -12,7 +12,6 @@ public ensureCompiled(): void;
 ```
 **Returns:** `void`
 
-
 ## Remarks
 
 Any dependencies will be compiled as well.

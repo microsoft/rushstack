@@ -4,7 +4,6 @@
 
 # Promise class
 
-
 ## Constructor
 
 Constructs a new instance of the `Promise` class

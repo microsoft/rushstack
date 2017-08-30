@@ -12,7 +12,6 @@ renderError(domElement: HTMLElement, error: Error | string): void;
 ```
 **Returns:** `void`
 
-
 ## Parameters
 
 |  Parameter | Type | Description |

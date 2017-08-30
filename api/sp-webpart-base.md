@@ -16,14 +16,12 @@ A web part is a reusable visual object that a page author can add to their conte
 |  --- | --- |
 |  [`BaseClientSideWebPart`](./sp-webpart-base.baseclientsidewebpart.md) | This abstract class implements the the base functionality for a client side web part. Every client side web part needs to inherit from this class. Along with the base functionality, this class provides some APIs that can be used by the web part. These APIs fall in two catagories. The first category of APIs provide data and functionality. Example, the web part context (i.e. this.context). This API should be used to access contextual data relevant to this web part instance. The second category of APIs provide a base implementation for the web part lifecycle and can be overridden for an updated implementation. The render() API is the only API that is mandatory to be implemented/overridden by a web part. All other life cycle APIs have a base implementation and can be overridden based on the needs of the web part. Please refer to the documentation of the individual APIs to make the right decision. |
 
-
 ## Enumerations
 
 |  Enumeration | Description |
 |  --- | --- |
 |  [`PropertyPaneButtonType`](./sp-webpart-base.propertypanebuttontype.md) | Enum for all the supported button types. |
 |  [`PropertyPaneFieldType`](./sp-webpart-base.propertypanefieldtype.md) | Enum for all the supported PropertyPane field types. Names should be consistent with those in office-ui-fabric-react, be careful to get letter casing correct. |
-
 
 ## Interfaces
 

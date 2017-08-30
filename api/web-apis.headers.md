@@ -4,7 +4,6 @@
 
 # Headers class
 
-
 ## Constructor
 
 Constructs a new instance of the `Headers` class

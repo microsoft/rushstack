@@ -12,7 +12,6 @@ protected renderError(error: Error): void;
 ```
 **Returns:** `void`
 
-
 ## Parameters
 
 |  Parameter | Type | Description |
