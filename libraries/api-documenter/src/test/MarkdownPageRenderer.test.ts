@@ -39,8 +39,15 @@ describe('MarkdownPageRenderer', () => {
     domPage.elements.push(...Domifier.createTextElements(' three', { bold: true }));
     domPage.elements.push(...Domifier.createTextElements('', { bold: false }));
     domPage.elements.push(...Domifier.createTextElements('four', { bold: true }));
-    domPage.elements.push(...Domifier.createTextElements('nonbold', { bold: false }));
+    domPage.elements.push(...Domifier.createTextElements('non-bold', { bold: false }));
     domPage.elements.push(...Domifier.createTextElements('five', { bold: true }));
+
+    domPage.elements.push(Domifier.createHeading1('Adjacent to other characters'));
+    // Creates a "[" before the bold text
+    domPage.elements.push(Domifier.createDocumentationLinkFromText('a link', 'index'));
+    domPage.elements.push(...Domifier.createTextElements('bold', { bold: true }));
+    domPage.elements.push(...Domifier.createTextElements('non-bold', { bold: false }));
+    domPage.elements.push(...Domifier.createTextElements('more-non-bold', { bold: false }));
 
     domPage.elements.push(Domifier.createHeading1('Bad characters'));
     domPage.elements.push(...Domifier.createTextElements('*one*two*', { bold: true }));

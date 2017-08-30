@@ -138,8 +138,9 @@ export interface IDomTableRow {
 export interface IDomPage {
   kind: 'page';
 
-  title: string;
   docId: string;
+  breadcrumb: DomBasicText[];
+  title: string;
 
   elements: DomTopLevelElement[];
 }

@@ -66,15 +66,23 @@ export class MarkdownPageRenderer extends BasePageRenderer {
     writer.writeLine('<!-- docId=' + domPage.docId + ' -->');
     writer.writeLine();
 
-    writer.writeLine('# ' + domPage.title);
-    writer.writeLine();
-
     const context: IRenderContext = {
       writer: writer,
       insideTable: false
     };
 
+    if (domPage.breadcrumb.length) {
+      // Write the breadcrumb before the title
+      this._writeElements(domPage.breadcrumb, context);
+      writer.finishLine();
+      writer.writeLine();
+    }
+
+    writer.writeLine('# ' + this._getEscapedText(domPage.title));
+    writer.writeLine();
+
     this._writeElements(domPage.elements, context);
+    writer.finishLine(); // finish the last line
 
     fsx.writeFileSync(filename, writer.toString());
 
@@ -162,6 +170,7 @@ export class MarkdownPageRenderer extends BasePageRenderer {
                 case '':
                 case '\n':
                 case ' ':
+                case '[':
                   // okay to put a symbol
                   break;
                 default:

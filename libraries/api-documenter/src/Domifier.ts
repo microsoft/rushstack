@@ -28,7 +28,7 @@ import {
   DomCodeHighlighter
 } from './SimpleDom';
 
-import { RenderingHelpers } from './RenderingHelpers';
+import { DocumentationNode } from './DocumentationNode';
 
 /**
  * A helper class for generating DomElement structures.
@@ -165,8 +165,9 @@ export class Domifier {
   public static createPage(title: string, docId: string): IDomPage {
     return {
       kind: 'page',
-      title: title,
       docId: docId,
+      breadcrumb: [],
+      title: title,
       elements: []
     } as IDomPage;
   }
@@ -196,8 +197,7 @@ export class Domifier {
             }
             result.push(
               Domifier.createDocumentationLinkFromText(linkText,
-                RenderingHelpers.getDocId(linkDocElement.packageName || '', linkDocElement.exportName,
-                  linkDocElement.memberName)
+                DocumentationNode.getDocIdForCodeLink(linkDocElement)
               )
             );
           } else {
