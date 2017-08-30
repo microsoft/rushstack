@@ -7,6 +7,7 @@ import {
   IDocClass,
   IDocPackage,
   IDocMember,
+  IDocProperty,
   IDocItem,
   IDocParam,
   IDocMethod
@@ -147,6 +148,13 @@ export class Documenter {
     domPage.elements.push(Domifier.createCode(className));
     domPage.elements.push(...Domifier.createTextElements(' class'));
 
+    const propertiesTable: IDomTable = Domifier.createTable([
+      Domifier.createTextElements('Property'),
+      Domifier.createTextElements('Access Modifier'),
+      Domifier.createTextElements('Type'),
+      Domifier.createTextElements('Description')
+    ]);
+
     const methodsTable: IDomTable = Domifier.createTable([
       Domifier.createTextElements('Method'),
       Domifier.createTextElements('Access Modifier'),
@@ -156,14 +164,32 @@ export class Documenter {
 
     for (const memberName of Object.keys(docClass.members)) {
       const member: IDocMember = docClass.members[memberName];
-      switch (member.kind) {
-        case 'method':
-          const methodNode: DocumentationNode = new DocumentationNode(member, memberName, classNode);
+      const memberNode: DocumentationNode = new DocumentationNode(member, memberName, classNode);
 
+      switch (member.kind) {
+        case 'property':
+          const propertyTitle: DomBasicText[] = [
+            Domifier.createDocumentationLink(
+              [Domifier.createCode(memberName, 'javascript')],
+              memberNode.docId)
+          ];
+
+          propertiesTable.rows.push(
+            Domifier.createTableRow([
+              propertyTitle,
+              [],
+              [Domifier.createCode(member.type)],
+              Domifier.renderDocElements(member.summary)
+            ])
+          );
+          this._writePropertyPage(member, memberNode, renderer);
+          break;
+
+        case 'method':
           const methodTitle: DomBasicText[] = [
             Domifier.createDocumentationLink(
               [Domifier.createCode(RenderingHelpers.getConciseSignature(memberName, member), 'javascript')],
-              methodNode.docId)
+              memberNode.docId)
           ];
 
           methodsTable.rows.push(
@@ -174,9 +200,14 @@ export class Documenter {
               Domifier.renderDocElements(member.summary)
             ])
           );
-          this._writeMethodPage(member, methodNode, renderer);
+          this._writeMethodPage(member, memberNode, renderer);
           break;
       }
+    }
+
+    if (propertiesTable.rows.length > 0) {
+      domPage.elements.push(Domifier.createHeading1('Properties'));
+      domPage.elements.push(propertiesTable);
     }
 
     if (methodsTable.rows.length > 0) {
@@ -187,6 +218,32 @@ export class Documenter {
     if (docClass.remarks && docClass.remarks.length) {
       domPage.elements.push(Domifier.createHeading1('Remarks'));
       domPage.elements.push(...Domifier.renderDocElements(docClass.remarks));
+    }
+
+    renderer.writePage(domPage);
+  }
+
+  private _writePropertyPage(docProperty: IDocProperty, propertyNode: DocumentationNode,
+    renderer: BasePageRenderer): void {
+
+    const fullProperyName: string = propertyNode.parent!.name + '.' + propertyNode.name;
+
+    const domPage: IDomPage = Domifier.createPage(`${fullProperyName} property`, propertyNode.docId);
+    this._writeBreadcrumb(domPage, propertyNode);
+
+    if (docProperty.isBeta) {
+      this._writeBetaWarning(domPage.elements);
+    }
+
+    domPage.elements.push(...Domifier.renderDocElements(docProperty.summary));
+
+    domPage.elements.push(Domifier.PARAGRAPH);
+    domPage.elements.push(...Domifier.createTextElements('Signature:', { bold: true }));
+    domPage.elements.push(Domifier.createCodeBox(propertyNode.name + ': ' + docProperty.type, 'javascript'));
+
+    if (docProperty.remarks && docProperty.remarks.length) {
+      domPage.elements.push(Domifier.createHeading1('Remarks'));
+      domPage.elements.push(...Domifier.renderDocElements(docProperty.remarks));
     }
 
     renderer.writePage(domPage);
@@ -256,7 +313,7 @@ export class Documenter {
       domPage.breadcrumb.push(...Domifier.createTextElements(' > '));
       domPage.breadcrumb.push(Domifier.createDocumentationLinkFromText(node.name, node.docId));
     }
-}
+  }
 
   private _writeBetaWarning(elements: DomTopLevelElement[]): void {
     const betaWarning: string = 'This API is provided as a preview for developers and may change'
