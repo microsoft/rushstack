@@ -24,7 +24,11 @@ This is a **bold** word.
 
 ## Adjacent bold regions
 
-**onetwo threefour**<!-- -->nonbold<!-- -->**five**
+**onetwo threefour**<!-- -->non-bold<!-- -->**five**
+
+## Adjacent to other characters
+
+[a link](./index.md)<!-- -->**bold**<!-- -->non-boldmore-non-bold
 
 ## Bad characters
 
