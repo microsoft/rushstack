@@ -7,6 +7,7 @@ import {
   IDocClass,
   IDocEnum,
   IDocEnumValue,
+  IDocFunction,
   IDocInterface,
   IDocPackage,
   IDocMember,
@@ -71,13 +72,19 @@ export class Documenter {
       Domifier.createTextElements('Description')
     ]);
 
-    const enumerationsTable: IDomTable = Domifier.createTable([
-      Domifier.createTextElements('Enumeration'),
+    const interfacesTable: IDomTable = Domifier.createTable([
+      Domifier.createTextElements('Interface'),
       Domifier.createTextElements('Description')
     ]);
 
-    const interfacesTable: IDomTable = Domifier.createTable([
-      Domifier.createTextElements('Interface'),
+    const functionsTable: IDomTable = Domifier.createTable([
+      Domifier.createTextElements('Function'),
+      Domifier.createTextElements('Returns'),
+      Domifier.createTextElements('Description')
+    ]);
+
+    const enumerationsTable: IDomTable = Domifier.createTable([
+      Domifier.createTextElements('Enumeration'),
       Domifier.createTextElements('Description')
     ]);
 
@@ -110,15 +117,6 @@ export class Documenter {
           );
           this._writeClassPage(docItem, exportNode, renderer);
           break;
-        case 'enum':
-          enumerationsTable.rows.push(
-            Domifier.createTableRow([
-              docItemTitle,
-              docItemDescription
-            ])
-          );
-          this._writeEnumPage(docItem, exportNode, renderer);
-          break;
         case 'interface':
           interfacesTable.rows.push(
             Domifier.createTableRow([
@@ -127,6 +125,25 @@ export class Documenter {
             ])
           );
           this._writeInterfacePage(docItem, exportNode, renderer);
+          break;
+        case 'function':
+          functionsTable.rows.push(
+            Domifier.createTableRow([
+              docItemTitle,
+              docItem.returnValue ? [Domifier.createCode(docItem.returnValue.type, 'javascript')] : [],
+              docItemDescription
+            ])
+          );
+          this._writeFunctionPage(docItem, exportNode, renderer);
+          break;
+        case 'enum':
+          enumerationsTable.rows.push(
+            Domifier.createTableRow([
+              docItemTitle,
+              docItemDescription
+            ])
+          );
+          this._writeEnumPage(docItem, exportNode, renderer);
           break;
       }
     }
@@ -141,14 +158,19 @@ export class Documenter {
       domPage.elements.push(classesTable);
     }
 
-    if (enumerationsTable.rows.length > 0) {
-      domPage.elements.push(Domifier.createHeading1('Enumerations'));
-      domPage.elements.push(enumerationsTable);
-    }
-
     if (interfacesTable.rows.length > 0) {
       domPage.elements.push(Domifier.createHeading1('Interfaces'));
       domPage.elements.push(interfacesTable);
+    }
+
+    if (functionsTable.rows.length > 0) {
+      domPage.elements.push(Domifier.createHeading1('Functions'));
+      domPage.elements.push(functionsTable);
+    }
+
+    if (enumerationsTable.rows.length > 0) {
+      domPage.elements.push(Domifier.createHeading1('Enumerations'));
+      domPage.elements.push(enumerationsTable);
     }
 
     renderer.writePage(domPage);
@@ -253,55 +275,6 @@ export class Documenter {
   }
 
   /**
-   * GENERATE PAGE: ENUM
-   */
-  private _writeEnumPage(docEnum: IDocEnum, enumNode: DocumentationNode,
-    renderer: BasePageRenderer): void {
-
-    const enumName: string = enumNode.name;
-
-    // TODO: Show concise generic parameters with class name
-    const domPage: IDomPage = Domifier.createPage(`${enumName} enumeration`, enumNode.docId);
-    this._writeBreadcrumb(domPage, enumNode);
-
-    if (docEnum.isBeta) {
-      this._writeBetaWarning(domPage.elements);
-    }
-
-    domPage.elements.push(...Domifier.renderDocElements(docEnum.summary));
-
-    const membersTable: IDomTable = Domifier.createTable([
-      Domifier.createTextElements('Member'),
-      Domifier.createTextElements('Value'),
-      Domifier.createTextElements('Description')
-    ]);
-
-    for (const memberName of Object.keys(docEnum.values)) {
-      const member: IDocEnumValue = (docEnum.values as any)[memberName]; // tslint:disable-line:no-any
-
-      const enumValue: DomBasicText[] = [];
-
-      if (member.value) {
-        enumValue.push(Domifier.createCode('= ' + member.value));
-      }
-
-      membersTable.rows.push(
-        Domifier.createTableRow([
-          Domifier.createTextElements(memberName),
-          enumValue,
-          Domifier.renderDocElements(member.summary)
-        ])
-      );
-    }
-
-    if (membersTable.rows.length > 0) {
-      domPage.elements.push(membersTable);
-    }
-
-    renderer.writePage(domPage);
-  }
-
-  /**
    * GENERATE PAGE: INTERFACE
    */
   private _writeInterfacePage(docInterface: IDocInterface, interfaceNode: DocumentationNode,
@@ -391,6 +364,55 @@ export class Documenter {
   }
 
   /**
+   * GENERATE PAGE: ENUM
+   */
+  private _writeEnumPage(docEnum: IDocEnum, enumNode: DocumentationNode,
+    renderer: BasePageRenderer): void {
+
+    const enumName: string = enumNode.name;
+
+    // TODO: Show concise generic parameters with class name
+    const domPage: IDomPage = Domifier.createPage(`${enumName} enumeration`, enumNode.docId);
+    this._writeBreadcrumb(domPage, enumNode);
+
+    if (docEnum.isBeta) {
+      this._writeBetaWarning(domPage.elements);
+    }
+
+    domPage.elements.push(...Domifier.renderDocElements(docEnum.summary));
+
+    const membersTable: IDomTable = Domifier.createTable([
+      Domifier.createTextElements('Member'),
+      Domifier.createTextElements('Value'),
+      Domifier.createTextElements('Description')
+    ]);
+
+    for (const memberName of Object.keys(docEnum.values)) {
+      const member: IDocEnumValue = (docEnum.values as any)[memberName]; // tslint:disable-line:no-any
+
+      const enumValue: DomBasicText[] = [];
+
+      if (member.value) {
+        enumValue.push(Domifier.createCode('= ' + member.value));
+      }
+
+      membersTable.rows.push(
+        Domifier.createTableRow([
+          Domifier.createTextElements(memberName),
+          enumValue,
+          Domifier.renderDocElements(member.summary)
+        ])
+      );
+    }
+
+    if (membersTable.rows.length > 0) {
+      domPage.elements.push(membersTable);
+    }
+
+    renderer.writePage(domPage);
+  }
+
+  /**
    * GENERATE PAGE: PROPERTY
    */
   private _writePropertyPage(docProperty: IDocProperty, propertyNode: DocumentationNode,
@@ -463,6 +485,61 @@ export class Documenter {
       domPage.elements.push(parametersTable);
       for (const parameterName of Object.keys(docMethod.parameters)) {
         const parameter: IDocParam = docMethod.parameters[parameterName];
+          parametersTable.rows.push(Domifier.createTableRow([
+            [Domifier.createCode(parameterName, 'javascript')],
+            parameter.type ? [Domifier.createCode(parameter.type, 'javascript')] : [],
+            Domifier.renderDocElements(parameter.description)
+          ])
+        );
+      }
+    }
+
+    renderer.writePage(domPage);
+  }
+
+  /**
+   * GENERATE PAGE: FUNCTION
+   */
+  private _writeFunctionPage(docFunction: IDocFunction, functionNode: DocumentationNode,
+    renderer: BasePageRenderer): void {
+
+    const domPage: IDomPage = Domifier.createPage(`${functionNode.name} function`, functionNode.docId);
+    this._writeBreadcrumb(domPage, functionNode);
+
+    if (docFunction.isBeta) {
+      this._writeBetaWarning(domPage.elements);
+    }
+
+    domPage.elements.push(...Domifier.renderDocElements(docFunction.summary));
+
+    domPage.elements.push(Domifier.PARAGRAPH);
+    domPage.elements.push(...Domifier.createTextElements('Signature:', { bold: true }));
+    domPage.elements.push(Domifier.createCodeBox(functionNode.name, 'javascript'));
+
+    if (docFunction.returnValue) {
+      domPage.elements.push(...Domifier.createTextElements('Returns:', { bold: true }));
+      domPage.elements.push(...Domifier.createTextElements(' '));
+      domPage.elements.push(Domifier.createCode(docFunction.returnValue.type, 'javascript'));
+      domPage.elements.push(Domifier.PARAGRAPH);
+      domPage.elements.push(...Domifier.renderDocElements(docFunction.returnValue.description));
+    }
+
+    if (docFunction.remarks && docFunction.remarks.length) {
+      domPage.elements.push(Domifier.createHeading1('Remarks'));
+      domPage.elements.push(...Domifier.renderDocElements(docFunction.remarks));
+    }
+
+    if (Object.keys(docFunction.parameters).length > 0) {
+      const parametersTable: IDomTable = Domifier.createTable([
+        Domifier.createTextElements('Parameter'),
+        Domifier.createTextElements('Type'),
+        Domifier.createTextElements('Description')
+      ]);
+
+      domPage.elements.push(Domifier.createHeading1('Parameters'));
+      domPage.elements.push(parametersTable);
+      for (const parameterName of Object.keys(docFunction.parameters)) {
+        const parameter: IDocParam = docFunction.parameters[parameterName];
           parametersTable.rows.push(Domifier.createTableRow([
             [Domifier.createCode(parameterName, 'javascript')],
             parameter.type ? [Domifier.createCode(parameter.type, 'javascript')] : [],
