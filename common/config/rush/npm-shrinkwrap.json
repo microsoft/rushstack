@@ -371,9 +371,9 @@
       "resolved": "https://registry.npmjs.org/@types/through2/-/through2-2.0.32.tgz"
     },
     "@types/uglify-js": {
-      "version": "2.6.28",
-      "from": "@types/uglify-js@2.6.28",
-      "resolved": "https://registry.npmjs.org/@types/uglify-js/-/uglify-js-2.6.28.tgz"
+      "version": "2.6.29",
+      "from": "@types/uglify-js@2.6.29",
+      "resolved": "https://registry.npmjs.org/@types/uglify-js/-/uglify-js-2.6.29.tgz"
     },
     "@types/vinyl": {
       "version": "1.2.30",
@@ -6029,9 +6029,26 @@
       "resolved": "https://registry.npmjs.org/typescript/-/typescript-2.4.2.tgz"
     },
     "uglify-js": {
-      "version": "2.8.29",
-      "from": "uglify-js@>=2.8.22 <2.9.0",
-      "resolved": "https://registry.npmjs.org/uglify-js/-/uglify-js-2.8.29.tgz",
+      "version": "3.0.28",
+      "from": "uglify-js@>=3.0.28 <3.1.0",
+      "resolved": "https://registry.npmjs.org/uglify-js/-/uglify-js-3.0.28.tgz",
+      "dependencies": {
+        "commander": {
+          "version": "2.11.0",
+          "from": "commander@>=2.11.0 <2.12.0",
+          "resolved": "https://registry.npmjs.org/commander/-/commander-2.11.0.tgz"
+        },
+        "source-map": {
+          "version": "0.5.7",
+          "from": "source-map@>=0.5.1 <0.6.0",
+          "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.5.7.tgz"
+        }
+      }
+    },
+    "uglifyjs-webpack-plugin": {
+      "version": "0.4.6",
+      "from": "uglifyjs-webpack-plugin@>=0.4.6 <0.5.0",
+      "resolved": "https://registry.npmjs.org/uglifyjs-webpack-plugin/-/uglifyjs-webpack-plugin-0.4.6.tgz",
       "dependencies": {
         "camelcase": {
           "version": "1.2.1",
@@ -6045,8 +6062,13 @@
         },
         "source-map": {
           "version": "0.5.7",
-          "from": "source-map@>=0.5.1 <0.6.0",
+          "from": "source-map@>=0.5.6 <0.6.0",
           "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.5.7.tgz"
+        },
+        "uglify-js": {
+          "version": "2.8.29",
+          "from": "uglify-js@>=2.8.29 <3.0.0",
+          "resolved": "https://registry.npmjs.org/uglify-js/-/uglify-js-2.8.29.tgz"
         },
         "window-size": {
           "version": "0.1.0",
@@ -6062,18 +6084,6 @@
           "version": "3.10.0",
           "from": "yargs@>=3.10.0 <3.11.0",
           "resolved": "https://registry.npmjs.org/yargs/-/yargs-3.10.0.tgz"
-        }
-      }
-    },
-    "uglifyjs-webpack-plugin": {
-      "version": "0.4.6",
-      "from": "uglifyjs-webpack-plugin@>=0.4.6 <0.5.0",
-      "resolved": "https://registry.npmjs.org/uglifyjs-webpack-plugin/-/uglifyjs-webpack-plugin-0.4.6.tgz",
-      "dependencies": {
-        "source-map": {
-          "version": "0.5.7",
-          "from": "source-map@>=0.5.6 <0.6.0",
-          "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.5.7.tgz"
         }
       }
     },

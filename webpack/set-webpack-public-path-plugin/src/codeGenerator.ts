@@ -149,16 +149,16 @@ export function getGlobalRegisterCode(debug: boolean = false): string {
   if (debug) {
     return `${EOL}${joinedScript}`;
   } else {
-    const uglified: uglify.AST_Toplevel = uglify.parse(joinedScript);
-    uglified.figure_out_scope();
-    const compressor: uglify.AST_Toplevel = uglify.Compressor({
-      dead_code: true
-    });
-    const compressed: uglify.AST_Toplevel = uglified.transform(compressor);
-    compressed.figure_out_scope();
-    compressed.compute_char_frequency();
-    compressed.mangle_names();
-    return `${EOL}${compressed.print_to_string()}`;
+    const minifyOutput: uglify.MinifyOutput = uglify.minify(
+      joinedScript,
+      {
+        compress: {
+          dead_code: true
+        }
+      }
+    );
+
+    return `${EOL}${minifyOutput.code}`;
   }
 }
 
