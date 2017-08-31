@@ -55,6 +55,7 @@ export class Documenter {
     const packageNode: DocumentationNode = new DocumentationNode(docPackage, unscopedPackageName, undefined);
 
     const domPage: IDomPage = Domifier.createPage(`${unscopedPackageName} package`, packageNode.docId);
+    this._writeBreadcrumb(domPage, packageNode);
 
     domPage.elements.push(...Domifier.renderDocElements(apiJsonFile.docPackage.summary));
 
@@ -131,6 +132,7 @@ export class Documenter {
 
     // TODO: Show concise generic parameters with class name
     const domPage: IDomPage = Domifier.createPage(`${className} class`, classNode.docId);
+    this._writeBreadcrumb(domPage, classNode);
 
     if (docClass.isBeta) {
       this._writeBetaWarning(domPage.elements);
@@ -195,6 +197,7 @@ export class Documenter {
     const fullMethodName: string = methodNode.parent!.name + '.' + methodNode.name;
 
     const domPage: IDomPage = Domifier.createPage(`${fullMethodName} method`, methodNode.docId);
+    this._writeBreadcrumb(domPage, methodNode);
 
     if (docMethod.isBeta) {
       this._writeBetaWarning(domPage.elements);
@@ -241,6 +244,19 @@ export class Documenter {
 
     renderer.writePage(domPage);
   }
+
+  private _writeBreadcrumb(domPage: IDomPage, currentNode: DocumentationNode): void {
+    domPage.breadcrumb.push(Domifier.createDocumentationLinkFromText('Home', 'index'));
+
+    const reversedNodes: DocumentationNode[] = [];
+    for (let node: DocumentationNode|undefined = currentNode.parent; node; node = node.parent) {
+      reversedNodes.unshift(node);
+    }
+    for (const node of reversedNodes) {
+      domPage.breadcrumb.push(...Domifier.createTextElements(' > '));
+      domPage.breadcrumb.push(Domifier.createDocumentationLinkFromText(node.name, node.docId));
+    }
+}
 
   private _writeBetaWarning(elements: DomTopLevelElement[]): void {
     const betaWarning: string = 'This API is provided as a preview for developers and may change'

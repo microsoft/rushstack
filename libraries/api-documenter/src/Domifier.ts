@@ -165,8 +165,9 @@ export class Domifier {
   public static createPage(title: string, docId: string): IDomPage {
     return {
       kind: 'page',
-      title: title,
       docId: docId,
+      breadcrumb: [],
+      title: title,
       elements: []
     } as IDomPage;
   }
