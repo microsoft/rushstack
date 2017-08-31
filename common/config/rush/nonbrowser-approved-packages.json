@@ -78,10 +78,6 @@
       "allowedCategories": [ "libraries", "other" ]
     },
     {
-      "name": "ajv",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "argparse",
       "allowedCategories": [ "libraries" ]
     },

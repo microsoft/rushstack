@@ -2,6 +2,77 @@
   "name": "@microsoft/web-library-build",
   "entries": [
     {
+      "version": "4.0.0",
+      "tag": "@microsoft/web-library-build_v4.0.0",
+      "date": "Thu, 31 Aug 2017 18:41:18 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Fix compatibility issues with old releases, by incrementing the major version number"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.10.1` to `3.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-karma\" from `3.0.1` to `4.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `3.2.11` to `4.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `2.1.13` to `3.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `3.5.3` to `4.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `2.0.2` to `3.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.16",
+      "tag": "@microsoft/web-library-build_v3.2.16",
+      "date": "Thu, 31 Aug 2017 17:46:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.10.0` to `2.10.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-karma\" from `3.0.0` to `3.0.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `3.2.10` to `3.2.11`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `2.1.12` to `2.1.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `3.5.2` to `3.5.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `2.0.1` to `2.0.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.15",
+      "tag": "@microsoft/web-library-build_v3.2.15",
+      "date": "Thu, 31 Aug 2017 13:04:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `2.0.0` to `2.0.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.14",
       "tag": "@microsoft/web-library-build_v3.2.14",
       "date": "Wed, 30 Aug 2017 22:08:21 GMT",

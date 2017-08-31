@@ -2,6 +2,35 @@
   "name": "@microsoft/gulp-core-build-karma",
   "entries": [
     {
+      "version": "4.0.0",
+      "tag": "@microsoft/gulp-core-build-karma_v4.0.0",
+      "date": "Thu, 31 Aug 2017 18:41:18 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Fix compatibility issues with old releases, by incrementing the major version number"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.10.1` to `3.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.0.1",
+      "tag": "@microsoft/gulp-core-build-karma_v3.0.1",
+      "date": "Thu, 31 Aug 2017 17:46:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.10.0` to `2.10.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.0",
       "tag": "@microsoft/gulp-core-build-karma_v3.0.0",
       "date": "Wed, 30 Aug 2017 22:08:21 GMT",
