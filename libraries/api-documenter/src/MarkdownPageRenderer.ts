@@ -75,8 +75,6 @@ export class MarkdownPageRenderer extends BasePageRenderer {
   public writePage(domPage: IDomPage): string { // override
     const filename: string = path.join(this.outputFolder, this.getFilenameForDocId(domPage.docId));
 
-    // console.log('Writing: ' + filename);
-
     const writer: SimpleWriter = new SimpleWriter();
     writer.writeLine('<!-- docId=' + domPage.docId + ' -->');
     writer.writeLine();
