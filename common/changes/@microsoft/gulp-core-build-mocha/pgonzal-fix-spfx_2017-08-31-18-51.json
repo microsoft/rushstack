@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-mocha",
+      "comment": "Fix compatibility issues by reverting to the last known good state for this major release number",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-mocha",
+  "email": "pgonzal@users.noreply.github.com"
+}

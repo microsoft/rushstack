@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/node-library-build",
+      "comment": "Fix compatibility issues by reverting to the last known good state for this major release number",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/node-library-build",
+  "email": "pgonzal@users.noreply.github.com"
+}
