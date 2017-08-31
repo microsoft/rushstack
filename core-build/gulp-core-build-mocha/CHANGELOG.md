@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-mocha
 
-This log was last generated on Tue, 15 Aug 2017 19:04:14 GMT and should not be manually modified.
+This log was last generated on Thu, 31 Aug 2017 19:10:10 GMT and should not be manually modified.
+
+## 2.1.14
+Thu, 31 Aug 2017 19:10:10 GMT
+
+### Patches
+
+- Fix compatibility issues by reverting to the last known good state for this major release number
 
 ## 2.1.8
 Tue, 15 Aug 2017 19:04:14 GMT

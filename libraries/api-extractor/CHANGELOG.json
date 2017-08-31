@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "2.3.8",
+      "tag": "@microsoft/api-extractor_v2.3.8",
+      "date": "Thu, 31 Aug 2017 19:10:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix compatibility issues by reverting to the last known good state for this major release number"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.3.2",
       "tag": "@microsoft/api-extractor_v2.3.2",
       "date": "Tue, 15 Aug 2017 01:29:31 GMT",
