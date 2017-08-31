@@ -12,7 +12,7 @@
     "test": "gulp test"
   },
   "dependencies": {
-    "uglify-js": "~2.8.22",
+    "uglify-js": "~3.0.28",
     "lodash": "~4.15.0",
     "@types/webpack": "3.0.10"
   },
@@ -20,6 +20,7 @@
     "@types/tapable": "0.2.3",
     "@types/lodash": "4.14.52",
     "@types/mocha": "2.2.38",
+    "@types/uglify-js": "2.6.29",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "mocha": "~3.4.2",
