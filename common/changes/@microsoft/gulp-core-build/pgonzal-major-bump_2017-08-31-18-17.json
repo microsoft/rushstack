@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build",
+      "comment": "Fix compatibility issues with old releases, by incrementing the major version number",
+      "type": "major"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build",
+  "email": "pgonzal@users.noreply.github.com"
+}
