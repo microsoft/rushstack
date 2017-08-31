@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 30 Aug 2017 01:04:34 GMT and should not be manually modified.
+This log was last generated on Thu, 31 Aug 2017 17:46:25 GMT and should not be manually modified.
+
+## 2.3.7
+Thu, 31 Aug 2017 17:46:25 GMT
+
+### Patches
+
+- Fix issue where node-core-library was not an explicit dependency
 
 ## 2.3.6
 Wed, 30 Aug 2017 01:04:34 GMT
