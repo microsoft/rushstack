@@ -55,78 +55,78 @@
     },
     "@rush-temp/api-documenter": {
       "version": "0.0.0",
-      "from": "projects\\api-documenter",
-      "resolved": "file:projects\\api-documenter"
+      "from": "projects\\api-documenter.tgz",
+      "resolved": "file:projects\\api-documenter.tgz"
     },
     "@rush-temp/api-extractor": {
       "version": "0.0.0",
-      "from": "projects\\api-extractor",
-      "resolved": "file:projects\\api-extractor"
+      "from": "projects\\api-extractor.tgz",
+      "resolved": "file:projects\\api-extractor.tgz"
     },
     "@rush-temp/decorators": {
       "version": "0.0.0",
-      "from": "projects\\decorators",
-      "resolved": "file:projects\\decorators"
+      "from": "projects\\decorators.tgz",
+      "resolved": "file:projects\\decorators.tgz"
     },
     "@rush-temp/gulp-core-build": {
       "version": "0.0.0",
-      "from": "projects\\gulp-core-build",
-      "resolved": "file:projects\\gulp-core-build"
+      "from": "projects\\gulp-core-build.tgz",
+      "resolved": "file:projects\\gulp-core-build.tgz"
     },
     "@rush-temp/gulp-core-build-karma": {
       "version": "0.0.0",
-      "from": "projects\\gulp-core-build-karma",
-      "resolved": "file:projects\\gulp-core-build-karma"
+      "from": "projects\\gulp-core-build-karma.tgz",
+      "resolved": "file:projects\\gulp-core-build-karma.tgz"
     },
     "@rush-temp/gulp-core-build-mocha": {
       "version": "0.0.0",
-      "from": "projects\\gulp-core-build-mocha",
-      "resolved": "file:projects\\gulp-core-build-mocha"
+      "from": "projects\\gulp-core-build-mocha.tgz",
+      "resolved": "file:projects\\gulp-core-build-mocha.tgz"
     },
     "@rush-temp/gulp-core-build-sass": {
       "version": "0.0.0",
-      "from": "projects\\gulp-core-build-sass",
-      "resolved": "file:projects\\gulp-core-build-sass"
+      "from": "projects\\gulp-core-build-sass.tgz",
+      "resolved": "file:projects\\gulp-core-build-sass.tgz"
     },
     "@rush-temp/gulp-core-build-serve": {
       "version": "0.0.0",
-      "from": "projects\\gulp-core-build-serve",
-      "resolved": "file:projects\\gulp-core-build-serve"
+      "from": "projects\\gulp-core-build-serve.tgz",
+      "resolved": "file:projects\\gulp-core-build-serve.tgz"
     },
     "@rush-temp/gulp-core-build-typescript": {
       "version": "0.0.0",
-      "from": "projects\\gulp-core-build-typescript",
-      "resolved": "file:projects\\gulp-core-build-typescript"
+      "from": "projects\\gulp-core-build-typescript.tgz",
+      "resolved": "file:projects\\gulp-core-build-typescript.tgz"
     },
     "@rush-temp/gulp-core-build-webpack": {
       "version": "0.0.0",
-      "from": "projects\\gulp-core-build-webpack",
-      "resolved": "file:projects\\gulp-core-build-webpack"
+      "from": "projects\\gulp-core-build-webpack.tgz",
+      "resolved": "file:projects\\gulp-core-build-webpack.tgz"
     },
     "@rush-temp/load-themed-styles": {
       "version": "0.0.0",
-      "from": "projects\\load-themed-styles",
-      "resolved": "file:projects\\load-themed-styles"
+      "from": "projects\\load-themed-styles.tgz",
+      "resolved": "file:projects\\load-themed-styles.tgz"
     },
     "@rush-temp/loader-load-themed-styles": {
       "version": "0.0.0",
-      "from": "projects\\loader-load-themed-styles",
-      "resolved": "file:projects\\loader-load-themed-styles"
+      "from": "projects\\loader-load-themed-styles.tgz",
+      "resolved": "file:projects\\loader-load-themed-styles.tgz"
     },
     "@rush-temp/loader-raw-script": {
       "version": "0.0.0",
-      "from": "projects\\loader-raw-script",
-      "resolved": "file:projects\\loader-raw-script"
+      "from": "projects\\loader-raw-script.tgz",
+      "resolved": "file:projects\\loader-raw-script.tgz"
     },
     "@rush-temp/loader-set-webpack-public-path": {
       "version": "0.0.0",
-      "from": "projects\\loader-set-webpack-public-path",
-      "resolved": "file:projects\\loader-set-webpack-public-path"
+      "from": "projects\\loader-set-webpack-public-path.tgz",
+      "resolved": "file:projects\\loader-set-webpack-public-path.tgz"
     },
     "@rush-temp/node-core-library": {
       "version": "0.0.0",
-      "from": "projects\\node-core-library",
-      "resolved": "file:projects\\node-core-library",
+      "from": "projects\\node-core-library.tgz",
+      "resolved": "file:projects\\node-core-library.tgz",
       "dependencies": {
         "@microsoft/api-extractor": {
           "version": "2.3.5",
@@ -157,48 +157,48 @@
     },
     "@rush-temp/node-library-build": {
       "version": "0.0.0",
-      "from": "projects\\node-library-build",
-      "resolved": "file:projects\\node-library-build"
+      "from": "projects\\node-library-build.tgz",
+      "resolved": "file:projects\\node-library-build.tgz"
     },
     "@rush-temp/package-deps-hash": {
       "version": "0.0.0",
-      "from": "projects\\package-deps-hash",
-      "resolved": "file:projects\\package-deps-hash"
+      "from": "projects\\package-deps-hash.tgz",
+      "resolved": "file:projects\\package-deps-hash.tgz"
     },
     "@rush-temp/rush": {
       "version": "0.0.0",
-      "from": "projects\\rush",
-      "resolved": "file:projects\\rush"
+      "from": "projects\\rush.tgz",
+      "resolved": "file:projects\\rush.tgz"
     },
     "@rush-temp/rush-lib": {
       "version": "0.0.0",
-      "from": "projects\\rush-lib",
-      "resolved": "file:projects\\rush-lib"
+      "from": "projects\\rush-lib.tgz",
+      "resolved": "file:projects\\rush-lib.tgz"
     },
     "@rush-temp/set-webpack-public-path-plugin": {
       "version": "0.0.0",
-      "from": "projects\\set-webpack-public-path-plugin",
-      "resolved": "file:projects\\set-webpack-public-path-plugin"
+      "from": "projects\\set-webpack-public-path-plugin.tgz",
+      "resolved": "file:projects\\set-webpack-public-path-plugin.tgz"
     },
     "@rush-temp/stream-collator": {
       "version": "0.0.0",
-      "from": "projects\\stream-collator",
-      "resolved": "file:projects\\stream-collator"
+      "from": "projects\\stream-collator.tgz",
+      "resolved": "file:projects\\stream-collator.tgz"
     },
     "@rush-temp/test-web-library-build": {
       "version": "0.0.0",
-      "from": "projects\\test-web-library-build",
-      "resolved": "file:projects\\test-web-library-build"
+      "from": "projects\\test-web-library-build.tgz",
+      "resolved": "file:projects\\test-web-library-build.tgz"
     },
     "@rush-temp/ts-command-line": {
       "version": "0.0.0",
-      "from": "projects\\ts-command-line",
-      "resolved": "file:projects\\ts-command-line"
+      "from": "projects\\ts-command-line.tgz",
+      "resolved": "file:projects\\ts-command-line.tgz"
     },
     "@rush-temp/web-library-build": {
       "version": "0.0.0",
-      "from": "projects\\web-library-build",
-      "resolved": "file:projects\\web-library-build"
+      "from": "projects\\web-library-build.tgz",
+      "resolved": "file:projects\\web-library-build.tgz"
     },
     "@types/assertion-error": {
       "version": "1.0.30",
@@ -684,12 +684,6 @@
       "from": "batch@>=0.5.3 <0.6.0",
       "resolved": "https://registry.npmjs.org/batch/-/batch-0.5.3.tgz"
     },
-    "bcrypt-pbkdf": {
-      "version": "1.0.1",
-      "from": "bcrypt-pbkdf@>=1.0.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/bcrypt-pbkdf/-/bcrypt-pbkdf-1.0.1.tgz",
-      "optional": true
-    },
     "beeper": {
       "version": "1.1.1",
       "from": "beeper@>=1.0.0 <2.0.0",
@@ -1167,9 +1161,9 @@
       "resolved": "https://registry.npmjs.org/cookie-signature/-/cookie-signature-1.0.6.tgz"
     },
     "core-js": {
-      "version": "2.5.0",
+      "version": "2.5.1",
       "from": "core-js@>=2.1.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/core-js/-/core-js-2.5.0.tgz"
+      "resolved": "https://registry.npmjs.org/core-js/-/core-js-2.5.1.tgz"
     },
     "core-util-is": {
       "version": "1.0.2",
@@ -1467,12 +1461,6 @@
           "resolved": "https://registry.npmjs.org/string_decoder/-/string_decoder-1.0.3.tgz"
         }
       }
-    },
-    "ecc-jsbn": {
-      "version": "0.1.1",
-      "from": "ecc-jsbn@>=0.1.1 <0.2.0",
-      "resolved": "https://registry.npmjs.org/ecc-jsbn/-/ecc-jsbn-0.1.1.tgz",
-      "optional": true
     },
     "ee-first": {
       "version": "1.1.1",
@@ -2929,14 +2917,7 @@
     "handlebars": {
       "version": "4.0.10",
       "from": "handlebars@>=4.0.1 <5.0.0",
-      "resolved": "https://registry.npmjs.org/handlebars/-/handlebars-4.0.10.tgz",
-      "dependencies": {
-        "source-map": {
-          "version": "0.4.4",
-          "from": "source-map@>=0.4.4 <0.5.0",
-          "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.4.4.tgz"
-        }
-      }
+      "resolved": "https://registry.npmjs.org/handlebars/-/handlebars-4.0.10.tgz"
     },
     "har-schema": {
       "version": "1.0.5",
@@ -3458,12 +3439,6 @@
       "from": "js-yaml@>=3.9.1 <3.10.0",
       "resolved": "https://registry.npmjs.org/js-yaml/-/js-yaml-3.9.1.tgz"
     },
-    "jsbn": {
-      "version": "0.1.1",
-      "from": "jsbn@>=0.1.0 <0.2.0",
-      "resolved": "https://registry.npmjs.org/jsbn/-/jsbn-0.1.1.tgz",
-      "optional": true
-    },
     "jsesc": {
       "version": "0.5.0",
       "from": "jsesc@>=0.5.0 <0.6.0",
@@ -3491,7 +3466,7 @@
     },
     "json-stable-stringify": {
       "version": "1.0.1",
-      "from": "json-stable-stringify@>=1.0.1 <2.0.0",
+      "from": "json-stable-stringify@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/json-stable-stringify/-/json-stable-stringify-1.0.1.tgz"
     },
     "json-stringify-safe": {
@@ -4143,7 +4118,7 @@
     },
     "mime-types": {
       "version": "2.1.16",
-      "from": "mime-types@>=2.1.7 <2.2.0",
+      "from": "mime-types@>=2.1.15 <2.2.0",
       "resolved": "https://registry.npmjs.org/mime-types/-/mime-types-2.1.16.tgz"
     },
     "mimic-fn": {
@@ -5016,7 +4991,7 @@
     },
     "qs": {
       "version": "6.4.0",
-      "from": "qs@>=6.4.0 <6.5.0",
+      "from": "qs@6.4.0",
       "resolved": "https://registry.npmjs.org/qs/-/qs-6.4.0.tgz"
     },
     "querystring": {
@@ -5221,7 +5196,7 @@
     },
     "request": {
       "version": "2.81.0",
-      "from": "request@>=2.54.0 <3.0.0",
+      "from": "request@>=2.81.0 <2.82.0",
       "resolved": "https://registry.npmjs.org/request/-/request-2.81.0.tgz"
     },
     "request-progress": {
@@ -5344,14 +5319,7 @@
     "scss-tokenizer": {
       "version": "0.2.3",
       "from": "scss-tokenizer@>=0.2.3 <0.3.0",
-      "resolved": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.2.3.tgz",
-      "dependencies": {
-        "source-map": {
-          "version": "0.4.4",
-          "from": "source-map@>=0.4.2 <0.5.0",
-          "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.4.4.tgz"
-        }
-      }
+      "resolved": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.2.3.tgz"
     },
     "semver": {
       "version": "5.3.0",
@@ -5585,10 +5553,9 @@
       "resolved": "https://registry.npmjs.org/source-list-map/-/source-list-map-2.0.0.tgz"
     },
     "source-map": {
-      "version": "0.2.0",
-      "from": "source-map@>=0.2.0 <0.3.0",
-      "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.2.0.tgz",
-      "optional": true
+      "version": "0.4.4",
+      "from": "source-map@>=0.4.4 <0.5.0",
+      "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.4.4.tgz"
     },
     "sparkles": {
       "version": "1.0.0",
@@ -6036,12 +6003,6 @@
       "from": "tunnel-agent@>=0.6.0 <0.7.0",
       "resolved": "https://registry.npmjs.org/tunnel-agent/-/tunnel-agent-0.6.0.tgz"
     },
-    "tweetnacl": {
-      "version": "0.14.5",
-      "from": "tweetnacl@>=0.14.0 <0.15.0",
-      "resolved": "https://registry.npmjs.org/tweetnacl/-/tweetnacl-0.14.5.tgz",
-      "optional": true
-    },
     "type-check": {
       "version": "0.3.2",
       "from": "type-check@>=0.3.2 <0.4.0",
@@ -6103,12 +6064,6 @@
           "resolved": "https://registry.npmjs.org/yargs/-/yargs-3.10.0.tgz"
         }
       }
-    },
-    "uglify-to-browserify": {
-      "version": "1.0.2",
-      "from": "uglify-to-browserify@>=1.0.0 <1.1.0",
-      "resolved": "https://registry.npmjs.org/uglify-to-browserify/-/uglify-to-browserify-1.0.2.tgz",
-      "optional": true
     },
     "uglifyjs-webpack-plugin": {
       "version": "0.4.6",
