@@ -20,8 +20,7 @@
     "@types/node": "6.0.62",
     "gulp": "~3.9.1",
     "gulp-util": "~3.0.7",
-    "webpack": "~3.5.5",
-    "ajv": "^5.2.2"
+    "webpack": "~3.5.5"
   },
   "devDependencies": {
     "@microsoft/node-library-build": "~3.2.0",
