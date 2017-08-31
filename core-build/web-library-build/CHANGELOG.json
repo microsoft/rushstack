@@ -2,6 +2,18 @@
   "name": "@microsoft/web-library-build",
   "entries": [
     {
+      "version": "3.2.15",
+      "tag": "@microsoft/web-library-build_v3.2.15",
+      "date": "Thu, 31 Aug 2017 13:04:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `2.0.0` to `2.0.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.14",
       "tag": "@microsoft/web-library-build_v3.2.14",
       "date": "Wed, 30 Aug 2017 22:08:21 GMT",

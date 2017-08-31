@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-webpack",
   "entries": [
     {
+      "version": "2.0.1",
+      "tag": "@microsoft/gulp-core-build-webpack_v2.0.1",
+      "date": "Thu, 31 Aug 2017 13:04:19 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Removing an unneccessary dependency."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.0",
       "tag": "@microsoft/gulp-core-build-webpack_v2.0.0",
       "date": "Wed, 30 Aug 2017 22:08:21 GMT",
