@@ -4837,9 +4837,9 @@
           "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.5.7.tgz"
         },
         "supports-color": {
-          "version": "4.3.0",
+          "version": "4.4.0",
           "from": "supports-color@>=4.2.1 <5.0.0",
-          "resolved": "https://registry.npmjs.org/supports-color/-/supports-color-4.3.0.tgz"
+          "resolved": "https://registry.npmjs.org/supports-color/-/supports-color-4.4.0.tgz"
         }
       }
     },
@@ -4874,9 +4874,9 @@
           "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.5.7.tgz"
         },
         "supports-color": {
-          "version": "4.3.0",
+          "version": "4.4.0",
           "from": "supports-color@>=4.2.1 <5.0.0",
-          "resolved": "https://registry.npmjs.org/supports-color/-/supports-color-4.3.0.tgz"
+          "resolved": "https://registry.npmjs.org/supports-color/-/supports-color-4.4.0.tgz"
         }
       }
     },
@@ -4911,9 +4911,9 @@
           "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.5.7.tgz"
         },
         "supports-color": {
-          "version": "4.3.0",
+          "version": "4.4.0",
           "from": "supports-color@>=4.2.1 <5.0.0",
-          "resolved": "https://registry.npmjs.org/supports-color/-/supports-color-4.3.0.tgz"
+          "resolved": "https://registry.npmjs.org/supports-color/-/supports-color-4.4.0.tgz"
         }
       }
     },
@@ -4948,9 +4948,9 @@
           "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.5.7.tgz"
         },
         "supports-color": {
-          "version": "4.3.0",
+          "version": "4.4.0",
           "from": "supports-color@>=4.2.1 <5.0.0",
-          "resolved": "https://registry.npmjs.org/supports-color/-/supports-color-4.3.0.tgz"
+          "resolved": "https://registry.npmjs.org/supports-color/-/supports-color-4.4.0.tgz"
         }
       }
     },
@@ -6402,9 +6402,9 @@
           "resolved": "https://registry.npmjs.org/strip-bom/-/strip-bom-3.0.0.tgz"
         },
         "supports-color": {
-          "version": "4.3.0",
+          "version": "4.4.0",
           "from": "supports-color@>=4.2.1 <5.0.0",
-          "resolved": "https://registry.npmjs.org/supports-color/-/supports-color-4.3.0.tgz"
+          "resolved": "https://registry.npmjs.org/supports-color/-/supports-color-4.4.0.tgz"
         },
         "yargs": {
           "version": "8.0.2",

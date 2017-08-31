@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix issue where node-core-library was not an explicit dependency",
+      "packageName": "@microsoft/api-extractor",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "pgonzal@users.noreply.github.com"
+}
