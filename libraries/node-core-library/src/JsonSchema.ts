@@ -271,6 +271,11 @@ export class JsonSchema {
 
     this.ensureCompiled();
 
+    // If the JSON object has a "$schema" property, delete it
+    if (jsonObject['$schema']) {
+      delete jsonObject['$schema'];
+    }
+
     if (!this._validator!.validate(jsonObject, this._schemaObject)) {
       const errorDetails: string = JsonSchema._formatErrorDetails(this._validator!.getLastErrors());
 
