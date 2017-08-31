@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/web-library-build",
-  "version": "3.2.9",
+  "version": "3.2.16",
   "description": "",
   "engines": {
     "npm": "3.10.8"
