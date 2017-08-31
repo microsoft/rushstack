@@ -2,6 +2,18 @@
   "name": "@microsoft/ts-command-line",
   "entries": [
     {
+      "version": "2.0.6",
+      "tag": "@microsoft/ts-command-line_v2.0.6",
+      "date": "Thu, 31 Aug 2017 18:41:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `~3.4.1` to `~4.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.5",
       "tag": "@microsoft/ts-command-line_v2.0.5",
       "date": "Wed, 30 Aug 2017 01:04:34 GMT",

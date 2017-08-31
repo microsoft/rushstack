@@ -2,6 +2,23 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "3.0.0",
+      "tag": "@microsoft/api-extractor_v3.0.0",
+      "date": "Thu, 31 Aug 2017 18:41:18 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Fix compatibility issues with old releases, by incrementing the major version number"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.2.1` to `~0.2.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.3.7",
       "tag": "@microsoft/api-extractor_v2.3.7",
       "date": "Thu, 31 Aug 2017 17:46:25 GMT",

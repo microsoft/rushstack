@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-library-build
 
-This log was last generated on Thu, 31 Aug 2017 17:46:25 GMT and should not be manually modified.
+This log was last generated on Thu, 31 Aug 2017 18:41:18 GMT and should not be manually modified.
+
+## 4.0.0
+Thu, 31 Aug 2017 18:41:18 GMT
+
+### Breaking changes
+
+- Fix compatibility issues with old releases, by incrementing the major version number
 
 ## 3.4.1
 Thu, 31 Aug 2017 17:46:25 GMT
