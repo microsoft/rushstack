@@ -15,7 +15,7 @@ import AstMember from '../ast/AstMember';
 import AstNamespace from '../ast/AstNamespace';
 import AstModuleVariable from '../ast/AstModuleVariable';
 import IndentedWriter from '../IndentedWriter';
-import { ReleaseTag } from '../aedoc/ApiDocumentation';
+import { ReleaseTag } from '../aedoc/ReleaseTag';
 
 /**
  * For a library such as "example-package", ApiFileGenerator generates the "example-package.api.ts"

@@ -17,7 +17,7 @@ import {
   ISeeDocElement
 } from '../markupItem/OldMarkupItem';
 
-import { IParam } from '../jsonItem/JsonItem';
+import { IAedocParameter } from '../aedoc/ApiDocumentation';
 
 import TestFileComparer from '../TestFileComparer';
 import AstStructuredType from '../ast/AstStructuredType';
@@ -77,7 +77,7 @@ class TestApiDocumentation extends ApiDocumentation {
     );
   }
 
-  public parseParam(tokenizer: Tokenizer): IParam {
+  public parseParam(tokenizer: Tokenizer): IAedocParameter {
     return this._parseParam(tokenizer);
   }
 }
@@ -133,17 +133,17 @@ describe('DocElementParser tests', function (): void {
       TestFileComparer.assertFileMatchesExpected('./lib/returnDocActual.json', './lib/returnDocExpected.json');
 
       // Testing Params Doc Elements
-      const expectedParam: IParam[] = [
+      const expectedParam: IAedocParameter[] = [
           {
               name: 'param1',
               description: [{kind: 'textDocElement', value: 'description of the type param1'}]
-          } as IParam,
+          } as IAedocParameter,
           {
               name: 'param2',
               description: [{kind: 'textDocElement', value: 'description of the type param2'}]
-          } as IParam
+          } as IAedocParameter
       ];
-      const actualParam: IParam[] = [];
+      const actualParam: IAedocParameter[] = [];
       tokenizer.getToken();
       actualParam.push(apiDoc.parseParam(tokenizer));
       tokenizer.getToken();
@@ -219,11 +219,11 @@ describe('DocElementParser tests', function (): void {
               value: 'http://wikipedia.org/pixel_units'
           } as IHrefLinkElement
       ];
-      const expectedParam: IParam = {
+      const expectedParam: IAedocParameter = {
           name: 'x',
           description: description
-      } as IParam;
-      const actualParam: IParam = apiDoc.parseParam(tokenizer);
+      } as IAedocParameter;
+      const actualParam: IAedocParameter = apiDoc.parseParam(tokenizer);
 
       JsonFile.save(JSON.stringify(expectedParam), './lib/nestedParamDocExpected.json');
       JsonFile.save(JSON.stringify(actualParam), './lib/nestedParamDocActual.json');

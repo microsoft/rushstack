@@ -2,14 +2,15 @@
 // See LICENSE in the project root for license information.
 
 import AstItem, { AstItemKind } from './ast/AstItem';
-import { ReleaseTag } from './aedoc/ApiDocumentation';
+import { ReleaseTag } from './aedoc/ReleaseTag';
 import { IDocElement } from './markupItem/OldMarkupItem';
-import { IDocItem, IParam } from './jsonItem/JsonItem';
-import ApiJsonFile from './jsonItem/ApiJsonFile';
+import { ApiItem } from './api/ApiItem';
+import ApiJsonFile from './api/ApiJsonFile';
+import { IAedocParameter } from './aedoc/ApiDocumentation';
 
 /**
  * A class to abstract away the difference between an item from our public API that could be
- * represented by either an AstItem or an IDocItem that is retrieved from a JSON file.
+ * represented by either an AstItem or an ApiItem that is retrieved from a JSON file.
  */
 export default class ResolvedApiItem {
   public kind: AstItemKind;
@@ -18,7 +19,7 @@ export default class ResolvedApiItem {
   public deprecatedMessage: IDocElement[];
   public releaseTag: ReleaseTag;
   public isBeta: boolean;
-  public params: {[name: string]: IParam};
+  public params: {[name: string]: IAedocParameter};
   public returnsMessage: IDocElement[];
   /**
    * This property will either be an AstItem or undefined.
@@ -45,10 +46,10 @@ export default class ResolvedApiItem {
 
   /**
    * A function to abstract the construction of a ResolvedApiItem instance
-   * from a JSON object that symbolizes an IDocItem.
+   * from a JSON object that symbolizes an ApiItem.
    */
-  public static createFromJson(docItem: IDocItem): ResolvedApiItem {
-    let parameters: {[name: string]: IParam} = undefined;
+  public static createFromJson(docItem: ApiItem): ResolvedApiItem {
+    let parameters: {[name: string]: IAedocParameter} = undefined;
     let returnsMessage: IDocElement[] = undefined;
     switch (docItem.kind) {
       case 'function':
@@ -82,7 +83,7 @@ export default class ResolvedApiItem {
     remarks: IDocElement[],
     deprecatedMessage: IDocElement[],
     isBeta: boolean,
-    params:  {[name: string]: IParam},
+    params:  {[name: string]: IAedocParameter},
     returnsMessage: IDocElement[],
     releaseTag: ReleaseTag,
     astItem: AstItem) {

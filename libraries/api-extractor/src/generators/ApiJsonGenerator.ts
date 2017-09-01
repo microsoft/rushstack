@@ -16,22 +16,22 @@ import AstItemVisitor from './AstItemVisitor';
 import AstPackage from '../ast/AstPackage';
 import AstParameter from '../ast/AstParameter';
 import AstProperty from '../ast/AstProperty';
-import AstMember, { AccessModifier } from '../ast/AstMember';
+import AstMember, { ApiAccessModifier } from '../ast/AstMember';
 import AstNamespace from '../ast/AstNamespace';
 import AstModuleVariable from '../ast/AstModuleVariable';
 import AstMethod from '../ast/AstMethod';
-import { ReleaseTag } from '../aedoc/ApiDocumentation';
-import { IReturn, IParam } from '../jsonItem/JsonItem';
-import ApiJsonFile from '../jsonItem/ApiJsonFile';
+import { ReleaseTag } from '../aedoc/ReleaseTag';
+import { IApiReturnValue, IApiParameter } from '../api/ApiItem';
+import ApiJsonFile from '../api/ApiJsonFile';
 
 /**
- * For a library such as "example-package", ApiFileGenerator generates the "example-package.api.ts"
- * report which is used to detect API changes.  The output is pseudocode whose syntax is similar
- * but not identical to a "*.d.ts" typings file.  The output file is designed to be committed to
- * Git with a branch policy that will trigger an API review workflow whenever the file contents
- * have changed.  For example, the API file indicates *whether* a class has been documented,
- * but it does not include the documentation text (since minor text changes should not require
- * an API review).
+ * For a library such as "example-package", ApiFileGenerator generates the "example-package.api.json"
+ * file which represents the API surface for that package.  This file should be published as part
+ * of the library's NPM package.  API Extractor will read this file later when it is analyzing
+ * another project that consumes the library.  (Otherwise, API Extractor would have to re-analyze all
+ * the *.d.ts files, which would be bad because the compiler definitions might not be available for
+ * a published package, or the results of the analysis might be different somehow.)  Documentation
+ * tools such as api-documenter can also use the *.api.json files.
  *
  * @public
  */
@@ -46,7 +46,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
    */
   public static get jsonSchema(): JsonSchema {
     if (!ApiJsonGenerator._jsonSchema) {
-      ApiJsonGenerator._jsonSchema = JsonSchema.fromFile(path.join(__dirname, '../jsonItem/api-json.schema.json'));
+      ApiJsonGenerator._jsonSchema = JsonSchema.fromFile(path.join(__dirname, '../api/api-json.schema.json'));
     }
 
     return ApiJsonGenerator._jsonSchema;
@@ -171,7 +171,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
     for (const param of astFunction.params) {
       this.visitApiParam(param, astFunction.documentation.parameters[param.name]);
     }
-    const returnValueNode: IReturn = {
+    const returnValueNode: IApiReturnValue = {
       type: astFunction.returnType,
       description: astFunction.documentation.returnsMessage
     };
@@ -292,7 +292,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
         remarks: astMethod.documentation.remarks || []
       };
     } else {
-      const returnValueNode: IReturn = {
+      const returnValueNode: IApiReturnValue = {
         type: astMethod.returnType,
         description: astMethod.documentation.returnsMessage
       };
@@ -300,7 +300,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
       newNode = {
         kind: ApiJsonFile.convertKindToJson(astMethod.kind),
         signature: astMethod.getDeclarationLine(),
-        accessModifier: astMethod.accessModifier ? AccessModifier[astMethod.accessModifier].toLowerCase() : '',
+        accessModifier: astMethod.accessModifier ? ApiAccessModifier[astMethod.accessModifier].toLowerCase() : '',
         isOptional: !!astMethod.isOptional,
         isStatic: !!astMethod.isStatic,
         returnValue: returnValueNode,
@@ -321,9 +321,9 @@ export default class ApiJsonGenerator extends AstItemVisitor {
     }
 
     if (refObject) {
-      (refObject as IParam).isOptional = astParam.isOptional;
-      (refObject as IParam).isSpread = astParam.isSpread;
-      (refObject as IParam).type = astParam.type;
+      (refObject as IApiParameter).isOptional = astParam.isOptional;
+      (refObject as IApiParameter).isSpread = astParam.isSpread;
+      (refObject as IApiParameter).type = astParam.type;
     }
   }
 }

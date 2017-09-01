@@ -7,7 +7,7 @@ import AstStructuredType from './AstStructuredType';
 import PrettyPrinter from '../PrettyPrinter';
 import TypeScriptHelpers from '../TypeScriptHelpers';
 
-export enum AccessModifier {
+export enum ApiAccessModifier {
   Private,
   Protected,
   Public
@@ -28,7 +28,7 @@ export default class AstMember extends AstItem {
   /**
    * True if the member is an optional field value, indicated by a question mark ("?") after the name
    */
-  public accessModifier: AccessModifier;
+  public accessModifier: ApiAccessModifier;
   public isOptional: boolean;
   public isStatic: boolean;
 
@@ -51,11 +51,11 @@ export default class AstMember extends AstItem {
     if (memberSignature.modifiers) {
       for (const modifier of memberSignature.modifiers) {
         if (modifier.kind === ts.SyntaxKind.PublicKeyword) {
-          this.accessModifier = AccessModifier.Public;
+          this.accessModifier = ApiAccessModifier.Public;
         } else if (modifier.kind === ts.SyntaxKind.ProtectedKeyword) {
-          this.accessModifier = AccessModifier.Protected;
+          this.accessModifier = ApiAccessModifier.Protected;
         } else if (modifier.kind === ts.SyntaxKind.PrivateKeyword) {
-          this.accessModifier = AccessModifier.Private;
+          this.accessModifier = ApiAccessModifier.Private;
         } else if (modifier.kind === ts.SyntaxKind.StaticKeyword) {
           this.isStatic = true;
         }
@@ -96,7 +96,7 @@ export default class AstMember extends AstItem {
   public getDeclarationLine(property?: {type: string; readonly: boolean}): string {
     if (this.typeLiteral || !!property) {
       const accessModifier: string =
-        this.accessModifier ? AccessModifier[this.accessModifier].toLowerCase() : undefined;
+        this.accessModifier ? ApiAccessModifier[this.accessModifier].toLowerCase() : undefined;
 
       let result: string = accessModifier ? `${accessModifier} ` : '';
       result += this.isStatic ? 'static ' : '';

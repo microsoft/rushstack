@@ -4,17 +4,17 @@
 import * as os from 'os';
 
 import {
-  IDocClass,
-  IDocEnum,
-  IDocEnumValue,
-  IDocFunction,
-  IDocInterface,
-  IDocPackage,
-  IDocMember,
-  IDocProperty,
-  IDocItem,
-  IDocParam,
-  IDocMethod,
+  IApiClass,
+  IApiEnum,
+  IApiEnumMember,
+  IApiFunction,
+  IApiInterface,
+  IApiPackage,
+  ApiMember,
+  IApiProperty,
+  ApiItem,
+  IApiParameter,
+  IApiMethod,
   IDomPage,
   IDomTable,
   DomBasicText,
@@ -55,7 +55,7 @@ export class Documenter {
 
     const unscopedPackageName: string = RenderingHelpers.getUnscopedPackageName(apiJsonFile.packageName);
 
-    const docPackage: IDocPackage = apiJsonFile.docPackage;
+    const docPackage: IApiPackage = apiJsonFile.docPackage;
 
     const packageNode: DocumentationNode = new DocumentationNode(docPackage, unscopedPackageName, undefined);
 
@@ -86,7 +86,7 @@ export class Documenter {
     ]);
 
     for (const exportName of Object.keys(docPackage.exports)) {
-      const docItem: IDocItem = docPackage.exports[exportName];
+      const docItem: ApiItem = docPackage.exports[exportName];
 
       const exportNode: DocumentationNode = new DocumentationNode(docItem, exportName, packageNode);
 
@@ -176,7 +176,7 @@ export class Documenter {
   /**
    * GENERATE PAGE: CLASS
    */
-  private _writeClassPage(docClass: IDocClass, classNode: DocumentationNode, renderer: BasePageRenderer): void {
+  private _writeClassPage(docClass: IApiClass, classNode: DocumentationNode, renderer: BasePageRenderer): void {
     const className: string = classNode.name;
 
     // TODO: Show concise generic parameters with class name
@@ -211,7 +211,7 @@ export class Documenter {
     ]);
 
     for (const memberName of Object.keys(docClass.members)) {
-      const member: IDocMember = docClass.members[memberName];
+      const member: ApiMember = docClass.members[memberName];
       const memberNode: DocumentationNode = new DocumentationNode(member, memberName, classNode);
 
       switch (member.kind) {
@@ -274,7 +274,7 @@ export class Documenter {
   /**
    * GENERATE PAGE: INTERFACE
    */
-  private _writeInterfacePage(docInterface: IDocInterface, interfaceNode: DocumentationNode,
+  private _writeInterfacePage(docInterface: IApiInterface, interfaceNode: DocumentationNode,
     renderer: BasePageRenderer): void {
 
     const interfaceName: string = interfaceNode.name;
@@ -302,7 +302,7 @@ export class Documenter {
     ]);
 
     for (const memberName of Object.keys(docInterface.members)) {
-      const member: IDocMember = docInterface.members[memberName];
+      const member: ApiMember = docInterface.members[memberName];
       const memberNode: DocumentationNode = new DocumentationNode(member, memberName, interfaceNode);
 
       switch (member.kind) {
@@ -363,7 +363,7 @@ export class Documenter {
   /**
    * GENERATE PAGE: ENUM
    */
-  private _writeEnumPage(docEnum: IDocEnum, enumNode: DocumentationNode,
+  private _writeEnumPage(docEnum: IApiEnum, enumNode: DocumentationNode,
     renderer: BasePageRenderer): void {
 
     const enumName: string = enumNode.name;
@@ -385,7 +385,7 @@ export class Documenter {
     ]);
 
     for (const memberName of Object.keys(docEnum.values)) {
-      const member: IDocEnumValue = (docEnum.values as any)[memberName]; // tslint:disable-line:no-any
+      const member: IApiEnumMember = (docEnum.values as any)[memberName]; // tslint:disable-line:no-any
 
       const enumValue: DomBasicText[] = [];
 
@@ -412,7 +412,7 @@ export class Documenter {
   /**
    * GENERATE PAGE: PROPERTY
    */
-  private _writePropertyPage(docProperty: IDocProperty, propertyNode: DocumentationNode,
+  private _writePropertyPage(docProperty: IApiProperty, propertyNode: DocumentationNode,
     renderer: BasePageRenderer): void {
 
     const fullProperyName: string = propertyNode.parent!.name + '.' + propertyNode.name;
@@ -441,7 +441,7 @@ export class Documenter {
   /**
    * GENERATE PAGE: METHOD
    */
-  private _writeMethodPage(docMethod: IDocMethod, methodNode: DocumentationNode, renderer: BasePageRenderer): void {
+  private _writeMethodPage(docMethod: IApiMethod, methodNode: DocumentationNode, renderer: BasePageRenderer): void {
 
     const fullMethodName: string = methodNode.parent!.name + '.' + methodNode.name;
 
@@ -481,7 +481,7 @@ export class Documenter {
       domPage.elements.push(Domifier.createHeading1('Parameters'));
       domPage.elements.push(parametersTable);
       for (const parameterName of Object.keys(docMethod.parameters)) {
-        const parameter: IDocParam = docMethod.parameters[parameterName];
+        const parameter: IApiParameter = docMethod.parameters[parameterName];
           parametersTable.rows.push(Domifier.createTableRow([
             [Domifier.createCode(parameterName, 'javascript')],
             parameter.type ? [Domifier.createCode(parameter.type, 'javascript')] : [],
@@ -497,7 +497,7 @@ export class Documenter {
   /**
    * GENERATE PAGE: FUNCTION
    */
-  private _writeFunctionPage(docFunction: IDocFunction, functionNode: DocumentationNode,
+  private _writeFunctionPage(docFunction: IApiFunction, functionNode: DocumentationNode,
     renderer: BasePageRenderer): void {
 
     const domPage: IDomPage = Domifier.createPage(`${functionNode.name} function`, functionNode.docId);
@@ -536,7 +536,7 @@ export class Documenter {
       domPage.elements.push(Domifier.createHeading1('Parameters'));
       domPage.elements.push(parametersTable);
       for (const parameterName of Object.keys(docFunction.parameters)) {
-        const parameter: IDocParam = docFunction.parameters[parameterName];
+        const parameter: IApiParameter = docFunction.parameters[parameterName];
           parametersTable.rows.push(Domifier.createTableRow([
             [Domifier.createCode(parameterName, 'javascript')],
             parameter.type ? [Domifier.createCode(parameter.type, 'javascript')] : [],

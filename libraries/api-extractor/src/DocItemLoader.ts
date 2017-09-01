@@ -7,10 +7,10 @@ import * as path from 'path';
 import { JsonFile, IJsonSchemaErrorInfo } from '@microsoft/node-core-library';
 
 import {
-  IDocItem,
-  IDocPackage,
-  IDocMember
-} from './jsonItem/JsonItem';
+  ApiItem,
+  IApiPackage,
+  ApiMember
+} from './api/ApiItem';
 
 import ApiDefinitionReference from './ApiDefinitionReference';
 import AstItem from './ast/AstItem';
@@ -36,16 +36,16 @@ export interface IParsedScopeName {
 }
 
 /**
- * A loader for locating the IDocItem associated with a given project and API item, or
+ * A loader for locating the ApiItem associated with a given project and API item, or
  * for locating an AstItem  locally.
- * No processing on the IDocItem orAstItem  should be done in this class, this class is only
+ * No processing on the ApiItem orAstItem  should be done in this class, this class is only
  * concerned with communicating state.
- * The IDocItem can then be used to enforce correct API usage, like enforcing internal.
+ * The ApiItem can then be used to enforce correct API usage, like enforcing internal.
  * To use DocItemLoader: provide a projectFolder to construct a instance of the DocItemLoader,
- * then use DocItemLoader.getItem to retrieve the IDocItem of a particular API item.
+ * then use DocItemLoader.getItem to retrieve the ApiItem of a particular API item.
  */
 export default class DocItemLoader {
-  private _cache: Map<string, IDocPackage>;
+  private _cache: Map<string, IApiPackage>;
   private _projectFolder: string; // Root directory to check for node modules
 
   /**
@@ -58,7 +58,7 @@ export default class DocItemLoader {
     }
 
     this._projectFolder = projectFolder;
-    this._cache = new Map<string, IDocPackage>();
+    this._cache = new Map<string, IApiPackage>();
   }
 
   /**
@@ -130,7 +130,7 @@ export default class DocItemLoader {
     warnings: string[]): ResolvedApiItem {
 
     // Check if package can be not found
-    const docPackage: IDocPackage =  this.getPackage(apiDefinitionRef);
+    const docPackage: IApiPackage =  this.getPackage(apiDefinitionRef);
     if (!docPackage) {
       // package not found in node_modules
       warnings.push(`Unable to find a documentation file (\"${apiDefinitionRef.packageName}.api.json\")` +
@@ -145,11 +145,11 @@ export default class DocItemLoader {
       return undefined;
     }
 
-    let docItem: IDocItem = docPackage.exports[apiDefinitionRef.exportName];
+    let docItem: ApiItem = docPackage.exports[apiDefinitionRef.exportName];
 
     // If memberName exists then check for the existence of the name
     if (apiDefinitionRef.memberName) {
-      let member: IDocMember = undefined;
+      let member: ApiMember = undefined;
       switch (docItem.kind) {
         case 'class':
 
@@ -185,12 +185,12 @@ export default class DocItemLoader {
   }
 
   /**
-   * Attempts to locate and load the IDocPackage object from the project folder's
+   * Attempts to locate and load the IApiPackage object from the project folder's
    * node modules. If the package already exists in the cache, nothing is done.
    *
    * @param apiDefinitionRef - interface with properties pertaining to the API definition reference
    */
-  public getPackage(apiDefinitionRef: ApiDefinitionReference): IDocPackage {
+  public getPackage(apiDefinitionRef: ApiDefinitionReference): IApiPackage {
     let cachePackageName: string = '';
 
     // We concatenate the scopeName and packageName in case there are packageName conflicts
@@ -225,8 +225,8 @@ export default class DocItemLoader {
    * Loads the API documentation json file and validates that it conforms to our schema. If it does,
    * then the json file is saved in the cache and returned.
    */
-  public loadPackageIntoCache(apiJsonFilePath: string, cachePackageName: string): IDocPackage {
-    const astPackage: IDocPackage = JsonFile.loadAndValidateWithCallback(apiJsonFilePath, ApiJsonGenerator.jsonSchema,
+  public loadPackageIntoCache(apiJsonFilePath: string, cachePackageName: string): IApiPackage {
+    const astPackage: IApiPackage = JsonFile.loadAndValidateWithCallback(apiJsonFilePath, ApiJsonGenerator.jsonSchema,
       (errorInfo: IJsonSchemaErrorInfo) => {
         const errorMessage: string
           = path.basename(apiJsonFilePath) + ' does not conform to the expected schema.' + os.EOL

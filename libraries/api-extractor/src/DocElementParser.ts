@@ -280,7 +280,7 @@ export default class DocElementParser {
       resolvedAstItem.astItem.completeInitialization();
     }
 
-    // inheritdoc found, copy over IDocBase properties
+    // inheritdoc found, copy over IApiBaseDefinition properties
     documentation.summary =  resolvedAstItem.summary;
     documentation.remarks = resolvedAstItem.remarks;
 
