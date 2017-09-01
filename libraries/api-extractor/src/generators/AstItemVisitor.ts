@@ -43,31 +43,31 @@ abstract class AstItemVisitor {
     }
   }
 
-  protected abstract visitAstStructuredType(apiStructuredType: AstStructuredType, refObject?: Object): void;
+  protected abstract visitAstStructuredType(astStructuredType: AstStructuredType, refObject?: Object): void;
 
-  protected abstract visitAstEnum(apiEnum: AstEnum, refObject?: Object): void;
+  protected abstract visitAstEnum(astEnum: AstEnum, refObject?: Object): void;
 
-  protected abstract visitAstEnumValue(apiEnumValue: AstEnumValue, refObject?: Object): void;
+  protected abstract visitAstEnumValue(astEnumValue: AstEnumValue, refObject?: Object): void;
 
-  protected abstract visitAstFunction(apiFunction: AstFunction, refObject?: Object): void;
+  protected abstract visitAstFunction(astFunction: AstFunction, refObject?: Object): void;
 
-  protected abstract visitAstPackage(apiPackage: AstPackage, refObject?: Object): void;
+  protected abstract visitAstPackage(astPackage: AstPackage, refObject?: Object): void;
 
-  protected abstract visitAstMember(apiMember: AstMember, refObject?: Object): void;
+  protected abstract visitAstMember(astMember: AstMember, refObject?: Object): void;
 
-  protected abstract visitAstNamespace(apiNamespace: AstNamespace, refObject?: Object): void;
+  protected abstract visitAstNamespace(astNamespace: AstNamespace, refObject?: Object): void;
 
-  protected abstract visitAstModuleVariable(apiModuleVariable: AstModuleVariable, refObject?: Object): void;
+  protected abstract visitAstModuleVariable(astModuleVariable: AstModuleVariable, refObject?: Object): void;
 
-  protected visitAstMethod(apiMethod: AstMethod, refObject?: Object): void {
-    this.visitAstMember(apiMethod, refObject);
+  protected visitAstMethod(astMethod: AstMethod, refObject?: Object): void {
+    this.visitAstMember(astMethod, refObject);
   }
 
-  protected visitAstProperty(apiProperty: AstProperty, refObject?: Object): void {
-    this.visitAstMember(apiProperty, refObject);
+  protected visitAstProperty(astProperty: AstProperty, refObject?: Object): void {
+    this.visitAstMember(astProperty, refObject);
   }
 
-  protected abstract visitApiParam(apiParam: AstParameter, refObject?: Object): void;
+  protected abstract visitApiParam(astParam: AstParameter, refObject?: Object): void;
 }
 
 export default AstItemVisitor;

@@ -63,7 +63,7 @@ export enum ReleaseTag {
 export interface IReferenceResolver {
   resolve(
     apiDefinitionRef: ApiDefinitionReference,
-    apiPackage: AstPackage,
+    astPackage: AstPackage,
     warnings: string[]): ResolvedApiItem;
 }
 

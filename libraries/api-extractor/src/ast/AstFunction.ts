@@ -28,14 +28,14 @@ class AstFunction extends AstItem {
       this.params = [];
       for (const param of methodDeclaration.parameters) {
         const declarationSymbol: ts.Symbol = TypeScriptHelpers.tryGetSymbolForDeclaration(param);
-        const apiParameter: AstParameter = new AstParameter({
+        const astParameter: AstParameter = new AstParameter({
           extractor: this.extractor,
           declaration: param,
           declarationSymbol: declarationSymbol,
           jsdocNode: param
         });
-        this.innerItems.push(apiParameter);
-        this.params.push(apiParameter);
+        this.innerItems.push(astParameter);
+        this.params.push(astParameter);
       }
     }
 

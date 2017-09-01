@@ -65,14 +65,14 @@ export default class DocItemLoader {
    * {@inheritdoc IReferenceResolver.resolve}
    */
   public resolve(apiDefinitionRef: ApiDefinitionReference,
-    apiPackage: AstPackage,
+    astPackage: AstPackage,
     warnings: string[]): ResolvedApiItem {
 
     // We determine if an 'apiDefinitionRef' is local if it has no package name or if the scoped
     // package name is equal to the current package's scoped package name.
-    if (!apiDefinitionRef.packageName || apiDefinitionRef.toScopePackageString() === apiPackage.name) {
+    if (!apiDefinitionRef.packageName || apiDefinitionRef.toScopePackageString() === astPackage.name) {
       // Resolution for local references
-      return this.resolveLocalReferences(apiDefinitionRef, apiPackage, warnings);
+      return this.resolveLocalReferences(apiDefinitionRef, astPackage, warnings);
 
     } else {
 
@@ -88,10 +88,10 @@ export default class DocItemLoader {
    * with communicating state.
    */
   public resolveLocalReferences(apiDefinitionRef: ApiDefinitionReference,
-    apiPackage: AstPackage,
+    astPackage: AstPackage,
     warnings: string[]): ResolvedApiItem {
 
-    let astItem: AstItem = apiPackage.getMemberItem(apiDefinitionRef.exportName);
+    let astItem: AstItem = astPackage.getMemberItem(apiDefinitionRef.exportName);
     // Check if export name was not found
     if (!astItem) {
       warnings.push(`Unable to find referenced export \"${apiDefinitionRef.toExportString()}\"`);
@@ -226,7 +226,7 @@ export default class DocItemLoader {
    * then the json file is saved in the cache and returned.
    */
   public loadPackageIntoCache(apiJsonFilePath: string, cachePackageName: string): IDocPackage {
-    const apiPackage: IDocPackage = JsonFile.loadAndValidateWithCallback(apiJsonFilePath, ApiJsonGenerator.jsonSchema,
+    const astPackage: IDocPackage = JsonFile.loadAndValidateWithCallback(apiJsonFilePath, ApiJsonGenerator.jsonSchema,
       (errorInfo: IJsonSchemaErrorInfo) => {
         const errorMessage: string
           = path.basename(apiJsonFilePath) + ' does not conform to the expected schema.' + os.EOL
@@ -238,7 +238,7 @@ export default class DocItemLoader {
       }
     );
 
-    this._cache.set(cachePackageName, apiPackage);
-    return apiPackage;
+    this._cache.set(cachePackageName, astPackage);
+    return astPackage;
   }
 }

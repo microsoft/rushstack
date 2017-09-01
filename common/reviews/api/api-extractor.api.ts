@@ -20,31 +20,31 @@ class ApiFileGenerator extends AstItemVisitor {
   public generateApiFileContent(extractor: Extractor): string;
   // WARNING: The type "AstParameter" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
-  protected visitApiParam(apiParam: AstParameter): void;
+  protected visitApiParam(astParam: AstParameter): void;
   // WARNING: The type "AstEnum" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
-  protected visitAstEnum(apiEnum: AstEnum): void;
+  protected visitAstEnum(astEnum: AstEnum): void;
   // WARNING: The type "AstEnumValue" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
-  protected visitAstEnumValue(apiEnumValue: AstEnumValue): void;
+  protected visitAstEnumValue(astEnumValue: AstEnumValue): void;
   // WARNING: The type "AstFunction" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
-  protected visitAstFunction(apiFunction: AstFunction): void;
+  protected visitAstFunction(astFunction: AstFunction): void;
   // WARNING: The type "AstMember" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
-  protected visitAstMember(apiMember: AstMember): void;
+  protected visitAstMember(astMember: AstMember): void;
   // WARNING: The type "AstModuleVariable" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
-  protected visitAstModuleVariable(apiModuleVariable: AstModuleVariable): void;
+  protected visitAstModuleVariable(astModuleVariable: AstModuleVariable): void;
   // WARNING: The type "AstNamespace" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
-  protected visitAstNamespace(apiNamespace: AstNamespace): void;
+  protected visitAstNamespace(astNamespace: AstNamespace): void;
   // WARNING: The type "AstPackage" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
-  protected visitAstPackage(apiPackage: AstPackage): void;
+  protected visitAstPackage(astPackage: AstPackage): void;
   // WARNING: The type "AstStructuredType" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
-  protected visitAstStructuredType(apiStructuredType: AstStructuredType): void;
+  protected visitAstStructuredType(astStructuredType: AstStructuredType): void;
   public writeApiFile(reportFilename: string, extractor: Extractor): void;
 }
 
@@ -58,37 +58,37 @@ class ApiJsonGenerator extends AstItemVisitor {
   protected visit(astItem: AstItem, refObject?: Object): void;
   // WARNING: The type "AstParameter" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
-  protected visitApiParam(apiParam: AstParameter, refObject?: Object): void;
+  protected visitApiParam(astParam: AstParameter, refObject?: Object): void;
   // WARNING: The type "AstEnum" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
-  protected visitAstEnum(apiEnum: AstEnum, refObject?: Object): void;
+  protected visitAstEnum(astEnum: AstEnum, refObject?: Object): void;
   // WARNING: The type "AstEnumValue" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
-  protected visitAstEnumValue(apiEnumValue: AstEnumValue, refObject?: Object): void;
+  protected visitAstEnumValue(astEnumValue: AstEnumValue, refObject?: Object): void;
   // WARNING: The type "AstFunction" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
-  protected visitAstFunction(apiFunction: AstFunction, refObject?: Object): void;
+  protected visitAstFunction(astFunction: AstFunction, refObject?: Object): void;
   // WARNING: The type "AstMember" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
-  protected visitAstMember(apiMember: AstMember, refObject?: Object): void;
+  protected visitAstMember(astMember: AstMember, refObject?: Object): void;
   // WARNING: The type "AstMethod" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
-  protected visitAstMethod(apiMethod: AstMethod, refObject?: Object): void;
+  protected visitAstMethod(astMethod: AstMethod, refObject?: Object): void;
   // WARNING: The type "AstModuleVariable" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
-  protected visitAstModuleVariable(apiModuleVariable: AstModuleVariable, refObject?: Object): void;
+  protected visitAstModuleVariable(astModuleVariable: AstModuleVariable, refObject?: Object): void;
   // WARNING: The type "AstNamespace" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
-  protected visitAstNamespace(apiNamespace: AstNamespace, refObject?: Object): void;
+  protected visitAstNamespace(astNamespace: AstNamespace, refObject?: Object): void;
   // WARNING: The type "AstPackage" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
-  protected visitAstPackage(apiPackage: AstPackage, refObject?: Object): void;
+  protected visitAstPackage(astPackage: AstPackage, refObject?: Object): void;
   // WARNING: The type "AstProperty" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
-  protected visitAstProperty(apiProperty: AstProperty, refObject?: Object): void;
+  protected visitAstProperty(astProperty: AstProperty, refObject?: Object): void;
   // WARNING: The type "AstStructuredType" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
-  protected visitAstStructuredType(apiStructuredType: AstStructuredType, refObject?: Object): void;
+  protected visitAstStructuredType(astStructuredType: AstStructuredType, refObject?: Object): void;
   // (undocumented)
   public writeJsonFile(reportFilename: string, extractor: Extractor): void;
 }
