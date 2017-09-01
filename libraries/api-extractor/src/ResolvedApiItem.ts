@@ -3,7 +3,7 @@
 
 import AstItem, { AstItemKind } from './ast/AstItem';
 import { ReleaseTag } from './aedoc/ReleaseTag';
-import { IDocElement } from './markupItem/OldMarkupItem';
+import { IDocElement } from './markup/OldMarkup';
 import { ApiItem } from './api/ApiItem';
 import ApiJsonFile from './api/ApiJsonFile';
 import { IAedocParameter } from './aedoc/ApiDocumentation';

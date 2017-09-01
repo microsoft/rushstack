@@ -14,5 +14,5 @@ export { default as ApiJsonGenerator  } from './generators/ApiJsonGenerator';
 export { default as ExternalApiHelper } from './ExternalApiHelper';
 
 export * from './api/ApiItem';
-export * from './markupItem/MarkupItem';
-export * from './markupItem/OldMarkupItem';
+export * from './markup/MarkupElement';
+export * from './markup/OldMarkup';

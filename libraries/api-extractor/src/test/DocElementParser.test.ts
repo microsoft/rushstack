@@ -15,7 +15,7 @@ import {
   ICodeLinkElement,
   ITextElement,
   ISeeDocElement
-} from '../markupItem/OldMarkupItem';
+} from '../markup/OldMarkup';
 
 import { IAedocParameter } from '../aedoc/ApiDocumentation';
 
