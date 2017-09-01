@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { IDomPage } from '@microsoft/api-extractor';
+
 import * as fsx from 'fs-extra';
 import * as path from 'path';
-import { IDomPage } from './SimpleDom';
 
 /**
  * This is an abstract base class for plug-ins that convert the IDomPage representation

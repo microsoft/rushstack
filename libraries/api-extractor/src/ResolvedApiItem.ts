@@ -3,8 +3,8 @@
 
 import ApiItem, { ApiItemKind } from './apiItem/ApiItem';
 import { ReleaseTag } from './aedoc/ApiDocumentation';
-import { IDocElement, IParam } from './markupItem/OldMarkupItem';
-import { IDocItem } from './jsonItem/JsonItem';
+import { IDocElement } from './markupItem/OldMarkupItem';
+import { IDocItem, IParam } from './jsonItem/JsonItem';
 import ApiJsonFile from './jsonItem/ApiJsonFile';
 
 /**

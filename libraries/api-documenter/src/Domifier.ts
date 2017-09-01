@@ -5,10 +5,7 @@ import {
   IDocElement,
   ITextElement,
   ILinkDocElement,
-  ISeeDocElement
-} from '@microsoft/api-extractor/lib/IDocElement';
-
-import {
+  ISeeDocElement,
   DomBasicText,
   IDomDocumentationLink,
   IDomWebLink,
@@ -26,7 +23,7 @@ import {
   IDomNoteBox,
   IDomCodeBox,
   DomCodeHighlighter
-} from './SimpleDom';
+} from '@microsoft/api-extractor';
 
 import { DocumentationNode } from './DocumentationNode';
 

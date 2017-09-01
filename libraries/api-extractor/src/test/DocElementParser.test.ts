@@ -11,12 +11,13 @@ import { JsonFile } from '@microsoft/node-core-library';
 import DocElementParser from '../DocElementParser';
 import {
   IDocElement,
-  IParam,
   IHrefLinkElement,
   ICodeLinkElement,
   ITextElement,
   ISeeDocElement
 } from '../markupItem/OldMarkupItem';
+
+import { IParam } from '../jsonItem/JsonItem';
 
 import TestFileComparer from '../TestFileComparer';
 import ApiStructuredType from '../apiItem/ApiStructuredType';

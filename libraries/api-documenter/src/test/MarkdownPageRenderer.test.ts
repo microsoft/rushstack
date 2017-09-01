@@ -6,9 +6,9 @@
 // import { assert } from 'chai';
 import * as path from 'path';
 import { FileDiffTest } from '@microsoft/node-core-library';
+import { IDomPage } from '@microsoft/api-extractor';
 
 import { MarkdownPageRenderer } from '../MarkdownPageRenderer';
-import { IDomPage } from '../SimpleDom';
 import { Domifier } from '../Domifier';
 
 describe('MarkdownPageRenderer', () => {

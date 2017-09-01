@@ -21,7 +21,7 @@ import ApiNamespace from '../apiItem/ApiNamespace';
 import ApiModuleVariable from '../apiItem/ApiModuleVariable';
 import ApiMethod from '../apiItem/ApiMethod';
 import { ReleaseTag } from '../aedoc/ApiDocumentation';
-import { IReturn, IParam }from '../markupItem/OldMarkupItem';
+import { IReturn, IParam } from '../jsonItem/JsonItem';
 import ApiJsonFile from '../jsonItem/ApiJsonFile';
 
 /**

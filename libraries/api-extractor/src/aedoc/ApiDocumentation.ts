@@ -5,7 +5,8 @@
 
 import ApiPackage from '../apiItem/ApiPackage';
 import DocElementParser from '../DocElementParser';
-import { IDocElement, IParam, ICodeLinkElement } from '../markupItem/OldMarkupItem';
+import { IDocElement, ICodeLinkElement } from '../markupItem/OldMarkupItem';
+import { IParam } from '../jsonItem/JsonItem';
 import ApiDefinitionReference, { IApiDefinitionReferenceParts } from '../ApiDefinitionReference';
 import Token, { TokenType } from './Token';
 import Tokenizer from './Tokenizer';

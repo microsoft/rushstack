@@ -8,7 +8,7 @@ import {
   IDomPage,
   IDomText,
   DomElement
-} from './SimpleDom';
+} from '@microsoft/api-extractor';
 
 import { BasePageRenderer } from './BasePageRenderer';
 
