@@ -265,11 +265,10 @@ interface IHrefLinkElement extends IBaseDocElement {
 // @alpha
 interface IMarkupCodeBox {
   // (undocumented)
-  code: string;
-  // (undocumented)
   highlighter: MarkupHighlighter;
   // (undocumented)
   kind: 'code-box';
+  text: string;
 }
 
 // @alpha
@@ -286,7 +285,6 @@ interface IMarkupDocumentationLink {
 interface IMarkupHeading1 {
   // (undocumented)
   kind: 'heading1';
-  // (undocumented)
   text: string;
 }
 
@@ -294,18 +292,16 @@ interface IMarkupHeading1 {
 interface IMarkupHeading2 {
   // (undocumented)
   kind: 'heading2';
-  // (undocumented)
   text: string;
 }
 
 // @alpha
 interface IMarkupHighlightedText {
   // (undocumented)
-  code: string;
-  // (undocumented)
   highlighter: MarkupHighlighter;
   // (undocumented)
   kind: 'code';
+  text: string;
 }
 
 // @alpha
@@ -373,11 +369,10 @@ interface IMarkupText {
   // (undocumented)
   bold?: boolean;
   // (undocumented)
-  content: string;
-  // (undocumented)
   italics?: boolean;
   // (undocumented)
   kind: 'text';
+  text: string;
 }
 
 // @alpha

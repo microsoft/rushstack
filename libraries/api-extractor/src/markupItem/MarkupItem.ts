@@ -10,7 +10,14 @@
  */
 export interface IMarkupText {
   kind: 'text';
-  content: string;
+
+  /**
+   * The plain text content to display.
+   * @remarks
+   * If this text contains symbols such as HTML codes, they will be rendered literally,
+   * without any special formatting.
+   */
+  text: string;
   bold?: boolean;
   italics?: boolean;
 }
@@ -31,7 +38,15 @@ export type MarkupHighlighter = 'javascript' | 'plain';
  */
 export interface IMarkupHighlightedText {
   kind: 'code';
-  code: string;
+
+  /**
+   * The text content to display.
+   * @remarks
+   * This content will be highlighted using the specified syntax highlighter.
+   * If this text contains symbols such as HTML codes, they will be rendered literally.
+   */
+  text: string;
+
   highlighter: MarkupHighlighter;
 }
 
@@ -96,6 +111,12 @@ export type MarkupBasicText = MarkupLinkText | IMarkupDocumentationLink | IMarku
  */
 export interface IMarkupHeading1 {
   kind: 'heading1';
+  /**
+   * The text for the heading.
+   * @remarks
+   * Formatting such as bold/italics are not supported in headings.
+   * If this text contains symbols such as HTML codes, they will be rendered literally.
+   */
   text: string;
 }
 
@@ -105,6 +126,8 @@ export interface IMarkupHeading1 {
  */
 export interface IMarkupHeading2 {
   kind: 'heading2';
+
+  /** {@inheritdoc IMarkupHeading1.text} */
   text: string;
 }
 
@@ -116,7 +139,8 @@ export interface IMarkupHeading2 {
  */
 export interface IMarkupCodeBox {
   kind: 'code-box';
-  code: string;
+  /** {@inheritdoc IMarkupHighlightedText.text} */
+  text: string;
   highlighter: MarkupHighlighter;
 }
 

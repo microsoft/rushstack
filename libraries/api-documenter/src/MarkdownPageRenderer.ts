@@ -128,7 +128,7 @@ export class MarkdownPageRenderer extends BasePageRenderer {
 
             const combinedElement: IMarkupText = { // push a combined element
               kind: 'text',
-              content: previousElement.content + element.content,
+              text: previousElement.text + element.text,
               bold: previousElement.bold,
               italics: previousElement.italics
             };
@@ -155,7 +155,7 @@ export class MarkdownPageRenderer extends BasePageRenderer {
     for (const element of mergedElements) {
       switch (element.kind) {
         case 'text':
-          let normalizedContent: string = element.content;
+          let normalizedContent: string = element.text;
           if (context.insideTable) {
             normalizedContent = normalizedContent.replace('\n', ' ');
           }
@@ -216,7 +216,7 @@ export class MarkdownPageRenderer extends BasePageRenderer {
           break;
         case 'code':
           writer.write('`');
-          writer.write(element.code);
+          writer.write(element.text);
           writer.write('`');
           break;
         case 'doc-link':
@@ -263,7 +263,7 @@ export class MarkdownPageRenderer extends BasePageRenderer {
               throw new Error('Unimplemented highlighter');
           }
           writer.writeLine();
-          writer.write(element.code);
+          writer.write(element.text);
           writer.writeLine();
           writer.writeLine('```');
           break;

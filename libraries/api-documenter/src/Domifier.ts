@@ -45,7 +45,7 @@ export class Domifier {
     } else {
       const result: IMarkupText = {
         kind: 'text',
-        content: trimmed
+        text: trimmed
       } as IMarkupText;
 
       if (options) {
@@ -87,7 +87,7 @@ export class Domifier {
     }
     return {
       kind: 'code',
-      code: code,
+      text: code,
       highlighter: highlighter || 'plain'
     } as IMarkupHighlightedText;
   }
@@ -112,7 +112,7 @@ export class Domifier {
     }
     return {
       kind: 'code-box',
-      code: code,
+      text: code,
       highlighter: highlighter
     } as IMarkupCodeBox;
   }
