@@ -274,7 +274,7 @@ interface IMarkupCodeBox {
 // @alpha
 interface IMarkupDocumentationLink {
   // (undocumented)
-  elements: MarkupLinkText[];
+  elements: MarkupLinkTextElement[];
   // (undocumented)
   kind: 'doc-link';
   // (undocumented)
@@ -313,7 +313,7 @@ interface IMarkupLineBreak {
 // @alpha
 interface IMarkupNoteBox {
   // (undocumented)
-  elements: MarkupBasicText[];
+  elements: MarkupBasicElement[];
   // (undocumented)
   kind: 'note-box';
 }
@@ -321,11 +321,11 @@ interface IMarkupNoteBox {
 // @alpha
 interface IMarkupPage {
   // (undocumented)
-  breadcrumb: MarkupBasicText[];
+  breadcrumb: MarkupBasicElement[];
   // (undocumented)
   docId: string;
   // (undocumented)
-  elements: MarkupStructuredText[];
+  elements: MarkupStructuredElement[];
   // (undocumented)
   kind: 'page';
   // (undocumented)
@@ -351,7 +351,7 @@ interface IMarkupTable {
 // @alpha
 interface IMarkupTableCell {
   // (undocumented)
-  elements: MarkupBasicText[];
+  elements: MarkupBasicElement[];
   // (undocumented)
   kind: 'table-cell';
 }
@@ -378,7 +378,7 @@ interface IMarkupText {
 // @alpha
 interface IMarkupWebLink {
   // (undocumented)
-  elements: MarkupLinkText[];
+  elements: MarkupLinkTextElement[];
   // (undocumented)
   kind: 'web-link';
   // (undocumented)
@@ -406,9 +406,9 @@ interface ITextElement extends IBaseDocElement {
 // WARNING: Unsupported export: ApiMember
 // WARNING: Unsupported export: ApiItem
 // WARNING: Unsupported export: MarkupHighlighter
-// WARNING: Unsupported export: MarkupLinkText
-// WARNING: Unsupported export: MarkupBasicText
-// WARNING: Unsupported export: MarkupStructuredText
-// WARNING: Unsupported export: MarkupItem
+// WARNING: Unsupported export: MarkupLinkTextElement
+// WARNING: Unsupported export: MarkupBasicElement
+// WARNING: Unsupported export: MarkupStructuredElement
+// WARNING: Unsupported export: MarkupElement
 // WARNING: Unsupported export: ILinkDocElement
 // WARNING: Unsupported export: IDocElement

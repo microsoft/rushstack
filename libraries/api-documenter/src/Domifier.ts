@@ -6,7 +6,7 @@ import {
   ITextElement,
   ILinkDocElement,
   ISeeDocElement,
-  MarkupBasicText,
+  MarkupBasicElement,
   IMarkupDocumentationLink,
   IMarkupWebLink,
   IMarkupText,
@@ -19,7 +19,7 @@ import {
   IMarkupHeading2,
   IMarkupPage,
   IMarkupHighlightedText,
-  MarkupLinkText,
+  MarkupLinkTextElement,
   IMarkupNoteBox,
   IMarkupCodeBox,
   MarkupHighlighter
@@ -28,7 +28,7 @@ import {
 import { DocumentationNode } from './DocumentationNode';
 
 /**
- * A helper class for generating MarkupItem structures.
+ * A helper class for generating MarkupElement structures.
  */
 export class Domifier {
   public static BREAK: IMarkupLineBreak = {
@@ -61,7 +61,9 @@ export class Domifier {
     }
   }
 
-  public static createDocumentationLink(textElements: MarkupLinkText[], targetDocId: string): IMarkupDocumentationLink {
+  public static createDocumentationLink(textElements: MarkupLinkTextElement[],
+    targetDocId: string): IMarkupDocumentationLink {
+
     if (!textElements.length) {
       throw new Error('Missing text for doc link');
     }
@@ -117,7 +119,7 @@ export class Domifier {
     } as IMarkupCodeBox;
   }
 
-  public static createNoteBox(textElements: MarkupBasicText[]): IMarkupNoteBox {
+  public static createNoteBox(textElements: MarkupBasicElement[]): IMarkupNoteBox {
     return {
       kind: 'note-box',
       elements: textElements
@@ -128,7 +130,7 @@ export class Domifier {
     return Domifier.createNoteBox(Domifier.createTextElements(text));
   }
 
-  public static createTableRow(cellValues: MarkupBasicText[][] | undefined = undefined): IMarkupTableRow {
+  public static createTableRow(cellValues: MarkupBasicElement[][] | undefined = undefined): IMarkupTableRow {
     const row: IMarkupTableRow = {
       kind: 'table-row',
       cells: []
@@ -147,7 +149,7 @@ export class Domifier {
     return row;
   }
 
-  public static createTable(headerCellValues: MarkupBasicText[][] | undefined = undefined): IMarkupTable {
+  public static createTable(headerCellValues: MarkupBasicElement[][] | undefined = undefined): IMarkupTable {
     let header: IMarkupTableRow | undefined = undefined;
     if (headerCellValues) {
       header = Domifier.createTableRow(headerCellValues);
@@ -169,12 +171,12 @@ export class Domifier {
     } as IMarkupPage;
   }
 
-  public static renderDocElements(docElements: IDocElement[] | undefined): MarkupBasicText[] {
+  public static renderDocElements(docElements: IDocElement[] | undefined): MarkupBasicElement[] {
     if (!docElements) {
       return [];
     }
 
-    const result: MarkupBasicText[] = [];
+    const result: MarkupBasicElement[] = [];
 
     for (const docElement of docElements || []) {
       switch (docElement.kind) {

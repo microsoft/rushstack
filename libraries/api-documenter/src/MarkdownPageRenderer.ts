@@ -7,7 +7,7 @@ import * as path from 'path';
 import {
   IMarkupPage,
   IMarkupText,
-  MarkupItem
+  MarkupElement
 } from '@microsoft/api-extractor';
 
 import { BasePageRenderer } from './BasePageRenderer';
@@ -115,9 +115,9 @@ export class MarkdownPageRenderer extends BasePageRenderer {
   /**
    * Merges any IMarkupText elements with compatible styles; this simplifies the emitted Markdown
    */
-  private _mergeTextElements(elements: MarkupItem[]): MarkupItem[] {
-    const mergedElements: MarkupItem[] = [];
-    let previousElement: MarkupItem|undefined;
+  private _mergeTextElements(elements: MarkupElement[]): MarkupElement[] {
+    const mergedElements: MarkupElement[] = [];
+    let previousElement: MarkupElement|undefined;
 
     for (const element of elements) {
       if (previousElement) {
@@ -147,10 +147,10 @@ export class MarkdownPageRenderer extends BasePageRenderer {
     return mergedElements;
   }
 
-  private _writeElements(elements: MarkupItem[], context: IRenderContext): void {
+  private _writeElements(elements: MarkupElement[], context: IRenderContext): void {
     const writer: SimpleWriter = context.writer;
 
-    const mergedElements: MarkupItem[] = this._mergeTextElements(elements);
+    const mergedElements: MarkupElement[] = this._mergeTextElements(elements);
 
     for (const element of mergedElements) {
       switch (element.kind) {

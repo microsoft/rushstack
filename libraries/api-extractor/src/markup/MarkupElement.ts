@@ -55,7 +55,7 @@ export interface IMarkupHighlightedText {
  *
  * @alpha
  */
-export type MarkupLinkText = IMarkupText | IMarkupHighlightedText;
+export type MarkupLinkTextElement = IMarkupText | IMarkupHighlightedText;
 
 // ----------------------------------------------------------------------------
 
@@ -65,7 +65,7 @@ export type MarkupLinkText = IMarkupText | IMarkupHighlightedText;
  */
 export interface IMarkupDocumentationLink {
   kind: 'doc-link';
-  elements: MarkupLinkText[];
+  elements: MarkupLinkTextElement[];
   targetDocId: string;
 }
 
@@ -75,7 +75,7 @@ export interface IMarkupDocumentationLink {
  */
 export interface IMarkupWebLink {
   kind: 'web-link';
-  elements: MarkupLinkText[];
+  elements: MarkupLinkTextElement[];
   targetUrl: string;
 }
 
@@ -100,7 +100,7 @@ export interface IMarkupLineBreak {
  *
  * @alpha
  */
-export type MarkupBasicText = MarkupLinkText | IMarkupDocumentationLink | IMarkupWebLink | IMarkupParagraph
+export type MarkupBasicElement = MarkupLinkTextElement | IMarkupDocumentationLink | IMarkupWebLink | IMarkupParagraph
   | IMarkupLineBreak;
 
 // ----------------------------------------------------------------------------
@@ -150,7 +150,7 @@ export interface IMarkupCodeBox {
  */
 export interface IMarkupNoteBox {
   kind: 'note-box';
-  elements: MarkupBasicText[];
+  elements: MarkupBasicElement[];
 }
 
 /**
@@ -169,7 +169,7 @@ export interface IMarkupTable {
  *
  * @alpha
  */
-export type MarkupStructuredText = MarkupBasicText | IMarkupHeading1 | IMarkupHeading2 | IMarkupCodeBox
+export type MarkupStructuredElement = MarkupBasicElement | IMarkupHeading1 | IMarkupHeading2 | IMarkupCodeBox
   | IMarkupNoteBox | IMarkupTable;
 
 // ----------------------------------------------------------------------------
@@ -181,7 +181,7 @@ export type MarkupStructuredText = MarkupBasicText | IMarkupHeading1 | IMarkupHe
  */
 export interface IMarkupTableCell {
   kind: 'table-cell';
-  elements: MarkupBasicText[];
+  elements: MarkupBasicElement[];
 }
 
 /**
@@ -203,10 +203,10 @@ export interface IMarkupPage {
   kind: 'page';
 
   docId: string;
-  breadcrumb: MarkupBasicText[];
+  breadcrumb: MarkupBasicElement[];
   title: string;
 
-  elements: MarkupStructuredText[];
+  elements: MarkupStructuredElement[];
 }
 
 /**
@@ -215,4 +215,4 @@ export interface IMarkupPage {
  *
  * @alpha
  */
-export type MarkupItem = MarkupStructuredText | IMarkupTableCell | IMarkupTableRow | IMarkupPage;
+export type MarkupElement = MarkupStructuredElement | IMarkupTableCell | IMarkupTableRow | IMarkupPage;

@@ -17,8 +17,8 @@ import {
   IApiMethod,
   IMarkupPage,
   IMarkupTable,
-  MarkupBasicText,
-  MarkupStructuredText
+  MarkupBasicElement,
+  MarkupStructuredElement
 } from '@microsoft/api-extractor';
 
 import { ApiJsonFile } from './ApiJsonFile';
@@ -90,13 +90,13 @@ export class Documenter {
 
       const exportNode: DocumentationNode = new DocumentationNode(docItem, exportName, packageNode);
 
-      const docItemTitle: MarkupBasicText[] = [
+      const docItemTitle: MarkupBasicElement[] = [
         Domifier.createDocumentationLink(
           [ Domifier.createCode(exportName, 'javascript') ],
           exportNode.docId)
       ];
 
-      const docItemDescription: MarkupBasicText[] = [];
+      const docItemDescription: MarkupBasicElement[] = [];
 
       if (docItem.isBeta) {
         docItemDescription.push(...Domifier.createTextElements('(BETA)', { italics: true, bold: true }));
@@ -216,7 +216,7 @@ export class Documenter {
 
       switch (member.kind) {
         case 'property':
-          const propertyTitle: MarkupBasicText[] = [
+          const propertyTitle: MarkupBasicElement[] = [
             Domifier.createDocumentationLink(
               [Domifier.createCode(memberName, 'javascript')],
               memberNode.docId)
@@ -234,7 +234,7 @@ export class Documenter {
           break;
 
         case 'method':
-          const methodTitle: MarkupBasicText[] = [
+          const methodTitle: MarkupBasicElement[] = [
             Domifier.createDocumentationLink(
               [Domifier.createCode(RenderingHelpers.getConciseSignature(memberName, member), 'javascript')],
               memberNode.docId)
@@ -307,7 +307,7 @@ export class Documenter {
 
       switch (member.kind) {
         case 'property':
-          const propertyTitle: MarkupBasicText[] = [
+          const propertyTitle: MarkupBasicElement[] = [
             Domifier.createDocumentationLink(
               [Domifier.createCode(memberName, 'javascript')],
               memberNode.docId)
@@ -324,7 +324,7 @@ export class Documenter {
           break;
 
         case 'method':
-          const methodTitle: MarkupBasicText[] = [
+          const methodTitle: MarkupBasicElement[] = [
             Domifier.createDocumentationLink(
               [Domifier.createCode(RenderingHelpers.getConciseSignature(memberName, member), 'javascript')],
               memberNode.docId)
@@ -387,7 +387,7 @@ export class Documenter {
     for (const memberName of Object.keys(docEnum.values)) {
       const member: IApiEnumMember = (docEnum.values as any)[memberName]; // tslint:disable-line:no-any
 
-      const enumValue: MarkupBasicText[] = [];
+      const enumValue: MarkupBasicElement[] = [];
 
       if (member.value) {
         enumValue.push(Domifier.createCode('= ' + member.value));
@@ -562,7 +562,7 @@ export class Documenter {
     }
   }
 
-  private _writeBetaWarning(elements: MarkupStructuredText[]): void {
+  private _writeBetaWarning(elements: MarkupStructuredElement[]): void {
     const betaWarning: string = 'This API is provided as a preview for developers and may change'
       + ' based on feedback that we receive.  Do not use this API in a production environment.';
     elements.push(
