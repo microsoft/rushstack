@@ -10,7 +10,7 @@ import {
 } from './markupItem/OldMarkupItem';
 import ApiDefinitionReference from './ApiDefinitionReference';
 import ApiDocumentation from './aedoc/ApiDocumentation';
-import { ApiItemKind } from './apiItem/ApiItem';
+import { AstItemKind } from './ast/AstItem';
 import Token, { TokenType } from './aedoc/Token';
 import Tokenizer from './aedoc/Tokenizer';
 import ResolvedApiItem from './ResolvedApiItem';
@@ -253,15 +253,15 @@ export default class DocElementParser {
     }
 
     // Atempt to locate the apiDefinitionRef
-    const resolvedApiItem: ResolvedApiItem = documentation.referenceResolver.resolve(
+    const resolvedAstItem: ResolvedApiItem = documentation.referenceResolver.resolve(
       apiDefinitionRef,
       documentation.extractor.package,
       warnings
     );
 
-    // If no resolvedApiItem found then nothing to inherit
+    // If no resolvedAstItem found then nothing to inherit
     // But for the time being set the summary to a text object
-    if (!resolvedApiItem) {
+    if (!resolvedAstItem) {
       const textDocItem: IDocElement = {
         kind: 'textDocElement',
         value: `See documentation for ${tokenChunks[0]}`
@@ -270,37 +270,37 @@ export default class DocElementParser {
       return;
     }
 
-    // We are going to copy the resolvedApiItem's documentation
+    // We are going to copy the resolvedAstItem's documentation
     // We must make sure it's documentation can be completed,
     // if we cannot, an error will be reported viathe documentation error handler.
-    // This will only be the case our resolvedApiItem was created from a local
-    // ApiItem. Resolutions from JSON will have an undefined 'apiItem' property.
+    // This will only be the case our resolvedAstItem was created from a local
+    // AstItem. Resolutions from JSON will have an undefined 'apiItem' property.
     // Example: a circular reference will report an error.
-    if (resolvedApiItem.apiItem) {
-      resolvedApiItem.apiItem.completeInitialization();
+    if (resolvedAstItem.apiItem) {
+      resolvedAstItem.apiItem.completeInitialization();
     }
 
     // inheritdoc found, copy over IDocBase properties
-    documentation.summary =  resolvedApiItem.summary;
-    documentation.remarks = resolvedApiItem.remarks;
+    documentation.summary =  resolvedAstItem.summary;
+    documentation.remarks = resolvedAstItem.remarks;
 
     // Copy over detailed properties if neccessary
     // Add additional cases if needed
-    switch (resolvedApiItem.kind) {
-      case ApiItemKind.Function:
-        documentation.parameters = resolvedApiItem.params;
-        documentation.returnsMessage = resolvedApiItem.returnsMessage;
+    switch (resolvedAstItem.kind) {
+      case AstItemKind.Function:
+        documentation.parameters = resolvedAstItem.params;
+        documentation.returnsMessage = resolvedAstItem.returnsMessage;
         break;
-      case ApiItemKind.Method:
-        documentation.parameters = resolvedApiItem.params;
-        documentation.returnsMessage = resolvedApiItem.returnsMessage;
+      case AstItemKind.Method:
+        documentation.parameters = resolvedAstItem.params;
+        documentation.returnsMessage = resolvedAstItem.returnsMessage;
         break;
     }
 
     // Check if inheritdoc is depreacted
     // We need to check if this documentation has a deprecated message
     // but it may not appear until after this token.
-    if (resolvedApiItem.deprecatedMessage.length > 0) {
+    if (resolvedAstItem.deprecatedMessage.length > 0) {
       documentation.isDocInheritedDeprecated = true;
     }
   }

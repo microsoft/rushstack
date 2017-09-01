@@ -20,7 +20,7 @@ import {
 import { IParam } from '../jsonItem/JsonItem';
 
 import TestFileComparer from '../TestFileComparer';
-import ApiStructuredType from '../apiItem/ApiStructuredType';
+import AstStructuredType from '../ast/AstStructuredType';
 import ApiDocumentation from '../aedoc/ApiDocumentation';
 import Extractor from '../Extractor';
 import Tokenizer from '../aedoc/Tokenizer';
@@ -45,7 +45,7 @@ function assertCapturedErrors(expectedMessages: string[]): void {
 }
 
 const inputFolder: string = './testInputs/example2';
-let myDocumentedClass: ApiStructuredType;
+let myDocumentedClass: AstStructuredType;
 
 const compilerOptions: ts.CompilerOptions = {
   target: ts.ScriptTarget.ES5,
@@ -89,7 +89,7 @@ extractor.analyze({
 });
 
 myDocumentedClass = extractor.package.getSortedMemberItems()
-  .filter(apiItem => apiItem.name === 'MyDocumentedClass')[0] as ApiStructuredType;
+  .filter(apiItem => apiItem.name === 'MyDocumentedClass')[0] as AstStructuredType;
 
 describe('DocElementParser tests', function (): void {
   this.timeout(10000);

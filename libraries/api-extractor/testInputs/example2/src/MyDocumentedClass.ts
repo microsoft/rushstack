@@ -89,7 +89,7 @@ export function functionWithIncompleteParameterType(param1, param2: string): boo
  * This is a class to test AEDoc parser and this is description that can
  * span to multiple lines and we need to make sure we parse this block
  * correctly. It can contain a {@link https://bing.com/ | bing home}. This block is entirely
- * valid and a correct documentation object should be built for this ApiItem.
+ * valid and a correct documentation object should be built for this AstItem.
  *
  * @remarks Mock class for testing JsDoc parser
  * @public

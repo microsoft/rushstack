@@ -7,7 +7,7 @@ import { assert } from 'chai';
 import * as ts from 'typescript';
 import * as path from 'path';
 import Extractor from '../../Extractor';
-import ApiStructuredType from '../ApiStructuredType';
+import AstStructuredType from '../../ast/AstStructuredType';
 import ApiDocumentation, { ReleaseTag } from '../../aedoc/ApiDocumentation';
 
 /* tslint:disable:no-function-expression - Mocha uses a poorly scoped "this" pointer */
@@ -45,8 +45,8 @@ extractor.analyze({
 // of the source package's '*.api.ts' file.
 const warnings: string[] = [];
 
-const myDocumentedClass: ApiStructuredType = extractor.package.getSortedMemberItems()
-.filter(apiItem => apiItem.name === 'MyDocumentedClass')[0] as ApiStructuredType;
+const myDocumentedClass: AstStructuredType = extractor.package.getSortedMemberItems()
+.filter(apiItem => apiItem.name === 'MyDocumentedClass')[0] as AstStructuredType;
 
 describe('ApiDocumentation tests', function (): void {
   this.timeout(10000);

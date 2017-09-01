@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import ApiItem, { IApiItemOptions } from './ApiItem';
-import ApiStructuredType from './ApiStructuredType';
+import AstItem, { IAstItemOptions } from './AstItem';
+import AstStructuredType from './AstStructuredType';
 import PrettyPrinter from '../PrettyPrinter';
 import TypeScriptHelpers from '../TypeScriptHelpers';
 
@@ -14,7 +14,7 @@ export enum AccessModifier {
 }
 
 /**
- * This class is part of the ApiItem abstract syntax tree.  It represents syntax following
+ * This class is part of the AstItem abstract syntax tree.  It represents syntax following
  * these types of patterns:
  *
  * - "someName: SomeTypeName;"
@@ -22,9 +22,9 @@ export enum AccessModifier {
  * - "someName: { someOtherName: SomeOtherTypeName }", i.e. involving a type literal expression
  * - "someFunction(): void;"
  *
- * ApiMember is used to represent members of classes, interfaces, and nested type literal expressions.
+ * AstMember is used to represent members of classes, interfaces, and nested type literal expressions.
  */
-export default class ApiMember extends ApiItem {
+export default class AstMember extends AstItem {
   /**
    * True if the member is an optional field value, indicated by a question mark ("?") after the name
    */
@@ -36,9 +36,9 @@ export default class ApiMember extends ApiItem {
    * The type of the member item, if specified as a type literal expression.  Otherwise,
    * this field is undefined.
    */
-  public typeLiteral: ApiStructuredType;
+  public typeLiteral: AstStructuredType;
 
-  constructor(options: IApiItemOptions) {
+  constructor(options: IAstItemOptions) {
     super(options);
 
     this.typeLiteral = undefined;
@@ -66,14 +66,14 @@ export default class ApiMember extends ApiItem {
       const propertyTypeDeclaration: ts.Declaration = memberSignature.type as ts.Node as ts.Declaration;
       const propertyTypeSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(propertyTypeDeclaration);
 
-      const typeLiteralOptions: IApiItemOptions = {
+      const typeLiteralOptions: IAstItemOptions = {
         extractor: this.extractor,
         declaration: propertyTypeDeclaration,
         declarationSymbol: propertyTypeSymbol,
         jsdocNode: propertyTypeDeclaration
       };
 
-      this.typeLiteral = new ApiStructuredType(typeLiteralOptions);
+      this.typeLiteral = new AstStructuredType(typeLiteralOptions);
       this.innerItems.push(this.typeLiteral);
     }
   }
@@ -81,8 +81,8 @@ export default class ApiMember extends ApiItem {
   /**
    * @virtual
    */
-  public visitTypeReferencesForApiItem(): void {
-    super.visitTypeReferencesForApiItem();
+  public visitTypeReferencesForAstItem(): void {
+    super.visitTypeReferencesForAstItem();
 
     if (this.declaration.kind !== ts.SyntaxKind.PropertySignature) {
       this.visitTypeReferencesForNode(this.declaration);

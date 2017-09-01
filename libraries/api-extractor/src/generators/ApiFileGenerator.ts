@@ -3,17 +3,17 @@
 
 import * as fs from 'fs';
 import Extractor from '../Extractor';
-import ApiStructuredType from '../apiItem/ApiStructuredType';
-import ApiEnum from '../apiItem/ApiEnum';
-import ApiEnumValue from '../apiItem/ApiEnumValue';
-import ApiFunction from '../apiItem/ApiFunction';
-import ApiItem, { ApiItemKind } from '../apiItem/ApiItem';
-import ApiItemVisitor from './ApiItemVisitor';
-import ApiPackage from '../apiItem/ApiPackage';
-import ApiParameter from '../apiItem/ApiParameter';
-import ApiMember from '../apiItem/ApiMember';
-import ApiNamespace from '../apiItem/ApiNamespace';
-import ApiModuleVariable from '../apiItem/ApiModuleVariable';
+import AstStructuredType from '../ast/AstStructuredType';
+import AstEnum from '../ast/AstEnum';
+import AstEnumValue from '../ast/AstEnumValue';
+import AstFunction from '../ast/AstFunction';
+import AstItem, { AstItemKind } from '../ast/AstItem';
+import AstItemVisitor from './AstItemVisitor';
+import AstPackage from '../ast/AstPackage';
+import AstParameter from '../ast/AstParameter';
+import AstMember from '../ast/AstMember';
+import AstNamespace from '../ast/AstNamespace';
+import AstModuleVariable from '../ast/AstModuleVariable';
 import IndentedWriter from '../IndentedWriter';
 import { ReleaseTag } from '../aedoc/ApiDocumentation';
 
@@ -28,7 +28,7 @@ import { ReleaseTag } from '../aedoc/ApiDocumentation';
  *
  * @public
  */
-export default class ApiFileGenerator extends ApiItemVisitor {
+export default class ApiFileGenerator extends AstItemVisitor {
   protected _indentedWriter: IndentedWriter = new IndentedWriter();
 
   /**
@@ -71,7 +71,7 @@ export default class ApiFileGenerator extends ApiItemVisitor {
     return fileContent;
   }
 
-  protected visitApiStructuredType(apiStructuredType: ApiStructuredType): void {
+  protected visitAstStructuredType(apiStructuredType: AstStructuredType): void {
     const declarationLine: string = apiStructuredType.getDeclarationLine();
 
     if (apiStructuredType.documentation.preapproved) {
@@ -81,14 +81,14 @@ export default class ApiFileGenerator extends ApiItemVisitor {
       return;
     }
 
-    if (apiStructuredType.kind !== ApiItemKind.TypeLiteral) {
+    if (apiStructuredType.kind !== AstItemKind.TypeLiteral) {
       this._writeAedocSynopsis(apiStructuredType);
     }
 
     this._indentedWriter.writeLine(declarationLine + ' {');
 
     this._indentedWriter.indentScope(() => {
-      if (apiStructuredType.kind === ApiItemKind.TypeLiteral) {
+      if (apiStructuredType.kind === AstItemKind.TypeLiteral) {
         // Type literals don't have normal JSDoc.  Write only the warnings,
         // and put them after the '{' since the declaration is nested.
         this._writeWarnings(apiStructuredType);
@@ -103,13 +103,13 @@ export default class ApiFileGenerator extends ApiItemVisitor {
     this._indentedWriter.write('}');
   }
 
-  protected visitApiEnum(apiEnum: ApiEnum): void {
+  protected visitAstEnum(apiEnum: AstEnum): void {
     this._writeAedocSynopsis(apiEnum);
 
     this._indentedWriter.writeLine(`enum ${apiEnum.name} {`);
 
     this._indentedWriter.indentScope(() => {
-      const members: ApiItem[] = apiEnum.getSortedMemberItems();
+      const members: AstItem[] = apiEnum.getSortedMemberItems();
       for (let i: number = 0; i < members.length; ++i) {
         this.visit(members[i]);
         this._indentedWriter.writeLine(i < members.length - 1 ? ',' : '');
@@ -119,13 +119,13 @@ export default class ApiFileGenerator extends ApiItemVisitor {
     this._indentedWriter.write('}');
   }
 
-  protected visitApiEnumValue(apiEnumValue: ApiEnumValue): void {
+  protected visitAstEnumValue(apiEnumValue: AstEnumValue): void {
     this._writeAedocSynopsis(apiEnumValue);
 
     this._indentedWriter.write(apiEnumValue.getDeclarationLine());
   }
 
-  protected visitApiPackage(apiPackage: ApiPackage): void {
+  protected visitAstPackage(apiPackage: AstPackage): void {
     for (const apiItem of apiPackage.getSortedMemberItems()) {
       this.visit(apiItem);
       this._indentedWriter.writeLine();
@@ -135,7 +135,7 @@ export default class ApiFileGenerator extends ApiItemVisitor {
     this._writeAedocSynopsis(apiPackage);
   }
 
-  protected visitApiNamespace(apiNamespace: ApiNamespace): void {
+  protected visitAstNamespace(apiNamespace: AstNamespace): void {
     this._writeAedocSynopsis(apiNamespace);
 
     // We have decided to call the apiNamespace a 'module' in our
@@ -153,13 +153,13 @@ export default class ApiFileGenerator extends ApiItemVisitor {
     this._indentedWriter.write('}');
   }
 
-  protected visitApiModuleVariable(apiModuleVariable: ApiModuleVariable): void {
+  protected visitAstModuleVariable(apiModuleVariable: AstModuleVariable): void {
     this._writeAedocSynopsis(apiModuleVariable);
 
     this._indentedWriter.write(`${apiModuleVariable.name}: ${apiModuleVariable.type} = ${apiModuleVariable.value};`);
   }
 
-  protected visitApiMember(apiMember: ApiMember): void {
+  protected visitAstMember(apiMember: AstMember): void {
     if (apiMember.documentation) {
       this._writeAedocSynopsis(apiMember);
     }
@@ -173,12 +173,12 @@ export default class ApiFileGenerator extends ApiItemVisitor {
     }
   }
 
-  protected visitApiFunction(apiFunction: ApiFunction): void {
+  protected visitAstFunction(apiFunction: AstFunction): void {
     this._writeAedocSynopsis(apiFunction);
     this._indentedWriter.write(apiFunction.getDeclarationLine());
   }
 
-  protected visitApiParam(apiParam: ApiParameter): void {
+  protected visitApiParam(apiParam: AstParameter): void {
     throw Error('Not Implemented');
   }
 
@@ -187,11 +187,11 @@ export default class ApiFileGenerator extends ApiItemVisitor {
    * whether the item has been documented, and any warnings that were detected
    * by the analysis.
    */
-  private _writeAedocSynopsis(apiItem: ApiItem): void {
+  private _writeAedocSynopsis(apiItem: AstItem): void {
     this._writeWarnings(apiItem);
     const lines: string[] = [];
 
-    if (apiItem instanceof ApiPackage && !apiItem.documentation.summary.length) {
+    if (apiItem instanceof AstPackage && !apiItem.documentation.summary.length) {
       lines.push('(No packageDescription for this package)');
     } else {
       let footer: string = '';
@@ -235,7 +235,7 @@ export default class ApiFileGenerator extends ApiItemVisitor {
     this._writeLinesAsComments(lines);
   }
 
-  private _writeWarnings(apiItem: ApiItem): void {
+  private _writeWarnings(apiItem: AstItem): void {
     const lines: string[] = apiItem.warnings.map((x: string) => 'WARNING: ' + x);
     this._writeLinesAsComments(lines);
   }

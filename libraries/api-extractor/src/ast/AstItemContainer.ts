@@ -1,56 +1,56 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import ApiItem, { IApiItemOptions } from './ApiItem';
+import AstItem, { IAstItemOptions } from './AstItem';
 
 /**
-  * This is an abstract base class for ApiPackage, ApiEnum, and ApiStructuredType,
-  * which all act as containers for other ApiItem definitions.
+  * This is an abstract base class for AstPackage, AstEnum, and AstStructuredType,
+  * which all act as containers for other AstItem definitions.
   */
-abstract class ApiItemContainer extends ApiItem {
-  private _memberItems: Map<string, ApiItem> = new Map<string, ApiItem>();
+abstract class AstItemContainer extends AstItem {
+  private _memberItems: Map<string, AstItem> = new Map<string, AstItem>();
 
-  constructor(options: IApiItemOptions) {
+  constructor(options: IAstItemOptions) {
     super(options);
   }
 
   /**
    * Find a member in this namespace by name and return it if found.
    *
-   * @param memberName - the name of the exported ApiItem
+   * @param memberName - the name of the exported AstItem
    */
-  public getMemberItem(memberName: string): ApiItem {
+  public getMemberItem(memberName: string): AstItem {
     return this._memberItems.get(memberName);
   }
 
   /**
    * Return a list of the child items for this container, sorted alphabetically.
    */
-  public getSortedMemberItems(): ApiItem[] {
-    const apiItems: ApiItem[] = [];
-    this._memberItems.forEach((apiItem: ApiItem) => {
+  public getSortedMemberItems(): AstItem[] {
+    const apiItems: AstItem[] = [];
+    this._memberItems.forEach((apiItem: AstItem) => {
       apiItems.push(apiItem);
     });
 
     return apiItems
-      .sort((a: ApiItem, b: ApiItem) => a.name.localeCompare(b.name));
+      .sort((a: AstItem, b: AstItem) => a.name.localeCompare(b.name));
   }
 
   /**
    * @virtual
    */
-  public visitTypeReferencesForApiItem(): void {
-    super.visitTypeReferencesForApiItem();
+  public visitTypeReferencesForAstItem(): void {
+    super.visitTypeReferencesForAstItem();
 
     this._memberItems.forEach((apiItem) => {
-      apiItem.visitTypeReferencesForApiItem();
+      apiItem.visitTypeReferencesForAstItem();
     });
   }
 
   /**
    * Add a child item to the container.
    */
-  protected addMemberItem(apiItem: ApiItem): void {
+  protected addMemberItem(apiItem: AstItem): void {
     if (apiItem.hasAnyIncompleteTypes()) {
       this.reportWarning(`${apiItem.name} has incomplete type information`);
     } else {
@@ -61,4 +61,4 @@ abstract class ApiItemContainer extends ApiItem {
   }
 }
 
-export default ApiItemContainer;
+export default AstItemContainer;

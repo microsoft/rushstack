@@ -7,19 +7,19 @@ import * as ts from 'typescript';
 import { JsonFile, JsonSchema, IJsonSchemaErrorInfo } from '@microsoft/node-core-library';
 
 import Extractor from '../Extractor';
-import ApiStructuredType from '../apiItem/ApiStructuredType';
-import ApiEnum from '../apiItem/ApiEnum';
-import ApiEnumValue from '../apiItem/ApiEnumValue';
-import ApiFunction from '../apiItem/ApiFunction';
-import ApiItem, { ApiItemKind } from '../apiItem/ApiItem';
-import ApiItemVisitor from './ApiItemVisitor';
-import ApiPackage from '../apiItem/ApiPackage';
-import ApiParameter from '../apiItem/ApiParameter';
-import ApiProperty from '../apiItem/ApiProperty';
-import ApiMember, { AccessModifier } from '../apiItem/ApiMember';
-import ApiNamespace from '../apiItem/ApiNamespace';
-import ApiModuleVariable from '../apiItem/ApiModuleVariable';
-import ApiMethod from '../apiItem/ApiMethod';
+import AstStructuredType from '../ast/AstStructuredType';
+import AstEnum from '../ast/AstEnum';
+import AstEnumValue from '../ast/AstEnumValue';
+import AstFunction from '../ast/AstFunction';
+import AstItem, { AstItemKind } from '../ast/AstItem';
+import AstItemVisitor from './AstItemVisitor';
+import AstPackage from '../ast/AstPackage';
+import AstParameter from '../ast/AstParameter';
+import AstProperty from '../ast/AstProperty';
+import AstMember, { AccessModifier } from '../ast/AstMember';
+import AstNamespace from '../ast/AstNamespace';
+import AstModuleVariable from '../ast/AstModuleVariable';
+import AstMethod from '../ast/AstMethod';
 import { ReleaseTag } from '../aedoc/ApiDocumentation';
 import { IReturn, IParam } from '../jsonItem/JsonItem';
 import ApiJsonFile from '../jsonItem/ApiJsonFile';
@@ -35,7 +35,7 @@ import ApiJsonFile from '../jsonItem/ApiJsonFile';
  *
  * @public
  */
-export default class ApiJsonGenerator extends ApiItemVisitor {
+export default class ApiJsonGenerator extends AstItemVisitor {
   private static _methodCounter: number = 0;
   private static _MEMBERS_KEY: string = 'members';
   private static _EXPORTS_KEY: string = 'exports';
@@ -72,7 +72,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
   }
 
   // @override
-  protected visit(apiItem: ApiItem, refObject?: Object): void {
+  protected visit(apiItem: AstItem, refObject?: Object): void {
     switch (apiItem.documentation.releaseTag) {
       case ReleaseTag.None:
       case ReleaseTag.Beta:
@@ -85,15 +85,15 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
     super.visit(apiItem, refObject);
   }
 
-  protected visitApiStructuredType(apiStructuredType: ApiStructuredType, refObject?: Object): void {
+  protected visitAstStructuredType(apiStructuredType: AstStructuredType, refObject?: Object): void {
     if (!apiStructuredType.supportedName) {
       return;
     }
 
     const kind: string =
-      apiStructuredType.kind === ApiItemKind.Class ? ApiJsonFile.convertKindToJson(ApiItemKind.Class) :
-      apiStructuredType.kind === ApiItemKind.Interface ?
-        ApiJsonFile.convertKindToJson(ApiItemKind.Interface) : '';
+      apiStructuredType.kind === AstItemKind.Class ? ApiJsonFile.convertKindToJson(AstItemKind.Class) :
+      apiStructuredType.kind === AstItemKind.Interface ?
+        ApiJsonFile.convertKindToJson(AstItemKind.Interface) : '';
 
     const structureNode: Object = {
       kind: kind,
@@ -109,7 +109,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
 
     ApiJsonGenerator._methodCounter = 0;
 
-    const members: ApiItem[] = apiStructuredType.getSortedMemberItems();
+    const members: AstItem[] = apiStructuredType.getSortedMemberItems();
 
     if (members && members.length) {
       const membersNode: Object = {};
@@ -121,7 +121,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
     }
   }
 
-  protected visitApiEnum(apiEnum: ApiEnum, refObject?: Object): void {
+  protected visitAstEnum(apiEnum: AstEnum, refObject?: Object): void {
     if (!apiEnum.supportedName) {
       return;
     }
@@ -142,7 +142,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
     }
   }
 
-  protected visitApiEnumValue(apiEnumValue: ApiEnumValue, refObject?: Object): void {
+  protected visitAstEnumValue(apiEnumValue: AstEnumValue, refObject?: Object): void {
     if (!apiEnumValue.supportedName) {
       return;
     }
@@ -163,7 +163,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
     };
   }
 
-  protected visitApiFunction(apiFunction: ApiFunction, refObject?: Object): void {
+  protected visitAstFunction(apiFunction: AstFunction, refObject?: Object): void {
     if (!apiFunction.supportedName) {
       return;
     }
@@ -189,7 +189,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
     refObject[apiFunction.name] = newNode;
   }
 
-  protected visitApiPackage(apiPackage: ApiPackage, refObject?: Object): void {
+  protected visitAstPackage(apiPackage: AstPackage, refObject?: Object): void {
     /* tslint:disable:no-string-literal */
     refObject['kind'] = ApiJsonFile.convertKindToJson(apiPackage.kind);
     refObject['summary'] = apiPackage.documentation.summary;
@@ -204,7 +204,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
     }
   }
 
-  protected visitApiNamespace(apiNamespace: ApiNamespace, refObject?: Object): void {
+  protected visitAstNamespace(apiNamespace: AstNamespace, refObject?: Object): void {
     if (!apiNamespace.supportedName) {
       return;
     }
@@ -226,7 +226,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
     refObject[apiNamespace.name] = newNode;
   }
 
-  protected visitApiMember(apiMember: ApiMember, refObject?: Object): void {
+  protected visitAstMember(apiMember: AstMember, refObject?: Object): void {
     if (!apiMember.supportedName) {
       return;
     }
@@ -234,7 +234,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
     refObject[apiMember.name] = 'apiMember-' + apiMember.getDeclaration().kind;
   }
 
-  protected visitApiProperty(apiProperty: ApiProperty, refObject?: Object): void {
+  protected visitAstProperty(apiProperty: AstProperty, refObject?: Object): void {
     if (!apiProperty.supportedName) {
       return;
     }
@@ -258,7 +258,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
     refObject[apiProperty.name] = newNode;
   }
 
-  protected visitApiModuleVariable(apiModuleVariable: ApiModuleVariable, refObject?: Object): void {
+  protected visitAstModuleVariable(apiModuleVariable: AstModuleVariable, refObject?: Object): void {
     const newNode: Object = {
       kind: ApiJsonFile.convertKindToJson(apiModuleVariable.kind),
       type: apiModuleVariable.type,
@@ -272,7 +272,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
     refObject[apiModuleVariable.name] = newNode;
   }
 
-  protected visitApiMethod(apiMethod: ApiMethod, refObject?: Object): void {
+  protected visitAstMethod(apiMethod: AstMethod, refObject?: Object): void {
     if (!apiMethod.supportedName) {
       return;
     }
@@ -284,7 +284,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
     let newNode: Object;
     if (apiMethod.name === '__constructor') {
       newNode = {
-        kind: ApiJsonFile.convertKindToJson(ApiItemKind.Constructor),
+        kind: ApiJsonFile.convertKindToJson(AstItemKind.Constructor),
         signature: apiMethod.getDeclarationLine(),
         parameters: apiMethod.documentation.parameters,
         deprecatedMessage: apiMethod.documentation.deprecatedMessage || [],
@@ -315,7 +315,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
     refObject[apiMethod.name] = newNode;
   }
 
-  protected visitApiParam(apiParam: ApiParameter, refObject?: Object): void {
+  protected visitApiParam(apiParam: AstParameter, refObject?: Object): void {
     if (!apiParam.supportedName) {
       return;
     }

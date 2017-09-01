@@ -2,24 +2,24 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import ApiItem, { ApiItemKind, IApiItemOptions } from './ApiItem';
-import ApiParameter from './ApiParameter';
+import AstItem, { AstItemKind, IAstItemOptions } from './AstItem';
+import AstParameter from './AstParameter';
 import TypeScriptHelpers from '../TypeScriptHelpers';
 import PrettyPrinter from '../PrettyPrinter';
 
 /**
-  * This class is part of the ApiItem abstract syntax tree. It represents functions that are directly
+  * This class is part of the AstItem abstract syntax tree. It represents functions that are directly
   * defined inside a package and are not member of classes, interfaces, or nested type literal expressions
   *
-  * @see ApiMethod for functions that are members of classes, interfaces, or nested type literal expressions
+  * @see AstMethod for functions that are members of classes, interfaces, or nested type literal expressions
   */
-class ApiFunction extends ApiItem {
+class AstFunction extends AstItem {
   public returnType: string;
-  public params: ApiParameter[];
+  public params: AstParameter[];
 
-  constructor(options: IApiItemOptions) {
+  constructor(options: IAstItemOptions) {
     super(options);
-    this.kind = ApiItemKind.Function;
+    this.kind = AstItemKind.Function;
 
     const methodDeclaration: ts.FunctionDeclaration = options.declaration as ts.FunctionDeclaration;
 
@@ -28,7 +28,7 @@ class ApiFunction extends ApiItem {
       this.params = [];
       for (const param of methodDeclaration.parameters) {
         const declarationSymbol: ts.Symbol = TypeScriptHelpers.tryGetSymbolForDeclaration(param);
-        const apiParameter: ApiParameter = new ApiParameter({
+        const apiParameter: AstParameter = new AstParameter({
           extractor: this.extractor,
           declaration: param,
           declarationSymbol: declarationSymbol,
@@ -57,4 +57,4 @@ class ApiFunction extends ApiItem {
   }
 }
 
-export default ApiFunction;
+export default AstFunction;

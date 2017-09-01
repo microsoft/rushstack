@@ -4,18 +4,18 @@
 /* tslint:disable:no-bitwise */
 
 import * as ts from 'typescript';
-import ApiMethod from './ApiMethod';
-import ApiProperty from './ApiProperty';
-import ApiItem, { ApiItemKind, IApiItemOptions } from './ApiItem';
-import ApiItemContainer from './ApiItemContainer';
+import AstMethod from './AstMethod';
+import AstProperty from './AstProperty';
+import AstItem, { AstItemKind, IAstItemOptions } from './AstItem';
+import AstItemContainer from './AstItemContainer';
 import TypeScriptHelpers from '../TypeScriptHelpers';
 import PrettyPrinter from '../PrettyPrinter';
 
 /**
-  * This class is part of the ApiItem abstract syntax tree.  It represents a class,
+  * This class is part of the AstItem abstract syntax tree.  It represents a class,
   * interface, or type literal expression.
   */
-export default class ApiStructuredType extends ApiItemContainer {
+export default class AstStructuredType extends AstItemContainer {
   public implements?: string;
   public extends?: string;
 
@@ -26,7 +26,7 @@ export default class ApiStructuredType extends ApiItemContainer {
   public typeParameters: string[];
 
   /**
-   * The data type of the ApiItem.declarationSymbol.  This is not the exported alias,
+   * The data type of the AstItem.declarationSymbol.  This is not the exported alias,
    * but rather the original that has complete member and inheritance information.
    */
   protected type: ts.Type;
@@ -35,18 +35,18 @@ export default class ApiStructuredType extends ApiItemContainer {
   private _processedMemberNames: Set<string> = new Set<string>();
   private _setterNames: Set<string> = new Set<string>();
 
-  constructor(options: IApiItemOptions) {
+  constructor(options: IAstItemOptions) {
     super(options);
 
     this._classLikeDeclaration = options.declaration as ts.ClassLikeDeclaration;
     this.type = this.typeChecker.getDeclaredTypeOfSymbol(this.declarationSymbol);
 
     if (this.declarationSymbol.flags & ts.SymbolFlags.Interface) {
-      this.kind = ApiItemKind.Interface;
+      this.kind = AstItemKind.Interface;
     } else if (this.declarationSymbol.flags & ts.SymbolFlags.TypeLiteral) {
-      this.kind = ApiItemKind.TypeLiteral;
+      this.kind = AstItemKind.TypeLiteral;
     } else {
-      this.kind = ApiItemKind.Class;
+      this.kind = AstItemKind.Class;
     }
 
     for (const memberDeclaration of this._classLikeDeclaration.members) {
@@ -68,7 +68,7 @@ export default class ApiStructuredType extends ApiItemContainer {
       const memberSymbol: ts.Symbol = TypeScriptHelpers.tryGetSymbolForDeclaration(member.getDeclaration());
       if (memberSymbol && (memberSymbol.flags === ts.SymbolFlags.GetAccessor)) {
         if (!this._setterNames.has(member.name)) {
-          (member as ApiProperty).isReadOnly = true;
+          (member as AstProperty).isReadOnly = true;
         }
       }
     }
@@ -110,8 +110,8 @@ export default class ApiStructuredType extends ApiItemContainer {
   /**
    * @virtual
    */
-  public visitTypeReferencesForApiItem(): void {
-    super.visitTypeReferencesForApiItem();
+  public visitTypeReferencesForAstItem(): void {
+    super.visitTypeReferencesForAstItem();
 
     // Collect type references from the base classes
     if (this._classLikeDeclaration && this._classLikeDeclaration.heritageClauses) {
@@ -124,12 +124,12 @@ export default class ApiStructuredType extends ApiItemContainer {
   /**
     * Returns a line of text such as "class MyClass extends MyBaseClass", excluding the
     * curly braces and body.  The name "MyClass" will be the public name seen by external
-    * callers, not the declared name of the class; @see ApiItem.name documentation for details.
+    * callers, not the declared name of the class; @see AstItem.name documentation for details.
     */
   public getDeclarationLine(): string {
     let result: string = '';
 
-    if (this.kind !== ApiItemKind.TypeLiteral) {
+    if (this.kind !== AstItemKind.TypeLiteral) {
       result += (this.declarationSymbol.flags & ts.SymbolFlags.Interface)
         ? 'interface ' : 'class ';
 
@@ -178,7 +178,7 @@ export default class ApiStructuredType extends ApiItemContainer {
     // Proceed to add the member
     this._processedMemberNames.add(memberSymbol.name);
 
-    const memberOptions: IApiItemOptions = {
+    const memberOptions: IAstItemOptions = {
       extractor: this.extractor,
       declaration: memberDeclaration,
       declarationSymbol: memberSymbol,
@@ -191,12 +191,12 @@ export default class ApiStructuredType extends ApiItemContainer {
         ts.SymbolFlags.Signature |
         ts.SymbolFlags.Function
     )) {
-      this.addMemberItem(new ApiMethod(memberOptions));
+      this.addMemberItem(new AstMethod(memberOptions));
     } else if (memberSymbol.flags & (
       ts.SymbolFlags.Property |
       ts.SymbolFlags.GetAccessor
     )) {
-      this.addMemberItem(new ApiProperty(memberOptions));
+      this.addMemberItem(new AstProperty(memberOptions));
     } else {
       this.reportWarning(`Unsupported member: ${memberSymbol.name}`);
     }

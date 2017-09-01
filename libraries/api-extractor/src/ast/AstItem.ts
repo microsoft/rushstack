@@ -12,12 +12,12 @@ import DocElementParser from '../DocElementParser';
 import ResolvedApiItem from '../ResolvedApiItem';
 import ApiDefinitionReference,
   { IScopedPackageName, IApiDefinitionReferenceParts } from '../ApiDefinitionReference';
-import ApiItemContainer from './ApiItemContainer';
+import AstItemContainer from './AstItemContainer';
 
 /**
- * Indicates the type of definition represented by a ApiItem object.
+ * Indicates the type of definition represented by a AstItem object.
  */
-export enum ApiItemKind {
+export enum AstItemKind {
   /**
     * A TypeScript class.
     */
@@ -73,36 +73,36 @@ export enum ApiItemKind {
 }
 
 /**
- * The state of completing the ApiItem's doc comment references inside a recursive call to ApiItem.resolveReferences().
+ * The state of completing the AstItem's doc comment references inside a recursive call to AstItem.resolveReferences().
  */
 enum InitializationState {
   /**
-   * The references of this ApiItem have not begun to be completed.
+   * The references of this AstItem have not begun to be completed.
    */
   Incomplete = 0,
   /**
-   * The references of this ApiItem are in the process of being completed.
+   * The references of this AstItem are in the process of being completed.
    * If we encounter this state again during completing, a circular dependency
    * has occurred.
    */
   Completing = 1,
   /**
-   * The references of this ApiItem have all been completed and the documentation can
+   * The references of this AstItem have all been completed and the documentation can
    * now safely be created.
    */
   Completed = 2
 }
 
 /**
-  * This interface is used to pass options between constructors for ApiItem child classes.
+  * This interface is used to pass options between constructors for AstItem child classes.
   */
-export interface IApiItemOptions {
+export interface IAstItemOptions {
   /**
-   * The associated Extractor object for this ApiItem
+   * The associated Extractor object for this AstItem
    */
   extractor: Extractor;
   /**
-   * The declaration node for the main syntax item that this ApiItem is associated with.
+   * The declaration node for the main syntax item that this AstItem is associated with.
    */
   declaration: ts.Declaration;
   /**
@@ -110,13 +110,13 @@ export interface IApiItemOptions {
    */
   declarationSymbol: ts.Symbol;
   /**
-   * The declaration node that contains the JSDoc comments for this ApiItem.
-   * In most cases this is the same as `declaration`, but for ApiPackage it will be
+   * The declaration node that contains the JSDoc comments for this AstItem.
+   * In most cases this is the same as `declaration`, but for AstPackage it will be
    * a separate node under the root.
    */
   jsdocNode: ts.Node;
   /**
-   * The symbol used to export this ApiItem from the ApiPackage.
+   * The symbol used to export this AstItem from the AstPackage.
    */
   exportSymbol?: ts.Symbol;
 }
@@ -132,12 +132,12 @@ export interface IApiItemOptions {
 const typingsScopeNames: string[] = [ '@types' ];
 
 /**
- * ApiItem is an abstract base that represents TypeScript API definitions such as classes,
+ * AstItem is an abstract base that represents TypeScript API definitions such as classes,
  * interfaces, enums, properties, functions, and variables.  Rather than directly using the
- * abstract syntax tree from the TypeScript Compiler API, we use ApiItem to extract a
+ * abstract syntax tree from the TypeScript Compiler API, we use AstItem to extract a
  * simplified tree which correponds to the major topics for our API documentation.
  */
-abstract class ApiItem {
+abstract class AstItem {
 
   /**
    * Names of API items should only contain letters, numbers and underscores.
@@ -151,8 +151,8 @@ abstract class ApiItem {
    *
    *    export { default as _MyClass } from './MyClass';
    *
-   * In this example, the ApiItem.name would be "_MyClass", i.e. the alias as exported
-   * from the top-level ApiPackage, not "MyClass" from the original definition.
+   * In this example, the AstItem.name would be "_MyClass", i.e. the alias as exported
+   * from the top-level AstPackage, not "MyClass" from the original definition.
    */
   public name: string;
 
@@ -162,44 +162,44 @@ abstract class ApiItem {
   public supportedName: boolean;
 
   /**
-   * Indicates the type of definition represented by this ApiItem instance.
+   * Indicates the type of definition represented by this AstItem instance.
    */
-  public kind: ApiItemKind;
+  public kind: AstItemKind;
 
   /**
-   * A superset of memberItems. Includes memberItems and also other ApiItems that
-   * comprise this ApiItem.
+   * A superset of memberItems. Includes memberItems and also other AstItems that
+   * comprise this AstItem.
    *
-   * Ex: if this ApiItem is an ApiFunction, then in it's innerItems would
-   * consist of ApiParameters.
-   * Ex: if this ApiItem is an ApiMember that is a type literal, then it's
+   * Ex: if this AstItem is an AstFunction, then in it's innerItems would
+   * consist of AstParameters.
+   * Ex: if this AstItem is an AstMember that is a type literal, then it's
    * innerItems would contain ApiProperties.
    */
-  public innerItems: ApiItem[] = [];
+  public innerItems: AstItem[] = [];
 
   /**
-   * True if this ApiItem either itself has missing type information or one
+   * True if this AstItem either itself has missing type information or one
    * of it's innerItems is missing type information.
    *
-   * Ex: if this ApiItem is an ApiMethod and has no type on the return value, then
-   * we consider the ApiItem as 'itself' missing type informations and this property
+   * Ex: if this AstItem is an AstMethod and has no type on the return value, then
+   * we consider the AstItem as 'itself' missing type informations and this property
    * is set to true.
-   * Ex: If this ApiItem is an ApiMethod and one of its innerItems is an ApiParameter
-   * that has no type specified, then we say an innerItem of this ApiMethod is missing
+   * Ex: If this AstItem is an AstMethod and one of its innerItems is an AstParameter
+   * that has no type specified, then we say an innerItem of this AstMethod is missing
    * type information and this property is set to true.
    */
   public hasIncompleteTypes: boolean = false;
 
   /**
-   * A list of extractor warnings that were reported using ApiItem.reportWarning().
+   * A list of extractor warnings that were reported using AstItem.reportWarning().
    * Whereas an "error" will break the build, a "warning" will merely be tracked in
    * the API file produced by ApiFileGenerator.
    */
   public warnings: string[];
 
   /**
-   * The declaration node that contains the JSDoc comments for this ApiItem.
-   * In most cases this is the same as `declaration`, but for ApiPackage it will be
+   * The declaration node that contains the JSDoc comments for this AstItem.
+   * In most cases this is the same as `declaration`, but for AstPackage it will be
    * a separate node under the root.
    */
   public jsdocNode: ts.Node;
@@ -210,7 +210,7 @@ abstract class ApiItem {
   public documentation: ApiDocumentation;
 
   /**
-   * Indicates that this ApiItem does not have adequate AEDoc comments. If shouldHaveDocumentation()=true,
+   * Indicates that this AstItem does not have adequate AEDoc comments. If shouldHaveDocumentation()=true,
    * and there is less than 10 characters of summary text in the AEDoc, then this will be set to true and
    * noted in the API file produced by ApiFileGenerator.
    * (The AEDoc text itself is not included in that report, because documentation
@@ -238,7 +238,7 @@ abstract class ApiItem {
   /**
    * Semantic information from the TypeScript Compiler API, corresponding to the symbol
    * that is seen by external consumers of the Public API.  For an aliased symbol, this
-   * would be the alias that is exported from the top-level package (i.e. ApiPackage).
+   * would be the alias that is exported from the top-level package (i.e. AstPackage).
    */
   protected exportSymbol: ts.Symbol;
 
@@ -246,19 +246,19 @@ abstract class ApiItem {
 
   /**
    * Syntax information from the TypeScript Compiler API, used to locate the file name
-   * and line number when reporting an error for this ApiItem.
+   * and line number when reporting an error for this AstItem.
    */
   private _errorNode: ts.Node;
 
   /**
-   * The state of this ApiItems references. These references could include \@inheritdoc references
+   * The state of this AstItems references. These references could include \@inheritdoc references
    * or type references.
    */
   private _state: InitializationState;
 
-  private _parentContainer: ApiItemContainer | undefined;
+  private _parentContainer: AstItemContainer | undefined;
 
-  constructor(options: IApiItemOptions) {
+  constructor(options: IAstItemOptions) {
     this.reportError = this.reportError.bind(this);
 
     this.jsdocNode = options.jsdocNode;
@@ -289,9 +289,9 @@ abstract class ApiItem {
   }
 
   /**
-   * Called by ApiItemContainer.addMemberItem().  Other code should NOT call this method.
+   * Called by AstItemContainer.addMemberItem().  Other code should NOT call this method.
    */
-  public notifyAddedToContainer(parentContainer: ApiItemContainer): void {
+  public notifyAddedToContainer(parentContainer: AstItemContainer): void {
     if (this._parentContainer) {
       // This would indicate a program bug
       throw new Error('The API item has already been added to another container: ' + this._parentContainer.name);
@@ -302,13 +302,13 @@ abstract class ApiItem {
   /**
    * Called after the constructor to finish the analysis.
    */
-  public visitTypeReferencesForApiItem(): void {
+  public visitTypeReferencesForAstItem(): void {
     // (virtual)
   }
 
   /**
    * Return the compiler's underlying Declaration object
-   * @todo Generally ApiItem classes don't expose ts API objects; we should add
+   * @todo Generally AstItem classes don't expose ts API objects; we should add
    *       an appropriate member to avoid the need for this.
    */
   public getDeclaration(): ts.Declaration {
@@ -317,7 +317,7 @@ abstract class ApiItem {
 
   /**
    * Return the compiler's underlying Symbol object that contains semantic information about the item
-   * @todo Generally ApiItem classes don't expose ts API objects; we should add
+   * @todo Generally AstItem classes don't expose ts API objects; we should add
    *       an appropriate member to avoid the need for this.
    */
   public getDeclarationSymbol(): ts.Symbol {
@@ -326,26 +326,26 @@ abstract class ApiItem {
 
   /**
    * Whether this APiItem should have documentation or not.  If false, then
-   * ApiItem.missingDocumentation will never be set.
+   * AstItem.missingDocumentation will never be set.
    */
   public shouldHaveDocumentation(): boolean {
     return true;
   }
 
   /**
-   * The ApiItemContainer that this member belongs to, or undefined if there is none.
+   * The AstItemContainer that this member belongs to, or undefined if there is none.
    */
-  public get parentContainer(): ApiItemContainer|undefined {
+  public get parentContainer(): AstItemContainer|undefined {
     return this._parentContainer;
   }
 
   /**
-   * This function is a second stage that happens after Extractor.analyze() calls ApiItem constructor to build up
-   * the abstract syntax tree. In this second stage, we are creating the documentation for each ApiItem.
+   * This function is a second stage that happens after Extractor.analyze() calls AstItem constructor to build up
+   * the abstract syntax tree. In this second stage, we are creating the documentation for each AstItem.
    *
-   * This function makes sure we create the documentation for each ApiItem in the correct order.
-   * In the event that a circular dependency occurs, an error is reported. For example, if ApiItemOne has
-   * an \@inheritdoc referencing ApiItemTwo, and ApiItemTwo has an \@inheritdoc referencing ApiItemOne then
+   * This function makes sure we create the documentation for each AstItem in the correct order.
+   * In the event that a circular dependency occurs, an error is reported. For example, if AstItemOne has
+   * an \@inheritdoc referencing AstItemTwo, and AstItemTwo has an \@inheritdoc referencing AstItemOne then
    * we have a circular dependency and an error will be reported.
    */
   public completeInitialization(): void {
@@ -365,22 +365,22 @@ abstract class ApiItem {
         this.reportError('circular reference');
         return;
       default:
-        throw new Error('ApiItem state is invalid');
+        throw new Error('AstItem state is invalid');
     }
   }
 
   /**
-   * A procedure for determining if this ApiItem is missing type
-   * information. We first check if the ApiItem itself is missing
+   * A procedure for determining if this AstItem is missing type
+   * information. We first check if the AstItem itself is missing
    * any type information and if not then we check each of it's
    * innerItems for missing types.
    *
-   * Ex: On the ApiItem itself, there may be missing type information
+   * Ex: On the AstItem itself, there may be missing type information
    * on the return value or missing type declaration of itself
    * (const name;).
-   * Ex: For each innerItem, there may be an ApiParameter that is missing
-   * a type. Or for an ApiMember that is a type literal, there may be an
-   * ApiProperty that is missing type information.
+   * Ex: For each innerItem, there may be an AstParameter that is missing
+   * a type. Or for an AstMember that is a type literal, there may be an
+   * AstProperty that is missing type information.
    */
   public hasAnyIncompleteTypes(): boolean {
     if (this.hasIncompleteTypes) {
@@ -425,14 +425,14 @@ abstract class ApiItem {
 
   /**
    * Reports an error through the ApiErrorHandler interface that was registered with the Extractor,
-   * adding the filename and line number information for the declaration of this ApiItem.
+   * adding the filename and line number information for the declaration of this AstItem.
    */
   protected reportError(message: string): void {
     this.extractor.reportError(message, this._errorNode.getSourceFile(), this._errorNode.getStart());
   }
 
   /**
-   * Adds a warning to the ApiItem.warnings list.  These warnings will be emitted in the API file
+   * Adds a warning to the AstItem.warnings list.  These warnings will be emitted in the API file
    * produced by ApiFileGenerator.
    */
   protected reportWarning(message: string): void {
@@ -440,7 +440,7 @@ abstract class ApiItem {
   }
 
   /**
-   * This function assumes all references from this ApiItem have been resolved and we can now safely create
+   * This function assumes all references from this AstItem have been resolved and we can now safely create
    * the documentation.
    */
   protected onCompleteInitialization(): void {
@@ -452,13 +452,13 @@ abstract class ApiItem {
       this.reportError).replace(/\s\s/g, ' ');
     this.needsDocumentation = this.shouldHaveDocumentation() && summaryTextCondensed.length <= 10;
 
-    this.supportedName =  (this.kind === ApiItemKind.Package) || ApiItem._allowedNameRegex.test(this.name);
+    this.supportedName =  (this.kind === AstItemKind.Package) || AstItem._allowedNameRegex.test(this.name);
     if (!this.supportedName) {
       this.warnings.push(`The name "${this.name}" contains unsupported characters; ` +
         'API names should use only letters, numbers, and underscores');
     }
 
-    if (this.kind === ApiItemKind.Package) {
+    if (this.kind === AstItemKind.Package) {
       if (this.documentation.releaseTag !== ReleaseTag.None) {
         const tag: string = '@' + ReleaseTag[this.documentation.releaseTag].toLowerCase();
         this.reportError(`The ${tag} tag is not allowed on the package, which is always considered to be @public`);
@@ -493,7 +493,7 @@ abstract class ApiItem {
     // Is it missing a release tag?
     if (this.documentation.releaseTag === ReleaseTag.None) {
       // Only warn about top-level exports
-      if (this.parentContainer && this.parentContainer.kind === ApiItemKind.Package) {
+      if (this.parentContainer && this.parentContainer.kind === AstItemKind.Package) {
         // Don't warn about items that failed to parse.
         if (!this.documentation.failedToParse) {
           // If there is no release tag, and this is a top-level export of the package, then
@@ -506,7 +506,7 @@ abstract class ApiItem {
   }
 
   /**
-   * This is called by ApiItems to visit the types that appear in an expression.  For example,
+   * This is called by AstItems to visit the types that appear in an expression.  For example,
    * if a Public API function returns a class that is defined in this package, but not exported,
    * this is a problem. visitTypeReferencesForNode() finds all TypeReference child nodes under the
    * specified node and analyzes each one.
@@ -579,7 +579,7 @@ abstract class ApiItem {
     }
 
     // Read the name/version from package.json -- that tells you what package the symbol
-    // belongs to. If it is your own ApiPackage.name/version, then you know it's a local symbol.
+    // belongs to. If it is your own AstPackage.name/version, then you know it's a local symbol.
     const currentPackageName: string = this.extractor.package.name;
 
     const typeName: string = typeReferenceNode.typeName.getText();
@@ -629,12 +629,12 @@ abstract class ApiItem {
 
     // Attempt to resolve the type by checking the node modules
     const referenceResolutionWarnings: string[] = [];
-    const resolvedApiItem: ResolvedApiItem = this.extractor.docItemLoader.resolveJsonReferences(
+    const resolvedAstItem: ResolvedApiItem = this.extractor.docItemLoader.resolveJsonReferences(
       apiDefinitionRef,
       referenceResolutionWarnings
     );
 
-    if (resolvedApiItem) {
+    if (resolvedAstItem) {
       // [CASE 3] External/Resolved
       // This is a reference to a type from an external package, and it was resolved.
       return;
@@ -649,4 +649,4 @@ abstract class ApiItem {
   }
 }
 
-export default ApiItem;
+export default AstItem;
