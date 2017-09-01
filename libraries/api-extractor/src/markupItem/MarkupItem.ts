@@ -5,6 +5,7 @@
 
 /**
  * A block of plain text, possibly with simple formatting.
+ * @alpha
  */
 export interface IDomText {
   kind: 'text';
@@ -13,12 +14,16 @@ export interface IDomText {
   italics?: boolean;
 }
 
+/**
+ * @alpha
+ */
 export type DomCodeHighlighter = 'javascript' | 'plain';
 
 /**
  * Source code shown in a fixed-width font, with syntax highlighting.
  * @remarks
  * NOTE: IDomCode is just a span of text, whereas IDomCodeBox is a box showing a larger code sample.
+ * @alpha
  */
 export interface IDomCode {
   kind: 'code';
@@ -26,12 +31,16 @@ export interface IDomCode {
   highlighter: DomCodeHighlighter;
 }
 
+/**
+ * @alpha
+ */
 export type DomLinkText = IDomText | IDomCode;
 
 // ----------------------------------------------------------------------------
 
 /**
  * A block of plain text, possibly with simple formatting.
+ * @alpha
  */
 export interface IDomDocumentationLink {
   kind: 'doc-link';
@@ -41,6 +50,7 @@ export interface IDomDocumentationLink {
 
 /**
  * A hyperlink to a web page.
+ * @alpha
  */
 export interface IDomWebLink {
   kind: 'web-link';
@@ -50,6 +60,7 @@ export interface IDomWebLink {
 
 /**
  * A paragraph separator, similar to the "<p>" tag in HTML.
+ * @alpha
  */
 export interface IDomParagraph {
   kind: 'paragraph';
@@ -57,17 +68,22 @@ export interface IDomParagraph {
 
 /**
  * A line break, similar to the "<br>" tag in HTML.
+ * @alpha
  */
 export interface IDomLineBreak {
   kind: 'break';
 }
 
+/**
+ * @alpha
+ */
 export type DomBasicText = DomLinkText | IDomDocumentationLink | IDomWebLink | IDomParagraph | IDomLineBreak;
 
 // ----------------------------------------------------------------------------
 
 /**
  * A top-level heading
+ * @alpha
  */
 export interface IDomHeading1 {
   kind: 'heading1';
@@ -76,6 +92,7 @@ export interface IDomHeading1 {
 
 /**
  * A sub heading
+ * @alpha
  */
 export interface IDomHeading2 {
   kind: 'heading2';
@@ -86,6 +103,7 @@ export interface IDomHeading2 {
  * A box containing source code with syntax highlighting.
  * @remarks
  * NOTE: IDomCode is just a span of text, whereas IDomCodeBox is a box showing a larger code sample.
+ * @alpha
  */
 export interface IDomCodeBox {
   kind: 'code-box';
@@ -95,6 +113,7 @@ export interface IDomCodeBox {
 
 /**
  * A call-out box containing an informational note.
+ * @alpha
  */
 export interface IDomNoteBox {
   kind: 'note-box';
@@ -103,6 +122,7 @@ export interface IDomNoteBox {
 
 /**
  * A table, with an optional header row.
+ * @alpha
  */
 export interface IDomTable {
   kind: 'table';
@@ -110,6 +130,10 @@ export interface IDomTable {
   rows: IDomTableRow[];
 }
 
+/**
+ * A cell inside an IDomTable object.
+ * @alpha
+ */
 export type DomTopLevelElement = DomBasicText | IDomHeading1 | IDomHeading2 | IDomCodeBox
   | IDomNoteBox | IDomTable;
 
@@ -117,6 +141,7 @@ export type DomTopLevelElement = DomBasicText | IDomHeading1 | IDomHeading2 | ID
 
 /**
  * A cell inside an IDomTable object.
+ * @alpha
  */
 export interface IDomTableCell {
   kind: 'table-cell';
@@ -125,6 +150,7 @@ export interface IDomTableCell {
 
 /**
  * A row inside an IDomTable object.
+ * @alpha
  */
 export interface IDomTableRow {
   kind: 'table-row';
@@ -134,6 +160,7 @@ export interface IDomTableRow {
 /**
  * The root node in the tree; a document page that contains the tree of other
  * DomElement objects.
+ * @alpha
  */
 export interface IDomPage {
   kind: 'page';
@@ -145,4 +172,7 @@ export interface IDomPage {
   elements: DomTopLevelElement[];
 }
 
+/**
+ * @alpha
+ */
 export type DomElement = DomTopLevelElement | IDomTableCell | IDomTableRow | IDomPage;

@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import ApiItem, { ApiItemKind } from './definitions/ApiItem';
-import { ReleaseTag } from './definitions/ApiDocumentation';
-import { IDocElement, IParam } from './IDocElement';
-import { IDocItem } from './IDocItem';
-import ApiJsonFile from './generators/ApiJsonFile';
+import ApiItem, { ApiItemKind } from './apiItem/ApiItem';
+import { ReleaseTag } from './aedoc/ApiDocumentation';
+import { IDocElement } from './markupItem/OldMarkupItem';
+import { IDocItem, IParam } from './jsonItem/JsonItem';
+import ApiJsonFile from './jsonItem/ApiJsonFile';
 
 /**
  * A class to abstract away the difference between an item from our public API that could be

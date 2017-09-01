@@ -1,8 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IDocItem } from '@microsoft/api-extractor/lib/IDocItem';
-import { ICodeLinkElement } from '@microsoft/api-extractor/lib/IDocElement';
+import {
+  IDocItem,
+  ICodeLinkElement
+} from '@microsoft/api-extractor';
 
 export class DocumentationNode {
   public readonly docItem: IDocItem;

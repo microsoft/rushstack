@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ApiItemKind } from '../definitions/ApiItem';
+import { ApiItemKind } from '../apiItem/ApiItem';
 
 /**
  * Supports the conversion between ApiItems that are loaded from ApiItem to JSON notation

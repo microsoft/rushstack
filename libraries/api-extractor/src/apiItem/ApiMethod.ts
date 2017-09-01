@@ -6,7 +6,7 @@ import { ApiItemKind, IApiItemOptions } from './ApiItem';
 import ApiMember from './ApiMember';
 import ApiParameter from './ApiParameter';
 import TypeScriptHelpers from '../TypeScriptHelpers';
-import { ITextElement, ICodeLinkElement } from '../IDocElement';
+import { ITextElement, ICodeLinkElement } from '../markupItem/OldMarkupItem';
 import ApiDefinitionReference, { IScopedPackageName } from '../ApiDefinitionReference';
 
 /**

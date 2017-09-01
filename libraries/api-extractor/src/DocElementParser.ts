@@ -1,12 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITextElement, IDocElement, IHrefLinkElement, ICodeLinkElement, ISeeDocElement } from './IDocElement';
+import {
+  ITextElement,
+  IDocElement,
+  IHrefLinkElement,
+  ICodeLinkElement,
+  ISeeDocElement
+} from './markupItem/OldMarkupItem';
 import ApiDefinitionReference from './ApiDefinitionReference';
-import ApiDocumentation from './definitions/ApiDocumentation';
-import { ApiItemKind } from './definitions/ApiItem';
-import Token, { TokenType } from './Token';
-import Tokenizer from './Tokenizer';
+import ApiDocumentation from './aedoc/ApiDocumentation';
+import { ApiItemKind } from './apiItem/ApiItem';
+import Token, { TokenType } from './aedoc/Token';
+import Tokenizer from './aedoc/Tokenizer';
 import ResolvedApiItem from './ResolvedApiItem';
 
 export default class DocElementParser {

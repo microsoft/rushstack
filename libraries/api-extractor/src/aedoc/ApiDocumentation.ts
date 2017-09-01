@@ -3,12 +3,13 @@
 
 /* tslint:disable:no-bitwise */
 
-import ApiPackage from './ApiPackage';
+import ApiPackage from '../apiItem/ApiPackage';
 import DocElementParser from '../DocElementParser';
-import { IDocElement, IParam, ICodeLinkElement } from '../IDocElement';
+import { IDocElement, ICodeLinkElement } from '../markupItem/OldMarkupItem';
+import { IParam } from '../jsonItem/JsonItem';
 import ApiDefinitionReference, { IApiDefinitionReferenceParts } from '../ApiDefinitionReference';
-import Token, { TokenType } from '../Token';
-import Tokenizer from '../Tokenizer';
+import Token, { TokenType } from './Token';
+import Tokenizer from './Tokenizer';
 import Extractor from '../Extractor';
 import ResolvedApiItem from '../ResolvedApiItem';
 

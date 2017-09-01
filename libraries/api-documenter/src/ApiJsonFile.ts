@@ -5,7 +5,7 @@ import * as os from 'os';
 import * as path from 'path';
 
 import { ApiJsonGenerator } from '@microsoft/api-extractor';
-import { IDocPackage } from '@microsoft/api-extractor/lib/IDocItem';
+import { IDocPackage } from '@microsoft/api-extractor';
 import { JsonFile, IJsonSchemaErrorInfo } from '@microsoft/node-core-library';
 
 /**

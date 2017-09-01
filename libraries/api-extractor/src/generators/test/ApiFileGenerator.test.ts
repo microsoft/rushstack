@@ -8,7 +8,7 @@ import * as ts from 'typescript';
 import * as fsx from 'fs-extra';
 import * as path from 'path';
 import Extractor from '../../Extractor';
-import ApiFileGenerator from '../../generators/ApiFileGenerator';
+import ApiFileGenerator from '../ApiFileGenerator';
 
 /* tslint:disable:no-function-expression - Mocha uses a poorly scoped "this" pointer */
 

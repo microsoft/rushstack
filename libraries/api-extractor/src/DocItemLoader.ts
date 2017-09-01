@@ -6,11 +6,16 @@ import * as os  from 'os';
 import * as path from 'path';
 import { JsonFile, IJsonSchemaErrorInfo } from '@microsoft/node-core-library';
 
-import { IDocItem, IDocPackage, IDocMember } from './IDocItem';
+import {
+  IDocItem,
+  IDocPackage,
+  IDocMember
+} from './jsonItem/JsonItem';
+
 import ApiDefinitionReference from './ApiDefinitionReference';
-import ApiItem from './definitions/ApiItem';
-import ApiItemContainer from './definitions/ApiItemContainer';
-import ApiPackage from './definitions/ApiPackage';
+import ApiItem from './apiItem/ApiItem';
+import ApiItemContainer from './apiItem/ApiItemContainer';
+import ApiPackage from './apiItem/ApiPackage';
 import ResolvedApiItem from './ResolvedApiItem';
 import ApiJsonGenerator from './generators/ApiJsonGenerator';
 

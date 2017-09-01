@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IDocElement } from './IDocElement';
+import { IDocElement } from '../markupItem/OldMarkupItem';
 
 /**
  * Whether the function is public, private, or protected.
+ * @alpha
  */
 export enum AccessModifier {
   public = 0,
@@ -21,6 +22,7 @@ export enum AccessModifier {
  *
  * IDocEnumValue does not extend the IDocITem base class
  * because the summary is not required.
+ * @alpha
  */
 export interface IDocEnumValue {
   value: string;
@@ -31,6 +33,7 @@ export interface IDocEnumValue {
 
 /**
  * Parameter Doc item.
+ * @alpha
  */
 export interface IDocParam {
   /**
@@ -61,6 +64,7 @@ export interface IDocParam {
 
 /**
  * Return value of a method or function.
+ * @alpha
  */
 export interface IDocReturnValue {
   /**
@@ -80,6 +84,7 @@ export interface IDocReturnValue {
  * for IDocItems because they represent formated rich text.
  *
  * This is the base class for other DocItem types.
+ * @alpha
  */
 export interface IDocBase {
   /**
@@ -94,6 +99,7 @@ export interface IDocBase {
 
 /**
  * A property of a TypeScript class or interface
+ * @alpha
  */
 export interface IDocProperty extends IDocBase {
 
@@ -124,6 +130,7 @@ export interface IDocProperty extends IDocBase {
 
 /**
  * A member function of a typescript class or interface.
+ * @alpha
  */
 export interface IDocMethod extends IDocBase {
   /**
@@ -164,6 +171,7 @@ export interface IDocMethod extends IDocBase {
 
 /**
  * A Typescript function.
+ * @alpha
  */
 export interface IDocFunction extends IDocBase {
   /**
@@ -183,7 +191,7 @@ export interface IDocFunction extends IDocBase {
 
 /**
  * IDocClass represetns an exported class.
- *
+ * @alpha
  */
 export interface IDocClass extends IDocBase {
   /**
@@ -213,6 +221,7 @@ export interface IDocClass extends IDocBase {
 
 /**
  * IDocEnum represents an exported enum.
+ * @alpha
  */
 export interface IDocEnum extends IDocBase {
   /**
@@ -225,6 +234,7 @@ export interface IDocEnum extends IDocBase {
 
 /**
  * IDocInterface represents an exported interface.
+ * @alpha
  */
 export interface IDocInterface extends IDocBase {
   /**
@@ -256,6 +266,7 @@ export interface IDocInterface extends IDocBase {
  * IDocPackage is an object contaning the exported
  * definions of this API package. The exports can include:
  * classes, interfaces, enums, functions.
+ * @alpha
  */
 export interface IDocPackage {
    /**
@@ -282,8 +293,47 @@ export interface IDocPackage {
 
 /**
  * A member of a class.
+ * @alpha
  */
 export type IDocMember = IDocProperty | IDocMethod;
 
+/**
+ * @alpha
+ */
 export type IDocItem = IDocProperty | IDocMember | IDocFunction |
    IDocClass |IDocEnum | IDocInterface | IDocPackage;
+
+/**
+ * An element that represents a param and relevant information to its use.
+ *
+ * Example:
+ * @param1 httpClient - description of httpClient {@link http://website.com}
+ * ->
+ * {
+ *  name: httpClient,
+ *  description: [
+ *      {kind: 'textDocElement', value: 'description of httpClient'},
+ *      {kind: 'linkDocElement', targetUrl: 'http://website.com}
+ *   ]
+ * }
+ *
+ * @alpha
+ */
+export interface IParam {
+  name: string;
+  description: IDocElement[];
+  isOptional?: boolean; // Used by ApiJsonGenerator
+  isSpread?: boolean; // Used by ApiJsonGenerator
+  type?: string; // Used by ApiJsonGenerator
+}
+
+/**
+ * Describes a return type and description of the return type
+ * that is given in documentation comments.
+ *
+ * @alpha
+ */
+export interface IReturn {
+  type: string;
+  description: IDocElement[];
+}

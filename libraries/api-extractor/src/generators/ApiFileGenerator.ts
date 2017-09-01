@@ -3,19 +3,19 @@
 
 import * as fs from 'fs';
 import Extractor from '../Extractor';
-import ApiStructuredType from '../definitions/ApiStructuredType';
-import ApiEnum from '../definitions/ApiEnum';
-import ApiEnumValue from '../definitions/ApiEnumValue';
-import ApiFunction from '../definitions/ApiFunction';
-import ApiItem, { ApiItemKind } from '../definitions/ApiItem';
-import ApiItemVisitor from '../ApiItemVisitor';
-import ApiPackage from '../definitions/ApiPackage';
-import ApiParameter from '../definitions/ApiParameter';
-import ApiMember from '../definitions/ApiMember';
-import ApiNamespace from '../definitions/ApiNamespace';
-import ApiModuleVariable from '../definitions/ApiModuleVariable';
+import ApiStructuredType from '../apiItem/ApiStructuredType';
+import ApiEnum from '../apiItem/ApiEnum';
+import ApiEnumValue from '../apiItem/ApiEnumValue';
+import ApiFunction from '../apiItem/ApiFunction';
+import ApiItem, { ApiItemKind } from '../apiItem/ApiItem';
+import ApiItemVisitor from './ApiItemVisitor';
+import ApiPackage from '../apiItem/ApiPackage';
+import ApiParameter from '../apiItem/ApiParameter';
+import ApiMember from '../apiItem/ApiMember';
+import ApiNamespace from '../apiItem/ApiNamespace';
+import ApiModuleVariable from '../apiItem/ApiModuleVariable';
 import IndentedWriter from '../IndentedWriter';
-import { ReleaseTag } from '../definitions/ApiDocumentation';
+import { ReleaseTag } from '../aedoc/ApiDocumentation';
 
 /**
  * For a library such as "example-package", ApiFileGenerator generates the "example-package.api.ts"

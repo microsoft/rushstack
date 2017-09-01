@@ -3,7 +3,7 @@
 
 import {
   IDocMethod
-} from '@microsoft/api-extractor/lib/IDocItem';
+} from '@microsoft/api-extractor';
 
 export class RenderingHelpers {
 

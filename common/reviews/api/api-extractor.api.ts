@@ -1,3 +1,15 @@
+// @alpha
+enum AccessModifier {
+  // WARNING: The name "???" contains unsupported characters; API names should use only letters, numbers, and underscores
+  '',
+  // (undocumented)
+  private,
+  // (undocumented)
+  protected,
+  // (undocumented)
+  public = 0
+}
+
 // @public
 class ApiFileGenerator extends ApiItemVisitor {
   // WARNING: The type "IndentedWriter" needs to be exported by the package (e.g. added to index.ts)
@@ -108,6 +120,266 @@ class Extractor {
   public typeChecker: ts.TypeChecker;
 }
 
+// @alpha
+interface IBaseDocElement {
+  // (undocumented)
+  kind: string;
+}
+
+// WARNING: Unable to find referenced export "ApiReference"
+// @alpha
+interface ICodeLinkElement extends IBaseDocElement {
+  exportName: string;
+  memberName?: string;
+  packageName?: string;
+  referenceType: 'code';
+  scopeName?: string;
+  value?: string;
+}
+
+// @alpha
+interface IDocBase {
+  // (undocumented)
+  deprecatedMessage?: IDocElement[];
+  // (undocumented)
+  isBeta: boolean;
+  kind: string;
+  // (undocumented)
+  remarks?: IDocElement[];
+  // (undocumented)
+  summary: IDocElement[];
+}
+
+// @alpha
+interface IDocClass extends IDocBase {
+  extends?: string;
+  implements?: string;
+  kind: 'class';
+  members: {
+    [ name: string ]: IDocMember
+  }
+  typeParameters?: string[];
+}
+
+// @alpha
+interface IDocEnum extends IDocBase {
+  kind: 'enum';
+  // (undocumented)
+  values: IDocEnumValue[];
+}
+
+// @alpha
+interface IDocEnumValue {
+  // (undocumented)
+  deprecatedMessage?: IDocElement[];
+  // (undocumented)
+  remarks?: IDocElement[];
+  // (undocumented)
+  summary?: IDocElement[];
+  // (undocumented)
+  value: string;
+}
+
+// @alpha
+interface IDocFunction extends IDocBase {
+  kind: 'function';
+  parameters: {
+    [ name: string ]: IDocParam
+  }
+  returnValue: IDocReturnValue;
+}
+
+// @alpha
+interface IDocInterface extends IDocBase {
+  extends?: string;
+  implements?: string;
+  kind: 'interface';
+  members: {
+    [ name: string ]: IDocMember
+  }
+  typeParameters?: string[];
+}
+
+// @alpha
+interface IDocMethod extends IDocBase {
+  accessModifier: AccessModifier;
+  isOptional: boolean;
+  isStatic: boolean;
+  kind: 'method';
+  parameters: {
+    [ name: string ]: IDocParam
+  }
+  returnValue: IDocReturnValue;
+  signature: string;
+}
+
+// @alpha
+interface IDocPackage {
+  // (undocumented)
+  deprecatedMessage?: IDocElement[];
+  exports: {
+    [ name: string ]: IDocItem
+  }
+  isBeta?: boolean;
+  kind: 'package';
+  // (undocumented)
+  remarks?: IDocElement[];
+  // (undocumented)
+  summary?: IDocElement[];
+}
+
+// @alpha
+interface IDocParam {
+  description: IDocElement[];
+  isOptional: boolean;
+  isSpread: boolean;
+  name: string;
+  type: string;
+}
+
+// @alpha
+interface IDocProperty extends IDocBase {
+  isOptional: boolean;
+  isReadOnly: boolean;
+  isStatic: boolean;
+  kind: 'property';
+  type: string;
+}
+
+// @alpha
+interface IDocReturnValue {
+  description: IDocElement[];
+  type: string;
+}
+
+// @alpha
+interface IDomCode {
+  // (undocumented)
+  code: string;
+  // (undocumented)
+  highlighter: DomCodeHighlighter;
+  // (undocumented)
+  kind: 'code';
+}
+
+// @alpha
+interface IDomCodeBox {
+  // (undocumented)
+  code: string;
+  // (undocumented)
+  highlighter: DomCodeHighlighter;
+  // (undocumented)
+  kind: 'code-box';
+}
+
+// @alpha
+interface IDomDocumentationLink {
+  // (undocumented)
+  elements: DomLinkText[];
+  // (undocumented)
+  kind: 'doc-link';
+  // (undocumented)
+  targetDocId: string;
+}
+
+// @alpha
+interface IDomHeading1 {
+  // (undocumented)
+  kind: 'heading1';
+  // (undocumented)
+  text: string;
+}
+
+// @alpha
+interface IDomHeading2 {
+  // (undocumented)
+  kind: 'heading2';
+  // (undocumented)
+  text: string;
+}
+
+// @alpha
+interface IDomLineBreak {
+  // (undocumented)
+  kind: 'break';
+}
+
+// @alpha
+interface IDomNoteBox {
+  // (undocumented)
+  elements: DomBasicText[];
+  // (undocumented)
+  kind: 'note-box';
+}
+
+// @alpha
+interface IDomPage {
+  // (undocumented)
+  breadcrumb: DomBasicText[];
+  // (undocumented)
+  docId: string;
+  // (undocumented)
+  elements: DomTopLevelElement[];
+  // (undocumented)
+  kind: 'page';
+  // (undocumented)
+  title: string;
+}
+
+// @alpha
+interface IDomParagraph {
+  // (undocumented)
+  kind: 'paragraph';
+}
+
+// @alpha
+interface IDomTable {
+  // (undocumented)
+  header?: IDomTableRow;
+  // (undocumented)
+  kind: 'table';
+  // (undocumented)
+  rows: IDomTableRow[];
+}
+
+// @alpha
+interface IDomTableCell {
+  // (undocumented)
+  elements: DomBasicText[];
+  // (undocumented)
+  kind: 'table-cell';
+}
+
+// @alpha
+interface IDomTableRow {
+  // (undocumented)
+  cells: IDomTableCell[];
+  // (undocumented)
+  kind: 'table-row';
+}
+
+// @alpha
+interface IDomText {
+  // (undocumented)
+  bold?: boolean;
+  // (undocumented)
+  content: string;
+  // (undocumented)
+  italics?: boolean;
+  // (undocumented)
+  kind: 'text';
+}
+
+// @alpha
+interface IDomWebLink {
+  // (undocumented)
+  elements: DomLinkText[];
+  // (undocumented)
+  kind: 'web-link';
+  // (undocumented)
+  targetUrl: string;
+}
+
 // @public
 interface IExtractorAnalyzeOptions {
   entryPointFile: string;
@@ -121,4 +393,58 @@ interface IExtractorOptions {
   errorHandler?: ApiErrorHandler;
 }
 
+// @alpha (undocumented)
+interface IHrefLinkElement extends IBaseDocElement {
+  referenceType: 'href';
+  targetUrl: string;
+  value?: string;
+}
+
+// @alpha
+interface IParam {
+  // (undocumented)
+  description: IDocElement[];
+  // (undocumented)
+  isOptional?: boolean;
+  // (undocumented)
+  isSpread?: boolean;
+  // (undocumented)
+  name: string;
+  // (undocumented)
+  type?: string;
+}
+
+// @alpha
+interface IReturn {
+  // (undocumented)
+  description: IDocElement[];
+  // (undocumented)
+  type: string;
+}
+
+// @alpha
+interface ISeeDocElement extends IBaseDocElement {
+  // (undocumented)
+  kind: 'seeDocElement';
+  // (undocumented)
+  seeElements: IDocElement[];
+}
+
+// @alpha
+interface ITextElement extends IBaseDocElement {
+  // (undocumented)
+  kind: 'textDocElement';
+  // (undocumented)
+  value: string;
+}
+
 // WARNING: Unsupported export: ApiErrorHandler
+// WARNING: Unsupported export: IDocMember
+// WARNING: Unsupported export: IDocItem
+// WARNING: Unsupported export: DomCodeHighlighter
+// WARNING: Unsupported export: DomLinkText
+// WARNING: Unsupported export: DomBasicText
+// WARNING: Unsupported export: DomTopLevelElement
+// WARNING: Unsupported export: DomElement
+// WARNING: Unsupported export: ILinkDocElement
+// WARNING: Unsupported export: IDocElement

@@ -12,7 +12,7 @@ import { ApiItemKind, IApiItemOptions } from './ApiItem';
 import ApiItemContainer from './ApiItemContainer';
 import ApiNamespace from './ApiNamespace';
 import TypeScriptHelpers from '../TypeScriptHelpers';
-import { IExportedSymbol } from '../IExportedSymbol';
+import { IExportedSymbol } from './IExportedSymbol';
 
 /**
   * This class is part of the ApiItem abstract syntax tree.  It represents the top-level

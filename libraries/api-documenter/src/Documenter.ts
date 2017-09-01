@@ -14,15 +14,12 @@ import {
   IDocProperty,
   IDocItem,
   IDocParam,
-  IDocMethod
-} from '@microsoft/api-extractor/lib/IDocItem';
-
-import {
+  IDocMethod,
   IDomPage,
   IDomTable,
   DomBasicText,
   DomTopLevelElement
-} from './SimpleDom';
+} from '@microsoft/api-extractor';
 
 import { ApiJsonFile } from './ApiJsonFile';
 import { BasePageRenderer } from './BasePageRenderer';

@@ -6,7 +6,7 @@ import * as fsx from 'fs-extra';
 import * as path from 'path';
 import { PackageJsonLookup } from '@microsoft/node-core-library';
 
-import ApiPackage from './definitions/ApiPackage';
+import ApiPackage from './apiItem/ApiPackage';
 import DocItemLoader from './DocItemLoader';
 
 export type ApiErrorHandler = (message: string, fileName: string, lineNumber: number) => void;
