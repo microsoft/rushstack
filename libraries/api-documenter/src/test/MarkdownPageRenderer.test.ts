@@ -6,7 +6,7 @@
 // import { assert } from 'chai';
 import * as path from 'path';
 import { FileDiffTest } from '@microsoft/node-core-library';
-import { IDomPage } from '@microsoft/api-extractor';
+import { IMarkupPage } from '@microsoft/api-extractor';
 
 import { MarkdownPageRenderer } from '../MarkdownPageRenderer';
 import { Domifier } from '../Domifier';
@@ -17,7 +17,7 @@ describe('MarkdownPageRenderer', () => {
     const outputFolder: string = FileDiffTest.prepareFolder(__dirname, 'MarkdownPageRenderer');
 
     const renderer: MarkdownPageRenderer = new MarkdownPageRenderer(outputFolder);
-    const domPage: IDomPage = Domifier.createPage('Test page', 'test-id');
+    const domPage: IMarkupPage = Domifier.createPage('Test page', 'test-id');
 
     domPage.elements.push(Domifier.createHeading1('Simple bold test'));
     domPage.elements.push(...Domifier.createTextElements('This is a '));

@@ -15,10 +15,10 @@ import {
   ApiItem,
   IApiParameter,
   IApiMethod,
-  IDomPage,
-  IDomTable,
-  DomBasicText,
-  DomTopLevelElement
+  IMarkupPage,
+  IMarkupTable,
+  MarkupBasicText,
+  MarkupStructuredText
 } from '@microsoft/api-extractor';
 
 import { ApiJsonFile } from './ApiJsonFile';
@@ -28,7 +28,7 @@ import { Domifier } from './Domifier';
 import { DocumentationNode } from './DocumentationNode';
 
 /**
- * This is the main engine that reads *.api.json input files and generates IDomPage data structures,
+ * This is the main engine that reads *.api.json input files and generates IMarkupPage data structures,
  * which are then rendered using an BasePageRenderer subclass.
  */
 export class Documenter {
@@ -59,28 +59,28 @@ export class Documenter {
 
     const packageNode: DocumentationNode = new DocumentationNode(docPackage, unscopedPackageName, undefined);
 
-    const domPage: IDomPage = Domifier.createPage(`${unscopedPackageName} package`, packageNode.docId);
+    const domPage: IMarkupPage = Domifier.createPage(`${unscopedPackageName} package`, packageNode.docId);
     this._writeBreadcrumb(domPage, packageNode);
 
     domPage.elements.push(...Domifier.renderDocElements(apiJsonFile.docPackage.summary));
 
-    const classesTable: IDomTable = Domifier.createTable([
+    const classesTable: IMarkupTable = Domifier.createTable([
       Domifier.createTextElements('Class'),
       Domifier.createTextElements('Description')
     ]);
 
-    const interfacesTable: IDomTable = Domifier.createTable([
+    const interfacesTable: IMarkupTable = Domifier.createTable([
       Domifier.createTextElements('Interface'),
       Domifier.createTextElements('Description')
     ]);
 
-    const functionsTable: IDomTable = Domifier.createTable([
+    const functionsTable: IMarkupTable = Domifier.createTable([
       Domifier.createTextElements('Function'),
       Domifier.createTextElements('Returns'),
       Domifier.createTextElements('Description')
     ]);
 
-    const enumerationsTable: IDomTable = Domifier.createTable([
+    const enumerationsTable: IMarkupTable = Domifier.createTable([
       Domifier.createTextElements('Enumeration'),
       Domifier.createTextElements('Description')
     ]);
@@ -90,13 +90,13 @@ export class Documenter {
 
       const exportNode: DocumentationNode = new DocumentationNode(docItem, exportName, packageNode);
 
-      const docItemTitle: DomBasicText[] = [
+      const docItemTitle: MarkupBasicText[] = [
         Domifier.createDocumentationLink(
           [ Domifier.createCode(exportName, 'javascript') ],
           exportNode.docId)
       ];
 
-      const docItemDescription: DomBasicText[] = [];
+      const docItemDescription: MarkupBasicText[] = [];
 
       if (docItem.isBeta) {
         docItemDescription.push(...Domifier.createTextElements('(BETA)', { italics: true, bold: true }));
@@ -180,7 +180,7 @@ export class Documenter {
     const className: string = classNode.name;
 
     // TODO: Show concise generic parameters with class name
-    const domPage: IDomPage = Domifier.createPage(`${className} class`, classNode.docId);
+    const domPage: IMarkupPage = Domifier.createPage(`${className} class`, classNode.docId);
     this._writeBreadcrumb(domPage, classNode);
 
     if (docClass.isBeta) {
@@ -196,14 +196,14 @@ export class Documenter {
     domPage.elements.push(Domifier.createCode(className));
     domPage.elements.push(...Domifier.createTextElements(' class'));
 
-    const propertiesTable: IDomTable = Domifier.createTable([
+    const propertiesTable: IMarkupTable = Domifier.createTable([
       Domifier.createTextElements('Property'),
       Domifier.createTextElements('Access Modifier'),
       Domifier.createTextElements('Type'),
       Domifier.createTextElements('Description')
     ]);
 
-    const methodsTable: IDomTable = Domifier.createTable([
+    const methodsTable: IMarkupTable = Domifier.createTable([
       Domifier.createTextElements('Method'),
       Domifier.createTextElements('Access Modifier'),
       Domifier.createTextElements('Returns'),
@@ -216,7 +216,7 @@ export class Documenter {
 
       switch (member.kind) {
         case 'property':
-          const propertyTitle: DomBasicText[] = [
+          const propertyTitle: MarkupBasicText[] = [
             Domifier.createDocumentationLink(
               [Domifier.createCode(memberName, 'javascript')],
               memberNode.docId)
@@ -234,7 +234,7 @@ export class Documenter {
           break;
 
         case 'method':
-          const methodTitle: DomBasicText[] = [
+          const methodTitle: MarkupBasicText[] = [
             Domifier.createDocumentationLink(
               [Domifier.createCode(RenderingHelpers.getConciseSignature(memberName, member), 'javascript')],
               memberNode.docId)
@@ -280,7 +280,7 @@ export class Documenter {
     const interfaceName: string = interfaceNode.name;
 
     // TODO: Show concise generic parameters with class name
-    const domPage: IDomPage = Domifier.createPage(`${interfaceName} interface`, interfaceNode.docId);
+    const domPage: IMarkupPage = Domifier.createPage(`${interfaceName} interface`, interfaceNode.docId);
     this._writeBreadcrumb(domPage, interfaceNode);
 
     if (docInterface.isBeta) {
@@ -289,13 +289,13 @@ export class Documenter {
 
     domPage.elements.push(...Domifier.renderDocElements(docInterface.summary));
 
-    const propertiesTable: IDomTable = Domifier.createTable([
+    const propertiesTable: IMarkupTable = Domifier.createTable([
       Domifier.createTextElements('Property'),
       Domifier.createTextElements('Type'),
       Domifier.createTextElements('Description')
     ]);
 
-    const methodsTable: IDomTable = Domifier.createTable([
+    const methodsTable: IMarkupTable = Domifier.createTable([
       Domifier.createTextElements('Method'),
       Domifier.createTextElements('Returns'),
       Domifier.createTextElements('Description')
@@ -307,7 +307,7 @@ export class Documenter {
 
       switch (member.kind) {
         case 'property':
-          const propertyTitle: DomBasicText[] = [
+          const propertyTitle: MarkupBasicText[] = [
             Domifier.createDocumentationLink(
               [Domifier.createCode(memberName, 'javascript')],
               memberNode.docId)
@@ -324,7 +324,7 @@ export class Documenter {
           break;
 
         case 'method':
-          const methodTitle: DomBasicText[] = [
+          const methodTitle: MarkupBasicText[] = [
             Domifier.createDocumentationLink(
               [Domifier.createCode(RenderingHelpers.getConciseSignature(memberName, member), 'javascript')],
               memberNode.docId)
@@ -369,7 +369,7 @@ export class Documenter {
     const enumName: string = enumNode.name;
 
     // TODO: Show concise generic parameters with class name
-    const domPage: IDomPage = Domifier.createPage(`${enumName} enumeration`, enumNode.docId);
+    const domPage: IMarkupPage = Domifier.createPage(`${enumName} enumeration`, enumNode.docId);
     this._writeBreadcrumb(domPage, enumNode);
 
     if (docEnum.isBeta) {
@@ -378,7 +378,7 @@ export class Documenter {
 
     domPage.elements.push(...Domifier.renderDocElements(docEnum.summary));
 
-    const membersTable: IDomTable = Domifier.createTable([
+    const membersTable: IMarkupTable = Domifier.createTable([
       Domifier.createTextElements('Member'),
       Domifier.createTextElements('Value'),
       Domifier.createTextElements('Description')
@@ -387,7 +387,7 @@ export class Documenter {
     for (const memberName of Object.keys(docEnum.values)) {
       const member: IApiEnumMember = (docEnum.values as any)[memberName]; // tslint:disable-line:no-any
 
-      const enumValue: DomBasicText[] = [];
+      const enumValue: MarkupBasicText[] = [];
 
       if (member.value) {
         enumValue.push(Domifier.createCode('= ' + member.value));
@@ -417,7 +417,7 @@ export class Documenter {
 
     const fullProperyName: string = propertyNode.parent!.name + '.' + propertyNode.name;
 
-    const domPage: IDomPage = Domifier.createPage(`${fullProperyName} property`, propertyNode.docId);
+    const domPage: IMarkupPage = Domifier.createPage(`${fullProperyName} property`, propertyNode.docId);
     this._writeBreadcrumb(domPage, propertyNode);
 
     if (docProperty.isBeta) {
@@ -445,7 +445,7 @@ export class Documenter {
 
     const fullMethodName: string = methodNode.parent!.name + '.' + methodNode.name;
 
-    const domPage: IDomPage = Domifier.createPage(`${fullMethodName} method`, methodNode.docId);
+    const domPage: IMarkupPage = Domifier.createPage(`${fullMethodName} method`, methodNode.docId);
     this._writeBreadcrumb(domPage, methodNode);
 
     if (docMethod.isBeta) {
@@ -472,7 +472,7 @@ export class Documenter {
     }
 
     if (Object.keys(docMethod.parameters).length > 0) {
-      const parametersTable: IDomTable = Domifier.createTable([
+      const parametersTable: IMarkupTable = Domifier.createTable([
         Domifier.createTextElements('Parameter'),
         Domifier.createTextElements('Type'),
         Domifier.createTextElements('Description')
@@ -500,7 +500,7 @@ export class Documenter {
   private _writeFunctionPage(docFunction: IApiFunction, functionNode: DocumentationNode,
     renderer: BasePageRenderer): void {
 
-    const domPage: IDomPage = Domifier.createPage(`${functionNode.name} function`, functionNode.docId);
+    const domPage: IMarkupPage = Domifier.createPage(`${functionNode.name} function`, functionNode.docId);
     this._writeBreadcrumb(domPage, functionNode);
 
     if (docFunction.isBeta) {
@@ -527,7 +527,7 @@ export class Documenter {
     }
 
     if (Object.keys(docFunction.parameters).length > 0) {
-      const parametersTable: IDomTable = Domifier.createTable([
+      const parametersTable: IMarkupTable = Domifier.createTable([
         Domifier.createTextElements('Parameter'),
         Domifier.createTextElements('Type'),
         Domifier.createTextElements('Description')
@@ -549,7 +549,7 @@ export class Documenter {
     renderer.writePage(domPage);
   }
 
-  private _writeBreadcrumb(domPage: IDomPage, currentNode: DocumentationNode): void {
+  private _writeBreadcrumb(domPage: IMarkupPage, currentNode: DocumentationNode): void {
     domPage.breadcrumb.push(Domifier.createDocumentationLinkFromText('Home', 'index'));
 
     const reversedNodes: DocumentationNode[] = [];
@@ -562,7 +562,7 @@ export class Documenter {
     }
   }
 
-  private _writeBetaWarning(elements: DomTopLevelElement[]): void {
+  private _writeBetaWarning(elements: MarkupStructuredText[]): void {
     const betaWarning: string = 'This API is provided as a preview for developers and may change'
       + ' based on feedback that we receive.  Do not use this API in a production environment.';
     elements.push(

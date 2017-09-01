@@ -4,10 +4,11 @@
 // ----------------------------------------------------------------------------
 
 /**
- * A block of plain text, possibly with simple formatting.
+ * A block of plain text, possibly with simple formatting such as bold or italics.
+ *
  * @alpha
  */
-export interface IDomText {
+export interface IMarkupText {
   kind: 'text';
   content: string;
   bold?: boolean;
@@ -15,26 +16,31 @@ export interface IDomText {
 }
 
 /**
+ * Indicates the the text should be colorized according to the specified language syntax.
+ * If "plain" is specified, then no highlighting should be performed.
+ *
  * @alpha
  */
-export type DomCodeHighlighter = 'javascript' | 'plain';
+export type MarkupHighlighter = 'javascript' | 'plain';
 
 /**
  * Source code shown in a fixed-width font, with syntax highlighting.
  * @remarks
- * NOTE: IDomCode is just a span of text, whereas IDomCodeBox is a box showing a larger code sample.
+ * NOTE: IMarkupHighlightedText is just a span of text, whereas IMarkupCodeBox is a box showing a larger code sample.
  * @alpha
  */
-export interface IDomCode {
+export interface IMarkupHighlightedText {
   kind: 'code';
   code: string;
-  highlighter: DomCodeHighlighter;
+  highlighter: MarkupHighlighter;
 }
 
 /**
+ * Represents markup that can be used as the text for a hyperlink.
+ *
  * @alpha
  */
-export type DomLinkText = IDomText | IDomCode;
+export type MarkupLinkText = IMarkupText | IMarkupHighlightedText;
 
 // ----------------------------------------------------------------------------
 
@@ -42,9 +48,9 @@ export type DomLinkText = IDomText | IDomCode;
  * A block of plain text, possibly with simple formatting.
  * @alpha
  */
-export interface IDomDocumentationLink {
+export interface IMarkupDocumentationLink {
   kind: 'doc-link';
-  elements: DomLinkText[];
+  elements: MarkupLinkText[];
   targetDocId: string;
 }
 
@@ -52,9 +58,9 @@ export interface IDomDocumentationLink {
  * A hyperlink to a web page.
  * @alpha
  */
-export interface IDomWebLink {
+export interface IMarkupWebLink {
   kind: 'web-link';
-  elements: DomLinkText[];
+  elements: MarkupLinkText[];
   targetUrl: string;
 }
 
@@ -62,7 +68,7 @@ export interface IDomWebLink {
  * A paragraph separator, similar to the "<p>" tag in HTML.
  * @alpha
  */
-export interface IDomParagraph {
+export interface IMarkupParagraph {
   kind: 'paragraph';
 }
 
@@ -70,14 +76,17 @@ export interface IDomParagraph {
  * A line break, similar to the "<br>" tag in HTML.
  * @alpha
  */
-export interface IDomLineBreak {
+export interface IMarkupLineBreak {
   kind: 'break';
 }
 
 /**
+ * Represents basic text consisting of paragraphs and links (without structures such as headers or tables).
+ *
  * @alpha
  */
-export type DomBasicText = DomLinkText | IDomDocumentationLink | IDomWebLink | IDomParagraph | IDomLineBreak;
+export type MarkupBasicText = MarkupLinkText | IMarkupDocumentationLink | IMarkupWebLink | IMarkupParagraph
+  | IMarkupLineBreak;
 
 // ----------------------------------------------------------------------------
 
@@ -85,7 +94,7 @@ export type DomBasicText = DomLinkText | IDomDocumentationLink | IDomWebLink | I
  * A top-level heading
  * @alpha
  */
-export interface IDomHeading1 {
+export interface IMarkupHeading1 {
   kind: 'heading1';
   text: string;
 }
@@ -94,7 +103,7 @@ export interface IDomHeading1 {
  * A sub heading
  * @alpha
  */
-export interface IDomHeading2 {
+export interface IMarkupHeading2 {
   kind: 'heading2';
   text: string;
 }
@@ -102,77 +111,84 @@ export interface IDomHeading2 {
 /**
  * A box containing source code with syntax highlighting.
  * @remarks
- * NOTE: IDomCode is just a span of text, whereas IDomCodeBox is a box showing a larger code sample.
+ * NOTE: IMarkupHighlightedText is just a span of text, whereas IMarkupCodeBox is a box showing a larger code sample.
  * @alpha
  */
-export interface IDomCodeBox {
+export interface IMarkupCodeBox {
   kind: 'code-box';
   code: string;
-  highlighter: DomCodeHighlighter;
+  highlighter: MarkupHighlighter;
 }
 
 /**
  * A call-out box containing an informational note.
  * @alpha
  */
-export interface IDomNoteBox {
+export interface IMarkupNoteBox {
   kind: 'note-box';
-  elements: DomBasicText[];
+  elements: MarkupBasicText[];
 }
 
 /**
  * A table, with an optional header row.
  * @alpha
  */
-export interface IDomTable {
+export interface IMarkupTable {
   kind: 'table';
-  header?: IDomTableRow;
-  rows: IDomTableRow[];
+  header?: IMarkupTableRow;
+  rows: IMarkupTableRow[];
 }
 
 /**
- * A cell inside an IDomTable object.
+ * Represents structured text that contains headings, tables, and boxes.  These are the top-level
+ * elements of a IMarkupPage.
+ *
  * @alpha
  */
-export type DomTopLevelElement = DomBasicText | IDomHeading1 | IDomHeading2 | IDomCodeBox
-  | IDomNoteBox | IDomTable;
+export type MarkupStructuredText = MarkupBasicText | IMarkupHeading1 | IMarkupHeading2 | IMarkupCodeBox
+  | IMarkupNoteBox | IMarkupTable;
 
 // ----------------------------------------------------------------------------
 
 /**
- * A cell inside an IDomTable object.
+ * A cell inside an IMarkupTable object.
+ *
  * @alpha
  */
-export interface IDomTableCell {
+export interface IMarkupTableCell {
   kind: 'table-cell';
-  elements: DomBasicText[];
+  elements: MarkupBasicText[];
 }
 
 /**
- * A row inside an IDomTable object.
+ * A row inside an IMarkupTable object.
+ *
  * @alpha
  */
-export interface IDomTableRow {
+export interface IMarkupTableRow {
   kind: 'table-row';
-  cells: IDomTableCell[];
+  cells: IMarkupTableCell[];
 }
 
 /**
- * The root node in the tree; a document page that contains the tree of other
- * DomElement objects.
+ * Represents an entire page.
+ *
  * @alpha
  */
-export interface IDomPage {
+export interface IMarkupPage {
   kind: 'page';
 
   docId: string;
-  breadcrumb: DomBasicText[];
+  breadcrumb: MarkupBasicText[];
   title: string;
 
-  elements: DomTopLevelElement[];
+  elements: MarkupStructuredText[];
 }
 
 /**
+ * The super set of all markup interfaces, used e.g. for functions that recursively traverse
+ * the tree.
+ *
  * @alpha
  */
-export type DomElement = DomTopLevelElement | IDomTableCell | IDomTableRow | IDomPage;
+export type MarkupItem = MarkupStructuredText | IMarkupTableCell | IMarkupTableRow | IMarkupPage;

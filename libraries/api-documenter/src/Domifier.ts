@@ -6,47 +6,47 @@ import {
   ITextElement,
   ILinkDocElement,
   ISeeDocElement,
-  DomBasicText,
-  IDomDocumentationLink,
-  IDomWebLink,
-  IDomText,
-  IDomParagraph,
-  IDomLineBreak,
-  IDomTable,
-  IDomTableRow,
-  IDomTableCell,
-  IDomHeading1,
-  IDomHeading2,
-  IDomPage,
-  IDomCode,
-  DomLinkText,
-  IDomNoteBox,
-  IDomCodeBox,
-  DomCodeHighlighter
+  MarkupBasicText,
+  IMarkupDocumentationLink,
+  IMarkupWebLink,
+  IMarkupText,
+  IMarkupParagraph,
+  IMarkupLineBreak,
+  IMarkupTable,
+  IMarkupTableRow,
+  IMarkupTableCell,
+  IMarkupHeading1,
+  IMarkupHeading2,
+  IMarkupPage,
+  IMarkupHighlightedText,
+  MarkupLinkText,
+  IMarkupNoteBox,
+  IMarkupCodeBox,
+  MarkupHighlighter
 } from '@microsoft/api-extractor';
 
 import { DocumentationNode } from './DocumentationNode';
 
 /**
- * A helper class for generating DomElement structures.
+ * A helper class for generating MarkupItem structures.
  */
 export class Domifier {
-  public static BREAK: IDomLineBreak = {
+  public static BREAK: IMarkupLineBreak = {
     kind: 'break'
   };
-  public static PARAGRAPH: IDomParagraph = {
+  public static PARAGRAPH: IMarkupParagraph = {
     kind: 'paragraph'
   };
 
-  public static createTextElements(text: string, options?: { bold?: boolean, italics?: boolean } ): IDomText[] {
+  public static createTextElements(text: string, options?: { bold?: boolean, italics?: boolean } ): IMarkupText[] {
     const trimmed: string = text;
     if (!trimmed) {
       return [];
     } else {
-      const result: IDomText = {
+      const result: IMarkupText = {
         kind: 'text',
         content: trimmed
-      } as IDomText;
+      } as IMarkupText;
 
       if (options) {
         if (options.bold) {
@@ -61,7 +61,7 @@ export class Domifier {
     }
   }
 
-  public static createDocumentationLink(textElements: DomLinkText[], targetDocId: string): IDomDocumentationLink {
+  public static createDocumentationLink(textElements: MarkupLinkText[], targetDocId: string): IMarkupDocumentationLink {
     if (!textElements.length) {
       throw new Error('Missing text for doc link');
     }
@@ -70,10 +70,10 @@ export class Domifier {
       kind: 'doc-link',
       elements: textElements,
       targetDocId: targetDocId
-    } as IDomDocumentationLink;
+    } as IMarkupDocumentationLink;
   }
 
-  public static createDocumentationLinkFromText(text: string, targetDocId: string): IDomDocumentationLink {
+  public static createDocumentationLinkFromText(text: string, targetDocId: string): IMarkupDocumentationLink {
     if (!text) {
       throw new Error('Missing text for doc link');
     }
@@ -81,7 +81,7 @@ export class Domifier {
     return Domifier.createDocumentationLink(Domifier.createTextElements(text), targetDocId);
   }
 
-  public static createCode(code: string, highlighter?: DomCodeHighlighter): IDomCode {
+  public static createCode(code: string, highlighter?: MarkupHighlighter): IMarkupHighlightedText {
     if (!code) {
       throw new Error('The code parameter is missing');
     }
@@ -89,24 +89,24 @@ export class Domifier {
       kind: 'code',
       code: code,
       highlighter: highlighter || 'plain'
-    } as IDomCode;
+    } as IMarkupHighlightedText;
   }
 
-  public static createHeading1(text: string): IDomHeading1 {
+  public static createHeading1(text: string): IMarkupHeading1 {
     return {
       kind: 'heading1',
       text: text
     };
   }
 
-  public static createHeading2(text: string): IDomHeading2 {
+  public static createHeading2(text: string): IMarkupHeading2 {
     return {
       kind: 'heading2',
       text: text
     };
   }
 
-  public static createCodeBox(code: string, highlighter: DomCodeHighlighter): IDomCodeBox {
+  public static createCodeBox(code: string, highlighter: MarkupHighlighter): IMarkupCodeBox {
     if (!code) {
       throw new Error('The code parameter is missing');
     }
@@ -114,29 +114,29 @@ export class Domifier {
       kind: 'code-box',
       code: code,
       highlighter: highlighter
-    } as IDomCodeBox;
+    } as IMarkupCodeBox;
   }
 
-  public static createNoteBox(textElements: DomBasicText[]): IDomNoteBox {
+  public static createNoteBox(textElements: MarkupBasicText[]): IMarkupNoteBox {
     return {
       kind: 'note-box',
       elements: textElements
-    } as IDomNoteBox;
+    } as IMarkupNoteBox;
   }
 
-  public static createNoteBoxFromText(text: string): IDomNoteBox {
+  public static createNoteBoxFromText(text: string): IMarkupNoteBox {
     return Domifier.createNoteBox(Domifier.createTextElements(text));
   }
 
-  public static createTableRow(cellValues: DomBasicText[][] | undefined = undefined): IDomTableRow {
-    const row: IDomTableRow = {
+  public static createTableRow(cellValues: MarkupBasicText[][] | undefined = undefined): IMarkupTableRow {
+    const row: IMarkupTableRow = {
       kind: 'table-row',
       cells: []
     };
 
     if (cellValues) {
       for (const cellValue of cellValues) {
-        const cell: IDomTableCell = {
+        const cell: IMarkupTableCell = {
           kind: 'table-cell',
           elements: cellValue
         };
@@ -147,8 +147,8 @@ export class Domifier {
     return row;
   }
 
-  public static createTable(headerCellValues: DomBasicText[][] | undefined = undefined): IDomTable {
-    let header: IDomTableRow | undefined = undefined;
+  public static createTable(headerCellValues: MarkupBasicText[][] | undefined = undefined): IMarkupTable {
+    let header: IMarkupTableRow | undefined = undefined;
     if (headerCellValues) {
       header = Domifier.createTableRow(headerCellValues);
     }
@@ -156,25 +156,25 @@ export class Domifier {
       kind: 'table',
       header: header,
       rows: []
-    } as IDomTable;
+    } as IMarkupTable;
   }
 
-  public static createPage(title: string, docId: string): IDomPage {
+  public static createPage(title: string, docId: string): IMarkupPage {
     return {
       kind: 'page',
       docId: docId,
       breadcrumb: [],
       title: title,
       elements: []
-    } as IDomPage;
+    } as IMarkupPage;
   }
 
-  public static renderDocElements(docElements: IDocElement[] | undefined): DomBasicText[] {
+  public static renderDocElements(docElements: IDocElement[] | undefined): MarkupBasicText[] {
     if (!docElements) {
       return [];
     }
 
-    const result: DomBasicText[] = [];
+    const result: MarkupBasicText[] = [];
 
     for (const docElement of docElements || []) {
       switch (docElement.kind) {
@@ -203,7 +203,7 @@ export class Domifier {
                 kind: 'web-link',
                 elements: Domifier.createTextElements(linkDocElement.value || linkDocElement.targetUrl),
                 targetUrl: linkDocElement.targetUrl
-              } as IDomWebLink
+              } as IMarkupWebLink
             );
           }
           break;

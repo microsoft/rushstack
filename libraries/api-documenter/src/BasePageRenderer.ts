@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IDomPage } from '@microsoft/api-extractor';
+import { IMarkupPage } from '@microsoft/api-extractor';
 
 import * as fsx from 'fs-extra';
 import * as path from 'path';
 
 /**
- * This is an abstract base class for plug-ins that convert the IDomPage representation
+ * This is an abstract base class for plug-ins that convert the IMarkupPage representation
  * to various output formats.
  */
 export abstract class BasePageRenderer {
@@ -25,7 +25,7 @@ export abstract class BasePageRenderer {
   /**
    * Write a file containing a single page of documentation.
    */
-  public abstract writePage(domPage: IDomPage): void;
+  public abstract writePage(domPage: IMarkupPage): void;
 
   /**
    * Delete all the output files created by this renderer.

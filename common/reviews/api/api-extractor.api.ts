@@ -242,134 +242,6 @@ interface ICodeLinkElement extends IBaseDocElement {
   value?: string;
 }
 
-// @alpha
-interface IDomCode {
-  // (undocumented)
-  code: string;
-  // (undocumented)
-  highlighter: DomCodeHighlighter;
-  // (undocumented)
-  kind: 'code';
-}
-
-// @alpha
-interface IDomCodeBox {
-  // (undocumented)
-  code: string;
-  // (undocumented)
-  highlighter: DomCodeHighlighter;
-  // (undocumented)
-  kind: 'code-box';
-}
-
-// @alpha
-interface IDomDocumentationLink {
-  // (undocumented)
-  elements: DomLinkText[];
-  // (undocumented)
-  kind: 'doc-link';
-  // (undocumented)
-  targetDocId: string;
-}
-
-// @alpha
-interface IDomHeading1 {
-  // (undocumented)
-  kind: 'heading1';
-  // (undocumented)
-  text: string;
-}
-
-// @alpha
-interface IDomHeading2 {
-  // (undocumented)
-  kind: 'heading2';
-  // (undocumented)
-  text: string;
-}
-
-// @alpha
-interface IDomLineBreak {
-  // (undocumented)
-  kind: 'break';
-}
-
-// @alpha
-interface IDomNoteBox {
-  // (undocumented)
-  elements: DomBasicText[];
-  // (undocumented)
-  kind: 'note-box';
-}
-
-// @alpha
-interface IDomPage {
-  // (undocumented)
-  breadcrumb: DomBasicText[];
-  // (undocumented)
-  docId: string;
-  // (undocumented)
-  elements: DomTopLevelElement[];
-  // (undocumented)
-  kind: 'page';
-  // (undocumented)
-  title: string;
-}
-
-// @alpha
-interface IDomParagraph {
-  // (undocumented)
-  kind: 'paragraph';
-}
-
-// @alpha
-interface IDomTable {
-  // (undocumented)
-  header?: IDomTableRow;
-  // (undocumented)
-  kind: 'table';
-  // (undocumented)
-  rows: IDomTableRow[];
-}
-
-// @alpha
-interface IDomTableCell {
-  // (undocumented)
-  elements: DomBasicText[];
-  // (undocumented)
-  kind: 'table-cell';
-}
-
-// @alpha
-interface IDomTableRow {
-  // (undocumented)
-  cells: IDomTableCell[];
-  // (undocumented)
-  kind: 'table-row';
-}
-
-// @alpha
-interface IDomText {
-  // (undocumented)
-  bold?: boolean;
-  // (undocumented)
-  content: string;
-  // (undocumented)
-  italics?: boolean;
-  // (undocumented)
-  kind: 'text';
-}
-
-// @alpha
-interface IDomWebLink {
-  // (undocumented)
-  elements: DomLinkText[];
-  // (undocumented)
-  kind: 'web-link';
-  // (undocumented)
-  targetUrl: string;
-}
-
 // @public
 interface IExtractorAnalyzeOptions {
   entryPointFile: string;
@@ -388,6 +260,134 @@ interface IHrefLinkElement extends IBaseDocElement {
   referenceType: 'href';
   targetUrl: string;
   value?: string;
+}
+
+// @alpha
+interface IMarkupCodeBox {
+  // (undocumented)
+  code: string;
+  // (undocumented)
+  highlighter: MarkupHighlighter;
+  // (undocumented)
+  kind: 'code-box';
+}
+
+// @alpha
+interface IMarkupDocumentationLink {
+  // (undocumented)
+  elements: MarkupLinkText[];
+  // (undocumented)
+  kind: 'doc-link';
+  // (undocumented)
+  targetDocId: string;
+}
+
+// @alpha
+interface IMarkupHeading1 {
+  // (undocumented)
+  kind: 'heading1';
+  // (undocumented)
+  text: string;
+}
+
+// @alpha
+interface IMarkupHeading2 {
+  // (undocumented)
+  kind: 'heading2';
+  // (undocumented)
+  text: string;
+}
+
+// @alpha
+interface IMarkupHighlightedText {
+  // (undocumented)
+  code: string;
+  // (undocumented)
+  highlighter: MarkupHighlighter;
+  // (undocumented)
+  kind: 'code';
+}
+
+// @alpha
+interface IMarkupLineBreak {
+  // (undocumented)
+  kind: 'break';
+}
+
+// @alpha
+interface IMarkupNoteBox {
+  // (undocumented)
+  elements: MarkupBasicText[];
+  // (undocumented)
+  kind: 'note-box';
+}
+
+// @alpha
+interface IMarkupPage {
+  // (undocumented)
+  breadcrumb: MarkupBasicText[];
+  // (undocumented)
+  docId: string;
+  // (undocumented)
+  elements: MarkupStructuredText[];
+  // (undocumented)
+  kind: 'page';
+  // (undocumented)
+  title: string;
+}
+
+// @alpha
+interface IMarkupParagraph {
+  // (undocumented)
+  kind: 'paragraph';
+}
+
+// @alpha
+interface IMarkupTable {
+  // (undocumented)
+  header?: IMarkupTableRow;
+  // (undocumented)
+  kind: 'table';
+  // (undocumented)
+  rows: IMarkupTableRow[];
+}
+
+// @alpha
+interface IMarkupTableCell {
+  // (undocumented)
+  elements: MarkupBasicText[];
+  // (undocumented)
+  kind: 'table-cell';
+}
+
+// @alpha
+interface IMarkupTableRow {
+  // (undocumented)
+  cells: IMarkupTableCell[];
+  // (undocumented)
+  kind: 'table-row';
+}
+
+// @alpha
+interface IMarkupText {
+  // (undocumented)
+  bold?: boolean;
+  // (undocumented)
+  content: string;
+  // (undocumented)
+  italics?: boolean;
+  // (undocumented)
+  kind: 'text';
+}
+
+// @alpha
+interface IMarkupWebLink {
+  // (undocumented)
+  elements: MarkupLinkText[];
+  // (undocumented)
+  kind: 'web-link';
+  // (undocumented)
+  targetUrl: string;
 }
 
 // @alpha
@@ -410,10 +410,10 @@ interface ITextElement extends IBaseDocElement {
 // WARNING: Unsupported export: ApiAccessModifier
 // WARNING: Unsupported export: ApiMember
 // WARNING: Unsupported export: ApiItem
-// WARNING: Unsupported export: DomCodeHighlighter
-// WARNING: Unsupported export: DomLinkText
-// WARNING: Unsupported export: DomBasicText
-// WARNING: Unsupported export: DomTopLevelElement
-// WARNING: Unsupported export: DomElement
+// WARNING: Unsupported export: MarkupHighlighter
+// WARNING: Unsupported export: MarkupLinkText
+// WARNING: Unsupported export: MarkupBasicText
+// WARNING: Unsupported export: MarkupStructuredText
+// WARNING: Unsupported export: MarkupItem
 // WARNING: Unsupported export: ILinkDocElement
 // WARNING: Unsupported export: IDocElement

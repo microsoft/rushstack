@@ -5,9 +5,9 @@ import * as fsx from 'fs-extra';
 import * as path from 'path';
 
 import {
-  IDomPage,
-  IDomText,
-  DomElement
+  IMarkupPage,
+  IMarkupText,
+  MarkupItem
 } from '@microsoft/api-extractor';
 
 import { BasePageRenderer } from './BasePageRenderer';
@@ -72,7 +72,7 @@ export class MarkdownPageRenderer extends BasePageRenderer {
     return '.md';
   }
 
-  public writePage(domPage: IDomPage): string { // override
+  public writePage(domPage: IMarkupPage): string { // override
     const filename: string = path.join(this.outputFolder, this.getFilenameForDocId(domPage.docId));
 
     const writer: SimpleWriter = new SimpleWriter();
@@ -113,11 +113,11 @@ export class MarkdownPageRenderer extends BasePageRenderer {
   }
 
   /**
-   * Merges any IDomText elements with compatible styles; this simplifies the emitted Markdown
+   * Merges any IMarkupText elements with compatible styles; this simplifies the emitted Markdown
    */
-  private _mergeTextElements(elements: DomElement[]): DomElement[] {
-    const mergedElements: DomElement[] = [];
-    let previousElement: DomElement|undefined;
+  private _mergeTextElements(elements: MarkupItem[]): MarkupItem[] {
+    const mergedElements: MarkupItem[] = [];
+    let previousElement: MarkupItem|undefined;
 
     for (const element of elements) {
       if (previousElement) {
@@ -126,7 +126,7 @@ export class MarkdownPageRenderer extends BasePageRenderer {
             // merge them
             mergedElements.pop(); // pop the previous element
 
-            const combinedElement: IDomText = { // push a combined element
+            const combinedElement: IMarkupText = { // push a combined element
               kind: 'text',
               content: previousElement.content + element.content,
               bold: previousElement.bold,
@@ -147,10 +147,10 @@ export class MarkdownPageRenderer extends BasePageRenderer {
     return mergedElements;
   }
 
-  private _writeElements(elements: DomElement[], context: IRenderContext): void {
+  private _writeElements(elements: MarkupItem[], context: IRenderContext): void {
     const writer: SimpleWriter = context.writer;
 
-    const mergedElements: DomElement[] = this._mergeTextElements(elements);
+    const mergedElements: MarkupItem[] = this._mergeTextElements(elements);
 
     for (const element of mergedElements) {
       switch (element.kind) {
