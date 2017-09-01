@@ -55,7 +55,7 @@ class ApiJsonGenerator extends AstItemVisitor {
   public static readonly jsonSchema: JsonSchema;
   // WARNING: The type "AstItem" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
-  protected visit(apiItem: AstItem, refObject?: Object): void;
+  protected visit(astItem: AstItem, refObject?: Object): void;
   // WARNING: The type "AstParameter" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   protected visitApiParam(apiParam: AstParameter, refObject?: Object): void;

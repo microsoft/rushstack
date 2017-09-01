@@ -72,8 +72,8 @@ export default class ApiJsonGenerator extends AstItemVisitor {
   }
 
   // @override
-  protected visit(apiItem: AstItem, refObject?: Object): void {
-    switch (apiItem.documentation.releaseTag) {
+  protected visit(astItem: AstItem, refObject?: Object): void {
+    switch (astItem.documentation.releaseTag) {
       case ReleaseTag.None:
       case ReleaseTag.Beta:
       case ReleaseTag.Public:
@@ -82,7 +82,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
         return; // skip @alpha and @internal definitions
     }
 
-    super.visit(apiItem, refObject);
+    super.visit(astItem, refObject);
   }
 
   protected visitAstStructuredType(apiStructuredType: AstStructuredType, refObject?: Object): void {
@@ -115,8 +115,8 @@ export default class ApiJsonGenerator extends AstItemVisitor {
       const membersNode: Object = {};
       structureNode[ApiJsonGenerator._MEMBERS_KEY] = membersNode;
 
-      for (const apiItem of members) {
-        this.visit(apiItem, membersNode);
+      for (const astItem of members) {
+        this.visit(astItem, membersNode);
       }
     }
   }
@@ -137,8 +137,8 @@ export default class ApiJsonGenerator extends AstItemVisitor {
     };
     refObject[apiEnum.name] = enumNode;
 
-    for (const apiItem of apiEnum.getSortedMemberItems()) {
-      this.visit(apiItem, valuesNode);
+    for (const astItem of apiEnum.getSortedMemberItems()) {
+      this.visit(astItem, valuesNode);
     }
   }
 
@@ -199,8 +199,8 @@ export default class ApiJsonGenerator extends AstItemVisitor {
     const membersNode: Object = {};
     refObject[ApiJsonGenerator._EXPORTS_KEY] = membersNode;
 
-    for (const apiItem of apiPackage.getSortedMemberItems()) {
-      this.visit(apiItem, membersNode);
+    for (const astItem of apiPackage.getSortedMemberItems()) {
+      this.visit(astItem, membersNode);
     }
   }
 
@@ -210,8 +210,8 @@ export default class ApiJsonGenerator extends AstItemVisitor {
     }
 
     const membersNode: Object = {};
-    for (const apiItem of apiNamespace.getSortedMemberItems()) {
-      this.visit(apiItem, membersNode);
+    for (const astItem of apiNamespace.getSortedMemberItems()) {
+      this.visit(astItem, membersNode);
     }
 
     const newNode: Object = {

@@ -76,7 +76,7 @@ export default class DocItemLoader {
 
     } else {
 
-      // If there was no resolved apiItem then try loading from JSON
+      // If there was no resolved astItem then try loading from JSON
       return this.resolveJsonReferences(apiDefinitionRef, warnings);
     }
   }
@@ -91,34 +91,34 @@ export default class DocItemLoader {
     apiPackage: AstPackage,
     warnings: string[]): ResolvedApiItem {
 
-    let apiItem: AstItem = apiPackage.getMemberItem(apiDefinitionRef.exportName);
+    let astItem: AstItem = apiPackage.getMemberItem(apiDefinitionRef.exportName);
     // Check if export name was not found
-    if (!apiItem) {
+    if (!astItem) {
       warnings.push(`Unable to find referenced export \"${apiDefinitionRef.toExportString()}\"`);
       return undefined;
     }
 
     // If memberName exists then check for the existence of the name
     if (apiDefinitionRef.memberName) {
-      if (apiItem instanceof AstItemContainer) {
-        const apiItemContainer: AstItemContainer = (apiItem as AstItemContainer);
+      if (astItem instanceof AstItemContainer) {
+        const astItemContainer: AstItemContainer = (astItem as AstItemContainer);
         // get() returns undefined if there is no match
-        apiItem = apiItemContainer.getMemberItem(apiDefinitionRef.memberName);
+        astItem = astItemContainer.getMemberItem(apiDefinitionRef.memberName);
       } else {
-        // There are no other instances of apiItem that has members,
+        // There are no other instances of astItem that has members,
         // thus there must be a mistake with the apiDefinitionRef.
-        apiItem = undefined;
+        astItem = undefined;
       }
     }
 
-    if (!apiItem) {
+    if (!astItem) {
       // If we are here, we can be sure there was a problem with the memberName.
       // memberName was not found, apiDefinitionRef is invalid
       warnings.push(`Unable to find referenced member \"${apiDefinitionRef.toMemberString()}\"`);
       return undefined;
     }
 
-    return ResolvedApiItem.createFromAstItem(apiItem);
+    return ResolvedApiItem.createFromAstItem(astItem);
   }
 
   /**

@@ -27,12 +27,12 @@ abstract class AstItemContainer extends AstItem {
    * Return a list of the child items for this container, sorted alphabetically.
    */
   public getSortedMemberItems(): AstItem[] {
-    const apiItems: AstItem[] = [];
-    this._memberItems.forEach((apiItem: AstItem) => {
-      apiItems.push(apiItem);
+    const astItems: AstItem[] = [];
+    this._memberItems.forEach((astItem: AstItem) => {
+      astItems.push(astItem);
     });
 
-    return apiItems
+    return astItems
       .sort((a: AstItem, b: AstItem) => a.name.localeCompare(b.name));
   }
 
@@ -42,21 +42,21 @@ abstract class AstItemContainer extends AstItem {
   public visitTypeReferencesForAstItem(): void {
     super.visitTypeReferencesForAstItem();
 
-    this._memberItems.forEach((apiItem) => {
-      apiItem.visitTypeReferencesForAstItem();
+    this._memberItems.forEach((astItem) => {
+      astItem.visitTypeReferencesForAstItem();
     });
   }
 
   /**
    * Add a child item to the container.
    */
-  protected addMemberItem(apiItem: AstItem): void {
-    if (apiItem.hasAnyIncompleteTypes()) {
-      this.reportWarning(`${apiItem.name} has incomplete type information`);
+  protected addMemberItem(astItem: AstItem): void {
+    if (astItem.hasAnyIncompleteTypes()) {
+      this.reportWarning(`${astItem.name} has incomplete type information`);
     } else {
-      this.innerItems.push(apiItem);
-      this._memberItems.set(apiItem.name, apiItem);
-      apiItem.notifyAddedToContainer(this);
+      this.innerItems.push(astItem);
+      this._memberItems.set(astItem.name, astItem);
+      astItem.notifyAddedToContainer(this);
     }
   }
 }

@@ -19,25 +19,25 @@ import AstModuleVariable from '../ast/AstModuleVariable';
   * abstract syntax tree.
   */
 abstract class AstItemVisitor {
-  protected visit(apiItem: AstItem, refObject?: Object): void {
-    if (apiItem instanceof AstStructuredType) {
-      this.visitAstStructuredType(apiItem as AstStructuredType, refObject);
-    } else if (apiItem instanceof AstEnum) {
-      this.visitAstEnum(apiItem as AstEnum, refObject);
-    } else if (apiItem instanceof AstEnumValue) {
-      this.visitAstEnumValue(apiItem as AstEnumValue, refObject);
-    } else if (apiItem instanceof AstFunction) {
-      this.visitAstFunction(apiItem as AstFunction, refObject);
-    } else if (apiItem instanceof AstPackage) {
-      this.visitAstPackage(apiItem as AstPackage, refObject);
-    } else if (apiItem instanceof AstProperty) {
-      this.visitAstProperty(apiItem as AstProperty, refObject);
-    } else if (apiItem instanceof AstMethod) {
-      this.visitAstMethod(apiItem as AstMethod, refObject);
-    } else if (apiItem instanceof AstNamespace) {
-      this.visitAstNamespace(apiItem as AstNamespace, refObject);
-    } else if (apiItem instanceof AstModuleVariable) {
-      this.visitAstModuleVariable(apiItem as AstModuleVariable, refObject);
+  protected visit(astItem: AstItem, refObject?: Object): void {
+    if (astItem instanceof AstStructuredType) {
+      this.visitAstStructuredType(astItem as AstStructuredType, refObject);
+    } else if (astItem instanceof AstEnum) {
+      this.visitAstEnum(astItem as AstEnum, refObject);
+    } else if (astItem instanceof AstEnumValue) {
+      this.visitAstEnumValue(astItem as AstEnumValue, refObject);
+    } else if (astItem instanceof AstFunction) {
+      this.visitAstFunction(astItem as AstFunction, refObject);
+    } else if (astItem instanceof AstPackage) {
+      this.visitAstPackage(astItem as AstPackage, refObject);
+    } else if (astItem instanceof AstProperty) {
+      this.visitAstProperty(astItem as AstProperty, refObject);
+    } else if (astItem instanceof AstMethod) {
+      this.visitAstMethod(astItem as AstMethod, refObject);
+    } else if (astItem instanceof AstNamespace) {
+      this.visitAstNamespace(astItem as AstNamespace, refObject);
+    } else if (astItem instanceof AstModuleVariable) {
+      this.visitAstModuleVariable(astItem as AstModuleVariable, refObject);
     } else {
       throw new Error('Not implemented');
     }

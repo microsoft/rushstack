@@ -89,7 +89,7 @@ extractor.analyze({
 });
 
 myDocumentedClass = extractor.package.getSortedMemberItems()
-  .filter(apiItem => apiItem.name === 'MyDocumentedClass')[0] as AstStructuredType;
+  .filter(astItem => astItem.name === 'MyDocumentedClass')[0] as AstStructuredType;
 
 describe('DocElementParser tests', function (): void {
   this.timeout(10000);

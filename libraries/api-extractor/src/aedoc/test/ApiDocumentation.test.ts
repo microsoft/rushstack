@@ -46,7 +46,7 @@ extractor.analyze({
 const warnings: string[] = [];
 
 const myDocumentedClass: AstStructuredType = extractor.package.getSortedMemberItems()
-.filter(apiItem => apiItem.name === 'MyDocumentedClass')[0] as AstStructuredType;
+.filter(astItem => astItem.name === 'MyDocumentedClass')[0] as AstStructuredType;
 
 describe('ApiDocumentation tests', function (): void {
   this.timeout(10000);

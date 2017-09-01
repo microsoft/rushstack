@@ -126,8 +126,8 @@ export default class ApiFileGenerator extends AstItemVisitor {
   }
 
   protected visitAstPackage(apiPackage: AstPackage): void {
-    for (const apiItem of apiPackage.getSortedMemberItems()) {
-      this.visit(apiItem);
+    for (const astItem of apiPackage.getSortedMemberItems()) {
+      this.visit(astItem);
       this._indentedWriter.writeLine();
       this._indentedWriter.writeLine();
     }
@@ -143,8 +143,8 @@ export default class ApiFileGenerator extends AstItemVisitor {
     this._indentedWriter.writeLine(`module ${apiNamespace.name} {`);
 
     this._indentedWriter.indentScope(() => {
-      for (const apiItem of apiNamespace.getSortedMemberItems()) {
-        this.visit(apiItem);
+      for (const astItem of apiNamespace.getSortedMemberItems()) {
+        this.visit(astItem);
         this._indentedWriter.writeLine();
         this._indentedWriter.writeLine();
       }
@@ -187,15 +187,15 @@ export default class ApiFileGenerator extends AstItemVisitor {
    * whether the item has been documented, and any warnings that were detected
    * by the analysis.
    */
-  private _writeAedocSynopsis(apiItem: AstItem): void {
-    this._writeWarnings(apiItem);
+  private _writeAedocSynopsis(astItem: AstItem): void {
+    this._writeWarnings(astItem);
     const lines: string[] = [];
 
-    if (apiItem instanceof AstPackage && !apiItem.documentation.summary.length) {
+    if (astItem instanceof AstPackage && !astItem.documentation.summary.length) {
       lines.push('(No packageDescription for this package)');
     } else {
       let footer: string = '';
-      switch (apiItem.documentation.releaseTag) {
+      switch (astItem.documentation.releaseTag) {
         case ReleaseTag.Internal:
           footer += '@internal';
           break;
@@ -212,7 +212,7 @@ export default class ApiFileGenerator extends AstItemVisitor {
 
       // deprecatedMessage is initialized by default,
       // this ensures it has contents before adding '@deprecated'
-      if (apiItem.documentation.deprecatedMessage.length > 0) {
+      if (astItem.documentation.deprecatedMessage.length > 0) {
         if (footer) {
           footer += ' ';
         }
@@ -220,7 +220,7 @@ export default class ApiFileGenerator extends AstItemVisitor {
       }
 
       // If we are anywhere inside a TypeLiteral, _insideTypeLiteral is greater than 0
-      if (this._insideTypeLiteral === 0 && apiItem.needsDocumentation) {
+      if (this._insideTypeLiteral === 0 && astItem.needsDocumentation) {
         if (footer) {
           footer += ' ';
         }
@@ -235,8 +235,8 @@ export default class ApiFileGenerator extends AstItemVisitor {
     this._writeLinesAsComments(lines);
   }
 
-  private _writeWarnings(apiItem: AstItem): void {
-    const lines: string[] = apiItem.warnings.map((x: string) => 'WARNING: ' + x);
+  private _writeWarnings(astItem: AstItem): void {
+    const lines: string[] = astItem.warnings.map((x: string) => 'WARNING: ' + x);
     this._writeLinesAsComments(lines);
   }
 

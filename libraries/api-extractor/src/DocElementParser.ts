@@ -274,10 +274,10 @@ export default class DocElementParser {
     // We must make sure it's documentation can be completed,
     // if we cannot, an error will be reported viathe documentation error handler.
     // This will only be the case our resolvedAstItem was created from a local
-    // AstItem. Resolutions from JSON will have an undefined 'apiItem' property.
+    // AstItem. Resolutions from JSON will have an undefined 'astItem' property.
     // Example: a circular reference will report an error.
-    if (resolvedAstItem.apiItem) {
-      resolvedAstItem.apiItem.completeInitialization();
+    if (resolvedAstItem.astItem) {
+      resolvedAstItem.astItem.completeInitialization();
     }
 
     // inheritdoc found, copy over IDocBase properties

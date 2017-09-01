@@ -59,8 +59,8 @@ export default class ApiJsonFile {
   /**
    * Converts the an AstItemKind into a lower-case string that is written to API JSON files.
    */
-  public static convertKindToJson(apiItemKind: AstItemKind): string {
-    switch (apiItemKind) {
+  public static convertKindToJson(astItemKind: AstItemKind): string {
+    switch (astItemKind) {
       case (AstItemKind.Constructor):
         return this._KIND_CONSTRUCTOR;
       case (AstItemKind.Class):

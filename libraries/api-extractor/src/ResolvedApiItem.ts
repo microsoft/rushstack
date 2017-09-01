@@ -23,23 +23,23 @@ export default class ResolvedApiItem {
   /**
    * This property will either be an AstItem or undefined.
    */
-  public apiItem: AstItem;
+  public astItem: AstItem;
 
   /**
    * A function to abstract the construction of a ResolvedApiItem instance
    * from an AstItem.
    */
-  public static createFromAstItem(apiItem: AstItem): ResolvedApiItem {
+  public static createFromAstItem(astItem: AstItem): ResolvedApiItem {
     return new ResolvedApiItem(
-      apiItem.kind,
-      apiItem.documentation.summary,
-      apiItem.documentation.remarks,
-      apiItem.documentation.deprecatedMessage,
-      apiItem.documentation.releaseTag === ReleaseTag.Beta,
-      apiItem.documentation.parameters,
-      apiItem.documentation.returnsMessage,
-      apiItem.documentation.releaseTag,
-      apiItem
+      astItem.kind,
+      astItem.documentation.summary,
+      astItem.documentation.remarks,
+      astItem.documentation.deprecatedMessage,
+      astItem.documentation.releaseTag === ReleaseTag.Beta,
+      astItem.documentation.parameters,
+      astItem.documentation.returnsMessage,
+      astItem.documentation.releaseTag,
+      astItem
     );
   }
 
@@ -85,7 +85,7 @@ export default class ResolvedApiItem {
     params:  {[name: string]: IParam},
     returnsMessage: IDocElement[],
     releaseTag: ReleaseTag,
-    apiItem: AstItem) {
+    astItem: AstItem) {
     this.kind = kind;
     this.summary = summary;
     this.remarks = remarks;
@@ -94,6 +94,6 @@ export default class ResolvedApiItem {
     this.params = params;
     this.returnsMessage = returnsMessage;
     this.releaseTag = releaseTag;
-    this.apiItem = apiItem;
+    this.astItem = astItem;
   }
 }
