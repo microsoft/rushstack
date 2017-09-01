@@ -296,30 +296,6 @@ export type IDocItem = IDocProperty | IDocMember | IDocFunction |
    IDocClass |IDocEnum | IDocInterface | IDocPackage;
 
 /**
- * An element that represents a param and relevant information to its use.
- *
- * Example:
- * @param1 httpClient - description of httpClient {@link http://website.com}
- * ->
- * {
- *  name: httpClient,
- *  description: [
- *      {kind: 'textDocElement', value: 'description of httpClient'},
- *      {kind: 'linkDocElement', targetUrl: 'http://website.com}
- *   ]
- * }
- *
- * @alpha
- */
-export interface IParam {
-  name: string;
-  description: IDocElement[];
-  isOptional?: boolean; // Used by ApiJsonGenerator
-  isSpread?: boolean; // Used by ApiJsonGenerator
-  type?: string; // Used by ApiJsonGenerator
-}
-
-/**
  * Describes a return type and description of the return type
  * that is given in documentation comments.
  *

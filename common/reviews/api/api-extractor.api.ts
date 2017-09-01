@@ -389,20 +389,6 @@ interface IHrefLinkElement extends IBaseDocElement {
 }
 
 // @alpha
-interface IParam {
-  // (undocumented)
-  description: IDocElement[];
-  // (undocumented)
-  isOptional?: boolean;
-  // (undocumented)
-  isSpread?: boolean;
-  // (undocumented)
-  name: string;
-  // (undocumented)
-  type?: string;
-}
-
-// @alpha
 interface IReturn {
   // (undocumented)
   description: IDocElement[];

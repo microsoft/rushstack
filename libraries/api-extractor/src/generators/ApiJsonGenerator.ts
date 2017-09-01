@@ -21,7 +21,7 @@ import AstNamespace from '../ast/AstNamespace';
 import AstModuleVariable from '../ast/AstModuleVariable';
 import AstMethod from '../ast/AstMethod';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
-import { IReturn, IParam } from '../api/ApiItem';
+import { IReturn, IDocParam } from '../api/ApiItem';
 import ApiJsonFile from '../api/ApiJsonFile';
 
 /**
@@ -321,9 +321,9 @@ export default class ApiJsonGenerator extends AstItemVisitor {
     }
 
     if (refObject) {
-      (refObject as IParam).isOptional = astParam.isOptional;
-      (refObject as IParam).isSpread = astParam.isSpread;
-      (refObject as IParam).type = astParam.type;
+      (refObject as IDocParam).isOptional = astParam.isOptional;
+      (refObject as IDocParam).isSpread = astParam.isSpread;
+      (refObject as IDocParam).type = astParam.type;
     }
   }
 }

@@ -4,8 +4,9 @@
 import AstItem, { AstItemKind } from './ast/AstItem';
 import { ReleaseTag } from './aedoc/ReleaseTag';
 import { IDocElement } from './markupItem/OldMarkupItem';
-import { IDocItem, IParam } from './api/ApiItem';
+import { IDocItem } from './api/ApiItem';
 import ApiJsonFile from './api/ApiJsonFile';
+import { IParam } from './aedoc/ApiDocumentation';
 
 /**
  * A class to abstract away the difference between an item from our public API that could be

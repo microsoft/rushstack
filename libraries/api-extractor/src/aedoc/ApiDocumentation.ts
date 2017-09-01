@@ -6,7 +6,6 @@
 import AstPackage from '../ast/AstPackage';
 import DocElementParser from '../DocElementParser';
 import { IDocElement, ICodeLinkElement } from '../markupItem/OldMarkupItem';
-import { IParam } from '../api/ApiItem';
 import ApiDefinitionReference, { IApiDefinitionReferenceParts } from '../ApiDefinitionReference';
 import Token, { TokenType } from './Token';
 import Tokenizer from './Tokenizer';
@@ -30,6 +29,14 @@ export interface IReferenceResolver {
     apiDefinitionRef: ApiDefinitionReference,
     astPackage: AstPackage,
     warnings: string[]): ResolvedApiItem;
+}
+
+/**
+ * Used by ApiDocumentation to represent the AEDoc description for a function parameter.
+ */
+export interface IParam {
+  name: string;
+  description: IDocElement[];
 }
 
 export default class ApiDocumentation {
@@ -358,7 +365,7 @@ export default class ApiDocumentation {
         description: descriptionElements
       };
       return paramDocElement;
-      }
+    }
   }
 
   /**
