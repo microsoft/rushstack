@@ -10,7 +10,7 @@ import {
   IDocItem,
   IDocPackage,
   IDocMember
-} from './jsonItem/JsonItem';
+} from './api/ApiItem';
 
 import ApiDefinitionReference from './ApiDefinitionReference';
 import AstItem from './ast/AstItem';

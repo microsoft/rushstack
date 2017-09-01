@@ -21,8 +21,8 @@ import AstNamespace from '../ast/AstNamespace';
 import AstModuleVariable from '../ast/AstModuleVariable';
 import AstMethod from '../ast/AstMethod';
 import { ReleaseTag } from '../aedoc/ApiDocumentation';
-import { IReturn, IParam } from '../jsonItem/JsonItem';
-import ApiJsonFile from '../jsonItem/ApiJsonFile';
+import { IReturn, IParam } from '../api/ApiItem';
+import ApiJsonFile from '../api/ApiJsonFile';
 
 /**
  * For a library such as "example-package", ApiFileGenerator generates the "example-package.api.json"
@@ -46,7 +46,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
    */
   public static get jsonSchema(): JsonSchema {
     if (!ApiJsonGenerator._jsonSchema) {
-      ApiJsonGenerator._jsonSchema = JsonSchema.fromFile(path.join(__dirname, '../jsonItem/api-json.schema.json'));
+      ApiJsonGenerator._jsonSchema = JsonSchema.fromFile(path.join(__dirname, '../api/api-json.schema.json'));
     }
 
     return ApiJsonGenerator._jsonSchema;

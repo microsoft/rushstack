@@ -17,7 +17,7 @@ import {
   ISeeDocElement
 } from '../markupItem/OldMarkupItem';
 
-import { IParam } from '../jsonItem/JsonItem';
+import { IParam } from '../api/ApiItem';
 
 import TestFileComparer from '../TestFileComparer';
 import AstStructuredType from '../ast/AstStructuredType';
