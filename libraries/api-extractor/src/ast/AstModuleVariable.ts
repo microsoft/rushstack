@@ -2,23 +2,23 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import { ApiItemKind, IApiItemOptions } from './ApiItem';
-import ApiMember from './ApiMember';
+import { AstItemKind, IAstItemOptions } from './AstItem';
+import AstMember from './AstMember';
 
 /**
- * This class is part of the ApiItem abstract syntax tree. It represents variables
- * that are exported by an ApiNamespace (or conceivably an ApiPackage in the future).
- * The variables have a name, a type, and an initializer. The ApiNamespace implementation
+ * This class is part of the AstItem abstract syntax tree. It represents variables
+ * that are exported by an AstNamespace (or conceivably an AstPackage in the future).
+ * The variables have a name, a type, and an initializer. The AstNamespace implementation
  * currently requires them to use a primitive type and be declared as "const".
  */
-class ApiModuleVariable extends ApiMember {
+class AstModuleVariable extends AstMember {
   public type: string;
   public name: string;
   public value: string;
 
-  constructor(options: IApiItemOptions) {
+  constructor(options: IAstItemOptions) {
     super(options);
-    this.kind = ApiItemKind.ModuleVariable;
+    this.kind = AstItemKind.ModuleVariable;
 
     const propertySignature: ts.PropertySignature = options.declaration as ts.PropertySignature;
     this.type = propertySignature.type.getText();
@@ -27,4 +27,4 @@ class ApiModuleVariable extends ApiMember {
   }
 }
 
-export default ApiModuleVariable;
+export default AstModuleVariable;

@@ -13,9 +13,9 @@ import {
 } from './jsonItem/JsonItem';
 
 import ApiDefinitionReference from './ApiDefinitionReference';
-import ApiItem from './apiItem/ApiItem';
-import ApiItemContainer from './apiItem/ApiItemContainer';
-import ApiPackage from './apiItem/ApiPackage';
+import AstItem from './ast/AstItem';
+import AstItemContainer from './ast/AstItemContainer';
+import AstPackage from './ast/AstPackage';
 import ResolvedApiItem from './ResolvedApiItem';
 import ApiJsonGenerator from './generators/ApiJsonGenerator';
 
@@ -37,8 +37,8 @@ export interface IParsedScopeName {
 
 /**
  * A loader for locating the IDocItem associated with a given project and API item, or
- * for locating an ApiItem  locally.
- * No processing on the IDocItem orApiItem  should be done in this class, this class is only
+ * for locating an AstItem  locally.
+ * No processing on the IDocItem orAstItem  should be done in this class, this class is only
  * concerned with communicating state.
  * The IDocItem can then be used to enforce correct API usage, like enforcing internal.
  * To use DocItemLoader: provide a projectFolder to construct a instance of the DocItemLoader,
@@ -65,65 +65,65 @@ export default class DocItemLoader {
    * {@inheritdoc IReferenceResolver.resolve}
    */
   public resolve(apiDefinitionRef: ApiDefinitionReference,
-    apiPackage: ApiPackage,
+    astPackage: AstPackage,
     warnings: string[]): ResolvedApiItem {
 
     // We determine if an 'apiDefinitionRef' is local if it has no package name or if the scoped
     // package name is equal to the current package's scoped package name.
-    if (!apiDefinitionRef.packageName || apiDefinitionRef.toScopePackageString() === apiPackage.name) {
+    if (!apiDefinitionRef.packageName || apiDefinitionRef.toScopePackageString() === astPackage.name) {
       // Resolution for local references
-      return this.resolveLocalReferences(apiDefinitionRef, apiPackage, warnings);
+      return this.resolveLocalReferences(apiDefinitionRef, astPackage, warnings);
 
     } else {
 
-      // If there was no resolved apiItem then try loading from JSON
+      // If there was no resolved astItem then try loading from JSON
       return this.resolveJsonReferences(apiDefinitionRef, warnings);
     }
   }
 
   /**
    * Resolution of API definition references in the scenario that the reference given indicates
-   * that we should search within the current ApiPackage to resolve.
-   * No processing on the ApiItem should be done here, this class is only concerned
+   * that we should search within the current AstPackage to resolve.
+   * No processing on the AstItem should be done here, this class is only concerned
    * with communicating state.
    */
   public resolveLocalReferences(apiDefinitionRef: ApiDefinitionReference,
-    apiPackage: ApiPackage,
+    astPackage: AstPackage,
     warnings: string[]): ResolvedApiItem {
 
-    let apiItem: ApiItem = apiPackage.getMemberItem(apiDefinitionRef.exportName);
+    let astItem: AstItem = astPackage.getMemberItem(apiDefinitionRef.exportName);
     // Check if export name was not found
-    if (!apiItem) {
+    if (!astItem) {
       warnings.push(`Unable to find referenced export \"${apiDefinitionRef.toExportString()}\"`);
       return undefined;
     }
 
     // If memberName exists then check for the existence of the name
     if (apiDefinitionRef.memberName) {
-      if (apiItem instanceof ApiItemContainer) {
-        const apiItemContainer: ApiItemContainer = (apiItem as ApiItemContainer);
+      if (astItem instanceof AstItemContainer) {
+        const astItemContainer: AstItemContainer = (astItem as AstItemContainer);
         // get() returns undefined if there is no match
-        apiItem = apiItemContainer.getMemberItem(apiDefinitionRef.memberName);
+        astItem = astItemContainer.getMemberItem(apiDefinitionRef.memberName);
       } else {
-        // There are no other instances of apiItem that has members,
+        // There are no other instances of astItem that has members,
         // thus there must be a mistake with the apiDefinitionRef.
-        apiItem = undefined;
+        astItem = undefined;
       }
     }
 
-    if (!apiItem) {
+    if (!astItem) {
       // If we are here, we can be sure there was a problem with the memberName.
       // memberName was not found, apiDefinitionRef is invalid
       warnings.push(`Unable to find referenced member \"${apiDefinitionRef.toMemberString()}\"`);
       return undefined;
     }
 
-    return ResolvedApiItem.createFromApiItem(apiItem);
+    return ResolvedApiItem.createFromAstItem(astItem);
   }
 
   /**
    * Resolution of API definition references in the scenario that the reference given indicates
-   * that we should search outside of this ApiPackage and instead search within the JSON API file
+   * that we should search outside of this AstPackage and instead search within the JSON API file
    * that is associated with the apiDefinitionRef.
    */
   public resolveJsonReferences(apiDefinitionRef: ApiDefinitionReference,
@@ -226,7 +226,7 @@ export default class DocItemLoader {
    * then the json file is saved in the cache and returned.
    */
   public loadPackageIntoCache(apiJsonFilePath: string, cachePackageName: string): IDocPackage {
-    const apiPackage: IDocPackage = JsonFile.loadAndValidateWithCallback(apiJsonFilePath, ApiJsonGenerator.jsonSchema,
+    const astPackage: IDocPackage = JsonFile.loadAndValidateWithCallback(apiJsonFilePath, ApiJsonGenerator.jsonSchema,
       (errorInfo: IJsonSchemaErrorInfo) => {
         const errorMessage: string
           = path.basename(apiJsonFilePath) + ' does not conform to the expected schema.' + os.EOL
@@ -238,7 +238,7 @@ export default class DocItemLoader {
       }
     );
 
-    this._cache.set(cachePackageName, apiPackage);
-    return apiPackage;
+    this._cache.set(cachePackageName, astPackage);
+    return astPackage;
   }
 }

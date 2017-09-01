@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import ApiItem, { ApiItemKind } from './apiItem/ApiItem';
+import AstItem, { AstItemKind } from './ast/AstItem';
 import { ReleaseTag } from './aedoc/ApiDocumentation';
 import { IDocElement } from './markupItem/OldMarkupItem';
 import { IDocItem, IParam } from './jsonItem/JsonItem';
@@ -9,10 +9,10 @@ import ApiJsonFile from './jsonItem/ApiJsonFile';
 
 /**
  * A class to abstract away the difference between an item from our public API that could be
- * represented by either an ApiItem or an IDocItem that is retrieved from a JSON file.
+ * represented by either an AstItem or an IDocItem that is retrieved from a JSON file.
  */
 export default class ResolvedApiItem {
-  public kind: ApiItemKind;
+  public kind: AstItemKind;
   public summary: IDocElement[];
   public remarks: IDocElement[];
   public deprecatedMessage: IDocElement[];
@@ -21,25 +21,25 @@ export default class ResolvedApiItem {
   public params: {[name: string]: IParam};
   public returnsMessage: IDocElement[];
   /**
-   * This property will either be an ApiItem or undefined.
+   * This property will either be an AstItem or undefined.
    */
-  public apiItem: ApiItem;
+  public astItem: AstItem;
 
   /**
    * A function to abstract the construction of a ResolvedApiItem instance
-   * from an ApiItem.
+   * from an AstItem.
    */
-  public static createFromApiItem(apiItem: ApiItem): ResolvedApiItem {
+  public static createFromAstItem(astItem: AstItem): ResolvedApiItem {
     return new ResolvedApiItem(
-      apiItem.kind,
-      apiItem.documentation.summary,
-      apiItem.documentation.remarks,
-      apiItem.documentation.deprecatedMessage,
-      apiItem.documentation.releaseTag === ReleaseTag.Beta,
-      apiItem.documentation.parameters,
-      apiItem.documentation.returnsMessage,
-      apiItem.documentation.releaseTag,
-      apiItem
+      astItem.kind,
+      astItem.documentation.summary,
+      astItem.documentation.remarks,
+      astItem.documentation.deprecatedMessage,
+      astItem.documentation.releaseTag === ReleaseTag.Beta,
+      astItem.documentation.parameters,
+      astItem.documentation.returnsMessage,
+      astItem.documentation.releaseTag,
+      astItem
     );
   }
 
@@ -77,7 +77,7 @@ export default class ResolvedApiItem {
   }
 
   private constructor(
-    kind: ApiItemKind,
+    kind: AstItemKind,
     summary: IDocElement[],
     remarks: IDocElement[],
     deprecatedMessage: IDocElement[],
@@ -85,7 +85,7 @@ export default class ResolvedApiItem {
     params:  {[name: string]: IParam},
     returnsMessage: IDocElement[],
     releaseTag: ReleaseTag,
-    apiItem: ApiItem) {
+    astItem: AstItem) {
     this.kind = kind;
     this.summary = summary;
     this.remarks = remarks;
@@ -94,6 +94,6 @@ export default class ResolvedApiItem {
     this.params = params;
     this.returnsMessage = returnsMessage;
     this.releaseTag = releaseTag;
-    this.apiItem = apiItem;
+    this.astItem = astItem;
   }
 }
