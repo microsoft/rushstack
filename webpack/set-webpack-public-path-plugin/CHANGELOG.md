@@ -1,6 +1,13 @@
 # Change Log - @microsoft/set-webpack-public-path-plugin
 
-This log was last generated on Thu, 31 Aug 2017 18:41:18 GMT and should not be manually modified.
+This log was last generated on Fri, 01 Sep 2017 01:05:54 GMT and should not be manually modified.
+
+## 1.2.2
+Fri, 01 Sep 2017 01:05:54 GMT
+
+### Patches
+
+- Updating uglifyjs.
 
 ## 1.2.1
 Thu, 31 Aug 2017 18:41:18 GMT
