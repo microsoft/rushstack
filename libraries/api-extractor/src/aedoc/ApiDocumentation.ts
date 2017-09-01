@@ -34,7 +34,7 @@ export interface IReferenceResolver {
 /**
  * Used by ApiDocumentation to represent the AEDoc description for a function parameter.
  */
-export interface IParam {
+export interface IAedocParameter {
   name: string;
   description: IDocElement[];
 }
@@ -100,7 +100,7 @@ export default class ApiDocumentation {
   public deprecatedMessage: IDocElement[];
   public remarks: IDocElement[];
   public returnsMessage: IDocElement[];
-  public parameters: { [name: string]: IParam; };
+  public parameters: { [name: string]: IAedocParameter; };
 
   /**
    * A list of \@link elements to be post-processed after all basic documentation has been created
@@ -243,7 +243,7 @@ export default class ApiDocumentation {
           case '@param':
             tokenizer.getToken();
             this._checkInheritDocStatus(token.tag);
-            const param: IParam = this._parseParam(tokenizer);
+            const param: IAedocParameter = this._parseParam(tokenizer);
             if (param) {
                this.parameters[param.name] = param;
             }
@@ -335,7 +335,7 @@ export default class ApiDocumentation {
     }
   }
 
-  protected _parseParam(tokenizer: Tokenizer): IParam {
+  protected _parseParam(tokenizer: Tokenizer): IAedocParameter {
     const paramDescriptionToken: Token = tokenizer.getToken();
     if (!paramDescriptionToken) {
       this.reportError('The @param tag is missing a parameter description');
@@ -360,7 +360,7 @@ export default class ApiDocumentation {
       const remainingElements: IDocElement[] = DocElementParser.parse(this, tokenizer);
       const descriptionElements: IDocElement[] = [commentTextElement].concat(remainingElements);
 
-      const paramDocElement: IParam = {
+      const paramDocElement: IAedocParameter = {
         name: name,
         description: descriptionElements
       };
