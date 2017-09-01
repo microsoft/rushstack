@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Expanded the api-extractor API to expose interfaces for the *.api.json file fileformat",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "pgonzal@users.noreply.github.com"
+}
