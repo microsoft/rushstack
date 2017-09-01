@@ -7,16 +7,16 @@ import { IDocElement } from '../markupItem/OldMarkupItem';
  * Whether the function is public, private, or protected.
  * @alpha
  */
-export type AccessModifier = 'public' | 'private' | 'protected' | '';
+export type ApiAccessModifier = 'public' | 'private' | 'protected' | '';
 
 /**
- * The enum value of an IDocEnum.
+ * The enum value of an IApiEnum.
  *
- * IDocEnumValue does not extend the IDocITem base class
+ * IApiEnumMember does not extend the IDocITem base class
  * because the summary is not required.
  * @alpha
  */
-export interface IDocEnumValue {
+export interface IApiEnumMember {
   value: string;
   summary?: IDocElement[];
   remarks?: IDocElement[];
@@ -27,7 +27,7 @@ export interface IDocEnumValue {
  * Parameter Doc item.
  * @alpha
  */
-export interface IDocParam {
+export interface IApiParameter {
   /**
    * the parameter name
    */
@@ -58,7 +58,7 @@ export interface IDocParam {
  * Return value of a method or function.
  * @alpha
  */
-export interface IDocReturnValue {
+export interface IApiReturnValue {
   /**
    * The data type returned by the function
    */
@@ -78,7 +78,7 @@ export interface IDocReturnValue {
  * This is the base class for other DocItem types.
  * @alpha
  */
-export interface IDocBase {
+export interface IApiBaseDefinition {
   /**
    * kind of DocItem. Ex: 'class', 'Enum', 'Function', etc.
    */
@@ -93,10 +93,10 @@ export interface IDocBase {
  * A property of a TypeScript class or interface
  * @alpha
  */
-export interface IDocProperty extends IDocBase {
+export interface IApiProperty extends IApiBaseDefinition {
 
   /**
-   * {@inheritdoc IDocBase.kind}
+   * {@inheritdoc IApiBaseDefinition.kind}
    */
   kind: 'property';
   /**
@@ -124,9 +124,9 @@ export interface IDocProperty extends IDocBase {
  * A member function of a typescript class or interface.
  * @alpha
  */
-export interface IDocMethod extends IDocBase {
+export interface IApiMethod extends IApiBaseDefinition {
   /**
-   * {@inheritdoc IDocBase.kind}
+   * {@inheritdoc IApiBaseDefinition.kind}
    */
   kind: 'method';
   /**
@@ -137,7 +137,7 @@ export interface IDocMethod extends IDocBase {
   /**
    * the access modifier of the method
    */
-  accessModifier: AccessModifier;
+  accessModifier: ApiAccessModifier;
 
   /**
    * for an interface member, whether it is optional
@@ -150,50 +150,50 @@ export interface IDocMethod extends IDocBase {
   isStatic: boolean;
 
   /**
-   * a mapping of parameter name to IDocParam
+   * a mapping of parameter name to IApiParameter
    */
 
-  parameters: { [name: string]: IDocParam};
+  parameters: { [name: string]: IApiParameter};
 
   /**
    * describes the return value of the method
    */
-  returnValue: IDocReturnValue;
+  returnValue: IApiReturnValue;
 }
 
 /**
  * A Typescript function.
  * @alpha
  */
-export interface IDocFunction extends IDocBase {
+export interface IApiFunction extends IApiBaseDefinition {
   /**
-   * {@inheritdoc IDocBase.kind}
+   * {@inheritdoc IApiBaseDefinition.kind}
    */
   kind: 'function';
   /**
    * parameters of the function
    */
-  parameters: { [name: string]: IDocParam};
+  parameters: { [name: string]: IApiParameter};
 
   /**
    * a description of the return value
    */
-  returnValue: IDocReturnValue;
+  returnValue: IApiReturnValue;
 }
 
 /**
- * IDocClass represetns an exported class.
+ * IApiClass represetns an exported class.
  * @alpha
  */
-export interface IDocClass extends IDocBase {
+export interface IApiClass extends IApiBaseDefinition {
   /**
-   * {@inheritdoc IDocBase.kind}
+   * {@inheritdoc IApiBaseDefinition.kind}
    */
   kind: 'class';
   /**
    * Can be a combination of methods and/or properties
    */
-  members: { [name: string]: IDocMember};
+  members: { [name: string]: ApiMember};
 
   /**
    * Interfaces implemented by this class
@@ -212,31 +212,31 @@ export interface IDocClass extends IDocBase {
 }
 
 /**
- * IDocEnum represents an exported enum.
+ * IApiEnum represents an exported enum.
  * @alpha
  */
-export interface IDocEnum extends IDocBase {
+export interface IApiEnum extends IApiBaseDefinition {
   /**
-   * {@inheritdoc IDocBase.kind}
+   * {@inheritdoc IApiBaseDefinition.kind}
    */
   kind: 'enum';
 
-  values: IDocEnumValue[];
+  values: IApiEnumMember[];
 }
 
 /**
- * IDocInterface represents an exported interface.
+ * IApiInterface represents an exported interface.
  * @alpha
  */
-export interface IDocInterface extends IDocBase {
+export interface IApiInterface extends IApiBaseDefinition {
   /**
-   * {@inheritdoc IDocBase.kind}
+   * {@inheritdoc IApiBaseDefinition.kind}
    */
   kind: 'interface';
   /**
-   * A mapping from the name of a member API to its IDocMember
+   * A mapping from the name of a member API to its ApiMember
    */
-  members: { [name: string]: IDocMember};
+  members: { [name: string]: ApiMember};
 
   /**
    * Interfaces implemented by this interface
@@ -255,26 +255,26 @@ export interface IDocInterface extends IDocBase {
 }
 
 /**
- * IDocPackage is an object contaning the exported
+ * IApiPackage is an object contaning the exported
  * definions of this API package. The exports can include:
  * classes, interfaces, enums, functions.
  * @alpha
  */
-export interface IDocPackage {
+export interface IApiPackage {
    /**
-   * {@inheritdoc IDocBase.kind}
+   * {@inheritdoc IApiBaseDefinition.kind}
    */
   kind: 'package';
 
   /**
    * IDocItems of exported API items
    */
-  exports: { [name: string]: IDocItem};
+  exports: { [name: string]: ApiItem};
 
   /**
    * The following are needed so that this interface and can share
-   * common properties with others that extend IDocBase. The IDocPackage
-   * does not extend the IDocBase because a summary is not required for
+   * common properties with others that extend IApiBaseDefinition. The IApiPackage
+   * does not extend the IApiBaseDefinition because a summary is not required for
    * a package.
    */
   isBeta?: boolean;
@@ -287,13 +287,13 @@ export interface IDocPackage {
  * A member of a class.
  * @alpha
  */
-export type IDocMember = IDocProperty | IDocMethod;
+export type ApiMember = IApiProperty | IApiMethod;
 
 /**
  * @alpha
  */
-export type IDocItem = IDocProperty | IDocMember | IDocFunction |
-   IDocClass |IDocEnum | IDocInterface | IDocPackage;
+export type ApiItem = IApiProperty | ApiMember | IApiFunction |
+   IApiClass |IApiEnum | IApiInterface | IApiPackage;
 
 /**
  * Describes a return type and description of the return type
@@ -301,7 +301,7 @@ export type IDocItem = IDocProperty | IDocMember | IDocFunction |
  *
  * @alpha
  */
-export interface IReturn {
+export interface IApiReturnValue {
   type: string;
   description: IDocElement[];
 }

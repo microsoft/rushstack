@@ -150,7 +150,7 @@ export default class ApiDocumentation {
    *
    * Ex: this is useful in the case of parsing inheritdoc expressions,
    * in the sense that we do not know if we the inherited documentation
-   * is coming from an AstItem or a IDocItem.
+   * is coming from an AstItem or a ApiItem.
    */
   public referenceResolver: IReferenceResolver;
 

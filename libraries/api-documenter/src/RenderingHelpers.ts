@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import {
-  IDocMethod
+  IApiMethod
 } from '@microsoft/api-extractor';
 
 export class RenderingHelpers {
@@ -42,7 +42,7 @@ export class RenderingHelpers {
   /**
    * Generates a concise signature for a function.  Example: "getArea(width, height)"
    */
-  public static getConciseSignature(methodName: string, method: IDocMethod): string {
+  public static getConciseSignature(methodName: string, method: IApiMethod): string {
     return methodName + '(' + Object.keys(method.parameters).join(', ') + ')';
   }
 }

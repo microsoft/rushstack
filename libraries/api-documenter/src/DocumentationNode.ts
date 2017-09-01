@@ -2,12 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import {
-  IDocItem,
+  ApiItem,
   ICodeLinkElement
 } from '@microsoft/api-extractor';
 
 export class DocumentationNode {
-  public readonly docItem: IDocItem;
+  public readonly docItem: ApiItem;
   public readonly name: string;
   public readonly parent: DocumentationNode | undefined;
   private _docId: string|undefined = undefined;
@@ -28,7 +28,7 @@ export class DocumentationNode {
     return result.toLowerCase();
   }
 
-  constructor(docItem: IDocItem, name: string, parent: DocumentationNode | undefined) {
+  constructor(docItem: ApiItem, name: string, parent: DocumentationNode | undefined) {
     this.docItem = docItem;
     this.name = name;
     this.parent = parent;

@@ -4,13 +4,13 @@
 import AstItem, { AstItemKind } from './ast/AstItem';
 import { ReleaseTag } from './aedoc/ReleaseTag';
 import { IDocElement } from './markupItem/OldMarkupItem';
-import { IDocItem } from './api/ApiItem';
+import { ApiItem } from './api/ApiItem';
 import ApiJsonFile from './api/ApiJsonFile';
 import { IAedocParameter } from './aedoc/ApiDocumentation';
 
 /**
  * A class to abstract away the difference between an item from our public API that could be
- * represented by either an AstItem or an IDocItem that is retrieved from a JSON file.
+ * represented by either an AstItem or an ApiItem that is retrieved from a JSON file.
  */
 export default class ResolvedApiItem {
   public kind: AstItemKind;
@@ -46,9 +46,9 @@ export default class ResolvedApiItem {
 
   /**
    * A function to abstract the construction of a ResolvedApiItem instance
-   * from a JSON object that symbolizes an IDocItem.
+   * from a JSON object that symbolizes an ApiItem.
    */
-  public static createFromJson(docItem: IDocItem): ResolvedApiItem {
+  public static createFromJson(docItem: ApiItem): ResolvedApiItem {
     let parameters: {[name: string]: IAedocParameter} = undefined;
     let returnsMessage: IDocElement[] = undefined;
     switch (docItem.kind) {

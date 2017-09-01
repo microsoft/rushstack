@@ -109,6 +109,123 @@ class Extractor {
 }
 
 // @alpha
+interface IApiBaseDefinition {
+  // (undocumented)
+  deprecatedMessage?: IDocElement[];
+  // (undocumented)
+  isBeta: boolean;
+  kind: string;
+  // (undocumented)
+  remarks?: IDocElement[];
+  // (undocumented)
+  summary: IDocElement[];
+}
+
+// @alpha
+interface IApiClass extends IApiBaseDefinition {
+  extends?: string;
+  implements?: string;
+  kind: 'class';
+  members: {
+    [ name: string ]: ApiMember
+  }
+  typeParameters?: string[];
+}
+
+// @alpha
+interface IApiEnum extends IApiBaseDefinition {
+  kind: 'enum';
+  // (undocumented)
+  values: IApiEnumMember[];
+}
+
+// @alpha
+interface IApiEnumMember {
+  // (undocumented)
+  deprecatedMessage?: IDocElement[];
+  // (undocumented)
+  remarks?: IDocElement[];
+  // (undocumented)
+  summary?: IDocElement[];
+  // (undocumented)
+  value: string;
+}
+
+// @alpha
+interface IApiFunction extends IApiBaseDefinition {
+  kind: 'function';
+  parameters: {
+    [ name: string ]: IApiParameter
+  }
+  returnValue: IApiReturnValue;
+}
+
+// @alpha
+interface IApiInterface extends IApiBaseDefinition {
+  extends?: string;
+  implements?: string;
+  kind: 'interface';
+  members: {
+    [ name: string ]: ApiMember
+  }
+  typeParameters?: string[];
+}
+
+// @alpha
+interface IApiMethod extends IApiBaseDefinition {
+  accessModifier: ApiAccessModifier;
+  isOptional: boolean;
+  isStatic: boolean;
+  kind: 'method';
+  parameters: {
+    [ name: string ]: IApiParameter
+  }
+  returnValue: IApiReturnValue;
+  signature: string;
+}
+
+// @alpha
+interface IApiPackage {
+  // (undocumented)
+  deprecatedMessage?: IDocElement[];
+  exports: {
+    [ name: string ]: ApiItem
+  }
+  isBeta?: boolean;
+  kind: 'package';
+  // (undocumented)
+  remarks?: IDocElement[];
+  // (undocumented)
+  summary?: IDocElement[];
+}
+
+// @alpha
+interface IApiParameter {
+  description: IDocElement[];
+  isOptional: boolean;
+  isSpread: boolean;
+  name: string;
+  type: string;
+}
+
+// @alpha
+interface IApiProperty extends IApiBaseDefinition {
+  isOptional: boolean;
+  isReadOnly: boolean;
+  isStatic: boolean;
+  kind: 'property';
+  type: string;
+}
+
+// @alpha
+interface IApiReturnValue {
+  // (undocumented)
+  description: IDocElement[];
+  // (undocumented)
+  type: string;
+}
+
+// @alpha
 interface IBaseDocElement {
   // (undocumented)
   kind: string;
@@ -123,121 +240,6 @@ interface ICodeLinkElement extends IBaseDocElement {
   referenceType: 'code';
   scopeName?: string;
   value?: string;
-}
-
-// @alpha
-interface IDocBase {
-  // (undocumented)
-  deprecatedMessage?: IDocElement[];
-  // (undocumented)
-  isBeta: boolean;
-  kind: string;
-  // (undocumented)
-  remarks?: IDocElement[];
-  // (undocumented)
-  summary: IDocElement[];
-}
-
-// @alpha
-interface IDocClass extends IDocBase {
-  extends?: string;
-  implements?: string;
-  kind: 'class';
-  members: {
-    [ name: string ]: IDocMember
-  }
-  typeParameters?: string[];
-}
-
-// @alpha
-interface IDocEnum extends IDocBase {
-  kind: 'enum';
-  // (undocumented)
-  values: IDocEnumValue[];
-}
-
-// @alpha
-interface IDocEnumValue {
-  // (undocumented)
-  deprecatedMessage?: IDocElement[];
-  // (undocumented)
-  remarks?: IDocElement[];
-  // (undocumented)
-  summary?: IDocElement[];
-  // (undocumented)
-  value: string;
-}
-
-// @alpha
-interface IDocFunction extends IDocBase {
-  kind: 'function';
-  parameters: {
-    [ name: string ]: IDocParam
-  }
-  returnValue: IDocReturnValue;
-}
-
-// @alpha
-interface IDocInterface extends IDocBase {
-  extends?: string;
-  implements?: string;
-  kind: 'interface';
-  members: {
-    [ name: string ]: IDocMember
-  }
-  typeParameters?: string[];
-}
-
-// @alpha
-interface IDocMethod extends IDocBase {
-  accessModifier: AccessModifier;
-  isOptional: boolean;
-  isStatic: boolean;
-  kind: 'method';
-  parameters: {
-    [ name: string ]: IDocParam
-  }
-  returnValue: IDocReturnValue;
-  signature: string;
-}
-
-// @alpha
-interface IDocPackage {
-  // (undocumented)
-  deprecatedMessage?: IDocElement[];
-  exports: {
-    [ name: string ]: IDocItem
-  }
-  isBeta?: boolean;
-  kind: 'package';
-  // (undocumented)
-  remarks?: IDocElement[];
-  // (undocumented)
-  summary?: IDocElement[];
-}
-
-// @alpha
-interface IDocParam {
-  description: IDocElement[];
-  isOptional: boolean;
-  isSpread: boolean;
-  name: string;
-  type: string;
-}
-
-// @alpha
-interface IDocProperty extends IDocBase {
-  isOptional: boolean;
-  isReadOnly: boolean;
-  isStatic: boolean;
-  kind: 'property';
-  type: string;
-}
-
-// @alpha
-interface IDocReturnValue {
-  description: IDocElement[];
-  type: string;
 }
 
 // @alpha
@@ -389,14 +391,6 @@ interface IHrefLinkElement extends IBaseDocElement {
 }
 
 // @alpha
-interface IReturn {
-  // (undocumented)
-  description: IDocElement[];
-  // (undocumented)
-  type: string;
-}
-
-// @alpha
 interface ISeeDocElement extends IBaseDocElement {
   // (undocumented)
   kind: 'seeDocElement';
@@ -413,9 +407,9 @@ interface ITextElement extends IBaseDocElement {
 }
 
 // WARNING: Unsupported export: ApiErrorHandler
-// WARNING: Unsupported export: AccessModifier
-// WARNING: Unsupported export: IDocMember
-// WARNING: Unsupported export: IDocItem
+// WARNING: Unsupported export: ApiAccessModifier
+// WARNING: Unsupported export: ApiMember
+// WARNING: Unsupported export: ApiItem
 // WARNING: Unsupported export: DomCodeHighlighter
 // WARNING: Unsupported export: DomLinkText
 // WARNING: Unsupported export: DomBasicText

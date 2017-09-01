@@ -16,12 +16,12 @@ import AstItemVisitor from './AstItemVisitor';
 import AstPackage from '../ast/AstPackage';
 import AstParameter from '../ast/AstParameter';
 import AstProperty from '../ast/AstProperty';
-import AstMember, { AccessModifier } from '../ast/AstMember';
+import AstMember, { ApiAccessModifier } from '../ast/AstMember';
 import AstNamespace from '../ast/AstNamespace';
 import AstModuleVariable from '../ast/AstModuleVariable';
 import AstMethod from '../ast/AstMethod';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
-import { IReturn, IDocParam } from '../api/ApiItem';
+import { IApiReturnValue, IApiParameter } from '../api/ApiItem';
 import ApiJsonFile from '../api/ApiJsonFile';
 
 /**
@@ -171,7 +171,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
     for (const param of astFunction.params) {
       this.visitApiParam(param, astFunction.documentation.parameters[param.name]);
     }
-    const returnValueNode: IReturn = {
+    const returnValueNode: IApiReturnValue = {
       type: astFunction.returnType,
       description: astFunction.documentation.returnsMessage
     };
@@ -292,7 +292,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
         remarks: astMethod.documentation.remarks || []
       };
     } else {
-      const returnValueNode: IReturn = {
+      const returnValueNode: IApiReturnValue = {
         type: astMethod.returnType,
         description: astMethod.documentation.returnsMessage
       };
@@ -300,7 +300,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
       newNode = {
         kind: ApiJsonFile.convertKindToJson(astMethod.kind),
         signature: astMethod.getDeclarationLine(),
-        accessModifier: astMethod.accessModifier ? AccessModifier[astMethod.accessModifier].toLowerCase() : '',
+        accessModifier: astMethod.accessModifier ? ApiAccessModifier[astMethod.accessModifier].toLowerCase() : '',
         isOptional: !!astMethod.isOptional,
         isStatic: !!astMethod.isStatic,
         returnValue: returnValueNode,
@@ -321,9 +321,9 @@ export default class ApiJsonGenerator extends AstItemVisitor {
     }
 
     if (refObject) {
-      (refObject as IDocParam).isOptional = astParam.isOptional;
-      (refObject as IDocParam).isSpread = astParam.isSpread;
-      (refObject as IDocParam).type = astParam.type;
+      (refObject as IApiParameter).isOptional = astParam.isOptional;
+      (refObject as IApiParameter).isSpread = astParam.isSpread;
+      (refObject as IApiParameter).type = astParam.type;
     }
   }
 }
