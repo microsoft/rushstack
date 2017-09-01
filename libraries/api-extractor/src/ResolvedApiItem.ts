@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import AstItem, { AstItemKind } from './ast/AstItem';
-import { ReleaseTag } from './aedoc/ApiDocumentation';
+import { ReleaseTag } from './aedoc/ReleaseTag';
 import { IDocElement } from './markupItem/OldMarkupItem';
 import { IDocItem, IParam } from './api/ApiItem';
 import ApiJsonFile from './api/ApiJsonFile';

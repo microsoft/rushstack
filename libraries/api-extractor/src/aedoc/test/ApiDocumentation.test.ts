@@ -8,7 +8,8 @@ import * as ts from 'typescript';
 import * as path from 'path';
 import Extractor from '../../Extractor';
 import AstStructuredType from '../../ast/AstStructuredType';
-import ApiDocumentation, { ReleaseTag } from '../../aedoc/ApiDocumentation';
+import ApiDocumentation from '../ApiDocumentation';
+import { ReleaseTag } from  '../ReleaseTag';
 
 /* tslint:disable:no-function-expression - Mocha uses a poorly scoped "this" pointer */
 

@@ -20,7 +20,7 @@ import AstMember, { AccessModifier } from '../ast/AstMember';
 import AstNamespace from '../ast/AstNamespace';
 import AstModuleVariable from '../ast/AstModuleVariable';
 import AstMethod from '../ast/AstMethod';
-import { ReleaseTag } from '../aedoc/ApiDocumentation';
+import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { IReturn, IParam } from '../api/ApiItem';
 import ApiJsonFile from '../api/ApiJsonFile';
 
