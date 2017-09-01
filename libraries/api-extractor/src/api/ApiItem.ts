@@ -7,15 +7,7 @@ import { IDocElement } from '../markupItem/OldMarkupItem';
  * Whether the function is public, private, or protected.
  * @alpha
  */
-export enum AccessModifier {
-  public = 0,
-  private,
-  protected,
-  /**
-   * Exmpty string, no access modifier.
-   */
-  ''
-}
+export type AccessModifier = 'public' | 'private' | 'protected' | '';
 
 /**
  * The enum value of an IDocEnum.

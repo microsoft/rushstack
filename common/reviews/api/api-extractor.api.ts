@@ -1,15 +1,3 @@
-// @alpha
-enum AccessModifier {
-  // WARNING: The name "???" contains unsupported characters; API names should use only letters, numbers, and underscores
-  '',
-  // (undocumented)
-  private,
-  // (undocumented)
-  protected,
-  // (undocumented)
-  public = 0
-}
-
 // @public
 class ApiFileGenerator extends AstItemVisitor {
   // WARNING: The type "IndentedWriter" needs to be exported by the package (e.g. added to index.ts)
@@ -439,6 +427,7 @@ interface ITextElement extends IBaseDocElement {
 }
 
 // WARNING: Unsupported export: ApiErrorHandler
+// WARNING: Unsupported export: AccessModifier
 // WARNING: Unsupported export: IDocMember
 // WARNING: Unsupported export: IDocItem
 // WARNING: Unsupported export: DomCodeHighlighter
