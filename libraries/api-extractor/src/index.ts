@@ -12,3 +12,7 @@ export { default as Extractor, IExtractorOptions, IExtractorAnalyzeOptions, ApiE
 export { default as ApiFileGenerator  } from './generators/ApiFileGenerator';
 export { default as ApiJsonGenerator  } from './generators/ApiJsonGenerator';
 export { default as ExternalApiHelper } from './ExternalApiHelper';
+
+export * from './jsonItem/JsonItem';
+export * from './markupItem/MarkupItem';
+export * from './markupItem/OldMarkupItem';
