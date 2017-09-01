@@ -71,10 +71,6 @@ export class DocItem {
     }
 
     this.parent = parent;
-
-    if (this.parent) {
-      this.parent.children.push(this);
-    }
   }
 
   /**

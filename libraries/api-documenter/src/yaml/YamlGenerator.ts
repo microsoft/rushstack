@@ -34,26 +34,67 @@ export class YamlGenerator {
     this._deleteOldOutputFiles();
 
     for (const docPackage of this._docItemSet.docPackages) {
-      this._generatePackage(docPackage);
+      this._visitDocItems(docPackage, undefined);
     }
   }
 
-  private _generatePackage(docPackage: DocItem): void {
-    const yamlFile: IYamlFile = {
-      items: [ ]
-    };
+  private _visitDocItems(docItem: DocItem, parentYamlFile: IYamlFile | undefined): boolean {
+    const yamlItem: IYamlItem | undefined = this._generateYamlItem(docItem);
+    if (!yamlItem) {
+      return false;
+    }
 
-    const yamlItem: IYamlItem = this._createYamlItem(docPackage, 'package');
-    yamlFile.items.push(yamlItem);
+    if (this._shouldEmbed(yamlItem.type)) {
+      if (!parentYamlFile) {
+        throw new Error('Missing file context'); // program bug
+      }
+      parentYamlFile.items.push(yamlItem);
+    } else {
+      const newYamlFile: IYamlFile = {
+        items: []
+      };
+      newYamlFile.items.push(yamlItem);
 
-    this._writeYamlFile(yamlFile, docPackage);
+      for (const child of docItem.children) {
+        if (this._visitDocItems(child, newYamlFile)) {
+          if (!yamlItem.children) {
+            yamlItem.children = [];
+          }
+          yamlItem.children.push(this._getUid(child));
+        }
+      }
+
+      this._writeYamlFile(newYamlFile, docItem);
+
+      if (parentYamlFile) {
+        if (!parentYamlFile.references) {
+          parentYamlFile.references = [];
+        }
+
+        parentYamlFile.references.push({
+          uid: this._getUid(docItem),
+          name: docItem.name
+        });
+
+      }
+    }
+
+    return true;
   }
 
-  private _createYamlItem(docItem: DocItem, type: YamlTypeId): IYamlItem {
-    const yamlItem: IYamlItem = {
-      type: type,
-      uid: this._getUid(docItem)
-    };
+  private _shouldEmbed(yamlTypeId: YamlTypeId): boolean {
+    switch (yamlTypeId) {
+      case 'class':
+      case 'package':
+      case 'interface':
+        return false;
+    }
+    return true;
+  }
+
+  private _generateYamlItem(docItem: DocItem): IYamlItem | undefined {
+    const yamlItem: Partial<IYamlItem> = { };
+    yamlItem.uid = this._getUid(docItem);
 
     const summary: string = this._renderMarkdownFromDocElement(docItem.apiItem.summary);
     if (summary) {
@@ -65,7 +106,25 @@ export class YamlGenerator {
       yamlItem.remarks = remarks;
     }
 
-    return yamlItem;
+    yamlItem.name = docItem.name;
+    yamlItem.fullName = docItem.name;
+    yamlItem.langs = [ 'typeScript' ];
+
+    switch (docItem.kind) {
+      case DocItemKind.Package:
+        yamlItem.type = 'package';
+        break;
+      case DocItemKind.Class:
+        yamlItem.type = 'class';
+        break;
+      case DocItemKind.Method:
+        yamlItem.type = 'method';
+        break;
+      default:
+        return undefined;
+    }
+
+    return yamlItem as IYamlItem;
   }
 
   private _renderMarkdownFromDocElement(docElements: IDocElement[] | undefined): string {
@@ -106,11 +165,11 @@ export class YamlGenerator {
     for (const current of docItem.getHierarchy()) {
       switch (current.kind) {
         case DocItemKind.Package:
-          result += RenderingHelpers.getUnscopedPackageName(docItem.name);
+          result += RenderingHelpers.getUnscopedPackageName(current.name);
           break;
         default:
           result += '.';
-          result += docItem.name;
+          result += current.name;
           break;
       }
     }
@@ -119,10 +178,11 @@ export class YamlGenerator {
 
   private _getYamlFilePath(docItem: DocItem): string {
     let result: string = '';
+
     for (const current of docItem.getHierarchy()) {
       switch (current.kind) {
         case DocItemKind.Package:
-          result += RenderingHelpers.getUnscopedPackageName(docItem.name);
+          result += RenderingHelpers.getUnscopedPackageName(current.name);
           break;
         default:
           if (current.parent && current.parent.kind === DocItemKind.Package) {
@@ -130,7 +190,7 @@ export class YamlGenerator {
           } else {
             result += '.';
           }
-          result += docItem.name;
+          result += current.name;
           break;
       }
     }

@@ -3,7 +3,7 @@
 
 export interface IYamlFile {
   items: IYamlItem[];
-  references?: IYamlReference;
+  references?: IYamlReference[];
 }
 
 export interface IYamlException {
