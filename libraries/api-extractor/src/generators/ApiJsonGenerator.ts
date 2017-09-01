@@ -7,22 +7,22 @@ import * as ts from 'typescript';
 import { JsonFile, JsonSchema, IJsonSchemaErrorInfo } from '@microsoft/node-core-library';
 
 import Extractor from '../Extractor';
-import ApiStructuredType from '../definitions/ApiStructuredType';
-import ApiEnum from '../definitions/ApiEnum';
-import ApiEnumValue from '../definitions/ApiEnumValue';
-import ApiFunction from '../definitions/ApiFunction';
-import ApiItem, { ApiItemKind } from '../definitions/ApiItem';
-import ApiItemVisitor from '../ApiItemVisitor';
-import ApiPackage from '../definitions/ApiPackage';
-import ApiParameter from '../definitions/ApiParameter';
-import ApiProperty from '../definitions/ApiProperty';
-import ApiMember, { AccessModifier } from '../definitions/ApiMember';
-import ApiNamespace from '../definitions/ApiNamespace';
-import ApiModuleVariable from '../definitions/ApiModuleVariable';
-import ApiMethod from '../definitions/ApiMethod';
-import { ReleaseTag } from '../definitions/ApiDocumentation';
-import { IReturn, IParam }from '../IDocElement';
-import ApiJsonFile from './ApiJsonFile';
+import ApiStructuredType from '../apiItem/ApiStructuredType';
+import ApiEnum from '../apiItem/ApiEnum';
+import ApiEnumValue from '../apiItem/ApiEnumValue';
+import ApiFunction from '../apiItem/ApiFunction';
+import ApiItem, { ApiItemKind } from '../apiItem/ApiItem';
+import ApiItemVisitor from './ApiItemVisitor';
+import ApiPackage from '../apiItem/ApiPackage';
+import ApiParameter from '../apiItem/ApiParameter';
+import ApiProperty from '../apiItem/ApiProperty';
+import ApiMember, { AccessModifier } from '../apiItem/ApiMember';
+import ApiNamespace from '../apiItem/ApiNamespace';
+import ApiModuleVariable from '../apiItem/ApiModuleVariable';
+import ApiMethod from '../apiItem/ApiMethod';
+import { ReleaseTag } from '../aedoc/ApiDocumentation';
+import { IReturn, IParam }from '../markupItem/OldMarkupItem';
+import ApiJsonFile from '../jsonItem/ApiJsonFile';
 
 /**
  * For a library such as "example-package", ApiFileGenerator generates the "example-package.api.ts"
@@ -46,7 +46,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
    */
   public static get jsonSchema(): JsonSchema {
     if (!ApiJsonGenerator._jsonSchema) {
-      ApiJsonGenerator._jsonSchema = JsonSchema.fromFile(path.join(__dirname, '../schemas/api-json-schema.json'));
+      ApiJsonGenerator._jsonSchema = JsonSchema.fromFile(path.join(__dirname, '../jsonItem/api-json.schema.json'));
     }
 
     return ApiJsonGenerator._jsonSchema;

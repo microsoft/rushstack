@@ -6,7 +6,7 @@
 
 import * as ts from 'typescript';
 import Extractor from '../Extractor';
-import ApiDocumentation, { ReleaseTag } from './ApiDocumentation';
+import ApiDocumentation, { ReleaseTag } from '../aedoc/ApiDocumentation';
 import TypeScriptHelpers from '../TypeScriptHelpers';
 import DocElementParser from '../DocElementParser';
 import ResolvedApiItem from '../ResolvedApiItem';

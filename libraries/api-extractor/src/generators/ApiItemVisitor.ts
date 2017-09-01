@@ -1,18 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import ApiPackage from './definitions/ApiPackage';
-import ApiItem from './definitions/ApiItem';
-import ApiEnum from './definitions/ApiEnum';
-import ApiEnumValue from './definitions/ApiEnumValue';
-import ApiFunction from './definitions/ApiFunction';
-import ApiStructuredType from './definitions/ApiStructuredType';
-import ApiMember from './definitions/ApiMember';
-import ApiMethod from './definitions/ApiMethod';
-import ApiNamespace from './definitions/ApiNamespace';
-import ApiParameter from './definitions/ApiParameter';
-import ApiProperty from './definitions/ApiProperty';
-import ApiModuleVariable from './definitions/ApiModuleVariable';
+import ApiPackage from '../apiItem/ApiPackage';
+import ApiItem from '../apiItem/ApiItem';
+import ApiEnum from '../apiItem/ApiEnum';
+import ApiEnumValue from '../apiItem/ApiEnumValue';
+import ApiFunction from '../apiItem/ApiFunction';
+import ApiStructuredType from '../apiItem/ApiStructuredType';
+import ApiMember from '../apiItem/ApiMember';
+import ApiMethod from '../apiItem/ApiMethod';
+import ApiNamespace from '../apiItem/ApiNamespace';
+import ApiParameter from '../apiItem/ApiParameter';
+import ApiProperty from '../apiItem/ApiProperty';
+import ApiModuleVariable from '../apiItem/ApiModuleVariable';
 
 /**
   * This is a helper class that provides a standard way to walk the ApiItem

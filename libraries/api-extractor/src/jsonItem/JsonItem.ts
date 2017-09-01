@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IDocElement } from './IDocElement';
+import { IDocElement } from '../markupItem/OldMarkupItem';
 
 /**
  * Whether the function is public, private, or protected.
