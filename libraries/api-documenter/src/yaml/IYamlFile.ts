@@ -11,8 +11,10 @@ export interface IYamlException {
   tupe?: string;
 }
 
+export type YamlTypeId = 'class' | 'constructor' | 'enum' | 'field' | 'interface' | 'method' | 'package' | 'property';
+
 export interface IYamlItem {
-  type: 'class' | 'constructor' | 'enum' | 'field' | 'interface' | 'method' | 'package' | 'property';
+  type: YamlTypeId;
 
   children?: string[];
   exceptions?: IYamlException[];
@@ -23,6 +25,7 @@ export interface IYamlItem {
   package?: string;
   source?: IYamlSource;
   summary?: string;
+  remarks?: string;
   syntax?: IYamlSyntax;
   uid: string;
 }

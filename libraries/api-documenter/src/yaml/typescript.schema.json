@@ -90,6 +90,9 @@
 				"summary": {
 					"type": "string"
 				},
+				"remarks": {
+					"type": "string"
+				},
 				"syntax": {
 					"$ref": "#/definitions/syntax"
 				},
