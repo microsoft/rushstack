@@ -30,7 +30,7 @@ import { DocumentationNode } from './DocumentationNode';
 /**
  * A helper class for generating MarkupElement structures.
  */
-export class Domifier {
+export class MarkupBuilder {
   public static BREAK: IMarkupLineBreak = {
     kind: 'break'
   };
@@ -80,7 +80,7 @@ export class Domifier {
       throw new Error('Missing text for doc link');
     }
 
-    return Domifier.createDocumentationLink(Domifier.createTextElements(text), targetDocId);
+    return MarkupBuilder.createDocumentationLink(MarkupBuilder.createTextElements(text), targetDocId);
   }
 
   public static createCode(code: string, highlighter?: MarkupHighlighter): IMarkupHighlightedText {
@@ -127,7 +127,7 @@ export class Domifier {
   }
 
   public static createNoteBoxFromText(text: string): IMarkupNoteBox {
-    return Domifier.createNoteBox(Domifier.createTextElements(text));
+    return MarkupBuilder.createNoteBox(MarkupBuilder.createTextElements(text));
   }
 
   public static createTableRow(cellValues: MarkupBasicElement[][] | undefined = undefined): IMarkupTableRow {
@@ -152,7 +152,7 @@ export class Domifier {
   public static createTable(headerCellValues: MarkupBasicElement[][] | undefined = undefined): IMarkupTable {
     let header: IMarkupTableRow | undefined = undefined;
     if (headerCellValues) {
-      header = Domifier.createTableRow(headerCellValues);
+      header = MarkupBuilder.createTableRow(headerCellValues);
     }
     return {
       kind: 'table',
@@ -182,7 +182,7 @@ export class Domifier {
       switch (docElement.kind) {
         case 'textDocElement':
           const textDocElement: ITextElement = docElement as ITextElement;
-          result.push(...Domifier.createTextElements(textDocElement.value));
+          result.push(...MarkupBuilder.createTextElements(textDocElement.value));
           break;
         case 'linkDocElement':
           const linkDocElement: ILinkDocElement = docElement as ILinkDocElement;
@@ -195,7 +195,7 @@ export class Domifier {
               }
             }
             result.push(
-              Domifier.createDocumentationLinkFromText(linkText,
+              MarkupBuilder.createDocumentationLinkFromText(linkText,
                 DocumentationNode.getDocIdForCodeLink(linkDocElement)
               )
             );
@@ -203,7 +203,7 @@ export class Domifier {
             result.push(
               {
                 kind: 'web-link',
-                elements: Domifier.createTextElements(linkDocElement.value || linkDocElement.targetUrl),
+                elements: MarkupBuilder.createTextElements(linkDocElement.value || linkDocElement.targetUrl),
                 targetUrl: linkDocElement.targetUrl
               } as IMarkupWebLink
             );
@@ -213,9 +213,9 @@ export class Domifier {
           const seeDocElement: ISeeDocElement = docElement as ISeeDocElement;
           // This representation should probably be improved later.
           result.push(
-            ...Domifier.createTextElements('see ')
+            ...MarkupBuilder.createTextElements('see ')
           );
-          result.push(...Domifier.renderDocElements(seeDocElement.seeElements));
+          result.push(...MarkupBuilder.renderDocElements(seeDocElement.seeElements));
           break;
       }
     }
