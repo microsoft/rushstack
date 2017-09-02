@@ -2,6 +2,23 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "3.1.0",
+      "tag": "@microsoft/api-extractor_v3.1.0",
+      "date": "Sat, 02 Sep 2017 01:04:26 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expanded the api-extractor API to expose interfaces for the *.api.json file fileformat"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.2.2` to `~0.2.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.0",
       "tag": "@microsoft/api-extractor_v3.0.0",
       "date": "Thu, 31 Aug 2017 18:41:18 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 31 Aug 2017 18:41:18 GMT and should not be manually modified.
+This log was last generated on Sat, 02 Sep 2017 01:04:26 GMT and should not be manually modified.
+
+## 3.1.0
+Sat, 02 Sep 2017 01:04:26 GMT
+
+### Minor changes
+
+- Expanded the api-extractor API to expose interfaces for the *.api.json file fileformat
 
 ## 3.0.0
 Thu, 31 Aug 2017 18:41:18 GMT
