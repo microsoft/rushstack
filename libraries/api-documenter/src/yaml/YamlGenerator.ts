@@ -87,7 +87,8 @@ export class YamlGenerator {
       case 'class':
       case 'package':
       case 'interface':
-        return false;
+      case 'enum':
+      return false;
     }
     return true;
   }
@@ -114,14 +115,30 @@ export class YamlGenerator {
       case DocItemKind.Package:
         yamlItem.type = 'package';
         break;
+      case DocItemKind.Enum:
+        yamlItem.type = 'enum';
+        break;
       case DocItemKind.Class:
         yamlItem.type = 'class';
+        break;
+      case DocItemKind.Interface:
+        yamlItem.type = 'interface';
         break;
       case DocItemKind.Method:
         yamlItem.type = 'method';
         break;
+      case DocItemKind.Constructor:
+        yamlItem.type = 'constructor';
+        break;
+      case DocItemKind.Property:
+        yamlItem.type = 'property';
+        break;
       default:
         return undefined;
+    }
+
+    if (docItem.kind !== DocItemKind.Package && !this._shouldEmbed(yamlItem.type)) {
+      yamlItem.package = this._getUid(docItem.getHierarchy()[0]);
     }
 
     return yamlItem as IYamlItem;

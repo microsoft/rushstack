@@ -13,6 +13,7 @@ export enum DocItemKind {
   Class,
   Interface,
   Method,
+  Constructor,
   Function,
   Property,
   Enum
@@ -54,8 +55,10 @@ export class DocItem {
         break;
 
         case 'method':
-        case 'constructor':
           this.kind = DocItemKind.Method;
+          break;
+        case 'constructor':
+          this.kind = DocItemKind.Constructor;
           break;
         case 'function':
           this.kind = DocItemKind.Function;
