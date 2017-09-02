@@ -6,7 +6,7 @@ import { AstItemKind, IAstItemOptions } from './AstItem';
 import AstMember from './AstMember';
 import AstParameter from './AstParameter';
 import TypeScriptHelpers from '../TypeScriptHelpers';
-import { ITextElement, ICodeLinkElement } from '../markupItem/OldMarkupItem';
+import { ITextElement, ICodeLinkElement } from '../markup/OldMarkup';
 import ApiDefinitionReference, { IScopedPackageName } from '../ApiDefinitionReference';
 
 /**

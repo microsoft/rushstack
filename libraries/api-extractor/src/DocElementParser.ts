@@ -7,7 +7,7 @@ import {
   IHrefLinkElement,
   ICodeLinkElement,
   ISeeDocElement
-} from './markupItem/OldMarkupItem';
+} from './markup/OldMarkup';
 import ApiDefinitionReference from './ApiDefinitionReference';
 import ApiDocumentation from './aedoc/ApiDocumentation';
 import { AstItemKind } from './ast/AstItem';

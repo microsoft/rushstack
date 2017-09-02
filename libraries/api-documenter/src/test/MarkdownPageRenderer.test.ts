@@ -6,10 +6,10 @@
 // import { assert } from 'chai';
 import * as path from 'path';
 import { FileDiffTest } from '@microsoft/node-core-library';
-import { IDomPage } from '@microsoft/api-extractor';
+import { IMarkupPage } from '@microsoft/api-extractor';
 
 import { MarkdownPageRenderer } from '../MarkdownPageRenderer';
-import { Domifier } from '../Domifier';
+import { MarkupBuilder } from '../MarkupBuilder';
 
 describe('MarkdownPageRenderer', () => {
   it('renders markdown', (done: MochaDone) => {
@@ -17,43 +17,43 @@ describe('MarkdownPageRenderer', () => {
     const outputFolder: string = FileDiffTest.prepareFolder(__dirname, 'MarkdownPageRenderer');
 
     const renderer: MarkdownPageRenderer = new MarkdownPageRenderer(outputFolder);
-    const domPage: IDomPage = Domifier.createPage('Test page', 'test-id');
+    const markupPage: IMarkupPage = MarkupBuilder.createPage('Test page', 'test-id');
 
-    domPage.elements.push(Domifier.createHeading1('Simple bold test'));
-    domPage.elements.push(...Domifier.createTextElements('This is a '));
-    domPage.elements.push(...Domifier.createTextElements('bold', { bold: true }));
-    domPage.elements.push(...Domifier.createTextElements(' word.'));
+    markupPage.elements.push(MarkupBuilder.createHeading1('Simple bold test'));
+    markupPage.elements.push(...MarkupBuilder.createTextElements('This is a '));
+    markupPage.elements.push(...MarkupBuilder.createTextElements('bold', { bold: true }));
+    markupPage.elements.push(...MarkupBuilder.createTextElements(' word.'));
 
-    domPage.elements.push(Domifier.createHeading1('All whitespace bold'));
-    domPage.elements.push(...Domifier.createTextElements('  ', { bold: true }));
+    markupPage.elements.push(MarkupBuilder.createHeading1('All whitespace bold'));
+    markupPage.elements.push(...MarkupBuilder.createTextElements('  ', { bold: true }));
 
-    domPage.elements.push(Domifier.createHeading1('Newline bold'));
-    domPage.elements.push(...Domifier.createTextElements('line 1\nline 2', { bold: true }));
+    markupPage.elements.push(MarkupBuilder.createHeading1('Newline bold'));
+    markupPage.elements.push(...MarkupBuilder.createTextElements('line 1\nline 2', { bold: true }));
 
-    domPage.elements.push(Domifier.createHeading1('Newline bold with spaces'));
-    domPage.elements.push(...Domifier.createTextElements('  line 1  \n  line 2  \n  line 3  ', { bold: true }));
+    markupPage.elements.push(MarkupBuilder.createHeading1('Newline bold with spaces'));
+    markupPage.elements.push(...MarkupBuilder.createTextElements('  line 1  \n  line 2  \n  line 3  ', { bold: true }));
 
-    domPage.elements.push(Domifier.createHeading1('Adjacent bold regions'));
-    domPage.elements.push(...Domifier.createTextElements('one', { bold: true }));
-    domPage.elements.push(...Domifier.createTextElements('two', { bold: true }));
-    domPage.elements.push(...Domifier.createTextElements(' three', { bold: true }));
-    domPage.elements.push(...Domifier.createTextElements('', { bold: false }));
-    domPage.elements.push(...Domifier.createTextElements('four', { bold: true }));
-    domPage.elements.push(...Domifier.createTextElements('non-bold', { bold: false }));
-    domPage.elements.push(...Domifier.createTextElements('five', { bold: true }));
+    markupPage.elements.push(MarkupBuilder.createHeading1('Adjacent bold regions'));
+    markupPage.elements.push(...MarkupBuilder.createTextElements('one', { bold: true }));
+    markupPage.elements.push(...MarkupBuilder.createTextElements('two', { bold: true }));
+    markupPage.elements.push(...MarkupBuilder.createTextElements(' three', { bold: true }));
+    markupPage.elements.push(...MarkupBuilder.createTextElements('', { bold: false }));
+    markupPage.elements.push(...MarkupBuilder.createTextElements('four', { bold: true }));
+    markupPage.elements.push(...MarkupBuilder.createTextElements('non-bold', { bold: false }));
+    markupPage.elements.push(...MarkupBuilder.createTextElements('five', { bold: true }));
 
-    domPage.elements.push(Domifier.createHeading1('Adjacent to other characters'));
+    markupPage.elements.push(MarkupBuilder.createHeading1('Adjacent to other characters'));
     // Creates a "[" before the bold text
-    domPage.elements.push(Domifier.createDocumentationLinkFromText('a link', 'index'));
-    domPage.elements.push(...Domifier.createTextElements('bold', { bold: true }));
-    domPage.elements.push(...Domifier.createTextElements('non-bold', { bold: false }));
-    domPage.elements.push(...Domifier.createTextElements('more-non-bold', { bold: false }));
+    markupPage.elements.push(MarkupBuilder.createDocumentationLinkFromText('a link', 'index'));
+    markupPage.elements.push(...MarkupBuilder.createTextElements('bold', { bold: true }));
+    markupPage.elements.push(...MarkupBuilder.createTextElements('non-bold', { bold: false }));
+    markupPage.elements.push(...MarkupBuilder.createTextElements('more-non-bold', { bold: false }));
 
-    domPage.elements.push(Domifier.createHeading1('Bad characters'));
-    domPage.elements.push(...Domifier.createTextElements('*one*two*', { bold: true }));
-    domPage.elements.push(...Domifier.createTextElements('three*four', { bold: true }));
+    markupPage.elements.push(MarkupBuilder.createHeading1('Bad characters'));
+    markupPage.elements.push(...MarkupBuilder.createTextElements('*one*two*', { bold: true }));
+    markupPage.elements.push(...MarkupBuilder.createTextElements('three*four', { bold: true }));
 
-    const outputFilename: string = renderer.writePage(domPage);
+    const outputFilename: string = renderer.writePage(markupPage);
 
     FileDiffTest.assertEqual(outputFilename, path.join(__dirname, 'ExpectedOutput.md'));
 

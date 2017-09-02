@@ -5,9 +5,9 @@ import * as fsx from 'fs-extra';
 import * as path from 'path';
 
 import {
-  IDomPage,
-  IDomText,
-  DomElement
+  IMarkupPage,
+  IMarkupText,
+  MarkupElement
 } from '@microsoft/api-extractor';
 
 import { BasePageRenderer } from './BasePageRenderer';
@@ -72,11 +72,11 @@ export class MarkdownPageRenderer extends BasePageRenderer {
     return '.md';
   }
 
-  public writePage(domPage: IDomPage): string { // override
-    const filename: string = path.join(this.outputFolder, this.getFilenameForDocId(domPage.docId));
+  public writePage(markupPage: IMarkupPage): string { // override
+    const filename: string = path.join(this.outputFolder, this.getFilenameForDocId(markupPage.docId));
 
     const writer: SimpleWriter = new SimpleWriter();
-    writer.writeLine('<!-- docId=' + domPage.docId + ' -->');
+    writer.writeLine('<!-- docId=' + markupPage.docId + ' -->');
     writer.writeLine();
 
     const context: IRenderContext = {
@@ -84,17 +84,17 @@ export class MarkdownPageRenderer extends BasePageRenderer {
       insideTable: false
     };
 
-    if (domPage.breadcrumb.length) {
+    if (markupPage.breadcrumb.length) {
       // Write the breadcrumb before the title
-      this._writeElements(domPage.breadcrumb, context);
+      this._writeElements(markupPage.breadcrumb, context);
       writer.ensureNewLine();
       writer.writeLine();
     }
 
-    writer.writeLine('# ' + this._getEscapedText(domPage.title));
+    writer.writeLine('# ' + this._getEscapedText(markupPage.title));
     writer.writeLine();
 
-    this._writeElements(domPage.elements, context);
+    this._writeElements(markupPage.elements, context);
     writer.ensureNewLine(); // finish the last line
 
     fsx.writeFileSync(filename, writer.toString());
@@ -113,11 +113,11 @@ export class MarkdownPageRenderer extends BasePageRenderer {
   }
 
   /**
-   * Merges any IDomText elements with compatible styles; this simplifies the emitted Markdown
+   * Merges any IMarkupText elements with compatible styles; this simplifies the emitted Markdown
    */
-  private _mergeTextElements(elements: DomElement[]): DomElement[] {
-    const mergedElements: DomElement[] = [];
-    let previousElement: DomElement|undefined;
+  private _mergeTextElements(elements: MarkupElement[]): MarkupElement[] {
+    const mergedElements: MarkupElement[] = [];
+    let previousElement: MarkupElement|undefined;
 
     for (const element of elements) {
       if (previousElement) {
@@ -126,9 +126,9 @@ export class MarkdownPageRenderer extends BasePageRenderer {
             // merge them
             mergedElements.pop(); // pop the previous element
 
-            const combinedElement: IDomText = { // push a combined element
+            const combinedElement: IMarkupText = { // push a combined element
               kind: 'text',
-              content: previousElement.content + element.content,
+              text: previousElement.text + element.text,
               bold: previousElement.bold,
               italics: previousElement.italics
             };
@@ -147,15 +147,15 @@ export class MarkdownPageRenderer extends BasePageRenderer {
     return mergedElements;
   }
 
-  private _writeElements(elements: DomElement[], context: IRenderContext): void {
+  private _writeElements(elements: MarkupElement[], context: IRenderContext): void {
     const writer: SimpleWriter = context.writer;
 
-    const mergedElements: DomElement[] = this._mergeTextElements(elements);
+    const mergedElements: MarkupElement[] = this._mergeTextElements(elements);
 
     for (const element of mergedElements) {
       switch (element.kind) {
         case 'text':
-          let normalizedContent: string = element.content;
+          let normalizedContent: string = element.text;
           if (context.insideTable) {
             normalizedContent = normalizedContent.replace('\n', ' ');
           }
@@ -216,7 +216,7 @@ export class MarkdownPageRenderer extends BasePageRenderer {
           break;
         case 'code':
           writer.write('`');
-          writer.write(element.code);
+          writer.write(element.text);
           writer.write('`');
           break;
         case 'doc-link':
@@ -263,7 +263,7 @@ export class MarkdownPageRenderer extends BasePageRenderer {
               throw new Error('Unimplemented highlighter');
           }
           writer.writeLine();
-          writer.write(element.code);
+          writer.write(element.text);
           writer.writeLine();
           writer.writeLine('```');
           break;
