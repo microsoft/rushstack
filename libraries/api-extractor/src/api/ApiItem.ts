@@ -267,6 +267,13 @@ export interface IApiPackage {
   kind: 'package';
 
   /**
+   * The name of the NPM package, including the optional scope.
+   * @remarks
+   * Example: "@microsoft/example-package"
+   */
+  name: string;
+
+  /**
    * IDocItems of exported API items
    */
   exports: { [name: string]: ApiItem};

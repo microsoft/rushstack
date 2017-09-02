@@ -668,6 +668,10 @@
       "type": "string",
       "enum": [ "package" ]
     },
+    "name": {
+      "description": "The name of the NPM package, including the optional scope.  Example: \"@microsoft/example-package\"",
+      "type": "string"
+    },
     "summary": {
           "$ref": "#/definitions/docElementCollection"
     },
@@ -693,5 +697,5 @@
     }
   },
   "additionalProperties": false,
-  "required": [ "kind", "exports" ]
+  "required": [ "kind", "name", "exports" ]
 }

@@ -192,6 +192,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
   protected visitAstPackage(astPackage: AstPackage, refObject?: Object): void {
     /* tslint:disable:no-string-literal */
     refObject['kind'] = ApiJsonFile.convertKindToJson(astPackage.kind);
+    refObject['name'] = astPackage.name;
     refObject['summary'] = astPackage.documentation.summary;
     refObject['remarks'] = astPackage.documentation.remarks;
     /* tslint:enable:no-string-literal */

@@ -4,7 +4,7 @@
 import * as fsx from 'fs-extra';
 import * as os  from 'os';
 import * as path from 'path';
-import { JsonFile, IJsonSchemaErrorInfo } from '@microsoft/node-core-library';
+import { JsonFile } from '@microsoft/node-core-library';
 
 import {
   ApiItem,
@@ -226,17 +226,10 @@ export default class DocItemLoader {
    * then the json file is saved in the cache and returned.
    */
   public loadPackageIntoCache(apiJsonFilePath: string, cachePackageName: string): IApiPackage {
-    const astPackage: IApiPackage = JsonFile.loadAndValidateWithCallback(apiJsonFilePath, ApiJsonGenerator.jsonSchema,
-      (errorInfo: IJsonSchemaErrorInfo) => {
-        const errorMessage: string
-          = path.basename(apiJsonFilePath) + ' does not conform to the expected schema.' + os.EOL
-          + '(Was it created by an incompatible release of API Extractor?)' + os.EOL
-          + errorInfo.details;
-
-        console.log(os.EOL + 'ERROR: ' + errorMessage + os.EOL + os.EOL);
-        throw new Error(errorMessage);
-      }
-    );
+    const astPackage: IApiPackage = JsonFile.loadAndValidate(apiJsonFilePath, ApiJsonGenerator.jsonSchema, {
+      customErrorHeader: 'The API JSON file does not conform to the expected schema, and may' + os.EOL
+        + 'have been created by an incompatible release of API Extractor:'
+    });
 
     this._cache.set(cachePackageName, astPackage);
     return astPackage;

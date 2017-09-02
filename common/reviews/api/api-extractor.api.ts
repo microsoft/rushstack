@@ -193,6 +193,7 @@ interface IApiPackage {
   }
   isBeta?: boolean;
   kind: 'package';
+  name: string;
   // (undocumented)
   remarks?: IDocElement[];
   // (undocumented)
