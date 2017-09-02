@@ -182,6 +182,21 @@ export interface IApiFunction extends IApiBaseDefinition {
 }
 
 /**
+ * A Typescript function.
+ * @alpha
+ */
+export interface IApiConstructor extends IApiBaseDefinition {
+  /**
+   * {@inheritdoc IApiBaseDefinition.kind}
+   */
+  kind: 'constructor';
+  /**
+   * parameters of the function
+   */
+  parameters: { [name: string]: IApiParameter};
+}
+
+/**
  * IApiClass represetns an exported class.
  * @alpha
  */
@@ -299,7 +314,7 @@ export type ApiMember = IApiProperty | IApiMethod;
 /**
  * @alpha
  */
-export type ApiItem = IApiProperty | ApiMember | IApiFunction |
+export type ApiItem = IApiProperty | ApiMember | IApiFunction | IApiConstructor |
    IApiClass |IApiEnum | IApiInterface | IApiPackage;
 
 /**
