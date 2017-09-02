@@ -6,6 +6,7 @@ import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import { DocItemSet } from './DocItemSet';
+import { YamlGenerator } from './yaml/YamlGenerator';
 
 const myPackageJsonFilename: string = path.resolve(path.join(
   __dirname, '..', 'package.json')
@@ -28,3 +29,6 @@ for (const filename of fsx.readdirSync(inputFolder)) {
 }
 
 docItemSet.calculateReferences();
+
+const yamlGenerator: YamlGenerator = new YamlGenerator(docItemSet);
+yamlGenerator.generateFiles(path.join(dataFolder, 'yaml'));

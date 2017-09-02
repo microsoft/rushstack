@@ -14,6 +14,7 @@ export enum DocItemKind {
   Interface,
   Method,
   Function,
+  Property,
   Enum
 }
 
@@ -53,16 +54,20 @@ export class DocItem {
         break;
 
         case 'method':
+        case 'constructor':
           this.kind = DocItemKind.Method;
           break;
         case 'function':
           this.kind = DocItemKind.Function;
           break;
+        case 'property':
+          this.kind = DocItemKind.Property;
+          break;
         case 'enum':
           this.kind = DocItemKind.Enum;
           break;
         default:
-          throw new Error('Unsupported item kind: ' + this.apiItem.kind);
+          throw new Error('Unsupported item kind: ' + (this.apiItem as ApiItem).kind);
     }
 
     this.parent = parent;
@@ -70,6 +75,18 @@ export class DocItem {
     if (this.parent) {
       this.parent.children.push(this);
     }
+  }
+
+  /**
+   * Returns the parent chain in reverse order, i.e. starting with the root of the tree
+   * (which is the package).
+   */
+  public getHierarchy(): DocItem[] {
+    const result: DocItem[] = [];
+    for (let current: DocItem | undefined = this; current; current = current.parent) {
+      result.unshift(current);
+    }
+    return result;
   }
 }
 

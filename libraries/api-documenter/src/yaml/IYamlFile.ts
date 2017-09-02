@@ -24,6 +24,7 @@ export interface IYamlItem {
   source?: IYamlSource;
   summary?: string;
   syntax?: IYamlSyntax;
+  uid: string;
 }
 
 export interface IYamlParameter {
