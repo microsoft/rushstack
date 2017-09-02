@@ -72,11 +72,11 @@ export class MarkdownPageRenderer extends BasePageRenderer {
     return '.md';
   }
 
-  public writePage(domPage: IMarkupPage): string { // override
-    const filename: string = path.join(this.outputFolder, this.getFilenameForDocId(domPage.docId));
+  public writePage(markupPage: IMarkupPage): string { // override
+    const filename: string = path.join(this.outputFolder, this.getFilenameForDocId(markupPage.docId));
 
     const writer: SimpleWriter = new SimpleWriter();
-    writer.writeLine('<!-- docId=' + domPage.docId + ' -->');
+    writer.writeLine('<!-- docId=' + markupPage.docId + ' -->');
     writer.writeLine();
 
     const context: IRenderContext = {
@@ -84,17 +84,17 @@ export class MarkdownPageRenderer extends BasePageRenderer {
       insideTable: false
     };
 
-    if (domPage.breadcrumb.length) {
+    if (markupPage.breadcrumb.length) {
       // Write the breadcrumb before the title
-      this._writeElements(domPage.breadcrumb, context);
+      this._writeElements(markupPage.breadcrumb, context);
       writer.ensureNewLine();
       writer.writeLine();
     }
 
-    writer.writeLine('# ' + this._getEscapedText(domPage.title));
+    writer.writeLine('# ' + this._getEscapedText(markupPage.title));
     writer.writeLine();
 
-    this._writeElements(domPage.elements, context);
+    this._writeElements(markupPage.elements, context);
     writer.ensureNewLine(); // finish the last line
 
     fsx.writeFileSync(filename, writer.toString());

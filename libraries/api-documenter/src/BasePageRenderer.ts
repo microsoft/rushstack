@@ -25,7 +25,7 @@ export abstract class BasePageRenderer {
   /**
    * Write a file containing a single page of documentation.
    */
-  public abstract writePage(domPage: IMarkupPage): void;
+  public abstract writePage(markupPage: IMarkupPage): void;
 
   /**
    * Delete all the output files created by this renderer.

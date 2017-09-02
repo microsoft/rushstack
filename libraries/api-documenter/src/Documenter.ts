@@ -59,10 +59,10 @@ export class Documenter {
 
     const packageNode: DocumentationNode = new DocumentationNode(docPackage, unscopedPackageName, undefined);
 
-    const domPage: IMarkupPage = MarkupBuilder.createPage(`${unscopedPackageName} package`, packageNode.docId);
-    this._writeBreadcrumb(domPage, packageNode);
+    const markupPage: IMarkupPage = MarkupBuilder.createPage(`${unscopedPackageName} package`, packageNode.docId);
+    this._writeBreadcrumb(markupPage, packageNode);
 
-    domPage.elements.push(...MarkupBuilder.renderDocElements(apiJsonFile.docPackage.summary));
+    markupPage.elements.push(...MarkupBuilder.renderDocElements(apiJsonFile.docPackage.summary));
 
     const classesTable: IMarkupTable = MarkupBuilder.createTable([
       MarkupBuilder.createTextElements('Class'),
@@ -146,31 +146,31 @@ export class Documenter {
     }
 
     if (docPackage.remarks && docPackage.remarks.length) {
-      domPage.elements.push(MarkupBuilder.createHeading1('Remarks'));
-      domPage.elements.push(...MarkupBuilder.renderDocElements(docPackage.remarks));
+      markupPage.elements.push(MarkupBuilder.createHeading1('Remarks'));
+      markupPage.elements.push(...MarkupBuilder.renderDocElements(docPackage.remarks));
     }
 
     if (classesTable.rows.length > 0) {
-      domPage.elements.push(MarkupBuilder.createHeading1('Classes'));
-      domPage.elements.push(classesTable);
+      markupPage.elements.push(MarkupBuilder.createHeading1('Classes'));
+      markupPage.elements.push(classesTable);
     }
 
     if (interfacesTable.rows.length > 0) {
-      domPage.elements.push(MarkupBuilder.createHeading1('Interfaces'));
-      domPage.elements.push(interfacesTable);
+      markupPage.elements.push(MarkupBuilder.createHeading1('Interfaces'));
+      markupPage.elements.push(interfacesTable);
     }
 
     if (functionsTable.rows.length > 0) {
-      domPage.elements.push(MarkupBuilder.createHeading1('Functions'));
-      domPage.elements.push(functionsTable);
+      markupPage.elements.push(MarkupBuilder.createHeading1('Functions'));
+      markupPage.elements.push(functionsTable);
     }
 
     if (enumerationsTable.rows.length > 0) {
-      domPage.elements.push(MarkupBuilder.createHeading1('Enumerations'));
-      domPage.elements.push(enumerationsTable);
+      markupPage.elements.push(MarkupBuilder.createHeading1('Enumerations'));
+      markupPage.elements.push(enumerationsTable);
     }
 
-    renderer.writePage(domPage);
+    renderer.writePage(markupPage);
   }
 
   /**
@@ -180,21 +180,21 @@ export class Documenter {
     const className: string = classNode.name;
 
     // TODO: Show concise generic parameters with class name
-    const domPage: IMarkupPage = MarkupBuilder.createPage(`${className} class`, classNode.docId);
-    this._writeBreadcrumb(domPage, classNode);
+    const markupPage: IMarkupPage = MarkupBuilder.createPage(`${className} class`, classNode.docId);
+    this._writeBreadcrumb(markupPage, classNode);
 
     if (docClass.isBeta) {
-      this._writeBetaWarning(domPage.elements);
+      this._writeBetaWarning(markupPage.elements);
     }
 
-    domPage.elements.push(...MarkupBuilder.renderDocElements(docClass.summary));
+    markupPage.elements.push(...MarkupBuilder.renderDocElements(docClass.summary));
 
-    domPage.elements.push(MarkupBuilder.createHeading1('Constructor'));
+    markupPage.elements.push(MarkupBuilder.createHeading1('Constructor'));
 
     // TODO: pending WBT fix
-    domPage.elements.push(...MarkupBuilder.createTextElements('Constructs a new instance of the '));
-    domPage.elements.push(MarkupBuilder.createCode(className));
-    domPage.elements.push(...MarkupBuilder.createTextElements(' class'));
+    markupPage.elements.push(...MarkupBuilder.createTextElements('Constructs a new instance of the '));
+    markupPage.elements.push(MarkupBuilder.createCode(className));
+    markupPage.elements.push(...MarkupBuilder.createTextElements(' class'));
 
     const propertiesTable: IMarkupTable = MarkupBuilder.createTable([
       MarkupBuilder.createTextElements('Property'),
@@ -254,21 +254,21 @@ export class Documenter {
     }
 
     if (propertiesTable.rows.length > 0) {
-      domPage.elements.push(MarkupBuilder.createHeading1('Properties'));
-      domPage.elements.push(propertiesTable);
+      markupPage.elements.push(MarkupBuilder.createHeading1('Properties'));
+      markupPage.elements.push(propertiesTable);
     }
 
     if (methodsTable.rows.length > 0) {
-      domPage.elements.push(MarkupBuilder.createHeading1('Methods'));
-      domPage.elements.push(methodsTable);
+      markupPage.elements.push(MarkupBuilder.createHeading1('Methods'));
+      markupPage.elements.push(methodsTable);
     }
 
     if (docClass.remarks && docClass.remarks.length) {
-      domPage.elements.push(MarkupBuilder.createHeading1('Remarks'));
-      domPage.elements.push(...MarkupBuilder.renderDocElements(docClass.remarks));
+      markupPage.elements.push(MarkupBuilder.createHeading1('Remarks'));
+      markupPage.elements.push(...MarkupBuilder.renderDocElements(docClass.remarks));
     }
 
-    renderer.writePage(domPage);
+    renderer.writePage(markupPage);
   }
 
   /**
@@ -280,14 +280,14 @@ export class Documenter {
     const interfaceName: string = interfaceNode.name;
 
     // TODO: Show concise generic parameters with class name
-    const domPage: IMarkupPage = MarkupBuilder.createPage(`${interfaceName} interface`, interfaceNode.docId);
-    this._writeBreadcrumb(domPage, interfaceNode);
+    const markupPage: IMarkupPage = MarkupBuilder.createPage(`${interfaceName} interface`, interfaceNode.docId);
+    this._writeBreadcrumb(markupPage, interfaceNode);
 
     if (docInterface.isBeta) {
-      this._writeBetaWarning(domPage.elements);
+      this._writeBetaWarning(markupPage.elements);
     }
 
-    domPage.elements.push(...MarkupBuilder.renderDocElements(docInterface.summary));
+    markupPage.elements.push(...MarkupBuilder.renderDocElements(docInterface.summary));
 
     const propertiesTable: IMarkupTable = MarkupBuilder.createTable([
       MarkupBuilder.createTextElements('Property'),
@@ -343,21 +343,21 @@ export class Documenter {
     }
 
     if (propertiesTable.rows.length > 0) {
-      domPage.elements.push(MarkupBuilder.createHeading1('Properties'));
-      domPage.elements.push(propertiesTable);
+      markupPage.elements.push(MarkupBuilder.createHeading1('Properties'));
+      markupPage.elements.push(propertiesTable);
     }
 
     if (methodsTable.rows.length > 0) {
-      domPage.elements.push(MarkupBuilder.createHeading1('Methods'));
-      domPage.elements.push(methodsTable);
+      markupPage.elements.push(MarkupBuilder.createHeading1('Methods'));
+      markupPage.elements.push(methodsTable);
     }
 
     if (docInterface.remarks && docInterface.remarks.length) {
-      domPage.elements.push(MarkupBuilder.createHeading1('Remarks'));
-      domPage.elements.push(...MarkupBuilder.renderDocElements(docInterface.remarks));
+      markupPage.elements.push(MarkupBuilder.createHeading1('Remarks'));
+      markupPage.elements.push(...MarkupBuilder.renderDocElements(docInterface.remarks));
     }
 
-    renderer.writePage(domPage);
+    renderer.writePage(markupPage);
   }
 
   /**
@@ -369,14 +369,14 @@ export class Documenter {
     const enumName: string = enumNode.name;
 
     // TODO: Show concise generic parameters with class name
-    const domPage: IMarkupPage = MarkupBuilder.createPage(`${enumName} enumeration`, enumNode.docId);
-    this._writeBreadcrumb(domPage, enumNode);
+    const markupPage: IMarkupPage = MarkupBuilder.createPage(`${enumName} enumeration`, enumNode.docId);
+    this._writeBreadcrumb(markupPage, enumNode);
 
     if (docEnum.isBeta) {
-      this._writeBetaWarning(domPage.elements);
+      this._writeBetaWarning(markupPage.elements);
     }
 
-    domPage.elements.push(...MarkupBuilder.renderDocElements(docEnum.summary));
+    markupPage.elements.push(...MarkupBuilder.renderDocElements(docEnum.summary));
 
     const membersTable: IMarkupTable = MarkupBuilder.createTable([
       MarkupBuilder.createTextElements('Member'),
@@ -403,10 +403,10 @@ export class Documenter {
     }
 
     if (membersTable.rows.length > 0) {
-      domPage.elements.push(membersTable);
+      markupPage.elements.push(membersTable);
     }
 
-    renderer.writePage(domPage);
+    renderer.writePage(markupPage);
   }
 
   /**
@@ -417,25 +417,25 @@ export class Documenter {
 
     const fullProperyName: string = propertyNode.parent!.name + '.' + propertyNode.name;
 
-    const domPage: IMarkupPage = MarkupBuilder.createPage(`${fullProperyName} property`, propertyNode.docId);
-    this._writeBreadcrumb(domPage, propertyNode);
+    const markupPage: IMarkupPage = MarkupBuilder.createPage(`${fullProperyName} property`, propertyNode.docId);
+    this._writeBreadcrumb(markupPage, propertyNode);
 
     if (docProperty.isBeta) {
-      this._writeBetaWarning(domPage.elements);
+      this._writeBetaWarning(markupPage.elements);
     }
 
-    domPage.elements.push(...MarkupBuilder.renderDocElements(docProperty.summary));
+    markupPage.elements.push(...MarkupBuilder.renderDocElements(docProperty.summary));
 
-    domPage.elements.push(MarkupBuilder.PARAGRAPH);
-    domPage.elements.push(...MarkupBuilder.createTextElements('Signature:', { bold: true }));
-    domPage.elements.push(MarkupBuilder.createCodeBox(propertyNode.name + ': ' + docProperty.type, 'javascript'));
+    markupPage.elements.push(MarkupBuilder.PARAGRAPH);
+    markupPage.elements.push(...MarkupBuilder.createTextElements('Signature:', { bold: true }));
+    markupPage.elements.push(MarkupBuilder.createCodeBox(propertyNode.name + ': ' + docProperty.type, 'javascript'));
 
     if (docProperty.remarks && docProperty.remarks.length) {
-      domPage.elements.push(MarkupBuilder.createHeading1('Remarks'));
-      domPage.elements.push(...MarkupBuilder.renderDocElements(docProperty.remarks));
+      markupPage.elements.push(MarkupBuilder.createHeading1('Remarks'));
+      markupPage.elements.push(...MarkupBuilder.renderDocElements(docProperty.remarks));
     }
 
-    renderer.writePage(domPage);
+    renderer.writePage(markupPage);
   }
 
   /**
@@ -445,30 +445,30 @@ export class Documenter {
 
     const fullMethodName: string = methodNode.parent!.name + '.' + methodNode.name;
 
-    const domPage: IMarkupPage = MarkupBuilder.createPage(`${fullMethodName} method`, methodNode.docId);
-    this._writeBreadcrumb(domPage, methodNode);
+    const markupPage: IMarkupPage = MarkupBuilder.createPage(`${fullMethodName} method`, methodNode.docId);
+    this._writeBreadcrumb(markupPage, methodNode);
 
     if (docMethod.isBeta) {
-      this._writeBetaWarning(domPage.elements);
+      this._writeBetaWarning(markupPage.elements);
     }
 
-    domPage.elements.push(...MarkupBuilder.renderDocElements(docMethod.summary));
+    markupPage.elements.push(...MarkupBuilder.renderDocElements(docMethod.summary));
 
-    domPage.elements.push(MarkupBuilder.PARAGRAPH);
-    domPage.elements.push(...MarkupBuilder.createTextElements('Signature:', { bold: true }));
-    domPage.elements.push(MarkupBuilder.createCodeBox(docMethod.signature, 'javascript'));
+    markupPage.elements.push(MarkupBuilder.PARAGRAPH);
+    markupPage.elements.push(...MarkupBuilder.createTextElements('Signature:', { bold: true }));
+    markupPage.elements.push(MarkupBuilder.createCodeBox(docMethod.signature, 'javascript'));
 
     if (docMethod.returnValue) {
-      domPage.elements.push(...MarkupBuilder.createTextElements('Returns:', { bold: true }));
-      domPage.elements.push(...MarkupBuilder.createTextElements(' '));
-      domPage.elements.push(MarkupBuilder.createCode(docMethod.returnValue.type, 'javascript'));
-      domPage.elements.push(MarkupBuilder.PARAGRAPH);
-      domPage.elements.push(...MarkupBuilder.renderDocElements(docMethod.returnValue.description));
+      markupPage.elements.push(...MarkupBuilder.createTextElements('Returns:', { bold: true }));
+      markupPage.elements.push(...MarkupBuilder.createTextElements(' '));
+      markupPage.elements.push(MarkupBuilder.createCode(docMethod.returnValue.type, 'javascript'));
+      markupPage.elements.push(MarkupBuilder.PARAGRAPH);
+      markupPage.elements.push(...MarkupBuilder.renderDocElements(docMethod.returnValue.description));
     }
 
     if (docMethod.remarks && docMethod.remarks.length) {
-      domPage.elements.push(MarkupBuilder.createHeading1('Remarks'));
-      domPage.elements.push(...MarkupBuilder.renderDocElements(docMethod.remarks));
+      markupPage.elements.push(MarkupBuilder.createHeading1('Remarks'));
+      markupPage.elements.push(...MarkupBuilder.renderDocElements(docMethod.remarks));
     }
 
     if (Object.keys(docMethod.parameters).length > 0) {
@@ -478,8 +478,8 @@ export class Documenter {
         MarkupBuilder.createTextElements('Description')
       ]);
 
-      domPage.elements.push(MarkupBuilder.createHeading1('Parameters'));
-      domPage.elements.push(parametersTable);
+      markupPage.elements.push(MarkupBuilder.createHeading1('Parameters'));
+      markupPage.elements.push(parametersTable);
       for (const parameterName of Object.keys(docMethod.parameters)) {
         const parameter: IApiParameter = docMethod.parameters[parameterName];
           parametersTable.rows.push(MarkupBuilder.createTableRow([
@@ -491,7 +491,7 @@ export class Documenter {
       }
     }
 
-    renderer.writePage(domPage);
+    renderer.writePage(markupPage);
   }
 
   /**
@@ -500,30 +500,30 @@ export class Documenter {
   private _writeFunctionPage(docFunction: IApiFunction, functionNode: DocumentationNode,
     renderer: BasePageRenderer): void {
 
-    const domPage: IMarkupPage = MarkupBuilder.createPage(`${functionNode.name} function`, functionNode.docId);
-    this._writeBreadcrumb(domPage, functionNode);
+    const markupPage: IMarkupPage = MarkupBuilder.createPage(`${functionNode.name} function`, functionNode.docId);
+    this._writeBreadcrumb(markupPage, functionNode);
 
     if (docFunction.isBeta) {
-      this._writeBetaWarning(domPage.elements);
+      this._writeBetaWarning(markupPage.elements);
     }
 
-    domPage.elements.push(...MarkupBuilder.renderDocElements(docFunction.summary));
+    markupPage.elements.push(...MarkupBuilder.renderDocElements(docFunction.summary));
 
-    domPage.elements.push(MarkupBuilder.PARAGRAPH);
-    domPage.elements.push(...MarkupBuilder.createTextElements('Signature:', { bold: true }));
-    domPage.elements.push(MarkupBuilder.createCodeBox(functionNode.name, 'javascript'));
+    markupPage.elements.push(MarkupBuilder.PARAGRAPH);
+    markupPage.elements.push(...MarkupBuilder.createTextElements('Signature:', { bold: true }));
+    markupPage.elements.push(MarkupBuilder.createCodeBox(functionNode.name, 'javascript'));
 
     if (docFunction.returnValue) {
-      domPage.elements.push(...MarkupBuilder.createTextElements('Returns:', { bold: true }));
-      domPage.elements.push(...MarkupBuilder.createTextElements(' '));
-      domPage.elements.push(MarkupBuilder.createCode(docFunction.returnValue.type, 'javascript'));
-      domPage.elements.push(MarkupBuilder.PARAGRAPH);
-      domPage.elements.push(...MarkupBuilder.renderDocElements(docFunction.returnValue.description));
+      markupPage.elements.push(...MarkupBuilder.createTextElements('Returns:', { bold: true }));
+      markupPage.elements.push(...MarkupBuilder.createTextElements(' '));
+      markupPage.elements.push(MarkupBuilder.createCode(docFunction.returnValue.type, 'javascript'));
+      markupPage.elements.push(MarkupBuilder.PARAGRAPH);
+      markupPage.elements.push(...MarkupBuilder.renderDocElements(docFunction.returnValue.description));
     }
 
     if (docFunction.remarks && docFunction.remarks.length) {
-      domPage.elements.push(MarkupBuilder.createHeading1('Remarks'));
-      domPage.elements.push(...MarkupBuilder.renderDocElements(docFunction.remarks));
+      markupPage.elements.push(MarkupBuilder.createHeading1('Remarks'));
+      markupPage.elements.push(...MarkupBuilder.renderDocElements(docFunction.remarks));
     }
 
     if (Object.keys(docFunction.parameters).length > 0) {
@@ -533,8 +533,8 @@ export class Documenter {
         MarkupBuilder.createTextElements('Description')
       ]);
 
-      domPage.elements.push(MarkupBuilder.createHeading1('Parameters'));
-      domPage.elements.push(parametersTable);
+      markupPage.elements.push(MarkupBuilder.createHeading1('Parameters'));
+      markupPage.elements.push(parametersTable);
       for (const parameterName of Object.keys(docFunction.parameters)) {
         const parameter: IApiParameter = docFunction.parameters[parameterName];
           parametersTable.rows.push(MarkupBuilder.createTableRow([
@@ -546,19 +546,19 @@ export class Documenter {
       }
     }
 
-    renderer.writePage(domPage);
+    renderer.writePage(markupPage);
   }
 
-  private _writeBreadcrumb(domPage: IMarkupPage, currentNode: DocumentationNode): void {
-    domPage.breadcrumb.push(MarkupBuilder.createDocumentationLinkFromText('Home', 'index'));
+  private _writeBreadcrumb(markupPage: IMarkupPage, currentNode: DocumentationNode): void {
+    markupPage.breadcrumb.push(MarkupBuilder.createDocumentationLinkFromText('Home', 'index'));
 
     const reversedNodes: DocumentationNode[] = [];
     for (let node: DocumentationNode|undefined = currentNode.parent; node; node = node.parent) {
       reversedNodes.unshift(node);
     }
     for (const node of reversedNodes) {
-      domPage.breadcrumb.push(...MarkupBuilder.createTextElements(' > '));
-      domPage.breadcrumb.push(MarkupBuilder.createDocumentationLinkFromText(node.name, node.docId));
+      markupPage.breadcrumb.push(...MarkupBuilder.createTextElements(' > '));
+      markupPage.breadcrumb.push(MarkupBuilder.createDocumentationLinkFromText(node.name, node.docId));
     }
   }
 
