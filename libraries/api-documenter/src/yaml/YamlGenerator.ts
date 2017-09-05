@@ -15,7 +15,7 @@ import {
 } from './IYamlFile';
 import { RenderingHelpers } from '../RenderingHelpers';
 import { MarkupBuilder } from '../MarkupBuilder';
-import { MarkdownRenderer } from '../MarkdownRenderer';
+import { MarkdownRenderer, IMarkdownRenderApiLinkArgs } from '../MarkdownRenderer';
 
 const yamlSchema: JsonSchema = JsonSchema.fromFile(path.join(__dirname, 'typescript.schema.json'));
 
@@ -157,8 +157,8 @@ export class YamlGenerator {
     }
 
     return MarkdownRenderer.renderElements(markupElements, {
-      docIdResolver: (docId: string) => {
-        return ''; // no link for now
+      onRenderApiLink: (args: IMarkdownRenderApiLinkArgs) => {
+        // no link for now
       }
     });
   }

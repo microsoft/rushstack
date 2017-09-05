@@ -5,10 +5,9 @@ import * as fsx from 'fs-extra';
 import * as path from 'path';
 
 import { IMarkupPage } from '@microsoft/api-extractor';
-
 import { BasePageRenderer } from './BasePageRenderer';
-
-import { MarkdownRenderer } from './MarkdownRenderer';
+import { DocumentationNode } from './DocumentationNode';
+import { MarkdownRenderer, IMarkdownRenderApiLinkArgs } from './MarkdownRenderer';
 
 /**
  * Renders API documentation in the Markdown file format.
@@ -23,8 +22,11 @@ export class MarkdownPageRenderer extends BasePageRenderer {
     const filename: string = path.join(this.outputFolder, this.getFilenameForDocId(markupPage.docId));
 
     const content: string = MarkdownRenderer.renderElements([markupPage], {
-      docIdResolver: (docId: string) => {
-        return this.getFilenameForDocId(docId);
+      onRenderApiLink: (args: IMarkdownRenderApiLinkArgs) => {
+        const docId: string = DocumentationNode.getDocIdForCodeLink(args.reference);
+        const docFilename: string = this.getFilenameForDocId(docId);
+        args.prefix = '[';
+        args.suffix = '](' + docFilename + ')';
       }
     });
 

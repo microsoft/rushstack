@@ -91,9 +91,9 @@ export class Documenter {
       const exportNode: DocumentationNode = new DocumentationNode(docItem, exportName, packageNode);
 
       const docItemTitle: MarkupBasicElement[] = [
-        MarkupBuilder.createDocumentationLink(
+        MarkupBuilder.createApiLink(
           [ MarkupBuilder.createCode(exportName, 'javascript') ],
-          exportNode.docId)
+          exportNode.getApiReference())
       ];
 
       const docItemDescription: MarkupBasicElement[] = [];
@@ -217,9 +217,9 @@ export class Documenter {
       switch (member.kind) {
         case 'property':
           const propertyTitle: MarkupBasicElement[] = [
-            MarkupBuilder.createDocumentationLink(
+            MarkupBuilder.createApiLink(
               [MarkupBuilder.createCode(memberName, 'javascript')],
-              memberNode.docId)
+              memberNode.getApiReference())
           ];
 
           propertiesTable.rows.push(
@@ -235,9 +235,9 @@ export class Documenter {
 
         case 'method':
           const methodTitle: MarkupBasicElement[] = [
-            MarkupBuilder.createDocumentationLink(
+            MarkupBuilder.createApiLink(
               [MarkupBuilder.createCode(RenderingHelpers.getConciseSignature(memberName, member), 'javascript')],
-              memberNode.docId)
+              memberNode.getApiReference())
           ];
 
           methodsTable.rows.push(
@@ -308,9 +308,9 @@ export class Documenter {
       switch (member.kind) {
         case 'property':
           const propertyTitle: MarkupBasicElement[] = [
-            MarkupBuilder.createDocumentationLink(
+            MarkupBuilder.createApiLink(
               [MarkupBuilder.createCode(memberName, 'javascript')],
-              memberNode.docId)
+              memberNode.getApiReference())
           ];
 
           propertiesTable.rows.push(
@@ -325,9 +325,9 @@ export class Documenter {
 
         case 'method':
           const methodTitle: MarkupBasicElement[] = [
-            MarkupBuilder.createDocumentationLink(
+            MarkupBuilder.createApiLink(
               [MarkupBuilder.createCode(RenderingHelpers.getConciseSignature(memberName, member), 'javascript')],
-              memberNode.docId)
+              memberNode.getApiReference())
           ];
 
           methodsTable.rows.push(
@@ -550,7 +550,7 @@ export class Documenter {
   }
 
   private _writeBreadcrumb(markupPage: IMarkupPage, currentNode: DocumentationNode): void {
-    markupPage.breadcrumb.push(MarkupBuilder.createDocumentationLinkFromText('Home', 'index'));
+    markupPage.breadcrumb.push(MarkupBuilder.createWebLinkFromText('Home', './index'));
 
     const reversedNodes: DocumentationNode[] = [];
     for (let node: DocumentationNode|undefined = currentNode.parent; node; node = node.parent) {
@@ -558,7 +558,7 @@ export class Documenter {
     }
     for (const node of reversedNodes) {
       markupPage.breadcrumb.push(...MarkupBuilder.createTextElements(' > '));
-      markupPage.breadcrumb.push(MarkupBuilder.createDocumentationLinkFromText(node.name, node.docId));
+      markupPage.breadcrumb.push(MarkupBuilder.createApiLinkFromText(node.name, node.getApiReference()));
     }
   }
 
