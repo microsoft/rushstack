@@ -133,6 +133,14 @@ interface IApiClass extends IApiBaseDefinition {
 }
 
 // @alpha
+interface IApiConstructor extends IApiBaseDefinition {
+  kind: 'constructor';
+  parameters: {
+    [ name: string ]: IApiParameter
+  }
+}
+
+// @alpha
 interface IApiEnum extends IApiBaseDefinition {
   kind: 'enum';
   // (undocumented)
@@ -193,6 +201,7 @@ interface IApiPackage {
   }
   isBeta?: boolean;
   kind: 'package';
+  name: string;
   // (undocumented)
   remarks?: IDocElement[];
   // (undocumented)

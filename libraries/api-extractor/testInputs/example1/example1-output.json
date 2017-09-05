@@ -1,5 +1,6 @@
 {
   "kind": "package",
+  "name": "example1",
   "summary": [],
   "remarks": [],
   "exports": {

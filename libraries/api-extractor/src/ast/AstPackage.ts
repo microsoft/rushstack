@@ -44,6 +44,7 @@ export default class AstPackage extends AstItemContainer {
       jsdocNode: foundDescription
     };
   }
+
   constructor(extractor: Extractor, rootFile: ts.SourceFile) {
     super(AstPackage._getOptions(extractor, rootFile));
     this.kind = AstItemKind.Package;

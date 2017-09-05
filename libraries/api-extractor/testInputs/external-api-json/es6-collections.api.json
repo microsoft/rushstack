@@ -1,5 +1,6 @@
 {
   "kind": "package",
+  "name": "es6-collections",
   "exports": {
     "ForEachable": {
       "kind": "interface",

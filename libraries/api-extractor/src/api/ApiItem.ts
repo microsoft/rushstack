@@ -182,6 +182,21 @@ export interface IApiFunction extends IApiBaseDefinition {
 }
 
 /**
+ * A Typescript function.
+ * @alpha
+ */
+export interface IApiConstructor extends IApiBaseDefinition {
+  /**
+   * {@inheritdoc IApiBaseDefinition.kind}
+   */
+  kind: 'constructor';
+  /**
+   * parameters of the function
+   */
+  parameters: { [name: string]: IApiParameter};
+}
+
+/**
  * IApiClass represetns an exported class.
  * @alpha
  */
@@ -267,6 +282,13 @@ export interface IApiPackage {
   kind: 'package';
 
   /**
+   * The name of the NPM package, including the optional scope.
+   * @remarks
+   * Example: "@microsoft/example-package"
+   */
+  name: string;
+
+  /**
    * IDocItems of exported API items
    */
   exports: { [name: string]: ApiItem};
@@ -292,7 +314,7 @@ export type ApiMember = IApiProperty | IApiMethod;
 /**
  * @alpha
  */
-export type ApiItem = IApiProperty | ApiMember | IApiFunction |
+export type ApiItem = IApiProperty | ApiMember | IApiFunction | IApiConstructor |
    IApiClass |IApiEnum | IApiInterface | IApiPackage;
 
 /**
