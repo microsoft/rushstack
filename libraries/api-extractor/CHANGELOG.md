@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sat, 02 Sep 2017 01:04:26 GMT and should not be manually modified.
+This log was last generated on Tue, 05 Sep 2017 19:03:56 GMT and should not be manually modified.
+
+## 3.2.0
+Tue, 05 Sep 2017 19:03:56 GMT
+
+### Minor changes
+
+- Add the constructor signature and package name to the exported API signature
 
 ## 3.1.0
 Sat, 02 Sep 2017 01:04:26 GMT
