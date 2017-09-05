@@ -19,6 +19,9 @@ import { MarkdownRenderer } from '../MarkdownRenderer';
 
 const yamlSchema: JsonSchema = JsonSchema.fromFile(path.join(__dirname, 'typescript.schema.json'));
 
+/**
+ * Writes documentation in the Universal Reference YAML file format, as defined by typescript.schema.json.
+ */
 export class YamlGenerator {
   private _docItemSet: DocItemSet;
   private _outputFolder: string;

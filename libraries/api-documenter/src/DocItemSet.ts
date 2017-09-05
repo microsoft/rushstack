@@ -19,6 +19,23 @@ export enum DocItemKind {
   Enum
 }
 
+/**
+ * Tracks additional metadata for an ApiItem while generating documentation.
+ *
+ * @remarks
+ *
+ * The api-documenter tool reads a tree of ApiItem objects from *.api.json files, and then
+ * generates documentation output.  To facilitate this process, a DocItem object is created
+ * for each hyperlinkable ApiItem (i.e. major types such as package, class, member, etc).
+ * The DocItems track the parent/child hierarchy, which is used for scenarios such as:
+ *
+ * - Preventing broken links, by checking that a referenced object is part of the documentation set
+ *   before generating a link
+ * - Detecting the base classes and derived classes for a class
+ * - Walking the parent chain to build a unique documentation ID for each item
+ *
+ * The set of DocItem objects is managed by DocItemSet.
+ */
 export class DocItem {
   public readonly kind: DocItemKind;
 
@@ -89,6 +106,15 @@ export class DocItem {
   }
 }
 
+/**
+ * The collection of DocItem objects that api-documenter is processing.
+ *
+ * @remarks
+ *
+ * The DocItemSet is built by repeatedly calling loadApiJsonFile() for each file that we want
+ * to process.  After all files are loaded, calculateReferences() is used to calculate
+ * cross-references and build up the indexes.
+ */
 export class DocItemSet {
   public readonly docPackagesByName: Map<string, DocItem> = new Map<string, DocItem>();
   public readonly docPackages: DocItem[] = [];
