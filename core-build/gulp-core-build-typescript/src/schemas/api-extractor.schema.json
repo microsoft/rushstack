@@ -6,6 +6,11 @@
 
   "type": "object",
   "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
     "enabled": {
       "description": "Indicates whether the task should be run",
       "type": "boolean"
