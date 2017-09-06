@@ -519,22 +519,7 @@
           "type": "object",
           "patternProperties": {
             "^[a-zA-Z_]+[a-zA-Z_0-9]*$": {
-              "type": "object",
-              "properties": {
-                "value": {
-                  "description": "The initializer to the enum value",
-                  "type": "string"
-                },
-                "deprecatedMessage": {
-                  "$ref": "#/definitions/docElementCollection"
-                },
-                "summary": {
-                  "$ref": "#/definitions/docElementCollection"
-                },
-                "remarks": {
-                  "$ref": "#/definitions/docElementCollection"
-                }
-              }
+              "$ref": "#/definitions/enumMemberApiItem"
             }
           },
           "additionalProperties": false
@@ -550,6 +535,41 @@
       },
       "additionalProperties": false,
       "required": [ "kind", "summary", "values", "isBeta" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "enumMemberApiItem": {
+      "description": "A TypeScript enum member definition",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of API definition",
+          "type": "string",
+          "enum": [ "enum value" ]
+        },
+        "summary": {
+          "$ref": "#/definitions/docElementCollection"
+        },
+        "isBeta": {
+          "description": "Whether the API enum member is beta",
+          "type": "boolean"
+        },
+        "value": {
+          "description": "The value of the enum, which may be a number, a string literal, or an empty string (if the value is automatically assigned)",
+          "type": "string"
+        },
+
+        // Optional properties:
+        "remarks": {
+          "$ref": "#/definitions/docElementCollection"
+        },
+        "deprecatedMessage": {
+          "$ref": "#/definitions/docElementCollection"
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "summary", "isBeta" ]
     },
 
     //---------------------------------------------------------------------------------------------
