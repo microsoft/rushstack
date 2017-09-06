@@ -22,7 +22,6 @@
     "@types/chai": "3.4.34",
     "@types/colors": "1.1.3",
     "@types/mocha": "2.2.38",
-    "@types/es6-collections": "0.5.29",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "mocha": "~3.4.2",

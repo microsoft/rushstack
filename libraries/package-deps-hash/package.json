@@ -14,9 +14,6 @@
     "clean": "gulp clean",
     "test": "gulp test"
   },
-  "dependencies": {
-    "@types/es6-collections": "0.5.29"
-  },
   "devDependencies": {
     "@microsoft/node-library-build": "~4.0.3",
     "chai": "~3.5.0",

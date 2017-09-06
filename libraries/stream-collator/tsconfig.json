@@ -7,8 +7,11 @@
     "declaration": true,
     "sourceMap": true,
     "types": [
-      "es6-collections",
       "node"
+    ],
+    "lib": [
+      "es5",
+      "es2015.collection"
     ]
   }
 }

@@ -17,7 +17,6 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "dependencies": {
-    "@types/es6-collections": "0.5.29",
     "@microsoft/gulp-core-build": "3.0.3",
     "@microsoft/gulp-core-build-karma": "4.0.3",
     "@microsoft/gulp-core-build-sass": "4.0.3",

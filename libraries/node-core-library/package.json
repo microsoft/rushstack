@@ -11,7 +11,6 @@
     "test": "gulp test"
   },
   "dependencies": {
-    "@types/es6-collections": "0.5.29",
     "@types/fs-extra": "0.0.37",
     "@types/node": "6.0.62",
     "@types/z-schema": "3.16.31",

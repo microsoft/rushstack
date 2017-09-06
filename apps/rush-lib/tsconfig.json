@@ -6,8 +6,9 @@
     "jsx": "react",
     "declaration": true,
     "sourceMap": true,
-    "types": [
-      "es6-collections"
+    "lib": [
+      "es5",
+      "es2015.collection"
     ]
   }
 }
