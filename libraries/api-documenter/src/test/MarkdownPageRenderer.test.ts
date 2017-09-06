@@ -44,7 +44,7 @@ describe('MarkdownPageRenderer', () => {
 
     markupPage.elements.push(MarkupBuilder.createHeading1('Adjacent to other characters'));
     // Creates a "[" before the bold text
-    markupPage.elements.push(MarkupBuilder.createDocumentationLinkFromText('a link', 'index'));
+    markupPage.elements.push(MarkupBuilder.createWebLinkFromText('a link', './index.md'));
     markupPage.elements.push(...MarkupBuilder.createTextElements('bold', { bold: true }));
     markupPage.elements.push(...MarkupBuilder.createTextElements('non-bold', { bold: false }));
     markupPage.elements.push(...MarkupBuilder.createTextElements('more-non-bold', { bold: false }));

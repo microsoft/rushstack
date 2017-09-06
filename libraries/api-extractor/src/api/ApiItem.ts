@@ -4,6 +4,42 @@
 import { IDocElement } from '../markup/OldMarkup';
 
 /**
+ * Represents a reference to an ApiItem.
+ * @alpha
+ */
+export interface IApiItemReference {
+  /**
+   * The name of the NPM scope, or an empty string if there is no scope.
+   * @remarks
+   * Example: "@microsoft"
+   */
+  scopeName: string;
+
+  /**
+   * The name of the NPM package that the API item belongs to, without the NPM scope.
+   * @remarks
+   * Example: "sample-package"
+   */
+  packageName: string;
+
+  /**
+   * The name of an exported API item, or an empty string.
+   * @remarks
+   * The name does not include any generic parameters or other punctuation.
+   * Example: "SampleClass"
+   */
+  exportName: string;
+
+  /**
+   * The name of a member of the exported item, or an empty string.
+   * @remarks
+   * The name does not include any parameters or punctuation.
+   * Example: "toString"
+   */
+  memberName: string;
+}
+
+/**
  * Whether the function is public, private, or protected.
  * @alpha
  */

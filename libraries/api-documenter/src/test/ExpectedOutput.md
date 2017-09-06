@@ -2,14 +2,13 @@
 
 # Test page
 
-
 ## Simple bold test
 
 This is a **bold** word.
 
 ## All whitespace bold
 
-
+  
 
 ## Newline bold
 
@@ -18,9 +17,9 @@ This is a **bold** word.
 
 ## Newline bold with spaces
 
-  **line 1**
-  **line 2**
-  **line 3**
+  **line 1**  
+  **line 2**  
+  **line 3**  
 
 ## Adjacent bold regions
 

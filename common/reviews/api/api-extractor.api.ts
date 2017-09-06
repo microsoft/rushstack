@@ -180,6 +180,14 @@ interface IApiInterface extends IApiBaseDefinition {
 }
 
 // @alpha
+interface IApiItemReference {
+  exportName: string;
+  memberName: string;
+  packageName: string;
+  scopeName: string;
+}
+
+// @alpha
 interface IApiMethod extends IApiBaseDefinition {
   accessModifier: ApiAccessModifier;
   isOptional: boolean;
@@ -272,22 +280,22 @@ interface IHrefLinkElement extends IBaseDocElement {
 }
 
 // @alpha
+interface IMarkupApiLink {
+  // (undocumented)
+  elements: MarkupLinkTextElement[];
+  // (undocumented)
+  kind: 'api-link';
+  // (undocumented)
+  target: IApiItemReference;
+}
+
+// @alpha
 interface IMarkupCodeBox {
   // (undocumented)
   highlighter: MarkupHighlighter;
   // (undocumented)
   kind: 'code-box';
   text: string;
-}
-
-// @alpha
-interface IMarkupDocumentationLink {
-  // (undocumented)
-  elements: MarkupLinkTextElement[];
-  // (undocumented)
-  kind: 'doc-link';
-  // (undocumented)
-  targetDocId: string;
 }
 
 // @alpha

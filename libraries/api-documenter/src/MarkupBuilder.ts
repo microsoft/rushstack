@@ -2,13 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import {
+  IApiItemReference,
   IDocElement,
   ITextElement,
   ILinkDocElement,
   ISeeDocElement,
   MarkupBasicElement,
-  IMarkupDocumentationLink,
   IMarkupWebLink,
+  IMarkupApiLink,
   IMarkupText,
   IMarkupParagraph,
   IMarkupLineBreak,
@@ -25,8 +26,6 @@ import {
   MarkupHighlighter
 } from '@microsoft/api-extractor';
 
-import { DocumentationNode } from './DocumentationNode';
-
 /**
  * A helper class for generating MarkupElement structures.
  */
@@ -39,13 +38,12 @@ export class MarkupBuilder {
   };
 
   public static createTextElements(text: string, options?: { bold?: boolean, italics?: boolean } ): IMarkupText[] {
-    const trimmed: string = text;
-    if (!trimmed) {
+    if (!text) {
       return [];
     } else {
       const result: IMarkupText = {
         kind: 'text',
-        text: trimmed
+        text: text
       } as IMarkupText;
 
       if (options) {
@@ -61,26 +59,39 @@ export class MarkupBuilder {
     }
   }
 
-  public static createDocumentationLink(textElements: MarkupLinkTextElement[],
-    targetDocId: string): IMarkupDocumentationLink {
-
+  public static createApiLink(textElements: MarkupLinkTextElement[], target: IApiItemReference): IMarkupApiLink {
     if (!textElements.length) {
-      throw new Error('Missing text for doc link');
+      throw new Error('Missing text for link');
     }
 
     return {
-      kind: 'doc-link',
+      kind: 'api-link',
       elements: textElements,
-      targetDocId: targetDocId
-    } as IMarkupDocumentationLink;
+      target: target
+    } as IMarkupApiLink;
   }
 
-  public static createDocumentationLinkFromText(text: string, targetDocId: string): IMarkupDocumentationLink {
-    if (!text) {
-      throw new Error('Missing text for doc link');
+  public static createApiLinkFromText(text: string, target: IApiItemReference): IMarkupApiLink {
+    return MarkupBuilder.createApiLink(MarkupBuilder.createTextElements(text), target);
+  }
+
+  public static createWebLink(textElements: MarkupLinkTextElement[], targetUrl: string): IMarkupWebLink {
+    if (!textElements.length) {
+      throw new Error('Missing text for link');
+    }
+    if (!targetUrl || !targetUrl.trim()) {
+      throw new Error('Missing link target');
     }
 
-    return MarkupBuilder.createDocumentationLink(MarkupBuilder.createTextElements(text), targetDocId);
+    return {
+      kind: 'web-link',
+      elements: textElements,
+      targetUrl: targetUrl
+    };
+  }
+
+  public static createWebLinkFromText(text: string, targetUrl: string): IMarkupWebLink {
+    return MarkupBuilder.createWebLink(MarkupBuilder.createTextElements(text), targetUrl);
   }
 
   public static createCode(code: string, highlighter?: MarkupHighlighter): IMarkupHighlightedText {
@@ -195,8 +206,13 @@ export class MarkupBuilder {
               }
             }
             result.push(
-              MarkupBuilder.createDocumentationLinkFromText(linkText,
-                DocumentationNode.getDocIdForCodeLink(linkDocElement)
+              MarkupBuilder.createApiLinkFromText(linkText,
+                {
+                  scopeName: linkDocElement.scopeName || '',
+                  packageName: linkDocElement.packageName || '',
+                  exportName: linkDocElement.exportName || '',
+                  memberName: linkDocElement.memberName || ''
+                }
               )
             );
           } else {

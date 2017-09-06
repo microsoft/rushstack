@@ -7,15 +7,14 @@ import yaml = require('js-yaml');
 import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
 import { MarkupElement, IDocElement } from '@microsoft/api-extractor';
 
-import { DocItemSet, DocItem, DocItemKind } from '../DocItemSet';
+import { DocItemSet, DocItem, DocItemKind, IDocItemSetResolveResult } from '../DocItemSet';
 import {
   IYamlFile,
-  IYamlItem,
-  YamlTypeId
+  IYamlItem
 } from './IYamlFile';
 import { RenderingHelpers } from '../RenderingHelpers';
 import { MarkupBuilder } from '../MarkupBuilder';
-import { MarkdownRenderer } from '../MarkdownRenderer';
+import { MarkdownRenderer, IMarkdownRenderApiLinkArgs } from '../MarkdownRenderer';
 
 const yamlSchema: JsonSchema = JsonSchema.fromFile(path.join(__dirname, 'typescript.schema.json'));
 
@@ -47,7 +46,7 @@ export class YamlGenerator {
       return false;
     }
 
-    if (this._shouldEmbed(yamlItem.type)) {
+    if (this._shouldEmbed(docItem.kind)) {
       if (!parentYamlFile) {
         throw new Error('Missing file context'); // program bug
       }
@@ -85,12 +84,12 @@ export class YamlGenerator {
     return true;
   }
 
-  private _shouldEmbed(yamlTypeId: YamlTypeId): boolean {
-    switch (yamlTypeId) {
-      case 'class':
-      case 'package':
-      case 'interface':
-      case 'enum':
+  private _shouldEmbed(docItemKind: DocItemKind): boolean {
+    switch (docItemKind) {
+      case DocItemKind.Class:
+      case DocItemKind.Package:
+      case DocItemKind.Interface:
+      case DocItemKind.Enum:
       return false;
     }
     return true;
@@ -100,12 +99,12 @@ export class YamlGenerator {
     const yamlItem: Partial<IYamlItem> = { };
     yamlItem.uid = this._getUid(docItem);
 
-    const summary: string = this._renderMarkdownFromDocElement(docItem.apiItem.summary);
+    const summary: string = this._renderMarkdownFromDocElement(docItem.apiItem.summary, docItem);
     if (summary) {
       yamlItem.summary = summary;
     }
 
-    const remarks: string = this._renderMarkdownFromDocElement(docItem.apiItem.remarks);
+    const remarks: string = this._renderMarkdownFromDocElement(docItem.apiItem.remarks, docItem);
     if (remarks) {
       yamlItem.remarks = remarks;
     }
@@ -140,25 +139,59 @@ export class YamlGenerator {
         return undefined;
     }
 
-    if (docItem.kind !== DocItemKind.Package && !this._shouldEmbed(yamlItem.type)) {
+    if (docItem.kind !== DocItemKind.Package && !this._shouldEmbed(docItem.kind)) {
       yamlItem.package = this._getUid(docItem.getHierarchy()[0]);
     }
 
     return yamlItem as IYamlItem;
   }
 
-  private _renderMarkdownFromDocElement(docElements: IDocElement[] | undefined): string {
-    return this._renderMarkdown(MarkupBuilder.renderDocElements(docElements || []));
+  private _renderMarkdownFromDocElement(docElements: IDocElement[] | undefined, containingDocItem: DocItem): string {
+    return this._renderMarkdown(MarkupBuilder.renderDocElements(docElements || []), containingDocItem);
   }
 
-  private _renderMarkdown(markupElements: MarkupElement[]): string {
+  private _renderMarkdown(markupElements: MarkupElement[], containingDocItem: DocItem): string {
     if (!markupElements.length) {
       return '';
     }
 
     return MarkdownRenderer.renderElements(markupElements, {
-      docIdResolver: (docId: string) => {
-        return ''; // no link for now
+      onRenderApiLink: (args: IMarkdownRenderApiLinkArgs) => {
+        const result: IDocItemSetResolveResult = this._docItemSet.resolveApiItemReference(args.reference);
+        if (!result.docItem) {
+          // Eventually we should introduce a warnings file
+          console.error('==> UNRESOLVED REFERENCE: ' + JSON.stringify(args.reference));
+        } else {
+          // We will calculate a relativeUrl to the nearest non-embedded DocItem.
+          // (The rest will be determined by the URL fragment.)
+          let nonEmbeddedDocItem: DocItem = result.docItem;
+          while (this._shouldEmbed(nonEmbeddedDocItem.kind) && nonEmbeddedDocItem.parent) {
+            nonEmbeddedDocItem = nonEmbeddedDocItem.parent;
+          }
+
+          const currentFolder: string = path.dirname(this._getYamlFilePath(containingDocItem));
+          const targetFilePath: string = this._getYamlFilePath(nonEmbeddedDocItem);
+          const relativePath: string = path.relative(currentFolder, targetFilePath);
+          let relativeUrl: string = relativePath
+            .replace(/[\\]/g, '/') // replace all backslashes with slashes
+            .replace(/\.[^\.\\/]+$/, ''); // remove file extension
+
+          if (relativeUrl.substr(0, 1) !== '.') {
+            // If the path doesn't already start with "./", then add this prefix.
+            relativeUrl = './' + relativeUrl;
+          }
+
+          // Do we need to link to a fragment within the page?
+          if (nonEmbeddedDocItem !== result.docItem) {
+            const urlFragment: string = this._getEmbeddedUrlFragment(result.docItem);
+            args.prefix = '[';
+            args.suffix = `](${relativeUrl}#${urlFragment})`;
+          } else {
+            args.prefix = '[';
+            args.suffix = `](${relativeUrl})`;
+          }
+
+        }
       }
     });
   }
@@ -166,7 +199,9 @@ export class YamlGenerator {
   private _writeYamlFile(yamlFile: IYamlFile, docItem: DocItem): void {
     const yamlFilePath: string = this._getYamlFilePath(docItem);
 
-    console.log('Writing ' + yamlFilePath);
+    if (docItem.kind === DocItemKind.Package) {
+      console.log('Writing ' + this._getYamlFilePath(docItem));
+    }
 
     JsonFile.validateNoUndefinedMembers(yamlFile);
 
@@ -180,6 +215,10 @@ export class YamlGenerator {
     yamlSchema.validateObject(yamlFile, yamlFilePath);
   }
 
+  /**
+   * Calculate the docfx "uid" for the DocItem
+   * Example:  node-core-library.JsonFile.load
+   */
   private _getUid(docItem: DocItem): string {
     let result: string = '';
     for (const current of docItem.getHierarchy()) {
@@ -194,6 +233,15 @@ export class YamlGenerator {
       }
     }
     return result;
+  }
+
+  /**
+   * Calculate the HTML anchor fragment for DocItems that are embedded in a web page containing
+   * other items.
+   * Example:  node_core_library_JsonFile_load
+   */
+  private _getEmbeddedUrlFragment(docItem: DocItem): string {
+    return this._getUid(docItem).replace(/\./g, '_'); // replace all periods with underscores
   }
 
   private _getYamlFilePath(docItem: DocItem): string {

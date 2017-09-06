@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { IApiItemReference } from '../api/ApiItem';
+
 // ----------------------------------------------------------------------------
 
 /**
@@ -63,10 +65,10 @@ export type MarkupLinkTextElement = IMarkupText | IMarkupHighlightedText;
  * A block of plain text, possibly with simple formatting.
  * @alpha
  */
-export interface IMarkupDocumentationLink {
-  kind: 'doc-link';
+export interface IMarkupApiLink {
+  kind: 'api-link';
   elements: MarkupLinkTextElement[];
-  targetDocId: string;
+  target: IApiItemReference;
 }
 
 /**
@@ -100,7 +102,7 @@ export interface IMarkupLineBreak {
  *
  * @alpha
  */
-export type MarkupBasicElement = MarkupLinkTextElement | IMarkupDocumentationLink | IMarkupWebLink | IMarkupParagraph
+export type MarkupBasicElement = MarkupLinkTextElement | IMarkupApiLink | IMarkupWebLink | IMarkupParagraph
   | IMarkupLineBreak;
 
 // ----------------------------------------------------------------------------

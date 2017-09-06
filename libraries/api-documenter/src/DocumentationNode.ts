@@ -3,7 +3,7 @@
 
 import {
   ApiItem,
-  ICodeLinkElement
+  IApiItemReference
 } from '@microsoft/api-extractor';
 
 export class DocumentationNode {
@@ -14,7 +14,7 @@ export class DocumentationNode {
 
   // TODO: This is not really correct.  We need to validate that the referenced object
   // actually exists, and avoid creating a broken link if not.
-  public static getDocIdForCodeLink(codeLink: ICodeLinkElement): string {
+  public static getDocIdForCodeLink(codeLink: Partial<IApiItemReference>): string {
     let result: string = '';
     if (codeLink.packageName) {
       result += codeLink.packageName;
@@ -54,5 +54,21 @@ export class DocumentationNode {
       this._docId = result;
     }
     return this._docId;
+  }
+
+  // This is a temporary workaround until the DocumentationNode class is replaced by DocItem
+  public getApiReference(): IApiItemReference {
+    const result: string[] = [];
+    for (let current: DocumentationNode | undefined = this; current; current = current.parent) {
+      result.unshift(current.name);
+    }
+    result.push('', '', '');
+
+    return {
+      scopeName: '',
+      packageName: result[0],
+      exportName: result[1],
+      memberName: result[2]
+    };
   }
 }
