@@ -10,6 +10,7 @@ import {
   IDocElement,
   IApiMethod,
   IApiParameter,
+  IApiProperty,
   IApiEnumMember
 } from '@microsoft/api-extractor';
 
@@ -154,6 +155,7 @@ export class YamlGenerator {
         break;
       case DocItemKind.Property:
         yamlItem.type = 'property';
+        this._populateYamlProperty(yamlItem, docItem);
         break;
       case DocItemKind.Function:
         // Unimplemented
@@ -201,6 +203,21 @@ export class YamlGenerator {
       syntax.parameters = parameters;
     }
 
+  }
+
+  private _populateYamlProperty(yamlItem: Partial<IYamlItem>, docItem: DocItem): void {
+    const apiProperty: IApiProperty = docItem.apiItem as IApiProperty;
+
+    const syntax: IYamlSyntax = {
+      content: docItem.name + ': ' + apiProperty.type + ';' // TODO
+    };
+    yamlItem.syntax = syntax;
+
+    if (apiProperty.type) {
+      syntax.return = {
+        type: [ apiProperty.type ]
+      };
+    }
   }
 
   private _renderMarkdownFromDocElement(docElements: IDocElement[] | undefined, containingDocItem: DocItem): string {

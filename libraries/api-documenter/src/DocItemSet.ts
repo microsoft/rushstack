@@ -69,9 +69,11 @@ export class DocItem {
       case 'class':
       case 'interface':
         this.kind = this.apiItem.kind === 'class' ? DocItemKind.Class : DocItemKind.Interface;
-        for (const memberName of Object.keys(this.apiItem.members)) {
-          const child: ApiItem = this.apiItem.members[memberName];
-          this.children.push(new DocItem(child, memberName, this.docItemSet, this));
+        if (this.apiItem.members) {
+          for (const memberName of Object.keys(this.apiItem.members)) {
+            const child: ApiItem = this.apiItem.members[memberName];
+            this.children.push(new DocItem(child, memberName, this.docItemSet, this));
+          }
         }
         break;
 
@@ -89,9 +91,11 @@ export class DocItem {
           break;
         case 'enum':
           this.kind = DocItemKind.Enum;
-          for (const memberName of Object.keys(this.apiItem.values)) {
-            const child: ApiItem = this.apiItem.values[memberName];
-            this.children.push(new DocItem(child, memberName, this.docItemSet, this));
+          if (this.apiItem.values) {
+            for (const memberName of Object.keys(this.apiItem.values)) {
+              const child: ApiItem = this.apiItem.values[memberName];
+              this.children.push(new DocItem(child, memberName, this.docItemSet, this));
+            }
           }
           break;
         case 'enum value':
