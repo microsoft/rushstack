@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-serve",
+      "comment": " Add $schema field to all schemas",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-serve",
+  "email": "nickpape@users.noreply.github.com"
+}
