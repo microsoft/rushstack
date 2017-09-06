@@ -4,9 +4,12 @@
 import {
   ApiJsonGenerator,
   IApiPackage,
-  ApiItem
+  ApiItem,
+  IApiItemReference
 } from '@microsoft/api-extractor';
 import { JsonFile } from '@microsoft/node-core-library';
+
+import { RenderingHelpers } from './RenderingHelpers';
 
 export enum DocItemKind {
   Package,
@@ -104,6 +107,30 @@ export class DocItem {
     }
     return result;
   }
+
+  public tryGetChild(name: string): DocItem | undefined {
+    for (const child of this.children) {
+      if (child.name === name) {
+        return child;
+      }
+    }
+    return undefined;
+  }
+}
+
+/**
+ * Return value for DocItemSet.resolveApiItemReference()
+ */
+export interface IDocItemSetResolveResult {
+  /**
+   * The matching DocItem object, if found.
+   */
+  docItem: DocItem | undefined;
+
+  /**
+   * The closest matching parent DocItem, if any.
+   */
+  closestMatch: DocItem | undefined;
 }
 
 /**
@@ -142,6 +169,50 @@ export class DocItemSet {
     for (const docPackage of this.docPackages) {
       this._calculateReferences(docPackage);
     }
+  }
+
+  /**
+   * Attempts to find the DocItem described by an IApiItemReference.  If no matching item is
+   * found, then undefined is returned.
+   */
+  public resolveApiItemReference(reference: IApiItemReference): IDocItemSetResolveResult {
+    const result: IDocItemSetResolveResult = {
+      docItem: undefined,
+      closestMatch: undefined
+    };
+
+    const packageName: string = RenderingHelpers.getScopedPackageName(reference.scopeName, reference.packageName);
+    if (!packageName) {
+      // This would indicate an invalid data file, since API Extractor is supposed to normalize this
+      throw new Error('resolveApiItemReference() failed because the packageName should not be empty');
+    }
+
+    let current: DocItem | undefined = undefined;
+
+    for (const nameToMatch of [packageName, reference.exportName, reference.memberName]) {
+      if (!nameToMatch) {
+        // Success, since we ran out of stuff to match
+        break;
+      }
+
+      // Is this the first time through the loop?
+      if (!current) {
+        // Yes, start with the package
+        current = this.docPackagesByName.get(nameToMatch);
+      } else {
+        // No, walk the tree
+        current = current.tryGetChild(nameToMatch);
+      }
+
+      if (!current) {
+        return result;  // no match; result.closestMatch has the closest match
+      }
+
+      result.closestMatch = current;
+    }
+
+    result.docItem = result.closestMatch;
+    return result;
   }
 
   private _calculateReferences(docItem: DocItem): void {
