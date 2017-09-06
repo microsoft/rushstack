@@ -120,6 +120,9 @@ export class YamlGenerator {
       case DocItemKind.Enum:
         yamlItem.type = 'enum';
         break;
+      case DocItemKind.EnumMember:
+        yamlItem.type = 'field';
+        break;
       case DocItemKind.Class:
         yamlItem.type = 'class';
         break;
@@ -135,8 +138,11 @@ export class YamlGenerator {
       case DocItemKind.Property:
         yamlItem.type = 'property';
         break;
+      case DocItemKind.Function:
+        // Unimplemented
+        break;
       default:
-        return undefined;
+        throw new Error('Unimplemented item kind: ' + DocItemKind[docItem.kind as DocItemKind]);
     }
 
     if (docItem.kind !== DocItemKind.Package && !this._shouldEmbed(docItem.kind)) {
