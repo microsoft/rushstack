@@ -242,7 +242,12 @@ export class MarkdownRenderer {
             suffix: ''
           };
 
+          // NOTE: The onRenderApiLink() callback will assign values to the args.prefix
+          // and args.suffix properties, which are used below.  (It is modeled this way because
+          // MarkdownRenderer._writeElements() may need to emit different escaping e.g. depending
+          // on what characters were written by writer.write(args.prefix).)
           context.options.onRenderApiLink(args);
+
           if (args.prefix) {
             writer.write(args.prefix);
           }
