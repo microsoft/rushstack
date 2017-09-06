@@ -6,6 +6,11 @@
 
   "type": "object",
   "properties": {
+    "$schema": {
+      "description": "The metadata to indicate the JSON schema, required by some editors such as VS2015",
+      "type": "string"
+    },
+
     "enabled": {
       "description": "Indicates whether the task should be run",
       "type": "boolean"

@@ -7,6 +7,10 @@
 		"items"
 	],
 	"properties": {
+		"$schema": {
+      "description": "The metadata to indicate the JSON schema, required by some editors such as VS2015",
+      "type": "string"
+    },
 		"items": {
 			"description": "This collection represents the main item (the first element) and it's possible children items.",
 			"type": "array",

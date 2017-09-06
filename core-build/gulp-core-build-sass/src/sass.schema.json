@@ -5,6 +5,11 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
+    "$schema": {
+      "description": "The metadata to indicate the JSON schema, required by some editors such as VS2015",
+      "type": "string"
+    },
+
     "preamble": {
       "title": "Preamble Text",
       "description": "An optional parameter for text to include in the generated typescript file.",

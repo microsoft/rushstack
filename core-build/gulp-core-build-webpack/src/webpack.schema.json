@@ -5,6 +5,10 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
+    "$schema": {
+      "description": "The metadata to indicate the JSON schema, required by some editors such as VS2015",
+      "type": "string"
+    },
     "config": {
       "title": "WebPack configuration object.",
       "description": "If a path is specified by `configPath,` and it is valid, this option is ignored.",

@@ -5,6 +5,11 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
+    "$schema": {
+      "description": "The metadata to indicate the JSON schema, required by some editors such as VS2015",
+      "type": "string"
+    },
+
     "api": {
       "title": "API server configuration",
       "description": "Parameters which configure the API server, which runs simultaneously and allows for mock testing",

@@ -7,6 +7,10 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
+    "$schema": {
+      "description": "The metadata to indicate the JSON schema, required by some editors such as VS2015",
+      "type": "string"
+    },
     "lintConfig": {
       "description": "A TsLint configuration object, options are from https://github.com/palantir/tslint#configuration",
       "type": "object"
