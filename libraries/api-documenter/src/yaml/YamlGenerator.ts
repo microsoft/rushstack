@@ -8,13 +8,17 @@ import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
 import {
   MarkupElement,
   IDocElement,
+  IApiMethod,
+  IApiParameter,
   IApiEnumMember
 } from '@microsoft/api-extractor';
 
 import { DocItemSet, DocItem, DocItemKind, IDocItemSetResolveResult } from '../DocItemSet';
 import {
   IYamlFile,
-  IYamlItem
+  IYamlItem,
+  IYamlSyntax,
+  IYamlParameter
 } from './IYamlFile';
 import { RenderingHelpers } from '../RenderingHelpers';
 import { MarkupBuilder } from '../MarkupBuilder';
@@ -143,6 +147,7 @@ export class YamlGenerator {
         break;
       case DocItemKind.Method:
         yamlItem.type = 'method';
+        this._populateYamlMethod(yamlItem, docItem);
         break;
       case DocItemKind.Constructor:
         yamlItem.type = 'constructor';
@@ -162,6 +167,40 @@ export class YamlGenerator {
     }
 
     return yamlItem as IYamlItem;
+  }
+
+  private _populateYamlMethod(yamlItem: Partial<IYamlItem>, docItem: DocItem): void {
+    const apiMethod: IApiMethod = docItem.apiItem as IApiMethod;
+    yamlItem.name = RenderingHelpers.getConciseSignature(docItem.name, apiMethod);
+
+    const syntax: IYamlSyntax = {
+      content: apiMethod.signature
+    };
+    yamlItem.syntax = syntax;
+
+    if (apiMethod.returnValue) {
+      syntax.return = {
+        type: [ apiMethod.returnValue.type ],
+        description: this._renderMarkdownFromDocElement(apiMethod.returnValue.description, docItem)
+      };
+    }
+
+    const parameters: IYamlParameter[] = [];
+    for (const parameterName of Object.keys(apiMethod.parameters)) {
+      const apiParameter: IApiParameter = apiMethod.parameters[parameterName];
+      parameters.push(
+        {
+           id: parameterName,
+           description:  this._renderMarkdownFromDocElement(apiParameter.description, docItem),
+           type: [ apiParameter.type || '' ]
+        } as IYamlParameter
+      );
+    }
+
+    if (parameters.length) {
+      syntax.parameters = parameters;
+    }
+
   }
 
   private _renderMarkdownFromDocElement(docElements: IDocElement[] | undefined, containingDocItem: DocItem): string {
