@@ -5,7 +5,11 @@ import * as fsx from 'fs-extra';
 import * as path from 'path';
 import yaml = require('js-yaml');
 import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
-import { MarkupElement, IDocElement } from '@microsoft/api-extractor';
+import {
+  MarkupElement,
+  IDocElement,
+  IApiEnumMember
+} from '@microsoft/api-extractor';
 
 import { DocItemSet, DocItem, DocItemKind, IDocItemSetResolveResult } from '../DocItemSet';
 import {
@@ -122,6 +126,14 @@ export class YamlGenerator {
         break;
       case DocItemKind.EnumMember:
         yamlItem.type = 'field';
+        const enumMember: IApiEnumMember = docItem.apiItem as IApiEnumMember;
+        if (enumMember.value) {
+          // NOTE: In TypeScript, enum members can be strings or integers.
+          // If it is an integer, then enumMember.value will be a string representation of the integer.
+          // If it is a string, then enumMember.value will include the quotation marks.
+          // Enum values can also be calculated numbers, however this is not implemented yet.
+          yamlItem.numericValue = enumMember.value as any; // tslint:disable-line:no-any
+        }
         break;
       case DocItemKind.Class:
         yamlItem.type = 'class';

@@ -556,7 +556,7 @@
           "type": "boolean"
         },
         "value": {
-          "description": "The value of the enum, which may be a number, a string literal, or an empty string (if the value is automatically assigned)",
+          "description": "The value of the enum member. This string may be a number, a string literal (including quotation marks), or an empty string (e.g. if the number is an automatically assigned increment)",
           "type": "string"
         },
 
