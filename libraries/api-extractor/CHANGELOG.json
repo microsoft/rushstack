@@ -2,6 +2,23 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "3.2.1",
+      "tag": "@microsoft/api-extractor_v3.2.1",
+      "date": "Wed, 06 Sep 2017 13:03:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Converted IMarkupDocumentationLink to IMarkupApiLink, which exposes the underlying IApiItemReference rather than assuming a particular \"document ID\" model"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.2.4` to `~0.2.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.0",
       "tag": "@microsoft/api-extractor_v3.2.0",
       "date": "Tue, 05 Sep 2017 19:03:56 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 05 Sep 2017 19:03:56 GMT and should not be manually modified.
+This log was last generated on Wed, 06 Sep 2017 13:03:42 GMT and should not be manually modified.
+
+## 3.2.1
+Wed, 06 Sep 2017 13:03:42 GMT
+
+### Patches
+
+- Converted IMarkupDocumentationLink to IMarkupApiLink, which exposes the underlying IApiItemReference rather than assuming a particular "document ID" model
 
 ## 3.2.0
 Tue, 05 Sep 2017 19:03:56 GMT
