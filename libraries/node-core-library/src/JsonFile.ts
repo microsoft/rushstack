@@ -146,17 +146,35 @@ export class JsonFile {
    */
   // tslint:disable-next-line:no-any
   public static validateNoUndefinedMembers(jsonObject: Object): void {
+    return JsonFile._validateNoUndefinedMembers(jsonObject, '');
+  }
+
+  // Private implementation of validateNoUndefinedMembers()
+  private static _validateNoUndefinedMembers(jsonObject: Object, path: string): void {
     if (!jsonObject) {
       return;
     }
     if (typeof jsonObject === 'object') {
       for (const key of Object.keys(jsonObject)) {
+        let fullPath: string = path;
+        if (Array.isArray(jsonObject)) {
+          fullPath += `[${key}]`;
+        } else if (/^[a-z_0-9]+$/i.test(key)) {
+          if (fullPath) {
+            fullPath += '.';
+          }
+          fullPath += `${key}`;
+        } else {
+          fullPath += `["${key.replace(/["]/g, '\\"')}"]`;
+        }
+
         // tslint:disable-next-line:no-any
         const value: any = jsonObject[key];
         if (value === undefined) {
-          throw new Error(`The key "${key}" is undefined`);
+          throw new Error(`The value for ${fullPath} is undefined`);
         }
-        JsonFile.validateNoUndefinedMembers(value);
+
+        JsonFile._validateNoUndefinedMembers(value, fullPath);
       }
     }
   }
