@@ -6,6 +6,7 @@ import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
+import * as tar from 'tar';
 import readPackageTree = require('read-package-tree');
 import { JsonFile } from '@microsoft/node-core-library';
 import {
@@ -238,15 +239,34 @@ export default class LinkManager {
       // Example: "project1"
       const unscopedTempProjectName: string = Utilities.parseScopedPackageName(project.tempProjectName).name;
 
+      // Example: "C:\MyRepo\common\temp\projects\project1
+      const extractedFolder: string = path.join(this._rushConfiguration.commonTempFolder,
+        RushConstants.rushTempProjectsFolderName, unscopedTempProjectName);
+
+      // Example: "C:\MyRepo\common\temp\projects\project1.tgz"
+      const tarballFile: string = path.join(this._rushConfiguration.commonTempFolder,
+        RushConstants.rushTempProjectsFolderName, unscopedTempProjectName + '.tgz');
+
       // Example: "C:\MyRepo\common\temp\projects\project1\package.json"
-      const packageJsonFilename: string = path.join(this._rushConfiguration.commonTempFolder,
-        RushConstants.rushTempProjectsFolderName, unscopedTempProjectName, 'package.json');
+      const packageJsonFilename: string = path.join(extractedFolder, 'package', 'package.json');
+
+      Utilities.createFolderWithRetry(extractedFolder);
+      tar.extract({
+        cwd: extractedFolder,
+        file: tarballFile,
+        sync: true
+      });
 
       // Example: "C:\MyRepo\common\temp\node_modules\@rush-temp\project1"
       const installFolderName: string = path.join(this._rushConfiguration.commonTempFolder,
         RushConstants.nodeModulesFolderName, RushConstants.rushTempNpmScope, unscopedTempProjectName);
 
       commonProjectPackage = Package.createVirtualTempPackage(packageJsonFilename, installFolderName);
+
+      // remove the extracted tarball contents
+      fsx.removeSync(packageJsonFilename);
+      fsx.removeSync(extractedFolder);
+
       commonRootPackage.addChild(commonProjectPackage);
     }
 
