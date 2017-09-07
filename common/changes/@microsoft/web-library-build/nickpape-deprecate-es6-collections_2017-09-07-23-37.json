@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/web-library-build",
+      "comment": "Deprecate @types/es6-collections in favor of built-in typescript typings 'es2015.collection' and 'es2015.iterable'",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/web-library-build",
+  "email": "nickpape@users.noreply.github.com"
+}

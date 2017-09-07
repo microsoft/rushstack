@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/stream-collator",
+      "comment": "Deprecate @types/es6-coll ections in favor of built-in typescript typings 'es2015.collection' a nd 'es2015.iterable'",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/stream-collator",
+  "email": "nickpape@users.noreply.github.com"
+}
