@@ -248,9 +248,9 @@ export default class LinkManager {
         RushConstants.rushTempProjectsFolderName, unscopedTempProjectName + '.tgz');
 
       // Example: "C:\MyRepo\common\temp\projects\project1\package.json"
-      const packageJsonFilename: string = path.join(extractedFolder, 'package.json');
+      const packageJsonFilename: string = path.join(extractedFolder, 'package', 'package.json');
 
-      // unzip the tarball into the target folder
+      Utilities.createFolderWithRetry(extractedFolder);
       tar.extract({
         cwd: extractedFolder,
         file: tarballFile,
@@ -264,6 +264,7 @@ export default class LinkManager {
       commonProjectPackage = Package.createVirtualTempPackage(packageJsonFilename, installFolderName);
 
       // remove the extracted tarball contents
+      fsx.removeSync(packageJsonFilename);
       fsx.removeSync(extractedFolder);
 
       commonRootPackage.addChild(commonProjectPackage);
