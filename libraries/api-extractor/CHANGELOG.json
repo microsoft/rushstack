@@ -2,6 +2,25 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "3.2.3",
+      "tag": "@microsoft/api-extractor_v3.2.3",
+      "date": "Thu, 07 Sep 2017 13:04:35 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "a8b0022b8912d6fb07d1e0dd6618f8842ad6e86c",
+            "comment": "Fix incorrect schema/typings for enum members"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.2.6` to `~0.2.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.2",
       "tag": "@microsoft/api-extractor_v3.2.2",
       "date": "Thu, 07 Sep 2017 00:11:11 GMT",
