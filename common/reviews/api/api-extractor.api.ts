@@ -148,13 +148,8 @@ interface IApiEnum extends IApiBaseDefinition {
 }
 
 // @alpha
-interface IApiEnumMember {
-  // (undocumented)
-  deprecatedMessage?: IDocElement[];
-  // (undocumented)
-  remarks?: IDocElement[];
-  // (undocumented)
-  summary?: IDocElement[];
+interface IApiEnumMember extends IApiBaseDefinition {
+  kind: 'enum value';
   // (undocumented)
   value: string;
 }

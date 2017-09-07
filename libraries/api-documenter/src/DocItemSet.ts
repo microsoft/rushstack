@@ -19,7 +19,8 @@ export enum DocItemKind {
   Constructor,
   Function,
   Property,
-  Enum
+  Enum,
+  EnumMember
 }
 
 /**
@@ -88,6 +89,13 @@ export class DocItem {
           break;
         case 'enum':
           this.kind = DocItemKind.Enum;
+          for (const memberName of Object.keys(this.apiItem.values)) {
+            const child: ApiItem = this.apiItem.values[memberName];
+            this.children.push(new DocItem(child, memberName, this.docItemSet, this));
+          }
+          break;
+        case 'enum value':
+          this.kind = DocItemKind.EnumMember;
           break;
         default:
           throw new Error('Unsupported item kind: ' + (this.apiItem as ApiItem).kind);

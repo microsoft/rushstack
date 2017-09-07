@@ -46,20 +46,6 @@ export interface IApiItemReference {
 export type ApiAccessModifier = 'public' | 'private' | 'protected' | '';
 
 /**
- * The enum value of an IApiEnum.
- *
- * IApiEnumMember does not extend the IDocITem base class
- * because the summary is not required.
- * @alpha
- */
-export interface IApiEnumMember {
-  value: string;
-  summary?: IDocElement[];
-  remarks?: IDocElement[];
-  deprecatedMessage?: IDocElement[];
-}
-
-/**
  * Parameter Doc item.
  * @alpha
  */
@@ -276,6 +262,20 @@ export interface IApiEnum extends IApiBaseDefinition {
 }
 
 /**
+ * A member of an IApiEnum.
+ *
+ * @alpha
+ */
+export interface IApiEnumMember extends IApiBaseDefinition {
+  /**
+   * {@inheritdoc IApiBaseDefinition.kind}
+   */
+  kind: 'enum value';
+
+  value: string;
+}
+
+/**
  * IApiInterface represents an exported interface.
  * @alpha
  */
@@ -351,7 +351,7 @@ export type ApiMember = IApiProperty | IApiMethod;
  * @alpha
  */
 export type ApiItem = IApiProperty | ApiMember | IApiFunction | IApiConstructor |
-   IApiClass |IApiEnum | IApiInterface | IApiPackage;
+   IApiClass | IApiEnum | IApiEnumMember | IApiInterface | IApiPackage;
 
 /**
  * Describes a return type and description of the return type

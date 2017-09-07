@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 30 Aug 2017 18:46:19 GMT and should not be manually modified.
+This log was last generated on Thu, 07 Sep 2017 00:16:44 GMT and should not be manually modified.
+
+## 3.0.16
+Wed, 6 Sep 2017 18:24:39 GMT
+
+### Patches
+
+- Fix an issue running 'rush install' after adding a new project
 
 ## 3.0.15
 Wed, 30 Aug 2017 18:24:39 GMT
@@ -234,7 +241,7 @@ Sun, 22 Jan 2017 02:04:57 GMT
 
 ### Patches
 
-- Update temp_modules when versions are bumped.
+- Update temp_modules when versions are bumped. 
 
 ## 1.4.1
 Tue, 03 Jan 2017 21:52:49 GMT

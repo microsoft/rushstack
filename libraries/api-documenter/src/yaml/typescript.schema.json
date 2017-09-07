@@ -7,6 +7,10 @@
 		"items"
 	],
 	"properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
 		"items": {
 			"description": "This collection represents the main item (the first element) and it's possible children items.",
 			"type": "array",
@@ -78,7 +82,7 @@
 					"description": "The name of the object. (ex: AnonymousObject<T1,T2>)"
 				},
 				"numericValue": {
-					"type": "integer",
+					"type": "string",
 					"description": "Used for Enum fields"
 				},
 				"package": {

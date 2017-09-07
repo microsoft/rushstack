@@ -16,7 +16,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-core-library": "~0.2.5",
+    "@microsoft/node-core-library": "~0.2.7",
     "@microsoft/stream-collator": "~2.0.6",
     "@types/fs-extra": "0.0.37",
     "@types/node": "6.0.62",
@@ -30,7 +30,7 @@
     "z-schema": "~3.18.3"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "~4.0.3",
+    "@microsoft/node-library-build": "~4.0.5",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "mocha": "~3.4.2",

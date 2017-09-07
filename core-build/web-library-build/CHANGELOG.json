@@ -2,6 +2,60 @@
   "name": "@microsoft/web-library-build",
   "entries": [
     {
+      "version": "4.0.5",
+      "tag": "@microsoft/web-library-build_v4.0.5",
+      "date": "Thu, 07 Sep 2017 13:04:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.4` to `3.0.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-karma\" from `4.0.4` to `4.0.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `4.0.4` to `4.0.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `3.0.4` to `3.0.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `4.0.4` to `4.0.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `3.0.4` to `3.0.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.4",
+      "tag": "@microsoft/web-library-build_v4.0.4",
+      "date": "Thu, 07 Sep 2017 00:11:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.3` to `3.0.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-karma\" from `4.0.3` to `4.0.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `4.0.3` to `4.0.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `3.0.3` to `3.0.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `4.0.3` to `4.0.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `3.0.3` to `3.0.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.0.3",
       "tag": "@microsoft/web-library-build_v4.0.3",
       "date": "Wed, 06 Sep 2017 13:03:42 GMT",
