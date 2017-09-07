@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 06 Sep 2017 13:03:42 GMT and should not be manually modified.
+This log was last generated on Thu, 07 Sep 2017 00:11:11 GMT and should not be manually modified.
+
+## 3.2.2
+Thu, 07 Sep 2017 00:11:11 GMT
+
+### Patches
+
+-  Add $schema field to all schemas
 
 ## 3.2.1
 Wed, 06 Sep 2017 13:03:42 GMT
