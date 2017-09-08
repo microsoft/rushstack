@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Thu, 07 Sep 2017 13:04:35 GMT and should not be manually modified.
+This log was last generated on Fri, 08 Sep 2017 01:28:04 GMT and should not be manually modified.
+
+## 4.0.6
+Fri, 08 Sep 2017 01:28:04 GMT
+
+### Patches
+
+- Deprecate @types/es6-coll ections in favor of built-in typescript typings 'es2015.collection' a nd 'es2015.iterable'
 
 ## 4.0.5
 Thu, 07 Sep 2017 13:04:35 GMT

@@ -2,6 +2,31 @@
   "name": "@microsoft/node-library-build",
   "entries": [
     {
+      "version": "4.0.6",
+      "tag": "@microsoft/node-library-build_v4.0.6",
+      "date": "Fri, 08 Sep 2017 01:28:04 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nick Pape <nickpape@users.noreply.github.com>",
+            "commit": "bb96549aa8508ff627a0cae5ee41ae0251f2777d",
+            "comment": "Deprecate @types/es6-coll ections in favor of built-in typescript typings 'es2015.collection' a nd 'es2015.iterable'"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.5` to `3.0.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" from `3.0.5` to `3.0.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `4.0.5` to `4.0.6`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.0.5",
       "tag": "@microsoft/node-library-build_v4.0.5",
       "date": "Thu, 07 Sep 2017 13:04:35 GMT",

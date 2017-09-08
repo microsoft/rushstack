@@ -2,6 +2,25 @@
   "name": "@microsoft/ts-command-line",
   "entries": [
     {
+      "version": "2.0.7",
+      "tag": "@microsoft/ts-command-line_v2.0.7",
+      "date": "Fri, 08 Sep 2017 01:28:04 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nick Pape <nickpape@users.noreply.github.com>",
+            "commit": "bb96549aa8508ff627a0cae5ee41ae0251f2777d",
+            "comment": "Deprecate @types/es6-coll ections in favor of built-in typescript typings 'es2015.collection' a nd 'es2015.iterable'"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `~4.0.5` to `~4.0.6`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.6",
       "tag": "@microsoft/ts-command-line_v2.0.6",
       "date": "Thu, 31 Aug 2017 18:41:18 GMT",

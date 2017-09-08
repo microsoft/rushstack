@@ -2,6 +2,25 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "3.2.4",
+      "tag": "@microsoft/api-extractor_v3.2.4",
+      "date": "Fri, 08 Sep 2017 01:28:04 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nick Pape <nickpape@users.noreply.github.com>",
+            "commit": "bb96549aa8508ff627a0cae5ee41ae0251f2777d",
+            "comment": "Deprecate @types/es6-coll ections in favor of built-in typescript typings 'es2015.collection' a nd 'es2015.iterable'"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.2.7` to `~0.2.8`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.3",
       "tag": "@microsoft/api-extractor_v3.2.3",
       "date": "Thu, 07 Sep 2017 13:04:35 GMT",

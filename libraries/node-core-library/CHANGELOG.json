@@ -2,6 +2,20 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "0.2.8",
+      "tag": "@microsoft/node-core-library_v0.2.8",
+      "date": "Fri, 08 Sep 2017 01:28:04 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nick Pape <nickpape@users.noreply.github.com>",
+            "commit": "bb96549aa8508ff627a0cae5ee41ae0251f2777d",
+            "comment": "Deprecate @types/es6-coll ections in favor of built-in typescript typings 'es2015.collection' a nd 'es2015.iterable'"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.7",
       "tag": "@microsoft/node-core-library_v0.2.7",
       "date": "Thu, 07 Sep 2017 13:04:35 GMT",
