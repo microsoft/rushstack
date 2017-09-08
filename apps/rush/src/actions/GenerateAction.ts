@@ -116,15 +116,9 @@ export default class GenerateAction extends BaseRushAction {
       // Do a clean install
       installManager.installCommonModules(InstallType.ForceClean);
 
-      // read the shrinkwrap file that is in the temp folder, normalize it,
-      // then write it back to the config folder
-      // common\temp\shrinkwrap.yaml --> common\shrinkwrap.yaml
-      // this is to work around a bug in PNPM
-      const shrinkwrap: ShrinkwrapFile =
-        ShrinkwrapFile.loadFromFile(this.rushConfiguration.tempShrinkwrapFilename);
-
-      shrinkwrap.normalize();
-      shrinkwrap.save(this.rushConfiguration.committedShrinkwrapFilename);
+       // Copy (or delete) common\temp\shrinkwrap.yaml --> common\shrinkwrap.yaml
+      installManager.syncFile(this.rushConfiguration.tempShrinkwrapFilename,
+        this.rushConfiguration.committedShrinkwrapFilename);
 
       // The flag file is normally created by installCommonModules(), but "rush install" will
       // compare its timestamp against the shrinkwrap file.  Since we just generated a new

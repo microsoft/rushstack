@@ -85,29 +85,6 @@ export default class ShrinkwrapFile {
   }
 
   /**
-   * Normalizes the file:/ specifiers in the shrinkwrap file
-   */
-  public normalize(): void {
-    /*
-    Object.keys(this._shrinkwrapJson.dependencies).forEach((key: string) => {
-      if (key.match(/^@rush-temp\//)) {
-        this._shrinkwrapJson.dependencies[key] =
-          this._normalizeFileSpec(this._shrinkwrapJson.dependencies[key]);
-      }
-    });
-
-    Object.keys(this._shrinkwrapJson.packages).forEach((key: string) => {
-      const normalizedKey: string = this._normalizeFileSpec(key);
-      if (normalizedKey !== key) {
-        const info: IShrinkwrapDependencyJson = this._shrinkwrapJson.packages[key];
-        info.resolution.tarball = this._normalizeFileSpec(info.resolution.tarball);
-        delete this._shrinkwrapJson.packages[key];
-        this._shrinkwrapJson.packages[normalizedKey] = info;
-      }
-    });*/
-  }
-
-  /**
    * Writes the shrinkwrapback to disk
    */
   public save(file: string): void {
@@ -179,15 +156,6 @@ export default class ShrinkwrapFile {
     }
     if (!this._shrinkwrapJson.packages) {
       this._shrinkwrapJson.packages = { };
-    }
-  }
-
-  private _normalizeFileSpec(spec: string): string {
-    const fileSpec: RegExpMatchArray = spec.match(/file:(.\/)?(.*)/);
-    if (fileSpec) {
-      return `file:./${fileSpec[2]}`;
-    } else {
-      return spec;
     }
   }
 }

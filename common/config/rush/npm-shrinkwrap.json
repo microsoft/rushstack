@@ -167,20 +167,8 @@
     },
     "@rush-temp/rush": {
       "version": "0.0.0",
-<<<<<<< HEAD
-      "from": "projects\\rush",
-      "resolved": "file:projects\\rush",
-      "dependencies": {
-        "@types/js-yaml": {
-          "version": "3.5.31",
-          "from": "@types/js-yaml@>=3.5.31 <3.6.0",
-          "resolved": "https://registry.npmjs.org/@types/js-yaml/-/js-yaml-3.5.31.tgz"
-        }
-      }
-=======
       "from": "projects\\rush.tgz",
       "resolved": "file:projects\\rush.tgz"
->>>>>>> master
     },
     "@rush-temp/rush-lib": {
       "version": "0.0.0",
@@ -881,15 +869,9 @@
       "resolved": "https://registry.npmjs.org/camelcase-keys/-/camelcase-keys-2.1.0.tgz"
     },
     "caniuse-db": {
-<<<<<<< HEAD
-      "version": "1.0.30000718",
-      "from": "caniuse-db@>=1.0.30000488 <2.0.0",
-      "resolved": "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000718.tgz"
-=======
       "version": "1.0.30000726",
       "from": "caniuse-db@>=1.0.30000488 <2.0.0",
       "resolved": "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000726.tgz"
->>>>>>> master
     },
     "caseless": {
       "version": "0.12.0",
@@ -4159,11 +4141,6 @@
       "from": "minimalistic-crypto-utils@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/minimalistic-crypto-utils/-/minimalistic-crypto-utils-1.0.1.tgz"
     },
-    "mimic-fn": {
-      "version": "1.1.0",
-      "from": "mimic-fn@>=1.0.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/mimic-fn/-/mimic-fn-1.1.0.tgz"
-    },
     "minimatch": {
       "version": "3.0.4",
       "from": "minimatch@>=3.0.2 <3.1.0",
@@ -4706,9 +4683,9 @@
       "resolved": "https://registry.npmjs.org/pause-stream/-/pause-stream-0.0.11.tgz"
     },
     "pbkdf2": {
-      "version": "3.0.13",
+      "version": "3.0.14",
       "from": "pbkdf2@>=3.0.3 <4.0.0",
-      "resolved": "https://registry.npmjs.org/pbkdf2/-/pbkdf2-3.0.13.tgz"
+      "resolved": "https://registry.npmjs.org/pbkdf2/-/pbkdf2-3.0.14.tgz"
     },
     "pend": {
       "version": "1.2.0",
@@ -4830,15 +4807,9 @@
           "resolved": "https://registry.npmjs.org/has-flag/-/has-flag-2.0.0.tgz"
         },
         "postcss": {
-<<<<<<< HEAD
-          "version": "6.0.10",
-          "from": "postcss@>=6.0.1 <7.0.0",
-          "resolved": "https://registry.npmjs.org/postcss/-/postcss-6.0.10.tgz"
-=======
           "version": "6.0.11",
           "from": "postcss@>=6.0.1 <7.0.0",
           "resolved": "https://registry.npmjs.org/postcss/-/postcss-6.0.11.tgz"
->>>>>>> master
         },
         "source-map": {
           "version": "0.5.7",
@@ -4873,15 +4844,9 @@
           "resolved": "https://registry.npmjs.org/has-flag/-/has-flag-2.0.0.tgz"
         },
         "postcss": {
-<<<<<<< HEAD
-          "version": "6.0.10",
-          "from": "postcss@>=6.0.1 <7.0.0",
-          "resolved": "https://registry.npmjs.org/postcss/-/postcss-6.0.10.tgz"
-=======
           "version": "6.0.11",
           "from": "postcss@>=6.0.1 <7.0.0",
           "resolved": "https://registry.npmjs.org/postcss/-/postcss-6.0.11.tgz"
->>>>>>> master
         },
         "source-map": {
           "version": "0.5.7",
@@ -4916,15 +4881,9 @@
           "resolved": "https://registry.npmjs.org/has-flag/-/has-flag-2.0.0.tgz"
         },
         "postcss": {
-<<<<<<< HEAD
-          "version": "6.0.10",
-          "from": "postcss@>=6.0.1 <7.0.0",
-          "resolved": "https://registry.npmjs.org/postcss/-/postcss-6.0.10.tgz"
-=======
           "version": "6.0.11",
           "from": "postcss@>=6.0.1 <7.0.0",
           "resolved": "https://registry.npmjs.org/postcss/-/postcss-6.0.11.tgz"
->>>>>>> master
         },
         "source-map": {
           "version": "0.5.7",
@@ -4959,15 +4918,9 @@
           "resolved": "https://registry.npmjs.org/has-flag/-/has-flag-2.0.0.tgz"
         },
         "postcss": {
-<<<<<<< HEAD
-          "version": "6.0.10",
-          "from": "postcss@>=6.0.1 <7.0.0",
-          "resolved": "https://registry.npmjs.org/postcss/-/postcss-6.0.10.tgz"
-=======
           "version": "6.0.11",
           "from": "postcss@>=6.0.1 <7.0.0",
           "resolved": "https://registry.npmjs.org/postcss/-/postcss-6.0.11.tgz"
->>>>>>> master
         },
         "source-map": {
           "version": "0.5.7",
