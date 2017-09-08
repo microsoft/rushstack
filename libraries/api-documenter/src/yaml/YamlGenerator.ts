@@ -173,12 +173,23 @@ export class YamlGenerator {
     const yamlItem: Partial<IYamlItem> = { };
     yamlItem.uid = this._getUid(docItem);
 
-    const summary: string = this._renderMarkdownFromDocElement(docItem.apiItem.summary, docItem);
+    let summary: string = this._renderMarkdownFromDocElement(docItem.apiItem.summary, docItem);
+    const remarks: string = this._renderMarkdownFromDocElement(docItem.apiItem.remarks, docItem);
+
+    if (remarks && this._shouldEmbed(docItem.kind)) {
+      // This is a temporary workaround, since "Remarks" are not currently being displayed for embedded items
+      if (!summary) {
+        summary = '';
+      } else {
+        summary += '\n\n';
+      }
+      summary += '### Remarks\n\n' + remarks;
+    }
+
     if (summary) {
       yamlItem.summary = summary;
     }
 
-    const remarks: string = this._renderMarkdownFromDocElement(docItem.apiItem.remarks, docItem);
     if (remarks) {
       yamlItem.remarks = remarks;
     }
