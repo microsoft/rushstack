@@ -128,6 +128,16 @@ export class DocItem {
     }
     return undefined;
   }
+
+  /**
+   * Returns true if this is a package, and it has been classified as "external",
+   * i.e. a system library that is maintained by an external party, but included in the
+   * documentation for informational purposes.
+   */
+  public get isExternalPackage(): boolean {
+    // We should define a better criteria for this
+    return this.apiItem.kind === 'package' && this.apiItem.name.substr(0, 1) === '@';
+  }
 }
 
 /**

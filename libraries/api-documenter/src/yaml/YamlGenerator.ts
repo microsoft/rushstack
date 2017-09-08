@@ -110,8 +110,26 @@ export class YamlGenerator {
    */
   private _writeTocFile(docItems: DocItem[]): void {
     const tocFile: IYamlTocFile = {
-      items: this._buildTocItems(docItems)
+      items: [ ]
     };
+
+    tocFile.items.push({
+      name: 'SharePoint Framework', // TODO: parameterize this
+      items: this._buildTocItems(docItems.filter(x => x.isExternalPackage))
+    });
+
+    const externalPackages: DocItem[] = docItems.filter(x => !x.isExternalPackage);
+    if (externalPackages.length) {
+      tocFile.items.push({
+        name: '─────────────'
+      });
+      tocFile.items.push({
+        name: 'External Packages',
+        items: this._buildTocItems(externalPackages)
+      });
+    }
+
+    this._buildTocItems(docItems);
     const tocFilePath: string = path.join(this._outputFolder, 'toc.yml');
     console.log('Writing ' + tocFilePath);
     this._writeYamlFile(tocFile, tocFilePath, '', undefined);
@@ -126,7 +144,7 @@ export class YamlGenerator {
       }
 
       const tocItem: IYamlTocItem = {
-        name: docItem.name,
+        name: RenderingHelpers.getUnscopedPackageName(docItem.name),
         href: this._getRelativeUrlForDocItem(docItem, this._outputFolder)
       };
 

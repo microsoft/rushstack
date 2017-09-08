@@ -6,7 +6,7 @@
  */
 export interface IYamlTocItem {
   name: string;
-  href: string;
+  href?: string;
   items?: IYamlTocItem[];
 }
 
