@@ -16,11 +16,11 @@ import {
 
 import { DocItemSet, DocItem, DocItemKind, IDocItemSetResolveResult } from '../DocItemSet';
 import {
-  IYamlFile,
+  IYamlApiFile,
   IYamlItem,
   IYamlSyntax,
   IYamlParameter
-} from './IYamlFile';
+} from './IYamlApiFile';
 import { RenderingHelpers } from '../RenderingHelpers';
 import { MarkupBuilder } from '../MarkupBuilder';
 import { MarkdownRenderer, IMarkdownRenderApiLinkArgs } from '../MarkdownRenderer';
@@ -49,7 +49,7 @@ export class YamlGenerator {
     }
   }
 
-  private _visitDocItems(docItem: DocItem, parentYamlFile: IYamlFile | undefined): boolean {
+  private _visitDocItems(docItem: DocItem, parentYamlFile: IYamlApiFile | undefined): boolean {
     const yamlItem: IYamlItem | undefined = this._generateYamlItem(docItem);
     if (!yamlItem) {
       return false;
@@ -61,7 +61,7 @@ export class YamlGenerator {
       }
       parentYamlFile.items.push(yamlItem);
     } else {
-      const newYamlFile: IYamlFile = {
+      const newYamlFile: IYamlApiFile = {
         items: []
       };
       newYamlFile.items.push(yamlItem);
@@ -270,7 +270,7 @@ export class YamlGenerator {
     });
   }
 
-  private _writeYamlFile(yamlFile: IYamlFile, docItem: DocItem): void {
+  private _writeYamlFile(yamlFile: IYamlApiFile, docItem: DocItem): void {
     const yamlFilePath: string = this._getYamlFilePath(docItem);
 
     if (docItem.kind === DocItemKind.Package) {
