@@ -177,11 +177,16 @@ export class YamlGenerator {
     let summary: string = this._renderMarkdownFromDocElement(docItem.apiItem.summary, docItem);
     const remarks: string = this._renderMarkdownFromDocElement(docItem.apiItem.remarks, docItem);
 
+    if (docItem.apiItem.isBeta) {
+      summary = '> [!NOTE]\n'
+        + '> *This API is provided as a preview for developers and may change based on feedback*\n'
+        + '> *that we receive. Do not use this API in a production environment.*\n\n'
+        + summary;
+    }
+
     if (remarks && this._shouldEmbed(docItem.kind)) {
       // This is a temporary workaround, since "Remarks" are not currently being displayed for embedded items
-      if (!summary) {
-        summary = '';
-      } else {
+      if (summary) {
         summary += '\n\n';
       }
       summary += '### Remarks\n\n' + remarks;
