@@ -146,37 +146,57 @@ export class JsonFile {
    */
   // tslint:disable-next-line:no-any
   public static validateNoUndefinedMembers(jsonObject: Object): void {
-    return JsonFile._validateNoUndefinedMembers(jsonObject, '');
+    return JsonFile._validateNoUndefinedMembers(jsonObject, []);
   }
 
   // Private implementation of validateNoUndefinedMembers()
-  private static _validateNoUndefinedMembers(jsonObject: Object, path: string): void {
+  private static _validateNoUndefinedMembers(jsonObject: Object, keyPath: string[]): void {
     if (!jsonObject) {
       return;
     }
     if (typeof jsonObject === 'object') {
       for (const key of Object.keys(jsonObject)) {
-        let fullPath: string = path;
-        if (Array.isArray(jsonObject)) {
-          fullPath += `[${key}]`;
-        } else if (/^[a-z_0-9]+$/i.test(key)) {
-          if (fullPath) {
-            fullPath += '.';
-          }
-          fullPath += `${key}`;
-        } else {
-          fullPath += `["${key.replace(/["]/g, '\\"')}"]`;
-        }
+        keyPath.push(key);
 
         // tslint:disable-next-line:no-any
         const value: any = jsonObject[key];
         if (value === undefined) {
+          const fullPath: string = JsonFile._formatKeyPath(keyPath);
           throw new Error(`The value for ${fullPath} is undefined`);
         }
 
-        JsonFile._validateNoUndefinedMembers(value, fullPath);
+        JsonFile._validateNoUndefinedMembers(value, keyPath);
+        keyPath.pop();
       }
     }
+  }
+
+  // Given this input:    ['items', '4', 'syntax', 'parameters', 'string "with" symbols", 'type']
+  // Return this string:  items[4].syntax.parameters["string \"with\" symbols"].type
+  private static _formatKeyPath(keyPath: string[]): string {
+    let result: string = '';
+
+    for (const key of keyPath) {
+      if (/^[0-9]+$/.test(key)) {
+        // It's an integer, so display like this:  parent[123]
+        result += `[${key}]`;
+      } else if (/^[a-z_][a-z_0-9]*$/i.test(key)) {
+        // It's an alphanumeric identifier, so display like this:  parent.name
+        if (result) {
+          result += '.';
+        }
+        result += `${key}`;
+      } else {
+        // It's a freeform string, so display like this:  parent["A path: \"C:\\file\""]
+
+        // Convert this:     A path: "C:\file"
+        // To this:          A path: \"C:\\file\"
+        const escapedKey: string = key.replace(/[\\]/g, '\\\\') // escape backslashes
+          .replace(/["]/g, '\\'); // escape quotes
+        result += `["${escapedKey}"]`;
+      }
+    }
+    return result;
   }
 
   /**
