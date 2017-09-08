@@ -82,6 +82,7 @@ export class DocItem {
           break;
         case 'constructor':
           this.kind = DocItemKind.Constructor;
+          this.name = 'constructor';
           break;
         case 'function':
           this.kind = DocItemKind.Function;

@@ -9,6 +9,7 @@ import {
   MarkupElement,
   IDocElement,
   IApiMethod,
+  IApiConstructor,
   IApiParameter,
   IApiProperty,
   IApiEnumMember
@@ -195,7 +196,7 @@ export class YamlGenerator {
     }
 
     yamlItem.name = docItem.name;
-    yamlItem.fullName = docItem.name;
+    yamlItem.fullName = yamlItem.uid;
     yamlItem.langs = [ 'typeScript' ];
 
     switch (docItem.kind) {
@@ -228,6 +229,7 @@ export class YamlGenerator {
         break;
       case DocItemKind.Constructor:
         yamlItem.type = 'constructor';
+        this._populateYamlMethod(yamlItem, docItem);
         break;
       case DocItemKind.Property:
         yamlItem.type = 'property';
@@ -248,7 +250,7 @@ export class YamlGenerator {
   }
 
   private _populateYamlMethod(yamlItem: Partial<IYamlItem>, docItem: DocItem): void {
-    const apiMethod: IApiMethod = docItem.apiItem as IApiMethod;
+    const apiMethod: IApiMethod | IApiConstructor = docItem.apiItem as IApiMethod;
     yamlItem.name = RenderingHelpers.getConciseSignature(docItem.name, apiMethod);
 
     const syntax: IYamlSyntax = {
