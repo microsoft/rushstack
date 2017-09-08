@@ -73,7 +73,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
 
   // @override
   protected visit(astItem: AstItem, refObject?: Object): void {
-    switch (astItem.documentation.releaseTag) {
+    switch (astItem.inheritedReleaseTag) {
       case ReleaseTag.None:
       case ReleaseTag.Beta:
       case ReleaseTag.Public:
@@ -100,10 +100,10 @@ export default class ApiJsonGenerator extends AstItemVisitor {
       extends: astStructuredType.extends || '',
       implements: astStructuredType.implements || '',
       typeParameters: astStructuredType.typeParameters || [],
-      deprecatedMessage: astStructuredType.documentation.deprecatedMessage || [],
+      deprecatedMessage: astStructuredType.inheritedDeprecatedMessage || [],
       summary: astStructuredType.documentation.summary || [],
       remarks: astStructuredType.documentation.remarks || [],
-      isBeta: astStructuredType.documentation.releaseTag === ReleaseTag.Beta
+      isBeta: astStructuredType.inheritedReleaseTag === ReleaseTag.Beta
     };
     refObject[astStructuredType.name] = structureNode;
 
@@ -130,10 +130,10 @@ export default class ApiJsonGenerator extends AstItemVisitor {
     const enumNode: Object = {
       kind: ApiJsonFile.convertKindToJson(astEnum.kind),
       values: valuesNode,
-      deprecatedMessage: astEnum.documentation.deprecatedMessage || [],
+      deprecatedMessage: astEnum.inheritedDeprecatedMessage || [],
       summary: astEnum.documentation.summary || [],
       remarks: astEnum.documentation.remarks || [],
-      isBeta: astEnum.documentation.releaseTag === ReleaseTag.Beta
+      isBeta: astEnum.inheritedReleaseTag === ReleaseTag.Beta
     };
     refObject[astEnum.name] = enumNode;
 
@@ -156,10 +156,10 @@ export default class ApiJsonGenerator extends AstItemVisitor {
     refObject[astEnumValue.name] = {
       kind: ApiJsonFile.convertKindToJson(astEnumValue.kind),
       value: value,
-      deprecatedMessage: astEnumValue.documentation.deprecatedMessage || [],
+      deprecatedMessage: astEnumValue.inheritedDeprecatedMessage || [],
       summary: astEnumValue.documentation.summary || [],
       remarks: astEnumValue.documentation.remarks || [],
-      isBeta: astEnumValue.documentation.releaseTag === ReleaseTag.Beta
+      isBeta: astEnumValue.inheritedReleaseTag === ReleaseTag.Beta
     };
   }
 
@@ -180,10 +180,10 @@ export default class ApiJsonGenerator extends AstItemVisitor {
       kind: ApiJsonFile.convertKindToJson(astFunction.kind),
       returnValue: returnValueNode,
       parameters: astFunction.documentation.parameters,
-      deprecatedMessage: astFunction.documentation.deprecatedMessage || [],
+      deprecatedMessage: astFunction.inheritedDeprecatedMessage || [],
       summary: astFunction.documentation.summary || [],
       remarks: astFunction.documentation.remarks || [],
-      isBeta: astFunction.documentation.releaseTag === ReleaseTag.Beta
+      isBeta: astFunction.inheritedReleaseTag === ReleaseTag.Beta
     };
 
     refObject[astFunction.name] = newNode;
@@ -217,10 +217,10 @@ export default class ApiJsonGenerator extends AstItemVisitor {
 
     const newNode: Object = {
       kind: ApiJsonFile.convertKindToJson(astNamespace.kind),
-      deprecatedMessage: astNamespace.documentation.deprecatedMessage || [],
+      deprecatedMessage: astNamespace.inheritedDeprecatedMessage || [],
       summary: astNamespace.documentation.summary || [],
       remarks: astNamespace.documentation.remarks || [],
-      isBeta: astNamespace.documentation.releaseTag === ReleaseTag.Beta,
+      isBeta: astNamespace.inheritedReleaseTag === ReleaseTag.Beta,
       exports: membersNode
     };
 
@@ -250,10 +250,10 @@ export default class ApiJsonGenerator extends AstItemVisitor {
       isReadOnly: !!astProperty.isReadOnly,
       isStatic: !!astProperty.isStatic,
       type: astProperty.type,
-      deprecatedMessage: astProperty.documentation.deprecatedMessage || [],
+      deprecatedMessage: astProperty.inheritedDeprecatedMessage || [],
       summary: astProperty.documentation.summary || [],
       remarks: astProperty.documentation.remarks || [],
-      isBeta: astProperty.documentation.releaseTag === ReleaseTag.Beta
+      isBeta: astProperty.inheritedReleaseTag === ReleaseTag.Beta
     };
 
     refObject[astProperty.name] = newNode;
@@ -264,10 +264,10 @@ export default class ApiJsonGenerator extends AstItemVisitor {
       kind: ApiJsonFile.convertKindToJson(astModuleVariable.kind),
       type: astModuleVariable.type,
       value: astModuleVariable.value,
-      deprecatedMessage: astModuleVariable.documentation.deprecatedMessage || [],
+      deprecatedMessage: astModuleVariable.inheritedDeprecatedMessage || [],
       summary: astModuleVariable.documentation.summary || [],
       remarks: astModuleVariable.documentation.remarks || [],
-      isBeta: astModuleVariable.documentation.releaseTag === ReleaseTag.Beta
+      isBeta: astModuleVariable.inheritedReleaseTag === ReleaseTag.Beta
     };
 
     refObject[astModuleVariable.name] = newNode;
@@ -288,7 +288,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
         kind: ApiJsonFile.convertKindToJson(AstItemKind.Constructor),
         signature: astMethod.getDeclarationLine(),
         parameters: astMethod.documentation.parameters,
-        deprecatedMessage: astMethod.documentation.deprecatedMessage || [],
+        deprecatedMessage: astMethod.inheritedDeprecatedMessage || [],
         summary: astMethod.documentation.summary || [],
         remarks: astMethod.documentation.remarks || []
       };
@@ -306,10 +306,10 @@ export default class ApiJsonGenerator extends AstItemVisitor {
         isStatic: !!astMethod.isStatic,
         returnValue: returnValueNode,
         parameters: astMethod.documentation.parameters,
-        deprecatedMessage: astMethod.documentation.deprecatedMessage || [],
+        deprecatedMessage: astMethod.inheritedDeprecatedMessage || [],
         summary: astMethod.documentation.summary || [],
         remarks: astMethod.documentation.remarks || [],
-        isBeta: astMethod.documentation.releaseTag === ReleaseTag.Beta
+        isBeta: astMethod.inheritedReleaseTag === ReleaseTag.Beta
       };
     }
 
