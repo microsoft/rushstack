@@ -177,10 +177,20 @@ export class YamlGenerator {
     let summary: string = this._renderMarkdownFromDocElement(docItem.apiItem.summary, docItem);
     const remarks: string = this._renderMarkdownFromDocElement(docItem.apiItem.remarks, docItem);
 
+    if ((docItem.apiItem.deprecatedMessage || []).length > 0) {
+      const deprecatedMessage: string = this._renderMarkdownFromDocElement(docItem.apiItem.deprecatedMessage, docItem);
+
+      summary = '> [!NOTE]\n'
+        + '> _This API is now obsolete._\n'
+        + '> \n'
+        + `> _${deprecatedMessage.trim()}_\n\n`
+        + summary;
+    }
+
     if (docItem.apiItem.isBeta) {
       summary = '> [!NOTE]\n'
-        + '> *This API is provided as a preview for developers and may change based on feedback*\n'
-        + '> *that we receive. Do not use this API in a production environment.*\n\n'
+        + '> _This API is provided as a preview for developers and may change based on feedback_\n'
+        + '> _that we receive. Do not use this API in a production environment._\n\n'
         + summary;
     }
 
