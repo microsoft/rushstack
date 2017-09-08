@@ -12,7 +12,9 @@ import {
   IApiConstructor,
   IApiParameter,
   IApiProperty,
-  IApiEnumMember
+  IApiEnumMember,
+  IApiClass,
+  IApiInterface
 } from '@microsoft/api-extractor';
 
 import { DocItemSet, DocItem, DocItemKind, IDocItemSetResolveResult } from '../DocItemSet';
@@ -234,9 +236,11 @@ export class YamlGenerator {
         break;
       case DocItemKind.Class:
         yamlItem.type = 'class';
+        this._populateYamlStructure(yamlItem, docItem);
         break;
       case DocItemKind.Interface:
         yamlItem.type = 'interface';
+        this._populateYamlStructure(yamlItem, docItem);
         break;
       case DocItemKind.Method:
         yamlItem.type = 'method';
@@ -262,6 +266,23 @@ export class YamlGenerator {
     }
 
     return yamlItem as IYamlItem;
+  }
+
+  private _populateYamlStructure(yamlItem: Partial<IYamlItem>, docItem: DocItem): void {
+    const apiStructure: IApiClass | IApiInterface = docItem.apiItem as IApiClass | IApiInterface;
+
+    let text: string = '';
+
+    if (apiStructure.extends) {
+      text += `**Extends:** \`${apiStructure.extends}\`\n\n`;
+    }
+    if (apiStructure.implements) {
+      text += `**Implements:** \`${apiStructure.implements}\`\n\n`;
+    }
+
+    if (text) {
+      yamlItem.remarks = text + (yamlItem.remarks || '');
+    }
   }
 
   private _populateYamlMethod(yamlItem: Partial<IYamlItem>, docItem: DocItem): void {
