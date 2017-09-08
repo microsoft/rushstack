@@ -1,6 +1,74 @@
 # Change Log - @microsoft/gulp-core-build-webpack
 
-This log was last generated on Wed, 16 Aug 2017 23:16:55 GMT and should not be manually modified.
+This log was last generated on Thu, 07 Sep 2017 00:11:12 GMT and should not be manually modified.
+
+## 3.0.4
+Thu, 07 Sep 2017 00:11:11 GMT
+
+### Patches
+
+- Add $schema field to all schemas
+
+## 3.0.3
+Wed, 06 Sep 2017 13:03:42 GMT
+
+*Changes not tracked*
+
+## 3.0.2
+Tue, 05 Sep 2017 19:03:56 GMT
+
+*Changes not tracked*
+
+## 3.0.1
+Sat, 02 Sep 2017 01:04:26 GMT
+
+*Changes not tracked*
+
+## 3.0.0
+Thu, 31 Aug 2017 18:41:18 GMT
+
+### Breaking changes
+
+- Fix compatibility issues with old releases, by incrementing the major version number
+
+## 2.0.2
+Thu, 31 Aug 2017 17:46:25 GMT
+
+*Changes not tracked*
+
+## 2.0.1
+Thu, 31 Aug 2017 13:04:19 GMT
+
+### Patches
+
+- Removing an unneccessary dependency.
+
+## 2.0.0
+Wed, 30 Aug 2017 22:08:21 GMT
+
+### Breaking changes
+
+- Upgrade to webpack 3.X.
+
+## 1.2.9
+Wed, 30 Aug 2017 01:04:34 GMT
+
+*Changes not tracked*
+
+## 1.2.8
+Thu, 24 Aug 2017 22:44:12 GMT
+
+*Changes not tracked*
+
+## 1.2.7
+Thu, 24 Aug 2017 01:04:33 GMT
+
+*Changes not tracked*
+
+## 1.2.6
+Tue, 22 Aug 2017 13:04:22 GMT
+
+*Changes not tracked*
 
 ## 1.2.5
 Wed, 16 Aug 2017 23:16:55 GMT

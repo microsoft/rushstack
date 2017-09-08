@@ -1,6 +1,62 @@
 # Change Log - @microsoft/node-library-build
 
-This log was last generated on Wed, 16 Aug 2017 13:04:08 GMT and should not be manually modified.
+This log was last generated on Thu, 07 Sep 2017 00:11:12 GMT and should not be manually modified.
+
+## 4.0.4
+Thu, 07 Sep 2017 00:11:12 GMT
+
+*Changes not tracked*
+
+## 4.0.3
+Wed, 06 Sep 2017 13:03:42 GMT
+
+*Changes not tracked*
+
+## 4.0.2
+Tue, 05 Sep 2017 19:03:56 GMT
+
+*Changes not tracked*
+
+## 4.0.1
+Sat, 02 Sep 2017 01:04:26 GMT
+
+*Changes not tracked*
+
+## 4.0.0
+Thu, 31 Aug 2017 18:41:18 GMT
+
+### Breaking changes
+
+- Fix compatibility issues with old releases, by incrementing the major version number
+
+## 3.4.1
+Thu, 31 Aug 2017 17:46:25 GMT
+
+*Changes not tracked*
+
+## 3.4.0
+Wed, 30 Aug 2017 01:04:34 GMT
+
+### Minor changes
+
+- node-library-build now supports the CopyStaticAssetsTask
+
+## 3.3.2
+Thu, 24 Aug 2017 22:44:12 GMT
+
+*Changes not tracked*
+
+## 3.3.1
+Thu, 24 Aug 2017 01:04:33 GMT
+
+*Changes not tracked*
+
+## 3.3.0
+Tue, 22 Aug 2017 13:04:22 GMT
+
+### Minor changes
+
+- node-library-build now supports pre-copy.json and post-copy.json
 
 ## 3.2.8
 Wed, 16 Aug 2017 13:04:08 GMT

@@ -2,6 +2,66 @@
   "name": "@microsoft/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "1.2.2",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v1.2.2",
+      "date": "Fri, 01 Sep 2017 01:05:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updating uglifyjs."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.1",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v1.2.1",
+      "date": "Thu, 31 Aug 2017 18:41:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `~3.4.1` to `~4.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.0",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v1.2.0",
+      "date": "Wed, 30 Aug 2017 22:08:21 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade to webpack 3.X."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.2",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v1.1.2",
+      "date": "Wed, 30 Aug 2017 01:04:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `~3.3.2` to `~3.4.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.1",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v1.1.1",
+      "date": "Tue, 22 Aug 2017 13:04:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `~3.2.8` to `~3.3.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.0",
       "tag": "@microsoft/set-webpack-public-path-plugin_v1.1.0",
       "date": "Thu, 03 Aug 2017 19:16:55 GMT",

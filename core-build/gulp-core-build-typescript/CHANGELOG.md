@@ -1,6 +1,62 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Wed, 16 Aug 2017 23:16:55 GMT and should not be manually modified.
+This log was last generated on Thu, 07 Sep 2017 00:11:11 GMT and should not be manually modified.
+
+## 4.0.4
+Thu, 07 Sep 2017 00:11:11 GMT
+
+### Patches
+
+-  Add $schema field to all schemas
+
+## 4.0.3
+Wed, 06 Sep 2017 13:03:42 GMT
+
+*Changes not tracked*
+
+## 4.0.2
+Tue, 05 Sep 2017 19:03:56 GMT
+
+*Changes not tracked*
+
+## 4.0.1
+Sat, 02 Sep 2017 01:04:26 GMT
+
+*Changes not tracked*
+
+## 4.0.0
+Thu, 31 Aug 2017 18:41:18 GMT
+
+### Breaking changes
+
+- Fix compatibility issues with old releases, by incrementing the major version number
+
+## 3.5.3
+Thu, 31 Aug 2017 17:46:25 GMT
+
+*Changes not tracked*
+
+## 3.5.2
+Wed, 30 Aug 2017 01:04:34 GMT
+
+*Changes not tracked*
+
+## 3.5.1
+Thu, 24 Aug 2017 22:44:12 GMT
+
+*Changes not tracked*
+
+## 3.5.0
+Thu, 24 Aug 2017 01:04:33 GMT
+
+### Minor changes
+
+- Upgrade to tslint 5.6.0
+
+## 3.4.2
+Tue, 22 Aug 2017 13:04:22 GMT
+
+*Changes not tracked*
 
 ## 3.4.1
 Wed, 16 Aug 2017 23:16:55 GMT

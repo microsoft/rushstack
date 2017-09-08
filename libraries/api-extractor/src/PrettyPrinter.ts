@@ -86,7 +86,7 @@ export default class PrettyPrinter {
 
   /**
    * Throws an exception.  Use this only for unexpected errors, as it may ungracefully terminate the process;
-   * ApiItem.reportError() is generally a better option.
+   * AstItem.reportError() is generally a better option.
    */
   public static throwUnexpectedSyntaxError(errorNode: ts.Node, message: string): void {
     throw new Error(PrettyPrinter.formatFileAndLineNumber(errorNode) + ': ' + message);

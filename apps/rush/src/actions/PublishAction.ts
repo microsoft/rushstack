@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as colors from 'colors';
-import * as path from 'path';
 import { EOL } from 'os';
 import {
   CommandLineFlagParameter,
@@ -12,7 +11,6 @@ import {
   IChangeInfo,
   ChangeType,
   RushConfigurationProject,
-  RushConstants,
   Npm
 } from '@microsoft/rush-lib';
 import RushCommandLineParser from './RushCommandLineParser';
@@ -38,6 +36,7 @@ export default class PublishAction extends BaseRushAction {
   private _suffix: CommandLineStringParameter;
   private _force: CommandLineFlagParameter;
   private _prereleaseToken: PrereleaseToken;
+  private _versionPolicy: CommandLineStringParameter;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -98,8 +97,16 @@ export default class PublishAction extends BaseRushAction {
     this._includeAll = this.defineFlagParameter({
       parameterLongName: '--include-all',
       parameterShortName: undefined,
-      description: 'If this flag is specified with --publish, all packages with shouldPublish=true in rush.json' +
+      description: 'If this flag is specified, all packages with shouldPublish=true in rush.json ' +
+      'or with a specified version policy ' +
       'will be published if their version is newer than published version.'
+    });
+    this._versionPolicy = this.defineStringParameter({
+      parameterLongName: '--version-policy',
+      parameterShortName: '-vp',
+      key: 'VERSIONPOLICY',
+      description: 'Version policy name. Only projects with this version policy will be published if used ' +
+      'with --include-all.'
     });
     this._prereleaseName = this.defineStringParameter({
       parameterLongName: '--prerelease-name',
@@ -135,7 +142,7 @@ export default class PublishAction extends BaseRushAction {
       return;
     }
 
-    if (this._includeAll.value && this._publish.value) {
+    if (this._includeAll.value) {
       this._publishAll(allPackages);
     } else {
       this._prereleaseToken = new PrereleaseToken(this._prereleaseName.value, this._suffix.value);
@@ -147,8 +154,7 @@ export default class PublishAction extends BaseRushAction {
 
   private _publishChanges(allPackages: Map<string, RushConfigurationProject>): void {
     const changeManager: ChangeManager = new ChangeManager(this.rushConfiguration);
-    const changesPath: string = path.join(this.rushConfiguration.commonFolder, RushConstants.changeFilesFolderName);
-    changeManager.load(changesPath,
+    changeManager.load(this.rushConfiguration.changesFolder,
       this._prereleaseToken,
       this._addCommitDetails.value);
 
@@ -162,6 +168,7 @@ export default class PublishAction extends BaseRushAction {
 
       // Make changes to package.json and change logs.
       changeManager.apply(this._apply.value);
+      changeManager.updateChangelog(this._apply.value);
 
       // Stage, commit, and push the changes to remote temp branch.
       git.addChanges();
@@ -189,11 +196,15 @@ export default class PublishAction extends BaseRushAction {
   }
 
   private _publishAll(allPackages: Map<string, RushConfigurationProject>): void {
+    console.log(`Rush publish starts with includeAll and version policy ${this._versionPolicy.value}`);
+
     let updated: boolean = false;
     const git: Git = new Git(this._targetBranch.value);
 
     allPackages.forEach((packageConfig, packageName) => {
-      if (packageConfig.shouldPublish) {
+      if (packageConfig.shouldPublish &&
+        (!this._versionPolicy.value || this._versionPolicy.value === packageConfig.versionPolicyName)
+      ) {
         if (this._force.value || !this._packageExists(packageConfig)) {
           this._npmPublish(packageName, packageConfig.projectFolder);
           git.addTag(!!this._publish.value && !this._registryUrl.value, packageName, packageConfig.packageJson.version);

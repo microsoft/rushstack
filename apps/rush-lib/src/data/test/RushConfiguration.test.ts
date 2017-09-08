@@ -47,6 +47,7 @@ describe('RushConfiguration', () => {
 
     assert.equal(rushConfiguration.npmToolVersion, '4.5.0', 'Failed to validate npmToolVersion');
 
+    assert.equal(rushConfiguration.repositoryUrl, 'someFakeUrl', 'Failed to get repository url');
     assert.equal(rushConfiguration.projectFolderMaxDepth, 99, 'Failed to validate projectFolderMaxDepth');
     assert.equal(rushConfiguration.projectFolderMinDepth, 1, 'Failed to validate projectFolderMinDepth');
 
@@ -76,8 +77,7 @@ describe('RushConfiguration', () => {
     assert.equal(project1.packageName, 'project1', 'Failed to validate project1.packageName');
     assertPathProperty('project1.projectFolder', project1.projectFolder, './repo/project1');
     assert.equal(project1.tempProjectName, '@rush-temp/project1', 'Failed to validate project1.tempProjectName');
-    assertPathProperty('project1.tempPackageJsonFilename', project1.tempPackageJsonFilename,
-      './repo/common/temp/projects/project1/package.json');
+    assert.equal(project1.unscopedTempProjectName, 'project1');
 
     done();
   });

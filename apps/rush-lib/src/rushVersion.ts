@@ -5,7 +5,7 @@ import * as path from 'path';
 import IPackageJson from './utilities/IPackageJson';
 
 const myPackageJsonFilename: string = path.resolve(path.join(
-  module.filename, '..', '..', 'package.json')
+  __dirname, '..', 'package.json')
 );
 const myPackageJson: IPackageJson = require(myPackageJsonFilename);
 

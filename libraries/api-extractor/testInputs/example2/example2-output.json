@@ -1,5 +1,6 @@
 {
   "kind": "package",
+  "name": "example2",
   "summary": [
     {
       "kind": "textDocElement",

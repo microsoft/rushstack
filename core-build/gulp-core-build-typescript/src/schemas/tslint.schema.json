@@ -1,10 +1,16 @@
 {
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
   "title": "Typescript Linter Task configuration",
   "description": "Defines configuration options for the tslint tool",
 
   "type": "object",
   "additionalProperties": false,
   "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
     "lintConfig": {
       "description": "A TsLint configuration object, options are from https://github.com/palantir/tslint#configuration",
       "type": "object"

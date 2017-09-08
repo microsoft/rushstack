@@ -59,18 +59,22 @@ enum BumpType {
   // (undocumented)
   'minor',
   // (undocumented)
+  'none',
+  // (undocumented)
   'patch',
   // (undocumented)
-  'prerelease',
+  'preminor',
   // (undocumented)
-  'release'
+  'prerelease'
 }
 
 // @public
 class ChangeFile {
   public constructor(private _changeFileData: IChangeFile,
       private _rushConfiguration: RushConfiguration);
+  public addChange(data: IChangeInfo): void;
   public generatePath(): string;
+  public getChanges(packageName: string): IChangeInfo[];
   public writeSync(): void;
 }
 
@@ -197,10 +201,11 @@ interface ILockStepVersionJson extends IVersionPolicyJson {
 // @alpha
 class IndividualVersionPolicy extends VersionPolicy {
   constructor(versionPolicyJson: IIndividualVersionJson);
-  // (undocumented)
+  public bump(bumpType?: BumpType, identifier?: string): void;
   public ensure(project: IPackageJson): IPackageJson | undefined;
-  // (undocumented)
+  public readonly json: IIndividualVersionJson;
   public readonly lockedMajor: number | undefined;
+  public validate(versionString: string, packageName: string): void;
 }
 
 // @public
@@ -233,11 +238,6 @@ interface IRushLinkJson {
   }
 }
 
-// @public
-interface ISaveJsonFileOptions {
-  onlyIfChanged?: boolean;
-}
-
 // @alpha (undocumented)
 interface IVersionPolicyJson {
   // (undocumented)
@@ -246,29 +246,14 @@ interface IVersionPolicyJson {
   policyName: string;
 }
 
-// @public
-class JsonFile {
-  public static loadJsonFile(jsonFilename: string): any;
-  public static saveJsonFile(jsonData: any, jsonFilename: string, options: ISaveJsonFileOptions = {}): boolean;
-}
-
-// @alpha (undocumented)
-class JsonSchemaValidator {
-  // (undocumented)
-  public static loadFromFile(schemaFilename: string): JsonSchemaValidator;
-  // WARNING: The type "ValidateErrorCallback" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  public validateObject(jsonObject: Object, errorCallback: ValidateErrorCallback): void;
-}
-
 // @alpha
 class LockStepVersionPolicy extends VersionPolicy {
   constructor(versionPolicyJson: ILockStepVersionJson);
-  // (undocumented)
+  public bump(bumpType?: BumpType, identifier?: string): void;
   public ensure(project: IPackageJson): IPackageJson | undefined;
-  // (undocumented)
+  public readonly json: ILockStepVersionJson;
   public readonly nextBump: BumpType;
-  // (undocumented)
+  public validate(versionString: string, packageName: string): void;
   public readonly version: semver.SemVer;
 }
 
@@ -307,6 +292,7 @@ export function RegexErrorDetector(regex: RegExp,
 // @public
 class RushConfiguration {
   public readonly approvedPackagesPolicy: ApprovedPackagesPolicy;
+  public readonly changesFolder: string;
   public readonly committedShrinkwrapFilename: string;
   public readonly commonFolder: string;
   public readonly commonRushConfigFolder: string;
@@ -333,6 +319,8 @@ class RushConfiguration {
   public readonly projects: RushConfigurationProject[];
   // (undocumented)
   public readonly projectsByName: Map<string, RushConfigurationProject>;
+  public readonly repositoryUrl: string;
+  public readonly rushJsonFile: string;
   public readonly rushJsonFolder: string;
   public readonly rushLinkJsonFilename: string;
   // @alpha
@@ -357,8 +345,8 @@ class RushConfigurationProject {
   public readonly projectRelativeFolder: string;
   public readonly reviewCategory: string;
   public readonly shouldPublish: boolean;
-  public readonly tempPackageJsonFilename: string;
   public readonly tempProjectName: string;
+  public readonly unscopedTempProjectName: string;
   // @alpha
   public readonly versionPolicyName: string;
 }
@@ -475,6 +463,8 @@ class VersionControl {
   public static getChangedFiles(prefix?: string, targetBranch?: string): string[];
   // (undocumented)
   public static getChangedFolders(targetBranch?: string): string[];
+  public static getRemoteMasterBranch(repositoryUrl?: string): string;
+  public static getUncommittedChanges(): ReadonlyArray<string>;
   // (undocumented)
   public static hasUncommittedChanges(): boolean;
 }
@@ -495,22 +485,23 @@ class VersionMismatchFinder {
 // @alpha
 class VersionPolicy {
   constructor(versionPolicyJson: IVersionPolicyJson);
-  // (undocumented)
+  public abstract bump(bumpType?: BumpType, identifier?: string): void;
   public readonly definitionName: VersionPolicyDefinitionName;
-  // (undocumented)
   public abstract ensure(project: IPackageJson): IPackageJson | undefined;
-  // (undocumented)
+  public readonly json: IVersionPolicyJson;
   public static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy;
-  // (undocumented)
   public readonly policyName: string;
+  public abstract validate(versionString: string, packageName: string): void;
 }
 
 // @alpha (undocumented)
 class VersionPolicyConfiguration {
   public constructor(private _jsonFileName: string);
-  // @alpha
+  public bump(versionPolicyName?: string,
+      bumpType?: BumpType,
+      identifier?: string,
+      shouldCommit?: boolean): void;
   public getVersionPolicy(policyName: string): VersionPolicy;
-  // @alpha
   public readonly versionPolicies: Map<string, VersionPolicy>;
 }
 

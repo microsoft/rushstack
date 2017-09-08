@@ -19,6 +19,15 @@ class CleanTask extends GulpTask<void> {
 }
 
 // @public
+class CopyStaticAssetsTask extends GulpTask<ICopyStaticAssetsTaskConfig> {
+  constructor();
+  // (undocumented)
+  public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream;
+  // (undocumented)
+  public loadSchema(): Object;
+}
+
+// @public
 class CopyTask extends GulpTask<ICopyConfig> {
   constructor();
   public executeTask(gulp: typeof Gulp,
@@ -148,6 +157,18 @@ interface ICopyConfig {
 }
 
 // @public
+interface ICopyStaticAssetsTaskConfig {
+  // (undocumented)
+  excludeExtensions?: string[];
+  // (undocumented)
+  excludeFiles?: string[];
+  // (undocumented)
+  includeExtensions?: string[];
+  // (undocumented)
+  includeFiles?: string[];
+}
+
+// @public
 interface ICustomGulpTask {
   // WARNING: The type "GulpProxy" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
@@ -183,14 +204,6 @@ export function replaceConfig(config: IBuildConfig): void;
 
 // @public
 export function reset(): void;
-
-// @public
-class SchemaValidator {
-  public static readAndValidateJson < TResult >(dataFilePath: string, schemaFilePath: string): TResult;
-  // (undocumented)
-  public static readCommentedJsonFile < TResult >(filename: string): TResult;
-  public static validate(data: Object, schema: Object, dataFilePath?: string): void;
-}
 
 // @public
 export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutable;
@@ -233,4 +246,5 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
 
 // WARNING: Unsupported export: cleanFlag
 // WARNING: Unsupported export: clean
+// WARNING: Unsupported export: copyStaticAssets
 // (No packageDescription for this package)

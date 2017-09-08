@@ -1,6 +1,64 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Tue, 15 Aug 2017 19:04:14 GMT and should not be manually modified.
+This log was last generated on Thu, 07 Sep 2017 00:11:12 GMT and should not be manually modified.
+
+## 3.0.4
+Thu, 07 Sep 2017 00:11:12 GMT
+
+### Patches
+
+-  Add $schema field to all schemas
+
+## 3.0.3
+Wed, 06 Sep 2017 13:03:42 GMT
+
+*Changes not tracked*
+
+## 3.0.2
+Tue, 05 Sep 2017 19:03:56 GMT
+
+*Changes not tracked*
+
+## 3.0.1
+Sat, 02 Sep 2017 01:04:26 GMT
+
+*Changes not tracked*
+
+## 3.0.0
+Thu, 31 Aug 2017 18:41:18 GMT
+
+### Breaking changes
+
+- Fix compatibility issues with old releases, by incrementing the major version number
+
+## 2.10.1
+Thu, 31 Aug 2017 17:46:25 GMT
+
+*Changes not tracked*
+
+## 2.10.0
+Wed, 30 Aug 2017 01:04:34 GMT
+
+### Minor changes
+
+- added CopyStaticAssetsTask
+
+## 2.9.6
+Thu, 24 Aug 2017 22:44:12 GMT
+
+### Patches
+
+- Update the schema validator.
+
+## 2.9.5
+Thu, 24 Aug 2017 01:04:33 GMT
+
+*Changes not tracked*
+
+## 2.9.4
+Tue, 22 Aug 2017 13:04:22 GMT
+
+*Changes not tracked*
 
 ## 2.9.3
 Tue, 15 Aug 2017 19:04:14 GMT

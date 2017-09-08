@@ -1,7 +1,14 @@
 // @public (undocumented)
+interface IWebpackResources {
+  // (undocumented)
+  webpack: typeof Webpack;
+}
+
+// @public (undocumented)
 interface IWebpackTaskConfig {
   config?: Webpack.Configuration;
   configPath: string;
+  printStats?: boolean;
   suppressWarnings?: (string | RegExp)[];
   webpack?: typeof Webpack;
 }
@@ -16,7 +23,7 @@ class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConfig & TE
   // (undocumented)
   public loadSchema(): Object;
   // (undocumented)
-  public readonly resources: Object;
+  public readonly resources: IWebpackResources;
 }
 
 // WARNING: Unsupported export: webpack

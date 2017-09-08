@@ -32,9 +32,13 @@ export default class Npm {
           `view ${packageName} versions --json`.split(' '),
           cwd,
           env);
-        (JSON.parse(packageVersions)).forEach(v => {
-          versions.push(v);
-        });
+        if (packageVersions && packageVersions.length > 0) {
+          (JSON.parse(packageVersions)).forEach(v => {
+            versions.push(v);
+          });
+        } else {
+          console.log(`No version is found for ${packageName}`);
+        }
       }
     } catch (error) {
       if (error.message.indexOf('npm ERR! 404') >= 0) {

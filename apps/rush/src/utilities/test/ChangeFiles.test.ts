@@ -3,6 +3,9 @@
 
 import { expect } from 'chai';
 import * as path from 'path';
+
+import { IChangelog } from '@microsoft/rush-lib';
+
 import ChangeFiles from '../ChangeFiles';
 
 describe('ChangeFiles', () => {
@@ -69,6 +72,31 @@ describe('ChangeFiles', () => {
       expect(() => {
         ChangeFiles.validate([changeFileA, changeFileB, changeFileC], changedPackages);
       }).not.to.throw(Error);
+    });
+  });
+
+  describe('deleteAll', () => {
+    it('delete all files when there are no prerelease packages', () => {
+      const changesPath: string = path.join(__dirname, 'multipleChangeFiles');
+      const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
+      expect(changeFiles.deleteAll(false)).equals(3);
+    });
+
+    it('does not delete change files for package whose change logs do not get updated. ', () => {
+      const changesPath: string = path.join(__dirname, 'multipleChangeFiles');
+      const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
+      const updatedChangelogs: IChangelog[] = [
+        {
+          name: 'a',
+          entries: []
+        },
+        {
+          name: 'b',
+          entries: []
+        }
+      ];
+      expect(changeFiles.deleteAll(false, updatedChangelogs)).equals(2,
+        'Changes files for a and b should be deleted.');
     });
   });
 });

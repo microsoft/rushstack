@@ -1,6 +1,72 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 15 Aug 2017 01:29:31 GMT and should not be manually modified.
+This log was last generated on Thu, 07 Sep 2017 00:11:11 GMT and should not be manually modified.
+
+## 3.2.2
+Thu, 07 Sep 2017 00:11:11 GMT
+
+### Patches
+
+-  Add $schema field to all schemas
+
+## 3.2.1
+Wed, 06 Sep 2017 13:03:42 GMT
+
+### Patches
+
+- Converted IMarkupDocumentationLink to IMarkupApiLink, which exposes the underlying IApiItemReference rather than assuming a particular "document ID" model
+
+## 3.2.0
+Tue, 05 Sep 2017 19:03:56 GMT
+
+### Minor changes
+
+- Add the constructor signature and package name to the exported API signature
+
+## 3.1.0
+Sat, 02 Sep 2017 01:04:26 GMT
+
+### Minor changes
+
+- Expanded the api-extractor API to expose interfaces for the *.api.json file fileformat
+
+## 3.0.0
+Thu, 31 Aug 2017 18:41:18 GMT
+
+### Breaking changes
+
+- Fix compatibility issues with old releases, by incrementing the major version number
+
+## 2.3.7
+Thu, 31 Aug 2017 17:46:25 GMT
+
+### Patches
+
+- Fix issue where node-core-library was not an explicit dependency
+
+## 2.3.6
+Wed, 30 Aug 2017 01:04:34 GMT
+
+*Changes not tracked*
+
+## 2.3.5
+Thu, 24 Aug 2017 22:44:12 GMT
+
+### Patches
+
+- Update the schema validator.
+
+## 2.3.4
+Thu, 24 Aug 2017 01:04:33 GMT
+
+*Changes not tracked*
+
+## 2.3.3
+Tue, 22 Aug 2017 13:04:22 GMT
+
+### Patches
+
+- Added "api-documenter" code sample
 
 ## 2.3.2
 Tue, 15 Aug 2017 01:29:31 GMT

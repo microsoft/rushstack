@@ -1,11 +1,12 @@
 {
+  "$schema": "http://json-schema.org/draft-04/schema#",
   "title": "Rush Configuration",
   "description": "Configuration file for the Rush multi-package build tool",
 
   "type": "object",
   "properties": {
     "$schema": {
-      "description": "The metadata to indicate the JSON schema, required by some editors such as VS2015",
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
       "type": "string"
     },
     "npmVersion": {
@@ -70,6 +71,17 @@
       },
       "additionalProperties": false
     },
+    "repository": {
+      "description": "The repository location",
+      "type": "object",
+      "properties": {
+        "url": {
+          "description": "The remote url of the repository. If a value is provided, \"Rush change\" will use it to find the right remote to compare against.",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
     "telemetryEnabled": {
       "description": "Indicates whether telemetry data should be collected and stored in the Rush temp folder during Rush runs.",
       "type": "boolean"
@@ -119,7 +131,6 @@
         "preRushInstall": {
           "description": "The list of scripts to run before the Rush install command starts.",
           "type": "array",
-          "optional": true,
           "items": {
             "type": "string"
           }
@@ -127,7 +138,6 @@
         "postRushInstall": {
           "description": "The list of scripts to run after the Rush install command finishes.",
           "type": "array",
-          "optional": true,
           "items": {
             "type": "string"
           }
@@ -135,7 +145,6 @@
         "preRushBuild": {
           "description": "The list of scripts to run before the Rush build command starts.",
           "type": "array",
-          "optional": true,
           "items": {
             "type": "string"
           }
@@ -143,7 +152,6 @@
         "postRushBuild": {
           "description": "The list of scripts to run after the Rush build command finishes.",
           "type": "array",
-          "optional": true,
           "items": {
             "type": "string"
           }

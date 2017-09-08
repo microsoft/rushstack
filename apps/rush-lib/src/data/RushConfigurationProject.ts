@@ -3,11 +3,11 @@
 
 import * as path from 'path';
 import * as fsx from 'fs-extra';
+import { JsonFile } from '@microsoft/node-core-library';
+
 import IPackageJson from '../utilities/IPackageJson';
-import JsonFile from '../utilities/JsonFile';
 import Utilities from '../utilities/Utilities';
 import RushConfiguration from '../data/RushConfiguration';
-import { RushConstants } from '../RushConstants';
 
 /**
  * This represents the JSON data object for a project entry in the rush.json configuration file.
@@ -33,7 +33,7 @@ export default class RushConfigurationProject {
   private _reviewCategory: string;
   private _packageJson: IPackageJson;
   private _tempProjectName: string;
-  private _tempPackageJsonFilename: string;
+  private _unscopedTempProjectName: string;
   private _cyclicDependencyProjects: Set<string>;
   private _versionPolicyName: string;
   private _shouldPublish: boolean;
@@ -81,7 +81,7 @@ export default class RushConfigurationProject {
     }
 
     const packageJsonFilename: string = path.join(this._projectFolder, 'package.json');
-    this._packageJson = JsonFile.loadJsonFile(packageJsonFilename);
+    this._packageJson = JsonFile.load(packageJsonFilename);
 
     if (this._packageJson.name !== this._packageName) {
       throw new Error(`The package name "${this._packageName}" specified in rush.json does not`
@@ -93,12 +93,7 @@ export default class RushConfigurationProject {
     // The "rushProject.tempProjectName" is guaranteed to be unique name (e.g. by adding the "-2"
     // suffix).  Even after we strip the NPM scope, it will still be unique.
     // Example: "my-project-2"
-    const unscopedTempProjectName: string = Utilities.parseScopedPackageName(tempProjectName).name;
-
-    // Example: "C:\MyRepo\common\temp\projects\my-project-2\package.json"
-    this._tempPackageJsonFilename = path.join(rushConfiguration.commonTempFolder,
-      RushConstants.rushTempProjectsFolderName, unscopedTempProjectName,
-      RushConstants.packageJsonFilename);
+    this._unscopedTempProjectName = Utilities.parseScopedPackageName(tempProjectName).name;
 
     this._cyclicDependencyProjects = new Set<string>();
     if (projectJson.cyclicDependencyProjects) {
@@ -184,12 +179,12 @@ export default class RushConfigurationProject {
   }
 
   /**
-   * The absolute path of the package.json file for the temp project.
+   * The unscoped temporary project name
    *
-   * Example: "C:\MyRepo\common\temp\projects\my-project-2\package.json"
+   * Example: "my-project-2"
    */
-  public get tempPackageJsonFilename(): string {
-    return this._tempPackageJsonFilename;
+  public get unscopedTempProjectName(): string {
+    return this._unscopedTempProjectName;
   }
 
   /**

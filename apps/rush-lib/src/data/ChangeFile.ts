@@ -6,9 +6,8 @@ import * as path from 'path';
 import gitInfo = require('git-repo-info');
 
 import RushConfiguration from './RushConfiguration';
-import { RushConstants } from '../RushConstants';
 
-import { IChangeFile } from './ChangeManagement';
+import { IChangeFile, IChangeInfo } from './ChangeManagement';
 
 /**
  * This class represents a single change file.
@@ -27,7 +26,29 @@ export class ChangeFile {
   }
 
   /**
-   * Write the change file to disk in sync mode
+   * Adds a change entry into the change file
+   * @param data - change information
+   */
+  public addChange(data: IChangeInfo): void {
+    this._changeFileData.changes.push(data);
+  }
+
+  /**
+   * Gets all the change entries about the specified package from the change file.
+   * @param packageName - package name
+   */
+  public getChanges(packageName: string): IChangeInfo[] {
+    const changes: IChangeInfo[] = [];
+    for (const info of this._changeFileData.changes) {
+      if (info.packageName === packageName) {
+        changes.push(info);
+      }
+    }
+    return changes;
+  }
+
+  /**
+   * Writes the change file to disk in sync mode
    */
   public writeSync(): void {
     const filePath: string = this.generatePath();
@@ -36,7 +57,7 @@ export class ChangeFile {
   }
 
   /**
-   * Generate a file path for storing the change file to disk
+   * Generates a file path for storing the change file to disk
    */
   public generatePath(): string {
     let branch: string = undefined;
@@ -50,8 +71,7 @@ export class ChangeFile {
     const filename: string = (branch ?
       this._escapeFilename(`${branch}_${this._getTimestamp()}.json`) :
       `${this._getTimestamp()}.json`);
-    const filePath: string = path.join(this._rushConfiguration.commonFolder,
-      RushConstants.changeFilesFolderName,
+    const filePath: string = path.join(this._rushConfiguration.changesFolder,
       ...this._changeFileData.packageName.split('/'),
       filename);
     return filePath;

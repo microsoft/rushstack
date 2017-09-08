@@ -1,0 +1,57 @@
+{
+  "title": "copy-static-assets Configuration",
+  "description": "Defines which static assets should be copied from the src directory to the lib directory",
+
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "includeExtensions": {
+      "title": "Include Extensions",
+      "description": "list of extensions to be copied",
+
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "excludeExtensions": {
+      "title": "Exclude Extensions",
+      "description": "list of extensions not to be copied. Takes prescedence over includeExtensions",
+
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "includeFiles": {
+      "title": "Include Files",
+      "description": "list of globs to be copied. Takes prescedence over extensions",
+
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "excludeFiles": {
+      "title": "Exclude Files",
+      "description": "list of globs not to be copied. Takes precedence over includeFiles",
+
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
