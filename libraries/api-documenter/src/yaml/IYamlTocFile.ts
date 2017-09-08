@@ -5,8 +5,23 @@
  * A node in the navigation hierarchy for the table of contents.
  */
 export interface IYamlTocItem {
+  /**
+   * The title to display
+   */
   name: string;
+
+  /**
+   * If specified, the hyperlink will point to the API with this UID
+   */
+  uid?: string;
+  /**
+   * IF specified, the hyperlink will point to this URL, which may be a relative URL path
+   */
   href?: string;
+
+  /**
+   * Child nodes in the hierarchy
+   */
   items?: IYamlTocItem[];
 }
 

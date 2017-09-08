@@ -145,7 +145,7 @@ export class YamlGenerator {
 
       const tocItem: IYamlTocItem = {
         name: RenderingHelpers.getUnscopedPackageName(docItem.name),
-        href: this._getRelativeUrlForDocItem(docItem, this._outputFolder)
+        uid: this._getUid(docItem)
       };
 
       tocItems.push(tocItem);
@@ -301,44 +301,11 @@ export class YamlGenerator {
           // Eventually we should introduce a warnings file
           console.error('==> UNRESOLVED REFERENCE: ' + JSON.stringify(args.reference));
         } else {
-          // We will calculate a relativeUrl to the nearest non-embedded DocItem.
-          // (The rest will be determined by the URL fragment.)
-          let nonEmbeddedDocItem: DocItem = result.docItem;
-          while (this._shouldEmbed(nonEmbeddedDocItem.kind) && nonEmbeddedDocItem.parent) {
-            nonEmbeddedDocItem = nonEmbeddedDocItem.parent;
-          }
-
-          const currentFolder: string = path.dirname(this._getYamlFilePath(containingDocItem));
-          const relativeUrl: string = this._getRelativeUrlForDocItem(nonEmbeddedDocItem, currentFolder);
-
-          // Do we need to link to a fragment within the page?
-          if (nonEmbeddedDocItem !== result.docItem) {
-            const urlFragment: string = this._getEmbeddedUrlFragment(result.docItem);
-            args.prefix = '[';
-            args.suffix = `](${relativeUrl}#${urlFragment})`;
-          } else {
-            args.prefix = '[';
-            args.suffix = `](${relativeUrl})`;
-          }
-
+          args.prefix = '[';
+          args.suffix = `](xref:${this._getUid(result.docItem)})`;
         }
       }
     });
-  }
-
-  // Returns a relative URL such as "../package/MyClass"
-  private _getRelativeUrlForDocItem(docItem: DocItem, currentFolder: string): string {
-    const targetFilePath: string = this._getYamlFilePath(docItem);
-    const relativePath: string = path.relative(currentFolder, targetFilePath);
-    let relativeUrl: string = relativePath
-      .replace(/[\\]/g, '/') // replace all backslashes with slashes
-      .replace(/\.[^\.\\/]+$/, ''); // remove file extension
-
-    if (relativeUrl.substr(0, 1) !== '.') {
-      // If the path doesn't already start with "./", then add this prefix.
-      relativeUrl = './' + relativeUrl;
-    }
-    return relativeUrl;
   }
 
   private _writeYamlFile(dataObject: {}, filePath: string, yamlMimeType: string,
@@ -382,15 +349,6 @@ export class YamlGenerator {
       }
     }
     return result;
-  }
-
-  /**
-   * Calculate the HTML anchor fragment for DocItems that are embedded in a web page containing
-   * other items.
-   * Example:  node_core_library_JsonFile_load
-   */
-  private _getEmbeddedUrlFragment(docItem: DocItem): string {
-    return this._getUid(docItem).replace(/\./g, '_'); // replace all periods with underscores
   }
 
   private _getYamlFilePath(docItem: DocItem): string {
