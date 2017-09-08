@@ -26,12 +26,12 @@ export class VersionMismatchFinder {
   }
 
   public getMismatches(): Array<string> {
-    return this._iterableToArray<string>(this._mismatches.keys());
+    return this._getKeys(this._mismatches);
   }
 
   public getVersionsOfMismatch(mismatch: string): Array<string> {
     return this._mismatches.has(mismatch)
-      ? this._iterableToArray<string>(this._mismatches.get(mismatch).keys())
+      ? this._getKeys(this._mismatches.get(mismatch))
       : undefined;
   }
 
@@ -82,12 +82,13 @@ export class VersionMismatchFinder {
     });
   }
 
-  private _iterableToArray<T>(iterable: Iterator<T>): T[] {
-    const b: T[] = [];
-    let a: IteratorResult<T>;
-    while ((a = iterable.next()) && !a.done) {
-      b.push(a.value);
-    }
-    return b;
+  // tslint:disable-next-line:no-any
+  private _getKeys(iterable: Map<string, any>): string[] {
+    const keys: string[] = [];
+    // tslint:disable-next-line:no-any
+    iterable.forEach((value: any, key: string) => {
+      keys.push(key);
+    });
+    return keys;
   }
 }

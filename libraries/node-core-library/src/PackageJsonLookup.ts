@@ -81,7 +81,7 @@ export class PackageJsonLookup {
    * @returns the name of the package (E.g. @microsoft/api-extractor)
    */
   public getPackageName(packageJsonPath: string): string {
-    let result: string = this._packageNameCache.get(packageJsonPath);
+    let result: string | undefined = this._packageNameCache.get(packageJsonPath);
     if (result !== undefined) {
       return result;
     }

@@ -17,7 +17,7 @@
     "lodash": "~4.15.0"
   },
   "devDependencies": {
-    "@types/lodash": "4.14.52",
+    "@types/lodash": "4.14.74",
     "@types/mocha": "2.2.38",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",

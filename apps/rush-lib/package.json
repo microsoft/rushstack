@@ -18,7 +18,6 @@
   "dependencies": {
     "@microsoft/node-core-library": "~0.2.7",
     "@microsoft/stream-collator": "~2.0.6",
-    "@types/es6-collections": "0.5.29",
     "@types/fs-extra": "0.0.37",
     "@types/node": "6.0.62",
     "@types/z-schema": "3.16.31",
@@ -36,7 +35,7 @@
     "gulp": "~3.9.1",
     "mocha": "~3.4.2",
     "sinon": "~1.17.3",
-    "@types/lodash": "4.14.52",
+    "@types/lodash": "4.14.74",
     "@types/sinon": "1.16.34",
     "@types/mocha": "2.2.38",
     "@types/chai": "3.4.34",

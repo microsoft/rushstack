@@ -7,8 +7,11 @@
     "moduleResolution": "node",
     "strictNullChecks": true,
     "types": [
-      "es6-collections",
       "node"
+    ],
+    "lib": [
+      "es5",
+      "es2015.collection"
     ]
   }
 }

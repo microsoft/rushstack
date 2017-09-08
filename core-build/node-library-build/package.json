@@ -15,7 +15,6 @@
     "test": "gulp"
   },
   "dependencies": {
-    "@types/es6-collections": "0.5.29",
     "@microsoft/gulp-core-build": "3.0.5",
     "@microsoft/gulp-core-build-mocha": "3.0.5",
     "@microsoft/gulp-core-build-typescript": "4.0.5",

@@ -21,7 +21,7 @@ const compilerOptions: ts.CompilerOptions = {
   experimentalDecorators: true,
   jsx: ts.JsxEmit.React,
   rootDir: ROOT_DIR,
-  types: [ 'es6-collections', 'webpack-env' ]
+  types: [ 'webpack-env', 'es6-collections' ]
 };
 
 const extractor: Extractor = new Extractor( {
