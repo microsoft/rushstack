@@ -21,11 +21,15 @@ import {
   IYamlSyntax,
   IYamlParameter
 } from './IYamlApiFile';
+import {
+  IYamlTocFile,
+  IYamlTocItem
+} from './IYamlTocFile';
 import { RenderingHelpers } from '../RenderingHelpers';
 import { MarkupBuilder } from '../MarkupBuilder';
 import { MarkdownRenderer, IMarkdownRenderApiLinkArgs } from '../MarkdownRenderer';
 
-const yamlSchema: JsonSchema = JsonSchema.fromFile(path.join(__dirname, 'typescript.schema.json'));
+const yamlApiSchema: JsonSchema = JsonSchema.fromFile(path.join(__dirname, 'typescript.schema.json'));
 
 /**
  * Writes documentation in the Universal Reference YAML file format, as defined by typescript.schema.json.
@@ -47,6 +51,8 @@ export class YamlGenerator {
     for (const docPackage of this._docItemSet.docPackages) {
       this._visitDocItems(docPackage, undefined);
     }
+
+    this._writeTocFile(this._docItemSet.docPackages);
   }
 
   private _visitDocItems(docItem: DocItem, parentYamlFile: IYamlApiFile | undefined): boolean {
@@ -75,7 +81,13 @@ export class YamlGenerator {
         }
       }
 
-      this._writeYamlFile(newYamlFile, docItem);
+      const yamlFilePath: string = this._getYamlFilePath(docItem);
+
+      if (docItem.kind === DocItemKind.Package) {
+        console.log('Writing ' + this._getYamlFilePath(docItem));
+      }
+
+      this._writeYamlFile(newYamlFile, yamlFilePath, 'UniversalReference', yamlApiSchema);
 
       if (parentYamlFile) {
         if (!parentYamlFile.references) {
@@ -91,6 +103,41 @@ export class YamlGenerator {
     }
 
     return true;
+  }
+
+  /**
+   * Write the table of contents
+   */
+  private _writeTocFile(docItems: DocItem[]): void {
+    const tocFile: IYamlTocFile = {
+      items: this._buildTocItems(docItems)
+    };
+    const tocFilePath: string = path.join(this._outputFolder, 'toc.yml');
+    console.log('Writing ' + tocFilePath);
+    this._writeYamlFile(tocFile, tocFilePath, '', undefined);
+  }
+
+  private _buildTocItems(docItems: DocItem[]): IYamlTocItem[] {
+    const tocItems: IYamlTocItem[] = [];
+    for (const docItem of docItems) {
+      if (this._shouldEmbed(docItem.kind)) {
+        // Don't generate table of contents items for embedded definitions
+        continue;
+      }
+
+      const tocItem: IYamlTocItem = {
+        name: docItem.name,
+        href: this._getRelativeUrlForDocItem(docItem, this._outputFolder)
+      };
+
+      tocItems.push(tocItem);
+
+      const childItems: IYamlTocItem[] = this._buildTocItems(docItem.children);
+      if (childItems.length > 0) {
+        tocItem.items = childItems;
+      }
+    }
+    return tocItems;
   }
 
   private _shouldEmbed(docItemKind: DocItemKind): boolean {
@@ -244,16 +291,7 @@ export class YamlGenerator {
           }
 
           const currentFolder: string = path.dirname(this._getYamlFilePath(containingDocItem));
-          const targetFilePath: string = this._getYamlFilePath(nonEmbeddedDocItem);
-          const relativePath: string = path.relative(currentFolder, targetFilePath);
-          let relativeUrl: string = relativePath
-            .replace(/[\\]/g, '/') // replace all backslashes with slashes
-            .replace(/\.[^\.\\/]+$/, ''); // remove file extension
-
-          if (relativeUrl.substr(0, 1) !== '.') {
-            // If the path doesn't already start with "./", then add this prefix.
-            relativeUrl = './' + relativeUrl;
-          }
+          const relativeUrl: string = this._getRelativeUrlForDocItem(nonEmbeddedDocItem, currentFolder);
 
           // Do we need to link to a fragment within the page?
           if (nonEmbeddedDocItem !== result.docItem) {
@@ -270,23 +308,42 @@ export class YamlGenerator {
     });
   }
 
-  private _writeYamlFile(yamlFile: IYamlApiFile, docItem: DocItem): void {
-    const yamlFilePath: string = this._getYamlFilePath(docItem);
+  // Returns a relative URL such as "../package/MyClass"
+  private _getRelativeUrlForDocItem(docItem: DocItem, currentFolder: string): string {
+    const targetFilePath: string = this._getYamlFilePath(docItem);
+    const relativePath: string = path.relative(currentFolder, targetFilePath);
+    let relativeUrl: string = relativePath
+      .replace(/[\\]/g, '/') // replace all backslashes with slashes
+      .replace(/\.[^\.\\/]+$/, ''); // remove file extension
 
-    if (docItem.kind === DocItemKind.Package) {
-      console.log('Writing ' + this._getYamlFilePath(docItem));
+    if (relativeUrl.substr(0, 1) !== '.') {
+      // If the path doesn't already start with "./", then add this prefix.
+      relativeUrl = './' + relativeUrl;
     }
+    return relativeUrl;
+  }
 
-    JsonFile.validateNoUndefinedMembers(yamlFile);
+  private _writeYamlFile(dataObject: {}, filePath: string, yamlMimeType: string,
+    schema: JsonSchema|undefined): void {
 
-    const stringified: string = '### YamlMime:UniversalReference\n' + yaml.safeDump(yamlFile, {
+    JsonFile.validateNoUndefinedMembers(dataObject);
+
+    let stringified: string = yaml.safeDump(dataObject, {
       lineWidth: 120
     });
+
+    if (yamlMimeType) {
+      stringified = `### YamlMime:${yamlMimeType}\n` + stringified;
+    }
+
     const normalized: string = stringified.split('\n').join('\r\n');
 
-    fsx.mkdirsSync(path.dirname(yamlFilePath));
-    fsx.writeFileSync(yamlFilePath, normalized);
-    yamlSchema.validateObject(yamlFile, yamlFilePath);
+    fsx.mkdirsSync(path.dirname(filePath));
+    fsx.writeFileSync(filePath, normalized);
+
+    if (schema) {
+      schema.validateObject(dataObject, filePath);
+    }
   }
 
   /**
