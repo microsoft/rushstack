@@ -2,6 +2,20 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "0.2.9",
+      "tag": "@microsoft/node-core-library_v0.2.9",
+      "date": "Fri, 08 Sep 2017 13:04:00 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "15489abe9063eb522c0adaff0f17ba7f9400c074",
+            "comment": "Improve error reporting for JsonFile.validateNoUndefinedMembers()"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.8",
       "tag": "@microsoft/node-core-library_v0.2.8",
       "date": "Fri, 08 Sep 2017 01:28:04 GMT",

@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@microsoft/api-extractor": "3.2.4",
-    "@microsoft/node-core-library": "~0.2.8",
+    "@microsoft/node-core-library": "~0.2.9",
     "colors": "~1.1.2",
     "fs-extra": "~0.26.7",
     "js-yaml": "~3.9.1"
