@@ -236,11 +236,11 @@ export class YamlGenerator {
         break;
       case DocItemKind.Class:
         yamlItem.type = 'class';
-        this._populateYamlStructure(yamlItem, docItem);
+        this._populateYamlClassOrInterface(yamlItem, docItem);
         break;
       case DocItemKind.Interface:
         yamlItem.type = 'interface';
-        this._populateYamlStructure(yamlItem, docItem);
+        this._populateYamlClassOrInterface(yamlItem, docItem);
         break;
       case DocItemKind.Method:
         yamlItem.type = 'method';
@@ -268,7 +268,7 @@ export class YamlGenerator {
     return yamlItem as IYamlItem;
   }
 
-  private _populateYamlStructure(yamlItem: Partial<IYamlItem>, docItem: DocItem): void {
+  private _populateYamlClassOrInterface(yamlItem: Partial<IYamlItem>, docItem: DocItem): void {
     const apiStructure: IApiClass | IApiInterface = docItem.apiItem as IApiClass | IApiInterface;
 
     let text: string = '';

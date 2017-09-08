@@ -14,6 +14,7 @@ export interface IYamlTocItem {
    * If specified, the hyperlink will point to the API with this UID
    */
   uid?: string;
+
   /**
    * IF specified, the hyperlink will point to this URL, which may be a relative URL path
    */
