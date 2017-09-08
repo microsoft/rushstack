@@ -1,6 +1,6 @@
 {
   "npmVersion": "4.5.0",
-  "rushMinimumVersion": "3.0.12",
+  "rushMinimumVersion": "3.0.15",
   "nodeSupportedVersionRange": ">=6.9.0 <7.0.0",
   "projectFolderMinDepth": 1,
 
@@ -159,7 +159,10 @@
       "packageName": "@microsoft/node-core-library",
       "projectFolder": "libraries/node-core-library",
       "reviewCategory": "libraries",
-      "shouldPublish": false
+      "shouldPublish": true,
+      "cyclicDependencyProjects": [
+        "@microsoft/node-library-build"
+      ]
     },
     {
       "packageName": "@microsoft/package-deps-hash",

@@ -1,0 +1,87 @@
+{
+  "name": "@microsoft/node-core-library",
+  "entries": [
+    {
+      "version": "0.2.9",
+      "tag": "@microsoft/node-core-library_v0.2.9",
+      "date": "Fri, 08 Sep 2017 13:04:00 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "15489abe9063eb522c0adaff0f17ba7f9400c074",
+            "comment": "Improve error reporting for JsonFile.validateNoUndefinedMembers()"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.8",
+      "tag": "@microsoft/node-core-library_v0.2.8",
+      "date": "Fri, 08 Sep 2017 01:28:04 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nick Pape <nickpape@users.noreply.github.com>",
+            "commit": "bb96549aa8508ff627a0cae5ee41ae0251f2777d",
+            "comment": "Deprecate @types/es6-coll ections in favor of built-in typescript typings 'es2015.collection' a nd 'es2015.iterable'"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.7",
+      "tag": "@microsoft/node-core-library_v0.2.7",
+      "date": "Thu, 07 Sep 2017 13:04:35 GMT",
+      "comments": {}
+    },
+    {
+      "version": "0.2.6",
+      "tag": "@microsoft/node-core-library_v0.2.6",
+      "date": "Thu, 07 Sep 2017 00:11:12 GMT",
+      "comments": {}
+    },
+    {
+      "version": "0.2.5",
+      "tag": "@microsoft/node-core-library_v0.2.5",
+      "date": "Wed, 06 Sep 2017 13:03:42 GMT",
+      "comments": {}
+    },
+    {
+      "version": "0.2.4",
+      "tag": "@microsoft/node-core-library_v0.2.4",
+      "date": "Tue, 05 Sep 2017 19:03:56 GMT",
+      "comments": {}
+    },
+    {
+      "version": "0.2.3",
+      "tag": "@microsoft/node-core-library_v0.2.3",
+      "date": "Sat, 02 Sep 2017 01:04:26 GMT",
+      "comments": {}
+    },
+    {
+      "version": "0.2.2",
+      "tag": "@microsoft/node-core-library_v0.2.2",
+      "date": "Thu, 31 Aug 2017 18:41:18 GMT",
+      "comments": {}
+    },
+    {
+      "version": "0.2.1",
+      "tag": "@microsoft/node-core-library_v0.2.1",
+      "date": "Thu, 31 Aug 2017 17:46:25 GMT",
+      "comments": {}
+    },
+    {
+      "version": "0.2.0",
+      "tag": "@microsoft/node-core-library_v0.2.0",
+      "date": "Wed, 30 Aug 2017 01:04:34 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial implementation of DiffTest, JsonFile, and PackageJsonLookup"
+          }
+        ]
+      }
+    }
+  ]
+}

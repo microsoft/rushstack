@@ -20,5 +20,6 @@
 
 ## Project specific definitions
 # -----------------------------
+!karma.config.js
 
 # (Add your exceptions here)

@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-karma",
-  "version": "2.3.11",
+  "version": "4.0.6",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -15,7 +15,7 @@
     "test": "gulp"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "2.9.6",
+    "@microsoft/gulp-core-build": "3.0.6",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "gulp-karma": "~0.0.5",
@@ -33,7 +33,7 @@
     "phantomjs-prebuilt": "~2.1.6",
     "sinon": "~1.17.3",
     "sinon-chai": "~2.8.0",
-    "webpack": "~1.13.0"
+    "webpack": "~3.5.5"
   },
   "devDependencies": {
     "@microsoft/node-library-build": "~3.2.0",

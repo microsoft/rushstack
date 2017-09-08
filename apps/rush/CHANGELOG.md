@@ -1,6 +1,25 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 21 Jul 2017 22:34:44 GMT and should not be manually modified.
+This log was last generated on Thu, 07 Sep 2017 00:16:44 GMT and should not be manually modified.
+
+## 3.0.16
+Wed, 6 Sep 2017 18:24:39 GMT
+
+### Patches
+
+- Fix an issue running 'rush install' after adding a new project
+
+## 3.0.15
+Wed, 30 Aug 2017 18:24:39 GMT
+
+### Patches
+
+- Replace the temp_modules/*/package.json files with TGZ files
+- Add repositoryUrl to RushConfiguration to track remote repository
+- Use the new Json API from node-core-library
+- Add two new methods to ChangeFile class
+- Introduce an experimental "rush version" action to manage project versions based on version policy
+- Make "rush generate" not throw if there is a problem reading the shrinkwrap file
 
 ## 3.0.12
 Fri, Jul 21, 2017 22:30:12 PM
@@ -222,7 +241,7 @@ Sun, 22 Jan 2017 02:04:57 GMT
 
 ### Patches
 
-- Update temp_modules when versions are bumped.
+- Update temp_modules when versions are bumped. 
 
 ## 1.4.1
 Tue, 03 Jan 2017 21:52:49 GMT

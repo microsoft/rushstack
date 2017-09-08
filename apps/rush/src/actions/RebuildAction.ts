@@ -10,12 +10,12 @@ import {
   CommandLineStringListParameter,
   ICommandLineActionOptions
 } from '@microsoft/ts-command-line';
+import { JsonFile } from '@microsoft/node-core-library';
 import {
   ErrorDetectionMode,
   ErrorDetector,
   IErrorDetectionRule,
   IRushLinkJson,
-  JsonFile,
   RushConfigurationProject,
   Stopwatch,
   TestErrorDetector,
@@ -114,7 +114,7 @@ export default class RebuildAction extends BaseRushAction {
         `${os.EOL}Did you run "rush link"?`);
     }
     this.eventHooksManager.handle(Event.preRushBuild);
-    this._rushLinkJson = JsonFile.loadJsonFile(this.rushConfiguration.rushLinkJsonFilename);
+    this._rushLinkJson = JsonFile.load(this.rushConfiguration.rushLinkJsonFilename);
 
     const stopwatch: Stopwatch = Stopwatch.start();
 
@@ -236,7 +236,10 @@ export default class RebuildAction extends BaseRushAction {
    * Collects all downstream dependents of a certain project
    */
   private _collectAllDependents(project: string): Set<string> {
-    const deps: Set<string> = new Set<string>(this._dependentList.get(project));
+    const deps: Set<string> = new Set<string>();
+    this._dependentList.get(project).forEach((dep) => {
+      deps.add(dep);
+    });
     deps.forEach(dep => this._collectAllDependents(dep).forEach(innerDep => deps.add(innerDep)));
     return deps;
   }

@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import {
-  IDocMethod
-} from '@microsoft/api-extractor/lib/IDocItem';
+  IApiMethod
+} from '@microsoft/api-extractor';
 
 export class RenderingHelpers {
 
@@ -31,24 +31,6 @@ export class RenderingHelpers {
   }
 
   /**
-   * Generates a documentation ID based on the provided scope elements.
-   * A documentation ID is a string that  uniquely identifies an object in
-   * the API documentation web site, and is used e.g. for creating internal hyperlinks.
-   */
-  public static getDocId(packageName: string, exportName?: string, memberName?: string): string {
-    let result: string = RenderingHelpers.getUnscopedPackageName(packageName);
-    if (exportName) {
-      result += '.' + exportName;
-      if (memberName === '__constructor') {
-        result += '.' + '-ctor';
-      } else if (memberName) {
-        result += '.' + memberName;
-      }
-    }
-    return result.toLowerCase();
-  }
-
-  /**
    * Strips the scope from an NPM package name.  For example, given "@microsoft/decorators"
    * this function would return "decorators".
    */
@@ -58,9 +40,21 @@ export class RenderingHelpers {
   }
 
   /**
+   * Creates a scoped package name by assembling the scope name and unscoped package name.
+   * For example, getScopedPackageName("", "example") returns "example", whereas
+   * getScopedPackageName("@ms", "example") returns "@ms/example".
+   */
+  public static getScopedPackageName(scopeName: string, packageName: string): string {
+    if (scopeName) {
+      return scopeName + '/' + packageName;
+    }
+    return packageName;
+  }
+
+  /**
    * Generates a concise signature for a function.  Example: "getArea(width, height)"
    */
-  public static getConciseSignature(methodName: string, method: IDocMethod): string {
+  public static getConciseSignature(methodName: string, method: IApiMethod): string {
     return methodName + '(' + Object.keys(method.parameters).join(', ') + ')';
   }
 }

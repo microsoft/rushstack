@@ -4,9 +4,10 @@
 import * as ts from 'typescript';
 import * as fsx from 'fs-extra';
 import * as path from 'path';
-import ApiPackage from './definitions/ApiPackage';
+import { PackageJsonLookup } from '@microsoft/node-core-library';
+
+import AstPackage from './ast/AstPackage';
 import DocItemLoader from './DocItemLoader';
-import PackageJsonLookup from './PackageJsonLookup';
 
 export type ApiErrorHandler = (message: string, fileName: string, lineNumber: number) => void;
 
@@ -53,7 +54,7 @@ export interface IExtractorAnalyzeOptions {
 
 /**
  * The main entry point for the "api-extractor" utility.  The Analyzer object invokes the
- * TypeScript Compiler API to analyze a project, and constructs the ApiItem
+ * TypeScript Compiler API to analyze a project, and constructs the AstItem
  * abstract syntax tree.
  *
  * @public
@@ -61,7 +62,7 @@ export interface IExtractorAnalyzeOptions {
 export default class Extractor {
   public readonly errorHandler: ApiErrorHandler;
   public typeChecker: ts.TypeChecker;
-  public package: ApiPackage;
+  public package: AstPackage;
   /**
    * One DocItemLoader is needed per analyzer to look up external API members
    * as needed.
@@ -122,11 +123,11 @@ export default class Extractor {
     // Assign _packageFolder by probing upwards from entryPointFile until we find a package.json
     const currentPath: string = path.resolve(options.entryPointFile);
     // This is guaranteed to succeed since we do check prior to this point
-    this._packageFolder = this.packageJsonLookup.tryFindPackagePathUpwards(currentPath);
+    this._packageFolder = this.packageJsonLookup.tryGetPackageFolder(currentPath);
 
-    this.package = new ApiPackage(this, rootFile); // construct members
+    this.package = new AstPackage(this, rootFile); // construct members
     this.package.completeInitialization(); // creates ApiDocumentation
-    this.package.visitTypeReferencesForApiItem();
+    this.package.visitTypeReferencesForAstItem();
   }
 
   /**

@@ -1,6 +1,65 @@
 # Change Log - @microsoft/web-library-build
 
-This log was last generated on Thu, 24 Aug 2017 22:44:12 GMT and should not be manually modified.
+This log was last generated on Fri, 08 Sep 2017 01:28:04 GMT and should not be manually modified.
+
+## 4.0.6
+Fri, 08 Sep 2017 01:28:04 GMT
+
+### Patches
+
+- Deprecate @types/es6-collections in favor of built-in typescript typings 'es2015.collection' and 'es2015.iterable'
+
+## 4.0.5
+Thu, 07 Sep 2017 13:04:35 GMT
+
+*Changes not tracked*
+
+## 4.0.4
+Thu, 07 Sep 2017 00:11:12 GMT
+
+*Changes not tracked*
+
+## 4.0.3
+Wed, 06 Sep 2017 13:03:42 GMT
+
+*Changes not tracked*
+
+## 4.0.2
+Tue, 05 Sep 2017 19:03:56 GMT
+
+*Changes not tracked*
+
+## 4.0.1
+Sat, 02 Sep 2017 01:04:26 GMT
+
+*Changes not tracked*
+
+## 4.0.0
+Thu, 31 Aug 2017 18:41:18 GMT
+
+### Breaking changes
+
+- Fix compatibility issues with old releases, by incrementing the major version number
+
+## 3.2.16
+Thu, 31 Aug 2017 17:46:25 GMT
+
+*Changes not tracked*
+
+## 3.2.15
+Thu, 31 Aug 2017 13:04:19 GMT
+
+*Changes not tracked*
+
+## 3.2.14
+Wed, 30 Aug 2017 22:08:21 GMT
+
+*Changes not tracked*
+
+## 3.2.13
+Wed, 30 Aug 2017 01:04:34 GMT
+
+*Changes not tracked*
 
 ## 3.2.12
 Thu, 24 Aug 2017 22:44:12 GMT

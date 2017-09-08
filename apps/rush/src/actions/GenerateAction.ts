@@ -69,18 +69,23 @@ export default class GenerateAction extends BaseRushAction {
     const committedShrinkwrapFilename: string = this.rushConfiguration.committedShrinkwrapFilename;
     const tempShrinkwrapFilename: string = this.rushConfiguration.tempShrinkwrapFilename;
 
-    const shrinkwrapFile: ShrinkwrapFile | undefined
-      = ShrinkwrapFile.loadFromFile(committedShrinkwrapFilename);
+    try {
+      const shrinkwrapFile: ShrinkwrapFile | undefined
+        = ShrinkwrapFile.loadFromFile(committedShrinkwrapFilename);
 
-    if (shrinkwrapFile
-      && !this._forceParameter.value
-      && installManager.createTempModulesAndCheckShrinkwrap(shrinkwrapFile)) {
+      if (shrinkwrapFile
+        && !this._forceParameter.value
+        && installManager.createTempModulesAndCheckShrinkwrap(shrinkwrapFile)) {
+        console.log();
+        console.log(colors.yellow('Skipping generate, since all project dependencies are already satisfied.'));
+        console.log();
+        console.log(`If you want to force an upgrade to the latest compatible versions, use ` +
+          `${colors.yellow('rush generate --force')}. Otherwise, just run ${colors.green('rush install')}.)`);
+        return;
+      }
+    } catch (ex) {
       console.log();
-      console.log(colors.yellow('Skipping generate, since all project dependencies are already satisfied.'));
-      console.log();
-      console.log(`If you want to force an upgrade to the latest compatible versions, use ` +
-        `${colors.yellow('rush generate --force')}. Otherwise, just run ${colors.green('rush install')}.)`);
-      return;
+      console.log('There was a problem reading the shrinkwrap file. Proceeeding with "rush generate".');
     }
 
     installManager.ensureLocalPnpmTool(false);

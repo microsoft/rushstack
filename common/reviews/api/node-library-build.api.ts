@@ -26,6 +26,15 @@ class CleanTask extends GulpTask<void> {
 }
 
 // @public
+class CopyStaticAssetsTask extends GulpTask<ICopyStaticAssetsTaskConfig> {
+  constructor();
+  // (undocumented)
+  executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream;
+  // (undocumented)
+  loadSchema(): Object;
+}
+
+// @public
 class CopyTask extends GulpTask<ICopyConfig> {
   constructor();
   executeTask(gulp: typeof Gulp, completeCallback: (error?: string | Error) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
@@ -135,6 +144,18 @@ interface ICopyConfig {
 }
 
 // @public
+interface ICopyStaticAssetsTaskConfig {
+  // (undocumented)
+  excludeExtensions?: string[];
+  // (undocumented)
+  excludeFiles?: string[];
+  // (undocumented)
+  includeExtensions?: string[];
+  // (undocumented)
+  includeFiles?: string[];
+}
+
+// @public
 interface ICustomGulpTask {
   // (undocumented)
   (gulp: typeof Gulp | GulpProxy, buildConfig: IBuildConfig, done?: (failure?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
@@ -175,14 +196,6 @@ export declare function replaceConfig(config: IBuildConfig): void;
 
 // @public
 export declare function reset(): void;
-
-// @public
-class SchemaValidator {
-  static readAndValidateJson < TResult >(dataFilePath: string, schemaFilePath: string): TResult;
-  // (undocumented)
-  static readCommentedJsonFile < TResult >(filename: string): TResult;
-  static validate(data: Object, schema: Object, dataFilePath?: string): void;
-}
 
 // @public
 export declare function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutable;
@@ -250,6 +263,7 @@ export declare function watch(watchMatch: string | string[], taskExecutable: IEx
 // WARNING: Unsupported export: defaultTasks
 // WARNING: Unsupported export: cleanFlag
 // WARNING: Unsupported export: clean
+// WARNING: Unsupported export: copyStaticAssets
 // WARNING: Unsupported export: apiExtractor
 // WARNING: Unsupported export: typescript
 // WARNING: Unsupported export: tslint

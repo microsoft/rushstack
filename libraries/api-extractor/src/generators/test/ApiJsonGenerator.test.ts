@@ -6,7 +6,7 @@
 import * as ts from 'typescript';
 import * as path from 'path';
 import Extractor from '../../Extractor';
-import ApiJsonGenerator from '../../generators/ApiJsonGenerator';
+import ApiJsonGenerator from '../ApiJsonGenerator';
 import TestFileComparer from '../../TestFileComparer';
 /* tslint:disable:no-function-expression - Mocha uses a poorly scoped "this" pointer */
 

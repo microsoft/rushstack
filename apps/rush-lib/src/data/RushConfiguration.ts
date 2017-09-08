@@ -3,17 +3,15 @@
 
 import * as path from 'path';
 import * as fsx from 'fs-extra';
-import * as os from 'os';
 import * as semver from 'semver';
+import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
 
 import rushVersion from '../rushVersion';
-import JsonFile from '../utilities/JsonFile';
 import RushConfigurationProject, { IRushConfigurationProjectJson } from './RushConfigurationProject';
 import { PinnedVersionsConfiguration } from './PinnedVersionsConfiguration';
 import Utilities from '../utilities/Utilities';
 import { RushConstants } from '../RushConstants';
 import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
-import JsonSchemaValidator from '../utilities/JsonSchemaValidator';
 import EventHooks from './EventHooks';
 import { VersionPolicyConfiguration } from './VersionPolicyConfiguration';
 
@@ -102,7 +100,11 @@ export interface IRushLinkJson {
  * @public
  */
 export default class RushConfiguration {
+  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(path.join(__dirname, '../rush.schema.json'));
+
+  private _rushJsonFile: string;
   private _rushJsonFolder: string;
+  private _changesFolder: string;
   private _commonFolder: string;
   private _commonTempFolder: string;
   private _commonRushConfigFolder: string;
@@ -143,7 +145,7 @@ export default class RushConfiguration {
    * an RushConfiguration object.
    */
   public static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration {
-    const rushConfigurationJson: IRushConfigurationJson = JsonFile.loadJsonFile(rushJsonFilename);
+    const rushConfigurationJson: IRushConfigurationJson = JsonFile.load(rushJsonFilename);
 
     // Check the Rush version *before* we validate the schema, since if the version is outdated
     // then the schema may have changed.
@@ -157,15 +159,7 @@ export default class RushConfiguration {
       }
     }
 
-    const rushSchemaFilename: string = path.join(__dirname, '../rush.schema.json');
-    const validator: JsonSchemaValidator = JsonSchemaValidator.loadFromFile(rushSchemaFilename);
-
-    validator.validateObject(rushConfigurationJson, (errorDescription: string) => {
-      const errorMessage: string = `Error parsing file '${rushJsonFilename}':`
-        + os.EOL + errorDescription;
-
-      throw new Error(errorMessage);
-    });
+    RushConfiguration._jsonSchema.validateObject(rushConfigurationJson, rushJsonFilename);
 
     return new RushConfiguration(rushConfigurationJson, rushJsonFilename);
   }
@@ -267,10 +261,24 @@ export default class RushConfiguration {
   }
 
   /**
+   * The Rush configuration file
+   */
+  public get rushJsonFile(): string {
+    return this._rushJsonFile;
+  }
+
+  /**
    * The folder that contains rush.json for this project.
    */
   public get rushJsonFolder(): string {
     return this._rushJsonFolder;
+  }
+
+  /**
+   * The folder that contains all change files.
+   */
+  public get changesFolder(): string {
+    return this._changesFolder;
   }
 
   /**
@@ -530,7 +538,7 @@ export default class RushConfiguration {
           + ` requires nodeSupportedVersionRange="${rushConfigurationJson.nodeSupportedVersionRange}")`);
       }
     }
-
+    this._rushJsonFile = rushJsonFilename;
     this._rushJsonFolder = path.dirname(rushJsonFilename);
 
     this._commonFolder = path.resolve(path.join(this._rushJsonFolder, RushConstants.commonFolderName));
@@ -540,6 +548,8 @@ export default class RushConfiguration {
 
     this._commonTempFolder = path.join(this._commonFolder, RushConstants.rushTempFolderName);
     this._pnpmStoreFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
+
+    this._changesFolder = path.join(this._commonFolder, RushConstants.changeFilesFolderName);
 
     this._committedShrinkwrapFilename = path.join(this._commonRushConfigFolder, RushConstants.npmShrinkwrapFilename);
     this._tempShrinkwrapFilename = path.join(this._commonTempFolder, RushConstants.npmShrinkwrapFilename);

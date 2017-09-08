@@ -1,6 +1,23 @@
 # Change Log - @microsoft/package-deps-hash
 
-This log was last generated on Tue, 22 Aug 2017 13:04:22 GMT and should not be manually modified.
+This log was last generated on Fri, 08 Sep 2017 01:28:04 GMT and should not be manually modified.
+
+## 2.0.9
+Fri, 08 Sep 2017 01:28:04 GMT
+
+### Patches
+
+- Deprecate @types/es6-coll ections in favor of built-in typescript typings 'es2015.collection' a nd 'es2015.iterable'
+
+## 2.0.8
+Thu, 31 Aug 2017 18:41:18 GMT
+
+*Changes not tracked*
+
+## 2.0.7
+Wed, 30 Aug 2017 01:04:34 GMT
+
+*Changes not tracked*
 
 ## 2.0.6
 Tue, 22 Aug 2017 13:04:22 GMT

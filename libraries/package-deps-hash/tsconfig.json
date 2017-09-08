@@ -7,8 +7,11 @@
     "moduleResolution": "node",
     "types": [
       "node",
-      "mocha",
-      "es6-collections"
+      "mocha"
+    ],
+    "lib": [
+      "es5",
+      "es2015.collection"
     ]
   }
 }

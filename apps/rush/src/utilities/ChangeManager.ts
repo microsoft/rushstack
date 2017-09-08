@@ -3,8 +3,12 @@
 
 import {
   IChangeInfo,
+  IChangelog,
+  IPackageJson,
   RushConfiguration,
-  RushConfigurationProject
+  RushConfigurationProject,
+  VersionPolicy,
+  VersionPolicyConfiguration
 } from '@microsoft/rush-lib';
 
 import PublishUtilities, {
@@ -25,7 +29,9 @@ export default class ChangeManager {
   private _allChanges: IChangeInfoHash;
   private _changeFiles: ChangeFiles;
 
-  constructor(private _rushConfiguration: RushConfiguration) {
+  constructor(private _rushConfiguration: RushConfiguration,
+    private _lockStepProjectsToExclude?: Set<string> | undefined
+  ) {
   }
 
   /**
@@ -48,7 +54,9 @@ export default class ChangeManager {
       this._allPackages,
       this._changeFiles,
       includeCommitDetails,
-      this._prereleaseToken);
+      this._prereleaseToken,
+      this._lockStepProjectsToExclude
+      );
     this._orderedChanges = PublishUtilities.sortChangeRequests(this._allChanges);
   }
 
@@ -64,28 +72,51 @@ export default class ChangeManager {
     return this._allPackages;
   }
 
+  public validateChanges(versionConfig: VersionPolicyConfiguration): void {
+    Object
+      .keys(this._allChanges)
+      .filter((key) => {
+        const versionPolicyName: string = this._rushConfiguration.getProjectByName(key).versionPolicyName;
+        if (versionPolicyName) {
+          const changeInfo: IChangeInfo = this._allChanges[key];
+          const versionPolicy: VersionPolicy = versionConfig.getVersionPolicy(versionPolicyName);
+          versionPolicy.validate(changeInfo.newVersion, key);
+        }
+      });
+  }
+
   /**
-   * Apply changes to package.json and change logs
-   * @param shouldCommit - If the value is true, package.json and change logs will be updated.
+   * Apply changes to package.json
+   * @param shouldCommit - If the value is true, package.json will be updated.
    * If the value is false, package.json and change logs will not be updated. It will only do a dry-run.
    */
-  public apply(shouldCommit: boolean): void {
+  public apply(shouldCommit: boolean): Map<string, IPackageJson> {
     if (!this.hasChanges()) {
       return;
     }
 
     // Apply all changes to package.json files.
-    PublishUtilities.updatePackages(this._allChanges, this._allPackages, shouldCommit,
-      this._prereleaseToken);
+    const updatedPackages: Map<string, IPackageJson> = PublishUtilities.updatePackages(
+      this._allChanges,
+      this._allPackages,
+      shouldCommit,
+      this._prereleaseToken,
+      this._lockStepProjectsToExclude);
 
+    return updatedPackages;
+  }
+
+  public updateChangelog(shouldCommit: boolean, updatedPackages?: Map<string, IPackageJson>): void {
     // Do not update changelog or delete the change files for prerelease.
     // Save them for the official release.
     if (!this._prereleaseToken.hasValue) {
       // Update changelogs.
-      ChangelogGenerator.updateChangelogs(this._allChanges, this._allPackages, shouldCommit);
+      const updatedChangelogs: IChangelog[] = ChangelogGenerator.updateChangelogs(this._allChanges,
+        this._allPackages,
+        shouldCommit);
 
       // Remove the change request files only if "-a" was provided.
-      this._changeFiles.deleteAll(shouldCommit);
+      this._changeFiles.deleteAll(shouldCommit, updatedChangelogs);
     }
   }
 }
