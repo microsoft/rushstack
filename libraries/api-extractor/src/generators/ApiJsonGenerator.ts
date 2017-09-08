@@ -21,7 +21,8 @@ import AstNamespace from '../ast/AstNamespace';
 import AstModuleVariable from '../ast/AstModuleVariable';
 import AstMethod from '../ast/AstMethod';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
-import { IApiReturnValue, IApiParameter } from '../api/ApiItem';
+import { IAedocParameter } from '../aedoc/ApiDocumentation';
+import { IApiReturnValue, IApiParameter, IApiNameMap } from '../api/ApiItem';
 import ApiJsonFile from '../api/ApiJsonFile';
 
 /**
@@ -168,9 +169,6 @@ export default class ApiJsonGenerator extends AstItemVisitor {
       return;
     }
 
-    for (const param of astFunction.params) {
-      this.visitApiParam(param, astFunction.documentation.parameters[param.name]);
-    }
     const returnValueNode: IApiReturnValue = {
       type: astFunction.returnType,
       description: astFunction.documentation.returnsMessage
@@ -179,7 +177,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
     const newNode: Object = {
       kind: ApiJsonFile.convertKindToJson(astFunction.kind),
       returnValue: returnValueNode,
-      parameters: astFunction.documentation.parameters,
+      parameters: this._createParameters(astFunction),
       deprecatedMessage: astFunction.inheritedDeprecatedMessage || [],
       summary: astFunction.documentation.summary || [],
       remarks: astFunction.documentation.remarks || [],
@@ -278,16 +276,12 @@ export default class ApiJsonGenerator extends AstItemVisitor {
       return;
     }
 
-    for (const param of astMethod.params) {
-      this.visitApiParam(param, astMethod.documentation.parameters[param.name]);
-    }
-
     let newNode: Object;
     if (astMethod.name === '__constructor') {
       newNode = {
         kind: ApiJsonFile.convertKindToJson(AstItemKind.Constructor),
         signature: astMethod.getDeclarationLine(),
-        parameters: astMethod.documentation.parameters,
+        parameters: this._createParameters(astMethod),
         deprecatedMessage: astMethod.inheritedDeprecatedMessage || [],
         summary: astMethod.documentation.summary || [],
         remarks: astMethod.documentation.remarks || []
@@ -305,7 +299,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
         isOptional: !!astMethod.isOptional,
         isStatic: !!astMethod.isStatic,
         returnValue: returnValueNode,
-        parameters: astMethod.documentation.parameters,
+        parameters: this._createParameters(astMethod),
         deprecatedMessage: astMethod.inheritedDeprecatedMessage || [],
         summary: astMethod.documentation.summary || [],
         remarks: astMethod.documentation.remarks || [],
@@ -316,15 +310,31 @@ export default class ApiJsonGenerator extends AstItemVisitor {
     refObject[astMethod.name] = newNode;
   }
 
-  protected visitApiParam(astParam: AstParameter, refObject?: Object): void {
-    if (!astParam.supportedName) {
-      return;
+  private _createParameters(astFunction: AstMethod | AstFunction): IApiNameMap<IApiParameter> {
+    const result: IApiNameMap<IApiParameter> = { };
+
+    for (const astParameter of astFunction.params) {
+      if (!astParameter.supportedName) {
+        continue; // skip parameter names with unusual characters
+      }
+
+      const apiParameter: IApiParameter = {
+        name: astParameter.name,
+        description: [],
+        isOptional: astParameter.isOptional,
+        isSpread: astParameter.isSpread,
+        type: astParameter.type || ''
+      };
+
+      const aedocParameter: IAedocParameter = astFunction.documentation.parameters[astParameter.name];
+      if (aedocParameter) {
+        apiParameter.description = aedocParameter.description;
+      }
+
+      result[astParameter.name] = apiParameter;
     }
 
-    if (refObject) {
-      (refObject as IApiParameter).isOptional = astParam.isOptional;
-      (refObject as IApiParameter).isSpread = astParam.isSpread;
-      (refObject as IApiParameter).type = astParam.type;
-    }
+    return result;
   }
+
 }

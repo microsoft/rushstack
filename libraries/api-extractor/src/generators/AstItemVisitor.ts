@@ -10,7 +10,6 @@ import AstStructuredType from '../ast/AstStructuredType';
 import AstMember from '../ast/AstMember';
 import AstMethod from '../ast/AstMethod';
 import AstNamespace from '../ast/AstNamespace';
-import AstParameter from '../ast/AstParameter';
 import AstProperty from '../ast/AstProperty';
 import AstModuleVariable from '../ast/AstModuleVariable';
 
@@ -66,8 +65,6 @@ abstract class AstItemVisitor {
   protected visitAstProperty(astProperty: AstProperty, refObject?: Object): void {
     this.visitAstMember(astProperty, refObject);
   }
-
-  protected abstract visitApiParam(astParam: AstParameter, refObject?: Object): void;
 }
 
 export default AstItemVisitor;
