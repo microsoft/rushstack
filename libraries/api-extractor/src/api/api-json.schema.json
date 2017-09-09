@@ -28,6 +28,22 @@
     },
 
     //---------------------------------------------------------------------------------------------
+    "paragraphDocElement": {
+      "description": "A documentation element representing a break between paragraphs",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of documentation element",
+          "type": "string",
+          "enum": [ "paragraphDocElement" ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
     "linkDocElement": {
       "description": "A documentation element representing a hyperlink",
       "type": "object",
@@ -90,6 +106,7 @@
           "items": {
             "oneOf": [
               { "$ref": "#/definitions/textDocElement" },
+              { "$ref": "#/definitions/paragraphDocElement" },
               { "$ref": "#/definitions/linkDocElement" }
             ]
           }
@@ -106,6 +123,7 @@
       "items": {
         "oneOf": [
           { "$ref": "#/definitions/textDocElement" },
+          { "$ref": "#/definitions/paragraphDocElement" },
           { "$ref": "#/definitions/linkDocElement" },
           { "$ref": "#/definitions/seeDocElement" }
         ]

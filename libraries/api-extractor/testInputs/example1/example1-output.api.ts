@@ -70,6 +70,7 @@ class MyClass {
   public field: number;
   // (undocumented)
   public myProp: number;
+  public paragraphTest(): void;
   // (undocumented)
   public test(): void;
 }

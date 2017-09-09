@@ -209,7 +209,7 @@ export default class ApiDocumentation {
     this.incompleteInheritdocs = [];
     this.releaseTag = ReleaseTag.None;
     const tokenizer: Tokenizer = new Tokenizer(this.originalAedoc, this.reportError);
-    this.summary = DocElementParser.parse(this, tokenizer);
+    this.summary = DocElementParser.getTrimmedSpan(DocElementParser.parse(this, tokenizer));
 
     let releaseTagCount: number = 0;
     let parsing: boolean = true;
@@ -233,12 +233,12 @@ export default class ApiDocumentation {
           case '@remarks':
             tokenizer.getToken();
             this._checkInheritDocStatus(token.tag);
-            this.remarks = DocElementParser.parse(this, tokenizer);
+            this.remarks = DocElementParser.getTrimmedSpan(DocElementParser.parse(this, tokenizer));
             break;
           case '@returns':
             tokenizer.getToken();
             this._checkInheritDocStatus(token.tag);
-            this.returnsMessage = DocElementParser.parse(this, tokenizer);
+            this.returnsMessage = DocElementParser.getTrimmedSpan(DocElementParser.parse(this, tokenizer));
             break;
           case '@param':
             tokenizer.getToken();
@@ -250,7 +250,7 @@ export default class ApiDocumentation {
             break;
           case '@deprecated':
             tokenizer.getToken();
-            this.deprecatedMessage = DocElementParser.parse(this, tokenizer);
+            this.deprecatedMessage = DocElementParser.getTrimmedSpan(DocElementParser.parse(this, tokenizer));
             if (!this.deprecatedMessage || this.deprecatedMessage.length === 0) {
               this.reportError(`deprecated description required after @deprecated AEDoc tag.`);
             }
@@ -311,13 +311,16 @@ export default class ApiDocumentation {
         }
       } else if (token.type === TokenType.Text)  {
         tokenizer.getToken();
-        // Shorten "This is too long text" to "This is..."
-        const MAX_LENGTH: number = 40;
-        let problemText: string = token.text.trim();
-        if (problemText.length > MAX_LENGTH) {
-          problemText = problemText.substr(0, MAX_LENGTH - 3).trim() + '...';
+
+        if (token.text.trim().length) {
+          // Shorten "This is too long text" to "This is..."
+          const MAX_LENGTH: number = 40;
+          let problemText: string = token.text.trim();
+          if (problemText.length > MAX_LENGTH) {
+            problemText = problemText.substr(0, MAX_LENGTH - 3).trim() + '...';
+          }
+          this.reportError(`Unexpected text in AEDoc comment: "${problemText}"`);
         }
-        this.reportError(`Unexpected text in AEDoc comment: "${problemText}"`);
       } else {
         tokenizer.getToken();
         // This would be a program bug
@@ -362,7 +365,7 @@ export default class ApiDocumentation {
 
       const paramDocElement: IAedocParameter = {
         name: name,
-        description: descriptionElements
+        description: DocElementParser.getTrimmedSpan(descriptionElements)
       };
       return paramDocElement;
     }

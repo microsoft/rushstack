@@ -22,6 +22,22 @@ export default class MyClass {
   public set myProp(value: number) {
     console.log(value);
   }
+
+  /**
+   *    This is   the
+   * first paragraph.
+   *
+   * This is the {@link MyClass} paragraph.
+   *
+   *
+   *
+   * This is the third paragraph
+   *
+   *
+   */
+  public paragraphTest(): void {
+    return;
+  }
 }
 
 class PrivateClass {

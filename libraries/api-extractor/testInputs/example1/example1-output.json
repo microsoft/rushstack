@@ -218,6 +218,54 @@
           "remarks": [],
           "isBeta": false
         },
+        "paragraphTest": {
+          "kind": "method",
+          "signature": "public paragraphTest(): void;",
+          "accessModifier": "public",
+          "isOptional": false,
+          "isStatic": false,
+          "returnValue": {
+            "type": "void",
+            "description": []
+          },
+          "parameters": {},
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "This is the first paragraph. "
+            },
+            {
+              "kind": "paragraphDocElement"
+            },
+            {
+              "kind": "textDocElement",
+              "value": " This is the "
+            },
+            {
+              "kind": "linkDocElement",
+              "referenceType": "code",
+              "scopeName": "",
+              "packageName": "example1",
+              "exportName": "MyClass",
+              "memberName": "",
+              "value": "MyClass"
+            },
+            {
+              "kind": "textDocElement",
+              "value": " paragraph. "
+            },
+            {
+              "kind": "paragraphDocElement"
+            },
+            {
+              "kind": "textDocElement",
+              "value": " This is the third paragraph"
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        },
         "test": {
           "kind": "method",
           "signature": "public test(): void;",

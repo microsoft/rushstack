@@ -91,6 +91,14 @@ export interface ICodeLinkElement extends IBaseDocElement {
 }
 
 /**
+ * A paragrpah separator, similar to <p /> in HTML.
+ * @alpha
+ */
+export interface IParagraphElement extends IBaseDocElement {
+  kind: 'paragraphDocElement';
+}
+
+/**
  * An element that denotes one of more elements to see for reference.
  *
  * Example:
@@ -116,4 +124,4 @@ export interface ISeeDocElement extends IBaseDocElement {
 export type ILinkDocElement = IHrefLinkElement | ICodeLinkElement;
 
 /** @alpha */
-export type IDocElement = ITextElement | ILinkDocElement | ISeeDocElement;
+export type IDocElement = ITextElement | ILinkDocElement | IParagraphElement | ISeeDocElement;

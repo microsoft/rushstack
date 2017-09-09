@@ -6,7 +6,8 @@ import {
   IDocElement,
   IHrefLinkElement,
   ICodeLinkElement,
-  ISeeDocElement
+  ISeeDocElement,
+  IParagraphElement
 } from './markup/OldMarkup';
 import ApiDefinitionReference, { IScopedPackageName } from './ApiDefinitionReference';
 import ApiDocumentation from './aedoc/ApiDocumentation';
@@ -47,6 +48,9 @@ export default class DocElementParser {
         case 'textDocElement':
           text += `${(docElement as ITextElement).value} `;
           break;
+        case 'paragraphDocElement':
+          text += '\n\n';
+          break;
         case 'linkDocElement':
           // links don't count towards the summary
           break;
@@ -66,7 +70,10 @@ export default class DocElementParser {
     if (!text) {
       return;
     }
-    return {kind: 'textDocElement', value: text} as ITextElement;
+    return {
+      kind: 'textDocElement',
+      value: text.replace(/\s+/g, ' ')
+    } as ITextElement;
   }
 
   public static parse(documentation: ApiDocumentation, tokenizer: Tokenizer): IDocElement[] {
@@ -121,8 +128,26 @@ export default class DocElementParser {
             break;
         }
       } else if (token.type === TokenType.Text) {
-        docElements.push({kind: 'textDocElement', value: token.text} as ITextElement);
-          tokenizer.getToken();
+        tokenizer.getToken();
+
+        let firstLoop: boolean = true;
+
+        for (const paragraph of token.text.split(/\n\s*\n/g)) {
+          if (!firstLoop) {
+            docElements.push({
+              kind: 'paragraphDocElement'
+            } as IParagraphElement);
+          }
+          firstLoop = false;
+
+          const normalizedParagraph: string = paragraph.replace(/\s+/g, ' ').trim();
+          if (normalizedParagraph) {
+            docElements.push({
+              kind: 'textDocElement',
+              value: ' ' + normalizedParagraph + ' '
+            } as ITextElement);
+          }
+        }
       } else {
         documentation.reportError(`Unidentifiable Token ${token.type} ${token.tag} "${token.text}"`);
       }
@@ -276,11 +301,9 @@ export default class DocElementParser {
     // If no resolvedAstItem found then nothing to inherit
     // But for the time being set the summary to a text object
     if (!resolvedAstItem) {
-      const textDocItem: IDocElement = {
-        kind: 'textDocElement',
-        value: `See documentation for ${tokenChunks[0]}`
-      } as ITextElement;
-      documentation.summary = [textDocItem];
+      documentation.summary = [
+        this.makeTextElement(`See documentation for ${tokenChunks[0]}`)
+      ];
       return;
     }
 
@@ -317,5 +340,37 @@ export default class DocElementParser {
     if (resolvedAstItem.deprecatedMessage.length > 0) {
       documentation.isDocInheritedDeprecated = true;
     }
+  }
+
+  /**
+   * For a span that will not be displayed adjacent to another span, this cleans it up:
+   * 1. Remove leading/trailing white space
+   * 2. Remove leading/trailing paragraph separators
+   */
+  public static getTrimmedSpan(docElements: IDocElement[]): IDocElement[] {
+    const span: IDocElement[] = [];
+    span.push(...docElements);
+
+    // Pop leading/trailing paragraph separators
+    while (span.length && span[0].kind === 'paragraphDocElement') {
+      span.shift();
+    }
+    while (span.length && span[span.length - 1].kind === 'paragraphDocElement') {
+      span.pop();
+    }
+
+    // Trim leading/trailing white space
+    if (span.length) {
+      const first: ITextElement = span[0] as ITextElement;
+      if (first.kind === 'textDocElement') {
+        first.value = first.value.replace(/^\s+/, ''); // trim left
+      }
+
+      const last: ITextElement = span[span.length - 1] as ITextElement;
+      if (last.kind === 'textDocElement') {
+        last.value = last.value.replace(/\s+$/, ''); // trim right
+      }
+    }
+    return span;
   }
 }

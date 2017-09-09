@@ -315,7 +315,7 @@
       "summary": [
         {
           "kind": "textDocElement",
-          "value": "Here we test that an error is reported when attempting to link to an internal API item."
+          "value": "Here we test that an error is reported when attempting to link to an internal API item. "
         },
         {
           "kind": "linkDocElement",

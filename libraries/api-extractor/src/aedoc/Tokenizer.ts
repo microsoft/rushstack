@@ -51,21 +51,24 @@ export default class Tokenizer {
     if (!docs) {
       return;
     }
-    const docEntries: string[] = TypeScriptHelpers.splitStringWithRegEx(docs, Tokenizer._aedocTagsRegex);
-    const sanitizedTokens: string[] =  this._sanitizeDocEntries(docEntries); // remove white space and empty entries
+    const docEntries: string[] = TypeScriptHelpers.splitStringWithRegEx(
+      docs.replace(/\r/g, ''), // CRLF -> LF
+      Tokenizer._aedocTagsRegex);
 
     // process each sanitized doc string to a Token object
     const tokens: Token[] = [];
-    let value: string;
-    for (let i: number = 0; i < sanitizedTokens.length; i++) {
+
+    for (let i: number = 0; i < docEntries.length; i++) {
       let token: Token;
-      value = sanitizedTokens[i];
-      if (value.charAt(0) === '@') {
-       token = new Token(TokenType.BlockTag, value);
-      } else if (value.charAt(0) === '{' && value.charAt(value.length - 1) === '}') {
-        token = this._tokenizeInline(value); // Can return undefined if invalid inline tag
-      } else {
-        token = new Token(TokenType.Text, '', value);
+      const untrimmed: string = docEntries[i];
+      const trimmed: string = untrimmed.replace(/\s+/g, ' ').trim();
+      if (trimmed.charAt(0) === '@') {
+        token = new Token(TokenType.BlockTag, trimmed);
+      } else if (trimmed.charAt(0) === '{' && trimmed.charAt(trimmed.length - 1) === '}') {
+        token = this._tokenizeInline(trimmed); // Can return undefined if invalid inline tag
+      } else if (untrimmed.length) {
+        // If it's not a tag, pass through the untrimmed text.
+        token = new Token(TokenType.Text, '', untrimmed);
       }
 
       if (token) {
@@ -121,26 +124,5 @@ export default class Tokenizer {
     // This is a program bug
     this._reportError('Invalid call to _tokenizeInline()');
     return;
-  }
-
-  /**
-   * Trims whitespace on either end of the entry (which is just a string within the doc comments),
-   * replaces \r and \n's with single whitespace, and removes empty entries.
-   *
-   * @param docEntries - Array of doc strings to be sanitized
-   */
-  private _sanitizeDocEntries(docEntries: string[]): string[] {
-    const result: string[] = [];
-    for (let entry of docEntries) {
-      entry = entry.replace(/\s+/g, ' ');
-      entry = entry.trim();
-
-      if (entry === '') {
-        continue;
-      }
-      result.push(entry);
-    }
-
-    return result;
   }
 }
