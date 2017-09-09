@@ -359,7 +359,7 @@ export class YamlGenerator {
           args.suffix = `](xref:${this._getUid(result.docItem)})`;
         }
       }
-    });
+    }).trim();
   }
 
   private _writeYamlFile(dataObject: {}, filePath: string, yamlMimeType: string,
