@@ -7,6 +7,7 @@
 import * as ts from 'typescript';
 import Extractor from '../Extractor';
 import ApiDocumentation from '../aedoc/ApiDocumentation';
+import { IDocElement } from '../markup/OldMarkup';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
 import TypeScriptHelpers from '../TypeScriptHelpers';
 import DocElementParser from '../DocElementParser';
@@ -218,6 +219,24 @@ abstract class AstItem {
    * changes do not require an API review, and thus should not cause a diff for that report.)
    */
   public needsDocumentation: boolean;
+
+  /**
+   * The release tag for this item, which may be inherited from a parent.
+   * By contrast, ApiDocumentation.releaseTag merely tracks the release tag that was
+   * explicitly applied to this item, and does not consider inheritance.
+   * @remarks
+   * This is calculated during completeInitialization() and should not be used beforehand.
+   */
+  public inheritedReleaseTag: ReleaseTag = ReleaseTag.None;
+
+  /**
+   * The deprecated message for this item, which may be inherited from a parent.
+   * By contrast, ApiDocumentation.deprecatedMessage merely tracks the message that was
+   * explicitly applied to this item, and does not consider inheritance.
+   * @remarks
+   * This is calculated during completeInitialization() and should not be used beforehand.
+   */
+  public inheritedDeprecatedMessage: IDocElement[] = [];
 
   /**
    * The Extractor object that acts as the root of the abstract syntax tree that this item belongs to.
@@ -446,6 +465,21 @@ abstract class AstItem {
    */
   protected onCompleteInitialization(): void {
     this.documentation.completeInitialization(this.warnings);
+
+    // Calculate the inherited release tag
+    if (this.documentation.releaseTag !== ReleaseTag.None) {
+      this.inheritedReleaseTag = this.documentation.releaseTag;
+    } else if (this.parentContainer) {
+      this.inheritedReleaseTag = this.parentContainer.inheritedReleaseTag;
+    }
+
+    // Calculate the inherited deprecation message
+    if (this.documentation.deprecatedMessage.length) {
+      this.inheritedDeprecatedMessage = this.documentation.deprecatedMessage;
+    } else if (this.parentContainer) {
+      this.inheritedDeprecatedMessage = this.parentContainer.inheritedDeprecatedMessage;
+    }
+
     // TODO: this.visitTypeReferencesForNode(this);
 
     const summaryTextCondensed: string = DocElementParser.getAsText(
