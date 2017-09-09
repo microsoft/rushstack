@@ -328,7 +328,7 @@ export class YamlGenerator {
     const apiProperty: IApiProperty = docItem.apiItem as IApiProperty;
 
     const syntax: IYamlSyntax = {
-      content: docItem.name + ': ' + apiProperty.type + ';' // TODO
+      content: apiProperty.signature
     };
     yamlItem.syntax = syntax;
 
