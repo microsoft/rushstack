@@ -97,6 +97,7 @@ class Extractor {
   public readonly packageFolder: string;
   // (undocumented)
   public packageJsonLookup: PackageJsonLookup;
+  public readonly packageName: string;
   public reportError(message: string, sourceFile: ts.SourceFile, start: number): void;
   // (undocumented)
   public typeChecker: ts.TypeChecker;

@@ -316,8 +316,8 @@
         {
           "kind": "linkDocElement",
           "referenceType": "code",
-          "scopeName": "",
-          "packageName": "",
+          "scopeName": "@scope",
+          "packageName": "example3",
           "exportName": "publicEnum",
           "memberName": "",
           "value": "publicEnum"
@@ -325,8 +325,8 @@
         {
           "kind": "linkDocElement",
           "referenceType": "code",
-          "scopeName": "",
-          "packageName": "",
+          "scopeName": "@scope",
+          "packageName": "example3",
           "exportName": "_internalEnum",
           "memberName": "",
           "value": "_internalEnum"

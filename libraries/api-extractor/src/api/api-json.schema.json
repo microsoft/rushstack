@@ -60,8 +60,9 @@
           "type": "string"
         },
         "packageName": {
-          "description": "An optional name of the package where an export is located",
-          "type": "string"
+          "description": "The name of the package being referenced (must be a nonempty string)",
+          "type": "string",
+          "minLength": 1
         },
         "scopeName": {
           "description": "An optional name that scopes the package name",
