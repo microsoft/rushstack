@@ -80,6 +80,7 @@
     },
     "inheritLocalOptionTwoFunction": {
       "kind": "function",
+      "signature": "export function inheritLocalOptionTwoFunction(): void;",
       "returnValue": {
         "type": "void",
         "description": []
@@ -112,6 +113,7 @@
       "members": {
         "thisIsTypeLiteral": {
           "kind": "property",
+          "signature": "thisIsTypeLiteral: [{name: string, age: number}];",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
@@ -145,6 +147,7 @@
       "members": {
         "thisIsTypeLiteral": {
           "kind": "property",
+          "signature": "thisIsTypeLiteral:",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
@@ -211,6 +214,7 @@
     },
     "jsonResolutionFunction": {
       "kind": "function",
+      "signature": "export function jsonResolutionFunction(): boolean;",
       "returnValue": {
         "type": "boolean",
         "description": [

@@ -178,6 +178,7 @@
         },
         "betaTagMissingParam": {
           "kind": "property",
+          "signature": "public betaTagMissingParam: string;",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
@@ -189,6 +190,7 @@
         },
         "fieldWithBadTag": {
           "kind": "property",
+          "signature": "public fieldWithBadTag: string;",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
@@ -205,6 +207,7 @@
         },
         "fieldWithInvalidInlineTag": {
           "kind": "property",
+          "signature": "public fieldWithInvalidInlineTag: string;",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
@@ -226,6 +229,7 @@
         },
         "fieldWithValidEscapedBraces": {
           "kind": "property",
+          "signature": "public fieldWithValidEscapedBraces: string;",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
@@ -246,6 +250,7 @@
         },
         "linkTagMissingParam": {
           "kind": "property",
+          "signature": "public linkTagMissingParam: string;",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
@@ -391,6 +396,7 @@
         },
         "propertyTypeLiteralIncompleteTypes": {
           "kind": "property",
+          "signature": "public propertyTypeLiteralIncompleteTypes:",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,

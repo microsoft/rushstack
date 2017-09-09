@@ -129,6 +129,7 @@ interface IApiClass extends IApiBaseDefinition {
 interface IApiConstructor extends IApiBaseDefinition {
   kind: 'constructor';
   parameters: IApiNameMap<IApiParameter>;
+  signature: string;
 }
 
 // @alpha
@@ -150,6 +151,7 @@ interface IApiFunction extends IApiBaseDefinition {
   kind: 'function';
   parameters: IApiNameMap<IApiParameter>;
   returnValue: IApiReturnValue;
+  signature: string;
 }
 
 // @alpha
@@ -215,6 +217,7 @@ interface IApiProperty extends IApiBaseDefinition {
   isReadOnly: boolean;
   isStatic: boolean;
   kind: 'property';
+  signature: string;
   type: string;
 }
 

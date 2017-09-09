@@ -21,6 +21,7 @@
       "members": {
         "propertyIsEnumerable": {
           "kind": "property",
+          "signature": "public propertyIsEnumerable: string;",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
@@ -44,6 +45,7 @@
       "members": {
         "___lookupSetter__": {
           "kind": "property",
+          "signature": "___lookupSetter__: __proto__;",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
@@ -96,6 +98,7 @@
       "members": {
         "aliasField": {
           "kind": "property",
+          "signature": "public aliasField: number;",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
@@ -107,6 +110,7 @@
         },
         "shouldBeReadOnly": {
           "kind": "property",
+          "signature": "public readonly shouldBeReadOnly: number;",
           "isOptional": false,
           "isReadOnly": true,
           "isStatic": false,
@@ -168,6 +172,7 @@
       "members": {
         "___lookupSetter__": {
           "kind": "property",
+          "signature": "___lookupSetter__: __proto__;",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
@@ -191,6 +196,7 @@
       "members": {
         "field": {
           "kind": "property",
+          "signature": "public field: number;",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
@@ -202,6 +208,7 @@
         },
         "myProp": {
           "kind": "property",
+          "signature": "public myProp: number;",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
@@ -231,6 +238,7 @@
     },
     "publicFunction": {
       "kind": "function",
+      "signature": "export function publicFunction(param: number): string;",
       "returnValue": {
         "type": "string",
         "description": []
