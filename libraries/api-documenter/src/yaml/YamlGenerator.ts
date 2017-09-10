@@ -186,19 +186,11 @@ export class YamlGenerator {
 
     if ((docItem.apiItem.deprecatedMessage || []).length > 0) {
       const deprecatedMessage: string = this._renderMarkdownFromDocElement(docItem.apiItem.deprecatedMessage, docItem);
-
-      summary = '> [!NOTE]\n'
-        + '> _This API is now obsolete._\n'
-        + '> \n'
-        + `> _${deprecatedMessage.trim()}_\n\n`
-        + summary;
+      yamlItem.deprecated = { content: deprecatedMessage };
     }
 
     if (docItem.apiItem.isBeta) {
-      summary = '> [!NOTE]\n'
-        + '> _This API is provided as a preview for developers and may change based on feedback_\n'
-        + '> _that we receive. Do not use this API in a production environment._\n\n'
-        + summary;
+      yamlItem.isPreview = true;
     }
 
     if (remarks && this._shouldEmbed(docItem.kind)) {
