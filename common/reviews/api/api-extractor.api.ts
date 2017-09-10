@@ -6,9 +6,6 @@ class ApiFileGenerator extends AstItemVisitor {
   public static areEquivalentApiFileContents(actualFileContent: string, expectedFileContent: string): boolean;
   // (undocumented)
   public generateApiFileContent(extractor: Extractor): string;
-  // WARNING: The type "AstParameter" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitApiParam(astParam: AstParameter): void;
   // WARNING: The type "AstEnum" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   protected visitAstEnum(astEnum: AstEnum): void;
@@ -44,9 +41,6 @@ class ApiJsonGenerator extends AstItemVisitor {
   // WARNING: The type "AstItem" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   protected visit(astItem: AstItem, refObject?: Object): void;
-  // WARNING: The type "AstParameter" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitApiParam(astParam: AstParameter, refObject?: Object): void;
   // WARNING: The type "AstEnum" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   protected visitAstEnum(astEnum: AstEnum, refObject?: Object): void;
@@ -126,18 +120,14 @@ interface IApiClass extends IApiBaseDefinition {
   extends?: string;
   implements?: string;
   kind: 'class';
-  members: {
-    [ name: string ]: ApiMember
-  }
+  members: IApiNameMap<ApiMember>;
   typeParameters?: string[];
 }
 
 // @alpha
 interface IApiConstructor extends IApiBaseDefinition {
   kind: 'constructor';
-  parameters: {
-    [ name: string ]: IApiParameter
-  }
+  parameters: IApiNameMap<IApiParameter>;
 }
 
 // @alpha
@@ -157,9 +147,7 @@ interface IApiEnumMember extends IApiBaseDefinition {
 // @alpha
 interface IApiFunction extends IApiBaseDefinition {
   kind: 'function';
-  parameters: {
-    [ name: string ]: IApiParameter
-  }
+  parameters: IApiNameMap<IApiParameter>;
   returnValue: IApiReturnValue;
 }
 
@@ -168,9 +156,7 @@ interface IApiInterface extends IApiBaseDefinition {
   extends?: string;
   implements?: string;
   kind: 'interface';
-  members: {
-    [ name: string ]: ApiMember
-  }
+  members: IApiNameMap<ApiMember>;
   typeParameters?: string[];
 }
 
@@ -188,20 +174,22 @@ interface IApiMethod extends IApiBaseDefinition {
   isOptional: boolean;
   isStatic: boolean;
   kind: 'method';
-  parameters: {
-    [ name: string ]: IApiParameter
-  }
+  parameters: IApiNameMap<IApiParameter>;
   returnValue: IApiReturnValue;
   signature: string;
+}
+
+// @alpha
+interface IApiNameMap<T> {
+  // (undocumented)
+  [ name: string ]: T;
 }
 
 // @alpha
 interface IApiPackage {
   // (undocumented)
   deprecatedMessage?: IDocElement[];
-  exports: {
-    [ name: string ]: ApiItem
-  }
+  exports: IApiNameMap<ApiItem>;
   isBeta?: boolean;
   kind: 'package';
   name: string;
