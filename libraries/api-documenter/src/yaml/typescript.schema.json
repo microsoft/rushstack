@@ -7,10 +7,6 @@
 		"items"
 	],
 	"properties": {
-    "$schema": {
-      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
-      "type": "string"
-    },
 		"items": {
 			"description": "This collection represents the main item (the first element) and it's possible children items.",
 			"type": "array",
@@ -30,6 +26,16 @@
 		}
 	},
 	"definitions":{
+		"deprecated": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"content": {
+					"description": "The string following the default obsolete message. Supports markdown.",
+					"type": "string"
+				}
+			}
+		},
 		"exception": {
 			"type": "object",
 			"additionalProperties": false,
@@ -57,6 +63,9 @@
 					"minItems": 1,
 					"uniqueItems": true
 				},
+				"deprecated": {
+					"$ref": "#/definitions/deprecated"
+				},
 				"exceptions": {
 					"type": "array",
 					"items": {
@@ -65,9 +74,28 @@
 					"minItems": 1,
 					"uniqueItems": true
 				},
+				"extends": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"minItems": 1,
+					"uniqueItems": true
+				},
 				"fullName": {
 					"type": "string",
 					"description": "The full friendly name of the object. (ex: Microsoft.FSharp.Linq.RuntimeHelpers.AnonymousObject<T1,T2>)"
+				},
+				"implements": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"minItems": 1,
+					"uniqueItems": true
+				},
+				"isPreview": {
+					"type": "boolean"
 				},
 				"langs": {
 					"type": "array",
@@ -101,7 +129,7 @@
 					"$ref": "#/definitions/syntax"
 				},
 				"type": {
-					"enum": [ "class", "constructor", "enum", "field", "interface", "method", "package", "property" ]
+					"enum": [ "class", "constructor", "enum", "field", "function", "interface", "method", "package", "property" ]
 				},
 				"uid": {
 					"type": "string",
