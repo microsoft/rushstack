@@ -269,17 +269,12 @@ export class YamlGenerator {
   private _populateYamlClassOrInterface(yamlItem: Partial<IYamlItem>, docItem: DocItem): void {
     const apiStructure: IApiClass | IApiInterface = docItem.apiItem as IApiClass | IApiInterface;
 
-    let text: string = '';
-
     if (apiStructure.extends) {
-      text += `**Extends:** \`${apiStructure.extends}\`\n\n`;
-    }
-    if (apiStructure.implements) {
-      text += `**Implements:** \`${apiStructure.implements}\`\n\n`;
+      yamlItem.extends = [ apiStructure.extends ];
     }
 
-    if (text) {
-      yamlItem.remarks = text + (yamlItem.remarks || '');
+    if (apiStructure.implements) {
+      yamlItem.implements = [ apiStructure.implements ];
     }
   }
 
