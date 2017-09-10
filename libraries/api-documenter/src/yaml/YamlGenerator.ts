@@ -181,8 +181,15 @@ export class YamlGenerator {
     const yamlItem: Partial<IYamlItem> = { };
     yamlItem.uid = this._getUid(docItem);
 
-    let summary: string = this._renderMarkdownFromDocElement(docItem.apiItem.summary, docItem);
+    const summary: string = this._renderMarkdownFromDocElement(docItem.apiItem.summary, docItem);
+    if (summary) {
+      yamlItem.summary = summary;
+    }
+
     const remarks: string = this._renderMarkdownFromDocElement(docItem.apiItem.remarks, docItem);
+    if (remarks) {
+      yamlItem.remarks = remarks;
+    }
 
     if ((docItem.apiItem.deprecatedMessage || []).length > 0) {
       const deprecatedMessage: string = this._renderMarkdownFromDocElement(docItem.apiItem.deprecatedMessage, docItem);
@@ -191,22 +198,6 @@ export class YamlGenerator {
 
     if (docItem.apiItem.isBeta) {
       yamlItem.isPreview = true;
-    }
-
-    if (remarks && this._shouldEmbed(docItem.kind)) {
-      // This is a temporary workaround, since "Remarks" are not currently being displayed for embedded items
-      if (summary) {
-        summary += '\n\n';
-      }
-      summary += '### Remarks\n\n' + remarks;
-    }
-
-    if (summary) {
-      yamlItem.summary = summary;
-    }
-
-    if (remarks) {
-      yamlItem.remarks = remarks;
     }
 
     yamlItem.name = docItem.name;
