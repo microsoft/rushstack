@@ -260,7 +260,8 @@ export class YamlGenerator {
         this._populateYamlProperty(yamlItem, docItem);
         break;
       case DocItemKind.Function:
-        // Unimplemented
+        yamlItem.type = 'function';
+        this._populateYamlMethod(yamlItem, docItem);
         break;
       default:
         throw new Error('Unimplemented item kind: ' + DocItemKind[docItem.kind as DocItemKind]);
