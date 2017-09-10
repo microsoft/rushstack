@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Skipping two lines in an AEDoc comment now creates a paragraph separator for the generated documentation",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "pgonzal@users.noreply.github.com"
+}
