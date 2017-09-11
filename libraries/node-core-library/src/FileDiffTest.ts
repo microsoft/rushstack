@@ -69,6 +69,14 @@ export class FileDiffTest {
     const normalizedExpected: string = FileDiffTest._getNormalizedContent(expectedContent);
 
     if (normalizedActual !== normalizedExpected) {
+      // Copy the expected file into the same folder as the actual file for easier comparisons
+      const expectedCopyFilename: string = path.join(path.dirname(actualFilePath), path.basename(expectedFilePath));
+      if (fsx.existsSync(expectedCopyFilename)) {
+        throw new Error('The FileDiffTest failed, but the expected output cannot be copied because'
+          + ' the file already exists:\n' + expectedCopyFilename);
+      }
+      fsx.copySync(expectedFilePath, expectedCopyFilename);
+
       throw new Error('The test output file does not match the expected input:\n'
         + actualFilePath);
     }
