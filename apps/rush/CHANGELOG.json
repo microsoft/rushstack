@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "3.0.16",
+      "tag": "@microsoft/rush_v3.0.16",
+      "date": "Wed, 6 Sep 2017 18:24:39 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue running 'rush install' after adding a new project"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.15",
       "tag": "@microsoft/rush_v3.0.15",
       "date": "Wed, 30 Aug 2017 18:24:39 GMT",

@@ -519,22 +519,7 @@
           "type": "object",
           "patternProperties": {
             "^[a-zA-Z_]+[a-zA-Z_0-9]*$": {
-              "type": "object",
-              "properties": {
-                "value": {
-                  "description": "The initializer to the enum value",
-                  "type": "string"
-                },
-                "deprecatedMessage": {
-                  "$ref": "#/definitions/docElementCollection"
-                },
-                "summary": {
-                  "$ref": "#/definitions/docElementCollection"
-                },
-                "remarks": {
-                  "$ref": "#/definitions/docElementCollection"
-                }
-              }
+              "$ref": "#/definitions/enumMemberApiItem"
             }
           },
           "additionalProperties": false
@@ -550,6 +535,41 @@
       },
       "additionalProperties": false,
       "required": [ "kind", "summary", "values", "isBeta" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "enumMemberApiItem": {
+      "description": "A TypeScript enum member definition",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of API definition",
+          "type": "string",
+          "enum": [ "enum value" ]
+        },
+        "summary": {
+          "$ref": "#/definitions/docElementCollection"
+        },
+        "isBeta": {
+          "description": "Whether the API enum member is beta",
+          "type": "boolean"
+        },
+        "value": {
+          "description": "The value of the enum member. This string may be a number, a string literal (including quotation marks), or an empty string (e.g. if the number is an automatically assigned increment)",
+          "type": "string"
+        },
+
+        // Optional properties:
+        "remarks": {
+          "$ref": "#/definitions/docElementCollection"
+        },
+        "deprecatedMessage": {
+          "$ref": "#/definitions/docElementCollection"
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "summary", "isBeta" ]
     },
 
     //---------------------------------------------------------------------------------------------
@@ -660,13 +680,17 @@
   "type": "object",
   "properties": {
     "$schema": {
-      "description": "The metadata to indicate the JSON schema, required by some editors such as VS2015",
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
       "type": "string"
     },
     "kind": {
       "description": "The kind of API definition",
       "type": "string",
       "enum": [ "package" ]
+    },
+    "name": {
+      "description": "The name of the NPM package, including the optional scope.  Example: \"@microsoft/example-package\"",
+      "type": "string"
     },
     "summary": {
           "$ref": "#/definitions/docElementCollection"
@@ -693,5 +717,5 @@
     }
   },
   "additionalProperties": false,
-  "required": [ "kind", "exports" ]
+  "required": [ "kind", "name", "exports" ]
 }

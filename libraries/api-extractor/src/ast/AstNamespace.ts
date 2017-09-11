@@ -4,16 +4,16 @@
 /* tslint:disable:no-bitwise */
 
 import * as ts from 'typescript';
-import ApiModuleVariable from './ApiModuleVariable';
-import { ApiItemKind, IApiItemOptions } from './ApiItem';
-import ApiItemContainer from './ApiItemContainer';
+import AstModuleVariable from './AstModuleVariable';
+import { AstItemKind, IAstItemOptions } from './AstItem';
+import AstItemContainer from './AstItemContainer';
 import { IExportedSymbol } from './IExportedSymbol';
 const allowedTypes: string[] = ['string', 'number', 'boolean'];
 
 /**
-  * This class is part of the ApiItem abstract syntax tree. It represents exports of
+  * This class is part of the AstItem abstract syntax tree. It represents exports of
   * a namespace, the exports can be module variable constants of type "string", "boolean" or "number".
-  * An ApiNamespace is defined using TypeScript's "namespace" keyword.
+  * An AstNamespace is defined using TypeScript's "namespace" keyword.
   *
   * @remarks A note about terminology:
   * - EcmaScript "namespace modules" are not conventional namespaces; their semantics are
@@ -23,12 +23,12 @@ const allowedTypes: string[] = ['string', 'number', 'boolean'];
   * - We currently still recommend to use static classes for utility libraries, since this
   * provides getters/setters, public/private, and some other structure missing from namespaces.
   */
-export default class ApiNamespace extends ApiItemContainer {
+export default class AstNamespace extends AstItemContainer {
   private _exportedNormalizedSymbols: IExportedSymbol[] = [];
 
-  constructor(options: IApiItemOptions) {
+  constructor(options: IAstItemOptions) {
     super(options);
-    this.kind = ApiItemKind.Namespace;
+    this.kind = AstItemKind.Namespace;
     this.name = options.declarationSymbol.name;
 
     const exportSymbols: ts.Symbol[] = this.typeChecker.getExportsOfModule(this.declarationSymbol);
@@ -88,7 +88,7 @@ export default class ApiNamespace extends ApiItemContainer {
           jsdocNode = declaration.parent.parent;
         }
 
-        const exportMemberOptions: IApiItemOptions = {
+        const exportMemberOptions: IAstItemOptions = {
           extractor: this.extractor,
           declaration,
           declarationSymbol: followedSymbol,
@@ -96,7 +96,7 @@ export default class ApiNamespace extends ApiItemContainer {
           exportSymbol
         };
 
-        this.addMemberItem(new ApiModuleVariable(exportMemberOptions));
+        this.addMemberItem(new AstModuleVariable(exportMemberOptions));
 
         this._exportedNormalizedSymbols.push({
           exportedName: exportSymbol.name,

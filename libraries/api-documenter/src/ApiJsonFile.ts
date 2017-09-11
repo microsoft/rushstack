@@ -5,18 +5,18 @@ import * as os from 'os';
 import * as path from 'path';
 
 import { ApiJsonGenerator } from '@microsoft/api-extractor';
-import { IDocPackage } from '@microsoft/api-extractor';
+import { IApiPackage } from '@microsoft/api-extractor';
 import { JsonFile, IJsonSchemaErrorInfo } from '@microsoft/node-core-library';
 
 /**
  * TODO: This should be converted into a public API for the API Extractor library.
  */
 export class ApiJsonFile {
-  public readonly docPackage: IDocPackage;
+  public readonly docPackage: IApiPackage;
   public readonly packageName: string;
 
   public static loadFromFile(apiJsonFilePath: string): ApiJsonFile {
-    const docPackage: IDocPackage = JsonFile.loadAndValidateWithCallback(apiJsonFilePath, ApiJsonGenerator.jsonSchema,
+    const docPackage: IApiPackage = JsonFile.loadAndValidateWithCallback(apiJsonFilePath, ApiJsonGenerator.jsonSchema,
       (errorInfo: IJsonSchemaErrorInfo) => {
         const errorMessage: string
           = path.basename(apiJsonFilePath) + ' does not conform to the expected schema.' + os.EOL
@@ -32,7 +32,7 @@ export class ApiJsonFile {
     return new ApiJsonFile(packageName, docPackage);
   }
 
-  private constructor(packageName: string, docPackage: IDocPackage) {
+  private constructor(packageName: string, docPackage: IApiPackage) {
     this.packageName = packageName;
     this.docPackage = docPackage;
   }

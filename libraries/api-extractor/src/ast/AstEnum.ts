@@ -2,32 +2,32 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import { ApiItemKind } from './ApiItem';
-import ApiItemContainer from './ApiItemContainer';
-import { IApiItemOptions } from './ApiItem';
-import ApiEnumValue from './ApiEnumValue';
+import { AstItemKind } from './AstItem';
+import AstItemContainer from './AstItemContainer';
+import { IAstItemOptions } from './AstItem';
+import AstEnumValue from './AstEnumValue';
 import TypeScriptHelpers from '../TypeScriptHelpers';
 
 /**
- * This class is part of the ApiItem abstract syntax tree. It represents a TypeScript enum definition.
- * The individual enum values are represented using ApiEnumValue.
+ * This class is part of the AstItem abstract syntax tree. It represents a TypeScript enum definition.
+ * The individual enum values are represented using AstEnumValue.
  */
-export default class ApiEnum extends ApiItemContainer {
-  constructor(options: IApiItemOptions) {
+export default class AstEnum extends AstItemContainer {
+  constructor(options: IAstItemOptions) {
     super(options);
-    this.kind = ApiItemKind.Enum;
+    this.kind = AstItemKind.Enum;
 
     for (const memberDeclaration of (options.declaration as ts.EnumDeclaration).members) {
       const memberSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(memberDeclaration);
 
-      const memberOptions: IApiItemOptions = {
+      const memberOptions: IAstItemOptions = {
         extractor: this.extractor,
         declaration: memberDeclaration,
         declarationSymbol: memberSymbol,
         jsdocNode: memberDeclaration
       };
 
-      this.addMemberItem(new ApiEnumValue(memberOptions));
+      this.addMemberItem(new AstEnumValue(memberOptions));
     }
 
   }

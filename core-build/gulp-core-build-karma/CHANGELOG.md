@@ -1,6 +1,43 @@
 # Change Log - @microsoft/gulp-core-build-karma
 
-This log was last generated on Thu, 31 Aug 2017 18:41:18 GMT and should not be manually modified.
+This log was last generated on Mon, 11 Sep 2017 13:04:55 GMT and should not be manually modified.
+
+## 4.0.7
+Mon, 11 Sep 2017 13:04:55 GMT
+
+*Changes not tracked*
+
+## 4.0.6
+Fri, 08 Sep 2017 01:28:04 GMT
+
+*Changes not tracked*
+
+## 4.0.5
+Thu, 07 Sep 2017 13:04:35 GMT
+
+*Changes not tracked*
+
+## 4.0.4
+Thu, 07 Sep 2017 00:11:11 GMT
+
+### Patches
+
+-  Add $schema field to all schemas
+
+## 4.0.3
+Wed, 06 Sep 2017 13:03:42 GMT
+
+*Changes not tracked*
+
+## 4.0.2
+Tue, 05 Sep 2017 19:03:56 GMT
+
+*Changes not tracked*
+
+## 4.0.1
+Sat, 02 Sep 2017 01:04:26 GMT
+
+*Changes not tracked*
 
 ## 4.0.0
 Thu, 31 Aug 2017 18:41:18 GMT

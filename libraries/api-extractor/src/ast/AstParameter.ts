@@ -2,12 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import ApiItem, { ApiItemKind, IApiItemOptions } from './ApiItem';
+import AstItem, { AstItemKind, IAstItemOptions } from './AstItem';
 
 /**
- * This class is part of the ApiItem abstract syntax tree. It represents parameters of a function declaration
+ * This class is part of the AstItem abstract syntax tree. It represents parameters of a function declaration
  */
-class ApiParameter extends ApiItem {
+class AstParameter extends AstItem {
   public isOptional: boolean;
   public type: string;
 
@@ -17,9 +17,9 @@ class ApiParameter extends ApiItem {
    */
   public isSpread: boolean;
 
-  constructor(options: IApiItemOptions, docComment?: string) {
+  constructor(options: IAstItemOptions, docComment?: string) {
     super(options);
-    this.kind = ApiItemKind.Parameter;
+    this.kind = AstItemKind.Parameter;
 
     const parameterDeclaration: ts.ParameterDeclaration = options.declaration as ts.ParameterDeclaration;
     this.isOptional = !!parameterDeclaration.questionToken || !!parameterDeclaration.initializer;
@@ -34,4 +34,4 @@ class ApiParameter extends ApiItem {
   }
 }
 
-export default ApiParameter;
+export default AstParameter;

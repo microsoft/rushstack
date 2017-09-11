@@ -2,19 +2,19 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import ApiItem, { IApiItemOptions } from './ApiItem';
-import ApiStructuredType from './ApiStructuredType';
+import AstItem, { IAstItemOptions } from './AstItem';
+import AstStructuredType from './AstStructuredType';
 import PrettyPrinter from '../PrettyPrinter';
 import TypeScriptHelpers from '../TypeScriptHelpers';
 
-export enum AccessModifier {
+export enum ApiAccessModifier {
   Private,
   Protected,
   Public
 }
 
 /**
- * This class is part of the ApiItem abstract syntax tree.  It represents syntax following
+ * This class is part of the AstItem abstract syntax tree.  It represents syntax following
  * these types of patterns:
  *
  * - "someName: SomeTypeName;"
@@ -22,13 +22,13 @@ export enum AccessModifier {
  * - "someName: { someOtherName: SomeOtherTypeName }", i.e. involving a type literal expression
  * - "someFunction(): void;"
  *
- * ApiMember is used to represent members of classes, interfaces, and nested type literal expressions.
+ * AstMember is used to represent members of classes, interfaces, and nested type literal expressions.
  */
-export default class ApiMember extends ApiItem {
+export default class AstMember extends AstItem {
   /**
    * True if the member is an optional field value, indicated by a question mark ("?") after the name
    */
-  public accessModifier: AccessModifier;
+  public accessModifier: ApiAccessModifier;
   public isOptional: boolean;
   public isStatic: boolean;
 
@@ -36,9 +36,9 @@ export default class ApiMember extends ApiItem {
    * The type of the member item, if specified as a type literal expression.  Otherwise,
    * this field is undefined.
    */
-  public typeLiteral: ApiStructuredType;
+  public typeLiteral: AstStructuredType;
 
-  constructor(options: IApiItemOptions) {
+  constructor(options: IAstItemOptions) {
     super(options);
 
     this.typeLiteral = undefined;
@@ -51,11 +51,11 @@ export default class ApiMember extends ApiItem {
     if (memberSignature.modifiers) {
       for (const modifier of memberSignature.modifiers) {
         if (modifier.kind === ts.SyntaxKind.PublicKeyword) {
-          this.accessModifier = AccessModifier.Public;
+          this.accessModifier = ApiAccessModifier.Public;
         } else if (modifier.kind === ts.SyntaxKind.ProtectedKeyword) {
-          this.accessModifier = AccessModifier.Protected;
+          this.accessModifier = ApiAccessModifier.Protected;
         } else if (modifier.kind === ts.SyntaxKind.PrivateKeyword) {
-          this.accessModifier = AccessModifier.Private;
+          this.accessModifier = ApiAccessModifier.Private;
         } else if (modifier.kind === ts.SyntaxKind.StaticKeyword) {
           this.isStatic = true;
         }
@@ -66,14 +66,14 @@ export default class ApiMember extends ApiItem {
       const propertyTypeDeclaration: ts.Declaration = memberSignature.type as ts.Node as ts.Declaration;
       const propertyTypeSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(propertyTypeDeclaration);
 
-      const typeLiteralOptions: IApiItemOptions = {
+      const typeLiteralOptions: IAstItemOptions = {
         extractor: this.extractor,
         declaration: propertyTypeDeclaration,
         declarationSymbol: propertyTypeSymbol,
         jsdocNode: propertyTypeDeclaration
       };
 
-      this.typeLiteral = new ApiStructuredType(typeLiteralOptions);
+      this.typeLiteral = new AstStructuredType(typeLiteralOptions);
       this.innerItems.push(this.typeLiteral);
     }
   }
@@ -81,8 +81,8 @@ export default class ApiMember extends ApiItem {
   /**
    * @virtual
    */
-  public visitTypeReferencesForApiItem(): void {
-    super.visitTypeReferencesForApiItem();
+  public visitTypeReferencesForAstItem(): void {
+    super.visitTypeReferencesForAstItem();
 
     if (this.declaration.kind !== ts.SyntaxKind.PropertySignature) {
       this.visitTypeReferencesForNode(this.declaration);
@@ -96,7 +96,7 @@ export default class ApiMember extends ApiItem {
   public getDeclarationLine(property?: {type: string; readonly: boolean}): string {
     if (this.typeLiteral || !!property) {
       const accessModifier: string =
-        this.accessModifier ? AccessModifier[this.accessModifier].toLowerCase() : undefined;
+        this.accessModifier ? ApiAccessModifier[this.accessModifier].toLowerCase() : undefined;
 
       let result: string = accessModifier ? `${accessModifier} ` : '';
       result += this.isStatic ? 'static ' : '';

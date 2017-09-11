@@ -2,19 +2,19 @@
 // See LICENSE in the project root for license information.
 
 import {
-  IDocItem,
-  ICodeLinkElement
+  ApiItem,
+  IApiItemReference
 } from '@microsoft/api-extractor';
 
 export class DocumentationNode {
-  public readonly docItem: IDocItem;
+  public readonly docItem: ApiItem;
   public readonly name: string;
   public readonly parent: DocumentationNode | undefined;
   private _docId: string|undefined = undefined;
 
   // TODO: This is not really correct.  We need to validate that the referenced object
   // actually exists, and avoid creating a broken link if not.
-  public static getDocIdForCodeLink(codeLink: ICodeLinkElement): string {
+  public static getDocIdForCodeLink(codeLink: Partial<IApiItemReference>): string {
     let result: string = '';
     if (codeLink.packageName) {
       result += codeLink.packageName;
@@ -28,7 +28,7 @@ export class DocumentationNode {
     return result.toLowerCase();
   }
 
-  constructor(docItem: IDocItem, name: string, parent: DocumentationNode | undefined) {
+  constructor(docItem: ApiItem, name: string, parent: DocumentationNode | undefined) {
     this.docItem = docItem;
     this.name = name;
     this.parent = parent;
@@ -54,5 +54,21 @@ export class DocumentationNode {
       this._docId = result;
     }
     return this._docId;
+  }
+
+  // This is a temporary workaround until the DocumentationNode class is replaced by DocItem
+  public getApiReference(): IApiItemReference {
+    const result: string[] = [];
+    for (let current: DocumentationNode | undefined = this; current; current = current.parent) {
+      result.unshift(current.name);
+    }
+    result.push('', '', '');
+
+    return {
+      scopeName: '',
+      packageName: result[0],
+      exportName: result[1],
+      memberName: result[2]
+    };
   }
 }

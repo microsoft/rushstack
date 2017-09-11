@@ -2,28 +2,28 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import { ApiItemKind, IApiItemOptions } from './ApiItem';
-import ApiMember from './ApiMember';
-import ApiParameter from './ApiParameter';
+import { AstItemKind, IAstItemOptions } from './AstItem';
+import AstMember from './AstMember';
+import AstParameter from './AstParameter';
 import TypeScriptHelpers from '../TypeScriptHelpers';
-import { ITextElement, ICodeLinkElement } from '../markupItem/OldMarkupItem';
+import { ITextElement, ICodeLinkElement } from '../markup/OldMarkup';
 import ApiDefinitionReference, { IScopedPackageName } from '../ApiDefinitionReference';
 
 /**
- * This class is part of the ApiItem abstract syntax tree. It represents functions that are members of
- * classes, interfaces, or nested type literal expressions. Unlike ApiFunctions, ApiMethods can have
+ * This class is part of the AstItem abstract syntax tree. It represents functions that are members of
+ * classes, interfaces, or nested type literal expressions. Unlike AstFunctions, AstMethods can have
  * access modifiers (public, private, etc.) or be optional, because they are members of a structured type
  *
- * @see ApiFunction for functions that are defined inside of a package
+ * @see AstFunction for functions that are defined inside of a package
  */
-export default class ApiMethod extends ApiMember {
+export default class AstMethod extends AstMember {
   public readonly returnType: string;
-  public readonly params: ApiParameter[];
+  public readonly params: AstParameter[];
   private readonly _isConstructor: boolean;
 
-  constructor(options: IApiItemOptions) {
+  constructor(options: IAstItemOptions) {
     super(options);
-    this.kind = ApiItemKind.Method;
+    this.kind = AstItemKind.Method;
 
     const methodDeclaration: ts.MethodDeclaration = options.declaration as ts.MethodDeclaration;
 
@@ -32,15 +32,15 @@ export default class ApiMethod extends ApiMember {
       this.params = [];
       for (const param of methodDeclaration.parameters) {
         const declarationSymbol: ts.Symbol = TypeScriptHelpers.tryGetSymbolForDeclaration(param);
-        const apiParameter: ApiParameter = new ApiParameter({
+        const astParameter: AstParameter = new AstParameter({
           extractor: this.extractor,
           declaration: param,
           declarationSymbol: declarationSymbol,
           jsdocNode: param
         });
 
-        this.innerItems.push(apiParameter);
-        this.params.push(apiParameter);
+        this.innerItems.push(astParameter);
+        this.params.push(astParameter);
       }
     }
 

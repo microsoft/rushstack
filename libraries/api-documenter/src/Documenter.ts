@@ -4,31 +4,31 @@
 import * as os from 'os';
 
 import {
-  IDocClass,
-  IDocEnum,
-  IDocEnumValue,
-  IDocFunction,
-  IDocInterface,
-  IDocPackage,
-  IDocMember,
-  IDocProperty,
-  IDocItem,
-  IDocParam,
-  IDocMethod,
-  IDomPage,
-  IDomTable,
-  DomBasicText,
-  DomTopLevelElement
+  IApiClass,
+  IApiEnum,
+  IApiEnumMember,
+  IApiFunction,
+  IApiInterface,
+  IApiPackage,
+  ApiMember,
+  IApiProperty,
+  ApiItem,
+  IApiParameter,
+  IApiMethod,
+  IMarkupPage,
+  IMarkupTable,
+  MarkupBasicElement,
+  MarkupStructuredElement
 } from '@microsoft/api-extractor';
 
 import { ApiJsonFile } from './ApiJsonFile';
 import { BasePageRenderer } from './BasePageRenderer';
 import { RenderingHelpers } from './RenderingHelpers';
-import { Domifier } from './Domifier';
+import { MarkupBuilder } from './MarkupBuilder';
 import { DocumentationNode } from './DocumentationNode';
 
 /**
- * This is the main engine that reads *.api.json input files and generates IDomPage data structures,
+ * This is the main engine that reads *.api.json input files and generates IMarkupPage data structures,
  * which are then rendered using an BasePageRenderer subclass.
  */
 export class Documenter {
@@ -55,59 +55,59 @@ export class Documenter {
 
     const unscopedPackageName: string = RenderingHelpers.getUnscopedPackageName(apiJsonFile.packageName);
 
-    const docPackage: IDocPackage = apiJsonFile.docPackage;
+    const docPackage: IApiPackage = apiJsonFile.docPackage;
 
     const packageNode: DocumentationNode = new DocumentationNode(docPackage, unscopedPackageName, undefined);
 
-    const domPage: IDomPage = Domifier.createPage(`${unscopedPackageName} package`, packageNode.docId);
-    this._writeBreadcrumb(domPage, packageNode);
+    const markupPage: IMarkupPage = MarkupBuilder.createPage(`${unscopedPackageName} package`, packageNode.docId);
+    this._writeBreadcrumb(markupPage, packageNode);
 
-    domPage.elements.push(...Domifier.renderDocElements(apiJsonFile.docPackage.summary));
+    markupPage.elements.push(...MarkupBuilder.renderDocElements(apiJsonFile.docPackage.summary));
 
-    const classesTable: IDomTable = Domifier.createTable([
-      Domifier.createTextElements('Class'),
-      Domifier.createTextElements('Description')
+    const classesTable: IMarkupTable = MarkupBuilder.createTable([
+      MarkupBuilder.createTextElements('Class'),
+      MarkupBuilder.createTextElements('Description')
     ]);
 
-    const interfacesTable: IDomTable = Domifier.createTable([
-      Domifier.createTextElements('Interface'),
-      Domifier.createTextElements('Description')
+    const interfacesTable: IMarkupTable = MarkupBuilder.createTable([
+      MarkupBuilder.createTextElements('Interface'),
+      MarkupBuilder.createTextElements('Description')
     ]);
 
-    const functionsTable: IDomTable = Domifier.createTable([
-      Domifier.createTextElements('Function'),
-      Domifier.createTextElements('Returns'),
-      Domifier.createTextElements('Description')
+    const functionsTable: IMarkupTable = MarkupBuilder.createTable([
+      MarkupBuilder.createTextElements('Function'),
+      MarkupBuilder.createTextElements('Returns'),
+      MarkupBuilder.createTextElements('Description')
     ]);
 
-    const enumerationsTable: IDomTable = Domifier.createTable([
-      Domifier.createTextElements('Enumeration'),
-      Domifier.createTextElements('Description')
+    const enumerationsTable: IMarkupTable = MarkupBuilder.createTable([
+      MarkupBuilder.createTextElements('Enumeration'),
+      MarkupBuilder.createTextElements('Description')
     ]);
 
     for (const exportName of Object.keys(docPackage.exports)) {
-      const docItem: IDocItem = docPackage.exports[exportName];
+      const docItem: ApiItem = docPackage.exports[exportName];
 
       const exportNode: DocumentationNode = new DocumentationNode(docItem, exportName, packageNode);
 
-      const docItemTitle: DomBasicText[] = [
-        Domifier.createDocumentationLink(
-          [ Domifier.createCode(exportName, 'javascript') ],
-          exportNode.docId)
+      const docItemTitle: MarkupBasicElement[] = [
+        MarkupBuilder.createApiLink(
+          [ MarkupBuilder.createCode(exportName, 'javascript') ],
+          exportNode.getApiReference())
       ];
 
-      const docItemDescription: DomBasicText[] = [];
+      const docItemDescription: MarkupBasicElement[] = [];
 
       if (docItem.isBeta) {
-        docItemDescription.push(...Domifier.createTextElements('(BETA)', { italics: true, bold: true }));
-        docItemDescription.push(...Domifier.createTextElements(' '));
+        docItemDescription.push(...MarkupBuilder.createTextElements('(BETA)', { italics: true, bold: true }));
+        docItemDescription.push(...MarkupBuilder.createTextElements(' '));
       }
-      docItemDescription.push(...Domifier.renderDocElements(docItem.summary));
+      docItemDescription.push(...MarkupBuilder.renderDocElements(docItem.summary));
 
       switch (docItem.kind) {
         case 'class':
           classesTable.rows.push(
-            Domifier.createTableRow([
+            MarkupBuilder.createTableRow([
               docItemTitle,
               docItemDescription
             ])
@@ -116,7 +116,7 @@ export class Documenter {
           break;
         case 'interface':
           interfacesTable.rows.push(
-            Domifier.createTableRow([
+            MarkupBuilder.createTableRow([
               docItemTitle,
               docItemDescription
             ])
@@ -125,9 +125,9 @@ export class Documenter {
           break;
         case 'function':
           functionsTable.rows.push(
-            Domifier.createTableRow([
+            MarkupBuilder.createTableRow([
               docItemTitle,
-              docItem.returnValue ? [Domifier.createCode(docItem.returnValue.type, 'javascript')] : [],
+              docItem.returnValue ? [MarkupBuilder.createCode(docItem.returnValue.type, 'javascript')] : [],
               docItemDescription
             ])
           );
@@ -135,7 +135,7 @@ export class Documenter {
           break;
         case 'enum':
           enumerationsTable.rows.push(
-            Domifier.createTableRow([
+            MarkupBuilder.createTableRow([
               docItemTitle,
               docItemDescription
             ])
@@ -146,106 +146,106 @@ export class Documenter {
     }
 
     if (docPackage.remarks && docPackage.remarks.length) {
-      domPage.elements.push(Domifier.createHeading1('Remarks'));
-      domPage.elements.push(...Domifier.renderDocElements(docPackage.remarks));
+      markupPage.elements.push(MarkupBuilder.createHeading1('Remarks'));
+      markupPage.elements.push(...MarkupBuilder.renderDocElements(docPackage.remarks));
     }
 
     if (classesTable.rows.length > 0) {
-      domPage.elements.push(Domifier.createHeading1('Classes'));
-      domPage.elements.push(classesTable);
+      markupPage.elements.push(MarkupBuilder.createHeading1('Classes'));
+      markupPage.elements.push(classesTable);
     }
 
     if (interfacesTable.rows.length > 0) {
-      domPage.elements.push(Domifier.createHeading1('Interfaces'));
-      domPage.elements.push(interfacesTable);
+      markupPage.elements.push(MarkupBuilder.createHeading1('Interfaces'));
+      markupPage.elements.push(interfacesTable);
     }
 
     if (functionsTable.rows.length > 0) {
-      domPage.elements.push(Domifier.createHeading1('Functions'));
-      domPage.elements.push(functionsTable);
+      markupPage.elements.push(MarkupBuilder.createHeading1('Functions'));
+      markupPage.elements.push(functionsTable);
     }
 
     if (enumerationsTable.rows.length > 0) {
-      domPage.elements.push(Domifier.createHeading1('Enumerations'));
-      domPage.elements.push(enumerationsTable);
+      markupPage.elements.push(MarkupBuilder.createHeading1('Enumerations'));
+      markupPage.elements.push(enumerationsTable);
     }
 
-    renderer.writePage(domPage);
+    renderer.writePage(markupPage);
   }
 
   /**
    * GENERATE PAGE: CLASS
    */
-  private _writeClassPage(docClass: IDocClass, classNode: DocumentationNode, renderer: BasePageRenderer): void {
+  private _writeClassPage(docClass: IApiClass, classNode: DocumentationNode, renderer: BasePageRenderer): void {
     const className: string = classNode.name;
 
     // TODO: Show concise generic parameters with class name
-    const domPage: IDomPage = Domifier.createPage(`${className} class`, classNode.docId);
-    this._writeBreadcrumb(domPage, classNode);
+    const markupPage: IMarkupPage = MarkupBuilder.createPage(`${className} class`, classNode.docId);
+    this._writeBreadcrumb(markupPage, classNode);
 
     if (docClass.isBeta) {
-      this._writeBetaWarning(domPage.elements);
+      this._writeBetaWarning(markupPage.elements);
     }
 
-    domPage.elements.push(...Domifier.renderDocElements(docClass.summary));
+    markupPage.elements.push(...MarkupBuilder.renderDocElements(docClass.summary));
 
-    domPage.elements.push(Domifier.createHeading1('Constructor'));
+    markupPage.elements.push(MarkupBuilder.createHeading1('Constructor'));
 
     // TODO: pending WBT fix
-    domPage.elements.push(...Domifier.createTextElements('Constructs a new instance of the '));
-    domPage.elements.push(Domifier.createCode(className));
-    domPage.elements.push(...Domifier.createTextElements(' class'));
+    markupPage.elements.push(...MarkupBuilder.createTextElements('Constructs a new instance of the '));
+    markupPage.elements.push(MarkupBuilder.createCode(className));
+    markupPage.elements.push(...MarkupBuilder.createTextElements(' class'));
 
-    const propertiesTable: IDomTable = Domifier.createTable([
-      Domifier.createTextElements('Property'),
-      Domifier.createTextElements('Access Modifier'),
-      Domifier.createTextElements('Type'),
-      Domifier.createTextElements('Description')
+    const propertiesTable: IMarkupTable = MarkupBuilder.createTable([
+      MarkupBuilder.createTextElements('Property'),
+      MarkupBuilder.createTextElements('Access Modifier'),
+      MarkupBuilder.createTextElements('Type'),
+      MarkupBuilder.createTextElements('Description')
     ]);
 
-    const methodsTable: IDomTable = Domifier.createTable([
-      Domifier.createTextElements('Method'),
-      Domifier.createTextElements('Access Modifier'),
-      Domifier.createTextElements('Returns'),
-      Domifier.createTextElements('Description')
+    const methodsTable: IMarkupTable = MarkupBuilder.createTable([
+      MarkupBuilder.createTextElements('Method'),
+      MarkupBuilder.createTextElements('Access Modifier'),
+      MarkupBuilder.createTextElements('Returns'),
+      MarkupBuilder.createTextElements('Description')
     ]);
 
     for (const memberName of Object.keys(docClass.members)) {
-      const member: IDocMember = docClass.members[memberName];
+      const member: ApiMember = docClass.members[memberName];
       const memberNode: DocumentationNode = new DocumentationNode(member, memberName, classNode);
 
       switch (member.kind) {
         case 'property':
-          const propertyTitle: DomBasicText[] = [
-            Domifier.createDocumentationLink(
-              [Domifier.createCode(memberName, 'javascript')],
-              memberNode.docId)
+          const propertyTitle: MarkupBasicElement[] = [
+            MarkupBuilder.createApiLink(
+              [MarkupBuilder.createCode(memberName, 'javascript')],
+              memberNode.getApiReference())
           ];
 
           propertiesTable.rows.push(
-            Domifier.createTableRow([
+            MarkupBuilder.createTableRow([
               propertyTitle,
               [],
-              [Domifier.createCode(member.type, 'javascript')],
-              Domifier.renderDocElements(member.summary)
+              [MarkupBuilder.createCode(member.type, 'javascript')],
+              MarkupBuilder.renderDocElements(member.summary)
             ])
           );
           this._writePropertyPage(member, memberNode, renderer);
           break;
 
         case 'method':
-          const methodTitle: DomBasicText[] = [
-            Domifier.createDocumentationLink(
-              [Domifier.createCode(RenderingHelpers.getConciseSignature(memberName, member), 'javascript')],
-              memberNode.docId)
+          const methodTitle: MarkupBasicElement[] = [
+            MarkupBuilder.createApiLink(
+              [MarkupBuilder.createCode(RenderingHelpers.getConciseSignature(memberName, member), 'javascript')],
+              memberNode.getApiReference())
           ];
 
           methodsTable.rows.push(
-            Domifier.createTableRow([
+            MarkupBuilder.createTableRow([
               methodTitle,
-              member.accessModifier ? [Domifier.createCode(member.accessModifier.toString(), 'javascript')] : [],
-              member.returnValue ? [Domifier.createCode(member.returnValue.type, 'javascript')] : [],
-              Domifier.renderDocElements(member.summary)
+              member.accessModifier ? [MarkupBuilder.createCode(member.accessModifier.toString(), 'javascript')] : [],
+              member.returnValue ? [MarkupBuilder.createCode(member.returnValue.type, 'javascript')] : [],
+              MarkupBuilder.renderDocElements(member.summary)
             ])
           );
           this._writeMethodPage(member, memberNode, renderer);
@@ -254,87 +254,87 @@ export class Documenter {
     }
 
     if (propertiesTable.rows.length > 0) {
-      domPage.elements.push(Domifier.createHeading1('Properties'));
-      domPage.elements.push(propertiesTable);
+      markupPage.elements.push(MarkupBuilder.createHeading1('Properties'));
+      markupPage.elements.push(propertiesTable);
     }
 
     if (methodsTable.rows.length > 0) {
-      domPage.elements.push(Domifier.createHeading1('Methods'));
-      domPage.elements.push(methodsTable);
+      markupPage.elements.push(MarkupBuilder.createHeading1('Methods'));
+      markupPage.elements.push(methodsTable);
     }
 
     if (docClass.remarks && docClass.remarks.length) {
-      domPage.elements.push(Domifier.createHeading1('Remarks'));
-      domPage.elements.push(...Domifier.renderDocElements(docClass.remarks));
+      markupPage.elements.push(MarkupBuilder.createHeading1('Remarks'));
+      markupPage.elements.push(...MarkupBuilder.renderDocElements(docClass.remarks));
     }
 
-    renderer.writePage(domPage);
+    renderer.writePage(markupPage);
   }
 
   /**
    * GENERATE PAGE: INTERFACE
    */
-  private _writeInterfacePage(docInterface: IDocInterface, interfaceNode: DocumentationNode,
+  private _writeInterfacePage(docInterface: IApiInterface, interfaceNode: DocumentationNode,
     renderer: BasePageRenderer): void {
 
     const interfaceName: string = interfaceNode.name;
 
     // TODO: Show concise generic parameters with class name
-    const domPage: IDomPage = Domifier.createPage(`${interfaceName} interface`, interfaceNode.docId);
-    this._writeBreadcrumb(domPage, interfaceNode);
+    const markupPage: IMarkupPage = MarkupBuilder.createPage(`${interfaceName} interface`, interfaceNode.docId);
+    this._writeBreadcrumb(markupPage, interfaceNode);
 
     if (docInterface.isBeta) {
-      this._writeBetaWarning(domPage.elements);
+      this._writeBetaWarning(markupPage.elements);
     }
 
-    domPage.elements.push(...Domifier.renderDocElements(docInterface.summary));
+    markupPage.elements.push(...MarkupBuilder.renderDocElements(docInterface.summary));
 
-    const propertiesTable: IDomTable = Domifier.createTable([
-      Domifier.createTextElements('Property'),
-      Domifier.createTextElements('Type'),
-      Domifier.createTextElements('Description')
+    const propertiesTable: IMarkupTable = MarkupBuilder.createTable([
+      MarkupBuilder.createTextElements('Property'),
+      MarkupBuilder.createTextElements('Type'),
+      MarkupBuilder.createTextElements('Description')
     ]);
 
-    const methodsTable: IDomTable = Domifier.createTable([
-      Domifier.createTextElements('Method'),
-      Domifier.createTextElements('Returns'),
-      Domifier.createTextElements('Description')
+    const methodsTable: IMarkupTable = MarkupBuilder.createTable([
+      MarkupBuilder.createTextElements('Method'),
+      MarkupBuilder.createTextElements('Returns'),
+      MarkupBuilder.createTextElements('Description')
     ]);
 
     for (const memberName of Object.keys(docInterface.members)) {
-      const member: IDocMember = docInterface.members[memberName];
+      const member: ApiMember = docInterface.members[memberName];
       const memberNode: DocumentationNode = new DocumentationNode(member, memberName, interfaceNode);
 
       switch (member.kind) {
         case 'property':
-          const propertyTitle: DomBasicText[] = [
-            Domifier.createDocumentationLink(
-              [Domifier.createCode(memberName, 'javascript')],
-              memberNode.docId)
+          const propertyTitle: MarkupBasicElement[] = [
+            MarkupBuilder.createApiLink(
+              [MarkupBuilder.createCode(memberName, 'javascript')],
+              memberNode.getApiReference())
           ];
 
           propertiesTable.rows.push(
-            Domifier.createTableRow([
+            MarkupBuilder.createTableRow([
               propertyTitle,
-              [Domifier.createCode(member.type)],
-              Domifier.renderDocElements(member.summary)
+              [MarkupBuilder.createCode(member.type)],
+              MarkupBuilder.renderDocElements(member.summary)
             ])
           );
           this._writePropertyPage(member, memberNode, renderer);
           break;
 
         case 'method':
-          const methodTitle: DomBasicText[] = [
-            Domifier.createDocumentationLink(
-              [Domifier.createCode(RenderingHelpers.getConciseSignature(memberName, member), 'javascript')],
-              memberNode.docId)
+          const methodTitle: MarkupBasicElement[] = [
+            MarkupBuilder.createApiLink(
+              [MarkupBuilder.createCode(RenderingHelpers.getConciseSignature(memberName, member), 'javascript')],
+              memberNode.getApiReference())
           ];
 
           methodsTable.rows.push(
-            Domifier.createTableRow([
+            MarkupBuilder.createTableRow([
               methodTitle,
-              member.returnValue ? [Domifier.createCode(member.returnValue.type, 'javascript')] : [],
-              Domifier.renderDocElements(member.summary)
+              member.returnValue ? [MarkupBuilder.createCode(member.returnValue.type, 'javascript')] : [],
+              MarkupBuilder.renderDocElements(member.summary)
             ])
           );
           this._writeMethodPage(member, memberNode, renderer);
@@ -343,230 +343,230 @@ export class Documenter {
     }
 
     if (propertiesTable.rows.length > 0) {
-      domPage.elements.push(Domifier.createHeading1('Properties'));
-      domPage.elements.push(propertiesTable);
+      markupPage.elements.push(MarkupBuilder.createHeading1('Properties'));
+      markupPage.elements.push(propertiesTable);
     }
 
     if (methodsTable.rows.length > 0) {
-      domPage.elements.push(Domifier.createHeading1('Methods'));
-      domPage.elements.push(methodsTable);
+      markupPage.elements.push(MarkupBuilder.createHeading1('Methods'));
+      markupPage.elements.push(methodsTable);
     }
 
     if (docInterface.remarks && docInterface.remarks.length) {
-      domPage.elements.push(Domifier.createHeading1('Remarks'));
-      domPage.elements.push(...Domifier.renderDocElements(docInterface.remarks));
+      markupPage.elements.push(MarkupBuilder.createHeading1('Remarks'));
+      markupPage.elements.push(...MarkupBuilder.renderDocElements(docInterface.remarks));
     }
 
-    renderer.writePage(domPage);
+    renderer.writePage(markupPage);
   }
 
   /**
    * GENERATE PAGE: ENUM
    */
-  private _writeEnumPage(docEnum: IDocEnum, enumNode: DocumentationNode,
+  private _writeEnumPage(docEnum: IApiEnum, enumNode: DocumentationNode,
     renderer: BasePageRenderer): void {
 
     const enumName: string = enumNode.name;
 
     // TODO: Show concise generic parameters with class name
-    const domPage: IDomPage = Domifier.createPage(`${enumName} enumeration`, enumNode.docId);
-    this._writeBreadcrumb(domPage, enumNode);
+    const markupPage: IMarkupPage = MarkupBuilder.createPage(`${enumName} enumeration`, enumNode.docId);
+    this._writeBreadcrumb(markupPage, enumNode);
 
     if (docEnum.isBeta) {
-      this._writeBetaWarning(domPage.elements);
+      this._writeBetaWarning(markupPage.elements);
     }
 
-    domPage.elements.push(...Domifier.renderDocElements(docEnum.summary));
+    markupPage.elements.push(...MarkupBuilder.renderDocElements(docEnum.summary));
 
-    const membersTable: IDomTable = Domifier.createTable([
-      Domifier.createTextElements('Member'),
-      Domifier.createTextElements('Value'),
-      Domifier.createTextElements('Description')
+    const membersTable: IMarkupTable = MarkupBuilder.createTable([
+      MarkupBuilder.createTextElements('Member'),
+      MarkupBuilder.createTextElements('Value'),
+      MarkupBuilder.createTextElements('Description')
     ]);
 
     for (const memberName of Object.keys(docEnum.values)) {
-      const member: IDocEnumValue = (docEnum.values as any)[memberName]; // tslint:disable-line:no-any
+      const member: IApiEnumMember = (docEnum.values as any)[memberName]; // tslint:disable-line:no-any
 
-      const enumValue: DomBasicText[] = [];
+      const enumValue: MarkupBasicElement[] = [];
 
       if (member.value) {
-        enumValue.push(Domifier.createCode('= ' + member.value));
+        enumValue.push(MarkupBuilder.createCode('= ' + member.value));
       }
 
       membersTable.rows.push(
-        Domifier.createTableRow([
-          Domifier.createTextElements(memberName),
+        MarkupBuilder.createTableRow([
+          MarkupBuilder.createTextElements(memberName),
           enumValue,
-          Domifier.renderDocElements(member.summary)
+          MarkupBuilder.renderDocElements(member.summary)
         ])
       );
     }
 
     if (membersTable.rows.length > 0) {
-      domPage.elements.push(membersTable);
+      markupPage.elements.push(membersTable);
     }
 
-    renderer.writePage(domPage);
+    renderer.writePage(markupPage);
   }
 
   /**
    * GENERATE PAGE: PROPERTY
    */
-  private _writePropertyPage(docProperty: IDocProperty, propertyNode: DocumentationNode,
+  private _writePropertyPage(docProperty: IApiProperty, propertyNode: DocumentationNode,
     renderer: BasePageRenderer): void {
 
     const fullProperyName: string = propertyNode.parent!.name + '.' + propertyNode.name;
 
-    const domPage: IDomPage = Domifier.createPage(`${fullProperyName} property`, propertyNode.docId);
-    this._writeBreadcrumb(domPage, propertyNode);
+    const markupPage: IMarkupPage = MarkupBuilder.createPage(`${fullProperyName} property`, propertyNode.docId);
+    this._writeBreadcrumb(markupPage, propertyNode);
 
     if (docProperty.isBeta) {
-      this._writeBetaWarning(domPage.elements);
+      this._writeBetaWarning(markupPage.elements);
     }
 
-    domPage.elements.push(...Domifier.renderDocElements(docProperty.summary));
+    markupPage.elements.push(...MarkupBuilder.renderDocElements(docProperty.summary));
 
-    domPage.elements.push(Domifier.PARAGRAPH);
-    domPage.elements.push(...Domifier.createTextElements('Signature:', { bold: true }));
-    domPage.elements.push(Domifier.createCodeBox(propertyNode.name + ': ' + docProperty.type, 'javascript'));
+    markupPage.elements.push(MarkupBuilder.PARAGRAPH);
+    markupPage.elements.push(...MarkupBuilder.createTextElements('Signature:', { bold: true }));
+    markupPage.elements.push(MarkupBuilder.createCodeBox(propertyNode.name + ': ' + docProperty.type, 'javascript'));
 
     if (docProperty.remarks && docProperty.remarks.length) {
-      domPage.elements.push(Domifier.createHeading1('Remarks'));
-      domPage.elements.push(...Domifier.renderDocElements(docProperty.remarks));
+      markupPage.elements.push(MarkupBuilder.createHeading1('Remarks'));
+      markupPage.elements.push(...MarkupBuilder.renderDocElements(docProperty.remarks));
     }
 
-    renderer.writePage(domPage);
+    renderer.writePage(markupPage);
   }
 
   /**
    * GENERATE PAGE: METHOD
    */
-  private _writeMethodPage(docMethod: IDocMethod, methodNode: DocumentationNode, renderer: BasePageRenderer): void {
+  private _writeMethodPage(docMethod: IApiMethod, methodNode: DocumentationNode, renderer: BasePageRenderer): void {
 
     const fullMethodName: string = methodNode.parent!.name + '.' + methodNode.name;
 
-    const domPage: IDomPage = Domifier.createPage(`${fullMethodName} method`, methodNode.docId);
-    this._writeBreadcrumb(domPage, methodNode);
+    const markupPage: IMarkupPage = MarkupBuilder.createPage(`${fullMethodName} method`, methodNode.docId);
+    this._writeBreadcrumb(markupPage, methodNode);
 
     if (docMethod.isBeta) {
-      this._writeBetaWarning(domPage.elements);
+      this._writeBetaWarning(markupPage.elements);
     }
 
-    domPage.elements.push(...Domifier.renderDocElements(docMethod.summary));
+    markupPage.elements.push(...MarkupBuilder.renderDocElements(docMethod.summary));
 
-    domPage.elements.push(Domifier.PARAGRAPH);
-    domPage.elements.push(...Domifier.createTextElements('Signature:', { bold: true }));
-    domPage.elements.push(Domifier.createCodeBox(docMethod.signature, 'javascript'));
+    markupPage.elements.push(MarkupBuilder.PARAGRAPH);
+    markupPage.elements.push(...MarkupBuilder.createTextElements('Signature:', { bold: true }));
+    markupPage.elements.push(MarkupBuilder.createCodeBox(docMethod.signature, 'javascript'));
 
     if (docMethod.returnValue) {
-      domPage.elements.push(...Domifier.createTextElements('Returns:', { bold: true }));
-      domPage.elements.push(...Domifier.createTextElements(' '));
-      domPage.elements.push(Domifier.createCode(docMethod.returnValue.type, 'javascript'));
-      domPage.elements.push(Domifier.PARAGRAPH);
-      domPage.elements.push(...Domifier.renderDocElements(docMethod.returnValue.description));
+      markupPage.elements.push(...MarkupBuilder.createTextElements('Returns:', { bold: true }));
+      markupPage.elements.push(...MarkupBuilder.createTextElements(' '));
+      markupPage.elements.push(MarkupBuilder.createCode(docMethod.returnValue.type, 'javascript'));
+      markupPage.elements.push(MarkupBuilder.PARAGRAPH);
+      markupPage.elements.push(...MarkupBuilder.renderDocElements(docMethod.returnValue.description));
     }
 
     if (docMethod.remarks && docMethod.remarks.length) {
-      domPage.elements.push(Domifier.createHeading1('Remarks'));
-      domPage.elements.push(...Domifier.renderDocElements(docMethod.remarks));
+      markupPage.elements.push(MarkupBuilder.createHeading1('Remarks'));
+      markupPage.elements.push(...MarkupBuilder.renderDocElements(docMethod.remarks));
     }
 
     if (Object.keys(docMethod.parameters).length > 0) {
-      const parametersTable: IDomTable = Domifier.createTable([
-        Domifier.createTextElements('Parameter'),
-        Domifier.createTextElements('Type'),
-        Domifier.createTextElements('Description')
+      const parametersTable: IMarkupTable = MarkupBuilder.createTable([
+        MarkupBuilder.createTextElements('Parameter'),
+        MarkupBuilder.createTextElements('Type'),
+        MarkupBuilder.createTextElements('Description')
       ]);
 
-      domPage.elements.push(Domifier.createHeading1('Parameters'));
-      domPage.elements.push(parametersTable);
+      markupPage.elements.push(MarkupBuilder.createHeading1('Parameters'));
+      markupPage.elements.push(parametersTable);
       for (const parameterName of Object.keys(docMethod.parameters)) {
-        const parameter: IDocParam = docMethod.parameters[parameterName];
-          parametersTable.rows.push(Domifier.createTableRow([
-            [Domifier.createCode(parameterName, 'javascript')],
-            parameter.type ? [Domifier.createCode(parameter.type, 'javascript')] : [],
-            Domifier.renderDocElements(parameter.description)
+        const parameter: IApiParameter = docMethod.parameters[parameterName];
+          parametersTable.rows.push(MarkupBuilder.createTableRow([
+            [MarkupBuilder.createCode(parameterName, 'javascript')],
+            parameter.type ? [MarkupBuilder.createCode(parameter.type, 'javascript')] : [],
+            MarkupBuilder.renderDocElements(parameter.description)
           ])
         );
       }
     }
 
-    renderer.writePage(domPage);
+    renderer.writePage(markupPage);
   }
 
   /**
    * GENERATE PAGE: FUNCTION
    */
-  private _writeFunctionPage(docFunction: IDocFunction, functionNode: DocumentationNode,
+  private _writeFunctionPage(docFunction: IApiFunction, functionNode: DocumentationNode,
     renderer: BasePageRenderer): void {
 
-    const domPage: IDomPage = Domifier.createPage(`${functionNode.name} function`, functionNode.docId);
-    this._writeBreadcrumb(domPage, functionNode);
+    const markupPage: IMarkupPage = MarkupBuilder.createPage(`${functionNode.name} function`, functionNode.docId);
+    this._writeBreadcrumb(markupPage, functionNode);
 
     if (docFunction.isBeta) {
-      this._writeBetaWarning(domPage.elements);
+      this._writeBetaWarning(markupPage.elements);
     }
 
-    domPage.elements.push(...Domifier.renderDocElements(docFunction.summary));
+    markupPage.elements.push(...MarkupBuilder.renderDocElements(docFunction.summary));
 
-    domPage.elements.push(Domifier.PARAGRAPH);
-    domPage.elements.push(...Domifier.createTextElements('Signature:', { bold: true }));
-    domPage.elements.push(Domifier.createCodeBox(functionNode.name, 'javascript'));
+    markupPage.elements.push(MarkupBuilder.PARAGRAPH);
+    markupPage.elements.push(...MarkupBuilder.createTextElements('Signature:', { bold: true }));
+    markupPage.elements.push(MarkupBuilder.createCodeBox(functionNode.name, 'javascript'));
 
     if (docFunction.returnValue) {
-      domPage.elements.push(...Domifier.createTextElements('Returns:', { bold: true }));
-      domPage.elements.push(...Domifier.createTextElements(' '));
-      domPage.elements.push(Domifier.createCode(docFunction.returnValue.type, 'javascript'));
-      domPage.elements.push(Domifier.PARAGRAPH);
-      domPage.elements.push(...Domifier.renderDocElements(docFunction.returnValue.description));
+      markupPage.elements.push(...MarkupBuilder.createTextElements('Returns:', { bold: true }));
+      markupPage.elements.push(...MarkupBuilder.createTextElements(' '));
+      markupPage.elements.push(MarkupBuilder.createCode(docFunction.returnValue.type, 'javascript'));
+      markupPage.elements.push(MarkupBuilder.PARAGRAPH);
+      markupPage.elements.push(...MarkupBuilder.renderDocElements(docFunction.returnValue.description));
     }
 
     if (docFunction.remarks && docFunction.remarks.length) {
-      domPage.elements.push(Domifier.createHeading1('Remarks'));
-      domPage.elements.push(...Domifier.renderDocElements(docFunction.remarks));
+      markupPage.elements.push(MarkupBuilder.createHeading1('Remarks'));
+      markupPage.elements.push(...MarkupBuilder.renderDocElements(docFunction.remarks));
     }
 
     if (Object.keys(docFunction.parameters).length > 0) {
-      const parametersTable: IDomTable = Domifier.createTable([
-        Domifier.createTextElements('Parameter'),
-        Domifier.createTextElements('Type'),
-        Domifier.createTextElements('Description')
+      const parametersTable: IMarkupTable = MarkupBuilder.createTable([
+        MarkupBuilder.createTextElements('Parameter'),
+        MarkupBuilder.createTextElements('Type'),
+        MarkupBuilder.createTextElements('Description')
       ]);
 
-      domPage.elements.push(Domifier.createHeading1('Parameters'));
-      domPage.elements.push(parametersTable);
+      markupPage.elements.push(MarkupBuilder.createHeading1('Parameters'));
+      markupPage.elements.push(parametersTable);
       for (const parameterName of Object.keys(docFunction.parameters)) {
-        const parameter: IDocParam = docFunction.parameters[parameterName];
-          parametersTable.rows.push(Domifier.createTableRow([
-            [Domifier.createCode(parameterName, 'javascript')],
-            parameter.type ? [Domifier.createCode(parameter.type, 'javascript')] : [],
-            Domifier.renderDocElements(parameter.description)
+        const parameter: IApiParameter = docFunction.parameters[parameterName];
+          parametersTable.rows.push(MarkupBuilder.createTableRow([
+            [MarkupBuilder.createCode(parameterName, 'javascript')],
+            parameter.type ? [MarkupBuilder.createCode(parameter.type, 'javascript')] : [],
+            MarkupBuilder.renderDocElements(parameter.description)
           ])
         );
       }
     }
 
-    renderer.writePage(domPage);
+    renderer.writePage(markupPage);
   }
 
-  private _writeBreadcrumb(domPage: IDomPage, currentNode: DocumentationNode): void {
-    domPage.breadcrumb.push(Domifier.createDocumentationLinkFromText('Home', 'index'));
+  private _writeBreadcrumb(markupPage: IMarkupPage, currentNode: DocumentationNode): void {
+    markupPage.breadcrumb.push(MarkupBuilder.createWebLinkFromText('Home', './index'));
 
     const reversedNodes: DocumentationNode[] = [];
     for (let node: DocumentationNode|undefined = currentNode.parent; node; node = node.parent) {
       reversedNodes.unshift(node);
     }
     for (const node of reversedNodes) {
-      domPage.breadcrumb.push(...Domifier.createTextElements(' > '));
-      domPage.breadcrumb.push(Domifier.createDocumentationLinkFromText(node.name, node.docId));
+      markupPage.breadcrumb.push(...MarkupBuilder.createTextElements(' > '));
+      markupPage.breadcrumb.push(MarkupBuilder.createApiLinkFromText(node.name, node.getApiReference()));
     }
   }
 
-  private _writeBetaWarning(elements: DomTopLevelElement[]): void {
+  private _writeBetaWarning(elements: MarkupStructuredElement[]): void {
     const betaWarning: string = 'This API is provided as a preview for developers and may change'
       + ' based on feedback that we receive.  Do not use this API in a production environment.';
     elements.push(
-      Domifier.createNoteBoxFromText(betaWarning)
+      MarkupBuilder.createNoteBoxFromText(betaWarning)
     );
   }
 

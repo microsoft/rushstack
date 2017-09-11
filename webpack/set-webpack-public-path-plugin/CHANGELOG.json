@@ -2,6 +2,25 @@
   "name": "@microsoft/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "1.2.3",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v1.2.3",
+      "date": "Fri, 08 Sep 2017 01:28:04 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nick Pape <nickpape@users.noreply.github.com>",
+            "commit": "bb96549aa8508ff627a0cae5ee41ae0251f2777d",
+            "comment": "Deprecate @types/es6-coll ections in favor of built-in typescript typings 'es2015.collection' a nd 'es2015.iterable'"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `~4.0.5` to `~4.0.6`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.2",
       "tag": "@microsoft/set-webpack-public-path-plugin_v1.2.2",
       "date": "Fri, 01 Sep 2017 01:05:54 GMT",

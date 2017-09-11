@@ -1,21 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ApiItemKind, IApiItemOptions } from './ApiItem';
-import ApiMember from './ApiMember';
+import { AstItemKind, IAstItemOptions } from './AstItem';
+import AstMember from './AstMember';
 
 /**
- * This class is part of the ApiItem abstract syntax tree. It represents properties of classes or interfaces
+ * This class is part of the AstItem abstract syntax tree. It represents properties of classes or interfaces
  * (It does not represent member methods)
  */
-class ApiProperty extends ApiMember {
+class AstProperty extends AstMember {
   public type: string;
   public isStatic: boolean;
   public isReadOnly: boolean;
 
-  constructor(options: IApiItemOptions) {
+  constructor(options: IAstItemOptions) {
     super(options);
-    this.kind = ApiItemKind.Property;
+    this.kind = AstItemKind.Property;
 
     if (this.documentation.hasReadOnlyTag) {
       this.isReadOnly = true;
@@ -38,4 +38,4 @@ class ApiProperty extends ApiMember {
   }
 }
 
-export default ApiProperty;
+export default AstProperty;

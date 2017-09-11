@@ -235,7 +235,10 @@ export default class RebuildAction extends BaseRushAction {
    * Collects all downstream dependents of a certain project
    */
   private _collectAllDependents(project: string): Set<string> {
-    const deps: Set<string> = new Set<string>(this._dependentList.get(project));
+    const deps: Set<string> = new Set<string>();
+    this._dependentList.get(project).forEach((dep) => {
+      deps.add(dep);
+    });
     deps.forEach(dep => this._collectAllDependents(dep).forEach(innerDep => deps.add(innerDep)));
     return deps;
   }

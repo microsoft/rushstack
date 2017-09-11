@@ -7,35 +7,36 @@ import * as ts from 'typescript';
 import { JsonFile, JsonSchema, IJsonSchemaErrorInfo } from '@microsoft/node-core-library';
 
 import Extractor from '../Extractor';
-import ApiStructuredType from '../apiItem/ApiStructuredType';
-import ApiEnum from '../apiItem/ApiEnum';
-import ApiEnumValue from '../apiItem/ApiEnumValue';
-import ApiFunction from '../apiItem/ApiFunction';
-import ApiItem, { ApiItemKind } from '../apiItem/ApiItem';
-import ApiItemVisitor from './ApiItemVisitor';
-import ApiPackage from '../apiItem/ApiPackage';
-import ApiParameter from '../apiItem/ApiParameter';
-import ApiProperty from '../apiItem/ApiProperty';
-import ApiMember, { AccessModifier } from '../apiItem/ApiMember';
-import ApiNamespace from '../apiItem/ApiNamespace';
-import ApiModuleVariable from '../apiItem/ApiModuleVariable';
-import ApiMethod from '../apiItem/ApiMethod';
-import { ReleaseTag } from '../aedoc/ApiDocumentation';
-import { IReturn, IParam } from '../jsonItem/JsonItem';
-import ApiJsonFile from '../jsonItem/ApiJsonFile';
+import AstStructuredType from '../ast/AstStructuredType';
+import AstEnum from '../ast/AstEnum';
+import AstEnumValue from '../ast/AstEnumValue';
+import AstFunction from '../ast/AstFunction';
+import AstItem, { AstItemKind } from '../ast/AstItem';
+import AstItemVisitor from './AstItemVisitor';
+import AstPackage from '../ast/AstPackage';
+import AstParameter from '../ast/AstParameter';
+import AstProperty from '../ast/AstProperty';
+import AstMember, { ApiAccessModifier } from '../ast/AstMember';
+import AstNamespace from '../ast/AstNamespace';
+import AstModuleVariable from '../ast/AstModuleVariable';
+import AstMethod from '../ast/AstMethod';
+import { ReleaseTag } from '../aedoc/ReleaseTag';
+import { IAedocParameter } from '../aedoc/ApiDocumentation';
+import { IApiReturnValue, IApiParameter, IApiNameMap } from '../api/ApiItem';
+import ApiJsonFile from '../api/ApiJsonFile';
 
 /**
- * For a library such as "example-package", ApiFileGenerator generates the "example-package.api.ts"
- * report which is used to detect API changes.  The output is pseudocode whose syntax is similar
- * but not identical to a "*.d.ts" typings file.  The output file is designed to be committed to
- * Git with a branch policy that will trigger an API review workflow whenever the file contents
- * have changed.  For example, the API file indicates *whether* a class has been documented,
- * but it does not include the documentation text (since minor text changes should not require
- * an API review).
+ * For a library such as "example-package", ApiFileGenerator generates the "example-package.api.json"
+ * file which represents the API surface for that package.  This file should be published as part
+ * of the library's NPM package.  API Extractor will read this file later when it is analyzing
+ * another project that consumes the library.  (Otherwise, API Extractor would have to re-analyze all
+ * the *.d.ts files, which would be bad because the compiler definitions might not be available for
+ * a published package, or the results of the analysis might be different somehow.)  Documentation
+ * tools such as api-documenter can also use the *.api.json files.
  *
  * @public
  */
-export default class ApiJsonGenerator extends ApiItemVisitor {
+export default class ApiJsonGenerator extends AstItemVisitor {
   private static _methodCounter: number = 0;
   private static _MEMBERS_KEY: string = 'members';
   private static _EXPORTS_KEY: string = 'exports';
@@ -46,7 +47,7 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
    */
   public static get jsonSchema(): JsonSchema {
     if (!ApiJsonGenerator._jsonSchema) {
-      ApiJsonGenerator._jsonSchema = JsonSchema.fromFile(path.join(__dirname, '../jsonItem/api-json.schema.json'));
+      ApiJsonGenerator._jsonSchema = JsonSchema.fromFile(path.join(__dirname, '../api/api-json.schema.json'));
     }
 
     return ApiJsonGenerator._jsonSchema;
@@ -72,8 +73,8 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
   }
 
   // @override
-  protected visit(apiItem: ApiItem, refObject?: Object): void {
-    switch (apiItem.documentation.releaseTag) {
+  protected visit(astItem: AstItem, refObject?: Object): void {
+    switch (astItem.inheritedReleaseTag) {
       case ReleaseTag.None:
       case ReleaseTag.Beta:
       case ReleaseTag.Public:
@@ -82,248 +83,258 @@ export default class ApiJsonGenerator extends ApiItemVisitor {
         return; // skip @alpha and @internal definitions
     }
 
-    super.visit(apiItem, refObject);
+    super.visit(astItem, refObject);
   }
 
-  protected visitApiStructuredType(apiStructuredType: ApiStructuredType, refObject?: Object): void {
-    if (!apiStructuredType.supportedName) {
+  protected visitAstStructuredType(astStructuredType: AstStructuredType, refObject?: Object): void {
+    if (!astStructuredType.supportedName) {
       return;
     }
 
     const kind: string =
-      apiStructuredType.kind === ApiItemKind.Class ? ApiJsonFile.convertKindToJson(ApiItemKind.Class) :
-      apiStructuredType.kind === ApiItemKind.Interface ?
-        ApiJsonFile.convertKindToJson(ApiItemKind.Interface) : '';
+      astStructuredType.kind === AstItemKind.Class ? ApiJsonFile.convertKindToJson(AstItemKind.Class) :
+      astStructuredType.kind === AstItemKind.Interface ?
+        ApiJsonFile.convertKindToJson(AstItemKind.Interface) : '';
 
     const structureNode: Object = {
       kind: kind,
-      extends: apiStructuredType.extends || '',
-      implements: apiStructuredType.implements || '',
-      typeParameters: apiStructuredType.typeParameters || [],
-      deprecatedMessage: apiStructuredType.documentation.deprecatedMessage || [],
-      summary: apiStructuredType.documentation.summary || [],
-      remarks: apiStructuredType.documentation.remarks || [],
-      isBeta: apiStructuredType.documentation.releaseTag === ReleaseTag.Beta
+      extends: astStructuredType.extends || '',
+      implements: astStructuredType.implements || '',
+      typeParameters: astStructuredType.typeParameters || [],
+      deprecatedMessage: astStructuredType.inheritedDeprecatedMessage || [],
+      summary: astStructuredType.documentation.summary || [],
+      remarks: astStructuredType.documentation.remarks || [],
+      isBeta: astStructuredType.inheritedReleaseTag === ReleaseTag.Beta
     };
-    refObject[apiStructuredType.name] = structureNode;
+    refObject[astStructuredType.name] = structureNode;
 
     ApiJsonGenerator._methodCounter = 0;
 
-    const members: ApiItem[] = apiStructuredType.getSortedMemberItems();
+    const members: AstItem[] = astStructuredType.getSortedMemberItems();
 
     if (members && members.length) {
       const membersNode: Object = {};
       structureNode[ApiJsonGenerator._MEMBERS_KEY] = membersNode;
 
-      for (const apiItem of members) {
-        this.visit(apiItem, membersNode);
+      for (const astItem of members) {
+        this.visit(astItem, membersNode);
       }
     }
   }
 
-  protected visitApiEnum(apiEnum: ApiEnum, refObject?: Object): void {
-    if (!apiEnum.supportedName) {
+  protected visitAstEnum(astEnum: AstEnum, refObject?: Object): void {
+    if (!astEnum.supportedName) {
       return;
     }
 
     const valuesNode: Object = {};
     const enumNode: Object = {
-      kind: ApiJsonFile.convertKindToJson(apiEnum.kind),
+      kind: ApiJsonFile.convertKindToJson(astEnum.kind),
       values: valuesNode,
-      deprecatedMessage: apiEnum.documentation.deprecatedMessage || [],
-      summary: apiEnum.documentation.summary || [],
-      remarks: apiEnum.documentation.remarks || [],
-      isBeta: apiEnum.documentation.releaseTag === ReleaseTag.Beta
+      deprecatedMessage: astEnum.inheritedDeprecatedMessage || [],
+      summary: astEnum.documentation.summary || [],
+      remarks: astEnum.documentation.remarks || [],
+      isBeta: astEnum.inheritedReleaseTag === ReleaseTag.Beta
     };
-    refObject[apiEnum.name] = enumNode;
+    refObject[astEnum.name] = enumNode;
 
-    for (const apiItem of apiEnum.getSortedMemberItems()) {
-      this.visit(apiItem, valuesNode);
+    for (const astItem of astEnum.getSortedMemberItems()) {
+      this.visit(astItem, valuesNode);
     }
   }
 
-  protected visitApiEnumValue(apiEnumValue: ApiEnumValue, refObject?: Object): void {
-    if (!apiEnumValue.supportedName) {
+  protected visitAstEnumValue(astEnumValue: AstEnumValue, refObject?: Object): void {
+    if (!astEnumValue.supportedName) {
       return;
     }
 
-    const declaration: ts.Declaration = apiEnumValue.getDeclaration();
+    const declaration: ts.Declaration = astEnumValue.getDeclaration();
     const firstToken: ts.Node = declaration ? declaration.getFirstToken() : undefined;
     const lastToken: ts.Node = declaration ? declaration.getLastToken() : undefined;
 
     const value: string = lastToken && lastToken !== firstToken ? lastToken.getText() : '';
 
-    refObject[apiEnumValue.name] = {
-      kind: ApiJsonFile.convertKindToJson(apiEnumValue.kind),
+    refObject[astEnumValue.name] = {
+      kind: ApiJsonFile.convertKindToJson(astEnumValue.kind),
       value: value,
-      deprecatedMessage: apiEnumValue.documentation.deprecatedMessage || [],
-      summary: apiEnumValue.documentation.summary || [],
-      remarks: apiEnumValue.documentation.remarks || [],
-      isBeta: apiEnumValue.documentation.releaseTag === ReleaseTag.Beta
+      deprecatedMessage: astEnumValue.inheritedDeprecatedMessage || [],
+      summary: astEnumValue.documentation.summary || [],
+      remarks: astEnumValue.documentation.remarks || [],
+      isBeta: astEnumValue.inheritedReleaseTag === ReleaseTag.Beta
     };
   }
 
-  protected visitApiFunction(apiFunction: ApiFunction, refObject?: Object): void {
-    if (!apiFunction.supportedName) {
+  protected visitAstFunction(astFunction: AstFunction, refObject?: Object): void {
+    if (!astFunction.supportedName) {
       return;
     }
 
-    for (const param of apiFunction.params) {
-      this.visitApiParam(param, apiFunction.documentation.parameters[param.name]);
-    }
-    const returnValueNode: IReturn = {
-      type: apiFunction.returnType,
-      description: apiFunction.documentation.returnsMessage
+    const returnValueNode: IApiReturnValue = {
+      type: astFunction.returnType,
+      description: astFunction.documentation.returnsMessage
     };
 
     const newNode: Object = {
-      kind: ApiJsonFile.convertKindToJson(apiFunction.kind),
+      kind: ApiJsonFile.convertKindToJson(astFunction.kind),
       returnValue: returnValueNode,
-      parameters: apiFunction.documentation.parameters,
-      deprecatedMessage: apiFunction.documentation.deprecatedMessage || [],
-      summary: apiFunction.documentation.summary || [],
-      remarks: apiFunction.documentation.remarks || [],
-      isBeta: apiFunction.documentation.releaseTag === ReleaseTag.Beta
+      parameters: this._createParameters(astFunction),
+      deprecatedMessage: astFunction.inheritedDeprecatedMessage || [],
+      summary: astFunction.documentation.summary || [],
+      remarks: astFunction.documentation.remarks || [],
+      isBeta: astFunction.inheritedReleaseTag === ReleaseTag.Beta
     };
 
-    refObject[apiFunction.name] = newNode;
+    refObject[astFunction.name] = newNode;
   }
 
-  protected visitApiPackage(apiPackage: ApiPackage, refObject?: Object): void {
+  protected visitAstPackage(astPackage: AstPackage, refObject?: Object): void {
     /* tslint:disable:no-string-literal */
-    refObject['kind'] = ApiJsonFile.convertKindToJson(apiPackage.kind);
-    refObject['summary'] = apiPackage.documentation.summary;
-    refObject['remarks'] = apiPackage.documentation.remarks;
+    refObject['kind'] = ApiJsonFile.convertKindToJson(astPackage.kind);
+    refObject['name'] = astPackage.name;
+    refObject['summary'] = astPackage.documentation.summary;
+    refObject['remarks'] = astPackage.documentation.remarks;
     /* tslint:enable:no-string-literal */
 
     const membersNode: Object = {};
     refObject[ApiJsonGenerator._EXPORTS_KEY] = membersNode;
 
-    for (const apiItem of apiPackage.getSortedMemberItems()) {
-      this.visit(apiItem, membersNode);
+    for (const astItem of astPackage.getSortedMemberItems()) {
+      this.visit(astItem, membersNode);
     }
   }
 
-  protected visitApiNamespace(apiNamespace: ApiNamespace, refObject?: Object): void {
-    if (!apiNamespace.supportedName) {
+  protected visitAstNamespace(astNamespace: AstNamespace, refObject?: Object): void {
+    if (!astNamespace.supportedName) {
       return;
     }
 
     const membersNode: Object = {};
-    for (const apiItem of apiNamespace.getSortedMemberItems()) {
-      this.visit(apiItem, membersNode);
+    for (const astItem of astNamespace.getSortedMemberItems()) {
+      this.visit(astItem, membersNode);
     }
 
     const newNode: Object = {
-      kind: ApiJsonFile.convertKindToJson(apiNamespace.kind),
-      deprecatedMessage: apiNamespace.documentation.deprecatedMessage || [],
-      summary: apiNamespace.documentation.summary || [],
-      remarks: apiNamespace.documentation.remarks || [],
-      isBeta: apiNamespace.documentation.releaseTag === ReleaseTag.Beta,
+      kind: ApiJsonFile.convertKindToJson(astNamespace.kind),
+      deprecatedMessage: astNamespace.inheritedDeprecatedMessage || [],
+      summary: astNamespace.documentation.summary || [],
+      remarks: astNamespace.documentation.remarks || [],
+      isBeta: astNamespace.inheritedReleaseTag === ReleaseTag.Beta,
       exports: membersNode
     };
 
-    refObject[apiNamespace.name] = newNode;
+    refObject[astNamespace.name] = newNode;
   }
 
-  protected visitApiMember(apiMember: ApiMember, refObject?: Object): void {
-    if (!apiMember.supportedName) {
+  protected visitAstMember(astMember: AstMember, refObject?: Object): void {
+    if (!astMember.supportedName) {
       return;
     }
 
-    refObject[apiMember.name] = 'apiMember-' + apiMember.getDeclaration().kind;
+    refObject[astMember.name] = 'astMember-' + astMember.getDeclaration().kind;
   }
 
-  protected visitApiProperty(apiProperty: ApiProperty, refObject?: Object): void {
-    if (!apiProperty.supportedName) {
+  protected visitAstProperty(astProperty: AstProperty, refObject?: Object): void {
+    if (!astProperty.supportedName) {
       return;
     }
 
-    if (apiProperty.getDeclaration().kind === ts.SyntaxKind.SetAccessor) {
+    if (astProperty.getDeclaration().kind === ts.SyntaxKind.SetAccessor) {
       return;
     }
 
     const newNode: Object = {
-      kind: ApiJsonFile.convertKindToJson(apiProperty.kind),
-      isOptional: !!apiProperty.isOptional,
-      isReadOnly: !!apiProperty.isReadOnly,
-      isStatic: !!apiProperty.isStatic,
-      type: apiProperty.type,
-      deprecatedMessage: apiProperty.documentation.deprecatedMessage || [],
-      summary: apiProperty.documentation.summary || [],
-      remarks: apiProperty.documentation.remarks || [],
-      isBeta: apiProperty.documentation.releaseTag === ReleaseTag.Beta
+      kind: ApiJsonFile.convertKindToJson(astProperty.kind),
+      isOptional: !!astProperty.isOptional,
+      isReadOnly: !!astProperty.isReadOnly,
+      isStatic: !!astProperty.isStatic,
+      type: astProperty.type,
+      deprecatedMessage: astProperty.inheritedDeprecatedMessage || [],
+      summary: astProperty.documentation.summary || [],
+      remarks: astProperty.documentation.remarks || [],
+      isBeta: astProperty.inheritedReleaseTag === ReleaseTag.Beta
     };
 
-    refObject[apiProperty.name] = newNode;
+    refObject[astProperty.name] = newNode;
   }
 
-  protected visitApiModuleVariable(apiModuleVariable: ApiModuleVariable, refObject?: Object): void {
+  protected visitAstModuleVariable(astModuleVariable: AstModuleVariable, refObject?: Object): void {
     const newNode: Object = {
-      kind: ApiJsonFile.convertKindToJson(apiModuleVariable.kind),
-      type: apiModuleVariable.type,
-      value: apiModuleVariable.value,
-      deprecatedMessage: apiModuleVariable.documentation.deprecatedMessage || [],
-      summary: apiModuleVariable.documentation.summary || [],
-      remarks: apiModuleVariable.documentation.remarks || [],
-      isBeta: apiModuleVariable.documentation.releaseTag === ReleaseTag.Beta
+      kind: ApiJsonFile.convertKindToJson(astModuleVariable.kind),
+      type: astModuleVariable.type,
+      value: astModuleVariable.value,
+      deprecatedMessage: astModuleVariable.inheritedDeprecatedMessage || [],
+      summary: astModuleVariable.documentation.summary || [],
+      remarks: astModuleVariable.documentation.remarks || [],
+      isBeta: astModuleVariable.inheritedReleaseTag === ReleaseTag.Beta
     };
 
-    refObject[apiModuleVariable.name] = newNode;
+    refObject[astModuleVariable.name] = newNode;
   }
 
-  protected visitApiMethod(apiMethod: ApiMethod, refObject?: Object): void {
-    if (!apiMethod.supportedName) {
+  protected visitAstMethod(astMethod: AstMethod, refObject?: Object): void {
+    if (!astMethod.supportedName) {
       return;
-    }
-
-    for (const param of apiMethod.params) {
-      this.visitApiParam(param, apiMethod.documentation.parameters[param.name]);
     }
 
     let newNode: Object;
-    if (apiMethod.name === '__constructor') {
+    if (astMethod.name === '__constructor') {
       newNode = {
-        kind: ApiJsonFile.convertKindToJson(ApiItemKind.Constructor),
-        signature: apiMethod.getDeclarationLine(),
-        parameters: apiMethod.documentation.parameters,
-        deprecatedMessage: apiMethod.documentation.deprecatedMessage || [],
-        summary: apiMethod.documentation.summary || [],
-        remarks: apiMethod.documentation.remarks || []
+        kind: ApiJsonFile.convertKindToJson(AstItemKind.Constructor),
+        signature: astMethod.getDeclarationLine(),
+        parameters: this._createParameters(astMethod),
+        deprecatedMessage: astMethod.inheritedDeprecatedMessage || [],
+        summary: astMethod.documentation.summary || [],
+        remarks: astMethod.documentation.remarks || []
       };
     } else {
-      const returnValueNode: IReturn = {
-        type: apiMethod.returnType,
-        description: apiMethod.documentation.returnsMessage
+      const returnValueNode: IApiReturnValue = {
+        type: astMethod.returnType,
+        description: astMethod.documentation.returnsMessage
       };
 
       newNode = {
-        kind: ApiJsonFile.convertKindToJson(apiMethod.kind),
-        signature: apiMethod.getDeclarationLine(),
-        accessModifier: apiMethod.accessModifier ? AccessModifier[apiMethod.accessModifier].toLowerCase() : '',
-        isOptional: !!apiMethod.isOptional,
-        isStatic: !!apiMethod.isStatic,
+        kind: ApiJsonFile.convertKindToJson(astMethod.kind),
+        signature: astMethod.getDeclarationLine(),
+        accessModifier: astMethod.accessModifier ? ApiAccessModifier[astMethod.accessModifier].toLowerCase() : '',
+        isOptional: !!astMethod.isOptional,
+        isStatic: !!astMethod.isStatic,
         returnValue: returnValueNode,
-        parameters: apiMethod.documentation.parameters,
-        deprecatedMessage: apiMethod.documentation.deprecatedMessage || [],
-        summary: apiMethod.documentation.summary || [],
-        remarks: apiMethod.documentation.remarks || [],
-        isBeta: apiMethod.documentation.releaseTag === ReleaseTag.Beta
+        parameters: this._createParameters(astMethod),
+        deprecatedMessage: astMethod.inheritedDeprecatedMessage || [],
+        summary: astMethod.documentation.summary || [],
+        remarks: astMethod.documentation.remarks || [],
+        isBeta: astMethod.inheritedReleaseTag === ReleaseTag.Beta
       };
     }
 
-    refObject[apiMethod.name] = newNode;
+    refObject[astMethod.name] = newNode;
   }
 
-  protected visitApiParam(apiParam: ApiParameter, refObject?: Object): void {
-    if (!apiParam.supportedName) {
-      return;
+  private _createParameters(astFunction: AstMethod | AstFunction): IApiNameMap<IApiParameter> {
+    const result: IApiNameMap<IApiParameter> = { };
+
+    for (const astParameter of astFunction.params) {
+      if (!astParameter.supportedName) {
+        continue; // skip parameter names with unusual characters
+      }
+
+      const apiParameter: IApiParameter = {
+        name: astParameter.name,
+        description: [],
+        isOptional: astParameter.isOptional,
+        isSpread: astParameter.isSpread,
+        type: astParameter.type || ''
+      };
+
+      const aedocParameter: IAedocParameter = astFunction.documentation.parameters[astParameter.name];
+      if (aedocParameter) {
+        apiParameter.description = aedocParameter.description;
+      }
+
+      result[astParameter.name] = apiParameter;
     }
 
-    if (refObject) {
-      (refObject as IParam).isOptional = apiParam.isOptional;
-      (refObject as IParam).isSpread = apiParam.isSpread;
-      (refObject as IParam).type = apiParam.type;
-    }
+    return result;
   }
+
 }

@@ -15,12 +15,12 @@ import {
   ICodeLinkElement,
   ITextElement,
   ISeeDocElement
-} from '../markupItem/OldMarkupItem';
+} from '../markup/OldMarkup';
 
-import { IParam } from '../jsonItem/JsonItem';
+import { IAedocParameter } from '../aedoc/ApiDocumentation';
 
 import TestFileComparer from '../TestFileComparer';
-import ApiStructuredType from '../apiItem/ApiStructuredType';
+import AstStructuredType from '../ast/AstStructuredType';
 import ApiDocumentation from '../aedoc/ApiDocumentation';
 import Extractor from '../Extractor';
 import Tokenizer from '../aedoc/Tokenizer';
@@ -45,7 +45,7 @@ function assertCapturedErrors(expectedMessages: string[]): void {
 }
 
 const inputFolder: string = './testInputs/example2';
-let myDocumentedClass: ApiStructuredType;
+let myDocumentedClass: AstStructuredType;
 
 const compilerOptions: ts.CompilerOptions = {
   target: ts.ScriptTarget.ES5,
@@ -77,7 +77,7 @@ class TestApiDocumentation extends ApiDocumentation {
     );
   }
 
-  public parseParam(tokenizer: Tokenizer): IParam {
+  public parseParam(tokenizer: Tokenizer): IAedocParameter {
     return this._parseParam(tokenizer);
   }
 }
@@ -89,7 +89,7 @@ extractor.analyze({
 });
 
 myDocumentedClass = extractor.package.getSortedMemberItems()
-  .filter(apiItem => apiItem.name === 'MyDocumentedClass')[0] as ApiStructuredType;
+  .filter(astItem => astItem.name === 'MyDocumentedClass')[0] as AstStructuredType;
 
 describe('DocElementParser tests', function (): void {
   this.timeout(10000);
@@ -133,17 +133,17 @@ describe('DocElementParser tests', function (): void {
       TestFileComparer.assertFileMatchesExpected('./lib/returnDocActual.json', './lib/returnDocExpected.json');
 
       // Testing Params Doc Elements
-      const expectedParam: IParam[] = [
+      const expectedParam: IAedocParameter[] = [
           {
               name: 'param1',
               description: [{kind: 'textDocElement', value: 'description of the type param1'}]
-          } as IParam,
+          } as IAedocParameter,
           {
               name: 'param2',
               description: [{kind: 'textDocElement', value: 'description of the type param2'}]
-          } as IParam
+          } as IAedocParameter
       ];
-      const actualParam: IParam[] = [];
+      const actualParam: IAedocParameter[] = [];
       tokenizer.getToken();
       actualParam.push(apiDoc.parseParam(tokenizer));
       tokenizer.getToken();
@@ -219,11 +219,11 @@ describe('DocElementParser tests', function (): void {
               value: 'http://wikipedia.org/pixel_units'
           } as IHrefLinkElement
       ];
-      const expectedParam: IParam = {
+      const expectedParam: IAedocParameter = {
           name: 'x',
           description: description
-      } as IParam;
-      const actualParam: IParam = apiDoc.parseParam(tokenizer);
+      } as IAedocParameter;
+      const actualParam: IAedocParameter = apiDoc.parseParam(tokenizer);
 
       JsonFile.save(JSON.stringify(expectedParam), './lib/nestedParamDocExpected.json');
       JsonFile.save(JSON.stringify(actualParam), './lib/nestedParamDocActual.json');

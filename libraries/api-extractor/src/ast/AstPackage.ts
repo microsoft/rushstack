@@ -5,23 +5,23 @@
 
 import * as ts from 'typescript';
 import Extractor from '../Extractor';
-import ApiStructuredType from './ApiStructuredType';
-import ApiEnum from './ApiEnum';
-import ApiFunction from './ApiFunction';
-import { ApiItemKind, IApiItemOptions } from './ApiItem';
-import ApiItemContainer from './ApiItemContainer';
-import ApiNamespace from './ApiNamespace';
+import AstStructuredType from './AstStructuredType';
+import AstEnum from './AstEnum';
+import AstFunction from './AstFunction';
+import { AstItemKind, IAstItemOptions } from './AstItem';
+import AstItemContainer from './AstItemContainer';
+import AstNamespace from './AstNamespace';
 import TypeScriptHelpers from '../TypeScriptHelpers';
 import { IExportedSymbol } from './IExportedSymbol';
 
 /**
-  * This class is part of the ApiItem abstract syntax tree.  It represents the top-level
+  * This class is part of the AstItem abstract syntax tree.  It represents the top-level
   * exports for an Rush package.  This object acts as the root of the Extractor's tree.
   */
-export default class ApiPackage extends ApiItemContainer {
+export default class AstPackage extends AstItemContainer {
   private _exportedNormalizedSymbols: IExportedSymbol[] = [];
 
-  private static _getOptions(extractor: Extractor, rootFile: ts.SourceFile): IApiItemOptions {
+  private static _getOptions(extractor: Extractor, rootFile: ts.SourceFile): IAstItemOptions {
     const rootFileSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(rootFile);
     let statement: ts.VariableStatement;
     let foundDescription: ts.Node = undefined;
@@ -44,9 +44,10 @@ export default class ApiPackage extends ApiItemContainer {
       jsdocNode: foundDescription
     };
   }
+
   constructor(extractor: Extractor, rootFile: ts.SourceFile) {
-    super(ApiPackage._getOptions(extractor, rootFile));
-    this.kind = ApiItemKind.Package;
+    super(AstPackage._getOptions(extractor, rootFile));
+    this.kind = AstItemKind.Package;
     // The scoped package name. (E.g. "@microsoft/api-extractor")
     this.name = this.extractor.packageJsonLookup.getPackageName(this.extractor.packageFolder);
 
@@ -64,7 +65,7 @@ export default class ApiPackage extends ApiItemContainer {
         }
 
         for (const declaration of followedSymbol.declarations) {
-          const options: IApiItemOptions = {
+          const options: IAstItemOptions = {
             extractor: this.extractor,
             declaration,
             declarationSymbol: followedSymbol,
@@ -73,13 +74,13 @@ export default class ApiPackage extends ApiItemContainer {
           };
 
           if (followedSymbol.flags & (ts.SymbolFlags.Class | ts.SymbolFlags.Interface)) {
-            this.addMemberItem(new ApiStructuredType(options));
+            this.addMemberItem(new AstStructuredType(options));
           } else if (followedSymbol.flags & ts.SymbolFlags.ValueModule) {
-            this.addMemberItem(new ApiNamespace(options));
+            this.addMemberItem(new AstNamespace(options));
           } else if (followedSymbol.flags & ts.SymbolFlags.Function) {
-            this.addMemberItem(new ApiFunction(options));
+            this.addMemberItem(new AstFunction(options));
           } else if (followedSymbol.flags & ts.SymbolFlags.Enum) {
-            this.addMemberItem(new ApiEnum(options));
+            this.addMemberItem(new AstEnum(options));
           } else {
             this.reportWarning(`Unsupported export: ${exportSymbol.name}`);
           }
@@ -114,7 +115,7 @@ export default class ApiPackage extends ApiItemContainer {
   }
 
   public shouldHaveDocumentation(): boolean {
-    // We don't write JSDoc for the ApiPackage object
+    // We don't write JSDoc for the AstPackage object
     return false;
   }
 }

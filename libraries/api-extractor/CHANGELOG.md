@@ -1,6 +1,56 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 31 Aug 2017 18:41:18 GMT and should not be manually modified.
+This log was last generated on Mon, 11 Sep 2017 13:04:55 GMT and should not be manually modified.
+
+## 3.2.5
+Mon, 11 Sep 2017 13:04:55 GMT
+
+### Patches
+
+- The isBeta and deprecatedMessage fields are now inherited in the *.api.json files
+- Fix an issue where the *.api.json file was sometimes missing function parameters
+
+## 3.2.4
+Fri, 08 Sep 2017 01:28:04 GMT
+
+### Patches
+
+- Deprecate @types/es6-coll ections in favor of built-in typescript typings 'es2015.collection' a nd 'es2015.iterable'
+
+## 3.2.3
+Thu, 07 Sep 2017 13:04:35 GMT
+
+### Patches
+
+- Fix incorrect schema/typings for enum members
+
+## 3.2.2
+Thu, 07 Sep 2017 00:11:11 GMT
+
+### Patches
+
+-  Add $schema field to all schemas
+
+## 3.2.1
+Wed, 06 Sep 2017 13:03:42 GMT
+
+### Patches
+
+- Converted IMarkupDocumentationLink to IMarkupApiLink, which exposes the underlying IApiItemReference rather than assuming a particular "document ID" model
+
+## 3.2.0
+Tue, 05 Sep 2017 19:03:56 GMT
+
+### Minor changes
+
+- Add the constructor signature and package name to the exported API signature
+
+## 3.1.0
+Sat, 02 Sep 2017 01:04:26 GMT
+
+### Minor changes
+
+- Expanded the api-extractor API to expose interfaces for the *.api.json file fileformat
 
 ## 3.0.0
 Thu, 31 Aug 2017 18:41:18 GMT

@@ -3,51 +3,15 @@
 
 /* tslint:disable:no-bitwise */
 
-import ApiPackage from '../apiItem/ApiPackage';
+import AstPackage from '../ast/AstPackage';
 import DocElementParser from '../DocElementParser';
-import { IDocElement, ICodeLinkElement } from '../markupItem/OldMarkupItem';
-import { IParam } from '../jsonItem/JsonItem';
+import { IDocElement, ICodeLinkElement } from '../markup/OldMarkup';
 import ApiDefinitionReference, { IApiDefinitionReferenceParts } from '../ApiDefinitionReference';
 import Token, { TokenType } from './Token';
 import Tokenizer from './Tokenizer';
 import Extractor from '../Extractor';
 import ResolvedApiItem from '../ResolvedApiItem';
-
-/**
-  * A "release tag" is an AEDoc tag which indicates whether an ApiItem definition
-  * is considered Public API for third party developers, as well as its release
-  * stage (alpha, beta, etc).
-  * @see https://onedrive.visualstudio.com/DefaultCollection/SPPPlat/_git/sp-client
-  *      ?path=/common/docs/ApiPrinciplesAndProcess.md
-  */
-export enum ReleaseTag {
-  /**
-   * No release tag was specified in the AEDoc summary.
-   */
-  None = 0,
-  /**
-   * Indicates that an API item is meant only for usage by other NPM packages from the same
-   * maintainer. Third parties should never use "internal" APIs. (To emphasize this, their
-   * names are prefixed by underscores.)
-   */
-  Internal = 1,
-  /**
-   * Indicates that an API item is eventually intended to be public, but currently is in an
-   * early stage of development. Third parties should not use "alpha" APIs.
-   */
-  Alpha = 2,
-  /**
-   * Indicates that an API item has been released in an experimental state. Third parties are
-   * encouraged to try it and provide feedback. However, a "beta" API should NOT be used
-   * in production.
-   */
-  Beta = 3,
-  /**
-   * Indicates that an API item has been officially released. It is part of the supported
-   * contract (e.g. SemVer) for a package.
-   */
-  Public = 4
-}
+import { ReleaseTag } from './ReleaseTag';
 
 /**
  * A dependency for ApiDocumentation constructor that abstracts away the function
@@ -63,8 +27,16 @@ export enum ReleaseTag {
 export interface IReferenceResolver {
   resolve(
     apiDefinitionRef: ApiDefinitionReference,
-    apiPackage: ApiPackage,
+    astPackage: AstPackage,
     warnings: string[]): ResolvedApiItem;
+}
+
+/**
+ * Used by ApiDocumentation to represent the AEDoc description for a function parameter.
+ */
+export interface IAedocParameter {
+  name: string;
+  description: IDocElement[];
 }
 
 export default class ApiDocumentation {
@@ -128,7 +100,7 @@ export default class ApiDocumentation {
   public deprecatedMessage: IDocElement[];
   public remarks: IDocElement[];
   public returnsMessage: IDocElement[];
-  public parameters: { [name: string]: IParam; };
+  public parameters: { [name: string]: IAedocParameter; };
 
   /**
    * A list of \@link elements to be post-processed after all basic documentation has been created
@@ -174,16 +146,16 @@ export default class ApiDocumentation {
   /**
    * A function type interface that abstracts away resolving
    * an API definition reference to an item that has friendly
-   * accessible ApiItem properties.
+   * accessible AstItem properties.
    *
    * Ex: this is useful in the case of parsing inheritdoc expressions,
    * in the sense that we do not know if we the inherited documentation
-   * is coming from an ApiItem or a IDocItem.
+   * is coming from an AstItem or a ApiItem.
    */
   public referenceResolver: IReferenceResolver;
 
   /**
-   * We need the extractor to access the package that this ApiItem
+   * We need the extractor to access the package that this AstItem
    * belongs to in order to resolve references.
    */
   public extractor: Extractor;
@@ -271,7 +243,7 @@ export default class ApiDocumentation {
           case '@param':
             tokenizer.getToken();
             this._checkInheritDocStatus(token.tag);
-            const param: IParam = this._parseParam(tokenizer);
+            const param: IAedocParameter = this._parseParam(tokenizer);
             if (param) {
                this.parameters[param.name] = param;
             }
@@ -363,7 +335,7 @@ export default class ApiDocumentation {
     }
   }
 
-  protected _parseParam(tokenizer: Tokenizer): IParam {
+  protected _parseParam(tokenizer: Tokenizer): IAedocParameter {
     const paramDescriptionToken: Token = tokenizer.getToken();
     if (!paramDescriptionToken) {
       this.reportError('The @param tag is missing a parameter description');
@@ -388,12 +360,12 @@ export default class ApiDocumentation {
       const remainingElements: IDocElement[] = DocElementParser.parse(this, tokenizer);
       const descriptionElements: IDocElement[] = [commentTextElement].concat(remainingElements);
 
-      const paramDocElement: IParam = {
+      const paramDocElement: IAedocParameter = {
         name: name,
         description: descriptionElements
       };
       return paramDocElement;
-      }
+    }
   }
 
   /**
@@ -411,17 +383,17 @@ export default class ApiDocumentation {
       };
 
       const apiDefinitionRef: ApiDefinitionReference = ApiDefinitionReference.createFromParts(parts);
-      const resolvedApiItem: ResolvedApiItem =  this.referenceResolver.resolve(
+      const resolvedAstItem: ResolvedApiItem =  this.referenceResolver.resolve(
         apiDefinitionRef,
         this.extractor.package,
         this.warnings
       );
 
-      // If the apiDefinitionRef can not be found the resolvedApiItem will be
+      // If the apiDefinitionRef can not be found the resolvedAstItem will be
       // undefined and an error will have been reported via this.reportError
-      if (resolvedApiItem) {
-        if (resolvedApiItem.releaseTag === ReleaseTag.Internal
-          || resolvedApiItem.releaseTag === ReleaseTag.Alpha) {
+      if (resolvedAstItem) {
+        if (resolvedAstItem.releaseTag === ReleaseTag.Internal
+          || resolvedAstItem.releaseTag === ReleaseTag.Alpha) {
 
           this.reportError('The {@link} tag references an @internal or @alpha API item, '
             + 'which will not appear in the generated documentation');

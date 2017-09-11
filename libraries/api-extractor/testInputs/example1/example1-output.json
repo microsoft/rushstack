@@ -1,5 +1,6 @@
 {
   "kind": "package",
+  "name": "example1",
   "summary": [],
   "remarks": [],
   "exports": {
@@ -62,7 +63,15 @@
             "type": "__proto__",
             "description": []
           },
-          "parameters": {},
+          "parameters": {
+            "___proto__": {
+              "name": "___proto__",
+              "description": [],
+              "isOptional": false,
+              "isSpread": false,
+              "type": "string"
+            }
+          },
           "deprecatedMessage": [],
           "summary": [],
           "remarks": [],
@@ -143,7 +152,7 @@
             }
           ],
           "remarks": [],
-          "isBeta": false
+          "isBeta": true
         }
       }
     },
@@ -226,7 +235,15 @@
         "type": "string",
         "description": []
       },
-      "parameters": {},
+      "parameters": {
+        "param": {
+          "name": "param",
+          "description": [],
+          "isOptional": false,
+          "isSpread": false,
+          "type": "number"
+        }
+      },
       "deprecatedMessage": [],
       "summary": [],
       "remarks": [],

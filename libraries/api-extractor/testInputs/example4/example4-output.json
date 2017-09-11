@@ -1,5 +1,6 @@
 {
   "kind": "package",
+  "name": "example4",
   "summary": [],
   "remarks": [],
   "exports": {
@@ -28,7 +29,15 @@
             "type": "void",
             "description": []
           },
-          "parameters": {},
+          "parameters": {
+            "promise": {
+              "name": "promise",
+              "description": [],
+              "isOptional": false,
+              "isSpread": false,
+              "type": "Promise<void>"
+            }
+          },
           "deprecatedMessage": [],
           "summary": [
             {
@@ -97,7 +106,15 @@
             "type": "MissingExport",
             "description": []
           },
-          "parameters": {},
+          "parameters": {
+            "library": {
+              "name": "library",
+              "description": [],
+              "isOptional": false,
+              "isSpread": false,
+              "type": "MyLibrary3"
+            }
+          },
           "deprecatedMessage": [],
           "summary": [
             {
@@ -118,7 +135,15 @@
             "type": "void",
             "description": []
           },
-          "parameters": {},
+          "parameters": {
+            "missing": {
+              "name": "missing",
+              "description": [],
+              "isOptional": false,
+              "isSpread": false,
+              "type": "MissingExport"
+            }
+          },
           "deprecatedMessage": [],
           "summary": [
             {

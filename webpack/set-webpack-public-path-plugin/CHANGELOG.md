@@ -1,6 +1,13 @@
 # Change Log - @microsoft/set-webpack-public-path-plugin
 
-This log was last generated on Fri, 01 Sep 2017 01:05:54 GMT and should not be manually modified.
+This log was last generated on Fri, 08 Sep 2017 01:28:04 GMT and should not be manually modified.
+
+## 1.2.3
+Fri, 08 Sep 2017 01:28:04 GMT
+
+### Patches
+
+- Deprecate @types/es6-coll ections in favor of built-in typescript typings 'es2015.collection' a nd 'es2015.iterable'
 
 ## 1.2.2
 Fri, 01 Sep 2017 01:05:54 GMT
