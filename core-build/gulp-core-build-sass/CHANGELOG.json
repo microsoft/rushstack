@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "4.0.7",
+      "tag": "@microsoft/gulp-core-build-sass_v4.0.7",
+      "date": "Mon, 11 Sep 2017 13:04:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.6` to `3.0.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.0.6",
       "tag": "@microsoft/gulp-core-build-sass_v4.0.6",
       "date": "Fri, 08 Sep 2017 01:28:04 GMT",

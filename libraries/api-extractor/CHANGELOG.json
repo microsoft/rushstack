@@ -2,6 +2,30 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "3.2.5",
+      "tag": "@microsoft/api-extractor_v3.2.5",
+      "date": "Mon, 11 Sep 2017 13:04:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "d4271683f40917843650ddb537dcd21f1b3372be",
+            "comment": "The isBeta and deprecatedMessage fields are now inherited in the *.api.json files"
+          },
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "7de7daf14ea8299922e578125669ecfabbde8857",
+            "comment": "Fix an issue where the *.api.json file was sometimes missing function parameters"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.2.9` to `~0.2.10`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.4",
       "tag": "@microsoft/api-extractor_v3.2.4",
       "date": "Fri, 08 Sep 2017 01:28:04 GMT",
