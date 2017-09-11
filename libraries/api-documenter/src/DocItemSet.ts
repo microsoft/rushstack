@@ -77,33 +77,33 @@ export class DocItem {
         }
         break;
 
-        case 'method':
-          this.kind = DocItemKind.Method;
-          break;
-        case 'constructor':
-          this.kind = DocItemKind.Constructor;
-          this.name = 'constructor';
-          break;
-        case 'function':
-          this.kind = DocItemKind.Function;
-          break;
-        case 'property':
-          this.kind = DocItemKind.Property;
-          break;
-        case 'enum':
-          this.kind = DocItemKind.Enum;
-          if (this.apiItem.values) {
-            for (const memberName of Object.keys(this.apiItem.values)) {
-              const child: ApiItem = this.apiItem.values[memberName];
-              this.children.push(new DocItem(child, memberName, this.docItemSet, this));
-            }
+      case 'method':
+        this.kind = DocItemKind.Method;
+        break;
+      case 'constructor':
+        this.kind = DocItemKind.Constructor;
+        this.name = 'constructor';
+        break;
+      case 'function':
+        this.kind = DocItemKind.Function;
+        break;
+      case 'property':
+        this.kind = DocItemKind.Property;
+        break;
+      case 'enum':
+        this.kind = DocItemKind.Enum;
+        if (this.apiItem.values) {
+          for (const memberName of Object.keys(this.apiItem.values)) {
+            const child: ApiItem = this.apiItem.values[memberName];
+            this.children.push(new DocItem(child, memberName, this.docItemSet, this));
           }
-          break;
-        case 'enum value':
-          this.kind = DocItemKind.EnumMember;
-          break;
-        default:
-          throw new Error('Unsupported item kind: ' + (this.apiItem as ApiItem).kind);
+        }
+        break;
+      case 'enum value':
+        this.kind = DocItemKind.EnumMember;
+        break;
+      default:
+        throw new Error('Unsupported item kind: ' + (this.apiItem as ApiItem).kind);
     }
 
     this.parent = parent;

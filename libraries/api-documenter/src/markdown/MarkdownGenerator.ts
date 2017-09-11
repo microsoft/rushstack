@@ -189,13 +189,6 @@ export class MarkdownGenerator {
 
     markupPage.elements.push(...MarkupBuilder.renderDocElements(apiClass.summary));
 
-    markupPage.elements.push(MarkupBuilder.createHeading1('Constructor'));
-
-    // TODO: pending WBT fix
-    markupPage.elements.push(...MarkupBuilder.createTextElements('Constructs a new instance of the '));
-    markupPage.elements.push(MarkupBuilder.createCode(docClass.name));
-    markupPage.elements.push(...MarkupBuilder.createTextElements(' class'));
-
     const propertiesTable: IMarkupTable = MarkupBuilder.createTable([
       MarkupBuilder.createTextElements('Property'),
       MarkupBuilder.createTextElements('Access Modifier'),
@@ -230,6 +223,25 @@ export class MarkdownGenerator {
             ])
           );
           this._writePropertyPage(docMember);
+          break;
+
+        case 'constructor':
+          // TODO: Extract constructor into its own section
+          const constructorTitle: MarkupBasicElement[] = [
+            MarkupBuilder.createApiLink(
+              [MarkupBuilder.createCode(RenderingHelpers.getConciseSignature(docMember.name, apiMember), 'javascript')],
+              docMember.getApiReference())
+          ];
+
+          methodsTable.rows.push(
+            MarkupBuilder.createTableRow([
+              constructorTitle,
+              [],
+              [],
+              MarkupBuilder.renderDocElements(apiMember.summary)
+            ])
+          );
+          this._writeMethodPage(docMember);
           break;
 
         case 'method':

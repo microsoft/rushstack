@@ -2,7 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import {
-  IApiMethod
+  IApiMethod,
+  IApiFunction,
+  IApiConstructor
 } from '@microsoft/api-extractor';
 
 export class RenderingHelpers {
@@ -54,7 +56,7 @@ export class RenderingHelpers {
   /**
    * Generates a concise signature for a function.  Example: "getArea(width, height)"
    */
-  public static getConciseSignature(methodName: string, method: IApiMethod): string {
+  public static getConciseSignature(methodName: string, method: IApiMethod | IApiConstructor | IApiFunction): string {
     return methodName + '(' + Object.keys(method.parameters).join(', ') + ')';
   }
 }
