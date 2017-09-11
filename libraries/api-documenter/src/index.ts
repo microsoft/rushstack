@@ -31,9 +31,12 @@ for (const filename of fsx.readdirSync(inputFolder)) {
 
 docItemSet.calculateReferences();
 
-// const yamlGenerator: YamlGenerator = new YamlGenerator(docItemSet);
-// yamlGenerator.generateFiles(path.join(dataFolder, 'yaml'));
+const yaml: boolean = false;
 
-const markdownGenerator: MarkdownGenerator = new MarkdownGenerator(docItemSet);
-markdownGenerator.generateFiles(path.join(dataFolder, 'markdown'));
-
+if (yaml) {
+  const yamlGenerator: YamlGenerator = new YamlGenerator(docItemSet);
+  yamlGenerator.generateFiles(path.join(dataFolder, 'yaml'));
+} else {
+  const markdownGenerator: MarkdownGenerator = new MarkdownGenerator(docItemSet);
+  markdownGenerator.generateFiles(path.join(dataFolder, 'markdown'));
+}
