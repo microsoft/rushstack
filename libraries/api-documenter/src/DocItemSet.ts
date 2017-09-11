@@ -121,6 +121,33 @@ export class DocItem {
     return result;
   }
 
+  public getApiReference(): IApiItemReference {
+    const reference: IApiItemReference = {
+      scopeName: '',
+      packageName: '',
+      exportName: '',
+      memberName: ''
+    };
+    let i: number = 0;
+    for (const docItem of this.getHierarchy()) {
+      switch (i) {
+        case 0:
+          reference.packageName = docItem.name;
+          break;
+        case 1:
+          reference.exportName = docItem.name;
+          break;
+        case 2:
+          reference.memberName = docItem.name;
+          break;
+        default:
+          throw new Error('Unable to create API reference for ' + this.name);
+      }
+      ++i;
+    }
+    return reference;
+  }
+
   public tryGetChild(name: string): DocItem | undefined {
     for (const child of this.children) {
       if (child.name === name) {

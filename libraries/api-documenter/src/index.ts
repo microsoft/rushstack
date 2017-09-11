@@ -7,6 +7,7 @@ import * as os from 'os';
 import * as path from 'path';
 import { DocItemSet } from './DocItemSet';
 import { YamlGenerator } from './yaml/YamlGenerator';
+import { MarkdownGenerator } from './markdown/MarkdownGenerator';
 
 const myPackageJsonFilename: string = path.resolve(path.join(
   __dirname, '..', 'package.json')
@@ -30,5 +31,9 @@ for (const filename of fsx.readdirSync(inputFolder)) {
 
 docItemSet.calculateReferences();
 
-const yamlGenerator: YamlGenerator = new YamlGenerator(docItemSet);
-yamlGenerator.generateFiles(path.join(dataFolder, 'yaml'));
+// const yamlGenerator: YamlGenerator = new YamlGenerator(docItemSet);
+// yamlGenerator.generateFiles(path.join(dataFolder, 'yaml'));
+
+const markdownGenerator: MarkdownGenerator = new MarkdownGenerator(docItemSet);
+markdownGenerator.generateFiles(path.join(dataFolder, 'markdown'));
+

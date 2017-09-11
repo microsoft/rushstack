@@ -172,10 +172,9 @@ export class MarkupBuilder {
     } as IMarkupTable;
   }
 
-  public static createPage(title: string, docId: string): IMarkupPage {
+  public static createPage(title: string): IMarkupPage {
     return {
       kind: 'page',
-      docId: docId,
       breadcrumb: [],
       title: title,
       elements: []

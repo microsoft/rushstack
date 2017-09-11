@@ -327,8 +327,6 @@ interface IMarkupPage {
   // (undocumented)
   breadcrumb: MarkupBasicElement[];
   // (undocumented)
-  docId: string;
-  // (undocumented)
   elements: MarkupStructuredElement[];
   // (undocumented)
   kind: 'page';
