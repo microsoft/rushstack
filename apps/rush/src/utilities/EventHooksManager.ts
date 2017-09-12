@@ -7,26 +7,37 @@ import * as colors from 'colors';
 import {
   EventHooks,
   Utilities,
-  Event
+  Event,
+  Stopwatch
 } from '@microsoft/rush-lib';
 
 export default class EventHooksManager {
   public constructor(private _eventHooks: EventHooks) {
   }
 
-  public handle(event: Event): void {
+  public handle(event: Event, isDebug: boolean = false): void {
     if (!this._eventHooks) {
       return;
     }
     const scripts: string[] = this._eventHooks.get(event);
     if (scripts.length > 0) {
+      const stopwatch: Stopwatch = Stopwatch.start();
       console.log(os.EOL + colors.green(`Executing event hooks for ${Event[event]}`));
       scripts.forEach((script) => {
-        Utilities.executeShellCommand(script,
-          process.cwd(),
-          process.env);
+        try {
+          Utilities.executeShellCommand(script,
+            process.cwd(),
+            process.env,
+          true);
+        } catch (error) {
+          console.error(os.EOL + `Event hook "${script}" failed. Run "rush" with -d to see errors.`);
+          if (isDebug) {
+            console.error(os.EOL + error.message);
+          }
+        }
       });
-      console.log(os.EOL + colors.green(`Event hooks finished successfully`));
+      stopwatch.stop();
+      console.log(os.EOL + colors.green(`Event hooks finished. (${stopwatch.toString()})`));
     }
   }
 }

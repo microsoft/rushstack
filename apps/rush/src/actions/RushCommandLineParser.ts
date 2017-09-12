@@ -56,6 +56,10 @@ export default class RushCommandLineParser extends CommandLineParser {
     }
   }
 
+  public get isDebug(): boolean {
+    return this._debugParameter.value;
+  }
+
   protected onDefineParameters(): void {
     this._debugParameter = this.defineFlagParameter({
       parameterLongName: '--debug',
