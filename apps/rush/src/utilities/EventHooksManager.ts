@@ -28,9 +28,11 @@ export default class EventHooksManager {
           Utilities.executeShellCommand(script,
             process.cwd(),
             process.env,
-          true);
+            true
+          );
         } catch (error) {
-          console.error(os.EOL + `Event hook "${script}" failed. Run "rush" with -d to see errors.`);
+          console.error(`${os.EOL} Event hook "${script}" failed. Run "rush" with --debug` +
+            ` to see detailed error information.`);
           if (isDebug) {
             console.error(os.EOL + error.message);
           }
