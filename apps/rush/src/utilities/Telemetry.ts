@@ -20,11 +20,12 @@ export interface ITelemetryData {
   extraData?: { [key: string]: string };
 }
 
+const MAX_FILE_COUNT: number = 100;
+
 export default class Telemetry {
   private _enabled: boolean;
   private _store: ITelemetryData[];
   private _dataFolder: string;
-  private readonly _MAX_FILE_COUNT: number = 100;
 
   public constructor(private _rushConfiguration: RushConfiguration) {
     this._enabled = this._rushConfiguration.telemetryEnabled;
@@ -49,12 +50,12 @@ export default class Telemetry {
     if (!this._enabled || this._store.length === 0) {
       return;
     }
-    this._cleanUp();
 
     const fullPath: string = this._getFilePath();
     fsx.ensureDirSync(this._dataFolder);
     writeFile(fullPath, JSON.stringify(this._store));
     this._store = [];
+    this._cleanUp();
   }
 
   public get store(): ITelemetryData[] {
@@ -65,15 +66,21 @@ export default class Telemetry {
    * When there are too many log files, delete the old ones.
    */
   private _cleanUp(): void {
-    if (fsx.exists(this._dataFolder)) {
+    if (fsx.existsSync(this._dataFolder)) {
       const files: string[] = fsx.readdirSync(this._dataFolder);
-      const filesToDelete: number = files.length - this._MAX_FILE_COUNT + 1;
-      if (filesToDelete > 0) {
-        const sortedFiles: string[] = files.map(filePath => {
+      if (files.length > MAX_FILE_COUNT) {
+        const sortedFiles: string[] = files.map(fileName => {
+          const filePath: string = path.join(this._dataFolder, fileName);
+          const stats: fsx.Stats = fsx.statSync(filePath);
           return {
             filePath: filePath,
-            modifiedTime: fsx.statSync(filePath).mtime.getTime()
+            modifiedTime: stats.mtime.getTime(),
+            isFile: stats.isFile()
           };
+        })
+        .filter(value => {
+          // Only delete files
+          return value.isFile;
         })
         .sort((a, b) => {
           return a.modifiedTime - b.modifiedTime;
@@ -81,6 +88,7 @@ export default class Telemetry {
         .map(s => {
           return s.filePath;
         });
+        const filesToDelete: number = sortedFiles.length - MAX_FILE_COUNT;
         for (let i: number = 0; i < filesToDelete; i++) {
           fsx.unlinkSync(sortedFiles[i]);
         }
