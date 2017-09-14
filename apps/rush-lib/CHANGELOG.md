@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush-lib
 
-This log was last generated on Thu, 07 Sep 2017 00:16:44 GMT and should not be manually modified.
+This log was last generated on Thu, 14 Sep 2017 18:51:05 GMT and should not be manually modified.
+
+## 3.0.17
+Thu, 14 Sep 2017 18:51:05 GMT
+
+### Patches
+
+- Fix some issues in rush telemetry collection
 
 ## 3.0.16
 Wed, 6 Sep 2017 18:24:39 GMT
