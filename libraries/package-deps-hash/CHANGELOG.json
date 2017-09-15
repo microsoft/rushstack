@@ -2,6 +2,20 @@
   "name": "@microsoft/package-deps-hash",
   "entries": [
     {
+      "version": "2.0.10",
+      "tag": "@microsoft/package-deps-hash_v2.0.10",
+      "date": "Fri, 15 Sep 2017 01:04:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nick Pape <nickpape@users.noreply.github.com>",
+            "commit": "9f65576f3adc0c7da3ec9025c26802fd8c04d867",
+            "comment": "Don't show Git errors if this is not a Git repository"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.9",
       "tag": "@microsoft/package-deps-hash_v2.0.9",
       "date": "Fri, 08 Sep 2017 01:28:04 GMT",
