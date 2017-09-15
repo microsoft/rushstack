@@ -191,20 +191,7 @@
               }
             ]
           },
-          "parameters": {
-            "param1": {
-              "name": "param1",
-              "description": [
-                {
-                  "kind": "textDocElement",
-                  "value": "A description for param1."
-                }
-              ],
-              "isOptional": false,
-              "isSpread": false,
-              "type": "string"
-            }
-          },
+          "parameters": {},
           "deprecatedMessage": [],
           "summary": [
             {
@@ -233,20 +220,7 @@
           }
         ]
       },
-      "parameters": {
-        "param1": {
-          "name": "param1",
-          "description": [
-            {
-              "kind": "textDocElement",
-              "value": "A description for param1."
-            }
-          ],
-          "isOptional": false,
-          "isSpread": false,
-          "type": "string"
-        }
-      },
+      "parameters": {},
       "deprecatedMessage": [],
       "summary": [
         {

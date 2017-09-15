@@ -10,7 +10,6 @@ import AstFunction from '../ast/AstFunction';
 import AstItem, { AstItemKind } from '../ast/AstItem';
 import AstItemVisitor from './AstItemVisitor';
 import AstPackage from '../ast/AstPackage';
-import AstParameter from '../ast/AstParameter';
 import AstMember from '../ast/AstMember';
 import AstNamespace from '../ast/AstNamespace';
 import AstModuleVariable from '../ast/AstModuleVariable';
@@ -176,10 +175,6 @@ export default class ApiFileGenerator extends AstItemVisitor {
   protected visitAstFunction(astFunction: AstFunction): void {
     this._writeAedocSynopsis(astFunction);
     this._indentedWriter.write(astFunction.getDeclarationLine());
-  }
-
-  protected visitApiParam(astParam: AstParameter): void {
-    throw Error('Not Implemented');
   }
 
   /**

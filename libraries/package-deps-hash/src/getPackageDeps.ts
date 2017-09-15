@@ -100,7 +100,10 @@ export function gitHashFiles(filesToHash: string[], packagePath: string): Map<st
 export function gitLsTree(path: string): string {
   return child_process.execSync(
     `git ls-tree HEAD -r`,
-    { cwd: path }).toString();
+    {
+      cwd: path,
+      stdio: 'pipe'
+    }).toString();
 }
 
 /**
@@ -109,7 +112,10 @@ export function gitLsTree(path: string): string {
 export function gitStatus(path: string): string {
   return child_process.execSync(
     `git status -s -u .`,
-    { cwd: path }).toString();
+    {
+      cwd: path,
+      stdio: 'pipe'
+    }).toString();
 }
 
 /**

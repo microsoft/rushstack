@@ -1,6 +1,14 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 08 Sep 2017 01:28:04 GMT and should not be manually modified.
+This log was last generated on Mon, 11 Sep 2017 13:04:55 GMT and should not be manually modified.
+
+## 3.2.5
+Mon, 11 Sep 2017 13:04:55 GMT
+
+### Patches
+
+- The isBeta and deprecatedMessage fields are now inherited in the *.api.json files
+- Fix an issue where the *.api.json file was sometimes missing function parameters
 
 ## 3.2.4
 Fri, 08 Sep 2017 01:28:04 GMT

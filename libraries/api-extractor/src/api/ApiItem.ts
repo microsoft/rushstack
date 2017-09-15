@@ -77,6 +77,17 @@ export interface IApiParameter {
 }
 
 /**
+ * An ordered map of items, indexed by the symbol name.
+ * @alpha
+ */
+export interface IApiNameMap<T> {
+  /**
+   * For a given name, returns the object with that name.
+   */
+  [name: string]: T;
+}
+
+/**
  * Return value of a method or function.
  * @alpha
  */
@@ -175,7 +186,7 @@ export interface IApiMethod extends IApiBaseDefinition {
    * a mapping of parameter name to IApiParameter
    */
 
-  parameters: { [name: string]: IApiParameter};
+  parameters: IApiNameMap<IApiParameter>;
 
   /**
    * describes the return value of the method
@@ -195,7 +206,7 @@ export interface IApiFunction extends IApiBaseDefinition {
   /**
    * parameters of the function
    */
-  parameters: { [name: string]: IApiParameter};
+  parameters: IApiNameMap<IApiParameter>;
 
   /**
    * a description of the return value
@@ -215,7 +226,7 @@ export interface IApiConstructor extends IApiBaseDefinition {
   /**
    * parameters of the function
    */
-  parameters: { [name: string]: IApiParameter};
+  parameters: IApiNameMap<IApiParameter>;
 }
 
 /**
@@ -230,7 +241,7 @@ export interface IApiClass extends IApiBaseDefinition {
   /**
    * Can be a combination of methods and/or properties
    */
-  members: { [name: string]: ApiMember};
+  members: IApiNameMap<ApiMember>;
 
   /**
    * Interfaces implemented by this class
@@ -287,7 +298,7 @@ export interface IApiInterface extends IApiBaseDefinition {
   /**
    * A mapping from the name of a member API to its ApiMember
    */
-  members: { [name: string]: ApiMember};
+  members: IApiNameMap<ApiMember>;
 
   /**
    * Interfaces implemented by this interface
@@ -327,7 +338,7 @@ export interface IApiPackage {
   /**
    * IDocItems of exported API items
    */
-  exports: { [name: string]: ApiItem};
+  exports: IApiNameMap<ApiItem>;
 
   /**
    * The following are needed so that this interface and can share
