@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/resolve-chunk-plugin",
+      "comment": "Initial commit.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/resolve-chunk-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}
