@@ -203,6 +203,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@microsoft/resolve-chunk-plugin",
+      "projectFolder": "webpack/resolve-chunk-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@microsoft/set-webpack-public-path-plugin",
       "projectFolder": "webpack/set-webpack-public-path-plugin",
       "reviewCategory": "libraries",
