@@ -5,6 +5,11 @@
     "jsx": "react",
     "declaration": true,
     "sourceMap": true,
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "lib": [
+      "es2015",
+      "es2015.collection"
+    ],
+    "types": []
   }
 }

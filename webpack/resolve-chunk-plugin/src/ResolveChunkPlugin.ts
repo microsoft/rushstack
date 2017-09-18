@@ -1,11 +1,19 @@
-/// <reference path="./webpackTypes.d.ts" />
+/// <reference path="./custom-typings/webpackTypes.d.ts" />
 
 import * as Webpack from 'webpack';
 
 // tslint:disable-next-line:variable-name
 const ConstDependency: IConstDependency = require('webpack/lib/dependencies/ConstDependency');
 
+/**
+ * See README for documentation on this plugin.
+ *
+ * @public
+ */
 export class ResolveChunkPlugin implements Webpack.Plugin {
+  /**
+   * Apply the plugin to the compilation.
+   */
   public apply(compiler: Webpack.Compiler): void {
     compiler.plugin('compilation', (compilation, data) => {
       const chunkIdMap: Map<string, ((id: number | undefined) => void)[]> =
@@ -27,7 +35,7 @@ export class ResolveChunkPlugin implements Webpack.Plugin {
 
             const state: IModule = parser.state.current;
             const addDependencyFn: ((dependency: IConstDependency) => void) = state.addDependency.bind(state);
-            chunkIdMap.get(chunkName).push((id: number | undefined) => {
+            (chunkIdMap.get(chunkName) || []).push((id: number | undefined) => {
               const value: string = id
                 ? `/*resolveChunk*/(${id} /* ${chunkName} */)`
                 : `/*resolveChunk*/(undefined /* Invalid chunk name "${chunkName}" */)`;
@@ -46,7 +54,7 @@ export class ResolveChunkPlugin implements Webpack.Plugin {
       compilation.plugin('after-optimize-chunk-ids', (chunks: IChunk[]) => {
         for (const chunk of chunks) {
           if (chunkIdMap.has(chunk.name)) {
-            for (const dependencyFn of chunkIdMap.get(chunk.name)) {
+            for (const dependencyFn of (chunkIdMap.get(chunk.name) || [])) {
               dependencyFn(chunk.id);
             }
 
