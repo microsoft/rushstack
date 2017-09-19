@@ -2,6 +2,20 @@
   "name": "@microsoft/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "1.2.4",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v1.2.4",
+      "date": "Tue, 19 Sep 2017 19:04:50 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Ian Clanton-Thuon <iclanton@users.noreply.github.com>",
+            "commit": "f19f59c2a95d327bc2604acd4e6338392de383b3",
+            "comment": "Minor README correction."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.3",
       "tag": "@microsoft/set-webpack-public-path-plugin_v1.2.3",
       "date": "Fri, 08 Sep 2017 01:28:04 GMT",

@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/set-webpack-public-path-plugin",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "This plugin sets the webpack public path at runtime.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",

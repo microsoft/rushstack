@@ -1,0 +1,19 @@
+{
+  "name": "@microsoft/resolve-chunk-plugin",
+  "entries": [
+    {
+      "version": "1.0.1",
+      "tag": "@microsoft/resolve-chunk-plugin_v1.0.1",
+      "date": "Tue, 19 Sep 2017 19:04:50 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Ian Clanton-Thuon <iclanton@users.noreply.github.com>",
+            "commit": "f19f59c2a95d327bc2604acd4e6338392de383b3",
+            "comment": "Initial commit."
+          }
+        ]
+      }
+    }
+  ]
+}
