@@ -2,7 +2,7 @@
 
 ## Installation
 
-`npm @microsoft/loader-set-webpack-public-path --save-dev`
+`npm install @microsoft/loader-set-webpack-public-path --save-dev`
 
 ## Overview
 

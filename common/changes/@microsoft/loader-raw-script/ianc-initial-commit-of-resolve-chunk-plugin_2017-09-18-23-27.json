@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/loader-raw-script",
+      "comment": "Minor README correction.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/loader-raw-script",
+  "email": "iclanton@users.noreply.github.com"
+}
