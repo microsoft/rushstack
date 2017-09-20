@@ -19,6 +19,7 @@ class TypeScriptConfiguration {
   public static getGulpTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<ts.Settings>;
   public static getTsConfigFile(config: IBuildConfig): ITsConfigFile<ts.Settings>;
   public static getTypescriptCompiler(): any;
+  public static setBaseConfig(config: ITsConfigFile<ts.Settings>): void;
   public static setTypescriptCompiler(typescriptOverride: any): void;
 }
 
