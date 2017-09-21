@@ -10,6 +10,9 @@
     "types": [
       "webpack-env"
     ],
+    "lib": [
+      "es6"
+    ],
     "strictNullChecks": true
   }
 }
