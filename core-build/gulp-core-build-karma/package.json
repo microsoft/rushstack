@@ -26,14 +26,14 @@
     "karma-mocha-clean-reporter": "~0.0.1",
     "karma-phantomjs-launcher": "~1.0.0",
     "karma-sinon-chai": "~1.2.0",
-    "karma-webpack": "~2.0.1",
+    "karma-webpack": "~2.0.4",
     "lolex": "~1.4.0",
     "mocha": "~3.4.2",
     "phantomjs-polyfill": "~0.0.2",
     "phantomjs-prebuilt": "~2.1.6",
     "sinon": "~1.17.3",
     "sinon-chai": "~2.8.0",
-    "webpack": "~3.5.5"
+    "webpack": "~3.6.0"
   },
   "devDependencies": {
     "@microsoft/node-library-build": "~3.2.0",
