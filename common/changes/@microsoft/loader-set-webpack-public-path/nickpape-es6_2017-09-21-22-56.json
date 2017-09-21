@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/loader-set-webpack-public-path",
+      "comment": "Upgrade to es6",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/loader-set-webpack-public-path",
+  "email": "nickpape@users.noreply.github.com"
+}

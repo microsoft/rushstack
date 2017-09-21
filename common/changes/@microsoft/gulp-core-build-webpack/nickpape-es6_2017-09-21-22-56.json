@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-webpack",
+      "comment": "Upgrade to es6",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-webpack",
+  "email": "nickpape@users.noreply.github.com"
+}
