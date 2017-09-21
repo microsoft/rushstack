@@ -3,7 +3,7 @@
     {
       "packageName": "@microsoft/ts-command-line",
       "comment": "Upgrade to es6",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/ts-command-line",

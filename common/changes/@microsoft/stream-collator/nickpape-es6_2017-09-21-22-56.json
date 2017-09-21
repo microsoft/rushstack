@@ -3,7 +3,7 @@
     {
       "packageName": "@microsoft/stream-collator",
       "comment": "Upgrade to es6",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/stream-collator",

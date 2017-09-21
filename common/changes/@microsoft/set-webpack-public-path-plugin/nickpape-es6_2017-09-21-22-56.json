@@ -3,7 +3,7 @@
     {
       "packageName": "@microsoft/set-webpack-public-path-plugin",
       "comment": "Upgrade to es6",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/set-webpack-public-path-plugin",

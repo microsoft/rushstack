@@ -3,7 +3,7 @@
     {
       "packageName": "@microsoft/gulp-core-build-mocha",
       "comment": "Upgrade to es6",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/gulp-core-build-mocha",

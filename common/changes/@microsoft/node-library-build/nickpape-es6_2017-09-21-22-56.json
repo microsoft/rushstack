@@ -3,7 +3,7 @@
     {
       "packageName": "@microsoft/node-library-build",
       "comment": "Upgrade to es6",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/node-library-build",
