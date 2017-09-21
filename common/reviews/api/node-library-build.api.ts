@@ -226,6 +226,7 @@ class TypeScriptConfiguration {
   static getGulpTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<ts.Settings>;
   static getTsConfigFile(config: IBuildConfig): ITsConfigFile<ts.Settings>;
   static getTypescriptCompiler(): any;
+  static setBaseConfig(config: ITsConfigFile<ts.Settings>): void;
   static setTypescriptCompiler(typescriptOverride: any): void;
 }
 

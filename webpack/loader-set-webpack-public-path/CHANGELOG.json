@@ -2,6 +2,25 @@
   "name": "@microsoft/loader-set-webpack-public-path",
   "entries": [
     {
+      "version": "3.0.7",
+      "tag": "@microsoft/loader-set-webpack-public-path_v3.0.7",
+      "date": "Tue, 19 Sep 2017 19:04:50 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Ian Clanton-Thuon <iclanton@users.noreply.github.com>",
+            "commit": "f19f59c2a95d327bc2604acd4e6338392de383b3",
+            "comment": "Minor README correction."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/set-webpack-public-path-plugin\" from `~1.2.3` to `~1.2.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.6",
       "tag": "@microsoft/loader-set-webpack-public-path_v3.0.6",
       "date": "Fri, 08 Sep 2017 01:28:04 GMT",

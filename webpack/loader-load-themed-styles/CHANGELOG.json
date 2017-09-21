@@ -2,6 +2,20 @@
   "name": "@microsoft/loader-load-themed-styles",
   "entries": [
     {
+      "version": "1.5.2",
+      "tag": "@microsoft/loader-load-themed-styles_v1.5.2",
+      "date": "Thu, 21 Sep 2017 20:34:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Ian Clanton-Thuon <iclanton@users.noreply.github.com>",
+            "commit": "3e9fdf5918d62327ef1b88ac75c8fa001306f2cb",
+            "comment": "Upgrade webpack to 3.6.0."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.5.1",
       "tag": "@microsoft/loader-load-themed-styles_v1.5.1",
       "date": "Thu, 31 Aug 2017 18:41:18 GMT",

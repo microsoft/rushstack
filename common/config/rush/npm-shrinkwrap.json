@@ -229,6 +229,11 @@
       "from": "projects\\package-deps-hash.tgz",
       "resolved": "file:projects\\package-deps-hash.tgz"
     },
+    "@rush-temp/resolve-chunk-plugin": {
+      "version": "0.0.0",
+      "from": "projects\\resolve-chunk-plugin.tgz",
+      "resolved": "file:projects\\resolve-chunk-plugin.tgz"
+    },
     "@rush-temp/rush": {
       "version": "0.0.0",
       "from": "projects\\rush.tgz",
@@ -445,9 +450,9 @@
       "resolved": "https://registry.npmjs.org/@types/vinyl/-/vinyl-1.2.30.tgz"
     },
     "@types/webpack": {
-      "version": "3.0.10",
-      "from": "@types/webpack@3.0.10",
-      "resolved": "https://registry.npmjs.org/@types/webpack/-/webpack-3.0.10.tgz"
+      "version": "3.0.11",
+      "from": "@types/webpack@3.0.11",
+      "resolved": "https://registry.npmjs.org/@types/webpack/-/webpack-3.0.11.tgz"
     },
     "@types/webpack-env": {
       "version": "1.13.0",
@@ -3658,7 +3663,7 @@
     },
     "karma-webpack": {
       "version": "2.0.4",
-      "from": "karma-webpack@>=2.0.1 <2.1.0",
+      "from": "karma-webpack@>=2.0.4 <2.1.0",
       "resolved": "https://registry.npmjs.org/karma-webpack/-/karma-webpack-2.0.4.tgz",
       "dependencies": {
         "async": {
@@ -6378,9 +6383,9 @@
       }
     },
     "webpack": {
-      "version": "3.5.6",
-      "from": "webpack@>=3.5.5 <3.6.0",
-      "resolved": "https://registry.npmjs.org/webpack/-/webpack-3.5.6.tgz",
+      "version": "3.6.0",
+      "from": "webpack@>=3.6.0 <3.7.0",
+      "resolved": "https://registry.npmjs.org/webpack/-/webpack-3.6.0.tgz",
       "dependencies": {
         "ansi-regex": {
           "version": "3.0.0",

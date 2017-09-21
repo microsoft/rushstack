@@ -2,6 +2,48 @@
   "name": "@microsoft/web-library-build",
   "entries": [
     {
+      "version": "4.0.9",
+      "tag": "@microsoft/web-library-build_v4.0.9",
+      "date": "Thu, 21 Sep 2017 20:34:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-karma\" from `4.0.8` to `4.0.9`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `3.0.8` to `3.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.8",
+      "tag": "@microsoft/web-library-build_v4.0.8",
+      "date": "Wed, 20 Sep 2017 22:10:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.7` to `3.0.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-karma\" from `4.0.7` to `4.0.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `4.0.7` to `4.0.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `3.0.7` to `3.0.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `4.0.7` to `4.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `3.0.7` to `3.0.8`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.0.7",
       "tag": "@microsoft/web-library-build_v4.0.7",
       "date": "Mon, 11 Sep 2017 13:04:55 GMT",
