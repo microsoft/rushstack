@@ -2,8 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/load-themed-styles",
-      "comment": "Upgrade to es6",
-      "type": "minor"
+      "type": "none"
     }
   ],
   "packageName": "@microsoft/load-themed-styles",
