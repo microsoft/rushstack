@@ -6,9 +6,13 @@
     "declaration": true,
     "sourceMap": true,
     "strictNullChecks": true,
-    "types": [],
+    "types": [
+      "node",
+      "mocha"
+    ],
     "lib": [
-      "es6"
+      "es5",
+      "es2015.iterable"
     ]
   }
 }

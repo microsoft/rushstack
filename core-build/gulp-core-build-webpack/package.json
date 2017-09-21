@@ -17,7 +17,7 @@
   "dependencies": {
     "@microsoft/gulp-core-build": "3.0.7",
     "@types/gulp": "3.8.32",
-    "@types/node": "6.0.62",
+    "@types/node": "6.0.88",
     "gulp": "~3.9.1",
     "gulp-util": "~3.0.7",
     "webpack": "~3.5.5"

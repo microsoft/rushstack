@@ -11,7 +11,9 @@
       "webpack-env"
     ],
     "lib": [
-      "es6"
+      "es5",
+      "es2015.iterable",
+      "dom"
     ],
     "strictNullChecks": true
   }

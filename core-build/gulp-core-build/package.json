@@ -21,7 +21,7 @@
     "@types/gulp": "3.8.32",
     "@types/gulp-util": "3.0.30",
     "@types/mocha": "2.2.38",
-    "@types/node": "6.0.62",
+    "@types/node": "6.0.88",
     "@types/node-notifier": "0.0.28",
     "@types/orchestrator": "0.0.30",
     "@types/q": "0.0.32",

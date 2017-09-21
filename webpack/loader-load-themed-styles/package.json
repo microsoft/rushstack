@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "@types/mocha": "2.2.38",
-    "@types/node": "6.0.62",
+    "@types/node": "6.0.88",
     "@types/loader-utils": "~1.1.0",
     "@types/webpack": "3.0.10",
     "chai": "~3.5.0",

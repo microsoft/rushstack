@@ -14,9 +14,10 @@
       "typings-custom"
     ],
     "lib": [
-      "es6",
+      "es5",
       "scripthost",
       "es2015.promise",
+      "es2015.iterable",
       "dom"
     ]
   }

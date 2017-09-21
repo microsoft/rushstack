@@ -6,9 +6,12 @@
     "jsx": "react",
     "declaration": true,
     "sourceMap": true,
-    "types": [],
+    "types": [
+      "node"
+    ],
     "lib": [
-      "es6",
+      "es5",
+      "es2015.iterable",
       "es2015.collection"
     ]
   }

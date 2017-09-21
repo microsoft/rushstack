@@ -6,9 +6,12 @@
     "declaration": true,
     "sourceMap": true,
     "strictNullChecks": true,
-    "types": [],
+    "types": [
+      "node"
+    ],
     "lib": [
-      "es6"
+      "es5",
+      "es2015.iterable"
     ]
   }
 }
