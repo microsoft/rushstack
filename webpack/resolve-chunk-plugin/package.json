@@ -12,7 +12,7 @@
     "test": "gulp test"
   },
   "dependencies": {
-    "@types/webpack": "3.0.10"
+    "@types/webpack": "3.0.11"
   },
   "devDependencies": {
     "@types/tapable": "0.2.3",
