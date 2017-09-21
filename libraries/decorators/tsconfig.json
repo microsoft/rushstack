@@ -1,14 +1,17 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es6",
     "forceConsistentCasingInFileNames": true,
     "module": "commonjs",
     "jsx": "react",
     "declaration": true,
     "sourceMap": true,
     "experimentalDecorators": true,
+    "strictNullChecks": true,
     "types": [
     ],
-    "strictNullChecks": true
+    "lib": [
+      "es6"
+    ]
   }
 }

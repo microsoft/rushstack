@@ -1,13 +1,14 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es6",
     "forceConsistentCasingInFileNames": true,
     "module": "commonjs",
     "jsx": "react",
     "declaration": true,
     "sourceMap": true,
+    "types": [],
     "lib": [
-      "es5",
+      "es6",
       "es2015.collection"
     ]
   }
