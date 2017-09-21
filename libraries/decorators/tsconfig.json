@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "es5",
     "forceConsistentCasingInFileNames": true,
     "module": "commonjs",
     "jsx": "react",
@@ -12,8 +12,7 @@
       "node"
     ],
     "lib": [
-      "es5",
-      "es2015.iterable"
+      "es5"
     ]
   }
 }
