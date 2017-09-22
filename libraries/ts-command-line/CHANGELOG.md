@@ -1,6 +1,13 @@
 # Change Log - @microsoft/ts-command-line
 
-This log was last generated on Fri, 08 Sep 2017 01:28:04 GMT and should not be manually modified.
+This log was last generated on Fri, 22 Sep 2017 01:04:02 GMT and should not be manually modified.
+
+## 2.1.0
+Fri, 22 Sep 2017 01:04:02 GMT
+
+### Minor changes
+
+- Upgrade to es6
 
 ## 2.0.7
 Fri, 08 Sep 2017 01:28:04 GMT

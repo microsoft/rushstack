@@ -2,6 +2,20 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "0.3.0",
+      "tag": "@microsoft/node-core-library_v0.3.0",
+      "date": "Fri, 22 Sep 2017 01:04:02 GMT",
+      "comments": {
+        "minor": [
+          {
+            "author": "Nick Pape <nickpape@users.noreply.github.com>",
+            "commit": "481a10f460a454fb5a3e336e3cf25a1c3f710645",
+            "comment": "Upgrade to es6"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.11",
       "tag": "@microsoft/node-core-library_v0.2.11",
       "date": "Wed, 20 Sep 2017 22:10:17 GMT",

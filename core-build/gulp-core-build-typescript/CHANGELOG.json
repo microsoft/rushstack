@@ -2,6 +2,31 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "4.2.0",
+      "tag": "@microsoft/gulp-core-build-typescript_v4.2.0",
+      "date": "Fri, 22 Sep 2017 01:04:02 GMT",
+      "comments": {
+        "minor": [
+          {
+            "author": "Nick Pape <nickpape@users.noreply.github.com>",
+            "commit": "481a10f460a454fb5a3e336e3cf25a1c3f710645",
+            "comment": "Upgrade to es6"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `3.2.6` to `3.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.8` to `3.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.2.11` to `~0.3.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.1.0",
       "tag": "@microsoft/gulp-core-build-typescript_v4.1.0",
       "date": "Wed, 20 Sep 2017 22:10:17 GMT",
