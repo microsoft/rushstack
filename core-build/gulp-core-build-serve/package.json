@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@microsoft/gulp-core-build": "3.0.8",
-    "@types/node": "6.0.62",
+    "@types/node": "6.0.88",
     "deasync": "~0.1.7",
     "express": "~4.14.0",
     "gulp": "~3.9.1",

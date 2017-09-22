@@ -1,12 +1,16 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es6",
     "module": "commonjs",
     "jsx": "react",
     "declaration": true,
     "sourceMap": true,
     "types": [
       "node"
+    ],
+    "lib": [
+      "es5",
+      "es2015.iterable"
     ]
   }
 }

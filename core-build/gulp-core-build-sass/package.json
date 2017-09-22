@@ -17,7 +17,7 @@
   "dependencies": {
     "@microsoft/gulp-core-build": "3.0.8",
     "@microsoft/load-themed-styles": "~1.7.4",
-    "@types/node": "6.0.62",
+    "@types/node": "6.0.88",
     "autoprefixer": "6.3.7",
     "gulp": "~3.9.1",
     "gulp-clean-css": "~3.0.4",

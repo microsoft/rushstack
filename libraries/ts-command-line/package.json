@@ -17,7 +17,7 @@
   "dependencies": {
     "argparse": "~1.0.7",
     "colors": "~1.1.2",
-    "@types/node": "6.0.62"
+    "@types/node": "6.0.88"
   },
   "devDependencies": {
     "@types/colors": "1.1.3",

@@ -277,11 +277,9 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
             (file: gutil.File,
               encoding: string,
               callback: (p?: Object) => void) => {
-                'use strict';
                 callback();
             },
             (callback: () => void) => {
-              'use strict';
               callback();
             }));
 

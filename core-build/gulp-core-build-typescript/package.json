@@ -20,7 +20,7 @@
     "@microsoft/node-core-library": "~0.2.11",
     "@types/fs-extra": "0.0.37",
     "@types/gulp": "3.8.32",
-    "@types/node": "6.0.62",
+    "@types/node": "6.0.88",
     "fs-extra": "~0.26.7",
     "gulp": "~3.9.1",
     "gulp-cache": "~0.4.5",

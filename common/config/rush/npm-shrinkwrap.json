@@ -7,6 +7,11 @@
       "from": "@microsoft/api-extractor@2.3.2",
       "resolved": "https://registry.npmjs.org/@microsoft/api-extractor/-/api-extractor-2.3.2.tgz",
       "dependencies": {
+        "@types/node": {
+          "version": "6.0.62",
+          "from": "@types/node@6.0.62",
+          "resolved": "https://registry.npmjs.org/@types/node/-/node-6.0.62.tgz"
+        },
         "z-schema": {
           "version": "3.17.0",
           "from": "z-schema@>=3.17.0 <3.18.0",
@@ -19,6 +24,11 @@
       "from": "@microsoft/gulp-core-build@2.9.3",
       "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build/-/gulp-core-build-2.9.3.tgz",
       "dependencies": {
+        "@types/node": {
+          "version": "6.0.62",
+          "from": "@types/node@6.0.62",
+          "resolved": "https://registry.npmjs.org/@types/node/-/node-6.0.62.tgz"
+        },
         "z-schema": {
           "version": "3.17.0",
           "from": "z-schema@>=3.17.0 <3.18.0",
@@ -29,13 +39,25 @@
     "@microsoft/gulp-core-build-mocha": {
       "version": "2.1.8",
       "from": "@microsoft/gulp-core-build-mocha@2.1.8",
-      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-mocha/-/gulp-core-build-mocha-2.1.8.tgz"
+      "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-mocha/-/gulp-core-build-mocha-2.1.8.tgz",
+      "dependencies": {
+        "@types/node": {
+          "version": "6.0.62",
+          "from": "@types/node@6.0.62",
+          "resolved": "https://registry.npmjs.org/@types/node/-/node-6.0.62.tgz"
+        }
+      }
     },
     "@microsoft/gulp-core-build-typescript": {
       "version": "3.4.0",
       "from": "@microsoft/gulp-core-build-typescript@3.4.0",
       "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-typescript/-/gulp-core-build-typescript-3.4.0.tgz",
       "dependencies": {
+        "@types/node": {
+          "version": "6.0.62",
+          "from": "@types/node@6.0.62",
+          "resolved": "https://registry.npmjs.org/@types/node/-/node-6.0.62.tgz"
+        },
         "glob": {
           "version": "7.1.2",
           "from": "glob@>=7.1.1 <8.0.0",
@@ -51,7 +73,14 @@
     "@microsoft/node-library-build": {
       "version": "3.2.8",
       "from": "@microsoft/node-library-build@>=3.2.0 <3.3.0",
-      "resolved": "https://registry.npmjs.org/@microsoft/node-library-build/-/node-library-build-3.2.8.tgz"
+      "resolved": "https://registry.npmjs.org/@microsoft/node-library-build/-/node-library-build-3.2.8.tgz",
+      "dependencies": {
+        "@types/node": {
+          "version": "6.0.62",
+          "from": "@types/node@6.0.62",
+          "resolved": "https://registry.npmjs.org/@types/node/-/node-6.0.62.tgz"
+        }
+      }
     },
     "@rush-temp/api-documenter": {
       "version": "0.0.0",
@@ -131,27 +160,62 @@
         "@microsoft/api-extractor": {
           "version": "2.3.5",
           "from": "@microsoft/api-extractor@2.3.5",
-          "resolved": "https://registry.npmjs.org/@microsoft/api-extractor/-/api-extractor-2.3.5.tgz"
+          "resolved": "https://registry.npmjs.org/@microsoft/api-extractor/-/api-extractor-2.3.5.tgz",
+          "dependencies": {
+            "@types/node": {
+              "version": "6.0.62",
+              "from": "@types/node@6.0.62",
+              "resolved": "https://registry.npmjs.org/@types/node/-/node-6.0.62.tgz"
+            }
+          }
         },
         "@microsoft/gulp-core-build": {
           "version": "2.9.6",
           "from": "@microsoft/gulp-core-build@2.9.6",
-          "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build/-/gulp-core-build-2.9.6.tgz"
+          "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build/-/gulp-core-build-2.9.6.tgz",
+          "dependencies": {
+            "@types/node": {
+              "version": "6.0.62",
+              "from": "@types/node@6.0.62",
+              "resolved": "https://registry.npmjs.org/@types/node/-/node-6.0.62.tgz"
+            }
+          }
         },
         "@microsoft/gulp-core-build-mocha": {
           "version": "2.1.11",
           "from": "@microsoft/gulp-core-build-mocha@2.1.11",
-          "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-mocha/-/gulp-core-build-mocha-2.1.11.tgz"
+          "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-mocha/-/gulp-core-build-mocha-2.1.11.tgz",
+          "dependencies": {
+            "@types/node": {
+              "version": "6.0.62",
+              "from": "@types/node@6.0.62",
+              "resolved": "https://registry.npmjs.org/@types/node/-/node-6.0.62.tgz"
+            }
+          }
         },
         "@microsoft/gulp-core-build-typescript": {
           "version": "3.5.1",
           "from": "@microsoft/gulp-core-build-typescript@3.5.1",
-          "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-typescript/-/gulp-core-build-typescript-3.5.1.tgz"
+          "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-typescript/-/gulp-core-build-typescript-3.5.1.tgz",
+          "dependencies": {
+            "@types/node": {
+              "version": "6.0.62",
+              "from": "@types/node@6.0.62",
+              "resolved": "https://registry.npmjs.org/@types/node/-/node-6.0.62.tgz"
+            }
+          }
         },
         "@microsoft/node-library-build": {
           "version": "3.3.2",
           "from": "@microsoft/node-library-build@>=3.3.2 <3.4.0",
-          "resolved": "https://registry.npmjs.org/@microsoft/node-library-build/-/node-library-build-3.3.2.tgz"
+          "resolved": "https://registry.npmjs.org/@microsoft/node-library-build/-/node-library-build-3.3.2.tgz",
+          "dependencies": {
+            "@types/node": {
+              "version": "6.0.62",
+              "from": "@types/node@6.0.62",
+              "resolved": "https://registry.npmjs.org/@types/node/-/node-6.0.62.tgz"
+            }
+          }
         }
       }
     },
@@ -316,9 +380,9 @@
       "resolved": "https://registry.npmjs.org/@types/mocha/-/mocha-2.2.38.tgz"
     },
     "@types/node": {
-      "version": "6.0.62",
-      "from": "@types/node@6.0.62",
-      "resolved": "https://registry.npmjs.org/@types/node/-/node-6.0.62.tgz"
+      "version": "6.0.88",
+      "from": "@types/node@6.0.88",
+      "resolved": "https://registry.npmjs.org/@types/node/-/node-6.0.88.tgz"
     },
     "@types/node-forge": {
       "version": "0.6.8",
@@ -1314,9 +1378,9 @@
       "resolved": "https://registry.npmjs.org/date-now/-/date-now-0.1.4.tgz"
     },
     "dateformat": {
-      "version": "2.0.0",
+      "version": "2.2.0",
       "from": "dateformat@>=2.0.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/dateformat/-/dateformat-2.0.0.tgz"
+      "resolved": "https://registry.npmjs.org/dateformat/-/dateformat-2.2.0.tgz"
     },
     "deasync": {
       "version": "0.1.10",
@@ -3032,9 +3096,9 @@
       "resolved": "https://registry.npmjs.org/http-errors/-/http-errors-1.6.2.tgz"
     },
     "http-parser-js": {
-      "version": "0.4.6",
+      "version": "0.4.7",
       "from": "http-parser-js@>=0.4.0",
-      "resolved": "https://registry.npmjs.org/http-parser-js/-/http-parser-js-0.4.6.tgz"
+      "resolved": "https://registry.npmjs.org/http-parser-js/-/http-parser-js-0.4.7.tgz"
     },
     "http-proxy": {
       "version": "1.16.2",
@@ -5972,9 +6036,9 @@
       "resolved": "https://registry.npmjs.org/to-iso-string/-/to-iso-string-0.0.2.tgz"
     },
     "tough-cookie": {
-      "version": "2.3.2",
+      "version": "2.3.3",
       "from": "tough-cookie@>=2.3.0 <2.4.0",
-      "resolved": "https://registry.npmjs.org/tough-cookie/-/tough-cookie-2.3.2.tgz"
+      "resolved": "https://registry.npmjs.org/tough-cookie/-/tough-cookie-2.3.3.tgz"
     },
     "trim-newlines": {
       "version": "1.0.0",

@@ -27,7 +27,7 @@
     "@types/fs-extra": "0.0.37",
     "@types/js-yaml": "3.9.1",
     "@types/mocha": "2.2.38",
-    "@types/node": "6.0.62",
+    "@types/node": "6.0.88",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "mocha": "~3.4.2"
