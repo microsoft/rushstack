@@ -1,9 +1,9 @@
 # Change Log - @microsoft/rush-lib
 
-This log was last generated on Tue, 26 Sep 2017 20:23:22 GMT and should not be manually modified.
+This log was last generated on Tue, 26 Sep 2017 20:25:51 GMT and should not be manually modified.
 
 ## 3.0.18
-Tue, 26 Sep 2017 18:51:05 GMT
+Tue, 26 Sep 2017 13:51:05 GMT
 
 ### Patches
 
