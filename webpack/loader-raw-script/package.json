@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/loader-raw-script",
-  "version": "1.0.5",
+  "version": "1.1.0",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -16,10 +16,10 @@
   },
   "devDependencies": {
     "@types/mocha": "2.2.38",
-    "@types/node": "6.0.62",
+    "@types/node": "6.0.88",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "mocha": "~3.4.2",
-    "@microsoft/node-library-build": "~4.0.4"
+    "@microsoft/node-library-build": "~4.1.0"
   }
 }

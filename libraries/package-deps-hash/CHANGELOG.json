@@ -2,6 +2,58 @@
   "name": "@microsoft/package-deps-hash",
   "entries": [
     {
+      "version": "2.1.0",
+      "tag": "@microsoft/package-deps-hash_v2.1.0",
+      "date": "Fri, 22 Sep 2017 01:04:02 GMT",
+      "comments": {
+        "minor": [
+          {
+            "author": "Nick Pape <nickpape@users.noreply.github.com>",
+            "commit": "481a10f460a454fb5a3e336e3cf25a1c3f710645",
+            "comment": "Upgrade to es6"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `~4.0.8` to `~4.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.10",
+      "tag": "@microsoft/package-deps-hash_v2.0.10",
+      "date": "Fri, 15 Sep 2017 01:04:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nick Pape <nickpape@users.noreply.github.com>",
+            "commit": "9f65576f3adc0c7da3ec9025c26802fd8c04d867",
+            "comment": "Don't show Git errors if this is not a Git repository"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.9",
+      "tag": "@microsoft/package-deps-hash_v2.0.9",
+      "date": "Fri, 08 Sep 2017 01:28:04 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nick Pape <nickpape@users.noreply.github.com>",
+            "commit": "bb96549aa8508ff627a0cae5ee41ae0251f2777d",
+            "comment": "Deprecate @types/es6-coll ections in favor of built-in typescript typings 'es2015.collection' a nd 'es2015.iterable'"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `~4.0.5` to `~4.0.6`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.8",
       "tag": "@microsoft/package-deps-hash_v2.0.8",
       "date": "Thu, 31 Aug 2017 18:41:18 GMT",

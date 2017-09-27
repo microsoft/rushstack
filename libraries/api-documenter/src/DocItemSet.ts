@@ -19,7 +19,8 @@ export enum DocItemKind {
   Constructor,
   Function,
   Property,
-  Enum
+  Enum,
+  EnumMember
 }
 
 /**
@@ -68,9 +69,11 @@ export class DocItem {
       case 'class':
       case 'interface':
         this.kind = this.apiItem.kind === 'class' ? DocItemKind.Class : DocItemKind.Interface;
-        for (const memberName of Object.keys(this.apiItem.members)) {
-          const child: ApiItem = this.apiItem.members[memberName];
-          this.children.push(new DocItem(child, memberName, this.docItemSet, this));
+        if (this.apiItem.members) {
+          for (const memberName of Object.keys(this.apiItem.members)) {
+            const child: ApiItem = this.apiItem.members[memberName];
+            this.children.push(new DocItem(child, memberName, this.docItemSet, this));
+          }
         }
         break;
 
@@ -79,6 +82,7 @@ export class DocItem {
           break;
         case 'constructor':
           this.kind = DocItemKind.Constructor;
+          this.name = 'constructor';
           break;
         case 'function':
           this.kind = DocItemKind.Function;
@@ -88,6 +92,15 @@ export class DocItem {
           break;
         case 'enum':
           this.kind = DocItemKind.Enum;
+          if (this.apiItem.values) {
+            for (const memberName of Object.keys(this.apiItem.values)) {
+              const child: ApiItem = this.apiItem.values[memberName];
+              this.children.push(new DocItem(child, memberName, this.docItemSet, this));
+            }
+          }
+          break;
+        case 'enum value':
+          this.kind = DocItemKind.EnumMember;
           break;
         default:
           throw new Error('Unsupported item kind: ' + (this.apiItem as ApiItem).kind);
@@ -115,6 +128,16 @@ export class DocItem {
       }
     }
     return undefined;
+  }
+
+  /**
+   * Returns true if this is a package, and it has been classified as "external",
+   * i.e. a system library that is maintained by an external party, but included in the
+   * documentation for informational purposes.
+   */
+  public get isExternalPackage(): boolean {
+    // We should define a better criteria for this
+    return this.apiItem.kind === 'package' && this.apiItem.name.substr(0, 1) === '@';
   }
 }
 

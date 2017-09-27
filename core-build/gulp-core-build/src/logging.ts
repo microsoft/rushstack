@@ -96,7 +96,6 @@ function isVerbose(): boolean {
 /* tslint:disable:no-any */
 function formatError(e: any): string | undefined {
 /* tslint:enable:no-any */
-  'use strict';
 
   if (!e.err) {
     if (isVerbose()) {
@@ -145,7 +144,6 @@ function formatError(e: any): string | undefined {
 }
 
 function afterStreamFlushed(streamName: string, callback: () => void): void {
-  'use strict';
   if (duringFastExit) {
     callback();
   } else {
@@ -170,7 +168,6 @@ function afterStreamFlushed(streamName: string, callback: () => void): void {
 }
 
 function afterStreamsFlushed(callback: () => void): void {
-  'use strict';
   afterStreamFlushed('stdout', () => {
     afterStreamFlushed('stderr', () => {
       callback();
@@ -179,7 +176,6 @@ function afterStreamsFlushed(callback: () => void): void {
 }
 
 function writeSummary(callback: () => void): void {
-  'use strict';
   const shouldRelogIssues: boolean = getFlagValue('relogIssues');
 
   localCache.writeSummaryCallbacks.push(callback);
@@ -269,7 +265,6 @@ function writeSummary(callback: () => void): void {
 /* tslint:disable:no-any */
 function _writeTaskError(e: any): void {
 /* tslint:enable:no-any */
-  'use strict';
   if (!e || !(e.err && e.err[WROTE_ERROR_KEY])) {
     writeError(e);
     localCache.taskErrors++;
@@ -277,7 +272,6 @@ function _writeTaskError(e: any): void {
 }
 
 function exitProcess(errorCode: number): void {
-  'use strict';
 
   if (!localCache.watchMode) {
     process.stdout.write('', () => {
@@ -287,11 +281,9 @@ function exitProcess(errorCode: number): void {
 }
 
 function wireUpProcessErrorHandling(): void {
-  'use strict';
   if (!wiredUpErrorHandling) {
     wiredUpErrorHandling = true;
     process.on('exit', (code: number) => {
-      'use strict';
       duringFastExit = true;
 
       if (!global['dontWatchExit']) { // tslint:disable-line:no-string-literal
@@ -313,7 +305,6 @@ function wireUpProcessErrorHandling(): void {
 
     process.on('uncaughtException',
       (err: Error) => {
-        'use strict';
         console.error(err);
 
         _writeTaskError(err);
@@ -346,7 +337,6 @@ function markErrorAsWritten(err: Error): void {
  * @public
  */
 export function logSummary(value: string): void {
-  'use strict';
   localCache.writeSummaryLogs.push(value);
 }
 
@@ -356,7 +346,6 @@ export function logSummary(value: string): void {
  * @public
  */
 export function log(...args: Array<string | Chalk.ChalkChain>): void {
-  'use strict';
   gutil.log.apply(this, args);
 }
 
@@ -365,7 +354,6 @@ export function log(...args: Array<string | Chalk.ChalkChain>): void {
  * @public
  */
 export function reset(): void {
-  'use strict';
   localCache.start = process.hrtime();
   localCache.warnings = [];
   localCache.errors = [];
@@ -407,7 +395,6 @@ export enum TestResultState {
  * @public
  */
 export function functionalTestRun(name: string, result: TestResultState, duration: number): void {
-  'use strict';
   localCache.testsRun++;
 
   switch (result) {
@@ -428,7 +415,6 @@ export function functionalTestRun(name: string, result: TestResultState, duratio
 
 /** @public */
 export function endTaskSrc(taskName: string, startHrtime: [number, number], fileCount: number): void {
-  'use strict';
   localCache.totalTaskSrc++;
   const taskDuration: [number, number] = process.hrtime(startHrtime);
   if (!localCache.totalTaskHrTime) {
@@ -456,7 +442,6 @@ export function endTaskSrc(taskName: string, startHrtime: [number, number], file
  * @public
  */
 export function coverageData(coverage: number, threshold: number, filePath: string): void {
-  'use strict';
   localCache.coverageResults++;
 
   if (coverage < threshold) {
@@ -476,7 +461,6 @@ const colorCodeRegex: RegExp = /\x1B[[(?);]{0,2}(;?\d)*./g;
  * @public
  */
 export function addSuppression(suppression: string | RegExp): void {
-  'use strict';
 
   if (typeof suppression === 'string') {
     suppression = normalizeMessage(suppression);
@@ -496,7 +480,6 @@ export function addSuppression(suppression: string | RegExp): void {
  * @public
  */
 export function warn(...args: Array<string | Chalk.ChalkChain>): void {
-  'use strict';
   args.splice(0, 0, 'Warning -');
 
   const stringMessage: string = normalizeMessage(args.join(' '));
@@ -513,7 +496,6 @@ export function warn(...args: Array<string | Chalk.ChalkChain>): void {
  * @public
  */
 export function error(...args: Array<string | Chalk.ChalkChain>): void {
-  'use strict';
   args.splice(0, 0, 'Error -');
 
   const stringMessage: string = normalizeMessage(args.join(' '));
@@ -544,7 +526,6 @@ export function fileLog(
   errorCode: string,
   message: string
 ): void {
-  'use strict';
 
   if (!filePath) {
     filePath = '<undefined path>';
@@ -601,7 +582,6 @@ export function fileError(
  * @public
  */
 export function verbose(...args: Array<string | Chalk.ChalkChain>): void {
-  'use strict';
 
   if (getFlagValue('verbose')) {
     log.apply(undefined, args);
@@ -636,7 +616,6 @@ export function generateGulpError(err: Object): Object {
  */
 export function writeError(e: any): void {
 /* tslint:enable:no-any */
-  'use strict';
   if (e) {
     if (!e[WROTE_ERROR_KEY]) {
       if (e.err) {
@@ -697,7 +676,6 @@ export function writeError(e: any): void {
  * @public
  */
 export function getWarnings(): string[] {
-  'use strict';
   return localCache.warnings;
 }
 
@@ -706,13 +684,11 @@ export function getWarnings(): string[] {
  * @public
  */
 export function getErrors(): string[] {
-  'use strict';
   return localCache.errors;
 }
 
 /** @public */
 export function getStart(): [number, number] | undefined {
-  'use strict';
   return localCache.start;
 }
 
@@ -720,7 +696,6 @@ export function getStart(): [number, number] | undefined {
  * @public
  */
 export function setWatchMode(): void {
-  'use strict';
   localCache.watchMode = true;
 }
 
@@ -728,7 +703,6 @@ export function setWatchMode(): void {
  * @public
  */
 export function getWatchMode(): boolean | undefined {
-  'use strict';
   return localCache.watchMode;
 }
 
@@ -736,7 +710,6 @@ export function getWatchMode(): boolean | undefined {
  * @public
  */
 export function setExitCode(exitCode: number): void {
-  'use strict';
   localCache.exitCode = exitCode;
 }
 
@@ -777,7 +750,6 @@ export function initialize(
   gulpErrorCallback?: (err: Error) => void,
   gulpStopCallback?: (err: Error) => void
 ): void {
-  'use strict';
   // This will add logging to the gulp execution
 
   localCache.gulp = gulp;
@@ -785,22 +757,22 @@ export function initialize(
   wireUpProcessErrorHandling();
 
   localCache.gulpErrorCallback = gulpErrorCallback || (() => {
-    'use strict';
+
     // Do Nothing
   });
 
   localCache.gulpStopCallback = gulpStopCallback || (() => {
-    'use strict';
+
     // Do Nothing
   });
 
   gulp.on('start', (err: Object) => {
-    'use strict';
+
     log('Starting gulp');
   });
 
   gulp.on('stop', (err: Object) => {
-    'use strict';
+
     writeSummary(() => {
       // error if we have any errors
       if (localCache.taskErrors > 0 ||
@@ -818,7 +790,7 @@ export function initialize(
   });
 
   gulp.on('err', (err: Object) => {
-    'use strict';
+
     _writeTaskError(err);
     writeSummary(() => {
       exitProcess(1);
@@ -831,7 +803,7 @@ export function initialize(
   /* tslint:disable:no-any */
   gulp.on('task_start', (e: any) => {
   /* tslint:enable:no-any */
-    'use strict';
+
     if (localCache.fromRunGulp) {
       log('Starting', '\'' + gutil.colors.cyan(e.task) + '\'...');
     }
@@ -842,7 +814,7 @@ export function initialize(
   /* tslint:disable:no-any */
   gulp.on('task_stop', (e: any) => {
   /* tslint:enable:no-any */
-    'use strict';
+
     const time: string = prettyTime(e.hrDuration);
 
     if (localCache.fromRunGulp) {
@@ -856,7 +828,7 @@ export function initialize(
   /* tslint:disable:no-any */
   gulp.on('task_err', (err: any) => {
   /* tslint:enable:no-any */
-    'use strict';
+
     _writeTaskError(err);
     writeSummary(() => {
       exitProcess(1);
@@ -866,7 +838,7 @@ export function initialize(
   /* tslint:disable:no-any */
   gulp.on('task_not_found', (err: any) => {
   /* tslint:enable:no-any */
-    'use strict';
+
     log(
       gutil.colors.red('Task \'' + err.task + '\' is not in your gulpfile')
     );
@@ -879,7 +851,6 @@ export function initialize(
  * @public
  */
 export function markTaskCreationTime(): void {
-  'use strict';
   localCache.taskCreationTime = process.hrtime(getStart());
 }
 

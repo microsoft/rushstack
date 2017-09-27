@@ -1,14 +1,18 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es6",
     "module": "commonjs",
     "declaration": true,
     "sourceMap": true,
     "moduleResolution": "node",
     "strictNullChecks": true,
     "types": [
-      "es6-collections",
       "node"
+    ],
+    "lib": [
+      "es5",
+      "es2015.iterable",
+      "es2015.collection"
     ]
   }
 }

@@ -2,6 +2,47 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "3.0.18",
+      "tag": "@microsoft/rush_v3.0.18",
+      "date": "Tue, 26 Sep 2017 13:51:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update various dependencies"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.0.17",
+      "tag": "@microsoft/rush_v3.0.17",
+      "date": "Thu, 14 Sep 2017 18:51:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix some issues in rush telemetry collection"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-lib\" from `3.0.16` to `3.0.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.0.16",
+      "tag": "@microsoft/rush_v3.0.16",
+      "date": "Wed, 6 Sep 2017 18:24:39 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue running 'rush install' after adding a new project"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.15",
       "tag": "@microsoft/rush_v3.0.15",
       "date": "Wed, 30 Aug 2017 18:24:39 GMT",

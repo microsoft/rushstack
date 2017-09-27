@@ -10,6 +10,10 @@
     "types": [
       "webpack-env"
     ],
+    "lib": [
+      "es5",
+      "dom"
+    ],
     "strictNullChecks": true
   }
 }

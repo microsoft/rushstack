@@ -46,20 +46,6 @@ export interface IApiItemReference {
 export type ApiAccessModifier = 'public' | 'private' | 'protected' | '';
 
 /**
- * The enum value of an IApiEnum.
- *
- * IApiEnumMember does not extend the IDocITem base class
- * because the summary is not required.
- * @alpha
- */
-export interface IApiEnumMember {
-  value: string;
-  summary?: IDocElement[];
-  remarks?: IDocElement[];
-  deprecatedMessage?: IDocElement[];
-}
-
-/**
  * Parameter Doc item.
  * @alpha
  */
@@ -88,6 +74,17 @@ export interface IApiParameter {
    * The data type of the parameter
    */
   type: string;
+}
+
+/**
+ * An ordered map of items, indexed by the symbol name.
+ * @alpha
+ */
+export interface IApiNameMap<T> {
+  /**
+   * For a given name, returns the object with that name.
+   */
+  [name: string]: T;
 }
 
 /**
@@ -189,7 +186,7 @@ export interface IApiMethod extends IApiBaseDefinition {
    * a mapping of parameter name to IApiParameter
    */
 
-  parameters: { [name: string]: IApiParameter};
+  parameters: IApiNameMap<IApiParameter>;
 
   /**
    * describes the return value of the method
@@ -209,7 +206,7 @@ export interface IApiFunction extends IApiBaseDefinition {
   /**
    * parameters of the function
    */
-  parameters: { [name: string]: IApiParameter};
+  parameters: IApiNameMap<IApiParameter>;
 
   /**
    * a description of the return value
@@ -229,7 +226,7 @@ export interface IApiConstructor extends IApiBaseDefinition {
   /**
    * parameters of the function
    */
-  parameters: { [name: string]: IApiParameter};
+  parameters: IApiNameMap<IApiParameter>;
 }
 
 /**
@@ -244,7 +241,7 @@ export interface IApiClass extends IApiBaseDefinition {
   /**
    * Can be a combination of methods and/or properties
    */
-  members: { [name: string]: ApiMember};
+  members: IApiNameMap<ApiMember>;
 
   /**
    * Interfaces implemented by this class
@@ -276,6 +273,20 @@ export interface IApiEnum extends IApiBaseDefinition {
 }
 
 /**
+ * A member of an IApiEnum.
+ *
+ * @alpha
+ */
+export interface IApiEnumMember extends IApiBaseDefinition {
+  /**
+   * {@inheritdoc IApiBaseDefinition.kind}
+   */
+  kind: 'enum value';
+
+  value: string;
+}
+
+/**
  * IApiInterface represents an exported interface.
  * @alpha
  */
@@ -287,7 +298,7 @@ export interface IApiInterface extends IApiBaseDefinition {
   /**
    * A mapping from the name of a member API to its ApiMember
    */
-  members: { [name: string]: ApiMember};
+  members: IApiNameMap<ApiMember>;
 
   /**
    * Interfaces implemented by this interface
@@ -327,7 +338,7 @@ export interface IApiPackage {
   /**
    * IDocItems of exported API items
    */
-  exports: { [name: string]: ApiItem};
+  exports: IApiNameMap<ApiItem>;
 
   /**
    * The following are needed so that this interface and can share
@@ -351,7 +362,7 @@ export type ApiMember = IApiProperty | IApiMethod;
  * @alpha
  */
 export type ApiItem = IApiProperty | ApiMember | IApiFunction | IApiConstructor |
-   IApiClass |IApiEnum | IApiInterface | IApiPackage;
+   IApiClass | IApiEnum | IApiEnumMember | IApiInterface | IApiPackage;
 
 /**
  * Describes a return type and description of the return type

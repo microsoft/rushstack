@@ -141,15 +141,16 @@ export default class RebuildAction extends BaseRushAction {
         stopwatch.stop();
         console.log(colors.green(`rush ${this.options.actionVerb} (${stopwatch.toString()})`));
         this._collectTelemetry(stopwatch, true);
+        this._parser.flushTelemetry();
+        this.eventHooksManager.handle(Event.postRushBuild, this._parser.isDebug);
       },
       () => {
         stopwatch.stop();
         console.log(colors.red(`rush ${this.options.actionVerb} - Errors! (${stopwatch.toString()})`));
         this._collectTelemetry(stopwatch, false);
+        this._parser.flushTelemetry();
+        this.eventHooksManager.handle(Event.postRushBuild, this._parser.isDebug);
         this._parser.exitWithError();
-      })
-      .then(() => {
-        this.eventHooksManager.handle(Event.postRushBuild);
       });
   }
 
@@ -236,7 +237,10 @@ export default class RebuildAction extends BaseRushAction {
    * Collects all downstream dependents of a certain project
    */
   private _collectAllDependents(project: string): Set<string> {
-    const deps: Set<string> = new Set<string>(this._dependentList.get(project));
+    const deps: Set<string> = new Set<string>();
+    this._dependentList.get(project).forEach((dep) => {
+      deps.add(dep);
+    });
     deps.forEach(dep => this._collectAllDependents(dep).forEach(innerDep => deps.add(innerDep)));
     return deps;
   }

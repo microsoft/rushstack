@@ -2,6 +2,73 @@
   "name": "@microsoft/gulp-core-build-mocha",
   "entries": [
     {
+      "version": "3.1.0",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.1.0",
+      "date": "Fri, 22 Sep 2017 01:04:02 GMT",
+      "comments": {
+        "minor": [
+          {
+            "author": "Nick Pape <nickpape@users.noreply.github.com>",
+            "commit": "481a10f460a454fb5a3e336e3cf25a1c3f710645",
+            "comment": "Upgrade to es6"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.8` to `3.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.0.8",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.0.8",
+      "date": "Wed, 20 Sep 2017 22:10:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.7` to `3.0.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.0.7",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.0.7",
+      "date": "Mon, 11 Sep 2017 13:04:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.6` to `3.0.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.0.6",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.0.6",
+      "date": "Fri, 08 Sep 2017 01:28:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.5` to `3.0.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.0.5",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.0.5",
+      "date": "Thu, 07 Sep 2017 13:04:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.4` to `3.0.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.4",
       "tag": "@microsoft/gulp-core-build-mocha_v3.0.4",
       "date": "Thu, 07 Sep 2017 00:11:12 GMT",

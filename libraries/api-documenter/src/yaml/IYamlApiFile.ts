@@ -5,13 +5,13 @@
  * TypeScript interface describing a Universal Reference YAML documentation file,
  * as defined by typescript.schema.json.
  */
-export interface IYamlFile {
+export interface IYamlApiFile {
   items: IYamlItem[];
   references?: IYamlReference[];
 }
 
 /**
- * Part of the IYamlFile structure.  Used to document exceptions that can be thrown
+ * Part of the IYamlApiFile structure.  Used to document exceptions that can be thrown
  * by a method, property, function, or constructor.
  */
 export interface IYamlException {
@@ -20,12 +20,12 @@ export interface IYamlException {
 }
 
 /**
- * Part of the IYamlFile structure.  Represents the type of an IYamlItem.
+ * Part of the IYamlApiFile structure.  Represents the type of an IYamlItem.
  */
 export type YamlTypeId = 'class' | 'constructor' | 'enum' | 'field' | 'interface' | 'method' | 'package' | 'property';
 
 /**
- * Part of the IYamlFile structure.  Represents basic API elements such as
+ * Part of the IYamlApiFile structure.  Represents basic API elements such as
  * classes, interfaces, members, etc.
  */
 export interface IYamlItem {
@@ -46,7 +46,7 @@ export interface IYamlItem {
 }
 
 /**
- * Part of the IYamlFile structure.  Represents a method or function parameter.
+ * Part of the IYamlApiFile structure.  Represents a method or function parameter.
  */
 export interface IYamlParameter {
   description?: string;
@@ -55,7 +55,7 @@ export interface IYamlParameter {
 }
 
 /**
- * Part of the IYamlFile structure.  Represents a reference to an item that is
+ * Part of the IYamlApiFile structure.  Represents a reference to an item that is
  * declared in a separate YAML file.
  */
 export interface IYamlReference {
@@ -64,7 +64,7 @@ export interface IYamlReference {
 }
 
 /**
- * Part of the IYamlFile structure.  Indicates the open source Git repository
+ * Part of the IYamlApiFile structure.  Indicates the open source Git repository
  * where an IYamlItem is defined.
  */
 export interface IYamlRemote {
@@ -74,7 +74,7 @@ export interface IYamlRemote {
 }
 
 /**
- * Part of the IYamlFile structure.  Documents the return value of a function
+ * Part of the IYamlApiFile structure.  Documents the return value of a function
  * or method.
  */
 export interface IYamlReturn {
@@ -83,7 +83,7 @@ export interface IYamlReturn {
 }
 
 /**
- * Part of the IYamlFile structure.  Documents the source file where an IYamlItem is defined.
+ * Part of the IYamlApiFile structure.  Documents the source file where an IYamlItem is defined.
  */
 export interface IYamlSource {
   id?: string;
@@ -93,7 +93,7 @@ export interface IYamlSource {
 }
 
 /**
- * Part of the IYamlFile structure.  Documents the type signature for an IYamlItem.
+ * Part of the IYamlApiFile structure.  Documents the type signature for an IYamlItem.
  */
 export interface IYamlSyntax {
   content?: string;

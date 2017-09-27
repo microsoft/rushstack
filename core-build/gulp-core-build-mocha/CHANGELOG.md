@@ -1,6 +1,33 @@
 # Change Log - @microsoft/gulp-core-build-mocha
 
-This log was last generated on Thu, 07 Sep 2017 00:11:12 GMT and should not be manually modified.
+This log was last generated on Fri, 22 Sep 2017 01:04:02 GMT and should not be manually modified.
+
+## 3.1.0
+Fri, 22 Sep 2017 01:04:02 GMT
+
+### Minor changes
+
+- Upgrade to es6
+
+## 3.0.8
+Wed, 20 Sep 2017 22:10:17 GMT
+
+*Changes not tracked*
+
+## 3.0.7
+Mon, 11 Sep 2017 13:04:55 GMT
+
+*Changes not tracked*
+
+## 3.0.6
+Fri, 08 Sep 2017 01:28:04 GMT
+
+*Changes not tracked*
+
+## 3.0.5
+Thu, 07 Sep 2017 13:04:35 GMT
+
+*Changes not tracked*
 
 ## 3.0.4
 Thu, 07 Sep 2017 00:11:12 GMT

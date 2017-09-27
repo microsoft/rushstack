@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es6",
     "module": "commonjs",
     "declaration": true,
     "sourceMap": true,
@@ -17,6 +17,7 @@
       "es5",
       "scripthost",
       "es2015.promise",
+      "es2015.iterable",
       "dom"
     ]
   }
