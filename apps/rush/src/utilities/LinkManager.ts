@@ -7,7 +7,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import * as tar from 'tar';
-import readPackageTree = require('read-package-tree');
+import encodeRegistry = require('encode-registry');
 import { JsonFile } from '@microsoft/node-core-library';
 import {
   RushConstants,
@@ -29,20 +29,10 @@ export default class LinkManager {
   private _rushConfiguration: RushConfiguration;
 
   private static _createSymlink(linkTarget: string, linkSource: string, symlinkKind: SymlinkKind): void {
-    if (symlinkKind === SymlinkKind.Directory) {
-      // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
-      fsx.symlinkSync(linkTarget, linkSource, 'junction');
-    } else {
-      if (process.platform === 'win32') {
-        // For files, we use a Windows "hard link", because creating a symbolic link requires
-        // administrator permission.
-        fsx.linkSync(linkTarget, linkSource);
-      } else {
-        // However hard links seem to cause build failures on Mac, so for all other operating systems
-        // we use symbolic links for this case.
-        fsx.symlinkSync(linkTarget, linkSource, 'file');
-      }
-    }
+    fsx.mkdirsSync(path.dirname(linkSource));
+
+    // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
+    fsx.symlinkSync(linkTarget, linkSource, 'junction');
   }
 
   /**
@@ -105,6 +95,7 @@ export default class LinkManager {
       }
     }
 
+    // this should never occur
     if (localPackage.children.length > 0) {
       Utilities.createFolderWithRetry(localModuleFolder);
 
@@ -145,7 +136,7 @@ export default class LinkManager {
     this._rushConfiguration = rushConfiguration;
   }
 
-  /**
+  /*
    * Creates node_modules symlinks for all Rush projects defined in the RushConfiguration.
    * @param force - Normally the operation will be skipped if the links are already up to date;
    *   if true, this option forces the links to be recreated.
@@ -167,52 +158,51 @@ export default class LinkManager {
       // a full "rush link" is required next time
       Utilities.deleteFile(this._rushConfiguration.rushLinkJsonFilename);
 
-      readPackageTree(this._rushConfiguration.commonTempFolder,
-        (error: Error, npmPackage: readPackageTree.PackageNode) => {
-        if (error) {
-          reject(error);
-        } else {
-          try {
-            const commonRootPackage: Package = Package.createFromNpm(npmPackage);
+      // go ahead and find out the registry we are using, we need this to locate the pnpm store folder
+      const registryUrl: string = Utilities.executeCommandAndCaptureOutput(
+        this._rushConfiguration.pnpmToolFilename,
+        ['config', 'get', 'registry'],
+        this._rushConfiguration.commonTempFolder,
+        process.env);
 
-            const commonPackageLookup: PackageLookup = new PackageLookup();
-            commonPackageLookup.loadTree(commonRootPackage);
+      const encodedRegistry: string = encodeRegistry(registryUrl);
 
-            const rushLinkJson: IRushLinkJson = { localLinks: {} };
+      const registryPath: string = path.join(
+        this._rushConfiguration.commonTempFolder,
+        RushConstants.nodeModulesFolderName,
+        `.${encodedRegistry}`
+      );
 
-            for (const rushProject of this._rushConfiguration.projects) {
-              console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
-              this._linkProject(rushProject, commonRootPackage, commonPackageLookup, rushLinkJson);
-            }
+      try {
+        const rushLinkJson: IRushLinkJson = { localLinks: {} };
 
-            console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
-            JsonFile.save(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
-
-            stopwatch.stop();
-            console.log(os.EOL + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));
-            console.log(os.EOL + 'Next you should probably run: "rush rebuild"');
-
-            resolve();
-          } catch (error) {
-            reject(error);
-          }
+        for (const rushProject of this._rushConfiguration.projects) {
+          console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
+          this._linkProject(registryPath, rushProject, rushLinkJson);
         }
-      });
+
+        console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
+        JsonFile.save(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
+
+        stopwatch.stop();
+        console.log(os.EOL + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));
+        console.log(os.EOL + 'Next you should probably run: "rush rebuild"');
+
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
     });
   }
 
   /**
    * This is called once for each local project from Rush.json.
    * @param project             The local project that we will create symlinks for
-   * @param commonRootPackage   The common/temp/package.json package
-   * @param commonPackageLookup A dictionary for finding packages under common/temp/node_modules
-   * @param rushConfiguration   The rush.json file contents
    * @param rushLinkJson        The common/temp/rush-link.json output file
-   * @param options             Command line options for "rush link"
    */
   private _linkProject(
+    pnpmStorePath: string,
     project: RushConfigurationProject,
-    commonRootPackage: Package,
     rushLinkJson: IRushLinkJson): void {
 
     // Naively, PNPM creates a directed acyclic graph, rather than a tree
@@ -263,9 +253,7 @@ export default class LinkManager {
 
     // now that we have the temp package.json, we can go ahead and link up all the direct dependencies
 
-    for (const dependencyName in commonPackage.packageJson.rushDependencies) {
-      const dependencyVersionRange: string = commonPackage.packageJson.dependencies[dependencyName];
-
+    Object.keys(commonPackage.packageJson.rushDependencies || {}).forEach((dependencyName: string) => {
       // Should this be a "local link" to a top-level Rush project (i.e. versus a regular link
       // into the Common folder)?
       const matchedRushPackage: RushConfigurationProject = this._rushConfiguration.getProjectByName(dependencyName);
@@ -291,14 +279,15 @@ export default class LinkManager {
         );
 
         newLocalPackage.symlinkTargetFolderPath = matchedRushPackage.projectFolder;
+        localPackage.children.push(newLocalPackage);
       } else {
         // weird state or program bug
         throw Error('Cannot find rush dependency in rush configuration');
       }
-    }
+    });
 
     // Iterate through all the regular dependencies
-    for (const dependencyName in commonPackage.packageJson.dependencies) {
+    Object.keys(commonPackage.packageJson.dependencies || {}).forEach((dependencyName: string) => {
       const dependencyVersionRange: string = commonPackage.packageJson.dependencies[dependencyName];
 
       // We can't symlink to an Rush project, so instead we will symlink to a folder
@@ -308,9 +297,10 @@ export default class LinkManager {
       // satisfies the dependency range (which is what I assume PNPM does)
 
       const storePackageVersionsPath: string = path.join(
-        // pnpm store
+        pnpmStorePath,
         dependencyName
       );
+
       const availableVersions: string[] = fsx.readdirSync(storePackageVersionsPath).filter((version) => {
         return fsx.lstatSync(path.join(storePackageVersionsPath, version));
       });
@@ -327,9 +317,10 @@ export default class LinkManager {
       }
 
       const pnpmStorePackagePath: string = path.join(
-        // pnpm store
+        pnpmStorePath,
         dependencyName,
         selectedVersion,
+        RushConstants.nodeModulesFolderName,
         dependencyName
       );
 
@@ -344,16 +335,17 @@ export default class LinkManager {
         );
 
         newLocalPackage.symlinkTargetFolderPath = pnpmStorePackagePath;
+        localPackage.addChild(newLocalPackage);
 
       } else {
         throw Error(`The dependency "${dependencyName}" needed by "${localPackage.name}"`
           + ` was not found the common folder -- do you need to run "rush generate"?`);
       }
-    }
+    });
 
     // When debugging, you can uncomment this line to dump the data structure
     // to the console:
-    // localPackage.printTree();
+    localPackage.printTree();
     LinkManager._createSymlinksForTopLevelProject(localPackage);
 
     // Also symlink the ".bin" folder

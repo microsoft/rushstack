@@ -7,7 +7,6 @@ import * as yaml from 'js-yaml';
 import * as os from 'os';
 import * as semver from 'semver';
 import npmPackageArg = require('npm-package-arg');
-import encodeRegistry = require('encode-registry');
 
 import { Utilities, RushConstants } from '@microsoft/rush-lib';
 
@@ -75,13 +74,6 @@ export default class ShrinkwrapFile {
     }
     result.sort();  // make the result deterministic
     return result;
-  }
-
-  /**
-   * Returns the normalized folder name for the registry. PNPM stores dependencies in this folder.
-   */
-  public getEncodedRegistry(): string {
-    return encodeRegistry(this._shrinkwrapJson.registry);
   }
 
   /**

@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-import readPackageTree = require('read-package-tree');
 import { JsonFile } from '@microsoft/node-core-library';
 import { IPackageJson } from '@microsoft/rush-lib';
 
@@ -37,6 +35,11 @@ export default class Package {
    */
   public folderPath: string;
 
+  /**
+   * The parent package, or undefined if this is the root of the tree.
+   */
+  public parent: Package;
+
   public packageJson: IRushTempPackageJson;
 
   /**
@@ -44,6 +47,13 @@ export default class Package {
    * then symlinkTargetFolderPath keeps track of the intended target.
    */
   public symlinkTargetFolderPath: string = undefined;
+
+   /**
+   * Packages that were placed in node_modules subfolders of this package.
+   * The child packages are not necessarily dependencies of this package.
+   */
+  public children: Package[];
+  private _childrenByName: Map<string, Package>;
 
   /**
    * Used by "npm link" when creating a Package object that represents symbolic links to be created.
@@ -65,7 +75,7 @@ export default class Package {
    */
   public static createVirtualTempPackage(packageJsonFilename: string, installFolderName: string): Package {
     const packageJson: IRushTempPackageJson = JsonFile.load(packageJsonFilename);
-    return Package.createLinkedPackage(name, packageJson.version, installFolderName, packageJson);
+    return Package.createLinkedPackage(packageJson.name, packageJson.version, installFolderName, packageJson);
   }
 
   public get nameAndVersion(): string {
@@ -85,6 +95,32 @@ export default class Package {
     return result;
   }
 
+  public addChild(child: Package): void {
+    if (child.parent) {
+      throw Error('Child already has a parent');
+    }
+    if (this._childrenByName.has(child.name)) {
+      throw Error('Child already exists');
+    }
+    child.parent = this;
+    this.children.push(child);
+    this._childrenByName.set(child.name, child);
+  }
+
+  public getChildByName(childPackageName: string): Package {
+    return this._childrenByName.get(childPackageName);
+  }
+
+  public printTree(indent?: string): void {
+    if (!indent) {
+      indent = '';
+    }
+    console.log(indent + this.nameAndVersion);
+    for (const child of this.children) {
+      child.printTree(indent + '  ');
+    }
+  }
+
   private constructor(name: string,
     version: string,
     folderPath: string,
@@ -92,7 +128,10 @@ export default class Package {
 
     this.name = name;
     this.packageJson = packageJson;
-    this.version = packageJson.version;
+    this.version = version;
     this.folderPath = folderPath;
+
+    this.children = [];
+    this._childrenByName = new Map<string, Package>();
   }
 }
