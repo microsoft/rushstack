@@ -132,6 +132,12 @@ export interface IApiProperty extends IApiBaseDefinition {
    * {@inheritdoc IApiBaseDefinition.kind}
    */
   kind: 'property';
+
+  /**
+   * a text summary of the method definition
+   */
+  signature: string;
+
   /**
    * For an interface member, whether it is optional
    */
@@ -162,6 +168,7 @@ export interface IApiMethod extends IApiBaseDefinition {
    * {@inheritdoc IApiBaseDefinition.kind}
    */
   kind: 'method';
+
   /**
    * a text summary of the method definition
    */
@@ -203,6 +210,12 @@ export interface IApiFunction extends IApiBaseDefinition {
    * {@inheritdoc IApiBaseDefinition.kind}
    */
   kind: 'function';
+
+  /**
+   * a text summary of the method definition
+   */
+  signature: string;
+
   /**
    * parameters of the function
    */
@@ -223,6 +236,12 @@ export interface IApiConstructor extends IApiBaseDefinition {
    * {@inheritdoc IApiBaseDefinition.kind}
    */
   kind: 'constructor';
+
+  /**
+   * a text summary of the method definition
+   */
+  signature: string;
+
   /**
    * parameters of the function
    */

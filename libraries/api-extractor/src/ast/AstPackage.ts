@@ -49,7 +49,7 @@ export default class AstPackage extends AstItemContainer {
     super(AstPackage._getOptions(extractor, rootFile));
     this.kind = AstItemKind.Package;
     // The scoped package name. (E.g. "@microsoft/api-extractor")
-    this.name = this.extractor.packageJsonLookup.getPackageName(this.extractor.packageFolder);
+    this.name = extractor.packageName;
 
     const exportSymbols: ts.Symbol[] = this.typeChecker.getExportsOfModule(this.declarationSymbol);
     if (exportSymbols) {

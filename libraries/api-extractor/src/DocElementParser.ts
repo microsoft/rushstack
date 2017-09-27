@@ -8,7 +8,7 @@ import {
   ICodeLinkElement,
   ISeeDocElement
 } from './markup/OldMarkup';
-import ApiDefinitionReference from './ApiDefinitionReference';
+import ApiDefinitionReference, { IScopedPackageName } from './ApiDefinitionReference';
 import ApiDocumentation from './aedoc/ApiDocumentation';
 import { AstItemKind } from './ast/AstItem';
 import Token, { TokenType } from './aedoc/Token';
@@ -202,6 +202,20 @@ export default class DocElementParser {
         memberName: apiDefitionRef.memberName
         // ("value" will be assigned below)
       };
+
+      if (!linkDocElement.packageName) {
+        if (!documentation.extractor.packageName) {
+          throw new Error('Unable to resolve API reference without a package name');
+        }
+
+        // If the package name is unspecified, assume it is the current package
+        const scopePackageName: IScopedPackageName = ApiDefinitionReference.parseScopedPackageName(
+          documentation.extractor.packageName);
+
+        linkDocElement.scopeName = scopePackageName.scope;
+        linkDocElement.packageName = scopePackageName.package;
+      }
+
     }
 
     // If a display name is given, ensure it only contains characters for words.

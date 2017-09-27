@@ -28,7 +28,7 @@ class AstProperty extends AstMember {
       this.hasIncompleteTypes = true;
       this.type = 'any';
     }
-}
+  }
 
   public getDeclarationLine(): string {
     return super.getDeclarationLine({

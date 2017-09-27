@@ -118,7 +118,12 @@ export class YamlGenerator {
 
     tocFile.items.push({
       name: 'SharePoint Framework', // TODO: parameterize this
-      items: this._buildTocItems(docItems.filter(x => x.isExternalPackage))
+      items: [
+        {
+          name: 'Overview',
+          href: './index.md'
+        } as IYamlTocItem
+      ].concat(this._buildTocItems(docItems.filter(x => x.isExternalPackage)))
     });
 
     const externalPackages: DocItem[] = docItems.filter(x => !x.isExternalPackage);
@@ -323,7 +328,7 @@ export class YamlGenerator {
     const apiProperty: IApiProperty = docItem.apiItem as IApiProperty;
 
     const syntax: IYamlSyntax = {
-      content: docItem.name + ': ' + apiProperty.type + ';' // TODO
+      content: apiProperty.signature
     };
     yamlItem.syntax = syntax;
 

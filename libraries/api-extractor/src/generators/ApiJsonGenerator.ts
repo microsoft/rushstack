@@ -176,6 +176,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
 
     const newNode: Object = {
       kind: ApiJsonFile.convertKindToJson(astFunction.kind),
+      signature: astFunction.getDeclarationLine(),
       returnValue: returnValueNode,
       parameters: this._createParameters(astFunction),
       deprecatedMessage: astFunction.inheritedDeprecatedMessage || [],
@@ -244,6 +245,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
 
     const newNode: Object = {
       kind: ApiJsonFile.convertKindToJson(astProperty.kind),
+      signature: astProperty.getDeclarationLine(),
       isOptional: !!astProperty.isOptional,
       isReadOnly: !!astProperty.isReadOnly,
       isStatic: !!astProperty.isStatic,
@@ -260,6 +262,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
   protected visitAstModuleVariable(astModuleVariable: AstModuleVariable, refObject?: Object): void {
     const newNode: Object = {
       kind: ApiJsonFile.convertKindToJson(astModuleVariable.kind),
+      signature: astModuleVariable.getDeclarationLine(),
       type: astModuleVariable.type,
       value: astModuleVariable.value,
       deprecatedMessage: astModuleVariable.inheritedDeprecatedMessage || [],

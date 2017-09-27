@@ -60,8 +60,9 @@
           "type": "string"
         },
         "packageName": {
-          "description": "An optional name of the package where an export is located",
-          "type": "string"
+          "description": "The name of the package being referenced (must be a nonempty string)",
+          "type": "string",
+          "minLength": 1
         },
         "scopeName": {
           "description": "An optional name that scopes the package name",
@@ -190,6 +191,10 @@
           "type": "string",
           "enum": [ "property" ]
         },
+        "signature": {
+          "description": "A text summary of the property definition",
+          "type": "string"
+        },
         "isOptional": {
           "description": "For an interface member, whether it is optional",
           "type": "boolean"
@@ -236,6 +241,10 @@
           "description": "The kind of API definition",
           "type": "string",
           "enum": [ "module variable" ]
+        },
+        "signature": {
+          "description": "A text summary of the variable definition",
+          "type": "string"
         },
         "type": {
           "description": "The data type of this module variable",
@@ -369,6 +378,10 @@
           "description": "The kind of API definition",
           "type": "string",
           "enum": [ "function" ]
+        },
+        "signature": {
+          "description": "A text summary of the function definition",
+          "type": "string"
         },
         "parameters": {
           "description": "The list of function parameters",

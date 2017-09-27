@@ -66,6 +66,7 @@
         },
         "propOne": {
           "kind": "property",
+          "signature": "public propOne: MissingExport;",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
@@ -156,6 +157,7 @@
         },
         "typeLiteralProp": {
           "kind": "property",
+          "signature": "public typeLiteralProp: [MissingExport];",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
@@ -201,6 +203,7 @@
       "exports": {
         "booleanConstant1": {
           "kind": "module variable",
+          "signature": "booleanConstant1: boolean = true",
           "type": "boolean",
           "value": "true",
           "deprecatedMessage": [],
@@ -210,6 +213,7 @@
         },
         "numberConstant1": {
           "kind": "module variable",
+          "signature": "numberConstant1: number = 24",
           "type": "number",
           "value": "24",
           "deprecatedMessage": [],
@@ -224,6 +228,7 @@
         },
         "stringConstant1": {
           "kind": "module variable",
+          "signature": "stringConstant1: string = '\\uED68'",
           "type": "string",
           "value": "'\\uED68'",
           "deprecatedMessage": [],
