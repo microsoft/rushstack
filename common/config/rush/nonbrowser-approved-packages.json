@@ -114,10 +114,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "es6-promise",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "express",
       "allowedCategories": [ "libraries" ]
     },

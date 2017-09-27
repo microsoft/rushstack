@@ -16,8 +16,8 @@
     "chai": "~3.5.0"
   },
   "dependencies": {
-    "@microsoft/load-themed-styles": "~1.7.4",
-    "@microsoft/web-library-build": "4.0.7",
+    "@microsoft/load-themed-styles": "~1.7.5",
+    "@microsoft/web-library-build": "4.1.0",
     "gulp": "~3.9.1"
   }
 }

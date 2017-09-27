@@ -1,6 +1,20 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Mon, 11 Sep 2017 13:04:55 GMT and should not be manually modified.
+This log was last generated on Fri, 22 Sep 2017 01:04:02 GMT and should not be manually modified.
+
+## 4.2.0
+Fri, 22 Sep 2017 01:04:02 GMT
+
+### Minor changes
+
+- Upgrade to es6
+
+## 4.1.0
+Wed, 20 Sep 2017 22:10:17 GMT
+
+### Minor changes
+
+- Support ESNext module output format and allow a base TypeScript configuration to be set by a build rig.
 
 ## 4.0.7
 Mon, 11 Sep 2017 13:04:55 GMT

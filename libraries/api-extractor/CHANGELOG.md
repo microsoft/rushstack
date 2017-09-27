@@ -1,6 +1,18 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 11 Sep 2017 13:04:55 GMT and should not be manually modified.
+This log was last generated on Fri, 22 Sep 2017 01:04:02 GMT and should not be manually modified.
+
+## 3.3.0
+Fri, 22 Sep 2017 01:04:02 GMT
+
+### Minor changes
+
+- Upgrade to es6
+
+## 3.2.6
+Wed, 20 Sep 2017 22:10:17 GMT
+
+*Changes not tracked*
 
 ## 3.2.5
 Mon, 11 Sep 2017 13:04:55 GMT

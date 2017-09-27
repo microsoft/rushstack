@@ -169,6 +169,14 @@ engine.
 [![npm version](https://badge.fury.io/js/%40microsoft%2Fset-webpack-public-path-plugin.svg)](https://badge.fury.io/js/%40microsoft%2Fset-webpack-public-path-plugin)
 [![Dependencies](https://david-dm.org/Microsoft/set-webpack-public-path-plugin.svg)](https://david-dm.org/Microsoft/set-webpack-public-path-plugin)
 
+### [@microsoft/resolve-chunk-plugin](./webpack/resolve-chunk-plugin/README.md)
+
+`resolve-chunk-plugin` is a plugin that looks for calls to `resolveChunk` with a chunk
+name, and returns the chunk ID.
+
+[![npm version](https://badge.fury.io/js/%40microsoft%2Fresolve-chunk-plugin.svg)](https://badge.fury.io/js/%40microsoft%2Fresolve-chunk-plugin)
+[![Dependencies](https://david-dm.org/Microsoft/resolve-chunk-plugin.svg)](https://david-dm.org/Microsoft/resolve-chunk-plugin)
+
 ### [@microsoft/loader-set-webpack-public-path](./webpack/loader-set-webpack-public-path/README.md)
 
 `loader-set-webpack-public-path` is a loader used to set the webpack public path variable. It's similar to `set-webpack-public-path-plugin`.
