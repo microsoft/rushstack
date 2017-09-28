@@ -32,15 +32,6 @@ groups:
       - pgonzal
       - qz2017
 
-  api-extractor-approvers:
-    conditions:
-      files:
-        - "libraries/api-extractor/*"
-    required: 1
-    users:
-      - pgonzal
-      - dgaeta
-
   gcb-approvers:
     conditions:
       files:
