@@ -1,6 +1,11 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Fri, 22 Sep 2017 01:04:02 GMT and should not be manually modified.
+This log was last generated on Thu, 28 Sep 2017 01:04:28 GMT and should not be manually modified.
+
+## 0.3.1
+Thu, 28 Sep 2017 01:04:28 GMT
+
+*Changes not tracked*
 
 ## 0.3.0
 Fri, 22 Sep 2017 01:04:02 GMT

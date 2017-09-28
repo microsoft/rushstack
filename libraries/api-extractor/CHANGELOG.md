@@ -1,6 +1,18 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 22 Sep 2017 01:04:02 GMT and should not be manually modified.
+This log was last generated on Thu, 28 Sep 2017 01:04:28 GMT and should not be manually modified.
+
+## 3.4.0
+Thu, 28 Sep 2017 01:04:28 GMT
+
+### Minor changes
+
+- Skipping two lines in an AEDoc comment now creates a paragraph separator for the generated documentation
+
+### Patches
+
+- The *.api.json "linkDocElement" type now always explicitly specifies the package name, rather than expecting the reader to infer it
+- The *.api.json file format now exposes "signature" information for properties, functions, and module variables
 
 ## 3.3.0
 Fri, 22 Sep 2017 01:04:02 GMT
