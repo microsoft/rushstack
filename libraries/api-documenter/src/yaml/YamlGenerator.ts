@@ -300,9 +300,12 @@ export class YamlGenerator {
     yamlItem.syntax = syntax;
 
     if (apiMethod.returnValue) {
+      const returnDescription: string = this._renderMarkdownFromDocElement(apiMethod.returnValue.description, docItem)
+        .replace(/^\s*-\s+/, ''); // temporary workaround for people who mistakenly add a hyphen, e.g. "@returns - blah"
+
       syntax.return = {
         type: [ apiMethod.returnValue.type ],
-        description: this._renderMarkdownFromDocElement(apiMethod.returnValue.description, docItem)
+        description: returnDescription
       };
     }
 
@@ -359,7 +362,7 @@ export class YamlGenerator {
           args.suffix = `](xref:${this._getUid(result.docItem)})`;
         }
       }
-    });
+    }).trim();
   }
 
   private _writeYamlFile(dataObject: {}, filePath: string, yamlMimeType: string,

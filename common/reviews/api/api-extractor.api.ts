@@ -390,6 +390,12 @@ interface IMarkupWebLink {
 }
 
 // @alpha
+interface IParagraphElement extends IBaseDocElement {
+  // (undocumented)
+  kind: 'paragraphDocElement';
+}
+
+// @alpha
 interface ISeeDocElement extends IBaseDocElement {
   // (undocumented)
   kind: 'seeDocElement';

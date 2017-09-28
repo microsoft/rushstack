@@ -109,7 +109,7 @@ describe('DocElementParser tests', function (): void {
 
       // Testing Summary Doc Elements
       const expectedSummary: IDocElement[] = [
-          {kind: 'textDocElement', value: 'This function parses docTokens for the apiLint website'} as ITextElement,
+          {kind: 'textDocElement', value: 'This function parses docTokens for the apiLint website '} as ITextElement,
           {
               kind: 'linkDocElement',
               referenceType: 'href',
@@ -117,9 +117,10 @@ describe('DocElementParser tests', function (): void {
               value: 'https://github.com/OfficeDev/office-ui-fabric-react'
         } as IHrefLinkElement
       ];
-      const actualSummary: IDocElement[] = DocElementParser.parse(myDocumentedClass.documentation, tokenizer);
-      JsonFile.save(JSON.stringify(expectedSummary), './lib/basicDocExpected.json');
-      JsonFile.save(JSON.stringify(actualSummary), './lib/basicDocActual.json');
+      const actualSummary: IDocElement[] = DocElementParser.getTrimmedSpan(
+        DocElementParser.parse(myDocumentedClass.documentation, tokenizer));
+      JsonFile.save(expectedSummary, './lib/basicDocExpected.json');
+      JsonFile.save(actualSummary, './lib/basicDocActual.json');
       TestFileComparer.assertFileMatchesExpected('./lib/basicDocActual.json', './lib/basicDocExpected.json');
 
       // Testing Returns Doc Elements
@@ -127,9 +128,10 @@ describe('DocElementParser tests', function (): void {
           {kind: 'textDocElement', value: 'an object'} as ITextElement
       ];
       tokenizer.getToken();
-      const actualReturn: IDocElement[] = DocElementParser.parse(myDocumentedClass.documentation, tokenizer);
-      JsonFile.save(JSON.stringify(expectedReturn), './lib/returnDocExpected.json');
-      JsonFile.save(JSON.stringify(actualReturn), './lib/returnDocActual.json');
+      const actualReturn: IDocElement[] = DocElementParser.getTrimmedSpan(
+        DocElementParser.parse(myDocumentedClass.documentation, tokenizer));
+      JsonFile.save(expectedReturn, './lib/returnDocExpected.json');
+      JsonFile.save(actualReturn, './lib/returnDocActual.json');
       TestFileComparer.assertFileMatchesExpected('./lib/returnDocActual.json', './lib/returnDocExpected.json');
 
       // Testing Params Doc Elements
@@ -149,8 +151,8 @@ describe('DocElementParser tests', function (): void {
       tokenizer.getToken();
       actualParam.push(apiDoc.parseParam(tokenizer));
 
-      JsonFile.save(JSON.stringify(expectedParam), './lib/paramDocExpected.json');
-      JsonFile.save(JSON.stringify(actualParam), './lib/paramDocActual.json');
+      JsonFile.save(expectedParam, './lib/paramDocExpected.json');
+      JsonFile.save(actualParam, './lib/paramDocActual.json');
       TestFileComparer.assertFileMatchesExpected('./lib/paramDocActual.json', './lib/paramDocExpected.json');
       assertCapturedErrors([]);
     });
@@ -165,9 +167,10 @@ describe('DocElementParser tests', function (): void {
           {kind: 'textDocElement', value: '- description of the deprecation'} as ITextElement
       ];
       tokenizer.getToken();
-      const actualDeprecated: IDocElement[] = DocElementParser.parse(myDocumentedClass.documentation, tokenizer);
-      JsonFile.save(JSON.stringify(expectedDeprecated), './lib/deprecatedDocExpected.json');
-      JsonFile.save(JSON.stringify(actualDeprecated), './lib/deprecatedDocActual.json');
+      const actualDeprecated: IDocElement[] = DocElementParser.getTrimmedSpan(
+        DocElementParser.parse(myDocumentedClass.documentation, tokenizer));
+      JsonFile.save(expectedDeprecated, './lib/deprecatedDocExpected.json');
+      JsonFile.save(actualDeprecated, './lib/deprecatedDocActual.json');
       TestFileComparer.assertFileMatchesExpected('./lib/deprecatedDocActual.json', './lib/deprecatedDocExpected.json');
       assertCapturedErrors([]);
     });
@@ -180,7 +183,7 @@ describe('DocElementParser tests', function (): void {
 
       // Testing Summary Elements
       const expectedSummary: IDocElement[] = [
-          {kind: 'textDocElement', value: 'Text describing the function’s purpose/nuances/context.'} as ITextElement,
+          {kind: 'textDocElement', value: 'Text describing the function’s purpose/nuances/context. '} as ITextElement,
           {
               kind: 'seeDocElement',
               seeElements: [
@@ -193,9 +196,10 @@ describe('DocElementParser tests', function (): void {
               ]
           } as ISeeDocElement
       ];
-      const actualSummary: IDocElement[] = DocElementParser.parse(myDocumentedClass.documentation, tokenizer);
-      JsonFile.save(JSON.stringify(expectedSummary), './lib/seeDocExpected.json');
-      JsonFile.save(JSON.stringify(actualSummary), './lib/seeDocActual.json');
+      const actualSummary: IDocElement[] = DocElementParser.getTrimmedSpan(
+        DocElementParser.parse(myDocumentedClass.documentation, tokenizer));
+      JsonFile.save(expectedSummary, './lib/seeDocExpected.json');
+      JsonFile.save(actualSummary, './lib/seeDocActual.json');
       TestFileComparer.assertFileMatchesExpected('./lib/seeDocExpected.json', './lib/seeDocActual.json');
       assertCapturedErrors([]);
     });
@@ -225,8 +229,8 @@ describe('DocElementParser tests', function (): void {
       } as IAedocParameter;
       const actualParam: IAedocParameter = apiDoc.parseParam(tokenizer);
 
-      JsonFile.save(JSON.stringify(expectedParam), './lib/nestedParamDocExpected.json');
-      JsonFile.save(JSON.stringify(actualParam), './lib/nestedParamDocActual.json');
+      JsonFile.save(expectedParam, './lib/nestedParamDocExpected.json');
+      JsonFile.save(actualParam, './lib/nestedParamDocActual.json');
       TestFileComparer.assertFileMatchesExpected(
         './lib/nestedParamDocActual.json',
         './lib/nestedParamDocExpected.json'

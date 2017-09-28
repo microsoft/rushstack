@@ -195,6 +195,9 @@ export class MarkupBuilder {
           const textDocElement: ITextElement = docElement as ITextElement;
           result.push(...MarkupBuilder.createTextElements(textDocElement.value));
           break;
+        case 'paragraphDocElement':
+          result.push(MarkupBuilder.PARAGRAPH);
+          break;
         case 'linkDocElement':
           const linkDocElement: ILinkDocElement = docElement as ILinkDocElement;
           if (linkDocElement.referenceType === 'code') {

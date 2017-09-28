@@ -130,7 +130,7 @@
       "summary": [
         {
           "kind": "textDocElement",
-          "value": "This is a class to test AEDoc parser and this is description that can span to multiple lines and we need to make sure we parse this block correctly. It can contain a"
+          "value": "This is a class to test AEDoc parser and this is description that can span to multiple lines and we need to make sure we parse this block correctly. It can contain a "
         },
         {
           "kind": "linkDocElement",
@@ -140,7 +140,7 @@
         },
         {
           "kind": "textDocElement",
-          "value": ". This block is entirely valid and a correct documentation object should be built for this ApiItem."
+          "value": " . This block is entirely valid and a correct documentation object should be built for this ApiItem."
         }
       ],
       "remarks": [
@@ -238,11 +238,11 @@
           "summary": [
             {
               "kind": "textDocElement",
-              "value": "This doc has {curly braces} which is valid but the inline @link token is missing a pipe between the URL and the display text"
+              "value": "This doc has {curly braces} which is valid but the inline @link token is missing a pipe between the URL and the display text "
             },
             {
               "kind": "textDocElement",
-              "value": "The displayName is not allowed to have non word characters."
+              "value": " The displayName is not allowed to have non word characters."
             }
           ],
           "remarks": [],
