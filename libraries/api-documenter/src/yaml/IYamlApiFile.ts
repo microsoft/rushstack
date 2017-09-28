@@ -10,6 +10,10 @@ export interface IYamlApiFile {
   references?: IYamlReference[];
 }
 
+export interface IYamlDeprecatedNotice {
+  content: string;
+}
+
 /**
  * Part of the IYamlApiFile structure.  Used to document exceptions that can be thrown
  * by a method, property, function, or constructor.
@@ -22,7 +26,8 @@ export interface IYamlException {
 /**
  * Part of the IYamlApiFile structure.  Represents the type of an IYamlItem.
  */
-export type YamlTypeId = 'class' | 'constructor' | 'enum' | 'field' | 'interface' | 'method' | 'package' | 'property';
+export type YamlTypeId = 'class' | 'constructor' | 'enum' | 'field' | 'function' | 'interface'
+  | 'method' | 'package' | 'property';
 
 /**
  * Part of the IYamlApiFile structure.  Represents basic API elements such as
@@ -32,8 +37,12 @@ export interface IYamlItem {
   type: YamlTypeId;
 
   children?: string[];
+  deprecated?: IYamlDeprecatedNotice;
   exceptions?: IYamlException[];
+  extends?: string[];
   fullName?: string;
+  implements?: string[];
+  isPreview?: boolean;
   langs?: string[];
   name?: string;
   numericValue?: number;

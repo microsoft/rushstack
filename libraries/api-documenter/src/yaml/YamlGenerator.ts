@@ -181,40 +181,23 @@ export class YamlGenerator {
     const yamlItem: Partial<IYamlItem> = { };
     yamlItem.uid = this._getUid(docItem);
 
-    let summary: string = this._renderMarkdownFromDocElement(docItem.apiItem.summary, docItem);
-    const remarks: string = this._renderMarkdownFromDocElement(docItem.apiItem.remarks, docItem);
-
-    if ((docItem.apiItem.deprecatedMessage || []).length > 0) {
-      const deprecatedMessage: string = this._renderMarkdownFromDocElement(docItem.apiItem.deprecatedMessage, docItem);
-
-      summary = '> [!NOTE]\n'
-        + '> _This API is now obsolete._\n'
-        + '> \n'
-        + `> _${deprecatedMessage.trim()}_\n\n`
-        + summary;
-    }
-
-    if (docItem.apiItem.isBeta) {
-      summary = '> [!NOTE]\n'
-        + '> _This API is provided as a preview for developers and may change based on feedback_\n'
-        + '> _that we receive. Do not use this API in a production environment._\n\n'
-        + summary;
-    }
-
-    if (remarks && this._shouldEmbed(docItem.kind)) {
-      // This is a temporary workaround, since "Remarks" are not currently being displayed for embedded items
-      if (summary) {
-        summary += '\n\n';
-      }
-      summary += '### Remarks\n\n' + remarks;
-    }
-
+    const summary: string = this._renderMarkdownFromDocElement(docItem.apiItem.summary, docItem);
     if (summary) {
       yamlItem.summary = summary;
     }
 
+    const remarks: string = this._renderMarkdownFromDocElement(docItem.apiItem.remarks, docItem);
     if (remarks) {
       yamlItem.remarks = remarks;
+    }
+
+    if ((docItem.apiItem.deprecatedMessage || []).length > 0) {
+      const deprecatedMessage: string = this._renderMarkdownFromDocElement(docItem.apiItem.deprecatedMessage, docItem);
+      yamlItem.deprecated = { content: deprecatedMessage };
+    }
+
+    if (docItem.apiItem.isBeta) {
+      yamlItem.isPreview = true;
     }
 
     yamlItem.name = docItem.name;
@@ -260,7 +243,8 @@ export class YamlGenerator {
         this._populateYamlProperty(yamlItem, docItem);
         break;
       case DocItemKind.Function:
-        // Unimplemented
+        yamlItem.type = 'function';
+        this._populateYamlMethod(yamlItem, docItem);
         break;
       default:
         throw new Error('Unimplemented item kind: ' + DocItemKind[docItem.kind as DocItemKind]);
@@ -276,17 +260,12 @@ export class YamlGenerator {
   private _populateYamlClassOrInterface(yamlItem: Partial<IYamlItem>, docItem: DocItem): void {
     const apiStructure: IApiClass | IApiInterface = docItem.apiItem as IApiClass | IApiInterface;
 
-    let text: string = '';
-
     if (apiStructure.extends) {
-      text += `**Extends:** \`${apiStructure.extends}\`\n\n`;
-    }
-    if (apiStructure.implements) {
-      text += `**Implements:** \`${apiStructure.implements}\`\n\n`;
+      yamlItem.extends = [ apiStructure.extends ];
     }
 
-    if (text) {
-      yamlItem.remarks = text + (yamlItem.remarks || '');
+    if (apiStructure.implements) {
+      yamlItem.implements = [ apiStructure.implements ];
     }
   }
 
