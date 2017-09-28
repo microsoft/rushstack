@@ -551,6 +551,8 @@ export default class InstallManager {
       if (deletingNodeModules) {
         // YES: Delete "node_modules"
 
+        // @todo, try not to remove the local registry install
+
         // Explain to the user why we are hosing their node_modules folder
         if (installType === InstallType.Normal) {
           console.log('Deleting the "node_modules" folder because the previous Rush install' +

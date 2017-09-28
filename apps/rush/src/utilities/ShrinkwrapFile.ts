@@ -90,6 +90,9 @@ export default class ShrinkwrapFile {
    * Returns true if the shrinkwrap file includes a package that would satisfiying the specified
    * package name and SemVer version range.
    */
+
+  //@todo this still has problems!
+
   public hasCompatibleDependency(dependencyName: string, versionRange: string, localPackage?: string): boolean {
     let dependencyVersion: string;
     let localPackageInformation: IShrinkwrapDependencyJson;
