@@ -564,6 +564,8 @@ export default class InstallManager {
         // Since it may be a while before PNPM gets around to creating the "node_modules" folder,
         // create an empty folder so that the above warning will be shown if we get interrupted.
         Utilities.createFolderWithRetry(commonNodeModulesFolder);
+
+
       } else {
         // NO: Do an incremental install in the "node_modules" folder
 
