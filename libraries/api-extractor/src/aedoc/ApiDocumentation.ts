@@ -312,7 +312,7 @@ export default class ApiDocumentation {
       } else if (token.type === TokenType.Text)  {
         tokenizer.getToken();
 
-        if (token.text.trim().length) {
+        if (token.text.trim().length !== 0) {
           // Shorten "This is too long text" to "This is..."
           const MAX_LENGTH: number = 40;
           let problemText: string = token.text.trim();
