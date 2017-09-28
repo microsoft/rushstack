@@ -3,6 +3,7 @@
 
 import * as path from 'path';
 import * as fs from 'fs';
+import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
 
 import { GulpProxy } from '../GulpProxy';
 import { IExecutable } from '../IExecutable';
@@ -18,7 +19,6 @@ const eos = require('end-of-stream');
 /* tslint:enable:typedef */
 
 import { args } from '../State';
-import { SchemaValidator } from '../jsonUtilities/SchemaValidator';
 
 /**
  * The base GulpTask class, should be extended by any classes which represent build tasks.
@@ -26,7 +26,7 @@ import { SchemaValidator } from '../jsonUtilities/SchemaValidator';
  * etc. It also provides convenient utility and logging functions.
  * @public
  */
-export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
+export abstract class GulpTask<TTaskConfig> implements IExecutable {
   /**
    * The name of the task. The configuration file with this name will be loaded and applied to the task.
    */
@@ -40,7 +40,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
   /**
    * The configuration for this task instance.
    */
-  public taskConfig: TASK_CONFIG;
+  public taskConfig: TTaskConfig;
 
   /**
    * An overridable array of file patterns which will be utilized by the CleanTask to
@@ -60,6 +60,14 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
    * The memoized schema for this task. Should not be utilized by child classes, use schema property instead.
    */
   private _schema: Object | undefined;
+
+  /**
+   * Initializes a new instance of the task with the specified initial task config
+   */
+  public constructor(name: string, initialTaskConfig: Partial<TTaskConfig> = {}) {
+    this.name = name;
+    this.setConfig(initialTaskConfig);
+  }
 
   /**
    * Overridable function which returns true if this task should be executed, or false if it should be skipped.
@@ -85,7 +93,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
    * Note this will override configuration options for those which are objects.
    * @param taskConfig - configuration settings which should be applied
    */
-  public setConfig(taskConfig: TASK_CONFIG): void {
+  public setConfig(taskConfig: Partial<TTaskConfig>): void {
     /* tslint:disable:typedef */
     const objectAssign = require('object-assign');
     /* tslint:enable:typedef */
@@ -98,7 +106,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
    * Do not use this function if the configuration contains complex objects that cannot be merged.
    * @param taskConfig - configuration settings which should be applied
    */
-  public mergeConfig(taskConfig: TASK_CONFIG): void {
+  public mergeConfig(taskConfig: Partial<TTaskConfig>): void {
     /* tslint:disable:typedef */
     const merge = require('lodash.merge');
     /* tslint:enable:typedef */
@@ -110,7 +118,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
    * Replaces all of the task config settings with new settings.
    * @param taskConfig - the new task configuration
    */
-  public replaceConfig(taskConfig: TASK_CONFIG): void {
+  public replaceConfig(taskConfig: TTaskConfig): void {
     this.taskConfig = taskConfig;
   }
 
@@ -122,7 +130,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
     const configFilename: string = this._getConfigFilePath();
     const schema: Object | undefined = this.schema;
 
-    const rawConfig: TASK_CONFIG | undefined = this._readConfigFile(configFilename, schema);
+    const rawConfig: TTaskConfig | undefined = this._readConfigFile(configFilename, schema);
 
     if (rawConfig) {
       this.mergeConfig(rawConfig);
@@ -139,7 +147,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
   public abstract executeTask(
     gulp: gulp.Gulp | GulpProxy,
     completeCallback?: (error?: string | Error) => void
-  ): Promise<Object> | NodeJS.ReadWriteStream | void;
+  ): Promise<Object | void> | NodeJS.ReadWriteStream | void;
 
   /**
    * Logs a message to standard output.
@@ -204,7 +212,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
    * @param buildConfig - the current build configuration
    * @param taskConfig - a task instance's configuration
    */
-  public getCleanMatch(buildConfig: IBuildConfig, taskConfig: TASK_CONFIG = this.taskConfig): string[] {
+  public getCleanMatch(buildConfig: IBuildConfig, taskConfig: TTaskConfig = this.taskConfig): string[] {
     return this.cleanMatch;
   }
 
@@ -269,11 +277,9 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
             (file: gutil.File,
               encoding: string,
               callback: (p?: Object) => void) => {
-                'use strict';
                 callback();
             },
             (callback: () => void) => {
-              'use strict';
               callback();
             }));
 
@@ -378,7 +384,7 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
    * @param schema - the z-schema schema object used to validate the configuration file
    * @returns If the configuration file is valid, returns the configuration as an object.
    */
-  private _readConfigFile(filePath: string, schema?: Object): TASK_CONFIG | undefined {
+  private _readConfigFile(filePath: string, schema?: Object): TTaskConfig | undefined {
     if (!fs.existsSync(filePath)) {
       return undefined;
     } else {
@@ -386,10 +392,12 @@ export abstract class GulpTask<TASK_CONFIG> implements IExecutable {
         console.log(`Found config file: ${path.basename(filePath)}`);
       }
 
-      const rawData: TASK_CONFIG = SchemaValidator.readCommentedJsonFile<TASK_CONFIG>(filePath);
+      const rawData: TTaskConfig = JsonFile.load(filePath);
 
       if (schema) {
-        SchemaValidator.validate(rawData, schema, filePath);
+        // TODO: Convert GulpTask.schema to be a JsonSchema instead of a bare object
+        const jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schema);
+        jsonSchema.validateObject(rawData, filePath);
       }
 
       return rawData;

@@ -13,10 +13,6 @@ let capturedErrors: {
   lineNumber: number;
 }[] = [];
 
-function testErrorHandler(message: string, fileName: string, lineNumber: number): void {
-  capturedErrors.push({ message, fileName, lineNumber });
-}
-
 function clearCapturedErrors(): void {
   capturedErrors = [];
 }

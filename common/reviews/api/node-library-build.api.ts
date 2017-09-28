@@ -3,14 +3,11 @@ export declare function addSuppression(suppression: string | RegExp): void;
 
 // @public
 class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig> {
+  constructor();
   // (undocumented)
   executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream | void;
   // (undocumented)
   loadSchema(): Object;
-  // (undocumented)
-  name: string;
-  // (undocumented)
-  taskConfig: IApiExtractorTaskConfig;
 }
 
 // @public
@@ -26,6 +23,15 @@ class CleanFlagTask extends CleanTask {
 class CleanTask extends GulpTask<void> {
   constructor();
   executeTask(gulp: typeof Gulp, completeCallback: (error?: string | Error) => void): void;
+}
+
+// @public
+class CopyStaticAssetsTask extends GulpTask<ICopyStaticAssetsTaskConfig> {
+  constructor();
+  // (undocumented)
+  executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream;
+  // (undocumented)
+  loadSchema(): Object;
 }
 
 // @public
@@ -69,33 +75,34 @@ export declare function getErrors(): string[];
 export declare function getWarnings(): string[];
 
 // @public
-class GulpTask<TASK_CONFIG> implements IExecutable {
+class GulpTask<TTaskConfig> implements IExecutable {
+  constructor(name: string, initialTaskConfig?: Partial<TTaskConfig>);
   protected _getConfigFilePath(): string;
   buildConfig: IBuildConfig;
   cleanMatch: string[];
   copyFile(localSourcePath: string, localDestPath?: string): void;
   enabled: boolean;
   execute(config: IBuildConfig): Promise<void>;
-  abstract executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (error?: string | Error) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
+  abstract executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (error?: string | Error) => void): Promise<Object | void> | NodeJS.ReadWriteStream | void;
   fileError(filePath: string, line: number, column: number, errorCode: string, message: string): void;
   fileExists(localPath: string): boolean;
   fileWarning(filePath: string, line: number, column: number, warningCode: string, message: string): void;
-  getCleanMatch(buildConfig: IBuildConfig, taskConfig?: TASK_CONFIG): string[];
+  getCleanMatch(buildConfig: IBuildConfig, taskConfig?: TTaskConfig): string[];
   isEnabled(buildConfig: IBuildConfig): boolean;
   protected loadSchema(): Object | undefined;
   log(message: string): void;
   logError(message: string): void;
   logVerbose(message: string): void;
   logWarning(message: string): void;
-  mergeConfig(taskConfig: TASK_CONFIG): void;
+  mergeConfig(taskConfig: Partial<TTaskConfig>): void;
   name: string;
   onRegister(): void;
   readJSONSync(localPath: string): Object | undefined;
-  replaceConfig(taskConfig: TASK_CONFIG): void;
+  replaceConfig(taskConfig: TTaskConfig): void;
   resolvePath(localPath: string): string;
   schema: Object | undefined;
-  setConfig(taskConfig: TASK_CONFIG): void;
-  taskConfig: TASK_CONFIG;
+  setConfig(taskConfig: Partial<TTaskConfig>): void;
+  taskConfig: TTaskConfig;
 }
 
 // @public (undocumented)
@@ -134,6 +141,18 @@ interface ICopyConfig {
     [ destPath: string ]: string[];
   }
   shouldFlatten?: boolean;
+}
+
+// @public
+interface ICopyStaticAssetsTaskConfig {
+  // (undocumented)
+  excludeExtensions?: string[];
+  // (undocumented)
+  excludeFiles?: string[];
+  // (undocumented)
+  includeExtensions?: string[];
+  // (undocumented)
+  includeFiles?: string[];
 }
 
 // @public
@@ -179,14 +198,6 @@ export declare function replaceConfig(config: IBuildConfig): void;
 export declare function reset(): void;
 
 // @public
-class SchemaValidator {
-  static readAndValidateJson < TResult >(dataFilePath: string, schemaFilePath: string): TResult;
-  // (undocumented)
-  static readCommentedJsonFile < TResult >(filename: string): TResult;
-  static validate(data: Object, schema: Object, dataFilePath?: string): void;
-}
-
-// @public
 export declare function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutable;
 
 // @public
@@ -215,11 +226,13 @@ class TypeScriptConfiguration {
   static getGulpTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<ts.Settings>;
   static getTsConfigFile(config: IBuildConfig): ITsConfigFile<ts.Settings>;
   static getTypescriptCompiler(): any;
+  static setBaseConfig(config: ITsConfigFile<ts.Settings>): void;
   static setTypescriptCompiler(typescriptOverride: any): void;
 }
 
 // @public (undocumented)
 class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
+  constructor();
   // (undocumented)
   executeTask(gulp: gulpType.Gulp, completeCallback: (error?: string) => void): void;
   // (undocumented)
@@ -227,10 +240,6 @@ class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   // (undocumented)
   loadSchema(): Object;
   mergeConfig(config: ITypeScriptTaskConfig): void;
-  // (undocumented)
-  name: string;
-  // (undocumented)
-  taskConfig: ITypeScriptTaskConfig;
 }
 
 // @public
@@ -248,11 +257,14 @@ export declare function warn(...args: Array<string | Chalk.ChalkChain>): void;
 // @public
 export declare function watch(watchMatch: string | string[], taskExecutable: IExecutable): IExecutable;
 
+// WARNING: Unsupported export: preCopy
+// WARNING: Unsupported export: postCopy
 // WARNING: Unsupported export: buildTasks
 // WARNING: Unsupported export: testTasks
 // WARNING: Unsupported export: defaultTasks
 // WARNING: Unsupported export: cleanFlag
 // WARNING: Unsupported export: clean
+// WARNING: Unsupported export: copyStaticAssets
 // WARNING: Unsupported export: apiExtractor
 // WARNING: Unsupported export: typescript
 // WARNING: Unsupported export: tslint

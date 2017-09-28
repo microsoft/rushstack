@@ -45,7 +45,6 @@ export function parseGitLsTree(output: string): Map<string, string> {
  */
 export function parseGitStatus(output: string, packagePath: string): Map<string, GitStatusChangeType> {
   const changes: Map<string, GitStatusChangeType> = new Map<string, GitStatusChangeType>();
-  const filesToHash: string[] = [];
 
   /*
   * Typically, output will look something like:
@@ -101,7 +100,10 @@ export function gitHashFiles(filesToHash: string[], packagePath: string): Map<st
 export function gitLsTree(path: string): string {
   return child_process.execSync(
     `git ls-tree HEAD -r`,
-    { cwd: path }).toString();
+    {
+      cwd: path,
+      stdio: 'pipe'
+    }).toString();
 }
 
 /**
@@ -110,7 +112,10 @@ export function gitLsTree(path: string): string {
 export function gitStatus(path: string): string {
   return child_process.execSync(
     `git status -s -u .`,
-    { cwd: path }).toString();
+    {
+      cwd: path,
+      stdio: 'pipe'
+    }).toString();
 }
 
 /**

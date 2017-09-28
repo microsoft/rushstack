@@ -4,6 +4,18 @@
 /**
  * Core libraries that every NodeJS toolchain project should use.
  */
-declare const packageDescription: void;
+declare const packageDescription: void; // tslint:disable-line:no-unused-variable
 
-export { JsonFile } from './JsonFile';
+export { FileDiffTest } from './FileDiffTest';
+export {
+  JsonFile,
+  IJsonFileSaveOptions,
+  IJsonFileStringifyOptions
+} from './JsonFile';
+export {
+  JsonSchema,
+  IJsonSchemaErrorInfo,
+  IJsonSchemaValidateOptions,
+  IJsonSchemaFromFileOptions
+} from './JsonSchema';
+export { PackageJsonLookup } from './PackageJsonLookup';

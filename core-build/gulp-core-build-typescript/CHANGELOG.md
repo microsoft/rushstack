@@ -1,6 +1,119 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Thu, 27 Jul 2017 01:04:48 GMT and should not be manually modified.
+This log was last generated on Thu, 28 Sep 2017 01:04:28 GMT and should not be manually modified.
+
+## 4.2.1
+Thu, 28 Sep 2017 01:04:28 GMT
+
+*Changes not tracked*
+
+## 4.2.0
+Fri, 22 Sep 2017 01:04:02 GMT
+
+### Minor changes
+
+- Upgrade to es6
+
+## 4.1.0
+Wed, 20 Sep 2017 22:10:17 GMT
+
+### Minor changes
+
+- Support ESNext module output format and allow a base TypeScript configuration to be set by a build rig.
+
+## 4.0.7
+Mon, 11 Sep 2017 13:04:55 GMT
+
+*Changes not tracked*
+
+## 4.0.6
+Fri, 08 Sep 2017 01:28:04 GMT
+
+### Patches
+
+- Deprecate @types/es6-coll ections in favor of built-in typescript typings 'es2015.collection' a nd 'es2015.iterable'
+
+## 4.0.5
+Thu, 07 Sep 2017 13:04:35 GMT
+
+*Changes not tracked*
+
+## 4.0.4
+Thu, 07 Sep 2017 00:11:11 GMT
+
+### Patches
+
+-  Add $schema field to all schemas
+
+## 4.0.3
+Wed, 06 Sep 2017 13:03:42 GMT
+
+*Changes not tracked*
+
+## 4.0.2
+Tue, 05 Sep 2017 19:03:56 GMT
+
+*Changes not tracked*
+
+## 4.0.1
+Sat, 02 Sep 2017 01:04:26 GMT
+
+*Changes not tracked*
+
+## 4.0.0
+Thu, 31 Aug 2017 18:41:18 GMT
+
+### Breaking changes
+
+- Fix compatibility issues with old releases, by incrementing the major version number
+
+## 3.5.3
+Thu, 31 Aug 2017 17:46:25 GMT
+
+*Changes not tracked*
+
+## 3.5.2
+Wed, 30 Aug 2017 01:04:34 GMT
+
+*Changes not tracked*
+
+## 3.5.1
+Thu, 24 Aug 2017 22:44:12 GMT
+
+*Changes not tracked*
+
+## 3.5.0
+Thu, 24 Aug 2017 01:04:33 GMT
+
+### Minor changes
+
+- Upgrade to tslint 5.6.0
+
+## 3.4.2
+Tue, 22 Aug 2017 13:04:22 GMT
+
+*Changes not tracked*
+
+## 3.4.1
+Wed, 16 Aug 2017 23:16:55 GMT
+
+### Patches
+
+- Publish
+
+## 3.4.0
+Wed, 16 Aug 2017 13:04:08 GMT
+
+### Minor changes
+
+- Include the no-unused-variable TSLint rule to bring back the "no-unused-import" functionality. Remove no-unused-parameters default TSConfig option to be consistent with the TSLint no-unused-variable behavior.
+
+## 3.3.2
+Tue, 15 Aug 2017 01:29:31 GMT
+
+### Patches
+
+- Force a patch bump to ensure everything is published
 
 ## 3.3.1
 Thu, 27 Jul 2017 01:04:48 GMT

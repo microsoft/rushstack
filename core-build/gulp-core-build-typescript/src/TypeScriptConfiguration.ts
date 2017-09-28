@@ -3,9 +3,9 @@
 
 import * as path from 'path';
 import assign = require('object-assign');
-import { SchemaValidator, IBuildConfig } from '@microsoft/gulp-core-build';
+import { JsonFile } from '@microsoft/node-core-library';
+import { IBuildConfig } from '@microsoft/gulp-core-build';
 import ts = require('gulp-typescript');
-import * as typescript from 'typescript';
 
 /**
  * @public
@@ -14,7 +14,6 @@ export interface ITsConfigFile<T> {
   compilerOptions: T;
 }
 
-/* tslint:disable:no-any */
 /**
  * A helper class which provides access to the TSConfig.json file for a particular project.
  * It also is a central place for managing the version of typescript which this project
@@ -23,7 +22,8 @@ export interface ITsConfigFile<T> {
  */
 export class TypeScriptConfiguration {
   private static _baseTsConfig: ITsConfigFile<ts.Settings>;
-  private static _typescript: any = undefined;
+  private static _projectTsConfig: ITsConfigFile<ts.Settings>;
+  private static _typescript: any = undefined; // tslint:disable-line:no-any
 
   /**
    * Gets `gulp-typescript` version of the config (used by TypeScriptTask)
@@ -41,7 +41,7 @@ export class TypeScriptConfiguration {
   /**
    * Override the version of the typescript compiler
    */
-  public static setTypescriptCompiler(typescriptOverride: any): void {
+  public static setTypescriptCompiler(typescriptOverride: any): void { // tslint:disable-line:no-any
     if (this._typescript) {
       throw new Error('The version of the typescript compiler should only be set once.');
     }
@@ -56,10 +56,11 @@ export class TypeScriptConfiguration {
   /**
    * Get the version of the typescript compiler which is to be used
    */
-  public static getTypescriptCompiler(): any {
+  public static getTypescriptCompiler(): any { // tslint:disable-line:no-any
     if (!this._typescript) {
       this._typescript = require('typescript');
     }
+
     return this._typescript;
   }
 
@@ -67,37 +68,45 @@ export class TypeScriptConfiguration {
    * Helper function which reads the tsconfig.json (or provides one), and memoizes it
    */
   public static getTsConfigFile(config: IBuildConfig): ITsConfigFile<ts.Settings> {
-    if (!this._baseTsConfig) {
+    if (!this._projectTsConfig) {
       try {
-        this._baseTsConfig = SchemaValidator.readCommentedJsonFile<any>(
-          this._getConfigPath(config)
-        );
+        this._projectTsConfig = JsonFile.load(this._getConfigPath(config));
       } catch (e) {
-        /* no-op */
-      }
-
-      if (!this._baseTsConfig) {
-        this._baseTsConfig = {
-          compilerOptions: {
-            declaration: true,
-            experimentalDecorators: true,
-            jsx: 'react',
-            moduleResolution: 'node',
-            sourceMap: true,
-            target: 'es5',
-            noUnusedParameters: true,
-            noUnusedLocals: true
-          }
-        };
+        /* Failed to load project TS Config - use the base config */
       }
     }
-    return this._baseTsConfig;
+
+    const baseConfig: ITsConfigFile<ts.Settings> =
+      this._baseTsConfig ||
+      {
+        compilerOptions: {
+          declaration: true,
+          experimentalDecorators: true,
+          forceConsistentCasingInFileNames: true,
+          jsx: 'react',
+          module: 'commonjs',
+          moduleResolution: 'node',
+          noUnusedLocals: true,
+          sourceMap: true,
+          strictNullChecks: true,
+          target: 'es5'
+        }
+      };
+
+    return assign({}, baseConfig, this._projectTsConfig || {});
+  }
+
+  /**
+   * Set the base config for the project. Useful when a rig wants to set common config settings.
+   */
+  public static setBaseConfig(config: ITsConfigFile<ts.Settings>): void {
+    this._baseTsConfig = config;
   }
 
   /**
    * Extracts the path to the tsconfig.json based on the buildConfiguration
    */
   private static _getConfigPath(buildConfig: IBuildConfig): string {
-    return path.resolve(path.join(buildConfig.rootPath, 'tsconfig.json'));
+    return path.join(buildConfig.rootPath, 'tsconfig.json');
   }
 }

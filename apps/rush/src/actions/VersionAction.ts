@@ -1,19 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
-import * as path from 'path';
-import * as semver from 'semver';
-
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
 import {
+  BumpType,
   IPackageJson,
-  IChangeInfo,
-  ChangeType,
-  RushConfigurationProject
+  Utilities,
+  VersionControl
 } from '@microsoft/rush-lib';
 
 import RushCommandLineParser from './RushCommandLineParser';
@@ -21,7 +17,6 @@ import GitPolicy from '../utilities/GitPolicy';
 import { BaseRushAction } from './BaseRushAction';
 import { VersionManager } from '../utilities/VersionManager';
 import { Git } from '../utilities/Git';
-import ChangelogGenerator from '../utilities/ChangelogGenerator';
 
 export default class VersionAction extends BaseRushAction {
   private _parser: RushCommandLineParser;
@@ -30,13 +25,16 @@ export default class VersionAction extends BaseRushAction {
   private _versionPolicy: CommandLineStringParameter;
   private _bypassPolicy: CommandLineFlagParameter;
   private _targetBranch: CommandLineStringParameter;
+  private _overwriteBump: CommandLineStringParameter;
+  private _prereleaseIdentifier: CommandLineStringParameter;
+
   private _versionManager: VersionManager;
 
   constructor(parser: RushCommandLineParser) {
     super({
       actionVerb: 'version',
       summary: '(EXPERIMENTAL) Manage package versions in the repo.',
-      documentation: 'use this "rush version" command to ensure version policies and bump versions.'
+      documentation: '(EXPERIMENTAL) use this "rush version" command to ensure version policies and bump versions.'
     });
     this._parser = parser;
   }
@@ -67,6 +65,18 @@ export default class VersionAction extends BaseRushAction {
       parameterShortName: '-p',
       description: 'The name of the version policy'
     });
+    this._overwriteBump = this.defineStringParameter({
+      parameterLongName: '--override-bump',
+      description: 'Overrides the bump type in the version-policy.json for the specified version policy.' +
+        'Valid values include: prerelease, patch, preminor, minor, major. ' +
+        'This setting only works for lock-step version policy in bump action.'
+    });
+    this._prereleaseIdentifier = this.defineStringParameter({
+      parameterLongName: '--override-prerelease-id',
+      description: 'Overrides the prerelease identifier in the version value of version-policy.json ' +
+        'for the specified version policy. ' +
+        'This setting only works for lock-step version policy in bump action.'
+    });
   }
 
   protected run(): void {
@@ -76,83 +86,73 @@ export default class VersionAction extends BaseRushAction {
         return;
       }
     }
+    this._validate();
 
-    this._versionManager = new VersionManager(this.rushConfiguration);
+    this._versionManager = new VersionManager(this.rushConfiguration, this._getUserEmail());
     if (this._ensureVersionPolicy.value) {
       const tempBranch: string = 'version/ensure-' + new Date().getTime();
-      const git: Git = new Git(this._targetBranch.value);
+      this._versionManager.ensure(this._versionPolicy.value, true);
 
-      const updatedPackages: Map<string, IPackageJson> = this._versionManager.ensure(this._versionPolicy.value);
-      if (updatedPackages) {
+      const updatedPackages: Map<string, IPackageJson> = this._versionManager.updatedProjects;
+      if (updatedPackages.size > 0) {
         console.log(`${updatedPackages.size} packages are getting updated.`);
-        this._updateFiles(updatedPackages);
-        // Make changes in temp branch.
-        git.checkout(tempBranch, true);
-
-        // Stage, commit, and push the changes to remote temp branch.
-        git.addChanges();
-        git.commit();
-        git.push(tempBranch);
-
-        // Now merge to target branch.
-        git.checkout(this._targetBranch.value);
-        git.pull();
-        git.merge(tempBranch);
-        git.push(this._targetBranch.value);
-        git.deleteBranch(tempBranch);
+        this._gitProcess(tempBranch);
       }
+    } else if (this._bumpVersion.value) {
+      const tempBranch: string = 'version/bump-' + new Date().getTime();
+      this._versionManager.bump(this._versionPolicy.value,
+        BumpType[this._overwriteBump.value],
+        this._prereleaseIdentifier.value,
+        true);
+      this._gitProcess(tempBranch);
     }
   }
 
-  private _updateFiles(updatedPackages: Map<string, IPackageJson>): void {
-    updatedPackages.forEach((newPackageJson, packageName) => {
-      const rushProject: RushConfigurationProject = this.rushConfiguration.getProjectByName(packageName);
-      // Update package.json
-      const packagePath: string = path.join(rushProject.projectFolder, 'package.json');
-      fsx.writeFileSync(packagePath, JSON.stringify(newPackageJson, undefined, 2), { encoding: 'utf8' });
+  private _validate(): void {
+    if (this._bumpVersion.value && this._ensureVersionPolicy.value) {
+      throw new Error('Please choose --bump or --ensure-version-policy but not together.');
+    }
 
-      if (newPackageJson.version !== rushProject.packageJson.version) {
-        // If package version changes, add an entry to changelog
-        const change: IChangeInfo = this._createChangeInfo(newPackageJson, rushProject);
-        ChangelogGenerator.updateIndividualChangelog(change,
-          rushProject.projectFolder,
-          true);
-      }
-      // TODO: if only package dependency changes, add change file.
+    if (this._overwriteBump.value && !BumpType[this._overwriteBump.value]) {
+      throw new Error('The value of override-bump is not valid.  ' +
+      'Valid values include prerelease, patch, preminor, minor, and major');
+    }
+  }
+
+  private _getUserEmail(): string {
+    return Utilities.executeCommandAndCaptureOutput('git',
+        ['config', 'user.email'], '.').trim();
+  }
+
+  private _gitProcess(tempBranch: string): void {
+    const git: Git = new Git(this._targetBranch.value);
+
+    // Make changes in temp branch.
+    git.checkout(tempBranch, true);
+
+    // Stage, commit, and push the changes to remote temp branch.
+    // Need to commit the change log updates in its own commit
+    const changeLogUpdated: boolean = VersionControl.getUncommittedChanges().some((changePath) => {
+      return changePath.indexOf('CHANGELOG.json') > 0;
     });
-  }
 
-  private _createChangeInfo(newPackageJson: IPackageJson,
-    rushProject: RushConfigurationProject
-  ): IChangeInfo {
-    const changeType: ChangeType = this._getChangeType(rushProject.packageJson.version,
-      newPackageJson.version);
-    // TODO: need to absorb all existing change files
-    return {
-      changeType: changeType,
-      newVersion: newPackageJson.version,
-      packageName: newPackageJson.name,
-      changes: [
-        {
-          changeType: changeType,
-          comment: `Version bump to ${newPackageJson.version}`,
-          newVersion: newPackageJson.version,
-          packageName: newPackageJson.name
-        }
-      ]
-    };
-  }
-
-  private _getChangeType(oldVersionString: string, newVersionString: string): ChangeType {
-    const diff: string = semver.diff(oldVersionString, newVersionString);
-    let changeType: ChangeType = ChangeType.none;
-    if (diff === 'major') {
-      changeType = ChangeType.major;
-    } else if (diff === 'minor') {
-      changeType = ChangeType.minor;
-    } else if (diff === 'patch') {
-      changeType = ChangeType.patch;
+    if (changeLogUpdated) {
+      git.addChanges('.', this.rushConfiguration.changesFolder);
+      git.addChanges('**/CHANGELOG.json');
+      git.addChanges('**/CHANGELOG.md');
+      git.commit('Deleting change files and updating change logs for package updates.');
     }
-    return changeType;
+
+    // Commit the package.json and change files updates.
+    git.addChanges();
+    git.commit();
+    git.push(tempBranch);
+
+    // Now merge to target branch.
+    git.checkout(this._targetBranch.value);
+    git.pull();
+    git.merge(tempBranch);
+    git.push(this._targetBranch.value);
+    git.deleteBranch(tempBranch);
   }
 }

@@ -1,12 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITextElement, IDocElement, IHrefLinkElement, ICodeLinkElement, ISeeDocElement } from './IDocElement';
-import ApiDefinitionReference from './ApiDefinitionReference';
-import ApiDocumentation from './definitions/ApiDocumentation';
-import { ApiItemKind } from './definitions/ApiItem';
-import Token, { TokenType } from './Token';
-import Tokenizer from './Tokenizer';
+import {
+  ITextElement,
+  IDocElement,
+  IHrefLinkElement,
+  ICodeLinkElement,
+  ISeeDocElement,
+  IParagraphElement
+} from './markup/OldMarkup';
+import ApiDefinitionReference, { IScopedPackageName } from './ApiDefinitionReference';
+import ApiDocumentation from './aedoc/ApiDocumentation';
+import { AstItemKind } from './ast/AstItem';
+import Token, { TokenType } from './aedoc/Token';
+import Tokenizer from './aedoc/Tokenizer';
 import ResolvedApiItem from './ResolvedApiItem';
 
 export default class DocElementParser {
@@ -41,6 +48,9 @@ export default class DocElementParser {
         case 'textDocElement':
           text += `${(docElement as ITextElement).value} `;
           break;
+        case 'paragraphDocElement':
+          text += '\n\n';
+          break;
         case 'linkDocElement':
           // links don't count towards the summary
           break;
@@ -60,7 +70,10 @@ export default class DocElementParser {
     if (!text) {
       return;
     }
-    return {kind: 'textDocElement', value: text} as ITextElement;
+    return {
+      kind: 'textDocElement',
+      value: text.replace(/\s+/g, ' ')
+    } as ITextElement;
   }
 
   public static parse(documentation: ApiDocumentation, tokenizer: Tokenizer): IDocElement[] {
@@ -115,8 +128,26 @@ export default class DocElementParser {
             break;
         }
       } else if (token.type === TokenType.Text) {
-        docElements.push({kind: 'textDocElement', value: token.text} as ITextElement);
-          tokenizer.getToken();
+        tokenizer.getToken();
+
+        let firstLoop: boolean = true;
+
+        for (const paragraph of token.text.split(/\n\s*\n/g)) {
+          if (!firstLoop) {
+            docElements.push({
+              kind: 'paragraphDocElement'
+            } as IParagraphElement);
+          }
+          firstLoop = false;
+
+          const normalizedParagraph: string = paragraph.replace(/\s+/g, ' ').trim();
+          if (normalizedParagraph) {
+            docElements.push({
+              kind: 'textDocElement',
+              value: ' ' + normalizedParagraph + ' '
+            } as ITextElement);
+          }
+        }
       } else {
         documentation.reportError(`Unidentifiable Token ${token.type} ${token.tag} "${token.text}"`);
       }
@@ -196,6 +227,20 @@ export default class DocElementParser {
         memberName: apiDefitionRef.memberName
         // ("value" will be assigned below)
       };
+
+      if (!linkDocElement.packageName) {
+        if (!documentation.extractor.packageName) {
+          throw new Error('Unable to resolve API reference without a package name');
+        }
+
+        // If the package name is unspecified, assume it is the current package
+        const scopePackageName: IScopedPackageName = ApiDefinitionReference.parseScopedPackageName(
+          documentation.extractor.packageName);
+
+        linkDocElement.scopeName = scopePackageName.scope;
+        linkDocElement.packageName = scopePackageName.package;
+      }
+
     }
 
     // If a display name is given, ensure it only contains characters for words.
@@ -247,55 +292,85 @@ export default class DocElementParser {
     }
 
     // Atempt to locate the apiDefinitionRef
-    const resolvedApiItem: ResolvedApiItem = documentation.referenceResolver.resolve(
+    const resolvedAstItem: ResolvedApiItem = documentation.referenceResolver.resolve(
       apiDefinitionRef,
       documentation.extractor.package,
       warnings
     );
 
-    // If no resolvedApiItem found then nothing to inherit
+    // If no resolvedAstItem found then nothing to inherit
     // But for the time being set the summary to a text object
-    if (!resolvedApiItem) {
-      const textDocItem: IDocElement = {
-        kind: 'textDocElement',
-        value: `See documentation for ${tokenChunks[0]}`
-      } as ITextElement;
-      documentation.summary = [textDocItem];
+    if (!resolvedAstItem) {
+      documentation.summary = [
+        this.makeTextElement(`See documentation for ${tokenChunks[0]}`)
+      ];
       return;
     }
 
-    // We are going to copy the resolvedApiItem's documentation
+    // We are going to copy the resolvedAstItem's documentation
     // We must make sure it's documentation can be completed,
     // if we cannot, an error will be reported viathe documentation error handler.
-    // This will only be the case our resolvedApiItem was created from a local
-    // ApiItem. Resolutions from JSON will have an undefined 'apiItem' property.
+    // This will only be the case our resolvedAstItem was created from a local
+    // AstItem. Resolutions from JSON will have an undefined 'astItem' property.
     // Example: a circular reference will report an error.
-    if (resolvedApiItem.apiItem) {
-      resolvedApiItem.apiItem.completeInitialization();
+    if (resolvedAstItem.astItem) {
+      resolvedAstItem.astItem.completeInitialization();
     }
 
-    // inheritdoc found, copy over IDocBase properties
-    documentation.summary =  resolvedApiItem.summary;
-    documentation.remarks = resolvedApiItem.remarks;
+    // inheritdoc found, copy over IApiBaseDefinition properties
+    documentation.summary =  resolvedAstItem.summary;
+    documentation.remarks = resolvedAstItem.remarks;
 
     // Copy over detailed properties if neccessary
     // Add additional cases if needed
-    switch (resolvedApiItem.kind) {
-      case ApiItemKind.Function:
-        documentation.parameters = resolvedApiItem.params;
-        documentation.returnsMessage = resolvedApiItem.returnsMessage;
+    switch (resolvedAstItem.kind) {
+      case AstItemKind.Function:
+        documentation.parameters = resolvedAstItem.params;
+        documentation.returnsMessage = resolvedAstItem.returnsMessage;
         break;
-      case ApiItemKind.Method:
-        documentation.parameters = resolvedApiItem.params;
-        documentation.returnsMessage = resolvedApiItem.returnsMessage;
+      case AstItemKind.Method:
+        documentation.parameters = resolvedAstItem.params;
+        documentation.returnsMessage = resolvedAstItem.returnsMessage;
         break;
     }
 
     // Check if inheritdoc is depreacted
     // We need to check if this documentation has a deprecated message
     // but it may not appear until after this token.
-    if (resolvedApiItem.deprecatedMessage.length > 0) {
+    if (resolvedAstItem.deprecatedMessage.length > 0) {
       documentation.isDocInheritedDeprecated = true;
     }
+  }
+
+  /**
+   * For a span that will not be displayed adjacent to another span, this cleans it up:
+   * 1. Remove leading/trailing white space
+   * 2. Remove leading/trailing paragraph separators
+   */
+  public static getTrimmedSpan(docElements: IDocElement[]): IDocElement[] {
+    const span: IDocElement[] = [];
+    span.push(...docElements);
+
+    // Pop leading/trailing paragraph separators
+    while (span.length && span[0].kind === 'paragraphDocElement') {
+      span.shift();
+    }
+    while (span.length && span[span.length - 1].kind === 'paragraphDocElement') {
+      span.pop();
+    }
+
+    // Trim leading/trailing white space
+    if (span.length) {
+      const first: ITextElement = span[0] as ITextElement;
+      if (first.kind === 'textDocElement') {
+        first.value = first.value.replace(/^\s+/, ''); // trim left
+      }
+
+      const last: ITextElement = span[span.length - 1] as ITextElement;
+      if (last.kind === 'textDocElement') {
+        last.value = last.value.replace(/\s+$/, ''); // trim right
+      }
+    }
+    return span;
   }
 }

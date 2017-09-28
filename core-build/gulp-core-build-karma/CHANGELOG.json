@@ -2,6 +2,301 @@
   "name": "@microsoft/gulp-core-build-karma",
   "entries": [
     {
+      "version": "4.1.1",
+      "tag": "@microsoft/gulp-core-build-karma_v4.1.1",
+      "date": "Thu, 28 Sep 2017 01:04:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.1.0` to `3.1.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.1.0",
+      "tag": "@microsoft/gulp-core-build-karma_v4.1.0",
+      "date": "Fri, 22 Sep 2017 01:04:02 GMT",
+      "comments": {
+        "minor": [
+          {
+            "author": "Nick Pape <nickpape@users.noreply.github.com>",
+            "commit": "481a10f460a454fb5a3e336e3cf25a1c3f710645",
+            "comment": "Upgrade to es6"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.8` to `3.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.9",
+      "tag": "@microsoft/gulp-core-build-karma_v4.0.9",
+      "date": "Thu, 21 Sep 2017 20:34:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Ian Clanton-Thuon <iclanton@users.noreply.github.com>",
+            "commit": "3e9fdf5918d62327ef1b88ac75c8fa001306f2cb",
+            "comment": "Upgrade webpack to 3.6.0."
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.8",
+      "tag": "@microsoft/gulp-core-build-karma_v4.0.8",
+      "date": "Wed, 20 Sep 2017 22:10:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.7` to `3.0.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.7",
+      "tag": "@microsoft/gulp-core-build-karma_v4.0.7",
+      "date": "Mon, 11 Sep 2017 13:04:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.6` to `3.0.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.6",
+      "tag": "@microsoft/gulp-core-build-karma_v4.0.6",
+      "date": "Fri, 08 Sep 2017 01:28:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.5` to `3.0.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.5",
+      "tag": "@microsoft/gulp-core-build-karma_v4.0.5",
+      "date": "Thu, 07 Sep 2017 13:04:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.4` to `3.0.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.4",
+      "tag": "@microsoft/gulp-core-build-karma_v4.0.4",
+      "date": "Thu, 07 Sep 2017 00:11:11 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nick Pape <nickpape@users.noreply.github.com>",
+            "commit": "4b7451b442c2078a96430f7a05caed37101aed52",
+            "comment": " Add $schema field to all schemas"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.3` to `3.0.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.3",
+      "tag": "@microsoft/gulp-core-build-karma_v4.0.3",
+      "date": "Wed, 06 Sep 2017 13:03:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.2` to `3.0.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.2",
+      "tag": "@microsoft/gulp-core-build-karma_v4.0.2",
+      "date": "Tue, 05 Sep 2017 19:03:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.1` to `3.0.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.1",
+      "tag": "@microsoft/gulp-core-build-karma_v4.0.1",
+      "date": "Sat, 02 Sep 2017 01:04:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.0` to `3.0.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.0",
+      "tag": "@microsoft/gulp-core-build-karma_v4.0.0",
+      "date": "Thu, 31 Aug 2017 18:41:18 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Fix compatibility issues with old releases, by incrementing the major version number"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.10.1` to `3.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.0.1",
+      "tag": "@microsoft/gulp-core-build-karma_v3.0.1",
+      "date": "Thu, 31 Aug 2017 17:46:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.10.0` to `2.10.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.0.0",
+      "tag": "@microsoft/gulp-core-build-karma_v3.0.0",
+      "date": "Wed, 30 Aug 2017 22:08:21 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Upgrade to webpack 3.X."
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.3.12",
+      "tag": "@microsoft/gulp-core-build-karma_v2.3.12",
+      "date": "Wed, 30 Aug 2017 01:04:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.9.6` to `2.10.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.3.11",
+      "tag": "@microsoft/gulp-core-build-karma_v2.3.11",
+      "date": "Thu, 24 Aug 2017 22:44:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.9.5` to `2.9.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.3.10",
+      "tag": "@microsoft/gulp-core-build-karma_v2.3.10",
+      "date": "Thu, 24 Aug 2017 01:04:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.9.4` to `2.9.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.3.9",
+      "tag": "@microsoft/gulp-core-build-karma_v2.3.9",
+      "date": "Tue, 22 Aug 2017 13:04:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.9.3` to `2.9.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.3.8",
+      "tag": "@microsoft/gulp-core-build-karma_v2.3.8",
+      "date": "Tue, 15 Aug 2017 19:04:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.9.2` to `2.9.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.3.7",
+      "tag": "@microsoft/gulp-core-build-karma_v2.3.7",
+      "date": "Tue, 15 Aug 2017 01:29:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Force a patch bump to ensure everything is published"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.9.1` to `2.9.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.3.6",
+      "tag": "@microsoft/gulp-core-build-karma_v2.3.6",
+      "date": "Sat, 12 Aug 2017 01:03:30 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Failed tests now fail the build, even in non production mode."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.9.0` to `2.9.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.3.5",
+      "tag": "@microsoft/gulp-core-build-karma_v2.3.5",
+      "date": "Fri, 11 Aug 2017 21:44:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.8.0` to `2.9.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.3.4",
       "tag": "@microsoft/gulp-core-build-karma_v2.3.4",
       "date": "Sat, 05 Aug 2017 01:04:41 GMT",

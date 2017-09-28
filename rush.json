@@ -1,6 +1,6 @@
 {
   "npmVersion": "4.5.0",
-  "rushMinimumVersion": "3.0.10",
+  "rushMinimumVersion": "3.0.17",
   "nodeSupportedVersionRange": ">=6.9.0 <7.0.0",
   "projectFolderMinDepth": 1,
 
@@ -138,6 +138,12 @@
       ]
     },
     {
+      "packageName": "@microsoft/api-documenter",
+      "projectFolder": "libraries/api-documenter",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
+    {
       "packageName": "@microsoft/decorators",
       "projectFolder": "libraries/decorators",
       "reviewCategory": "libraries",
@@ -153,7 +159,10 @@
       "packageName": "@microsoft/node-core-library",
       "projectFolder": "libraries/node-core-library",
       "reviewCategory": "libraries",
-      "shouldPublish": false
+      "shouldPublish": true,
+      "cyclicDependencyProjects": [
+        "@microsoft/node-library-build"
+      ]
     },
     {
       "packageName": "@microsoft/package-deps-hash",
@@ -190,6 +199,12 @@
     {
       "packageName": "@microsoft/loader-raw-script",
       "projectFolder": "webpack/loader-raw-script",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@microsoft/resolve-chunk-plugin",
+      "projectFolder": "webpack/resolve-chunk-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },

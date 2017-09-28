@@ -10,11 +10,14 @@ export interface IInstrumentTaskConfig {
 }
 
 export class InstrumentTask extends GulpTask<IInstrumentTaskConfig> {
-  public name: string = 'instrument';
-
-  public taskConfig: IInstrumentTaskConfig = {
-    coverageMatch: ['lib/**/*.js', '!lib/**/*.test.js']
-  };
+  constructor() {
+    super(
+      'instrument',
+      {
+        coverageMatch: ['lib/**/*.js', '!lib/**/*.test.js']
+      }
+    );
+  }
 
   public executeTask(gulp: typeof Gulp, completeCallback?: (error?: string) => void): NodeJS.ReadWriteStream {
     const istanbul: typeof gulpIstanbul = require('gulp-istanbul');

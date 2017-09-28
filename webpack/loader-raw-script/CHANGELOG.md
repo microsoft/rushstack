@@ -1,6 +1,35 @@
 # Change Log - @microsoft/loader-raw-script
 
-This log was last generated on Tue, 28 Feb 2017 02:01:29 GMT and should not be manually modified.
+This log was last generated on Fri, 22 Sep 2017 01:04:02 GMT and should not be manually modified.
+
+## 1.1.0
+Fri, 22 Sep 2017 01:04:02 GMT
+
+### Minor changes
+
+- Upgrade to es6
+
+## 1.0.6
+Tue, 19 Sep 2017 19:04:50 GMT
+
+### Patches
+
+- Minor README correction.
+
+## 1.0.5
+Thu, 31 Aug 2017 18:41:18 GMT
+
+*Changes not tracked*
+
+## 1.0.4
+Wed, 30 Aug 2017 01:04:34 GMT
+
+*Changes not tracked*
+
+## 1.0.3
+Tue, 22 Aug 2017 13:04:22 GMT
+
+*Changes not tracked*
 
 ## 1.0.2
 Tue, 28 Feb 2017 02:01:29 GMT

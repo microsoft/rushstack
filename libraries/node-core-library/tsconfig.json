@@ -1,19 +1,20 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es6",
     "forceConsistentCasingInFileNames": true,
     "module": "commonjs",
     "declaration": true,
     "sourceMap": true,
     "experimentalDecorators": true,
     "types": [
-      "es6-collections",
       "node"
     ],
     "lib": [
       "es5",
       "scripthost",
+      "es2015.collection",
       "es2015.promise",
+      "es2015.iterable",
       "dom"
     ],
     "strictNullChecks": true

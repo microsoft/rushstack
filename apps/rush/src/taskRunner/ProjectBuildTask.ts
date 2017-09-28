@@ -5,7 +5,7 @@ import * as child_process from 'child_process';
 import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
-
+import { JsonFile } from '@microsoft/node-core-library';
 import { ITaskWriter } from '@microsoft/stream-collator';
 import {
   RushConfiguration,
@@ -14,7 +14,6 @@ import {
   ErrorDetector,
   ErrorDetectionMode,
   TaskError,
-  JsonFile,
   Utilities
 } from '@microsoft/rush-lib';
 
@@ -110,7 +109,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
       const currentDepsPath: string = path.join(this._rushProject.projectFolder, RushConstants.packageDepsFilename);
       if (fsx.existsSync(currentDepsPath)) {
-        lastPackageDeps = JsonFile.loadJsonFile(currentDepsPath) as IPackageDependencies;
+        lastPackageDeps = JsonFile.load(currentDepsPath) as IPackageDependencies;
       }
 
       const isPackageUnchanged: boolean = (
@@ -198,7 +197,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
           } else {
             // Write deps on success.
             if (currentPackageDeps) {
-              JsonFile.saveJsonFile(currentPackageDeps, currentDepsPath);
+              JsonFile.save(currentPackageDeps, currentDepsPath);
             }
             resolve(TaskStatus.Success);
           }

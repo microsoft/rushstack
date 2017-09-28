@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/loader-load-themed-styles",
-  "version": "1.4.0",
+  "version": "1.6.0",
   "description": "This simple loader wraps the loading of CSS in script equivalent to `require('load-themed-styles').loadStyles( /* css text */ )`. It is designed to be a replacement for style-loader.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -13,15 +13,15 @@
   },
   "dependencies": {
     "loader-utils": "~1.1.0",
-    "@microsoft/load-themed-styles": "~1.6.0"
+    "@microsoft/load-themed-styles": "~1.7.5"
   },
   "devDependencies": {
     "@types/mocha": "2.2.38",
-    "@types/node": "6.0.62",
+    "@types/node": "6.0.88",
     "@types/loader-utils": "~1.1.0",
-    "@types/webpack": "~2.2.4",
+    "@types/webpack": "3.0.11",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
-    "@microsoft/node-library-build": "~3.2.3"
+    "@microsoft/node-library-build": "~4.1.1"
   }
 }

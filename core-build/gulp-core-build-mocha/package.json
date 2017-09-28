@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-mocha",
-  "version": "2.1.4",
+  "version": "3.1.1",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -15,8 +15,8 @@
     "test": "gulp"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "2.8.0",
-    "@types/node": "6.0.62",
+    "@microsoft/gulp-core-build": "3.1.1",
+    "@types/node": "6.0.88",
     "gulp": "~3.9.1",
     "gulp-istanbul": "~0.10.3",
     "gulp-mocha": "~2.2.0"

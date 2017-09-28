@@ -7,17 +7,19 @@ import * as os from 'os';
 import * as path from 'path';
 import * as fsx from 'fs-extra';
 import * as semver from 'semver';
+import * as tar from 'tar';
 import * as wordwrap from 'wordwrap';
 import globEscape = require('glob-escape');
+import { JsonFile } from '@microsoft/node-core-library';
 
 import {
   AsyncRecycler,
-  JsonFile,
   RushConfiguration,
   RushConfigurationProject,
   IPackageJson,
   RushConstants,
-  Utilities
+  Utilities,
+  Stopwatch
 } from '@microsoft/rush-lib';
 
 import { IRushTempPackageJson } from '../utilities/Package';
@@ -174,27 +176,12 @@ export default class InstallManager {
         private: true,
         version: '0.0.0'
       };
-      JsonFile.saveJsonFile(npmPackageJson, path.join(npmToolFolder, 'package.json'));
+      JsonFile.save(npmPackageJson, path.join(npmToolFolder, 'package.json'));
 
       console.log(os.EOL + 'Running "npm install" in ' + npmToolFolder);
 
       // NOTE: Here we use whatever version of NPM we happen to find in the PATH
-
-      // NOTE: we do NOT install optional dependencies for Rush, as it seems that optional dependencies do not
-      //       work properly with shrinkwrap. Consider the "fsevents" package. This is a Mac specific package
-      //       which is an optional second-order dependency. Optional dependencies work by attempting to install
-      //       the package, but removes the package if the install failed.
-      //       This means that someone running generate on a Mac WILL have fsevents included in their shrinkwrap.
-      //       When someone using Windows attempts to install from the shrinkwrap, the install will fail.
-      //
-      //       If someone generates the shrinkwrap using Windows, then fsevents will NOT be listed in the shrinkwrap.
-      //       When someone using Mac attempts to install from the shrinkwrap, (as of NPM 4), they will NOT have the
-      //       optional dependency installed.
-      //
-      //       One possible solution would be to have the shrinkwrap include information about whether the dependency
-      //       is optional or not, but it does not appear to do so. Also, this would result in strange behavior where
-      //       people would have different node_modules based on their system.
-      Utilities.executeCommandWithRetry('npm', ['install', '--no-optional'], MAX_INSTALL_ATTEMPTS, npmToolFolder);
+      Utilities.executeCommandWithRetry('npm', ['install'], MAX_INSTALL_ATTEMPTS, npmToolFolder);
 
       // Create the marker file to indicate a successful install
       fsx.writeFileSync(npmToolFlagFile, '');
@@ -232,6 +219,8 @@ export default class InstallManager {
    * the return value is false.
    */
   public createTempModulesAndCheckShrinkwrap(shrinkwrapFile: ShrinkwrapFile | undefined): boolean {
+    const stopwatch: Stopwatch = Stopwatch.start();
+
     // Example: "C:\MyRepo\common\temp\projects"
     const tempProjectsFolder: string = path.join(this._rushConfiguration.commonTempFolder,
       RushConstants.rushTempProjectsFolderName);
@@ -313,19 +302,19 @@ export default class InstallManager {
     sortedRushProjects.sort(
       (a: RushConfigurationProject, b: RushConfigurationProject) => a.tempProjectName.localeCompare(b.tempProjectName)
     );
+
     for (const rushProject of sortedRushProjects) {
       const packageJson: IPackageJson = rushProject.packageJson;
 
-      // Example: "C:\MyRepo\common\temp\projects\my-project-2"
-      const tempProjectFolder: string = path.dirname(rushProject.tempPackageJsonFilename);
-      fsx.mkdirsSync(tempProjectFolder);
+      // Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
+      const tarballFile: string = this._getTarballFilePath(rushProject);
 
-      // Example: dependencies["@rush-temp/my-project-2"] = "file:./projects/my-project-2"
+      // Example: "my-project-2"
+      const unscopedTempProjectName: string = rushProject.unscopedTempProjectName;
+
+      // Example: dependencies["@rush-temp/my-project-2"] = "file:./projects/my-project-2.tgz"
       commonPackageJson.dependencies[rushProject.tempProjectName]
-        = `file:./${RushConstants.rushTempProjectsFolderName}/${path.basename(tempProjectFolder)}`;
-
-      // Example: "C:\MyRepo\common\temp\projects\my-project-2\package.json"
-      const tempPackageJsonFilename: string = path.join(tempProjectFolder, 'package.json');
+        = `file:./${RushConstants.rushTempProjectsFolderName}/${rushProject.unscopedTempProjectName}.tgz`;
 
       const tempPackageJson: IRushTempPackageJson = {
         name: rushProject.tempProjectName,
@@ -399,9 +388,75 @@ export default class InstallManager {
         }
       }
 
-      // Don't update the file timestamp unless the content has changed, since "rush install"
-      // will consider this timestamp
-      JsonFile.saveJsonFile(tempPackageJson, tempPackageJsonFilename, { onlyIfChanged: true });
+      // NPM expects the root of the tarball to have a directory called 'package'
+      const npmPackageFolder: string = 'package';
+
+      // Example: "C:\MyRepo\common\temp\projects\my-project-2.new"
+      const tempProjectFolder: string = path.join(
+        this._rushConfiguration.commonTempFolder,
+        RushConstants.rushTempProjectsFolderName,
+        unscopedTempProjectName + '.new');
+
+      // Example: "C:\MyRepo\common\temp\projects\my-project-2\package.json"
+      const tempPackageJsonFilename: string = path.join(tempProjectFolder, RushConstants.packageJsonFilename);
+
+      // Example: "C:\MyRepo\common\temp\projects\my-project-2.old"
+      const extractedFolder: string = tempProjectFolder + '.old';
+
+      // we only want to overwrite the package if the existing tarball's package.json is different from tempPackageJson
+      let shouldOverwrite: boolean = true;
+      try {
+        // extract the tarball and compare the package.json directly
+        if (fsx.existsSync(tarballFile)) {
+
+          // ensure the folder we are about to extract into exists
+          Utilities.createFolderWithRetry(extractedFolder);
+
+          tar.extract({
+            cwd: extractedFolder,
+            file: tarballFile,
+            sync: true
+          });
+
+          const extractedPackageJsonFilename: string =
+            path.join(extractedFolder, npmPackageFolder, RushConstants.packageJsonFilename);
+
+          // compare the extracted package.json with the one we are about to write
+          const oldBuffer: Buffer = fsx.readFileSync(extractedPackageJsonFilename);
+          const newBuffer: Buffer = new Buffer(JsonFile.stringify(tempPackageJson));
+
+          if (Buffer.compare(oldBuffer, newBuffer) === 0) {
+            shouldOverwrite = false;
+          }
+        }
+      } catch (error) {
+        // ignore the error, we will go ahead and create a new tarball
+      }
+
+      if (shouldOverwrite) {
+        // ensure the folder we are about to zip exists
+        Utilities.createFolderWithRetry(tempProjectFolder);
+
+        // write the expected package.json file into the zip staging folder
+        JsonFile.save(tempPackageJson, tempPackageJsonFilename);
+
+        // create the new tarball, this overwrites the existing one
+        tar.create({
+          gzip: true,
+          file: tarballFile,
+          cwd: tempProjectFolder,
+          portable: true,
+          noPax: true,
+          sync: true,
+          prefix: npmPackageFolder
+        }, ['package.json']);
+
+        console.log(`Updating ${tarballFile}`);
+      }
+
+      // clean up the old tarball & the temp folder
+      fsx.removeSync(tempProjectFolder);
+      fsx.removeSync(extractedFolder);
     }
 
     // Example: "C:\MyRepo\common\temp\package.json"
@@ -410,7 +465,10 @@ export default class InstallManager {
 
     // Don't update the file timestamp unless the content has changed, since "rush install"
     // will consider this timestamp
-    JsonFile.saveJsonFile(commonPackageJson, commonPackageJsonFilename, { onlyIfChanged: true });
+    JsonFile.save(commonPackageJson, commonPackageJsonFilename, { onlyIfChanged: true });
+
+    stopwatch.stop();
+    console.log(`Finished creating temporary modules (${stopwatch.toString()})`);
 
     return shrinkwrapIsValid;
   }
@@ -456,10 +514,12 @@ export default class InstallManager {
       // then we can't skip this install
       potentiallyChangedFiles.push(this._rushConfiguration.committedShrinkwrapFilename);
 
-      // Also consider timestamps for all the temp package.json files. (createTempModulesAndCheckShrinkwrap() will
+      // Also consider timestamps for all the temp tarballs. (createTempModulesAndCheckShrinkwrap() will
       // carefully preserve these timestamps unless something has changed.)
-      // Example: "C:\MyRepo\common\temp\projects\my-project-2\package.json"
-      potentiallyChangedFiles.push(...this._rushConfiguration.projects.map(x => x.tempPackageJsonFilename));
+      // Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
+      potentiallyChangedFiles.push(...this._rushConfiguration.projects.map(x => {
+        return this._getTarballFilePath(x);
+      }));
 
       // NOTE: If commonNodeModulesMarkerFilename (or any of the potentiallyChangedFiles) does not
       // exist, then isFileTimestampCurrent() returns false.
@@ -538,7 +598,23 @@ export default class InstallManager {
     this._asyncRecycler.deleteAll();
 
     // Run "npm install" in the common folder
-    const npmInstallArgs: string[] = ['install'];
+
+    // NOTE: we do NOT install optional dependencies for Rush, as it seems that optional dependencies do not
+    //       work properly with shrinkwrap. Consider the "fsevents" package. This is a Mac specific package
+    //       which is an optional second-order dependency. Optional dependencies work by attempting to install
+    //       the package, but removes the package if the install failed.
+    //       This means that someone running generate on a Mac WILL have fsevents included in their shrinkwrap.
+    //       When someone using Windows attempts to install from the shrinkwrap, the install will fail.
+    //
+    //       If someone generates the shrinkwrap using Windows, then fsevents will NOT be listed in the shrinkwrap.
+    //       When someone using Mac attempts to install from the shrinkwrap, (as of NPM 4), they will NOT have the
+    //       optional dependency installed.
+    //
+    //       One possible solution would be to have the shrinkwrap include information about whether the dependency
+    //       is optional or not, but it does not appear to do so. Also, this would result in strange behavior where
+    //       people would have different node_modules based on their system.
+
+    const npmInstallArgs: string[] = ['install', '--no-optional'];
     this.pushConfigurationNpmArgs(npmInstallArgs);
 
     console.log(os.EOL + colors.bold(`Running "npm install" in ${this._rushConfiguration.commonTempFolder}`)
@@ -576,6 +652,17 @@ export default class InstallManager {
         fsx.unlinkSync(targetPath);
       }
     }
+  }
+
+  /**
+   * Gets the path to the tarball
+   * Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
+   */
+  private _getTarballFilePath(project: RushConfigurationProject): string {
+    return path.join(
+      this._rushConfiguration.commonTempFolder,
+      RushConstants.rushTempProjectsFolderName,
+      `${project.unscopedTempProjectName}.tgz`);
   }
 
   /**

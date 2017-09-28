@@ -2,6 +2,261 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "4.1.1",
+      "tag": "@microsoft/gulp-core-build-sass_v4.1.1",
+      "date": "Thu, 28 Sep 2017 01:04:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.1.0` to `3.1.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.1.0",
+      "tag": "@microsoft/gulp-core-build-sass_v4.1.0",
+      "date": "Fri, 22 Sep 2017 01:04:02 GMT",
+      "comments": {
+        "minor": [
+          {
+            "author": "Nick Pape <nickpape@users.noreply.github.com>",
+            "commit": "481a10f460a454fb5a3e336e3cf25a1c3f710645",
+            "comment": "Upgrade to es6"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.8` to `3.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `~1.7.4` to `~1.7.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.8",
+      "tag": "@microsoft/gulp-core-build-sass_v4.0.8",
+      "date": "Wed, 20 Sep 2017 22:10:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.7` to `3.0.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.7",
+      "tag": "@microsoft/gulp-core-build-sass_v4.0.7",
+      "date": "Mon, 11 Sep 2017 13:04:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.6` to `3.0.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.6",
+      "tag": "@microsoft/gulp-core-build-sass_v4.0.6",
+      "date": "Fri, 08 Sep 2017 01:28:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.5` to `3.0.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.5",
+      "tag": "@microsoft/gulp-core-build-sass_v4.0.5",
+      "date": "Thu, 07 Sep 2017 13:04:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.4` to `3.0.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.4",
+      "tag": "@microsoft/gulp-core-build-sass_v4.0.4",
+      "date": "Thu, 07 Sep 2017 00:11:11 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nick Pape <nickpape@users.noreply.github.com>",
+            "commit": "4b7451b442c2078a96430f7a05caed37101aed52",
+            "comment": " Add $schema field to all schemas"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.3` to `3.0.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.3",
+      "tag": "@microsoft/gulp-core-build-sass_v4.0.3",
+      "date": "Wed, 06 Sep 2017 13:03:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.2` to `3.0.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.2",
+      "tag": "@microsoft/gulp-core-build-sass_v4.0.2",
+      "date": "Tue, 05 Sep 2017 19:03:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.1` to `3.0.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.1",
+      "tag": "@microsoft/gulp-core-build-sass_v4.0.1",
+      "date": "Sat, 02 Sep 2017 01:04:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.0` to `3.0.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.0",
+      "tag": "@microsoft/gulp-core-build-sass_v4.0.0",
+      "date": "Thu, 31 Aug 2017 18:41:18 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Fix compatibility issues with old releases, by incrementing the major version number"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.10.1` to `3.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `~1.7.3` to `~1.7.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.11",
+      "tag": "@microsoft/gulp-core-build-sass_v3.2.11",
+      "date": "Thu, 31 Aug 2017 17:46:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.10.0` to `2.10.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.10",
+      "tag": "@microsoft/gulp-core-build-sass_v3.2.10",
+      "date": "Wed, 30 Aug 2017 01:04:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.9.6` to `2.10.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `~1.7.2` to `~1.7.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.9",
+      "tag": "@microsoft/gulp-core-build-sass_v3.2.9",
+      "date": "Thu, 24 Aug 2017 22:44:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.9.5` to `2.9.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.8",
+      "tag": "@microsoft/gulp-core-build-sass_v3.2.8",
+      "date": "Thu, 24 Aug 2017 01:04:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.9.4` to `2.9.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.7",
+      "tag": "@microsoft/gulp-core-build-sass_v3.2.7",
+      "date": "Tue, 22 Aug 2017 13:04:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.9.3` to `2.9.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `~1.7.1` to `~1.7.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.6",
+      "tag": "@microsoft/gulp-core-build-sass_v3.2.6",
+      "date": "Wed, 16 Aug 2017 23:16:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Publish"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.5",
+      "tag": "@microsoft/gulp-core-build-sass_v3.2.5",
+      "date": "Tue, 15 Aug 2017 01:29:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Force a patch bump to ensure everything is published"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `2.9.1` to `2.9.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `~1.6.0` to `~1.7.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.4",
       "tag": "@microsoft/gulp-core-build-sass_v3.2.4",
       "date": "Tue, 08 Aug 2017 23:10:36 GMT",

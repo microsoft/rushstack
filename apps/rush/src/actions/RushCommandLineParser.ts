@@ -50,9 +50,19 @@ export default class RushCommandLineParser extends CommandLineParser {
 
   public exitWithError(): void {
     try {
-      this._flushTelemetry();
+      this.flushTelemetry();
     } finally {
       process.exit(1);
+    }
+  }
+
+  public get isDebug(): boolean {
+    return this._debugParameter.value;
+  }
+
+  public flushTelemetry(): void {
+    if (this.telemetry) {
+      this.telemetry.flush();
     }
   }
 
@@ -80,13 +90,7 @@ export default class RushCommandLineParser extends CommandLineParser {
   private _execute(): void {
     this.telemetry = new Telemetry(RushConfiguration.loadFromDefaultLocation());
     super.onExecute();
-    this._flushTelemetry();
-  }
-
-  private _flushTelemetry(): void {
-    if (this.telemetry) {
-      this.telemetry.flush();
-    }
+    this.flushTelemetry();
   }
 
   private _populateActions(): void {

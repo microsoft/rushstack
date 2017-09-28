@@ -1,6 +1,40 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Tue, 08 Aug 2017 23:10:36 GMT and should not be manually modified.
+This log was last generated on Fri, 22 Sep 2017 01:04:02 GMT and should not be manually modified.
+
+## 1.7.5
+Fri, 22 Sep 2017 01:04:02 GMT
+
+*Changes not tracked*
+
+## 1.7.4
+Thu, 31 Aug 2017 18:41:18 GMT
+
+*Changes not tracked*
+
+## 1.7.3
+Wed, 30 Aug 2017 01:04:34 GMT
+
+*Changes not tracked*
+
+## 1.7.2
+Tue, 22 Aug 2017 13:04:22 GMT
+
+*Changes not tracked*
+
+## 1.7.1
+Tue, 15 Aug 2017 23:48:10 GMT
+
+### Patches
+
+- Ensuring load-themed-styles publishes a lib-amd directory.
+
+## 1.7.0
+Tue, 15 Aug 2017 01:29:31 GMT
+
+### Minor changes
+
+- improve loadTheme performance
 
 ## 1.6.0
 Tue, 08 Aug 2017 23:10:36 GMT

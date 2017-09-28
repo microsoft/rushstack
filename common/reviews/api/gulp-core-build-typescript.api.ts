@@ -1,15 +1,11 @@
 // WARNING: The type "IApiExtractorTaskConfig" needs to be exported by the package (e.g. added to index.ts)
 // @public
 class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig> {
+  constructor();
   // (undocumented)
   public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream | void;
   // (undocumented)
   public loadSchema(): Object;
-  // (undocumented)
-  public name: string;
-  // WARNING: The type "IApiExtractorTaskConfig" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  public taskConfig: IApiExtractorTaskConfig;
 }
 
 // @public (undocumented)
@@ -23,12 +19,14 @@ class TypeScriptConfiguration {
   public static getGulpTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<ts.Settings>;
   public static getTsConfigFile(config: IBuildConfig): ITsConfigFile<ts.Settings>;
   public static getTypescriptCompiler(): any;
+  public static setBaseConfig(config: ITsConfigFile<ts.Settings>): void;
   public static setTypescriptCompiler(typescriptOverride: any): void;
 }
 
 // WARNING: The type "ITypeScriptTaskConfig" needs to be exported by the package (e.g. added to index.ts)
 // @public (undocumented)
 class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
+  constructor();
   // (undocumented)
   public executeTask(gulp: gulpType.Gulp, completeCallback: (error?: string) => void): void;
   // WARNING: The type "ITypeScriptTaskConfig" needs to be exported by the package (e.g. added to index.ts)
@@ -38,11 +36,6 @@ class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   public loadSchema(): Object;
   // WARNING: The type "ITypeScriptTaskConfig" needs to be exported by the package (e.g. added to index.ts)
   public mergeConfig(config: ITypeScriptTaskConfig): void;
-  // (undocumented)
-  public name: string;
-  // WARNING: The type "ITypeScriptTaskConfig" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  public taskConfig: ITypeScriptTaskConfig;
 }
 
 // WARNING: Unsupported export: apiExtractor

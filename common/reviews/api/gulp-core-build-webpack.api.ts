@@ -1,13 +1,21 @@
 // @public (undocumented)
+interface IWebpackResources {
+  // (undocumented)
+  webpack: typeof Webpack;
+}
+
+// @public (undocumented)
 interface IWebpackTaskConfig {
   config?: Webpack.Configuration;
   configPath: string;
+  printStats?: boolean;
   suppressWarnings?: (string | RegExp)[];
   webpack?: typeof Webpack;
 }
 
 // @public (undocumented)
-class WebpackTask extends GulpTask<IWebpackTaskConfig> {
+class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConfig & TExtendedConfig> {
+  constructor(extendedName?: string, extendedConfig?: TExtendedConfig);
   // (undocumented)
   public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): void;
   // (undocumented)
@@ -15,11 +23,7 @@ class WebpackTask extends GulpTask<IWebpackTaskConfig> {
   // (undocumented)
   public loadSchema(): Object;
   // (undocumented)
-  public name: string;
-  // (undocumented)
-  public readonly resources: Object;
-  // (undocumented)
-  public taskConfig: IWebpackTaskConfig;
+  public readonly resources: IWebpackResources;
 }
 
 // WARNING: Unsupported export: webpack

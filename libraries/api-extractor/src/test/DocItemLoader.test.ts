@@ -27,10 +27,6 @@ function assertCapturedErrors(expectedMessages: string[]): void {
     'The captured errors did not match the expected output.');
 }
 
-// These warnings would normally be printed at the bottom
-// of the source package's '*.api.ts' file.
-const warnings: string[] = [];
-
 describe('DocItemLoader tests', function (): void {
   this.timeout(10000);
 
@@ -47,8 +43,9 @@ describe('DocItemLoader tests', function (): void {
         module: ts.ModuleKind.CommonJS,
         moduleResolution: ts.ModuleResolutionKind.NodeJs,
         rootDir: inputFolder,
-        typeRoots: ['./'] // We need to ignore @types in these tests
+        typeRoots: [] // We need to ignore @types in these tests
       };
+
       const extractor: Extractor = new Extractor({
         compilerOptions: compilerOptions,
         errorHandler: testErrorHandler

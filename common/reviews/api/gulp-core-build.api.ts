@@ -19,6 +19,15 @@ class CleanTask extends GulpTask<void> {
 }
 
 // @public
+class CopyStaticAssetsTask extends GulpTask<ICopyStaticAssetsTaskConfig> {
+  constructor();
+  // (undocumented)
+  public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream;
+  // (undocumented)
+  public loadSchema(): Object;
+}
+
+// @public
 class CopyTask extends GulpTask<ICopyConfig> {
   constructor();
   public executeTask(gulp: typeof Gulp,
@@ -77,7 +86,8 @@ export function getErrors(): string[];
 export function getWarnings(): string[];
 
 // @public
-class GulpTask<TASK_CONFIG> implements IExecutable {
+class GulpTask<TTaskConfig> implements IExecutable {
+  public constructor(name: string, initialTaskConfig: Partial<TTaskConfig> = {});
   protected _getConfigFilePath(): string;
   public buildConfig: IBuildConfig;
   public cleanMatch: string[];
@@ -86,26 +96,26 @@ class GulpTask<TASK_CONFIG> implements IExecutable {
   public execute(config: IBuildConfig): Promise<void>;
   // WARNING: The type "GulpProxy" needs to be exported by the package (e.g. added to index.ts)
   public abstract executeTask(gulp: gulp.Gulp | GulpProxy,
-      completeCallback?: (error?: string | Error) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
+      completeCallback?: (error?: string | Error) => void): Promise<Object | void> | NodeJS.ReadWriteStream | void;
   public fileError(filePath: string, line: number, column: number, errorCode: string, message: string): void;
   public fileExists(localPath: string): boolean;
   public fileWarning(filePath: string, line: number, column: number, warningCode: string, message: string): void;
-  public getCleanMatch(buildConfig: IBuildConfig, taskConfig: TASK_CONFIG = this.taskConfig): string[];
+  public getCleanMatch(buildConfig: IBuildConfig, taskConfig: TTaskConfig = this.taskConfig): string[];
   public isEnabled(buildConfig: IBuildConfig): boolean;
   protected loadSchema(): Object | undefined;
   public log(message: string): void;
   public logError(message: string): void;
   public logVerbose(message: string): void;
   public logWarning(message: string): void;
-  public mergeConfig(taskConfig: TASK_CONFIG): void;
+  public mergeConfig(taskConfig: Partial<TTaskConfig>): void;
   public name: string;
   public onRegister(): void;
   public readJSONSync(localPath: string): Object | undefined;
-  public replaceConfig(taskConfig: TASK_CONFIG): void;
+  public replaceConfig(taskConfig: TTaskConfig): void;
   public resolvePath(localPath: string): string;
   public readonly schema: Object | undefined;
-  public setConfig(taskConfig: TASK_CONFIG): void;
-  public taskConfig: TASK_CONFIG;
+  public setConfig(taskConfig: Partial<TTaskConfig>): void;
+  public taskConfig: TTaskConfig;
 }
 
 // @public (undocumented)
@@ -147,6 +157,18 @@ interface ICopyConfig {
 }
 
 // @public
+interface ICopyStaticAssetsTaskConfig {
+  // (undocumented)
+  excludeExtensions?: string[];
+  // (undocumented)
+  excludeFiles?: string[];
+  // (undocumented)
+  includeExtensions?: string[];
+  // (undocumented)
+  includeFiles?: string[];
+}
+
+// @public
 interface ICustomGulpTask {
   // WARNING: The type "GulpProxy" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
@@ -182,14 +204,6 @@ export function replaceConfig(config: IBuildConfig): void;
 
 // @public
 export function reset(): void;
-
-// @public
-class SchemaValidator {
-  public static readAndValidateJson < TResult >(dataFilePath: string, schemaFilePath: string): TResult;
-  // (undocumented)
-  public static readCommentedJsonFile < TResult >(filename: string): TResult;
-  public static validate(data: Object, schema: Object, dataFilePath?: string): void;
-}
 
 // @public
 export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutable;
@@ -232,4 +246,5 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
 
 // WARNING: Unsupported export: cleanFlag
 // WARNING: Unsupported export: clean
+// WARNING: Unsupported export: copyStaticAssets
 // (No packageDescription for this package)

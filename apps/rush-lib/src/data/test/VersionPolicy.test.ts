@@ -24,7 +24,7 @@ describe('VersionPolicy', () => {
     it('loads configuration.', () => {
       assert.isTrue(versionPolicy instanceof LockStepVersionPolicy, 'versionPolicy is a LockStepVersionPolicy');
       const lockStepVersionPolicy: LockStepVersionPolicy = versionPolicy as LockStepVersionPolicy;
-      assert.equal(lockStepVersionPolicy.version, '1.1.0');
+      assert.equal(lockStepVersionPolicy.version.format(), '1.1.0');
       assert.equal(lockStepVersionPolicy.nextBump, BumpType.patch);
     });
 
@@ -58,6 +58,20 @@ describe('VersionPolicy', () => {
       assert.throw(() => {
         lockStepVersionPolicy.ensure(originalPackageJson);
       });
+    });
+
+    it('bumps version for preminor release', () => {
+      const lockStepVersionPolicy: LockStepVersionPolicy = versionPolicy as LockStepVersionPolicy;
+      lockStepVersionPolicy.bump(BumpType.preminor, 'pr');
+      assert.equal(lockStepVersionPolicy.version.format(), '1.2.0-pr.0');
+      assert.equal(lockStepVersionPolicy.nextBump, BumpType.patch);
+    });
+
+    it('bumps version for minor release', () => {
+      const lockStepVersionPolicy: LockStepVersionPolicy = versionPolicy as LockStepVersionPolicy;
+      lockStepVersionPolicy.bump(BumpType.minor);
+      assert.equal(lockStepVersionPolicy.version.format(), '1.2.0');
+      assert.equal(lockStepVersionPolicy.nextBump, BumpType.patch);
     });
   });
 

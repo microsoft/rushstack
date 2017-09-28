@@ -7,8 +7,12 @@
     "declaration": true,
     "sourceMap": true,
     "experimentalDecorators": true,
+    "strictNullChecks": true,
     "types": [
+      "node"
     ],
-    "strictNullChecks": true
+    "lib": [
+      "es5"
+    ]
   }
 }

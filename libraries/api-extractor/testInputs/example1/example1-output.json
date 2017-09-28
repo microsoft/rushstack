@@ -1,5 +1,6 @@
 {
   "kind": "package",
+  "name": "example1",
   "summary": [],
   "remarks": [],
   "exports": {
@@ -20,6 +21,7 @@
       "members": {
         "propertyIsEnumerable": {
           "kind": "property",
+          "signature": "public propertyIsEnumerable: string;",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
@@ -43,6 +45,7 @@
       "members": {
         "___lookupSetter__": {
           "kind": "property",
+          "signature": "___lookupSetter__: __proto__;",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
@@ -62,7 +65,15 @@
             "type": "__proto__",
             "description": []
           },
-          "parameters": {},
+          "parameters": {
+            "___proto__": {
+              "name": "___proto__",
+              "description": [],
+              "isOptional": false,
+              "isSpread": false,
+              "type": "string"
+            }
+          },
           "deprecatedMessage": [],
           "summary": [],
           "remarks": [],
@@ -87,6 +98,7 @@
       "members": {
         "aliasField": {
           "kind": "property",
+          "signature": "public aliasField: number;",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
@@ -98,6 +110,7 @@
         },
         "shouldBeReadOnly": {
           "kind": "property",
+          "signature": "public readonly shouldBeReadOnly: number;",
           "isOptional": false,
           "isReadOnly": true,
           "isStatic": false,
@@ -143,7 +156,7 @@
             }
           ],
           "remarks": [],
-          "isBeta": false
+          "isBeta": true
         }
       }
     },
@@ -159,6 +172,7 @@
       "members": {
         "___lookupSetter__": {
           "kind": "property",
+          "signature": "___lookupSetter__: __proto__;",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
@@ -182,6 +196,7 @@
       "members": {
         "field": {
           "kind": "property",
+          "signature": "public field: number;",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
@@ -193,12 +208,61 @@
         },
         "myProp": {
           "kind": "property",
+          "signature": "public myProp: number;",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
           "type": "number",
           "deprecatedMessage": [],
           "summary": [],
+          "remarks": [],
+          "isBeta": false
+        },
+        "paragraphTest": {
+          "kind": "method",
+          "signature": "public paragraphTest(): void;",
+          "accessModifier": "public",
+          "isOptional": false,
+          "isStatic": false,
+          "returnValue": {
+            "type": "void",
+            "description": []
+          },
+          "parameters": {},
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "textDocElement",
+              "value": "This is the first paragraph. "
+            },
+            {
+              "kind": "paragraphDocElement"
+            },
+            {
+              "kind": "textDocElement",
+              "value": " This is the "
+            },
+            {
+              "kind": "linkDocElement",
+              "referenceType": "code",
+              "scopeName": "",
+              "packageName": "example1",
+              "exportName": "MyClass",
+              "memberName": "",
+              "value": "MyClass"
+            },
+            {
+              "kind": "textDocElement",
+              "value": " paragraph. "
+            },
+            {
+              "kind": "paragraphDocElement"
+            },
+            {
+              "kind": "textDocElement",
+              "value": " This is the third paragraph"
+            }
+          ],
           "remarks": [],
           "isBeta": false
         },
@@ -222,11 +286,20 @@
     },
     "publicFunction": {
       "kind": "function",
+      "signature": "export function publicFunction(param: number): string;",
       "returnValue": {
         "type": "string",
         "description": []
       },
-      "parameters": {},
+      "parameters": {
+        "param": {
+          "name": "param",
+          "description": [],
+          "isOptional": false,
+          "isSpread": false,
+          "type": "number"
+        }
+      },
       "deprecatedMessage": [],
       "summary": [],
       "remarks": [],

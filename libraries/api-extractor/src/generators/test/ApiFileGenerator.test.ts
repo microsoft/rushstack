@@ -8,7 +8,7 @@ import * as ts from 'typescript';
 import * as fsx from 'fs-extra';
 import * as path from 'path';
 import Extractor from '../../Extractor';
-import ApiFileGenerator from '../../generators/ApiFileGenerator';
+import ApiFileGenerator from '../ApiFileGenerator';
 
 /* tslint:disable:no-function-expression - Mocha uses a poorly scoped "this" pointer */
 
@@ -51,7 +51,7 @@ describe('ApiFileGenerator tests', function (): void {
         module: ts.ModuleKind.CommonJS,
         moduleResolution: ts.ModuleResolutionKind.NodeJs,
         rootDir: inputFolder,
-        typeRoots: ['./'] // We need to ignore @types in these tests
+        typeRoots: [] // We need to ignore @types in these tests
       };
       const extractor: Extractor = new Extractor({
         compilerOptions: compilerOptions,
@@ -115,7 +115,7 @@ describe('ApiFileGenerator tests', function (): void {
         module: ts.ModuleKind.CommonJS,
         moduleResolution: ts.ModuleResolutionKind.NodeJs,
         rootDir: inputFolder,
-        typeRoots: ['./'] // We need to ignore @types in these tests
+        typeRoots: [] // We need to ignore @types in these tests
       };
       const extractor: Extractor = new Extractor({
         compilerOptions: compilerOptions,

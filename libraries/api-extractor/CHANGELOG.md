@@ -1,6 +1,125 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 27 Jul 2017 01:04:48 GMT and should not be manually modified.
+This log was last generated on Thu, 28 Sep 2017 01:04:28 GMT and should not be manually modified.
+
+## 3.4.0
+Thu, 28 Sep 2017 01:04:28 GMT
+
+### Minor changes
+
+- Skipping two lines in an AEDoc comment now creates a paragraph separator for the generated documentation
+
+### Patches
+
+- The *.api.json "linkDocElement" type now always explicitly specifies the package name, rather than expecting the reader to infer it
+- The *.api.json file format now exposes "signature" information for properties, functions, and module variables
+
+## 3.3.0
+Fri, 22 Sep 2017 01:04:02 GMT
+
+### Minor changes
+
+- Upgrade to es6
+
+## 3.2.6
+Wed, 20 Sep 2017 22:10:17 GMT
+
+*Changes not tracked*
+
+## 3.2.5
+Mon, 11 Sep 2017 13:04:55 GMT
+
+### Patches
+
+- The isBeta and deprecatedMessage fields are now inherited in the *.api.json files
+- Fix an issue where the *.api.json file was sometimes missing function parameters
+
+## 3.2.4
+Fri, 08 Sep 2017 01:28:04 GMT
+
+### Patches
+
+- Deprecate @types/es6-coll ections in favor of built-in typescript typings 'es2015.collection' a nd 'es2015.iterable'
+
+## 3.2.3
+Thu, 07 Sep 2017 13:04:35 GMT
+
+### Patches
+
+- Fix incorrect schema/typings for enum members
+
+## 3.2.2
+Thu, 07 Sep 2017 00:11:11 GMT
+
+### Patches
+
+-  Add $schema field to all schemas
+
+## 3.2.1
+Wed, 06 Sep 2017 13:03:42 GMT
+
+### Patches
+
+- Converted IMarkupDocumentationLink to IMarkupApiLink, which exposes the underlying IApiItemReference rather than assuming a particular "document ID" model
+
+## 3.2.0
+Tue, 05 Sep 2017 19:03:56 GMT
+
+### Minor changes
+
+- Add the constructor signature and package name to the exported API signature
+
+## 3.1.0
+Sat, 02 Sep 2017 01:04:26 GMT
+
+### Minor changes
+
+- Expanded the api-extractor API to expose interfaces for the *.api.json file fileformat
+
+## 3.0.0
+Thu, 31 Aug 2017 18:41:18 GMT
+
+### Breaking changes
+
+- Fix compatibility issues with old releases, by incrementing the major version number
+
+## 2.3.7
+Thu, 31 Aug 2017 17:46:25 GMT
+
+### Patches
+
+- Fix issue where node-core-library was not an explicit dependency
+
+## 2.3.6
+Wed, 30 Aug 2017 01:04:34 GMT
+
+*Changes not tracked*
+
+## 2.3.5
+Thu, 24 Aug 2017 22:44:12 GMT
+
+### Patches
+
+- Update the schema validator.
+
+## 2.3.4
+Thu, 24 Aug 2017 01:04:33 GMT
+
+*Changes not tracked*
+
+## 2.3.3
+Tue, 22 Aug 2017 13:04:22 GMT
+
+### Patches
+
+- Added "api-documenter" code sample
+
+## 2.3.2
+Tue, 15 Aug 2017 01:29:31 GMT
+
+### Patches
+
+- Introduce Span parser for upcoming *.d.ts generator
 
 ## 2.3.1
 Thu, 27 Jul 2017 01:04:48 GMT

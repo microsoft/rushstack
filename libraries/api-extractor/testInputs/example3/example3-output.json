@@ -1,5 +1,6 @@
 {
   "kind": "package",
+  "name": "@scope/example3",
   "summary": [
     {
       "kind": "textDocElement",
@@ -79,6 +80,7 @@
     },
     "inheritLocalOptionTwoFunction": {
       "kind": "function",
+      "signature": "export function inheritLocalOptionTwoFunction(): void;",
       "returnValue": {
         "type": "void",
         "description": []
@@ -111,6 +113,7 @@
       "members": {
         "thisIsTypeLiteral": {
           "kind": "property",
+          "signature": "thisIsTypeLiteral: [{name: string, age: number}];",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
@@ -144,6 +147,7 @@
       "members": {
         "thisIsTypeLiteral": {
           "kind": "property",
+          "signature": "thisIsTypeLiteral:",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
@@ -190,20 +194,7 @@
               }
             ]
           },
-          "parameters": {
-            "param1": {
-              "name": "param1",
-              "description": [
-                {
-                  "kind": "textDocElement",
-                  "value": "A description for param1."
-                }
-              ],
-              "isOptional": false,
-              "isSpread": false,
-              "type": "string"
-            }
-          },
+          "parameters": {},
           "deprecatedMessage": [],
           "summary": [
             {
@@ -223,6 +214,7 @@
     },
     "jsonResolutionFunction": {
       "kind": "function",
+      "signature": "export function jsonResolutionFunction(): boolean;",
       "returnValue": {
         "type": "boolean",
         "description": [
@@ -232,20 +224,7 @@
           }
         ]
       },
-      "parameters": {
-        "param1": {
-          "name": "param1",
-          "description": [
-            {
-              "kind": "textDocElement",
-              "value": "A description for param1."
-            }
-          ],
-          "isOptional": false,
-          "isSpread": false,
-          "type": "string"
-        }
-      },
+      "parameters": {},
       "deprecatedMessage": [],
       "summary": [
         {
@@ -336,13 +315,13 @@
       "summary": [
         {
           "kind": "textDocElement",
-          "value": "Here we test that an error is reported when attempting to link to an internal API item."
+          "value": "Here we test that an error is reported when attempting to link to an internal API item. "
         },
         {
           "kind": "linkDocElement",
           "referenceType": "code",
-          "scopeName": "",
-          "packageName": "",
+          "scopeName": "@scope",
+          "packageName": "example3",
           "exportName": "publicEnum",
           "memberName": "",
           "value": "publicEnum"
@@ -350,8 +329,8 @@
         {
           "kind": "linkDocElement",
           "referenceType": "code",
-          "scopeName": "",
-          "packageName": "",
+          "scopeName": "@scope",
+          "packageName": "example3",
           "exportName": "_internalEnum",
           "memberName": "",
           "value": "_internalEnum"

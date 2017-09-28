@@ -54,23 +54,26 @@ export interface ISassTaskConfig {
 const _classMaps: { [file: string]: Object } = {};
 
 export class SassTask extends GulpTask<ISassTaskConfig> {
-  public name: string = 'sass';
-
-  public taskConfig: ISassTaskConfig = {
-    preamble: '/* tslint:disable */',
-    postamble: '/* tslint:enable */',
-    sassMatch: [
-      'src/**/*.scss'
-    ],
-    useCSSModules: false,
-    warnOnCssInvalidPropertyName: true,
-    dropCssFiles: false,
-    warnOnNonCSSModules: false
-  };
-
   public cleanMatch: string[] = [
     'src/**/*.scss.ts'
   ];
+
+  constructor() {
+    super(
+      'sass',
+      {
+        preamble: '/* tslint:disable */',
+        postamble: '/* tslint:enable */',
+        sassMatch: [
+          'src/**/*.scss'
+        ],
+        useCSSModules: false,
+        warnOnCssInvalidPropertyName: true,
+        dropCssFiles: false,
+        warnOnNonCSSModules: false
+      }
+    );
+  }
 
   public loadSchema(): Object {
     return require('./sass.schema.json');

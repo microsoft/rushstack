@@ -2,6 +2,83 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "1.7.5",
+      "tag": "@microsoft/load-themed-styles_v1.7.5",
+      "date": "Fri, 22 Sep 2017 01:04:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `~4.0.8` to `~4.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.7.4",
+      "tag": "@microsoft/load-themed-styles_v1.7.4",
+      "date": "Thu, 31 Aug 2017 18:41:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `~3.4.1` to `~4.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.7.3",
+      "tag": "@microsoft/load-themed-styles_v1.7.3",
+      "date": "Wed, 30 Aug 2017 01:04:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `~3.3.2` to `~3.4.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.7.2",
+      "tag": "@microsoft/load-themed-styles_v1.7.2",
+      "date": "Tue, 22 Aug 2017 13:04:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `~3.2.8` to `~3.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.7.1",
+      "tag": "@microsoft/load-themed-styles_v1.7.1",
+      "date": "Tue, 15 Aug 2017 23:48:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Ensuring load-themed-styles publishes a lib-amd directory."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.7.0",
+      "tag": "@microsoft/load-themed-styles_v1.7.0",
+      "date": "Tue, 15 Aug 2017 01:29:31 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "improve loadTheme performance"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `~3.2.5` to `~3.2.6`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.6.0",
       "tag": "@microsoft/load-themed-styles_v1.6.0",
       "date": "Tue, 08 Aug 2017 23:10:36 GMT",

@@ -10,6 +10,10 @@
     "ignoredNpmScopes": [ "@types", "@internal" ]
   },
 
+  "repository": {
+    "url": "someFakeUrl"
+  },
+
   "gitPolicy": {
     "allowedEmailRegExps": [
       "[^@]+@contoso\\.com"
