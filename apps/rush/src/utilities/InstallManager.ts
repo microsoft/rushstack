@@ -25,7 +25,7 @@ import {
 import { IRushTempPackageJson } from '../utilities/Package';
 import ShrinkwrapFile from '../utilities/ShrinkwrapFile';
 
-const MAX_INSTALL_ATTEMPTS: number = 1;
+const MAX_INSTALL_ATTEMPTS: number = 5;
 
 const wrap: (textToWrap: string) => string = wordwrap.soft(Utilities.getConsoleWidth());
 
