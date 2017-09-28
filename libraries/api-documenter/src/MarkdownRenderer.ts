@@ -358,9 +358,6 @@ export class MarkdownRenderer {
             throw new Error('The page element must be the top-level element of the document');
           }
 
-          writer.writeLine('<!-- docId=' + element.docId + ' -->');
-          writer.writeLine();
-
           if (element.breadcrumb.length) {
             // Write the breadcrumb before the title
             MarkdownRenderer._writeElements(element.breadcrumb, context);

@@ -375,7 +375,7 @@ export interface IApiPackage {
  * A member of a class.
  * @alpha
  */
-export type ApiMember = IApiProperty | IApiMethod;
+export type ApiMember = IApiProperty | IApiMethod | IApiConstructor;
 
 /**
  * @alpha
