@@ -189,7 +189,7 @@ export class VersionManager {
     clonedProject: IPackageJson,
     projectVersionChanged: boolean
   ): void {
-    if (!clonedProject.dependencies) {
+    if (!clonedProject.dependencies && !clonedProject.devDependencies) {
       return;
     }
     const changes: IChangeInfo[] = [];

@@ -38,6 +38,11 @@
       "packageName": "f",
       "projectFolder": "f",
       "reviewCategory": "third-party"
+    },
+    {
+      "packageName": "g",
+      "projectFolder": "g",
+      "reviewCategory": "third-party"
     }
   ]
 }
