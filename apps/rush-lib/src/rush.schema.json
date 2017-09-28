@@ -9,7 +9,7 @@
       "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
       "type": "string"
     },
-    "npmVersion": {
+    "pnpmVersion": {
       "description": "The version of the NPM tool to install.",
       "type": "string",
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
@@ -161,5 +161,5 @@
     }
   },
   "additionalProperties": false,
-  "required": [ "npmVersion", "rushMinimumVersion", "projects" ]
+  "required": [ "pnpmVersion", "rushMinimumVersion", "projects" ]
 }

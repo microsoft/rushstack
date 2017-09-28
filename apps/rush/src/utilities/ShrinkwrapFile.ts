@@ -91,7 +91,7 @@ export default class ShrinkwrapFile {
    * package name and SemVer version range.
    */
 
-  //@todo this still has problems!
+  // @todo this still has problems!
 
   public hasCompatibleDependency(dependencyName: string, versionRange: string, localPackage?: string): boolean {
     let dependencyVersion: string;

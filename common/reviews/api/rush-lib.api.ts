@@ -308,10 +308,10 @@ class RushConfiguration {
   public static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
   // (undocumented)
   public static loadFromDefaultLocation(): RushConfiguration;
-  public readonly npmToolVersion: string;
   public readonly pinnedVersions: PinnedVersionsConfiguration;
   public readonly pnpmStoreFolder: string;
   public readonly pnpmToolFilename: string;
+  public readonly pnpmToolVersion: string;
   public readonly projectFolderMaxDepth: number;
   public readonly projectFolderMinDepth: number;
   // (undocumented)

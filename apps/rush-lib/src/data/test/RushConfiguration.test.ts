@@ -43,7 +43,7 @@ describe('RushConfiguration', () => {
     assertPathProperty('rushLinkJsonFilename',
       rushConfiguration.rushLinkJsonFilename, './repo/common/temp/rush-link.json');
 
-    assert.equal(rushConfiguration.npmToolVersion, '4.5.0', 'Failed to validate npmToolVersion');
+    assert.equal(rushConfiguration.pnpmToolVersion, '4.5.0', 'Failed to validate pnpmToolVersion');
 
     assert.equal(rushConfiguration.repositoryUrl, 'someFakeUrl', 'Failed to get repository url');
     assert.equal(rushConfiguration.projectFolderMaxDepth, 99, 'Failed to validate projectFolderMaxDepth');

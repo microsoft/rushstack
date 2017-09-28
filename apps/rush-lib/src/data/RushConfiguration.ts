@@ -71,7 +71,7 @@ export interface IRushRepositoryJson {
  */
 export interface IRushConfigurationJson {
   $schema: string;
-  npmVersion: string;
+  pnpmVersion: string;
   rushMinimumVersion: string;
   repository?: IRushRepositoryJson;
   nodeSupportedVersionRange?: string;
@@ -113,7 +113,7 @@ export default class RushConfiguration {
   private _tempShrinkwrapFilename: string;
   private _homeFolder: string;
   private _rushLinkJsonFilename: string;
-  private _npmToolVersion: string;
+  private _pnpmToolVersion: string;
   private _pnpmToolFilename: string;
   private _projectFolderMinDepth: number;
   private _projectFolderMaxDepth: number;
@@ -365,8 +365,8 @@ export default class RushConfiguration {
   /**
    * The version of the locally installed NPM tool.  (Example: "1.2.3")
    */
-  public get npmToolVersion(): string {
-    return this._npmToolVersion;
+  public get pnpmToolVersion(): string {
+    return this._pnpmToolVersion;
   }
 
   /**
@@ -562,7 +562,7 @@ export default class RushConfiguration {
 
     this._rushLinkJsonFilename = path.join(this._commonTempFolder, 'rush-link.json');
 
-    this._npmToolVersion = rushConfigurationJson.npmVersion;
+    this._pnpmToolVersion = rushConfigurationJson.pnpmVersion;
     this._pnpmToolFilename = path.resolve(path.join(this._commonTempFolder,
       'pnpm-local', 'node_modules', '.bin', 'pnpm'));
 
