@@ -43,7 +43,7 @@ describe('VersionManager', () => {
       versionManager.ensure('testPolicy1');
       const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
       const expectedVersion: string = '10.10.0';
-      assert.equal(updatedPackages.size, 5, 'The number of updated packages matches');
+      assert.equal(updatedPackages.size, 6, 'The number of updated packages matches');
       assert.equal(updatedPackages.get('a').version, expectedVersion);
       assert.equal(updatedPackages.get('b').version, expectedVersion);
       assert.equal(updatedPackages.get('b').dependencies['a'], `~${expectedVersion}`);
@@ -53,6 +53,7 @@ describe('VersionManager', () => {
       assert.equal(updatedPackages.get('d').dependencies['b'], `>=10.10.0 <11.0.0`);
       assert.equal(updatedPackages.get('f').version, '1.0.0', 'f version should not change');
       assert.equal(updatedPackages.get('f').dependencies['a'], `~10.10.0`);
+      assert.equal(updatedPackages.get('g').devDependencies['a'], `~10.10.0`);
 
       const changeFiles: Map<string, ChangeFile> = versionManager.changeFiles;
       assert.equal(changeFiles.size, 4, 'The number of change files matches');
@@ -104,6 +105,8 @@ describe('VersionManager', () => {
       assert.equal(updatedPackages.get('a').version, expectedVersion, `a version is not expected`);
       assert.equal(updatedPackages.get('b').version, expectedVersion, `b version is not expected`);
       assert.equal(updatedPackages.get('e').version, expectedVersion, `e version is not expected`);
+      assert.equal(updatedPackages.get('g').devDependencies['a'], `~${expectedVersion}`,
+        'a version is not expected in dev dependency');
       assert.isUndefined(_getChanges(changeFiles, 'a'), 'a has change entry.');
       assert.isUndefined(_getChanges(changeFiles, 'b'), 'b has change entry');
     });
