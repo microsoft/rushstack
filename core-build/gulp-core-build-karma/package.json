@@ -15,6 +15,7 @@
     "test": "gulp"
   },
   "dependencies": {
+    "@types/node": "6.0.88",
     "@microsoft/gulp-core-build": "3.1.0",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
@@ -37,7 +38,7 @@
   },
   "devDependencies": {
     "@microsoft/node-library-build": "~3.2.0",
-    "@types/gulp": "3.8.32",
+    "@types/gulp": "3.8.33",
     "@types/karma": "0.13.33",
     "@types/bluebird": "3.5.3"
   }

@@ -83,7 +83,7 @@ class GulpTask<TTaskConfig> implements IExecutable {
   copyFile(localSourcePath: string, localDestPath?: string): void;
   enabled: boolean;
   execute(config: IBuildConfig): Promise<void>;
-  abstract executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (error?: string | Error) => void): Promise<Object | void> | NodeJS.ReadWriteStream | void;
+  abstract executeTask(gulp: gulp.Gulp, completeCallback?: (error?: string | Error) => void): Promise<Object | void> | NodeJS.ReadWriteStream | void;
   fileError(filePath: string, line: number, column: number, errorCode: string, message: string): void;
   fileExists(localPath: string): boolean;
   fileWarning(filePath: string, line: number, column: number, warningCode: string, message: string): void;
@@ -113,7 +113,7 @@ interface IBuildConfig {
   buildErrorIconPath?: string;
   buildSuccessIconPath?: string;
   distFolder: string;
-  gulp: GulpProxy | gulp.Gulp;
+  gulp: gulp.Gulp;
   isRedundantBuild?: boolean;
   libAMDFolder?: string;
   libES6Folder?: string;
@@ -158,7 +158,7 @@ interface ICopyStaticAssetsTaskConfig {
 // @public
 interface ICustomGulpTask {
   // (undocumented)
-  (gulp: typeof Gulp | GulpProxy, buildConfig: IBuildConfig, done?: (failure?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
+  (gulp: typeof Gulp, buildConfig: IBuildConfig, done?: (failure?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
 }
 
 // @public (undocumented)

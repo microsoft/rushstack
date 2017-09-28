@@ -18,7 +18,7 @@
     "@microsoft/gulp-core-build": "3.1.0",
     "@microsoft/gulp-core-build-mocha": "3.1.0",
     "@microsoft/gulp-core-build-typescript": "4.2.0",
-    "@types/gulp": "3.8.32",
+    "@types/gulp": "3.8.33",
     "@types/node": "6.0.88",
     "gulp": "~3.9.1"
   },
