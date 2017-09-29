@@ -28,7 +28,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-core-library": "~0.3.1",
+    "@microsoft/node-core-library": "~0.3.2",
     "@microsoft/package-deps-hash": "~2.1.0",
     "@microsoft/rush-lib": "3.0.18",
     "@microsoft/stream-collator": "~2.1.0",

@@ -14,8 +14,8 @@
     "test": "gulp test"
   },
   "dependencies": {
-    "@microsoft/api-extractor": "3.4.0",
-    "@microsoft/node-core-library": "~0.3.1",
+    "@microsoft/api-extractor": "3.4.1",
+    "@microsoft/node-core-library": "~0.3.2",
     "colors": "~1.1.2",
     "fs-extra": "~0.26.7",
     "js-yaml": "~3.9.1"

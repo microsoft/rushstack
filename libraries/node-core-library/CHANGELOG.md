@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Thu, 28 Sep 2017 01:04:28 GMT and should not be manually modified.
+This log was last generated on Fri, 29 Sep 2017 01:03:42 GMT and should not be manually modified.
+
+## 0.3.2
+Fri, 29 Sep 2017 01:03:42 GMT
+
+### Patches
+
+- FileDiffTest now copies the expected file into the same folder as the actual file for easier comparisons
 
 ## 0.3.1
 Thu, 28 Sep 2017 01:04:28 GMT

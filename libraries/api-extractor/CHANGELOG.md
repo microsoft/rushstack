@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 28 Sep 2017 01:04:28 GMT and should not be manually modified.
+This log was last generated on Fri, 29 Sep 2017 01:03:42 GMT and should not be manually modified.
+
+## 3.4.1
+Fri, 29 Sep 2017 01:03:42 GMT
+
+### Patches
+
+- Removed IMarkupPage.docId
 
 ## 3.4.0
 Thu, 28 Sep 2017 01:04:28 GMT

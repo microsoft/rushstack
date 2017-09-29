@@ -2,6 +2,25 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "3.4.1",
+      "tag": "@microsoft/api-extractor_v3.4.1",
+      "date": "Fri, 29 Sep 2017 01:03:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "5d78825558e12fa828d114a655975c315aa1a566",
+            "comment": "Removed IMarkupPage.docId"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.1` to `~0.3.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.4.0",
       "tag": "@microsoft/api-extractor_v3.4.0",
       "date": "Thu, 28 Sep 2017 01:04:28 GMT",
