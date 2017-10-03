@@ -49,7 +49,7 @@ export class VersionPolicyConfiguration {
    * @param policyName - Name of the version policy
    */
   public getVersionPolicy(policyName: string): VersionPolicy {
-    const policy: VersionPolicy = this._versionPolicies.get(policyName);
+    const policy: VersionPolicy | undefined = this._versionPolicies.get(policyName);
     if (!policy) {
       throw new Error(`Failed to find version policy by name \'${policyName}\'`);
     }
@@ -77,7 +77,7 @@ export class VersionPolicyConfiguration {
     shouldCommit?: boolean
   ): void {
     if (versionPolicyName) {
-      const policy: VersionPolicy = this.versionPolicies.get(versionPolicyName);
+      const policy: VersionPolicy | undefined = this.versionPolicies.get(versionPolicyName);
       if (policy) {
         policy.bump(bumpType, identifier);
       }
@@ -105,7 +105,7 @@ export class VersionPolicyConfiguration {
       VersionPolicyConfiguration._jsonSchema);
 
     versionPolicyJson.forEach(policyJson => {
-      const policy: VersionPolicy = VersionPolicy.load(policyJson);
+      const policy: VersionPolicy | undefined = VersionPolicy.load(policyJson);
       if (policy) {
         this._versionPolicies.set(policy.policyName, policy);
       }

@@ -16,7 +16,7 @@ export enum ErrorDetectionMode {
  * @public
  */
 export interface IErrorDetectionRule {
-  (line: string): TaskError;
+  (line: string): TaskError | undefined;
 }
 
 /**
@@ -24,10 +24,10 @@ export interface IErrorDetectionRule {
  * @public
  */
 export function RegexErrorDetector(regex: RegExp,
-    getError: (match: RegExpExecArray) => TaskError): IErrorDetectionRule {
+    getError: (match: RegExpExecArray) => TaskError | undefined): IErrorDetectionRule {
 
-  return (line: string): TaskError => {
-    const match: RegExpExecArray = regex.exec(line);
+  return (line: string): TaskError | undefined => {
+    const match: RegExpExecArray | null = regex.exec(line);
     if (match) {
       return getError(match);
     }
@@ -50,7 +50,7 @@ export default class ErrorDetector {
   public execute(data: string): TaskError[] {
     const errors: TaskError[] = [];
     data.split('\n').forEach((line: string) => {
-      const error: TaskError = this._checkLine(line);
+      const error: TaskError | undefined = this._checkLine(line);
       if (error) {
         errors.push(error);
       }
@@ -58,9 +58,9 @@ export default class ErrorDetector {
     return errors;
   }
 
-  private _checkLine(line: string): TaskError {
+  private _checkLine(line: string): TaskError | undefined {
     for (const rule of this._rules) {
-      const error: TaskError = rule(line);
+      const error: TaskError | undefined = rule(line);
       if (error) {
         return error;
       }

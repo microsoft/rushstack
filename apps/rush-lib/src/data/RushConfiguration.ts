@@ -482,7 +482,7 @@ export default class RushConfiguration {
    * Looks up a project in the projectsByName map.  If the project is not found,
    * then undefined is returned.
    */
-  public getProjectByName(projectName: string): RushConfigurationProject {
+  public getProjectByName(projectName: string): RushConfigurationProject | undefined {
     return this._projectsByName.get(projectName);
   }
 
@@ -492,9 +492,9 @@ export default class RushConfiguration {
    * like "@something/example".  If exactly one project matches this heuristic, it
    * is returned.  Otherwise, undefined is returned.
    */
-  public findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject {
+  public findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined {
     // Is there an exact match?
-    let result: RushConfigurationProject = this._projectsByName.get(shorthandProjectName);
+    let result: RushConfigurationProject | undefined = this._projectsByName.get(shorthandProjectName);
     if (result) {
       return result;
     }
@@ -637,14 +637,16 @@ export default class RushConfiguration {
       = RushConfiguration._generateTempNamesForProjects(sortedProjectJsons);
 
     for (const projectJson of sortedProjectJsons) {
-      const tempProjectName: string = tempNamesByProject.get(projectJson);
-      const project: RushConfigurationProject = new RushConfigurationProject(projectJson, this, tempProjectName);
-      this._projects.push(project);
-      if (this._projectsByName.get(project.packageName)) {
-        throw new Error(`The project name "${project.packageName}" was specified more than once`
-          + ` in the rush.json configuration file.`);
+      const tempProjectName: string | undefined = tempNamesByProject.get(projectJson);
+      if (tempProjectName) {
+        const project: RushConfigurationProject = new RushConfigurationProject(projectJson, this, tempProjectName);
+        this._projects.push(project);
+        if (this._projectsByName.get(project.packageName)) {
+          throw new Error(`The project name "${project.packageName}" was specified more than once`
+            + ` in the rush.json configuration file.`);
+        }
+        this._projectsByName.set(project.packageName, project);
       }
-      this._projectsByName.set(project.packageName, project);
     }
 
     for (const project of this._projects) {
@@ -665,12 +667,12 @@ export default class RushConfiguration {
     this._pinnedVersions = PinnedVersionsConfiguration.tryLoadFromFile(pinnedVersionsFile);
   }
 
-  private _populateDownstreamDependencies(dependencies: { [key: string]: string }, packageName: string): void {
+  private _populateDownstreamDependencies(dependencies: { [key: string]: string } | undefined, packageName: string): void {
     if (!dependencies) {
       return;
     }
     Object.keys(dependencies).forEach(dependencyName => {
-      const depProject: RushConfigurationProject = this._projectsByName.get(dependencyName);
+      const depProject: RushConfigurationProject | undefined = this._projectsByName.get(dependencyName);
 
       if (depProject) {
         depProject.downstreamDependencyProjects.push(packageName);

@@ -67,7 +67,7 @@ describe('VersionMismatchFinder', () => {
     assert.equal(mismatchFinder.numberOfMismatches, 1);
     assert.equal(mismatchFinder.getMismatches().length, 1);
     assert.equal(mismatchFinder.getMismatches()[0], '@types/foo');
-    assert.includeMembers(mismatchFinder.getVersionsOfMismatch('@types/foo'), ['2.0.0', '1.2.3']);
+    assert.includeMembers(mismatchFinder.getVersionsOfMismatch('@types/foo')!, ['2.0.0', '1.2.3']);
     assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '2.0.0'), 'B');
     assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '1.2.3'), 'A');
     done();
@@ -181,8 +181,8 @@ describe('VersionMismatchFinder', () => {
     assert.equal(mismatchFinder.numberOfMismatches, 2);
     assert.equal(mismatchFinder.getMismatches().length, 2);
     assert.includeMembers(mismatchFinder.getMismatches(), ['@types/foo', 'mocha']);
-    assert.includeMembers(mismatchFinder.getVersionsOfMismatch('@types/foo'), ['2.0.0', '1.2.3']);
-    assert.includeMembers(mismatchFinder.getVersionsOfMismatch('mocha'), ['2.0.0', '1.2.3']);
+    assert.includeMembers(mismatchFinder.getVersionsOfMismatch('@types/foo')!, ['2.0.0', '1.2.3']);
+    assert.includeMembers(mismatchFinder.getVersionsOfMismatch('mocha')!, ['2.0.0', '1.2.3']);
     assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '1.2.3'), 'A');
     assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '2.0.0'), 'B');
     assert.equal(mismatchFinder.getConsumersOfMismatch('mocha', '1.2.3'), 'C');
@@ -228,7 +228,7 @@ describe('VersionMismatchFinder', () => {
     assert.equal(mismatchFinder.numberOfMismatches, 1);
     assert.equal(mismatchFinder.getMismatches().length, 1);
     assert.includeMembers(mismatchFinder.getMismatches(), ['@types/foo']);
-    assert.includeMembers(mismatchFinder.getVersionsOfMismatch('@types/foo'), ['2.0.0', '1.2.3', '9.9.9']);
+    assert.includeMembers(mismatchFinder.getVersionsOfMismatch('@types/foo')!, ['2.0.0', '1.2.3', '9.9.9']);
     assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '1.2.3'), 'A');
     assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '2.0.0'), 'B');
     assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '9.9.9'), 'C');
@@ -263,7 +263,7 @@ describe('VersionMismatchFinder', () => {
     assert.equal(mismatchFinder.numberOfMismatches, 1);
     assert.equal(mismatchFinder.getMismatches().length, 1);
     assert.equal(mismatchFinder.getMismatches()[0], '@types/foo');
-    assert.includeMembers(mismatchFinder.getVersionsOfMismatch('@types/foo'), ['2.0.0', '1.2.3']);
+    assert.includeMembers(mismatchFinder.getVersionsOfMismatch('@types/foo')!, ['2.0.0', '1.2.3']);
     assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '2.0.0'), 'B');
     assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '1.2.3'), 'A');
     done();
@@ -297,7 +297,7 @@ describe('VersionMismatchFinder', () => {
     assert.equal(mismatchFinder.numberOfMismatches, 1);
     assert.equal(mismatchFinder.getMismatches().length, 1);
     assert.equal(mismatchFinder.getMismatches()[0], '@types/foo');
-    assert.includeMembers(mismatchFinder.getVersionsOfMismatch('@types/foo'), ['2.0.0', '1.2.3']);
+    assert.includeMembers(mismatchFinder.getVersionsOfMismatch('@types/foo')!, ['2.0.0', '1.2.3']);
     assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '2.0.0'), 'B');
     assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '1.2.3'), 'A');
     done();
@@ -331,7 +331,7 @@ describe('VersionMismatchFinder', () => {
     assert.equal(mismatchFinder.numberOfMismatches, 1);
     assert.equal(mismatchFinder.getMismatches().length, 1);
     assert.equal(mismatchFinder.getMismatches()[0], '@types/foo');
-    assert.includeMembers(mismatchFinder.getVersionsOfMismatch('@types/foo'), ['2.0.0', '1.2.3']);
+    assert.includeMembers(mismatchFinder.getVersionsOfMismatch('@types/foo')!, ['2.0.0', '1.2.3']);
     assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '2.0.0'), 'B');
     assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '1.2.3'), 'A');
     done();
