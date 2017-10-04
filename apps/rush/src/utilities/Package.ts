@@ -82,13 +82,13 @@ export default class Package {
   /**
    * The parent package, or undefined if this is the root of the tree.
    */
-  public parent: Package;
+  public parent: Package | undefined;
 
   /**
    * If this is a local path that we are planning to symlink to a target folder,
    * then symlinkTargetFolderPath keeps track of the intended target.
    */
-  public symlinkTargetFolderPath: string = undefined;
+  public symlinkTargetFolderPath: string | undefined = undefined;
 
   /**
    * Packages that were placed in node_modules subfolders of this package.
@@ -141,7 +141,7 @@ export default class Package {
           dependencyNames.add(dependencyName);
           dependencies.push({
             name: dependencyName,
-            versionRange: packageJson.dependencies[dependencyName],
+            versionRange: packageJson.dependencies![dependencyName],
             kind: PackageDependencyKind.LocalLink
           });
         }
@@ -227,7 +227,7 @@ export default class Package {
     this._childrenByName.set(child.name, child);
   }
 
-  public getChildByName(childPackageName: string): Package {
+  public getChildByName(childPackageName: string): Package | undefined {
     return this._childrenByName.get(childPackageName);
   }
 
@@ -246,7 +246,7 @@ export default class Package {
   public resolveOrCreate(dependencyName: string, cyclicSubtreeRoot?: Package): IResolveOrCreateResult {
 
     let currentParent: Package = this;
-    let parentForCreate: Package = undefined;
+    let parentForCreate: Package | undefined = undefined;
 
     // tslint:disable-next-line:no-constant-condition
     while (true) {
@@ -280,7 +280,7 @@ export default class Package {
    * Searches the node_modules hierarchy for the nearest matching package with the
    * given name.  If no match is found, then undefined is returned.
    */
-  public resolve(dependencyName: string): Package {
+  public resolve(dependencyName: string): Package | undefined {
     return this.resolveOrCreate(dependencyName).found;
   }
 
@@ -309,6 +309,6 @@ export default class Package {
  * Used by the "rush link" algorithm when doing NPM package resolution.
  */
 export interface IResolveOrCreateResult {
-  found: Package;
-  parentForCreate: Package;
+  found: Package | undefined;
+  parentForCreate: Package | undefined;
 }

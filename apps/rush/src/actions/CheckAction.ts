@@ -46,9 +46,9 @@ export default class CheckAction extends BaseRushAction {
     // Iterate over the list. For any dependency with mismatching versions, print the projects
     mismatchFinder.getMismatches().forEach((dependency: string) => {
       console.log(colors.yellow(dependency));
-      mismatchFinder.getVersionsOfMismatch(dependency).forEach((version: string) => {
+      mismatchFinder.getVersionsOfMismatch(dependency)!.forEach((version: string) => {
         console.log(`  ${version}`);
-        mismatchFinder.getConsumersOfMismatch(dependency, version).forEach((project: string) => {
+        mismatchFinder.getConsumersOfMismatch(dependency, version)!.forEach((project: string) => {
           console.log(`   - ${project}`);
         });
       });

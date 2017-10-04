@@ -146,7 +146,7 @@ describe('findChangeRequests', () => {
     expect(allChanges['c'].newVersion).equals('3.1.2');
     expect(allChanges['d'].changeType).equals(ChangeType.patch, 'd was not a patch');
     expect(allChanges['d'].newVersion).equals('4.1.2');
-    expect(allChanges['e'].newVersion).equals(allPackages.get('e').packageJson.version, 'e version gets changed');
+    expect(allChanges['e'].newVersion).equals(allPackages.get('e')!.packageJson.version, 'e version gets changed');
   });
 });
 

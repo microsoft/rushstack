@@ -72,12 +72,12 @@ export class ApprovedPackagesConfiguration {
     };
   }
 
-  public getItemByName(packageName: string): ApprovedPackagesItem {
+  public getItemByName(packageName: string): ApprovedPackagesItem | undefined {
     return this._itemsByName.get(packageName);
   }
 
   public addOrUpdatePackage(packageName: string, reviewCategory: string): void {
-    let item: ApprovedPackagesItem = this._itemsByName.get(packageName);
+    let item: ApprovedPackagesItem | undefined = this._itemsByName.get(packageName);
     if (!item) {
       item = new ApprovedPackagesItem();
       item.packageName = packageName;

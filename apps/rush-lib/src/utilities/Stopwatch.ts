@@ -18,8 +18,8 @@ export enum StopwatchState {
  * @public
  */
 export class Stopwatch {
-  private _startTime: number;
-  private _endTime: number;
+  private _startTime: number | undefined;
+  private _endTime: number | undefined;
   private _state: StopwatchState;
 
   private _getTime: () => number;

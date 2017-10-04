@@ -18,7 +18,7 @@ export default class PackageLookup {
 
     // tslint:disable-next-line:no-constant-condition
     while (true) {
-      const current: Package = queue.shift();
+      const current: Package | undefined = queue.shift();
       if (!current) {
         break;
       }
@@ -35,7 +35,7 @@ export default class PackageLookup {
     }
   }
 
-  public getPackage(nameAndVersion: string): Package {
+  public getPackage(nameAndVersion: string): Package | undefined {
     return this._packageMap.get(nameAndVersion);
   }
 }

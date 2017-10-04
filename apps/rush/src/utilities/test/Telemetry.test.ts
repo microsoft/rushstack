@@ -79,8 +79,8 @@ describe('Telemetry', () => {
       logFile = file;
       dataToWrite = data;
     });
-    assert.isDefined(logFile.match(/telemetry_.*\.json/));
-    assert.deepEqual(dataToWrite, JSON.stringify([logData]));
+    assert.isDefined(logFile!.match(/telemetry_.*\.json/));
+    assert.deepEqual(dataToWrite!, JSON.stringify([logData]));
     assert.deepEqual(telemetry.store, []);
   });
 
