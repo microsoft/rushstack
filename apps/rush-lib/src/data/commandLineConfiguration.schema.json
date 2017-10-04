@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Rush Configuration",
+  "description": "Configuration file for the Rush multi-package build tool",
+
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "customCommands": {
+      "description": "A list of custom commands that can be invoked from the Rush command line"
+    },
+
+    "customOptions": {
+
+    }
+  }
+}
