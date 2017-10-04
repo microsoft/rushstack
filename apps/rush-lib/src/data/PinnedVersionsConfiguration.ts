@@ -83,9 +83,9 @@ export class PinnedVersionsConfiguration {
   private constructor(pinnedVersionJson: IPinnedVersionsJson | undefined, private _filename: string) {
     this._data = new Map<string, string>();
     if (pinnedVersionJson) {
-      Object.keys(pinnedVersionJson).forEach((dep: string) => {
-        this.set(dep, pinnedVersionJson[dep]);
-      });
+      for (const dependency of Object.keys(pinnedVersionJson)) {
+        this.set(dependency, pinnedVersionJson[dependency]);
+      }
     }
   }
 
