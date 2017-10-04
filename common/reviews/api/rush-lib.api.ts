@@ -128,7 +128,7 @@ interface IChangeFile {
   // (undocumented)
   changes: IChangeInfo[];
   // (undocumented)
-  email: string;
+  email: string | undefined;
   // (undocumented)
   packageName: string;
 }
@@ -168,7 +168,7 @@ interface IChangeLogEntry {
     minor?: IChangeLogComment[];
     patch?: IChangeLogComment[];
   }
-  date: string;
+  date: string | undefined;
   tag: string;
   version: string;
 }

@@ -76,11 +76,14 @@ export default class ChangeManager {
     Object
       .keys(this._allChanges)
       .filter((key) => {
-        const versionPolicyName: string = this._rushConfiguration.getProjectByName(key).versionPolicyName;
-        if (versionPolicyName) {
-          const changeInfo: IChangeInfo = this._allChanges[key];
-          const versionPolicy: VersionPolicy = versionConfig.getVersionPolicy(versionPolicyName);
-          versionPolicy.validate(changeInfo.newVersion, key);
+        const projectInfo: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(key);
+        if (projectInfo) {
+          const versionPolicyName: string | undefined = projectInfo.versionPolicyName;
+          if (versionPolicyName) {
+            const changeInfo: IChangeInfo = this._allChanges[key];
+            const versionPolicy: VersionPolicy = versionConfig.getVersionPolicy(versionPolicyName);
+            versionPolicy.validate(changeInfo.newVersion!, key);
+          }
         }
       });
   }
@@ -90,7 +93,7 @@ export default class ChangeManager {
    * @param shouldCommit - If the value is true, package.json will be updated.
    * If the value is false, package.json and change logs will not be updated. It will only do a dry-run.
    */
-  public apply(shouldCommit: boolean): Map<string, IPackageJson> {
+  public apply(shouldCommit: boolean): Map<string, IPackageJson> | undefined {
     if (!this.hasChanges()) {
       return;
     }

@@ -39,7 +39,7 @@ export class ApprovedPackagesChecker {
     approvedPackagesPolicy.nonbrowserApprovedPackages.saveToFile();
   }
 
-  private static _collectDependencies(dependencies: { [key: string]: string },
+  private static _collectDependencies(dependencies: { [key: string]: string } | undefined,
     approvedPackagesPolicy: ApprovedPackagesPolicy, rushProject: RushConfigurationProject): void {
 
     if (dependencies) {

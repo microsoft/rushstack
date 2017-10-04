@@ -667,7 +667,10 @@ export default class RushConfiguration {
     this._pinnedVersions = PinnedVersionsConfiguration.tryLoadFromFile(pinnedVersionsFile);
   }
 
-  private _populateDownstreamDependencies(dependencies: { [key: string]: string } | undefined, packageName: string): void {
+  private _populateDownstreamDependencies(
+    dependencies: { [key: string]: string } | undefined,
+    packageName: string): void {
+
     if (!dependencies) {
       return;
     }

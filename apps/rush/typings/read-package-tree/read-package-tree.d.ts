@@ -6,11 +6,11 @@ declare module 'read-package-tree' {
   namespace readPackageTree {
     interface PackageNode {
       children: PackageNode[];
-      error: Error;
+      error?: Error;
       id: number;
       isLink: boolean;
       package: PackageJson;
-      parent: Node;
+      parent?: Node;
 
       /**
        * The absolute path to the folder containing package.json.

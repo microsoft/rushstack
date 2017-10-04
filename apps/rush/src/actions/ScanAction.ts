@@ -87,7 +87,7 @@ export default class ScanAction extends BaseRushAction {
 
         for (const line of lines) {
           for (const requireRegExp of requireRegExps) {
-            const requireRegExpResult: RegExpExecArray = requireRegExp.exec(line);
+            const requireRegExpResult: RegExpExecArray | null = requireRegExp.exec(line);
             if (requireRegExpResult) {
               requireMatches.add(requireRegExpResult[1]);
             }
@@ -101,7 +101,7 @@ export default class ScanAction extends BaseRushAction {
     const packageMatches: Set<string> = new Set<string>();
 
     requireMatches.forEach((requireMatch: string) => {
-      const packageRegExpResult: RegExpExecArray = packageRegExp.exec(requireMatch);
+      const packageRegExpResult: RegExpExecArray | null = packageRegExp.exec(requireMatch);
       if (packageRegExpResult) {
         packageMatches.add(packageRegExpResult[1]);
       }

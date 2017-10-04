@@ -17,8 +17,8 @@ import {
 import { VersionManager } from '../VersionManager';
 
 function _getChanges(changeFiles: Map<string, ChangeFile>,
-  packageName: string): IChangeInfo[] {
-  const changeFile: ChangeFile = changeFiles.get(packageName);
+  packageName: string): IChangeInfo[] | undefined {
+  const changeFile: ChangeFile | undefined = changeFiles.get(packageName);
   if (!changeFile) {
     return undefined;
   }
@@ -44,36 +44,36 @@ describe('VersionManager', () => {
       const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
       const expectedVersion: string = '10.10.0';
       assert.equal(updatedPackages.size, 6, 'The number of updated packages matches');
-      assert.equal(updatedPackages.get('a').version, expectedVersion);
-      assert.equal(updatedPackages.get('b').version, expectedVersion);
-      assert.equal(updatedPackages.get('b').dependencies['a'], `~${expectedVersion}`);
-      assert.equal(updatedPackages.get('c').version, '3.1.1', 'c version should not change');
-      assert.equal(updatedPackages.get('c').dependencies['b'], `>=10.10.0 <11.0.0`);
-      assert.equal(updatedPackages.get('d').version, '4.1.1', 'd version should not change');
-      assert.equal(updatedPackages.get('d').dependencies['b'], `>=10.10.0 <11.0.0`);
-      assert.equal(updatedPackages.get('f').version, '1.0.0', 'f version should not change');
-      assert.equal(updatedPackages.get('f').dependencies['a'], `~10.10.0`);
-      assert.equal(updatedPackages.get('g').devDependencies['a'], `~10.10.0`);
+      assert.equal(updatedPackages.get('a')!.version, expectedVersion);
+      assert.equal(updatedPackages.get('b')!.version, expectedVersion);
+      assert.equal(updatedPackages.get('b')!.dependencies!['a'], `~${expectedVersion}`);
+      assert.equal(updatedPackages.get('c')!.version, '3.1.1', 'c version should not change');
+      assert.equal(updatedPackages.get('c')!.dependencies!['b'], `>=10.10.0 <11.0.0`);
+      assert.equal(updatedPackages.get('d')!.version, '4.1.1', 'd version should not change');
+      assert.equal(updatedPackages.get('d')!.dependencies!['b'], `>=10.10.0 <11.0.0`);
+      assert.equal(updatedPackages.get('f')!.version, '1.0.0', 'f version should not change');
+      assert.equal(updatedPackages.get('f')!.dependencies!['a'], `~10.10.0`);
+      assert.equal(updatedPackages.get('g')!.devDependencies!['a'], `~10.10.0`);
 
       const changeFiles: Map<string, ChangeFile> = versionManager.changeFiles;
       assert.equal(changeFiles.size, 4, 'The number of change files matches');
-      assert.equal(_getChanges(changeFiles, 'a').length, 1, 'a does not have one change');
-      assert.equal(_getChanges(changeFiles, 'a')[0].changeType, ChangeType.none,
+      assert.equal(_getChanges(changeFiles, 'a')!.length, 1, 'a does not have one change');
+      assert.equal(_getChanges(changeFiles, 'a')![0].changeType, ChangeType.none,
         'a does not have a none change');
-      assert.equal(_getChanges(changeFiles, 'b').length, 2, 'b does not have two change');
-      assert.equal(_getChanges(changeFiles, 'b')[0].changeType, ChangeType.none,
+      assert.equal(_getChanges(changeFiles, 'b')!.length, 2, 'b does not have two change');
+      assert.equal(_getChanges(changeFiles, 'b')![0].changeType, ChangeType.none,
         'b does not have a none change');
-      assert.equal(_getChanges(changeFiles, 'b')[1].changeType, ChangeType.dependency,
+      assert.equal(_getChanges(changeFiles, 'b')![1].changeType, ChangeType.dependency,
         'b does not have a dependency update');
-      assert.equal(_getChanges(changeFiles, 'c').length, 2, 'c does not have two change');
-      assert.equal(_getChanges(changeFiles, 'c')[0].changeType, ChangeType.patch,
+      assert.equal(_getChanges(changeFiles, 'c')!.length, 2, 'c does not have two change');
+      assert.equal(_getChanges(changeFiles, 'c')![0].changeType, ChangeType.patch,
         'c does not have a patch change');
-      assert.equal(_getChanges(changeFiles, 'c')[1].changeType, ChangeType.dependency,
+      assert.equal(_getChanges(changeFiles, 'c')![1].changeType, ChangeType.dependency,
         'c does not have a dependency change');
-      assert.equal(_getChanges(changeFiles, 'd').length, 2, 'd does not have two change');
-      assert.equal(_getChanges(changeFiles, 'd')[0].changeType, ChangeType.patch,
+      assert.equal(_getChanges(changeFiles, 'd')!.length, 2, 'd does not have two change');
+      assert.equal(_getChanges(changeFiles, 'd')![0].changeType, ChangeType.patch,
         'd does not have a  patch change');
-      assert.equal(_getChanges(changeFiles, 'd')[1].changeType, ChangeType.dependency,
+      assert.equal(_getChanges(changeFiles, 'd')![1].changeType, ChangeType.dependency,
         'd does not have a  patch change');
     });
 
@@ -81,10 +81,10 @@ describe('VersionManager', () => {
       versionManager.ensure('testPolicy2');
       const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
       assert.equal(updatedPackages.size, 2);
-      assert.equal(updatedPackages.get('c').version, '5.0.0');
-      assert.equal(updatedPackages.get('c').dependencies['b'], `>=2.0.0 <3.0.0`);
-      assert.equal(updatedPackages.get('e').version, '10.10.0');
-      assert.equal(updatedPackages.get('e').dependencies['c'], '~5.0.0');
+      assert.equal(updatedPackages.get('c')!.version, '5.0.0');
+      assert.equal(updatedPackages.get('c')!.dependencies!['b'], `>=2.0.0 <3.0.0`);
+      assert.equal(updatedPackages.get('e')!.version, '10.10.0');
+      assert.equal(updatedPackages.get('e')!.dependencies!['c'], '~5.0.0');
     });
 
     it('does not change packageJson if not needed by individual version policy', () => {
@@ -102,10 +102,10 @@ describe('VersionManager', () => {
 
       const changeFiles: Map<string, ChangeFile> = versionManager.changeFiles;
 
-      assert.equal(updatedPackages.get('a').version, expectedVersion, `a version is not expected`);
-      assert.equal(updatedPackages.get('b').version, expectedVersion, `b version is not expected`);
-      assert.equal(updatedPackages.get('e').version, expectedVersion, `e version is not expected`);
-      assert.equal(updatedPackages.get('g').devDependencies['a'], `~${expectedVersion}`,
+      assert.equal(updatedPackages.get('a')!.version, expectedVersion, `a version is not expected`);
+      assert.equal(updatedPackages.get('b')!.version, expectedVersion, `b version is not expected`);
+      assert.equal(updatedPackages.get('e')!.version, expectedVersion, `e version is not expected`);
+      assert.equal(updatedPackages.get('g')!.devDependencies!['a'], `~${expectedVersion}`,
         'a version is not expected in dev dependency');
       assert.isUndefined(_getChanges(changeFiles, 'a'), 'a has change entry.');
       assert.isUndefined(_getChanges(changeFiles, 'b'), 'b has change entry');
