@@ -14,7 +14,7 @@ import {
 } from '@microsoft/rush-lib';
 
 export class PackageChangeAnalyzer {
-  public static _instance: PackageChangeAnalyzer;
+  public static _instance: PackageChangeAnalyzer | undefined;
 
   // Allow this function to be overwritten during unit tests
   public static getPackageDeps: (path: string, ignoredFiles: string[]) => IPackageDeps;
@@ -37,7 +37,7 @@ export class PackageChangeAnalyzer {
     this._data = this.getData();
   }
 
-  public getPackageDepsHash(projectName: string): IPackageDeps {
+  public getPackageDepsHash(projectName: string): IPackageDeps | undefined {
     if (!this._data) {
       this._data = this.getData();
     }
@@ -73,11 +73,11 @@ export class PackageChangeAnalyzer {
     Object.keys(repoDeps.files).forEach((filepath: string) => {
       const fileHash: string = repoDeps.files[filepath];
 
-      const projectName: string = this._getProjectForFile(filepath);
+      const projectName: string | undefined = this._getProjectForFile(filepath);
 
       // If we found a project for the file, go ahead and store this file's hash
       if (projectName) {
-        projectHashDeps.get(projectName).files[filepath] = fileHash;
+        projectHashDeps.get(projectName)!.files[filepath] = fileHash;
       } else {
         noProjectHashes[filepath] = fileHash;
       }
@@ -127,7 +127,7 @@ export class PackageChangeAnalyzer {
     return projectHashDeps;
   }
 
-  private _getProjectForFile(filepath: string): string {
+  private _getProjectForFile(filepath: string): string | undefined {
     for (const project of PackageChangeAnalyzer.rushConfig.projects) {
       if (this._fileExistsInFolder(filepath, project.projectRelativeFolder)) {
         return project.packageName;

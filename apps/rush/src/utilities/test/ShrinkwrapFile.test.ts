@@ -8,7 +8,7 @@ import ShrinkwapFile from '../ShrinkwrapFile';
 
 describe('ShrinkwrapFile', () => {
   const filename: string = path.resolve(path.join(__dirname, './shrinkwrapFile/npm-shrinkwrap.json'));
-  const shrinkwrapFile: ShrinkwapFile = ShrinkwapFile.loadFromFile(filename);
+  const shrinkwrapFile: ShrinkwapFile = ShrinkwapFile.loadFromFile(filename)!;
 
   it('verifies root-level dependency', () => {
     shrinkwrapFile.hasCompatibleDependency('q', '~1.5.0');

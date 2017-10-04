@@ -8,7 +8,7 @@ export default class PrereleaseToken {
     if (_prereleaseName && _suffixName) {
       throw new Error('Pre-release name and suffix cannot be provided at the same time.');
     }
-    this._name = _prereleaseName || _suffixName;
+    this._name = _prereleaseName! || _suffixName!;
   }
 
   public get hasValue(): boolean {

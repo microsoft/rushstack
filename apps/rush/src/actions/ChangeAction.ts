@@ -128,11 +128,14 @@ export default class ChangeAction extends BaseRushAction {
   }
 
   private _getChangedPackageNames(): string[] {
-    const changedFolders: string[] = VersionControl.getChangedFolders(this._targetBranch);
+    const changedFolders: Array<string | undefined> | undefined = VersionControl.getChangedFolders(this._targetBranch);
+    if (!changedFolders) {
+      return [];
+    }
     return this.rushConfiguration.projects
       .filter(project => project.shouldPublish)
       .filter(project => this._hasProjectChanged(changedFolders, project))
-      .map(project => project.packageName);
+      .map(project => project.packageName) as string[];
   }
 
   private _validateChangeFile(changedPackages: string[]): void {
@@ -149,7 +152,7 @@ export default class ChangeAction extends BaseRushAction {
     return VersionControl.getChangedFiles(`common/changes/`, this._targetBranch);
   }
 
-  private _hasProjectChanged(changedFolders: string[],
+  private _hasProjectChanged(changedFolders: Array<string | undefined>,
     project: RushConfigurationProject): boolean {
     let normalizedFolder: string = project.projectRelativeFolder;
     if (normalizedFolder.charAt(normalizedFolder.length - 1) !== '/') {
@@ -161,6 +164,7 @@ export default class ChangeAction extends BaseRushAction {
         return true;
       }
     }
+    return false;
   }
 
   /**
@@ -171,20 +175,20 @@ export default class ChangeAction extends BaseRushAction {
 
     // If there are still projects, ask about the next one
     if (this._sortedProjectList.length) {
-      return this._askQuestions(this._sortedProjectList.pop())
+      return this._askQuestions(this._sortedProjectList.pop()!)
         .then((answers: IChangeInfo) => {
 
           // Save the info into the changefile
-          let changeFile: IChangeFile = this._changeFileData.get(answers.packageName);
+          let changeFile: IChangeFile | undefined = this._changeFileData.get(answers.packageName);
           if (!changeFile) {
             changeFile = {
               changes: [],
               packageName: answers.packageName,
               email: undefined
             };
-            this._changeFileData.set(answers.packageName, changeFile);
+            this._changeFileData.set(answers.packageName, changeFile!);
           }
-          changeFile.changes.push(answers);
+          changeFile!.changes.push(answers);
 
           // Continue to loop
           return this._promptLoop();
@@ -263,8 +267,8 @@ export default class ChangeAction extends BaseRushAction {
    * Detects the user's email address from their git configuration, prompts the user to approve the
    * detected email. It returns undefined if it cannot be detected.
    */
-  private _detectAndConfirmEmail(): Promise<string> {
-    let email: string;
+  private _detectAndConfirmEmail(): Promise<string | undefined> {
+    let email: string | undefined;
     try {
       email = child_process.execSync('git config user.email')
         .toString()
@@ -357,12 +361,11 @@ export default class ChangeAction extends BaseRushAction {
           return this._writeFile(filePath, output);
         } else {
           console.log(`Not overwriting ${filePath}...`);
-          return Promise.resolve(undefined);
+          return Promise.resolve();
         }
       });
-    } else {
-      return this._writeFile(filePath, output);
     }
+    return this._writeFile(filePath, output);
   }
 
   /**

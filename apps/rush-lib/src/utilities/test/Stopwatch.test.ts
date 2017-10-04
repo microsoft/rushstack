@@ -8,7 +8,7 @@ import { assert } from 'chai';
 import { Stopwatch, StopwatchState } from '../Stopwatch';
 
 function pseudoTimeMilliseconds(times: number[]): () => number {
-  return () => times.shift();
+  return () => times.shift()!;
 }
 
 function pseudoTimeSeconds(times: number[]): () => number {

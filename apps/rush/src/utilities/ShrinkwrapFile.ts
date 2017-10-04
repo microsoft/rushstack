@@ -30,7 +30,7 @@ export default class ShrinkwrapFile {
   private _alreadyWarnedSpecs: Set<string> = new Set<string>();
 
   public static loadFromFile(shrinkwrapJsonFilename: string): ShrinkwrapFile | undefined {
-    let data: string = undefined;
+    let data: string | undefined = undefined;
     try {
       if (!fsx.existsSync(shrinkwrapJsonFilename)) {
         return undefined; // file does not exist
@@ -92,10 +92,10 @@ export default class ShrinkwrapFile {
   public hasCompatibleDependency(dependencyName: string, versionRange: string, tempProjectName?: string): boolean {
 
     // First, check under tempProjectName, as this is the first place "rush link" looks.
-    let dependencyJson: IShrinkwrapDependencyJson = undefined;
+    let dependencyJson: IShrinkwrapDependencyJson | undefined = undefined;
 
     if (tempProjectName) {
-      const tempDependency: IShrinkwrapDependencyJson = ShrinkwrapFile.tryGetValue(
+      const tempDependency: IShrinkwrapDependencyJson | undefined = ShrinkwrapFile.tryGetValue(
         this._shrinkwrapJson.dependencies, tempProjectName);
       if (tempDependency && tempDependency.dependencies) {
         dependencyJson = ShrinkwrapFile.tryGetValue(tempDependency.dependencies, dependencyName);

@@ -52,7 +52,7 @@ export default class PublishUtilities {
         PublishUtilities._updateCommitDetails(fullPath, changeRequest.changes);
       }
 
-      for (const change of changeRequest.changes) {
+      for (const change of changeRequest.changes!) {
         PublishUtilities._addChange(change, allChanges, allPackages, prereleaseToken, projectsToExclude);
       }
     });
@@ -74,7 +74,7 @@ export default class PublishUtilities {
     for (const packageName in allChanges) {
       if (allChanges.hasOwnProperty(packageName)) {
         const change: IChangeInfo = allChanges[packageName];
-        const project: RushConfigurationProject = allPackages.get(packageName);
+        const project: RushConfigurationProject = allPackages.get(packageName)!;
         const pkg: IPackageJson = project.packageJson;
         const deps: string[] = project.downstreamDependencyProjects;
 
@@ -84,8 +84,8 @@ export default class PublishUtilities {
         if (skipVersionBump) {
           change.newVersion = pkg.version;
         } else {
-          change.newVersion = (change.changeType >= ChangeType.patch) ?
-            semver.inc(pkg.version, PublishUtilities._getReleaseType(change.changeType)) :
+          change.newVersion = (change.changeType! >= ChangeType.patch) ?
+            semver.inc(pkg.version, PublishUtilities._getReleaseType(change.changeType!)) :
             pkg.version;
         }
 
@@ -94,7 +94,7 @@ export default class PublishUtilities {
             const depChange: IChangeInfo = allChanges[depName];
 
             if (depChange) {
-              depChange.order = Math.max(change.order + 1, depChange.order);
+              depChange.order = Math.max(change.order! + 1, depChange.order!);
             }
           }
         }
@@ -113,7 +113,7 @@ export default class PublishUtilities {
     return Object
       .keys(allChanges)
       .map(key => allChanges[key])
-      .sort((a, b) => a.order < b.order ? -1 : 1);
+      .sort((a, b) => a.order! < b.order! ? -1 : 1);
   }
 
   /**
@@ -252,13 +252,13 @@ export default class PublishUtilities {
       !project.shouldPublish;
   }
 
-  private static _updateCommitDetails(filename: string, changes: IChangeInfo[]): void {
+  private static _updateCommitDetails(filename: string, changes: IChangeInfo[] | undefined): void {
     try {
       const fileLog: string = execSync('git log -n 1 ' + filename, { cwd: path.dirname(filename) }).toString();
-      const author: string = fileLog.match(/Author: (.*)/)[1];
-      const commit: string = fileLog.match(/commit (.*)/)[1];
+      const author: string = fileLog.match(/Author: (.*)/)![1];
+      const commit: string = fileLog.match(/commit (.*)/)![1];
 
-      changes.forEach(change => {
+      changes!.forEach(change => {
         change.author = author;
         change.commit = commit;
       });
@@ -274,18 +274,18 @@ export default class PublishUtilities {
     projectsToExclude?: Set<string>
   ): IPackageJson {
 
-    const project: RushConfigurationProject = allPackages.get(change.packageName);
+    const project: RushConfigurationProject = allPackages.get(change.packageName)!;
     const pkg: IPackageJson = project.packageJson;
 
     const shouldSkipVersionBump: boolean = !project.shouldPublish ||
-      projectsToExclude && projectsToExclude.has(change.packageName);
+      !!projectsToExclude && projectsToExclude.has(change.packageName);
 
     const newVersion: string = shouldSkipVersionBump ? pkg.version :
       PublishUtilities._getChangeInfoNewVersion(change, prereleaseToken);
 
     if (!shouldSkipVersionBump) {
       console.log(
-        `${EOL}* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: ${ChangeType[change.changeType]} update ` +
+        `${EOL}* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: ${ChangeType[change.changeType!]} update ` +
         `for ${change.packageName} to ${newVersion}`
       );
     } else {
@@ -305,9 +305,9 @@ export default class PublishUtilities {
     PublishUtilities._updateDependencies(pkg.name, pkg.devDependencies, allChanges, allPackages,
       prereleaseToken, projectsToExclude);
 
-    change.changes.forEach(subChange => {
+    change.changes!.forEach(subChange => {
       if (subChange.comment) {
-        console.log(` - [${ChangeType[subChange.changeType]}] ${subChange.comment}`);
+        console.log(` - [${ChangeType[subChange.changeType!]}] ${subChange.comment}`);
       }
     });
 
@@ -322,16 +322,16 @@ export default class PublishUtilities {
     packageName: string,
     dependencyName: string
   ): boolean {
-    const packageConfig: RushConfigurationProject = allPackages.get(packageName);
+    const packageConfig: RushConfigurationProject | undefined = allPackages.get(packageName);
     return !!packageConfig && packageConfig.cyclicDependencyProjects.has(dependencyName);
   }
 
   private static _updateDependencies(
     packageName: string,
-    dependencies: { [key: string]: string; },
+    dependencies: { [key: string]: string; } | undefined,
     allChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
-    prereleaseToken: PrereleaseToken,
+    prereleaseToken: PrereleaseToken | undefined,
     projectsToExclude?: Set<string>
   ): void {
 
@@ -342,7 +342,7 @@ export default class PublishUtilities {
           if (!depChange) {
             return;
           }
-          const depProject: RushConfigurationProject = allPackages.get(depName);
+          const depProject: RushConfigurationProject = allPackages.get(depName)!;
 
           if (!depProject.shouldPublish || projectsToExclude && projectsToExclude.has(depName)) {
             // No version change.
@@ -352,7 +352,7 @@ export default class PublishUtilities {
             // For prelease, the newVersion needs to be appended with prerelease name.
             // And dependency should specify the specific prerelease version.
             dependencies[depName] = PublishUtilities._getChangeInfoNewVersion(depChange, prereleaseToken);
-          } else if (depChange && depChange.changeType >= ChangeType.patch) {
+          } else if (depChange && depChange.changeType! >= ChangeType.patch) {
             PublishUtilities._updateDependencyVersion(
               packageName,
               dependencies,
@@ -374,9 +374,9 @@ export default class PublishUtilities {
    */
   private static _getChangeInfoNewVersion(
     change: IChangeInfo,
-    prereleaseToken: PrereleaseToken
+    prereleaseToken: PrereleaseToken | undefined
   ): string {
-    let newVersion: string = change.newVersion;
+    let newVersion: string = change.newVersion!;
     if (prereleaseToken && prereleaseToken.hasValue) {
       if (prereleaseToken.isPrerelease && change.changeType === ChangeType.dependency) {
         newVersion = semver.inc(newVersion, 'patch');
@@ -401,12 +401,12 @@ export default class PublishUtilities {
   ): boolean {
     let hasChanged: boolean = false;
     const packageName: string = change.packageName;
-    const project: RushConfigurationProject = allPackages.get(packageName);
+    const project: RushConfigurationProject | undefined = allPackages.get(packageName);
 
     if (!project) {
       console.log(`The package ${packageName} was requested for publishing but ` +
         `does not exist. Skip this change.`);
-      return;
+      return false;
     }
 
     const pkg: IPackageJson = project.packageJson;
@@ -414,7 +414,7 @@ export default class PublishUtilities {
 
     // If the given change does not have a changeType, derive it from the "type" string.
     if (change.changeType === undefined) {
-      change.changeType = ChangeType[change.type];
+      change.changeType = ChangeType[change.type!];
     }
 
     if (!allChanges[packageName]) {
@@ -428,10 +428,10 @@ export default class PublishUtilities {
     } else {
       currentChange = allChanges[packageName];
 
-      const oldChangeType: ChangeType = currentChange.changeType;
+      const oldChangeType: ChangeType = currentChange.changeType!;
 
-      currentChange.changeType = Math.max(currentChange.changeType, change.changeType);
-      currentChange.changes.push(change);
+      currentChange.changeType = Math.max(currentChange.changeType!, change.changeType!);
+      currentChange.changes!.push(change);
 
       hasChanged = hasChanged || (oldChangeType !== currentChange.changeType);
     }
@@ -443,8 +443,8 @@ export default class PublishUtilities {
       hasChanged = false;
       currentChange.changeType = ChangeType.none;
     } else {
-      currentChange.newVersion = change.changeType >= ChangeType.patch ?
-        semver.inc(pkg.version, PublishUtilities._getReleaseType(currentChange.changeType)) :
+      currentChange.newVersion = change.changeType! >= ChangeType.patch ?
+        semver.inc(pkg.version, PublishUtilities._getReleaseType(currentChange.changeType!)) :
         pkg.version;
       currentChange.newRangeDependency = PublishUtilities._getNewRangeDependency(currentChange.newVersion);
     }
@@ -455,19 +455,19 @@ export default class PublishUtilities {
     change: IChangeInfo,
     allChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
-    prereleaseToken: PrereleaseToken,
+    prereleaseToken: PrereleaseToken | undefined,
     projectsToExclude?: Set<string>
   ): void {
 
     const packageName: string = change.packageName;
-    const downstreamNames: string[] = allPackages.get(packageName).downstreamDependencyProjects;
+    const downstreamNames: string[] = allPackages.get(packageName)!.downstreamDependencyProjects;
 
     // Iterate through all downstream dependencies for the package.
     if (downstreamNames) {
-      if ((change.changeType >= ChangeType.patch) ||
+      if ((change.changeType! >= ChangeType.patch) ||
         (prereleaseToken && prereleaseToken.hasValue)) {
         for (const depName of downstreamNames) {
-          const pkg: IPackageJson = allPackages.get(depName).packageJson;
+          const pkg: IPackageJson = allPackages.get(depName)!.packageJson;
 
           PublishUtilities._updateDownstreamDependency(pkg.name, pkg.dependencies, change, allChanges, allPackages,
             prereleaseToken, projectsToExclude);
@@ -480,17 +480,17 @@ export default class PublishUtilities {
 
   private static _updateDownstreamDependency(
     parentPackageName: string,
-    dependencies: { [packageName: string]: string },
+    dependencies: { [packageName: string]: string } | undefined,
     change: IChangeInfo,
     allChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
-    prereleaseToken: PrereleaseToken,
+    prereleaseToken: PrereleaseToken | undefined,
     projectsToExclude?: Set<string>
   ): void {
 
     if (dependencies && dependencies[change.packageName]) {
       const requiredVersion: string = dependencies[change.packageName];
-      const alwaysUpdate: boolean = prereleaseToken && prereleaseToken.hasValue &&
+      const alwaysUpdate: boolean = !!prereleaseToken && prereleaseToken.hasValue &&
         !allChanges.hasOwnProperty(parentPackageName);
 
       // If the version range exists and has not yet been updated to this version, update it.
@@ -498,7 +498,7 @@ export default class PublishUtilities {
 
         // Either it already satisfies the new version, or doesn't.
         // If not, the downstream dep needs to be republished.
-        const changeType: ChangeType = semver.satisfies(change.newVersion, requiredVersion) ?
+        const changeType: ChangeType = semver.satisfies(change.newVersion!, requiredVersion) ?
           ChangeType.dependency :
           ChangeType.patch;
 
@@ -535,7 +535,7 @@ export default class PublishUtilities {
     dependencies[dependencyName] = PublishUtilities.getNewDependencyVersion(
       dependencies,
       dependencyName,
-      dependencyChange.newVersion
+      dependencyChange.newVersion!
     );
 
     // Add dependency version update comment.

@@ -5,7 +5,7 @@ class ApprovedPackagesConfiguration {
   public addOrUpdatePackage(packageName: string, reviewCategory: string): void;
   public clear(): void;
   // (undocumented)
-  public getItemByName(packageName: string): ApprovedPackagesItem;
+  public getItemByName(packageName: string): ApprovedPackagesItem | undefined;
   // (undocumented)
   public items: ApprovedPackagesItem[];
   public loadFromFile(): void;
@@ -128,7 +128,7 @@ interface IChangeFile {
   // (undocumented)
   changes: IChangeInfo[];
   // (undocumented)
-  email: string;
+  email: string | undefined;
   // (undocumented)
   packageName: string;
 }
@@ -168,7 +168,7 @@ interface IChangeLogEntry {
     minor?: IChangeLogComment[];
     patch?: IChangeLogComment[];
   }
-  date: string;
+  date: string | undefined;
   tag: string;
   version: string;
 }
@@ -176,7 +176,7 @@ interface IChangeLogEntry {
 // @public (undocumented)
 interface IErrorDetectionRule {
   // (undocumented)
-  (line: string): TaskError;
+  (line: string): TaskError | undefined;
 }
 
 // @alpha
@@ -274,7 +274,7 @@ class PinnedVersionsConfiguration {
   // (undocumented)
   public forEach(cb: (version: string, dependency: string) => void): this;
   // (undocumented)
-  public get(dependency: string): string;
+  public get(dependency: string): string | undefined;
   // (undocumented)
   public has(dependency: string): boolean;
   // (undocumented)
@@ -287,7 +287,7 @@ class PinnedVersionsConfiguration {
 
 // @public
 export function RegexErrorDetector(regex: RegExp,
-    getError: (match: RegExpExecArray) => TaskError): IErrorDetectionRule;
+    getError: (match: RegExpExecArray) => TaskError | undefined): IErrorDetectionRule;
 
 // @public
 class RushConfiguration {
@@ -299,9 +299,9 @@ class RushConfiguration {
   public readonly commonTempFolder: string;
   // @alpha
   public readonly eventHooks: EventHooks;
-  public findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject;
+  public findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
   public findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
-  public getProjectByName(projectName: string): RushConfigurationProject;
+  public getProjectByName(projectName: string): RushConfigurationProject | undefined;
   public readonly gitAllowedEmailRegExps: string[];
   public readonly gitSampleEmail: string;
   public readonly homeFolder: string;
@@ -348,7 +348,7 @@ class RushConfigurationProject {
   public readonly tempProjectName: string;
   public readonly unscopedTempProjectName: string;
   // @alpha
-  public readonly versionPolicyName: string;
+  public readonly versionPolicyName: string | undefined;
 }
 
 // @public
@@ -462,7 +462,7 @@ class VersionControl {
   // (undocumented)
   public static getChangedFiles(prefix?: string, targetBranch?: string): string[];
   // (undocumented)
-  public static getChangedFolders(targetBranch?: string): string[];
+  public static getChangedFolders(targetBranch?: string): Array<string | undefined> | undefined;
   public static getRemoteMasterBranch(repositoryUrl?: string): string;
   public static getUncommittedChanges(): ReadonlyArray<string>;
   // (undocumented)
@@ -473,11 +473,11 @@ class VersionControl {
 class VersionMismatchFinder {
   constructor(private _projects: RushConfigurationProject[]);
   // (undocumented)
-  public getConsumersOfMismatch(mismatch: string, version: string): Array<string>;
+  public getConsumersOfMismatch(mismatch: string, version: string): Array<string> | undefined;
   // (undocumented)
   public getMismatches(): Array<string>;
   // (undocumented)
-  public getVersionsOfMismatch(mismatch: string): Array<string>;
+  public getVersionsOfMismatch(mismatch: string): Array<string> | undefined;
   // (undocumented)
   public readonly numberOfMismatches: number;
 }
@@ -489,7 +489,7 @@ class VersionPolicy {
   public readonly definitionName: VersionPolicyDefinitionName;
   public abstract ensure(project: IPackageJson): IPackageJson | undefined;
   public readonly json: IVersionPolicyJson;
-  public static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy;
+  public static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy | undefined;
   public readonly policyName: string;
   public abstract validate(versionString: string, packageName: string): void;
 }

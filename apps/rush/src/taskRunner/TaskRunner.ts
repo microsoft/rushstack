@@ -74,7 +74,7 @@ export default class TaskRunner {
    * @taskDependencies
    */
   public addDependencies(taskName: string, taskDependencies: string[]): void {
-    const task: ITask = this._tasks.get(taskName);
+    const task: ITask | undefined = this._tasks.get(taskName);
 
     if (!task) {
       throw new Error(`The task '${taskName}' has not been registered`);
@@ -87,7 +87,7 @@ export default class TaskRunner {
       if (!this._tasks.has(dependencyName)) {
         throw new Error(`The project '${dependencyName}' has not been registered.`);
       }
-      const dependency: ITask = this._tasks.get(dependencyName);
+      const dependency: ITask = this._tasks.get(dependencyName)!;
       task.dependencies.add(dependency);
       dependency.dependents.add(task);
     }
@@ -113,7 +113,7 @@ export default class TaskRunner {
 
     // Sort the queue in descending order, nothing will mess with the order
     this._buildQueue.sort((taskA: ITask, taskB: ITask): number => {
-      return taskB.criticalPathLength - taskA.criticalPathLength;
+      return taskB.criticalPathLength! - taskA.criticalPathLength!;
     });
 
     return new Promise<void>((complete: () => void, reject: () => void) => {
@@ -125,7 +125,7 @@ export default class TaskRunner {
    * Pulls the next task with no dependencies off the build queue
    * Removes any non-ready tasks from the build queue (this should only be blocked tasks)
    */
-  private _getNextTask(): ITask {
+  private _getNextTask(): ITask | undefined {
     for (let i: number = 0; i < this._buildQueue.length; i++) {
       const task: ITask = this._buildQueue[i];
 
@@ -157,7 +157,7 @@ export default class TaskRunner {
       }
     }
 
-    let ctask: ITask;
+    let ctask: ITask | undefined;
     while (this._currentActiveTasks < this._parallelism && (ctask = this._getNextTask())) {
       this._currentActiveTasks++;
       const task: ITask = ctask;

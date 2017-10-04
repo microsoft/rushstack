@@ -78,7 +78,7 @@ export interface ITask extends ITaskDefinition {
    *
    * The algorithm is implemented in TaskRunner as _calculateCriticalPaths()
    */
-  criticalPathLength: number;
+  criticalPathLength: number | undefined;
 
   /**
    * A list of all errors which occurred while executing this task, this is stored in case we need

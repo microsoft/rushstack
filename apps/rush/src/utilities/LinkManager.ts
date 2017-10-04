@@ -30,7 +30,7 @@ interface IQueueItem {
 
   // If we encounter a dependency listed in cyclicDependencyProjects, this will be set to the root
   // of the localPackage subtree where we will stop creating local links.
-  cyclicSubtreeRoot: Package;
+  cyclicSubtreeRoot: Package | undefined;
 }
 
 enum SymlinkKind {
@@ -229,7 +229,7 @@ export default class LinkManager {
     commonPackageLookup: PackageLookup,
     rushLinkJson: IRushLinkJson): void {
 
-    let commonProjectPackage: Package = commonRootPackage.getChildByName(project.tempProjectName);
+    let commonProjectPackage: Package | undefined = commonRootPackage.getChildByName(project.tempProjectName);
     if (!commonProjectPackage) {
       // Normally we would expect the temp project to have been installed into the common\node_modules
       // folder.  However, if it was recently added, "rush install" doesn't technically require
@@ -287,7 +287,7 @@ export default class LinkManager {
 
     // tslint:disable-next-line:no-constant-condition
     while (true) {
-      const queueItem: IQueueItem = queue.shift();
+      const queueItem: IQueueItem | undefined = queue.shift();
       if (!queueItem) {
         break;
       }
@@ -301,17 +301,18 @@ export default class LinkManager {
 
       // If we encounter a dependency listed in cyclicDependencyProjects, this will be set to the root
       // of the localPackage subtree where we will stop creating local links.
-      const cyclicSubtreeRoot: Package = queueItem.cyclicSubtreeRoot;
+      const cyclicSubtreeRoot: Package | undefined = queueItem.cyclicSubtreeRoot;
 
       // NOTE: It's important that this traversal follows the dependencies in the Common folder,
       // because for Rush projects this will be the union of
       // devDependencies / dependencies / optionalDependencies.
       for (const dependency of commonPackage.dependencies) {
-        let startingCyclicSubtree: boolean;
+        let startingCyclicSubtree: boolean = false;
 
         // Should this be a "local link" to a top-level Rush project (i.e. versus a regular link
         // into the Common folder)?
-        const matchedRushPackage: RushConfigurationProject = this._rushConfiguration.getProjectByName(dependency.name);
+        const matchedRushPackage: RushConfigurationProject | undefined =
+          this._rushConfiguration.getProjectByName(dependency.name);
 
         if (matchedRushPackage) {
           const matchedVersion: string = matchedRushPackage.packageJson.version;
@@ -357,7 +358,7 @@ export default class LinkManager {
               // We did not find a suitable match, so place a new local package that
               // symlinks to the Rush project
               const newLocalFolderPath: string = path.join(
-                resolution.parentForCreate.folderPath, 'node_modules', dependency.name);
+                resolution.parentForCreate!.folderPath, 'node_modules', dependency.name);
 
               const newLocalPackage: Package = Package.createLinkedPackage(
                 dependency.name,
@@ -370,7 +371,7 @@ export default class LinkManager {
 
               newLocalPackage.symlinkTargetFolderPath = matchedRushPackage.projectFolder;
 
-              resolution.parentForCreate.addChild(newLocalPackage);
+              resolution.parentForCreate!.addChild(newLocalPackage);
 
               // (There are no dependencies, so we do not need to push it onto the queue.)
             }
@@ -381,7 +382,7 @@ export default class LinkManager {
 
         // We can't symlink to an Rush project, so instead we will symlink to a folder
         // under the "Common" folder
-        const commonDependencyPackage: Package = commonPackage.resolve(dependency.name);
+        const commonDependencyPackage: Package | undefined = commonPackage.resolve(dependency.name);
         if (commonDependencyPackage) {
           // This is the version that was chosen when "npm install" ran in the common folder
           const effectiveDependencyVersion: string = commonDependencyPackage.version;
@@ -403,7 +404,7 @@ export default class LinkManager {
             // We did not find a suitable match, so place a new local package
 
             const newLocalFolderPath: string = path.join(
-              resolution.parentForCreate.folderPath, 'node_modules', commonDependencyPackage.name);
+              resolution.parentForCreate!.folderPath, 'node_modules', commonDependencyPackage.name);
 
             const newLocalPackage: Package = Package.createLinkedPackage(
               commonDependencyPackage.name,
@@ -412,14 +413,15 @@ export default class LinkManager {
               newLocalFolderPath
             );
 
-            const commonPackageFromLookup: Package = commonPackageLookup.getPackage(newLocalPackage.nameAndVersion);
+            const commonPackageFromLookup: Package | undefined =
+              commonPackageLookup.getPackage(newLocalPackage.nameAndVersion);
             if (!commonPackageFromLookup) {
               throw Error(`The ${localPackage.name}@${localPackage.version} package was not found`
                 + ` in the common folder`);
             }
             newLocalPackage.symlinkTargetFolderPath = commonPackageFromLookup.folderPath;
 
-            let newCyclicSubtreeRoot: Package = cyclicSubtreeRoot;
+            let newCyclicSubtreeRoot: Package | undefined = cyclicSubtreeRoot;
             if (startingCyclicSubtree) {
               // If we are starting a new subtree, then newLocalPackage will be its root
               // NOTE: cyclicSubtreeRoot is guaranteed to be undefined here, since we never start
@@ -427,7 +429,7 @@ export default class LinkManager {
               newCyclicSubtreeRoot = newLocalPackage;
             }
 
-            resolution.parentForCreate.addChild(newLocalPackage);
+            resolution.parentForCreate!.addChild(newLocalPackage);
             queue.push({
               commonPackage: commonDependencyPackage,
               localPackage: newLocalPackage,

@@ -31,7 +31,7 @@ export default class ChangeFiles {
     newChangeFilePaths.forEach((filePath) => {
       console.log(`Found change file: ${filePath}`);
       const changeRequest: IChangeInfo = JSON.parse(fsx.readFileSync(filePath, 'utf8'));
-      changeRequest.changes.forEach(change => {
+      changeRequest.changes!.forEach(change => {
         if (changedSet.has(change.packageName)) {
           const duplicateError: string = `Project ${change.packageName} has more than one entries. ` +
             `Delete the duplicate change file and commit.`;
@@ -88,7 +88,7 @@ export default class ChangeFiles {
 
       const filesToDelete: string[] = this.getFiles().filter((filePath) => {
         const changeRequest: IChangeInfo = JSON.parse(fsx.readFileSync(filePath, 'utf8'));
-        for (const changeInfo of changeRequest.changes) {
+        for (const changeInfo of changeRequest.changes!) {
           if (!packagesToInclude.has(changeInfo.packageName)) {
             return false;
           }
