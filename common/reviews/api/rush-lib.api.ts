@@ -210,7 +210,6 @@ interface ICustomEnumValue {
 interface ICustomOption {
   // (undocumented)
   description: string;
-  longName: string;
   // (undocumented)
   optionType: 'enum' | 'flag';
   // (undocumented)

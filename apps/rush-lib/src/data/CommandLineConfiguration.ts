@@ -22,9 +22,6 @@ export interface ICustomOption {
   description: string;
   supportedCommands: Array<string>;
   shortName?: string;
-
-  /** this is added after reading the JSON */
-  longName: string;
 }
 
 /** @public */
@@ -73,7 +70,6 @@ export class CommandLineConfiguration {
       if (commandLineJson.customOptions) {
         Object.keys(commandLineJson.customOptions).forEach((flagName: string) => {
           const customOption: ICustomOption = commandLineJson.customOptions![flagName];
-          customOption.longName = flagName;
           this.options.set(flagName, customOption);
         });
       }

@@ -11,18 +11,16 @@ import {
 } from '@microsoft/rush-lib';
 
 import { CustomCommandFactory } from './CustomCommandFactory';
-import BuildAction from './BuildAction';
 import ChangeAction from './ChangeAction';
 import CheckAction from './CheckAction';
 import GenerateAction from './GenerateAction';
 import InstallAction from './InstallAction';
 import LinkAction from './LinkAction';
 import PublishAction from './PublishAction';
-import RebuildAction from './RebuildAction';
 import UnlinkAction from './UnlinkAction';
 import ScanAction from './ScanAction';
 import VersionAction from './VersionAction';
-import { CustomRushAction } from './CustomCommandFactory';
+import { CustomRushAction } from './CustomRushAction';
 
 import Telemetry from '../utilities/Telemetry';
 
@@ -100,19 +98,17 @@ export default class RushCommandLineParser extends CommandLineParser {
     try {
       this.rushConfig = RushConfiguration.loadFromDefaultLocation();
 
-      this.addAction(new BuildAction(this));
       this.addAction(new ChangeAction(this));
       this.addAction(new CheckAction(this));
       this.addAction(new GenerateAction(this));
       this.addAction(new InstallAction(this));
       this.addAction(new LinkAction(this));
       this.addAction(new PublishAction(this));
-      this.addAction(new RebuildAction(this));
       this.addAction(new ScanAction(this));
       this.addAction(new UnlinkAction(this));
       this.addAction(new VersionAction(this));
 
-      CustomCommandFactory.createCommands(this.rushConfig.commandLineConfiguration)
+      CustomCommandFactory.createCommands(this, this.rushConfig.commandLineConfiguration)
         .forEach((customAction: CustomRushAction) => {
           this.addAction(customAction);
         });

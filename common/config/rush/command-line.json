@@ -7,11 +7,41 @@
   ],
 
   "customOptions": {
-    "--doAwesomeThings": {
+    "--profile": {
+      "optionType": "enum",
+      "description": "Changes the build profile, affecting the build output",
+      "supportedCommands": [ "build", "rebuild" ],
+      "enumValues": [
+        {
+          "name": "vso",
+          "description": "For running on CI servers"
+        },
+        {
+          "name": "npm",
+          "description": "For publishing to an NPM registry"
+        }
+      ]
+    },
+
+    "--ship": {
+      "optionType": "flag",
+      "description": "Perform a production build, including minification and localization steps",
+      "supportedCommands": [ "build", "rebuild" ],
+      "shortName": "-s"
+    },
+
+    "--minimal": {
+      "optionType": "flag",
+      "description": "Perform a fast build, which disables certain tasks such as unit tests and linting",
+      "supportedCommands": [ "build", "rebuild" ],
+      "shortName": "-m"
+    },
+
+    "--clean": {
       "optionType": "flag",
       "description": "This flag does awesome things!",
-      "supportedCommands": [ "blah" ],
-      "shortName": "-d"
+      "supportedCommands": [ "blah", "build", "rebuild" ],
+      "shortName": "-c"
     }
   }
 }
