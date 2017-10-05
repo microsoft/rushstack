@@ -27,6 +27,7 @@ export default class PublishAction extends BaseRushAction {
   private _apply: CommandLineFlagParameter;
   private _includeAll: CommandLineFlagParameter;
   private _npmAuthToken: CommandLineStringParameter;
+  private _npmTag: CommandLineStringParameter;
   private _parser: RushCommandLineParser;
   private _publish: CommandLineFlagParameter;
   private _regenerateChangelogs: CommandLineFlagParameter;
@@ -93,6 +94,15 @@ export default class PublishAction extends BaseRushAction {
       key: 'TOKEN',
       description:
       'Provide the default scope npm auth token to be passed into npm publish for global package publishing.'
+    });
+    this._npmTag = this.defineStringParameter({
+      parameterLongName: '--tag',
+      parameterShortName: '-t',
+      key: 'TAG',
+      description:
+      `The tag option to pass to npm publish. By default npm will publish using the 'latest' tag, even if ` +
+      `the package is older than the current latest, so in publishing workflows for older releases, providing ` +
+      `a tag is important.`
     });
     this._includeAll = this.defineFlagParameter({
       parameterLongName: '--include-all',
@@ -248,6 +258,10 @@ export default class PublishAction extends BaseRushAction {
 
       if (this._npmAuthToken.value) {
         args.push(`--${registry}:_authToken=${this._npmAuthToken.value}`);
+      }
+
+      if (this._npmTag.value) {
+        args.push(`--tag`, this._npmTag.value);
       }
 
       if (this._force.value) {
