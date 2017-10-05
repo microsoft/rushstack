@@ -14,6 +14,10 @@ export interface ITsConfigFile<T> {
   compilerOptions: T;
 }
 
+export interface IFixupSettingsOptions {
+  mustBeCommonJsOrEsnext: boolean;
+}
+
 /**
  * A helper class which provides access to the TSConfig.json file for a particular project.
  * It also is a central place for managing the version of typescript which this project
@@ -94,6 +98,28 @@ export class TypeScriptConfiguration {
       };
 
     return assign({}, baseConfig, this._projectTsConfig || {});
+  }
+
+  public static fixupSettings(
+    compilerOptions: ts.Settings,
+    logWarning: (msg: string) => void,
+    options: Partial<IFixupSettingsOptions> = {}
+  ): void {
+    if (compilerOptions.module !== 'commonjs' && compilerOptions.module !== 'esnext' && compilerOptions.module) {
+      let warningMessage: string =
+        'Your tsconfig.json file specifies a different "module" than expected. ' +
+        `Expected: "commonjs" or "esnext". Actual: "${compilerOptions.module}".`
+
+      if (options.mustBeCommonJsOrEsnext) {
+        warningMessage += ' Using "commonjs" instead.';
+        compilerOptions.module = 'commonjs';
+      }
+
+      logWarning(warningMessage);
+    } else if (!compilerOptions.module) {
+      logWarning(`Your tsconfig.json file does not specify a "module". Using "commonjs" instead.`);
+      compilerOptions.module = 'commonjs';
+    }
   }
 
   /**
