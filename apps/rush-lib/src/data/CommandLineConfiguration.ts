@@ -2,34 +2,40 @@
 // See LICENSE in the project root for license information.
 
 import * as fs from 'fs';
-import * as semver from 'semver';
 import { JsonFile } from '@microsoft/node-core-library';
 
+/** @public */
 export interface ICustomCommand {
   name: string;
   description: string;
 }
 
+/** @public */
 export interface ICustomEnumValue {
   name: string;
   description: string;
 }
 
-export interface ICustomEnumOption extends ICustomOption {
-  optionType: 'enum';
-  enumValues: Array<ICustomEnumValue>;
-}
-
+/** @public */
 export interface ICustomOption {
   optionType: 'enum' | 'flag';
   description: string;
   supportedCommands: Array<string>;
   shortName?: string;
+
+  /** this is added after reading the JSON */
+  longName: string;
+}
+
+/** @public */
+export interface ICustomEnumOption extends ICustomOption {
+  optionType: 'enum';
+  enumValues: Array<ICustomEnumValue>;
 }
 
 interface ICommandLineConfigurationJson {
-  customCommands: Array<ICustomCommand>;
-  customOptions: { [optionName: string]: ICustomOption };
+  customCommands?: Array<ICustomCommand>;
+  customOptions?: { [optionName: string]: ICustomOption };
 }
 
 /**
@@ -37,8 +43,8 @@ interface ICommandLineConfigurationJson {
  * @public
  */
 export class CommandLineConfiguration {
-  private _options: Map<string, ICustomOption>;
-  private _commands: Map<string, ICustomCommand>;
+  public options: Map<string, ICustomOption>;
+  public commands: Map<string, ICustomCommand>;
 
   /** Attempts to load pinned versions configuration from a given file */
   public static tryLoadFromFile(jsonFilename: string): CommandLineConfiguration {
@@ -54,17 +60,23 @@ export class CommandLineConfiguration {
    * Preferred to use CommandLineConfiguration.loadFromFile()
    */
   private constructor(commandLineJson: ICommandLineConfigurationJson | undefined) {
-    this._options = new Map<string, ICustomOption>();
-    this._commands = new Map<string, ICustomCommand>();
+    this.options = new Map<string, ICustomOption>();
+    this.commands = new Map<string, ICustomCommand>();
 
     if (commandLineJson) {
-      commandLineJson.customCommands.forEach((command: ICustomCommand) => {
-        this._commands.set(command.name, command);
-      });
+      if (commandLineJson.customCommands) {
+        commandLineJson.customCommands.forEach((command: ICustomCommand) => {
+          this.commands.set(command.name, command);
+        });
+      }
 
-      Object.keys(commandLineJson.customOptions).forEach((flagName: string) => {
-        this._options.set(flagName, commandLineJson.customOptions[flagName]);
-      });
+      if (commandLineJson.customOptions) {
+        Object.keys(commandLineJson.customOptions).forEach((flagName: string) => {
+          const customOption: ICustomOption = commandLineJson.customOptions![flagName];
+          customOption.longName = flagName;
+          this.options.set(flagName, customOption);
+        });
+      }
     }
   }
 }

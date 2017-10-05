@@ -16,6 +16,14 @@ export {
 } from './data/RushConfigurationProject';
 
 export {
+  CommandLineConfiguration,
+  ICustomCommand,
+  ICustomOption,
+  ICustomEnumOption,
+  ICustomEnumValue
+} from './data/CommandLineConfiguration';
+
+export {
   ApprovedPackagesItem,
   ApprovedPackagesConfiguration
 } from './data/ApprovedPackagesConfiguration';

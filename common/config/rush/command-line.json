@@ -1,0 +1,17 @@
+{
+  "customCommands": [
+    {
+      "name": "blah",
+      "description": "Do some really, really cool custom stuff! This is the best command!"
+    }
+  ],
+
+  "customOptions": {
+    "--doAwesomeThings": {
+      "optionType": "flag",
+      "description": "This flag does awesome things!",
+      "supportedCommands": [ "blah" ],
+      "shortName": "-d"
+    }
+  }
+}

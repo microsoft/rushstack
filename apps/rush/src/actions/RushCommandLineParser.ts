@@ -10,6 +10,7 @@ import {
   Utilities
 } from '@microsoft/rush-lib';
 
+import { CustomCommandFactory } from './CustomCommandFactory';
 import BuildAction from './BuildAction';
 import ChangeAction from './ChangeAction';
 import CheckAction from './CheckAction';
@@ -21,11 +22,13 @@ import RebuildAction from './RebuildAction';
 import UnlinkAction from './UnlinkAction';
 import ScanAction from './ScanAction';
 import VersionAction from './VersionAction';
+import { CustomRushAction } from './CustomCommandFactory';
 
 import Telemetry from '../utilities/Telemetry';
 
 export default class RushCommandLineParser extends CommandLineParser {
   public telemetry: Telemetry;
+  public rushConfig: RushConfiguration;
 
   private _debugParameter: CommandLineFlagParameter;
 
@@ -88,13 +91,15 @@ export default class RushCommandLineParser extends CommandLineParser {
   }
 
   private _execute(): void {
-    this.telemetry = new Telemetry(RushConfiguration.loadFromDefaultLocation());
+    this.telemetry = new Telemetry(this.rushConfig);
     super.onExecute();
     this.flushTelemetry();
   }
 
   private _populateActions(): void {
     try {
+      this.rushConfig = RushConfiguration.loadFromDefaultLocation();
+
       this.addAction(new BuildAction(this));
       this.addAction(new ChangeAction(this));
       this.addAction(new CheckAction(this));
@@ -106,13 +111,18 @@ export default class RushCommandLineParser extends CommandLineParser {
       this.addAction(new ScanAction(this));
       this.addAction(new UnlinkAction(this));
       this.addAction(new VersionAction(this));
+
+      CustomCommandFactory.createCommands(this.rushConfig.commandLineConfiguration)
+        .forEach((customAction: CustomRushAction) => {
+          this.addAction(customAction);
+        });
     } catch (error) {
       this._exitAndReportError(error);
     }
   }
 
   private _exitAndReportError(error: Error): void {
-    if (this._debugParameter.value) {
+    if (!this._debugParameter.value) {
       // If catchSyncErrors() called this, then show a call stack similar to what NodeJS
       // would show for an uncaught error
       console.error(os.EOL + error.stack);

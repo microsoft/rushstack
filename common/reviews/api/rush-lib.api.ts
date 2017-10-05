@@ -92,6 +92,15 @@ enum ChangeType {
   patch = 2
 }
 
+// @public
+class CommandLineConfiguration {
+  // (undocumented)
+  public commands: Map<string, ICustomCommand>;
+  // (undocumented)
+  public options: Map<string, ICustomOption>;
+  public static tryLoadFromFile(jsonFilename: string): CommandLineConfiguration;
+}
+
 // @public (undocumented)
 enum ErrorDetectionMode {
   // (undocumented)
@@ -171,6 +180,43 @@ interface IChangeLogEntry {
   date: string | undefined;
   tag: string;
   version: string;
+}
+
+// @public (undocumented)
+interface ICustomCommand {
+  // (undocumented)
+  description: string;
+  // (undocumented)
+  name: string;
+}
+
+// @public (undocumented)
+interface ICustomEnumOption extends ICustomOption {
+  // (undocumented)
+  enumValues: Array<ICustomEnumValue>;
+  // (undocumented)
+  optionType: 'enum';
+}
+
+// @public (undocumented)
+interface ICustomEnumValue {
+  // (undocumented)
+  description: string;
+  // (undocumented)
+  name: string;
+}
+
+// @public (undocumented)
+interface ICustomOption {
+  // (undocumented)
+  description: string;
+  longName: string;
+  // (undocumented)
+  optionType: 'enum' | 'flag';
+  // (undocumented)
+  shortName?: string;
+  // (undocumented)
+  supportedCommands: Array<string>;
 }
 
 // @public (undocumented)
@@ -293,6 +339,7 @@ export function RegexErrorDetector(regex: RegExp,
 class RushConfiguration {
   public readonly approvedPackagesPolicy: ApprovedPackagesPolicy;
   public readonly changesFolder: string;
+  public readonly commandLineConfiguration: CommandLineConfiguration;
   public readonly committedShrinkwrapFilename: string;
   public readonly commonFolder: string;
   public readonly commonRushConfigFolder: string;
@@ -356,6 +403,8 @@ module RushConstants {
   browserApprovedPackagesFilename: string = 'browser-approved-packages.json';
 
   changeFilesFolderName: string = 'changes';
+
+  commandLineFilename: string = 'command-line.json';
 
   commonFolderName: string = 'common';
 
