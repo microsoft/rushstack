@@ -1,7 +1,0 @@
-# For now, the api-documenter tool operates on files in a local folder:
-#
-# ./files/input      - the *.api.json files to process
-# ./files/markdown   - the generated *.md output files
-#
-# (In the future, we will introduce a command-line to make this more configurable.)
-files
