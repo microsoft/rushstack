@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 26 Sep 2017 20:25:51 GMT and should not be manually modified.
+This log was last generated on Fri, 06 Oct 2017 22:50:11 GMT and should not be manually modified.
+
+## 3.0.19
+Fri, 06 Oct 2017 22:44:31 GMT
+
+### Patches
+
+- Enable strickNullChecks
+- Fix a bug in "rush version" that devdependency does not get bumped if there is no dependency. 
+- Fix a bug in "rush change" so it handles rename properly. 
+- Add npm tag support in "rush publish". 
 
 ## 3.0.18
 Tue, 26 Sep 2017 13:51:05 GMT
