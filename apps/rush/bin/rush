@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-require('../lib/rush.js')
+require('../lib/start.js')
