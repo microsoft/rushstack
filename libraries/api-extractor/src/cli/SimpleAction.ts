@@ -2,11 +2,15 @@
 // See LICENSE in the project root for license information.
 
 import * as fsx from 'fs-extra';
+import * as path from 'path';
+import * as ts from 'typescript';
 
 import {
   CommandLineAction,
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
+
+import Extractor from '../Extractor';
 
 import { ApiExtractorCommandLine } from './ApiExtractorCommandLine';
 
@@ -37,11 +41,24 @@ export class SimpleAction extends CommandLineAction {
       throw new Error('The -f parameter is required');
     }
 
-    const dtsFilename: string = this._dtsFileParameter.value;
+    const dtsFilename: string = path.normalize(this._dtsFileParameter.value);
     if (!fsx.existsSync(dtsFilename)) {
       throw new Error('Input file not found: ' + dtsFilename);
     }
 
+    const compilerOptions: ts.CompilerOptions = {
+      target: ts.ScriptTarget.ES5,
+      module: ts.ModuleKind.CommonJS,
+      moduleResolution: ts.ModuleResolutionKind.NodeJs,
+      rootDir: path.dirname(dtsFilename)
+    };
 
+    const extractor: Extractor = new Extractor({
+      compilerOptions: compilerOptions
+    });
+
+    extractor.analyze({
+      entryPointFile: dtsFilename
+    });
   }
 }
