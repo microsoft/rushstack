@@ -101,7 +101,7 @@ export default class TaskRunner {
     this._currentActiveTasks = 0;
     console.log(`Executing a maximum of ${this._parallelism} simultaneous processes...${os.EOL}`);
 
-    this._checkForCyclicDependencies([...this._tasks.values()], []);
+    this._checkForCyclicDependencies(this._tasks.values(), []);
 
     // Precalculate the number of dependent packages
     this._tasks.forEach((task: ITask) => {
@@ -284,7 +284,7 @@ export default class TaskRunner {
   /**
    * Checks for projects that indirectly depend on themselves.
    */
-  private _checkForCyclicDependencies(tasks: ReadonlyArray<ITask>, dependencyChain: string[]): void {
+  private _checkForCyclicDependencies(tasks: Iterable<ITask>, dependencyChain: string[]): void {
     for (const task of tasks) {
       if (dependencyChain.indexOf(task.name) >= 0) {
         throw new Error('A cyclic dependency was encountered:' + os.EOL
@@ -292,7 +292,7 @@ export default class TaskRunner {
           + 'Consider using the cyclicDependencyProjects option for rush.json.');
       }
       dependencyChain.push(task.name);
-      this._checkForCyclicDependencies([...task.dependents], dependencyChain);
+      this._checkForCyclicDependencies(task.dependents, dependencyChain);
       dependencyChain.pop();
     }
   }
