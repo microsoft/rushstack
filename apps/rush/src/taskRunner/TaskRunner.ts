@@ -287,9 +287,9 @@ export default class TaskRunner {
   private _checkForCyclicDependencies(tasks: Iterable<ITask>, dependencyChain: string[]): void {
     for (const task of tasks) {
       if (dependencyChain.indexOf(task.name) >= 0) {
-        throw new Error('A cyclic dependency was encountered:' + os.EOL
-          + '  ' + [...dependencyChain, task.name].reverse().join('\n  -> ') + os.EOL
-          + 'Consider using the cyclicDependencyProjects option for rush.json.');
+        throw new Error('A cyclic dependency was encountered:\n'
+          + '  ' + [...dependencyChain, task.name].reverse().join('\n  -> ')
+          + '\nConsider using the cyclicDependencyProjects option for rush.json.');
       }
       dependencyChain.push(task.name);
       this._checkForCyclicDependencies(task.dependents, dependencyChain);
