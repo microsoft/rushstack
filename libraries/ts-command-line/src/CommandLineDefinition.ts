@@ -3,6 +3,8 @@
 
 /**
  * For use with CommandLineParser, this interface represents a generic command-line parameter
+ *
+ * @public
  */
 export interface IBaseCommandLineDefinition {
   /**
@@ -32,22 +34,30 @@ export interface IKeyedCommandLineDefinition extends IBaseCommandLineDefinition 
 
 /**
  * For use with CommandLineParser, this interface represents a boolean flag command line parameter
+ *
+ * @public
  */
 export interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition { }
 
 /**
  * For use with CommandLineParser, this interface represents a string command line parameter
+ *
+ * @public
  */
 export interface ICommandLineStringDefinition extends IKeyedCommandLineDefinition { }
 
 /**
  * For use with CommandLineParser, this interface represents a string command line parameter
+ *
+ * @public
  */
 export interface ICommandLineStringListDefinition extends IKeyedCommandLineDefinition { }
 
 /**
  * For use with CommandLineParser, this interface represents a parameter which is constrained to
  * a list of possible options
+ *
+ * @public
  */
 export interface ICommandLineOptionDefinition extends IBaseCommandLineDefinition {
   /**
@@ -63,5 +73,7 @@ export interface ICommandLineOptionDefinition extends IBaseCommandLineDefinition
 
 /**
  * For use with CommandLineParser, this interface represents an integer command line parameter
+ *
+ * @public
  */
 export interface ICommandLineIntegerDefinition extends IKeyedCommandLineDefinition { }

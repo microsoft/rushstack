@@ -5,6 +5,9 @@ import * as argparse from 'argparse';
 import { ICommandLineParserData } from './CommandLineParameter';
 import CommandLineParameterProvider from './CommandLineParameterProvider';
 
+/**
+ * @public
+ */
 export interface ICommandLineActionOptions {
   /**
    * The name of the sub-command.  For example, if the tool is called "example",
@@ -29,6 +32,8 @@ export interface ICommandLineActionOptions {
  * Represents a sub-command that is part of the CommandLineParser command line.
  * Applications should create subclasses of CommandLineAction corresponding to
  * each action that they want to expose.
+ *
+ * @public
  */
 export abstract class CommandLineAction extends CommandLineParameterProvider {
   public options: ICommandLineActionOptions;

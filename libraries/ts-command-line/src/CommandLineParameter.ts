@@ -1,15 +1,24 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/**
+ * @public
+ */
 export interface IConverterFunction<T> {
   (initial: any): T; /* tslint:disable-line:no-any */
 }
 
+/**
+ * @public
+ */
 export interface ICommandLineParserData {
   action: string;
   [key: string]: any; /* tslint:disable-line:no-any */
 }
 
+/**
+ * @public
+ */
 export class CommandLineParameter<T> {
   private _converter: IConverterFunction<T>;
   private _value: T;
@@ -33,12 +42,27 @@ export class CommandLineParameter<T> {
   }
 }
 
+/**
+ * @public
+ */
 export class CommandLineOptionParameter extends CommandLineParameter<string> { }
 
+/**
+ * @public
+ */
 export class CommandLineStringParameter extends CommandLineParameter<string> { }
 
+/**
+ * @public
+ */
 export class CommandLineStringListParameter extends CommandLineParameter<string[]> { }
 
+/**
+ * @public
+ */
 export class CommandLineFlagParameter extends CommandLineParameter<boolean> { }
 
+/**
+ * @public
+ */
 export class CommandLineIntegerParameter extends CommandLineParameter<number> { }
