@@ -107,10 +107,10 @@ abstract class CommandLineParameterProvider {
     parameterLongName: string,
     key: string = 'key_' + (CommandLineParameterProvider._keyCounter++).toString()): string {
 
-    if (this._keys.has(key)) {
-      const otherParam: string = this._keys.get(key);
+    const existingKey: string | undefined = this._keys.get(key);
+    if (existingKey) {
       throw colors.red(`The parameter "${parameterLongName}" tried to define a key which was already ` +
-        `defined by the "${otherParam}" parameter. Ensure that the keys values are unique.`);
+        `defined by the "${existingKey}" parameter. Ensure that the keys values are unique.`);
     }
 
     this._keys.set(key, parameterLongName);
@@ -141,7 +141,7 @@ abstract class CommandLineParameterProvider {
     };
 
     Object.keys(argparseOptions || {}).forEach((keyVal: string) => {
-      baseArgparseOptions[keyVal] = argparseOptions[keyVal];
+      baseArgparseOptions[keyVal] = (argparseOptions || {})[keyVal];
     });
 
     this.argumentParser.addArgument(names, baseArgparseOptions);
