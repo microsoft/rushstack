@@ -3,14 +3,23 @@
 
 import * as argparse from 'argparse';
 import * as colors from 'colors';
+
 import CommandLineAction from './CommandLineAction';
 import { ICommandLineParserData } from './CommandLineParameter';
 import CommandLineParameterProvider from './CommandLineParameterProvider';
 
+/**
+ * @public
+ */
 export interface ICommandListParserOptions {
-  // The name of your tool when invoked from the command line
+  /**
+   * The name of your tool when invoked from the command line
+   */
   toolFilename: string;
-  // General documentation that is included in the "--help" main page
+
+  /**
+   * General documentation that is included in the "--help" main page
+   */
   toolDescription: string;
 }
 
@@ -21,6 +30,8 @@ export interface ICommandListParserOptions {
  * is awkward to use.  The abstract base classes CommandLineParser and CommandLineAction
  * provide a wrapper for "argparse" that makes defining and consuming arguments quick
  * and simple, and enforces that appropriate documentation is provided for each parameter.
+ *
+ * @public
  */
 abstract class CommandLineParser extends CommandLineParameterProvider {
   protected chosenAction: CommandLineAction;
@@ -101,4 +112,5 @@ abstract class CommandLineParser extends CommandLineParameterProvider {
     this.chosenAction.execute();
   }
 }
+
 export default CommandLineParser;

@@ -26,6 +26,8 @@ import {
 /**
  * This is the common base class for CommandLineAction and CommandLineParser
  * that provides functionality for defining command-line parameters.
+ *
+ * @public
  */
 abstract class CommandLineParameterProvider {
   private static _keyCounter: number = 0;

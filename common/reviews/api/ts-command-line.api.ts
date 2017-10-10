@@ -1,3 +1,4 @@
+// @public
 class CommandLineAction extends CommandLineParameterProvider {
   constructor(options: ICommandLineActionOptions);
   // (undocumented)
@@ -11,19 +12,19 @@ class CommandLineAction extends CommandLineParameterProvider {
   public processParsedData(data: ICommandLineParserData): void;
 }
 
-// (undocumented)
+// @public (undocumented)
 class CommandLineFlagParameter extends CommandLineParameter<boolean> {
 }
 
-// (undocumented)
+// @public (undocumented)
 class CommandLineIntegerParameter extends CommandLineParameter<number> {
 }
 
-// (undocumented)
+// @public (undocumented)
 class CommandLineOptionParameter extends CommandLineParameter<string> {
 }
 
-// (undocumented)
+// @public (undocumented)
 class CommandLineParameter<T> {
   constructor(key: string, converter: (data: string) => T);
   // (undocumented)
@@ -34,6 +35,7 @@ class CommandLineParameter<T> {
   public readonly value: T;
 }
 
+// @public
 class CommandLineParameterProvider {
   constructor();
   // (undocumented)
@@ -49,6 +51,7 @@ class CommandLineParameterProvider {
   protected processParsedData(data: ICommandLineParserData): void;
 }
 
+// @public
 class CommandLineParser extends CommandLineParameterProvider {
   constructor(options: ICommandListParserOptions);
   public addAction(command: CommandLineAction): void;
@@ -58,38 +61,42 @@ class CommandLineParser extends CommandLineParameterProvider {
   protected onExecute(): void;
 }
 
-// (undocumented)
+// @public (undocumented)
 class CommandLineStringListParameter extends CommandLineParameter<string[]> {
 }
 
-// (undocumented)
+// @public (undocumented)
 class CommandLineStringParameter extends CommandLineParameter<string> {
 }
 
+// @public
 interface IBaseCommandLineDefinition {
   description: string;
   parameterLongName: string;
   parameterShortName?: string;
 }
 
-// (undocumented)
+// @public (undocumented)
 interface ICommandLineActionOptions {
   actionVerb: string;
   documentation: string;
   summary: string;
 }
 
+// @public
 interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition {
 }
 
+// @public
 interface ICommandLineIntegerDefinition extends IKeyedCommandLineDefinition {
 }
 
+// @public
 interface ICommandLineOptionDefinition extends IBaseCommandLineDefinition {
   options: string[];
 }
 
-// (undocumented)
+// @public (undocumented)
 interface ICommandLineParserData {
   // (undocumented)
   [ key: string ]: any;
@@ -97,17 +104,17 @@ interface ICommandLineParserData {
   action: string;
 }
 
+// @public
 interface ICommandLineStringDefinition extends IKeyedCommandLineDefinition {
 }
 
+// @public
 interface ICommandLineStringListDefinition extends IKeyedCommandLineDefinition {
 }
 
-// (undocumented)
+// @public (undocumented)
 interface ICommandListParserOptions {
-  // (undocumented)
   toolDescription: string;
-  // (undocumented)
   toolFilename: string;
 }
 
