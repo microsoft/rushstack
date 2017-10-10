@@ -26,7 +26,7 @@ class CommandLineOptionParameter extends CommandLineParameter<string> {
 
 // @public (undocumented)
 class CommandLineParameter<T> {
-  constructor(key: string, converter: (data: string) => T);
+  constructor(key: string, converter?: (data: string) => T);
   // (undocumented)
   public readonly key: string;
   // (undocumented)

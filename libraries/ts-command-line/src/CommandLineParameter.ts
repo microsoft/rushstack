@@ -23,7 +23,7 @@ export class CommandLineParameter<T> {
   private _converter: IConverterFunction<T>;
   private _value: T;
   private _key: string;
-  constructor(key: string, converter: (data: string) => T) {
+  constructor(key: string, converter?: (data: string) => T) {
     this._converter = converter || ((data: string) => data as any as T); /* tslint:disable-line:no-any */
     this._key = key;
   }
