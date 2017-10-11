@@ -1,0 +1,41 @@
+{
+  "title": "Jest Task configuration",
+  "description": "Defines Jest task configuration",
+
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+    "ci": {
+      "description": "Indicate whether the test is running in a CI environment",
+      "type": "boolean"
+    },
+    "configFilePath": {
+      "description": "The path to a jest config file",
+      "type": "string"
+    },
+    "coverage": {
+      "description": "Indicates that test coverage information should be collected and reported in the output",
+      "type": "boolean"
+    },
+    "maxWorkers": {
+      "description": "Specifies the maximum number of workers the worker-pool will spawn for running tests.",
+      "type": "number"
+    },
+    "rootDir": {
+      "description": "The root directory for the project",
+      "type": "string"
+    },
+    "runInBand": {
+      "description": "Indicates that test coverage information should be collected and reported in the output",
+      "type": "boolean"
+    },
+    "updateSnapshot": {
+      "description": "Run all tests serially in the current process, rather than creating a worker pool of child processes that run tests",
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false
+}

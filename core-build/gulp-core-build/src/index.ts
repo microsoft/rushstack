@@ -45,6 +45,7 @@ export * from './tasks/CleanTask';
 export * from './tasks/CleanFlagTask';
 export * from './tasks/ValidateShrinkwrapTask';
 export * from './tasks/copyStaticAssets/CopyStaticAssetsTask';
+export * from './tasks/JestTask';
 
 const _taskMap: { [key: string]: IExecutable } = {};
 const _uniqueTasks: IExecutable[] = [];
