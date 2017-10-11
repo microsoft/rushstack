@@ -177,6 +177,17 @@ interface IFixupSettingsOptions {
 }
 
 // @public
+interface IJestConfig {
+  ci: boolean;
+  configFilePath: string;
+  coverage: boolean;
+  maxWorkers: number;
+  rootDir: string;
+  runInBand: boolean;
+  updateSnapshot: boolean;
+}
+
+// @public
 export declare function initialize(gulp: typeof Gulp): void;
 
 // @public (undocumented)
@@ -198,6 +209,14 @@ interface IWebpackTaskConfig {
   printStats?: boolean;
   suppressWarnings?: (string | RegExp)[];
   webpack?: typeof Webpack;
+}
+
+// @public
+class JestTask extends GulpTask<IJestConfig> {
+  constructor();
+  // (undocumented)
+  executeTask(gulp: typeof Gulp, completeCallback: (error?: string | Error) => void): void;
+  loadSchema(): Object;
 }
 
 // @public

@@ -185,7 +185,27 @@ interface IExecutable {
 }
 
 // @public
+interface IJestConfig {
+  ci: boolean;
+  configFilePath: string;
+  coverage: boolean;
+  maxWorkers: number;
+  rootDir: string;
+  runInBand: boolean;
+  updateSnapshot: boolean;
+}
+
+// @public
 export function initialize(gulp: typeof Gulp): void;
+
+// @public
+class JestTask extends GulpTask<IJestConfig> {
+  constructor();
+  // (undocumented)
+  public executeTask(gulp: typeof Gulp,
+      completeCallback: (error?: string | Error) => void): void;
+  public loadSchema(): Object;
+}
 
 // @public
 export function log(...args: Array<string | Chalk.ChalkChain>): void;
