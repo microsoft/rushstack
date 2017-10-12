@@ -239,7 +239,7 @@ export default class RebuildAction extends BaseRushAction {
    */
   private _collectAllDependents(project: string): Set<string> {
     const deps: Set<string> = new Set<string>();
-    this._dependentList.get(project)!.forEach((dep) => {
+    (this._dependentList.get(project) || new Set<string>()).forEach((dep) => {
       deps.add(dep);
     });
     deps.forEach(dep => this._collectAllDependents(dep).forEach(innerDep => deps.add(innerDep)));
