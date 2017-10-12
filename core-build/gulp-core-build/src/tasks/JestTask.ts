@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
-
+import * as path from 'path';
 import { GulpTask } from './GulpTask';
 import * as Gulp from 'gulp';
 import * as Jest from 'jest-cli';
@@ -12,33 +12,37 @@ import * as Jest from 'jest-cli';
 export interface IJestConfig {
   /**
    * Indicate whether the test is running in a CI environment
+   * If not provided, the default value is true.
    */
-  ci: boolean;
+  ci?: boolean;
   /**
-   * The path to a jest config file
+   * The jest config file relative to project root directory
+   * If not provided, the default value is 'jest.config.json'.
    */
-  configFilePath: string;
+  configFilePath?: string;
   /**
    * Indicates that test coverage information should be collected and reported in the output
+   * If not provided, the default value is true.
    */
-  coverage: boolean;
+  coverage?: boolean;
   /**
    * Specifies the maximum number of workers the worker-pool will spawn for running tests.
+   * If not provided, the default value is 1.
    */
-  maxWorkers: number;
+  maxWorkers?: number;
   /**
-   * The root directory for the project
+   * Indicates that test coverage information should be collected and reported in the output.
+   * If not provided, the default value is true.
    */
-  rootDir: string;
-  /**
-   * Indicates that test coverage information should be collected and reported in the output
-   */
-  runInBand: boolean;
+  runInBand?: boolean;
   /**
    * Run all tests serially in the current process, rather than creating a worker pool of child processes that run tests
+   * If not provided, the default value is false.
    */
-  updateSnapshot: boolean;
+  updateSnapshot?: boolean;
 }
+
+const DEFAULT_JEST_CONFIG_FILE_NAME: string = 'jest.config.json';
 
 /**
  * This task takes in a map of dest: [sources], and copies items from one place to another.
@@ -50,10 +54,9 @@ export class JestTask extends GulpTask<IJestConfig> {
     super('Jest',
     {
       ci: true,
-      configFilePath: './jest.config.json',
+      configFilePath: DEFAULT_JEST_CONFIG_FILE_NAME,
       coverage: true,
       maxWorkers: 1,
-      rootDir: '.',
       runInBand: true,
       updateSnapshot: false
     });
@@ -70,16 +73,19 @@ export class JestTask extends GulpTask<IJestConfig> {
     gulp: typeof Gulp,
     completeCallback: (error?: string | Error) => void
   ): void {
+    const configFileFullPath: string = path.join(this.buildConfig.rootPath,
+      this.taskConfig.configFilePath || DEFAULT_JEST_CONFIG_FILE_NAME);
+
     Jest.runCLI(
       {
         ci: this.taskConfig.ci,
-        config: this.taskConfig.configFilePath,
+        config: configFileFullPath,
         coverage: this.taskConfig.coverage,
         maxWorkers: this.taskConfig.maxWorkers,
         runInBand: this.taskConfig.runInBand,
         updateSnapshot: this.taskConfig.updateSnapshot
       },
-      [this.taskConfig.rootDir],
+      [this.buildConfig.rootPath],
       (result) => {
         if (result.numFailedTests || result.numFailedTestSuites) {
           completeCallback(new Error('Jest tests failed'));

@@ -178,13 +178,12 @@ interface IFixupSettingsOptions {
 
 // @public
 interface IJestConfig {
-  ci: boolean;
-  configFilePath: string;
-  coverage: boolean;
-  maxWorkers: number;
-  rootDir: string;
-  runInBand: boolean;
-  updateSnapshot: boolean;
+  ci?: boolean;
+  configFilePath?: string;
+  coverage?: boolean;
+  maxWorkers?: number;
+  runInBand?: boolean;
+  updateSnapshot?: boolean;
 }
 
 // @public

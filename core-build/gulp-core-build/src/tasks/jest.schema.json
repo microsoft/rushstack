@@ -1,6 +1,6 @@
 {
   "title": "Jest Task configuration",
-  "description": "Defines Jest task configuration",
+  "description": "Defines Jest task configuration. Same definitions as Jest CLI has.",
 
   "type": "object",
   "properties": {
@@ -9,32 +9,34 @@
       "type": "string"
     },
     "ci": {
-      "description": "Indicate whether the test is running in a CI environment",
-      "type": "boolean"
+      "description": "Indicate whether the test is running in a CI environment. Tests fail in CI environment if snapshots get updated while update snapshots in non-CI environments. ",
+      "type": "boolean",
+      "default": true
     },
     "configFilePath": {
-      "description": "The path to a jest config file",
-      "type": "string"
+      "description": "The path to a jest config file relative to root project folder",
+      "type": "string",
+      "default": "jest.config.json"
     },
     "coverage": {
       "description": "Indicates that test coverage information should be collected and reported in the output",
-      "type": "boolean"
+      "type": "boolean",
+      "default": true
     },
     "maxWorkers": {
-      "description": "Specifies the maximum number of workers the worker-pool will spawn for running tests.",
-      "type": "number"
-    },
-    "rootDir": {
-      "description": "The root directory for the project",
-      "type": "string"
+      "description": "Specifies the maximum number of workers the worker-pool will spawn for running tests. Default is set to 1.",
+      "type": "number",
+      "default": 1
     },
     "runInBand": {
-      "description": "Indicates that test coverage information should be collected and reported in the output",
-      "type": "boolean"
+      "description": "Run all tests serially in the current process, rather than creating a worker pool of child processes that run tests.",
+      "type": "boolean",
+      "default": true
     },
     "updateSnapshot": {
-      "description": "Run all tests serially in the current process, rather than creating a worker pool of child processes that run tests",
-      "type": "boolean"
+      "description": "Use this flag to re-record every snapshot that fails during this test run",
+      "type": "boolean",
+      "default": false
     }
   },
   "additionalProperties": false
