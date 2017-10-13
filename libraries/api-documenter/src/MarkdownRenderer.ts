@@ -116,11 +116,12 @@ export class MarkdownRenderer {
   private static _getEscapedText(text: string): string {
     const textWithBackslashes: string = text
       .replace(/\\/g, '\\\\')  // first replace the escape character
-      .replace(/[*#[\]_|]/g, (x) => '\\' + x); // then escape any special characters
-    return textWithBackslashes
+      .replace(/[*#[\]_|`~]/g, (x) => '\\' + x) // then escape any special characters
+      .replace(/---/g, '\\-\\-\\-') // hyphens only if it's 3 or more
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
+    return textWithBackslashes
   }
 
   /**
