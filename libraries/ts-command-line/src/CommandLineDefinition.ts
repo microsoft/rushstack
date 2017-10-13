@@ -6,7 +6,7 @@
  *
  * @public
  */
-export interface IBaseCommandLineDefinition {
+export interface IBaseCommandLineDefinition<TValue> {
   /**
    * The long name of the flag including double dashes, e.g. "--do-something"
    */
@@ -21,9 +21,20 @@ export interface IBaseCommandLineDefinition {
    * Documentation for the flag, that will be shown when invoking the tool with "--help"
    */
   description: string;
+
+  /**
+   * If true and no "getDefaultValue" function is provided, the parameter must be provided.
+   */
+  required?: boolean;
+
+  /**
+   * A function that returns a default value for the parameter if no value was provided. If the function
+   *  returns undefined and the "required" flag is set, validation will fail.
+   */
+  getDefaultValue?: () => TValue | undefined;
 }
 
-export interface IKeyedCommandLineDefinition extends IBaseCommandLineDefinition {
+export interface IKeyedCommandLineDefinition<TValue> extends IBaseCommandLineDefinition<TValue> {
   /**
    * The key used to identify the value of this parameter. This must be a unique value. If it is
    * omitted, a unique key is created. This key name appears in the help menu.
@@ -37,21 +48,21 @@ export interface IKeyedCommandLineDefinition extends IBaseCommandLineDefinition 
  *
  * @public
  */
-export interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition { }
+export interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition<void> { }
 
 /**
  * For use with CommandLineParser, this interface represents a string command line parameter
  *
  * @public
  */
-export interface ICommandLineStringDefinition extends IKeyedCommandLineDefinition { }
+export interface ICommandLineStringDefinition extends IKeyedCommandLineDefinition<string> { }
 
 /**
  * For use with CommandLineParser, this interface represents a string command line parameter
  *
  * @public
  */
-export interface ICommandLineStringListDefinition extends IKeyedCommandLineDefinition { }
+export interface ICommandLineStringListDefinition extends IKeyedCommandLineDefinition<string[]> { }
 
 /**
  * For use with CommandLineParser, this interface represents a parameter which is constrained to
@@ -59,7 +70,7 @@ export interface ICommandLineStringListDefinition extends IKeyedCommandLineDefin
  *
  * @public
  */
-export interface ICommandLineOptionDefinition extends IBaseCommandLineDefinition {
+export interface ICommandLineOptionDefinition extends IBaseCommandLineDefinition<string> {
   /**
    * A list of strings (which contain no spaces), of possible options which can be selected
    */
@@ -76,4 +87,4 @@ export interface ICommandLineOptionDefinition extends IBaseCommandLineDefinition
  *
  * @public
  */
-export interface ICommandLineIntegerDefinition extends IKeyedCommandLineDefinition { }
+export interface ICommandLineIntegerDefinition extends IKeyedCommandLineDefinition<number> { }

@@ -25,13 +25,14 @@ export interface ICommandLineParserData {
  * they are used as shorthand for various parameterizations of CommandLineParameter<T>.
  * @public
  */
-export class CommandLineParameter<T> {
-  private _converter: IConverterFunction<T>;
-  private _value: T;
+export class CommandLineParameter<TValue> {
+  private _converter: IConverterFunction<TValue>;
+  private _value: TValue;
   private _keyData: string;
 
-  constructor(key: string, converter?: (data: string) => T) {
-    this._converter = converter || ((data: string) => data as any as T); /* tslint:disable-line:no-any */
+
+  constructor(key: string, converter?: (data: string) => TValue) {
+    this._converter = converter || ((data: string) => data as any as TValue); /* tslint:disable-line:no-any */
     this._keyData = key;
   }
 
@@ -50,7 +51,7 @@ export class CommandLineParameter<T> {
    * whether the switch was provided.  For a CommandLineStringListParameter it will
    * be an array of strings.
    */
-  public get value(): T {
+  public get value(): TValue {
     return this._value;
   }
 
