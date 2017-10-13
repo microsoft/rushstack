@@ -121,7 +121,7 @@ export class MarkdownRenderer {
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
-    return textWithBackslashes
+    return textWithBackslashes;
   }
 
   /**
