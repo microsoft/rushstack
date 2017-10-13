@@ -53,6 +53,16 @@ describe('MarkdownPageRenderer', () => {
     markupPage.elements.push(...MarkupBuilder.createTextElements('*one*two*', { bold: true }));
     markupPage.elements.push(...MarkupBuilder.createTextElements('three*four', { bold: true }));
 
+    markupPage.elements.push(MarkupBuilder.createHeading1('Characters that should be escaped'));
+    markupPage.elements.push(...MarkupBuilder.createTextElements(
+      'Double-encoded JSON: "{ \\"A\\": 123}"\n\n'));
+    markupPage.elements.push(...MarkupBuilder.createTextElements(
+      'HTML chars: <script>alert("[You] are #1!");</script>\n\n'));
+    markupPage.elements.push(...MarkupBuilder.createTextElements(
+      'HTML escape: &quot;\n\n'));
+    markupPage.elements.push(...MarkupBuilder.createTextElements(
+      '3 or more hyphens: - -- --- ---- ----- ------\n\n'));
+
     const outputFilename: string = path.join(outputFolder, 'ActualOutput.md');
     fsx.writeFileSync(outputFilename, MarkdownRenderer.renderElements([markupPage], { }));
 

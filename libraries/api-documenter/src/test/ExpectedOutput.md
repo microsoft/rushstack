@@ -30,3 +30,14 @@ This is a **bold** word.
 ## Bad characters
 
 **\*one\*two\*three\*four**
+
+## Characters that should be escaped
+
+Double-encoded JSON: "{ \\"A\\": 123}"
+
+HTML chars: &lt;script&gt;alert("\[You\] are \#1!");&lt;/script&gt;
+
+HTML escape: &amp;quot;
+
+3 or more hyphens: - -- \-\-\- \-\-\-- \-\-\--- \-\-\-\-\-\-
+
