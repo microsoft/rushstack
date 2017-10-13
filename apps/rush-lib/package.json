@@ -16,7 +16,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-core-library": "~0.3.3",
+    "@microsoft/node-core-library": "~0.3.4",
     "@microsoft/stream-collator": "~2.1.0",
     "@types/fs-extra": "0.0.37",
     "@types/node": "6.0.88",
