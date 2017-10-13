@@ -15,26 +15,31 @@ export interface IJestConfig {
    * If not provided, the default value is true.
    */
   ci?: boolean;
+
   /**
    * The jest config file relative to project root directory
    * If not provided, the default value is 'jest.config.json'.
    */
   configFilePath?: string;
+
   /**
    * Indicates that test coverage information should be collected and reported in the output
    * If not provided, the default value is true.
    */
   coverage?: boolean;
+
   /**
    * Specifies the maximum number of workers the worker-pool will spawn for running tests.
    * If not provided, the default value is 1.
    */
   maxWorkers?: number;
+
   /**
    * Indicates that test coverage information should be collected and reported in the output.
    * If not provided, the default value is true.
    */
   runInBand?: boolean;
+
   /**
    * Run all tests serially in the current process, rather than creating a worker pool of child processes that run tests
    * If not provided, the default value is false.
@@ -51,7 +56,7 @@ const DEFAULT_JEST_CONFIG_FILE_NAME: string = 'jest.config.json';
 export class JestTask extends GulpTask<IJestConfig> {
 
   constructor() {
-    super('Jest',
+    super('jest',
     {
       ci: true,
       configFilePath: DEFAULT_JEST_CONFIG_FILE_NAME,
