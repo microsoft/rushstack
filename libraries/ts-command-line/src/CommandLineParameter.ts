@@ -19,12 +19,13 @@ export interface ICommandLineParserData {
 /**
  * @public
  */
-export class CommandLineParameter<T> {
-  private _converter: IConverterFunction<T>;
-  private _value: T;
+export class CommandLineParameter<TValue> {
+  private _converter: IConverterFunction<TValue>;
+  private _value: TValue;
   private _key: string;
-  constructor(key: string, converter?: (data: string) => T) {
-    this._converter = converter || ((data: string) => data as any as T); /* tslint:disable-line:no-any */
+
+  constructor(key: string, converter?: (data: string) => TValue) {
+    this._converter = converter || ((data: string) => data as any as TValue); /* tslint:disable-line:no-any */
     this._key = key;
   }
 
@@ -32,7 +33,7 @@ export class CommandLineParameter<T> {
     this._value = this._converter(data[this._key]);
   }
 
-  public get value(): T {
+  public get value(): TValue {
     return this._value;
   }
 

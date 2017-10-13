@@ -25,14 +25,14 @@ class CommandLineOptionParameter extends CommandLineParameter<string> {
 }
 
 // @public (undocumented)
-class CommandLineParameter<T> {
-  constructor(key: string, converter?: (data: string) => T);
+class CommandLineParameter<TValue> {
+  constructor(key: string, converter?: (data: string) => TValue);
   // (undocumented)
   public readonly key: string;
   // (undocumented)
   public setValue(data: ICommandLineParserData): void;
   // (undocumented)
-  public readonly value: T;
+  public readonly value: TValue;
 }
 
 // @public
@@ -41,14 +41,16 @@ class CommandLineParameterProvider {
   // (undocumented)
   protected argumentParser: argparse.ArgumentParser;
   protected defineFlagParameter(options: ICommandLineFlagDefinition): CommandLineFlagParameter;
-  protected defineIntegerParameter(options: ICommandLineIntegerDefinition): CommandLineIntegerParameter;
+  protected defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter;
   // (undocumented)
-  protected defineOptionParameter(options: ICommandLineOptionDefinition): CommandLineOptionParameter;
-  protected defineStringListParameter(options: ICommandLineStringListDefinition): CommandLineStringListParameter;
-  protected defineStringParameter(options: ICommandLineStringDefinition): CommandLineStringParameter;
+  protected defineOptionParameter(definition: ICommandLineOptionDefinition): CommandLineOptionParameter;
+  protected defineStringListParameter(definition: ICommandLineStringListDefinition): CommandLineStringListParameter;
+  protected defineStringParameter(definition: ICommandLineStringDefinition): CommandLineStringParameter;
   protected abstract onDefineParameters(): void;
   // (undocumented)
   protected processParsedData(data: ICommandLineParserData): void;
+  // (undocumented)
+  protected validateParameters(): boolean;
 }
 
 // @public
@@ -70,10 +72,12 @@ class CommandLineStringParameter extends CommandLineParameter<string> {
 }
 
 // @public
-interface IBaseCommandLineDefinition {
+interface IBaseCommandLineDefinition<TValue> {
   description: string;
+  getDefaultValue?: () => TValue | undefined;
   parameterLongName: string;
   parameterShortName?: string;
+  required?: boolean;
 }
 
 // @public (undocumented)
@@ -84,15 +88,15 @@ interface ICommandLineActionOptions {
 }
 
 // @public
-interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition {
+interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition<void> {
 }
 
 // @public
-interface ICommandLineIntegerDefinition extends IKeyedCommandLineDefinition {
+interface ICommandLineIntegerDefinition extends IKeyedCommandLineDefinition<number> {
 }
 
 // @public
-interface ICommandLineOptionDefinition extends IBaseCommandLineDefinition {
+interface ICommandLineOptionDefinition extends IBaseCommandLineDefinition<string> {
   options: string[];
 }
 
@@ -105,11 +109,11 @@ interface ICommandLineParserData {
 }
 
 // @public
-interface ICommandLineStringDefinition extends IKeyedCommandLineDefinition {
+interface ICommandLineStringDefinition extends IKeyedCommandLineDefinition<string> {
 }
 
 // @public
-interface ICommandLineStringListDefinition extends IKeyedCommandLineDefinition {
+interface ICommandLineStringListDefinition extends IKeyedCommandLineDefinition<string[]> {
 }
 
 // @public (undocumented)
