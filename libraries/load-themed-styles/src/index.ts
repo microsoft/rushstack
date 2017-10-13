@@ -7,14 +7,23 @@
 // entire node.js d.ts for now)
 declare var global: any; // tslint:disable-line:no-any
 
+/**
+ * @public
+ */
 export interface IThemingInstruction {
   theme?: string;
   defaultValue?: string;
   rawString?: string;
 }
 
+/**
+ * @public
+ */
 export type ThemableArray = Array<IThemingInstruction>;
 
+/**
+ * @public
+ */
 export interface ITheme {
   [key: string]: string;
 }
@@ -75,6 +84,8 @@ interface IThemableArrayResolveResult {
 /**
  * In sync mode, styles are registered as style elements synchronously with loadStyles() call.
  * In async mode, styles are buffered and registered as batch in async timer for performance purpose.
+ *
+ * @public
  */
 export const enum Mode {
   sync,
@@ -87,6 +98,8 @@ export const enum Mode {
  * @onlyThemable: only themable styles will be cleared
  * @onlyNonThemable: only non-themable styles will be cleared
  * @all: both themable and non-themable styles will be cleared
+ *
+ * @public
  */
 export const enum ClearStyleOptions {
   onlyThemable = 1,
@@ -160,8 +173,10 @@ function initializeThemeState(): IThemeState {
 /**
  * Loads a set of style text. If it is registered too early, we will register it when the window.load
  * event is fired.
- * @param {string | ThemableArray} styles Themable style text to register.
- * @param {boolean} loadAsync When true, always load styles in async mode, irrespective of current sync mode.
+ * @param {string | ThemableArray} styles - Themable style text to register.
+ * @param {boolean} loadAsync - When true, always load styles in async mode, irrespective of current sync mode.
+ *
+ * @public
  */
 export function loadStyles(styles: string | ThemableArray, loadAsync: boolean = false): void {
   measure(() => {
@@ -187,8 +202,10 @@ export function loadStyles(styles: string | ThemableArray, loadAsync: boolean = 
 
 /**
  * Allows for customizable loadStyles logic. e.g. for server side rendering application
- * @param {(processedStyles: string, rawStyles?: string | ThemableArray) => void}
+ * @param {(processedStyles: string, rawStyles?: string | ThemableArray) => void} -
  * a loadStyles callback that gets called when styles are loaded or reloaded
+ *
+ * @public
  */
 export function configureLoadStyles(
   loadStylesFn: ((processedStyles: string, rawStyles?: string | ThemableArray) => void) | undefined
@@ -199,6 +216,8 @@ export function configureLoadStyles(
 /**
  * Configure run mode of load-themable-styles
  * @param mode load-themable-styles run mode, async or sync
+ *
+ * @public
  */
 export function configureRunMode(mode: Mode): void {
   _themeState.runState.mode = mode;
@@ -206,6 +225,8 @@ export function configureRunMode(mode: Mode): void {
 
 /**
  * external code can call flush to synchronously force processing of currently buffered styles
+ *
+ * @public
  */
 export function flush(): void {
   measure(() => {
@@ -220,6 +241,8 @@ export function flush(): void {
 
 /**
  * register async loadStyles
+ *
+ * @public
  */
 function asyncLoadStyles(): number {
   return setTimeout(() => {
@@ -233,6 +256,8 @@ function asyncLoadStyles(): number {
  * is fired.
  * @param {string} styleText Style to register.
  * @param {IStyleRecord} styleRecord Existing style record to re-apply.
+ *
+ * @public
  */
 function applyThemableStyles(stylesArray: ThemableArray, styleRecord?: IStyleRecord): void {
   if (_themeState.loadStyles) {
@@ -247,7 +272,9 @@ function applyThemableStyles(stylesArray: ThemableArray, styleRecord?: IStyleRec
 /**
  * Registers a set theme tokens to find and replace. If styles were already registered, they will be
  * replaced.
- * @param {theme} theme JSON object of theme tokens to values.
+ * @param {theme} theme - JSON object of theme tokens to values.
+ *
+ * @public
  */
 export function loadTheme(theme: ITheme | undefined): void {
   _themeState.theme = theme;
@@ -260,6 +287,8 @@ export function loadTheme(theme: ITheme | undefined): void {
  * Clear already registered style elements and style records in theme_State object
  * @option: specify which group of registered styles should be cleared.
  * Default to be both themable and non-themable styles will be cleared
+ *
+ * @public
  */
 export function clearStyles(option: ClearStyleOptions = ClearStyleOptions.all): void {
   if (option === ClearStyleOptions.all || option === ClearStyleOptions.onlyNonThemable) {
@@ -299,7 +328,9 @@ function reloadStyles(): void {
 
 /**
  * Find theme tokens and replaces them with provided theme values.
- * @param {string} styles Tokenized styles to fix.
+ * @param {string} styles - Tokenized styles to fix.
+ *
+ * @public
  */
 export function detokenize(styles: string | undefined): string | undefined {
   if (styles) {
@@ -347,7 +378,9 @@ function resolveThemableArray(splitStyleArray: ThemableArray): IThemableArrayRes
 
 /**
  * Split tokenized CSS into an array of strings and theme specification objects
- * @param {string} styles Tokenized styles to split.
+ * @param {string} styles - Tokenized styles to split.
+ *
+ * @public
  */
 export function splitStyles(styles: string): ThemableArray {
   const result: ThemableArray = [];
