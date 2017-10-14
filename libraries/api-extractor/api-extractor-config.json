@@ -1,0 +1,15 @@
+{
+  "compiler" : {
+    "configType": "tsconfig",
+    "rootFolder": "."
+  },
+  "project": {
+    "entryPointSourceFile": "src/index.ts"
+  },
+  "apiReviewFile": {
+    "enabled": false
+  },
+  "apiJsonFile": {
+    "enabled": false
+  }
+}

@@ -8,8 +8,7 @@ import { PackageJsonLookup } from '@microsoft/node-core-library';
 
 import AstPackage from './ast/AstPackage';
 import DocItemLoader from './DocItemLoader';
-
-export type ApiErrorHandler = (message: string, fileName: string, lineNumber: number) => void;
+import { ExtractorErrorHandler } from './extractor/IExtractorConfig';
 
 /**
  * Options for Extractor constructor.
@@ -25,17 +24,8 @@ export interface IExtractorOptions {
    * - moduleResolution: ts.ModuleResolutionKind.NodeJs
    * - rootDir: inputFolder
    */
-  compilerOptions: ts.CompilerOptions;
+  program: ts.Program;
 
-  errorHandler?: ApiErrorHandler;
-}
-
-/**
- * Options for Extractor.analyze()
- *
- * @public
- */
-export interface IExtractorAnalyzeOptions {
   /**
    * The entry point for the project.  This should correspond to the "main" field
    * from NPM's package.json file.  If it is a relative path, it will be relative to
@@ -43,13 +33,7 @@ export interface IExtractorAnalyzeOptions {
    */
   entryPointFile: string;
 
-  /**
-   * This can be used to specify other files that should be processed by the TypeScript compiler
-   * for some reason, e.g. a "typings/tsd.d.ts" file.  It is NOT necessary to specify files that
-   * are explicitly imported/required by the entryPointFile, since the compiler will trace
-   * (the transitive closure of) ordinary dependencies.
-   */
-  otherFiles?: string[];
+  errorHandler?: ExtractorErrorHandler;
 }
 
 /**
@@ -60,7 +44,7 @@ export interface IExtractorAnalyzeOptions {
  * @public
  */
 export default class Extractor {
-  public readonly errorHandler: ApiErrorHandler;
+  public readonly errorHandler: ExtractorErrorHandler;
   public typeChecker: ts.TypeChecker;
   public package: AstPackage;
   /**
@@ -70,8 +54,6 @@ export default class Extractor {
   public readonly docItemLoader: DocItemLoader;
 
   public readonly packageJsonLookup: PackageJsonLookup;
-
-  private _compilerOptions: ts.CompilerOptions;
 
   private _packageName: string;
 
@@ -87,10 +69,32 @@ export default class Extractor {
   }
 
   constructor(options: IExtractorOptions) {
-    this._compilerOptions = options.compilerOptions;
-    this.docItemLoader = new DocItemLoader(options.compilerOptions.rootDir);
     this.packageJsonLookup = new PackageJsonLookup();
+
+    this._packageFolder = this.packageJsonLookup.tryGetPackageFolder(options.entryPointFile);
+    this._packageName = this.packageJsonLookup.getPackageName(this._packageFolder);
+
+    this.docItemLoader = new DocItemLoader(this._packageFolder);
+
     this.errorHandler = options.errorHandler || Extractor.defaultErrorHandler;
+
+    // This runs a full type analysis, and then augments the Abstract Syntax Tree (i.e. declarations)
+    // with semantic information (i.e. symbols).  The "diagnostics" are a subset of the everyday
+    // compile errors that would result from a full compilation.
+    for (const diagnostic of options.program.getSemanticDiagnostics()) {
+      this.reportError('TypeScript: ' + diagnostic.messageText, diagnostic.file, diagnostic.start);
+    }
+
+    this.typeChecker = options.program.getTypeChecker();
+
+    const rootFile: ts.SourceFile = options.program.getSourceFile(options.entryPointFile);
+    if (!rootFile) {
+      throw new Error('Unable to load file: ' + options.entryPointFile);
+    }
+
+    this.package = new AstPackage(this, rootFile); // construct members
+    this.package.completeInitialization(); // creates ApiDocumentation
+    this.package.visitTypeReferencesForAstItem();
   }
 
   /**
@@ -105,40 +109,6 @@ export default class Extractor {
    */
   public get packageFolder(): string {
     return this._packageFolder;
-  }
-
-  /**
-   * Analyzes the specified project.
-   */
-  public analyze(options: IExtractorAnalyzeOptions): void {
-    const rootFiles: string[] = [options.entryPointFile].concat(options.otherFiles || []);
-
-    const program: ts.Program = ts.createProgram(rootFiles, this._compilerOptions);
-
-    // This runs a full type analysis, and then augments the Abstract Syntax Tree (i.e. declarations)
-    // with semantic information (i.e. symbols).  The "diagnostics" are a subset of the everyday
-    // compile errors that would result from a full compilation.
-    for (const diagnostic of program.getSemanticDiagnostics()) {
-      this.reportError('TypeScript: ' + diagnostic.messageText, diagnostic.file, diagnostic.start);
-    }
-
-    this.typeChecker = program.getTypeChecker();
-
-    const rootFile: ts.SourceFile = program.getSourceFile(options.entryPointFile);
-    if (!rootFile) {
-      throw new Error('Unable to load file: ' + options.entryPointFile);
-    }
-
-    // Assign _packageFolder by probing upwards from entryPointFile until we find a package.json
-    const currentPath: string = path.resolve(options.entryPointFile);
-    // This is guaranteed to succeed since we do check prior to this point
-    this._packageFolder = this.packageJsonLookup.tryGetPackageFolder(currentPath);
-
-    this._packageName = this.packageJsonLookup.getPackageName(this._packageFolder);
-
-    this.package = new AstPackage(this, rootFile); // construct members
-    this.package.completeInitialization(); // creates ApiDocumentation
-    this.package.visitTypeReferencesForAstItem();
   }
 
   /**
