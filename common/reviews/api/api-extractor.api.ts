@@ -1,78 +1,9 @@
-// @public
-class ApiFileGenerator extends AstItemVisitor {
-  // WARNING: The type "IndentedWriter" needs to be exported by the package (e.g. added to index.ts)
+// @beta
+class ApiExtractor {
+  public constructor(config: IExtractorConfig);
+  public analyzeProject(options?: IAnalyzeProjectOptions): void;
   // (undocumented)
-  protected _indentedWriter: IndentedWriter;
-  public static areEquivalentApiFileContents(actualFileContent: string, expectedFileContent: string): boolean;
-  // (undocumented)
-  public generateApiFileContent(extractor: Extractor): string;
-  // WARNING: The type "AstEnum" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstEnum(astEnum: AstEnum): void;
-  // WARNING: The type "AstEnumValue" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstEnumValue(astEnumValue: AstEnumValue): void;
-  // WARNING: The type "AstFunction" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstFunction(astFunction: AstFunction): void;
-  // WARNING: The type "AstMember" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstMember(astMember: AstMember): void;
-  // WARNING: The type "AstModuleVariable" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstModuleVariable(astModuleVariable: AstModuleVariable): void;
-  // WARNING: The type "AstNamespace" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstNamespace(astNamespace: AstNamespace): void;
-  // WARNING: The type "AstPackage" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstPackage(astPackage: AstPackage): void;
-  // WARNING: The type "AstStructuredType" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstStructuredType(astStructuredType: AstStructuredType): void;
-  public writeApiFile(reportFilename: string, extractor: Extractor): void;
-}
-
-// @public
-class ApiJsonGenerator extends AstItemVisitor {
-  // (undocumented)
-  protected jsonOutput: Object;
-  public static readonly jsonSchema: JsonSchema;
-  // WARNING: The type "AstItem" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visit(astItem: AstItem, refObject?: Object): void;
-  // WARNING: The type "AstEnum" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstEnum(astEnum: AstEnum, refObject?: Object): void;
-  // WARNING: The type "AstEnumValue" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstEnumValue(astEnumValue: AstEnumValue, refObject?: Object): void;
-  // WARNING: The type "AstFunction" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstFunction(astFunction: AstFunction, refObject?: Object): void;
-  // WARNING: The type "AstMember" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstMember(astMember: AstMember, refObject?: Object): void;
-  // WARNING: The type "AstMethod" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstMethod(astMethod: AstMethod, refObject?: Object): void;
-  // WARNING: The type "AstModuleVariable" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstModuleVariable(astModuleVariable: AstModuleVariable, refObject?: Object): void;
-  // WARNING: The type "AstNamespace" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstNamespace(astNamespace: AstNamespace, refObject?: Object): void;
-  // WARNING: The type "AstPackage" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstPackage(astPackage: AstPackage, refObject?: Object): void;
-  // WARNING: The type "AstProperty" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstProperty(astProperty: AstProperty, refObject?: Object): void;
-  // WARNING: The type "AstStructuredType" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstStructuredType(astStructuredType: AstStructuredType, refObject?: Object): void;
-  // (undocumented)
-  public writeJsonFile(reportFilename: string, extractor: Extractor): void;
+  public static jsonSchema: JsonSchema;
 }
 
 // @public
@@ -81,26 +12,9 @@ class ExternalApiHelper {
   public static generateApiJson(rootDir: string, libFolder: string, externalPackageFilePath: string): void;
 }
 
-// @public
-class Extractor {
-  constructor(options: IExtractorOptions);
-  public analyze(options: IExtractorAnalyzeOptions): void;
-  public static defaultErrorHandler(message: string, fileName: string, lineNumber: number): void;
-  // WARNING: The type "DocItemLoader" needs to be exported by the package (e.g. added to index.ts)
-  public docItemLoader: DocItemLoader;
-  // (undocumented)
-  public errorHandler: ApiErrorHandler;
-  public loadExternalPackages(externalJsonCollectionPath: string): void;
-  // WARNING: The type "AstPackage" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  public package: AstPackage;
-  public readonly packageFolder: string;
-  // (undocumented)
-  public packageJsonLookup: PackageJsonLookup;
-  public readonly packageName: string;
-  public reportError(message: string, sourceFile: ts.SourceFile, start: number): void;
-  // (undocumented)
-  public typeChecker: ts.TypeChecker;
+// @beta
+interface IAnalyzeProjectOptions {
+  projectConfig?: IExtractorProjectConfig;
 }
 
 // @alpha
@@ -246,17 +160,48 @@ interface ICodeLinkElement extends IBaseDocElement {
   value?: string;
 }
 
-// @public
-interface IExtractorAnalyzeOptions {
-  entryPointFile: string;
-  otherFiles?: string[];
+// @beta
+interface IExtractorApiJsonFileConfig {
+  enabled: boolean;
+  outputFolder?: string;
 }
 
-// @public
-interface IExtractorOptions {
-  compilerOptions: ts.CompilerOptions;
+// @beta
+interface IExtractorApiReviewFileConfig {
+  apiReviewFolder: string;
+  enabled: boolean;
+}
+
+// @beta
+interface IExtractorConfig {
+  apiJsonFile: IExtractorApiJsonFileConfig;
+  apiReviewFile: IExtractorApiReviewFileConfig;
+  compiler: IExtractorTsconfigCompilerConfig | IExtractorRuntimeCompilerConfig;
+  customErrorHandler?: ExtractorErrorHandler;
+  project: IExtractorProjectConfig;
+}
+
+// @beta
+interface IExtractorProjectConfig {
+  entryPointSourceFile: string;
+  externalJsonFileFolders: string[];
+}
+
+// @beta
+interface IExtractorRuntimeCompilerConfig {
   // (undocumented)
-  errorHandler?: ApiErrorHandler;
+  configType: 'runtime';
+  // (undocumented)
+  program: ts.Program;
+}
+
+// @beta
+interface IExtractorTsconfigCompilerConfig {
+  // (undocumented)
+  configType: 'tsconfig';
+  overrideTsconfig?: {
+  }
+  rootFolder: string;
 }
 
 // @alpha (undocumented)
@@ -409,7 +354,7 @@ interface ITextElement extends IBaseDocElement {
   value: string;
 }
 
-// WARNING: Unsupported export: ApiErrorHandler
+// WARNING: Unsupported export: ExtractorErrorHandler
 // WARNING: Unsupported export: ApiAccessModifier
 // WARNING: Unsupported export: ApiMember
 // WARNING: Unsupported export: ApiItem
