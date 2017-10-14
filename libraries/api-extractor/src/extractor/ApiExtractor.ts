@@ -9,9 +9,11 @@ import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
 import {
   IExtractorConfig,
   IExtractorProjectConfig,
-  ExtractorErrorHandler
+  ExtractorErrorHandler,
+  IExtractorApiJsonFileConfig
 } from './IExtractorConfig';
 import Extractor from '../Extractor';
+import ApiJsonGenerator from '../generators/ApiJsonGenerator';
 
 /**
  * Options for {@link ApiExtractor.analyzeProject}.
@@ -35,6 +37,7 @@ export class ApiExtractor {
   private _config: IExtractorConfig;
   private _program: ts.Program;
   private _customErrorHandler: ExtractorErrorHandler | undefined;
+  private _absoluteRootFolder: string;
 
   public constructor (config: IExtractorConfig) {
     this._config = config;
@@ -46,13 +49,16 @@ export class ApiExtractor {
           throw new Error('The root folder does not exist: ' + rootFolder);
         }
 
+        this._absoluteRootFolder = path.normalize(path.resolve(rootFolder));
+
         let tsconfig: {} | undefined = this._config.compiler.overrideTsconfig;
         if (!tsconfig) {
           // If it wasn't overridden, then load it from disk
-          tsconfig = JsonFile.load(path.join(rootFolder, 'tsconfig.json'));
+          tsconfig = JsonFile.load(path.join(this._absoluteRootFolder, 'tsconfig.json'));
         }
 
-        const commandLine: ts.ParsedCommandLine = ts.parseJsonConfigFileContent(tsconfig, ts.sys, rootFolder);
+        const commandLine: ts.ParsedCommandLine = ts.parseJsonConfigFileContent(tsconfig,
+          ts.sys, this._absoluteRootFolder);
         this._program = ts.createProgram(commandLine.fileNames, commandLine.options);
 
         if (commandLine.errors.length > 0) {
@@ -63,6 +69,14 @@ export class ApiExtractor {
 
       case 'runtime':
         this._program = this._config.compiler.program;
+        const rootDir: string = this._program.getCompilerOptions().rootDir;
+        if (!rootDir) {
+          throw new Error('The provided compiler state does not specify a root folder');
+        }
+        if (!fsx.existsSync(rootDir)) {
+          throw new Error('The rootDir does not exist: ' + rootDir);
+        }
+        this._absoluteRootFolder = path.resolve(rootDir);
         break;
 
       default:
@@ -83,20 +97,33 @@ export class ApiExtractor {
 
     const extractor: Extractor = new Extractor({
       program: this._program,
-      entryPointFile: projectConfig.entryPointSourceFile,
+      entryPointFile: path.resolve(this._absoluteRootFolder, projectConfig.entryPointSourceFile),
       errorHandler: this._customErrorHandler
     });
 
     for (const externalJsonFileFolder of projectConfig.externalJsonFileFolders || []) {
-      extractor.loadExternalPackages(externalJsonFileFolder);
+      extractor.loadExternalPackages(path.resolve(this._absoluteRootFolder, externalJsonFileFolder));
     }
 
-    if (this._config.apiJsonFile.enabled) {
-      // ...
+    const packageBaseName: string = path.basename(extractor.packageName);
+
+    const apiJsonFileConfig: IExtractorApiJsonFileConfig = this._config.apiJsonFile;
+
+    if (apiJsonFileConfig.enabled) {
+      const outputFolder: string = path.resolve(this._absoluteRootFolder,
+        apiJsonFileConfig.outputFolder || './dist');
+
+      fsx.mkdirsSync(outputFolder);
+
+      const jsonGenerator: ApiJsonGenerator = new ApiJsonGenerator();
+      const apiJsonFilename: string = path.join(outputFolder, packageBaseName + '.api.json');
+
+      console.log('Writing: ' + apiJsonFilename);
+      jsonGenerator.writeJsonFile(apiJsonFilename, extractor);
     }
 
     if (this._config.apiReviewFile.enabled) {
-      // ...
+      //
     }
   }
 }
