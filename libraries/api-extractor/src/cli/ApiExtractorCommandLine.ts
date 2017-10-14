@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { CommandLineParser } from '@microsoft/ts-command-line';
-import { SimpleAction } from './SimpleAction';
+import { RunAction } from './RunAction';
 
 export class ApiExtractorCommandLine extends CommandLineParser {
   constructor() {
@@ -17,6 +17,6 @@ export class ApiExtractorCommandLine extends CommandLineParser {
   }
 
   private _populateActions(): void {
-    this.addAction(new SimpleAction(this));
+    this.addAction(new RunAction(this));
   }
 }
