@@ -23,6 +23,23 @@
       ]
     },
 
+    "--color": {
+      "optionType": "enum",
+      "description": "Enable or disable colors in the build log, defaults to 'true'",
+      "supportedCommands": [ "build", "rebuild" ],
+      "defaultValue": "true",
+      "enumValues": [
+        {
+          "name": "true",
+          "description": "For running on CI servers"
+        },
+        {
+          "name": "false",
+          "description": "For publishing to an NPM registry"
+        }
+      ]
+    },
+
     "--ship": {
       "optionType": "flag",
       "description": "Perform a production build, including minification and localization steps",
