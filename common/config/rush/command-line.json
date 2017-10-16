@@ -31,11 +31,11 @@
       "enumValues": [
         {
           "name": "true",
-          "description": "For running on CI servers"
+          "description": "Displays colors in the build log"
         },
         {
           "name": "false",
-          "description": "For publishing to an NPM registry"
+          "description": "Disables all colors in build log, useful for CI builds"
         }
       ]
     },
