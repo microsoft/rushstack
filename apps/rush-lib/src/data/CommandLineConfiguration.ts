@@ -28,6 +28,7 @@ export interface ICustomOption {
 export interface ICustomEnumOption extends ICustomOption {
   optionType: 'enum';
   enumValues: Array<ICustomEnumValue>;
+  defaultValue?: string;
 }
 
 interface ICommandLineConfigurationJson {
@@ -70,6 +71,19 @@ export class CommandLineConfiguration {
       if (commandLineJson.customOptions) {
         Object.keys(commandLineJson.customOptions).forEach((flagName: string) => {
           const customOption: ICustomOption = commandLineJson.customOptions![flagName];
+
+          if (customOption.optionType === 'enum') {
+            const customEnum: ICustomEnumOption = customOption as ICustomEnumOption;
+
+            const enumValues: string[] = customEnum.enumValues.map(v => v.name);
+
+            if (customEnum.defaultValue &&
+               (enumValues.indexOf(customEnum.defaultValue) === -1)) {
+              throw new Error(`In definition for custom option "${flagName}", could not find default value ` +
+                `"${customEnum.defaultValue}" in list of options: "${enumValues.toString()}"`);
+            }
+          }
+
           this.options.set(flagName, customOption);
         });
       }

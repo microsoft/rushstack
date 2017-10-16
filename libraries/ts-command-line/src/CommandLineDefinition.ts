@@ -54,6 +54,11 @@ export interface ICommandLineOptionDefinition extends IBaseCommandLineDefinition
    * A list of strings (which contain no spaces), of possible options which can be selected
    */
   options: string[];
+
+  /**
+   * The default value which will be used if the parameter is omitted from the command line
+   */
+  defaultValue?: string;
 }
 
 /**

@@ -81,8 +81,17 @@ abstract class CommandLineParameterProvider {
   }
 
   protected defineOptionParameter(options: ICommandLineOptionDefinition): CommandLineOptionParameter {
+    if (!options.options || options.options.length < 2) {
+      throw new Error(`When defining an option parameter, the options array must`
+        + ` be defined and have at least 2 options`);
+    }
+    if (options.defaultValue && options.options.indexOf(options.defaultValue) === -1) {
+      throw new Error(`Could not find default value "${options.defaultValue}" `
+        + `in the array of available options: ${options.options.toString()}`);
+    }
     return this._createParameter(options, {
-      choices: options.options
+      choices: options.options,
+      defaultValue: options.defaultValue
     }) as CommandLineOptionParameter;
   }
 

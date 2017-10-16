@@ -193,6 +193,8 @@ interface ICustomCommand {
 // @public (undocumented)
 interface ICustomEnumOption extends ICustomOption {
   // (undocumented)
+  defaultValue?: string;
+  // (undocumented)
   enumValues: Array<ICustomEnumValue>;
   // (undocumented)
   optionType: 'enum';

@@ -151,6 +151,7 @@ export class CustomRushAction extends BaseRushAction {
           parameterShortName: customOption.shortName,
           parameterLongName: customOption.longName,
           description: customOption.description,
+          defaultValue: (customOption as ICustomOption as ICustomEnumOption).defaultValue,
           options: (customOption as ICustomOption as ICustomEnumOption).enumValues.map(
             (enumValue: ICustomEnumValue) => {
               return enumValue.name;
