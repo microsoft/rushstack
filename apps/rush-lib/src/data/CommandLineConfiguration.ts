@@ -4,6 +4,8 @@
 import * as fs from 'fs';
 import { JsonFile } from '@microsoft/node-core-library';
 
+import { RushConstants } from '../RushConstants';
+
 /** @public */
 export interface ICustomCommand {
   name: string;
@@ -79,8 +81,9 @@ export class CommandLineConfiguration {
 
             if (customEnum.defaultValue &&
                (enumValues.indexOf(customEnum.defaultValue) === -1)) {
-              throw new Error(`In definition for custom option "${flagName}", could not find default value ` +
-                `"${customEnum.defaultValue}" in list of options: "${enumValues.toString()}"`);
+              throw new Error(`In "${RushConstants.commandLineFilename}", custom option "${flagName}",`
+                + ` uses a default value "${customEnum.defaultValue}"`
+                + ` which is missing from list of options: "${enumValues.toString()}"`);
             }
           }
 
