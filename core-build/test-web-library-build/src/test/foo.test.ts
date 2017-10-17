@@ -4,7 +4,7 @@
 import { assert } from 'chai';
 
 describe('BaseFieldCustomizer', () => {
-  it('Test that we can test things', (done: MochaDone): void => {
+  it('Test that we can test things', done => {
     assert(true);
     done();
   });

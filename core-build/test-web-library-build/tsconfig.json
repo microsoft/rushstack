@@ -1,18 +1,23 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "es5",
     "module": "commonjs",
     "jsx": "react",
     "declaration": true,
     "sourceMap": true,
     "experimentalDecorators": true,
     "skipLibCheck": true,
+    "moduleResolution": "node",
     "typeRoots": [
-      "./node_modules/@types",
-      "./node_modules/@microsoft"
+      "./node_modules/@types"
     ],
     "types": [
-      "jest"
+      "jest",
+      "node"
+    ],
+    "lib": [
+      "es5",
+      "es2015.collection"
     ]
   }
 }

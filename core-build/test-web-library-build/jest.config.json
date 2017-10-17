@@ -1,0 +1,8 @@
+{
+  "testPathIgnorePatterns": [
+    "<rootDir>/(src|lib-amd|lib-es6|coverage|build|docs|node_modules)/"
+  ],
+  "testMatch": [
+    "**/*.test.js?(x)"
+  ]
+}

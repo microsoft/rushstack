@@ -13,4 +13,10 @@ build.setConfig({
 
 build.preCopy.cleanMatch = ['src/preCopyTest.ts'];
 
+build.karma.enabled = false;
+
+const jestTask = new build.JestTask();
+build.task('default', build.serial(build.defaultTasks, jestTask));
+build.task('test', build.serial(build.testTasks, jestTask));
+
 build.initialize(require('gulp'));
