@@ -2,7 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import * as fs from 'fs';
-import { JsonFile } from '@microsoft/node-core-library';
+import * as path from 'path';
+
+import {
+  JsonFile,
+  JsonSchema
+} from '@microsoft/node-core-library';
 
 import { RushConstants } from '../RushConstants';
 
@@ -50,7 +55,8 @@ export class CommandLineConfiguration {
   public static tryLoadFromFile(jsonFilename: string): CommandLineConfiguration {
     let commandLineJson: ICommandLineConfigurationJson | undefined = undefined;
     if (fs.existsSync(jsonFilename)) {
-      commandLineJson = JsonFile.load(jsonFilename);
+      const schemaFilename: string = path.join(__dirname, 'commandLineConfiguration.schema.json');
+      commandLineJson = JsonFile.loadAndValidate(jsonFilename, JsonSchema.fromFile(schemaFilename));
     }
 
     return new CommandLineConfiguration(commandLineJson);
