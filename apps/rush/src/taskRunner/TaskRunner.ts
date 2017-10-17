@@ -101,6 +101,8 @@ export default class TaskRunner {
     this._currentActiveTasks = 0;
     console.log(`Executing a maximum of ${this._parallelism} simultaneous processes...${os.EOL}`);
 
+    this._checkForCyclicDependencies(this._tasks.values(), []);
+
     // Precalculate the number of dependent packages
     this._tasks.forEach((task: ITask) => {
       this._calculateCriticalPaths(task);
@@ -280,10 +282,27 @@ export default class TaskRunner {
   }
 
   /**
-   * Calculate the number of packages which must be build before we reach
+   * Checks for projects that indirectly depend on themselves.
+   */
+  private _checkForCyclicDependencies(tasks: Iterable<ITask>, dependencyChain: string[]): void {
+    for (const task of tasks) {
+      if (dependencyChain.indexOf(task.name) >= 0) {
+        throw new Error('A cyclic dependency was encountered:\n'
+          + '  ' + [...dependencyChain, task.name].reverse().join('\n  -> ')
+          + '\nConsider using the cyclicDependencyProjects option for rush.json.');
+      }
+      dependencyChain.push(task.name);
+      this._checkForCyclicDependencies(task.dependents, dependencyChain);
+      dependencyChain.pop();
+    }
+  }
+
+  /**
+   * Calculate the number of packages which must be built before we reach
    * the furthest away "root" node
    */
   private _calculateCriticalPaths(task: ITask): number {
+
     // Return the memoized value
     if (task.criticalPathLength !== undefined) {
       return task.criticalPathLength;

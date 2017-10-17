@@ -170,6 +170,12 @@ interface IExecutable {
   onRegister?: () => void;
 }
 
+// @public (undocumented)
+interface IFixupSettingsOptions {
+  // (undocumented)
+  mustBeCommonJsOrEsnext: boolean;
+}
+
 // @public
 export declare function initialize(gulp: typeof Gulp): void;
 
@@ -238,6 +244,7 @@ enum TestResultState {
 
 // @public
 class TypeScriptConfiguration {
+  static fixupSettings(compilerOptions: ts.Settings, logWarning: (msg: string) => void, options?: Partial<IFixupSettingsOptions>): void;
   static getGulpTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<ts.Settings>;
   static getTsConfigFile(config: IBuildConfig): ITsConfigFile<ts.Settings>;
   static getTypescriptCompiler(): any;

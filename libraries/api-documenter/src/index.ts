@@ -18,7 +18,7 @@ console.log(os.EOL + colors.bold(`api-documenter ${myPackageJson.version}` + os.
 
 const docItemSet: DocItemSet = new DocItemSet();
 
-const dataFolder: string = path.join(__dirname, '../files');
+const dataFolder: string = path.join(__dirname, '../local');
 
 const inputFolder: string = path.join(dataFolder, 'input');
 for (const filename of fsx.readdirSync(inputFolder)) {

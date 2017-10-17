@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Thu, 28 Sep 2017 01:04:28 GMT and should not be manually modified.
+This log was last generated on Thu, 05 Oct 2017 01:05:02 GMT and should not be manually modified.
+
+## 4.2.2
+Thu, 05 Oct 2017 01:05:02 GMT
+
+### Patches
+
+- Fix an error message when the "module" property is set to esnext.
 
 ## 4.2.1
 Thu, 28 Sep 2017 01:04:28 GMT

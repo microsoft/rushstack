@@ -40,17 +40,8 @@ export class CustomRushAction extends BaseRushAction {
 
   private _parser: RushCommandLineParser;
 
-  constructor(parser: RushCommandLineParser, options?: ICommandLineActionOptions) {
-    super(options || {
-      actionVerb: 'rebuild',
-      summary: 'Clean and rebuild the entire set of projects',
-      documentation: 'The Rush rebuild command assumes that the package.json file for each'
-      + ' project contains scripts for "npm run clean" and "npm run test".  It invokes'
-      + ' these commands to build each project.  Projects are built in parallel where'
-      + ' possible, but always respecting the dependency graph for locally linked projects.'
-      + ' The number of simultaneous processes will be equal to the number of machine cores.'
-      + ' unless overridden by the --parallelism flag.'
-    });
+  constructor(parser: RushCommandLineParser, options: ICommandLineActionOptions) {
+    super(options);
     this._parser = parser;
   }
 

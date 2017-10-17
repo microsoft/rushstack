@@ -1,6 +1,18 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Fri, 29 Sep 2017 01:03:42 GMT and should not be manually modified.
+This log was last generated on Fri, 13 Oct 2017 19:02:46 GMT and should not be manually modified.
+
+## 0.3.4
+Fri, 13 Oct 2017 19:02:46 GMT
+
+### Patches
+
+- When FileDiffTest creates a copy of the expected output for comparison, it is now marked as read-only to avoid confusion
+
+## 0.3.3
+Thu, 05 Oct 2017 01:05:02 GMT
+
+*Changes not tracked*
 
 ## 0.3.2
 Fri, 29 Sep 2017 01:03:42 GMT
