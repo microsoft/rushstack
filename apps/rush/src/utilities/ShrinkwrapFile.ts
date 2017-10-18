@@ -14,8 +14,13 @@ export default abstract class ShrinkwrapFile {
   protected _alreadyWarnedSpecs: Set<string> = new Set<string>();
 
   public static loadFromFile(shrinkwrapFilename: string): ShrinkwrapFile | undefined {
-    return require('./npm/NpmShrinkwrapFile').default.loadFromFile(shrinkwrapFilename)
-        || require('./npm/PnpmShrinkwrapFile').default.loadFromFile(shrinkwrapFilename);
+    try {
+      return require('./npm/NpmShrinkwrapFile').default.loadFromFile(shrinkwrapFilename);
+    } catch (e) { /* no-op */ }
+    try {
+      return require('./pnpm/PnpmShrinkwrapFile').default.loadFromFile(shrinkwrapFilename);
+    } catch (e) { /* no-op */ }
+    throw new Error(`Unable to load shrinkwrap file!`);
   }
 
   protected static tryGetValue<T>(dictionary: { [key2: string]: T }, key: string): T | undefined {
