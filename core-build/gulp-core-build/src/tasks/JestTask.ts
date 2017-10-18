@@ -88,7 +88,8 @@ export class JestTask extends GulpTask<IJestConfig> {
         coverage: this.taskConfig.coverage,
         maxWorkers: this.taskConfig.maxWorkers,
         runInBand: this.taskConfig.runInBand,
-        updateSnapshot: this.taskConfig.updateSnapshot
+        updateSnapshot: this.taskConfig.updateSnapshot,
+        reporters: [path.join(__dirname, 'JestReporter.js')]
       },
       [this.buildConfig.rootPath],
       (result) => {

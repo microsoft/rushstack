@@ -239,11 +239,11 @@
     },
     {
       "name": "jest",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "other" ]
     },
     {
       "name": "jest-cli",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "other" ]
     },
     {
       "name": "jju",
