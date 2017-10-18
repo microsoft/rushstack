@@ -2,12 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import {
-  ApiJsonGenerator,
   IApiPackage,
   ApiItem,
+  ApiJsonFile,
   IApiItemReference
 } from '@microsoft/api-extractor';
-import { JsonFile } from '@microsoft/node-core-library';
 
 import { RenderingHelpers } from './RenderingHelpers';
 
@@ -202,13 +201,10 @@ export class DocItemSet {
       throw new Error('calculateReferences() was already called');
     }
 
-    const docPackage: IApiPackage = JsonFile.loadAndValidate(apiJsonFilename, ApiJsonGenerator.jsonSchema, {
-      customErrorHeader: 'The API JSON file does not conform to the expected schema.\n'
-      + '(Was it created by an incompatible release of API Extractor?)'
-    });
+    const apiPackage: IApiPackage = ApiJsonFile.loadFromFile(apiJsonFilename);
 
-    const docItem: DocItem = new DocItem(docPackage, docPackage.name, this, undefined);
-    this.docPackagesByName.set(docPackage.name, docItem);
+    const docItem: DocItem = new DocItem(apiPackage, apiPackage.name, this, undefined);
+    this.docPackagesByName.set(apiPackage.name, docItem);
     this.docPackages.push(docItem);
   }
 

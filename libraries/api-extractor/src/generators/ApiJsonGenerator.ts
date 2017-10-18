@@ -4,7 +4,7 @@
 import * as os  from 'os';
 import * as path from 'path';
 import * as ts from 'typescript';
-import { JsonFile, JsonSchema, IJsonSchemaErrorInfo } from '@microsoft/node-core-library';
+import { JsonFile, IJsonSchemaErrorInfo } from '@microsoft/node-core-library';
 
 import Extractor from '../Extractor';
 import AstStructuredType from '../ast/AstStructuredType';
@@ -24,6 +24,7 @@ import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { IAedocParameter } from '../aedoc/ApiDocumentation';
 import { IApiReturnValue, IApiParameter, IApiNameMap } from '../api/ApiItem';
 import { ApiJsonConverter } from '../api/ApiJsonConverter';
+import { ApiJsonFile } from '../api/ApiJsonFile';
 
 /**
  * For a library such as "example-package", ApiFileGenerator generates the "example-package.api.json"
@@ -40,18 +41,6 @@ export default class ApiJsonGenerator extends AstItemVisitor {
   private static _methodCounter: number = 0;
   private static _MEMBERS_KEY: string = 'members';
   private static _EXPORTS_KEY: string = 'exports';
-  private static _jsonSchema: JsonSchema | undefined = undefined;
-
-  /**
-   * The JSON schema for the *.api.json file format.
-   */
-  public static get jsonSchema(): JsonSchema {
-    if (!ApiJsonGenerator._jsonSchema) {
-      ApiJsonGenerator._jsonSchema = JsonSchema.fromFile(path.join(__dirname, '../api/api-json.schema.json'));
-    }
-
-    return ApiJsonGenerator._jsonSchema;
-  }
 
   protected jsonOutput: Object = {};
 
@@ -62,7 +51,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
     JsonFile.save(this.jsonOutput, reportFilename);
 
     // Validate that the output conforms to our JSON schema
-    ApiJsonGenerator.jsonSchema.validateObjectWithCallback(this.jsonOutput, (errorInfo: IJsonSchemaErrorInfo) => {
+    ApiJsonFile.jsonSchema.validateObjectWithCallback(this.jsonOutput, (errorInfo: IJsonSchemaErrorInfo) => {
       const errorMessage: string = path.basename(reportFilename)
         + ` does not conform to the expected schema -- please report this API Extractor bug:`
         + os.EOL + errorInfo.details;

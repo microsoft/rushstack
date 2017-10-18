@@ -5,6 +5,12 @@ class ApiExtractor {
   public static jsonSchema: JsonSchema;
 }
 
+// @public
+class ApiJsonFile {
+  public static jsonSchema: JsonSchema;
+  public static loadFromFile(apiJsonFilePath: string): IApiPackage;
+}
+
 // @beta
 class ExternalApiHelper {
   // (undocumented)

@@ -17,7 +17,7 @@ import AstItem from './ast/AstItem';
 import AstItemContainer from './ast/AstItemContainer';
 import AstPackage from './ast/AstPackage';
 import ResolvedApiItem from './ResolvedApiItem';
-import ApiJsonGenerator from './generators/ApiJsonGenerator';
+import { ApiJsonFile } from './api/ApiJsonFile';
 
 /**
  * Used to describe a parsed package name in the form of
@@ -226,7 +226,7 @@ export default class DocItemLoader {
    * then the json file is saved in the cache and returned.
    */
   public loadPackageIntoCache(apiJsonFilePath: string, cachePackageName: string): IApiPackage {
-    const astPackage: IApiPackage = JsonFile.loadAndValidate(apiJsonFilePath, ApiJsonGenerator.jsonSchema, {
+    const astPackage: IApiPackage = JsonFile.loadAndValidate(apiJsonFilePath, ApiJsonFile.jsonSchema, {
       customErrorHeader: 'The API JSON file does not conform to the expected schema, and may' + os.EOL
         + 'have been created by an incompatible release of API Extractor:'
     });

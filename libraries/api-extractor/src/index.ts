@@ -23,5 +23,6 @@ export {
 export { ILogger } from './extractor/ILogger';
 
 export * from './api/ApiItem';
+export { ApiJsonFile } from './api/ApiJsonFile';
 export * from './markup/MarkupElement';
 export * from './markup/OldMarkup';
