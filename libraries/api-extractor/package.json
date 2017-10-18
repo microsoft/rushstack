@@ -35,11 +35,14 @@
     "colors": "~1.1.2",
     "fs-extra": "~0.26.7",
     "jju": "~1.3.0",
+    "lodash": "~4.15.0",
     "typescript": "~2.4.1",
     "z-schema": "~3.18.3"
   },
   "devDependencies": {
     "@types/chai": "3.4.34",
+    "@types/colors": "1.1.3",
+    "@types/lodash": "4.14.74",
     "@types/mocha": "2.2.38",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",

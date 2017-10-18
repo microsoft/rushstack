@@ -8,7 +8,7 @@ import { PackageJsonLookup } from '@microsoft/node-core-library';
 
 import AstPackage from './ast/AstPackage';
 import DocItemLoader from './DocItemLoader';
-import { ExtractorErrorHandler } from './extractor/IExtractorConfig';
+import { ILogger } from './extractor/ILogger';
 
 /**
  * Options for Extractor constructor.
@@ -33,7 +33,7 @@ export interface IExtractorOptions {
    */
   entryPointFile: string;
 
-  errorHandler?: ExtractorErrorHandler;
+  logger: ILogger;
 }
 
 /**
@@ -44,7 +44,6 @@ export interface IExtractorOptions {
  * @public
  */
 export default class Extractor {
-  public readonly errorHandler: ExtractorErrorHandler;
   public typeChecker: ts.TypeChecker;
   public package: AstPackage;
   /**
@@ -61,12 +60,7 @@ export default class Extractor {
   // is "C:\Folder\project\package.json", then the packageFolder is "C:\Folder\project"
   private _packageFolder: string;
 
-  /**
-   * The default implementation of ApiErrorHandler, which merely writes to console.log().
-   */
-  public static defaultErrorHandler(message: string, fileName: string, lineNumber: number): void {
-    console.log(`ERROR: [${fileName}:${lineNumber}] ${message}`);
-  }
+  private _logger: ILogger;
 
   constructor(options: IExtractorOptions) {
     this.packageJsonLookup = new PackageJsonLookup();
@@ -76,7 +70,7 @@ export default class Extractor {
 
     this.docItemLoader = new DocItemLoader(this._packageFolder);
 
-    this.errorHandler = options.errorHandler || Extractor.defaultErrorHandler;
+    this._logger = options.logger;
 
     // This runs a full type analysis, and then augments the Abstract Syntax Tree (i.e. declarations)
     // with semantic information (i.e. symbols).  The "diagnostics" are a subset of the everyday
@@ -116,7 +110,8 @@ export default class Extractor {
    */
   public reportError(message: string, sourceFile: ts.SourceFile, start: number): void {
     const lineNumber: number = sourceFile.getLineAndCharacterOfPosition(start).line;
-    this.errorHandler(message, sourceFile.fileName, lineNumber);
+
+    this._logger.logError(`ERROR: [${sourceFile.fileName}:${lineNumber}] ${message}`);
   }
 
   /**

@@ -12,7 +12,7 @@ import { ApiExtractor } from './extractor/ApiExtractor';
  * The job of this method is almost the same as the API Extractor task that is executed on first party packages,
  * with the exception that all packages analyzed here are external packages with definition files.
  *
- * @public
+ * @beta
  */
 export default class ExternalApiHelper {
 

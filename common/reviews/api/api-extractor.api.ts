@@ -1,18 +1,17 @@
-// @beta
+// @public
 class ApiExtractor {
-  public constructor(config: IExtractorConfig);
+  public constructor(config: IExtractorConfig, options?: IExtractorOptions);
   public analyzeProject(options?: IAnalyzeProjectOptions): void;
-  // (undocumented)
   public static jsonSchema: JsonSchema;
 }
 
-// @public
+// @beta
 class ExternalApiHelper {
   // (undocumented)
   public static generateApiJson(rootDir: string, libFolder: string, externalPackageFilePath: string): void;
 }
 
-// @beta
+// @public
 interface IAnalyzeProjectOptions {
   projectConfig?: IExtractorProjectConfig;
 }
@@ -160,42 +159,47 @@ interface ICodeLinkElement extends IBaseDocElement {
   value?: string;
 }
 
-// @beta
+// @public
 interface IExtractorApiJsonFileConfig {
   enabled: boolean;
   outputFolder?: string;
 }
 
-// @beta
+// @public
 interface IExtractorApiReviewFileConfig {
-  apiReviewFolder: string;
+  apiReviewFolder?: string;
   enabled: boolean;
+  tempFolder?: string;
 }
 
-// @beta
+// @public
 interface IExtractorConfig {
-  apiJsonFile: IExtractorApiJsonFileConfig;
-  apiReviewFile: IExtractorApiReviewFileConfig;
+  apiJsonFile?: IExtractorApiJsonFileConfig;
+  apiReviewFile?: IExtractorApiReviewFileConfig;
   compiler: IExtractorTsconfigCompilerConfig | IExtractorRuntimeCompilerConfig;
-  customErrorHandler?: ExtractorErrorHandler;
   project: IExtractorProjectConfig;
 }
 
-// @beta
+// @public
+interface IExtractorOptions {
+  compilerProgram?: ts.Program;
+  customLogger?: ILogger;
+  localBuild?: boolean;
+}
+
+// @public
 interface IExtractorProjectConfig {
   entryPointSourceFile: string;
   externalJsonFileFolders: string[];
 }
 
-// @beta
+// @public
 interface IExtractorRuntimeCompilerConfig {
   // (undocumented)
   configType: 'runtime';
-  // (undocumented)
-  program: ts.Program;
 }
 
-// @beta
+// @public
 interface IExtractorTsconfigCompilerConfig {
   // (undocumented)
   configType: 'tsconfig';
@@ -209,6 +213,14 @@ interface IHrefLinkElement extends IBaseDocElement {
   referenceType: 'href';
   targetUrl: string;
   value?: string;
+}
+
+// @public
+interface ILogger {
+  logError(message: string): void;
+  logInfo(message: string): void;
+  logVerbose(message: string): void;
+  logWarning(message: string): void;
 }
 
 // @alpha
@@ -354,7 +366,6 @@ interface ITextElement extends IBaseDocElement {
   value: string;
 }
 
-// WARNING: Unsupported export: ExtractorErrorHandler
 // WARNING: Unsupported export: ApiAccessModifier
 // WARNING: Unsupported export: ApiMember
 // WARNING: Unsupported export: ApiItem

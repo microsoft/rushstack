@@ -5,11 +5,5 @@
   },
   "project": {
     "entryPointSourceFile": "index.ts"
-  },
-  "apiReviewFile": {
-    "enabled": false
-  },
-  "apiJsonFile": {
-    "enabled": true
   }
 }

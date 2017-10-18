@@ -8,7 +8,8 @@ import { JsonFile, PackageJsonLookup } from '@microsoft/node-core-library';
 
 import {
   CommandLineAction,
-  CommandLineStringParameter
+  CommandLineStringParameter,
+  CommandLineFlagParameter
 } from '@microsoft/ts-command-line';
 
 import { ApiExtractor } from '../extractor/ApiExtractor';
@@ -21,6 +22,7 @@ const AE_CONFIG_FILENAME: string = 'api-extractor-config.json';
 export class RunAction extends CommandLineAction {
   private _parser: ApiExtractorCommandLine;
   private _configFileParameter: CommandLineStringParameter;
+  private _localParameter: CommandLineFlagParameter;
 
   constructor(parser: ApiExtractorCommandLine) {
     super({
@@ -37,6 +39,14 @@ export class RunAction extends CommandLineAction {
       parameterShortName: '-c',
       key: 'FILE',
       description: `Use the specified ${AE_CONFIG_FILENAME} file path, rather than guessing its location`
+    });
+    this._localParameter = this.defineFlagParameter({
+      parameterLongName: '--local',
+      parameterShortName: '-l',
+      description: 'Indicates that API Extractor is running as part of a local build,'
+        + ' e.g. on a developer\'s machine. This disables certain validation that would'
+        + ' normally be performed for a ship/production build. For example, the *.api.ts'
+        + ' signature file is automatically copied in a local build.'
     });
   }
 
@@ -69,7 +79,9 @@ export class RunAction extends CommandLineAction {
     }
 
     const config: IExtractorConfig = JsonFile.loadAndValidate(configFilename, ApiExtractor.jsonSchema);
-    const apiExtractor: ApiExtractor = new ApiExtractor(config);
+    const apiExtractor: ApiExtractor = new ApiExtractor(config, {
+      localBuild: this._localParameter.value
+    });
     apiExtractor.analyzeProject();
   }
 }

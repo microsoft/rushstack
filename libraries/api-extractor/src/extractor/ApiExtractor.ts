@@ -4,20 +4,23 @@
 import * as fsx from 'fs-extra';
 import * as path from 'path';
 import * as ts from 'typescript';
+import lodash = require('lodash');
+import colors = require('colors');
 
 import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
 import {
   IExtractorConfig,
   IExtractorProjectConfig,
-  ExtractorErrorHandler,
   IExtractorApiJsonFileConfig
 } from './IExtractorConfig';
 import Extractor from '../Extractor';
+import { ILogger } from './ILogger';
 import ApiJsonGenerator from '../generators/ApiJsonGenerator';
+import ApiFileGenerator from '../generators/ApiFileGenerator';
 
 /**
  * Options for {@link ApiExtractor.analyzeProject}.
- * @beta
+ * @public
  */
 export interface IAnalyzeProjectOptions {
   /**
@@ -27,20 +30,95 @@ export interface IAnalyzeProjectOptions {
 }
 
 /**
+ * Runtime options for ApiExtractor.
+ *
+ * @public
+ */
+export interface IExtractorOptions {
+  /**
+   * If IExtractorConfig.project.configType = 'runtime', then the TypeScript compiler state
+   * must be provided via this option.
+   */
+  compilerProgram?: ts.Program;
+
+  /**
+   * Allows the caller to handle API Extractor errors; otherwise, they will be logged
+   * to the console.
+   */
+  customLogger?: ILogger;
+
+  /**
+   * Indicates that API Extractor is running as part of a local build, e.g. on developer's
+   * machine. This disables certain validation that would normally be performed
+   * for a ship/production build. For example, the *.api.ts signature file is
+   * automatically local in a debug build.
+   *
+   * The default value is false.
+   */
+  localBuild?: boolean;
+}
+
+/**
  * Used to invoke the API Extractor tool.
- * @beta
+ * @public
  */
 export class ApiExtractor {
+  /**
+   * The JSON Schema for API Extractor config file (api-extractor-config.schema.json).
+   */
   public static jsonSchema: JsonSchema = JsonSchema.fromFile(
     path.join(__dirname, './api-extractor-config.schema.json'));
 
   private _config: IExtractorConfig;
   private _program: ts.Program;
-  private _customErrorHandler: ExtractorErrorHandler | undefined;
+  private _localBuild: boolean;
+  private _logger: ILogger;
   private _absoluteRootFolder: string;
 
-  public constructor (config: IExtractorConfig) {
-    this._config = config;
+  private static _applyConfigDefaults(config: IExtractorConfig): IExtractorConfig {
+    const normalized: IExtractorConfig  = lodash.clone(config);
+
+    if (!normalized.apiReviewFile) {
+      normalized.apiReviewFile = {
+        enabled: true
+      };
+    }
+
+    if (!normalized.apiReviewFile.apiReviewFolder) {
+      normalized.apiReviewFile.apiReviewFolder = './etc';
+    }
+
+    if (!normalized.apiReviewFile.tempFolder) {
+      normalized.apiReviewFile.tempFolder = './temp';
+    }
+
+    if (!normalized.apiJsonFile) {
+      normalized.apiJsonFile = {
+        enabled: true
+      };
+    }
+
+    if (!normalized.apiJsonFile.outputFolder) {
+      normalized.apiJsonFile.outputFolder = './dist';
+    }
+
+    return normalized;
+  }
+
+  public constructor (config: IExtractorConfig, options?: IExtractorOptions) {
+    this._config = ApiExtractor._applyConfigDefaults(config);
+    if (!options) {
+      options = { };
+    }
+
+    this._logger = options.customLogger || {
+      logVerbose: (message: string) => console.log('(Verbose) ' + message),
+      logInfo: (message: string) => console.log(message),
+      logWarning: (message: string) => console.warn(colors.yellow(message)),
+      logError: (message: string) => console.error(colors.red(message))
+    };
+
+    this._localBuild = options.localBuild || false;
 
     switch (this._config.compiler.configType) {
       case 'tsconfig':
@@ -68,7 +146,12 @@ export class ApiExtractor {
         break;
 
       case 'runtime':
-        this._program = this._config.compiler.program;
+        if (!options.compilerProgram) {
+          throw new Error('The compiler.configType=runtime configuration was specified,'
+            + ' but the caller did not provide an options.compilerProgram object');
+        }
+
+        this._program = options.compilerProgram;
         const rootDir: string = this._program.getCompilerOptions().rootDir;
         if (!rootDir) {
           throw new Error('The provided compiler state does not specify a root folder');
@@ -98,7 +181,7 @@ export class ApiExtractor {
     const extractor: Extractor = new Extractor({
       program: this._program,
       entryPointFile: path.resolve(this._absoluteRootFolder, projectConfig.entryPointSourceFile),
-      errorHandler: this._customErrorHandler
+      logger: this._logger
     });
 
     for (const externalJsonFileFolder of projectConfig.externalJsonFileFolders || []) {
@@ -111,19 +194,73 @@ export class ApiExtractor {
 
     if (apiJsonFileConfig.enabled) {
       const outputFolder: string = path.resolve(this._absoluteRootFolder,
-        apiJsonFileConfig.outputFolder || './dist');
+        apiJsonFileConfig.outputFolder);
 
       fsx.mkdirsSync(outputFolder);
 
       const jsonGenerator: ApiJsonGenerator = new ApiJsonGenerator();
       const apiJsonFilename: string = path.join(outputFolder, packageBaseName + '.api.json');
 
-      console.log('Writing: ' + apiJsonFilename);
+      this._logger.logVerbose('Writing: ' + apiJsonFilename);
       jsonGenerator.writeJsonFile(apiJsonFilename, extractor);
     }
 
     if (this._config.apiReviewFile.enabled) {
-      //
+      const generator: ApiFileGenerator = new ApiFileGenerator();
+      const apiReviewFilename: string = packageBaseName + '.api.ts';
+
+      const actualApiReviewPath: string = path.resolve(this._absoluteRootFolder,
+        this._config.apiReviewFile.tempFolder, apiReviewFilename);
+      const actualApiReviewShortPath: string = this._getShortFilePath(actualApiReviewPath);
+
+      const expectedApiReviewPath: string = path.resolve(this._absoluteRootFolder,
+        this._config.apiReviewFile.apiReviewFolder, apiReviewFilename);
+      const expectedApiReviewShortPath: string = this._getShortFilePath(expectedApiReviewPath);
+
+      const actualApiReviewContent: string = generator.generateApiFileContent(extractor);
+
+      // Write the actual file
+      fsx.mkdirsSync(path.dirname(actualApiReviewPath));
+      fsx.writeFileSync(actualApiReviewPath, actualApiReviewContent);
+
+      // Compare it against the expected file
+      if (fsx.existsSync(expectedApiReviewPath)) {
+        const expectedApiReviewContent: string = fsx.readFileSync(expectedApiReviewPath).toString();
+
+        if (!ApiFileGenerator.areEquivalentApiFileContents(actualApiReviewContent, expectedApiReviewContent)) {
+          if (!this._localBuild) {
+            // For production, issue a warning that will break the CI build.
+            this._logger.logWarning('You have changed the public API signature for this project.'
+              // @microsoft/gulp-core-build seems to run JSON.stringify() on the error messages for some reason,
+              // so try to avoid escaped characters:
+              + ` Please overwrite ${expectedApiReviewShortPath} with a`
+              + ` copy of ${actualApiReviewShortPath}`
+              + ' and then request an API review. See the Git repository README.md for more info.');
+          } else {
+            // For a local build, just copy the file automatically.
+            this._logger.logWarning('\nYou have changed the public API signature for this project.'
+              + ` Updating ${expectedApiReviewShortPath}\n`);
+
+            fsx.writeFileSync(expectedApiReviewPath, actualApiReviewContent);
+          }
+        } else {
+          this._logger.logVerbose(`The API signature is up to date: ${actualApiReviewShortPath}`);
+        }
+      } else {
+        // NOTE: This warning seems like a nuisance, but it has caught genuine mistakes.
+        // For example, when projects were moved into category folders, the relative path for
+        // the API review files ended up in the wrong place.
+        this._logger.logError(`\nThis file is missing from the "apiReviewFolder": ${expectedApiReviewShortPath}`
+          + `\nPlease create it by copying this file: ${actualApiReviewShortPath}\n`);
+      }
     }
   }
+
+  private _getShortFilePath(absolutePath: string): string {
+    if (!path.isAbsolute(absolutePath)) {
+      throw new Error('Expected absolute path: ' + absolutePath);
+    }
+    return path.relative(this._absoluteRootFolder, absolutePath).replace(/\\/g, '/');
+  }
+
 }

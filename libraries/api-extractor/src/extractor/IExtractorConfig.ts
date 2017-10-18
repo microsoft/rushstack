@@ -1,15 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as ts from 'typescript';
-
-export type ExtractorErrorHandler = (message: string, fileName: string, lineNumber: number) => void;
-
 /**
  * With this configuration, API Extractor configures the compiler based on settings that
  * it finds in the project's tsconfig.json file.
  *
- * @beta
+ * @public
  */
 export interface IExtractorTsconfigCompilerConfig {
   configType: 'tsconfig';
@@ -38,19 +34,20 @@ export interface IExtractorTsconfigCompilerConfig {
  * that is provided programmatically at runtime.  This can potentially enable faster builds,
  * by reusing the same compiler invocation for tsc, tslint, and API Extractor.
  *
- * @beta
+ * If configType='runtime' is specified, then IExtractorRuntimeOptions.compilerProgram must be
+ * provided.
+ *
+ * @public
  */
 export interface IExtractorRuntimeCompilerConfig {
   configType: 'runtime';
-
-  program: ts.Program;
 }
 
 /**
  * Describes a specific project that will be analyzed.  In principle, multiple individual
  * projects can be processed while reusing a common compiler state.
  *
- * @beta
+ * @public
  */
 export interface IExtractorProjectConfig {
   /**
@@ -72,11 +69,11 @@ export interface IExtractorProjectConfig {
 /**
  * Configures how the API review files (*.api.ts) will be generated.
  *
- * @beta
+ * @public
  */
 export interface IExtractorApiReviewFileConfig {
   /**
-   * Whether to generate review files at all.
+   * Whether to generate review files at all.  The default is true.
    */
   enabled: boolean;
 
@@ -91,34 +88,49 @@ export interface IExtractorApiReviewFileConfig {
    * create a Pull Request, a branch policy will look for changes under "api-review/*"
    * and require signoff from the appropriate reviewers.
    *
+   * The default value is "./etc".
+   *
    * Example: "config" (for a standalone project)
    * Example: "../../common/api-review"  (for a Git repository with Rush)
    */
-  apiReviewFolder: string;
+  apiReviewFolder?: string;
+
+  /**
+   * The *.api.ts report is saved into this folder.  During a production build
+   * (i.e. when IExtractorRuntimeOptions.productionBuild=true) the temporary file will
+   * be compared with the file in apiReviewFolder; if there are differences, and error
+   * will be reported.  During a non-production build, the temporary file will be
+   * automatically copied to the apiReviewFolder.
+   *
+   * The default value is "./temp".
+   */
+  tempFolder?: string;
 }
 
 /**
  * Configures how the API JSON files (*.api.json) will be generated.
  *
- * @beta
+ * @public
  */
 export interface IExtractorApiJsonFileConfig {
   /**
-   * Whether to generate API JSON files at all.
+   * Whether to generate API JSON files at all.  The default is true.
    */
   enabled: boolean;
 
   /**
-   * Specifies where the *.api.json file should be written.  If omitted, it will be written
-   * to the './dist' folder by default.
+   * Specifies where the *.api.json file should be written.
+   *
+   * The default value is "./dist"
    */
   outputFolder?: string;
 }
 
 /**
- * Describes how the API Extractor tool will process a project
+ * Configuration options for the API Extractor tool.  These options can be loaded
+ * from a JSON config file.
  *
- * @beta
+ * @public
  */
 export interface IExtractorConfig {
   /**
@@ -129,12 +141,6 @@ export interface IExtractorConfig {
   compiler: IExtractorTsconfigCompilerConfig | IExtractorRuntimeCompilerConfig;
 
   /**
-   * Allows the caller to handle API Extractor errors; otherwise, they will be logged
-   * to the console.
-   */
-  customErrorHandler?: ExtractorErrorHandler;
-
-  /**
    * {@inheritdoc IExtractorProjectConfig}
    */
   project: IExtractorProjectConfig;
@@ -142,10 +148,10 @@ export interface IExtractorConfig {
   /**
    * {@inheritdoc IExtractorApiReviewFileConfig}
    */
-  apiReviewFile: IExtractorApiReviewFileConfig;
+  apiReviewFile?: IExtractorApiReviewFileConfig;
 
   /**
    * {@inheritdoc IExtractorApiJsonFileConfig}
    */
-  apiJsonFile: IExtractorApiJsonFileConfig;
+  apiJsonFile?: IExtractorApiJsonFileConfig;
 }
