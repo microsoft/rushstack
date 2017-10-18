@@ -312,6 +312,8 @@ class RushConfiguration {
   public readonly npmTmpFolder: string;
   public readonly npmToolFilename: string;
   public readonly npmToolVersion: string;
+  // (undocumented)
+  public readonly packageManager: 'pnpm' | 'npm';
   public readonly pinnedVersions: PinnedVersionsConfiguration;
   public readonly projectFolderMaxDepth: number;
   public readonly projectFolderMinDepth: number;
@@ -370,6 +372,8 @@ module RushConstants {
   packageJsonFilename: string = 'package.json';
 
   pinnedVersionsFilename: string = 'pinned-versions.json';
+
+  pnpmShrinkwrapFilename: string = 'shrinkwrap.yaml';
 
   rushTempFolderName: string = 'temp';
 

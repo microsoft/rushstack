@@ -71,7 +71,8 @@ export interface IRushRepositoryJson {
  */
 export interface IRushConfigurationJson {
   $schema: string;
-  npmVersion: string;
+  npmVersion?: string;
+  pnpmVersion?: string;
   rushMinimumVersion: string;
   repository?: IRushRepositoryJson;
   nodeSupportedVersionRange?: string;
@@ -108,14 +109,15 @@ export default class RushConfiguration {
   private _commonFolder: string;
   private _commonTempFolder: string;
   private _commonRushConfigFolder: string;
-  private _npmCacheFolder: string;
-  private _npmTmpFolder: string;
+  private _packageManager: 'pnpm' | 'npm';
+  private _packageManagerCacheFolder: string;
+  private _packageManagerTmpFolder: string;
   private _committedShrinkwrapFilename: string;
   private _tempShrinkwrapFilename: string;
   private _homeFolder: string;
   private _rushLinkJsonFilename: string;
-  private _npmToolVersion: string;
-  private _npmToolFilename: string;
+  private _packageManagerToolVersion: string;
+  private _packageManagerToolFilename: string;
   private _projectFolderMinDepth: number;
   private _projectFolderMaxDepth: number;
 
@@ -261,6 +263,10 @@ export default class RushConfiguration {
     }
   }
 
+  public get packageManager(): 'pnpm' | 'npm' {
+    return this._packageManager;
+  }
+
   /**
    * The Rush configuration file
    */
@@ -321,7 +327,7 @@ export default class RushConfiguration {
    * Example: "C:\MyRepo\common\temp\npm-cache"
    */
   public get npmCacheFolder(): string {
-    return this._npmCacheFolder;
+    return this._packageManagerCacheFolder;
   }
 
   /**
@@ -332,14 +338,14 @@ export default class RushConfiguration {
    * Example: "C:\MyRepo\common\temp\npm-tmp"
    */
   public get npmTmpFolder(): string {
-    return this._npmTmpFolder;
+    return this._packageManagerTmpFolder;
   }
 
   /**
    * The filename of the NPM shrinkwrap file that is tracked e.g. by Git.  (The "rush install"
    * command uses a temporary copy, whose path is tempShrinkwrapFilename.)
    * This property merely reports the filename; the file itself may not actually exist.
-   * Example: "C:\MyRepo\common\npm-shrinkwrap.json"
+   * Example: "C:\MyRepo\common\npm-shrinkwrap.json" or "C:\MyRepo\common\shrinkwrap.yaml"
    */
   public get committedShrinkwrapFilename(): string {
     return this._committedShrinkwrapFilename;
@@ -349,7 +355,7 @@ export default class RushConfiguration {
    * The filename of the temporary NPM shrinkwrap file that is used by "rush install".
    * (The master copy is tempShrinkwrapFilename.)
    * This property merely reports the filename; the file itself may not actually exist.
-   * Example: "C:\MyRepo\common\temp\npm-shrinkwrap.json"
+   * Example: "C:\MyRepo\common\temp\npm-shrinkwrap.json" or "C:\MyRepo\common\temp\shrinkwrap.yaml"
    */
   public get tempShrinkwrapFilename(): string {
     return this._tempShrinkwrapFilename;
@@ -378,7 +384,7 @@ export default class RushConfiguration {
    * The version of the locally installed NPM tool.  (Example: "1.2.3")
    */
   public get npmToolVersion(): string {
-    return this._npmToolVersion;
+    return this._packageManagerToolVersion;
   }
 
   /**
@@ -387,7 +393,7 @@ export default class RushConfiguration {
    * Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
    */
   public get npmToolFilename(): string {
-    return this._npmToolFilename;
+    return this._packageManagerToolFilename;
   }
 
   /**
@@ -559,13 +565,10 @@ export default class RushConfiguration {
     RushConfiguration._validateCommonRushConfigFolder(this._commonRushConfigFolder);
 
     this._commonTempFolder = path.join(this._commonFolder, RushConstants.rushTempFolderName);
-    this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
-    this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));
+    this._packageManagerCacheFolder = path.resolve(path.join(this._commonTempFolder, 'packages-cache'));
+    this._packageManagerTmpFolder = path.resolve(path.join(this._commonTempFolder, 'packages-tmp'));
 
     this._changesFolder = path.join(this._commonFolder, RushConstants.changeFilesFolderName);
-
-    this._committedShrinkwrapFilename = path.join(this._commonRushConfigFolder, RushConstants.npmShrinkwrapFilename);
-    this._tempShrinkwrapFilename = path.join(this._commonTempFolder, RushConstants.npmShrinkwrapFilename);
 
     const unresolvedUserFolder: string = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
     this._homeFolder = path.resolve(unresolvedUserFolder);
@@ -575,9 +578,29 @@ export default class RushConfiguration {
 
     this._rushLinkJsonFilename = path.join(this._commonTempFolder, 'rush-link.json');
 
-    this._npmToolVersion = rushConfigurationJson.npmVersion;
-    this._npmToolFilename = path.resolve(path.join(this._commonTempFolder,
-      'npm-local', 'node_modules', '.bin', 'npm'));
+    if (rushConfigurationJson.npmVersion) {
+      this._packageManager = 'npm';
+
+      this._committedShrinkwrapFilename = path.join(this._commonRushConfigFolder, RushConstants.npmShrinkwrapFilename);
+      this._tempShrinkwrapFilename = path.join(this._commonTempFolder, RushConstants.npmShrinkwrapFilename);
+
+      this._packageManagerToolVersion = rushConfigurationJson.npmVersion;
+      this._packageManagerToolFilename = path.resolve(path.join(this._commonTempFolder,
+        'npm-local', 'node_modules', '.bin', 'npm'));
+
+    } else if (rushConfigurationJson.pnpmVersion) {
+      this._packageManager = 'pnpm';
+
+      this._committedShrinkwrapFilename = path.join(this._commonRushConfigFolder, RushConstants.pnpmShrinkwrapFilename);
+      this._tempShrinkwrapFilename = path.join(this._commonTempFolder, RushConstants.pnpmShrinkwrapFilename);
+
+      this._packageManagerToolVersion = rushConfigurationJson.pnpmVersion;
+      this._packageManagerToolFilename = path.resolve(path.join(this._commonTempFolder,
+        'pnpm-local', 'node_modules', '.bin', 'pnpm'));
+
+    } else {
+      throw new Error(`Neither "npmVersion" nor "pnpmVersion" was defined in the rush configuration.`);
+    }
 
     this._projectFolderMinDepth = rushConfigurationJson.projectFolderMinDepth !== undefined
       ? rushConfigurationJson.projectFolderMinDepth : 1;
