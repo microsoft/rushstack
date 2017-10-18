@@ -253,10 +253,11 @@ export default class LinkManager {
 
     // now that we have the temp package.json, we can go ahead and link up all the direct dependencies
 
-    Object.keys(commonPackage.packageJson.rushDependencies || {}).forEach((dependencyName: string) => {
+    Object.keys(commonPackage.packageJson!.rushDependencies || {}).forEach((dependencyName: string) => {
       // Should this be a "local link" to a top-level Rush project (i.e. versus a regular link
       // into the Common folder)?
-      const matchedRushPackage: RushConfigurationProject = this._rushConfiguration.getProjectByName(dependencyName);
+      const matchedRushPackage: RushConfigurationProject | undefined =
+        this._rushConfiguration.getProjectByName(dependencyName);
 
       if (matchedRushPackage) {
         const matchedVersion: string = matchedRushPackage.packageJson.version;
@@ -287,8 +288,8 @@ export default class LinkManager {
     });
 
     // Iterate through all the regular dependencies
-    Object.keys(commonPackage.packageJson.dependencies || {}).forEach((dependencyName: string) => {
-      const dependencyVersionRange: string = commonPackage.packageJson.dependencies[dependencyName];
+    Object.keys(commonPackage.packageJson!.dependencies || {}).forEach((dependencyName: string) => {
+      const dependencyVersionRange: string = commonPackage.packageJson!.dependencies![dependencyName];
 
       // We can't symlink to an Rush project, so instead we will symlink to a folder
       // under the "Common" folder
@@ -319,14 +320,14 @@ export default class LinkManager {
       const pnpmStorePackagePath: string = path.join(
         pnpmStorePath,
         dependencyName,
-        selectedVersion,
+        selectedVersion!,
         RushConstants.nodeModulesFolderName,
         dependencyName
       );
 
       if (fsx.lstatSync(pnpmStorePackagePath).isDirectory()) {
         const newLocalFolderPath: string = path.join(
-          localPackage.folderPath, 'node_modules', dependencyName);
+           localPackage.folderPath, 'node_modules', dependencyName);
 
         const newLocalPackage: Package = Package.createLinkedPackage(
           dependencyName,

@@ -97,6 +97,7 @@ class Extractor {
   public readonly packageFolder: string;
   // (undocumented)
   public packageJsonLookup: PackageJsonLookup;
+  public readonly packageName: string;
   public reportError(message: string, sourceFile: ts.SourceFile, start: number): void;
   // (undocumented)
   public typeChecker: ts.TypeChecker;
@@ -128,6 +129,7 @@ interface IApiClass extends IApiBaseDefinition {
 interface IApiConstructor extends IApiBaseDefinition {
   kind: 'constructor';
   parameters: IApiNameMap<IApiParameter>;
+  signature: string;
 }
 
 // @alpha
@@ -149,6 +151,7 @@ interface IApiFunction extends IApiBaseDefinition {
   kind: 'function';
   parameters: IApiNameMap<IApiParameter>;
   returnValue: IApiReturnValue;
+  signature: string;
 }
 
 // @alpha
@@ -214,6 +217,7 @@ interface IApiProperty extends IApiBaseDefinition {
   isReadOnly: boolean;
   isStatic: boolean;
   kind: 'property';
+  signature: string;
   type: string;
 }
 
@@ -323,8 +327,6 @@ interface IMarkupPage {
   // (undocumented)
   breadcrumb: MarkupBasicElement[];
   // (undocumented)
-  docId: string;
-  // (undocumented)
   elements: MarkupStructuredElement[];
   // (undocumented)
   kind: 'page';
@@ -383,6 +385,12 @@ interface IMarkupWebLink {
   kind: 'web-link';
   // (undocumented)
   targetUrl: string;
+}
+
+// @alpha
+interface IParagraphElement extends IBaseDocElement {
+  // (undocumented)
+  kind: 'paragraphDocElement';
 }
 
 // @alpha

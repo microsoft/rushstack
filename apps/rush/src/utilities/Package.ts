@@ -38,15 +38,15 @@ export default class Package {
   /**
    * The parent package, or undefined if this is the root of the tree.
    */
-  public parent: Package;
+  public parent: Package | undefined;
 
-  public packageJson: IRushTempPackageJson;
+  public packageJson: IRushTempPackageJson | undefined;
 
   /**
    * If this is a local path that we are planning to symlink to a target folder,
    * then symlinkTargetFolderPath keeps track of the intended target.
    */
-  public symlinkTargetFolderPath: string = undefined;
+  public symlinkTargetFolderPath: string | undefined = undefined;
 
    /**
    * Packages that were placed in node_modules subfolders of this package.
@@ -107,7 +107,7 @@ export default class Package {
     this._childrenByName.set(child.name, child);
   }
 
-  public getChildByName(childPackageName: string): Package {
+  public getChildByName(childPackageName: string): Package | undefined {
     return this._childrenByName.get(childPackageName);
   }
 
@@ -124,7 +124,7 @@ export default class Package {
   private constructor(name: string,
     version: string,
     folderPath: string,
-    packageJson: IRushTempPackageJson) {
+    packageJson: IRushTempPackageJson | undefined) {
 
     this.name = name;
     this.packageJson = packageJson;

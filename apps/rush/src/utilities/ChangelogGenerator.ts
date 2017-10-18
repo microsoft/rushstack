@@ -34,15 +34,15 @@ export default class ChangelogGenerator {
 
     for (const packageName in allChanges) {
       if (allChanges.hasOwnProperty(packageName)) {
-        const project: RushConfigurationProject = allProjects.get(packageName);
+        const project: RushConfigurationProject | undefined = allProjects.get(packageName);
 
         // Changelogs should only be generated for publishable projects.
         // Do not update changelog or delete the change files for prerelease.
         // Save them for the official release.
-        if (project.shouldPublish && !semver.prerelease(project.packageJson.version)) {
-          const changeLog: IChangelog = ChangelogGenerator.updateIndividualChangelog(
+        if (!!project && project.shouldPublish && !semver.prerelease(project.packageJson.version)) {
+          const changeLog: IChangelog | undefined = ChangelogGenerator.updateIndividualChangelog(
             allChanges[packageName],
-            allProjects.get(packageName).projectFolder,
+            project.projectFolder,
             shouldCommit);
 
             if (changeLog) {
@@ -97,17 +97,17 @@ export default class ChangelogGenerator {
       !changelog.entries.some(entry => entry.version === change.newVersion)) {
 
       const changelogEntry: IChangeLogEntry = {
-        version: change.newVersion,
-        tag: PublishUtilities.createTagname(change.packageName, change.newVersion),
+        version: change.newVersion!,
+        tag: PublishUtilities.createTagname(change.packageName, change.newVersion!),
         date: new Date().toUTCString(),
         comments: {}
       };
 
-      change.changes.forEach(individualChange => {
+      change.changes!.forEach(individualChange => {
         if (individualChange.comment) {
 
           // Initialize the comments array only as necessary.
-          const changeTypeString: string = ChangeType[individualChange.changeType];
+          const changeTypeString: string = ChangeType[individualChange.changeType!];
           const comments: IChangeLogComment[] =
             changelogEntry.comments[changeTypeString] =
             changelogEntry.comments[changeTypeString] || [];
@@ -151,7 +151,7 @@ export default class ChangelogGenerator {
    */
   private static _getChangelog(packageName: string, projectFolder: string): IChangelog {
     const changelogFilename: string = path.join(projectFolder, CHANGELOG_JSON);
-    let changelog: IChangelog;
+    let changelog: IChangelog | undefined = undefined;
 
     // Try to read the existing changelog.
     if (fs.existsSync(changelogFilename)) {

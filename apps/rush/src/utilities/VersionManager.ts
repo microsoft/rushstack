@@ -80,10 +80,10 @@ export class VersionManager {
     changeManager.load(this._rushConfiguration.changesFolder);
     if (changeManager.hasChanges()) {
       changeManager.validateChanges(this._versionPolicyConfiguration);
-      changeManager.apply(shouldCommit).forEach(packageJson => {
+      changeManager.apply(!!shouldCommit)!.forEach(packageJson => {
         this._updatedProjects.set(packageJson.name, packageJson);
       });
-      changeManager.updateChangelog(shouldCommit, this._updatedProjects);
+      changeManager.updateChangelog(!!shouldCommit, this._updatedProjects);
     }
   }
 
@@ -119,7 +119,7 @@ export class VersionManager {
     });
     const lockStepProjectNames: Set<string> = new Set<string>();
     this._rushConfiguration.projects.forEach((rushProject) => {
-      if (lockStepVersionPolicyNames.has(rushProject.versionPolicyName)) {
+      if (lockStepVersionPolicyNames.has(rushProject.versionPolicyName!)) {
         lockStepProjectNames.add(rushProject.packageName);
       }
     });
@@ -129,12 +129,12 @@ export class VersionManager {
   private _updateVersionsByPolicy(versionPolicyName?: string): void {
     // Update versions based on version policy
     this._rushConfiguration.projects.forEach(rushProject => {
-      const projectVersionPolicyName: string = rushProject.versionPolicyName;
+      const projectVersionPolicyName: string | undefined = rushProject.versionPolicyName;
       if (projectVersionPolicyName &&
           (!versionPolicyName || projectVersionPolicyName === versionPolicyName)) {
         const versionPolicy: VersionPolicy = this._versionPolicyConfiguration.getVersionPolicy(
           projectVersionPolicyName);
-        const updatedProject: IPackageJson = versionPolicy.ensure(rushProject.packageJson);
+        const updatedProject: IPackageJson | undefined = versionPolicy.ensure(rushProject.packageJson);
         if (updatedProject) {
           this._updatedProjects.set(updatedProject.name, updatedProject);
 
@@ -158,7 +158,7 @@ export class VersionManager {
     if (!changeInfos.length) {
       return;
     }
-    let changeFile: ChangeFile = this._changeFiles.get(packageName);
+    let changeFile: ChangeFile | undefined = this._changeFiles.get(packageName);
     if (!changeFile) {
       changeFile = new ChangeFile({
         changes: [],
@@ -168,13 +168,13 @@ export class VersionManager {
       this._changeFiles.set(packageName, changeFile);
     }
     changeInfos.forEach((changeInfo) => {
-      changeFile.addChange(changeInfo);
+      changeFile!.addChange(changeInfo);
     });
   }
 
   private _updateDependencies(): void {
     this._rushConfiguration.projects.forEach(rushProject => {
-      let clonedProject: IPackageJson = this._updatedProjects.get(rushProject.packageName);
+      let clonedProject: IPackageJson | undefined = this._updatedProjects.get(rushProject.packageName);
       let projectVersionChanged: boolean = true;
       if (!clonedProject) {
         clonedProject = cloneDeep(rushProject.packageJson);
@@ -189,7 +189,7 @@ export class VersionManager {
     clonedProject: IPackageJson,
     projectVersionChanged: boolean
   ): void {
-    if (!clonedProject.dependencies) {
+    if (!clonedProject.dependencies && !clonedProject.devDependencies) {
       return;
     }
     const changes: IChangeInfo[] = [];
@@ -212,7 +212,7 @@ export class VersionManager {
     }
   }
 
-  private _updateProjectDependencies(dependencies: { [key: string]: string; },
+  private _updateProjectDependencies(dependencies: { [key: string]: string; } | undefined,
     changes: IChangeInfo[],
     clonedProject: IPackageJson,
     rushProject: RushConfigurationProject,
@@ -303,10 +303,12 @@ export class VersionManager {
 
   private _updatePackageJsonFiles(): void {
     this._updatedProjects.forEach((newPackageJson, packageName) => {
-      const rushProject: RushConfigurationProject = this._rushConfiguration.getProjectByName(packageName);
+      const rushProject: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(packageName);
       // Update package.json
-      const packagePath: string = path.join(rushProject.projectFolder, 'package.json');
-      fsx.writeFileSync(packagePath, JSON.stringify(newPackageJson, undefined, 2), { encoding: 'utf8' });
+      if (rushProject) {
+        const packagePath: string = path.join(rushProject.projectFolder, 'package.json');
+        fsx.writeFileSync(packagePath, JSON.stringify(newPackageJson, undefined, 2), { encoding: 'utf8' });
+      }
     });
   }
 

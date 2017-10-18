@@ -383,8 +383,8 @@ export default class Utilities {
    */
   private static _executeCommandInternal(
     command: string, args: string[], workingDirectory: string,
-    stdio: (string|number)[],
-    environmentVariables: { [key: string]: string }): child_process.SpawnSyncReturns<Buffer> {
+    stdio: (string|number)[] | undefined,
+    environmentVariables: { [key: string]: string } | undefined): child_process.SpawnSyncReturns<Buffer> {
 
     const options: child_process.SpawnSyncOptions = {
       cwd: workingDirectory,

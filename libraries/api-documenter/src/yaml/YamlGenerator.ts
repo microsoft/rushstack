@@ -118,7 +118,12 @@ export class YamlGenerator {
 
     tocFile.items.push({
       name: 'SharePoint Framework', // TODO: parameterize this
-      items: this._buildTocItems(docItems.filter(x => x.isExternalPackage))
+      items: [
+        {
+          name: 'Overview',
+          href: './index.md'
+        } as IYamlTocItem
+      ].concat(this._buildTocItems(docItems.filter(x => x.isExternalPackage)))
     });
 
     const externalPackages: DocItem[] = docItems.filter(x => !x.isExternalPackage);
@@ -176,40 +181,23 @@ export class YamlGenerator {
     const yamlItem: Partial<IYamlItem> = { };
     yamlItem.uid = this._getUid(docItem);
 
-    let summary: string = this._renderMarkdownFromDocElement(docItem.apiItem.summary, docItem);
-    const remarks: string = this._renderMarkdownFromDocElement(docItem.apiItem.remarks, docItem);
-
-    if ((docItem.apiItem.deprecatedMessage || []).length > 0) {
-      const deprecatedMessage: string = this._renderMarkdownFromDocElement(docItem.apiItem.deprecatedMessage, docItem);
-
-      summary = '> [!NOTE]\n'
-        + '> _This API is now obsolete._\n'
-        + '> \n'
-        + `> _${deprecatedMessage.trim()}_\n\n`
-        + summary;
-    }
-
-    if (docItem.apiItem.isBeta) {
-      summary = '> [!NOTE]\n'
-        + '> _This API is provided as a preview for developers and may change based on feedback_\n'
-        + '> _that we receive. Do not use this API in a production environment._\n\n'
-        + summary;
-    }
-
-    if (remarks && this._shouldEmbed(docItem.kind)) {
-      // This is a temporary workaround, since "Remarks" are not currently being displayed for embedded items
-      if (summary) {
-        summary += '\n\n';
-      }
-      summary += '### Remarks\n\n' + remarks;
-    }
-
+    const summary: string = this._renderMarkdownFromDocElement(docItem.apiItem.summary, docItem);
     if (summary) {
       yamlItem.summary = summary;
     }
 
+    const remarks: string = this._renderMarkdownFromDocElement(docItem.apiItem.remarks, docItem);
     if (remarks) {
       yamlItem.remarks = remarks;
+    }
+
+    if ((docItem.apiItem.deprecatedMessage || []).length > 0) {
+      const deprecatedMessage: string = this._renderMarkdownFromDocElement(docItem.apiItem.deprecatedMessage, docItem);
+      yamlItem.deprecated = { content: deprecatedMessage };
+    }
+
+    if (docItem.apiItem.isBeta) {
+      yamlItem.isPreview = true;
     }
 
     yamlItem.name = docItem.name;
@@ -255,7 +243,8 @@ export class YamlGenerator {
         this._populateYamlProperty(yamlItem, docItem);
         break;
       case DocItemKind.Function:
-        // Unimplemented
+        yamlItem.type = 'function';
+        this._populateYamlMethod(yamlItem, docItem);
         break;
       default:
         throw new Error('Unimplemented item kind: ' + DocItemKind[docItem.kind as DocItemKind]);
@@ -271,17 +260,12 @@ export class YamlGenerator {
   private _populateYamlClassOrInterface(yamlItem: Partial<IYamlItem>, docItem: DocItem): void {
     const apiStructure: IApiClass | IApiInterface = docItem.apiItem as IApiClass | IApiInterface;
 
-    let text: string = '';
-
     if (apiStructure.extends) {
-      text += `**Extends:** \`${apiStructure.extends}\`\n\n`;
-    }
-    if (apiStructure.implements) {
-      text += `**Implements:** \`${apiStructure.implements}\`\n\n`;
+      yamlItem.extends = [ apiStructure.extends ];
     }
 
-    if (text) {
-      yamlItem.remarks = text + (yamlItem.remarks || '');
+    if (apiStructure.implements) {
+      yamlItem.implements = [ apiStructure.implements ];
     }
   }
 
@@ -295,9 +279,12 @@ export class YamlGenerator {
     yamlItem.syntax = syntax;
 
     if (apiMethod.returnValue) {
+      const returnDescription: string = this._renderMarkdownFromDocElement(apiMethod.returnValue.description, docItem)
+        .replace(/^\s*-\s+/, ''); // temporary workaround for people who mistakenly add a hyphen, e.g. "@returns - blah"
+
       syntax.return = {
         type: [ apiMethod.returnValue.type ],
-        description: this._renderMarkdownFromDocElement(apiMethod.returnValue.description, docItem)
+        description: returnDescription
       };
     }
 
@@ -323,7 +310,7 @@ export class YamlGenerator {
     const apiProperty: IApiProperty = docItem.apiItem as IApiProperty;
 
     const syntax: IYamlSyntax = {
-      content: docItem.name + ': ' + apiProperty.type + ';' // TODO
+      content: apiProperty.signature
     };
     yamlItem.syntax = syntax;
 
@@ -354,7 +341,7 @@ export class YamlGenerator {
           args.suffix = `](xref:${this._getUid(result.docItem)})`;
         }
       }
-    });
+    }).trim();
   }
 
   private _writeYamlFile(dataObject: {}, filePath: string, yamlMimeType: string,

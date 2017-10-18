@@ -130,7 +130,7 @@
       "summary": [
         {
           "kind": "textDocElement",
-          "value": "This is a class to test AEDoc parser and this is description that can span to multiple lines and we need to make sure we parse this block correctly. It can contain a"
+          "value": "This is a class to test AEDoc parser and this is description that can span to multiple lines and we need to make sure we parse this block correctly. It can contain a "
         },
         {
           "kind": "linkDocElement",
@@ -140,7 +140,7 @@
         },
         {
           "kind": "textDocElement",
-          "value": ". This block is entirely valid and a correct documentation object should be built for this ApiItem."
+          "value": " . This block is entirely valid and a correct documentation object should be built for this ApiItem."
         }
       ],
       "remarks": [
@@ -178,6 +178,7 @@
         },
         "betaTagMissingParam": {
           "kind": "property",
+          "signature": "public betaTagMissingParam: string;",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
@@ -189,6 +190,7 @@
         },
         "fieldWithBadTag": {
           "kind": "property",
+          "signature": "public fieldWithBadTag: string;",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
@@ -205,6 +207,7 @@
         },
         "fieldWithInvalidInlineTag": {
           "kind": "property",
+          "signature": "public fieldWithInvalidInlineTag: string;",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
@@ -226,6 +229,7 @@
         },
         "fieldWithValidEscapedBraces": {
           "kind": "property",
+          "signature": "public fieldWithValidEscapedBraces: string;",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
@@ -234,11 +238,11 @@
           "summary": [
             {
               "kind": "textDocElement",
-              "value": "This doc has {curly braces} which is valid but the inline @link token is missing a pipe between the URL and the display text"
+              "value": "This doc has {curly braces} which is valid but the inline @link token is missing a pipe between the URL and the display text "
             },
             {
               "kind": "textDocElement",
-              "value": "The displayName is not allowed to have non word characters."
+              "value": " The displayName is not allowed to have non word characters."
             }
           ],
           "remarks": [],
@@ -246,6 +250,7 @@
         },
         "linkTagMissingParam": {
           "kind": "property",
+          "signature": "public linkTagMissingParam: string;",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,
@@ -391,6 +396,7 @@
         },
         "propertyTypeLiteralIncompleteTypes": {
           "kind": "property",
+          "signature": "public propertyTypeLiteralIncompleteTypes:",
           "isOptional": false,
           "isReadOnly": false,
           "isStatic": false,

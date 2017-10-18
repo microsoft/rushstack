@@ -53,7 +53,7 @@ export abstract class VersionPolicy {
    *
    * @param versionPolicyJson - version policy Json
    */
-  public static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy {
+  public static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy | undefined {
     const definition: VersionPolicyDefinitionName = VersionPolicyDefinitionName[versionPolicyJson.definitionName];
     if (definition === VersionPolicyDefinitionName.lockStepVersion) {
        // tslint:disable-next-line:no-use-before-declare
@@ -247,11 +247,11 @@ export class IndividualVersionPolicy extends VersionPolicy {
   public ensure(project: IPackageJson): IPackageJson | undefined {
     if (this.lockedMajor) {
       const version: semver.SemVer = new semver.SemVer(project.version);
-      if (version.major < this._lockedMajor) {
+      if (version.major < this.lockedMajor) {
         const updatedProject: IPackageJson = cloneDeep(project);
         updatedProject.version = `${this._lockedMajor}.0.0`;
         return updatedProject;
-      } else if (version.major > this._lockedMajor) {
+      } else if (version.major > this.lockedMajor) {
         const errorMessage: string = `Version ${project.version} in package ${project.name}`
           + ` is higher than locked major version ${this._lockedMajor}.`;
         throw new Error(errorMessage);

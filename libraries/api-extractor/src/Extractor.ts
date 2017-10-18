@@ -73,6 +73,8 @@ export default class Extractor {
 
   private _compilerOptions: ts.CompilerOptions;
 
+  private _packageName: string;
+
   // If the entry point is "C:\Folder\project\src\index.ts" and the nearest package.json
   // is "C:\Folder\project\package.json", then the packageFolder is "C:\Folder\project"
   private _packageFolder: string;
@@ -92,7 +94,14 @@ export default class Extractor {
   }
 
   /**
-   * Getter for the package folder that Extractor is analyzing.
+   * Returns the full name of the package being analyzed.
+   */
+  public get packageName(): string {
+    return this._packageName;
+  }
+
+  /**
+   * Returns the folder for the package being analyzed.
    */
   public get packageFolder(): string {
     return this._packageFolder;
@@ -124,6 +133,8 @@ export default class Extractor {
     const currentPath: string = path.resolve(options.entryPointFile);
     // This is guaranteed to succeed since we do check prior to this point
     this._packageFolder = this.packageJsonLookup.tryGetPackageFolder(currentPath);
+
+    this._packageName = this.packageJsonLookup.getPackageName(this._packageFolder);
 
     this.package = new AstPackage(this, rootFile); // construct members
     this.package.completeInitialization(); // creates ApiDocumentation

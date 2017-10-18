@@ -4,20 +4,20 @@
 /// <reference types='mocha' />
 
 // import { assert } from 'chai';
+import * as fsx from 'fs-extra';
 import * as path from 'path';
 import { FileDiffTest } from '@microsoft/node-core-library';
 import { IMarkupPage } from '@microsoft/api-extractor';
 
-import { MarkdownPageRenderer } from '../MarkdownPageRenderer';
 import { MarkupBuilder } from '../MarkupBuilder';
+import { MarkdownRenderer } from '../MarkdownRenderer';
 
 describe('MarkdownPageRenderer', () => {
   it('renders markdown', (done: MochaDone) => {
 
     const outputFolder: string = FileDiffTest.prepareFolder(__dirname, 'MarkdownPageRenderer');
 
-    const renderer: MarkdownPageRenderer = new MarkdownPageRenderer(outputFolder);
-    const markupPage: IMarkupPage = MarkupBuilder.createPage('Test page', 'test-id');
+    const markupPage: IMarkupPage = MarkupBuilder.createPage('Test page');
 
     markupPage.elements.push(MarkupBuilder.createHeading1('Simple bold test'));
     markupPage.elements.push(...MarkupBuilder.createTextElements('This is a '));
@@ -53,7 +53,18 @@ describe('MarkdownPageRenderer', () => {
     markupPage.elements.push(...MarkupBuilder.createTextElements('*one*two*', { bold: true }));
     markupPage.elements.push(...MarkupBuilder.createTextElements('three*four', { bold: true }));
 
-    const outputFilename: string = renderer.writePage(markupPage);
+    markupPage.elements.push(MarkupBuilder.createHeading1('Characters that should be escaped'));
+    markupPage.elements.push(...MarkupBuilder.createTextElements(
+      'Double-encoded JSON: "{ \\"A\\": 123}"\n\n'));
+    markupPage.elements.push(...MarkupBuilder.createTextElements(
+      'HTML chars: <script>alert("[You] are #1!");</script>\n\n'));
+    markupPage.elements.push(...MarkupBuilder.createTextElements(
+      'HTML escape: &quot;\n\n'));
+    markupPage.elements.push(...MarkupBuilder.createTextElements(
+      '3 or more hyphens: - -- --- ---- ----- ------\n\n'));
+
+    const outputFilename: string = path.join(outputFolder, 'ActualOutput.md');
+    fsx.writeFileSync(outputFilename, MarkdownRenderer.renderElements([markupPage], { }));
 
     FileDiffTest.assertEqual(outputFilename, path.join(__dirname, 'ExpectedOutput.md'));
 

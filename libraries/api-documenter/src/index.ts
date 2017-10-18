@@ -7,6 +7,7 @@ import * as os from 'os';
 import * as path from 'path';
 import { DocItemSet } from './DocItemSet';
 import { YamlGenerator } from './yaml/YamlGenerator';
+import { MarkdownGenerator } from './markdown/MarkdownGenerator';
 
 const myPackageJsonFilename: string = path.resolve(path.join(
   __dirname, '..', 'package.json')
@@ -17,7 +18,7 @@ console.log(os.EOL + colors.bold(`api-documenter ${myPackageJson.version}` + os.
 
 const docItemSet: DocItemSet = new DocItemSet();
 
-const dataFolder: string = path.join(__dirname, '../files');
+const dataFolder: string = path.join(__dirname, '../local');
 
 const inputFolder: string = path.join(dataFolder, 'input');
 for (const filename of fsx.readdirSync(inputFolder)) {
@@ -30,5 +31,12 @@ for (const filename of fsx.readdirSync(inputFolder)) {
 
 docItemSet.calculateReferences();
 
-const yamlGenerator: YamlGenerator = new YamlGenerator(docItemSet);
-yamlGenerator.generateFiles(path.join(dataFolder, 'yaml'));
+const yaml: boolean = false;
+
+if (yaml) {
+  const yamlGenerator: YamlGenerator = new YamlGenerator(docItemSet);
+  yamlGenerator.generateFiles(path.join(dataFolder, 'yaml'));
+} else {
+  const markdownGenerator: MarkdownGenerator = new MarkdownGenerator(docItemSet);
+  markdownGenerator.generateFiles(path.join(dataFolder, 'markdown'));
+}

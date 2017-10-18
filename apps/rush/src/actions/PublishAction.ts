@@ -27,6 +27,7 @@ export default class PublishAction extends BaseRushAction {
   private _apply: CommandLineFlagParameter;
   private _includeAll: CommandLineFlagParameter;
   private _npmAuthToken: CommandLineStringParameter;
+  private _npmTag: CommandLineStringParameter;
   private _parser: RushCommandLineParser;
   private _publish: CommandLineFlagParameter;
   private _regenerateChangelogs: CommandLineFlagParameter;
@@ -93,6 +94,15 @@ export default class PublishAction extends BaseRushAction {
       key: 'TOKEN',
       description:
       'Provide the default scope npm auth token to be passed into npm publish for global package publishing.'
+    });
+    this._npmTag = this.defineStringParameter({
+      parameterLongName: '--tag',
+      parameterShortName: '-t',
+      key: 'TAG',
+      description:
+      `The tag option to pass to npm publish. By default npm will publish using the 'latest' tag, even if ` +
+      `the package is older than the current latest, so in publishing workflows for older releases, providing ` +
+      `a tag is important.`
     });
     this._includeAll = this.defineFlagParameter({
       parameterLongName: '--include-all',
@@ -177,8 +187,11 @@ export default class PublishAction extends BaseRushAction {
 
       // NPM publish the things that need publishing.
       for (const change of orderedChanges) {
-        if (change.changeType > ChangeType.dependency) {
-          this._npmPublish(change.packageName, allPackages.get(change.packageName).projectFolder);
+        if (change.changeType && change.changeType > ChangeType.dependency) {
+          const project: RushConfigurationProject | undefined = allPackages.get(change.packageName);
+          if (project) {
+            this._npmPublish(change.packageName, project.projectFolder);
+          }
         }
       }
 
@@ -222,10 +235,11 @@ export default class PublishAction extends BaseRushAction {
   private _gitAddTags(git: Git, orderedChanges: IChangeInfo[]): void {
     for (const change of orderedChanges) {
       if (
+        change.changeType &&
         change.changeType > ChangeType.dependency &&
-        this.rushConfiguration.projectsByName.get(change.packageName).shouldPublish
+        this.rushConfiguration.projectsByName.get(change.packageName)!.shouldPublish
       ) {
-        git.addTag(!!this._publish.value && !this._registryUrl.value, change.packageName, change.newVersion);
+        git.addTag(!!this._publish.value && !this._registryUrl.value, change.packageName, change.newVersion!);
       }
     }
   }
@@ -234,7 +248,7 @@ export default class PublishAction extends BaseRushAction {
     const env: { [key: string]: string } = PublishUtilities.getEnvArgs();
     const args: string[] = ['publish'];
 
-    if (this.rushConfiguration.projectsByName.get(packageName).shouldPublish) {
+    if (this.rushConfiguration.projectsByName.get(packageName)!.shouldPublish) {
       let registry: string = '//registry.npmjs.org/';
       if (this._registryUrl.value) {
         const registryUrl: string = this._registryUrl.value;
@@ -244,6 +258,10 @@ export default class PublishAction extends BaseRushAction {
 
       if (this._npmAuthToken.value) {
         args.push(`--${registry}:_authToken=${this._npmAuthToken.value}`);
+      }
+
+      if (this._npmTag.value) {
+        args.push(`--tag`, this._npmTag.value);
       }
 
       if (this._force.value) {

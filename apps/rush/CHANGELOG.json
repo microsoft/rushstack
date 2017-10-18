@@ -2,6 +2,32 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "3.0.19",
+      "tag": "@microsoft/rush_v3.0.19",
+      "date": "Fri, 06 Oct 2017 22:44:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Enable strickNullChecks"
+          },
+          {
+            "comment": "Fix a bug in \"rush version\" that devdependency does not get bumped if there is no dependency. "
+          },
+          {
+            "comment": "Fix a bug in \"rush change\" so it handles rename properly. "
+          },
+          {
+            "comment": "Add npm tag support in \"rush publish\". "
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-lib\" from `3.0.18` to `3.0.19`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.18",
       "tag": "@microsoft/rush_v3.0.18",
       "date": "Tue, 26 Sep 2017 13:51:05 GMT",

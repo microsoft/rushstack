@@ -29,7 +29,7 @@ describe('updateIndividualChangelog', () => {
         }]
       },
       'rootMajorChange',
-      false);
+      false)!;
 
     const expectedResult: IChangelog = {
       name: 'a',
@@ -72,7 +72,7 @@ describe('updateIndividualChangelog', () => {
       },
       path.resolve(__dirname, 'exampleChangelog'),
       false
-    );
+    )!;
 
     const expectedResult: IChangelog = {
       name: 'a',
@@ -127,7 +127,7 @@ describe('updateIndividualChangelog', () => {
       },
       path.resolve(__dirname, 'exampleChangelog'),
       false
-    );
+    )!;
 
     /* tslint:disable-next-line:no-unused-expression */
     expect(actualResult).to.be.undefined;
@@ -148,7 +148,7 @@ describe('updateIndividualChangelog', () => {
       },
       path.resolve(__dirname, 'exampleChangelog'),
       false
-    );
+    )!;
 
     const expectedResult: IChangelog = {
       name: 'a',
@@ -238,7 +238,7 @@ describe('updateChangelogs', () => {
       changes: []
     };
     // Makes package 'a' prerelease package.
-    const rushProjectA: RushConfigurationProject = rushConfiguration.projectsByName.get('a');
+    const rushProjectA: RushConfigurationProject = rushConfiguration.projectsByName.get('a')!;
     rushProjectA.packageJson.version = '1.0.1-pre.1';
 
     const updatedChangeLogs: IChangelog[] = ChangelogGenerator.updateChangelogs(

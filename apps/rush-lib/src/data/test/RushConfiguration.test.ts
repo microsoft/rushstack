@@ -69,7 +69,7 @@ describe('RushConfiguration', () => {
     assert.isNotTrue(rushConfiguration.telemetryEnabled);
 
     // Validate project1 settings
-    const project1: RushConfigurationProject = rushConfiguration.getProjectByName('project1');
+    const project1: RushConfigurationProject = rushConfiguration.getProjectByName('project1')!;
     assert.ok(project1, 'Failed to find project1');
 
     assert.equal(project1.packageName, 'project1', 'Failed to validate project1.packageName');

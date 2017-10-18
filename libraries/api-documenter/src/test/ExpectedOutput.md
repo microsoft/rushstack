@@ -1,5 +1,3 @@
-<!-- docId=test-id -->
-
 # Test page
 
 ## Simple bold test
@@ -8,7 +6,7 @@ This is a **bold** word.
 
 ## All whitespace bold
 
-  
+
 
 ## Newline bold
 
@@ -17,9 +15,9 @@ This is a **bold** word.
 
 ## Newline bold with spaces
 
-  **line 1**  
-  **line 2**  
-  **line 3**  
+  **line 1**
+  **line 2**
+  **line 3**
 
 ## Adjacent bold regions
 
@@ -32,3 +30,14 @@ This is a **bold** word.
 ## Bad characters
 
 **\*one\*two\*three\*four**
+
+## Characters that should be escaped
+
+Double-encoded JSON: "{ \\"A\\": 123}"
+
+HTML chars: &lt;script&gt;alert("\[You\] are \#1!");&lt;/script&gt;
+
+HTML escape: &amp;quot;
+
+3 or more hyphens: - -- \-\-\- \-\-\-- \-\-\--- \-\-\-\-\-\-
+

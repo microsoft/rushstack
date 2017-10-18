@@ -2,6 +2,46 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "0.3.4",
+      "tag": "@microsoft/node-core-library_v0.3.4",
+      "date": "Fri, 13 Oct 2017 19:02:46 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "d1a74b1d44b2425c57869d9754b2f822c8597025",
+            "comment": "When FileDiffTest creates a copy of the expected output for comparison, it is now marked as read-only to avoid confusion"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.3",
+      "tag": "@microsoft/node-core-library_v0.3.3",
+      "date": "Thu, 05 Oct 2017 01:05:02 GMT",
+      "comments": {}
+    },
+    {
+      "version": "0.3.2",
+      "tag": "@microsoft/node-core-library_v0.3.2",
+      "date": "Fri, 29 Sep 2017 01:03:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "5d78825558e12fa828d114a655975c315aa1a566",
+            "comment": "FileDiffTest now copies the expected file into the same folder as the actual file for easier comparisons"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.1",
+      "tag": "@microsoft/node-core-library_v0.3.1",
+      "date": "Thu, 28 Sep 2017 01:04:28 GMT",
+      "comments": {}
+    },
+    {
       "version": "0.3.0",
       "tag": "@microsoft/node-core-library_v0.3.0",
       "date": "Fri, 22 Sep 2017 01:04:02 GMT",

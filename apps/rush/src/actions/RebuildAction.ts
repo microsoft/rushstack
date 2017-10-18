@@ -169,7 +169,7 @@ export default class RebuildAction extends BaseRushAction {
 
   private _registerToFlags(taskRunner: TaskRunner, toFlags: string[]): void {
     for (const toFlag of toFlags) {
-      const toProject: RushConfigurationProject = this.rushConfiguration.findProjectByShorthandName(toFlag);
+      const toProject: RushConfigurationProject | undefined = this.rushConfiguration.findProjectByShorthandName(toFlag);
       if (!toProject) {
         throw new Error(`The project '${toFlag}' does not exist in rush.json`);
       }
@@ -186,7 +186,8 @@ export default class RebuildAction extends BaseRushAction {
 
   private _registerFromFlags(taskRunner: TaskRunner, fromFlags: string[]): void {
     for (const fromFlag of fromFlags) {
-      const fromProject: RushConfigurationProject = this.rushConfiguration.findProjectByShorthandName(fromFlag);
+      const fromProject: RushConfigurationProject | undefined
+        = this.rushConfiguration.findProjectByShorthandName(fromFlag);
       if (!fromProject) {
         throw new Error(`The project '${fromFlag}' does not exist in rush.json`);
       }
@@ -238,7 +239,7 @@ export default class RebuildAction extends BaseRushAction {
    */
   private _collectAllDependents(project: string): Set<string> {
     const deps: Set<string> = new Set<string>();
-    this._dependentList.get(project).forEach((dep) => {
+    (this._dependentList.get(project) || new Set<string>()).forEach((dep) => {
       deps.add(dep);
     });
     deps.forEach(dep => this._collectAllDependents(dep).forEach(innerDep => deps.add(innerDep)));
@@ -257,34 +258,36 @@ export default class RebuildAction extends BaseRushAction {
         if (!this._dependentList.has(dep)) {
           this._dependentList.set(dep, new Set<string>());
         }
-        this._dependentList.get(dep).add(project);
+        this._dependentList.get(dep)!.add(project);
       });
     });
   }
 
-  private _registerTask(taskRunner: TaskRunner, project: RushConfigurationProject): void {
-    const errorMode: ErrorDetectionMode = this._vsoParameter.value
-      ? ErrorDetectionMode.VisualStudioOnline
-      : ErrorDetectionMode.LocalBuild;
+  private _registerTask(taskRunner: TaskRunner, project: RushConfigurationProject | undefined): void {
+    if (project) {
+      const errorMode: ErrorDetectionMode = this._vsoParameter.value
+        ? ErrorDetectionMode.VisualStudioOnline
+        : ErrorDetectionMode.LocalBuild;
 
-    const activeRules: IErrorDetectionRule[] = [
-      TestErrorDetector,
-      TsErrorDetector,
-      TsLintErrorDetector
-    ];
-    const errorDetector: ErrorDetector = new ErrorDetector(activeRules);
-    const projectTask: ProjectBuildTask = new ProjectBuildTask(
-      project,
-      this.rushConfiguration,
-      errorDetector,
-      errorMode,
-      this._productionParameter.value,
-      this._npmParameter.value,
-      this._minimalParameter.value,
-      this._isIncrementalBuildAllowed);
+      const activeRules: IErrorDetectionRule[] = [
+        TestErrorDetector,
+        TsErrorDetector,
+        TsLintErrorDetector
+      ];
+      const errorDetector: ErrorDetector = new ErrorDetector(activeRules);
+      const projectTask: ProjectBuildTask = new ProjectBuildTask(
+        project,
+        this.rushConfiguration,
+        errorDetector,
+        errorMode,
+        this._productionParameter.value,
+        this._npmParameter.value,
+        this._minimalParameter.value,
+        this._isIncrementalBuildAllowed);
 
-    if (!taskRunner.hasTask(projectTask.name)) {
-      taskRunner.addTask(projectTask);
+      if (!taskRunner.hasTask(projectTask.name)) {
+        taskRunner.addTask(projectTask);
+      }
     }
   }
 }

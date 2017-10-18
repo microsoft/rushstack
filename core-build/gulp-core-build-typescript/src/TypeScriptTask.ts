@@ -150,13 +150,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     const compilerOptions: ICompilerOptions =
       TypeScriptConfiguration.getGulpTypescriptOptions(this.buildConfig).compilerOptions;
 
-    if (compilerOptions.module !== 'commonjs' && compilerOptions.module !== 'esnext' && compilerOptions.module) {
-      this.log(`Your tsconfig.json file specifies a different "target" than expected. `
-        + `Expected: "commonjs" or "esnext". Actual: "${compilerOptions.module}".`);
-    } else if (!compilerOptions.module) {
-      this.log(`Your tsconfig.json file does not specify a "target". Using "commonjs" instead.`);
-      compilerOptions.module = 'commonjs';
-    }
+    TypeScriptConfiguration.fixupSettings(compilerOptions, this.logWarning);
 
     this._tsProject = this._tsProject || ts.createProject(compilerOptions);
 

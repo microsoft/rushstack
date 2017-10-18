@@ -35,7 +35,7 @@ export default class RushConfigurationProject {
   private _tempProjectName: string;
   private _unscopedTempProjectName: string;
   private _cyclicDependencyProjects: Set<string>;
-  private _versionPolicyName: string;
+  private _versionPolicyName: string | undefined;
   private _shouldPublish: boolean;
   private _downstreamDependencyProjects: string[];
 
@@ -200,7 +200,7 @@ export default class RushConfigurationProject {
    * The version policy used by this project.
    * @alpha
    */
-  public get versionPolicyName(): string {
+  public get versionPolicyName(): string | undefined {
     return this._versionPolicyName;
   }
 }

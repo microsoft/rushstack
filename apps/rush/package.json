@@ -1,5 +1,5 @@
 {
-  "name": "@ms/rush",
+  "name": "@microsoft/rush",
   "version": "4.0.0-pnpm.1",
   "description": "The professional solution for consolidating all your JavaScript projects in one Git repo",
   "keywords": [
@@ -28,9 +28,9 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-core-library": "~0.3.0",
+    "@microsoft/node-core-library": "~0.3.4",
     "@microsoft/package-deps-hash": "~2.1.0",
-    "@ms/rush-lib": "4.0.0-pnpm.1",
+    "@microsoft/rush-lib": "4.0.0-pnpm.1",
     "@microsoft/stream-collator": "~2.1.0",
     "@microsoft/ts-command-line": "~2.1.0",
     "builtins": "~1.0.3",
@@ -50,7 +50,7 @@
     "wordwrap": "~1.0.0"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "~4.1.0",
+    "@microsoft/node-library-build": "~4.1.2",
     "@types/chai": "3.4.34",
     "@types/colors": "1.1.3",
     "@types/fs-extra": "0.0.37",

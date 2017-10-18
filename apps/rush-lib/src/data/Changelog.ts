@@ -35,7 +35,7 @@ export interface IChangeLogEntry {
   /**
    * The UTC date when the publish was applied. (Example: Fri, 02 Dec 2016 22:27:16 GMT)
    */
-  date: string;
+  date: string | undefined;
 
   /**
    * Comments for the entry, where key respresents the ChangeType string (Example: major)

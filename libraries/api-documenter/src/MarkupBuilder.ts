@@ -172,10 +172,9 @@ export class MarkupBuilder {
     } as IMarkupTable;
   }
 
-  public static createPage(title: string, docId: string): IMarkupPage {
+  public static createPage(title: string): IMarkupPage {
     return {
       kind: 'page',
-      docId: docId,
       breadcrumb: [],
       title: title,
       elements: []
@@ -194,6 +193,9 @@ export class MarkupBuilder {
         case 'textDocElement':
           const textDocElement: ITextElement = docElement as ITextElement;
           result.push(...MarkupBuilder.createTextElements(textDocElement.value));
+          break;
+        case 'paragraphDocElement':
+          result.push(MarkupBuilder.PARAGRAPH);
           break;
         case 'linkDocElement':
           const linkDocElement: ILinkDocElement = docElement as ILinkDocElement;

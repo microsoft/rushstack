@@ -72,17 +72,17 @@ export default class ProjectBuildTask implements ITaskDefinition {
   public execute(writer: ITaskWriter): Promise<TaskStatus> {
     return new Promise<TaskStatus>((resolve: (status: TaskStatus) => void, reject: (errors: TaskError[]) => void) => {
       const build: string = this._getBuildCommand();
-      const deps: IPackageDependencies = this._getPackageDependencies(build, writer);
+      const deps: IPackageDependencies | undefined = this._getPackageDependencies(build, writer);
       this._executeTask(build, writer, deps, resolve, reject);
     });
   }
 
-  private _getPackageDependencies(buildCommand: string, writer: ITaskWriter): IPackageDependencies {
-    let deps: IPackageDependencies = undefined;
+  private _getPackageDependencies(buildCommand: string, writer: ITaskWriter): IPackageDependencies | undefined {
+    let deps: IPackageDependencies | undefined = undefined;
     PackageChangeAnalyzer.rushConfig = this._rushConfiguration;
     try {
       deps = {
-        files: PackageChangeAnalyzer.instance.getPackageDepsHash(this._rushProject.packageName).files,
+        files: PackageChangeAnalyzer.instance.getPackageDepsHash(this._rushProject.packageName)!.files,
         arguments: buildCommand
       };
     } catch (error) {
@@ -95,14 +95,14 @@ export default class ProjectBuildTask implements ITaskDefinition {
   private _executeTask(
     buildCommand: string,
     writer: ITaskWriter,
-    currentPackageDeps: IPackageDependencies,
+    currentPackageDeps: IPackageDependencies | undefined,
     resolve: (status: TaskStatus) => void,
     reject: (errors: TaskError[]) => void
   ): void {
     this._hasWarningOrError = false;
 
     const projectFolder: string = this._rushProject.projectFolder;
-    let lastPackageDeps: IPackageDependencies;
+    let lastPackageDeps: IPackageDependencies | undefined = undefined;
 
     try {
       writer.writeLine(`>>> ${this.name}`);
@@ -129,7 +129,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
           fsx.unlinkSync(currentDepsPath);
         }
 
-        const cleanCommand: string = this._getScriptCommand('clean');
+        const cleanCommand: string | undefined = this._getScriptCommand('clean');
 
         if (cleanCommand === undefined) {
           // tslint:disable-next-line:max-line-length
@@ -213,7 +213,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
   }
 
   private _getBuildCommand(): string {
-    const build: string =
+    const build: string | undefined =
       this._getScriptCommand('test') || this._getScriptCommand('build');
 
     if (build === undefined) {
@@ -243,7 +243,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
     return `${build} ${args.join(' ')}`;
   }
 
-  private _getScriptCommand(script: string): string {
+  private _getScriptCommand(script: string): string | undefined {
     // tslint:disable-next-line:no-string-literal
     if (!this._rushProject.packageJson.scripts) {
       return undefined;

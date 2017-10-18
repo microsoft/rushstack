@@ -204,7 +204,6 @@ export interface IMarkupTableRow {
 export interface IMarkupPage {
   kind: 'page';
 
-  docId: string;
   breadcrumb: MarkupBasicElement[];
   title: string;
 

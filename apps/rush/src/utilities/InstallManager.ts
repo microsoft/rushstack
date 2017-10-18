@@ -98,25 +98,27 @@ export default class InstallManager {
     if (!directDependencies.has(dependency)) {
       directDependencies.set(dependency, new Set<string>());
     }
-    directDependencies.get(dependency).add(version);
+    directDependencies.get(dependency)!.add(version);
   }
 
   private static _addDependenciesToMap(
     rushConfiguration: RushConfiguration,
     directDependencies: Map<string, Set<string>>,
-    cyclicDeps: Set<string>, deps: { [dep: string]: string }): void {
+    cyclicDeps: Set<string>, deps: { [dep: string]: string } | undefined): void {
 
-    Object.keys(deps || {}).forEach((dependency: string) => {
-      const version: string = deps[dependency];
+    if (deps) {
+      Object.keys(deps).forEach((dependency: string) => {
+        const version: string = deps[dependency];
 
-      // If the dependency is not a local project OR
-      //    the dependency is a cyclic dependency OR
-      //    we depend on a different version than the one locally
-      if (!rushConfiguration.getProjectByName(dependency) || cyclicDeps.has(dependency) ||
-          !semver.satisfies(rushConfiguration.getProjectByName(dependency).packageJson.version, version)) {
-        InstallManager._addDependencyToMap(directDependencies, dependency, version);
-      }
-    });
+        // If the dependency is not a local project OR
+        //    the dependency is a cyclic dependency OR
+        //    we depend on a different version than the one locally
+        if (!rushConfiguration.getProjectByName(dependency) || cyclicDeps.has(dependency) ||
+          !semver.satisfies(rushConfiguration.getProjectByName(dependency)!.packageJson.version, version)) {
+          InstallManager._addDependencyToMap(directDependencies, dependency, version);
+        }
+      });
+    }
   }
 
   constructor(rushConfiguration: RushConfiguration) {
@@ -293,7 +295,7 @@ export default class InstallManager {
     // Add any pinned versions to the top of the commonPackageJson
     // do this in alphabetical order for simpler debugging
     InstallManager._keys(pinnedVersions).sort().forEach((dependency: string) => {
-      commonPackageJson.dependencies[dependency] = pinnedVersions.get(dependency);
+      commonPackageJson.dependencies![dependency] = pinnedVersions.get(dependency)!;
     });
 
     // To make the common/package.json file more readable, sort alphabetically
@@ -313,7 +315,7 @@ export default class InstallManager {
       const unscopedTempProjectName: string = rushProject.unscopedTempProjectName;
 
       // Example: dependencies["@rush-temp/my-project-2"] = "file:./projects/my-project-2.tgz"
-      commonPackageJson.dependencies[rushProject.tempProjectName]
+      commonPackageJson.dependencies![rushProject.tempProjectName]
         = `file:./${RushConstants.rushTempProjectsFolderName}/${rushProject.unscopedTempProjectName}.tgz`;
 
       const tempPackageJson: IRushTempPackageJson = {
@@ -354,7 +356,8 @@ export default class InstallManager {
         // If so, then we will symlink to the project folder rather than to common/temp/node_modules.
         // In this case, we don't want "pnpm install" to process this package, but we do need
         // to record this decision for "rush link" later, so we add it to a special 'rushDependencies' field.
-        const localProject: RushConfigurationProject = this._rushConfiguration.getProjectByName(pair.packageName);
+        const localProject: RushConfigurationProject | undefined =
+          this._rushConfiguration.getProjectByName(pair.packageName);
         if (localProject) {
 
           // Don't locally link if it's listed in the cyclicDependencyProjects
@@ -375,7 +378,7 @@ export default class InstallManager {
         }
 
         // We will NOT locally link this package; add it as a regular dependency.
-        tempPackageJson.dependencies[pair.packageName] = pair.packageVersion;
+        tempPackageJson.dependencies![pair.packageName] = pair.packageVersion;
 
         if (shrinkwrapFile) {
           const tarballFileSpecifier: string = // tslint:disable-next-line:max-line-length

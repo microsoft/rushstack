@@ -9,6 +9,12 @@ class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig> {
 }
 
 // @public (undocumented)
+interface IFixupSettingsOptions {
+  // (undocumented)
+  mustBeCommonJsOrEsnext: boolean;
+}
+
+// @public (undocumented)
 interface ITsConfigFile<T> {
   // (undocumented)
   compilerOptions: T;
@@ -16,6 +22,9 @@ interface ITsConfigFile<T> {
 
 // @public
 class TypeScriptConfiguration {
+  public static fixupSettings(compilerOptions: ts.Settings,
+      logWarning: (msg: string) => void,
+      options: Partial<IFixupSettingsOptions> = {}): void;
   public static getGulpTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<ts.Settings>;
   public static getTsConfigFile(config: IBuildConfig): ITsConfigFile<ts.Settings>;
   public static getTypescriptCompiler(): any;

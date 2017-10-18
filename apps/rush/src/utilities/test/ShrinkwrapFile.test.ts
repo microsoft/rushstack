@@ -7,10 +7,10 @@ import * as path from 'path';
 import ShrinkwapFile from '../ShrinkwrapFile';
 
 describe('ShrinkwrapFile', () => {
-  const filename: string = path.resolve(
-    path.join(
-      __dirname, '../../../src/utilities/test/shrinkwrapFile/shrinkwrap.yaml'));
-  const shrinkwrapFile: ShrinkwapFile = ShrinkwapFile.loadFromFile(filename);
+
+  const filename: string = path.resolve(path.join(
+    __dirname, '../../../src/utilities/test/shrinkwrapFile/shrinkwrap.yaml'));
+  const shrinkwrapFile: ShrinkwapFile = ShrinkwapFile.loadFromFile(filename)!;
 
   it('verifies root-level dependency', () => {
     shrinkwrapFile.hasCompatibleDependency('q', '~1.5.0');

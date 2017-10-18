@@ -119,11 +119,7 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
     const compilerOptions: ts.Settings =
       TypeScriptConfiguration.getGulpTypescriptOptions(this.buildConfig).compilerOptions;
 
-    if (compilerOptions.module !== 'commonjs' && compilerOptions.module) {
-      this.logWarning(`Your tsconfig.json file specifies a different "target" than expected. `
-        + `Expected: "commonjs". Actual: "${compilerOptions.module}". Using "commonjs" instead.`);
-      compilerOptions.module = 'commonjs';
-    }
+    TypeScriptConfiguration.fixupSettings(compilerOptions, this.logWarning, { mustBeCommonJsOrEsnext: true });
 
     const extractorOptions: IExtractorOptions = {
       compilerOptions: ts.createProject(compilerOptions).options,

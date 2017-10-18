@@ -40,7 +40,7 @@ describe('PackageChangeAnalyzer', () => {
       }]
     } as any; // tslint:disable-line:no-any
 
-    const packageDeps: IPackageDeps = PackageChangeAnalyzer.instance.getPackageDepsHash(packageA);
+    const packageDeps: IPackageDeps | undefined = PackageChangeAnalyzer.instance.getPackageDepsHash(packageA);
     expect(packageDeps).eql(repoHashDeps);
   });
 

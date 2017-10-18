@@ -94,14 +94,7 @@ export default class ShrinkwrapFile {
   // @todo this still has problems!
 
   public hasCompatibleDependency(dependencyName: string, versionRange: string, localPackage?: string): boolean {
-    let dependencyVersion: string;
-    let localPackageInformation: IShrinkwrapDependencyJson;
-
-    // prefer to find the version that is being used by the local package, otherwise fall back to root
-    if (localPackage &&
-        (localPackageInformation = ShrinkwrapFile.tryGetValue(this._shrinkwrapJson.packages, localPackage))) {
-      dependencyVersion = ShrinkwrapFile.tryGetValue(localPackageInformation.dependencies, dependencyName);
-    }
+    let dependencyVersion: string | undefined = undefined;
 
     if (!dependencyVersion) {
       dependencyVersion = ShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);

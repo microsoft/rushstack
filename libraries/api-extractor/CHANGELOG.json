@@ -2,6 +2,68 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "3.4.2",
+      "tag": "@microsoft/api-extractor_v3.4.2",
+      "date": "Thu, 05 Oct 2017 01:05:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.2` to `~0.3.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.1",
+      "tag": "@microsoft/api-extractor_v3.4.1",
+      "date": "Fri, 29 Sep 2017 01:03:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "5d78825558e12fa828d114a655975c315aa1a566",
+            "comment": "Removed IMarkupPage.docId"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.1` to `~0.3.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.0",
+      "tag": "@microsoft/api-extractor_v3.4.0",
+      "date": "Thu, 28 Sep 2017 01:04:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "8e0010db430e7d6b84d12f38c5c1669c94ccf30e",
+            "comment": "The *.api.json \"linkDocElement\" type now always explicitly specifies the package name, rather than expecting the reader to infer it"
+          },
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "8e0010db430e7d6b84d12f38c5c1669c94ccf30e",
+            "comment": "The *.api.json file format now exposes \"signature\" information for properties, functions, and module variables"
+          }
+        ],
+        "minor": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "0309dea3eb9f78162f85d59ae4fbf5f1b6f4ea31",
+            "comment": "Skipping two lines in an AEDoc comment now creates a paragraph separator for the generated documentation"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.0` to `~0.3.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.3.0",
       "tag": "@microsoft/api-extractor_v3.3.0",
       "date": "Fri, 22 Sep 2017 01:04:02 GMT",

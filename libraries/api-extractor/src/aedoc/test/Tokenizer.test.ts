@@ -40,19 +40,19 @@ describe('Tokenizer tests', function (): void {
         @tagc this is {   @inlineTag param1  param2   } and this is {just curly braces}`;
 
       const expectedTokens: Token[] = [
-        new Token(TokenType.Text, '', 'this is a mock documentation'),
+        new Token(TokenType.Text, '', 'this is a mock documentation\n'),
         new Token(TokenType.BlockTag, '@taga'),
-        new Token(TokenType.Text, '', 'hi'),
+        new Token(TokenType.Text, '', ' hi\n'),
         new Token(TokenType.BlockTag, '@tagb'),
-        new Token(TokenType.Text, '', 'hello @invalid@tag email@domain.com'),
+        new Token(TokenType.Text, '', ' hello @invalid@tag email@domain.com\n       '),
         new Token(TokenType.BlockTag, '@tagc'),
-        new Token(TokenType.Text, '', 'this is'),
-        new Token(TokenType.Text, '', 'and this is {just curly braces}')
+        new Token(TokenType.Text, '', ' this is '),
+        new Token(TokenType.Text, '', ' and this is {just curly braces}')
       ];
 
       const actualTokens: Token[] = testTokenizer.tokenizeDocs(docs);
-      JsonFile.save(JSON.stringify(expectedTokens), './lib/tokenizeDocsExpected.json');
-      JsonFile.save(JSON.stringify(actualTokens), './lib/tokenizeDocsActual.json');
+      JsonFile.save(expectedTokens, './lib/tokenizeDocsExpected.json');
+      JsonFile.save(actualTokens, './lib/tokenizeDocsActual.json');
       TestFileComparer.assertFileMatchesExpected('./lib/tokenizeDocsActual.json', './lib/tokenizeDocsExpected.json');
     });
 

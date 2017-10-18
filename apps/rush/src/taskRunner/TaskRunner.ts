@@ -74,7 +74,7 @@ export default class TaskRunner {
    * @taskDependencies
    */
   public addDependencies(taskName: string, taskDependencies: string[]): void {
-    const task: ITask = this._tasks.get(taskName);
+    const task: ITask | undefined = this._tasks.get(taskName);
 
     if (!task) {
       throw new Error(`The task '${taskName}' has not been registered`);
@@ -87,7 +87,7 @@ export default class TaskRunner {
       if (!this._tasks.has(dependencyName)) {
         throw new Error(`The project '${dependencyName}' has not been registered.`);
       }
-      const dependency: ITask = this._tasks.get(dependencyName);
+      const dependency: ITask = this._tasks.get(dependencyName)!;
       task.dependencies.add(dependency);
       dependency.dependents.add(task);
     }
@@ -101,6 +101,8 @@ export default class TaskRunner {
     this._currentActiveTasks = 0;
     console.log(`Executing a maximum of ${this._parallelism} simultaneous processes...${os.EOL}`);
 
+    this._checkForCyclicDependencies(this._tasks.values(), []);
+
     // Precalculate the number of dependent packages
     this._tasks.forEach((task: ITask) => {
       this._calculateCriticalPaths(task);
@@ -113,7 +115,7 @@ export default class TaskRunner {
 
     // Sort the queue in descending order, nothing will mess with the order
     this._buildQueue.sort((taskA: ITask, taskB: ITask): number => {
-      return taskB.criticalPathLength - taskA.criticalPathLength;
+      return taskB.criticalPathLength! - taskA.criticalPathLength!;
     });
 
     return new Promise<void>((complete: () => void, reject: () => void) => {
@@ -125,7 +127,7 @@ export default class TaskRunner {
    * Pulls the next task with no dependencies off the build queue
    * Removes any non-ready tasks from the build queue (this should only be blocked tasks)
    */
-  private _getNextTask(): ITask {
+  private _getNextTask(): ITask | undefined {
     for (let i: number = 0; i < this._buildQueue.length; i++) {
       const task: ITask = this._buildQueue[i];
 
@@ -157,7 +159,7 @@ export default class TaskRunner {
       }
     }
 
-    let ctask: ITask;
+    let ctask: ITask | undefined;
     while (this._currentActiveTasks < this._parallelism && (ctask = this._getNextTask())) {
       this._currentActiveTasks++;
       const task: ITask = ctask;
@@ -280,10 +282,27 @@ export default class TaskRunner {
   }
 
   /**
-   * Calculate the number of packages which must be build before we reach
+   * Checks for projects that indirectly depend on themselves.
+   */
+  private _checkForCyclicDependencies(tasks: Iterable<ITask>, dependencyChain: string[]): void {
+    for (const task of tasks) {
+      if (dependencyChain.indexOf(task.name) >= 0) {
+        throw new Error('A cyclic dependency was encountered:\n'
+          + '  ' + [...dependencyChain, task.name].reverse().join('\n  -> ')
+          + '\nConsider using the cyclicDependencyProjects option for rush.json.');
+      }
+      dependencyChain.push(task.name);
+      this._checkForCyclicDependencies(task.dependents, dependencyChain);
+      dependencyChain.pop();
+    }
+  }
+
+  /**
+   * Calculate the number of packages which must be built before we reach
    * the furthest away "root" node
    */
   private _calculateCriticalPaths(task: ITask): number {
+
     // Return the memoized value
     if (task.criticalPathLength !== undefined) {
       return task.criticalPathLength;
