@@ -23,7 +23,7 @@ import AstMethod from '../ast/AstMethod';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { IAedocParameter } from '../aedoc/ApiDocumentation';
 import { IApiReturnValue, IApiParameter, IApiNameMap } from '../api/ApiItem';
-import ApiJsonFile from '../api/ApiJsonFile';
+import { ApiJsonConverter } from '../api/ApiJsonConverter';
 
 /**
  * For a library such as "example-package", ApiFileGenerator generates the "example-package.api.json"
@@ -92,9 +92,9 @@ export default class ApiJsonGenerator extends AstItemVisitor {
     }
 
     const kind: string =
-      astStructuredType.kind === AstItemKind.Class ? ApiJsonFile.convertKindToJson(AstItemKind.Class) :
+      astStructuredType.kind === AstItemKind.Class ? ApiJsonConverter.convertKindToJson(AstItemKind.Class) :
       astStructuredType.kind === AstItemKind.Interface ?
-        ApiJsonFile.convertKindToJson(AstItemKind.Interface) : '';
+        ApiJsonConverter.convertKindToJson(AstItemKind.Interface) : '';
 
     const structureNode: Object = {
       kind: kind,
@@ -129,7 +129,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
 
     const valuesNode: Object = {};
     const enumNode: Object = {
-      kind: ApiJsonFile.convertKindToJson(astEnum.kind),
+      kind: ApiJsonConverter.convertKindToJson(astEnum.kind),
       values: valuesNode,
       deprecatedMessage: astEnum.inheritedDeprecatedMessage || [],
       summary: astEnum.documentation.summary || [],
@@ -155,7 +155,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
     const value: string = lastToken && lastToken !== firstToken ? lastToken.getText() : '';
 
     refObject[astEnumValue.name] = {
-      kind: ApiJsonFile.convertKindToJson(astEnumValue.kind),
+      kind: ApiJsonConverter.convertKindToJson(astEnumValue.kind),
       value: value,
       deprecatedMessage: astEnumValue.inheritedDeprecatedMessage || [],
       summary: astEnumValue.documentation.summary || [],
@@ -175,7 +175,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
     };
 
     const newNode: Object = {
-      kind: ApiJsonFile.convertKindToJson(astFunction.kind),
+      kind: ApiJsonConverter.convertKindToJson(astFunction.kind),
       signature: astFunction.getDeclarationLine(),
       returnValue: returnValueNode,
       parameters: this._createParameters(astFunction),
@@ -190,7 +190,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
 
   protected visitAstPackage(astPackage: AstPackage, refObject?: Object): void {
     /* tslint:disable:no-string-literal */
-    refObject['kind'] = ApiJsonFile.convertKindToJson(astPackage.kind);
+    refObject['kind'] = ApiJsonConverter.convertKindToJson(astPackage.kind);
     refObject['name'] = astPackage.name;
     refObject['summary'] = astPackage.documentation.summary;
     refObject['remarks'] = astPackage.documentation.remarks;
@@ -215,7 +215,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
     }
 
     const newNode: Object = {
-      kind: ApiJsonFile.convertKindToJson(astNamespace.kind),
+      kind: ApiJsonConverter.convertKindToJson(astNamespace.kind),
       deprecatedMessage: astNamespace.inheritedDeprecatedMessage || [],
       summary: astNamespace.documentation.summary || [],
       remarks: astNamespace.documentation.remarks || [],
@@ -244,7 +244,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
     }
 
     const newNode: Object = {
-      kind: ApiJsonFile.convertKindToJson(astProperty.kind),
+      kind: ApiJsonConverter.convertKindToJson(astProperty.kind),
       signature: astProperty.getDeclarationLine(),
       isOptional: !!astProperty.isOptional,
       isReadOnly: !!astProperty.isReadOnly,
@@ -261,7 +261,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
 
   protected visitAstModuleVariable(astModuleVariable: AstModuleVariable, refObject?: Object): void {
     const newNode: Object = {
-      kind: ApiJsonFile.convertKindToJson(astModuleVariable.kind),
+      kind: ApiJsonConverter.convertKindToJson(astModuleVariable.kind),
       signature: astModuleVariable.getDeclarationLine(),
       type: astModuleVariable.type,
       value: astModuleVariable.value,
@@ -282,7 +282,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
     let newNode: Object;
     if (astMethod.name === '__constructor') {
       newNode = {
-        kind: ApiJsonFile.convertKindToJson(AstItemKind.Constructor),
+        kind: ApiJsonConverter.convertKindToJson(AstItemKind.Constructor),
         signature: astMethod.getDeclarationLine(),
         parameters: this._createParameters(astMethod),
         deprecatedMessage: astMethod.inheritedDeprecatedMessage || [],
@@ -296,7 +296,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
       };
 
       newNode = {
-        kind: ApiJsonFile.convertKindToJson(astMethod.kind),
+        kind: ApiJsonConverter.convertKindToJson(astMethod.kind),
         signature: astMethod.getDeclarationLine(),
         accessModifier: astMethod.accessModifier ? ApiAccessModifier[astMethod.accessModifier].toLowerCase() : '',
         isOptional: !!astMethod.isOptional,

@@ -7,7 +7,7 @@ import { AstItemKind } from '../ast/AstItem';
  * Supports the conversion between AstItems that are loaded from AstItem to JSON notation
  * and vice versa.
  */
-export default class ApiJsonFile {
+export class ApiJsonConverter {
   private static _KIND_CONSTRUCTOR: string = 'constructor';
   private static _KIND_CLASS: string = 'class';
   private static _KIND_ENUM: string = 'enum';
