@@ -78,7 +78,7 @@ export class ApiExtractor {
   private static _applyConfigDefaults(config: IExtractorConfig): IExtractorConfig {
     const normalized: IExtractorConfig  = lodash.clone(config);
 
-    if (normalized.project.externalJsonFileFolders) {
+    if (!normalized.project.externalJsonFileFolders) {
       normalized.project.externalJsonFileFolders = [];
     }
 
