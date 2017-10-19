@@ -12,8 +12,6 @@ import { ILogger } from './extractor/ILogger';
 
 /**
  * Options for Extractor constructor.
- *
- * @public
  */
 export interface IExtractorOptions {
   /**
@@ -40,8 +38,6 @@ export interface IExtractorOptions {
  * The main entry point for the "api-extractor" utility.  The Analyzer object invokes the
  * TypeScript Compiler API to analyze a project, and constructs the AstItem
  * abstract syntax tree.
- *
- * @public
  */
 export default class Extractor {
   public typeChecker: ts.TypeChecker;
@@ -109,9 +105,16 @@ export default class Extractor {
    * Reports an error message to the registered ApiErrorHandler.
    */
   public reportError(message: string, sourceFile: ts.SourceFile, start: number): void {
-    const lineNumber: number = sourceFile.getLineAndCharacterOfPosition(start).line;
+    const lineAndCharacter: ts.LineAndCharacter = sourceFile.getLineAndCharacterOfPosition(start);
 
-    this._logger.logError(`ERROR: [${sourceFile.fileName}:${lineNumber}] ${message}`);
+    // If the file is under the packageFolder, then show a relative path
+    const relativePath: string = path.relative(this.packageFolder, sourceFile.fileName);
+    const shownPath: string = relativePath.substr(0, 2) === '..' ? sourceFile.fileName : relativePath;
+
+    // Format the error so that VS Code can follow it.  For example:
+    // "src\MyClass.ts(15,1): The JSDoc tag "@blah" is not supported by AEDoc"
+    this._logger.logError(`${shownPath}(${lineAndCharacter.line + 1},${lineAndCharacter.character + 1}): `
+      + message);
   }
 
   /**
