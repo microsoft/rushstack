@@ -11,7 +11,7 @@ import RushCommandLineParser from './cli/actions/RushCommandLineParser';
 export function executeCli(wrapperVersion: string, isManaged: boolean = false): void {
   console.log(
     EOL +
-    colors.bold(`Rush Multi-Package Build Tool ${rushVersion}` + colors.yellow(isManaged ? '' : '(unmanaged)')) +
+    colors.bold(`Rush Multi-Package Build Tool ${rushVersion}` + colors.yellow(isManaged ? '' : ' (unmanaged)')) +
     colors.cyan(' - http://aka.ms/rush') +
     EOL
   );
