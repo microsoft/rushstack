@@ -301,9 +301,7 @@ class RushConfiguration {
   public readonly eventHooks: EventHooks;
   public findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
   public findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
-  // (undocumented)
   public static findRushJsonLocation(verbose: boolean = true): string;
-  // (undocumented)
   public static getHomeDirectory(): string;
   public getProjectByName(projectName: string): RushConfigurationProject | undefined;
   public readonly gitAllowedEmailRegExps: string[];
