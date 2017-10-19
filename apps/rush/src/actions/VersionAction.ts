@@ -8,8 +8,10 @@ import {
 import {
   BumpType,
   IPackageJson,
+  RushConfiguration,
   Utilities,
-  VersionControl
+  VersionControl,
+  VersionMismatchFinder
 } from '@microsoft/rush-lib';
 
 import RushCommandLineParser from './RushCommandLineParser';
@@ -86,7 +88,7 @@ export default class VersionAction extends BaseRushAction {
         return;
       }
     }
-    this._validate();
+    this._validateInput();
 
     this._versionManager = new VersionManager(this.rushConfiguration, this._getUserEmail());
     if (this._ensureVersionPolicy.value) {
@@ -108,7 +110,7 @@ export default class VersionAction extends BaseRushAction {
     }
   }
 
-  private _validate(): void {
+  private _validateInput(): void {
     if (this._bumpVersion.value && this._ensureVersionPolicy.value) {
       throw new Error('Please choose --bump or --ensure-version-policy but not together.');
     }
@@ -119,12 +121,26 @@ export default class VersionAction extends BaseRushAction {
     }
   }
 
+  private _validateResult(): void {
+    // Load the config from file to avoid using inconsistent in-memory data.
+    const rushConfig: RushConfiguration =
+      RushConfiguration.loadFromConfigurationFile(this.rushConfiguration.rushJsonFile);
+    const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(rushConfig.projects);
+    if (mismatchFinder.numberOfMismatches) {
+      throw new Error('Unable to finish version bump because inconsistencies were encountered.' +
+        ' Run \"rush check\" to find more details.');
+    }
+  }
+
   private _getUserEmail(): string {
     return Utilities.executeCommandAndCaptureOutput('git',
         ['config', 'user.email'], '.').trim();
   }
 
   private _gitProcess(tempBranch: string): void {
+    // Validate the result before commit.
+    this._validateResult();
+
     const git: Git = new Git(this._targetBranch.value);
 
     // Make changes in temp branch.
