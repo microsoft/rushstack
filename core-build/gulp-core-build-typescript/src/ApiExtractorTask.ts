@@ -136,7 +136,7 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
 
       const extractorOptions: IExtractorOptions = {
         compilerProgram: compilerProgram,
-        localBuild: this.buildConfig.production,
+        localBuild: !this.buildConfig.production,
         customLogger: {
           logVerbose: (message: string) => this.logVerbose(message),
           logInfo: (message: string) => this.log(message),
