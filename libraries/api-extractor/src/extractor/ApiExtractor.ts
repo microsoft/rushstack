@@ -45,7 +45,7 @@ export interface IExtractorOptions {
    * Allows the caller to handle API Extractor errors; otherwise, they will be logged
    * to the console.
    */
-  customLogger?: ILogger;
+  customLogger?: Partial<ILogger>;
 
   /**
    * Indicates that API Extractor is running as part of a local build, e.g. on developer's
@@ -69,8 +69,15 @@ export class ApiExtractor {
   public static jsonSchema: JsonSchema = JsonSchema.fromFile(
     path.join(__dirname, './api-extractor-config.schema.json'));
 
-  private static _jsonDefaults: Partial<IExtractorConfig> = JsonFile.load(path.join(__dirname,
+  private static _defaultConfig: Partial<IExtractorConfig> = JsonFile.load(path.join(__dirname,
     './api-extractor-config-default.json'));
+
+  private static _defaultLogger: ILogger = {
+    logVerbose: (message: string) => console.log('(Verbose) ' + message),
+    logInfo: (message: string) => console.log(message),
+    logWarning: (message: string) => console.warn(colors.yellow(message)),
+    logError: (message: string) => console.error(colors.red(message))
+  };
 
   private _config: IExtractorConfig;
   private _program: ts.Program;
@@ -81,25 +88,22 @@ export class ApiExtractor {
   private static _applyConfigDefaults(config: IExtractorConfig): IExtractorConfig {
     // Use the provided config to override the defaults
     const normalized: IExtractorConfig  = lodash.merge(
-      lodash.cloneDeep(ApiExtractor._jsonDefaults), config);
-
-    console.log('CONFIG: ' + JSON.stringify(normalized));
+      lodash.cloneDeep(ApiExtractor._defaultConfig), config);
 
     return normalized;
   }
 
   public constructor (config: IExtractorConfig, options?: IExtractorOptions) {
+    this._logger = lodash.merge(lodash.cloneDeep(ApiExtractor._defaultLogger),
+      options.customLogger);
+
     this._config = ApiExtractor._applyConfigDefaults(config);
+
+    this._logger.logVerbose('API Extractor Config: ' + JSON.stringify(this._config));
+
     if (!options) {
       options = { };
     }
-
-    this._logger = options.customLogger || {
-      logVerbose: (message: string) => console.log('(Verbose) ' + message),
-      logInfo: (message: string) => console.log(message),
-      logWarning: (message: string) => console.warn(colors.yellow(message)),
-      logError: (message: string) => console.error(colors.red(message))
-    };
 
     this._localBuild = options.localBuild || false;
 

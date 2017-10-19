@@ -65,10 +65,7 @@ export default class ExternalApiHelper {
       }
     }, {
        customLogger: {
-        logVerbose: (message: string) => { /* don't log */ },
-        logInfo: (message: string) => console.log(message),
-        logWarning: (message: string) => console.error(message),
-        logError: (message: string) => console.error(message)
+        logVerbose: (message: string) => { /* don't log */ }
       }
     });
 

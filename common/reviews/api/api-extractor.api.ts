@@ -189,7 +189,7 @@ interface IExtractorConfig {
 // @public
 interface IExtractorOptions {
   compilerProgram?: ts.Program;
-  customLogger?: ILogger;
+  customLogger?: Partial<ILogger>;
   localBuild?: boolean;
 }
 
