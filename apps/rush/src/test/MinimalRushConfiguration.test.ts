@@ -24,18 +24,20 @@ describe('MinimalRushConfiguration', () => {
     });
 
     it('correctly loads the rush.json file', () => {
-      const config: MinimalRushConfiguration = MinimalRushConfiguration.loadFromDefaultLocation();
+      const config: MinimalRushConfiguration =
+        MinimalRushConfiguration.loadFromDefaultLocation() as MinimalRushConfiguration;
       assert.equal(config.rushVersion, '2.5.0');
     });
   });
 
-  describe('legacy rush config', () => {
+  describe('non-legacy rush config', () => {
     beforeEach(() => {
       sandbox.stub(process, 'cwd', () => path.join(__dirname, 'sandbox', 'repo', 'project'));
     });
 
     it('correctly loads the rush.json file', () => {
-      const config: MinimalRushConfiguration = MinimalRushConfiguration.loadFromDefaultLocation();
+      const config: MinimalRushConfiguration =
+        MinimalRushConfiguration.loadFromDefaultLocation() as MinimalRushConfiguration;
       assert.equal(config.rushVersion, '4.0.0');
     });
   });

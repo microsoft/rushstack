@@ -4,22 +4,22 @@
 import * as path from 'path';
 import * as fsx from 'fs-extra';
 import * as semver from 'semver';
+
 import { Utilities } from '@microsoft/rush-lib';
+import * as rushLibCli from '@microsoft/rush-lib/lib/start';
 
 import RushWrapper from './RushWrapper';
 
 const RUSH_TRANSITIONAL_VERSION: string = '4.0.0';
 const MAX_INSTALL_ATTEMPTS: number = 5;
 
-interface IRushCliEntrypoint {
-  executeCli(): void;
-}
-
 export default class RushVersionManager {
   private _rushDirectory: string;
+  private _currentPackageVersion: string;
 
-  constructor(homeDirectory: string) {
+  constructor(homeDirectory: string, currentPackageVersion: string) {
     this._rushDirectory = path.join(homeDirectory, '.rush');
+    this._currentPackageVersion = currentPackageVersion;
   }
 
   public ensureRushVersionInstalled(version: string): RushWrapper {
@@ -50,16 +50,15 @@ export default class RushVersionManager {
       });
     } else {
       return new RushWrapper(() => {
-        const rushCliEntrypoint: IRushCliEntrypoint = require(path.join(
+        const rushCliEntrypoint: typeof rushLibCli = require(path.join(
           expectedRushPath,
           'node_modules',
           '@microsoft',
           'rush-lib',
           'lib',
-          'cli',
-          'executeCli'
+          'start'
         ));
-        rushCliEntrypoint.executeCli();
+        rushCliEntrypoint.executeCli(this._currentPackageVersion, true);
       });
     }
   }

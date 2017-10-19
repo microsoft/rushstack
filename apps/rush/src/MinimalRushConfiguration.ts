@@ -13,17 +13,17 @@ export default class MinimalRushConfiguration {
   private _rushVersion: string;
   private _homeFolder: string;
 
-  public static loadFromDefaultLocation(): MinimalRushConfiguration {
+  public static loadFromDefaultLocation(): MinimalRushConfiguration | undefined {
     const rushJsonLocation: string = RushConfiguration.findRushJsonLocation();
     return MinimalRushConfiguration.loadFromConfigurationFile(rushJsonLocation);
   }
 
-  public static loadFromConfigurationFile(rushJsonFilename: string): MinimalRushConfiguration {
+  public static loadFromConfigurationFile(rushJsonFilename: string): MinimalRushConfiguration | undefined {
     try {
       const minimalRushConfigurationJson: IMinimalRushConfigurationJson = JsonFile.load(rushJsonFilename);
       return new MinimalRushConfiguration(minimalRushConfigurationJson);
     } catch (e) {
-      throw new Error(`Failed to load rush.json: ${e}`);
+      return undefined;
     }
   }
 
