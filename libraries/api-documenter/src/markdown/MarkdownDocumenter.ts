@@ -31,7 +31,7 @@ import { MarkdownRenderer, IMarkdownRenderApiLinkArgs } from '../MarkdownRendere
  * Renders API documentation in the Markdown file format.
  * For more info:  https://en.wikipedia.org/wiki/Markdown
  */
-export class MarkdownGenerator {
+export class MarkdownDocumenter {
   private _docItemSet: DocItemSet;
   private _outputFolder: string;
 

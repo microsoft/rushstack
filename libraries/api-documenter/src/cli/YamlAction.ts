@@ -4,7 +4,7 @@
 import { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine';
 import { BaseAction } from './BaseAction';
 import { DocItemSet } from '../DocItemSet';
-import { YamlGenerator } from '../yaml/YamlGenerator';
+import { YamlDocumenter } from '../yaml/YamlDocumenter';
 
 export class YamlAction extends BaseAction {
   constructor(parser: ApiDocumenterCommandLine) {
@@ -17,7 +17,7 @@ export class YamlAction extends BaseAction {
 
   protected onExecute(): void { // override
     const docItemSet: DocItemSet = this.buildDocItemSet();
-    const yamlGenerator: YamlGenerator = new YamlGenerator(docItemSet);
-    yamlGenerator.generateFiles(this.outputFolder);
+    const yamlDocumenter: YamlDocumenter = new YamlDocumenter(docItemSet);
+    yamlDocumenter.generateFiles(this.outputFolder);
   }
 }

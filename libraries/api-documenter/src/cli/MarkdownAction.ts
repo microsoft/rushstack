@@ -4,7 +4,7 @@
 import { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine';
 import { BaseAction } from './BaseAction';
 import { DocItemSet } from '../DocItemSet';
-import { MarkdownGenerator } from '../markdown/MarkdownGenerator';
+import { MarkdownDocumenter } from '../markdown/MarkdownDocumenter';
 
 export class MarkdownAction extends BaseAction {
   constructor(parser: ApiDocumenterCommandLine) {
@@ -17,7 +17,7 @@ export class MarkdownAction extends BaseAction {
 
   protected onExecute(): void { // override
     const docItemSet: DocItemSet = this.buildDocItemSet();
-    const markdownGenerator: MarkdownGenerator = new MarkdownGenerator(docItemSet);
-    markdownGenerator.generateFiles(this.outputFolder);
+    const markdownDocumenter: MarkdownDocumenter = new MarkdownDocumenter(docItemSet);
+    markdownDocumenter.generateFiles(this.outputFolder);
   }
 }

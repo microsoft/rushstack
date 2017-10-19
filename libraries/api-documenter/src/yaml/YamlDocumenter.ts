@@ -37,7 +37,7 @@ const yamlApiSchema: JsonSchema = JsonSchema.fromFile(path.join(__dirname, 'type
 /**
  * Writes documentation in the Universal Reference YAML file format, as defined by typescript.schema.json.
  */
-export class YamlGenerator {
+export class YamlDocumenter {
   private _docItemSet: DocItemSet;
   private _outputFolder: string;
 
