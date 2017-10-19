@@ -28,7 +28,7 @@ import {
   IYamlTocFile,
   IYamlTocItem
 } from './IYamlTocFile';
-import { RenderingHelpers } from '../RenderingHelpers';
+import { Utilities } from '../Utilities';
 import { MarkupBuilder } from '../MarkupBuilder';
 import { MarkdownRenderer, IMarkdownRenderApiLinkArgs } from '../MarkdownRenderer';
 
@@ -152,7 +152,7 @@ export class YamlGenerator {
       }
 
       const tocItem: IYamlTocItem = {
-        name: RenderingHelpers.getUnscopedPackageName(docItem.name),
+        name: Utilities.getUnscopedPackageName(docItem.name),
         uid: this._getUid(docItem)
       };
 
@@ -271,7 +271,7 @@ export class YamlGenerator {
 
   private _populateYamlMethod(yamlItem: Partial<IYamlItem>, docItem: DocItem): void {
     const apiMethod: IApiMethod | IApiConstructor = docItem.apiItem as IApiMethod;
-    yamlItem.name = RenderingHelpers.getConciseSignature(docItem.name, apiMethod);
+    yamlItem.name = Utilities.getConciseSignature(docItem.name, apiMethod);
 
     const syntax: IYamlSyntax = {
       content: apiMethod.signature
@@ -376,7 +376,7 @@ export class YamlGenerator {
     for (const current of docItem.getHierarchy()) {
       switch (current.kind) {
         case DocItemKind.Package:
-          result += RenderingHelpers.getUnscopedPackageName(current.name);
+          result += Utilities.getUnscopedPackageName(current.name);
           break;
         default:
           result += '.';
@@ -393,7 +393,7 @@ export class YamlGenerator {
     for (const current of docItem.getHierarchy()) {
       switch (current.kind) {
         case DocItemKind.Package:
-          result += RenderingHelpers.getUnscopedPackageName(current.name);
+          result += Utilities.getUnscopedPackageName(current.name);
           break;
         default:
           if (current.parent && current.parent.kind === DocItemKind.Package) {

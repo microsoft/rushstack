@@ -23,7 +23,7 @@ import {
 } from '@microsoft/api-extractor';
 
 import { DocItemSet, DocItem, DocItemKind, IDocItemSetResolveResult } from '../DocItemSet';
-import { RenderingHelpers } from '../RenderingHelpers';
+import { Utilities } from '../Utilities';
 import { MarkupBuilder } from '../MarkupBuilder';
 import { MarkdownRenderer, IMarkdownRenderApiLinkArgs } from '../MarkdownRenderer';
 
@@ -57,7 +57,7 @@ export class MarkdownGenerator {
   private _writePackagePage(docPackage: DocItem): void {
     console.log(`Writing ${docPackage.name} package`);
 
-    const unscopedPackageName: string = RenderingHelpers.getUnscopedPackageName(docPackage.name);
+    const unscopedPackageName: string = Utilities.getUnscopedPackageName(docPackage.name);
 
     const markupPage: IMarkupPage = MarkupBuilder.createPage(`${unscopedPackageName} package`);
     this._writeBreadcrumb(markupPage, docPackage);
@@ -229,7 +229,7 @@ export class MarkdownGenerator {
           // TODO: Extract constructor into its own section
           const constructorTitle: MarkupBasicElement[] = [
             MarkupBuilder.createApiLink(
-              [MarkupBuilder.createCode(RenderingHelpers.getConciseSignature(docMember.name, apiMember), 'javascript')],
+              [MarkupBuilder.createCode(Utilities.getConciseSignature(docMember.name, apiMember), 'javascript')],
               docMember.getApiReference())
           ];
 
@@ -247,7 +247,7 @@ export class MarkdownGenerator {
         case 'method':
           const methodTitle: MarkupBasicElement[] = [
             MarkupBuilder.createApiLink(
-              [MarkupBuilder.createCode(RenderingHelpers.getConciseSignature(docMember.name, apiMember), 'javascript')],
+              [MarkupBuilder.createCode(Utilities.getConciseSignature(docMember.name, apiMember), 'javascript')],
               docMember.getApiReference())
           ];
 
@@ -334,7 +334,7 @@ export class MarkdownGenerator {
         case 'method':
           const methodTitle: MarkupBasicElement[] = [
             MarkupBuilder.createApiLink(
-              [MarkupBuilder.createCode(RenderingHelpers.getConciseSignature(docMember.name, apiMember), 'javascript')],
+              [MarkupBuilder.createCode(Utilities.getConciseSignature(docMember.name, apiMember), 'javascript')],
               docMember.getApiReference())
           ];
 
@@ -596,7 +596,7 @@ export class MarkdownGenerator {
     let baseName: string = '';
     for (const part of docItem.getHierarchy()) {
       if (part.kind === DocItemKind.Package) {
-        baseName = RenderingHelpers.getUnscopedPackageName(part.name);
+        baseName = Utilities.getUnscopedPackageName(part.name);
       } else {
         baseName += '.' + part.name;
       }
