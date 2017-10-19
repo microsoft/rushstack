@@ -54,8 +54,7 @@ export default class ExternalApiHelper {
         overrideTsconfig: overrideTsconfig
       },
       project: {
-        entryPointSourceFile: entryPointFile,
-        externalJsonFileFolders: [ './testInputs/external-api-json' ]
+        entryPointSourceFile: entryPointFile
       },
       apiReviewFile: {
         enabled: false
