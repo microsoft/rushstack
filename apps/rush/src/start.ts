@@ -4,25 +4,37 @@
 import * as path from 'path';
 import { JsonFile } from '@microsoft/node-core-library';
 
-import { IPackageJson } from '@microsoft/rush-lib';
+import {
+  IPackageJson,
+  RushConfiguration,
+  Utilities
+} from '@microsoft/rush-lib';
 import { start } from '@microsoft/rush-lib/lib/start';
 
 import MinimalRushConfiguration from './MinimalRushConfiguration';
 import RushVersionManager from './RushVersionManager';
 import RushWrapper from './RushWrapper';
 
-const currentPackageJson: IPackageJson = JsonFile.load(path.join(__dirname, '..', 'package.json'));
+const RUSH_PURGE_OPTION_NAME: string = 'purge';
 
-// Load the configuration
-const configuration: MinimalRushConfiguration | undefined = MinimalRushConfiguration.loadFromDefaultLocation();
-
-if (configuration) {
-  const versionManager: RushVersionManager = new RushVersionManager(
-    configuration.homeFolder,
-    currentPackageJson.version
-  );
-  const rushWrapper: RushWrapper = versionManager.ensureRushVersionInstalled(configuration.rushVersion);
-  rushWrapper.invokeRush();
+if (process.argv[2] === RUSH_PURGE_OPTION_NAME) {
+  const rushDirectory: string = path.join(RushConfiguration.getHomeDirectory(), '.rush');
+  console.log(`Deleting ${rushDirectory} directory...`);
+  Utilities.dangerouslyDeletePath(rushDirectory);
+  console.log('done');
 } else {
-  start(currentPackageJson.version, false);
+  // Load the configuration
+  const configuration: MinimalRushConfiguration | undefined = MinimalRushConfiguration.loadFromDefaultLocation();
+  const currentPackageJson: IPackageJson = JsonFile.load(path.join(__dirname, '..', 'package.json'));
+
+  if (configuration) {
+    const versionManager: RushVersionManager = new RushVersionManager(
+      configuration.homeFolder,
+      currentPackageJson.version
+    );
+    const rushWrapper: RushWrapper = versionManager.ensureRushVersionInstalled(configuration.rushVersion);
+    rushWrapper.invokeRush();
+  } else {
+    start(currentPackageJson.version, false);
+  }
 }
