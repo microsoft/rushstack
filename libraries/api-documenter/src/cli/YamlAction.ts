@@ -3,7 +3,7 @@
 
 import { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine';
 import { BaseAction } from './BaseAction';
-import { DocItemSet } from '../DocItemSet';
+import { DocItemSet } from '../utils/DocItemSet';
 import { YamlDocumenter } from '../yaml/YamlDocumenter';
 
 export class YamlAction extends BaseAction {

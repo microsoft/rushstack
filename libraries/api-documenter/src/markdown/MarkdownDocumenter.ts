@@ -22,10 +22,15 @@ import {
   MarkupStructuredElement
 } from '@microsoft/api-extractor';
 
-import { DocItemSet, DocItem, DocItemKind, IDocItemSetResolveResult } from '../DocItemSet';
-import { Utilities } from '../Utilities';
-import { MarkupBuilder } from '../MarkupBuilder';
-import { MarkdownRenderer, IMarkdownRenderApiLinkArgs } from '../MarkdownRenderer';
+import {
+  DocItemSet,
+  DocItem,
+  DocItemKind,
+  IDocItemSetResolveResult
+} from '../utils/DocItemSet';
+import { Utilities } from '../utils/Utilities';
+import { MarkupBuilder } from '../utils/MarkupBuilder';
+import { MarkdownRenderer, IMarkdownRenderApiLinkArgs } from '../utils/MarkdownRenderer';
 
 /**
  * Renders API documentation in the Markdown file format.

@@ -17,7 +17,7 @@ import {
   IApiInterface
 } from '@microsoft/api-extractor';
 
-import { DocItemSet, DocItem, DocItemKind, IDocItemSetResolveResult } from '../DocItemSet';
+import { DocItemSet, DocItem, DocItemKind, IDocItemSetResolveResult } from '../utils/DocItemSet';
 import {
   IYamlApiFile,
   IYamlItem,
@@ -28,9 +28,9 @@ import {
   IYamlTocFile,
   IYamlTocItem
 } from './IYamlTocFile';
-import { Utilities } from '../Utilities';
-import { MarkupBuilder } from '../MarkupBuilder';
-import { MarkdownRenderer, IMarkdownRenderApiLinkArgs } from '../MarkdownRenderer';
+import { Utilities } from '../utils/Utilities';
+import { MarkupBuilder } from '../utils/MarkupBuilder';
+import { MarkdownRenderer, IMarkdownRenderApiLinkArgs } from '../utils/MarkdownRenderer';
 
 const yamlApiSchema: JsonSchema = JsonSchema.fromFile(path.join(__dirname, 'typescript.schema.json'));
 

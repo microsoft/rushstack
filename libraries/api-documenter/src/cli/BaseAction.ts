@@ -9,7 +9,7 @@ import {
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
 
-import { DocItemSet } from '../DocItemSet';
+import { DocItemSet } from '../utils/DocItemSet';
 
 export abstract class BaseAction extends CommandLineAction {
   protected inputFolder: string;
