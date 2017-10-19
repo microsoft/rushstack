@@ -69,6 +69,9 @@ export class ApiExtractor {
   public static jsonSchema: JsonSchema = JsonSchema.fromFile(
     path.join(__dirname, './api-extractor-config.schema.json'));
 
+  private static _jsonDefaults: Partial<IExtractorConfig> = JsonFile.load(path.join(__dirname,
+    './api-extractor-config-default.json'));
+
   private _config: IExtractorConfig;
   private _program: ts.Program;
   private _localBuild: boolean;
@@ -76,35 +79,11 @@ export class ApiExtractor {
   private _absoluteRootFolder: string;
 
   private static _applyConfigDefaults(config: IExtractorConfig): IExtractorConfig {
-    const normalized: IExtractorConfig  = lodash.clone(config);
+    // Use the provided config to override the defaults
+    const normalized: IExtractorConfig  = lodash.merge(
+      lodash.cloneDeep(ApiExtractor._jsonDefaults), config);
 
-    if (!normalized.project.externalJsonFileFolders) {
-      normalized.project.externalJsonFileFolders = [];
-    }
-
-    if (!normalized.apiReviewFile) {
-      normalized.apiReviewFile = {
-        enabled: true
-      };
-    }
-
-    if (!normalized.apiReviewFile.apiReviewFolder) {
-      normalized.apiReviewFile.apiReviewFolder = './etc';
-    }
-
-    if (!normalized.apiReviewFile.tempFolder) {
-      normalized.apiReviewFile.tempFolder = './temp';
-    }
-
-    if (!normalized.apiJsonFile) {
-      normalized.apiJsonFile = {
-        enabled: true
-      };
-    }
-
-    if (!normalized.apiJsonFile.outputFolder) {
-      normalized.apiJsonFile.outputFolder = './dist';
-    }
+    console.log('CONFIG: ' + JSON.stringify(normalized));
 
     return normalized;
   }
