@@ -127,7 +127,8 @@ export default class VersionAction extends BaseRushAction {
       RushConfiguration.loadFromConfigurationFile(this.rushConfiguration.rushJsonFile);
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(rushConfig.projects);
     if (mismatchFinder.numberOfMismatches) {
-      throw new Error('Mismatched dependencies are found. Run \'rush check\' to find more details.');
+      throw new Error('Unable to finish version bump because inconsistencies were encountered.' +
+        ' Run \"rush check\" to find more details.');
     }
   }
 
