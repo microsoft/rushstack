@@ -196,7 +196,7 @@ interface IExtractorOptions {
 // @public
 interface IExtractorProjectConfig {
   entryPointSourceFile: string;
-  externalJsonFileFolders: string[];
+  externalJsonFileFolders?: string[];
 }
 
 // @public

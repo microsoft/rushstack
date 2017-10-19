@@ -3,27 +3,16 @@
 
 import * as fsx from 'fs-extra';
 import * as Gulp from 'gulp';
-import * as os from 'os';
 import * as path from 'path';
-import * as through from 'through2';
-import * as gulpUtil from 'gulp-util';
+import * as ts from 'typescript';
 import { GulpTask } from '@microsoft/gulp-core-build';
 import {
-  Extractor,
+  ApiExtractor,
   IExtractorOptions,
-  IExtractorAnalyzeOptions,
-  ApiFileGenerator,
-  ApiJsonGenerator
+  IExtractorConfig
 } from '@microsoft/api-extractor';
 import { TypeScriptConfiguration } from './TypeScriptConfiguration';
-import ts = require('gulp-typescript');
-
-function writeStringToGulpUtilFile(content: string, filename: string = 'tempfile'): gulpUtil.File {
-  return new gulpUtil.File({
-    contents: new Buffer(content),
-    path: filename
-  });
-}
+import gulpTypeScript = require('gulp-typescript');
 
 /** @public */
 export interface IApiExtractorTaskConfig {
@@ -111,103 +100,59 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
       return;
     }
 
-    const entryPointFile: string = path.join(this.buildConfig.rootPath, this.taskConfig.entry);
-    const typingsFilePath: string = path.join(this.buildConfig.rootPath, 'typings/tsd.d.ts');
-    const otherFiles: string[] = fsx.existsSync(typingsFilePath) ? [typingsFilePath] : [];
+    try {
+      const entryPointFile: string = path.join(this.buildConfig.rootPath, this.taskConfig.entry);
+      const typingsFilePath: string = path.join(this.buildConfig.rootPath, 'typings/tsd.d.ts');
+      const otherFiles: string[] = fsx.existsSync(typingsFilePath) ? [typingsFilePath] : [];
 
-    // tslint:disable-next-line:no-any
-    const compilerOptions: ts.Settings =
-      TypeScriptConfiguration.getGulpTypescriptOptions(this.buildConfig).compilerOptions;
+      // tslint:disable-next-line:no-any
+      const gulpTypeScriptSettings: gulpTypeScript.Settings =
+        TypeScriptConfiguration.getGulpTypescriptOptions(this.buildConfig).compilerOptions;
 
-    TypeScriptConfiguration.fixupSettings(compilerOptions, this.logWarning, { mustBeCommonJsOrEsnext: true });
+      TypeScriptConfiguration.fixupSettings(gulpTypeScriptSettings, this.logWarning, { mustBeCommonJsOrEsnext: true });
 
-    const extractorOptions: IExtractorOptions = {
-      compilerOptions: ts.createProject(compilerOptions).options,
-      errorHandler: (message: string, fileName: string, lineNumber: number): void => {
-        this.logWarning(`${message}` + os.EOL
-          + `  ${fileName}#${lineNumber}`);
-      }
-    };
+      const compilerOptions: ts.CompilerOptions = gulpTypeScript.createProject(gulpTypeScriptSettings).options;
 
-    const analyzeOptions: IExtractorAnalyzeOptions = {
-      entryPointFile,
-      otherFiles
-    } as any; /* tslint:disable-line:no-any */
+      const rootFiles: string[] = [ entryPointFile ].concat(otherFiles);
 
-    const extractor: Extractor = new Extractor(extractorOptions);
-    extractor.loadExternalPackages(path.join(__dirname, 'external-api-json'));
-    extractor.analyze(analyzeOptions);
+      const compilerProgram: ts.Program = ts.createProgram(rootFiles, compilerOptions);
 
-    const jsonGenerator: ApiJsonGenerator = new ApiJsonGenerator();
-    // const jsonContent: string = generator.generateJsonFileContent(analyzer);
-    const jsonFileName: string = path.basename(this.buildConfig.rootPath) + '.api.json';
-
-    if (!fsx.existsSync(this.taskConfig.apiJsonFolder)) {
-      fsx.mkdirsSync(this.taskConfig.apiJsonFolder, (err) => {
-        if (err) {
-          this.logError(`Could not create directory ${this.taskConfig.apiJsonFolder}`);
+      const extractorConfig: IExtractorConfig = {
+        compiler: { configType: 'runtime' },
+        project: {
+          entryPointSourceFile: entryPointFile,
+          externalJsonFileFolders: [ path.join(__dirname, 'external-api-json') ]
+        },
+        apiReviewFile: {
+          enabled: true,
+          apiReviewFolder: this.taskConfig.apiReviewFolder,
+          tempFolder: this.buildConfig.tempFolder
+        },
+        apiJsonFile: {
+          enabled: true,
+          outputFolder: this.taskConfig.apiJsonFolder
         }
-      });
+      };
+
+      const extractorOptions: IExtractorOptions = {
+        compilerProgram: compilerProgram,
+        localBuild: this.buildConfig.production,
+        customLogger: {
+          logVerbose: (message: string) => this.logVerbose(message),
+          logInfo: (message: string) => this.log(message),
+          logWarning: (message: string) => this.logWarning(message),
+          logError: (message: string) => this.logError(message)
+        }
+      };
+
+      const extractor: ApiExtractor = new ApiExtractor(extractorConfig, extractorOptions);
+      extractor.analyzeProject();
+    } catch (e) {
+      completeCallback(e.message);
+      return;
     }
 
-    if (fsx.existsSync(this.taskConfig.apiJsonFolder)) {
-      const jsonFilePath: string = path.join(this.taskConfig.apiJsonFolder, jsonFileName);
-      this.logVerbose(`Writing Api JSON file to ${jsonFilePath}`);
-      jsonGenerator.writeJsonFile(jsonFilePath, extractor);
-    }
-
-    const generator: ApiFileGenerator = new ApiFileGenerator();
-    const actualApiFileContent: string = generator.generateApiFileContent(extractor);
-
-    // Ex: "project.api.ts"
-    const apiFileName: string = path.basename(this.buildConfig.rootPath) + '.api.ts';
-    this.logVerbose(`Output filename is "${apiFileName}"`);
-
-    const actualApiFilePath: string = path.join(this.buildConfig.tempFolder, apiFileName);
-
-    let foundSourceFiles: number = 0;
-    const self: ApiExtractorTask = this;
-    const expectedApiFilePath: string = path.join(this.taskConfig.apiReviewFolder, apiFileName);
-    return gulp.src(expectedApiFilePath)
-      /* tslint:disable-next-line:no-function-expression */
-      .pipe(through.obj(function (file: gulpUtil.File, enc: string, callback: () => void): void {
-        const expectedApiFileContent: string = (file.contents as Buffer).toString(enc);
-        foundSourceFiles++;
-
-        if (!ApiFileGenerator.areEquivalentApiFileContents(actualApiFileContent, expectedApiFileContent)) {
-          if (self.buildConfig.production) {
-            // For production, issue a warning that will break the CI build.
-            self.logWarning('You have changed the Public API signature for this project.  Please overwrite '
-              // @microsoft/gulp-core-build seems to run JSON.stringify() on the error messages for some reason,
-              // so try to avoid escaped characters:
-              + `'${expectedApiFilePath.replace(/\\/g, '/')}' with a copy of '${actualApiFilePath.replace(/\\/g, '/')}'`
-              + ' and then request an API review. See the Git repository README.md for more info.');
-          } else {
-            // For a local build, just copy the file automatically.
-            self.log('You have changed the Public API signature for this project.  Updating '
-              + `'${expectedApiFilePath}'`);
-            fsx.writeFileSync(expectedApiFilePath, actualApiFileContent);
-          }
-        }
-
-        callback();
-      }, function (callback: () => void): void {
-        if (foundSourceFiles === 0) {
-          // NOTE: This warning seems like a nuisance, but it has caught genuine mistakes.
-          // For example, when projects were moved into category folders, the relative path for
-          // the API review files ended up in the wrong place.
-          self.logError(`This file is missing from the "apiReviewFolder": "${expectedApiFilePath}"`
-            + ` Please copy it from the project's "temp" folder and commit it.`);
-        } else if (foundSourceFiles > 1) {
-          self.logError(`More than one file matching "${expectedApiFilePath}" was found. This is not expected.`);
-        }
-
-        this.push(writeStringToGulpUtilFile(actualApiFileContent, apiFileName));
-
-        callback();
-      }))
-      .pipe(gulp.dest(this.buildConfig.tempFolder))
-      .on('finish', () => completeCallback());
+    completeCallback();
   }
 
   private _validateConfiguration(): boolean {

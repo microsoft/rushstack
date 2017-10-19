@@ -25,16 +25,19 @@ export default class ExternalApiHelper {
    * Ex: 'resources/external-api-json/es6-collection/index.t.ds'
    */
   public static generateApiJson(rootDir: string, libFolder: string, externalPackageFilePath: string): void {
+    const entryPointFile: string = path.resolve(rootDir, externalPackageFilePath);
+    const entryPointFolder: string = path.dirname(entryPointFile);
+
     const overrideTsconfig: { } = {
       target: 'es5',
       module: 'commonjs',
       moduleResolution: 'node',
       experimentalDecorators: true,
       jsx: 'react',
-      rootDir: rootDir
+      rootDir: entryPointFolder
     };
 
-    let outputPath: string = path.join(rootDir, libFolder);
+    let outputPath: string = path.resolve(rootDir, libFolder);
     if (!fs.existsSync(outputPath)) {
       fs.mkdirSync(outputPath);
     }
@@ -44,27 +47,29 @@ export default class ExternalApiHelper {
       fs.mkdirSync(outputPath);
     }
 
-    const externalPackageRootDir: string = path.dirname(externalPackageFilePath);
-    const outputApiJsonFilePath: string = path.join(outputPath, `${path.basename(externalPackageRootDir)}.api.json`);
-    const entryPointFile: string = path.join(rootDir, externalPackageFilePath);
-
     const apiExtractor: ApiExtractor = new ApiExtractor({
       compiler: {
         configType: 'tsconfig',
-        rootFolder: path.dirname(entryPointFile),
+        rootFolder: entryPointFolder,
         overrideTsconfig: overrideTsconfig
       },
       project: {
         entryPointSourceFile: entryPointFile,
-        externalJsonFileFolders: ['./testInputs/external-api-json' ]
+        externalJsonFileFolders: [ './testInputs/external-api-json' ]
       },
       apiReviewFile: {
-        enabled: true,
-        apiReviewFolder: __dirname
+        enabled: false
       },
       apiJsonFile: {
         enabled: true,
-        outputFolder: outputApiJsonFilePath
+        outputFolder: outputPath
+      }
+    }, {
+       customLogger: {
+        logVerbose: (message: string) => { /* don't log */ },
+        logInfo: (message: string) => console.log(message),
+        logWarning: (message: string) => console.error(message),
+        logError: (message: string) => console.error(message)
       }
     });
 

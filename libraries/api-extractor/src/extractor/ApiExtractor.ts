@@ -78,6 +78,10 @@ export class ApiExtractor {
   private static _applyConfigDefaults(config: IExtractorConfig): IExtractorConfig {
     const normalized: IExtractorConfig  = lodash.clone(config);
 
+    if (normalized.project.externalJsonFileFolders) {
+      normalized.project.externalJsonFileFolders = [];
+    }
+
     if (!normalized.apiReviewFile) {
       normalized.apiReviewFile = {
         enabled: true
@@ -184,7 +188,7 @@ export class ApiExtractor {
       logger: this._logger
     });
 
-    for (const externalJsonFileFolder of projectConfig.externalJsonFileFolders || []) {
+    for (const externalJsonFileFolder of projectConfig.externalJsonFileFolders) {
       extractor.loadExternalPackages(path.resolve(this._absoluteRootFolder, externalJsonFileFolder));
     }
 

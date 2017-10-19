@@ -63,7 +63,7 @@ export interface IExtractorProjectConfig {
    * consulted during the analysis.  This is useful for providing annotations for
    * external packages that were not built using API Extractor.
    */
-  externalJsonFileFolders: string[];
+  externalJsonFileFolders?: string[];
 }
 
 /**
