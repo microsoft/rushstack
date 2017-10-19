@@ -14,13 +14,9 @@ export default class MinimalRushConfiguration {
   private _homeFolder: string;
 
   public static loadFromDefaultLocation(): MinimalRushConfiguration | undefined {
-    const rushJsonLocation: string = RushConfiguration.findRushJsonLocation();
-    return MinimalRushConfiguration.loadFromConfigurationFile(rushJsonLocation);
-  }
-
-  public static loadFromConfigurationFile(rushJsonFilename: string): MinimalRushConfiguration | undefined {
     try {
-      const minimalRushConfigurationJson: IMinimalRushConfigurationJson = JsonFile.load(rushJsonFilename);
+      const rushJsonLocation: string = RushConfiguration.findRushJsonLocation();
+      const minimalRushConfigurationJson: IMinimalRushConfigurationJson = JsonFile.load(rushJsonLocation);
       return new MinimalRushConfiguration(minimalRushConfigurationJson);
     } catch (e) {
       return undefined;
