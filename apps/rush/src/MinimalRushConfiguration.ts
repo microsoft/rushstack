@@ -9,14 +9,26 @@ interface IMinimalRushConfigurationJson {
   rushVersion?: string;
 }
 
+/**
+ * Represents a minimal subset of the rush.json configuration file. It provides the information necessary to
+ *  decide which version of Rush should be installed/used.
+ */
 export default class MinimalRushConfiguration {
   private _rushVersion: string;
   private _homeFolder: string;
 
   public static loadFromDefaultLocation(): MinimalRushConfiguration | undefined {
+    const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation();
+    if (rushJsonLocation) {
+      return MinimalRushConfiguration._loadFromConfigurationFile(rushJsonLocation);
+    } else {
+      return undefined;
+    }
+  }
+
+  private static _loadFromConfigurationFile(rushJsonFilename: string): MinimalRushConfiguration | undefined {
     try {
-      const rushJsonLocation: string = RushConfiguration.findRushJsonLocation();
-      const minimalRushConfigurationJson: IMinimalRushConfigurationJson = JsonFile.load(rushJsonLocation);
+      const minimalRushConfigurationJson: IMinimalRushConfigurationJson = JsonFile.load(rushJsonFilename);
       return new MinimalRushConfiguration(minimalRushConfigurationJson);
     } catch (e) {
       return undefined;
@@ -28,10 +40,19 @@ export default class MinimalRushConfiguration {
     this._homeFolder = RushConfiguration.getHomeDirectory();
   }
 
+  /**
+   * The version of rush specified by the rushVersion property of the rush.json configuration file. If the
+   *  rushVersion property is not specified, this falls back to the rushMinimumVersion property. This should be
+   *  a semver style version number like "4.0.0"
+   */
   public get rushVersion(): string {
     return this._rushVersion;
   }
 
+  /**
+   * The absolute path to the home directory for the current user. On Windows, it would be something
+   *  like "C:\Users\YourName".
+   */
   public get homeFolder(): string {
     return this._homeFolder;
   }

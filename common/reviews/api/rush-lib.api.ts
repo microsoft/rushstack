@@ -301,7 +301,6 @@ class RushConfiguration {
   public readonly eventHooks: EventHooks;
   public findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
   public findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
-  public static findRushJsonLocation(verbose: boolean = true): string;
   public static getHomeDirectory(): string;
   public getProjectByName(projectName: string): RushConfigurationProject | undefined;
   public readonly gitAllowedEmailRegExps: string[];
@@ -328,6 +327,7 @@ class RushConfiguration {
   // @alpha
   public readonly telemetryEnabled: boolean;
   public readonly tempShrinkwrapFilename: string;
+  public static tryFindRushJsonLocation(verbose: boolean = true): string | undefined;
   // @alpha (undocumented)
   public readonly versionPolicyConfiguration: VersionPolicyConfiguration;
 }

@@ -5,7 +5,7 @@ import * as path from 'path';
 import { JsonFile } from '@microsoft/node-core-library';
 
 import { IPackageJson } from '@microsoft/rush-lib';
-import { executeCli } from '@microsoft/rush-lib/lib/start';
+import { start } from '@microsoft/rush-lib/lib/start';
 
 import MinimalRushConfiguration from './MinimalRushConfiguration';
 import RushVersionManager from './RushVersionManager';
@@ -24,5 +24,5 @@ if (configuration) {
   const rushWrapper: RushWrapper = versionManager.ensureRushVersionInstalled(configuration.rushVersion);
   rushWrapper.invokeRush();
 } else {
-  executeCli(currentPackageJson.version);
+  start(currentPackageJson.version, false);
 }

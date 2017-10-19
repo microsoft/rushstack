@@ -167,14 +167,18 @@ export default class RushConfiguration {
   }
 
   public static loadFromDefaultLocation(): RushConfiguration {
-    const rushJsonLocation: string = RushConfiguration.findRushJsonLocation();
-    return RushConfiguration.loadFromConfigurationFile(rushJsonLocation);
+    const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation();
+    if (rushJsonLocation) {
+      return RushConfiguration.loadFromConfigurationFile(rushJsonLocation);
+    } else {
+      throw new Error('Unable to find rush.json configuration file');
+    }
   }
 
   /**
-   * Find the rush.json location and return the path.
+   * Find the rush.json location and return the path, or undefined if a rush.json can't be found.
    */
-  public static findRushJsonLocation(verbose: boolean = true): string {
+  public static tryFindRushJsonLocation(verbose: boolean = true): string | undefined {
     let currentFolder: string = process.cwd();
 
     // Look upwards at parent folders until we find a folder containing rush.json
@@ -197,10 +201,11 @@ export default class RushConfiguration {
       if (parentFolder === currentFolder) {
         break;
       }
+
       currentFolder = parentFolder;
     }
 
-    throw new Error('Unable to find rush.json configuration file');
+    return undefined;
   }
 
   /**

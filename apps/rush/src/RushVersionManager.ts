@@ -10,8 +10,12 @@ import * as rushLibCli from '@microsoft/rush-lib/lib/start';
 
 import RushWrapper from './RushWrapper';
 
+/**
+ * Version 4.0.0 is the first version where the rush CLI implementation is in rush-lib. This version changes the
+ *  installation and calling convention.
+ */
 const RUSH_TRANSITIONAL_VERSION: string = '4.0.0';
-const MAX_INSTALL_ATTEMPTS: number = 5;
+const MAX_INSTALL_ATTEMPTS: number = 3;
 
 export default class RushVersionManager {
   private _rushDirectory: string;
@@ -58,7 +62,7 @@ export default class RushVersionManager {
           'lib',
           'start'
         ));
-        rushCliEntrypoint.executeCli(this._currentPackageVersion, true);
+        rushCliEntrypoint.start(this._currentPackageVersion, true);
       });
     }
   }
