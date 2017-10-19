@@ -242,8 +242,8 @@ export class ApiExtractor {
               + ' and then request an API review. See the Git repository README.md for more info.');
           } else {
             // For a local build, just copy the file automatically.
-            this._logger.logWarning('\nYou have changed the public API signature for this project.'
-              + ` Updating ${expectedApiReviewShortPath}\n`);
+            this._logger.logWarning('You have changed the public API signature for this project.'
+              + ` Updating ${expectedApiReviewShortPath}`);
 
             fsx.writeFileSync(expectedApiReviewPath, actualApiReviewContent);
           }
@@ -254,8 +254,8 @@ export class ApiExtractor {
         // NOTE: This warning seems like a nuisance, but it has caught genuine mistakes.
         // For example, when projects were moved into category folders, the relative path for
         // the API review files ended up in the wrong place.
-        this._logger.logError(`\nThis file is missing from the "apiReviewFolder": ${expectedApiReviewShortPath}`
-          + `\nPlease create it by copying this file: ${actualApiReviewShortPath}\n`);
+        this._logger.logError(`The API review file has not been set up. Do this by copying ${actualApiReviewShortPath}`
+          + ` to ${expectedApiReviewShortPath} and committing it.`);
       }
     }
   }
