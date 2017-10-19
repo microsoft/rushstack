@@ -1,29 +1,23 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  CommandLineAction
-} from '@microsoft/ts-command-line';
-
 import { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine';
+import { BaseAction } from './BaseAction';
+import { DocItemSet } from '../DocItemSet';
+import { MarkdownGenerator } from '../markdown/MarkdownGenerator';
 
-export class MarkdownAction extends CommandLineAction {
-  private _parser: ApiDocumenterCommandLine;
-
+export class MarkdownAction extends BaseAction {
   constructor(parser: ApiDocumenterCommandLine) {
     super({
-      actionVerb: 'md',
+      actionVerb: 'markdown',
       summary: 'Generate documentation as Markdown files (*.md)',
       documentation: 'Generate documentation as Markdown files (*.md)'
     });
-    this._parser = parser;
-  }
-
-  protected onDefineParameters(): void { // override
-    // No parameters
   }
 
   protected onExecute(): void { // override
-    console.log('Markdown');
+    const docItemSet: DocItemSet = this.buildDocItemSet();
+    const markdownGenerator: MarkdownGenerator = new MarkdownGenerator(docItemSet);
+    markdownGenerator.generateFiles(this.outputFolder);
   }
 }
