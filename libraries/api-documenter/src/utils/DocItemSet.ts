@@ -8,7 +8,7 @@ import {
   IApiItemReference
 } from '@microsoft/api-extractor';
 
-import { RenderingHelpers } from './RenderingHelpers';
+import { Utilities } from './Utilities';
 
 export enum DocItemKind {
   Package,
@@ -227,7 +227,7 @@ export class DocItemSet {
       closestMatch: undefined
     };
 
-    const packageName: string = RenderingHelpers.getScopedPackageName(reference.scopeName, reference.packageName);
+    const packageName: string = Utilities.getScopedPackageName(reference.scopeName, reference.packageName);
     if (!packageName) {
       // This would indicate an invalid data file, since API Extractor is supposed to normalize this
       throw new Error('resolveApiItemReference() failed because the packageName should not be empty');
