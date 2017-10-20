@@ -2,6 +2,25 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "4.0.0",
+      "tag": "@microsoft/api-extractor_v4.0.0",
+      "date": "Fri, 20 Oct 2017 01:04:44 GMT",
+      "comments": {
+        "major": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "3ff332dc81aafca27952120afc1be0788239b741",
+            "comment": "Redesigned interface for invoking API Extractor"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.4` to `~0.3.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.4.2",
       "tag": "@microsoft/api-extractor_v3.4.2",
       "date": "Thu, 05 Oct 2017 01:05:02 GMT",

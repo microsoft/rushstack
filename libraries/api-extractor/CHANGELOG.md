@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 05 Oct 2017 01:05:02 GMT and should not be manually modified.
+This log was last generated on Fri, 20 Oct 2017 01:04:44 GMT and should not be manually modified.
+
+## 4.0.0
+Fri, 20 Oct 2017 01:04:44 GMT
+
+### Breaking changes
+
+- Redesigned interface for invoking API Extractor
 
 ## 3.4.2
 Thu, 05 Oct 2017 01:05:02 GMT
