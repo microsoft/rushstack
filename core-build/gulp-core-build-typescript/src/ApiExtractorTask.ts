@@ -7,7 +7,7 @@ import * as path from 'path';
 import * as ts from 'typescript';
 import { GulpTask } from '@microsoft/gulp-core-build';
 import {
-  ApiExtractor,
+  Extractor,
   IExtractorOptions,
   IExtractorConfig
 } from '@microsoft/api-extractor';
@@ -145,7 +145,7 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
         }
       };
 
-      const extractor: ApiExtractor = new ApiExtractor(extractorConfig, extractorOptions);
+      const extractor: Extractor = new Extractor(extractorConfig, extractorOptions);
       extractor.analyzeProject();
     } catch (e) {
       completeCallback(e.message);

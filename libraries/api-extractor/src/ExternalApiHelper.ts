@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import * as fs from 'fs';
-import { ApiExtractor } from './extractor/ApiExtractor';
+import { Extractor } from './extractor/Extractor';
 
 /**
  * ExternalApiHelper has the specific use case of generating an API json file from third-party definition files.
@@ -47,7 +47,7 @@ export default class ExternalApiHelper {
       fs.mkdirSync(outputPath);
     }
 
-    const apiExtractor: ApiExtractor = new ApiExtractor({
+    const extractor: Extractor = new Extractor({
       compiler: {
         configType: 'tsconfig',
         rootFolder: entryPointFolder,
@@ -69,6 +69,6 @@ export default class ExternalApiHelper {
       }
     });
 
-    apiExtractor.analyzeProject();
+    extractor.analyzeProject();
   }
 }

@@ -1,11 +1,4 @@
 // @public
-class ApiExtractor {
-  public constructor(config: IExtractorConfig, options?: IExtractorOptions);
-  public analyzeProject(options?: IAnalyzeProjectOptions): void;
-  public static jsonSchema: JsonSchema;
-}
-
-// @public
 class ApiJsonFile {
   public static jsonSchema: JsonSchema;
   public static loadFromFile(apiJsonFilePath: string): IApiPackage;
@@ -15,6 +8,13 @@ class ApiJsonFile {
 class ExternalApiHelper {
   // (undocumented)
   public static generateApiJson(rootDir: string, libFolder: string, externalPackageFilePath: string): void;
+}
+
+// @public
+class Extractor {
+  public constructor(config: IExtractorConfig, options?: IExtractorOptions);
+  public analyzeProject(options?: IAnalyzeProjectOptions): void;
+  public static jsonSchema: JsonSchema;
 }
 
 // @public

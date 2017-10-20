@@ -19,7 +19,7 @@ import ApiJsonGenerator from '../generators/ApiJsonGenerator';
 import ApiFileGenerator from '../generators/ApiFileGenerator';
 
 /**
- * Options for {@link ApiExtractor.analyzeProject}.
+ * Options for {@link Extractor.analyzeProject}.
  * @public
  */
 export interface IAnalyzeProjectOptions {
@@ -30,7 +30,7 @@ export interface IAnalyzeProjectOptions {
 }
 
 /**
- * Runtime options for ApiExtractor.
+ * Runtime options for Extractor.
  *
  * @public
  */
@@ -62,7 +62,7 @@ export interface IExtractorOptions {
  * Used to invoke the API Extractor tool.
  * @public
  */
-export class ApiExtractor {
+export class Extractor {
   /**
    * The JSON Schema for API Extractor config file (api-extractor-config.schema.json).
    */
@@ -91,7 +91,7 @@ export class ApiExtractor {
       lodash.cloneDeep(ApiExtractor._defaultConfig), config);
 
     return normalized;
-  }
+    }
 
   public constructor (config: IExtractorConfig, options?: IExtractorOptions) {
     this._logger = lodash.merge(lodash.cloneDeep(ApiExtractor._defaultLogger),
