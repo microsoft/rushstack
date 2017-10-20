@@ -29,7 +29,7 @@ class AstFunction extends AstItem {
       for (const param of methodDeclaration.parameters) {
         const declarationSymbol: ts.Symbol = TypeScriptHelpers.tryGetSymbolForDeclaration(param);
         const astParameter: AstParameter = new AstParameter({
-          extractor: this.extractor,
+          context: this.context,
           declaration: param,
           declarationSymbol: declarationSymbol,
           jsdocNode: param

@@ -4,7 +4,7 @@
 /* tslint:disable:no-bitwise */
 
 import * as ts from 'typescript';
-import Extractor from '../Extractor';
+import { ExtractorContext } from '../ExtractorContext';
 import AstStructuredType from './AstStructuredType';
 import AstEnum from './AstEnum';
 import AstFunction from './AstFunction';
@@ -21,7 +21,7 @@ import { IExportedSymbol } from './IExportedSymbol';
 export default class AstPackage extends AstItemContainer {
   private _exportedNormalizedSymbols: IExportedSymbol[] = [];
 
-  private static _getOptions(extractor: Extractor, rootFile: ts.SourceFile): IAstItemOptions {
+  private static _getOptions(context: ExtractorContext, rootFile: ts.SourceFile): IAstItemOptions {
     const rootFileSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(rootFile);
     let statement: ts.VariableStatement;
     let foundDescription: ts.Node = undefined;
@@ -38,18 +38,18 @@ export default class AstPackage extends AstItemContainer {
     }
 
     return {
-      extractor,
+      context,
       declaration: rootFileSymbol.declarations[0],
       declarationSymbol: rootFileSymbol,
       jsdocNode: foundDescription
     };
   }
 
-  constructor(extractor: Extractor, rootFile: ts.SourceFile) {
-    super(AstPackage._getOptions(extractor, rootFile));
+  constructor(context: ExtractorContext, rootFile: ts.SourceFile) {
+    super(AstPackage._getOptions(context, rootFile));
     this.kind = AstItemKind.Package;
     // The scoped package name. (E.g. "@microsoft/api-extractor")
-    this.name = extractor.packageName;
+    this.name = context.packageName;
 
     const exportSymbols: ts.Symbol[] = this.typeChecker.getExportsOfModule(this.declarationSymbol);
     if (exportSymbols) {
@@ -66,7 +66,7 @@ export default class AstPackage extends AstItemContainer {
 
         for (const declaration of followedSymbol.declarations) {
           const options: IAstItemOptions = {
-            extractor: this.extractor,
+            context: this.context,
             declaration,
             declarationSymbol: followedSymbol,
             jsdocNode: declaration,

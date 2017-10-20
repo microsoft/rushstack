@@ -13,13 +13,13 @@ import {
   IExtractorProjectConfig,
   IExtractorApiJsonFileConfig
 } from './IExtractorConfig';
-import Extractor from '../Extractor';
+import { ExtractorContext } from '../ExtractorContext';
 import { ILogger } from './ILogger';
 import ApiJsonGenerator from '../generators/ApiJsonGenerator';
 import ApiFileGenerator from '../generators/ApiFileGenerator';
 
 /**
- * Options for {@link ApiExtractor.analyzeProject}.
+ * Options for {@link Extractor.analyzeProject}.
  * @public
  */
 export interface IAnalyzeProjectOptions {
@@ -30,7 +30,7 @@ export interface IAnalyzeProjectOptions {
 }
 
 /**
- * Runtime options for ApiExtractor.
+ * Runtime options for Extractor.
  *
  * @public
  */
@@ -62,7 +62,7 @@ export interface IExtractorOptions {
  * Used to invoke the API Extractor tool.
  * @public
  */
-export class ApiExtractor {
+export class Extractor {
   /**
    * The JSON Schema for API Extractor config file (api-extractor-config.schema.json).
    */
@@ -88,16 +88,16 @@ export class ApiExtractor {
   private static _applyConfigDefaults(config: IExtractorConfig): IExtractorConfig {
     // Use the provided config to override the defaults
     const normalized: IExtractorConfig  = lodash.merge(
-      lodash.cloneDeep(ApiExtractor._defaultConfig), config);
+      lodash.cloneDeep(Extractor._defaultConfig), config);
 
     return normalized;
-  }
+    }
 
   public constructor (config: IExtractorConfig, options?: IExtractorOptions) {
-    this._logger = lodash.merge(lodash.cloneDeep(ApiExtractor._defaultLogger),
+    this._logger = lodash.merge(lodash.cloneDeep(Extractor._defaultLogger),
       options.customLogger);
 
-    this._config = ApiExtractor._applyConfigDefaults(config);
+    this._config = Extractor._applyConfigDefaults(config);
 
     this._logger.logVerbose('API Extractor Config: ' + JSON.stringify(this._config));
 
@@ -165,17 +165,17 @@ export class ApiExtractor {
     const projectConfig: IExtractorProjectConfig = options.projectConfig ?
       options.projectConfig : this._config.project;
 
-    const extractor: Extractor = new Extractor({
+    const context: ExtractorContext = new ExtractorContext({
       program: this._program,
       entryPointFile: path.resolve(this._absoluteRootFolder, projectConfig.entryPointSourceFile),
       logger: this._logger
     });
 
     for (const externalJsonFileFolder of projectConfig.externalJsonFileFolders) {
-      extractor.loadExternalPackages(path.resolve(this._absoluteRootFolder, externalJsonFileFolder));
+      context.loadExternalPackages(path.resolve(this._absoluteRootFolder, externalJsonFileFolder));
     }
 
-    const packageBaseName: string = path.basename(extractor.packageName);
+    const packageBaseName: string = path.basename(context.packageName);
 
     const apiJsonFileConfig: IExtractorApiJsonFileConfig = this._config.apiJsonFile;
 
@@ -189,7 +189,7 @@ export class ApiExtractor {
       const apiJsonFilename: string = path.join(outputFolder, packageBaseName + '.api.json');
 
       this._logger.logVerbose('Writing: ' + apiJsonFilename);
-      jsonGenerator.writeJsonFile(apiJsonFilename, extractor);
+      jsonGenerator.writeJsonFile(apiJsonFilename, context);
     }
 
     if (this._config.apiReviewFile.enabled) {
@@ -204,7 +204,7 @@ export class ApiExtractor {
         this._config.apiReviewFile.apiReviewFolder, apiReviewFilename);
       const expectedApiReviewShortPath: string = this._getShortFilePath(expectedApiReviewPath);
 
-      const actualApiReviewContent: string = generator.generateApiFileContent(extractor);
+      const actualApiReviewContent: string = generator.generateApiFileContent(context);
 
       // Write the actual file
       fsx.mkdirsSync(path.dirname(actualApiReviewPath));

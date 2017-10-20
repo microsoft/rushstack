@@ -4,9 +4,9 @@
 // NOTE: THIS SOURCE FILE IS FOR DEBUGGING PURPOSES ONLY.
 //       IT IS INVOKED BY THE "Run.cmd" AND "Debug.cmd" BATCH FILES.
 
-import { ApiExtractor } from './extractor/ApiExtractor';
+import { Extractor } from './extractor/Extractor';
 
-const apiExtractor: ApiExtractor = new ApiExtractor(
+const extractor: Extractor = new Extractor(
   {
     compiler: {
       configType: 'tsconfig',
@@ -26,6 +26,6 @@ const apiExtractor: ApiExtractor = new ApiExtractor(
   }
 );
 
-apiExtractor.analyzeProject();
+extractor.analyzeProject();
 
 console.log('DebugRun completed.');

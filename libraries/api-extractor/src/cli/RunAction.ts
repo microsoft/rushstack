@@ -12,7 +12,7 @@ import {
   CommandLineFlagParameter
 } from '@microsoft/ts-command-line';
 
-import { ApiExtractor } from '../extractor/ApiExtractor';
+import { Extractor } from '../extractor/Extractor';
 import { IExtractorConfig } from '../extractor/IExtractorConfig';
 
 import { ApiExtractorCommandLine } from './ApiExtractorCommandLine';
@@ -78,10 +78,10 @@ export class RunAction extends CommandLineAction {
       console.log(`Using configuration from ${configFilename}` + os.EOL + os.EOL);
     }
 
-    const config: IExtractorConfig = JsonFile.loadAndValidate(configFilename, ApiExtractor.jsonSchema);
-    const apiExtractor: ApiExtractor = new ApiExtractor(config, {
+    const config: IExtractorConfig = JsonFile.loadAndValidate(configFilename, Extractor.jsonSchema);
+    const extractor: Extractor = new Extractor(config, {
       localBuild: this._localParameter.value
     });
-    apiExtractor.analyzeProject();
+    extractor.analyzeProject();
   }
 }

@@ -11,9 +11,9 @@ import DocItemLoader from './DocItemLoader';
 import { ILogger } from './extractor/ILogger';
 
 /**
- * Options for Extractor constructor.
+ * Options for ExtractorContext constructor.
  */
-export interface IExtractorOptions {
+export interface IExtractorContextOptions {
   /**
    * Configuration for the TypeScript compiler.  The most important options to set are:
    *
@@ -39,7 +39,7 @@ export interface IExtractorOptions {
  * TypeScript Compiler API to analyze a project, and constructs the AstItem
  * abstract syntax tree.
  */
-export default class Extractor {
+export class ExtractorContext {
   public typeChecker: ts.TypeChecker;
   public package: AstPackage;
   /**
@@ -58,7 +58,7 @@ export default class Extractor {
 
   private _logger: ILogger;
 
-  constructor(options: IExtractorOptions) {
+  constructor(options: IExtractorContextOptions) {
     this.packageJsonLookup = new PackageJsonLookup();
 
     this._packageFolder = this.packageJsonLookup.tryGetPackageFolder(options.entryPointFile);

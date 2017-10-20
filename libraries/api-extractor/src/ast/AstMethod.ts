@@ -33,7 +33,7 @@ export default class AstMethod extends AstMember {
       for (const param of methodDeclaration.parameters) {
         const declarationSymbol: ts.Symbol = TypeScriptHelpers.tryGetSymbolForDeclaration(param);
         const astParameter: AstParameter = new AstParameter({
-          extractor: this.extractor,
+          context: this.context,
           declaration: param,
           declarationSymbol: declarationSymbol,
           jsdocNode: param
@@ -79,7 +79,7 @@ export default class AstMethod extends AstMember {
         } as ITextElement);
 
         const scopedPackageName: IScopedPackageName = ApiDefinitionReference
-          .parseScopedPackageName(this.extractor.package.name);
+          .parseScopedPackageName(this.context.package.name);
 
         this.documentation.summary.push({
           kind: 'linkDocElement',

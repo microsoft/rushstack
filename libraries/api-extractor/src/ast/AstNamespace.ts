@@ -89,7 +89,7 @@ export default class AstNamespace extends AstItemContainer {
         }
 
         const exportMemberOptions: IAstItemOptions = {
-          extractor: this.extractor,
+          context: this.context,
           declaration,
           declarationSymbol: followedSymbol,
           jsdocNode: jsdocNode,
