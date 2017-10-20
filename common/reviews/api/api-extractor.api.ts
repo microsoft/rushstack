@@ -108,6 +108,12 @@ interface IApiNameMap<T> {
 }
 
 // @alpha
+interface IApiNamespace extends IApiBaseDefinition {
+  exports: IApiNameMap<ApiItem>;
+  kind: 'namespace';
+}
+
+// @alpha
 interface IApiPackage {
   // (undocumented)
   deprecatedMessage?: IDocElement[];
