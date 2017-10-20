@@ -1,0 +1,9 @@
+{
+  "compiler" : {
+    "configType": "tsconfig",
+    "rootFolder": "."
+  },
+  "project": {
+    "entryPointSourceFile": "index.ts"
+  }
+}

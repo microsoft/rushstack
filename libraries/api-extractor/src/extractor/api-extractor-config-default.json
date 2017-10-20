@@ -1,0 +1,20 @@
+{
+  // ("compiler" is required)
+
+  "project": {
+    // ("entryPointSourceFile" is required)
+
+    "externalJsonFileFolders": [ ]
+  },
+
+  "apiReviewFile": {
+    "enabled": true,
+    "apiReviewFolder": "./etc",
+    "tempFolder": "./temp"
+  },
+
+  "apiJsonFile": {
+    "enabled": true,
+    "outputFolder": "./dist"
+  }
+}

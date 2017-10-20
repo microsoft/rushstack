@@ -8,11 +8,21 @@
  */
 declare const packageDescription: void; // tslint:disable-line:no-unused-variable
 
-export { default as Extractor, IExtractorOptions, IExtractorAnalyzeOptions, ApiErrorHandler } from './Extractor';
-export { default as ApiFileGenerator  } from './generators/ApiFileGenerator';
-export { default as ApiJsonGenerator  } from './generators/ApiJsonGenerator';
 export { default as ExternalApiHelper } from './ExternalApiHelper';
 
+export { ApiExtractor, IAnalyzeProjectOptions, IExtractorOptions } from './extractor/ApiExtractor';
+export {
+  IExtractorTsconfigCompilerConfig,
+  IExtractorRuntimeCompilerConfig,
+  IExtractorProjectConfig,
+  IExtractorApiReviewFileConfig,
+  IExtractorApiJsonFileConfig,
+  IExtractorConfig
+} from './extractor/IExtractorConfig';
+
+export { ILogger } from './extractor/ILogger';
+
 export * from './api/ApiItem';
+export { ApiJsonFile } from './api/ApiJsonFile';
 export * from './markup/MarkupElement';
 export * from './markup/OldMarkup';
