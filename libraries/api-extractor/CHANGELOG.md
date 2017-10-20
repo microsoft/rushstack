@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 20 Oct 2017 01:04:44 GMT and should not be manually modified.
+This log was last generated on Fri, 20 Oct 2017 01:52:54 GMT and should not be manually modified.
+
+## 4.0.1
+Fri, 20 Oct 2017 01:52:54 GMT
+
+### Patches
+
+- Rename ApiExtractor class to Extractor
 
 ## 4.0.0
 Fri, 20 Oct 2017 01:04:44 GMT

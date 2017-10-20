@@ -2,6 +2,25 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "4.0.1",
+      "tag": "@microsoft/api-extractor_v4.0.1",
+      "date": "Fri, 20 Oct 2017 01:52:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "7f9f66ba071e2bcf77f224f784c14efbe627ba40",
+            "comment": "Rename ApiExtractor class to Extractor"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.5` to `~0.3.6`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.0.0",
       "tag": "@microsoft/api-extractor_v4.0.0",
       "date": "Fri, 20 Oct 2017 01:04:44 GMT",
