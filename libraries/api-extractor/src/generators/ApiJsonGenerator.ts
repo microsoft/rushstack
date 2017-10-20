@@ -6,7 +6,7 @@ import * as path from 'path';
 import * as ts from 'typescript';
 import { JsonFile, IJsonSchemaErrorInfo } from '@microsoft/node-core-library';
 
-import Extractor from '../Extractor';
+import { ExtractorContext } from '../ExtractorContext';
 import AstStructuredType from '../ast/AstStructuredType';
 import AstEnum from '../ast/AstEnum';
 import AstEnumValue from '../ast/AstEnumValue';
@@ -44,7 +44,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
 
   protected jsonOutput: Object = {};
 
-  public writeJsonFile(reportFilename: string, extractor: Extractor): void {
+  public writeJsonFile(reportFilename: string, extractor: ExtractorContext): void {
     this.visit(extractor.package, this.jsonOutput);
 
     // Write the output before validating the schema, so we can debug it

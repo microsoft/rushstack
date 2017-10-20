@@ -13,7 +13,7 @@ import {
   IExtractorProjectConfig,
   IExtractorApiJsonFileConfig
 } from './IExtractorConfig';
-import Extractor from '../Extractor';
+import { ExtractorContext } from '../ExtractorContext';
 import { ILogger } from './ILogger';
 import ApiJsonGenerator from '../generators/ApiJsonGenerator';
 import ApiFileGenerator from '../generators/ApiFileGenerator';
@@ -165,7 +165,7 @@ export class ApiExtractor {
     const projectConfig: IExtractorProjectConfig = options.projectConfig ?
       options.projectConfig : this._config.project;
 
-    const extractor: Extractor = new Extractor({
+    const extractor: ExtractorContext = new ExtractorContext({
       program: this._program,
       entryPointFile: path.resolve(this._absoluteRootFolder, projectConfig.entryPointSourceFile),
       logger: this._logger

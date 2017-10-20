@@ -4,7 +4,7 @@
 /* tslint:disable:no-bitwise */
 
 import * as ts from 'typescript';
-import Extractor from '../Extractor';
+import { ExtractorContext } from '../ExtractorContext';
 import AstStructuredType from './AstStructuredType';
 import AstEnum from './AstEnum';
 import AstFunction from './AstFunction';
@@ -21,7 +21,7 @@ import { IExportedSymbol } from './IExportedSymbol';
 export default class AstPackage extends AstItemContainer {
   private _exportedNormalizedSymbols: IExportedSymbol[] = [];
 
-  private static _getOptions(extractor: Extractor, rootFile: ts.SourceFile): IAstItemOptions {
+  private static _getOptions(extractor: ExtractorContext, rootFile: ts.SourceFile): IAstItemOptions {
     const rootFileSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(rootFile);
     let statement: ts.VariableStatement;
     let foundDescription: ts.Node = undefined;
@@ -45,7 +45,7 @@ export default class AstPackage extends AstItemContainer {
     };
   }
 
-  constructor(extractor: Extractor, rootFile: ts.SourceFile) {
+  constructor(extractor: ExtractorContext, rootFile: ts.SourceFile) {
     super(AstPackage._getOptions(extractor, rootFile));
     this.kind = AstItemKind.Package;
     // The scoped package name. (E.g. "@microsoft/api-extractor")

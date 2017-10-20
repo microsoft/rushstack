@@ -5,7 +5,7 @@
 /* tslint:disable:no-constant-condition */
 
 import * as ts from 'typescript';
-import Extractor from '../Extractor';
+import { ExtractorContext } from '../ExtractorContext';
 import ApiDocumentation from '../aedoc/ApiDocumentation';
 import { IDocElement } from '../markup/OldMarkup';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
@@ -100,9 +100,9 @@ enum InitializationState {
   */
 export interface IAstItemOptions {
   /**
-   * The associated Extractor object for this AstItem
+   * The associated ExtractorContext object for this AstItem
    */
-  extractor: Extractor;
+  extractor: ExtractorContext;
   /**
    * The declaration node for the main syntax item that this AstItem is associated with.
    */
@@ -239,9 +239,10 @@ abstract class AstItem {
   public inheritedDeprecatedMessage: IDocElement[] = [];
 
   /**
-   * The Extractor object that acts as the root of the abstract syntax tree that this item belongs to.
+   * The ExtractorContext object provides common contextual information for all of
+   * items in the AstItem tree.
    */
-  protected extractor: Extractor;
+  protected extractor: ExtractorContext;
 
   /**
    * Syntax information from the TypeScript Compiler API, corresponding to the place
@@ -360,7 +361,7 @@ abstract class AstItem {
   }
 
   /**
-   * This function is a second stage that happens after Extractor.analyze() calls AstItem constructor to build up
+   * This function is a second stage that happens after ExtractorContext.analyze() calls AstItem constructor to build up
    * the abstract syntax tree. In this second stage, we are creating the documentation for each AstItem.
    *
    * This function makes sure we create the documentation for each AstItem in the correct order.
