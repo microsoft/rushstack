@@ -13,6 +13,9 @@
     "clean": "gulp clean",
     "test": "gulp test"
   },
+  "bin": {
+    "api-documenter": "./bin/api-documenter"
+  },  
   "dependencies": {
     "@microsoft/api-extractor": "4.0.0",
     "@microsoft/node-core-library": "~0.3.5",
