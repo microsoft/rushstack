@@ -113,7 +113,7 @@ export interface IApiReturnValue {
  */
 export interface IApiBaseDefinition {
   /**
-   * kind of DocItem. Ex: 'class', 'Enum', 'Function', etc.
+   * kind of item: 'class', 'enum', 'function', etc.
    */
   kind: string;
   isBeta: boolean;
@@ -336,6 +336,22 @@ export interface IApiInterface extends IApiBaseDefinition {
 }
 
 /**
+ * IApiInterface represents an exported interface.
+ * @alpha
+ */
+export interface IApiNamespace extends IApiBaseDefinition {
+  /**
+   * {@inheritdoc IApiBaseDefinition.kind}
+   */
+  kind: 'namespace';
+
+  /**
+   * A mapping from the name of a member API to its ApiMember
+   */
+  exports: IApiNameMap<ApiItem>;
+}
+
+/**
  * IApiPackage is an object contaning the exported
  * definions of this API package. The exports can include:
  * classes, interfaces, enums, functions.
@@ -381,7 +397,7 @@ export type ApiMember = IApiProperty | IApiMethod | IApiConstructor;
  * @alpha
  */
 export type ApiItem = IApiProperty | ApiMember | IApiFunction | IApiConstructor |
-   IApiClass | IApiEnum | IApiEnumMember | IApiInterface | IApiPackage;
+   IApiClass | IApiEnum | IApiEnumMember | IApiInterface | IApiNamespace | IApiPackage;
 
 /**
  * Describes a return type and description of the return type

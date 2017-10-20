@@ -108,6 +108,12 @@ interface IApiNameMap<T> {
 }
 
 // @alpha
+interface IApiNamespace extends IApiBaseDefinition {
+  exports: IApiNameMap<ApiItem>;
+  kind: 'namespace';
+}
+
+// @alpha
 interface IApiPackage {
   // (undocumented)
   deprecatedMessage?: IDocElement[];
@@ -183,6 +189,7 @@ interface IExtractorConfig {
   apiJsonFile?: IExtractorApiJsonFileConfig;
   apiReviewFile?: IExtractorApiReviewFileConfig;
   compiler: IExtractorTsconfigCompilerConfig | IExtractorRuntimeCompilerConfig;
+  policies?: IExtractorPoliciesConfig;
   project: IExtractorProjectConfig;
 }
 
@@ -191,6 +198,11 @@ interface IExtractorOptions {
   compilerProgram?: ts.Program;
   customLogger?: Partial<ILogger>;
   localBuild?: boolean;
+}
+
+// @public
+interface IExtractorPoliciesConfig {
+  namespaceSupport: 'conservative' | 'permissive';
 }
 
 // @public

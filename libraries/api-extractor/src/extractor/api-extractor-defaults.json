@@ -7,6 +7,10 @@
     "externalJsonFileFolders": [ ]
   },
 
+  "policies": {
+    "namespaceSupport": "conservative"
+  },
+
   "apiReviewFile": {
     "enabled": true,
     "apiReviewFolder": "./etc",

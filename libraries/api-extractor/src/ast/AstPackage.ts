@@ -5,12 +5,8 @@
 
 import * as ts from 'typescript';
 import { ExtractorContext } from '../ExtractorContext';
-import AstStructuredType from './AstStructuredType';
-import AstEnum from './AstEnum';
-import AstFunction from './AstFunction';
 import { AstItemKind, IAstItemOptions } from './AstItem';
-import AstItemContainer from './AstItemContainer';
-import AstNamespace from './AstNamespace';
+import AstModule from './AstModule';
 import TypeScriptHelpers from '../TypeScriptHelpers';
 import { IExportedSymbol } from './IExportedSymbol';
 
@@ -18,7 +14,7 @@ import { IExportedSymbol } from './IExportedSymbol';
   * This class is part of the AstItem abstract syntax tree.  It represents the top-level
   * exports for an Rush package.  This object acts as the root of the Extractor's tree.
   */
-export default class AstPackage extends AstItemContainer {
+export default class AstPackage extends AstModule {
   private _exportedNormalizedSymbols: IExportedSymbol[] = [];
 
   private static _getOptions(context: ExtractorContext, rootFile: ts.SourceFile): IAstItemOptions {
@@ -54,37 +50,9 @@ export default class AstPackage extends AstItemContainer {
     const exportSymbols: ts.Symbol[] = this.typeChecker.getExportsOfModule(this.declarationSymbol);
     if (exportSymbols) {
       for (const exportSymbol of exportSymbols) {
+        this.processModuleExport(exportSymbol);
+
         const followedSymbol: ts.Symbol = this.followAliases(exportSymbol);
-
-        if (!followedSymbol.declarations) {
-          // This is an API Extractor bug, but it could happen e.g. if we upgrade to a new
-          // version of the TypeScript compiler that introduces new AST variations that we
-          // haven't tested before.
-          this.reportWarning(`Definition with no declarations: ${exportSymbol.name}`);
-          continue;
-        }
-
-        for (const declaration of followedSymbol.declarations) {
-          const options: IAstItemOptions = {
-            context: this.context,
-            declaration,
-            declarationSymbol: followedSymbol,
-            jsdocNode: declaration,
-            exportSymbol
-          };
-
-          if (followedSymbol.flags & (ts.SymbolFlags.Class | ts.SymbolFlags.Interface)) {
-            this.addMemberItem(new AstStructuredType(options));
-          } else if (followedSymbol.flags & ts.SymbolFlags.ValueModule) {
-            this.addMemberItem(new AstNamespace(options));
-          } else if (followedSymbol.flags & ts.SymbolFlags.Function) {
-            this.addMemberItem(new AstFunction(options));
-          } else if (followedSymbol.flags & ts.SymbolFlags.Enum) {
-            this.addMemberItem(new AstEnum(options));
-          } else {
-            this.reportWarning(`Unsupported export: ${exportSymbol.name}`);
-          }
-        }
         this._exportedNormalizedSymbols.push({
           exportedName: exportSymbol.name,
           followedSymbol: followedSymbol
