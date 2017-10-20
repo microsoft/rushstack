@@ -12,6 +12,7 @@ import { Utilities } from './Utilities';
 
 export enum DocItemKind {
   Package,
+  Namespace,
   Class,
   Interface,
   Method,
@@ -58,7 +59,8 @@ export class DocItem {
 
     switch (this.apiItem.kind) {
       case 'package':
-        this.kind = DocItemKind.Package;
+      case 'namespace':
+        this.kind = this.apiItem.kind === 'package' ? DocItemKind.Package : DocItemKind.Namespace;
         for (const exportName of Object.keys(this.apiItem.exports)) {
           const child: ApiItem = this.apiItem.exports[exportName];
           this.children.push(new DocItem(child, exportName, this.docItemSet, this));
