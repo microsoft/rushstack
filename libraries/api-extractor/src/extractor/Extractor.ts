@@ -88,16 +88,16 @@ export class Extractor {
   private static _applyConfigDefaults(config: IExtractorConfig): IExtractorConfig {
     // Use the provided config to override the defaults
     const normalized: IExtractorConfig  = lodash.merge(
-      lodash.cloneDeep(ApiExtractor._defaultConfig), config);
+      lodash.cloneDeep(Extractor._defaultConfig), config);
 
     return normalized;
     }
 
   public constructor (config: IExtractorConfig, options?: IExtractorOptions) {
-    this._logger = lodash.merge(lodash.cloneDeep(ApiExtractor._defaultLogger),
+    this._logger = lodash.merge(lodash.cloneDeep(Extractor._defaultLogger),
       options.customLogger);
 
-    this._config = ApiExtractor._applyConfigDefaults(config);
+    this._config = Extractor._applyConfigDefaults(config);
 
     this._logger.logVerbose('API Extractor Config: ' + JSON.stringify(this._config));
 
