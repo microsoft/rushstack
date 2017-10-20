@@ -86,10 +86,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "babel-jest",
-      "allowedCategories": [ "other" ]
-    },
-    {
       "name": "builtins",
       "allowedCategories": [ "libraries" ]
     },
