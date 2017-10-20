@@ -19,11 +19,16 @@ import ApiDefinitionReference, { IScopedPackageName } from '../ApiDefinitionRefe
 export default class AstMethod extends AstMember {
   public readonly returnType: string;
   public readonly params: AstParameter[];
-  private readonly _isConstructor: boolean;
 
   constructor(options: IAstItemOptions) {
     super(options);
-    this.kind = AstItemKind.Method;
+
+    // tslint:disable-next-line:no-bitwise
+    if ((options.declarationSymbol.flags & ts.SymbolFlags.Constructor) !== 0) {
+      this.kind = AstItemKind.Constructor;
+    } else {
+      this.kind = AstItemKind.Method;
+    }
 
     const methodDeclaration: ts.MethodDeclaration = options.declaration as ts.MethodDeclaration;
 
@@ -44,11 +49,8 @@ export default class AstMethod extends AstMember {
       }
     }
 
-    // tslint:disable-next-line:no-bitwise
-    this._isConstructor = (options.declarationSymbol.flags & ts.SymbolFlags.Constructor) !== 0;
-
     // Return type
-    if (!this.isConstructor) {
+    if (this.kind !== AstItemKind.Constructor) {
       if (methodDeclaration.type) {
         this.returnType = methodDeclaration.type.getText();
       } else {
@@ -58,20 +60,13 @@ export default class AstMethod extends AstMember {
     }
   }
 
-  /**
-   * Returns true if this member represents a class constructor.
-   */
-  public get isConstructor(): boolean {
-    return this._isConstructor;
-  }
-
   protected onCompleteInitialization(): void {
     super.onCompleteInitialization();
 
     // If this is a class constructor, and if the documentation summary was omitted, then
     // we fill in a default summary versus flagging it as "undocumented".
     // Generally class constructors have uninteresting documentation.
-    if (this.isConstructor) {
+    if (this.kind === AstItemKind.Constructor) {
       if (this.documentation.summary.length === 0) {
         this.documentation.summary.push({
           kind: 'textDocElement',
