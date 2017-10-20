@@ -53,10 +53,9 @@ export namespace RushConstants {
   export const rushTempProjectsFolderName: string = 'projects';
 
   /**
-   * The filename ("npm-shrinkwrap.json") used to store state for the "npm shrinkwrap"
-   * command.
+   * The filename ("shrinkwrap.yaml") used to store state
    */
-  export const npmShrinkwrapFilename: string = 'npm-shrinkwrap.json';
+  export const npmShrinkwrapFilename: string = 'shrinkwrap.yaml';
 
   /**
    * The folder name ("node_modules") where NPM installs its packages.

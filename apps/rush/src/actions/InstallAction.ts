@@ -31,7 +31,7 @@ export default class InstallAction extends BaseRushAction {
       summary: 'Install NPM packages in the Rush "common" folder, as specified by your shrinkwrap file.',
       documentation: 'Always run "rush install" whenever you: (1) clone a repo, or (2) pull new changes from source'
       + ' control, or (3) edit any package.json file.  The "rush install" command installs NPM packages into your'
-      + ' Rush "common" folder, using the exact versions specified in your npm-shrinkwrap.json file.'
+      + ' Rush "common" folder, using the exact versions specified in your shrinkwrap.yaml file.'
       + ' It also makes sure these versions satisfy your dependencies; if not, it will ask you to run'
       + ' "rush generate". If there is nothing to do, then "rush install" won\'t take any time.'
       + ' Afterwards, it will run "rush link" to create symlinks for all your projects.'
@@ -81,7 +81,7 @@ export default class InstallAction extends BaseRushAction {
     try {
       const installManager: InstallManager = new InstallManager(this.rushConfiguration);
 
-      installManager.ensureLocalNpmTool(this._cleanInstallFull.value);
+      installManager.ensureLocalPnpmTool(this._cleanInstallFull.value);
 
       const shrinkwrapFile: ShrinkwrapFile | undefined
         = ShrinkwrapFile.loadFromFile(this.rushConfiguration.committedShrinkwrapFilename);

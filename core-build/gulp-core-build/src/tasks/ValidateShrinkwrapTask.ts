@@ -18,7 +18,7 @@ interface INpmPackage {
 }
 
 /**
- * Partial representation of the contents of an `npm-shrinkwrap.json` file
+ * Partial representation of the contents of an `shrinkwrap.yaml` file
  */
 interface INpmShrinkwrap {
   dependencies: ShrinkwrapDep;

@@ -106,6 +106,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "encode-registry",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "end-of-stream",
       "allowedCategories": [ "libraries" ]
     },

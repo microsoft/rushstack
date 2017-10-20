@@ -6,7 +6,6 @@ import * as os from 'os';
 import * as fsx from 'fs-extra';
 import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import {
-  Utilities,
   Stopwatch
 } from '@microsoft/rush-lib';
 
@@ -67,9 +66,12 @@ export default class GenerateAction extends BaseRushAction {
 
     const installManager: InstallManager = new InstallManager(this.rushConfiguration);
 
+    const committedShrinkwrapFilename: string = this.rushConfiguration.committedShrinkwrapFilename;
+    const tempShrinkwrapFilename: string = this.rushConfiguration.tempShrinkwrapFilename;
+
     try {
       const shrinkwrapFile: ShrinkwrapFile | undefined
-        = ShrinkwrapFile.loadFromFile(this.rushConfiguration.committedShrinkwrapFilename);
+        = ShrinkwrapFile.loadFromFile(committedShrinkwrapFilename);
 
       if (shrinkwrapFile
         && !this._forceParameter.value
@@ -86,17 +88,17 @@ export default class GenerateAction extends BaseRushAction {
       console.log('There was a problem reading the shrinkwrap file. Proceeeding with "rush generate".');
     }
 
-    installManager.ensureLocalNpmTool(false);
+    installManager.ensureLocalPnpmTool(false);
 
     installManager.createTempModules();
 
     // Delete both copies of the shrinkwrap file
-    if (fsx.existsSync(this.rushConfiguration.committedShrinkwrapFilename)) {
-      console.log(os.EOL + 'Deleting ' + this.rushConfiguration.committedShrinkwrapFilename);
-      fsx.unlinkSync(this.rushConfiguration.committedShrinkwrapFilename);
+    if (fsx.existsSync(committedShrinkwrapFilename)) {
+      console.log(os.EOL + 'Deleting ' + committedShrinkwrapFilename);
+      fsx.unlinkSync(committedShrinkwrapFilename);
     }
-    if (fsx.existsSync(this.rushConfiguration.tempShrinkwrapFilename)) {
-      fsx.unlinkSync(this.rushConfiguration.tempShrinkwrapFilename);
+    if (fsx.existsSync(tempShrinkwrapFilename)) {
+      fsx.unlinkSync(tempShrinkwrapFilename);
     }
 
     if (isLazy) {
@@ -107,19 +109,14 @@ export default class GenerateAction extends BaseRushAction {
       // Do an incremental install
       installManager.installCommonModules(InstallType.Normal);
 
-      console.log(os.EOL + colors.bold('(Skipping "npm shrinkwrap")') + os.EOL);
+      console.log(os.EOL + colors.bold('(Deleting "shrinkwrap.yaml")') + os.EOL);
+      fsx.unlinkSync(tempShrinkwrapFilename);
+
     } else {
       // Do a clean install
       installManager.installCommonModules(InstallType.ForceClean);
 
-      console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
-      const npmArgs: string [] = ['shrinkwrap'];
-      installManager.pushConfigurationNpmArgs(npmArgs);
-      Utilities.executeCommand(this.rushConfiguration.npmToolFilename,
-        npmArgs, this.rushConfiguration.commonTempFolder);
-      console.log('"npm shrinkwrap" completed' + os.EOL);
-
-      // Copy (or delete) common\temp\npm-shrinkwrap.json --> common\npm-shrinkwrap.json
+       // Copy (or delete) common\temp\shrinkwrap.yaml --> common\shrinkwrap.yaml
       installManager.syncFile(this.rushConfiguration.tempShrinkwrapFilename,
         this.rushConfiguration.committedShrinkwrapFilename);
 

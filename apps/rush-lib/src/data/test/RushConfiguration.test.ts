@@ -27,25 +27,23 @@ describe('RushConfiguration', () => {
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
 
     assertPathProperty('committedShrinkwrapFilename',
-      rushConfiguration.committedShrinkwrapFilename, './repo/common/config/rush/npm-shrinkwrap.json');
+      rushConfiguration.committedShrinkwrapFilename, './repo/common/config/rush/shrinkwrap.yaml');
     assertPathProperty('commonFolder',
       rushConfiguration.commonFolder, './repo/common');
     assertPathProperty('commonRushConfigFolder',
       rushConfiguration.commonRushConfigFolder, './repo/common/config/rush');
     assertPathProperty('commonTempFolder',
       rushConfiguration.commonTempFolder, './repo/common/temp');
-    assertPathProperty('npmCacheFolder',
-      rushConfiguration.npmCacheFolder, './repo/common/temp/npm-cache');
-    assertPathProperty('npmTmpFolder',
-      rushConfiguration.npmTmpFolder, './repo/common/temp/npm-tmp');
+    assertPathProperty('pnpmStoreFolder',
+      rushConfiguration.pnpmStoreFolder, './repo/common/temp/npm-cache');
     assertPathProperty('npmToolFilename',
-      rushConfiguration.npmToolFilename, './repo/common/temp/npm-local/node_modules/.bin/npm');
+      rushConfiguration.pnpmToolFilename, './repo/common/temp/pnpm-local/node_modules/.bin/pnpm');
     assertPathProperty('rushJsonFolder',
       rushConfiguration.rushJsonFolder, './repo');
     assertPathProperty('rushLinkJsonFilename',
       rushConfiguration.rushLinkJsonFilename, './repo/common/temp/rush-link.json');
 
-    assert.equal(rushConfiguration.npmToolVersion, '4.5.0', 'Failed to validate npmToolVersion');
+    assert.equal(rushConfiguration.pnpmToolVersion, '4.5.0', 'Failed to validate pnpmToolVersion');
 
     assert.equal(rushConfiguration.repositoryUrl, 'someFakeUrl', 'Failed to get repository url');
     assert.equal(rushConfiguration.projectFolderMaxDepth, 99, 'Failed to validate projectFolderMaxDepth');

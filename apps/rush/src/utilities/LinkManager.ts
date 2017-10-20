@@ -7,7 +7,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import * as tar from 'tar';
-import readPackageTree = require('read-package-tree');
+import encodeRegistry = require('encode-registry');
 import { JsonFile } from '@microsoft/node-core-library';
 import {
   RushConstants,
@@ -18,20 +18,7 @@ import {
   Stopwatch
 } from '@microsoft/rush-lib';
 
-import Package, { IResolveOrCreateResult, PackageDependencyKind } from './Package';
-import PackageLookup from './PackageLookup';
-
-interface IQueueItem {
-  // A project from somewhere under "common/temp/node_modules"
-  commonPackage: Package;
-
-  // A symlinked virtual package that we will create somewhere under "this-project/node_modules"
-  localPackage: Package;
-
-  // If we encounter a dependency listed in cyclicDependencyProjects, this will be set to the root
-  // of the localPackage subtree where we will stop creating local links.
-  cyclicSubtreeRoot: Package | undefined;
-}
+import Package from './Package';
 
 enum SymlinkKind {
   File,
@@ -42,20 +29,10 @@ export default class LinkManager {
   private _rushConfiguration: RushConfiguration;
 
   private static _createSymlink(linkTarget: string, linkSource: string, symlinkKind: SymlinkKind): void {
-    if (symlinkKind === SymlinkKind.Directory) {
-      // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
-      fsx.symlinkSync(linkTarget, linkSource, 'junction');
-    } else {
-      if (process.platform === 'win32') {
-        // For files, we use a Windows "hard link", because creating a symbolic link requires
-        // administrator permission.
-        fsx.linkSync(linkTarget, linkSource);
-      } else {
-        // However hard links seem to cause build failures on Mac, so for all other operating systems
-        // we use symbolic links for this case.
-        fsx.symlinkSync(linkTarget, linkSource, 'file');
-      }
-    }
+    fsx.mkdirsSync(path.dirname(linkSource));
+
+    // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
+    fsx.symlinkSync(linkTarget, linkSource, 'junction');
   }
 
   /**
@@ -118,6 +95,7 @@ export default class LinkManager {
       }
     }
 
+    // this should never occur
     if (localPackage.children.length > 0) {
       Utilities.createFolderWithRetry(localModuleFolder);
 
@@ -158,7 +136,7 @@ export default class LinkManager {
     this._rushConfiguration = rushConfiguration;
   }
 
-  /**
+  /*
    * Creates node_modules symlinks for all Rush projects defined in the RushConfiguration.
    * @param force - Normally the operation will be skipped if the links are already up to date;
    *   if true, this option forces the links to be recreated.
@@ -180,287 +158,203 @@ export default class LinkManager {
       // a full "rush link" is required next time
       Utilities.deleteFile(this._rushConfiguration.rushLinkJsonFilename);
 
-      readPackageTree(this._rushConfiguration.commonTempFolder,
-        (error: Error, npmPackage: readPackageTree.PackageNode) => {
-        if (error) {
-          reject(error);
-        } else {
-          try {
-            const commonRootPackage: Package = Package.createFromNpm(npmPackage);
+      // go ahead and find out the registry we are using, we need this to locate the pnpm store folder
+      const registryUrl: string = Utilities.executeCommandAndCaptureOutput(
+        this._rushConfiguration.pnpmToolFilename,
+        ['config', 'get', 'registry'],
+        this._rushConfiguration.commonTempFolder,
+        process.env);
 
-            const commonPackageLookup: PackageLookup = new PackageLookup();
-            commonPackageLookup.loadTree(commonRootPackage);
+      const encodedRegistry: string = encodeRegistry(registryUrl);
 
-            const rushLinkJson: IRushLinkJson = { localLinks: {} };
+      const registryPath: string = path.join(
+        this._rushConfiguration.commonTempFolder,
+        RushConstants.nodeModulesFolderName,
+        `.${encodedRegistry}`
+      );
 
-            for (const rushProject of this._rushConfiguration.projects) {
-              console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
-              this._linkProject(rushProject, commonRootPackage, commonPackageLookup, rushLinkJson);
-            }
+      try {
+        const rushLinkJson: IRushLinkJson = { localLinks: {} };
 
-            console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
-            JsonFile.save(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
-
-            stopwatch.stop();
-            console.log(os.EOL + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));
-            console.log(os.EOL + 'Next you should probably run: "rush rebuild"');
-
-            resolve();
-          } catch (error) {
-            reject(error);
-          }
+        for (const rushProject of this._rushConfiguration.projects) {
+          console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
+          this._linkProject(registryPath, rushProject, rushLinkJson);
         }
-      });
+
+        console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
+        JsonFile.save(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
+
+        stopwatch.stop();
+        console.log(os.EOL + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));
+        console.log(os.EOL + 'Next you should probably run: "rush rebuild"');
+
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
     });
   }
 
   /**
    * This is called once for each local project from Rush.json.
    * @param project             The local project that we will create symlinks for
-   * @param commonRootPackage   The common/temp/package.json package
-   * @param commonPackageLookup A dictionary for finding packages under common/temp/node_modules
-   * @param rushConfiguration   The rush.json file contents
    * @param rushLinkJson        The common/temp/rush-link.json output file
-   * @param options             Command line options for "rush link"
    */
   private _linkProject(
+    pnpmStorePath: string,
     project: RushConfigurationProject,
-    commonRootPackage: Package,
-    commonPackageLookup: PackageLookup,
     rushLinkJson: IRushLinkJson): void {
 
-    let commonProjectPackage: Package | undefined = commonRootPackage.getChildByName(project.tempProjectName);
-    if (!commonProjectPackage) {
-      // Normally we would expect the temp project to have been installed into the common\node_modules
-      // folder.  However, if it was recently added, "rush install" doesn't technically require
-      // this, as long as its dependencies can be found at the root of the NPM shrinkwrap file.
-      // This avoids the need to run "rush generate" unnecessarily.
+    // Naively, PNPM creates a directed acyclic graph, rather than a tree
+    // thus if sp-http and sp-core-library both depend on GCB@1.2.3,
+    // and GCB@1.2.3 depends on gulp-typescript, then for both cases it must
+    // be the exact same version of gulp-typescript
+    // thus, we only need to link the direct dependencies of this project to the
+    // common folder
 
-      // Example: "project1"
-      const unscopedTempProjectName: string = Utilities.parseScopedPackageName(project.tempProjectName).name;
+    // Example: "project1"
+    const unscopedTempProjectName: string = Utilities.parseScopedPackageName(project.tempProjectName).name;
 
-      // Example: "C:\MyRepo\common\temp\projects\project1
-      const extractedFolder: string = path.join(this._rushConfiguration.commonTempFolder,
-        RushConstants.rushTempProjectsFolderName, unscopedTempProjectName);
+    // Example: "C:\MyRepo\common\temp\projects\project1
+    const extractedFolder: string = path.join(this._rushConfiguration.commonTempFolder,
+      RushConstants.rushTempProjectsFolderName, unscopedTempProjectName);
 
-      // Example: "C:\MyRepo\common\temp\projects\project1.tgz"
-      const tarballFile: string = path.join(this._rushConfiguration.commonTempFolder,
-        RushConstants.rushTempProjectsFolderName, unscopedTempProjectName + '.tgz');
+    // Example: "C:\MyRepo\common\temp\projects\project1.tgz"
+    const tarballFile: string = path.join(this._rushConfiguration.commonTempFolder,
+      RushConstants.rushTempProjectsFolderName, unscopedTempProjectName + '.tgz');
 
-      // Example: "C:\MyRepo\common\temp\projects\project1\package.json"
-      const packageJsonFilename: string = path.join(extractedFolder, 'package', 'package.json');
+    // Example: "C:\MyRepo\common\temp\projects\project1\package.json"
+    const packageJsonFilename: string = path.join(extractedFolder, 'package', 'package.json');
 
-      Utilities.createFolderWithRetry(extractedFolder);
-      tar.extract({
-        cwd: extractedFolder,
-        file: tarballFile,
-        sync: true
-      });
-
-      // Example: "C:\MyRepo\common\temp\node_modules\@rush-temp\project1"
-      const installFolderName: string = path.join(this._rushConfiguration.commonTempFolder,
-        RushConstants.nodeModulesFolderName, RushConstants.rushTempNpmScope, unscopedTempProjectName);
-
-      commonProjectPackage = Package.createVirtualTempPackage(packageJsonFilename, installFolderName);
-
-      // remove the extracted tarball contents
-      fsx.removeSync(packageJsonFilename);
-      fsx.removeSync(extractedFolder);
-
-      commonRootPackage.addChild(commonProjectPackage);
-    }
-
-    // TODO: Validate that the project's package.json still matches the common folder
-    const localProjectPackage: Package = Package.createLinkedPackage(
-      project.packageJson.name,
-      commonProjectPackage.version,
-      commonProjectPackage.dependencies,
-      project.projectFolder
-    );
-
-    const queue: IQueueItem[] = [];
-    queue.push({
-      commonPackage: commonProjectPackage,
-      localPackage: localProjectPackage,
-      cyclicSubtreeRoot: undefined
+    Utilities.createFolderWithRetry(extractedFolder);
+    tar.extract({
+      cwd: extractedFolder,
+      file: tarballFile,
+      sync: true
     });
 
-    // tslint:disable-next-line:no-constant-condition
-    while (true) {
-      const queueItem: IQueueItem | undefined = queue.shift();
-      if (!queueItem) {
-        break;
-      }
+    // Example: "C:\MyRepo\common\temp\node_modules\@rush-temp\project1"
+    const installFolderName: string = path.join(this._rushConfiguration.commonTempFolder,
+      RushConstants.nodeModulesFolderName, RushConstants.rushTempNpmScope, unscopedTempProjectName);
 
-      // A project from somewhere under "common/temp/node_modules"
-      const commonPackage: Package = queueItem.commonPackage;
+    const commonPackage: Package = Package.createVirtualTempPackage(packageJsonFilename, installFolderName);
 
-      // A symlinked virtual package somewhere under "this-project/node_modules",
-      // where "this-project" corresponds to the "project" parameter for linkProject().
-      const localPackage: Package = queueItem.localPackage;
+    // remove the extracted tarball contents
+    fsx.removeSync(packageJsonFilename);
+    fsx.removeSync(extractedFolder);
 
-      // If we encounter a dependency listed in cyclicDependencyProjects, this will be set to the root
-      // of the localPackage subtree where we will stop creating local links.
-      const cyclicSubtreeRoot: Package | undefined = queueItem.cyclicSubtreeRoot;
+    // TODO: Validate that the project's package.json still matches the common folder
+    const localPackage: Package = Package.createLinkedPackage(
+      project.packageJson.name,
+      commonPackage.version,
+      project.projectFolder,
+      commonPackage
+    );
 
-      // NOTE: It's important that this traversal follows the dependencies in the Common folder,
-      // because for Rush projects this will be the union of
-      // devDependencies / dependencies / optionalDependencies.
-      for (const dependency of commonPackage.dependencies) {
-        let startingCyclicSubtree: boolean = false;
+    // now that we have the temp package.json, we can go ahead and link up all the direct dependencies
 
-        // Should this be a "local link" to a top-level Rush project (i.e. versus a regular link
-        // into the Common folder)?
-        const matchedRushPackage: RushConfigurationProject | undefined =
-          this._rushConfiguration.getProjectByName(dependency.name);
+    Object.keys(commonPackage.packageJson!.rushDependencies || {}).forEach((dependencyName: string) => {
+      // Should this be a "local link" to a top-level Rush project (i.e. versus a regular link
+      // into the Common folder)?
+      const matchedRushPackage: RushConfigurationProject | undefined =
+        this._rushConfiguration.getProjectByName(dependencyName);
 
-        if (matchedRushPackage) {
-          const matchedVersion: string = matchedRushPackage.packageJson.version;
+      if (matchedRushPackage) {
+        const matchedVersion: string = matchedRushPackage.packageJson.version;
 
-          // The dependency name matches an Rush project, but are there any other reasons not
-          // to create a local link?
-          if (cyclicSubtreeRoot) {
-            // DO NOT create a local link, because this is part of an existing
-            // cyclicDependencyProjects subtree
-          } else if (project.cyclicDependencyProjects.has(dependency.name)) {
-            // DO NOT create a local link, because we are starting a new
-            // cyclicDependencyProjects subtree
-            startingCyclicSubtree = true;
-          } else if (dependency.kind !== PackageDependencyKind.LocalLink
-            && !semver.satisfies(matchedVersion, dependency.versionRange)) {
-            // DO NOT create a local link, because the local project's version isn't SemVer compatible.
-
-            // (Note that in order to make version bumping work as expected, we ignore SemVer for
-            // immediate dependencies of top-level projects, indicated by PackageDependencyKind.LocalLink.
-            // Is this wise?)
-
-            console.log(colors.yellow(`Rush will not locally link ${dependency.name} for ${localPackage.name}`
-              + ` because the requested version "${dependency.versionRange}" is incompatible`
-              + ` with the local version ${matchedVersion}`));
-          } else {
-            // Yes, it is compatible, so create a symlink to the Rush project.
-
-            // If the link is coming from our top-level Rush project, then record a
-            // build dependency in rush-link.json:
-            if (localPackage === localProjectPackage) {
-              let localLinks: string[] = rushLinkJson.localLinks[localPackage.name];
-              if (!localLinks) {
-                localLinks = [];
-                rushLinkJson.localLinks[localPackage.name] = localLinks;
-              }
-              localLinks.push(dependency.name);
-            }
-
-            // Is the dependency already resolved?
-            const resolution: IResolveOrCreateResult = localPackage.resolveOrCreate(dependency.name);
-
-            if (!resolution.found || resolution.found.version !== matchedVersion) {
-              // We did not find a suitable match, so place a new local package that
-              // symlinks to the Rush project
-              const newLocalFolderPath: string = path.join(
-                resolution.parentForCreate!.folderPath, 'node_modules', dependency.name);
-
-              const newLocalPackage: Package = Package.createLinkedPackage(
-                dependency.name,
-                matchedVersion,
-                // Since matchingRushProject does not have a parent, its dependencies are
-                // guaranteed to be already fully resolved inside its node_modules folder.
-                [],
-                newLocalFolderPath
-              );
-
-              newLocalPackage.symlinkTargetFolderPath = matchedRushPackage.projectFolder;
-
-              resolution.parentForCreate!.addChild(newLocalPackage);
-
-              // (There are no dependencies, so we do not need to push it onto the queue.)
-            }
-
-            continue;
-          }
+        let localLinks: string[] = rushLinkJson.localLinks[localPackage.name];
+        if (!localLinks) {
+          localLinks = [];
+          rushLinkJson.localLinks[localPackage.name] = localLinks;
         }
+        localLinks.push(dependencyName);
 
-        // We can't symlink to an Rush project, so instead we will symlink to a folder
-        // under the "Common" folder
-        const commonDependencyPackage: Package | undefined = commonPackage.resolve(dependency.name);
-        if (commonDependencyPackage) {
-          // This is the version that was chosen when "npm install" ran in the common folder
-          const effectiveDependencyVersion: string = commonDependencyPackage.version;
+        // We did not find a suitable match, so place a new local package that
+        // symlinks to the Rush project
+        const newLocalFolderPath: string = path.join(localPackage.folderPath, 'node_modules', dependencyName);
 
-          // Is the dependency already resolved?
-          let resolution: IResolveOrCreateResult;
-          if (!cyclicSubtreeRoot || !matchedRushPackage) {
-            // Perform normal module resolution.
-            resolution = localPackage.resolveOrCreate(dependency.name);
-          } else {
-            // We are inside a cyclicDependencyProjects subtree (i.e. cyclicSubtreeRoot != undefined),
-            // and the dependency is a local project (i.e. matchedRushPackage != undefined), so
-            // we use a special module resolution strategy that places everything under the
-            // cyclicSubtreeRoot.
-            resolution = localPackage.resolveOrCreate(dependency.name, cyclicSubtreeRoot);
-          }
+        const newLocalPackage: Package = Package.createLinkedPackage(
+          dependencyName,
+          matchedVersion,
+          newLocalFolderPath
+        );
 
-          if (!resolution.found || resolution.found.version !== effectiveDependencyVersion) {
-            // We did not find a suitable match, so place a new local package
+        newLocalPackage.symlinkTargetFolderPath = matchedRushPackage.projectFolder;
+        localPackage.children.push(newLocalPackage);
+      } else {
+        // weird state or program bug
+        throw Error('Cannot find rush dependency in rush configuration');
+      }
+    });
 
-            const newLocalFolderPath: string = path.join(
-              resolution.parentForCreate!.folderPath, 'node_modules', commonDependencyPackage.name);
+    // Iterate through all the regular dependencies
+    Object.keys(commonPackage.packageJson!.dependencies || {}).forEach((dependencyName: string) => {
+      const dependencyVersionRange: string = commonPackage.packageJson!.dependencies![dependencyName];
 
-            const newLocalPackage: Package = Package.createLinkedPackage(
-              commonDependencyPackage.name,
-              commonDependencyPackage.version,
-              commonDependencyPackage.dependencies,
-              newLocalFolderPath
-            );
+      // We can't symlink to an Rush project, so instead we will symlink to a folder
+      // under the "Common" folder
 
-            const commonPackageFromLookup: Package | undefined =
-              commonPackageLookup.getPackage(newLocalPackage.nameAndVersion);
-            if (!commonPackageFromLookup) {
-              throw Error(`The ${localPackage.name}@${localPackage.version} package was not found`
-                + ` in the common folder`);
-            }
-            newLocalPackage.symlinkTargetFolderPath = commonPackageFromLookup.folderPath;
+      // here we need to get the list of versions and find the newest version that
+      // satisfies the dependency range (which is what I assume PNPM does)
 
-            let newCyclicSubtreeRoot: Package | undefined = cyclicSubtreeRoot;
-            if (startingCyclicSubtree) {
-              // If we are starting a new subtree, then newLocalPackage will be its root
-              // NOTE: cyclicSubtreeRoot is guaranteed to be undefined here, since we never start
-              // a new tree inside an existing tree
-              newCyclicSubtreeRoot = newLocalPackage;
-            }
+      const storePackageVersionsPath: string = path.join(
+        pnpmStorePath,
+        dependencyName
+      );
 
-            resolution.parentForCreate!.addChild(newLocalPackage);
-            queue.push({
-              commonPackage: commonDependencyPackage,
-              localPackage: newLocalPackage,
-              cyclicSubtreeRoot: newCyclicSubtreeRoot
-            });
-          }
-        } else {
-          if (dependency.kind !== PackageDependencyKind.Optional) {
-            throw Error(`The dependency "${dependency.name}" needed by "${localPackage.name}"`
-              + ` was not found the common folder -- do you need to run "rush generate"?`);
-          } else {
-            console.log(colors.yellow('Skipping optional dependency: ' + dependency.name));
-          }
+      const availableVersions: string[] = fsx.readdirSync(storePackageVersionsPath).filter((version) => {
+        return fsx.lstatSync(path.join(storePackageVersionsPath, version));
+      });
+      availableVersions.sort((v1: string, v2: string) => {
+        return semver.gt(v1, v2) ? 1 : -1;
+      });
+
+      let selectedVersion: string;
+      for (const version of availableVersions) {
+        if (semver.satisfies(version, dependencyVersionRange)) {
+          selectedVersion = version;
+          break;
         }
       }
-    }
+
+      const pnpmStorePackagePath: string = path.join(
+        pnpmStorePath,
+        dependencyName,
+        selectedVersion!,
+        RushConstants.nodeModulesFolderName,
+        dependencyName
+      );
+
+      if (fsx.lstatSync(pnpmStorePackagePath).isDirectory()) {
+        const newLocalFolderPath: string = path.join(
+           localPackage.folderPath, 'node_modules', dependencyName);
+
+        const newLocalPackage: Package = Package.createLinkedPackage(
+          dependencyName,
+          selectedVersion,
+          newLocalFolderPath
+        );
+
+        newLocalPackage.symlinkTargetFolderPath = pnpmStorePackagePath;
+        localPackage.addChild(newLocalPackage);
+
+      } else {
+        throw Error(`The dependency "${dependencyName}" needed by "${localPackage.name}"`
+          + ` was not found the common folder -- do you need to run "rush generate"?`);
+      }
+    });
 
     // When debugging, you can uncomment this line to dump the data structure
     // to the console:
-    // localProjectPackage.printTree();
-
-    LinkManager._createSymlinksForTopLevelProject(localProjectPackage);
+    localPackage.printTree();
+    LinkManager._createSymlinksForTopLevelProject(localPackage);
 
     // Also symlink the ".bin" folder
-    if (localProjectPackage.children.length > 0) {
-      const commonBinFolder: string = path.join(this._rushConfiguration.commonTempFolder, 'node_modules', '.bin');
-      const projectBinFolder: string = path.join(localProjectPackage.folderPath, 'node_modules', '.bin');
+    const commonBinFolder: string = path.join(this._rushConfiguration.commonTempFolder, 'node_modules', '.bin');
+    const projectBinFolder: string = path.join(localPackage.folderPath, 'node_modules', '.bin');
 
-      if (fsx.existsSync(commonBinFolder)) {
-        LinkManager._createSymlink(commonBinFolder, projectBinFolder, SymlinkKind.Directory);
-      }
+    if (fsx.existsSync(commonBinFolder)) {
+      LinkManager._createSymlink(commonBinFolder, projectBinFolder, SymlinkKind.Directory);
     }
   }
 }

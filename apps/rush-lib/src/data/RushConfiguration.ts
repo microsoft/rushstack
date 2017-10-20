@@ -71,7 +71,7 @@ export interface IRushRepositoryJson {
  */
 export interface IRushConfigurationJson {
   $schema: string;
-  npmVersion: string;
+  pnpmVersion: string;
   rushMinimumVersion: string;
   repository?: IRushRepositoryJson;
   nodeSupportedVersionRange?: string;
@@ -108,14 +108,13 @@ export default class RushConfiguration {
   private _commonFolder: string;
   private _commonTempFolder: string;
   private _commonRushConfigFolder: string;
-  private _npmCacheFolder: string;
-  private _npmTmpFolder: string;
+  private _pnpmStoreFolder: string;
   private _committedShrinkwrapFilename: string;
   private _tempShrinkwrapFilename: string;
   private _homeFolder: string;
   private _rushLinkJsonFilename: string;
-  private _npmToolVersion: string;
-  private _npmToolFilename: string;
+  private _pnpmToolVersion: string;
+  private _pnpmToolFilename: string;
   private _projectFolderMinDepth: number;
   private _projectFolderMaxDepth: number;
 
@@ -320,26 +319,15 @@ export default class RushConfiguration {
    *
    * Example: "C:\MyRepo\common\temp\npm-cache"
    */
-  public get npmCacheFolder(): string {
-    return this._npmCacheFolder;
-  }
-
-  /**
-   * The local folder where NPM's temporary files will be written during installation.
-   * Rush does not rely on the global default folder, because it may be on a different
-   * hard disk.
-   *
-   * Example: "C:\MyRepo\common\temp\npm-tmp"
-   */
-  public get npmTmpFolder(): string {
-    return this._npmTmpFolder;
+  public get pnpmStoreFolder(): string {
+    return this._pnpmStoreFolder;
   }
 
   /**
    * The filename of the NPM shrinkwrap file that is tracked e.g. by Git.  (The "rush install"
    * command uses a temporary copy, whose path is tempShrinkwrapFilename.)
    * This property merely reports the filename; the file itself may not actually exist.
-   * Example: "C:\MyRepo\common\npm-shrinkwrap.json"
+   * Example: "C:\MyRepo\common\shrinkwrap.yaml"
    */
   public get committedShrinkwrapFilename(): string {
     return this._committedShrinkwrapFilename;
@@ -349,7 +337,7 @@ export default class RushConfiguration {
    * The filename of the temporary NPM shrinkwrap file that is used by "rush install".
    * (The master copy is tempShrinkwrapFilename.)
    * This property merely reports the filename; the file itself may not actually exist.
-   * Example: "C:\MyRepo\common\temp\npm-shrinkwrap.json"
+   * Example: "C:\MyRepo\common\temp\shrinkwrap.yaml"
    */
   public get tempShrinkwrapFilename(): string {
     return this._tempShrinkwrapFilename;
@@ -377,8 +365,8 @@ export default class RushConfiguration {
   /**
    * The version of the locally installed NPM tool.  (Example: "1.2.3")
    */
-  public get npmToolVersion(): string {
-    return this._npmToolVersion;
+  public get pnpmToolVersion(): string {
+    return this._pnpmToolVersion;
   }
 
   /**
@@ -386,8 +374,8 @@ export default class RushConfiguration {
    * been run, then this file may not exist yet.
    * Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
    */
-  public get npmToolFilename(): string {
-    return this._npmToolFilename;
+  public get pnpmToolFilename(): string {
+    return this._pnpmToolFilename;
   }
 
   /**
@@ -559,8 +547,7 @@ export default class RushConfiguration {
     RushConfiguration._validateCommonRushConfigFolder(this._commonRushConfigFolder);
 
     this._commonTempFolder = path.join(this._commonFolder, RushConstants.rushTempFolderName);
-    this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
-    this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));
+    this._pnpmStoreFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
 
     this._changesFolder = path.join(this._commonFolder, RushConstants.changeFilesFolderName);
 
@@ -575,9 +562,9 @@ export default class RushConfiguration {
 
     this._rushLinkJsonFilename = path.join(this._commonTempFolder, 'rush-link.json');
 
-    this._npmToolVersion = rushConfigurationJson.npmVersion;
-    this._npmToolFilename = path.resolve(path.join(this._commonTempFolder,
-      'npm-local', 'node_modules', '.bin', 'npm'));
+    this._pnpmToolVersion = rushConfigurationJson.pnpmVersion;
+    this._pnpmToolFilename = path.resolve(path.join(this._commonTempFolder,
+      'pnpm-local', 'node_modules', '.bin', 'pnpm'));
 
     this._projectFolderMinDepth = rushConfigurationJson.projectFolderMinDepth !== undefined
       ? rushConfigurationJson.projectFolderMinDepth : 1;
