@@ -168,7 +168,8 @@ export class Extractor {
     const context: ExtractorContext = new ExtractorContext({
       program: this._program,
       entryPointFile: path.resolve(this._absoluteRootFolder, projectConfig.entryPointSourceFile),
-      logger: this._logger
+      logger: this._logger,
+      policies: this._config.policies
     });
 
     for (const externalJsonFileFolder of projectConfig.externalJsonFileFolders) {

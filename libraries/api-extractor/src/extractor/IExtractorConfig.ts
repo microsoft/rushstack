@@ -67,6 +67,22 @@ export interface IExtractorProjectConfig {
 }
 
 /**
+ * These policies determine how API Extractor validates various best practices for API design.
+ *
+ * @public
+ */
+export interface IExtractorPoliciesConfig {
+  /**
+   * Controls how API Extractor treats the TypeScript namespace keyword:
+   *
+   * conservative - (the default) namespaces may only be used to represent tables of constants
+   *
+   * permissive - arbitrary nesting of namespaces is allowed
+   */
+  namespaceSupport: 'conservative' | 'permissive';
+}
+
+/**
  * Configures how the API review files (*.api.ts) will be generated.
  *
  * @public
@@ -139,6 +155,11 @@ export interface IExtractorConfig {
    * Different options are available according to the configuration type.
    */
   compiler: IExtractorTsconfigCompilerConfig | IExtractorRuntimeCompilerConfig;
+
+  /**
+   * {@inheritdoc IExtractorPoliciesConfig}
+   */
+  policies?: IExtractorPoliciesConfig;
 
   /**
    * {@inheritdoc IExtractorProjectConfig}

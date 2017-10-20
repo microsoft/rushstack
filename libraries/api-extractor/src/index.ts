@@ -15,6 +15,7 @@ export {
   IExtractorTsconfigCompilerConfig,
   IExtractorRuntimeCompilerConfig,
   IExtractorProjectConfig,
+  IExtractorPoliciesConfig,
   IExtractorApiReviewFileConfig,
   IExtractorApiJsonFileConfig,
   IExtractorConfig

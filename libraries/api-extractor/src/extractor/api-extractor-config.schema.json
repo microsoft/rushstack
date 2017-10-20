@@ -64,6 +64,20 @@
       "additionalProperties": false
     },
 
+    "policies": {
+      "description": "These policies determine how API Extractor validates various best practices for API design.",
+      "type": "object",
+      "properties": {
+        "namespaceSupport": {
+          "description": "Controls how API Extractor treats the TypeScript namespace keyword:\n\nconservative - (the default) namespaces may only be used to represent tables of constants\n\npermissive - arbitrary nesting of namespaces is allowed",
+          "type": "string",
+          "enum": [ "conservative", "permissive" ]
+        }
+      },
+      "required": [ ],
+      "additionalProperties": false
+    },
+
     "apiReviewFile": {
       "description": "Configures how the API review files (*.api.ts) will be generated.",
       "type": "object",
