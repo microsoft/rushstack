@@ -12,7 +12,7 @@ import { IMarkupPage } from '@microsoft/api-extractor';
 import { MarkupBuilder } from '../MarkupBuilder';
 import { MarkdownRenderer } from '../MarkdownRenderer';
 
-describe('MarkdownPageRenderer', () => {
+describe('MarkdownRenderer', () => {
   it('renders markdown', (done: MochaDone) => {
 
     const outputFolder: string = FileDiffTest.prepareFolder(__dirname, 'MarkdownPageRenderer');
