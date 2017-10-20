@@ -67,10 +67,10 @@ export class Extractor {
    * The JSON Schema for API Extractor config file (api-extractor-config.schema.json).
    */
   public static jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, './api-extractor-config.schema.json'));
+    path.join(__dirname, './api-extractor.schema.json'));
 
   private static _defaultConfig: Partial<IExtractorConfig> = JsonFile.load(path.join(__dirname,
-    './api-extractor-config-default.json'));
+    './api-extractor-defaults.json'));
 
   private static _defaultLogger: ILogger = {
     logVerbose: (message: string) => console.log('(Verbose) ' + message),
