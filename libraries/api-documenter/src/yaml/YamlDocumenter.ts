@@ -45,7 +45,7 @@ export class YamlDocumenter {
     this._docItemSet = docItemSet;
   }
 
-  public generateFiles(outputFolder: string): void {
+  public generateFiles(outputFolder: string): void { // virtual
     this._outputFolder = outputFolder;
 
     console.log();
@@ -58,11 +58,25 @@ export class YamlDocumenter {
     this._writeTocFile(this._docItemSet.docPackages);
   }
 
+  protected onGetTocRoot(): IYamlTocItem {  // virtual
+    return {
+      name: 'SharePoint Framework',
+      href: '~/overview/sharepoint.md',
+      items: [ ]
+    };
+  }
+
+  protected onCustomizeYamlItem(yamlItem: IYamlItem): void { // virtual
+    // (overridden by child class)
+  }
+
   private _visitDocItems(docItem: DocItem, parentYamlFile: IYamlApiFile | undefined): boolean {
     const yamlItem: IYamlItem | undefined = this._generateYamlItem(docItem);
     if (!yamlItem) {
       return false;
     }
+
+    this.onCustomizeYamlItem(yamlItem);
 
     if (this._shouldEmbed(docItem.kind)) {
       if (!parentYamlFile) {
@@ -132,11 +146,10 @@ export class YamlDocumenter {
       items: [ ]
     };
 
-    tocFile.items.push({
-      name: 'SharePoint Framework', // TODO: parameterize this
-      href: '~/overview/sharepoint.md',
-      items: this._buildTocItems(docItems)
-    });
+    const rootItem: IYamlTocItem = this.onGetTocRoot();
+    tocFile.items.push(rootItem);
+
+    rootItem.items!.push(...this._buildTocItems(docItems));
 
     const tocFilePath: string = path.join(this._outputFolder, 'toc.yml');
     console.log('Writing ' + tocFilePath);
