@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-serve",
-  "version": "3.1.4",
+  "version": "3.1.5",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -15,7 +15,7 @@
     "test": "gulp"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.1.4",
+    "@microsoft/gulp-core-build": "3.1.5",
     "@types/node": "6.0.88",
     "deasync": "~0.1.7",
     "express": "~4.14.0",

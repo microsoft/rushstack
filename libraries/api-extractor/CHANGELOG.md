@@ -1,6 +1,17 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 20 Oct 2017 01:52:54 GMT and should not be manually modified.
+This log was last generated on Fri, 20 Oct 2017 19:57:12 GMT and should not be manually modified.
+
+## 4.1.0
+Fri, 20 Oct 2017 19:57:12 GMT
+
+### Minor changes
+
+- Add policies.namespaceSupport option to API Extractor config
+
+### Patches
+
+- Fixed an issue where properties were sometimes marked as readonly; a remark is automatically generated for classes with internal constructors
 
 ## 4.0.1
 Fri, 20 Oct 2017 01:52:54 GMT
