@@ -329,6 +329,7 @@ export default class DocElementParser {
         documentation.returnsMessage = resolvedAstItem.returnsMessage;
         break;
       case AstItemKind.Method:
+      case AstItemKind.Constructor:
         documentation.parameters = resolvedAstItem.params;
         documentation.returnsMessage = resolvedAstItem.returnsMessage;
         break;
