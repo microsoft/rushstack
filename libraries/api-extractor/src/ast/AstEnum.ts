@@ -21,7 +21,7 @@ export default class AstEnum extends AstItemContainer {
       const memberSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(memberDeclaration);
 
       const memberOptions: IAstItemOptions = {
-        extractor: this.extractor,
+        context: this.context,
         declaration: memberDeclaration,
         declarationSymbol: memberSymbol,
         jsdocNode: memberDeclaration

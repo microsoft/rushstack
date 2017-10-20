@@ -7,7 +7,7 @@ import {
   IApiConstructor
 } from '@microsoft/api-extractor';
 
-export class RenderingHelpers {
+export class Utilities {
 
   /**
    * Used to validate a data structure before converting to JSON or YAML format.  Reports
@@ -26,7 +26,7 @@ export class RenderingHelpers {
         if (value === undefined) {
           throw new Error(`The key "${keyWithPath}" is undefined`);
         }
-        RenderingHelpers.validateNoUndefinedMembers(value, keyWithPath);
+        Utilities.validateNoUndefinedMembers(value, keyWithPath);
       }
     }
 

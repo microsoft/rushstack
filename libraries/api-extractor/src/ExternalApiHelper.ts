@@ -1,21 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as ts from 'typescript';
-import * as os from 'os';
 import * as path from 'path';
 import * as fs from 'fs';
-import Extractor from './Extractor';
-import ApiJsonGenerator from './generators/ApiJsonGenerator';
+import { Extractor } from './extractor/Extractor';
 
 /**
- * ExternalApiHelper has the specific use case of generating an API json file from third party definition files.
+ * ExternalApiHelper has the specific use case of generating an API json file from third-party definition files.
  * This class is invoked by the gulp-core-build-typescript gulpfile, where the external package names are
  * hard wired.
  * The job of this method is almost the same as the API Extractor task that is executed on first party packages,
  * with the exception that all packages analyzed here are external packages with definition files.
  *
- * @public
+ * @beta
  */
 export default class ExternalApiHelper {
 
@@ -28,24 +25,19 @@ export default class ExternalApiHelper {
    * Ex: 'resources/external-api-json/es6-collection/index.t.ds'
    */
   public static generateApiJson(rootDir: string, libFolder: string, externalPackageFilePath: string): void {
-    const compilerOptions: ts.CompilerOptions = {
-      target: ts.ScriptTarget.ES5,
-      module: ts.ModuleKind.CommonJS,
-      moduleResolution: ts.ModuleResolutionKind.NodeJs,
-      experimentalDecorators: true,
-      jsx: ts.JsxEmit.React,
-      rootDir: rootDir
-    };
-    const extractor: Extractor = new Extractor({
-      compilerOptions: compilerOptions,
-      errorHandler:
-      (message: string, fileName: string, lineNumber: number): void => {
-        console.log(`TypeScript error: ${message}` + os.EOL
-          + `  ${fileName}#${lineNumber}`);
-      }
-    });
+    const entryPointFile: string = path.resolve(rootDir, externalPackageFilePath);
+    const entryPointFolder: string = path.dirname(entryPointFile);
 
-    let outputPath: string = path.join(rootDir, libFolder);
+    const overrideTsconfig: { } = {
+      target: 'es5',
+      module: 'commonjs',
+      moduleResolution: 'node',
+      experimentalDecorators: true,
+      jsx: 'react',
+      rootDir: entryPointFolder
+    };
+
+    let outputPath: string = path.resolve(rootDir, libFolder);
     if (!fs.existsSync(outputPath)) {
       fs.mkdirSync(outputPath);
     }
@@ -55,17 +47,28 @@ export default class ExternalApiHelper {
       fs.mkdirSync(outputPath);
     }
 
-    const externalPackageRootDir: string = path.dirname(externalPackageFilePath);
-    const outputApiJsonFilePath: string = path.join(outputPath, `${path.basename(externalPackageRootDir)}.api.json`);
-    const entryPointFile: string = path.join(rootDir, externalPackageFilePath);
-
-    extractor.analyze({
-      entryPointFile: entryPointFile, // local/bundles/platform-exports.ts',
-      otherFiles: []
+    const extractor: Extractor = new Extractor({
+      compiler: {
+        configType: 'tsconfig',
+        rootFolder: entryPointFolder,
+        overrideTsconfig: overrideTsconfig
+      },
+      project: {
+        entryPointSourceFile: entryPointFile
+      },
+      apiReviewFile: {
+        enabled: false
+      },
+      apiJsonFile: {
+        enabled: true,
+        outputFolder: outputPath
+      }
+    }, {
+       customLogger: {
+        logVerbose: (message: string) => { /* don't log */ }
+      }
     });
 
-    const apiJsonGenerator: ApiJsonGenerator = new ApiJsonGenerator();
-    apiJsonGenerator.writeJsonFile(outputApiJsonFilePath, extractor);
-
+    extractor.analyzeProject();
   }
 }
