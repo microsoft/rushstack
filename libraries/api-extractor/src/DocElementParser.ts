@@ -229,13 +229,13 @@ export default class DocElementParser {
       };
 
       if (!linkDocElement.packageName) {
-        if (!documentation.extractor.packageName) {
+        if (!documentation.context.packageName) {
           throw new Error('Unable to resolve API reference without a package name');
         }
 
         // If the package name is unspecified, assume it is the current package
         const scopePackageName: IScopedPackageName = ApiDefinitionReference.parseScopedPackageName(
-          documentation.extractor.packageName);
+          documentation.context.packageName);
 
         linkDocElement.scopeName = scopePackageName.scope;
         linkDocElement.packageName = scopePackageName.package;
@@ -294,7 +294,7 @@ export default class DocElementParser {
     // Atempt to locate the apiDefinitionRef
     const resolvedAstItem: ResolvedApiItem = documentation.referenceResolver.resolve(
       apiDefinitionRef,
-      documentation.extractor.package,
+      documentation.context.package,
       warnings
     );
 

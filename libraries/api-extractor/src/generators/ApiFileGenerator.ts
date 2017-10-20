@@ -57,15 +57,15 @@ export default class ApiFileGenerator extends AstItemVisitor {
    * @param reportFilename - The output filename
    * @param analyzer       - An Analyzer object representing the input project.
    */
-  public writeApiFile(reportFilename: string, extractor: ExtractorContext): void {
-    const fileContent: string = this.generateApiFileContent(extractor);
+  public writeApiFile(reportFilename: string, context: ExtractorContext): void {
+    const fileContent: string = this.generateApiFileContent(context);
     fs.writeFileSync(reportFilename, fileContent);
   }
 
-  public generateApiFileContent(extractor: ExtractorContext): string {
+  public generateApiFileContent(context: ExtractorContext): string {
     this._insideTypeLiteral = 0;
     // Normalize to CRLF
-    this.visit(extractor.package);
+    this.visit(context.package);
     const fileContent: string = this._indentedWriter.toString().replace(/\r?\n/g, '\r\n');
     return fileContent;
   }

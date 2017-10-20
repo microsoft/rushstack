@@ -44,8 +44,8 @@ export default class ApiJsonGenerator extends AstItemVisitor {
 
   protected jsonOutput: Object = {};
 
-  public writeJsonFile(reportFilename: string, extractor: ExtractorContext): void {
-    this.visit(extractor.package, this.jsonOutput);
+  public writeJsonFile(reportFilename: string, context: ExtractorContext): void {
+    this.visit(context.package, this.jsonOutput);
 
     // Write the output before validating the schema, so we can debug it
     JsonFile.save(this.jsonOutput, reportFilename);

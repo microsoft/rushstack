@@ -165,17 +165,17 @@ export class ApiExtractor {
     const projectConfig: IExtractorProjectConfig = options.projectConfig ?
       options.projectConfig : this._config.project;
 
-    const extractor: ExtractorContext = new ExtractorContext({
+    const context: ExtractorContext = new ExtractorContext({
       program: this._program,
       entryPointFile: path.resolve(this._absoluteRootFolder, projectConfig.entryPointSourceFile),
       logger: this._logger
     });
 
     for (const externalJsonFileFolder of projectConfig.externalJsonFileFolders) {
-      extractor.loadExternalPackages(path.resolve(this._absoluteRootFolder, externalJsonFileFolder));
+      context.loadExternalPackages(path.resolve(this._absoluteRootFolder, externalJsonFileFolder));
     }
 
-    const packageBaseName: string = path.basename(extractor.packageName);
+    const packageBaseName: string = path.basename(context.packageName);
 
     const apiJsonFileConfig: IExtractorApiJsonFileConfig = this._config.apiJsonFile;
 
@@ -189,7 +189,7 @@ export class ApiExtractor {
       const apiJsonFilename: string = path.join(outputFolder, packageBaseName + '.api.json');
 
       this._logger.logVerbose('Writing: ' + apiJsonFilename);
-      jsonGenerator.writeJsonFile(apiJsonFilename, extractor);
+      jsonGenerator.writeJsonFile(apiJsonFilename, context);
     }
 
     if (this._config.apiReviewFile.enabled) {
@@ -204,7 +204,7 @@ export class ApiExtractor {
         this._config.apiReviewFile.apiReviewFolder, apiReviewFilename);
       const expectedApiReviewShortPath: string = this._getShortFilePath(expectedApiReviewPath);
 
-      const actualApiReviewContent: string = generator.generateApiFileContent(extractor);
+      const actualApiReviewContent: string = generator.generateApiFileContent(context);
 
       // Write the actual file
       fsx.mkdirsSync(path.dirname(actualApiReviewPath));

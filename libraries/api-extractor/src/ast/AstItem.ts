@@ -102,7 +102,7 @@ export interface IAstItemOptions {
   /**
    * The associated ExtractorContext object for this AstItem
    */
-  extractor: ExtractorContext;
+  context: ExtractorContext;
   /**
    * The declaration node for the main syntax item that this AstItem is associated with.
    */
@@ -242,7 +242,7 @@ abstract class AstItem {
    * The ExtractorContext object provides common contextual information for all of
    * items in the AstItem tree.
    */
-  protected extractor: ExtractorContext;
+  protected context: ExtractorContext;
 
   /**
    * Syntax information from the TypeScript Compiler API, corresponding to the place
@@ -288,8 +288,8 @@ abstract class AstItem {
     this._state = InitializationState.Incomplete;
     this.warnings = [];
 
-    this.extractor = options.extractor;
-    this.typeChecker = this.extractor.typeChecker;
+    this.context = options.context;
+    this.typeChecker = this.context.typeChecker;
     this.declarationSymbol = options.declarationSymbol;
     this.exportSymbol = options.exportSymbol || this.declarationSymbol;
 
@@ -302,8 +302,8 @@ abstract class AstItem {
 
     this.documentation = new ApiDocumentation(
       originalJsdoc,
-      this.extractor.docItemLoader,
-      this.extractor,
+      this.context.docItemLoader,
+      this.context,
       this.reportError,
       this.warnings
     );
@@ -449,7 +449,7 @@ abstract class AstItem {
    * adding the filename and line number information for the declaration of this AstItem.
    */
   protected reportError(message: string): void {
-    this.extractor.reportError(message, this._errorNode.getSourceFile(), this._errorNode.getStart());
+    this.context.reportError(message, this._errorNode.getSourceFile(), this._errorNode.getStart());
   }
 
   /**
@@ -569,7 +569,7 @@ abstract class AstItem {
    * This is a helper for visitTypeReferencesForNode().  It analyzes a single TypeReferenceNode.
    */
   private _analyzeTypeReference(typeReferenceNode: ts.TypeReferenceNode): void {
-    const symbol: ts.Symbol = this.extractor.typeChecker.getSymbolAtLocation(typeReferenceNode.typeName);
+    const symbol: ts.Symbol = this.context.typeChecker.getSymbolAtLocation(typeReferenceNode.typeName);
     if (!symbol) {
       // Is this bad?
       return;
@@ -592,7 +592,7 @@ abstract class AstItem {
     // Walk upwards from that directory until you find a directory containing package.json,
     // this is where the referenced type is located.
     // Example: "c:\users\<username>\sp-client\spfx-core\sp-core-library"
-    const typeReferencePackagePath: string = this.extractor.packageJsonLookup
+    const typeReferencePackagePath: string = this.context.packageJsonLookup
       .tryGetPackageFolder(sourceFile.fileName);
     // Example: "@microsoft/sp-core-library"
     let typeReferencePackageName: string = '';
@@ -600,9 +600,9 @@ abstract class AstItem {
     // If we can not find a package path, we consider the type to be part of the current project's package.
     // One case where this happens is when looking for a type that is a symlink
     if (!typeReferencePackagePath) {
-      typeReferencePackageName = this.extractor.package.name;
+      typeReferencePackageName = this.context.package.name;
     } else {
-      typeReferencePackageName = this.extractor.packageJsonLookup
+      typeReferencePackageName = this.context.packageJsonLookup
         .getPackageName(typeReferencePackagePath);
 
       typingsScopeNames.every(typingScopeName => {
@@ -616,12 +616,12 @@ abstract class AstItem {
 
     // Read the name/version from package.json -- that tells you what package the symbol
     // belongs to. If it is your own AstPackage.name/version, then you know it's a local symbol.
-    const currentPackageName: string = this.extractor.package.name;
+    const currentPackageName: string = this.context.package.name;
 
     const typeName: string = typeReferenceNode.typeName.getText();
     if (!typeReferencePackagePath || typeReferencePackageName === currentPackageName) {
       // The type is defined in this project.  Did the person remember to export it?
-      const exportedLocalName: string = this.extractor.package.tryGetExportedSymbolName(currentSymbol);
+      const exportedLocalName: string = this.context.package.tryGetExportedSymbolName(currentSymbol);
       if (exportedLocalName) {
         // [CASE 1] Local/Exported
         // Yes; the type is properly exported.
@@ -665,7 +665,7 @@ abstract class AstItem {
 
     // Attempt to resolve the type by checking the node modules
     const referenceResolutionWarnings: string[] = [];
-    const resolvedAstItem: ResolvedApiItem = this.extractor.docItemLoader.resolveJsonReferences(
+    const resolvedAstItem: ResolvedApiItem = this.context.docItemLoader.resolveJsonReferences(
       apiDefinitionRef,
       referenceResolutionWarnings
     );

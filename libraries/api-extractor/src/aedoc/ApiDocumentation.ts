@@ -158,7 +158,7 @@ export default class ApiDocumentation {
    * We need the extractor to access the package that this AstItem
    * belongs to in order to resolve references.
    */
-  public extractor: ExtractorContext;
+  public context: ExtractorContext;
 
   /**
    * True if any errors were encountered while parsing the AEDoc tokens.
@@ -171,7 +171,7 @@ export default class ApiDocumentation {
 
   constructor(docComment: string,
     referenceResolver: IReferenceResolver,
-    extractor: ExtractorContext,
+    context: ExtractorContext,
     errorLogger: (message: string) => void,
     warnings: string[]) {
 
@@ -182,7 +182,7 @@ export default class ApiDocumentation {
 
     this.originalAedoc = docComment;
     this.referenceResolver = referenceResolver;
-    this.extractor = extractor;
+    this.context = context;
     this.reportError = errorLogger;
     this.parameters = {};
     this.warnings = warnings;
@@ -388,7 +388,7 @@ export default class ApiDocumentation {
       const apiDefinitionRef: ApiDefinitionReference = ApiDefinitionReference.createFromParts(parts);
       const resolvedAstItem: ResolvedApiItem =  this.referenceResolver.resolve(
         apiDefinitionRef,
-        this.extractor.package,
+        this.context.package,
         this.warnings
       );
 

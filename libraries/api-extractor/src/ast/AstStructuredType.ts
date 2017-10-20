@@ -179,7 +179,7 @@ export default class AstStructuredType extends AstItemContainer {
     this._processedMemberNames.add(memberSymbol.name);
 
     const memberOptions: IAstItemOptions = {
-      extractor: this.extractor,
+      context: this.context,
       declaration: memberDeclaration,
       declarationSymbol: memberSymbol,
       jsdocNode: memberDeclaration
