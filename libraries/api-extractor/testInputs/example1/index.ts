@@ -23,37 +23,3 @@ export function publicFunction(param: number): string {
 }
 
 export { AlphaTaggedClass, BetaTaggedClass, PublicTaggedClass } from './folder/ReleaseTagTests';
-
-
-/** 
-  * Summary text
-  * @remarks
-  * Remarks text
-  * @public 
-  */
-export class Blarg {
-  /** 
-   * @internal 
-   */
-  public constructor(x: number) {
-  }
-  
-  doSomething(): void {
-  }
-}
-
-/** 
-  * Summary text
-  * @remarks
-  * Remarks text
-  * @public 
-  */
-export class Blorg {
-  /** @beta */
-  public constructor(x: number) {
-  }
-  
-  doSomething(): void {
-  }
-}
-
