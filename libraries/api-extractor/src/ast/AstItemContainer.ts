@@ -4,7 +4,7 @@
 import AstItem, { IAstItemOptions } from './AstItem';
 
 /**
-  * This is an abstract base class for AstPackage, AstEnum, and AstStructuredType,
+  * This is an abstract base class for AstModule, AstEnum, and AstStructuredType,
   * which all act as containers for other AstItem definitions.
   */
 abstract class AstItemContainer extends AstItem {

@@ -17,7 +17,7 @@ import { IExtractorConfig } from '../extractor/IExtractorConfig';
 
 import { ApiExtractorCommandLine } from './ApiExtractorCommandLine';
 
-const AE_CONFIG_FILENAME: string = 'api-extractor-config.json';
+const AE_CONFIG_FILENAME: string = 'api-extractor.json';
 
 export class RunAction extends CommandLineAction {
   private _parser: ApiExtractorCommandLine;
