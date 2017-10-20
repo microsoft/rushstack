@@ -118,26 +118,10 @@ export class YamlDocumenter {
 
     tocFile.items.push({
       name: 'SharePoint Framework', // TODO: parameterize this
-      items: [
-        {
-          name: 'Overview',
-          href: './index.md'
-        } as IYamlTocItem
-      ].concat(this._buildTocItems(docItems.filter(x => x.isExternalPackage)))
+      href: '~/overview/sharepoint.md',
+      items: this._buildTocItems(docItems)
     });
 
-    const externalPackages: DocItem[] = docItems.filter(x => !x.isExternalPackage);
-    if (externalPackages.length) {
-      tocFile.items.push({
-        name: '─────────────'
-      });
-      tocFile.items.push({
-        name: 'External Packages',
-        items: this._buildTocItems(externalPackages)
-      });
-    }
-
-    this._buildTocItems(docItems);
     const tocFilePath: string = path.join(this._outputFolder, 'toc.yml');
     console.log('Writing ' + tocFilePath);
     this._writeYamlFile(tocFile, tocFilePath, '', undefined);
