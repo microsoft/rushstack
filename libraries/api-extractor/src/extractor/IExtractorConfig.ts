@@ -135,7 +135,7 @@ export interface IExtractorApiJsonFileConfig {
 export interface IExtractorConfig {
   /**
    * Determines how the TypeScript compiler will be invoked.
-   * The compilerConfig.configType selects the type of configuration;
+   * The compiler.configType selects the type of configuration;
    * Different options are available according to the configuration type.
    */
   compiler: IExtractorTsconfigCompilerConfig | IExtractorRuntimeCompilerConfig;
