@@ -8,10 +8,10 @@
       "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
       "type": "string"
     },
-    "ci": {
-      "description": "Indicate whether the test is running in a CI environment. Tests fail in CI environment if snapshots get updated while update snapshots in non-CI environments. ",
+    "isEnabled": {
+      "description": "Indicate whether the test is enabled",
       "type": "boolean",
-      "default": true
+      "default": false
     },
     "configFilePath": {
       "description": "The path to a jest config file relative to root project folder",

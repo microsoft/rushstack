@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 import * as path from 'path';
-import { GulpTask } from './GulpTask';
+import * as fsx from 'fs-extra';
+import { GulpTask} from './GulpTask';
+import { IBuildConfig } from '../IBuildConfig';
 import * as Gulp from 'gulp';
 import * as Jest from 'jest-cli';
 
@@ -11,10 +13,9 @@ import * as Jest from 'jest-cli';
  */
 export interface IJestConfig {
   /**
-   * Indicate whether the test is running in a CI environment
-   * If not provided, the default value is true.
+   * Indicate whether this task is enabled. The default value is false.
    */
-  ci?: boolean;
+  isEnabled?: boolean;
 
   /**
    * The jest config file relative to project root directory
@@ -39,15 +40,23 @@ export interface IJestConfig {
    * If not provided, the default value is true.
    */
   runInBand?: boolean;
-
-  /**
-   * Run all tests serially in the current process, rather than creating a worker pool of child processes that run tests
-   * If not provided, the default value is false.
-   */
-  updateSnapshot?: boolean;
 }
 
 const DEFAULT_JEST_CONFIG_FILE_NAME: string = 'jest.config.json';
+
+/**
+ * @internal
+ * @param rootFolder - package root folder
+ */
+export function isJestEnabled(rootFolder: string): boolean {
+  const taskConfigFile: string = path.join(rootFolder, 'config', 'jest.json');
+  if (!fsx.existsSync(taskConfigFile)) {
+    return false;
+  }
+  const taskConfig: {} = require(taskConfigFile);
+  // tslint:disable-next-line:no-string-literal
+  return !!taskConfig['isEnabled'];
+}
 
 /**
  * This task takes in a map of dest: [sources], and copies items from one place to another.
@@ -58,13 +67,14 @@ export class JestTask extends GulpTask<IJestConfig> {
   constructor() {
     super('jest',
     {
-      ci: true,
-      configFilePath: DEFAULT_JEST_CONFIG_FILE_NAME,
       coverage: true,
       maxWorkers: 1,
-      runInBand: true,
-      updateSnapshot: false
+      runInBand: true
     });
+  }
+
+  public isEnabled(buildConfig: IBuildConfig): boolean {
+    return super.isEnabled(buildConfig) && !!this.taskConfig.isEnabled;
   }
 
   /**
@@ -79,16 +89,19 @@ export class JestTask extends GulpTask<IJestConfig> {
     completeCallback: (error?: string | Error) => void
   ): void {
     const configFileFullPath: string = path.join(this.buildConfig.rootPath,
-      this.taskConfig.configFilePath || DEFAULT_JEST_CONFIG_FILE_NAME);
+      'config', DEFAULT_JEST_CONFIG_FILE_NAME);
 
     Jest.runCLI(
       {
-        ci: this.taskConfig.ci,
+        ci: this.buildConfig.production,
         config: configFileFullPath,
         coverage: this.taskConfig.coverage,
         maxWorkers: this.taskConfig.maxWorkers,
         runInBand: this.taskConfig.runInBand,
-        updateSnapshot: this.taskConfig.updateSnapshot,
+        updateSnapshot: !this.buildConfig.production,
+        rootDir: this.buildConfig.rootPath,
+        testMatch: ['**/*.test.js?(x)'],
+        testPathIgnorePatterns: ['<rootDir>/(src|lib-amd|lib-es6|coverage|build|docs|node_modules)/'],
         reporters: [path.join(__dirname, 'JestReporter.js')]
       },
       [this.buildConfig.rootPath],

@@ -19,6 +19,7 @@ import { initialize as initializeLogging, markTaskCreationTime, generateGulpErro
 import { getFlagValue, setConfigDefaults } from './config';
 import * as Gulp from 'gulp';
 import * as notifier from 'node-notifier';
+import { JestTask, isJestEnabled } from './tasks/JestTask';
 
 export * from './IBuildConfig';
 export {
@@ -333,6 +334,7 @@ export function initialize(gulp: typeof Gulp): void {
   _buildConfig.rootPath = process.cwd();
   _buildConfig.gulp = new GulpProxy(gulp);
   _buildConfig.uniqueTasks = _uniqueTasks;
+  _buildConfig.jestEnabled = isJestEnabled(_buildConfig.rootPath);
 
   _handleCommandLineArguments();
 
@@ -460,6 +462,8 @@ function _handleTasksListArguments(): void {
 export const clean: IExecutable = new CleanTask();
 
 export const copyStaticAssets: CopyStaticAssetsTask = new CopyStaticAssetsTask();
+
+export const jest: JestTask = new JestTask();
 
 // Register default clean task.
 task('clean', clean);

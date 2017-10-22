@@ -115,6 +115,7 @@ interface IBuildConfig {
   distFolder: string;
   gulp: GulpProxy | gulp.Gulp;
   isRedundantBuild?: boolean;
+  jestEnabled?: boolean;
   libAMDFolder?: string;
   libES6Folder?: string;
   libFolder: string;
@@ -189,6 +190,10 @@ interface IJestConfig {
 // @public
 export declare function initialize(gulp: typeof Gulp): void;
 
+// WARNING: Because this definition is explicitly marked as @internal, an underscore prefix ("_") should be added to its name
+// @internal (undocumented)
+export declare function isJestEnabled(packageFolder: string): boolean;
+
 // @public (undocumented)
 interface ITsConfigFile<T> {
   // (undocumented)
@@ -200,6 +205,8 @@ class JestTask extends GulpTask<IJestConfig> {
   constructor();
   // (undocumented)
   executeTask(gulp: typeof Gulp, completeCallback: (error?: string | Error) => void): void;
+  // (undocumented)
+  isEnabled(buildConfig: IBuildConfig): boolean;
   loadSchema(): Object;
 }
 
@@ -290,6 +297,7 @@ export declare function watch(watchMatch: string | string[], taskExecutable: IEx
 // WARNING: Unsupported export: cleanFlag
 // WARNING: Unsupported export: clean
 // WARNING: Unsupported export: copyStaticAssets
+// WARNING: Unsupported export: jest
 // WARNING: Unsupported export: apiExtractor
 // WARNING: Unsupported export: typescript
 // WARNING: Unsupported export: tslint
