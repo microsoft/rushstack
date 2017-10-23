@@ -179,12 +179,11 @@ interface IFixupSettingsOptions {
 
 // @public
 interface IJestConfig {
-  ci?: boolean;
   configFilePath?: string;
   coverage?: boolean;
+  isEnabled?: boolean;
   maxWorkers?: number;
   runInBand?: boolean;
-  updateSnapshot?: boolean;
 }
 
 // @public
@@ -192,7 +191,7 @@ export declare function initialize(gulp: typeof Gulp): void;
 
 // WARNING: Because this definition is explicitly marked as @internal, an underscore prefix ("_") should be added to its name
 // @internal (undocumented)
-export declare function isJestEnabled(packageFolder: string): boolean;
+export declare function isJestEnabled(rootFolder: string): boolean;
 
 // @public (undocumented)
 interface ITsConfigFile<T> {
