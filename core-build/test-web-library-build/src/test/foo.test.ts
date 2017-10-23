@@ -2,10 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import { assert } from 'chai';
+import { add } from '../test';
 
-describe('BaseFieldCustomizer', () => {
-  it('Test that we can test things', done => {
-    assert(true);
-    done();
+describe('foo test', () => {
+  it('can assert using chai', () => {
+    assert(add(1, 2) === 3);
+  });
+
+  it('can assert using jest', () => {
+    expect(add(1, 2)).toBe(3);
   });
 });

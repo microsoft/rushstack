@@ -102,6 +102,7 @@ export class JestTask extends GulpTask<IJestConfig> {
         rootDir: this.buildConfig.rootPath,
         testMatch: ['**/*.test.js?(x)'],
         testPathIgnorePatterns: ['<rootDir>/(src|lib-amd|lib-es6|coverage|build|docs|node_modules)/'],
+        collectCoverageFrom: ['lib/**/*.js?(x)'],
         reporters: [path.join(__dirname, 'JestReporter.js')]
       },
       [this.buildConfig.rootPath],

@@ -187,13 +187,11 @@ interface IExecutable {
 
 // @public
 interface IJestConfig {
-  ci?: boolean;
   configFilePath?: string;
   coverage?: boolean;
   isEnabled?: boolean;
   maxWorkers?: number;
   runInBand?: boolean;
-  updateSnapshot?: boolean;
 }
 
 // @public
@@ -201,7 +199,7 @@ export function initialize(gulp: typeof Gulp): void;
 
 // WARNING: Because this definition is explicitly marked as @internal, an underscore prefix ("_") should be added to its name
 // @internal (undocumented)
-export function isJestEnabled(packageFolder: string): boolean;
+export function isJestEnabled(rootFolder: string): boolean;
 
 // @public
 class JestTask extends GulpTask<IJestConfig> {
