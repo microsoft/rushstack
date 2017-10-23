@@ -1,6 +1,4 @@
-<!-- docId=node-core-library.jsonfile.load -->
-
-[Home](./index.md) &gt; [node-core-library](./node-core-library.md) &gt; [JsonFile](./node-core-library.jsonfile.md)
+[Home](./index) &gt; [@microsoft/node-core-library](node-core-library.md) &gt; [JsonFile](node-core-library.jsonfile.md) &gt; [load](node-core-library.jsonfile.load.md)
 
 # JsonFile.load method
 
@@ -11,4 +9,10 @@ Loads a JSON file.
 public static load(jsonFilename: string): any;
 ```
 **Returns:** `any`
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  `jsonFilename` | `string` |  |
 

@@ -1,6 +1,4 @@
-<!-- docId=node-core-library.packagejsonlookup.trygetpackagefolder -->
-
-[Home](./index.md) &gt; [node-core-library](./node-core-library.md) &gt; [PackageJsonLookup](./node-core-library.packagejsonlookup.md)
+[Home](./index) &gt; [@microsoft/node-core-library](node-core-library.md) &gt; [PackageJsonLookup](node-core-library.packagejsonlookup.md) &gt; [tryGetPackageFolder](node-core-library.packagejsonlookup.trygetpackagefolder.md)
 
 # PackageJsonLookup.tryGetPackageFolder method
 
@@ -18,5 +16,5 @@ a relative path to the package folder
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  `currentPath` |  | a path (relative or absolute) of the current location |
+|  `sourceFilePath` | `string` |  |
 

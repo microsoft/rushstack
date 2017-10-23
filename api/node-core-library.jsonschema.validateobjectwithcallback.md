@@ -1,6 +1,4 @@
-<!-- docId=node-core-library.jsonschema.validateobjectwithcallback -->
-
-[Home](./index.md) &gt; [node-core-library](./node-core-library.md) &gt; [JsonSchema](./node-core-library.jsonschema.md)
+[Home](./index) &gt; [@microsoft/node-core-library](node-core-library.md) &gt; [JsonSchema](node-core-library.jsonschema.md) &gt; [validateObjectWithCallback](node-core-library.jsonschema.validateobjectwithcallback.md)
 
 # JsonSchema.validateObjectWithCallback method
 
@@ -12,4 +10,11 @@ public validateObjectWithCallback(jsonObject: Object,
     errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): void;
 ```
 **Returns:** `void`
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  `jsonObject` | `Object` |  |
+|  `errorCallback` | `(errorInfo: IJsonSchemaErrorInfo) => void` |  |
 

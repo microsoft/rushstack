@@ -1,6 +1,4 @@
-<!-- docId=node-core-library.jsonschema.ensurecompiled -->
-
-[Home](./index.md) &gt; [node-core-library](./node-core-library.md) &gt; [JsonSchema](./node-core-library.jsonschema.md)
+[Home](./index) &gt; [@microsoft/node-core-library](node-core-library.md) &gt; [JsonSchema](node-core-library.jsonschema.md) &gt; [ensureCompiled](node-core-library.jsonschema.ensurecompiled.md)
 
 # JsonSchema.ensureCompiled method
 

@@ -1,6 +1,4 @@
-<!-- docId=web-apis.headers.getall -->
-
-[Home](./index.md) &gt; [web-apis](./web-apis.md) &gt; [Headers](./web-apis.headers.md)
+[Home](./index) &gt; [web-apis](web-apis.md) &gt; [Headers](web-apis.headers.md) &gt; [getAll](web-apis.headers.getall.md)
 
 # Headers.getAll method
 
@@ -10,4 +8,10 @@
 getAll(name: string): Array<string>;
 ```
 **Returns:** `Array<string>`
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  `name` | `string` |  |
 

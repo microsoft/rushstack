@@ -1,6 +1,4 @@
-<!-- docId=web-apis.promise.resolve -->
-
-[Home](./index.md) &gt; [web-apis](./web-apis.md) &gt; [Promise](./web-apis.promise.md)
+[Home](./index) &gt; [web-apis](web-apis.md) &gt; [Promise](web-apis.promise.md) &gt; [resolve](web-apis.promise.resolve.md)
 
 # Promise.resolve method
 
@@ -10,4 +8,10 @@
 public static resolve < T >(value?: T | Thenable<T>): Promise<T>;
 ```
 **Returns:** `Promise<T>`
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  `value` | `T | Thenable<T>` |  |
 

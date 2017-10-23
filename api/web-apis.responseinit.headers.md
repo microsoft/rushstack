@@ -1,6 +1,4 @@
-<!-- docId=web-apis.responseinit.headers -->
-
-[Home](./index.md) &gt; [web-apis](./web-apis.md) &gt; [ResponseInit](./web-apis.responseinit.md)
+[Home](./index) &gt; [web-apis](web-apis.md) &gt; [ResponseInit](web-apis.responseinit.md) &gt; [headers](web-apis.responseinit.headers.md)
 
 # ResponseInit.headers property
 

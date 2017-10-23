@@ -1,6 +1,4 @@
-<!-- docId=web-apis.request.credentials -->
-
-[Home](./index.md) &gt; [web-apis](./web-apis.md) &gt; [Request](./web-apis.request.md)
+[Home](./index) &gt; [web-apis](web-apis.md) &gt; [Request](web-apis.request.md) &gt; [credentials](web-apis.request.credentials.md)
 
 # Request.credentials property
 

@@ -1,6 +1,4 @@
-<!-- docId=web-apis.headers.get -->
-
-[Home](./index.md) &gt; [web-apis](./web-apis.md) &gt; [Headers](./web-apis.headers.md)
+[Home](./index) &gt; [web-apis](web-apis.md) &gt; [Headers](web-apis.headers.md) &gt; [get](web-apis.headers.get.md)
 
 # Headers.get method
 
@@ -10,4 +8,10 @@
 get(name: string): string;
 ```
 **Returns:** `string`
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  `name` | `string` |  |
 

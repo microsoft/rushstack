@@ -1,6 +1,4 @@
-<!-- docId=node-core-library.jsonfile.loadandvalidate -->
-
-[Home](./index.md) &gt; [node-core-library](./node-core-library.md) &gt; [JsonFile](./node-core-library.jsonfile.md)
+[Home](./index) &gt; [@microsoft/node-core-library](node-core-library.md) &gt; [JsonFile](node-core-library.jsonfile.md) &gt; [loadAndValidate](node-core-library.jsonfile.loadandvalidate.md)
 
 # JsonFile.loadAndValidate method
 
@@ -12,4 +10,12 @@ public static loadAndValidate(jsonFilename: string, jsonSchema: JsonSchema,
     options?: IJsonSchemaValidateOptions): any;
 ```
 **Returns:** `any`
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  `jsonFilename` | `string` |  |
+|  `jsonSchema` | `JsonSchema` |  |
+|  `options` | `IJsonSchemaValidateOptions` |  |
 

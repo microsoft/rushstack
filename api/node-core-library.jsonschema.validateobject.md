@@ -1,6 +1,4 @@
-<!-- docId=node-core-library.jsonschema.validateobject -->
-
-[Home](./index.md) &gt; [node-core-library](./node-core-library.md) &gt; [JsonSchema](./node-core-library.jsonschema.md)
+[Home](./index) &gt; [@microsoft/node-core-library](node-core-library.md) &gt; [JsonSchema](node-core-library.jsonschema.md) &gt; [validateObject](node-core-library.jsonschema.validateobject.md)
 
 # JsonSchema.validateObject method
 

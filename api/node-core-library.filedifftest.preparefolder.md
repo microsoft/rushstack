@@ -1,6 +1,4 @@
-<!-- docId=node-core-library.filedifftest.preparefolder -->
-
-[Home](./index.md) &gt; [node-core-library](./node-core-library.md) &gt; [FileDiffTest](./node-core-library.filedifftest.md)
+[Home](./index) &gt; [@microsoft/node-core-library](node-core-library.md) &gt; [FileDiffTest](node-core-library.filedifftest.md) &gt; [prepareFolder](node-core-library.filedifftest.preparefolder.md)
 
 # FileDiffTest.prepareFolder method
 

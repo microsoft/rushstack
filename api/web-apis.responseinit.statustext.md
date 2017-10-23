@@ -1,6 +1,4 @@
-<!-- docId=web-apis.responseinit.statustext -->
-
-[Home](./index.md) &gt; [web-apis](./web-apis.md) &gt; [ResponseInit](./web-apis.responseinit.md)
+[Home](./index) &gt; [web-apis](web-apis.md) &gt; [ResponseInit](web-apis.responseinit.md) &gt; [statusText](web-apis.responseinit.statustext.md)
 
 # ResponseInit.statusText property
 

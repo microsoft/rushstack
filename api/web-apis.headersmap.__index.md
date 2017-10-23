@@ -1,6 +1,4 @@
-<!-- docId=web-apis.headersmap.__index -->
-
-[Home](./index.md) &gt; [web-apis](./web-apis.md) &gt; [HeadersMap](./web-apis.headersmap.md)
+[Home](./index) &gt; [web-apis](web-apis.md) &gt; [HeadersMap](web-apis.headersmap.md) &gt; [\_\_index](web-apis.headersmap.__index.md)
 
 # HeadersMap.\_\_index method
 
@@ -10,4 +8,10 @@
 [ index: string ]: string;
 ```
 **Returns:** `string`
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  `index` | `string` |  |
 

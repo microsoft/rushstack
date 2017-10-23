@@ -1,6 +1,4 @@
-<!-- docId=node-core-library.ijsonschemavalidateoptions.customerrorheader -->
-
-[Home](./index.md) &gt; [node-core-library](./node-core-library.md) &gt; [IJsonSchemaValidateOptions](./node-core-library.ijsonschemavalidateoptions.md)
+[Home](./index) &gt; [@microsoft/node-core-library](node-core-library.md) &gt; [IJsonSchemaValidateOptions](node-core-library.ijsonschemavalidateoptions.md) &gt; [customErrorHeader](node-core-library.ijsonschemavalidateoptions.customerrorheader.md)
 
 # IJsonSchemaValidateOptions.customErrorHeader property
 

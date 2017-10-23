@@ -1,6 +1,4 @@
-<!-- docId=web-apis.headers.set -->
-
-[Home](./index.md) &gt; [web-apis](./web-apis.md) &gt; [Headers](./web-apis.headers.md)
+[Home](./index) &gt; [web-apis](web-apis.md) &gt; [Headers](web-apis.headers.md) &gt; [set](web-apis.headers.set.md)
 
 # Headers.set method
 
@@ -10,4 +8,11 @@
 set(name: string, value: string): void;
 ```
 **Returns:** `void`
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  `name` | `string` |  |
+|  `value` | `string` |  |
 

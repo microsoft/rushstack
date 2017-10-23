@@ -1,6 +1,4 @@
-<!-- docId=web-apis.headers.foreach -->
-
-[Home](./index.md) &gt; [web-apis](./web-apis.md) &gt; [Headers](./web-apis.headers.md)
+[Home](./index) &gt; [web-apis](web-apis.md) &gt; [Headers](web-apis.headers.md) &gt; [forEach](web-apis.headers.foreach.md)
 
 # Headers.forEach method
 
@@ -10,4 +8,10 @@
 forEach(callback: (value: string, name: string) => void): void;
 ```
 **Returns:** `void`
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  `callback` | `(value: string, name: string) => void` |  |
 

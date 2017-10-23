@@ -1,6 +1,4 @@
-<!-- docId=web-apis.response.url -->
-
-[Home](./index.md) &gt; [web-apis](./web-apis.md) &gt; [Response](./web-apis.response.md)
+[Home](./index) &gt; [web-apis](web-apis.md) &gt; [Response](web-apis.response.md) &gt; [url](web-apis.response.url.md)
 
 # Response.url property
 

@@ -1,6 +1,4 @@
-<!-- docId=web-apis.body.text -->
-
-[Home](./index.md) &gt; [web-apis](./web-apis.md) &gt; [Body](./web-apis.body.md)
+[Home](./index) &gt; [web-apis](web-apis.md) &gt; [Body](web-apis.body.md) &gt; [text](web-apis.body.text.md)
 
 # Body.text method
 

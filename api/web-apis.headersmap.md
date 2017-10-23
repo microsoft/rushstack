@@ -1,6 +1,4 @@
-<!-- docId=web-apis.headersmap -->
-
-[Home](./index.md) &gt; [web-apis](./web-apis.md)
+[Home](./index) &gt; [web-apis](web-apis.md) &gt; [HeadersMap](web-apis.headersmap.md)
 
 # HeadersMap interface
 
@@ -8,5 +6,5 @@
 
 |  Method | Returns | Description |
 |  --- | --- | --- |
-|  [`__index()`](./web-apis.headersmap.__index.md) | `string` |  |
+|  [`__index(index)`](web-apis.headersmap.__index.md) | `string` |  |
 

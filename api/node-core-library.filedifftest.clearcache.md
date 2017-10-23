@@ -1,6 +1,4 @@
-<!-- docId=node-core-library.filedifftest.clearcache -->
-
-[Home](./index.md) &gt; [node-core-library](./node-core-library.md) &gt; [FileDiffTest](./node-core-library.filedifftest.md)
+[Home](./index) &gt; [@microsoft/node-core-library](node-core-library.md) &gt; [FileDiffTest](node-core-library.filedifftest.md) &gt; [clearCache](node-core-library.filedifftest.clearcache.md)
 
 # FileDiffTest.clearCache method
 

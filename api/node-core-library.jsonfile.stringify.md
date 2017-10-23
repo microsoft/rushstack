@@ -1,6 +1,4 @@
-<!-- docId=node-core-library.jsonfile.stringify -->
-
-[Home](./index.md) &gt; [node-core-library](./node-core-library.md) &gt; [JsonFile](./node-core-library.jsonfile.md)
+[Home](./index) &gt; [@microsoft/node-core-library](node-core-library.md) &gt; [JsonFile](node-core-library.jsonfile.md) &gt; [stringify](node-core-library.jsonfile.stringify.md)
 
 # JsonFile.stringify method
 

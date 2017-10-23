@@ -1,6 +1,4 @@
-<!-- docId=node-core-library.jsonfile.loadandvalidatewithcallback -->
-
-[Home](./index.md) &gt; [node-core-library](./node-core-library.md) &gt; [JsonFile](./node-core-library.jsonfile.md)
+[Home](./index) &gt; [@microsoft/node-core-library](node-core-library.md) &gt; [JsonFile](node-core-library.jsonfile.md) &gt; [loadAndValidateWithCallback](node-core-library.jsonfile.loadandvalidatewithcallback.md)
 
 # JsonFile.loadAndValidateWithCallback method
 
@@ -16,3 +14,12 @@ public static loadAndValidateWithCallback(jsonFilename: string, jsonSchema: Json
 ## Remarks
 
 See JsonSchema.validateObjectWithCallback() for more info.
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  `jsonFilename` | `string` |  |
+|  `jsonSchema` | `JsonSchema` |  |
+|  `errorCallback` | `(errorInfo: IJsonSchemaErrorInfo) => void` |  |
+

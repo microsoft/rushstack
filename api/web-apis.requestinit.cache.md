@@ -1,6 +1,4 @@
-<!-- docId=web-apis.requestinit.cache -->
-
-[Home](./index.md) &gt; [web-apis](./web-apis.md) &gt; [RequestInit](./web-apis.requestinit.md)
+[Home](./index) &gt; [web-apis](web-apis.md) &gt; [RequestInit](web-apis.requestinit.md) &gt; [cache](web-apis.requestinit.cache.md)
 
 # RequestInit.cache property
 

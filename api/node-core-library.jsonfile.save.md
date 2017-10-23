@@ -1,6 +1,4 @@
-<!-- docId=node-core-library.jsonfile.save -->
-
-[Home](./index.md) &gt; [node-core-library](./node-core-library.md) &gt; [JsonFile](./node-core-library.jsonfile.md)
+[Home](./index) &gt; [@microsoft/node-core-library](node-core-library.md) &gt; [JsonFile](node-core-library.jsonfile.md) &gt; [save](node-core-library.jsonfile.save.md)
 
 # JsonFile.save method
 

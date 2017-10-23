@@ -1,6 +1,4 @@
-<!-- docId=node-core-library.packagejsonlookup.clearcache -->
-
-[Home](./index.md) &gt; [node-core-library](./node-core-library.md) &gt; [PackageJsonLookup](./node-core-library.packagejsonlookup.md)
+[Home](./index) &gt; [@microsoft/node-core-library](node-core-library.md) &gt; [PackageJsonLookup](node-core-library.packagejsonlookup.md) &gt; [clearCache](node-core-library.packagejsonlookup.clearcache.md)
 
 # PackageJsonLookup.clearCache method
 

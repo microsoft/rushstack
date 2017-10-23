@@ -1,6 +1,4 @@
-<!-- docId=node-core-library.filedifftest.assertequal -->
-
-[Home](./index.md) &gt; [node-core-library](./node-core-library.md) &gt; [FileDiffTest](./node-core-library.filedifftest.md)
+[Home](./index) &gt; [@microsoft/node-core-library](node-core-library.md) &gt; [FileDiffTest](node-core-library.filedifftest.md) &gt; [assertEqual](node-core-library.filedifftest.assertequal.md)
 
 # FileDiffTest.assertEqual method
 
@@ -11,4 +9,11 @@ Compares the contents of two files, and returns true if they are equivalent. Not
 public static assertEqual(actualFilePath: string, expectedFilePath: string): void;
 ```
 **Returns:** `void`
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  `actualFilePath` | `string` |  |
+|  `expectedFilePath` | `string` |  |
 

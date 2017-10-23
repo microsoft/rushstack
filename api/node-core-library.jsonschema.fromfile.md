@@ -1,6 +1,4 @@
-<!-- docId=node-core-library.jsonschema.fromfile -->
-
-[Home](./index.md) &gt; [node-core-library](./node-core-library.md) &gt; [JsonSchema](./node-core-library.jsonschema.md)
+[Home](./index) &gt; [@microsoft/node-core-library](node-core-library.md) &gt; [JsonSchema](node-core-library.jsonschema.md) &gt; [fromFile](node-core-library.jsonschema.fromfile.md)
 
 # JsonSchema.fromFile method
 
@@ -15,3 +13,11 @@ public static fromFile(filename: string, options?: IJsonSchemaFromFileOptions): 
 ## Remarks
 
 NOTE: An error occurs if the file does not exist; however, the file itself is not loaded or validated until it the schema is actually used.
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  `filename` | `string` |  |
+|  `options` | `IJsonSchemaFromFileOptions` |  |
+

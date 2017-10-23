@@ -1,6 +1,4 @@
-<!-- docId=node-core-library.packagejsonlookup.getpackagename -->
-
-[Home](./index.md) &gt; [node-core-library](./node-core-library.md) &gt; [PackageJsonLookup](./node-core-library.packagejsonlookup.md)
+[Home](./index) &gt; [@microsoft/node-core-library](node-core-library.md) &gt; [PackageJsonLookup](node-core-library.packagejsonlookup.md) &gt; [getPackageName](node-core-library.packagejsonlookup.getpackagename.md)
 
 # PackageJsonLookup.getPackageName method
 

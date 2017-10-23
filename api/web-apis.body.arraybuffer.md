@@ -1,6 +1,4 @@
-<!-- docId=web-apis.body.arraybuffer -->
-
-[Home](./index.md) &gt; [web-apis](./web-apis.md) &gt; [Body](./web-apis.body.md)
+[Home](./index) &gt; [web-apis](web-apis.md) &gt; [Body](web-apis.body.md) &gt; [arrayBuffer](web-apis.body.arraybuffer.md)
 
 # Body.arrayBuffer method
 
