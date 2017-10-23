@@ -1,3 +1,6 @@
+// @internal
+export declare function _isJestEnabled(rootFolder: string): boolean;
+
 // @public
 export declare function addSuppression(suppression: string | RegExp): void;
 
@@ -188,10 +191,6 @@ interface IJestConfig {
 
 // @public
 export declare function initialize(gulp: typeof Gulp): void;
-
-// WARNING: Because this definition is explicitly marked as @internal, an underscore prefix ("_") should be added to its name
-// @internal (undocumented)
-export declare function isJestEnabled(rootFolder: string): boolean;
 
 // @public (undocumented)
 interface ITsConfigFile<T> {

@@ -45,10 +45,11 @@ export interface IJestConfig {
 const DEFAULT_JEST_CONFIG_FILE_NAME: string = 'jest.config.json';
 
 /**
+ * Indicates if jest is enabled
  * @internal
  * @param rootFolder - package root folder
  */
-export function isJestEnabled(rootFolder: string): boolean {
+export function _isJestEnabled(rootFolder: string): boolean {
   const taskConfigFile: string = path.join(rootFolder, 'config', 'jest.json');
   if (!fsx.existsSync(taskConfigFile)) {
     return false;

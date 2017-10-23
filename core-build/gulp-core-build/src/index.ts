@@ -19,7 +19,7 @@ import { initialize as initializeLogging, markTaskCreationTime, generateGulpErro
 import { getFlagValue, setConfigDefaults } from './config';
 import * as Gulp from 'gulp';
 import * as notifier from 'node-notifier';
-import { JestTask, isJestEnabled } from './tasks/JestTask';
+import { JestTask, _isJestEnabled } from './tasks/JestTask';
 
 export * from './IBuildConfig';
 export {
@@ -334,7 +334,7 @@ export function initialize(gulp: typeof Gulp): void {
   _buildConfig.rootPath = process.cwd();
   _buildConfig.gulp = new GulpProxy(gulp);
   _buildConfig.uniqueTasks = _uniqueTasks;
-  _buildConfig.jestEnabled = isJestEnabled(_buildConfig.rootPath);
+  _buildConfig.jestEnabled = _isJestEnabled(_buildConfig.rootPath);
 
   _handleCommandLineArguments();
 
