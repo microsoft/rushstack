@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/ts-command-line",
+      "comment": "Updated cyclic dependencies",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/ts-command-line",
+  "email": "pgonzal@users.noreply.github.com"
+}
