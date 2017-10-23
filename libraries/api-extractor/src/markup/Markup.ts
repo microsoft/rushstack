@@ -2,11 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import {
-  IApiItemReference,
-  IDocElement,
-  ITextElement,
-  ILinkDocElement,
-  ISeeDocElement,
   MarkupBasicElement,
   IMarkupWebLink,
   IMarkupApiLink,
@@ -24,7 +19,7 @@ import {
   IMarkupNoteBox,
   IMarkupCodeBox,
   MarkupHighlighter
-} from '@microsoft/api-extractor';
+} from './MarkupElement';
 
 /**
  * A helper class for generating MarkupElement structures.
@@ -179,65 +174,5 @@ export class MarkupBuilder {
       title: title,
       elements: []
     } as IMarkupPage;
-  }
-
-  public static renderDocElements(docElements: IDocElement[] | undefined): MarkupBasicElement[] {
-    if (!docElements) {
-      return [];
-    }
-
-    const result: MarkupBasicElement[] = [];
-
-    for (const docElement of docElements || []) {
-      switch (docElement.kind) {
-        case 'textDocElement':
-          const textDocElement: ITextElement = docElement as ITextElement;
-          result.push(...MarkupBuilder.createTextElements(textDocElement.value));
-          break;
-        case 'paragraphDocElement':
-          result.push(MarkupBuilder.PARAGRAPH);
-          break;
-        case 'linkDocElement':
-          const linkDocElement: ILinkDocElement = docElement as ILinkDocElement;
-          if (linkDocElement.referenceType === 'code') {
-            let linkText: string | undefined = linkDocElement.value;
-            if (!linkText) {
-              linkText = linkDocElement.exportName;
-              if (linkDocElement.memberName) {
-                linkText += '.' + linkDocElement.memberName;
-              }
-            }
-            result.push(
-              MarkupBuilder.createApiLinkFromText(linkText,
-                {
-                  scopeName: linkDocElement.scopeName || '',
-                  packageName: linkDocElement.packageName || '',
-                  exportName: linkDocElement.exportName || '',
-                  memberName: linkDocElement.memberName || ''
-                }
-              )
-            );
-          } else {
-            result.push(
-              {
-                kind: 'web-link',
-                elements: MarkupBuilder.createTextElements(linkDocElement.value || linkDocElement.targetUrl),
-                targetUrl: linkDocElement.targetUrl
-              } as IMarkupWebLink
-            );
-          }
-          break;
-        case 'seeDocElement':
-          const seeDocElement: ISeeDocElement = docElement as ISeeDocElement;
-          // This representation should probably be improved later.
-          result.push(
-            ...MarkupBuilder.createTextElements('see ')
-          );
-          result.push(...MarkupBuilder.renderDocElements(seeDocElement.seeElements));
-          break;
-      }
-    }
-
-    return result;
   }
 }
