@@ -160,7 +160,7 @@ interface IBaseDocElement {
   kind: string;
 }
 
-// WARNING: Unable to find referenced export "ApiReference"
+// WARNING: Unable to find referenced export "@microsoft/api-extractor:ApiReference"
 // @alpha
 interface ICodeLinkElement extends IBaseDocElement {
   exportName: string;
