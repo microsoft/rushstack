@@ -24,7 +24,7 @@ import {
 /**
  * A helper class for generating MarkupElement structures.
  */
-export class MarkupBuilder {
+export class Markup {
   public static BREAK: IMarkupLineBreak = {
     kind: 'break'
   };
@@ -67,7 +67,7 @@ export class MarkupBuilder {
   }
 
   public static createApiLinkFromText(text: string, target: IApiItemReference): IMarkupApiLink {
-    return MarkupBuilder.createApiLink(MarkupBuilder.createTextElements(text), target);
+    return Markup.createApiLink(Markup.createTextElements(text), target);
   }
 
   public static createWebLink(textElements: MarkupLinkTextElement[], targetUrl: string): IMarkupWebLink {
@@ -86,7 +86,7 @@ export class MarkupBuilder {
   }
 
   public static createWebLinkFromText(text: string, targetUrl: string): IMarkupWebLink {
-    return MarkupBuilder.createWebLink(MarkupBuilder.createTextElements(text), targetUrl);
+    return Markup.createWebLink(Markup.createTextElements(text), targetUrl);
   }
 
   public static createCode(code: string, highlighter?: MarkupHighlighter): IMarkupHighlightedText {
@@ -133,7 +133,7 @@ export class MarkupBuilder {
   }
 
   public static createNoteBoxFromText(text: string): IMarkupNoteBox {
-    return MarkupBuilder.createNoteBox(MarkupBuilder.createTextElements(text));
+    return Markup.createNoteBox(Markup.createTextElements(text));
   }
 
   public static createTableRow(cellValues: MarkupBasicElement[][] | undefined = undefined): IMarkupTableRow {
@@ -158,7 +158,7 @@ export class MarkupBuilder {
   public static createTable(headerCellValues: MarkupBasicElement[][] | undefined = undefined): IMarkupTable {
     let header: IMarkupTableRow | undefined = undefined;
     if (headerCellValues) {
-      header = MarkupBuilder.createTableRow(headerCellValues);
+      header = Markup.createTableRow(headerCellValues);
     }
     return {
       kind: 'table',
