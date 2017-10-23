@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import {
+  MarkupElement,
   MarkupBasicElement,
   IMarkupWebLink,
   IMarkupApiLink,
@@ -174,5 +175,72 @@ export class Markup {
       title: title,
       elements: []
     } as IMarkupPage;
+  }
+
+  /**
+   * Extracts plain text from the provided markup elements, discarding any formatting.
+   *
+   * @remarks
+   * The returned string is suitable for counting words or extracting search keywords.
+   * Its formatting is not guaranteed, and may change in future updates of this API.
+   *
+   * API Extractor determines whether an API is "undocumented" by using extractTextContent()
+   * to extract the text from its summary, and then counting the number of words.
+   */
+  public static extractTextContent(elements: MarkupElement[]): string {
+    // Pass a buffer, since "+=" uses less memory than "+"
+    const buffer: { text: string } = { text: '' };
+    Markup._extractTextContent(elements, buffer);
+    return buffer.text;
+  }
+
+  private static _extractTextContent(elements: MarkupElement[], buffer: { text: string }): void {
+    for (const element of elements) {
+      switch (element.kind) {
+        case 'api-link':
+          buffer.text += Markup.extractTextContent(element.elements);
+          break;
+        case 'break':
+          buffer.text += '\n';
+          break;
+        case 'code':
+        case 'code-box':
+          break;
+        case 'heading1':
+        case 'heading2':
+          buffer.text += element.text;
+          break;
+        case 'note-box':
+          buffer.text += Markup.extractTextContent(element.elements);
+          break;
+        case 'page':
+          buffer.text += element.title + '\n';
+          buffer.text += Markup.extractTextContent(element.elements);
+          break;
+        case 'paragraph':
+          buffer.text += '\n\n';
+          break;
+        case 'table':
+          buffer.text += Markup.extractTextContent([element.header])
+            + Markup.extractTextContent(element.rows);
+          break;
+        case 'table-cell':
+          buffer.text += Markup.extractTextContent(element.elements);
+          buffer.text += '\n';
+          break;
+        case 'table-row':
+          buffer.text += Markup.extractTextContent(element.cells);
+          buffer.text += '\n';
+          break;
+        case 'text':
+          buffer.text += element.text;
+          break;
+        case 'web-link':
+          buffer.text += Markup.extractTextContent(element.elements);
+          break;
+        default:
+          throw new Error('Unsupported element kind');
+      }
+    }
   }
 }
