@@ -39,14 +39,14 @@ describe('RushConfiguration', () => {
       rushConfiguration.npmCacheFolder, './repo/common/temp/packages-cache');
     assertPathProperty('npmTmpFolder',
       rushConfiguration.npmTmpFolder, './repo/common/temp/packages-tmp');
-    assertPathProperty('npmToolFilename',
-      rushConfiguration.npmToolFilename, './repo/common/temp/npm-local/node_modules/.bin/npm');
+    assertPathProperty('packageManagerToolFilename',
+      rushConfiguration.packageManagerToolFilename, './repo/common/temp/npm-local/node_modules/.bin/npm');
     assertPathProperty('rushJsonFolder',
       rushConfiguration.rushJsonFolder, './repo');
     assertPathProperty('rushLinkJsonFilename',
       rushConfiguration.rushLinkJsonFilename, './repo/common/temp/rush-link.json');
 
-    assert.equal(rushConfiguration.npmToolVersion, '4.5.0', 'Failed to validate npmToolVersion');
+    assert.equal(rushConfiguration.packageManagerToolVersion, '4.5.0', 'Failed to validate packageManagerToolVersion');
 
     assert.equal(rushConfiguration.repositoryUrl, 'someFakeUrl', 'Failed to get repository url');
     assert.equal(rushConfiguration.projectFolderMaxDepth, 99, 'Failed to validate projectFolderMaxDepth');
@@ -100,14 +100,14 @@ describe('RushConfiguration', () => {
       rushConfiguration.npmCacheFolder, './repo/common/temp/packages-cache');
     assertPathProperty('npmTmpFolder',
       rushConfiguration.npmTmpFolder, './repo/common/temp/packages-tmp');
-    assertPathProperty('npmToolFilename',
-      rushConfiguration.npmToolFilename, './repo/common/temp/pnpm-local/node_modules/.bin/pnpm');
+    assertPathProperty('packageManagerToolFilename',
+      rushConfiguration.packageManagerToolFilename, './repo/common/temp/pnpm-local/node_modules/.bin/pnpm');
     assertPathProperty('rushJsonFolder',
       rushConfiguration.rushJsonFolder, './repo');
     assertPathProperty('rushLinkJsonFilename',
       rushConfiguration.rushLinkJsonFilename, './repo/common/temp/rush-link.json');
 
-    assert.equal(rushConfiguration.npmToolVersion, '4.5.0', 'Failed to validate npmToolVersion');
+    assert.equal(rushConfiguration.packageManagerToolVersion, '4.5.0', 'Failed to validate packageManagerToolVersion');
 
     assert.equal(rushConfiguration.repositoryUrl, 'someFakeUrl', 'Failed to get repository url');
     assert.equal(rushConfiguration.projectFolderMaxDepth, 99, 'Failed to validate projectFolderMaxDepth');

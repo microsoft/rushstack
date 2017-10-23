@@ -310,10 +310,10 @@ class RushConfiguration {
   public static loadFromDefaultLocation(): RushConfiguration;
   public readonly npmCacheFolder: string;
   public readonly npmTmpFolder: string;
-  public readonly npmToolFilename: string;
-  public readonly npmToolVersion: string;
   // (undocumented)
   public readonly packageManager: 'pnpm' | 'npm';
+  public readonly packageManagerToolFilename: string;
+  public readonly packageManagerToolVersion: string;
   public readonly pinnedVersions: PinnedVersionsConfiguration;
   public readonly projectFolderMaxDepth: number;
   public readonly projectFolderMinDepth: number;

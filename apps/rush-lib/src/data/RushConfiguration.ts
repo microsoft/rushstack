@@ -21,7 +21,6 @@ import { VersionPolicyConfiguration } from './VersionPolicyConfiguration';
  */
 const knownRushConfigFilenames: string[] = [
   '.npmrc',
-  RushConstants.npmShrinkwrapFilename,
   RushConstants.pinnedVersionsFilename,
   RushConstants.browserApprovedPackagesFilename,
   RushConstants.nonbrowserApprovedPackagesFilename,
@@ -230,7 +229,7 @@ export default class RushConfiguration {
    * _validateCommonRushConfigFolder() function makes sure that this folder only contains
    * recognized config files.
    */
-  private static _validateCommonRushConfigFolder(commonRushConfigFolder: string): void {
+  private static _validateCommonRushConfigFolder(commonRushConfigFolder: string, packageManager: 'pnpm' | 'npm'): void {
     if (!fsx.existsSync(commonRushConfigFolder)) {
       console.log(`Creating folder: ${commonRushConfigFolder}`);
       fsx.mkdirsSync(commonRushConfigFolder);
@@ -254,6 +253,11 @@ export default class RushConfiguration {
       }
 
       const knownSet: Set<string> = new Set<string>(knownRushConfigFilenames.map(x => x.toUpperCase()));
+      if (packageManager === 'npm') {
+        knownSet.add(RushConstants.npmShrinkwrapFilename.toUpperCase());
+      } else {
+        knownSet.add(RushConstants.pnpmShrinkwrapFilename.toUpperCase());
+      }
 
       // Is the filename something we know?  If not, report an error.
       if (!knownSet.has(filename.toUpperCase())) {
@@ -383,7 +387,7 @@ export default class RushConfiguration {
   /**
    * The version of the locally installed NPM tool.  (Example: "1.2.3")
    */
-  public get npmToolVersion(): string {
+  public get packageManagerToolVersion(): string {
     return this._packageManagerToolVersion;
   }
 
@@ -392,7 +396,7 @@ export default class RushConfiguration {
    * been run, then this file may not exist yet.
    * Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
    */
-  public get npmToolFilename(): string {
+  public get packageManagerToolFilename(): string {
     return this._packageManagerToolFilename;
   }
 
@@ -562,7 +566,6 @@ export default class RushConfiguration {
     this._commonFolder = path.resolve(path.join(this._rushJsonFolder, RushConstants.commonFolderName));
 
     this._commonRushConfigFolder = path.join(this._commonFolder, 'config', 'rush');
-    RushConfiguration._validateCommonRushConfigFolder(this._commonRushConfigFolder);
 
     this._commonTempFolder = path.join(this._commonFolder, RushConstants.rushTempFolderName);
     this._packageManagerCacheFolder = path.resolve(path.join(this._commonTempFolder, 'packages-cache'));
@@ -601,6 +604,8 @@ export default class RushConfiguration {
     } else {
       throw new Error(`Neither "npmVersion" nor "pnpmVersion" was defined in the rush configuration.`);
     }
+
+    RushConfiguration._validateCommonRushConfigFolder(this._commonRushConfigFolder);
 
     this._projectFolderMinDepth = rushConfigurationJson.projectFolderMinDepth !== undefined
       ? rushConfigurationJson.projectFolderMinDepth : 1;
