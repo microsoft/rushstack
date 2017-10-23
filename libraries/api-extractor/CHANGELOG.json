@@ -2,6 +2,70 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "4.1.0",
+      "tag": "@microsoft/api-extractor_v4.1.0",
+      "date": "Fri, 20 Oct 2017 19:57:12 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "3c4f7aeb43999a968da41a8a2a2acbc3410f4ae9",
+            "comment": "Fixed an issue where properties were sometimes marked as readonly; a remark is automatically generated for classes with internal constructors"
+          }
+        ],
+        "minor": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "e37c63a2810a22957806bfe6a607b6c925244b7a",
+            "comment": "Add policies.namespaceSupport option to API Extractor config"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.6` to `~0.3.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.1",
+      "tag": "@microsoft/api-extractor_v4.0.1",
+      "date": "Fri, 20 Oct 2017 01:52:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "7f9f66ba071e2bcf77f224f784c14efbe627ba40",
+            "comment": "Rename ApiExtractor class to Extractor"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.5` to `~0.3.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.0",
+      "tag": "@microsoft/api-extractor_v4.0.0",
+      "date": "Fri, 20 Oct 2017 01:04:44 GMT",
+      "comments": {
+        "major": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "3ff332dc81aafca27952120afc1be0788239b741",
+            "comment": "Redesigned interface for invoking API Extractor"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.4` to `~0.3.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.4.2",
       "tag": "@microsoft/api-extractor_v3.4.2",
       "date": "Thu, 05 Oct 2017 01:05:02 GMT",

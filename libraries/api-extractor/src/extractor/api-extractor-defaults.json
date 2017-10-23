@@ -1,0 +1,24 @@
+{
+  // ("compiler" is required)
+
+  "project": {
+    // ("entryPointSourceFile" is required)
+
+    "externalJsonFileFolders": [ ]
+  },
+
+  "policies": {
+    "namespaceSupport": "conservative"
+  },
+
+  "apiReviewFile": {
+    "enabled": true,
+    "apiReviewFolder": "./etc",
+    "tempFolder": "./temp"
+  },
+
+  "apiJsonFile": {
+    "enabled": true,
+    "outputFolder": "./dist"
+  }
+}

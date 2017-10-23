@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as ts from 'typescript';
+
 import { AstItemKind, IAstItemOptions } from './AstItem';
 import AstMember from './AstMember';
 
@@ -17,16 +19,23 @@ class AstProperty extends AstMember {
     super(options);
     this.kind = AstItemKind.Property;
 
-    if (this.documentation.hasReadOnlyTag) {
-      this.isReadOnly = true;
-    }
-
-    const declaration: any = options.declaration as any; /* tslint:disable-line:no-any */
+    const declaration: ts.PropertyDeclaration = options.declaration as ts.PropertyDeclaration;
     if (declaration.type) {
       this.type = declaration.type.getText();
     } else {
       this.hasIncompleteTypes = true;
       this.type = 'any';
+    }
+
+    if (this.documentation.hasReadOnlyTag) {
+      this.isReadOnly = true;
+    } else {
+      // Check for a readonly modifier
+      for (const modifier of declaration.modifiers || []) {
+        if (modifier.kind === ts.SyntaxKind.ReadonlyKeyword) {
+          this.isReadOnly = true;
+        }
+      }
     }
   }
 

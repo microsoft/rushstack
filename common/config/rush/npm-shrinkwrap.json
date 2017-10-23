@@ -80,6 +80,11 @@
         }
       }
     },
+    "@microsoft/node-core-library": {
+      "version": "0.3.3",
+      "from": "@microsoft/node-core-library@>=0.3.3 <0.4.0",
+      "resolved": "https://registry.npmjs.org/@microsoft/node-core-library/-/node-core-library-0.3.3.tgz"
+    },
     "@microsoft/node-library-build": {
       "version": "3.2.8",
       "from": "@microsoft/node-library-build@>=3.2.0 <3.3.0",
@@ -272,7 +277,34 @@
     "@rush-temp/ts-command-line": {
       "version": "0.0.0",
       "from": "projects\\ts-command-line.tgz",
-      "resolved": "file:projects\\ts-command-line.tgz"
+      "resolved": "file:projects\\ts-command-line.tgz",
+      "dependencies": {
+        "@microsoft/api-extractor": {
+          "version": "3.4.2",
+          "from": "@microsoft/api-extractor@3.4.2",
+          "resolved": "https://registry.npmjs.org/@microsoft/api-extractor/-/api-extractor-3.4.2.tgz"
+        },
+        "@microsoft/gulp-core-build": {
+          "version": "3.1.2",
+          "from": "@microsoft/gulp-core-build@3.1.2",
+          "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build/-/gulp-core-build-3.1.2.tgz"
+        },
+        "@microsoft/gulp-core-build-mocha": {
+          "version": "3.1.2",
+          "from": "@microsoft/gulp-core-build-mocha@3.1.2",
+          "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-mocha/-/gulp-core-build-mocha-3.1.2.tgz"
+        },
+        "@microsoft/gulp-core-build-typescript": {
+          "version": "4.2.2",
+          "from": "@microsoft/gulp-core-build-typescript@4.2.2",
+          "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-typescript/-/gulp-core-build-typescript-4.2.2.tgz"
+        },
+        "@microsoft/node-library-build": {
+          "version": "4.1.2",
+          "from": "@microsoft/node-library-build@>=4.1.2 <4.2.0",
+          "resolved": "https://registry.npmjs.org/@microsoft/node-library-build/-/node-library-build-4.1.2.tgz"
+        }
+      }
     },
     "@rush-temp/web-library-build": {
       "version": "0.0.0",
@@ -989,11 +1021,14 @@
           "version": "2.6.9",
           "from": "debug@2.6.9",
           "resolved": "https://registry.npmjs.org/debug/-/debug-2.6.9.tgz"
+<<<<<<< HEAD
         },
         "iconv-lite": {
           "version": "0.4.19",
           "from": "iconv-lite@0.4.19",
           "resolved": "https://registry.npmjs.org/iconv-lite/-/iconv-lite-0.4.19.tgz"
+=======
+>>>>>>> master
         },
         "ms": {
           "version": "2.0.0",
@@ -1142,9 +1177,15 @@
       "resolved": "https://registry.npmjs.org/camelcase-keys/-/camelcase-keys-2.1.0.tgz"
     },
     "caniuse-db": {
+<<<<<<< HEAD
       "version": "1.0.30000747",
       "from": "caniuse-db@>=1.0.30000488 <2.0.0",
       "resolved": "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000747.tgz"
+=======
+      "version": "1.0.30000744",
+      "from": "caniuse-db@>=1.0.30000488 <2.0.0",
+      "resolved": "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000744.tgz"
+>>>>>>> master
     },
     "caseless": {
       "version": "0.12.0",
@@ -6718,9 +6759,15 @@
       "resolved": "https://registry.npmjs.org/tsscmp/-/tsscmp-1.0.5.tgz"
     },
     "tsutils": {
+<<<<<<< HEAD
       "version": "2.12.1",
       "from": "tsutils@>=2.5.1 <3.0.0",
       "resolved": "https://registry.npmjs.org/tsutils/-/tsutils-2.12.1.tgz"
+=======
+      "version": "2.12.0",
+      "from": "tsutils@>=2.5.1 <3.0.0",
+      "resolved": "https://registry.npmjs.org/tsutils/-/tsutils-2.12.0.tgz"
+>>>>>>> master
     },
     "tty-browserify": {
       "version": "0.0.0",

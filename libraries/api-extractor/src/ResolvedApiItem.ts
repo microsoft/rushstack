@@ -5,7 +5,7 @@ import AstItem, { AstItemKind } from './ast/AstItem';
 import { ReleaseTag } from './aedoc/ReleaseTag';
 import { IDocElement } from './markup/OldMarkup';
 import { ApiItem } from './api/ApiItem';
-import ApiJsonFile from './api/ApiJsonFile';
+import { ApiJsonConverter } from './api/ApiJsonConverter';
 import { IAedocParameter } from './aedoc/ApiDocumentation';
 
 /**
@@ -65,7 +65,7 @@ export default class ResolvedApiItem {
     }
 
     return new ResolvedApiItem(
-      ApiJsonFile.convertJsonToKind(docItem.kind),
+      ApiJsonConverter.convertJsonToKind(docItem.kind),
       docItem.summary,
       docItem.remarks,
       docItem.deprecatedMessage,
