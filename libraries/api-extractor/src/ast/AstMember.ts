@@ -67,7 +67,7 @@ export default class AstMember extends AstItem {
       const propertyTypeSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(propertyTypeDeclaration);
 
       const typeLiteralOptions: IAstItemOptions = {
-        extractor: this.extractor,
+        context: this.context,
         declaration: propertyTypeDeclaration,
         declarationSymbol: propertyTypeSymbol,
         jsdocNode: propertyTypeDeclaration

@@ -6,8 +6,9 @@
 import * as ts from 'typescript';
 import AstModuleVariable from './AstModuleVariable';
 import { AstItemKind, IAstItemOptions } from './AstItem';
-import AstItemContainer from './AstItemContainer';
 import { IExportedSymbol } from './IExportedSymbol';
+import AstModule from './AstModule';
+
 const allowedTypes: string[] = ['string', 'number', 'boolean'];
 
 /**
@@ -23,7 +24,7 @@ const allowedTypes: string[] = ['string', 'number', 'boolean'];
   * - We currently still recommend to use static classes for utility libraries, since this
   * provides getters/setters, public/private, and some other structure missing from namespaces.
   */
-export default class AstNamespace extends AstItemContainer {
+export default class AstNamespace extends AstModule {
   private _exportedNormalizedSymbols: IExportedSymbol[] = [];
 
   constructor(options: IAstItemOptions) {
@@ -33,76 +34,92 @@ export default class AstNamespace extends AstItemContainer {
 
     const exportSymbols: ts.Symbol[] = this.typeChecker.getExportsOfModule(this.declarationSymbol);
     if (exportSymbols) {
-      for (const exportSymbol of exportSymbols) {
-        const followedSymbol: ts.Symbol = this.followAliases(exportSymbol);
-
-        if (!followedSymbol.declarations) {
-          // This is an API Extractor bug, but it could happen e.g. if we upgrade to a new
-          // version of the TypeScript compiler that introduces new AST variations that we
-          // haven't tested before.
-          this.reportWarning(`The definition "${exportSymbol.name}" has no declarations`);
-          continue;
-        }
-
-        if (!(followedSymbol.flags === ts.SymbolFlags.BlockScopedVariable)) {
-          this.reportWarning(`Unsupported export "${exportSymbol.name}" ` +
-            'Currently the "namespace" block only supports constant variables.');
-          continue;
-        }
-
-        // Since we are imposing that the items within a namespace be
-        // const properties we are only taking the first declaration.
-        // If we decide to add support for other types within a namespace
-        // we will have for evaluate each declaration.
-        const declaration: ts.Declaration = followedSymbol.getDeclarations()[0];
-
-        if (declaration.parent.flags !== ts.NodeFlags.Const) {
-          this.reportWarning(`Export "${exportSymbol.name}" is missing the "const" ` +
-            'modifier. Currently the "namespace" block only supports constant variables.');
-          continue;
-        }
-
-        const propertySignature: ts.PropertySignature = declaration as ts.PropertySignature;
-        if (!propertySignature.type || allowedTypes.indexOf(propertySignature.type.getText()) < 0) {
-          this.reportWarning(`Export "${exportSymbol.name}" must specify and be of type` +
-            '"string", "number" or "boolean"');
-          continue;
-        }
-
-        if (!propertySignature.initializer) {
-          this.reportWarning(`Export "${exportSymbol.name}" must have an initialized value`);
-          continue;
-        }
-
-        // Typescript's VariableDeclaration AST nodes have an VariableDeclarationList parent,
-        // and the VariableDeclarationList exists within a VariableStatement, which is where
-        // the JSDoc comment Node can be found.
-        // If there is no parent or grandparent of this VariableDeclaration then
-        // we do not know how to obtain the JSDoc comment.
-        let jsdocNode: ts.Node;
-        if (!declaration.parent || !declaration.parent.parent ||
-          declaration.parent.parent.kind !== ts.SyntaxKind.VariableStatement) {
-          this.reportWarning(`Unable to locate the documentation node for "${exportSymbol.name}"; `
-            + `this may be an API Extractor bug`);
-        } else {
-          jsdocNode = declaration.parent.parent;
-        }
-
-        const exportMemberOptions: IAstItemOptions = {
-          extractor: this.extractor,
-          declaration,
-          declarationSymbol: followedSymbol,
-          jsdocNode: jsdocNode,
-          exportSymbol
-        };
-
-        this.addMemberItem(new AstModuleVariable(exportMemberOptions));
-
-        this._exportedNormalizedSymbols.push({
-          exportedName: exportSymbol.name,
-          followedSymbol: followedSymbol
-        });
+      if (this.context.policies.namespaceSupport === 'conservative') {
+        this._processConservativeMembers(exportSymbols);
+      } else {
+        this._processPermissiveMembers(exportSymbols);
       }
+    }
+  }
+
+  // Used when policies.namespaceSupport=conservative
+  private _processConservativeMembers(exportSymbols: ts.Symbol[]): void {
+    for (const exportSymbol of exportSymbols) {
+      const followedSymbol: ts.Symbol = this.followAliases(exportSymbol);
+
+      if (!followedSymbol.declarations) {
+        // This is an API Extractor bug, but it could happen e.g. if we upgrade to a new
+        // version of the TypeScript compiler that introduces new AST variations that we
+        // haven't tested before.
+        this.reportWarning(`The definition "${exportSymbol.name}" has no declarations`);
+        continue;
+      }
+
+      if (!(followedSymbol.flags === ts.SymbolFlags.BlockScopedVariable)) {
+        this.reportWarning(`Unsupported export "${exportSymbol.name}" ` +
+          'Currently the "namespace" block only supports constant variables.');
+        continue;
+      }
+
+      // Since we are imposing that the items within a namespace be
+      // const properties we are only taking the first declaration.
+      // If we decide to add support for other types within a namespace
+      // we will have for evaluate each declaration.
+      const declaration: ts.Declaration = followedSymbol.getDeclarations()[0];
+
+      if (declaration.parent.flags !== ts.NodeFlags.Const) {
+        this.reportWarning(`Export "${exportSymbol.name}" is missing the "const" ` +
+          'modifier. Currently the "namespace" block only supports constant variables.');
+        continue;
+      }
+
+      const propertySignature: ts.PropertySignature = declaration as ts.PropertySignature;
+      if (!propertySignature.type || allowedTypes.indexOf(propertySignature.type.getText()) < 0) {
+        this.reportWarning(`Export "${exportSymbol.name}" must specify and be of type` +
+          '"string", "number" or "boolean"');
+        continue;
+      }
+
+      if (!propertySignature.initializer) {
+        this.reportWarning(`Export "${exportSymbol.name}" must have an initialized value`);
+        continue;
+      }
+
+      // Typescript's VariableDeclaration AST nodes have an VariableDeclarationList parent,
+      // and the VariableDeclarationList exists within a VariableStatement, which is where
+      // the JSDoc comment Node can be found.
+      // If there is no parent or grandparent of this VariableDeclaration then
+      // we do not know how to obtain the JSDoc comment.
+      let jsdocNode: ts.Node;
+      if (!declaration.parent || !declaration.parent.parent ||
+        declaration.parent.parent.kind !== ts.SyntaxKind.VariableStatement) {
+        this.reportWarning(`Unable to locate the documentation node for "${exportSymbol.name}"; `
+          + `this may be an API Extractor bug`);
+      } else {
+        jsdocNode = declaration.parent.parent;
+      }
+
+      const exportMemberOptions: IAstItemOptions = {
+        context: this.context,
+        declaration,
+        declarationSymbol: followedSymbol,
+        jsdocNode: jsdocNode,
+        exportSymbol
+      };
+
+      this.addMemberItem(new AstModuleVariable(exportMemberOptions));
+
+      this._exportedNormalizedSymbols.push({
+        exportedName: exportSymbol.name,
+        followedSymbol: followedSymbol
+      });
+    }
+  }
+
+  // Used when policies.namespaceSupport=permissive
+  private _processPermissiveMembers(exportSymbols: ts.Symbol[]): void {
+    for (const exportSymbol of exportSymbols) {
+      this.processModuleExport(exportSymbol);
     }
   }
 }

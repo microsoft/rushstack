@@ -1,0 +1,9 @@
+{
+  "npmVersion": "3.10.8",
+  "rushVersion": "1.0.5",
+  "nodeSupportedVersionRange": ">=4.3.0 <7.0.0",
+  "projectFolderMinDepth": 1,
+
+  "projects": [],
+  "telemetryEnabled": true
+}

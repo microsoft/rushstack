@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as fs from 'fs';
-import Extractor from '../Extractor';
+import { ExtractorContext } from '../ExtractorContext';
 import AstStructuredType from '../ast/AstStructuredType';
 import AstEnum from '../ast/AstEnum';
 import AstEnumValue from '../ast/AstEnumValue';
@@ -57,15 +57,15 @@ export default class ApiFileGenerator extends AstItemVisitor {
    * @param reportFilename - The output filename
    * @param analyzer       - An Analyzer object representing the input project.
    */
-  public writeApiFile(reportFilename: string, extractor: Extractor): void {
-    const fileContent: string = this.generateApiFileContent(extractor);
+  public writeApiFile(reportFilename: string, context: ExtractorContext): void {
+    const fileContent: string = this.generateApiFileContent(context);
     fs.writeFileSync(reportFilename, fileContent);
   }
 
-  public generateApiFileContent(extractor: Extractor): string {
+  public generateApiFileContent(context: ExtractorContext): string {
     this._insideTypeLiteral = 0;
     // Normalize to CRLF
-    this.visit(extractor.package);
+    this.visit(context.package);
     const fileContent: string = this._indentedWriter.toString().replace(/\r?\n/g, '\r\n');
     return fileContent;
   }

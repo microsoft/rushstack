@@ -349,6 +349,7 @@ class RushConfiguration {
   public readonly eventHooks: EventHooks;
   public findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
   public findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
+  public static getHomeDirectory(): string;
   public getProjectByName(projectName: string): RushConfigurationProject | undefined;
   public readonly gitAllowedEmailRegExps: string[];
   public readonly gitSampleEmail: string;
@@ -374,6 +375,7 @@ class RushConfiguration {
   // @alpha
   public readonly telemetryEnabled: boolean;
   public readonly tempShrinkwrapFilename: string;
+  public static tryFindRushJsonLocation(verbose: boolean = true): string | undefined;
   // @alpha (undocumented)
   public readonly versionPolicyConfiguration: VersionPolicyConfiguration;
 }
@@ -470,7 +472,7 @@ class Utilities {
   public static createFolderWithRetry(folderName: string): void;
   public static dangerouslyDeletePath(folderPath: string): void;
   public static deleteFile(filePath: string): void;
-  public static directoryExists(path: string): boolean;
+  public static directoryExists(directoryPath: string): boolean;
   public static escapeShellParameter(parameter: string): string;
   public static executeCommand(command: string, args: string[], workingDirectory: string,
       suppressOutput: boolean = false, environmentVariables?: { [key: string]: string }): void;
@@ -490,11 +492,17 @@ class Utilities {
       workingDirectory: string,
       environmentVariables?: { [key: string]: string },
       captureOutput: boolean = false): child_process.ChildProcess;
-  public static fileExists(path: string): boolean;
+  public static fileExists(filePath: string): boolean;
   public static getAllReplaced(targetString: string, searchValue: string, replaceValue: string): string;
   public static getConsoleWidth(): number;
   public static getSetAsArray < T >(set: Set<T>): T[];
   public static getTimeInMs(): number;
+  public static installPackageInDirectory(directory: string,
+      packageName: string,
+      version: string,
+      tempPackageTitle: string,
+      maxInstallAttempts: number,
+      suppressOutput: boolean = false): void;
   // (undocumented)
   public static isFileTimestampCurrent(outputFilename: string, inputFilenames: string[]): boolean;
   public static parseScopedPackageName: {

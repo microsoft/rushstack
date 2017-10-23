@@ -100,7 +100,7 @@ class GulpTask<TTaskConfig> implements IExecutable {
   readJSONSync(localPath: string): Object | undefined;
   replaceConfig(taskConfig: TTaskConfig): void;
   resolvePath(localPath: string): string;
-  schema: Object | undefined;
+  readonly schema: Object | undefined;
   setConfig(taskConfig: Partial<TTaskConfig>): void;
   taskConfig: TTaskConfig;
 }
@@ -289,7 +289,7 @@ class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConfig & TE
   // (undocumented)
   loadSchema(): Object;
   // (undocumented)
-  resources: IWebpackResources;
+  readonly resources: IWebpackResources;
 }
 
 // WARNING: Unsupported export: preCopy

@@ -4,13 +4,9 @@
 /* tslint:disable:no-bitwise */
 
 import * as ts from 'typescript';
-import Extractor from '../Extractor';
-import AstStructuredType from './AstStructuredType';
-import AstEnum from './AstEnum';
-import AstFunction from './AstFunction';
+import { ExtractorContext } from '../ExtractorContext';
 import { AstItemKind, IAstItemOptions } from './AstItem';
-import AstItemContainer from './AstItemContainer';
-import AstNamespace from './AstNamespace';
+import AstModule from './AstModule';
 import TypeScriptHelpers from '../TypeScriptHelpers';
 import { IExportedSymbol } from './IExportedSymbol';
 
@@ -18,10 +14,10 @@ import { IExportedSymbol } from './IExportedSymbol';
   * This class is part of the AstItem abstract syntax tree.  It represents the top-level
   * exports for an Rush package.  This object acts as the root of the Extractor's tree.
   */
-export default class AstPackage extends AstItemContainer {
+export default class AstPackage extends AstModule {
   private _exportedNormalizedSymbols: IExportedSymbol[] = [];
 
-  private static _getOptions(extractor: Extractor, rootFile: ts.SourceFile): IAstItemOptions {
+  private static _getOptions(context: ExtractorContext, rootFile: ts.SourceFile): IAstItemOptions {
     const rootFileSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(rootFile);
     let statement: ts.VariableStatement;
     let foundDescription: ts.Node = undefined;
@@ -38,53 +34,25 @@ export default class AstPackage extends AstItemContainer {
     }
 
     return {
-      extractor,
+      context,
       declaration: rootFileSymbol.declarations[0],
       declarationSymbol: rootFileSymbol,
       jsdocNode: foundDescription
     };
   }
 
-  constructor(extractor: Extractor, rootFile: ts.SourceFile) {
-    super(AstPackage._getOptions(extractor, rootFile));
+  constructor(context: ExtractorContext, rootFile: ts.SourceFile) {
+    super(AstPackage._getOptions(context, rootFile));
     this.kind = AstItemKind.Package;
     // The scoped package name. (E.g. "@microsoft/api-extractor")
-    this.name = extractor.packageName;
+    this.name = context.packageName;
 
     const exportSymbols: ts.Symbol[] = this.typeChecker.getExportsOfModule(this.declarationSymbol);
     if (exportSymbols) {
       for (const exportSymbol of exportSymbols) {
+        this.processModuleExport(exportSymbol);
+
         const followedSymbol: ts.Symbol = this.followAliases(exportSymbol);
-
-        if (!followedSymbol.declarations) {
-          // This is an API Extractor bug, but it could happen e.g. if we upgrade to a new
-          // version of the TypeScript compiler that introduces new AST variations that we
-          // haven't tested before.
-          this.reportWarning(`Definition with no declarations: ${exportSymbol.name}`);
-          continue;
-        }
-
-        for (const declaration of followedSymbol.declarations) {
-          const options: IAstItemOptions = {
-            extractor: this.extractor,
-            declaration,
-            declarationSymbol: followedSymbol,
-            jsdocNode: declaration,
-            exportSymbol
-          };
-
-          if (followedSymbol.flags & (ts.SymbolFlags.Class | ts.SymbolFlags.Interface)) {
-            this.addMemberItem(new AstStructuredType(options));
-          } else if (followedSymbol.flags & ts.SymbolFlags.ValueModule) {
-            this.addMemberItem(new AstNamespace(options));
-          } else if (followedSymbol.flags & ts.SymbolFlags.Function) {
-            this.addMemberItem(new AstFunction(options));
-          } else if (followedSymbol.flags & ts.SymbolFlags.Enum) {
-            this.addMemberItem(new AstEnum(options));
-          } else {
-            this.reportWarning(`Unsupported export: ${exportSymbol.name}`);
-          }
-        }
         this._exportedNormalizedSymbols.push({
           exportedName: exportSymbol.name,
           followedSymbol: followedSymbol
