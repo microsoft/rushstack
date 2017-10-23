@@ -1,0 +1,33 @@
+{
+  "name": "@microsoft/api-documenter",
+  "entries": [
+    {
+      "version": "1.0.0",
+      "tag": "@microsoft/api-documenter_v1.0.0",
+      "date": "Mon, 23 Oct 2017 21:53:12 GMT",
+      "comments": {
+        "major": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "5de032b254b632b8af0d0dd98913acef589f88d5",
+            "comment": "Initial release"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `4.1.0` to `4.1.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.7` to `~0.3.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `~2.1.0` to `~2.1.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `~4.1.5` to `~4.1.6`"
+          }
+        ]
+      }
+    }
+  ]
+}
