@@ -28,18 +28,6 @@ export interface IJestConfig {
    * If not provided, the default value is true.
    */
   coverage?: boolean;
-
-  /**
-   * Specifies the maximum number of workers the worker-pool will spawn for running tests.
-   * If not provided, the default value is 1.
-   */
-  maxWorkers?: number;
-
-  /**
-   * Indicates that test coverage information should be collected and reported in the output.
-   * If not provided, the default value is true.
-   */
-  runInBand?: boolean;
 }
 
 const DEFAULT_JEST_CONFIG_FILE_NAME: string = 'jest.config.json';
@@ -68,9 +56,7 @@ export class JestTask extends GulpTask<IJestConfig> {
   constructor() {
     super('jest',
     {
-      coverage: true,
-      maxWorkers: 1,
-      runInBand: true
+      coverage: true
     });
   }
 
@@ -97,8 +83,8 @@ export class JestTask extends GulpTask<IJestConfig> {
         ci: this.buildConfig.production,
         config: configFileFullPath,
         coverage: this.taskConfig.coverage,
-        maxWorkers: this.taskConfig.maxWorkers,
-        runInBand: this.taskConfig.runInBand,
+        maxWorkers: 1,
+        runInBand: true,
         updateSnapshot: !this.buildConfig.production,
         rootDir: this.buildConfig.rootPath,
         testMatch: ['**/*.test.js?(x)'],

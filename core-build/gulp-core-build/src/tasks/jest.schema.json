@@ -22,21 +22,6 @@
       "description": "Indicates that test coverage information should be collected and reported in the output",
       "type": "boolean",
       "default": true
-    },
-    "maxWorkers": {
-      "description": "Specifies the maximum number of workers the worker-pool will spawn for running tests. Default is set to 1.",
-      "type": "number",
-      "default": 1
-    },
-    "runInBand": {
-      "description": "Run all tests serially in the current process, rather than creating a worker pool of child processes that run tests.",
-      "type": "boolean",
-      "default": true
-    },
-    "updateSnapshot": {
-      "description": "Use this flag to re-record every snapshot that fails during this test run",
-      "type": "boolean",
-      "default": false
     }
   },
   "additionalProperties": false

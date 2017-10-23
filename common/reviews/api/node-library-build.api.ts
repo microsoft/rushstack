@@ -185,8 +185,6 @@ interface IJestConfig {
   configFilePath?: string;
   coverage?: boolean;
   isEnabled?: boolean;
-  maxWorkers?: number;
-  runInBand?: boolean;
 }
 
 // @public
