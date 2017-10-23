@@ -2,6 +2,7 @@
 
 |  Package | Description |
 |  --- | --- |
+|  [`api-extractor`](./api-extractor.md) | Library API for the api-extractor tool. |
 |  [`node-core-library`](./node-core-library.md) | Core libraries that every NodeJS toolchain project should use. |
 
 ## External Packages
