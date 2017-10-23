@@ -36,7 +36,7 @@
     "webpack": "~3.6.0"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "~3.2.0",
+    "@microsoft/node-library-build": "~4.1.5",
     "@types/gulp": "3.8.32",
     "@types/karma": "0.13.33",
     "@types/bluebird": "3.5.3"
