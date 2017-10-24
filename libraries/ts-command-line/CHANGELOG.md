@@ -1,6 +1,11 @@
 # Change Log - @microsoft/ts-command-line
 
-This log was last generated on Mon, 23 Oct 2017 21:53:12 GMT and should not be manually modified.
+This log was last generated on Tue, 24 Oct 2017 18:17:12 GMT and should not be manually modified.
+
+## 2.1.2
+Tue, 24 Oct 2017 18:17:12 GMT
+
+*Changes not tracked*
 
 ## 2.1.1
 Mon, 23 Oct 2017 21:53:12 GMT
