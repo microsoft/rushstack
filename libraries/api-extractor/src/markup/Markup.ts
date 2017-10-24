@@ -22,6 +22,8 @@ import {
   MarkupHighlighter
 } from './MarkupElement';
 
+import { IApiItemReference } from '../api/ApiItem';
+
 /**
  * A helper class for generating MarkupElement structures.
  */
@@ -39,7 +41,7 @@ export class Markup {
     } else {
       const result: IMarkupText = {
         kind: 'text',
-        text: text
+        text: Markup._trimRawText(text)
       } as IMarkupText;
 
       if (options) {
@@ -104,14 +106,14 @@ export class Markup {
   public static createHeading1(text: string): IMarkupHeading1 {
     return {
       kind: 'heading1',
-      text: text
+      text: Markup._trimRawText(text)
     };
   }
 
   public static createHeading2(text: string): IMarkupHeading2 {
     return {
       kind: 'heading2',
-      text: text
+      text: Markup._trimRawText(text)
     };
   }
 
@@ -172,7 +174,7 @@ export class Markup {
     return {
       kind: 'page',
       breadcrumb: [],
-      title: title,
+      title: Markup._trimRawText(title),
       elements: []
     } as IMarkupPage;
   }
@@ -242,5 +244,10 @@ export class Markup {
           throw new Error('Unsupported element kind');
       }
     }
+  }
+
+  private static _trimRawText(text: string): string {
+    // Replace multiple whitespaces with a single space
+    return text.replace(/\s+/g, ' ');
   }
 }

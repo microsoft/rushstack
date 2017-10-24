@@ -3,7 +3,7 @@
 
 import AstItem, { AstItemKind } from './ast/AstItem';
 import { ReleaseTag } from './aedoc/ReleaseTag';
-import { IDocElement } from './markup/OldMarkup';
+import { MarkupElement } from './markup/MarkupElement';
 import { ApiItem } from './api/ApiItem';
 import { ApiJsonConverter } from './api/ApiJsonConverter';
 import { IAedocParameter } from './aedoc/ApiDocumentation';
@@ -14,13 +14,13 @@ import { IAedocParameter } from './aedoc/ApiDocumentation';
  */
 export default class ResolvedApiItem {
   public kind: AstItemKind;
-  public summary: IDocElement[];
-  public remarks: IDocElement[];
-  public deprecatedMessage: IDocElement[];
+  public summary: MarkupElement[];
+  public remarks: MarkupElement[];
+  public deprecatedMessage: MarkupElement[];
   public releaseTag: ReleaseTag;
   public isBeta: boolean;
   public params: {[name: string]: IAedocParameter};
-  public returnsMessage: IDocElement[];
+  public returnsMessage: MarkupElement[];
   /**
    * This property will either be an AstItem or undefined.
    */
@@ -50,7 +50,7 @@ export default class ResolvedApiItem {
    */
   public static createFromJson(docItem: ApiItem): ResolvedApiItem {
     let parameters: {[name: string]: IAedocParameter} = undefined;
-    let returnsMessage: IDocElement[] = undefined;
+    let returnsMessage: MarkupElement[] = undefined;
     switch (docItem.kind) {
       case 'function':
         parameters = docItem.parameters;
@@ -79,12 +79,12 @@ export default class ResolvedApiItem {
 
   private constructor(
     kind: AstItemKind,
-    summary: IDocElement[],
-    remarks: IDocElement[],
-    deprecatedMessage: IDocElement[],
+    summary: MarkupElement[],
+    remarks: MarkupElement[],
+    deprecatedMessage: MarkupElement[],
     isBeta: boolean,
     params:  {[name: string]: IAedocParameter},
-    returnsMessage: IDocElement[],
+    returnsMessage: MarkupElement[],
     releaseTag: ReleaseTag,
     astItem: AstItem) {
     this.kind = kind;

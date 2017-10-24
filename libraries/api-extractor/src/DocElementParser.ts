@@ -2,18 +2,18 @@
 // See LICENSE in the project root for license information.
 
 import {
-  IMarkupText,
-  IMarkupWebLink,
-  IMarkupApiLink,
-  IMarkupParagraph,
+  MarkupLinkTextElement,
+  MarkupBasicElement,
   MarkupElement
 } from './markup/MarkupElement';
+import { Markup } from './markup/Markup';
 import ApiDefinitionReference, { IScopedPackageName } from './ApiDefinitionReference';
 import ApiDocumentation from './aedoc/ApiDocumentation';
 import { AstItemKind } from './ast/AstItem';
 import Token, { TokenType } from './aedoc/Token';
 import Tokenizer from './aedoc/Tokenizer';
 import ResolvedApiItem from './ResolvedApiItem';
+import { IApiItemReference} from './api/ApiItem';
 
 export default class DocElementParser {
   /**
@@ -39,18 +39,8 @@ export default class DocElementParser {
    */
   private static _hrefRegEx: RegExp = /^[a-z]+:\/\//;
 
-  public static makeTextElement(text: string): IDocElement {
-    if (!text) {
-      return;
-    }
-    return {
-      kind: 'textDocElement',
-      value: text.replace(/\s+/g, ' ')
-    } as ITextElement;
-  }
-
-  public static parse(documentation: ApiDocumentation, tokenizer: Tokenizer): IDocElement[] {
-    const docElements: IDocElement[] = [];
+  public static parse(documentation: ApiDocumentation, tokenizer: Tokenizer): MarkupElement[] {
+    const markupElements: MarkupElement[] = [];
     let parsing: boolean = true;
     let token: Token;
 
@@ -62,23 +52,12 @@ export default class DocElementParser {
       }
 
       if (token.type === TokenType.BlockTag) {
-        switch (token.tag) {
-          case '@see':
-            tokenizer.getToken();
-            docElements.push({
-              kind: 'seeDocElement',
-              seeElements: this.parse(documentation, tokenizer)
-            } as ISeeDocElement);
-            break;
-          default:
-            parsing = false; // end of summary tokens
-            break;
-        }
+        parsing = false; // end of summary tokens
       } else if (token.type === TokenType.InlineTag) {
         switch (token.tag) {
           case '@inheritdoc':
             tokenizer.getToken();
-            if (docElements.length > 0 ||  documentation.summary.length > 0) {
+            if (markupElements.length > 0 ||  documentation.summary.length > 0) {
               documentation.reportError('A summary block is not allowed here,'
                 + ' because the @inheritdoc target provides the summary');
             }
@@ -86,12 +65,12 @@ export default class DocElementParser {
             documentation.isDocInherited = true;
             break;
           case '@link' :
-            const linkDocElement: ICodeLinkElement | IHrefLinkElement = this.parseLinkTag(documentation, token);
-            if (linkDocElement) {
-              // Push to docElements to retain position in the documentation
-              docElements.push(linkDocElement);
-              if (linkDocElement.referenceType === 'code') {
-                documentation.incompleteLinks.push(linkDocElement);
+            const linkMarkupElement: MarkupElement = this.parseLinkTag(documentation, token);
+            if (linkMarkupElement) {
+              // Push to linkMarkupElement to retain position in the documentation
+              markupElements.push(linkMarkupElement);
+              if (linkMarkupElement.kind === 'api-link') {
+                documentation.incompleteLinks.push(linkMarkupElement);
               }
             }
             tokenizer.getToken(); // get the link token
@@ -107,30 +86,27 @@ export default class DocElementParser {
 
         for (const paragraph of token.text.split(/\n\s*\n/g)) {
           if (!firstLoop) {
-            docElements.push({
-              kind: 'paragraphDocElement'
-            } as IParagraphElement);
+            markupElements.push(Markup.PARAGRAPH);
           }
           firstLoop = false;
 
           const normalizedParagraph: string = paragraph.replace(/\s+/g, ' ').trim();
           if (normalizedParagraph) {
-            docElements.push({
-              kind: 'textDocElement',
-              value: ' ' + normalizedParagraph + ' '
-            } as ITextElement);
+            markupElements.push(
+              ...Markup.createTextElements(' ' + normalizedParagraph + ' ')
+            );
           }
         }
       } else {
         documentation.reportError(`Unidentifiable Token ${token.type} ${token.tag} "${token.text}"`);
       }
     }
-    return docElements;
+    return markupElements;
   }
 
   /**
    * This method parses the semantic information in an \@link JSDoc tag, creates and returns a
-   * linkDocElement with the corresponding information. If the corresponding inline tag \@link is
+   * MarkupElement with the corresponding information. If the corresponding inline tag \@link is
    * not formatted correctly an error will be reported.
    *
    * The format for the \@link tag is {\@link URL or API defintion reference | display text}, where
@@ -142,7 +118,7 @@ export default class DocElementParser {
    * \{@link @microsoft/sp-core-library:Guid.newGuid | new Guid Object \}
    * \{@link @microsoft/sp-core-library:Guid.newGuid \}
    */
-  public static parseLinkTag(documentation: ApiDocumentation, tokenItem: Token): IHrefLinkElement | ICodeLinkElement {
+  public static parseLinkTag(documentation: ApiDocumentation, tokenItem: Token): MarkupBasicElement {
     if (!tokenItem.text) {
       documentation.reportError('The {@link} tag must include a URL or API item reference');
        return;
@@ -162,8 +138,25 @@ export default class DocElementParser {
     const addressPart: string = pipeSplitContent[0];
     const displayTextPart: string = pipeSplitContent.length > 1 ? pipeSplitContent[1] : '';
 
+    let displayTextElements: MarkupLinkTextElement[];
+
+    // If a display name is given, ensure it only contains characters for words.
+    if (displayTextPart) {
+      const match: RegExpExecArray | undefined = this._displayTextBadCharacterRegEx.exec(displayTextPart);
+      if (match) {
+        documentation.reportError(`The {@link} tag\'s display text contains an unsupported`
+          + ` character: "${match[0]}"`);
+        return undefined;
+      }
+      // Full match is valid text
+      displayTextElements = Markup.createTextElements(displayTextPart);
+    } else {
+      // If the display text is not explicitly provided, then use the address as the display text
+      displayTextElements = Markup.createTextElements(addressPart);
+    }
+
     // Try to guess if the tokenContent is a link or API definition reference
-    let linkDocElement: ICodeLinkElement | IHrefLinkElement;
+    let linkMarkupElement: MarkupBasicElement;
     if (this._hrefRegEx.test(addressPart)) {
       // Make sure only a single URL is given
       if (addressPart.indexOf(' ') >= 0) {
@@ -172,13 +165,7 @@ export default class DocElementParser {
         return undefined;
       }
 
-      linkDocElement = {
-        kind: 'linkDocElement',
-        referenceType: 'href',
-        targetUrl: addressPart
-        // ("value" will be assigned below)
-      };
-
+      linkMarkupElement = Markup.createWebLink(displayTextElements, addressPart);
     } else {
       // we are processing an API definition reference
       const apiDefitionRef: ApiDefinitionReference = ApiDefinitionReference.createFromString(
@@ -191,17 +178,8 @@ export default class DocElementParser {
         return undefined;
       }
 
-      linkDocElement = {
-        kind: 'linkDocElement',
-        referenceType: 'code',
-        scopeName: apiDefitionRef.scopeName,
-        packageName: apiDefitionRef.packageName,
-        exportName: apiDefitionRef.exportName,
-        memberName: apiDefitionRef.memberName
-        // ("value" will be assigned below)
-      };
-
-      if (!linkDocElement.packageName) {
+      const normalizedApiLink: IApiItemReference = apiDefitionRef.toApiItemReference();
+      if (!normalizedApiLink.packageName) {
         if (!documentation.context.packageName) {
           throw new Error('Unable to resolve API reference without a package name');
         }
@@ -210,28 +188,14 @@ export default class DocElementParser {
         const scopePackageName: IScopedPackageName = ApiDefinitionReference.parseScopedPackageName(
           documentation.context.packageName);
 
-        linkDocElement.scopeName = scopePackageName.scope;
-        linkDocElement.packageName = scopePackageName.package;
+        normalizedApiLink.scopeName = scopePackageName.scope;
+        normalizedApiLink.packageName = scopePackageName.package;
       }
 
+      linkMarkupElement = Markup.createApiLink(displayTextElements, apiDefitionRef);
     }
 
-    // If a display name is given, ensure it only contains characters for words.
-    if (displayTextPart) {
-      const match: RegExpExecArray | undefined = this._displayTextBadCharacterRegEx.exec(displayTextPart);
-      if (match) {
-        documentation.reportError(`The {@link} tag\'s display text contains an unsupported`
-          + ` character: "${match[0]}"`);
-        return undefined;
-      }
-      // Full match is valid text
-      linkDocElement.value = displayTextPart;
-    } else {
-      // If the display text is not explicitly provided, then use the address as the display text
-      linkDocElement.value = addressPart;
-    }
-
-    return linkDocElement;
+    return linkMarkupElement;
   }
 
   /**
@@ -274,9 +238,7 @@ export default class DocElementParser {
     // If no resolvedAstItem found then nothing to inherit
     // But for the time being set the summary to a text object
     if (!resolvedAstItem) {
-      documentation.summary = [
-        this.makeTextElement(`See documentation for ${tokenChunks[0]}`)
-      ];
+      documentation.summary = Markup.createTextElements(`See documentation for ${tokenChunks[0]}`);
       return;
     }
 
@@ -321,28 +283,28 @@ export default class DocElementParser {
    * 1. Remove leading/trailing white space
    * 2. Remove leading/trailing paragraph separators
    */
-  public static getTrimmedSpan(docElements: IDocElement[]): IDocElement[] {
-    const span: IDocElement[] = [];
-    span.push(...docElements);
+  public static getTrimmedSpan(markupElements: MarkupElement[]): MarkupElement[] {
+    const span: MarkupElement[] = [];
+    span.push(...markupElements);
 
     // Pop leading/trailing paragraph separators
-    while (span.length && span[0].kind === 'paragraphDocElement') {
+    while (span.length && span[0].kind === 'paragraph') {
       span.shift();
     }
-    while (span.length && span[span.length - 1].kind === 'paragraphDocElement') {
+    while (span.length && span[span.length - 1].kind === 'paragraph') {
       span.pop();
     }
 
     // Trim leading/trailing white space
     if (span.length) {
-      const first: ITextElement = span[0] as ITextElement;
-      if (first.kind === 'textDocElement') {
-        first.value = first.value.replace(/^\s+/, ''); // trim left
+      const first: MarkupElement = span[0];
+      if (first.kind === 'text') {
+        first.text = first.text.replace(/^\s+/, ''); // trim left
       }
 
-      const last: ITextElement = span[span.length - 1] as ITextElement;
-      if (last.kind === 'textDocElement') {
-        last.value = last.value.replace(/\s+$/, ''); // trim right
+      const last: MarkupElement = span[span.length - 1];
+      if (last.kind === 'text') {
+        last.text = last.text.replace(/\s+$/, ''); // trim right
       }
     }
     return span;

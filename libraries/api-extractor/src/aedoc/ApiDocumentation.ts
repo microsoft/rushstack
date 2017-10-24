@@ -5,13 +5,14 @@
 
 import AstPackage from '../ast/AstPackage';
 import DocElementParser from '../DocElementParser';
-import { IDocElement, ICodeLinkElement } from '../markup/OldMarkup';
 import ApiDefinitionReference, { IApiDefinitionReferenceParts } from '../ApiDefinitionReference';
 import Token, { TokenType } from './Token';
 import Tokenizer from './Tokenizer';
 import { ExtractorContext } from '../ExtractorContext';
 import ResolvedApiItem from '../ResolvedApiItem';
 import { ReleaseTag } from './ReleaseTag';
+import { MarkupElement, IMarkupApiLink } from '../markup/MarkupElement';
+import { Markup } from '../markup/Markup';
 
 /**
  * A dependency for ApiDocumentation constructor that abstracts away the function
@@ -36,7 +37,7 @@ export interface IReferenceResolver {
  */
 export interface IAedocParameter {
   name: string;
-  description: IDocElement[];
+  description: MarkupElement[];
 }
 
 export default class ApiDocumentation {
@@ -59,7 +60,6 @@ export default class ApiDocumentation {
     '@preapproved',
     '@public',
     '@returns',
-    '@see',
     '@deprecated',
     '@readonly',
     '@remarks'
@@ -96,10 +96,10 @@ export default class ApiDocumentation {
    /**
    * docCommentTokens that are parsed into Doc Elements.
    */
-  public summary: IDocElement[];
-  public deprecatedMessage: IDocElement[];
-  public remarks: IDocElement[];
-  public returnsMessage: IDocElement[];
+  public summary: MarkupElement[];
+  public deprecatedMessage: MarkupElement[];
+  public remarks: MarkupElement[];
+  public returnsMessage: MarkupElement[];
   public parameters: { [name: string]: IAedocParameter; };
 
   /**
@@ -109,7 +109,7 @@ export default class ApiDocumentation {
    * Example: If API item A has a \@link in its documentation to API item B, then B must not
    * have ReleaseTag.Internal.
    */
-  public incompleteLinks: ICodeLinkElement[];
+  public incompleteLinks: IMarkupApiLink[];
 
   /**
    * A list of 'Token' objects that have been recognized as \@inheritdoc tokens that will be processed
@@ -358,10 +358,10 @@ export default class ApiDocumentation {
         return;
       }
 
-      const commentTextElement: IDocElement = DocElementParser.makeTextElement(comment);
+      const commentTextElements: MarkupElement[] = Markup.createTextElements(comment);
       // Full param description may contain additional Tokens (Ex: @link)
-      const remainingElements: IDocElement[] = DocElementParser.parse(this, tokenizer);
-      const descriptionElements: IDocElement[] = [commentTextElement].concat(remainingElements);
+      const remainingElements: MarkupElement[] = DocElementParser.parse(this, tokenizer);
+      const descriptionElements: MarkupElement[] = commentTextElements.concat(remainingElements);
 
       const paramDocElement: IAedocParameter = {
         name: name,
@@ -377,12 +377,12 @@ export default class ApiDocumentation {
    */
   private _completeLinks(): void {
     while (this.incompleteLinks.length) {
-      const codeLink: ICodeLinkElement = this.incompleteLinks.pop();
+      const codeLink: IMarkupApiLink = this.incompleteLinks.pop();
       const parts: IApiDefinitionReferenceParts = {
-        scopeName: codeLink.scopeName,
-        packageName: codeLink.packageName,
-        exportName: codeLink.exportName,
-        memberName: codeLink.memberName
+        scopeName: codeLink.target.scopeName,
+        packageName: codeLink.target.packageName,
+        exportName: codeLink.target.exportName,
+        memberName: codeLink.target.memberName
       };
 
       const apiDefinitionRef: ApiDefinitionReference = ApiDefinitionReference.createFromParts(parts);

@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { IApiItemReference } from './api/ApiItem';
+
 /**
  * An API definition reference that is used to locate the documentation of exported
  * API items that may or may not belong to an external package.
@@ -204,6 +206,15 @@ export default class ApiDefinitionReference {
    */
   public toMemberString(): string {
     return this.toExportString() + `.${this.memberName}`;
+  }
+
+  public toApiItemReference(): IApiItemReference {
+    return {
+      scopeName: this.scopeName,
+      packageName: this.packageName,
+      exportName: this.exportName,
+      memberName: this.memberName
+    };
   }
 
   private constructor(parts: IApiDefinitionReferenceParts) {

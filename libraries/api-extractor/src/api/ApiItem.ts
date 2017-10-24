@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IDocElement } from '../markup/OldMarkup';
+import { MarkupElement } from '../markup/MarkupElement';
 
 /**
  * Represents a reference to an ApiItem.
@@ -58,7 +58,7 @@ export interface IApiParameter {
   /**
    * describes the parameter
    */
-  description: IDocElement[];
+  description: MarkupElement[];
 
   /**
    * Whether the parameter is optional
@@ -100,7 +100,7 @@ export interface IApiReturnValue {
   /**
    * Describes the return value
    */
-  description: IDocElement[];
+  description: MarkupElement[];
 }
 
 /**
@@ -117,9 +117,9 @@ export interface IApiBaseDefinition {
    */
   kind: string;
   isBeta: boolean;
-  summary: IDocElement[];
-  remarks?: IDocElement[];
-  deprecatedMessage?: IDocElement[];
+  summary: MarkupElement[];
+  remarks?: MarkupElement[];
+  deprecatedMessage?: MarkupElement[];
 }
 
 /**
@@ -382,9 +382,9 @@ export interface IApiPackage {
    * a package.
    */
   isBeta?: boolean;
-  summary?: IDocElement[];
-  remarks?: IDocElement[];
-  deprecatedMessage?: IDocElement[];
+  summary?: MarkupElement[];
+  remarks?: MarkupElement[];
+  deprecatedMessage?: MarkupElement[];
 }
 
 /**
@@ -407,5 +407,5 @@ export type ApiItem = IApiProperty | ApiMember | IApiFunction | IApiConstructor 
  */
 export interface IApiReturnValue {
   type: string;
-  description: IDocElement[];
+  description: MarkupElement[];
 }
