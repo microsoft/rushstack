@@ -6,6 +6,7 @@ import { GulpTask} from './GulpTask';
 import { IBuildConfig } from '../IBuildConfig';
 import * as Gulp from 'gulp';
 import * as Jest from 'jest-cli';
+import * as globby from 'globby';
 
 /**
  * Configuration for JestTask
@@ -78,6 +79,7 @@ export class JestTask extends GulpTask<IJestConfig> {
     const configFileFullPath: string = path.join(this.buildConfig.rootPath,
       'config', DEFAULT_JEST_CONFIG_FILE_NAME);
 
+    this._copySnapshots(this.buildConfig.srcFolder, this.buildConfig.libFolder);
     Jest.runCLI(
       {
         ci: this.buildConfig.production,
@@ -97,8 +99,19 @@ export class JestTask extends GulpTask<IJestConfig> {
         if (result.numFailedTests || result.numFailedTestSuites) {
           completeCallback(new Error('Jest tests failed'));
         } else {
+          if (!this.buildConfig.production) {
+            this._copySnapshots(this.buildConfig.libFolder, this.buildConfig.srcFolder);
+          }
           completeCallback();
         }
       });
+  }
+
+  private _copySnapshots(srcRoot: string, destRoot: string): void {
+    const pattern: string = path.join(srcRoot, '**/__snapshots__/*.snap');
+    globby.sync(pattern).forEach(sourceFile => {
+      const destination: string = sourceFile.replace(srcRoot, destRoot);
+      fsx.copySync(sourceFile, destination);
+    });
   }
 }
