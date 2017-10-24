@@ -39,8 +39,8 @@ export default class DocElementParser {
    */
   private static _hrefRegEx: RegExp = /^[a-z]+:\/\//;
 
-  public static parse(documentation: ApiDocumentation, tokenizer: Tokenizer): MarkupElement[] {
-    const markupElements: MarkupElement[] = [];
+  public static parse(documentation: ApiDocumentation, tokenizer: Tokenizer): MarkupBasicElement[] {
+    const markupElements: MarkupBasicElement[] = [];
     let parsing: boolean = true;
     let token: Token;
 
@@ -283,8 +283,8 @@ export default class DocElementParser {
    * 1. Remove leading/trailing white space
    * 2. Remove leading/trailing paragraph separators
    */
-  public static getTrimmedSpan(markupElements: MarkupElement[]): MarkupElement[] {
-    const span: MarkupElement[] = [];
+  public static getTrimmedSpan(markupElements: MarkupBasicElement[]): MarkupBasicElement[] {
+    const span: MarkupBasicElement[] = [];
     span.push(...markupElements);
 
     // Pop leading/trailing paragraph separators

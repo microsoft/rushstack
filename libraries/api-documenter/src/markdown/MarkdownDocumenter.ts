@@ -69,7 +69,7 @@ export class MarkdownDocumenter {
 
     const apiPackage: IApiPackage = docPackage.apiItem as IApiPackage;
 
-    markupPage.elements.push(...Markup.renderDocElements(apiPackage.summary));
+    markupPage.elements.push(...apiPackage.summary);
 
     const classesTable: IMarkupTable = Markup.createTable([
       Markup.createTextElements('Class'),
@@ -107,7 +107,7 @@ export class MarkdownDocumenter {
         docChildDescription.push(...Markup.createTextElements('(BETA)', { italics: true, bold: true }));
         docChildDescription.push(...Markup.createTextElements(' '));
       }
-      docChildDescription.push(...Markup.renderDocElements(apiChild.summary));
+      docChildDescription.push(...apiChild.summary);
 
       switch (apiChild.kind) {
         case 'class':
@@ -152,7 +152,7 @@ export class MarkdownDocumenter {
 
     if (apiPackage.remarks && apiPackage.remarks.length) {
       markupPage.elements.push(Markup.createHeading1('Remarks'));
-      markupPage.elements.push(...Markup.renderDocElements(apiPackage.remarks));
+      markupPage.elements.push(...apiPackage.remarks);
     }
 
     if (classesTable.rows.length > 0) {
@@ -192,7 +192,7 @@ export class MarkdownDocumenter {
       this._writeBetaWarning(markupPage.elements);
     }
 
-    markupPage.elements.push(...Markup.renderDocElements(apiClass.summary));
+    markupPage.elements.push(...apiClass.summary);
 
     const propertiesTable: IMarkupTable = Markup.createTable([
       Markup.createTextElements('Property'),
@@ -224,7 +224,7 @@ export class MarkdownDocumenter {
               propertyTitle,
               [],
               [Markup.createCode(apiMember.type, 'javascript')],
-              Markup.renderDocElements(apiMember.summary)
+              apiMember.summary
             ])
           );
           this._writePropertyPage(docMember);
@@ -243,7 +243,7 @@ export class MarkdownDocumenter {
               constructorTitle,
               [],
               [],
-              Markup.renderDocElements(apiMember.summary)
+              apiMember.summary
             ])
           );
           this._writeMethodPage(docMember);
@@ -261,7 +261,7 @@ export class MarkdownDocumenter {
               methodTitle,
               apiMember.accessModifier ? [Markup.createCode(apiMember.accessModifier, 'javascript')] : [],
               apiMember.returnValue ? [Markup.createCode(apiMember.returnValue.type, 'javascript')] : [],
-              Markup.renderDocElements(apiMember.summary)
+              apiMember.summary
             ])
           );
           this._writeMethodPage(docMember);
@@ -281,7 +281,7 @@ export class MarkdownDocumenter {
 
     if (apiClass.remarks && apiClass.remarks.length) {
       markupPage.elements.push(Markup.createHeading1('Remarks'));
-      markupPage.elements.push(...Markup.renderDocElements(apiClass.remarks));
+      markupPage.elements.push(...apiClass.remarks);
     }
 
     this._writePage(markupPage, docClass);
@@ -301,7 +301,7 @@ export class MarkdownDocumenter {
       this._writeBetaWarning(markupPage.elements);
     }
 
-    markupPage.elements.push(...Markup.renderDocElements(apiInterface.summary));
+    markupPage.elements.push(...apiInterface.summary);
 
     const propertiesTable: IMarkupTable = Markup.createTable([
       Markup.createTextElements('Property'),
@@ -330,7 +330,7 @@ export class MarkdownDocumenter {
             Markup.createTableRow([
               propertyTitle,
               [Markup.createCode(apiMember.type)],
-              Markup.renderDocElements(apiMember.summary)
+              apiMember.summary
             ])
           );
           this._writePropertyPage(docMember);
@@ -347,7 +347,7 @@ export class MarkdownDocumenter {
             Markup.createTableRow([
               methodTitle,
               apiMember.returnValue ? [Markup.createCode(apiMember.returnValue.type, 'javascript')] : [],
-              Markup.renderDocElements(apiMember.summary)
+              apiMember.summary
             ])
           );
           this._writeMethodPage(docMember);
@@ -367,7 +367,7 @@ export class MarkdownDocumenter {
 
     if (apiInterface.remarks && apiInterface.remarks.length) {
       markupPage.elements.push(Markup.createHeading1('Remarks'));
-      markupPage.elements.push(...Markup.renderDocElements(apiInterface.remarks));
+      markupPage.elements.push(...apiInterface.remarks);
     }
 
     this._writePage(markupPage, docInterface);
@@ -387,7 +387,7 @@ export class MarkdownDocumenter {
       this._writeBetaWarning(markupPage.elements);
     }
 
-    markupPage.elements.push(...Markup.renderDocElements(apiEnum.summary));
+    markupPage.elements.push(...apiEnum.summary);
 
     const membersTable: IMarkupTable = Markup.createTable([
       Markup.createTextElements('Member'),
@@ -408,7 +408,7 @@ export class MarkdownDocumenter {
         Markup.createTableRow([
           Markup.createTextElements(docEnumMember.name),
           enumValue,
-          Markup.renderDocElements(apiEnumMember.summary)
+          apiEnumMember.summary
         ])
       );
     }
@@ -434,7 +434,7 @@ export class MarkdownDocumenter {
       this._writeBetaWarning(markupPage.elements);
     }
 
-    markupPage.elements.push(...Markup.renderDocElements(apiProperty.summary));
+    markupPage.elements.push(...apiProperty.summary);
 
     markupPage.elements.push(Markup.PARAGRAPH);
     markupPage.elements.push(...Markup.createTextElements('Signature:', { bold: true }));
@@ -442,7 +442,7 @@ export class MarkdownDocumenter {
 
     if (apiProperty.remarks && apiProperty.remarks.length) {
       markupPage.elements.push(Markup.createHeading1('Remarks'));
-      markupPage.elements.push(...Markup.renderDocElements(apiProperty.remarks));
+      markupPage.elements.push(...apiProperty.remarks);
     }
 
     this._writePage(markupPage, docProperty);
@@ -463,7 +463,7 @@ export class MarkdownDocumenter {
       this._writeBetaWarning(markupPage.elements);
     }
 
-    markupPage.elements.push(...Markup.renderDocElements(apiMethod.summary));
+    markupPage.elements.push(...apiMethod.summary);
 
     markupPage.elements.push(Markup.PARAGRAPH);
     markupPage.elements.push(...Markup.createTextElements('Signature:', { bold: true }));
@@ -474,12 +474,12 @@ export class MarkdownDocumenter {
       markupPage.elements.push(...Markup.createTextElements(' '));
       markupPage.elements.push(Markup.createCode(apiMethod.returnValue.type, 'javascript'));
       markupPage.elements.push(Markup.PARAGRAPH);
-      markupPage.elements.push(...Markup.renderDocElements(apiMethod.returnValue.description));
+      markupPage.elements.push(...apiMethod.returnValue.description);
     }
 
     if (apiMethod.remarks && apiMethod.remarks.length) {
       markupPage.elements.push(Markup.createHeading1('Remarks'));
-      markupPage.elements.push(...Markup.renderDocElements(apiMethod.remarks));
+      markupPage.elements.push(...apiMethod.remarks);
     }
 
     if (Object.keys(apiMethod.parameters).length > 0) {
@@ -496,7 +496,7 @@ export class MarkdownDocumenter {
           parametersTable.rows.push(Markup.createTableRow([
             [Markup.createCode(parameterName, 'javascript')],
             apiParameter.type ? [Markup.createCode(apiParameter.type, 'javascript')] : [],
-            Markup.renderDocElements(apiParameter.description)
+            apiParameter.description
           ])
         );
       }
@@ -518,7 +518,7 @@ export class MarkdownDocumenter {
       this._writeBetaWarning(markupPage.elements);
     }
 
-    markupPage.elements.push(...Markup.renderDocElements(apiFunction.summary));
+    markupPage.elements.push(...apiFunction.summary);
 
     markupPage.elements.push(Markup.PARAGRAPH);
     markupPage.elements.push(...Markup.createTextElements('Signature:', { bold: true }));
@@ -529,12 +529,12 @@ export class MarkdownDocumenter {
       markupPage.elements.push(...Markup.createTextElements(' '));
       markupPage.elements.push(Markup.createCode(apiFunction.returnValue.type, 'javascript'));
       markupPage.elements.push(Markup.PARAGRAPH);
-      markupPage.elements.push(...Markup.renderDocElements(apiFunction.returnValue.description));
+      markupPage.elements.push(...apiFunction.returnValue.description);
     }
 
     if (apiFunction.remarks && apiFunction.remarks.length) {
       markupPage.elements.push(Markup.createHeading1('Remarks'));
-      markupPage.elements.push(...Markup.renderDocElements(apiFunction.remarks));
+      markupPage.elements.push(...apiFunction.remarks);
     }
 
     if (Object.keys(apiFunction.parameters).length > 0) {
@@ -551,7 +551,7 @@ export class MarkdownDocumenter {
           parametersTable.rows.push(Markup.createTableRow([
             [Markup.createCode(parameterName, 'javascript')],
             apiParameter.type ? [Markup.createCode(apiParameter.type, 'javascript')] : [],
-            Markup.renderDocElements(apiParameter.description)
+            apiParameter.description
           ])
         );
       }

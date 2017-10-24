@@ -25,6 +25,23 @@ import {
 import { IApiItemReference } from '../api/ApiItem';
 
 /**
+ * Options for {@link Markup.createTextElements}
+ *
+ * @public
+ */
+export interface IMarkupCreateTextOptions {
+  /**
+   * Whether the text should be boldfaced.
+   */
+  bold?: boolean;
+
+  /**
+   * Whether the text should be italicized.
+   */
+  italics?: boolean;
+}
+
+/**
  * Provides various operations for working with MarkupElement objects.
  *
  * @public
@@ -49,12 +66,11 @@ export class Markup {
    * optional formatting.
    *
    * @remarks
-   * The return value is represented as an array containing at most one element.
-   * Another possible design would be to return a single IMarkupText object that
-   * is possibly undefined; however, in practice appending arrays turns out to be
-   * more concise than checking for undefined.
+   * NOTE: All whitespace (including newlines) will be collapsed to single spaces.
+   * This behavior is similar to how HTML handles whitespace.  To preserve
+   * newlines, use {@link Markup.createTextParagraphs} instead.
    */
-  public static createTextElement(text: string, options?: { bold?: boolean, italics?: boolean } ): IMarkupText[] {
+  public static createTextElements(text: string, options?: IMarkupCreateTextOptions): IMarkupText[] {
     if (!text) {
       return [];
     } else {
@@ -72,8 +88,32 @@ export class Markup {
         }
       }
 
+      // The return value is represented as an array containing at most one element.
+      // Another possible design would be to return a single IMarkupText object that
+      // is possibly undefined; however, in practice appending arrays turns out to be
+      // more concise than checking for undefined.
       return [ result ];
     }
+  }
+
+  /**
+   * This function is similar to {@link Markup.createTextElements}, except that multiple newlines
+   * will be converted to a Markup.PARAGRAPH object.
+   */
+  public static createTextParagraphs(text: string, options?: IMarkupCreateTextOptions): MarkupBasicElement[] {
+    const result: MarkupBasicElement[] = [];
+
+    if (text) {
+      // Split up the paragraphs
+      for (const paragraph of text.split(/\n\s*\n/g)) {
+        if (result.length > 0) {
+          result.push(Markup.PARAGRAPH);
+        }
+        result.push(...Markup.createTextElements(paragraph, options));
+      }
+    }
+
+    return result;
   }
 
   /**

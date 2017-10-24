@@ -3,7 +3,7 @@
 
 import AstItem, { AstItemKind } from './ast/AstItem';
 import { ReleaseTag } from './aedoc/ReleaseTag';
-import { MarkupElement } from './markup/MarkupElement';
+import { MarkupElement, MarkupBasicElement } from './markup/MarkupElement';
 import { ApiItem } from './api/ApiItem';
 import { ApiJsonConverter } from './api/ApiJsonConverter';
 import { IAedocParameter } from './aedoc/ApiDocumentation';
@@ -16,11 +16,11 @@ export default class ResolvedApiItem {
   public kind: AstItemKind;
   public summary: MarkupElement[];
   public remarks: MarkupElement[];
-  public deprecatedMessage: MarkupElement[];
+  public deprecatedMessage: MarkupBasicElement[];
   public releaseTag: ReleaseTag;
   public isBeta: boolean;
   public params: {[name: string]: IAedocParameter};
-  public returnsMessage: MarkupElement[];
+  public returnsMessage: MarkupBasicElement[];
   /**
    * This property will either be an AstItem or undefined.
    */
@@ -50,7 +50,7 @@ export default class ResolvedApiItem {
    */
   public static createFromJson(docItem: ApiItem): ResolvedApiItem {
     let parameters: {[name: string]: IAedocParameter} = undefined;
-    let returnsMessage: MarkupElement[] = undefined;
+    let returnsMessage: MarkupBasicElement[] = undefined;
     switch (docItem.kind) {
       case 'function':
         parameters = docItem.parameters;
@@ -81,10 +81,10 @@ export default class ResolvedApiItem {
     kind: AstItemKind,
     summary: MarkupElement[],
     remarks: MarkupElement[],
-    deprecatedMessage: MarkupElement[],
+    deprecatedMessage: MarkupBasicElement[],
     isBeta: boolean,
     params:  {[name: string]: IAedocParameter},
-    returnsMessage: MarkupElement[],
+    returnsMessage: MarkupBasicElement[],
     releaseTag: ReleaseTag,
     astItem: AstItem) {
     this.kind = kind;

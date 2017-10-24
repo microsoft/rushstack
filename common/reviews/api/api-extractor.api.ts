@@ -25,14 +25,14 @@ interface IAnalyzeProjectOptions {
 // @alpha
 interface IApiBaseDefinition {
   // (undocumented)
-  deprecatedMessage?: MarkupElement[];
+  deprecatedMessage?: MarkupBasicElement[];
   // (undocumented)
   isBeta: boolean;
   kind: string;
   // (undocumented)
-  remarks?: MarkupElement[];
+  remarks: MarkupStructuredElement[];
   // (undocumented)
-  summary: MarkupElement[];
+  summary: MarkupBasicElement[];
 }
 
 // @alpha
@@ -116,20 +116,20 @@ interface IApiNamespace extends IApiBaseDefinition {
 // @alpha
 interface IApiPackage {
   // (undocumented)
-  deprecatedMessage?: MarkupElement[];
+  deprecatedMessage?: MarkupBasicElement[];
   exports: IApiNameMap<ApiItem>;
-  isBeta?: boolean;
+  isBeta: boolean;
   kind: 'package';
   name: string;
   // (undocumented)
-  remarks?: MarkupElement[];
+  remarks: MarkupStructuredElement[];
   // (undocumented)
-  summary?: MarkupElement[];
+  summary: MarkupBasicElement[];
 }
 
 // @alpha
 interface IApiParameter {
-  description: MarkupElement[];
+  description: MarkupBasicElement[];
   isOptional: boolean;
   isSpread: boolean;
   name: string;
@@ -149,7 +149,7 @@ interface IApiProperty extends IApiBaseDefinition {
 // @alpha
 interface IApiReturnValue {
   // (undocumented)
-  description: MarkupElement[];
+  description: MarkupBasicElement[];
   // (undocumented)
   type: string;
 }
@@ -234,6 +234,12 @@ interface IMarkupCodeBox {
   // (undocumented)
   kind: 'code-box';
   text: string;
+}
+
+// @public
+interface IMarkupCreateTextOptions {
+  bold?: boolean;
+  italics?: boolean;
 }
 
 // @alpha
@@ -352,7 +358,8 @@ class Markup {
   public static createPage(title: string): IMarkupPage;
   public static createTable(headerCellValues: MarkupBasicElement[][] | undefined = undefined): IMarkupTable;
   public static createTableRow(cellValues: MarkupBasicElement[][] | undefined = undefined): IMarkupTableRow;
-  public static createTextElements(text: string, options?: { bold?: boolean, italics?: boolean }): IMarkupText[];
+  public static createTextElements(text: string, options?: IMarkupCreateTextOptions): IMarkupText[];
+  public static createTextParagraphs(text: string, options?: IMarkupCreateTextOptions): MarkupBasicElement[];
   public static createWebLink(textElements: MarkupLinkTextElement[], targetUrl: string): IMarkupWebLink;
   public static createWebLinkFromText(text: string, targetUrl: string): IMarkupWebLink;
   public static extractTextContent(elements: MarkupElement[]): string;

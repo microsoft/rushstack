@@ -11,7 +11,7 @@ import Tokenizer from './Tokenizer';
 import { ExtractorContext } from '../ExtractorContext';
 import ResolvedApiItem from '../ResolvedApiItem';
 import { ReleaseTag } from './ReleaseTag';
-import { MarkupElement, IMarkupApiLink } from '../markup/MarkupElement';
+import { MarkupElement, MarkupBasicElement, IMarkupApiLink } from '../markup/MarkupElement';
 import { Markup } from '../markup/Markup';
 
 /**
@@ -37,7 +37,7 @@ export interface IReferenceResolver {
  */
 export interface IAedocParameter {
   name: string;
-  description: MarkupElement[];
+  description: MarkupBasicElement[];
 }
 
 export default class ApiDocumentation {
@@ -97,9 +97,9 @@ export default class ApiDocumentation {
    * docCommentTokens that are parsed into Doc Elements.
    */
   public summary: MarkupElement[];
-  public deprecatedMessage: MarkupElement[];
+  public deprecatedMessage: MarkupBasicElement[];
   public remarks: MarkupElement[];
-  public returnsMessage: MarkupElement[];
+  public returnsMessage: MarkupBasicElement[];
   public parameters: { [name: string]: IAedocParameter; };
 
   /**
@@ -358,10 +358,10 @@ export default class ApiDocumentation {
         return;
       }
 
-      const commentTextElements: MarkupElement[] = Markup.createTextElements(comment);
+      const commentTextElements: MarkupBasicElement[] = Markup.createTextElements(comment);
       // Full param description may contain additional Tokens (Ex: @link)
-      const remainingElements: MarkupElement[] = DocElementParser.parse(this, tokenizer);
-      const descriptionElements: MarkupElement[] = commentTextElements.concat(remainingElements);
+      const remainingElements: MarkupBasicElement[] = DocElementParser.parse(this, tokenizer);
+      const descriptionElements: MarkupBasicElement[] = commentTextElements.concat(remainingElements);
 
       const paramDocElement: IAedocParameter = {
         name: name,

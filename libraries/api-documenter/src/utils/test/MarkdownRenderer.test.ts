@@ -50,13 +50,13 @@ describe('MarkdownPageRenderer', () => {
     markupPage.elements.push(...Markup.createTextElements('three*four', { bold: true }));
 
     markupPage.elements.push(Markup.createHeading1('Characters that should be escaped'));
-    markupPage.elements.push(...Markup.createTextElements(
+    markupPage.elements.push(...Markup.createTextParagraphs(
       'Double-encoded JSON: "{ \\"A\\": 123}"\n\n'));
-    markupPage.elements.push(...Markup.createTextElements(
+    markupPage.elements.push(...Markup.createTextParagraphs(
       'HTML chars: <script>alert("[You] are #1!");</script>\n\n'));
-    markupPage.elements.push(...Markup.createTextElements(
+    markupPage.elements.push(...Markup.createTextParagraphs(
       'HTML escape: &quot;\n\n'));
-    markupPage.elements.push(...Markup.createTextElements(
+    markupPage.elements.push(...Markup.createTextParagraphs(
       '3 or more hyphens: - -- --- ---- ----- ------\n\n'));
 
     const outputFilename: string = path.join(outputFolder, 'ActualOutput.md');

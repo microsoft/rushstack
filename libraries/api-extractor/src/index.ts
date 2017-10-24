@@ -26,4 +26,4 @@ export { ILogger } from './extractor/ILogger';
 export * from './api/ApiItem';
 export { ApiJsonFile } from './api/ApiJsonFile';
 export * from './markup/MarkupElement';
-export { Markup } from './markup/Markup';
+export { Markup, IMarkupCreateTextOptions } from './markup/Markup';

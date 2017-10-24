@@ -1,7 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { MarkupElement } from '../markup/MarkupElement';
+import {
+  MarkupBasicElement,
+  MarkupStructuredElement
+} from '../markup/MarkupElement';
 
 /**
  * Represents a reference to an ApiItem.
@@ -58,7 +61,7 @@ export interface IApiParameter {
   /**
    * describes the parameter
    */
-  description: MarkupElement[];
+  description: MarkupBasicElement[];
 
   /**
    * Whether the parameter is optional
@@ -100,7 +103,7 @@ export interface IApiReturnValue {
   /**
    * Describes the return value
    */
-  description: MarkupElement[];
+  description: MarkupBasicElement[];
 }
 
 /**
@@ -117,9 +120,9 @@ export interface IApiBaseDefinition {
    */
   kind: string;
   isBeta: boolean;
-  summary: MarkupElement[];
-  remarks?: MarkupElement[];
-  deprecatedMessage?: MarkupElement[];
+  summary: MarkupBasicElement[];
+  remarks: MarkupStructuredElement[];
+  deprecatedMessage?: MarkupBasicElement[];
 }
 
 /**
@@ -381,10 +384,10 @@ export interface IApiPackage {
    * does not extend the IApiBaseDefinition because a summary is not required for
    * a package.
    */
-  isBeta?: boolean;
-  summary?: MarkupElement[];
-  remarks?: MarkupElement[];
-  deprecatedMessage?: MarkupElement[];
+  isBeta: boolean;
+  summary: MarkupBasicElement[];
+  remarks: MarkupStructuredElement[];
+  deprecatedMessage?: MarkupBasicElement[];
 }
 
 /**
@@ -407,5 +410,5 @@ export type ApiItem = IApiProperty | ApiMember | IApiFunction | IApiConstructor 
  */
 export interface IApiReturnValue {
   type: string;
-  description: MarkupElement[];
+  description: MarkupBasicElement[];
 }
