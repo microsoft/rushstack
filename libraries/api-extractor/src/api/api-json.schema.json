@@ -4,39 +4,153 @@
 
   "definitions": {
     //=============================================================================================
-    // Documentation Elements
+    // Markup Elements
     //=============================================================================================
 
     //---------------------------------------------------------------------------------------------
-    "textDocElement": {
-      "description": "A documentation element representing a block of plain text",
+    "markupText": {
+      "description": "A block of plain text, possibly with simple formatting such as bold or italics",
       "type": "object",
 
       "properties": {
         "kind": {
-          "description": "The kind of documentation element",
+          "description": "The kind of markup element",
           "type": "string",
-          "enum": [ "textDocElement" ]
+          "enum": [ "text" ]
         },
-        "value": {
-          "description": "The text",
+        "text": {
+          "description": "The text content to display",
+          "type": "string"
+        },
+        "bold": {
+          "description": "Whether the text should be formatted using boldface",
+          "type": "boolean"
+        },
+        "italics": {
+          "description": "Whether the text should be formatted using italics",
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "text" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "markupHighlightedText": {
+      "description": "Source code shown in a fixed-width font, with syntax highlighting",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of markup element",
+          "type": "string",
+          "enum": [ "code" ]
+        },
+        "text": {
+          "description": "The text content to display",
+          "type": "string"
+        },
+        "highlighter": {
+          "description": "The syntax highlighting to be applied to the text",
+          "type": "string",
+          "enum": [ "javascript", "plain" ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "text", "highlighter" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "markupLinkTextElement": {
+      "description": "Represents markup that can be used as the link text for a hyperlink",
+      "type": "object",
+      "oneOf": [
+        { "$ref": "#/definitions/markupText" },
+        { "$ref": "#/definitions/markupHighlightedText" }
+      ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "markupApiLink": {
+      "description": "A hyperlink to an API item",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of markup element",
+          "type": "string",
+          "enum": [ "api-link" ]
+        },
+        "elements": {
+          "description": "The link text",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupLinkTextElement" }
+        },
+        "target": {
+          "description": "The API item that will serve as the hyperlink target",
+          "type": "object",
+          "properties": {
+            "scopeName": {
+              "description": "An optional NPM scope for the package name",
+              "type": "string"
+            },
+            "packageName": {
+              "description": "The name of the NPM package being referenced (must be a nonempty string)",
+              "type": "string",
+              "minLength": 1
+            },
+            "exportName": {
+              "description": "The name of the package export",
+              "type": "string"
+            },
+            "memberName": {
+              "description": "An optional name of a member of the package export",
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [ "scopeName", "packageName", "exportName", "memberName" ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "elements", "target" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "markupWebLink": {
+      "description": "A hyperlink to an internet URL",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of markup element",
+          "type": "string",
+          "enum": [ "web-link" ]
+        },
+        "elements": {
+          "description": "The link text",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupLinkTextElement" }
+        },
+        "targetUrl": {
+          "description": "The internet URL that will serve as the hyperlink target",
           "type": "string"
         }
       },
       "additionalProperties": false,
-      "required": [ "kind", "value" ]
+      "required": [ "kind", "elements", "target" ]
     },
 
     //---------------------------------------------------------------------------------------------
-    "paragraphDocElement": {
-      "description": "A documentation element representing a break between paragraphs",
+    "markupParagraph": {
+      "description": "A paragraph separator, similar to the \"<p>\" tag in HTML",
       "type": "object",
 
       "properties": {
         "kind": {
-          "description": "The kind of documentation element",
+          "description": "The kind of markup element",
           "type": "string",
-          "enum": [ "paragraphDocElement" ]
+          "enum": [ "paragraph" ]
         }
       },
       "additionalProperties": false,
@@ -44,90 +158,199 @@
     },
 
     //---------------------------------------------------------------------------------------------
-    "linkDocElement": {
-      "description": "A documentation element representing a hyperlink",
+    "markupLineBreak": {
+      "description": "A line break, similar to the \"<br>\" tag in HTML.",
       "type": "object",
 
       "properties": {
         "kind": {
-          "description": "The kind of documentation element",
+          "description": "The kind of markup element",
           "type": "string",
-          "enum": [ "linkDocElement" ]
-        },
-        "referenceType": {
-          "description": "The link can either refer to a API definition or href",
+          "enum": [ "break" ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "markupBasicElement": {
+      "description": "Represents basic text consisting of paragraphs and links (without structures such as headers or tables)",
+      "type": "object",
+      "oneOf": [
+        { "$ref": "#/definitions/markupLinkTextElement" },
+        { "$ref": "#/definitions/markupApiLink" },
+        { "$ref": "#/definitions/markupWebLink" },
+        { "$ref": "#/definitions/markupParagraph" },
+        { "$ref": "#/definitions/markupLineBreak" }
+      ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "markupHeading1": {
+      "description": "A top-level heading",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of markup element",
           "type": "string",
-          "enum": [ "href", "code" ]
+          "enum": [ "heading1" ]
         },
-        "targetUrl": {
-          "description": "The target URL for the hyperlink",
-          "type": "string"
-        },
-        "value": {
-          "description": "An optional display name to show for a link",
-          "type": "string"
-        },
-        "memberName": {
-          "description": "An optional name that specifies the export item",
-          "type": "string"
-        },
-        "exportName": {
-          "description": "A name that is required if the referenceType is code",
-          "type": "string"
-        },
-        "packageName": {
-          "description": "The name of the package being referenced (must be a nonempty string)",
-          "type": "string",
-          "minLength": 1
-        },
-        "scopeName": {
-          "description": "An optional name that scopes the package name",
+        "text": {
+          "description": "The heading title",
           "type": "string"
         }
       },
       "additionalProperties": false,
-      "required": [ "kind", "referenceType" ]
+      "required": [ "kind", "text" ]
     },
 
     //---------------------------------------------------------------------------------------------
-    "seeDocElement": {
-      "description": "A documentation element representing a see js doc tag",
+    "markupHeading2": {
+      "description": "A sub heading",
       "type": "object",
 
       "properties": {
         "kind": {
-          "description": "The kind of documentation element",
+          "description": "The kind of markup element",
           "type": "string",
-          "enum": [ "seeDocElement" ]
+          "enum": [ "heading2" ]
         },
-        "seeElements": {
-          "description": "The element collection that follows the see js dog tag.",
+        "text": {
+          "description": "The heading title",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "text" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "markupCodeBox": {
+      "description": "A box containing source code with syntax highlighting",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of markup element",
+          "type": "string",
+          "enum": [ "code-box" ]
+        },
+        "text": {
+          "description": "The text content to display",
+          "type": "string"
+        },
+        "highlighter": {
+          "description": "The syntax highlighting to be applied to the text",
+          "type": "string",
+          "enum": [ "javascript", "plain" ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "text", "highlighter" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "markupNoteBox": {
+      "description": "A call-out box containing an informational note",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of markup element",
+          "type": "string",
+          "enum": [ "note-box" ]
+        },
+        "text": {
+          "description": "The text content to display",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "text" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "markupTable": {
+      "description": "A table, with an optional header row",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of markup element",
+          "type": "string",
+          "enum": [ "table" ]
+        },
+
+        "header": { "$ref": "#/definitions/markupTableRow" },
+
+        "rows": {
+          "description": "The table rows",
           "type": "array",
-          "items": {
-            "oneOf": [
-              { "$ref": "#/definitions/textDocElement" },
-              { "$ref": "#/definitions/paragraphDocElement" },
-              { "$ref": "#/definitions/linkDocElement" }
-            ]
-          }
+          "items": { "$ref": "#/definitions/markupTableRow" }
         }
       },
       "additionalProperties": false,
-      "required": [ "kind", "seeElements" ]
+      "required": [ "kind", "rows" ]
     },
 
     //---------------------------------------------------------------------------------------------
-    "docElementCollection": {
-      "description": "A block of annotated text, represented as a list of documentation elements",
-      "type": "array",
-      "items": {
-        "oneOf": [
-          { "$ref": "#/definitions/textDocElement" },
-          { "$ref": "#/definitions/paragraphDocElement" },
-          { "$ref": "#/definitions/linkDocElement" },
-          { "$ref": "#/definitions/seeDocElement" }
-        ]
-      }
+    "markupStructuredElement": {
+      "description": "Represents structured text that contains headings, tables, and boxes",
+      "type": "object",
+      "oneOf": [
+        { "$ref": "#/definitions/markupBasicElement" },
+        { "$ref": "#/definitions/markupHeading1" },
+        { "$ref": "#/definitions/markupHeading2" },
+        { "$ref": "#/definitions/markupCodeBox" },
+        { "$ref": "#/definitions/markupNoteBox" },
+        { "$ref": "#/definitions/markupTable" }
+      ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "markupTableCell": {
+      "description": "A cell inside an table row element",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of markup element",
+          "type": "string",
+          "enum": [ "table-cell" ]
+        },
+
+        "elements": {
+          "description": "The cell text",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "elements" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "markupTableRow": {
+      "description": "A row inside an table element",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of markup element",
+          "type": "string",
+          "enum": [ "table-row" ]
+        },
+
+        "cells": {
+          "description": "The cells comprising this row, ordered from left to right",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupTableCell" }
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "elements" ]
     },
 
     //=============================================================================================
@@ -146,7 +369,9 @@
           "enum": [ "constructor" ]
         },
         "summary": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "A short description of the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
         },
         "signature": {
           "description": "A text summary of the method definition",
@@ -164,7 +389,9 @@
                   "type": "string"
                 },
                 "description": {
-                  "$ref": "#/definitions/docElementCollection"
+                  "description": "A description of the parameter",
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/markupBasicElement" }
                 },
                 "isOptional": {
                   "description": "Whether the parameter is optional",
@@ -186,10 +413,14 @@
 
         // Optional properties:
         "remarks": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "Detailed additional notes regarding the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupStructuredElement" }
         },
         "deprecatedMessage": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
         }
       },
       "additionalProperties": false,
@@ -234,15 +465,21 @@
           "type": "boolean"
         },
         "summary": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "A short description of the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
         },
 
         // Optional properties:
         "remarks": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "Detailed additional notes regarding the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupStructuredElement" }
         },
         "deprecatedMessage": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
         }
       },
       "additionalProperties": false,
@@ -273,7 +510,9 @@
           "type": "string"
         },
         "summary": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "A short description of the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
         },
         "isBeta": {
           "description": "Whether the API method is beta",
@@ -282,10 +521,14 @@
 
         // Optional properties:
         "remarks": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "Detailed additional notes regarding the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupStructuredElement" }
         },
         "deprecatedMessage": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
         }
       },
       "additionalProperties": false,
@@ -336,7 +579,9 @@
                   "type": "string"
                 },
                 "description": {
-                  "$ref": "#/definitions/docElementCollection"
+                  "description": "A description of the parameter",
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/markupBasicElement" }
                 },
                 "isOptional": {
                   "description": "Whether the parameter is optional",
@@ -364,22 +609,30 @@
               "type": "string"
             },
             "description": {
-              "$ref": "#/definitions/docElementCollection"
-            }
+              "description": "A description of the return value",
+              "type": "array",
+              "items": { "$ref": "#/definitions/markupBasicElement" }
+            },
           },
           "additionalProperties": false,
           "required": [ "type", "description" ]
         },
         "summary": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "A short description of the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
         },
 
         // Optional properties:
         "remarks": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "Detailed additional notes regarding the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupStructuredElement" }
         },
         "deprecatedMessage": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
         }
       },
       "additionalProperties": false,
@@ -413,7 +666,9 @@
                   "type": "string"
                 },
                 "description": {
-                  "$ref": "#/definitions/docElementCollection"
+                  "description": "A description of the parameter",
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/markupBasicElement" }
                 },
                 "isOptional": {
                   "description": "Whether the parameter is optional",
@@ -441,14 +696,18 @@
               "type": "string"
             },
             "description": {
-              "$ref": "#/definitions/docElementCollection"
+              "description": "A description of the return value",
+              "type": "array",
+              "items": { "$ref": "#/definitions/markupBasicElement" }
             }
           },
           "additionalProperties": false,
           "required": [ "type", "description" ]
         },
         "summary": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "A short description of the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
         },
         "isBeta": {
           "description": "Whether the API method is beta",
@@ -457,10 +716,14 @@
 
         // Optional properties:
         "remarks": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "Detailed additional notes regarding the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupStructuredElement" }
         },
         "deprecatedMessage": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
         }
       },
       "additionalProperties": false,
@@ -480,7 +743,9 @@
           "enum": [ "class" ]
         },
         "summary": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "A short description of the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
         },
         "members": {
           "type": "object",
@@ -518,10 +783,14 @@
 
         // Optional properties:
         "remarks": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "Detailed additional notes regarding the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupStructuredElement" }
         },
         "deprecatedMessage": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
         }
       },
       "additionalProperties": false,
@@ -540,7 +809,9 @@
           "enum": [ "enum" ]
         },
         "summary": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "A short description of the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
         },
         "isBeta": {
           "description": "Whether the API enum is beta",
@@ -558,10 +829,14 @@
 
         // Optional properties:
         "remarks": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "Detailed additional notes regarding the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupStructuredElement" }
         },
         "deprecatedMessage": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
         }
       },
       "additionalProperties": false,
@@ -580,7 +855,9 @@
           "enum": [ "enum value" ]
         },
         "summary": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "A short description of the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
         },
         "isBeta": {
           "description": "Whether the API enum member is beta",
@@ -593,10 +870,14 @@
 
         // Optional properties:
         "remarks": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "Detailed additional notes regarding the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupStructuredElement" }
         },
         "deprecatedMessage": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
         }
       },
       "additionalProperties": false,
@@ -615,7 +896,9 @@
           "enum": [ "interface" ]
         },
         "summary": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "A short description of the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
         },
         "members": {
           "type": "object",
@@ -652,10 +935,14 @@
 
         // Optional properties:
         "remarks": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "Detailed additional notes regarding the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupStructuredElement" }
         },
         "deprecatedMessage": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
         }
       },
       "additionalProperties": false,
@@ -674,7 +961,9 @@
           "enum": [ "namespace" ]
         },
         "summary": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "A short description of the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
         },
         "exports": {
           "type": "object",
@@ -702,10 +991,14 @@
 
         // Optional properties:
         "remarks": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "Detailed additional notes regarding the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupStructuredElement" }
         },
         "deprecatedMessage": {
-          "$ref": "#/definitions/docElementCollection"
+          "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
         }
       },
       "additionalProperties": false,
@@ -732,10 +1025,14 @@
       "type": "string"
     },
     "summary": {
-          "$ref": "#/definitions/docElementCollection"
+      "description": "A short description of the item",
+      "type": "array",
+      "items": { "$ref": "#/definitions/markupBasicElement" }
     },
     "remarks": {
-          "$ref": "#/definitions/docElementCollection"
+      "description": "Detailed additional notes regarding the item",
+      "type": "array",
+      "items": { "$ref": "#/definitions/markupStructuredElement" }
     },
     "exports": {
       "description": "The exported definitions for this API package",
