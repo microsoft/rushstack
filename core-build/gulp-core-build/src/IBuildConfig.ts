@@ -122,4 +122,10 @@ export interface IBuildConfig {
    * Flag used to indicate if the build is redundant and should be exited prematurely.
    */
   isRedundantBuild?: boolean;
+
+  /**
+   * Flag to indicate whether Jest is enabled.
+   * If Jest is enabled, mocha and Karma are disabled.
+   */
+  jestEnabled?: boolean;
 }

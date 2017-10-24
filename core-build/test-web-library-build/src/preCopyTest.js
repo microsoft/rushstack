@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-export default function preCopyTest() {
-  /* no-op */
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+function preCopyTest() {
+    /* no-op */
 }
+exports.default = preCopyTest;
+

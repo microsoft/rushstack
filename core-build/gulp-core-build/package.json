@@ -50,7 +50,9 @@
     "semver": "~5.3.0",
     "through2": "~2.0.1",
     "yargs": "~4.6.0",
-    "z-schema": "~3.18.3"
+    "z-schema": "~3.18.3",
+    "jest-cli": "~20.0.4",
+    "jest": "~20.0.4"
   },
   "devDependencies": {
     "@types/z-schema": "3.16.31",

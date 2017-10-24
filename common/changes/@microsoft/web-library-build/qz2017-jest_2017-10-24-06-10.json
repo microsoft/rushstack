@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/web-library-build",
+      "comment": "Support Jest task",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/web-library-build",
+  "email": "qz2017@users.noreply.github.com"
+}
