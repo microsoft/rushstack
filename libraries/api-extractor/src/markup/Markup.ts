@@ -25,17 +25,36 @@ import {
 import { IApiItemReference } from '../api/ApiItem';
 
 /**
- * A helper class for generating MarkupElement structures.
+ * Provides various operations for working with MarkupElement objects.
+ *
+ * @public
  */
 export class Markup {
+  /**
+   * A predefined constant for the IMarkupLineBreak element.
+   */
   public static BREAK: IMarkupLineBreak = {
     kind: 'break'
   };
+
+  /**
+   * A predefined constant for the IMarkupParagraph element.
+   */
   public static PARAGRAPH: IMarkupParagraph = {
     kind: 'paragraph'
   };
 
-  public static createTextElements(text: string, options?: { bold?: boolean, italics?: boolean } ): IMarkupText[] {
+  /**
+   * Constructs an IMarkupText element representing the specified text string, with
+   * optional formatting.
+   *
+   * @remarks
+   * The return value is represented as an array containing at most one element.
+   * Another possible design would be to return a single IMarkupText object that
+   * is possibly undefined; however, in practice appending arrays turns out to be
+   * more concise than checking for undefined.
+   */
+  public static createTextElement(text: string, options?: { bold?: boolean, italics?: boolean } ): IMarkupText[] {
     if (!text) {
       return [];
     } else {
@@ -57,6 +76,12 @@ export class Markup {
     }
   }
 
+  /**
+   * Constructs an IMarkupApiLink element that represents a hyperlink to the specified
+   * API object.  The hyperlink is applied to an existing stream of markup elements.
+   * @param textElements - the markup sequence that will serve as the link text
+   * @param target - the API object that the hyperlink will point to
+   */
   public static createApiLink(textElements: MarkupLinkTextElement[], target: IApiItemReference): IMarkupApiLink {
     if (!textElements.length) {
       throw new Error('Missing text for link');
@@ -69,10 +94,21 @@ export class Markup {
     } as IMarkupApiLink;
   }
 
+  /**
+   * Constructs an IMarkupApiLink element that represents a hyperlink to the specified
+   * API object.  The hyperlink is applied to a plain text string.
+   * @param text - the text string that will serve as the link text
+   * @param target - the API object that the hyperlink will point to
+   */
   public static createApiLinkFromText(text: string, target: IApiItemReference): IMarkupApiLink {
     return Markup.createApiLink(Markup.createTextElements(text), target);
   }
 
+  /**
+   * Constructs an IMarkupWebLink element that represents a hyperlink an internet URL.
+   * @param textElements - the markup sequence that will serve as the link text
+   * @param targetUrl - the URL that the hyperlink will point to
+   */
   public static createWebLink(textElements: MarkupLinkTextElement[], targetUrl: string): IMarkupWebLink {
     if (!textElements.length) {
       throw new Error('Missing text for link');
@@ -88,10 +124,19 @@ export class Markup {
     };
   }
 
+  /**
+   * Constructs an IMarkupWebLink element that represents a hyperlink an internet URL.
+   * @param text - the plain text string that will serve as the link text
+   * @param targetUrl - the URL that the hyperlink will point to
+   */
   public static createWebLinkFromText(text: string, targetUrl: string): IMarkupWebLink {
     return Markup.createWebLink(Markup.createTextElements(text), targetUrl);
   }
 
+  /**
+   * Constructs an IMarkupHighlightedText element representing a program code text
+   * with optional syntax highlighting
+   */
   public static createCode(code: string, highlighter?: MarkupHighlighter): IMarkupHighlightedText {
     if (!code) {
       throw new Error('The code parameter is missing');
@@ -103,6 +148,9 @@ export class Markup {
     } as IMarkupHighlightedText;
   }
 
+  /**
+   * Constructs an IMarkupHeading1 element with the specified title text
+   */
   public static createHeading1(text: string): IMarkupHeading1 {
     return {
       kind: 'heading1',
@@ -110,6 +158,9 @@ export class Markup {
     };
   }
 
+  /**
+   * Constructs an IMarkupHeading2 element with the specified title text
+   */
   public static createHeading2(text: string): IMarkupHeading2 {
     return {
       kind: 'heading2',
@@ -117,6 +168,10 @@ export class Markup {
     };
   }
 
+  /**
+   * Constructs an IMarkupCodeBox element representing a program code text
+   * with the specified syntax highlighting
+   */
   public static createCodeBox(code: string, highlighter: MarkupHighlighter): IMarkupCodeBox {
     if (!code) {
       throw new Error('The code parameter is missing');
@@ -128,6 +183,9 @@ export class Markup {
     } as IMarkupCodeBox;
   }
 
+  /**
+   * Constructs an IMarkupNoteBox element that will display the specified markup content
+   */
   public static createNoteBox(textElements: MarkupBasicElement[]): IMarkupNoteBox {
     return {
       kind: 'note-box',
@@ -135,10 +193,17 @@ export class Markup {
     } as IMarkupNoteBox;
   }
 
+  /**
+   * Constructs an IMarkupNoteBox element that will display the specified plain text string
+   */
   public static createNoteBoxFromText(text: string): IMarkupNoteBox {
     return Markup.createNoteBox(Markup.createTextElements(text));
   }
 
+  /**
+   * Constructs an IMarkupTableRow element containing the specified cells, which each contain a
+   * sequence of MarkupBasicElement content
+   */
   public static createTableRow(cellValues: MarkupBasicElement[][] | undefined = undefined): IMarkupTableRow {
     const row: IMarkupTableRow = {
       kind: 'table-row',
@@ -158,6 +223,12 @@ export class Markup {
     return row;
   }
 
+  /**
+   * Constructs an IMarkupTable element containing the specified header cells, which each contain a
+   * sequence of MarkupBasicElement content.
+   * @remarks
+   * The table initially has zero rows.
+   */
   public static createTable(headerCellValues: MarkupBasicElement[][] | undefined = undefined): IMarkupTable {
     let header: IMarkupTableRow | undefined = undefined;
     if (headerCellValues) {
@@ -170,6 +241,9 @@ export class Markup {
     } as IMarkupTable;
   }
 
+  /**
+   * Constructs an IMarkupTable element with the specified title.
+   */
   public static createPage(title: string): IMarkupPage {
     return {
       kind: 'page',

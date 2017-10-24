@@ -25,14 +25,14 @@ interface IAnalyzeProjectOptions {
 // @alpha
 interface IApiBaseDefinition {
   // (undocumented)
-  deprecatedMessage?: IDocElement[];
+  deprecatedMessage?: MarkupElement[];
   // (undocumented)
   isBeta: boolean;
   kind: string;
   // (undocumented)
-  remarks?: IDocElement[];
+  remarks?: MarkupElement[];
   // (undocumented)
-  summary: IDocElement[];
+  summary: MarkupElement[];
 }
 
 // @alpha
@@ -116,20 +116,20 @@ interface IApiNamespace extends IApiBaseDefinition {
 // @alpha
 interface IApiPackage {
   // (undocumented)
-  deprecatedMessage?: IDocElement[];
+  deprecatedMessage?: MarkupElement[];
   exports: IApiNameMap<ApiItem>;
   isBeta?: boolean;
   kind: 'package';
   name: string;
   // (undocumented)
-  remarks?: IDocElement[];
+  remarks?: MarkupElement[];
   // (undocumented)
-  summary?: IDocElement[];
+  summary?: MarkupElement[];
 }
 
 // @alpha
 interface IApiParameter {
-  description: IDocElement[];
+  description: MarkupElement[];
   isOptional: boolean;
   isSpread: boolean;
   name: string;
@@ -149,26 +149,9 @@ interface IApiProperty extends IApiBaseDefinition {
 // @alpha
 interface IApiReturnValue {
   // (undocumented)
-  description: IDocElement[];
+  description: MarkupElement[];
   // (undocumented)
   type: string;
-}
-
-// @alpha
-interface IBaseDocElement {
-  // (undocumented)
-  kind: string;
-}
-
-// WARNING: Unable to find referenced export "@microsoft/api-extractor:ApiReference"
-// @alpha
-interface ICodeLinkElement extends IBaseDocElement {
-  exportName: string;
-  memberName?: string;
-  packageName?: string;
-  referenceType: 'code';
-  scopeName?: string;
-  value?: string;
 }
 
 // @public
@@ -224,13 +207,6 @@ interface IExtractorTsconfigCompilerConfig {
   overrideTsconfig?: {
   }
   rootFolder: string;
-}
-
-// @alpha (undocumented)
-interface IHrefLinkElement extends IBaseDocElement {
-  referenceType: 'href';
-  targetUrl: string;
-  value?: string;
 }
 
 // @public
@@ -362,26 +338,25 @@ interface IMarkupWebLink {
   targetUrl: string;
 }
 
-// @alpha
-interface IParagraphElement extends IBaseDocElement {
-  // (undocumented)
-  kind: 'paragraphDocElement';
-}
-
-// @alpha
-interface ISeeDocElement extends IBaseDocElement {
-  // (undocumented)
-  kind: 'seeDocElement';
-  // (undocumented)
-  seeElements: IDocElement[];
-}
-
-// @alpha
-interface ITextElement extends IBaseDocElement {
-  // (undocumented)
-  kind: 'textDocElement';
-  // (undocumented)
-  value: string;
+// @public
+class Markup {
+  public static BREAK: IMarkupLineBreak;
+  public static createApiLink(textElements: MarkupLinkTextElement[], target: IApiItemReference): IMarkupApiLink;
+  public static createApiLinkFromText(text: string, target: IApiItemReference): IMarkupApiLink;
+  public static createCode(code: string, highlighter?: MarkupHighlighter): IMarkupHighlightedText;
+  public static createCodeBox(code: string, highlighter: MarkupHighlighter): IMarkupCodeBox;
+  public static createHeading1(text: string): IMarkupHeading1;
+  public static createHeading2(text: string): IMarkupHeading2;
+  public static createNoteBox(textElements: MarkupBasicElement[]): IMarkupNoteBox;
+  public static createNoteBoxFromText(text: string): IMarkupNoteBox;
+  public static createPage(title: string): IMarkupPage;
+  public static createTable(headerCellValues: MarkupBasicElement[][] | undefined = undefined): IMarkupTable;
+  public static createTableRow(cellValues: MarkupBasicElement[][] | undefined = undefined): IMarkupTableRow;
+  public static createTextElements(text: string, options?: { bold?: boolean, italics?: boolean }): IMarkupText[];
+  public static createWebLink(textElements: MarkupLinkTextElement[], targetUrl: string): IMarkupWebLink;
+  public static createWebLinkFromText(text: string, targetUrl: string): IMarkupWebLink;
+  public static extractTextContent(elements: MarkupElement[]): string;
+  public static PARAGRAPH: IMarkupParagraph;
 }
 
 // WARNING: Unsupported export: ApiAccessModifier
@@ -392,5 +367,3 @@ interface ITextElement extends IBaseDocElement {
 // WARNING: Unsupported export: MarkupBasicElement
 // WARNING: Unsupported export: MarkupStructuredElement
 // WARNING: Unsupported export: MarkupElement
-// WARNING: Unsupported export: ILinkDocElement
-// WARNING: Unsupported export: IDocElement
