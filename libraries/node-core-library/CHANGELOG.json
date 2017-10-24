@@ -2,6 +2,20 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "0.3.8",
+      "tag": "@microsoft/node-core-library_v0.3.8",
+      "date": "Mon, 23 Oct 2017 21:53:12 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "5de032b254b632b8af0d0dd98913acef589f88d5",
+            "comment": "Updated cyclic dependencies"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.7",
       "tag": "@microsoft/node-core-library_v0.3.7",
       "date": "Fri, 20 Oct 2017 19:57:12 GMT",

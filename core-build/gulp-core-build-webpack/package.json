@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-webpack",
-  "version": "3.2.5",
+  "version": "3.2.6",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -15,7 +15,7 @@
     "test": "gulp"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.1.5",
+    "@microsoft/gulp-core-build": "3.1.6",
     "@types/gulp": "3.8.32",
     "@types/node": "6.0.88",
     "gulp": "~3.9.1",
@@ -23,7 +23,7 @@
     "webpack": "~3.6.0"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "~3.2.0",
+    "@microsoft/node-library-build": "~4.1.5",
     "@types/orchestrator": "0.0.30",
     "@types/q": "0.0.32",
     "@types/source-map": "0.5.0",

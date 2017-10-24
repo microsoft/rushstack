@@ -21,7 +21,7 @@
 
 - **Alpha/Beta graduation:**  You want to release previews of new APIs that are not ready for prime time yet.  If you did a major SemVer bump every time you change these definitions, the villagers would be after you with torches and pitchforks.  A better approach is to designate certain classes/members as "**alpha**" quality, then promote them to "**beta**" and finally to "**public**" when they're mature.  But how to indicate this to your consumers?  (And how to detect scoping mistakes?  A "public" function should never return a "beta" result.)
 
-- **Online documentation:**  You have faithfully annotated each TypeScript member with nice [JSDoc](http://usejsdoc.org/) descriptions.  Now that your library is published, you should probably set up [a nicely formatted](https://dev.office.com/sharepoint/reference/spfx/sp-page-context/cultureinfo) API reference.  Which tool should we use to generate that?  (What!?  There aren't any good ones!?)
+- **Online documentation:**  You have faithfully annotated each TypeScript member with nice [JSDoc](http://usejsdoc.org/) descriptions.  Now that your library is published, you should probably set up [a nicely formatted](https://docs.microsoft.com/en-us/javascript/api/sp-http) API reference.  Which tool should we use to generate that?  (What!?  There aren't any good ones!?)
 
 **API Extractor** provides an integrated, professional-quality solution for all these problems.  It is invoked at build time by your toolchain and leverages the TypeScript compiler engine to:
 

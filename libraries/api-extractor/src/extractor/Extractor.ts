@@ -50,7 +50,7 @@ export interface IExtractorOptions {
   /**
    * Indicates that API Extractor is running as part of a local build, e.g. on developer's
    * machine. This disables certain validation that would normally be performed
-   * for a ship/production build. For example, the *.api.ts signature file is
+   * for a ship/production build. For example, the *.api.ts review file is
    * automatically local in a debug build.
    *
    * The default value is false.
