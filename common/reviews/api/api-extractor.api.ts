@@ -217,21 +217,17 @@ interface ILogger {
   logWarning(message: string): void;
 }
 
-// @alpha
+// @public
 interface IMarkupApiLink {
-  // (undocumented)
   elements: MarkupLinkTextElement[];
-  // (undocumented)
   kind: 'api-link';
-  // (undocumented)
   target: IApiItemReference;
 }
 
-// @alpha
+// @public
 interface IMarkupCodeBox {
   // (undocumented)
   highlighter: MarkupHighlighter;
-  // (undocumented)
   kind: 'code-box';
   text: string;
 }
@@ -242,105 +238,87 @@ interface IMarkupCreateTextOptions {
   italics?: boolean;
 }
 
-// @alpha
+// @public
 interface IMarkupHeading1 {
-  // (undocumented)
   kind: 'heading1';
   text: string;
 }
 
-// @alpha
+// @public
 interface IMarkupHeading2 {
-  // (undocumented)
   kind: 'heading2';
   text: string;
 }
 
-// @alpha
+// @public
 interface IMarkupHighlightedText {
-  // (undocumented)
   highlighter: MarkupHighlighter;
-  // (undocumented)
   kind: 'code';
   text: string;
 }
 
-// @alpha
+// @public
 interface IMarkupLineBreak {
-  // (undocumented)
   kind: 'break';
 }
 
-// @alpha
+// @public
 interface IMarkupNoteBox {
   // (undocumented)
   elements: MarkupBasicElement[];
-  // (undocumented)
   kind: 'note-box';
 }
 
-// @alpha
+// @public
 interface IMarkupPage {
   // (undocumented)
   breadcrumb: MarkupBasicElement[];
   // (undocumented)
   elements: MarkupStructuredElement[];
-  // (undocumented)
   kind: 'page';
   // (undocumented)
   title: string;
 }
 
-// @alpha
+// @public
 interface IMarkupParagraph {
-  // (undocumented)
   kind: 'paragraph';
 }
 
-// @alpha
+// @public
 interface IMarkupTable {
   // (undocumented)
   header?: IMarkupTableRow;
-  // (undocumented)
   kind: 'table';
   // (undocumented)
   rows: IMarkupTableRow[];
 }
 
-// @alpha
+// @public
 interface IMarkupTableCell {
-  // (undocumented)
   elements: MarkupBasicElement[];
-  // (undocumented)
   kind: 'table-cell';
 }
 
-// @alpha
+// @public
 interface IMarkupTableRow {
   // (undocumented)
   cells: IMarkupTableCell[];
-  // (undocumented)
   kind: 'table-row';
 }
 
-// @alpha
+// @public
 interface IMarkupText {
-  // (undocumented)
   bold?: boolean;
-  // (undocumented)
   italics?: boolean;
-  // (undocumented)
   kind: 'text';
   text: string;
 }
 
-// @alpha
+// @public
 interface IMarkupWebLink {
-  // (undocumented)
   elements: MarkupLinkTextElement[];
-  // (undocumented)
   kind: 'web-link';
-  // (undocumented)
   targetUrl: string;
 }
 
