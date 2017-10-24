@@ -154,13 +154,14 @@ export class CustomRushAction extends BaseRushAction {
 
   private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {
     const extraData: { [key: string]: string } = {
-      to: (!!this._toFlag.value).toString(),
-      from: (!!this._fromFlag.value).toString()
+      command_to: (!!this._toFlag.value).toString(),
+      command_from: (!!this._fromFlag.value).toString()
     };
 
     this.customOptions.forEach((customOption: ICustomOptionInstance) => {
       if (customOption.parameterValue.value) {
-        extraData[customOption.longName] = customOption.parameterValue.value.toString();
+        extraData[`${this.options.actionVerb}_${customOption.longName}`] =
+          customOption.parameterValue.value.toString();
       }
     });
 
