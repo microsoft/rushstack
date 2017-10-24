@@ -18,6 +18,7 @@ import {
   IApiMethod,
   IMarkupPage,
   IMarkupTable,
+  Markup,
   MarkupBasicElement,
   MarkupStructuredElement
 } from '@microsoft/api-extractor';
@@ -29,7 +30,6 @@ import {
   IDocItemSetResolveResult
 } from '../utils/DocItemSet';
 import { Utilities } from '../utils/Utilities';
-import { MarkupBuilder } from '../utils/MarkupBuilder';
 import { MarkdownRenderer, IMarkdownRenderApiLinkArgs } from '../utils/MarkdownRenderer';
 
 /**
@@ -64,55 +64,55 @@ export class MarkdownDocumenter {
 
     const unscopedPackageName: string = Utilities.getUnscopedPackageName(docPackage.name);
 
-    const markupPage: IMarkupPage = MarkupBuilder.createPage(`${unscopedPackageName} package`);
+    const markupPage: IMarkupPage = Markup.createPage(`${unscopedPackageName} package`);
     this._writeBreadcrumb(markupPage, docPackage);
 
     const apiPackage: IApiPackage = docPackage.apiItem as IApiPackage;
 
-    markupPage.elements.push(...MarkupBuilder.renderDocElements(apiPackage.summary));
+    markupPage.elements.push(...Markup.renderDocElements(apiPackage.summary));
 
-    const classesTable: IMarkupTable = MarkupBuilder.createTable([
-      MarkupBuilder.createTextElements('Class'),
-      MarkupBuilder.createTextElements('Description')
+    const classesTable: IMarkupTable = Markup.createTable([
+      Markup.createTextElements('Class'),
+      Markup.createTextElements('Description')
     ]);
 
-    const interfacesTable: IMarkupTable = MarkupBuilder.createTable([
-      MarkupBuilder.createTextElements('Interface'),
-      MarkupBuilder.createTextElements('Description')
+    const interfacesTable: IMarkupTable = Markup.createTable([
+      Markup.createTextElements('Interface'),
+      Markup.createTextElements('Description')
     ]);
 
-    const functionsTable: IMarkupTable = MarkupBuilder.createTable([
-      MarkupBuilder.createTextElements('Function'),
-      MarkupBuilder.createTextElements('Returns'),
-      MarkupBuilder.createTextElements('Description')
+    const functionsTable: IMarkupTable = Markup.createTable([
+      Markup.createTextElements('Function'),
+      Markup.createTextElements('Returns'),
+      Markup.createTextElements('Description')
     ]);
 
-    const enumerationsTable: IMarkupTable = MarkupBuilder.createTable([
-      MarkupBuilder.createTextElements('Enumeration'),
-      MarkupBuilder.createTextElements('Description')
+    const enumerationsTable: IMarkupTable = Markup.createTable([
+      Markup.createTextElements('Enumeration'),
+      Markup.createTextElements('Description')
     ]);
 
     for (const docChild of docPackage.children) {
       const apiChild: ApiItem = docChild.apiItem;
 
       const docItemTitle: MarkupBasicElement[] = [
-        MarkupBuilder.createApiLink(
-          [ MarkupBuilder.createCode(docChild.name, 'javascript') ],
+        Markup.createApiLink(
+          [ Markup.createCode(docChild.name, 'javascript') ],
           docChild.getApiReference())
       ];
 
       const docChildDescription: MarkupBasicElement[] = [];
 
       if (apiChild.isBeta) {
-        docChildDescription.push(...MarkupBuilder.createTextElements('(BETA)', { italics: true, bold: true }));
-        docChildDescription.push(...MarkupBuilder.createTextElements(' '));
+        docChildDescription.push(...Markup.createTextElements('(BETA)', { italics: true, bold: true }));
+        docChildDescription.push(...Markup.createTextElements(' '));
       }
-      docChildDescription.push(...MarkupBuilder.renderDocElements(apiChild.summary));
+      docChildDescription.push(...Markup.renderDocElements(apiChild.summary));
 
       switch (apiChild.kind) {
         case 'class':
           classesTable.rows.push(
-            MarkupBuilder.createTableRow([
+            Markup.createTableRow([
               docItemTitle,
               docChildDescription
             ])
@@ -121,7 +121,7 @@ export class MarkdownDocumenter {
           break;
         case 'interface':
           interfacesTable.rows.push(
-            MarkupBuilder.createTableRow([
+            Markup.createTableRow([
               docItemTitle,
               docChildDescription
             ])
@@ -130,9 +130,9 @@ export class MarkdownDocumenter {
           break;
         case 'function':
           functionsTable.rows.push(
-            MarkupBuilder.createTableRow([
+            Markup.createTableRow([
               docItemTitle,
-              apiChild.returnValue ? [MarkupBuilder.createCode(apiChild.returnValue.type, 'javascript')] : [],
+              apiChild.returnValue ? [Markup.createCode(apiChild.returnValue.type, 'javascript')] : [],
               docChildDescription
             ])
           );
@@ -140,7 +140,7 @@ export class MarkdownDocumenter {
           break;
         case 'enum':
           enumerationsTable.rows.push(
-            MarkupBuilder.createTableRow([
+            Markup.createTableRow([
               docItemTitle,
               docChildDescription
             ])
@@ -151,27 +151,27 @@ export class MarkdownDocumenter {
     }
 
     if (apiPackage.remarks && apiPackage.remarks.length) {
-      markupPage.elements.push(MarkupBuilder.createHeading1('Remarks'));
-      markupPage.elements.push(...MarkupBuilder.renderDocElements(apiPackage.remarks));
+      markupPage.elements.push(Markup.createHeading1('Remarks'));
+      markupPage.elements.push(...Markup.renderDocElements(apiPackage.remarks));
     }
 
     if (classesTable.rows.length > 0) {
-      markupPage.elements.push(MarkupBuilder.createHeading1('Classes'));
+      markupPage.elements.push(Markup.createHeading1('Classes'));
       markupPage.elements.push(classesTable);
     }
 
     if (interfacesTable.rows.length > 0) {
-      markupPage.elements.push(MarkupBuilder.createHeading1('Interfaces'));
+      markupPage.elements.push(Markup.createHeading1('Interfaces'));
       markupPage.elements.push(interfacesTable);
     }
 
     if (functionsTable.rows.length > 0) {
-      markupPage.elements.push(MarkupBuilder.createHeading1('Functions'));
+      markupPage.elements.push(Markup.createHeading1('Functions'));
       markupPage.elements.push(functionsTable);
     }
 
     if (enumerationsTable.rows.length > 0) {
-      markupPage.elements.push(MarkupBuilder.createHeading1('Enumerations'));
+      markupPage.elements.push(Markup.createHeading1('Enumerations'));
       markupPage.elements.push(enumerationsTable);
     }
 
@@ -185,27 +185,27 @@ export class MarkdownDocumenter {
     const apiClass: IApiClass = docClass.apiItem as IApiClass;
 
     // TODO: Show concise generic parameters with class name
-    const markupPage: IMarkupPage = MarkupBuilder.createPage(`${docClass.name} class`);
+    const markupPage: IMarkupPage = Markup.createPage(`${docClass.name} class`);
     this._writeBreadcrumb(markupPage, docClass);
 
     if (apiClass.isBeta) {
       this._writeBetaWarning(markupPage.elements);
     }
 
-    markupPage.elements.push(...MarkupBuilder.renderDocElements(apiClass.summary));
+    markupPage.elements.push(...Markup.renderDocElements(apiClass.summary));
 
-    const propertiesTable: IMarkupTable = MarkupBuilder.createTable([
-      MarkupBuilder.createTextElements('Property'),
-      MarkupBuilder.createTextElements('Access Modifier'),
-      MarkupBuilder.createTextElements('Type'),
-      MarkupBuilder.createTextElements('Description')
+    const propertiesTable: IMarkupTable = Markup.createTable([
+      Markup.createTextElements('Property'),
+      Markup.createTextElements('Access Modifier'),
+      Markup.createTextElements('Type'),
+      Markup.createTextElements('Description')
     ]);
 
-    const methodsTable: IMarkupTable = MarkupBuilder.createTable([
-      MarkupBuilder.createTextElements('Method'),
-      MarkupBuilder.createTextElements('Access Modifier'),
-      MarkupBuilder.createTextElements('Returns'),
-      MarkupBuilder.createTextElements('Description')
+    const methodsTable: IMarkupTable = Markup.createTable([
+      Markup.createTextElements('Method'),
+      Markup.createTextElements('Access Modifier'),
+      Markup.createTextElements('Returns'),
+      Markup.createTextElements('Description')
     ]);
 
     for (const docMember of docClass.children) {
@@ -214,17 +214,17 @@ export class MarkdownDocumenter {
       switch (apiMember.kind) {
         case 'property':
           const propertyTitle: MarkupBasicElement[] = [
-            MarkupBuilder.createApiLink(
-              [MarkupBuilder.createCode(docMember.name, 'javascript')],
+            Markup.createApiLink(
+              [Markup.createCode(docMember.name, 'javascript')],
               docMember.getApiReference())
           ];
 
           propertiesTable.rows.push(
-            MarkupBuilder.createTableRow([
+            Markup.createTableRow([
               propertyTitle,
               [],
-              [MarkupBuilder.createCode(apiMember.type, 'javascript')],
-              MarkupBuilder.renderDocElements(apiMember.summary)
+              [Markup.createCode(apiMember.type, 'javascript')],
+              Markup.renderDocElements(apiMember.summary)
             ])
           );
           this._writePropertyPage(docMember);
@@ -233,17 +233,17 @@ export class MarkdownDocumenter {
         case 'constructor':
           // TODO: Extract constructor into its own section
           const constructorTitle: MarkupBasicElement[] = [
-            MarkupBuilder.createApiLink(
-              [MarkupBuilder.createCode(Utilities.getConciseSignature(docMember.name, apiMember), 'javascript')],
+            Markup.createApiLink(
+              [Markup.createCode(Utilities.getConciseSignature(docMember.name, apiMember), 'javascript')],
               docMember.getApiReference())
           ];
 
           methodsTable.rows.push(
-            MarkupBuilder.createTableRow([
+            Markup.createTableRow([
               constructorTitle,
               [],
               [],
-              MarkupBuilder.renderDocElements(apiMember.summary)
+              Markup.renderDocElements(apiMember.summary)
             ])
           );
           this._writeMethodPage(docMember);
@@ -251,17 +251,17 @@ export class MarkdownDocumenter {
 
         case 'method':
           const methodTitle: MarkupBasicElement[] = [
-            MarkupBuilder.createApiLink(
-              [MarkupBuilder.createCode(Utilities.getConciseSignature(docMember.name, apiMember), 'javascript')],
+            Markup.createApiLink(
+              [Markup.createCode(Utilities.getConciseSignature(docMember.name, apiMember), 'javascript')],
               docMember.getApiReference())
           ];
 
           methodsTable.rows.push(
-            MarkupBuilder.createTableRow([
+            Markup.createTableRow([
               methodTitle,
-              apiMember.accessModifier ? [MarkupBuilder.createCode(apiMember.accessModifier, 'javascript')] : [],
-              apiMember.returnValue ? [MarkupBuilder.createCode(apiMember.returnValue.type, 'javascript')] : [],
-              MarkupBuilder.renderDocElements(apiMember.summary)
+              apiMember.accessModifier ? [Markup.createCode(apiMember.accessModifier, 'javascript')] : [],
+              apiMember.returnValue ? [Markup.createCode(apiMember.returnValue.type, 'javascript')] : [],
+              Markup.renderDocElements(apiMember.summary)
             ])
           );
           this._writeMethodPage(docMember);
@@ -270,18 +270,18 @@ export class MarkdownDocumenter {
     }
 
     if (propertiesTable.rows.length > 0) {
-      markupPage.elements.push(MarkupBuilder.createHeading1('Properties'));
+      markupPage.elements.push(Markup.createHeading1('Properties'));
       markupPage.elements.push(propertiesTable);
     }
 
     if (methodsTable.rows.length > 0) {
-      markupPage.elements.push(MarkupBuilder.createHeading1('Methods'));
+      markupPage.elements.push(Markup.createHeading1('Methods'));
       markupPage.elements.push(methodsTable);
     }
 
     if (apiClass.remarks && apiClass.remarks.length) {
-      markupPage.elements.push(MarkupBuilder.createHeading1('Remarks'));
-      markupPage.elements.push(...MarkupBuilder.renderDocElements(apiClass.remarks));
+      markupPage.elements.push(Markup.createHeading1('Remarks'));
+      markupPage.elements.push(...Markup.renderDocElements(apiClass.remarks));
     }
 
     this._writePage(markupPage, docClass);
@@ -294,25 +294,25 @@ export class MarkdownDocumenter {
     const apiInterface: IApiInterface = docInterface.apiItem as IApiInterface;
 
     // TODO: Show concise generic parameters with class name
-    const markupPage: IMarkupPage = MarkupBuilder.createPage(`${docInterface.name} interface`);
+    const markupPage: IMarkupPage = Markup.createPage(`${docInterface.name} interface`);
     this._writeBreadcrumb(markupPage, docInterface);
 
     if (apiInterface.isBeta) {
       this._writeBetaWarning(markupPage.elements);
     }
 
-    markupPage.elements.push(...MarkupBuilder.renderDocElements(apiInterface.summary));
+    markupPage.elements.push(...Markup.renderDocElements(apiInterface.summary));
 
-    const propertiesTable: IMarkupTable = MarkupBuilder.createTable([
-      MarkupBuilder.createTextElements('Property'),
-      MarkupBuilder.createTextElements('Type'),
-      MarkupBuilder.createTextElements('Description')
+    const propertiesTable: IMarkupTable = Markup.createTable([
+      Markup.createTextElements('Property'),
+      Markup.createTextElements('Type'),
+      Markup.createTextElements('Description')
     ]);
 
-    const methodsTable: IMarkupTable = MarkupBuilder.createTable([
-      MarkupBuilder.createTextElements('Method'),
-      MarkupBuilder.createTextElements('Returns'),
-      MarkupBuilder.createTextElements('Description')
+    const methodsTable: IMarkupTable = Markup.createTable([
+      Markup.createTextElements('Method'),
+      Markup.createTextElements('Returns'),
+      Markup.createTextElements('Description')
     ]);
 
     for (const docMember of docInterface.children) {
@@ -321,16 +321,16 @@ export class MarkdownDocumenter {
       switch (apiMember.kind) {
         case 'property':
           const propertyTitle: MarkupBasicElement[] = [
-            MarkupBuilder.createApiLink(
-              [MarkupBuilder.createCode(docMember.name, 'javascript')],
+            Markup.createApiLink(
+              [Markup.createCode(docMember.name, 'javascript')],
               docMember.getApiReference())
           ];
 
           propertiesTable.rows.push(
-            MarkupBuilder.createTableRow([
+            Markup.createTableRow([
               propertyTitle,
-              [MarkupBuilder.createCode(apiMember.type)],
-              MarkupBuilder.renderDocElements(apiMember.summary)
+              [Markup.createCode(apiMember.type)],
+              Markup.renderDocElements(apiMember.summary)
             ])
           );
           this._writePropertyPage(docMember);
@@ -338,16 +338,16 @@ export class MarkdownDocumenter {
 
         case 'method':
           const methodTitle: MarkupBasicElement[] = [
-            MarkupBuilder.createApiLink(
-              [MarkupBuilder.createCode(Utilities.getConciseSignature(docMember.name, apiMember), 'javascript')],
+            Markup.createApiLink(
+              [Markup.createCode(Utilities.getConciseSignature(docMember.name, apiMember), 'javascript')],
               docMember.getApiReference())
           ];
 
           methodsTable.rows.push(
-            MarkupBuilder.createTableRow([
+            Markup.createTableRow([
               methodTitle,
-              apiMember.returnValue ? [MarkupBuilder.createCode(apiMember.returnValue.type, 'javascript')] : [],
-              MarkupBuilder.renderDocElements(apiMember.summary)
+              apiMember.returnValue ? [Markup.createCode(apiMember.returnValue.type, 'javascript')] : [],
+              Markup.renderDocElements(apiMember.summary)
             ])
           );
           this._writeMethodPage(docMember);
@@ -356,18 +356,18 @@ export class MarkdownDocumenter {
     }
 
     if (propertiesTable.rows.length > 0) {
-      markupPage.elements.push(MarkupBuilder.createHeading1('Properties'));
+      markupPage.elements.push(Markup.createHeading1('Properties'));
       markupPage.elements.push(propertiesTable);
     }
 
     if (methodsTable.rows.length > 0) {
-      markupPage.elements.push(MarkupBuilder.createHeading1('Methods'));
+      markupPage.elements.push(Markup.createHeading1('Methods'));
       markupPage.elements.push(methodsTable);
     }
 
     if (apiInterface.remarks && apiInterface.remarks.length) {
-      markupPage.elements.push(MarkupBuilder.createHeading1('Remarks'));
-      markupPage.elements.push(...MarkupBuilder.renderDocElements(apiInterface.remarks));
+      markupPage.elements.push(Markup.createHeading1('Remarks'));
+      markupPage.elements.push(...Markup.renderDocElements(apiInterface.remarks));
     }
 
     this._writePage(markupPage, docInterface);
@@ -380,19 +380,19 @@ export class MarkdownDocumenter {
     const apiEnum: IApiEnum = docEnum.apiItem as IApiEnum;
 
     // TODO: Show concise generic parameters with class name
-    const markupPage: IMarkupPage = MarkupBuilder.createPage(`${docEnum.name} enumeration`);
+    const markupPage: IMarkupPage = Markup.createPage(`${docEnum.name} enumeration`);
     this._writeBreadcrumb(markupPage, docEnum);
 
     if (apiEnum.isBeta) {
       this._writeBetaWarning(markupPage.elements);
     }
 
-    markupPage.elements.push(...MarkupBuilder.renderDocElements(apiEnum.summary));
+    markupPage.elements.push(...Markup.renderDocElements(apiEnum.summary));
 
-    const membersTable: IMarkupTable = MarkupBuilder.createTable([
-      MarkupBuilder.createTextElements('Member'),
-      MarkupBuilder.createTextElements('Value'),
-      MarkupBuilder.createTextElements('Description')
+    const membersTable: IMarkupTable = Markup.createTable([
+      Markup.createTextElements('Member'),
+      Markup.createTextElements('Value'),
+      Markup.createTextElements('Description')
     ]);
 
     for (const docEnumMember of docEnum.children) {
@@ -401,14 +401,14 @@ export class MarkdownDocumenter {
       const enumValue: MarkupBasicElement[] = [];
 
       if (apiEnumMember.value) {
-        enumValue.push(MarkupBuilder.createCode('= ' + apiEnumMember.value));
+        enumValue.push(Markup.createCode('= ' + apiEnumMember.value));
       }
 
       membersTable.rows.push(
-        MarkupBuilder.createTableRow([
-          MarkupBuilder.createTextElements(docEnumMember.name),
+        Markup.createTableRow([
+          Markup.createTextElements(docEnumMember.name),
           enumValue,
-          MarkupBuilder.renderDocElements(apiEnumMember.summary)
+          Markup.renderDocElements(apiEnumMember.summary)
         ])
       );
     }
@@ -427,22 +427,22 @@ export class MarkdownDocumenter {
     const apiProperty: IApiProperty = docProperty.apiItem as IApiProperty;
     const fullProperyName: string = docProperty.parent!.name + '.' + docProperty.name;
 
-    const markupPage: IMarkupPage = MarkupBuilder.createPage(`${fullProperyName} property`);
+    const markupPage: IMarkupPage = Markup.createPage(`${fullProperyName} property`);
     this._writeBreadcrumb(markupPage, docProperty);
 
     if (apiProperty.isBeta) {
       this._writeBetaWarning(markupPage.elements);
     }
 
-    markupPage.elements.push(...MarkupBuilder.renderDocElements(apiProperty.summary));
+    markupPage.elements.push(...Markup.renderDocElements(apiProperty.summary));
 
-    markupPage.elements.push(MarkupBuilder.PARAGRAPH);
-    markupPage.elements.push(...MarkupBuilder.createTextElements('Signature:', { bold: true }));
-    markupPage.elements.push(MarkupBuilder.createCodeBox(docProperty.name + ': ' + apiProperty.type, 'javascript'));
+    markupPage.elements.push(Markup.PARAGRAPH);
+    markupPage.elements.push(...Markup.createTextElements('Signature:', { bold: true }));
+    markupPage.elements.push(Markup.createCodeBox(docProperty.name + ': ' + apiProperty.type, 'javascript'));
 
     if (apiProperty.remarks && apiProperty.remarks.length) {
-      markupPage.elements.push(MarkupBuilder.createHeading1('Remarks'));
-      markupPage.elements.push(...MarkupBuilder.renderDocElements(apiProperty.remarks));
+      markupPage.elements.push(Markup.createHeading1('Remarks'));
+      markupPage.elements.push(...Markup.renderDocElements(apiProperty.remarks));
     }
 
     this._writePage(markupPage, docProperty);
@@ -456,47 +456,47 @@ export class MarkdownDocumenter {
 
     const fullMethodName: string = docMethod.parent!.name + '.' + docMethod.name;
 
-    const markupPage: IMarkupPage = MarkupBuilder.createPage(`${fullMethodName} method`);
+    const markupPage: IMarkupPage = Markup.createPage(`${fullMethodName} method`);
     this._writeBreadcrumb(markupPage, docMethod);
 
     if (apiMethod.isBeta) {
       this._writeBetaWarning(markupPage.elements);
     }
 
-    markupPage.elements.push(...MarkupBuilder.renderDocElements(apiMethod.summary));
+    markupPage.elements.push(...Markup.renderDocElements(apiMethod.summary));
 
-    markupPage.elements.push(MarkupBuilder.PARAGRAPH);
-    markupPage.elements.push(...MarkupBuilder.createTextElements('Signature:', { bold: true }));
-    markupPage.elements.push(MarkupBuilder.createCodeBox(apiMethod.signature, 'javascript'));
+    markupPage.elements.push(Markup.PARAGRAPH);
+    markupPage.elements.push(...Markup.createTextElements('Signature:', { bold: true }));
+    markupPage.elements.push(Markup.createCodeBox(apiMethod.signature, 'javascript'));
 
     if (apiMethod.returnValue) {
-      markupPage.elements.push(...MarkupBuilder.createTextElements('Returns:', { bold: true }));
-      markupPage.elements.push(...MarkupBuilder.createTextElements(' '));
-      markupPage.elements.push(MarkupBuilder.createCode(apiMethod.returnValue.type, 'javascript'));
-      markupPage.elements.push(MarkupBuilder.PARAGRAPH);
-      markupPage.elements.push(...MarkupBuilder.renderDocElements(apiMethod.returnValue.description));
+      markupPage.elements.push(...Markup.createTextElements('Returns:', { bold: true }));
+      markupPage.elements.push(...Markup.createTextElements(' '));
+      markupPage.elements.push(Markup.createCode(apiMethod.returnValue.type, 'javascript'));
+      markupPage.elements.push(Markup.PARAGRAPH);
+      markupPage.elements.push(...Markup.renderDocElements(apiMethod.returnValue.description));
     }
 
     if (apiMethod.remarks && apiMethod.remarks.length) {
-      markupPage.elements.push(MarkupBuilder.createHeading1('Remarks'));
-      markupPage.elements.push(...MarkupBuilder.renderDocElements(apiMethod.remarks));
+      markupPage.elements.push(Markup.createHeading1('Remarks'));
+      markupPage.elements.push(...Markup.renderDocElements(apiMethod.remarks));
     }
 
     if (Object.keys(apiMethod.parameters).length > 0) {
-      const parametersTable: IMarkupTable = MarkupBuilder.createTable([
-        MarkupBuilder.createTextElements('Parameter'),
-        MarkupBuilder.createTextElements('Type'),
-        MarkupBuilder.createTextElements('Description')
+      const parametersTable: IMarkupTable = Markup.createTable([
+        Markup.createTextElements('Parameter'),
+        Markup.createTextElements('Type'),
+        Markup.createTextElements('Description')
       ]);
 
-      markupPage.elements.push(MarkupBuilder.createHeading1('Parameters'));
+      markupPage.elements.push(Markup.createHeading1('Parameters'));
       markupPage.elements.push(parametersTable);
       for (const parameterName of Object.keys(apiMethod.parameters)) {
         const apiParameter: IApiParameter = apiMethod.parameters[parameterName];
-          parametersTable.rows.push(MarkupBuilder.createTableRow([
-            [MarkupBuilder.createCode(parameterName, 'javascript')],
-            apiParameter.type ? [MarkupBuilder.createCode(apiParameter.type, 'javascript')] : [],
-            MarkupBuilder.renderDocElements(apiParameter.description)
+          parametersTable.rows.push(Markup.createTableRow([
+            [Markup.createCode(parameterName, 'javascript')],
+            apiParameter.type ? [Markup.createCode(apiParameter.type, 'javascript')] : [],
+            Markup.renderDocElements(apiParameter.description)
           ])
         );
       }
@@ -511,47 +511,47 @@ export class MarkdownDocumenter {
   private _writeFunctionPage(docFunction: DocItem): void {
     const apiFunction: IApiFunction = docFunction.apiItem as IApiFunction;
 
-    const markupPage: IMarkupPage = MarkupBuilder.createPage(`${docFunction.name} function`);
+    const markupPage: IMarkupPage = Markup.createPage(`${docFunction.name} function`);
     this._writeBreadcrumb(markupPage, docFunction);
 
     if (apiFunction.isBeta) {
       this._writeBetaWarning(markupPage.elements);
     }
 
-    markupPage.elements.push(...MarkupBuilder.renderDocElements(apiFunction.summary));
+    markupPage.elements.push(...Markup.renderDocElements(apiFunction.summary));
 
-    markupPage.elements.push(MarkupBuilder.PARAGRAPH);
-    markupPage.elements.push(...MarkupBuilder.createTextElements('Signature:', { bold: true }));
-    markupPage.elements.push(MarkupBuilder.createCodeBox(docFunction.name, 'javascript'));
+    markupPage.elements.push(Markup.PARAGRAPH);
+    markupPage.elements.push(...Markup.createTextElements('Signature:', { bold: true }));
+    markupPage.elements.push(Markup.createCodeBox(docFunction.name, 'javascript'));
 
     if (apiFunction.returnValue) {
-      markupPage.elements.push(...MarkupBuilder.createTextElements('Returns:', { bold: true }));
-      markupPage.elements.push(...MarkupBuilder.createTextElements(' '));
-      markupPage.elements.push(MarkupBuilder.createCode(apiFunction.returnValue.type, 'javascript'));
-      markupPage.elements.push(MarkupBuilder.PARAGRAPH);
-      markupPage.elements.push(...MarkupBuilder.renderDocElements(apiFunction.returnValue.description));
+      markupPage.elements.push(...Markup.createTextElements('Returns:', { bold: true }));
+      markupPage.elements.push(...Markup.createTextElements(' '));
+      markupPage.elements.push(Markup.createCode(apiFunction.returnValue.type, 'javascript'));
+      markupPage.elements.push(Markup.PARAGRAPH);
+      markupPage.elements.push(...Markup.renderDocElements(apiFunction.returnValue.description));
     }
 
     if (apiFunction.remarks && apiFunction.remarks.length) {
-      markupPage.elements.push(MarkupBuilder.createHeading1('Remarks'));
-      markupPage.elements.push(...MarkupBuilder.renderDocElements(apiFunction.remarks));
+      markupPage.elements.push(Markup.createHeading1('Remarks'));
+      markupPage.elements.push(...Markup.renderDocElements(apiFunction.remarks));
     }
 
     if (Object.keys(apiFunction.parameters).length > 0) {
-      const parametersTable: IMarkupTable = MarkupBuilder.createTable([
-        MarkupBuilder.createTextElements('Parameter'),
-        MarkupBuilder.createTextElements('Type'),
-        MarkupBuilder.createTextElements('Description')
+      const parametersTable: IMarkupTable = Markup.createTable([
+        Markup.createTextElements('Parameter'),
+        Markup.createTextElements('Type'),
+        Markup.createTextElements('Description')
       ]);
 
-      markupPage.elements.push(MarkupBuilder.createHeading1('Parameters'));
+      markupPage.elements.push(Markup.createHeading1('Parameters'));
       markupPage.elements.push(parametersTable);
       for (const parameterName of Object.keys(apiFunction.parameters)) {
         const apiParameter: IApiParameter = apiFunction.parameters[parameterName];
-          parametersTable.rows.push(MarkupBuilder.createTableRow([
-            [MarkupBuilder.createCode(parameterName, 'javascript')],
-            apiParameter.type ? [MarkupBuilder.createCode(apiParameter.type, 'javascript')] : [],
-            MarkupBuilder.renderDocElements(apiParameter.description)
+          parametersTable.rows.push(Markup.createTableRow([
+            [Markup.createCode(parameterName, 'javascript')],
+            apiParameter.type ? [Markup.createCode(apiParameter.type, 'javascript')] : [],
+            Markup.renderDocElements(apiParameter.description)
           ])
         );
       }
@@ -561,11 +561,11 @@ export class MarkdownDocumenter {
   }
 
   private _writeBreadcrumb(markupPage: IMarkupPage, docItem: DocItem): void {
-    markupPage.breadcrumb.push(MarkupBuilder.createWebLinkFromText('Home', './index'));
+    markupPage.breadcrumb.push(Markup.createWebLinkFromText('Home', './index'));
 
     for (const hierarchyItem of docItem.getHierarchy()) {
-      markupPage.breadcrumb.push(...MarkupBuilder.createTextElements(' > '));
-      markupPage.breadcrumb.push(MarkupBuilder.createApiLinkFromText(
+      markupPage.breadcrumb.push(...Markup.createTextElements(' > '));
+      markupPage.breadcrumb.push(Markup.createApiLinkFromText(
         hierarchyItem.name, hierarchyItem.getApiReference()));
     }
   }
@@ -574,7 +574,7 @@ export class MarkdownDocumenter {
     const betaWarning: string = 'This API is provided as a preview for developers and may change'
       + ' based on feedback that we receive.  Do not use this API in a production environment.';
     elements.push(
-      MarkupBuilder.createNoteBoxFromText(betaWarning)
+      Markup.createNoteBoxFromText(betaWarning)
     );
   }
 
