@@ -2,7 +2,7 @@ import {
   CommandLineConfiguration,
   ICustomCommand,
   ICustomOption
-} from '@microsoft/rush-lib';
+} from '../../index';
 
 import RushCommandLineParser from './RushCommandLineParser';
 import { CustomRushAction } from './CustomRushAction';

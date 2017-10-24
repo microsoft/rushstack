@@ -2,7 +2,7 @@ import {
   RushConfiguration,
   RushConfigurationProject,
   IRushLinkJson
-} from '@microsoft/rush-lib';
+} from '../../index';
 import { JsonFile } from '@microsoft/node-core-library';
 
 import TaskRunner from '../taskRunner/TaskRunner';

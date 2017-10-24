@@ -11,7 +11,7 @@ import {
   ICustomEnumValue,
   Stopwatch,
   Event
-} from '@microsoft/rush-lib';
+} from '../../index';
 
 import {
   CommandLineFlagParameter,
