@@ -5,7 +5,7 @@
 
 import * as ts from 'typescript';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
-import { ITextElement, IParagraphElement } from '../markup/OldMarkup';
+import { Markup } from '../markup/Markup';
 import AstMethod from './AstMethod';
 import AstProperty from './AstProperty';
 import AstItem, { AstItemKind, IAstItemOptions } from './AstItem';
@@ -166,14 +166,9 @@ export default class AstStructuredType extends AstItemContainer {
         if (member.documentation.releaseTag === ReleaseTag.Internal) {
           // Add a boilerplate notice for classes with internal constructors
           this.documentation.remarks.unshift(
-            {
-              kind: 'textDocElement',
-              value: `The constructor for this class is marked as internal. Third-party code`
-                + ` should not extend subclasses of the ${this.name} class or instantiate it directly.`
-            } as ITextElement,
-            {
-              kind: 'paragraphDocElement'
-            } as IParagraphElement
+            ...Markup.createTextElements(`The constructor for this class is marked as internal. Third-party code`
+              + ` should not call the constructor directly or create subclasses that extend the ${this.name} class.`),
+            Markup.PARAGRAPH
           );
         }
       }

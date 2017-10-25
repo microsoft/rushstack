@@ -7,7 +7,6 @@ import yaml = require('js-yaml');
 import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
 import {
   MarkupElement,
-  IDocElement,
   IApiMethod,
   IApiConstructor,
   IApiParameter,
@@ -29,7 +28,6 @@ import {
   IYamlTocItem
 } from './IYamlTocFile';
 import { Utilities } from '../utils/Utilities';
-import { MarkupBuilder } from '../utils/MarkupBuilder';
 import { MarkdownRenderer, IMarkdownRenderApiLinkArgs } from '../utils/MarkdownRenderer';
 
 const yamlApiSchema: JsonSchema = JsonSchema.fromFile(path.join(__dirname, 'typescript.schema.json'));
@@ -45,7 +43,7 @@ export class YamlDocumenter {
     this._docItemSet = docItemSet;
   }
 
-  public generateFiles(outputFolder: string): void {
+  public generateFiles(outputFolder: string): void { // virtual
     this._outputFolder = outputFolder;
 
     console.log();
@@ -58,11 +56,25 @@ export class YamlDocumenter {
     this._writeTocFile(this._docItemSet.docPackages);
   }
 
+  protected onGetTocRoot(): IYamlTocItem {  // virtual
+    return {
+      name: 'SharePoint Framework reference',
+      href: '~/overview/sharepoint.md',
+      items: [ ]
+    };
+  }
+
+  protected onCustomizeYamlItem(yamlItem: IYamlItem): void { // virtual
+    // (overridden by child class)
+  }
+
   private _visitDocItems(docItem: DocItem, parentYamlFile: IYamlApiFile | undefined): boolean {
     const yamlItem: IYamlItem | undefined = this._generateYamlItem(docItem);
     if (!yamlItem) {
       return false;
     }
+
+    this.onCustomizeYamlItem(yamlItem);
 
     if (this._shouldEmbed(docItem.kind)) {
       if (!parentYamlFile) {
@@ -75,7 +87,9 @@ export class YamlDocumenter {
       };
       newYamlFile.items.push(yamlItem);
 
-      for (const child of docItem.children) {
+      const flattenedChildren: DocItem[] = this._flattenNamespaces(docItem.children);
+
+      for (const child of flattenedChildren) {
         if (this._visitDocItems(child, newYamlFile)) {
           if (!yamlItem.children) {
             yamlItem.children = [];
@@ -99,13 +113,27 @@ export class YamlDocumenter {
 
         parentYamlFile.references.push({
           uid: this._getUid(docItem),
-          name: docItem.name
+          name: this._getYamlItemName(docItem)
         });
 
       }
     }
 
     return true;
+  }
+
+  // Since the YAML schema does not yet support nested namespaces, we simply omit them from
+  // the tree.  However, _getYamlItemName() will show the namespace.
+  private _flattenNamespaces(items: DocItem[]): DocItem[] {
+    const flattened: DocItem[] = [];
+    for (const item of items) {
+      if (item.kind === DocItemKind.Namespace) {
+        flattened.push(... this._flattenNamespaces(item.children));
+      } else {
+        flattened.push(item);
+      }
+    }
+    return flattened;
   }
 
   /**
@@ -116,28 +144,11 @@ export class YamlDocumenter {
       items: [ ]
     };
 
-    tocFile.items.push({
-      name: 'SharePoint Framework', // TODO: parameterize this
-      items: [
-        {
-          name: 'Overview',
-          href: './index.md'
-        } as IYamlTocItem
-      ].concat(this._buildTocItems(docItems.filter(x => x.isExternalPackage)))
-    });
+    const rootItem: IYamlTocItem = this.onGetTocRoot();
+    tocFile.items.push(rootItem);
 
-    const externalPackages: DocItem[] = docItems.filter(x => !x.isExternalPackage);
-    if (externalPackages.length) {
-      tocFile.items.push({
-        name: '─────────────'
-      });
-      tocFile.items.push({
-        name: 'External Packages',
-        items: this._buildTocItems(externalPackages)
-      });
-    }
+    rootItem.items!.push(...this._buildTocItems(docItems));
 
-    this._buildTocItems(docItems);
     const tocFilePath: string = path.join(this._outputFolder, 'toc.yml');
     console.log('Writing ' + tocFilePath);
     this._writeYamlFile(tocFile, tocFilePath, '', undefined);
@@ -146,15 +157,24 @@ export class YamlDocumenter {
   private _buildTocItems(docItems: DocItem[]): IYamlTocItem[] {
     const tocItems: IYamlTocItem[] = [];
     for (const docItem of docItems) {
-      if (this._shouldEmbed(docItem.kind)) {
-        // Don't generate table of contents items for embedded definitions
-        continue;
-      }
+      let tocItem: IYamlTocItem;
 
-      const tocItem: IYamlTocItem = {
-        name: Utilities.getUnscopedPackageName(docItem.name),
-        uid: this._getUid(docItem)
-      };
+      if (docItem.kind === DocItemKind.Namespace) {
+        // Namespaces don't have nodes yet
+        tocItem = {
+          name: Utilities.getUnscopedPackageName(docItem.name)
+        };
+      } else {
+        if (this._shouldEmbed(docItem.kind)) {
+          // Don't generate table of contents items for embedded definitions
+          continue;
+        }
+
+        tocItem = {
+          name: Utilities.getUnscopedPackageName(docItem.name),
+          uid: this._getUid(docItem)
+        };
+      }
 
       tocItems.push(tocItem);
 
@@ -181,26 +201,29 @@ export class YamlDocumenter {
     const yamlItem: Partial<IYamlItem> = { };
     yamlItem.uid = this._getUid(docItem);
 
-    const summary: string = this._renderMarkdownFromDocElement(docItem.apiItem.summary, docItem);
+    const summary: string = this._renderMarkdown(docItem.apiItem.summary, docItem);
     if (summary) {
       yamlItem.summary = summary;
     }
 
-    const remarks: string = this._renderMarkdownFromDocElement(docItem.apiItem.remarks, docItem);
+    const remarks: string = this._renderMarkdown(docItem.apiItem.remarks, docItem);
     if (remarks) {
       yamlItem.remarks = remarks;
     }
 
-    if ((docItem.apiItem.deprecatedMessage || []).length > 0) {
-      const deprecatedMessage: string = this._renderMarkdownFromDocElement(docItem.apiItem.deprecatedMessage, docItem);
-      yamlItem.deprecated = { content: deprecatedMessage };
+    if (docItem.apiItem.deprecatedMessage) {
+      if (docItem.apiItem.deprecatedMessage.length > 0) {
+        const deprecatedMessage: string = this._renderMarkdown(docItem.apiItem.deprecatedMessage, docItem);
+        yamlItem.deprecated = { content: deprecatedMessage };
+      }
     }
 
     if (docItem.apiItem.isBeta) {
       yamlItem.isPreview = true;
     }
 
-    yamlItem.name = docItem.name;
+    yamlItem.name = this._getYamlItemName(docItem);
+
     yamlItem.fullName = yamlItem.uid;
     yamlItem.langs = [ 'typeScript' ];
 
@@ -279,7 +302,7 @@ export class YamlDocumenter {
     yamlItem.syntax = syntax;
 
     if (apiMethod.returnValue) {
-      const returnDescription: string = this._renderMarkdownFromDocElement(apiMethod.returnValue.description, docItem)
+      const returnDescription: string = this._renderMarkdown(apiMethod.returnValue.description, docItem)
         .replace(/^\s*-\s+/, ''); // temporary workaround for people who mistakenly add a hyphen, e.g. "@returns - blah"
 
       syntax.return = {
@@ -294,7 +317,7 @@ export class YamlDocumenter {
       parameters.push(
         {
            id: parameterName,
-           description:  this._renderMarkdownFromDocElement(apiParameter.description, docItem),
+           description:  this._renderMarkdown(apiParameter.description, docItem),
            type: [ apiParameter.type || '' ]
         } as IYamlParameter
       );
@@ -319,10 +342,6 @@ export class YamlDocumenter {
         type: [ apiProperty.type ]
       };
     }
-  }
-
-  private _renderMarkdownFromDocElement(docElements: IDocElement[] | undefined, containingDocItem: DocItem): string {
-    return this._renderMarkdown(MarkupBuilder.renderDocElements(docElements || []), containingDocItem);
   }
 
   private _renderMarkdown(markupElements: MarkupElement[], containingDocItem: DocItem): string {
@@ -385,6 +404,15 @@ export class YamlDocumenter {
       }
     }
     return result;
+  }
+
+  private _getYamlItemName(docItem: DocItem): string {
+    if (docItem.parent && docItem.parent.kind === DocItemKind.Namespace) {
+      // For members a namespace, show the full name excluding the package part:
+      // Example: excel.Excel.Binding --> Excel.Binding
+      return this._getUid(docItem).replace(/^[^.]+\./, '');
+    }
+    return docItem.name;
   }
 
   private _getYamlFilePath(docItem: DocItem): string {

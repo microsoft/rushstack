@@ -4,6 +4,7 @@
 import {
   CopyTask,
   copyStaticAssets,
+  jest,
   task,
   watch,
   serial,
@@ -38,7 +39,7 @@ tslint.mergeConfig({
 
 const buildSubtask: IExecutable = serial(preCopy, parallel(tslint, typescript, copyStaticAssets), apiExtractor, postCopy);
 export const buildTasks: IExecutable = task('build', buildSubtask);
-export const testTasks: IExecutable = task('test', serial(buildSubtask, mocha));
-export const defaultTasks: IExecutable = task('default', serial(buildSubtask, instrument, mocha));
+export const testTasks: IExecutable = task('test', serial(buildSubtask, mocha, jest));
+export const defaultTasks: IExecutable = task('default', serial(buildSubtask, instrument, mocha, jest));
 
 task('watch', watch('src/**.ts', testTasks));

@@ -10,14 +10,11 @@ This is a **bold** word.
 
 ## Newline bold
 
-**line 1**
-**line 2**
+**line 1 line 2**
 
 ## Newline bold with spaces
 
-  **line 1**
-  **line 2**
-  **line 3**
+ **line 1 line 2 line 3**
 
 ## Adjacent bold regions
 

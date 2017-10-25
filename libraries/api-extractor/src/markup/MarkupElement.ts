@@ -8,9 +8,10 @@ import { IApiItemReference } from '../api/ApiItem';
 /**
  * A block of plain text, possibly with simple formatting such as bold or italics.
  *
- * @alpha
+ * @public
  */
 export interface IMarkupText {
+  /** The kind of markup element */
   kind: 'text';
 
   /**
@@ -20,7 +21,15 @@ export interface IMarkupText {
    * without any special formatting.
    */
   text: string;
+
+  /**
+   * Whether the text should be formatted using boldface
+   */
   bold?: boolean;
+
+  /**
+   * Whether the text should be formatted using italics
+   */
   italics?: boolean;
 }
 
@@ -28,7 +37,7 @@ export interface IMarkupText {
  * Indicates the the text should be colorized according to the specified language syntax.
  * If "plain" is specified, then no highlighting should be performed.
  *
- * @alpha
+ * @public
  */
 export type MarkupHighlighter = 'javascript' | 'plain';
 
@@ -36,9 +45,10 @@ export type MarkupHighlighter = 'javascript' | 'plain';
  * Source code shown in a fixed-width font, with syntax highlighting.
  * @remarks
  * NOTE: IMarkupHighlightedText is just a span of text, whereas IMarkupCodeBox is a box showing a larger code sample.
- * @alpha
+ * @public
  */
 export interface IMarkupHighlightedText {
+  /** The kind of markup element */
   kind: 'code';
 
   /**
@@ -49,58 +59,71 @@ export interface IMarkupHighlightedText {
    */
   text: string;
 
+  /** Indicates the syntax highlighting that will be applied to this text */
   highlighter: MarkupHighlighter;
 }
 
 /**
- * Represents markup that can be used as the text for a hyperlink.
+ * Represents markup that can be used as the link text for a hyperlink
  *
- * @alpha
+ * @public
  */
 export type MarkupLinkTextElement = IMarkupText | IMarkupHighlightedText;
 
 // ----------------------------------------------------------------------------
 
 /**
- * A block of plain text, possibly with simple formatting.
- * @alpha
+ * A hyperlink to an API item
+ * @public
  */
 export interface IMarkupApiLink {
+  /** The kind of markup element */
   kind: 'api-link';
+
+  /** The link text */
   elements: MarkupLinkTextElement[];
+
+  /** The API item that will serve as the hyperlink target */
   target: IApiItemReference;
 }
 
 /**
- * A hyperlink to a web page.
- * @alpha
+ * A hyperlink to an internet URL
+ * @public
  */
 export interface IMarkupWebLink {
+  /** The kind of markup element */
   kind: 'web-link';
+
+  /** The link text */
   elements: MarkupLinkTextElement[];
+
+  /** The internet URL that will serve as the hyperlink target */
   targetUrl: string;
 }
 
 /**
- * A paragraph separator, similar to the "<p>" tag in HTML.
- * @alpha
+ * A paragraph separator, similar to the "<p>" tag in HTML
+ * @public
  */
 export interface IMarkupParagraph {
+  /** The kind of markup element */
   kind: 'paragraph';
 }
 
 /**
  * A line break, similar to the "<br>" tag in HTML.
- * @alpha
+ * @public
  */
 export interface IMarkupLineBreak {
+  /** The kind of markup element */
   kind: 'break';
 }
 
 /**
  * Represents basic text consisting of paragraphs and links (without structures such as headers or tables).
  *
- * @alpha
+ * @public
  */
 export type MarkupBasicElement = MarkupLinkTextElement | IMarkupApiLink | IMarkupWebLink | IMarkupParagraph
   | IMarkupLineBreak;
@@ -109,12 +132,14 @@ export type MarkupBasicElement = MarkupLinkTextElement | IMarkupApiLink | IMarku
 
 /**
  * A top-level heading
- * @alpha
+ * @public
  */
 export interface IMarkupHeading1 {
+  /** The kind of markup element */
   kind: 'heading1';
+
   /**
-   * The text for the heading.
+   * The heading title
    * @remarks
    * Formatting such as bold/italics are not supported in headings.
    * If this text contains symbols such as HTML codes, they will be rendered literally.
@@ -124,9 +149,10 @@ export interface IMarkupHeading1 {
 
 /**
  * A sub heading
- * @alpha
+ * @public
  */
 export interface IMarkupHeading2 {
+  /** The kind of markup element */
   kind: 'heading2';
 
   /** {@inheritdoc IMarkupHeading1.text} */
@@ -134,32 +160,36 @@ export interface IMarkupHeading2 {
 }
 
 /**
- * A box containing source code with syntax highlighting.
+ * A box containing source code with syntax highlighting
  * @remarks
  * NOTE: IMarkupHighlightedText is just a span of text, whereas IMarkupCodeBox is a box showing a larger code sample.
- * @alpha
+ * @public
  */
 export interface IMarkupCodeBox {
+  /** The kind of markup element */
   kind: 'code-box';
+
   /** {@inheritdoc IMarkupHighlightedText.text} */
   text: string;
   highlighter: MarkupHighlighter;
 }
 
 /**
- * A call-out box containing an informational note.
- * @alpha
+ * A call-out box containing an informational note
+ * @public
  */
 export interface IMarkupNoteBox {
+  /** The kind of markup element */
   kind: 'note-box';
   elements: MarkupBasicElement[];
 }
 
 /**
- * A table, with an optional header row.
- * @alpha
+ * A table, with an optional header row
+ * @public
  */
 export interface IMarkupTable {
+  /** The kind of markup element */
   kind: 'table';
   header?: IMarkupTableRow;
   rows: IMarkupTableRow[];
@@ -169,7 +199,7 @@ export interface IMarkupTable {
  * Represents structured text that contains headings, tables, and boxes.  These are the top-level
  * elements of a IMarkupPage.
  *
- * @alpha
+ * @public
  */
 export type MarkupStructuredElement = MarkupBasicElement | IMarkupHeading1 | IMarkupHeading2 | IMarkupCodeBox
   | IMarkupNoteBox | IMarkupTable;
@@ -177,21 +207,25 @@ export type MarkupStructuredElement = MarkupBasicElement | IMarkupHeading1 | IMa
 // ----------------------------------------------------------------------------
 
 /**
- * A cell inside an IMarkupTable object.
+ * A cell inside an IMarkupTableRow element.
  *
- * @alpha
+ * @public
  */
 export interface IMarkupTableCell {
+  /** The kind of markup element */
   kind: 'table-cell';
+
+  /** The text content for the table cell */
   elements: MarkupBasicElement[];
 }
 
 /**
- * A row inside an IMarkupTable object.
+ * A row inside an IMarkupTable element.
  *
- * @alpha
+ * @public
  */
 export interface IMarkupTableRow {
+  /** The kind of markup element */
   kind: 'table-row';
   cells: IMarkupTableCell[];
 }
@@ -199,9 +233,10 @@ export interface IMarkupTableRow {
 /**
  * Represents an entire page.
  *
- * @alpha
+ * @public
  */
 export interface IMarkupPage {
+  /** The kind of markup element */
   kind: 'page';
 
   breadcrumb: MarkupBasicElement[];
@@ -214,6 +249,6 @@ export interface IMarkupPage {
  * The super set of all markup interfaces, used e.g. for functions that recursively traverse
  * the tree.
  *
- * @alpha
+ * @public
  */
 export type MarkupElement = MarkupStructuredElement | IMarkupTableCell | IMarkupTableRow | IMarkupPage;

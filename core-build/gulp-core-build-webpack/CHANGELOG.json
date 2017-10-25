@@ -2,6 +2,49 @@
   "name": "@microsoft/gulp-core-build-webpack",
   "entries": [
     {
+      "version": "3.2.8",
+      "tag": "@microsoft/gulp-core-build-webpack_v3.2.8",
+      "date": "Wed, 25 Oct 2017 20:03:59 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.2.0` to `3.2.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.7",
+      "tag": "@microsoft/gulp-core-build-webpack_v3.2.7",
+      "date": "Tue, 24 Oct 2017 18:17:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.1.6` to `3.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.6",
+      "tag": "@microsoft/gulp-core-build-webpack_v3.2.6",
+      "date": "Mon, 23 Oct 2017 21:53:12 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "5de032b254b632b8af0d0dd98913acef589f88d5",
+            "comment": "Updated cyclic dependencies"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.1.5` to `3.1.6`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.5",
       "tag": "@microsoft/gulp-core-build-webpack_v3.2.5",
       "date": "Fri, 20 Oct 2017 19:57:12 GMT",

@@ -71,6 +71,7 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
   public isEnabled(buildConfig: IBuildConfig): boolean {
     return (
       super.isEnabled(buildConfig) &&
+      !buildConfig.jestEnabled &&
       this.taskConfig.configPath !== null // tslint:disable-line:no-null-keyword
     );
   }
