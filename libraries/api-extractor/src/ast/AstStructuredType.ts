@@ -167,7 +167,7 @@ export default class AstStructuredType extends AstItemContainer {
           // Add a boilerplate notice for classes with internal constructors
           this.documentation.remarks.unshift(
             ...Markup.createTextElements(`The constructor for this class is marked as internal. Third-party code`
-              + ` should not extend subclasses of the ${this.name} class or instantiate it directly.`),
+              + ` should not call the constructor directly or create subclasses that extend the ${this.name} class.`),
             Markup.PARAGRAPH
           );
         }
