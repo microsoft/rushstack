@@ -7,7 +7,6 @@ import yaml = require('js-yaml');
 import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
 import {
   MarkupElement,
-  IDocElement,
   IApiMethod,
   IApiConstructor,
   IApiParameter,
@@ -29,7 +28,6 @@ import {
   IYamlTocItem
 } from './IYamlTocFile';
 import { Utilities } from '../utils/Utilities';
-import { MarkupBuilder } from '../utils/MarkupBuilder';
 import { MarkdownRenderer, IMarkdownRenderApiLinkArgs } from '../utils/MarkdownRenderer';
 
 const yamlApiSchema: JsonSchema = JsonSchema.fromFile(path.join(__dirname, 'typescript.schema.json'));
@@ -60,7 +58,7 @@ export class YamlDocumenter {
 
   protected onGetTocRoot(): IYamlTocItem {  // virtual
     return {
-      name: 'SharePoint Framework',
+      name: 'SharePoint Framework reference',
       href: '~/overview/sharepoint.md',
       items: [ ]
     };
@@ -203,19 +201,21 @@ export class YamlDocumenter {
     const yamlItem: Partial<IYamlItem> = { };
     yamlItem.uid = this._getUid(docItem);
 
-    const summary: string = this._renderMarkdownFromDocElement(docItem.apiItem.summary, docItem);
+    const summary: string = this._renderMarkdown(docItem.apiItem.summary, docItem);
     if (summary) {
       yamlItem.summary = summary;
     }
 
-    const remarks: string = this._renderMarkdownFromDocElement(docItem.apiItem.remarks, docItem);
+    const remarks: string = this._renderMarkdown(docItem.apiItem.remarks, docItem);
     if (remarks) {
       yamlItem.remarks = remarks;
     }
 
-    if ((docItem.apiItem.deprecatedMessage || []).length > 0) {
-      const deprecatedMessage: string = this._renderMarkdownFromDocElement(docItem.apiItem.deprecatedMessage, docItem);
-      yamlItem.deprecated = { content: deprecatedMessage };
+    if (docItem.apiItem.deprecatedMessage) {
+      if (docItem.apiItem.deprecatedMessage.length > 0) {
+        const deprecatedMessage: string = this._renderMarkdown(docItem.apiItem.deprecatedMessage, docItem);
+        yamlItem.deprecated = { content: deprecatedMessage };
+      }
     }
 
     if (docItem.apiItem.isBeta) {
@@ -302,7 +302,7 @@ export class YamlDocumenter {
     yamlItem.syntax = syntax;
 
     if (apiMethod.returnValue) {
-      const returnDescription: string = this._renderMarkdownFromDocElement(apiMethod.returnValue.description, docItem)
+      const returnDescription: string = this._renderMarkdown(apiMethod.returnValue.description, docItem)
         .replace(/^\s*-\s+/, ''); // temporary workaround for people who mistakenly add a hyphen, e.g. "@returns - blah"
 
       syntax.return = {
@@ -317,7 +317,7 @@ export class YamlDocumenter {
       parameters.push(
         {
            id: parameterName,
-           description:  this._renderMarkdownFromDocElement(apiParameter.description, docItem),
+           description:  this._renderMarkdown(apiParameter.description, docItem),
            type: [ apiParameter.type || '' ]
         } as IYamlParameter
       );
@@ -342,10 +342,6 @@ export class YamlDocumenter {
         type: [ apiProperty.type ]
       };
     }
-  }
-
-  private _renderMarkdownFromDocElement(docElements: IDocElement[] | undefined, containingDocItem: DocItem): string {
-    return this._renderMarkdown(MarkupBuilder.renderDocElements(docElements || []), containingDocItem);
   }
 
   private _renderMarkdown(markupElements: MarkupElement[], containingDocItem: DocItem): string {

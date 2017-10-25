@@ -6,7 +6,7 @@ import { AstItemKind, IAstItemOptions } from './AstItem';
 import AstMember from './AstMember';
 import AstParameter from './AstParameter';
 import TypeScriptHelpers from '../TypeScriptHelpers';
-import { ITextElement, ICodeLinkElement } from '../markup/OldMarkup';
+import { Markup } from '../markup/Markup';
 import ApiDefinitionReference, { IScopedPackageName } from '../ApiDefinitionReference';
 
 /**
@@ -68,27 +68,23 @@ export default class AstMethod extends AstMember {
     // Generally class constructors have uninteresting documentation.
     if (this.kind === AstItemKind.Constructor) {
       if (this.documentation.summary.length === 0) {
-        this.documentation.summary.push({
-          kind: 'textDocElement',
-          value: 'Constructs a new instance of the '
-        } as ITextElement);
+        this.documentation.summary.push(
+          ...Markup.createTextElements('Constructs a new instance of the '));
 
         const scopedPackageName: IScopedPackageName = ApiDefinitionReference
           .parseScopedPackageName(this.context.package.name);
 
-        this.documentation.summary.push({
-          kind: 'linkDocElement',
-          referenceType: 'code',
-          scopeName: scopedPackageName.scope,
-          packageName: scopedPackageName.package,
-          exportName: this.parentContainer.name,
-          value: this.parentContainer.name
-        } as ICodeLinkElement);
+        this.documentation.summary.push(
+          Markup.createApiLinkFromText(this.parentContainer.name, {
+              scopeName: scopedPackageName.scope,
+              packageName: scopedPackageName.package,
+              exportName: this.parentContainer.name,
+              memberName: ''
+            }
+          )
+        );
 
-        this.documentation.summary.push({
-          kind: 'textDocElement',
-          value: ' class'
-        } as ITextElement);
+        this.documentation.summary.push(...Markup.createTextElements(' class'));
       }
       this.needsDocumentation = false;
     }

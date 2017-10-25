@@ -25,14 +25,14 @@ interface IAnalyzeProjectOptions {
 // @alpha
 interface IApiBaseDefinition {
   // (undocumented)
-  deprecatedMessage?: IDocElement[];
+  deprecatedMessage?: MarkupBasicElement[];
   // (undocumented)
   isBeta: boolean;
   kind: string;
   // (undocumented)
-  remarks?: IDocElement[];
+  remarks: MarkupStructuredElement[];
   // (undocumented)
-  summary: IDocElement[];
+  summary: MarkupBasicElement[];
 }
 
 // @alpha
@@ -116,20 +116,20 @@ interface IApiNamespace extends IApiBaseDefinition {
 // @alpha
 interface IApiPackage {
   // (undocumented)
-  deprecatedMessage?: IDocElement[];
+  deprecatedMessage?: MarkupBasicElement[];
   exports: IApiNameMap<ApiItem>;
-  isBeta?: boolean;
+  isBeta: boolean;
   kind: 'package';
   name: string;
   // (undocumented)
-  remarks?: IDocElement[];
+  remarks: MarkupStructuredElement[];
   // (undocumented)
-  summary?: IDocElement[];
+  summary: MarkupBasicElement[];
 }
 
 // @alpha
 interface IApiParameter {
-  description: IDocElement[];
+  description: MarkupBasicElement[];
   isOptional: boolean;
   isSpread: boolean;
   name: string;
@@ -149,26 +149,9 @@ interface IApiProperty extends IApiBaseDefinition {
 // @alpha
 interface IApiReturnValue {
   // (undocumented)
-  description: IDocElement[];
+  description: MarkupBasicElement[];
   // (undocumented)
   type: string;
-}
-
-// @alpha
-interface IBaseDocElement {
-  // (undocumented)
-  kind: string;
-}
-
-// WARNING: Unable to find referenced export "@microsoft/api-extractor:ApiReference"
-// @alpha
-interface ICodeLinkElement extends IBaseDocElement {
-  exportName: string;
-  memberName?: string;
-  packageName?: string;
-  referenceType: 'code';
-  scopeName?: string;
-  value?: string;
 }
 
 // @public
@@ -226,13 +209,6 @@ interface IExtractorTsconfigCompilerConfig {
   rootFolder: string;
 }
 
-// @alpha (undocumented)
-interface IHrefLinkElement extends IBaseDocElement {
-  referenceType: 'href';
-  targetUrl: string;
-  value?: string;
-}
-
 // @public
 interface ILogger {
   logError(message: string): void;
@@ -241,147 +217,132 @@ interface ILogger {
   logWarning(message: string): void;
 }
 
-// @alpha
+// @public
 interface IMarkupApiLink {
-  // (undocumented)
   elements: MarkupLinkTextElement[];
-  // (undocumented)
   kind: 'api-link';
-  // (undocumented)
   target: IApiItemReference;
 }
 
-// @alpha
+// @public
 interface IMarkupCodeBox {
   // (undocumented)
   highlighter: MarkupHighlighter;
-  // (undocumented)
   kind: 'code-box';
   text: string;
 }
 
-// @alpha
+// @public
+interface IMarkupCreateTextOptions {
+  bold?: boolean;
+  italics?: boolean;
+}
+
+// @public
 interface IMarkupHeading1 {
-  // (undocumented)
   kind: 'heading1';
   text: string;
 }
 
-// @alpha
+// @public
 interface IMarkupHeading2 {
-  // (undocumented)
   kind: 'heading2';
   text: string;
 }
 
-// @alpha
+// @public
 interface IMarkupHighlightedText {
-  // (undocumented)
   highlighter: MarkupHighlighter;
-  // (undocumented)
   kind: 'code';
   text: string;
 }
 
-// @alpha
+// @public
 interface IMarkupLineBreak {
-  // (undocumented)
   kind: 'break';
 }
 
-// @alpha
+// @public
 interface IMarkupNoteBox {
   // (undocumented)
   elements: MarkupBasicElement[];
-  // (undocumented)
   kind: 'note-box';
 }
 
-// @alpha
+// @public
 interface IMarkupPage {
   // (undocumented)
   breadcrumb: MarkupBasicElement[];
   // (undocumented)
   elements: MarkupStructuredElement[];
-  // (undocumented)
   kind: 'page';
   // (undocumented)
   title: string;
 }
 
-// @alpha
+// @public
 interface IMarkupParagraph {
-  // (undocumented)
   kind: 'paragraph';
 }
 
-// @alpha
+// @public
 interface IMarkupTable {
   // (undocumented)
   header?: IMarkupTableRow;
-  // (undocumented)
   kind: 'table';
   // (undocumented)
   rows: IMarkupTableRow[];
 }
 
-// @alpha
+// @public
 interface IMarkupTableCell {
-  // (undocumented)
   elements: MarkupBasicElement[];
-  // (undocumented)
   kind: 'table-cell';
 }
 
-// @alpha
+// @public
 interface IMarkupTableRow {
   // (undocumented)
   cells: IMarkupTableCell[];
-  // (undocumented)
   kind: 'table-row';
 }
 
-// @alpha
+// @public
 interface IMarkupText {
-  // (undocumented)
   bold?: boolean;
-  // (undocumented)
   italics?: boolean;
-  // (undocumented)
   kind: 'text';
   text: string;
 }
 
-// @alpha
+// @public
 interface IMarkupWebLink {
-  // (undocumented)
   elements: MarkupLinkTextElement[];
-  // (undocumented)
   kind: 'web-link';
-  // (undocumented)
   targetUrl: string;
 }
 
-// @alpha
-interface IParagraphElement extends IBaseDocElement {
-  // (undocumented)
-  kind: 'paragraphDocElement';
-}
-
-// @alpha
-interface ISeeDocElement extends IBaseDocElement {
-  // (undocumented)
-  kind: 'seeDocElement';
-  // (undocumented)
-  seeElements: IDocElement[];
-}
-
-// @alpha
-interface ITextElement extends IBaseDocElement {
-  // (undocumented)
-  kind: 'textDocElement';
-  // (undocumented)
-  value: string;
+// @public
+class Markup {
+  public static BREAK: IMarkupLineBreak;
+  public static createApiLink(textElements: MarkupLinkTextElement[], target: IApiItemReference): IMarkupApiLink;
+  public static createApiLinkFromText(text: string, target: IApiItemReference): IMarkupApiLink;
+  public static createCode(code: string, highlighter?: MarkupHighlighter): IMarkupHighlightedText;
+  public static createCodeBox(code: string, highlighter: MarkupHighlighter): IMarkupCodeBox;
+  public static createHeading1(text: string): IMarkupHeading1;
+  public static createHeading2(text: string): IMarkupHeading2;
+  public static createNoteBox(textElements: MarkupBasicElement[]): IMarkupNoteBox;
+  public static createNoteBoxFromText(text: string): IMarkupNoteBox;
+  public static createPage(title: string): IMarkupPage;
+  public static createTable(headerCellValues: MarkupBasicElement[][] | undefined = undefined): IMarkupTable;
+  public static createTableRow(cellValues: MarkupBasicElement[][] | undefined = undefined): IMarkupTableRow;
+  public static createTextElements(text: string, options?: IMarkupCreateTextOptions): IMarkupText[];
+  public static createTextParagraphs(text: string, options?: IMarkupCreateTextOptions): MarkupBasicElement[];
+  public static createWebLink(textElements: MarkupLinkTextElement[], targetUrl: string): IMarkupWebLink;
+  public static createWebLinkFromText(text: string, targetUrl: string): IMarkupWebLink;
+  public static extractTextContent(elements: MarkupElement[]): string;
+  public static normalize < T extends MarkupElement >(elements: T[]): void;
+  public static PARAGRAPH: IMarkupParagraph;
 }
 
 // WARNING: Unsupported export: ApiAccessModifier
@@ -392,5 +353,3 @@ interface ITextElement extends IBaseDocElement {
 // WARNING: Unsupported export: MarkupBasicElement
 // WARNING: Unsupported export: MarkupStructuredElement
 // WARNING: Unsupported export: MarkupElement
-// WARNING: Unsupported export: ILinkDocElement
-// WARNING: Unsupported export: IDocElement

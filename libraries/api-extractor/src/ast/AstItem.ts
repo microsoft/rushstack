@@ -7,10 +7,10 @@
 import * as ts from 'typescript';
 import { ExtractorContext } from '../ExtractorContext';
 import ApiDocumentation from '../aedoc/ApiDocumentation';
-import { IDocElement } from '../markup/OldMarkup';
+import { MarkupElement } from '../markup/MarkupElement';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
 import TypeScriptHelpers from '../TypeScriptHelpers';
-import DocElementParser from '../DocElementParser';
+import { Markup } from '../markup/Markup';
 import ResolvedApiItem from '../ResolvedApiItem';
 import ApiDefinitionReference,
   { IScopedPackageName, IApiDefinitionReferenceParts } from '../ApiDefinitionReference';
@@ -236,7 +236,7 @@ abstract class AstItem {
    * @remarks
    * This is calculated during completeInitialization() and should not be used beforehand.
    */
-  public inheritedDeprecatedMessage: IDocElement[] = [];
+  public inheritedDeprecatedMessage: MarkupElement[] = [];
 
   /**
    * The ExtractorContext object provides common contextual information for all of
@@ -483,9 +483,8 @@ abstract class AstItem {
 
     // TODO: this.visitTypeReferencesForNode(this);
 
-    const summaryTextCondensed: string = DocElementParser.getAsText(
-      this.documentation.summary,
-      this.reportError).replace(/\s\s/g, ' ');
+    const summaryTextCondensed: string = Markup.extractTextContent(
+      this.documentation.summary).replace(/\s\s/g, ' ');
     this.needsDocumentation = this.shouldHaveDocumentation() && summaryTextCondensed.length <= 10;
 
     this.supportedName =  (this.kind === AstItemKind.Package) || AstItem._allowedNameRegex.test(this.name);

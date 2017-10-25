@@ -4,9 +4,8 @@
 import * as fsx from 'fs-extra';
 import * as path from 'path';
 import { FileDiffTest } from '@microsoft/node-core-library';
-import { IMarkupPage } from '@microsoft/api-extractor';
+import { IMarkupPage, Markup } from '@microsoft/api-extractor';
 
-import { MarkupBuilder } from '../MarkupBuilder';
 import { MarkdownRenderer } from '../MarkdownRenderer';
 
 describe('MarkdownPageRenderer', () => {
@@ -14,50 +13,50 @@ describe('MarkdownPageRenderer', () => {
 
     const outputFolder: string = FileDiffTest.prepareFolder(__dirname, 'MarkdownPageRenderer');
 
-    const markupPage: IMarkupPage = MarkupBuilder.createPage('Test page');
+    const markupPage: IMarkupPage = Markup.createPage('Test page');
 
-    markupPage.elements.push(MarkupBuilder.createHeading1('Simple bold test'));
-    markupPage.elements.push(...MarkupBuilder.createTextElements('This is a '));
-    markupPage.elements.push(...MarkupBuilder.createTextElements('bold', { bold: true }));
-    markupPage.elements.push(...MarkupBuilder.createTextElements(' word.'));
+    markupPage.elements.push(Markup.createHeading1('Simple bold test'));
+    markupPage.elements.push(...Markup.createTextElements('This is a '));
+    markupPage.elements.push(...Markup.createTextElements('bold', { bold: true }));
+    markupPage.elements.push(...Markup.createTextElements(' word.'));
 
-    markupPage.elements.push(MarkupBuilder.createHeading1('All whitespace bold'));
-    markupPage.elements.push(...MarkupBuilder.createTextElements('  ', { bold: true }));
+    markupPage.elements.push(Markup.createHeading1('All whitespace bold'));
+    markupPage.elements.push(...Markup.createTextElements('  ', { bold: true }));
 
-    markupPage.elements.push(MarkupBuilder.createHeading1('Newline bold'));
-    markupPage.elements.push(...MarkupBuilder.createTextElements('line 1\nline 2', { bold: true }));
+    markupPage.elements.push(Markup.createHeading1('Newline bold'));
+    markupPage.elements.push(...Markup.createTextElements('line 1\nline 2', { bold: true }));
 
-    markupPage.elements.push(MarkupBuilder.createHeading1('Newline bold with spaces'));
-    markupPage.elements.push(...MarkupBuilder.createTextElements('  line 1  \n  line 2  \n  line 3  ', { bold: true }));
+    markupPage.elements.push(Markup.createHeading1('Newline bold with spaces'));
+    markupPage.elements.push(...Markup.createTextElements('  line 1  \n  line 2  \n  line 3  ', { bold: true }));
 
-    markupPage.elements.push(MarkupBuilder.createHeading1('Adjacent bold regions'));
-    markupPage.elements.push(...MarkupBuilder.createTextElements('one', { bold: true }));
-    markupPage.elements.push(...MarkupBuilder.createTextElements('two', { bold: true }));
-    markupPage.elements.push(...MarkupBuilder.createTextElements(' three', { bold: true }));
-    markupPage.elements.push(...MarkupBuilder.createTextElements('', { bold: false }));
-    markupPage.elements.push(...MarkupBuilder.createTextElements('four', { bold: true }));
-    markupPage.elements.push(...MarkupBuilder.createTextElements('non-bold', { bold: false }));
-    markupPage.elements.push(...MarkupBuilder.createTextElements('five', { bold: true }));
+    markupPage.elements.push(Markup.createHeading1('Adjacent bold regions'));
+    markupPage.elements.push(...Markup.createTextElements('one', { bold: true }));
+    markupPage.elements.push(...Markup.createTextElements('two', { bold: true }));
+    markupPage.elements.push(...Markup.createTextElements(' three', { bold: true }));
+    markupPage.elements.push(...Markup.createTextElements('', { bold: false }));
+    markupPage.elements.push(...Markup.createTextElements('four', { bold: true }));
+    markupPage.elements.push(...Markup.createTextElements('non-bold', { bold: false }));
+    markupPage.elements.push(...Markup.createTextElements('five', { bold: true }));
 
-    markupPage.elements.push(MarkupBuilder.createHeading1('Adjacent to other characters'));
+    markupPage.elements.push(Markup.createHeading1('Adjacent to other characters'));
     // Creates a "[" before the bold text
-    markupPage.elements.push(MarkupBuilder.createWebLinkFromText('a link', './index.md'));
-    markupPage.elements.push(...MarkupBuilder.createTextElements('bold', { bold: true }));
-    markupPage.elements.push(...MarkupBuilder.createTextElements('non-bold', { bold: false }));
-    markupPage.elements.push(...MarkupBuilder.createTextElements('more-non-bold', { bold: false }));
+    markupPage.elements.push(Markup.createWebLinkFromText('a link', './index.md'));
+    markupPage.elements.push(...Markup.createTextElements('bold', { bold: true }));
+    markupPage.elements.push(...Markup.createTextElements('non-bold', { bold: false }));
+    markupPage.elements.push(...Markup.createTextElements('more-non-bold', { bold: false }));
 
-    markupPage.elements.push(MarkupBuilder.createHeading1('Bad characters'));
-    markupPage.elements.push(...MarkupBuilder.createTextElements('*one*two*', { bold: true }));
-    markupPage.elements.push(...MarkupBuilder.createTextElements('three*four', { bold: true }));
+    markupPage.elements.push(Markup.createHeading1('Bad characters'));
+    markupPage.elements.push(...Markup.createTextElements('*one*two*', { bold: true }));
+    markupPage.elements.push(...Markup.createTextElements('three*four', { bold: true }));
 
-    markupPage.elements.push(MarkupBuilder.createHeading1('Characters that should be escaped'));
-    markupPage.elements.push(...MarkupBuilder.createTextElements(
+    markupPage.elements.push(Markup.createHeading1('Characters that should be escaped'));
+    markupPage.elements.push(...Markup.createTextParagraphs(
       'Double-encoded JSON: "{ \\"A\\": 123}"\n\n'));
-    markupPage.elements.push(...MarkupBuilder.createTextElements(
+    markupPage.elements.push(...Markup.createTextParagraphs(
       'HTML chars: <script>alert("[You] are #1!");</script>\n\n'));
-    markupPage.elements.push(...MarkupBuilder.createTextElements(
+    markupPage.elements.push(...Markup.createTextParagraphs(
       'HTML escape: &quot;\n\n'));
-    markupPage.elements.push(...MarkupBuilder.createTextElements(
+    markupPage.elements.push(...Markup.createTextParagraphs(
       '3 or more hyphens: - -- --- ---- ----- ------\n\n'));
 
     const outputFilename: string = path.join(outputFolder, 'ActualOutput.md');
