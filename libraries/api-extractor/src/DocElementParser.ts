@@ -192,7 +192,7 @@ export default class DocElementParser {
         normalizedApiLink.packageName = scopePackageName.package;
       }
 
-      linkMarkupElement = Markup.createApiLink(displayTextElements, apiDefitionRef);
+      linkMarkupElement = Markup.createApiLink(displayTextElements, normalizedApiLink);
     }
 
     return linkMarkupElement;

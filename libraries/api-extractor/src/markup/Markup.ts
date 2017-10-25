@@ -127,6 +127,10 @@ export class Markup {
       throw new Error('Missing text for link');
     }
 
+    if (!target.packageName || target.packageName.length < 1) {
+      throw new Error('The IApiItemReference.packageName cannot be empty');
+    }
+
     return {
       kind: 'api-link',
       elements: textElements,
