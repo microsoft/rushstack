@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 24 Oct 2017 18:17:12 GMT and should not be manually modified.
+This log was last generated on Wed, 25 Oct 2017 20:03:59 GMT and should not be manually modified.
+
+## 4.2.0
+Wed, 25 Oct 2017 20:03:59 GMT
+
+### Minor changes
+
+- Improved the way API JSON represents documentation markup; this is a file format change
 
 ## 4.1.2
 Tue, 24 Oct 2017 18:17:12 GMT

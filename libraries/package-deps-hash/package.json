@@ -15,7 +15,7 @@
     "test": "gulp test"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "~4.2.0",
+    "@microsoft/node-library-build": "~4.2.1",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "@types/chai": "3.4.34",
