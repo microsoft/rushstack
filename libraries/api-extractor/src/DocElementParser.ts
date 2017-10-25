@@ -82,21 +82,7 @@ export default class DocElementParser {
       } else if (token.type === TokenType.Text) {
         tokenizer.getToken();
 
-        let firstLoop: boolean = true;
-
-        for (const paragraph of token.text.split(/\n\s*\n/g)) {
-          if (!firstLoop) {
-            markupElements.push(Markup.PARAGRAPH);
-          }
-          firstLoop = false;
-
-          const normalizedParagraph: string = paragraph.replace(/\s+/g, ' ').trim();
-          if (normalizedParagraph) {
-            markupElements.push(
-              ...Markup.createTextElements(' ' + normalizedParagraph + ' ')
-            );
-          }
-        }
+        markupElements.push(...Markup.createTextParagraphs(token.text));
       } else {
         documentation.reportError(`Unidentifiable Token ${token.type} ${token.tag} "${token.text}"`);
       }
