@@ -58,7 +58,7 @@ export class YamlDocumenter {
 
   protected onGetTocRoot(): IYamlTocItem {  // virtual
     return {
-      name: 'SharePoint Framework',
+      name: 'SharePoint Framework reference',
       href: '~/overview/sharepoint.md',
       items: [ ]
     };
