@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-karma",
+      "comment": "Upgrade the istanbul instrumenter loader to be compatible with es6+ module formats.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-karma",
+  "email": "iclanton@users.noreply.github.com"
+}

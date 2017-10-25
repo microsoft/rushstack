@@ -23,9 +23,9 @@
       "resolved": "https://registry.npmjs.org/@microsoft/gulp-core-build-typescript/-/gulp-core-build-typescript-4.2.6.tgz"
     },
     "@microsoft/node-core-library": {
-      "version": "0.3.8",
+      "version": "0.3.9",
       "from": "@microsoft/node-core-library@>=0.3.8 <0.4.0",
-      "resolved": "https://registry.npmjs.org/@microsoft/node-core-library/-/node-core-library-0.3.8.tgz"
+      "resolved": "https://registry.npmjs.org/@microsoft/node-core-library/-/node-core-library-0.3.9.tgz"
     },
     "@microsoft/node-library-build": {
       "version": "4.1.6",
@@ -33,9 +33,9 @@
       "resolved": "https://registry.npmjs.org/@microsoft/node-library-build/-/node-library-build-4.1.6.tgz"
     },
     "@microsoft/ts-command-line": {
-      "version": "2.1.1",
+      "version": "2.1.2",
       "from": "@microsoft/ts-command-line@>=2.1.1 <2.2.0",
-      "resolved": "https://registry.npmjs.org/@microsoft/ts-command-line/-/ts-command-line-2.1.1.tgz"
+      "resolved": "https://registry.npmjs.org/@microsoft/ts-command-line/-/ts-command-line-2.1.2.tgz"
     },
     "@rush-temp/api-documenter": {
       "version": "0.0.0",
@@ -3501,16 +3501,9 @@
       }
     },
     "istanbul-instrumenter-loader": {
-      "version": "0.2.0",
-      "from": "istanbul-instrumenter-loader@>=0.2.0 <0.3.0",
-      "resolved": "https://registry.npmjs.org/istanbul-instrumenter-loader/-/istanbul-instrumenter-loader-0.2.0.tgz",
-      "dependencies": {
-        "loader-utils": {
-          "version": "0.2.17",
-          "from": "loader-utils@>=0.0.0 <1.0.0",
-          "resolved": "https://registry.npmjs.org/loader-utils/-/loader-utils-0.2.17.tgz"
-        }
-      }
+      "version": "3.0.0",
+      "from": "istanbul-instrumenter-loader@>=3.0.0 <3.1.0",
+      "resolved": "https://registry.npmjs.org/istanbul-instrumenter-loader/-/istanbul-instrumenter-loader-3.0.0.tgz"
     },
     "istanbul-lib-coverage": {
       "version": "1.1.1",
@@ -5901,6 +5894,11 @@
       "version": "1.2.4",
       "from": "sax@>=1.2.1 <2.0.0",
       "resolved": "https://registry.npmjs.org/sax/-/sax-1.2.4.tgz"
+    },
+    "schema-utils": {
+      "version": "0.3.0",
+      "from": "schema-utils@>=0.3.0 <0.4.0",
+      "resolved": "https://registry.npmjs.org/schema-utils/-/schema-utils-0.3.0.tgz"
     },
     "scss-tokenizer": {
       "version": "0.2.3",
