@@ -341,6 +341,7 @@ class Markup {
   public static createWebLink(textElements: MarkupLinkTextElement[], targetUrl: string): IMarkupWebLink;
   public static createWebLinkFromText(text: string, targetUrl: string): IMarkupWebLink;
   public static extractTextContent(elements: MarkupElement[]): string;
+  public static normalize < T extends MarkupElement >(elements: T[]): void;
   public static PARAGRAPH: IMarkupParagraph;
 }
 

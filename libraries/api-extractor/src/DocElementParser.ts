@@ -40,6 +40,7 @@ export default class DocElementParser {
   private static _hrefRegEx: RegExp = /^[a-z]+:\/\//;
 
   public static parse(documentation: ApiDocumentation, tokenizer: Tokenizer): MarkupBasicElement[] {
+
     const markupElements: MarkupBasicElement[] = [];
     let parsing: boolean = true;
     let token: Token;
@@ -87,6 +88,13 @@ export default class DocElementParser {
         documentation.reportError(`Unidentifiable Token ${token.type} ${token.tag} "${token.text}"`);
       }
     }
+
+    return markupElements;
+  }
+
+  public static parseAndNormalize(documentation: ApiDocumentation, tokenizer: Tokenizer): MarkupBasicElement[] {
+    const markupElements: MarkupBasicElement[] = DocElementParser.parse(documentation, tokenizer);
+    Markup.normalize(markupElements);
     return markupElements;
   }
 
@@ -262,37 +270,5 @@ export default class DocElementParser {
     if (resolvedAstItem.deprecatedMessage.length > 0) {
       documentation.isDocInheritedDeprecated = true;
     }
-  }
-
-  /**
-   * For a span that will not be displayed adjacent to another span, this cleans it up:
-   * 1. Remove leading/trailing white space
-   * 2. Remove leading/trailing paragraph separators
-   */
-  public static getTrimmedSpan(markupElements: MarkupBasicElement[]): MarkupBasicElement[] {
-    const span: MarkupBasicElement[] = [];
-    span.push(...markupElements);
-
-    // Pop leading/trailing paragraph separators
-    while (span.length && span[0].kind === 'paragraph') {
-      span.shift();
-    }
-    while (span.length && span[span.length - 1].kind === 'paragraph') {
-      span.pop();
-    }
-
-    // Trim leading/trailing white space
-    if (span.length) {
-      const first: MarkupElement = span[0];
-      if (first.kind === 'text') {
-        first.text = first.text.replace(/^\s+/, ''); // trim left
-      }
-
-      const last: MarkupElement = span[span.length - 1];
-      if (last.kind === 'text') {
-        last.text = last.text.replace(/\s+$/, ''); // trim right
-      }
-    }
-    return span;
   }
 }

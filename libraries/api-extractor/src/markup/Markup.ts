@@ -314,6 +314,50 @@ export class Markup {
     return buffer.text;
   }
 
+  /**
+   * Use this to clean up a MarkupElement sequence, assuming the sequence is now in
+   * its final form.
+   *
+   * @remarks
+   * The following operations are performed:
+   *
+   * 1. Remove leading/trailing white space around paragraphs
+   *
+   * 2. Remove redundant paragraph elements
+   */
+  public static normalize<T extends MarkupElement>(elements: T[]): void {
+    let i: number = 0;
+
+    while (i < elements.length) {
+      const element: T = elements[i];
+      const previousElement: T | undefined = i - 1 >= 0 ? elements[i - 1] : undefined;
+      const nextElement: T | undefined = i + 1 < elements.length ? elements[i + 1] : undefined;
+
+      const paragraphBefore: boolean = previousElement && previousElement.kind === 'paragraph';
+      const paragraphAfter: boolean = nextElement && nextElement.kind === 'paragraph';
+
+      if (element.kind === 'paragraph') {
+        if (i === 0 || i === elements.length - 1 || paragraphBefore) {
+          // Delete this element.  We do not update i because the "previous" item
+          // is unchanged on the next loop.
+          elements.splice(i, 1);
+          continue;
+        }
+      } else if (element.kind === 'text') {
+        const textElement: IMarkupText = element as IMarkupText;
+        if (paragraphBefore || i === 0) {
+          textElement.text = textElement.text.replace(/^\s+/, ''); // trim left
+        }
+
+        if (paragraphAfter || i === elements.length - 1) {
+          textElement.text = textElement.text.replace(/\s+$/, ''); // trim right
+        }
+      }
+
+      ++i;
+    }
+  }
+
   private static _extractTextContent(elements: MarkupElement[], buffer: { text: string }): void {
     for (const element of elements) {
       switch (element.kind) {

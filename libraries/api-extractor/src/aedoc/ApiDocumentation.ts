@@ -209,7 +209,7 @@ export default class ApiDocumentation {
     this.incompleteInheritdocs = [];
     this.releaseTag = ReleaseTag.None;
     const tokenizer: Tokenizer = new Tokenizer(this.originalAedoc, this.reportError);
-    this.summary = DocElementParser.getTrimmedSpan(DocElementParser.parse(this, tokenizer));
+    this.summary = DocElementParser.parseAndNormalize(this, tokenizer);
 
     let releaseTagCount: number = 0;
     let parsing: boolean = true;
@@ -233,12 +233,12 @@ export default class ApiDocumentation {
           case '@remarks':
             tokenizer.getToken();
             this._checkInheritDocStatus(token.tag);
-            this.remarks = DocElementParser.getTrimmedSpan(DocElementParser.parse(this, tokenizer));
+            this.remarks = DocElementParser.parseAndNormalize(this, tokenizer);
             break;
           case '@returns':
             tokenizer.getToken();
             this._checkInheritDocStatus(token.tag);
-            this.returnsMessage = DocElementParser.getTrimmedSpan(DocElementParser.parse(this, tokenizer));
+            this.returnsMessage = DocElementParser.parseAndNormalize(this, tokenizer);
             break;
           case '@param':
             tokenizer.getToken();
@@ -250,7 +250,7 @@ export default class ApiDocumentation {
             break;
           case '@deprecated':
             tokenizer.getToken();
-            this.deprecatedMessage = DocElementParser.getTrimmedSpan(DocElementParser.parse(this, tokenizer));
+            this.deprecatedMessage = DocElementParser.parseAndNormalize(this, tokenizer);
             if (!this.deprecatedMessage || this.deprecatedMessage.length === 0) {
               this.reportError(`deprecated description required after @deprecated AEDoc tag.`);
             }
@@ -362,10 +362,11 @@ export default class ApiDocumentation {
       // Full param description may contain additional Tokens (Ex: @link)
       const remainingElements: MarkupBasicElement[] = DocElementParser.parse(this, tokenizer);
       const descriptionElements: MarkupBasicElement[] = commentTextElements.concat(remainingElements);
+      Markup.normalize(descriptionElements);
 
       const paramDocElement: IAedocParameter = {
         name: name,
-        description: DocElementParser.getTrimmedSpan(descriptionElements)
+        description: descriptionElements
       };
       return paramDocElement;
     }
