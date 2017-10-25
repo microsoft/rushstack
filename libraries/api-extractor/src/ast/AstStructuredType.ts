@@ -4,6 +4,8 @@
 /* tslint:disable:no-bitwise */
 
 import * as ts from 'typescript';
+import { ReleaseTag } from '../aedoc/ReleaseTag';
+import { Markup } from '../markup/Markup';
 import AstMethod from './AstMethod';
 import AstProperty from './AstProperty';
 import AstItem, { AstItemKind, IAstItemOptions } from './AstItem';
@@ -155,6 +157,24 @@ export default class AstStructuredType extends AstItemContainer {
     return result;
   }
 
+  protected onCompleteInitialization(): void {
+    super.onCompleteInitialization();
+
+    // Is the constructor internal?
+    for (const member of this.getSortedMemberItems()) {
+      if (member.kind === AstItemKind.Constructor) {
+        if (member.documentation.releaseTag === ReleaseTag.Internal) {
+          // Add a boilerplate notice for classes with internal constructors
+          this.documentation.remarks.unshift(
+            ...Markup.createTextElements(`The constructor for this class is marked as internal. Third-party code`
+              + ` should not call the constructor directly or create subclasses that extend the ${this.name} class.`),
+            Markup.PARAGRAPH
+          );
+        }
+      }
+    }
+  }
+
   private _processMember(memberSymbol: ts.Symbol, memberDeclaration: ts.Declaration): void {
     if (memberDeclaration.modifiers) {
       for (let i: number = 0; i < memberDeclaration.modifiers.length; i++ ) {
@@ -179,7 +199,7 @@ export default class AstStructuredType extends AstItemContainer {
     this._processedMemberNames.add(memberSymbol.name);
 
     const memberOptions: IAstItemOptions = {
-      extractor: this.extractor,
+      context: this.context,
       declaration: memberDeclaration,
       declarationSymbol: memberSymbol,
       jsdocNode: memberDeclaration

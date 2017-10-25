@@ -1,6 +1,25 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 26 Sep 2017 20:25:51 GMT and should not be manually modified.
+This log was last generated on Thu, 19 Oct 2017 23:01:49 GMT and should not be manually modified.
+
+## 3.0.20
+Thu, 19 Oct 2017 23:01:49 GMT
+
+### Patches
+
+- Fix a stack overflow error that occurs when "rush rebuild" encounters a cyclic dependency
+- Fix a bug that "rush rebuild" fails if "from" parameter is provided
+- Validate versions before "rush version" commits version updates
+
+## 3.0.19
+Fri, 06 Oct 2017 22:44:31 GMT
+
+### Patches
+
+- Enable strickNullChecks
+- Fix a bug in "rush version" that devdependency does not get bumped if there is no dependency.
+- Fix a bug in "rush change" so it handles rename properly.
+- Add npm tag support in "rush publish".
 
 ## 3.0.18
 Tue, 26 Sep 2017 13:51:05 GMT
@@ -255,7 +274,7 @@ Sun, 22 Jan 2017 02:04:57 GMT
 
 ### Patches
 
-- Update temp_modules when versions are bumped. 
+- Update temp_modules when versions are bumped.
 
 ## 1.4.1
 Tue, 03 Jan 2017 21:52:49 GMT

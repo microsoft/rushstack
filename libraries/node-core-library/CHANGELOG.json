@@ -2,6 +2,64 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "0.3.10",
+      "tag": "@microsoft/node-core-library_v0.3.10",
+      "date": "Wed, 25 Oct 2017 20:03:59 GMT",
+      "comments": {}
+    },
+    {
+      "version": "0.3.9",
+      "tag": "@microsoft/node-core-library_v0.3.9",
+      "date": "Tue, 24 Oct 2017 18:17:12 GMT",
+      "comments": {}
+    },
+    {
+      "version": "0.3.8",
+      "tag": "@microsoft/node-core-library_v0.3.8",
+      "date": "Mon, 23 Oct 2017 21:53:12 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "5de032b254b632b8af0d0dd98913acef589f88d5",
+            "comment": "Updated cyclic dependencies"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.7",
+      "tag": "@microsoft/node-core-library_v0.3.7",
+      "date": "Fri, 20 Oct 2017 19:57:12 GMT",
+      "comments": {}
+    },
+    {
+      "version": "0.3.6",
+      "tag": "@microsoft/node-core-library_v0.3.6",
+      "date": "Fri, 20 Oct 2017 01:52:54 GMT",
+      "comments": {}
+    },
+    {
+      "version": "0.3.5",
+      "tag": "@microsoft/node-core-library_v0.3.5",
+      "date": "Fri, 20 Oct 2017 01:04:44 GMT",
+      "comments": {}
+    },
+    {
+      "version": "0.3.4",
+      "tag": "@microsoft/node-core-library_v0.3.4",
+      "date": "Fri, 13 Oct 2017 19:02:46 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "d1a74b1d44b2425c57869d9754b2f822c8597025",
+            "comment": "When FileDiffTest creates a copy of the expected output for comparison, it is now marked as read-only to avoid confusion"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.3",
       "tag": "@microsoft/node-core-library_v0.3.3",
       "date": "Thu, 05 Oct 2017 01:05:02 GMT",

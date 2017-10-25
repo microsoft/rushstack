@@ -1,7 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IDocElement } from '../markup/OldMarkup';
+import {
+  MarkupBasicElement,
+  MarkupStructuredElement
+} from '../markup/MarkupElement';
 
 /**
  * Represents a reference to an ApiItem.
@@ -58,7 +61,7 @@ export interface IApiParameter {
   /**
    * describes the parameter
    */
-  description: IDocElement[];
+  description: MarkupBasicElement[];
 
   /**
    * Whether the parameter is optional
@@ -100,7 +103,7 @@ export interface IApiReturnValue {
   /**
    * Describes the return value
    */
-  description: IDocElement[];
+  description: MarkupBasicElement[];
 }
 
 /**
@@ -113,13 +116,13 @@ export interface IApiReturnValue {
  */
 export interface IApiBaseDefinition {
   /**
-   * kind of DocItem. Ex: 'class', 'Enum', 'Function', etc.
+   * kind of item: 'class', 'enum', 'function', etc.
    */
   kind: string;
   isBeta: boolean;
-  summary: IDocElement[];
-  remarks?: IDocElement[];
-  deprecatedMessage?: IDocElement[];
+  summary: MarkupBasicElement[];
+  remarks: MarkupStructuredElement[];
+  deprecatedMessage?: MarkupBasicElement[];
 }
 
 /**
@@ -336,6 +339,22 @@ export interface IApiInterface extends IApiBaseDefinition {
 }
 
 /**
+ * IApiInterface represents an exported interface.
+ * @alpha
+ */
+export interface IApiNamespace extends IApiBaseDefinition {
+  /**
+   * {@inheritdoc IApiBaseDefinition.kind}
+   */
+  kind: 'namespace';
+
+  /**
+   * A mapping from the name of a member API to its ApiMember
+   */
+  exports: IApiNameMap<ApiItem>;
+}
+
+/**
  * IApiPackage is an object contaning the exported
  * definions of this API package. The exports can include:
  * classes, interfaces, enums, functions.
@@ -365,10 +384,10 @@ export interface IApiPackage {
    * does not extend the IApiBaseDefinition because a summary is not required for
    * a package.
    */
-  isBeta?: boolean;
-  summary?: IDocElement[];
-  remarks?: IDocElement[];
-  deprecatedMessage?: IDocElement[];
+  isBeta: boolean;
+  summary: MarkupBasicElement[];
+  remarks: MarkupStructuredElement[];
+  deprecatedMessage?: MarkupBasicElement[];
 }
 
 /**
@@ -381,7 +400,7 @@ export type ApiMember = IApiProperty | IApiMethod | IApiConstructor;
  * @alpha
  */
 export type ApiItem = IApiProperty | ApiMember | IApiFunction | IApiConstructor |
-   IApiClass | IApiEnum | IApiEnumMember | IApiInterface | IApiPackage;
+   IApiClass | IApiEnum | IApiEnumMember | IApiInterface | IApiNamespace | IApiPackage;
 
 /**
  * Describes a return type and description of the return type
@@ -391,5 +410,5 @@ export type ApiItem = IApiProperty | ApiMember | IApiFunction | IApiConstructor 
  */
 export interface IApiReturnValue {
   type: string;
-  description: IDocElement[];
+  description: MarkupBasicElement[];
 }

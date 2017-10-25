@@ -14,8 +14,8 @@
       "type": "string",
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
     },
-    "rushMinimumVersion": {
-      "description": "The minimum version of the Rush tool that must be installed in order to build this repository.",
+    "rushVersion": {
+      "description": "The version of the Rush tool that will be used to build this repository.",
       "type": "string",
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
     },
@@ -161,5 +161,5 @@
     }
   },
   "additionalProperties": false,
-  "required": [ "npmVersion", "rushMinimumVersion", "projects" ]
+  "required": [ "npmVersion", "rushVersion", "projects" ]
 }

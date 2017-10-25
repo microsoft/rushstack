@@ -72,7 +72,7 @@ export interface IRushRepositoryJson {
 export interface IRushConfigurationJson {
   $schema: string;
   npmVersion: string;
-  rushMinimumVersion: string;
+  rushVersion: string;
   repository?: IRushRepositoryJson;
   nodeSupportedVersionRange?: string;
   projectFolderMinDepth?: number;
@@ -149,13 +149,14 @@ export default class RushConfiguration {
     const rushConfigurationJson: IRushConfigurationJson = JsonFile.load(rushJsonFilename);
 
     // Check the Rush version *before* we validate the schema, since if the version is outdated
-    // then the schema may have changed.
-    const rushMinimumVersion: string = rushConfigurationJson.rushMinimumVersion;
+    // then the schema may have changed. This should no longer be a problem after Rush 4.0 and the C2R wrapper,
+    // but we'll validate anyway.
+    const expectedRushVersion: string = rushConfigurationJson.rushVersion;
     // If the version is missing or malformed, fall through and let the schema handle it.
-    if (rushMinimumVersion && semver.valid(rushMinimumVersion)) {
-      if (semver.lt(rushVersion, rushMinimumVersion)) {
+    if (expectedRushVersion && semver.valid(expectedRushVersion)) {
+      if (semver.eq(rushVersion, expectedRushVersion)) {
         throw new Error(`Your rush tool is version ${rushVersion}, but rush.json`
-          + ` requires version ${rushConfigurationJson.rushMinimumVersion} or newer.  To upgrade,`
+          + ` requires version ${rushConfigurationJson.rushVersion}. To upgrade,`
           + ` run "npm install @microsoft/rush -g".`);
       }
     }
@@ -166,6 +167,18 @@ export default class RushConfiguration {
   }
 
   public static loadFromDefaultLocation(): RushConfiguration {
+    const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation();
+    if (rushJsonLocation) {
+      return RushConfiguration.loadFromConfigurationFile(rushJsonLocation);
+    } else {
+      throw new Error('Unable to find rush.json configuration file');
+    }
+  }
+
+  /**
+   * Find the rush.json location and return the path, or undefined if a rush.json can't be found.
+   */
+  public static tryFindRushJsonLocation(verbose: boolean = true): string | undefined {
     let currentFolder: string = process.cwd();
 
     // Look upwards at parent folders until we find a folder containing rush.json
@@ -173,20 +186,40 @@ export default class RushConfiguration {
       const rushJsonFilename: string = path.join(currentFolder, 'rush.json');
 
       if (fsx.existsSync(rushJsonFilename)) {
-        if (i > 0) {
+        if (i > 0 && verbose) {
           console.log('Found configuration in ' + rushJsonFilename);
         }
-        console.log('');
-        return RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
+
+        if (verbose) {
+          console.log('');
+        }
+
+        return rushJsonFilename;
       }
 
       const parentFolder: string = path.dirname(currentFolder);
       if (parentFolder === currentFolder) {
         break;
       }
+
       currentFolder = parentFolder;
     }
-    throw new Error('Unable to find rush.json configuration file');
+
+    return undefined;
+  }
+
+  /**
+   * Get the user's home directory. On windows this looks something like "C:\users\username\" and on UNIX
+   * this looks something like "/usr/username/"
+   */
+  public static getHomeDirectory(): string {
+    const unresolvedUserFolder: string = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
+    const homeFolder: string = path.resolve(unresolvedUserFolder);
+    if (!fsx.existsSync(homeFolder)) {
+      throw new Error('Unable to determine the current user\'s home directory');
+    }
+
+    return homeFolder;
   }
 
   /**
@@ -567,11 +600,7 @@ export default class RushConfiguration {
     this._committedShrinkwrapFilename = path.join(this._commonRushConfigFolder, RushConstants.npmShrinkwrapFilename);
     this._tempShrinkwrapFilename = path.join(this._commonTempFolder, RushConstants.npmShrinkwrapFilename);
 
-    const unresolvedUserFolder: string = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
-    this._homeFolder = path.resolve(unresolvedUserFolder);
-    if (!fsx.existsSync(this._homeFolder)) {
-      throw new Error('Unable to determine the current user\'s home directory');
-    }
+    this._homeFolder = RushConfiguration.getHomeDirectory();
 
     this._rushLinkJsonFilename = path.join(this._commonTempFolder, 'rush-link.json');
 

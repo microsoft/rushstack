@@ -5,13 +5,14 @@
 
 import AstPackage from '../ast/AstPackage';
 import DocElementParser from '../DocElementParser';
-import { IDocElement, ICodeLinkElement } from '../markup/OldMarkup';
 import ApiDefinitionReference, { IApiDefinitionReferenceParts } from '../ApiDefinitionReference';
 import Token, { TokenType } from './Token';
 import Tokenizer from './Tokenizer';
-import Extractor from '../Extractor';
+import { ExtractorContext } from '../ExtractorContext';
 import ResolvedApiItem from '../ResolvedApiItem';
 import { ReleaseTag } from './ReleaseTag';
+import { MarkupElement, MarkupBasicElement, IMarkupApiLink } from '../markup/MarkupElement';
+import { Markup } from '../markup/Markup';
 
 /**
  * A dependency for ApiDocumentation constructor that abstracts away the function
@@ -36,7 +37,7 @@ export interface IReferenceResolver {
  */
 export interface IAedocParameter {
   name: string;
-  description: IDocElement[];
+  description: MarkupBasicElement[];
 }
 
 export default class ApiDocumentation {
@@ -59,7 +60,6 @@ export default class ApiDocumentation {
     '@preapproved',
     '@public',
     '@returns',
-    '@see',
     '@deprecated',
     '@readonly',
     '@remarks'
@@ -96,10 +96,10 @@ export default class ApiDocumentation {
    /**
    * docCommentTokens that are parsed into Doc Elements.
    */
-  public summary: IDocElement[];
-  public deprecatedMessage: IDocElement[];
-  public remarks: IDocElement[];
-  public returnsMessage: IDocElement[];
+  public summary: MarkupElement[];
+  public deprecatedMessage: MarkupBasicElement[];
+  public remarks: MarkupElement[];
+  public returnsMessage: MarkupBasicElement[];
   public parameters: { [name: string]: IAedocParameter; };
 
   /**
@@ -109,7 +109,7 @@ export default class ApiDocumentation {
    * Example: If API item A has a \@link in its documentation to API item B, then B must not
    * have ReleaseTag.Internal.
    */
-  public incompleteLinks: ICodeLinkElement[];
+  public incompleteLinks: IMarkupApiLink[];
 
   /**
    * A list of 'Token' objects that have been recognized as \@inheritdoc tokens that will be processed
@@ -158,7 +158,7 @@ export default class ApiDocumentation {
    * We need the extractor to access the package that this AstItem
    * belongs to in order to resolve references.
    */
-  public extractor: Extractor;
+  public context: ExtractorContext;
 
   /**
    * True if any errors were encountered while parsing the AEDoc tokens.
@@ -171,7 +171,7 @@ export default class ApiDocumentation {
 
   constructor(docComment: string,
     referenceResolver: IReferenceResolver,
-    extractor: Extractor,
+    context: ExtractorContext,
     errorLogger: (message: string) => void,
     warnings: string[]) {
 
@@ -182,7 +182,7 @@ export default class ApiDocumentation {
 
     this.originalAedoc = docComment;
     this.referenceResolver = referenceResolver;
-    this.extractor = extractor;
+    this.context = context;
     this.reportError = errorLogger;
     this.parameters = {};
     this.warnings = warnings;
@@ -209,7 +209,7 @@ export default class ApiDocumentation {
     this.incompleteInheritdocs = [];
     this.releaseTag = ReleaseTag.None;
     const tokenizer: Tokenizer = new Tokenizer(this.originalAedoc, this.reportError);
-    this.summary = DocElementParser.getTrimmedSpan(DocElementParser.parse(this, tokenizer));
+    this.summary = DocElementParser.parseAndNormalize(this, tokenizer);
 
     let releaseTagCount: number = 0;
     let parsing: boolean = true;
@@ -233,12 +233,12 @@ export default class ApiDocumentation {
           case '@remarks':
             tokenizer.getToken();
             this._checkInheritDocStatus(token.tag);
-            this.remarks = DocElementParser.getTrimmedSpan(DocElementParser.parse(this, tokenizer));
+            this.remarks = DocElementParser.parseAndNormalize(this, tokenizer);
             break;
           case '@returns':
             tokenizer.getToken();
             this._checkInheritDocStatus(token.tag);
-            this.returnsMessage = DocElementParser.getTrimmedSpan(DocElementParser.parse(this, tokenizer));
+            this.returnsMessage = DocElementParser.parseAndNormalize(this, tokenizer);
             break;
           case '@param':
             tokenizer.getToken();
@@ -250,7 +250,7 @@ export default class ApiDocumentation {
             break;
           case '@deprecated':
             tokenizer.getToken();
-            this.deprecatedMessage = DocElementParser.getTrimmedSpan(DocElementParser.parse(this, tokenizer));
+            this.deprecatedMessage = DocElementParser.parseAndNormalize(this, tokenizer);
             if (!this.deprecatedMessage || this.deprecatedMessage.length === 0) {
               this.reportError(`deprecated description required after @deprecated AEDoc tag.`);
             }
@@ -358,14 +358,15 @@ export default class ApiDocumentation {
         return;
       }
 
-      const commentTextElement: IDocElement = DocElementParser.makeTextElement(comment);
+      const commentTextElements: MarkupBasicElement[] = Markup.createTextElements(comment);
       // Full param description may contain additional Tokens (Ex: @link)
-      const remainingElements: IDocElement[] = DocElementParser.parse(this, tokenizer);
-      const descriptionElements: IDocElement[] = [commentTextElement].concat(remainingElements);
+      const remainingElements: MarkupBasicElement[] = DocElementParser.parse(this, tokenizer);
+      const descriptionElements: MarkupBasicElement[] = commentTextElements.concat(remainingElements);
+      Markup.normalize(descriptionElements);
 
       const paramDocElement: IAedocParameter = {
         name: name,
-        description: DocElementParser.getTrimmedSpan(descriptionElements)
+        description: descriptionElements
       };
       return paramDocElement;
     }
@@ -377,18 +378,18 @@ export default class ApiDocumentation {
    */
   private _completeLinks(): void {
     while (this.incompleteLinks.length) {
-      const codeLink: ICodeLinkElement = this.incompleteLinks.pop();
+      const codeLink: IMarkupApiLink = this.incompleteLinks.pop();
       const parts: IApiDefinitionReferenceParts = {
-        scopeName: codeLink.scopeName,
-        packageName: codeLink.packageName,
-        exportName: codeLink.exportName,
-        memberName: codeLink.memberName
+        scopeName: codeLink.target.scopeName,
+        packageName: codeLink.target.packageName,
+        exportName: codeLink.target.exportName,
+        memberName: codeLink.target.memberName
       };
 
       const apiDefinitionRef: ApiDefinitionReference = ApiDefinitionReference.createFromParts(parts);
       const resolvedAstItem: ResolvedApiItem =  this.referenceResolver.resolve(
         apiDefinitionRef,
-        this.extractor.package,
+        this.context.package,
         this.warnings
       );
 
