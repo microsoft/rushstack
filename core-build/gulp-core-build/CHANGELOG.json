@@ -2,6 +2,25 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.2.0",
+      "tag": "@microsoft/gulp-core-build_v3.2.0",
+      "date": "Tue, 24 Oct 2017 18:17:12 GMT",
+      "comments": {
+        "minor": [
+          {
+            "author": "QZ <qz2017@users.noreply.github.com>",
+            "commit": "5fe47765dbb3567bebc30cf5d7ac2205f6e655b0",
+            "comment": "Add a Jest task to support running tests on Jest"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.8` to `~0.3.9`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.1.6",
       "tag": "@microsoft/gulp-core-build_v3.1.6",
       "date": "Mon, 23 Oct 2017 21:53:12 GMT",

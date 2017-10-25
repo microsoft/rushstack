@@ -1,3 +1,6 @@
+// @internal
+export declare function _isJestEnabled(rootFolder: string): boolean;
+
 // @public
 export declare function addSuppression(suppression: string | RegExp): void;
 
@@ -115,6 +118,7 @@ interface IBuildConfig {
   distFolder: string;
   gulp: GulpProxy | gulp.Gulp;
   isRedundantBuild?: boolean;
+  jestEnabled?: boolean;
   libAMDFolder?: string;
   libES6Folder?: string;
   libFolder: string;
@@ -177,6 +181,13 @@ interface IFixupSettingsOptions {
 }
 
 // @public
+interface IJestConfig {
+  configFilePath?: string;
+  coverage?: boolean;
+  isEnabled?: boolean;
+}
+
+// @public
 export declare function initialize(gulp: typeof Gulp): void;
 
 // @public (undocumented)
@@ -198,6 +209,16 @@ interface IWebpackTaskConfig {
   printStats?: boolean;
   suppressWarnings?: (string | RegExp)[];
   webpack?: typeof Webpack;
+}
+
+// @public
+class JestTask extends GulpTask<IJestConfig> {
+  constructor();
+  // (undocumented)
+  executeTask(gulp: typeof Gulp, completeCallback: (error?: string | Error) => void): void;
+  // (undocumented)
+  isEnabled(buildConfig: IBuildConfig): boolean;
+  loadSchema(): Object;
 }
 
 // @public
@@ -305,6 +326,7 @@ class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConfig & TE
 // WARNING: Unsupported export: cleanFlag
 // WARNING: Unsupported export: clean
 // WARNING: Unsupported export: copyStaticAssets
+// WARNING: Unsupported export: jest
 // WARNING: Unsupported export: apiExtractor
 // WARNING: Unsupported export: typescript
 // WARNING: Unsupported export: tslint

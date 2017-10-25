@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-webpack",
   "entries": [
     {
+      "version": "3.2.7",
+      "tag": "@microsoft/gulp-core-build-webpack_v3.2.7",
+      "date": "Tue, 24 Oct 2017 18:17:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.1.6` to `3.2.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.6",
       "tag": "@microsoft/gulp-core-build-webpack_v3.2.6",
       "date": "Mon, 23 Oct 2017 21:53:12 GMT",

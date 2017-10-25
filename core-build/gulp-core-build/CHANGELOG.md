@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Mon, 23 Oct 2017 21:53:12 GMT and should not be manually modified.
+This log was last generated on Tue, 24 Oct 2017 18:17:12 GMT and should not be manually modified.
+
+## 3.2.0
+Tue, 24 Oct 2017 18:17:12 GMT
+
+### Minor changes
+
+- Add a Jest task to support running tests on Jest
 
 ## 3.1.6
 Mon, 23 Oct 2017 21:53:12 GMT

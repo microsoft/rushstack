@@ -5,6 +5,7 @@ import {
   CopyTask,
   GenerateShrinkwrapTask,
   IExecutable,
+  jest,
   ValidateShrinkwrapTask,
   parallel,
   serial,
@@ -54,8 +55,8 @@ tslint.mergeConfig({
 export const compileTsTasks: IExecutable = parallel(typescript, text, apiExtractor);
 export const buildTasks: IExecutable = task('build', serial(preCopy, sass, parallel(tslint, compileTsTasks), postCopy));
 export const bundleTasks: IExecutable = task('bundle', serial(buildTasks, webpack));
-export const testTasks: IExecutable = task('test', serial(buildTasks, karma));
-export const defaultTasks: IExecutable = serial(bundleTasks, karma);
+export const testTasks: IExecutable = task('test', serial(buildTasks, karma, jest));
+export const defaultTasks: IExecutable = serial(bundleTasks, karma, jest);
 export const postProcessSourceMapsTask: PostProcessSourceMaps = new PostProcessSourceMaps();
 export const validateShrinkwrapTask: ValidateShrinkwrapTask = new ValidateShrinkwrapTask();
 export const generateShrinkwrapTask: GenerateShrinkwrapTask = new GenerateShrinkwrapTask();

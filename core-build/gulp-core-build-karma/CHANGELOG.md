@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-karma
 
-This log was last generated on Mon, 23 Oct 2017 21:53:12 GMT and should not be manually modified.
+This log was last generated on Tue, 24 Oct 2017 18:17:12 GMT and should not be manually modified.
+
+## 4.2.0
+Tue, 24 Oct 2017 18:17:12 GMT
+
+### Minor changes
+
+- Turn off Karma task when Jest task is enabled
 
 ## 4.1.6
 Mon, 23 Oct 2017 21:53:12 GMT

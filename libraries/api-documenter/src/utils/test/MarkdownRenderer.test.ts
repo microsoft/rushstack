@@ -1,9 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/// <reference types='mocha' />
-
-// import { assert } from 'chai';
 import * as fsx from 'fs-extra';
 import * as path from 'path';
 import { FileDiffTest } from '@microsoft/node-core-library';
@@ -12,8 +9,8 @@ import { IMarkupPage } from '@microsoft/api-extractor';
 import { MarkupBuilder } from '../MarkupBuilder';
 import { MarkdownRenderer } from '../MarkdownRenderer';
 
-describe('MarkdownRenderer', () => {
-  it('renders markdown', (done: MochaDone) => {
+describe('MarkdownPageRenderer', () => {
+  it('renders markdown', done => {
 
     const outputFolder: string = FileDiffTest.prepareFolder(__dirname, 'MarkdownPageRenderer');
 

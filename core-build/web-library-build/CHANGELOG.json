@@ -2,6 +2,40 @@
   "name": "@microsoft/web-library-build",
   "entries": [
     {
+      "version": "4.2.0",
+      "tag": "@microsoft/web-library-build_v4.2.0",
+      "date": "Tue, 24 Oct 2017 18:17:12 GMT",
+      "comments": {
+        "minor": [
+          {
+            "author": "QZ <qz2017@users.noreply.github.com>",
+            "commit": "5fe47765dbb3567bebc30cf5d7ac2205f6e655b0",
+            "comment": "Support Jest task"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.1.6` to `3.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-karma\" from `4.1.6` to `4.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `4.1.6` to `4.1.7`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `3.1.6` to `3.1.7`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `4.2.6` to `4.2.7`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `3.2.6` to `3.2.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.1.6",
       "tag": "@microsoft/web-library-build_v4.1.6",
       "date": "Mon, 23 Oct 2017 21:53:12 GMT",
