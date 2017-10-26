@@ -36,6 +36,9 @@ export class CustomCommandFactory {
     }));
 
     commandLineConfig.commands.forEach((command: ICustomCommand) => {
+      if (customActions.get(command.name)) {
+        throw new Error(`Cannot define two custom actions with the same name: "${command.name}"`);
+      }
       customActions.set(command.name, new CustomRushAction(parser, {
         actionVerb: command.name,
         summary: command.description,

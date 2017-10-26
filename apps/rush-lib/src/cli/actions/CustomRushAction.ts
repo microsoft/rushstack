@@ -31,7 +31,7 @@ interface ICustomOptionInstance extends ICustomOption {
 }
 
 export class CustomRushAction extends BaseRushAction {
-  private customOptions: Array<ICustomOptionInstance> = [];
+  private customOptions: Map<string, ICustomOptionInstance> = new Map<string, ICustomOptionInstance>();
 
   private _fromFlag: CommandLineStringListParameter;
   private _toFlag: CommandLineStringListParameter;
@@ -46,9 +46,10 @@ export class CustomRushAction extends BaseRushAction {
   }
 
   public addCustomOption(longName: string, option: ICustomOption): void {
-    const optionInstance: ICustomOptionInstance = option as ICustomOptionInstance;
-    optionInstance.longName = longName;
-    this.customOptions.push(optionInstance);
+    if (this.customOptions.get(longName)) {
+      throw new Error(`Cannot define two custom options with the same name: "${longName}"`);
+    }
+    this.customOptions.set(longName, option as ICustomOptionInstance);
   }
 
   public run(): void {
