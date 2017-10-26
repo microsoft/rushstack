@@ -6,9 +6,8 @@
 import * as fs from 'fs';
 import * as ts from 'typescript';
 
-import Extractor from '../Extractor';
+import { ExtractorContext } from '../ExtractorContext';
 import IndentedWriter from '../IndentedWriter';
-import PrettyPrinter from '../PrettyPrinter';
 import TypeScriptHelpers from '../TypeScriptHelpers';
 import { Span } from './Span';
 
@@ -41,7 +40,7 @@ interface IFollowAliasesResult {
 }
 
 export default class DtsGenerator {
-  private _extractor: Extractor;
+  private _context: ExtractorContext;
   private _typeChecker: ts.TypeChecker;
   private _indentedWriter: IndentedWriter = new IndentedWriter();
 
@@ -109,9 +108,9 @@ export default class DtsGenerator {
     return { symbol: current, external: false };
   }
 
-  public constructor(extractor: Extractor) {
-    this._extractor = extractor;
-    this._typeChecker = extractor.typeChecker;
+  public constructor(context: ExtractorContext) {
+    this._context = context;
+    this._typeChecker = context.typeChecker;
   }
 
   /**
@@ -129,7 +128,7 @@ export default class DtsGenerator {
     this._indentedWriter.spacing = '';
     this._indentedWriter.clear();
 
-    const packageSymbol: ts.Symbol = this._extractor.package.getDeclarationSymbol();
+    const packageSymbol: ts.Symbol = this._context.package.getDeclarationSymbol();
 
     const exportSymbols: ts.Symbol[] = this._typeChecker.getExportsOfModule(packageSymbol) || [];
 
@@ -156,7 +155,7 @@ export default class DtsGenerator {
         // console.log('=====================================');
 
         const span: Span = new Span(declaration);
-        span.dump();
+        console.log(span.getDump());
         console.log('-------------------------------------');
 
         this._modifySpan(span, entry);
