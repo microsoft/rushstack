@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@microsoft/load-themed-styles": "~1.7.6",
-    "@microsoft/web-library-build": "4.2.1",
+    "@microsoft/web-library-build": "4.2.2",
     "gulp": "~3.9.1"
   }
 }

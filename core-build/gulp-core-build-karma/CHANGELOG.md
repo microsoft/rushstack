@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-karma
 
-This log was last generated on Wed, 25 Oct 2017 20:03:59 GMT and should not be manually modified.
+This log was last generated on Thu, 26 Oct 2017 00:00:12 GMT and should not be manually modified.
+
+## 4.3.0
+Thu, 26 Oct 2017 00:00:12 GMT
+
+### Minor changes
+
+- Upgrade the istanbul instrumenter loader to be compatible with es6+ module formats.
 
 ## 4.2.1
 Wed, 25 Oct 2017 20:03:59 GMT
