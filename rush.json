@@ -26,7 +26,7 @@
     // "apps" folder (alphabetical order)
     {
       "packageName": "@microsoft/api-extractor",
-      "projectFolder": "libraries/api-extractor",
+      "projectFolder": "apps/api-extractor",
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
@@ -35,7 +35,7 @@
     },
     {
       "packageName": "@microsoft/api-documenter",
-      "projectFolder": "libraries/api-documenter",
+      "projectFolder": "apps/api-documenter",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
