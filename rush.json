@@ -24,7 +24,21 @@
   // in Windows Explorer
   "projects": [
     // "apps" folder (alphabetical order)
-
+    {
+      "packageName": "@microsoft/api-extractor",
+      "projectFolder": "libraries/api-extractor",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": [
+        "@microsoft/node-library-build"
+      ]
+    },
+    {
+      "packageName": "@microsoft/api-documenter",
+      "projectFolder": "libraries/api-documenter",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
     {
       "packageName": "@microsoft/rush",
       "projectFolder": "apps/rush",
@@ -128,21 +142,6 @@
     },
 
     // "libraries" folder (alphabetical order)
-    {
-      "packageName": "@microsoft/api-extractor",
-      "projectFolder": "libraries/api-extractor",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build"
-      ]
-    },
-    {
-      "packageName": "@microsoft/api-documenter",
-      "projectFolder": "libraries/api-documenter",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
     {
       "packageName": "@microsoft/decorators",
       "projectFolder": "libraries/decorators",
