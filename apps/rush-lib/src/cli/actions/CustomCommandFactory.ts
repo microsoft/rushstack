@@ -44,7 +44,7 @@ export class CustomCommandFactory {
     });
 
     commandLineConfig.options.forEach((customOption: ICustomOption, longName: string) => {
-      customOption.supportedCommands.forEach((associatedCommand: string) => {
+      customOption.associatedCommands.forEach((associatedCommand: string) => {
         const customAction: CustomRushAction | undefined = customActions.get(associatedCommand);
         if (customAction) {
           customAction.addCustomOption(longName, customOption);

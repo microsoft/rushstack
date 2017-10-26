@@ -48,7 +48,7 @@
 
           "required": [
             "description",
-            "supportedCommands"
+            "associatedCommands"
           ],
 
           "properties": {
@@ -57,7 +57,7 @@
               "type": "string"
             },
 
-            "supportedCommands": {
+            "associatedCommands": {
               "title": "Supported Commands",
               "description": "A list of commands which this option can be used with",
               "type": "array",

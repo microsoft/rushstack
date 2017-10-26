@@ -217,7 +217,7 @@ interface ICustomOption {
   // (undocumented)
   shortName?: string;
   // (undocumented)
-  supportedCommands: Array<string>;
+  associatedCommands: Array<string>;
 }
 
 // @public (undocumented)

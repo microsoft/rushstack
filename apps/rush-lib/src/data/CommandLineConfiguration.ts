@@ -27,7 +27,7 @@ export interface ICustomEnumValue {
 export interface ICustomOption {
   optionType: 'enum' | 'flag';
   description: string;
-  supportedCommands: Array<string>;
+  associatedCommands: Array<string>;
   shortName?: string;
 }
 
