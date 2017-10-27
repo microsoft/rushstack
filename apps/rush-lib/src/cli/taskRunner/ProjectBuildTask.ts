@@ -3,7 +3,6 @@
 
 import * as child_process from 'child_process';
 import * as fsx from 'fs-extra';
-import * as os from 'os';
 import * as path from 'path';
 import { JsonFile } from '@microsoft/node-core-library';
 import { ITaskWriter } from '@microsoft/stream-collator';
@@ -104,28 +103,6 @@ export default class ProjectBuildTask implements ITaskDefinition {
         // If the deps file exists, remove it before starting a build.
         if (fsx.existsSync(currentDepsPath)) {
           fsx.unlinkSync(currentDepsPath);
-        }
-
-        if (this._isBuildCommand()) {
-          const cleanCommand: string | undefined = `${this._getScriptCommand('clean')} ${this._customFlags.join(' ')}`;
-
-          if (cleanCommand === undefined) {
-            // tslint:disable-next-line:max-line-length
-            throw new Error(`The project [${this._rushProject.packageName}] does not define a 'clean' command in the 'scripts' section of its package.json`);
-          }
-
-          // Run the clean step
-          if (!cleanCommand) {
-            // tslint:disable-next-line:max-line-length
-            writer.writeLine(`The clean command was registered in the package.json but is blank. Skipping 'clean' step...`);
-          } else {
-            writer.writeLine(cleanCommand);
-            try {
-              Utilities.executeShellCommand(cleanCommand, projectFolder, process.env, true);
-            } catch (error) {
-              throw new Error(`There was a problem running the 'clean' script: ${os.EOL} ${error.toString()}`);
-            }
-          }
         }
 
         if (!buildCommand) {

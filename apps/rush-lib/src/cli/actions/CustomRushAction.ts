@@ -40,13 +40,18 @@ export class CustomRushAction extends BaseRushAction {
   private _verboseParameter: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineIntegerParameter;
 
-  private _parser: RushCommandLineParser;
+  constructor(private _parser: RushCommandLineParser,
+    options: ICommandLineActionOptions,
+    private _parallelized: boolean = true) {
 
-  constructor(parser: RushCommandLineParser, options: ICommandLineActionOptions) {
     super(options);
-    this._parser = parser;
   }
 
+  /**
+   * Registers a custom option to a task. This custom option is then registered during onDefineParameters()
+   * @param longName the long name of the option, e.g. "--verbose"
+   * @param option the Custom Option definition
+   */
   public addCustomOption(longName: string, option: CustomOption): void {
     if (this.customOptions.get(longName)) {
       throw new Error(`Cannot define two custom options with the same name: "${longName}"`);
@@ -66,6 +71,7 @@ export class CustomRushAction extends BaseRushAction {
     const stopwatch: Stopwatch = Stopwatch.start();
 
     const isQuietMode: boolean = !(this._verboseParameter.value);
+    const parallelism: number = (this._parallelized ? this._parallelismParameter.value : 1);
 
     // collect all custom flags here
     const customFlags: string[] = [];
@@ -87,7 +93,7 @@ export class CustomRushAction extends BaseRushAction {
         commandToRun: this.options.actionVerb,
         customFlags,
         isQuietMode,
-        parallelism: this._parallelismParameter.value,
+        parallelism,
         isIncrementalBuildAllowed: this.options.actionVerb === 'build'
       }
     );

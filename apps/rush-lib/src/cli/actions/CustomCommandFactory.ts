@@ -7,6 +7,10 @@ import {
 import RushCommandLineParser from './RushCommandLineParser';
 import { CustomRushAction } from './CustomRushAction';
 
+/**
+ * Using the custom command line configuration, generates a set of
+ * rush actions that are then registered to the command line.
+ */
 export class CustomCommandFactory {
   public static createCommands(
       parser: RushCommandLineParser,
@@ -35,6 +39,7 @@ export class CustomCommandFactory {
       documentation: documentationForBuild
     }));
 
+    // Register each custom command
     commandLineConfig.commands.forEach((command: ICustomCommand) => {
       if (customActions.get(command.name)) {
         throw new Error(`Cannot define two custom actions with the same name: "${command.name}"`);
@@ -43,9 +48,11 @@ export class CustomCommandFactory {
         actionVerb: command.name,
         summary: command.summary,
         documentation: command.documentation || command.summary
-      }));
+      },
+      command.parallelized !== false));
     });
 
+    // Associate each custom option to a command
     commandLineConfig.options.forEach((customOption: CustomOption, longName: string) => {
       customOption.associatedCommands.forEach((associatedCommand: string) => {
         const customAction: CustomRushAction | undefined = customActions.get(associatedCommand);

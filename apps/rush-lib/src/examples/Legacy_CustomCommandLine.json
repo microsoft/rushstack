@@ -1,0 +1,59 @@
+{
+  "customCommands": [],
+
+  "customOptions": {
+    "--profile": {
+      "optionType": "enum",
+      "description": "Changes the build profile, affecting the build output",
+      "supportedCommands": [ "build", "rebuild" ],
+      "enumValues": [
+        {
+          "name": "vso",
+          "description": "For running on CI servers"
+        },
+        {
+          "name": "npm",
+          "description": "For publishing to an NPM registry"
+        }
+      ]
+    },
+
+    "--color": {
+      "optionType": "enum",
+      "description": "Enable or disable colors in the build log, defaults to 'true'",
+      "supportedCommands": [ "build", "rebuild" ],
+      "defaultValue": "true",
+      "enumValues": [
+        {
+          "name": "true",
+          "description": "Displays colors in the build log"
+        },
+        {
+          "name": "false",
+          "description": "Disables all colors in build log, useful for CI builds"
+        }
+      ]
+    },
+
+    "--ship": {
+      "optionType": "flag",
+      "description": "Perform a production build, including minification and localization steps",
+      "supportedCommands": [ "build", "rebuild" ],
+      "shortName": "-s"
+    },
+
+    "--minimal": {
+      "optionType": "flag",
+      "description": "Perform a fast build, which disables certain tasks such as unit tests and linting",
+      "supportedCommands": [ "build", "rebuild" ],
+      "shortName": "-m"
+    },
+
+    "--clean": {
+      "optionType": "flag",
+      "description": "This flag ensures that the build is done clean!",
+      "supportedCommands": [ "build", "rebuild" ],
+      "shortName": "-c"
+    }
+  }
+}

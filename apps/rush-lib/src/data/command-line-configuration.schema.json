@@ -36,6 +36,11 @@
             "title": "Custom Command Documentation",
             "description": "A detailed description of the command, which appears when requesting command-line help for this command. If omitted, the summary will be used.",
             "type": "string"
+          },
+          "parallelized": {
+            "title": "Is Parallelized",
+            "description": "Describes whether or not this command can be run in parallel (with multiple instances running on several projects simultaneously). Defaults to 'true'.",
+            "type": "boolean"
           }
         }
       }
