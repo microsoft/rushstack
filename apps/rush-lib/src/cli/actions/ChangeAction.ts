@@ -252,9 +252,9 @@ export default class ChangeAction extends BaseRushAction {
     const versionPolicy: VersionPolicy | undefined = project!.versionPolicy;
 
     let bumpOptions: { [type: string]: string } = {
-      'major': 'major - for breaking changes (ex: renaming a file)',
-      'minor': 'minor - for adding new features (ex: exposing a new public API)',
-      'patch': 'patch - for fixes (ex: updating how an API works without touching its signature)'
+      'major': 'major - for changes that break compatibility, e.g. removing an API',
+      'minor': 'minor - for backwards compatible changes, e.g. adding a new API',
+      'patch': 'patch - for changes that do not affect compatibility, e.g. fixing a bug'
     };
 
     if (versionPolicy) {
