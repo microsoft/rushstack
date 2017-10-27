@@ -11,28 +11,29 @@ import {
 
 import { RushConstants } from '../RushConstants';
 
-/** @public */
 export interface ICustomCommand {
   name: string;
   description: string;
 }
 
-/** @public */
 export interface ICustomEnumValue {
   name: string;
   description: string;
 }
 
-/** @public */
-export interface ICustomOption {
-  optionType: 'enum' | 'flag';
+export type CustomOption = ICustomEnumOption | ICustomFlagOption;
+
+export interface IBaseCustomOption {
   description: string;
   associatedCommands: Array<string>;
   shortName?: string;
 }
 
-/** @public */
-export interface ICustomEnumOption extends ICustomOption {
+export interface ICustomFlagOption extends IBaseCustomOption {
+  optionType: 'flag';
+}
+
+export interface ICustomEnumOption extends IBaseCustomOption {
   optionType: 'enum';
   enumValues: Array<ICustomEnumValue>;
   defaultValue?: string;
@@ -40,7 +41,7 @@ export interface ICustomEnumOption extends ICustomOption {
 
 interface ICommandLineConfigurationJson {
   customCommands?: Array<ICustomCommand>;
-  customOptions?: { [optionName: string]: ICustomOption };
+  customOptions?: { [optionName: string]: CustomOption };
 }
 
 /**
@@ -48,7 +49,7 @@ interface ICommandLineConfigurationJson {
  * @public
  */
 export class CommandLineConfiguration {
-  public options: Map<string, ICustomOption>;
+  public options: Map<string, CustomOption>;
   public commands: Map<string, ICustomCommand>;
 
   /** Attempts to load pinned versions configuration from a given file */
@@ -66,7 +67,7 @@ export class CommandLineConfiguration {
    * Preferred to use CommandLineConfiguration.loadFromFile()
    */
   private constructor(commandLineJson: ICommandLineConfigurationJson | undefined) {
-    this.options = new Map<string, ICustomOption>();
+    this.options = new Map<string, CustomOption>();
     this.commands = new Map<string, ICustomCommand>();
 
     if (commandLineJson) {
@@ -78,17 +79,16 @@ export class CommandLineConfiguration {
 
       if (commandLineJson.customOptions) {
         Object.keys(commandLineJson.customOptions).forEach((flagName: string) => {
-          const customOption: ICustomOption = commandLineJson.customOptions![flagName];
+          const customOption: CustomOption = commandLineJson.customOptions![flagName];
 
           if (customOption.optionType === 'enum') {
-            const customEnum: ICustomEnumOption = customOption as ICustomEnumOption;
 
-            const enumValues: string[] = customEnum.enumValues.map(v => v.name);
+            const enumValues: string[] = customOption.enumValues.map(v => v.name);
 
-            if (customEnum.defaultValue &&
-               (enumValues.indexOf(customEnum.defaultValue) === -1)) {
+            if (customOption.defaultValue &&
+               (enumValues.indexOf(customOption.defaultValue) === -1)) {
               throw new Error(`In "${RushConstants.commandLineFilename}", custom option "${flagName}",`
-                + ` uses a default value "${customEnum.defaultValue}"`
+                + ` uses a default value "${customOption.defaultValue}"`
                 + ` which is missing from list of options: "${enumValues.toString()}"`);
             }
           }

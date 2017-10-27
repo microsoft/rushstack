@@ -15,10 +15,10 @@ import {
   RushConfiguration,
   RushConfigurationProject,
   RushConstants,
-  TaskError,
   Utilities
 } from '../../index';
 import TaskStatus from './TaskStatus';
+import TaskError from './TaskError';
 import { ITaskDefinition } from '../taskRunner/ITask';
 import {
   PackageChangeAnalyzer

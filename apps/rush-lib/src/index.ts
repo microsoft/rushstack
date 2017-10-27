@@ -16,14 +16,6 @@ export {
 } from './data/RushConfigurationProject';
 
 export {
-  CommandLineConfiguration,
-  ICustomCommand,
-  ICustomOption,
-  ICustomEnumOption,
-  ICustomEnumValue
-} from './data/CommandLineConfiguration';
-
-export {
   ApprovedPackagesItem,
   ApprovedPackagesConfiguration
 } from './data/ApprovedPackagesConfiguration';
@@ -56,18 +48,6 @@ export {
 export {
   VersionMismatchFinder
 } from './data/VersionMismatchFinder';
-
-export {
-  ErrorDetectionMode,
-  IErrorDetectionRule,
-  RegexErrorDetector,
-  default as ErrorDetector
-} from './errorDetection/ErrorDetector';
-
-export {
-  default as TaskError,
-  BuildTaskError
-} from './errorDetection/TaskError';
 
 export {
   default as IPackageJson
@@ -111,7 +91,4 @@ export {
   default as Npm
 } from './utilities/Npm';
 
-export { default as TestErrorDetector } from './errorDetection/rules/TestErrorDetector';
-export { default as TsErrorDetector } from './errorDetection/rules/TsErrorDetector';
-export { default as TsLintErrorDetector } from './errorDetection/rules/TsLintErrorDetector';
 export { default as AsyncRecycler } from './utilities/AsyncRecycler';

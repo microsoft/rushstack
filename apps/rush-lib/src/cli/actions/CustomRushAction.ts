@@ -6,12 +6,14 @@ import * as os from 'os';
 import * as colors from 'colors';
 
 import {
-  ICustomOption,
-  ICustomEnumOption,
-  ICustomEnumValue,
   Stopwatch,
   Event
 } from '../../index';
+
+import {
+  CustomOption,
+  ICustomEnumValue
+} from '../../data/CommandLineConfiguration';
 
 import {
   CommandLineFlagParameter,
@@ -25,9 +27,9 @@ import RushCommandLineParser from './RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 import { TaskManager } from '../utilities/TaskManager';
 
-interface ICustomOptionInstance extends ICustomOption {
-  longName: string;
-  parameterValue: CommandLineFlagParameter | CommandLineOptionParameter;
+interface ICustomOptionInstance {
+  optionDefinition: CustomOption;
+  parameterValue?: CommandLineFlagParameter | CommandLineOptionParameter;
 }
 
 export class CustomRushAction extends BaseRushAction {
@@ -45,11 +47,13 @@ export class CustomRushAction extends BaseRushAction {
     this._parser = parser;
   }
 
-  public addCustomOption(longName: string, option: ICustomOption): void {
+  public addCustomOption(longName: string, option: CustomOption): void {
     if (this.customOptions.get(longName)) {
       throw new Error(`Cannot define two custom options with the same name: "${longName}"`);
     }
-    this.customOptions.set(longName, option as ICustomOptionInstance);
+    this.customOptions.set(longName, {
+      optionDefinition: option
+    });
   }
 
   public run(): void {
@@ -65,12 +69,12 @@ export class CustomRushAction extends BaseRushAction {
 
     // collect all custom flags here
     const customFlags: string[] = [];
-    this.customOptions.forEach((customOption: ICustomOptionInstance) => {
-      if (customOption.parameterValue.value) {
-        if (customOption.optionType === 'flag') {
-          customFlags.push(customOption.longName);
-        } else if (customOption.optionType === 'enum') {
-          customFlags.push(`${customOption.longName}=${customOption.parameterValue.value}`);
+    this.customOptions.forEach((customOption: ICustomOptionInstance, longName: string) => {
+      if (customOption.parameterValue!.value) {
+        if (customOption.optionDefinition.optionType === 'flag') {
+          customFlags.push(longName);
+        } else if (customOption.optionDefinition.optionType === 'enum') {
+          customFlags.push(`${longName}=${customOption.parameterValue!.value}`);
         }
       }
     });
@@ -131,21 +135,20 @@ export class CustomRushAction extends BaseRushAction {
 
     // @TODO we should throw if they are trying to overwrite built in flags
 
-    this.customOptions.forEach((customOption: ICustomOptionInstance) => {
-      if (customOption.optionType === 'flag') {
+    this.customOptions.forEach((customOption: ICustomOptionInstance, longName: string) => {
+      if (customOption.optionDefinition.optionType === 'flag') {
         customOption.parameterValue = this.defineFlagParameter({
-          parameterShortName: customOption.shortName,
-          parameterLongName: customOption.longName,
-          description: customOption.description
+          parameterShortName: customOption.optionDefinition.shortName,
+          parameterLongName: longName,
+          description: customOption.optionDefinition.description
         });
-      } else if (customOption.optionType === 'enum') {
+      } else if (customOption.optionDefinition.optionType === 'enum') {
         customOption.parameterValue = this.defineOptionParameter({
-          parameterShortName: customOption.shortName,
-          parameterLongName: customOption.longName,
-          description: customOption.description,
-          defaultValue: (customOption as ICustomOption as ICustomEnumOption).defaultValue,
-          options: (customOption as ICustomOption as ICustomEnumOption).enumValues.map(
-            (enumValue: ICustomEnumValue) => {
+          parameterShortName: customOption.optionDefinition.shortName,
+          parameterLongName: longName,
+          description: customOption.optionDefinition.description,
+          defaultValue: customOption.optionDefinition.defaultValue,
+          options: customOption.optionDefinition.enumValues.map((enumValue: ICustomEnumValue) => {
               return enumValue.name;
             })
         });
@@ -159,10 +162,10 @@ export class CustomRushAction extends BaseRushAction {
       command_from: (!!this._fromFlag.value).toString()
     };
 
-    this.customOptions.forEach((customOption: ICustomOptionInstance) => {
-      if (customOption.parameterValue.value) {
-        extraData[`${this.options.actionVerb}_${customOption.longName}`] =
-          customOption.parameterValue.value.toString();
+    this.customOptions.forEach((customOption: ICustomOptionInstance, longName: string) => {
+      if (customOption.parameterValue!.value) {
+        extraData[`${this.options.actionVerb}_${longName}`] =
+          customOption.parameterValue!.value.toString();
       }
     });
 

@@ -39,19 +39,6 @@ class AsyncRecycler {
   public readonly recyclerFolder: string;
 }
 
-// @public
-class BuildTaskError extends TaskError {
-  constructor(type: string, message: string, file: string, line: number, offset: number);
-  // (undocumented)
-  protected _file: string;
-  // (undocumented)
-  protected _line: number;
-  // (undocumented)
-  protected _offset: number;
-  // (undocumented)
-  public toString(mode: ErrorDetectionMode): string;
-}
-
 // @alpha
 enum BumpType {
   // (undocumented)
@@ -90,32 +77,6 @@ enum ChangeType {
   none = 0,
   // (undocumented)
   patch = 2
-}
-
-// @public
-class CommandLineConfiguration {
-  // (undocumented)
-  public commands: Map<string, ICustomCommand>;
-  // (undocumented)
-  public options: Map<string, ICustomOption>;
-  public static tryLoadFromFile(jsonFilename: string): CommandLineConfiguration;
-}
-
-// @public (undocumented)
-enum ErrorDetectionMode {
-  // (undocumented)
-  LocalBuild = 1,
-  // (undocumented)
-  VisualStudio = 2,
-  // (undocumented)
-  VisualStudioOnline = 3
-}
-
-// @public
-class ErrorDetector {
-  constructor(rules: IErrorDetectionRule[]);
-  // (undocumented)
-  public execute(data: string): TaskError[];
 }
 
 // @alpha
@@ -180,50 +141,6 @@ interface IChangeLogEntry {
   date: string | undefined;
   tag: string;
   version: string;
-}
-
-// @public (undocumented)
-interface ICustomCommand {
-  // (undocumented)
-  description: string;
-  // (undocumented)
-  name: string;
-}
-
-// @public (undocumented)
-interface ICustomEnumOption extends ICustomOption {
-  // (undocumented)
-  defaultValue?: string;
-  // (undocumented)
-  enumValues: Array<ICustomEnumValue>;
-  // (undocumented)
-  optionType: 'enum';
-}
-
-// @public (undocumented)
-interface ICustomEnumValue {
-  // (undocumented)
-  description: string;
-  // (undocumented)
-  name: string;
-}
-
-// @public (undocumented)
-interface ICustomOption {
-  // (undocumented)
-  description: string;
-  // (undocumented)
-  optionType: 'enum' | 'flag';
-  // (undocumented)
-  shortName?: string;
-  // (undocumented)
-  associatedCommands: Array<string>;
-}
-
-// @public (undocumented)
-interface IErrorDetectionRule {
-  // (undocumented)
-  (line: string): TaskError | undefined;
 }
 
 // @alpha
@@ -333,13 +250,10 @@ class PinnedVersionsConfiguration {
 }
 
 // @public
-export function RegexErrorDetector(regex: RegExp,
-    getError: (match: RegExpExecArray) => TaskError | undefined): IErrorDetectionRule;
-
-// @public
 class RushConfiguration {
   public readonly approvedPackagesPolicy: ApprovedPackagesPolicy;
   public readonly changesFolder: string;
+  // WARNING: The type "CommandLineConfiguration" needs to be exported by the package (e.g. added to index.ts)
   public readonly commandLineConfiguration: CommandLineConfiguration;
   public readonly committedShrinkwrapFilename: string;
   public readonly commonFolder: string;
@@ -454,19 +368,6 @@ enum StopwatchState {
   Stopped = 1
 }
 
-// @public
-class TaskError {
-  constructor(type: string, message: string);
-  // (undocumented)
-  protected _appendPrefix(errorMessage: string, mode: ErrorDetectionMode): string;
-  // (undocumented)
-  protected _message: string;
-  // (undocumented)
-  protected _type: string;
-  // (undocumented)
-  public toString(mode: ErrorDetectionMode): string;
-}
-
 // @public (undocumented)
 class Utilities {
   public static createFolderWithRetry(folderName: string): void;
@@ -572,7 +473,4 @@ enum VersionPolicyDefinitionName {
 }
 
 // WARNING: Unsupported export: rushVersion
-// WARNING: Unsupported export: TestErrorDetector
-// WARNING: Unsupported export: TsErrorDetector
-// WARNING: Unsupported export: TsLintErrorDetector
 // (No packageDescription for this package)

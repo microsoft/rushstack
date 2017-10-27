@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ErrorDetectionMode } from './ErrorDetector';
-
 /**
  * Encapsulates information about an error
  * @public
@@ -16,16 +14,8 @@ export default class TaskError {
     this._message = message;
   }
 
-  public toString(mode: ErrorDetectionMode): string {
-    const errorMessage: string = `[${this._type}] '${this._message}'`;
-    return this._appendPrefix(errorMessage, mode);
-  }
-
-  protected _appendPrefix(errorMessage: string, mode: ErrorDetectionMode): string {
-    if (mode === ErrorDetectionMode.VisualStudioOnline) {
-      return `##vso[task.logissue type=error;]${errorMessage}`;
-    }
-    return errorMessage;
+  public toString(): string {
+    return `[${this._type}] '${this._message}'`;
   }
 }
 
@@ -45,9 +35,8 @@ export class BuildTaskError extends TaskError {
     this._offset = offset;
   }
 
-  public toString(mode: ErrorDetectionMode): string {
+  public toString(): string {
     // Example: "C:\Project\Blah.ts(123,1): [tslint] error no-any: 'any' is not allowed"
-    const errorMessage: string = `${this._file}(${this._line},${this._offset}): [${this._type}] ${this._message}`;
-    return this._appendPrefix(errorMessage, mode);
+    return `${this._file}(${this._line},${this._offset}): [${this._type}] ${this._message}`;
   }
 }

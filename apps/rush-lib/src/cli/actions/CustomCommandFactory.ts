@@ -1,8 +1,8 @@
 import {
   CommandLineConfiguration,
   ICustomCommand,
-  ICustomOption
-} from '../../index';
+  CustomOption
+} from '../../data/CommandLineConfiguration';
 
 import RushCommandLineParser from './RushCommandLineParser';
 import { CustomRushAction } from './CustomRushAction';
@@ -46,7 +46,7 @@ export class CustomCommandFactory {
       }));
     });
 
-    commandLineConfig.options.forEach((customOption: ICustomOption, longName: string) => {
+    commandLineConfig.options.forEach((customOption: CustomOption, longName: string) => {
       customOption.associatedCommands.forEach((associatedCommand: string) => {
         const customAction: CustomRushAction | undefined = customActions.get(associatedCommand);
         if (customAction) {
