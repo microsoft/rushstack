@@ -19,11 +19,9 @@ const MAX_INSTALL_ATTEMPTS: number = 3;
 
 export default class RushVersionManager {
   private _rushDirectory: string;
-  private _currentPackageVersion: string;
 
-  constructor(homeDirectory: string, currentPackageVersion: string) {
+  constructor(homeDirectory: string) {
     this._rushDirectory = path.join(homeDirectory, '.rush');
-    this._currentPackageVersion = currentPackageVersion;
   }
 
   public ensureRushVersionInstalled(version: string): RushWrapper {
@@ -62,7 +60,7 @@ export default class RushVersionManager {
           'lib',
           'start'
         ));
-        rushCliEntrypoint.start(this._currentPackageVersion, true);
+        rushCliEntrypoint.start(true);
       });
     }
   }

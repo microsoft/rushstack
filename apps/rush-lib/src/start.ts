@@ -16,7 +16,7 @@ import RushCommandLineParser from './cli/actions/RushCommandLineParser';
  *  consider a project without a rush.json to be "unmanaged" and we'll print that to the command line when
  *  the tool is executed. This is mainly used for debugging purposes.
  */
-export function start(launcherVersion: string, isManaged: boolean): void {
+export function start(isManaged: boolean): void {
   console.log(
     EOL +
     colors.bold(`Rush Multi-Package Build Tool ${rushVersion}` + colors.yellow(isManaged ? '' : ' (unmanaged)')) +
