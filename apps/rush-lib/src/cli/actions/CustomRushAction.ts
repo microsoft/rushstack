@@ -80,14 +80,16 @@ export class CustomRushAction extends BaseRushAction {
     });
 
     const tasks: TaskManager = new TaskManager(
-      this._parser.rushConfig,
-      this._toFlag.value,
-      this._fromFlag.value,
-      this.options.actionVerb,
-      customFlags,
-      isQuietMode,
-      this._parallelismParameter.value,
-      this.options.actionVerb === 'build'
+      {
+        rushConfiguration: this._parser.rushConfig,
+        toFlags: this._toFlag.value,
+        fromFlags: this._fromFlag.value,
+        commandToRun: this.options.actionVerb,
+        customFlags,
+        isQuietMode,
+        parallelism: this._parallelismParameter.value,
+        isIncrementalBuildAllowed: this.options.actionVerb === 'build'
+      }
     );
 
     tasks.execute().then(

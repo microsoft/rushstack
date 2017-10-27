@@ -8,31 +8,34 @@ import { JsonFile } from '@microsoft/node-core-library';
 import TaskRunner from '../taskRunner/TaskRunner';
 import ProjectBuildTask from '../taskRunner/ProjectBuildTask';
 
+export interface ITaskManagerConstructor {
+  rushConfiguration: RushConfiguration;
+  toFlags: Array<string>;
+  fromFlags: Array<string>;
+  commandToRun: string;
+  customFlags: string[];
+  isQuietMode: boolean;
+  parallelism: number;
+  isIncrementalBuildAllowed: boolean;
+}
+
 export class TaskManager {
   private _taskRunner: TaskRunner;
   private _dependentList: Map<string, Set<string>>;
   private _rushLinkJson: IRushLinkJson;
 
-  constructor(
-    private _rushConfiguration: RushConfiguration,
-    toFlags: Array<string>,
-    fromFlags: Array<string>,
-    private _commandToRun: string,
-    private _customFlags: string[],
-    isQuietMode: boolean,
-    parallelism: number,
-    private _isIncrementalBuildAllowed: boolean) {
+  constructor(private _options: ITaskManagerConstructor) {
 
-    this._taskRunner = new TaskRunner(isQuietMode, parallelism);
-    this._rushLinkJson = JsonFile.load(this._rushConfiguration.rushLinkJsonFilename);
+    this._taskRunner = new TaskRunner(this._options.isQuietMode, this._options.parallelism);
+    this._rushLinkJson = JsonFile.load(this._options.rushConfiguration.rushLinkJsonFilename);
 
-    if (toFlags) {
-      this._registerToFlags(toFlags);
+    if (this._options.toFlags) {
+      this._registerToFlags(this._options.toFlags);
     }
-    if (fromFlags) {
-      this._registerFromFlags(fromFlags);
+    if (this._options.fromFlags) {
+      this._registerFromFlags(this._options.fromFlags);
     }
-    if (!toFlags && !fromFlags) {
+    if (!this._options.toFlags && !this._options.fromFlags) {
       this._registerAll();
     }
   }
@@ -44,7 +47,7 @@ export class TaskManager {
   private _registerToFlags(toFlags: string[]): void {
     for (const toFlag of toFlags) {
       const toProject: RushConfigurationProject | undefined =
-        this._rushConfiguration.findProjectByShorthandName(toFlag);
+        this._options.rushConfiguration.findProjectByShorthandName(toFlag);
       if (!toProject) {
         throw new Error(`The project '${toFlag}' does not exist in rush.json`);
       }
@@ -52,7 +55,7 @@ export class TaskManager {
       const deps: Set<string> = this._collectAllDependencies(toProject.packageName);
 
       // Register any dependencies it may have
-      deps.forEach(dep => this._registerTask(this._rushConfiguration.getProjectByName(dep)));
+      deps.forEach(dep => this._registerTask(this._options.rushConfiguration.getProjectByName(dep)));
 
       // Register the dependency graph to the TaskRunner
       deps.forEach(dep => this._taskRunner.addDependencies(dep, this._rushLinkJson.localLinks[dep] || []));
@@ -62,7 +65,7 @@ export class TaskManager {
   private _registerFromFlags(fromFlags: string[]): void {
     for (const fromFlag of fromFlags) {
       const fromProject: RushConfigurationProject | undefined
-        = this._rushConfiguration.findProjectByShorthandName(fromFlag);
+        = this._options.rushConfiguration.findProjectByShorthandName(fromFlag);
       if (!fromProject) {
         throw new Error(`The project '${fromFlag}' does not exist in rush.json`);
       }
@@ -76,7 +79,7 @@ export class TaskManager {
 
       // Register all downstream dependents
       dependents.forEach(dependent => {
-        this._registerTask(this._rushConfiguration.getProjectByName(dependent));
+        this._registerTask(this._options.rushConfiguration.getProjectByName(dependent));
       });
 
       // Only register dependencies graph for projects which have been registered
@@ -89,7 +92,7 @@ export class TaskManager {
 
   private _registerAll(): void {
     // Register all tasks
-    for (const rushProject of this._rushConfiguration.projects) {
+    for (const rushProject of this._options.rushConfiguration.projects) {
       this._registerTask(rushProject);
     }
 
@@ -143,10 +146,10 @@ export class TaskManager {
 
       const projectTask: ProjectBuildTask = new ProjectBuildTask(
         project,
-        this._rushConfiguration,
-        this._commandToRun,
-        this._customFlags,
-        this._isIncrementalBuildAllowed);
+        this._options.rushConfiguration,
+        this._options.commandToRun,
+        this._options.customFlags,
+        this._options.isIncrementalBuildAllowed);
 
       if (!this._taskRunner.hasTask(projectTask.name)) {
         this._taskRunner.addTask(projectTask);

@@ -51,16 +51,23 @@ interface ICommandLineConfigurationJson {
 export class CommandLineConfiguration {
   public options: Map<string, CustomOption>;
   public commands: Map<string, ICustomCommand>;
+  private static _schema: JsonSchema | undefined = undefined;
 
   /** Attempts to load pinned versions configuration from a given file */
   public static tryLoadFromFile(jsonFilename: string): CommandLineConfiguration {
     let commandLineJson: ICommandLineConfigurationJson | undefined = undefined;
     if (fs.existsSync(jsonFilename)) {
-      const schemaFilename: string = path.join(__dirname, 'commandLineConfiguration.schema.json');
-      commandLineJson = JsonFile.loadAndValidate(jsonFilename, JsonSchema.fromFile(schemaFilename));
+      commandLineJson = JsonFile.loadAndValidate(jsonFilename, CommandLineConfiguration.getSchema());
     }
-
     return new CommandLineConfiguration(commandLineJson);
+  }
+
+  private static getSchema(): JsonSchema {
+    if (!CommandLineConfiguration._schema) {
+      const schemaFilename: string = path.join(__dirname, 'command-line-configuration.schema.json');
+      CommandLineConfiguration._schema = JsonSchema.fromFile(schemaFilename);
+    }
+    return CommandLineConfiguration._schema;
   }
 
   /**
@@ -78,7 +85,7 @@ export class CommandLineConfiguration {
       }
 
       if (commandLineJson.customOptions) {
-        Object.keys(commandLineJson.customOptions).forEach((flagName: string) => {
+        for (const flagName of Object.keys(commandLineJson.customOptions)) {
           const customOption: CustomOption = commandLineJson.customOptions![flagName];
 
           if (customOption.optionType === 'enum') {
@@ -94,7 +101,7 @@ export class CommandLineConfiguration {
           }
 
           this.options.set(flagName, customOption);
-        });
+        }
       }
     }
   }
