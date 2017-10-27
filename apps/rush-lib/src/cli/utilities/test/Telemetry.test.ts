@@ -16,7 +16,7 @@ import {
 describe('Telemetry', () => {
   it('adds data to store if telemetry is enabled', () => {
     const filename: string = path.resolve(path.join(__dirname, './telemetry/telemetryEnabled.json'));
-    const rushConfig: RushConfiguration = RushConfiguration.loadFromConfigurationFile(filename);
+    const rushConfig: RushConfiguration = RushConfiguration.loadFromConfigurationFile(filename, false);
     const telemetry: Telemetry = new Telemetry(rushConfig);
     const logData1: ITelemetryData = {
       name: 'testData1',
@@ -43,7 +43,7 @@ describe('Telemetry', () => {
 
   it('does not add data to store if telemetry is not enabled', () => {
     const filename: string = path.resolve(path.join(__dirname, './telemetry/telemetryNotEnabled.json'));
-    const rushConfig: RushConfiguration = RushConfiguration.loadFromConfigurationFile(filename);
+    const rushConfig: RushConfiguration = RushConfiguration.loadFromConfigurationFile(filename, false);
     const telemetry: Telemetry = new Telemetry(rushConfig);
     const logData: ITelemetryData = {
       name: 'testData',
@@ -60,7 +60,7 @@ describe('Telemetry', () => {
 
   it('deletes data after flush', () => {
     const filename: string = path.resolve(path.join(__dirname, './telemetry/telemetryEnabled.json'));
-    const rushConfig: RushConfiguration = RushConfiguration.loadFromConfigurationFile(filename);
+    const rushConfig: RushConfiguration = RushConfiguration.loadFromConfigurationFile(filename, false);
     const telemetry: Telemetry = new Telemetry(rushConfig);
     const logData: ITelemetryData = {
       name: 'testData1',
@@ -85,7 +85,7 @@ describe('Telemetry', () => {
 
   it('populates default fields', () => {
     const filename: string = path.resolve(path.join(__dirname, './telemetry/telemetryEnabled.json'));
-    const rushConfig: RushConfiguration = RushConfiguration.loadFromConfigurationFile(filename);
+    const rushConfig: RushConfiguration = RushConfiguration.loadFromConfigurationFile(filename, false);
     const telemetry: Telemetry = new Telemetry(rushConfig);
     const logData: ITelemetryData = {
       name: 'testData1',

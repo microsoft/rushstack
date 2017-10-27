@@ -71,7 +71,7 @@ export class VersionManager {
     this._ensure(lockStepVersionPolicyName, shouldCommit);
 
     // Refresh rush configuration
-    this._rushConfiguration = RushConfiguration.loadFromConfigurationFile(this._rushConfiguration.rushJsonFile);
+    this._rushConfiguration = RushConfiguration.loadFromConfigurationFile(this._rushConfiguration.rushJsonFile, false);
 
     // Update projects based on individual policies
     const changeManager: ChangeManager = new ChangeManager(this._rushConfiguration,

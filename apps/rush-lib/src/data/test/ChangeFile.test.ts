@@ -12,7 +12,7 @@ import { ChangeType } from '../ChangeManagement';
 describe('ChangeFile', () => {
   it('can add a change', () => {
     const rushFilename: string = path.resolve(__dirname, 'repo', 'rush.json');
-    const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
+    const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename, false);
 
     const changeFile: ChangeFile = new ChangeFile({
       packageName: 'a',

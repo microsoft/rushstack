@@ -145,7 +145,10 @@ export default class RushConfiguration {
    * Loads the configuration data from an Rush.json configuration file and returns
    * an RushConfiguration object.
    */
-  public static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration {
+  public static loadFromConfigurationFile(
+    rushJsonFilename: string,
+    validateVersion: boolean = true
+  ): RushConfiguration {
     const rushConfigurationJson: IRushConfigurationJson = JsonFile.load(rushJsonFilename);
 
     // Check the Rush version *before* we validate the schema, since if the version is outdated
@@ -153,8 +156,8 @@ export default class RushConfiguration {
     // but we'll validate anyway.
     const expectedRushVersion: string = rushConfigurationJson.rushVersion;
     // If the version is missing or malformed, fall through and let the schema handle it.
-    if (expectedRushVersion && semver.valid(expectedRushVersion)) {
-      if (semver.eq(rushVersion, expectedRushVersion)) {
+    if (validateVersion && expectedRushVersion && semver.valid(expectedRushVersion)) {
+      if (!semver.eq(rushVersion, expectedRushVersion)) {
         throw new Error(`Your rush tool is version ${rushVersion}, but rush.json`
           + ` requires version ${rushConfigurationJson.rushVersion}. To upgrade,`
           + ` run "npm install @microsoft/rush -g".`);

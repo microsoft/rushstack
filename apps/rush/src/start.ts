@@ -9,7 +9,7 @@ import {
   RushConfiguration,
   Utilities
 } from '@microsoft/rush-lib';
-import { start } from '@microsoft/rush-lib/lib/start';
+import { start } from '@microsoft/rush-lib';
 
 import MinimalRushConfiguration from './MinimalRushConfiguration';
 import RushVersionManager from './RushVersionManager';
@@ -27,7 +27,7 @@ if (process.argv[2] === RUSH_PURGE_OPTION_NAME) {
   const configuration: MinimalRushConfiguration | undefined = MinimalRushConfiguration.loadFromDefaultLocation();
   const currentPackageJson: IPackageJson = JsonFile.load(path.join(__dirname, '..', 'package.json'));
 
-  if (configuration) {
+  if (configuration && configuration.rushVersion !== currentPackageJson.version) {
     const versionManager: RushVersionManager = new RushVersionManager(
       configuration.homeFolder,
       currentPackageJson.version

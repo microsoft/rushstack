@@ -196,7 +196,7 @@ describe('updateChangelogs', () => {
   let rushConfiguration: RushConfiguration;
 
   beforeEach(() => {
-    rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile);
+    rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile, false);
   });
 
   /* tslint:disable:no-string-literal */

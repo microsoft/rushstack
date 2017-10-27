@@ -107,3 +107,5 @@ export { default as TestErrorDetector } from './errorDetection/rules/TestErrorDe
 export { default as TsErrorDetector } from './errorDetection/rules/TsErrorDetector';
 export { default as TsLintErrorDetector } from './errorDetection/rules/TsLintErrorDetector';
 export { default as AsyncRecycler } from './utilities/AsyncRecycler';
+
+export { start } from './cli/start';

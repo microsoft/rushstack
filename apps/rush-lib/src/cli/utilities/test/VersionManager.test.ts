@@ -26,7 +26,7 @@ function _getChanges(changeFiles: Map<string, ChangeFile>,
 
 describe('VersionManager', () => {
   const rushJsonFile: string = path.resolve(__dirname, 'repo', 'rush.json');
-  const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile);
+  const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile, false);
   const versionConfigJsonFile: string = path.resolve(__dirname, 'repo', 'version-policies.json');
   const versionPolicyConfiguration: VersionPolicyConfiguration =
     new VersionPolicyConfiguration(versionConfigJsonFile);
