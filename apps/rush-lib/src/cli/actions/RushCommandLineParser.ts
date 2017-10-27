@@ -118,7 +118,7 @@ export default class RushCommandLineParser extends CommandLineParser {
   }
 
   private _exitAndReportError(error: Error): void {
-    if (!this._debugParameter.value) {
+    if (this._debugParameter.value) {
       // If catchSyncErrors() called this, then show a call stack similar to what NodeJS
       // would show for an uncaught error
       console.error(os.EOL + error.stack);

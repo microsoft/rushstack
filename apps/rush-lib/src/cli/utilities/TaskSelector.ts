@@ -8,7 +8,7 @@ import { JsonFile } from '@microsoft/node-core-library';
 import TaskRunner from '../taskRunner/TaskRunner';
 import ProjectBuildTask from '../taskRunner/ProjectBuildTask';
 
-export interface ITaskManagerConstructor {
+export interface ITaskSelectorConstructor {
   rushConfiguration: RushConfiguration;
   toFlags: Array<string>;
   fromFlags: Array<string>;
@@ -19,15 +19,29 @@ export interface ITaskManagerConstructor {
   isIncrementalBuildAllowed: boolean;
 }
 
-export class TaskManager {
+/**
+ * This class is responsible for:
+ *  - based on to/from flags, solving the dependency graph and figuring out which projects need to be run
+ *  - creating a ProjectBuildTask for each project that needs to be built
+ *  - registering the necessary ProjectBuildTasks with the TaskRunner, which actually orchestrates execution
+ *
+ * This class is currently only used by CustomRushAction
+ */
+export class TaskSelector {
   private _taskRunner: TaskRunner;
   private _dependentList: Map<string, Set<string>>;
   private _rushLinkJson: IRushLinkJson;
 
-  constructor(private _options: ITaskManagerConstructor) {
+  constructor(private _options: ITaskSelectorConstructor) {
 
     this._taskRunner = new TaskRunner(this._options.isQuietMode, this._options.parallelism);
-    this._rushLinkJson = JsonFile.load(this._options.rushConfiguration.rushLinkJsonFilename);
+
+    try {
+      this._rushLinkJson = JsonFile.load(this._options.rushConfiguration.rushLinkJsonFilename);
+    } catch (error) {
+      throw new Error(`Could not read "${this._options.rushConfiguration.rushLinkJsonFilename}".`
+        + ` Have you ran "rush install" and/or "rush link"?`);
+    }
 
     if (this._options.toFlags) {
       this._registerToFlags(this._options.toFlags);
