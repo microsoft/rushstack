@@ -24,7 +24,7 @@ describe('RushConfiguration', () => {
 
   it('can load repo/rush.json', (done: MochaDone) => {
     const rushFilename: string = path.resolve(__dirname, 'repo', 'rush.json');
-    const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename, false);
+    const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
 
     assertPathProperty('committedShrinkwrapFilename',
       rushConfiguration.committedShrinkwrapFilename, './repo/common/config/rush/npm-shrinkwrap.json');

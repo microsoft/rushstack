@@ -62,7 +62,7 @@ export default class RushVersionManager {
           'lib',
           'index'
         ));
-        rushCliEntrypoint.start(this._currentPackageVersion, true);
+        rushCliEntrypoint._CLI.start(this._currentPackageVersion, true);
       });
     }
   }

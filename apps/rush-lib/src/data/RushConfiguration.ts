@@ -15,6 +15,8 @@ import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
 import EventHooks from './EventHooks';
 import { VersionPolicyConfiguration } from './VersionPolicyConfiguration';
 
+const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
+
 /**
  * A list of known config filenames that are expected to appear in the "./common/config/rush" folder.
  * To avoid confusion/mistakes, any extra files will be reported as an error.
@@ -145,10 +147,7 @@ export default class RushConfiguration {
    * Loads the configuration data from an Rush.json configuration file and returns
    * an RushConfiguration object.
    */
-  public static loadFromConfigurationFile(
-    rushJsonFilename: string,
-    validateVersion: boolean = true
-  ): RushConfiguration {
+  public static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration {
     const rushConfigurationJson: IRushConfigurationJson = JsonFile.load(rushJsonFilename);
 
     // Check the Rush version *before* we validate the schema, since if the version is outdated
@@ -156,11 +155,14 @@ export default class RushConfiguration {
     // but we'll validate anyway.
     const expectedRushVersion: string = rushConfigurationJson.rushVersion;
     // If the version is missing or malformed, fall through and let the schema handle it.
-    if (validateVersion && expectedRushVersion && semver.valid(expectedRushVersion)) {
-      if (!semver.eq(rushVersion, expectedRushVersion)) {
-        throw new Error(`Your rush tool is version ${rushVersion}, but rush.json`
-          + ` requires version ${rushConfigurationJson.rushVersion}. To upgrade,`
-          + ` run "npm install @microsoft/rush -g".`);
+    if (expectedRushVersion && semver.valid(expectedRushVersion)) {
+      if (semver.lt(rushVersion, expectedRushVersion)) {
+        throw new Error(`Your rush tool is version ${rushVersion}, but rush.json ` +
+          `requires version ${rushConfigurationJson.rushVersion}. To upgrade, ` +
+          `run "npm install @microsoft/rush -g".`);
+      } else if (semver.lt(expectedRushVersion, MINIMUM_SUPPORTED_RUSH_JSON_VERSION)) {
+        throw new Error(`rush.json is version ${expectedRushVersion}, which is too old for this tool. ` +
+          `The minimum supported version is ${MINIMUM_SUPPORTED_RUSH_JSON_VERSION}.`);
       }
     }
 

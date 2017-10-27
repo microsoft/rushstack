@@ -108,4 +108,7 @@ export { default as TsErrorDetector } from './errorDetection/rules/TsErrorDetect
 export { default as TsLintErrorDetector } from './errorDetection/rules/TsLintErrorDetector';
 export { default as AsyncRecycler } from './utilities/AsyncRecycler';
 
-export { start } from './cli/start';
+/**
+ * @internal
+ */
+export { CLI as _CLI } from './cli/CLI';

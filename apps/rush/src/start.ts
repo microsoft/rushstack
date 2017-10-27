@@ -9,7 +9,7 @@ import {
   RushConfiguration,
   Utilities
 } from '@microsoft/rush-lib';
-import { start } from '@microsoft/rush-lib';
+import { _CLI } from '@microsoft/rush-lib';
 
 import MinimalRushConfiguration from './MinimalRushConfiguration';
 import RushVersionManager from './RushVersionManager';
@@ -35,6 +35,6 @@ if (process.argv[2] === RUSH_PURGE_OPTION_NAME) {
     const rushWrapper: RushWrapper = versionManager.ensureRushVersionInstalled(configuration.rushVersion);
     rushWrapper.invokeRush();
   } else {
-    start(currentPackageJson.version, false);
+    _CLI.start(currentPackageJson.version, false);
   }
 }

@@ -1,3 +1,8 @@
+// @internal (undocumented)
+class _CLI {
+  public static start(launcherVersion: string, isManaged: boolean): void;
+}
+
 // @public
 class ApprovedPackagesConfiguration {
   public constructor(jsonFilename: string);
@@ -306,8 +311,7 @@ class RushConfiguration {
   public readonly gitAllowedEmailRegExps: string[];
   public readonly gitSampleEmail: string;
   public readonly homeFolder: string;
-  public static loadFromConfigurationFile(rushJsonFilename: string,
-      validateVersion: boolean = true): RushConfiguration;
+  public static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
   // (undocumented)
   public static loadFromDefaultLocation(): RushConfiguration;
   public readonly npmCacheFolder: string;
@@ -384,10 +388,6 @@ module RushConstants {
   versionPoliciesFileName: string = 'version-policies.json';
 
 }
-
-// WARNING: Because this definition is explicitly marked as @internal, an underscore prefix ("_") should be added to its name
-// @internal
-export function start(launcherVersion: string, isManaged: boolean): void;
 
 // @public
 class Stopwatch {

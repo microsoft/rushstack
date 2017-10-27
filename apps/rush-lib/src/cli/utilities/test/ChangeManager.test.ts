@@ -14,7 +14,7 @@ describe('ChangeManager', () => {
   let changeManager: ChangeManager;
 
   beforeEach(() => {
-    rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile, false);
+    rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile);
     changeManager = new ChangeManager(rushConfiguration);
   });
 

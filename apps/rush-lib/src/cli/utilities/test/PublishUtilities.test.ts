@@ -20,10 +20,8 @@ import ChangeFiles from '../ChangeFiles';
 describe('findChangeRequests', () => {
 
   it('returns no changes in an empty change folder', () => {
-    const allPackages: Map<string, RushConfigurationProject> = RushConfiguration.loadFromConfigurationFile(
-      path.resolve(__dirname, 'packages', 'rush.json'),
-      false
-    ).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
       new ChangeFiles(path.join(__dirname, 'noChange')));
@@ -32,10 +30,8 @@ describe('findChangeRequests', () => {
   });
 
   it('returns 1 change when changing a leaf package', () => {
-    const allPackages: Map<string, RushConfigurationProject> = RushConfiguration.loadFromConfigurationFile(
-      path.resolve(__dirname, 'packages', 'rush.json'),
-      false
-    ).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
       new ChangeFiles(path.join(__dirname, 'leafChange')));
@@ -46,10 +42,8 @@ describe('findChangeRequests', () => {
   });
 
   it('returns 2 changes when patching a root package', () => {
-    const allPackages: Map<string, RushConfigurationProject> = RushConfiguration.loadFromConfigurationFile(
-      path.resolve(__dirname, 'packages', 'rush.json'),
-      false
-    ).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
       new ChangeFiles(path.join(__dirname, 'rootPatchChange')));
@@ -67,10 +61,8 @@ describe('findChangeRequests', () => {
   });
 
   it('returns 3 changes when major bumping a root package', () => {
-    const allPackages: Map<string, RushConfigurationProject> = RushConfiguration.loadFromConfigurationFile(
-      path.resolve(__dirname, 'packages', 'rush.json'),
-      false
-    ).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
       new ChangeFiles(path.join(__dirname, 'rootMajorChange')));
@@ -91,10 +83,8 @@ describe('findChangeRequests', () => {
   });
 
   it('returns 2 changes when bumping cyclic dependencies', () => {
-    const allPackages: Map<string, RushConfigurationProject> = RushConfiguration.loadFromConfigurationFile(
-      path.resolve(__dirname, 'packages', 'rush.json'),
-      false
-    ).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
       new ChangeFiles(path.join(__dirname, 'cyclicDeps')));
@@ -109,10 +99,8 @@ describe('findChangeRequests', () => {
   });
 
   it('can resolve multiple changes requests on the same package', () => {
-    const allPackages: Map<string, RushConfigurationProject> = RushConfiguration.loadFromConfigurationFile(
-      path.resolve(__dirname, 'packages', 'rush.json'),
-      false
-    ).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
       new ChangeFiles(path.join(__dirname, 'multipleChanges')));
@@ -130,10 +118,8 @@ describe('findChangeRequests', () => {
   });
 
   it('can update an explicit dependency', () => {
-    const allPackages: Map<string, RushConfigurationProject> = RushConfiguration.loadFromConfigurationFile(
-      path.resolve(__dirname, 'packages', 'rush.json'),
-      false
-    ).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
       new ChangeFiles(path.join(__dirname, 'explicitVersionChange')));
@@ -146,10 +132,8 @@ describe('findChangeRequests', () => {
   });
 
   it('can exclude lock step projects', () => {
-    const allPackages: Map<string, RushConfigurationProject> = RushConfiguration.loadFromConfigurationFile(
-      path.resolve(__dirname, 'packages', 'rush.json'),
-      false
-    ).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'repo', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
       new ChangeFiles(path.join(__dirname, 'repo', 'changes')),
@@ -169,10 +153,8 @@ describe('findChangeRequests', () => {
 
 describe('sortChangeRequests', () => {
   it('can return a sorted array of the change requests to be published in the correct order', () => {
-    const allPackages: Map<string, RushConfigurationProject> = RushConfiguration.loadFromConfigurationFile(
-      path.resolve(__dirname, 'packages', 'rush.json'),
-      false
-    ).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
       new ChangeFiles(path.join(__dirname, 'multipleChanges')));
