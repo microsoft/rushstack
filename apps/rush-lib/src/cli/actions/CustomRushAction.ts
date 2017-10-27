@@ -25,7 +25,7 @@ import {
 
 import RushCommandLineParser from './RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
-import { TaskManager } from '../utilities/TaskManager';
+import { TaskSelector } from '../utilities/TaskSelector';
 
 interface ICustomOptionInstance {
   optionDefinition: CustomOption;
@@ -79,7 +79,7 @@ export class CustomRushAction extends BaseRushAction {
       }
     });
 
-    const tasks: TaskManager = new TaskManager(
+    const tasks: TaskSelector = new TaskSelector(
       {
         rushConfiguration: this._parser.rushConfig,
         toFlags: this._toFlag.value,

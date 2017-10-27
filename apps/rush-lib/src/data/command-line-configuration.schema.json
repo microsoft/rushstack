@@ -27,9 +27,14 @@
             "description": "The name of the custom command, which can be invoked via \"rush <name>\"",
             "type": "string"
           },
-          "description": {
-            "title": "Custom Command Description",
-            "description": "A short description of the custom command, which will appear when printing command line usage (e.g. \"rush --help\")",
+          "summary": {
+            "title": "Custom Command Summary",
+            "description": "A short summary of the custom command, which will appear when printing command line usage (e.g. \"rush --help\")",
+            "type": "string"
+          },
+          "documentation": {
+            "title": "Custom Command Documentation",
+            "description": "A detailed description of the command, which appears when requesting command-line help for this command. If omitted, the summary will be used.",
             "type": "string"
           }
         }

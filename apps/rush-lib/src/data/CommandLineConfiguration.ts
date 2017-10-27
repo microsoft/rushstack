@@ -13,7 +13,8 @@ import { RushConstants } from '../RushConstants';
 
 export interface ICustomCommand {
   name: string;
-  description: string;
+  summary: string;
+  documentation: string | undefined;
 }
 
 export interface ICustomEnumValue {
@@ -49,9 +50,9 @@ interface ICommandLineConfigurationJson {
  * @public
  */
 export class CommandLineConfiguration {
+  private static _schema: JsonSchema | undefined = undefined;
   public options: Map<string, CustomOption>;
   public commands: Map<string, ICustomCommand>;
-  private static _schema: JsonSchema | undefined = undefined;
 
   /** Attempts to load pinned versions configuration from a given file */
   public static tryLoadFromFile(jsonFilename: string): CommandLineConfiguration {

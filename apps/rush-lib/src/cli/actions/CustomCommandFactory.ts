@@ -41,8 +41,8 @@ export class CustomCommandFactory {
       }
       customActions.set(command.name, new CustomRushAction(parser, {
         actionVerb: command.name,
-        summary: command.description,
-        documentation: command.description
+        summary: command.summary,
+        documentation: command.documentation || command.summary
       }));
     });
 
