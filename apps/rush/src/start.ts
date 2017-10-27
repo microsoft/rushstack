@@ -2,10 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { JsonFile } from '@microsoft/node-core-library';
 
 import {
-  IPackageJson,
   RushConfiguration,
   Utilities
 } from '@microsoft/rush-lib';
@@ -25,16 +23,14 @@ if (process.argv[2] === RUSH_PURGE_OPTION_NAME) {
 } else {
   // Load the configuration
   const configuration: MinimalRushConfiguration | undefined = MinimalRushConfiguration.loadFromDefaultLocation();
-  const currentPackageJson: IPackageJson = JsonFile.load(path.join(__dirname, '..', 'package.json'));
 
   if (configuration) {
     const versionManager: RushVersionManager = new RushVersionManager(
-      configuration.homeFolder,
-      currentPackageJson.version
+      configuration.homeFolder
     );
     const rushWrapper: RushWrapper = versionManager.ensureRushVersionInstalled(configuration.rushVersion);
     rushWrapper.invokeRush();
   } else {
-    start(currentPackageJson.version, false);
+    start(false);
   }
 }
