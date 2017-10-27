@@ -154,7 +154,7 @@ export default class RushConfiguration {
     const expectedRushVersion: string = rushConfigurationJson.rushVersion;
     // If the version is missing or malformed, fall through and let the schema handle it.
     if (expectedRushVersion && semver.valid(expectedRushVersion)) {
-      if (semver.eq(rushVersion, expectedRushVersion)) {
+      if (semver.lt(rushVersion, expectedRushVersion)) {
         throw new Error(`Your rush tool is version ${rushVersion}, but rush.json`
           + ` requires version ${rushConfigurationJson.rushVersion}. To upgrade,`
           + ` run "npm install @microsoft/rush -g".`);
