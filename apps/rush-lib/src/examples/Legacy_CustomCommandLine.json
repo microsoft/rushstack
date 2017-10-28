@@ -2,20 +2,30 @@
   "customCommands": [],
 
   "customOptions": {
-    "--profile": {
-      "optionType": "enum",
-      "description": "Changes the build profile, affecting the build output",
+    "--vso": {
+      "optionType": "flag",
+      "description": "Used for CI builds. Note that colorization of build output is now controlled by the --color flag.",
+      "supportedCommands": ["build", "rebuild"]
+    },
+
+    "--npm": {
+      "optionType": "flag",
+      "description": "For doing builds that will be published to NPM",
+      "supportedCommands": ["build", "rebuild"]
+    },
+
+    "--ship": {
+      "optionType": "flag",
+      "description": "Perform a production build, including minification and localization steps",
       "supportedCommands": [ "build", "rebuild" ],
-      "enumValues": [
-        {
-          "name": "vso",
-          "description": "For running on CI servers"
-        },
-        {
-          "name": "npm",
-          "description": "For publishing to an NPM registry"
-        }
-      ]
+      "shortName": "-s"
+    },
+
+    "--minimal": {
+      "optionType": "flag",
+      "description": "Perform a fast build, which disables certain tasks such as unit tests and linting",
+      "supportedCommands": [ "build", "rebuild" ],
+      "shortName": "-m"
     },
 
     "--color": {
@@ -33,27 +43,6 @@
           "description": "Disables all colors in build log, useful for CI builds"
         }
       ]
-    },
-
-    "--ship": {
-      "optionType": "flag",
-      "description": "Perform a production build, including minification and localization steps",
-      "supportedCommands": [ "build", "rebuild" ],
-      "shortName": "-s"
-    },
-
-    "--minimal": {
-      "optionType": "flag",
-      "description": "Perform a fast build, which disables certain tasks such as unit tests and linting",
-      "supportedCommands": [ "build", "rebuild" ],
-      "shortName": "-m"
-    },
-
-    "--clean": {
-      "optionType": "flag",
-      "description": "This flag ensures that the build is done clean!",
-      "supportedCommands": [ "build", "rebuild" ],
-      "shortName": "-c"
     }
   }
 }
