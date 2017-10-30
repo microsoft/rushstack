@@ -310,6 +310,8 @@ class RushConfigurationProject {
   public readonly tempProjectName: string;
   public readonly unscopedTempProjectName: string;
   // @alpha
+  public readonly versionPolicy: VersionPolicy | undefined;
+  // @alpha
   public readonly versionPolicyName: string | undefined;
 }
 
