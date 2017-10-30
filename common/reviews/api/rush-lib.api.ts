@@ -108,12 +108,11 @@ class IndividualVersionPolicy extends VersionPolicy {
   // WARNING: The type "IIndividualVersionJson" needs to be exported by the package (e.g. added to index.ts)
   // @internal
   constructor(versionPolicyJson: IIndividualVersionJson);
-  public bump(bumpType?: BumpType, identifier?: string): void;
-  public ensure(project: IPackageJson): IPackageJson | undefined;
-  // WARNING: Because this definition is explicitly marked as @internal, an underscore prefix ("_") should be added to its name
   // WARNING: The type "IIndividualVersionJson" needs to be exported by the package (e.g. added to index.ts)
   // @internal
-  public readonly json: IIndividualVersionJson;
+  public readonly _json: IIndividualVersionJson;
+  public bump(bumpType?: BumpType, identifier?: string): void;
+  public ensure(project: IPackageJson): IPackageJson | undefined;
   public readonly lockedMajor: number | undefined;
   public validate(versionString: string, packageName: string): void;
 }
@@ -145,12 +144,11 @@ class LockStepVersionPolicy extends VersionPolicy {
   // WARNING: The type "ILockStepVersionJson" needs to be exported by the package (e.g. added to index.ts)
   // @internal
   constructor(versionPolicyJson: ILockStepVersionJson);
-  public bump(bumpType?: BumpType, identifier?: string): void;
-  public ensure(project: IPackageJson): IPackageJson | undefined;
-  // WARNING: Because this definition is explicitly marked as @internal, an underscore prefix ("_") should be added to its name
   // WARNING: The type "ILockStepVersionJson" needs to be exported by the package (e.g. added to index.ts)
   // @internal
-  public readonly json: ILockStepVersionJson;
+  public readonly _json: ILockStepVersionJson;
+  public bump(bumpType?: BumpType, identifier?: string): void;
+  public ensure(project: IPackageJson): IPackageJson | undefined;
   public readonly nextBump: BumpType;
   public validate(versionString: string, packageName: string): void;
   public readonly version: semver.SemVer;
@@ -254,14 +252,15 @@ class VersionPolicy {
   // WARNING: The type "IVersionPolicyJson" needs to be exported by the package (e.g. added to index.ts)
   // @internal
   constructor(versionPolicyJson: IVersionPolicyJson);
+  // WARNING: The type "IVersionPolicyJson" needs to be exported by the package (e.g. added to index.ts)
+  // @internal
+  public readonly _json: IVersionPolicyJson;
   public abstract bump(bumpType?: BumpType, identifier?: string): void;
   public readonly definitionName: VersionPolicyDefinitionName;
   public abstract ensure(project: IPackageJson): IPackageJson | undefined;
   // WARNING: Because this definition is explicitly marked as @internal, an underscore prefix ("_") should be added to its name
   // WARNING: The type "IVersionPolicyJson" needs to be exported by the package (e.g. added to index.ts)
   // @internal
-  public readonly json: IVersionPolicyJson;
-  // WARNING: The type "IVersionPolicyJson" needs to be exported by the package (e.g. added to index.ts)
   public static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy | undefined;
   public readonly policyName: string;
   public abstract validate(versionString: string, packageName: string): void;

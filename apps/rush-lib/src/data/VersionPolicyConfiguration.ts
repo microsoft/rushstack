@@ -93,7 +93,7 @@ export class VersionPolicyConfiguration {
     }
     const versionPolicyJson: IVersionPolicyJson[] = [];
     this.versionPolicies.forEach((versionPolicy) => {
-      versionPolicyJson.push(versionPolicy.json);
+      versionPolicyJson.push(versionPolicy._json);
     });
     if (shouldCommit) {
       JsonFile.save(versionPolicyJson, this._jsonFileName);

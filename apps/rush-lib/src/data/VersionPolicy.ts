@@ -52,6 +52,8 @@ export abstract class VersionPolicy {
    * Loads from version policy json
    *
    * @param versionPolicyJson - version policy Json
+   *
+   * @internal
    */
   public static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy | undefined {
     const definition: VersionPolicyDefinitionName = VersionPolicyDefinitionName[versionPolicyJson.definitionName];
@@ -108,7 +110,7 @@ export abstract class VersionPolicy {
    *
    * @internal
    */
-  public abstract get json(): IVersionPolicyJson;
+  public abstract get _json(): IVersionPolicyJson;
 
   /**
    * Validates the specified version and throws if the version does not satisfy the policy.
@@ -157,7 +159,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
    *
    * @internal
    */
-  public get json(): ILockStepVersionJson {
+  public get _json(): ILockStepVersionJson {
     return {
       policyName: this.policyName,
       definitionName: VersionPolicyDefinitionName[this.definitionName],
@@ -246,7 +248,7 @@ export class IndividualVersionPolicy extends VersionPolicy {
    *
    * @internal
    */
-  public get json(): IIndividualVersionJson {
+  public get _json(): IIndividualVersionJson {
     return {
       policyName: this.policyName,
       definitionName: VersionPolicyDefinitionName[this.definitionName],
