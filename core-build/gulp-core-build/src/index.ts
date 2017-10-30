@@ -197,7 +197,7 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
 
   let isWatchRunning: boolean = false;
   let shouldRerunWatch: boolean = false;
-  let lastError: boolean | undefined = undefined;
+  let lastError: Error | string | undefined = undefined;
 
   const successMessage: string = 'Build succeeded';
   const failureMessage: string = 'Build failed';
@@ -230,14 +230,14 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
                 }
                 return _finalizeWatch();
               })
-              .catch((error) => {
+              .catch((error: Error | string) => {
                 if (!lastError || lastError !== error) {
                   lastError = error;
 
                   if (buildConfig.showToast) {
                     notifier.notify({
                       title: failureMessage,
-                      message: error,
+                      message: error.toString(),
                       icon: buildConfig.buildErrorIconPath
                     });
                   } else {
