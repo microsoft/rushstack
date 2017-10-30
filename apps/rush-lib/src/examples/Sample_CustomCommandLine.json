@@ -1,3 +1,11 @@
+// This example illustrates how to define your own custom command line
+// options for Rush.  These options will be passed to the NPM scripts in your
+// package.json file.
+//
+// To use this example file, rename it to "command-line.json" and copy it into your
+// "common/config/rush" folder.  For more information about custom commands,
+// see the documentation at https://aka.ms/rush
+
 {
   "customCommands": [
     {

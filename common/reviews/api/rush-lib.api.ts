@@ -79,6 +79,17 @@ enum ChangeType {
   patch = 2
 }
 
+// @public
+class CommandLineConfiguration {
+  // WARNING: The type "ICustomCommand" needs to be exported by the package (e.g. added to index.ts)
+  // (undocumented)
+  public commands: Map<string, ICustomCommand>;
+  // WARNING: The type "CustomOption" needs to be exported by the package (e.g. added to index.ts)
+  // (undocumented)
+  public options: Map<string, CustomOption>;
+  public static tryLoadFromFile(jsonFilename: string): CommandLineConfiguration;
+}
+
 // @alpha
 enum Event {
   postRushBuild = 4,
@@ -253,7 +264,6 @@ class PinnedVersionsConfiguration {
 class RushConfiguration {
   public readonly approvedPackagesPolicy: ApprovedPackagesPolicy;
   public readonly changesFolder: string;
-  // WARNING: The type "CommandLineConfiguration" needs to be exported by the package (e.g. added to index.ts)
   public readonly commandLineConfiguration: CommandLineConfiguration;
   public readonly committedShrinkwrapFilename: string;
   public readonly commonFolder: string;
