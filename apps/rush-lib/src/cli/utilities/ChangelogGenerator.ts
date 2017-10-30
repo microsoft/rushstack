@@ -206,7 +206,7 @@ export default class ChangelogGenerator {
       if (!comments) {
         markdown += ((changelog.entries.length === index + 1) ?
           '*Initial release*' :
-          '*Changes not tracked*') +
+          '*Version update only*') +
           EOL + EOL;
       } else {
         markdown += comments;

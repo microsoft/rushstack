@@ -25,12 +25,11 @@ import {
 import { BaseRushAction } from './BaseRushAction';
 import RushCommandLineParser from './RushCommandLineParser';
 import ChangeFiles from '../utilities/ChangeFiles';
-
-const BUMP_OPTIONS: { [type: string]: string } = {
-  'major': 'major - for breaking changes (ex: renaming a file)',
-  'minor': 'minor - for adding new features (ex: exposing a new public API)',
-  'patch': 'patch - for fixes (ex: updating how an API works without touching its signature)'
-};
+import {
+  VersionPolicy,
+  IndividualVersionPolicy,
+  VersionPolicyDefinitionName
+} from '../../data/VersionPolicy';
 
 export default class ChangeAction extends BaseRushAction {
   private _parser: RushCommandLineParser;
@@ -211,6 +210,7 @@ export default class ChangeAction extends BaseRushAction {
    */
   private _askQuestions(packageName: string): Promise<IChangeInfo> {
     console.log(`${os.EOL}${packageName}`);
+    const bumpOptions: { [type: string]: string } = this._getBumpOptions(packageName);
 
     return this._prompt({
       name: 'comment',
@@ -218,12 +218,18 @@ export default class ChangeAction extends BaseRushAction {
       message: `Describe changes, or ENTER if no changes:`
     })
       .then(({ comment }: { comment: string }) => {
-        if (comment) {
+        if (Object.keys(bumpOptions).length === 0 || !comment) {
+          return {
+            comment: comment || '',
+            packageName: packageName,
+            type: 'none'
+          } as IChangeInfo;
+        } else {
           return this._prompt({
-            choices: Object.keys(BUMP_OPTIONS).map(option => {
+            choices: Object.keys(bumpOptions).map(option => {
               return {
                 'value': option,
-                'name': BUMP_OPTIONS[option]
+                'name': bumpOptions[option]
               };
             }),
             default: 'patch',
@@ -237,14 +243,33 @@ export default class ChangeAction extends BaseRushAction {
               type: bumpType
             } as IChangeInfo;
           });
-        } else {
-          return {
-            comment: '',
-            packageName: packageName,
-            type: 'none'
-          } as IChangeInfo;
         }
       });
+  }
+
+  private _getBumpOptions(packageName: string): {[type: string]: string } {
+    const project: RushConfigurationProject | undefined = this.rushConfiguration.getProjectByName(packageName);
+    const versionPolicy: VersionPolicy | undefined = project!.versionPolicy;
+
+    let bumpOptions: { [type: string]: string } = {
+      'major': 'major - for changes that break compatibility, e.g. removing an API',
+      'minor': 'minor - for backwards compatible changes, e.g. adding a new API',
+      'patch': 'patch - for changes that do not affect compatibility, e.g. fixing a bug'
+    };
+
+    if (versionPolicy) {
+      if (versionPolicy.definitionName === VersionPolicyDefinitionName.lockStepVersion) {
+        // No need to ask for bump types if project is lockstep versioned.
+        bumpOptions = {};
+      } else if (versionPolicy.definitionName === VersionPolicyDefinitionName.individualVersion) {
+        const individualPolicy: IndividualVersionPolicy = versionPolicy as IndividualVersionPolicy;
+        if (individualPolicy.lockedMajor !== undefined) {
+          // tslint:disable-next-line:no-string-literal
+          delete bumpOptions['major'];
+        }
+      }
+    }
+    return bumpOptions;
   }
 
   /**
