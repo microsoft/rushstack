@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-karma",
-  "version": "4.2.1",
+  "version": "4.3.0",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -19,7 +19,7 @@
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "gulp-karma": "~0.0.5",
-    "istanbul-instrumenter-loader": "~0.2.0",
+    "istanbul-instrumenter-loader": "~3.0.0",
     "karma": "~0.13.9",
     "karma-coverage": "~0.5.5",
     "karma-mocha": "~0.2.2",
