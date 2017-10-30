@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as fsx from 'fs-extra';
 import * as semver from 'semver';
 
-import { Utilities } from '@microsoft/rush-lib';
+import Utilities from '@microsoft/rush-lib/lib/utilities/Utilities';
 import * as rushLib from '@microsoft/rush-lib';
 
 import RushWrapper from './RushWrapper';
@@ -62,7 +62,7 @@ export default class RushVersionManager {
           'lib',
           'index'
         ));
-        rushCliEntrypoint._CLI.start(this._currentPackageVersion, true);
+        rushCliEntrypoint.Rush.launch(this._currentPackageVersion, true);
       });
     }
   }

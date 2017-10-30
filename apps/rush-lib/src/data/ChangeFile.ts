@@ -6,8 +6,10 @@ import * as path from 'path';
 import gitInfo = require('git-repo-info');
 
 import RushConfiguration from './RushConfiguration';
-
-import { IChangeFile, IChangeInfo } from './ChangeManagement';
+import {
+  IChangeFile,
+  IChangeInfo
+} from './ChangeManagement';
 
 /**
  * This class represents a single change file.

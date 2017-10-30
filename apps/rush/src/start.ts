@@ -7,9 +7,9 @@ import { JsonFile } from '@microsoft/node-core-library';
 import {
   IPackageJson,
   RushConfiguration,
-  Utilities
+  Rush
 } from '@microsoft/rush-lib';
-import { _CLI } from '@microsoft/rush-lib';
+import Utilities from '@microsoft/rush-lib/lib/utilities/Utilities';
 
 import MinimalRushConfiguration from './MinimalRushConfiguration';
 import RushVersionManager from './RushVersionManager';
@@ -35,6 +35,6 @@ if (process.argv[2] === RUSH_PURGE_OPTION_NAME) {
     const rushWrapper: RushWrapper = versionManager.ensureRushVersionInstalled(configuration.rushVersion);
     rushWrapper.invokeRush();
   } else {
-    _CLI.start(currentPackageJson.version, false);
+    Rush.launch(currentPackageJson.version, false);
   }
 }
