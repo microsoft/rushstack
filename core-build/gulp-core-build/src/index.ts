@@ -197,7 +197,7 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
 
   let isWatchRunning: boolean = false;
   let shouldRerunWatch: boolean = false;
-  let lastError: Error | string | undefined = undefined;
+  let lastError: Error | undefined = undefined;
 
   const successMessage: string = 'Build succeeded';
   const failureMessage: string = 'Build failed';
@@ -230,7 +230,7 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
                 }
                 return _finalizeWatch();
               })
-              .catch((error: Error | string) => {
+              .catch((error: Error) => {
                 if (!lastError || lastError !== error) {
                   lastError = error;
 
@@ -399,8 +399,7 @@ function _executeTask(taskExecutable: IExecutable, buildConfig: IBuildConfig): P
           buildConfig.onTaskEnd(taskExecutable.name, process.hrtime(startTime));
         }
       },
-      // tslint:disable-next-line:no-any
-      (error: any) => {
+      (error: Error) => {
         if (buildConfig.onTaskEnd && taskExecutable.name) {
           buildConfig.onTaskEnd(taskExecutable.name, process.hrtime(startTime), error);
         }
