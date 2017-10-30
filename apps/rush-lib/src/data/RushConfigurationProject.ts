@@ -201,7 +201,7 @@ export default class RushConfigurationProject {
 
   /**
    * Name of the version policy used by this project.
-   * @alpha
+   * @beta
    */
   public get versionPolicyName(): string | undefined {
     return this._versionPolicyName;
@@ -209,7 +209,7 @@ export default class RushConfigurationProject {
 
   /**
    * Version policy of the project
-   * @alpha
+   * @beta
    */
   public get versionPolicy(): VersionPolicy | undefined {
     if (this.versionPolicyName && this._rushConfiguration.versionPolicyConfiguration) {

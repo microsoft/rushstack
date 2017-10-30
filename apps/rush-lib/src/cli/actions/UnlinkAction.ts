@@ -5,7 +5,7 @@ import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 
-import { Utilities } from '../../index';
+import Utilities from '../../utilities/Utilities';
 import RushCommandLineParser from './RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 

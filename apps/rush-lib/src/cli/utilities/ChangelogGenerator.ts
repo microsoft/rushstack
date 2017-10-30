@@ -1,20 +1,24 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import PublishUtilities, {
+import * as fs from 'fs';
+import * as path from 'path';
+import * as semver from 'semver';
+
+import {
+  default as PublishUtilities,
   IChangeInfoHash
 } from './PublishUtilities';
 import {
   IChangeInfo,
+  ChangeType
+} from '../../data/ChangeManagement';
+import {
   IChangelog,
   IChangeLogEntry,
-  IChangeLogComment,
-  ChangeType,
-  RushConfigurationProject
-} from '../../index';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as semver from 'semver';
+  IChangeLogComment
+} from '../../data/Changelog';
+import RushConfigurationProject from '../../data/RushConfigurationProject';
 
 const CHANGELOG_JSON: string = 'CHANGELOG.json';
 const CHANGELOG_MD: string = 'CHANGELOG.md';

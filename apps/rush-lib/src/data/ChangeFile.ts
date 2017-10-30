@@ -14,6 +14,9 @@ import { IChangeFile, IChangeInfo } from './ChangeManagement';
  * @public
  */
 export class ChangeFile {
+  /**
+   * @internal
+   */
   public constructor(private _changeFileData: IChangeFile,
     private _rushConfiguration: RushConfiguration
   ) {

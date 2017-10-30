@@ -6,7 +6,7 @@ import * as fsx from 'fs-extra';
 import * as semver from 'semver';
 import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
 
-import rushVersion from '../rushVersion';
+import Rush from '../Rush';
 import RushConfigurationProject, { IRushConfigurationProjectJson } from './RushConfigurationProject';
 import { PinnedVersionsConfiguration } from './PinnedVersionsConfiguration';
 import Utilities from '../utilities/Utilities';
@@ -48,7 +48,7 @@ export interface IRushGitPolicyJson {
 
 /**
  * Part of IRushConfigurationJson.
- * @alpha
+ * @beta
  */
 export interface IEventHooksJson {
   /**
@@ -156,8 +156,8 @@ export default class RushConfiguration {
     const expectedRushVersion: string = rushConfigurationJson.rushVersion;
     // If the version is missing or malformed, fall through and let the schema handle it.
     if (expectedRushVersion && semver.valid(expectedRushVersion)) {
-      if (semver.lt(rushVersion, expectedRushVersion)) {
-        throw new Error(`Your rush tool is version ${rushVersion}, but rush.json ` +
+      if (semver.lt(Rush.version, expectedRushVersion)) {
+        throw new Error(`Your rush tool is version ${Rush.version}, but rush.json ` +
           `requires version ${rushConfigurationJson.rushVersion}. To upgrade, ` +
           `run "npm install @microsoft/rush -g".`);
       } else if (semver.lt(expectedRushVersion, MINIMUM_SUPPORTED_RUSH_JSON_VERSION)) {
@@ -485,7 +485,7 @@ export default class RushConfiguration {
 
   /**
    * Indicates whether telemetry collection is enabled for Rush runs.
-   * @alpha
+   * @beta
    */
   public get telemetryEnabled(): boolean {
     return this._telemetryEnabled;
@@ -510,7 +510,7 @@ export default class RushConfiguration {
 
   /**
    * The rush hooks. It allows cusomized scripts to run at the specified point.
-   * @alpha
+   * @beta
    */
   public get eventHooks(): EventHooks {
     return this._eventHooks;
@@ -566,7 +566,7 @@ export default class RushConfiguration {
   }
 
   /**
-   * @alpha
+   * @beta
    */
   public get versionPolicyConfiguration(): VersionPolicyConfiguration {
     return this._versionPolicyConfiguration;

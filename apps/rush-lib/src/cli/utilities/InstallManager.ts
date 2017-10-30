@@ -12,15 +12,13 @@ import * as wordwrap from 'wordwrap';
 import globEscape = require('glob-escape');
 import { JsonFile } from '@microsoft/node-core-library';
 
-import {
-  AsyncRecycler,
-  RushConfiguration,
-  RushConfigurationProject,
-  RushConstants,
-  Utilities,
-  Stopwatch,
-  IPackageJson
-} from '../../index';
+import AsyncRecycler from '../../utilities/AsyncRecycler';
+import RushConfiguration from '../../data/RushConfiguration';
+import RushConfigurationProject from '../../data/RushConfigurationProject';
+import { RushConstants } from '../../RushConstants';
+import Utilities from '../../utilities/Utilities';
+import { Stopwatch } from '../../utilities/Stopwatch';
+import IPackageJson from '../../utilities/IPackageJson';
 import { IRushTempPackageJson } from '../utilities/Package';
 import ShrinkwrapFile from '../utilities/ShrinkwrapFile';
 

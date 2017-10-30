@@ -5,11 +5,9 @@ import * as fsx from 'fs-extra';
 import { EOL } from 'os';
 import * as glob from 'glob';
 
-import {
-  Utilities,
-  IChangeInfo,
-  IChangelog
-} from '../../index';
+import Utilities from '../../utilities/Utilities';
+import { IChangeInfo } from '../../data/ChangeManagement';
+import { IChangelog } from '../../data/Changelog';
 
 /**
  * This class represents the collection of change files existing in the repo and provides operations

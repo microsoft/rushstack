@@ -6,10 +6,8 @@ import * as colors from 'colors';
 import * as wordwrap from 'wordwrap';
 import { CommandLineParser, CommandLineFlagParameter } from '@microsoft/ts-command-line';
 
-import {
-  RushConfiguration,
-  Utilities
-} from '../../index';
+import RushConfiguration from '../../data/RushConfiguration';
+import Utilities from '../../utilities/Utilities';
 import BuildAction from './BuildAction';
 import ChangeAction from './ChangeAction';
 import CheckAction from './CheckAction';

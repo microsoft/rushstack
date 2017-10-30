@@ -14,16 +14,18 @@ import { JsonFile } from '@microsoft/node-core-library';
 
 import {
   ErrorDetectionMode,
-  ErrorDetector,
-  IErrorDetectionRule,
-  IRushLinkJson,
-  RushConfigurationProject,
-  Stopwatch,
+  default as ErrorDetector,
+  IErrorDetectionRule
+} from '../../errorDetection/ErrorDetector';
+import { IRushLinkJson } from '../../data/RushConfiguration';
+import RushConfigurationProject from '../../data/RushConfigurationProject';
+import { Stopwatch } from '../../utilities/Stopwatch';
+import {
   TestErrorDetector,
   TsErrorDetector,
-  TsLintErrorDetector,
-  Event
-} from '../../index';
+  TsLintErrorDetector
+} from '../../errorDetection/rules';
+import { Event } from '../../data/EventHooks';
 import { BaseRushAction } from './BaseRushAction';
 import TaskRunner from '../taskRunner/TaskRunner';
 import ProjectBuildTask from '../taskRunner/ProjectBuildTask';

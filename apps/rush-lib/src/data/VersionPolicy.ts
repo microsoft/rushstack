@@ -14,7 +14,7 @@ import IPackageJson from '../utilities/IPackageJson';
 
 /**
  * Type of version bumps
- * @alpha
+ * @beta
  */
 export enum BumpType {
   // No version bump
@@ -33,7 +33,7 @@ export enum BumpType {
 
 /**
  * Version policy base type names
- * @alpha
+ * @beta
  */
 export enum VersionPolicyDefinitionName {
   'lockStepVersion',
@@ -42,7 +42,7 @@ export enum VersionPolicyDefinitionName {
 
 /**
  * This is the base class for version policy which controls how versions get bumped.
- * @alpha
+ * @beta
  */
 export abstract class VersionPolicy {
   private _policyName: string;
@@ -66,6 +66,9 @@ export abstract class VersionPolicy {
     return undefined;
   }
 
+  /**
+   * @internal
+   */
   constructor(versionPolicyJson: IVersionPolicyJson) {
     this._policyName = versionPolicyJson.policyName;
     this._definitionName = VersionPolicyDefinitionName[versionPolicyJson.definitionName];
@@ -102,6 +105,8 @@ export abstract class VersionPolicy {
 
   /**
    * Serialized json for the policy
+   *
+   * @internal
    */
   public abstract get json(): IVersionPolicyJson;
 
@@ -116,7 +121,7 @@ export abstract class VersionPolicy {
 
 /**
  * This policy indicates all related projects should use the same version.
- * @alpha
+ * @beta
  */
 export class LockStepVersionPolicy extends VersionPolicy {
   private _version: semver.SemVer;
@@ -124,6 +129,9 @@ export class LockStepVersionPolicy extends VersionPolicy {
   // Other types of bumps can be passed in as a parameter to bump method, so can identifier.
   private _nextBump: BumpType;
 
+  /**
+   * @internal
+   */
   constructor(versionPolicyJson: ILockStepVersionJson) {
     super(versionPolicyJson);
     this._version = new semver.SemVer(versionPolicyJson.version);
@@ -146,6 +154,8 @@ export class LockStepVersionPolicy extends VersionPolicy {
 
   /**
    * Serialized json for this policy
+   *
+   * @internal
    */
   public get json(): ILockStepVersionJson {
     return {
@@ -211,11 +221,14 @@ export class LockStepVersionPolicy extends VersionPolicy {
 
 /**
  * This policy indicates all related projects get version bump driven by their own changes.
- * @alpha
+ * @beta
  */
 export class IndividualVersionPolicy extends VersionPolicy {
   private _lockedMajor: number | undefined;
 
+  /**
+   * @internal
+   */
   constructor(versionPolicyJson: IIndividualVersionJson) {
     super(versionPolicyJson);
     this._lockedMajor = versionPolicyJson.lockedMajor;
@@ -230,6 +243,8 @@ export class IndividualVersionPolicy extends VersionPolicy {
 
   /**
    * Serialized json for this policy
+   *
+   * @internal
    */
   public get json(): IIndividualVersionJson {
     return {

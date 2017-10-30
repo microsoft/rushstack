@@ -11,15 +11,15 @@ import { ITaskWriter } from '@microsoft/stream-collator';
     IPackageDeps
   } from '@microsoft/package-deps-hash';
 
+import RushConfiguration from '../../data/RushConfiguration';
+import RushConfigurationProject from '../../data/RushConfigurationProject';
+import { RushConstants } from '../../RushConstants';
 import {
-  RushConfiguration,
-  RushConfigurationProject,
-  RushConstants,
-  ErrorDetector,
-  ErrorDetectionMode,
-  TaskError,
-  Utilities
-} from '../../index';
+  default as ErrorDetector,
+  ErrorDetectionMode
+} from '../../errorDetection/ErrorDetector';
+import TaskError from '../../errorDetection/TaskError';
+import Utilities from '../../utilities/Utilities';
 import TaskStatus from './TaskStatus';
 import { ITaskDefinition } from '../taskRunner/ITask';
 import {
