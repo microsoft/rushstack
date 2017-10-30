@@ -222,7 +222,7 @@ export default class ChangeAction extends BaseRushAction {
         name: 'appendComment',
         type: 'list',
         default: 'skip',
-        message: 'Append to existing comments or skip:',
+        message: 'Append to existing comments or skip?',
         choices: [
           {
             'name': 'Skip',
@@ -234,7 +234,7 @@ export default class ChangeAction extends BaseRushAction {
           }
         ]
       })
-      .then(({ appendComment }: { appendComment: string }) => {
+      .then(({ appendComment }: { appendComment: 'skip' | 'append' }) => {
         if (appendComment === 'skip') {
           return undefined;
         } else {

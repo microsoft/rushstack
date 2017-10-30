@@ -31,9 +31,13 @@ export default class ChangeFiles {
     newChangeFilePaths.forEach((filePath) => {
       console.log(`Found change file: ${filePath}`);
       const changeRequest: IChangeInfo = JSON.parse(fsx.readFileSync(filePath, 'utf8'));
-      changeRequest.changes!.forEach(change => {
-        changedSet.add(change.packageName);
-      });
+      if (changeRequest && changeRequest.changes) {
+        changeRequest.changes!.forEach(change => {
+          changedSet.add(change.packageName);
+        });
+      } else {
+        throw new Error(`Invalid change file: ${filePath}`);
+      }
     });
 
     const requiredSet: Set<string> = new Set(changedPackages);
@@ -58,14 +62,18 @@ export default class ChangeFiles {
     newChangeFilePaths.forEach((filePath) => {
       console.log(`Found change file: ${filePath}`);
       const changeRequest: IChangeInfo = JSON.parse(fsx.readFileSync(filePath, 'utf8'));
-      changeRequest.changes!.forEach(change => {
-        if (!changes.get(change.packageName)) {
-          changes.set(change.packageName, []);
-        }
-        if (change.comment && change.comment.length) {
-          changes.get(change.packageName)!.push(change.comment);
-        }
-      });
+      if (changeRequest && changeRequest.changes) {
+        changeRequest.changes!.forEach(change => {
+          if (!changes.get(change.packageName)) {
+            changes.set(change.packageName, []);
+          }
+          if (change.comment && change.comment.length) {
+            changes.get(change.packageName)!.push(change.comment);
+          }
+        });
+      } else {
+        throw new Error(`Invalid change file: ${filePath}`);
+      }
     });
     return changes;
   }
