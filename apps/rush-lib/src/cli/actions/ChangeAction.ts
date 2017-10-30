@@ -35,6 +35,7 @@ export default class ChangeAction extends BaseRushAction {
   private _parser: RushCommandLineParser;
   private _sortedProjectList: string[];
   private _changeFileData: Map<string, IChangeFile>;
+  private _changeComments: Map<string, string[]>;
   private _verifyParameter: CommandLineFlagParameter;
   private _targetBranchParameter: CommandLineStringParameter;
   private _targetBranchName: string;
@@ -100,6 +101,8 @@ export default class ChangeAction extends BaseRushAction {
 
     this._prompt = inquirer.createPromptModule();
     this._changeFileData = new Map<string, IChangeFile>();
+    this._changeComments = ChangeFiles.getChangeComments(this._getChangeFiles(),
+      this._sortedProjectList);
 
     // We should consider making onExecute either be an async/await or have it return a promise
     this._promptLoop()
@@ -138,9 +141,7 @@ export default class ChangeAction extends BaseRushAction {
   }
 
   private _validateChangeFile(changedPackages: string[]): void {
-    const files: string[] = this._getChangeFiles().map(relativePath => {
-      return path.join(this.rushConfiguration.rushJsonFolder, relativePath);
-    });
+    const files: string[] = this._getChangeFiles();
     if (files.length === 0) {
       throw new Error(`No change file is found. Run 'rush change' to generate a change file.`);
     }
@@ -148,7 +149,9 @@ export default class ChangeAction extends BaseRushAction {
   }
 
   private _getChangeFiles(): string[] {
-    return VersionControl.getChangedFiles(`common/changes/`, this._targetBranch);
+    return VersionControl.getChangedFiles(`common/changes/`, this._targetBranch).map(relativePath => {
+      return path.join(this.rushConfiguration.rushJsonFolder, relativePath);
+    });
   }
 
   private _hasProjectChanged(changedFolders: Array<string | undefined>,
@@ -171,24 +174,23 @@ export default class ChangeAction extends BaseRushAction {
    * have any more, at which point we collect their email and write the change file.
    */
   private _promptLoop(): Promise<void> {
-
     // If there are still projects, ask about the next one
     if (this._sortedProjectList.length) {
       return this._askQuestions(this._sortedProjectList.pop()!)
         .then((answers: IChangeInfo) => {
-
-          // Save the info into the changefile
-          let changeFile: IChangeFile | undefined = this._changeFileData.get(answers.packageName);
-          if (!changeFile) {
-            changeFile = {
-              changes: [],
-              packageName: answers.packageName,
-              email: undefined
-            };
-            this._changeFileData.set(answers.packageName, changeFile!);
+          if (answers) {
+            // Save the info into the changefile
+            let changeFile: IChangeFile | undefined = this._changeFileData.get(answers.packageName);
+            if (!changeFile) {
+              changeFile = {
+                changes: [],
+                packageName: answers.packageName,
+                email: undefined
+              };
+              this._changeFileData.set(answers.packageName, changeFile!);
+            }
+            changeFile!.changes.push(answers);
           }
-          changeFile!.changes.push(answers);
-
           // Continue to loop
           return this._promptLoop();
 
@@ -208,43 +210,77 @@ export default class ChangeAction extends BaseRushAction {
   /**
    * Asks all questions which are needed to generate changelist for a project.
    */
-  private _askQuestions(packageName: string): Promise<IChangeInfo> {
+  private _askQuestions(packageName: string): Promise<IChangeInfo | undefined> {
     console.log(`${os.EOL}${packageName}`);
-    const bumpOptions: { [type: string]: string } = this._getBumpOptions(packageName);
+    const comments: string[] | undefined = this._changeComments.get(packageName);
+    if (comments && comments.length) {
+      console.log(`Found existing comments:`);
+      comments.forEach(comment => {
+        console.log(`    > ${comment}`);
+      });
+      return this._prompt({
+        name: 'appendComment',
+        type: 'list',
+        default: 'skip',
+        message: 'Append to existing comments or skip:',
+        choices: [
+          {
+            'name': 'Skip',
+            'value': 'skip'
+          },
+          {
+            'name': 'Append',
+            'value': 'append'
+          }
+        ]
+      })
+      .then(({ appendComment }: { appendComment: string }) => {
+        if (appendComment === 'skip') {
+          return undefined;
+        } else {
+          return this._promptForComments(packageName);
+        }
+      });
+    } else {
+      return this._promptForComments(packageName);
+    }
+  }
 
+  private _promptForComments(packageName: string): Promise<IChangeInfo | undefined> {
+    const bumpOptions: { [type: string]: string } = this._getBumpOptions(packageName);
     return this._prompt({
       name: 'comment',
       type: 'input',
       message: `Describe changes, or ENTER if no changes:`
     })
-      .then(({ comment }: { comment: string }) => {
-        if (Object.keys(bumpOptions).length === 0 || !comment) {
-          return {
-            comment: comment || '',
-            packageName: packageName,
-            type: 'none'
-          } as IChangeInfo;
-        } else {
-          return this._prompt({
-            choices: Object.keys(bumpOptions).map(option => {
-              return {
-                'value': option,
-                'name': bumpOptions[option]
-              };
-            }),
-            default: 'patch',
-            message: 'Select the type of change:',
-            name: 'bumpType',
-            type: 'list'
-          }).then(({ bumpType }: { bumpType: string }) => {
+    .then(({ comment }: { comment: string }) => {
+      if (Object.keys(bumpOptions).length === 0 || !comment) {
+        return {
+          comment: comment || '',
+          packageName: packageName,
+          type: 'none'
+        } as IChangeInfo;
+      } else {
+        return this._prompt({
+          choices: Object.keys(bumpOptions).map(option => {
             return {
-              packageName: packageName,
-              comment: comment,
-              type: bumpType
-            } as IChangeInfo;
-          });
-        }
-      });
+              'value': option,
+              'name': bumpOptions[option]
+            };
+          }),
+          default: 'patch',
+          message: 'Select the type of change:',
+          name: 'bumpType',
+          type: 'list'
+        }).then(({ bumpType }: { bumpType: string }) => {
+          return {
+            packageName: packageName,
+            comment: comment,
+            type: bumpType
+          } as IChangeInfo;
+        });
+      }
+    });
   }
 
   private _getBumpOptions(packageName: string): {[type: string]: string } {
