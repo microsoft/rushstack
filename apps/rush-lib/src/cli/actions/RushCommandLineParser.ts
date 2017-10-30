@@ -2,14 +2,17 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
+import * as path from 'path';
 import * as colors from 'colors';
 import * as wordwrap from 'wordwrap';
 import { CommandLineParser, CommandLineFlagParameter } from '@microsoft/ts-command-line';
 
 import {
   RushConfiguration,
+  RushConstants,
   Utilities
 } from '../../index';
+import { CommandLineConfiguration } from '../../data/CommandLineConfiguration';
 import ChangeAction from './ChangeAction';
 import CheckAction from './CheckAction';
 import GenerateAction from './GenerateAction';
@@ -98,6 +101,12 @@ export default class RushCommandLineParser extends CommandLineParser {
     try {
       this.rushConfig = RushConfiguration.loadFromDefaultLocation();
 
+      const commandLineConfigFile: string = path.join(
+        this.rushConfig.commonRushConfigFolder, RushConstants.commandLineFilename);
+
+      const commandLineConfig: CommandLineConfiguration =
+        CommandLineConfiguration.tryLoadFromFile(commandLineConfigFile);
+
       this.addAction(new ChangeAction(this));
       this.addAction(new CheckAction(this));
       this.addAction(new GenerateAction(this));
@@ -108,7 +117,7 @@ export default class RushCommandLineParser extends CommandLineParser {
       this.addAction(new UnlinkAction(this));
       this.addAction(new VersionAction(this));
 
-      CustomCommandFactory.createCommands(this, this.rushConfig.commandLineConfiguration)
+      CustomCommandFactory.createCommands(this, commandLineConfig)
         .forEach((customAction: CustomRushAction) => {
           this.addAction(customAction);
         });

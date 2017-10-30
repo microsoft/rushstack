@@ -14,7 +14,6 @@ import { RushConstants } from '../RushConstants';
 import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
 import EventHooks from './EventHooks';
 import { VersionPolicyConfiguration } from './VersionPolicyConfiguration';
-import { CommandLineConfiguration } from './CommandLineConfiguration';
 
 /**
  * A list of known config filenames that are expected to appear in the "./common/config/rush" folder.
@@ -142,7 +141,6 @@ export default class RushConfiguration {
   private _projectsByName: Map<string, RushConfigurationProject>;
 
   private _versionPolicyConfiguration: VersionPolicyConfiguration;
-  private _commandLineConfiguration: CommandLineConfiguration;
 
   /**
    * Loads the configuration data from an Rush.json configuration file and returns
@@ -454,13 +452,6 @@ export default class RushConfiguration {
   }
 
   /**
-   * Custom Command Line configuration
-   */
-  public get commandLineConfiguration(): CommandLineConfiguration {
-    return this._commandLineConfiguration;
-  }
-
-  /**
    * [Part of the "gitPolicy" feature.]
    * A list of regular expressions describing allowable e-mail patterns for Git commits.
    * They are case-insensitive anchored JavaScript RegExps.
@@ -661,9 +652,6 @@ export default class RushConfiguration {
     const versionPolicyConfigFile: string =
       path.join(this._commonRushConfigFolder, RushConstants.versionPoliciesFileName);
     this._versionPolicyConfiguration = new VersionPolicyConfiguration(versionPolicyConfigFile);
-
-    const commandLineConfigFile: string = path.join(this._commonRushConfigFolder, RushConstants.commandLineFilename);
-    this._commandLineConfiguration = CommandLineConfiguration.tryLoadFromFile(commandLineConfigFile);
 
     this._projects = [];
     this._projectsByName = new Map<string, RushConfigurationProject>();

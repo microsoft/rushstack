@@ -25,10 +25,6 @@ export {
 } from './data/PinnedVersionsConfiguration';
 
 export {
-  CommandLineConfiguration
-} from './data/CommandLineConfiguration';
-
-export {
   default as EventHooks,
   Event
 } from './data/EventHooks';
