@@ -1,3 +1,3 @@
 import { start } from './start';
 
-start(false);
+start('', false);
