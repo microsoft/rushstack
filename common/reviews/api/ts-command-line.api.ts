@@ -40,7 +40,7 @@ class CommandLineParameterProvider {
   constructor();
   // (undocumented)
   protected argumentParser: argparse.ArgumentParser;
-  protected defineFlagParameter(options: ICommandLineFlagDefinition): CommandLineFlagParameter;
+  protected defineFlagParameter(definition: ICommandLineFlagDefinition): CommandLineFlagParameter;
   protected defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter;
   // (undocumented)
   protected defineOptionParameter(definition: ICommandLineOptionDefinition): CommandLineOptionParameter;
@@ -73,8 +73,8 @@ class CommandLineStringParameter extends CommandLineParameter<string> {
 
 // @public
 interface IBaseCommandLineDefinition<TValue> {
+  defaultValue?: TValue | undefined;
   description: string;
-  getDefaultValue?: () => TValue | undefined;
   parameterLongName: string;
   parameterShortName?: string;
   required?: boolean;

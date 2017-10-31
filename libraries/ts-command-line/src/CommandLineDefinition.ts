@@ -28,10 +28,10 @@ export interface IBaseCommandLineDefinition<TValue> {
   required?: boolean;
 
   /**
-   * A function that returns a default value for the parameter if no value was provided. If the function
-   *  returns undefined and the "required" flag is set, validation will fail.
+   * A default value for the parameter if no value was provided. If this property is undefined and the "required" flag
+   *  is set, validation will fail.
    */
-  getDefaultValue?: () => TValue | undefined;
+  defaultValue?: TValue | undefined;
 }
 
 export interface IKeyedCommandLineDefinition<TValue> extends IBaseCommandLineDefinition<TValue> {
@@ -75,11 +75,6 @@ export interface ICommandLineOptionDefinition extends IBaseCommandLineDefinition
    * A list of strings (which contain no spaces), of possible options which can be selected
    */
   options: string[];
-
-  /**
-   * The default value which will be used if the parameter is omitted from the command line
-   */
-  defaultValue?: string;
 }
 
 /**

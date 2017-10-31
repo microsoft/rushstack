@@ -26,7 +26,7 @@ import {
 interface IParameterMetadata<TValue> {
   parameter: CommandLineParameter<TValue>;
   required: boolean;
-  getDefaultValue: (() => TValue | undefined) | undefined;
+  defaultValue: TValue | undefined;
 }
 
 /**
@@ -61,9 +61,9 @@ abstract class CommandLineParameterProvider {
   /**
    * Defines a flag parameter.  See ICommandLineFlagDefinition for details.
    */
-  protected defineFlagParameter(options: ICommandLineFlagDefinition): CommandLineFlagParameter {
+  protected defineFlagParameter(definition: ICommandLineFlagDefinition): CommandLineFlagParameter {
     return this._createParameter(
-      options, { action: 'storeTrue' }
+      definition, { action: 'storeTrue' }
     ) as CommandLineFlagParameter;
   }
 
@@ -96,17 +96,19 @@ abstract class CommandLineParameterProvider {
     ) as CommandLineIntegerParameter;
   }
 
-  protected defineOptionParameter(options: ICommandLineOptionDefinition): CommandLineOptionParameter {
-    if (!options.options) {
+  protected defineOptionParameter(definition: ICommandLineOptionDefinition): CommandLineOptionParameter {
+    if (!definition.options) {
       throw new Error(`When defining an option parameter, the options array must be defined.`);
     }
-    if (options.defaultValue && options.options.indexOf(options.defaultValue) === -1) {
-      throw new Error(`Could not find default value "${options.defaultValue}" `
-        + `in the array of available options: ${options.options.toString()}`);
+
+    if (definition.defaultValue && definition.options.indexOf(definition.defaultValue) === -1) {
+      throw new Error(`Could not find default value "${definition.defaultValue}" ` +
+        `in the array of available options: ${definition.options.toString()}`);
     }
-    return this._createParameter(options, {
-      choices: options.options,
-      defaultValue: options.defaultValue
+
+    return this._createParameter(definition, {
+      choices: definition.options,
+      defaultValue: definition.defaultValue
     }) as CommandLineOptionParameter;
   }
 
@@ -117,11 +119,11 @@ abstract class CommandLineParameterProvider {
     }
 
     this._parameterMetadata.forEach((parameterMetadata: IParameterMetadata<any>) => { // tslint:disable-line:no-any
-      if (parameterMetadata.parameter.value === undefined && parameterMetadata.getDefaultValue) {
+      if (parameterMetadata.parameter.value === undefined && parameterMetadata.defaultValue) {
         try {
           parameterMetadata.parameter.setValue({
             action: '',
-            [parameterMetadata.parameter.key]: parameterMetadata.getDefaultValue()
+            [parameterMetadata.parameter.key]: parameterMetadata.defaultValue
           });
         } catch (e) {
           /* do nothing */
@@ -198,7 +200,7 @@ abstract class CommandLineParameterProvider {
       {
         required: !!definition.required,
         parameter: result,
-        getDefaultValue: definition.getDefaultValue
+        defaultValue: definition.defaultValue
       }
     );
 
