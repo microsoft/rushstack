@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-extractor",
-  "version": "4.2.1",
+  "version": "4.2.2",
   "description": "Validate, document, and review the exported API for a TypeScript library",
   "keywords": [
     "typescript",
@@ -30,8 +30,8 @@
     "test": "gulp test"
   },
   "dependencies": {
-    "@microsoft/node-core-library": "~0.3.11",
-    "@microsoft/ts-command-line": "~2.1.4",
+    "@microsoft/node-core-library": "~0.3.12",
+    "@microsoft/ts-command-line": "~2.2.0",
     "@types/fs-extra": "0.0.37",
     "@types/node": "6.0.88",
     "@types/z-schema": "3.16.31",

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/ts-command-line
 
-This log was last generated on Tue, 31 Oct 2017 16:04:55 GMT and should not be manually modified.
+This log was last generated on Tue, 31 Oct 2017 21:04:04 GMT and should not be manually modified.
+
+## 2.2.0
+Tue, 31 Oct 2017 21:04:04 GMT
+
+### Minor changes
+
+- Add ability to specify default value for enum options.
 
 ## 2.1.4
 Tue, 31 Oct 2017 16:04:55 GMT

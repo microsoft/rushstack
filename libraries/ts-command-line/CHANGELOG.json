@@ -2,6 +2,20 @@
   "name": "@microsoft/ts-command-line",
   "entries": [
     {
+      "version": "2.2.0",
+      "tag": "@microsoft/ts-command-line_v2.2.0",
+      "date": "Tue, 31 Oct 2017 21:04:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "author": "Nicholas Pape <nickpape-msft@users.noreply.github.com>",
+            "commit": "fe386a0305b16e6dbde953197c6dc2b89005216e",
+            "comment": "Add ability to specify default value for enum options."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.1.4",
       "tag": "@microsoft/ts-command-line_v2.1.4",
       "date": "Tue, 31 Oct 2017 16:04:55 GMT",
