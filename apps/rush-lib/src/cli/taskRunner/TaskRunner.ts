@@ -5,12 +5,13 @@ import * as colors from 'colors';
 import * as os from 'os';
 import { Interleaver } from '@microsoft/stream-collator';
 
+import TaskError from '../../errorDetection/TaskError';
+import { ErrorDetectionMode } from '../../errorDetection/ErrorDetector';
+import { Stopwatch } from '../../utilities/Stopwatch';
 import {
-  TaskError,
-  ErrorDetectionMode,
-  Stopwatch
-} from '../../index';
-import ITask, { ITaskDefinition } from './ITask';
+  ITask,
+  ITaskDefinition
+} from './ITask';
 import TaskStatus from './TaskStatus';
 
 /**

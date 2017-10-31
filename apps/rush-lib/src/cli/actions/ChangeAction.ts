@@ -14,14 +14,13 @@ import {
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
 
+import RushConfigurationProject from '../../data/RushConfigurationProject';
 import {
-  RushConfigurationProject,
   IChangeFile,
-  IChangeInfo,
-  VersionControl,
-  ChangeFile
-} from '../../index';
-
+  IChangeInfo
+} from '../../data/ChangeManagement';
+import VersionControl from '../../utilities/VersionControl';
+import { ChangeFile } from '../../data/ChangeFile';
 import { BaseRushAction } from './BaseRushAction';
 import RushCommandLineParser from './RushCommandLineParser';
 import ChangeFiles from '../utilities/ChangeFiles';

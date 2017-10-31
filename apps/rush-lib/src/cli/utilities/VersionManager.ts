@@ -7,17 +7,16 @@ import * as fsx from 'fs-extra';
 import { cloneDeep } from 'lodash';
 
 import {
+  VersionPolicy,
   BumpType,
-  ChangeFile,
-  ChangeType,
-  IChangeInfo,
-  LockStepVersionPolicy,
-  RushConfiguration,
-  RushConfigurationProject,
-  VersionPolicyConfiguration,
-  IPackageJson,
-  VersionPolicy
-} from '../../index';
+  LockStepVersionPolicy
+} from '../../data/VersionPolicy';
+import { ChangeFile } from '../../data/ChangeFile';
+import { ChangeType, IChangeInfo } from '../../data/ChangeManagement';
+import RushConfiguration from '../../data/RushConfiguration';
+import RushConfigurationProject from '../../data/RushConfigurationProject';
+import { VersionPolicyConfiguration } from '../../data/VersionPolicyConfiguration';
+import IPackageJson from '../../utilities/IPackageJson';
 import PublishUtilities from './PublishUtilities';
 import ChangeManager from './ChangeManager';
 

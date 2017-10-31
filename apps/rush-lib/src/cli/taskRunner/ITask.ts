@@ -3,7 +3,8 @@
 
 import { ITaskWriter } from '@microsoft/stream-collator';
 
-import { TaskError, Stopwatch } from '../../index';
+import TaskError from '../../errorDetection/TaskError';
+import { Stopwatch } from '../../utilities/Stopwatch';
 import TaskStatus from './TaskStatus';
 
 /**

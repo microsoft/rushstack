@@ -6,14 +6,19 @@ import * as path from 'path';
 import gitInfo = require('git-repo-info');
 
 import RushConfiguration from './RushConfiguration';
-
-import { IChangeFile, IChangeInfo } from './ChangeManagement';
+import {
+  IChangeFile,
+  IChangeInfo
+} from './ChangeManagement';
 
 /**
  * This class represents a single change file.
  * @public
  */
 export class ChangeFile {
+  /**
+   * @internal
+   */
   public constructor(private _changeFileData: IChangeFile,
     private _rushConfiguration: RushConfiguration
   ) {

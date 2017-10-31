@@ -83,7 +83,7 @@ export namespace RushConstants {
   export const packageDepsFilename: string = 'package-deps.json';
 
   /**
-   * @alpha
+   * @beta
    */
   export const versionPoliciesFileName: string = 'version-policies.json';
 }
