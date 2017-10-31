@@ -81,9 +81,8 @@ abstract class CommandLineParameterProvider {
   }
 
   protected defineOptionParameter(definition: ICommandLineOptionDefinition): CommandLineOptionParameter {
-    if (!definition.options || definition.options.length < 2) {
-      throw new Error(`When defining an option parameter, the options array must`
-        + ` be defined and have at least 2 options`);
+    if (!definition.options) {
+      throw new Error(`When defining an option parameter, the options array must be defined.`);
     }
     if (definition.defaultValue && definition.options.indexOf(definition.defaultValue) === -1) {
       throw new Error(`Could not find default value "${definition.defaultValue}" `

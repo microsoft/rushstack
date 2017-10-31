@@ -121,7 +121,7 @@
                   "title": "Enum Values",
                   "description": "A list of possible options for this flag",
                   "type": "array",
-                  "minItems": 2,
+                  "minItems": 1,
 
                   "items": {
                     "type": "object",
