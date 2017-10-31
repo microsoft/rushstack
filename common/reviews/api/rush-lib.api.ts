@@ -73,11 +73,7 @@ enum ChangeType {
   patch = 2
 }
 
-<<<<<<< HEAD
-// @alpha
-=======
 // @beta
->>>>>>> master
 enum Event {
   postRushBuild = 4,
   postRushInstall = 2,
@@ -107,56 +103,7 @@ interface IChangeInfo {
   type?: string;
 }
 
-<<<<<<< HEAD
-// @alpha
-interface IChangelog {
-  entries: IChangeLogEntry[];
-  name: string;
-}
-
-// @alpha
-interface IChangeLogComment {
-  author?: string;
-  comment: string;
-  commit?: string;
-}
-
-// @alpha
-interface IChangeLogEntry {
-  comments: {
-    dependency?: IChangeLogComment[];
-    major?: IChangeLogComment[];
-    minor?: IChangeLogComment[];
-    patch?: IChangeLogComment[];
-  }
-  date: string | undefined;
-  tag: string;
-  version: string;
-}
-
-// @alpha
-interface IEventHooksJson {
-  postRushBuild?: string[];
-}
-
-// @alpha (undocumented)
-interface IIndividualVersionJson extends IVersionPolicyJson {
-  // (undocumented)
-  lockedMajor?: number;
-}
-
-// @alpha (undocumented)
-interface ILockStepVersionJson extends IVersionPolicyJson {
-  // (undocumented)
-  nextBump: string;
-  // (undocumented)
-  version: string;
-}
-
-// @alpha
-=======
 // @beta
->>>>>>> master
 class IndividualVersionPolicy extends VersionPolicy {
   // WARNING: The type "IIndividualVersionJson" needs to be exported by the package (e.g. added to index.ts)
   // @internal
@@ -228,8 +175,6 @@ class PinnedVersionsConfiguration {
 }
 
 // @public
-<<<<<<< HEAD
-=======
 class Rush {
   public static launch(launcherVersion: string, isManaged: boolean): void;
   // @public
@@ -237,7 +182,6 @@ class Rush {
 }
 
 // @public
->>>>>>> master
 class RushConfiguration {
   public readonly approvedPackagesPolicy: ApprovedPackagesPolicy;
   public readonly changesFolder: string;
@@ -303,137 +247,7 @@ class RushConfigurationProject {
   public readonly versionPolicyName: string | undefined;
 }
 
-<<<<<<< HEAD
-// @public
-module RushConstants {
-  browserApprovedPackagesFilename: string = 'browser-approved-packages.json';
-
-  changeFilesFolderName: string = 'changes';
-
-  commandLineFilename: string = 'command-line.json';
-
-  commonFolderName: string = 'common';
-
-  nodeModulesFolderName: string = 'node_modules';
-
-  nonbrowserApprovedPackagesFilename: string = 'nonbrowser-approved-packages.json';
-
-  npmShrinkwrapFilename: string = 'npm-shrinkwrap.json';
-
-  packageDepsFilename: string = 'package-deps.json';
-
-  packageJsonFilename: string = 'package.json';
-
-  pinnedVersionsFilename: string = 'pinned-versions.json';
-
-  rushTempFolderName: string = 'temp';
-
-  rushTempNpmScope: string = '@rush-temp';
-
-  rushTempProjectsFolderName: string = 'projects';
-
-  // @alpha (undocumented)
-  versionPoliciesFileName: string = 'version-policies.json';
-
-}
-
-// @public
-class Stopwatch {
-  constructor(getTime: () => number = Utilities.getTimeInMs);
-  public readonly duration: number;
-  public reset(): Stopwatch;
-  public static start(): Stopwatch;
-  // (undocumented)
-  public readonly state: StopwatchState;
-  public stop(): Stopwatch;
-  public toString(): string;
-}
-
-// @public
-enum StopwatchState {
-  // (undocumented)
-  Started = 2,
-  // (undocumented)
-  Stopped = 1
-}
-
-// @public (undocumented)
-class Utilities {
-  public static createFolderWithRetry(folderName: string): void;
-  public static dangerouslyDeletePath(folderPath: string): void;
-  public static deleteFile(filePath: string): void;
-  public static directoryExists(directoryPath: string): boolean;
-  public static escapeShellParameter(parameter: string): string;
-  public static executeCommand(command: string, args: string[], workingDirectory: string,
-      suppressOutput: boolean = false, environmentVariables?: { [key: string]: string }): void;
-  public static executeCommandAndCaptureOutput(command: string, args: string[], workingDirectory: string,
-      environmentVariables?: { [key: string]: string }): string;
-  public static executeCommandAsync(command: string, args: string[], workingDirectory: string,
-      environmentVariables?: { [key: string]: string }): child_process.ChildProcess;
-  public static executeCommandWithRetry(command: string, args: string[], maxAttempts: number,
-      workingDirectory: string, suppressOutput: boolean = false): void;
-  // @alpha
-  public static executeShellCommand(command: string,
-      workingDirectory: string,
-      environmentVariables?: { [key: string]: string },
-      captureOutput: boolean = false): child_process.SpawnSyncReturns<Buffer>;
-  // @alpha
-  public static executeShellCommandAsync(command: string,
-      workingDirectory: string,
-      environmentVariables?: { [key: string]: string },
-      captureOutput: boolean = false): child_process.ChildProcess;
-  public static fileExists(filePath: string): boolean;
-  public static getAllReplaced(targetString: string, searchValue: string, replaceValue: string): string;
-  public static getConsoleWidth(): number;
-  public static getSetAsArray < T >(set: Set<T>): T[];
-  public static getTimeInMs(): number;
-  public static installPackageInDirectory(directory: string,
-      packageName: string,
-      version: string,
-      tempPackageTitle: string,
-      maxInstallAttempts: number,
-      suppressOutput: boolean = false): void;
-  // (undocumented)
-  public static isFileTimestampCurrent(outputFilename: string, inputFilenames: string[]): boolean;
-  public static parseScopedPackageName: {
-    name: string;
-    scope: string;
-  }
-  public static retryUntilTimeout < TResult >(fn: () => TResult,
-                                             maxWaitTimeMs: number,
-                                             getTimeoutError: (innerError: Error) => Error,
-                                             fnName: string): TResult;
-}
-
-// @public (undocumented)
-class VersionControl {
-  // (undocumented)
-  public static getChangedFiles(prefix?: string, targetBranch?: string): string[];
-  // (undocumented)
-  public static getChangedFolders(targetBranch?: string): Array<string | undefined> | undefined;
-  public static getRemoteMasterBranch(repositoryUrl?: string): string;
-  public static getUncommittedChanges(): ReadonlyArray<string>;
-  // (undocumented)
-  public static hasUncommittedChanges(): boolean;
-}
-
-// @public (undocumented)
-class VersionMismatchFinder {
-  constructor(private _projects: RushConfigurationProject[]);
-  // (undocumented)
-  public getConsumersOfMismatch(mismatch: string, version: string): Array<string> | undefined;
-  // (undocumented)
-  public getMismatches(): Array<string>;
-  // (undocumented)
-  public getVersionsOfMismatch(mismatch: string): Array<string> | undefined;
-  // (undocumented)
-  public readonly numberOfMismatches: number;
-}
-
-// @alpha
-=======
 // @beta
->>>>>>> master
 class VersionPolicy {
   // WARNING: The type "IVersionPolicyJson" needs to be exported by the package (e.g. added to index.ts)
   // @internal
@@ -472,8 +286,3 @@ enum VersionPolicyDefinitionName {
   'lockStepVersion'
 }
 
-<<<<<<< HEAD
-// WARNING: Unsupported export: rushVersion
-// (No packageDescription for this package)
-=======
->>>>>>> master
