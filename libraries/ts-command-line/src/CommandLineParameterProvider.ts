@@ -72,7 +72,8 @@ abstract class CommandLineParameterProvider {
    */
   protected defineFlagParameter(definition: ICommandLineFlagDefinition): CommandLineFlagParameter {
     return this._createParameter(
-      definition, { action: 'storeTrue' }
+      definition,
+      { action: 'storeTrue' }
     ) as CommandLineFlagParameter;
   }
 
@@ -146,14 +147,10 @@ abstract class CommandLineParameterProvider {
 
     this._parameterMetadata.forEach((parameterMetadata: IParameterMetadata<any>) => { // tslint:disable-line:no-any
       if (parameterMetadata.parameter.value === undefined && parameterMetadata.defaultValue) {
-        try {
-          parameterMetadata.parameter.setValue({
-            action: '',
-            [parameterMetadata.parameter.key]: parameterMetadata.defaultValue
-          });
-        } catch (e) {
-          /* do nothing */
-        }
+        parameterMetadata.parameter.setValue({
+          action: '',
+          [parameterMetadata.parameter.key]: parameterMetadata.defaultValue
+        });
       }
     });
   }
