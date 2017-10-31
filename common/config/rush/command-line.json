@@ -1,28 +1,5 @@
 {
-  "customCommands": [
-    {
-      "name": "blah",
-      "description": "Do some really, really cool custom stuff! This is the best command!"
-    }
-  ],
-
   "customOptions": {
-    "--profile": {
-      "optionType": "enum",
-      "description": "Changes the build profile, affecting the build output",
-      "associatedCommands": [ "build", "rebuild" ],
-      "enumValues": [
-        {
-          "name": "vso",
-          "description": "For running on CI servers"
-        },
-        {
-          "name": "npm",
-          "description": "For publishing to an NPM registry"
-        }
-      ]
-    },
-
     "--color": {
       "optionType": "enum",
       "description": "Enable or disable colors in the build log, defaults to 'true'",
@@ -40,25 +17,10 @@
       ]
     },
 
-    "--ship": {
+    "--production": {
       "optionType": "flag",
       "description": "Perform a production build, including minification and localization steps",
-      "associatedCommands": [ "build", "rebuild" ],
-      "shortName": "-s"
-    },
-
-    "--minimal": {
-      "optionType": "flag",
-      "description": "Perform a fast build, which disables certain tasks such as unit tests and linting",
-      "associatedCommands": [ "build", "rebuild" ],
-      "shortName": "-m"
-    },
-
-    "--clean": {
-      "optionType": "flag",
-      "description": "This flag does awesome things!",
-      "associatedCommands": [ "blah", "build", "rebuild" ],
-      "shortName": "-c"
+      "associatedCommands": [ "build", "rebuild" ]
     }
   }
 }
