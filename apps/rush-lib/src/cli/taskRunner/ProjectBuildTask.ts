@@ -109,7 +109,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
 
         if (!buildCommand) {
           // tslint:disable-next-line:max-line-length
-          writer.writeLine(`The 'build' or 'test' command was registered in the package.json but is blank. Skipping 'clean' step...`);
+          writer.writeLine(`The 'build' or 'test' command was registered in the package.json but is blank, so no action will be taken.`);
           resolve(TaskStatus.Success);
           return;
         }
