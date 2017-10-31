@@ -1,0 +1,120 @@
+{
+  "title": "API Extractor Configuration",
+  "description": "Describes how the API Extractor tool will process a project.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "compiler": {
+      "description": "Determines how the TypeScript compiler will be invoked. The compiler.configType selects the type of configuration. Different options are available according to the configuration type.",
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "configType": {
+              "description": "configType=tsconfig indicates that the compiler settings will be taken from a tsconfig.json file",
+              "type": "string",
+              "enum": [ "tsconfig" ]
+            },
+            "rootFolder": {
+              "description": "The root folder for the project. This folder typically contains the tsconfig.json and package.json config files.",
+              "type": "string"
+            },
+            "overrideTsconfig": {
+              "description": "Provides already parsed tsconfig.json contents conforming to the TypeScript tsconfig schema: http://json.schemastore.org/tsconfig If omitted, then the tsconfig.json file will be read.",
+              "type": "object"
+            }
+          },
+          "required": [ "configType", "rootFolder" ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "configType": {
+              "description": "configType=runtime indicates that the compiler settings will be provided by a tool chain via a runtime API",
+              "type": "string",
+              "enum": [ "runtime" ]
+            }
+          },
+          "required": [ "configType" ],
+          "additionalProperties": false
+        }
+      ]
+    },
+
+    "project": {
+      "description": "Describes a specific project that will be analyzed.",
+      "type": "object",
+      "properties": {
+        "entryPointSourceFile": {
+          "description": "Specifies the TypeScript source file that will be treated as the entry point for compilation.",
+          "type": "string"
+        },
+        "externalJsonFileFolders": {
+          "description": "Indicates folders containing additional APJ JSON files (*.api.json) that will be consulted during the analysis.  This is useful for providing annotations for external packages that were not built using API Extractor.",
+          "type": "string"
+        }
+      },
+      "required": [ "entryPointSourceFile" ],
+      "additionalProperties": false
+    },
+
+    "policies": {
+      "description": "These policies determine how API Extractor validates various best practices for API design.",
+      "type": "object",
+      "properties": {
+        "namespaceSupport": {
+          "description": "Controls how API Extractor treats the TypeScript namespace keyword:\n\nconservative - (the default) namespaces may only be used to represent tables of constants\n\npermissive - arbitrary nesting of namespaces is allowed",
+          "type": "string",
+          "enum": [ "conservative", "permissive" ]
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "apiReviewFile": {
+      "description": "Configures how the API review files (*.api.ts) will be generated.",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "description": "Whether to generate review files at all.  The default is true.",
+          "type": "boolean"
+        },
+        "apiReviewFolder": {
+          "description": "The file path of the folder containing API review file, relative to the project folder. The default value is \"./etc\".",
+          "type": "string"
+        },
+        "tempFolder": {
+          "description": "The *.api.ts report is saved into this folder.  During a production build, the temporary file will be compared with the file in apiReviewFolder; if there are differences, and error will be reported. The default value is \"./temp\".",
+          "type": "string"
+        }
+      },
+      "required": [ "enabled" ],
+      "additionalProperties": false
+    },
+
+    "apiJsonFile": {
+      "description": "Configures how the API JSON files (*.api.json) will be generated.",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "description": "Whether to generate API JSON files at all.  The default is true.",
+          "type": "boolean"
+        },
+        "outputFolder": {
+          "description": "Specifies where the *.api.json file should be written. The default value is \"./dist\"",
+          "type": "string"
+        }
+      },
+      "required": [ "enabled" ],
+      "additionalProperties": false
+    }
+  },
+  "required": [ "compiler", "project" ],
+  "additionalProperties": false
+}

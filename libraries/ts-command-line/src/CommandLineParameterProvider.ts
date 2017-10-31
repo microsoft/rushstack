@@ -96,11 +96,18 @@ abstract class CommandLineParameterProvider {
     ) as CommandLineIntegerParameter;
   }
 
-  protected defineOptionParameter(definition: ICommandLineOptionDefinition): CommandLineOptionParameter {
-    return this._createParameter(
-      definition,
-      { choices: definition.options }
-    ) as CommandLineOptionParameter;
+  protected defineOptionParameter(options: ICommandLineOptionDefinition): CommandLineOptionParameter {
+    if (!options.options) {
+      throw new Error(`When defining an option parameter, the options array must be defined.`);
+    }
+    if (options.defaultValue && options.options.indexOf(options.defaultValue) === -1) {
+      throw new Error(`Could not find default value "${options.defaultValue}" `
+        + `in the array of available options: ${options.options.toString()}`);
+    }
+    return this._createParameter(options, {
+      choices: options.options,
+      defaultValue: options.defaultValue
+    }) as CommandLineOptionParameter;
   }
 
   protected processParsedData(data: ICommandLineParserData): void {

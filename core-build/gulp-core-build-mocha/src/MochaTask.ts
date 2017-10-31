@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { GulpTask } from '@microsoft/gulp-core-build';
+import { GulpTask, IBuildConfig } from '@microsoft/gulp-core-build';
 import * as Gulp from 'gulp';
 import * as gulpMocha from 'gulp-mocha';
 import * as gulpIstanbul from 'gulp-istanbul';
@@ -19,6 +19,13 @@ export class MochaTask extends GulpTask<IMochaTaskConfig> {
         testMatch: ['lib/**/*.test.js'],
         reportDir: 'coverage'
       }
+    );
+  }
+
+  public isEnabled(buildConfig: IBuildConfig): boolean {
+    return (
+      super.isEnabled(buildConfig) &&
+      !buildConfig.jestEnabled
     );
   }
 

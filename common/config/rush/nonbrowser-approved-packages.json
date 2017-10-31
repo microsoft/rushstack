@@ -234,6 +234,14 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "jest",
+      "allowedCategories": [ "libraries", "other" ]
+    },
+    {
+      "name": "jest-cli",
+      "allowedCategories": [ "libraries", "other" ]
+    },
+    {
       "name": "jju",
       "allowedCategories": [ "libraries" ]
     },
