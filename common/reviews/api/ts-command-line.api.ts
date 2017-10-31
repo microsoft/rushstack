@@ -40,12 +40,12 @@ class CommandLineParameterProvider {
   constructor();
   // (undocumented)
   protected argumentParser: argparse.ArgumentParser;
-  protected defineFlagParameter(options: ICommandLineFlagDefinition): CommandLineFlagParameter;
-  protected defineIntegerParameter(options: ICommandLineIntegerDefinition): CommandLineIntegerParameter;
+  protected defineFlagParameter(definition: ICommandLineFlagDefinition): CommandLineFlagParameter;
+  protected defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter;
   // (undocumented)
-  protected defineOptionParameter(options: ICommandLineOptionDefinition): CommandLineOptionParameter;
-  protected defineStringListParameter(options: ICommandLineStringListDefinition): CommandLineStringListParameter;
-  protected defineStringParameter(options: ICommandLineStringDefinition): CommandLineStringParameter;
+  protected defineOptionParameter(definition: ICommandLineOptionDefinition): CommandLineOptionParameter;
+  protected defineStringListParameter(definition: ICommandLineStringListDefinition): CommandLineStringListParameter;
+  protected defineStringParameter(definition: ICommandLineStringDefinition): CommandLineStringParameter;
   protected abstract onDefineParameters(): void;
   // (undocumented)
   protected processParsedData(data: ICommandLineParserData): void;
@@ -93,6 +93,7 @@ interface ICommandLineIntegerDefinition extends IKeyedCommandLineDefinition {
 
 // @public
 interface ICommandLineOptionDefinition extends IBaseCommandLineDefinition {
+  defaultValue?: string;
   options: string[];
 }
 
