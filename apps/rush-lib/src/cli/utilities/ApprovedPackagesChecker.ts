@@ -1,13 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  IPackageJson,
-  ApprovedPackagesPolicy,
-  RushConfiguration,
-  RushConfigurationProject,
-  Utilities
-} from '../../index';
+import IPackageJson from '../../utilities/IPackageJson';
+import { ApprovedPackagesPolicy } from '../../data/ApprovedPackagesPolicy';
+import RushConfiguration from '../../data/RushConfiguration';
+import RushConfigurationProject from '../../data/RushConfigurationProject';
+import Utilities from '../../utilities/Utilities';
 
 export class ApprovedPackagesChecker {
   /**

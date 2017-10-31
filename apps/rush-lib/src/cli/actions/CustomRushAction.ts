@@ -6,7 +6,6 @@ import * as os from 'os';
 import * as colors from 'colors';
 
 import {
-  Stopwatch,
   Event
 } from '../../index';
 
@@ -26,6 +25,7 @@ import {
 import RushCommandLineParser from './RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 import { TaskSelector } from '../utilities/TaskSelector';
+import { Stopwatch } from '../../utilities/Stopwatch';
 
 interface ICustomOptionInstance {
   optionDefinition: CustomOption;

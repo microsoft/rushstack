@@ -4,12 +4,10 @@
 import * as os from 'os';
 import * as colors from 'colors';
 
-import {
-  EventHooks,
-  Utilities,
-  Event,
-  Stopwatch
-} from '../../index';
+import EventHooks from '../../data/EventHooks';
+import Utilities from '../../utilities/Utilities';
+import { Event } from '../../data/EventHooks';
+import { Stopwatch } from '../../utilities/Stopwatch';
 
 export default class EventHooksManager {
   public constructor(private _eventHooks: EventHooks) {

@@ -1,8 +1,8 @@
 import {
-  RushConfiguration,
-  RushConfigurationProject,
+  default as RushConfiguration,
   IRushLinkJson
-} from '../../index';
+} from '../../data/RushConfiguration';
+import { default as RushConfigurationProject } from '../../data/RushConfigurationProject';
 import { JsonFile } from '@microsoft/node-core-library';
 
 import TaskRunner from '../taskRunner/TaskRunner';

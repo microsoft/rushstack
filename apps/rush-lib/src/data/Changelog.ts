@@ -2,7 +2,7 @@
  * Interface respresenting a changelog json object for a package used to represent the parsed
  * content of CHANGELOG.json
  *
- * @alpha
+ * @beta
  */
 export interface IChangelog {
   /**
@@ -19,7 +19,7 @@ export interface IChangelog {
 /**
  * Interface representing a single published entry in the changelog.
  *
- * @alpha
+ * @beta
  */
 export interface IChangeLogEntry {
   /**
@@ -55,7 +55,7 @@ export interface IChangeLogEntry {
 /**
  * Interface representing a single changelog comment within an entry.
  *
- * @alpha
+ * @beta
  */
 export interface IChangeLogComment {
   /**

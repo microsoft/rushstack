@@ -7,12 +7,10 @@ import * as colors from 'colors';
 import * as wordwrap from 'wordwrap';
 import { CommandLineParser, CommandLineFlagParameter } from '@microsoft/ts-command-line';
 
-import {
-  RushConfiguration,
-  RushConstants,
-  Utilities
-} from '../../index';
+import { RushConstants } from '../../RushConstants';
 import { CommandLineConfiguration } from '../../data/CommandLineConfiguration';
+import RushConfiguration from '../../data/RushConfiguration';
+import Utilities from '../../utilities/Utilities';
 import ChangeAction from './ChangeAction';
 import CheckAction from './CheckAction';
 import GenerateAction from './GenerateAction';

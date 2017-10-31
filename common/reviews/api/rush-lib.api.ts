@@ -31,15 +31,7 @@ class ApprovedPackagesPolicy {
   public readonly reviewCategories: Set<string>;
 }
 
-// @public
-class AsyncRecycler {
-  constructor(rushConfiguration: RushConfiguration);
-  public deleteAll(): void;
-  public moveFolder(folderPath: string): void;
-  public readonly recyclerFolder: string;
-}
-
-// @alpha
+// @beta
 enum BumpType {
   // (undocumented)
   'major',
@@ -57,6 +49,8 @@ enum BumpType {
 
 // @public
 class ChangeFile {
+  // WARNING: The type "IChangeFile" needs to be exported by the package (e.g. added to index.ts)
+  // @internal
   public constructor(private _changeFileData: IChangeFile,
       private _rushConfiguration: RushConfiguration);
   public addChange(data: IChangeInfo): void;
@@ -79,7 +73,11 @@ enum ChangeType {
   patch = 2
 }
 
+<<<<<<< HEAD
 // @alpha
+=======
+// @beta
+>>>>>>> master
 enum Event {
   postRushBuild = 4,
   postRushInstall = 2,
@@ -87,20 +85,12 @@ enum Event {
   preRushInstall = 1
 }
 
-// @alpha
+// @beta
 class EventHooks {
+  // WARNING: The type "IEventHooksJson" needs to be exported by the package (e.g. added to index.ts)
+  // @internal
   public constructor(eventHooksJson: IEventHooksJson);
   public get(event: Event): string[];
-}
-
-// @public
-interface IChangeFile {
-  // (undocumented)
-  changes: IChangeInfo[];
-  // (undocumented)
-  email: string | undefined;
-  // (undocumented)
-  packageName: string;
 }
 
 // @public
@@ -117,6 +107,7 @@ interface IChangeInfo {
   type?: string;
 }
 
+<<<<<<< HEAD
 // @alpha
 interface IChangelog {
   entries: IChangeLogEntry[];
@@ -163,11 +154,18 @@ interface ILockStepVersionJson extends IVersionPolicyJson {
 }
 
 // @alpha
+=======
+// @beta
+>>>>>>> master
 class IndividualVersionPolicy extends VersionPolicy {
+  // WARNING: The type "IIndividualVersionJson" needs to be exported by the package (e.g. added to index.ts)
+  // @internal
   constructor(versionPolicyJson: IIndividualVersionJson);
+  // WARNING: The type "IIndividualVersionJson" needs to be exported by the package (e.g. added to index.ts)
+  // @internal
+  public readonly _json: IIndividualVersionJson;
   public bump(bumpType?: BumpType, identifier?: string): void;
   public ensure(project: IPackageJson): IPackageJson | undefined;
-  public readonly json: IIndividualVersionJson;
   public readonly lockedMajor: number | undefined;
   public validate(versionString: string, packageName: string): void;
 }
@@ -194,39 +192,19 @@ interface IPackageJson {
   version: string;
 }
 
-// @public
-interface IRushLinkJson {
-  // (undocumented)
-  localLinks: {
-    [ name: string ]: string[]
-  }
-}
-
-// @alpha (undocumented)
-interface IVersionPolicyJson {
-  // (undocumented)
-  definitionName: string;
-  // (undocumented)
-  policyName: string;
-}
-
-// @alpha
+// @beta
 class LockStepVersionPolicy extends VersionPolicy {
+  // WARNING: The type "ILockStepVersionJson" needs to be exported by the package (e.g. added to index.ts)
+  // @internal
   constructor(versionPolicyJson: ILockStepVersionJson);
+  // WARNING: The type "ILockStepVersionJson" needs to be exported by the package (e.g. added to index.ts)
+  // @internal
+  public readonly _json: ILockStepVersionJson;
   public bump(bumpType?: BumpType, identifier?: string): void;
   public ensure(project: IPackageJson): IPackageJson | undefined;
-  public readonly json: ILockStepVersionJson;
   public readonly nextBump: BumpType;
   public validate(versionString: string, packageName: string): void;
   public readonly version: semver.SemVer;
-}
-
-// @public (undocumented)
-class Npm {
-  // (undocumented)
-  public static publishedVersions(packageName: string,
-      cwd: string,
-      env: { [key: string]: string }): string[];
 }
 
 // @public
@@ -250,6 +228,16 @@ class PinnedVersionsConfiguration {
 }
 
 // @public
+<<<<<<< HEAD
+=======
+class Rush {
+  public static launch(launcherVersion: string, isManaged: boolean): void;
+  // @public
+  public static readonly version: string;
+}
+
+// @public
+>>>>>>> master
 class RushConfiguration {
   public readonly approvedPackagesPolicy: ApprovedPackagesPolicy;
   public readonly changesFolder: string;
@@ -257,7 +245,7 @@ class RushConfiguration {
   public readonly commonFolder: string;
   public readonly commonRushConfigFolder: string;
   public readonly commonTempFolder: string;
-  // @alpha
+  // @beta
   public readonly eventHooks: EventHooks;
   public findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
   public findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
@@ -284,11 +272,11 @@ class RushConfiguration {
   public readonly rushJsonFile: string;
   public readonly rushJsonFolder: string;
   public readonly rushLinkJsonFilename: string;
-  // @alpha
+  // @beta
   public readonly telemetryEnabled: boolean;
   public readonly tempShrinkwrapFilename: string;
   public static tryFindRushJsonLocation(verbose: boolean = true): string | undefined;
-  // @alpha (undocumented)
+  // @beta (undocumented)
   public readonly versionPolicyConfiguration: VersionPolicyConfiguration;
 }
 
@@ -309,12 +297,13 @@ class RushConfigurationProject {
   public readonly shouldPublish: boolean;
   public readonly tempProjectName: string;
   public readonly unscopedTempProjectName: string;
-  // @alpha
+  // @beta
   public readonly versionPolicy: VersionPolicy | undefined;
-  // @alpha
+  // @beta
   public readonly versionPolicyName: string | undefined;
 }
 
+<<<<<<< HEAD
 // @public
 module RushConstants {
   browserApprovedPackagesFilename: string = 'browser-approved-packages.json';
@@ -442,19 +431,30 @@ class VersionMismatchFinder {
 }
 
 // @alpha
+=======
+// @beta
+>>>>>>> master
 class VersionPolicy {
+  // WARNING: The type "IVersionPolicyJson" needs to be exported by the package (e.g. added to index.ts)
+  // @internal
   constructor(versionPolicyJson: IVersionPolicyJson);
+  // WARNING: The type "IVersionPolicyJson" needs to be exported by the package (e.g. added to index.ts)
+  // @internal
+  public readonly _json: IVersionPolicyJson;
   public abstract bump(bumpType?: BumpType, identifier?: string): void;
   public readonly definitionName: VersionPolicyDefinitionName;
   public abstract ensure(project: IPackageJson): IPackageJson | undefined;
-  public readonly json: IVersionPolicyJson;
+  // WARNING: Because this definition is explicitly marked as @internal, an underscore prefix ("_") should be added to its name
+  // WARNING: The type "IVersionPolicyJson" needs to be exported by the package (e.g. added to index.ts)
+  // @internal
   public static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy | undefined;
   public readonly policyName: string;
   public abstract validate(versionString: string, packageName: string): void;
 }
 
-// @alpha (undocumented)
+// @beta (undocumented)
 class VersionPolicyConfiguration {
+  // @internal
   public constructor(private _jsonFileName: string);
   public bump(versionPolicyName?: string,
       bumpType?: BumpType,
@@ -464,7 +464,7 @@ class VersionPolicyConfiguration {
   public readonly versionPolicies: Map<string, VersionPolicy>;
 }
 
-// @alpha
+// @beta
 enum VersionPolicyDefinitionName {
   // (undocumented)
   'individualVersion',
@@ -472,5 +472,8 @@ enum VersionPolicyDefinitionName {
   'lockStepVersion'
 }
 
+<<<<<<< HEAD
 // WARNING: Unsupported export: rushVersion
 // (No packageDescription for this package)
+=======
+>>>>>>> master

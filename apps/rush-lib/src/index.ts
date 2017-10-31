@@ -1,14 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/**
+ * A library for writing scripts that interact with the Rush tool.
+ */
+declare const packageDescription: void; // tslint:disable-line:no-unused-variable
+
 export {
   ApprovedPackagesPolicy
 } from './data/ApprovedPackagesPolicy';
 
 export {
-  IRushLinkJson,
-  default as RushConfiguration,
-  IEventHooksJson
+  default as RushConfiguration
 } from './data/RushConfiguration';
 
 export {
@@ -35,42 +38,12 @@ export {
 
 export {
   ChangeType,
-  IChangeFile,
   IChangeInfo
 } from './data/ChangeManagement';
 
 export {
-  IChangelog,
-  IChangeLogEntry,
-  IChangeLogComment
-} from './data/Changelog';
-
-export {
-  VersionMismatchFinder
-} from './data/VersionMismatchFinder';
-
-export {
   default as IPackageJson
 } from './utilities/IPackageJson';
-
-export {
-  default as VersionControl
-} from './utilities/VersionControl';
-
-export {
-  default as Utilities
-} from './utilities/Utilities';
-
-export {
-  Stopwatch,
-  StopwatchState
-} from './utilities/Stopwatch';
-
-export { RushConstants } from './RushConstants';
-
-export {
-  default as rushVersion
-} from './rushVersion';
 
 export {
   VersionPolicyDefinitionName,
@@ -81,14 +54,10 @@ export {
 } from './data/VersionPolicy';
 
 export {
-  VersionPolicyConfiguration,
-  IVersionPolicyJson,
-  ILockStepVersionJson,
-  IIndividualVersionJson
+  VersionPolicyConfiguration
 } from './data/VersionPolicyConfiguration';
 
-export {
-  default as Npm
-} from './utilities/Npm';
-
-export { default as AsyncRecycler } from './utilities/AsyncRecycler';
+/**
+ * @internal
+ */
+export { default as Rush } from './Rush';

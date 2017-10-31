@@ -10,12 +10,10 @@ import { ITaskWriter } from '@microsoft/stream-collator';
     IPackageDeps
   } from '@microsoft/package-deps-hash';
 
-import {
-  RushConfiguration,
-  RushConfigurationProject,
-  RushConstants,
-  Utilities
-} from '../../index';
+import RushConfiguration from '../../data/RushConfiguration';
+import RushConfigurationProject from '../../data/RushConfigurationProject';
+import { RushConstants } from '../../RushConstants';
+import Utilities from '../../utilities/Utilities';
 import TaskStatus from './TaskStatus';
 import TaskError from './TaskError';
 import { ITaskDefinition } from '../taskRunner/ITask';

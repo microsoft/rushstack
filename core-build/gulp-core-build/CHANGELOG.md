@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Wed, 25 Oct 2017 20:03:59 GMT and should not be manually modified.
+This log was last generated on Tue, 31 Oct 2017 16:04:55 GMT and should not be manually modified.
+
+## 3.2.2
+Tue, 31 Oct 2017 16:04:55 GMT
+
+### Patches
+
+- Fix an issue where an exception was being thrown when displaying toasts for build failures.
 
 ## 3.2.1
 Wed, 25 Oct 2017 20:03:59 GMT

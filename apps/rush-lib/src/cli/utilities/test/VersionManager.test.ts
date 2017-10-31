@@ -4,15 +4,12 @@
 import { assert } from 'chai';
 import * as path from 'path';
 
-import {
-  BumpType,
-  ChangeFile,
-  ChangeType,
-  IChangeInfo,
-  RushConfiguration,
-  VersionPolicyConfiguration,
-  IPackageJson
-} from '../../../index';
+import { BumpType } from '../../../data/VersionPolicy';
+import { ChangeFile } from '../../../data/ChangeFile';
+import { ChangeType, IChangeInfo } from '../../../data/ChangeManagement';
+import RushConfiguration from '../../../data/RushConfiguration';
+import { VersionPolicyConfiguration } from '../../../data/VersionPolicyConfiguration';
+import IPackageJson from '../../../utilities/IPackageJson';
 import { VersionManager } from '../VersionManager';
 
 function _getChanges(changeFiles: Map<string, ChangeFile>,

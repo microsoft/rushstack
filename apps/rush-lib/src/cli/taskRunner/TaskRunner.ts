@@ -5,9 +5,7 @@ import * as colors from 'colors';
 import * as os from 'os';
 import { Interleaver } from '@microsoft/stream-collator';
 
-import {
-  Stopwatch
-} from '../../index';
+import { Stopwatch } from '../../utilities/Stopwatch';
 import ITask, { ITaskDefinition } from './ITask';
 import TaskStatus from './TaskStatus';
 import TaskError from './TaskError';
