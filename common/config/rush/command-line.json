@@ -9,10 +9,6 @@
         {
           "name": "true",
           "description": "Displays colors in the build log"
-        },
-        {
-          "name": "false",
-          "description": "Disables all colors in build log, useful for CI builds"
         }
       ]
     },
