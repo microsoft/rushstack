@@ -49,8 +49,8 @@ abstract class CommandLineParameterProvider {
   /**
    * Defines a flag parameter.  See ICommandLineFlagDefinition for details.
    */
-  protected defineFlagParameter(options: ICommandLineFlagDefinition): CommandLineFlagParameter {
-    return this._createParameter(options, {
+  protected defineFlagParameter(definition: ICommandLineFlagDefinition): CommandLineFlagParameter {
+    return this._createParameter(definition, {
       action: 'storeTrue'
     }) as CommandLineFlagParameter;
   }
@@ -58,31 +58,39 @@ abstract class CommandLineParameterProvider {
   /**
    * Defines a string parameter.
    */
-  protected defineStringParameter(options: ICommandLineStringDefinition): CommandLineStringParameter {
-    return this._createParameter(options, undefined, options.key) as CommandLineStringParameter;
+  protected defineStringParameter(definition: ICommandLineStringDefinition): CommandLineStringParameter {
+    return this._createParameter(definition, undefined, definition.key) as CommandLineStringParameter;
   }
 
   /**
    * Defines a list of string by specifying the flag multiple times.
    */
-  protected defineStringListParameter(options: ICommandLineStringListDefinition): CommandLineStringListParameter {
-    return this._createParameter(options, {
+  protected defineStringListParameter(definition: ICommandLineStringListDefinition): CommandLineStringListParameter {
+    return this._createParameter(definition, {
       action: 'append'
-    }, options.key) as CommandLineStringListParameter;
+    }, definition.key) as CommandLineStringListParameter;
   }
 
   /**
    * Defines an integer parameter
    */
-  protected defineIntegerParameter(options: ICommandLineIntegerDefinition): CommandLineIntegerParameter {
-    return this._createParameter(options, {
+  protected defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter {
+    return this._createParameter(definition, {
       type: 'int'
-    }, options.key) as CommandLineIntegerParameter;
+    }, definition.key) as CommandLineIntegerParameter;
   }
 
-  protected defineOptionParameter(options: ICommandLineOptionDefinition): CommandLineOptionParameter {
-    return this._createParameter(options, {
-      choices: options.options
+  protected defineOptionParameter(definition: ICommandLineOptionDefinition): CommandLineOptionParameter {
+    if (!definition.options) {
+      throw new Error(`When defining an option parameter, the options array must be defined.`);
+    }
+    if (definition.defaultValue && definition.options.indexOf(definition.defaultValue) === -1) {
+      throw new Error(`Could not find default value "${definition.defaultValue}" `
+        + `in the array of available options: ${definition.options.toString()}`);
+    }
+    return this._createParameter(definition, {
+      choices: definition.options,
+      defaultValue: definition.defaultValue
     }) as CommandLineOptionParameter;
   }
 

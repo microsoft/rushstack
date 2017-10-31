@@ -5,14 +5,10 @@ import * as colors from 'colors';
 import * as os from 'os';
 import { Interleaver } from '@microsoft/stream-collator';
 
-import TaskError from '../../errorDetection/TaskError';
-import { ErrorDetectionMode } from '../../errorDetection/ErrorDetector';
 import { Stopwatch } from '../../utilities/Stopwatch';
-import {
-  ITask,
-  ITaskDefinition
-} from './ITask';
+import ITask, { ITaskDefinition } from './ITask';
 import TaskStatus from './TaskStatus';
+import TaskError from './TaskError';
 
 /**
  * A class which manages the execution of a set of tasks with interdependencies.
@@ -348,7 +344,7 @@ export default class TaskRunner {
       tasksWithErrors.forEach((task: ITask) => {
         task.errors.forEach((error: TaskError) => {
           if (error) {
-            console.log(colors.red(`[${task.name}] ${error.toString(ErrorDetectionMode.LocalBuild)}`));
+            console.log(colors.red(`[${task.name}] ${error.toString()}`));
           }
         });
       });

@@ -1,0 +1,7 @@
+{
+  "copyTo": {
+    "./lib/examples": [
+      "./src/examples/**/*.*"
+    ]
+  }
+}

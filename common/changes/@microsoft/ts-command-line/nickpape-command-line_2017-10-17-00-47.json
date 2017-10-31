@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/ts-command-line",
+      "comment": "Add ability to specify default value for enum options.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/ts-command-line",
+  "email": "nickpape@users.noreply.github.com"
+}

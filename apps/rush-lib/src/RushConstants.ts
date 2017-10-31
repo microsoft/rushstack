@@ -83,6 +83,12 @@ export namespace RushConstants {
   export const packageDepsFilename: string = 'package-deps.json';
 
   /**
+   * Custom command line configuration file, which is used by rush for implementing
+   * custom command and options.
+   */
+  export const commandLineFilename: string = 'command-line.json';
+
+  /**
    * @beta
    */
   export const versionPoliciesFileName: string = 'version-policies.json';
