@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/node-core-library",
+      "comment": "lock the reference version between web build tools projects",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/node-core-library",
+  "email": "qz2017@users.noreply.github.com"
+}

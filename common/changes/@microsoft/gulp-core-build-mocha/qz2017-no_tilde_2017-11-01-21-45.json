@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-mocha",
+      "comment": "lock the reference version between web build tools projects",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-mocha",
+  "email": "qz2017@users.noreply.github.com"
+}
