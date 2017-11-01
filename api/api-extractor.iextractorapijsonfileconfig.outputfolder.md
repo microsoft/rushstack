@@ -2,9 +2,9 @@
 
 # IExtractorApiJsonFileConfig.outputFolder property
 
-Specifies where the \*.api.json file should be written. 
+Specifies where the \*.api.json file should be written.
 
- The default value is "./dist"
+The default value is "./dist"
 
 **Signature:**
 ```javascript

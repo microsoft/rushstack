@@ -2,9 +2,9 @@
 
 # IExtractorRuntimeCompilerConfig interface
 
-With this configuration, API Extractor is configured using an already prepared compiler state that is provided programmatically at runtime. This can potentially enable faster builds, by reusing the same compiler invocation for tsc, tslint, and API Extractor. 
+With this configuration, API Extractor is configured using an already prepared compiler state that is provided programmatically at runtime. This can potentially enable faster builds, by reusing the same compiler invocation for tsc, tslint, and API Extractor.
 
- If configType='runtime' is specified, then IExtractorRuntimeOptions.compilerProgram must be provided.
+If configType='runtime' is specified, then IExtractorRuntimeOptions.compilerProgram must be provided.
 
 ## Properties
 

@@ -11,6 +11,6 @@ overrideTsconfig: { }
 
 ## Remarks
 
-Provides already parsed tsconfig.json contents conforming to the TypeScript tsconfig schema: http://json.schemastore.org/tsconfig 
+Provides already parsed tsconfig.json contents conforming to the TypeScript tsconfig schema: http://json.schemastore.org/tsconfig
 
- If omitted, then by default the tsconfig.json file will be loaded from the root folder.
+If omitted, then by default the tsconfig.json file will be loaded from the root folder.

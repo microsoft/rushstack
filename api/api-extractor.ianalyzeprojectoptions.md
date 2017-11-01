@@ -2,7 +2,7 @@
 
 # IAnalyzeProjectOptions interface
 
-Options for [Extractor.analyzeProject](api-extractor.extractor.analyzeproject.md) .
+Options for [Extractor.analyzeProject](api-extractor.extractor.analyzeproject.md)<!-- -->.
 
 ## Properties
 
