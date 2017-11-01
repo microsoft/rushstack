@@ -146,7 +146,7 @@ abstract class CommandLineParameterProvider {
     }
 
     this._parameterMetadata.forEach((parameterMetadata: IParameterMetadata<any>) => { // tslint:disable-line:no-any
-      if (parameterMetadata.parameter.value === undefined && parameterMetadata.defaultValue) {
+      if (parameterMetadata.parameter.value === undefined && parameterMetadata.defaultValue !== undefined) {
         parameterMetadata.parameter._setValue({
           action: '',
           [parameterMetadata.parameter._key]: parameterMetadata.defaultValue
@@ -155,7 +155,7 @@ abstract class CommandLineParameterProvider {
     });
   }
 
-  protected validateParameters(): boolean {
+  protected validateParameters(): void {
     const missingParameterLongNames: string[] = [];
     // tslint:disable-next-line:no-any
     this._parameterMetadata.forEach((parameterMetadata: IParameterMetadata<any>, parameterLongName: string) => {
@@ -165,11 +165,7 @@ abstract class CommandLineParameterProvider {
     });
 
     if (missingParameterLongNames.length > 0) {
-      console.log(colors.red(`Missing required parameters: ${missingParameterLongNames.join(', ')}`));
-      process.exit(1);
-      return false;
-    } else {
-      return true;
+      throw new Error(`Missing required parameters: ${missingParameterLongNames.join(', ')}`)
     }
   }
 

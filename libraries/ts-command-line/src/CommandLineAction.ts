@@ -73,9 +73,8 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
    * @internal
    */
   public _execute(): void {
-    if (this.validateParameters()) {
-      this.onExecute();
-    }
+    this.validateParameters()
+    this.onExecute();
   }
 
   /**
