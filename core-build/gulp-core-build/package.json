@@ -18,6 +18,7 @@
     "@microsoft/node-core-library": "~0.3.12",
     "@types/assertion-error": "1.0.30",
     "@types/chai": "3.4.34",
+    "@types/chalk": "0.4.31",
     "@types/gulp": "3.8.32",
     "@types/gulp-util": "3.0.30",
     "@types/mocha": "2.2.38",
@@ -56,7 +57,7 @@
   },
   "devDependencies": {
     "@types/z-schema": "3.16.31",
-    "@microsoft/node-library-build": "~4.1.5",
+    "@microsoft/node-library-build": "~4.2.3",
     "chai": "~3.5.0"
   }
 }
