@@ -147,9 +147,9 @@ abstract class CommandLineParameterProvider {
 
     this._parameterMetadata.forEach((parameterMetadata: IParameterMetadata<any>) => { // tslint:disable-line:no-any
       if (parameterMetadata.parameter.value === undefined && parameterMetadata.defaultValue) {
-        parameterMetadata.parameter.setValue({
+        parameterMetadata.parameter._setValue({
           action: '',
-          [parameterMetadata.parameter.key]: parameterMetadata.defaultValue
+          [parameterMetadata.parameter._key]: parameterMetadata.defaultValue
         });
       }
     });
@@ -192,7 +192,7 @@ abstract class CommandLineParameterProvider {
     argparseOptions?: argparse.ArgumentOptions,
     key?: string,
     converter?: IConverterFunction<any> // tslint:disable-line:no-any
-  ): CommandLineParameter<any> { // tslint:disable-line:no-any
+  ): CommandLineParameter<TValue> {
     const names: string[] = [];
     if (definition.parameterShortName) {
       names.push(definition.parameterShortName);
@@ -200,7 +200,7 @@ abstract class CommandLineParameterProvider {
 
     names.push(definition.parameterLongName);
 
-    const result: CommandLineParameter<any> = new CommandLineParameter<any>( // tslint:disable-line:no-any
+    const result: CommandLineParameter<TValue> = new CommandLineParameter<TValue>(
       this._getKey(definition.parameterLongName, key),
       converter
     );
@@ -217,16 +217,6 @@ abstract class CommandLineParameterProvider {
     });
 
     this._argumentParser.addArgument(names, baseArgparseOptions);
-
-    this._parameterMetadata.set(
-      definition.parameterLongName,
-      {
-        required: !!definition.required,
-        parameter: result,
-        defaultValue: definition.defaultValue
-      }
-    );
-
 
     this._parameterMetadata.set(
       definition.parameterLongName,

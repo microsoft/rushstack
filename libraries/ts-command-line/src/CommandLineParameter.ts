@@ -30,7 +30,6 @@ export class CommandLineParameter<TValue> {
   private _value: TValue;
   private _keyData: string;
 
-
   constructor(key: string, converter?: (data: string) => TValue) {
     this._converter = converter || ((data: string) => data as any as TValue); /* tslint:disable-line:no-any */
     this._keyData = key;

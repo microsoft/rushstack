@@ -48,7 +48,7 @@ export interface IKeyedCommandLineDefinition<TValue> extends IBaseCommandLineDef
  *
  * @public
  */
-export interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition<void> { }
+export interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition<boolean> { }
 
 /**
  * For use with CommandLineParser, this interface represents a string command line parameter
