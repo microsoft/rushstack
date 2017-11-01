@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/loader-load-themed-styles",
+      "comment": "Update the load-themed-styles loader to correspond to API changes in load-themed-styles.",
+      "type": "major"
+    }
+  ],
+  "packageName": "@microsoft/loader-load-themed-styles",
+  "email": "iclanton@users.noreply.github.com"
+}
