@@ -162,6 +162,11 @@
       "from": "projects\\web-library-build.tgz",
       "resolved": "file:projects\\web-library-build.tgz"
     },
+    "@types/argparse": {
+      "version": "1.0.33",
+      "from": "@types/argparse@>=1.0.33 <1.1.0",
+      "resolved": "https://registry.npmjs.org/@types/argparse/-/argparse-1.0.33.tgz"
+    },
     "@types/assertion-error": {
       "version": "1.0.30",
       "from": "@types/assertion-error@1.0.30",
@@ -476,7 +481,7 @@
     },
     "argparse": {
       "version": "1.0.9",
-      "from": "argparse@>=1.0.7 <1.1.0",
+      "from": "argparse@>=1.0.9 <1.1.0",
       "resolved": "https://registry.npmjs.org/argparse/-/argparse-1.0.9.tgz"
     },
     "arr-diff": {
@@ -1020,9 +1025,9 @@
       "resolved": "https://registry.npmjs.org/camelcase-keys/-/camelcase-keys-2.1.0.tgz"
     },
     "caniuse-db": {
-      "version": "1.0.30000749",
+      "version": "1.0.30000745",
       "from": "caniuse-db@>=1.0.30000488 <2.0.0",
-      "resolved": "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000749.tgz"
+      "resolved": "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000745.tgz"
     },
     "caseless": {
       "version": "0.12.0",
@@ -1744,9 +1749,9 @@
       "resolved": "https://registry.npmjs.org/errorhandler/-/errorhandler-1.4.3.tgz"
     },
     "es5-ext": {
-      "version": "0.10.35",
+      "version": "0.10.31",
       "from": "es5-ext@>=0.10.14 <0.11.0",
-      "resolved": "https://registry.npmjs.org/es5-ext/-/es5-ext-0.10.35.tgz"
+      "resolved": "https://registry.npmjs.org/es5-ext/-/es5-ext-0.10.31.tgz"
     },
     "es6-iterator": {
       "version": "2.0.3",
@@ -6612,7 +6617,7 @@
     },
     "tsutils": {
       "version": "2.12.1",
-      "from": "tsutils@>=2.7.1 <3.0.0",
+      "from": "tsutils@>=2.5.1 <3.0.0",
       "resolved": "https://registry.npmjs.org/tsutils/-/tsutils-2.12.1.tgz"
     },
     "tty-browserify": {

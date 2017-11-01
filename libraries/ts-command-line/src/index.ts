@@ -1,6 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/**
+ * An object-oriented command-line parser for TypeScript projects.
+ */
+declare const packageDescription: void; // tslint:disable-line:no-unused-variable
+
 export {
   default as CommandLineAction,
   ICommandLineActionOptions
@@ -16,7 +21,7 @@ export {
 } from './CommandLineDefinition';
 
 export {
-  ICommandLineParserData,
+  ICommandLineParserData as _ICommandLineParserData,
   CommandLineParameter,
   CommandLineStringParameter,
   CommandLineStringListParameter,
