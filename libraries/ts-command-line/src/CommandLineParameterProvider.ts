@@ -32,7 +32,12 @@ import {
 abstract class CommandLineParameterProvider {
   private static _keyCounter: number = 0;
 
-  protected argumentParser: argparse.ArgumentParser;
+  /**
+   * NOTE: THIS IS INTERNAL.  IN THE FUTURE, WE MAY REPLACE "argparse" WITH A DIFFERENT ENGINE.
+   * @internal
+   */
+  protected _argumentParser: argparse.ArgumentParser;
+
   /* tslint:disable-next-line:no-any */
   private _parameters: CommandLineParameter<any>[];
   private _keys: Map<string, string>;
@@ -49,7 +54,11 @@ abstract class CommandLineParameterProvider {
   protected abstract onDefineParameters(): void;
 
   /**
-   * Defines a flag parameter.  See ICommandLineFlagDefinition for details.
+   * Defines a command-line switch whose boolean value is true if the switch is provided,
+   * and false otherwise.
+   *
+   * @remarks
+   * Example:  example-tool --debug
    */
   protected defineFlagParameter(definition: ICommandLineFlagDefinition): CommandLineFlagParameter {
     return this._createParameter(definition, {
@@ -58,14 +67,20 @@ abstract class CommandLineParameterProvider {
   }
 
   /**
-   * Defines a string parameter.
+   * Defines a command-line parameter whose value is a single text string.
+   *
+   * @remarks
+   * Example:  example-tool --message "Hello, world!"
    */
   protected defineStringParameter(definition: ICommandLineStringDefinition): CommandLineStringParameter {
     return this._createParameter(definition, undefined, definition.key) as CommandLineStringParameter;
   }
 
   /**
-   * Defines a list of string by specifying the flag multiple times.
+   * Defines a command-line parameter whose value is one or more text strings.
+   *
+   * @remarks
+   * Example:  example-tool --add file1.txt --add file2.txt --add file3.txt
    */
   protected defineStringListParameter(definition: ICommandLineStringListDefinition): CommandLineStringListParameter {
     return this._createParameter(definition, {
@@ -74,7 +89,10 @@ abstract class CommandLineParameterProvider {
   }
 
   /**
-   * Defines an integer parameter
+   * Defines a command-line parameter whose value is an integer.
+   *
+   * @remarks
+   * Example:  example-tool l --max-attempts 5
    */
   protected defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter {
     return this._createParameter(definition, {
@@ -82,6 +100,13 @@ abstract class CommandLineParameterProvider {
     }, definition.key) as CommandLineIntegerParameter;
   }
 
+  /**
+   * Defines a command-line parameter whose value must be a string from a fixed set of
+   * allowable choice (similar to an enum).
+   *
+   * @remarks
+   * Example:  example-tool --log-level warn
+   */
   protected defineOptionParameter(definition: ICommandLineOptionDefinition): CommandLineOptionParameter {
     if (!definition.options) {
       throw new Error(`When defining an option parameter, the options array must be defined.`);
@@ -96,10 +121,11 @@ abstract class CommandLineParameterProvider {
     }) as CommandLineOptionParameter;
   }
 
-  protected processParsedData(data: ICommandLineParserData): void {
+  /** @internal */
+  protected _processParsedData(data: ICommandLineParserData): void {
     // Fill in the values for the parameters
     for (const parameter of this._parameters) {
-      parameter.setValue(data);
+      parameter._setValue(data);
     }
   }
 
@@ -137,14 +163,14 @@ abstract class CommandLineParameterProvider {
 
     const baseArgparseOptions: argparse.ArgumentOptions = {
       help: definition.description,
-      dest: result.key
+      dest: result._key
     };
 
     Object.keys(argparseOptions || {}).forEach((keyVal: string) => {
       baseArgparseOptions[keyVal] = (argparseOptions || {})[keyVal];
     });
 
-    this.argumentParser.addArgument(names, baseArgparseOptions);
+    this._argumentParser.addArgument(names, baseArgparseOptions);
     return result;
   }
 }
