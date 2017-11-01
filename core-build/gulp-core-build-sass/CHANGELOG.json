@@ -2,6 +2,25 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "4.1.11",
+      "tag": "@microsoft/gulp-core-build-sass_v4.1.11",
+      "date": "Wed, 01 Nov 2017 21:06:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "e449bd6cdc3c179461be68e59590c25021cd1286",
+            "comment": "Upgrade cyclic dependencies"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.2.3` to `3.2.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.1.10",
       "tag": "@microsoft/gulp-core-build-sass_v4.1.10",
       "date": "Tue, 31 Oct 2017 21:04:04 GMT",
