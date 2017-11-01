@@ -1,5 +1,5 @@
 // @public
-export function configureLoadStyles(loadStylesFunction: ((processedStyles: string, rawStyles?: string | IThemingInstruction[]) => void) | undefined): void;
+export function configureLoadStyles(loadStylesFunction: LoadStylesFunction | undefined): void;
 
 // @public
 export function flush(): void;
@@ -29,3 +29,4 @@ export function loadTheme(theme: ITheme | undefined): void;
 // @public
 export function splitStyles(styles: string): IThemingInstruction[];
 
+// WARNING: Unsupported export: LoadStylesFunction

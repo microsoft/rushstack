@@ -14,6 +14,7 @@ declare const packageDescription: void; // tslint:disable-line:no-unused-variabl
 export {
   ITheme,
   IThemingInstruction,
+  LoadStylesFunction,
   loadStyles,
   loadStylesAsync,
   loadTheme,

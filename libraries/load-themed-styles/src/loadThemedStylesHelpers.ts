@@ -47,6 +47,8 @@ export interface ITheme {
   [key: string]: string;
 }
 
+export type LoadStylesFunction = ((processedStyles: string, rawStyles?: string | IThemingInstruction[]) => void);
+
 interface IStyleSheet {
   cssText: string;
 }
@@ -79,7 +81,7 @@ interface IThemeState {
   lastStyleElement: IExtendedHtmlStyleElement;
   registeredStyles: IStyleRecord[];  // records of already registered non-themable styles
   registeredThemableStyles: IStyleRecord[];  // records of already registered themable styles
-  loadStyles: ((processedStyles: string, rawStyles?: string | IThemingInstruction[]) => void) | undefined;
+  loadStyles: LoadStylesFunction | undefined;
   perf: IMeasurement;
   runState: IRunState;
 }
@@ -241,7 +243,7 @@ function _loadStylesInternal(styles: string | IThemingInstruction[], loadAsync: 
  * @public
  */
 export function configureLoadStyles(
-  loadStylesFunction: ((processedStyles: string, rawStyles?: string | IThemingInstruction[]) => void) | undefined
+  loadStylesFunction: LoadStylesFunction | undefined
 ): void {
   _themeState.loadStyles = loadStylesFunction;
 }
