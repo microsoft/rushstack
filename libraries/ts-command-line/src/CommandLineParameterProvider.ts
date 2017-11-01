@@ -227,6 +227,16 @@ abstract class CommandLineParameterProvider {
       }
     );
 
+
+    this._parameterMetadata.set(
+      definition.parameterLongName,
+      {
+        required: !!definition.required,
+        parameter: result,
+        defaultValue: definition.defaultValue
+      }
+    );
+
     return result;
   }
 }
