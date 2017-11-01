@@ -20,11 +20,11 @@ groups:
       - qz2017
       - patmill
 
-  rush-approvers:
+  general-approvers:
     conditions:
       files:
-        - "apps/rush/*"
-        - "apps/rush-lib/*"
+        - "apps/*"
+        - "libraries/*"
     required: 1
     users:
       - iclanton
@@ -36,7 +36,6 @@ groups:
     conditions:
       files:
         - "core-build/*"
-        - "libraries/*"
         - "webpack/*"
     required: 1
     users:

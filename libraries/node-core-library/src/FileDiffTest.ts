@@ -76,6 +76,7 @@ export class FileDiffTest {
           + ' the file already exists:\n' + expectedCopyFilename);
       }
       fsx.copySync(expectedFilePath, expectedCopyFilename);
+      fsx.chmodSync(expectedCopyFilename, 292); // 292 = 444 octal = "rrr"
 
       throw new Error('The test output file does not match the expected input:\n'
         + actualFilePath);

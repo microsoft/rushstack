@@ -19,6 +19,20 @@ Highlighted projects:
 
 ## Apps
 
+### [@microsoft/api-extractor](./apps/api-extractor/README.md)
+
+Validate, document, and review the exported API for a TypeScript library.
+
+[![npm version](https://badge.fury.io/js/%40microsoft%2Fapi-extractor.svg)](https://badge.fury.io/js/%40microsoft%2Fapi-extractor)
+[![Dependencies](https://david-dm.org/Microsoft/api-extractor.svg)](https://david-dm.org/Microsoft/api-extractor)
+
+### [@microsoft/api-documenter](./apps/api-documenter/README.md)
+
+Read JSON files from **api-extractor**, generate documentation pages.
+
+[![npm version](https://badge.fury.io/js/%40microsoft%2Fapi-extractor.svg)](https://badge.fury.io/js/%40microsoft%2Fapi-documenter)
+[![Dependencies](https://david-dm.org/Microsoft/api-extractor.svg)](https://david-dm.org/Microsoft/api-documenter)
+
 ### [@microsoft/rush](./apps/rush/README.md)
 
 The professional solution for consolidating all your JavaScript projects in one Git repo.
@@ -103,13 +117,6 @@ A **Gulp Core Build** rig for building web libraries. It includes build tasks fo
 
 
 ## Libraries
-
-### [@microsoft/api-extractor](./libraries/api-extractor/README.md)
-
-Validate, document, and review the exported API for a TypeScript library.
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Fapi-extractor.svg)](https://badge.fury.io/js/%40microsoft%2Fapi-extractor)
-[![Dependencies](https://david-dm.org/Microsoft/api-extractor.svg)](https://david-dm.org/Microsoft/api-extractor)
 
 ### [@microsoft/decorators](./libraries/decorators/README.md)
 
