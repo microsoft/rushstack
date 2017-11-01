@@ -2,6 +2,142 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.2.4",
+      "tag": "@microsoft/gulp-core-build_v3.2.4",
+      "date": "Wed, 01 Nov 2017 21:06:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "e449bd6cdc3c179461be68e59590c25021cd1286",
+            "comment": "Upgrade cyclic dependencies"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.12` to `~0.3.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.3",
+      "tag": "@microsoft/gulp-core-build_v3.2.3",
+      "date": "Tue, 31 Oct 2017 21:04:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.11` to `~0.3.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.2",
+      "tag": "@microsoft/gulp-core-build_v3.2.2",
+      "date": "Tue, 31 Oct 2017 16:04:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nick Pape <nickpape-msft@users.noreply.github.com>",
+            "commit": "e204dd49b5af75511cf0dd8e50eb6c6c40a694a1",
+            "comment": "Fix an issue where an exception was being thrown when displaying toasts for build failures."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.10` to `~0.3.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.1",
+      "tag": "@microsoft/gulp-core-build_v3.2.1",
+      "date": "Wed, 25 Oct 2017 20:03:59 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.9` to `~0.3.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.0",
+      "tag": "@microsoft/gulp-core-build_v3.2.0",
+      "date": "Tue, 24 Oct 2017 18:17:12 GMT",
+      "comments": {
+        "minor": [
+          {
+            "author": "QZ <qz2017@users.noreply.github.com>",
+            "commit": "5fe47765dbb3567bebc30cf5d7ac2205f6e655b0",
+            "comment": "Add a Jest task to support running tests on Jest"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.8` to `~0.3.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.6",
+      "tag": "@microsoft/gulp-core-build_v3.1.6",
+      "date": "Mon, 23 Oct 2017 21:53:12 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "5de032b254b632b8af0d0dd98913acef589f88d5",
+            "comment": "Updated cyclic dependencies"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.7` to `~0.3.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.5",
+      "tag": "@microsoft/gulp-core-build_v3.1.5",
+      "date": "Fri, 20 Oct 2017 19:57:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.6` to `~0.3.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.4",
+      "tag": "@microsoft/gulp-core-build_v3.1.4",
+      "date": "Fri, 20 Oct 2017 01:52:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.5` to `~0.3.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.3",
+      "tag": "@microsoft/gulp-core-build_v3.1.3",
+      "date": "Fri, 20 Oct 2017 01:04:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.4` to `~0.3.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.1.2",
       "tag": "@microsoft/gulp-core-build_v3.1.2",
       "date": "Thu, 05 Oct 2017 01:05:02 GMT",

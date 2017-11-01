@@ -1,0 +1,63 @@
+{
+  "npmVersion": "3.10.8",
+  "rushVersion": "1.0.5",
+  "nodeSupportedVersionRange": ">=4.3.0 <7.0.0",
+  "projectFolderMinDepth": 1,
+  "approvedPackagesPolicy": {
+    "reviewCategories": [ "first-party", "third-party", "prototype" ],
+    "ignoredNpmScopes": [ "@types", "@internal" ]
+  },
+  "projects": [
+    {
+      "packageName": "a",
+      "projectFolder": "a",
+      "reviewCategory": "third-party",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "b",
+      "projectFolder": "b",
+      "reviewCategory": "third-party",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "c",
+      "projectFolder": "c",
+      "reviewCategory": "third-party",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "d",
+      "projectFolder": "d",
+      "reviewCategory": "third-party",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "cyclic-dep-1",
+      "projectFolder": "cyclic-dep-1",
+      "reviewCategory": "third-party",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "cyclic-dep-2",
+      "projectFolder": "cyclic-dep-2",
+      "reviewCategory": "third-party",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "cyclic-dep-explicit-1",
+      "projectFolder": "cyclic-dep-explicit-1",
+      "reviewCategory": "third-party",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "cyclic-dep-explicit-2",
+      "projectFolder": "cyclic-dep-explicit-2",
+      "reviewCategory": "third-party",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": [
+        "cyclic-dep-explicit-1"
+      ]
+    }
+  ]
+}

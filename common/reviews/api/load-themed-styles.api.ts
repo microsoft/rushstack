@@ -1,60 +1,32 @@
 // @public
-enum ClearStyleOptions {
-  // (undocumented)
-  all = 3,
-  // (undocumented)
-  onlyNonThemable = 2,
-  // (undocumented)
-  onlyThemable = 1
-}
-
-// @public
-export function clearStyles(option: ClearStyleOptions = ClearStyleOptions.all): void;
-
-// @public
-export function configureLoadStyles(loadStylesFn: ((processedStyles: string, rawStyles?: string | ThemableArray) => void) | undefined): void;
-
-// @public
-export function configureRunMode(mode: Mode): void;
-
-// @public
-export function detokenize(styles: string | undefined): string | undefined;
+export function configureLoadStyles(loadStylesFunction: LoadStylesFunction | undefined): void;
 
 // @public
 export function flush(): void;
 
-// @public (undocumented)
+// @public
 interface ITheme {
   // (undocumented)
   [ key: string ]: string;
 }
 
-// @public (undocumented)
+// @public
 interface IThemingInstruction {
-  // (undocumented)
   defaultValue?: string;
-  // (undocumented)
   rawString?: string;
-  // (undocumented)
   theme?: string;
 }
 
 // @public
-export function loadStyles(styles: string | ThemableArray, loadAsync: boolean = false): void;
+export function loadStyles(styles: string | IThemingInstruction[]): void;
+
+// @public
+export function loadStylesAsync(styles: string | IThemingInstruction[]): void;
 
 // @public
 export function loadTheme(theme: ITheme | undefined): void;
 
 // @public
-enum Mode {
-  // (undocumented)
-  async,
-  // (undocumented)
-  sync
-}
+export function splitStyles(styles: string): IThemingInstruction[];
 
-// @public
-export function splitStyles(styles: string): ThemableArray;
-
-// WARNING: Unsupported export: ThemableArray
-// (No packageDescription for this package)
+// WARNING: Unsupported export: LoadStylesFunction

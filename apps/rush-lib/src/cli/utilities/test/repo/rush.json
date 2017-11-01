@@ -1,0 +1,48 @@
+{
+  "npmVersion": "3.10.8",
+  "rushVersion": "1.0.5",
+  "nodeSupportedVersionRange": ">=4.3.0 <7.0.0",
+
+  "projects": [
+    {
+      "packageName": "a",
+      "projectFolder": "a",
+      "reviewCategory": "third-party",
+      "versionPolicyName": "testPolicy1"
+    },
+    {
+      "packageName": "b",
+      "projectFolder": "b",
+      "reviewCategory": "third-party",
+      "versionPolicyName": "testPolicy1"
+    },
+    {
+      "packageName": "c",
+      "projectFolder": "c",
+      "reviewCategory": "third-party",
+      "versionPolicyName": "testPolicy2"
+    },
+    {
+      "packageName": "d",
+      "projectFolder": "d",
+      "reviewCategory": "third-party",
+      "versionPolicyName": "testPolicy3"
+    },
+    {
+      "packageName": "e",
+      "projectFolder": "e",
+      "reviewCategory": "third-party",
+      "versionPolicyName": "testPolicy1"
+    },
+    {
+      "packageName": "f",
+      "projectFolder": "f",
+      "reviewCategory": "third-party"
+    },
+    {
+      "packageName": "g",
+      "projectFolder": "g",
+      "reviewCategory": "third-party"
+    }
+  ]
+}

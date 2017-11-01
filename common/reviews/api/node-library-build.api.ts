@@ -1,3 +1,6 @@
+// @internal
+export declare function _isJestEnabled(rootFolder: string): boolean;
+
 // @public
 export declare function addSuppression(suppression: string | RegExp): void;
 
@@ -100,7 +103,7 @@ class GulpTask<TTaskConfig> implements IExecutable {
   readJSONSync(localPath: string): Object | undefined;
   replaceConfig(taskConfig: TTaskConfig): void;
   resolvePath(localPath: string): string;
-  schema: Object | undefined;
+  readonly schema: Object | undefined;
   setConfig(taskConfig: Partial<TTaskConfig>): void;
   taskConfig: TTaskConfig;
 }
@@ -115,6 +118,7 @@ interface IBuildConfig {
   distFolder: string;
   gulp: GulpProxy | gulp.Gulp;
   isRedundantBuild?: boolean;
+  jestEnabled?: boolean;
   libAMDFolder?: string;
   libES6Folder?: string;
   libFolder: string;
@@ -177,12 +181,29 @@ interface IFixupSettingsOptions {
 }
 
 // @public
+interface IJestConfig {
+  configFilePath?: string;
+  coverage?: boolean;
+  isEnabled?: boolean;
+}
+
+// @public
 export declare function initialize(gulp: typeof Gulp): void;
 
 // @public (undocumented)
 interface ITsConfigFile<T> {
   // (undocumented)
   compilerOptions: T;
+}
+
+// @public
+class JestTask extends GulpTask<IJestConfig> {
+  constructor();
+  // (undocumented)
+  executeTask(gulp: typeof Gulp, completeCallback: (error?: string | Error) => void): void;
+  // (undocumented)
+  isEnabled(buildConfig: IBuildConfig): boolean;
+  loadSchema(): Object;
 }
 
 // @public
@@ -272,6 +293,7 @@ export declare function watch(watchMatch: string | string[], taskExecutable: IEx
 // WARNING: Unsupported export: cleanFlag
 // WARNING: Unsupported export: clean
 // WARNING: Unsupported export: copyStaticAssets
+// WARNING: Unsupported export: jest
 // WARNING: Unsupported export: apiExtractor
 // WARNING: Unsupported export: typescript
 // WARNING: Unsupported export: tslint

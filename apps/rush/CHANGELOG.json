@@ -2,6 +2,29 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "3.0.20",
+      "tag": "@microsoft/rush_v3.0.20",
+      "date": "Thu, 19 Oct 2017 23:01:49 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a stack overflow error that occurs when \"rush rebuild\" encounters a cyclic dependency"
+          },
+          {
+            "comment": "Fix a bug that \"rush rebuild\" fails if \"from\" parameter is provided"
+          },
+          {
+            "comment": "Validate versions before \"rush version\" commits version updates"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-lib\" from `3.0.19` to `3.0.20`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.19",
       "tag": "@microsoft/rush_v3.0.19",
       "date": "Fri, 06 Oct 2017 22:44:31 GMT",

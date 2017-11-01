@@ -6,6 +6,7 @@
     "jsx": "react",
     "declaration": true,
     "sourceMap": true,
+    "strictNullChecks": true,
     "types": [
       "node"
     ],
