@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/load-themed-styles",
-      "comment": "[Srdeshpa] Enabling api extractor in the load-themed-styles ",
+      "comment": "Enabling api extractor in the load-themed-styles ",
       "type": "patch"
     }
   ],

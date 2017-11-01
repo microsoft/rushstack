@@ -1,30 +1,49 @@
-/**
- * An IThemingInstruction can specify a rawString to be preserved or a theme slot and a default value
- * to use if that slot is not specified by the theme.
- */
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
 
 // Declaring a global here in case that the execution environment is Node.js (without importing the
 // entire node.js d.ts for now)
 declare var global: any; // tslint:disable-line:no-any
 
 /**
+ * An IThemingInstruction can specify a rawString to be preserved or a theme slot and a default value
+ *  to use if that slot is not specified by the theme.
+ *
+ * For example, the simple stylesheet `.container { background-color: "[theme:themePrimary, default: #0078d7]" }`
+ *  contains three theming instructions:
+ * 1. { rawString: '.container { background-color: "' }
+ * 2. { defaultValue: '#0078d7', theme: 'themePrimary' }
+ * 3. { rawString: '" }' }
+ *
  * @public
  */
 export interface IThemingInstruction {
+  /**
+   * If this is a theme color token, the name of the theme color.
+   */
   theme?: string;
+
+  /**
+   * If this is a theme color token, the default color value to be used if one is not provided by the theme.
+   */
   defaultValue?: string;
+
+  /**
+   * A raw string value from the provided style text.
+   */
   rawString?: string;
 }
 
 /**
- * @public
- */
-export type ThemableArray = Array<IThemingInstruction>;
-
-/**
+ * A set of theming keys and their color values.
+ *
  * @public
  */
 export interface ITheme {
+  /**
+   * Keys are theming parameters like themePrimary, neutralDark, or blueMid.
+   * Values are the colors the theme parameters should be replaced with like #0078d7, #212121, or #00188f.
+   */
   [key: string]: string;
 }
 
@@ -45,14 +64,13 @@ interface IMeasurement {
    */
   count: number;
   /**
-   * Total duration of all loadStyles exections
+   * Total duration of all loadStyles executions
    */
   duration: number;
 }
 
 interface IRunState {
-  mode: Mode;
-  buffer: ThemableArray[];
+  buffer: IThemingInstruction[][];
   flushTimer: number;
 }
 
@@ -61,14 +79,14 @@ interface IThemeState {
   lastStyleElement: IExtendedHtmlStyleElement;
   registeredStyles: IStyleRecord[];  // records of already registered non-themable styles
   registeredThemableStyles: IStyleRecord[];  // records of already registered themable styles
-  loadStyles: ((processedStyles: string, rawStyles?: string | ThemableArray) => void) | undefined;
+  loadStyles: ((processedStyles: string, rawStyles?: string | IThemingInstruction[]) => void) | undefined;
   perf: IMeasurement;
   runState: IRunState;
 }
 
 interface IStyleRecord {
   styleElement: Element;
-  themableStyle: ThemableArray;
+  themableStyle: IThemingInstruction[];
 }
 
 /**
@@ -82,28 +100,24 @@ interface IThemableArrayResolveResult {
 }
 
 /**
- * In sync mode, styles are registered as style elements synchronously with loadStyles() call.
- * In async mode, styles are buffered and registered as batch in async timer for performance purpose.
- *
- * @public
- */
-export const enum Mode {
-  sync,
-  async
-}
-
-/**
  * Themable styles and non-themable styles are tracked separately
- * Specify ClearStyleOptions when calling clearStyles API to specify which group of registered styles should be cleared.
- * @onlyThemable: only themable styles will be cleared
- * @onlyNonThemable: only non-themable styles will be cleared
- * @all: both themable and non-themable styles will be cleared
- *
- * @public
+ * Specify ClearStylesOptions when calling clearStyles API to specify which group of registered styles should be
+ *  cleared.
  */
-export const enum ClearStyleOptions {
+const enum ClearStylesOptions {
+  /**
+   * Only themable styles will be cleared
+   */
   onlyThemable = 1,
+
+  /**
+   * Only non-themable styles will be cleared
+   */
   onlyNonThemable = 2,
+
+  /**
+   * Both themable and non-themable styles will be cleared
+   */
   all = 3
 }
 
@@ -115,7 +129,7 @@ let _injectStylesWithCssText: boolean;
 // load-themed-styles hosted on the page.
 const _root: any = (typeof window === 'undefined') ? global : window; // tslint:disable-line:no-any
 
-const _themeState: IThemeState = initializeThemeState();
+const _themeState: IThemeState = _initializeThemeState();
 
 /**
  * Matches theming tokens. For example, "[theme: themeSlotName, default: #FFF]" (including the quotes).
@@ -126,20 +140,20 @@ const _themeTokenRegex: RegExp = /[\'\"]\[theme:\s*(\w+)\s*(?:\,\s*default:\s*([
 /** Maximum style text length, for supporting IE style restrictions. */
 const MAX_STYLE_CONTENT_SIZE: number = 10000;
 
-const now: () => number =
+const _now: () => number =
   () => (typeof performance !== 'undefined' && !!performance.now) ? performance.now() : Date.now();
 
-function measure(func: () => void): void {
-  const start: number = now();
+function _measure(func: () => void): void {
+  const start: number = _now();
   func();
-  const end: number = now();
+  const end: number = _now();
   _themeState.perf.duration += end - start;
 }
 
 /**
  * initialize global state object
  */
-function initializeThemeState(): IThemeState {
+function _initializeThemeState(): IThemeState {
   let state: IThemeState = _root.__themeState__ || {
     theme: undefined,
     lastStyleElement: undefined,
@@ -155,7 +169,6 @@ function initializeThemeState(): IThemeState {
       },
       runState: {
         flushTimer: 0,
-        mode: Mode.sync,
         buffer: []
       }
     };
@@ -171,56 +184,66 @@ function initializeThemeState(): IThemeState {
 }
 
 /**
- * Loads a set of style text. If it is registered too early, we will register it when the window.load
+ * Synchronously loads a set of style text. If it is registered too early, we will register it when the window.load
  * event is fired.
- * @param {string | ThemableArray} styles - Themable style text to register.
- * @param {boolean} loadAsync - When true, always load styles in async mode, irrespective of current sync mode.
+ * @param styles - Themable style text to register.
  *
  * @public
  */
-export function loadStyles(styles: string | ThemableArray, loadAsync: boolean = false): void {
-  measure(() => {
-    const styleParts: ThemableArray = Array.isArray(styles) ? styles : splitStyles(styles);
+export function loadStyles(styles: string | IThemingInstruction[]): void {
+  _loadStylesInternal(styles, false);
+}
+
+/**
+ * Asynchronously loads a set of style text. If it is registered too early, we will register it when the window.load
+ * event is fired.
+ * @param styles - Themable style text to register.
+ *
+ * @public
+ */
+export function loadStylesAsync(styles: string | IThemingInstruction[]): void {
+  _loadStylesInternal(styles, true);
+}
+
+/**
+ * Loads a set of style text. If it is registered too early, we will register it when the window.load
+ * event is fired.
+ * @param styles - Themable style text to register.
+ * @param loadAsync - When true, always load styles in async mode, irrespective of current sync mode.
+ *
+ * @public
+ */
+function _loadStylesInternal(styles: string | IThemingInstruction[], loadAsync: boolean = false): void {
+  _measure(() => {
+    const styleParts: IThemingInstruction[] = Array.isArray(styles) ? styles : splitStyles(styles);
     if (_injectStylesWithCssText === undefined) {
-      _injectStylesWithCssText = shouldUseCssText();
+      _injectStylesWithCssText = _shouldUseCssText();
     }
     const {
-      mode,
       buffer,
       flushTimer
     } = _themeState.runState;
-    if (loadAsync || mode === Mode.async) {
+    if (loadAsync) {
       buffer.push(styleParts);
       if (!flushTimer) {
-        _themeState.runState.flushTimer = asyncLoadStyles();
+        _themeState.runState.flushTimer = _asyncLoadStyles();
       }
     } else {
-      applyThemableStyles(styleParts);
+      _applyThemableStyles(styleParts);
     }
   });
 }
 
 /**
  * Allows for customizable loadStyles logic. e.g. for server side rendering application
- * @param {(processedStyles: string, rawStyles?: string | ThemableArray) => void} -
- * a loadStyles callback that gets called when styles are loaded or reloaded
+ * @param processedStyles - a loadStyles callback that gets called when styles are loaded or reloaded
  *
  * @public
  */
 export function configureLoadStyles(
-  loadStylesFn: ((processedStyles: string, rawStyles?: string | ThemableArray) => void) | undefined
+  loadStylesFunction: ((processedStyles: string, rawStyles?: string | IThemingInstruction[]) => void) | undefined
 ): void {
-  _themeState.loadStyles = loadStylesFn;
-}
-
-/**
- * Configure run mode of load-themable-styles
- * @param mode load-themable-styles run mode, async or sync
- *
- * @public
- */
-export function configureRunMode(mode: Mode): void {
-  _themeState.runState.mode = mode;
+  _themeState.loadStyles = loadStylesFunction;
 }
 
 /**
@@ -229,12 +252,12 @@ export function configureRunMode(mode: Mode): void {
  * @public
  */
 export function flush(): void {
-  measure(() => {
-    const styleArrays: ThemableArray[] = _themeState.runState.buffer.slice();
+  _measure(() => {
+    const styleArrays: IThemingInstruction[][] = _themeState.runState.buffer.slice();
     _themeState.runState.buffer = [];
-    const mergedStyleArray: ThemableArray = [].concat.apply([], styleArrays);
+    const mergedStyleArray: IThemingInstruction[] = [].concat.apply([], styleArrays);
     if (mergedStyleArray.length > 0) {
-      applyThemableStyles(mergedStyleArray);
+      _applyThemableStyles(mergedStyleArray);
     }
   });
 }
@@ -244,7 +267,7 @@ export function flush(): void {
  *
  * @public
  */
-function asyncLoadStyles(): number {
+function _asyncLoadStyles(): number {
   return setTimeout(() => {
     _themeState.runState.flushTimer = 0;
     flush();
@@ -254,25 +277,25 @@ function asyncLoadStyles(): number {
 /**
  * Loads a set of style text. If it is registered too early, we will register it when the window.load event
  * is fired.
- * @param {string} styleText Style to register.
- * @param {IStyleRecord} styleRecord Existing style record to re-apply.
+ * @param stylesArray - Styles to register.
+ * @param styleRecord - Existing style record to re-apply.
  *
  * @public
  */
-function applyThemableStyles(stylesArray: ThemableArray, styleRecord?: IStyleRecord): void {
+function _applyThemableStyles(stylesArray: IThemingInstruction[], styleRecord?: IStyleRecord): void {
   if (_themeState.loadStyles) {
-    _themeState.loadStyles(resolveThemableArray(stylesArray).styleString, stylesArray);
+    _themeState.loadStyles(_resolveThemableArray(stylesArray).styleString, stylesArray);
   } else {
     _injectStylesWithCssText ?
-      registerStylesIE(stylesArray, styleRecord) :
-      registerStyles(stylesArray);
+      _registerStylesIE(stylesArray, styleRecord) :
+      _registerStyles(stylesArray);
   }
 }
 
 /**
  * Registers a set theme tokens to find and replace. If styles were already registered, they will be
  * replaced.
- * @param {theme} theme - JSON object of theme tokens to values.
+ * @param theme - JSON object of theme tokens to values.
  *
  * @public
  */
@@ -280,28 +303,26 @@ export function loadTheme(theme: ITheme | undefined): void {
   _themeState.theme = theme;
 
   // reload styles.
-  reloadStyles();
+  _reloadStyles();
 }
 
 /**
  * Clear already registered style elements and style records in theme_State object
- * @option: specify which group of registered styles should be cleared.
- * Default to be both themable and non-themable styles will be cleared
- *
- * @public
+ * @param option - specify which group of registered styles should be cleared. Defaults to both themable and
+ *  non-themable styles will be cleared
  */
-export function clearStyles(option: ClearStyleOptions = ClearStyleOptions.all): void {
-  if (option === ClearStyleOptions.all || option === ClearStyleOptions.onlyNonThemable) {
-    clearStylesInternal(_themeState.registeredStyles);
+function _clearStyles(option: ClearStylesOptions = ClearStylesOptions.all): void {
+  if (option === ClearStylesOptions.all || option === ClearStylesOptions.onlyNonThemable) {
+    _clearStylesInternal(_themeState.registeredStyles);
     _themeState.registeredStyles = [];
   }
-  if (option === ClearStyleOptions.all || option === ClearStyleOptions.onlyThemable) {
-    clearStylesInternal(_themeState.registeredThemableStyles);
+  if (option === ClearStylesOptions.all || option === ClearStylesOptions.onlyThemable) {
+    _clearStylesInternal(_themeState.registeredThemableStyles);
     _themeState.registeredThemableStyles = [];
   }
 }
 
-function clearStylesInternal(records: IStyleRecord[]): void {
+function _clearStylesInternal(records: IStyleRecord[]): void {
   records.forEach((styleRecord: IStyleRecord) => {
     const styleElement: HTMLStyleElement = styleRecord && styleRecord.styleElement as HTMLStyleElement;
     if (styleElement && styleElement.parentElement) {
@@ -313,38 +334,34 @@ function clearStylesInternal(records: IStyleRecord[]): void {
 /**
  * Reloads styles.
  */
-function reloadStyles(): void {
+function _reloadStyles(): void {
   if (_themeState.theme) {
-    const themableStyles: ThemableArray[] = [];
+    const themableStyles: IThemingInstruction[][] = [];
     for (const styleRecord of _themeState.registeredThemableStyles) {
       themableStyles.push(styleRecord.themableStyle);
     }
     if (themableStyles.length > 0) {
-      clearStyles(ClearStyleOptions.onlyThemable);
-      applyThemableStyles([].concat.apply([], themableStyles));
+      _clearStyles(ClearStylesOptions.onlyThemable);
+      _applyThemableStyles([].concat.apply([], themableStyles));
     }
   }
 }
 
 /**
  * Find theme tokens and replaces them with provided theme values.
- * @param {string} styles - Tokenized styles to fix.
+ * @param styles - Tokenized styles to fix.
  *
- * @public
+ * @internal
  */
-export function detokenize(styles: string | undefined): string | undefined {
-  if (styles) {
-    styles = resolveThemableArray(splitStyles(styles)).styleString;
-  }
-
-  return styles;
+export function _detokenize(styles: string): string {
+  return _resolveThemableArray(splitStyles(styles)).styleString;
 }
 
 /**
  * Resolves ThemingInstruction objects in an array and joins the result into a string.
- * @param {ThemableArray} splitStyleArray ThemableArray to resolve and join.
+ * @param splitStyleArray - Theming instructions to resolve and join.
  */
-function resolveThemableArray(splitStyleArray: ThemableArray): IThemableArrayResolveResult {
+function _resolveThemableArray(splitStyleArray: IThemingInstruction[]): IThemableArrayResolveResult {
   const { theme }: IThemeState = _themeState;
   let themable: boolean = false;
   // Resolve the array of theming instructions to an array of strings.
@@ -378,12 +395,12 @@ function resolveThemableArray(splitStyleArray: ThemableArray): IThemableArrayRes
 
 /**
  * Split tokenized CSS into an array of strings and theme specification objects
- * @param {string} styles - Tokenized styles to split.
+ * @param styles - Tokenized styles to split.
  *
  * @public
  */
-export function splitStyles(styles: string): ThemableArray {
-  const result: ThemableArray = [];
+export function splitStyles(styles: string): IThemingInstruction[] {
+  const result: IThemingInstruction[] = [];
   if (styles) {
     let pos: number = 0; // Current position in styles.
     let tokenMatch: RegExpExecArray | null; // tslint:disable-line:no-null-keyword
@@ -415,17 +432,16 @@ export function splitStyles(styles: string): ThemableArray {
 
 /**
  * Registers a set of style text. If it is registered too early, we will register it when the
- * window.load event is fired.
- * @param {ThemableArray} styleArray Array of IThemingInstruction objects to register.
- * @param {IStyleRecord} styleRecord May specify a style Element to update.
+ *  window.load event is fired.
+ * @param styleArray - Array of IThemingInstruction objects to register.
  */
-function registerStyles(styleArray: ThemableArray): void {
+function _registerStyles(styleArray: IThemingInstruction[]): void {
   const head: HTMLHeadElement = document.getElementsByTagName('head')[0];
   const styleElement: HTMLStyleElement = document.createElement('style');
   const {
     styleString,
     themable
-  } = resolveThemableArray(styleArray);
+  } = _resolveThemableArray(styleArray);
 
   styleElement.type = 'text/css';
   styleElement.appendChild(document.createTextNode(styleString));
@@ -447,10 +463,10 @@ function registerStyles(styleArray: ThemableArray): void {
 /**
  * Registers a set of style text, for IE 9 and below, which has a ~30 style element limit so we need
  * to register slightly differently.
- * @param {ThemableArray} styleArray Array of IThemingInstruction objects to register.
- * @param {IStyleRecord} styleRecord May specify a style Element to update.
+ * @param styleArray - Array of IThemingInstruction objects to register.
+ * @param styleRecord - May specify a style Element to update.
  */
-function registerStylesIE(styleArray: ThemableArray, styleRecord?: IStyleRecord): void {
+function _registerStylesIE(styleArray: IThemingInstruction[], styleRecord?: IStyleRecord): void {
   const head: HTMLHeadElement = document.getElementsByTagName('head')[0];
   const registeredStyles: IStyleRecord[] = _themeState.registeredStyles;
   let lastStyleElement: IExtendedHtmlStyleElement = _themeState.lastStyleElement;
@@ -458,7 +474,7 @@ function registerStylesIE(styleArray: ThemableArray, styleRecord?: IStyleRecord)
   const stylesheet: IStyleSheet | undefined = lastStyleElement ? lastStyleElement.styleSheet : undefined;
   const lastStyleContent: string = stylesheet ? stylesheet.cssText : '';
   let lastRegisteredStyle: IStyleRecord = registeredStyles[registeredStyles.length - 1];
-  const resolvedStyleText: string = resolveThemableArray(styleArray).styleString;
+  const resolvedStyleText: string = _resolveThemableArray(styleArray).styleString;
 
   if (!lastStyleElement || (lastStyleContent.length + resolvedStyleText.length) > MAX_STYLE_CONTENT_SIZE) {
     lastStyleElement = document.createElement('style') as IExtendedHtmlStyleElement;
@@ -480,7 +496,7 @@ function registerStylesIE(styleArray: ThemableArray, styleRecord?: IStyleRecord)
     }
   }
 
-  lastStyleElement.styleSheet.cssText += detokenize(resolvedStyleText);
+  lastStyleElement.styleSheet.cssText += _detokenize(resolvedStyleText);
   Array.prototype.push.apply(lastRegisteredStyle.themableStyle, styleArray); // concat in-place
 
   // Preserve the theme state.
@@ -491,7 +507,7 @@ function registerStylesIE(styleArray: ThemableArray, styleRecord?: IStyleRecord)
  * Checks to see if styleSheet exists as a property off of a style element.
  * This will determine if style registration should be done via cssText (<= IE9) or not
  */
-function shouldUseCssText(): boolean {
+function _shouldUseCssText(): boolean {
   let useCSSText: boolean = false;
 
   if (typeof document !== 'undefined') {
