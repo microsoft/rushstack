@@ -55,7 +55,7 @@ class CommandLineParameterProvider {
   protected defineStringParameter(definition: ICommandLineStringDefinition): CommandLineStringParameter;
   protected abstract onDefineParameters(): void;
   // (undocumented)
-  protected validateParameters(): boolean;
+  protected validateParameters(): void;
 }
 
 // @public

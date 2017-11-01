@@ -165,7 +165,7 @@ abstract class CommandLineParameterProvider {
     });
 
     if (missingParameterLongNames.length > 0) {
-      throw new Error(`Missing required parameters: ${missingParameterLongNames.join(', ')}`)
+      throw new Error(`Missing required parameters: ${missingParameterLongNames.join(', ')}`);
     }
   }
 
