@@ -17,7 +17,7 @@
   "dependencies": {
     "@microsoft/api-extractor": "4.2.3",
     "@microsoft/gulp-core-build": "3.2.4",
-    "@microsoft/node-core-library": "~0.3.13",
+    "@microsoft/node-core-library": "0.3.13",
     "@types/fs-extra": "0.0.37",
     "@types/gulp": "3.8.32",
     "@types/node": "6.0.88",
@@ -41,7 +41,7 @@
     "typescript": "~2.4.1"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "~4.2.3",
+    "@microsoft/node-library-build": "4.2.3",
     "@types/gulp-util": "3.0.30",
     "@types/orchestrator": "0.0.30",
     "@types/q": "0.0.32",
