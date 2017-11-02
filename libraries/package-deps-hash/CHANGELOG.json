@@ -2,6 +2,25 @@
   "name": "@microsoft/package-deps-hash",
   "entries": [
     {
+      "version": "2.1.2",
+      "tag": "@microsoft/package-deps-hash_v2.1.2",
+      "date": "Thu, 02 Nov 2017 16:05:24 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "QZ <qz2017@users.noreply.github.com>",
+            "commit": "2c58095f2f13492887cc1278c9a0cff49af9735b",
+            "comment": "lock the reference version between web build tools projects"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.2.4` to `4.2.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.1.1",
       "tag": "@microsoft/package-deps-hash_v2.1.1",
       "date": "Tue, 24 Oct 2017 18:17:12 GMT",

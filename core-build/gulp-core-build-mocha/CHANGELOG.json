@@ -2,6 +2,25 @@
   "name": "@microsoft/gulp-core-build-mocha",
   "entries": [
     {
+      "version": "3.2.5",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.2.5",
+      "date": "Thu, 02 Nov 2017 16:05:24 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "QZ <qz2017@users.noreply.github.com>",
+            "commit": "2c58095f2f13492887cc1278c9a0cff49af9735b",
+            "comment": "lock the reference version between web build tools projects"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.2.4` to `3.2.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.4",
       "tag": "@microsoft/gulp-core-build-mocha_v3.2.4",
       "date": "Wed, 01 Nov 2017 21:06:08 GMT",

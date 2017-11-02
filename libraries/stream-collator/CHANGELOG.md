@@ -1,6 +1,13 @@
 # Change Log - @microsoft/stream-collator
 
-This log was last generated on Tue, 24 Oct 2017 18:17:12 GMT and should not be manually modified.
+This log was last generated on Thu, 02 Nov 2017 16:05:24 GMT and should not be manually modified.
+
+## 2.1.2
+Thu, 02 Nov 2017 16:05:24 GMT
+
+### Patches
+
+- lock the reference version between web build tools projects
 
 ## 2.1.1
 Tue, 24 Oct 2017 18:17:12 GMT

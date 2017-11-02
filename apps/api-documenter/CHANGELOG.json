@@ -2,6 +2,34 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "1.0.6",
+      "tag": "@microsoft/api-documenter_v1.0.6",
+      "date": "Thu, 02 Nov 2017 16:05:24 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "QZ <qz2017@users.noreply.github.com>",
+            "commit": "2c58095f2f13492887cc1278c9a0cff49af9735b",
+            "comment": "lock the reference version between web build tools projects"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `4.2.3` to `4.2.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.13` to `0.3.14`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `2.2.1` to `2.2.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.2.4` to `4.2.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.5",
       "tag": "@microsoft/api-documenter_v1.0.5",
       "date": "Wed, 01 Nov 2017 21:06:08 GMT",

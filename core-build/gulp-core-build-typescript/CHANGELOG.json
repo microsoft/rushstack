@@ -2,6 +2,31 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "4.2.12",
+      "tag": "@microsoft/gulp-core-build-typescript_v4.2.12",
+      "date": "Thu, 02 Nov 2017 16:05:24 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "QZ <qz2017@users.noreply.github.com>",
+            "commit": "2c58095f2f13492887cc1278c9a0cff49af9735b",
+            "comment": "lock the reference version between web build tools projects"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `4.2.3` to `4.2.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.2.4` to `3.2.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.13` to `0.3.14`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.2.11",
       "tag": "@microsoft/gulp-core-build-typescript_v4.2.11",
       "date": "Wed, 01 Nov 2017 21:06:08 GMT",

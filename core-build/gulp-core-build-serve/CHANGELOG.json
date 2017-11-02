@@ -2,6 +2,25 @@
   "name": "@microsoft/gulp-core-build-serve",
   "entries": [
     {
+      "version": "3.1.12",
+      "tag": "@microsoft/gulp-core-build-serve_v3.1.12",
+      "date": "Thu, 02 Nov 2017 16:05:24 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "QZ <qz2017@users.noreply.github.com>",
+            "commit": "2c58095f2f13492887cc1278c9a0cff49af9735b",
+            "comment": "lock the reference version between web build tools projects"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.2.4` to `3.2.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.1.11",
       "tag": "@microsoft/gulp-core-build-serve_v3.1.11",
       "date": "Wed, 01 Nov 2017 21:06:08 GMT",

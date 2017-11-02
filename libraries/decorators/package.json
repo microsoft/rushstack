@@ -10,7 +10,7 @@
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "devDependencies": {
-    "@microsoft/node-library-build": "4.2.4",
+    "@microsoft/node-library-build": "4.2.5",
     "@types/node": "6.0.88",
     "@types/chai": "3.4.34",
     "@types/mocha": "2.2.38",

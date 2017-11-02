@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-mocha
 
-This log was last generated on Wed, 01 Nov 2017 21:06:08 GMT and should not be manually modified.
+This log was last generated on Thu, 02 Nov 2017 16:05:24 GMT and should not be manually modified.
+
+## 3.2.5
+Thu, 02 Nov 2017 16:05:24 GMT
+
+### Patches
+
+- lock the reference version between web build tools projects
 
 ## 3.2.4
 Wed, 01 Nov 2017 21:06:08 GMT
