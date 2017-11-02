@@ -8,18 +8,6 @@ import * as semver from 'semver';
 import Utilities from '@microsoft/rush-lib/lib/utilities/Utilities';
 import * as rushLib from '@microsoft/rush-lib';
 
-import RushWrapper from './RushWrapper';
-
-/**
- * Version 4.0.0 is the first version where the rush CLI implementation is in rush-lib. This version changes the
- *  installation and calling convention.
- */
-const RUSH_TRANSITIONAL_VERSION: string = '4.0.0';
-
-/**
- * lib/rush.js was renamed to start.js just for rush 3.0.20.
- */
-const RUSH_START_JS_VERSION: string = '3.0.20';
 const MAX_INSTALL_ATTEMPTS: number = 3;
 
 export default class RushVersionManager {
@@ -31,8 +19,8 @@ export default class RushVersionManager {
     this._currentPackageVersion = currentPackageVersion;
   }
 
-  public ensureRushVersionInstalled(version: string): RushWrapper {
-    const isLegacyRushVersion: boolean = semver.lt(version, RUSH_TRANSITIONAL_VERSION);
+  public ensureRushVersionInstalled(version: string): () => void {
+    const isLegacyRushVersion: boolean = semver.lt(version, '4.0.0');
     const expectedRushPath: string = path.join(this._rushDirectory, `rush-${version}`);
     const expectedRushInstalledFlagPath: string = path.join(expectedRushPath, 'last-install.flag');
     if (!fsx.existsSync(expectedRushInstalledFlagPath)) {
@@ -53,19 +41,30 @@ export default class RushVersionManager {
       console.log(`Successfully installed Rush version ${version} in ${expectedRushPath}`);
     }
 
-    if (isLegacyRushVersion) {
-      return new RushWrapper(() => {
+    if (semver.lt(version, '3.0.20')) {
+      return () => {
         require(path.join(
           expectedRushPath,
           'node_modules',
           '@microsoft',
           'rush',
           'lib',
-          semver.eq(version, RUSH_START_JS_VERSION) ? 'start' : 'rush'
+          'rush'
         ));
-      });
+      };
+    } else if (semver.lt(version, '4.0.0')) {
+      return () => {
+        require(path.join(
+          expectedRushPath,
+          'node_modules',
+          '@microsoft',
+          'rush',
+          'lib',
+          'start'
+        ));
+      };
     } else {
-      return new RushWrapper(() => {
+      return () => {
         const rushCliEntrypoint: typeof rushLib = require(path.join(
           expectedRushPath,
           'node_modules',
@@ -75,7 +74,7 @@ export default class RushVersionManager {
           'index'
         ));
         rushCliEntrypoint.Rush.launch(this._currentPackageVersion, true);
-      });
+      };
     }
   }
 }

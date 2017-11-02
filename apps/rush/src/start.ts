@@ -12,8 +12,7 @@ import {
 import Utilities from '@microsoft/rush-lib/lib/utilities/Utilities';
 
 import MinimalRushConfiguration from './MinimalRushConfiguration';
-import RushVersionManager from './RushVersionManager';
-import RushWrapper from './RushWrapper';
+import RushEngine from './RushVersionManager';
 
 const RUSH_PURGE_OPTION_NAME: string = 'purge';
 
@@ -27,17 +26,21 @@ if (process.argv[2] === RUSH_PURGE_OPTION_NAME) {
   const configuration: MinimalRushConfiguration | undefined = MinimalRushConfiguration.loadFromDefaultLocation();
   const currentPackageJson: IPackageJson = JsonFile.load(path.join(__dirname, '..', 'package.json'));
 
+  // If we're inside a repo folder, and it's requesting a different version, then use the RushVersionManager to
+  //  install it
   if (configuration && configuration.rushVersion !== currentPackageJson.version) {
-    const versionManager: RushVersionManager = new RushVersionManager(
+    const versionManager: RushEngine = new RushEngine(
       configuration.homeFolder,
       currentPackageJson.version
     );
-    const rushWrapper: RushWrapper = versionManager.ensureRushVersionInstalled(configuration.rushVersion);
-    rushWrapper.invokeRush();
+    const rushWrapper: () => void = versionManager.ensureRushVersionInstalled(configuration.rushVersion);
+    rushWrapper();
   } else {
+    // Otherwise invoke the rush-lib that came with this rush package
+    const isManaged: boolean = !!configuration && configuration.rushVersion === currentPackageJson.version;
     Rush.launch(
       currentPackageJson.version,
-      !!configuration && configuration.rushVersion === currentPackageJson.version
+      isManaged // Rush is "managed" if its version and configuration are dictated by a repo's rush.json
     );
   }
 }
