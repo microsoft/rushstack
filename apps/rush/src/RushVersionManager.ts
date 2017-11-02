@@ -15,6 +15,11 @@ import RushWrapper from './RushWrapper';
  *  installation and calling convention.
  */
 const RUSH_TRANSITIONAL_VERSION: string = '4.0.0';
+
+/**
+ * lib/rush.js was renamed to start.js just for rush 3.0.20.
+ */
+const RUSH_START_JS_VERSION: string = '3.0.20';
 const MAX_INSTALL_ATTEMPTS: number = 3;
 
 export default class RushVersionManager {
@@ -50,7 +55,14 @@ export default class RushVersionManager {
 
     if (isLegacyRushVersion) {
       return new RushWrapper(() => {
-        require(path.join(expectedRushPath, 'node_modules', '@microsoft', 'rush', 'lib', 'rush'));
+        require(path.join(
+          expectedRushPath,
+          'node_modules',
+          '@microsoft',
+          'rush',
+          'lib',
+          semver.eq(version, RUSH_START_JS_VERSION) ? 'start' : 'rush'
+        ));
       });
     } else {
       return new RushWrapper(() => {

@@ -35,6 +35,9 @@ if (process.argv[2] === RUSH_PURGE_OPTION_NAME) {
     const rushWrapper: RushWrapper = versionManager.ensureRushVersionInstalled(configuration.rushVersion);
     rushWrapper.invokeRush();
   } else {
-    Rush.launch(currentPackageJson.version, false);
+    Rush.launch(
+      currentPackageJson.version,
+      !!configuration && configuration.rushVersion === currentPackageJson.version
+    );
   }
 }
