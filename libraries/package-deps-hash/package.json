@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/package-deps-hash",
-  "version": "2.1.0",
+  "version": "2.1.2",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -15,7 +15,7 @@
     "test": "gulp test"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "~4.1.2",
+    "@microsoft/node-library-build": "4.2.5",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "@types/chai": "3.4.34",

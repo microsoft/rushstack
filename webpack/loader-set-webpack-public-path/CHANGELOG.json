@@ -2,6 +2,43 @@
   "name": "@microsoft/loader-set-webpack-public-path",
   "entries": [
     {
+      "version": "3.1.2",
+      "tag": "@microsoft/loader-set-webpack-public-path_v3.1.2",
+      "date": "Thu, 02 Nov 2017 16:05:24 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "QZ <qz2017@users.noreply.github.com>",
+            "commit": "2c58095f2f13492887cc1278c9a0cff49af9735b",
+            "comment": "lock the reference version between web build tools projects"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/set-webpack-public-path-plugin\" from `1.3.1` to `1.3.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.2.4` to `4.2.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.1",
+      "tag": "@microsoft/loader-set-webpack-public-path_v3.1.1",
+      "date": "Tue, 24 Oct 2017 18:17:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/set-webpack-public-path-plugin\" from `~1.3.0` to `~1.3.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `~4.1.6` to `~4.2.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.1.0",
       "tag": "@microsoft/loader-set-webpack-public-path_v3.1.0",
       "date": "Fri, 22 Sep 2017 01:04:02 GMT",

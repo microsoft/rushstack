@@ -40,12 +40,13 @@
     "npmVersion": {
       "type": "string"
     },
+
     "pnpmVersion": {
       "type": "string"
     },
 
-    "rushMinimumVersion": {
-      "description": "The minimum version of the Rush tool that must be installed in order to build this repository.",
+    "rushVersion": {
+      "description": "The version of the Rush tool that will be used to build this repository.",
       "type": "string",
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
     },
@@ -191,5 +192,5 @@
     }
   },
   "additionalProperties": false,
-  "required": [ "rushMinimumVersion", "projects" ]
+  "required": [ "rushVersion", "projects" ]
 }

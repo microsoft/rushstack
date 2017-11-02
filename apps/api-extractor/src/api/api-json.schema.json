@@ -1,0 +1,1057 @@
+{
+  "title": "api-extractor documentation JSON file",
+  "description": "Describes the public API types and documentation for a TypeScript project",
+
+  "definitions": {
+    //=============================================================================================
+    // Markup Elements
+    //=============================================================================================
+
+    //---------------------------------------------------------------------------------------------
+    "markupText": {
+      "description": "A block of plain text, possibly with simple formatting such as bold or italics",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of markup element",
+          "type": "string",
+          "enum": [ "text" ]
+        },
+        "text": {
+          "description": "The text content to display",
+          "type": "string"
+        },
+        "bold": {
+          "description": "Whether the text should be formatted using boldface",
+          "type": "boolean"
+        },
+        "italics": {
+          "description": "Whether the text should be formatted using italics",
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "text" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "markupHighlightedText": {
+      "description": "Source code shown in a fixed-width font, with syntax highlighting",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of markup element",
+          "type": "string",
+          "enum": [ "code" ]
+        },
+        "text": {
+          "description": "The text content to display",
+          "type": "string"
+        },
+        "highlighter": {
+          "description": "The syntax highlighting to be applied to the text",
+          "type": "string",
+          "enum": [ "javascript", "plain" ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "text", "highlighter" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "markupLinkTextElement": {
+      "description": "Represents markup that can be used as the link text for a hyperlink",
+      "type": "object",
+      "oneOf": [
+        { "$ref": "#/definitions/markupText" },
+        { "$ref": "#/definitions/markupHighlightedText" }
+      ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "markupApiLink": {
+      "description": "A hyperlink to an API item",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of markup element",
+          "type": "string",
+          "enum": [ "api-link" ]
+        },
+        "elements": {
+          "description": "The link text",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupLinkTextElement" }
+        },
+        "target": {
+          "description": "The API item that will serve as the hyperlink target",
+          "type": "object",
+          "properties": {
+            "scopeName": {
+              "description": "An optional NPM scope for the package name",
+              "type": "string"
+            },
+            "packageName": {
+              "description": "The name of the NPM package being referenced (must be a nonempty string)",
+              "type": "string",
+              "minLength": 1
+            },
+            "exportName": {
+              "description": "The name of the package export",
+              "type": "string"
+            },
+            "memberName": {
+              "description": "An optional name of a member of the package export",
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [ "scopeName", "packageName", "exportName", "memberName" ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "elements", "target" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "markupWebLink": {
+      "description": "A hyperlink to an internet URL",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of markup element",
+          "type": "string",
+          "enum": [ "web-link" ]
+        },
+        "elements": {
+          "description": "The link text",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupLinkTextElement" }
+        },
+        "targetUrl": {
+          "description": "The internet URL that will serve as the hyperlink target",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "elements", "targetUrl" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "markupParagraph": {
+      "description": "A paragraph separator, similar to the \"<p>\" tag in HTML",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of markup element",
+          "type": "string",
+          "enum": [ "paragraph" ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "markupLineBreak": {
+      "description": "A line break, similar to the \"<br>\" tag in HTML.",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of markup element",
+          "type": "string",
+          "enum": [ "break" ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "markupBasicElement": {
+      "description": "Represents basic text consisting of paragraphs and links (without structures such as headers or tables)",
+      "type": "object",
+      "oneOf": [
+        { "$ref": "#/definitions/markupLinkTextElement" },
+        { "$ref": "#/definitions/markupApiLink" },
+        { "$ref": "#/definitions/markupWebLink" },
+        { "$ref": "#/definitions/markupParagraph" },
+        { "$ref": "#/definitions/markupLineBreak" }
+      ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "markupHeading1": {
+      "description": "A top-level heading",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of markup element",
+          "type": "string",
+          "enum": [ "heading1" ]
+        },
+        "text": {
+          "description": "The heading title",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "text" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "markupHeading2": {
+      "description": "A sub heading",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of markup element",
+          "type": "string",
+          "enum": [ "heading2" ]
+        },
+        "text": {
+          "description": "The heading title",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "text" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "markupCodeBox": {
+      "description": "A box containing source code with syntax highlighting",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of markup element",
+          "type": "string",
+          "enum": [ "code-box" ]
+        },
+        "text": {
+          "description": "The text content to display",
+          "type": "string"
+        },
+        "highlighter": {
+          "description": "The syntax highlighting to be applied to the text",
+          "type": "string",
+          "enum": [ "javascript", "plain" ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "text", "highlighter" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "markupNoteBox": {
+      "description": "A call-out box containing an informational note",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of markup element",
+          "type": "string",
+          "enum": [ "note-box" ]
+        },
+        "text": {
+          "description": "The text content to display",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "text" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "markupTable": {
+      "description": "A table, with an optional header row",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of markup element",
+          "type": "string",
+          "enum": [ "table" ]
+        },
+
+        "header": { "$ref": "#/definitions/markupTableRow" },
+
+        "rows": {
+          "description": "The table rows",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupTableRow" }
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "rows" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "markupStructuredElement": {
+      "description": "Represents structured text that contains headings, tables, and boxes",
+      "type": "object",
+      "oneOf": [
+        { "$ref": "#/definitions/markupBasicElement" },
+        { "$ref": "#/definitions/markupHeading1" },
+        { "$ref": "#/definitions/markupHeading2" },
+        { "$ref": "#/definitions/markupCodeBox" },
+        { "$ref": "#/definitions/markupNoteBox" },
+        { "$ref": "#/definitions/markupTable" }
+      ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "markupTableCell": {
+      "description": "A cell inside an table row element",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of markup element",
+          "type": "string",
+          "enum": [ "table-cell" ]
+        },
+
+        "elements": {
+          "description": "The cell text",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "elements" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "markupTableRow": {
+      "description": "A row inside an table element",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of markup element",
+          "type": "string",
+          "enum": [ "table-row" ]
+        },
+
+        "cells": {
+          "description": "The cells comprising this row, ordered from left to right",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupTableCell" }
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "elements" ]
+    },
+
+    //=============================================================================================
+    // API Items
+    //=============================================================================================
+
+    //---------------------------------------------------------------------------------------------
+    "constructorApiItem": {
+      "description": "A constructor of a TypeScript class",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of documentation element",
+          "type": "string",
+          "enum": [ "constructor" ]
+        },
+        "summary": {
+          "description": "A short description of the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
+        },
+        "signature": {
+          "description": "A text summary of the method definition",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "The list of function parameters",
+          "type": "object",
+          "patternProperties": {
+            "^[a-zA-Z_]+[a-zA-Z_0-9]*$": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The parameter name",
+                  "type": "string"
+                },
+                "description": {
+                  "description": "A description of the parameter",
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/markupBasicElement" }
+                },
+                "isOptional": {
+                  "description": "Whether the parameter is optional",
+                  "type": "boolean"
+                },
+                "isSpread": {
+                  "description": "Whether the parameter has the '...' spread suffix",
+                  "type": "boolean"
+                },
+                "type": {
+                  "description": "The data type of the parameter",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+
+        // Optional properties:
+        "remarks": {
+          "description": "Detailed additional notes regarding the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupStructuredElement" }
+        },
+        "deprecatedMessage": {
+          "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
+        }
+      },
+      "additionalProperties": false,
+      "required": ["summary"]
+    },
+
+    //---------------------------------------------------------------------------------------------
+
+    //---------------------------------------------------------------------------------------------
+    "propertyApiItem": {
+      "description": "A property of a TypeScript class or interface",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of API definition",
+          "type": "string",
+          "enum": [ "property" ]
+        },
+        "signature": {
+          "description": "A text summary of the property definition",
+          "type": "string"
+        },
+        "isOptional": {
+          "description": "For an interface member, whether it is optional",
+          "type": "boolean"
+        },
+        "isReadOnly": {
+          "description": "Whether the property is read-only",
+          "type": "boolean"
+        },
+        "isStatic": {
+          "description": "For a class member, whether it is static",
+          "type": "boolean"
+        },
+        "type": {
+          "description": "The data type of this property",
+          "type": "string"
+        },
+        "isBeta": {
+          "description": "Whether the API property is beta",
+          "type": "boolean"
+        },
+        "summary": {
+          "description": "A short description of the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
+        },
+
+        // Optional properties:
+        "remarks": {
+          "description": "Detailed additional notes regarding the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupStructuredElement" }
+        },
+        "deprecatedMessage": {
+          "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "isOptional", "isReadOnly", "isStatic", "type", "summary", "isBeta" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "moduleVariableApiItem": {
+      "description": "A TypeScript BlockScopedVariable",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of API definition",
+          "type": "string",
+          "enum": [ "module variable" ]
+        },
+        "signature": {
+          "description": "A text summary of the variable definition",
+          "type": "string"
+        },
+        "type": {
+          "description": "The data type of this module variable",
+          "type": "string"
+        },
+        "value": {
+          "description": "The value of this module variable",
+          "type": "string"
+        },
+        "summary": {
+          "description": "A short description of the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
+        },
+        "isBeta": {
+          "description": "Whether the API method is beta",
+          "type": "boolean"
+        },
+
+        // Optional properties:
+        "remarks": {
+          "description": "Detailed additional notes regarding the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupStructuredElement" }
+        },
+        "deprecatedMessage": {
+          "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "type", "value", "summary", "isBeta"]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "methodApiItem": {
+      "description": "A member function of a TypeScript class or interface",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of API definition",
+          "type": "string",
+          "enum": [ "method" ]
+        },
+        "signature": {
+          "description": "A text summary of the method definition",
+          "type": "string"
+        },
+        "accessModifier": {
+          "description": "Whether the function is public, private, or protected",
+          "type": "string",
+          "enum": [ "public", "private", "protected", ""]
+        },
+        "isOptional": {
+          "description": "For an interface member, whether it is optional",
+          "type": "boolean"
+        },
+        "isStatic": {
+          "description": "For a class member, whether it is static",
+          "type": "boolean"
+        },
+        "isBeta": {
+          "description": "Whether the API method is beta",
+          "type": "boolean"
+        },
+        "parameters": {
+          "description": "The list of function parameters",
+          "type": "object",
+          "patternProperties": {
+            "^[a-zA-Z_]+[a-zA-Z_0-9]*$": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The parameter name",
+                  "type": "string"
+                },
+                "description": {
+                  "description": "A description of the parameter",
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/markupBasicElement" }
+                },
+                "isOptional": {
+                  "description": "Whether the parameter is optional",
+                  "type": "boolean"
+                },
+                "isSpread": {
+                  "description": "Whether the parameter has the '...' spread suffix",
+                  "type": "boolean"
+                },
+                "type": {
+                  "description": "The data type of the parameter",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "returnValue": {
+          "description": "Information about the return value of this function",
+          "type": "object",
+          "properties": {
+            "type": {
+              "description": "The data type returned by the function",
+              "type": "string"
+            },
+            "description": {
+              "description": "A description of the return value",
+              "type": "array",
+              "items": { "$ref": "#/definitions/markupBasicElement" }
+            },
+          },
+          "additionalProperties": false,
+          "required": [ "type", "description" ]
+        },
+        "summary": {
+          "description": "A short description of the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
+        },
+
+        // Optional properties:
+        "remarks": {
+          "description": "Detailed additional notes regarding the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupStructuredElement" }
+        },
+        "deprecatedMessage": {
+          "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "isOptional", "isStatic", "parameters", "returnValue", "summary", "isBeta" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "functionApiItem": {
+      "description": "A Typescript function",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of API definition",
+          "type": "string",
+          "enum": [ "function" ]
+        },
+        "signature": {
+          "description": "A text summary of the function definition",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "The list of function parameters",
+          "type": "object",
+          "patternProperties": {
+            "^[a-zA-Z_]+[a-zA-Z_0-9]*$": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The parameter name",
+                  "type": "string"
+                },
+                "description": {
+                  "description": "A description of the parameter",
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/markupBasicElement" }
+                },
+                "isOptional": {
+                  "description": "Whether the parameter is optional",
+                  "type": "boolean"
+                },
+                "isSpread": {
+                  "description": "Whether the parameter has the '...' spread suffix",
+                  "type": "boolean"
+                },
+                "type": {
+                  "description": "The data type of the parameter",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "returnValue": {
+          "description": "Information about the return value of this function",
+          "type": "object",
+          "properties": {
+            "type": {
+              "description": "The data type returned by the function",
+              "type": "string"
+            },
+            "description": {
+              "description": "A description of the return value",
+              "type": "array",
+              "items": { "$ref": "#/definitions/markupBasicElement" }
+            }
+          },
+          "additionalProperties": false,
+          "required": [ "type", "description" ]
+        },
+        "summary": {
+          "description": "A short description of the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
+        },
+        "isBeta": {
+          "description": "Whether the API method is beta",
+          "type": "boolean"
+        },
+
+        // Optional properties:
+        "remarks": {
+          "description": "Detailed additional notes regarding the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupStructuredElement" }
+        },
+        "deprecatedMessage": {
+          "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "parameters", "returnValue", "summary", "isBeta" ]
+    },
+
+
+    //---------------------------------------------------------------------------------------------
+    "classApiItem": {
+      "description": "A TypeScript class definition",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of API definition",
+          "type": "string",
+          "enum": [ "class" ]
+        },
+        "summary": {
+          "description": "A short description of the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
+        },
+        "members": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-zA-Z_]+[a-zA-Z_0-9]*$": {
+              "oneOf": [
+                { "$ref": "#/definitions/propertyApiItem" },
+                { "$ref": "#/definitions/constructorApiItem" },
+                { "$ref": "#/definitions/methodApiItem" }
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+
+        "implements": {
+          "description": "Interfaces implemented by this class",
+          "type": "string"
+        },
+        "extends": {
+          "description": "The base class for this class",
+          "type": "string"
+        },
+        "typeParameters": {
+          "description": "Generic type parameters for this class",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "isBeta": {
+          "description": "Whether the API class is beta",
+          "type": "boolean"
+        },
+
+        // Optional properties:
+        "remarks": {
+          "description": "Detailed additional notes regarding the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupStructuredElement" }
+        },
+        "deprecatedMessage": {
+          "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "summary", "isBeta" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "enumApiItem": {
+      "description": "A TypeScript enum definition",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of API definition",
+          "type": "string",
+          "enum": [ "enum" ]
+        },
+        "summary": {
+          "description": "A short description of the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
+        },
+        "isBeta": {
+          "description": "Whether the API enum is beta",
+          "type": "boolean"
+        },
+        "values": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-zA-Z_]+[a-zA-Z_0-9]*$": {
+              "$ref": "#/definitions/enumMemberApiItem"
+            }
+          },
+          "additionalProperties": false
+        },
+
+        // Optional properties:
+        "remarks": {
+          "description": "Detailed additional notes regarding the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupStructuredElement" }
+        },
+        "deprecatedMessage": {
+          "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "summary", "values", "isBeta" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "enumMemberApiItem": {
+      "description": "A TypeScript enum member definition",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of API definition",
+          "type": "string",
+          "enum": [ "enum value" ]
+        },
+        "summary": {
+          "description": "A short description of the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
+        },
+        "isBeta": {
+          "description": "Whether the API enum member is beta",
+          "type": "boolean"
+        },
+        "value": {
+          "description": "The value of the enum member. This string may be a number, a string literal (including quotation marks), or an empty string (e.g. if the number is an automatically assigned increment)",
+          "type": "string"
+        },
+
+        // Optional properties:
+        "remarks": {
+          "description": "Detailed additional notes regarding the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupStructuredElement" }
+        },
+        "deprecatedMessage": {
+          "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "summary", "isBeta" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "interfaceApiItem": {
+      "description": "A TypeScript interface definition",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of API definition",
+          "type": "string",
+          "enum": [ "interface" ]
+        },
+        "summary": {
+          "description": "A short description of the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
+        },
+        "members": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-zA-Z_]+[a-zA-Z_0-9]*$": {
+              "oneOf": [
+                { "$ref": "#/definitions/propertyApiItem" },
+                { "$ref": "#/definitions/methodApiItem" }
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+
+        "implements": {
+          "description": "Interfaces implemented by this interface",
+          "type": "string"
+        },
+        "extends": {
+          "description": "The base interface for this interface",
+          "type": "string"
+        },
+        "typeParameters": {
+          "description": "Generic type parameters for this interface",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "isBeta": {
+          "description": "Whether the API interface is beta",
+          "type": "boolean"
+        },
+
+        // Optional properties:
+        "remarks": {
+          "description": "Detailed additional notes regarding the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupStructuredElement" }
+        },
+        "deprecatedMessage": {
+          "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "summary", "isBeta" ]
+    },
+
+  //---------------------------------------------------------------------------------------------
+  "namespaceApiItem": {
+      "description": "A TypeScript namespace definition",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of API definition",
+          "type": "string",
+          "enum": [ "namespace" ]
+        },
+        "summary": {
+          "description": "A short description of the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
+        },
+        "exports": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-zA-Z_]+[a-zA-Z_0-9]*$": {
+              "oneOf": [
+                // Conservative mode
+                { "$ref": "#/definitions/moduleVariableApiItem" },
+
+                // Permissive mode
+                { "$ref": "#/definitions/classApiItem" },
+                { "$ref": "#/definitions/interfaceApiItem" },
+                { "$ref": "#/definitions/namespaceApiItem" },
+                { "$ref": "#/definitions/enumApiItem" },
+                { "$ref": "#/definitions/functionApiItem" }
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "isBeta": {
+          "description": "Whether the API interface is beta",
+          "type": "boolean"
+        },
+
+        // Optional properties:
+        "remarks": {
+          "description": "Detailed additional notes regarding the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupStructuredElement" }
+        },
+        "deprecatedMessage": {
+          "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "exports", "summary", "isBeta" ]
+    }
+  },
+
+  //===============================================================================================
+  // Package
+  //===============================================================================================
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+    "kind": {
+      "description": "The kind of API definition",
+      "type": "string",
+      "enum": [ "package" ]
+    },
+    "name": {
+      "description": "The name of the NPM package, including the optional scope.  Example: \"@microsoft/example-package\"",
+      "type": "string"
+    },
+    "summary": {
+      "description": "A short description of the item",
+      "type": "array",
+      "items": { "$ref": "#/definitions/markupBasicElement" }
+    },
+    "remarks": {
+      "description": "Detailed additional notes regarding the item",
+      "type": "array",
+      "items": { "$ref": "#/definitions/markupStructuredElement" }
+    },
+    "exports": {
+      "description": "The exported definitions for this API package",
+      "type": "object",
+
+      "patternProperties": {
+         "^[a-zA-Z_]+[a-zA-Z_0-9]*$": {
+           "oneOf": [
+             { "$ref": "#/definitions/classApiItem" },
+             { "$ref": "#/definitions/interfaceApiItem" },
+             { "$ref": "#/definitions/namespaceApiItem" },
+             { "$ref": "#/definitions/enumApiItem" },
+             { "$ref": "#/definitions/functionApiItem" }
+           ]
+         }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "required": [ "kind", "name", "exports" ]
+}

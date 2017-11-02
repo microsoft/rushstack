@@ -12,12 +12,13 @@
   },
   "devDependencies": {
     "@types/chai": "3.4.34",
-    "@types/mocha": "2.2.38",
-    "chai": "~3.5.0"
+    "chai": "~3.5.0",
+    "@types/jest": "~20.0.4",
+    "@types/node": "6.0.88"
   },
   "dependencies": {
-    "@microsoft/load-themed-styles": "~1.7.5",
-    "@microsoft/web-library-build": "4.1.2",
+    "@microsoft/load-themed-styles": "1.7.7",
+    "@microsoft/web-library-build": "4.2.6",
     "gulp": "~3.9.1"
   }
 }

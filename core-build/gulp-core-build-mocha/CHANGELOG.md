@@ -1,6 +1,64 @@
 # Change Log - @microsoft/gulp-core-build-mocha
 
-This log was last generated on Thu, 05 Oct 2017 01:05:02 GMT and should not be manually modified.
+This log was last generated on Thu, 02 Nov 2017 16:05:24 GMT and should not be manually modified.
+
+## 3.2.5
+Thu, 02 Nov 2017 16:05:24 GMT
+
+### Patches
+
+- lock the reference version between web build tools projects
+
+## 3.2.4
+Wed, 01 Nov 2017 21:06:08 GMT
+
+### Patches
+
+- Upgrade cyclic dependencies
+
+## 3.2.3
+Tue, 31 Oct 2017 21:04:04 GMT
+
+*Changes not tracked*
+
+## 3.2.2
+Tue, 31 Oct 2017 16:04:55 GMT
+
+*Changes not tracked*
+
+## 3.2.1
+Wed, 25 Oct 2017 20:03:59 GMT
+
+*Changes not tracked*
+
+## 3.2.0
+Tue, 24 Oct 2017 18:17:12 GMT
+
+### Minor changes
+
+- Turn off Mocha task when Jest task is enabled
+
+## 3.1.6
+Mon, 23 Oct 2017 21:53:12 GMT
+
+### Patches
+
+- Updated cyclic dependencies
+
+## 3.1.5
+Fri, 20 Oct 2017 19:57:12 GMT
+
+*Changes not tracked*
+
+## 3.1.4
+Fri, 20 Oct 2017 01:52:54 GMT
+
+*Changes not tracked*
+
+## 3.1.3
+Fri, 20 Oct 2017 01:04:44 GMT
+
+*Changes not tracked*
 
 ## 3.1.2
 Thu, 05 Oct 2017 01:05:02 GMT

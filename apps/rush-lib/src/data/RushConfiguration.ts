@@ -6,7 +6,7 @@ import * as fsx from 'fs-extra';
 import * as semver from 'semver';
 import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
 
-import rushVersion from '../rushVersion';
+import Rush from '../Rush';
 import RushConfigurationProject, { IRushConfigurationProjectJson } from './RushConfigurationProject';
 import { PinnedVersionsConfiguration } from './PinnedVersionsConfiguration';
 import Utilities from '../utilities/Utilities';
@@ -14,6 +14,8 @@ import { RushConstants } from '../RushConstants';
 import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
 import EventHooks from './EventHooks';
 import { VersionPolicyConfiguration } from './VersionPolicyConfiguration';
+
+const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 
 /**
  * A list of known config filenames that are expected to appear in the "./common/config/rush" folder.
@@ -24,7 +26,8 @@ const knownRushConfigFilenames: string[] = [
   RushConstants.pinnedVersionsFilename,
   RushConstants.browserApprovedPackagesFilename,
   RushConstants.nonbrowserApprovedPackagesFilename,
-  RushConstants.versionPoliciesFileName
+  RushConstants.versionPoliciesFileName,
+  RushConstants.commandLineFilename
 ];
 
 /**
@@ -45,7 +48,7 @@ export interface IRushGitPolicyJson {
 
 /**
  * Part of IRushConfigurationJson.
- * @alpha
+ * @beta
  */
 export interface IEventHooksJson {
   /**
@@ -72,7 +75,7 @@ export interface IRushConfigurationJson {
   $schema: string;
   npmVersion?: string;
   pnpmVersion?: string;
-  rushMinimumVersion: string;
+  rushVersion: string;
   repository?: IRushRepositoryJson;
   nodeSupportedVersionRange?: string;
   projectFolderMinDepth?: number;
@@ -150,14 +153,18 @@ export default class RushConfiguration {
     const rushConfigurationJson: IRushConfigurationJson = JsonFile.load(rushJsonFilename);
 
     // Check the Rush version *before* we validate the schema, since if the version is outdated
-    // then the schema may have changed.
-    const rushMinimumVersion: string = rushConfigurationJson.rushMinimumVersion;
+    // then the schema may have changed. This should no longer be a problem after Rush 4.0 and the C2R wrapper,
+    // but we'll validate anyway.
+    const expectedRushVersion: string = rushConfigurationJson.rushVersion;
     // If the version is missing or malformed, fall through and let the schema handle it.
-    if (rushMinimumVersion && semver.valid(rushMinimumVersion)) {
-      if (semver.lt(rushVersion, rushMinimumVersion)) {
-        throw new Error(`Your rush tool is version ${rushVersion}, but rush.json`
-          + ` requires version ${rushConfigurationJson.rushMinimumVersion} or newer.  To upgrade,`
-          + ` run "npm install @microsoft/rush -g".`);
+    if (expectedRushVersion && semver.valid(expectedRushVersion)) {
+      if (semver.lt(Rush.version, expectedRushVersion)) {
+        throw new Error(`Your rush tool is version ${Rush.version}, but rush.json ` +
+          `requires version ${rushConfigurationJson.rushVersion}. To upgrade, ` +
+          `run "npm install @microsoft/rush -g".`);
+      } else if (semver.lt(expectedRushVersion, MINIMUM_SUPPORTED_RUSH_JSON_VERSION)) {
+        throw new Error(`rush.json is version ${expectedRushVersion}, which is too old for this tool. ` +
+          `The minimum supported version is ${MINIMUM_SUPPORTED_RUSH_JSON_VERSION}.`);
       }
     }
 
@@ -167,6 +174,18 @@ export default class RushConfiguration {
   }
 
   public static loadFromDefaultLocation(): RushConfiguration {
+    const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation();
+    if (rushJsonLocation) {
+      return RushConfiguration.loadFromConfigurationFile(rushJsonLocation);
+    } else {
+      throw new Error('Unable to find rush.json configuration file');
+    }
+  }
+
+  /**
+   * Find the rush.json location and return the path, or undefined if a rush.json can't be found.
+   */
+  public static tryFindRushJsonLocation(verbose: boolean = true): string | undefined {
     let currentFolder: string = process.cwd();
 
     // Look upwards at parent folders until we find a folder containing rush.json
@@ -174,20 +193,40 @@ export default class RushConfiguration {
       const rushJsonFilename: string = path.join(currentFolder, 'rush.json');
 
       if (fsx.existsSync(rushJsonFilename)) {
-        if (i > 0) {
+        if (i > 0 && verbose) {
           console.log('Found configuration in ' + rushJsonFilename);
         }
-        console.log('');
-        return RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
+
+        if (verbose) {
+          console.log('');
+        }
+
+        return rushJsonFilename;
       }
 
       const parentFolder: string = path.dirname(currentFolder);
       if (parentFolder === currentFolder) {
         break;
       }
+
       currentFolder = parentFolder;
     }
-    throw new Error('Unable to find rush.json configuration file');
+
+    return undefined;
+  }
+
+  /**
+   * Get the user's home directory. On windows this looks something like "C:\users\username\" and on UNIX
+   * this looks something like "/usr/username/"
+   */
+  public static getHomeDirectory(): string {
+    const unresolvedUserFolder: string = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
+    const homeFolder: string = path.resolve(unresolvedUserFolder);
+    if (!fsx.existsSync(homeFolder)) {
+      throw new Error('Unable to determine the current user\'s home directory');
+    }
+
+    return homeFolder;
   }
 
   /**
@@ -457,7 +496,7 @@ export default class RushConfiguration {
 
   /**
    * Indicates whether telemetry collection is enabled for Rush runs.
-   * @alpha
+   * @beta
    */
   public get telemetryEnabled(): boolean {
     return this._telemetryEnabled;
@@ -482,7 +521,7 @@ export default class RushConfiguration {
 
   /**
    * The rush hooks. It allows cusomized scripts to run at the specified point.
-   * @alpha
+   * @beta
    */
   public get eventHooks(): EventHooks {
     return this._eventHooks;
@@ -538,7 +577,7 @@ export default class RushConfiguration {
   }
 
   /**
-   * @alpha
+   * @beta
    */
   public get versionPolicyConfiguration(): VersionPolicyConfiguration {
     return this._versionPolicyConfiguration;
@@ -572,12 +611,7 @@ export default class RushConfiguration {
     this._packageManagerTmpFolder = path.resolve(path.join(this._commonTempFolder, 'packages-tmp'));
 
     this._changesFolder = path.join(this._commonFolder, RushConstants.changeFilesFolderName);
-
-    const unresolvedUserFolder: string = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
-    this._homeFolder = path.resolve(unresolvedUserFolder);
-    if (!fsx.existsSync(this._homeFolder)) {
-      throw new Error('Unable to determine the current user\'s home directory');
-    }
+    this._homeFolder = RushConfiguration.getHomeDirectory();
 
     this._rushLinkJsonFilename = path.join(this._commonTempFolder, 'rush-link.json');
 
@@ -605,7 +639,7 @@ export default class RushConfiguration {
       throw new Error(`Neither "npmVersion" nor "pnpmVersion" was defined in the rush configuration.`);
     }
 
-    RushConfiguration._validateCommonRushConfigFolder(this._commonRushConfigFolder);
+    RushConfiguration._validateCommonRushConfigFolder(this._commonRushConfigFolder, this.packageManager);
 
     this._projectFolderMinDepth = rushConfigurationJson.projectFolderMinDepth !== undefined
       ? rushConfigurationJson.projectFolderMinDepth : 1;
@@ -647,8 +681,8 @@ export default class RushConfiguration {
       this._eventHooks = new EventHooks(rushConfigurationJson.eventHooks);
     }
 
-    const versionPolicyConfigFile: string = path.join(this._commonRushConfigFolder,
-      RushConstants.versionPoliciesFileName);
+    const versionPolicyConfigFile: string =
+      path.join(this._commonRushConfigFolder, RushConstants.versionPoliciesFileName);
     this._versionPolicyConfiguration = new VersionPolicyConfiguration(versionPolicyConfigFile);
 
     this._projects = [];

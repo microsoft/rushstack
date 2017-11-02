@@ -10,7 +10,7 @@ import { Event, default as EventHooks } from '../EventHooks';
 
 describe('EventHooks', () => {
   it('loads a post build hook from rush.json', () => {
-    const rushFilename: string = path.resolve(__dirname, 'repo', 'rush.json');
+    const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-npm.json');
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
     assert.deepEqual(rushConfiguration.eventHooks.get(Event.postRushBuild), ['do something'],
       'Failed to get the correct post rush build hook');
