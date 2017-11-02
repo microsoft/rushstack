@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-webpack",
+      "comment": "lock the reference version between web build tools projects",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-webpack",
+  "email": "qz2017@users.noreply.github.com"
+}

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/package-deps-hash",
+      "comment": "lock the reference version between web build tools projects",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/package-deps-hash",
+  "email": "qz2017@users.noreply.github.com"
+}
