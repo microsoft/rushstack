@@ -31,13 +31,13 @@ export class CustomCommandFactory {
       summary: '(EXPERIMENTAL) Build all projects that haven\'t been built, or have changed since they were last '
         + 'built.',
       documentation: documentationForBuild
-    }));
+    }, true));
 
     customActions.set('rebuild', new CustomRushAction(parser, {
       actionVerb: 'rebuild',
       summary: 'Clean and rebuild the entire set of projects',
       documentation: documentationForBuild
-    }));
+    }, true));
 
     // Register each custom command
     commandLineConfig.commands.forEach((command: ICustomCommand) => {
@@ -49,7 +49,7 @@ export class CustomCommandFactory {
         summary: command.summary,
         documentation: command.documentation || command.summary
       },
-      command.parallelized !== false));
+      command.parallelized));
     });
 
     // Associate each custom option to a command

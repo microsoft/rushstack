@@ -15,7 +15,7 @@ export interface ICustomCommand {
   name: string;
   summary: string;
   documentation: string | undefined;
-  parallelized: boolean | undefined;
+  parallelized: boolean;
 }
 
 export interface ICustomEnumValue {

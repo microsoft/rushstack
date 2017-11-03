@@ -42,7 +42,7 @@ export class CustomRushAction extends BaseRushAction {
 
   constructor(private _parser: RushCommandLineParser,
     options: ICommandLineActionOptions,
-    private _parallelized: boolean = true) {
+    private _parallelized: boolean = false) {
 
     super(options);
   }
