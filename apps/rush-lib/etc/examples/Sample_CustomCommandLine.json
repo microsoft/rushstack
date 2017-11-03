@@ -13,7 +13,7 @@
       "name": "check-copyright",
       "summary": "Ensure that all files have a copyright header",
       "documentation": "Ensures that all TS files have a copyright header",
-      "parallelized": false
+      "parallelized": true
     }
   ],
 
