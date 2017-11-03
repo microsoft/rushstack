@@ -162,11 +162,11 @@ export default class ProjectBuildTask implements ITaskDefinition {
   private _getScriptToRun(): string {
     let script: string | undefined = undefined;
     if (this._isBuildCommand()) {
-      script = this._getScriptCommand('test') || this._getScriptCommand('build');
+      script = this._getScriptCommand('build');
 
       if (script === undefined) {
         // tslint:disable-next-line:max-line-length
-        throw new Error(`The project [${this._rushProject.packageName}] does not define a 'test' or 'build' command in the 'scripts' section of its package.json`);
+        throw new Error(`The project [${this._rushProject.packageName}] does not define a 'build' command in the 'scripts' section of its package.json`);
       }
 
     } else {
