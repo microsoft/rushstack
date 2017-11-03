@@ -19,7 +19,7 @@
     "--profile": {
       "optionType": "enum",
       "description": "Changes the build profile, affecting the build output",
-      "supportedCommands": [ "build", "rebuild" ],
+      "associatedCommands": [ "build", "rebuild" ],
       "enumValues": [
         {
           "name": "vso",
@@ -35,7 +35,7 @@
     "--color": {
       "optionType": "enum",
       "description": "Enable or disable colors in the build log, defaults to 'true'",
-      "supportedCommands": [ "build", "rebuild" ],
+      "associatedCommands": [ "build", "rebuild" ],
       "defaultValue": "true",
       "enumValues": [
         {
@@ -52,14 +52,14 @@
     "--ship": {
       "optionType": "flag",
       "description": "Perform a production build, including minification and localization steps",
-      "supportedCommands": [ "build", "rebuild" ],
+      "associatedCommands": [ "build", "rebuild" ],
       "shortName": "-s"
     },
 
     "--minimal": {
       "optionType": "flag",
       "description": "Perform a fast build, which disables certain tasks such as unit tests and linting",
-      "supportedCommands": [ "build", "rebuild" ],
+      "associatedCommands": [ "build", "rebuild" ],
       "shortName": "-m"
     }
   }
