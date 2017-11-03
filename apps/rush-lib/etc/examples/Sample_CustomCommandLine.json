@@ -7,11 +7,13 @@
 // see the documentation at https://aka.ms/rush
 
 {
+  "$schema": "https://dev.office.com/json-schemas/rush/command-line.schema.json",
   "customCommands": [
     {
       "name": "check-copyright",
       "summary": "Ensure that all files have a copyright header",
-      "documentation": "Ensures that all TS files have a copyright header"
+      "documentation": "Ensures that all TS files have a copyright header",
+      "parallelized": false
     }
   ],
 
@@ -52,7 +54,7 @@
     "--ship": {
       "optionType": "flag",
       "description": "Perform a production build, including minification and localization steps",
-      "associatedCommands": [ "build", "rebuild" ],
+      "associatedCommands": [ "build", "rebuild", "check-copyright" ],
       "shortName": "-s"
     },
 
