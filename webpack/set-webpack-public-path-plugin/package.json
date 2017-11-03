@@ -7,9 +7,7 @@
   "license": "MIT",
   "repository": "github:microsoft/web-build-tools",
   "scripts": {
-    "build": "gulp",
-    "clean": "gulp clean",
-    "test": "gulp test"
+    "build": "gulp test --clean"
   },
   "dependencies": {
     "uglify-js": "~3.0.28",

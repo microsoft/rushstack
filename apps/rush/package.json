@@ -19,9 +19,7 @@
   },
   "homepage": "http://aka.ms/rush",
   "scripts": {
-    "build": "gulp",
-    "clean": "gulp clean",
-    "test": "gulp test"
+    "build": "gulp test --clean"
   },
   "bin": {
     "rush": "./bin/rush"

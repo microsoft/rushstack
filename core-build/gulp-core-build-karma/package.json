@@ -10,9 +10,7 @@
     "url": "https://github.com/microsoft/web-build-tools"
   },
   "scripts": {
-    "build": "gulp",
-    "clean": "gulp clean",
-    "test": "gulp"
+    "build": "gulp --clean"
   },
   "dependencies": {
     "@microsoft/gulp-core-build": "3.2.1",

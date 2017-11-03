@@ -10,9 +10,7 @@
     "url": "https://github.com/microsoft/web-build-tools"
   },
   "scripts": {
-    "build": "gulp",
-    "clean": "gulp clean",
-    "test": "gulp test"
+    "build": "gulp test --clean"
   },
   "devDependencies": {
     "@microsoft/node-library-build": "~4.2.1",

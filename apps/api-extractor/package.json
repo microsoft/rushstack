@@ -25,9 +25,7 @@
   },
   "license": "MIT",
   "scripts": {
-    "build": "gulp",
-    "clean": "gulp clean",
-    "test": "gulp test"
+    "build": "gulp test --clean"
   },
   "dependencies": {
     "@microsoft/node-core-library": "~0.3.10",

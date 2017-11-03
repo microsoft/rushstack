@@ -6,9 +6,7 @@
   "module": "lib-es6/test.js",
   "private": true,
   "scripts": {
-    "build": "gulp",
-    "clean": "gulp clean",
-    "test": "gulp"
+    "build": "gulp --clean"
   },
   "devDependencies": {
     "@types/chai": "3.4.34",

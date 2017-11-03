@@ -9,9 +9,7 @@
   "homepage": "http://aka.ms/extractor",
   "license": "MIT",
   "scripts": {
-    "build": "gulp",
-    "clean": "gulp clean",
-    "test": "gulp test"
+    "build": "gulp test --clean"
   },
   "bin": {
     "api-documenter": "./bin/api-documenter"
