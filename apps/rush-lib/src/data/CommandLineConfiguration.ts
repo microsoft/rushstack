@@ -66,7 +66,7 @@ export class CommandLineConfiguration {
 
   private static getSchema(): JsonSchema {
     if (!CommandLineConfiguration._schema) {
-      const schemaFilename: string = path.join(__dirname, 'command-line-configuration.schema.json');
+      const schemaFilename: string = path.join(__dirname, '../schemas/command-line-configuration.schema.json');
       CommandLineConfiguration._schema = JsonSchema.fromFile(schemaFilename);
     }
     return CommandLineConfiguration._schema;
