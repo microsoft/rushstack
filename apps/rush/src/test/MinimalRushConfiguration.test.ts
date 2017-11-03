@@ -5,7 +5,7 @@ import * as sinon from 'sinon';
 import * as path from 'path';
 import { assert } from 'chai';
 
-import MinimalRushConfiguration from '../MinimalRushConfiguration';
+import { MinimalRushConfiguration } from '../MinimalRushConfiguration';
 
 describe('MinimalRushConfiguration', () => {
   let sandbox: sinon.SinonSandbox;
