@@ -1,3 +1,6 @@
+// @internal
+export declare function _isJestEnabled(rootFolder: string): boolean;
+
 // @public
 export declare function addSuppression(suppression: string | RegExp): void;
 
@@ -100,7 +103,7 @@ class GulpTask<TTaskConfig> implements IExecutable {
   readJSONSync(localPath: string): Object | undefined;
   replaceConfig(taskConfig: TTaskConfig): void;
   resolvePath(localPath: string): string;
-  schema: Object | undefined;
+  readonly schema: Object | undefined;
   setConfig(taskConfig: Partial<TTaskConfig>): void;
   taskConfig: TTaskConfig;
 }
@@ -115,6 +118,7 @@ interface IBuildConfig {
   distFolder: string;
   gulp: gulp.Gulp;
   isRedundantBuild?: boolean;
+  jestEnabled?: boolean;
   libAMDFolder?: string;
   libES6Folder?: string;
   libFolder: string;
@@ -170,6 +174,19 @@ interface IExecutable {
   onRegister?: () => void;
 }
 
+// @public (undocumented)
+interface IFixupSettingsOptions {
+  // (undocumented)
+  mustBeCommonJsOrEsnext: boolean;
+}
+
+// @public
+interface IJestConfig {
+  configFilePath?: string;
+  coverage?: boolean;
+  isEnabled?: boolean;
+}
+
 // @public
 export declare function initialize(gulp: typeof Gulp): void;
 
@@ -192,6 +209,16 @@ interface IWebpackTaskConfig {
   printStats?: boolean;
   suppressWarnings?: (string | RegExp)[];
   webpack?: typeof Webpack;
+}
+
+// @public
+class JestTask extends GulpTask<IJestConfig> {
+  constructor();
+  // (undocumented)
+  executeTask(gulp: typeof Gulp, completeCallback: (error?: string | Error) => void): void;
+  // (undocumented)
+  isEnabled(buildConfig: IBuildConfig): boolean;
+  loadSchema(): Object;
 }
 
 // @public
@@ -238,6 +265,7 @@ enum TestResultState {
 
 // @public
 class TypeScriptConfiguration {
+  static fixupSettings(compilerOptions: ts.Settings, logWarning: (msg: string) => void, options?: Partial<IFixupSettingsOptions>): void;
   static getGulpTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<ts.Settings>;
   static getTsConfigFile(config: IBuildConfig): ITsConfigFile<ts.Settings>;
   static getTypescriptCompiler(): any;
@@ -282,7 +310,7 @@ class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConfig & TE
   // (undocumented)
   loadSchema(): Object;
   // (undocumented)
-  resources: IWebpackResources;
+  readonly resources: IWebpackResources;
 }
 
 // WARNING: Unsupported export: preCopy
@@ -298,6 +326,7 @@ class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConfig & TE
 // WARNING: Unsupported export: cleanFlag
 // WARNING: Unsupported export: clean
 // WARNING: Unsupported export: copyStaticAssets
+// WARNING: Unsupported export: jest
 // WARNING: Unsupported export: apiExtractor
 // WARNING: Unsupported export: typescript
 // WARNING: Unsupported export: tslint

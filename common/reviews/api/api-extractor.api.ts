@@ -1,81 +1,10 @@
 // @public
-class ApiFileGenerator extends AstItemVisitor {
-  // WARNING: The type "IndentedWriter" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected _indentedWriter: IndentedWriter;
-  public static areEquivalentApiFileContents(actualFileContent: string, expectedFileContent: string): boolean;
-  // (undocumented)
-  public generateApiFileContent(extractor: Extractor): string;
-  // WARNING: The type "AstEnum" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstEnum(astEnum: AstEnum): void;
-  // WARNING: The type "AstEnumValue" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstEnumValue(astEnumValue: AstEnumValue): void;
-  // WARNING: The type "AstFunction" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstFunction(astFunction: AstFunction): void;
-  // WARNING: The type "AstMember" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstMember(astMember: AstMember): void;
-  // WARNING: The type "AstModuleVariable" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstModuleVariable(astModuleVariable: AstModuleVariable): void;
-  // WARNING: The type "AstNamespace" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstNamespace(astNamespace: AstNamespace): void;
-  // WARNING: The type "AstPackage" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstPackage(astPackage: AstPackage): void;
-  // WARNING: The type "AstStructuredType" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstStructuredType(astStructuredType: AstStructuredType): void;
-  public writeApiFile(reportFilename: string, extractor: Extractor): void;
+class ApiJsonFile {
+  public static jsonSchema: JsonSchema;
+  public static loadFromFile(apiJsonFilePath: string): IApiPackage;
 }
 
-// @public
-class ApiJsonGenerator extends AstItemVisitor {
-  // (undocumented)
-  protected jsonOutput: Object;
-  public static readonly jsonSchema: JsonSchema;
-  // WARNING: The type "AstItem" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visit(astItem: AstItem, refObject?: Object): void;
-  // WARNING: The type "AstEnum" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstEnum(astEnum: AstEnum, refObject?: Object): void;
-  // WARNING: The type "AstEnumValue" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstEnumValue(astEnumValue: AstEnumValue, refObject?: Object): void;
-  // WARNING: The type "AstFunction" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstFunction(astFunction: AstFunction, refObject?: Object): void;
-  // WARNING: The type "AstMember" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstMember(astMember: AstMember, refObject?: Object): void;
-  // WARNING: The type "AstMethod" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstMethod(astMethod: AstMethod, refObject?: Object): void;
-  // WARNING: The type "AstModuleVariable" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstModuleVariable(astModuleVariable: AstModuleVariable, refObject?: Object): void;
-  // WARNING: The type "AstNamespace" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstNamespace(astNamespace: AstNamespace, refObject?: Object): void;
-  // WARNING: The type "AstPackage" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstPackage(astPackage: AstPackage, refObject?: Object): void;
-  // WARNING: The type "AstProperty" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstProperty(astProperty: AstProperty, refObject?: Object): void;
-  // WARNING: The type "AstStructuredType" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected visitAstStructuredType(astStructuredType: AstStructuredType, refObject?: Object): void;
-  // (undocumented)
-  public writeJsonFile(reportFilename: string, extractor: Extractor): void;
-}
-
-// @public
+// @beta
 class ExternalApiHelper {
   // (undocumented)
   public static generateApiJson(rootDir: string, libFolder: string, externalPackageFilePath: string): void;
@@ -83,36 +12,27 @@ class ExternalApiHelper {
 
 // @public
 class Extractor {
-  constructor(options: IExtractorOptions);
-  public analyze(options: IExtractorAnalyzeOptions): void;
-  public static defaultErrorHandler(message: string, fileName: string, lineNumber: number): void;
-  // WARNING: The type "DocItemLoader" needs to be exported by the package (e.g. added to index.ts)
-  public docItemLoader: DocItemLoader;
-  // (undocumented)
-  public errorHandler: ApiErrorHandler;
-  public loadExternalPackages(externalJsonCollectionPath: string): void;
-  // WARNING: The type "AstPackage" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  public package: AstPackage;
-  public readonly packageFolder: string;
-  // (undocumented)
-  public packageJsonLookup: PackageJsonLookup;
-  public reportError(message: string, sourceFile: ts.SourceFile, start: number): void;
-  // (undocumented)
-  public typeChecker: ts.TypeChecker;
+  public constructor(config: IExtractorConfig, options?: IExtractorOptions);
+  public analyzeProject(options?: IAnalyzeProjectOptions): void;
+  public static jsonSchema: JsonSchema;
+}
+
+// @public
+interface IAnalyzeProjectOptions {
+  projectConfig?: IExtractorProjectConfig;
 }
 
 // @alpha
 interface IApiBaseDefinition {
   // (undocumented)
-  deprecatedMessage?: IDocElement[];
+  deprecatedMessage?: MarkupBasicElement[];
   // (undocumented)
   isBeta: boolean;
   kind: string;
   // (undocumented)
-  remarks?: IDocElement[];
+  remarks: MarkupStructuredElement[];
   // (undocumented)
-  summary: IDocElement[];
+  summary: MarkupBasicElement[];
 }
 
 // @alpha
@@ -128,6 +48,7 @@ interface IApiClass extends IApiBaseDefinition {
 interface IApiConstructor extends IApiBaseDefinition {
   kind: 'constructor';
   parameters: IApiNameMap<IApiParameter>;
+  signature: string;
 }
 
 // @alpha
@@ -149,6 +70,7 @@ interface IApiFunction extends IApiBaseDefinition {
   kind: 'function';
   parameters: IApiNameMap<IApiParameter>;
   returnValue: IApiReturnValue;
+  signature: string;
 }
 
 // @alpha
@@ -186,22 +108,28 @@ interface IApiNameMap<T> {
 }
 
 // @alpha
+interface IApiNamespace extends IApiBaseDefinition {
+  exports: IApiNameMap<ApiItem>;
+  kind: 'namespace';
+}
+
+// @alpha
 interface IApiPackage {
   // (undocumented)
-  deprecatedMessage?: IDocElement[];
+  deprecatedMessage?: MarkupBasicElement[];
   exports: IApiNameMap<ApiItem>;
-  isBeta?: boolean;
+  isBeta: boolean;
   kind: 'package';
   name: string;
   // (undocumented)
-  remarks?: IDocElement[];
+  remarks: MarkupStructuredElement[];
   // (undocumented)
-  summary?: IDocElement[];
+  summary: MarkupBasicElement[];
 }
 
 // @alpha
 interface IApiParameter {
-  description: IDocElement[];
+  description: MarkupBasicElement[];
   isOptional: boolean;
   isSpread: boolean;
   name: string;
@@ -214,194 +142,209 @@ interface IApiProperty extends IApiBaseDefinition {
   isReadOnly: boolean;
   isStatic: boolean;
   kind: 'property';
+  signature: string;
   type: string;
 }
 
 // @alpha
 interface IApiReturnValue {
   // (undocumented)
-  description: IDocElement[];
+  description: MarkupBasicElement[];
   // (undocumented)
   type: string;
 }
 
-// @alpha
-interface IBaseDocElement {
-  // (undocumented)
-  kind: string;
-}
-
-// WARNING: Unable to find referenced export "ApiReference"
-// @alpha
-interface ICodeLinkElement extends IBaseDocElement {
-  exportName: string;
-  memberName?: string;
-  packageName?: string;
-  referenceType: 'code';
-  scopeName?: string;
-  value?: string;
+// @public
+interface IExtractorApiJsonFileConfig {
+  enabled: boolean;
+  outputFolder?: string;
 }
 
 // @public
-interface IExtractorAnalyzeOptions {
-  entryPointFile: string;
-  otherFiles?: string[];
+interface IExtractorApiReviewFileConfig {
+  apiReviewFolder?: string;
+  enabled: boolean;
+  tempFolder?: string;
+}
+
+// @public
+interface IExtractorConfig {
+  apiJsonFile?: IExtractorApiJsonFileConfig;
+  apiReviewFile?: IExtractorApiReviewFileConfig;
+  compiler: IExtractorTsconfigCompilerConfig | IExtractorRuntimeCompilerConfig;
+  policies?: IExtractorPoliciesConfig;
+  project: IExtractorProjectConfig;
 }
 
 // @public
 interface IExtractorOptions {
-  compilerOptions: ts.CompilerOptions;
+  compilerProgram?: ts.Program;
+  customLogger?: Partial<ILogger>;
+  localBuild?: boolean;
+}
+
+// @public
+interface IExtractorPoliciesConfig {
+  namespaceSupport: 'conservative' | 'permissive';
+}
+
+// @public
+interface IExtractorProjectConfig {
+  entryPointSourceFile: string;
+  externalJsonFileFolders?: string[];
+}
+
+// @public
+interface IExtractorRuntimeCompilerConfig {
   // (undocumented)
-  errorHandler?: ApiErrorHandler;
+  configType: 'runtime';
 }
 
-// @alpha (undocumented)
-interface IHrefLinkElement extends IBaseDocElement {
-  referenceType: 'href';
-  targetUrl: string;
-  value?: string;
+// @public
+interface IExtractorTsconfigCompilerConfig {
+  // (undocumented)
+  configType: 'tsconfig';
+  overrideTsconfig?: {
+  }
+  rootFolder: string;
 }
 
-// @alpha
+// @public
+interface ILogger {
+  logError(message: string): void;
+  logInfo(message: string): void;
+  logVerbose(message: string): void;
+  logWarning(message: string): void;
+}
+
+// @public
 interface IMarkupApiLink {
-  // (undocumented)
   elements: MarkupLinkTextElement[];
-  // (undocumented)
   kind: 'api-link';
-  // (undocumented)
   target: IApiItemReference;
 }
 
-// @alpha
+// @public
 interface IMarkupCodeBox {
   // (undocumented)
   highlighter: MarkupHighlighter;
-  // (undocumented)
   kind: 'code-box';
   text: string;
 }
 
-// @alpha
+// @public
+interface IMarkupCreateTextOptions {
+  bold?: boolean;
+  italics?: boolean;
+}
+
+// @public
 interface IMarkupHeading1 {
-  // (undocumented)
   kind: 'heading1';
   text: string;
 }
 
-// @alpha
+// @public
 interface IMarkupHeading2 {
-  // (undocumented)
   kind: 'heading2';
   text: string;
 }
 
-// @alpha
+// @public
 interface IMarkupHighlightedText {
-  // (undocumented)
   highlighter: MarkupHighlighter;
-  // (undocumented)
   kind: 'code';
   text: string;
 }
 
-// @alpha
+// @public
 interface IMarkupLineBreak {
-  // (undocumented)
   kind: 'break';
 }
 
-// @alpha
+// @public
 interface IMarkupNoteBox {
   // (undocumented)
   elements: MarkupBasicElement[];
-  // (undocumented)
   kind: 'note-box';
 }
 
-// @alpha
+// @public
 interface IMarkupPage {
   // (undocumented)
   breadcrumb: MarkupBasicElement[];
   // (undocumented)
-  docId: string;
-  // (undocumented)
   elements: MarkupStructuredElement[];
-  // (undocumented)
   kind: 'page';
   // (undocumented)
   title: string;
 }
 
-// @alpha
+// @public
 interface IMarkupParagraph {
-  // (undocumented)
   kind: 'paragraph';
 }
 
-// @alpha
+// @public
 interface IMarkupTable {
   // (undocumented)
   header?: IMarkupTableRow;
-  // (undocumented)
   kind: 'table';
   // (undocumented)
   rows: IMarkupTableRow[];
 }
 
-// @alpha
+// @public
 interface IMarkupTableCell {
-  // (undocumented)
   elements: MarkupBasicElement[];
-  // (undocumented)
   kind: 'table-cell';
 }
 
-// @alpha
+// @public
 interface IMarkupTableRow {
   // (undocumented)
   cells: IMarkupTableCell[];
-  // (undocumented)
   kind: 'table-row';
 }
 
-// @alpha
+// @public
 interface IMarkupText {
-  // (undocumented)
   bold?: boolean;
-  // (undocumented)
   italics?: boolean;
-  // (undocumented)
   kind: 'text';
   text: string;
 }
 
-// @alpha
+// @public
 interface IMarkupWebLink {
-  // (undocumented)
   elements: MarkupLinkTextElement[];
-  // (undocumented)
   kind: 'web-link';
-  // (undocumented)
   targetUrl: string;
 }
 
-// @alpha
-interface ISeeDocElement extends IBaseDocElement {
-  // (undocumented)
-  kind: 'seeDocElement';
-  // (undocumented)
-  seeElements: IDocElement[];
+// @public
+class Markup {
+  public static BREAK: IMarkupLineBreak;
+  public static createApiLink(textElements: MarkupLinkTextElement[], target: IApiItemReference): IMarkupApiLink;
+  public static createApiLinkFromText(text: string, target: IApiItemReference): IMarkupApiLink;
+  public static createCode(code: string, highlighter?: MarkupHighlighter): IMarkupHighlightedText;
+  public static createCodeBox(code: string, highlighter: MarkupHighlighter): IMarkupCodeBox;
+  public static createHeading1(text: string): IMarkupHeading1;
+  public static createHeading2(text: string): IMarkupHeading2;
+  public static createNoteBox(textElements: MarkupBasicElement[]): IMarkupNoteBox;
+  public static createNoteBoxFromText(text: string): IMarkupNoteBox;
+  public static createPage(title: string): IMarkupPage;
+  public static createTable(headerCellValues: MarkupBasicElement[][] | undefined = undefined): IMarkupTable;
+  public static createTableRow(cellValues: MarkupBasicElement[][] | undefined = undefined): IMarkupTableRow;
+  public static createTextElements(text: string, options?: IMarkupCreateTextOptions): IMarkupText[];
+  public static createTextParagraphs(text: string, options?: IMarkupCreateTextOptions): MarkupBasicElement[];
+  public static createWebLink(textElements: MarkupLinkTextElement[], targetUrl: string): IMarkupWebLink;
+  public static createWebLinkFromText(text: string, targetUrl: string): IMarkupWebLink;
+  public static extractTextContent(elements: MarkupElement[]): string;
+  public static normalize < T extends MarkupElement >(elements: T[]): void;
+  public static PARAGRAPH: IMarkupParagraph;
 }
 
-// @alpha
-interface ITextElement extends IBaseDocElement {
-  // (undocumented)
-  kind: 'textDocElement';
-  // (undocumented)
-  value: string;
-}
-
-// WARNING: Unsupported export: ApiErrorHandler
 // WARNING: Unsupported export: ApiAccessModifier
 // WARNING: Unsupported export: ApiMember
 // WARNING: Unsupported export: ApiItem
@@ -410,5 +353,3 @@ interface ITextElement extends IBaseDocElement {
 // WARNING: Unsupported export: MarkupBasicElement
 // WARNING: Unsupported export: MarkupStructuredElement
 // WARNING: Unsupported export: MarkupElement
-// WARNING: Unsupported export: ILinkDocElement
-// WARNING: Unsupported export: IDocElement

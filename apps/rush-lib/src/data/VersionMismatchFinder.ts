@@ -29,19 +29,19 @@ export class VersionMismatchFinder {
     return this._getKeys(this._mismatches);
   }
 
-  public getVersionsOfMismatch(mismatch: string): Array<string> {
+  public getVersionsOfMismatch(mismatch: string): Array<string> | undefined {
     return this._mismatches.has(mismatch)
       ? this._getKeys(this._mismatches.get(mismatch))
       : undefined;
   }
 
-  public getConsumersOfMismatch(mismatch: string, version: string): Array<string> {
-    const mismatchedPackage: Map<string, string[]> = this._mismatches.get(mismatch);
+  public getConsumersOfMismatch(mismatch: string, version: string): Array<string> | undefined {
+    const mismatchedPackage: Map<string, string[]> | undefined = this._mismatches.get(mismatch);
     if (!mismatchedPackage) {
       return undefined;
     }
 
-    const mismatchedVersion: string[] = mismatchedPackage.get(version);
+    const mismatchedVersion: string[] | undefined = mismatchedPackage.get(version);
     return mismatchedVersion;
   }
 
@@ -66,29 +66,37 @@ export class VersionMismatchFinder {
 
   private _addDependenciesToList(
     project: string,
-    dependencyMap: { [dependency: string]: string },
+    dependencyMap: { [dependency: string]: string } | undefined,
     exclude: Set<string>): void {
-    Object.keys(dependencyMap || {}).forEach((dependency: string) => {
-      if (!exclude || !exclude.has(dependency)) {
-        const version: string = dependencyMap[dependency];
-        if (!this._mismatches.has(dependency)) {
-          this._mismatches.set(dependency, new Map<string, string[]>());
+
+    if (dependencyMap) {
+      Object.keys(dependencyMap).forEach((dependency: string) => {
+        if (!exclude || !exclude.has(dependency)) {
+          const version: string = dependencyMap[dependency];
+          if (!this._mismatches.has(dependency)) {
+            this._mismatches.set(dependency, new Map<string, string[]>());
+          }
+
+          const dependencyVersions: Map<string, string[]> = this._mismatches.get(dependency)!;
+
+          if (!dependencyVersions.has(version)) {
+            dependencyVersions.set(version, []);
+          }
+          dependencyVersions.get(version)!.push(project);
         }
-        if (!this._mismatches.get(dependency).has(version)) {
-          this._mismatches.get(dependency).set(version, []);
-        }
-        this._mismatches.get(dependency).get(version).push(project);
-      }
-    });
+      });
+    }
   }
 
   // tslint:disable-next-line:no-any
-  private _getKeys(iterable: Map<string, any>): string[] {
+  private _getKeys(iterable: Map<string, any> | undefined): string[] {
     const keys: string[] = [];
-    // tslint:disable-next-line:no-any
-    iterable.forEach((value: any, key: string) => {
-      keys.push(key);
-    });
+    if (iterable) {
+      // tslint:disable-next-line:no-any
+      iterable.forEach((value: any, key: string) => {
+        keys.push(key);
+      });
+    }
     return keys;
   }
 }

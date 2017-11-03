@@ -8,7 +8,7 @@ import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
 import { VersionPolicy, BumpType } from './VersionPolicy';
 
 /**
- * @alpha
+ * @beta
  */
 export interface IVersionPolicyJson {
   policyName: string;
@@ -16,7 +16,7 @@ export interface IVersionPolicyJson {
 }
 
 /**
- * @alpha
+ * @beta
  */
 export interface ILockStepVersionJson extends IVersionPolicyJson {
   version: string;
@@ -24,20 +24,23 @@ export interface ILockStepVersionJson extends IVersionPolicyJson {
 }
 
 /**
- * @alpha
+ * @beta
  */
 export interface IIndividualVersionJson extends IVersionPolicyJson {
   lockedMajor?: number;
 }
 
 /**
- * @alpha
+ * @beta
  */
 export class VersionPolicyConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(path.join(__dirname, '../version-policies.schema.json'));
 
   private _versionPolicies: Map<string, VersionPolicy>;
 
+  /**
+   * @internal
+   */
   public constructor(private _jsonFileName: string) {
     this._versionPolicies = new Map<string, VersionPolicy>();
     this._loadFile();
@@ -49,7 +52,7 @@ export class VersionPolicyConfiguration {
    * @param policyName - Name of the version policy
    */
   public getVersionPolicy(policyName: string): VersionPolicy {
-    const policy: VersionPolicy = this._versionPolicies.get(policyName);
+    const policy: VersionPolicy | undefined = this._versionPolicies.get(policyName);
     if (!policy) {
       throw new Error(`Failed to find version policy by name \'${policyName}\'`);
     }
@@ -77,7 +80,7 @@ export class VersionPolicyConfiguration {
     shouldCommit?: boolean
   ): void {
     if (versionPolicyName) {
-      const policy: VersionPolicy = this.versionPolicies.get(versionPolicyName);
+      const policy: VersionPolicy | undefined = this.versionPolicies.get(versionPolicyName);
       if (policy) {
         policy.bump(bumpType, identifier);
       }
@@ -90,7 +93,7 @@ export class VersionPolicyConfiguration {
     }
     const versionPolicyJson: IVersionPolicyJson[] = [];
     this.versionPolicies.forEach((versionPolicy) => {
-      versionPolicyJson.push(versionPolicy.json);
+      versionPolicyJson.push(versionPolicy._json);
     });
     if (shouldCommit) {
       JsonFile.save(versionPolicyJson, this._jsonFileName);
@@ -105,7 +108,7 @@ export class VersionPolicyConfiguration {
       VersionPolicyConfiguration._jsonSchema);
 
     versionPolicyJson.forEach(policyJson => {
-      const policy: VersionPolicy = VersionPolicy.load(policyJson);
+      const policy: VersionPolicy | undefined = VersionPolicy.load(policyJson);
       if (policy) {
         this._versionPolicies.set(policy.policyName, policy);
       }

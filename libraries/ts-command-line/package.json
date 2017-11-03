@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/ts-command-line",
-  "version": "2.1.0",
+  "version": "2.2.2",
   "description": "An object-oriented command-line parser for TypeScript",
   "repository": {
     "type": "git",
@@ -15,7 +15,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "argparse": "~1.0.7",
+    "argparse": "~1.0.9",
+    "@types/argparse": "~1.0.33",
     "colors": "~1.1.2",
     "@types/node": "6.0.88"
   },
@@ -24,6 +25,6 @@
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "mocha": "~3.4.2",
-    "@microsoft/node-library-build": "~4.1.0"
+    "@microsoft/node-library-build": "4.2.3"
   }
 }

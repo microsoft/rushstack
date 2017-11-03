@@ -28,7 +28,8 @@ export class PinnedVersionsConfiguration {
 
   /** Attempts to load pinned versions configuration from a given file */
   public static tryLoadFromFile(jsonFilename: string): PinnedVersionsConfiguration {
-    let pinnedVersionJson: IPinnedVersionsJson = undefined;
+    let pinnedVersionJson: IPinnedVersionsJson | undefined = undefined;
+
     if (fs.existsSync(jsonFilename)) {
       pinnedVersionJson = JsonFile.load(jsonFilename);
     }
@@ -45,7 +46,7 @@ export class PinnedVersionsConfiguration {
     return this;
   }
 
-  public get(dependency: string): string {
+  public get(dependency: string): string | undefined {
     return this._data.get(dependency);
   }
 
@@ -79,11 +80,13 @@ export class PinnedVersionsConfiguration {
   /**
    * Preferred to use PinnedVersionsConfiguration.loadFromFile()
    */
-  private constructor(pinnedVersionJson: IPinnedVersionsJson, private _filename: string) {
+  private constructor(pinnedVersionJson: IPinnedVersionsJson | undefined, private _filename: string) {
     this._data = new Map<string, string>();
-    Object.keys(pinnedVersionJson || {}).forEach((dep: string) => {
-      this.set(dep, pinnedVersionJson[dep]);
-    });
+    if (pinnedVersionJson) {
+      for (const dependency of Object.keys(pinnedVersionJson)) {
+        this.set(dependency, pinnedVersionJson[dependency]);
+      }
+    }
   }
 
   private _serialize(): IPinnedVersionsJson {

@@ -2,7 +2,7 @@
  * Interface respresenting a changelog json object for a package used to represent the parsed
  * content of CHANGELOG.json
  *
- * @alpha
+ * @beta
  */
 export interface IChangelog {
   /**
@@ -19,7 +19,7 @@ export interface IChangelog {
 /**
  * Interface representing a single published entry in the changelog.
  *
- * @alpha
+ * @beta
  */
 export interface IChangeLogEntry {
   /**
@@ -35,7 +35,7 @@ export interface IChangeLogEntry {
   /**
    * The UTC date when the publish was applied. (Example: Fri, 02 Dec 2016 22:27:16 GMT)
    */
-  date: string;
+  date: string | undefined;
 
   /**
    * Comments for the entry, where key respresents the ChangeType string (Example: major)
@@ -55,7 +55,7 @@ export interface IChangeLogEntry {
 /**
  * Interface representing a single changelog comment within an entry.
  *
- * @alpha
+ * @beta
  */
 export interface IChangeLogComment {
   /**

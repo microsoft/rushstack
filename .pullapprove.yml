@@ -20,11 +20,11 @@ groups:
       - qz2017
       - patmill
 
-  rush-approvers:
+  general-approvers:
     conditions:
       files:
-        - "apps/rush/*"
-        - "apps/rush-lib/*"
+        - "apps/*"
+        - "libraries/*"
     required: 1
     users:
       - iclanton
@@ -32,20 +32,10 @@ groups:
       - pgonzal
       - qz2017
 
-  api-extractor-approvers:
-    conditions:
-      files:
-        - "libraries/api-extractor/*"
-    required: 1
-    users:
-      - pgonzal
-      - dgaeta
-
   gcb-approvers:
     conditions:
       files:
         - "core-build/*"
-        - "libraries/*"
         - "webpack/*"
     required: 1
     users:

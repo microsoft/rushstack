@@ -18,6 +18,7 @@ import { initialize as initializeLogging, markTaskCreationTime, generateGulpErro
 import { getFlagValue, setConfigDefaults } from './config';
 import * as Gulp from 'gulp';
 import * as notifier from 'node-notifier';
+import { JestTask, _isJestEnabled } from './tasks/JestTask';
 
 export * from './IBuildConfig';
 export {
@@ -44,6 +45,7 @@ export * from './tasks/CleanTask';
 export * from './tasks/CleanFlagTask';
 export * from './tasks/ValidateShrinkwrapTask';
 export * from './tasks/copyStaticAssets/CopyStaticAssetsTask';
+export * from './tasks/JestTask';
 
 const _taskMap: { [key: string]: IExecutable } = {};
 const _uniqueTasks: IExecutable[] = [];
@@ -194,7 +196,7 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
 
   let isWatchRunning: boolean = false;
   let shouldRerunWatch: boolean = false;
-  let lastError: boolean | undefined = undefined;
+  let lastError: Error | undefined = undefined;
 
   const successMessage: string = 'Build succeeded';
   const failureMessage: string = 'Build failed';
@@ -227,14 +229,14 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
                 }
                 return _finalizeWatch();
               })
-              .catch((error) => {
+              .catch((error: Error) => {
                 if (!lastError || lastError !== error) {
                   lastError = error;
 
                   if (buildConfig.showToast) {
                     notifier.notify({
                       title: failureMessage,
-                      message: error,
+                      message: error.toString(),
                       icon: buildConfig.buildErrorIconPath
                     });
                   } else {
@@ -331,6 +333,7 @@ export function initialize(gulp: typeof Gulp): void {
   _buildConfig.rootPath = process.cwd();
   _buildConfig.gulp = gulp;
   _buildConfig.uniqueTasks = _uniqueTasks;
+  _buildConfig.jestEnabled = _isJestEnabled(_buildConfig.rootPath);
 
   _handleCommandLineArguments();
 
@@ -395,8 +398,7 @@ function _executeTask(taskExecutable: IExecutable, buildConfig: IBuildConfig): P
           buildConfig.onTaskEnd(taskExecutable.name, process.hrtime(startTime));
         }
       },
-      // tslint:disable-next-line:no-any
-      (error: any) => {
+      (error: Error) => {
         if (buildConfig.onTaskEnd && taskExecutable.name) {
           buildConfig.onTaskEnd(taskExecutable.name, process.hrtime(startTime), error);
         }
@@ -458,6 +460,8 @@ function _handleTasksListArguments(): void {
 export const clean: IExecutable = new CleanTask();
 
 export const copyStaticAssets: CopyStaticAssetsTask = new CopyStaticAssetsTask();
+
+export const jest: JestTask = new JestTask();
 
 // Register default clean task.
 task('clean', clean);

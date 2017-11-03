@@ -17,6 +17,7 @@ app
 app-min
 bower_components
 coverage
+local
 dist
 jspm_packages
 lib

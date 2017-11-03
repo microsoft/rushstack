@@ -6,14 +6,19 @@ import * as path from 'path';
 import gitInfo = require('git-repo-info');
 
 import RushConfiguration from './RushConfiguration';
-
-import { IChangeFile, IChangeInfo } from './ChangeManagement';
+import {
+  IChangeFile,
+  IChangeInfo
+} from './ChangeManagement';
 
 /**
  * This class represents a single change file.
  * @public
  */
 export class ChangeFile {
+  /**
+   * @internal
+   */
   public constructor(private _changeFileData: IChangeFile,
     private _rushConfiguration: RushConfiguration
   ) {
@@ -60,7 +65,7 @@ export class ChangeFile {
    * Generates a file path for storing the change file to disk
    */
   public generatePath(): string {
-    let branch: string = undefined;
+    let branch: string | undefined = undefined;
     try {
       branch = gitInfo().branch;
     } catch (error) {
@@ -81,7 +86,7 @@ export class ChangeFile {
   * Gets the current time, formatted as YYYY-MM-DD-HH-MM
   * Optionally will include seconds
   */
-  private _getTimestamp(useSeconds: boolean = false): string {
+  private _getTimestamp(useSeconds: boolean = false): string | undefined {
     // Create a date string with the current time
 
     // dateString === "2016-10-19T22:47:49.606Z"
@@ -92,22 +97,25 @@ export class ChangeFile {
 
     // matches[1] === "2016-10-19"
     // matches[2] === "22:47:49"
-    const matches: RegExpMatchArray = dateString.match(dateParseRegex);
+    const matches: RegExpMatchArray | null = dateString.match(dateParseRegex);
 
-    // formattedDate === "2016-10-19"
-    const formattedDate: string = matches[1];
+    if (matches) {
+      // formattedDate === "2016-10-19"
+      const formattedDate: string = matches[1];
 
-    let formattedTime: string;
-    if (useSeconds) {
-      // formattedTime === "22-47-49"
-      formattedTime = matches[2].replace(':', '-');
-    } else {
-      // formattedTime === "22-47"
-      const timeParts: string[] = matches[2].split(':');
-      formattedTime = `${timeParts[0]}-${timeParts[1]}`;
+      let formattedTime: string;
+      if (useSeconds) {
+        // formattedTime === "22-47-49"
+        formattedTime = matches[2].replace(':', '-');
+      } else {
+        // formattedTime === "22-47"
+        const timeParts: string[] = matches[2].split(':');
+        formattedTime = `${timeParts[0]}-${timeParts[1]}`;
+      }
+
+      return `${formattedDate}-${formattedTime}`;
     }
-
-    return `${formattedDate}-${formattedTime}`;
+    return undefined;
   }
 
   private _escapeFilename(filename: string, replacer: string = '-'): string {

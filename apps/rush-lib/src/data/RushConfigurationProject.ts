@@ -8,6 +8,7 @@ import { JsonFile } from '@microsoft/node-core-library';
 import IPackageJson from '../utilities/IPackageJson';
 import Utilities from '../utilities/Utilities';
 import RushConfiguration from '../data/RushConfiguration';
+import { VersionPolicy } from './VersionPolicy';
 
 /**
  * This represents the JSON data object for a project entry in the rush.json configuration file.
@@ -35,14 +36,16 @@ export default class RushConfigurationProject {
   private _tempProjectName: string;
   private _unscopedTempProjectName: string;
   private _cyclicDependencyProjects: Set<string>;
-  private _versionPolicyName: string;
+  private _versionPolicyName: string | undefined;
   private _shouldPublish: boolean;
   private _downstreamDependencyProjects: string[];
+  private readonly _rushConfiguration: RushConfiguration;
 
   /** @internal */
   constructor(projectJson: IRushConfigurationProjectJson,
               rushConfiguration: RushConfiguration,
               tempProjectName: string) {
+    this._rushConfiguration = rushConfiguration;
     this._packageName = projectJson.packageName;
     this._projectRelativeFolder = projectJson.projectFolder;
 
@@ -197,10 +200,22 @@ export default class RushConfigurationProject {
   }
 
   /**
-   * The version policy used by this project.
-   * @alpha
+   * Name of the version policy used by this project.
+   * @beta
    */
-  public get versionPolicyName(): string {
+  public get versionPolicyName(): string | undefined {
     return this._versionPolicyName;
+  }
+
+  /**
+   * Version policy of the project
+   * @beta
+   */
+  public get versionPolicy(): VersionPolicy | undefined {
+    if (this.versionPolicyName && this._rushConfiguration.versionPolicyConfiguration) {
+      return this._rushConfiguration.versionPolicyConfiguration.getVersionPolicy(
+        this.versionPolicyName);
+    }
+    return undefined;
   }
 }

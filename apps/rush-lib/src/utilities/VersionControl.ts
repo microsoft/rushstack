@@ -7,9 +7,9 @@ import * as child_process from 'child_process';
  * @public
  */
 export default class VersionControl {
-  public static getChangedFolders(targetBranch?: string): string[] {
+  public static getChangedFolders(targetBranch?: string): Array<string | undefined> | undefined {
     const branchName: string = targetBranch ? targetBranch : 'origin/master';
-    const output: string = child_process.execSync(`git diff ${branchName}... --dirstat=files,0`)
+    const output: string | undefined = child_process.execSync(`git diff ${branchName}... --dirstat=files,0`)
       .toString();
     return output.split('\n').map(s => {
       if (s) {
@@ -25,20 +25,20 @@ export default class VersionControl {
   public static getChangedFiles(prefix?: string, targetBranch?: string): string[] {
     const branchName: string = targetBranch ? targetBranch : 'origin/master';
     const output: string = child_process
-      .execSync(`git diff ${branchName}... --name-only --diff-filter=A`)
+      .execSync(`git diff ${branchName}... --name-only --no-renames --diff-filter=A`)
       .toString();
-    const regex: RegExp = prefix ? new RegExp(`^${prefix}`, 'i') : undefined;
+    const regex: RegExp | undefined = prefix ? new RegExp(`^${prefix}`, 'i') : undefined;
     return output.split('\n').map(s => {
       if (s) {
         const trimmedLine: string = s.trim();
-        if (trimmedLine.match(regex)) {
+        if (regex && trimmedLine.match(regex)) {
           return trimmedLine;
         }
       }
       return undefined;
     }).filter(s => {
       return s && s.length > 0;
-    });
+    }) as string[];
   }
 
   /**

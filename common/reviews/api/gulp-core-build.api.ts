@@ -1,3 +1,6 @@
+// @internal
+export function _isJestEnabled(rootFolder: string): boolean;
+
 // @public
 export function addSuppression(suppression: string | RegExp): void;
 
@@ -127,6 +130,7 @@ interface IBuildConfig {
   distFolder: string;
   gulp: gulp.Gulp;
   isRedundantBuild?: boolean;
+  jestEnabled?: boolean;
   libAMDFolder?: string;
   libES6Folder?: string;
   libFolder: string;
@@ -183,7 +187,25 @@ interface IExecutable {
 }
 
 // @public
+interface IJestConfig {
+  configFilePath?: string;
+  coverage?: boolean;
+  isEnabled?: boolean;
+}
+
+// @public
 export function initialize(gulp: typeof Gulp): void;
+
+// @public
+class JestTask extends GulpTask<IJestConfig> {
+  constructor();
+  // (undocumented)
+  public executeTask(gulp: typeof Gulp,
+      completeCallback: (error?: string | Error) => void): void;
+  // (undocumented)
+  public isEnabled(buildConfig: IBuildConfig): boolean;
+  public loadSchema(): Object;
+}
 
 // @public
 export function log(...args: Array<string | Chalk.ChalkChain>): void;
@@ -245,4 +267,5 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
 // WARNING: Unsupported export: cleanFlag
 // WARNING: Unsupported export: clean
 // WARNING: Unsupported export: copyStaticAssets
+// WARNING: Unsupported export: jest
 // (No packageDescription for this package)
