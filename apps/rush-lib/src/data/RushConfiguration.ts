@@ -103,7 +103,7 @@ export interface IRushLinkJson {
  * @public
  */
 export default class RushConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(path.join(__dirname, '../rush.schema.json'));
+  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(path.join(__dirname, '../schemas/rush.schema.json'));
 
   private _rushJsonFile: string;
   private _rushJsonFolder: string;
@@ -510,7 +510,7 @@ export default class RushConfiguration {
   }
 
   /**
-   * The rush hooks. It allows cusomized scripts to run at the specified point.
+   * The rush hooks. It allows customized scripts to run at the specified point.
    * @beta
    */
   public get eventHooks(): EventHooks {

@@ -20,7 +20,7 @@
         "title": "Custom Command",
         "type": "object",
         "additionalProperties": false,
-        "required": [ "name", "summary", "documentation" ],
+        "required": [ "name", "summary", "documentation", "parallelized" ],
         "properties": {
           "name": {
             "title": "Custom Command Name",

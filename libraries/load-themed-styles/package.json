@@ -7,7 +7,7 @@
     "url": "https://github.com/Microsoft/web-build-tools"
   },
   "scripts": {
-    "build": "gulp bundle",
+    "build": "gulp test",
     "clean": "gulp clean",
     "test": "gulp test"
   },

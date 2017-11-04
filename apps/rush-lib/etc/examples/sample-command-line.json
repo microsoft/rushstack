@@ -1,0 +1,60 @@
+// This example illustrates how to define your own custom command line
+// options for Rush.  These options will be passed to the NPM scripts in your
+// package.json file.
+//
+// To use this example file, rename it to "command-line.json" and copy it into your
+// "common/config/rush" folder.  For more information about custom commands,
+// see the documentation at https://aka.ms/rush
+
+{
+  "$schema": "https://dev.office.com/json-schemas/rush/v4/command-line.schema.json",
+  "customCommands": [
+    {
+      "name": "import-strings",
+      "summary": "Imports translated strings into each project.",
+      "documentation": "Requests translated strings from the translation service and imports them into each project.",
+      "parallelized": true
+    }
+  ],
+
+  "customOptions": {
+    "--locale": {
+      "optionType": "enum",
+      "description": "Selects a single instead of the default locale (en-us) for non-ship builds or all locales for ship builds.",
+      "associatedCommands": [ "build", "rebuild", "import-strings" ],
+      "defaultValue": "en-us",
+      "enumValues": [
+        {
+          "name": "en-us",
+          "description": "US English"
+        },
+        {
+          "name": "fr-fr",
+          "description": "French (France)"
+        },
+        {
+          "name": "es-es",
+          "description": "Spanish (Spain)"
+        },
+        {
+          "name": "zh-cn",
+          "description": "Chinese (China)"
+        }
+      ]
+    },
+
+    "--ship": {
+      "optionType": "flag",
+      "description": "Perform a production build, including minification and localization steps",
+      "associatedCommands": [ "build", "rebuild", "import-strings" ],
+      "shortName": "-s"
+    },
+
+    "--minimal": {
+      "optionType": "flag",
+      "description": "Perform a fast build, which disables certain tasks such as unit tests and linting",
+      "associatedCommands": [ "build", "rebuild" ],
+      "shortName": "-m"
+    }
+  }
+}
