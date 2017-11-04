@@ -85,7 +85,7 @@ export class CustomRushAction extends BaseRushAction {
         if (customOption.optionDefinition.optionType === 'flag') {
           customFlags.push(longName);
         } else if (customOption.optionDefinition.optionType === 'enum') {
-          customFlags.push(`${longName}=${customOption.parameterValue!.value}`);
+          customFlags.push(`${longName} ${customOption.parameterValue!.value}`);
         }
       }
     });
@@ -127,20 +127,20 @@ export class CustomRushAction extends BaseRushAction {
         parameterLongName: '--parallelism',
         parameterShortName: '-p',
         key: 'COUNT',
-        description: 'Change limit the number of simultaneous builds. This value defaults to the number of CPU cores'
+        description: 'Limit the number of simultaneous executions. This value defaults to the number of CPU cores.'
       });
     }
     this._toFlag = this.defineStringListParameter({
       parameterLongName: '--to',
       parameterShortName: '-t',
       key: 'PROJECT1',
-      description: 'Build the specified project and all of its dependencies'
+      description: 'Run command in the specified project and all of its dependencies'
     });
     this._fromFlag = this.defineStringListParameter({
       parameterLongName: '--from',
       parameterShortName: '-f',
       key: 'PROJECT2',
-      description: 'Build all projects that directly or indirectly depend on the specified project'
+      description: 'Run command in all projects that directly or indirectly depend on the specified project'
     });
     this._verboseParameter = this.defineFlagParameter({
       parameterLongName: '--verbose',
