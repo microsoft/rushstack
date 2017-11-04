@@ -510,7 +510,7 @@ export default class RushConfiguration {
   }
 
   /**
-   * The rush hooks. It allows cusomized scripts to run at the specified point.
+   * The rush hooks. It allows customized scripts to run at the specified point.
    * @beta
    */
   public get eventHooks(): EventHooks {
