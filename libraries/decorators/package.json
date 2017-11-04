@@ -18,7 +18,7 @@
     "gulp": "~3.9.1"
   },
   "scripts": {
-    "build": "gulp bundle",
+    "build": "gulp test",
     "clean": "gulp clean",
     "test": "gulp test"
   }
