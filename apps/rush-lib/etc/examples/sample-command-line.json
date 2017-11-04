@@ -10,43 +10,34 @@
   "$schema": "https://dev.office.com/json-schemas/rush/command-line.schema.json",
   "customCommands": [
     {
-      "name": "check-copyright",
-      "summary": "Ensure that all files have a copyright header",
-      "documentation": "Ensures that all TS files have a copyright header",
+      "name": "import-strings",
+      "summary": "Imports translated strings into each project.",
+      "documentation": "Requests translated strings from the translation service and imports them into each project.",
       "parallelized": true
     }
   ],
 
   "customOptions": {
-    "--profile": {
+    "--locale": {
       "optionType": "enum",
-      "description": "Changes the build profile, affecting the build output",
-      "associatedCommands": [ "build", "rebuild" ],
+      "description": "Selects a single instead of the default locale (en-us) for non-ship builds or all locales for ship builds.",
+      "associatedCommands": [ "build", "rebuild", "import-strings" ],
       "enumValues": [
         {
-          "name": "vso",
-          "description": "For running on CI servers"
+          "name": "en-us",
+          "description": "US English"
         },
         {
-          "name": "npm",
-          "description": "For publishing to an NPM registry"
-        }
-      ]
-    },
-
-    "--color": {
-      "optionType": "enum",
-      "description": "Enable or disable colors in the build log, defaults to 'true'",
-      "associatedCommands": [ "build", "rebuild" ],
-      "defaultValue": "true",
-      "enumValues": [
-        {
-          "name": "true",
-          "description": "Displays colors in the build log"
+          "name": "fr-fr",
+          "description": "French (France)"
         },
         {
-          "name": "false",
-          "description": "Disables all colors in build log, useful for CI builds"
+          "name": "es-es",
+          "description": "Spanish (Spain)"
+        },
+        {
+          "name": "zh-cn",
+          "description": "Chinese (China)"
         }
       ]
     },
