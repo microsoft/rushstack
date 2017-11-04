@@ -29,7 +29,7 @@
   "license": "MIT",
   "dependencies": {
     "@microsoft/node-core-library": "0.3.14",
-    "@microsoft/rush-lib": "3.0.20",
+    "@microsoft/rush-lib": "4.0.0",
     "fs-extra": "~0.26.7",
     "semver": "~5.3.0"
   },
