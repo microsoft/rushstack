@@ -45,7 +45,7 @@
     "--ship": {
       "optionType": "flag",
       "description": "Perform a production build, including minification and localization steps",
-      "associatedCommands": [ "build", "rebuild", "check-copyright" ],
+      "associatedCommands": [ "build", "rebuild", "import-strings" ],
       "shortName": "-s"
     },
 
