@@ -1,16 +1,9 @@
 {
   "customOptions": {
-    "--color": {
-      "optionType": "enum",
-      "description": "Enable or disable colors in the build log, defaults to 'true'",
-      "associatedCommands": [ "build", "rebuild" ],
-      "defaultValue": "true",
-      "enumValues": [
-        {
-          "name": "true",
-          "description": "Displays colors in the build log"
-        }
-      ]
+    "--no-color": {
+      "optionType": "flag",
+      "description": "disable colors in the build log, defaults to 'true'",
+      "associatedCommands": [ "build", "rebuild" ]
     },
 
     "--production": {
