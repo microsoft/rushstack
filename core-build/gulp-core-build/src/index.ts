@@ -4,9 +4,7 @@
 /* tslint:disable:max-line-length */
 
 if (process.argv.indexOf('--no-color') === -1) {
-  process.argv.push('--color=true');
-} else {
-  process.argv.push('--color=false');
+  process.argv.push('--color');
 }
 
 import * as path from 'path';
