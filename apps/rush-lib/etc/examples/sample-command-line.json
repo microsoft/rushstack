@@ -22,6 +22,7 @@
       "optionType": "enum",
       "description": "Selects a single instead of the default locale (en-us) for non-ship builds or all locales for ship builds.",
       "associatedCommands": [ "build", "rebuild", "import-strings" ],
+      "defaultValue": "en-us",
       "enumValues": [
         {
           "name": "en-us",
