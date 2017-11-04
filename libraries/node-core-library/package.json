@@ -6,9 +6,7 @@
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "scripts": {
-    "build": "gulp",
-    "clean": "gulp clean",
-    "test": "gulp test"
+    "build": "gulp test --clean"
   },
   "dependencies": {
     "@types/fs-extra": "0.0.37",
