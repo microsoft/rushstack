@@ -5,11 +5,9 @@ import * as colors from 'colors';
 import * as os from 'os';
 import * as fsx from 'fs-extra';
 import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
-import {
-  Utilities,
-  Stopwatch
-} from '../../index';
 
+import Utilities from '../../utilities/Utilities';
+import { Stopwatch } from '../../utilities/Stopwatch';
 import InstallManager, { InstallType } from '../utilities/InstallManager';
 import LinkManager from '../utilities/LinkManager';
 import RushCommandLineParser from './RushCommandLineParser';

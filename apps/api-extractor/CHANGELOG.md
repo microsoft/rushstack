@@ -1,6 +1,30 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 25 Oct 2017 20:03:59 GMT and should not be manually modified.
+This log was last generated on Thu, 02 Nov 2017 16:05:24 GMT and should not be manually modified.
+
+## 4.2.4
+Thu, 02 Nov 2017 16:05:24 GMT
+
+### Patches
+
+- lock the reference version between web build tools projects
+
+## 4.2.3
+Wed, 01 Nov 2017 21:06:08 GMT
+
+### Patches
+
+- Upgrade cyclic dependencies
+
+## 4.2.2
+Tue, 31 Oct 2017 21:04:04 GMT
+
+*Changes not tracked*
+
+## 4.2.1
+Tue, 31 Oct 2017 16:04:55 GMT
+
+*Changes not tracked*
 
 ## 4.2.0
 Wed, 25 Oct 2017 20:03:59 GMT

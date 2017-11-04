@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 19 Oct 2017 23:01:49 GMT and should not be manually modified.
+This log was last generated on Sat, 04 Nov 2017 01:29:27 GMT and should not be manually modified.
+
+## 4.0.0
+Sat, 4 Nov 2017 03:22:28 GMT
+
+### Breaking changes
+
+- See here for major change summary: https://github.com/Microsoft/web-build-tools/wiki/Rush-~-Custom-commands
+- Adding custom commands and options.
+- Adding rush version selector.
+- Updating the semantics of rush change.
 
 ## 3.0.20
 Thu, 19 Oct 2017 23:01:49 GMT
@@ -17,9 +27,9 @@ Fri, 06 Oct 2017 22:44:31 GMT
 ### Patches
 
 - Enable strickNullChecks
-- Fix a bug in "rush version" that devdependency does not get bumped if there is no dependency.
-- Fix a bug in "rush change" so it handles rename properly.
-- Add npm tag support in "rush publish".
+- Fix a bug in "rush version" that devdependency does not get bumped if there is no dependency. 
+- Fix a bug in "rush change" so it handles rename properly. 
+- Add npm tag support in "rush publish". 
 
 ## 3.0.18
 Tue, 26 Sep 2017 13:51:05 GMT
@@ -274,7 +284,7 @@ Sun, 22 Jan 2017 02:04:57 GMT
 
 ### Patches
 
-- Update temp_modules when versions are bumped.
+- Update temp_modules when versions are bumped. 
 
 ## 1.4.1
 Tue, 03 Jan 2017 21:52:49 GMT

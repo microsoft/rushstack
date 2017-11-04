@@ -1,0 +1,155 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Rush Configuration",
+  "description": "Configuration file for the Rush multi-package build tool",
+
+  "type": "object",
+  "additionalProperties": false,
+
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "customCommands": {
+      "title": "Custom Commands",
+      "description": "A list of custom commands that can be invoked from the Rush command line",
+      "type": "array",
+      "items": {
+        "title": "Custom Command",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [ "name", "summary", "documentation", "parallelized" ],
+        "properties": {
+          "name": {
+            "title": "Custom Command Name",
+            "description": "The name of the custom command, which can be invoked via \"rush <name>\"",
+            "type": "string"
+          },
+          "summary": {
+            "title": "Custom Command Summary",
+            "description": "A short summary of the custom command, which will appear when printing command line usage (e.g. \"rush --help\")",
+            "type": "string"
+          },
+          "documentation": {
+            "title": "Custom Command Documentation",
+            "description": "A detailed description of the command, which appears when requesting command-line help for this command. If omitted, the summary will be used.",
+            "type": "string"
+          },
+          "parallelized": {
+            "title": "Is Parallelized",
+            "description": "Describes whether or not this command can be run in parallel (with multiple instances running on several projects simultaneously). Defaults to 'true'.",
+            "type": "boolean"
+          }
+        }
+      }
+    },
+
+    "customOptions": {
+      "title": "Custom Options",
+      "description": "A list of custom options that can be associated with commands",
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^--[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$": {
+          "title": "Custom Option",
+          "type": "object",
+
+          "required": [
+            "description",
+            "associatedCommands"
+          ],
+
+          "properties": {
+            "description": {
+              "title": "Description",
+              "type": "string"
+            },
+
+            "associatedCommands": {
+              "title": "Supported Commands",
+              "description": "A list of commands which this option can be used with",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              }
+            },
+
+            "shortName": {
+              "title": "Shortened Name",
+              "description": "A optional shortened value for the flag (e.g. --verbose might become -v)",
+              "type": "string",
+              "pattern": "^-[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$"
+            },
+
+            "optionType": {
+              "type": "string",
+              "enum": [
+                "flag",
+                "enum"
+              ]
+            }
+          },
+
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [ "optionType" ],
+              "properties": {
+                "optionType": {
+                  "type": "string",
+                  "enum": [
+                    "flag"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [ "optionType", "enumValues" ],
+              "properties": {
+                "optionType": {
+                  "type": "string",
+                  "enum": [
+                    "enum"
+                  ]
+                },
+
+                "enumValues": {
+                  "title": "Enum Values",
+                  "description": "A list of possible options for this flag",
+                  "type": "array",
+                  "minItems": 1,
+
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [ "name", "description" ],
+                    "properties": {
+                      "name": {
+                        "title": "Name",
+                        "type": "string"
+                      },
+                      "description": {
+                        "title": "Description",
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+
+                "defaultValue": {
+                  "title": "Default Value",
+                  "description": "If this flag is omitted, use this value by default",
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

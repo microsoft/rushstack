@@ -5,19 +5,12 @@ import * as path from 'path';
 import * as fsx from 'fs-extra';
 import * as semver from 'semver';
 
-import { Utilities } from '@microsoft/rush-lib';
-import * as rushLibCli from '@microsoft/rush-lib/lib/start';
+import Utilities from '@microsoft/rush-lib/lib/utilities/Utilities';
+import * as rushLib from '@microsoft/rush-lib';
 
-import RushWrapper from './RushWrapper';
-
-/**
- * Version 4.0.0 is the first version where the rush CLI implementation is in rush-lib. This version changes the
- *  installation and calling convention.
- */
-const RUSH_TRANSITIONAL_VERSION: string = '4.0.0';
 const MAX_INSTALL_ATTEMPTS: number = 3;
 
-export default class RushVersionManager {
+export class RushVersionSelector {
   private _rushDirectory: string;
   private _currentPackageVersion: string;
 
@@ -26,8 +19,8 @@ export default class RushVersionManager {
     this._currentPackageVersion = currentPackageVersion;
   }
 
-  public ensureRushVersionInstalled(version: string): RushWrapper {
-    const isLegacyRushVersion: boolean = semver.lt(version, RUSH_TRANSITIONAL_VERSION);
+  public ensureRushVersionInstalled(version: string): () => void {
+    const isLegacyRushVersion: boolean = semver.lt(version, '4.0.0');
     const expectedRushPath: string = path.join(this._rushDirectory, `rush-${version}`);
     const expectedRushInstalledFlagPath: string = path.join(expectedRushPath, 'last-install.flag');
     if (!fsx.existsSync(expectedRushInstalledFlagPath)) {
@@ -48,22 +41,40 @@ export default class RushVersionManager {
       console.log(`Successfully installed Rush version ${version} in ${expectedRushPath}`);
     }
 
-    if (isLegacyRushVersion) {
-      return new RushWrapper(() => {
-        require(path.join(expectedRushPath, 'node_modules', '@microsoft', 'rush', 'lib', 'rush'));
-      });
+    if (semver.lt(version, '3.0.20')) {
+      return () => {
+        require(path.join(
+          expectedRushPath,
+          'node_modules',
+          '@microsoft',
+          'rush',
+          'lib',
+          'rush'
+        ));
+      };
+    } else if (semver.lt(version, '4.0.0')) {
+      return () => {
+        require(path.join(
+          expectedRushPath,
+          'node_modules',
+          '@microsoft',
+          'rush',
+          'lib',
+          'start'
+        ));
+      };
     } else {
-      return new RushWrapper(() => {
-        const rushCliEntrypoint: typeof rushLibCli = require(path.join(
+      return () => {
+        const rushCliEntrypoint: typeof rushLib = require(path.join(
           expectedRushPath,
           'node_modules',
           '@microsoft',
           'rush-lib',
           'lib',
-          'start'
+          'index'
         ));
-        rushCliEntrypoint.start(this._currentPackageVersion, true);
-      });
+        rushCliEntrypoint.Rush.launch(this._currentPackageVersion, true);
+      };
     }
   }
 }

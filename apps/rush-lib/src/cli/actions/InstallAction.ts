@@ -5,11 +5,9 @@ import * as colors from 'colors';
 import * as os from 'os';
 
 import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
-import {
-  Stopwatch,
-  Event
-} from '../../index';
 
+import { Event } from '../../data/EventHooks';
+import { Stopwatch } from '../../utilities/Stopwatch';
 import RushCommandLineParser from './RushCommandLineParser';
 import GitPolicy from '../utilities/GitPolicy';
 import InstallManager, { InstallType } from '../utilities/InstallManager';

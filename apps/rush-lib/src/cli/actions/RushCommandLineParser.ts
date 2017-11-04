@@ -2,30 +2,32 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
+import * as path from 'path';
 import * as colors from 'colors';
 import * as wordwrap from 'wordwrap';
 import { CommandLineParser, CommandLineFlagParameter } from '@microsoft/ts-command-line';
 
-import {
-  RushConfiguration,
-  Utilities
-} from '../../index';
-import BuildAction from './BuildAction';
+import { RushConstants } from '../../RushConstants';
+import { CommandLineConfiguration } from '../../data/CommandLineConfiguration';
+import RushConfiguration from '../../data/RushConfiguration';
+import Utilities from '../../utilities/Utilities';
 import ChangeAction from './ChangeAction';
 import CheckAction from './CheckAction';
 import GenerateAction from './GenerateAction';
 import InstallAction from './InstallAction';
 import LinkAction from './LinkAction';
 import PublishAction from './PublishAction';
-import RebuildAction from './RebuildAction';
 import UnlinkAction from './UnlinkAction';
 import ScanAction from './ScanAction';
 import VersionAction from './VersionAction';
+import { CustomCommandFactory } from './CustomCommandFactory';
+import { CustomRushAction } from './CustomRushAction';
 
 import Telemetry from '../utilities/Telemetry';
 
 export default class RushCommandLineParser extends CommandLineParser {
   public telemetry: Telemetry;
+  public rushConfig: RushConfiguration;
 
   private _debugParameter: CommandLineFlagParameter;
 
@@ -88,24 +90,35 @@ export default class RushCommandLineParser extends CommandLineParser {
   }
 
   private _execute(): void {
-    this.telemetry = new Telemetry(RushConfiguration.loadFromDefaultLocation());
+    this.telemetry = new Telemetry(this.rushConfig);
     super.onExecute();
     this.flushTelemetry();
   }
 
   private _populateActions(): void {
     try {
-      this.addAction(new BuildAction(this));
+      this.rushConfig = RushConfiguration.loadFromDefaultLocation();
+
+      const commandLineConfigFile: string = path.join(
+        this.rushConfig.commonRushConfigFolder, RushConstants.commandLineFilename);
+
+      const commandLineConfig: CommandLineConfiguration =
+        CommandLineConfiguration.tryLoadFromFile(commandLineConfigFile);
+
       this.addAction(new ChangeAction(this));
       this.addAction(new CheckAction(this));
       this.addAction(new GenerateAction(this));
       this.addAction(new InstallAction(this));
       this.addAction(new LinkAction(this));
       this.addAction(new PublishAction(this));
-      this.addAction(new RebuildAction(this));
       this.addAction(new ScanAction(this));
       this.addAction(new UnlinkAction(this));
       this.addAction(new VersionAction(this));
+
+      CustomCommandFactory.createCommands(this, commandLineConfig)
+        .forEach((customAction: CustomRushAction) => {
+          this.addAction(customAction);
+        });
     } catch (error) {
       this._exitAndReportError(error);
     }

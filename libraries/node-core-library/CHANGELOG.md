@@ -1,6 +1,30 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Wed, 25 Oct 2017 20:03:59 GMT and should not be manually modified.
+This log was last generated on Thu, 02 Nov 2017 16:05:24 GMT and should not be manually modified.
+
+## 0.3.14
+Thu, 02 Nov 2017 16:05:24 GMT
+
+### Patches
+
+- lock the reference version between web build tools projects
+
+## 0.3.13
+Wed, 01 Nov 2017 21:06:08 GMT
+
+### Patches
+
+- Upgrade cyclic dependencies
+
+## 0.3.12
+Tue, 31 Oct 2017 21:04:04 GMT
+
+*Changes not tracked*
+
+## 0.3.11
+Tue, 31 Oct 2017 16:04:55 GMT
+
+*Changes not tracked*
 
 ## 0.3.10
 Wed, 25 Oct 2017 20:03:59 GMT

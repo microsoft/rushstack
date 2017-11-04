@@ -3,12 +3,10 @@
 
 import { expect } from 'chai';
 
-import {
-  IChangelog,
-  ChangeType,
-  RushConfiguration,
-  RushConfigurationProject
-} from '../../../index';
+import { IChangelog } from '../../../data/Changelog';
+import { ChangeType } from '../../../data/ChangeManagement';
+import RushConfiguration from '../../../data/RushConfiguration';
+import RushConfigurationProject from '../../../data/RushConfigurationProject';
 import ChangelogGenerator from '../ChangelogGenerator';
 import { IChangeInfoHash } from '../PublishUtilities';
 

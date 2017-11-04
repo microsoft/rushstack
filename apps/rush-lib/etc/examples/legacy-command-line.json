@@ -1,0 +1,47 @@
+// This file recreates the command-line options that were built into Rush prior to version 4.
+// Note that earlier versions of Rush also performed the following transformations to
+// produce the command-line that was passed to the NPM scripts in the project's
+// package.json file:
+//
+// - If "--vso" was passed to Rush, then "--color" was passed to the script instead
+// - Before running a "build" script, the "clean" script was automatically executed first
+//
+// Rush 4 no longer performs these sorts of transformations.  Instead, it aims for
+// the Rush options and script options to be as similar as possible.
+//
+// To use this example file, rename it to "command-line.json" and copy it into your
+// "common/config/rush" folder.  For more information about custom commands,
+// see the documentation at https://aka.ms/rush
+
+{
+  "$schema": "https://dev.office.com/json-schemas/rush/v4/command-line.schema.json",
+  "customCommands": [],
+
+  "customOptions": {
+    "--vso": {
+      "optionType": "flag",
+      "description": "Used for CI builds. Note that colorization of build output is now controlled by the --color flag.",
+      "associatedCommands": ["build", "rebuild"]
+    },
+
+    "--npm": {
+      "optionType": "flag",
+      "description": "For doing builds that will be published to NPM",
+      "associatedCommands": ["build", "rebuild"]
+    },
+
+    "--ship": {
+      "optionType": "flag",
+      "description": "Perform a production build, including minification and localization steps",
+      "associatedCommands": [ "build", "rebuild" ],
+      "shortName": "-s"
+    },
+
+    "--minimal": {
+      "optionType": "flag",
+      "description": "Perform a fast build, which disables certain tasks such as unit tests and linting",
+      "associatedCommands": [ "build", "rebuild" ],
+      "shortName": "-m"
+    }
+  }
+}

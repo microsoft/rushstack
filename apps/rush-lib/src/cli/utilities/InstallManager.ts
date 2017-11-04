@@ -12,15 +12,13 @@ import * as wordwrap from 'wordwrap';
 import globEscape = require('glob-escape');
 import { JsonFile } from '@microsoft/node-core-library';
 
-import {
-  AsyncRecycler,
-  RushConfiguration,
-  RushConfigurationProject,
-  RushConstants,
-  Utilities,
-  Stopwatch,
-  IPackageJson
-} from '../../index';
+import AsyncRecycler from '../../utilities/AsyncRecycler';
+import RushConfiguration from '../../data/RushConfiguration';
+import RushConfigurationProject from '../../data/RushConfigurationProject';
+import { RushConstants } from '../../RushConstants';
+import Utilities from '../../utilities/Utilities';
+import { Stopwatch } from '../../utilities/Stopwatch';
+import IPackageJson from '../../utilities/IPackageJson';
 import { IRushTempPackageJson } from '../utilities/Package';
 import ShrinkwrapFile from '../utilities/ShrinkwrapFile';
 
@@ -614,6 +612,8 @@ export default class InstallManager {
       MAX_INSTALL_ATTEMPTS,
       this._rushConfiguration.commonTempFolder);
 
+    this._fixupNpm5Regression();
+
     // Finally, create the marker file to indicate a successful install
     fsx.createFileSync(this.commonNodeModulesMarkerFilename);
     console.log('');
@@ -653,6 +653,47 @@ export default class InstallManager {
       this._rushConfiguration.commonTempFolder,
       RushConstants.rushTempProjectsFolderName,
       `${project.unscopedTempProjectName}.tgz`);
+  }
+
+  /**
+   * This is a workaround for a bug introduced in NPM 5 (and still unfixed as of NPM 5.5.1):
+   * https://github.com/npm/npm/issues/19006
+   *
+   * The regression is that "npm install" sets the package.json "version" field for the
+   * @rush-temp projects to a value like "file:projects/example.tgz", when it should be "0.0.0".
+   * This causes "rush link" to fail later, when read-package-tree tries to parse the bad version.
+   * The error looks like this:
+   *
+   * ERROR: Failed to parse package.json for foo: Invalid version: "file:projects/example.tgz"
+   *
+   * Our workaround is to rewrite the package.json files for each of the @rush-temp projects
+   * in the node_modules folder, after "npm install" completes.
+   */
+  private _fixupNpm5Regression(): void {
+    const pathToDeleteWithoutStar: string = path.join(this._rushConfiguration.commonTempFolder,
+      'node_modules', RushConstants.rushTempNpmScope);
+    // Glob can't handle Windows paths
+    const normalizedpathToDeleteWithoutStar: string
+      = Utilities.getAllReplaced(pathToDeleteWithoutStar, '\\', '/');
+
+    let anyChanges: boolean = false;
+
+    // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/*/package.json"
+    for (const packageJsonPath of glob.sync(globEscape(normalizedpathToDeleteWithoutStar) + '/*/package.json')) {
+      // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/example/package.json"
+      const packageJsonObject: IRushTempPackageJson = JsonFile.load(packageJsonPath);
+
+      // The temp projects always use "0.0.0" as their version
+      packageJsonObject.version = '0.0.0';
+
+      if (JsonFile.save(packageJsonObject, packageJsonPath, { onlyIfChanged: true })) {
+        anyChanges = true;
+      }
+    }
+
+    if (anyChanges) {
+      console.log(os.EOL + colors.yellow(wrap(`Applied workaround for NPM 5 bug`)) + os.EOL);
+    }
   }
 
   /**

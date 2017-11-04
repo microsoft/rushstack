@@ -4,7 +4,8 @@
 import * as os from 'os';
 import * as colors from 'colors';
 
-import { RushConfiguration, Utilities } from '../../index';
+import RushConfiguration from '../../data/RushConfiguration';
+import Utilities from '../../utilities/Utilities';
 
 export default class GitPolicy {
   public static check(rushConfiguration: RushConfiguration): boolean {

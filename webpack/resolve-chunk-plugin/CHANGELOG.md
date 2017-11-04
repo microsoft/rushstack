@@ -1,6 +1,13 @@
 # Change Log - @microsoft/resolve-chunk-plugin
 
-This log was last generated on Tue, 24 Oct 2017 18:17:12 GMT and should not be manually modified.
+This log was last generated on Thu, 02 Nov 2017 16:05:24 GMT and should not be manually modified.
+
+## 1.0.5
+Thu, 02 Nov 2017 16:05:24 GMT
+
+### Patches
+
+- lock the reference version between web build tools projects
 
 ## 1.0.4
 Tue, 24 Oct 2017 18:17:12 GMT
