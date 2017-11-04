@@ -38,7 +38,7 @@ export class CustomRushAction extends BaseRushAction {
   private _fromFlag: CommandLineStringListParameter;
   private _toFlag: CommandLineStringListParameter;
   private _verboseParameter: CommandLineFlagParameter;
-  private _parallelismParameter: CommandLineIntegerParameter;
+  private _parallelismParameter: CommandLineIntegerParameter | undefined;
 
   constructor(private _parser: RushCommandLineParser,
     options: ICommandLineActionOptions,
@@ -71,7 +71,12 @@ export class CustomRushAction extends BaseRushAction {
     const stopwatch: Stopwatch = Stopwatch.start();
 
     const isQuietMode: boolean = !(this._verboseParameter.value);
-    const parallelism: number = (this._parallelized ? this._parallelismParameter.value : 1);
+
+    // if this is parallizable, then use the value from the flag (undefined or a number),
+    // if this is not parallelized, then use 1 core
+    const parallelism: number | undefined = this._isParallelized()
+      ? this._parallelismParameter!.value
+      : 1;
 
     // collect all custom flags here
     const customFlags: string[] = [];
@@ -117,12 +122,14 @@ export class CustomRushAction extends BaseRushAction {
   }
 
   protected onDefineParameters(): void {
-    this._parallelismParameter = this.defineIntegerParameter({
-      parameterLongName: '--parallelism',
-      parameterShortName: '-p',
-      key: 'COUNT',
-      description: 'Change limit the number of simultaneous builds. This value defaults to the number of CPU cores'
-    });
+    if (this._isParallelized()) {
+      this._parallelismParameter = this.defineIntegerParameter({
+        parameterLongName: '--parallelism',
+        parameterShortName: '-p',
+        key: 'COUNT',
+        description: 'Change limit the number of simultaneous builds. This value defaults to the number of CPU cores'
+      });
+    }
     this._toFlag = this.defineStringListParameter({
       parameterLongName: '--to',
       parameterShortName: '-t',
@@ -162,6 +169,12 @@ export class CustomRushAction extends BaseRushAction {
         });
       }
     });
+  }
+
+  private _isParallelized(): boolean {
+    return this.options.actionVerb === 'build'
+      || this.options.actionVerb === 'rebuild'
+      || this._parallelized;
   }
 
   private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {
