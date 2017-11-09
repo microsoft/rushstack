@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/ts-command-line",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "An object-oriented command-line parser for TypeScript",
   "repository": {
     "type": "git",
@@ -9,9 +9,7 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
-    "build": "gulp",
-    "test": "gulp test",
-    "clean": "gulp clean"
+    "build": "gulp test --clean"
   },
   "license": "MIT",
   "dependencies": {

@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-sass",
-  "version": "4.1.12",
+  "version": "4.1.13",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -10,13 +10,11 @@
     "url": "https://github.com/microsoft/web-build-tools"
   },
   "scripts": {
-    "build": "gulp",
-    "clean": "gulp clean",
-    "test": "gulp"
+    "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.2.5",
-    "@microsoft/load-themed-styles": "1.7.7",
+    "@microsoft/gulp-core-build": "3.2.6",
+    "@microsoft/load-themed-styles": "1.7.8",
     "@types/node": "6.0.88",
     "autoprefixer": "6.3.7",
     "gulp": "~3.9.1",

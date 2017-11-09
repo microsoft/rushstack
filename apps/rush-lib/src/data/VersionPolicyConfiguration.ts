@@ -34,7 +34,8 @@ export interface IIndividualVersionJson extends IVersionPolicyJson {
  * @beta
  */
 export class VersionPolicyConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(path.join(__dirname, '../version-policies.schema.json'));
+  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
+    path.join(__dirname, '../schemas/version-policies.schema.json'));
 
   private _versionPolicies: Map<string, VersionPolicy>;
 

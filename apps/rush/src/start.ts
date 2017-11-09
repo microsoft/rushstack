@@ -11,8 +11,8 @@ import {
 } from '@microsoft/rush-lib';
 import Utilities from '@microsoft/rush-lib/lib/utilities/Utilities';
 
-import MinimalRushConfiguration from './MinimalRushConfiguration';
-import RushEngine from './RushVersionManager';
+import { MinimalRushConfiguration } from './MinimalRushConfiguration';
+import { RushVersionSelector } from './RushVersionSelector';
 
 const RUSH_PURGE_OPTION_NAME: string = 'purge';
 
@@ -29,11 +29,11 @@ if (process.argv[2] === RUSH_PURGE_OPTION_NAME) {
   // If we're inside a repo folder, and it's requesting a different version, then use the RushVersionManager to
   //  install it
   if (configuration && configuration.rushVersion !== currentPackageJson.version) {
-    const versionManager: RushEngine = new RushEngine(
+    const versionSelector: RushVersionSelector = new RushVersionSelector(
       configuration.homeFolder,
       currentPackageJson.version
     );
-    const rushWrapper: () => void = versionManager.ensureRushVersionInstalled(configuration.rushVersion);
+    const rushWrapper: () => void = versionSelector.ensureRushVersionInstalled(configuration.rushVersion);
     rushWrapper();
   } else {
     // Otherwise invoke the rush-lib that came with this rush package

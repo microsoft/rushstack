@@ -1,0 +1,15 @@
+{
+  "customOptions": {
+    "--no-color": {
+      "optionType": "flag",
+      "description": "disable colors in the build log, defaults to 'true'",
+      "associatedCommands": [ "build", "rebuild" ]
+    },
+
+    "--production": {
+      "optionType": "flag",
+      "description": "Perform a production build, including minification and localization steps",
+      "associatedCommands": [ "build", "rebuild" ]
+    }
+  }
+}

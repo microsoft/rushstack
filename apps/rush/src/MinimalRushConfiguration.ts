@@ -13,7 +13,7 @@ interface IMinimalRushConfigurationJson {
  * Represents a minimal subset of the rush.json configuration file. It provides the information necessary to
  *  decide which version of Rush should be installed/used.
  */
-export default class MinimalRushConfiguration {
+export class MinimalRushConfiguration {
   private _rushVersion: string;
   private _homeFolder: string;
 

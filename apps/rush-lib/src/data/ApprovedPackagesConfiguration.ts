@@ -48,7 +48,7 @@ export class ApprovedPackagesItem {
  */
 export class ApprovedPackagesConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../approved-packages.schema.json'));
+    path.join(__dirname, '../schemas/approved-packages.schema.json'));
 
   public items: ApprovedPackagesItem[] = [];
 

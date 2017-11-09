@@ -2,6 +2,32 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "4.0.0",
+      "tag": "@microsoft/rush_v4.0.0",
+      "date": "Sat, 4 Nov 2017 03:22:28 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "See here for major change summary: https://github.com/Microsoft/web-build-tools/wiki/Rush-~-Custom-commands"
+          },
+          {
+            "comment": "Adding custom commands and options."
+          },
+          {
+            "comment": "Adding rush version selector."
+          },
+          {
+            "comment": "Updating the semantics of rush change."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-lib\" from `3.0.20` to `4.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.20",
       "tag": "@microsoft/rush_v3.0.20",
       "date": "Thu, 19 Oct 2017 23:01:49 GMT",
