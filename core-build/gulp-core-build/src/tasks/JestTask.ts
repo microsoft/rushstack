@@ -7,6 +7,7 @@ import { IBuildConfig } from '../IBuildConfig';
 import * as Gulp from 'gulp';
 import * as Jest from 'jest-cli';
 import * as globby from 'globby';
+import { JsonFile } from '@microsoft/node-core-library';
 
 /**
  * Configuration for JestTask
@@ -80,19 +81,31 @@ export class JestTask extends GulpTask<IJestConfig> {
       'config', DEFAULT_JEST_CONFIG_FILE_NAME);
 
     this._copySnapshots(this.buildConfig.srcFolder, this.buildConfig.libFolder);
+
+    let jestConfigFromFile: any = {}; // tslint:disable-line:no-any
+    if (fsx.existsSync(configFileFullPath)) {
+      jestConfigFromFile = JsonFile.load(configFileFullPath);
+    }
+
     Jest.runCLI(
       {
         ci: this.buildConfig.production,
         config: configFileFullPath,
-        coverage: this.taskConfig.coverage,
+        collectCoverageFrom: jestConfigFromFile.collectCoverageFrom ||
+          ['lib/**/*.js?(x)', '!lib/resx-strings/**', '!lib/**/test/**'],
+        coverage: (jestConfigFromFile.collectCoverage === undefined) ?
+          this.taskConfig.coverage : jestConfigFromFile.collectCoverage,
+        coverageReporters: jestConfigFromFile.coverageReporters || ['json', 'html'],
+        coverageDirectory: path.join(this.buildConfig.tempFolder, 'coverage'),
         maxWorkers: 1,
-        runInBand: true,
-        updateSnapshot: !this.buildConfig.production,
+        moduleDirectories: ['node_modules', this.buildConfig.libFolder],
+        reporters: [path.join(__dirname, 'JestReporter.js')],
         rootDir: this.buildConfig.rootPath,
+        runInBand: true,
         testMatch: ['**/*.test.js?(x)'],
-        testPathIgnorePatterns: ['<rootDir>/(src|lib-amd|lib-es6|coverage|build|docs|node_modules)/'],
-        collectCoverageFrom: ['lib/**/*.js?(x)'],
-        reporters: [path.join(__dirname, 'JestReporter.js')]
+        testPathIgnorePatterns: jestConfigFromFile.testPathIgnorePatterns ||
+          ['<rootDir>/(src|lib-amd|lib-es6|coverage|build|docs|node_modules)/'],
+        updateSnapshot: !this.buildConfig.production
       },
       [this.buildConfig.rootPath],
       (result) => {
