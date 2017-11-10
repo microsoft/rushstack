@@ -127,7 +127,8 @@ export class CustomRushAction extends BaseRushAction {
         parameterLongName: '--parallelism',
         parameterShortName: '-p',
         key: 'COUNT',
-        description: 'Limit the number of simultaneous executions. This value defaults to the number of CPU cores.'
+        description: 'Specify the number of concurrent build processes.'
+          + ' If omitted, the parallelism will be based on the number of CPU cores.'
       });
     }
     this._toFlag = this.defineStringListParameter({
