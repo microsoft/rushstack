@@ -27,13 +27,30 @@ export default class TaskRunner {
   private _parallelism: number;
   private _currentActiveTasks: number;
 
-  constructor(quietMode: boolean = false, parallelism?: number) {
+  constructor(quietMode: boolean, parallelism: number | undefined) {
     this._tasks = new Map<string, ITask>();
     this._buildQueue = [];
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
 
-    this._parallelism = parallelism || os.cpus().length;
+    if (parallelism) {
+      this._parallelism = parallelism;
+    } else {
+      // If an explicit parallelism number wasn't provided, then choose a sensible
+      // default.
+      const numberOfCores: number = os.cpus().length;
+
+      if (os.platform() === 'win32') {
+        // On desktop Windows, some people have complained that their system becomes
+        // sluggish if Rush is using all the CPU cores.  Leave one thread for
+        // other operations.
+        this._parallelism = Math.max(numberOfCores - 1, 1);
+      } else {
+        // Unix-like operating systems have more balanced scheduling, so default
+        // to the number of CPU cores
+        this._parallelism = numberOfCores;
+      }
+    }
   }
 
   /**
