@@ -105,8 +105,9 @@ export default class RushCommandLineParser extends CommandLineParser {
     try {
       let  commandLineConfig: CommandLineConfiguration | undefined = undefined;
 
-      if (RushConfiguration.tryFindRushJsonLocation()) {
-        this.rushConfig = RushConfiguration.loadFromDefaultLocation();
+      const rushJsonFilename: string | undefined = RushConfiguration.tryFindRushJsonLocation();
+      if (rushJsonFilename) {
+        this.rushConfig = RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
 
         const commandLineConfigFile: string = path.join(
           this.rushConfig.commonRushConfigFolder, RushConstants.commandLineFilename);
