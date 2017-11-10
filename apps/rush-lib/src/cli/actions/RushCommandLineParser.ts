@@ -26,7 +26,7 @@ import { CustomRushAction } from './CustomRushAction';
 import Telemetry from '../utilities/Telemetry';
 
 export default class RushCommandLineParser extends CommandLineParser {
-  public telemetry: Telemetry;
+  public telemetry: Telemetry | undefined;
   public rushConfig: RushConfiguration;
 
   private _debugParameter: CommandLineFlagParameter;
@@ -90,9 +90,15 @@ export default class RushCommandLineParser extends CommandLineParser {
   }
 
   private _execute(): void {
-    this.telemetry = new Telemetry(this.rushConfig);
+    if (this.rushConfig) {
+      this.telemetry = new Telemetry(this.rushConfig);
+    }
+
     super.onExecute();
-    this.flushTelemetry();
+
+    if (this.telemetry) {
+      this.flushTelemetry();
+    }
   }
 
   private _populateActions(): void {
