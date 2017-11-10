@@ -191,11 +191,13 @@ export class CustomRushAction extends BaseRushAction {
       }
     });
 
-    this._parser.telemetry.log({
-      name: this.options.actionVerb,
-      duration: stopwatch.duration,
-      result: success ? 'Succeeded' : 'Failed',
-      extraData
-    });
+    if (this._parser.telemetry) {
+      this._parser.telemetry.log({
+        name: this.options.actionVerb,
+        duration: stopwatch.duration,
+        result: success ? 'Succeeded' : 'Failed',
+        extraData
+      });
+    }
   }
 }
