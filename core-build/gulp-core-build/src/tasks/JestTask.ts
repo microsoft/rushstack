@@ -7,7 +7,6 @@ import { IBuildConfig } from '../IBuildConfig';
 import * as Gulp from 'gulp';
 import * as Jest from 'jest-cli';
 import * as globby from 'globby';
-import { JsonFile } from '@microsoft/node-core-library';
 
 /**
  * Configuration for JestTask
@@ -92,11 +91,6 @@ export class JestTask extends GulpTask<IJestConfig> {
       'config', 'jest', DEFAULT_JEST_CONFIG_FILE_NAME);
 
     this._copySnapshots(this.buildConfig.srcFolder, this.buildConfig.libFolder);
-
-    let jestConfigFromFile: any = {}; // tslint:disable-line:no-any
-    if (fsx.existsSync(configFileFullPath)) {
-      jestConfigFromFile = JsonFile.load(configFileFullPath);
-    }
 
     Jest.runCLI(
       {
