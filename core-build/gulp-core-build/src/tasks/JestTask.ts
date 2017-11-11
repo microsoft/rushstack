@@ -11,7 +11,7 @@ import { JsonFile } from '@microsoft/node-core-library';
 
 /**
  * Configuration for JestTask
- * @public
+ * @alpha
  */
 export interface IJestConfig {
   /**
@@ -20,16 +20,24 @@ export interface IJestConfig {
   isEnabled?: boolean;
 
   /**
-   * The jest config file relative to project root directory
-   * If not provided, the default value is 'jest.config.json'.
+   * Same as Jest CLI option collectCoverageFrom
    */
-  configFilePath?: string;
+  collectCoverageFrom?: string[];
 
   /**
-   * Indicates that test coverage information should be collected and reported in the output
-   * If not provided, the default value is true.
+   * Same as Jest CLI option coverage
    */
   coverage?: boolean;
+
+  /**
+   * Same as Jest CLI option coverageReporters
+   */
+  coverageReporters?: string[];
+
+  /**
+   * Same as Jest CLI option testPathIgnorePatterns
+   */
+  testPathIgnorePatterns?: string[];
 }
 
 const DEFAULT_JEST_CONFIG_FILE_NAME: string = 'jest.config.json';
@@ -51,14 +59,17 @@ export function _isJestEnabled(rootFolder: string): boolean {
 
 /**
  * This task takes in a map of dest: [sources], and copies items from one place to another.
- * @public
+ * @alpha
  */
 export class JestTask extends GulpTask<IJestConfig> {
 
   constructor() {
     super('jest',
     {
-      coverage: true
+      collectCoverageFrom: ['lib/**/*.js?(x)', '!lib/**/test/**'],
+      coverage: true,
+      coverageReporters: ['json', 'html'],
+      testPathIgnorePatterns: ['<rootDir>/(src|lib-amd|lib-es6|coverage|build|docs|node_modules)/']
     });
   }
 
@@ -78,7 +89,7 @@ export class JestTask extends GulpTask<IJestConfig> {
     completeCallback: (error?: string | Error) => void
   ): void {
     const configFileFullPath: string = path.join(this.buildConfig.rootPath,
-      'config', DEFAULT_JEST_CONFIG_FILE_NAME);
+      'config', 'jest', DEFAULT_JEST_CONFIG_FILE_NAME);
 
     this._copySnapshots(this.buildConfig.srcFolder, this.buildConfig.libFolder);
 
@@ -91,11 +102,9 @@ export class JestTask extends GulpTask<IJestConfig> {
       {
         ci: this.buildConfig.production,
         config: configFileFullPath,
-        collectCoverageFrom: jestConfigFromFile.collectCoverageFrom ||
-          ['lib/**/*.js?(x)', '!lib/resx-strings/**', '!lib/**/test/**'],
-        coverage: (jestConfigFromFile.collectCoverage === undefined) ?
-          this.taskConfig.coverage : jestConfigFromFile.collectCoverage,
-        coverageReporters: jestConfigFromFile.coverageReporters || ['json', 'html'],
+        collectCoverageFrom: this.taskConfig.collectCoverageFrom,
+        coverage: this.taskConfig.coverage,
+        coverageReporters: this.taskConfig.coverageReporters,
         coverageDirectory: path.join(this.buildConfig.tempFolder, 'coverage'),
         maxWorkers: 1,
         moduleDirectories: ['node_modules', this.buildConfig.libFolder],
@@ -103,8 +112,7 @@ export class JestTask extends GulpTask<IJestConfig> {
         rootDir: this.buildConfig.rootPath,
         runInBand: true,
         testMatch: ['**/*.test.js?(x)'],
-        testPathIgnorePatterns: jestConfigFromFile.testPathIgnorePatterns ||
-          ['<rootDir>/(src|lib-amd|lib-es6|coverage|build|docs|node_modules)/'],
+        testPathIgnorePatterns: this.taskConfig.testPathIgnorePatterns,
         updateSnapshot: !this.buildConfig.production
       },
       [this.buildConfig.rootPath],

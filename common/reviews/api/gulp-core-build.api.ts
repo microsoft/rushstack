@@ -188,17 +188,19 @@ interface IExecutable {
   onRegister?: () => void;
 }
 
-// @public
+// @alpha
 interface IJestConfig {
-  configFilePath?: string;
+  collectCoverageFrom?: string[];
   coverage?: boolean;
+  coverageReporters?: string[];
   isEnabled?: boolean;
+  testPathIgnorePatterns?: string[];
 }
 
 // @public
 export function initialize(gulp: typeof Gulp): void;
 
-// @public
+// @alpha
 class JestTask extends GulpTask<IJestConfig> {
   constructor();
   // (undocumented)
