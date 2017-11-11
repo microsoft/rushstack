@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/gulp-core-build",
-      "comment": "Update Jest task to allow some settings in jest.config.json to override CLI options",
+      "comment": "Allow settings in jest.json to override Jest task's default options",
       "type": "patch"
     }
   ],
