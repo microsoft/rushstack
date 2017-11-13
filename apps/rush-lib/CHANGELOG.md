@@ -16,7 +16,7 @@ Sat, 4 Nov 2017 03:22:28 GMT
 
 ### Breaking changes
 
-- See here for major change summary: https://github.com/Microsoft/web-build-tools/wiki/Rush-~-Custom-commands
+- Complete release notes are here: https://github.com/Microsoft/web-build-tools/wiki#november-3-2017---rush-4-released
 - Adding custom commands and options.
 - Adding rush version selector.
 - Updating the semantics of rush change.

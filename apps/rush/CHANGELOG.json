@@ -31,7 +31,7 @@
       "comments": {
         "major": [
           {
-            "comment": "See here for major change summary: https://github.com/Microsoft/web-build-tools/wiki/Rush-~-Custom-commands"
+            "comment": "Complete release notes are here: https://github.com/Microsoft/web-build-tools/wiki#november-3-2017---rush-4-released"
           },
           {
             "comment": "Adding custom commands and options."
