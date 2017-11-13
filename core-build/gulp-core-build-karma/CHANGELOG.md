@@ -1,6 +1,11 @@
 # Change Log - @microsoft/gulp-core-build-karma
 
-This log was last generated on Mon, 06 Nov 2017 17:04:18 GMT and should not be manually modified.
+This log was last generated on Mon, 13 Nov 2017 17:04:50 GMT and should not be manually modified.
+
+## 4.3.6
+Mon, 13 Nov 2017 17:04:50 GMT
+
+*Version update only*
 
 ## 4.3.5
 Mon, 06 Nov 2017 17:04:18 GMT

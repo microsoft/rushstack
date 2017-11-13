@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Mon, 06 Nov 2017 17:04:18 GMT and should not be manually modified.
+This log was last generated on Mon, 13 Nov 2017 17:04:50 GMT and should not be manually modified.
+
+## 3.2.7
+Mon, 13 Nov 2017 17:04:50 GMT
+
+### Patches
+
+- Allow settings in jest.json to override Jest task's default options
 
 ## 3.2.6
 Mon, 06 Nov 2017 17:04:18 GMT

@@ -1,6 +1,11 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Mon, 06 Nov 2017 17:04:18 GMT and should not be manually modified.
+This log was last generated on Mon, 13 Nov 2017 17:04:50 GMT and should not be manually modified.
+
+## 1.0.8
+Mon, 13 Nov 2017 17:04:50 GMT
+
+*Version update only*
 
 ## 1.0.7
 Mon, 06 Nov 2017 17:04:18 GMT
