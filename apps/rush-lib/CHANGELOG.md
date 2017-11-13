@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush-lib
 
-This log was last generated on Sat, 04 Nov 2017 01:29:27 GMT and should not be manually modified.
+This log was last generated on Mon, 13 Nov 2017 18:34:30 GMT and should not be manually modified.
+
+## 4.0.1
+Mon, 13 Nov 2017 18:34:30 GMT
+
+### Patches
+
+- Fix the regression where "rush -h" didn't work outside a repo folder
+- Reduce the default parallelism on Windows platform
+- Force change log name to be the same as package name to handle the error case when package is renamed but change log is not
 
 ## 4.0.0
 Sat, 4 Nov 2017 03:22:28 GMT
@@ -27,9 +36,9 @@ Fri, 06 Oct 2017 22:44:31 GMT
 ### Patches
 
 - Enable strickNullChecks
-- Fix a bug in "rush version" that devdependency does not get bumped if there is no dependency. 
-- Fix a bug in "rush change" so it handles rename properly. 
-- Add npm tag support in "rush publish". 
+- Fix a bug in "rush version" that devdependency does not get bumped if there is no dependency.
+- Fix a bug in "rush change" so it handles rename properly.
+- Add npm tag support in "rush publish".
 
 ## 3.0.18
 Tue, 26 Sep 2017 13:51:05 GMT
@@ -222,7 +231,7 @@ Sun, 05 Feb 2017 01:21:30 GMT
 ## 1.5.1
 Tue, 24 Jan 2017 03:26:06 GMT
 
-*Changes not tracked*
+*Version update only*
 
 ## 1.5.0
 Sun, 22 Jan 2017 02:04:57 GMT

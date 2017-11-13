@@ -2,6 +2,24 @@
   "name": "@microsoft/rush-lib",
   "entries": [
     {
+      "version": "4.0.1",
+      "tag": "@microsoft/rush-lib_v4.0.1",
+      "date": "Mon, 13 Nov 2017 18:34:30 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix the regression where \"rush -h\" didn't work outside a repo folder"
+          },
+          {
+            "comment": "Reduce the default parallelism on Windows platform"
+          },
+          {
+            "comment": "Force change log name to be the same as package name to handle the error case when package is renamed but change log is not"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.0.0",
       "tag": "@microsoft/rush-lib_v4.0.0",
       "date": "Sat, 4 Nov 2017 03:22:28 GMT",
