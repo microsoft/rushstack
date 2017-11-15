@@ -19,7 +19,7 @@ abstract class AstItemContainer extends AstItem {
    *
    * @param memberName - the name of the exported AstItem
    */
-  public getMemberItem(memberName: string): AstItem {
+  public getMemberItem(memberName: string): AstItem | undefined {
     return this._memberItems.get(memberName);
   }
 

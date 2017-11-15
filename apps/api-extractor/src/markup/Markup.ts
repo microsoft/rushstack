@@ -333,8 +333,8 @@ export class Markup {
       const previousElement: T | undefined = i - 1 >= 0 ? elements[i - 1] : undefined;
       const nextElement: T | undefined = i + 1 < elements.length ? elements[i + 1] : undefined;
 
-      const paragraphBefore: boolean = previousElement && previousElement.kind === 'paragraph';
-      const paragraphAfter: boolean = nextElement && nextElement.kind === 'paragraph';
+      const paragraphBefore: boolean = !!(previousElement && previousElement.kind === 'paragraph');
+      const paragraphAfter: boolean = !!(nextElement && nextElement.kind === 'paragraph');
 
       if (element.kind === 'paragraph') {
         if (i === 0 || i === elements.length - 1 || paragraphBefore) {
@@ -385,8 +385,10 @@ export class Markup {
           buffer.text += '\n\n';
           break;
         case 'table':
-          buffer.text += Markup.extractTextContent([element.header])
-            + Markup.extractTextContent(element.rows);
+          if (element.header) {
+            buffer.text += Markup.extractTextContent([element.header]);
+          }
+          buffer.text += Markup.extractTextContent(element.rows);
           break;
         case 'table-cell':
           buffer.text += Markup.extractTextContent(element.elements);

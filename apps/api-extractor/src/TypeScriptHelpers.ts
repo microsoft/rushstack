@@ -140,7 +140,7 @@ export default class TypeScriptHelpers {
 
     const result: string[] = [];
     let index: number = 0;
-    let match: RegExpExecArray;
+    let match: RegExpExecArray | null;
 
     do {
       match = regExp.exec(text);

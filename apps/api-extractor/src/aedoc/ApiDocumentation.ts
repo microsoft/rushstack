@@ -29,7 +29,7 @@ export interface IReferenceResolver {
   resolve(
     apiDefinitionRef: ApiDefinitionReference,
     astPackage: AstPackage,
-    warnings: string[]): ResolvedApiItem;
+    warnings: string[]): ResolvedApiItem | undefined;
 }
 
 /**
@@ -215,7 +215,7 @@ export default class ApiDocumentation {
     let parsing: boolean = true;
 
       while (parsing) {
-      const token: Token = tokenizer.peekToken();
+      const token: Token | undefined = tokenizer.peekToken();
       if (!token) {
         parsing = false; // end of stream
         // Report error if @inheritdoc is deprecated but no @deprecated tag present here
@@ -243,7 +243,7 @@ export default class ApiDocumentation {
           case '@param':
             tokenizer.getToken();
             this._checkInheritDocStatus(token.tag);
-            const param: IAedocParameter = this._parseParam(tokenizer);
+            const param: IAedocParameter | undefined = this._parseParam(tokenizer);
             if (param) {
                this.parameters[param.name] = param;
             }
@@ -338,24 +338,24 @@ export default class ApiDocumentation {
     }
   }
 
-  protected _parseParam(tokenizer: Tokenizer): IAedocParameter {
-    const paramDescriptionToken: Token = tokenizer.getToken();
+  protected _parseParam(tokenizer: Tokenizer): IAedocParameter | undefined {
+    const paramDescriptionToken: Token | undefined = tokenizer.getToken();
     if (!paramDescriptionToken) {
       this.reportError('The @param tag is missing a parameter description');
-      return;
+      return undefined;
     }
     const hyphenIndex: number = paramDescriptionToken ? paramDescriptionToken.text.indexOf('-') : -1;
     if (hyphenIndex < 0) {
       this.reportError('The @param tag is missing the hyphen that delimits the parameter name '
         + ' and description');
-      return;
+      return undefined;
     } else {
       const name: string = paramDescriptionToken.text.slice(0, hyphenIndex).trim();
       const comment: string = paramDescriptionToken.text.substr(hyphenIndex + 1).trim();
 
       if (!comment) {
         this.reportError('The @param tag is missing a parameter description');
-        return;
+        return undefined;
       }
 
       const commentTextElements: MarkupBasicElement[] = Markup.createTextElements(comment);
@@ -377,8 +377,12 @@ export default class ApiDocumentation {
    * ensures that the reference is to an API item that is not 'Internal'.
    */
   private _completeLinks(): void {
-    while (this.incompleteLinks.length) {
-      const codeLink: IMarkupApiLink = this.incompleteLinks.pop();
+    for ( ; ; ) {
+      const codeLink: IMarkupApiLink | undefined = this.incompleteLinks.pop();
+      if (!codeLink) {
+        break;
+      }
+
       const parts: IApiDefinitionReferenceParts = {
         scopeName: codeLink.target.scopeName,
         packageName: codeLink.target.packageName,
@@ -387,7 +391,7 @@ export default class ApiDocumentation {
       };
 
       const apiDefinitionRef: ApiDefinitionReference = ApiDefinitionReference.createFromParts(parts);
-      const resolvedAstItem: ResolvedApiItem =  this.referenceResolver.resolve(
+      const resolvedAstItem: ResolvedApiItem | undefined =  this.referenceResolver.resolve(
         apiDefinitionRef,
         this.context.package,
         this.warnings
@@ -411,8 +415,12 @@ export default class ApiDocumentation {
    * for all API items.
    */
   private _completeInheritdocs(warnings: string[]): void {
-    while (this.incompleteInheritdocs.length) {
-      const token: Token = this.incompleteInheritdocs.pop();
+    for ( ; ; ) {
+      const token: Token | undefined = this.incompleteInheritdocs.pop();
+      if (!token) {
+        break;
+      }
+
       DocElementParser.parseInheritDoc(this, token, warnings);
     }
   }

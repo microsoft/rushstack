@@ -43,7 +43,7 @@ export default class DocElementParser {
 
     const markupElements: MarkupBasicElement[] = [];
     let parsing: boolean = true;
-    let token: Token;
+    let token: Token | undefined;
 
     while (parsing) {
       token = tokenizer.peekToken();
@@ -66,7 +66,7 @@ export default class DocElementParser {
             documentation.isDocInherited = true;
             break;
           case '@link' :
-            const linkMarkupElement: MarkupElement = this.parseLinkTag(documentation, token);
+            const linkMarkupElement: MarkupElement | undefined = this.parseLinkTag(documentation, token);
             if (linkMarkupElement) {
               // Push to linkMarkupElement to retain position in the documentation
               markupElements.push(linkMarkupElement);
@@ -101,7 +101,7 @@ export default class DocElementParser {
   /**
    * This method parses the semantic information in an \@link JSDoc tag, creates and returns a
    * MarkupElement with the corresponding information. If the corresponding inline tag \@link is
-   * not formatted correctly an error will be reported.
+   * not formatted correctly an error will be reported and undefined is returned.
    *
    * The format for the \@link tag is {\@link URL or API defintion reference | display text}, where
    * the '|' is only needed if the optional display text is given.
@@ -112,18 +112,17 @@ export default class DocElementParser {
    * \{@link @microsoft/sp-core-library:Guid.newGuid | new Guid Object \}
    * \{@link @microsoft/sp-core-library:Guid.newGuid \}
    */
-  public static parseLinkTag(documentation: ApiDocumentation, tokenItem: Token): MarkupBasicElement {
+  public static parseLinkTag(documentation: ApiDocumentation, tokenItem: Token): MarkupBasicElement | undefined {
     if (!tokenItem.text) {
       documentation.reportError('The {@link} tag must include a URL or API item reference');
-       return;
+      return undefined;
     }
 
     // Make sure there are no extra pipes
     const pipeSplitContent: string[] = tokenItem.text.split('|').map(value => {
-      if (value) {
-        return value.trim();
-      }
+      return value ? value.trim() : value;
     });
+
     if (pipeSplitContent.length > 2) {
       documentation.reportError('The {@link} tag contains more than one pipe character ("|")');
       return undefined;
@@ -136,7 +135,7 @@ export default class DocElementParser {
 
     // If a display name is given, ensure it only contains characters for words.
     if (displayTextPart) {
-      const match: RegExpExecArray | undefined = this._displayTextBadCharacterRegEx.exec(displayTextPart);
+      const match: RegExpExecArray | null = this._displayTextBadCharacterRegEx.exec(displayTextPart);
       if (match) {
         documentation.reportError(`The {@link} tag\'s display text contains an unsupported`
           + ` character: "${match[0]}"`);
@@ -162,7 +161,7 @@ export default class DocElementParser {
       linkMarkupElement = Markup.createWebLink(displayTextElements, addressPart);
     } else {
       // we are processing an API definition reference
-      const apiDefitionRef: ApiDefinitionReference = ApiDefinitionReference.createFromString(
+      const apiDefitionRef: ApiDefinitionReference | undefined = ApiDefinitionReference.createFromString(
         addressPart,
         documentation.reportError
       );
@@ -212,7 +211,7 @@ export default class DocElementParser {
 
     // Create the IApiDefinitionReference object
     // Deconstruct the API reference expression 'scopeName/packageName:exportName.memberName'
-    const apiDefinitionRef: ApiDefinitionReference = ApiDefinitionReference.createFromString(
+    const apiDefinitionRef: ApiDefinitionReference | undefined = ApiDefinitionReference.createFromString(
       token.text,
       documentation.reportError
     );
@@ -223,7 +222,7 @@ export default class DocElementParser {
     }
 
     // Atempt to locate the apiDefinitionRef
-    const resolvedAstItem: ResolvedApiItem = documentation.referenceResolver.resolve(
+    const resolvedAstItem: ResolvedApiItem | undefined = documentation.referenceResolver.resolve(
       apiDefinitionRef,
       documentation.context.package,
       warnings
@@ -254,20 +253,20 @@ export default class DocElementParser {
     // Add additional cases if needed
     switch (resolvedAstItem.kind) {
       case AstItemKind.Function:
-        documentation.parameters = resolvedAstItem.params;
-        documentation.returnsMessage = resolvedAstItem.returnsMessage;
+        documentation.parameters = resolvedAstItem.params || { };
+        documentation.returnsMessage = resolvedAstItem.returnsMessage || [];
         break;
       case AstItemKind.Method:
       case AstItemKind.Constructor:
-        documentation.parameters = resolvedAstItem.params;
-        documentation.returnsMessage = resolvedAstItem.returnsMessage;
+        documentation.parameters = resolvedAstItem.params || { };
+        documentation.returnsMessage = resolvedAstItem.returnsMessage || [];
         break;
     }
 
     // Check if inheritdoc is depreacted
     // We need to check if this documentation has a deprecated message
     // but it may not appear until after this token.
-    if (resolvedAstItem.deprecatedMessage.length > 0) {
+    if (resolvedAstItem.deprecatedMessage && resolvedAstItem.deprecatedMessage.length > 0) {
       documentation.isDocInheritedDeprecated = true;
     }
   }

@@ -24,7 +24,7 @@ class TestTokenizer extends Tokenizer {
     return this._tokenizeDocs(docs);
   }
 
-  public tokenizeInline(docs: string): Token {
+  public tokenizeInline(docs: string): Token | undefined {
     return this._tokenizeInline(docs);
   }
 }
@@ -59,10 +59,10 @@ describe('Tokenizer tests', function (): void {
     it('tokenizeInline()', function (): void {
       const token: string = '{    @link   https://bing.com  |  Bing  }';
       const expectedToken: Token = new Token(TokenType.InlineTag, '@link', 'https://bing.com | Bing');
-      const actualToken: Token = testTokenizer.tokenizeInline(token);
-      assert.equal(expectedToken.type, actualToken.type);
-      assert.equal(expectedToken.tag, actualToken.tag);
-      assert.equal(expectedToken.text, actualToken.text);
+      const actualToken: Token | undefined = testTokenizer.tokenizeInline(token);
+      assert.equal(expectedToken.type, actualToken!.type);
+      assert.equal(expectedToken.tag, actualToken!.tag);
+      assert.equal(expectedToken.text, actualToken!.text);
     });
   });
 });

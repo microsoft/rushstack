@@ -36,7 +36,7 @@ export default class AstMember extends AstItem {
    * The type of the member item, if specified as a type literal expression.  Otherwise,
    * this field is undefined.
    */
-  public typeLiteral: AstStructuredType;
+  public typeLiteral: AstStructuredType | undefined;
 
   constructor(options: IAstItemOptions) {
     super(options);
@@ -95,7 +95,7 @@ export default class AstMember extends AstItem {
    */
   public getDeclarationLine(property?: {type: string; readonly: boolean}): string {
     if (this.typeLiteral || !!property) {
-      const accessModifier: string =
+      const accessModifier: string | undefined =
         this.accessModifier ? ApiAccessModifier[this.accessModifier].toLowerCase() : undefined;
 
       let result: string = accessModifier ? `${accessModifier} ` : '';
