@@ -18,6 +18,7 @@ import AstItemContainer from './ast/AstItemContainer';
 import AstPackage from './ast/AstPackage';
 import ResolvedApiItem from './ResolvedApiItem';
 import { ApiJsonFile } from './api/ApiJsonFile';
+import { IReferenceResolver } from './aedoc/ApiDocumentation';
 
 /**
  * Used to describe a parsed package name in the form of
@@ -44,7 +45,7 @@ export interface IParsedScopeName {
  * To use DocItemLoader: provide a projectFolder to construct a instance of the DocItemLoader,
  * then use DocItemLoader.getItem to retrieve the ApiItem of a particular API item.
  */
-export default class DocItemLoader {
+export default class DocItemLoader implements IReferenceResolver {
   private _cache: Map<string, IApiPackage>;
   private _projectFolder: string; // Root directory to check for node modules
 
@@ -66,7 +67,7 @@ export default class DocItemLoader {
    */
   public resolve(apiDefinitionRef: ApiDefinitionReference,
     astPackage: AstPackage,
-    warnings: string[]): ResolvedApiItem {
+    warnings: string[]): ResolvedApiItem | undefined {
 
     // We determine if an 'apiDefinitionRef' is local if it has no package name or if the scoped
     // package name is equal to the current package's scoped package name.
@@ -89,9 +90,9 @@ export default class DocItemLoader {
    */
   public resolveLocalReferences(apiDefinitionRef: ApiDefinitionReference,
     astPackage: AstPackage,
-    warnings: string[]): ResolvedApiItem {
+    warnings: string[]): ResolvedApiItem | undefined {
 
-    let astItem: AstItem = astPackage.getMemberItem(apiDefinitionRef.exportName);
+    let astItem: AstItem | undefined = astPackage.getMemberItem(apiDefinitionRef.exportName);
     // Check if export name was not found
     if (!astItem) {
       warnings.push(`Unable to find referenced export \"${apiDefinitionRef.toExportString()}\"`);
@@ -127,10 +128,10 @@ export default class DocItemLoader {
    * that is associated with the apiDefinitionRef.
    */
   public resolveJsonReferences(apiDefinitionRef: ApiDefinitionReference,
-    warnings: string[]): ResolvedApiItem {
+    warnings: string[]): ResolvedApiItem | undefined {
 
     // Check if package can be not found
-    const docPackage: IApiPackage =  this.getPackage(apiDefinitionRef);
+    const docPackage: IApiPackage | undefined =  this.getPackage(apiDefinitionRef);
     if (!docPackage) {
       // package not found in node_modules
       warnings.push(`Unable to find a documentation file (\"${apiDefinitionRef.packageName}.api.json\")` +
@@ -149,7 +150,7 @@ export default class DocItemLoader {
 
     // If memberName exists then check for the existence of the name
     if (apiDefinitionRef.memberName) {
-      let member: ApiMember = undefined;
+      let member: ApiMember | undefined = undefined;
       switch (docItem.kind) {
         case 'class':
 
@@ -190,7 +191,7 @@ export default class DocItemLoader {
    *
    * @param apiDefinitionRef - interface with properties pertaining to the API definition reference
    */
-  public getPackage(apiDefinitionRef: ApiDefinitionReference): IApiPackage {
+  public getPackage(apiDefinitionRef: ApiDefinitionReference): IApiPackage | undefined {
     let cachePackageName: string = '';
 
     // We concatenate the scopeName and packageName in case there are packageName conflicts
@@ -201,7 +202,7 @@ export default class DocItemLoader {
     }
     // Check if package exists in cache
     if (this._cache.has(cachePackageName)) {
-        return this._cache.get(cachePackageName);
+      return this._cache.get(cachePackageName);
     }
 
     // Doesn't exist in cache, attempt to load the json file

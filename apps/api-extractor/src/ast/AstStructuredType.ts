@@ -78,8 +78,11 @@ export default class AstStructuredType extends AstItemContainer {
     // Check for heritage clauses (implements and extends)
     if (this._classLikeDeclaration.heritageClauses) {
       for (const heritage of this._classLikeDeclaration.heritageClauses) {
-        const typeText: string = heritage.types && heritage.types.length && heritage.types[0].expression ?
-          heritage.types[0].expression.getText() : undefined;
+
+        const typeText: string | undefined = heritage.types && heritage.types.length
+          && heritage.types[0].expression
+          ? heritage.types[0].expression.getText() : undefined;
+
         if (heritage.token === ts.SyntaxKind.ExtendsKeyword) {
           this.extends = typeText;
         } else if (heritage.token === ts.SyntaxKind.ImplementsKeyword) {

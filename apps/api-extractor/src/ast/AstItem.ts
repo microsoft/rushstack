@@ -116,7 +116,7 @@ export interface IAstItemOptions {
    * In most cases this is the same as `declaration`, but for AstPackage it will be
    * a separate node under the root.
    */
-  jsdocNode: ts.Node;
+  jsdocNode: ts.Node | undefined;
   /**
    * The symbol used to export this AstItem from the AstPackage.
    */
@@ -204,7 +204,7 @@ abstract class AstItem {
    * In most cases this is the same as `declaration`, but for AstPackage it will be
    * a separate node under the root.
    */
-  public jsdocNode: ts.Node;
+  public jsdocNode: ts.Node | undefined;
 
   /**
    * The parsed AEDoc comment for this item.
@@ -568,7 +568,7 @@ abstract class AstItem {
    * This is a helper for visitTypeReferencesForNode().  It analyzes a single TypeReferenceNode.
    */
   private _analyzeTypeReference(typeReferenceNode: ts.TypeReferenceNode): void {
-    const symbol: ts.Symbol = this.context.typeChecker.getSymbolAtLocation(typeReferenceNode.typeName);
+    const symbol: ts.Symbol | undefined = this.context.typeChecker.getSymbolAtLocation(typeReferenceNode.typeName);
     if (!symbol) {
       // Is this bad?
       return;
@@ -591,7 +591,7 @@ abstract class AstItem {
     // Walk upwards from that directory until you find a directory containing package.json,
     // this is where the referenced type is located.
     // Example: "c:\users\<username>\sp-client\spfx-core\sp-core-library"
-    const typeReferencePackagePath: string = this.context.packageJsonLookup
+    const typeReferencePackagePath: string | undefined = this.context.packageJsonLookup
       .tryGetPackageFolder(sourceFile.fileName);
     // Example: "@microsoft/sp-core-library"
     let typeReferencePackageName: string = '';
@@ -610,6 +610,7 @@ abstract class AstItem {
           // returning true breaks the every loop
           return true;
         }
+        return false;
       });
     }
 
@@ -620,7 +621,7 @@ abstract class AstItem {
     const typeName: string = typeReferenceNode.typeName.getText();
     if (!typeReferencePackagePath || typeReferencePackageName === currentPackageName) {
       // The type is defined in this project.  Did the person remember to export it?
-      const exportedLocalName: string = this.context.package.tryGetExportedSymbolName(currentSymbol);
+      const exportedLocalName: string | undefined = this.context.package.tryGetExportedSymbolName(currentSymbol);
       if (exportedLocalName) {
         // [CASE 1] Local/Exported
         // Yes; the type is properly exported.
@@ -652,8 +653,8 @@ abstract class AstItem {
     // after the period is the member name
     if (currentSymbol.name.indexOf('.') > -1) {
       const exportMemberName: string[] = currentSymbol.name.split('.');
-      apiDefinitionRefParts.exportName = exportMemberName.pop();
-      apiDefinitionRefParts.memberName = exportMemberName.pop();
+      apiDefinitionRefParts.exportName = exportMemberName.pop() || '';
+      apiDefinitionRefParts.memberName = exportMemberName.pop() || '';
     } else {
       apiDefinitionRefParts.exportName = currentSymbol.name;
     }
@@ -664,7 +665,7 @@ abstract class AstItem {
 
     // Attempt to resolve the type by checking the node modules
     const referenceResolutionWarnings: string[] = [];
-    const resolvedAstItem: ResolvedApiItem = this.context.docItemLoader.resolveJsonReferences(
+    const resolvedAstItem: ResolvedApiItem | undefined = this.context.docItemLoader.resolveJsonReferences(
       apiDefinitionRef,
       referenceResolutionWarnings
     );

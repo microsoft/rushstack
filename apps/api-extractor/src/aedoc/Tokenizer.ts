@@ -27,11 +27,11 @@ export default class Tokenizer {
     this._tokenStream = this._tokenizeDocs(docs);
   }
 
-  public peekToken(): Token {
+  public peekToken(): Token | undefined {
     return (!this._tokenStream || this._tokenStream.length === 0) ? undefined : this._tokenStream[0];
   }
 
-  public getToken(): Token {
+  public getToken(): Token | undefined {
     return (!this._tokenStream || this._tokenStream.length === 0) ? undefined : this._tokenStream.shift();
   }
 
@@ -49,7 +49,7 @@ export default class Tokenizer {
    */
   protected _tokenizeDocs(docs: string): Token[] {
     if (!docs) {
-      return;
+      return [];
     }
     const docEntries: string[] = TypeScriptHelpers.splitStringWithRegEx(
       docs.replace(/\r/g, ''), // CRLF -> LF
@@ -59,7 +59,7 @@ export default class Tokenizer {
     const tokens: Token[] = [];
 
     for (let i: number = 0; i < docEntries.length; i++) {
-      let token: Token;
+      let token: Token | undefined;
       const untrimmed: string = docEntries[i];
       const trimmed: string = untrimmed.replace(/\s+/g, ' ').trim();
       if (trimmed.charAt(0) === '@') {
@@ -83,7 +83,7 @@ export default class Tokenizer {
    * Parse an inline tag and returns the Token for it if itis a valid inline tag.
    * Example '{@link https://bing.com | Bing}' => '{type: 'Inline', tag: '@link', text: 'https://bing.com  | Bing'}'
    */
-  protected _tokenizeInline(docEntry: string): Token {
+  protected _tokenizeInline(docEntry: string): Token | undefined {
     if (docEntry.charAt(0) !== '{' || docEntry.charAt(docEntry.length - 1) !== '}') {
       // This is a program bug, since _tokenizeDocs() checks this condition before calling
       this._reportError('The AEDoc tag is not enclosed in "{" and "}"');
@@ -93,14 +93,14 @@ export default class Tokenizer {
     if (tokenContent.charAt(0) !== '@') {
       // This is a program bug, since it should have already been validated by the Tokenizer
       this._reportError('The AEDoc tag does not start with "@".');
-      return;
+      return undefined;
     }
 
     const unescapedCurlyBraces: RegExp = /([^\\])({|}[^$])/gi;
     if (unescapedCurlyBraces.test(tokenContent)) {
       this._reportError(`An unescaped "{" or "}" character was found inside an inline tag. ` +
         'Use a backslash ("\\") to escape curly braces.');
-      return;
+      return undefined;
     }
 
     // Split the inline tag content with whitespace
@@ -109,7 +109,7 @@ export default class Tokenizer {
     if (tokenChunks[0] === '@link') {
       if (tokenChunks.length < 2) {
         this._reportError('The {@link} tag must include a URL or API item reference');
-        return;
+        return undefined;
       }
 
       tokenChunks.shift(); // Gets rid of '@link'
@@ -123,6 +123,6 @@ export default class Tokenizer {
 
     // This is a program bug
     this._reportError('Invalid call to _tokenizeInline()');
-    return;
+    return undefined;
   }
 }

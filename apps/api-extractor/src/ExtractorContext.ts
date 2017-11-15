@@ -68,7 +68,12 @@ export class ExtractorContext {
 
     this.policies = options.policies;
 
-    this._packageFolder = this.packageJsonLookup.tryGetPackageFolder(options.entryPointFile);
+    const folder: string | undefined = this.packageJsonLookup.tryGetPackageFolder(options.entryPointFile);
+    if (!folder) {
+      throw new Error('Unable to find a package.json for entry point: ' + options.entryPointFile);
+    }
+    this._packageFolder = folder;
+
     this._packageName = this.packageJsonLookup.getPackageName(this._packageFolder);
 
     this.docItemLoader = new DocItemLoader(this._packageFolder);
@@ -111,17 +116,21 @@ export class ExtractorContext {
   /**
    * Reports an error message to the registered ApiErrorHandler.
    */
-  public reportError(message: string, sourceFile: ts.SourceFile, start: number): void {
-    const lineAndCharacter: ts.LineAndCharacter = sourceFile.getLineAndCharacterOfPosition(start);
+  public reportError(message: string, sourceFile: ts.SourceFile | undefined, start: number | undefined): void {
+    if (sourceFile && start) {
+      const lineAndCharacter: ts.LineAndCharacter = sourceFile.getLineAndCharacterOfPosition(start);
 
-    // If the file is under the packageFolder, then show a relative path
-    const relativePath: string = path.relative(this.packageFolder, sourceFile.fileName);
-    const shownPath: string = relativePath.substr(0, 2) === '..' ? sourceFile.fileName : relativePath;
+      // If the file is under the packageFolder, then show a relative path
+      const relativePath: string = path.relative(this.packageFolder, sourceFile.fileName);
+      const shownPath: string = relativePath.substr(0, 2) === '..' ? sourceFile.fileName : relativePath;
 
-    // Format the error so that VS Code can follow it.  For example:
-    // "src\MyClass.ts(15,1): The JSDoc tag "@blah" is not supported by AEDoc"
-    this._logger.logError(`${shownPath}(${lineAndCharacter.line + 1},${lineAndCharacter.character + 1}): `
-      + message);
+      // Format the error so that VS Code can follow it.  For example:
+      // "src\MyClass.ts(15,1): The JSDoc tag "@blah" is not supported by AEDoc"
+      this._logger.logError(`${shownPath}(${lineAndCharacter.line + 1},${lineAndCharacter.character + 1}): `
+        + message);
+    } else {
+      this._logger.logError(message);
+    }
   }
 
   /**
@@ -142,7 +151,10 @@ export class ExtractorContext {
     files.forEach(file => {
       if (path.extname(file) === '.json') {
         const externalJsonFilePath: string = path.join(externalJsonCollectionPath, file);
-        this.docItemLoader.loadPackageIntoCache(externalJsonFilePath, path.parse(file).name.split('.').shift());
+
+        // Example: "C:\Example\my-package.json" --> "my-package"
+        const packageName: string = path.parse(file).name;
+        this.docItemLoader.loadPackageIntoCache(externalJsonFilePath, packageName);
       }
     });
   }

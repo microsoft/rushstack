@@ -129,7 +129,7 @@ export class Span {
     this.children = [];
     this.modification = new SpanModification(this);
 
-    let previousChildSpan: Span = undefined;
+    let previousChildSpan: Span | undefined = undefined;
 
     for (const childNode of this.node.getChildren() || []) {
       const childSpan: Span = new Span(childNode);

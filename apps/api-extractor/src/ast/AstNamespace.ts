@@ -65,9 +65,14 @@ export default class AstNamespace extends AstModule {
       // const properties we are only taking the first declaration.
       // If we decide to add support for other types within a namespace
       // we will have for evaluate each declaration.
-      const declaration: ts.Declaration = followedSymbol.getDeclarations()[0];
+      const declarations: ts.Declaration[] | undefined = followedSymbol.getDeclarations();
+      if (!declarations) {
+        throw new Error('Missing declaration');
+      }
 
-      if (declaration.parent.flags !== ts.NodeFlags.Const) {
+      const declaration: ts.Declaration = declarations[0];
+
+      if (declaration.parent && declaration.parent.flags !== ts.NodeFlags.Const) {
         this.reportWarning(`Export "${exportSymbol.name}" is missing the "const" ` +
           'modifier. Currently the "namespace" block only supports constant variables.');
         continue;
@@ -90,7 +95,7 @@ export default class AstNamespace extends AstModule {
       // the JSDoc comment Node can be found.
       // If there is no parent or grandparent of this VariableDeclaration then
       // we do not know how to obtain the JSDoc comment.
-      let jsdocNode: ts.Node;
+      let jsdocNode: ts.Node | undefined = undefined;
       if (!declaration.parent || !declaration.parent.parent ||
         declaration.parent.parent.kind !== ts.SyntaxKind.VariableStatement) {
         this.reportWarning(`Unable to locate the documentation node for "${exportSymbol.name}"; `

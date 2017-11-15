@@ -75,10 +75,10 @@ export default class AstMethod extends AstMember {
           .parseScopedPackageName(this.context.package.name);
 
         this.documentation.summary.push(
-          Markup.createApiLinkFromText(this.parentContainer.name, {
+          Markup.createApiLinkFromText(this.parentContainer!.name, {
               scopeName: scopedPackageName.scope,
               packageName: scopedPackageName.package,
-              exportName: this.parentContainer.name,
+              exportName: this.parentContainer!.name,
               memberName: ''
             }
           )

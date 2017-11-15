@@ -20,7 +20,7 @@ export default class AstPackage extends AstModule {
   private static _getOptions(context: ExtractorContext, rootFile: ts.SourceFile): IAstItemOptions {
     const rootFileSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(rootFile);
     let statement: ts.VariableStatement;
-    let foundDescription: ts.Node = undefined;
+    let foundDescription: ts.Node | undefined = undefined;
 
     for (const statementNode of rootFile.statements) {
       if (statementNode.kind === ts.SyntaxKind.VariableStatement) {
@@ -31,6 +31,10 @@ export default class AstPackage extends AstModule {
           }
         }
       }
+    }
+
+    if (!rootFileSymbol.declarations) {
+      throw new Error('Unable to find a root declaration for this package');
     }
 
     return {
@@ -72,7 +76,7 @@ export default class AstPackage extends AstModule {
    * In this example, given the symbol for _MyClass, getExportedSymbolName() will return
    * the string "MyClass".
    */
-  public tryGetExportedSymbolName(symbol: ts.Symbol): string {
+  public tryGetExportedSymbolName(symbol: ts.Symbol): string | undefined {
     const followedSymbol: ts.Symbol = this.followAliases(symbol);
     for (const exportedSymbol of this._exportedNormalizedSymbols) {
       if (exportedSymbol.followedSymbol === followedSymbol) {
