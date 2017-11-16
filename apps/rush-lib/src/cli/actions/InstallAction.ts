@@ -122,7 +122,7 @@ export default class InstallAction extends BaseRushAction {
     this.eventHooksManager.handle(Event.postRushInstall);
 
     if (!this._noLinkParameter.value) {
-      const linkManager: LinkManager = new LinkManager(this.rushConfiguration);
+      const linkManager: LinkManager = LinkManager.getLinkManager(this.rushConfiguration);
       this._parser.catchSyncErrors(linkManager.createSymlinksForProjects(false));
     } else {
       console.log(os.EOL + 'Next you should probably run: "rush link"');

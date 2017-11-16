@@ -30,7 +30,7 @@ export default class LinkAction extends BaseRushAction {
   }
 
   protected run(): void {
-    const linkManager: LinkManager = new LinkManager(this.rushConfiguration);
+    const linkManager: LinkManager = LinkManager.getLinkManager(this.rushConfiguration);
     this._parser.catchSyncErrors(linkManager.createSymlinksForProjects(this._force.value));
   }
 }

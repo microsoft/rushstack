@@ -148,7 +148,7 @@ export default class GenerateAction extends BaseRushAction {
     console.log(os.EOL + colors.green(`Rush generate finished successfully. (${stopwatch.toString()})`));
 
     if (!this._noLinkParameter.value) {
-      const linkManager: LinkManager = new LinkManager(this.rushConfiguration);
+      const linkManager: LinkManager = LinkManager.getLinkManager(this.rushConfiguration);
       // NOTE: Setting force=true here shouldn't be strictly necessary, since installCommonModules()
       // above should have already deleted the marker file, but it doesn't hurt to be explicit.
       this._parser.catchSyncErrors(linkManager.createSymlinksForProjects(true));
