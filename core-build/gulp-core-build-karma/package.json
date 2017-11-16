@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-karma",
-  "version": "4.3.4",
+  "version": "4.3.6",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -10,13 +10,10 @@
     "url": "https://github.com/microsoft/web-build-tools"
   },
   "scripts": {
-    "build": "gulp",
-    "clean": "gulp clean",
-    "test": "gulp"
+    "build": "gulp --clean"
   },
   "dependencies": {
-    "@types/node": "6.0.88",
-    "@microsoft/gulp-core-build": "3.2.5",
+    "@microsoft/gulp-core-build": "3.2.7",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "gulp-karma": "~0.0.5",

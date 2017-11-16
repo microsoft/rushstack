@@ -10,7 +10,7 @@ import * as rushLib from '@microsoft/rush-lib';
 
 const MAX_INSTALL_ATTEMPTS: number = 3;
 
-export default class RushVersionManager {
+export class RushVersionSelector {
   private _rushDirectory: string;
   private _currentPackageVersion: string;
 

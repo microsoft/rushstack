@@ -180,11 +180,13 @@ interface IFixupSettingsOptions {
   mustBeCommonJsOrEsnext: boolean;
 }
 
-// @public
+// @alpha
 interface IJestConfig {
-  configFilePath?: string;
+  collectCoverageFrom?: string[];
   coverage?: boolean;
+  coverageReporters?: string[];
   isEnabled?: boolean;
+  testPathIgnorePatterns?: string[];
 }
 
 // @public
@@ -196,7 +198,7 @@ interface ITsConfigFile<T> {
   compilerOptions: T;
 }
 
-// @public
+// @alpha
 class JestTask extends GulpTask<IJestConfig> {
   constructor();
   // (undocumented)

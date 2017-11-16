@@ -1,6 +1,16 @@
 # Change Log - @microsoft/ts-command-line
 
-This log was last generated on Thu, 02 Nov 2017 16:05:24 GMT and should not be manually modified.
+This log was last generated on Mon, 13 Nov 2017 17:04:50 GMT and should not be manually modified.
+
+## 2.2.4
+Mon, 13 Nov 2017 17:04:50 GMT
+
+*Version update only*
+
+## 2.2.3
+Mon, 06 Nov 2017 17:04:18 GMT
+
+*Version update only*
 
 ## 2.2.2
 Thu, 02 Nov 2017 16:05:24 GMT
@@ -26,17 +36,17 @@ Tue, 31 Oct 2017 21:04:04 GMT
 ## 2.1.4
 Tue, 31 Oct 2017 16:04:55 GMT
 
-*Changes not tracked*
+*Version update only*
 
 ## 2.1.3
 Wed, 25 Oct 2017 20:03:59 GMT
 
-*Changes not tracked*
+*Version update only*
 
 ## 2.1.2
 Tue, 24 Oct 2017 18:17:12 GMT
 
-*Changes not tracked*
+*Version update only*
 
 ## 2.1.1
 Mon, 23 Oct 2017 21:53:12 GMT
@@ -62,17 +72,17 @@ Fri, 08 Sep 2017 01:28:04 GMT
 ## 2.0.6
 Thu, 31 Aug 2017 18:41:18 GMT
 
-*Changes not tracked*
+*Version update only*
 
 ## 2.0.5
 Wed, 30 Aug 2017 01:04:34 GMT
 
-*Changes not tracked*
+*Version update only*
 
 ## 2.0.4
 Tue, 22 Aug 2017 13:04:22 GMT
 
-*Changes not tracked*
+*Version update only*
 
 ## 2.0.3
 Tue, 25 Jul 2017 20:03:31 GMT
@@ -121,7 +131,7 @@ Tue, 06 Dec 2016 20:44:26 GMT
 
 ## 1.2.0
 
-*Changes not tracked*
+*Version update only*
 
 ## 1.1.0
 

@@ -26,7 +26,7 @@ import { CustomRushAction } from './CustomRushAction';
 import Telemetry from '../utilities/Telemetry';
 
 export default class RushCommandLineParser extends CommandLineParser {
-  public telemetry: Telemetry;
+  public telemetry: Telemetry | undefined;
   public rushConfig: RushConfiguration;
 
   private _debugParameter: CommandLineFlagParameter;
@@ -90,20 +90,30 @@ export default class RushCommandLineParser extends CommandLineParser {
   }
 
   private _execute(): void {
-    this.telemetry = new Telemetry(this.rushConfig);
+    if (this.rushConfig) {
+      this.telemetry = new Telemetry(this.rushConfig);
+    }
+
     super.onExecute();
-    this.flushTelemetry();
+
+    if (this.telemetry) {
+      this.flushTelemetry();
+    }
   }
 
   private _populateActions(): void {
     try {
-      this.rushConfig = RushConfiguration.loadFromDefaultLocation();
+      let  commandLineConfig: CommandLineConfiguration | undefined = undefined;
 
-      const commandLineConfigFile: string = path.join(
-        this.rushConfig.commonRushConfigFolder, RushConstants.commandLineFilename);
+      const rushJsonFilename: string | undefined = RushConfiguration.tryFindRushJsonLocation();
+      if (rushJsonFilename) {
+        this.rushConfig = RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
 
-      const commandLineConfig: CommandLineConfiguration =
-        CommandLineConfiguration.tryLoadFromFile(commandLineConfigFile);
+        const commandLineConfigFile: string = path.join(
+          this.rushConfig.commonRushConfigFolder, RushConstants.commandLineFilename);
+
+        commandLineConfig = CommandLineConfiguration.tryLoadFromFile(commandLineConfigFile);
+      }
 
       this.addAction(new ChangeAction(this));
       this.addAction(new CheckAction(this));
@@ -119,6 +129,7 @@ export default class RushCommandLineParser extends CommandLineParser {
         .forEach((customAction: CustomRushAction) => {
           this.addAction(customAction);
         });
+
     } catch (error) {
       this._exitAndReportError(error);
     }

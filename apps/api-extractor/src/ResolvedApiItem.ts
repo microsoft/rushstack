@@ -16,15 +16,15 @@ export default class ResolvedApiItem {
   public kind: AstItemKind;
   public summary: MarkupElement[];
   public remarks: MarkupElement[];
-  public deprecatedMessage: MarkupBasicElement[];
+  public deprecatedMessage: MarkupBasicElement[] | undefined;
   public releaseTag: ReleaseTag;
   public isBeta: boolean;
-  public params: {[name: string]: IAedocParameter};
-  public returnsMessage: MarkupBasicElement[];
+  public params: { [name: string]: IAedocParameter } | undefined;
+  public returnsMessage: MarkupBasicElement[] | undefined;
   /**
    * This property will either be an AstItem or undefined.
    */
-  public astItem: AstItem;
+  public astItem: AstItem | undefined;
 
   /**
    * A function to abstract the construction of a ResolvedApiItem instance
@@ -49,8 +49,8 @@ export default class ResolvedApiItem {
    * from a JSON object that symbolizes an ApiItem.
    */
   public static createFromJson(docItem: ApiItem): ResolvedApiItem {
-    let parameters: {[name: string]: IAedocParameter} = undefined;
-    let returnsMessage: MarkupBasicElement[] = undefined;
+    let parameters: { [name: string]: IAedocParameter } | undefined = undefined;
+    let returnsMessage: MarkupBasicElement[] | undefined = undefined;
     switch (docItem.kind) {
       case 'function':
         parameters = docItem.parameters;
@@ -81,12 +81,12 @@ export default class ResolvedApiItem {
     kind: AstItemKind,
     summary: MarkupElement[],
     remarks: MarkupElement[],
-    deprecatedMessage: MarkupBasicElement[],
+    deprecatedMessage: MarkupBasicElement[] | undefined,
     isBeta: boolean,
-    params:  {[name: string]: IAedocParameter},
-    returnsMessage: MarkupBasicElement[],
+    params: { [name: string]: IAedocParameter } | undefined,
+    returnsMessage: MarkupBasicElement[] | undefined,
     releaseTag: ReleaseTag,
-    astItem: AstItem) {
+    astItem: AstItem | undefined) {
     this.kind = kind;
     this.summary = summary;
     this.remarks = remarks;

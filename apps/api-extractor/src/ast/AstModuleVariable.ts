@@ -21,9 +21,19 @@ class AstModuleVariable extends AstMember {
     this.kind = AstItemKind.ModuleVariable;
 
     const propertySignature: ts.PropertySignature = options.declaration as ts.PropertySignature;
-    this.type = propertySignature.type.getText();
+    if (propertySignature.type) {
+      this.type = propertySignature.type.getText();
+    } else {
+      this.type = '';
+    }
+
     this.name = propertySignature.name.getText();
-    this.value = propertySignature.initializer.getText(); // value of the export
+
+    if (propertySignature.initializer) {
+      this.value = propertySignature.initializer.getText(); // value of the export
+    } else {
+      this.value = '';
+    }
   }
 }
 

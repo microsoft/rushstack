@@ -38,11 +38,11 @@ export class CustomRushAction extends BaseRushAction {
   private _fromFlag: CommandLineStringListParameter;
   private _toFlag: CommandLineStringListParameter;
   private _verboseParameter: CommandLineFlagParameter;
-  private _parallelismParameter: CommandLineIntegerParameter;
+  private _parallelismParameter: CommandLineIntegerParameter | undefined;
 
   constructor(private _parser: RushCommandLineParser,
     options: ICommandLineActionOptions,
-    private _parallelized: boolean = true) {
+    private _parallelized: boolean = false) {
 
     super(options);
   }
@@ -71,7 +71,12 @@ export class CustomRushAction extends BaseRushAction {
     const stopwatch: Stopwatch = Stopwatch.start();
 
     const isQuietMode: boolean = !(this._verboseParameter.value);
-    const parallelism: number = (this._parallelized ? this._parallelismParameter.value : 1);
+
+    // if this is parallizable, then use the value from the flag (undefined or a number),
+    // if this is not parallelized, then use 1 core
+    const parallelism: number | undefined = this._isParallelized()
+      ? this._parallelismParameter!.value
+      : 1;
 
     // collect all custom flags here
     const customFlags: string[] = [];
@@ -80,7 +85,7 @@ export class CustomRushAction extends BaseRushAction {
         if (customOption.optionDefinition.optionType === 'flag') {
           customFlags.push(longName);
         } else if (customOption.optionDefinition.optionType === 'enum') {
-          customFlags.push(`${longName}=${customOption.parameterValue!.value}`);
+          customFlags.push(`${longName} ${customOption.parameterValue!.value}`);
         }
       }
     });
@@ -117,23 +122,26 @@ export class CustomRushAction extends BaseRushAction {
   }
 
   protected onDefineParameters(): void {
-    this._parallelismParameter = this.defineIntegerParameter({
-      parameterLongName: '--parallelism',
-      parameterShortName: '-p',
-      key: 'COUNT',
-      description: 'Change limit the number of simultaneous builds. This value defaults to the number of CPU cores'
-    });
+    if (this._isParallelized()) {
+      this._parallelismParameter = this.defineIntegerParameter({
+        parameterLongName: '--parallelism',
+        parameterShortName: '-p',
+        key: 'COUNT',
+        description: 'Specify the number of concurrent build processes.'
+          + ' If omitted, the parallelism will be based on the number of CPU cores.'
+      });
+    }
     this._toFlag = this.defineStringListParameter({
       parameterLongName: '--to',
       parameterShortName: '-t',
       key: 'PROJECT1',
-      description: 'Build the specified project and all of its dependencies'
+      description: 'Run command in the specified project and all of its dependencies'
     });
     this._fromFlag = this.defineStringListParameter({
       parameterLongName: '--from',
       parameterShortName: '-f',
       key: 'PROJECT2',
-      description: 'Build all projects that directly or indirectly depend on the specified project'
+      description: 'Run command in all projects that directly or indirectly depend on the specified project'
     });
     this._verboseParameter = this.defineFlagParameter({
       parameterLongName: '--verbose',
@@ -164,6 +172,12 @@ export class CustomRushAction extends BaseRushAction {
     });
   }
 
+  private _isParallelized(): boolean {
+    return this.options.actionVerb === 'build'
+      || this.options.actionVerb === 'rebuild'
+      || this._parallelized;
+  }
+
   private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {
     const extraData: { [key: string]: string } = {
       command_to: (!!this._toFlag.value).toString(),
@@ -177,11 +191,13 @@ export class CustomRushAction extends BaseRushAction {
       }
     });
 
-    this._parser.telemetry.log({
-      name: this.options.actionVerb,
-      duration: stopwatch.duration,
-      result: success ? 'Succeeded' : 'Failed',
-      extraData
-    });
+    if (this._parser.telemetry) {
+      this._parser.telemetry.log({
+        name: this.options.actionVerb,
+        duration: stopwatch.duration,
+        result: success ? 'Succeeded' : 'Failed',
+        extraData
+      });
+    }
   }
 }

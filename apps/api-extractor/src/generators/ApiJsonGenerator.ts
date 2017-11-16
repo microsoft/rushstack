@@ -95,7 +95,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
       remarks: astStructuredType.documentation.remarks || [],
       isBeta: astStructuredType.inheritedReleaseTag === ReleaseTag.Beta
     };
-    refObject[astStructuredType.name] = structureNode;
+    refObject![astStructuredType.name] = structureNode;
 
     ApiJsonGenerator._methodCounter = 0;
 
@@ -125,7 +125,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
       remarks: astEnum.documentation.remarks || [],
       isBeta: astEnum.inheritedReleaseTag === ReleaseTag.Beta
     };
-    refObject[astEnum.name] = enumNode;
+    refObject![astEnum.name] = enumNode;
 
     for (const astItem of astEnum.getSortedMemberItems()) {
       this.visit(astItem, valuesNode);
@@ -138,12 +138,12 @@ export default class ApiJsonGenerator extends AstItemVisitor {
     }
 
     const declaration: ts.Declaration = astEnumValue.getDeclaration();
-    const firstToken: ts.Node = declaration ? declaration.getFirstToken() : undefined;
-    const lastToken: ts.Node = declaration ? declaration.getLastToken() : undefined;
+    const firstToken: ts.Node | undefined = declaration ? declaration.getFirstToken() : undefined;
+    const lastToken: ts.Node | undefined = declaration ? declaration.getLastToken() : undefined;
 
     const value: string = lastToken && lastToken !== firstToken ? lastToken.getText() : '';
 
-    refObject[astEnumValue.name] = {
+    refObject![astEnumValue.name] = {
       kind: ApiJsonConverter.convertKindToJson(astEnumValue.kind),
       value: value,
       deprecatedMessage: astEnumValue.inheritedDeprecatedMessage || [],
@@ -174,19 +174,19 @@ export default class ApiJsonGenerator extends AstItemVisitor {
       isBeta: astFunction.inheritedReleaseTag === ReleaseTag.Beta
     };
 
-    refObject[astFunction.name] = newNode;
+    refObject![astFunction.name] = newNode;
   }
 
   protected visitAstPackage(astPackage: AstPackage, refObject?: Object): void {
     /* tslint:disable:no-string-literal */
-    refObject['kind'] = ApiJsonConverter.convertKindToJson(astPackage.kind);
-    refObject['name'] = astPackage.name;
-    refObject['summary'] = astPackage.documentation.summary;
-    refObject['remarks'] = astPackage.documentation.remarks;
+    refObject!['kind'] = ApiJsonConverter.convertKindToJson(astPackage.kind);
+    refObject!['name'] = astPackage.name;
+    refObject!['summary'] = astPackage.documentation.summary;
+    refObject!['remarks'] = astPackage.documentation.remarks;
     /* tslint:enable:no-string-literal */
 
     const membersNode: Object = {};
-    refObject[ApiJsonGenerator._EXPORTS_KEY] = membersNode;
+    refObject![ApiJsonGenerator._EXPORTS_KEY] = membersNode;
 
     for (const astItem of astPackage.getSortedMemberItems()) {
       this.visit(astItem, membersNode);
@@ -212,7 +212,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
       exports: membersNode
     };
 
-    refObject[astNamespace.name] = newNode;
+    refObject![astNamespace.name] = newNode;
   }
 
   protected visitAstMember(astMember: AstMember, refObject?: Object): void {
@@ -220,7 +220,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
       return;
     }
 
-    refObject[astMember.name] = 'astMember-' + astMember.getDeclaration().kind;
+    refObject![astMember.name] = 'astMember-' + astMember.getDeclaration().kind;
   }
 
   protected visitAstProperty(astProperty: AstProperty, refObject?: Object): void {
@@ -245,7 +245,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
       isBeta: astProperty.inheritedReleaseTag === ReleaseTag.Beta
     };
 
-    refObject[astProperty.name] = newNode;
+    refObject![astProperty.name] = newNode;
   }
 
   protected visitAstModuleVariable(astModuleVariable: AstModuleVariable, refObject?: Object): void {
@@ -260,7 +260,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
       isBeta: astModuleVariable.inheritedReleaseTag === ReleaseTag.Beta
     };
 
-    refObject[astModuleVariable.name] = newNode;
+    refObject![astModuleVariable.name] = newNode;
   }
 
   protected visitAstMethod(astMethod: AstMethod, refObject?: Object): void {
@@ -299,7 +299,7 @@ export default class ApiJsonGenerator extends AstItemVisitor {
       };
     }
 
-    refObject[astMethod.name] = newNode;
+    refObject![astMethod.name] = newNode;
   }
 
   private _createParameters(astFunction: AstMethod | AstFunction): IApiNameMap<IApiParameter> {

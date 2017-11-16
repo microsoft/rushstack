@@ -167,6 +167,10 @@ export default class ChangelogGenerator {
         name: packageName,
         entries: []
       };
+    } else {
+      // Force the changelog name to be same as package name.
+      // In case the package has been renamed but change log name is not updated.
+      changelog.name = packageName;
     }
 
     return changelog;

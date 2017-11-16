@@ -1,6 +1,16 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 02 Nov 2017 16:05:24 GMT and should not be manually modified.
+This log was last generated on Mon, 13 Nov 2017 17:04:50 GMT and should not be manually modified.
+
+## 4.2.6
+Mon, 13 Nov 2017 17:04:50 GMT
+
+*Version update only*
+
+## 4.2.5
+Mon, 06 Nov 2017 17:04:18 GMT
+
+*Version update only*
 
 ## 4.2.4
 Thu, 02 Nov 2017 16:05:24 GMT
@@ -19,12 +29,12 @@ Wed, 01 Nov 2017 21:06:08 GMT
 ## 4.2.2
 Tue, 31 Oct 2017 21:04:04 GMT
 
-*Changes not tracked*
+*Version update only*
 
 ## 4.2.1
 Tue, 31 Oct 2017 16:04:55 GMT
 
-*Changes not tracked*
+*Version update only*
 
 ## 4.2.0
 Wed, 25 Oct 2017 20:03:59 GMT
@@ -36,7 +46,7 @@ Wed, 25 Oct 2017 20:03:59 GMT
 ## 4.1.2
 Tue, 24 Oct 2017 18:17:12 GMT
 
-*Changes not tracked*
+*Version update only*
 
 ## 4.1.1
 Mon, 23 Oct 2017 21:53:12 GMT
@@ -73,7 +83,7 @@ Fri, 20 Oct 2017 01:04:44 GMT
 ## 3.4.2
 Thu, 05 Oct 2017 01:05:02 GMT
 
-*Changes not tracked*
+*Version update only*
 
 ## 3.4.1
 Fri, 29 Sep 2017 01:03:42 GMT
@@ -104,7 +114,7 @@ Fri, 22 Sep 2017 01:04:02 GMT
 ## 3.2.6
 Wed, 20 Sep 2017 22:10:17 GMT
 
-*Changes not tracked*
+*Version update only*
 
 ## 3.2.5
 Mon, 11 Sep 2017 13:04:55 GMT
@@ -173,7 +183,7 @@ Thu, 31 Aug 2017 17:46:25 GMT
 ## 2.3.6
 Wed, 30 Aug 2017 01:04:34 GMT
 
-*Changes not tracked*
+*Version update only*
 
 ## 2.3.5
 Thu, 24 Aug 2017 22:44:12 GMT
@@ -185,7 +195,7 @@ Thu, 24 Aug 2017 22:44:12 GMT
 ## 2.3.4
 Thu, 24 Aug 2017 01:04:33 GMT
 
-*Changes not tracked*
+*Version update only*
 
 ## 2.3.3
 Tue, 22 Aug 2017 13:04:22 GMT
@@ -426,7 +436,7 @@ Tue, 24 Jan 2017 01:36:35 GMT
 ## 1.1.2
 Fri, 20 Jan 2017 01:46:41 GMT
 
-*Changes not tracked*
+*Version update only*
 
 ## 1.1.1
 Thu, 19 Jan 2017 20:04:40 GMT
@@ -453,7 +463,7 @@ Mon, 16 Jan 2017 20:04:15 GMT
 ## 1.0.1
 Fri, 13 Jan 2017 06:46:05 GMT
 
-*Changes not tracked*
+*Version update only*
 
 ## 1.0.0
 Wed, 11 Jan 2017 14:11:26 GMT

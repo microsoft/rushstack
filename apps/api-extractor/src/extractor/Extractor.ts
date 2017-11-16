@@ -91,11 +91,15 @@ export class Extractor {
       lodash.cloneDeep(Extractor._defaultConfig), config);
 
     return normalized;
-    }
+  }
 
   public constructor (config: IExtractorConfig, options?: IExtractorOptions) {
-    this._logger = lodash.merge(lodash.cloneDeep(Extractor._defaultLogger),
-      options.customLogger);
+    if (options && options.customLogger) {
+      this._logger = lodash.merge(lodash.cloneDeep(Extractor._defaultLogger),
+        options.customLogger);
+    } else {
+      this._logger = Extractor._defaultLogger;
+    }
 
     this._config = Extractor._applyConfigDefaults(config);
 
@@ -139,7 +143,7 @@ export class Extractor {
         }
 
         this._program = options.compilerProgram;
-        const rootDir: string = this._program.getCompilerOptions().rootDir;
+        const rootDir: string | undefined = this._program.getCompilerOptions().rootDir;
         if (!rootDir) {
           throw new Error('The provided compiler state does not specify a root folder');
         }
@@ -165,6 +169,12 @@ export class Extractor {
     const projectConfig: IExtractorProjectConfig = options.projectConfig ?
       options.projectConfig : this._config.project;
 
+    // This helps strict-null-checks to understand that _applyConfigDefaults() eliminated
+    // any undefined members
+    if (!(this._config.policies && this._config.apiJsonFile && this._config.apiReviewFile)) {
+      throw new Error('The configuration object wasn\'t normalized properly');
+    }
+
     const context: ExtractorContext = new ExtractorContext({
       program: this._program,
       entryPointFile: path.resolve(this._absoluteRootFolder, projectConfig.entryPointSourceFile),
@@ -172,7 +182,7 @@ export class Extractor {
       policies: this._config.policies
     });
 
-    for (const externalJsonFileFolder of projectConfig.externalJsonFileFolders) {
+    for (const externalJsonFileFolder of projectConfig.externalJsonFileFolders || []) {
       context.loadExternalPackages(path.resolve(this._absoluteRootFolder, externalJsonFileFolder));
     }
 

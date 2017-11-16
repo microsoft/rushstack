@@ -98,7 +98,6 @@ Once this is set up, you should be able to execute the gulp tasks and they shoul
 | [gulp-core-build-serve](https://www.npmjs.com/package/@microsoft/gulp-core-build-serve) | Sets up a server and live reload for a quick dev loop. |
 | [gulp-core-build-karma](https://www.npmjs.com/package/@microsoft/gulp-core-build-karma) | Runs unit tests in a browser using [Karma](https://www.npmjs.com/package/karma) |
 | [gulp-core-build-mocha](https://www.npmjs.com/package/@microsoft/gulp-core-build-mocha) | Runs unit tests in a NodeJS environment with [Mocha](https://www.npmjs.com/package/mocha) |
-| [sp-build-core-tasks](https://www.npmjs.com/package/@microsoft/sp-build-core-tasks) | Special tasks for developing with the SharePoint Framework (SPFx) |
 
 # API
 

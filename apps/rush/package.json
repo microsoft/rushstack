@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush",
-  "version": "3.0.20",
+  "version": "4.0.1",
   "description": "The professional solution for consolidating all your JavaScript projects in one Git repo",
   "keywords": [
     "install",
@@ -19,22 +19,20 @@
   },
   "homepage": "http://aka.ms/rush",
   "scripts": {
-    "build": "gulp",
-    "clean": "gulp clean",
-    "test": "gulp test"
+    "build": "gulp test --clean"
   },
   "bin": {
     "rush": "./bin/rush"
   },
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-core-library": "0.3.14",
-    "@microsoft/rush-lib": "3.0.20",
+    "@microsoft/node-core-library": "0.3.16",
+    "@microsoft/rush-lib": "4.0.1",
     "fs-extra": "~0.26.7",
     "semver": "~5.3.0"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "4.2.5",
+    "@microsoft/node-library-build": "4.2.7",
     "@types/chai": "3.4.34",
     "@types/fs-extra": "0.0.37",
     "@types/mocha": "2.2.38",
