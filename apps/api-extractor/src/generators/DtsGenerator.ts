@@ -51,8 +51,8 @@ export default class DtsGenerator {
    * Walks up the tree from the given starting node.  If each parent matches the expected kind
    * from parentKinds, then the matching node is returned.  Otherwise, undefined is returned.
    */
-  private static _matchParent<T extends ts.Node>(node: ts.Node, parentKinds: ts.SyntaxKind[]): T {
-    let current: ts.Node = node;
+  private static _matchParent<T extends ts.Node>(node: ts.Node, parentKinds: ts.SyntaxKind[]): T | undefined {
+    let current: ts.Node | undefined = node;
 
     let  i: number = 0;
     while (true) { // tslint:disable-line:no-constant-condition
@@ -86,11 +86,11 @@ export default class DtsGenerator {
 
       // Is it an export declaration?
       if (currentAlias.declarations) {
-        const exportDeclaration: ts.ExportDeclaration = DtsGenerator._matchParent<ts.ExportDeclaration>(
-          currentAlias.declarations[0],
+        const exportDeclaration: ts.ExportDeclaration | undefined
+          = DtsGenerator._matchParent<ts.ExportDeclaration>(currentAlias.declarations[0],
           [ts.SyntaxKind.ExportSpecifier, ts.SyntaxKind.NamedExports, ts.SyntaxKind.ExportDeclaration]);
 
-        if (exportDeclaration) {
+        if (exportDeclaration && exportDeclaration.moduleSpecifier) {
           // Example: " '@microsoft/sp-lodash-subset'" or " './MyClass'"
           const moduleSpecifier: string = exportDeclaration.moduleSpecifier.getFullText();
 
@@ -148,20 +148,22 @@ export default class DtsGenerator {
     this._entries.sort((a, b) => a.getSortKey().localeCompare(b.getSortKey()));
 
     for (const entry of this._entries) {
-      for (const declaration of entry.followedSymbol.declarations) {
-        // console.log(PrettyPrinter.dumpTree(declaration));
+      if (entry.followedSymbol) {
+        for (const declaration of entry.followedSymbol.declarations || []) {
+          // console.log(PrettyPrinter.dumpTree(declaration));
 
-        // console.log(declaration.getText());
-        // console.log('=====================================');
+          // console.log(declaration.getText());
+          // console.log('=====================================');
 
-        const span: Span = new Span(declaration);
-        console.log(span.getDump());
-        console.log('-------------------------------------');
+          const span: Span = new Span(declaration);
+          console.log(span.getDump());
+          console.log('-------------------------------------');
 
-        this._modifySpan(span, entry);
+          this._modifySpan(span, entry);
 
-        this._indentedWriter.writeLine();
-        this._indentedWriter.writeLine(span.getModifiedText());
+          this._indentedWriter.writeLine();
+          this._indentedWriter.writeLine(span.getModifiedText());
+        }
       }
     }
 
@@ -211,7 +213,7 @@ export default class DtsGenerator {
             // Since we are emitting a separate declaration for each one, we need to look upwards
             // in the ts.Node tree and write a copy of the enclosing VariableDeclarationList
             // content (e.g. "var" from "var x=1, y=2").
-            const list: ts.VariableDeclarationList = DtsGenerator._matchParent(span.node,
+            const list: ts.VariableDeclarationList | undefined = DtsGenerator._matchParent(span.node,
               [ts.SyntaxKind.VariableDeclaration, ts.SyntaxKind.VariableDeclarationList]);
             if (!list) {
               throw new Error('Unsupported variable declaration');
@@ -235,12 +237,12 @@ export default class DtsGenerator {
               case ts.SyntaxKind.TypeAliasDeclaration:
               case ts.SyntaxKind.ModuleDeclaration:  // (namespaces are a type of module declaration)
                 {
-                  const symbol: ts.Symbol = this._typeChecker.getSymbolAtLocation(span.node);
+                  const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(span.node);
                   if (!symbol) {
                     throw new Error('Symbol not found');
                   }
 
-                  const referencedEntry: Entry = this._fetchEntryForSymbol(symbol);
+                  const referencedEntry: Entry | undefined = this._fetchEntryForSymbol(symbol);
                   if (referencedEntry) {
                     span.modification.prefix = '/**/' + referencedEntry.uniqueName;
                   }
@@ -279,7 +281,7 @@ export default class DtsGenerator {
       return undefined;
     }
 
-    let entry: Entry = this._entriesBySymbol.get(followedSymbol);
+    let entry: Entry | undefined = this._entriesBySymbol.get(followedSymbol);
     if (entry) {
       return entry;
     }
@@ -291,7 +293,7 @@ export default class DtsGenerator {
     this._entriesBySymbol.set(followedSymbol, entry);
     console.log('======> ' + entry.localName);
 
-    for (const declaration of followedSymbol.declarations) {
+    for (const declaration of followedSymbol.declarations || []) {
       // console.log(PrettyPrinter.dumpTree(declaration));
       // console.log('-------------------------------------');
       // console.log(declaration.getText());
@@ -315,7 +317,7 @@ export default class DtsGenerator {
             case ts.SyntaxKind.ExpressionWithTypeArguments:
             case ts.SyntaxKind.TypeReference:
               {
-                const symbol: ts.Symbol = this._typeChecker.getSymbolAtLocation(node);
+                const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(node);
                 if (!symbol) {
                   throw new Error('Symbol not found');
                 }
