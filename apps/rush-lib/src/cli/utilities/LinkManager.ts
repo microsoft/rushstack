@@ -38,10 +38,18 @@ export enum SymlinkKind {
   Directory
 }
 
-export default class LinkManager {
+export default abstract class LinkManager {
   private _rushConfiguration: RushConfiguration;
 
+  public static getLinkManager(rushConfiguration: RushConfiguration): LinkManager {
+    return rushConfiguration.packageManager === 'pnpm'
+      ? require('./pnpm/PnpmLinkManager').default
+      : require('./npm/NpmLinkManager').default;
+  }
+
   private static _createSymlink(linkTarget: string, linkSource: string, symlinkKind: SymlinkKind): void {
+    fsx.mkdirsSync(path.dirname(linkSource));
+
     if (symlinkKind === SymlinkKind.Directory) {
       // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
       fsx.symlinkSync(linkTarget, linkSource, 'junction');
