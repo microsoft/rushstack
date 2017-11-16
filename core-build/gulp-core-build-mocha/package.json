@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "@microsoft/node-library-build": "4.2.3",
-    "@types/gulp": "3.8.32",
+    "@types/gulp": "3.8.33",
     "@types/gulp-istanbul": "0.9.30",
     "@types/gulp-mocha": "0.0.29",
     "@types/mocha": "2.2.38",
