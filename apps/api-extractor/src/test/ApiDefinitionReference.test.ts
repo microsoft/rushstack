@@ -27,36 +27,36 @@ describe('ApiDocumentation tests', function (): void {
 
   describe('ApiDocumentation internal methods', function (): void {
     let apiReferenceExpr: string;
-    let actual: ApiDefinitionReference;
+    let actual: ApiDefinitionReference | undefined;
 
     it('_parseApiReferenceExpression() with scope name', function (): void {
       apiReferenceExpr = '@microsoft/sp-core-library:Guid';
 
       actual = ApiDefinitionReference.createFromString(apiReferenceExpr, console.log);
-      assert.equal('@microsoft', actual.scopeName);
-      assert.equal('sp-core-library', actual.packageName);
-      assert.equal('Guid', actual.exportName);
-      assert.equal('', actual.memberName);
+      assert.equal('@microsoft', actual!.scopeName);
+      assert.equal('sp-core-library', actual!.packageName);
+      assert.equal('Guid', actual!.exportName);
+      assert.equal('', actual!.memberName);
     });
 
     it('_parseApiReferenceExpression() without scope name', function (): void {
       apiReferenceExpr = 'sp-core-library:Guid';
 
       actual = ApiDefinitionReference.createFromString(apiReferenceExpr, console.log);
-      assert.equal('', actual.scopeName);
-      assert.equal('sp-core-library', actual.packageName);
-      assert.equal('Guid', actual.exportName);
-      assert.equal('', actual.memberName);
+      assert.equal('', actual!.scopeName);
+      assert.equal('sp-core-library', actual!.packageName);
+      assert.equal('Guid', actual!.exportName);
+      assert.equal('', actual!.memberName);
     });
 
     it('_parseApiReferenceExpression() without scope name and with member name', function (): void {
       apiReferenceExpr = 'sp-core-library:Guid.equals';
 
       actual = ApiDefinitionReference.createFromString(apiReferenceExpr, console.log);
-      assert.equal('', actual.scopeName);
-      assert.equal('sp-core-library', actual.packageName);
-      assert.equal('Guid', actual.exportName);
-      assert.equal('equals', actual.memberName);
+      assert.equal('', actual!.scopeName);
+      assert.equal('sp-core-library', actual!.packageName);
+      assert.equal('Guid', actual!.exportName);
+      assert.equal('equals', actual!.memberName);
     });
 
     it('_parseApiReferenceExpression() without scope name and invalid memberName', function (): void {

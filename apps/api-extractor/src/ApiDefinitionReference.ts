@@ -121,7 +121,7 @@ export default class ApiDefinitionReference {
     };
 
     // E.g. @microsoft/sp-core-library:Guid.equals
-    let parts: string[] = apiReferenceExpr.match(ApiDefinitionReference._packageRegEx);
+    let parts: string[] | null = apiReferenceExpr.match(ApiDefinitionReference._packageRegEx);
     if (parts) {
       // parts[1] is of the form ‘@microsoft/sp-core-library’ or ‘sp-core-library’
       const scopePackageName: IScopedPackageName = ApiDefinitionReference.parseScopedPackageName(parts[1]);

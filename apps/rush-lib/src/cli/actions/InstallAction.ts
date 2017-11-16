@@ -130,14 +130,16 @@ export default class InstallAction extends BaseRushAction {
   }
 
   private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {
-    this._parser.telemetry.log({
-      name: 'install',
-      duration: stopwatch.duration,
-      result: success ? 'Succeeded' : 'Failed',
-      extraData: {
-        clean: (!!this._cleanInstall.value).toString(),
-        fullClean: (!!this._cleanInstallFull.value).toString()
-      }
-    });
+    if (this._parser.telemetry) {
+      this._parser.telemetry.log({
+        name: 'install',
+        duration: stopwatch.duration,
+        result: success ? 'Succeeded' : 'Failed',
+        extraData: {
+          clean: (!!this._cleanInstall.value).toString(),
+          fullClean: (!!this._cleanInstallFull.value).toString()
+        }
+      });
+    }
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-webpack",
-  "version": "3.2.12",
+  "version": "3.2.14",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -10,12 +10,10 @@
     "url": "https://github.com/microsoft/web-build-tools"
   },
   "scripts": {
-    "build": "gulp",
-    "clean": "gulp clean",
-    "test": "gulp"
+    "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.2.5",
+    "@microsoft/gulp-core-build": "3.2.7",
     "@types/gulp": "3.8.32",
     "@types/node": "6.0.88",
     "gulp": "~3.9.1",

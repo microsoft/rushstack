@@ -13,15 +13,31 @@
       "type": "boolean",
       "default": false
     },
-    "configFilePath": {
-      "description": "The path to a jest config file relative to root project folder",
-      "type": "string",
-      "default": "jest.config.json"
+    "collectCoverageFrom": {
+      "description": "Same as Jest CLI option collectCoverageFrom",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
     "coverage": {
-      "description": "Indicates that test coverage information should be collected and reported in the output",
+      "description": "Same as Jest CLI option coverage",
       "type": "boolean",
       "default": true
+    },
+    "coverageReporters": {
+      "description": "Same as Jest CLI option coverageReporters",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "testPathIgnorePatterns": {
+      "description": "Same as Jest CLI option testPathIgnorePatterns",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     }
   },
   "additionalProperties": false

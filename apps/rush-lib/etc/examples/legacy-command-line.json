@@ -14,32 +14,33 @@
 // see the documentation at https://aka.ms/rush
 
 {
+  "$schema": "https://dev.office.com/json-schemas/rush/v4/command-line.schema.json",
   "customCommands": [],
 
   "customOptions": {
     "--vso": {
       "optionType": "flag",
       "description": "Used for CI builds. Note that colorization of build output is now controlled by the --color flag.",
-      "supportedCommands": ["build", "rebuild"]
+      "associatedCommands": ["build", "rebuild"]
     },
 
     "--npm": {
       "optionType": "flag",
       "description": "For doing builds that will be published to NPM",
-      "supportedCommands": ["build", "rebuild"]
+      "associatedCommands": ["build", "rebuild"]
     },
 
     "--ship": {
       "optionType": "flag",
       "description": "Perform a production build, including minification and localization steps",
-      "supportedCommands": [ "build", "rebuild" ],
+      "associatedCommands": [ "build", "rebuild" ],
       "shortName": "-s"
     },
 
     "--minimal": {
       "optionType": "flag",
       "description": "Perform a fast build, which disables certain tasks such as unit tests and linting",
-      "supportedCommands": [ "build", "rebuild" ],
+      "associatedCommands": [ "build", "rebuild" ],
       "shortName": "-m"
     }
   }

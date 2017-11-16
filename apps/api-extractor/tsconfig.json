@@ -6,6 +6,7 @@
     "declaration": true,
     "sourceMap": true,
     "experimentalDecorators": true,
+    "strictNullChecks": true,
     "types": [
       "node"
     ],

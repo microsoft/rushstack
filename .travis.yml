@@ -7,14 +7,14 @@ script:
   - set -e
   - echo 'Checking change file...' && echo -en 'travis_fold:start:check\\r'
   - git fetch origin master:refs/remotes/origin/master -a
-  - node common/local-rush/node_modules/@microsoft/rush/lib/rush.js change -v
+  - node common/local-rush/node_modules/@microsoft/rush/lib/start.js change -v
   - echo -en 'travis_fold:end:check\\r'
   - echo 'Installing...' && echo -en 'travis_fold:start:install\\r'
-  - node common/local-rush/node_modules/@microsoft/rush/lib/rush.js install --bypass-policy
+  - node common/local-rush/node_modules/@microsoft/rush/lib/start.js install --bypass-policy
   - echo -en 'travis_fold:end:install\\r'
   - echo 'Running rush check' && echo -en 'travis_fold:start:check\\r'
-  - node common/local-rush/node_modules/@microsoft/rush/lib/rush.js check
+  - node common/local-rush/node_modules/@microsoft/rush/lib/start.js check
   - echo -en 'travis_fold:end:check\\r'
   - echo 'Building...' && echo -en 'travis_fold:start:build\\r'
-  - node common/local-rush/node_modules/@microsoft/rush/lib/rush.js rebuild --verbose --production
+  - node common/local-rush/node_modules/@microsoft/rush/lib/start.js rebuild --verbose --production
   - echo -en 'travis_fold:end:build\\r'

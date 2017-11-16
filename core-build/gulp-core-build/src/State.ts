@@ -5,7 +5,7 @@ import { argv as clArgs } from 'yargs';
 import * as path from 'path';
 
 export const root: string = process.cwd();
-export const args: { [flat: string]: boolean | string} = clArgs;
+export const args: { [flat: string]: boolean | string } = clArgs;
 
 export interface IPackageJSON {
   name?: string;

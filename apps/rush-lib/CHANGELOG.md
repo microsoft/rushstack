@@ -1,6 +1,25 @@
 # Change Log - @microsoft/rush-lib
 
-This log was last generated on Thu, 19 Oct 2017 23:01:49 GMT and should not be manually modified.
+This log was last generated on Mon, 13 Nov 2017 18:34:30 GMT and should not be manually modified.
+
+## 4.0.1
+Mon, 13 Nov 2017 18:34:30 GMT
+
+### Patches
+
+- Fix the regression where "rush -h" didn't work outside a repo folder
+- Reduce the default parallelism on Windows platform
+- Force change log name to be the same as package name to handle the error case when package is renamed but change log is not
+
+## 4.0.0
+Sat, 4 Nov 2017 03:22:28 GMT
+
+### Breaking changes
+
+- Complete release notes are here: https://github.com/Microsoft/web-build-tools/wiki#november-3-2017---rush-4-released
+- Adding custom commands and options.
+- Adding rush version selector.
+- Updating the semantics of rush change.
 
 ## 3.0.20
 Thu, 19 Oct 2017 23:01:49 GMT
@@ -212,7 +231,7 @@ Sun, 05 Feb 2017 01:21:30 GMT
 ## 1.5.1
 Tue, 24 Jan 2017 03:26:06 GMT
 
-*Changes not tracked*
+*Version update only*
 
 ## 1.5.0
 Sun, 22 Jan 2017 02:04:57 GMT
