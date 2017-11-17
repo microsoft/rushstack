@@ -113,6 +113,23 @@
       },
       "required": [ "enabled" ],
       "additionalProperties": false
+    },
+
+    "packageTypings": {
+      "description": "Configures how the package typings (*.d.ts) will be generated.",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "description": "Whether to generate package typings.  The default is false.",
+          "type": "boolean"
+        },
+        "outputFolder": {
+          "description": "Specifies where the *.d.ts files should be written. The default value is \"./dist\"",
+          "type": "string"
+        }
+      },
+      "required": [ "enabled" ],
+      "additionalProperties": false
     }
   },
   "required": [ "compiler", "project" ],

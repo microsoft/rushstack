@@ -143,6 +143,29 @@ export interface IExtractorApiJsonFileConfig {
 }
 
 /**
+ * Configures how the package typings (*.d.ts) will be generated.
+ * @remarks
+ * API Extractor can generate a single unified *.d.ts file that contains all
+ * the exported typings for the package entry point.  It can also remove
+ * \@alpha \@beta \@internal definitions depending on the release type.
+ *
+ * @beta
+ */
+export interface IExtractorPackageTypingsConfig {
+  /**
+   * Whether to generate package typings.  The default is false.
+   */
+  enabled: boolean;
+
+  /**
+   * Specifies where the *.d.ts files should be written.
+   *
+   * The default value is "./dist"
+   */
+  outputFolder?: string;
+}
+
+/**
  * Configuration options for the API Extractor tool.  These options can be loaded
  * from a JSON config file.
  *
@@ -175,4 +198,10 @@ export interface IExtractorConfig {
    * {@inheritdoc IExtractorApiJsonFileConfig}
    */
   apiJsonFile?: IExtractorApiJsonFileConfig;
+
+  /**
+   * {@inheritdoc IExtractorPackageTypingsConfig}
+   * @beta
+   */
+  packageTypings?: IExtractorPackageTypingsConfig;
 }

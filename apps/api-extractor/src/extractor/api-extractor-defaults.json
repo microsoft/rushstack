@@ -20,5 +20,10 @@
   "apiJsonFile": {
     "enabled": true,
     "outputFolder": "./dist"
+  },
+
+  "packageTypings": {
+    "enabled": false,
+    "outputFolder": "./dist"
   }
 }
