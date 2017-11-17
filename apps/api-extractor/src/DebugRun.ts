@@ -47,6 +47,10 @@ const extractor: Extractor = new Extractor(
     apiJsonFile: {
       enabled: true,
       outputFolder: path.join(__dirname, 'debug')
+    },
+    packageTypings: {
+      enabled: true,
+      outputFolder: path.join(__dirname, 'debug')
     }
   }
 );

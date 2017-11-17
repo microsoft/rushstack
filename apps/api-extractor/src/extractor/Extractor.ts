@@ -17,6 +17,7 @@ import { ExtractorContext } from '../ExtractorContext';
 import { ILogger } from './ILogger';
 import ApiJsonGenerator from '../generators/ApiJsonGenerator';
 import ApiFileGenerator from '../generators/ApiFileGenerator';
+import PackageTypingsGenerator from '../generators/PackageTypingsGenerator';
 import { MonitoredLogger } from './MonitoredLogger';
 
 /**
@@ -196,7 +197,8 @@ export class Extractor {
 
     // This helps strict-null-checks to understand that _applyConfigDefaults() eliminated
     // any undefined members
-    if (!(this._config.policies && this._config.apiJsonFile && this._config.apiReviewFile)) {
+    if (!(this._config.policies && this._config.apiJsonFile && this._config.apiReviewFile
+      && this._config.packageTypings)) {
       throw new Error('The configuration object wasn\'t normalized properly');
     }
 
@@ -219,12 +221,11 @@ export class Extractor {
       const outputFolder: string = path.resolve(this._absoluteRootFolder,
         apiJsonFileConfig.outputFolder);
 
-      fsx.mkdirsSync(outputFolder);
-
       const jsonGenerator: ApiJsonGenerator = new ApiJsonGenerator();
       const apiJsonFilename: string = path.join(outputFolder, packageBaseName + '.api.json');
 
       this._monitoredLogger.logVerbose('Writing: ' + apiJsonFilename);
+      fsx.mkdirsSync(path.dirname(apiJsonFilename));
       jsonGenerator.writeJsonFile(apiJsonFilename, context);
     }
 
@@ -277,6 +278,18 @@ export class Extractor {
           + ` Do this by copying ${actualApiReviewShortPath}`
           + ` to ${expectedApiReviewShortPath} and committing it.`);
       }
+    }
+
+    if (this._config.packageTypings.enabled) {
+      const packageTypingsGenerator: PackageTypingsGenerator = new PackageTypingsGenerator(context);
+
+      const dtsFilename: string = path.resolve(this._absoluteRootFolder,
+        this._config.packageTypings.outputFolder, this._config.packageTypings.internalFilename);
+        this._monitoredLogger.logVerbose(`Writing package typings: ${dtsFilename}`);
+
+      fsx.mkdirsSync(path.dirname(dtsFilename));
+
+      packageTypingsGenerator.writeTypingsFile(dtsFilename);
     }
 
     // If there were any errors or warnings, then fail the build

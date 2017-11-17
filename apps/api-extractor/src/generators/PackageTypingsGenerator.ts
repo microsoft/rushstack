@@ -114,17 +114,16 @@ export default class PackageTypingsGenerator {
   }
 
   /**
-   * Generates the report and writes it to disk.
+   * Generates the typings file and writes it to disk.
    *
-   * @param reportFilename - The output filename
-   * @param analyzer       - An Analyzer object representing the input project.
+   * @param dtsFilename    - The *.d.ts output filename
    */
-  public writeDtsFile(reportFilename: string): void {
-    const fileContent: string = this.generateDtsFileContent();
-    fs.writeFileSync(reportFilename, fileContent);
+  public writeTypingsFile(dtsFilename: string): void {
+    const fileContent: string = this.generateTypingsFileContent();
+    fs.writeFileSync(dtsFilename, fileContent);
   }
 
-  public generateDtsFileContent(): string {
+  public generateTypingsFileContent(): string {
     this._indentedWriter.spacing = '';
     this._indentedWriter.clear();
 
