@@ -163,6 +163,34 @@ export interface IExtractorPackageTypingsConfig {
    * The default value is "./dist"
    */
   outputFolder?: string;
+
+  /**
+   * Specifies the output filename for an internal release.
+   *
+   * @remarks
+   * The default value is "index-internal.d.ts".  This file will contain all definitions that
+   * are reachable from the entry point.
+   */
+  internalFilename?: string;
+
+  /**
+   * Specifies the output filename for a preview release.
+   *
+   * @remarks
+   * The default value is "index-preview.d.ts".  This file will contain all definitions that
+   * are reachable from the entry point, except definitions marked as \@alpha or \@internal.
+   */
+  previewFilename?: string;
+
+  /**
+   * Specifies the output filename for a public release.
+   *
+   * @remarks
+   * The default value is "index-public.d.ts".  This file will contain all definitions that
+   * are reachable from the entry point, except definitions marked as \@beta, \@alpha,
+   * or \@internal.
+   */
+  publicFilename?: string;
 }
 
 /**

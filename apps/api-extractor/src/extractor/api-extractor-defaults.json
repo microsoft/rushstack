@@ -24,6 +24,9 @@
 
   "packageTypings": {
     "enabled": false,
-    "outputFolder": "./dist"
+    "outputFolder": "./dist",
+    "internalFilename": "index-internal.d.ts",
+    "previewFilename": "index-preview.d.ts",
+    "publicFilename": "index-public.d.ts"
   }
 }
