@@ -39,7 +39,7 @@ interface IFollowAliasesResult {
   external: boolean;
 }
 
-export default class DtsGenerator {
+export default class PackageTypingsGenerator {
   private _context: ExtractorContext;
   private _typeChecker: ts.TypeChecker;
   private _indentedWriter: IndentedWriter = new IndentedWriter();
@@ -87,7 +87,7 @@ export default class DtsGenerator {
       // Is it an export declaration?
       if (currentAlias.declarations) {
         const exportDeclaration: ts.ExportDeclaration | undefined
-          = DtsGenerator._matchParent<ts.ExportDeclaration>(currentAlias.declarations[0],
+          = PackageTypingsGenerator._matchParent<ts.ExportDeclaration>(currentAlias.declarations[0],
           [ts.SyntaxKind.ExportSpecifier, ts.SyntaxKind.NamedExports, ts.SyntaxKind.ExportDeclaration]);
 
         if (exportDeclaration && exportDeclaration.moduleSpecifier) {
@@ -213,7 +213,7 @@ export default class DtsGenerator {
             // Since we are emitting a separate declaration for each one, we need to look upwards
             // in the ts.Node tree and write a copy of the enclosing VariableDeclarationList
             // content (e.g. "var" from "var x=1, y=2").
-            const list: ts.VariableDeclarationList | undefined = DtsGenerator._matchParent(span.node,
+            const list: ts.VariableDeclarationList | undefined = PackageTypingsGenerator._matchParent(span.node,
               [ts.SyntaxKind.VariableDeclaration, ts.SyntaxKind.VariableDeclarationList]);
             if (!list) {
               throw new Error('Unsupported variable declaration');
@@ -269,7 +269,7 @@ export default class DtsGenerator {
   }
 
   private _fetchEntryForSymbol(symbol: ts.Symbol): Entry | undefined {
-    const result: IFollowAliasesResult = DtsGenerator._followAliases(symbol, this._typeChecker);
+    const result: IFollowAliasesResult = PackageTypingsGenerator._followAliases(symbol, this._typeChecker);
     if (result.external) {
       return; // external definition
     }
