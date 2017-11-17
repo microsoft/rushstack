@@ -22,9 +22,9 @@ export default abstract class LinkManager {
   protected _rushConfiguration: RushConfiguration;
 
   public static getLinkManager(rushConfiguration: RushConfiguration): LinkManager {
-    return rushConfiguration.packageManager === 'pnpm'
+    return new (rushConfiguration.packageManager === 'pnpm'
       ? require('./pnpm/PnpmLinkManager').default
-      : require('./npm/NpmLinkManager').default;
+      : require('./npm/NpmLinkManager').default)(rushConfiguration);
   }
 
   protected static _createSymlink(linkTarget: string, linkSource: string, symlinkKind: SymlinkKind): void {
