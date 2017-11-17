@@ -12,7 +12,10 @@ interface IShrinkwrapDependencyJson {
   dependencies: { [dependency: string]: string };
 }
 
-interface IShrinkwrapJson {
+/**
+ * This interface represents the raw shrinkwrap.YAML file
+ */
+interface IShrinkwrapYaml {
   /** The list of resolved direct dependencies */
   dependencies: { [dependency: string]: string };
 /** The description of the solved DAG */
@@ -25,7 +28,7 @@ interface IShrinkwrapJson {
 }
 
 export default class PnpmShrinkwrapFile extends ShrinkwrapFile {
-  private _shrinkwrapJson: IShrinkwrapJson;
+  private _shrinkwrapJson: IShrinkwrapYaml;
 
   public static loadFromFile(shrinkwrapYamlFilename: string): ShrinkwrapFile | undefined {
     try {
@@ -35,7 +38,7 @@ export default class PnpmShrinkwrapFile extends ShrinkwrapFile {
 
       // We don't use JsonFile/jju here because shrinkwrap.json is a special NPM file format
       // and typically very large, so we want to load it the same way that NPM does.
-      const parsedData: IShrinkwrapJson = yaml.safeLoad(fsx.readFileSync(shrinkwrapYamlFilename).toString());
+      const parsedData: IShrinkwrapYaml = yaml.safeLoad(fsx.readFileSync(shrinkwrapYamlFilename).toString());
 
       return new PnpmShrinkwrapFile(parsedData);
     } catch (error) {
@@ -68,7 +71,7 @@ export default class PnpmShrinkwrapFile extends ShrinkwrapFile {
     return dependencyVersion;
   }
 
-  private constructor(shrinkwrapJson: IShrinkwrapJson) {
+  private constructor(shrinkwrapJson: IShrinkwrapYaml) {
     super();
     this._shrinkwrapJson = shrinkwrapJson;
 
