@@ -22,7 +22,7 @@
       "required": ["pnpmVersion"],
       "properties": {
         "pnpmVersion": {
-          "description": "The version of the NPM tool to install.",
+          "description": "The version of the PNPM tool to install.",
           "type": "string",
           "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
         }

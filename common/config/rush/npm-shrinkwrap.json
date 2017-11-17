@@ -1600,9 +1600,16 @@
       "resolved": "https://registry.npmjs.org/emojis-list/-/emojis-list-2.1.0.tgz"
     },
     "encode-registry": {
-      "version": "1.0.0",
-      "from": "encode-registry@>=1.0.0 <1.1.0",
-      "resolved": "https://registry.npmjs.org/encode-registry/-/encode-registry-1.0.0.tgz"
+      "version": "1.1.0",
+      "from": "encode-registry@>=1.1.0 <1.2.0",
+      "resolved": "https://registry.npmjs.org/encode-registry/-/encode-registry-1.1.0.tgz",
+      "dependencies": {
+        "mem": {
+          "version": "3.0.0",
+          "from": "mem@>=3.0.0 <4.0.0",
+          "resolved": "https://registry.npmjs.org/mem/-/mem-3.0.0.tgz"
+        }
+      }
     },
     "encodeurl": {
       "version": "1.0.1",
@@ -4937,6 +4944,11 @@
       "version": "1.0.0",
       "from": "p-finally@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/p-finally/-/p-finally-1.0.0.tgz"
+    },
+    "p-is-promise": {
+      "version": "1.1.0",
+      "from": "p-is-promise@>=1.1.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/p-is-promise/-/p-is-promise-1.1.0.tgz"
     },
     "p-limit": {
       "version": "1.1.0",
