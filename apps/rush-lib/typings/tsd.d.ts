@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 /// <reference path="git-repo-info/git-repo-info.d.ts" />
-/// <reference path="encode-registry/encode-registry.d.ts" />
 /// <reference path="jju/jju.d.ts" />
 /// <reference path="rimraf/rimraf.d.ts" />
 /// <reference path="builtins/builtins.d.ts" />
