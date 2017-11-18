@@ -306,6 +306,7 @@ export default class RushConfiguration {
     }
   }
 
+  /** The name of the package manager being used to install dependencies */
   public get packageManager(): 'pnpm' | 'npm' {
     return this._packageManager;
   }
