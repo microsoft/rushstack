@@ -69,6 +69,13 @@ interface IFollowAliasesResult {
    * from another source file in the current project.
    */
   external: boolean;
+
+  /**
+   * If true, the symbol is exported from a module somewhere.  If false, then it's
+   * a global ambient definition or else a private declaration in the referencing file.
+   * NOTE: The "external" status is unknown if moduleExport=true.
+   */
+  moduleExport: boolean;
 }
 
 export default class PackageTypingsGenerator {
@@ -142,7 +149,7 @@ export default class PackageTypingsGenerator {
           // Does it start with something like "'./"?
           // If not, then assume it's an import from an external package
           if (!/^['"\s]+\.[\/\\]/.test(moduleSpecifier)) {
-            return { symbol: current, external: true };
+            return { symbol: current, external: true, moduleExport: true };
           }
         }
       }
@@ -150,7 +157,18 @@ export default class PackageTypingsGenerator {
       current = currentAlias;
     }
 
-    return { symbol: current, external: false };
+    // Is it an export?  We examine all of the declarations to see if any of them contains
+    // the "export" keyword.
+    let moduleExport: boolean = false;
+    for (const declaration of current.declarations || []) {
+      const modifiers: ts.ModifierFlags = ts.getCombinedModifierFlags(declaration);
+      if (modifiers & (ts.ModifierFlags.Export | ts.ModifierFlags.ExportDefault)) {
+        moduleExport = true;
+        break;
+      }
+    }
+
+    return { symbol: current, external: false, moduleExport: moduleExport };
   }
 
   public constructor(context: ExtractorContext) {
@@ -317,7 +335,7 @@ export default class PackageTypingsGenerator {
 
   private _fetchEntryForSymbol(symbol: ts.Symbol): Entry | undefined {
     const result: IFollowAliasesResult = PackageTypingsGenerator._followAliases(symbol, this._typeChecker);
-    if (result.external) {
+    if (result.external || !result.moduleExport) {
       return; // external definition
     }
 
