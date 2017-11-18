@@ -86,7 +86,7 @@ export default class GenerateAction extends BaseRushAction {
 
     installManager.ensureLocalNpmTool(false);
 
-    installManager.createTempModules();
+    installManager.createTempModules(true);
 
     // Delete both copies of the shrinkwrap file
     if (fsx.existsSync(this.rushConfiguration.committedShrinkwrapFilename)) {

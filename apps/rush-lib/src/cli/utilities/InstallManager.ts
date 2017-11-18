@@ -195,8 +195,8 @@ export default class InstallManager {
   /**
    * Regenerates the common/package.json and all temp_modules projects.
    */
-  public createTempModules(): void {
-    this.createTempModulesAndCheckShrinkwrap(undefined);
+  public createTempModules(forceCreate: boolean = false): void {
+    this.createTempModulesAndCheckShrinkwrap(undefined, forceCreate);
   }
 
   /**
@@ -205,7 +205,9 @@ export default class InstallManager {
    * everything we need to install and returns true if so; in all other cases,
    * the return value is false.
    */
-  public createTempModulesAndCheckShrinkwrap(shrinkwrapFile: ShrinkwrapFile | undefined): boolean {
+  public createTempModulesAndCheckShrinkwrap(
+    shrinkwrapFile: ShrinkwrapFile | undefined,
+    forceCreate: boolean = false): boolean {
     const stopwatch: Stopwatch = Stopwatch.start();
 
     // Example: "C:\MyRepo\common\temp\projects"
@@ -391,7 +393,7 @@ export default class InstallManager {
       // we only want to overwrite the package if the existing tarball's package.json is different from tempPackageJson
       let shouldOverwrite: boolean = true;
       try {
-        // if the tarball and the temp folder still exist, then compare the contents
+        // if the tarball and the temp file still exist, then compare the contents
         if (fsx.existsSync(tarballFile) && fsx.existsSync(tempPackageJsonFilename)) {
 
           // compare the extracted package.json with the one we are about to write
@@ -406,7 +408,7 @@ export default class InstallManager {
         // ignore the error, we will go ahead and create a new tarball
       }
 
-      if (shouldOverwrite) {
+      if (shouldOverwrite || forceCreate) {
         try {
           // ensure the folder we are about to zip exists
           Utilities.createFolderWithRetry(tempProjectFolder);

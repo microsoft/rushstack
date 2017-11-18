@@ -93,18 +93,18 @@ export default class InstallAction extends BaseRushAction {
         return;
       }
 
-      if (!installManager.createTempModulesAndCheckShrinkwrap(shrinkwrapFile)) {
-        console.log('');
-        console.log(colors.red('You need to run "rush generate" to update your NPM shrinkwrap file.'));
-        process.exit(1);
-        return;
-      }
-
       let installType: InstallType = InstallType.Normal;
       if (this._cleanInstallFull.value) {
         installType = InstallType.UnsafePurge;
       } else if (this._cleanInstall.value) {
         installType = InstallType.ForceClean;
+      }
+
+      if (!installManager.createTempModulesAndCheckShrinkwrap(shrinkwrapFile, installType !== InstallType.Normal)) {
+        console.log('');
+        console.log(colors.red('You need to run "rush generate" to update your NPM shrinkwrap file.'));
+        process.exit(1);
+        return;
       }
 
       installManager.installCommonModules(installType);
