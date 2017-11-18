@@ -223,16 +223,6 @@ export default class PackageTypingsGenerator {
   private _modifySpan(rootSpan: Span, entry: Entry): void {
     rootSpan.modify((span: Span, previousSpan: Span | undefined, parentSpan: Span | undefined) => {
       switch (span.kind) {
-        case ts.SyntaxKind.Block:
-          // Replace code blocks with a semicolon
-          span.modification.prefix = ';';
-          span.modification.skipChildren = true;
-          span.modification.suffix = span.getLastInnerSeparator();
-          if (previousSpan) {
-            previousSpan.modification.skipSeparatorAfter = true;
-          }
-          break;
-
         case ts.SyntaxKind.ExportKeyword:
         case ts.SyntaxKind.DefaultKeyword:
         case ts.SyntaxKind.DeclareKeyword:
