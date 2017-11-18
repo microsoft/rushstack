@@ -11,10 +11,31 @@ import IndentedWriter from '../IndentedWriter';
 import TypeScriptHelpers from '../TypeScriptHelpers';
 import { Span } from './Span';
 
+/**
+ * An "Entry" is a type definition that we encounter while traversing the
+ * references from the package entry point.  This data structure helps filter,
+ * sort, and rename the entries that end up in the output package typings file.
+ */
 class Entry {
+  /**
+   * The original name of the symbol, as exported from the module (i.e. source file)
+   * containing the original TypeScript definition.
+   */
   public localName: string;
+
+  /**
+   * The localName, possibly renamed to ensure that all the top-level exports have unique names.
+   */
   public uniqueName: string | undefined = undefined;
+
+  /**
+   * The compiler symbol where this type was defined, after following any aliases.
+   */
   public followedSymbol: ts.Symbol;
+
+  /**
+   * If true, this entry should be emitted using the "export" keyword instead of the "declare" keyword.
+   */
   public exported: boolean = false;
 
   private _sortKey: string|undefined = undefined;
@@ -34,8 +55,19 @@ class Entry {
   }
 }
 
+/**
+ * Return value for PackageTypingsGenerator._followAliases()
+ */
 interface IFollowAliasesResult {
+  /**
+   * The original symbol that defined this entry, after following any aliases.
+   */
   symbol: ts.Symbol;
+
+  /**
+   * If true, the symbol was declared by an external package, e.g. versus being imported
+   * from another source file in the current project.
+   */
   external: boolean;
 }
 
@@ -44,7 +76,16 @@ export default class PackageTypingsGenerator {
   private _typeChecker: ts.TypeChecker;
   private _indentedWriter: IndentedWriter = new IndentedWriter();
 
+  /**
+   * A cache that tells us the Entry that is tracking a given symbol.  Because of aliases,
+   * two different symbols can map to the same Entry object.
+   */
   private readonly _entriesBySymbol: Map<ts.Symbol, Entry> = new Map<ts.Symbol, Entry>();
+
+  /**
+   * This data structure stores the same entries as _entriesBySymbol.values().
+   * They are sorted according to Entry.getSortKey().
+   */
   private readonly _entries: Entry[] = [];
 
   /**
@@ -71,6 +112,10 @@ export default class PackageTypingsGenerator {
     return current as T;
   }
 
+  /**
+   * For the given symbol, follow imports and type alias to find the symbol that represents
+   * the original definition.
+   */
   private static _followAliases(symbol: ts.Symbol, typeChecker: ts.TypeChecker): IFollowAliasesResult {
     let current: ts.Symbol = symbol;
 
@@ -135,7 +180,8 @@ export default class PackageTypingsGenerator {
       const entry: Entry | undefined = this._fetchEntryForSymbol(exportSymbol);
 
       if (!entry) {
-        // We are reexporting an external definition
+        // We are reexporting an external definition.
+        // To handle this, we would need to emit an import statement.
         this._indentedWriter.writeLine('// Unsupported re-export: ' + exportSymbol.name);
       } else {
         entry.exported = true;
@@ -155,8 +201,8 @@ export default class PackageTypingsGenerator {
           // console.log('=====================================');
 
           const span: Span = new Span(declaration);
-          console.log(span.getDump());
-          console.log('-------------------------------------');
+          // console.log(span.getDump());
+          // console.log('-------------------------------------');
 
           this._modifySpan(span, entry);
 
@@ -171,6 +217,9 @@ export default class PackageTypingsGenerator {
     return fileContent;
   }
 
+  /**
+   * Before writing out a declaration, _modifySpan() applies various fixups to make it nice.
+   */
   private _modifySpan(rootSpan: Span, entry: Entry): void {
     rootSpan.modify((span: Span, previousSpan: Span | undefined, parentSpan: Span | undefined) => {
       switch (span.kind) {
@@ -243,7 +292,13 @@ export default class PackageTypingsGenerator {
 
                   const referencedEntry: Entry | undefined = this._fetchEntryForSymbol(symbol);
                   if (referencedEntry) {
-                    span.modification.prefix = '/**/' + referencedEntry.uniqueName;
+                    if (!referencedEntry.uniqueName) {
+                      // This should never happen
+                      throw new Error('referencedEntry.uniqueName is undefined');
+                    }
+
+                    span.modification.prefix = referencedEntry.uniqueName;
+                    // span.modification.prefix += '/**/';
                   }
                 }
                 break;
@@ -255,6 +310,9 @@ export default class PackageTypingsGenerator {
     );
   }
 
+  /**
+   * Ensures a unique name for each item in the package typings file.
+   */
   private _makeUniqueNames(): void {
     const usedNames: Set<string> = new Set<string>();
     for (const entry of this._entries) {
