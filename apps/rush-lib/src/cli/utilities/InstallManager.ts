@@ -440,8 +440,6 @@ export default class InstallManager {
       }
     }
 
-    process.exit();
-
     // Example: "C:\MyRepo\common\temp\package.json"
     const commonPackageJsonFilename: string = path.join(this._rushConfiguration.commonTempFolder,
       RushConstants.packageJsonFilename);
