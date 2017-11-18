@@ -195,7 +195,7 @@ export default class InstallManager {
   /**
    * Regenerates the common/package.json and all temp_modules projects.
    */
-  public createTempModules(forceCreate: boolean = false): void {
+  public createTempModules(forceCreate: boolean): void {
     this.createTempModulesAndCheckShrinkwrap(undefined, forceCreate);
   }
 
@@ -207,7 +207,7 @@ export default class InstallManager {
    */
   public createTempModulesAndCheckShrinkwrap(
     shrinkwrapFile: ShrinkwrapFile | undefined,
-    forceCreate: boolean = false): boolean {
+    forceCreate: boolean): boolean {
     const stopwatch: Stopwatch = Stopwatch.start();
 
     // Example: "C:\MyRepo\common\temp\projects"
