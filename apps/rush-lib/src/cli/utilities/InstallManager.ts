@@ -195,8 +195,8 @@ export default class InstallManager {
   /**
    * Regenerates the common/package.json and all temp_modules projects.
    */
-  public createTempModules(): void {
-    this.createTempModulesAndCheckShrinkwrap(undefined);
+  public createTempModules(forceCreate: boolean): void {
+    this.createTempModulesAndCheckShrinkwrap(undefined, forceCreate);
   }
 
   /**
@@ -205,7 +205,9 @@ export default class InstallManager {
    * everything we need to install and returns true if so; in all other cases,
    * the return value is false.
    */
-  public createTempModulesAndCheckShrinkwrap(shrinkwrapFile: ShrinkwrapFile | undefined): boolean {
+  public createTempModulesAndCheckShrinkwrap(
+    shrinkwrapFile: ShrinkwrapFile | undefined,
+    forceCreate: boolean): boolean {
     const stopwatch: Stopwatch = Stopwatch.start();
 
     // Example: "C:\MyRepo\common\temp\projects"
@@ -379,38 +381,23 @@ export default class InstallManager {
       // NPM expects the root of the tarball to have a directory called 'package'
       const npmPackageFolder: string = 'package';
 
-      // Example: "C:\MyRepo\common\temp\projects\my-project-2.new"
+      // Example: "C:\MyRepo\common\temp\projects\my-project-2"
       const tempProjectFolder: string = path.join(
         this._rushConfiguration.commonTempFolder,
         RushConstants.rushTempProjectsFolderName,
-        unscopedTempProjectName + '.new');
+        unscopedTempProjectName);
 
       // Example: "C:\MyRepo\common\temp\projects\my-project-2\package.json"
       const tempPackageJsonFilename: string = path.join(tempProjectFolder, RushConstants.packageJsonFilename);
 
-      // Example: "C:\MyRepo\common\temp\projects\my-project-2.old"
-      const extractedFolder: string = tempProjectFolder + '.old';
-
       // we only want to overwrite the package if the existing tarball's package.json is different from tempPackageJson
       let shouldOverwrite: boolean = true;
       try {
-        // extract the tarball and compare the package.json directly
-        if (fsx.existsSync(tarballFile)) {
-
-          // ensure the folder we are about to extract into exists
-          Utilities.createFolderWithRetry(extractedFolder);
-
-          tar.extract({
-            cwd: extractedFolder,
-            file: tarballFile,
-            sync: true
-          });
-
-          const extractedPackageJsonFilename: string =
-            path.join(extractedFolder, npmPackageFolder, RushConstants.packageJsonFilename);
+        // if the tarball and the temp file still exist, then compare the contents
+        if (fsx.existsSync(tarballFile) && fsx.existsSync(tempPackageJsonFilename)) {
 
           // compare the extracted package.json with the one we are about to write
-          const oldBuffer: Buffer = fsx.readFileSync(extractedPackageJsonFilename);
+          const oldBuffer: Buffer = fsx.readFileSync(tempPackageJsonFilename);
           const newBuffer: Buffer = new Buffer(JsonFile.stringify(tempPackageJson));
 
           if (Buffer.compare(oldBuffer, newBuffer) === 0) {
@@ -421,30 +408,38 @@ export default class InstallManager {
         // ignore the error, we will go ahead and create a new tarball
       }
 
-      if (shouldOverwrite) {
-        // ensure the folder we are about to zip exists
-        Utilities.createFolderWithRetry(tempProjectFolder);
+      if (shouldOverwrite || forceCreate) {
+        try {
+          // ensure the folder we are about to zip exists
+          Utilities.createFolderWithRetry(tempProjectFolder);
 
-        // write the expected package.json file into the zip staging folder
-        JsonFile.save(tempPackageJson, tempPackageJsonFilename);
+          // remove the old tarball & old temp package json, this is for any cases where new tarball creation
+          // fails, and the shouldOverwrite logic is messed up because the my-project-2\package.json
+          // exists and is updated, but the tarball is not accurate
+          fsx.removeSync(tarballFile);
+          fsx.removeSync(tempPackageJsonFilename);
 
-        // create the new tarball, this overwrites the existing one
-        tar.create({
-          gzip: true,
-          file: tarballFile,
-          cwd: tempProjectFolder,
-          portable: true,
-          noPax: true,
-          sync: true,
-          prefix: npmPackageFolder
-        }, ['package.json']);
+          // write the expected package.json file into the zip staging folder
+          JsonFile.save(tempPackageJson, tempPackageJsonFilename);
 
-        console.log(`Updating ${tarballFile}`);
+          // create the new tarball
+          tar.create({
+            gzip: true,
+            file: tarballFile,
+            cwd: tempProjectFolder,
+            portable: true,
+            noPax: true,
+            sync: true,
+            prefix: npmPackageFolder
+          }, ['package.json']);
+
+          console.log(`Updating ${tarballFile}`);
+        } catch (error) {
+          // delete everything in case of any error
+          fsx.removeSync(tarballFile);
+          fsx.removeSync(tempPackageJsonFilename);
+        }
       }
-
-      // clean up the old tarball & the temp folder
-      fsx.removeSync(tempProjectFolder);
-      fsx.removeSync(extractedFolder);
     }
 
     // Example: "C:\MyRepo\common\temp\package.json"
