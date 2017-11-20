@@ -71,7 +71,7 @@ export default class GenerateAction extends BaseRushAction {
 
       if (shrinkwrapFile
         && !this._forceParameter.value
-        && installManager.createTempModulesAndCheckShrinkwrap(shrinkwrapFile)) {
+        && installManager.createTempModulesAndCheckShrinkwrap(shrinkwrapFile, false)) {
         console.log();
         console.log(colors.yellow('Skipping generate, since all project dependencies are already satisfied.'));
         console.log();
@@ -86,7 +86,7 @@ export default class GenerateAction extends BaseRushAction {
 
     installManager.ensureLocalNpmTool(false);
 
-    installManager.createTempModules();
+    installManager.createTempModules(true);
 
     // Delete both copies of the shrinkwrap file
     if (fsx.existsSync(this.rushConfiguration.committedShrinkwrapFilename)) {
