@@ -5,7 +5,6 @@ import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-import * as tar from 'tar';
 import encodeRegistry = require('encode-registry');
 
 import { JsonFile } from '@microsoft/node-core-library';
@@ -83,20 +82,8 @@ export default class PnpmLinkManager extends LinkManager {
     const extractedFolder: string = path.join(this._rushConfiguration.commonTempFolder,
       RushConstants.rushTempProjectsFolderName, unscopedTempProjectName);
 
-    // Example: "C:\MyRepo\common\temp\projects\project1.tgz"
-    const tarballFile: string = path.join(this._rushConfiguration.commonTempFolder,
-      RushConstants.rushTempProjectsFolderName, unscopedTempProjectName + '.tgz');
-
     // Example: "C:\MyRepo\common\temp\projects\project1\package.json"
-    const packageJsonFilename: string = path.join(extractedFolder, 'package', 'package.json');
-
-    // @todo this code is duplicated
-    Utilities.createFolderWithRetry(extractedFolder);
-    tar.extract({
-      cwd: extractedFolder,
-      file: tarballFile,
-      sync: true
-    });
+    const packageJsonFilename: string = path.join(extractedFolder, 'package.json');
 
     // Example: "C:\MyRepo\common\temp\node_modules\@rush-temp\project1"
     const installFolderName: string = path.join(this._rushConfiguration.commonTempFolder,
@@ -104,11 +91,8 @@ export default class PnpmLinkManager extends LinkManager {
 
     const commonPackage: Package = Package.createVirtualTempPackage(packageJsonFilename, installFolderName);
 
-    // remove the extracted tarball contents
-    fsx.removeSync(packageJsonFilename);
-    fsx.removeSync(extractedFolder);
+    // @TODO: Validate that the project's package.json still matches the common folder
 
-    // TODO: Validate that the project's package.json still matches the common folder
     const localPackage: Package = Package.createLinkedPackage(
       project.packageJson.name,
       commonPackage.version,

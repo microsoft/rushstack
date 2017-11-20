@@ -544,7 +544,7 @@ export default class InstallManager {
       }
     }
 
-    if (markerFileExistedAndWasValidAtStart) {
+    if (fsx.existsSync(this.commonNodeModulesMarkerFilename)) {
       // Delete the successful install file to indicate the install transaction has started
       fsx.unlinkSync(this.commonNodeModulesMarkerFilename);
     }
@@ -646,7 +646,10 @@ export default class InstallManager {
     this._fixupNpm5Regression();
 
     // Finally, create the marker file to indicate a successful install
-    fsx.createFileSync(this.commonNodeModulesMarkerFilename);
+    const lastInstallFlagContents: string =
+      `${this._rushConfiguration.packageManager}@${this._rushConfiguration.packageManagerToolVersion}`;
+
+    fsx.writeFileSync(this.commonNodeModulesMarkerFilename, lastInstallFlagContents);
     console.log('');
   }
 
