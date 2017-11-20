@@ -23,14 +23,18 @@ export default class PnpmLinkManager extends LinkManager {
   protected _linkProjects(): Promise<void> {
     return new Promise<void>((resolve: () => void, reject: (reason: Error) => void): void => {
       // go ahead and find out the registry we are using, we need this to locate the pnpm store folder
+
+      // EXAMPLE: https://onedrive.pkgs.visualstudio.com/_packaging/odsp-npm/npm/registry
       const registryUrl: string = Utilities.executeCommandAndCaptureOutput(
         this._rushConfiguration.packageManagerToolFilename,
         ['config', 'get', 'registry'],
         this._rushConfiguration.commonTempFolder,
         process.env);
 
+      // EXAMPLE: onedrive.pkgs.visualstudio.com
       const encodedRegistry: string = encodeRegistry(registryUrl);
 
+      // EXAMPLE: c:/src/foo/common/temp/node_modules/.onedrive.pkgs.visualstudio.com
       const registryPath: string = path.join(
         this._rushConfiguration.commonTempFolder,
         RushConstants.nodeModulesFolderName,

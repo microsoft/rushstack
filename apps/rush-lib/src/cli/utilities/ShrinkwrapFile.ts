@@ -6,6 +6,7 @@ import * as semver from 'semver';
 import npmPackageArg = require('npm-package-arg');
 
 import Utilities from '../../utilities/Utilities';
+import { PackageManager } from '../../data/RushConfiguration';
 import { RushConstants } from '../../RushConstants';
 
 /**
@@ -14,14 +15,13 @@ import { RushConstants } from '../../RushConstants';
 export default abstract class ShrinkwrapFile {
   protected _alreadyWarnedSpecs: Set<string> = new Set<string>();
 
-  public static loadFromFile(shrinkwrapFilename: string): ShrinkwrapFile | undefined {
-    try {
+  public static loadFromFile(packageManager: PackageManager, shrinkwrapFilename: string): ShrinkwrapFile | undefined {
+    if (packageManager === 'npm') {
       return require('./npm/NpmShrinkwrapFile').default.loadFromFile(shrinkwrapFilename);
-    } catch (e) { /* no-op */ }
-    try {
+    } else if (packageManager === 'pnpm') {
       return require('./pnpm/PnpmShrinkwrapFile').default.loadFromFile(shrinkwrapFilename);
-    } catch (e) { /* no-op */ }
-    throw new Error(`Unable to load shrinkwrap file!`);
+    }
+    throw new Error(`Invalid package manager: "${packageManager}"`);
   }
 
   protected static tryGetValue<T>(dictionary: { [key2: string]: T }, key: string): T | undefined {

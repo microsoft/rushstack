@@ -11,7 +11,8 @@ export {
 } from './data/ApprovedPackagesPolicy';
 
 export {
-  default as RushConfiguration
+  default as RushConfiguration,
+  PackageManager
 } from './data/RushConfiguration';
 
 export {

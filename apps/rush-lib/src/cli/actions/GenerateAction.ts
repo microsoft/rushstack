@@ -61,6 +61,11 @@ export default class GenerateAction extends BaseRushAction {
     const stopwatch: Stopwatch = Stopwatch.start();
     const isLazy: boolean = this._lazyParameter.value;
 
+    if (this._lazyParameter.value && this.rushConfiguration.packageManager === 'pnpm') {
+      console.warn(colors.yellow('The --lazy flag is not required for PNPM'
+        + ' because its algorithm inherently incorporates this optimization.'));
+    }
+
     ApprovedPackagesChecker.rewriteConfigFiles(this.rushConfiguration);
 
     const installManager: InstallManager = new InstallManager(this.rushConfiguration);
@@ -70,7 +75,7 @@ export default class GenerateAction extends BaseRushAction {
 
     try {
       const shrinkwrapFile: ShrinkwrapFile | undefined
-        = ShrinkwrapFile.loadFromFile(committedShrinkwrapFilename);
+        = ShrinkwrapFile.loadFromFile(this.rushConfiguration.packageManager, committedShrinkwrapFilename);
 
       if (shrinkwrapFile
         && !this._forceParameter.value

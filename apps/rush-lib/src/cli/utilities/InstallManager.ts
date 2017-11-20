@@ -13,7 +13,9 @@ import globEscape = require('glob-escape');
 import { JsonFile } from '@microsoft/node-core-library';
 
 import AsyncRecycler from '../../utilities/AsyncRecycler';
-import RushConfiguration from '../../data/RushConfiguration';
+import RushConfiguration, {
+  PackageManager
+} from '../../data/RushConfiguration';
 import RushConfigurationProject from '../../data/RushConfigurationProject';
 import { RushConstants } from '../../RushConstants';
 import Utilities from '../../utilities/Utilities';
@@ -152,7 +154,7 @@ export default class InstallManager {
       fsx.mkdirSync(rushHomeFolder);
     }
 
-    const packageManager: 'pnpm' | 'npm' = this._rushConfiguration.packageManager;
+    const packageManager: PackageManager = this._rushConfiguration.packageManager;
     const packageManagerVersion: string = this._rushConfiguration.packageManagerToolVersion;
 
     // Example: "C:\Users\YourName\.rush\pnpm-1.2.3"
@@ -517,16 +519,16 @@ export default class InstallManager {
       }
     } else {
       if (this._rushConfiguration.packageManager === 'npm') {
-        console.log(`Deleting the packages-cache folder`);
+        console.log(`Deleting the "npm-cache" folder`);
         // This is faster and more thorough than "npm cache clean"
         this._asyncRecycler.moveFolder(this._rushConfiguration.npmCacheFolder);
 
-        console.log(`Deleting the "packages-tmp" folder`);
+        console.log(`Deleting the "npm-tmp" folder`);
         this._asyncRecycler.moveFolder(this._rushConfiguration.npmTmpFolder);
 
       } else if (installType === InstallType.UnsafePurge) {
-        console.log(`Deleting the PNPM store folder`);
-        this._asyncRecycler.moveFolder(this._rushConfiguration.npmCacheFolder);
+        console.log(`Deleting the "pnpm-store" folder`);
+        this._asyncRecycler.moveFolder(this._rushConfiguration.pnpmStoreFolder);
       }
     }
 
@@ -545,8 +547,6 @@ export default class InstallManager {
       if (deletingNodeModules) {
         // YES: Delete "node_modules"
 
-        // @todo, try not to remove the local registry install
-
         // Explain to the user why we are hosing their node_modules folder
         if (installType === InstallType.Normal) {
           console.log('Deleting the "node_modules" folder because the previous Rush install' +
@@ -563,12 +563,15 @@ export default class InstallManager {
       } else {
         // NO: Do an incremental install in the "node_modules" folder
 
-        console.log(`Running "${this._rushConfiguration.packageManager} prune"`
-          + ` in ${this._rushConfiguration.commonTempFolder}`);
-        const args: string[] = ['prune'];
-        this.pushConfigurationArgs(args);
-        Utilities.executeCommandWithRetry(packageManagerFilename, args, MAX_INSTALL_ATTEMPTS,
-          this._rushConfiguration.commonTempFolder);
+        // note: it is not necessary to run "prune" with pnpm
+        if (this._rushConfiguration.packageManager === 'npm') {
+          console.log(`Running "${this._rushConfiguration.packageManager} prune"`
+            + ` in ${this._rushConfiguration.commonTempFolder}`);
+          const args: string[] = ['prune'];
+          this.pushConfigurationArgs(args);
+          Utilities.executeCommandWithRetry(packageManagerFilename, args, MAX_INSTALL_ATTEMPTS,
+            this._rushConfiguration.commonTempFolder);
+        }
 
         // Delete the (installed image of) the temp projects, since "npm install" does not
         // detect changes for "file:./" references.
@@ -596,7 +599,8 @@ export default class InstallManager {
 
     // Run "npm install" in the common folder
 
-    // NOTE: we do NOT install optional dependencies for Rush, as it seems that optional dependencies do not
+    // NOTE FOR NPM:
+    //       we do NOT install optional dependencies for Rush, as it seems that optional dependencies do not
     //       work properly with shrinkwrap. Consider the "fsevents" package. This is a Mac specific package
     //       which is an optional second-order dependency. Optional dependencies work by attempting to install
     //       the package, but removes the package if the install failed.
@@ -637,7 +641,7 @@ export default class InstallManager {
       args.push('--cache', this._rushConfiguration.npmCacheFolder);
       args.push('--tmp', this._rushConfiguration.npmTmpFolder);
     } else if (this._rushConfiguration.packageManager === 'pnpm') {
-      args.push('--store', this._rushConfiguration.npmCacheFolder);
+      args.push('--store', this._rushConfiguration.pnpmStoreFolder);
       args.push('--no-lock');
     }
   }

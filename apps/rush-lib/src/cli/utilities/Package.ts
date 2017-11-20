@@ -3,7 +3,7 @@
 
 import { JsonFile } from '@microsoft/node-core-library';
 
-import { IPackageJson } from '../../index';
+import IPackageJson from '../../utilities/IPackageJson';
 
 /**
  * The type of dependency; used by IPackageDependency.

@@ -98,6 +98,12 @@ export interface IRushLinkJson {
 }
 
 /**
+ * This represents the available Package Manager tools as a string
+ * @public
+ */
+export type PackageManager = 'pnpm' | 'npm';
+
+/**
  * This represents the Rush configuration for a repository, based on the Rush.json
  * configuration file.
  * @public
@@ -111,9 +117,10 @@ export default class RushConfiguration {
   private _commonFolder: string;
   private _commonTempFolder: string;
   private _commonRushConfigFolder: string;
-  private _packageManager: 'pnpm' | 'npm';
-  private _packageManagerCacheFolder: string;
-  private _packageManagerTmpFolder: string;
+  private _packageManager: PackageManager;
+  private _pnpmStoreFolder: string;
+  private _npmCacheFolder: string;
+  private _npmTmpFolder: string;
   private _committedShrinkwrapFilename: string;
   private _tempShrinkwrapFilename: string;
   private _homeFolder: string;
@@ -268,7 +275,7 @@ export default class RushConfiguration {
    * _validateCommonRushConfigFolder() function makes sure that this folder only contains
    * recognized config files.
    */
-  private static _validateCommonRushConfigFolder(commonRushConfigFolder: string, packageManager: 'pnpm' | 'npm'): void {
+  private static _validateCommonRushConfigFolder(commonRushConfigFolder: string, packageManager: PackageManager): void {
     if (!fsx.existsSync(commonRushConfigFolder)) {
       console.log(`Creating folder: ${commonRushConfigFolder}`);
       fsx.mkdirsSync(commonRushConfigFolder);
@@ -306,8 +313,10 @@ export default class RushConfiguration {
     }
   }
 
-  /** The name of the package manager being used to install dependencies */
-  public get packageManager(): 'pnpm' | 'npm' {
+  /**
+   * The name of the package manager being used to install dependencies
+   */
+  public get packageManager(): PackageManager {
     return this._packageManager;
   }
 
@@ -371,7 +380,7 @@ export default class RushConfiguration {
    * Example: "C:\MyRepo\common\temp\npm-cache"
    */
   public get npmCacheFolder(): string {
-    return this._packageManagerCacheFolder;
+    return this._npmCacheFolder;
   }
 
   /**
@@ -382,7 +391,16 @@ export default class RushConfiguration {
    * Example: "C:\MyRepo\common\temp\npm-tmp"
    */
   public get npmTmpFolder(): string {
-    return this._packageManagerTmpFolder;
+    return this._npmTmpFolder;
+  }
+
+  /**
+   * The local folder where PNPM stores a global installation for every installed package
+   *
+   * Example: "C:\MyRepo\common\temp\pnpm-store"
+   */
+  public get pnpmStoreFolder(): string {
+    return this._pnpmStoreFolder;
   }
 
   /**
@@ -608,8 +626,9 @@ export default class RushConfiguration {
     this._commonRushConfigFolder = path.join(this._commonFolder, 'config', 'rush');
 
     this._commonTempFolder = path.join(this._commonFolder, RushConstants.rushTempFolderName);
-    this._packageManagerCacheFolder = path.resolve(path.join(this._commonTempFolder, 'packages-cache'));
-    this._packageManagerTmpFolder = path.resolve(path.join(this._commonTempFolder, 'packages-tmp'));
+    this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
+    this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));
+    this._pnpmStoreFolder = path.resolve(path.join(this._commonTempFolder, 'pnpm-store'));
 
     this._changesFolder = path.join(this._commonFolder, RushConstants.changeFilesFolderName);
     this._homeFolder = RushConfiguration.getHomeDirectory();

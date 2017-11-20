@@ -203,11 +203,11 @@ class RushConfiguration {
   public static loadFromDefaultLocation(): RushConfiguration;
   public readonly npmCacheFolder: string;
   public readonly npmTmpFolder: string;
-  // (undocumented)
-  public readonly packageManager: 'pnpm' | 'npm';
+  public readonly packageManager: PackageManager;
   public readonly packageManagerToolFilename: string;
   public readonly packageManagerToolVersion: string;
   public readonly pinnedVersions: PinnedVersionsConfiguration;
+  public readonly pnpmStoreFolder: string;
   public readonly projectFolderMaxDepth: number;
   public readonly projectFolderMinDepth: number;
   // (undocumented)
@@ -288,3 +288,4 @@ enum VersionPolicyDefinitionName {
   'lockStepVersion'
 }
 
+// WARNING: Unsupported export: PackageManager

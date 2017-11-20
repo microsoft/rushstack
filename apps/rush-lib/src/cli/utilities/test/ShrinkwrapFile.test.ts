@@ -8,7 +8,7 @@ import ShrinkwapFile from '../ShrinkwrapFile';
 
 describe('NPM ShrinkwrapFile', () => {
   const filename: string = path.resolve(path.join(__dirname, './shrinkwrapFile/npm-shrinkwrap.json'));
-  const shrinkwrapFile: ShrinkwapFile = ShrinkwapFile.loadFromFile(filename)!;
+  const shrinkwrapFile: ShrinkwapFile = ShrinkwapFile.loadFromFile('npm', filename)!;
 
   it('verifies root-level dependency', () => {
     shrinkwrapFile.hasCompatibleDependency('q', '~1.5.0');
@@ -31,7 +31,7 @@ describe('NPM ShrinkwrapFile', () => {
 describe('PNPM ShrinkwrapFile', () => {
   const filename: string = path.resolve(path.join(
     __dirname, '../../../../src/cli/utilities/test/shrinkwrapFile/shrinkwrap.yaml'));
-  const shrinkwrapFile: ShrinkwapFile = ShrinkwapFile.loadFromFile(filename)!;
+  const shrinkwrapFile: ShrinkwapFile = ShrinkwapFile.loadFromFile('pnpm', filename)!;
 
   it('verifies root-level dependency', () => {
     shrinkwrapFile.hasCompatibleDependency('q', '~1.5.0');

@@ -82,7 +82,9 @@ export default class InstallAction extends BaseRushAction {
       installManager.ensureLocalPackageManager(this._cleanInstallFull.value);
 
       const shrinkwrapFile: ShrinkwrapFile | undefined
-        = ShrinkwrapFile.loadFromFile(this.rushConfiguration.committedShrinkwrapFilename);
+        = ShrinkwrapFile.loadFromFile(
+          this.rushConfiguration.packageManager,
+          this.rushConfiguration.committedShrinkwrapFilename);
 
       if (!shrinkwrapFile) {
         console.log('');
