@@ -207,7 +207,6 @@ class RushConfiguration {
   public readonly packageManagerToolFilename: string;
   public readonly packageManagerToolVersion: string;
   public readonly pinnedVersions: PinnedVersionsConfiguration;
-  public readonly pnpmStoreFolder: string;
   public readonly projectFolderMaxDepth: number;
   public readonly projectFolderMinDepth: number;
   // (undocumented)

@@ -10,18 +10,13 @@ import { PackageManager } from '../../data/RushConfiguration';
 import { RushConstants } from '../../RushConstants';
 
 /**
- * This class is a parser for both NPM's npm-shrinkwrap.json and PNPM's shrinkwrap.yaml file formats.
+ * This class is a parser for both NPM's npm-shrinkwrap.json file formats.
  */
 export default abstract class ShrinkwrapFile {
   protected _alreadyWarnedSpecs: Set<string> = new Set<string>();
 
   public static loadFromFile(packageManager: PackageManager, shrinkwrapFilename: string): ShrinkwrapFile | undefined {
-    if (packageManager === 'npm') {
-      return require('./npm/NpmShrinkwrapFile').default.loadFromFile(shrinkwrapFilename);
-    } else if (packageManager === 'pnpm') {
-      return require('./pnpm/PnpmShrinkwrapFile').default.loadFromFile(shrinkwrapFilename);
-    }
-    throw new Error(`Invalid package manager: "${packageManager}"`);
+    return require('./npm/NpmShrinkwrapFile').default.loadFromFile(shrinkwrapFilename);
   }
 
   protected static tryGetValue<T>(dictionary: { [key2: string]: T }, key: string): T | undefined {
