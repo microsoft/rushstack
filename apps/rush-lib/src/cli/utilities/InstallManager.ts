@@ -485,12 +485,24 @@ export default class InstallManager {
       'node_modules');
 
     // This marker file indicates that the last "rush install" completed successfully
-    const markerFileExistedAtStart: boolean = fsx.existsSync(this.commonNodeModulesMarkerFilename);
+    let markerFileExistedAndWasValidAtStart: boolean = false;
+
+    if (fsx.existsSync(this.commonNodeModulesMarkerFilename)) {
+      const markerFileContents: string = fsx.readFileSync(this.commonNodeModulesMarkerFilename).toString();
+      const expectedFileContents: string =
+        `${this._rushConfiguration.packageManager}@${this._rushConfiguration.packageManagerToolVersion}`;
+      if (markerFileContents === expectedFileContents) {
+        markerFileExistedAndWasValidAtStart = true;
+      }
+    }
+
+    // @todo for PNPM, we should look at the lock file to determine if the store needs to be cleaned
+    // ie even if the marker file does not exist, the store may be ok if there is no lock file
 
     // If "--clean" or "--full-clean" was specified, or if the last install was interrupted,
     // then we will need to delete the node_modules folder.  Otherwise, we can do an incremental
     // install.
-    const deletingNodeModules: boolean = installType !== InstallType.Normal || !markerFileExistedAtStart;
+    const deletingNodeModules: boolean = installType !== InstallType.Normal || !markerFileExistedAndWasValidAtStart;
 
     // Based on timestamps, can we skip this install entirely?
     if (!deletingNodeModules) {
@@ -526,13 +538,13 @@ export default class InstallManager {
         console.log(`Deleting the "npm-tmp" folder`);
         this._asyncRecycler.moveFolder(this._rushConfiguration.npmTmpFolder);
 
-      } else if (installType === InstallType.UnsafePurge) {
+      } else {
         console.log(`Deleting the "pnpm-store" folder`);
         this._asyncRecycler.moveFolder(this._rushConfiguration.pnpmStoreFolder);
       }
     }
 
-    if (markerFileExistedAtStart) {
+    if (markerFileExistedAndWasValidAtStart) {
       // Delete the successful install file to indicate the install transaction has started
       fsx.unlinkSync(this.commonNodeModulesMarkerFilename);
     }
@@ -614,8 +626,14 @@ export default class InstallManager {
     //       One possible solution would be to have the shrinkwrap include information about whether the dependency
     //       is optional or not, but it does not appear to do so. Also, this would result in strange behavior where
     //       people would have different node_modules based on their system.
+    //
+    // NOTE FOR PNPM:
+    //       PNPM does not appear to support the --no-optional flag at the moment
 
-    const installArgs: string[] = ['install', '--no-optional'];
+    const installArgs: string[] = ['install'];
+    if (this._rushConfiguration.packageManager === 'npm') {
+      installArgs.push('--no-optional');
+    }
     this.pushConfigurationArgs(installArgs);
 
     console.log(os.EOL + colors.bold(`Running "${this._rushConfiguration.packageManager} install" in`

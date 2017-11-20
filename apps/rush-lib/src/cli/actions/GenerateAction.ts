@@ -3,6 +3,7 @@
 
 import * as colors from 'colors';
 import * as os from 'os';
+import * as path from 'path';
 import * as fsx from 'fs-extra';
 import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 
@@ -105,19 +106,24 @@ export default class GenerateAction extends BaseRushAction {
       fsx.unlinkSync(tempShrinkwrapFilename);
     }
 
-    if (isLazy) {
-      console.log(colors.green(
-        `${os.EOL}Rush is running in "--lazy" mode. ` +
-        `You will need to run a normal "rush generate" before committing.`));
+    if (isLazy || this.rushConfiguration.packageManager === 'pnpm') {
+      if (this.rushConfiguration.packageManager === 'npm') {
+        console.log(colors.green(
+          `${os.EOL}Rush is running in "--lazy" mode. ` +
+          `You will need to run a normal "rush generate" before committing.`));
+      }
 
       // Do an incremental install
       installManager.installCommonModules(InstallType.Normal);
 
       if (this.rushConfiguration.packageManager === 'npm') {
         console.log(os.EOL + colors.bold('(Skipping "npm shrinkwrap")') + os.EOL);
-      } else if (this.rushConfiguration.packageManager === 'pnpm') {
-        console.log(os.EOL + colors.bold('(Deleting "shrinkwrap.yaml")') + os.EOL);
-        fsx.unlinkSync(tempShrinkwrapFilename);
+        const packageLogFilePath: string = path.join(this.rushConfiguration.commonTempFolder, 'package.lock');
+
+        if (fsx.existsSync(packageLogFilePath)) {
+          console.log('Removing NPM5\'s "package.lock" file');
+          fsx.removeSync(packageLogFilePath);
+        }
       }
     } else {
       // Do a clean install

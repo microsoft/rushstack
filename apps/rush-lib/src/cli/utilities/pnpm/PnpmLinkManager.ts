@@ -69,10 +69,10 @@ export default class PnpmLinkManager extends LinkManager {
     project: RushConfigurationProject,
     rushLinkJson: IRushLinkJson): void {
 
-    // Naively, PNPM creates a directed acyclic graph, rather than a tree
-    // thus if sp-http and sp-core-library both depend on GCB@1.2.3,
-    // and GCB@1.2.3 depends on gulp-typescript, then for both cases it must
-    // be the exact same version of gulp-typescript
+    // PNPM creates a directed acyclic graph, rather than a tree.
+    // Thus, imagine "sp-http" and "sp-core-library" both depend on "request"@1.2.3,
+    // and "request"@1.2.3 depends on "http@*", then both "sp-http" and "sp-core-library"
+    // must have the exact same version of "http"
     // thus, we only need to link the direct dependencies of this project to the
     // common folder
 
