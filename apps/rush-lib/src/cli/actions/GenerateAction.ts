@@ -71,7 +71,7 @@ export default class GenerateAction extends BaseRushAction {
 
     try {
       const shrinkwrapFile: ShrinkwrapFile | undefined
-        = ShrinkwrapFile.loadFromFile(this.rushConfiguration.packageManager, committedShrinkwrapFilename);
+        = ShrinkwrapFile.loadFromFile(committedShrinkwrapFilename);
 
       if (shrinkwrapFile
         && !this._forceParameter.value

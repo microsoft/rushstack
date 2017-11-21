@@ -6,16 +6,18 @@ import * as semver from 'semver';
 import npmPackageArg = require('npm-package-arg');
 
 import Utilities from '../../utilities/Utilities';
-import { PackageManager } from '../../data/RushConfiguration';
 import { RushConstants } from '../../RushConstants';
 
 /**
- * This class is a parser for both NPM's npm-shrinkwrap.json file formats.
+ * This class is a parser for NPM's npm-shrinkwrap.json file format.
  */
 export default abstract class ShrinkwrapFile {
   protected _alreadyWarnedSpecs: Set<string> = new Set<string>();
 
-  public static loadFromFile(packageManager: PackageManager, shrinkwrapFilename: string): ShrinkwrapFile | undefined {
+  /**
+   * Attempt to load the shrinkwrap from a filepath
+   */
+  public static loadFromFile(shrinkwrapFilename: string): ShrinkwrapFile | undefined {
     return require('./npm/NpmShrinkwrapFile').default.loadFromFile(shrinkwrapFilename);
   }
 
@@ -59,16 +61,4 @@ export default abstract class ShrinkwrapFile {
   public abstract getTempProjectNames(): ReadonlyArray<string>;
 
   protected abstract getDependencyVersion(dependencyName: string, tempProjectName?: string): string | undefined;
-
-  protected _getTempProjectNames(dependencies: { [key: string]: {} } ): ReadonlyArray<string> {
-    const result: string[] = [];
-    for (const key of Object.keys(dependencies)) {
-      // If it starts with @rush-temp, then include it:
-      if (Utilities.parseScopedPackageName(key).scope === RushConstants.rushTempNpmScope) {
-        result.push(key);
-      }
-    }
-    result.sort();  // make the result deterministic
-    return result;
-  }
 }

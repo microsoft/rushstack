@@ -142,7 +142,7 @@ export default class InstallManager {
   }
 
   /**
-   * If the "(p)npm-local" symlink hasn't been set up yet, this creates it, installing the
+   * If the "npm-local" symlink hasn't been set up yet, this creates it, installing the
    * specified NPM version in the user's home directory if needed.
    */
   public ensureLocalPackageManager(forceReinstall: boolean): void {
@@ -615,10 +615,7 @@ export default class InstallManager {
     //       is optional or not, but it does not appear to do so. Also, this would result in strange behavior where
     //       people would have different node_modules based on their system.
 
-    const installArgs: string[] = ['install'];
-    if (this._rushConfiguration.packageManager === 'npm') {
-      installArgs.push('--no-optional');
-    }
+    const installArgs: string[] = ['install', '--no-optional'];
     this.pushConfigurationArgs(installArgs);
 
     console.log(os.EOL + colors.bold(`Running "${this._rushConfiguration.packageManager} install" in`

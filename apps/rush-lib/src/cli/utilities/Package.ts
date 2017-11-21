@@ -73,6 +73,9 @@ export default class Package {
    */
   public parent: Package | undefined;
 
+  /**
+   * The raw package.json information for this Package
+   */
   public packageJson: IRushTempPackageJson | undefined;
 
   /**
