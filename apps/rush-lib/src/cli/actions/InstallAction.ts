@@ -11,8 +11,10 @@ import { Stopwatch } from '../../utilities/Stopwatch';
 import RushCommandLineParser from './RushCommandLineParser';
 import GitPolicy from '../utilities/GitPolicy';
 import InstallManager, { InstallType } from '../utilities/InstallManager';
-import LinkManager from '../utilities/LinkManager';
-import ShrinkwrapFile from '../utilities/ShrinkwrapFile';
+import { LinkManagerFactory } from '../utilities/LinkManagerFactory';
+import { ShrinkwrapFileFactory } from '../utilities/ShrinkwrapFileFactory';
+import { BaseLinkManager } from '../utilities/base/BaseLinkManager';
+import { BaseShrinkwrapFile } from '../utilities/base/BaseShrinkwrapFile';
 import { ApprovedPackagesChecker } from '../utilities/ApprovedPackagesChecker';
 import { BaseRushAction } from './BaseRushAction';
 
@@ -79,10 +81,11 @@ export default class InstallAction extends BaseRushAction {
     try {
       const installManager: InstallManager = new InstallManager(this.rushConfiguration);
 
-      installManager.ensureLocalNpmTool(this._cleanInstallFull.value);
+      installManager.ensureLocalPackageManager(this._cleanInstallFull.value);
 
-      const shrinkwrapFile: ShrinkwrapFile | undefined
-        = ShrinkwrapFile.loadFromFile(this.rushConfiguration.committedShrinkwrapFilename);
+      const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
+        this.rushConfiguration.packageManager,
+        this.rushConfiguration.committedShrinkwrapFilename);
 
       if (!shrinkwrapFile) {
         console.log('');
@@ -122,7 +125,7 @@ export default class InstallAction extends BaseRushAction {
     this.eventHooksManager.handle(Event.postRushInstall);
 
     if (!this._noLinkParameter.value) {
-      const linkManager: LinkManager = new LinkManager(this.rushConfiguration);
+      const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
       this._parser.catchSyncErrors(linkManager.createSymlinksForProjects(false));
     } else {
       console.log(os.EOL + 'Next you should probably run: "rush link"');

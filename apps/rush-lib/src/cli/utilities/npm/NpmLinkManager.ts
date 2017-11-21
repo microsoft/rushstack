@@ -8,185 +8,46 @@ import * as path from 'path';
 import * as semver from 'semver';
 import * as tar from 'tar';
 import readPackageTree = require('read-package-tree');
+
 import { JsonFile } from '@microsoft/node-core-library';
 
-import { RushConstants } from '../../RushConstants';
+import { RushConstants } from '../../../RushConstants';
+import { IRushLinkJson } from '../../../data/RushConfiguration';
+import RushConfigurationProject from '../../../data/RushConfigurationProject';
+import Utilities from '../../../utilities/Utilities';
 import {
-  default as RushConfiguration,
-  IRushLinkJson
-} from '../../data/RushConfiguration';
-import RushConfigurationProject from '../../data/RushConfigurationProject';
-import Utilities from '../../utilities/Utilities';
-import { Stopwatch } from '../../utilities/Stopwatch';
-import Package, { IResolveOrCreateResult, PackageDependencyKind } from './Package';
-import PackageLookup from './PackageLookup';
+  NpmPackage,
+  IResolveOrCreateResult,
+  PackageDependencyKind
+} from './NpmPackage';
+import PackageLookup from '../PackageLookup';
+import {
+  BaseLinkManager,
+  SymlinkKind
+} from '../base/BaseLinkManager';
 
 interface IQueueItem {
   // A project from somewhere under "common/temp/node_modules"
-  commonPackage: Package;
+  commonPackage: NpmPackage;
 
   // A symlinked virtual package that we will create somewhere under "this-project/node_modules"
-  localPackage: Package;
+  localPackage: NpmPackage;
 
   // If we encounter a dependency listed in cyclicDependencyProjects, this will be set to the root
   // of the localPackage subtree where we will stop creating local links.
-  cyclicSubtreeRoot: Package | undefined;
+  cyclicSubtreeRoot: NpmPackage | undefined;
 }
 
-enum SymlinkKind {
-  File,
-  Directory
-}
-
-export default class LinkManager {
-  private _rushConfiguration: RushConfiguration;
-
-  private static _createSymlink(linkTarget: string, linkSource: string, symlinkKind: SymlinkKind): void {
-    if (symlinkKind === SymlinkKind.Directory) {
-      // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
-      fsx.symlinkSync(linkTarget, linkSource, 'junction');
-    } else {
-      if (process.platform === 'win32') {
-        // For files, we use a Windows "hard link", because creating a symbolic link requires
-        // administrator permission.
-        fsx.linkSync(linkTarget, linkSource);
-      } else {
-        // However hard links seem to cause build failures on Mac, so for all other operating systems
-        // we use symbolic links for this case.
-        fsx.symlinkSync(linkTarget, linkSource, 'file');
-      }
-    }
-  }
-
-  /**
-   * This is a helper function used by createSymlinksForTopLevelProject().
-   * It will recursively creates symlinked folders corresponding to each of the
-   * Package objects in the provided tree.
-   */
-  private static _createSymlinksForDependencies(localPackage: Package): void {
-    const localModuleFolder: string = path.join(localPackage.folderPath, 'node_modules');
-
-    if (!localPackage.symlinkTargetFolderPath) {
-      // Program bug
-      throw Error('localPackage.symlinkTargetFolderPath was not assigned');
-    }
-
-    // This is special case for when localPackage.name has the form '@scope/name',
-    // in which case we need to create the '@scope' folder first.
-    const parentFolderPath: string = path.dirname(localPackage.folderPath);
-    if (parentFolderPath && parentFolderPath !== localPackage.folderPath) {
-      if (!fsx.existsSync(parentFolderPath)) {
-        Utilities.createFolderWithRetry(parentFolderPath);
-      }
-    }
-
-    if (localPackage.children.length === 0) {
-      // If there are no children, then we can symlink the entire folder
-      LinkManager._createSymlink(localPackage.symlinkTargetFolderPath, localPackage.folderPath, SymlinkKind.Directory);
-    } else {
-      // If there are children, then we need to symlink each item in the folder individually
-      Utilities.createFolderWithRetry(localPackage.folderPath);
-
-      for (const filename of fsx.readdirSync(localPackage.symlinkTargetFolderPath)) {
-        if (filename.toLowerCase() !== 'node_modules') {
-          // Create the symlink
-          let symlinkKind: SymlinkKind = SymlinkKind.File;
-
-          const linkSource: string = path.join(localPackage.folderPath, filename);
-          let linkTarget: string = path.join(localPackage.symlinkTargetFolderPath, filename);
-
-          const linkStats: fsx.Stats = fsx.lstatSync(linkTarget);
-
-          if (linkStats.isSymbolicLink()) {
-            const targetStats: fsx.Stats = fsx.statSync(linkTarget);
-            if (targetStats.isDirectory()) {
-              // Neither a junction nor a directory-symlink can have a directory-symlink
-              // as its target; instead, we must obtain the real physical path.
-              // A junction can link to another junction.  Unfortunately, the node 'fs' API
-              // lacks the ability to distinguish between a junction and a directory-symlink
-              // (even though it has the ability to create them both), so the safest policy
-              // is to always make a junction and always to the real physical path.
-              linkTarget = fsx.realpathSync(linkTarget);
-              symlinkKind = SymlinkKind.Directory;
-            }
-          } else if (linkStats.isDirectory()) {
-            symlinkKind = SymlinkKind.Directory;
-          }
-
-          LinkManager._createSymlink(linkTarget, linkSource, symlinkKind);
-        }
-      }
-    }
-
-    if (localPackage.children.length > 0) {
-      Utilities.createFolderWithRetry(localModuleFolder);
-
-      for (const child of localPackage.children) {
-        LinkManager._createSymlinksForDependencies(child);
-      }
-    }
-  }
-
-  /**
-   * For a Package object that represents a top-level Rush project folder
-   * (i.e. with source code that we will be building), this clears out its
-   * node_modules folder and then recursively creates all the symlinked folders.
-   */
-  private static _createSymlinksForTopLevelProject(localPackage: Package): void {
-    const localModuleFolder: string = path.join(localPackage.folderPath, 'node_modules');
-
-    // Sanity check
-    if (localPackage.parent) {
-      throw new Error('The provided package is not a top-level project');
-    }
-
-    // The root-level folder is the project itself, so we simply delete its node_modules
-    // to start clean
-    console.log('Purging ' + localModuleFolder);
-    Utilities.dangerouslyDeletePath(localModuleFolder);
-
-    if (localPackage.children.length > 0) {
-      Utilities.createFolderWithRetry(localModuleFolder);
-
-      for (const child of localPackage.children) {
-        LinkManager._createSymlinksForDependencies(child);
-      }
-    }
-  }
-
-  constructor(rushConfiguration: RushConfiguration) {
-    this._rushConfiguration = rushConfiguration;
-  }
-
-  /**
-   * Creates node_modules symlinks for all Rush projects defined in the RushConfiguration.
-   * @param force - Normally the operation will be skipped if the links are already up to date;
-   *   if true, this option forces the links to be recreated.
-   */
-  public createSymlinksForProjects(force: boolean): Promise<void> {
+export class NpmLinkManager extends BaseLinkManager {
+  protected _linkProjects(): Promise<void> {
     return new Promise<void>((resolve: () => void, reject: (reason: Error) => void): void => {
-      if (!force) {
-        if (fsx.existsSync(this._rushConfiguration.rushLinkJsonFilename)) {
-          console.log(colors.green(`Skipping linking -- everything is already up to date.`));
-          resolve();
-          return;
-        }
-      }
-
-      console.log('Linking projects together...');
-      const stopwatch: Stopwatch = Stopwatch.start();
-
-      // Delete the flag file if it exists; if we get interrupted, this will ensure that
-      // a full "rush link" is required next time
-      Utilities.deleteFile(this._rushConfiguration.rushLinkJsonFilename);
-
       readPackageTree(this._rushConfiguration.commonTempFolder,
         (error: Error, npmPackage: readPackageTree.PackageNode) => {
         if (error) {
           reject(error);
         } else {
           try {
-            const commonRootPackage: Package = Package.createFromNpm(npmPackage);
+            const commonRootPackage: NpmPackage = NpmPackage.createFromNpm(npmPackage);
 
             const commonPackageLookup: PackageLookup = new PackageLookup();
             commonPackageLookup.loadTree(commonRootPackage);
@@ -200,10 +61,6 @@ export default class LinkManager {
 
             console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
             JsonFile.save(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
-
-            stopwatch.stop();
-            console.log(os.EOL + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));
-            console.log(os.EOL + 'Next you should probably run: "rush rebuild"');
 
             resolve();
           } catch (error) {
@@ -225,11 +82,12 @@ export default class LinkManager {
    */
   private _linkProject(
     project: RushConfigurationProject,
-    commonRootPackage: Package,
+    commonRootPackage: NpmPackage,
     commonPackageLookup: PackageLookup,
     rushLinkJson: IRushLinkJson): void {
 
-    let commonProjectPackage: Package | undefined = commonRootPackage.getChildByName(project.tempProjectName);
+    let commonProjectPackage: NpmPackage | undefined =
+      commonRootPackage.getChildByName(project.tempProjectName) as NpmPackage;
     if (!commonProjectPackage) {
       // Normally we would expect the temp project to have been installed into the common\node_modules
       // folder.  However, if it was recently added, "rush install" doesn't technically require
@@ -261,7 +119,7 @@ export default class LinkManager {
       const installFolderName: string = path.join(this._rushConfiguration.commonTempFolder,
         RushConstants.nodeModulesFolderName, RushConstants.rushTempNpmScope, unscopedTempProjectName);
 
-      commonProjectPackage = Package.createVirtualTempPackage(packageJsonFilename, installFolderName);
+      commonProjectPackage = NpmPackage.createVirtualTempPackage(packageJsonFilename, installFolderName);
 
       // remove the extracted tarball contents
       fsx.removeSync(packageJsonFilename);
@@ -271,7 +129,7 @@ export default class LinkManager {
     }
 
     // TODO: Validate that the project's package.json still matches the common folder
-    const localProjectPackage: Package = Package.createLinkedPackage(
+    const localProjectPackage: NpmPackage = NpmPackage.createLinkedNpmPackage(
       project.packageJson.name,
       commonProjectPackage.version,
       commonProjectPackage.dependencies,
@@ -293,15 +151,15 @@ export default class LinkManager {
       }
 
       // A project from somewhere under "common/temp/node_modules"
-      const commonPackage: Package = queueItem.commonPackage;
+      const commonPackage: NpmPackage = queueItem.commonPackage;
 
       // A symlinked virtual package somewhere under "this-project/node_modules",
       // where "this-project" corresponds to the "project" parameter for linkProject().
-      const localPackage: Package = queueItem.localPackage;
+      const localPackage: NpmPackage = queueItem.localPackage;
 
       // If we encounter a dependency listed in cyclicDependencyProjects, this will be set to the root
       // of the localPackage subtree where we will stop creating local links.
-      const cyclicSubtreeRoot: Package | undefined = queueItem.cyclicSubtreeRoot;
+      const cyclicSubtreeRoot: NpmPackage | undefined = queueItem.cyclicSubtreeRoot;
 
       // NOTE: It's important that this traversal follows the dependencies in the Common folder,
       // because for Rush projects this will be the union of
@@ -360,7 +218,7 @@ export default class LinkManager {
               const newLocalFolderPath: string = path.join(
                 resolution.parentForCreate!.folderPath, 'node_modules', dependency.name);
 
-              const newLocalPackage: Package = Package.createLinkedPackage(
+              const newLocalPackage: NpmPackage = NpmPackage.createLinkedNpmPackage(
                 dependency.name,
                 matchedVersion,
                 // Since matchingRushProject does not have a parent, its dependencies are
@@ -382,7 +240,7 @@ export default class LinkManager {
 
         // We can't symlink to an Rush project, so instead we will symlink to a folder
         // under the "Common" folder
-        const commonDependencyPackage: Package | undefined = commonPackage.resolve(dependency.name);
+        const commonDependencyPackage: NpmPackage | undefined = commonPackage.resolve(dependency.name);
         if (commonDependencyPackage) {
           // This is the version that was chosen when "npm install" ran in the common folder
           const effectiveDependencyVersion: string = commonDependencyPackage.version;
@@ -406,22 +264,22 @@ export default class LinkManager {
             const newLocalFolderPath: string = path.join(
               resolution.parentForCreate!.folderPath, 'node_modules', commonDependencyPackage.name);
 
-            const newLocalPackage: Package = Package.createLinkedPackage(
+            const newLocalPackage: NpmPackage = NpmPackage.createLinkedNpmPackage(
               commonDependencyPackage.name,
               commonDependencyPackage.version,
               commonDependencyPackage.dependencies,
               newLocalFolderPath
             );
 
-            const commonPackageFromLookup: Package | undefined =
-              commonPackageLookup.getPackage(newLocalPackage.nameAndVersion);
+            const commonPackageFromLookup: NpmPackage | undefined =
+              commonPackageLookup.getPackage(newLocalPackage.nameAndVersion) as NpmPackage;
             if (!commonPackageFromLookup) {
               throw Error(`The ${localPackage.name}@${localPackage.version} package was not found`
                 + ` in the common folder`);
             }
             newLocalPackage.symlinkTargetFolderPath = commonPackageFromLookup.folderPath;
 
-            let newCyclicSubtreeRoot: Package | undefined = cyclicSubtreeRoot;
+            let newCyclicSubtreeRoot: NpmPackage | undefined = cyclicSubtreeRoot;
             if (startingCyclicSubtree) {
               // If we are starting a new subtree, then newLocalPackage will be its root
               // NOTE: cyclicSubtreeRoot is guaranteed to be undefined here, since we never start
@@ -451,7 +309,7 @@ export default class LinkManager {
     // to the console:
     // localProjectPackage.printTree();
 
-    LinkManager._createSymlinksForTopLevelProject(localProjectPackage);
+    NpmLinkManager._createSymlinksForTopLevelProject(localProjectPackage);
 
     // Also symlink the ".bin" folder
     if (localProjectPackage.children.length > 0) {
@@ -459,7 +317,7 @@ export default class LinkManager {
       const projectBinFolder: string = path.join(localProjectPackage.folderPath, 'node_modules', '.bin');
 
       if (fsx.existsSync(commonBinFolder)) {
-        LinkManager._createSymlink(commonBinFolder, projectBinFolder, SymlinkKind.Directory);
+        NpmLinkManager._createSymlink(commonBinFolder, projectBinFolder, SymlinkKind.Directory);
       }
     }
   }

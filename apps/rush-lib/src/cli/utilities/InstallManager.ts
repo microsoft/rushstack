@@ -13,14 +13,16 @@ import globEscape = require('glob-escape');
 import { JsonFile } from '@microsoft/node-core-library';
 
 import AsyncRecycler from '../../utilities/AsyncRecycler';
-import RushConfiguration from '../../data/RushConfiguration';
+import RushConfiguration, {
+  PackageManager
+} from '../../data/RushConfiguration';
 import RushConfigurationProject from '../../data/RushConfigurationProject';
 import { RushConstants } from '../../RushConstants';
 import Utilities from '../../utilities/Utilities';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import IPackageJson from '../../utilities/IPackageJson';
-import { IRushTempPackageJson } from '../utilities/Package';
-import ShrinkwrapFile from '../utilities/ShrinkwrapFile';
+import { IRushTempPackageJson } from '../utilities/base/BasePackage';
+import { BaseShrinkwrapFile } from '../utilities/base/BaseShrinkwrapFile';
 
 const MAX_INSTALL_ATTEMPTS: number = 5;
 
@@ -143,7 +145,7 @@ export default class InstallManager {
    * If the "npm-local" symlink hasn't been set up yet, this creates it, installing the
    * specified NPM version in the user's home directory if needed.
    */
-  public ensureLocalNpmTool(forceReinstall: boolean): void {
+  public ensureLocalPackageManager(forceReinstall: boolean): void {
     // Example: "C:\Users\YourName\.rush"
     const rushHomeFolder: string = path.join(this._rushConfiguration.homeFolder, '.rush');
 
@@ -152,29 +154,33 @@ export default class InstallManager {
       fsx.mkdirSync(rushHomeFolder);
     }
 
+    const packageManager: PackageManager = this._rushConfiguration.packageManager;
+    const packageManagerVersion: string = this._rushConfiguration.packageManagerToolVersion;
+
     // Example: "C:\Users\YourName\.rush\npm-1.2.3"
-    const npmToolFolder: string = path.join(rushHomeFolder, 'npm-' + this._rushConfiguration.npmToolVersion);
+    const packageManagerToolFolder: string = path.join(rushHomeFolder,
+      `${packageManager}-${packageManagerVersion}`);
     // Example: "C:\Users\YourName\.rush\npm-1.2.3\last-install.flag"
-    const npmToolFlagFile: string = path.join(npmToolFolder, 'last-install.flag');
+    const packageManagerToolFlagFile: string = path.join(packageManagerToolFolder, 'last-install.flag');
 
     // NOTE: We don't care about the timestamp for last-install.flag, because nobody will change
     // the package.json for this case
-    if (forceReinstall || !fsx.existsSync(npmToolFlagFile)) {
-      console.log(colors.bold('Installing NPM version ' + this._rushConfiguration.npmToolVersion) + os.EOL);
+    if (forceReinstall || !fsx.existsSync(packageManagerToolFlagFile)) {
+      console.log(colors.bold(`Installing ${packageManager} version ${packageManagerVersion}${os.EOL}`));
 
       Utilities.installPackageInDirectory(
-        npmToolFolder,
-        'npm',
-        this._rushConfiguration.npmToolVersion,
-        'npm-local-install',
+        packageManagerToolFolder,
+        packageManager,
+        this._rushConfiguration.packageManagerToolVersion,
+        `${packageManager}-local-install`,
         MAX_INSTALL_ATTEMPTS
       );
 
       // Create the marker file to indicate a successful install
-      fsx.writeFileSync(npmToolFlagFile, '');
-      console.log('Successfully installed NPM ' + this._rushConfiguration.npmToolVersion);
+      fsx.writeFileSync(packageManagerToolFlagFile, '');
+      console.log(`Successfully installed ${packageManager} version ${packageManagerVersion}`);
     } else {
-      console.log('Found NPM version ' + this._rushConfiguration.npmToolVersion + ' in ' + npmToolFolder);
+      console.log(`Found ${packageManager} version ${packageManagerVersion} in ${packageManagerToolFolder}`);
     }
 
     // Example: "C:\MyRepo\common\temp"
@@ -183,13 +189,14 @@ export default class InstallManager {
     }
 
     // Example: "C:\MyRepo\common\temp\npm-local"
-    const localNpmToolFolder: string = path.join(this._rushConfiguration.commonTempFolder, 'npm-local');
-    if (fsx.existsSync(localNpmToolFolder)) {
-      fsx.unlinkSync(localNpmToolFolder);
+    const localPackageManagerToolFolder: string =
+      path.join(this._rushConfiguration.commonTempFolder, `${packageManager}-local`);
+    if (fsx.existsSync(localPackageManagerToolFolder)) {
+      fsx.unlinkSync(localPackageManagerToolFolder);
     }
-    console.log(os.EOL + 'Symlinking "' + localNpmToolFolder + '"');
-    console.log('  --> "' + npmToolFolder + '"');
-    fsx.symlinkSync(npmToolFolder, localNpmToolFolder, 'junction');
+    console.log(os.EOL + 'Symlinking "' + localPackageManagerToolFolder + '"');
+    console.log('  --> "' + packageManagerToolFolder + '"');
+    fsx.symlinkSync(packageManagerToolFolder, localPackageManagerToolFolder, 'junction');
   }
 
   /**
@@ -206,7 +213,7 @@ export default class InstallManager {
    * the return value is false.
    */
   public createTempModulesAndCheckShrinkwrap(
-    shrinkwrapFile: ShrinkwrapFile | undefined,
+    shrinkwrapFile: BaseShrinkwrapFile | undefined,
     forceCreate: boolean): boolean {
     const stopwatch: Stopwatch = Stopwatch.start();
 
@@ -464,11 +471,11 @@ export default class InstallManager {
    */
   public installCommonModules(installType: InstallType): void {
     // Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
-    const npmToolFilename: string = this._rushConfiguration.npmToolFilename;
-    if (!fsx.existsSync(npmToolFilename)) {
+    const packageManagerFilename: string = this._rushConfiguration.packageManagerToolFilename;
+    if (!fsx.existsSync(packageManagerFilename)) {
       // This normally should never occur -- it indicates that some code path forgot to call
       // InstallManager.ensureLocalNpmTool().
-      throw new Error('Expected to find local NPM here: "' + npmToolFilename + '"');
+      throw new Error('Expected to find local NPM here: "' + packageManagerFilename + '"');
     }
 
     console.log(os.EOL + colors.bold('Checking node_modules in ' + this._rushConfiguration.commonTempFolder)
@@ -478,12 +485,21 @@ export default class InstallManager {
       'node_modules');
 
     // This marker file indicates that the last "rush install" completed successfully
-    const markerFileExistedAtStart: boolean = fsx.existsSync(this.commonNodeModulesMarkerFilename);
+    let markerFileExistedAndWasValidAtStart: boolean = false;
+
+    if (fsx.existsSync(this.commonNodeModulesMarkerFilename)) {
+      const markerFileContents: string = fsx.readFileSync(this.commonNodeModulesMarkerFilename).toString();
+      const expectedFileContents: string =
+        `${this._rushConfiguration.packageManager}@${this._rushConfiguration.packageManagerToolVersion}`;
+      if (markerFileContents === expectedFileContents) {
+        markerFileExistedAndWasValidAtStart = true;
+      }
+    }
 
     // If "--clean" or "--full-clean" was specified, or if the last install was interrupted,
     // then we will need to delete the node_modules folder.  Otherwise, we can do an incremental
     // install.
-    const deletingNodeModules: boolean = installType !== InstallType.Normal || !markerFileExistedAtStart;
+    const deletingNodeModules: boolean = installType !== InstallType.Normal || !markerFileExistedAndWasValidAtStart;
 
     // Based on timestamps, can we skip this install entirely?
     if (!deletingNodeModules) {
@@ -511,7 +527,7 @@ export default class InstallManager {
         return;
       }
     } else {
-      console.log(`Deleting the NPM cache folder`);
+      console.log(`Deleting the "npm-cache" folder`);
       // This is faster and more thorough than "npm cache clean"
       this._asyncRecycler.moveFolder(this._rushConfiguration.npmCacheFolder);
 
@@ -519,7 +535,7 @@ export default class InstallManager {
       this._asyncRecycler.moveFolder(this._rushConfiguration.npmTmpFolder);
     }
 
-    if (markerFileExistedAtStart) {
+    if (fsx.existsSync(this.commonNodeModulesMarkerFilename)) {
       // Delete the successful install file to indicate the install transaction has started
       fsx.unlinkSync(this.commonNodeModulesMarkerFilename);
     }
@@ -550,10 +566,11 @@ export default class InstallManager {
       } else {
         // NO: Do an incremental install in the "node_modules" folder
 
-        console.log(`Running "npm prune" in ${this._rushConfiguration.commonTempFolder}`);
-        const npmArgs: string[] = ['prune'];
-        this.pushConfigurationNpmArgs(npmArgs);
-        Utilities.executeCommandWithRetry(npmToolFilename, npmArgs, MAX_INSTALL_ATTEMPTS,
+        console.log(`Running "${this._rushConfiguration.packageManager} prune"`
+          + ` in ${this._rushConfiguration.commonTempFolder}`);
+        const args: string[] = ['prune'];
+        this.pushConfigurationArgs(args);
+        Utilities.executeCommandWithRetry(packageManagerFilename, args, MAX_INSTALL_ATTEMPTS,
           this._rushConfiguration.commonTempFolder);
 
         // Delete the (installed image of) the temp projects, since "npm install" does not
@@ -582,7 +599,8 @@ export default class InstallManager {
 
     // Run "npm install" in the common folder
 
-    // NOTE: we do NOT install optional dependencies for Rush, as it seems that optional dependencies do not
+    // NOTE FOR NPM:
+    //       we do NOT install optional dependencies for Rush, as it seems that optional dependencies do not
     //       work properly with shrinkwrap. Consider the "fsevents" package. This is a Mac specific package
     //       which is an optional second-order dependency. Optional dependencies work by attempting to install
     //       the package, but removes the package if the install failed.
@@ -597,20 +615,23 @@ export default class InstallManager {
     //       is optional or not, but it does not appear to do so. Also, this would result in strange behavior where
     //       people would have different node_modules based on their system.
 
-    const npmInstallArgs: string[] = ['install', '--no-optional'];
-    this.pushConfigurationNpmArgs(npmInstallArgs);
+    const installArgs: string[] = ['install', '--no-optional'];
+    this.pushConfigurationArgs(installArgs);
 
-    console.log(os.EOL + colors.bold(`Running "npm install" in ${this._rushConfiguration.commonTempFolder}`)
-      + os.EOL);
-    Utilities.executeCommandWithRetry(npmToolFilename,
-      npmInstallArgs,
+    console.log(os.EOL + colors.bold(`Running "${this._rushConfiguration.packageManager} install" in`
+      + ` ${this._rushConfiguration.commonTempFolder}`) + os.EOL);
+    Utilities.executeCommandWithRetry(packageManagerFilename,
+      installArgs,
       MAX_INSTALL_ATTEMPTS,
       this._rushConfiguration.commonTempFolder);
 
     this._fixupNpm5Regression();
 
     // Finally, create the marker file to indicate a successful install
-    fsx.createFileSync(this.commonNodeModulesMarkerFilename);
+    const lastInstallFlagContents: string =
+      `${this._rushConfiguration.packageManager}@${this._rushConfiguration.packageManagerToolVersion}`;
+
+    fsx.writeFileSync(this.commonNodeModulesMarkerFilename, lastInstallFlagContents);
     console.log('');
   }
 
@@ -618,9 +639,9 @@ export default class InstallManager {
    * Used when invoking the NPM tool.  Appends the common configuration options
    * to the command-line.
    */
-  public pushConfigurationNpmArgs(npmArgs: string[]): void {
-    npmArgs.push('--cache', this._rushConfiguration.npmCacheFolder);
-    npmArgs.push('--tmp', this._rushConfiguration.npmTmpFolder);
+  public pushConfigurationArgs(args: string[]): void {
+    args.push('--cache', this._rushConfiguration.npmCacheFolder);
+    args.push('--tmp', this._rushConfiguration.npmTmpFolder);
   }
 
   /**
@@ -697,7 +718,7 @@ export default class InstallManager {
    *
    * @returns true if orphans were found, or false if everything is okay
    */
-  private _findOrphanedTempProjects(shrinkwrapFile: ShrinkwrapFile): boolean {
+  private _findOrphanedTempProjects(shrinkwrapFile: BaseShrinkwrapFile): boolean {
 
     // We can recognize temp projects because they are under the "@rush-temp" NPM scope.
     for (const tempProjectName of shrinkwrapFile.getTempProjectNames()) {

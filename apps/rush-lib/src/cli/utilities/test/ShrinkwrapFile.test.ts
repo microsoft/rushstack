@@ -4,11 +4,12 @@
 import { assert } from 'chai';
 import * as path from 'path';
 
-import ShrinkwapFile from '../ShrinkwrapFile';
+import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
+import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 
-describe('ShrinkwrapFile', () => {
+describe('NPM ShrinkwrapFile', () => {
   const filename: string = path.resolve(path.join(__dirname, './shrinkwrapFile/npm-shrinkwrap.json'));
-  const shrinkwrapFile: ShrinkwapFile = ShrinkwapFile.loadFromFile(filename)!;
+  const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('npm', filename)!;
 
   it('verifies root-level dependency', () => {
     shrinkwrapFile.hasCompatibleDependency('q', '~1.5.0');
