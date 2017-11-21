@@ -3,7 +3,7 @@
 
 import { JsonFile } from '@microsoft/node-core-library';
 
-import IPackageJson from '../../utilities/IPackageJson';
+import IPackageJson from '../../../utilities/IPackageJson';
 
 /**
  * The type of dependency; used by IPackageDependency.
@@ -52,7 +52,7 @@ export interface IRushTempPackageJson extends IPackageJson {
 /**
  * Represents an NPM package being processed by the "rush link" algorithm.
  */
-export default class Package {
+export class BasePackage {
   /**
    * The "name" field from package.json
    */
@@ -71,7 +71,7 @@ export default class Package {
   /**
    * The parent package, or undefined if this is the root of the tree.
    */
-  public parent: Package | undefined;
+  public parent: BasePackage | undefined;
 
   /**
    * The raw package.json information for this Package
@@ -88,8 +88,8 @@ export default class Package {
    * Packages that were placed in node_modules subfolders of this package.
    * The child packages are not necessarily dependencies of this package.
    */
-  public children: Package[];
-  private _childrenByName: Map<string, Package>;
+  public children: BasePackage[];
+  private _childrenByName: Map<string, BasePackage>;
 
   /**
    * Used by "npm link" when creating a Package object that represents symbolic links to be created.
@@ -97,8 +97,8 @@ export default class Package {
   public static createLinkedPackage(name: string,
     version: string,
     folderPath: string,
-    packageJson?: IRushTempPackageJson): Package {
-    return new Package(name, version, folderPath, packageJson);
+    packageJson?: IRushTempPackageJson): BasePackage {
+    return new BasePackage(name, version, folderPath, packageJson);
   }
 
   /**
@@ -109,9 +109,9 @@ export default class Package {
    * @param targetFolderName - Filename where it should have been installed
    *        Example: c:\MyRepo\common\temp\node_modules\@rush-temp\project1
    */
-  public static createVirtualTempPackage(packageJsonFilename: string, installFolderName: string): Package {
+  public static createVirtualTempPackage(packageJsonFilename: string, installFolderName: string): BasePackage {
     const packageJson: IRushTempPackageJson = JsonFile.load(packageJsonFilename);
-    return Package.createLinkedPackage(packageJson.name, packageJson.version, installFolderName, packageJson);
+    return BasePackage.createLinkedPackage(packageJson.name, packageJson.version, installFolderName, packageJson);
   }
 
   public get nameAndVersion(): string {
@@ -131,7 +131,7 @@ export default class Package {
     return result;
   }
 
-  public addChild<T extends Package>(child: T): void {
+  public addChild<T extends BasePackage>(child: T): void {
     if (child.parent) {
       throw Error('Child already has a parent');
     }
@@ -143,7 +143,7 @@ export default class Package {
     this._childrenByName.set(child.name, child);
   }
 
-  public getChildByName(childPackageName: string): Package | undefined {
+  public getChildByName(childPackageName: string): BasePackage | undefined {
     return this._childrenByName.get(childPackageName);
   }
 
@@ -168,6 +168,6 @@ export default class Package {
     this.folderPath = folderPath;
 
     this.children = [];
-    this._childrenByName = new Map<string, Package>();
+    this._childrenByName = new Map<string, BasePackage>();
   }
 }

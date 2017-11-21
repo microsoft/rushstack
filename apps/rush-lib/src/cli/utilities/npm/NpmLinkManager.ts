@@ -21,9 +21,10 @@ import {
   PackageDependencyKind
 } from './NpmPackage';
 import PackageLookup from '../PackageLookup';
-import LinkManager, {
+import {
+  BaseLinkManager,
   SymlinkKind
-} from '../LinkManager';
+} from '../base/BaseLinkManager';
 
 interface IQueueItem {
   // A project from somewhere under "common/temp/node_modules"
@@ -37,7 +38,7 @@ interface IQueueItem {
   cyclicSubtreeRoot: NpmPackage | undefined;
 }
 
-export default class NpmLinkManager extends LinkManager {
+export class NpmLinkManager extends BaseLinkManager {
   protected _linkProjects(): Promise<void> {
     return new Promise<void>((resolve: () => void, reject: (reason: Error) => void): void => {
       readPackageTree(this._rushConfiguration.commonTempFolder,
@@ -308,7 +309,7 @@ export default class NpmLinkManager extends LinkManager {
     // to the console:
     // localProjectPackage.printTree();
 
-    LinkManager._createSymlinksForTopLevelProject(localProjectPackage);
+    NpmLinkManager._createSymlinksForTopLevelProject(localProjectPackage);
 
     // Also symlink the ".bin" folder
     if (localProjectPackage.children.length > 0) {
@@ -316,7 +317,7 @@ export default class NpmLinkManager extends LinkManager {
       const projectBinFolder: string = path.join(localProjectPackage.folderPath, 'node_modules', '.bin');
 
       if (fsx.existsSync(commonBinFolder)) {
-        LinkManager._createSymlink(commonBinFolder, projectBinFolder, SymlinkKind.Directory);
+        NpmLinkManager._createSymlink(commonBinFolder, projectBinFolder, SymlinkKind.Directory);
       }
     }
   }

@@ -4,7 +4,9 @@ import * as os from 'os';
 import Utilities from '../../../utilities/Utilities';
 import { RushConstants } from '../../../RushConstants';
 
-import ShrinkwrapFile from '../ShrinkwrapFile';
+import {
+  BaseShrinkwrapFile
+} from '../base/BaseShrinkwrapFile';
 
 interface IShrinkwrapDependencyJson {
   version: string;
@@ -19,7 +21,7 @@ interface IShrinkwrapJson {
   dependencies: { [dependency: string]: IShrinkwrapDependencyJson };
 }
 
-export default class NpmShrinkwrapFile extends ShrinkwrapFile {
+export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
   private _shrinkwrapJson: IShrinkwrapJson;
 
   public static loadFromFile(shrinkwrapJsonFilename: string): NpmShrinkwrapFile | undefined {
@@ -69,16 +71,16 @@ export default class NpmShrinkwrapFile extends ShrinkwrapFile {
     let dependencyJson: IShrinkwrapDependencyJson | undefined = undefined;
 
     if (tempProjectName) {
-      const tempDependency: IShrinkwrapDependencyJson | undefined = ShrinkwrapFile.tryGetValue(
+      const tempDependency: IShrinkwrapDependencyJson | undefined = NpmShrinkwrapFile.tryGetValue(
         this._shrinkwrapJson.dependencies, tempProjectName);
       if (tempDependency && tempDependency.dependencies) {
-        dependencyJson = ShrinkwrapFile.tryGetValue(tempDependency.dependencies, dependencyName);
+        dependencyJson = NpmShrinkwrapFile.tryGetValue(tempDependency.dependencies, dependencyName);
       }
     }
 
     // Otherwise look at the root of the shrinkwrap file
     if (!dependencyJson) {
-      dependencyJson = ShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
+      dependencyJson = NpmShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
     }
 
     if (!dependencyJson) {

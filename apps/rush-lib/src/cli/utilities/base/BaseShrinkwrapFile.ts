@@ -8,15 +8,8 @@ import npmPackageArg = require('npm-package-arg');
 /**
  * This class is a parser for NPM's npm-shrinkwrap.json file format.
  */
-export default abstract class ShrinkwrapFile {
+export abstract class BaseShrinkwrapFile {
   protected _alreadyWarnedSpecs: Set<string> = new Set<string>();
-
-  /**
-   * Attempt to load the shrinkwrap from a filepath
-   */
-  public static loadFromFile(shrinkwrapFilename: string): ShrinkwrapFile | undefined {
-    return require('./npm/NpmShrinkwrapFile').default.loadFromFile(shrinkwrapFilename);
-  }
 
   protected static tryGetValue<T>(dictionary: { [key2: string]: T }, key: string): T | undefined {
     if (dictionary.hasOwnProperty(key)) {

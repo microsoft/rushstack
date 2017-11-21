@@ -8,22 +8,18 @@ import * as path from 'path';
 
 import {
   default as RushConfiguration
-} from '../../data/RushConfiguration';
-import Utilities from '../../utilities/Utilities';
-import { Stopwatch } from '../../utilities/Stopwatch';
-import Package from './Package';
+} from '../../../data/RushConfiguration';
+import Utilities from '../../../utilities/Utilities';
+import { Stopwatch } from '../../../utilities/Stopwatch';
+import { BasePackage } from './BasePackage';
 
 export enum SymlinkKind {
   File,
   Directory
 }
 
-export default abstract class LinkManager {
+export abstract class BaseLinkManager {
   protected _rushConfiguration: RushConfiguration;
-
-  public static getLinkManager(rushConfiguration: RushConfiguration): LinkManager {
-    return new (require('./npm/NpmLinkManager').default)(rushConfiguration);
-  }
 
   protected static _createSymlink(linkTarget: string, linkSource: string, symlinkKind: SymlinkKind): void {
     fsx.mkdirsSync(path.dirname(linkSource));
@@ -49,7 +45,7 @@ export default abstract class LinkManager {
    * (i.e. with source code that we will be building), this clears out its
    * node_modules folder and then recursively creates all the symlinked folders.
    */
-  protected static _createSymlinksForTopLevelProject(localPackage: Package): void {
+  protected static _createSymlinksForTopLevelProject(localPackage: BasePackage): void {
     const localModuleFolder: string = path.join(localPackage.folderPath, 'node_modules');
 
     // Sanity check
@@ -66,7 +62,7 @@ export default abstract class LinkManager {
       Utilities.createFolderWithRetry(localModuleFolder);
 
       for (const child of localPackage.children) {
-        LinkManager._createSymlinksForDependencies(child);
+        BaseLinkManager._createSymlinksForDependencies(child);
       }
     }
   }
@@ -76,7 +72,7 @@ export default abstract class LinkManager {
    * It will recursively creates symlinked folders corresponding to each of the
    * Package objects in the provided tree.
    */
-  private static _createSymlinksForDependencies(localPackage: Package): void {
+  private static _createSymlinksForDependencies(localPackage: BasePackage): void {
     const localModuleFolder: string = path.join(localPackage.folderPath, 'node_modules');
 
     if (!localPackage.symlinkTargetFolderPath) {
@@ -95,7 +91,10 @@ export default abstract class LinkManager {
 
     if (localPackage.children.length === 0) {
       // If there are no children, then we can symlink the entire folder
-      LinkManager._createSymlink(localPackage.symlinkTargetFolderPath, localPackage.folderPath, SymlinkKind.Directory);
+      BaseLinkManager._createSymlink(
+        localPackage.symlinkTargetFolderPath,
+        localPackage.folderPath,
+        SymlinkKind.Directory);
     } else {
       // If there are children, then we need to symlink each item in the folder individually
       Utilities.createFolderWithRetry(localPackage.folderPath);
@@ -126,7 +125,7 @@ export default abstract class LinkManager {
             symlinkKind = SymlinkKind.Directory;
           }
 
-          LinkManager._createSymlink(linkTarget, linkSource, symlinkKind);
+          BaseLinkManager._createSymlink(linkTarget, linkSource, symlinkKind);
         }
       }
     }
@@ -135,7 +134,7 @@ export default abstract class LinkManager {
       Utilities.createFolderWithRetry(localModuleFolder);
 
       for (const child of localPackage.children) {
-        LinkManager._createSymlinksForDependencies(child);
+        BaseLinkManager._createSymlinksForDependencies(child);
       }
     }
   }

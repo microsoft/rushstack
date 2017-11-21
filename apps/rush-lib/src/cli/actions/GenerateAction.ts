@@ -10,10 +10,12 @@ import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import Utilities from '../../utilities/Utilities';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import InstallManager, { InstallType } from '../utilities/InstallManager';
-import LinkManager from '../utilities/LinkManager';
+import { LinkManagerFactory } from '../utilities/LinkManagerFactory';
+import { BaseLinkManager } from '../utilities/base/BaseLinkManager';
 import RushCommandLineParser from './RushCommandLineParser';
 import { ApprovedPackagesChecker } from '../utilities/ApprovedPackagesChecker';
-import ShrinkwrapFile from '../utilities/ShrinkwrapFile';
+import { BaseShrinkwrapFile } from '../utilities/base/BaseShrinkwrapFile';
+import { ShrinkwrapFileFactory } from '../utilities/ShrinkwrapFileFactory';
 import { BaseRushAction } from './BaseRushAction';
 
 export default class GenerateAction extends BaseRushAction {
@@ -70,8 +72,9 @@ export default class GenerateAction extends BaseRushAction {
     const tempShrinkwrapFilename: string = this.rushConfiguration.tempShrinkwrapFilename;
 
     try {
-      const shrinkwrapFile: ShrinkwrapFile | undefined
-        = ShrinkwrapFile.loadFromFile(committedShrinkwrapFilename);
+      const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
+          this.rushConfiguration.packageManager,
+          this.rushConfiguration.committedShrinkwrapFilename);
 
       if (shrinkwrapFile
         && !this._forceParameter.value
@@ -148,7 +151,8 @@ export default class GenerateAction extends BaseRushAction {
     console.log(os.EOL + colors.green(`Rush generate finished successfully. (${stopwatch.toString()})`));
 
     if (!this._noLinkParameter.value) {
-      const linkManager: LinkManager = LinkManager.getLinkManager(this.rushConfiguration);
+      const linkManager: BaseLinkManager =
+        LinkManagerFactory.getLinkManager(this.rushConfiguration);
       // NOTE: Setting force=true here shouldn't be strictly necessary, since installCommonModules()
       // above should have already deleted the marker file, but it doesn't hurt to be explicit.
       this._parser.catchSyncErrors(linkManager.createSymlinksForProjects(true));

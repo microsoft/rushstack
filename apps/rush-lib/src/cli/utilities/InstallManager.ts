@@ -21,8 +21,8 @@ import { RushConstants } from '../../RushConstants';
 import Utilities from '../../utilities/Utilities';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import IPackageJson from '../../utilities/IPackageJson';
-import { IRushTempPackageJson } from '../utilities/Package';
-import ShrinkwrapFile from '../utilities/ShrinkwrapFile';
+import { IRushTempPackageJson } from '../utilities/base/BasePackage';
+import { BaseShrinkwrapFile } from '../utilities/base/BaseShrinkwrapFile';
 
 const MAX_INSTALL_ATTEMPTS: number = 5;
 
@@ -213,7 +213,7 @@ export default class InstallManager {
    * the return value is false.
    */
   public createTempModulesAndCheckShrinkwrap(
-    shrinkwrapFile: ShrinkwrapFile | undefined,
+    shrinkwrapFile: BaseShrinkwrapFile | undefined,
     forceCreate: boolean): boolean {
     const stopwatch: Stopwatch = Stopwatch.start();
 
@@ -718,7 +718,7 @@ export default class InstallManager {
    *
    * @returns true if orphans were found, or false if everything is okay
    */
-  private _findOrphanedTempProjects(shrinkwrapFile: ShrinkwrapFile): boolean {
+  private _findOrphanedTempProjects(shrinkwrapFile: BaseShrinkwrapFile): boolean {
 
     // We can recognize temp projects because they are under the "@rush-temp" NPM scope.
     for (const tempProjectName of shrinkwrapFile.getTempProjectNames()) {

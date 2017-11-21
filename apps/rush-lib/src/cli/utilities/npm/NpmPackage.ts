@@ -3,16 +3,17 @@ import readPackageTree = require('read-package-tree');
 import { JsonFile } from '@microsoft/node-core-library';
 
 import { IPackageJson } from '../../../index';
-import Package, {
+import {
+  BasePackage,
   IRushTempPackageJson
-} from '../Package';
+} from '../base/BasePackage';
 
 /**
  * Used by the "rush link" algorithm when doing NPM package resolution.
  */
 export interface IResolveOrCreateResult {
-  found: Package | undefined;
-  parentForCreate: Package | undefined;
+  found: BasePackage | undefined;
+  parentForCreate: BasePackage | undefined;
 }
 
 /**
@@ -47,7 +48,7 @@ export interface IPackageDependency {
   kind: PackageDependencyKind;
 }
 
-export class NpmPackage extends Package {
+export class NpmPackage extends BasePackage {
   /**
    * Names of packages that we explicitly depend on.  The actual dependency
    * package may be found in this.children, or possibly in this.children of
