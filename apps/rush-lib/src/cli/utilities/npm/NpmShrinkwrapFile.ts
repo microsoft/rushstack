@@ -88,6 +88,18 @@ export default class NpmShrinkwrapFile extends ShrinkwrapFile {
     return dependencyJson.version;
   }
 
+  protected _getTempProjectNames(dependencies: { [key: string]: {} } ): ReadonlyArray<string> {
+    const result: string[] = [];
+    for (const key of Object.keys(dependencies)) {
+      // If it starts with @rush-temp, then include it:
+      if (Utilities.parseScopedPackageName(key).scope === RushConstants.rushTempNpmScope) {
+        result.push(key);
+      }
+    }
+    result.sort();  // make the result deterministic
+    return result;
+  }
+
   private constructor(shrinkwrapJson: IShrinkwrapJson) {
     super();
     this._shrinkwrapJson = shrinkwrapJson;
@@ -102,17 +114,5 @@ export default class NpmShrinkwrapFile extends ShrinkwrapFile {
     if (!this._shrinkwrapJson.dependencies) {
       this._shrinkwrapJson.dependencies = { };
     }
-  }
-
-  protected _getTempProjectNames(dependencies: { [key: string]: {} } ): ReadonlyArray<string> {
-    const result: string[] = [];
-    for (const key of Object.keys(dependencies)) {
-      // If it starts with @rush-temp, then include it:
-      if (Utilities.parseScopedPackageName(key).scope === RushConstants.rushTempNpmScope) {
-        result.push(key);
-      }
-    }
-    result.sort();  // make the result deterministic
-    return result;
   }
 }

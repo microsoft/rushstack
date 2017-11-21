@@ -5,9 +5,6 @@ import * as colors from 'colors';
 import * as semver from 'semver';
 import npmPackageArg = require('npm-package-arg');
 
-import Utilities from '../../utilities/Utilities';
-import { RushConstants } from '../../RushConstants';
-
 /**
  * This class is a parser for NPM's npm-shrinkwrap.json file format.
  */
