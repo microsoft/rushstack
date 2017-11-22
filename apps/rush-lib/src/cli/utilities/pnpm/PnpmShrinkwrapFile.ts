@@ -2,7 +2,7 @@ import * as fsx from 'fs-extra';
 import * as yaml from 'js-yaml';
 import * as os from 'os';
 
-import ShrinkwrapFile from '../ShrinkwrapFile';
+import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 
 interface IShrinkwrapDependencyJson {
   resolution: {
@@ -27,10 +27,10 @@ interface IShrinkwrapYaml {
   specifiers: { [dependency: string]: string };
 }
 
-export default class PnpmShrinkwrapFile extends ShrinkwrapFile {
+export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   private _shrinkwrapJson: IShrinkwrapYaml;
 
-  public static loadFromFile(shrinkwrapYamlFilename: string): ShrinkwrapFile | undefined {
+  public static loadFromFile(shrinkwrapYamlFilename: string): PnpmShrinkwrapFile | undefined {
     try {
       if (!fsx.existsSync(shrinkwrapYamlFilename)) {
         return undefined; // file does not exist
@@ -55,7 +55,7 @@ export default class PnpmShrinkwrapFile extends ShrinkwrapFile {
     let dependencyVersion: string | undefined = undefined;
 
     if (!dependencyVersion) {
-      dependencyVersion = ShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
+      dependencyVersion = BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
     }
 
     if (!dependencyVersion) {

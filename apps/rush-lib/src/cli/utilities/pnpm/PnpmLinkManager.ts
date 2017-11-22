@@ -9,16 +9,17 @@ import encodeRegistry = require('encode-registry');
 
 import { JsonFile } from '@microsoft/node-core-library';
 
-import LinkManager, {
+import {
+  BaseLinkManager,
   SymlinkKind
-} from '../LinkManager';
+} from '../base/BaseLinkManager';
 import Utilities from '../../../utilities/Utilities';
-import Package from '../Package';
+import { BasePackage } from '../base/BasePackage';
 import { RushConstants } from '../../../RushConstants';
 import { IRushLinkJson } from '../../../data/RushConfiguration';
 import RushConfigurationProject from '../../../data/RushConfigurationProject';
 
-export default class PnpmLinkManager extends LinkManager {
+export class PnpmLinkManager extends BaseLinkManager {
   protected _linkProjects(): Promise<void> {
     return new Promise<void>((resolve: () => void, reject: (reason: Error) => void): void => {
       // go ahead and find out the registry we are using, we need this to locate the pnpm store folder
@@ -89,11 +90,11 @@ export default class PnpmLinkManager extends LinkManager {
     const installFolderName: string = path.join(this._rushConfiguration.commonTempFolder,
       RushConstants.nodeModulesFolderName, RushConstants.rushTempNpmScope, unscopedTempProjectName);
 
-    const commonPackage: Package = Package.createVirtualTempPackage(packageJsonFilename, installFolderName);
+    const commonPackage: BasePackage = BasePackage.createVirtualTempPackage(packageJsonFilename, installFolderName);
 
     // @TODO: Validate that the project's package.json still matches the common folder
 
-    const localPackage: Package = Package.createLinkedPackage(
+    const localPackage: BasePackage = BasePackage.createLinkedPackage(
       project.packageJson.name,
       commonPackage.version,
       project.projectFolder,
@@ -122,7 +123,7 @@ export default class PnpmLinkManager extends LinkManager {
         // symlinks to the Rush project
         const newLocalFolderPath: string = path.join(localPackage.folderPath, 'node_modules', dependencyName);
 
-        const newLocalPackage: Package = Package.createLinkedPackage(
+        const newLocalPackage: BasePackage = BasePackage.createLinkedPackage(
           dependencyName,
           matchedVersion,
           newLocalFolderPath
@@ -178,7 +179,7 @@ export default class PnpmLinkManager extends LinkManager {
         const newLocalFolderPath: string = path.join(
            localPackage.folderPath, 'node_modules', dependencyName);
 
-        const newLocalPackage: Package = Package.createLinkedPackage(
+        const newLocalPackage: BasePackage = BasePackage.createLinkedPackage(
           dependencyName,
           selectedVersion,
           newLocalFolderPath
@@ -196,14 +197,14 @@ export default class PnpmLinkManager extends LinkManager {
     // When debugging, you can uncomment this line to dump the data structure
     // to the console:
     localPackage.printTree();
-    LinkManager._createSymlinksForTopLevelProject(localPackage);
+    PnpmLinkManager._createSymlinksForTopLevelProject(localPackage);
 
     // Also symlink the ".bin" folder
     const commonBinFolder: string = path.join(this._rushConfiguration.commonTempFolder, 'node_modules', '.bin');
     const projectBinFolder: string = path.join(localPackage.folderPath, 'node_modules', '.bin');
 
     if (fsx.existsSync(commonBinFolder)) {
-      LinkManager._createSymlink(commonBinFolder, projectBinFolder, SymlinkKind.Directory);
+      PnpmLinkManager._createSymlink(commonBinFolder, projectBinFolder, SymlinkKind.Directory);
     }
   }
 }

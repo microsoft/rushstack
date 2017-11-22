@@ -5,6 +5,9 @@ import * as colors from 'colors';
 import * as semver from 'semver';
 import npmPackageArg = require('npm-package-arg');
 
+import { RushConstants } from '../../../RushConstants';
+import Utilities from '../../../utilities/Utilities';
+
 /**
  * This class is a parser for both NPM's npm-shrinkwrap.json and PNPM's shrinkwrap.yaml file formats.
  */
@@ -51,4 +54,16 @@ export abstract class BaseShrinkwrapFile {
   public abstract getTempProjectNames(): ReadonlyArray<string>;
 
   protected abstract getDependencyVersion(dependencyName: string, tempProjectName?: string): string | undefined;
+
+  protected _getTempProjectNames(dependencies: { [key: string]: {} } ): ReadonlyArray<string> {
+    const result: string[] = [];
+    for (const key of Object.keys(dependencies)) {
+      // If it starts with @rush-temp, then include it:
+      if (Utilities.parseScopedPackageName(key).scope === RushConstants.rushTempNpmScope) {
+        result.push(key);
+      }
+    }
+    result.sort();  // make the result deterministic
+    return result;
+  }
 }

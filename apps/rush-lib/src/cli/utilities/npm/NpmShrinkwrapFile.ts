@@ -1,9 +1,6 @@
 import * as fsx from 'fs-extra';
 import * as os from 'os';
 
-import Utilities from '../../../utilities/Utilities';
-import { RushConstants } from '../../../RushConstants';
-
 import {
   BaseShrinkwrapFile
 } from '../base/BaseShrinkwrapFile';
@@ -88,18 +85,6 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
 
     return dependencyJson.version;
-  }
-
-  protected _getTempProjectNames(dependencies: { [key: string]: {} } ): ReadonlyArray<string> {
-    const result: string[] = [];
-    for (const key of Object.keys(dependencies)) {
-      // If it starts with @rush-temp, then include it:
-      if (Utilities.parseScopedPackageName(key).scope === RushConstants.rushTempNpmScope) {
-        result.push(key);
-      }
-    }
-    result.sort();  // make the result deterministic
-    return result;
   }
 
   private constructor(shrinkwrapJson: IShrinkwrapJson) {
