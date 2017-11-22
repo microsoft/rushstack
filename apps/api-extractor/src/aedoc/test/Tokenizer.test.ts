@@ -1,9 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile } from '@microsoft/node-core-library';
-
-import TestFileComparer from '../../TestFileComparer';
 import Token, { TokenType } from '../Token';
 import Tokenizer from '../Tokenizer';
 
@@ -46,9 +43,7 @@ describe('Tokenizer tests', function (): void {
       ];
 
       const actualTokens: Token[] = testTokenizer.tokenizeDocs(docs);
-      JsonFile.save(expectedTokens, './lib/tokenizeDocsExpected.json');
-      JsonFile.save(actualTokens, './lib/tokenizeDocsActual.json');
-      TestFileComparer.assertFileMatchesExpected('./lib/tokenizeDocsActual.json', './lib/tokenizeDocsExpected.json');
+      expect(actualTokens).toEqual(expectedTokens);
     });
 
     it('tokenizeInline()', function (): void {
