@@ -64,6 +64,11 @@ export default class GenerateAction extends BaseRushAction {
     const stopwatch: Stopwatch = Stopwatch.start();
     const isLazy: boolean = this._lazyParameter.value;
 
+    if (this._lazyParameter.value && this.rushConfiguration.packageManager === 'pnpm') {
+      console.warn(colors.yellow('The --lazy flag is not required for PNPM'
+        + ' because its algorithm inherently incorporates this optimization.'));
+    }
+
     ApprovedPackagesChecker.rewriteConfigFiles(this.rushConfiguration);
 
     const installManager: InstallManager = new InstallManager(this.rushConfiguration);
@@ -104,31 +109,37 @@ export default class GenerateAction extends BaseRushAction {
       fsx.unlinkSync(tempShrinkwrapFilename);
     }
 
-    if (isLazy) {
-      console.log(colors.green(
-        `${os.EOL}Rush is running in "--lazy" mode. ` +
-        `You will need to run a normal "rush generate" before committing.`));
+    if (isLazy || this.rushConfiguration.packageManager === 'pnpm') {
+      if (this.rushConfiguration.packageManager === 'npm') {
+        console.log(colors.green(
+          `${os.EOL}Rush is running in "--lazy" mode. ` +
+          `You will need to run a normal "rush generate" before committing.`));
+      }
 
       // Do an incremental install
       installManager.installCommonModules(InstallType.Normal);
 
-      console.log(os.EOL + colors.bold('(Skipping "npm shrinkwrap")') + os.EOL);
-      const packageLogFilePath: string = path.join(this.rushConfiguration.commonTempFolder, 'package.lock');
+      if (this.rushConfiguration.packageManager === 'npm') {
+        console.log(os.EOL + colors.bold('(Skipping "npm shrinkwrap")') + os.EOL);
+        const packageLogFilePath: string = path.join(this.rushConfiguration.commonTempFolder, 'package.lock');
 
-      if (fsx.existsSync(packageLogFilePath)) {
-        console.log('Removing NPM5\'s "package.lock" file');
-        fsx.removeSync(packageLogFilePath);
+        if (fsx.existsSync(packageLogFilePath)) {
+          console.log('Removing NPM5\'s "package.lock" file');
+          fsx.removeSync(packageLogFilePath);
+        }
       }
     } else {
       // Do a clean install
       installManager.installCommonModules(InstallType.ForceClean);
 
-      console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
-      const npmArgs: string[] = ['shrinkwrap'];
-      installManager.pushConfigurationArgs(npmArgs);
-      Utilities.executeCommand(this.rushConfiguration.packageManagerToolFilename,
-        npmArgs, this.rushConfiguration.commonTempFolder);
-      console.log('"npm shrinkwrap" completed' + os.EOL);
+      if (this.rushConfiguration.packageManager === 'npm') {
+        console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
+        const npmArgs: string[] = ['shrinkwrap'];
+        installManager.pushConfigurationArgs(npmArgs);
+        Utilities.executeCommand(this.rushConfiguration.packageManagerToolFilename,
+          npmArgs, this.rushConfiguration.commonTempFolder);
+        console.log('"npm shrinkwrap" completed' + os.EOL);
+      }
 
       // Copy (or delete) common\temp\npm-shrinkwrap.json --> common\npm-shrinkwrap.json
       installManager.syncFile(tempShrinkwrapFilename,

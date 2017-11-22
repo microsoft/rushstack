@@ -142,8 +142,8 @@ export default class InstallManager {
   }
 
   /**
-   * If the "npm-local" symlink hasn't been set up yet, this creates it, installing the
-   * specified NPM version in the user's home directory if needed.
+   * If the "(p)npm-local" symlink hasn't been set up yet, this creates it, installing the
+   * specified (P)NPM version in the user's home directory if needed.
    */
   public ensureLocalPackageManager(forceReinstall: boolean): void {
     // Example: "C:\Users\YourName\.rush"
@@ -157,10 +157,10 @@ export default class InstallManager {
     const packageManager: PackageManager = this._rushConfiguration.packageManager;
     const packageManagerVersion: string = this._rushConfiguration.packageManagerToolVersion;
 
-    // Example: "C:\Users\YourName\.rush\npm-1.2.3"
+    // Example: "C:\Users\YourName\.rush\pnpm-1.2.3"
     const packageManagerToolFolder: string = path.join(rushHomeFolder,
       `${packageManager}-${packageManagerVersion}`);
-    // Example: "C:\Users\YourName\.rush\npm-1.2.3\last-install.flag"
+    // Example: "C:\Users\YourName\.rush\pnpm-1.2.3\last-install.flag"
     const packageManagerToolFlagFile: string = path.join(packageManagerToolFolder, 'last-install.flag');
 
     // NOTE: We don't care about the timestamp for last-install.flag, because nobody will change
@@ -188,7 +188,7 @@ export default class InstallManager {
       fsx.mkdirsSync(this._rushConfiguration.commonTempFolder);
     }
 
-    // Example: "C:\MyRepo\common\temp\npm-local"
+    // Example: "C:\MyRepo\common\temp\pnpm-local"
     const localPackageManagerToolFolder: string =
       path.join(this._rushConfiguration.commonTempFolder, `${packageManager}-local`);
     if (fsx.existsSync(localPackageManagerToolFolder)) {
@@ -496,6 +496,9 @@ export default class InstallManager {
       }
     }
 
+    // @todo for PNPM, we should look at the lock file to determine if the store needs to be cleaned
+    // ie even if the marker file does not exist, the store may be ok if there is no lock file
+
     // If "--clean" or "--full-clean" was specified, or if the last install was interrupted,
     // then we will need to delete the node_modules folder.  Otherwise, we can do an incremental
     // install.
@@ -527,12 +530,18 @@ export default class InstallManager {
         return;
       }
     } else {
-      console.log(`Deleting the "npm-cache" folder`);
-      // This is faster and more thorough than "npm cache clean"
-      this._asyncRecycler.moveFolder(this._rushConfiguration.npmCacheFolder);
+      if (this._rushConfiguration.packageManager === 'npm') {
+        console.log(`Deleting the "npm-cache" folder`);
+        // This is faster and more thorough than "npm cache clean"
+        this._asyncRecycler.moveFolder(this._rushConfiguration.npmCacheFolder);
 
-      console.log(`Deleting the "npm-tmp" folder`);
-      this._asyncRecycler.moveFolder(this._rushConfiguration.npmTmpFolder);
+        console.log(`Deleting the "npm-tmp" folder`);
+        this._asyncRecycler.moveFolder(this._rushConfiguration.npmTmpFolder);
+
+      } else {
+        console.log(`Deleting the "pnpm-store" folder`);
+        this._asyncRecycler.moveFolder(this._rushConfiguration.pnpmStoreFolder);
+      }
     }
 
     if (fsx.existsSync(this.commonNodeModulesMarkerFilename)) {
@@ -566,12 +575,15 @@ export default class InstallManager {
       } else {
         // NO: Do an incremental install in the "node_modules" folder
 
-        console.log(`Running "${this._rushConfiguration.packageManager} prune"`
-          + ` in ${this._rushConfiguration.commonTempFolder}`);
-        const args: string[] = ['prune'];
-        this.pushConfigurationArgs(args);
-        Utilities.executeCommandWithRetry(packageManagerFilename, args, MAX_INSTALL_ATTEMPTS,
-          this._rushConfiguration.commonTempFolder);
+        // note: it is not necessary to run "prune" with pnpm
+        if (this._rushConfiguration.packageManager === 'npm') {
+          console.log(`Running "${this._rushConfiguration.packageManager} prune"`
+            + ` in ${this._rushConfiguration.commonTempFolder}`);
+          const args: string[] = ['prune'];
+          this.pushConfigurationArgs(args);
+          Utilities.executeCommandWithRetry(packageManagerFilename, args, MAX_INSTALL_ATTEMPTS,
+            this._rushConfiguration.commonTempFolder);
+        }
 
         // Delete the (installed image of) the temp projects, since "npm install" does not
         // detect changes for "file:./" references.
@@ -614,6 +626,9 @@ export default class InstallManager {
     //       One possible solution would be to have the shrinkwrap include information about whether the dependency
     //       is optional or not, but it does not appear to do so. Also, this would result in strange behavior where
     //       people would have different node_modules based on their system.
+    //
+    // NOTE FOR PNPM:
+    //       PNPM does not appear to support the --no-optional flag at the moment
 
     const installArgs: string[] = ['install', '--no-optional'];
     this.pushConfigurationArgs(installArgs);
@@ -640,8 +655,13 @@ export default class InstallManager {
    * to the command-line.
    */
   public pushConfigurationArgs(args: string[]): void {
-    args.push('--cache', this._rushConfiguration.npmCacheFolder);
-    args.push('--tmp', this._rushConfiguration.npmTmpFolder);
+    if (this._rushConfiguration.packageManager === 'npm') {
+      args.push('--cache', this._rushConfiguration.npmCacheFolder);
+      args.push('--tmp', this._rushConfiguration.npmTmpFolder);
+    } else if (this._rushConfiguration.packageManager === 'pnpm') {
+      args.push('--store', this._rushConfiguration.pnpmStoreFolder);
+      args.push('--no-lock');
+    }
   }
 
   /**

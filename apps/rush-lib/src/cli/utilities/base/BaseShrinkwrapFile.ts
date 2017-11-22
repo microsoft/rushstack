@@ -6,7 +6,7 @@ import * as semver from 'semver';
 import npmPackageArg = require('npm-package-arg');
 
 /**
- * This class is a parser for NPM's npm-shrinkwrap.json file format.
+ * This class is a parser for both NPM's npm-shrinkwrap.json and PNPM's shrinkwrap.yaml file formats.
  */
 export abstract class BaseShrinkwrapFile {
   protected _alreadyWarnedSpecs: Set<string> = new Set<string>();
