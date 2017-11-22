@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { assert } from 'chai';
 import * as fs from 'fs';
 
 /* tslint:disable:no-function-expression - Mocha uses a poorly scoped "this" pointer */
@@ -12,10 +11,11 @@ export default class TestFileComparer {
     const actualContent: string = fs.readFileSync(actualFilename).toString('utf8');
     const expectedContent: string = fs.readFileSync(expectedFilename).toString('utf8');
 
-    assert(this.areEquivalentFileContents(actualContent, expectedContent),
-      'The file content does not match the expected value:'
+    if (!this.areEquivalentFileContents(actualContent, expectedContent)) {
+      throw new Error('The file content does not match the expected value:'
       + '\nEXPECTED: ' + expectedFilename
       + '\nACTUAL: ' + actualFilename);
+    }
   }
 
   /**

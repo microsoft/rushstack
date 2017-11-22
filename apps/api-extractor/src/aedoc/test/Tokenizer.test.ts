@@ -1,9 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/// <reference types="mocha" />
-
-import { assert } from 'chai';
 import { JsonFile } from '@microsoft/node-core-library';
 
 import TestFileComparer from '../../TestFileComparer';
@@ -30,8 +27,6 @@ class TestTokenizer extends Tokenizer {
 }
 
 describe('Tokenizer tests', function (): void {
-  this.timeout(10000);
-
   describe('Tokenizer methods', function (): void {
     const testTokenizer: TestTokenizer = new TestTokenizer('', console.log);
 
@@ -60,9 +55,9 @@ describe('Tokenizer tests', function (): void {
       const token: string = '{    @link   https://bing.com  |  Bing  }';
       const expectedToken: Token = new Token(TokenType.InlineTag, '@link', 'https://bing.com | Bing');
       const actualToken: Token | undefined = testTokenizer.tokenizeInline(token);
-      assert.equal(expectedToken.type, actualToken!.type);
-      assert.equal(expectedToken.tag, actualToken!.tag);
-      assert.equal(expectedToken.text, actualToken!.text);
+      expect(actualToken!.type).toBe(expectedToken.type);
+      expect(actualToken!.tag).toBe(expectedToken.tag);
+      expect(actualToken!.text).toBe(expectedToken.text);
     });
   });
 });
