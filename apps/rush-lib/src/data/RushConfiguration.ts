@@ -275,7 +275,7 @@ export default class RushConfiguration {
    * _validateCommonRushConfigFolder() function makes sure that this folder only contains
    * recognized config files.
    */
-  private static _validateCommonRushConfigFolder(commonRushConfigFolder: string): void {
+  private static _validateCommonRushConfigFolder(commonRushConfigFolder: string, packageManager: PackageManager): void {
     if (!fsx.existsSync(commonRushConfigFolder)) {
       console.log(`Creating folder: ${commonRushConfigFolder}`);
       fsx.mkdirsSync(commonRushConfigFolder);
@@ -407,7 +407,7 @@ export default class RushConfiguration {
    * The filename of the NPM shrinkwrap file that is tracked e.g. by Git.  (The "rush install"
    * command uses a temporary copy, whose path is tempShrinkwrapFilename.)
    * This property merely reports the filename; the file itself may not actually exist.
-   * Example: "C:\MyRepo\common\npm-shrinkwrap.json"
+   * Example: "C:\MyRepo\common\npm-shrinkwrap.json" or "C:\MyRepo\common\shrinkwrap.yaml"
    */
   public get committedShrinkwrapFilename(): string {
     return this._committedShrinkwrapFilename;
@@ -417,7 +417,7 @@ export default class RushConfiguration {
    * The filename of the temporary NPM shrinkwrap file that is used by "rush install".
    * (The master copy is tempShrinkwrapFilename.)
    * This property merely reports the filename; the file itself may not actually exist.
-   * Example: "C:\MyRepo\common\temp\npm-shrinkwrap.json"
+   * Example: "C:\MyRepo\common\temp\npm-shrinkwrap.json" or "C:\MyRepo\common\temp\shrinkwrap.yaml"
    */
   public get tempShrinkwrapFilename(): string {
     return this._tempShrinkwrapFilename;
@@ -659,7 +659,7 @@ export default class RushConfiguration {
       throw new Error(`Neither "npmVersion" nor "pnpmVersion" was defined in the rush configuration.`);
     }
 
-    RushConfiguration._validateCommonRushConfigFolder(this._commonRushConfigFolder);
+    RushConfiguration._validateCommonRushConfigFolder(this._commonRushConfigFolder, this.packageManager);
 
     this._projectFolderMinDepth = rushConfigurationJson.projectFolderMinDepth !== undefined
       ? rushConfigurationJson.projectFolderMinDepth : 1;

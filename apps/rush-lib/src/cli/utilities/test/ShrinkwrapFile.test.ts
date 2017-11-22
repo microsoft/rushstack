@@ -32,7 +32,7 @@ describe('NPM ShrinkwrapFile', () => {
 describe('PNPM ShrinkwrapFile', () => {
   const filename: string = path.resolve(path.join(
     __dirname, '../../../../src/cli/utilities/test/shrinkwrapFile/shrinkwrap.yaml'));
-  const shrinkwrapFile: ShrinkwapFile = ShrinkwapFile.loadFromFile('pnpm', filename)!;
+  const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
 
   it('verifies root-level dependency', () => {
     shrinkwrapFile.hasCompatibleDependency('q', '~1.5.0');

@@ -630,7 +630,10 @@ export default class InstallManager {
     // NOTE FOR PNPM:
     //       PNPM does not appear to support the --no-optional flag at the moment
 
-    const installArgs: string[] = ['install', '--no-optional'];
+    const installArgs: string[] = ['install'];
+    if (this._rushConfiguration.packageManager === 'npm') {
+      installArgs.push('--no-optional');
+    }
     this.pushConfigurationArgs(installArgs);
 
     console.log(os.EOL + colors.bold(`Running "${this._rushConfiguration.packageManager} install" in`
