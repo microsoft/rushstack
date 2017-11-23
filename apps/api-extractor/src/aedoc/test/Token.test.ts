@@ -32,20 +32,14 @@ describe('Token tests', function (): void {
       let token: Token;
 
       token =  new Token(TokenType.Text, '', 'Some text');
-      let errorThrown: boolean = false;
-      try {
-        token.requireType(TokenType.Text);
-      } catch (error) {
-        errorThrown = true;
-      }
-      expect(errorThrown).toBe(false);
 
-      try {
+      expect(() => {
+        token.requireType(TokenType.Text);
+      }).not.toThrow();
+
+      expect(() => {
         token.requireType(TokenType.BlockTag);
-      } catch (error) {
-        errorThrown = true;
-      }
-      expect(errorThrown).toBe(true);
+      }).toThrow();
     });
   });
 });
