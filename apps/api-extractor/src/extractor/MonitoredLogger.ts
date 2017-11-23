@@ -36,19 +36,19 @@ export class MonitoredLogger implements ILogger {
 
   public logInfo(message: string): void {
     ++this.messageCount;
-    this._innerLogger.logVerbose(message);
+    this._innerLogger.logInfo(message);
   }
 
   public logWarning(message: string): void {
     ++this.messageCount;
     ++this.warningCount;
-    this._innerLogger.logVerbose(message);
+    this._innerLogger.logWarning(message);
   }
 
   public logError(message: string): void {
     ++this.messageCount;
     ++this.errorCount;
-    this._innerLogger.logVerbose(message);
+    this._innerLogger.logError(message);
   }
 
   public resetCounters(): void {
