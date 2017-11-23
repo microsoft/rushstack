@@ -10,22 +10,23 @@ export class MonitoredLogger implements ILogger {
   /**
    * Number of calls to logError()
    */
-  public errorCount: number = 0;
+  public errorCount: number;
 
   /**
    * Number of calls to logWarning()
    */
-  public warningCount: number = 0;
+  public warningCount: number;
 
   /**
    * Number of calls to any logging method.
    */
-  public messageCount: number = 0;
+  public messageCount: number;
 
   private _innerLogger: ILogger;
 
   constructor(logger: ILogger) {
     this._innerLogger = logger;
+    this.resetCounters();
   }
 
   public logVerbose(message: string): void {
@@ -48,5 +49,11 @@ export class MonitoredLogger implements ILogger {
     ++this.messageCount;
     ++this.errorCount;
     this._innerLogger.logVerbose(message);
+  }
+
+  public resetCounters(): void {
+    this.errorCount = 0;
+    this.warningCount = 0;
+    this.messageCount = 0;
   }
 }

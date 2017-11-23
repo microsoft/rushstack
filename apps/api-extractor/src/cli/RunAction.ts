@@ -82,6 +82,9 @@ export class RunAction extends CommandLineAction {
     const extractor: Extractor = new Extractor(config, {
       localBuild: this._localParameter.value
     });
-    extractor.analyzeProject();
+
+    if (!extractor.processProject()) {
+      throw new Error('The build failed');
+    }
   }
 }

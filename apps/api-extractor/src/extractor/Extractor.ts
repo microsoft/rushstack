@@ -20,7 +20,7 @@ import ApiFileGenerator from '../generators/ApiFileGenerator';
 import { MonitoredLogger } from './MonitoredLogger';
 
 /**
- * Options for {@link Extractor.analyzeProject}.
+ * Options for {@link Extractor.processProject}.
  * @public
  */
 export interface IAnalyzeProjectOptions {
@@ -163,11 +163,21 @@ export class Extractor {
 
   /**
    * Invokes the API Extractor engine, using the configuration that was passed to the constructor.
-   * @param options - provides additional runtime state that is NOT part of the API Extractor
-   *     config file.
-   * @returns true if there were no errors; false if the tool chain should fail the build
+   * @deprecated Use {@link Extractor.processProject} instead.
    */
   public analyzeProject(options?: IAnalyzeProjectOptions): void {
+    this.processProject(options);
+  }
+
+  /**
+   * Invokes the API Extractor engine, using the configuration that was passed to the constructor.
+   * @param options - provides additional runtime state that is NOT part of the API Extractor
+   *     config file.
+   * @returns true if there were no errors or warnings; false if the tool chain should fail the build
+   */
+  public processProject(options?: IAnalyzeProjectOptions): boolean {
+    this._monitoredLogger.resetCounters();
+
     if (!options) {
       options = { };
     }
@@ -259,6 +269,9 @@ export class Extractor {
           + ` to ${expectedApiReviewShortPath} and committing it.`);
       }
     }
+
+    // If there were any errors or warnings, then fail the build
+    return (this._monitoredLogger.errorCount + this._monitoredLogger.warningCount) === 0;
   }
 
   private _getShortFilePath(absolutePath: string): string {
