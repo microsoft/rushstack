@@ -141,10 +141,6 @@ export default class GenerateAction extends BaseRushAction {
         console.log('"npm shrinkwrap" completed' + os.EOL);
       }
 
-      // Copy (or delete) common\temp\npm-shrinkwrap.json --> common\npm-shrinkwrap.json
-      installManager.syncFile(tempShrinkwrapFilename,
-        this.rushConfiguration.committedShrinkwrapFilename);
-
       // The flag file is normally created by installCommonModules(), but "rush install" will
       // compare its timestamp against the shrinkwrap file.  Since we just generated a new
       // npm-shrinkwrap file, it's safe to bump the timestamp, which ensures that "rush install"
@@ -157,6 +153,10 @@ export default class GenerateAction extends BaseRushAction {
         throw new Error('The install flag file is missing');
       }
     }
+
+    // Copy (or delete) common\temp\npm-shrinkwrap.json --> common\npm-shrinkwrap.json
+    installManager.syncFile(tempShrinkwrapFilename,
+      this.rushConfiguration.committedShrinkwrapFilename);
 
     stopwatch.stop();
     console.log(os.EOL + colors.green(`Rush generate finished successfully. (${stopwatch.toString()})`));
