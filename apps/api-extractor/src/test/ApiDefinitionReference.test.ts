@@ -1,9 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/// <reference types="mocha" />
-
-import { assert } from 'chai';
 import ApiDefinitionReference from '../ApiDefinitionReference';
 
 /* tslint:disable:no-function-expression - Mocha uses a poorly scoped "this" pointer */
@@ -18,13 +15,10 @@ function clearCapturedErrors(): void {
 }
 
 function assertCapturedErrors(expectedMessages: string[]): void {
-  assert.deepEqual(capturedErrors.map(x => x.message), expectedMessages,
-    'The captured errors did not match the expected output.');
+  expect(capturedErrors.map(x => x.message)).toEqual(expectedMessages);
 }
 
 describe('ApiDocumentation tests', function (): void {
-  this.timeout(10000);
-
   describe('ApiDocumentation internal methods', function (): void {
     let apiReferenceExpr: string;
     let actual: ApiDefinitionReference | undefined;
@@ -33,30 +27,30 @@ describe('ApiDocumentation tests', function (): void {
       apiReferenceExpr = '@microsoft/sp-core-library:Guid';
 
       actual = ApiDefinitionReference.createFromString(apiReferenceExpr, console.log);
-      assert.equal('@microsoft', actual!.scopeName);
-      assert.equal('sp-core-library', actual!.packageName);
-      assert.equal('Guid', actual!.exportName);
-      assert.equal('', actual!.memberName);
+      expect(actual!.scopeName).toBe('@microsoft');
+      expect(actual!.packageName).toBe('sp-core-library');
+      expect(actual!.exportName).toBe('Guid');
+      expect(actual!.memberName).toBe('');
     });
 
     it('_parseApiReferenceExpression() without scope name', function (): void {
       apiReferenceExpr = 'sp-core-library:Guid';
 
       actual = ApiDefinitionReference.createFromString(apiReferenceExpr, console.log);
-      assert.equal('', actual!.scopeName);
-      assert.equal('sp-core-library', actual!.packageName);
-      assert.equal('Guid', actual!.exportName);
-      assert.equal('', actual!.memberName);
+      expect(actual!.scopeName).toBe('');
+      expect(actual!.packageName).toBe('sp-core-library');
+      expect(actual!.exportName).toBe('Guid');
+      expect(actual!.memberName).toBe('');
     });
 
     it('_parseApiReferenceExpression() without scope name and with member name', function (): void {
       apiReferenceExpr = 'sp-core-library:Guid.equals';
 
       actual = ApiDefinitionReference.createFromString(apiReferenceExpr, console.log);
-      assert.equal('', actual!.scopeName);
-      assert.equal('sp-core-library', actual!.packageName);
-      assert.equal('Guid', actual!.exportName);
-      assert.equal('equals', actual!.memberName);
+      expect(actual!.scopeName).toBe('');
+      expect(actual!.packageName).toBe('sp-core-library');
+      expect(actual!.exportName).toBe('Guid');
+      expect(actual!.memberName).toBe('equals');
     });
 
     it('_parseApiReferenceExpression() without scope name and invalid memberName', function (): void {

@@ -4,16 +4,20 @@
   "description": "Configuration file for the Rush multi-package build tool",
 
   "type": "object",
+
   "properties": {
+
     "$schema": {
       "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
       "type": "string"
     },
+
     "npmVersion": {
       "description": "The version of the NPM tool to install.",
       "type": "string",
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
     },
+
     "rushVersion": {
       "description": "The version of the Rush tool that will be used to build this repository.",
       "type": "string",

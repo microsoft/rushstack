@@ -3,16 +3,19 @@
 
 import * as colors from 'colors';
 import * as os from 'os';
+import * as path from 'path';
 import * as fsx from 'fs-extra';
 import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 
 import Utilities from '../../utilities/Utilities';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import InstallManager, { InstallType } from '../utilities/InstallManager';
-import LinkManager from '../utilities/LinkManager';
+import { LinkManagerFactory } from '../utilities/LinkManagerFactory';
+import { BaseLinkManager } from '../utilities/base/BaseLinkManager';
 import RushCommandLineParser from './RushCommandLineParser';
 import { ApprovedPackagesChecker } from '../utilities/ApprovedPackagesChecker';
-import ShrinkwrapFile from '../utilities/ShrinkwrapFile';
+import { BaseShrinkwrapFile } from '../utilities/base/BaseShrinkwrapFile';
+import { ShrinkwrapFileFactory } from '../utilities/ShrinkwrapFileFactory';
 import { BaseRushAction } from './BaseRushAction';
 
 export default class GenerateAction extends BaseRushAction {
@@ -65,9 +68,13 @@ export default class GenerateAction extends BaseRushAction {
 
     const installManager: InstallManager = new InstallManager(this.rushConfiguration);
 
+    const committedShrinkwrapFilename: string = this.rushConfiguration.committedShrinkwrapFilename;
+    const tempShrinkwrapFilename: string = this.rushConfiguration.tempShrinkwrapFilename;
+
     try {
-      const shrinkwrapFile: ShrinkwrapFile | undefined
-        = ShrinkwrapFile.loadFromFile(this.rushConfiguration.committedShrinkwrapFilename);
+      const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
+          this.rushConfiguration.packageManager,
+          this.rushConfiguration.committedShrinkwrapFilename);
 
       if (shrinkwrapFile
         && !this._forceParameter.value
@@ -84,17 +91,17 @@ export default class GenerateAction extends BaseRushAction {
       console.log('There was a problem reading the shrinkwrap file. Proceeeding with "rush generate".');
     }
 
-    installManager.ensureLocalNpmTool(false);
+    installManager.ensureLocalPackageManager(false);
 
     installManager.createTempModules(true);
 
     // Delete both copies of the shrinkwrap file
-    if (fsx.existsSync(this.rushConfiguration.committedShrinkwrapFilename)) {
-      console.log(os.EOL + 'Deleting ' + this.rushConfiguration.committedShrinkwrapFilename);
-      fsx.unlinkSync(this.rushConfiguration.committedShrinkwrapFilename);
+    if (fsx.existsSync(committedShrinkwrapFilename)) {
+      console.log(os.EOL + 'Deleting ' + committedShrinkwrapFilename);
+      fsx.unlinkSync(committedShrinkwrapFilename);
     }
-    if (fsx.existsSync(this.rushConfiguration.tempShrinkwrapFilename)) {
-      fsx.unlinkSync(this.rushConfiguration.tempShrinkwrapFilename);
+    if (fsx.existsSync(tempShrinkwrapFilename)) {
+      fsx.unlinkSync(tempShrinkwrapFilename);
     }
 
     if (isLazy) {
@@ -106,19 +113,25 @@ export default class GenerateAction extends BaseRushAction {
       installManager.installCommonModules(InstallType.Normal);
 
       console.log(os.EOL + colors.bold('(Skipping "npm shrinkwrap")') + os.EOL);
+      const packageLogFilePath: string = path.join(this.rushConfiguration.commonTempFolder, 'package.lock');
+
+      if (fsx.existsSync(packageLogFilePath)) {
+        console.log('Removing NPM5\'s "package.lock" file');
+        fsx.removeSync(packageLogFilePath);
+      }
     } else {
       // Do a clean install
       installManager.installCommonModules(InstallType.ForceClean);
 
       console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
-      const npmArgs: string [] = ['shrinkwrap'];
-      installManager.pushConfigurationNpmArgs(npmArgs);
-      Utilities.executeCommand(this.rushConfiguration.npmToolFilename,
+      const npmArgs: string[] = ['shrinkwrap'];
+      installManager.pushConfigurationArgs(npmArgs);
+      Utilities.executeCommand(this.rushConfiguration.packageManagerToolFilename,
         npmArgs, this.rushConfiguration.commonTempFolder);
       console.log('"npm shrinkwrap" completed' + os.EOL);
 
       // Copy (or delete) common\temp\npm-shrinkwrap.json --> common\npm-shrinkwrap.json
-      installManager.syncFile(this.rushConfiguration.tempShrinkwrapFilename,
+      installManager.syncFile(tempShrinkwrapFilename,
         this.rushConfiguration.committedShrinkwrapFilename);
 
       // The flag file is normally created by installCommonModules(), but "rush install" will
@@ -138,7 +151,8 @@ export default class GenerateAction extends BaseRushAction {
     console.log(os.EOL + colors.green(`Rush generate finished successfully. (${stopwatch.toString()})`));
 
     if (!this._noLinkParameter.value) {
-      const linkManager: LinkManager = new LinkManager(this.rushConfiguration);
+      const linkManager: BaseLinkManager =
+        LinkManagerFactory.getLinkManager(this.rushConfiguration);
       // NOTE: Setting force=true here shouldn't be strictly necessary, since installCommonModules()
       // above should have already deleted the marker file, but it doesn't hurt to be explicit.
       this._parser.catchSyncErrors(linkManager.createSymlinksForProjects(true));

@@ -271,7 +271,7 @@ export default class PublishAction extends BaseRushAction {
 
       PublishUtilities.execCommand(
         !!this._publish.value,
-        this.rushConfiguration.npmToolFilename,
+        this.rushConfiguration.packageManagerToolFilename,
         args,
         packagePath,
         env);
