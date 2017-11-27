@@ -169,7 +169,7 @@ export class PnpmLinkManager extends BaseLinkManager {
 
     // When debugging, you can uncomment this line to dump the data structure
     // to the console:
-    localPackage.printTree();
+    // localPackage.printTree();
     PnpmLinkManager._createSymlinksForTopLevelProject(localPackage);
 
     // Also symlink the ".bin" folder
