@@ -42,29 +42,37 @@ export default class ChangeAction extends BaseRushAction {
   private _prompt: inquirer.PromptModule;
 
   constructor(parser: RushCommandLineParser) {
+    const documentation: string[] = [
+      'Asks a series of questions and then generates a <branchname>-<timstamp>.json file ' +
+      'in the common folder. The `publish` command will consume these files and perform the proper ' +
+      'version bumps. Note these changes will eventually be published in a changelog.md file in each package.',
+      '',
+      'The possible types of changes are: ',
+      '',
+      'MAJOR - these are breaking changes that are not backwards compatible. ' +
+      'Examples are: renaming a public class, adding/removing a non-optional ' +
+      'parameter from a public API, or renaming an variable or function that ' +
+      'is exported.',
+      '',
+      'MINOR - these are changes that are backwards compatible (but not ' +
+      'forwards compatible). Examples are: adding a new public API or adding an ' +
+      'optional parameter to a public API',
+      '',
+      'PATCH - these are changes that are backwards and forwards compatible. ' +
+      'Examples are: Modifying a private API or fixing a bug in the logic ' +
+      'of how an existing API works.',
+      '',
+      'HOTFIX (EXPERIMENTAL) - these are changes that are hotfixes targeting a ' +
+      'specific older version of the package. When a hotfix change is added, ' +
+      'other changes will not be able to increment the version number.' +
+      'Enable this feature by setting \'hotfixChangeEnabled\' in your rush.json.',
+      ''
+    ];
     super({
       actionVerb: 'change',
       summary: 'Records changes made to projects, indicating how the package version number should be bumped ' +
         'for the next publish.',
-      documentation: ['Asks a series of questions and then generates a <branchname>-<timstamp>.json file ' +
-        'in the common folder. The `publish` command will consume these files and perform the proper ' +
-        'version bumps. Note these changes will eventually be published in a changelog.md file in each package.',
-        '',
-        'The possible types of changes are: ',
-        '',
-        'MAJOR - these are breaking changes that are not backwards compatible. ' +
-        'Examples are: renaming a public class, adding/removing a non-optional ' +
-        'parameter from a public API, or renaming an variable or function that ' +
-        'is exported.',
-        '',
-        'MINOR - these are changes that are backwards compatible (but not ' +
-        'forwards compatible). Examples are: adding a new public API or adding an ' +
-        'optional parameter to a public API',
-        '',
-        'PATCH - these are changes that are backwards and forwards compatible. ' +
-        'Examples are: Modifying a private API or fixing a bug in the logic ' +
-        'of how an existing API works.',
-        ''].join(os.EOL)
+      documentation: documentation.join(os.EOL)
     });
     this._parser = parser;
   }
@@ -291,6 +299,11 @@ export default class ChangeAction extends BaseRushAction {
       'minor': 'minor - for backwards compatible changes, e.g. adding a new API',
       'patch': 'patch - for changes that do not affect compatibility, e.g. fixing a bug'
     };
+
+    if (this.rushConfiguration.hotfixChangeEnabled) {
+      // tslint:disable-next-line:no-string-literal
+      bumpOptions['hotfix'] = 'hotfix - for changes that need to be published in a separate hotfix package';
+    }
 
     if (versionPolicy) {
       if (versionPolicy.definitionName === VersionPolicyDefinitionName.lockStepVersion) {
