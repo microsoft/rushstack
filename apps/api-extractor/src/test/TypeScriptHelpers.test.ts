@@ -1,46 +1,38 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/// <reference types="mocha" />
-
-import { assert } from 'chai';
 import TypeScriptHelpers from '../TypeScriptHelpers';
 
 describe('TypeScriptHelpers tests', () => {
 
   describe('splitStringWithRegEx()', () => {
     it('simple case', () => {
-      assert.deepEqual(
-        TypeScriptHelpers.splitStringWithRegEx('ABCDaFG', /A/gi), ['A', 'BCD', 'a', 'FG']
-      );
+      expect(TypeScriptHelpers.splitStringWithRegEx('ABCDaFG', /A/gi))
+        .toEqual(['A', 'BCD', 'a', 'FG']);
     });
 
     it('empty match', () => {
-      assert.deepEqual(
-        TypeScriptHelpers.splitStringWithRegEx('', /A/gi), []
-      );
+      expect(TypeScriptHelpers.splitStringWithRegEx('', /A/gi))
+        .toEqual([]);
     });
 
   });
 
   describe('extractCommentContent()', () => {
     it('multi-line comment', () => {
-      assert.equal(
-        TypeScriptHelpers.extractCommentContent('/**\n * this is\n * a test\n */\n'),
-        'this is\na test');
+      expect(TypeScriptHelpers.extractCommentContent('/**\n * this is\n * a test\n */\n'))
+        .toBe('this is\na test');
     });
 
     it('single-line comment', () => {
-      assert.equal(
-        TypeScriptHelpers.extractCommentContent('/** single line comment */'),
-        'single line comment');
+      expect(TypeScriptHelpers.extractCommentContent('/** single line comment */'))
+        .toBe('single line comment');
     });
 
     it('degenerate comment', () => {
-      assert.equal(
-        TypeScriptHelpers.removeJsdocSequences(
-        ['/**', '* degenerate comment', 'star missing here', '* end of comment', '*/']),
-        'degenerate comment\nstar missing here\nend of comment');
+      expect(TypeScriptHelpers.removeJsdocSequences(
+        ['/**', '* degenerate comment', 'star missing here', '* end of comment', '*/']))
+        .toBe('degenerate comment\nstar missing here\nend of comment');
     });
   });
 
