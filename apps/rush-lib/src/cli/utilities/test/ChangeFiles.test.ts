@@ -97,5 +97,11 @@ describe('ChangeFiles', () => {
       expect(changeFiles.deleteAll(false, updatedChangelogs)).equals(2,
         'Changes files for a and b should be deleted.');
     });
+
+    it('delete all files when there are hotfixes', () => {
+      const changesPath: string = path.join(__dirname, 'multipleHotfixChanges');
+      const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
+      expect(changeFiles.deleteAll(false)).equals(3);
+    });
   });
 });

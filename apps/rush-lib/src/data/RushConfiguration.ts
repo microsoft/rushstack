@@ -85,6 +85,7 @@ export interface IRushConfigurationJson {
   telemetryEnabled?: boolean;
   projects: IRushConfigurationProjectJson[];
   eventHooks?: IEventHooksJson;
+  hotfixChangeEnabled?: boolean;
 }
 
 /**
@@ -135,6 +136,9 @@ export default class RushConfiguration {
   // "gitPolicy" feature
   private _gitAllowedEmailRegExps: string[];
   private _gitSampleEmail: string;
+
+  // "hotfixChangeEnabled" feature
+  private _hotfixChangeEnabled: boolean;
 
   // Repository info
   private _repositoryUrl: string;
@@ -492,6 +496,14 @@ export default class RushConfiguration {
   }
 
   /**
+   * [Part of the "hotfixChange" feature.]
+   * Enables creating hotfix changes
+   */
+  public get hotfixChangeEnabled(): boolean {
+    return this._hotfixChangeEnabled;
+  }
+
+  /**
    * The remote url of the repository. It helps 'Rush change' finds the right remote to compare against.
    */
   public get repositoryUrl(): string {
@@ -657,6 +669,11 @@ export default class RushConfiguration {
             'which is required when using "allowedEmailRegExps"');
         }
       }
+    }
+
+    this._hotfixChangeEnabled = false;
+    if (rushConfigurationJson.hotfixChangeEnabled) {
+      this._hotfixChangeEnabled = rushConfigurationJson.hotfixChangeEnabled;
     }
 
     if (rushConfigurationJson.repository) {

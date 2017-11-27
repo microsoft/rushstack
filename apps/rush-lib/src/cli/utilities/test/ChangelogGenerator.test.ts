@@ -245,5 +245,32 @@ describe('updateChangelogs', () => {
     expect(updatedChangeLogs.length).eqls(1);
     expect(updatedChangeLogs[0].name).eqls('b');
   });
+
+  it('writes changelog for hotfix changes', () => {
+    const changeHash: IChangeInfoHash = {};
+    // Package a is a hotfix
+    changeHash['a'] = {
+      packageName: 'a',
+      changeType: ChangeType.hotfix,
+      newVersion: '1.0.1-hotfix.1',
+      changes: []
+    };
+    // Package b is not a hotfix
+    changeHash['b'] = {
+      packageName: 'b',
+      changeType: ChangeType.patch,
+      newVersion: '1.0.1',
+      changes: []
+    };
+    // Makes package 'a' hotfix package.
+    const rushProjectA: RushConfigurationProject = rushConfiguration.projectsByName.get('a')!;
+    rushProjectA.packageJson.version = '1.0.1-hotfix.1';
+
+    const updatedChangeLogs: IChangelog[] = ChangelogGenerator.updateChangelogs(
+      changeHash, rushConfiguration.projectsByName, false);
+    expect(updatedChangeLogs.length).eqls(2);
+    expect(updatedChangeLogs[0].name).eqls('a');
+    expect(updatedChangeLogs[1].name).eqls('b');
+  });
   /* tslint:enable:no-string-literal */
 });
