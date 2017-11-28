@@ -158,8 +158,15 @@ export default class VersionAction extends BaseRushAction {
     }
 
     // Commit the package.json and change files updates.
-    git.addChanges();
-    git.commit();
+    const packageJsonUpdated: boolean = VersionControl.getUncommittedChanges().some((changePath) => {
+      return changePath.indexOf('package.json') > 0;
+    });
+
+    if (packageJsonUpdated) {
+      git.addChanges();
+      git.commit();
+    }
+
     git.push(tempBranch);
 
     // Now merge to target branch.
