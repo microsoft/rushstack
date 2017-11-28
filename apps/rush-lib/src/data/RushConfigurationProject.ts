@@ -94,7 +94,7 @@ export default class RushConfigurationProject {
     this._tempProjectName = tempProjectName;
 
     // The "rushProject.tempProjectName" is guaranteed to be unique name (e.g. by adding the "-2"
-    // suffix).  Even after we strip the NPM scope, it will still be unique.
+    // suffix).  Even after we strip the npm scope, it will still be unique.
     // Example: "my-project-2"
     this._unscopedTempProjectName = Utilities.parseScopedPackageName(tempProjectName).name;
 
@@ -110,7 +110,7 @@ export default class RushConfigurationProject {
   }
 
   /**
-   * The name of the NPM package.  An error is reported if this name is not
+   * The name of the npm package.  An error is reported if this name is not
    * identical to packageJson.name.
    *
    * Example: "@scope/MyProject"
@@ -164,7 +164,7 @@ export default class RushConfigurationProject {
   }
 
   /**
-   * The parsed NPM "package.json" file from projectFolder.
+   * The parsed npm "package.json" file from projectFolder.
    */
   public get packageJson(): IPackageJson {
     return this._packageJson;

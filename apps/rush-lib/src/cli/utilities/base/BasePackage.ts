@@ -50,7 +50,7 @@ export interface IRushTempPackageJson extends IPackageJson {
 }
 
 /**
- * Represents an NPM package being processed by the "rush link" algorithm.
+ * Represents an npm package being processed by the "rush link" algorithm.
  */
 export class BasePackage {
   /**

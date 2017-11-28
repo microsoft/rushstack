@@ -7,7 +7,7 @@ import * as path from 'path';
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 
-describe('NPM ShrinkwrapFile', () => {
+describe('npm ShrinkwrapFile', () => {
   const filename: string = path.resolve(path.join(__dirname, './shrinkwrapFile/npm-shrinkwrap.json'));
   const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('npm', filename)!;
 
@@ -29,7 +29,7 @@ describe('NPM ShrinkwrapFile', () => {
   });
 });
 
-describe('PNPM ShrinkwrapFile', () => {
+describe('pnpm ShrinkwrapFile', () => {
   const filename: string = path.resolve(path.join(
     __dirname, '../../../../src/cli/utilities/test/shrinkwrapFile/shrinkwrap.yaml'));
   const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;

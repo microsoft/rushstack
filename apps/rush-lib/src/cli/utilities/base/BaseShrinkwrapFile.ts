@@ -9,7 +9,7 @@ import { RushConstants } from '../../../RushConstants';
 import Utilities from '../../../utilities/Utilities';
 
 /**
- * This class is a parser for both NPM's npm-shrinkwrap.json and PNPM's shrinkwrap.yaml file formats.
+ * This class is a parser for both npm's npm-shrinkwrap.json and pnpm's shrinkwrap.yaml file formats.
  */
 export abstract class BaseShrinkwrapFile {
   protected _alreadyWarnedSpecs: Set<string> = new Set<string>();

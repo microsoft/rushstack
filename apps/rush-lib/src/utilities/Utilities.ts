@@ -16,7 +16,7 @@ import IPackageJson from './IPackageJson';
  */
 export default class Utilities {
   /**
-   * For a scoped NPM package name this separates the scope and name parts.  For example:
+   * For a scoped npm package name this separates the scope and name parts.  For example:
    * parseScopedPackageName('@my-scope/myproject') = { scope: '@my-scope', name: 'myproject' }
    * parseScopedPackageName('myproject') = { scope: '', name: 'myproject' }
    */
@@ -412,7 +412,7 @@ export default class Utilities {
 
     console.log(os.EOL + 'Running "npm install" in ' + directory);
 
-    // NOTE: Here we use whatever version of NPM we happen to find in the PATH
+    // NOTE: Here we use whatever version of npm we happen to find in the PATH
     Utilities.executeCommandWithRetry('npm', ['install'], maxInstallAttempts, directory, suppressOutput);
   }
 

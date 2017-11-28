@@ -74,7 +74,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     // now that we have the temp package.json, we can go ahead and link up all the direct dependencies
 
     // first, start with the rush dependencies, we just need to link to the project folder
-    Object.keys(commonPackage.packageJson!.rushDependencies || {}).forEach((dependencyName: string) => {
+    for (const dependencyName of Object.keys(commonPackage.packageJson!.rushDependencies || {})) {
 
       const matchedRushPackage: RushConfigurationProject | undefined =
         this._rushConfiguration.getProjectByName(dependencyName);
@@ -105,21 +105,21 @@ export class PnpmLinkManager extends BaseLinkManager {
         // weird state or program bug
         throw Error('Cannot find rush dependency in rush configuration');
       }
-    });
+    }
 
     // Iterate through all the regular dependencies
 
-    // With NPM, it's possible for two different projects to have dependencies on
+    // With npm, it's possible for two different projects to have dependencies on
     // the same version of the same library, but end up with different implementations
     // of that library, if the library is installed twice and with different secondary
     // dependencies.The NpmLinkManager recursively links dependency folders to try to
-    // honor this. Since PNPM always uses the same physical folder to represent a given
+    // honor this. Since pnpm always uses the same physical folder to represent a given
     // version of a library, we only need to link directly to that folder, and it will
     // have a consistent set of secondary dependencies.
 
-    // each of these dependencies should be linked in a special folder that PNPM
+    // each of these dependencies should be linked in a special folder that pnpm
     // creates for the installed version of each .TGZ package, all we need to do
-    // is re-use that symlink in order to get linked to whatever PNPM thought was
+    // is re-use that symlink in order to get linked to whatever pnpm thought was
     // appropriate. This folder is usually something like:
     // C:\{path-to-tgz-with-slashes-replaced-with-"%2F"}\node_modules\{package-name}
 
@@ -143,7 +143,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       escapedPathToTgzFile,
       RushConstants.nodeModulesFolderName);
 
-    Object.keys(commonPackage.packageJson!.dependencies || {}).forEach((dependencyName: string) => {
+    for (const dependencyName of Object.keys(commonPackage.packageJson!.dependencies || {})) {
       // the dependency we are looking for should have already created a symlink here
 
       const dependencyLocalInstallationSymlink: string = path.join(
@@ -172,7 +172,7 @@ export class PnpmLinkManager extends BaseLinkManager {
 
       newLocalPackage.symlinkTargetFolderPath = dependencyLocalInstallationSymlink;
       localPackage.addChild(newLocalPackage);
-    });
+    }
 
     // When debugging, you can uncomment this line to dump the data structure
     // to the console:

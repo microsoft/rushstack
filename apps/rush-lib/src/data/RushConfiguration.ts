@@ -372,8 +372,8 @@ export default class RushConfiguration {
   }
 
   /**
-   * The local folder that will store the NPM package cache.  Rush does not rely on the
-   * NPM's default global cache folder, because NPM's caching implementation does not
+   * The local folder that will store the npm package cache.  Rush does not rely on the
+   * npm's default global cache folder, because npm's caching implementation does not
    * reliably handle multiple processes.  (For example, if a build box is running
    * "rush install" simultaneously for two different working folders, it may fail randomly.)
    *
@@ -384,7 +384,7 @@ export default class RushConfiguration {
   }
 
   /**
-   * The local folder where NPM's temporary files will be written during installation.
+   * The local folder where npm's temporary files will be written during installation.
    * Rush does not rely on the global default folder, because it may be on a different
    * hard disk.
    *
@@ -395,7 +395,7 @@ export default class RushConfiguration {
   }
 
   /**
-   * The local folder where PNPM stores a global installation for every installed package
+   * The local folder where pnpm stores a global installation for every installed package
    *
    * Example: "C:\MyRepo\common\temp\pnpm-store"
    */
@@ -404,7 +404,7 @@ export default class RushConfiguration {
   }
 
   /**
-   * The filename of the NPM shrinkwrap file that is tracked e.g. by Git.  (The "rush install"
+   * The filename of the npm shrinkwrap file that is tracked e.g. by Git.  (The "rush install"
    * command uses a temporary copy, whose path is tempShrinkwrapFilename.)
    * This property merely reports the filename; the file itself may not actually exist.
    * Example: "C:\MyRepo\common\npm-shrinkwrap.json" or "C:\MyRepo\common\shrinkwrap.yaml"
@@ -414,7 +414,7 @@ export default class RushConfiguration {
   }
 
   /**
-   * The filename of the temporary NPM shrinkwrap file that is used by "rush install".
+   * The filename of the temporary npm shrinkwrap file that is used by "rush install".
    * (The master copy is tempShrinkwrapFilename.)
    * This property merely reports the filename; the file itself may not actually exist.
    * Example: "C:\MyRepo\common\temp\npm-shrinkwrap.json" or "C:\MyRepo\common\temp\shrinkwrap.yaml"
@@ -443,14 +443,14 @@ export default class RushConfiguration {
   }
 
   /**
-   * The version of the locally installed NPM tool.  (Example: "1.2.3")
+   * The version of the locally installed npm tool.  (Example: "1.2.3")
    */
   public get packageManagerToolVersion(): string {
     return this._packageManagerToolVersion;
   }
 
   /**
-   * The absolute path to the locally installed NPM tool.  If "rush install" has not
+   * The absolute path to the locally installed npm tool.  If "rush install" has not
    * been run, then this file may not exist yet.
    * Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
    */

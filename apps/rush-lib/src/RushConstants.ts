@@ -9,7 +9,7 @@
 export namespace RushConstants {
   /**
    * The filename ("browser-approved-packages.json") for an optional policy configuration file
-   * that stores a list of NPM packages that have been approved for usage by Rush projects.
+   * that stores a list of npm packages that have been approved for usage by Rush projects.
    * This is part of a pair of config files, one for projects that run in a web browser
    * (e.g. whose approval criteria mostly focuses on licensing and code size), and one for everywhere else
    * (e.g. tooling projects whose approval criteria mostly focuses on avoiding node_modules sprawl).
@@ -23,7 +23,7 @@ export namespace RushConstants {
 
   /**
    * The filename ("nonbrowser-approved-packages.json") for an optional policy configuration file
-   * that stores a list of NPM packages that have been approved for usage by Rush projects.
+   * that stores a list of npm packages that have been approved for usage by Rush projects.
    * This is part of a pair of config files, one for projects that run in a web browser
    * (e.g. whose approval criteria mostly focuses on licensing and code size), and one for everywhere else
    * (e.g. tooling projects whose approval criteria mostly focuses on avoiding node_modules sprawl).
@@ -36,7 +36,7 @@ export namespace RushConstants {
   export const commonFolderName: string = 'common';
 
   /**
-   * The NPM scope ("@rush-temp") that is used for Rush's temporary projects.
+   * The npm scope ("@rush-temp") that is used for Rush's temporary projects.
    */
   export const rushTempNpmScope: string = '@rush-temp';
 
@@ -64,12 +64,12 @@ export namespace RushConstants {
   export const pnpmShrinkwrapFilename: string = 'shrinkwrap.yaml';
 
   /**
-   * The folder name ("node_modules") where NPM installs its packages.
+   * The folder name ("node_modules") where npm installs its packages.
    */
   export const nodeModulesFolderName: string = 'node_modules';
 
   /**
-   * The filename ("package.json") used by NPM to define a package.
+   * The filename ("package.json") used by npm to define a package.
    */
   export const packageJsonFilename: string = 'package.json';
 

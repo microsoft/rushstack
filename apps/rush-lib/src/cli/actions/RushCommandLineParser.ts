@@ -34,12 +34,12 @@ export default class RushCommandLineParser extends CommandLineParser {
   constructor() {
     super({
       toolFilename: 'rush',
-      toolDescription: 'Rush helps you to manage a collection of NPM'
+      toolDescription: 'Rush helps you to manage a collection of npm'
       + ' projects.  Rush collects the dependencies for all projects to perform a minimal install,'
       + ' detects which projects can be locally linked, and performs a fast parallel'
       + ' build according to the detected dependency graph.  If you want to decompose'
       + ' your monolithic project into many small packages but are afraid of the dreaded'
-      + ' NPM progress bar, Rush is for you.'
+      + ' npm progress bar, Rush is for you.'
     });
     this._populateActions();
   }

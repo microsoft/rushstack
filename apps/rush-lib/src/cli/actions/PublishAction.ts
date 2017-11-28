@@ -86,7 +86,7 @@ export default class PublishAction extends BaseRushAction {
       parameterShortName: '-r',
       key: 'REGISTRY',
       description:
-      `Publishes to a specified NPM registry. If this is specified, it will prevent the current commit will not be ` +
+      `Publishes to a specified npm registry. If this is specified, it will prevent the current commit will not be ` +
       'tagged.'
     });
     this._npmAuthToken = this.defineStringParameter({
@@ -186,7 +186,7 @@ export default class PublishAction extends BaseRushAction {
       git.commit();
       git.push(tempBranch);
 
-      // NPM publish the things that need publishing.
+      // npm publish the things that need publishing.
       for (const change of orderedChanges) {
         if (change.changeType && change.changeType > ChangeType.dependency) {
           const project: RushConfigurationProject | undefined = allPackages.get(change.packageName);

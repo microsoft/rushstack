@@ -36,8 +36,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         return undefined; // file does not exist
       }
 
-      // We don't use JsonFile/jju here because shrinkwrap.json is a special NPM file format
-      // and typically very large, so we want to load it the same way that NPM does.
+      // We don't use JsonFile/jju here because shrinkwrap.json is a special npm file format
+      // and typically very large, so we want to load it the same way that npm does.
       const parsedData: IShrinkwrapYaml = yaml.safeLoad(fsx.readFileSync(shrinkwrapYamlFilename).toString());
 
       return new PnpmShrinkwrapFile(parsedData);

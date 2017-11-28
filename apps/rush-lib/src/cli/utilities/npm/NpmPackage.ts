@@ -9,7 +9,7 @@ import {
 } from '../base/BasePackage';
 
 /**
- * Used by the "rush link" algorithm when doing NPM package resolution.
+ * Used by the "rush link" algorithm when doing npm package resolution.
  */
 export interface IResolveOrCreateResult {
   found: BasePackage | undefined;
