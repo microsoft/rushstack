@@ -4,6 +4,7 @@
 import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
+import uriEncode = require('strict-uri-encode');
 
 import { JsonFile } from '@microsoft/node-core-library';
 
@@ -17,6 +18,10 @@ import { BasePackage } from '../base/BasePackage';
 import { RushConstants } from '../../../RushConstants';
 import { IRushLinkJson } from '../../../data/RushConfiguration';
 import RushConfigurationProject from '../../../data/RushConfigurationProject';
+
+// special flag for debugging, will print extra diagnostic information,
+// but comes with performance cost
+const DEBUG: boolean = false;
 
 export class PnpmLinkManager extends BaseLinkManager {
   protected _linkProjects(): Promise<void> {
@@ -67,8 +72,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     const localPackage: BasePackage = BasePackage.createLinkedPackage(
       project.packageJson.name,
       commonPackage.version,
-      project.projectFolder,
-      commonPackage
+      project.projectFolder
     );
 
     // now that we have the temp package.json, we can go ahead and link up all the direct dependencies
@@ -80,6 +84,8 @@ export class PnpmLinkManager extends BaseLinkManager {
         this._rushConfiguration.getProjectByName(dependencyName);
 
       if (matchedRushPackage) {
+        // We found a suitable match, so place a new local package that
+        // symlinks to the Rush project
         const matchedVersion: string = matchedRushPackage.packageJson.version;
 
         let localLinks: string[] = rushLinkJson.localLinks[localPackage.name];
@@ -89,8 +95,7 @@ export class PnpmLinkManager extends BaseLinkManager {
         }
         localLinks.push(dependencyName);
 
-        // We did not find a suitable match, so place a new local package that
-        // symlinks to the Rush project
+        // e.g. "C:\my-repo\project-a\node_modules\project-b" if project-b is a rush dependency of project-a
         const newLocalFolderPath: string = path.join(localPackage.folderPath, 'node_modules', dependencyName);
 
         const newLocalPackage: BasePackage = BasePackage.createLinkedPackage(
@@ -103,7 +108,7 @@ export class PnpmLinkManager extends BaseLinkManager {
         localPackage.children.push(newLocalPackage);
       } else {
         // weird state or program bug
-        throw Error('Cannot find rush dependency in rush configuration');
+        throw Error(`Cannot find dependency "${dependencyName}" for "${project.packageName}" in rush configuration`);
       }
     }
 
@@ -114,25 +119,23 @@ export class PnpmLinkManager extends BaseLinkManager {
     // of that library, if the library is installed twice and with different secondary
     // dependencies.The NpmLinkManager recursively links dependency folders to try to
     // honor this. Since pnpm always uses the same physical folder to represent a given
-    // version of a library, we only need to link directly to that folder, and it will
-    // have a consistent set of secondary dependencies.
+    // version of a library, we only need to link directly to the folder that pnpm has chosen,
+    // and it will have a consistent set of secondary dependencies.
 
     // each of these dependencies should be linked in a special folder that pnpm
     // creates for the installed version of each .TGZ package, all we need to do
     // is re-use that symlink in order to get linked to whatever pnpm thought was
     // appropriate. This folder is usually something like:
-    // C:\{path-to-tgz-with-slashes-replaced-with-"%2F"}\node_modules\{package-name}
+    // C:\{uri-encoed-path-to-tgz}\node_modules\{package-name}
 
-    const slashEscapeRegExp: RegExp = new RegExp(path.sep.replace('\\', '\\\\'), 'g');
-    const colonEscapeRegExp: RegExp = new RegExp(':', 'g');
-
-    // e.g.: C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz
-    const escapedPathToTgzFile: string = path.join(
+    // e.g.: C:\wbt\common\temp\projects\api-documenter.tgz
+    const pathToTgzFile: string = path.join(
       this._rushConfiguration.commonTempFolder,
       'projects',
-      `${unscopedTempProjectName}.tgz`)
-        .replace(slashEscapeRegExp, '%2F')
-        .replace(colonEscapeRegExp, '%3A');
+      `${unscopedTempProjectName}.tgz`);
+
+    // e.g.: C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz
+    const escapedPathToTgzFile: string = uriEncode(pathToTgzFile.split(path.sep).join('/'));
 
     // tslint:disable-next-line:max-line-length
     // e.g.: C:\wbt\common\temp\node_modules\.local\C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz\node_modules
@@ -146,27 +149,39 @@ export class PnpmLinkManager extends BaseLinkManager {
     for (const dependencyName of Object.keys(commonPackage.packageJson!.dependencies || {})) {
       // the dependency we are looking for should have already created a symlink here
 
+      // FYI dependencyName might contain an NPM scope, here it gets converted into a filesystem folder name
+      // e.g. if the dependency is supi:
+      // tslint:disable-next-line:max-line-length
+      // "C:\wbt\common\temp\node_modules\.local\C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz\node_modules\supi"
       const dependencyLocalInstallationSymlink: string = path.join(
         pathToLocalInstallation,
         dependencyName);
 
       if (!fsx.existsSync(dependencyLocalInstallationSymlink)) {
+        // if this occurs, it is a bug in Rush algorithm or unexpected pnpm behavior
         throw Error(`Cannot find installed dependency "${dependencyName}" in "${pathToLocalInstallation}"`);
       }
 
       if (!fsx.lstatSync(dependencyLocalInstallationSymlink).isSymbolicLink()) {
+        // if this occurs, it is a bug in Rush algorithm or unexpected pnpm behavior
         throw Error(`Dependency "${dependencyName}" is not a symlink in "${pathToLocalInstallation}`);
       }
 
       const newLocalFolderPath: string = path.join(
           localPackage.folderPath, 'node_modules', dependencyName);
 
-      const packageJsonForDependency: IPackageJson = fsx.readJsonSync(
-        path.join(dependencyLocalInstallationSymlink, RushConstants.packageJsonFilename));
+      let version: string | undefined = undefined;
+      if (DEBUG) {
+        // read the version number for diagnostic purposes
+        const packageJsonForDependency: IPackageJson = fsx.readJsonSync(
+          path.join(dependencyLocalInstallationSymlink, RushConstants.packageJsonFilename));
+
+        version = packageJsonForDependency.version;
+      }
 
       const newLocalPackage: BasePackage = BasePackage.createLinkedPackage(
         dependencyName,
-        packageJsonForDependency.version,
+        version,
         newLocalFolderPath
       );
 
@@ -174,9 +189,10 @@ export class PnpmLinkManager extends BaseLinkManager {
       localPackage.addChild(newLocalPackage);
     }
 
-    // When debugging, you can uncomment this line to dump the data structure
-    // to the console:
-    // localPackage.printTree();
+    if (DEBUG) {
+      localPackage.printTree();
+    }
+
     PnpmLinkManager._createSymlinksForTopLevelProject(localPackage);
 
     // Also symlink the ".bin" folder

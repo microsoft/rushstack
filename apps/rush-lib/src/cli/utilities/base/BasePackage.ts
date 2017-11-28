@@ -61,7 +61,7 @@ export class BasePackage {
   /**
    * The "version" field from package.json
    */
-  public version: string;
+  public version: string | undefined;
 
   /**
    * The absolute path to the folder that contains package.json.
@@ -92,10 +92,11 @@ export class BasePackage {
   private _childrenByName: Map<string, BasePackage>;
 
   /**
-   * Used by "npm link" when creating a Package object that represents symbolic links to be created.
+   * Used by link managers, creates a virtual Package object that represents symbolic links
+   * which will be created later
    */
   public static createLinkedPackage(name: string,
-    version: string,
+    version: string | undefined,
     folderPath: string,
     packageJson?: IRushTempPackageJson): BasePackage {
     return new BasePackage(name, version, folderPath, packageJson);
@@ -158,7 +159,7 @@ export class BasePackage {
   }
 
   protected constructor(name: string,
-    version: string,
+    version: string | undefined,
     folderPath: string,
     packageJson: IRushTempPackageJson | undefined) {
 
