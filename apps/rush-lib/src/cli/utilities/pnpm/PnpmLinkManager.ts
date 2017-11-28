@@ -20,23 +20,21 @@ import RushConfigurationProject from '../../../data/RushConfigurationProject';
 
 export class PnpmLinkManager extends BaseLinkManager {
   protected _linkProjects(): Promise<void> {
-    return new Promise<void>((resolve: () => void, reject: (reason: Error) => void): void => {
-      try {
-        const rushLinkJson: IRushLinkJson = { localLinks: {} };
+    try {
+      const rushLinkJson: IRushLinkJson = { localLinks: {} };
 
-        for (const rushProject of this._rushConfiguration.projects) {
-          console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
-          this._linkProject(rushProject, rushLinkJson);
-        }
-
-        console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
-        JsonFile.save(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
-
-        resolve();
-      } catch (error) {
-        reject(error);
+      for (const rushProject of this._rushConfiguration.projects) {
+        console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
+        this._linkProject(rushProject, rushLinkJson);
       }
-    });
+
+      console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
+      JsonFile.save(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
+
+      return Promise.resolve();
+    } catch (error) {
+      return Promise.reject(error);
+    }
   }
 
   /**
@@ -110,6 +108,15 @@ export class PnpmLinkManager extends BaseLinkManager {
     });
 
     // Iterate through all the regular dependencies
+
+    // With NPM, it's possible for two different projects to have dependencies on
+    // the same version of the same library, but end up with different implementations
+    // of that library, if the library is installed twice and with different secondary
+    // dependencies.The NpmLinkManager recursively links dependency folders to try to
+    // honor this. Since PNPM always uses the same physical folder to represent a given
+    // version of a library, we only need to link directly to that folder, and it will
+    // have a consistent set of secondary dependencies.
+
     // each of these dependencies should be linked in a special folder that PNPM
     // creates for the installed version of each .TGZ package, all we need to do
     // is re-use that symlink in order to get linked to whatever PNPM thought was
@@ -124,8 +131,8 @@ export class PnpmLinkManager extends BaseLinkManager {
       this._rushConfiguration.commonTempFolder,
       'projects',
       `${unscopedTempProjectName}.tgz`)
-      .replace(slashEscapeRegExp, '%2F')
-      .replace(colonEscapeRegExp, '%3A');
+        .replace(slashEscapeRegExp, '%2F')
+        .replace(colonEscapeRegExp, '%3A');
 
     // tslint:disable-next-line:max-line-length
     // e.g.: C:\wbt\common\temp\node_modules\.local\C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz\node_modules
