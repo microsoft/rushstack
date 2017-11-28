@@ -144,9 +144,11 @@ export default class VersionAction extends BaseRushAction {
     // Make changes in temp branch.
     git.checkout(tempBranch, true);
 
+    const uncommittedChanges: ReadonlyArray<string> = VersionControl.getUncommittedChanges();
+
     // Stage, commit, and push the changes to remote temp branch.
     // Need to commit the change log updates in its own commit
-    const changeLogUpdated: boolean = VersionControl.getUncommittedChanges().some((changePath) => {
+    const changeLogUpdated: boolean = uncommittedChanges.some((changePath) => {
       return changePath.indexOf('CHANGELOG.json') > 0;
     });
 
@@ -158,7 +160,7 @@ export default class VersionAction extends BaseRushAction {
     }
 
     // Commit the package.json and change files updates.
-    const packageJsonUpdated: boolean = VersionControl.getUncommittedChanges().some((changePath) => {
+    const packageJsonUpdated: boolean = uncommittedChanges.some((changePath) => {
       return changePath.indexOf('package.json') > 0;
     });
 
