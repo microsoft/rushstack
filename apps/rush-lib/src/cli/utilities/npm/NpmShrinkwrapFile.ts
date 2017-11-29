@@ -45,6 +45,10 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
     return this._getTempProjectNames(this._shrinkwrapJson.dependencies);
   }
 
+  protected getTopLevelDependencyVersion(dependencyName: string): string | undefined {
+    return this.getDependencyVersion(dependencyName);
+  }
+
   /**
    * Returns true if the shrinkwrap file includes a package that would satisfiying the specified
    * package name and SemVer version range.  By default, the dependencies are resolved by looking

@@ -12,14 +12,14 @@ describe('npm ShrinkwrapFile', () => {
   const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('npm', filename)!;
 
   it('verifies root-level dependency', () => {
-    shrinkwrapFile.hasCompatibleDependency('q', '~1.5.0');
+    assert.isTrue(shrinkwrapFile.hasCompatibleTopLevelDependency('q', '~1.5.0'));
   });
 
   it('verifies temp project dependencies', () => {
     // Found locally
-    shrinkwrapFile.hasCompatibleDependency('jquery', '>=2.2.4 <3.0.0', '@rush-temp/project2');
+    assert.isTrue(shrinkwrapFile.hasCompatibleDependency('jquery', '>=2.2.4 <3.0.0', '@rush-temp/project2'));
     // Found at root
-    shrinkwrapFile.hasCompatibleDependency('q', '~1.5.0', '@rush-temp/project2');
+    assert.isTrue(shrinkwrapFile.hasCompatibleDependency('q', '~1.5.0', '@rush-temp/project2'));
   });
 
   it('extracts temp projects successfully', () => {
@@ -35,14 +35,14 @@ describe('pnpm ShrinkwrapFile', () => {
   const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
 
   it('verifies root-level dependency', () => {
-    shrinkwrapFile.hasCompatibleDependency('q', '~1.5.0');
+    assert.isTrue(shrinkwrapFile.hasCompatibleTopLevelDependency('jquery', '>=2.0.0 <3.0.0'));
+    assert.isFalse(shrinkwrapFile.hasCompatibleTopLevelDependency('q', '~1.5.0'));
   });
 
   it('verifies temp project dependencies', () => {
-    // Found locally
-    shrinkwrapFile.hasCompatibleDependency('jquery', '>=2.2.4 <3.0.0');
-    // Found at root
-    shrinkwrapFile.hasCompatibleDependency('q', '~1.5.0');
+    assert.isTrue(shrinkwrapFile.hasCompatibleDependency('jquery', '>=2.0.0 <3.0.0', '@rush-temp/project1'));
+    assert.isTrue(shrinkwrapFile.hasCompatibleDependency('q', '~1.5.0', '@rush-temp/project2'));
+    assert.isFalse(shrinkwrapFile.hasCompatibleDependency('left-pad', '~9.9.9', '@rush-temp/project1'));
   });
 
   it('extracts temp projects successfully', () => {

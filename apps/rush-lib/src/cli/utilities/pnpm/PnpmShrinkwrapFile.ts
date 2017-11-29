@@ -2,6 +2,7 @@ import * as fsx from 'fs-extra';
 import * as yaml from 'js-yaml';
 import * as os from 'os';
 
+import Utilities from '../../../utilities/Utilities';
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 
 interface IShrinkwrapDependencyJson {
@@ -22,7 +23,7 @@ interface IShrinkwrapYaml {
   packages: { [dependencyVersion: string]: IShrinkwrapDependencyJson };
   /** URL of the registry */
   registry: string;
-  shrinkwrapVersion: number;
+  shrinkwrapVersion: number | undefined;
   /** The list of specifiers used to resolve direct dependency versions */
   specifiers: { [dependency: string]: string };
 }
@@ -50,25 +51,31 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return this._getTempProjectNames(this._shrinkwrapJson.dependencies);
   }
 
-  // @todo this still has problems!
-  protected getDependencyVersion(dependencyName: string): string | undefined {
-    let dependencyVersion: string | undefined = undefined;
+  protected getTopLevelDependencyVersion(dependencyName: string): string | undefined {
+    return BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
+  }
 
-    if (!dependencyVersion) {
-      dependencyVersion = BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
-    }
+  protected getDependencyVersion(dependencyName: string, tempProjectName: string): string | undefined {
+    // pnpm doesn't have the same advantage of pnpm, where we can skip generate as long as the
+    // shrinkwrap file puts our dependency in either the top of the node_modules folder
+    // or underneath the package we are looking at.
+    // this is because the pnpm shrinkwrap file describes the exact links that need to be created
+    // to recreate the graph..
+    // because of this, we actually need to check to grab the version that this package is actually
+    // linked to
 
-    if (!dependencyVersion) {
+    // Example: "project1"
+    const unscopedTempProjectName: string = Utilities.parseScopedPackageName(tempProjectName).name;
+    const tempProjectDependencyKey: string = `file:projects/${unscopedTempProjectName}.tgz`;
+
+    const packageDescription: IShrinkwrapDependencyJson | undefined
+      = BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.packages, tempProjectDependencyKey);
+
+    if (!packageDescription || !packageDescription.dependencies) {
       return undefined;
     }
 
-    // dependency version can also be a pnpm path such as "/gulp-karma/0.0.5/karma@0.13.22"
-    // in this case we want the first version number that appears. it will be in 3rd spot
-    if (dependencyVersion[0] === '/') {
-      dependencyVersion = dependencyVersion.split('/')[2];
-    }
-
-    return dependencyVersion;
+    return packageDescription.dependencies[dependencyName];
   }
 
   private constructor(shrinkwrapJson: IShrinkwrapYaml) {
@@ -78,9 +85,6 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     // Normalize the data
     if (!this._shrinkwrapJson.registry) {
       this._shrinkwrapJson.registry = '';
-    }
-    if (!this._shrinkwrapJson.shrinkwrapVersion) {
-      this._shrinkwrapJson.shrinkwrapVersion = 3; // 3 is the current version for pnpm
     }
     if (!this._shrinkwrapJson.dependencies) {
       this._shrinkwrapJson.dependencies = { };

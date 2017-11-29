@@ -251,7 +251,7 @@ export default class InstallManager {
     if (shrinkwrapFile) {
       // Check any pinned dependencies first
       pinnedVersions.forEach((version: string, dependency: string) => {
-        if (!shrinkwrapFile.hasCompatibleDependency(dependency, version)) {
+        if (!shrinkwrapFile.hasCompatibleTopLevelDependency(dependency, version)) {
           console.log(colors.yellow(wrap(
             `${os.EOL}The npm shrinkwrap file does not provide "${dependency}"`
             + ` (${version}) required by pinned versions`)));
