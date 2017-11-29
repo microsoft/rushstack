@@ -6,10 +6,14 @@ import Utilities from '../../../utilities/Utilities';
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 
 interface IShrinkwrapDependencyJson {
+  /** Information about the resolved package */
   resolution: {
+    /** The hash of the tarball, to ensure archive integrity */
     integrity: string;
+    /** The name of the tarball, if this was from a TGX file */
     tarball?: string;
   };
+  /** The list of dependencies and the resolved version */
   dependencies: { [dependency: string]: string };
 }
 
@@ -17,12 +21,13 @@ interface IShrinkwrapDependencyJson {
  * This interface represents the raw shrinkwrap.YAML file
  */
 interface IShrinkwrapYaml {
-  /** The list of resolved direct dependencies */
+  /** The list of resolved version numbers for direct dependencies */
   dependencies: { [dependency: string]: string };
-/** The description of the solved DAG */
+  /** The description of the solved graph */
   packages: { [dependencyVersion: string]: IShrinkwrapDependencyJson };
-  /** URL of the registry */
+  /** URL of the registry which was used */
   registry: string;
+  /** The PNPM shrinkwrap internal versioning number */
   shrinkwrapVersion: number | undefined;
   /** The list of specifiers used to resolve direct dependency versions */
   specifiers: { [dependency: string]: string };
