@@ -72,6 +72,10 @@ export default class GenerateAction extends BaseRushAction {
     const stopwatch: Stopwatch = Stopwatch.start();
     const isLazy: boolean = this._lazyParameter.value;
 
+    if (this._cleanParameter.value && this._lazyParameter.value) {
+      throw new Error(`Cannot specify both --clean and --lazy, as these are mutually exclusive operations.`);
+    }
+
     if (this._lazyParameter.value && this.rushConfiguration.packageManager === 'pnpm') {
       console.warn(colors.yellow('The --lazy flag is not required for pnpm'
         + ' because its algorithm inherently incorporates this optimization.'));
@@ -79,11 +83,7 @@ export default class GenerateAction extends BaseRushAction {
 
     if (this._cleanParameter.value && this.rushConfiguration.packageManager === 'npm') {
       console.warn(colors.yellow('The --clean flag is not required for npm'
-        + ' because its algorithm requires a clean installation.'));
-    }
-
-    if (this._cleanParameter.value && this._lazyParameter.value) {
-      throw new Error(`Cannot specify both --clean and --lazy, as these are mutually exclusive operations.`);
+        + ' because its algorithm always performs a clean installation.'));
     }
 
     ApprovedPackagesChecker.rewriteConfigFiles(this.rushConfiguration);
@@ -152,7 +152,7 @@ export default class GenerateAction extends BaseRushAction {
         // delete the automatically created npm5 "package.lock" file
         const packageLogFilePath: string = path.join(this.rushConfiguration.commonTempFolder, 'package.lock');
         if (fsx.existsSync(packageLogFilePath)) {
-          console.log('Removing npm5\'s "package.lock" file');
+          console.log('Removing npm 5\'s "package.lock" file');
           fsx.removeSync(packageLogFilePath);
         }
       } else {
@@ -188,7 +188,7 @@ export default class GenerateAction extends BaseRushAction {
     }
   }
 
-  private _syncShrinkwrapAndCheckInstallFlag( installManager: InstallManager): void {
+  private _syncShrinkwrapAndCheckInstallFlag(installManager: InstallManager): void {
     // Copy (or delete) common\temp\npm-shrinkwrap.json --> common\npm-shrinkwrap.json
     installManager.syncFile(this.rushConfiguration.tempShrinkwrapFilename,
       this.rushConfiguration.committedShrinkwrapFilename);

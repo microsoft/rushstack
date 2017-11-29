@@ -59,7 +59,8 @@ export class BasePackage {
   public name: string;
 
   /**
-   * The "version" field from package.json
+   * The "version" field from package.json. This is expensive to read
+   * because we have to open the package.json file.  Only when DEBUG=true
    */
   public version: string | undefined;
 

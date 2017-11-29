@@ -55,8 +55,6 @@ interface IShrinkwrapYaml {
   packages: { [dependencyVersion: string]: IShrinkwrapDependencyJson };
   /** URL of the registry which was used */
   registry: string;
-  /** The PNPM shrinkwrap internal versioning number */
-  shrinkwrapVersion: number | undefined;
   /** The list of specifiers used to resolve direct dependency versions */
   specifiers: { [dependency: string]: string };
 }
@@ -84,10 +82,19 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return this._getTempProjectNames(this._shrinkwrapJson.dependencies);
   }
 
+  /**
+   * abstract
+   * Gets the version number from the list of top-level dependencies in the "dependencies" section
+   * of the shrinkwrap file
+   */
   protected getTopLevelDependencyVersion(dependencyName: string): string | undefined {
     return BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
   }
 
+  /**
+   * abstract
+   * Gets the resolved version number of a a dependency for a specific temp project
+   */
   protected getDependencyVersion(dependencyName: string, tempProjectName: string): string | undefined {
     // pnpm doesn't have the same advantage of pnpm, where we can skip generate as long as the
     // shrinkwrap file puts our dependency in either the top of the node_modules folder
