@@ -19,6 +19,34 @@ interface IShrinkwrapDependencyJson {
 
 /**
  * This interface represents the raw shrinkwrap.YAML file
+ * Example:
+ *  {
+ *    "dependencies": {
+ *      "@rush-temp/project1": "file:./projects/project1.tgz"
+ *    },
+ *    "packages": {
+ *      "file:projects/library1.tgz": {
+ *        "dependencies: {
+ *          "markdown": "0.5.0"
+ *        },
+ *        "name": "@rush-temp/library1",
+ *        "resolution": {
+ *          "tarball": "file:projects/library1.tgz"
+ *        },
+ *        "version": "0.0.0"
+ *      },
+ *      "markdown/0.5.0": {
+ *        "resolution": {
+ *          "integrity": "sha1-KCBbVlqK51kt4gdGPWY33BgnIrI="
+ *        }
+ *      }
+ *    },
+ *    "registry": "http://localhost:4873/",
+ *    "shrinkwrapVersion": 3,
+ *    "specifiers": {
+ *      "@rush-temp/project1": "file:./projects/project1.tgz"
+ *    }
+ *  }
  */
 interface IShrinkwrapYaml {
   /** The list of resolved version numbers for direct dependencies */
