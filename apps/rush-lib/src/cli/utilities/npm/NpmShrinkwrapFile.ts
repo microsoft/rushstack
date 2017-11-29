@@ -28,8 +28,8 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
         return undefined; // file does not exist
       }
 
-      // We don't use JsonFile/jju here because shrinkwrap.json is a special npm file format
-      // and typically very large, so we want to load it the same way that npm does.
+      // We don't use JsonFile/jju here because shrinkwrap.json is a special NPM file format
+      // and typically very large, so we want to load it the same way that NPM does.
       data = fsx.readFileSync(shrinkwrapJsonFilename).toString();
       if (data.charCodeAt(0) === 0xFEFF) {  // strip BOM
         data = data.slice(1);

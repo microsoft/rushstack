@@ -32,7 +32,7 @@ export interface IApprovedPackagesJson {
  */
 export class ApprovedPackagesItem {
   /**
-   * The npm package name
+   * The NPM package name
    */
   public packageName: string;
 

@@ -88,7 +88,7 @@ export default class PublishAction extends BaseRushAction {
       parameterShortName: '-r',
       key: 'REGISTRY',
       description:
-      `Publishes to a specified npm registry. If this is specified, it will prevent the current commit will not be ` +
+      `Publishes to a specified NPM registry. If this is specified, it will prevent the current commit will not be ` +
       'tagged.'
     });
     this._npmAuthToken = this.defineStringParameter({
@@ -96,14 +96,14 @@ export default class PublishAction extends BaseRushAction {
       parameterShortName: '-n',
       key: 'TOKEN',
       description:
-      'Provide the default scope npm auth token to be passed into npm publish for global package publishing.'
+      'Provide the default scope NPM auth token to be passed into NPM publish for global package publishing.'
     });
     this._npmTag = this.defineStringParameter({
       parameterLongName: '--tag',
       parameterShortName: '-t',
       key: 'TAG',
       description:
-      `The tag option to pass to npm publish. By default npm will publish using the 'latest' tag, even if ` +
+      `The tag option to pass to NPM publish. By default NPM will publish using the 'latest' tag, even if ` +
       `the package is older than the current latest, so in publishing workflows for older releases, providing ` +
       `a tag is important. When hotfix changes are made, this parameter defaults to 'hotfix'.`
     });

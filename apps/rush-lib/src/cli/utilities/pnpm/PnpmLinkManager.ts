@@ -118,13 +118,13 @@ export class PnpmLinkManager extends BaseLinkManager {
     // the same version of the same library, but end up with different implementations
     // of that library, if the library is installed twice and with different secondary
     // dependencies.The NpmLinkManager recursively links dependency folders to try to
-    // honor this. Since pnpm always uses the same physical folder to represent a given
-    // version of a library, we only need to link directly to the folder that pnpm has chosen,
+    // honor this. Since PNPM always uses the same physical folder to represent a given
+    // version of a library, we only need to link directly to the folder that PNPM has chosen,
     // and it will have a consistent set of secondary dependencies.
 
     // each of these dependencies should be linked in a special folder that pnpm
     // creates for the installed version of each .TGZ package, all we need to do
-    // is re-use that symlink in order to get linked to whatever pnpm thought was
+    // is re-use that symlink in order to get linked to whatever PNPM thought was
     // appropriate. This folder is usually something like:
     // C:\{uri-encoed-path-to-tgz}\node_modules\{package-name}
 
@@ -158,12 +158,12 @@ export class PnpmLinkManager extends BaseLinkManager {
         dependencyName);
 
       if (!fsx.existsSync(dependencyLocalInstallationSymlink)) {
-        // if this occurs, it is a bug in Rush algorithm or unexpected pnpm behavior
+        // if this occurs, it is a bug in Rush algorithm or unexpected PNPM behavior
         throw Error(`Cannot find installed dependency "${dependencyName}" in "${pathToLocalInstallation}"`);
       }
 
       if (!fsx.lstatSync(dependencyLocalInstallationSymlink).isSymbolicLink()) {
-        // if this occurs, it is a bug in Rush algorithm or unexpected pnpm behavior
+        // if this occurs, it is a bug in Rush algorithm or unexpected PNPM behavior
         throw Error(`Dependency "${dependencyName}" is not a symlink in "${pathToLocalInstallation}`);
       }
 

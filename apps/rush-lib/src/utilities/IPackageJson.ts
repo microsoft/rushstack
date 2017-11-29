@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 /**
- * Represents an npm "package.json" file.
+ * Represents an NPM "package.json" file.
  * @public
  */
 interface IPackageJson {
@@ -16,7 +16,7 @@ interface IPackageJson {
   version: string;
 
   /**
-   * The package description.  On the npm web site, this will be shown as a subtitle,
+   * The package description.  On the NPM web site, this will be shown as a subtitle,
    * below the package name, above the README.md excerpt.
    */
   description?: string;

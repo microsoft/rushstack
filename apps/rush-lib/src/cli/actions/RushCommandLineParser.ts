@@ -39,7 +39,7 @@ export default class RushCommandLineParser extends CommandLineParser {
       + ' detects which projects can be locally linked, and performs a fast parallel'
       + ' build according to the detected dependency graph.  If you want to decompose'
       + ' your monolithic project into many small packages but are afraid of the dreaded'
-      + ' npm progress bar, Rush is for you.'
+      + ' NPM progress bar, Rush is for you.'
     });
     this._populateActions();
   }

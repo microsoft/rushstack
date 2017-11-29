@@ -34,7 +34,7 @@ export class Git {
   }
 
   public addTag(shouldExecute: boolean, packageName: string, packageVersion: string): void {
-    // Tagging only happens if we're publishing to real npm and committing to git.
+    // Tagging only happens if we're publishing to real NPM and committing to git.
     const tagName: string = PublishUtilities.createTagname(packageName, packageVersion);
     PublishUtilities.execCommand(
       !!this._targetBranch && shouldExecute,

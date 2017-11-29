@@ -68,8 +68,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         return undefined; // file does not exist
       }
 
-      // We don't use JsonFile/jju here because shrinkwrap.json is a special npm file format
-      // and typically very large, so we want to load it the same way that npm does.
+      // We don't use JsonFile/jju here because shrinkwrap.json is a special NPM file format
+      // and typically very large, so we want to load it the same way that NPM does.
       const parsedData: IShrinkwrapYaml = yaml.safeLoad(fsx.readFileSync(shrinkwrapYamlFilename).toString());
 
       return new PnpmShrinkwrapFile(parsedData);
@@ -96,10 +96,10 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    * Gets the resolved version number of a a dependency for a specific temp project
    */
   protected getDependencyVersion(dependencyName: string, tempProjectName: string): string | undefined {
-    // pnpm doesn't have the same advantage of pnpm, where we can skip generate as long as the
+    // PNPM doesn't have the same advantage of pnpm, where we can skip generate as long as the
     // shrinkwrap file puts our dependency in either the top of the node_modules folder
     // or underneath the package we are looking at.
-    // this is because the pnpm shrinkwrap file describes the exact links that need to be created
+    // this is because the PNPM shrinkwrap file describes the exact links that need to be created
     // to recreate the graph..
     // because of this, we actually need to check to grab the version that this package is actually
     // linked to

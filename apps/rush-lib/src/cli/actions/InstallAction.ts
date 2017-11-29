@@ -28,9 +28,9 @@ export default class InstallAction extends BaseRushAction {
   constructor(parser: RushCommandLineParser) {
     super({
       actionVerb: 'install',
-      summary: 'Install npm packages in the Rush "common" folder, as specified by your shrinkwrap file.',
+      summary: 'Install NPM packages in the Rush "common" folder, as specified by your shrinkwrap file.',
       documentation: 'Always run "rush install" whenever you: (1) clone a repo, or (2) pull new changes from source'
-      + ' control, or (3) edit any package.json file.  The "rush install" command installs npm packages into your'
+      + ' control, or (3) edit any package.json file.  The "rush install" command installs NPM packages into your'
       + ' Rush "common" folder, using the exact versions specified in your npm-shrinkwrap.json file.'
       + ' It also makes sure these versions satisfy your dependencies; if not, it will ask you to run'
       + ' "rush generate". If there is nothing to do, then "rush install" won\'t take any time.'
@@ -43,17 +43,17 @@ export default class InstallAction extends BaseRushAction {
     this._cleanInstall = this.defineFlagParameter({
       parameterLongName: '--clean',
       parameterShortName: '-c',
-      description: 'Deletes the common "node_modules" folder and npm cache before installing.'
+      description: 'Deletes the common "node_modules" folder and NPM cache before installing.'
         + ' Use this option if you suspect that your package folder has become corrupted.'
-        + ' This occurs sometimes due to bugs in the npm tool, or if you upgraded your'
+        + ' This occurs sometimes due to bugs in the NPM tool, or if you upgraded your'
         + ' Node.js engine.'
     });
     this._cleanInstallFull = this.defineFlagParameter({
       parameterLongName: '--full-clean',
       parameterShortName: '-C',
       description: '(UNSAFE!) Similar to "--clean", but also deletes and reinstalls shared files'
-        + ' such as the npm tool itself. This is a more aggressive fix that is NOT SAFE to run'
-        + ' regularly because it may cause other Rush or npm processes to fail.'
+        + ' such as the NPM tool itself. This is a more aggressive fix that is NOT SAFE to run'
+        + ' regularly because it may cause other Rush or NPM processes to fail.'
     });
     this._bypassPolicy = this.defineFlagParameter({
       parameterLongName: '--bypass-policy',
@@ -89,7 +89,7 @@ export default class InstallAction extends BaseRushAction {
 
       if (!shrinkwrapFile) {
         console.log('');
-        console.log(colors.red('Unable to proceed: The npm shrinkwrap file is missing.'));
+        console.log(colors.red('Unable to proceed: The NPM shrinkwrap file is missing.'));
         console.log('');
         console.log('You need to run "rush generate" first.');
         process.exit(1);
@@ -105,7 +105,7 @@ export default class InstallAction extends BaseRushAction {
 
       if (!installManager.createTempModulesAndCheckShrinkwrap(shrinkwrapFile, installType !== InstallType.Normal)) {
         console.log('');
-        console.log(colors.red('You need to run "rush generate" to update your npm shrinkwrap file.'));
+        console.log(colors.red('You need to run "rush generate" to update your NPM shrinkwrap file.'));
         process.exit(1);
         return;
       }

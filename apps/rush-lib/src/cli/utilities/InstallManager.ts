@@ -44,7 +44,7 @@ export enum InstallType {
    */
   ForceClean,
   /**
-   * Same as ForceClean, but also clears the global npm cache (which is not threadsafe).
+   * Same as ForceClean, but also clears the global NPM cache (which is not threadsafe).
    */
   UnsafePurge
 }
@@ -253,7 +253,7 @@ export default class InstallManager {
       pinnedVersions.forEach((version: string, dependency: string) => {
         if (!shrinkwrapFile.hasCompatibleTopLevelDependency(dependency, version)) {
           console.log(colors.yellow(wrap(
-            `${os.EOL}The npm shrinkwrap file does not provide "${dependency}"`
+            `${os.EOL}The NPM shrinkwrap file does not provide "${dependency}"`
             + ` (${version}) required by pinned versions`)));
           shrinkwrapIsValid = false;
         }
@@ -331,8 +331,8 @@ export default class InstallManager {
       // dependencies.  If the same library appears in both places, then the
       // regular dependency takes precedence over the devDependency.
       // It also takes precedence over a duplicate in optionalDependencies,
-      // but npm will take care of that for us.  (Frankly any kind of duplicate
-      // should be an error, but npm is pretty lax about this.)
+      // but NPM will take care of that for us.  (Frankly any kind of duplicate
+      // should be an error, but NPM is pretty lax about this.)
       if (packageJson.devDependencies) {
         for (const packageName of Object.keys(packageJson.devDependencies)) {
           pairs.push({ packageName: packageName, packageVersion: packageJson.devDependencies[packageName] });
@@ -378,14 +378,14 @@ export default class InstallManager {
           if (!shrinkwrapFile.hasCompatibleDependency(pair.packageName, pair.packageVersion,
             rushProject.tempProjectName)) {
             console.log(colors.yellow(
-              wrap(`${os.EOL}The npm shrinkwrap file is missing "${pair.packageName}"`
+              wrap(`${os.EOL}The NPM shrinkwrap file is missing "${pair.packageName}"`
                 + ` (${pair.packageVersion}) required by "${rushProject.packageName}".`)));
             shrinkwrapIsValid = false;
           }
         }
       }
 
-      // npm expects the root of the tarball to have a directory called 'package'
+      // NPM expects the root of the tarball to have a directory called 'package'
       const npmPackageFolder: string = 'package';
 
       // Example: "C:\MyRepo\common\temp\projects\my-project-2"
@@ -475,7 +475,7 @@ export default class InstallManager {
     if (!fsx.existsSync(packageManagerFilename)) {
       // This normally should never occur -- it indicates that some code path forgot to call
       // InstallManager.ensureLocalNpmTool().
-      throw new Error('Expected to find local npm here: "' + packageManagerFilename + '"');
+      throw new Error('Expected to find local NPM here: "' + packageManagerFilename + '"');
     }
 
     console.log(os.EOL + colors.bold('Checking node_modules in ' + this._rushConfiguration.commonTempFolder)
@@ -566,7 +566,7 @@ export default class InstallManager {
 
         this._asyncRecycler.moveFolder(commonNodeModulesFolder);
 
-        // Since it may be a while before npm gets around to creating the "node_modules" folder,
+        // Since it may be a while before NPM gets around to creating the "node_modules" folder,
         // create an empty folder so that the above warning will be shown if we get interrupted.
         Utilities.createFolderWithRetry(commonNodeModulesFolder);
       } else {
@@ -617,7 +617,7 @@ export default class InstallManager {
     //       When someone using Windows attempts to install from the shrinkwrap, the install will fail.
     //
     //       If someone generates the shrinkwrap using Windows, then fsevents will NOT be listed in the shrinkwrap.
-    //       When someone using Mac attempts to install from the shrinkwrap, (as of npm 4), they will NOT have the
+    //       When someone using Mac attempts to install from the shrinkwrap, (as of NPM 4), they will NOT have the
     //       optional dependency installed.
     //
     //       One possible solution would be to have the shrinkwrap include information about whether the dependency
@@ -625,7 +625,7 @@ export default class InstallManager {
     //       people would have different node_modules based on their system.
     //
     // NOTE FOR pnpm:
-    //       pnpm does not appear to support the --no-optional flag at the moment
+    //       PNPM does not appear to support the --no-optional flag at the moment
 
     const installArgs: string[] = ['install'];
     if (this._rushConfiguration.packageManager === 'npm') {
@@ -651,7 +651,7 @@ export default class InstallManager {
   }
 
   /**
-   * Used when invoking the npm tool.  Appends the common configuration options
+   * Used when invoking the NPM tool.  Appends the common configuration options
    * to the command-line.
    */
   public pushConfigurationArgs(args: string[]): void {
@@ -664,7 +664,7 @@ export default class InstallManager {
       // we are using the --no-lock flag for now, which unfortunately prints a warning, but should be OK
       // since rush already has its own install lock file which will invalidate the cache for us.
       // we theoretically could use the lock file, but we would need to clean the store if the
-      // lockfile existed, otherwise pnpm would hang indefinitely. it is simpler to rely on Rush's
+      // lockfile existed, otherwise PNPM would hang indefinitely. it is simpler to rely on Rush's
       // last install flag, which encapsulates the entire installation
       args.push('--no-lock');
     }
@@ -698,7 +698,7 @@ export default class InstallManager {
   }
 
   /**
-   * This is a workaround for a bug introduced in npm 5 (and still unfixed as of npm 5.5.1):
+   * This is a workaround for a bug introduced in NPM 5 (and still unfixed as of NPM 5.5.1):
    * https://github.com/npm/npm/issues/19006
    *
    * The regression is that "npm install" sets the package.json "version" field for the
@@ -734,7 +734,7 @@ export default class InstallManager {
     }
 
     if (anyChanges) {
-      console.log(os.EOL + colors.yellow(wrap(`Applied workaround for npm 5 bug`)) + os.EOL);
+      console.log(os.EOL + colors.yellow(wrap(`Applied workaround for NPM 5 bug`)) + os.EOL);
     }
   }
 
@@ -746,11 +746,11 @@ export default class InstallManager {
    */
   private _findOrphanedTempProjects(shrinkwrapFile: BaseShrinkwrapFile): boolean {
 
-    // We can recognize temp projects because they are under the "@rush-temp" npm scope.
+    // We can recognize temp projects because they are under the "@rush-temp" NPM scope.
     for (const tempProjectName of shrinkwrapFile.getTempProjectNames()) {
       if (!this._rushConfiguration.findProjectByTempName(tempProjectName)) {
         console.log(os.EOL + colors.yellow(wrap(
-          `Your npm shrinkwrap file references a project "${tempProjectName}" which no longer exists.`))
+          `Your NPM shrinkwrap file references a project "${tempProjectName}" which no longer exists.`))
           + os.EOL);
         return true;  // found one
       }

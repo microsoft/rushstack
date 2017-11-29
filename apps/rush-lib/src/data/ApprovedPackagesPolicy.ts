@@ -56,7 +56,7 @@ export class ApprovedPackagesPolicy {
   }
 
   /**
-   * A list of npm package scopes that will be excluded from review (e.g. \"@types\")
+   * A list of NPM package scopes that will be excluded from review (e.g. \"@types\")
    */
   public get ignoredNpmScopes(): Set<string> {
     return this._ignoredNpmScopes;

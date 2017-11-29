@@ -91,7 +91,7 @@ export class NpmLinkManager extends BaseLinkManager {
     if (!commonProjectPackage) {
       // Normally we would expect the temp project to have been installed into the common\node_modules
       // folder.  However, if it was recently added, "rush install" doesn't technically require
-      // this, as long as its dependencies can be found at the root of the npm shrinkwrap file.
+      // this, as long as its dependencies can be found at the root of the NPM shrinkwrap file.
       // This avoids the need to run "rush generate" unnecessarily.
 
       // Example: "project1"

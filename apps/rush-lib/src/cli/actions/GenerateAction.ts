@@ -152,7 +152,7 @@ export default class GenerateAction extends BaseRushAction {
         // delete the automatically created npm5 "package.lock" file
         const packageLogFilePath: string = path.join(this.rushConfiguration.commonTempFolder, 'package.lock');
         if (fsx.existsSync(packageLogFilePath)) {
-          console.log('Removing npm 5\'s "package.lock" file');
+          console.log('Removing NPM 5\'s "package.lock" file');
           fsx.removeSync(packageLogFilePath);
         }
       } else {

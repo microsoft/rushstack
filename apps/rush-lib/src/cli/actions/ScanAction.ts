@@ -17,7 +17,7 @@ export default class ScanAction extends BaseRushAction {
     super({
       actionVerb: 'scan',
       summary: 'Scan the current project folder and display a report of imported packages.',
-      documentation: `The npm system allows a project to import dependencies without explicitly`
+      documentation: `The NPM system allows a project to import dependencies without explicitly`
         + ` listing them in its package.json file. This is a dangerous practice, because`
         + ` there is no guarantee you will get a compatible version. The "rush scan" command`
         + ` reports a list of packages that are imported by your code, which you can`
