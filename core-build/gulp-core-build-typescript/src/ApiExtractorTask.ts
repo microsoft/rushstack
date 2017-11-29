@@ -146,7 +146,10 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
       };
 
       const extractor: Extractor = new Extractor(extractorConfig, extractorOptions);
-      extractor.analyzeProject();
+
+      // NOTE: processProject() returns false if errors or warnings occurred, however we
+      // already handle this above via our customLogger
+      extractor.processProject();
     } catch (e) {
       completeCallback(e.message);
       return;

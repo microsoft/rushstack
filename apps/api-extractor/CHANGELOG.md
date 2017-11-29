@@ -1,6 +1,17 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 13 Nov 2017 17:04:50 GMT and should not be manually modified.
+This log was last generated on Tue, 28 Nov 2017 23:43:55 GMT and should not be manually modified.
+
+## 4.3.0
+Tue, 28 Nov 2017 23:43:55 GMT
+
+### Minor changes
+
+- Add Extractor.processProject() whose return value indicates success
+
+### Patches
+
+- Deprecate Extractor.analyzeProject() API
 
 ## 4.2.6
 Mon, 13 Nov 2017 17:04:50 GMT

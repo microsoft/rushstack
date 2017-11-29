@@ -19,12 +19,25 @@ import {
   IChangeLogComment
 } from '../../data/Changelog';
 import RushConfigurationProject from '../../data/RushConfigurationProject';
+import RushConfiguration from '../../data/RushConfiguration';
 
 const CHANGELOG_JSON: string = 'CHANGELOG.json';
 const CHANGELOG_MD: string = 'CHANGELOG.md';
 const EOL: string = '\n';
 
 export default class ChangelogGenerator {
+  private static _rushConfiguration: RushConfiguration;
+
+  public static get rushConfiguration(): RushConfiguration {
+    if (!ChangelogGenerator._rushConfiguration) {
+      ChangelogGenerator._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
+    }
+    return ChangelogGenerator._rushConfiguration;
+  }
+
+  public static set rushConfiguration(newConfiguration: RushConfiguration) {
+    ChangelogGenerator._rushConfiguration = newConfiguration;
+  }
 
   /**
    * Updates the appropriate changelogs with the given changes.
@@ -43,7 +56,11 @@ export default class ChangelogGenerator {
         // Changelogs should only be generated for publishable projects.
         // Do not update changelog or delete the change files for prerelease.
         // Save them for the official release.
-        if (!!project && project.shouldPublish && !semver.prerelease(project.packageJson.version)) {
+        // Unless the package is a hotfix, in which case do delete the change files.
+        if (!!project && project.shouldPublish &&
+          (!semver.prerelease(project.packageJson.version) ||
+           allChanges[packageName].changeType === ChangeType.hotfix)
+        ) {
           const changeLog: IChangelog | undefined = ChangelogGenerator.updateIndividualChangelog(
             allChanges[packageName],
             project.projectFolder,
@@ -210,6 +227,12 @@ export default class ChangelogGenerator {
       comments += ChangelogGenerator._getChangeComments(
         'Patches',
         entry.comments[ChangeType[ChangeType.patch]]);
+
+      if (this.rushConfiguration.hotfixChangeEnabled) {
+        comments += ChangelogGenerator._getChangeComments(
+          'Hotfixes',
+          entry.comments[ChangeType[ChangeType.hotfix]]);
+      }
 
       if (!comments) {
         markdown += ((changelog.entries.length === index + 1) ?

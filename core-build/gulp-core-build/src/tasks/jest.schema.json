@@ -13,6 +13,14 @@
       "type": "boolean",
       "default": false
     },
+    "cache": {
+      "description": "Indicate whether Jest cache is enabled or not",
+      "type": "boolean"
+    },
+    "cacheDirectory": {
+      "description": "The directory where Jest should store its cached information",
+      "type": "string"
+    },
     "collectCoverageFrom": {
       "description": "Same as Jest CLI option collectCoverageFrom",
       "type": "array",

@@ -2,7 +2,6 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "title": "Rush Configuration",
   "description": "Configuration file for the Rush multi-package build tool",
-
   "type": "object",
 
   "oneOf": [
@@ -57,6 +56,10 @@
     "projectFolderMinDepth": {
       "description": "The minimum folder depth for the projectFolder field.  The default value is 1, i.e. no slashes in the path name.",
       "type": "number"
+    },
+    "hotfixChangeEnabled": {
+      "description": "Allows creation of hotfix changes. This feature is experimental so it is disabled by default.",
+      "type": "boolean"
     },
     "projectFolderMaxDepth": {
       "description": "The maximum folder depth for the projectFolder field.  The default value is 2, i.e. a single slash in the path name.",
@@ -152,7 +155,10 @@
           }
         },
         "additionalProperties": false,
-        "required": [ "packageName", "projectFolder" ]
+        "required": [
+          "packageName",
+          "projectFolder"
+        ]
       }
     },
     "eventHooks": {
@@ -192,5 +198,8 @@
     }
   },
   "additionalProperties": false,
-  "required": [ "rushVersion", "projects" ]
+  "required": [
+    "rushVersion",
+    "projects"
+  ]
 }
