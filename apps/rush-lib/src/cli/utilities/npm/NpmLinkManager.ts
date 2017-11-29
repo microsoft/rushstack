@@ -243,7 +243,7 @@ export class NpmLinkManager extends BaseLinkManager {
         const commonDependencyPackage: NpmPackage | undefined = commonPackage.resolve(dependency.name);
         if (commonDependencyPackage) {
           // This is the version that was chosen when "npm install" ran in the common folder
-          const effectiveDependencyVersion: string = commonDependencyPackage.version;
+          const effectiveDependencyVersion: string | undefined = commonDependencyPackage.version;
 
           // Is the dependency already resolved?
           let resolution: IResolveOrCreateResult;

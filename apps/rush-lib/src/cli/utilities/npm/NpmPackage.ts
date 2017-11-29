@@ -62,7 +62,7 @@ export class NpmPackage extends BasePackage {
   /**
    * Used by "npm link" when creating a Package object that represents symbolic links to be created.
    */
-  public static createLinkedNpmPackage(name: string, version: string, dependencies: IPackageDependency[],
+  public static createLinkedNpmPackage(name: string, version: string | undefined, dependencies: IPackageDependency[],
     folderPath: string): NpmPackage {
     return new NpmPackage(name, version, dependencies, folderPath);
   }
@@ -212,7 +212,11 @@ export class NpmPackage extends BasePackage {
     return this.resolveOrCreate(dependencyName).found as NpmPackage;
   }
 
-  private constructor(name: string, version: string, dependencies: IPackageDependency[], folderPath: string) {
+  private constructor(name: string,
+    version: string | undefined,
+    dependencies: IPackageDependency[],
+    folderPath: string) {
+
     super(name, version, folderPath, undefined);
     this.dependencies = dependencies.slice(0); // clone the array
     this.parent = undefined;

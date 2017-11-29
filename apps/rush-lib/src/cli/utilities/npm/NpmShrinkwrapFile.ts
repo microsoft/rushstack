@@ -1,9 +1,6 @@
 import * as fsx from 'fs-extra';
 import * as os from 'os';
 
-import Utilities from '../../../utilities/Utilities';
-import { RushConstants } from '../../../RushConstants';
-
 import {
   BaseShrinkwrapFile
 } from '../base/BaseShrinkwrapFile';
@@ -48,6 +45,10 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
     return this._getTempProjectNames(this._shrinkwrapJson.dependencies);
   }
 
+  protected getTopLevelDependencyVersion(dependencyName: string): string | undefined {
+    return this.getDependencyVersion(dependencyName);
+  }
+
   /**
    * Returns true if the shrinkwrap file includes a package that would satisfiying the specified
    * package name and SemVer version range.  By default, the dependencies are resolved by looking
@@ -88,18 +89,6 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
 
     return dependencyJson.version;
-  }
-
-  protected _getTempProjectNames(dependencies: { [key: string]: {} } ): ReadonlyArray<string> {
-    const result: string[] = [];
-    for (const key of Object.keys(dependencies)) {
-      // If it starts with @rush-temp, then include it:
-      if (Utilities.parseScopedPackageName(key).scope === RushConstants.rushTempNpmScope) {
-        result.push(key);
-      }
-    }
-    result.sort();  // make the result deterministic
-    return result;
   }
 
   private constructor(shrinkwrapJson: IShrinkwrapJson) {

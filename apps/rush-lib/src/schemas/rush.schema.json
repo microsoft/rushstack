@@ -4,6 +4,31 @@
   "description": "Configuration file for the Rush multi-package build tool",
   "type": "object",
 
+  "oneOf": [
+    {
+      "type": "object",
+      "required": ["npmVersion"],
+      "properties": {
+        "npmVersion": {
+          "description": "The version of the NPM tool to install.",
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": ["pnpmVersion"],
+      "properties": {
+        "pnpmVersion": {
+          "description": "The version of the PNPM tool to install.",
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        }
+      }
+    }
+  ],
+
   "properties": {
 
     "$schema": {
@@ -12,9 +37,11 @@
     },
 
     "npmVersion": {
-      "description": "The version of the NPM tool to install.",
-      "type": "string",
-      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+      "type": "string"
+    },
+
+    "pnpmVersion": {
+      "type": "string"
     },
 
     "rushVersion": {
@@ -172,7 +199,6 @@
   },
   "additionalProperties": false,
   "required": [
-    "npmVersion",
     "rushVersion",
     "projects"
   ]
