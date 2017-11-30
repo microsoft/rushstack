@@ -52,11 +52,6 @@ export interface IJestConfig {
    * Same as Jest CLI option moduleDirectories
    */
   moduleDirectories?: string[];
-
-  /**
-   * Same as Jest CLI option rootDir
-   */
-  rootDir?: string;
 }
 
 const DEFAULT_JEST_CONFIG_FILE_NAME: string = 'jest.config.json';
