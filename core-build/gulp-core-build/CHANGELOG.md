@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Thu, 30 Nov 2017 23:12:21 GMT and should not be manually modified.
+This log was last generated on Thu, 30 Nov 2017 23:59:09 GMT and should not be manually modified.
+
+## 3.3.1
+Thu, 30 Nov 2017 23:59:09 GMT
+
+### Patches
+
+- reverted addition of rootDir as a parameter for jest task
 
 ## 3.3.0
 Thu, 30 Nov 2017 23:12:21 GMT
