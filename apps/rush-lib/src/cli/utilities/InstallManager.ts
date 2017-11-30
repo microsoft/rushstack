@@ -608,7 +608,7 @@ export default class InstallManager {
 
     // Run "npm install" in the common folder
 
-    // NOTE FOR npm:
+    // NOTE:
     //       we do NOT install optional dependencies for Rush, as it seems that optional dependencies do not
     //       work properly with shrinkwrap. Consider the "fsevents" package. This is a Mac specific package
     //       which is an optional second-order dependency. Optional dependencies work by attempting to install
@@ -623,14 +623,8 @@ export default class InstallManager {
     //       One possible solution would be to have the shrinkwrap include information about whether the dependency
     //       is optional or not, but it does not appear to do so. Also, this would result in strange behavior where
     //       people would have different node_modules based on their system.
-    //
-    // NOTE FOR pnpm:
-    //       PNPM does not appear to support the --no-optional flag at the moment
 
-    const installArgs: string[] = ['install'];
-    if (this._rushConfiguration.packageManager === 'npm') {
-      installArgs.push('--no-optional');
-    }
+    const installArgs: string[] = ['install', '--no-optional'];
     this.pushConfigurationArgs(installArgs);
 
     console.log(os.EOL + colors.bold(`Running "${this._rushConfiguration.packageManager} install" in`
