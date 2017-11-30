@@ -18,9 +18,10 @@ export interface IChangeFile {
 export enum ChangeType {
   none = 0,
   dependency = 1,
-  patch = 2,
-  minor = 3,
-  major = 4
+  hotfix = 2,
+  patch = 3,
+  minor = 4,
+  major = 5
 }
 
 /**

@@ -4,6 +4,7 @@
   "nodeSupportedVersionRange": ">=6.9.0 <7.0.0",
   "projectFolderMinDepth": 1,
   "projectFolderMaxDepth": 99,
+  "hotfixChangeEnabled": true,
 
   "approvedPackagesPolicy": {
     "reviewCategories": [ "first-party", "third-party", "prototype" ],

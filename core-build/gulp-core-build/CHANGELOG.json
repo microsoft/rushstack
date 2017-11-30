@@ -2,6 +2,37 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.2.9",
+      "tag": "@microsoft/gulp-core-build_v3.2.9",
+      "date": "Wed, 29 Nov 2017 17:05:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "QZ <qz2017@users.noreply.github.com>",
+            "commit": "a3b528954bebb0e683a2a860e36a568b3f778643",
+            "comment": "Add cache configuration to Jest task"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.17` to `0.3.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.8",
+      "tag": "@microsoft/gulp-core-build_v3.2.8",
+      "date": "Tue, 28 Nov 2017 23:43:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.16` to `0.3.17`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.7",
       "tag": "@microsoft/gulp-core-build_v3.2.7",
       "date": "Mon, 13 Nov 2017 17:04:50 GMT",

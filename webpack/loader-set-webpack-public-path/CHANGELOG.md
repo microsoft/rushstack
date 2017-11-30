@@ -1,6 +1,16 @@
 # Change Log - @microsoft/loader-set-webpack-public-path
 
-This log was last generated on Mon, 13 Nov 2017 17:04:50 GMT and should not be manually modified.
+This log was last generated on Wed, 29 Nov 2017 17:05:37 GMT and should not be manually modified.
+
+## 3.1.6
+Wed, 29 Nov 2017 17:05:37 GMT
+
+*Version update only*
+
+## 3.1.5
+Tue, 28 Nov 2017 23:43:55 GMT
+
+*Version update only*
 
 ## 3.1.4
 Mon, 13 Nov 2017 17:04:50 GMT

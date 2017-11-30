@@ -26,6 +26,10 @@ const extractor: Extractor = new Extractor(
   }
 );
 
-extractor.analyzeProject();
+if (!extractor.processProject()) {
+  console.log('processProject() failed the build');
+} else {
+  console.log('processProject() succeeded');
+}
 
 console.log('DebugRun completed.');

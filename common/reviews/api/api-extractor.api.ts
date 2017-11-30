@@ -13,8 +13,10 @@ class ExternalApiHelper {
 // @public
 class Extractor {
   public constructor(config: IExtractorConfig, options?: IExtractorOptions);
+  // @deprecated
   public analyzeProject(options?: IAnalyzeProjectOptions): void;
   public static jsonSchema: JsonSchema;
+  public processProject(options?: IAnalyzeProjectOptions): boolean;
 }
 
 // @public

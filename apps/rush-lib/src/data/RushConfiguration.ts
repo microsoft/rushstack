@@ -23,7 +23,6 @@ const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
  */
 const knownRushConfigFilenames: string[] = [
   '.npmrc',
-  RushConstants.npmShrinkwrapFilename,
   RushConstants.pinnedVersionsFilename,
   RushConstants.browserApprovedPackagesFilename,
   RushConstants.nonbrowserApprovedPackagesFilename,
@@ -74,7 +73,8 @@ export interface IRushRepositoryJson {
  */
 export interface IRushConfigurationJson {
   $schema: string;
-  npmVersion: string;
+  npmVersion?: string;
+  pnpmVersion?: string;
   rushVersion: string;
   repository?: IRushRepositoryJson;
   nodeSupportedVersionRange?: string;
@@ -85,6 +85,7 @@ export interface IRushConfigurationJson {
   telemetryEnabled?: boolean;
   projects: IRushConfigurationProjectJson[];
   eventHooks?: IEventHooksJson;
+  hotfixChangeEnabled?: boolean;
 }
 
 /**
@@ -101,7 +102,7 @@ export interface IRushLinkJson {
  * This represents the available Package Manager tools as a string
  * @public
  */
-export type PackageManager = 'npm';
+export type PackageManager = 'pnpm' | 'npm';
 
 /**
  * This represents the Rush configuration for a repository, based on the Rush.json
@@ -118,6 +119,7 @@ export default class RushConfiguration {
   private _commonTempFolder: string;
   private _commonRushConfigFolder: string;
   private _packageManager: PackageManager;
+  private _pnpmStoreFolder: string;
   private _npmCacheFolder: string;
   private _npmTmpFolder: string;
   private _committedShrinkwrapFilename: string;
@@ -135,6 +137,9 @@ export default class RushConfiguration {
   // "gitPolicy" feature
   private _gitAllowedEmailRegExps: string[];
   private _gitSampleEmail: string;
+
+  // "hotfixChangeEnabled" feature
+  private _hotfixChangeEnabled: boolean;
 
   // Repository info
   private _repositoryUrl: string;
@@ -274,7 +279,7 @@ export default class RushConfiguration {
    * _validateCommonRushConfigFolder() function makes sure that this folder only contains
    * recognized config files.
    */
-  private static _validateCommonRushConfigFolder(commonRushConfigFolder: string): void {
+  private static _validateCommonRushConfigFolder(commonRushConfigFolder: string, packageManager: PackageManager): void {
     if (!fsx.existsSync(commonRushConfigFolder)) {
       console.log(`Creating folder: ${commonRushConfigFolder}`);
       fsx.mkdirsSync(commonRushConfigFolder);
@@ -298,6 +303,11 @@ export default class RushConfiguration {
       }
 
       const knownSet: Set<string> = new Set<string>(knownRushConfigFilenames.map(x => x.toUpperCase()));
+      if (packageManager === 'npm') {
+        knownSet.add(RushConstants.npmShrinkwrapFilename.toUpperCase());
+      } else {
+        knownSet.add(RushConstants.pnpmShrinkwrapFilename.toUpperCase());
+      }
 
       // Is the filename something we know?  If not, report an error.
       if (!knownSet.has(filename.toUpperCase())) {
@@ -367,7 +377,7 @@ export default class RushConfiguration {
 
   /**
    * The local folder that will store the NPM package cache.  Rush does not rely on the
-   * NPM's default global cache folder, because NPM's caching implementation does not
+   * npm's default global cache folder, because npm's caching implementation does not
    * reliably handle multiple processes.  (For example, if a build box is running
    * "rush install" simultaneously for two different working folders, it may fail randomly.)
    *
@@ -378,7 +388,7 @@ export default class RushConfiguration {
   }
 
   /**
-   * The local folder where NPM's temporary files will be written during installation.
+   * The local folder where npm's temporary files will be written during installation.
    * Rush does not rely on the global default folder, because it may be on a different
    * hard disk.
    *
@@ -389,10 +399,19 @@ export default class RushConfiguration {
   }
 
   /**
+   * The local folder where PNPM stores a global installation for every installed package
+   *
+   * Example: "C:\MyRepo\common\temp\pnpm-store"
+   */
+  public get pnpmStoreFolder(): string {
+    return this._pnpmStoreFolder;
+  }
+
+  /**
    * The filename of the NPM shrinkwrap file that is tracked e.g. by Git.  (The "rush install"
    * command uses a temporary copy, whose path is tempShrinkwrapFilename.)
    * This property merely reports the filename; the file itself may not actually exist.
-   * Example: "C:\MyRepo\common\npm-shrinkwrap.json"
+   * Example: "C:\MyRepo\common\npm-shrinkwrap.json" or "C:\MyRepo\common\shrinkwrap.yaml"
    */
   public get committedShrinkwrapFilename(): string {
     return this._committedShrinkwrapFilename;
@@ -402,7 +421,7 @@ export default class RushConfiguration {
    * The filename of the temporary NPM shrinkwrap file that is used by "rush install".
    * (The master copy is tempShrinkwrapFilename.)
    * This property merely reports the filename; the file itself may not actually exist.
-   * Example: "C:\MyRepo\common\temp\npm-shrinkwrap.json"
+   * Example: "C:\MyRepo\common\temp\npm-shrinkwrap.json" or "C:\MyRepo\common\temp\shrinkwrap.yaml"
    */
   public get tempShrinkwrapFilename(): string {
     return this._tempShrinkwrapFilename;
@@ -489,6 +508,14 @@ export default class RushConfiguration {
    */
   public get gitSampleEmail(): string {
     return this._gitSampleEmail;
+  }
+
+  /**
+   * [Part of the "hotfixChange" feature.]
+   * Enables creating hotfix changes
+   */
+  public get hotfixChangeEnabled(): boolean {
+    return this._hotfixChangeEnabled;
   }
 
   /**
@@ -613,20 +640,38 @@ export default class RushConfiguration {
     this._commonTempFolder = path.join(this._commonFolder, RushConstants.rushTempFolderName);
     this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
     this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));
+    this._pnpmStoreFolder = path.resolve(path.join(this._commonTempFolder, 'pnpm-store'));
 
     this._changesFolder = path.join(this._commonFolder, RushConstants.changeFilesFolderName);
     this._homeFolder = RushConfiguration.getHomeDirectory();
 
     this._rushLinkJsonFilename = path.join(this._commonTempFolder, 'rush-link.json');
 
-    this._packageManager = 'npm';
-    this._committedShrinkwrapFilename = path.join(this._commonRushConfigFolder, RushConstants.npmShrinkwrapFilename);
-    this._tempShrinkwrapFilename = path.join(this._commonTempFolder, RushConstants.npmShrinkwrapFilename);
-    this._packageManagerToolVersion = rushConfigurationJson.npmVersion;
-    this._packageManagerToolFilename = path.resolve(path.join(this._commonTempFolder,
-      'npm-local', 'node_modules', '.bin', 'npm'));
+    if (rushConfigurationJson.npmVersion) {
+      this._packageManager = 'npm';
 
-    RushConfiguration._validateCommonRushConfigFolder(this._commonRushConfigFolder);
+      this._committedShrinkwrapFilename = path.join(this._commonRushConfigFolder, RushConstants.npmShrinkwrapFilename);
+      this._tempShrinkwrapFilename = path.join(this._commonTempFolder, RushConstants.npmShrinkwrapFilename);
+
+      this._packageManagerToolVersion = rushConfigurationJson.npmVersion;
+      this._packageManagerToolFilename = path.resolve(path.join(this._commonTempFolder,
+        'npm-local', 'node_modules', '.bin', 'npm'));
+
+    } else if (rushConfigurationJson.pnpmVersion) {
+      this._packageManager = 'pnpm';
+
+      this._committedShrinkwrapFilename = path.join(this._commonRushConfigFolder, RushConstants.pnpmShrinkwrapFilename);
+      this._tempShrinkwrapFilename = path.join(this._commonTempFolder, RushConstants.pnpmShrinkwrapFilename);
+
+      this._packageManagerToolVersion = rushConfigurationJson.pnpmVersion;
+      this._packageManagerToolFilename = path.resolve(path.join(this._commonTempFolder,
+        'pnpm-local', 'node_modules', '.bin', 'pnpm'));
+
+    } else {
+      throw new Error(`Neither "npmVersion" nor "pnpmVersion" was defined in the rush configuration.`);
+    }
+
+    RushConfiguration._validateCommonRushConfigFolder(this._commonRushConfigFolder, this.packageManager);
 
     this._projectFolderMinDepth = rushConfigurationJson.projectFolderMinDepth !== undefined
       ? rushConfigurationJson.projectFolderMinDepth : 1;
@@ -657,6 +702,11 @@ export default class RushConfiguration {
             'which is required when using "allowedEmailRegExps"');
         }
       }
+    }
+
+    this._hotfixChangeEnabled = false;
+    if (rushConfigurationJson.hotfixChangeEnabled) {
+      this._hotfixChangeEnabled = rushConfigurationJson.hotfixChangeEnabled;
     }
 
     if (rushConfigurationJson.repository) {

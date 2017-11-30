@@ -69,6 +69,8 @@ export default class ExternalApiHelper {
       }
     });
 
-    extractor.analyzeProject();
+    if (!extractor.processProject()) {
+      throw new Error('API Extractor failed to process the input: ' + externalPackageFilePath);
+    }
   }
 }

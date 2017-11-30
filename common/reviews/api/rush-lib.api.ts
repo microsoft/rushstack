@@ -64,13 +64,15 @@ enum ChangeType {
   // (undocumented)
   dependency = 1,
   // (undocumented)
-  major = 4,
+  hotfix = 2,
   // (undocumented)
-  minor = 3,
+  major = 5,
+  // (undocumented)
+  minor = 4,
   // (undocumented)
   none = 0,
   // (undocumented)
-  patch = 2
+  patch = 3
 }
 
 // @beta
@@ -198,6 +200,7 @@ class RushConfiguration {
   public readonly gitAllowedEmailRegExps: string[];
   public readonly gitSampleEmail: string;
   public readonly homeFolder: string;
+  public readonly hotfixChangeEnabled: boolean;
   public static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
   // (undocumented)
   public static loadFromDefaultLocation(): RushConfiguration;
@@ -207,6 +210,7 @@ class RushConfiguration {
   public readonly packageManagerToolFilename: string;
   public readonly packageManagerToolVersion: string;
   public readonly pinnedVersions: PinnedVersionsConfiguration;
+  public readonly pnpmStoreFolder: string;
   public readonly projectFolderMaxDepth: number;
   public readonly projectFolderMinDepth: number;
   // (undocumented)

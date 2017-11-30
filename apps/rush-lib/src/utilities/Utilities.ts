@@ -433,8 +433,8 @@ export default class Utilities {
     };
 
     // This is needed since we specify shell=true below.
-    // NOTE: On Windows if we escape "npm", the spawnSync() function runs something like this:
-    //   [ 'C:\\Windows\\system32\\cmd.exe', '/s', '/c', '""npm" "install""' ]
+    // NOTE: On Windows if we escape "NPM", the spawnSync() function runs something like this:
+    //   [ 'C:\\Windows\\system32\\cmd.exe', '/s', '/c', '""NPM" "install""' ]
     //
     // Due to a bug with Windows cmd.exe, the npm.cmd batch file's "%~dp0" variable will
     // return the current working directory instead of the batch file's directory.
