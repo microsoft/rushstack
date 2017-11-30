@@ -4,8 +4,8 @@ version: 2
 group_defaults:
   approve_by_comment:
     enabled: true
-    approve_regex: '^(Approved|:shipit:|:\+1:)'
-    reject_regex: '^(Rejected|:-1:)'
+    approve_regex: '^(Approved|:shipit:)'
+    reject_regex: '^(Rejected)'
 
 groups:
   pullapprove-admins:
