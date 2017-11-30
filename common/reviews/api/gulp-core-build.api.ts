@@ -197,7 +197,6 @@ interface IJestConfig {
   coverageReporters?: string[];
   isEnabled?: boolean;
   moduleDirectories?: string[];
-  rootDir?: string;
   testPathIgnorePatterns?: string[];
 }
 

@@ -53,10 +53,6 @@
       "items": {
         "type": "string"
       }
-    },
-    "rootDir": {
-      "description": "Same as Jest CLI option rootDir",
-      "type": "string"
     }
   },
   "additionalProperties": false
