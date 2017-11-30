@@ -20,21 +20,23 @@ groups:
       - qz2017
       - patmill
 
-  general-approvers:
+  api-approvers:
     conditions:
       files:
-        - "apps/*"
-        - "libraries/*"
+        - "common/reviews/*"
     required: 1
     users:
       - iclanton
       - nickpape-msft
       - pgonzal
       - qz2017
+      - mpasarin
 
-  gcb-approvers:
+  general-approvers:
     conditions:
       files:
+        - "apps/*"
+        - "libraries/*"
         - "core-build/*"
         - "webpack/*"
     required: 1
