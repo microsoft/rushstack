@@ -182,6 +182,8 @@ interface IFixupSettingsOptions {
 
 // @alpha
 interface IJestConfig {
+  cache?: boolean;
+  cacheDirectory?: string;
   collectCoverageFrom?: string[];
   coverage?: boolean;
   coverageReporters?: string[];
