@@ -46,6 +46,13 @@
       "items": {
         "type": "string"
       }
+    },
+    "moduleDirectories": {
+      "description": "Same as Jest CLI option moduleDirectories",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     }
   },
   "additionalProperties": false

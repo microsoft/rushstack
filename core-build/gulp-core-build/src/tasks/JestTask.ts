@@ -47,6 +47,11 @@ export interface IJestConfig {
    * Same as Jest CLI option testPathIgnorePatterns
    */
   testPathIgnorePatterns?: string[];
+
+  /**
+   * Same as Jest CLI option moduleDirectories
+   */
+  moduleDirectories?: string[];
 }
 
 const DEFAULT_JEST_CONFIG_FILE_NAME: string = 'jest.config.json';
@@ -113,7 +118,9 @@ export class JestTask extends GulpTask<IJestConfig> {
       coverageReporters: this.taskConfig.coverageReporters,
       coverageDirectory: path.join(this.buildConfig.tempFolder, 'coverage'),
       maxWorkers: 1,
-      moduleDirectories: ['node_modules', this.buildConfig.libFolder],
+      moduleDirectories: !!this.taskConfig.moduleDirectories ?
+        this.taskConfig.moduleDirectories :
+        ['node_modules', this.buildConfig.libFolder],
       reporters: [path.join(__dirname, 'JestReporter.js')],
       rootDir: this.buildConfig.rootPath,
       runInBand: true,
