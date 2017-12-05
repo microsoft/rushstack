@@ -52,15 +52,7 @@ describe('VersionManager', () => {
       assert.equal(updatedPackages.get('g')!.devDependencies!['a'], `~10.10.0`);
 
       const changeFiles: Map<string, ChangeFile> = versionManager.changeFiles;
-      assert.equal(changeFiles.size, 4, 'The number of change files matches');
-      assert.equal(_getChanges(changeFiles, 'a')!.length, 1, 'a does not have one change');
-      assert.equal(_getChanges(changeFiles, 'a')![0].changeType, ChangeType.none,
-        'a does not have a none change');
-      assert.equal(_getChanges(changeFiles, 'b')!.length, 2, 'b does not have two change');
-      assert.equal(_getChanges(changeFiles, 'b')![0].changeType, ChangeType.none,
-        'b does not have a none change');
-      assert.equal(_getChanges(changeFiles, 'b')![1].changeType, ChangeType.dependency,
-        'b does not have a dependency update');
+      assert.equal(changeFiles.size, 2, 'The number of change files matches');
       assert.equal(_getChanges(changeFiles, 'c')!.length, 2, 'c does not have two change');
       assert.equal(_getChanges(changeFiles, 'c')![0].changeType, ChangeType.patch,
         'c does not have a patch change');

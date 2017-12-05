@@ -106,7 +106,7 @@ export default class ChangeManager {
     return updatedPackages;
   }
 
-  public updateChangelog(shouldCommit: boolean, updatedPackages?: Map<string, IPackageJson>): void {
+  public updateChangelog(shouldCommit: boolean): void {
     // Do not update changelog or delete the change files for prerelease.
     // Save them for the official release.
     if (!this._prereleaseToken.hasValue) {
