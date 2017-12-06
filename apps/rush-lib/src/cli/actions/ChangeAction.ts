@@ -27,6 +27,7 @@ import ChangeFiles from '../utilities/ChangeFiles';
 import {
   VersionPolicy,
   IndividualVersionPolicy,
+  LockStepVersionPolicy,
   VersionPolicyDefinitionName
 } from '../../data/VersionPolicy';
 
@@ -38,6 +39,7 @@ export default class ChangeAction extends BaseRushAction {
   private _verifyParameter: CommandLineFlagParameter;
   private _targetBranchParameter: CommandLineStringParameter;
   private _targetBranchName: string;
+  private _projectHostMap: Map<string, string>;
 
   private _prompt: inquirer.PromptModule;
 
@@ -94,6 +96,8 @@ export default class ChangeAction extends BaseRushAction {
 
   public run(): void {
     console.log(`Target branch is ${this._targetBranch}`);
+    this._projectHostMap = this._generateHostMap();
+
     if (this._verifyParameter.value) {
       return this._verify();
     }
@@ -115,6 +119,19 @@ export default class ChangeAction extends BaseRushAction {
       .catch((error: Error) => {
         console.error('There was an error creating the changefile:' + os.EOL + error.toString());
       });
+  }
+
+  private _generateHostMap(): Map<string, string> {
+    const hostMap: Map<string, string> = new Map<string, string>();
+    this.rushConfiguration.projects.forEach(project => {
+      if (!!project.versionPolicy && project.versionPolicy instanceof LockStepVersionPolicy) {
+        const lockstepPolicy: LockStepVersionPolicy = project.versionPolicy as LockStepVersionPolicy;
+        if (lockstepPolicy.changeLogHostProject) {
+          hostMap.set(project.packageName, lockstepPolicy.changeLogHostProject);
+        }
+      }
+    });
+    return hostMap;
   }
 
   private _verify(): void {
@@ -140,10 +157,24 @@ export default class ChangeAction extends BaseRushAction {
     if (!changedFolders) {
       return [];
     }
-    return this.rushConfiguration.projects
-      .filter(project => project.shouldPublish)
-      .filter(project => this._hasProjectChanged(changedFolders, project))
-      .map(project => project.packageName) as string[];
+    const logHosts: Set<string> = new Set<string>();
+    const changedPackageNames: string[] = [];
+
+    this.rushConfiguration.projects
+    .filter(project => project.shouldPublish)
+    .filter(project => this._hasProjectChanged(changedFolders, project))
+    .forEach(project => {
+      const hostName: string | undefined = this._projectHostMap.get(project.packageName);
+      if (hostName) {
+        logHosts.add(hostName);
+      } else {
+        changedPackageNames.push(project.packageName);
+      }
+    });
+    logHosts.forEach(host => {
+      changedPackageNames.push(host);
+    });
+    return changedPackageNames;
   }
 
   private _validateChangeFile(changedPackages: string[]): void {
