@@ -64,7 +64,6 @@ export abstract class VersionPolicy {
       // tslint:disable-next-line:no-use-before-declare
       return new IndividualVersionPolicy(versionPolicyJson as IIndividualVersionJson);
     }
-
     return undefined;
   }
 
@@ -88,6 +87,13 @@ export abstract class VersionPolicy {
    */
   public get definitionName(): VersionPolicyDefinitionName {
     return this._definitionName;
+  }
+
+  /**
+   * Whether it is a lockstepped version policy
+   */
+  public get isLockstepped(): boolean {
+    return this.definitionName === VersionPolicyDefinitionName.lockStepVersion;
   }
 
   /**
@@ -130,6 +136,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
   // nextBump is probably not needed. It can be prerelease only.
   // Other types of bumps can be passed in as a parameter to bump method, so can identifier.
   private _nextBump: BumpType;
+  private _changeLogHostProject: string | undefined;
 
   /**
    * @internal
@@ -138,6 +145,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
     super(versionPolicyJson);
     this._version = new semver.SemVer(versionPolicyJson.version);
     this._nextBump = BumpType[versionPolicyJson.nextBump];
+    this._changeLogHostProject = versionPolicyJson.changeLogHostProject;
   }
 
   /**
@@ -154,6 +162,10 @@ export class LockStepVersionPolicy extends VersionPolicy {
     return this._nextBump;
   }
 
+  public get changeLogHostProject(): string | undefined {
+    return this._changeLogHostProject;
+  }
+
   /**
    * Serialized json for this policy
    *
@@ -164,7 +176,8 @@ export class LockStepVersionPolicy extends VersionPolicy {
       policyName: this.policyName,
       definitionName: VersionPolicyDefinitionName[this.definitionName],
       version: this.version.format(),
-      nextBump: BumpType[this.nextBump]
+      nextBump: BumpType[this.nextBump],
+      changeLogHostProject: this._changeLogHostProject
     };
   }
 

@@ -53,18 +53,12 @@ export default class ChangelogGenerator {
       if (allChanges.hasOwnProperty(packageName)) {
         const project: RushConfigurationProject | undefined = allProjects.get(packageName);
 
-        // Changelogs should only be generated for publishable projects.
-        // Do not update changelog or delete the change files for prerelease.
-        // Save them for the official release.
-        // Unless the package is a hotfix, in which case do delete the change files.
-        if (!!project && project.shouldPublish &&
-          (!semver.prerelease(project.packageJson.version) ||
-           allChanges[packageName].changeType === ChangeType.hotfix)
-        ) {
+        if (!!project && ChangelogGenerator._shouldUpdateChangeLog(project, allChanges)) {
           const changeLog: IChangelog | undefined = ChangelogGenerator.updateIndividualChangelog(
             allChanges[packageName],
             project.projectFolder,
-            shouldCommit);
+            shouldCommit,
+            !!project.versionPolicy && project.versionPolicy.isLockstepped);
 
             if (changeLog) {
               updatedChangeLogs.push(changeLog);
@@ -92,10 +86,11 @@ export default class ChangelogGenerator {
         }
 
         const changelog: IChangelog = ChangelogGenerator._getChangelog(project.packageName, project.projectFolder);
+        const isLockstepped: boolean = !!project.versionPolicy && project.versionPolicy.isLockstepped;
 
         fs.writeFileSync(
           path.join(project.projectFolder, CHANGELOG_MD),
-          ChangelogGenerator._translateToMarkdown(changelog),
+          ChangelogGenerator._translateToMarkdown(changelog, isLockstepped),
           { encoding: 'utf8' }
         );
       }
@@ -110,7 +105,8 @@ export default class ChangelogGenerator {
     change: IChangeInfo,
     projectFolder: string,
     shouldCommit: boolean,
-    forceUpdate?: boolean
+    forceUpdate?: boolean,
+    isLockstepped?: boolean
   ): IChangelog | undefined {
     const changelog: IChangelog = ChangelogGenerator._getChangelog(change.packageName, projectFolder);
 
@@ -157,7 +153,7 @@ export default class ChangelogGenerator {
 
         fs.writeFileSync(
           path.join(projectFolder, CHANGELOG_MD),
-          ChangelogGenerator._translateToMarkdown(changelog),
+          ChangelogGenerator._translateToMarkdown(changelog, isLockstepped),
           { encoding: 'utf8' }
         );
       }
@@ -196,7 +192,7 @@ export default class ChangelogGenerator {
   /**
    * Translates the given changelog json object into a markdown string.
    */
-  private static _translateToMarkdown(changelog: IChangelog): string {
+  private static _translateToMarkdown(changelog: IChangelog, isLockstepped: boolean = false): string {
     let markdown: string = [
       `# Change Log - ${changelog.name}`,
       '',
@@ -227,6 +223,13 @@ export default class ChangelogGenerator {
       comments += ChangelogGenerator._getChangeComments(
         'Patches',
         entry.comments[ChangeType[ChangeType.patch]]);
+
+      if (isLockstepped) {
+        // In lockstepped projects, all changes are of type ChangeType.none.
+        comments += ChangelogGenerator._getChangeComments(
+          'Updates',
+          entry.comments[ChangeType[ChangeType.none]]);
+      }
 
       if (this.rushConfiguration.hotfixChangeEnabled) {
         comments += ChangelogGenerator._getChangeComments(
@@ -265,4 +268,18 @@ export default class ChangelogGenerator {
     return comments;
   }
 
+  private static _shouldUpdateChangeLog(
+    project: RushConfigurationProject,
+    allChanges: IChangeInfoHash
+  ): boolean {
+    // Changelogs should only be generated for publishable projects.
+    // Do not update changelog or delete the change files for prerelease.
+    // Save them for the official release.
+    // Unless the package is a hotfix, in which case do delete the change files.
+
+    return project.shouldPublish &&
+      (!semver.prerelease(project.packageJson.version) ||
+      allChanges[project.packageName].changeType === ChangeType.hotfix) &&
+      project.hostChangeLog();
+  }
 }

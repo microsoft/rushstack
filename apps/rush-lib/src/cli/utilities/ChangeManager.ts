@@ -6,7 +6,6 @@ import { IChangelog } from '../../data/Changelog';
 import IPackageJson from '../../utilities/IPackageJson';
 import RushConfiguration from '../../data/RushConfiguration';
 import RushConfigurationProject from '../../data/RushConfigurationProject';
-import { VersionPolicy } from '../../data/VersionPolicy';
 import { VersionPolicyConfiguration } from '../../data/VersionPolicyConfiguration';
 import PublishUtilities, {
   IChangeInfoHash
@@ -75,11 +74,9 @@ export default class ChangeManager {
       .filter((key) => {
         const projectInfo: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(key);
         if (projectInfo) {
-          const versionPolicyName: string | undefined = projectInfo.versionPolicyName;
-          if (versionPolicyName) {
+          if (projectInfo.versionPolicy) {
             const changeInfo: IChangeInfo = this._allChanges[key];
-            const versionPolicy: VersionPolicy = versionConfig.getVersionPolicy(versionPolicyName);
-            versionPolicy.validate(changeInfo.newVersion!, key);
+            projectInfo.versionPolicy.validate(changeInfo.newVersion!, key);
           }
         }
       });

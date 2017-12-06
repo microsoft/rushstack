@@ -150,6 +150,8 @@ class LockStepVersionPolicy extends VersionPolicy {
   // @internal
   public readonly _json: ILockStepVersionJson;
   public bump(bumpType?: BumpType, identifier?: string): void;
+  // (undocumented)
+  public readonly changeLogHostProject: string | undefined;
   public ensure(project: IPackageJson): IPackageJson | undefined;
   public readonly nextBump: BumpType;
   public validate(versionString: string, packageName: string): void;
@@ -238,6 +240,8 @@ class RushConfigurationProject {
                 tempProjectName: string);
   public readonly cyclicDependencyProjects: Set<string>;
   public readonly downstreamDependencyProjects: string[];
+  // @beta
+  public hostChangeLog(): boolean;
   public readonly packageJson: IPackageJson;
   public readonly packageName: string;
   public readonly projectFolder: string;
@@ -263,6 +267,7 @@ class VersionPolicy {
   public abstract bump(bumpType?: BumpType, identifier?: string): void;
   public readonly definitionName: VersionPolicyDefinitionName;
   public abstract ensure(project: IPackageJson): IPackageJson | undefined;
+  public readonly isLockstepped: boolean;
   // WARNING: Because this definition is explicitly marked as @internal, an underscore prefix ("_") should be added to its name
   // WARNING: The type "IVersionPolicyJson" needs to be exported by the package (e.g. added to index.ts)
   // @internal

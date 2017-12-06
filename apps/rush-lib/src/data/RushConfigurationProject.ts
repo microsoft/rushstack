@@ -8,7 +8,7 @@ import { JsonFile } from '@microsoft/node-core-library';
 import IPackageJson from '../utilities/IPackageJson';
 import Utilities from '../utilities/Utilities';
 import RushConfiguration from '../data/RushConfiguration';
-import { VersionPolicy } from './VersionPolicy';
+import { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy';
 
 /**
  * This represents the JSON data object for a project entry in the rush.json configuration file.
@@ -37,6 +37,7 @@ export default class RushConfigurationProject {
   private _unscopedTempProjectName: string;
   private _cyclicDependencyProjects: Set<string>;
   private _versionPolicyName: string | undefined;
+  private _versionPolicy: VersionPolicy;
   private _shouldPublish: boolean;
   private _downstreamDependencyProjects: string[];
   private readonly _rushConfiguration: RushConfiguration;
@@ -212,10 +213,32 @@ export default class RushConfigurationProject {
    * @beta
    */
   public get versionPolicy(): VersionPolicy | undefined {
-    if (this.versionPolicyName && this._rushConfiguration.versionPolicyConfiguration) {
-      return this._rushConfiguration.versionPolicyConfiguration.getVersionPolicy(
-        this.versionPolicyName);
+    if (!this._versionPolicy) {
+      if (this.versionPolicyName && this._rushConfiguration.versionPolicyConfiguration) {
+        this._versionPolicy = this._rushConfiguration.versionPolicyConfiguration.getVersionPolicy(
+          this.versionPolicyName);
+      }
     }
-    return undefined;
+    return this._versionPolicy;
+  }
+
+  /**
+   * Indicate whether this project needs to host change log.
+   * A project that has shouldPublish=true or a version policy should have its change log.
+   * In the case when this project is lockstepped and the version policy has a change log host, this function
+   * returns true if the project is the change log host and returns false if not.
+   * @beta
+   */
+  public hostChangeLog(): boolean {
+    if (!this.shouldPublish) {
+      return false;
+    }
+    if (this.versionPolicy && this.versionPolicy instanceof LockStepVersionPolicy) {
+      const lockStepPolicy: LockStepVersionPolicy = new LockStepVersionPolicy(this.versionPolicy._json);
+      if (lockStepPolicy.changeLogHostProject && lockStepPolicy.changeLogHostProject !== this.packageName) {
+        return false;
+      }
+    }
+    return true;
   }
 }

@@ -274,3 +274,43 @@ describe('updateChangelogs', () => {
   });
   /* tslint:enable:no-string-literal */
 });
+
+describe('updateChangelogs for lockstepped projects', () => {
+  /* tslint:disable:no-string-literal */
+  it('can skip projects that are not change log hosts', () => {
+    const rushJsonFile: string = path.resolve(__dirname, 'lockstepRepo', 'rush.json');
+    const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile);
+
+    const changeHash: IChangeInfoHash = {};
+    changeHash['a'] = {
+      packageName: 'a',
+      changeType: ChangeType.none,
+      newVersion: '1.1.0',
+      changes: []
+    };
+    changeHash['b'] = {
+      packageName: 'b',
+      changeType: ChangeType.none,
+      newVersion: '1.1.0',
+      changes: [
+        {
+          packageName: 'b',
+          comment: 'b blah 1',
+          changeType: ChangeType.none
+        },
+        {
+          packageName: 'b',
+          comment: 'b blah 2',
+          changeType: ChangeType.none
+        }
+      ]
+    };
+    const updatedChangeLogs: IChangelog[] = ChangelogGenerator.updateChangelogs(
+      changeHash, rushConfiguration.projectsByName, false);
+    expect(updatedChangeLogs.length).eqls(1);
+    expect(updatedChangeLogs[0].name).eqls('b');
+    expect(updatedChangeLogs[0].entries[0].version).eqls('1.1.0');
+    expect(updatedChangeLogs[0].entries[0].comments.none!.length).eqls(2);
+  });
+  /* tslint:enable:no-string-literal */
+});
