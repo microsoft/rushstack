@@ -273,10 +273,25 @@ export default class InstallManager {
       this._rushConfiguration.tempShrinkwrapFilename);
 
     // Also copy down the committed .npmrc file, if there is one
-    // "common\.npmrc" --> "common\temp\.npmrc"
+    // "common\config\rush\.npmrc" --> "common\temp\.npmrc"
     const committedNpmrcPath: string = path.join(this._rushConfiguration.commonRushConfigFolder, '.npmrc');
     const tempNpmrcPath: string = path.join(this._rushConfiguration.commonTempFolder, '.npmrc');
+
+    // ensure that we remove any old one that may be hanging around
+    fsx.removeSync(tempNpmrcPath);
     this.syncFile(committedNpmrcPath, tempNpmrcPath);
+
+    // also, copy the pnpmfile.js if it exists
+    if (this._rushConfiguration.packageManager === 'pnpm') {
+      const committedPnpmFilePath: string
+        = path.join(this._rushConfiguration.commonRushConfigFolder, RushConstants.pnpmFileFilename);
+      const tempPnpmFilePath: string
+        = path.join(this._rushConfiguration.commonTempFolder, RushConstants.pnpmFileFilename);
+
+      // ensure that we remove any old one that may be hanging around
+      fsx.removeSync(tempPnpmFilePath);
+      this.syncFile(committedPnpmFilePath, tempPnpmFilePath);
+    }
 
     const commonPackageJson: IPackageJson = {
       dependencies: {},
