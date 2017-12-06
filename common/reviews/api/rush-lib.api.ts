@@ -285,6 +285,7 @@ class VersionPolicyConfiguration {
       identifier?: string,
       shouldCommit?: boolean): void;
   public getVersionPolicy(policyName: string): VersionPolicy;
+  public validate(projectsByName: Map<string, RushConfigurationProject>): void;
   public readonly versionPolicies: Map<string, VersionPolicy>;
 }
 

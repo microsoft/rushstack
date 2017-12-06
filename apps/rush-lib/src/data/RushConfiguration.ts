@@ -760,6 +760,7 @@ export default class RushConfiguration {
       // Compute the downstream dependencies within the list of Rush projects.
       this._populateDownstreamDependencies(project.packageJson.dependencies, project.packageName);
       this._populateDownstreamDependencies(project.packageJson.devDependencies, project.packageName);
+      this._versionPolicyConfiguration.validate(this._projectsByName);
     }
 
     // Example: "./common/config/rush/pinnedVersions.json"

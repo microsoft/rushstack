@@ -5,7 +5,8 @@ import * as path from 'path';
 import * as fsx from 'fs-extra';
 import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
 
-import { VersionPolicy, BumpType } from './VersionPolicy';
+import { VersionPolicy, BumpType, LockStepVersionPolicy } from './VersionPolicy';
+import RushConfigurationProject from './RushConfigurationProject';
 
 /**
  * @beta
@@ -46,6 +47,26 @@ export class VersionPolicyConfiguration {
   public constructor(private _jsonFileName: string) {
     this._versionPolicies = new Map<string, VersionPolicy>();
     this._loadFile();
+  }
+
+  /**
+   * Validate the version policy configuration against the rush config
+   */
+  public validate(projectsByName: Map<string, RushConfigurationProject>): void {
+    if (!this.versionPolicies) {
+      return;
+    }
+    this.versionPolicies.forEach((policy) => {
+      if (policy instanceof LockStepVersionPolicy) {
+        const lockStepPolicy: LockStepVersionPolicy = policy as LockStepVersionPolicy;
+        if (lockStepPolicy.changeLogHostProject) {
+          if (!projectsByName.get(lockStepPolicy.changeLogHostProject)) {
+            throw new Error(`Version policy \"${policy.policyName}\" has a non-existing changeLogHostProject:` +
+              ` ${lockStepPolicy.changeLogHostProject}.`);
+          }
+        }
+      }
+    });
   }
 
   /**
