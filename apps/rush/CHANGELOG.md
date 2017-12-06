@@ -1,6 +1,20 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 13 Nov 2017 18:34:30 GMT and should not be manually modified.
+This log was last generated on Thu, 30 Nov 2017 20:31:01 GMT and should not be manually modified.
+
+## 4.1.0
+Thu, 30 Nov 2017 20:34:30 GMT
+
+### Minor changes
+
+- Adding support for using PNPM with Rush
+
+### Patches
+
+- Fix issue where 'rush publish' was failing when the only changefiles were 'none' type
+- Add support for hotfix changes
+- Fix an issue with file locks causing exceptions during 'rush install'
+- Fix issue where 'rush install' did not invalidate node_modules after bumping package manager version
 
 ## 4.0.1
 Mon, 13 Nov 2017 18:34:30 GMT
@@ -36,9 +50,9 @@ Fri, 06 Oct 2017 22:44:31 GMT
 ### Patches
 
 - Enable strickNullChecks
-- Fix a bug in "rush version" that devdependency does not get bumped if there is no dependency.
-- Fix a bug in "rush change" so it handles rename properly.
-- Add npm tag support in "rush publish".
+- Fix a bug in "rush version" that devdependency does not get bumped if there is no dependency. 
+- Fix a bug in "rush change" so it handles rename properly. 
+- Add npm tag support in "rush publish". 
 
 ## 3.0.18
 Tue, 26 Sep 2017 13:51:05 GMT
@@ -293,7 +307,7 @@ Sun, 22 Jan 2017 02:04:57 GMT
 
 ### Patches
 
-- Update temp_modules when versions are bumped.
+- Update temp_modules when versions are bumped. 
 
 ## 1.4.1
 Tue, 03 Jan 2017 21:52:49 GMT

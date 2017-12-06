@@ -64,6 +64,11 @@ export namespace RushConstants {
   export const pnpmShrinkwrapFilename: string = 'shrinkwrap.yaml';
 
   /**
+   * The filename ("pnpmfile.js") used to add custom configuration to PNPM
+   */
+  export const pnpmFileFilename: string = 'pnpmfile.js';
+
+  /**
    * The folder name ("node_modules") where NPM installs its packages.
    */
   export const nodeModulesFolderName: string = 'node_modules';
