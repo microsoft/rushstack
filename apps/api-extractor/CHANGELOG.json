@@ -2,6 +2,80 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "4.3.3",
+      "tag": "@microsoft/api-extractor_v4.3.3",
+      "date": "Thu, 30 Nov 2017 23:59:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.19` to `0.3.20`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `2.2.7` to `2.2.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.2",
+      "tag": "@microsoft/api-extractor_v4.3.2",
+      "date": "Thu, 30 Nov 2017 23:12:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.18` to `0.3.19`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `2.2.6` to `2.2.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.1",
+      "tag": "@microsoft/api-extractor_v4.3.1",
+      "date": "Wed, 29 Nov 2017 17:05:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.17` to `0.3.18`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `2.2.5` to `2.2.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.0",
+      "tag": "@microsoft/api-extractor_v4.3.0",
+      "date": "Tue, 28 Nov 2017 23:43:55 GMT",
+      "comments": {
+        "minor": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "aa6a9d0000c787f37623ae434cccbb5f0fdb7f29",
+            "comment": "Add Extractor.processProject() whose return value indicates success"
+          }
+        ],
+        "patch": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "aa6a9d0000c787f37623ae434cccbb5f0fdb7f29",
+            "comment": "Deprecate Extractor.analyzeProject() API"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.16` to `0.3.17`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `2.2.4` to `2.2.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.2.6",
       "tag": "@microsoft/api-extractor_v4.2.6",
       "date": "Mon, 13 Nov 2017 17:04:50 GMT",

@@ -4,8 +4,8 @@ version: 2
 group_defaults:
   approve_by_comment:
     enabled: true
-    approve_regex: '^(Approved|:shipit:|:\+1:)'
-    reject_regex: '^(Rejected|:-1:)'
+    approve_regex: '^(Approved|:shipit:)'
+    reject_regex: '^(Rejected)'
 
 groups:
   pullapprove-admins:
@@ -20,21 +20,23 @@ groups:
       - qz2017
       - patmill
 
-  general-approvers:
+  api-approvers:
     conditions:
       files:
-        - "apps/*"
-        - "libraries/*"
+        - "common/reviews/*"
     required: 1
     users:
       - iclanton
       - nickpape-msft
       - pgonzal
       - qz2017
+      - mpasarin
 
-  gcb-approvers:
+  general-approvers:
     conditions:
       files:
+        - "apps/*"
+        - "libraries/*"
         - "core-build/*"
         - "webpack/*"
     required: 1

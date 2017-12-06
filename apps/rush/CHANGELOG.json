@@ -2,6 +2,32 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "4.1.0",
+      "tag": "@microsoft/rush_v4.1.0",
+      "date": "Thu, 30 Nov 2017 20:34:30 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix issue where 'rush publish' was failing when the only changefiles were 'none' type"
+          },
+          {
+            "comment": "Add support for hotfix changes"
+          },
+          {
+            "comment": "Fix an issue with file locks causing exceptions during 'rush install'"
+          },
+          {
+            "comment": "Fix issue where 'rush install' did not invalidate node_modules after bumping package manager version"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Adding support for using PNPM with Rush"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.0.1",
       "tag": "@microsoft/rush_v4.0.1",
       "date": "Mon, 13 Nov 2017 18:34:30 GMT",

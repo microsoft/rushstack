@@ -17,9 +17,10 @@ import { ExtractorContext } from '../ExtractorContext';
 import { ILogger } from './ILogger';
 import ApiJsonGenerator from '../generators/ApiJsonGenerator';
 import ApiFileGenerator from '../generators/ApiFileGenerator';
+import { MonitoredLogger } from './MonitoredLogger';
 
 /**
- * Options for {@link Extractor.analyzeProject}.
+ * Options for {@link Extractor.processProject}.
  * @public
  */
 export interface IAnalyzeProjectOptions {
@@ -79,11 +80,11 @@ export class Extractor {
     logError: (message: string) => console.error(colors.red(message))
   };
 
-  private _config: IExtractorConfig;
-  private _program: ts.Program;
-  private _localBuild: boolean;
-  private _logger: ILogger;
-  private _absoluteRootFolder: string;
+  private readonly _config: IExtractorConfig;
+  private readonly _program: ts.Program;
+  private readonly _localBuild: boolean;
+  private readonly _monitoredLogger: MonitoredLogger;
+  private readonly _absoluteRootFolder: string;
 
   private static _applyConfigDefaults(config: IExtractorConfig): IExtractorConfig {
     // Use the provided config to override the defaults
@@ -93,17 +94,18 @@ export class Extractor {
     return normalized;
   }
 
-  public constructor (config: IExtractorConfig, options?: IExtractorOptions) {
+  public constructor(config: IExtractorConfig, options?: IExtractorOptions) {
+    let mergedLogger: ILogger;
     if (options && options.customLogger) {
-      this._logger = lodash.merge(lodash.cloneDeep(Extractor._defaultLogger),
-        options.customLogger);
+      mergedLogger = lodash.merge(lodash.clone(Extractor._defaultLogger), options.customLogger);
     } else {
-      this._logger = Extractor._defaultLogger;
+      mergedLogger = Extractor._defaultLogger;
     }
+    this._monitoredLogger = new MonitoredLogger(mergedLogger);
 
     this._config = Extractor._applyConfigDefaults(config);
 
-    this._logger.logVerbose('API Extractor Config: ' + JSON.stringify(this._config));
+    this._monitoredLogger.logVerbose('API Extractor Config: ' + JSON.stringify(this._config));
 
     if (!options) {
       options = { };
@@ -160,8 +162,21 @@ export class Extractor {
 
   /**
    * Invokes the API Extractor engine, using the configuration that was passed to the constructor.
+   * @deprecated Use {@link Extractor.processProject} instead.
    */
   public analyzeProject(options?: IAnalyzeProjectOptions): void {
+    this.processProject(options);
+  }
+
+  /**
+   * Invokes the API Extractor engine, using the configuration that was passed to the constructor.
+   * @param options - provides additional runtime state that is NOT part of the API Extractor
+   *     config file.
+   * @returns true if there were no errors or warnings; false if the tool chain should fail the build
+   */
+  public processProject(options?: IAnalyzeProjectOptions): boolean {
+    this._monitoredLogger.resetCounters();
+
     if (!options) {
       options = { };
     }
@@ -178,7 +193,7 @@ export class Extractor {
     const context: ExtractorContext = new ExtractorContext({
       program: this._program,
       entryPointFile: path.resolve(this._absoluteRootFolder, projectConfig.entryPointSourceFile),
-      logger: this._logger,
+      logger: this._monitoredLogger,
       policies: this._config.policies
     });
 
@@ -199,7 +214,7 @@ export class Extractor {
       const jsonGenerator: ApiJsonGenerator = new ApiJsonGenerator();
       const apiJsonFilename: string = path.join(outputFolder, packageBaseName + '.api.json');
 
-      this._logger.logVerbose('Writing: ' + apiJsonFilename);
+      this._monitoredLogger.logVerbose('Writing: ' + apiJsonFilename);
       jsonGenerator.writeJsonFile(apiJsonFilename, context);
     }
 
@@ -228,7 +243,7 @@ export class Extractor {
         if (!ApiFileGenerator.areEquivalentApiFileContents(actualApiReviewContent, expectedApiReviewContent)) {
           if (!this._localBuild) {
             // For production, issue a warning that will break the CI build.
-            this._logger.logWarning('You have changed the public API signature for this project.'
+            this._monitoredLogger.logWarning('You have changed the public API signature for this project.'
               // @microsoft/gulp-core-build seems to run JSON.stringify() on the error messages for some reason,
               // so try to avoid escaped characters:
               + ` Please overwrite ${expectedApiReviewShortPath} with a`
@@ -236,22 +251,26 @@ export class Extractor {
               + ' and then request an API review. See the Git repository README.md for more info.');
           } else {
             // For a local build, just copy the file automatically.
-            this._logger.logWarning('You have changed the public API signature for this project.'
+            this._monitoredLogger.logWarning('You have changed the public API signature for this project.'
               + ` Updating ${expectedApiReviewShortPath}`);
 
             fsx.writeFileSync(expectedApiReviewPath, actualApiReviewContent);
           }
         } else {
-          this._logger.logVerbose(`The API signature is up to date: ${actualApiReviewShortPath}`);
+          this._monitoredLogger.logVerbose(`The API signature is up to date: ${actualApiReviewShortPath}`);
         }
       } else {
         // NOTE: This warning seems like a nuisance, but it has caught genuine mistakes.
         // For example, when projects were moved into category folders, the relative path for
         // the API review files ended up in the wrong place.
-        this._logger.logError(`The API review file has not been set up. Do this by copying ${actualApiReviewShortPath}`
+        this._monitoredLogger.logError(`The API review file has not been set up.`
+          + ` Do this by copying ${actualApiReviewShortPath}`
           + ` to ${expectedApiReviewShortPath} and committing it.`);
       }
     }
+
+    // If there were any errors or warnings, then fail the build
+    return (this._monitoredLogger.errorCount + this._monitoredLogger.warningCount) === 0;
   }
 
   private _getShortFilePath(absolutePath: string): string {

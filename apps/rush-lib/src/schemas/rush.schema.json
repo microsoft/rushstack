@@ -2,18 +2,48 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "title": "Rush Configuration",
   "description": "Configuration file for the Rush multi-package build tool",
-
   "type": "object",
+
+  "oneOf": [
+    {
+      "type": "object",
+      "required": ["npmVersion"],
+      "properties": {
+        "npmVersion": {
+          "description": "The version of the NPM tool to install.",
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": ["pnpmVersion"],
+      "properties": {
+        "pnpmVersion": {
+          "description": "The version of the PNPM tool to install.",
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        }
+      }
+    }
+  ],
+
   "properties": {
+
     "$schema": {
       "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
       "type": "string"
     },
+
     "npmVersion": {
-      "description": "The version of the NPM tool to install.",
-      "type": "string",
-      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+      "type": "string"
     },
+
+    "pnpmVersion": {
+      "type": "string"
+    },
+
     "rushVersion": {
       "description": "The version of the Rush tool that will be used to build this repository.",
       "type": "string",
@@ -26,6 +56,10 @@
     "projectFolderMinDepth": {
       "description": "The minimum folder depth for the projectFolder field.  The default value is 1, i.e. no slashes in the path name.",
       "type": "number"
+    },
+    "hotfixChangeEnabled": {
+      "description": "Allows creation of hotfix changes. This feature is experimental so it is disabled by default.",
+      "type": "boolean"
     },
     "projectFolderMaxDepth": {
       "description": "The maximum folder depth for the projectFolder field.  The default value is 2, i.e. a single slash in the path name.",
@@ -121,7 +155,10 @@
           }
         },
         "additionalProperties": false,
-        "required": [ "packageName", "projectFolder" ]
+        "required": [
+          "packageName",
+          "projectFolder"
+        ]
       }
     },
     "eventHooks": {
@@ -161,5 +198,8 @@
     }
   },
   "additionalProperties": false,
-  "required": [ "npmVersion", "rushVersion", "projects" ]
+  "required": [
+    "rushVersion",
+    "projects"
+  ]
 }

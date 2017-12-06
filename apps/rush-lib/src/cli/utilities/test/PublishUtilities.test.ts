@@ -61,6 +61,32 @@ describe('findChangeRequests', () => {
     expect(allChanges['b'].newVersion).equals('1.0.0', 'b was not left unchanged');
   });
 
+  it('returns 4 changes when hotfixing a root package', () => {
+    const configuration: RushConfiguration =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json'));
+    const allPackages: Map<string, RushConfigurationProject> = configuration.projectsByName;
+    // tslint:disable-next-line no-any
+    PublishUtilities.rushConfiguration = configuration as any;
+    const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
+      allPackages,
+      new ChangeFiles(path.join(__dirname, 'rootHotfixChange')));
+
+    expect(Object.keys(allChanges).length).to.equal(4);
+
+    expect(allChanges).has.property('a');
+    expect(allChanges).has.property('b');
+
+    expect(allChanges['a'].changeType).equals(ChangeType.hotfix, 'a was not a hotfix');
+    expect(allChanges['b'].changeType).equals(ChangeType.hotfix, 'b did not receive a hotfix');
+    expect(allChanges['c'].changeType).equals(ChangeType.hotfix, 'c did not receive a hotfix');
+    expect(allChanges['d'].changeType).equals(ChangeType.hotfix, 'd did not receive a hotfix');
+
+    expect(allChanges['a'].newVersion).equals('1.0.0-hotfix.0', 'a was not hotfixed');
+    expect(allChanges['b'].newVersion).equals('1.0.0-hotfix.0', 'b did not receive a hotfix version bump');
+    expect(allChanges['c'].newVersion).equals('1.0.0-hotfix.0', 'c did not receive a hotfix version bump');
+    expect(allChanges['d'].newVersion).equals('1.0.0-hotfix.0', 'd did not receive a hotfix version bump');
+  });
+
   it('returns 3 changes when major bumping a root package', () => {
     const allPackages: Map<string, RushConfigurationProject> =
       RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
@@ -99,6 +125,35 @@ describe('findChangeRequests', () => {
     expect(allChanges['cyclic-dep-2'].changeType).equals(ChangeType.patch, 'cyclic-dep-2 was not a patch');
   });
 
+  it('returns error when mixing hotfix and non-hotfix changes', () => {
+    const configuration: RushConfiguration =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json'));
+    const allPackages: Map<string, RushConfigurationProject> = configuration.projectsByName;
+    // tslint:disable-next-line no-any
+    PublishUtilities.rushConfiguration = configuration as any;
+    expect(PublishUtilities.findChangeRequests.bind(
+      PublishUtilities,
+      allPackages,
+      new ChangeFiles(path.join(__dirname, 'hotfixWithPatchChanges')))).to
+        .throw('Cannot apply hotfix alongside patch change on same package');
+  });
+
+  it('returns error when adding hotfix with config disabled', () => {
+    const configuration: RushConfiguration =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json'));
+    const allPackages: Map<string, RushConfigurationProject> = configuration.projectsByName;
+    // Overload hotfixChangeEnabled function
+    configuration['_hotfixChangeEnabled'] = false;
+    // tslint:disable-next-line no-any
+    PublishUtilities.rushConfiguration = configuration as any;
+
+    expect(PublishUtilities.findChangeRequests.bind(
+      PublishUtilities,
+      allPackages,
+      new ChangeFiles(path.join(__dirname, 'rootHotfixChange')))).to
+        .throw('Cannot add hotfix change; hotfixChangeEnabled is false in configuration.');
+  });
+
   it('can resolve multiple changes requests on the same package', () => {
     const allPackages: Map<string, RushConfigurationProject> =
       RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
@@ -116,6 +171,33 @@ describe('findChangeRequests', () => {
     expect(allChanges['a'].newVersion).equals('2.0.0', 'a was not a major change');
     expect(allChanges['b'].newVersion).equals('1.0.1', 'b was not patched');
     expect(allChanges['c'].newVersion).equals('1.0.0', 'b was not left unchanged');
+  });
+
+  it('can resolve multiple hotfix changes', () => {
+    const configuration: RushConfiguration =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json'));
+    const allPackages: Map<string, RushConfigurationProject> = configuration.projectsByName;
+    // tslint:disable-next-line no-any
+    PublishUtilities.rushConfiguration = configuration as any;
+    const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
+      allPackages,
+      new ChangeFiles(path.join(__dirname, 'multipleHotfixChanges')));
+
+    expect(Object.keys(allChanges).length).to.equal(4);
+    expect(allChanges).has.property('a');
+    expect(allChanges).has.property('b');
+    expect(allChanges).has.property('c');
+    expect(allChanges).has.property('d');
+
+    expect(allChanges['a'].changeType).equals(ChangeType.hotfix, 'a was not a hotfix');
+    expect(allChanges['b'].changeType).equals(ChangeType.hotfix, 'b did not receive a hotfix');
+    expect(allChanges['c'].changeType).equals(ChangeType.hotfix, 'c did not receive a hotfix');
+    expect(allChanges['d'].changeType).equals(ChangeType.hotfix, 'd did not receive a hotfix');
+
+    expect(allChanges['a'].newVersion).equals('1.0.0-hotfix.0', 'a was not hotfixed');
+    expect(allChanges['b'].newVersion).equals('1.0.0-hotfix.0', 'b did not receive a hotfix version bump');
+    expect(allChanges['c'].newVersion).equals('1.0.0-hotfix.0', 'c did not receive a hotfix version bump');
+    expect(allChanges['d'].newVersion).equals('1.0.0-hotfix.0', 'd did not receive a hotfix version bump');
   });
 
   it('can update an explicit dependency', () => {
@@ -207,5 +289,19 @@ describe('getNewDependencyVersion', () => {
       'b', '1.2.0-pr.2')).equals('^1.2.0-pr.2');
     expect(PublishUtilities.getNewDependencyVersion(dependencies,
       'c', '1.3.0-pr.3')).equals('>=1.3.0-pr.3 <2.0.0');
+  });
+
+  it('can update to prerelease', () => {
+    const dependencies: { [key: string]: string} = {
+      'a': '~1.0.0',
+      'b': '^1.0.0',
+      'c': '>=1.0.0 <2.0.0'
+    };
+    expect(PublishUtilities.getNewDependencyVersion(dependencies,
+      'a', '1.0.0-hotfix.0')).equals('~1.0.0-hotfix.0');
+    expect(PublishUtilities.getNewDependencyVersion(dependencies,
+      'b', '1.0.0-hotfix.0')).equals('^1.0.0-hotfix.0');
+    expect(PublishUtilities.getNewDependencyVersion(dependencies,
+      'c', '1.0.0-hotfix.0')).equals('>=1.0.0-hotfix.0 <2.0.0');
   });
 });

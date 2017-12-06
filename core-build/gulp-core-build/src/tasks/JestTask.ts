@@ -19,6 +19,16 @@ export interface IJestConfig {
   isEnabled?: boolean;
 
   /**
+   * Indicate whether Jest cache is enabled or not.
+   */
+  cache?: boolean;
+
+  /**
+   * The directory where Jest should store its cached information.
+   */
+  cacheDirectory?: string;
+
+  /**
    * Same as Jest CLI option collectCoverageFrom
    */
   collectCoverageFrom?: string[];
@@ -37,6 +47,11 @@ export interface IJestConfig {
    * Same as Jest CLI option testPathIgnorePatterns
    */
   testPathIgnorePatterns?: string[];
+
+  /**
+   * Same as Jest CLI option moduleDirectories
+   */
+  moduleDirectories?: string[];
 }
 
 const DEFAULT_JEST_CONFIG_FILE_NAME: string = 'jest.config.json';
@@ -65,6 +80,7 @@ export class JestTask extends GulpTask<IJestConfig> {
   constructor() {
     super('jest',
     {
+      cache: true,
       collectCoverageFrom: ['lib/**/*.js?(x)', '!lib/**/test/**'],
       coverage: true,
       coverageReporters: ['json', 'html'],
@@ -92,23 +108,33 @@ export class JestTask extends GulpTask<IJestConfig> {
 
     this._copySnapshots(this.buildConfig.srcFolder, this.buildConfig.libFolder);
 
-    Jest.runCLI(
-      {
-        ci: this.buildConfig.production,
-        config: configFileFullPath,
-        collectCoverageFrom: this.taskConfig.collectCoverageFrom,
-        coverage: this.taskConfig.coverage,
-        coverageReporters: this.taskConfig.coverageReporters,
-        coverageDirectory: path.join(this.buildConfig.tempFolder, 'coverage'),
-        maxWorkers: 1,
-        moduleDirectories: ['node_modules', this.buildConfig.libFolder],
-        reporters: [path.join(__dirname, 'JestReporter.js')],
-        rootDir: this.buildConfig.rootPath,
-        runInBand: true,
-        testMatch: ['**/*.test.js?(x)'],
-        testPathIgnorePatterns: this.taskConfig.testPathIgnorePatterns,
-        updateSnapshot: !this.buildConfig.production
-      },
+    // tslint:disable-next-line:no-any
+    const jestConfig: any = {
+      ci: this.buildConfig.production,
+      cache: !!this.taskConfig.cache,
+      config: configFileFullPath,
+      collectCoverageFrom: this.taskConfig.collectCoverageFrom,
+      coverage: this.taskConfig.coverage,
+      coverageReporters: this.taskConfig.coverageReporters,
+      coverageDirectory: path.join(this.buildConfig.tempFolder, 'coverage'),
+      maxWorkers: 1,
+      moduleDirectories: !!this.taskConfig.moduleDirectories ?
+        this.taskConfig.moduleDirectories :
+        ['node_modules', this.buildConfig.libFolder],
+      reporters: [path.join(__dirname, 'JestReporter.js')],
+      rootDir: this.buildConfig.rootPath,
+      runInBand: true,
+      testMatch: ['**/*.test.js?(x)'],
+      testPathIgnorePatterns: this.taskConfig.testPathIgnorePatterns,
+      updateSnapshot: !this.buildConfig.production
+    };
+
+    if (this.taskConfig.cacheDirectory) {
+      // tslint:disable-next-line:no-string-literal
+      jestConfig['cacheDirectory'] = this.taskConfig.cacheDirectory;
+    }
+
+    Jest.runCLI(jestConfig,
       [this.buildConfig.rootPath],
       (result) => {
         if (result.numFailedTests || result.numFailedTestSuites) {

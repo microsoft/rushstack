@@ -13,6 +13,14 @@
       "type": "boolean",
       "default": false
     },
+    "cache": {
+      "description": "Indicate whether Jest cache is enabled or not",
+      "type": "boolean"
+    },
+    "cacheDirectory": {
+      "description": "The directory where Jest should store its cached information",
+      "type": "string"
+    },
     "collectCoverageFrom": {
       "description": "Same as Jest CLI option collectCoverageFrom",
       "type": "array",
@@ -34,6 +42,13 @@
     },
     "testPathIgnorePatterns": {
       "description": "Same as Jest CLI option testPathIgnorePatterns",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "moduleDirectories": {
+      "description": "Same as Jest CLI option moduleDirectories",
       "type": "array",
       "items": {
         "type": "string"

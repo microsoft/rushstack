@@ -44,7 +44,7 @@ export default class Npm {
       if (error.message.indexOf('npm ERR! 404') >= 0) {
         console.log(`Package ${packageName} does not exist in the registry.`);
       } else {
-        console.log(`Failed to get npm information about ${packageName}.`);
+        console.log(`Failed to get NPM information about ${packageName}.`);
         throw error;
       }
     }

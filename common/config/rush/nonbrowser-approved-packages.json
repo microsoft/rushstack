@@ -366,6 +366,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "strict-uri-encode",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "sudo",
       "allowedCategories": [ "libraries" ]
     },

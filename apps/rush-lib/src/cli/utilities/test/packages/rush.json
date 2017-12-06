@@ -3,6 +3,7 @@
   "rushVersion": "1.0.5",
   "nodeSupportedVersionRange": ">=4.3.0 <7.0.0",
   "projectFolderMinDepth": 1,
+  "hotfixChangeEnabled": true,
   "approvedPackagesPolicy": {
     "reviewCategories": [ "first-party", "third-party", "prototype" ],
     "ignoredNpmScopes": [ "@types", "@internal" ]

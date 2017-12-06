@@ -1,14 +1,9 @@
-// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
-// See LICENSE in the project root for license information.
-
-import * as colors from 'colors';
 import * as fsx from 'fs-extra';
 import * as os from 'os';
-import * as semver from 'semver';
-import npmPackageArg = require('npm-package-arg');
 
-import Utilities from '../../utilities/Utilities';
-import { RushConstants } from '../../RushConstants';
+import {
+  BaseShrinkwrapFile
+} from '../base/BaseShrinkwrapFile';
 
 interface IShrinkwrapDependencyJson {
   version: string;
@@ -23,14 +18,10 @@ interface IShrinkwrapJson {
   dependencies: { [dependency: string]: IShrinkwrapDependencyJson };
 }
 
-/**
- * This class is a parser for NPM's npm-shrinkwrap.json file format.
- */
-export default class ShrinkwrapFile {
+export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
   private _shrinkwrapJson: IShrinkwrapJson;
-  private _alreadyWarnedSpecs: Set<string> = new Set<string>();
 
-  public static loadFromFile(shrinkwrapJsonFilename: string): ShrinkwrapFile | undefined {
+  public static loadFromFile(shrinkwrapJsonFilename: string): NpmShrinkwrapFile | undefined {
     let data: string | undefined = undefined;
     try {
       if (!fsx.existsSync(shrinkwrapJsonFilename)) {
@@ -44,33 +35,18 @@ export default class ShrinkwrapFile {
         data = data.slice(1);
       }
 
-      return new ShrinkwrapFile(JSON.parse(data));
+      return new NpmShrinkwrapFile(JSON.parse(data));
     } catch (error) {
       throw new Error(`Error reading "${shrinkwrapJsonFilename}":` + os.EOL + `  ${error.message}`);
     }
   }
 
-  private static tryGetValue<T>(dictionary: { [key2: string]: T }, key: string): T | undefined {
-    if (dictionary.hasOwnProperty(key)) {
-      return dictionary[key];
-    }
-    return undefined;
+  public getTempProjectNames(): ReadonlyArray<string> {
+    return this._getTempProjectNames(this._shrinkwrapJson.dependencies);
   }
 
-  /**
-   * Returns the list of temp projects defined in this file.
-   * Example: [ '@rush-temp/project1', '@rush-temp/project2' ]
-   */
-  public getTempProjectNames(): ReadonlyArray<string> {
-    const result: string[] = [];
-    for (const key of Object.keys(this._shrinkwrapJson.dependencies)) {
-      // If it starts with @rush-temp, then include it:
-      if (Utilities.parseScopedPackageName(key).scope === RushConstants.rushTempNpmScope) {
-        result.push(key);
-      }
-    }
-    result.sort();  // make the result deterministic
-    return result;
+  protected getTopLevelDependencyVersion(dependencyName: string): string | undefined {
+    return this.getDependencyVersion(dependencyName);
   }
 
   /**
@@ -90,45 +66,33 @@ export default class ShrinkwrapFile {
    * In this example, hasCompatibleDependency("lib-b", ">= 1.1.0", "temp-project") would fail
    * because it finds lib-b@1.0.0 which does not satisfy the pattern ">= 1.1.0".
    */
-  public hasCompatibleDependency(dependencyName: string, versionRange: string, tempProjectName?: string): boolean {
+  protected getDependencyVersion(dependencyName: string, tempProjectName?: string): string | undefined {
 
     // First, check under tempProjectName, as this is the first place "rush link" looks.
     let dependencyJson: IShrinkwrapDependencyJson | undefined = undefined;
 
     if (tempProjectName) {
-      const tempDependency: IShrinkwrapDependencyJson | undefined = ShrinkwrapFile.tryGetValue(
+      const tempDependency: IShrinkwrapDependencyJson | undefined = NpmShrinkwrapFile.tryGetValue(
         this._shrinkwrapJson.dependencies, tempProjectName);
       if (tempDependency && tempDependency.dependencies) {
-        dependencyJson = ShrinkwrapFile.tryGetValue(tempDependency.dependencies, dependencyName);
+        dependencyJson = NpmShrinkwrapFile.tryGetValue(tempDependency.dependencies, dependencyName);
       }
     }
 
     // Otherwise look at the root of the shrinkwrap file
     if (!dependencyJson) {
-      dependencyJson = ShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
+      dependencyJson = NpmShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
     }
 
     if (!dependencyJson) {
-      return false;
+      return undefined;
     }
 
-    const result: npmPackageArg.IResult = npmPackageArg.resolve(dependencyName, versionRange);
-    switch (result.type) {
-      case 'version':
-      case 'range':
-        // If it's a SemVer pattern, then require that the shrinkwrapped version must be compatible
-        return semver.satisfies(dependencyJson.version, versionRange);
-      default:
-        // Only warn once for each spec
-        if (!this._alreadyWarnedSpecs.has(result.rawSpec)) {
-          this._alreadyWarnedSpecs.add(result.rawSpec);
-          console.log(colors.yellow(`WARNING: Not validating ${result.type}-based specifier: "${result.rawSpec}"`));
-        }
-        return true;
-    }
+    return dependencyJson.version;
   }
 
   private constructor(shrinkwrapJson: IShrinkwrapJson) {
+    super();
     this._shrinkwrapJson = shrinkwrapJson;
 
     // Normalize the data

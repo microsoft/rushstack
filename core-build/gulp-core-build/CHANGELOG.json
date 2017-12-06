@@ -2,6 +2,75 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.3.1",
+      "tag": "@microsoft/gulp-core-build_v3.3.1",
+      "date": "Thu, 30 Nov 2017 23:59:09 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Oleg F <1832418+olfilato@users.noreply.github.com>",
+            "commit": "68ba0ac17fb415cbc5ae9ec7508e9b426e50d46b",
+            "comment": "reverted addition of rootDir as a parameter for jest task"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.19` to `0.3.20`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.0",
+      "tag": "@microsoft/gulp-core-build_v3.3.0",
+      "date": "Thu, 30 Nov 2017 23:12:21 GMT",
+      "comments": {
+        "minor": [
+          {
+            "author": "Oleg F <1832418+olfilato@users.noreply.github.com>",
+            "commit": "23b9679ff4b4adbd4fd56253e7283a92091443ee",
+            "comment": "Added optional args moduleDirectories and rootDir to JestTask"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.18` to `0.3.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.9",
+      "tag": "@microsoft/gulp-core-build_v3.2.9",
+      "date": "Wed, 29 Nov 2017 17:05:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "QZ <qz2017@users.noreply.github.com>",
+            "commit": "a3b528954bebb0e683a2a860e36a568b3f778643",
+            "comment": "Add cache configuration to Jest task"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.17` to `0.3.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.8",
+      "tag": "@microsoft/gulp-core-build_v3.2.8",
+      "date": "Tue, 28 Nov 2017 23:43:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.16` to `0.3.17`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.7",
       "tag": "@microsoft/gulp-core-build_v3.2.7",
       "date": "Mon, 13 Nov 2017 17:04:50 GMT",
