@@ -32,13 +32,13 @@ class CommandLineOptionParameter extends CommandLineParameter<string> {
 }
 
 // @public
-class CommandLineParameter<T> {
-  constructor(key: string, converter?: (data: string) => T);
+class CommandLineParameter<TValue> {
+  constructor(key: string, converter?: (data: string) => TValue);
   // @internal
   public readonly _key: string;
   // @internal
   public _setValue(data: ICommandLineParserData): void;
-  public readonly value: T;
+  public readonly value: TValue;
 }
 
 // @public
@@ -54,6 +54,8 @@ class CommandLineParameterProvider {
   protected defineStringListParameter(definition: ICommandLineStringListDefinition): CommandLineStringListParameter;
   protected defineStringParameter(definition: ICommandLineStringDefinition): CommandLineStringParameter;
   protected abstract onDefineParameters(): void;
+  // (undocumented)
+  protected validateParameters(): void;
 }
 
 // @public
@@ -74,10 +76,12 @@ class CommandLineStringParameter extends CommandLineParameter<string> {
 }
 
 // @public
-interface IBaseCommandLineDefinition {
+interface IBaseCommandLineDefinition<TValue> {
+  defaultValue?: TValue | undefined;
   description: string;
   parameterLongName: string;
   parameterShortName?: string;
+  required?: boolean;
 }
 
 // @public
@@ -88,25 +92,24 @@ interface ICommandLineActionOptions {
 }
 
 // @public
-interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition {
+interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition<boolean> {
 }
 
 // @public
-interface ICommandLineIntegerDefinition extends IKeyedCommandLineDefinition {
+interface ICommandLineIntegerDefinition extends IKeyedCommandLineDefinition<number> {
 }
 
 // @public
-interface ICommandLineOptionDefinition extends IBaseCommandLineDefinition {
-  defaultValue?: string;
+interface ICommandLineOptionDefinition extends IBaseCommandLineDefinition<string> {
   options: string[];
 }
 
 // @public
-interface ICommandLineStringDefinition extends IKeyedCommandLineDefinition {
+interface ICommandLineStringDefinition extends IKeyedCommandLineDefinition<string> {
 }
 
 // @public
-interface ICommandLineStringListDefinition extends IKeyedCommandLineDefinition {
+interface ICommandLineStringListDefinition extends IKeyedCommandLineDefinition<string[]> {
 }
 
 // @public

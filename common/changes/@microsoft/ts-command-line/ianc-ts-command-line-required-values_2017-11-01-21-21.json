@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/ts-command-line",
+      "comment": "Include required and default values for all command line parameters.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/ts-command-line",
+  "email": "iclanton@users.noreply.github.com"
+}
