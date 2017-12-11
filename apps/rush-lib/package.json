@@ -19,7 +19,7 @@
     "@microsoft/stream-collator": "2.1.8",
     "@microsoft/ts-command-line": "2.2.8",
     "@types/fs-extra": "0.0.37",
-    "@types/node": "*",
+    "@types/node": "^8.0.0",
     "@types/z-schema": "3.16.31",
     "builtins": "~1.0.3",
     "colors": "~1.1.2",

@@ -10026,6 +10026,7 @@ packages:
       '@types/gulp': 3.8.33
       '@types/karma': 0.13.33
       '@types/log4js': 0.0.33
+      '@types/node': 8.0.58
       chai: 3.5.0
       gulp: 3.9.1
       gulp-karma: /gulp-karma/0.0.5/karma@0.13.22
@@ -10518,7 +10519,7 @@ specifiers:
   '@types/mime': 0.0.29
   '@types/minimatch': 2.0.29
   '@types/mocha': 2.2.38
-  '@types/node': '*'
+  '@types/node': ^8.0.0
   '@types/node-forge': 0.6.8
   '@types/node-notifier': 0.0.28
   '@types/orchestrator': 0.3.0
