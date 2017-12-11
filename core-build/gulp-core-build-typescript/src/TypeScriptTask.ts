@@ -73,7 +73,7 @@ export interface ITypeScriptTaskConfig {
   /**
    * If defined, apply these settings on top of the standardized project TypeScript compiler configuration.
    */
-  configAddons?: ts.Settings;
+  configurationAddons?: ts.Settings;
 }
 
 /**
@@ -156,8 +156,8 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
     let compilerOptions: ICompilerOptions =
       TypeScriptConfiguration.getGulpTypescriptOptions(this.buildConfig).compilerOptions;
 
-    if (this.taskConfig.configAddons) {
-      compilerOptions = lodash.merge({}, compilerOptions, this.taskConfig.configAddons);
+    if (this.taskConfig.configurationAddons) {
+      compilerOptions = lodash.merge({}, compilerOptions, this.taskConfig.configurationAddons);
     }
 
     TypeScriptConfiguration.fixupSettings(compilerOptions, this.logWarning);
