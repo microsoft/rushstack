@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-karma",
   "entries": [
     {
+      "version": "4.3.11",
+      "tag": "@microsoft/gulp-core-build-karma_v4.3.11",
+      "date": "Tue, 12 Dec 2017 03:33:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.3.1` to `3.3.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.3.10",
       "tag": "@microsoft/gulp-core-build-karma_v4.3.10",
       "date": "Thu, 30 Nov 2017 23:59:09 GMT",

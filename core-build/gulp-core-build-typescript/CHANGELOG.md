@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Thu, 30 Nov 2017 23:59:09 GMT and should not be manually modified.
+This log was last generated on Tue, 12 Dec 2017 03:33:26 GMT and should not be manually modified.
+
+## 4.3.0
+Tue, 12 Dec 2017 03:33:26 GMT
+
+### Minor changes
+
+- Allow the TS task's configuration to be extended on an instance-by-instance basis.
 
 ## 4.2.18
 Thu, 30 Nov 2017 23:59:09 GMT
