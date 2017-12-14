@@ -13,9 +13,9 @@ class ExternalApiHelper {
 // @public
 class Extractor {
   public constructor(config: IExtractorConfig, options?: IExtractorOptions);
+  public readonly actualConfig: IExtractorConfig;
   // @deprecated
   public analyzeProject(options?: IAnalyzeProjectOptions): void;
-  public readonly config: IExtractorConfig;
   public static jsonSchema: JsonSchema;
   public processProject(options?: IAnalyzeProjectOptions): boolean;
 }

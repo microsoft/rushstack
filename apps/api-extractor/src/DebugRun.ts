@@ -55,7 +55,7 @@ const extractor: Extractor = new Extractor(
   }
 );
 
-console.log('CONFIG:' + JSON.stringify(extractor.config, undefined, '  '));
+console.log('CONFIG:' + JSON.stringify(extractor.actualConfig, undefined, '  '));
 
 if (!extractor.processProject()) {
   console.log('processProject() failed the build');

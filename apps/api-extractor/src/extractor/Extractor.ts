@@ -81,7 +81,7 @@ export class Extractor {
     logError: (message: string) => console.error(colors.red(message))
   };
 
-  private readonly _config: IExtractorConfig;
+  private readonly _actualConfig: IExtractorConfig;
   private readonly _program: ts.Program;
   private readonly _localBuild: boolean;
   private readonly _monitoredLogger: MonitoredLogger;
@@ -104,7 +104,7 @@ export class Extractor {
     }
     this._monitoredLogger = new MonitoredLogger(mergedLogger);
 
-    this._config = Extractor._applyConfigDefaults(config);
+    this._actualConfig = Extractor._applyConfigDefaults(config);
 
     if (!options) {
       options = { };
@@ -112,16 +112,16 @@ export class Extractor {
 
     this._localBuild = options.localBuild || false;
 
-    switch (this._config.compiler.configType) {
+    switch (this._actualConfig.compiler.configType) {
       case 'tsconfig':
-        const rootFolder: string = this._config.compiler.rootFolder;
+        const rootFolder: string = this._actualConfig.compiler.rootFolder;
         if (!fsx.existsSync(rootFolder)) {
           throw new Error('The root folder does not exist: ' + rootFolder);
         }
 
         this._absoluteRootFolder = path.normalize(path.resolve(rootFolder));
 
-        let tsconfig: {} | undefined = this._config.compiler.overrideTsconfig;
+        let tsconfig: {} | undefined = this._actualConfig.compiler.overrideTsconfig;
         if (!tsconfig) {
           // If it wasn't overridden, then load it from disk
           tsconfig = JsonFile.load(path.join(this._absoluteRootFolder, 'tsconfig.json'));
@@ -167,8 +167,8 @@ export class Extractor {
    * It is provided for diagnostic purposes.  For example, a build script could write
    * this object to a JSON file to report the final configuration options used by API Extractor.
    */
-  public get config(): IExtractorConfig {
-    return this._config;
+  public get actualConfig(): IExtractorConfig {
+    return this._actualConfig;
   }
 
   /**
@@ -193,12 +193,12 @@ export class Extractor {
     }
 
     const projectConfig: IExtractorProjectConfig = options.projectConfig ?
-      options.projectConfig : this._config.project;
+      options.projectConfig : this._actualConfig.project;
 
     // This helps strict-null-checks to understand that _applyConfigDefaults() eliminated
     // any undefined members
-    if (!(this._config.policies && this._config.apiJsonFile && this._config.apiReviewFile
-      && this._config.packageTypings)) {
+    if (!(this._actualConfig.policies && this._actualConfig.apiJsonFile && this._actualConfig.apiReviewFile
+      && this._actualConfig.packageTypings)) {
       throw new Error('The configuration object wasn\'t normalized properly');
     }
 
@@ -206,7 +206,7 @@ export class Extractor {
       program: this._program,
       entryPointFile: path.resolve(this._absoluteRootFolder, projectConfig.entryPointSourceFile),
       logger: this._monitoredLogger,
-      policies: this._config.policies
+      policies: this._actualConfig.policies
     });
 
     for (const externalJsonFileFolder of projectConfig.externalJsonFileFolders || []) {
@@ -215,7 +215,7 @@ export class Extractor {
 
     const packageBaseName: string = path.basename(context.packageName);
 
-    const apiJsonFileConfig: IExtractorApiJsonFileConfig = this._config.apiJsonFile;
+    const apiJsonFileConfig: IExtractorApiJsonFileConfig = this._actualConfig.apiJsonFile;
 
     if (apiJsonFileConfig.enabled) {
       const outputFolder: string = path.resolve(this._absoluteRootFolder,
@@ -229,16 +229,16 @@ export class Extractor {
       jsonGenerator.writeJsonFile(apiJsonFilename, context);
     }
 
-    if (this._config.apiReviewFile.enabled) {
+    if (this._actualConfig.apiReviewFile.enabled) {
       const generator: ApiFileGenerator = new ApiFileGenerator();
       const apiReviewFilename: string = packageBaseName + '.api.ts';
 
       const actualApiReviewPath: string = path.resolve(this._absoluteRootFolder,
-        this._config.apiReviewFile.tempFolder, apiReviewFilename);
+        this._actualConfig.apiReviewFile.tempFolder, apiReviewFilename);
       const actualApiReviewShortPath: string = this._getShortFilePath(actualApiReviewPath);
 
       const expectedApiReviewPath: string = path.resolve(this._absoluteRootFolder,
-        this._config.apiReviewFile.apiReviewFolder, apiReviewFilename);
+        this._actualConfig.apiReviewFile.apiReviewFolder, apiReviewFilename);
       const expectedApiReviewShortPath: string = this._getShortFilePath(expectedApiReviewPath);
 
       const actualApiReviewContent: string = generator.generateApiFileContent(context);
@@ -280,11 +280,11 @@ export class Extractor {
       }
     }
 
-    if (this._config.packageTypings.enabled) {
+    if (this._actualConfig.packageTypings.enabled) {
       const packageTypingsGenerator: PackageTypingsGenerator = new PackageTypingsGenerator(context);
 
       const dtsFilename: string = path.resolve(this._absoluteRootFolder,
-        this._config.packageTypings.outputFolder, this._config.packageTypings.internalFilename);
+        this._actualConfig.packageTypings.outputFolder, this._actualConfig.packageTypings.internalFilename);
         this._monitoredLogger.logVerbose(`Writing package typings: ${dtsFilename}`);
 
       fsx.mkdirsSync(path.dirname(dtsFilename));
