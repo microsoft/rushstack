@@ -25,8 +25,8 @@
   "packageTypings": {
     "enabled": false,
     "outputFolder": "./dist",
-    "internalFilename": "index-internal.d.ts",
-    "previewFilename": "index-preview.d.ts",
-    "publicFilename": "index-public.d.ts"
+    "dtsFilePathForInternal": "index-internal.d.ts",
+    "dtsFilePathForPreview": "index-preview.d.ts",
+    "dtsFilePathForPublic": "index-public.d.ts"
   }
 }

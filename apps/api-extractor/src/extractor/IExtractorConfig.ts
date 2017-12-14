@@ -165,32 +165,36 @@ export interface IExtractorPackageTypingsConfig {
   outputFolder?: string;
 
   /**
-   * Specifies the output filename for an internal release.
+   * Specifies the *.d.ts file path used for an internal release.
+   * The default value is "index-internal.d.ts".
    *
    * @remarks
-   * The default value is "index-internal.d.ts".  This file will contain all definitions that
-   * are reachable from the entry point.
+   * If the path is not an absolute path, it will be resolved relative to the outputFolder.
+   * This output file will contain all definitions that are reachable from the entry point.
    */
-  internalFilename?: string;
+  dtsFilePathForInternal?: string;
 
   /**
    * Specifies the output filename for a preview release.
+   * The default value is "index-preview.d.ts".
    *
    * @remarks
-   * The default value is "index-preview.d.ts".  This file will contain all definitions that
-   * are reachable from the entry point, except definitions marked as \@alpha or \@internal.
+   * If the path is not an absolute path, it will be resolved relative to the outputFolder.
+   * This output file will contain all definitions that are reachable from the entry point,
+   * except definitions marked as \@alpha or \@internal.
    */
-  previewFilename?: string;
+  dtsFilePathForPreview?: string;
 
   /**
    * Specifies the output filename for a public release.
+   * The default value is "index-public.d.ts".
    *
    * @remarks
-   * The default value is "index-public.d.ts".  This file will contain all definitions that
-   * are reachable from the entry point, except definitions marked as \@beta, \@alpha,
-   * or \@internal.
+   * If the path is not an absolute path, it will be resolved relative to the outputFolder.
+   * This output file will contain all definitions that are reachable from the entry point,
+   * except definitions marked as \@beta, \@alpha, or \@internal.
    */
-  publicFilename?: string;
+  dtsFilePathForPublic?: string;
 }
 
 /**

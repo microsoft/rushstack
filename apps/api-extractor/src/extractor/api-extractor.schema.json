@@ -127,16 +127,16 @@
           "description": "Specifies where the *.d.ts files should be written. The default value is \"./dist\"",
           "type": "string"
         },
-        "internalFilename": {
-          "description": "Specifies the output filename for an internal release. The default value is \"index-internal.d.ts\". This file will contain all definitions that are reachable from the entry point.",
+        "dtsFilePathForInternal": {
+          "description": "Specifies the output filename for an internal release. The default value is \"index-internal.d.ts\". If the path is not an absolute path, it will be resolved relative to the outputFolder. This file will contain all definitions that are reachable from the entry point.",
           "type": "string"
         },
-        "previewFilename": {
-          "description": "Specifies the output filename for a preview release. The default value is \"index-preview.d.ts\". This file will contain all definitions that are reachable from the entry point, except definitions marked as @alpha or @internal",
+        "dtsFilePathForPreview": {
+          "description": "Specifies the output filename for a preview release. The default value is \"index-preview.d.ts\". If the path is not an absolute path, it will be resolved relative to the outputFolder. This file will contain all definitions that are reachable from the entry point, except definitions marked as @alpha or @internal",
           "type": "string"
         },
-        "publicFilename": {
-          "description": "Specifies the output filename for a public release. The default value is \"index-public.d.ts\". This file will contain all definitions that are reachable from the entry point, except definitions marked as @beta, @alpha, or @internal.",
+        "dtsFilePathForPublic": {
+          "description": "Specifies the output filename for a public release. The default value is \"index-public.d.ts\". If the path is not an absolute path, it will be resolved relative to the outputFolder. This file will contain all definitions that are reachable from the entry point, except definitions marked as @beta, @alpha, or @internal.",
           "type": "string"
         }
       },

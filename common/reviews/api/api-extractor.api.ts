@@ -190,11 +190,11 @@ interface IExtractorOptions {
 
 // @beta
 interface IExtractorPackageTypingsConfig {
+  dtsFilePathForInternal?: string;
+  dtsFilePathForPreview?: string;
+  dtsFilePathForPublic?: string;
   enabled: boolean;
-  internalFilename?: string;
   outputFolder?: string;
-  previewFilename?: string;
-  publicFilename?: string;
 }
 
 // @public

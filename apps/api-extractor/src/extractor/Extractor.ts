@@ -284,7 +284,7 @@ export class Extractor {
       const packageTypingsGenerator: PackageTypingsGenerator = new PackageTypingsGenerator(context);
 
       const dtsFilename: string = path.resolve(this._absoluteRootFolder,
-        this._actualConfig.packageTypings.outputFolder, this._actualConfig.packageTypings.internalFilename);
+        this._actualConfig.packageTypings.outputFolder, this._actualConfig.packageTypings.dtsFilePathForInternal);
 
       this._monitoredLogger.logVerbose(`Writing package typings: ${dtsFilename}`);
 
