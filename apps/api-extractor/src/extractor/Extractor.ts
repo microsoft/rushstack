@@ -285,7 +285,8 @@ export class Extractor {
 
       const dtsFilename: string = path.resolve(this._absoluteRootFolder,
         this._actualConfig.packageTypings.outputFolder, this._actualConfig.packageTypings.internalFilename);
-        this._monitoredLogger.logVerbose(`Writing package typings: ${dtsFilename}`);
+
+      this._monitoredLogger.logVerbose(`Writing package typings: ${dtsFilename}`);
 
       fsx.mkdirsSync(path.dirname(dtsFilename));
 

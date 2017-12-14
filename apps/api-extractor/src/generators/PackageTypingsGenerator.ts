@@ -43,10 +43,10 @@ class Entry {
   public getSortKey(): string {
     if (!this._sortKey) {
       if (this.localName.substr(0, 1) === '_') {
-        // Removes the leading underscore, for example:  "_example" --> "example*"
+        // Removes the leading underscore, for example: "_example" --> "example*"
         // This causes internal definitions to sort alphabetically with regular definitions.
         // The star is appended to preserve uniqueness, since "*" is not a legal  identifier character.
-        this._sortKey = this.localName.substr(1) + ' ';
+        this._sortKey = this.localName.substr(1) + '*';
       } else {
         this._sortKey = this.localName;
       }
@@ -96,26 +96,40 @@ export default class PackageTypingsGenerator {
   private readonly _entries: Entry[] = [];
 
   /**
-   * Walks up the tree from the given starting node.  If each parent matches the expected kind
-   * from parentKinds, then the matching node is returned.  Otherwise, undefined is returned.
+   * Returns an ancestor of "node", such that the ancestor, any intermediary nodes,
+   * and the starting node match a list of expected kinds.  Undefined is returned
+   * if there aren't enough ancestors, or if the kinds are incorrect.
+   *
+   * For example, suppose child "C" has parents A --> B --> C.
+   *
+   * Calling _matchAncestor(C, [ExportSpecifier, NamedExports, ExportDeclaration])
+   * would return A only if A is of kind ExportSpecifier, B is of kind NamedExports,
+   * and C is of kind ExportDeclaration.
+   *
+   * Calling _matchAncestor(C, [ExportDeclaration]) would return C.
    */
-  private static _matchParent<T extends ts.Node>(node: ts.Node, parentKinds: ts.SyntaxKind[]): T | undefined {
-    let current: ts.Node | undefined = node;
+  private static _matchAncestor<T extends ts.Node>(node: ts.Node, kindsToMatch: ts.SyntaxKind[]): T | undefined {
+    // (slice(0) clones an array)
+    const reversedParentKinds: ts.SyntaxKind[] = kindsToMatch.slice(0).reverse();
 
-    let  i: number = 0;
-    while (true) { // tslint:disable-line:no-constant-condition
-      if (!current || current.kind !== parentKinds[i]) {
+    let current: ts.Node | undefined = undefined;
+
+    for (const parentKind of reversedParentKinds) {
+      if (!current) {
+        // The first time through, start with node
+        current = node;
+      } else {
+        // Then walk the parents
+        current = current.parent;
+      }
+
+      // If we ran out of items, or if the kind doesn't match, then fail
+      if (!current || current.kind !== parentKind) {
         return undefined;
       }
-
-      if (i >= parentKinds.length - 1) {
-        break;
-      }
-
-      ++i;
-      current = current.parent;
     }
 
+    // If we matched everything, then return the node that matched the last parentKinds item
     return current as T;
   }
 
@@ -139,8 +153,8 @@ export default class PackageTypingsGenerator {
       // Is it an export declaration?
       if (currentAlias.declarations) {
         const exportDeclaration: ts.ExportDeclaration | undefined
-          = PackageTypingsGenerator._matchParent<ts.ExportDeclaration>(currentAlias.declarations[0],
-          [ts.SyntaxKind.ExportSpecifier, ts.SyntaxKind.NamedExports, ts.SyntaxKind.ExportDeclaration]);
+          = PackageTypingsGenerator._matchAncestor<ts.ExportDeclaration>(currentAlias.declarations[0],
+          [ts.SyntaxKind.ExportDeclaration, ts.SyntaxKind.NamedExports, ts.SyntaxKind.ExportSpecifier]);
 
         if (exportDeclaration && exportDeclaration.moduleSpecifier) {
           // Example: " '@microsoft/sp-lodash-subset'" or " './MyClass'"
@@ -213,14 +227,8 @@ export default class PackageTypingsGenerator {
     for (const entry of this._entries) {
       if (entry.followedSymbol) {
         for (const declaration of entry.followedSymbol.declarations || []) {
-          // console.log(PrettyPrinter.dumpTree(declaration));
-
-          // console.log(declaration.getText());
-          // console.log('=====================================');
 
           const span: Span = new Span(declaration);
-          // console.log(span.getDump());
-          // console.log('-------------------------------------');
 
           this._modifySpan(span, entry);
 
@@ -269,8 +277,8 @@ export default class PackageTypingsGenerator {
             // Since we are emitting a separate declaration for each one, we need to look upwards
             // in the ts.Node tree and write a copy of the enclosing VariableDeclarationList
             // content (e.g. "var" from "var x=1, y=2").
-            const list: ts.VariableDeclarationList | undefined = PackageTypingsGenerator._matchParent(span.node,
-              [ts.SyntaxKind.VariableDeclaration, ts.SyntaxKind.VariableDeclarationList]);
+            const list: ts.VariableDeclarationList | undefined = PackageTypingsGenerator._matchAncestor(span.node,
+              [ts.SyntaxKind.VariableDeclarationList, ts.SyntaxKind.VariableDeclaration]);
             if (!list) {
               throw new Error('Unsupported variable declaration');
             }
