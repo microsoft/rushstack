@@ -54,8 +54,6 @@ export interface IJestConfig {
   moduleDirectories?: string[];
 }
 
-const DEFAULT_JEST_CONFIG_FILE_NAME: string = 'jest.config.json';
-
 /**
  * Indicates if jest is enabled
  * @internal
@@ -103,8 +101,6 @@ export class JestTask extends GulpTask<IJestConfig> {
     gulp: typeof Gulp,
     completeCallback: (error?: string | Error) => void
   ): void {
-    const configFileFullPath: string = path.join(this.buildConfig.rootPath,
-      'config', 'jest', DEFAULT_JEST_CONFIG_FILE_NAME);
 
     this._copySnapshots(this.buildConfig.srcFolder, this.buildConfig.libFolder);
 
@@ -112,7 +108,6 @@ export class JestTask extends GulpTask<IJestConfig> {
     const jestConfig: any = {
       ci: this.buildConfig.production,
       cache: !!this.taskConfig.cache,
-      config: configFileFullPath,
       collectCoverageFrom: this.taskConfig.collectCoverageFrom,
       coverage: this.taskConfig.coverage,
       coverageReporters: this.taskConfig.coverageReporters,
@@ -135,7 +130,7 @@ export class JestTask extends GulpTask<IJestConfig> {
     }
 
     Jest.runCLI(jestConfig,
-      [this.buildConfig.rootPath],
+      [this.buildConfig.rootPath]).then(
       (result) => {
         if (result.numFailedTests || result.numFailedTestSuites) {
           completeCallback(new Error('Jest tests failed'));
@@ -145,7 +140,8 @@ export class JestTask extends GulpTask<IJestConfig> {
           }
           completeCallback();
         }
-      });
+      },
+      completeCallback);
   }
 
   private _copySnapshots(srcRoot: string, destRoot: string): void {

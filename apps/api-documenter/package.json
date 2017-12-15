@@ -29,6 +29,6 @@
     "@types/js-yaml": "3.9.1",
     "@types/node": "*",
     "gulp": "~3.9.1",
-    "@types/jest": "~21.1.5"
+    "@types/jest": "~21.1.8"
   }
 }

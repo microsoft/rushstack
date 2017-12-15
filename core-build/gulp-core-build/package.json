@@ -51,7 +51,7 @@
     "through2": "~2.0.1",
     "yargs": "~4.6.0",
     "z-schema": "~3.18.3",
-    "jest-cli": "~20.0.4",
+    "jest-cli": "~21.2.1",
     "jest": "~21.2.1"
   },
   "devDependencies": {

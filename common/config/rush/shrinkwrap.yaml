@@ -48,7 +48,7 @@ dependencies:
   '@types/mime': 0.0.29
   '@types/minimatch': 2.0.29
   '@types/mocha': 2.2.38
-  '@types/node': 8.0.56
+  '@types/node': 8.0.57
   '@types/node-forge': 0.6.8
   '@types/node-notifier': 0.0.28
   '@types/orchestrator': 0.3.0
@@ -107,7 +107,8 @@ dependencies:
   inquirer: 1.2.3
   istanbul-instrumenter-loader: 3.0.0
   jest: 21.2.1
-  jest-cli: 20.0.4
+  jest-cli: 21.2.1
+  jest-environment-jsdom: 21.2.1
   jju: 1.3.0
   js-yaml: 3.9.1
   karma: 0.13.22
@@ -300,7 +301,7 @@ packages:
   /@types/body-parser/1.16.8:
     dependencies:
       '@types/express': 4.0.39
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
     dev: false
     resolution:
       integrity: sha512-BdN2PXxOFnTXFcyONPW6t0fHjz2fvRZHVMFpaS0wYr+Y8fWEaNOs4V8LEu/fpzQlMx+ahdndgTaGTwPC+J/EeA==
@@ -325,13 +326,13 @@ packages:
       integrity: sha1-VBOwp6GxbdGL4OP9V9L+7Mgcx3Y=
   /@types/express-serve-static-core/4.0.41:
     dependencies:
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
     dev: false
     resolution:
       integrity: sha1-Bd81TLvlBptMCJMgBlhwAz9B5nA=
   /@types/express-serve-static-core/4.0.57:
     dependencies:
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
     dev: false
     resolution:
       integrity: sha512-QLAHjdLwEICm3thVbXSKRoisjfgMVI4xJH/HU8F385BR2HI7PmM6ax4ELXf8Du6sLmSpySXMYaI+xc//oQ/IFw==
@@ -352,34 +353,34 @@ packages:
       integrity: sha512-dBUam7jEjyuEofigUXCtublUHknRZvcRgITlGsTbFgPvnTwtQUt2NgLakbsf+PsGo/Nupqr3IXCYsOpBpofyrA==
   /@types/fs-extra/0.0.37:
     dependencies:
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
     dev: false
     resolution:
       integrity: sha1-GV8RvNmhuX2eQSxrZombVFRxofc=
   /@types/glob/5.0.30:
     dependencies:
       '@types/minimatch': 3.0.1
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
     dev: false
     resolution:
       integrity: sha1-ECZAnFYlqGiQdGAoCNCCsoZ7ilE=
   /@types/gulp-istanbul/0.9.30:
     dependencies:
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
     dev: false
     resolution:
       integrity: sha1-RAh5rEB1frbwiO+CjRaedfkV7gs=
   /@types/gulp-mocha/0.0.29:
     dependencies:
       '@types/mocha': 2.2.44
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
     dev: false
     resolution:
       integrity: sha1-O39aPvtaVDC75FyjhjdqvCAtAjo=
   /@types/gulp-util/3.0.30:
     dependencies:
       '@types/chalk': 2.2.0
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       '@types/through2': 2.0.33
       '@types/vinyl': 2.0.1
     dev: false
@@ -387,7 +388,7 @@ packages:
       integrity: sha1-TF9lg6IWCBOWZ+OsVrBbxn7PqPs=
   /@types/gulp/3.8.32:
     dependencies:
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       '@types/orchestrator': 0.3.2
       '@types/vinyl': 2.0.1
     dev: false
@@ -395,7 +396,7 @@ packages:
       integrity: sha1-g8WcaBzCM9Hsf4LSaVVVZvoTMVY=
   /@types/gulp/3.8.33:
     dependencies:
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       '@types/orchestrator': 0.3.2
       '@types/vinyl': 2.0.1
     dev: false
@@ -413,13 +414,13 @@ packages:
     dependencies:
       '@types/bluebird': 3.5.18
       '@types/log4js': 2.3.5
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
     dev: false
     resolution:
       integrity: sha1-ODXT2U6IS23oiEo+cKb1aQ5qWFA=
   /@types/loader-utils/1.1.0:
     dependencies:
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       '@types/webpack': 3.8.1
     dev: false
     resolution:
@@ -471,7 +472,7 @@ packages:
       integrity: sha1-+ziuQgvpybZ5vtP5dCARIJR7kg8=
   /@types/node-notifier/0.0.28:
     dependencies:
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
     dev: false
     resolution:
       integrity: sha1-hro9OqjZGDUswxkdiN4yiyDck8E=
@@ -479,10 +480,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-bYDPZTX0/s1aihdjLuAgogUAT5M+TpoWChEMea2p0yOcfn5bu3k6cJb9cp6nw268XeSNIGGr+4+/8V5K6BGzLQ==
-  /@types/node/8.0.56:
+  /@types/node/8.0.57:
     dev: false
     resolution:
-      integrity: sha512-JAlQv3hUWbrnruuTiLDf1scd4F/TBT0LgGEe+BBeF3p/Rc3yL6RV57WJN2nK5i+BshEz1sDllwH0Fzbuo7G4QA==
+      integrity: sha512-ZxrhcBxlZA7tn0HFf7ebUYfR9aHyBgjyavBLzyrYMYuAMbONBPY4S5O35562iV2FfwnZCjQky3gTDy1B3jSZ2Q==
   /@types/orchestrator/0.0.30:
     dependencies:
       '@types/q': 1.0.6
@@ -491,14 +492,14 @@ packages:
       integrity: sha1-3N2o1ke1aLex40F4yx8LRKyamOU=
   /@types/orchestrator/0.3.0:
     dependencies:
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       '@types/q': 0.0.37
     dev: false
     resolution:
       integrity: sha1-v4ShaZyTMNT+ic2BJj6PwJ+zKXg=
   /@types/orchestrator/0.3.2:
     dependencies:
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       '@types/q': 1.0.6
     dev: false
     resolution:
@@ -559,13 +560,13 @@ packages:
       integrity: sha512-pclMAvhPnXJcJu1ZZ8bQthuUcdDWzDuxDdbSf6l1U6s4fP6EBiZpPsOZYqFOrbqDV97sXGFSsb6AUpiLfv4xIA==
   /@types/through2/2.0.32:
     dependencies:
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
     dev: false
     resolution:
       integrity: sha1-RwAkRQ8at2QPGfnr9C09pXTCYSk=
   /@types/through2/2.0.33:
     dependencies:
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
     dev: false
     resolution:
       integrity: sha1-H/LoihAN+1sUDnu5h5HxGUQA0TE=
@@ -577,13 +578,13 @@ packages:
       integrity: sha512-BdFLCZW0GTl31AbqXSak8ss/MqEZ3DN2MH9rkAyGoTuzK7ifGUlX+u0nfbWeTsa7IPcZhtn8BlpYBXSV+vqGhQ==
   /@types/vinyl/1.2.30:
     dependencies:
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
     dev: false
     resolution:
       integrity: sha1-kRXAxFxAxXVziQa+n7Tfb1ueUBM=
   /@types/vinyl/2.0.1:
     dependencies:
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
     dev: false
     resolution:
       integrity: sha512-Joudabfn2ZofU2usW04y8OLmN75u7ZQkW0MCT3AnoBf5oUBp5iQ3Pgfz9+y1RdWkzhCPZo9/wBJ7FMWW2JrY0g==
@@ -593,7 +594,7 @@ packages:
       integrity: sha1-MEQ4FkfhHulzxa8uklMjkw9pHYA=
   /@types/webpack/3.0.11:
     dependencies:
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       '@types/tapable': 0.2.4
       '@types/uglify-js': 2.6.29
     dev: false
@@ -601,7 +602,7 @@ packages:
       integrity: sha512-zd9NK+SLVONhuD2iGVfE8KcpTHIwIcIZqyisRyGurjC2iXzRu1rkJmAWq4agBOw7rU3GocH29JX/gwrDLSA+cw==
   /@types/webpack/3.8.1:
     dependencies:
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       '@types/tapable': 0.2.4
       '@types/uglify-js': 2.6.29
     dev: false
@@ -1144,7 +1145,7 @@ packages:
   /babel-runtime/6.26.0:
     dependencies:
       core-js: 2.5.1
-      regenerator-runtime: 0.11.0
+      regenerator-runtime: 0.11.1
     dev: false
     resolution:
       integrity: sha1-llxwWGaOgrVde/4E/yM3vItWR/4=
@@ -7828,10 +7829,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-jVpo1GadrDAK59t/0jRx5VxYWQEDkkEKi6+HjE3joFVLfDOh9Xrdh0dF1eSq+BI/SwvTQ44gSscJ8N5zYL61sg==
-  /regenerator-runtime/0.11.0:
+  /regenerator-runtime/0.11.1:
     dev: false
     resolution:
-      integrity: sha512-/aA0kLeRb5N9K0d4fw7ooEbI+xDe+DKD499EQqygGqeS8N3xto15p09uY2xj7ixP81sNPXvRLnAQIqdVStgb1A==
+      integrity: sha512-MguG95oij0fC3QV3URf4V2SDYGJhJnJGqvIIgdECeODCT98wSWDAJ94SSuVpYQUoTcGUIL6L4yNB7j1DFFHSBg==
   /regex-cache/0.4.4:
     dependencies:
       is-equal-shallow: 0.1.3
@@ -9130,10 +9131,10 @@ packages:
     dev: false
     resolution:
       integrity: sha1-jbAWIuh35RuDFAyu58gIZK05DII=
-  /tslib/1.8.0:
+  /tslib/1.8.1:
     dev: false
     resolution:
-      integrity: sha512-ymKWWZJST0/CkgduC2qkzjMOWr4bouhuURNXCn/inEX0L57BnRG6FhX76o7FOnsjHazCjfU2LKeSrlS2sIKQJg==
+      integrity: sha1-aUavLR1lGnsYY7Ux1uWvpBqkTqw=
   /tslint-microsoft-contrib/5.0.1:
     dependencies:
       tsutils: 1.9.1
@@ -9162,7 +9163,7 @@ packages:
       minimatch: 3.0.4
       resolve: 1.5.0
       semver: 5.4.1
-      tslib: 1.8.0
+      tslib: 1.8.1
       tsutils: 2.13.0
     dev: false
     engines:
@@ -9181,7 +9182,7 @@ packages:
       minimatch: 3.0.4
       resolve: 1.5.0
       semver: 5.4.1
-      tslib: 1.8.0
+      tslib: 1.8.1
       tsutils: /tsutils/2.13.0/typescript@2.4.2
       typescript: 2.4.2
     dev: false
@@ -9215,7 +9216,7 @@ packages:
       integrity: sha1-ufmrROVa+WgYMdXyjQrur1x1DLA=
   /tsutils/2.13.0:
     dependencies:
-      tslib: 1.8.0
+      tslib: 1.8.1
     dev: false
     peerDependencies:
       typescript: '>=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >= 2.4.0-dev || >= 2.5.0-dev || >= 2.6.0-dev || >= 2.7.0-dev || >= 2.8.0-dev'
@@ -9223,7 +9224,7 @@ packages:
       integrity: sha512-FuWzNJbMsp3gcZMbI3b5DomhW4Ia41vMxjN63nKWI0t7f+I3UmHfRl0TrXJTwI2LUduDG+eR1Mksp3pvtlyCFQ==
   /tsutils/2.13.0/typescript@2.4.2:
     dependencies:
-      tslib: 1.8.0
+      tslib: 1.8.1
       typescript: 2.4.2
     dev: false
     id: registry.npmjs.org/tsutils/2.13.0
@@ -9972,10 +9973,11 @@ packages:
       '@types/fs-extra': 0.0.37
       '@types/jest': 21.1.8
       '@types/js-yaml': 3.9.1
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       colors: 1.1.2
       fs-extra: 0.26.7
       gulp: 3.9.1
+      jest-environment-jsdom: 21.2.1
       js-yaml: 3.9.1
     dev: false
     name: '@rush-temp/api-documenter'
@@ -9989,7 +9991,7 @@ packages:
       '@types/fs-extra': 0.0.37
       '@types/jest': 21.1.8
       '@types/lodash': 4.14.74
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       '@types/z-schema': 3.16.31
       colors: 1.1.2
       fs-extra: 0.26.7
@@ -10007,7 +10009,7 @@ packages:
     dependencies:
       '@types/chai': 3.4.34
       '@types/mocha': 2.2.38
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       chai: 3.5.0
       gulp: 3.9.1
     dev: false
@@ -10022,6 +10024,7 @@ packages:
       '@types/gulp': 3.8.33
       '@types/karma': 0.13.33
       '@types/log4js': 0.0.33
+      '@types/node': 8.0.57
       chai: 3.5.0
       gulp: 3.9.1
       gulp-karma: /gulp-karma/0.0.5/karma@0.13.22
@@ -10052,7 +10055,7 @@ packages:
       '@types/gulp-istanbul': 0.9.30
       '@types/gulp-mocha': 0.0.29
       '@types/mocha': 2.2.38
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       '@types/orchestrator': 0.3.0
       '@types/q': 0.0.32
       gulp: 3.9.1
@@ -10071,7 +10074,7 @@ packages:
       '@types/gulp': 3.8.33
       '@types/gulp-util': 3.0.30
       '@types/mime': 0.0.29
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       '@types/orchestrator': 0.3.0
       '@types/q': 0.0.32
       '@types/serve-static': 1.7.31
@@ -10087,6 +10090,7 @@ packages:
       gulp-texttojs: 1.0.3
       merge2: 1.0.3
       postcss-modules: 0.6.4
+      through2: 2.0.3
     dev: false
     name: '@rush-temp/gulp-core-build-sass'
     resolution:
@@ -10100,7 +10104,7 @@ packages:
       '@types/gulp': 3.8.33
       '@types/gulp-util': 3.0.30
       '@types/mime': 0.0.29
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       '@types/node-forge': 0.6.8
       '@types/orchestrator': 0.3.0
       '@types/q': 0.0.32
@@ -10127,7 +10131,7 @@ packages:
       '@types/fs-extra': 0.0.37
       '@types/gulp': 3.8.33
       '@types/gulp-util': 3.0.30
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       '@types/orchestrator': 0.3.0
       '@types/q': 0.0.32
       '@types/through2': 2.0.32
@@ -10159,7 +10163,7 @@ packages:
     dependencies:
       '@microsoft/node-library-build': 4.2.3
       '@types/gulp': 3.8.33
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       '@types/orchestrator': 0.3.0
       '@types/q': 0.0.32
       '@types/source-map': 0.5.0
@@ -10182,7 +10186,7 @@ packages:
       '@types/gulp': 3.8.33
       '@types/gulp-util': 3.0.30
       '@types/mocha': 2.2.38
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       '@types/node-notifier': 0.0.28
       '@types/orchestrator': 0.3.0
       '@types/q': 0.0.32
@@ -10204,7 +10208,8 @@ packages:
       gulp-if: 2.0.2
       gulp-util: 3.0.8
       jest: 21.2.1
-      jest-cli: 20.0.4
+      jest-cli: 21.2.1
+      jest-environment-jsdom: 21.2.1
       jju: 1.3.0
       lodash.merge: 4.3.5
       merge2: 1.0.3
@@ -10238,7 +10243,7 @@ packages:
     dependencies:
       '@types/loader-utils': 1.1.0
       '@types/mocha': 2.2.38
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       '@types/webpack': 3.0.11
       chai: 3.5.0
       gulp: 3.9.1
@@ -10251,7 +10256,7 @@ packages:
   'file:projects/loader-raw-script.tgz':
     dependencies:
       '@types/mocha': 2.2.38
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       chai: 3.5.0
       gulp: 3.9.1
       loader-utils: 1.1.0
@@ -10265,7 +10270,7 @@ packages:
     dependencies:
       '@types/lodash': 4.14.74
       '@types/mocha': 2.2.38
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       chai: 3.5.0
       gulp: 3.9.1
       loader-utils: 1.1.0
@@ -10282,7 +10287,7 @@ packages:
       '@types/chai': 3.4.34
       '@types/fs-extra': 0.0.37
       '@types/mocha': 2.2.38
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       '@types/z-schema': 3.16.31
       chai: 3.5.0
       fs-extra: 0.26.7
@@ -10298,7 +10303,7 @@ packages:
   'file:projects/node-library-build.tgz':
     dependencies:
       '@types/gulp': 3.8.33
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       gulp: 3.9.1
     dev: false
     name: '@rush-temp/node-library-build'
@@ -10309,7 +10314,7 @@ packages:
     dependencies:
       '@types/chai': 3.4.34
       '@types/mocha': 2.2.38
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       chai: 3.5.0
       gulp: 3.9.1
     dev: false
@@ -10340,7 +10345,7 @@ packages:
       '@types/lodash': 4.14.74
       '@types/minimatch': 2.0.29
       '@types/mocha': 2.2.38
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       '@types/semver': 5.3.33
       '@types/sinon': 1.16.34
       '@types/z-schema': 3.16.31
@@ -10377,7 +10382,7 @@ packages:
       '@types/chai': 3.4.34
       '@types/fs-extra': 0.0.37
       '@types/mocha': 2.2.38
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       '@types/semver': 5.3.33
       '@types/sinon': 1.16.34
       chai: 3.5.0
@@ -10394,7 +10399,7 @@ packages:
     dependencies:
       '@types/lodash': 4.14.74
       '@types/mocha': 2.2.38
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       '@types/tapable': 0.2.3
       '@types/uglify-js': 2.6.29
       '@types/webpack': 3.0.11
@@ -10413,7 +10418,7 @@ packages:
       '@types/chai': 3.4.34
       '@types/colors': 1.1.3
       '@types/mocha': 2.2.38
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       chai: 3.5.0
       colors: 1.1.2
       gulp: 3.9.1
@@ -10427,7 +10432,7 @@ packages:
     dependencies:
       '@types/chai': 3.4.34
       '@types/jest': 21.1.8
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       chai: 3.5.0
       gulp: 3.9.1
     dev: false
@@ -10440,7 +10445,7 @@ packages:
       '@microsoft/node-library-build': 4.2.3
       '@types/argparse': 1.0.33
       '@types/colors': 1.1.3
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       argparse: 1.0.9
       chai: 3.5.0
       colors: 1.1.2
@@ -10454,7 +10459,7 @@ packages:
   'file:projects/web-library-build.tgz':
     dependencies:
       '@types/gulp': 3.8.33
-      '@types/node': 8.0.56
+      '@types/node': 8.0.57
       gulp: 3.9.1
       gulp-replace: 0.5.4
     dev: false
@@ -10506,7 +10511,7 @@ specifiers:
   '@types/gulp-istanbul': 0.9.30
   '@types/gulp-mocha': 0.0.29
   '@types/gulp-util': 3.0.30
-  '@types/jest': ~21.1.5
+  '@types/jest': ~21.1.8
   '@types/js-yaml': 3.9.1
   '@types/karma': 0.13.33
   '@types/loader-utils': ~1.1.0
@@ -10574,7 +10579,8 @@ specifiers:
   inquirer: ~1.2.1
   istanbul-instrumenter-loader: ~3.0.0
   jest: ~21.2.1
-  jest-cli: ~20.0.4
+  jest-cli: ~21.2.1
+  jest-environment-jsdom: ^21.2.1
   jju: ~1.3.0
   js-yaml: ~3.9.1
   karma: ~0.13.9
