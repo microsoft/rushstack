@@ -14,7 +14,7 @@
   "license": "MIT",
   "dependencies": {
     "colors": "~1.1.2",
-    "@types/node": "*"
+    "@types/node": "^8.0.0"
   },
   "devDependencies": {
     "@types/chai": "3.4.34",

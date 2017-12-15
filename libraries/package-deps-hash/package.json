@@ -18,6 +18,6 @@
     "gulp": "~3.9.1",
     "@types/chai": "3.4.34",
     "@types/mocha": "2.2.38",
-    "@types/node": "*"
+    "@types/node": "^8.0.0"
   }
 }

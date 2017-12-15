@@ -306,8 +306,9 @@ export default class RushConfiguration {
       const knownSet: Set<string> = new Set<string>(knownRushConfigFilenames.map(x => x.toUpperCase()));
       if (packageManager === 'npm') {
         knownSet.add(RushConstants.npmShrinkwrapFilename.toUpperCase());
-      } else {
+      } else if (packageManager === 'pnpm') {
         knownSet.add(RushConstants.pnpmShrinkwrapFilename.toUpperCase());
+        knownSet.add(RushConstants.pnpmFileFilename.toUpperCase());
       }
 
       // Is the filename something we know?  If not, report an error.

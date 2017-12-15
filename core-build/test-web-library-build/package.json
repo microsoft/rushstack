@@ -12,7 +12,7 @@
     "@types/chai": "3.4.34",
     "chai": "~3.5.0",
     "@types/jest": "~21.1.8",
-    "@types/node": "*"
+    "@types/node": "^8.0.0"
   },
   "dependencies": {
     "@microsoft/load-themed-styles": "1.7.13",
