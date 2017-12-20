@@ -35,11 +35,7 @@
 
   },
 
-  "apiJsonFile": {
-    "enabled": true
-  },
-
-  "apiReviewFile": {
+  "packageTypings": {
     "enabled": true
   },
 
