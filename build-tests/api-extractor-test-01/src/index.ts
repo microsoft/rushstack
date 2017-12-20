@@ -24,25 +24,33 @@ export interface ISimpleInterface {
  * @public
  */
 export class AmbientConsumer {
-  // Found via tsconfig.json's "lib" setting, which specifies the built-in "es2015.collection"
+  /**
+   * Found via tsconfig.json's "lib" setting, which specifies the built-in "es2015.collection"
+   */
   public builtinDefinition1(): Map<string, string> {
     return new Map<string, string>();
   }
 
-  // Found via tsconfig.json's "lib" setting, which specifies the built-in "es2015.promise"
+  /**
+   * Found via tsconfig.json's "lib" setting, which specifies the built-in "es2015.promise"
+   */
   public builtinDefinition2(): Promise<void> {
     return new Promise<void>(() => { /* */ });
   }
 
-  // Configured via tsconfig.json's "lib" setting, which specifies "@types/jest".
-  // The emitted index.d.ts gets a reference like this:  <reference types="jest" />
+  /**
+   * Configured via tsconfig.json's "lib" setting, which specifies "@types/jest".
+   * The emitted index.d.ts gets a reference like this:  <reference types="jest" />
+   */
   public definitelyTyped(): jest.Context {
     return {} as jest.Context;
   }
 
-  // Found via tsconfig.json's "include" setting point to a *.d.ts file.
-  // This is an old-style Definitely Typed definition, which is the worst possible kind,
-  // because consumers are expected to provide this, with no idea where it came from.
+  /**
+   * Found via tsconfig.json's "include" setting point to a *.d.ts file.
+   * This is an old-style Definitely Typed definition, which is the worst possible kind,
+   * because consumers are expected to provide this, with no idea where it came from.
+   */
   public localTypings(): IAmbientInterfaceExample {
     return {} as IAmbientInterfaceExample;
   }
