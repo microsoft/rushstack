@@ -183,7 +183,13 @@ export class Extractor {
    * Invokes the API Extractor engine, using the configuration that was passed to the constructor.
    * @param options - provides additional runtime state that is NOT part of the API Extractor
    *     config file.
-   * @returns true if there were no errors or warnings; false if the tool chain should fail the build
+   * @returns true for a successful build, or false if the tool chain should fail the build
+   *
+   * @remarks
+   *
+   * This function returns false to indicate that the build failed, i.e. the command-line tool
+   * would return a nonzero exit code.  Normally the build fails if there are any errors or
+   * warnings; however, if options.localBuild=true then warnings are ignored.
    */
   public processProject(options?: IAnalyzeProjectOptions): boolean {
     this._monitoredLogger.resetCounters();
@@ -293,8 +299,13 @@ export class Extractor {
       packageTypingsGenerator.writeTypingsFile(dtsFilename);
     }
 
-    // If there were any errors or warnings, then fail the build
-    return (this._monitoredLogger.errorCount + this._monitoredLogger.warningCount) === 0;
+    if (this._localBuild) {
+      // For a local build, fail if there were errors (but ignore warnings)
+      return this._monitoredLogger.errorCount === 0;
+    } else {
+      // For a production build, fail if there were any errors or warnings
+      return (this._monitoredLogger.errorCount + this._monitoredLogger.warningCount) === 0;
+    }
   }
 
   private _getShortFilePath(absolutePath: string): string {
@@ -303,5 +314,4 @@ export class Extractor {
     }
     return path.relative(this._absoluteRootFolder, absolutePath).replace(/\\/g, '/');
   }
-
 }
