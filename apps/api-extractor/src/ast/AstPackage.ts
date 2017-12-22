@@ -51,17 +51,16 @@ export default class AstPackage extends AstModule {
     // The scoped package name. (E.g. "@microsoft/api-extractor")
     this.name = context.packageName;
 
-    const exportSymbols: ts.Symbol[] = this.typeChecker.getExportsOfModule(this.declarationSymbol);
-    if (exportSymbols) {
-      for (const exportSymbol of exportSymbols) {
+    const exportSymbols: ts.Symbol[] = this.typeChecker.getExportsOfModule(this.declarationSymbol) || [];
+
+    for (const exportSymbol of exportSymbols) {
         this.processModuleExport(exportSymbol);
 
-        const followedSymbol: ts.Symbol = this.followAliases(exportSymbol);
-        this._exportedNormalizedSymbols.push({
-          exportedName: exportSymbol.name,
-          followedSymbol: followedSymbol
-        });
-      }
+        const followedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(exportSymbol, this.typeChecker);
+      this._exportedNormalizedSymbols.push({
+        exportedName: exportSymbol.name,
+        followedSymbol: followedSymbol
+      });
     }
   }
 
@@ -77,7 +76,7 @@ export default class AstPackage extends AstModule {
    * the string "MyClass".
    */
   public tryGetExportedSymbolName(symbol: ts.Symbol): string | undefined {
-    const followedSymbol: ts.Symbol = this.followAliases(symbol);
+    const followedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(symbol, this.typeChecker);
     for (const exportedSymbol of this._exportedNormalizedSymbols) {
       if (exportedSymbol.followedSymbol === followedSymbol) {
         return exportedSymbol.exportedName;

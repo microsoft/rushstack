@@ -51,7 +51,7 @@ export default class AstStructuredType extends AstItemContainer {
       this.kind = AstItemKind.Class;
     }
 
-    for (const memberDeclaration of this._classLikeDeclaration.members) {
+    for (const memberDeclaration of this._classLikeDeclaration.members || []) {
       const memberSymbol: ts.Symbol = TypeScriptHelpers.tryGetSymbolForDeclaration(memberDeclaration);
       if (memberSymbol) {
         this._processMember(memberSymbol, memberDeclaration);

@@ -13,6 +13,7 @@ class ExternalApiHelper {
 // @public
 class Extractor {
   public constructor(config: IExtractorConfig, options?: IExtractorOptions);
+  public readonly actualConfig: IExtractorConfig;
   // @deprecated
   public analyzeProject(options?: IAnalyzeProjectOptions): void;
   public static jsonSchema: JsonSchema;
@@ -174,6 +175,8 @@ interface IExtractorConfig {
   apiJsonFile?: IExtractorApiJsonFileConfig;
   apiReviewFile?: IExtractorApiReviewFileConfig;
   compiler: IExtractorTsconfigCompilerConfig | IExtractorRuntimeCompilerConfig;
+  // @beta
+  packageTypings?: IExtractorPackageTypingsConfig;
   policies?: IExtractorPoliciesConfig;
   project: IExtractorProjectConfig;
 }
@@ -183,6 +186,15 @@ interface IExtractorOptions {
   compilerProgram?: ts.Program;
   customLogger?: Partial<ILogger>;
   localBuild?: boolean;
+}
+
+// @beta
+interface IExtractorPackageTypingsConfig {
+  dtsFilePathForInternal?: string;
+  dtsFilePathForPreview?: string;
+  dtsFilePathForPublic?: string;
+  enabled: boolean;
+  outputFolder?: string;
 }
 
 // @public
