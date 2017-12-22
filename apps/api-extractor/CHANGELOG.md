@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 12 Dec 2017 03:33:26 GMT and should not be manually modified.
+This log was last generated on Fri, 22 Dec 2017 17:04:46 GMT and should not be manually modified.
+
+## 4.3.5
+Fri, 22 Dec 2017 17:04:46 GMT
+
+### Patches
+
+- Fixed an issue where warnings would cause the api-extractor tool to return a nonzero exit code for a "--local" build; warnings should not fail the build in this scenario
 
 ## 4.3.4
 Tue, 12 Dec 2017 03:33:26 GMT
