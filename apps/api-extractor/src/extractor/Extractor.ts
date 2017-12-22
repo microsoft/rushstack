@@ -74,6 +74,8 @@ export class Extractor {
   private static _defaultConfig: Partial<IExtractorConfig> = JsonFile.load(path.join(__dirname,
     './api-extractor-defaults.json'));
 
+  private static _outputFileExtensionRegExp: RegExp = /\.d\.ts$/i;
+
   private static _defaultLogger: ILogger = {
     logVerbose: (message: string) => console.log('(Verbose) ' + message),
     logInfo: (message: string) => console.log(message),
@@ -86,6 +88,45 @@ export class Extractor {
   private readonly _localBuild: boolean;
   private readonly _monitoredLogger: MonitoredLogger;
   private readonly _absoluteRootFolder: string;
+
+  /**
+   * Given a list of absolute file paths, return a list containing only the declaration
+   * files.  Duplicates are also eliminated.
+   *
+   * @remarks
+   * The tsconfig.json settings specify the compiler's input (a set of *.ts source files,
+   * plus some *.d.ts declaration files used for legacy typings).  However API Extractor
+   * analyzes the compiler's output (a set of *.d.ts entry point files, plus any legacy
+   * typings).  This requires API Extractor to generate a special file list when it invokes
+   * the compiler.
+   *
+   * For configType=tsconfig this happens automatically, but for configType=runtime it is
+   * the responsibility of the custom tooling.  The generateFilePathsForAnalysis() function
+   * is provided to facilitate that.  Duplicates are removed so that entry points can be
+   * appended without worrying whether they may already appear in the tsconfig.json file list.
+   */
+  public static generateFilePathsForAnalysis(inputFilePaths: string[]): string[] {
+    const analysisFilePaths: string[] = [];
+
+    const seenFiles: Set<string> = new Set<string>();
+
+    for (const inputFilePath of inputFilePaths) {
+      const inputFileToUpper: string = inputFilePath.toUpperCase();
+      if (!seenFiles.has(inputFileToUpper)) {
+        seenFiles.add(inputFileToUpper);
+
+        if (!path.isAbsolute(inputFilePath)) {
+          throw new Error('Input file is not an absolute path: ' + inputFilePath);
+        }
+
+        if (Extractor._outputFileExtensionRegExp.test(inputFilePath)) {
+          analysisFilePaths.push(inputFilePath);
+        }
+      }
+    }
+
+    return analysisFilePaths;
+  }
 
   private static _applyConfigDefaults(config: IExtractorConfig): IExtractorConfig {
     // Use the provided config to override the defaults
@@ -129,7 +170,15 @@ export class Extractor {
 
         const commandLine: ts.ParsedCommandLine = ts.parseJsonConfigFileContent(tsconfig,
           ts.sys, this._absoluteRootFolder);
-        this._program = ts.createProgram(commandLine.fileNames, commandLine.options);
+
+        const normalizedEntryPointFile: string = path.normalize(
+          path.resolve(this._absoluteRootFolder, this._actualConfig.project.entryPointSourceFile));
+
+        // Append the normalizedEntryPointFile and remove any source files from the list
+        const analysisFilePaths: string[] = Extractor.generateFilePathsForAnalysis(commandLine.fileNames
+          .concat(normalizedEntryPointFile));
+
+        this._program = ts.createProgram(analysisFilePaths, commandLine.options);
 
         if (commandLine.errors.length > 0) {
           throw new Error('Error parsing tsconfig.json content: ' + commandLine.errors[0].messageText);
@@ -206,6 +255,10 @@ export class Extractor {
     if (!(this._actualConfig.policies && this._actualConfig.apiJsonFile && this._actualConfig.apiReviewFile
       && this._actualConfig.packageTypings)) {
       throw new Error('The configuration object wasn\'t normalized properly');
+    }
+
+    if (!Extractor._outputFileExtensionRegExp.test(projectConfig.entryPointSourceFile)) {
+      throw new Error('The entry point is not a declaration file: ' + projectConfig.entryPointSourceFile);
     }
 
     const context: ExtractorContext = new ExtractorContext({
