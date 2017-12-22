@@ -25,10 +25,10 @@ export enum ApiAccessModifier {
  * AstMember is used to represent members of classes, interfaces, and nested type literal expressions.
  */
 export default class AstMember extends AstItem {
+  public accessModifier: ApiAccessModifier;
   /**
    * True if the member is an optional field value, indicated by a question mark ("?") after the name
    */
-  public accessModifier: ApiAccessModifier;
   public isOptional: boolean;
   public isStatic: boolean;
 

@@ -4,6 +4,9 @@
 /* tslint:disable:no-bitwise */
 
 import * as ts from 'typescript';
+
+import { Span } from './generators/Span';
+
 /**
   * Some helper functions for formatting certain TypeScript Compiler API expressions.
   */
@@ -61,27 +64,17 @@ export default class PrettyPrinter {
     * "test(): void;" without the curly braces.
     */
   public static getDeclarationSummary(node: ts.Node): string {
-    let result: string = '';
-    let previousSyntaxKind: ts.SyntaxKind = ts.SyntaxKind.Unknown;
-
-    for (const childNode of node.getChildren()) {
-      switch (childNode.kind) {
-        case ts.SyntaxKind.JSDocComment:
-          break;
-        case ts.SyntaxKind.Block:
-          result += ';';
-          break;
-        default:
-          if (PrettyPrinter._wantSpaceAfter(previousSyntaxKind)
-            && PrettyPrinter._wantSpaceBefore(childNode.kind)) {
-            result += ' ';
-          }
-          result += childNode.getText();
-          previousSyntaxKind = childNode.kind;
+    const rootSpan: Span = new Span(node);
+    rootSpan.modify((span: Span, previousSpan: Span | undefined, parentSpan: Span | undefined) => {
+      switch (span.kind) {
+        case ts.SyntaxKind.JSDocComment:   // strip any code comments
+        case ts.SyntaxKind.DeclareKeyword: // strip the "declare" keyword
+          span.modification.skipAll();
           break;
       }
-    }
-    return result;
+    });
+
+    return rootSpan.getModifiedText();
   }
 
   /**
@@ -128,25 +121,4 @@ export default class PrettyPrinter {
     /* tslint:enable:no-any */
   }
 
-  private static _wantSpaceAfter(syntaxKind: ts.SyntaxKind): boolean {
-    switch (syntaxKind) {
-      case ts.SyntaxKind.Unknown:
-      case ts.SyntaxKind.OpenParenToken:
-      case ts.SyntaxKind.CloseParenToken:
-        return false;
-    }
-    return true;
-  }
-
-  private static _wantSpaceBefore(syntaxKind: ts.SyntaxKind): boolean {
-    switch (syntaxKind) {
-      case ts.SyntaxKind.Unknown:
-      case ts.SyntaxKind.OpenParenToken:
-      case ts.SyntaxKind.CloseParenToken:
-      case ts.SyntaxKind.ColonToken:
-      case ts.SyntaxKind.SemicolonToken:
-        return false;
-    }
-    return true;
-  }
 }
