@@ -152,7 +152,20 @@ export class JestTask extends GulpTask<IJestConfig> {
     const pattern: string = path.join(srcRoot, '**/__snapshots__/*.snap');
     globby.sync(pattern).forEach(sourceFile => {
       const destination: string = sourceFile.replace(srcRoot, destRoot);
-      fsx.copySync(sourceFile, destination);
+      const tsDestination: string = destination.replace('.test.js.snap', '.test.ts.snap');
+      const tsxDestination: string = destination.replace('.test.js.snap', '.test.tsx.snap');
+
+      if (this._doesSnapBaseFileExist(tsDestination)) {
+        fsx.copySync(sourceFile, tsDestination);
+      } else if (this._doesSnapBaseFileExist(tsxDestination)) {
+        fsx.copySync(sourceFile, tsxDestination);
+      }
     });
+  }
+
+  private _doesSnapBaseFileExist(snapFilePath: string): boolean {
+    const fileName: string = path.basename(snapFilePath, '.snap');
+    const snapBaseFilePath: string = path.resolve(snapFilePath, '../../', fileName);
+    return fsx.existsSync(snapBaseFilePath);
   }
 }
