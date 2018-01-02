@@ -36,8 +36,9 @@ groups:
     conditions:
       files:
         - "apps/*"
-        - "libraries/*"
+        - "build-tests/*"
         - "core-build/*"
+        - "libraries/*"
         - "webpack/*"
     required: 1
     users:

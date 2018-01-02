@@ -2,6 +2,48 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "1.0.14",
+      "tag": "@microsoft/api-documenter_v1.0.14",
+      "date": "Fri, 22 Dec 2017 17:04:46 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `4.3.4` to `4.3.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.21` to `0.3.22`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `2.2.9` to `2.2.10`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.2.12` to `4.2.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.13",
+      "tag": "@microsoft/api-documenter_v1.0.13",
+      "date": "Tue, 12 Dec 2017 03:33:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `4.3.3` to `4.3.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.20` to `0.3.21`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `2.2.8` to `2.2.9`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.2.11` to `4.2.12`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.12",
       "tag": "@microsoft/api-documenter_v1.0.12",
       "date": "Thu, 30 Nov 2017 23:59:09 GMT",

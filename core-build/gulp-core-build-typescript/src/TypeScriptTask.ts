@@ -5,6 +5,7 @@ import gulpType = require('gulp');
 import ts = require('gulp-typescript');
 import * as Typescript from 'typescript';
 import * as path from 'path';
+import * as lodash from 'lodash';
 
 import { GulpTask, IBuildConfig } from '@microsoft/gulp-core-build';
 
@@ -68,6 +69,11 @@ export interface ITypeScriptTaskConfig {
    * If defined, drop typescript files build using modules=ES6.
    */
   libES6Dir?: string;
+
+  /**
+   * If defined, apply these settings on top of the standardized project TypeScript compiler configuration.
+   */
+  configurationAddons?: ts.Settings;
 }
 
 /**
@@ -147,8 +153,12 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       this.log(`TypeScript version: ${typescript.version}`);
     }
     // tslint:disable-next-line:no-any
-    const compilerOptions: ICompilerOptions =
+    let compilerOptions: ICompilerOptions =
       TypeScriptConfiguration.getGulpTypescriptOptions(this.buildConfig).compilerOptions;
+
+    if (this.taskConfig.configurationAddons) {
+      compilerOptions = lodash.merge({}, compilerOptions, this.taskConfig.configurationAddons);
+    }
 
     TypeScriptConfiguration.fixupSettings(compilerOptions, this.logWarning);
 

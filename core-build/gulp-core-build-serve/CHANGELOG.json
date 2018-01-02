@@ -2,6 +2,30 @@
   "name": "@microsoft/gulp-core-build-serve",
   "entries": [
     {
+      "version": "3.1.20",
+      "tag": "@microsoft/gulp-core-build-serve_v3.1.20",
+      "date": "Fri, 22 Dec 2017 17:04:46 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.3.2` to `3.3.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.19",
+      "tag": "@microsoft/gulp-core-build-serve_v3.1.19",
+      "date": "Tue, 12 Dec 2017 03:33:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.3.1` to `3.3.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.1.18",
       "tag": "@microsoft/gulp-core-build-serve_v3.1.18",
       "date": "Thu, 30 Nov 2017 23:59:09 GMT",
