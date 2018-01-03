@@ -22,7 +22,7 @@ export interface IVersionPolicyJson {
 export interface ILockStepVersionJson extends IVersionPolicyJson {
   version: string;
   nextBump: string;
-  changeLogHostProject?: string;
+  mainProject?: string;
 }
 
 /**
@@ -57,14 +57,10 @@ export class VersionPolicyConfiguration {
       return;
     }
     this.versionPolicies.forEach((policy) => {
-      if (policy instanceof LockStepVersionPolicy) {
-        const lockStepPolicy: LockStepVersionPolicy = policy as LockStepVersionPolicy;
-        if (lockStepPolicy.changeLogHostProject) {
-          if (!projectsByName.get(lockStepPolicy.changeLogHostProject)) {
-            throw new Error(`Version policy \"${policy.policyName}\" has a non-existing changeLogHostProject:` +
-              ` ${lockStepPolicy.changeLogHostProject}.`);
-          }
-        }
+      const lockStepPolicy: LockStepVersionPolicy = policy as LockStepVersionPolicy;
+      if (lockStepPolicy.mainProject && !projectsByName.get(lockStepPolicy.mainProject)) {
+        throw new Error(`Version policy \"${policy.policyName}\" has a non-existing mainProject:` +
+          ` ${lockStepPolicy.mainProject}.`);
       }
     });
   }

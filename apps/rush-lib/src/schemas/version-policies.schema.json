@@ -32,8 +32,8 @@
           "description": "Type of next version bump",
           "enum": [ "prerelease", "release", "minor", "patch", "major" ]
         },
-        "changeLogHostProject": {
-          "description": "The name of project that hosts the change log for all the packages in the policy",
+        "mainProject": {
+          "description": "The main project for this version policy",
           "type": "string"
         }
       },

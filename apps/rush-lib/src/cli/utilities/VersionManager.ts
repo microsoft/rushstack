@@ -252,12 +252,8 @@ export class VersionManager {
     const dependencyRushProject: RushConfigurationProject | undefined =
       this._rushConfiguration.projectsByName.get(dependencyName);
 
-    if (!dependencyRushProject || !rushProject.shouldPublish ||
-      dependencyRushProject.versionPolicyName === rushProject.versionPolicyName
-    ) {
-      return false;
-    }
-    return true;
+    return !!dependencyRushProject && rushProject.shouldPublish &&
+      dependencyRushProject.versionPolicyName !== rushProject.versionPolicyName;
   }
 
   private _trackDependencyChange(

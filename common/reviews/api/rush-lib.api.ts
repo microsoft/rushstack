@@ -150,9 +150,8 @@ class LockStepVersionPolicy extends VersionPolicy {
   // @internal
   public readonly _json: ILockStepVersionJson;
   public bump(bumpType?: BumpType, identifier?: string): void;
-  // (undocumented)
-  public readonly changeLogHostProject: string | undefined;
   public ensure(project: IPackageJson): IPackageJson | undefined;
+  public readonly mainProject: string | undefined;
   public readonly nextBump: BumpType;
   public validate(versionString: string, packageName: string): void;
   public readonly version: semver.SemVer;
@@ -241,7 +240,7 @@ class RushConfigurationProject {
   public readonly cyclicDependencyProjects: Set<string>;
   public readonly downstreamDependencyProjects: string[];
   // @beta
-  public hostChangeLog(): boolean;
+  public readonly isMainProject: boolean;
   public readonly packageJson: IPackageJson;
   public readonly packageName: string;
   public readonly projectFolder: string;

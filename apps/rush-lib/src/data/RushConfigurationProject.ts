@@ -223,22 +223,25 @@ export default class RushConfigurationProject {
   }
 
   /**
-   * Indicate whether this project needs to host change log.
-   * A project that has shouldPublish=true or a version policy should have its change log.
-   * In the case when this project is lockstepped and the version policy has a change log host, this function
-   * returns true if the project is the change log host and returns false if not.
+   * Indicate whether this project is the main project for the related version policy.
+   *
+   * False if the project is not for publishing.
+   * True if the project is individually versioned or if its lockstep version policy does not specify main project.
+   * False if the project is lockstepped and is not the main project for its version policy.
+   *
    * @beta
    */
-  public hostChangeLog(): boolean {
+  public get isMainProject(): boolean {
     if (!this.shouldPublish) {
       return false;
     }
-    if (this.versionPolicy && this.versionPolicy instanceof LockStepVersionPolicy) {
-      const lockStepPolicy: LockStepVersionPolicy = new LockStepVersionPolicy(this.versionPolicy._json);
-      if (lockStepPolicy.changeLogHostProject && lockStepPolicy.changeLogHostProject !== this.packageName) {
-        return false;
+    let isMain: boolean = true;
+    if (this.versionPolicy && this.versionPolicy.isLockstepped) {
+      const lockStepPolicy: LockStepVersionPolicy = this.versionPolicy as LockStepVersionPolicy;
+      if (lockStepPolicy.mainProject && lockStepPolicy.mainProject !== this.packageName) {
+        isMain = false;
       }
     }
-    return true;
+    return isMain;
   }
 }

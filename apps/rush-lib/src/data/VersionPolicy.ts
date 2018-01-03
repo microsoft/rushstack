@@ -136,7 +136,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
   // nextBump is probably not needed. It can be prerelease only.
   // Other types of bumps can be passed in as a parameter to bump method, so can identifier.
   private _nextBump: BumpType;
-  private _changeLogHostProject: string | undefined;
+  private _mainProject: string | undefined;
 
   /**
    * @internal
@@ -145,7 +145,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
     super(versionPolicyJson);
     this._version = new semver.SemVer(versionPolicyJson.version);
     this._nextBump = BumpType[versionPolicyJson.nextBump];
-    this._changeLogHostProject = versionPolicyJson.changeLogHostProject;
+    this._mainProject = versionPolicyJson.mainProject;
   }
 
   /**
@@ -162,8 +162,14 @@ export class LockStepVersionPolicy extends VersionPolicy {
     return this._nextBump;
   }
 
-  public get changeLogHostProject(): string | undefined {
-    return this._changeLogHostProject;
+  /**
+   * The main project for the version policy.
+   *
+   * If the value is provided, change logs will only be generated in that project.
+   * If the value is not provided, change logs will be hosted in each project associated with the policy.
+   */
+  public get mainProject(): string | undefined {
+    return this._mainProject;
   }
 
   /**
@@ -177,7 +183,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
       definitionName: VersionPolicyDefinitionName[this.definitionName],
       version: this.version.format(),
       nextBump: BumpType[this.nextBump],
-      changeLogHostProject: this._changeLogHostProject
+      mainProject: this._mainProject
     };
   }
 

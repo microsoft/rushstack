@@ -53,12 +53,12 @@ export default class ChangelogGenerator {
       if (allChanges.hasOwnProperty(packageName)) {
         const project: RushConfigurationProject | undefined = allProjects.get(packageName);
 
-        if (!!project && ChangelogGenerator._shouldUpdateChangeLog(project, allChanges)) {
+        if (project && ChangelogGenerator._shouldUpdateChangeLog(project, allChanges)) {
           const changeLog: IChangelog | undefined = ChangelogGenerator.updateIndividualChangelog(
             allChanges[packageName],
             project.projectFolder,
             shouldCommit,
-            !!project.versionPolicy && project.versionPolicy.isLockstepped);
+            project.versionPolicy && project.versionPolicy.isLockstepped);
 
             if (changeLog) {
               updatedChangeLogs.push(changeLog);
@@ -268,18 +268,22 @@ export default class ChangelogGenerator {
     return comments;
   }
 
+  /**
+   * Changelogs should only be generated for publishable projects.
+   * Do not update changelog or delete the change files for prerelease. Save them for the official release.
+   * Unless the package is a hotfix, in which case do delete the change files.
+   *
+   * @param project
+   * @param allChanges
+   */
   private static _shouldUpdateChangeLog(
     project: RushConfigurationProject,
     allChanges: IChangeInfoHash
   ): boolean {
-    // Changelogs should only be generated for publishable projects.
-    // Do not update changelog or delete the change files for prerelease.
-    // Save them for the official release.
-    // Unless the package is a hotfix, in which case do delete the change files.
 
     return project.shouldPublish &&
       (!semver.prerelease(project.packageJson.version) ||
       allChanges[project.packageName].changeType === ChangeType.hotfix) &&
-      project.hostChangeLog();
+      project.isMainProject;
   }
 }

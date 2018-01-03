@@ -124,12 +124,12 @@ export default class ChangeAction extends BaseRushAction {
   private _generateHostMap(): Map<string, string> {
     const hostMap: Map<string, string> = new Map<string, string>();
     this.rushConfiguration.projects.forEach(project => {
-      if (!!project.versionPolicy && project.versionPolicy instanceof LockStepVersionPolicy) {
+      let hostProjectName: string = project.packageName;
+      if (project.versionPolicy && project.versionPolicy.isLockstepped) {
         const lockstepPolicy: LockStepVersionPolicy = project.versionPolicy as LockStepVersionPolicy;
-        if (lockstepPolicy.changeLogHostProject) {
-          hostMap.set(project.packageName, lockstepPolicy.changeLogHostProject);
-        }
+        hostProjectName = lockstepPolicy.mainProject || project.packageName;
       }
+      hostMap.set(project.packageName, hostProjectName);
     });
     return hostMap;
   }
@@ -157,8 +157,7 @@ export default class ChangeAction extends BaseRushAction {
     if (!changedFolders) {
       return [];
     }
-    const logHosts: Set<string> = new Set<string>();
-    const changedPackageNames: string[] = [];
+    const changedPackageNames: Set<string> = new Set<string>();
 
     this.rushConfiguration.projects
     .filter(project => project.shouldPublish)
@@ -166,15 +165,10 @@ export default class ChangeAction extends BaseRushAction {
     .forEach(project => {
       const hostName: string | undefined = this._projectHostMap.get(project.packageName);
       if (hostName) {
-        logHosts.add(hostName);
-      } else {
-        changedPackageNames.push(project.packageName);
+        changedPackageNames.add(hostName);
       }
     });
-    logHosts.forEach(host => {
-      changedPackageNames.push(host);
-    });
-    return changedPackageNames;
+    return [...changedPackageNames];
   }
 
   private _validateChangeFile(changedPackages: string[]): void {
