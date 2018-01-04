@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build",
+      "comment": "Update Jest to ~21.2.1",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build",
+  "email": "nickpape-msft@users.noreply.github.com"
+}
