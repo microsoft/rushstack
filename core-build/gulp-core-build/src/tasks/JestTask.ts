@@ -71,29 +71,29 @@ nodeModulesPaths.default = (
   }
 ): string[] => {
   const nodeModulesFolders: string = 'node_modules';
-
-  const moduleFolders: string[] =
-    options && options.moduleDirectory
-      ? ([] as string[]).concat(options.moduleDirectory)
-      : [nodeModulesFolders];
-
   const absoluteBaseDir: string = path.resolve(basedir);
+  const realAbsoluteBaseDir: string = fsx.realpathSync(absoluteBaseDir);
+  const possiblePaths: string[] = [realAbsoluteBaseDir];
 
+  let moduleFolders: string[] = [nodeModulesFolders];
+  if (options && options.moduleDirectory) {
+    moduleFolders = ([] as string[]).concat(options.moduleDirectory);
+  }
+
+  const windowsBaseRegex: RegExp = /^([A-Za-z]:)/;
+  const fileshareBaseRegex: RegExp = /^\\\\/;
   let prefix: string = '/';
-  if (/^([A-Za-z]:)/.test(absoluteBaseDir)) {
+  if (windowsBaseRegex.test(absoluteBaseDir)) {
     prefix = '';
-  } else if (/^\\\\/.test(absoluteBaseDir)) {
+  } else if (fileshareBaseRegex.test(absoluteBaseDir)) {
     prefix = '\\\\';
   }
 
-  const realAbsoluteBaseDir: string = fsx.realpathSync(absoluteBaseDir);
-
-  const possiblePaths: string[] = [realAbsoluteBaseDir];
-  let parsed: path.ParsedPath = path.parse(realAbsoluteBaseDir);
-  while (parsed.dir !== possiblePaths[possiblePaths.length - 1]) {
-    const realParsedDir: string = fsx.realpathSync(parsed.dir);
+  let parsedPath: path.ParsedPath = path.parse(realAbsoluteBaseDir);
+  while (parsedPath.dir !== possiblePaths[possiblePaths.length - 1]) {
+    const realParsedDir: string = fsx.realpathSync(parsedPath.dir);
     possiblePaths.push(realParsedDir);
-    parsed = path.parse(realParsedDir);
+    parsedPath = path.parse(realParsedDir);
   }
 
   const dirs: string[] = possiblePaths.reduce((possibleDirs: string[], aPath: string) => {
@@ -104,9 +104,10 @@ nodeModulesPaths.default = (
     );
   }, []);
 
-  return options.paths
-    ? options.paths.concat(dirs)
-    : dirs;
+  if (options.paths) {
+    return options.paths.concat(dirs);
+  }
+  return dirs;
 };
 
 /**
