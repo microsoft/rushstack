@@ -283,7 +283,6 @@ export default class ChangelogGenerator {
 
     return project.shouldPublish &&
       (!semver.prerelease(project.packageJson.version) ||
-      allChanges[project.packageName].changeType === ChangeType.hotfix) &&
-      project.isMainProject;
+      allChanges[project.packageName].changeType === ChangeType.hotfix);
   }
 }
