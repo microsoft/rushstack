@@ -105,7 +105,6 @@ export default class ChangelogGenerator {
     change: IChangeInfo,
     projectFolder: string,
     shouldCommit: boolean,
-    forceUpdate?: boolean,
     isLockstepped?: boolean
   ): IChangelog | undefined {
     const changelog: IChangelog = ChangelogGenerator._getChangelog(change.packageName, projectFolder);
