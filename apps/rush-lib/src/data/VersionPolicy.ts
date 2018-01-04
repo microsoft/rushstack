@@ -178,13 +178,16 @@ export class LockStepVersionPolicy extends VersionPolicy {
    * @internal
    */
   public get _json(): ILockStepVersionJson {
-    return {
+    const json: ILockStepVersionJson = {
       policyName: this.policyName,
       definitionName: VersionPolicyDefinitionName[this.definitionName],
       version: this.version.format(),
-      nextBump: BumpType[this.nextBump],
-      mainProject: this._mainProject
+      nextBump: BumpType[this.nextBump]
     };
+    if (this._mainProject) {
+      json.mainProject = this._mainProject;
+    }
+    return json;
   }
 
   /**
@@ -268,11 +271,14 @@ export class IndividualVersionPolicy extends VersionPolicy {
    * @internal
    */
   public get _json(): IIndividualVersionJson {
-    return {
+    const json: IIndividualVersionJson = {
       policyName: this.policyName,
-      definitionName: VersionPolicyDefinitionName[this.definitionName],
-      lockedMajor: this.lockedMajor
+      definitionName: VersionPolicyDefinitionName[this.definitionName]
     };
+    if (this.lockedMajor !== undefined) {
+      json.lockedMajor = this.lockedMajor;
+    }
+    return json;
   }
 
   /**
