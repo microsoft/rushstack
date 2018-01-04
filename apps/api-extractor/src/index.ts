@@ -18,6 +18,7 @@ export {
   IExtractorPoliciesConfig,
   IExtractorApiReviewFileConfig,
   IExtractorApiJsonFileConfig,
+  IExtractorPackageTypingsConfig,
   IExtractorConfig
 } from './extractor/IExtractorConfig';
 

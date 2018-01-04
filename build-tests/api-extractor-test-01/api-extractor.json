@@ -1,0 +1,45 @@
+{
+  "$schema": "https://dev.office.com/json-schemas/api-extractor/api-extractor.schema.json",
+  "compiler" : {
+    "configType": "tsconfig",
+    "rootFolder": ".",
+
+    "overrideTsconfig": {
+      "compilerOptions": {
+        "target": "es6",
+        "forceConsistentCasingInFileNames": true,
+        "module": "commonjs",
+        "declaration": true,
+        "sourceMap": true,
+        "experimentalDecorators": true,
+        "strictNullChecks": true,
+        "types": [
+          "node",
+          "jest"
+        ],
+        "lib": [
+          "es5",
+          "scripthost",
+          "es2015.collection",
+          "es2015.promise",
+          "es2015.iterable",
+          "dom"
+        ]
+      },
+      "include": [
+        // TODO: Automatically generate this from the real tsconfig.json
+        "lib/index.d.ts",
+        "typings/tsd.d.ts"
+      ]
+    }
+
+  },
+
+  "packageTypings": {
+    "enabled": true
+  },
+
+  "project": {
+    "entryPointSourceFile": "lib/index.d.ts"
+  }
+}

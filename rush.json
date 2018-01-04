@@ -58,6 +58,14 @@
       "shouldPublish": false
     },
 
+    // "build-tests" folder (alphabetical order)
+    {
+      "packageName": "api-extractor-test-01",
+      "projectFolder": "build-tests/api-extractor-test-01",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
+
     // "core-build" folder (alphabetical order)
     {
       "packageName": "@microsoft/gulp-core-build",
