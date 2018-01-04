@@ -1,5 +1,5 @@
 {
-  "pnpmVersion": "1.21.0",
+  "pnpmVersion": "1.25.1",
   "rushVersion": "4.1.0",
   "nodeSupportedVersionRange": ">=6.9.0 <7.0.0",
   "projectFolderMinDepth": 1,
