@@ -112,7 +112,7 @@ export class JestTask extends GulpTask<IJestConfig> {
     const jestConfig: any = {
       ci: this.buildConfig.production,
       cache: !!this.taskConfig.cache,
-      config: configFileFullPath,
+      config: fsx.existsSync(configFileFullPath) ? configFileFullPath : undefined,
       collectCoverageFrom: this.taskConfig.collectCoverageFrom,
       coverage: this.taskConfig.coverage,
       coverageReporters: this.taskConfig.coverageReporters,
@@ -135,7 +135,7 @@ export class JestTask extends GulpTask<IJestConfig> {
     }
 
     Jest.runCLI(jestConfig,
-      [this.buildConfig.rootPath],
+      [this.buildConfig.rootPath]).then(
       (result) => {
         if (result.numFailedTests || result.numFailedTestSuites) {
           completeCallback(new Error('Jest tests failed'));
@@ -145,7 +145,8 @@ export class JestTask extends GulpTask<IJestConfig> {
           }
           completeCallback();
         }
-      });
+      },
+      completeCallback);
   }
 
   private _copySnapshots(srcRoot: string, destRoot: string): void {
