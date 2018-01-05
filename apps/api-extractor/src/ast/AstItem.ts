@@ -294,7 +294,7 @@ abstract class AstItem {
 
     let aedocCommentRange: ts.TextRange | undefined;
 
-    if (options.aedocCommentRange) {
+    if (options.aedocCommentRange) { // but might be ""
       // This is e.g. for the special @packagedocumentation comment, which is pulled
       // from elsewhere in the AST.
       aedocCommentRange = options.aedocCommentRange;
@@ -312,9 +312,11 @@ abstract class AstItem {
     // This will be the AEDoc content, excluding the "/**" characters
     let aedoc: string = '';
     if (aedocCommentRange) {
-      // This is the raw comment including the "/**" characters
+      // This is the raw comment including the "/**" characters, or "" if there was no comment
       const rawComment: string = sourceFileText.substring(aedocCommentRange.pos, aedocCommentRange.end);
-      aedoc = TypeScriptHelpers.extractJSDocContent(rawComment, this.reportError);
+      if (rawComment) {
+        aedoc = TypeScriptHelpers.extractJSDocContent(rawComment, this.reportError);
+      }
     }
 
     this.documentation = new ApiDocumentation(

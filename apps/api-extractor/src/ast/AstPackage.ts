@@ -34,17 +34,21 @@ export default class AstPackage extends AstModule {
     //
     // This implementation assumes that the "@packagedocumentation" will be in the first JSDoc-comment
     // that appears in the entry point *.d.ts file.  We could possibly look in other places,
-    // but the above warning suggests enforcing a standard layout.  This design choice is open
+    // but the above warning suggests enforcing a standardized layout.  This design choice is open
     // to feedback.
-    let packageCommentRange: ts.TextRange | undefined = undefined;
+    let packageCommentRange: ts.TextRange | undefined = undefined; // empty string
 
     for (const commentRange of ts.getLeadingCommentRanges(rootFile.text, rootFile.getFullStart()) || []) {
       if (commentRange.kind === ts.SyntaxKind.MultiLineCommentTrivia) {
         const commentBody: string = rootFile.text.substring(commentRange.pos, commentRange.end);
 
-        // Make sure it's a JSDoc-style comment
+        // Choose the first JSDoc-style comment
         if (/^\s*\/\*\*/.test(commentBody)) {
-          packageCommentRange = commentRange;
+          // But onliy if it looks like it's trying to be @packagedocumentation
+          // (The ApiDocumentation parser will validate this more rigorously)
+          if (commentBody.indexOf('@packagedocumentation') >= 0) {
+            packageCommentRange = commentRange;
+          }
           break;
         }
       }
@@ -52,7 +56,7 @@ export default class AstPackage extends AstModule {
 
     if (!packageCommentRange) {
       // If we didn't find the @packagedocumentation tag in the expected place, is it in some
-      // wrong place?
+      // wrong place?  This sanity check helps people to figure out why there comment isn't working.
       for (const statement of rootFile.statements) {
         const ranges: ts.CommentRange[] = [];
         ranges.push(...ts.getLeadingCommentRanges(rootFile.text, statement.getFullStart()) || []);
@@ -62,7 +66,7 @@ export default class AstPackage extends AstModule {
           const commentBody: string = rootFile.text.substring(commentRange.pos, commentRange.end);
 
           if (commentBody.indexOf('@packagedocumentation') >= 0) {
-            context.reportError('The @packagedocumentation comment must appear at the top of the source file',
+            context.reportError('The @packagedocumentation comment must appear at the top of entry point *.d.ts file',
               rootFile, commentRange.pos);
           }
         }
@@ -73,7 +77,9 @@ export default class AstPackage extends AstModule {
       context,
       declaration: rootFileSymbol.declarations[0],
       declarationSymbol: rootFileSymbol,
-      aedocCommentRange: packageCommentRange
+      // NOTE: If there is no range, then provide an empty range to prevent ApiItem from
+      // looking in the default place
+      aedocCommentRange: packageCommentRange || { pos: 0, end: 0 }
     };
   }
 
