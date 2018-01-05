@@ -34,7 +34,7 @@
     "webpack": "~3.6.0"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "4.2.3",
+    "@microsoft/node-library-build": "4.2.13",
     "@types/gulp": "3.8.33",
     "@types/karma": "0.13.33",
     "@types/log4js": "0.0.33",

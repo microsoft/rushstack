@@ -9,6 +9,59 @@ import * as Jest from 'jest-cli';
 import * as globby from 'globby';
 
 /**
+ * We need to replace the resolver function which jest is using until the PR which
+ * fixes jest-resolves handling of symlinks is merged:
+ * https://github.com/facebook/jest/pull/5085
+ */
+// tslint:disable-next-line:no-any
+const nodeModulesPaths: any = require('jest-resolve/build/node_modules_paths');
+nodeModulesPaths.default = (
+  basedir: string,
+  options: {
+    moduleDirectory?: string[],
+    paths?: string[]
+  }
+): string[] => {
+  const nodeModulesFolders: string = 'node_modules';
+
+  const moduleFolders: string[] =
+    options && options.moduleDirectory
+      ? ([] as string[]).concat(options.moduleDirectory)
+      : [nodeModulesFolders];
+
+  const absoluteBaseDir: string = path.resolve(basedir);
+
+  let prefix: string = '/';
+  if (/^([A-Za-z]:)/.test(absoluteBaseDir)) {
+    prefix = '';
+  } else if (/^\\\\/.test(absoluteBaseDir)) {
+    prefix = '\\\\';
+  }
+
+  const realAbsoluteBaseDir: string = fsx.realpathSync(absoluteBaseDir);
+
+  const possiblePaths: string[] = [realAbsoluteBaseDir];
+  let parsed: path.ParsedPath = path.parse(realAbsoluteBaseDir);
+  while (parsed.dir !== possiblePaths[possiblePaths.length - 1]) {
+    const realParsedDir: string = fsx.realpathSync(parsed.dir);
+    possiblePaths.push(realParsedDir);
+    parsed = path.parse(realParsedDir);
+  }
+
+  const dirs: string[] = possiblePaths.reduce((possibleDirs: string[], aPath: string) => {
+    return possibleDirs.concat(
+      moduleFolders.map((moduleDir: string) => {
+        return path.join(prefix, aPath, moduleDir);
+      })
+    );
+  }, []);
+
+  return options.paths
+    ? options.paths.concat(dirs)
+    : dirs;
+};
+
+/**
  * Configuration for JestTask
  * @alpha
  */

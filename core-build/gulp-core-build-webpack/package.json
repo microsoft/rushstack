@@ -21,7 +21,7 @@
     "webpack": "~3.6.0"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "4.2.3",
+    "@microsoft/node-library-build": "4.2.13",
     "@types/orchestrator": "0.3.0",
     "@types/q": "0.0.32",
     "@types/source-map": "0.5.0",

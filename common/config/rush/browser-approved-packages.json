@@ -4,6 +4,10 @@
     {
       "name": "chalk",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jest-resolve",
+      "allowedCategories": [ "libraries" ]
     }
   ]
 }
