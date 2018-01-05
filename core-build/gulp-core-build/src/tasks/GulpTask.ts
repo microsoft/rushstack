@@ -5,6 +5,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
 
+import { GulpProxy } from '../GulpProxy';
 import { IExecutable } from '../IExecutable';
 import { IBuildConfig } from '../IBuildConfig';
 import { log, verbose, error, fileError, fileWarning,
@@ -144,7 +145,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    * @returns a Promise, a Stream or undefined if completeCallback() is called
    */
   public abstract executeTask(
-    gulp: gulp.Gulp,
+    gulp: gulp.Gulp | GulpProxy,
     completeCallback?: (error?: string | Error) => void
   ): Promise<Object | void> | NodeJS.ReadWriteStream | void;
 
