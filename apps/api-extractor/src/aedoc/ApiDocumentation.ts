@@ -72,7 +72,7 @@ export default class ApiDocumentation {
   ];
 
   /**
-   * The original AEDoc comment.
+   * The original AEDoc comment, with the "/**" characters already removed.
    *
    * Example: "This is a summary. \{\@link a\} \@remarks These are remarks."
    */
@@ -169,7 +169,7 @@ export default class ApiDocumentation {
 
   public readonly reportError: (message: string) => void;
 
-  constructor(docComment: string,
+  constructor(originalAedoc: string,
     referenceResolver: IReferenceResolver,
     context: ExtractorContext,
     errorLogger: (message: string) => void,
@@ -180,7 +180,7 @@ export default class ApiDocumentation {
       this.failedToParse = true;
     };
 
-    this.originalAedoc = docComment;
+    this.originalAedoc = originalAedoc;
     this.referenceResolver = referenceResolver;
     this.context = context;
     this.reportError = errorLogger;

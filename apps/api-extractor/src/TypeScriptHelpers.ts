@@ -88,69 +88,14 @@ export default class TypeScriptHelpers {
   }
 
   /**
-   * Returns the JSDoc comments associated with the specified node, if any.
-   *
-   * Example:
-   * "This \n is \n a comment" from "\/** This\r\n* is\r\n* a comment *\/
+   * Retrieves the comment ranges associated with the specified node.
    */
-  public static getJsdocComments(node: ts.Node, errorLogger: (message: string) => void): string {
-    let jsdoc: string = '';
+  public static getJSDocCommentRanges(node: ts.Node, text: string): ts.CommentRange[] | undefined {
+    // Compiler internal:
+    // https://github.com/Microsoft/TypeScript/blob/v2.4.2/src/compiler/utilities.ts#L616
+
     // tslint:disable-next-line:no-any
-    const nodeJsdocObjects: any = (node as any).jsDoc;
-    if (nodeJsdocObjects && nodeJsdocObjects.length > 0) {
-      // Use the JSDoc closest to the declaration
-      const lastJsdocIndex: number = nodeJsdocObjects.length - 1;
-      const jsdocFullText: string = nodeJsdocObjects[lastJsdocIndex].getText();
-      const jsdocLines: string[] = jsdocFullText.split(TypeScriptHelpers.newLineRegEx);
-      const jsdocStartSeqExists: boolean = TypeScriptHelpers.jsdocStartRegEx.test(jsdocLines[0].toString());
-
-      // Report error for each missing sequence separately
-      if (!jsdocStartSeqExists) {
-        errorLogger('Jsdoc comment must begin with a \"/**\" sequence.');
-        return '';
-      }
-      const jsdocEndSeqExists: boolean = TypeScriptHelpers.jsdocEndRegEx.test(
-        jsdocLines[jsdocLines.length - 1].toString()
-      );
-      if (!jsdocEndSeqExists) {
-        errorLogger('Jsdoc comment must end with a \"*/\" sequence.');
-        return '';
-      }
-
-      jsdoc = TypeScriptHelpers.removeJsdocSequences(jsdocLines);
-    }
-
-    return jsdoc;
-  }
-
-  /**
-   * Helper function to remove the comment stars ('/**'. '*', '/*) from lines of comment text.
-   *
-   * Example:
-   * ["\/**", "*This \n", "*is \n", "*a comment", "*\/"] to "This \n is \n a comment"
-   */
-  public static removeJsdocSequences(textLines: string[]): string {
-  // Remove '/**'
-    textLines[0] = textLines[0].replace(TypeScriptHelpers.jsdocStartRegEx, '');
-    if (textLines[0] === '') {
-      textLines.shift();
-    }
-    // Remove '*/'
-    textLines[textLines.length - 1] = textLines[textLines.length - 1].replace(
-      TypeScriptHelpers.jsdocEndRegEx,
-      '');
-    if (textLines[textLines.length - 1] === '') {
-      textLines.pop();
-    }
-
-    // Remove the leading '*' from any intermediate lines
-    if (textLines.length > 0) {
-      for (let i: number = 0; i < textLines.length; i++) {
-        textLines[i] = textLines[i].replace(TypeScriptHelpers.jsdocIntermediateRegEx, '');
-      }
-    }
-
-    return textLines.join('\n');
+    return (ts as any).getJSDocCommentRanges.apply(this, arguments);
   }
 
   /**
@@ -197,12 +142,12 @@ export default class TypeScriptHelpers {
   }
 
   /**
-   * Extracts the body of a TypeScript comment and returns it.
+   * Extracts the body of a JSDoc comment and returns it.
    */
   // Examples:
   // "/**\n * this is\n * a test\n */\n" --> "this is\na test"
   // "/** single line comment */" --> "single line comment"
-  public static extractCommentContent(text: string): string {
+  public static extractJSDocContent(text: string, errorLogger: (message: string) => void): string {
     const lines: string[] = text.replace('\r', '').split('\n');
 
     enum State {
@@ -262,7 +207,8 @@ export default class TypeScriptHelpers {
     }
 
     if (state !== State.Done) {
-      return '[ERROR PARSING COMMENT]';
+      errorLogger('Invalid JSDoc comment syntax');
+      return '';
     }
 
     return content;

@@ -20,19 +20,13 @@ describe('TypeScriptHelpers tests', () => {
 
   describe('extractCommentContent()', () => {
     it('multi-line comment', () => {
-      expect(TypeScriptHelpers.extractCommentContent('/**\n * this is\n * a test\n */\n'))
+      expect(TypeScriptHelpers.extractJSDocContent('/**\n * this is\n * a test\n */\n', console.error))
         .toBe('this is\na test');
     });
 
     it('single-line comment', () => {
-      expect(TypeScriptHelpers.extractCommentContent('/** single line comment */'))
+      expect(TypeScriptHelpers.extractJSDocContent('/** single line comment */', console.error))
         .toBe('single line comment');
-    });
-
-    it('degenerate comment', () => {
-      expect(TypeScriptHelpers.removeJsdocSequences(
-        ['/**', '* degenerate comment', 'star missing here', '* end of comment', '*/']))
-        .toBe('degenerate comment\nstar missing here\nend of comment');
     });
   });
 

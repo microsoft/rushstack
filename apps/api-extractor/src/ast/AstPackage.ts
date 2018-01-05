@@ -19,29 +19,41 @@ export default class AstPackage extends AstModule {
 
   private static _getOptions(context: ExtractorContext, rootFile: ts.SourceFile): IAstItemOptions {
     const rootFileSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(rootFile);
-    let statement: ts.VariableStatement;
-    let foundDescription: ts.Node | undefined = undefined;
-
-    for (const statementNode of rootFile.statements) {
-      if (statementNode.kind === ts.SyntaxKind.VariableStatement) {
-        statement = statementNode as ts.VariableStatement;
-        for (const statementDeclaration of statement.declarationList.declarations) {
-          if (statementDeclaration.name.getText() === 'packageDescription') {
-            foundDescription = statement;
-          }
-        }
-      }
-    }
 
     if (!rootFileSymbol.declarations) {
       throw new Error('Unable to find a root declaration for this package');
+    }
+
+    // The @packagedocumentation comment is special because it is not attached to an AST
+    // definition.  Instead, it is part of the "trivia" tokens that the compiler treats
+    // as irrelevant white space.
+    //
+    // WARNING: If the comment doesn't precede an export statement, the compiler will omit
+    // it from the *.d.ts file, and API Extractor won't find it.  If this happens, you need
+    // to rearrange your statements to ensure it is passed through.
+    //
+    // This implementation assumes that the "@packagedocumentation" will be in the first JSDoc-comment
+    // that appears in the entry point *.d.ts file.  We could possibly look in other places,
+    // but the above warning suggests enforcing a standard layout.  This design choice is open
+    // to feedback.
+    let packageCommentRange: ts.TextRange | undefined = undefined;
+    for (const commentRange of ts.getLeadingCommentRanges(rootFile.text, rootFile.getFullStart()) || []) {
+      if (commentRange.kind === ts.SyntaxKind.MultiLineCommentTrivia) {
+        const commentBody: string = rootFile.text.substring(commentRange.pos, commentRange.end);
+
+        // Make sure it's a JSDoc-style comment
+        if (/^\s*\/\*\*/.test(commentBody)) {
+          packageCommentRange = commentRange;
+          break;
+        }
+      }
     }
 
     return {
       context,
       declaration: rootFileSymbol.declarations[0],
       declarationSymbol: rootFileSymbol,
-      jsdocNode: foundDescription
+      aedocCommentRange: packageCommentRange
     };
   }
 

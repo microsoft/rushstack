@@ -23,8 +23,7 @@ export default class AstEnum extends AstItemContainer {
       const memberOptions: IAstItemOptions = {
         context: this.context,
         declaration: memberDeclaration,
-        declarationSymbol: memberSymbol,
-        jsdocNode: memberDeclaration
+        declarationSymbol: memberSymbol
       };
 
       this.addMemberItem(new AstEnumValue(memberOptions));

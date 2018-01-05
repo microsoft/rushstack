@@ -69,8 +69,7 @@ export default class AstMember extends AstItem {
       const typeLiteralOptions: IAstItemOptions = {
         context: this.context,
         declaration: propertyTypeDeclaration,
-        declarationSymbol: propertyTypeSymbol,
-        jsdocNode: propertyTypeDeclaration
+        declarationSymbol: propertyTypeSymbol
       };
 
       this.typeLiteral = new AstStructuredType(typeLiteralOptions);
