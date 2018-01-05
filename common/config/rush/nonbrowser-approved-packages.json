@@ -94,6 +94,10 @@
       "allowedCategories": [ "libraries", "other" ]
     },
     {
+      "name": "chalk",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "colors",
       "allowedCategories": [ "libraries" ]
     },
