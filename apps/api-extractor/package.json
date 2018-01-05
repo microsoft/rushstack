@@ -31,7 +31,7 @@
     "@microsoft/node-core-library": "0.3.23",
     "@microsoft/ts-command-line": "2.2.11",
     "@types/fs-extra": "0.0.37",
-    "@types/node": "^8.0.0",
+    "@types/node": "6.0.88",
     "@types/z-schema": "3.16.31",
     "colors": "~1.1.2",
     "fs-extra": "~0.26.7",

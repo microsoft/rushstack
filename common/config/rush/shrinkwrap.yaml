@@ -49,7 +49,7 @@ dependencies:
   '@types/mime': 0.0.29
   '@types/minimatch': 2.0.29
   '@types/mocha': 2.2.38
-  '@types/node': 8.5.5
+  '@types/node': 6.0.88
   '@types/node-forge': 0.6.8
   '@types/node-notifier': 0.0.28
   '@types/orchestrator': 0.3.0
@@ -310,7 +310,7 @@ packages:
       integrity: sha1-VBOwp6GxbdGL4OP9V9L+7Mgcx3Y=
   /@types/express-serve-static-core/4.0.41:
     dependencies:
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
     dev: false
     resolution:
       integrity: sha1-Bd81TLvlBptMCJMgBlhwAz9B5nA=
@@ -323,34 +323,34 @@ packages:
       integrity: sha1-YmfHtgpR+sRzRns8SgLNHkQYBf4=
   /@types/fs-extra/0.0.37:
     dependencies:
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
     dev: false
     resolution:
       integrity: sha1-GV8RvNmhuX2eQSxrZombVFRxofc=
   /@types/glob/5.0.30:
     dependencies:
       '@types/minimatch': 2.0.29
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
     dev: false
     resolution:
       integrity: sha1-ECZAnFYlqGiQdGAoCNCCsoZ7ilE=
   /@types/gulp-istanbul/0.9.30:
     dependencies:
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
     dev: false
     resolution:
       integrity: sha1-RAh5rEB1frbwiO+CjRaedfkV7gs=
   /@types/gulp-mocha/0.0.29:
     dependencies:
       '@types/mocha': 2.2.38
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
     dev: false
     resolution:
       integrity: sha1-O39aPvtaVDC75FyjhjdqvCAtAjo=
   /@types/gulp-util/3.0.30:
     dependencies:
       '@types/chalk': 0.4.31
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       '@types/through2': 2.0.32
       '@types/vinyl': 1.2.30
     dev: false
@@ -358,7 +358,7 @@ packages:
       integrity: sha1-TF9lg6IWCBOWZ+OsVrBbxn7PqPs=
   /@types/gulp/3.8.32:
     dependencies:
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       '@types/orchestrator': 0.3.0
       '@types/vinyl': 1.2.30
     dev: false
@@ -366,7 +366,7 @@ packages:
       integrity: sha1-g8WcaBzCM9Hsf4LSaVVVZvoTMVY=
   /@types/gulp/3.8.33:
     dependencies:
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       '@types/orchestrator': 0.3.0
       '@types/vinyl': 1.2.30
     dev: false
@@ -384,13 +384,13 @@ packages:
     dependencies:
       '@types/bluebird': 3.5.3
       '@types/log4js': 0.0.33
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
     dev: false
     resolution:
       integrity: sha1-ODXT2U6IS23oiEo+cKb1aQ5qWFA=
   /@types/loader-utils/1.1.1:
     dependencies:
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       '@types/webpack': 3.0.11
     dev: false
     resolution:
@@ -423,7 +423,7 @@ packages:
       integrity: sha1-+ziuQgvpybZ5vtP5dCARIJR7kg8=
   /@types/node-notifier/0.0.28:
     dependencies:
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
     dev: false
     resolution:
       integrity: sha1-hro9OqjZGDUswxkdiN4yiyDck8E=
@@ -431,10 +431,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-bYDPZTX0/s1aihdjLuAgogUAT5M+TpoWChEMea2p0yOcfn5bu3k6cJb9cp6nw268XeSNIGGr+4+/8V5K6BGzLQ==
-  /@types/node/8.5.5:
-    dev: false
-    resolution:
-      integrity: sha512-JRnfoh0Ll4ElmIXKxbUfcOodkGvcNHljct6mO1X9hE/mlrMzAx0hYCLAD7sgT53YAY1HdlpzUcV0CkmDqUqTuA==
   /@types/orchestrator/0.0.30:
     dependencies:
       '@types/q': 0.0.32
@@ -443,7 +439,7 @@ packages:
       integrity: sha1-3N2o1ke1aLex40F4yx8LRKyamOU=
   /@types/orchestrator/0.3.0:
     dependencies:
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       '@types/q': 0.0.32
     dev: false
     resolution:
@@ -481,7 +477,7 @@ packages:
       integrity: sha1-CIiw8gzH5Y4cIqGIi06WPu+qgQo=
   /@types/through2/2.0.32:
     dependencies:
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
     dev: false
     resolution:
       integrity: sha1-RwAkRQ8at2QPGfnr9C09pXTCYSk=
@@ -493,7 +489,7 @@ packages:
       integrity: sha512-BdFLCZW0GTl31AbqXSak8ss/MqEZ3DN2MH9rkAyGoTuzK7ifGUlX+u0nfbWeTsa7IPcZhtn8BlpYBXSV+vqGhQ==
   /@types/vinyl/1.2.30:
     dependencies:
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
     dev: false
     resolution:
       integrity: sha1-kRXAxFxAxXVziQa+n7Tfb1ueUBM=
@@ -503,7 +499,7 @@ packages:
       integrity: sha1-MEQ4FkfhHulzxa8uklMjkw9pHYA=
   /@types/webpack/3.0.11:
     dependencies:
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       '@types/tapable': 0.2.3
       '@types/uglify-js': 2.6.29
     dev: false
@@ -9427,7 +9423,7 @@ packages:
       '@types/fs-extra': 0.0.37
       '@types/jest': 21.1.10
       '@types/js-yaml': 3.9.1
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       colors: 1.1.2
       fs-extra: 0.26.7
       gulp: 3.9.1
@@ -9440,7 +9436,7 @@ packages:
   'file:projects/api-extractor-test-01.tgz':
     dependencies:
       '@types/jest': 21.1.10
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       fs-extra: 0.26.7
       typescript: 2.4.2
     dev: false
@@ -9455,7 +9451,7 @@ packages:
       '@types/fs-extra': 0.0.37
       '@types/jest': 21.1.10
       '@types/lodash': 4.14.74
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       '@types/z-schema': 3.16.31
       colors: 1.1.2
       fs-extra: 0.26.7
@@ -9473,7 +9469,7 @@ packages:
     dependencies:
       '@types/chai': 3.4.34
       '@types/mocha': 2.2.38
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       chai: 3.5.0
       gulp: 3.9.1
     dev: false
@@ -9488,7 +9484,7 @@ packages:
       '@types/gulp': 3.8.33
       '@types/karma': 0.13.33
       '@types/log4js': 0.0.33
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       chai: 3.5.0
       gulp: 3.9.1
       gulp-karma: /gulp-karma/0.0.5/karma@0.13.22
@@ -9519,7 +9515,7 @@ packages:
       '@types/gulp-istanbul': 0.9.30
       '@types/gulp-mocha': 0.0.29
       '@types/mocha': 2.2.38
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       '@types/orchestrator': 0.3.0
       '@types/q': 0.0.32
       gulp: 3.9.1
@@ -9538,7 +9534,7 @@ packages:
       '@types/gulp': 3.8.33
       '@types/gulp-util': 3.0.30
       '@types/mime': 0.0.29
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       '@types/orchestrator': 0.3.0
       '@types/q': 0.0.32
       '@types/serve-static': 1.7.31
@@ -9568,7 +9564,7 @@ packages:
       '@types/gulp': 3.8.33
       '@types/gulp-util': 3.0.30
       '@types/mime': 0.0.29
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       '@types/node-forge': 0.6.8
       '@types/orchestrator': 0.3.0
       '@types/q': 0.0.32
@@ -9595,7 +9591,7 @@ packages:
       '@types/fs-extra': 0.0.37
       '@types/gulp': 3.8.33
       '@types/gulp-util': 3.0.30
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       '@types/orchestrator': 0.3.0
       '@types/q': 0.0.32
       '@types/through2': 2.0.32
@@ -9627,7 +9623,7 @@ packages:
     dependencies:
       '@microsoft/node-library-build': 4.2.14
       '@types/gulp': 3.8.33
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       '@types/orchestrator': 0.3.0
       '@types/q': 0.0.32
       '@types/source-map': 0.5.0
@@ -9650,7 +9646,7 @@ packages:
       '@types/gulp': 3.8.33
       '@types/gulp-util': 3.0.30
       '@types/mocha': 2.2.38
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       '@types/node-notifier': 0.0.28
       '@types/orchestrator': 0.3.0
       '@types/q': 0.0.32
@@ -9707,7 +9703,7 @@ packages:
     dependencies:
       '@types/loader-utils': 1.1.1
       '@types/mocha': 2.2.38
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       '@types/webpack': 3.0.11
       chai: 3.5.0
       gulp: 3.9.1
@@ -9720,7 +9716,7 @@ packages:
   'file:projects/loader-raw-script.tgz':
     dependencies:
       '@types/mocha': 2.2.38
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       chai: 3.5.0
       gulp: 3.9.1
       loader-utils: 1.1.0
@@ -9734,7 +9730,7 @@ packages:
     dependencies:
       '@types/lodash': 4.14.74
       '@types/mocha': 2.2.38
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       chai: 3.5.0
       gulp: 3.9.1
       loader-utils: 1.1.0
@@ -9751,7 +9747,7 @@ packages:
       '@types/chai': 3.4.34
       '@types/fs-extra': 0.0.37
       '@types/mocha': 2.2.38
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       '@types/z-schema': 3.16.31
       chai: 3.5.0
       fs-extra: 0.26.7
@@ -9767,7 +9763,7 @@ packages:
   'file:projects/node-library-build.tgz':
     dependencies:
       '@types/gulp': 3.8.33
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       gulp: 3.9.1
     dev: false
     name: '@rush-temp/node-library-build'
@@ -9778,7 +9774,7 @@ packages:
     dependencies:
       '@types/chai': 3.4.34
       '@types/mocha': 2.2.38
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       chai: 3.5.0
       gulp: 3.9.1
     dev: false
@@ -9809,7 +9805,7 @@ packages:
       '@types/lodash': 4.14.74
       '@types/minimatch': 2.0.29
       '@types/mocha': 2.2.38
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       '@types/semver': 5.3.33
       '@types/sinon': 1.16.34
       '@types/z-schema': 3.16.31
@@ -9846,7 +9842,7 @@ packages:
       '@types/chai': 3.4.34
       '@types/fs-extra': 0.0.37
       '@types/mocha': 2.2.38
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       '@types/semver': 5.3.33
       '@types/sinon': 1.16.34
       chai: 3.5.0
@@ -9863,7 +9859,7 @@ packages:
     dependencies:
       '@types/lodash': 4.14.74
       '@types/mocha': 2.2.38
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       '@types/tapable': 0.2.3
       '@types/uglify-js': 2.6.29
       '@types/webpack': 3.0.11
@@ -9882,7 +9878,7 @@ packages:
       '@types/chai': 3.4.34
       '@types/colors': 1.1.3
       '@types/mocha': 2.2.38
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       chai: 3.5.0
       colors: 1.1.2
       gulp: 3.9.1
@@ -9896,7 +9892,7 @@ packages:
     dependencies:
       '@types/chai': 3.4.34
       '@types/jest': 21.1.10
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       chai: 3.5.0
       gulp: 3.9.1
     dev: false
@@ -9909,7 +9905,7 @@ packages:
       '@microsoft/node-library-build': 4.2.14
       '@types/argparse': 1.0.33
       '@types/colors': 1.1.3
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       argparse: 1.0.9
       chai: 3.5.0
       colors: 1.1.2
@@ -9923,7 +9919,7 @@ packages:
   'file:projects/web-library-build.tgz':
     dependencies:
       '@types/gulp': 3.8.33
-      '@types/node': 8.5.5
+      '@types/node': 6.0.88
       gulp: 3.9.1
       gulp-replace: 0.5.4
     dev: false
@@ -9985,7 +9981,7 @@ specifiers:
   '@types/mime': 0.0.29
   '@types/minimatch': 2.0.29
   '@types/mocha': 2.2.38
-  '@types/node': ^8.0.0
+  '@types/node': 6.0.88
   '@types/node-forge': 0.6.8
   '@types/node-notifier': 0.0.28
   '@types/orchestrator': 0.3.0
