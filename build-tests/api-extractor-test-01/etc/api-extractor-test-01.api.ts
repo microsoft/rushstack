@@ -15,4 +15,4 @@ interface ISimpleInterface {
 class ReexportedClass {
 }
 
-// (No packageDescription for this package)
+// (No @packagedocumentation comment for this package)

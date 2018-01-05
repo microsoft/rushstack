@@ -1,62 +1,61 @@
 // @public
 class ApprovedPackagesConfiguration {
-  public constructor(jsonFilename: string);
+  constructor(jsonFilename: string);
   // (undocumented)
-  public addOrUpdatePackage(packageName: string, reviewCategory: string): void;
-  public clear(): void;
+  addOrUpdatePackage(packageName: string, reviewCategory: string): void;
+  clear(): void;
   // (undocumented)
-  public getItemByName(packageName: string): ApprovedPackagesItem | undefined;
+  getItemByName(packageName: string): ApprovedPackagesItem | undefined;
   // (undocumented)
-  public items: ApprovedPackagesItem[];
-  public loadFromFile(): void;
-  public saveToFile(): void;
-  public tryLoadFromFile(approvedPackagesPolicyEnabled: boolean): boolean;
+  items: ApprovedPackagesItem[];
+  loadFromFile(): void;
+  saveToFile(): void;
+  tryLoadFromFile(approvedPackagesPolicyEnabled: boolean): boolean;
 }
 
 // @public
 class ApprovedPackagesItem {
-  public allowedCategories: Set<string>;
-  public packageName: string;
+  allowedCategories: Set<string>;
+  packageName: string;
 }
 
 // @public
 class ApprovedPackagesPolicy {
   // WARNING: The type "IRushConfigurationJson" needs to be exported by the package (e.g. added to index.ts)
   // @internal
-  public constructor(rushConfiguration: RushConfiguration, rushConfigurationJson: IRushConfigurationJson);
-  public readonly browserApprovedPackages: ApprovedPackagesConfiguration;
-  public readonly enabled: boolean;
-  public readonly ignoredNpmScopes: Set<string>;
-  public readonly nonbrowserApprovedPackages: ApprovedPackagesConfiguration;
-  public readonly reviewCategories: Set<string>;
+  constructor(rushConfiguration: RushConfiguration, rushConfigurationJson: IRushConfigurationJson);
+  readonly browserApprovedPackages: ApprovedPackagesConfiguration;
+  readonly enabled: boolean;
+  readonly ignoredNpmScopes: Set<string>;
+  readonly nonbrowserApprovedPackages: ApprovedPackagesConfiguration;
+  readonly reviewCategories: Set<string>;
 }
 
 // @beta
 enum BumpType {
   // (undocumented)
-  'major',
+  'major' = 5,
   // (undocumented)
-  'minor',
+  'minor' = 4,
   // (undocumented)
-  'none',
+  'none' = 0,
   // (undocumented)
-  'patch',
+  'patch' = 2,
   // (undocumented)
-  'preminor',
+  'preminor' = 3,
   // (undocumented)
-  'prerelease'
+  'prerelease' = 1
 }
 
 // @public
 class ChangeFile {
   // WARNING: The type "IChangeFile" needs to be exported by the package (e.g. added to index.ts)
   // @internal
-  public constructor(private _changeFileData: IChangeFile,
-      private _rushConfiguration: RushConfiguration);
-  public addChange(data: IChangeInfo): void;
-  public generatePath(): string;
-  public getChanges(packageName: string): IChangeInfo[];
-  public writeSync(): void;
+  constructor(_changeFileData: IChangeFile, _rushConfiguration: RushConfiguration);
+  addChange(data: IChangeInfo): void;
+  generatePath(): string;
+  getChanges(packageName: string): IChangeInfo[];
+  writeSync(): void;
 }
 
 // @public
@@ -87,8 +86,8 @@ enum Event {
 class EventHooks {
   // WARNING: The type "IEventHooksJson" needs to be exported by the package (e.g. added to index.ts)
   // @internal
-  public constructor(eventHooksJson: IEventHooksJson);
-  public get(event: Event): string[];
+  constructor(eventHooksJson: IEventHooksJson);
+  get(event: Event): string[];
 }
 
 // @public
@@ -112,31 +111,30 @@ class IndividualVersionPolicy extends VersionPolicy {
   constructor(versionPolicyJson: IIndividualVersionJson);
   // WARNING: The type "IIndividualVersionJson" needs to be exported by the package (e.g. added to index.ts)
   // @internal
-  public readonly _json: IIndividualVersionJson;
-  public bump(bumpType?: BumpType, identifier?: string): void;
-  public ensure(project: IPackageJson): IPackageJson | undefined;
-  public readonly lockedMajor: number | undefined;
-  public validate(versionString: string, packageName: string): void;
+  readonly _json: IIndividualVersionJson;
+  bump(bumpType?: BumpType, identifier?: string): void;
+  ensure(project: IPackageJson): IPackageJson | undefined;
+  readonly lockedMajor: number | undefined;
+  validate(versionString: string, packageName: string): void;
 }
 
 // @public
 interface IPackageJson {
-  // (undocumented)
-  [ key: string ]: any;
+  [key: string]: any;
   dependencies?: {
-    [ key: string ]: string
+    [key: string]: string;
   }
   description?: string;
   devDependencies?: {
-    [ key: string ]: string
+    [key: string]: string;
   }
   name: string;
   optionalDependencies?: {
-    [ key: string ]: string
+    [key: string]: string;
   }
   private?: boolean;
   scripts?: {
-    [ key: string ]: string
+    [key: string]: string;
   }
   version: string;
 }
@@ -148,108 +146,106 @@ class LockStepVersionPolicy extends VersionPolicy {
   constructor(versionPolicyJson: ILockStepVersionJson);
   // WARNING: The type "ILockStepVersionJson" needs to be exported by the package (e.g. added to index.ts)
   // @internal
-  public readonly _json: ILockStepVersionJson;
-  public bump(bumpType?: BumpType, identifier?: string): void;
-  public ensure(project: IPackageJson): IPackageJson | undefined;
-  public readonly nextBump: BumpType;
-  public validate(versionString: string, packageName: string): void;
-  public readonly version: semver.SemVer;
+  readonly _json: ILockStepVersionJson;
+  bump(bumpType?: BumpType, identifier?: string): void;
+  ensure(project: IPackageJson): IPackageJson | undefined;
+  readonly nextBump: BumpType;
+  validate(versionString: string, packageName: string): void;
+  readonly version: semver.SemVer;
 }
 
 // @public
 class PinnedVersionsConfiguration {
   // (undocumented)
-  public clear(): this;
+  clear(): this;
   // (undocumented)
-  public delete(dependency: string): boolean;
+  delete(dependency: string): boolean;
   // (undocumented)
-  public forEach(cb: (version: string, dependency: string) => void): this;
+  forEach(cb: (version: string, dependency: string) => void): this;
   // (undocumented)
-  public get(dependency: string): string | undefined;
+  get(dependency: string): string | undefined;
   // (undocumented)
-  public has(dependency: string): boolean;
+  has(dependency: string): boolean;
   // (undocumented)
-  public save(): this;
-  public set(dependency: string, version: string): this;
+  save(): this;
+  set(dependency: string, version: string): this;
   // (undocumented)
-  public readonly size: number;
-  public static tryLoadFromFile(jsonFilename: string): PinnedVersionsConfiguration;
+  readonly size: number;
+  static tryLoadFromFile(jsonFilename: string): PinnedVersionsConfiguration;
 }
 
 // @public
 class Rush {
-  public static launch(launcherVersion: string, isManaged: boolean): void;
+  static launch(launcherVersion: string, isManaged: boolean): void;
   // @public
-  public static readonly version: string;
+  static readonly version: string;
 }
 
 // @public
 class RushConfiguration {
-  public readonly approvedPackagesPolicy: ApprovedPackagesPolicy;
-  public readonly changesFolder: string;
-  public readonly committedShrinkwrapFilename: string;
-  public readonly commonFolder: string;
-  public readonly commonRushConfigFolder: string;
-  public readonly commonTempFolder: string;
+  readonly approvedPackagesPolicy: ApprovedPackagesPolicy;
+  readonly changesFolder: string;
+  readonly committedShrinkwrapFilename: string;
+  readonly commonFolder: string;
+  readonly commonRushConfigFolder: string;
+  readonly commonTempFolder: string;
   // @beta
-  public readonly eventHooks: EventHooks;
-  public findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
-  public findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
-  public static getHomeDirectory(): string;
-  public getProjectByName(projectName: string): RushConfigurationProject | undefined;
-  public readonly gitAllowedEmailRegExps: string[];
-  public readonly gitSampleEmail: string;
-  public readonly homeFolder: string;
-  public readonly hotfixChangeEnabled: boolean;
-  public static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
+  readonly eventHooks: EventHooks;
+  findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
+  findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
+  static getHomeDirectory(): string;
+  getProjectByName(projectName: string): RushConfigurationProject | undefined;
+  readonly gitAllowedEmailRegExps: string[];
+  readonly gitSampleEmail: string;
+  readonly homeFolder: string;
+  readonly hotfixChangeEnabled: boolean;
+  static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
   // (undocumented)
-  public static loadFromDefaultLocation(): RushConfiguration;
-  public readonly npmCacheFolder: string;
-  public readonly npmTmpFolder: string;
-  public readonly packageManager: PackageManager;
-  public readonly packageManagerToolFilename: string;
-  public readonly packageManagerToolVersion: string;
-  public readonly pinnedVersions: PinnedVersionsConfiguration;
-  public readonly pnpmStoreFolder: string;
-  public readonly projectFolderMaxDepth: number;
-  public readonly projectFolderMinDepth: number;
+  static loadFromDefaultLocation(): RushConfiguration;
+  readonly npmCacheFolder: string;
+  readonly npmTmpFolder: string;
+  readonly packageManager: PackageManager;
+  readonly packageManagerToolFilename: string;
+  readonly packageManagerToolVersion: string;
+  readonly pinnedVersions: PinnedVersionsConfiguration;
+  readonly pnpmStoreFolder: string;
+  readonly projectFolderMaxDepth: number;
+  readonly projectFolderMinDepth: number;
   // (undocumented)
-  public readonly projects: RushConfigurationProject[];
+  readonly projects: RushConfigurationProject[];
   // (undocumented)
-  public readonly projectsByName: Map<string, RushConfigurationProject>;
-  public readonly repositoryUrl: string;
-  public readonly rushJsonFile: string;
-  public readonly rushJsonFolder: string;
-  public readonly rushLinkJsonFilename: string;
+  readonly projectsByName: Map<string, RushConfigurationProject>;
+  readonly repositoryUrl: string;
+  readonly rushJsonFile: string;
+  readonly rushJsonFolder: string;
+  readonly rushLinkJsonFilename: string;
   // @beta
-  public readonly telemetryEnabled: boolean;
-  public readonly tempShrinkwrapFilename: string;
-  public static tryFindRushJsonLocation(verbose: boolean = true): string | undefined;
+  readonly telemetryEnabled: boolean;
+  readonly tempShrinkwrapFilename: string;
+  static tryFindRushJsonLocation(verbose?: boolean): string | undefined;
   // @beta (undocumented)
-  public readonly versionPolicyConfiguration: VersionPolicyConfiguration;
+  readonly versionPolicyConfiguration: VersionPolicyConfiguration;
 }
 
 // @public
 class RushConfigurationProject {
   // WARNING: The type "IRushConfigurationProjectJson" needs to be exported by the package (e.g. added to index.ts)
   // @internal
-  constructor(projectJson: IRushConfigurationProjectJson,
-                rushConfiguration: RushConfiguration,
-                tempProjectName: string);
-  public readonly cyclicDependencyProjects: Set<string>;
-  public readonly downstreamDependencyProjects: string[];
-  public readonly packageJson: IPackageJson;
-  public readonly packageName: string;
-  public readonly projectFolder: string;
-  public readonly projectRelativeFolder: string;
-  public readonly reviewCategory: string;
-  public readonly shouldPublish: boolean;
-  public readonly tempProjectName: string;
-  public readonly unscopedTempProjectName: string;
+  constructor(projectJson: IRushConfigurationProjectJson, rushConfiguration: RushConfiguration, tempProjectName: string);
+  readonly cyclicDependencyProjects: Set<string>;
+  readonly downstreamDependencyProjects: string[];
+  readonly packageJson: IPackageJson;
+  readonly packageName: string;
+  readonly projectFolder: string;
+  readonly projectRelativeFolder: string;
+  readonly reviewCategory: string;
+  readonly shouldPublish: boolean;
+  readonly tempProjectName: string;
+  readonly unscopedTempProjectName: string;
   // @beta
-  public readonly versionPolicy: VersionPolicy | undefined;
+  readonly versionPolicy: VersionPolicy | undefined;
   // @beta
-  public readonly versionPolicyName: string | undefined;
+  readonly versionPolicyName: string | undefined;
 }
 
 // @beta
@@ -259,36 +255,33 @@ class VersionPolicy {
   constructor(versionPolicyJson: IVersionPolicyJson);
   // WARNING: The type "IVersionPolicyJson" needs to be exported by the package (e.g. added to index.ts)
   // @internal
-  public readonly _json: IVersionPolicyJson;
-  public abstract bump(bumpType?: BumpType, identifier?: string): void;
-  public readonly definitionName: VersionPolicyDefinitionName;
-  public abstract ensure(project: IPackageJson): IPackageJson | undefined;
+  readonly _json: IVersionPolicyJson;
+  abstract bump(bumpType?: BumpType, identifier?: string): void;
+  readonly definitionName: VersionPolicyDefinitionName;
+  abstract ensure(project: IPackageJson): IPackageJson | undefined;
   // WARNING: Because this definition is explicitly marked as @internal, an underscore prefix ("_") should be added to its name
   // WARNING: The type "IVersionPolicyJson" needs to be exported by the package (e.g. added to index.ts)
   // @internal
-  public static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy | undefined;
-  public readonly policyName: string;
-  public abstract validate(versionString: string, packageName: string): void;
+  static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy | undefined;
+  readonly policyName: string;
+  abstract validate(versionString: string, packageName: string): void;
 }
 
 // @beta (undocumented)
 class VersionPolicyConfiguration {
   // @internal
-  public constructor(private _jsonFileName: string);
-  public bump(versionPolicyName?: string,
-      bumpType?: BumpType,
-      identifier?: string,
-      shouldCommit?: boolean): void;
-  public getVersionPolicy(policyName: string): VersionPolicy;
-  public readonly versionPolicies: Map<string, VersionPolicy>;
+  constructor(_jsonFileName: string);
+  bump(versionPolicyName?: string, bumpType?: BumpType, identifier?: string, shouldCommit?: boolean): void;
+  getVersionPolicy(policyName: string): VersionPolicy;
+  readonly versionPolicies: Map<string, VersionPolicy>;
 }
 
 // @beta
 enum VersionPolicyDefinitionName {
   // (undocumented)
-  'individualVersion',
+  'individualVersion' = 1,
   // (undocumented)
-  'lockStepVersion'
+  'lockStepVersion' = 0
 }
 
 // WARNING: Unsupported export: PackageManager
