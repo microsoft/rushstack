@@ -2,6 +2,34 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "1.0.15",
+      "tag": "@microsoft/api-documenter_v1.0.15",
+      "date": "Fri, 05 Jan 2018 00:48:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nicholas Pape <nickpape-msft@users.noreply.github.com>",
+            "commit": "b942f54445bf01dbdb98aaa5f0007f5b95315b58",
+            "comment": "Update Jest to ~21.2.1"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `4.3.5` to `4.3.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.22` to `0.3.23`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `2.2.10` to `2.2.11`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.2.13` to `4.2.14`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.14",
       "tag": "@microsoft/api-documenter_v1.0.14",
       "date": "Fri, 22 Dec 2017 17:04:46 GMT",

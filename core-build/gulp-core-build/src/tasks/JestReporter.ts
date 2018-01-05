@@ -1,5 +1,5 @@
 /* tslint:disable-next-line:no-any */
-const DEFAULT_REPORTER: any = require('jest-cli/build/reporters/DefaultReporter');
+const DEFAULT_REPORTER: any = require('jest-cli/build/reporters/default_reporter').default;
 
 /**
  * Jest logs message to stderr. This class is to override that behavior so that
