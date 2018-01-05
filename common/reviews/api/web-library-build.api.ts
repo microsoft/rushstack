@@ -116,7 +116,7 @@ interface IBuildConfig {
   buildErrorIconPath?: string;
   buildSuccessIconPath?: string;
   distFolder: string;
-  gulp: gulp.Gulp;
+  gulp: GulpProxy | gulp.Gulp;
   isRedundantBuild?: boolean;
   jestEnabled?: boolean;
   libAMDFolder?: string;
@@ -162,7 +162,7 @@ interface ICopyStaticAssetsTaskConfig {
 // @public
 interface ICustomGulpTask {
   // (undocumented)
-  (gulp: typeof Gulp, buildConfig: IBuildConfig, done?: (failure?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
+  (gulp: typeof Gulp | GulpProxy, buildConfig: IBuildConfig, done?: (failure?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
 }
 
 // @public (undocumented)

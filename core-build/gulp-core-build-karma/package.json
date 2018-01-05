@@ -35,7 +35,7 @@
   },
   "devDependencies": {
     "@microsoft/node-library-build": "4.2.14",
-    "@types/gulp": "3.8.33",
+    "@types/gulp": "3.8.32",
     "@types/karma": "0.13.33",
     "@types/log4js": "0.0.33",
     "@types/node": "6.0.88",

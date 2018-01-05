@@ -10,6 +10,7 @@ if (process.argv.indexOf('--no-color') === -1) {
 import * as path from 'path';
 
 import { GulpTask } from './tasks/GulpTask';
+import { GulpProxy } from './GulpProxy';
 import { IExecutable } from './IExecutable';
 import { IBuildConfig } from './IBuildConfig';
 import { CleanTask } from './tasks/CleanTask';
@@ -155,7 +156,7 @@ export function task(taskName: string, taskExecutable: IExecutable): IExecutable
  * @public
  */
 export interface ICustomGulpTask {
-  (gulp: typeof Gulp, buildConfig: IBuildConfig, done?: (failure?: Object) => void):
+  (gulp: typeof Gulp | GulpProxy, buildConfig: IBuildConfig, done?: (failure?: Object) => void):
     Promise<Object> | NodeJS.ReadWriteStream | void;
 }
 
@@ -167,7 +168,7 @@ class CustomTask extends GulpTask<void> {
     this._fn = fn.bind(this);
   }
 
-  public executeTask(gulp: typeof Gulp, completeCallback?: (error?: string | Error) => void):
+  public executeTask(gulp: typeof Gulp | GulpProxy, completeCallback?: (error?: string | Error) => void):
     Promise<Object> | NodeJS.ReadWriteStream | void {
     return this._fn(gulp, getConfig(), completeCallback);
   }
@@ -335,7 +336,7 @@ export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecuta
  */
 export function initialize(gulp: typeof Gulp): void {
   _buildConfig.rootPath = process.cwd();
-  _buildConfig.gulp = gulp;
+  _buildConfig.gulp = new GulpProxy(gulp);
   _buildConfig.uniqueTasks = _uniqueTasks;
   _buildConfig.jestEnabled = _isJestEnabled(_buildConfig.rootPath);
 

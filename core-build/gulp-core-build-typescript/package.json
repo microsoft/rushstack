@@ -17,7 +17,7 @@
     "@microsoft/gulp-core-build": "3.3.4",
     "@microsoft/node-core-library": "0.3.23",
     "@types/fs-extra": "0.0.37",
-    "@types/gulp": "3.8.33",
+    "@types/gulp": "3.8.32",
     "@types/node": "6.0.88",
     "fs-extra": "~0.26.7",
     "gulp": "~3.9.1",
@@ -41,7 +41,7 @@
   "devDependencies": {
     "@microsoft/node-library-build": "4.2.14",
     "@types/gulp-util": "3.0.30",
-    "@types/orchestrator": "0.3.0",
+    "@types/orchestrator": "0.0.30",
     "@types/q": "0.0.32",
     "@types/through2": "2.0.32",
     "@types/vinyl": "1.2.30"

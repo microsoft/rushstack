@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as gulp from 'gulp';
+import { GulpProxy } from './GulpProxy';
 import { IExecutable } from './IExecutable';
 
 /* tslint:disable:no-any */
@@ -13,7 +14,7 @@ export interface IBuildConfig {
   /**
    * Proxy gulp instance.
    */
-  gulp: gulp.Gulp;
+  gulp: GulpProxy | gulp.Gulp;
 
   /**
    * Array of all unique tasks.

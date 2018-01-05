@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@microsoft/gulp-core-build": "3.3.4",
-    "@types/gulp": "3.8.33",
+    "@types/gulp": "3.8.32",
     "@types/node": "6.0.88",
     "gulp": "~3.9.1",
     "gulp-util": "~3.0.7",
@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@microsoft/node-library-build": "4.2.14",
-    "@types/orchestrator": "0.3.0",
+    "@types/orchestrator": "0.0.30",
     "@types/q": "0.0.32",
     "@types/source-map": "0.5.0",
     "@types/uglify-js": "2.6.29",
