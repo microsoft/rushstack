@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 22 Dec 2017 17:04:46 GMT and should not be manually modified.
+This log was last generated on Fri, 05 Jan 2018 00:48:41 GMT and should not be manually modified.
+
+## 4.3.6
+Fri, 05 Jan 2018 00:48:41 GMT
+
+### Patches
+
+- Update Jest to ~21.2.1
 
 ## 4.3.5
 Fri, 22 Dec 2017 17:04:46 GMT
