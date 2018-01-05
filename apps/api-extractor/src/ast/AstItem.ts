@@ -477,16 +477,26 @@ abstract class AstItem {
       this.documentation.summary).replace(/\s\s/g, ' ');
     this.needsDocumentation = this.shouldHaveDocumentation() && summaryTextCondensed.length <= 10;
 
-    this.supportedName =  (this.kind === AstItemKind.Package) || AstItem._allowedNameRegex.test(this.name);
+    this.supportedName = (this.kind === AstItemKind.Package) || AstItem._allowedNameRegex.test(this.name);
     if (!this.supportedName) {
       this.warnings.push(`The name "${this.name}" contains unsupported characters; ` +
         'API names should use only letters, numbers, and underscores');
     }
 
     if (this.kind === AstItemKind.Package) {
+      if (this.documentation.originalAedoc.trim().length > 0) {
+        if (!this.documentation.isPackageDocumentation) {
+          this.reportError('A package comment was found, but it is missing the @packagedocumentation tag');
+        }
+      }
+
       if (this.documentation.releaseTag !== ReleaseTag.None) {
         const tag: string = '@' + ReleaseTag[this.documentation.releaseTag].toLowerCase();
         this.reportError(`The ${tag} tag is not allowed on the package, which is always considered to be @public`);
+      }
+    } else {
+      if (this.documentation.isPackageDocumentation) {
+        this.reportError(`The @packagedocumentation tag cannot be used for an item of type ${AstItemKind[this.kind]}`);
       }
     }
 

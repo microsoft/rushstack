@@ -56,6 +56,7 @@ export default class ApiDocumentation {
     '@betadocumentation',
     '@internal',
     '@internalremarks',
+    '@packagedocumentation',
     '@param',
     '@preapproved',
     '@public',
@@ -127,10 +128,16 @@ export default class ApiDocumentation {
   public releaseTag: ReleaseTag;
 
   /**
-   * True if the "@preapproved" tag was specified.
+   * True if the "\@preapproved" tag was specified.
    * Indicates that this internal API is exempt from further reviews.
    */
   public preapproved?: boolean;
+
+  /**
+   * True if the "\@packagedocumentation" tag was specified.
+   */
+  public isPackageDocumentation?: boolean;
+
   public deprecated?: string;
   public internalremarks?: string;
   public paramDocs?: Map<string, string>;
@@ -283,6 +290,10 @@ export default class ApiDocumentation {
           case '@preapproved':
             tokenizer.getToken();
             this.preapproved = true;
+            break;
+          case '@packagedocumentation':
+            tokenizer.getToken();
+            this.isPackageDocumentation = true;
             break;
           case '@readonly':
             tokenizer.getToken();

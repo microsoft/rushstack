@@ -37,6 +37,7 @@ export default class AstPackage extends AstModule {
     // but the above warning suggests enforcing a standard layout.  This design choice is open
     // to feedback.
     let packageCommentRange: ts.TextRange | undefined = undefined;
+
     for (const commentRange of ts.getLeadingCommentRanges(rootFile.text, rootFile.getFullStart()) || []) {
       if (commentRange.kind === ts.SyntaxKind.MultiLineCommentTrivia) {
         const commentBody: string = rootFile.text.substring(commentRange.pos, commentRange.end);
@@ -45,6 +46,25 @@ export default class AstPackage extends AstModule {
         if (/^\s*\/\*\*/.test(commentBody)) {
           packageCommentRange = commentRange;
           break;
+        }
+      }
+    }
+
+    if (!packageCommentRange) {
+      // If we didn't find the @packagedocumentation tag in the expected place, is it in some
+      // wrong place?
+      for (const statement of rootFile.statements) {
+        const ranges: ts.CommentRange[] = [];
+        ranges.push(...ts.getLeadingCommentRanges(rootFile.text, statement.getFullStart()) || []);
+        ranges.push(...ts.getTrailingCommentRanges(rootFile.text, statement.getEnd()) || []);
+
+        for (const commentRange of ranges) {
+          const commentBody: string = rootFile.text.substring(commentRange.pos, commentRange.end);
+
+          if (commentBody.indexOf('@packagedocumentation') >= 0) {
+            context.reportError('The @packagedocumentation comment must appear at the top of the source file',
+              rootFile, commentRange.pos);
+          }
         }
       }
     }
