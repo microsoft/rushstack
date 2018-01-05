@@ -1,13 +1,5 @@
 // DO NOT ADD COMMENTS IN THIS FILE.  They will be lost when the Rush tool resaves it.
 {
   "packages": [
-    {
-      "name": "chalk",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "jest-resolve",
-      "allowedCategories": [ "libraries" ]
-    }
   ]
 }
