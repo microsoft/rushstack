@@ -2,6 +2,25 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.3.4",
+      "tag": "@microsoft/gulp-core-build_v3.3.4",
+      "date": "Fri, 05 Jan 2018 00:48:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nicholas Pape <nickpape-msft@users.noreply.github.com>",
+            "commit": "b942f54445bf01dbdb98aaa5f0007f5b95315b58",
+            "comment": "Update Jest to ~21.2.1"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.22` to `0.3.23`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.3.3",
       "tag": "@microsoft/gulp-core-build_v3.3.3",
       "date": "Fri, 22 Dec 2017 17:04:46 GMT",
