@@ -9,59 +9,6 @@ import * as Jest from 'jest-cli';
 import * as globby from 'globby';
 
 /**
- * We need to replace the resolver function which jest is using until the PR which
- * fixes jest-resolves handling of symlinks is merged:
- * https://github.com/facebook/jest/pull/5085
- */
-// tslint:disable-next-line:no-any
-const nodeModulesPaths: any = require('jest-resolve/build/node_modules_paths');
-nodeModulesPaths.default = (
-  basedir: string,
-  options: {
-    moduleDirectory?: string[],
-    paths?: string[]
-  }
-): string[] => {
-  const nodeModulesFolders: string = 'node_modules';
-
-  const moduleFolders: string[] =
-    options && options.moduleDirectory
-      ? ([] as string[]).concat(options.moduleDirectory)
-      : [nodeModulesFolders];
-
-  const absoluteBaseDir: string = path.resolve(basedir);
-
-  let prefix: string = '/';
-  if (/^([A-Za-z]:)/.test(absoluteBaseDir)) {
-    prefix = '';
-  } else if (/^\\\\/.test(absoluteBaseDir)) {
-    prefix = '\\\\';
-  }
-
-  const realAbsoluteBaseDir: string = fsx.realpathSync(absoluteBaseDir);
-
-  const possiblePaths: string[] = [realAbsoluteBaseDir];
-  let parsed: path.ParsedPath = path.parse(realAbsoluteBaseDir);
-  while (parsed.dir !== possiblePaths[possiblePaths.length - 1]) {
-    const realParsedDir: string = fsx.realpathSync(parsed.dir);
-    possiblePaths.push(realParsedDir);
-    parsed = path.parse(realParsedDir);
-  }
-
-  const dirs: string[] = possiblePaths.reduce((possibleDirs: string[], aPath: string) => {
-    return possibleDirs.concat(
-      moduleFolders.map((moduleDir: string) => {
-        return path.join(prefix, aPath, moduleDir);
-      })
-    );
-  }, []);
-
-  return options.paths
-    ? options.paths.concat(dirs)
-    : dirs;
-};
-
-/**
  * Configuration for JestTask
  * @alpha
  */
@@ -106,6 +53,62 @@ export interface IJestConfig {
    */
   moduleDirectories?: string[];
 }
+
+const DEFAULT_JEST_CONFIG_FILE_NAME: string = 'jest.config.json';
+
+/**
+ * We need to replace the resolver function which jest is using until the PR which
+ * fixes jest-resolves handling of symlinks is merged:
+ * https://github.com/facebook/jest/pull/5085
+ */
+// tslint:disable-next-line:no-any
+const nodeModulesPaths: any = require('jest-resolve/build/node_modules_paths');
+nodeModulesPaths.default = (
+  basedir: string,
+  options: {
+    moduleDirectory?: string[],
+    paths?: string[]
+  }
+): string[] => {
+  const nodeModulesFolders: string = 'node_modules';
+  const absoluteBaseDir: string = path.resolve(basedir);
+  const realAbsoluteBaseDir: string = fsx.realpathSync(absoluteBaseDir);
+  const possiblePaths: string[] = [realAbsoluteBaseDir];
+
+  let moduleFolders: string[] = [nodeModulesFolders];
+  if (options && options.moduleDirectory) {
+    moduleFolders = ([] as string[]).concat(options.moduleDirectory);
+  }
+
+  const windowsBaseRegex: RegExp = /^([A-Za-z]:)/;
+  const fileshareBaseRegex: RegExp = /^\\\\/;
+  let prefix: string = '/';
+  if (windowsBaseRegex.test(absoluteBaseDir)) {
+    prefix = '';
+  } else if (fileshareBaseRegex.test(absoluteBaseDir)) {
+    prefix = '\\\\';
+  }
+
+  let parsedPath: path.ParsedPath = path.parse(realAbsoluteBaseDir);
+  while (parsedPath.dir !== possiblePaths[possiblePaths.length - 1]) {
+    const realParsedDir: string = fsx.realpathSync(parsedPath.dir);
+    possiblePaths.push(realParsedDir);
+    parsedPath = path.parse(realParsedDir);
+  }
+
+  const dirs: string[] = possiblePaths.reduce((possibleDirs: string[], aPath: string) => {
+    return possibleDirs.concat(
+      moduleFolders.map((moduleDir: string) => {
+        return path.join(prefix, aPath, moduleDir);
+      })
+    );
+  }, []);
+
+  if (options.paths) {
+    return options.paths.concat(dirs);
+  }
+  return dirs;
+};
 
 /**
  * Indicates if jest is enabled
@@ -154,6 +157,8 @@ export class JestTask extends GulpTask<IJestConfig> {
     gulp: typeof Gulp,
     completeCallback: (error?: string | Error) => void
   ): void {
+    const configFileFullPath: string = path.join(this.buildConfig.rootPath,
+      'config', 'jest', DEFAULT_JEST_CONFIG_FILE_NAME);
 
     this._copySnapshots(this.buildConfig.srcFolder, this.buildConfig.libFolder);
 
@@ -161,6 +166,7 @@ export class JestTask extends GulpTask<IJestConfig> {
     const jestConfig: any = {
       ci: this.buildConfig.production,
       cache: !!this.taskConfig.cache,
+      config: fsx.existsSync(configFileFullPath) ? configFileFullPath : undefined,
       collectCoverageFrom: this.taskConfig.collectCoverageFrom,
       coverage: this.taskConfig.coverage,
       coverageReporters: this.taskConfig.coverageReporters,
