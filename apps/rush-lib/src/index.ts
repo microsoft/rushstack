@@ -3,8 +3,8 @@
 
 /**
  * A library for writing scripts that interact with the Rush tool.
+ * @packagedocumentation
  */
-declare const packageDescription: void; // tslint:disable-line:no-unused-variable
 
 export {
   ApprovedPackagesPolicy
