@@ -7,26 +7,30 @@ import * as ts from 'typescript';
 import PrettyPrinter from './PrettyPrinter';
 
 export default class TypeScriptHelpers {
-
   /**
-   * Splits by the characters '\r\n'.
+   * Splits on CRLF and other newline sequences
    */
-  public static newLineRegEx: RegExp = /\r\n|\n/g;
+  private static _newLineRegEx: RegExp = /\r\n|\n\r|\r|\n/g;
 
   /**
    * Start sequence is '/**'.
    */
-  public static jsdocStartRegEx: RegExp = /^\s*\/\*\*\s?/g;
+  private static _jsdocStartRegEx: RegExp = /^\s*\/\*\*+\s*/;
 
   /**
    * End sequence is '*\/'.
    */
-  public static jsdocEndRegEx: RegExp = /\s*\*\/\s*$/g;
+  private static _jsdocEndRegEx: RegExp = /\s*\*+\/\s*$/;
 
   /**
    * Intermediate lines of JSDoc comment character.
    */
-  public static jsdocIntermediateRegEx: RegExp = /^\s*[*]\s?/g;
+  private static _jsdocIntermediateRegEx: RegExp = /^\s*\*\s?/;
+
+  /**
+   * Trailing white space
+   */
+  private static _jsdocTrimRightRegEx: RegExp = /\s*$/;
 
   /**
    * This traverses any type aliases to find the original place where an item was defined.
@@ -145,73 +149,54 @@ export default class TypeScriptHelpers {
    * Extracts the body of a JSDoc comment and returns it.
    */
   // Examples:
-  // "/**\n * this is\n * a test\n */\n" --> "this is\na test"
+  // "/**\n * this is\n * a test\n */\n" --> "this is\na test\n"
   // "/** single line comment */" --> "single line comment"
   public static extractJSDocContent(text: string, errorLogger: (message: string) => void): string {
-    const lines: string[] = text.replace('\r', '').split('\n');
-
-    enum State {
-      Start,
-      Body,
-      Done,
-      Error
-    }
-    let state: State = State.Start;
-
-    const startRegExp: RegExp = /^\s*\/\*\*+ ?/;
-    const bodyRegExp: RegExp = /^\s*\* ?/;
-    const endRegExp: RegExp = /^\s*\*+\/\s*$/;
-    const singleLineEndRegExp: RegExp = / ?\*+\/\s*$/;
-
-    let content: string = '';
-    for (const line of lines) {
-      if (line.trim().length === 0) {
-        continue;
-      }
-
-      let modified: string = line;
-      switch (state) {
-        case State.Start:
-          if (line.match(startRegExp)) {
-            modified = line.replace(startRegExp, '');
-            if (modified.match(singleLineEndRegExp)) {
-              modified = modified.replace(singleLineEndRegExp, '');
-              state = State.Done;
-            } else {
-              state = State.Body;
-            }
-          } else {
-            state = State.Error;
-          }
-          break;
-        case State.Body:
-          if (line.match(endRegExp)) {
-            modified = line.replace(endRegExp, '');
-            state = State.Done;
-          } else if (line.match(bodyRegExp)) {
-            modified = line.replace(bodyRegExp, '');
-          } else {
-            state = State.Error;
-          }
-          break;
-        case State.Done:
-          state = State.Error;
-          break;
-      }
-      if (modified !== '') {
-        if (content !== '') {
-          content += '\n';
-        }
-        content += modified;
-      }
-    }
-
-    if (state !== State.Done) {
-      errorLogger('Invalid JSDoc comment syntax');
+    // Remove any leading/trailing whitespace around the comment characters, then split on newlines
+    const lines: string[] = text.trim().split(TypeScriptHelpers._newLineRegEx);
+    if (lines.length === 0) {
       return '';
     }
 
-    return content;
-  }
+    let matched: boolean;
 
+    // Remove "/**" from the first line
+    matched = false;
+    lines[0] = lines[0].replace(TypeScriptHelpers._jsdocStartRegEx, () => {
+      matched = true;
+      return '';
+    });
+    if (!matched) {
+      errorLogger('The comment does not begin with a \"/**\" delimiter.');
+      return '';
+    }
+
+    // Remove "*/" from the last line
+    matched = false;
+    lines[lines.length - 1] = lines[lines.length - 1].replace(TypeScriptHelpers._jsdocEndRegEx, () => {
+      matched = true;
+      return '';
+    });
+    if (!matched) {
+      errorLogger('The comment does not end with a \"*/\" delimiter.');
+      return '';
+    }
+
+    // Remove a leading "*" from all lines except the first one
+    for (let i: number = 1; i < lines.length; ++i) {
+      lines[i] = lines[i].replace(TypeScriptHelpers._jsdocIntermediateRegEx, '');
+    }
+
+    // Remove trailing spaces from all lines
+    for (let i: number = 0; i < lines.length; ++i) {
+      lines[i] = lines[i].replace(TypeScriptHelpers._jsdocTrimRightRegEx, '');
+    }
+
+    // If the first line is blank, then remove it
+    if (lines[0] === '') {
+      lines.shift();
+    }
+
+    return lines.join('\n');
+  }
 }
