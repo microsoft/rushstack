@@ -109,7 +109,6 @@ export default class AstNamespace extends AstModule {
         context: this.context,
         declaration,
         declarationSymbol: followedSymbol,
-        jsdocNode: jsdocNode,
         exportSymbol
       };
 

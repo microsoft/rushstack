@@ -2,5 +2,5 @@
   "enabled": true,
   "apiReviewFolder": "../../common/reviews/api",
   "apiJsonFolder": "./temp",
-  "entry": "src/test.ts"
+  "entry": "lib/test.d.ts"
 }

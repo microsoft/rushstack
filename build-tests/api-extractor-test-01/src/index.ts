@@ -2,9 +2,13 @@
 // See LICENSE in the project root for license information.
 
 /**
- * Example package docs.
+ * Example documentation for the package.
+ *
+ * @remarks
+ * Additional remarks
+ *
+ * @packagedocumentation
  */
-declare const packageDescription: void; // tslint:disable-line:no-unused-variable
 
 /**
  * Test the alias-following logic:  This class gets aliased twice before being
@@ -53,5 +57,29 @@ export class AmbientConsumer {
    */
   public localTypings(): IAmbientInterfaceExample {
     return {} as IAmbientInterfaceExample;
+  }
+}
+
+/**
+ * Example decorator
+ * @public
+ */
+export function virtual(target: Object, propertyKey: string | symbol,
+  descriptor: TypedPropertyDescriptor<any>): void {
+  // Eventually we may implement runtime validation (e.g. in DEBUG builds)
+  // but currently this decorator is only used by the build tools.
+}
+
+/**
+ * Tests a decorator
+ * @public
+ */
+export class DecoratorTest {
+  /**
+   * Function with a decorator
+   */
+  @virtual
+  public test(): void {
+    console.log('');
   }
 }

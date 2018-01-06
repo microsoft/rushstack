@@ -16,6 +16,7 @@ class Extractor {
   public readonly actualConfig: IExtractorConfig;
   // @deprecated
   public analyzeProject(options?: IAnalyzeProjectOptions): void;
+  public static generateFilePathsForAnalysis(inputFilePaths: string[]): string[];
   public static jsonSchema: JsonSchema;
   public processProject(options?: IAnalyzeProjectOptions): boolean;
 }

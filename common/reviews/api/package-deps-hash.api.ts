@@ -1,12 +1,12 @@
 // @public
-export function getPackageDeps(packagePath: string = process.cwd(), excludedPaths?: string[]): IPackageDeps;
+export function getPackageDeps(packagePath?: string, excludedPaths?: string[]): IPackageDeps;
 
 // @public (undocumented)
 interface IPackageDeps {
   // (undocumented)
   files: {
-    [ key: string ]: string
+    [key: string]: string;
   }
 }
 
-// (No packageDescription for this package)
+// (No @packagedocumentation comment for this package)

@@ -31,8 +31,7 @@ class AstFunction extends AstItem {
         const astParameter: AstParameter = new AstParameter({
           context: this.context,
           declaration: param,
-          declarationSymbol: declarationSymbol,
-          jsdocNode: param
+          declarationSymbol: declarationSymbol
         });
         this.innerItems.push(astParameter);
         this.params.push(astParameter);

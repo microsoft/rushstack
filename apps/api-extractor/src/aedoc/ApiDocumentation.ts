@@ -56,6 +56,7 @@ export default class ApiDocumentation {
     '@betadocumentation',
     '@internal',
     '@internalremarks',
+    '@packagedocumentation',
     '@param',
     '@preapproved',
     '@public',
@@ -72,7 +73,7 @@ export default class ApiDocumentation {
   ];
 
   /**
-   * The original AEDoc comment.
+   * The original AEDoc comment, with the "/**" characters already removed.
    *
    * Example: "This is a summary. \{\@link a\} \@remarks These are remarks."
    */
@@ -127,10 +128,16 @@ export default class ApiDocumentation {
   public releaseTag: ReleaseTag;
 
   /**
-   * True if the "@preapproved" tag was specified.
+   * True if the "\@preapproved" tag was specified.
    * Indicates that this internal API is exempt from further reviews.
    */
   public preapproved?: boolean;
+
+  /**
+   * True if the "\@packagedocumentation" tag was specified.
+   */
+  public isPackageDocumentation?: boolean;
+
   public deprecated?: string;
   public internalremarks?: string;
   public paramDocs?: Map<string, string>;
@@ -169,7 +176,7 @@ export default class ApiDocumentation {
 
   public readonly reportError: (message: string) => void;
 
-  constructor(docComment: string,
+  constructor(originalAedoc: string,
     referenceResolver: IReferenceResolver,
     context: ExtractorContext,
     errorLogger: (message: string) => void,
@@ -180,7 +187,7 @@ export default class ApiDocumentation {
       this.failedToParse = true;
     };
 
-    this.originalAedoc = docComment;
+    this.originalAedoc = originalAedoc;
     this.referenceResolver = referenceResolver;
     this.context = context;
     this.reportError = errorLogger;
@@ -283,6 +290,10 @@ export default class ApiDocumentation {
           case '@preapproved':
             tokenizer.getToken();
             this.preapproved = true;
+            break;
+          case '@packagedocumentation':
+            tokenizer.getToken();
+            this.isPackageDocumentation = true;
             break;
           case '@readonly':
             tokenizer.getToken();

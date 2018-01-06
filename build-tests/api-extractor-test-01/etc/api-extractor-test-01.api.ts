@@ -8,6 +8,11 @@ class AmbientConsumer {
 }
 
 // @public
+class DecoratorTest {
+  test(): void;
+}
+
+// @public
 interface ISimpleInterface {
 }
 
@@ -15,4 +20,6 @@ interface ISimpleInterface {
 class ReexportedClass {
 }
 
-// (No packageDescription for this package)
+// @public
+export function virtual(target: Object, propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<any>): void;
+
