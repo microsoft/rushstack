@@ -2,6 +2,35 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "5.0.0",
+      "tag": "@microsoft/api-extractor_v5.0.0",
+      "date": "Sun, 07 Jan 2018 05:12:08 GMT",
+      "comments": {
+        "major": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "aa0c67382d4dee0cde40ee84a581dbdcdabe77ef",
+            "comment": "API Extractor now processes *.d.ts files instead of *.ts files"
+          }
+        ],
+        "minor": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "aa0c67382d4dee0cde40ee84a581dbdcdabe77ef",
+            "comment": "Introduced new tag @packagedocumentation which replaces the earlier approach that used a \"packageDescription\" variable"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.24` to `0.3.25`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `2.2.12` to `2.2.13`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.3.7",
       "tag": "@microsoft/api-extractor_v4.3.7",
       "date": "Fri, 05 Jan 2018 20:26:45 GMT",
