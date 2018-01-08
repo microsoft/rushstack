@@ -1,5 +1,5 @@
 // @public
-export function getGlobalRegisterCode(debug: boolean = false): string;
+export function getGlobalRegisterCode(debug?: boolean): string;
 
 // @public
 interface ISetWebpackPublicPathOptions {
@@ -22,9 +22,9 @@ interface ISetWebpackPublicPathPluginOptions extends ISetWebpackPublicPathOption
 class SetPublicPathPlugin implements Webpack.Plugin {
   constructor(options: ISetWebpackPublicPathPluginOptions);
   // (undocumented)
-  public apply(compiler: Webpack.Compiler): void;
+  apply(compiler: Webpack.Compiler): void;
   // (undocumented)
-  public options: ISetWebpackPublicPathPluginOptions;
+  options: ISetWebpackPublicPathPluginOptions;
 }
 
 // WARNING: Unsupported export: registryVariableName

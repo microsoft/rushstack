@@ -32,7 +32,6 @@ abstract class AstModule extends AstItemContainer {
         context: this.context,
         declaration,
         declarationSymbol: followedSymbol,
-        jsdocNode: declaration,
         exportSymbol
       };
 

@@ -1,6 +1,18 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Fri, 05 Jan 2018 00:48:41 GMT and should not be manually modified.
+This log was last generated on Sun, 07 Jan 2018 05:12:08 GMT and should not be manually modified.
+
+## 4.4.0
+Sun, 07 Jan 2018 05:12:08 GMT
+
+### Minor changes
+
+- The ApiExtractor task now expects *.d.ts files instead of *.ts, but includes a compatibility workaround for the common case of src/index.ts
+
+## 4.3.3
+Fri, 05 Jan 2018 20:26:45 GMT
+
+*Version update only*
 
 ## 4.3.2
 Fri, 05 Jan 2018 00:48:41 GMT

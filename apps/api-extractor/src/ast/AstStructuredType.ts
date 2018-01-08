@@ -204,8 +204,7 @@ export default class AstStructuredType extends AstItemContainer {
     const memberOptions: IAstItemOptions = {
       context: this.context,
       declaration: memberDeclaration,
-      declarationSymbol: memberSymbol,
-      jsdocNode: memberDeclaration
+      declarationSymbol: memberSymbol
     };
 
     if (memberSymbol.flags & (

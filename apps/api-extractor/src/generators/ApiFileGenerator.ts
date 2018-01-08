@@ -187,7 +187,7 @@ export default class ApiFileGenerator extends AstItemVisitor {
     const lines: string[] = [];
 
     if (astItem instanceof AstPackage && !astItem.documentation.summary.length) {
-      lines.push('(No packageDescription for this package)');
+      lines.push('(No @packagedocumentation comment for this package)');
     } else {
       let footer: string = '';
       switch (astItem.documentation.releaseTag) {

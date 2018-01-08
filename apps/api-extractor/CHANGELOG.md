@@ -1,6 +1,22 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 05 Jan 2018 00:48:41 GMT and should not be manually modified.
+This log was last generated on Sun, 07 Jan 2018 05:12:08 GMT and should not be manually modified.
+
+## 5.0.0
+Sun, 07 Jan 2018 05:12:08 GMT
+
+### Breaking changes
+
+- API Extractor now processes *.d.ts files instead of *.ts files
+
+### Minor changes
+
+- Introduced new tag @packagedocumentation which replaces the earlier approach that used a "packageDescription" variable
+
+## 4.3.7
+Fri, 05 Jan 2018 20:26:45 GMT
+
+*Version update only*
 
 ## 4.3.6
 Fri, 05 Jan 2018 00:48:41 GMT

@@ -72,7 +72,6 @@ dependencies:
   autoprefixer: 6.3.7
   builtins: 1.0.3
   chai: 3.5.0
-  chalk: 2.1.0
   colors: 1.1.2
   deasync: 0.1.12
   del: 2.2.2
@@ -833,10 +832,10 @@ packages:
     dev: false
     resolution:
       integrity: sha1-mZEtWRg2tab1s0XA8H7vwI/GXZE=
-  /assertion-error/1.0.2:
+  /assertion-error/1.1.0:
     dev: false
     resolution:
-      integrity: sha1-E8pRXYYgbaC6xm6DTdOX2HWBCUw=
+      integrity: sha512-jgsaNduz+ndvGyFt3uSuWqvy4lCnIJiovtouQN5JZHOKCS2QuhEdbcQHFhVksz2N2U9hXJo8odG7ETyWlEeuDw==
   /assign-symbols/1.0.0:
     dev: false
     engines:
@@ -884,7 +883,7 @@ packages:
   /autoprefixer/6.3.7:
     dependencies:
       browserslist: 1.3.6
-      caniuse-db: 1.0.30000787
+      caniuse-db: 1.0.30000789
       normalize-range: 0.1.2
       num2fraction: 1.2.2
       postcss: 5.2.18
@@ -1353,7 +1352,7 @@ packages:
       integrity: sha512-Z942RysHXmJrhqk88FmKBVq/v5tqmSkDz7p54G/MGyjMnCFFnC79XWNbg+Vta8W6Wb2qtSZTSxIGkJrRpCFEiA==
   /browserslist/1.3.6:
     dependencies:
-      caniuse-db: 1.0.30000787
+      caniuse-db: 1.0.30000789
     dev: false
     resolution:
       integrity: sha1-lS/0jVZGPTtTj4XvL46t39KEsTM=
@@ -1475,10 +1474,10 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha1-1UVjW+HjPFQmScaRc+Xeas+uNN0=
-  /caniuse-db/1.0.30000787:
+  /caniuse-db/1.0.30000789:
     dev: false
     resolution:
-      integrity: sha1-ygeigb5Taoi9f6yWuolfPPU/gRs=
+      integrity: sha1-XPP+x1SABBqxYsoGQTFTFB4jQyU=
   /caseless/0.11.0:
     dev: false
     resolution:
@@ -1498,7 +1497,7 @@ packages:
       integrity: sha1-qg0yYptu6XIgBBHL1EYckHvCt60=
   /chai/3.5.0:
     dependencies:
-      assertion-error: 1.0.2
+      assertion-error: 1.1.0
       deep-eql: 0.1.3
       type-detect: 1.0.0
     dev: false
@@ -3074,7 +3073,7 @@ packages:
     dependencies:
       detect-file: 1.0.0
       is-glob: 3.1.0
-      micromatch: 3.1.4
+      micromatch: 3.1.5
       resolve-dir: 1.0.1
     dev: false
     engines:
@@ -4785,7 +4784,7 @@ packages:
   /jest-cli/21.2.1:
     dependencies:
       ansi-escapes: 3.0.0
-      chalk: 2.1.0
+      chalk: 2.3.0
       glob: 7.1.2
       graceful-fs: 4.1.11
       is-ci: 1.1.0
@@ -4820,7 +4819,7 @@ packages:
       integrity: sha512-T1BzrbFxDIW/LLYQqVfo94y/hhaj1NzVQkZgBumAC+sxbjMROI7VkihOdxNR758iYbQykL2ZOWUBurFgkQrzdg==
   /jest-config/21.2.1:
     dependencies:
-      chalk: 2.1.0
+      chalk: 2.3.0
       glob: 7.1.2
       jest-environment-jsdom: 21.2.1
       jest-environment-node: 21.2.1
@@ -4836,7 +4835,7 @@ packages:
       integrity: sha512-fJru5HtlD/5l2o25eY9xT0doK3t2dlglrqoGpbktduyoI0T5CwuB++2YfoNZCrgZipTwPuAGonYv0q7+8yDc/A==
   /jest-diff/21.2.1:
     dependencies:
-      chalk: 2.1.0
+      chalk: 2.3.0
       diff: 3.4.0
       jest-get-type: 21.2.0
       pretty-format: 21.2.1
@@ -4879,7 +4878,7 @@ packages:
       integrity: sha512-5LhsY/loPH7wwOFRMs+PT4aIAORJ2qwgbpMFlbWbxfN0bk3ZCwxJ530vrbSiTstMkYLao6JwBkLhCJ5XbY7ZHw==
   /jest-jasmine2/21.2.1:
     dependencies:
-      chalk: 2.1.0
+      chalk: 2.3.0
       expect: 21.2.1
       graceful-fs: 4.1.11
       jest-diff: 21.2.1
@@ -4892,7 +4891,7 @@ packages:
       integrity: sha512-lw8FXXIEekD+jYNlStfgNsUHpfMWhWWCgHV7n0B7mA/vendH7vBFs8xybjQsDzJSduptBZJHqQX9SMssya9+3A==
   /jest-matcher-utils/21.2.1:
     dependencies:
-      chalk: 2.1.0
+      chalk: 2.3.0
       jest-get-type: 21.2.0
       pretty-format: 21.2.1
     dev: false
@@ -4900,7 +4899,7 @@ packages:
       integrity: sha512-kn56My+sekD43dwQPrXBl9Zn9tAqwoy25xxe7/iY4u+mG8P3ALj5IK7MLHZ4Mi3xW7uWVCjGY8cm4PqgbsqMCg==
   /jest-message-util/21.2.1:
     dependencies:
-      chalk: 2.1.0
+      chalk: 2.3.0
       micromatch: 2.3.11
       slash: 1.0.0
     dev: false
@@ -4923,7 +4922,7 @@ packages:
   /jest-resolve/21.2.0:
     dependencies:
       browser-resolve: 1.11.2
-      chalk: 2.1.0
+      chalk: 2.3.0
       is-builtin-module: 1.0.0
     dev: false
     resolution:
@@ -4948,7 +4947,7 @@ packages:
       babel-core: 6.26.0
       babel-jest: /babel-jest/21.2.0/babel-core@6.26.0
       babel-plugin-istanbul: 4.1.5
-      chalk: 2.1.0
+      chalk: 2.3.0
       convert-source-map: 1.5.1
       graceful-fs: 4.1.11
       jest-config: 21.2.1
@@ -4967,7 +4966,7 @@ packages:
       integrity: sha512-6omlpA3+NSE+rHwD0PQjNEjZeb2z+oRmuehMfM1tWQVum+E0WV3pFt26Am0DUfQkkPyTABvxITRjCUclYgSOsA==
   /jest-snapshot/21.2.1:
     dependencies:
-      chalk: 2.1.0
+      chalk: 2.3.0
       jest-diff: 21.2.1
       jest-matcher-utils: 21.2.1
       mkdirp: 0.5.1
@@ -4979,7 +4978,7 @@ packages:
   /jest-util/21.2.1:
     dependencies:
       callsites: 2.0.0
-      chalk: 2.1.0
+      chalk: 2.3.0
       graceful-fs: 4.1.11
       jest-message-util: 21.2.1
       jest-mock: 21.2.0
@@ -4990,7 +4989,7 @@ packages:
       integrity: sha512-r20W91rmHY3fnCoO7aOAlyfC51x2yeV3xF+prGsJAUsYhKeV670ZB8NO88Lwm7ASu8SdH0S+U+eFf498kjhA4g==
   /jest-validate/21.2.1:
     dependencies:
-      chalk: 2.1.0
+      chalk: 2.3.0
       jest-get-type: 21.2.0
       leven: 2.1.0
       pretty-format: 21.2.1
@@ -5909,7 +5908,7 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-hmd8l9FyCzY0MdBNDRUpO9OMFWU=
-  /micromatch/3.1.4:
+  /micromatch/3.1.5:
     dependencies:
       arr-diff: 4.0.0
       array-unique: 0.3.2
@@ -5919,7 +5918,7 @@ packages:
       extglob: 2.0.3
       fragment-cache: 0.2.1
       kind-of: 6.0.2
-      nanomatch: 1.2.6
+      nanomatch: 1.2.7
       object.pick: 1.3.0
       regex-not: 1.0.0
       snapdragon: 0.8.1
@@ -5928,7 +5927,7 @@ packages:
     engines:
       node: '>=0.10.0'
     resolution:
-      integrity: sha512-kFRtviKYoAJT+t7HggMl0tBFGNAKLw/S7N+CO9qfEQyisob1Oy4pao+geRbkyeEd+V9aOkvZ4mhuyPvI/q9Sfg==
+      integrity: sha512-ykttrLPQrz1PUJcXjwsTUjGoPJ64StIGNE2lGVD1c9CuguJ+L7/navsE8IcDNndOoCMvYV0qc/exfVbMHkUhvA==
   /miller-rabin/4.0.1:
     dependencies:
       bn.js: 4.11.8
@@ -6153,7 +6152,7 @@ packages:
     dev: false
     resolution:
       integrity: sha1-7XFfP+neArV6XmJS2QqWZ14fCFo=
-  /nanomatch/1.2.6:
+  /nanomatch/1.2.7:
     dependencies:
       arr-diff: 4.0.0
       array-unique: 0.3.2
@@ -6170,7 +6169,7 @@ packages:
     engines:
       node: '>=0.10.0'
     resolution:
-      integrity: sha512-WJ6XTCbvWXUFPbi/bDwKcYkCeOGUHzaJj72KbuPqGn78Ba/F5Vu26Zlo6SuMQbCIst1RGKL1zfWBCOGAlbRLAg==
+      integrity: sha512-/5ldsnyurvEw7wNpxLFgjVvBLMta43niEYOy0CJ4ntcYSbx6bugRUTQeFb4BR/WanEL1o3aQgHuVLHQaB6tOqg==
   /natives/1.1.1:
     dev: false
     resolution:
@@ -6918,28 +6917,28 @@ packages:
       integrity: sha1-dFdoEWWZrKLwCfrUJrABdQSdjZI=
   /postcss-modules-extract-imports/1.1.0:
     dependencies:
-      postcss: 6.0.15
+      postcss: 6.0.16
     dev: false
     resolution:
       integrity: sha1-thTJcgvmgW6u41+zpfqh26agXds=
   /postcss-modules-local-by-default/1.2.0:
     dependencies:
       css-selector-tokenizer: 0.7.0
-      postcss: 6.0.15
+      postcss: 6.0.16
     dev: false
     resolution:
       integrity: sha1-99gMOYxaOT+nlkRmvRlQCn1hwGk=
   /postcss-modules-scope/1.1.0:
     dependencies:
       css-selector-tokenizer: 0.7.0
-      postcss: 6.0.15
+      postcss: 6.0.16
     dev: false
     resolution:
       integrity: sha1-1upkmUx5+XtipytCb75gVqGUu5A=
   /postcss-modules-values/1.3.0:
     dependencies:
       icss-replace-symbols: 1.1.0
-      postcss: 6.0.15
+      postcss: 6.0.16
     dev: false
     resolution:
       integrity: sha1-7P+p1+GSUYOJ9CrQ6D9yrsRW6iA=
@@ -6977,7 +6976,7 @@ packages:
       node: '>=4.0.0'
     resolution:
       integrity: sha1-AA29H47vIXqjaLmiEsX8QLKo8/I=
-  /postcss/6.0.15:
+  /postcss/6.0.16:
     dependencies:
       chalk: 2.3.0
       source-map: 0.6.1
@@ -6986,7 +6985,7 @@ packages:
     engines:
       node: '>=4.0.0'
     resolution:
-      integrity: sha512-v/SpyMzLbtkmh45zUdaqLAaqXqzPdSrw8p4cQVO0/w6YiYfpj4k+Wkzhn68qk9br+H+0qfddhdPEVnbmBPfXVQ==
+      integrity: sha512-m758RWPmSjFH/2MyyG3UOW1fgYbR9rtdzz5UNJnlm7OLtu4B2h9C6gi+bE4qFKghsBRFfZT8NzoQBs6JhLotoA==
   /prelude-ls/1.1.2:
     dev: false
     engines:
@@ -8597,7 +8596,7 @@ packages:
       resolve: 1.5.0
       semver: 5.3.0
       tslib: 1.8.1
-      tsutils: 2.15.0
+      tsutils: 2.16.0
     dev: false
     engines:
       node: '>=4.1.2'
@@ -8616,7 +8615,7 @@ packages:
       resolve: 1.5.0
       semver: 5.3.0
       tslib: 1.8.1
-      tsutils: /tsutils/2.15.0/typescript@2.4.2
+      tsutils: /tsutils/2.16.0/typescript@2.4.2
       typescript: 2.4.2
     dev: false
     engines:
@@ -8645,23 +8644,23 @@ packages:
     peerDependencies: *ref_4
     resolution:
       integrity: sha1-ufmrROVa+WgYMdXyjQrur1x1DLA=
-  /tsutils/2.15.0:
+  /tsutils/2.16.0:
     dependencies:
       tslib: 1.8.1
     dev: false
     peerDependencies: &ref_2
       typescript: '>=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >= 2.4.0-dev || >= 2.5.0-dev || >= 2.6.0-dev || >= 2.7.0-dev || >= 2.8.0-dev'
     resolution:
-      integrity: sha512-kKb1mSqRMwF0GHKya5/hZsI2m7Flg4ONZDeYu4e6Gx+kYAu86zsLNCHcUmNWhCRaUcKshNI272hOzuaCQDzJ2g==
-  /tsutils/2.15.0/typescript@2.4.2:
+      integrity: sha512-9Ier/60O7OZRNPiw+or5QAtAY4kQA+WDiO/r6xOYATEyefH9bdfvTRLCxrYnFhQlZfET2vYXKfpr3Vw2BiArZw==
+  /tsutils/2.16.0/typescript@2.4.2:
     dependencies:
       tslib: 1.8.1
       typescript: 2.4.2
     dev: false
-    id: registry.npmjs.org/tsutils/2.15.0
+    id: registry.npmjs.org/tsutils/2.16.0
     peerDependencies: *ref_2
     resolution:
-      integrity: sha512-kKb1mSqRMwF0GHKya5/hZsI2m7Flg4ONZDeYu4e6Gx+kYAu86zsLNCHcUmNWhCRaUcKshNI272hOzuaCQDzJ2g==
+      integrity: sha512-9Ier/60O7OZRNPiw+or5QAtAY4kQA+WDiO/r6xOYATEyefH9bdfvTRLCxrYnFhQlZfET2vYXKfpr3Vw2BiArZw==
   /tty-browserify/0.0.0:
     dev: false
     resolution:
@@ -9642,7 +9641,7 @@ packages:
       '@types/yargs': 0.0.34
       '@types/z-schema': 3.16.31
       chai: 3.5.0
-      chalk: 2.1.0
+      chalk: 1.1.3
       del: 2.2.2
       end-of-stream: 1.1.0
       fs-extra: 0.26.7
@@ -9989,7 +9988,6 @@ specifiers:
   autoprefixer: 6.3.7
   builtins: ~1.0.3
   chai: ~3.5.0
-  chalk: ~2.1.0
   colors: ~1.1.2
   deasync: ~0.1.7
   del: ^2.2.2

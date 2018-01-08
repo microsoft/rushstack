@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/ts-command-line",
-  "version": "2.2.11",
+  "version": "2.2.13",
   "description": "An object-oriented command-line parser for TypeScript",
   "repository": {
     "type": "git",
