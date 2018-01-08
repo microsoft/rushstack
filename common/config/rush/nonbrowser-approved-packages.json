@@ -82,6 +82,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "api-extractor-test-02",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "argparse",
       "allowedCategories": [ "libraries" ]
     },
