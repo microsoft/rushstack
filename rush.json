@@ -7,7 +7,7 @@
   "approvedPackagesPolicy": {
     "reviewCategories": [
       "libraries",
-      "other"
+      "tests"
     ],
     "ignoredNpmScopes": [ "@types" ]
   },
@@ -62,7 +62,14 @@
     {
       "packageName": "api-extractor-test-01",
       "projectFolder": "build-tests/api-extractor-test-01",
-      "reviewCategory": "libraries",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+
+    {
+      "packageName": "api-extractor-test-02",
+      "projectFolder": "build-tests/api-extractor-test-02",
+      "reviewCategory": "tests",
       "shouldPublish": false
     },
 
@@ -139,7 +146,7 @@
     {
       "packageName": "test-web-library-build",
       "projectFolder": "core-build/test-web-library-build",
-      "reviewCategory": "other",
+      "reviewCategory": "tests",
       "shouldPublish": false
     },
     {

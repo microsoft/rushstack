@@ -3,7 +3,7 @@
   "packages": [
     {
       "name": "@microsoft/api-extractor",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/decorators",
@@ -39,7 +39,7 @@
     },
     {
       "name": "@microsoft/load-themed-styles",
-      "allowedCategories": [ "libraries", "other" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/node-core-library",
@@ -75,7 +75,11 @@
     },
     {
       "name": "@microsoft/web-library-build",
-      "allowedCategories": [ "libraries", "other" ]
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "api-extractor-test-01",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "argparse",
@@ -91,7 +95,7 @@
     },
     {
       "name": "chai",
-      "allowedCategories": [ "libraries", "other" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "chalk",
@@ -119,7 +123,7 @@
     },
     {
       "name": "fs-extra",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "fsevents",
@@ -143,7 +147,7 @@
     },
     {
       "name": "gulp",
-      "allowedCategories": [ "libraries", "other" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "gulp-cache",
@@ -239,11 +243,11 @@
     },
     {
       "name": "jest",
-      "allowedCategories": [ "libraries", "other" ]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "jest-cli",
-      "allowedCategories": [ "libraries", "other" ]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "jju",
@@ -355,11 +359,11 @@
     },
     {
       "name": "rimraf",
-      "allowedCategories": [ "libraries", "other" ]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "semver",
-      "allowedCategories": [ "libraries", "other" ]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "sinon",
@@ -395,7 +399,7 @@
     },
     {
       "name": "typescript",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "uglify-js",
@@ -411,7 +415,7 @@
     },
     {
       "name": "yargs",
-      "allowedCategories": [ "libraries", "other" ]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "z-schema",
