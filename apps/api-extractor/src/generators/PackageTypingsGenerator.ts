@@ -262,6 +262,7 @@ export default class PackageTypingsGenerator {
         case ts.SyntaxKind.NamespaceKeyword:
         case ts.SyntaxKind.ModuleKeyword:
         case ts.SyntaxKind.TypeKeyword:
+        case ts.SyntaxKind.FunctionKeyword:
           span.modification.prefix = 'declare ' + span.modification.prefix;
           if (entry.exported) {
             span.modification.prefix = 'export ' + span.modification.prefix;
