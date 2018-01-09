@@ -3,6 +3,8 @@ dependencies:
   '@rush-temp/api-documenter': 'file:projects/api-documenter.tgz'
   '@rush-temp/api-extractor': 'file:projects/api-extractor.tgz'
   '@rush-temp/api-extractor-test-01': 'file:projects/api-extractor-test-01.tgz'
+  '@rush-temp/api-extractor-test-02': 'file:projects/api-extractor-test-02.tgz'
+  '@rush-temp/api-extractor-test-03': 'file:projects/api-extractor-test-03.tgz'
   '@rush-temp/decorators': 'file:projects/decorators.tgz'
   '@rush-temp/gulp-core-build': 'file:projects/gulp-core-build.tgz'
   '@rush-temp/gulp-core-build-karma': 'file:projects/gulp-core-build-karma.tgz'
@@ -9430,6 +9432,28 @@ packages:
     resolution:
       tarball: 'file:projects/api-extractor-test-01.tgz'
     version: 0.0.0
+  'file:projects/api-extractor-test-02.tgz':
+    dependencies:
+      '@types/jest': 21.1.10
+      '@types/node': 6.0.88
+      fs-extra: 0.26.7
+      typescript: 2.4.2
+    dev: false
+    name: '@rush-temp/api-extractor-test-02'
+    resolution:
+      tarball: 'file:projects/api-extractor-test-02.tgz'
+    version: 0.0.0
+  'file:projects/api-extractor-test-03.tgz':
+    dependencies:
+      '@types/jest': 21.1.10
+      '@types/node': 6.0.88
+      fs-extra: 0.26.7
+      typescript: 2.4.2
+    dev: false
+    name: '@rush-temp/api-extractor-test-03'
+    resolution:
+      tarball: 'file:projects/api-extractor-test-03.tgz'
+    version: 0.0.0
   'file:projects/api-extractor.tgz':
     dependencies:
       '@microsoft/node-library-build': 4.2.16
@@ -9921,6 +9945,8 @@ specifiers:
   '@rush-temp/api-documenter': 'file:./projects/api-documenter.tgz'
   '@rush-temp/api-extractor': 'file:./projects/api-extractor.tgz'
   '@rush-temp/api-extractor-test-01': 'file:./projects/api-extractor-test-01.tgz'
+  '@rush-temp/api-extractor-test-02': 'file:./projects/api-extractor-test-02.tgz'
+  '@rush-temp/api-extractor-test-03': 'file:./projects/api-extractor-test-03.tgz'
   '@rush-temp/decorators': 'file:./projects/decorators.tgz'
   '@rush-temp/gulp-core-build': 'file:./projects/gulp-core-build.tgz'
   '@rush-temp/gulp-core-build-karma': 'file:./projects/gulp-core-build-karma.tgz'
