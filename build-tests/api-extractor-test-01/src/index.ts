@@ -83,3 +83,6 @@ export class DecoratorTest {
     console.log('');
   }
 }
+
+export { ForgottenExportConsumer1 } from './ForgottenExportConsumer1';
+export { ForgottenExportConsumer2 } from './ForgottenExportConsumer2';

@@ -12,6 +12,17 @@ import TypeScriptHelpers from '../TypeScriptHelpers';
 import { Span } from './Span';
 
 /**
+ * Constructor parameters for the Entry class
+ */
+interface IEntryParameters {
+  // (see documentation for the corresponding properties in the Entry class)
+  localName: string;
+  followedSymbol: ts.Symbol;
+  importPackagePath: string | undefined;
+  importPackageExportName: string | undefined;
+}
+
+/**
  * An "Entry" is a type definition that we encounter while traversing the
  * references from the package entry point.  This data structure helps filter,
  * sort, and rename the entries that end up in the output package typings file.
@@ -21,34 +32,56 @@ class Entry {
    * The original name of the symbol, as exported from the module (i.e. source file)
    * containing the original TypeScript definition.
    */
-  public localName: string;
+  public readonly localName: string;
 
   /**
    * The localName, possibly renamed to ensure that all the top-level exports have unique names.
    */
-  public uniqueName: string | undefined = undefined;
+  public get uniqueName(): string | undefined {
+    return this._uniqueName;
+  }
+
+  public set uniqueName(value: string | undefined) {
+    this._uniqueName = value;
+    this._sortKey = undefined; // invalidate the cached value
+  }
 
   /**
    * The compiler symbol where this type was defined, after following any aliases.
    */
-  public followedSymbol: ts.Symbol;
+  public readonly followedSymbol: ts.Symbol;
+
+  /** {@inheritdoc IFollowAliasesResult.importPackagePath} */
+  public readonly importPackagePath: string | undefined;
+
+  /** {@inheritdoc IFollowAliasesResult.importPackageExportName} */
+  public readonly importPackageExportName: string | undefined;
 
   /**
    * If true, this entry should be emitted using the "export" keyword instead of the "declare" keyword.
    */
   public exported: boolean = false;
 
+  private _uniqueName: string | undefined = undefined;
   private _sortKey: string|undefined = undefined;
+
+  public constructor(parameters: IEntryParameters) {
+    this.localName = parameters.localName;
+    this.followedSymbol = parameters.followedSymbol;
+    this.importPackagePath = parameters.importPackagePath;
+    this.importPackageExportName = parameters.importPackageExportName;
+  }
 
   public getSortKey(): string {
     if (!this._sortKey) {
-      if (this.localName.substr(0, 1) === '_') {
+      const name: string = this.uniqueName || this.localName;
+      if (name.substr(0, 1) === '_') {
         // Removes the leading underscore, for example: "_example" --> "example*"
         // This causes internal definitions to sort alphabetically with regular definitions.
         // The star is appended to preserve uniqueness, since "*" is not a legal  identifier character.
-        this._sortKey = this.localName.substr(1) + '*';
+        this._sortKey = name.substr(1) + '*';
       } else {
-        this._sortKey = this.localName;
+        this._sortKey = name;
       }
     }
     return this._sortKey;
@@ -65,17 +98,22 @@ interface IFollowAliasesResult {
   symbol: ts.Symbol;
 
   /**
-   * If true, the symbol was declared by an external package, e.g. versus being imported
-   * from another source file in the current project.
+   * True if this is an ambient definition, e.g. from a "typings" folder.
    */
-  external: boolean;
+  isAmbient: boolean;
 
   /**
-   * If true, the symbol is exported from a module somewhere.  If false, then it's
-   * a global ambient definition or else a private declaration in the referencing file.
-   * NOTE: The "external" status is unknown if moduleExport=true.
+   * The name of the external package (and possibly module path) that this definition
+   * was imported from.  If it was defined in the referencing source file, or if it was
+   * imported from a local file, or if it is an ambient definition, then externalPackageName
+   * will be undefined.
    */
-  moduleExport: boolean;
+  importPackagePath: string | undefined;
+
+  /**
+   * If importPackagePath is defined, then this specifies the export name for the definition.
+   */
+  importPackageExportName: string | undefined;
 }
 
 export default class PackageTypingsGenerator {
@@ -152,18 +190,37 @@ export default class PackageTypingsGenerator {
 
       // Is it an export declaration?
       if (currentAlias.declarations) {
+        // Example: " ExportName as RenamedName"
+        const exportSpecifier: ts.ExportSpecifier = currentAlias.declarations[0] as ts.ExportSpecifier;
+
         const exportDeclaration: ts.ExportDeclaration | undefined
-          = PackageTypingsGenerator._matchAncestor<ts.ExportDeclaration>(currentAlias.declarations[0],
+          = PackageTypingsGenerator._matchAncestor<ts.ExportDeclaration>(exportSpecifier,
           [ts.SyntaxKind.ExportDeclaration, ts.SyntaxKind.NamedExports, ts.SyntaxKind.ExportSpecifier]);
 
         if (exportDeclaration && exportDeclaration.moduleSpecifier) {
-          // Example: " '@microsoft/sp-lodash-subset'" or " './MyClass'"
-          const moduleSpecifier: string = exportDeclaration.moduleSpecifier.getFullText();
+          // Examples:
+          //    " '@microsoft/sp-lodash-subset'"
+          //    " "lodash/has""
+          //    " './MyClass'"
+          const moduleSpecifierText: string = exportDeclaration.moduleSpecifier.getFullText();
 
-          // Does it start with something like "'./"?
+          // Remove quotes/whitespace
+          const moduleSpecifier: string = moduleSpecifierText
+            .replace(/^\s*['"]/, '')
+            .replace(/['"]\s*$/, '');
+
+          // Does it start with something like "./"?
           // If not, then assume it's an import from an external package
-          if (!/^['"\s]+\.[\/\\]/.test(moduleSpecifier)) {
-            return { symbol: current, external: true, moduleExport: true };
+          if (!/^\.\//.test(moduleSpecifier)) {
+            const importPackageExportName: string =
+              (exportSpecifier.propertyName || exportSpecifier.name).getText();
+
+            return {
+              symbol: current,
+              importPackagePath: moduleSpecifier,
+              importPackageExportName: importPackageExportName,
+              isAmbient: false
+            };
           }
         }
       }
@@ -171,18 +228,23 @@ export default class PackageTypingsGenerator {
       current = currentAlias;
     }
 
-    // Is it an export?  We examine all of the declarations to see if any of them contains
-    // the "export" keyword.
-    let moduleExport: boolean = false;
+    // Is it ambient?  We examine all of the declarations to see if any of them contains
+    // the "export" keyword; if not, then it's ambient.
+    let isAmbient: boolean = true;
     for (const declaration of current.declarations || []) {
       const modifiers: ts.ModifierFlags = ts.getCombinedModifierFlags(declaration);
       if (modifiers & (ts.ModifierFlags.Export | ts.ModifierFlags.ExportDefault)) {
-        moduleExport = true;
+        isAmbient = false;
         break;
       }
     }
 
-    return { symbol: current, external: false, moduleExport: moduleExport };
+    return {
+      symbol: current,
+      importPackagePath: undefined,
+      importPackageExportName: undefined,
+      isAmbient: isAmbient
+    };
   }
 
   public constructor(context: ExtractorContext) {
@@ -212,8 +274,8 @@ export default class PackageTypingsGenerator {
       const entry: Entry | undefined = this._fetchEntryForSymbol(exportSymbol);
 
       if (!entry) {
-        // We are reexporting an external definition.
-        // To handle this, we would need to emit an import statement.
+        // This is an export of the current package, but for some reason _fetchEntryForSymbol()
+        // can't analyze it.
         this._indentedWriter.writeLine('// Unsupported re-export: ' + exportSymbol.name);
       } else {
         entry.exported = true;
@@ -224,10 +286,23 @@ export default class PackageTypingsGenerator {
 
     this._entries.sort((a, b) => a.getSortKey().localeCompare(b.getSortKey()));
 
+    // Emit the imports first
     for (const entry of this._entries) {
-      if (entry.followedSymbol) {
-        for (const declaration of entry.followedSymbol.declarations || []) {
+      if (entry.importPackagePath) {
+        if (entry.uniqueName !== entry.importPackageExportName) {
+          this._indentedWriter.write(`import { ${entry.importPackageExportName} as ${entry.uniqueName} }`);
+        } else {
+          this._indentedWriter.write(`import { ${entry.importPackageExportName} }`);
+        }
+        this._indentedWriter.writeLine(` from '${entry.importPackagePath}';`);
+      }
+    }
 
+    // Emit the regular declarations
+    for (const entry of this._entries) {
+      if (!entry.importPackagePath) {
+        // If it's local, then emit all the declarations
+        for (const declaration of entry.followedSymbol.declarations || []) {
           const span: Span = new Span(declaration);
 
           this._modifySpan(span, entry);
@@ -262,6 +337,7 @@ export default class PackageTypingsGenerator {
         case ts.SyntaxKind.NamespaceKeyword:
         case ts.SyntaxKind.ModuleKeyword:
         case ts.SyntaxKind.TypeKeyword:
+        case ts.SyntaxKind.FunctionKeyword:
           span.modification.prefix = 'declare ' + span.modification.prefix;
           if (entry.exported) {
             span.modification.prefix = 'export ' + span.modification.prefix;
@@ -342,12 +418,14 @@ export default class PackageTypingsGenerator {
   }
 
   private _fetchEntryForSymbol(symbol: ts.Symbol): Entry | undefined {
-    const result: IFollowAliasesResult = PackageTypingsGenerator._followAliases(symbol, this._typeChecker);
-    if (result.external || !result.moduleExport) {
-      return; // external definition
+    const followAliasesResult: IFollowAliasesResult
+      = PackageTypingsGenerator._followAliases(symbol, this._typeChecker);
+
+    if (followAliasesResult.isAmbient) {
+      return undefined; // we don't care about ambient definitions
     }
 
-    const followedSymbol: ts.Symbol = result.symbol;
+    const followedSymbol: ts.Symbol = followAliasesResult.symbol;
     if (followedSymbol.flags & (
       ts.SymbolFlags.TypeParameter | ts.SymbolFlags.TypeLiteral
       )) {
@@ -359,9 +437,13 @@ export default class PackageTypingsGenerator {
       return entry;
     }
 
-    entry = new Entry();
-    entry.localName = symbol.name;
-    entry.followedSymbol = followedSymbol;
+    entry = new Entry({
+      localName: symbol.name,
+      followedSymbol: followedSymbol,
+      importPackagePath: followAliasesResult.importPackagePath,
+      importPackageExportName: followAliasesResult.importPackageExportName
+    });
+
     this._entries.push(entry);
     this._entriesBySymbol.set(followedSymbol, entry);
     console.log('======> ' + entry.localName);

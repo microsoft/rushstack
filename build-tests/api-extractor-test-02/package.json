@@ -1,5 +1,5 @@
 {
-  "name": "api-extractor-test-01",
+  "name": "api-extractor-test-02",
   "description": "Building this project is a regression test for api-extractor",
   "version": "1.0.0",
   "private": true,
@@ -12,6 +12,7 @@
     "@microsoft/api-extractor": "5.0.1",
     "@types/jest": "~21.1.8",
     "@types/node": "6.0.88",
+    "api-extractor-test-01": "1.0.0",
     "fs-extra": "~0.26.7",
     "typescript": "~2.4.1"
   }

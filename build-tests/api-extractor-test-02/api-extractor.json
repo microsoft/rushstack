@@ -1,0 +1,15 @@
+{
+  "$schema": "https://dev.office.com/json-schemas/api-extractor/api-extractor.schema.json",
+  "compiler" : {
+    "configType": "tsconfig",
+    "rootFolder": "."
+  },
+
+  "packageTypings": {
+    "enabled": true
+  },
+
+  "project": {
+    "entryPointSourceFile": "lib/index.d.ts"
+  }
+}
