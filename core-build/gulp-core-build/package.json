@@ -29,7 +29,7 @@
     "@types/through2": "2.0.32",
     "@types/vinyl": "1.2.30",
     "@types/yargs": "0.0.34",
-    "chalk": "~1.1.3",
+    "chalk": "~2.1.0",
     "del": "^2.2.2",
     "end-of-stream": "~1.1.0",
     "fs-extra": "~0.26.7",
@@ -52,6 +52,7 @@
     "yargs": "~4.6.0",
     "z-schema": "~3.18.3",
     "jest-cli": "~21.2.1",
+    "jest-resolve": "~21.2.0",
     "jest": "~21.2.1"
   },
   "devDependencies": {

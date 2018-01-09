@@ -25,7 +25,8 @@
     "gulp-sass": "~3.1.0",
     "gulp-texttojs": "~1.0.3",
     "merge2": "~1.0.2",
-    "postcss-modules": "~0.6.4"
+    "postcss-modules": "~0.6.4",
+    "through2": "~2.0.1"
   },
   "devDependencies": {
     "@microsoft/node-library-build": "4.2.16",

@@ -50,7 +50,7 @@ export abstract class BaseRushAction extends CommandLineAction {
 
   private _ensureEnvironment(): void {
     /* tslint:disable-next-line:no-string-literal */
-    let environmentPath: string = process.env['PATH'];
+    let environmentPath: string | undefined = process.env['PATH'];
     environmentPath = path.join(this.rushConfiguration.commonTempFolder, 'node_modules', '.bin') +
       path.delimiter + environmentPath;
     /* tslint:disable-next-line:no-string-literal */

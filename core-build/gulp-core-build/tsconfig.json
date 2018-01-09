@@ -10,8 +10,8 @@
       "node"
     ],
     "typeRoots": [
-      "node_modules",
-      "typings-custom"
+      "./node_modules/@types",
+      "./typings-custom"
     ],
     "lib": [
       "es5",

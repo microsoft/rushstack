@@ -171,8 +171,8 @@ export default class PublishUtilities {
     return LOOSE_PKG_REGEX.test(version);
   }
 
-  public static getEnvArgs(): { [key: string]: string } {
-    const env: { [key: string]: string } = {};
+  public static getEnvArgs(): { [key: string]: string | undefined } {
+    const env: { [key: string]: string | undefined } = {};
 
     // Copy existing process.env values (for nodist)
     Object.keys(process.env).forEach((key: string) => {
@@ -186,11 +186,11 @@ export default class PublishUtilities {
     command: string,
     args: string[] = [],
     workingDirectory: string = process.cwd(),
-    env?: { [key: string]: string }
+    env?: { [key: string]: string | undefined }
   ): void {
 
     let relativeDirectory: string = path.relative(process.cwd(), workingDirectory);
-    const envArgs: { [key: string]: string } = PublishUtilities.getEnvArgs();
+    const envArgs: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
 
     if (relativeDirectory) {
       relativeDirectory = `(${relativeDirectory})`;

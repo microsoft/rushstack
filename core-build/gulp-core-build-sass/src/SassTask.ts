@@ -187,7 +187,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
         ext: scssTsExtName,
         isExtensionAppended: false,
         template: (file: gulpUtil.File): string => {
-          const content: string = file.contents.toString();
+          const content: string = file.contents!.toString();
           const classNames: Object = _classMaps[file.path];
           let exportClassNames: string = '';
 
