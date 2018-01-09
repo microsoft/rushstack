@@ -1,0 +1,245 @@
+{
+  "kind": "package",
+  "name": "api-extractor-test-01",
+  "summary": [
+    {
+      "kind": "text",
+      "text": "Example documentation for the package."
+    }
+  ],
+  "remarks": [
+    {
+      "kind": "text",
+      "text": "Additional remarks"
+    }
+  ],
+  "exports": {
+    "AmbientConsumer": {
+      "kind": "class",
+      "extends": "",
+      "implements": "",
+      "typeParameters": [],
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "text",
+          "text": "Test different kinds of ambient definitions"
+        }
+      ],
+      "remarks": [],
+      "isBeta": false,
+      "members": {
+        "builtinDefinition1": {
+          "kind": "method",
+          "signature": "builtinDefinition1(): Map<string, string>;",
+          "accessModifier": "",
+          "isOptional": false,
+          "isStatic": false,
+          "returnValue": {
+            "type": "Map<string, string>",
+            "description": []
+          },
+          "parameters": {},
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "text",
+              "text": "Found via tsconfig.json's \"lib\" setting, which specifies the built-in \"es2015.collection\""
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        },
+        "builtinDefinition2": {
+          "kind": "method",
+          "signature": "builtinDefinition2(): Promise<void>;",
+          "accessModifier": "",
+          "isOptional": false,
+          "isStatic": false,
+          "returnValue": {
+            "type": "Promise<void>",
+            "description": []
+          },
+          "parameters": {},
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "text",
+              "text": "Found via tsconfig.json's \"lib\" setting, which specifies the built-in \"es2015.promise\""
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        },
+        "definitelyTyped": {
+          "kind": "method",
+          "signature": "definitelyTyped(): jest.Context;",
+          "accessModifier": "",
+          "isOptional": false,
+          "isStatic": false,
+          "returnValue": {
+            "type": "jest.Context",
+            "description": []
+          },
+          "parameters": {},
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "text",
+              "text": "Configured via tsconfig.json's \"lib\" setting, which specifies \"@types/jest\". The emitted index.d.ts gets a reference like this: <reference types=\"jest\" />"
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        },
+        "localTypings": {
+          "kind": "method",
+          "signature": "localTypings(): IAmbientInterfaceExample;",
+          "accessModifier": "",
+          "isOptional": false,
+          "isStatic": false,
+          "returnValue": {
+            "type": "IAmbientInterfaceExample",
+            "description": []
+          },
+          "parameters": {},
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "text",
+              "text": "Found via tsconfig.json's \"include\" setting point to a *.d.ts file. This is an old-style Definitely Typed definition, which is the worst possible kind, because consumers are expected to provide this, with no idea where it came from."
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        }
+      }
+    },
+    "DecoratorTest": {
+      "kind": "class",
+      "extends": "",
+      "implements": "",
+      "typeParameters": [],
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "text",
+          "text": "Tests a decorator"
+        }
+      ],
+      "remarks": [],
+      "isBeta": false,
+      "members": {
+        "test": {
+          "kind": "method",
+          "signature": "test(): void;",
+          "accessModifier": "",
+          "isOptional": false,
+          "isStatic": false,
+          "returnValue": {
+            "type": "void",
+            "description": []
+          },
+          "parameters": {},
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "text",
+              "text": "Function with a decorator"
+            }
+          ],
+          "remarks": [],
+          "isBeta": false
+        }
+      }
+    },
+    "ISimpleInterface": {
+      "kind": "interface",
+      "extends": "",
+      "implements": "",
+      "typeParameters": [],
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "text",
+          "text": "A simple, normal definition"
+        }
+      ],
+      "remarks": [],
+      "isBeta": false
+    },
+    "ReexportedClass": {
+      "kind": "class",
+      "extends": "",
+      "implements": "",
+      "typeParameters": [],
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "text",
+          "text": "This class gets aliased twice before being exported from the package."
+        }
+      ],
+      "remarks": [],
+      "isBeta": false,
+      "members": {
+        "getSelfReference": {
+          "kind": "method",
+          "signature": "getSelfReference(): ReexportedClass2 | undefined;",
+          "accessModifier": "",
+          "isOptional": false,
+          "isStatic": false,
+          "returnValue": {
+            "type": "ReexportedClass2 | undefined",
+            "description": []
+          },
+          "parameters": {},
+          "deprecatedMessage": [],
+          "summary": [],
+          "remarks": [],
+          "isBeta": false
+        }
+      }
+    },
+    "virtual": {
+      "kind": "function",
+      "signature": "export function virtual(target: Object, propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<any>): void;",
+      "returnValue": {
+        "type": "void",
+        "description": []
+      },
+      "parameters": {
+        "target": {
+          "name": "target",
+          "description": [],
+          "isOptional": false,
+          "isSpread": false,
+          "type": "Object"
+        },
+        "propertyKey": {
+          "name": "propertyKey",
+          "description": [],
+          "isOptional": false,
+          "isSpread": false,
+          "type": "string | symbol"
+        },
+        "descriptor": {
+          "name": "descriptor",
+          "description": [],
+          "isOptional": false,
+          "isSpread": false,
+          "type": "TypedPropertyDescriptor<any>"
+        }
+      },
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "text",
+          "text": "Example decorator"
+        }
+      ],
+      "remarks": [],
+      "isBeta": false
+    }
+  }
+}

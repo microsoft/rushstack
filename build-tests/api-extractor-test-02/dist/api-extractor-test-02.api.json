@@ -1,0 +1,41 @@
+{
+  "kind": "package",
+  "name": "api-extractor-test-02",
+  "summary": [],
+  "remarks": [],
+  "exports": {
+    "SubclassWithImport": {
+      "kind": "class",
+      "extends": "RenamedReexportedClass",
+      "implements": "ISimpleInterface",
+      "typeParameters": [],
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "text",
+          "text": "Example of a class that inherits from an externally imported class."
+        }
+      ],
+      "remarks": [],
+      "isBeta": false,
+      "members": {
+        "test": {
+          "kind": "method",
+          "signature": "test(): void;",
+          "accessModifier": "",
+          "isOptional": false,
+          "isStatic": false,
+          "returnValue": {
+            "type": "void",
+            "description": []
+          },
+          "parameters": {},
+          "deprecatedMessage": [],
+          "summary": [],
+          "remarks": [],
+          "isBeta": false
+        }
+      }
+    }
+  }
+}
