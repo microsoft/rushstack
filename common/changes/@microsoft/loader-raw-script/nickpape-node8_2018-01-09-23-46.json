@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/loader-raw-script",
+      "comment": "Upgrade to Node 8",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/loader-raw-script",
+  "email": "nickpape-msft@users.noreply.github.com"
+}

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/web-library-build",
+      "comment": "Upgrade to Node 8",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/web-library-build",
+  "email": "nickpape-msft@users.noreply.github.com"
+}
