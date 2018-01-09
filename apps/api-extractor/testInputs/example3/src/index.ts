@@ -3,8 +3,9 @@
 
 /**
  * This example folder is used to test the functionality of DocItemLoader and API reference resolution.
+ *
+ * @packagedocumentation
  */
-declare const packageDescription: void;
 
 export {
     inheritLocalOptionOne,

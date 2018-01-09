@@ -2,6 +2,51 @@
   "name": "@microsoft/loader-load-themed-styles",
   "entries": [
     {
+      "version": "1.6.13",
+      "tag": "@microsoft/loader-load-themed-styles_v1.6.13",
+      "date": "Sun, 07 Jan 2018 05:12:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.7.17` to `1.7.18`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.2.15` to `4.2.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.6.12",
+      "tag": "@microsoft/loader-load-themed-styles_v1.6.12",
+      "date": "Fri, 05 Jan 2018 20:26:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.7.16` to `1.7.17`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.2.14` to `4.2.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.6.11",
+      "tag": "@microsoft/loader-load-themed-styles_v1.6.11",
+      "date": "Fri, 05 Jan 2018 00:48:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.7.15` to `1.7.16`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.2.13` to `4.2.14`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.6.10",
       "tag": "@microsoft/loader-load-themed-styles_v1.6.10",
       "date": "Fri, 22 Dec 2017 17:04:46 GMT",

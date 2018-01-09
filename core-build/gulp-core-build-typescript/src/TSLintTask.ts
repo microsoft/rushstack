@@ -198,7 +198,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
 
           const configuration: TSLint.Configuration.IConfigurationFile =
             TSLint.Configuration.parseConfigFile(lintRulesFile);
-          linter.lint(file.path, file.contents.toString(), configuration);
+          linter.lint(file.path, file.contents!.toString(), configuration);
 
           const result: TSLint.LintResult = linter.getResult();
 

@@ -2,6 +2,42 @@
   "name": "@microsoft/stream-collator",
   "entries": [
     {
+      "version": "2.1.13",
+      "tag": "@microsoft/stream-collator_v2.1.13",
+      "date": "Sun, 07 Jan 2018 05:12:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.2.15` to `4.2.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.12",
+      "tag": "@microsoft/stream-collator_v2.1.12",
+      "date": "Fri, 05 Jan 2018 20:26:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.2.14` to `4.2.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.11",
+      "tag": "@microsoft/stream-collator_v2.1.11",
+      "date": "Fri, 05 Jan 2018 00:48:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.2.13` to `4.2.14`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.1.10",
       "tag": "@microsoft/stream-collator_v2.1.10",
       "date": "Fri, 22 Dec 2017 17:04:46 GMT",

@@ -2,6 +2,94 @@
   "name": "@microsoft/web-library-build",
   "entries": [
     {
+      "version": "4.3.0",
+      "tag": "@microsoft/web-library-build_v4.3.0",
+      "date": "Sun, 07 Jan 2018 05:12:08 GMT",
+      "comments": {
+        "minor": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "aa0c67382d4dee0cde40ee84a581dbdcdabe77ef",
+            "comment": "api-extractor now runs after tsc rather than in parallel, and is excluded from \"gulp serve\""
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.3.5` to `3.3.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-karma\" from `4.3.14` to `4.3.15`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `4.1.22` to `4.1.23`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `3.1.22` to `3.1.23`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `4.3.3` to `4.4.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `3.2.22` to `3.2.23`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.2.16",
+      "tag": "@microsoft/web-library-build_v4.2.16",
+      "date": "Fri, 05 Jan 2018 20:26:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.3.4` to `3.3.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-karma\" from `4.3.13` to `4.3.14`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `4.1.21` to `4.1.22`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `3.1.21` to `3.1.22`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `4.3.2` to `4.3.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `3.2.21` to `3.2.22`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.2.15",
+      "tag": "@microsoft/web-library-build_v4.2.15",
+      "date": "Fri, 05 Jan 2018 00:48:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.3.3` to `3.3.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-karma\" from `4.3.12` to `4.3.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `4.1.20` to `4.1.21`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `3.1.20` to `3.1.21`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `4.3.1` to `4.3.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `3.2.20` to `3.2.21`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.2.14",
       "tag": "@microsoft/web-library-build_v4.2.14",
       "date": "Fri, 22 Dec 2017 17:04:46 GMT",

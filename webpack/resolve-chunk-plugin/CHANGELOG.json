@@ -2,6 +2,49 @@
   "name": "@microsoft/resolve-chunk-plugin",
   "entries": [
     {
+      "version": "1.0.16",
+      "tag": "@microsoft/resolve-chunk-plugin_v1.0.16",
+      "date": "Sun, 07 Jan 2018 05:12:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "aa0c67382d4dee0cde40ee84a581dbdcdabe77ef",
+            "comment": "Minor updates for compatibility with new api-extractor"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.2.15` to `4.2.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.15",
+      "tag": "@microsoft/resolve-chunk-plugin_v1.0.15",
+      "date": "Fri, 05 Jan 2018 20:26:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.2.14` to `4.2.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.14",
+      "tag": "@microsoft/resolve-chunk-plugin_v1.0.14",
+      "date": "Fri, 05 Jan 2018 00:48:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.2.13` to `4.2.14`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.13",
       "tag": "@microsoft/resolve-chunk-plugin_v1.0.13",
       "date": "Fri, 22 Dec 2017 17:04:46 GMT",

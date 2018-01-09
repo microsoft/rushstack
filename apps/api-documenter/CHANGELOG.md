@@ -1,6 +1,23 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Fri, 22 Dec 2017 17:04:46 GMT and should not be manually modified.
+This log was last generated on Sun, 07 Jan 2018 05:12:08 GMT and should not be manually modified.
+
+## 1.0.17
+Sun, 07 Jan 2018 05:12:08 GMT
+
+*Version update only*
+
+## 1.0.16
+Fri, 05 Jan 2018 20:26:45 GMT
+
+*Version update only*
+
+## 1.0.15
+Fri, 05 Jan 2018 00:48:41 GMT
+
+### Patches
+
+- Update Jest to ~21.2.1
 
 ## 1.0.14
 Fri, 22 Dec 2017 17:04:46 GMT

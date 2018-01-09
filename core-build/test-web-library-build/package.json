@@ -11,12 +11,12 @@
   "devDependencies": {
     "@types/chai": "3.4.34",
     "chai": "~3.5.0",
-    "@types/jest": "~20.0.4",
+    "@types/jest": "~21.1.8",
     "@types/node": "6.0.88"
   },
   "dependencies": {
-    "@microsoft/load-themed-styles": "1.7.15",
-    "@microsoft/web-library-build": "4.2.14",
+    "@microsoft/load-themed-styles": "1.7.18",
+    "@microsoft/web-library-build": "4.3.0",
     "gulp": "~3.9.1"
   }
 }

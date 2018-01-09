@@ -2,6 +2,51 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "4.1.23",
+      "tag": "@microsoft/gulp-core-build-sass_v4.1.23",
+      "date": "Sun, 07 Jan 2018 05:12:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.3.5` to `3.3.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.7.17` to `1.7.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.1.22",
+      "tag": "@microsoft/gulp-core-build-sass_v4.1.22",
+      "date": "Fri, 05 Jan 2018 20:26:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.3.4` to `3.3.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.7.16` to `1.7.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.1.21",
+      "tag": "@microsoft/gulp-core-build-sass_v4.1.21",
+      "date": "Fri, 05 Jan 2018 00:48:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.3.3` to `3.3.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.7.15` to `1.7.16`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.1.20",
       "tag": "@microsoft/gulp-core-build-sass_v4.1.20",
       "date": "Fri, 22 Dec 2017 17:04:46 GMT",

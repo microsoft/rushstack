@@ -231,7 +231,8 @@ export default class RushConfiguration {
    * this looks something like "/usr/username/"
    */
   public static getHomeDirectory(): string {
-    const unresolvedUserFolder: string = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
+    const unresolvedUserFolder: string | undefined
+      = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
     const homeFolder: string = path.resolve(unresolvedUserFolder);
     if (!fsx.existsSync(homeFolder)) {
       throw new Error('Unable to determine the current user\'s home directory');

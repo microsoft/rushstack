@@ -94,6 +94,10 @@
       "allowedCategories": [ "libraries", "other" ]
     },
     {
+      "name": "chalk",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "colors",
       "allowedCategories": [ "libraries" ]
     },
@@ -240,6 +244,10 @@
     {
       "name": "jest-cli",
       "allowedCategories": [ "libraries", "other" ]
+    },
+    {
+      "name": "jest-resolve",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "jju",

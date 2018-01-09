@@ -7,4 +7,4 @@ export function log(message: string): void;
 // @public (undocumented)
 export function logClass(): void;
 
-// (No packageDescription for this package)
+// (No @packagedocumentation comment for this package)
