@@ -8,7 +8,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "Fix an issue with checking the shrinkwrap file when there are peer dependency version specifiers"
+            "comment": "Fix an issue with checking the pnpm shrinkwrap file when there are peer dependency version specifiers"
           }
         ]
       }

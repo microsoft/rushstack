@@ -7,7 +7,7 @@ Mon, 08 Jan 2018 20:34:30 GMT
 
 ### Patches
 
-- Fix an issue with checking the shrinkwrap file when there are peer dependency version specifiers
+- Fix an issue with checking the pnpm shrinkwrap file when there are peer dependency version specifiers
 
 ## 4.1.0
 Thu, 30 Nov 2017 20:34:30 GMT
@@ -57,9 +57,9 @@ Fri, 06 Oct 2017 22:44:31 GMT
 ### Patches
 
 - Enable strickNullChecks
-- Fix a bug in "rush version" that devdependency does not get bumped if there is no dependency. 
-- Fix a bug in "rush change" so it handles rename properly. 
-- Add npm tag support in "rush publish". 
+- Fix a bug in "rush version" that devdependency does not get bumped if there is no dependency.
+- Fix a bug in "rush change" so it handles rename properly.
+- Add npm tag support in "rush publish".
 
 ## 3.0.18
 Tue, 26 Sep 2017 13:51:05 GMT
