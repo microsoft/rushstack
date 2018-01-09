@@ -22,7 +22,7 @@
     "@microsoft/gulp-core-build-typescript": "4.4.1",
     "@microsoft/gulp-core-build-webpack": "3.2.24",
     "@types/gulp": "3.8.32",
-    "@types/node": "6.0.88",
+    "@types/node": "8.5.8",
     "gulp": "~3.9.1",
     "gulp-replace": "^0.5.4"
   },
