@@ -1,3 +1,4 @@
+import { ReexportedClass as RenamedReexportedClass } from 'api-extractor-test-01';
 
 /**
  * A simple, normal definition
