@@ -129,7 +129,12 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     // e.g.:  "/gulp-karma/0.0.5/karma@0.13.22"
     // split it by forward slashes, then grab the second group
     // if the second group doesn't exist, return the version directly
-    return version ? (version.split('/')[2] || version) : undefined;
+    const versionParts: string[] = version.split('/');
+    if (versionParts.length !== 1 && versionParts.length !== 4) {
+      throw new Error(`Cannot parse pnpm shrinkwrap version specifier: `
+        + `"${version}" for "${dependencyName}"`);
+    }
+    return version ? (versionParts[2] || version) : undefined;
   }
 
   private constructor(shrinkwrapJson: IShrinkwrapYaml) {
