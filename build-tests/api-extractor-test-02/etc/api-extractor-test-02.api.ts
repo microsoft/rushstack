@@ -1,5 +1,5 @@
-// @public (undocumented)
-class Subclass extends AmbientConsumer, implements ISimpleInterface {
+// @public
+class SubclassWithImport extends RenamedReexportedClass, implements ISimpleInterface {
   // (undocumented)
   test(): void;
 }

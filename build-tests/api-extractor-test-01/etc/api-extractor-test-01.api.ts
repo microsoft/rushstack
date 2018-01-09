@@ -18,6 +18,8 @@ interface ISimpleInterface {
 
 // @public
 class ReexportedClass {
+  // (undocumented)
+  getSelfReference(): ReexportedClass2 | undefined;
 }
 
 // @public

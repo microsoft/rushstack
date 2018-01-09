@@ -6,4 +6,7 @@
  * @public
  */
 export class ReexportedClass2 {
+  public getSelfReference(): ReexportedClass2 | undefined {
+    return undefined;
+  }
 }
