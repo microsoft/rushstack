@@ -11,7 +11,7 @@ export default class Npm {
   public static publishedVersions(
     packageName: string,
     cwd: string,
-    env: { [key: string]: string }
+    env: { [key: string]: string | undefined }
   ): string[] {
     const versions: string[] = [];
     try {

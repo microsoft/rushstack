@@ -10,6 +10,7 @@
     "build": "gulp test --clean"
   },
   "dependencies": {
+    "@types/node": "6.0.88",
     "uglify-js": "~3.0.28",
     "lodash": "~4.15.0",
     "@types/webpack": "3.0.11"

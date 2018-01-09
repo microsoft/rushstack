@@ -3,8 +3,9 @@
 
 /**
  * An object-oriented command-line parser for TypeScript projects.
+ *
+ * @packagedocumentation
  */
-declare const packageDescription: void; // tslint:disable-line:no-unused-variable
 
 export {
   default as CommandLineAction,

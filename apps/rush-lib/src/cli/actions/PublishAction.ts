@@ -256,7 +256,7 @@ export default class PublishAction extends BaseRushAction {
   }
 
   private _npmPublish(packageName: string, packagePath: string): void {
-    const env: { [key: string]: string } = PublishUtilities.getEnvArgs();
+    const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
     const args: string[] = ['publish'];
 
     if (this.rushConfiguration.projectsByName.get(packageName)!.shouldPublish) {
@@ -291,7 +291,7 @@ export default class PublishAction extends BaseRushAction {
   }
 
   private _packageExists(packageConfig: RushConfigurationProject): boolean {
-    const env: { [key: string]: string } = PublishUtilities.getEnvArgs();
+    const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
     if (this._registryUrl.value) {
       env['npm_config_registry'] = this._registryUrl.value; // tslint:disable-line:no-string-literal
     }

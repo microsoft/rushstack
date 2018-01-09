@@ -254,6 +254,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "jest-resolve",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "jju",
       "allowedCategories": [ "libraries" ]
     },

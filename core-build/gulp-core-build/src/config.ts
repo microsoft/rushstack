@@ -15,7 +15,7 @@ export function getConfigValue(name: string, defaultValue?: string | boolean): s
 
   // Try to get config value from environment variable.
   const envVariable: string = ENVIRONMENT_VARIABLE_PREFIX + name.toUpperCase();
-  const envValue: string = process.env[envVariable];
+  const envValue: string | undefined = process.env[envVariable];
   const argsValue: string | boolean = args[name.toLowerCase()];
 
   return _firstDefinedValue(argsValue, envValue, defaultValue, _defaultValues[name]);
