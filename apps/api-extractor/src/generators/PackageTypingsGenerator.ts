@@ -11,7 +11,11 @@ import IndentedWriter from '../IndentedWriter';
 import TypeScriptHelpers from '../TypeScriptHelpers';
 import { Span } from './Span';
 
+/**
+ * Constructor parameters for the Entry class
+ */
 interface IEntryParameters {
+  // (see documentation for the corresponding properties in the Entry class)
   localName: string;
   followedSymbol: ts.Symbol;
   importPackagePath: string | undefined;

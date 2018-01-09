@@ -12,6 +12,20 @@ class DecoratorTest {
   test(): void;
 }
 
+// @public (undocumented)
+class ForgottenExportConsumer1 {
+  // WARNING: The type "IForgottenExport" needs to be exported by the package (e.g. added to index.ts)
+  // (undocumented)
+  test1(): IForgottenExport | undefined;
+}
+
+// @public (undocumented)
+class ForgottenExportConsumer2 {
+  // WARNING: The type "IForgottenExport" needs to be exported by the package (e.g. added to index.ts)
+  // (undocumented)
+  test2(): IForgottenExport | undefined;
+}
+
 // @public
 interface ISimpleInterface {
 }

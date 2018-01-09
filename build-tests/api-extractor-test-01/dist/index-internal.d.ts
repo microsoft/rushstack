@@ -36,6 +36,35 @@ export declare class DecoratorTest {
     test(): void;
 }
 
+/** @public */
+export declare class ForgottenExportConsumer1 {
+    test1(): IForgottenExport | undefined;
+}
+
+/** @public */
+export declare class ForgottenExportConsumer2 {
+    test2(): IForgottenExport_2 | undefined;
+}
+
+/**
+ * The ForgottenExportConsumer1 class relies on this IForgottenExport.
+ *
+ * This should end up as a non-exported "IForgottenExport" in the index.d.ts.
+ */
+declare interface IForgottenExport {
+    instance1: string;
+}
+
+/**
+ * The ForgottenExportConsumer2 class relies on this IForgottenExport.
+ *
+ * This should end up as a non-exported "IForgottenExport_2" in the index.d.ts.
+ * It is renamed to avoid a conflict with the IForgottenExport from ForgottenExportConsumer1.
+ */
+declare interface IForgottenExport_2 {
+    instance2: string;
+}
+
 /**
  * A simple, normal definition
  * @public
