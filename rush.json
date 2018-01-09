@@ -1,7 +1,7 @@
 {
   "pnpmVersion": "1.25.1",
   "rushVersion": "4.1.1",
-  "nodeSupportedVersionRange": ">=6.9.0 <7.0.0",
+  "nodeSupportedVersionRange": ">=8.9.4 <9.0.0",
   "projectFolderMinDepth": 1,
 
   "approvedPackagesPolicy": {

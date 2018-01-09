@@ -1,7 +1,7 @@
 {
   "npmVersion": "4.5.0",
   "rushVersion": "2.5.0",
-  "nodeSupportedVersionRange": ">=6.9.0 <7.0.0",
+  "nodeSupportedVersionRange": ">=8.9.4 <9.0.0",
   "projectFolderMinDepth": 1,
   "projectFolderMaxDepth": 99,
   "hotfixChangeEnabled": true,
