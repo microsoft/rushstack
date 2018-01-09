@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 30 Nov 2017 20:31:01 GMT and should not be manually modified.
+This log was last generated on Tue, 09 Jan 2018 01:30:15 GMT and should not be manually modified.
+
+## 4.1.1
+Mon, 08 Jan 2018 20:34:30 GMT
+
+### Patches
+
+- Fix an issue with checking the pnpm shrinkwrap file when there are peer dependency version specifiers
 
 ## 4.1.0
 Thu, 30 Nov 2017 20:34:30 GMT
@@ -50,9 +57,9 @@ Fri, 06 Oct 2017 22:44:31 GMT
 ### Patches
 
 - Enable strickNullChecks
-- Fix a bug in "rush version" that devdependency does not get bumped if there is no dependency. 
-- Fix a bug in "rush change" so it handles rename properly. 
-- Add npm tag support in "rush publish". 
+- Fix a bug in "rush version" that devdependency does not get bumped if there is no dependency.
+- Fix a bug in "rush change" so it handles rename properly.
+- Add npm tag support in "rush publish".
 
 ## 3.0.18
 Tue, 26 Sep 2017 13:51:05 GMT
@@ -307,7 +314,7 @@ Sun, 22 Jan 2017 02:04:57 GMT
 
 ### Patches
 
-- Update temp_modules when versions are bumped. 
+- Update temp_modules when versions are bumped.
 
 ## 1.4.1
 Tue, 03 Jan 2017 21:52:49 GMT

@@ -3,8 +3,9 @@
 
 /**
  * Core libraries that every NodeJS toolchain project should use.
+ *
+ * @packagedocumentation
  */
-declare const packageDescription: void; // tslint:disable-line:no-unused-variable
 
 export { FileDiffTest } from './FileDiffTest';
 export {

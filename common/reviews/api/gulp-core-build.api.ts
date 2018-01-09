@@ -8,34 +8,31 @@ export function addSuppression(suppression: string | RegExp): void;
 class CleanFlagTask extends CleanTask {
   constructor();
   // (undocumented)
-  public executeTask(gulp: typeof Gulp,
-      completeCallback: (error?: string | Error) => void): void;
+  executeTask(gulp: typeof Gulp, completeCallback: (error?: string | Error) => void): void;
   // (undocumented)
-  public isEnabled(buildConfig: IBuildConfig): boolean;
+  isEnabled(buildConfig: IBuildConfig): boolean;
 }
 
 // @public
 class CleanTask extends GulpTask<void> {
   constructor();
-  public executeTask(gulp: typeof Gulp,
-      completeCallback: (error?: string | Error) => void): void;
+  executeTask(gulp: typeof Gulp, completeCallback: (error?: string | Error) => void): void;
 }
 
 // @public
 class CopyStaticAssetsTask extends GulpTask<ICopyStaticAssetsTaskConfig> {
   constructor();
   // (undocumented)
-  public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream;
+  executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream;
   // (undocumented)
-  public loadSchema(): Object;
+  loadSchema(): Object;
 }
 
 // @public
 class CopyTask extends GulpTask<ICopyConfig> {
   constructor();
-  public executeTask(gulp: typeof Gulp,
-      completeCallback: (error?: string | Error) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
-  public loadSchema(): Object;
+  executeTask(gulp: typeof Gulp, completeCallback: (error?: string | Error) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
+  loadSchema(): Object;
 }
 
 // @public
@@ -45,29 +42,13 @@ export function coverageData(coverage: number, threshold: number, filePath: stri
 export function error(...args: Array<string | Chalk.ChalkChain>): void;
 
 // @public
-export function fileError(taskName: string,
-  filePath: string,
-  line: number,
-  column: number,
-  errorCode: string,
-  message: string): void;
+export function fileError(taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
 
 // @public
-export function fileLog(write: (text: string) => void,
-  taskName: string,
-  filePath: string,
-  line: number,
-  column: number,
-  errorCode: string,
-  message: string): void;
+export function fileLog(write: (text: string) => void, taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
 
 // @public
-export function fileWarning(taskName: string,
-  filePath: string,
-  line: number,
-  column: number,
-  errorCode: string,
-  message: string): void;
+export function fileWarning(taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
 
 // @public
 export function functionalTestRun(name: string, result: TestResultState, duration: number): void;
@@ -75,8 +56,7 @@ export function functionalTestRun(name: string, result: TestResultState, duratio
 // @public
 class GenerateShrinkwrapTask extends GulpTask<void> {
   constructor();
-  public executeTask(gulp: gulpType.Gulp,
-      completeCallback: (error?: string | Error) => void): NodeJS.ReadWriteStream | void;
+  executeTask(gulp: gulpType.Gulp, completeCallback: (error?: string | Error) => void): NodeJS.ReadWriteStream | void;
 }
 
 // @public
@@ -90,41 +70,40 @@ export function getWarnings(): string[];
 
 // @public
 class GulpTask<TTaskConfig> implements IExecutable {
-  public constructor(name: string, initialTaskConfig: Partial<TTaskConfig> = {});
+  constructor(name: string, initialTaskConfig?: Partial<TTaskConfig>);
   protected _getConfigFilePath(): string;
-  public buildConfig: IBuildConfig;
-  public cleanMatch: string[];
-  public copyFile(localSourcePath: string, localDestPath?: string): void;
-  public enabled: boolean;
-  public execute(config: IBuildConfig): Promise<void>;
+  buildConfig: IBuildConfig;
+  cleanMatch: string[];
+  copyFile(localSourcePath: string, localDestPath?: string): void;
+  enabled: boolean;
+  execute(config: IBuildConfig): Promise<void>;
   // WARNING: The type "GulpProxy" needs to be exported by the package (e.g. added to index.ts)
-  public abstract executeTask(gulp: gulp.Gulp | GulpProxy,
-      completeCallback?: (error?: string | Error) => void): Promise<Object | void> | NodeJS.ReadWriteStream | void;
-  public fileError(filePath: string, line: number, column: number, errorCode: string, message: string): void;
-  public fileExists(localPath: string): boolean;
-  public fileWarning(filePath: string, line: number, column: number, warningCode: string, message: string): void;
-  public getCleanMatch(buildConfig: IBuildConfig, taskConfig: TTaskConfig = this.taskConfig): string[];
-  public isEnabled(buildConfig: IBuildConfig): boolean;
+  abstract executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (error?: string | Error) => void): Promise<Object | void> | NodeJS.ReadWriteStream | void;
+  fileError(filePath: string, line: number, column: number, errorCode: string, message: string): void;
+  fileExists(localPath: string): boolean;
+  fileWarning(filePath: string, line: number, column: number, warningCode: string, message: string): void;
+  getCleanMatch(buildConfig: IBuildConfig, taskConfig?: TTaskConfig): string[];
+  isEnabled(buildConfig: IBuildConfig): boolean;
   protected loadSchema(): Object | undefined;
-  public log(message: string): void;
-  public logError(message: string): void;
-  public logVerbose(message: string): void;
-  public logWarning(message: string): void;
-  public mergeConfig(taskConfig: Partial<TTaskConfig>): void;
-  public name: string;
-  public onRegister(): void;
-  public readJSONSync(localPath: string): Object | undefined;
-  public replaceConfig(taskConfig: TTaskConfig): void;
-  public resolvePath(localPath: string): string;
-  public readonly schema: Object | undefined;
-  public setConfig(taskConfig: Partial<TTaskConfig>): void;
-  public taskConfig: TTaskConfig;
+  log(message: string): void;
+  logError(message: string): void;
+  logVerbose(message: string): void;
+  logWarning(message: string): void;
+  mergeConfig(taskConfig: Partial<TTaskConfig>): void;
+  name: string;
+  onRegister(): void;
+  readJSONSync(localPath: string): Object | undefined;
+  replaceConfig(taskConfig: TTaskConfig): void;
+  resolvePath(localPath: string): string;
+  readonly schema: Object | undefined;
+  setConfig(taskConfig: Partial<TTaskConfig>): void;
+  taskConfig: TTaskConfig;
 }
 
 // @public (undocumented)
 interface IBuildConfig {
   args: {
-    [ name: string ]: string | boolean
+    [name: string]: string | boolean;
   }
   buildErrorIconPath?: string;
   buildSuccessIconPath?: string;
@@ -140,7 +119,7 @@ interface IBuildConfig {
   packageFolder: string;
   production: boolean;
   properties?: {
-    [ key: string ]: any
+    [key: string]: any;
   }
   relogIssues?: boolean;
   rootPath: string;
@@ -155,7 +134,7 @@ interface IBuildConfig {
 // @public
 interface ICopyConfig {
   copyTo: {
-    [ destPath: string ]: string[];
+    [destPath: string]: string[];
   }
   shouldFlatten?: boolean;
 }
@@ -207,11 +186,10 @@ export function initialize(gulp: typeof Gulp): void;
 class JestTask extends GulpTask<IJestConfig> {
   constructor();
   // (undocumented)
-  public executeTask(gulp: typeof Gulp,
-      completeCallback: (error?: string | Error) => void): void;
+  executeTask(gulp: typeof Gulp, completeCallback: (error?: string | Error) => void): void;
   // (undocumented)
-  public isEnabled(buildConfig: IBuildConfig): boolean;
-  public loadSchema(): Object;
+  isEnabled(buildConfig: IBuildConfig): boolean;
+  loadSchema(): Object;
 }
 
 // @public
@@ -247,19 +225,19 @@ export function task(taskName: string, taskExecutable: IExecutable): IExecutable
 // @public
 enum TestResultState {
   // (undocumented)
-  Failed,
+  Failed = 1,
   // (undocumented)
-  FlakyFailed,
+  FlakyFailed = 2,
   // (undocumented)
-  Passed,
+  Passed = 0,
   // (undocumented)
-  Skipped
+  Skipped = 3
 }
 
 // @public
 class ValidateShrinkwrapTask extends GulpTask<void> {
   constructor();
-  public executeTask(gulp: gulpType.Gulp, completeCallback: (error: string) => void): NodeJS.ReadWriteStream | void;
+  executeTask(gulp: gulpType.Gulp, completeCallback: (error: string) => void): NodeJS.ReadWriteStream | void;
 }
 
 // @public
@@ -275,4 +253,4 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
 // WARNING: Unsupported export: clean
 // WARNING: Unsupported export: copyStaticAssets
 // WARNING: Unsupported export: jest
-// (No packageDescription for this package)
+// (No @packagedocumentation comment for this package)
