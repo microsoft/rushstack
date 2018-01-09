@@ -15,9 +15,9 @@
     "api-documenter": "./bin/api-documenter"
   },
   "dependencies": {
-    "@microsoft/api-extractor": "5.0.0",
-    "@microsoft/node-core-library": "0.3.25",
-    "@microsoft/ts-command-line": "2.2.13",
+    "@microsoft/api-extractor": "5.0.1",
+    "@microsoft/node-core-library": "0.3.26",
+    "@microsoft/ts-command-line": "2.2.14",
     "colors": "~1.1.2",
     "fs-extra": "~0.26.7",
     "js-yaml": "~3.9.1"

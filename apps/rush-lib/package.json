@@ -14,10 +14,10 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-core-library": "0.3.25",
+    "@microsoft/node-core-library": "0.3.26",
     "@microsoft/package-deps-hash": "2.1.13",
     "@microsoft/stream-collator": "2.1.13",
-    "@microsoft/ts-command-line": "2.2.13",
+    "@microsoft/ts-command-line": "2.2.14",
     "@types/fs-extra": "0.0.37",
     "@types/node": "6.0.88",
     "@types/z-schema": "3.16.31",

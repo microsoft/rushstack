@@ -2,6 +2,25 @@
   "name": "@microsoft/gulp-core-build-karma",
   "entries": [
     {
+      "version": "4.3.16",
+      "tag": "@microsoft/gulp-core-build-karma_v4.3.16",
+      "date": "Tue, 09 Jan 2018 17:05:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nicholas Pape <nickpape-msft@users.noreply.github.com>",
+            "commit": "d00b6549d13610fbb6f84be3478b532be9da0747",
+            "comment": "Get web-build-tools building with pnpm"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.3.6` to `3.3.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.3.15",
       "tag": "@microsoft/gulp-core-build-karma_v4.3.15",
       "date": "Sun, 07 Jan 2018 05:12:08 GMT",

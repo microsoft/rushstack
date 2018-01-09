@@ -2,6 +2,20 @@
   "name": "@microsoft/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "1.3.14",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v1.3.14",
+      "date": "Tue, 09 Jan 2018 17:05:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nicholas Pape <nickpape-msft@users.noreply.github.com>",
+            "commit": "d00b6549d13610fbb6f84be3478b532be9da0747",
+            "comment": "Get web-build-tools building with pnpm"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.13",
       "tag": "@microsoft/set-webpack-public-path-plugin_v1.3.13",
       "date": "Sun, 07 Jan 2018 05:12:08 GMT",
