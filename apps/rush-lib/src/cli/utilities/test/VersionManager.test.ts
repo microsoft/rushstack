@@ -8,7 +8,6 @@ import { BumpType } from '../../../data/VersionPolicy';
 import { ChangeFile } from '../../../data/ChangeFile';
 import { ChangeType, IChangeInfo } from '../../../data/ChangeManagement';
 import RushConfiguration from '../../../data/RushConfiguration';
-import { VersionPolicyConfiguration } from '../../../data/VersionPolicyConfiguration';
 import IPackageJson from '../../../utilities/IPackageJson';
 import { VersionManager } from '../VersionManager';
 
@@ -24,13 +23,11 @@ function _getChanges(changeFiles: Map<string, ChangeFile>,
 describe('VersionManager', () => {
   const rushJsonFile: string = path.resolve(__dirname, 'repo', 'rush.json');
   const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile);
-  const versionConfigJsonFile: string = path.resolve(__dirname, 'repo', 'version-policies.json');
-  const versionPolicyConfiguration: VersionPolicyConfiguration =
-    new VersionPolicyConfiguration(versionConfigJsonFile);
   let versionManager: VersionManager;
 
   beforeEach(() => {
-    versionManager = new VersionManager(rushConfiguration, 'test@microsoft.com', versionPolicyConfiguration);
+    versionManager = new VersionManager(rushConfiguration, 'test@microsoft.com',
+      rushConfiguration.versionPolicyConfiguration);
   });
 
   /* tslint:disable:no-string-literal */
@@ -52,7 +49,13 @@ describe('VersionManager', () => {
       assert.equal(updatedPackages.get('g')!.devDependencies!['a'], `~10.10.0`);
 
       const changeFiles: Map<string, ChangeFile> = versionManager.changeFiles;
-      assert.equal(changeFiles.size, 2, 'The number of change files matches');
+      assert.equal(changeFiles.size, 4, 'The number of change files matches');
+       assert.equal(_getChanges(changeFiles, 'a')!.length, 1, 'a does not have one change');
+       assert.equal(_getChanges(changeFiles, 'a')![0].changeType, ChangeType.none,
+         'a does not have a none change');
+       assert.equal(_getChanges(changeFiles, 'b')!.length, 1, 'b does not have one change');
+       assert.equal(_getChanges(changeFiles, 'b')![0].changeType, ChangeType.none,
+         'b does not have a none change');
       assert.equal(_getChanges(changeFiles, 'c')!.length, 2, 'c does not have two change');
       assert.equal(_getChanges(changeFiles, 'c')![0].changeType, ChangeType.patch,
         'c does not have a patch change');

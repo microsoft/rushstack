@@ -135,6 +135,11 @@ export class VersionManager {
         const updatedProject: IPackageJson | undefined = versionPolicy.ensure(rushProject.packageJson);
         if (updatedProject) {
           this._updatedProjects.set(updatedProject.name, updatedProject);
+          // No need to create an entry for prerelease version bump.
+          if (!this._isPrerelease(updatedProject.version) && rushProject.isMainProject) {
+            this._addChangeInfo(updatedProject.name,
+              [this._createChangeInfo(updatedProject, rushProject)]);
+          }
         }
       }
     });
@@ -253,7 +258,9 @@ export class VersionManager {
       this._rushConfiguration.projectsByName.get(dependencyName);
 
     return !!dependencyRushProject && rushProject.shouldPublish &&
-      dependencyRushProject.versionPolicyName !== rushProject.versionPolicyName;
+      (!rushProject.versionPolicy ||
+        !rushProject.versionPolicy.isLockstepped ||
+        rushProject.isMainProject && (dependencyRushProject.versionPolicyName !== rushProject.versionPolicyName));
   }
 
   private _trackDependencyChange(
@@ -311,5 +318,16 @@ export class VersionManager {
         fsx.writeFileSync(packagePath, JSON.stringify(newPackageJson, undefined, 2), { encoding: 'utf8' });
       }
     });
+  }
+
+  private _createChangeInfo(newPackageJson: IPackageJson,
+    rushProject: RushConfigurationProject
+  ): IChangeInfo {
+    return {
+      changeType: ChangeType.none,
+      newVersion: newPackageJson.version,
+      packageName: newPackageJson.name,
+      comment: `Version update`
+    };
   }
 }

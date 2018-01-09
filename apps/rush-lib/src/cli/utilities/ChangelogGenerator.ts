@@ -58,7 +58,8 @@ export default class ChangelogGenerator {
             allChanges[packageName],
             project.projectFolder,
             shouldCommit,
-            project.versionPolicy && project.versionPolicy.isLockstepped);
+            project.versionPolicy && project.versionPolicy.isLockstepped,
+            project.isMainProject);
 
             if (changeLog) {
               updatedChangeLogs.push(changeLog);
@@ -105,8 +106,13 @@ export default class ChangelogGenerator {
     change: IChangeInfo,
     projectFolder: string,
     shouldCommit: boolean,
-    isLockstepped?: boolean
+    isLockstepped: boolean = false,
+    isMain: boolean = true
   ): IChangelog | undefined {
+    if (isLockstepped && !isMain) {
+      // Early return if the project is lockstepped and does not host change logs
+      return undefined;
+    }
     const changelog: IChangelog = ChangelogGenerator._getChangelog(change.packageName, projectFolder);
 
     if (
