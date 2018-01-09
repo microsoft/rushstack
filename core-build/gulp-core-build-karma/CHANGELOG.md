@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-karma
 
-This log was last generated on Sun, 07 Jan 2018 05:12:08 GMT and should not be manually modified.
+This log was last generated on Tue, 09 Jan 2018 17:05:51 GMT and should not be manually modified.
+
+## 4.3.16
+Tue, 09 Jan 2018 17:05:51 GMT
+
+### Patches
+
+- Get web-build-tools building with pnpm
 
 ## 4.3.15
 Sun, 07 Jan 2018 05:12:08 GMT

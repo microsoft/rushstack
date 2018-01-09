@@ -1,6 +1,13 @@
 # Change Log - @microsoft/set-webpack-public-path-plugin
 
-This log was last generated on Sun, 07 Jan 2018 05:12:08 GMT and should not be manually modified.
+This log was last generated on Tue, 09 Jan 2018 17:05:51 GMT and should not be manually modified.
+
+## 1.3.14
+Tue, 09 Jan 2018 17:05:51 GMT
+
+### Patches
+
+- Get web-build-tools building with pnpm
 
 ## 1.3.13
 Sun, 07 Jan 2018 05:12:08 GMT

@@ -149,6 +149,7 @@ class LockStepVersionPolicy extends VersionPolicy {
   readonly _json: ILockStepVersionJson;
   bump(bumpType?: BumpType, identifier?: string): void;
   ensure(project: IPackageJson): IPackageJson | undefined;
+  readonly mainProject: string | undefined;
   readonly nextBump: BumpType;
   validate(versionString: string, packageName: string): void;
   readonly version: semver.SemVer;
@@ -234,6 +235,8 @@ class RushConfigurationProject {
   constructor(projectJson: IRushConfigurationProjectJson, rushConfiguration: RushConfiguration, tempProjectName: string);
   readonly cyclicDependencyProjects: Set<string>;
   readonly downstreamDependencyProjects: string[];
+  // @beta
+  readonly isMainProject: boolean;
   readonly packageJson: IPackageJson;
   readonly packageName: string;
   readonly projectFolder: string;
@@ -259,6 +262,7 @@ class VersionPolicy {
   abstract bump(bumpType?: BumpType, identifier?: string): void;
   readonly definitionName: VersionPolicyDefinitionName;
   abstract ensure(project: IPackageJson): IPackageJson | undefined;
+  readonly isLockstepped: boolean;
   // WARNING: Because this definition is explicitly marked as @internal, an underscore prefix ("_") should be added to its name
   // WARNING: The type "IVersionPolicyJson" needs to be exported by the package (e.g. added to index.ts)
   // @internal
@@ -273,6 +277,7 @@ class VersionPolicyConfiguration {
   constructor(_jsonFileName: string);
   bump(versionPolicyName?: string, bumpType?: BumpType, identifier?: string, shouldCommit?: boolean): void;
   getVersionPolicy(policyName: string): VersionPolicy;
+  validate(projectsByName: Map<string, RushConfigurationProject>): void;
   readonly versionPolicies: Map<string, VersionPolicy>;
 }
 

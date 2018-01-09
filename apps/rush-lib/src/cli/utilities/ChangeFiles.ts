@@ -52,8 +52,7 @@ export default class ChangeFiles {
   }
 
   public static getChangeComments(
-    newChangeFilePaths: string[],
-    changedPackages: string[]
+    newChangeFilePaths: string[]
   ): Map<string, string[]> {
     const changes: Map<string, string[]> = new Map<string, string[]>();
 

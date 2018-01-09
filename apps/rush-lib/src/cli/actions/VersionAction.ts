@@ -169,13 +169,15 @@ export default class VersionAction extends BaseRushAction {
       git.commit();
     }
 
-    git.push(tempBranch);
+    if (changeLogUpdated || packageJsonUpdated) {
+      git.push(tempBranch);
 
-    // Now merge to target branch.
-    git.checkout(this._targetBranch.value);
-    git.pull();
-    git.merge(tempBranch);
-    git.push(this._targetBranch.value);
+      // Now merge to target branch.
+      git.checkout(this._targetBranch.value);
+      git.pull();
+      git.merge(tempBranch);
+      git.push(this._targetBranch.value);
+    }
     git.deleteBranch(tempBranch);
   }
 }

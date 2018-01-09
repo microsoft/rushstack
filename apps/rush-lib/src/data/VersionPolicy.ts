@@ -64,7 +64,6 @@ export abstract class VersionPolicy {
       // tslint:disable-next-line:no-use-before-declare
       return new IndividualVersionPolicy(versionPolicyJson as IIndividualVersionJson);
     }
-
     return undefined;
   }
 
@@ -88,6 +87,13 @@ export abstract class VersionPolicy {
    */
   public get definitionName(): VersionPolicyDefinitionName {
     return this._definitionName;
+  }
+
+  /**
+   * Whether it is a lockstepped version policy
+   */
+  public get isLockstepped(): boolean {
+    return this.definitionName === VersionPolicyDefinitionName.lockStepVersion;
   }
 
   /**
@@ -130,6 +136,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
   // nextBump is probably not needed. It can be prerelease only.
   // Other types of bumps can be passed in as a parameter to bump method, so can identifier.
   private _nextBump: BumpType;
+  private _mainProject: string | undefined;
 
   /**
    * @internal
@@ -138,6 +145,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
     super(versionPolicyJson);
     this._version = new semver.SemVer(versionPolicyJson.version);
     this._nextBump = BumpType[versionPolicyJson.nextBump];
+    this._mainProject = versionPolicyJson.mainProject;
   }
 
   /**
@@ -155,17 +163,31 @@ export class LockStepVersionPolicy extends VersionPolicy {
   }
 
   /**
+   * The main project for the version policy.
+   *
+   * If the value is provided, change logs will only be generated in that project.
+   * If the value is not provided, change logs will be hosted in each project associated with the policy.
+   */
+  public get mainProject(): string | undefined {
+    return this._mainProject;
+  }
+
+  /**
    * Serialized json for this policy
    *
    * @internal
    */
   public get _json(): ILockStepVersionJson {
-    return {
+    const json: ILockStepVersionJson = {
       policyName: this.policyName,
       definitionName: VersionPolicyDefinitionName[this.definitionName],
       version: this.version.format(),
       nextBump: BumpType[this.nextBump]
     };
+    if (this._mainProject) {
+      json.mainProject = this._mainProject;
+    }
+    return json;
   }
 
   /**
@@ -249,11 +271,14 @@ export class IndividualVersionPolicy extends VersionPolicy {
    * @internal
    */
   public get _json(): IIndividualVersionJson {
-    return {
+    const json: IIndividualVersionJson = {
       policyName: this.policyName,
-      definitionName: VersionPolicyDefinitionName[this.definitionName],
-      lockedMajor: this.lockedMajor
+      definitionName: VersionPolicyDefinitionName[this.definitionName]
     };
+    if (this.lockedMajor !== undefined) {
+      json.lockedMajor = this.lockedMajor;
+    }
+    return json;
   }
 
   /**

@@ -2,6 +2,28 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "5.0.1",
+      "tag": "@microsoft/api-extractor_v5.0.1",
+      "date": "Tue, 09 Jan 2018 17:05:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nicholas Pape <nickpape-msft@users.noreply.github.com>",
+            "commit": "d00b6549d13610fbb6f84be3478b532be9da0747",
+            "comment": "Get web-build-tools building with pnpm"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.25` to `0.3.26`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `2.2.13` to `2.2.14`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.0.0",
       "tag": "@microsoft/api-extractor_v5.0.0",
       "date": "Sun, 07 Jan 2018 05:12:08 GMT",
