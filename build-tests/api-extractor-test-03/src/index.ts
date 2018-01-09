@@ -3,3 +3,7 @@
 
 import { SubclassWithImport } from 'api-extractor-test-02';
 
+const subclassWithImport: SubclassWithImport = new SubclassWithImport();
+
+subclassWithImport.test();
+console.log(subclassWithImport.getSelfReference().getValue());

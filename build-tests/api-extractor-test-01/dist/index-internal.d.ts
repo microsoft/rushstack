@@ -48,7 +48,8 @@ export declare interface ISimpleInterface {
  * @public
  */
 export declare class ReexportedClass {
-    getSelfReference(): ReexportedClass | undefined;
+    getSelfReference(): ReexportedClass;
+    getValue(): string;
 }
 
 /**
