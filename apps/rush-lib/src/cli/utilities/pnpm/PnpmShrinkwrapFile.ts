@@ -115,18 +115,21 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       return undefined;
     }
 
-    const version: string = packageDescription.dependencies[dependencyName];
-    if (version) {
-      // e.g.:  "/gulp-karma/0.0.5/karma@0.13.22"
-      // capture 0: "/gulp-karma/0.0.5/"
-      // capture 1: "0.0.5"
-      const specialVersionCase: RegExp = /\/[a-z\-]+\/(.*)\//;
-      const match: RegExpMatchArray | null = version.match(specialVersionCase);
-      if (match) {
-        return match[1];
-      }
+    if (!packageDescription.dependencies.hasOwnProperty(dependencyName)) {
+      return undefined;
     }
-    return version;
+
+    const version: string = packageDescription.dependencies[dependencyName];
+    // version will be either:
+    // A - the version (e.g. "0.0.5")
+    // B - a peer dep version (e.g. "/gulp-karma/0.0.5/karma@0.13.22"
+    //                           or "/sinon-chai/2.8.0/chai@3.5.0+sinon@1.17.7")
+
+    // check to see if this is the special style of specifiers
+    // e.g.:  "/gulp-karma/0.0.5/karma@0.13.22"
+    // split it by forward slashes, then grab the second group
+    // if the second group doesn't exist, return the version directly
+    return version ? (version.split('/')[2] || version) : undefined;
   }
 
   private constructor(shrinkwrapJson: IShrinkwrapYaml) {
