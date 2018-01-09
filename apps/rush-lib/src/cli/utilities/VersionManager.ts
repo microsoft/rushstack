@@ -81,7 +81,7 @@ export class VersionManager {
       changeManager.apply(!!shouldCommit)!.forEach(packageJson => {
         this._updatedProjects.set(packageJson.name, packageJson);
       });
-      changeManager.updateChangelog(!!shouldCommit, this._updatedProjects);
+      changeManager.updateChangelog(!!shouldCommit);
     }
   }
 
@@ -135,9 +135,8 @@ export class VersionManager {
         const updatedProject: IPackageJson | undefined = versionPolicy.ensure(rushProject.packageJson);
         if (updatedProject) {
           this._updatedProjects.set(updatedProject.name, updatedProject);
-
           // No need to create an entry for prerelease version bump.
-          if (!this._isPrerelease(updatedProject.version)) {
+          if (!this._isPrerelease(updatedProject.version) && rushProject.isMainProject) {
             this._addChangeInfo(updatedProject.name,
               [this._createChangeInfo(updatedProject, rushProject)]);
           }
@@ -237,10 +236,9 @@ export class VersionManager {
 
         if (newDependencyVersion !== oldDependencyVersion) {
           updated = true;
-          if (rushProject.shouldPublish) {
+          if (this._shouldTrackDependencyChange(rushProject, updatedDependentProjectName)) {
             this._trackDependencyChange(changes, clonedProject, projectVersionChanged,
               updatedDependentProject,
-              updatedDependentProjectName,
               oldDependencyVersion,
               newDependencyVersion
             );
@@ -252,12 +250,24 @@ export class VersionManager {
     return updated;
   }
 
+  private _shouldTrackDependencyChange(
+    rushProject: RushConfigurationProject,
+    dependencyName: string
+  ): boolean {
+    const dependencyRushProject: RushConfigurationProject | undefined =
+      this._rushConfiguration.projectsByName.get(dependencyName);
+
+    return !!dependencyRushProject && rushProject.shouldPublish &&
+      (!rushProject.versionPolicy ||
+        !rushProject.versionPolicy.isLockstepped ||
+        rushProject.isMainProject && (dependencyRushProject.versionPolicyName !== rushProject.versionPolicyName));
+  }
+
   private _trackDependencyChange(
     changes: IChangeInfo[],
     clonedProject: IPackageJson,
     projectVersionChanged: boolean,
     updatedDependentProject: IPackageJson,
-    updatedDependentProjectName: string,
     oldDependencyVersion: string,
     newDependencyVersion: string
   ): void {
@@ -276,7 +286,7 @@ export class VersionManager {
       this._addChange(changes,
         {
           changeType: ChangeType.dependency,
-          comment: `Dependency ${updatedDependentProjectName} version bump from ${oldDependencyVersion}` +
+          comment: `Dependency ${updatedDependentProject.name} version bump from ${oldDependencyVersion}` +
             ` to ${newDependencyVersion}.`,
           packageName: clonedProject.name
         }
@@ -317,9 +327,7 @@ export class VersionManager {
       changeType: ChangeType.none,
       newVersion: newPackageJson.version,
       packageName: newPackageJson.name,
-      comment: `Package version bump from ${rushProject.packageJson.version} to ${newPackageJson.version}` +
-        ` by version policy`
+      comment: `Version update`
     };
   }
-
 }
