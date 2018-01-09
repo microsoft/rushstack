@@ -17,15 +17,15 @@ interface IWebpackTaskConfig {
 class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConfig & TExtendedConfig> {
   constructor(extendedName?: string, extendedConfig?: TExtendedConfig);
   // (undocumented)
-  public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): void;
+  executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): void;
   // (undocumented)
-  public isEnabled(buildConfig: IBuildConfig): boolean;
+  isEnabled(buildConfig: IBuildConfig): boolean;
   // (undocumented)
-  public loadSchema(): Object;
+  loadSchema(): Object;
   // (undocumented)
-  public readonly resources: IWebpackResources;
+  readonly resources: IWebpackResources;
 }
 
 // WARNING: Unsupported export: webpack
 // WARNING: Unsupported export: default
-// (No packageDescription for this package)
+// (No @packagedocumentation comment for this package)
