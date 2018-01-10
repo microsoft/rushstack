@@ -7,13 +7,16 @@ import * as path from 'path';
 import * as fsx from 'fs-extra';
 import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 
+import { PackageManager } from '../../data/RushConfiguration';
 import Utilities from '../../utilities/Utilities';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import InstallManager, { InstallType } from '../utilities/InstallManager';
-import LinkManager from '../utilities/LinkManager';
+import { LinkManagerFactory } from '../utilities/LinkManagerFactory';
+import { BaseLinkManager } from '../utilities/base/BaseLinkManager';
 import RushCommandLineParser from './RushCommandLineParser';
 import { ApprovedPackagesChecker } from '../utilities/ApprovedPackagesChecker';
-import ShrinkwrapFile from '../utilities/ShrinkwrapFile';
+import { BaseShrinkwrapFile } from '../utilities/base/BaseShrinkwrapFile';
+import { ShrinkwrapFileFactory } from '../utilities/ShrinkwrapFileFactory';
 import { BaseRushAction } from './BaseRushAction';
 
 export default class GenerateAction extends BaseRushAction {
@@ -21,6 +24,7 @@ export default class GenerateAction extends BaseRushAction {
   private _lazyParameter: CommandLineFlagParameter;
   private _noLinkParameter: CommandLineFlagParameter;
   private _forceParameter: CommandLineFlagParameter;
+  private _cleanParameter: CommandLineFlagParameter;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -50,11 +54,17 @@ export default class GenerateAction extends BaseRushAction {
       parameterLongName: '--force',
       parameterShortName: '-f',
       description: 'Use this to bypass checking the shrinkwrap file, which forces rush generate to run even if all'
-      + ' dependencies already exist in the shrinkwrap file'
+      + ' dependencies already exist in the shrinkwrap file. Only applies when package manager is npm.'
     });
     this._noLinkParameter = this.defineFlagParameter({
       parameterLongName: '--no-link',
       description: 'Do not automatically run the "rush link" action after "rush generate"'
+    });
+    this._cleanParameter = this.defineFlagParameter({
+      parameterLongName: '--clean',
+      parameterShortName: '-c',
+      description: 'When using pnpm, forces a non-incremental clean install which clears the node_module and pnpm'
+        + ' store. Use this if any store corruption has occurred.'
     });
   }
 
@@ -62,9 +72,18 @@ export default class GenerateAction extends BaseRushAction {
     const stopwatch: Stopwatch = Stopwatch.start();
     const isLazy: boolean = this._lazyParameter.value;
 
+    if (this._cleanParameter.value && this._lazyParameter.value) {
+      throw new Error(`Cannot specify both --clean and --lazy, as these are mutually exclusive operations.`);
+    }
+
     if (this._lazyParameter.value && this.rushConfiguration.packageManager === 'pnpm') {
-      console.warn(colors.yellow('The --lazy flag is not required for PNPM'
+      console.warn(colors.yellow('The --lazy flag is not required for pnpm'
         + ' because its algorithm inherently incorporates this optimization.'));
+    }
+
+    if (this._cleanParameter.value && this.rushConfiguration.packageManager === 'npm') {
+      console.warn(colors.yellow('The --clean flag is not required for npm'
+        + ' because its algorithm always performs a clean installation.'));
     }
 
     ApprovedPackagesChecker.rewriteConfigFiles(this.rushConfiguration);
@@ -75,8 +94,9 @@ export default class GenerateAction extends BaseRushAction {
     const tempShrinkwrapFilename: string = this.rushConfiguration.tempShrinkwrapFilename;
 
     try {
-      const shrinkwrapFile: ShrinkwrapFile | undefined
-        = ShrinkwrapFile.loadFromFile(this.rushConfiguration.packageManager, committedShrinkwrapFilename);
+      const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
+          this.rushConfiguration.packageManager,
+          this.rushConfiguration.committedShrinkwrapFilename);
 
       if (shrinkwrapFile
         && !this._forceParameter.value
@@ -106,65 +126,84 @@ export default class GenerateAction extends BaseRushAction {
       fsx.unlinkSync(tempShrinkwrapFilename);
     }
 
-    if (isLazy || this.rushConfiguration.packageManager === 'pnpm') {
-      if (this.rushConfiguration.packageManager === 'npm') {
+    const packageManager: PackageManager = this.rushConfiguration.packageManager;
+
+    if (this.rushConfiguration.packageManager === 'pnpm') {
+
+      // Do an incremental install unless --clean is specified
+      installManager.installCommonModules(this._cleanParameter.value
+        ?  InstallType.ForceClean
+        :  InstallType.Normal);
+
+      this._syncShrinkwrapAndCheckInstallFlag(installManager);
+
+    } else if (this.rushConfiguration.packageManager === 'npm') {
+
+      if (isLazy) {
         console.log(colors.green(
           `${os.EOL}Rush is running in "--lazy" mode. ` +
           `You will need to run a normal "rush generate" before committing.`));
-      }
 
-      // Do an incremental install
-      installManager.installCommonModules(InstallType.Normal);
+        // Do an incremental install
+        installManager.installCommonModules(InstallType.Normal);
 
-      if (this.rushConfiguration.packageManager === 'npm') {
         console.log(os.EOL + colors.bold('(Skipping "npm shrinkwrap")') + os.EOL);
-        const packageLogFilePath: string = path.join(this.rushConfiguration.commonTempFolder, 'package.lock');
 
+        // delete the automatically created npm5 "package.lock" file
+        const packageLogFilePath: string = path.join(this.rushConfiguration.commonTempFolder, 'package.lock');
         if (fsx.existsSync(packageLogFilePath)) {
-          console.log('Removing NPM5\'s "package.lock" file');
+          console.log('Removing NPM 5\'s "package.lock" file');
           fsx.removeSync(packageLogFilePath);
         }
-      }
-    } else {
-      // Do a clean install
-      installManager.installCommonModules(InstallType.ForceClean);
+      } else {
+        // Do a clean install
+        installManager.installCommonModules(InstallType.ForceClean);
 
-      if (this.rushConfiguration.packageManager === 'npm') {
         console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
         const npmArgs: string[] = ['shrinkwrap'];
         installManager.pushConfigurationArgs(npmArgs);
         Utilities.executeCommand(this.rushConfiguration.packageManagerToolFilename,
           npmArgs, this.rushConfiguration.commonTempFolder);
         console.log('"npm shrinkwrap" completed' + os.EOL);
+
+        this._syncShrinkwrapAndCheckInstallFlag(installManager);
       }
 
-      // Copy (or delete) common\temp\npm-shrinkwrap.json --> common\npm-shrinkwrap.json
-      installManager.syncFile(tempShrinkwrapFilename,
-        this.rushConfiguration.committedShrinkwrapFilename);
-
-      // The flag file is normally created by installCommonModules(), but "rush install" will
-      // compare its timestamp against the shrinkwrap file.  Since we just generated a new
-      // npm-shrinkwrap file, it's safe to bump the timestamp, which ensures that "rush install"
-      // won't do anything immediately after "rush generate".  This is a minor performance
-      // optimization, but it helps people to understand the semantics of the commands.
-      if (fsx.existsSync(installManager.commonNodeModulesMarkerFilename)) {
-        fsx.writeFileSync(installManager.commonNodeModulesMarkerFilename, '');
-      } else {
-        // Sanity check -- since we requested a clean install above, this should never occur
-        throw new Error('The install flag file is missing');
-      }
+    } else {
+      // program bug
+      throw new Error(`Program bug: invalid package manager "${packageManager}"`);
     }
 
     stopwatch.stop();
     console.log(os.EOL + colors.green(`Rush generate finished successfully. (${stopwatch.toString()})`));
 
     if (!this._noLinkParameter.value) {
-      const linkManager: LinkManager = LinkManager.getLinkManager(this.rushConfiguration);
+      const linkManager: BaseLinkManager =
+        LinkManagerFactory.getLinkManager(this.rushConfiguration);
       // NOTE: Setting force=true here shouldn't be strictly necessary, since installCommonModules()
       // above should have already deleted the marker file, but it doesn't hurt to be explicit.
       this._parser.catchSyncErrors(linkManager.createSymlinksForProjects(true));
     } else {
       console.log(os.EOL + 'Next you should probably run: "rush link"');
+    }
+  }
+
+  private _syncShrinkwrapAndCheckInstallFlag(installManager: InstallManager): void {
+    // Copy (or delete) common\temp\npm-shrinkwrap.json --> common\npm-shrinkwrap.json
+    installManager.syncFile(this.rushConfiguration.tempShrinkwrapFilename,
+      this.rushConfiguration.committedShrinkwrapFilename);
+
+    // The flag file is normally created by installCommonModules(), but "rush install" will
+    // compare its timestamp against the shrinkwrap file.  Since we just generated a new
+    // npm-shrinkwrap file, it's safe to bump the timestamp, which ensures that "rush install"
+    // won't do anything immediately after "rush generate".  This is a minor performance
+    // optimization, but it helps people to understand the semantics of the commands.
+    if (fsx.existsSync(installManager.commonNodeModulesMarkerFilename)) {
+      fsx.writeFileSync(installManager.commonNodeModulesMarkerFilename,
+        `${this.rushConfiguration.packageManager}@${this.rushConfiguration.packageManagerToolVersion}`);
+    } else {
+      // Sanity check -- since we requested a clean install above, this should never occur
+      throw new Error('The install flag file is missing');
     }
   }
 }

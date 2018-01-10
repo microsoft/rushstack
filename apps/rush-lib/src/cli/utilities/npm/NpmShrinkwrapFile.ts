@@ -1,7 +1,9 @@
 import * as fsx from 'fs-extra';
 import * as os from 'os';
 
-import ShrinkwrapFile from '../ShrinkwrapFile';
+import {
+  BaseShrinkwrapFile
+} from '../base/BaseShrinkwrapFile';
 
 interface IShrinkwrapDependencyJson {
   version: string;
@@ -16,7 +18,7 @@ interface IShrinkwrapJson {
   dependencies: { [dependency: string]: IShrinkwrapDependencyJson };
 }
 
-export default class NpmShrinkwrapFile extends ShrinkwrapFile {
+export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
   private _shrinkwrapJson: IShrinkwrapJson;
 
   public static loadFromFile(shrinkwrapJsonFilename: string): NpmShrinkwrapFile | undefined {
@@ -43,6 +45,10 @@ export default class NpmShrinkwrapFile extends ShrinkwrapFile {
     return this._getTempProjectNames(this._shrinkwrapJson.dependencies);
   }
 
+  protected getTopLevelDependencyVersion(dependencyName: string): string | undefined {
+    return this.getDependencyVersion(dependencyName);
+  }
+
   /**
    * Returns true if the shrinkwrap file includes a package that would satisfiying the specified
    * package name and SemVer version range.  By default, the dependencies are resolved by looking
@@ -66,16 +72,16 @@ export default class NpmShrinkwrapFile extends ShrinkwrapFile {
     let dependencyJson: IShrinkwrapDependencyJson | undefined = undefined;
 
     if (tempProjectName) {
-      const tempDependency: IShrinkwrapDependencyJson | undefined = ShrinkwrapFile.tryGetValue(
+      const tempDependency: IShrinkwrapDependencyJson | undefined = NpmShrinkwrapFile.tryGetValue(
         this._shrinkwrapJson.dependencies, tempProjectName);
       if (tempDependency && tempDependency.dependencies) {
-        dependencyJson = ShrinkwrapFile.tryGetValue(tempDependency.dependencies, dependencyName);
+        dependencyJson = NpmShrinkwrapFile.tryGetValue(tempDependency.dependencies, dependencyName);
       }
     }
 
     // Otherwise look at the root of the shrinkwrap file
     if (!dependencyJson) {
-      dependencyJson = ShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
+      dependencyJson = NpmShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
     }
 
     if (!dependencyJson) {
@@ -100,5 +106,4 @@ export default class NpmShrinkwrapFile extends ShrinkwrapFile {
       this._shrinkwrapJson.dependencies = { };
     }
   }
-
 }

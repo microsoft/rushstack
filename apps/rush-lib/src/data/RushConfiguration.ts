@@ -85,6 +85,7 @@ export interface IRushConfigurationJson {
   telemetryEnabled?: boolean;
   projects: IRushConfigurationProjectJson[];
   eventHooks?: IEventHooksJson;
+  hotfixChangeEnabled?: boolean;
 }
 
 /**
@@ -136,6 +137,9 @@ export default class RushConfiguration {
   // "gitPolicy" feature
   private _gitAllowedEmailRegExps: string[];
   private _gitSampleEmail: string;
+
+  // "hotfixChangeEnabled" feature
+  private _hotfixChangeEnabled: boolean;
 
   // Repository info
   private _repositoryUrl: string;
@@ -227,7 +231,8 @@ export default class RushConfiguration {
    * this looks something like "/usr/username/"
    */
   public static getHomeDirectory(): string {
-    const unresolvedUserFolder: string = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
+    const unresolvedUserFolder: string | undefined
+      = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
     const homeFolder: string = path.resolve(unresolvedUserFolder);
     if (!fsx.existsSync(homeFolder)) {
       throw new Error('Unable to determine the current user\'s home directory');
@@ -301,8 +306,9 @@ export default class RushConfiguration {
       const knownSet: Set<string> = new Set<string>(knownRushConfigFilenames.map(x => x.toUpperCase()));
       if (packageManager === 'npm') {
         knownSet.add(RushConstants.npmShrinkwrapFilename.toUpperCase());
-      } else {
+      } else if (packageManager === 'pnpm') {
         knownSet.add(RushConstants.pnpmShrinkwrapFilename.toUpperCase());
+        knownSet.add(RushConstants.pnpmFileFilename.toUpperCase());
       }
 
       // Is the filename something we know?  If not, report an error.
@@ -373,7 +379,7 @@ export default class RushConfiguration {
 
   /**
    * The local folder that will store the NPM package cache.  Rush does not rely on the
-   * NPM's default global cache folder, because NPM's caching implementation does not
+   * npm's default global cache folder, because npm's caching implementation does not
    * reliably handle multiple processes.  (For example, if a build box is running
    * "rush install" simultaneously for two different working folders, it may fail randomly.)
    *
@@ -384,7 +390,7 @@ export default class RushConfiguration {
   }
 
   /**
-   * The local folder where NPM's temporary files will be written during installation.
+   * The local folder where npm's temporary files will be written during installation.
    * Rush does not rely on the global default folder, because it may be on a different
    * hard disk.
    *
@@ -504,6 +510,14 @@ export default class RushConfiguration {
    */
   public get gitSampleEmail(): string {
     return this._gitSampleEmail;
+  }
+
+  /**
+   * [Part of the "hotfixChange" feature.]
+   * Enables creating hotfix changes
+   */
+  public get hotfixChangeEnabled(): boolean {
+    return this._hotfixChangeEnabled;
   }
 
   /**
@@ -692,6 +706,11 @@ export default class RushConfiguration {
       }
     }
 
+    this._hotfixChangeEnabled = false;
+    if (rushConfigurationJson.hotfixChangeEnabled) {
+      this._hotfixChangeEnabled = rushConfigurationJson.hotfixChangeEnabled;
+    }
+
     if (rushConfigurationJson.repository) {
       this._repositoryUrl = rushConfigurationJson.repository.url;
     }
@@ -742,6 +761,7 @@ export default class RushConfiguration {
       // Compute the downstream dependencies within the list of Rush projects.
       this._populateDownstreamDependencies(project.packageJson.dependencies, project.packageName);
       this._populateDownstreamDependencies(project.packageJson.devDependencies, project.packageName);
+      this._versionPolicyConfiguration.validate(this._projectsByName);
     }
 
     // Example: "./common/config/rush/pinnedVersions.json"

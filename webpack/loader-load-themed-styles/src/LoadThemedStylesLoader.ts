@@ -1,16 +1,14 @@
-/*
- * Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
- * See LICENSE in the project root for license information.
- */
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
 
 /**
  * This simple loader wraps the loading of CSS in script equivalent to
  *  require("load-themed-styles").loadStyles('... css text ...').
+ * @packagedocumentation
  */
-declare const packageDescription: void; // tslint:disable-line:no-unused-variable
 
-import loaderUtils = require('loader-utils');
 import { loader } from 'webpack';
+import loaderUtils = require('loader-utils');
 
 const loadedThemedStylesPath: string = require.resolve('@microsoft/load-themed-styles');
 

@@ -3,10 +3,13 @@
 
 /**
  * Here is some documentation for example2.
- * @remarks These are additional remarks that may be too long for the summary.
+ *
+ * @remarks
+ * These are additional remarks that may be too long for the summary.
  * They should appear in the remarks of the json generated file for this package.
+ *
+ * @packagedocumentation
  */
-declare const packageDescription: void;
 
 export {
     TestMissingCommentStar,

@@ -1,6 +1,27 @@
 # Change Log - @microsoft/rush-lib
 
-This log was last generated on Mon, 13 Nov 2017 18:34:30 GMT and should not be manually modified.
+This log was last generated on Tue, 09 Jan 2018 01:30:15 GMT and should not be manually modified.
+
+## 4.1.1
+Mon, 08 Jan 2018 20:34:30 GMT
+
+### Patches
+
+- Fix an issue with checking the pnpm shrinkwrap file when there are peer dependency version specifiers
+
+## 4.1.0
+Thu, 30 Nov 2017 20:34:30 GMT
+
+### Minor changes
+
+- Adding support for using PNPM with Rush
+
+### Patches
+
+- Fix issue where 'rush publish' was failing when the only changefiles were 'none' type
+- Add support for hotfix changes
+- Fix an issue with file locks causing exceptions during 'rush install'
+- Fix issue where 'rush install' did not invalidate node_modules after bumping package manager version
 
 ## 4.0.1
 Mon, 13 Nov 2017 18:34:30 GMT

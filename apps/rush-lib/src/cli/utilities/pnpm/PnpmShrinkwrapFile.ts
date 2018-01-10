@@ -2,35 +2,67 @@ import * as fsx from 'fs-extra';
 import * as yaml from 'js-yaml';
 import * as os from 'os';
 
-import ShrinkwrapFile from '../ShrinkwrapFile';
+import Utilities from '../../../utilities/Utilities';
+import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 
 interface IShrinkwrapDependencyJson {
+  /** Information about the resolved package */
   resolution: {
+    /** The hash of the tarball, to ensure archive integrity */
     integrity: string;
+    /** The name of the tarball, if this was from a TGX file */
     tarball?: string;
   };
+  /** The list of dependencies and the resolved version */
   dependencies: { [dependency: string]: string };
 }
 
 /**
  * This interface represents the raw shrinkwrap.YAML file
+ * Example:
+ *  {
+ *    "dependencies": {
+ *      "@rush-temp/project1": "file:./projects/project1.tgz"
+ *    },
+ *    "packages": {
+ *      "file:projects/library1.tgz": {
+ *        "dependencies: {
+ *          "markdown": "0.5.0"
+ *        },
+ *        "name": "@rush-temp/library1",
+ *        "resolution": {
+ *          "tarball": "file:projects/library1.tgz"
+ *        },
+ *        "version": "0.0.0"
+ *      },
+ *      "markdown/0.5.0": {
+ *        "resolution": {
+ *          "integrity": "sha1-KCBbVlqK51kt4gdGPWY33BgnIrI="
+ *        }
+ *      }
+ *    },
+ *    "registry": "http://localhost:4873/",
+ *    "shrinkwrapVersion": 3,
+ *    "specifiers": {
+ *      "@rush-temp/project1": "file:./projects/project1.tgz"
+ *    }
+ *  }
  */
 interface IShrinkwrapYaml {
-  /** The list of resolved direct dependencies */
+  /** The list of resolved version numbers for direct dependencies */
   dependencies: { [dependency: string]: string };
-/** The description of the solved DAG */
+  /** The description of the solved graph */
   packages: { [dependencyVersion: string]: IShrinkwrapDependencyJson };
-  /** URL of the registry */
+  /** URL of the registry which was used */
   registry: string;
-  shrinkwrapVersion: number;
   /** The list of specifiers used to resolve direct dependency versions */
   specifiers: { [dependency: string]: string };
 }
 
-export default class PnpmShrinkwrapFile extends ShrinkwrapFile {
+export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   private _shrinkwrapJson: IShrinkwrapYaml;
 
-  public static loadFromFile(shrinkwrapYamlFilename: string): ShrinkwrapFile | undefined {
+  public static loadFromFile(shrinkwrapYamlFilename: string): PnpmShrinkwrapFile | undefined {
     try {
       if (!fsx.existsSync(shrinkwrapYamlFilename)) {
         return undefined; // file does not exist
@@ -50,25 +82,63 @@ export default class PnpmShrinkwrapFile extends ShrinkwrapFile {
     return this._getTempProjectNames(this._shrinkwrapJson.dependencies);
   }
 
-  // @todo this still has problems!
-  protected getDependencyVersion(dependencyName: string): string | undefined {
-    let dependencyVersion: string | undefined = undefined;
+  /**
+   * abstract
+   * Gets the version number from the list of top-level dependencies in the "dependencies" section
+   * of the shrinkwrap file
+   */
+  protected getTopLevelDependencyVersion(dependencyName: string): string | undefined {
+    return BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
+  }
 
-    if (!dependencyVersion) {
-      dependencyVersion = ShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
-    }
+  /**
+   * abstract
+   * Gets the resolved version number of a a dependency for a specific temp project
+   */
+  protected getDependencyVersion(dependencyName: string, tempProjectName: string): string | undefined {
+    // PNPM doesn't have the same advantage of pnpm, where we can skip generate as long as the
+    // shrinkwrap file puts our dependency in either the top of the node_modules folder
+    // or underneath the package we are looking at.
+    // this is because the PNPM shrinkwrap file describes the exact links that need to be created
+    // to recreate the graph..
+    // because of this, we actually need to check to grab the version that this package is actually
+    // linked to
 
-    if (!dependencyVersion) {
+    // Example: "project1"
+    const unscopedTempProjectName: string = Utilities.parseScopedPackageName(tempProjectName).name;
+    const tempProjectDependencyKey: string = `file:projects/${unscopedTempProjectName}.tgz`;
+
+    const packageDescription: IShrinkwrapDependencyJson | undefined
+      = BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.packages, tempProjectDependencyKey);
+
+    if (!packageDescription || !packageDescription.dependencies) {
       return undefined;
     }
 
-    // dependency version can also be a pnpm path such as "/gulp-karma/0.0.5/karma@0.13.22"
-    // in this case we want the first version number that appears. it will be in 3rd spot
-    if (dependencyVersion[0] === '/') {
-      dependencyVersion = dependencyVersion.split('/')[2];
+    if (!packageDescription.dependencies.hasOwnProperty(dependencyName)) {
+      return undefined;
     }
 
-    return dependencyVersion;
+    const version: string = packageDescription.dependencies[dependencyName];
+    // version will be either:
+    // A - the version (e.g. "0.0.5")
+    // B - a peer dep version (e.g. "/gulp-karma/0.0.5/karma@0.13.22"
+    //                           or "/sinon-chai/2.8.0/chai@3.5.0+sinon@1.17.7")
+
+    // check to see if this is the special style of specifiers
+    // e.g.:  "/gulp-karma/0.0.5/karma@0.13.22"
+    // split it by forward slashes, then grab the second group
+    // if the second group doesn't exist, return the version directly
+    if (version) {
+      const versionParts: string[] = version.split('/');
+      if (versionParts.length !== 1 && versionParts.length !== 4) {
+        throw new Error(`Cannot parse pnpm shrinkwrap version specifier: `
+          + `"${version}" for "${dependencyName}"`);
+      }
+      return versionParts[2] || version;
+    } else {
+      return undefined;
+    }
   }
 
   private constructor(shrinkwrapJson: IShrinkwrapYaml) {
@@ -78,9 +148,6 @@ export default class PnpmShrinkwrapFile extends ShrinkwrapFile {
     // Normalize the data
     if (!this._shrinkwrapJson.registry) {
       this._shrinkwrapJson.registry = '';
-    }
-    if (!this._shrinkwrapJson.shrinkwrapVersion) {
-      this._shrinkwrapJson.shrinkwrapVersion = 3; // 3 is the current version for pnpm
     }
     if (!this._shrinkwrapJson.dependencies) {
       this._shrinkwrapJson.dependencies = { };

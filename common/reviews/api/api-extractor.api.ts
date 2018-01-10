@@ -1,20 +1,24 @@
 // @public
 class ApiJsonFile {
-  public static jsonSchema: JsonSchema;
-  public static loadFromFile(apiJsonFilePath: string): IApiPackage;
+  static jsonSchema: JsonSchema;
+  static loadFromFile(apiJsonFilePath: string): IApiPackage;
 }
 
 // @beta
 class ExternalApiHelper {
   // (undocumented)
-  public static generateApiJson(rootDir: string, libFolder: string, externalPackageFilePath: string): void;
+  static generateApiJson(rootDir: string, libFolder: string, externalPackageFilePath: string): void;
 }
 
 // @public
 class Extractor {
-  public constructor(config: IExtractorConfig, options?: IExtractorOptions);
-  public analyzeProject(options?: IAnalyzeProjectOptions): void;
-  public static jsonSchema: JsonSchema;
+  constructor(config: IExtractorConfig, options?: IExtractorOptions);
+  readonly actualConfig: IExtractorConfig;
+  // @deprecated
+  analyzeProject(options?: IAnalyzeProjectOptions): void;
+  static generateFilePathsForAnalysis(inputFilePaths: string[]): string[];
+  static jsonSchema: JsonSchema;
+  processProject(options?: IAnalyzeProjectOptions): boolean;
 }
 
 // @public
@@ -103,8 +107,7 @@ interface IApiMethod extends IApiBaseDefinition {
 
 // @alpha
 interface IApiNameMap<T> {
-  // (undocumented)
-  [ name: string ]: T;
+  [name: string]: T;
 }
 
 // @alpha
@@ -172,6 +175,8 @@ interface IExtractorConfig {
   apiJsonFile?: IExtractorApiJsonFileConfig;
   apiReviewFile?: IExtractorApiReviewFileConfig;
   compiler: IExtractorTsconfigCompilerConfig | IExtractorRuntimeCompilerConfig;
+  // @beta
+  packageTypings?: IExtractorPackageTypingsConfig;
   policies?: IExtractorPoliciesConfig;
   project: IExtractorProjectConfig;
 }
@@ -181,6 +186,15 @@ interface IExtractorOptions {
   compilerProgram?: ts.Program;
   customLogger?: Partial<ILogger>;
   localBuild?: boolean;
+}
+
+// @beta
+interface IExtractorPackageTypingsConfig {
+  dtsFilePathForInternal?: string;
+  dtsFilePathForPreview?: string;
+  dtsFilePathForPublic?: string;
+  enabled: boolean;
+  outputFolder?: string;
 }
 
 // @public
@@ -324,25 +338,25 @@ interface IMarkupWebLink {
 
 // @public
 class Markup {
-  public static BREAK: IMarkupLineBreak;
-  public static createApiLink(textElements: MarkupLinkTextElement[], target: IApiItemReference): IMarkupApiLink;
-  public static createApiLinkFromText(text: string, target: IApiItemReference): IMarkupApiLink;
-  public static createCode(code: string, highlighter?: MarkupHighlighter): IMarkupHighlightedText;
-  public static createCodeBox(code: string, highlighter: MarkupHighlighter): IMarkupCodeBox;
-  public static createHeading1(text: string): IMarkupHeading1;
-  public static createHeading2(text: string): IMarkupHeading2;
-  public static createNoteBox(textElements: MarkupBasicElement[]): IMarkupNoteBox;
-  public static createNoteBoxFromText(text: string): IMarkupNoteBox;
-  public static createPage(title: string): IMarkupPage;
-  public static createTable(headerCellValues: MarkupBasicElement[][] | undefined = undefined): IMarkupTable;
-  public static createTableRow(cellValues: MarkupBasicElement[][] | undefined = undefined): IMarkupTableRow;
-  public static createTextElements(text: string, options?: IMarkupCreateTextOptions): IMarkupText[];
-  public static createTextParagraphs(text: string, options?: IMarkupCreateTextOptions): MarkupBasicElement[];
-  public static createWebLink(textElements: MarkupLinkTextElement[], targetUrl: string): IMarkupWebLink;
-  public static createWebLinkFromText(text: string, targetUrl: string): IMarkupWebLink;
-  public static extractTextContent(elements: MarkupElement[]): string;
-  public static normalize < T extends MarkupElement >(elements: T[]): void;
-  public static PARAGRAPH: IMarkupParagraph;
+  static BREAK: IMarkupLineBreak;
+  static createApiLink(textElements: MarkupLinkTextElement[], target: IApiItemReference): IMarkupApiLink;
+  static createApiLinkFromText(text: string, target: IApiItemReference): IMarkupApiLink;
+  static createCode(code: string, highlighter?: MarkupHighlighter): IMarkupHighlightedText;
+  static createCodeBox(code: string, highlighter: MarkupHighlighter): IMarkupCodeBox;
+  static createHeading1(text: string): IMarkupHeading1;
+  static createHeading2(text: string): IMarkupHeading2;
+  static createNoteBox(textElements: MarkupBasicElement[]): IMarkupNoteBox;
+  static createNoteBoxFromText(text: string): IMarkupNoteBox;
+  static createPage(title: string): IMarkupPage;
+  static createTable(headerCellValues?: MarkupBasicElement[][] | undefined): IMarkupTable;
+  static createTableRow(cellValues?: MarkupBasicElement[][] | undefined): IMarkupTableRow;
+  static createTextElements(text: string, options?: IMarkupCreateTextOptions): IMarkupText[];
+  static createTextParagraphs(text: string, options?: IMarkupCreateTextOptions): MarkupBasicElement[];
+  static createWebLink(textElements: MarkupLinkTextElement[], targetUrl: string): IMarkupWebLink;
+  static createWebLinkFromText(text: string, targetUrl: string): IMarkupWebLink;
+  static extractTextContent(elements: MarkupElement[]): string;
+  static normalize<T extends MarkupElement>(elements: T[]): void;
+  static PARAGRAPH: IMarkupParagraph;
 }
 
 // WARNING: Unsupported export: ApiAccessModifier

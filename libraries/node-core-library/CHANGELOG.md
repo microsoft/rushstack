@@ -1,6 +1,58 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Mon, 13 Nov 2017 17:04:50 GMT and should not be manually modified.
+This log was last generated on Tue, 09 Jan 2018 17:05:51 GMT and should not be manually modified.
+
+## 0.3.26
+Tue, 09 Jan 2018 17:05:51 GMT
+
+### Patches
+
+- Get web-build-tools building with pnpm
+
+## 0.3.25
+Sun, 07 Jan 2018 05:12:08 GMT
+
+*Version update only*
+
+## 0.3.24
+Fri, 05 Jan 2018 20:26:45 GMT
+
+*Version update only*
+
+## 0.3.23
+Fri, 05 Jan 2018 00:48:41 GMT
+
+*Version update only*
+
+## 0.3.22
+Fri, 22 Dec 2017 17:04:46 GMT
+
+*Version update only*
+
+## 0.3.21
+Tue, 12 Dec 2017 03:33:27 GMT
+
+*Version update only*
+
+## 0.3.20
+Thu, 30 Nov 2017 23:59:09 GMT
+
+*Version update only*
+
+## 0.3.19
+Thu, 30 Nov 2017 23:12:21 GMT
+
+*Version update only*
+
+## 0.3.18
+Wed, 29 Nov 2017 17:05:37 GMT
+
+*Version update only*
+
+## 0.3.17
+Tue, 28 Nov 2017 23:43:55 GMT
+
+*Version update only*
 
 ## 0.3.16
 Mon, 13 Nov 2017 17:04:50 GMT

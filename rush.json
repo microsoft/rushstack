@@ -1,13 +1,13 @@
 {
-  "npmVersion": "4.5.0",
-  "rushVersion": "4.0.0",
-  "nodeSupportedVersionRange": ">=6.9.0 <7.0.0",
+  "pnpmVersion": "1.25.1",
+  "rushVersion": "4.1.1",
+  "nodeSupportedVersionRange": ">=8.9.4 <9.0.0",
   "projectFolderMinDepth": 1,
 
   "approvedPackagesPolicy": {
     "reviewCategories": [
       "libraries",
-      "other"
+      "tests"
     ],
     "ignoredNpmScopes": [ "@types" ]
   },
@@ -55,6 +55,26 @@
       "packageName": "@microsoft/rush-lib",
       "projectFolder": "apps/rush-lib",
       "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
+
+    // "build-tests" folder (alphabetical order)
+    {
+      "packageName": "api-extractor-test-01",
+      "projectFolder": "build-tests/api-extractor-test-01",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "api-extractor-test-02",
+      "projectFolder": "build-tests/api-extractor-test-02",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "api-extractor-test-03",
+      "projectFolder": "build-tests/api-extractor-test-03",
+      "reviewCategory": "tests",
       "shouldPublish": false
     },
 
@@ -131,7 +151,7 @@
     {
       "packageName": "test-web-library-build",
       "projectFolder": "core-build/test-web-library-build",
-      "reviewCategory": "other",
+      "reviewCategory": "tests",
       "shouldPublish": false
     },
     {

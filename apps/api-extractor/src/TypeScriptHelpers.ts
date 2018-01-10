@@ -7,26 +7,61 @@ import * as ts from 'typescript';
 import PrettyPrinter from './PrettyPrinter';
 
 export default class TypeScriptHelpers {
-
   /**
-   * Splits by the characters '\r\n'.
+   * Splits on CRLF and other newline sequences
    */
-  public static newLineRegEx: RegExp = /\r\n|\n/g;
+  private static _newLineRegEx: RegExp = /\r\n|\n\r|\r|\n/g;
 
   /**
    * Start sequence is '/**'.
    */
-  public static jsdocStartRegEx: RegExp = /^\s*\/\*\*\s?/g;
+  private static _jsdocStartRegEx: RegExp = /^\s*\/\*\*+\s*/;
 
   /**
    * End sequence is '*\/'.
    */
-  public static jsdocEndRegEx: RegExp = /\s*\*\/\s*$/g;
+  private static _jsdocEndRegEx: RegExp = /\s*\*+\/\s*$/;
 
   /**
    * Intermediate lines of JSDoc comment character.
    */
-  public static jsdocIntermediateRegEx: RegExp = /^\s*[*]\s?/g;
+  private static _jsdocIntermediateRegEx: RegExp = /^\s*\*\s?/;
+
+  /**
+   * Trailing white space
+   */
+  private static _jsdocTrimRightRegEx: RegExp = /\s*$/;
+
+  /**
+   * This traverses any type aliases to find the original place where an item was defined.
+   * For example, suppose a class is defined as "export default class MyClass { }"
+   * but exported from the package's index.ts like this:
+   *
+   *    export { default as _MyClass } from './MyClass';
+   *
+   * In this example, calling followAliases() on the _MyClass symbol will return the
+   * original definition of MyClass, traversing any intermediary places where the
+   * symbol was imported and re-exported.
+   */
+  public static followAliases(symbol: ts.Symbol, typeChecker: ts.TypeChecker): ts.Symbol {
+    let current: ts.Symbol = symbol;
+    while (true) { // tslint:disable-line:no-constant-condition
+      if (!(current.flags & ts.SymbolFlags.Alias)) {
+        break;
+      }
+      const currentAlias: ts.Symbol = typeChecker.getAliasedSymbol(current);
+      if (!currentAlias || currentAlias === current) {
+        break;
+      }
+      current = currentAlias;
+    }
+
+    return current;
+  }
+
+  public static getImmediateAliasedSymbol(symbol: ts.Symbol, typeChecker: ts.TypeChecker): ts.Symbol {
+    return (typeChecker as any).getImmediateAliasedSymbol(symbol); // tslint:disable-line:no-any
+  }
 
   /**
    * Returns the Symbol for the provided Declaration.  This is a workaround for a missing
@@ -57,69 +92,14 @@ export default class TypeScriptHelpers {
   }
 
   /**
-   * Returns the JSDoc comments associated with the specified node, if any.
-   *
-   * Example:
-   * "This \n is \n a comment" from "\/** This\r\n* is\r\n* a comment *\/
+   * Retrieves the comment ranges associated with the specified node.
    */
-  public static getJsdocComments(node: ts.Node, errorLogger: (message: string) => void): string {
-    let jsdoc: string = '';
+  public static getJSDocCommentRanges(node: ts.Node, text: string): ts.CommentRange[] | undefined {
+    // Compiler internal:
+    // https://github.com/Microsoft/TypeScript/blob/v2.4.2/src/compiler/utilities.ts#L616
+
     // tslint:disable-next-line:no-any
-    const nodeJsdocObjects: any = (node as any).jsDoc;
-    if (nodeJsdocObjects && nodeJsdocObjects.length > 0) {
-      // Use the JSDoc closest to the declaration
-      const lastJsdocIndex: number = nodeJsdocObjects.length - 1;
-      const jsdocFullText: string = nodeJsdocObjects[lastJsdocIndex].getText();
-      const jsdocLines: string[] = jsdocFullText.split(TypeScriptHelpers.newLineRegEx);
-      const jsdocStartSeqExists: boolean = TypeScriptHelpers.jsdocStartRegEx.test(jsdocLines[0].toString());
-
-      // Report error for each missing sequence separately
-      if (!jsdocStartSeqExists) {
-        errorLogger('Jsdoc comment must begin with a \"/**\" sequence.');
-        return '';
-      }
-      const jsdocEndSeqExists: boolean = TypeScriptHelpers.jsdocEndRegEx.test(
-        jsdocLines[jsdocLines.length - 1].toString()
-      );
-      if (!jsdocEndSeqExists) {
-        errorLogger('Jsdoc comment must end with a \"*/\" sequence.');
-        return '';
-      }
-
-      jsdoc = TypeScriptHelpers.removeJsdocSequences(jsdocLines);
-    }
-
-    return jsdoc;
-  }
-
-  /**
-   * Helper function to remove the comment stars ('/**'. '*', '/*) from lines of comment text.
-   *
-   * Example:
-   * ["\/**", "*This \n", "*is \n", "*a comment", "*\/"] to "This \n is \n a comment"
-   */
-  public static removeJsdocSequences(textLines: string[]): string {
-  // Remove '/**'
-    textLines[0] = textLines[0].replace(TypeScriptHelpers.jsdocStartRegEx, '');
-    if (textLines[0] === '') {
-      textLines.shift();
-    }
-    // Remove '*/'
-    textLines[textLines.length - 1] = textLines[textLines.length - 1].replace(
-      TypeScriptHelpers.jsdocEndRegEx,
-      '');
-    if (textLines[textLines.length - 1] === '') {
-      textLines.pop();
-    }
-
-    // Remove the leading '*' from any intermediate lines
-    if (textLines.length > 0) {
-      for (let i: number = 0; i < textLines.length; i++) {
-        textLines[i] = textLines[i].replace(TypeScriptHelpers.jsdocIntermediateRegEx, '');
-      }
-    }
-
-    return textLines.join('\n');
+    return (ts as any).getJSDocCommentRanges.apply(this, arguments);
   }
 
   /**
@@ -166,75 +146,57 @@ export default class TypeScriptHelpers {
   }
 
   /**
-   * Extracts the body of a TypeScript comment and returns it.
+   * Extracts the body of a JSDoc comment and returns it.
    */
   // Examples:
-  // "/**\n * this is\n * a test\n */\n" --> "this is\na test"
+  // "/**\n * this is\n * a test\n */\n" --> "this is\na test\n"
   // "/** single line comment */" --> "single line comment"
-  public static extractCommentContent(text: string): string {
-    const lines: string[] = text.replace('\r', '').split('\n');
-
-    enum State {
-      Start,
-      Body,
-      Done,
-      Error
-    }
-    let state: State = State.Start;
-
-    const startRegExp: RegExp = /^\s*\/\*\*+ ?/;
-    const bodyRegExp: RegExp = /^\s*\* ?/;
-    const endRegExp: RegExp = /^\s*\*+\/\s*$/;
-    const singleLineEndRegExp: RegExp = / ?\*+\/\s*$/;
-
-    let content: string = '';
-    for (const line of lines) {
-      if (line.trim().length === 0) {
-        continue;
-      }
-
-      let modified: string = line;
-      switch (state) {
-        case State.Start:
-          if (line.match(startRegExp)) {
-            modified = line.replace(startRegExp, '');
-            if (modified.match(singleLineEndRegExp)) {
-              modified = modified.replace(singleLineEndRegExp, '');
-              state = State.Done;
-            } else {
-              state = State.Body;
-            }
-          } else {
-            state = State.Error;
-          }
-          break;
-        case State.Body:
-          if (line.match(endRegExp)) {
-            modified = line.replace(endRegExp, '');
-            state = State.Done;
-          } else if (line.match(bodyRegExp)) {
-            modified = line.replace(bodyRegExp, '');
-          } else {
-            state = State.Error;
-          }
-          break;
-        case State.Done:
-          state = State.Error;
-          break;
-      }
-      if (modified !== '') {
-        if (content !== '') {
-          content += '\n';
-        }
-        content += modified;
-      }
+  public static extractJSDocContent(text: string, errorLogger: (message: string) => void): string {
+    // Remove any leading/trailing whitespace around the comment characters, then split on newlines
+    const lines: string[] = text.trim().split(TypeScriptHelpers._newLineRegEx);
+    if (lines.length === 0) {
+      return '';
     }
 
-    if (state !== State.Done) {
-      return '[ERROR PARSING COMMENT]';
+    let matched: boolean;
+
+    // Remove "/**" from the first line
+    matched = false;
+    lines[0] = lines[0].replace(TypeScriptHelpers._jsdocStartRegEx, () => {
+      matched = true;
+      return '';
+    });
+    if (!matched) {
+      errorLogger('The comment does not begin with a \"/**\" delimiter.');
+      return '';
     }
 
-    return content;
+    // Remove "*/" from the last line
+    matched = false;
+    lines[lines.length - 1] = lines[lines.length - 1].replace(TypeScriptHelpers._jsdocEndRegEx, () => {
+      matched = true;
+      return '';
+    });
+    if (!matched) {
+      errorLogger('The comment does not end with a \"*/\" delimiter.');
+      return '';
+    }
+
+    // Remove a leading "*" from all lines except the first one
+    for (let i: number = 1; i < lines.length; ++i) {
+      lines[i] = lines[i].replace(TypeScriptHelpers._jsdocIntermediateRegEx, '');
+    }
+
+    // Remove trailing spaces from all lines
+    for (let i: number = 0; i < lines.length; ++i) {
+      lines[i] = lines[i].replace(TypeScriptHelpers._jsdocTrimRightRegEx, '');
+    }
+
+    // If the first line is blank, then remove it
+    if (lines[0] === '') {
+      lines.shift();
+    }
+
+    return lines.join('\n');
   }
-
 }

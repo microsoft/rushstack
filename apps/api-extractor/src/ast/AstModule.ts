@@ -6,6 +6,7 @@
 import * as ts from 'typescript';
 import { IAstItemOptions } from './AstItem';
 import AstItemContainer from './AstItemContainer';
+import TypeScriptHelpers from '../TypeScriptHelpers';
 import AstStructuredType from './AstStructuredType';
 import AstEnum from './AstEnum';
 import AstFunction from './AstFunction';
@@ -16,7 +17,7 @@ import AstFunction from './AstFunction';
 abstract class AstModule extends AstItemContainer {
 
   protected processModuleExport(exportSymbol: ts.Symbol): void {
-    const followedSymbol: ts.Symbol = this.followAliases(exportSymbol);
+    const followedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(exportSymbol, this.typeChecker);
 
     if (!followedSymbol.declarations) {
       // This is an API Extractor bug, but it could happen e.g. if we upgrade to a new
@@ -31,7 +32,6 @@ abstract class AstModule extends AstItemContainer {
         context: this.context,
         declaration,
         declarationSymbol: followedSymbol,
-        jsdocNode: declaration,
         exportSymbol
       };
 

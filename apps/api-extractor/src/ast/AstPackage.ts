@@ -19,29 +19,67 @@ export default class AstPackage extends AstModule {
 
   private static _getOptions(context: ExtractorContext, rootFile: ts.SourceFile): IAstItemOptions {
     const rootFileSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(rootFile);
-    let statement: ts.VariableStatement;
-    let foundDescription: ts.Node | undefined = undefined;
 
-    for (const statementNode of rootFile.statements) {
-      if (statementNode.kind === ts.SyntaxKind.VariableStatement) {
-        statement = statementNode as ts.VariableStatement;
-        for (const statementDeclaration of statement.declarationList.declarations) {
-          if (statementDeclaration.name.getText() === 'packageDescription') {
-            foundDescription = statement;
+    if (!rootFileSymbol.declarations) {
+      throw new Error('Unable to find a root declaration for this package');
+    }
+
+    // The @packagedocumentation comment is special because it is not attached to an AST
+    // definition.  Instead, it is part of the "trivia" tokens that the compiler treats
+    // as irrelevant white space.
+    //
+    // WARNING: If the comment doesn't precede an export statement, the compiler will omit
+    // it from the *.d.ts file, and API Extractor won't find it.  If this happens, you need
+    // to rearrange your statements to ensure it is passed through.
+    //
+    // This implementation assumes that the "@packagedocumentation" will be in the first JSDoc-comment
+    // that appears in the entry point *.d.ts file.  We could possibly look in other places,
+    // but the above warning suggests enforcing a standardized layout.  This design choice is open
+    // to feedback.
+    let packageCommentRange: ts.TextRange | undefined = undefined; // empty string
+
+    for (const commentRange of ts.getLeadingCommentRanges(rootFile.text, rootFile.getFullStart()) || []) {
+      if (commentRange.kind === ts.SyntaxKind.MultiLineCommentTrivia) {
+        const commentBody: string = rootFile.text.substring(commentRange.pos, commentRange.end);
+
+        // Choose the first JSDoc-style comment
+        if (/^\s*\/\*\*/.test(commentBody)) {
+          // But onliy if it looks like it's trying to be @packagedocumentation
+          // (The ApiDocumentation parser will validate this more rigorously)
+          if (commentBody.indexOf('@packagedocumentation') >= 0) {
+            packageCommentRange = commentRange;
           }
+          break;
         }
       }
     }
 
-    if (!rootFileSymbol.declarations) {
-      throw new Error('Unable to find a root declaration for this package');
+    if (!packageCommentRange) {
+      // If we didn't find the @packagedocumentation tag in the expected place, is it in some
+      // wrong place?  This sanity check helps people to figure out why there comment isn't working.
+      for (const statement of rootFile.statements) {
+        const ranges: ts.CommentRange[] = [];
+        ranges.push(...ts.getLeadingCommentRanges(rootFile.text, statement.getFullStart()) || []);
+        ranges.push(...ts.getTrailingCommentRanges(rootFile.text, statement.getEnd()) || []);
+
+        for (const commentRange of ranges) {
+          const commentBody: string = rootFile.text.substring(commentRange.pos, commentRange.end);
+
+          if (commentBody.indexOf('@packagedocumentation') >= 0) {
+            context.reportError('The @packagedocumentation comment must appear at the top of entry point *.d.ts file',
+              rootFile, commentRange.pos);
+          }
+        }
+      }
     }
 
     return {
       context,
       declaration: rootFileSymbol.declarations[0],
       declarationSymbol: rootFileSymbol,
-      jsdocNode: foundDescription
+      // NOTE: If there is no range, then provide an empty range to prevent ApiItem from
+      // looking in the default place
+      aedocCommentRange: packageCommentRange || { pos: 0, end: 0 }
     };
   }
 
@@ -51,17 +89,16 @@ export default class AstPackage extends AstModule {
     // The scoped package name. (E.g. "@microsoft/api-extractor")
     this.name = context.packageName;
 
-    const exportSymbols: ts.Symbol[] = this.typeChecker.getExportsOfModule(this.declarationSymbol);
-    if (exportSymbols) {
-      for (const exportSymbol of exportSymbols) {
+    const exportSymbols: ts.Symbol[] = this.typeChecker.getExportsOfModule(this.declarationSymbol) || [];
+
+    for (const exportSymbol of exportSymbols) {
         this.processModuleExport(exportSymbol);
 
-        const followedSymbol: ts.Symbol = this.followAliases(exportSymbol);
-        this._exportedNormalizedSymbols.push({
-          exportedName: exportSymbol.name,
-          followedSymbol: followedSymbol
-        });
-      }
+        const followedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(exportSymbol, this.typeChecker);
+      this._exportedNormalizedSymbols.push({
+        exportedName: exportSymbol.name,
+        followedSymbol: followedSymbol
+      });
     }
   }
 
@@ -77,7 +114,7 @@ export default class AstPackage extends AstModule {
    * the string "MyClass".
    */
   public tryGetExportedSymbolName(symbol: ts.Symbol): string | undefined {
-    const followedSymbol: ts.Symbol = this.followAliases(symbol);
+    const followedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(symbol, this.typeChecker);
     for (const exportedSymbol of this._exportedNormalizedSymbols) {
       if (exportedSymbol.followedSymbol === followedSymbol) {
         return exportedSymbol.exportedName;

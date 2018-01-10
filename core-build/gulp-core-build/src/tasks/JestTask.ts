@@ -19,6 +19,16 @@ export interface IJestConfig {
   isEnabled?: boolean;
 
   /**
+   * Indicate whether Jest cache is enabled or not.
+   */
+  cache?: boolean;
+
+  /**
+   * The directory where Jest should store its cached information.
+   */
+  cacheDirectory?: string;
+
+  /**
    * Same as Jest CLI option collectCoverageFrom
    */
   collectCoverageFrom?: string[];
@@ -37,9 +47,68 @@ export interface IJestConfig {
    * Same as Jest CLI option testPathIgnorePatterns
    */
   testPathIgnorePatterns?: string[];
+
+  /**
+   * Same as Jest CLI option moduleDirectories
+   */
+  moduleDirectories?: string[];
 }
 
 const DEFAULT_JEST_CONFIG_FILE_NAME: string = 'jest.config.json';
+
+/**
+ * We need to replace the resolver function which jest is using until the PR which
+ * fixes jest-resolves handling of symlinks is merged:
+ * https://github.com/facebook/jest/pull/5085
+ */
+// tslint:disable-next-line:no-any
+const nodeModulesPaths: any = require('jest-resolve/build/node_modules_paths');
+nodeModulesPaths.default = (
+  basedir: string,
+  options: {
+    moduleDirectory?: string[],
+    paths?: string[]
+  }
+): string[] => {
+  const nodeModulesFolders: string = 'node_modules';
+  const absoluteBaseDir: string = path.resolve(basedir);
+  const realAbsoluteBaseDir: string = fsx.realpathSync(absoluteBaseDir);
+  const possiblePaths: string[] = [realAbsoluteBaseDir];
+
+  let moduleFolders: string[] = [nodeModulesFolders];
+  if (options && options.moduleDirectory) {
+    moduleFolders = ([] as string[]).concat(options.moduleDirectory);
+  }
+
+  const windowsBaseRegex: RegExp = /^([A-Za-z]:)/;
+  const fileshareBaseRegex: RegExp = /^\\\\/;
+  let prefix: string = '/';
+  if (windowsBaseRegex.test(absoluteBaseDir)) {
+    prefix = '';
+  } else if (fileshareBaseRegex.test(absoluteBaseDir)) {
+    prefix = '\\\\';
+  }
+
+  let parsedPath: path.ParsedPath = path.parse(realAbsoluteBaseDir);
+  while (parsedPath.dir !== possiblePaths[possiblePaths.length - 1]) {
+    const realParsedDir: string = fsx.realpathSync(parsedPath.dir);
+    possiblePaths.push(realParsedDir);
+    parsedPath = path.parse(realParsedDir);
+  }
+
+  const dirs: string[] = possiblePaths.reduce((possibleDirs: string[], aPath: string) => {
+    return possibleDirs.concat(
+      moduleFolders.map((moduleDir: string) => {
+        return path.join(prefix, aPath, moduleDir);
+      })
+    );
+  }, []);
+
+  if (options.paths) {
+    return options.paths.concat(dirs);
+  }
+  return dirs;
+};
 
 /**
  * Indicates if jest is enabled
@@ -65,6 +134,7 @@ export class JestTask extends GulpTask<IJestConfig> {
   constructor() {
     super('jest',
     {
+      cache: true,
       collectCoverageFrom: ['lib/**/*.js?(x)', '!lib/**/test/**'],
       coverage: true,
       coverageReporters: ['json', 'html'],
@@ -92,24 +162,34 @@ export class JestTask extends GulpTask<IJestConfig> {
 
     this._copySnapshots(this.buildConfig.srcFolder, this.buildConfig.libFolder);
 
-    Jest.runCLI(
-      {
-        ci: this.buildConfig.production,
-        config: configFileFullPath,
-        collectCoverageFrom: this.taskConfig.collectCoverageFrom,
-        coverage: this.taskConfig.coverage,
-        coverageReporters: this.taskConfig.coverageReporters,
-        coverageDirectory: path.join(this.buildConfig.tempFolder, 'coverage'),
-        maxWorkers: 1,
-        moduleDirectories: ['node_modules', this.buildConfig.libFolder],
-        reporters: [path.join(__dirname, 'JestReporter.js')],
-        rootDir: this.buildConfig.rootPath,
-        runInBand: true,
-        testMatch: ['**/*.test.js?(x)'],
-        testPathIgnorePatterns: this.taskConfig.testPathIgnorePatterns,
-        updateSnapshot: !this.buildConfig.production
-      },
-      [this.buildConfig.rootPath],
+    // tslint:disable-next-line:no-any
+    const jestConfig: any = {
+      ci: this.buildConfig.production,
+      cache: !!this.taskConfig.cache,
+      config: fsx.existsSync(configFileFullPath) ? configFileFullPath : undefined,
+      collectCoverageFrom: this.taskConfig.collectCoverageFrom,
+      coverage: this.taskConfig.coverage,
+      coverageReporters: this.taskConfig.coverageReporters,
+      coverageDirectory: path.join(this.buildConfig.tempFolder, 'coverage'),
+      maxWorkers: 1,
+      moduleDirectories: !!this.taskConfig.moduleDirectories ?
+        this.taskConfig.moduleDirectories :
+        ['node_modules', this.buildConfig.libFolder],
+      reporters: [path.join(__dirname, 'JestReporter.js')],
+      rootDir: this.buildConfig.rootPath,
+      runInBand: true,
+      testMatch: ['**/*.test.js?(x)'],
+      testPathIgnorePatterns: this.taskConfig.testPathIgnorePatterns,
+      updateSnapshot: !this.buildConfig.production
+    };
+
+    if (this.taskConfig.cacheDirectory) {
+      // tslint:disable-next-line:no-string-literal
+      jestConfig['cacheDirectory'] = this.taskConfig.cacheDirectory;
+    }
+
+    Jest.runCLI(jestConfig,
+      [this.buildConfig.rootPath]).then(
       (result) => {
         if (result.numFailedTests || result.numFailedTestSuites) {
           completeCallback(new Error('Jest tests failed'));
@@ -119,7 +199,8 @@ export class JestTask extends GulpTask<IJestConfig> {
           }
           completeCallback();
         }
-      });
+      },
+      completeCallback);
   }
 
   private _copySnapshots(srcRoot: string, destRoot: string): void {

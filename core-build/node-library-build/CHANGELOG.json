@@ -2,6 +2,168 @@
   "name": "@microsoft/node-library-build",
   "entries": [
     {
+      "version": "4.2.16",
+      "tag": "@microsoft/node-library-build_v4.2.16",
+      "date": "Sun, 07 Jan 2018 05:12:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.3.5` to `3.3.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" from `3.2.15` to `3.2.16`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `4.3.3` to `4.4.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.2.15",
+      "tag": "@microsoft/node-library-build_v4.2.15",
+      "date": "Fri, 05 Jan 2018 20:26:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.3.4` to `3.3.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" from `3.2.14` to `3.2.15`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `4.3.2` to `4.3.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.2.14",
+      "tag": "@microsoft/node-library-build_v4.2.14",
+      "date": "Fri, 05 Jan 2018 00:48:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.3.3` to `3.3.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" from `3.2.13` to `3.2.14`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `4.3.1` to `4.3.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.2.13",
+      "tag": "@microsoft/node-library-build_v4.2.13",
+      "date": "Fri, 22 Dec 2017 17:04:46 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.3.2` to `3.3.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" from `3.2.12` to `3.2.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `4.3.0` to `4.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.2.12",
+      "tag": "@microsoft/node-library-build_v4.2.12",
+      "date": "Tue, 12 Dec 2017 03:33:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.3.1` to `3.3.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" from `3.2.11` to `3.2.12`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `4.2.18` to `4.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.2.11",
+      "tag": "@microsoft/node-library-build_v4.2.11",
+      "date": "Thu, 30 Nov 2017 23:59:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.3.0` to `3.3.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" from `3.2.10` to `3.2.11`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `4.2.17` to `4.2.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.2.10",
+      "tag": "@microsoft/node-library-build_v4.2.10",
+      "date": "Thu, 30 Nov 2017 23:12:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.2.9` to `3.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" from `3.2.9` to `3.2.10`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `4.2.16` to `4.2.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.2.9",
+      "tag": "@microsoft/node-library-build_v4.2.9",
+      "date": "Wed, 29 Nov 2017 17:05:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.2.8` to `3.2.9`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" from `3.2.8` to `3.2.9`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `4.2.15` to `4.2.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.2.8",
+      "tag": "@microsoft/node-library-build_v4.2.8",
+      "date": "Tue, 28 Nov 2017 23:43:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.2.7` to `3.2.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" from `3.2.7` to `3.2.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `4.2.14` to `4.2.15`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.2.7",
       "tag": "@microsoft/node-library-build_v4.2.7",
       "date": "Mon, 13 Nov 2017 17:04:50 GMT",

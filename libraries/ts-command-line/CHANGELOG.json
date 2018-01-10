@@ -2,6 +2,74 @@
   "name": "@microsoft/ts-command-line",
   "entries": [
     {
+      "version": "2.2.14",
+      "tag": "@microsoft/ts-command-line_v2.2.14",
+      "date": "Tue, 09 Jan 2018 17:05:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nicholas Pape <nickpape-msft@users.noreply.github.com>",
+            "commit": "d00b6549d13610fbb6f84be3478b532be9da0747",
+            "comment": "Get web-build-tools building with pnpm"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.13",
+      "tag": "@microsoft/ts-command-line_v2.2.13",
+      "date": "Sun, 07 Jan 2018 05:12:08 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.2.12",
+      "tag": "@microsoft/ts-command-line_v2.2.12",
+      "date": "Fri, 05 Jan 2018 20:26:45 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.2.11",
+      "tag": "@microsoft/ts-command-line_v2.2.11",
+      "date": "Fri, 05 Jan 2018 00:48:42 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.2.10",
+      "tag": "@microsoft/ts-command-line_v2.2.10",
+      "date": "Fri, 22 Dec 2017 17:04:46 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.2.9",
+      "tag": "@microsoft/ts-command-line_v2.2.9",
+      "date": "Tue, 12 Dec 2017 03:33:27 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.2.8",
+      "tag": "@microsoft/ts-command-line_v2.2.8",
+      "date": "Thu, 30 Nov 2017 23:59:09 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.2.7",
+      "tag": "@microsoft/ts-command-line_v2.2.7",
+      "date": "Thu, 30 Nov 2017 23:12:21 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.2.6",
+      "tag": "@microsoft/ts-command-line_v2.2.6",
+      "date": "Wed, 29 Nov 2017 17:05:37 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.2.5",
+      "tag": "@microsoft/ts-command-line_v2.2.5",
+      "date": "Tue, 28 Nov 2017 23:43:55 GMT",
+      "comments": {}
+    },
+    {
       "version": "2.2.4",
       "tag": "@microsoft/ts-command-line_v2.2.4",
       "date": "Mon, 13 Nov 2017 17:04:50 GMT",

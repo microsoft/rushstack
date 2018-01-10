@@ -11,7 +11,7 @@ export default class Npm {
   public static publishedVersions(
     packageName: string,
     cwd: string,
-    env: { [key: string]: string }
+    env: { [key: string]: string | undefined }
   ): string[] {
     const versions: string[] = [];
     try {
@@ -44,7 +44,7 @@ export default class Npm {
       if (error.message.indexOf('npm ERR! 404') >= 0) {
         console.log(`Package ${packageName} does not exist in the registry.`);
       } else {
-        console.log(`Failed to get npm information about ${packageName}.`);
+        console.log(`Failed to get NPM information about ${packageName}.`);
         throw error;
       }
     }

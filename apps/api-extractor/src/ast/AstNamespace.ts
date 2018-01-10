@@ -8,6 +8,7 @@ import AstModuleVariable from './AstModuleVariable';
 import { AstItemKind, IAstItemOptions } from './AstItem';
 import { IExportedSymbol } from './IExportedSymbol';
 import AstModule from './AstModule';
+import TypeScriptHelpers from '../TypeScriptHelpers';
 
 const allowedTypes: string[] = ['string', 'number', 'boolean'];
 
@@ -45,7 +46,7 @@ export default class AstNamespace extends AstModule {
   // Used when policies.namespaceSupport=conservative
   private _processConservativeMembers(exportSymbols: ts.Symbol[]): void {
     for (const exportSymbol of exportSymbols) {
-      const followedSymbol: ts.Symbol = this.followAliases(exportSymbol);
+      const followedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(exportSymbol, this.typeChecker);
 
       if (!followedSymbol.declarations) {
         // This is an API Extractor bug, but it could happen e.g. if we upgrade to a new
@@ -108,7 +109,6 @@ export default class AstNamespace extends AstModule {
         context: this.context,
         declaration,
         declarationSymbol: followedSymbol,
-        jsdocNode: jsdocNode,
         exportSymbol
       };
 

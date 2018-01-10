@@ -1,6 +1,53 @@
 # Change Log - @microsoft/web-library-build
 
-This log was last generated on Mon, 13 Nov 2017 17:04:50 GMT and should not be manually modified.
+This log was last generated on Sun, 07 Jan 2018 05:12:08 GMT and should not be manually modified.
+
+## 4.3.0
+Sun, 07 Jan 2018 05:12:08 GMT
+
+### Minor changes
+
+- api-extractor now runs after tsc rather than in parallel, and is excluded from "gulp serve"
+
+## 4.2.16
+Fri, 05 Jan 2018 20:26:45 GMT
+
+*Version update only*
+
+## 4.2.15
+Fri, 05 Jan 2018 00:48:41 GMT
+
+*Version update only*
+
+## 4.2.14
+Fri, 22 Dec 2017 17:04:46 GMT
+
+*Version update only*
+
+## 4.2.13
+Tue, 12 Dec 2017 03:33:26 GMT
+
+*Version update only*
+
+## 4.2.12
+Thu, 30 Nov 2017 23:59:09 GMT
+
+*Version update only*
+
+## 4.2.11
+Thu, 30 Nov 2017 23:12:21 GMT
+
+*Version update only*
+
+## 4.2.10
+Wed, 29 Nov 2017 17:05:37 GMT
+
+*Version update only*
+
+## 4.2.9
+Tue, 28 Nov 2017 23:43:55 GMT
+
+*Version update only*
 
 ## 4.2.8
 Mon, 13 Nov 2017 17:04:50 GMT

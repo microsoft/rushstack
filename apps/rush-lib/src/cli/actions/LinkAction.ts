@@ -4,7 +4,8 @@
 import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 
 import RushCommandLineParser from './RushCommandLineParser';
-import LinkManager from '../utilities/LinkManager';
+import { LinkManagerFactory } from '../utilities/LinkManagerFactory';
+import { BaseLinkManager } from '../utilities/base/BaseLinkManager';
 import { BaseRushAction } from './BaseRushAction';
 
 export default class LinkAction extends BaseRushAction {
@@ -30,7 +31,7 @@ export default class LinkAction extends BaseRushAction {
   }
 
   protected run(): void {
-    const linkManager: LinkManager = LinkManager.getLinkManager(this.rushConfiguration);
+    const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
     this._parser.catchSyncErrors(linkManager.createSymlinksForProjects(this._force.value));
   }
 }

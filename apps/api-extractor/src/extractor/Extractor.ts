@@ -17,9 +17,11 @@ import { ExtractorContext } from '../ExtractorContext';
 import { ILogger } from './ILogger';
 import ApiJsonGenerator from '../generators/ApiJsonGenerator';
 import ApiFileGenerator from '../generators/ApiFileGenerator';
+import PackageTypingsGenerator from '../generators/PackageTypingsGenerator';
+import { MonitoredLogger } from './MonitoredLogger';
 
 /**
- * Options for {@link Extractor.analyzeProject}.
+ * Options for {@link Extractor.processProject}.
  * @public
  */
 export interface IAnalyzeProjectOptions {
@@ -72,6 +74,8 @@ export class Extractor {
   private static _defaultConfig: Partial<IExtractorConfig> = JsonFile.load(path.join(__dirname,
     './api-extractor-defaults.json'));
 
+  private static _outputFileExtensionRegExp: RegExp = /\.d\.ts$/i;
+
   private static _defaultLogger: ILogger = {
     logVerbose: (message: string) => console.log('(Verbose) ' + message),
     logInfo: (message: string) => console.log(message),
@@ -79,11 +83,50 @@ export class Extractor {
     logError: (message: string) => console.error(colors.red(message))
   };
 
-  private _config: IExtractorConfig;
-  private _program: ts.Program;
-  private _localBuild: boolean;
-  private _logger: ILogger;
-  private _absoluteRootFolder: string;
+  private readonly _actualConfig: IExtractorConfig;
+  private readonly _program: ts.Program;
+  private readonly _localBuild: boolean;
+  private readonly _monitoredLogger: MonitoredLogger;
+  private readonly _absoluteRootFolder: string;
+
+  /**
+   * Given a list of absolute file paths, return a list containing only the declaration
+   * files.  Duplicates are also eliminated.
+   *
+   * @remarks
+   * The tsconfig.json settings specify the compiler's input (a set of *.ts source files,
+   * plus some *.d.ts declaration files used for legacy typings).  However API Extractor
+   * analyzes the compiler's output (a set of *.d.ts entry point files, plus any legacy
+   * typings).  This requires API Extractor to generate a special file list when it invokes
+   * the compiler.
+   *
+   * For configType=tsconfig this happens automatically, but for configType=runtime it is
+   * the responsibility of the custom tooling.  The generateFilePathsForAnalysis() function
+   * is provided to facilitate that.  Duplicates are removed so that entry points can be
+   * appended without worrying whether they may already appear in the tsconfig.json file list.
+   */
+  public static generateFilePathsForAnalysis(inputFilePaths: string[]): string[] {
+    const analysisFilePaths: string[] = [];
+
+    const seenFiles: Set<string> = new Set<string>();
+
+    for (const inputFilePath of inputFilePaths) {
+      const inputFileToUpper: string = inputFilePath.toUpperCase();
+      if (!seenFiles.has(inputFileToUpper)) {
+        seenFiles.add(inputFileToUpper);
+
+        if (!path.isAbsolute(inputFilePath)) {
+          throw new Error('Input file is not an absolute path: ' + inputFilePath);
+        }
+
+        if (Extractor._outputFileExtensionRegExp.test(inputFilePath)) {
+          analysisFilePaths.push(inputFilePath);
+        }
+      }
+    }
+
+    return analysisFilePaths;
+  }
 
   private static _applyConfigDefaults(config: IExtractorConfig): IExtractorConfig {
     // Use the provided config to override the defaults
@@ -93,17 +136,16 @@ export class Extractor {
     return normalized;
   }
 
-  public constructor (config: IExtractorConfig, options?: IExtractorOptions) {
+  public constructor(config: IExtractorConfig, options?: IExtractorOptions) {
+    let mergedLogger: ILogger;
     if (options && options.customLogger) {
-      this._logger = lodash.merge(lodash.cloneDeep(Extractor._defaultLogger),
-        options.customLogger);
+      mergedLogger = lodash.merge(lodash.clone(Extractor._defaultLogger), options.customLogger);
     } else {
-      this._logger = Extractor._defaultLogger;
+      mergedLogger = Extractor._defaultLogger;
     }
+    this._monitoredLogger = new MonitoredLogger(mergedLogger);
 
-    this._config = Extractor._applyConfigDefaults(config);
-
-    this._logger.logVerbose('API Extractor Config: ' + JSON.stringify(this._config));
+    this._actualConfig = Extractor._applyConfigDefaults(config);
 
     if (!options) {
       options = { };
@@ -111,16 +153,16 @@ export class Extractor {
 
     this._localBuild = options.localBuild || false;
 
-    switch (this._config.compiler.configType) {
+    switch (this._actualConfig.compiler.configType) {
       case 'tsconfig':
-        const rootFolder: string = this._config.compiler.rootFolder;
+        const rootFolder: string = this._actualConfig.compiler.rootFolder;
         if (!fsx.existsSync(rootFolder)) {
           throw new Error('The root folder does not exist: ' + rootFolder);
         }
 
         this._absoluteRootFolder = path.normalize(path.resolve(rootFolder));
 
-        let tsconfig: {} | undefined = this._config.compiler.overrideTsconfig;
+        let tsconfig: {} | undefined = this._actualConfig.compiler.overrideTsconfig;
         if (!tsconfig) {
           // If it wasn't overridden, then load it from disk
           tsconfig = JsonFile.load(path.join(this._absoluteRootFolder, 'tsconfig.json'));
@@ -128,7 +170,15 @@ export class Extractor {
 
         const commandLine: ts.ParsedCommandLine = ts.parseJsonConfigFileContent(tsconfig,
           ts.sys, this._absoluteRootFolder);
-        this._program = ts.createProgram(commandLine.fileNames, commandLine.options);
+
+        const normalizedEntryPointFile: string = path.normalize(
+          path.resolve(this._absoluteRootFolder, this._actualConfig.project.entryPointSourceFile));
+
+        // Append the normalizedEntryPointFile and remove any source files from the list
+        const analysisFilePaths: string[] = Extractor.generateFilePathsForAnalysis(commandLine.fileNames
+          .concat(normalizedEntryPointFile));
+
+        this._program = ts.createProgram(analysisFilePaths, commandLine.options);
 
         if (commandLine.errors.length > 0) {
           throw new Error('Error parsing tsconfig.json content: ' + commandLine.errors[0].messageText);
@@ -159,27 +209,63 @@ export class Extractor {
   }
 
   /**
+   * Returns the normalized configuration object after defaults have been applied.
+   *
+   * @remarks
+   * This is a read-only object.  The caller should NOT modify any member of this object.
+   * It is provided for diagnostic purposes.  For example, a build script could write
+   * this object to a JSON file to report the final configuration options used by API Extractor.
+   */
+  public get actualConfig(): IExtractorConfig {
+    return this._actualConfig;
+  }
+
+  /**
    * Invokes the API Extractor engine, using the configuration that was passed to the constructor.
+   * @deprecated Use {@link Extractor.processProject} instead.
    */
   public analyzeProject(options?: IAnalyzeProjectOptions): void {
+    this.processProject(options);
+  }
+
+  /**
+   * Invokes the API Extractor engine, using the configuration that was passed to the constructor.
+   * @param options - provides additional runtime state that is NOT part of the API Extractor
+   *     config file.
+   * @returns true for a successful build, or false if the tool chain should fail the build
+   *
+   * @remarks
+   *
+   * This function returns false to indicate that the build failed, i.e. the command-line tool
+   * would return a nonzero exit code.  Normally the build fails if there are any errors or
+   * warnings; however, if options.localBuild=true then warnings are ignored.
+   */
+  public processProject(options?: IAnalyzeProjectOptions): boolean {
+    this._monitoredLogger.resetCounters();
+
     if (!options) {
       options = { };
     }
 
     const projectConfig: IExtractorProjectConfig = options.projectConfig ?
-      options.projectConfig : this._config.project;
+      options.projectConfig : this._actualConfig.project;
 
     // This helps strict-null-checks to understand that _applyConfigDefaults() eliminated
     // any undefined members
-    if (!(this._config.policies && this._config.apiJsonFile && this._config.apiReviewFile)) {
+    if (!(this._actualConfig.policies && this._actualConfig.apiJsonFile && this._actualConfig.apiReviewFile
+      && this._actualConfig.packageTypings)) {
       throw new Error('The configuration object wasn\'t normalized properly');
+    }
+
+    if (!Extractor._outputFileExtensionRegExp.test(projectConfig.entryPointSourceFile)) {
+      throw new Error('The entry point is not a declaration file: ' + projectConfig.entryPointSourceFile);
     }
 
     const context: ExtractorContext = new ExtractorContext({
       program: this._program,
       entryPointFile: path.resolve(this._absoluteRootFolder, projectConfig.entryPointSourceFile),
-      logger: this._logger,
-      policies: this._config.policies
+      logger: this._monitoredLogger,
+      policies: this._actualConfig.policies
     });
 
     for (const externalJsonFileFolder of projectConfig.externalJsonFileFolders || []) {
@@ -188,31 +274,30 @@ export class Extractor {
 
     const packageBaseName: string = path.basename(context.packageName);
 
-    const apiJsonFileConfig: IExtractorApiJsonFileConfig = this._config.apiJsonFile;
+    const apiJsonFileConfig: IExtractorApiJsonFileConfig = this._actualConfig.apiJsonFile;
 
     if (apiJsonFileConfig.enabled) {
       const outputFolder: string = path.resolve(this._absoluteRootFolder,
         apiJsonFileConfig.outputFolder);
 
-      fsx.mkdirsSync(outputFolder);
-
       const jsonGenerator: ApiJsonGenerator = new ApiJsonGenerator();
       const apiJsonFilename: string = path.join(outputFolder, packageBaseName + '.api.json');
 
-      this._logger.logVerbose('Writing: ' + apiJsonFilename);
+      this._monitoredLogger.logVerbose('Writing: ' + apiJsonFilename);
+      fsx.mkdirsSync(path.dirname(apiJsonFilename));
       jsonGenerator.writeJsonFile(apiJsonFilename, context);
     }
 
-    if (this._config.apiReviewFile.enabled) {
+    if (this._actualConfig.apiReviewFile.enabled) {
       const generator: ApiFileGenerator = new ApiFileGenerator();
       const apiReviewFilename: string = packageBaseName + '.api.ts';
 
       const actualApiReviewPath: string = path.resolve(this._absoluteRootFolder,
-        this._config.apiReviewFile.tempFolder, apiReviewFilename);
+        this._actualConfig.apiReviewFile.tempFolder, apiReviewFilename);
       const actualApiReviewShortPath: string = this._getShortFilePath(actualApiReviewPath);
 
       const expectedApiReviewPath: string = path.resolve(this._absoluteRootFolder,
-        this._config.apiReviewFile.apiReviewFolder, apiReviewFilename);
+        this._actualConfig.apiReviewFile.apiReviewFolder, apiReviewFilename);
       const expectedApiReviewShortPath: string = this._getShortFilePath(expectedApiReviewPath);
 
       const actualApiReviewContent: string = generator.generateApiFileContent(context);
@@ -228,7 +313,7 @@ export class Extractor {
         if (!ApiFileGenerator.areEquivalentApiFileContents(actualApiReviewContent, expectedApiReviewContent)) {
           if (!this._localBuild) {
             // For production, issue a warning that will break the CI build.
-            this._logger.logWarning('You have changed the public API signature for this project.'
+            this._monitoredLogger.logWarning('You have changed the public API signature for this project.'
               // @microsoft/gulp-core-build seems to run JSON.stringify() on the error messages for some reason,
               // so try to avoid escaped characters:
               + ` Please overwrite ${expectedApiReviewShortPath} with a`
@@ -236,21 +321,43 @@ export class Extractor {
               + ' and then request an API review. See the Git repository README.md for more info.');
           } else {
             // For a local build, just copy the file automatically.
-            this._logger.logWarning('You have changed the public API signature for this project.'
+            this._monitoredLogger.logWarning('You have changed the public API signature for this project.'
               + ` Updating ${expectedApiReviewShortPath}`);
 
             fsx.writeFileSync(expectedApiReviewPath, actualApiReviewContent);
           }
         } else {
-          this._logger.logVerbose(`The API signature is up to date: ${actualApiReviewShortPath}`);
+          this._monitoredLogger.logVerbose(`The API signature is up to date: ${actualApiReviewShortPath}`);
         }
       } else {
         // NOTE: This warning seems like a nuisance, but it has caught genuine mistakes.
         // For example, when projects were moved into category folders, the relative path for
         // the API review files ended up in the wrong place.
-        this._logger.logError(`The API review file has not been set up. Do this by copying ${actualApiReviewShortPath}`
+        this._monitoredLogger.logError(`The API review file has not been set up.`
+          + ` Do this by copying ${actualApiReviewShortPath}`
           + ` to ${expectedApiReviewShortPath} and committing it.`);
       }
+    }
+
+    if (this._actualConfig.packageTypings.enabled) {
+      const packageTypingsGenerator: PackageTypingsGenerator = new PackageTypingsGenerator(context);
+
+      const dtsFilename: string = path.resolve(this._absoluteRootFolder,
+        this._actualConfig.packageTypings.outputFolder, this._actualConfig.packageTypings.dtsFilePathForInternal);
+
+      this._monitoredLogger.logVerbose(`Writing package typings: ${dtsFilename}`);
+
+      fsx.mkdirsSync(path.dirname(dtsFilename));
+
+      packageTypingsGenerator.writeTypingsFile(dtsFilename);
+    }
+
+    if (this._localBuild) {
+      // For a local build, fail if there were errors (but ignore warnings)
+      return this._monitoredLogger.errorCount === 0;
+    } else {
+      // For a production build, fail if there were any errors or warnings
+      return (this._monitoredLogger.errorCount + this._monitoredLogger.warningCount) === 0;
     }
   }
 
@@ -260,5 +367,4 @@ export class Extractor {
     }
     return path.relative(this._absoluteRootFolder, absolutePath).replace(/\\/g, '/');
   }
-
 }

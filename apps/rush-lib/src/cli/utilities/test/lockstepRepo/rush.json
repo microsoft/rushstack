@@ -1,0 +1,20 @@
+{
+  "npmVersion": "3.10.8",
+  "rushVersion": "1.0.5",
+  "projectFolderMinDepth": 1,
+
+  "projects": [
+    {
+      "packageName": "a",
+      "projectFolder": "a",
+      "reviewCategory": "third-party",
+      "versionPolicyName": "lockStep1"
+    },
+    {
+      "packageName": "b",
+      "projectFolder": "b",
+      "reviewCategory": "third-party",
+      "versionPolicyName": "lockStep1"
+    }
+  ]
+}

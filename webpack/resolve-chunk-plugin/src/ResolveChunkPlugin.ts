@@ -1,5 +1,3 @@
-/// <reference path="./custom-typings/webpackTypes.d.ts" />
-
 import * as Webpack from 'webpack';
 
 // tslint:disable-next-line:variable-name

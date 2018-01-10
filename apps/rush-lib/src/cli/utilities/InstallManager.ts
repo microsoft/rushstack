@@ -21,8 +21,8 @@ import { RushConstants } from '../../RushConstants';
 import Utilities from '../../utilities/Utilities';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import IPackageJson from '../../utilities/IPackageJson';
-import { IRushTempPackageJson } from '../utilities/Package';
-import ShrinkwrapFile from '../utilities/ShrinkwrapFile';
+import { IRushTempPackageJson } from '../utilities/base/BasePackage';
+import { BaseShrinkwrapFile } from '../utilities/base/BaseShrinkwrapFile';
 
 const MAX_INSTALL_ATTEMPTS: number = 5;
 
@@ -143,7 +143,7 @@ export default class InstallManager {
 
   /**
    * If the "(p)npm-local" symlink hasn't been set up yet, this creates it, installing the
-   * specified PNPM or NPM version in the user's home directory if needed.
+   * specified (P)npm version in the user's home directory if needed.
    */
   public ensureLocalPackageManager(forceReinstall: boolean): void {
     // Example: "C:\Users\YourName\.rush"
@@ -213,7 +213,7 @@ export default class InstallManager {
    * the return value is false.
    */
   public createTempModulesAndCheckShrinkwrap(
-    shrinkwrapFile: ShrinkwrapFile | undefined,
+    shrinkwrapFile: BaseShrinkwrapFile | undefined,
     forceCreate: boolean): boolean {
     const stopwatch: Stopwatch = Stopwatch.start();
 
@@ -251,7 +251,7 @@ export default class InstallManager {
     if (shrinkwrapFile) {
       // Check any pinned dependencies first
       pinnedVersions.forEach((version: string, dependency: string) => {
-        if (!shrinkwrapFile.hasCompatibleDependency(dependency, version)) {
+        if (!shrinkwrapFile.hasCompatibleTopLevelDependency(dependency, version)) {
           console.log(colors.yellow(wrap(
             `${os.EOL}The NPM shrinkwrap file does not provide "${dependency}"`
             + ` (${version}) required by pinned versions`)));
@@ -273,10 +273,25 @@ export default class InstallManager {
       this._rushConfiguration.tempShrinkwrapFilename);
 
     // Also copy down the committed .npmrc file, if there is one
-    // "common\.npmrc" --> "common\temp\.npmrc"
+    // "common\config\rush\.npmrc" --> "common\temp\.npmrc"
     const committedNpmrcPath: string = path.join(this._rushConfiguration.commonRushConfigFolder, '.npmrc');
     const tempNpmrcPath: string = path.join(this._rushConfiguration.commonTempFolder, '.npmrc');
+
+    // ensure that we remove any old one that may be hanging around
+    fsx.removeSync(tempNpmrcPath);
     this.syncFile(committedNpmrcPath, tempNpmrcPath);
+
+    // also, copy the pnpmfile.js if it exists
+    if (this._rushConfiguration.packageManager === 'pnpm') {
+      const committedPnpmFilePath: string
+        = path.join(this._rushConfiguration.commonRushConfigFolder, RushConstants.pnpmFileFilename);
+      const tempPnpmFilePath: string
+        = path.join(this._rushConfiguration.commonTempFolder, RushConstants.pnpmFileFilename);
+
+      // ensure that we remove any old one that may be hanging around
+      fsx.removeSync(tempPnpmFilePath);
+      this.syncFile(committedPnpmFilePath, tempPnpmFilePath);
+    }
 
     const commonPackageJson: IPackageJson = {
       dependencies: {},
@@ -496,9 +511,6 @@ export default class InstallManager {
       }
     }
 
-    // @todo for PNPM, we should look at the lock file to determine if the store needs to be cleaned
-    // ie even if the marker file does not exist, the store may be ok if there is no lock file
-
     // If "--clean" or "--full-clean" was specified, or if the last install was interrupted,
     // then we will need to delete the node_modules folder.  Otherwise, we can do an incremental
     // install.
@@ -611,7 +623,7 @@ export default class InstallManager {
 
     // Run "npm install" in the common folder
 
-    // NOTE FOR NPM:
+    // NOTE:
     //       we do NOT install optional dependencies for Rush, as it seems that optional dependencies do not
     //       work properly with shrinkwrap. Consider the "fsevents" package. This is a Mac specific package
     //       which is an optional second-order dependency. Optional dependencies work by attempting to install
@@ -626,14 +638,8 @@ export default class InstallManager {
     //       One possible solution would be to have the shrinkwrap include information about whether the dependency
     //       is optional or not, but it does not appear to do so. Also, this would result in strange behavior where
     //       people would have different node_modules based on their system.
-    //
-    // NOTE FOR PNPM:
-    //       PNPM does not appear to support the --no-optional flag at the moment
 
-    const installArgs: string[] = ['install'];
-    if (this._rushConfiguration.packageManager === 'npm') {
-      installArgs.push('--no-optional');
-    }
+    const installArgs: string[] = ['install', '--no-optional'];
     this.pushConfigurationArgs(installArgs);
 
     console.log(os.EOL + colors.bold(`Running "${this._rushConfiguration.packageManager} install" in`
@@ -663,6 +669,12 @@ export default class InstallManager {
       args.push('--tmp', this._rushConfiguration.npmTmpFolder);
     } else if (this._rushConfiguration.packageManager === 'pnpm') {
       args.push('--store', this._rushConfiguration.pnpmStoreFolder);
+
+      // we are using the --no-lock flag for now, which unfortunately prints a warning, but should be OK
+      // since rush already has its own install lock file which will invalidate the cache for us.
+      // we theoretically could use the lock file, but we would need to clean the store if the
+      // lockfile existed, otherwise PNPM would hang indefinitely. it is simpler to rely on Rush's
+      // last install flag, which encapsulates the entire installation
       args.push('--no-lock');
     }
   }
@@ -741,7 +753,7 @@ export default class InstallManager {
    *
    * @returns true if orphans were found, or false if everything is okay
    */
-  private _findOrphanedTempProjects(shrinkwrapFile: ShrinkwrapFile): boolean {
+  private _findOrphanedTempProjects(shrinkwrapFile: BaseShrinkwrapFile): boolean {
 
     // We can recognize temp projects because they are under the "@rush-temp" NPM scope.
     for (const tempProjectName of shrinkwrapFile.getTempProjectNames()) {

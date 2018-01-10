@@ -4,12 +4,12 @@ interface ILoadThemedStylesLoaderOptions {
   namedExport?: string;
 }
 
-// WARNING: loadedThemedStylesPath has incomplete type information
 // @public
 class LoadThemedStylesLoader {
   constructor();
+  static loadedThemedStylesPath: string;
   // (undocumented)
-  public static pitch(this: loader.LoaderContext, remainingRequest: string): string;
-  public static resetLoadedThemedStylesPath(): void;
+  static pitch(this: loader.LoaderContext, remainingRequest: string): string;
+  static resetLoadedThemedStylesPath(): void;
 }
 

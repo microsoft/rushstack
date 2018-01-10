@@ -51,10 +51,16 @@ export interface IExtractorRuntimeCompilerConfig {
  */
 export interface IExtractorProjectConfig {
   /**
-   * Specifies the TypeScript source file that will be treated as the entry point
-   * for compilation.  This cannot always be inferred automatically.  (The package.json
-   * "main" and "typings" field point to the compiler output files, but this does not
-   * guarantee a specific location for the source files.)
+   * Specifies the TypeScript *.d.ts file that will be treated as the entry point
+   * for compilation.  Typically this corresponds to the "typings" or "types" field
+   * from package.json, but secondary entry points are also possible.
+   *
+   * @remarks
+   * The file extension must not be *.ts.  API Extractor does NOT process TypeScript
+   * source code, but instead the output of the compiler.  This is needed for compatibility
+   * with preprocessors and also custom tooling that produces TypeScript-compatible outputs
+   * without using the real compiler.  It also speeds up the analysis by avoiding the
+   * need to parse implementation code.
    */
   entryPointSourceFile: string;
 
@@ -143,6 +149,61 @@ export interface IExtractorApiJsonFileConfig {
 }
 
 /**
+ * Configures how the package typings (*.d.ts) will be generated.
+ * @remarks
+ * API Extractor can generate a single unified *.d.ts file that contains all
+ * the exported typings for the package entry point.  It can also remove
+ * \@alpha \@beta \@internal definitions depending on the release type.
+ *
+ * @beta
+ */
+export interface IExtractorPackageTypingsConfig {
+  /**
+   * Whether to generate package typings.  The default is false.
+   */
+  enabled: boolean;
+
+  /**
+   * Specifies where the *.d.ts files should be written.
+   *
+   * The default value is "./dist"
+   */
+  outputFolder?: string;
+
+  /**
+   * Specifies the *.d.ts file path used for an internal release.
+   * The default value is "index-internal.d.ts".
+   *
+   * @remarks
+   * If the path is not an absolute path, it will be resolved relative to the outputFolder.
+   * This output file will contain all definitions that are reachable from the entry point.
+   */
+  dtsFilePathForInternal?: string;
+
+  /**
+   * Specifies the output filename for a preview release.
+   * The default value is "index-preview.d.ts".
+   *
+   * @remarks
+   * If the path is not an absolute path, it will be resolved relative to the outputFolder.
+   * This output file will contain all definitions that are reachable from the entry point,
+   * except definitions marked as \@alpha or \@internal.
+   */
+  dtsFilePathForPreview?: string;
+
+  /**
+   * Specifies the output filename for a public release.
+   * The default value is "index-public.d.ts".
+   *
+   * @remarks
+   * If the path is not an absolute path, it will be resolved relative to the outputFolder.
+   * This output file will contain all definitions that are reachable from the entry point,
+   * except definitions marked as \@beta, \@alpha, or \@internal.
+   */
+  dtsFilePathForPublic?: string;
+}
+
+/**
  * Configuration options for the API Extractor tool.  These options can be loaded
  * from a JSON config file.
  *
@@ -175,4 +236,10 @@ export interface IExtractorConfig {
    * {@inheritdoc IExtractorApiJsonFileConfig}
    */
   apiJsonFile?: IExtractorApiJsonFileConfig;
+
+  /**
+   * {@inheritdoc IExtractorPackageTypingsConfig}
+   * @beta
+   */
+  packageTypings?: IExtractorPackageTypingsConfig;
 }

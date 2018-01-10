@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-documenter",
+      "comment": "Upgrade to Node 8",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter",
+  "email": "nickpape-msft@users.noreply.github.com"
+}

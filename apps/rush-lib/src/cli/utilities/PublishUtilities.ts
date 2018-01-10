@@ -17,6 +17,7 @@ import {
   ChangeType
 } from '../../data/ChangeManagement';
 import RushConfigurationProject from '../../data/RushConfigurationProject';
+import RushConfiguration from '../../data/RushConfiguration';
 import Utilities from '../../utilities/Utilities';
 import { execSync } from 'child_process';
 import PrereleaseToken from './PrereleaseToken';
@@ -27,6 +28,19 @@ export interface IChangeInfoHash {
 }
 
 export default class PublishUtilities {
+  private static _rushConfiguration: RushConfiguration;
+
+  public static get rushConfiguration(): RushConfiguration {
+    if (!PublishUtilities._rushConfiguration) {
+      PublishUtilities._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
+    }
+    return PublishUtilities._rushConfiguration;
+  }
+
+  public static set rushConfiguration(newConfiguration: RushConfiguration) {
+    PublishUtilities._rushConfiguration = newConfiguration;
+  }
+
   /**
    * Finds change requests in the given folder.
    * @param changesPath Path to the changes folder.
@@ -85,9 +99,10 @@ export default class PublishUtilities {
         if (skipVersionBump) {
           change.newVersion = pkg.version;
         } else {
+          // For hotfix changes, do not re-write new version
           change.newVersion = (change.changeType! >= ChangeType.patch) ?
             semver.inc(pkg.version, PublishUtilities._getReleaseType(change.changeType!)) :
-            pkg.version;
+            (change.changeType === ChangeType.hotfix ? change.newVersion : pkg.version);
         }
 
         if (deps) {
@@ -156,8 +171,8 @@ export default class PublishUtilities {
     return LOOSE_PKG_REGEX.test(version);
   }
 
-  public static getEnvArgs(): { [key: string]: string } {
-    const env: { [key: string]: string } = {};
+  public static getEnvArgs(): { [key: string]: string | undefined } {
+    const env: { [key: string]: string | undefined } = {};
 
     // Copy existing process.env values (for nodist)
     Object.keys(process.env).forEach((key: string) => {
@@ -171,11 +186,11 @@ export default class PublishUtilities {
     command: string,
     args: string[] = [],
     workingDirectory: string = process.cwd(),
-    env?: { [key: string]: string }
+    env?: { [key: string]: string | undefined }
   ): void {
 
     let relativeDirectory: string = path.relative(process.cwd(), workingDirectory);
-    const envArgs: { [key: string]: string } = PublishUtilities.getEnvArgs();
+    const envArgs: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
 
     if (relativeDirectory) {
       relativeDirectory = `(${relativeDirectory})`;
@@ -205,7 +220,6 @@ export default class PublishUtilities {
   ): string {
     const currentDependencyVersion: string = dependencies[dependencyName];
     let newDependencyVersion: string;
-
     if (PublishUtilities.isRangeDependency(currentDependencyVersion)) {
       newDependencyVersion = PublishUtilities._getNewRangeDependency(newProjectVersion);
     } else if (currentDependencyVersion.lastIndexOf('~', 0) === 0) {
@@ -226,6 +240,8 @@ export default class PublishUtilities {
         return 'minor';
       case ChangeType.patch:
         return 'patch';
+      case ChangeType.hotfix:
+        return 'prerelease';
       default:
         throw new Error(`Wrong change type ${changeType}`);
     }
@@ -353,7 +369,7 @@ export default class PublishUtilities {
             // For prelease, the newVersion needs to be appended with prerelease name.
             // And dependency should specify the specific prerelease version.
             dependencies[depName] = PublishUtilities._getChangeInfoNewVersion(depChange, prereleaseToken);
-          } else if (depChange && depChange.changeType! >= ChangeType.patch) {
+          } else if (depChange && depChange.changeType! >= ChangeType.hotfix) {
             PublishUtilities._updateDependencyVersion(
               packageName,
               dependencies,
@@ -431,6 +447,13 @@ export default class PublishUtilities {
 
       const oldChangeType: ChangeType = currentChange.changeType!;
 
+      if (oldChangeType === ChangeType.hotfix && change.changeType! > oldChangeType) {
+        throw new Error(`Cannot apply ${this._getReleaseType(change.changeType!)} change after hotfix on same package`);
+      }
+      if (change.changeType! === ChangeType.hotfix && oldChangeType > change.changeType!) {
+        throw new Error(`Cannot apply hotfix alongside ${this._getReleaseType(oldChangeType!)} change on same package`);
+      }
+
       currentChange.changeType = Math.max(currentChange.changeType!, change.changeType!);
       currentChange.changes!.push(change);
 
@@ -444,10 +467,27 @@ export default class PublishUtilities {
       hasChanged = false;
       currentChange.changeType = ChangeType.none;
     } else {
-      currentChange.newVersion = change.changeType! >= ChangeType.patch ?
-        semver.inc(pkg.version, PublishUtilities._getReleaseType(currentChange.changeType!)) :
-        pkg.version;
-      currentChange.newRangeDependency = PublishUtilities._getNewRangeDependency(currentChange.newVersion);
+      if (change.changeType === ChangeType.hotfix) {
+        const prereleaseComponents: string[] = semver.prerelease(pkg.version);
+        if (!this.rushConfiguration.hotfixChangeEnabled) {
+          throw new Error(`Cannot add hotfix change; hotfixChangeEnabled is false in configuration.`);
+        }
+
+        currentChange.newVersion = pkg.version;
+        if (!prereleaseComponents) {
+          currentChange.newVersion += '-hotfix';
+        }
+        currentChange.newVersion = semver.inc(currentChange.newVersion, 'prerelease');
+      } else {
+        currentChange.newVersion = change.changeType! >= ChangeType.patch ?
+          semver.inc(pkg.version, PublishUtilities._getReleaseType(currentChange.changeType!)) :
+          pkg.version;
+      }
+
+      // If hotfix change, force new range dependency to be the exact new version
+      currentChange.newRangeDependency = change.changeType === ChangeType.hotfix ?
+        currentChange.newVersion :
+        PublishUtilities._getNewRangeDependency(currentChange.newVersion);
     }
     return hasChanged;
   }
@@ -465,7 +505,7 @@ export default class PublishUtilities {
 
     // Iterate through all downstream dependencies for the package.
     if (downstreamNames) {
-      if ((change.changeType! >= ChangeType.patch) ||
+      if ((change.changeType! >= ChangeType.hotfix) ||
         (prereleaseToken && prereleaseToken.hasValue)) {
         for (const depName of downstreamNames) {
           const pkg: IPackageJson = allPackages.get(depName)!.packageJson;
@@ -497,11 +537,17 @@ export default class PublishUtilities {
       // If the version range exists and has not yet been updated to this version, update it.
       if (requiredVersion !== change.newRangeDependency || alwaysUpdate) {
 
-        // Either it already satisfies the new version, or doesn't.
-        // If not, the downstream dep needs to be republished.
-        const changeType: ChangeType = semver.satisfies(change.newVersion!, requiredVersion) ?
-          ChangeType.dependency :
-          ChangeType.patch;
+        let changeType: ChangeType;
+        // Propagate hotfix changes to dependencies
+        if (change.changeType === ChangeType.hotfix) {
+          changeType = ChangeType.hotfix;
+        } else {
+          // Either it already satisfies the new version, or doesn't.
+          // If not, the downstream dep needs to be republished.
+          changeType = semver.satisfies(change.newVersion!, requiredVersion) ?
+            ChangeType.dependency :
+            ChangeType.patch;
+        }
 
         const hasChanged: boolean = PublishUtilities._addChange({
           packageName: parentPackageName,
@@ -545,8 +591,8 @@ export default class PublishUtilities {
         packageName: packageName,
         changeType: ChangeType.dependency,
         comment:
-        `Updating dependency "${dependencyName}" from \`${currentDependencyVersion}\`` +
-        ` to \`${dependencies[dependencyName]}\``
+          `Updating dependency "${dependencyName}" from \`${currentDependencyVersion}\`` +
+          ` to \`${dependencies[dependencyName]}\``
       },
       allChanges,
       allPackages

@@ -27,6 +27,7 @@ import ChangeFiles from '../utilities/ChangeFiles';
 import {
   VersionPolicy,
   IndividualVersionPolicy,
+  LockStepVersionPolicy,
   VersionPolicyDefinitionName
 } from '../../data/VersionPolicy';
 
@@ -38,33 +39,42 @@ export default class ChangeAction extends BaseRushAction {
   private _verifyParameter: CommandLineFlagParameter;
   private _targetBranchParameter: CommandLineStringParameter;
   private _targetBranchName: string;
+  private _projectHostMap: Map<string, string>;
 
   private _prompt: inquirer.PromptModule;
 
   constructor(parser: RushCommandLineParser) {
+    const documentation: string[] = [
+      'Asks a series of questions and then generates a <branchname>-<timstamp>.json file ' +
+      'in the common folder. The `publish` command will consume these files and perform the proper ' +
+      'version bumps. Note these changes will eventually be published in a changelog.md file in each package.',
+      '',
+      'The possible types of changes are: ',
+      '',
+      'MAJOR - these are breaking changes that are not backwards compatible. ' +
+      'Examples are: renaming a public class, adding/removing a non-optional ' +
+      'parameter from a public API, or renaming an variable or function that ' +
+      'is exported.',
+      '',
+      'MINOR - these are changes that are backwards compatible (but not ' +
+      'forwards compatible). Examples are: adding a new public API or adding an ' +
+      'optional parameter to a public API',
+      '',
+      'PATCH - these are changes that are backwards and forwards compatible. ' +
+      'Examples are: Modifying a private API or fixing a bug in the logic ' +
+      'of how an existing API works.',
+      '',
+      'HOTFIX (EXPERIMENTAL) - these are changes that are hotfixes targeting a ' +
+      'specific older version of the package. When a hotfix change is added, ' +
+      'other changes will not be able to increment the version number.' +
+      'Enable this feature by setting \'hotfixChangeEnabled\' in your rush.json.',
+      ''
+    ];
     super({
       actionVerb: 'change',
       summary: 'Records changes made to projects, indicating how the package version number should be bumped ' +
         'for the next publish.',
-      documentation: ['Asks a series of questions and then generates a <branchname>-<timstamp>.json file ' +
-        'in the common folder. The `publish` command will consume these files and perform the proper ' +
-        'version bumps. Note these changes will eventually be published in a changelog.md file in each package.',
-        '',
-        'The possible types of changes are: ',
-        '',
-        'MAJOR - these are breaking changes that are not backwards compatible. ' +
-        'Examples are: renaming a public class, adding/removing a non-optional ' +
-        'parameter from a public API, or renaming an variable or function that ' +
-        'is exported.',
-        '',
-        'MINOR - these are changes that are backwards compatible (but not ' +
-        'forwards compatible). Examples are: adding a new public API or adding an ' +
-        'optional parameter to a public API',
-        '',
-        'PATCH - these are changes that are backwards and forwards compatible. ' +
-        'Examples are: Modifying a private API or fixing a bug in the logic ' +
-        'of how an existing API works.',
-        ''].join(os.EOL)
+      documentation: documentation.join(os.EOL)
     });
     this._parser = parser;
   }
@@ -86,6 +96,8 @@ export default class ChangeAction extends BaseRushAction {
 
   public run(): void {
     console.log(`Target branch is ${this._targetBranch}`);
+    this._projectHostMap = this._generateHostMap();
+
     if (this._verifyParameter.value) {
       return this._verify();
     }
@@ -100,14 +112,26 @@ export default class ChangeAction extends BaseRushAction {
 
     this._prompt = inquirer.createPromptModule();
     this._changeFileData = new Map<string, IChangeFile>();
-    this._changeComments = ChangeFiles.getChangeComments(this._getChangeFiles(),
-      this._sortedProjectList);
+    this._changeComments = ChangeFiles.getChangeComments(this._getChangeFiles());
 
     // We should consider making onExecute either be an async/await or have it return a promise
     this._promptLoop()
       .catch((error: Error) => {
         console.error('There was an error creating the changefile:' + os.EOL + error.toString());
       });
+  }
+
+  private _generateHostMap(): Map<string, string> {
+    const hostMap: Map<string, string> = new Map<string, string>();
+    this.rushConfiguration.projects.forEach(project => {
+      let hostProjectName: string = project.packageName;
+      if (project.versionPolicy && project.versionPolicy.isLockstepped) {
+        const lockstepPolicy: LockStepVersionPolicy = project.versionPolicy as LockStepVersionPolicy;
+        hostProjectName = lockstepPolicy.mainProject || project.packageName;
+      }
+      hostMap.set(project.packageName, hostProjectName);
+    });
+    return hostMap;
   }
 
   private _verify(): void {
@@ -133,10 +157,18 @@ export default class ChangeAction extends BaseRushAction {
     if (!changedFolders) {
       return [];
     }
-    return this.rushConfiguration.projects
-      .filter(project => project.shouldPublish)
-      .filter(project => this._hasProjectChanged(changedFolders, project))
-      .map(project => project.packageName) as string[];
+    const changedPackageNames: Set<string> = new Set<string>();
+
+    this.rushConfiguration.projects
+    .filter(project => project.shouldPublish)
+    .filter(project => this._hasProjectChanged(changedFolders, project))
+    .forEach(project => {
+      const hostName: string | undefined = this._projectHostMap.get(project.packageName);
+      if (hostName) {
+        changedPackageNames.add(hostName);
+      }
+    });
+    return [...changedPackageNames];
   }
 
   private _validateChangeFile(changedPackages: string[]): void {
@@ -291,6 +323,11 @@ export default class ChangeAction extends BaseRushAction {
       'minor': 'minor - for backwards compatible changes, e.g. adding a new API',
       'patch': 'patch - for changes that do not affect compatibility, e.g. fixing a bug'
     };
+
+    if (this.rushConfiguration.hotfixChangeEnabled) {
+      // tslint:disable-next-line:no-string-literal
+      bumpOptions['hotfix'] = 'hotfix - for changes that need to be published in a separate hotfix package';
+    }
 
     if (versionPolicy) {
       if (versionPolicy.definitionName === VersionPolicyDefinitionName.lockStepVersion) {

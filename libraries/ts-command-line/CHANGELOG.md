@@ -1,6 +1,58 @@
 # Change Log - @microsoft/ts-command-line
 
-This log was last generated on Mon, 13 Nov 2017 17:04:50 GMT and should not be manually modified.
+This log was last generated on Tue, 09 Jan 2018 17:05:51 GMT and should not be manually modified.
+
+## 2.2.14
+Tue, 09 Jan 2018 17:05:51 GMT
+
+### Patches
+
+- Get web-build-tools building with pnpm
+
+## 2.2.13
+Sun, 07 Jan 2018 05:12:08 GMT
+
+*Version update only*
+
+## 2.2.12
+Fri, 05 Jan 2018 20:26:45 GMT
+
+*Version update only*
+
+## 2.2.11
+Fri, 05 Jan 2018 00:48:42 GMT
+
+*Version update only*
+
+## 2.2.10
+Fri, 22 Dec 2017 17:04:46 GMT
+
+*Version update only*
+
+## 2.2.9
+Tue, 12 Dec 2017 03:33:27 GMT
+
+*Version update only*
+
+## 2.2.8
+Thu, 30 Nov 2017 23:59:09 GMT
+
+*Version update only*
+
+## 2.2.7
+Thu, 30 Nov 2017 23:12:21 GMT
+
+*Version update only*
+
+## 2.2.6
+Wed, 29 Nov 2017 17:05:37 GMT
+
+*Version update only*
+
+## 2.2.5
+Tue, 28 Nov 2017 23:43:55 GMT
+
+*Version update only*
 
 ## 2.2.4
 Mon, 13 Nov 2017 17:04:50 GMT
