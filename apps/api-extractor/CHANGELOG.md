@@ -1,6 +1,17 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 09 Jan 2018 17:05:51 GMT and should not be manually modified.
+This log was last generated on Wed, 10 Jan 2018 20:40:01 GMT and should not be manually modified.
+
+## 5.1.0
+Wed, 10 Jan 2018 20:40:01 GMT
+
+### Minor changes
+
+- Upgrade to Node 8
+
+### Patches
+
+- Continued progress for the experimental PackageTypingsGenerator
 
 ## 5.0.1
 Tue, 09 Jan 2018 17:05:51 GMT

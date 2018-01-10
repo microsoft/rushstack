@@ -2,6 +2,25 @@
   "name": "@microsoft/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "1.4.0",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v1.4.0",
+      "date": "Wed, 10 Jan 2018 20:40:01 GMT",
+      "comments": {
+        "minor": [
+          {
+            "author": "Nicholas Pape <nickpape-msft@users.noreply.github.com>",
+            "commit": "1271a0dc21fedb882e7953f491771724f80323a1",
+            "comment": "Upgrade to Node 8"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.2.16` to `4.3.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.14",
       "tag": "@microsoft/set-webpack-public-path-plugin_v1.3.14",
       "date": "Tue, 09 Jan 2018 17:05:51 GMT",

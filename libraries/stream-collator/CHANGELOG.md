@@ -1,6 +1,13 @@
 # Change Log - @microsoft/stream-collator
 
-This log was last generated on Sun, 07 Jan 2018 05:12:08 GMT and should not be manually modified.
+This log was last generated on Wed, 10 Jan 2018 20:40:01 GMT and should not be manually modified.
+
+## 2.2.0
+Wed, 10 Jan 2018 20:40:01 GMT
+
+### Minor changes
+
+- Upgrade to Node 8
 
 ## 2.1.13
 Sun, 07 Jan 2018 05:12:08 GMT

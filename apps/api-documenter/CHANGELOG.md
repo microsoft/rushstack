@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Sun, 07 Jan 2018 05:12:08 GMT and should not be manually modified.
+This log was last generated on Wed, 10 Jan 2018 20:40:01 GMT and should not be manually modified.
+
+## 1.1.0
+Wed, 10 Jan 2018 20:40:01 GMT
+
+### Minor changes
+
+- Upgrade to Node 8
 
 ## 1.0.17
 Sun, 07 Jan 2018 05:12:08 GMT

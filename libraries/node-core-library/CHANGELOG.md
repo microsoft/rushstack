@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Tue, 09 Jan 2018 17:05:51 GMT and should not be manually modified.
+This log was last generated on Wed, 10 Jan 2018 20:40:01 GMT and should not be manually modified.
+
+## 0.4.0
+Wed, 10 Jan 2018 20:40:01 GMT
+
+### Minor changes
+
+- Upgrade to Node 8
 
 ## 0.3.26
 Tue, 09 Jan 2018 17:05:51 GMT

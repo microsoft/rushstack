@@ -2,6 +2,31 @@
   "name": "@microsoft/node-library-build",
   "entries": [
     {
+      "version": "4.3.0",
+      "tag": "@microsoft/node-library-build_v4.3.0",
+      "date": "Wed, 10 Jan 2018 20:40:01 GMT",
+      "comments": {
+        "minor": [
+          {
+            "author": "Nicholas Pape <nickpape-msft@users.noreply.github.com>",
+            "commit": "1271a0dc21fedb882e7953f491771724f80323a1",
+            "comment": "Upgrade to Node 8"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.3.7` to `3.4.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" from `3.2.17` to `3.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `4.4.1` to `4.5.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.2.16",
       "tag": "@microsoft/node-library-build_v4.2.16",
       "date": "Sun, 07 Jan 2018 05:12:08 GMT",
