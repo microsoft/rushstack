@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "@types/mocha": "2.2.38",
-    "@types/node": "6.0.88",
+    "@types/node": "8.5.8",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "mocha": "~3.4.2",

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/loader-set-webpack-public-path",
+      "comment": "Upgrade to Node 8",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/loader-set-webpack-public-path",
+  "email": "nickpape-msft@users.noreply.github.com"
+}

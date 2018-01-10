@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-webpack",
+      "comment": "Upgrade to Node 8",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-webpack",
+  "email": "nickpape-msft@users.noreply.github.com"
+}
