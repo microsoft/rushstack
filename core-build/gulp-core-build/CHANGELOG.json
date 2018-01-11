@@ -2,6 +2,25 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.4.1",
+      "tag": "@microsoft/gulp-core-build_v3.4.1",
+      "date": "Thu, 11 Jan 2018 22:31:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nicholas Pape <nickpape-msft@users.noreply.github.com>",
+            "commit": "f1ba3c91dcdb8eb661fb303583f4476bce2c099f",
+            "comment": "Fix Jest error handling"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.0` to `0.4.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.4.0",
       "tag": "@microsoft/gulp-core-build_v3.4.0",
       "date": "Wed, 10 Jan 2018 20:40:01 GMT",
