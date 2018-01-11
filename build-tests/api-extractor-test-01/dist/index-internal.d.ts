@@ -1,3 +1,12 @@
+/**
+ * Example documentation for the package.
+ * 
+ * @remarks
+ * Additional remarks
+ * 
+ * @packagedocumentation
+ */
+
 
 /**
  * Test different kinds of ambient definitions

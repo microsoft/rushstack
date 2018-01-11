@@ -4,4 +4,3 @@ class SubclassWithImport extends RenamedReexportedClass, implements ISimpleInter
   test(): void;
 }
 
-// (No @packagedocumentation comment for this package)

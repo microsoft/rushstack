@@ -1,3 +1,12 @@
+/**
+ * Example documentation for the package.
+ * 
+ * @remarks
+ * Additional remarks
+ * 
+ * @packagedocumentation
+ */
+
 import { ReexportedClass as RenamedReexportedClass } from 'api-extractor-test-01';
 
 /**
