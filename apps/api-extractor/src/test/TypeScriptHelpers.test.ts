@@ -23,7 +23,7 @@ describe('TypeScriptHelpers tests', () => {
 
   });
 
-  describe('extractCommentContent()', () => {
+  describe('extractJSDocContent()', () => {
 
     const testCases: ITestCase[] = [
       { // 0
@@ -122,4 +122,25 @@ describe('TypeScriptHelpers tests', () => {
 
   });
 
+  describe('formatJSDocContent()', () => {
+
+    const testCases: ITestCase[] = [
+      { // 0
+        input: 'this is\na test\n',
+        output: '/**\n * this is\n * a test\n */\n'
+      },
+      { // 1
+        input: 'single line comment',
+        output: '/** single line comment */'
+      }
+    ];
+
+    for (let i: number = 0; i < testCases.length; ++i) {
+      it(`JSDoc test case ${i}`, () => {
+        expect(TypeScriptHelpers.extractJSDocContent(testCases[i].input, console.log))
+        .toBe(testCases[i].output);
+      });
+    }
+
+  });
 });
