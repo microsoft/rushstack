@@ -2,5 +2,6 @@
   "enabled": true,
   "apiReviewFolder": "../../common/reviews/api",
   "apiJsonFolder": "./temp",
-  "entry": "lib/test.d.ts"
+  "entry": "lib/test.d.ts",
+  "generatePackageTypings": true
 }
