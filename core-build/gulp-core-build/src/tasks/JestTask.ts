@@ -70,6 +70,7 @@ nodeModulesPaths.default = (
     paths?: string[]
   }
 ): string[] => {
+
   const nodeModulesFolders: string = 'node_modules';
   const absoluteBaseDir: string = path.resolve(basedir);
   const realAbsoluteBaseDir: string = fsx.realpathSync(absoluteBaseDir);
@@ -190,8 +191,8 @@ export class JestTask extends GulpTask<IJestConfig> {
 
     Jest.runCLI(jestConfig,
       [this.buildConfig.rootPath]).then(
-      (result) => {
-        if (result.numFailedTests || result.numFailedTestSuites) {
+      (result: { results: Jest.AggregatedResult, globalConfig: Jest.GlobalConfig }) => {
+        if (result.results.numFailedTests || result.results.numFailedTestSuites) {
           completeCallback(new Error('Jest tests failed'));
         } else {
           if (!this.buildConfig.production) {
@@ -200,7 +201,9 @@ export class JestTask extends GulpTask<IJestConfig> {
           completeCallback();
         }
       },
-      completeCallback);
+      (err) => {
+        completeCallback(err);
+      });
   }
 
   private _copySnapshots(srcRoot: string, destRoot: string): void {
