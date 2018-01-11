@@ -38,7 +38,8 @@
     {
       "packageName": "project2",
       "projectFolder": "project2",
-      "reviewCategory": "third-party"
+      "reviewCategory": "third-party",
+      "skipRushCheck": true
     },
 
     {
