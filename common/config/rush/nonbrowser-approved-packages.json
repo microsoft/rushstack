@@ -254,6 +254,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "jest-environment-jsdom",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "jest-resolve",
       "allowedCategories": [ "libraries" ]
     },
