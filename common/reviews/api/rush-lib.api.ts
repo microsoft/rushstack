@@ -243,6 +243,7 @@ class RushConfigurationProject {
   readonly projectRelativeFolder: string;
   readonly reviewCategory: string;
   readonly shouldPublish: boolean;
+  readonly skipRushCheck: boolean;
   readonly tempProjectName: string;
   readonly unscopedTempProjectName: string;
   // @beta
