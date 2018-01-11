@@ -199,4 +199,35 @@ export default class TypeScriptHelpers {
 
     return lines.join('\n');
   }
+
+  /**
+   * Returns a JSDoc comment containing the provided content.
+   * @remarks
+   * This is the inverse of the extractJSDocContent() operation.
+   *
+   * WARNING: This function assumes that the content does not include strings
+   * such as "*\/" which would prematurely terminate the comment.
+   */
+  // Examples:
+  // "this is\na test\n" --> "/**\n * this is\n * a test\n */\n"
+  // "single line comment" --> "/** single line comment */"
+  public static formatJSDocContent(content: string): string {
+    const lines: string[] = content.split(TypeScriptHelpers._newLineRegEx);
+    if (!content || lines.length === 0) {
+      return '';
+    }
+
+    if (lines.length < 2) {
+      return `/** ${content} */`;
+    } else {
+      // If there was a trailing newline, remove it
+      if (lines[lines.length - 1] === '') {
+        lines.pop();
+      }
+
+      return '/**\n * '
+        + lines.join('\n * ')
+        + '\n */';
+    }
+  }
 }
