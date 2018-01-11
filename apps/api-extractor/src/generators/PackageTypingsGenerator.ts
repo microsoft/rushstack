@@ -286,6 +286,13 @@ export default class PackageTypingsGenerator {
 
     this._entries.sort((a, b) => a.getSortKey().localeCompare(b.getSortKey()));
 
+    // If there is a @packagedocumentation header, put it first:
+    const packageDocumentation: string = this._context.package.documentation.originalAedoc;
+    if (packageDocumentation) {
+      this._indentedWriter.writeLine(TypeScriptHelpers.formatJSDocContent(packageDocumentation));
+      this._indentedWriter.writeLine();
+    }
+
     // Emit the imports first
     for (const entry of this._entries) {
       if (entry.importPackagePath) {
