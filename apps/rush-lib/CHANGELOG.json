@@ -2,6 +2,21 @@
   "name": "@microsoft/rush-lib",
   "entries": [
     {
+      "version": "4.2.0",
+      "tag": "@microsoft/rush-lib_v4.2.0",
+      "date": "Mon, 11 Jan 2018 22:14:30 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Introduce a new project-specific setting \"skipRushCheck\" to exempt certain projects from the \"rush check\" validation"
+          },
+          {
+            "comment": "Introduce a new setting \"mainProject\" for lockstep version policies. This enables a scenario where a group of packages share a common change log, which is associated with the main project."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.1.1",
       "tag": "@microsoft/rush-lib_v4.1.1",
       "date": "Mon, 08 Jan 2018 20:34:30 GMT",
