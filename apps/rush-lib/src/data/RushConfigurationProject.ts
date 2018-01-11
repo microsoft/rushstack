@@ -20,6 +20,7 @@ export interface IRushConfigurationProjectJson {
   cyclicDependencyProjects: string[];
   versionPolicyName?: string;
   shouldPublish?: boolean;
+  skipRushCheck?: boolean;
 }
 
 /**
@@ -39,6 +40,7 @@ export default class RushConfigurationProject {
   private _versionPolicyName: string | undefined;
   private _versionPolicy: VersionPolicy;
   private _shouldPublish: boolean;
+  private _skipRushCheck: boolean;
   private _downstreamDependencyProjects: string[];
   private readonly _rushConfiguration: RushConfiguration;
 
@@ -105,8 +107,9 @@ export default class RushConfigurationProject {
         this._cyclicDependencyProjects.add(cyclicDependencyProject);
       }
     }
-    this._downstreamDependencyProjects = [];
     this._shouldPublish = !!projectJson.shouldPublish;
+    this._skipRushCheck = !!projectJson.skipRushCheck;
+    this._downstreamDependencyProjects = [];
     this._versionPolicyName = projectJson.versionPolicyName;
   }
 
@@ -198,6 +201,14 @@ export default class RushConfigurationProject {
    */
   public get shouldPublish(): boolean {
     return this._shouldPublish || !!this._versionPolicyName;
+  }
+
+  /**
+   * If true, then this project will be ignored by the "rush check" command.
+   * The default value is false.
+   */
+  public get skipRushCheck(): boolean {
+    return this._skipRushCheck;
   }
 
   /**

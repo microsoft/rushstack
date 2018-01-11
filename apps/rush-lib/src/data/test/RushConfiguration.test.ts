@@ -82,6 +82,11 @@ describe('RushConfiguration', () => {
     assertPathProperty('project1.projectFolder', project1.projectFolder, './repo/project1');
     assert.equal(project1.tempProjectName, '@rush-temp/project1', 'Failed to validate project1.tempProjectName');
     assert.equal(project1.unscopedTempProjectName, 'project1');
+    assert.equal(project1.skipRushCheck, false);
+
+    // Validate project2 settings
+    const project2: RushConfigurationProject = rushConfiguration.getProjectByName('project2')!;
+    assert.equal(project2.skipRushCheck, true);
 
     done();
   });

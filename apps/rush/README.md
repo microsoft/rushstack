@@ -46,7 +46,9 @@ To see Rush build some real projects, try running these commands:  :-)
 $ git clone https://github.com/Microsoft/web-build-tools
 $ cd web-build-tools
 $ rush install
+$ rush install  # <-- instantaneous!
 $ rush rebuild
+$ rush build    # <-- instantaneous!
 ```
 _(If you don't have a GitHub account set up, you can use `rush install --bypass-policy`.)_
 
