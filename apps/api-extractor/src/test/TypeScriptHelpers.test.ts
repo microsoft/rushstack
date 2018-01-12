@@ -110,6 +110,10 @@ describe('TypeScriptHelpers tests', () => {
                ' * C\n' +
                ' */',
         output: 'A\n\nB\n\nC\n'
+      },
+      { // 16
+        input: '/**   *\\/   */',  // a properly escaped terminator
+        output: '*\\/'
       }
     ];
 
@@ -126,12 +130,36 @@ describe('TypeScriptHelpers tests', () => {
 
     const testCases: ITestCase[] = [
       { // 0
-        input: 'this is\na test\n',
-        output: '/**\n * this is\n * a test\n */\n'
+        input: '',
+        output: ''
       },
       { // 1
+        input: 'a',
+        output: '/** a */'
+      },
+      { // 2
+        input: '\na',
+        output: '/**\n * \n * a\n */'
+      },
+      { // 3
+        input: 'a\n',
+        output: '/**\n * a\n */'
+      },
+      { // 4
+        input: '  \na\n  ',
+        output: '/**\n *   \n * a\n *   \n */'
+      },
+      { // 5
+        input: 'this is\na test\n',
+        output: '/**\n * this is\n * a test\n */'
+      },
+      { // 6
         input: 'single line comment',
         output: '/** single line comment */'
+      },
+      { // 7
+        input: 'a */ b',
+        output: '/** a *\\/ b */'
       }
     ];
 
