@@ -137,7 +137,7 @@ describe('TypeScriptHelpers tests', () => {
 
     for (let i: number = 0; i < testCases.length; ++i) {
       it(`JSDoc test case ${i}`, () => {
-        expect(TypeScriptHelpers.extractJSDocContent(testCases[i].input, console.log))
+        expect(TypeScriptHelpers.formatJSDocContent(testCases[i].input))
         .toBe(testCases[i].output);
       });
     }
