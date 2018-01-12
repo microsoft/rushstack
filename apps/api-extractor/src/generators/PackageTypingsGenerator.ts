@@ -178,7 +178,26 @@ export default class PackageTypingsGenerator {
   private static _followAliases(symbol: ts.Symbol, typeChecker: ts.TypeChecker): IFollowAliasesResult {
     let current: ts.Symbol = symbol;
 
+    // Is it ambient?  We will examine all of the declarations we encounter
+    // to see if any of them contains the "export" keyword; if not, then it's ambient.
+    let isAmbient: boolean = true;
+
     while (true) { // tslint:disable-line:no-constant-condition
+
+      for (const declaration of current.declarations || []) {
+        if (declaration.kind === ts.SyntaxKind.ExportSpecifier
+          || declaration.kind === ts.SyntaxKind.ExportAssignment) {
+          isAmbient = false;
+          break;
+        }
+
+        const modifiers: ts.ModifierFlags = ts.getCombinedModifierFlags(declaration);
+        if (modifiers & (ts.ModifierFlags.Export | ts.ModifierFlags.ExportDefault)) {
+            isAmbient = false;
+            break;
+        }
+      }
+
       if (!(current.flags & ts.SymbolFlags.Alias)) {
         break;
       }
@@ -226,17 +245,6 @@ export default class PackageTypingsGenerator {
       }
 
       current = currentAlias;
-    }
-
-    // Is it ambient?  We examine all of the declarations to see if any of them contains
-    // the "export" keyword; if not, then it's ambient.
-    let isAmbient: boolean = true;
-    for (const declaration of current.declarations || []) {
-      const modifiers: ts.ModifierFlags = ts.getCombinedModifierFlags(declaration);
-      if (modifiers & (ts.ModifierFlags.Export | ts.ModifierFlags.ExportDefault)) {
-        isAmbient = false;
-        break;
-      }
     }
 
     return {

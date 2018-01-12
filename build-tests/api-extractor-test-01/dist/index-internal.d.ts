@@ -1,4 +1,3 @@
-// Unsupported re-export: IInterfaceAsDefaultExport
 /**
  * Example documentation for the package.
  * 
@@ -73,6 +72,17 @@ declare interface IForgottenExport {
  */
 declare interface IForgottenExport_2 {
     instance2: string;
+}
+
+/**
+ * This interface is exported as the default export for its source file.
+ * @public
+ */
+export declare interface IInterfaceAsDefaultExport {
+    /**
+     * A member of the interface
+     */
+    member: string;
 }
 
 /**
