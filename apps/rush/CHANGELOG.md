@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 11 Jan 2018 22:35:55 GMT and should not be manually modified.
+This log was last generated on Fri, 12 Jan 2018 23:35:48 GMT and should not be manually modified.
+
+## 4.2.1
+Fri, 12 Jan 2018 23:35:48 GMT
+
+### Patches
+
+- Fix a bug in "rush change" to allow skipping changes when empty change file exists.
+- Change the way Rush prints output, to make it more readable and easy to tell how far into a build you are.
 
 ## 4.2.0
 Mon, 11 Jan 2018 22:14:30 GMT
