@@ -327,7 +327,7 @@ export class VersionManager {
       changeType: ChangeType.none,
       newVersion: newPackageJson.version,
       packageName: newPackageJson.name,
-      comment: `Version update`
+      comment: ''
     };
   }
 }

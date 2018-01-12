@@ -244,7 +244,7 @@ export default class ChangeAction extends BaseRushAction {
   private _askQuestions(packageName: string): Promise<IChangeInfo | undefined> {
     console.log(`${os.EOL}${packageName}`);
     const comments: string[] | undefined = this._changeComments.get(packageName);
-    if (comments && comments.length) {
+    if (comments) {
       console.log(`Found existing comments:`);
       comments.forEach(comment => {
         console.log(`    > ${comment}`);

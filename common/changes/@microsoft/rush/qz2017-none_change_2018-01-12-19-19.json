@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix a bug in \"rush change\" to allow skipping changes when empty change file exists.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "qz2017@users.noreply.github.com"
+}
