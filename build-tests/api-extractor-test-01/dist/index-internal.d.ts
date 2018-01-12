@@ -1,3 +1,4 @@
+// Unsupported re-export: IInterfaceAsDefaultExport
 /**
  * Example documentation for the package.
  * 
