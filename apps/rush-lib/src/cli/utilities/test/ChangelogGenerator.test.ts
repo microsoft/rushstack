@@ -187,6 +187,52 @@ describe('updateIndividualChangelog', () => {
     expect(actualResult).eql(expectedResult);
   });
 
+  it('skip empty comment', () => {
+    const actualResult: IChangelog = ChangelogGenerator.updateIndividualChangelog(
+      {
+        packageName: 'a',
+        newVersion: '0.0.2',
+        changeType: ChangeType.none,
+        changes: [{
+          packageName: 'a',
+          type: 'none',
+          changeType: ChangeType.none,
+          comment: ''
+        }]
+      },
+      path.resolve(__dirname, 'exampleChangelog'),
+      false
+    )!;
+
+    const expectedResult: IChangelog = {
+      name: 'a',
+      entries: [
+        {
+          version: '0.0.2',
+          tag: 'a_v0.0.2',
+          date: undefined,
+          comments: {}
+        },
+        {
+          version: '0.0.1',
+          tag: 'a_v0.0.1',
+          date: 'Wed, 30 Nov 2016 18:37:45 GMT',
+          comments: {
+            patch: [
+              {
+                comment: 'Patching a'
+              }
+            ]
+          }
+        }
+      ]
+    };
+
+    // Remove date.
+    actualResult.entries[0].date = undefined;
+
+    expect(actualResult).eql(expectedResult);
+  });
 });
 
 describe('updateChangelogs', () => {
