@@ -2,6 +2,21 @@
   "name": "@microsoft/rush-lib",
   "entries": [
     {
+      "version": "4.2.1",
+      "tag": "@microsoft/rush-lib_v4.2.1",
+      "date": "Fri, 12 Jan 2018 23:35:48 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a bug in \"rush change\" to allow skipping changes when empty change file exists."
+          },
+          {
+            "comment": "Change the way Rush prints output, to make it more readable and easy to tell how far into a build you are."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.2.0",
       "tag": "@microsoft/rush-lib_v4.2.0",
       "date": "Mon, 11 Jan 2018 22:14:30 GMT",

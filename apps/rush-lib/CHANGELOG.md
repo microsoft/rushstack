@@ -2,6 +2,14 @@
 
 This log was last generated on Thu, 11 Jan 2018 22:35:55 GMT and should not be manually modified.
 
+## 4.2.1
+Fri, 12 Jan 2018 23:35:48 GMT
+
+### Patches
+
+- Fix a bug in "rush change" to allow skipping changes when empty change file exists.
+- Change the way Rush prints output, to make it more readable and easy to tell how far into a build you are.
+
 ## 4.2.0
 Mon, 11 Jan 2018 22:14:30 GMT
 
@@ -65,9 +73,9 @@ Fri, 06 Oct 2017 22:44:31 GMT
 ### Patches
 
 - Enable strickNullChecks
-- Fix a bug in "rush version" that devdependency does not get bumped if there is no dependency. 
-- Fix a bug in "rush change" so it handles rename properly. 
-- Add npm tag support in "rush publish". 
+- Fix a bug in "rush version" that devdependency does not get bumped if there is no dependency.
+- Fix a bug in "rush change" so it handles rename properly.
+- Add npm tag support in "rush publish".
 
 ## 3.0.18
 Tue, 26 Sep 2017 13:51:05 GMT
