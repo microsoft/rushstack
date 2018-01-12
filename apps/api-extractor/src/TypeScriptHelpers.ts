@@ -33,6 +33,11 @@ export default class TypeScriptHelpers {
   private static _jsdocTrimRightRegEx: RegExp = /\s*$/;
 
   /**
+   * Invalid comment sequence
+   */
+  private static _jsdocCommentTerminator: RegExp = /[*][/]/g;
+
+  /**
    * This traverses any type aliases to find the original place where an item was defined.
    * For example, suppose a class is defined as "export default class MyClass { }"
    * but exported from the package's index.ts like this:
@@ -198,5 +203,41 @@ export default class TypeScriptHelpers {
     }
 
     return lines.join('\n');
+  }
+
+  /**
+   * Returns a JSDoc comment containing the provided content.
+   *
+   * @remarks
+   * This is the inverse of the extractJSDocContent() operation.
+   */
+  // Examples:
+  // "this is\na test\n" --> "/**\n * this is\n * a test\n */\n"
+  // "single line comment" --> "/** single line comment */"
+  public static formatJSDocContent(content: string): string {
+    if (!content) {
+      return '';
+    }
+
+    // If the string contains "*/", then replace it with "*\/"
+    const escapedContent: string = content.replace(TypeScriptHelpers._jsdocCommentTerminator, '*\\/');
+
+    const lines: string[] = escapedContent.split(TypeScriptHelpers._newLineRegEx);
+    if (lines.length === 0) {
+      return '';
+    }
+
+    if (lines.length < 2) {
+      return `/** ${escapedContent} */`;
+    } else {
+      // If there was a trailing newline, remove it
+      if (lines[lines.length - 1] === '') {
+        lines.pop();
+      }
+
+      return '/**\n * '
+        + lines.join('\n * ')
+        + '\n */';
+    }
   }
 }

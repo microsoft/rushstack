@@ -27,6 +27,11 @@ class ForgottenExportConsumer2 {
 }
 
 // @public
+interface IInterfaceAsDefaultExport {
+  member: string;
+}
+
+// @public
 interface ISimpleInterface {
 }
 

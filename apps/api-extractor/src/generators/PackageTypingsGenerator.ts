@@ -178,7 +178,26 @@ export default class PackageTypingsGenerator {
   private static _followAliases(symbol: ts.Symbol, typeChecker: ts.TypeChecker): IFollowAliasesResult {
     let current: ts.Symbol = symbol;
 
+    // Is it ambient?  We will examine all of the declarations we encounter
+    // to see if any of them contains the "export" keyword; if not, then it's ambient.
+    let isAmbient: boolean = true;
+
     while (true) { // tslint:disable-line:no-constant-condition
+
+      for (const declaration of current.declarations || []) {
+        if (declaration.kind === ts.SyntaxKind.ExportSpecifier
+          || declaration.kind === ts.SyntaxKind.ExportAssignment) {
+          isAmbient = false;
+          break;
+        }
+
+        const modifiers: ts.ModifierFlags = ts.getCombinedModifierFlags(declaration);
+        if (modifiers & (ts.ModifierFlags.Export | ts.ModifierFlags.ExportDefault)) {
+            isAmbient = false;
+            break;
+        }
+      }
+
       if (!(current.flags & ts.SymbolFlags.Alias)) {
         break;
       }
@@ -228,17 +247,6 @@ export default class PackageTypingsGenerator {
       current = currentAlias;
     }
 
-    // Is it ambient?  We examine all of the declarations to see if any of them contains
-    // the "export" keyword; if not, then it's ambient.
-    let isAmbient: boolean = true;
-    for (const declaration of current.declarations || []) {
-      const modifiers: ts.ModifierFlags = ts.getCombinedModifierFlags(declaration);
-      if (modifiers & (ts.ModifierFlags.Export | ts.ModifierFlags.ExportDefault)) {
-        isAmbient = false;
-        break;
-      }
-    }
-
     return {
       symbol: current,
       importPackagePath: undefined,
@@ -285,6 +293,13 @@ export default class PackageTypingsGenerator {
     this._makeUniqueNames();
 
     this._entries.sort((a, b) => a.getSortKey().localeCompare(b.getSortKey()));
+
+    // If there is a @packagedocumentation header, put it first:
+    const packageDocumentation: string = this._context.package.documentation.originalAedoc;
+    if (packageDocumentation) {
+      this._indentedWriter.writeLine(TypeScriptHelpers.formatJSDocContent(packageDocumentation));
+      this._indentedWriter.writeLine();
+    }
 
     // Emit the imports first
     for (const entry of this._entries) {
@@ -446,14 +461,8 @@ export default class PackageTypingsGenerator {
 
     this._entries.push(entry);
     this._entriesBySymbol.set(followedSymbol, entry);
-    console.log('======> ' + entry.localName);
 
     for (const declaration of followedSymbol.declarations || []) {
-      // console.log(PrettyPrinter.dumpTree(declaration));
-      // console.log('-------------------------------------');
-      // console.log(declaration.getText());
-      // console.log('=====================================');
-
       this._collectTypes(declaration);
     }
 

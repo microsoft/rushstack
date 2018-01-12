@@ -54,6 +54,13 @@ export interface IApiExtractorTaskConfig {
    * https://github.com/SharePoint/ts-spec-gen that generates an online API documentation.
    */
   apiJsonFolder?: string;
+
+  /**
+   * If true, then API Extractor will generate consolidated \*.d.ts outputs for this project.
+   * The filenames are: "index-internal.d.ts", "index-preview.d.ts", and "index-public.d.ts".
+   * @beta
+   */
+  generatePackageTypings?: boolean;
 }
 
 /**
@@ -141,6 +148,12 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
           outputFolder: this.taskConfig.apiJsonFolder
         }
       };
+
+      if (this.taskConfig.generatePackageTypings) {
+        extractorConfig.packageTypings = {
+          enabled: true
+        };
+      }
 
       const extractorOptions: IExtractorOptions = {
         compilerProgram: compilerProgram,
