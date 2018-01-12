@@ -453,14 +453,8 @@ export default class PackageTypingsGenerator {
 
     this._entries.push(entry);
     this._entriesBySymbol.set(followedSymbol, entry);
-    console.log('======> ' + entry.localName);
 
     for (const declaration of followedSymbol.declarations || []) {
-      // console.log(PrettyPrinter.dumpTree(declaration));
-      // console.log('-------------------------------------');
-      // console.log(declaration.getText());
-      // console.log('=====================================');
-
       this._collectTypes(declaration);
     }
 
