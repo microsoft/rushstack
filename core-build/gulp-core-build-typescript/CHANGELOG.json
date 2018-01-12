@@ -2,6 +2,31 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "4.6.0",
+      "tag": "@microsoft/gulp-core-build-typescript_v4.6.0",
+      "date": "Fri, 12 Jan 2018 03:35:22 GMT",
+      "comments": {
+        "minor": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "4589070d63c8c1d5d77bfa5e52b4f9fd2734e19f",
+            "comment": "Add a new setting \"generatePackageTypings\" for the API Extractor task"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.1.1` to `5.1.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.4.1` to `3.4.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.1` to `0.4.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.5.1",
       "tag": "@microsoft/gulp-core-build-typescript_v4.5.1",
       "date": "Thu, 11 Jan 2018 22:31:51 GMT",
