@@ -342,7 +342,7 @@ export default class PackageTypingsGenerator {
         case ts.SyntaxKind.ExportKeyword:
         case ts.SyntaxKind.DefaultKeyword:
         case ts.SyntaxKind.DeclareKeyword:
-          // Delete any explicit "export" keywords -- we will re-add them based on Entry.exported
+          // Delete any explicit "export" or "declare" keywords -- we will re-add them below
           span.modification.skipAll();
           break;
 
@@ -353,9 +353,19 @@ export default class PackageTypingsGenerator {
         case ts.SyntaxKind.ModuleKeyword:
         case ts.SyntaxKind.TypeKeyword:
         case ts.SyntaxKind.FunctionKeyword:
-          span.modification.prefix = 'declare ' + span.modification.prefix;
+          // Replace the stuff we possibly deleted above
+          let replacedModifiers: string = 'declare ';
           if (entry.exported) {
-            span.modification.prefix = 'export ' + span.modification.prefix;
+            replacedModifiers = 'export ' + replacedModifiers;
+          }
+
+          if (previousSpan && previousSpan.kind === ts.SyntaxKind.SyntaxList) {
+            // If there is a previous span of type SyntaxList, then apply it before any other modifiers
+            // (e.g. "abstract") that appear there.
+            previousSpan.modification.prefix = replacedModifiers + previousSpan.modification.prefix;
+          } else {
+            // Otherwise just stick it in front of this span
+            span.modification.prefix = replacedModifiers + span.modification.prefix;
           }
           break;
 

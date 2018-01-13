@@ -12,7 +12,7 @@
  * Example of an abstract class that is directly exported.
  * @public
  */
-abstract export declare class AbstractClass {
+export declare abstract class AbstractClass {
     abstract test(): void;
 }
 
@@ -22,7 +22,7 @@ abstract export declare class AbstractClass {
  *
  * @public
  */
-abstract export declare class AbstractClass2 {
+export declare abstract class AbstractClass2 {
     abstract test2(): void;
 }
 
@@ -31,7 +31,7 @@ abstract export declare class AbstractClass2 {
  *
  * @public
  */
-abstract export declare class AbstractClass3 {
+export declare abstract class AbstractClass3 {
     abstract test3(): void;
 }
 
