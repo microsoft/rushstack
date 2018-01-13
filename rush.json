@@ -1,6 +1,6 @@
 {
   "pnpmVersion": "1.25.1",
-  "rushVersion": "4.1.1",
+  "rushVersion": "4.2.1",
   "nodeSupportedVersionRange": ">=6.9.0 <9.0.0",
   "projectFolderMinDepth": 1,
 
@@ -43,19 +43,13 @@
       "packageName": "@microsoft/rush",
       "projectFolder": "apps/rush",
       "reviewCategory": "libraries",
-
-      // Rush is published manually for two reasons:
-      // 1. We need to do proper validation before pushing out a new release
-      //    that potentially could screw up everyone's daily work.
-      // 2. The "rush" and "rush-lib" packages need to have identical versions,
-      //    which is currently not supported by the automatic publishing system.
-      "shouldPublish": false
+      "versionPolicyName": "rush"
     },
     {
       "packageName": "@microsoft/rush-lib",
       "projectFolder": "apps/rush-lib",
       "reviewCategory": "libraries",
-      "shouldPublish": false
+      "versionPolicyName": "rush"
     },
 
     // "build-tests" folder (alphabetical order)

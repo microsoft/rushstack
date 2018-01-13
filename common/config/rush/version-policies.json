@@ -1,0 +1,9 @@
+[
+  {
+  "policyName": "rush",
+  "definitionName": "lockStepVersion",
+  "version": "4.2.1",
+  "nextBump": "patch",
+  "mainProject": "@microsoft/rush"
+}
+]
