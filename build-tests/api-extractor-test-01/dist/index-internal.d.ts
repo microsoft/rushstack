@@ -9,6 +9,33 @@
 
 
 /**
+ * Example of an abstract class that is directly exported.
+ * @public
+ */
+abstract export declare class AbstractClass {
+    abstract test(): void;
+}
+
+/**
+ * Example of an abstract class that is exported separately from its
+ * definition.
+ *
+ * @public
+ */
+abstract export declare class AbstractClass2 {
+    abstract test2(): void;
+}
+
+/**
+ * Example of an abstract class that is not the default export
+ *
+ * @public
+ */
+abstract export declare class AbstractClass3 {
+    abstract test3(): void;
+}
+
+/**
  * Test different kinds of ambient definitions
  * @public
  */

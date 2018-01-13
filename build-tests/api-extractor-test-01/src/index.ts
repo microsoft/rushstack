@@ -88,3 +88,6 @@ export { ForgottenExportConsumer1 } from './ForgottenExportConsumer1';
 export { ForgottenExportConsumer2 } from './ForgottenExportConsumer2';
 
 export { default as IInterfaceAsDefaultExport } from './IInterfaceAsDefaultExport';
+
+export { default as AbstractClass } from './AbstractClass';
+export { default as AbstractClass2, AbstractClass3 } from './AbstractClass2';
