@@ -93,16 +93,16 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
   /**
    * abstract
-   * Gets the resolved version number of a a dependency for a specific temp project
+   * Gets the resolved version number of a dependency for a specific temp project
    */
   protected getDependencyVersion(dependencyName: string, tempProjectName: string): string | undefined {
-    // PNPM doesn't have the same advantage of pnpm, where we can skip generate as long as the
+    // PNPM doesn't have the same advantage of NPM, where we can skip generate as long as the
     // shrinkwrap file puts our dependency in either the top of the node_modules folder
     // or underneath the package we are looking at.
-    // this is because the PNPM shrinkwrap file describes the exact links that need to be created
+    // This is because the PNPM shrinkwrap file describes the exact links that need to be created
     // to recreate the graph..
-    // because of this, we actually need to check to grab the version that this package is actually
-    // linked to
+    // Because of this, we actually need to check for a version that this package is directly
+    // linked to.
 
     // Example: "project1"
     const unscopedTempProjectName: string = Utilities.parseScopedPackageName(tempProjectName).name;
