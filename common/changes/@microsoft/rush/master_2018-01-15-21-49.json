@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix pnpm shrinkwrap parsing",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "configurator@users.noreply.github.com"
+}
