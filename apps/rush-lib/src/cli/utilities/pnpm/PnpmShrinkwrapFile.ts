@@ -124,6 +124,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     // A - the version (e.g. "0.0.5")
     // B - a peer dep version (e.g. "/gulp-karma/0.0.5/karma@0.13.22"
     //                           or "/sinon-chai/2.8.0/chai@3.5.0+sinon@1.17.7")
+    // C - a peer dep version of a scoped package ("/@scope/package/0.0.5/karma@0.13.22")
 
     // check to see if this is the special style of specifiers
     // e.g.:  "/gulp-karma/0.0.5/karma@0.13.22"
@@ -131,11 +132,28 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     // if the second group doesn't exist, return the version directly
     if (version) {
       const versionParts: string[] = version.split('/');
-      if (versionParts.length !== 1 && versionParts.length !== 4) {
-        throw new Error(`Cannot parse pnpm shrinkwrap version specifier: `
-          + `"${version}" for "${dependencyName}"`);
+
+      // (A) the version
+      if (versionParts.length === 1) {
+        return version;
       }
-      return versionParts[2] || version;
+
+      if (versionParts[1][0] === '@') {
+        // (C) a peer dep version of a scoped package
+        if (versionParts.length === 5) {
+          return versionParts[3];
+        }
+      } else {
+        // (B) a peer dep version
+        if (versionParts.length === 4) {
+          return versionParts[2];
+        }
+      }
+
+      // None of the cases matched
+      throw new Error(`Cannot parse pnpm shrinkwrap version specifier: `
+        + `"${version}" for "${dependencyName}"`);
+
     } else {
       return undefined;
     }
