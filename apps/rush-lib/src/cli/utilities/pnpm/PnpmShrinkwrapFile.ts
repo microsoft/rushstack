@@ -62,6 +62,10 @@ interface IShrinkwrapYaml {
 export function extractVersionFromPnpmVersionSpecifier(version: string): string | undefined {
   let extractedVersion: string | undefined = undefined;
 
+  if (!version) {
+    return undefined;
+  }
+
   const versionParts: string[] = version.split('/');
 
   // it had no slashes, so we know it is a version like "0.0.5"

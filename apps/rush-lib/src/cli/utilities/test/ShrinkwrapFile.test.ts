@@ -67,6 +67,10 @@ describe('pnpm', () => {
     it('handles bad cases', () => {
       assert.equal(extractVersionFromPnpmVersionSpecifier('/foo/gulp-karma/0.0.5/karma@0.13.22'), undefined);
       assert.equal(extractVersionFromPnpmVersionSpecifier('/@ms/3.1.1/foo@13.1.0'), undefined);
+      assert.equal(extractVersionFromPnpmVersionSpecifier(''), undefined);
+      assert.equal(extractVersionFromPnpmVersionSpecifier('/'), undefined);
+      assert.equal(extractVersionFromPnpmVersionSpecifier('//'), undefined);
+      assert.equal(extractVersionFromPnpmVersionSpecifier('/@/'), undefined);
     });
   });
 });
