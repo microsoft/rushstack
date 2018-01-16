@@ -86,7 +86,6 @@ export function extractVersionFromPnpmVersionSpecifier(version: string): string 
   return extractedVersion;
 }
 
-
 export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   private _shrinkwrapJson: IShrinkwrapYaml;
 
@@ -160,7 +159,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     // split it by forward slashes, then grab the second group (or the 3rd, if the package name is scoped)
     // if the second group doesn't exist, return the version directly
     if (version) {
-      const extractedVersion = extractVersionFromPnpmVersionSpecifier(version);
+      const extractedVersion: string | undefined = extractVersionFromPnpmVersionSpecifier(version);
 
       if (!extractedVersion) {
         throw new Error(`Cannot parse pnpm shrinkwrap version specifier: `
