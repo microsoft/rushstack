@@ -123,11 +123,13 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     // version will be either:
     // A - the version (e.g. "0.0.5")
     // B - a peer dep version (e.g. "/gulp-karma/0.0.5/karma@0.13.22"
+    //                           or "/@ms/sp-client-utilities/3.1.1/foo@13.1.0"
     //                           or "/sinon-chai/2.8.0/chai@3.5.0+sinon@1.17.7")
 
     // check to see if this is the special style of specifiers
-    // e.g.:  "/gulp-karma/0.0.5/karma@0.13.22"
-    // split it by forward slashes, then grab the second group (or the 3rd, if the 1st group starts with a "@")
+    // e.g.:  "/gulp-karma/0.0.5/karma@0.13.22" or
+    //     or "/@ms/sp-client-utilities/3.1.1/foo@13.1.0"
+    // split it by forward slashes, then grab the second group (or the 3rd, if the package name is scoped)
     // if the second group doesn't exist, return the version directly
     if (version) {
       try {
