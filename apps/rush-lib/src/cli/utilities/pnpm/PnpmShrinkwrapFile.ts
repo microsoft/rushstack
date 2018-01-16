@@ -127,15 +127,47 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
     // check to see if this is the special style of specifiers
     // e.g.:  "/gulp-karma/0.0.5/karma@0.13.22"
-    // split it by forward slashes, then grab the second group
+    // split it by forward slashes, then grab the second group (or the 3rd, if the 1st group starts with a "@")
     // if the second group doesn't exist, return the version directly
     if (version) {
-      const versionParts: string[] = version.split('/');
-      if (versionParts.length !== 1 && versionParts.length !== 4) {
+      try {
+        const versionParts: string[] = version.split('/');
+
+        // it had no slashes, so we know it is a version like "0.0.5"
+        if (versionParts.length === 1) {
+          return version;
+        }
+
+        // this should never happen
+        if (versionParts.length === 2 || versionParts.length === 3) {
+          throw undefined;
+        }
+
+        const isScoped: boolean = versionParts[1].indexOf('@') === 0;
+
+        // if it has 4 parts, then it should be unscoped
+        if (versionParts.length === 4) {
+          if (isScoped) {
+            throw undefined;
+          }
+          return versionParts[2];
+        }
+
+        // if it has 5 parts, it should be scoped
+        if (versionParts.length === 5) {
+          if (!isScoped) {
+            throw undefined;
+          }
+          return versionParts[3];
+        }
+
+        // it is too long
+        throw undefined;
+
+      } catch (error) {
         throw new Error(`Cannot parse pnpm shrinkwrap version specifier: `
           + `"${version}" for "${dependencyName}"`);
       }
-      return versionParts[2] || version;
     } else {
       return undefined;
     }
