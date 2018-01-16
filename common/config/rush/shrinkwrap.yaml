@@ -148,7 +148,7 @@ dependencies:
   sudo: 1.0.3
   tar: 3.1.15
   through2: 2.0.3
-  tslint: 5.6.0
+  tslint: 5.9.1
   tslint-microsoft-contrib: 5.0.2
   typescript: 2.4.2
   uglify-js: 3.0.28
@@ -3673,7 +3673,7 @@ packages:
     dev: false
     engines:
       node: '>=0.6'
-    peerDependencies: &ref_4
+    peerDependencies: &ref_3
       karma: '>=0.10 <=0.13'
     resolution:
       integrity: sha1-RLoZejEFTlyXOlujOUITwUKAOVg=
@@ -3688,7 +3688,7 @@ packages:
     engines:
       node: '>=0.6'
     id: registry.npmjs.org/gulp-karma/0.0.5
-    peerDependencies: *ref_4
+    peerDependencies: *ref_3
     resolution:
       integrity: sha1-RLoZejEFTlyXOlujOUITwUKAOVg=
   /gulp-match/1.0.3:
@@ -4660,7 +4660,7 @@ packages:
     dev: false
     engines:
       node: '>= 4.3 < 5.0.0 || >= 5.10'
-    peerDependencies: &ref_5
+    peerDependencies: &ref_4
       webpack: ^2.0.0 || ^3.0.0
     resolution:
       integrity: sha512-alLSEFX06ApU75sm5oWcaVNaiss/bgMRiWTct3g0P0ZZTKjR+6QiCcuVOKDI1kWJgwHEnIXsv/dWm783kPpmtw==
@@ -4675,7 +4675,7 @@ packages:
     engines:
       node: '>= 4.3 < 5.0.0 || >= 5.10'
     id: registry.npmjs.org/istanbul-instrumenter-loader/3.0.0
-    peerDependencies: *ref_5
+    peerDependencies: *ref_4
     resolution:
       integrity: sha512-alLSEFX06ApU75sm5oWcaVNaiss/bgMRiWTct3g0P0ZZTKjR+6QiCcuVOKDI1kWJgwHEnIXsv/dWm783kPpmtw==
   /istanbul-lib-coverage/1.1.1:
@@ -5153,7 +5153,7 @@ packages:
       integrity: sha1-6G961LxefGLX8uJC3ydRzPk/Rvo=
   /karma-mocha/0.2.2:
     dev: false
-    peerDependencies: &ref_6
+    peerDependencies: &ref_5
       mocha: '*'
     resolution:
       integrity: sha1-OI7ZF9oV3LGW0bkVwZNO+AMZP44=
@@ -5162,7 +5162,7 @@ packages:
       mocha: 3.4.2
     dev: false
     id: registry.npmjs.org/karma-mocha/0.2.2
-    peerDependencies: *ref_6
+    peerDependencies: *ref_5
     resolution:
       integrity: sha1-OI7ZF9oV3LGW0bkVwZNO+AMZP44=
   /karma-phantomjs-launcher/1.0.4:
@@ -5170,7 +5170,7 @@ packages:
       lodash: 4.15.0
       phantomjs-prebuilt: 2.1.16
     dev: false
-    peerDependencies: &ref_7
+    peerDependencies: &ref_6
       karma: '>=0.9'
     resolution:
       integrity: sha1-0jyjSAG9qYY60xjju0vUBisTrNI=
@@ -5181,14 +5181,14 @@ packages:
       phantomjs-prebuilt: 2.1.16
     dev: false
     id: registry.npmjs.org/karma-phantomjs-launcher/1.0.4
-    peerDependencies: *ref_7
+    peerDependencies: *ref_6
     resolution:
       integrity: sha1-0jyjSAG9qYY60xjju0vUBisTrNI=
   /karma-sinon-chai/1.2.4:
     dependencies:
       lolex: 1.6.0
     dev: false
-    peerDependencies: &ref_8
+    peerDependencies: &ref_7
       chai: ^3.2.0
       sinon: ^1.17.2
       sinon-chai: ^2.8.0
@@ -5202,7 +5202,7 @@ packages:
       sinon-chai: /sinon-chai/2.8.0/chai@3.5.0+sinon@1.17.7
     dev: false
     id: registry.npmjs.org/karma-sinon-chai/1.2.4
-    peerDependencies: *ref_8
+    peerDependencies: *ref_7
     resolution:
       integrity: sha1-/qk19ivjNmzwJxyNi+UcDHDkCrw=
   /karma-webpack/2.0.9:
@@ -5213,7 +5213,7 @@ packages:
       source-map: 0.5.7
       webpack-dev-middleware: 1.12.2
     dev: false
-    peerDependencies: &ref_10
+    peerDependencies: &ref_9
       webpack: ^1.0.0 || ^2.0.0 || ^3.0.0
     resolution:
       integrity: sha512-F1j3IG/XhiMzcunAXbWXH95uizjzr3WdTzmVWlta8xqxcCtAu9FByCb4sccIMxaVFAefpgnUW9KlCo0oLvIX6A==
@@ -5227,7 +5227,7 @@ packages:
       webpack-dev-middleware: /webpack-dev-middleware/1.12.2/webpack@3.6.0
     dev: false
     id: registry.npmjs.org/karma-webpack/2.0.9
-    peerDependencies: *ref_10
+    peerDependencies: *ref_9
     resolution:
       integrity: sha512-F1j3IG/XhiMzcunAXbWXH95uizjzr3WdTzmVWlta8xqxcCtAu9FByCb4sccIMxaVFAefpgnUW9KlCo0oLvIX6A==
   /karma/0.13.22:
@@ -7821,7 +7821,7 @@ packages:
       integrity: sha1-tf3AjxKH6hF4Yo5BXiUTK3NkbG0=
   /sinon-chai/2.8.0:
     dev: false
-    peerDependencies: &ref_9
+    peerDependencies: &ref_8
       chai: '>=1.9.2 <4'
       sinon: '>=1.4.0 <2'
     resolution:
@@ -7832,7 +7832,7 @@ packages:
       sinon: 1.17.7
     dev: false
     id: registry.npmjs.org/sinon-chai/2.8.0
-    peerDependencies: *ref_9
+    peerDependencies: *ref_8
     resolution:
       integrity: sha1-Qyqbv9Uab8AHmPTSUmqCnAYGh6w=
   /sinon/1.17.7:
@@ -8584,7 +8584,7 @@ packages:
     dependencies:
       tsutils: 2.19.0
     dev: false
-    peerDependencies: &ref_3
+    peerDependencies: &ref_2
       tslint: ^5.1.0
       typescript: ^2.1.0
     resolution:
@@ -8596,28 +8596,19 @@ packages:
       typescript: 2.4.2
     dev: false
     id: registry.npmjs.org/tslint-microsoft-contrib/5.0.2
-    peerDependencies: *ref_3
+    peerDependencies: *ref_2
     resolution:
       integrity: sha1-7MKnl/d3oS8AZpRM7AyBqefFnuk=
-  /tslint/5.6.0:
+  /tslint-microsoft-contrib/5.0.2/tslint@5.9.1+typescript@2.4.2:
     dependencies:
-      babel-code-frame: 6.26.0
-      colors: 1.1.2
-      commander: 2.13.0
-      diff: 3.4.0
-      glob: 7.1.2
-      minimatch: 3.0.4
-      resolve: 1.5.0
-      semver: 5.3.0
-      tslib: 1.8.1
-      tsutils: 2.19.0
+      tslint: /tslint/5.9.1/typescript@2.4.2
+      tsutils: /tsutils/2.19.0/typescript@2.4.2
+      typescript: 2.4.2
     dev: false
-    engines:
-      node: '>=4.1.2'
-    peerDependencies: &ref_1
-      typescript: '>=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >=2.4.0-dev || >=2.5.0-dev || >=2.6.0-dev'
+    id: registry.npmjs.org/tslint-microsoft-contrib/5.0.2
+    peerDependencies: *ref_2
     resolution:
-      integrity: sha1-CIqmxgJmIzOGULKQCCirPt9Z9s8=
+      integrity: sha1-7MKnl/d3oS8AZpRM7AyBqefFnuk=
   /tslint/5.6.0/typescript@2.4.2:
     dependencies:
       babel-code-frame: 6.26.0
@@ -8635,9 +8626,53 @@ packages:
     engines:
       node: '>=4.1.2'
     id: registry.npmjs.org/tslint/5.6.0
-    peerDependencies: *ref_1
+    peerDependencies:
+      typescript: '>=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >=2.4.0-dev || >=2.5.0-dev || >=2.6.0-dev'
     resolution:
       integrity: sha1-CIqmxgJmIzOGULKQCCirPt9Z9s8=
+  /tslint/5.9.1:
+    dependencies:
+      babel-code-frame: 6.26.0
+      builtin-modules: 1.1.1
+      chalk: 2.3.0
+      commander: 2.13.0
+      diff: 3.4.0
+      glob: 7.1.2
+      js-yaml: 3.9.1
+      minimatch: 3.0.4
+      resolve: 1.5.0
+      semver: 5.3.0
+      tslib: 1.8.1
+      tsutils: 2.19.0
+    dev: false
+    engines:
+      node: '>=4.8.0'
+    peerDependencies: &ref_11
+      typescript: '>=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >=2.4.0-dev || >=2.5.0-dev || >=2.6.0-dev || >=2.7.0-dev || >=2.8.0-dev'
+    resolution:
+      integrity: sha1-ElX4ej/1frCw4fDmEKi0dIBGya4=
+  /tslint/5.9.1/typescript@2.4.2:
+    dependencies:
+      babel-code-frame: 6.26.0
+      builtin-modules: 1.1.1
+      chalk: 2.3.0
+      commander: 2.13.0
+      diff: 3.4.0
+      glob: 7.1.2
+      js-yaml: 3.9.1
+      minimatch: 3.0.4
+      resolve: 1.5.0
+      semver: 5.3.0
+      tslib: 1.8.1
+      tsutils: /tsutils/2.19.0/typescript@2.4.2
+      typescript: 2.4.2
+    dev: false
+    engines:
+      node: '>=4.8.0'
+    id: registry.npmjs.org/tslint/5.9.1
+    peerDependencies: *ref_11
+    resolution:
+      integrity: sha1-ElX4ej/1frCw4fDmEKi0dIBGya4=
   /tsscmp/1.0.5:
     dev: false
     engines:
@@ -8648,7 +8683,7 @@ packages:
     dependencies:
       tslib: 1.8.1
     dev: false
-    peerDependencies: &ref_2
+    peerDependencies: &ref_1
       typescript: '>=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >= 2.4.0-dev || >= 2.5.0-dev || >= 2.6.0-dev || >= 2.7.0-dev || >= 2.8.0-dev'
     resolution:
       integrity: sha512-qjgvrvtzRUtOmqlZTfBFtep6s+ymuBLsHOC4ee9JNA+AZIbnR/x4C2Y7QFhOGpD2R3lDp0BBcnxb0vnMVrU7Aw==
@@ -8658,7 +8693,7 @@ packages:
       typescript: 2.4.2
     dev: false
     id: registry.npmjs.org/tsutils/2.19.0
-    peerDependencies: *ref_2
+    peerDependencies: *ref_1
     resolution:
       integrity: sha512-qjgvrvtzRUtOmqlZTfBFtep6s+ymuBLsHOC4ee9JNA+AZIbnR/x4C2Y7QFhOGpD2R3lDp0BBcnxb0vnMVrU7Aw==
   /tty-browserify/0.0.0:
@@ -9070,7 +9105,7 @@ packages:
     dev: false
     engines:
       node: '>=0.6'
-    peerDependencies: &ref_11
+    peerDependencies: &ref_10
       webpack: ^1.0.0 || ^2.0.0 || ^3.0.0
     resolution:
       integrity: sha512-FCrqPy1yy/sN6U/SaEZcHKRXGlqU0DUaEBL45jkUYoB8foVb6wCnbIJ1HKIx+qUFTW+3JpVcCJCxZ8VATL4e+A==
@@ -9086,7 +9121,7 @@ packages:
     engines:
       node: '>=0.6'
     id: registry.npmjs.org/webpack-dev-middleware/1.12.2
-    peerDependencies: *ref_11
+    peerDependencies: *ref_10
     resolution:
       integrity: sha512-FCrqPy1yy/sN6U/SaEZcHKRXGlqU0DUaEBL45jkUYoB8foVb6wCnbIJ1HKIx+qUFTW+3JpVcCJCxZ8VATL4e+A==
   /webpack-sources/1.1.0:
@@ -9617,8 +9652,8 @@ packages:
       merge2: 1.0.3
       object-assign: 4.1.1
       through2: 2.0.3
-      tslint: /tslint/5.6.0/typescript@2.4.2
-      tslint-microsoft-contrib: /tslint-microsoft-contrib/5.0.2/tslint@5.6.0+typescript@2.4.2
+      tslint: /tslint/5.9.1/typescript@2.4.2
+      tslint-microsoft-contrib: /tslint-microsoft-contrib/5.0.2/tslint@5.9.1+typescript@2.4.2
       typescript: 2.4.2
     dev: false
     name: '@rush-temp/gulp-core-build-typescript'
@@ -10087,7 +10122,7 @@ specifiers:
   sudo: ~1.0.3
   tar: ~3.1.12
   through2: ~2.0.1
-  tslint: ~5.6.0
+  tslint: ~5.9.1
   tslint-microsoft-contrib: ~5.0.2
   typescript: ~2.4.1
   uglify-js: ~3.0.28
