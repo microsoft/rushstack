@@ -67,20 +67,20 @@ export function extractVersionFromPnpmVersionSpecifier(version: string): string 
   // it had no slashes, so we know it is a version like "0.0.5"
   if (versionParts.length === 1) {
     extractedVersion = version; // e.g. "0.0.5"
-  }
+  } else {
+    const isScoped: boolean = versionParts[1].indexOf('@') === 0;
 
-  const isScoped: boolean = versionParts[1].indexOf('@') === 0;
+    // e.g. "/gulp-karma/0.0.5/karma@0.13.22"
+    // if it has 4 parts, then it should be unscoped
+    if (versionParts.length === 4 && !isScoped) {
+      extractedVersion = versionParts[2]; // e.g. "0.0.5"
+    }
 
-  // e.g. "/gulp-karma/0.0.5/karma@0.13.22"
-  // if it has 4 parts, then it should be unscoped
-  if (versionParts.length === 4 && !isScoped) {
-    extractedVersion = versionParts[2]; // e.g. "0.0.5"
-  }
-
-  // e.g. "/@ms/sp-client-utilities/3.1.1/foo@13.1.0"
-  // if it has 5 parts, it should be scoped
-  if (versionParts.length === 5 && isScoped) {
-    extractedVersion = versionParts[3]; // e.g. "3.1.1"
+    // e.g. "/@ms/sp-client-utilities/3.1.1/foo@13.1.0"
+    // if it has 5 parts, it should be scoped
+    if (versionParts.length === 5 && isScoped) {
+      extractedVersion = versionParts[3]; // e.g. "3.1.1"
+    }
   }
 
   return extractedVersion;
