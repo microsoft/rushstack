@@ -288,7 +288,7 @@ export default class PackageTypingsGenerator {
               return {
                 symbol: current,
                 importPackagePath: packagePath,
-                importPackageExportName: "*",
+                importPackageExportName: '*',
                 isAmbient: false
               };
             }
