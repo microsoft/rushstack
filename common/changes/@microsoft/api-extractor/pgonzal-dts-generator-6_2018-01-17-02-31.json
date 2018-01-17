@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "The GeneratePackageTypings feature now supports abstract classes and \"import * as X\" imports",
+      "comment": "Improve the packageTypings feature to support abstract classes and \"import * as X\" imports",
       "type": "minor"
     }
   ],
