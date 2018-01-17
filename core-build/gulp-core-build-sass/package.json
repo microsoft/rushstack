@@ -29,7 +29,7 @@
     "through2": "~2.0.1"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "4.3.2",
+    "@microsoft/node-library-build": "4.3.3",
     "@types/express": "4.0.35",
     "@types/express-serve-static-core": "4.0.41",
     "@types/gulp": "3.8.32",
