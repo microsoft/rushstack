@@ -22,6 +22,7 @@ import PrereleaseToken from '../utilities/PrereleaseToken';
 import ChangeManager from '../utilities/ChangeManager';
 import { BaseRushAction } from './BaseRushAction';
 import { Git } from '../utilities/Git';
+import VersionControl from '../../utilities/VersionControl';
 
 export default class PublishAction extends BaseRushAction {
   private _addCommitDetails: CommandLineFlagParameter;
@@ -183,39 +184,44 @@ export default class PublishAction extends BaseRushAction {
       changeManager.apply(this._apply.value);
       changeManager.updateChangelog(this._apply.value);
 
-      // Stage, commit, and push the changes to remote temp branch.
-      git.addChanges();
-      git.commit();
-      git.push(tempBranch);
+      if (VersionControl.hasUncommittedChanges()) {
+        // Stage, commit, and push the changes to remote temp branch.
+        git.addChanges();
+        git.commit();
+        git.push(tempBranch);
 
-      // Override tag parameter if there is a hotfix change.
-      for (const change of orderedChanges) {
-        if (change.changeType === ChangeType.hotfix) {
-          this._hotfixTagOverride = 'hotfix';
-          break;
-        }
-      }
-
-      // npm publish the things that need publishing.
-      for (const change of orderedChanges) {
-        if (change.changeType && change.changeType > ChangeType.dependency) {
-          const project: RushConfigurationProject | undefined = allPackages.get(change.packageName);
-          if (project) {
-            this._npmPublish(change.packageName, project.projectFolder);
+        // Override tag parameter if there is a hotfix change.
+        for (const change of orderedChanges) {
+          if (change.changeType === ChangeType.hotfix) {
+            this._hotfixTagOverride = 'hotfix';
+            break;
           }
         }
+
+        // npm publish the things that need publishing.
+        for (const change of orderedChanges) {
+          if (change.changeType && change.changeType > ChangeType.dependency) {
+            const project: RushConfigurationProject | undefined = allPackages.get(change.packageName);
+            if (project) {
+              this._npmPublish(change.packageName, project.projectFolder);
+            }
+          }
+        }
+
+        // Create and push appropriate git tags.
+        this._gitAddTags(git, orderedChanges);
+        git.push(tempBranch);
+
+        // Now merge to target branch.
+        git.checkout(this._targetBranch.value);
+        git.pull();
+        git.merge(tempBranch);
+        git.push(this._targetBranch.value);
+        git.deleteBranch(tempBranch);
+      } else {
+        git.checkout(this._targetBranch.value);
+        git.deleteBranch(tempBranch, false);
       }
-
-      // Create and push appropriate git tags.
-      this._gitAddTags(git, orderedChanges);
-      git.push(tempBranch);
-
-      // Now merge to target branch.
-      git.checkout(this._targetBranch.value);
-      git.pull();
-      git.merge(tempBranch);
-      git.push(this._targetBranch.value);
-      git.deleteBranch(tempBranch);
     }
   }
 
