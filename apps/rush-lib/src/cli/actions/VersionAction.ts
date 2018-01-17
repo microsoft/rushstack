@@ -177,7 +177,11 @@ export default class VersionAction extends BaseRushAction {
       git.pull();
       git.merge(tempBranch);
       git.push(this._targetBranch.value);
+      git.deleteBranch(tempBranch);
+    } else {
+      // skip commits
+      git.checkout(this._targetBranch.value);
+      git.deleteBranch(tempBranch, false);
     }
-    git.deleteBranch(tempBranch);
   }
 }

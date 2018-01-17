@@ -18,9 +18,11 @@ export class Git {
     PublishUtilities.execCommand(!!this._targetBranch, 'git', `merge ${branchName} --no-edit`.split(' '));
   }
 
-  public deleteBranch(branchName: string): void {
+  public deleteBranch(branchName: string, hasRemote: boolean = true): void {
     PublishUtilities.execCommand(!!this._targetBranch, 'git', `branch -d ${branchName}`.split(' '));
-    PublishUtilities.execCommand(!!this._targetBranch, 'git', `push origin --delete ${branchName}`.split(' '));
+    if (hasRemote) {
+      PublishUtilities.execCommand(!!this._targetBranch, 'git', `push origin --delete ${branchName}`.split(' '));
+    }
   }
 
   public pull(): void {
