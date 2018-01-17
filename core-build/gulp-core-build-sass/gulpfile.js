@@ -7,8 +7,7 @@ build.tslint.setConfig({
   lintConfig: {
     rules: {
       'no-duplicate-case': false,
-      'valid-typeof': false,
-      'typeof-compare': true
+      'valid-typeof': false
     }
   }
 });
