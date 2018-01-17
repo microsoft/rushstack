@@ -49,7 +49,7 @@
     "no-constant-condition": true,
     "no-construct": true,
     "no-debugger": true,
-    "no-duplicate-case": true,
+    "no-duplicate-switch-case": true,
     "no-duplicate-parameter-names": true,
     "no-duplicate-variable": true,
     "no-empty": true,
@@ -108,7 +108,6 @@
     ],
     "use-isnan": true,
     "use-named-parameter": true,
-    "valid-typeof": true,
     "variable-name": [true, "check-format", "allow-leading-underscore", "ban-keywords"],
     "whitespace": [
       true,

@@ -1,11 +1,11 @@
 {
   "changes": [
     {
-      "comment": "",
       "packageName": "@microsoft/gulp-core-build-typescript",
-      "type": "none"
+      "comment": "Upgrade TSLint and tslint-microsoft-contrib.",
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/gulp-core-build-typescript",
-  "email": "nickpape-msft@users.noreply.github.com"
+  "email": "iclanton@users.noreply.github.com"
 }
