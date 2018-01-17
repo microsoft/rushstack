@@ -2,6 +2,21 @@
   "name": "@microsoft/loader-set-webpack-public-path",
   "entries": [
     {
+      "version": "3.2.3",
+      "tag": "@microsoft/loader-set-webpack-public-path_v3.2.3",
+      "date": "Wed, 17 Jan 2018 10:49:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/set-webpack-public-path-plugin\" from `1.4.2` to `1.4.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.2` to `4.3.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.2",
       "tag": "@microsoft/loader-set-webpack-public-path_v3.2.2",
       "date": "Fri, 12 Jan 2018 03:35:22 GMT",

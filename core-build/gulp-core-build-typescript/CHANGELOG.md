@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Fri, 12 Jan 2018 03:35:22 GMT and should not be manually modified.
+This log was last generated on Wed, 17 Jan 2018 10:49:31 GMT and should not be manually modified.
+
+## 4.7.0
+Wed, 17 Jan 2018 10:49:31 GMT
+
+### Minor changes
+
+- Upgrade TSLint and tslint-microsoft-contrib.
 
 ## 4.6.0
 Fri, 12 Jan 2018 03:35:22 GMT

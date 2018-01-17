@@ -1,6 +1,11 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 12 Jan 2018 23:35:48 GMT and should not be manually modified.
+This log was last generated on Wed, 17 Jan 2018 10:49:31 GMT and should not be manually modified.
+
+## 4.2.2
+Wed, 17 Jan 2018 10:49:31 GMT
+
+*Version update only*
 
 ## 4.2.1
 Fri, 12 Jan 2018 23:35:48 GMT
