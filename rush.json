@@ -71,6 +71,12 @@
       "reviewCategory": "tests",
       "shouldPublish": false
     },
+    {
+      "packageName": "web-library-build-test",
+      "projectFolder": "build-tests/web-library-build-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
 
     // "core-build" folder (alphabetical order)
     {
@@ -141,12 +147,6 @@
       "projectFolder": "core-build/node-library-build",
       "reviewCategory": "libraries",
       "shouldPublish": true
-    },
-    {
-      "packageName": "test-web-library-build",
-      "projectFolder": "core-build/test-web-library-build",
-      "reviewCategory": "tests",
-      "shouldPublish": false
     },
     {
       "packageName": "@microsoft/web-library-build",
