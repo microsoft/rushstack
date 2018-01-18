@@ -15,7 +15,7 @@
   "dependencies": {
     "@microsoft/gulp-core-build": "3.4.3",
     "@microsoft/gulp-core-build-mocha": "3.3.3",
-    "@microsoft/gulp-core-build-typescript": "4.7.0",
+    "@microsoft/gulp-core-build-typescript": "4.7.1",
     "@types/gulp": "3.8.32",
     "@types/node": "8.5.8",
     "gulp": "~3.9.1"
