@@ -7,6 +7,7 @@ import * as path from 'path';
 /* tslint:disable:typedef */
 const prettyTime = require('pretty-hrtime');
 /* tslint:enable:typedef */
+import { IBuildConfig } from './IBuildConfig';
 import * as state from './State';
 import { getFlagValue } from './config';
 import { getConfig } from './index';
@@ -86,8 +87,6 @@ const localCache: ILocalCache = globalInstance.__loggingCache = globalInstance._
 if (!localCache.start) {
   localCache.start = process.hrtime();
 }
-
-wireUpProcessErrorHandling();
 
 function isVerbose(): boolean {
   return getFlagValue('verbose');
@@ -279,13 +278,13 @@ function exitProcess(errorCode: number): void {
   }
 }
 
-function wireUpProcessErrorHandling(): void {
+function wireUpProcessErrorHandling(shouldWarningsFailBuild: boolean | undefined): void {
   if (!wiredUpErrorHandling) {
     wiredUpErrorHandling = true;
 
     let wroteToStdErr: boolean = false;
 
-    if (getConfig().shouldWarningsFailBuild) {
+    if (shouldWarningsFailBuild) {
       const oldStdErr: Function = process.stderr.write;
       // tslint:disable-next-line:no-function-expression
       process.stderr.write = function (text: string | Buffer): boolean {
@@ -764,6 +763,7 @@ export function logEndSubtask(name: string, startTime: [number, number], errorOb
  */
 export function initialize(
   gulp: typeof Gulp,
+  config: IBuildConfig,
   gulpErrorCallback?: (err: Error) => void,
   gulpStopCallback?: (err: Error) => void
 ): void {
@@ -771,7 +771,7 @@ export function initialize(
 
   localCache.gulp = gulp;
 
-  wireUpProcessErrorHandling();
+  wireUpProcessErrorHandling(config.shouldWarningsFailBuild);
 
   localCache.gulpErrorCallback = gulpErrorCallback || (() => {
 
