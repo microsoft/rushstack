@@ -21,8 +21,8 @@ import { RushConstants } from '../../RushConstants';
 import Utilities from '../../utilities/Utilities';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import IPackageJson from '../../utilities/IPackageJson';
-import { IRushTempPackageJson } from '../utilities/base/BasePackage';
-import { BaseShrinkwrapFile } from '../utilities/base/BaseShrinkwrapFile';
+import { IRushTempPackageJson } from '../logic/base/BasePackage';
+import { BaseShrinkwrapFile } from '../logic/base/BaseShrinkwrapFile';
 
 const MAX_INSTALL_ATTEMPTS: number = 5;
 

@@ -9,13 +9,13 @@ import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import { Event } from '../../data/EventHooks';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import RushCommandLineParser from './RushCommandLineParser';
-import GitPolicy from '../utilities/GitPolicy';
-import InstallManager, { InstallType } from '../utilities/InstallManager';
-import { LinkManagerFactory } from '../utilities/LinkManagerFactory';
-import { ShrinkwrapFileFactory } from '../utilities/ShrinkwrapFileFactory';
-import { BaseLinkManager } from '../utilities/base/BaseLinkManager';
-import { BaseShrinkwrapFile } from '../utilities/base/BaseShrinkwrapFile';
-import { ApprovedPackagesChecker } from '../utilities/ApprovedPackagesChecker';
+import GitPolicy from '../logic/GitPolicy';
+import InstallManager, { InstallType } from '../logic/InstallManager';
+import { LinkManagerFactory } from '../logic/LinkManagerFactory';
+import { ShrinkwrapFileFactory } from '../logic/ShrinkwrapFileFactory';
+import { BaseLinkManager } from '../logic/base/BaseLinkManager';
+import { BaseShrinkwrapFile } from '../logic/base/BaseShrinkwrapFile';
+import { ApprovedPackagesChecker } from '../logic/ApprovedPackagesChecker';
 import { BaseRushAction } from './BaseRushAction';
 
 export default class InstallAction extends BaseRushAction {

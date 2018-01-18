@@ -24,7 +24,7 @@ import {
 
 import RushCommandLineParser from './RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
-import { TaskSelector } from '../utilities/TaskSelector';
+import { TaskSelector } from '../logic/TaskSelector';
 import { Stopwatch } from '../../utilities/Stopwatch';
 
 interface ICustomOptionInstance {

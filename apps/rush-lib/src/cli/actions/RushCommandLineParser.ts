@@ -23,7 +23,7 @@ import VersionAction from './VersionAction';
 import { CustomCommandFactory } from './CustomCommandFactory';
 import { CustomRushAction } from './CustomRushAction';
 
-import Telemetry from '../utilities/Telemetry';
+import Telemetry from '../logic/Telemetry';
 
 export default class RushCommandLineParser extends CommandLineParser {
   public telemetry: Telemetry | undefined;

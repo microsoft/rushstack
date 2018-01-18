@@ -15,13 +15,13 @@ import {
 import RushConfigurationProject from '../../data/RushConfigurationProject';
 import Npm from '../../utilities/Npm';
 import RushCommandLineParser from './RushCommandLineParser';
-import PublishUtilities from '../utilities/PublishUtilities';
-import ChangelogGenerator from '../utilities/ChangelogGenerator';
-import GitPolicy from '../utilities/GitPolicy';
-import PrereleaseToken from '../utilities/PrereleaseToken';
-import ChangeManager from '../utilities/ChangeManager';
+import PublishUtilities from '../logic/PublishUtilities';
+import ChangelogGenerator from '../logic/ChangelogGenerator';
+import GitPolicy from '../logic/GitPolicy';
+import PrereleaseToken from '../logic/PrereleaseToken';
+import ChangeManager from '../logic/ChangeManager';
 import { BaseRushAction } from './BaseRushAction';
-import { Git } from '../utilities/Git';
+import { Git } from '../logic/Git';
 import VersionControl from '../../utilities/VersionControl';
 
 export default class PublishAction extends BaseRushAction {
