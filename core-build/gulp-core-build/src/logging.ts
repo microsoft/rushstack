@@ -272,7 +272,6 @@ function _writeTaskError(e: any): void {
 }
 
 function exitProcess(errorCode: number): void {
-
   if (!localCache.watchMode) {
     process.stdout.write('', () => {
       process.exit(errorCode);
@@ -283,9 +282,22 @@ function exitProcess(errorCode: number): void {
 function wireUpProcessErrorHandling(): void {
   if (!wiredUpErrorHandling) {
     wiredUpErrorHandling = true;
+
+    const oldStdErr: Function = process.stderr.write;
+
+    let wroteToStdErr: boolean = false;
+
+    // tslint:disable-next-line:no-function-expression
+    process.stderr.write = function (text: string | Buffer): boolean {
+      if (!!text.toString()) {
+        wroteToStdErr = true;
+        return oldStdErr.apply(process.stderr, arguments);
+      }
+      return true;
+    };
+
     process.on('exit', (code: number) => {
       duringFastExit = true;
-
       if (!global['dontWatchExit']) { // tslint:disable-line:no-string-literal
         if (!localCache.wroteSummary) {
           localCache.wroteSummary = true;
@@ -296,8 +308,12 @@ function wireUpProcessErrorHandling(): void {
           process.exit(1);
         } else {
           if (localCache.exitCode !== 0) {
-            console.log(`Exiting with exit code: ${localCache.exitCode}`);
+            console.log(`Exiting with exit code: ${localCache.exitCode || 1}`);
             process.exit(localCache.exitCode);
+          } else if (wroteToStdErr) {
+            console.log(`Data written to stderr is treated as a failure.`);
+            console.log(`Exiting with exit code: 1`);
+            process.exit(1);
           }
         }
       }
