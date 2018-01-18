@@ -2,6 +2,21 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "5.2.1",
+      "tag": "@microsoft/api-extractor_v5.2.1",
+      "date": "Thu, 18 Jan 2018 00:48:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.4` to `0.4.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `2.3.3` to `2.3.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.2.0",
       "tag": "@microsoft/api-extractor_v5.2.0",
       "date": "Thu, 18 Jan 2018 00:27:23 GMT",
