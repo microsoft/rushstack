@@ -64,5 +64,5 @@
 
 # Don't allow people to merge changes to these generated files, because the result
 # may be invalid.  You need to run "rush generate" again.
-/common/npm-shrinkwrap.json  merge=binary
-/common/temp_modules/**      merge=binary
+shrinkwrap.yaml              merge=binary
+npm-shrinkwrap.json          merge=binary
