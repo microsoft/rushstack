@@ -32,6 +32,8 @@ class StreamInfo<T extends NodeJS.ReadableStream> {
 
 /**
  * A class which manages the output of multiple threads.
+ *
+ * @public
  */
 export default class StreamCollator<T extends NodeJS.ReadableStream>
   extends Stream.Readable implements NodeJS.ReadableStream {
