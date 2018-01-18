@@ -308,7 +308,7 @@ function wireUpProcessErrorHandling(shouldWarningsFailBuild: boolean | undefined
           process.exit(1);
         } else {
           if (localCache.exitCode !== 0) {
-            console.log(`Exiting with exit code: ${localCache.exitCode || 1}`);
+            console.log(`Exiting with exit code: ${localCache.exitCode}`);
             process.exit(localCache.exitCode);
           } else if (wroteToStdErr) {
             console.log(`Data written to stderr is treated as a failure.`);
