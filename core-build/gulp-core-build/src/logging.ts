@@ -186,8 +186,8 @@ function writeSummary(callback: () => void): void {
     afterStreamsFlushed(() => {
       log(gutil.colors.magenta('==================[ Finished ]=================='));
 
-      if (shouldRelogIssues && getWarnings().length) {
-        const warnings: string[] = getWarnings();
+      const warnings: string[] = getWarnings();
+      if (shouldRelogIssues) {
         for (let x: number = 0; x < warnings.length; x++) {
           console.error(gutil.colors.yellow(warnings[x]));
         }
