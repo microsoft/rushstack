@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 17 Jan 2018 10:49:31 GMT and should not be manually modified.
+This log was last generated on Thu, 18 Jan 2018 19:02:07 GMT and should not be manually modified.
+
+## 4.2.3
+Thu, 18 Jan 2018 19:02:07 GMT
+
+### Updates
+
+- Avoid git errors when there are only empty change files
 
 ## 4.2.2
 Wed, 17 Jan 2018 10:49:31 GMT

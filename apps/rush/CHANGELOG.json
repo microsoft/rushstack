@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "4.2.3",
+      "tag": "@microsoft/rush_v4.2.3",
+      "date": "Thu, 18 Jan 2018 19:02:07 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Avoid git errors when there are only empty change files"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.2.2",
       "tag": "@microsoft/rush_v4.2.2",
       "date": "Wed, 17 Jan 2018 10:49:31 GMT",
