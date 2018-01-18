@@ -9,7 +9,7 @@
     "build": "node build.js"
   },
   "dependencies": {
-    "@microsoft/api-extractor": "5.2.0",
+    "@microsoft/api-extractor": "5.2.1",
     "@types/jest": "~21.1.8",
     "@types/semver": "5.3.33",
     "@types/node": "8.5.8",

@@ -14,10 +14,10 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-core-library": "0.4.4",
-    "@microsoft/package-deps-hash": "2.2.3",
-    "@microsoft/stream-collator": "2.2.3",
-    "@microsoft/ts-command-line": "2.3.3",
+    "@microsoft/node-core-library": "0.4.5",
+    "@microsoft/package-deps-hash": "2.2.4",
+    "@microsoft/stream-collator": "2.2.4",
+    "@microsoft/ts-command-line": "2.3.4",
     "@types/fs-extra": "0.0.37",
     "@types/node": "8.5.8",
     "@types/z-schema": "3.16.31",
@@ -42,7 +42,7 @@
     "z-schema": "~3.18.3"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "4.3.3",
+    "@microsoft/node-library-build": "4.3.4",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "mocha": "~3.4.2",
