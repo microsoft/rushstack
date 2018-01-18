@@ -10,13 +10,13 @@ import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import { PackageManager } from '../../data/RushConfiguration';
 import Utilities from '../../utilities/Utilities';
 import { Stopwatch } from '../../utilities/Stopwatch';
-import InstallManager, { InstallType } from '../utilities/InstallManager';
-import { LinkManagerFactory } from '../utilities/LinkManagerFactory';
-import { BaseLinkManager } from '../utilities/base/BaseLinkManager';
+import InstallManager, { InstallType } from '../logic/InstallManager';
+import { LinkManagerFactory } from '../logic/LinkManagerFactory';
+import { BaseLinkManager } from '../logic/base/BaseLinkManager';
 import RushCommandLineParser from './RushCommandLineParser';
-import { ApprovedPackagesChecker } from '../utilities/ApprovedPackagesChecker';
-import { BaseShrinkwrapFile } from '../utilities/base/BaseShrinkwrapFile';
-import { ShrinkwrapFileFactory } from '../utilities/ShrinkwrapFileFactory';
+import { ApprovedPackagesChecker } from '../logic/ApprovedPackagesChecker';
+import { BaseShrinkwrapFile } from '../logic/base/BaseShrinkwrapFile';
+import { ShrinkwrapFileFactory } from '../logic/ShrinkwrapFileFactory';
 import { BaseRushAction } from './BaseRushAction';
 
 export default class GenerateAction extends BaseRushAction {

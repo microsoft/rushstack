@@ -23,7 +23,7 @@ import VersionControl from '../../utilities/VersionControl';
 import { ChangeFile } from '../../data/ChangeFile';
 import { BaseRushAction } from './BaseRushAction';
 import RushCommandLineParser from './RushCommandLineParser';
-import ChangeFiles from '../utilities/ChangeFiles';
+import ChangeFiles from '../logic/ChangeFiles';
 import {
   VersionPolicy,
   IndividualVersionPolicy,

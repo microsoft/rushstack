@@ -25,9 +25,9 @@ dependencies:
   '@rush-temp/rush-lib': 'file:projects/rush-lib.tgz'
   '@rush-temp/set-webpack-public-path-plugin': 'file:projects/set-webpack-public-path-plugin.tgz'
   '@rush-temp/stream-collator': 'file:projects/stream-collator.tgz'
-  '@rush-temp/test-web-library-build': 'file:projects/test-web-library-build.tgz'
   '@rush-temp/ts-command-line': 'file:projects/ts-command-line.tgz'
   '@rush-temp/web-library-build': 'file:projects/web-library-build.tgz'
+  '@rush-temp/web-library-build-test': 'file:projects/web-library-build-test.tgz'
   '@types/argparse': 1.0.33
   '@types/assertion-error': 1.0.30
   '@types/bluebird': 3.5.3
@@ -8589,7 +8589,7 @@ packages:
       integrity: sha1-aUavLR1lGnsYY7Ux1uWvpBqkTqw=
   /tslint-microsoft-contrib/5.0.2:
     dependencies:
-      tsutils: 2.19.0
+      tsutils: 2.19.1
     dev: false
     peerDependencies: &ref_3
       tslint: ^5.1.0
@@ -8599,7 +8599,7 @@ packages:
   /tslint-microsoft-contrib/5.0.2/tslint@5.9.1+typescript@2.4.2:
     dependencies:
       tslint: /tslint/5.9.1/typescript@2.4.2
-      tsutils: /tsutils/2.19.0/typescript@2.4.2
+      tsutils: /tsutils/2.19.1/typescript@2.4.2
       typescript: 2.4.2
     dev: false
     id: registry.npmjs.org/tslint-microsoft-contrib/5.0.2
@@ -8619,7 +8619,7 @@ packages:
       resolve: 1.5.0
       semver: 5.3.0
       tslib: 1.8.1
-      tsutils: 2.19.0
+      tsutils: 2.19.1
     dev: false
     engines:
       node: '>=4.8.0'
@@ -8640,7 +8640,7 @@ packages:
       resolve: 1.5.0
       semver: 5.3.0
       tslib: 1.8.1
-      tsutils: /tsutils/2.19.0/typescript@2.4.2
+      tsutils: /tsutils/2.19.1/typescript@2.4.2
       typescript: 2.4.2
     dev: false
     engines:
@@ -8655,23 +8655,23 @@ packages:
       node: '>=0.6.x'
     resolution:
       integrity: sha1-fcSjOvcVgatDN9qR2FylQn69mpc=
-  /tsutils/2.19.0:
+  /tsutils/2.19.1:
     dependencies:
       tslib: 1.8.1
     dev: false
     peerDependencies: &ref_2
       typescript: '>=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >= 2.4.0-dev || >= 2.5.0-dev || >= 2.6.0-dev || >= 2.7.0-dev || >= 2.8.0-dev'
     resolution:
-      integrity: sha512-qjgvrvtzRUtOmqlZTfBFtep6s+ymuBLsHOC4ee9JNA+AZIbnR/x4C2Y7QFhOGpD2R3lDp0BBcnxb0vnMVrU7Aw==
-  /tsutils/2.19.0/typescript@2.4.2:
+      integrity: sha512-1B3z4H4HddgzWptqLzwrJloDEsyBt8DvZhnFO14k7A4RsQL/UhEfQjD4hpcY5NpF3veBkjJhQJ8Bl7Xp96cN+A==
+  /tsutils/2.19.1/typescript@2.4.2:
     dependencies:
       tslib: 1.8.1
       typescript: 2.4.2
     dev: false
-    id: registry.npmjs.org/tsutils/2.19.0
+    id: registry.npmjs.org/tsutils/2.19.1
     peerDependencies: *ref_2
     resolution:
-      integrity: sha512-qjgvrvtzRUtOmqlZTfBFtep6s+ymuBLsHOC4ee9JNA+AZIbnR/x4C2Y7QFhOGpD2R3lDp0BBcnxb0vnMVrU7Aw==
+      integrity: sha512-1B3z4H4HddgzWptqLzwrJloDEsyBt8DvZhnFO14k7A4RsQL/UhEfQjD4hpcY5NpF3veBkjJhQJ8Bl7Xp96cN+A==
   /tty-browserify/0.0.0:
     dev: false
     resolution:
@@ -9909,18 +9909,6 @@ packages:
     resolution:
       tarball: 'file:projects/stream-collator.tgz'
     version: 0.0.0
-  'file:projects/test-web-library-build.tgz':
-    dependencies:
-      '@types/chai': 3.4.34
-      '@types/jest': 21.1.10
-      '@types/node': 8.5.8
-      chai: 3.5.0
-      gulp: 3.9.1
-    dev: false
-    name: '@rush-temp/test-web-library-build'
-    resolution:
-      tarball: 'file:projects/test-web-library-build.tgz'
-    version: 0.0.0
   'file:projects/ts-command-line.tgz':
     dependencies:
       '@microsoft/node-library-build': 4.3.3
@@ -9936,6 +9924,18 @@ packages:
     name: '@rush-temp/ts-command-line'
     resolution:
       tarball: 'file:projects/ts-command-line.tgz'
+    version: 0.0.0
+  'file:projects/web-library-build-test.tgz':
+    dependencies:
+      '@types/chai': 3.4.34
+      '@types/jest': 21.1.10
+      '@types/node': 8.5.8
+      chai: 3.5.0
+      gulp: 3.9.1
+    dev: false
+    name: '@rush-temp/web-library-build-test'
+    resolution:
+      tarball: 'file:projects/web-library-build-test.tgz'
     version: 0.0.0
   'file:projects/web-library-build.tgz':
     dependencies:
@@ -9978,9 +9978,9 @@ specifiers:
   '@rush-temp/rush-lib': 'file:./projects/rush-lib.tgz'
   '@rush-temp/set-webpack-public-path-plugin': 'file:./projects/set-webpack-public-path-plugin.tgz'
   '@rush-temp/stream-collator': 'file:./projects/stream-collator.tgz'
-  '@rush-temp/test-web-library-build': 'file:./projects/test-web-library-build.tgz'
   '@rush-temp/ts-command-line': 'file:./projects/ts-command-line.tgz'
   '@rush-temp/web-library-build': 'file:./projects/web-library-build.tgz'
+  '@rush-temp/web-library-build-test': 'file:./projects/web-library-build-test.tgz'
   '@types/argparse': ~1.0.33
   '@types/assertion-error': 1.0.30
   '@types/bluebird': 3.5.3

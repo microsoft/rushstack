@@ -1,5 +1,5 @@
 {
-  "name": "test-web-library-build",
+  "name": "web-library-build-test",
   "version": "1.0.21",
   "description": "",
   "main": "lib/test.js",
