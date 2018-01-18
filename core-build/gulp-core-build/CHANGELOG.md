@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Thu, 18 Jan 2018 00:48:06 GMT and should not be manually modified.
+This log was last generated on Thu, 18 Jan 2018 03:23:46 GMT and should not be manually modified.
+
+## 3.5.0
+Thu, 18 Jan 2018 03:23:46 GMT
+
+### Minor changes
+
+- Add a feature where when shouldWarningsFailBuild is true, then we will hook stderr and fail the build if anything consequential is written there
 
 ## 3.4.4
 Thu, 18 Jan 2018 00:48:06 GMT
