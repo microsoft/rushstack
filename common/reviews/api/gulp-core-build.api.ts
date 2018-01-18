@@ -123,7 +123,7 @@ interface IBuildConfig {
   }
   relogIssues?: boolean;
   rootPath: string;
-  shouldWarningsFailBuild?: boolean;
+  shouldWarningsFailBuild: boolean;
   showToast?: boolean;
   srcFolder: string;
   tempFolder: string;

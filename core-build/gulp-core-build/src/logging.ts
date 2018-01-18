@@ -278,7 +278,7 @@ function exitProcess(errorCode: number): void {
   }
 }
 
-function wireUpProcessErrorHandling(shouldWarningsFailBuild: boolean | undefined): void {
+function wireUpProcessErrorHandling(shouldWarningsFailBuild: boolean): void {
   if (!wiredUpErrorHandling) {
     wiredUpErrorHandling = true;
 
@@ -305,15 +305,15 @@ function wireUpProcessErrorHandling(shouldWarningsFailBuild: boolean | undefined
           console.error('Process terminated before summary could be written, possible error in async code not ' +
                         'continuing!');
           console.log('Trying to exit with exit code 1');
-          process.exit(1);
+          exitProcess(1);
         } else {
           if (localCache.exitCode !== 0) {
             console.log(`Exiting with exit code: ${localCache.exitCode}`);
-            process.exit(localCache.exitCode);
+            exitProcess(localCache.exitCode);
           } else if (wroteToStdErr) {
-            console.log(`Data written to stderr is treated as a failure.`);
+            console.error(`The build failed because a task wrote output to stderr.`);
             console.log(`Exiting with exit code: 1`);
-            process.exit(1);
+            exitProcess(1);
           }
         }
       }
@@ -793,7 +793,7 @@ export function initialize(
     writeSummary(() => {
       // error if we have any errors
       if (localCache.taskErrors > 0 ||
-        (getWarnings().length && getConfig().shouldWarningsFailBuild) ||
+        (getWarnings().length && config.shouldWarningsFailBuild) ||
         getErrors().length ||
         localCache.testsFailed > 0) {
         exitProcess(1);
