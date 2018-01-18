@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 17 Jan 2018 10:49:31 GMT and should not be manually modified.
+This log was last generated on Thu, 18 Jan 2018 00:27:23 GMT and should not be manually modified.
+
+## 5.2.0
+Thu, 18 Jan 2018 00:27:23 GMT
+
+### Minor changes
+
+- Improve the packageTypings feature to support abstract classes and "import * as X" imports
 
 ## 5.1.3
 Wed, 17 Jan 2018 10:49:31 GMT

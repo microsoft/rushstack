@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Wed, 17 Jan 2018 10:49:31 GMT and should not be manually modified.
+This log was last generated on Thu, 18 Jan 2018 00:27:23 GMT and should not be manually modified.
+
+## 4.7.1
+Thu, 18 Jan 2018 00:27:23 GMT
+
+### Patches
+
+- Remove deprecated tslint rule "typeof-compare"
 
 ## 4.7.0
 Wed, 17 Jan 2018 10:49:31 GMT
