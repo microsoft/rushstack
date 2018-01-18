@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build",
+      "comment": "If shouldWarningsFailBuild, then we will hook stderr and fail the build if anything consequential is written there",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build",
+  "email": "nickpape-msft@users.noreply.github.com"
+}
