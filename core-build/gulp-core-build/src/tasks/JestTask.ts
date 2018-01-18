@@ -189,9 +189,14 @@ export class JestTask extends GulpTask<IJestConfig> {
       jestConfig['cacheDirectory'] = this.taskConfig.cacheDirectory;
     }
 
+    // suppress 'Running coverage on untested files...' warning
+    const oldTTY: true | undefined = process.stdout.isTTY;
+    process.stdout.isTTY = undefined;
+
     Jest.runCLI(jestConfig,
       [this.buildConfig.rootPath]).then(
       (result: { results: Jest.AggregatedResult, globalConfig: Jest.GlobalConfig }) => {
+        process.stdout.isTTY = oldTTY;
         if (result.results.numFailedTests || result.results.numFailedTestSuites) {
           completeCallback(new Error('Jest tests failed'));
         } else {
@@ -202,6 +207,7 @@ export class JestTask extends GulpTask<IJestConfig> {
         }
       },
       (err) => {
+        process.stdout.isTTY = oldTTY;
         completeCallback(err);
       });
   }
