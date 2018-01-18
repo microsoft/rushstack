@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/gulp-core-build",
-      "comment": "If shouldWarningsFailBuild, then we will hook stderr and fail the build if anything consequential is written there",
+      "comment": "Add a feature where when shouldWarningsFailBuild is true, then we will hook stderr and fail the build if anything consequential is written there",
       "type": "minor"
     }
   ],
