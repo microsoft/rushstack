@@ -7,7 +7,7 @@
     "url": "https://github.com/microsoft/web-build-tools"
   },
   "main": "lib/index.js",
-  "typings": "lib/index.d.ts",
+  "typings": "dist/index-internal.d.ts",
   "license": "MIT",
   "devDependencies": {
     "@microsoft/node-library-build": "4.3.4",
