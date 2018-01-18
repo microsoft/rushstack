@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "packageName": "@microsoft/gulp-core-build-karma",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-karma",
+  "email": "pgonzal@users.noreply.github.com"
+}

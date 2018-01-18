@@ -1,5 +1,5 @@
 dependencies:
-  '@microsoft/node-library-build': 4.3.3
+  '@microsoft/node-library-build': 4.3.4
   '@rush-temp/api-documenter': 'file:projects/api-documenter.tgz'
   '@rush-temp/api-extractor': 'file:projects/api-extractor.tgz'
   '@rush-temp/api-extractor-test-01': 'file:projects/api-extractor-test-01.tgz'
@@ -157,10 +157,10 @@ dependencies:
   yargs: 4.6.0
   z-schema: 3.18.4
 packages:
-  /@microsoft/api-extractor/5.1.3:
+  /@microsoft/api-extractor/5.2.1:
     dependencies:
-      '@microsoft/node-core-library': 0.4.3
-      '@microsoft/ts-command-line': 2.3.3
+      '@microsoft/node-core-library': 0.4.5
+      '@microsoft/ts-command-line': 2.3.4
       '@types/fs-extra': 0.0.37
       '@types/node': 8.5.8
       '@types/z-schema': 3.16.31
@@ -172,22 +172,22 @@ packages:
       z-schema: 3.18.4
     dev: false
     resolution:
-      integrity: sha1-q7jgilqMKRXKr2Is6dhQVIBoOLY=
-  /@microsoft/gulp-core-build-mocha/3.3.3:
+      integrity: sha1-p2pO+QeSsruAh9v+Ix5zs/ZkKeE=
+  /@microsoft/gulp-core-build-mocha/3.3.4:
     dependencies:
-      '@microsoft/gulp-core-build': 3.4.3
+      '@microsoft/gulp-core-build': 3.4.4
       '@types/node': 8.5.8
       gulp: 3.9.1
       gulp-istanbul: 0.10.4
       gulp-mocha: 2.2.0
     dev: false
     resolution:
-      integrity: sha1-Y8PI9qs9CQufK1OWHV44qXlk5Yw=
-  /@microsoft/gulp-core-build-typescript/4.7.0:
+      integrity: sha1-Le/az6/+0f0DSRgqga5Kjbgyk+A=
+  /@microsoft/gulp-core-build-typescript/4.7.2:
     dependencies:
-      '@microsoft/api-extractor': 5.1.3
-      '@microsoft/gulp-core-build': 3.4.3
-      '@microsoft/node-core-library': 0.4.3
+      '@microsoft/api-extractor': 5.2.1
+      '@microsoft/gulp-core-build': 3.4.4
+      '@microsoft/node-core-library': 0.4.5
       '@types/fs-extra': 0.0.37
       '@types/gulp': 3.8.32
       '@types/node': 8.5.8
@@ -211,10 +211,10 @@ packages:
       typescript: 2.4.2
     dev: false
     resolution:
-      integrity: sha1-u554ZwjROWVzBGhe0SOPesy5/98=
-  /@microsoft/gulp-core-build/3.4.3:
+      integrity: sha1-FP30yFa6ZUytWEs83+m5UtViCbM=
+  /@microsoft/gulp-core-build/3.4.4:
     dependencies:
-      '@microsoft/node-core-library': 0.4.3
+      '@microsoft/node-core-library': 0.4.5
       '@types/assertion-error': 1.0.30
       '@types/chai': 3.4.34
       '@types/chalk': 0.4.31
@@ -258,8 +258,8 @@ packages:
       z-schema: 3.18.4
     dev: false
     resolution:
-      integrity: sha1-+dpQMvdnELdXAY+ZbbVSn/Wd3Dk=
-  /@microsoft/node-core-library/0.4.3:
+      integrity: sha1-FeVXASW06Z3gEd5sWs+L+5wzIP8=
+  /@microsoft/node-core-library/0.4.5:
     dependencies:
       '@types/fs-extra': 0.0.37
       '@types/node': 8.5.8
@@ -269,19 +269,19 @@ packages:
       z-schema: 3.18.4
     dev: false
     resolution:
-      integrity: sha1-o18ml57dHZOip8hTfLHugKDHRQg=
-  /@microsoft/node-library-build/4.3.3:
+      integrity: sha1-EBtIwRTITt36dS09fctGnAYbjqA=
+  /@microsoft/node-library-build/4.3.4:
     dependencies:
-      '@microsoft/gulp-core-build': 3.4.3
-      '@microsoft/gulp-core-build-mocha': 3.3.3
-      '@microsoft/gulp-core-build-typescript': 4.7.0
+      '@microsoft/gulp-core-build': 3.4.4
+      '@microsoft/gulp-core-build-mocha': 3.3.4
+      '@microsoft/gulp-core-build-typescript': 4.7.2
       '@types/gulp': 3.8.32
       '@types/node': 8.5.8
       gulp: 3.9.1
     dev: false
     resolution:
-      integrity: sha1-8zURjvjHF+8ft2HUaDgtgCgyAZw=
-  /@microsoft/ts-command-line/2.3.3:
+      integrity: sha1-GbIQMt7bCvsD402wYkx1xkI0kvE=
+  /@microsoft/ts-command-line/2.3.4:
     dependencies:
       '@types/argparse': 1.0.33
       '@types/node': 8.5.8
@@ -289,7 +289,7 @@ packages:
       colors: 1.1.2
     dev: false
     resolution:
-      integrity: sha1-b7kCJCQle2g6D8yhI4XDGTzgzk0=
+      integrity: sha1-/gA+INrnInvus5cLnQOVfgMwWbM=
   /@types/argparse/1.0.33:
     dev: false
     resolution:
@@ -9466,7 +9466,7 @@ packages:
     version: 0.0.0
   'file:projects/api-extractor.tgz':
     dependencies:
-      '@microsoft/node-library-build': 4.3.3
+      '@microsoft/node-library-build': 4.3.4
       '@types/colors': 1.1.3
       '@types/fs-extra': 0.0.37
       '@types/jest': 21.1.10
@@ -9499,7 +9499,7 @@ packages:
     version: 0.0.0
   'file:projects/gulp-core-build-karma.tgz':
     dependencies:
-      '@microsoft/node-library-build': 4.3.3
+      '@microsoft/node-library-build': 4.3.4
       '@types/bluebird': 3.5.3
       '@types/gulp': 3.8.32
       '@types/karma': 0.13.33
@@ -9530,7 +9530,7 @@ packages:
     version: 0.0.0
   'file:projects/gulp-core-build-mocha.tgz':
     dependencies:
-      '@microsoft/node-library-build': 4.3.3
+      '@microsoft/node-library-build': 4.3.4
       '@types/gulp': 3.8.32
       '@types/gulp-istanbul': 0.9.30
       '@types/gulp-mocha': 0.0.29
@@ -9548,7 +9548,7 @@ packages:
     version: 0.0.0
   'file:projects/gulp-core-build-sass.tgz':
     dependencies:
-      '@microsoft/node-library-build': 4.3.3
+      '@microsoft/node-library-build': 4.3.4
       '@types/express': 4.0.35
       '@types/express-serve-static-core': 4.0.41
       '@types/gulp': 3.8.32
@@ -9578,7 +9578,7 @@ packages:
     version: 0.0.0
   'file:projects/gulp-core-build-serve.tgz':
     dependencies:
-      '@microsoft/node-library-build': 4.3.3
+      '@microsoft/node-library-build': 4.3.4
       '@types/express': 4.0.35
       '@types/express-serve-static-core': 4.0.41
       '@types/gulp': 3.8.32
@@ -9607,7 +9607,7 @@ packages:
     version: 0.0.0
   'file:projects/gulp-core-build-typescript.tgz':
     dependencies:
-      '@microsoft/node-library-build': 4.3.3
+      '@microsoft/node-library-build': 4.3.4
       '@types/fs-extra': 0.0.37
       '@types/gulp': 3.8.32
       '@types/gulp-util': 3.0.30
@@ -9641,7 +9641,7 @@ packages:
     version: 0.0.0
   'file:projects/gulp-core-build-webpack.tgz':
     dependencies:
-      '@microsoft/node-library-build': 4.3.3
+      '@microsoft/node-library-build': 4.3.4
       '@types/gulp': 3.8.32
       '@types/node': 8.5.8
       '@types/orchestrator': 0.0.30
@@ -9659,7 +9659,7 @@ packages:
     version: 0.0.0
   'file:projects/gulp-core-build.tgz':
     dependencies:
-      '@microsoft/node-library-build': 4.3.3
+      '@microsoft/node-library-build': 4.3.4
       '@types/assertion-error': 1.0.30
       '@types/chai': 3.4.34
       '@types/chalk': 0.4.31
@@ -9764,7 +9764,7 @@ packages:
     version: 0.0.0
   'file:projects/node-core-library.tgz':
     dependencies:
-      '@microsoft/node-library-build': 4.3.3
+      '@microsoft/node-library-build': 4.3.4
       '@types/chai': 3.4.34
       '@types/fs-extra': 0.0.37
       '@types/mocha': 2.2.38
@@ -9911,7 +9911,7 @@ packages:
     version: 0.0.0
   'file:projects/ts-command-line.tgz':
     dependencies:
-      '@microsoft/node-library-build': 4.3.3
+      '@microsoft/node-library-build': 4.3.4
       '@types/argparse': 1.0.33
       '@types/colors': 1.1.3
       '@types/node': 8.5.8
@@ -9952,7 +9952,7 @@ registry: 'https://registry.npmjs.org/'
 shrinkwrapMinorVersion: 4
 shrinkwrapVersion: 3
 specifiers:
-  '@microsoft/node-library-build': 4.3.3
+  '@microsoft/node-library-build': 4.3.4
   '@rush-temp/api-documenter': 'file:./projects/api-documenter.tgz'
   '@rush-temp/api-extractor': 'file:./projects/api-extractor.tgz'
   '@rush-temp/api-extractor-test-01': 'file:./projects/api-extractor-test-01.tgz'

@@ -6,7 +6,8 @@ import * as os from 'os';
 
 /**
  * An writable interface for managing output of simultaneous processes.
- * @todo #168347: should we export a WritableStream or Buffer or similar?
+ *
+ * @public
  */
 export interface ITaskWriter {
   write(data: string): void;      // Writes a string to the buffer
@@ -38,9 +39,8 @@ enum ITaskOutputStream {
 
 /**
  * A static class which manages the output of multiple threads.
- * @todo #168348: make this class not be static
- * @todo #168349: add ability to inject stdout WritableStream
- * @todo #168350: add unit testing
+ *
+ * @public
  */
 export default class Interleaver {
   private static _tasks: Map<string, ITaskWriterInfo> = new Map<string, ITaskWriterInfo>();
