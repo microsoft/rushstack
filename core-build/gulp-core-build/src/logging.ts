@@ -283,18 +283,19 @@ function wireUpProcessErrorHandling(): void {
   if (!wiredUpErrorHandling) {
     wiredUpErrorHandling = true;
 
-    const oldStdErr: Function = process.stderr.write;
-
     let wroteToStdErr: boolean = false;
 
-    // tslint:disable-next-line:no-function-expression
-    process.stderr.write = function (text: string | Buffer): boolean {
-      if (!!text.toString()) {
-        wroteToStdErr = true;
-        return oldStdErr.apply(process.stderr, arguments);
-      }
-      return true;
-    };
+    if (getConfig().shouldWarningsFailBuild) {
+      const oldStdErr: Function = process.stderr.write;
+      // tslint:disable-next-line:no-function-expression
+      process.stderr.write = function (text: string | Buffer): boolean {
+        if (!!text.toString()) {
+          wroteToStdErr = true;
+          return oldStdErr.apply(process.stderr, arguments);
+        }
+        return true;
+      };
+    }
 
     process.on('exit', (code: number) => {
       duringFastExit = true;
