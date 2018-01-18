@@ -1,4 +1,22 @@
 // @public
+class AbstractClass {
+  // (undocumented)
+  abstract test(): void;
+}
+
+// @public
+class AbstractClass2 {
+  // (undocumented)
+  abstract test2(): void;
+}
+
+// @public
+class AbstractClass3 {
+  // (undocumented)
+  abstract test3(): void;
+}
+
+// @public
 class AmbientConsumer {
   builtinDefinition1(): Map<string, string>;
   builtinDefinition2(): Promise<void>;

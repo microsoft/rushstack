@@ -12,3 +12,4 @@
 
 export { SubclassWithImport } from './SubclassWithImport';
 
+export * from './TypeFromImportedModule';
