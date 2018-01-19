@@ -167,14 +167,17 @@ export default class RushConfiguration {
     // then the schema may have changed. This should no longer be a problem after Rush 4.0 and the C2R wrapper,
     // but we'll validate anyway.
     const expectedRushVersion: string = rushConfigurationJson.rushVersion;
+
+    const rushJsonBaseName: string = path.basename(rushJsonFilename);
+
     // If the version is missing or malformed, fall through and let the schema handle it.
     if (expectedRushVersion && semver.valid(expectedRushVersion)) {
       if (semver.lt(Rush.version, expectedRushVersion)) {
-        throw new Error(`Your rush tool is version ${Rush.version}, but rush.json ` +
-          `requires version ${rushConfigurationJson.rushVersion}. To upgrade, ` +
-          `run "npm install @microsoft/rush -g".`);
+        throw new Error(`Unable to load ${rushJsonBaseName} because its RushVersion is`
+          + ` ${rushConfigurationJson.rushVersion}, whereas @microsoft/rush-lib is version ${Rush.version}.`
+          + ` Consider upgrading the library.`);
       } else if (semver.lt(expectedRushVersion, MINIMUM_SUPPORTED_RUSH_JSON_VERSION)) {
-        throw new Error(`rush.json is version ${expectedRushVersion}, which is too old for this tool. ` +
+        throw new Error(`${rushJsonBaseName} is version ${expectedRushVersion}, which is too old for this tool. ` +
           `The minimum supported version is ${MINIMUM_SUPPORTED_RUSH_JSON_VERSION}.`);
       }
     }
