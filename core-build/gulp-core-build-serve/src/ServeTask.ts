@@ -16,6 +16,18 @@ import {
   ICertificate
 } from './certificates';
 
+/* Monkey-patch the connect-livereload library to provide a default hostname
+ * If this is not patched, on node 8, you get an error:
+ * TypeError: Cannot read property 'split' of undefined
+ * at Object.livereload [as handle]
+ * (Z:\wbt\1\common\temp\node_modules\.registry.npmjs.org\connect-livereload\0.5.4\node_modules\connect-livereload\index.js:93:49)
+ */
+const livereload = require('connect-livereload');
+require.cache[require.resolve('connect-livereload')].exports = function (opt) {
+  opt.hostname = 'localhost';
+  return livereload(opt);
+};
+
 export interface IServeTaskConfig {
   /**
    * API server configuration
@@ -102,6 +114,7 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
   }
 
   public executeTask(gulp: typeof Gulp, completeCallback?: (error?: string) => void): void {
+
     /* tslint:disable:typedef */
     const gulpConnect = require('gulp-connect');
     const open = require('gulp-open');
