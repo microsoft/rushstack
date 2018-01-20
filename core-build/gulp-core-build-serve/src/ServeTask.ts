@@ -293,23 +293,26 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
    * Workaround for loading gulp-connect, which automatically uses http2 if it
    * can require() a module called 'http2'
    *
+   * https://github.com/AveVlad/gulp-connect/issues/246
+   *
    * In versions of NodeJS < 8:
    *   'http2' would have to be a module in the node_modules folder.
    *   We did not provide this normally, so most of the time nobody used http2 with gulp serve.
    *
    * However, in versions of NodeJS >= 8:
    *   They provide a built-in module called 'http2', which is experimental and unstable
-   *   The built in module is preferred unless the an environment variable is set: NODE_NO_HTTP2=1
+   *   The built-in module is preferred unless an environment variable is set: NODE_NO_HTTP2=1
    *
-   * We don't want people to have to change environment variables to run our stuff, nor
-   * do we want people on Node8 using an experimental version of http2 that may break.
+   * We don't want to enforce environmental requirements, nor
+   * do we want to support a toolchain that relies on an experimental API.
    *
-   * Therefore, we will insert a dummy export into the require cache which is undefined.
-   * This will trick gulp-connect into thinking that HTTP2 is never available, which will make
-   * things work as they always did.
+   * Until gulp-connect provides a way to disable HTTP2, we're using this workaround:
+   * Inject a falsey value into the require() cache, require gulp-connect,
+   * then restore the old cache state.
    *
-   * However, this will  using Node < 8, who also had a module called 'http2' in their
-   * node_modules
+   * As a consequence, this approach will prevent "gulp-connect" from using http2 in
+   * environments with Node < 8. This is intentional, because we don't see a reason to
+   * support http2 for serving localhost scripts.
    */
   // tslint:disable-next-line:no-any
   private _loadGulpConnect(): any {
@@ -336,12 +339,12 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
       // restore the old cache value
       require.cache[http2CacheKey] = http2CacheObject;
     } else {
-      // node 8 or http2 is not in cache, insert a blank record into cache
+      // node 8 or http2 is not in cache, insert a module with no exports into cache
       require.cache[http2CacheKey] = { exports: undefined };
 
       gulpConnect = require('gulp-connect');
 
-      // remove blank record from cache
+      // remove module with no exports from cache
       delete require.cache[http2CacheKey];
     }
     /* tslint:enable:typedef */
