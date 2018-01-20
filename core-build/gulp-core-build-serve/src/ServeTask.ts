@@ -102,62 +102,9 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
   }
 
   public executeTask(gulp: typeof Gulp, completeCallback?: (error?: string) => void): void {
-    /*
-     * Workaround for loading gulp-connect, which automatically uses http2 if it
-     * can require() a module called 'http2'
-     *
-     * In versions of NodeJS < 8:
-     *   'http2' would have to be a module in the node_modules folder.
-     *   We did not provide this normally, so most of the time nobody used http2 with gulp serve.
-     *
-     * However, in versions of NodeJS >= 8:
-     *   They provide a built-in module called 'http2', which is experimental and unstable
-     *   The built in module is preferred unless the an environment variable is set: NODE_NO_HTTP2=1
-     *
-     * We don't want people to have to change environment variables to run our stuff, nor
-     * do we want people on Node8 using an experimental version of http2 that may break.
-     *
-     * Therefore, we will insert a dummy export into the require cache which is undefined.
-     * This will trick gulp-connect into thinking that HTTP2 is never available, which will make
-     * things work as they always did.
-     *
-     * However, this will  using Node < 8, who also had a module called 'http2' in their
-     * node_modules
-     */
-
-    // this will raise an exception if it can't find http2,
-    // which happens if we are on Node6 and 'http2' has not been required yet
-    let http2ResolvePath: string | undefined = undefined;
-    try {
-      http2ResolvePath = require.resolve('http2');
-    } catch (exception) {
-      // no-op
-    }
 
     /* tslint:disable:typedef */
-    let gulpConnect;
-
-    // if http2 is somewhere in the cache
-    if (Object.keys(require.cache).indexOf(http2ResolvePath) !== -1) {
-      // store the old exports
-      const http2CacheObject = require.cache.http2;
-      const oldHttp2Exports = http2CacheObject.exports;
-      http2CacheObject.exports = undefined;
-
-      gulpConnect = require('gulp-connect');
-
-      // restore the old exports
-      http2CacheObject.exports = oldHttp2Exports;
-    } else {
-      // http2 doesn't exist in the cache, so insert a dummy object into cache
-      require.cache.http2 = { exports: undefined };
-
-      gulpConnect = require('gulp-connect');
-
-      // remove dummy from cache
-      delete require.cache.http2;
-    }
-
+    const gulpConnect = this._loadGulpConnect();
     const open = require('gulp-open');
     const http = require('http');
     const https = require('https');
@@ -340,5 +287,64 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
     } else {
       return undefined;
     }
+  }
+
+  /**
+   * Workaround for loading gulp-connect, which automatically uses http2 if it
+   * can require() a module called 'http2'
+   *
+   * In versions of NodeJS < 8:
+   *   'http2' would have to be a module in the node_modules folder.
+   *   We did not provide this normally, so most of the time nobody used http2 with gulp serve.
+   *
+   * However, in versions of NodeJS >= 8:
+   *   They provide a built-in module called 'http2', which is experimental and unstable
+   *   The built in module is preferred unless the an environment variable is set: NODE_NO_HTTP2=1
+   *
+   * We don't want people to have to change environment variables to run our stuff, nor
+   * do we want people on Node8 using an experimental version of http2 that may break.
+   *
+   * Therefore, we will insert a dummy export into the require cache which is undefined.
+   * This will trick gulp-connect into thinking that HTTP2 is never available, which will make
+   * things work as they always did.
+   *
+   * However, this will  using Node < 8, who also had a module called 'http2' in their
+   * node_modules
+   */
+  // tslint:disable-next-line:no-any
+  private _loadGulpConnect(): any {
+    // this will raise an exception if it can't find http2,
+    // which happens if we are on Node6 and 'http2' has not been required yet
+    let http2CacheKey: string = 'http2';
+    try {
+      http2CacheKey = require.resolve('http2');
+    } catch (exception) {
+      // no-op
+    }
+
+    /* tslint:disable:typedef */
+    let gulpConnect;
+
+    // node 6 and http2 is in cache
+    if (Object.keys(require.cache).indexOf(http2CacheKey) !== -1) {
+      // store the old cache value
+      const http2CacheObject = require.cache[http2CacheKey];
+      require.cache[http2CacheKey] = { exports: undefined };
+
+      gulpConnect = require('gulp-connect');
+
+      // restore the old cache value
+      require.cache[http2CacheKey] = http2CacheObject;
+    } else {
+      // node 8 or http2 is not in cache, insert a blank record into cache
+      require.cache[http2CacheKey] = { exports: undefined };
+
+      gulpConnect = require('gulp-connect');
+
+      // remove blank record from cache
+      delete require.cache[http2CacheKey];
+    }
+    /* tslint:enable:typedef */
+    return gulpConnect;
   }
 }
