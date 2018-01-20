@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "4.2.7",
+      "tag": "@microsoft/gulp-core-build-sass_v4.2.7",
+      "date": "Sat, 20 Jan 2018 02:39:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove unused dependencies"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.2.6",
       "tag": "@microsoft/gulp-core-build-sass_v4.2.6",
       "date": "Thu, 18 Jan 2018 03:23:46 GMT",

@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-serve",
   "entries": [
     {
+      "version": "3.2.6",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.6",
+      "date": "Sat, 20 Jan 2018 02:39:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue with gulp serve when serving via https on Node8"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.5",
       "tag": "@microsoft/gulp-core-build-serve_v3.2.5",
       "date": "Thu, 18 Jan 2018 03:23:46 GMT",
