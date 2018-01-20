@@ -20,10 +20,11 @@ import {
  * If this is not patched, on node 8, you get an error:
  * TypeError: Cannot read property 'split' of undefined
  * at Object.livereload [as handle]
- * (Z:\wbt\1\common\temp\node_modules\.registry.npmjs.org\connect-livereload\0.5.4\node_modules\connect-livereload\index.js:93:49)
+ * (...\connect-livereload\0.5.4\node_modules\connect-livereload\index.js:93:49)
  */
-const livereload = require('connect-livereload');
-require.cache[require.resolve('connect-livereload')].exports = function (opt) {
+const livereload: Function = require('connect-livereload');
+// tslint:disable-next-line:no-function-expression no-any
+require.cache[require.resolve('connect-livereload')].exports = function (opt: any): Function {
   opt.hostname = 'localhost';
   return livereload(opt);
 };
