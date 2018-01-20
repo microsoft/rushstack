@@ -76,7 +76,6 @@ dependencies:
   chai: 3.5.0
   chalk: 2.1.0
   colors: 1.1.2
-  connect-livereload: 0.5.4
   deasync: 0.1.12
   del: 2.2.2
   end-of-stream: 1.1.0
@@ -9614,7 +9613,6 @@ packages:
       '@types/through2': 2.0.32
       '@types/vinyl': 1.2.30
       chalk: 2.1.0
-      connect-livereload: 0.5.4
       deasync: 0.1.12
       express: 4.16.2
       gulp: 3.9.1
@@ -10052,7 +10050,6 @@ specifiers:
   chai: ~3.5.0
   chalk: ~2.1.0
   colors: ~1.1.2
-  connect-livereload: ^0.5.4
   deasync: ~0.1.7
   del: ^2.2.2
   end-of-stream: ~1.1.0
