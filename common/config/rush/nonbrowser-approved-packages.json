@@ -110,10 +110,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "connect-livereload",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "deasync",
       "allowedCategories": [ "libraries" ]
     },

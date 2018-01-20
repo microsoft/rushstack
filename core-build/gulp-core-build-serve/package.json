@@ -20,7 +20,6 @@
     "express": "~4.16.2",
     "gulp": "~3.9.1",
     "gulp-connect": "~5.2.0",
-    "connect-livereload": "^0.5.4",
     "gulp-open": "~2.0.0",
     "gulp-util": "~3.0.7",
     "node-forge": "~0.7.1",
