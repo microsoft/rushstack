@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 18 Jan 2018 19:02:07 GMT and should not be manually modified.
+This log was last generated on Sun, 21 Jan 2018 06:33:59 GMT and should not be manually modified.
+
+## 4.2.4
+Sun, 21 Jan 2018 06:33:59 GMT
+
+### Updates
+
+- Improve the error message when loading rush.json from a newer release
 
 ## 4.2.3
 Thu, 18 Jan 2018 19:02:07 GMT

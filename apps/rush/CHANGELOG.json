@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "4.2.4",
+      "tag": "@microsoft/rush_v4.2.4",
+      "date": "Sun, 21 Jan 2018 06:33:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve the error message when loading rush.json from a newer release"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.2.3",
       "tag": "@microsoft/rush_v4.2.3",
       "date": "Thu, 18 Jan 2018 19:02:07 GMT",
