@@ -2,6 +2,75 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "4.2.7",
+      "tag": "@microsoft/gulp-core-build-sass_v4.2.7",
+      "date": "Sat, 20 Jan 2018 02:39:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove unused dependencies"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.2.6",
+      "tag": "@microsoft/gulp-core-build-sass_v4.2.6",
+      "date": "Thu, 18 Jan 2018 03:23:46 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.4.4` to `3.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.7.23` to `1.7.24`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.2.5",
+      "tag": "@microsoft/gulp-core-build-sass_v4.2.5",
+      "date": "Thu, 18 Jan 2018 00:48:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.4.3` to `3.4.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.7.22` to `1.7.23`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.2.4",
+      "tag": "@microsoft/gulp-core-build-sass_v4.2.4",
+      "date": "Thu, 18 Jan 2018 00:27:23 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove deprecated tslint rule \"typeof-compare\""
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.2.3",
+      "tag": "@microsoft/gulp-core-build-sass_v4.2.3",
+      "date": "Wed, 17 Jan 2018 10:49:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.4.2` to `3.4.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.7.21` to `1.7.22`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.2.2",
       "tag": "@microsoft/gulp-core-build-sass_v4.2.2",
       "date": "Fri, 12 Jan 2018 03:35:22 GMT",

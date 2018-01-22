@@ -1,13 +1,13 @@
 {
   "name": "@microsoft/ts-command-line",
-  "version": "2.3.2",
+  "version": "2.3.5",
   "description": "An object-oriented command-line parser for TypeScript",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/web-build-tools"
   },
   "main": "lib/index.js",
-  "typings": "lib/index.d.ts",
+  "typings": "dist/index-internal.d.ts",
   "scripts": {
     "build": "gulp test --clean"
   },
@@ -23,6 +23,6 @@
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "mocha": "~3.4.2",
-    "@microsoft/node-library-build": "4.3.2"
+    "@microsoft/node-library-build": "4.3.4"
   }
 }

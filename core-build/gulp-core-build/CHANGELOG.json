@@ -2,6 +2,47 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.5.0",
+      "tag": "@microsoft/gulp-core-build_v3.5.0",
+      "date": "Thu, 18 Jan 2018 03:23:46 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a feature where when shouldWarningsFailBuild is true, then we will hook stderr and fail the build if anything consequential is written there"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.5` to `0.4.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.4",
+      "tag": "@microsoft/gulp-core-build_v3.4.4",
+      "date": "Thu, 18 Jan 2018 00:48:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.4` to `0.4.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.3",
+      "tag": "@microsoft/gulp-core-build_v3.4.3",
+      "date": "Wed, 17 Jan 2018 10:49:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.2` to `0.4.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.4.2",
       "tag": "@microsoft/gulp-core-build_v3.4.2",
       "date": "Fri, 12 Jan 2018 03:35:22 GMT",

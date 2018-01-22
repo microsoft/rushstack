@@ -9,7 +9,7 @@ import {
 } from '@microsoft/ts-command-line';
 
 import RushConfiguration from '../../data/RushConfiguration';
-import EventHooksManager from '../utilities/EventHooksManager';
+import EventHooksManager from '../logic/EventHooksManager';
 
 /**
  * The base Rush action that all Rush actions should extend.

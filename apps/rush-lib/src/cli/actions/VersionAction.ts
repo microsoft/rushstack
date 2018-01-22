@@ -13,10 +13,10 @@ import Utilities from '../../utilities/Utilities';
 import VersionControl from '../../utilities/VersionControl';
 import { VersionMismatchFinder } from '../../data/VersionMismatchFinder';
 import RushCommandLineParser from './RushCommandLineParser';
-import GitPolicy from '../utilities/GitPolicy';
+import GitPolicy from '../logic/GitPolicy';
 import { BaseRushAction } from './BaseRushAction';
-import { VersionManager } from '../utilities/VersionManager';
-import { Git } from '../utilities/Git';
+import { VersionManager } from '../logic/VersionManager';
+import { Git } from '../logic/Git';
 
 export default class VersionAction extends BaseRushAction {
   private _parser: RushCommandLineParser;
@@ -177,7 +177,11 @@ export default class VersionAction extends BaseRushAction {
       git.pull();
       git.merge(tempBranch);
       git.push(this._targetBranch.value);
+      git.deleteBranch(tempBranch);
+    } else {
+      // skip commits
+      git.checkout(this._targetBranch.value);
+      git.deleteBranch(tempBranch, false);
     }
-    git.deleteBranch(tempBranch);
   }
 }

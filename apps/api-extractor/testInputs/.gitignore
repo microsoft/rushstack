@@ -1,4 +1,0 @@
-# Don't ignore the these folders when they are test inputs
-
-!node_modules
-!dist

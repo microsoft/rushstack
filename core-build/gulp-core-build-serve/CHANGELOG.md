@@ -1,6 +1,28 @@
 # Change Log - @microsoft/gulp-core-build-serve
 
-This log was last generated on Fri, 12 Jan 2018 03:35:22 GMT and should not be manually modified.
+This log was last generated on Sat, 20 Jan 2018 02:39:16 GMT and should not be manually modified.
+
+## 3.2.6
+Sat, 20 Jan 2018 02:39:16 GMT
+
+### Patches
+
+- Fix an issue with gulp serve when serving via https on Node8
+
+## 3.2.5
+Thu, 18 Jan 2018 03:23:46 GMT
+
+*Version update only*
+
+## 3.2.4
+Thu, 18 Jan 2018 00:48:06 GMT
+
+*Version update only*
+
+## 3.2.3
+Wed, 17 Jan 2018 10:49:31 GMT
+
+*Version update only*
 
 ## 3.2.2
 Fri, 12 Jan 2018 03:35:22 GMT

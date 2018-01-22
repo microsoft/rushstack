@@ -350,7 +350,7 @@ export function initialize(gulp: typeof Gulp): void {
     }
   }
 
-  initializeLogging(gulp, undefined, undefined);
+  initializeLogging(gulp, getConfig(), undefined, undefined);
 
   Object.keys(_taskMap).forEach(taskName => _registerTask(gulp, taskName, _taskMap[taskName]));
 

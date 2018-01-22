@@ -2,6 +2,42 @@
   "name": "@microsoft/resolve-chunk-plugin",
   "entries": [
     {
+      "version": "1.0.22",
+      "tag": "@microsoft/resolve-chunk-plugin_v1.0.22",
+      "date": "Thu, 18 Jan 2018 03:23:46 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.4` to `4.3.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.21",
+      "tag": "@microsoft/resolve-chunk-plugin_v1.0.21",
+      "date": "Thu, 18 Jan 2018 00:48:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.3` to `4.3.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.20",
+      "tag": "@microsoft/resolve-chunk-plugin_v1.0.20",
+      "date": "Wed, 17 Jan 2018 10:49:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.2` to `4.3.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.19",
       "tag": "@microsoft/resolve-chunk-plugin_v1.0.19",
       "date": "Fri, 12 Jan 2018 03:35:22 GMT",

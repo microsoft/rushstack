@@ -7,6 +7,7 @@ import * as path from 'path';
 /* tslint:disable:typedef */
 const prettyTime = require('pretty-hrtime');
 /* tslint:enable:typedef */
+import { IBuildConfig } from './IBuildConfig';
 import * as state from './State';
 import { getFlagValue } from './config';
 import { getConfig } from './index';
@@ -86,8 +87,6 @@ const localCache: ILocalCache = globalInstance.__loggingCache = globalInstance._
 if (!localCache.start) {
   localCache.start = process.hrtime();
 }
-
-wireUpProcessErrorHandling();
 
 function isVerbose(): boolean {
   return getFlagValue('verbose');
@@ -187,8 +186,8 @@ function writeSummary(callback: () => void): void {
     afterStreamsFlushed(() => {
       log(gutil.colors.magenta('==================[ Finished ]=================='));
 
-      if (shouldRelogIssues && getWarnings().length) {
-        const warnings: string[] = getWarnings();
+      const warnings: string[] = getWarnings();
+      if (shouldRelogIssues) {
         for (let x: number = 0; x < warnings.length; x++) {
           console.error(gutil.colors.yellow(warnings[x]));
         }
@@ -272,7 +271,6 @@ function _writeTaskError(e: any): void {
 }
 
 function exitProcess(errorCode: number): void {
-
   if (!localCache.watchMode) {
     process.stdout.write('', () => {
       process.exit(errorCode);
@@ -280,12 +278,26 @@ function exitProcess(errorCode: number): void {
   }
 }
 
-function wireUpProcessErrorHandling(): void {
+function wireUpProcessErrorHandling(shouldWarningsFailBuild: boolean): void {
   if (!wiredUpErrorHandling) {
     wiredUpErrorHandling = true;
+
+    let wroteToStdErr: boolean = false;
+
+    if (shouldWarningsFailBuild) {
+      const oldStdErr: Function = process.stderr.write;
+      // tslint:disable-next-line:no-function-expression
+      process.stderr.write = function (text: string | Buffer): boolean {
+        if (!!text.toString()) {
+          wroteToStdErr = true;
+          return oldStdErr.apply(process.stderr, arguments);
+        }
+        return true;
+      };
+    }
+
     process.on('exit', (code: number) => {
       duringFastExit = true;
-
       if (!global['dontWatchExit']) { // tslint:disable-line:no-string-literal
         if (!localCache.wroteSummary) {
           localCache.wroteSummary = true;
@@ -293,11 +305,15 @@ function wireUpProcessErrorHandling(): void {
           console.error('Process terminated before summary could be written, possible error in async code not ' +
                         'continuing!');
           console.log('Trying to exit with exit code 1');
-          process.exit(1);
+          exitProcess(1);
         } else {
           if (localCache.exitCode !== 0) {
             console.log(`Exiting with exit code: ${localCache.exitCode}`);
-            process.exit(localCache.exitCode);
+            exitProcess(localCache.exitCode);
+          } else if (wroteToStdErr) {
+            console.error(`The build failed because a task wrote output to stderr.`);
+            console.log(`Exiting with exit code: 1`);
+            exitProcess(1);
           }
         }
       }
@@ -747,6 +763,7 @@ export function logEndSubtask(name: string, startTime: [number, number], errorOb
  */
 export function initialize(
   gulp: typeof Gulp,
+  config: IBuildConfig,
   gulpErrorCallback?: (err: Error) => void,
   gulpStopCallback?: (err: Error) => void
 ): void {
@@ -754,7 +771,7 @@ export function initialize(
 
   localCache.gulp = gulp;
 
-  wireUpProcessErrorHandling();
+  wireUpProcessErrorHandling(config.shouldWarningsFailBuild);
 
   localCache.gulpErrorCallback = gulpErrorCallback || (() => {
 
@@ -776,7 +793,7 @@ export function initialize(
     writeSummary(() => {
       // error if we have any errors
       if (localCache.taskErrors > 0 ||
-        (getWarnings().length && getConfig().shouldWarningsFailBuild) ||
+        (getWarnings().length && config.shouldWarningsFailBuild) ||
         getErrors().length ||
         localCache.testsFailed > 0) {
         exitProcess(1);

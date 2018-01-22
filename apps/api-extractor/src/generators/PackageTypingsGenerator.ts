@@ -172,6 +172,25 @@ export default class PackageTypingsGenerator {
   }
 
   /**
+   * Does a depth-first search of the children of the specified node.  Returns the first child
+   * with the specified kind, or undefined if there is no match.
+   */
+  private static _findFirstChildNode<T extends ts.Node>(node: ts.Node, kindToMatch: ts.SyntaxKind): T | undefined {
+    for (const child of node.getChildren()) {
+      if (child.kind === kindToMatch) {
+        return child as T;
+      }
+
+      const recursiveMatch: T | undefined = this._findFirstChildNode(child, kindToMatch);
+      if (recursiveMatch) {
+        return recursiveMatch;
+      }
+    }
+
+    return undefined;
+  }
+
+  /**
    * For the given symbol, follow imports and type alias to find the symbol that represents
    * the original definition.
    */
@@ -185,63 +204,39 @@ export default class PackageTypingsGenerator {
     while (true) { // tslint:disable-line:no-constant-condition
 
       for (const declaration of current.declarations || []) {
+        // 1. Check for any signs that this is not an ambient definition
         if (declaration.kind === ts.SyntaxKind.ExportSpecifier
           || declaration.kind === ts.SyntaxKind.ExportAssignment) {
           isAmbient = false;
-          break;
         }
 
         const modifiers: ts.ModifierFlags = ts.getCombinedModifierFlags(declaration);
         if (modifiers & (ts.ModifierFlags.Export | ts.ModifierFlags.ExportDefault)) {
-            isAmbient = false;
-            break;
+          isAmbient = false;
+        }
+
+        // 2. Check for any signs that this was imported from an external package
+        let result: IFollowAliasesResult | undefined;
+
+        result = PackageTypingsGenerator._followAliasesForExportDeclaration(declaration, current);
+        if (result) {
+          return result;
+        }
+
+        result = PackageTypingsGenerator._followAliasesForImportDeclaration(declaration, current);
+        if (result) {
+          return result;
         }
       }
 
       if (!(current.flags & ts.SymbolFlags.Alias)) {
         break;
       }
+
       const currentAlias: ts.Symbol = TypeScriptHelpers.getImmediateAliasedSymbol(current, typeChecker);
       // Stop if we reach the end of the chain
       if (!currentAlias || currentAlias === current) {
         break;
-      }
-
-      // Is it an export declaration?
-      if (currentAlias.declarations) {
-        // Example: " ExportName as RenamedName"
-        const exportSpecifier: ts.ExportSpecifier = currentAlias.declarations[0] as ts.ExportSpecifier;
-
-        const exportDeclaration: ts.ExportDeclaration | undefined
-          = PackageTypingsGenerator._matchAncestor<ts.ExportDeclaration>(exportSpecifier,
-          [ts.SyntaxKind.ExportDeclaration, ts.SyntaxKind.NamedExports, ts.SyntaxKind.ExportSpecifier]);
-
-        if (exportDeclaration && exportDeclaration.moduleSpecifier) {
-          // Examples:
-          //    " '@microsoft/sp-lodash-subset'"
-          //    " "lodash/has""
-          //    " './MyClass'"
-          const moduleSpecifierText: string = exportDeclaration.moduleSpecifier.getFullText();
-
-          // Remove quotes/whitespace
-          const moduleSpecifier: string = moduleSpecifierText
-            .replace(/^\s*['"]/, '')
-            .replace(/['"]\s*$/, '');
-
-          // Does it start with something like "./"?
-          // If not, then assume it's an import from an external package
-          if (!/^\.\//.test(moduleSpecifier)) {
-            const importPackageExportName: string =
-              (exportSpecifier.propertyName || exportSpecifier.name).getText();
-
-            return {
-              symbol: current,
-              importPackagePath: moduleSpecifier,
-              importPackageExportName: importPackageExportName,
-              isAmbient: false
-            };
-          }
-        }
       }
 
       current = currentAlias;
@@ -253,6 +248,118 @@ export default class PackageTypingsGenerator {
       importPackageExportName: undefined,
       isAmbient: isAmbient
     };
+  }
+
+  /**
+   * Helper function for _followAliases(), for handling ts.ExportDeclaration patterns
+   */
+  private static _followAliasesForExportDeclaration(declaration: ts.Declaration,
+    symbol: ts.Symbol): IFollowAliasesResult | undefined {
+
+    // EXAMPLE:
+    // "export { A } from './file-a';"
+    //
+    // ExportDeclaration:
+    //   ExportKeyword:  pre=[export] sep=[ ]
+    //   NamedExports:
+    //     FirstPunctuation:  pre=[{] sep=[ ]
+    //     SyntaxList:
+    //       ExportSpecifier:  <------------- declaration
+    //         Identifier:  pre=[A] sep=[ ]
+    //     CloseBraceToken:  pre=[}] sep=[ ]
+    //   FromKeyword:  pre=[from] sep=[ ]
+    //   StringLiteral:  pre=['./file-a']
+    //   SemicolonToken:  pre=[;]
+    const exportDeclaration: ts.ExportDeclaration | undefined
+      = PackageTypingsGenerator._matchAncestor<ts.ExportDeclaration>(declaration,
+      [ts.SyntaxKind.ExportDeclaration, ts.SyntaxKind.NamedExports, ts.SyntaxKind.ExportSpecifier]);
+
+    if (exportDeclaration && exportDeclaration.moduleSpecifier) {
+      // Examples:
+      //    " '@microsoft/sp-lodash-subset'"
+      //    " "lodash/has""
+      const packagePath: string | undefined = PackageTypingsGenerator._getPackagePathFromModuleSpecifier(
+        exportDeclaration.moduleSpecifier);
+
+      if (packagePath) {
+        // Example: " ExportName as RenamedName"
+        const exportSpecifier: ts.ExportSpecifier = declaration as ts.ExportSpecifier;
+
+        const importPackageExportName: string =
+          (exportSpecifier.propertyName || exportSpecifier.name).getText();
+
+        return {
+          symbol: symbol,
+          importPackagePath: packagePath,
+          importPackageExportName: importPackageExportName.trim(),
+          isAmbient: false
+        };
+      }
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Helper function for _followAliases(), for handling ts.ImportDeclaration patterns
+   */
+  private static _followAliasesForImportDeclaration(declaration: ts.Declaration,
+    symbol: ts.Symbol): IFollowAliasesResult | undefined {
+
+    // EXAMPLE:
+    // "import * as theLib from 'the-lib';"
+    //
+    // ImportDeclaration:
+    //   ImportKeyword:  pre=[import] sep=[ ]
+    //   ImportClause:
+    //     NamespaceImport:  <------------- declaration
+    //       AsteriskToken:  pre=[*] sep=[ ]
+    //       AsKeyword:  pre=[as] sep=[ ]
+    //       Identifier:  pre=[theLib] sep=[ ]
+    //   FromKeyword:  pre=[from] sep=[ ]
+    //   StringLiteral:  pre=['the-lib']
+    //   SemicolonToken:  pre=[;]
+    const importDeclaration: ts.ImportDeclaration | undefined
+      = PackageTypingsGenerator._matchAncestor<ts.ImportDeclaration>(declaration,
+      [ts.SyntaxKind.ImportDeclaration, ts.SyntaxKind.ImportClause, ts.SyntaxKind.NamespaceImport]);
+
+    if (importDeclaration && importDeclaration.moduleSpecifier) {
+      // Examples:
+      //    " '@microsoft/sp-lodash-subset'"
+      //    " "lodash/has""
+      const packagePath: string | undefined = PackageTypingsGenerator._getPackagePathFromModuleSpecifier(
+        importDeclaration.moduleSpecifier);
+
+      if (packagePath) {
+        return {
+          symbol: symbol,
+          importPackagePath: packagePath,
+          importPackageExportName: '*',
+          isAmbient: false
+        };
+      }
+    }
+  }
+
+  private static _getPackagePathFromModuleSpecifier(moduleSpecifier: ts.Expression): string | undefined {
+    // Examples:
+    //    " '@microsoft/sp-lodash-subset'"
+    //    " "lodash/has""
+    //    " './MyClass'"
+    const moduleSpecifierText: string = moduleSpecifier.getFullText();
+
+    // Remove quotes/whitespace
+    const path: string = moduleSpecifierText
+      .replace(/^\s*['"]/, '')
+      .replace(/['"]\s*$/, '');
+
+    // Does it start with something like "./"?
+    // If not, then assume it's an import from an external package
+    if (!/^\.\//.test(path)) {
+      return path;
+    }
+
+    return undefined;
   }
 
   public constructor(context: ExtractorContext) {
@@ -304,7 +411,9 @@ export default class PackageTypingsGenerator {
     // Emit the imports first
     for (const entry of this._entries) {
       if (entry.importPackagePath) {
-        if (entry.uniqueName !== entry.importPackageExportName) {
+        if (entry.importPackageExportName === '*') {
+          this._indentedWriter.write(`import * as ${entry.uniqueName}`);
+        } else if (entry.uniqueName !== entry.importPackageExportName) {
           this._indentedWriter.write(`import { ${entry.importPackageExportName} as ${entry.uniqueName} }`);
         } else {
           this._indentedWriter.write(`import { ${entry.importPackageExportName} }`);
@@ -342,7 +451,7 @@ export default class PackageTypingsGenerator {
         case ts.SyntaxKind.ExportKeyword:
         case ts.SyntaxKind.DefaultKeyword:
         case ts.SyntaxKind.DeclareKeyword:
-          // Delete any explicit "export" keywords -- we will re-add them based on Entry.exported
+          // Delete any explicit "export" or "declare" keywords -- we will re-add them below
           span.modification.skipAll();
           break;
 
@@ -353,9 +462,19 @@ export default class PackageTypingsGenerator {
         case ts.SyntaxKind.ModuleKeyword:
         case ts.SyntaxKind.TypeKeyword:
         case ts.SyntaxKind.FunctionKeyword:
-          span.modification.prefix = 'declare ' + span.modification.prefix;
+          // Replace the stuff we possibly deleted above
+          let replacedModifiers: string = 'declare ';
           if (entry.exported) {
-            span.modification.prefix = 'export ' + span.modification.prefix;
+            replacedModifiers = 'export ' + replacedModifiers;
+          }
+
+          if (previousSpan && previousSpan.kind === ts.SyntaxKind.SyntaxList) {
+            // If there is a previous span of type SyntaxList, then apply it before any other modifiers
+            // (e.g. "abstract") that appear there.
+            previousSpan.modification.prefix = replacedModifiers + previousSpan.modification.prefix;
+          } else {
+            // Otherwise just stick it in front of this span
+            span.modification.prefix = replacedModifiers + span.modification.prefix;
           }
           break;
 
@@ -397,7 +516,7 @@ export default class PackageTypingsGenerator {
                     throw new Error('Symbol not found');
                   }
 
-                  const referencedEntry: Entry | undefined = this._fetchEntryForSymbol(symbol);
+                  const referencedEntry: Entry | undefined = this._getEntryForSymbol(symbol);
                   if (referencedEntry) {
                     if (!referencedEntry.uniqueName) {
                       // This should never happen
@@ -432,6 +551,19 @@ export default class PackageTypingsGenerator {
     }
   }
 
+  /**
+   * Looks up the corresponding Entry for the requested symbol.
+   */
+  private _getEntryForSymbol(symbol: ts.Symbol): Entry | undefined {
+    const followAliasesResult: IFollowAliasesResult
+      = PackageTypingsGenerator._followAliases(symbol, this._typeChecker);
+    return this._entriesBySymbol.get(followAliasesResult.symbol);
+  }
+
+  /**
+   * Looks up the corresponding Entry for the requested symbol.  If it doesn't exist,
+   * then it tries to create one.
+   */
   private _fetchEntryForSymbol(symbol: ts.Symbol): Entry | undefined {
     const followAliasesResult: IFollowAliasesResult
       = PackageTypingsGenerator._followAliases(symbol, this._typeChecker);
@@ -474,24 +606,27 @@ export default class PackageTypingsGenerator {
       case ts.SyntaxKind.Block:
         // Don't traverse into code
         return;
+      case ts.SyntaxKind.TypeReference: // general type references
+      case ts.SyntaxKind.ExpressionWithTypeArguments: // special case for e.g. the "extends" keyword
+        {
+          // Sometimes the type reference will involve multiple identifiers, e.g. "a.b.C".
+          // In this case, we only need to worry about importing the first identifier,
+          // so do a depth-first search for it:
+          const symbolNode: ts.Node | undefined = PackageTypingsGenerator._findFirstChildNode(
+            node, ts.SyntaxKind.Identifier);
 
-      case ts.SyntaxKind.Identifier:
-        if (node.parent) {
-          switch (node.parent.kind) {
-            case ts.SyntaxKind.ExpressionWithTypeArguments:
-            case ts.SyntaxKind.TypeReference:
-              {
-                const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(node);
-                if (!symbol) {
-                  throw new Error('Symbol not found');
-                }
-
-                this._fetchEntryForSymbol(symbol);
-              }
-              break;
+          if (!symbolNode) {
+            break;
           }
+
+          const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(symbolNode);
+          if (!symbol) {
+            throw new Error('Symbol not found for identifier: ' + symbolNode.getText());
+          }
+
+          this._fetchEntryForSymbol(symbol);
         }
-        return;
+        break;  // keep recursing
     }
 
     for (const child of node.getChildren() || []) {

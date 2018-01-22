@@ -12,6 +12,8 @@ import PersistentStream from './PersistentStream';
  * This is a special type of stream class which has two substreams (stderr and stdout), which you can write to.
  * The DualTaskStream will merge these two streams into a single readable stream.
  * Everything written to stderr is written in red, unless it is a Warning, in which case it appears in yellow.
+ *
+ * @public
  */
 export default class DualTaskStream extends stream.Readable implements NodeJS.ReadableStream, NodeJS.EventEmitter {
   public stdout: PersistentStream;
@@ -23,7 +25,7 @@ export default class DualTaskStream extends stream.Readable implements NodeJS.Re
   private _closed: boolean;
 
   /**
-   * @param {boolean} quietMode is true if things written to stdout (and warnings) should be ignored
+   * @param quietMode - true if things written to stdout (and warnings) should be ignored
    */
   constructor(quietMode: boolean = false) {
     super();

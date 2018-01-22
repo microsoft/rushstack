@@ -12,5 +12,6 @@ export const mockBuildConfig: IBuildConfig = {
   tempFolder: 'temp',
   verbose: false,
   production: false,
-  args: {}
+  args: {},
+  shouldWarningsFailBuild: false
 };

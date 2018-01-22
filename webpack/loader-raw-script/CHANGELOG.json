@@ -2,6 +2,42 @@
   "name": "@microsoft/loader-raw-script",
   "entries": [
     {
+      "version": "1.2.5",
+      "tag": "@microsoft/loader-raw-script_v1.2.5",
+      "date": "Thu, 18 Jan 2018 03:23:46 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.4` to `4.3.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.4",
+      "tag": "@microsoft/loader-raw-script_v1.2.4",
+      "date": "Thu, 18 Jan 2018 00:48:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.3` to `4.3.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.3",
+      "tag": "@microsoft/loader-raw-script_v1.2.3",
+      "date": "Wed, 17 Jan 2018 10:49:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.2` to `4.3.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.2",
       "tag": "@microsoft/loader-raw-script_v1.2.2",
       "date": "Fri, 12 Jan 2018 03:35:22 GMT",

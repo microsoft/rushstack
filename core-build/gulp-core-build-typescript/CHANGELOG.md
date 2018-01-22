@@ -1,6 +1,32 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Fri, 12 Jan 2018 03:35:22 GMT and should not be manually modified.
+This log was last generated on Thu, 18 Jan 2018 03:23:46 GMT and should not be manually modified.
+
+## 4.7.3
+Thu, 18 Jan 2018 03:23:46 GMT
+
+### Patches
+
+- Upgrade api-extractor library
+
+## 4.7.2
+Thu, 18 Jan 2018 00:48:06 GMT
+
+*Version update only*
+
+## 4.7.1
+Thu, 18 Jan 2018 00:27:23 GMT
+
+### Patches
+
+- Remove deprecated tslint rule "typeof-compare"
+
+## 4.7.0
+Wed, 17 Jan 2018 10:49:31 GMT
+
+### Minor changes
+
+- Upgrade TSLint and tslint-microsoft-contrib.
 
 ## 4.6.0
 Fri, 12 Jan 2018 03:35:22 GMT

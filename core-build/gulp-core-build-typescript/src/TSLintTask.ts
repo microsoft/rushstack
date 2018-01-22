@@ -72,7 +72,6 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
     super(
       'tslint',
       {
-        // lintConfig: require('../lib/defaultTslint.json'),
         lintConfig: {},
         reporter: (result: TSLint.LintResult, file: gutil.File, options: ITSLintTaskConfig): void => {
           for (const failure of result.failures) {

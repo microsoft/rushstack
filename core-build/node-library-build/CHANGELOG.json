@@ -2,6 +2,65 @@
   "name": "@microsoft/node-library-build",
   "entries": [
     {
+      "version": "4.3.5",
+      "tag": "@microsoft/node-library-build_v4.3.5",
+      "date": "Thu, 18 Jan 2018 03:23:46 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.4.4` to `3.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" from `3.3.4` to `3.3.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `4.7.2` to `4.7.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.4",
+      "tag": "@microsoft/node-library-build_v4.3.4",
+      "date": "Thu, 18 Jan 2018 00:48:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update dependency of node-library-build"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.4.3` to `3.4.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" from `3.3.3` to `3.3.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `4.7.1` to `4.7.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.3",
+      "tag": "@microsoft/node-library-build_v4.3.3",
+      "date": "Wed, 17 Jan 2018 10:49:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.4.2` to `3.4.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" from `3.3.2` to `3.3.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `4.6.0` to `4.7.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.3.2",
       "tag": "@microsoft/node-library-build_v4.3.2",
       "date": "Fri, 12 Jan 2018 03:35:22 GMT",

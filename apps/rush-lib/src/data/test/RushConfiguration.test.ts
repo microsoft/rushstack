@@ -21,6 +21,15 @@ function assertPathProperty(validatedPropertyName: string, absolutePath: string,
 }
 
 describe('RushConfiguration', () => {
+  it ('can\'t load too new rush', (done: MochaDone) => {
+    const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-too-new.json');
+
+    assert.throws(() => {
+      RushConfiguration.loadFromConfigurationFile(rushFilename);
+    }, 'Unable to load rush-too-new.json because its RushVersion is 99.0.0');
+
+    done();
+  });
 
   it('can load repo/rush-npm.json', (done: MochaDone) => {
     const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-npm.json');
