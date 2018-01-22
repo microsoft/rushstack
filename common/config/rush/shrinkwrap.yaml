@@ -1,5 +1,5 @@
 dependencies:
-  '@microsoft/node-library-build': 4.3.4
+  '@microsoft/node-library-build': 4.3.5
   '@rush-temp/api-documenter': 'file:projects/api-documenter.tgz'
   '@rush-temp/api-extractor': 'file:projects/api-extractor.tgz'
   '@rush-temp/api-extractor-test-01': 'file:projects/api-extractor-test-01.tgz'
@@ -157,10 +157,10 @@ dependencies:
   yargs: 4.6.0
   z-schema: 3.18.4
 packages:
-  /@microsoft/api-extractor/5.2.1:
+  /@microsoft/api-extractor/5.2.2:
     dependencies:
-      '@microsoft/node-core-library': 0.4.5
-      '@microsoft/ts-command-line': 2.3.4
+      '@microsoft/node-core-library': 0.4.6
+      '@microsoft/ts-command-line': 2.3.5
       '@types/fs-extra': 0.0.37
       '@types/node': 8.5.8
       '@types/z-schema': 3.16.31
@@ -172,22 +172,22 @@ packages:
       z-schema: 3.18.4
     dev: false
     resolution:
-      integrity: sha1-p2pO+QeSsruAh9v+Ix5zs/ZkKeE=
-  /@microsoft/gulp-core-build-mocha/3.3.4:
+      integrity: sha1-peztcc4PFm0QToFFFUeMuODke/Y=
+  /@microsoft/gulp-core-build-mocha/3.3.5:
     dependencies:
-      '@microsoft/gulp-core-build': 3.4.4
+      '@microsoft/gulp-core-build': 3.5.0
       '@types/node': 8.5.8
       gulp: 3.9.1
       gulp-istanbul: 0.10.4
       gulp-mocha: 2.2.0
     dev: false
     resolution:
-      integrity: sha1-Le/az6/+0f0DSRgqga5Kjbgyk+A=
-  /@microsoft/gulp-core-build-typescript/4.7.2:
+      integrity: sha1-RmLYarr8pv1hBpFLOjjT2X+i6CY=
+  /@microsoft/gulp-core-build-typescript/4.7.3:
     dependencies:
-      '@microsoft/api-extractor': 5.2.1
-      '@microsoft/gulp-core-build': 3.4.4
-      '@microsoft/node-core-library': 0.4.5
+      '@microsoft/api-extractor': 5.2.2
+      '@microsoft/gulp-core-build': 3.5.0
+      '@microsoft/node-core-library': 0.4.6
       '@types/fs-extra': 0.0.37
       '@types/gulp': 3.8.32
       '@types/node': 8.5.8
@@ -211,10 +211,10 @@ packages:
       typescript: 2.4.2
     dev: false
     resolution:
-      integrity: sha1-FP30yFa6ZUytWEs83+m5UtViCbM=
-  /@microsoft/gulp-core-build/3.4.4:
+      integrity: sha1-FVlQBi548r+nJnuqWgy8sMAtG+w=
+  /@microsoft/gulp-core-build/3.5.0:
     dependencies:
-      '@microsoft/node-core-library': 0.4.5
+      '@microsoft/node-core-library': 0.4.6
       '@types/assertion-error': 1.0.30
       '@types/chai': 3.4.34
       '@types/chalk': 0.4.31
@@ -258,8 +258,8 @@ packages:
       z-schema: 3.18.4
     dev: false
     resolution:
-      integrity: sha1-FeVXASW06Z3gEd5sWs+L+5wzIP8=
-  /@microsoft/node-core-library/0.4.5:
+      integrity: sha1-IS5be4P5sWV6IPbnqYz68bynDlE=
+  /@microsoft/node-core-library/0.4.6:
     dependencies:
       '@types/fs-extra': 0.0.37
       '@types/node': 8.5.8
@@ -269,19 +269,19 @@ packages:
       z-schema: 3.18.4
     dev: false
     resolution:
-      integrity: sha1-EBtIwRTITt36dS09fctGnAYbjqA=
-  /@microsoft/node-library-build/4.3.4:
+      integrity: sha1-k8/Dipz6GKEoDtOQO01QbOM9N30=
+  /@microsoft/node-library-build/4.3.5:
     dependencies:
-      '@microsoft/gulp-core-build': 3.4.4
-      '@microsoft/gulp-core-build-mocha': 3.3.4
-      '@microsoft/gulp-core-build-typescript': 4.7.2
+      '@microsoft/gulp-core-build': 3.5.0
+      '@microsoft/gulp-core-build-mocha': 3.3.5
+      '@microsoft/gulp-core-build-typescript': 4.7.3
       '@types/gulp': 3.8.32
       '@types/node': 8.5.8
       gulp: 3.9.1
     dev: false
     resolution:
-      integrity: sha1-GbIQMt7bCvsD402wYkx1xkI0kvE=
-  /@microsoft/ts-command-line/2.3.4:
+      integrity: sha1-c9jgqTxSLZBDi9hHsB2dPW+rIt0=
+  /@microsoft/ts-command-line/2.3.5:
     dependencies:
       '@types/argparse': 1.0.33
       '@types/node': 8.5.8
@@ -289,7 +289,7 @@ packages:
       colors: 1.1.2
     dev: false
     resolution:
-      integrity: sha1-/gA+INrnInvus5cLnQOVfgMwWbM=
+      integrity: sha1-54VvveYK30wSz/yar4e6jw6Y9f4=
   /@types/argparse/1.0.33:
     dev: false
     resolution:
@@ -1960,7 +1960,7 @@ packages:
       cipher-base: 1.0.4
       inherits: 2.0.3
       ripemd160: 2.0.1
-      sha.js: 2.4.9
+      sha.js: 2.4.10
     dev: false
     resolution:
       integrity: sha1-YGBCrIuSYnUPSDyt2rD1gZFy2P0=
@@ -1971,7 +1971,7 @@ packages:
       inherits: 2.0.3
       ripemd160: 2.0.1
       safe-buffer: 5.1.1
-      sha.js: 2.4.9
+      sha.js: 2.4.10
     dev: false
     resolution:
       integrity: sha1-rLniIaThe9sHbpBlfEK5PjcmzwY=
@@ -2399,12 +2399,12 @@ packages:
       node: '>= 0.10'
     resolution:
       integrity: sha1-TapNnbAPmBmIDHn6RXrlsJof04k=
-  /encodeurl/1.0.1:
+  /encodeurl/1.0.2:
     dev: false
     engines:
       node: '>= 0.8'
     resolution:
-      integrity: sha1-eePVhlU0aQn+bw9Fpd5oEDspTSA=
+      integrity: sha1-rT/0yG7C0CkyL1oCw6mmBslbP1k=
   /end-of-stream/0.1.5:
     dependencies:
       once: 1.3.3
@@ -2856,7 +2856,7 @@ packages:
       cookie-signature: 1.0.6
       debug: 2.6.9
       depd: 1.1.2
-      encodeurl: 1.0.1
+      encodeurl: 1.0.2
       escape-html: 1.0.3
       etag: 1.8.1
       finalhandler: 1.1.0
@@ -3067,7 +3067,7 @@ packages:
   /finalhandler/1.0.6:
     dependencies:
       debug: 2.6.9
-      encodeurl: 1.0.1
+      encodeurl: 1.0.2
       escape-html: 1.0.3
       on-finished: 2.3.0
       parseurl: 1.3.2
@@ -3081,7 +3081,7 @@ packages:
   /finalhandler/1.1.0:
     dependencies:
       debug: 2.6.9
-      encodeurl: 1.0.1
+      encodeurl: 1.0.2
       escape-html: 1.0.3
       on-finished: 2.3.0
       parseurl: 1.3.2
@@ -4914,7 +4914,7 @@ packages:
       graceful-fs: 4.1.11
       jest-docblock: 21.2.0
       micromatch: 2.3.11
-      sane: 2.2.0
+      sane: 2.3.0
       worker-farm: 1.5.2
     dev: false
     resolution:
@@ -6846,7 +6846,7 @@ packages:
       create-hmac: 1.1.6
       ripemd160: 2.0.1
       safe-buffer: 5.1.1
-      sha.js: 2.4.9
+      sha.js: 2.4.10
     dev: false
     engines:
       node: '>=0.12'
@@ -7620,7 +7620,7 @@ packages:
     dev: false
     resolution:
       integrity: sha1-n1CHQZtNCR8jJXHn+lLpCw9VJiE=
-  /sane/2.2.0:
+  /sane/2.3.0:
     dependencies:
       anymatch: 1.3.2
       exec-sh: 0.2.1
@@ -7635,7 +7635,7 @@ packages:
     optionalDependencies:
       fsevents: 1.1.3
     resolution:
-      integrity: sha512-OSJxhHO0CgPUw3lUm3GhfREAfza45smvEI9ozuFrxKG10GHVo0ryW9FK5VYlLvxj0SV7HVKHW0voYJIRu27GWg==
+      integrity: sha512-6GB9zPCsqJqQPAGcvEkUPijM1ZUFI+A/DrscL++dXO3Ltt5q5mPDayGxZtr3cBRkrbb4akbwszVVkTIFefEkcg==
   /sass-graph/2.2.4:
     dependencies:
       glob: 7.0.6
@@ -7696,7 +7696,7 @@ packages:
       debug: 2.6.9
       depd: 1.1.2
       destroy: 1.0.4
-      encodeurl: 1.0.1
+      encodeurl: 1.0.2
       escape-html: 1.0.3
       etag: 1.8.1
       fresh: 0.5.2
@@ -7754,7 +7754,7 @@ packages:
       integrity: sha1-zlpuzTEB/tXsCYJ9rCKpwpv7BTU=
   /serve-static/1.13.1:
     dependencies:
-      encodeurl: 1.0.1
+      encodeurl: 1.0.2
       escape-html: 1.0.3
       parseurl: 1.3.2
       send: 0.16.1
@@ -7815,13 +7815,13 @@ packages:
     dev: false
     resolution:
       integrity: sha512-BvE/TwpZX4FXExxOxZyRGQQv651MSwmWKZGqvmPcRIjDqWub67kTKuIMx43cZZrS/cBBzwBcNDWoFxt2XEFIpQ==
-  /sha.js/2.4.9:
+  /sha.js/2.4.10:
     dependencies:
       inherits: 2.0.3
       safe-buffer: 5.1.1
     dev: false
     resolution:
-      integrity: sha512-G8zektVqbiPHrylgew9Zg1VRB1L/DtXNUVAM6q4QLy8NE3qtHlFXTf8VLL4k1Yl6c7NMjtZUTdXV+X44nFaT6A==
+      integrity: sha512-vnwmrFDlOExK4Nm16J2KMWHLrp14lBrjxMxBJpu++EnsuBmpiYaM/MEs46Vxxm/4FvdP5yTwuCTO9it5FSjrqA==
   /shebang-command/1.2.0:
     dependencies:
       shebang-regex: 1.0.0
@@ -9490,7 +9490,7 @@ packages:
     version: 0.0.0
   'file:projects/api-extractor.tgz':
     dependencies:
-      '@microsoft/node-library-build': 4.3.4
+      '@microsoft/node-library-build': 4.3.5
       '@types/colors': 1.1.3
       '@types/fs-extra': 0.0.37
       '@types/jest': 21.1.10
@@ -9523,7 +9523,7 @@ packages:
     version: 0.0.0
   'file:projects/gulp-core-build-karma.tgz':
     dependencies:
-      '@microsoft/node-library-build': 4.3.4
+      '@microsoft/node-library-build': 4.3.5
       '@types/bluebird': 3.5.3
       '@types/gulp': 3.8.32
       '@types/karma': 0.13.33
@@ -9554,7 +9554,7 @@ packages:
     version: 0.0.0
   'file:projects/gulp-core-build-mocha.tgz':
     dependencies:
-      '@microsoft/node-library-build': 4.3.4
+      '@microsoft/node-library-build': 4.3.5
       '@types/gulp': 3.8.32
       '@types/gulp-istanbul': 0.9.30
       '@types/gulp-mocha': 0.0.29
@@ -9572,7 +9572,7 @@ packages:
     version: 0.0.0
   'file:projects/gulp-core-build-sass.tgz':
     dependencies:
-      '@microsoft/node-library-build': 4.3.4
+      '@microsoft/node-library-build': 4.3.5
       '@types/gulp': 3.8.32
       '@types/gulp-util': 3.0.30
       '@types/mime': 0.0.29
@@ -9599,7 +9599,7 @@ packages:
     version: 0.0.0
   'file:projects/gulp-core-build-serve.tgz':
     dependencies:
-      '@microsoft/node-library-build': 4.3.4
+      '@microsoft/node-library-build': 4.3.5
       '@types/express': 4.11.0
       '@types/express-serve-static-core': 4.11.0
       '@types/gulp': 3.8.32
@@ -9628,7 +9628,7 @@ packages:
     version: 0.0.0
   'file:projects/gulp-core-build-typescript.tgz':
     dependencies:
-      '@microsoft/node-library-build': 4.3.4
+      '@microsoft/node-library-build': 4.3.5
       '@types/fs-extra': 0.0.37
       '@types/gulp': 3.8.32
       '@types/gulp-util': 3.0.30
@@ -9662,7 +9662,7 @@ packages:
     version: 0.0.0
   'file:projects/gulp-core-build-webpack.tgz':
     dependencies:
-      '@microsoft/node-library-build': 4.3.4
+      '@microsoft/node-library-build': 4.3.5
       '@types/gulp': 3.8.32
       '@types/node': 8.5.8
       '@types/orchestrator': 0.0.30
@@ -9680,7 +9680,7 @@ packages:
     version: 0.0.0
   'file:projects/gulp-core-build.tgz':
     dependencies:
-      '@microsoft/node-library-build': 4.3.4
+      '@microsoft/node-library-build': 4.3.5
       '@types/assertion-error': 1.0.30
       '@types/chai': 3.4.34
       '@types/chalk': 0.4.31
@@ -9785,7 +9785,7 @@ packages:
     version: 0.0.0
   'file:projects/node-core-library.tgz':
     dependencies:
-      '@microsoft/node-library-build': 4.3.4
+      '@microsoft/node-library-build': 4.3.5
       '@types/chai': 3.4.34
       '@types/fs-extra': 0.0.37
       '@types/mocha': 2.2.38
@@ -9932,7 +9932,7 @@ packages:
     version: 0.0.0
   'file:projects/ts-command-line.tgz':
     dependencies:
-      '@microsoft/node-library-build': 4.3.4
+      '@microsoft/node-library-build': 4.3.5
       '@types/argparse': 1.0.33
       '@types/colors': 1.1.3
       '@types/node': 8.5.8
@@ -9973,7 +9973,7 @@ registry: 'https://registry.npmjs.org/'
 shrinkwrapMinorVersion: 4
 shrinkwrapVersion: 3
 specifiers:
-  '@microsoft/node-library-build': 4.3.4
+  '@microsoft/node-library-build': 4.3.5
   '@rush-temp/api-documenter': 'file:./projects/api-documenter.tgz'
   '@rush-temp/api-extractor': 'file:./projects/api-extractor.tgz'
   '@rush-temp/api-extractor-test-01': 'file:./projects/api-extractor-test-01.tgz'
