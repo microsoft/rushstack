@@ -59,6 +59,37 @@ interface IShrinkwrapYaml {
   specifiers: { [dependency: string]: string };
 }
 
+export function extractVersionFromPnpmVersionSpecifier(version: string): string | undefined {
+  let extractedVersion: string | undefined = undefined;
+
+  if (!version) {
+    return undefined;
+  }
+
+  const versionParts: string[] = version.split('/');
+
+  // it had no slashes, so we know it is a version like "0.0.5"
+  if (versionParts.length === 1) {
+    extractedVersion = version; // e.g. "0.0.5"
+  } else {
+    const isScoped: boolean = versionParts[1].indexOf('@') === 0;
+
+    // e.g. "/gulp-karma/0.0.5/karma@0.13.22"
+    // if it has 4 parts, then it should be unscoped
+    if (versionParts.length === 4 && !isScoped) {
+      extractedVersion = versionParts[2]; // e.g. "0.0.5"
+    }
+
+    // e.g. "/@ms/sp-client-utilities/3.1.1/foo@13.1.0"
+    // if it has 5 parts, it should be scoped
+    if (versionParts.length === 5 && isScoped) {
+      extractedVersion = versionParts[3]; // e.g. "3.1.1"
+    }
+  }
+
+  return extractedVersion;
+}
+
 export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   private _shrinkwrapJson: IShrinkwrapYaml;
 
@@ -123,19 +154,23 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     // version will be either:
     // A - the version (e.g. "0.0.5")
     // B - a peer dep version (e.g. "/gulp-karma/0.0.5/karma@0.13.22"
+    //                           or "/@ms/sp-client-utilities/3.1.1/foo@13.1.0"
     //                           or "/sinon-chai/2.8.0/chai@3.5.0+sinon@1.17.7")
 
     // check to see if this is the special style of specifiers
-    // e.g.:  "/gulp-karma/0.0.5/karma@0.13.22"
-    // split it by forward slashes, then grab the second group
+    // e.g.:  "/gulp-karma/0.0.5/karma@0.13.22" or
+    //     or "/@ms/sp-client-utilities/3.1.1/foo@13.1.0"
+    // split it by forward slashes, then grab the second group (or the 3rd, if the package name is scoped)
     // if the second group doesn't exist, return the version directly
     if (version) {
-      const versionParts: string[] = version.split('/');
-      if (versionParts.length !== 1 && versionParts.length !== 4) {
+      const extractedVersion: string | undefined = extractVersionFromPnpmVersionSpecifier(version);
+
+      if (!extractedVersion) {
         throw new Error(`Cannot parse pnpm shrinkwrap version specifier: `
           + `"${version}" for "${dependencyName}"`);
       }
-      return versionParts[2] || version;
+
+      return extractedVersion;
     } else {
       return undefined;
     }

@@ -6,6 +6,7 @@ import * as path from 'path';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
+import { extractVersionFromPnpmVersionSpecifier } from '../pnpm/PnpmShrinkwrapFile';
 
 describe('npm ShrinkwrapFile', () => {
   const filename: string = path.resolve(path.join(__dirname, './shrinkwrapFile/npm-shrinkwrap.json'));
@@ -30,9 +31,9 @@ describe('npm ShrinkwrapFile', () => {
 });
 
 describe('pnpm ShrinkwrapFile', () => {
-  const filename: string = path.resolve(path.join(
-    __dirname, '../../../../src/cli/logic/test/shrinkwrapFile/shrinkwrap.yaml'));
-  const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
+const filename: string = path.resolve(path.join(
+  __dirname, '../../../../src/cli/logic/test/shrinkwrapFile/shrinkwrap.yaml'));
+const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
 
   it('verifies root-level dependency', () => {
     assert.isTrue(shrinkwrapFile.hasCompatibleTopLevelDependency('jquery', '>=2.0.0 <3.0.0'));
@@ -49,5 +50,25 @@ describe('pnpm ShrinkwrapFile', () => {
     const tempProjectNames: ReadonlyArray<string> = shrinkwrapFile.getTempProjectNames();
 
     assert.deepEqual(tempProjectNames, ['@rush-temp/project1', '@rush-temp/project2']);
+  });
+});
+
+describe('extractVersionFromPnpmVersionSpecifier', () => {
+  it('extracts a simple version with no slashes', () => {
+    assert.equal(extractVersionFromPnpmVersionSpecifier('0.0.5'), '0.0.5');
+  });
+  it('extracts an unscoped peer dep', () => {
+    assert.equal(extractVersionFromPnpmVersionSpecifier('/gulp-karma/0.0.5/karma@0.13.22'), '0.0.5');
+  });
+  it('extracts a scoped peer dep', () => {
+    assert.equal(extractVersionFromPnpmVersionSpecifier('/@ms/sp-client-utilities/3.1.1/foo@13.1.0'), '3.1.1');
+  });
+  it('handles bad cases', () => {
+    assert.equal(extractVersionFromPnpmVersionSpecifier('/foo/gulp-karma/0.0.5/karma@0.13.22'), undefined);
+    assert.equal(extractVersionFromPnpmVersionSpecifier('/@ms/3.1.1/foo@13.1.0'), undefined);
+    assert.equal(extractVersionFromPnpmVersionSpecifier(''), undefined);
+    assert.equal(extractVersionFromPnpmVersionSpecifier('/'), undefined);
+    assert.equal(extractVersionFromPnpmVersionSpecifier('//'), undefined);
+    assert.equal(extractVersionFromPnpmVersionSpecifier('/@/'), undefined);
   });
 });
