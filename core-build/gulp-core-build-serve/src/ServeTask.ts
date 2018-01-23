@@ -5,7 +5,7 @@ import { GulpTask } from '@microsoft/gulp-core-build';
 import { IBuildConfig } from '@microsoft/gulp-core-build/lib/IBuildConfig';
 import * as Gulp from 'gulp';
 import * as fs from 'fs';
-import * as ChalkType from 'chalk';
+import * as colors from 'colors';
 import * as HttpType from 'http';
 import * as HttpsType from 'https';
 import * as pathType from 'path';
@@ -198,7 +198,7 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
     /* tslint:disable:no-any */
     const ipAddress: string = (req as any).ip;
     /* tslint:enable:no-any */
-    let resourceColor: ChalkType.ChalkChain = colors.cyan;
+    let resourceColor: (text: string) => string = colors.cyan;
 
     if (req && req.url) {
       if (req.url.indexOf('.bundle.js') >= 0) {
