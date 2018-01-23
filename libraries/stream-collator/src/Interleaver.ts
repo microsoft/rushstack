@@ -33,8 +33,7 @@ interface ITaskWriterInfo {
 
 enum ITaskOutputStream {
   stdout = 1,
-  stderr = 2,
-  warning = 3
+  stderr = 2
 }
 
 /**
@@ -79,13 +78,7 @@ export default class Interleaver {
       getStdError: (): string => this._getTaskOutput(taskName, ITaskOutputStream.stderr),
       getStdOutput: (): string => this._getTaskOutput(taskName),
       write: (data: string): void => this._writeTaskOutput(taskName, data),
-      writeError: (data: string): void => {
-        const stream: ITaskOutputStream = (data.indexOf('Warning - ') === 0) ?
-          ITaskOutputStream.warning : // Warning written to stderr
-          ITaskOutputStream.stderr;
-
-        this._writeTaskOutput(taskName, data, stream);
-      },
+      writeError: (data: string): void => this._writeTaskOutput(taskName, data, ITaskOutputStream.stderr),
       writeLine: (data: string): void => this._writeTaskOutput(taskName, data + os.EOL)
     };
   }
@@ -120,10 +113,8 @@ export default class Interleaver {
     if (this._activeTask === taskName) {
       if (stream === ITaskOutputStream.stdout && !taskInfo.quietMode) {
         this._stdout.write(data);
-      } else if (stream === ITaskOutputStream.warning && !taskInfo.quietMode) {
-        this._stdout.write(colors.yellow(data));
       } else if (stream === ITaskOutputStream.stderr) {
-        this._stdout.write(colors.red(data));
+        this._stdout.write(data);
       }
     }
   }

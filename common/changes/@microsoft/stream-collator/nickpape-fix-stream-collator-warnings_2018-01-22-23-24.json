@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/stream-collator",
+      "comment": "Remove code which redirected warnings to stdout.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/stream-collator",
+  "email": "nickpape-msft@users.noreply.github.com"
+}
