@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as colors from 'colors';
 import * as path from 'path';
 import * as fs from 'fs';
 import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
@@ -8,8 +9,16 @@ import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
 import { GulpProxy } from '../GulpProxy';
 import { IExecutable } from '../IExecutable';
 import { IBuildConfig } from '../IBuildConfig';
-import { log, verbose, error, fileError, fileWarning,
-  warn, logEndSubtask, logStartSubtask } from '../logging';
+import {
+  log,
+  verbose,
+  error,
+  fileError,
+  fileWarning,
+  warn,
+  logEndSubtask,
+  logStartSubtask
+} from '../logging';
 import gutil = require('gulp-util');
 import gulp = require('gulp');
 import through2 = require('through2');
@@ -154,7 +163,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    * @param message - the message to log to standard output.
    */
   public log(message: string): void {
-    log(`[${gutil.colors.cyan(this.name)}] ${message}`);
+    log(`[${colors.cyan(this.name)}] ${message}`);
   }
 
   /**
@@ -162,7 +171,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    * @param message - the message to log when in verbose mode
    */
   public logVerbose(message: string): void {
-    verbose(`[${gutil.colors.cyan(this.name)}] ${message}`);
+    verbose(`[${colors.cyan(this.name)}] ${message}`);
   }
 
   /**
@@ -171,7 +180,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    * @param message - the warning description
    */
   public logWarning(message: string): void {
-    warn(`[${gutil.colors.cyan(this.name)}] ${message}`);
+    warn(`[${colors.cyan(this.name)}] ${message}`);
   }
 
   /**
@@ -179,7 +188,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    * @param message - the error description
    */
   public logError(message: string): void {
-    error(`[${gutil.colors.cyan(this.name)}] ${message}`);
+    error(`[${colors.cyan(this.name)}] ${message}`);
   }
 
   /**
