@@ -12,7 +12,6 @@ import { IBuildConfig } from '../IBuildConfig';
 import { log, verbose, error, fileError, fileWarning,
   warn, logEndSubtask, logStartSubtask
 } from '../logging';
-import * as Chalk from 'chalk';
 import gutil = require('gulp-util');
 import gulp = require('gulp');
 import through2 = require('through2');
