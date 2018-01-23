@@ -177,7 +177,7 @@ export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConf
                     chunk.files.forEach(file => (
                       this.log(`Bundled: '${colors.cyan(path.basename(file))}', ` +
                                 `size: ${colors.magenta(chunk.size)} bytes, ` +
-                                `took ${colors.magenta(duration)} ms.`)
+                                `took ${colors.magenta(duration.toString(10))} ms.`)
                     )); // end file
                   }
                 }); // end chunk

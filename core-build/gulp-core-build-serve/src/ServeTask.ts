@@ -194,7 +194,6 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
   }
 
   private _logRequestsMiddleware(req: HttpType.IncomingMessage, res: HttpType.ServerResponse, next?: () => void): void {
-    const { colors }: typeof gUtilType = require('gulp-util');
     /* tslint:disable:no-any */
     const ipAddress: string = (req as any).ip;
     /* tslint:enable:no-any */
