@@ -361,12 +361,17 @@ export function logSummary(value: string): void {
  * @public
  */
 export function log(...args: Array<string>): void {
-  const currentTime = new Date();
+  const currentTime: Date = new Date();
   const timestamp: string = colors.gray(
-    [currentTime.getHours(),
-     currentTime.getMinutes(),
-     currentTime.getSeconds()].join(':'));
+    [padTimePart(currentTime.getHours()),
+     padTimePart(currentTime.getMinutes()),
+     padTimePart(currentTime.getSeconds())]
+    .join(':'));
   console.log(`[${timestamp}] ${args.join('')}`);
+}
+
+function padTimePart(timepart: number): string {
+  return timepart >= 10 ? timepart.toString(10) : `0${timepart.toString(10)}`;
 }
 
 /**
