@@ -9,8 +9,15 @@ import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
 import { GulpProxy } from '../GulpProxy';
 import { IExecutable } from '../IExecutable';
 import { IBuildConfig } from '../IBuildConfig';
-import { log, verbose, error, fileError, fileWarning,
-  warn, logEndSubtask, logStartSubtask
+import {
+  log,
+  verbose,
+  error,
+  fileError,
+  fileWarning,
+  warn,
+  logEndSubtask,
+  logStartSubtask
 } from '../logging';
 import gutil = require('gulp-util');
 import gulp = require('gulp');
