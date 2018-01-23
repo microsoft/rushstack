@@ -126,10 +126,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "fancy-log",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "fs-extra",
       "allowedCategories": [ "libraries", "tests" ]
     },

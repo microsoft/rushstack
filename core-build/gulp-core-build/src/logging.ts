@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as colors from 'colors';
-import * as fancyLog from 'fancy-log';
 import * as Gulp from 'gulp';
 import * as path from 'path';
 /* tslint:disable:typedef */
@@ -362,7 +361,12 @@ export function logSummary(value: string): void {
  * @public
  */
 export function log(...args: Array<string>): void {
-  fancyLog.apply(fancyLog, args);
+  const currentTime = new Date();
+  const timestamp: string = colors.gray(
+    [currentTime.getHours(),
+     currentTime.getMinutes(),
+     currentTime.getSeconds()].join(':'));
+  console.log(`[${timestamp}] ${args.join('')}`);
 }
 
 /**
