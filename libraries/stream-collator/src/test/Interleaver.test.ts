@@ -4,7 +4,6 @@
 /// <reference types="mocha" />
 
 import { assert } from 'chai';
-import * as colors from 'colors';
 import * as os from 'os';
 
 import Interleaver, { ITaskWriter } from '../Interleaver';
