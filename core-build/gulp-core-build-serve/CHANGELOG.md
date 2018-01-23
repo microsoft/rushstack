@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-serve
 
-This log was last generated on Sat, 20 Jan 2018 02:39:16 GMT and should not be manually modified.
+This log was last generated on Tue, 23 Jan 2018 17:05:28 GMT and should not be manually modified.
+
+## 3.2.7
+Tue, 23 Jan 2018 17:05:28 GMT
+
+### Patches
+
+- Replace gulp-util.colors with colors package
 
 ## 3.2.6
 Sat, 20 Jan 2018 02:39:16 GMT

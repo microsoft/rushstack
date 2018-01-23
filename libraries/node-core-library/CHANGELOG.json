@@ -2,6 +2,12 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "0.4.7",
+      "tag": "@microsoft/node-core-library_v0.4.7",
+      "date": "Tue, 23 Jan 2018 17:05:28 GMT",
+      "comments": {}
+    },
+    {
       "version": "0.4.6",
       "tag": "@microsoft/node-core-library_v0.4.6",
       "date": "Thu, 18 Jan 2018 03:23:46 GMT",

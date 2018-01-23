@@ -2,6 +2,23 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.5.1",
+      "tag": "@microsoft/gulp-core-build_v3.5.1",
+      "date": "Tue, 23 Jan 2018 17:05:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace gulp-util.colors with colors package"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.6` to `0.4.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.5.0",
       "tag": "@microsoft/gulp-core-build_v3.5.0",
       "date": "Thu, 18 Jan 2018 03:23:46 GMT",

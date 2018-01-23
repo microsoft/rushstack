@@ -2,6 +2,23 @@
   "name": "@microsoft/stream-collator",
   "entries": [
     {
+      "version": "2.2.6",
+      "tag": "@microsoft/stream-collator_v2.2.6",
+      "date": "Tue, 23 Jan 2018 17:05:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove code which redirected warnings to stdout."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.5` to `4.3.6`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.5",
       "tag": "@microsoft/stream-collator_v2.2.5",
       "date": "Thu, 18 Jan 2018 03:23:46 GMT",
