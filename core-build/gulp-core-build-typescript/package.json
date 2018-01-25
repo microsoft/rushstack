@@ -19,6 +19,7 @@
     "@types/fs-extra": "0.0.37",
     "@types/gulp": "3.8.32",
     "@types/node": "8.5.8",
+    "@types/vinyl": "1.2.30",
     "fs-extra": "~0.26.7",
     "gulp": "~3.9.1",
     "gulp-cache": "~0.4.5",
@@ -43,7 +44,6 @@
     "@types/gulp-util": "3.0.30",
     "@types/orchestrator": "0.0.30",
     "@types/q": "0.0.32",
-    "@types/through2": "2.0.32",
-    "@types/vinyl": "1.2.30"
+    "@types/through2": "2.0.32"
   }
 }
