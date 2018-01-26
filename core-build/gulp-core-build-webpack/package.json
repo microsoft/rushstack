@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-webpack",
-  "version": "3.3.8",
+  "version": "3.3.9",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -13,7 +13,7 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.5.3",
+    "@microsoft/gulp-core-build": "3.6.0",
     "@types/gulp": "3.8.32",
     "@types/node": "8.5.8",
     "colors": "~1.1.2",
