@@ -170,7 +170,26 @@ describe('findChangeRequests', () => {
     expect(allChanges['c'].changeType).equals(ChangeType.dependency, 'c was not a dependency change');
     expect(allChanges['a'].newVersion).equals('2.0.0', 'a was not a major change');
     expect(allChanges['b'].newVersion).equals('1.0.1', 'b was not patched');
-    expect(allChanges['c'].newVersion).equals('1.0.0', 'b was not left unchanged');
+    expect(allChanges['c'].newVersion).equals('1.0.0', 'c was not left unchanged');
+  });
+
+  it('can resolve multiple reverse-ordered changes requests on the same package', () => {
+    const allPackages: Map<string, RushConfigurationProject> =
+      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
+      allPackages,
+      new ChangeFiles(path.join(__dirname, 'orderedChanges')));
+
+    expect(Object.keys(allChanges).length).to.equal(3);
+    expect(allChanges).has.property('a');
+    expect(allChanges).has.property('b');
+    expect(allChanges).has.property('c');
+    expect(allChanges['a'].changeType).equals(ChangeType.major, 'a was not a major');
+    expect(allChanges['b'].changeType).equals(ChangeType.patch, 'b was not a patch');
+    expect(allChanges['c'].changeType).equals(ChangeType.dependency, 'c was not a dependency change');
+    expect(allChanges['a'].newVersion).equals('2.0.0', 'a was not a major change');
+    expect(allChanges['b'].newVersion).equals('1.0.1', 'b was not patched');
+    expect(allChanges['c'].newVersion).equals('1.0.0', 'c was not left unchanged');
   });
 
   it('can resolve multiple hotfix changes', () => {

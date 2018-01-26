@@ -479,6 +479,8 @@ export default class PublishUtilities {
         }
         currentChange.newVersion = semver.inc(currentChange.newVersion, 'prerelease');
       } else {
+        // When there are multiple changes of this package, the final value of new version
+        // should not depend on the order of the changes.
         let packageVersion: string = pkg.version;
         if (currentChange.newVersion && semver.gt(currentChange.newVersion, pkg.version)) {
           packageVersion = currentChange.newVersion;
