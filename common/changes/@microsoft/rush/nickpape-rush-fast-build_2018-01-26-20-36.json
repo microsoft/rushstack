@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add a --no-deps flag to 'rush build', which will skip rebuilding of downstream packages. It will only rebuild projects that change, but not their dependents.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "nickpape-msft@users.noreply.github.com"
+}
