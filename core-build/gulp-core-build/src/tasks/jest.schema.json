@@ -53,6 +53,17 @@
       "items": {
         "type": "string"
       }
+    },
+    "maxWorkers": {
+      "description": "Same as Jest CLI option maxWorkers",
+      "type": "number"
+    },
+    "testMatch": {
+      "description": "Same as Jest CLI option testMatch",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     }
   },
   "additionalProperties": false
