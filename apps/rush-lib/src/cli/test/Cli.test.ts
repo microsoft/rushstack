@@ -9,7 +9,6 @@ import { assert } from 'chai';
 import Utilities from '../../utilities/Utilities';
 
 describe('CLI', function() {
-  this.timeout(15000);
   it('should not fail when there is no rush.json', () => {
     const workingDir: string = '/';
     const startPath: string = path.resolve(path.join(__dirname, '../../start.js'));
