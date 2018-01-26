@@ -1,5 +1,5 @@
 {
-  "name":  "api-extractor-test-01",
+  "name": "api-extractor-test-01",
   "description": "Building this project is a regression test for api-extractor",
   "version": "1.0.0",
   "private": true,

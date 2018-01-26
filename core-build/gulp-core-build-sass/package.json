@@ -1,5 +1,5 @@
 {
-  "name":  "@microsoft/gulp-core-build-sass",
+  "name": "@microsoft/gulp-core-build-sass",
   "version": "4.2.9",
   "description": "",
   "main": "lib/index.js",

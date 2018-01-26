@@ -1,5 +1,5 @@
 {
-  "name":  "b",
+  "name": "b",
   "version": "2.0.0",
   "description": "Test package b",
   "dependencies": {

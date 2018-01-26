@@ -1,5 +1,5 @@
 {
-  "name":  "@microsoft/gulp-core-build-mocha",
+  "name": "@microsoft/gulp-core-build-mocha",
   "version": "3.3.7",
   "description": "",
   "main": "lib/index.js",

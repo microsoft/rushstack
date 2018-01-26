@@ -1,5 +1,5 @@
 {
-  "name":  "@microsoft/rush",
+  "name": "@microsoft/rush",
   "version": "4.2.5",
   "description": "The professional solution for consolidating all your JavaScript projects in one Git repo",
   "keywords": [
