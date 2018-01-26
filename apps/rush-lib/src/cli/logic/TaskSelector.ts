@@ -17,6 +17,7 @@ export interface ITaskSelectorConstructor {
   isQuietMode: boolean;
   parallelism: number;
   isIncrementalBuildAllowed: boolean;
+  invalidateDownstream: boolean;
 }
 
 /**
@@ -34,7 +35,10 @@ export class TaskSelector {
 
   constructor(private _options: ITaskSelectorConstructor) {
 
-    this._taskRunner = new TaskRunner(this._options.isQuietMode, this._options.parallelism);
+    this._taskRunner = new TaskRunner(
+      this._options.isQuietMode,
+      this._options.parallelism,
+      this._options.invalidateDownstream);
 
     try {
       this._rushLinkJson = JsonFile.load(this._options.rushConfiguration.rushLinkJsonFilename);

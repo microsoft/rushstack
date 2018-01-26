@@ -35,6 +35,7 @@ interface ICustomOptionInstance {
 export class CustomRushAction extends BaseRushAction {
   private customOptions: Map<string, ICustomOptionInstance> = new Map<string, ICustomOptionInstance>();
 
+  private _ignoreDownstream: CommandLineFlagParameter;
   private _fromFlag: CommandLineStringListParameter;
   private _toFlag: CommandLineStringListParameter;
   private _verboseParameter: CommandLineFlagParameter;
@@ -90,6 +91,11 @@ export class CustomRushAction extends BaseRushAction {
       }
     });
 
+    let invalidateDownstream: boolean = true;
+    if (this.options.actionVerb === 'build' && this._ignoreDownstream.value) {
+      invalidateDownstream = false;
+    }
+
     const tasks: TaskSelector = new TaskSelector(
       {
         rushConfiguration: this._parser.rushConfig,
@@ -99,7 +105,8 @@ export class CustomRushAction extends BaseRushAction {
         customFlags,
         isQuietMode,
         parallelism,
-        isIncrementalBuildAllowed: this.options.actionVerb === 'build'
+        isIncrementalBuildAllowed: this.options.actionVerb === 'build',
+        invalidateDownstream
       }
     );
 
@@ -148,6 +155,13 @@ export class CustomRushAction extends BaseRushAction {
       parameterShortName: '-v',
       description: 'Display the logs during the build, rather than just displaying the build status summary'
     });
+    if (this.options.actionVerb === 'build') {
+      this._ignoreDownstream = this.defineFlagParameter({
+        parameterLongName: '--no-deps',
+        description: 'If specified, the incremental build will only rebuild projects that have changed, '
+          + 'but not their dependents.'
+      });
+    }
 
     // @TODO we should throw if they are trying to overwrite built in flags
 
