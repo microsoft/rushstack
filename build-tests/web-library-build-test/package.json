@@ -15,8 +15,8 @@
     "@types/node": "8.5.8"
   },
   "dependencies": {
-    "@microsoft/load-themed-styles": "1.7.26",
-    "@microsoft/web-library-build": "4.4.9",
+    "@microsoft/load-themed-styles": "1.7.27",
+    "@microsoft/web-library-build": "4.4.10",
     "gulp": "~3.9.1"
   }
 }
