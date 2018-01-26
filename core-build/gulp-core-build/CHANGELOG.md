@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Fri, 26 Jan 2018 17:53:38 GMT and should not be manually modified.
+This log was last generated on Fri, 26 Jan 2018 22:05:30 GMT and should not be manually modified.
+
+## 3.6.0
+Fri, 26 Jan 2018 22:05:30 GMT
+
+### Minor changes
+
+- made default testMatch and maxWorkers arguments in Jest task overridable
 
 ## 3.5.3
 Fri, 26 Jan 2018 17:53:38 GMT
