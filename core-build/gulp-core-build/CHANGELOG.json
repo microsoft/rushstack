@@ -2,6 +2,23 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.5.3",
+      "tag": "@microsoft/gulp-core-build_v3.5.3",
+      "date": "Fri, 26 Jan 2018 17:53:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Force a patch bump in case the previous version was an empty package"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.8` to `0.4.9`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.5.2",
       "tag": "@microsoft/gulp-core-build_v3.5.2",
       "date": "Fri, 26 Jan 2018 00:36:51 GMT",
