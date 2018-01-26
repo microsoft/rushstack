@@ -1,5 +1,5 @@
 {
-  "name": "cyclic-dep-2",
+  "name":  "cyclic-dep-2",
   "version": "1.0.0",
   "description": "cyclic-dep-2",
   "dependencies": {

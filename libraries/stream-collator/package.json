@@ -1,5 +1,5 @@
 {
-  "name": "@microsoft/stream-collator",
+  "name":  "@microsoft/stream-collator",
   "version": "2.2.7",
   "description": "Display intelligible realtime output from your asynchronous streams",
   "repository": {

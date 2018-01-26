@@ -1,5 +1,5 @@
 {
-  "name": "@microsoft/gulp-core-build-karma",
+  "name":  "@microsoft/gulp-core-build-karma",
   "version": "4.4.7",
   "description": "",
   "main": "lib/index.js",

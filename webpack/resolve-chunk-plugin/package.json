@@ -1,5 +1,5 @@
 {
-  "name": "@microsoft/resolve-chunk-plugin",
+  "name":  "@microsoft/resolve-chunk-plugin",
   "version": "1.0.24",
   "description": "This is a webpack plugin that looks for calls to \"resolveChunk\" with a chunk name, and returns the chunk ID.",
   "main": "lib/index.js",

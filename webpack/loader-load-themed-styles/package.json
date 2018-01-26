@@ -1,5 +1,5 @@
 {
-  "name": "@microsoft/loader-load-themed-styles",
+  "name":  "@microsoft/loader-load-themed-styles",
   "version": "1.7.7",
   "description": "This simple loader wraps the loading of CSS in script equivalent to `require('load-themed-styles').loadStyles( /* css text */ )`. It is designed to be a replacement for style-loader.",
   "main": "lib/index.js",

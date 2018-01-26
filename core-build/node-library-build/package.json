@@ -1,5 +1,5 @@
 {
-  "name": "@microsoft/node-library-build",
+  "name":  "@microsoft/node-library-build",
   "version": "4.3.7",
   "description": "",
   "main": "lib/index.js",

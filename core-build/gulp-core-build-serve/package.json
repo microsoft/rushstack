@@ -1,5 +1,5 @@
 {
-  "name": "@microsoft/gulp-core-build-serve",
+  "name":  "@microsoft/gulp-core-build-serve",
   "version": "3.2.8",
   "description": "",
   "main": "lib/index.js",

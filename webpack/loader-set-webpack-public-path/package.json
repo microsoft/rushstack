@@ -1,5 +1,5 @@
 {
-  "name": "@microsoft/loader-set-webpack-public-path",
+  "name":  "@microsoft/loader-set-webpack-public-path",
   "version": "3.2.7",
   "description": "This loader sets the webpack public path at runtime.",
   "main": "lib/index.js",

@@ -1,5 +1,5 @@
 {
-  "name": "@microsoft/gulp-core-build-typescript",
+  "name":  "@microsoft/gulp-core-build-typescript",
   "version": "4.7.5",
   "description": "",
   "main": "lib/index.js",

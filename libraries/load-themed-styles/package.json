@@ -1,5 +1,5 @@
 {
-  "name": "@microsoft/load-themed-styles",
+  "name":  "@microsoft/load-themed-styles",
   "version": "1.7.26",
   "description": "Loads themed styles.",
   "license": "MIT",
