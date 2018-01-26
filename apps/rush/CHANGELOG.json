@@ -2,6 +2,26 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "4.2.5",
+      "tag": "@microsoft/rush_v4.2.5",
+      "date": "Fri, 26 Jan 2018 00:36:51 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue when parsing scoped peer dependencies in the pnpm shrinkwrap file"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.7` to `0.4.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.6` to `4.3.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.2.4",
       "tag": "@microsoft/rush_v4.2.4",
       "date": "Sun, 21 Jan 2018 06:33:59 GMT",

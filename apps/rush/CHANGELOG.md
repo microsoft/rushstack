@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sun, 21 Jan 2018 06:33:59 GMT and should not be manually modified.
+This log was last generated on Fri, 26 Jan 2018 00:36:51 GMT and should not be manually modified.
+
+## 4.2.5
+Fri, 26 Jan 2018 00:36:51 GMT
+
+### Updates
+
+- Fix an issue when parsing scoped peer dependencies in the pnpm shrinkwrap file
 
 ## 4.2.4
 Sun, 21 Jan 2018 06:33:59 GMT
