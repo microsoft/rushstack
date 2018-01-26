@@ -175,7 +175,9 @@ interface IJestConfig {
   coverage?: boolean;
   coverageReporters?: string[];
   isEnabled?: boolean;
+  maxWorkers?: number;
   moduleDirectories?: string[];
+  testMatch?: string[];
   testPathIgnorePatterns?: string[];
 }
 
