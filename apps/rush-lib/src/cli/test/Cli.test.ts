@@ -8,7 +8,7 @@ import { assert } from 'chai';
 
 import Utilities from '../../utilities/Utilities';
 
-describe('CLI', () => {
+describe('CLI', function() {
   this.timeout(5000);
   it('should not fail when there is no rush.json', () => {
     const workingDir: string = '/';
