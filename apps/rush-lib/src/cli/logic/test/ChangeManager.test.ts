@@ -54,11 +54,11 @@ describe('ChangeManager', () => {
       'cyclic-dep-explicit-1 should have been updated.');
     expect(changeManager.allPackages.get('cyclic-dep-explicit-1')!.packageJson.dependencies!['cyclic-dep-explicit-2'])
       .equals(
-        '>=1.0.1 <2.0.0',
-        'the "cyclic-dep-explicit-2" dependency in "cyclic-dep-explicit-1" should be updated');
+        '>=1.0.0 <2.0.0',
+        'the "cyclic-dep-explicit-2" dependency in "cyclic-dep-explicit-1" should not be updated');
     expect(changeManager.allPackages.get('cyclic-dep-explicit-2')!.packageJson.version).equals(
-      '1.0.1',
-      'cyclic-dep-explicit-2 should have patch version update.');
+      '1.0.0',
+      'cyclic-dep-explicit-2 should not have patch version update.');
     expect(changeManager.allPackages.get('cyclic-dep-explicit-2')!.packageJson.dependencies!['cyclic-dep-explicit-1'])
       .equals(
         '>=1.0.0 <2.0.0',

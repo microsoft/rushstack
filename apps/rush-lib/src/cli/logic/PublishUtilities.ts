@@ -479,9 +479,13 @@ export default class PublishUtilities {
         }
         currentChange.newVersion = semver.inc(currentChange.newVersion, 'prerelease');
       } else {
+        let packageVersion: string = pkg.version;
+        if (currentChange.newVersion && semver.gt(currentChange.newVersion, pkg.version)) {
+          packageVersion = currentChange.newVersion;
+        }
         currentChange.newVersion = change.changeType! >= ChangeType.patch ?
           semver.inc(pkg.version, PublishUtilities._getReleaseType(currentChange.changeType!)) :
-          pkg.version;
+          packageVersion;
       }
 
       // If hotfix change, force new range dependency to be the exact new version
@@ -529,7 +533,8 @@ export default class PublishUtilities {
     projectsToExclude?: Set<string>
   ): void {
 
-    if (dependencies && dependencies[change.packageName]) {
+    if (dependencies && dependencies[change.packageName] &&
+      !PublishUtilities._isCyclicDependency(allPackages, parentPackageName, change.packageName)) {
       const requiredVersion: string = dependencies[change.packageName];
       const alwaysUpdate: boolean = !!prereleaseToken && prereleaseToken.hasValue &&
         !allChanges.hasOwnProperty(parentPackageName);
