@@ -97,6 +97,9 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
     );
   }
 
+  /**
+   * @remarks If this schema is updated, all dependent tasks' schemas must also be updated.
+   */
   public loadSchema(): Object {
     return require('./serve.schema.json');
   }
