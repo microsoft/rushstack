@@ -91,7 +91,7 @@ export class CustomRushAction extends BaseRushAction {
       }
     });
 
-    let changedProjectsOnly: boolean = this.options.actionVerb === 'build' && this._changedProjectsOnly.value;
+    const changedProjectsOnly: boolean = this.options.actionVerb === 'build' && this._changedProjectsOnly.value;
 
     const tasks: TaskSelector = new TaskSelector(
       {
