@@ -35,7 +35,7 @@ interface ICustomOptionInstance {
 export class CustomRushAction extends BaseRushAction {
   private customOptions: Map<string, ICustomOptionInstance> = new Map<string, ICustomOptionInstance>();
 
-  private _ignoreDownstream: CommandLineFlagParameter;
+  private _changedProjectsOnly: CommandLineFlagParameter;
   private _fromFlag: CommandLineStringListParameter;
   private _toFlag: CommandLineStringListParameter;
   private _verboseParameter: CommandLineFlagParameter;
@@ -91,10 +91,7 @@ export class CustomRushAction extends BaseRushAction {
       }
     });
 
-    let invalidateDownstream: boolean = true;
-    if (this.options.actionVerb === 'build' && this._ignoreDownstream.value) {
-      invalidateDownstream = false;
-    }
+    let changedProjectsOnly: boolean = this.options.actionVerb === 'build' && this._changedProjectsOnly.value;
 
     const tasks: TaskSelector = new TaskSelector(
       {
@@ -106,7 +103,7 @@ export class CustomRushAction extends BaseRushAction {
         isQuietMode,
         parallelism,
         isIncrementalBuildAllowed: this.options.actionVerb === 'build',
-        invalidateDownstream
+        changedProjectsOnly
       }
     );
 
@@ -156,10 +153,11 @@ export class CustomRushAction extends BaseRushAction {
       description: 'Display the logs during the build, rather than just displaying the build status summary'
     });
     if (this.options.actionVerb === 'build') {
-      this._ignoreDownstream = this.defineFlagParameter({
-        parameterLongName: '--no-deps',
+      this._changedProjectsOnly = this.defineFlagParameter({
+        parameterLongName: '--changed-projects-only',
+        parameterShortName: '-cpo',
         description: 'If specified, the incremental build will only rebuild projects that have changed, '
-          + 'but not their dependents.'
+          + 'but not any projects that directly or indirectly depend on the changed package.'
       });
     }
 
