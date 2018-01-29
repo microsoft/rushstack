@@ -16,6 +16,12 @@ import {
   ICertificate
 } from './certificates';
 
+/**
+ * @remarks
+ * If this schema is updated, dependant schemas MUST also be updated, including the spfx-serve.schema.json.
+ * The spfx-serve.schema.json is the serve.schema.json file with the spfx-specific properties included. The
+ * merge is simple, but must be done manually whenever the serve.schema.json file is changed.
+ */
 export interface IServeTaskConfig {
   /**
    * API server configuration
@@ -97,12 +103,6 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
     );
   }
 
-  /**
-   * @remarks
-   * If this schema is updated, dependant schemas MUST also be updated, including the spfx-serve.schema.json.
-   * The spfx-serve.schema.json is the serve.schema.json file with the spfx-specific properties included. The
-   * merge is simple, but must be done manually whenever the serve.schema.json file is changed.
-   */
   public loadSchema(): Object {
     return require('./serve.schema.json');
   }
