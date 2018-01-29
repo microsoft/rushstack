@@ -98,7 +98,10 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
   }
 
   /**
-   * @remarks If this schema is updated, all dependent tasks' schemas must also be updated.
+   * @remarks
+   * If this schema is updated, this schema MUST also be updated. The spfx-serve.schema.json is
+   * the serve.schema.json file with the spfx-specific properties included. The merge is simple, but
+   * must be done manually whenever the serve.schema.json file in GCB is changed.
    */
   public loadSchema(): Object {
     return require('./serve.schema.json');
