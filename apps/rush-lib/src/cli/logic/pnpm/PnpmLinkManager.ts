@@ -167,6 +167,11 @@ export class PnpmLinkManager extends BaseLinkManager {
         throw Error(`Dependency "${dependencyName}" is not a symlink in "${pathToLocalInstallation}`);
       }
 
+      // The dependencyLocalInstallationSymlink is just a symlink to another folder.
+      // To reduce the number of filesystem reads that are needed, we will link to where that symlink
+      // it pointed, rather than linking to a link.
+      const dependencyLocalInstallationRealpath: string = fsx.realpathSync(dependencyLocalInstallationSymlink);
+
       const newLocalFolderPath: string = path.join(
           localPackage.folderPath, 'node_modules', dependencyName);
 
@@ -174,7 +179,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       if (DEBUG) {
         // read the version number for diagnostic purposes
         const packageJsonForDependency: IPackageJson = fsx.readJsonSync(
-          path.join(dependencyLocalInstallationSymlink, RushConstants.packageJsonFilename));
+          path.join(dependencyLocalInstallationRealpath, RushConstants.packageJsonFilename));
 
         version = packageJsonForDependency.version;
       }
@@ -185,7 +190,7 @@ export class PnpmLinkManager extends BaseLinkManager {
         newLocalFolderPath
       );
 
-      newLocalPackage.symlinkTargetFolderPath = dependencyLocalInstallationSymlink;
+      newLocalPackage.symlinkTargetFolderPath = dependencyLocalInstallationRealpath;
       localPackage.addChild(newLocalPackage);
     }
 
