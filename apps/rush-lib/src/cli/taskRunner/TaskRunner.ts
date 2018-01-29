@@ -21,6 +21,7 @@ import TaskError from './TaskError';
  */
 export default class TaskRunner {
   private _tasks: Map<string, ITask>;
+  private _changedProjectsOnly: boolean;
   private _buildQueue: ITask[];
   private _quietMode: boolean;
   private _hasAnyFailures: boolean;
@@ -29,11 +30,14 @@ export default class TaskRunner {
   private _totalTasks: number;
   private _completedTasks: number;
 
-  constructor(quietMode: boolean, parallelism: number | undefined) {
+  constructor(quietMode: boolean,
+    parallelism: number | undefined,
+    changedProjectsOnly: boolean) {
     this._tasks = new Map<string, ITask>();
     this._buildQueue = [];
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
+    this._changedProjectsOnly = changedProjectsOnly;
 
     if (parallelism) {
       this._parallelism = parallelism;
@@ -261,7 +265,9 @@ export default class TaskRunner {
     task.status = TaskStatus.Success;
 
     task.dependents.forEach((dependent: ITask) => {
-      dependent.isIncrementalBuildAllowed = false;
+      if (!this._changedProjectsOnly) {
+        dependent.isIncrementalBuildAllowed = false;
+      }
       dependent.dependencies.delete(task);
     });
   }
@@ -275,7 +281,9 @@ export default class TaskRunner {
       + `[${task.name}] completed with warnings in ${task.stopwatch.toString()}`));
     task.status = TaskStatus.SuccessWithWarning;
     task.dependents.forEach((dependent: ITask) => {
-      dependent.isIncrementalBuildAllowed = false;
+      if (!this._changedProjectsOnly) {
+        dependent.isIncrementalBuildAllowed = false;
+      }
       dependent.dependencies.delete(task);
     });
   }
