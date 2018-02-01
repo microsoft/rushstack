@@ -237,7 +237,7 @@ export default class Utilities {
    * Attempts to run Utilities.executeCommand() up to maxAttempts times before giving up.
    */
   public static executeCommandWithRetry(command: string, args: string[], maxAttempts: number,
-    workingDirectory: string, suppressOutput: boolean = false): void {
+    workingDirectory: string, suppressOutput: boolean = false, retryCallback?: () => void): void {
 
     if (maxAttempts < 1) {
       throw new Error('The maxAttempts parameter cannot be less than 1');
@@ -257,6 +257,9 @@ export default class Utilities {
         if (attemptNumber < maxAttempts) {
           ++attemptNumber;
           console.log(`Trying again (attempt #${attemptNumber})...` + os.EOL);
+          if (retryCallback) {
+            retryCallback();
+          }
           continue;
         } else {
           console.error(`Giving up after ${attemptNumber} attempts` + os.EOL);

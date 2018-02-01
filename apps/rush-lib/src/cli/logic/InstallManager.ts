@@ -644,10 +644,29 @@ export default class InstallManager {
 
     console.log(os.EOL + colors.bold(`Running "${this._rushConfiguration.packageManager} install" in`
       + ` ${this._rushConfiguration.commonTempFolder}`) + os.EOL);
+
     Utilities.executeCommandWithRetry(packageManagerFilename,
       installArgs,
       MAX_INSTALL_ATTEMPTS,
-      this._rushConfiguration.commonTempFolder);
+      this._rushConfiguration.commonTempFolder,
+      false, () => {
+        if (this._rushConfiguration.packageManager === 'pnpm') {
+          // If there is a failure in pnpm, it is possible that it left the
+          // store in a bad state. Therefore, we should clean out the store
+          // before attempting the install again.
+
+          console.log(colors.yellow(`Deleting the "node_modules" folder`));
+          this._asyncRecycler.moveFolder(commonNodeModulesFolder);
+          console.log(colors.yellow(`Deleting the "pnpm-store" folder`));
+          this._asyncRecycler.moveFolder(this._rushConfiguration.pnpmStoreFolder);
+
+          // Since it may be a while before the package manager gets around to creating the "node_modules" folder,
+          // create an empty folder so that the warning on the next attempt of "rush install"
+          Utilities.createFolderWithRetry(commonNodeModulesFolder);
+
+          this._asyncRecycler.deleteAll();
+        }
+      });
 
     this._fixupNpm5Regression();
 
