@@ -55,30 +55,40 @@ export class LockFile {
       return undefined;
     }
 
-    return new LockFile(fileDescriptor, state);
+    return new LockFile(fileDescriptor, filename, state);
   }
 
+  /**
+   * Unlocks a file and removes it from disk.
+   * This can only be called once.
+   */
   public unlock(): void {
     if (this.isLocked) {
       fsx.closeSync(this._fileDescriptor!);
+      fsx.removeSync(this._fileName);
       this._fileDescriptor = undefined;
+    } else {
+      throw new Error(`The lock on file "${this._fileName}" has already been released.`);
     }
   }
 
+  /**
+   * Returns the initial state of the lock.
+   */
   public get state(): LockFileState {
     return this._state;
   }
 
-  public set state(state: LockFileState) {
-    this._state = state;
-  }
-
+  /**
+   * Returns true if this lock is currently being held.
+   */
   public get isLocked(): boolean {
     return this._fileDescriptor !== undefined;
   }
 
   private constructor(
     private _fileDescriptor: number | undefined,
+    private _fileName: string,
     private _state: LockFileState) {
   }
 }

@@ -52,12 +52,9 @@ class JsonSchema {
 
 // @public
 class LockFile {
-  // (undocumented)
   readonly isLocked: boolean;
   static lock(filename: string): LockFile | undefined;
-  // (undocumented)
-  state: LockFileState;
-  // (undocumented)
+  readonly state: LockFileState;
   unlock(): void;
 }
 
