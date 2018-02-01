@@ -21,6 +21,5 @@ export {
 } from './JsonSchema';
 export { PackageJsonLookup } from './PackageJsonLookup';
 export {
-  LockFile,
-  LockFileState
+  LockFile
 } from './LockFile';
