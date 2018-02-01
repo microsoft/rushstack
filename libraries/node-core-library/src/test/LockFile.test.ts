@@ -8,7 +8,7 @@ import { assert } from 'chai';
 import * as path from 'path';
 import { LockFile } from '../LockFile';
 
-let i = 0;
+let i: number = 0;
 function getLockFileName(): string {
   i++;
   return path.join(__dirname, `${Date.now()}_${i}.lock`);
