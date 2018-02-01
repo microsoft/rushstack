@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 import * as os from 'os';
 import * as path from 'path';
+import * as fsx from 'fs-extra';
 
 import {
   CommandLineAction,
@@ -24,6 +25,20 @@ export abstract class BaseRushAction extends CommandLineAction {
 
   protected onExecute(): void {
     this._ensureEnvironment();
+    const lockFilePath: string = path.join(
+      this.rushConfiguration.commonTempFolder,
+      'rush.lock'
+    );
+
+    if (fsx.existsSync(lockFilePath)) {
+      fsx.removeSync(lockFilePath);
+    }
+    try {
+      fsx.openSync(lockFilePath, 'wx');
+    } catch (error) {
+      console.log(`Another rush command is already running in this repository!`);
+    }
+
     console.log(`Starting "rush ${this.options.actionVerb}"${os.EOL}`);
     this.run();
   }
