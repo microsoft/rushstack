@@ -13,7 +13,10 @@ import RushConfiguration from '../../data/RushConfiguration';
 import EventHooksManager from '../logic/EventHooksManager';
 
 export interface IRushCommandLineActionOptions extends ICommandLineActionOptions {
-  /** If true, no locking mechanism will be enforced when this action is run */
+  /**
+   * If true, no locking mechanism will be enforced when this action is run.
+   * Note this defaults to false (which is safer).
+   */
   safeForSimultaneousRushProcesses?: boolean;
 }
 

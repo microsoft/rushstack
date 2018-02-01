@@ -51,6 +51,23 @@ class JsonSchema {
 }
 
 // @public
+class LockFile {
+  // (undocumented)
+  readonly isLocked: boolean;
+  static lock(filename: string): LockFile | undefined;
+  // (undocumented)
+  state: LockFileState;
+  // (undocumented)
+  unlock(): void;
+}
+
+// @public
+enum LockFileState {
+  Clean = 1,
+  Dirty = 2
+}
+
+// @public
 class PackageJsonLookup {
   constructor();
   clearCache(): void;

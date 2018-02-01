@@ -20,3 +20,7 @@ export {
   IJsonSchemaFromFileOptions
 } from './JsonSchema';
 export { PackageJsonLookup } from './PackageJsonLookup';
+export {
+  LockFile,
+  LockFileState
+} from './LockFile';
