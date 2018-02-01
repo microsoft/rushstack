@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix issue with pnpm where store was not removed after an unsuccessful installation",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "nickpape-msft@users.noreply.github.com"
+}
