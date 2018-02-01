@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import * as fsx from 'fs-extra';
 import * as path from 'path';
 
@@ -58,7 +61,7 @@ export class LockFile {
    * Returns the initial state of the lock.
    * This can be used to detect if the previous process was terminated before releasing the resource.
    */
-  public dirtyWhenAcquired(): boolean {
+  public get dirtyWhenAcquired(): boolean {
     return this._dirtyWhenAcquired;
   }
 

@@ -52,16 +52,10 @@ class JsonSchema {
 
 // @public
 class LockFile {
+  readonly dirtyWhenAcquired: boolean;
   readonly isReleased: boolean;
-  readonly previousState: LockFileState;
   release(): void;
-  static tryAcquire(filename: string): LockFile | undefined;
-}
-
-// @public
-enum LockFileState {
-  Clean = 1,
-  Dirty = 2
+  static tryAcquire(filePath: string): LockFile | undefined;
 }
 
 // @public
