@@ -6,7 +6,7 @@
 import * as fsx from 'fs-extra';
 import { assert } from 'chai';
 import * as path from 'path';
-import { LockFile } from '../LockFile';
+import { LockFile, getProcessStartTime } from '../LockFile';
 
 let i: number = 0;
 function getLockFileName(): string {
@@ -18,18 +18,25 @@ describe('LockFile', () => {
   it('will not acquire if existing lock is there', () => {
     // create an open lockfile
     const lockFileName: string = getLockFileName();
+    fsx.removeSync(lockFileName);
     const lockFileDescriptor: number = fsx.openSync(lockFileName, 'wx');
 
+    if (process.platform === 'darwin') {
+      fsx.writeSync(lockFileDescriptor, `${process.pid};${getProcessStartTime(process.pid.toString())}`);
+    }
     const lock: LockFile | undefined = LockFile.tryAcquire(lockFileName);
 
     // this lock should be undefined since there is an existing lock
     assert.isUndefined(lock);
     fsx.closeSync(lockFileDescriptor);
+
+    fsx.removeSync(lockFileName);
   });
 
   it('can acquire and close a dirty lockfile', () => {
     // Create a lockfile that is still hanging around on disk,
     const lockFileName: string = getLockFileName();
+    fsx.removeSync(lockFileName);
     fsx.closeSync(fsx.openSync(lockFileName, 'wx'));
 
     const lock: LockFile | undefined = LockFile.tryAcquire(lockFileName);
@@ -46,6 +53,7 @@ describe('LockFile', () => {
 
   it('can acquire and close a clean lockfile', () => {
     const lockFileName: string = getLockFileName();
+    fsx.removeSync(lockFileName);
     const lock: LockFile | undefined = LockFile.tryAcquire(lockFileName);
 
     // The lockfile should exist and be in a clean state

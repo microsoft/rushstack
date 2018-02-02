@@ -3,6 +3,18 @@
 
 import * as fsx from 'fs-extra';
 import * as path from 'path';
+import * as child_process from 'child_process';
+
+export function getProcessStartTime(pid: string): string | undefined {
+  const psResult: string = child_process.spawnSync('ps', [`-p ${pid}`, '-f']).stdout.toString();
+  const psSplit: string[] = psResult.split('\n');
+
+  if (psSplit[1]) {
+    const items: string[] = psSplit[1].split(/\s+/);
+    return items[5];
+  }
+  return undefined;
+}
 
 /**
  * A helper utility for working with file-based locks.
@@ -21,13 +33,35 @@ export class LockFile {
     let dirtyWhenAcquired: boolean = false;
 
     if (fsx.existsSync(filePath)) {
-      // If the lockfile is held by an process with an exclusive lock, then removing it will
-      // silently fail. OpenSync() below will then fail and we will be unable to create a lock.
 
-      // Otherwise, the lockfile is sitting on disk, but nothing is holding it, implying that
-      // the last process to hold it died.
       dirtyWhenAcquired = true;
-      fsx.removeSync(filePath);
+
+      if (process.platform === 'win32') {
+        // If the lockfile is held by an process with an exclusive lock, then removing it will
+        // silently fail. OpenSync() below will then fail and we will be unable to create a lock.
+
+        // Otherwise, the lockfile is sitting on disk, but nothing is holding it, implying that
+        // the last process to hold it died.
+      } else if (process.platform === 'darwin') {
+        // we need to compare the process ID and start time in the lockfile
+        // to the result of the ps command
+
+        const contents: string = fsx.readFileSync(filePath).toString();
+        const [pid, startTime] = contents.split(';');
+
+        if (!!pid && !!startTime) {
+          const oldStartTime: string | undefined = getProcessStartTime(pid);
+          // the process that created this lock is still running!
+          if (oldStartTime === startTime) {
+            return undefined;
+          }
+        }
+      } else {
+        throw new Error(`Unsupported operating system: ${process.platform}`);
+      }
+
+      // If we get here it is safe to unlink the lockfile
+      fsx.unlinkSync(filePath);
     }
 
     let fileDescriptor: number;
@@ -38,6 +72,10 @@ export class LockFile {
       // we tried to delete the lock, but something else is holding it,
       // (probably an active process), therefore we are unable to create a lock
       return undefined;
+    }
+
+    if (process.platform === 'darwin') {
+      fsx.writeSync(fileDescriptor, `${process.pid};${getProcessStartTime(process.pid.toString())}`);
     }
 
     return new LockFile(fileDescriptor, filePath, dirtyWhenAcquired);
