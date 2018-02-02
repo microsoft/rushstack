@@ -2,12 +2,13 @@
 // See LICENSE in the project root for license information.
 import * as os from 'os';
 import * as path from 'path';
-import * as fsx from 'fs-extra';
 
 import {
   CommandLineAction,
   ICommandLineActionOptions
 } from '@microsoft/ts-command-line';
+
+import { LockFile } from '@microsoft/node-core-library';
 
 import RushConfiguration from '../../data/RushConfiguration';
 import EventHooksManager from '../logic/EventHooksManager';
@@ -41,13 +42,9 @@ export abstract class BaseRushAction extends CommandLineAction {
         this.rushConfiguration.commonTempFolder,
         'rush.lock'
       );
-      if (fsx.existsSync(lockFilePath)) {
-        fsx.removeSync(lockFilePath);
-      }
-      try {
-        fsx.openSync(lockFilePath, 'wx');
-      } catch (error) {
-        console.log(`Another rush command is already running in this repository!`);
+
+      if (!LockFile.tryAcquire(lockFilePath)) {
+        console.log(`Another rush command is already running in this repository.`);
         process.exit(1);
       }
     }
