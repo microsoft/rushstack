@@ -21,7 +21,7 @@ describe('LockFile', () => {
     fsx.removeSync(lockFileName);
     const lockFileDescriptor: number = fsx.openSync(lockFileName, 'wx');
 
-    if (process.platform === 'darwin') {
+    if (process.platform === 'darwin' || process.platform === 'linux') {
       fsx.writeSync(lockFileDescriptor, `${process.pid};${getProcessStartTime(process.pid.toString())}`);
     }
     const lock: LockFile | undefined = LockFile.tryAcquire(lockFileName);

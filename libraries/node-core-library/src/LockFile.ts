@@ -6,12 +6,24 @@ import * as path from 'path';
 import * as child_process from 'child_process';
 
 export function getProcessStartTime(pid: string): string | undefined {
-  const psResult: string = child_process.spawnSync('ps', [`-p ${pid}`, '-f']).stdout.toString();
+  let args: string[];
+  if (process.platform === 'darwin') {
+    args = [`-p {pid}`, '-f'];
+  } else if (process.platform === 'linux') {
+    args = ['-p', pid.toString(), '-f'];
+  } else {
+    throw new Error(`Unsupported system: ${process.platform}`);
+  }
+
+  const psResult: string = child_process.spawnSync('ps', args).stdout.toString();
   const psSplit: string[] = psResult.split('\n');
 
   if (psSplit[1]) {
+    // note that on OSX the first entry is a ""
+    // UID, PID, PPID, C, STIME, TTY, TIME, CMD
+    // e.g.: items = ['root', '2848', '1', '0', '13:08', '?', '00:00:00', '/usr/lib/udisks2/udisksd']
     const items: string[] = psSplit[1].split(/\s+/);
-    return items[5];
+    return items[process.platform === 'darwin' ? 5 : 4];
   }
   return undefined;
 }
@@ -42,7 +54,7 @@ export class LockFile {
 
         // Otherwise, the lockfile is sitting on disk, but nothing is holding it, implying that
         // the last process to hold it died.
-      } else if (process.platform === 'darwin') {
+      } else if (process.platform === 'darwin' || process.platform === 'linux') {
         // we need to compare the process ID and start time in the lockfile
         // to the result of the ps command
 
@@ -74,7 +86,7 @@ export class LockFile {
       return undefined;
     }
 
-    if (process.platform === 'darwin') {
+    if (process.platform === 'darwin' || process.platform === 'linux') {
       fsx.writeSync(fileDescriptor, `${process.pid};${getProcessStartTime(process.pid.toString())}`);
     }
 
