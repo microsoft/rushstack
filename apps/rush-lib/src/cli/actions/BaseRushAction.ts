@@ -16,7 +16,8 @@ import EventHooksManager from '../logic/EventHooksManager';
 export interface IRushCommandLineActionOptions extends ICommandLineActionOptions {
   /**
    * If true, no locking mechanism will be enforced when this action is run.
-   * Note this defaults to false (which is safer).
+   * Note this defaults to false (which is a safer assumption in case this value
+   *  is ommitted).
    */
   safeForSimultaneousRushProcesses?: boolean;
 }

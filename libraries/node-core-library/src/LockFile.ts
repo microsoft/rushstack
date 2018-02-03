@@ -59,6 +59,9 @@ export class LockFile {
   public static tryAcquire(filePath: string): LockFile | undefined {
     let dirtyWhenAcquired: boolean = false;
 
+    // resolve the filepath in case the cwd is changed during process execution
+    filePath = path.resolve(filePath);
+
     if (fsx.existsSync(filePath)) {
 
       dirtyWhenAcquired = true;
