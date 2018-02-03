@@ -5,6 +5,9 @@ import * as fsx from 'fs-extra';
 import * as path from 'path';
 import * as child_process from 'child_process';
 
+/**
+ * Helper function that is exported for unit tests only
+ */
 export function getProcessStartTime(pid: string): string | undefined {
   let args: string[];
   if (process.platform === 'darwin') {
