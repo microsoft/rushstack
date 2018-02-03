@@ -8,24 +8,16 @@ import * as child_process from 'child_process';
 export function getProcessStartTime(pid: string): string | undefined {
   let args: string[];
   if (process.platform === 'darwin') {
-    args = [`-p ${pid}`, '-f'];
+    args = [`-p ${pid}`, '-o', 'lstat'];
   } else if (process.platform === 'linux') {
-    args = ['-p', pid.toString(), '-f'];
+    args = ['-p', pid.toString(), '-o', 'lstat'];
   } else {
     throw new Error(`Unsupported system: ${process.platform}`);
   }
 
   const psResult: string = child_process.spawnSync('ps', args).stdout.toString();
   const psSplit: string[] = psResult.split('\n');
-
-  if (psSplit[1]) {
-    // note that on OSX the first entry is a ""
-    // UID, PID, PPID, C, STIME, TTY, TIME, CMD
-    // e.g.: items = ['root', '2848', '1', '0', '13:08', '?', '00:00:00', '/usr/lib/udisks2/udisksd']
-    const items: string[] = psSplit[1].split(/\s+/);
-    return items[process.platform === 'darwin' ? 5 : 4];
-  }
-  return undefined;
+  return psSplit[1];
 }
 
 /**
