@@ -8,16 +8,16 @@ import * as child_process from 'child_process';
 export function getProcessStartTime(pid: string): string | undefined {
   let args: string[];
   if (process.platform === 'darwin') {
-    args = [`-p ${pid}`, '-o', 'lstat'];
+    args = [`-p ${pid}`, '-o lstart'];
   } else if (process.platform === 'linux') {
-    args = ['-p', pid.toString(), '-o', 'lstat'];
+    args = ['-p', pid.toString(), '-o', 'lstart'];
   } else {
     throw new Error(`Unsupported system: ${process.platform}`);
   }
 
   const psResult: string = child_process.spawnSync('ps', args).stdout.toString();
   const psSplit: string[] = psResult.split('\n');
-  return psSplit[1];
+  return psSplit[1] ? psSplit[1].trimRight().trimLeft() : undefined;
 }
 
 /**
