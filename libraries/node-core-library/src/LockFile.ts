@@ -79,7 +79,12 @@ export class LockFile {
     }
 
     if (process.platform === 'darwin' || process.platform === 'linux') {
-      fsx.writeSync(fileDescriptor, `${process.pid};${getProcessStartTime(process.pid.toString())}`);
+      try {
+        fsx.writeSync(fileDescriptor, `${process.pid};${getProcessStartTime(process.pid.toString())}`);
+      } catch (error) {
+        fsx.closeSync(fileDescriptor);
+        return undefined;
+      }
     }
 
     return new LockFile(fileDescriptor, filePath, dirtyWhenAcquired);
