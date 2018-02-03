@@ -53,6 +53,7 @@ class JsonSchema {
 // @public
 class LockFile {
   readonly dirtyWhenAcquired: boolean;
+  readonly filePath: string;
   readonly isReleased: boolean;
   release(): void;
   static tryAcquire(filePath: string): LockFile | undefined;

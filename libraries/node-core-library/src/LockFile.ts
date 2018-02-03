@@ -154,6 +154,13 @@ export class LockFile {
   }
 
   /**
+   * Returns the absolute path to the lockfile
+   */
+  public get filePath(): string {
+    return this._filePath;
+  }
+
+  /**
    * Returns true if this lock is currently being held.
    */
   public get isReleased(): boolean {
