@@ -8,7 +8,7 @@ import * as child_process from 'child_process';
 export function getProcessStartTime(pid: string): string | undefined {
   let args: string[];
   if (process.platform === 'darwin') {
-    args = [`-p {pid}`, '-f'];
+    args = [`-p ${pid}`, '-f'];
   } else if (process.platform === 'linux') {
     args = ['-p', pid.toString(), '-f'];
   } else {
