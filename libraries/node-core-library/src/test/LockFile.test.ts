@@ -33,7 +33,7 @@ describe('LockFile', () => {
     fsx.removeSync(lockFileName);
   });
 
-  it('can acquire and close a dirty lockfile', () => {
+  it('can acquire and close a dirty lockfile that cannot be parsed', () => {
     // Create a lockfile that is still hanging around on disk,
     const lockFileName: string = getLockFileName();
     fsx.removeSync(lockFileName);
@@ -49,6 +49,29 @@ describe('LockFile', () => {
     lock!.release();
     assert.isFalse(fsx.existsSync(lockFileName));
     assert.isTrue(lock!.isReleased);
+  });
+
+  it('can acquire and close a dirty lockfile', () => {
+    if (process.platform === 'darwin' || process.platform === 'linux') {
+      // Create a lockfile that is still hanging around on disk,
+      const lockFileName: string = getLockFileName();
+      fsx.removeSync(lockFileName);
+      const lockFileDescriptor: number = fsx.openSync(lockFileName, 'wx');
+
+      fsx.writeSync(lockFileDescriptor, `${process.pid};12345`);
+      fsx.closeSync(lockFileDescriptor);
+
+      const lock: LockFile | undefined = LockFile.tryAcquire(lockFileName);
+
+      assert.isDefined(lock);
+      assert.isTrue(lock!.dirtyWhenAcquired);
+      assert.isFalse(lock!.isReleased);
+
+      // Ensure that we can release the "dirty" lockfile
+      lock!.release();
+      assert.isFalse(fsx.existsSync(lockFileName));
+      assert.isTrue(lock!.isReleased);
+    }
   });
 
   it('can acquire and close a clean lockfile', () => {
