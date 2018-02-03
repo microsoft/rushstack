@@ -6,12 +6,13 @@ import * as path from 'path';
 import * as child_process from 'child_process';
 
 /**
- * Helper function that is exported for unit tests only
+ * Helper function that is exported for unit tests only.
+ * Returns undefined if the process doesn't exist with that pid.
  */
-export function getProcessStartTime(pid: string): string | undefined {
+export function getProcessStartTime(pid: number): string | undefined {
   let args: string[];
   if (process.platform === 'darwin') {
-    args = [`-p ${pid}`, '-o lstart'];
+    args = [`-p ${pid.toString()}`, '-o lstart'];
   } else if (process.platform === 'linux') {
     args = ['-p', pid.toString(), '-o', 'lstart'];
   } else {
@@ -19,8 +20,27 @@ export function getProcessStartTime(pid: string): string | undefined {
   }
 
   const psResult: string = child_process.spawnSync('ps', args).stdout.toString();
+
+  // there was an error executing psresult
+  if (!psResult) {
+    throw new Error(`Unexpected output from "ps" command`);
+  }
+
   const psSplit: string[] = psResult.split('\n');
-  return psSplit[1] ? psSplit[1].trimRight().trimLeft() : undefined;
+
+  // successfuly able to run "ps", but no process was found
+  if (psSplit[1] === '') {
+    return undefined;
+  }
+
+  if (psSplit[1]) {
+    const trimmed: string = psSplit[1].trim();
+    if (trimmed.length > 10) {
+      return trimmed;
+    }
+  }
+
+  throw new Error(`Unexpected output from the "ps" command`);
 }
 
 /**
@@ -54,10 +74,10 @@ export class LockFile {
         // to the result of the ps command
 
         const contents: string = fsx.readFileSync(filePath).toString();
-        const [pid, startTime] = contents.split(';');
+        const [pid, startTime]: string[] = contents.split(';');
 
         if (!!pid && !!startTime) {
-          const oldStartTime: string | undefined = getProcessStartTime(pid);
+          const oldStartTime: string | undefined = getProcessStartTime(parseInt(pid, 10));
           // the process that created this lock is still running!
           if (oldStartTime === startTime) {
             return undefined;
@@ -71,7 +91,7 @@ export class LockFile {
       fsx.unlinkSync(filePath);
     }
 
-    let fileDescriptor: number;
+    let fileDescriptor: number | undefined;
     try {
       // Attempt to open an exclusive lockfile
       fileDescriptor = fsx.openSync(filePath, 'wx');
@@ -81,16 +101,31 @@ export class LockFile {
       return undefined;
     }
 
-    if (process.platform === 'darwin' || process.platform === 'linux') {
-      try {
-        fsx.writeSync(fileDescriptor, `${process.pid};${getProcessStartTime(process.pid.toString())}`);
-      } catch (error) {
+    let lockFile: LockFile;
+    try {
+      if (process.platform === 'darwin' || process.platform === 'linux') {
+        const startTime: string | undefined = getProcessStartTime(process.pid);
+        if (startTime === undefined) {
+          // we were unable to get the current pid
+          throw new Error(`Unable to determine current process' start time`);
+        }
+
+        try {
+          fsx.writeSync(fileDescriptor, `${process.pid};${startTime}`);
+        } catch (error) {
+          throw new Error(`Unable to write process pid and start time to lockfile!`);
+        }
+      }
+
+      lockFile = new LockFile(fileDescriptor, filePath, dirtyWhenAcquired);
+      fileDescriptor = undefined;
+    } finally {
+      if (fileDescriptor) {
         fsx.closeSync(fileDescriptor);
-        return undefined;
       }
     }
 
-    return new LockFile(fileDescriptor, filePath, dirtyWhenAcquired);
+    return lockFile;
   }
 
   /**
