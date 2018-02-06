@@ -39,12 +39,7 @@ export abstract class BaseRushAction extends CommandLineAction {
     this._ensureEnvironment();
 
     if (!this._safeForSimultaneousRushProcesses) {
-      const lockFilePath: string = path.join(
-        this.rushConfiguration.commonTempFolder,
-        'rush.lock'
-      );
-
-      if (!LockFile.tryAcquire(lockFilePath)) {
+      if (!LockFile.tryAcquire(this.rushConfiguration.commonTempFolder, 'rush')) {
         console.log(`Another rush command is already running in this repository.`);
         process.exit(1);
       }
