@@ -57,78 +57,14 @@ export class LockFile {
    * @param filePath - the filePath of the lockfile.
    */
   public static tryAcquire(filePath: string): LockFile | undefined {
-    let dirtyWhenAcquired: boolean = false;
-
     // resolve the filepath in case the cwd is changed during process execution
     filePath = path.resolve(filePath);
-
-    if (fsx.existsSync(filePath)) {
-
-      dirtyWhenAcquired = true;
-
-      if (process.platform === 'win32') {
-        // If the lockfile is held by an process with an exclusive lock, then removing it will
-        // silently fail. OpenSync() below will then fail and we will be unable to create a lock.
-
-        // Otherwise, the lockfile is sitting on disk, but nothing is holding it, implying that
-        // the last process to hold it died.
-      } else if (process.platform === 'darwin' || process.platform === 'linux') {
-        // we need to compare the process ID and start time in the lockfile
-        // to the result of the ps command
-
-        const contents: string = fsx.readFileSync(filePath).toString();
-        const [pid, startTime]: string[] = contents.split(';');
-
-        if (!!pid && !!startTime) {
-          const oldStartTime: string | undefined = getProcessStartTime(parseInt(pid, 10));
-          // the process that created this lock is still running!
-          if (oldStartTime === startTime) {
-            return undefined;
-          }
-        }
-      } else {
-        throw new Error(`Unsupported operating system: ${process.platform}`);
-      }
-
-      // If we get here it is safe to unlink the lockfile
-      fsx.unlinkSync(filePath);
+    if (process.platform === 'win32') {
+      return LockFile._tryAcquireWindows(filePath);
+    } else if (process.platform === 'linux' || process.platform === 'darwin') {
+      return LockFile._tryAcquireMacOrLinux(filePath);
     }
-
-    let fileDescriptor: number | undefined;
-    try {
-      // Attempt to open an exclusive lockfile
-      fileDescriptor = fsx.openSync(filePath, 'wx');
-    } catch (error) {
-      // we tried to delete the lock, but something else is holding it,
-      // (probably an active process), therefore we are unable to create a lock
-      return undefined;
-    }
-
-    let lockFile: LockFile;
-    try {
-      if (process.platform === 'darwin' || process.platform === 'linux') {
-        const startTime: string | undefined = getProcessStartTime(process.pid);
-        if (startTime === undefined) {
-          // we were unable to get the current pid
-          throw new Error(`Unable to determine current process' start time`);
-        }
-
-        try {
-          fsx.writeSync(fileDescriptor, `${process.pid};${startTime}`);
-        } catch (error) {
-          throw new Error(`Unable to write process pid and start time to lockfile!`);
-        }
-      }
-
-      lockFile = new LockFile(fileDescriptor, filePath, dirtyWhenAcquired);
-      fileDescriptor = undefined;
-    } finally {
-      if (fileDescriptor) {
-        fsx.closeSync(fileDescriptor);
-      }
-    }
-
-    return lockFile;
+    throw new Error(`Unable to create lock file for platform: "${process.platform}"`);
   }
 
   /**
@@ -165,6 +101,166 @@ export class LockFile {
    */
   public get isReleased(): boolean {
     return this._fileDescriptor === undefined;
+  }
+
+  /**
+   * Attempts to acquire the lock on a Linux or OSX machine
+   */
+  private static _tryAcquireMacOrLinux(absoluteFilePath): LockFile | undefined {
+    let dirtyWhenAcquired: boolean = false;
+
+    // get the current process' pid
+    const pid: number = process.pid;
+    const startTime: string | undefined = getProcessStartTime(pid);
+
+    if (!startTime) {
+      throw new Error(`UNable to calcualte start time for current process.`);
+    }
+
+    const lockFileDir: string = path.dirname(absoluteFilePath);
+
+    // create your own pid file
+    const pidLockFilePath: string = `${absoluteFilePath}.${pid}`;
+    let lockFileDescriptor: number | undefined;
+
+    try {
+      // open in write mode since if this file exists, it cannot be from the current process
+      // we are not handling the case where multiple lockfiles are opened in the same process
+      lockFileDescriptor = fsx.openSync(pidLockFilePath, 'w');
+      fsx.writeSync(lockFileDescriptor, startTime);
+
+      const currentBirthTimeMs: number = fsx.statSync(pidLockFilePath).birthtimeMs
+
+      let smallestBirthTimeMs: number = currentBirthTimeMs;
+      let smallestBirthTimePid: string = pid.toString();
+
+      // now, scan the directory for all lockfiles
+      const files: string[] = fsx.readdirSync(lockFileDir);
+
+      // escape anything in the filename that could confuse regex
+      let escapedLockFilePattern = path.basename(absoluteFilePath).replace(/[^\w\s]/g, "\\$&") + '\\.([0-9])+';
+
+      let match: RegExpMatchArray | null;
+      for (const fileInFolder of files) {
+        if (match = fileInFolder.match(escapedLockFilePattern)) {
+          const fileInFolderPath: string = path.join(lockFileDir, fileInFolder);
+
+          // the pid of this process is in match[1]
+          const otherPid: string = match[1];
+
+          // we found at least one lockfile hanging around that isn't ours
+          if (otherPid !== pid.toString()) {
+            dirtyWhenAcquired = true;
+
+            const oldPidCurrentStartTime: string | undefined = getProcessStartTime(parseInt(otherPid, 10));
+
+            let oldPidOldStartTime: string | undefined;
+            try {
+              oldPidOldStartTime = fsx.readFileSync(fileInFolderPath).toString();
+            } catch (err) {
+              // this means the file is probably deleted already
+            }
+
+            // check the timestamp of the file
+            const stats: fsx.Stats = fsx.statSync(fileInFolderPath);
+
+            // if the oldPidOldStartTime is invalid, then we should look at the timestamp,
+            // if this file was created after us, ignore it
+            // if it was created within 1 second before us, then it could be good, so we
+            //  will conservatively fail
+            // otherwise it is an old lock file and will be deleted
+            if (oldPidOldStartTime === '') {
+              if (stats.birthtimeMs > currentBirthTimeMs) {
+                // ignore this file, he will be unable to get the lock since this process
+                // will hold it
+                continue;
+              } else if (stats.birthtimeMs - currentBirthTimeMs < 0        // it was created before us AND
+                      && stats.birthtimeMs - currentBirthTimeMs > -1000) { // it was created less than a second before
+
+                // conservatively be unable to keep the lock
+                fsx.closeSync(lockFileDescriptor);
+                fsx.removeSync(pidLockFilePath);
+                lockFileDescriptor = undefined;
+                return undefined;
+              }
+            }
+
+            // this means the process is no longer executing, delete the file
+            if (!oldPidCurrentStartTime || oldPidOldStartTime !== oldPidCurrentStartTime) {
+              fsx.removeSync(fileInFolderPath);
+              continue;
+            }
+
+            // this is a lockfile pointing at something valid
+
+            if (stats.birthtimeMs < smallestBirthTimeMs) {
+              smallestBirthTimeMs = stats.birthtimeMs;
+              smallestBirthTimePid = otherPid;
+            }
+          }
+        }
+      }
+
+      if (smallestBirthTimePid !== pid.toString()) {
+        // we do not have the lock
+        fsx.closeSync(lockFileDescriptor);
+        fsx.removeSync(pidLockFilePath);
+        lockFileDescriptor = undefined;
+        return undefined;
+      }
+
+      // we have the lock!
+      return new LockFile(lockFileDescriptor, absoluteFilePath, dirtyWhenAcquired);
+
+    } finally {
+      if (lockFileDescriptor) {
+        // ensure our lock is closed
+        fsx.closeSync(lockFileDescriptor);
+        fsx.removeSync(pidLockFilePath);
+      }
+    }
+  }
+
+  /**
+   * Attempts to acquire the lock using Windows
+   * This algorithm is much simpler since we can rely on the operating system
+   */
+  private static _tryAcquireWindows(absoluteFilePath): LockFile | undefined {
+    let dirtyWhenAcquired: boolean = false;
+
+    if (fsx.existsSync(absoluteFilePath)) {
+      dirtyWhenAcquired = true;
+
+      // If the lockfile is held by an process with an exclusive lock, then removing it will
+      // silently fail. OpenSync() below will then fail and we will be unable to create a lock.
+
+      // Otherwise, the lockfile is sitting on disk, but nothing is holding it, implying that
+      // the last process to hold it died.
+      fsx.unlinkSync(absoluteFilePath);
+    }
+
+    let fileDescriptor: number | undefined;
+    try {
+      // Attempt to open an exclusive lockfile
+      fileDescriptor = fsx.openSync(absoluteFilePath, 'wx');
+    } catch (error) {
+      // we tried to delete the lock, but something else is holding it,
+      // (probably an active process), therefore we are unable to create a lock
+      return undefined;
+    }
+
+    // Ensure we can hand off the file descriptor to the lockfile
+    let lockFile: LockFile;
+    try {
+      lockFile = new LockFile(fileDescriptor, absoluteFilePath, dirtyWhenAcquired);
+      fileDescriptor = undefined;
+    } finally {
+      if (fileDescriptor) {
+        fsx.closeSync(fileDescriptor);
+      }
+    }
+
+    return lockFile;
   }
 
   private constructor(

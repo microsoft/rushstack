@@ -33,7 +33,7 @@ describe('LockFile', () => {
     fsx.removeSync(lockFileName);
   });
 
-  it('can acquire and close a dirty lockfile that cannot be parsed', () => {
+  it('throws an exception when a lockfile cannot be parsed', () => {
     // Create a lockfile that is still hanging around on disk,
     const lockFileName: string = getLockFileName();
     fsx.removeSync(lockFileName);
