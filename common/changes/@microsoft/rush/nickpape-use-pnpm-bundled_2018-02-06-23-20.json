@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Change the package of pnpm that gets installed to a version with bundled dependencies, which is more deterministic.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "nickpape-msft@users.noreply.github.com"
+}
