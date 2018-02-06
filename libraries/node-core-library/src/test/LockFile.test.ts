@@ -53,7 +53,6 @@ describe('LockFile', () => {
       });
 
       it('cannot acquire a lock if another valid lock exists', () => {
-
         // ensure test folder is clean
         const testFolder: string = path.join(__dirname, '2');
         fsx.removeSync(testFolder);
@@ -75,6 +74,8 @@ describe('LockFile', () => {
         const lockFileDescriptor: number = fsx.openSync(otherPidLockFileName, 'w');
         fsx.writeSync(lockFileDescriptor, otherPidStartTime);
         fsx.closeSync(lockFileDescriptor);
+        const stats: fsx.Stats = fsx.statSync(otherPidLockFileName);
+        fsx.utimesSync(otherPidLockFileName, 10000, 10000);
 
         const lock: LockFile | undefined = LockFile.tryAcquire(lockFileName);
 
