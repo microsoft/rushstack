@@ -662,14 +662,10 @@ export default class InstallManager {
             Utilities.createFolderWithRetry(commonNodeModulesFolder);
           }
         });
-    } catch (error) {
-      // Delete anything hanging around in the Async Recycler in case of total failure
+    } finally {
+      // Delete anything hanging around in the Async Recycler
       this._asyncRecycler.deleteAll();
-      throw error;
     }
-
-    // Delete anything hanging around in the Async Recycler after success
-    this._asyncRecycler.deleteAll();
 
     this._fixupNpm5Regression();
 
