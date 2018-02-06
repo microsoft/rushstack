@@ -68,45 +68,9 @@ export class LockFile {
   }
 
   /**
-   * Unlocks a file and removes it from disk.
-   * This can only be called once.
-   */
-  public release(): void {
-    if (this.isReleased) {
-      throw new Error(`The lock for file "${path.basename(this._filePath)}" has already been released.`);
-    }
-
-    fsx.closeSync(this._fileDescriptor!);
-    fsx.removeSync(this._filePath);
-    this._fileDescriptor = undefined;
-  }
-
-  /**
-   * Returns the initial state of the lock.
-   * This can be used to detect if the previous process was terminated before releasing the resource.
-   */
-  public get dirtyWhenAcquired(): boolean {
-    return this._dirtyWhenAcquired;
-  }
-
-  /**
-   * Returns the absolute path to the lockfile
-   */
-  public get filePath(): string {
-    return this._filePath;
-  }
-
-  /**
-   * Returns true if this lock is currently being held.
-   */
-  public get isReleased(): boolean {
-    return this._fileDescriptor === undefined;
-  }
-
-  /**
    * Attempts to acquire the lock on a Linux or OSX machine
    */
-  private static _tryAcquireMacOrLinux(absoluteFilePath): LockFile | undefined {
+  private static _tryAcquireMacOrLinux(absoluteFilePath: string): LockFile | undefined {
     let dirtyWhenAcquired: boolean = false;
 
     // get the current process' pid
@@ -129,7 +93,7 @@ export class LockFile {
       lockFileDescriptor = fsx.openSync(pidLockFilePath, 'w');
       fsx.writeSync(lockFileDescriptor, startTime);
 
-      const currentBirthTimeMs: number = fsx.statSync(pidLockFilePath).birthtimeMs
+      const currentBirthTimeMs: number = fsx.statSync(pidLockFilePath).birthtimeMs;
 
       let smallestBirthTimeMs: number = currentBirthTimeMs;
       let smallestBirthTimePid: string = pid.toString();
@@ -138,7 +102,8 @@ export class LockFile {
       const files: string[] = fsx.readdirSync(lockFileDir);
 
       // escape anything in the filename that could confuse regex
-      let escapedLockFilePattern = path.basename(absoluteFilePath).replace(/[^\w\s]/g, "\\$&") + '\\.([0-9])+';
+      const escapedLockFilePattern: RegExp =
+        new RegExp(path.basename(absoluteFilePath).replace(/[^\w\s]/g, '\\$&') + '\\.([0-9])+');
 
       let match: RegExpMatchArray | null;
       for (const fileInFolder of files) {
@@ -225,7 +190,7 @@ export class LockFile {
    * Attempts to acquire the lock using Windows
    * This algorithm is much simpler since we can rely on the operating system
    */
-  private static _tryAcquireWindows(absoluteFilePath): LockFile | undefined {
+  private static _tryAcquireWindows(absoluteFilePath: string): LockFile | undefined {
     let dirtyWhenAcquired: boolean = false;
 
     if (fsx.existsSync(absoluteFilePath)) {
@@ -261,6 +226,42 @@ export class LockFile {
     }
 
     return lockFile;
+  }
+
+  /**
+   * Unlocks a file and removes it from disk.
+   * This can only be called once.
+   */
+  public release(): void {
+    if (this.isReleased) {
+      throw new Error(`The lock for file "${path.basename(this._filePath)}" has already been released.`);
+    }
+
+    fsx.closeSync(this._fileDescriptor!);
+    fsx.removeSync(this._filePath);
+    this._fileDescriptor = undefined;
+  }
+
+  /**
+   * Returns the initial state of the lock.
+   * This can be used to detect if the previous process was terminated before releasing the resource.
+   */
+  public get dirtyWhenAcquired(): boolean {
+    return this._dirtyWhenAcquired;
+  }
+
+  /**
+   * Returns the absolute path to the lockfile
+   */
+  public get filePath(): string {
+    return this._filePath;
+  }
+
+  /**
+   * Returns true if this lock is currently being held.
+   */
+  public get isReleased(): boolean {
+    return this._fileDescriptor === undefined;
   }
 
   private constructor(
