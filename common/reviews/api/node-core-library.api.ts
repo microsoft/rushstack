@@ -51,6 +51,16 @@ class JsonSchema {
 }
 
 // @public
+class LockFile {
+  readonly dirtyWhenAcquired: boolean;
+  readonly filePath: string;
+  static getLockFilePath(resourceDir: string, resourceName: string, pid?: number): string;
+  readonly isReleased: boolean;
+  release(): void;
+  static tryAcquire(resourceDir: string, resourceName: string): LockFile | undefined;
+}
+
+// @public
 class PackageJsonLookup {
   constructor();
   clearCache(): void;

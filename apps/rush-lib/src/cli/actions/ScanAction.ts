@@ -24,7 +24,8 @@ export default class ScanAction extends BaseRushAction {
         + ` compare against your package.json file to find mistakes. It searches the "./src"`
         + ` and "./lib" folders for typical import syntaxes such as "import __ from '__'",`
         + ` "require('__')", "System.import('__'), etc.  The results are only approximate,`
-        + ` but generally pretty accurate.`
+        + ` but generally pretty accurate.`,
+      safeForSimultaneousRushProcesses: true
     });
     this._parser = parser;
   }
