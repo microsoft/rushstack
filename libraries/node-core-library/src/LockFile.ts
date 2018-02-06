@@ -53,26 +53,42 @@ export class LockFile {
   private static _getStartTime: (pid: number) => string | undefined = getProcessStartTime;
 
   /**
+   * Returns the path to the lockfile, should it be created successfully.
+   */
+  public static getLockFilePath(resourceDir: string, resourceName: string): string {
+    if (!resourceName.match(/[a-zA-Z]+/)) {
+      throw new Error(`The resource name "${resourceName}" is invalid.`
+        + ` It must be an alphabetic string with no special characters.`);
+    }
+
+    if (process.platform === 'win32') {
+      return path.join(path.resolve(resourceDir), `${resourceName}.lock`);
+    } else if (process.platform === 'linux' || process.platform === 'darwin') {
+      return path.join(path.resolve(resourceDir), `${resourceName}.${process.pid}.lock`);
+    }
+
+    throw new Error(`File locking not implemented for platform: "${process.platform}"`);
+  }
+
+  /**
    * Attempts to create a lockfile with the given filePath.
    * If successful, returns a LockFile instance.
    * If unable to get a lock, returns undefined.
-   * @param filePath - the filePath of the lockfile.
+   * @param resourceName - the name of the resource we are locking on. Should be an alphabetic string.
    */
-  public static tryAcquire(filePath: string): LockFile | undefined {
-    // resolve the filepath in case the cwd is changed during process execution
-    filePath = path.resolve(filePath);
+  public static tryAcquire(resourceDir: string, resourceName: string): LockFile | undefined {
     if (process.platform === 'win32') {
-      return LockFile._tryAcquireWindows(filePath);
+      return LockFile._tryAcquireWindows(resourceDir, resourceName);
     } else if (process.platform === 'linux' || process.platform === 'darwin') {
-      return LockFile._tryAcquireMacOrLinux(filePath);
+      return LockFile._tryAcquireMacOrLinux(resourceDir, resourceName);
     }
-    throw new Error(`Unable to create lock file for platform: "${process.platform}"`);
+    throw new Error(`File locking not implemented for platform: "${process.platform}"`);
   }
 
   /**
    * Attempts to acquire the lock on a Linux or OSX machine
    */
-  private static _tryAcquireMacOrLinux(absoluteFilePath: string): LockFile | undefined {
+  private static _tryAcquireMacOrLinux(resourceDir: string, resourceName: string): LockFile | undefined {
     let dirtyWhenAcquired: boolean = false;
 
     // get the current process' pid
@@ -80,20 +96,18 @@ export class LockFile {
     const startTime: string | undefined = LockFile._getStartTime(pid);
 
     if (!startTime) {
-      throw new Error(`UNable to calcualte start time for current process.`);
+      throw new Error(`Unable to calculate start time for current process.`);
     }
 
-    const lockFileDir: string = path.dirname(absoluteFilePath);
-
-    // create your own pid file
-    const pidLockFilePath: string = `${absoluteFilePath}.${pid}`;
+    const pidLockFilePath: string = LockFile.getLockFilePath(resourceDir, resourceName);
     let lockFileDescriptor: number | undefined;
 
     let lockFile: LockFile;
 
     try {
       // open in write mode since if this file exists, it cannot be from the current process
-      // we are not handling the case where multiple lockfiles are opened in the same process
+      // TODO: This will malfunction if the same process tries to acquire two locks on the same file.
+      // We should ideally maintain a dictionary of normalized acquired filenames
       lockFileDescriptor = fsx.openSync(pidLockFilePath, 'w');
       fsx.writeSync(lockFileDescriptor, startTime);
 
@@ -103,78 +117,74 @@ export class LockFile {
       let smallestBirthTimePid: string = pid.toString();
 
       // now, scan the directory for all lockfiles
-      const files: string[] = fsx.readdirSync(lockFileDir);
+      const files: string[] = fsx.readdirSync(resourceDir);
 
-      // escape anything in the filename that could confuse regex
-      const escapedLockFilePattern: RegExp =
-        new RegExp(path.basename(absoluteFilePath).replace(/[^\w\s]/g, '\\$&') + '\\.([0-9]+)$');
+      // look for anything ending with numbers and ".lock"
+      const lockFileRegExp: RegExp = /(.+)\.([0-9]+)\.lock/;
 
       let match: RegExpMatchArray | null;
+      let otherPid: string;
       for (const fileInFolder of files) {
-        if (match = fileInFolder.match(escapedLockFilePattern)) {
-
-          const fileInFolderPath: string = path.join(lockFileDir, fileInFolder);
-
-          // the pid of this process is in match[1]
-          const otherPid: string = match[1];
+        if ((match = fileInFolder.match(lockFileRegExp))
+          && (match[1] === resourceName)
+          && ((otherPid = match[2]) !== pid.toString())) {
 
           // we found at least one lockfile hanging around that isn't ours
-          if (otherPid !== pid.toString()) {
-            dirtyWhenAcquired = true;
+          const fileInFolderPath: string = path.join(resourceDir, fileInFolder);
+          dirtyWhenAcquired = true;
 
-            // console.log(`FOUND OTHER LOCKFILE: ${otherPid}`);
+          // console.log(`FOUND OTHER LOCKFILE: ${otherPid}`);
 
-            const otherPidCurrentStartTime: string | undefined = LockFile._getStartTime(parseInt(otherPid, 10));
+          const otherPidCurrentStartTime: string | undefined = LockFile._getStartTime(parseInt(otherPid, 10));
 
-            let otherPidOldStartTime: string | undefined;
-            try {
-              otherPidOldStartTime = fsx.readFileSync(fileInFolderPath).toString();
-            } catch (err) {
-              // this means the file is probably deleted already
-            }
+          let otherPidOldStartTime: string | undefined;
+          try {
+            otherPidOldStartTime = fsx.readFileSync(fileInFolderPath).toString();
+          } catch (err) {
+            // this means the file is probably deleted already
+          }
 
-            // check the timestamp of the file
-            const otherBirthtimeMs: number = fsx.statSync(fileInFolderPath).birthtime.getTime();
+          // check the timestamp of the file
+          const otherBirthtimeMs: number = fsx.statSync(fileInFolderPath).birthtime.getTime();
 
-            // if the otherPidOldStartTime is invalid, then we should look at the timestamp,
-            // if this file was created after us, ignore it
-            // if it was created within 1 second before us, then it could be good, so we
-            //  will conservatively fail
-            // otherwise it is an old lock file and will be deleted
-            if (otherPidOldStartTime === '') {
-              if (otherBirthtimeMs > currentBirthTimeMs) {
-                // ignore this file, he will be unable to get the lock since this process
-                // will hold it
-                // console.log(`Ignoring lock for pid ${otherPid} because its lockfile is newer than ours.`);
-                continue;
-              } else if (otherBirthtimeMs - currentBirthTimeMs < 0        // it was created before us AND
-                      && otherBirthtimeMs - currentBirthTimeMs > -1000) { // it was created less than a second before
-
-                // conservatively be unable to keep the lock
-                fsx.closeSync(lockFileDescriptor);
-                fsx.removeSync(pidLockFilePath);
-                lockFileDescriptor = undefined;
-                return undefined;
-              }
-            }
-
-            // console.log(`Other pid ${otherPid} lockfile has start time: "${otherPidOldStartTime}"`);
-            // console.log(`Other pid ${otherPid} actually has start time: "${otherPidCurrentStartTime}"`);
-
-            // this means the process is no longer executing, delete the file
-            if (!otherPidCurrentStartTime || otherPidOldStartTime !== otherPidCurrentStartTime) {
-              // console.log(`Other pid ${otherPid} is no longer executing!`);
-              fsx.removeSync(fileInFolderPath);
+          // if the otherPidOldStartTime is invalid, then we should look at the timestamp,
+          // if this file was created after us, ignore it
+          // if it was created within 1 second before us, then it could be good, so we
+          //  will conservatively fail
+          // otherwise it is an old lock file and will be deleted
+          if (otherPidOldStartTime === '') {
+            if (otherBirthtimeMs > currentBirthTimeMs) {
+              // ignore this file, he will be unable to get the lock since this process
+              // will hold it
+              // console.log(`Ignoring lock for pid ${otherPid} because its lockfile is newer than ours.`);
               continue;
-            }
+            } else if (otherBirthtimeMs - currentBirthTimeMs < 0        // it was created before us AND
+              && otherBirthtimeMs - currentBirthTimeMs > -1000) { // it was created less than a second before
 
-            // console.log(`Pid ${otherPid} lockfile has birth time: ${otherBirthtimeMs}`);
-            // console.log(`Pid ${pid} lockfile has birth time: ${currentBirthTimeMs}`);
-            // this is a lockfile pointing at something valid
-            if (otherBirthtimeMs < smallestBirthTimeMs) {
-              smallestBirthTimeMs = otherBirthtimeMs;
-              smallestBirthTimePid = otherPid;
+              // conservatively be unable to keep the lock
+              fsx.closeSync(lockFileDescriptor);
+              fsx.removeSync(pidLockFilePath);
+              lockFileDescriptor = undefined;
+              return undefined;
             }
+          }
+
+          // console.log(`Other pid ${otherPid} lockfile has start time: "${otherPidOldStartTime}"`);
+          // console.log(`Other pid ${otherPid} actually has start time: "${otherPidCurrentStartTime}"`);
+
+          // this means the process is no longer executing, delete the file
+          if (!otherPidCurrentStartTime || otherPidOldStartTime !== otherPidCurrentStartTime) {
+            // console.log(`Other pid ${otherPid} is no longer executing!`);
+            fsx.removeSync(fileInFolderPath);
+            continue;
+          }
+
+          // console.log(`Pid ${otherPid} lockfile has birth time: ${otherBirthtimeMs}`);
+          // console.log(`Pid ${pid} lockfile has birth time: ${currentBirthTimeMs}`);
+          // this is a lockfile pointing at something valid
+          if (otherBirthtimeMs < smallestBirthTimeMs) {
+            smallestBirthTimeMs = otherBirthtimeMs;
+            smallestBirthTimePid = otherPid;
           }
         }
       }
@@ -204,10 +214,11 @@ export class LockFile {
    * Attempts to acquire the lock using Windows
    * This algorithm is much simpler since we can rely on the operating system
    */
-  private static _tryAcquireWindows(absoluteFilePath: string): LockFile | undefined {
+  private static _tryAcquireWindows(resourceDir: string, resourceName: string): LockFile | undefined {
+    const lockFilePath: string = LockFile.getLockFilePath(resourceDir, resourceName);
     let dirtyWhenAcquired: boolean = false;
 
-    if (fsx.existsSync(absoluteFilePath)) {
+    if (fsx.existsSync(lockFilePath)) {
       dirtyWhenAcquired = true;
 
       // If the lockfile is held by an process with an exclusive lock, then removing it will
@@ -215,13 +226,13 @@ export class LockFile {
 
       // Otherwise, the lockfile is sitting on disk, but nothing is holding it, implying that
       // the last process to hold it died.
-      fsx.unlinkSync(absoluteFilePath);
+      fsx.unlinkSync(lockFilePath);
     }
 
     let fileDescriptor: number | undefined;
     try {
       // Attempt to open an exclusive lockfile
-      fileDescriptor = fsx.openSync(absoluteFilePath, 'wx');
+      fileDescriptor = fsx.openSync(lockFilePath, 'wx');
     } catch (error) {
       // we tried to delete the lock, but something else is holding it,
       // (probably an active process), therefore we are unable to create a lock
@@ -231,7 +242,7 @@ export class LockFile {
     // Ensure we can hand off the file descriptor to the lockfile
     let lockFile: LockFile;
     try {
-      lockFile = new LockFile(fileDescriptor, absoluteFilePath, dirtyWhenAcquired);
+      lockFile = new LockFile(fileDescriptor, lockFilePath, dirtyWhenAcquired);
       fileDescriptor = undefined;
     } finally {
       if (fileDescriptor) {

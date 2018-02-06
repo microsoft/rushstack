@@ -27,9 +27,9 @@ describe('LockFile', () => {
         fsx.removeSync(testFolder);
         fsx.mkdirsSync(testFolder);
 
-        const lockFileName: string = path.join(testFolder, 'test.lock');
-        const pidLockFileName: string = `${lockFileName}.${process.pid}`;
-        const lock: LockFile | undefined = LockFile.tryAcquire(lockFileName);
+        const resourceName: string = 'test';
+        const pidLockFileName: string = LockFile.getLockFilePath(testFolder, resourceName);
+        const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
 
         // The lockfile should exist and be in a clean state
         assert.isDefined(lock);
@@ -57,8 +57,8 @@ describe('LockFile', () => {
         const otherPid: number = 999999999;
         const otherPidStartTime: string = '2012-01-02 12:53:12';
 
-        const lockFileName: string = path.join(testFolder, 'test.lock');
-        const otherPidLockFileName: string = `${lockFileName}.${otherPid}`;
+        const resourceName: string = 'test';
+        const otherPidLockFileName: string = `${resourceName}.${otherPid}.lock`;
 
         setLockFileGetProcessStartTime((pid: number) => {
           return pid === process.pid ? getProcessStartTime(process.pid) : otherPidStartTime;
@@ -70,7 +70,7 @@ describe('LockFile', () => {
         fsx.closeSync(lockFileDescriptor);
         fsx.utimesSync(otherPidLockFileName, 10000, 10000);
 
-        const lock: LockFile | undefined = LockFile.tryAcquire(lockFileName);
+        const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
 
         // this lock should be undefined since there is an existing lock
         assert.isUndefined(lock);
@@ -86,10 +86,11 @@ describe('LockFile', () => {
       fsx.mkdirsSync(testFolder);
 
       // create an open lockfile
-      const lockFileName: string = path.join(testFolder, 'lock.file');
+      const resourceName: string = 'test';
+      const lockFileName: string = LockFile.getLockFilePath(testFolder, resourceName);
       const lockFileDescriptor: number = fsx.openSync(lockFileName, 'wx');
 
-      const lock: LockFile | undefined = LockFile.tryAcquire(lockFileName);
+      const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
 
       // this lock should be undefined since there is an existing lock
       assert.isUndefined(lock);
@@ -103,10 +104,11 @@ describe('LockFile', () => {
       fsx.mkdirsSync(testFolder);
 
       // Create a lockfile that is still hanging around on disk,
-      const lockFileName: string = path.join(testFolder, 'lock.file');
+      const resourceName: string = 'test';
+      const lockFileName: string = LockFile.getLockFilePath(testFolder, resourceName);
       fsx.closeSync(fsx.openSync(lockFileName, 'wx'));
 
-      const lock: LockFile | undefined = LockFile.tryAcquire(lockFileName);
+      const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
 
       assert.isDefined(lock);
       assert.isTrue(lock!.dirtyWhenAcquired);
@@ -125,8 +127,9 @@ describe('LockFile', () => {
       fsx.removeSync(testFolder);
       fsx.mkdirsSync(testFolder);
 
-      const lockFileName: string = path.join(testFolder, 'lock.file');
-      const lock: LockFile | undefined = LockFile.tryAcquire(lockFileName);
+      const resourceName: string = 'test';
+      const lockFileName: string = LockFile.getLockFilePath(testFolder, resourceName);
+      const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
 
       // The lockfile should exist and be in a clean state
       assert.isDefined(lock);
