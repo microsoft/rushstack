@@ -122,7 +122,7 @@ export class LockFile {
           if (otherPid !== pid.toString()) {
             dirtyWhenAcquired = true;
 
-            console.log(`FOUND OTHER LOCKFILE: ${otherPid}`);
+            // console.log(`FOUND OTHER LOCKFILE: ${otherPid}`);
 
             const otherPidCurrentStartTime: string | undefined = LockFile._getStartTime(parseInt(otherPid, 10));
 
@@ -145,7 +145,7 @@ export class LockFile {
               if (otherBirthtimeMs > currentBirthTimeMs) {
                 // ignore this file, he will be unable to get the lock since this process
                 // will hold it
-                console.log(`Ignoring lock for pid ${otherPid} because its lockfile is newer than ours.`);
+                // console.log(`Ignoring lock for pid ${otherPid} because its lockfile is newer than ours.`);
                 continue;
               } else if (otherBirthtimeMs - currentBirthTimeMs < 0        // it was created before us AND
                       && otherBirthtimeMs - currentBirthTimeMs > -1000) { // it was created less than a second before
@@ -158,18 +158,18 @@ export class LockFile {
               }
             }
 
-            console.log(`Other pid ${otherPid} lockfile has start time: "${otherPidOldStartTime}"`);
-            console.log(`Other pid ${otherPid} actually has start time: "${otherPidCurrentStartTime}"`);
+            // console.log(`Other pid ${otherPid} lockfile has start time: "${otherPidOldStartTime}"`);
+            // console.log(`Other pid ${otherPid} actually has start time: "${otherPidCurrentStartTime}"`);
 
             // this means the process is no longer executing, delete the file
             if (!otherPidCurrentStartTime || otherPidOldStartTime !== otherPidCurrentStartTime) {
-              console.log(`Other pid ${otherPid} is no longer executing!`);
+              // console.log(`Other pid ${otherPid} is no longer executing!`);
               fsx.removeSync(fileInFolderPath);
               continue;
             }
 
-            console.log(`Pid ${otherPid} lockfile has birth time: ${otherBirthtimeMs}`);
-            console.log(`Pid ${pid} lockfile has birth time: ${currentBirthTimeMs}`);
+            // console.log(`Pid ${otherPid} lockfile has birth time: ${otherBirthtimeMs}`);
+            // console.log(`Pid ${pid} lockfile has birth time: ${currentBirthTimeMs}`);
             // this is a lockfile pointing at something valid
             if (otherBirthtimeMs < smallestBirthTimeMs) {
               smallestBirthTimeMs = otherBirthtimeMs;
