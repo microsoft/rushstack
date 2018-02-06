@@ -163,6 +163,13 @@ export default class InstallManager {
     // Example: "C:\Users\YourName\.rush\pnpm-1.2.3\last-install.flag"
     const packageManagerToolFlagFile: string = path.join(packageManagerToolFolder, 'last-install.flag');
 
+    let packageManagerPackageName: string;
+    if (packageManager === 'npm') {
+      packageManagerPackageName = 'npm';
+    } else if (packageManager === 'pnpm') {
+      packageManagerPackageName = '@pnpm/bundled';
+    }
+
     // NOTE: We don't care about the timestamp for last-install.flag, because nobody will change
     // the package.json for this case
     if (forceReinstall || !fsx.existsSync(packageManagerToolFlagFile)) {
@@ -170,7 +177,7 @@ export default class InstallManager {
 
       Utilities.installPackageInDirectory(
         packageManagerToolFolder,
-        packageManager,
+        packageManagerPackageName!,
         this._rushConfiguration.packageManagerToolVersion,
         `${packageManager}-local-install`,
         MAX_INSTALL_ATTEMPTS
@@ -489,8 +496,9 @@ export default class InstallManager {
     const packageManagerFilename: string = this._rushConfiguration.packageManagerToolFilename;
     if (!fsx.existsSync(packageManagerFilename)) {
       // This normally should never occur -- it indicates that some code path forgot to call
-      // InstallManager.ensureLocalNpmTool().
-      throw new Error('Expected to find local NPM here: "' + packageManagerFilename + '"');
+      // InstallManager.ensureLocalPackageManager().
+      throw new Error(
+        `Expected to find local ${this._rushConfiguration.packageManager} here: "${packageManagerFilename}"`);
     }
 
     console.log(os.EOL + colors.bold('Checking node_modules in ' + this._rushConfiguration.commonTempFolder)
