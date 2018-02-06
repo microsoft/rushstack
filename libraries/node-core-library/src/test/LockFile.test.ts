@@ -68,6 +68,8 @@ describe('LockFile', () => {
         const lockFileDescriptor: number = fsx.openSync(otherPidLockFileName, 'w');
         fsx.writeSync(lockFileDescriptor, otherPidStartTime);
         fsx.closeSync(lockFileDescriptor);
+        const stats: fsx.Stats = fsx.statSync(otherPidLockFileName);
+        fsx.utimesSync(otherPidLockFileName, 10000, 10000);
 
         const lock: LockFile | undefined = LockFile.tryAcquire(lockFileName);
 
