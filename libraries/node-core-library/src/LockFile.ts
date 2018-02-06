@@ -55,8 +55,8 @@ export class LockFile {
   /**
    * Returns the path to the lockfile, should it be created successfully.
    */
-  public static getLockFilePath(resourceDir: string, resourceName: string): string {
-    if (!resourceName.match(/[a-zA-Z]+/)) {
+  public static getLockFilePath(resourceDir: string, resourceName: string, pid: number = process.pid): string {
+    if (!resourceName.match(/^[a-zA-Z]+$/)) {
       throw new Error(`The resource name "${resourceName}" is invalid.`
         + ` It must be an alphabetic string with no special characters.`);
     }
@@ -64,7 +64,7 @@ export class LockFile {
     if (process.platform === 'win32') {
       return path.join(path.resolve(resourceDir), `${resourceName}.lock`);
     } else if (process.platform === 'linux' || process.platform === 'darwin') {
-      return path.join(path.resolve(resourceDir), `${resourceName}.${process.pid}.lock`);
+      return path.join(path.resolve(resourceDir), `${resourceName}.${pid}.lock`);
     }
 
     throw new Error(`File locking not implemented for platform: "${process.platform}"`);
@@ -120,7 +120,7 @@ export class LockFile {
       const files: string[] = fsx.readdirSync(resourceDir);
 
       // look for anything ending with numbers and ".lock"
-      const lockFileRegExp: RegExp = /(.+)\.([0-9]+)\.lock/;
+      const lockFileRegExp: RegExp = /^([a-zA-Z]+)\.([0-9]+)\.lock$/;
 
       let match: RegExpMatchArray | null;
       let otherPid: string;
@@ -162,9 +162,6 @@ export class LockFile {
               && otherBirthtimeMs - currentBirthTimeMs > -1000) { // it was created less than a second before
 
               // conservatively be unable to keep the lock
-              fsx.closeSync(lockFileDescriptor);
-              fsx.removeSync(pidLockFilePath);
-              lockFileDescriptor = undefined;
               return undefined;
             }
           }
@@ -191,9 +188,6 @@ export class LockFile {
 
       if (smallestBirthTimePid !== pid.toString()) {
         // we do not have the lock
-        fsx.closeSync(lockFileDescriptor);
-        fsx.removeSync(pidLockFilePath);
-        lockFileDescriptor = undefined;
         return undefined;
       }
 

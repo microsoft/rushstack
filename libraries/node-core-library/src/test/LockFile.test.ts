@@ -18,8 +18,43 @@ describe('LockFile', () => {
     setLockFileGetProcessStartTime(getProcessStartTime);
   });
 
+  describe('getLockFilePath', () => {
+    it('only acceps alphabetical characters for resource name', () => {
+      assert.throws(() => {
+        LockFile.getLockFilePath(process.cwd(), 'foo123');
+      });
+      assert.throws(() => {
+        LockFile.getLockFilePath(process.cwd(), 'bar.123');
+      });
+      assert.throws(() => {
+        LockFile.getLockFilePath(process.cwd(), 'foo.bar');
+      });
+      assert.throws(() => {
+        LockFile.getLockFilePath(process.cwd(), 'lock-file');
+      });
+      assert.throws(() => {
+        LockFile.getLockFilePath(process.cwd(), '');
+      });
+    });
+  });
+
   if (process.platform === 'darwin' || process.platform === 'linux') {
     describe('Linux and Mac', () => {
+      describe('getLockFilePath()', () => {
+        it('returns a resolved path containing the pid', () => {
+          assert.equal(
+            path.join(process.cwd(), `test.${process.pid}.lock`),
+            LockFile.getLockFilePath('./', 'test')
+          );
+        });
+
+        it('allows for overridden pid', () => {
+          assert.equal(
+            path.join(process.cwd(), `test.99.lock`),
+            LockFile.getLockFilePath('./', 'test', 99)
+          );
+        });
+      });
 
       it('can acquire and close a clean lockfile', () => {
         // ensure test folder is clean
@@ -58,7 +93,8 @@ describe('LockFile', () => {
         const otherPidStartTime: string = '2012-01-02 12:53:12';
 
         const resourceName: string = 'test';
-        const otherPidLockFileName: string = `${resourceName}.${otherPid}.lock`;
+
+        const otherPidLockFileName: string = LockFile.getLockFilePath(testFolder, resourceName, otherPid);
 
         setLockFileGetProcessStartTime((pid: number) => {
           return pid === process.pid ? getProcessStartTime(process.pid) : otherPidStartTime;
@@ -79,6 +115,22 @@ describe('LockFile', () => {
   }
 
   if (process.platform === 'win32') {
+    describe('getLockFilePath()', () => {
+      it('returns a resolved path that doesn\'t contain', () => {
+        assert.equal(
+          path.join(process.cwd(), `test.lock`),
+          LockFile.getLockFilePath('./', 'test')
+        );
+      });
+
+      it('ignores pid that is passed in', () => {
+        assert.equal(
+          path.join(process.cwd(), `test.lock`),
+          LockFile.getLockFilePath('./', 'test', 99)
+        );
+      });
+    });
+
     it('will not acquire if existing lock is there', () => {
       // ensure test folder is clean
       const testFolder: string = path.join(__dirname, '1');
