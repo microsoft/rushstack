@@ -2,6 +2,12 @@
   "name": "@microsoft/ts-command-line",
   "entries": [
     {
+      "version": "2.3.10",
+      "tag": "@microsoft/ts-command-line_v2.3.10",
+      "date": "Wed, 07 Feb 2018 17:05:11 GMT",
+      "comments": {}
+    },
+    {
       "version": "2.3.9",
       "tag": "@microsoft/ts-command-line_v2.3.9",
       "date": "Fri, 26 Jan 2018 22:05:30 GMT",

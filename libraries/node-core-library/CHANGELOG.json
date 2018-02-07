@@ -2,6 +2,18 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "0.5.0",
+      "tag": "@microsoft/node-core-library_v0.5.0",
+      "date": "Wed, 07 Feb 2018 17:05:11 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a LockFile class to work with LockFile's that manage resources across multiple processes."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.10",
       "tag": "@microsoft/node-core-library_v0.4.10",
       "date": "Fri, 26 Jan 2018 22:05:30 GMT",

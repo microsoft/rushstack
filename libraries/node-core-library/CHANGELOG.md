@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Fri, 26 Jan 2018 22:05:30 GMT and should not be manually modified.
+This log was last generated on Wed, 07 Feb 2018 17:05:11 GMT and should not be manually modified.
+
+## 0.5.0
+Wed, 07 Feb 2018 17:05:11 GMT
+
+### Minor changes
+
+- Add a LockFile class to work with LockFile's that manage resources across multiple processes.
 
 ## 0.4.10
 Fri, 26 Jan 2018 22:05:30 GMT
