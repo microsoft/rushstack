@@ -167,7 +167,7 @@ export abstract class BaseLinkManager {
       .then(() => {
         stopwatch.stop();
         console.log(os.EOL + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));
-        console.log(os.EOL + 'Next you should probably run: "rush rebuild"');
+        console.log(os.EOL + 'Next you should probably run "rush build" or "rush rebuild"');
       });
   }
 
