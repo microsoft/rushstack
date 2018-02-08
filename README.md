@@ -1,5 +1,7 @@
 # web-build-tools
 
+[![Join the chat at https://gitter.im/web-build-tools/Lobby](https://badges.gitter.im/web-build-tools/Lobby.svg)](https://gitter.im/web-build-tools/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![Build Status](https://travis-ci.org/Microsoft/web-build-tools.svg?branch=master)](https://travis-ci.org/Microsoft/web-build-tools)
 
 _**This repo hosts a collection of tools and libraries used to build web projects at Microsoft.**_
