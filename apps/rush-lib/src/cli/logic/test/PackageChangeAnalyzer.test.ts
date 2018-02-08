@@ -28,7 +28,8 @@ describe('PackageChangeAnalyzer', () => {
   it('can associate a file in a project folder with a project', () => {
     const repoHashDeps: IPackageDeps = {
       files: {
-        [fileA]: HASH
+        [fileA]: HASH,
+        [path.posix.join('common', 'config', 'rush', 'shrinkwrap.yaml')]: HASH
       }
     };
 
@@ -37,7 +38,9 @@ describe('PackageChangeAnalyzer', () => {
       projects: [{
         packageName: packageA,
         projectRelativeFolder: packageAPath
-      }]
+      }],
+      rushJsonFolder: '',
+      committedShrinkwrapFilename: 'common/config/rush/shrinkwrap.yaml'
     } as any; // tslint:disable-line:no-any
 
     const packageDeps: IPackageDeps | undefined = PackageChangeAnalyzer.instance.getPackageDepsHash(packageA);

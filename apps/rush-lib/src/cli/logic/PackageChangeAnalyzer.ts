@@ -122,6 +122,19 @@ export class PackageChangeAnalyzer {
     //  });
     // }
 
+    // Add the shrinkwrap file to every project's dependencies
+    const shrinkwrapFile: string =
+      path.relative(PackageChangeAnalyzer.rushConfig.rushJsonFolder,
+        PackageChangeAnalyzer.rushConfig.committedShrinkwrapFilename)
+        .replace(/\\/g, '/');
+
+    for (const project of PackageChangeAnalyzer.rushConfig.projects) {
+      const shrinkwrapHash: string | undefined = noProjectHashes[shrinkwrapFile];
+      if (shrinkwrapHash) {
+        projectHashDeps.get(project.packageName)!.files[shrinkwrapFile] = shrinkwrapHash;
+      }
+    }
+
     return projectHashDeps;
   }
 
