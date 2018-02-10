@@ -72,6 +72,24 @@ export declare class DecoratorTest {
     test(): void;
 }
 
+/**
+ * Referenced by DefaultExportEdgeCaseReferencer.
+ * @public
+ */
+export declare class default {
+}
+
+/**
+ * @public
+ */
+export declare class DefaultExportEdgeCase {
+    /**
+     * This reference is encountered before the definition of DefaultExportEdgeCase.
+     * The symbol.name will be "default" in this situation.
+     */
+    reference: default;
+}
+
 /** @public */
 export declare class ForgottenExportConsumer1 {
     test1(): IForgottenExport | undefined;
