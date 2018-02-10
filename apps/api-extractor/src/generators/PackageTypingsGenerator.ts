@@ -98,6 +98,11 @@ interface IFollowAliasesResult {
   symbol: ts.Symbol;
 
   /**
+   * The original name used where it was defined.
+   */
+  localName: string;
+
+  /**
    * True if this is an ambient definition, e.g. from a "typings" folder.
    */
   isAmbient: boolean;
@@ -201,8 +206,10 @@ export default class PackageTypingsGenerator {
     // to see if any of them contains the "export" keyword; if not, then it's ambient.
     let isAmbient: boolean = true;
 
-    while (true) { // tslint:disable-line:no-constant-condition
+    // We will try to obtain the name from a declaration; otherwise we'll fall back to the symbol name
+    let declarationName: string | undefined = undefined;
 
+    while (true) { // tslint:disable-line:no-constant-condition
       for (const declaration of current.declarations || []) {
         // 1. Check for any signs that this is not an ambient definition
         if (declaration.kind === ts.SyntaxKind.ExportSpecifier
@@ -213,6 +220,11 @@ export default class PackageTypingsGenerator {
         const modifiers: ts.ModifierFlags = ts.getCombinedModifierFlags(declaration);
         if (modifiers & (ts.ModifierFlags.Export | ts.ModifierFlags.ExportDefault)) {
           isAmbient = false;
+        }
+
+        const declarationNameIdentifier: ts.DeclarationName | undefined = ts.getNameOfDeclaration(declaration);
+        if (declarationNameIdentifier && ts.isIdentifier(declarationNameIdentifier)) {
+          declarationName = declarationNameIdentifier.getText().trim();
         }
 
         // 2. Check for any signs that this was imported from an external package
@@ -244,6 +256,7 @@ export default class PackageTypingsGenerator {
 
     return {
       symbol: current,
+      localName: declarationName || current.name,
       importPackagePath: undefined,
       importPackageExportName: undefined,
       isAmbient: isAmbient
@@ -286,12 +299,13 @@ export default class PackageTypingsGenerator {
         const exportSpecifier: ts.ExportSpecifier = declaration as ts.ExportSpecifier;
 
         const importPackageExportName: string =
-          (exportSpecifier.propertyName || exportSpecifier.name).getText();
+          (exportSpecifier.propertyName || exportSpecifier.name).getText().trim();
 
         return {
           symbol: symbol,
+          localName: importPackageExportName,
           importPackagePath: packagePath,
-          importPackageExportName: importPackageExportName.trim(),
+          importPackageExportName: importPackageExportName,
           isAmbient: false
         };
       }
@@ -333,6 +347,7 @@ export default class PackageTypingsGenerator {
       if (packagePath) {
         return {
           symbol: symbol,
+          localName: symbol.name,
           importPackagePath: packagePath,
           importPackageExportName: '*',
           isAmbient: false
@@ -386,7 +401,7 @@ export default class PackageTypingsGenerator {
     const exportSymbols: ts.Symbol[] = this._typeChecker.getExportsOfModule(packageSymbol) || [];
 
     for (const exportSymbol of exportSymbols) {
-      const entry: Entry | undefined = this._fetchEntryForSymbol(exportSymbol);
+      const entry: Entry | undefined = this._fetchEntryForSymbol(exportSymbol, true);
 
       if (!entry) {
         // This is an export of the current package, but for some reason _fetchEntryForSymbol()
@@ -564,7 +579,7 @@ export default class PackageTypingsGenerator {
    * Looks up the corresponding Entry for the requested symbol.  If it doesn't exist,
    * then it tries to create one.
    */
-  private _fetchEntryForSymbol(symbol: ts.Symbol): Entry | undefined {
+  private _fetchEntryForSymbol(symbol: ts.Symbol, symbolIsExported: boolean): Entry | undefined {
     const followAliasesResult: IFollowAliasesResult
       = PackageTypingsGenerator._followAliases(symbol, this._typeChecker);
 
@@ -585,8 +600,10 @@ export default class PackageTypingsGenerator {
     }
 
     entry = new Entry({
-      localName: symbol.name,
-      followedSymbol: followedSymbol,
+      // If the symbol is exported, then we use the exported name.  Otherwise, since
+      // there can be many possible names, we use the name from the original definition.
+      localName: symbolIsExported ? symbol.name : followAliasesResult.localName,
+      followedSymbol: followAliasesResult.symbol,
       importPackagePath: followAliasesResult.importPackagePath,
       importPackageExportName: followAliasesResult.importPackageExportName
     });
@@ -624,7 +641,7 @@ export default class PackageTypingsGenerator {
             throw new Error('Symbol not found for identifier: ' + symbolNode.getText());
           }
 
-          this._fetchEntryForSymbol(symbol);
+          this._fetchEntryForSymbol(symbol, false);
         }
         break;  // keep recursing
     }

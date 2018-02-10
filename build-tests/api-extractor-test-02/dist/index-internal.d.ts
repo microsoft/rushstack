@@ -7,7 +7,7 @@
  * @packagedocumentation
  */
 
-import { ReexportedClass as RenamedReexportedClass } from 'api-extractor-test-01';
+import { ReexportedClass } from 'api-extractor-test-01';
 import * as semver1 from 'semver';
 import * as semver2 from 'semver';
 import * as semver3 from 'semver';
@@ -50,6 +50,6 @@ declare interface ISimpleInterface {
  * Example of a class that inherits from an externally imported class.
  * @public
  */
-export declare class SubclassWithImport extends RenamedReexportedClass implements ISimpleInterface {
+export declare class SubclassWithImport extends ReexportedClass implements ISimpleInterface {
     test(): void;
 }

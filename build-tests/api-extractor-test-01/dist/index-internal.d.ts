@@ -62,6 +62,13 @@ export declare class AmbientConsumer {
 }
 
 /**
+ * Referenced by DefaultExportEdgeCaseReferencer.
+ * @public
+ */
+export declare class ClassExportedAsDefault {
+}
+
+/**
  * Tests a decorator
  * @public
  */
@@ -73,13 +80,6 @@ export declare class DecoratorTest {
 }
 
 /**
- * Referenced by DefaultExportEdgeCaseReferencer.
- * @public
- */
-export declare class default {
-}
-
-/**
  * @public
  */
 export declare class DefaultExportEdgeCase {
@@ -87,7 +87,7 @@ export declare class DefaultExportEdgeCase {
      * This reference is encountered before the definition of DefaultExportEdgeCase.
      * The symbol.name will be "default" in this situation.
      */
-    reference: default;
+    reference: ClassExportedAsDefault;
 }
 
 /** @public */
