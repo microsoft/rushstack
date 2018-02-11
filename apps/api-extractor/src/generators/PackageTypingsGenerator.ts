@@ -199,6 +199,22 @@ export default class PackageTypingsGenerator {
   }
 
   /**
+   * Returns the first parent node with the specified  SyntaxKind, or undefined if there is no match.
+   */
+  private static _findFirstParent<T extends ts.Node>(node: ts.Node, kindToMatch: ts.SyntaxKind): T | undefined {
+    let current: ts.Node | undefined = node.parent;
+
+    while (current) {
+      if (current.kind === kindToMatch) {
+        return current as T;
+      }
+      current = current.parent;
+    }
+
+    return undefined;
+  }
+
+  /**
    * For the given symbol, follow imports and type alias to find the symbol that represents
    * the original definition.
    */
@@ -272,46 +288,53 @@ export default class PackageTypingsGenerator {
   private static _followAliasesForExportDeclaration(declaration: ts.Declaration,
     symbol: ts.Symbol): IFollowAliasesResult | undefined {
 
-    // EXAMPLE:
-    // "export { A } from './file-a';"
-    //
-    // ExportDeclaration:
-    //   ExportKeyword:  pre=[export] sep=[ ]
-    //   NamedExports:
-    //     FirstPunctuation:  pre=[{] sep=[ ]
-    //     SyntaxList:
-    //       ExportSpecifier:  <------------- declaration
-    //         Identifier:  pre=[A] sep=[ ]
-    //     CloseBraceToken:  pre=[}] sep=[ ]
-    //   FromKeyword:  pre=[from] sep=[ ]
-    //   StringLiteral:  pre=['./file-a']
-    //   SemicolonToken:  pre=[;]
     const exportDeclaration: ts.ExportDeclaration | undefined
-      = PackageTypingsGenerator._matchAncestor<ts.ExportDeclaration>(declaration,
-      [ts.SyntaxKind.ExportDeclaration, ts.SyntaxKind.NamedExports, ts.SyntaxKind.ExportSpecifier]);
+      = PackageTypingsGenerator._findFirstParent<ts.ExportDeclaration>(declaration, ts.SyntaxKind.ExportDeclaration);
 
-    if (exportDeclaration && exportDeclaration.moduleSpecifier) {
-      // Examples:
-      //    " '@microsoft/sp-lodash-subset'"
-      //    " "lodash/has""
-      const packagePath: string | undefined = PackageTypingsGenerator._getPackagePathFromModuleSpecifier(
-        exportDeclaration.moduleSpecifier);
+    if (exportDeclaration) {
+      let importPackageExportName: string;
 
-      if (packagePath) {
+      if (declaration.kind === ts.SyntaxKind.ExportSpecifier) {
+        // EXAMPLE:
+        // "export { A } from './file-a';"
+        //
+        // ExportDeclaration:
+        //   ExportKeyword:  pre=[export] sep=[ ]
+        //   NamedExports:
+        //     FirstPunctuation:  pre=[{] sep=[ ]
+        //     SyntaxList:
+        //       ExportSpecifier:  <------------- declaration
+        //         Identifier:  pre=[A] sep=[ ]
+        //     CloseBraceToken:  pre=[}] sep=[ ]
+        //   FromKeyword:  pre=[from] sep=[ ]
+        //   StringLiteral:  pre=['./file-a']
+        //   SemicolonToken:  pre=[;]
+
         // Example: " ExportName as RenamedName"
         const exportSpecifier: ts.ExportSpecifier = declaration as ts.ExportSpecifier;
-
-        const importPackageExportName: string =
-          (exportSpecifier.propertyName || exportSpecifier.name).getText().trim();
-
-        return {
-          symbol: symbol,
-          localName: importPackageExportName,
-          importPackagePath: packagePath,
-          importPackageExportName: importPackageExportName,
-          isAmbient: false
-        };
+        importPackageExportName = (exportSpecifier.propertyName || exportSpecifier.name).getText().trim();
+      } else {
+        throw new Error('Unimplemented export declaration kind: ' + declaration.getText());
       }
+
+      if (exportDeclaration.moduleSpecifier) {
+        // Examples:
+        //    " '@microsoft/sp-lodash-subset'"
+        //    " "lodash/has""
+        const packagePath: string | undefined = PackageTypingsGenerator._getPackagePathFromModuleSpecifier(
+          exportDeclaration.moduleSpecifier);
+
+        if (packagePath) {
+          return {
+            symbol: symbol,
+            localName: importPackageExportName,
+            importPackagePath: packagePath,
+            importPackageExportName: importPackageExportName,
+            isAmbient: false
+          };
+        }
+      }
+
     }
 
     return undefined;
@@ -323,40 +346,94 @@ export default class PackageTypingsGenerator {
   private static _followAliasesForImportDeclaration(declaration: ts.Declaration,
     symbol: ts.Symbol): IFollowAliasesResult | undefined {
 
-    // EXAMPLE:
-    // "import * as theLib from 'the-lib';"
-    //
-    // ImportDeclaration:
-    //   ImportKeyword:  pre=[import] sep=[ ]
-    //   ImportClause:
-    //     NamespaceImport:  <------------- declaration
-    //       AsteriskToken:  pre=[*] sep=[ ]
-    //       AsKeyword:  pre=[as] sep=[ ]
-    //       Identifier:  pre=[theLib] sep=[ ]
-    //   FromKeyword:  pre=[from] sep=[ ]
-    //   StringLiteral:  pre=['the-lib']
-    //   SemicolonToken:  pre=[;]
     const importDeclaration: ts.ImportDeclaration | undefined
-      = PackageTypingsGenerator._matchAncestor<ts.ImportDeclaration>(declaration,
-      [ts.SyntaxKind.ImportDeclaration, ts.SyntaxKind.ImportClause, ts.SyntaxKind.NamespaceImport]);
+      = PackageTypingsGenerator._findFirstParent<ts.ImportDeclaration>(declaration, ts.SyntaxKind.ImportDeclaration);
 
-    if (importDeclaration && importDeclaration.moduleSpecifier) {
-      // Examples:
-      //    " '@microsoft/sp-lodash-subset'"
-      //    " "lodash/has""
-      const packagePath: string | undefined = PackageTypingsGenerator._getPackagePathFromModuleSpecifier(
-        importDeclaration.moduleSpecifier);
+    if (importDeclaration) {
+      let importPackageExportName: string;
 
-      if (packagePath) {
-        return {
-          symbol: symbol,
-          localName: symbol.name,
-          importPackagePath: packagePath,
-          importPackageExportName: '*',
-          isAmbient: false
-        };
+      if (declaration.kind === ts.SyntaxKind.ImportSpecifier) {
+        // EXAMPLE:
+        // "import { A, B } from 'the-lib';"
+        //
+        // ImportDeclaration:
+        //   ImportKeyword:  pre=[import] sep=[ ]
+        //   ImportClause:
+        //     NamedImports:
+        //       FirstPunctuation:  pre=[{] sep=[ ]
+        //       SyntaxList:
+        //         ImportSpecifier:  <------------- declaration
+        //           Identifier:  pre=[A]
+        //         CommaToken:  pre=[,] sep=[ ]
+        //         ImportSpecifier:
+        //           Identifier:  pre=[B] sep=[ ]
+        //       CloseBraceToken:  pre=[}] sep=[ ]
+        //   FromKeyword:  pre=[from] sep=[ ]
+        //   StringLiteral:  pre=['the-lib']
+        //   SemicolonToken:  pre=[;]
+
+        // Example: " ExportName as RenamedName"
+        const importSpecifier: ts.ImportSpecifier = declaration as ts.ImportSpecifier;
+        importPackageExportName = (importSpecifier.propertyName || importSpecifier.name).getText().trim();
+      } else if (declaration.kind === ts.SyntaxKind.NamespaceImport) {
+        // EXAMPLE:
+        // "import * as theLib from 'the-lib';"
+        //
+        // ImportDeclaration:
+        //   ImportKeyword:  pre=[import] sep=[ ]
+        //   ImportClause:
+        //     NamespaceImport:  <------------- declaration
+        //       AsteriskToken:  pre=[*] sep=[ ]
+        //       AsKeyword:  pre=[as] sep=[ ]
+        //       Identifier:  pre=[theLib] sep=[ ]
+        //   FromKeyword:  pre=[from] sep=[ ]
+        //   StringLiteral:  pre=['the-lib']
+        //   SemicolonToken:  pre=[;]
+        importPackageExportName = '*';
+      } else if (declaration.kind === ts.SyntaxKind.ImportClause) {
+        // EXAMPLE:
+        // "import A, { B } from './A';"
+        //
+        // ImportDeclaration:
+        //   ImportKeyword:  pre=[import] sep=[ ]
+        //   ImportClause:  <------------- declaration (referring to A)
+        //     Identifier:  pre=[A]
+        //     CommaToken:  pre=[,] sep=[ ]
+        //     NamedImports:
+        //       FirstPunctuation:  pre=[{] sep=[ ]
+        //       SyntaxList:
+        //         ImportSpecifier:
+        //           Identifier:  pre=[B] sep=[ ]
+        //       CloseBraceToken:  pre=[}] sep=[ ]
+        //   FromKeyword:  pre=[from] sep=[ ]
+        //   StringLiteral:  pre=['./A']
+        //   SemicolonToken:  pre=[;]
+        importPackageExportName = 'default';
+      } else {
+        throw new Error('Unimplemented import declaration kind: ' + declaration.getText());
       }
+
+      if (importDeclaration.moduleSpecifier) {
+        // Examples:
+        //    " '@microsoft/sp-lodash-subset'"
+        //    " "lodash/has""
+        const packagePath: string | undefined = PackageTypingsGenerator._getPackagePathFromModuleSpecifier(
+          importDeclaration.moduleSpecifier);
+
+        if (packagePath) {
+          return {
+            symbol: symbol,
+            localName: symbol.name,
+            importPackagePath: packagePath,
+            importPackageExportName: importPackageExportName,
+            isAmbient: false
+          };
+        }
+      }
+
     }
+
+    return undefined;
   }
 
   private static _getPackagePathFromModuleSpecifier(moduleSpecifier: ts.Expression): string | undefined {
@@ -371,9 +448,9 @@ export default class PackageTypingsGenerator {
       .replace(/^\s*['"]/, '')
       .replace(/['"]\s*$/, '');
 
-    // Does it start with something like "./"?
+    // Does it start with something like "./" or "../"?
     // If not, then assume it's an import from an external package
-    if (!/^\.\//.test(path)) {
+    if (!/^\.\.?\//.test(path)) {
       return path;
     }
 
