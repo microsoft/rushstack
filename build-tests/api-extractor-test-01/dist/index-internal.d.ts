@@ -7,6 +7,7 @@
  * @packagedocumentation
  */
 
+/// <reference types="jest" />
 
 /**
  * Example of an abstract class that is directly exported.

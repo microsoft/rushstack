@@ -138,6 +138,9 @@ export default class PackageTypingsGenerator {
    */
   private readonly _entries: Entry[] = [];
 
+  private readonly _typeDirectiveReferences: string[] = [];
+  private readonly _typeDirectiveReferencesFiles: Set<string> = new Set<string>();
+
   /**
    * Returns an ancestor of "node", such that the ancestor, any intermediary nodes,
    * and the starting node match a list of expected kinds.  Undefined is returned
@@ -423,7 +426,15 @@ export default class PackageTypingsGenerator {
       this._indentedWriter.writeLine();
     }
 
-    // Emit the imports first
+    // Emit the triple slash directives
+    this._typeDirectiveReferences.sort();
+    for (const typeDirectiveReference of this._typeDirectiveReferences) {
+      // tslint:disable-next-line:max-line-length
+      // https://github.com/Microsoft/TypeScript/blob/611ebc7aadd7a44a4c0447698bfda9222a78cb66/src/compiler/declarationEmitter.ts#L162
+      this._indentedWriter.writeLine(`/// <reference types="${typeDirectiveReference}" />`);
+    }
+
+    // Emit the imports
     for (const entry of this._entries) {
       if (entry.importPackagePath) {
         if (entry.importPackageExportName === '*') {
@@ -613,6 +624,7 @@ export default class PackageTypingsGenerator {
 
     for (const declaration of followedSymbol.declarations || []) {
       this._collectTypes(declaration);
+      this._collectTypeReferenceDirectives(declaration);
     }
 
     return entry;
@@ -648,6 +660,26 @@ export default class PackageTypingsGenerator {
 
     for (const child of node.getChildren() || []) {
       this._collectTypes(child);
+    }
+  }
+
+  private _collectTypeReferenceDirectives(node: ts.Node): void {
+    const sourceFile: ts.SourceFile = node.getSourceFile();
+    if (!sourceFile || !sourceFile.fileName) {
+      return;
+    }
+
+    if (this._typeDirectiveReferencesFiles.has(sourceFile.fileName)) {
+      return;
+    }
+
+    this._typeDirectiveReferencesFiles.add(sourceFile.fileName);
+
+    for (const typeReferenceDirective of sourceFile.typeReferenceDirectives) {
+      const name: string = sourceFile.text.substring(typeReferenceDirective.pos, typeReferenceDirective.end);
+      if (this._typeDirectiveReferences.indexOf(name) < 0) {
+        this._typeDirectiveReferences.push(name);
+      }
     }
   }
 }

@@ -7,6 +7,7 @@
  * @packagedocumentation
  */
 
+/// <reference types="jest" />
 import { ReexportedClass } from 'api-extractor-test-01';
 import * as semver1 from 'semver';
 import * as semver2 from 'semver';
