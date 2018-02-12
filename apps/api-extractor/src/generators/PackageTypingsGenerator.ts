@@ -35,6 +35,16 @@ class Entry {
   public readonly localName: string;
 
   /**
+   * If this entry is a top-level export of the package that we are analyzing, then its
+   * name is stored here.  In this case, the uniqueName must be the same as packageExportName.
+   * @remarks
+   * Since Entry objects are collected via a depth first search, we may encounter it
+   * before we realize that it is a package export; the packageExportName property is not
+   * accurate until the collection phase has completed.
+   */
+  public packageExportName: string | undefined;
+
+  /**
    * The localName, possibly renamed to ensure that all the top-level exports have unique names.
    */
   public get uniqueName(): string | undefined {
@@ -644,13 +654,33 @@ export default class PackageTypingsGenerator {
    */
   private _makeUniqueNames(): void {
     const usedNames: Set<string> = new Set<string>();
+
+    // First collect the package exports
     for (const entry of this._entries) {
-      let suffix: number = 1;
-      entry.uniqueName = entry.localName;
-      while (usedNames.has(entry.uniqueName)) {
-        entry.uniqueName = entry.localName + '_' + ++suffix;
+      if (entry.packageExportName) {
+        if (usedNames.has(entry.packageExportName)) {
+          // This should be impossible
+          throw new Error('Program bug: a package cannot have two exports with the same name');
+        }
+
+        entry.uniqueName = entry.packageExportName;
+
+        usedNames.add(entry.packageExportName);
       }
-      usedNames.add(entry.uniqueName);
+    }
+
+    // Next generate unique names for the non-exports
+    for (const entry of this._entries) {
+      if (!entry.packageExportName) {
+
+        let suffix: number = 1;
+        entry.uniqueName = entry.localName;
+        while (usedNames.has(entry.uniqueName)) {
+          entry.uniqueName = entry.localName + '_' + ++suffix;
+        }
+
+        usedNames.add(entry.uniqueName);
+      }
     }
   }
 
@@ -683,25 +713,31 @@ export default class PackageTypingsGenerator {
     }
 
     let entry: Entry | undefined = this._entriesBySymbol.get(followedSymbol);
-    if (entry) {
-      return entry;
+    if (!entry) {
+      entry = new Entry({
+        localName: followAliasesResult.localName,
+        followedSymbol: followAliasesResult.symbol,
+        importPackagePath: followAliasesResult.importPackagePath,
+        importPackageExportName: followAliasesResult.importPackageExportName
+      });
+
+      this._entries.push(entry);
+      this._entriesBySymbol.set(followedSymbol, entry);
+
+      for (const declaration of followedSymbol.declarations || []) {
+        this._collectTypes(declaration);
+        this._collectTypeReferenceDirectives(declaration);
+      }
     }
 
-    entry = new Entry({
-      // If the symbol is exported, then we use the exported name.  Otherwise, since
-      // there can be many possible names, we use the name from the original definition.
-      localName: symbolIsExported ? symbol.name : followAliasesResult.localName,
-      followedSymbol: followAliasesResult.symbol,
-      importPackagePath: followAliasesResult.importPackagePath,
-      importPackageExportName: followAliasesResult.importPackageExportName
-    });
+    if (symbolIsExported) {
+      if (entry.packageExportName && entry.packageExportName !== symbol.name) {
+        // TODO: If the same symbol is exported more than once, we need to emit an alias;
+        // We cannot simply export two definitions.
+        throw new Error(`${symbol.name} is exported twice`);
+      }
 
-    this._entries.push(entry);
-    this._entriesBySymbol.set(followedSymbol, entry);
-
-    for (const declaration of followedSymbol.declarations || []) {
-      this._collectTypes(declaration);
-      this._collectTypeReferenceDirectives(declaration);
+      entry.packageExportName = symbol.name;
     }
 
     return entry;
