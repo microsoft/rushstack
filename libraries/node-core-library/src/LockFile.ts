@@ -86,6 +86,28 @@ export class LockFile {
   }
 
   /**
+   * Attempts to create the lockfile.
+   * Will continue to loop at the given interval until the lock becomes available.
+   * Note that this function is subject to starvation issues.
+   */
+  public static acquire(resourceDir: string, resourceName: string, interval?: number): Promise<LockFile> {
+    interval = interval || 100;
+
+    const tryLock: (resolve: (value: LockFile) => void) => void = (resolve => {
+      const lock: LockFile | undefined = LockFile.tryAcquire(resourceDir, resourceName);
+      if (lock) {
+        resolve(lock);
+      } else {
+        setTimeout(tryLock.bind(this, resolve), interval);
+      }
+    });
+
+    return new Promise((resolve: (value: LockFile) => void, reject: () => void) => {
+      tryLock(resolve);
+    });
+  }
+
+  /**
    * Attempts to acquire the lock on a Linux or OSX machine
    */
   private static _tryAcquireMacOrLinux(resourceDir: string, resourceName: string): LockFile | undefined {

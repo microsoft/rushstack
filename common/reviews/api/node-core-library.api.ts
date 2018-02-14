@@ -52,6 +52,7 @@ class JsonSchema {
 
 // @public
 class LockFile {
+  static acquire(resourceDir: string, resourceName: string, interval?: number): Promise<LockFile>;
   readonly dirtyWhenAcquired: boolean;
   readonly filePath: string;
   static getLockFilePath(resourceDir: string, resourceName: string, pid?: number): string;

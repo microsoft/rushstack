@@ -10,7 +10,7 @@ import * as semver from 'semver';
 import * as tar from 'tar';
 import * as wordwrap from 'wordwrap';
 import globEscape = require('glob-escape');
-import { JsonFile } from '@microsoft/node-core-library';
+import { JsonFile, LockFile } from '@microsoft/node-core-library';
 
 import AsyncRecycler from '../../utilities/AsyncRecycler';
 import RushConfiguration, {
@@ -145,7 +145,7 @@ export default class InstallManager {
    * If the "(p)npm-local" symlink hasn't been set up yet, this creates it, installing the
    * specified (P)npm version in the user's home directory if needed.
    */
-  public ensureLocalPackageManager(forceReinstall: boolean): void {
+  public ensureLocalPackageManager(forceReinstall: boolean): Promise<void> {
     // Example: "C:\Users\YourName\.rush"
     const rushHomeFolder: string = path.join(this._rushConfiguration.homeFolder, '.rush');
 
@@ -157,46 +157,51 @@ export default class InstallManager {
     const packageManager: PackageManager = this._rushConfiguration.packageManager;
     const packageManagerVersion: string = this._rushConfiguration.packageManagerToolVersion;
 
+    const packageManagerAndVersion: string = `${packageManager}-${packageManagerVersion}`;
     // Example: "C:\Users\YourName\.rush\pnpm-1.2.3"
-    const packageManagerToolFolder: string = path.join(rushHomeFolder,
-      `${packageManager}-${packageManagerVersion}`);
-    // Example: "C:\Users\YourName\.rush\pnpm-1.2.3\last-install.flag"
-    const packageManagerToolFlagFile: string = path.join(packageManagerToolFolder, 'last-install.flag');
+    const packageManagerToolFolder: string = path.join(rushHomeFolder, packageManagerAndVersion);
 
-    // NOTE: We don't care about the timestamp for last-install.flag, because nobody will change
-    // the package.json for this case
-    if (forceReinstall || !fsx.existsSync(packageManagerToolFlagFile)) {
-      console.log(colors.bold(`Installing ${packageManager} version ${packageManagerVersion}${os.EOL}`));
+    return LockFile.acquire(rushHomeFolder, packageManagerAndVersion).then((lock: LockFile) => {
+      if (lock.dirtyWhenAcquired) {
+        fsx.removeSync(packageManagerToolFolder);
+        fsx.mkdirSync(packageManagerToolFolder);
+      }
 
-      Utilities.installPackageInDirectory(
-        packageManagerToolFolder,
-        packageManager,
-        this._rushConfiguration.packageManagerToolVersion,
-        `${packageManager}-local-install`,
-        MAX_INSTALL_ATTEMPTS
-      );
+      // NOTE: We don't care about the timestamp for last-install.flag, because nobody will change
+      // the package.json for this case
+      if (forceReinstall || lock.dirtyWhenAcquired) {
+        console.log(colors.bold(`Installing ${packageManager} version ${packageManagerVersion}${os.EOL}`));
 
-      // Create the marker file to indicate a successful install
-      fsx.writeFileSync(packageManagerToolFlagFile, '');
-      console.log(`Successfully installed ${packageManager} version ${packageManagerVersion}`);
-    } else {
-      console.log(`Found ${packageManager} version ${packageManagerVersion} in ${packageManagerToolFolder}`);
-    }
+        Utilities.installPackageInDirectory(
+          packageManagerToolFolder,
+          packageManager,
+          this._rushConfiguration.packageManagerToolVersion,
+          `${packageManager}-local-install`,
+          MAX_INSTALL_ATTEMPTS
+        );
 
-    // Example: "C:\MyRepo\common\temp"
-    if (!fsx.existsSync(this._rushConfiguration.commonTempFolder)) {
-      fsx.mkdirsSync(this._rushConfiguration.commonTempFolder);
-    }
+        console.log(`Successfully installed ${packageManager} version ${packageManagerVersion}`);
+      } else {
+        console.log(`Found ${packageManager} version ${packageManagerVersion} in ${packageManagerToolFolder}`);
+      }
 
-    // Example: "C:\MyRepo\common\temp\pnpm-local"
-    const localPackageManagerToolFolder: string =
-      path.join(this._rushConfiguration.commonTempFolder, `${packageManager}-local`);
-    if (fsx.existsSync(localPackageManagerToolFolder)) {
-      fsx.unlinkSync(localPackageManagerToolFolder);
-    }
-    console.log(os.EOL + 'Symlinking "' + localPackageManagerToolFolder + '"');
-    console.log('  --> "' + packageManagerToolFolder + '"');
-    fsx.symlinkSync(packageManagerToolFolder, localPackageManagerToolFolder, 'junction');
+      lock.release();
+
+      // Example: "C:\MyRepo\common\temp"
+      if (!fsx.existsSync(this._rushConfiguration.commonTempFolder)) {
+        fsx.mkdirsSync(this._rushConfiguration.commonTempFolder);
+      }
+
+      // Example: "C:\MyRepo\common\temp\pnpm-local"
+      const localPackageManagerToolFolder: string =
+        path.join(this._rushConfiguration.commonTempFolder, `${packageManager}-local`);
+      if (fsx.existsSync(localPackageManagerToolFolder)) {
+        fsx.unlinkSync(localPackageManagerToolFolder);
+      }
+      console.log(os.EOL + 'Symlinking "' + localPackageManagerToolFolder + '"');
+      console.log('  --> "' + packageManagerToolFolder + '"');
+      fsx.symlinkSync(packageManagerToolFolder, localPackageManagerToolFolder, 'junction');
+    });
   }
 
   /**
