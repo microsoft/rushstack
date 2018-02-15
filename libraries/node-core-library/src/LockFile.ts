@@ -56,9 +56,9 @@ export class LockFile {
    * Returns the path to the lockfile, should it be created successfully.
    */
   public static getLockFilePath(resourceDir: string, resourceName: string, pid: number = process.pid): string {
-    if (!resourceName.match(/^[a-zA-Z]+$/)) {
+    if (!resourceName.match(/^[a-zA-Z0-9][a-zA-Z0-9-.]+[a-zA-Z0-9]$/)) {
       throw new Error(`The resource name "${resourceName}" is invalid.`
-        + ` It must be an alphabetic string with no special characters.`);
+        + ` It must be an alphanumberic string with only "-" or "." It must start with a alphanumeric character.`);
     }
 
     if (process.platform === 'win32') {
