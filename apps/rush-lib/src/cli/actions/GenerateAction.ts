@@ -95,8 +95,8 @@ export default class GenerateAction extends BaseRushAction {
 
     try {
       const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
-          this.rushConfiguration.packageManager,
-          this.rushConfiguration.committedShrinkwrapFilename);
+        this.rushConfiguration.packageManager,
+        this.rushConfiguration.committedShrinkwrapFilename);
 
       if (shrinkwrapFile
         && !this._forceParameter.value
@@ -113,85 +113,79 @@ export default class GenerateAction extends BaseRushAction {
       console.log('There was a problem reading the shrinkwrap file. Proceeeding with "rush generate".');
     }
 
-    return installManager.ensureLocalPackageManager(false).then(() => {
+    installManager.ensureLocalPackageManager(false);
+    installManager.createTempModules(true);
 
-      installManager.createTempModules(true);
+    // Delete both copies of the shrinkwrap file
+    if (fsx.existsSync(committedShrinkwrapFilename)) {
+      console.log(os.EOL + 'Deleting ' + committedShrinkwrapFilename);
+      fsx.unlinkSync(committedShrinkwrapFilename);
+    }
+    if (fsx.existsSync(tempShrinkwrapFilename)) {
+      fsx.unlinkSync(tempShrinkwrapFilename);
+    }
 
-      // Delete both copies of the shrinkwrap file
-      if (fsx.existsSync(committedShrinkwrapFilename)) {
-        console.log(os.EOL + 'Deleting ' + committedShrinkwrapFilename);
-        fsx.unlinkSync(committedShrinkwrapFilename);
-      }
-      if (fsx.existsSync(tempShrinkwrapFilename)) {
-        fsx.unlinkSync(tempShrinkwrapFilename);
-      }
+    const packageManager: PackageManager = this.rushConfiguration.packageManager;
 
-      const packageManager: PackageManager = this.rushConfiguration.packageManager;
+    if (this.rushConfiguration.packageManager === 'pnpm') {
 
-      if (this.rushConfiguration.packageManager === 'pnpm') {
+      // Do an incremental install unless --clean is specified
+      installManager.installCommonModules(this._cleanParameter.value
+        ? InstallType.ForceClean
+        : InstallType.Normal);
 
-        // Do an incremental install unless --clean is specified
-        installManager.installCommonModules(this._cleanParameter.value
-          ? InstallType.ForceClean
-          : InstallType.Normal);
+      this._syncShrinkwrapAndCheckInstallFlag(installManager);
+
+    } else if (this.rushConfiguration.packageManager === 'npm') {
+
+      if (isLazy) {
+        console.log(colors.green(
+          `${os.EOL}Rush is running in "--lazy" mode. ` +
+          `You will need to run a normal "rush generate" before committing.`));
+
+        // Do an incremental install
+        installManager.installCommonModules(InstallType.Normal);
+
+        console.log(os.EOL + colors.bold('(Skipping "npm shrinkwrap")') + os.EOL);
+
+        // delete the automatically created npm5 "package.lock" file
+        const packageLogFilePath: string = path.join(this.rushConfiguration.commonTempFolder, 'package.lock');
+        if (fsx.existsSync(packageLogFilePath)) {
+          console.log('Removing NPM 5\'s "package.lock" file');
+          fsx.removeSync(packageLogFilePath);
+        }
+      } else {
+        // Do a clean install
+        installManager.installCommonModules(InstallType.ForceClean);
+
+        console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
+        const npmArgs: string[] = ['shrinkwrap'];
+        installManager.pushConfigurationArgs(npmArgs);
+        Utilities.executeCommand(this.rushConfiguration.packageManagerToolFilename,
+          npmArgs, this.rushConfiguration.commonTempFolder);
+        console.log('"npm shrinkwrap" completed' + os.EOL);
 
         this._syncShrinkwrapAndCheckInstallFlag(installManager);
-
-      } else if (this.rushConfiguration.packageManager === 'npm') {
-
-        if (isLazy) {
-          console.log(colors.green(
-            `${os.EOL}Rush is running in "--lazy" mode. ` +
-            `You will need to run a normal "rush generate" before committing.`));
-
-          // Do an incremental install
-          installManager.installCommonModules(InstallType.Normal);
-
-          console.log(os.EOL + colors.bold('(Skipping "npm shrinkwrap")') + os.EOL);
-
-          // delete the automatically created npm5 "package.lock" file
-          const packageLogFilePath: string = path.join(this.rushConfiguration.commonTempFolder, 'package.lock');
-          if (fsx.existsSync(packageLogFilePath)) {
-            console.log('Removing NPM 5\'s "package.lock" file');
-            fsx.removeSync(packageLogFilePath);
-          }
-        } else {
-          // Do a clean install
-          installManager.installCommonModules(InstallType.ForceClean);
-
-          console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
-          const npmArgs: string[] = ['shrinkwrap'];
-          installManager.pushConfigurationArgs(npmArgs);
-          Utilities.executeCommand(this.rushConfiguration.packageManagerToolFilename,
-            npmArgs, this.rushConfiguration.commonTempFolder);
-          console.log('"npm shrinkwrap" completed' + os.EOL);
-
-          this._syncShrinkwrapAndCheckInstallFlag(installManager);
-        }
-
-      } else {
-        // program bug
-        throw new Error(`Program bug: invalid package manager "${packageManager}"`);
       }
 
-    }).catch((error) => {
-      stopwatch.stop();
-      console.log(os.EOL + colors.green(`Rush generate failed:${os.EOL}`));
-      throw error;
-    }).then(() => {
-      stopwatch.stop();
-      console.log(os.EOL + colors.green(`Rush generate finished successfully. (${stopwatch.toString()})`));
+    } else {
+      // program bug
+      throw new Error(`Program bug: invalid package manager "${packageManager}"`);
+    }
 
-      if (!this._noLinkParameter.value) {
-        const linkManager: BaseLinkManager =
-          LinkManagerFactory.getLinkManager(this.rushConfiguration);
-        // NOTE: Setting force=true here shouldn't be strictly necessary, since installCommonModules()
-        // above should have already deleted the marker file, but it doesn't hurt to be explicit.
-        this._parser.catchSyncErrors(linkManager.createSymlinksForProjects(true));
-      } else {
-        console.log(os.EOL + 'Next you should probably run: "rush link"');
-      }
-    });
+    stopwatch.stop();
+    console.log(os.EOL + colors.green(`Rush generate finished successfully. (${stopwatch.toString()})`));
+
+    if (!this._noLinkParameter.value) {
+      const linkManager: BaseLinkManager =
+        LinkManagerFactory.getLinkManager(this.rushConfiguration);
+      // NOTE: Setting force=true here shouldn't be strictly necessary, since installCommonModules()
+      // above should have already deleted the marker file, but it doesn't hurt to be explicit.
+      this._parser.catchSyncErrors(linkManager.createSymlinksForProjects(true));
+    } else {
+      console.log(os.EOL + 'Next you should probably run: "rush link"');
+    }
+    return Promise.resolve();
   }
 
   private _syncShrinkwrapAndCheckInstallFlag(installManager: InstallManager): void {

@@ -79,8 +79,9 @@ export default class InstallAction extends BaseRushAction {
 
     this.eventHooksManager.handle(Event.preRushInstall);
 
-    const installManager: InstallManager = new InstallManager(this.rushConfiguration);
-    return installManager.ensureLocalPackageManager(this._cleanInstallFull.value).then(() => {
+    try {
+      const installManager: InstallManager = new InstallManager(this.rushConfiguration);
+      installManager.ensureLocalPackageManager(this._cleanInstallFull.value);
 
       const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
         this.rushConfiguration.packageManager,
@@ -92,7 +93,7 @@ export default class InstallAction extends BaseRushAction {
         console.log('');
         console.log('You need to run "rush generate" first.');
         process.exit(1);
-        return;
+        return Promise.resolve();
       }
 
       let installType: InstallType = InstallType.Normal;
@@ -106,30 +107,31 @@ export default class InstallAction extends BaseRushAction {
         console.log('');
         console.log(colors.red('You need to run "rush generate" to update your shrinkwrap file.'));
         process.exit(1);
-        return;
+        return Promise.resolve();
       }
 
       installManager.installCommonModules(installType);
 
-    }).catch((error) => {
+    } catch (error) {
       stopwatch.stop();
       this._collectTelemetry(stopwatch, false);
       throw error;
-    }).then(() => {
-      stopwatch.stop();
-      console.log(colors.green(`Done. (${stopwatch.toString()})`));
+    }
+    stopwatch.stop();
+    console.log(colors.green(`Done. (${stopwatch.toString()})`));
 
-      this._collectTelemetry(stopwatch, true);
+    this._collectTelemetry(stopwatch, true);
 
-      this.eventHooksManager.handle(Event.postRushInstall);
+    this.eventHooksManager.handle(Event.postRushInstall);
 
-      if (!this._noLinkParameter.value) {
-        const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
-        this._parser.catchSyncErrors(linkManager.createSymlinksForProjects(false));
-      } else {
-        console.log(os.EOL + 'Next you should probably run: "rush link"');
-      }
-    });
+    if (!this._noLinkParameter.value) {
+      const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
+      this._parser.catchSyncErrors(linkManager.createSymlinksForProjects(false));
+    } else {
+      console.log(os.EOL + 'Next you should probably run: "rush link"');
+    }
+
+    return Promise.resolve();
   }
 
   private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {

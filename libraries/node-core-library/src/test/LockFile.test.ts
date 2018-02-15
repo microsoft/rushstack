@@ -20,29 +20,17 @@ describe('LockFile', () => {
 
   describe('getLockFilePath', () => {
     it('only acceps alphabetical characters for resource name', () => {
-      assert.doesNotThrow(() => {
+      assert.throws(() => {
         LockFile.getLockFilePath(process.cwd(), 'foo123');
       });
-      assert.doesNotThrow(() => {
+      assert.throws(() => {
         LockFile.getLockFilePath(process.cwd(), 'bar.123');
       });
-      assert.doesNotThrow(() => {
+      assert.throws(() => {
         LockFile.getLockFilePath(process.cwd(), 'foo.bar');
       });
-      assert.doesNotThrow(() => {
-        LockFile.getLockFilePath(process.cwd(), 'lock-file.123');
-      });
       assert.throws(() => {
-        LockFile.getLockFilePath(process.cwd(), '.foo123');
-      });
-      assert.throws(() => {
-        LockFile.getLockFilePath(process.cwd(), 'foo123.');
-      });
-      assert.throws(() => {
-        LockFile.getLockFilePath(process.cwd(), '-foo123');
-      });
-      assert.throws(() => {
-        LockFile.getLockFilePath(process.cwd(), 'foo123-');
+        LockFile.getLockFilePath(process.cwd(), 'lock-file');
       });
       assert.throws(() => {
         LockFile.getLockFilePath(process.cwd(), '');

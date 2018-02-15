@@ -56,9 +56,9 @@ export class LockFile {
    * Returns the path to the lockfile, should it be created successfully.
    */
   public static getLockFilePath(resourceDir: string, resourceName: string, pid: number = process.pid): string {
-    if (!resourceName.match(/^[a-zA-Z0-9][a-zA-Z0-9-.]+[a-zA-Z0-9]$/)) {
+    if (!resourceName.match(/^[a-zA-Z]+$/)) {
       throw new Error(`The resource name "${resourceName}" is invalid.`
-        + ` It must be an alphanumberic string with only "-" or "." It must start with a alphanumeric character.`);
+        + ` It must be an alphabetic string with no special characters.`);
     }
 
     if (process.platform === 'win32') {
@@ -83,28 +83,6 @@ export class LockFile {
       return LockFile._tryAcquireMacOrLinux(resourceDir, resourceName);
     }
     throw new Error(`File locking not implemented for platform: "${process.platform}"`);
-  }
-
-  /**
-   * Attempts to create the lockfile.
-   * Will continue to loop at the given interval until the lock becomes available.
-   * Note that this function is subject to starvation issues.
-   */
-  public static acquire(resourceDir: string, resourceName: string, interval?: number): Promise<LockFile> {
-    interval = interval || 100;
-
-    const tryLock: (resolve: (value: LockFile) => void) => void = (resolve => {
-      const lock: LockFile | undefined = LockFile.tryAcquire(resourceDir, resourceName);
-      if (lock) {
-        resolve(lock);
-      } else {
-        setTimeout(tryLock.bind(this, resolve), interval);
-      }
-    });
-
-    return new Promise((resolve: (value: LockFile) => void, reject: () => void) => {
-      tryLock(resolve);
-    });
   }
 
   /**
@@ -142,7 +120,7 @@ export class LockFile {
       const files: string[] = fsx.readdirSync(resourceDir);
 
       // look for anything ending with numbers and ".lock"
-      const lockFileRegExp: RegExp = /^(.+)\.([0-9]+)\.lock$/;
+      const lockFileRegExp: RegExp = /^([a-zA-Z]+)\.([0-9]+)\.lock$/;
 
       let match: RegExpMatchArray | null;
       let otherPid: string;
