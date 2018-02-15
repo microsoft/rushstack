@@ -161,14 +161,10 @@ export default class InstallManager {
     // Example: "C:\Users\YourName\.rush\pnpm-1.2.3"
     const packageManagerToolFolder: string = path.join(rushHomeFolder, packageManagerAndVersion);
 
+    console.log(`Trying to acquire lock for ${packageManagerAndVersion}`);
     return LockFile.acquire(rushHomeFolder, packageManagerAndVersion).then((lock: LockFile) => {
-      if (lock.dirtyWhenAcquired) {
-        fsx.removeSync(packageManagerToolFolder);
-        fsx.mkdirSync(packageManagerToolFolder);
-      }
+      console.log(`Acquired lock for ${packageManagerAndVersion}`);
 
-      // NOTE: We don't care about the timestamp for last-install.flag, because nobody will change
-      // the package.json for this case
       if (forceReinstall || lock.dirtyWhenAcquired) {
         console.log(colors.bold(`Installing ${packageManager} version ${packageManagerVersion}${os.EOL}`));
 
