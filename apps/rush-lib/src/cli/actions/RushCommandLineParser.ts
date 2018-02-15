@@ -81,6 +81,9 @@ export default class RushCommandLineParser extends CommandLineParser {
     return this._execute().catch((error: Error) => {
       if (this._debugParameter.value) {
         console.log(colors.red(error.toString()));
+        if (error.stack) {
+          console.log(os.EOL + error.stack);
+        }
       } else {
         this._exitAndReportError(error);
       }
@@ -98,7 +101,7 @@ export default class RushCommandLineParser extends CommandLineParser {
         return;
       }
 
-      return super.onExecute();
+      super.onExecute().then(resolve).catch(reject);
     }).then(() => {
       if (this.telemetry) {
         this.flushTelemetry();
