@@ -142,7 +142,7 @@ export class LockFile {
       const files: string[] = fsx.readdirSync(resourceDir);
 
       // look for anything ending with numbers and ".lock"
-      const lockFileRegExp: RegExp = /^([a-zA-Z]+)\.([0-9]+)\.lock$/;
+      const lockFileRegExp: RegExp = /^(.+)\.([0-9]+)\.lock$/;
 
       let match: RegExpMatchArray | null;
       let otherPid: string;
