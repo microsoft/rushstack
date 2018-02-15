@@ -27,7 +27,7 @@ export default class UnlinkAction extends BaseRushAction {
     // No parameters
   }
 
-  protected run(): void {
+  protected run(): Promise<void> {
     // Delete the flag file if it exists; this will ensure that
     // a full "rush link" is required next time
     Utilities.deleteFile(this.rushConfiguration.rushLinkJsonFilename);
@@ -46,5 +46,6 @@ export default class UnlinkAction extends BaseRushAction {
     } else {
       console.log(os.EOL + 'Done.');
     }
+    return Promise.resolve();
   }
 }

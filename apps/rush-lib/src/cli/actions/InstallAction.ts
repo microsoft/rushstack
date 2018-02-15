@@ -65,11 +65,11 @@ export default class InstallAction extends BaseRushAction {
     });
   }
 
-  protected run(): void {
+  protected run(): Promise<void> {
     if (!this._bypassPolicy.value) {
       if (!GitPolicy.check(this.rushConfiguration)) {
         process.exit(1);
-        return;
+        return Promise.resolve();
       }
 
       ApprovedPackagesChecker.rewriteConfigFiles(this.rushConfiguration);
@@ -80,7 +80,7 @@ export default class InstallAction extends BaseRushAction {
     this.eventHooksManager.handle(Event.preRushInstall);
 
     const installManager: InstallManager = new InstallManager(this.rushConfiguration);
-    installManager.ensureLocalPackageManager(this._cleanInstallFull.value).then(() => {
+    return installManager.ensureLocalPackageManager(this._cleanInstallFull.value).then(() => {
 
       const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
         this.rushConfiguration.packageManager,
@@ -88,7 +88,7 @@ export default class InstallAction extends BaseRushAction {
 
       if (!shrinkwrapFile) {
         console.log('');
-        console.log(colors.red('Unable to proceed: The NPM shrinkwrap file is missing.'));
+        console.log(colors.red('Unable to proceed: The shrinkwrap file is missing.'));
         console.log('');
         console.log('You need to run "rush generate" first.');
         process.exit(1);
@@ -104,7 +104,7 @@ export default class InstallAction extends BaseRushAction {
 
       if (!installManager.createTempModulesAndCheckShrinkwrap(shrinkwrapFile, installType !== InstallType.Normal)) {
         console.log('');
-        console.log(colors.red('You need to run "rush generate" to update your NPM shrinkwrap file.'));
+        console.log(colors.red('You need to run "rush generate" to update your shrinkwrap file.'));
         process.exit(1);
         return;
       }

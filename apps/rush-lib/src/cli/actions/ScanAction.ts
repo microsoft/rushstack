@@ -34,7 +34,7 @@ export default class ScanAction extends BaseRushAction {
     // abstract
   }
 
-  protected run(): void {
+  protected run(): Promise<void> {
     const packageJsonFilename: string = path.resolve('./package.json');
 
     if (!fsx.existsSync(packageJsonFilename)) {
@@ -122,5 +122,6 @@ export default class ScanAction extends BaseRushAction {
         console.log('  ' + packageName);
       }
     }
+    return Promise.resolve();
   }
 }

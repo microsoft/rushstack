@@ -35,7 +35,7 @@ export abstract class BaseRushAction extends CommandLineAction {
     this._safeForSimultaneousRushProcesses = !!options.safeForSimultaneousRushProcesses;
   }
 
-  protected onExecute(): void {
+  protected onExecute(): Promise<void> {
     this._ensureEnvironment();
 
     if (!this._safeForSimultaneousRushProcesses) {
@@ -46,14 +46,14 @@ export abstract class BaseRushAction extends CommandLineAction {
     }
 
     console.log(`Starting "rush ${this.options.actionVerb}"${os.EOL}`);
-    this.run();
+    return this.run();
   }
 
   /**
    * All Rush actions need to implement this method. This method runs after
    * environment has been set up by the base class.
    */
-  protected abstract run(): void;
+  protected abstract run(): Promise<void>;
 
   protected get rushConfiguration(): RushConfiguration {
     if (!this._rushConfiguration) {

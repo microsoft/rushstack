@@ -11,7 +11,7 @@
       "node"
     ],
     "lib": [
-      "es5",
+      "es6",
       "es2015.iterable",
       "es2015.collection"
     ]

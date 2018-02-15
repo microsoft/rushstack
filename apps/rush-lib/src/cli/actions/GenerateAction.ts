@@ -68,7 +68,7 @@ export default class GenerateAction extends BaseRushAction {
     });
   }
 
-  protected run(): void {
+  protected run(): Promise<void> {
     const stopwatch: Stopwatch = Stopwatch.start();
     const isLazy: boolean = this._lazyParameter.value;
 
@@ -106,14 +106,14 @@ export default class GenerateAction extends BaseRushAction {
         console.log();
         console.log(`If you want to force an upgrade to the latest compatible versions, use ` +
           `${colors.yellow('rush generate --force')}. Otherwise, just run ${colors.green('rush install')}.)`);
-        return;
+        return Promise.resolve();
       }
     } catch (ex) {
       console.log();
       console.log('There was a problem reading the shrinkwrap file. Proceeeding with "rush generate".');
     }
 
-    installManager.ensureLocalPackageManager(false).then(() => {
+    return installManager.ensureLocalPackageManager(false).then(() => {
 
       installManager.createTempModules(true);
 
@@ -174,6 +174,11 @@ export default class GenerateAction extends BaseRushAction {
         throw new Error(`Program bug: invalid package manager "${packageManager}"`);
       }
 
+    }).catch((error) => {
+      stopwatch.stop();
+      console.log(os.EOL + colors.green(`Rush generate failed:${os.EOL}`));
+      throw error;
+    }).then(() => {
       stopwatch.stop();
       console.log(os.EOL + colors.green(`Rush generate finished successfully. (${stopwatch.toString()})`));
 

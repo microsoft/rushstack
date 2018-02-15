@@ -181,8 +181,6 @@ export default class InstallManager {
         console.log(`Found ${packageManager} version ${packageManagerVersion} in ${packageManagerToolFolder}`);
       }
 
-      lock.release();
-
       // Example: "C:\MyRepo\common\temp"
       if (!fsx.existsSync(this._rushConfiguration.commonTempFolder)) {
         fsx.mkdirsSync(this._rushConfiguration.commonTempFolder);
@@ -197,6 +195,8 @@ export default class InstallManager {
       console.log(os.EOL + 'Symlinking "' + localPackageManagerToolFolder + '"');
       console.log('  --> "' + packageManagerToolFolder + '"');
       fsx.symlinkSync(packageManagerToolFolder, localPackageManagerToolFolder, 'junction');
+
+      lock.release();
     });
   }
 
@@ -491,7 +491,7 @@ export default class InstallManager {
     if (!fsx.existsSync(packageManagerFilename)) {
       // This normally should never occur -- it indicates that some code path forgot to call
       // InstallManager.ensureLocalNpmTool().
-      throw new Error('Expected to find local NPM here: "' + packageManagerFilename + '"');
+      throw new Error('Expected to find local package manager tool here: "' + packageManagerFilename + '"');
     }
 
     console.log(os.EOL + colors.bold('Checking node_modules in ' + this._rushConfiguration.commonTempFolder)

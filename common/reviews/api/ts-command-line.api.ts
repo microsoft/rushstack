@@ -12,10 +12,10 @@ class CommandLineAction extends CommandLineParameterProvider {
   // @internal
   _buildParser(actionsSubParser: argparse.SubParser): void;
   // @internal
-  _execute(): void;
+  _execute(): Promise<void>;
   // @internal
   _processParsedData(data: ICommandLineParserData): void;
-  protected abstract onExecute(): void;
+  protected abstract onExecute(): Promise<void>;
   options: ICommandLineActionOptions;
 }
 
@@ -60,8 +60,8 @@ class CommandLineParameterProvider {
 class CommandLineParser extends CommandLineParameterProvider {
   constructor(options: ICommandListParserOptions);
   addAction(command: CommandLineAction): void;
-  execute(args?: string[]): void;
-  protected onExecute(): void;
+  execute(args?: string[]): Promise<void>;
+  protected onExecute(): Promise<void>;
   protected selectedAction: CommandLineAction;
 }
 

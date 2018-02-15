@@ -79,11 +79,11 @@ export default class VersionAction extends BaseRushAction {
     });
   }
 
-  protected run(): void {
+  protected run(): Promise<void> {
     if (!this._bypassPolicy.value) {
       if (!GitPolicy.check(this.rushConfiguration)) {
         process.exit(1);
-        return;
+        return Promise.resolve();
       }
     }
     this._validateInput();
@@ -106,6 +106,7 @@ export default class VersionAction extends BaseRushAction {
         true);
       this._gitProcess(tempBranch);
     }
+    return Promise.resolve();
   }
 
   private _validateInput(): void {

@@ -76,29 +76,34 @@ export default class RushCommandLineParser extends CommandLineParser {
     });
   }
 
-  protected onExecute(): void {
-    if (this._debugParameter.value) {
-      // For debugging, don't catch any exceptions; show the full call stack
-      this._execute();
-    } else {
-      try {
-        this._execute();
-      } catch (error) {
+  protected onExecute(): Promise<void> {
+    // For debugging, don't catch any exceptions; show the full call stack
+    return this._execute().catch((error: Error) => {
+      if (this._debugParameter.value) {
+        console.log(colors.red(error.toString()));
+      } else {
         this._exitAndReportError(error);
       }
-    }
+    });
   }
 
-  private _execute(): void {
-    if (this.rushConfig) {
-      this.telemetry = new Telemetry(this.rushConfig);
-    }
+  private _execute(): Promise<void> {
+    return new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
+      try {
+        if (this.rushConfig) {
+          this.telemetry = new Telemetry(this.rushConfig);
+        }
+      } catch (error) {
+        reject(error);
+        return;
+      }
 
-    super.onExecute();
-
-    if (this.telemetry) {
-      this.flushTelemetry();
-    }
+      return super.onExecute();
+    }).then(() => {
+      if (this.telemetry) {
+        this.flushTelemetry();
+      }
+    });
   }
 
   private _populateActions(): void {
