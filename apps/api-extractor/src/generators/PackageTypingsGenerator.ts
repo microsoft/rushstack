@@ -105,7 +105,7 @@ interface IFollowAliasesResult {
   /**
    * The original symbol that defined this entry, after following any aliases.
    */
-  symbol: ts.Symbol;
+  followedSymbol: ts.Symbol;
 
   /**
    * The original name used where it was defined.
@@ -137,8 +137,10 @@ export default class PackageTypingsGenerator {
   private _indentedWriter: IndentedWriter = new IndentedWriter();
 
   /**
-   * A cache that tells us the Entry that is tracking a given symbol.  Because of aliases,
-   * two different symbols can map to the same Entry object.
+   * A mapping from Entry.followedSymbol --> Entry.
+   * NOTE:  Two different keys may map to the same value.
+   *
+   * After following type aliases, we use this map to look up the corresponding Entry.
    */
   private readonly _entriesBySymbol: Map<ts.Symbol, Entry> = new Map<ts.Symbol, Entry>();
 
@@ -284,7 +286,7 @@ export default class PackageTypingsGenerator {
     }
 
     return {
-      symbol: current,
+      followedSymbol: current,
       localName: declarationName || current.name,
       importPackagePath: undefined,
       importPackageExportName: undefined,
@@ -336,7 +338,7 @@ export default class PackageTypingsGenerator {
 
         if (packagePath) {
           return {
-            symbol: symbol,
+            followedSymbol: symbol,
             localName: importPackageExportName,
             importPackagePath: packagePath,
             importPackageExportName: importPackageExportName,
@@ -432,7 +434,7 @@ export default class PackageTypingsGenerator {
 
         if (packagePath) {
           return {
-            symbol: symbol,
+            followedSymbol: symbol,
             localName: symbol.name,
             importPackagePath: packagePath,
             importPackageExportName: importPackageExportName,
@@ -690,7 +692,7 @@ export default class PackageTypingsGenerator {
   private _getEntryForSymbol(symbol: ts.Symbol): Entry | undefined {
     const followAliasesResult: IFollowAliasesResult
       = PackageTypingsGenerator._followAliases(symbol, this._typeChecker);
-    return this._entriesBySymbol.get(followAliasesResult.symbol);
+    return this._entriesBySymbol.get(followAliasesResult.followedSymbol);
   }
 
   /**
@@ -705,10 +707,8 @@ export default class PackageTypingsGenerator {
       return undefined; // we don't care about ambient definitions
     }
 
-    const followedSymbol: ts.Symbol = followAliasesResult.symbol;
-    if (followedSymbol.flags & (
-      ts.SymbolFlags.TypeParameter | ts.SymbolFlags.TypeLiteral
-      )) {
+    const followedSymbol: ts.Symbol = followAliasesResult.followedSymbol;
+    if (followedSymbol.flags & (ts.SymbolFlags.TypeParameter | ts.SymbolFlags.TypeLiteral)) {
       return undefined;
     }
 
@@ -716,7 +716,7 @@ export default class PackageTypingsGenerator {
     if (!entry) {
       entry = new Entry({
         localName: followAliasesResult.localName,
-        followedSymbol: followAliasesResult.symbol,
+        followedSymbol: followAliasesResult.followedSymbol,
         importPackagePath: followAliasesResult.importPackagePath,
         importPackageExportName: followAliasesResult.importPackageExportName
       });
