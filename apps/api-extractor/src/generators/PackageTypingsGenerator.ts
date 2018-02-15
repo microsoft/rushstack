@@ -20,6 +20,7 @@ interface IEntryParameters {
   followedSymbol: ts.Symbol;
   importPackagePath: string | undefined;
   importPackageExportName: string | undefined;
+  importPackageKey: string | undefined;
 }
 
 /**
@@ -61,11 +62,30 @@ class Entry {
    */
   public readonly followedSymbol: ts.Symbol;
 
-  /** {@inheritdoc IFollowAliasesResult.importPackagePath} */
+  /**
+   * The name of the external package (and possibly module path) that this definition
+   * was imported from.  If it was defined in the referencing source file, or if it was
+   * imported from a local file, or if it is an ambient definition, then externalPackageName
+   * will be undefined.
+   *
+   * Example: "@microsoft/gulp-core-build/lib/IBuildConfig"
+   */
   public readonly importPackagePath: string | undefined;
 
-  /** {@inheritdoc IFollowAliasesResult.importPackageExportName} */
+  /**
+   * If importPackagePath is defined, then this specifies the export name for the definition.
+   *
+   * Example: "IBuildConfig"
+   */
   public readonly importPackageExportName: string | undefined;
+
+  /**
+   * If importPackagePath and importPackageExportName are defined, then this is a dictionary key
+   * that combines them with a colon (":").
+   *
+   * Example: "@microsoft/gulp-core-build/lib/IBuildConfig:IBuildConfig"
+   */
+  public readonly importPackageKey: string | undefined;
 
   /**
    * If true, this entry should be emitted using the "export" keyword instead of the "declare" keyword.
@@ -80,6 +100,7 @@ class Entry {
     this.followedSymbol = parameters.followedSymbol;
     this.importPackagePath = parameters.importPackagePath;
     this.importPackageExportName = parameters.importPackageExportName;
+    this.importPackageKey = parameters.importPackageKey;
   }
 
   public getSortKey(): string {
@@ -117,17 +138,10 @@ interface IFollowAliasesResult {
    */
   isAmbient: boolean;
 
-  /**
-   * The name of the external package (and possibly module path) that this definition
-   * was imported from.  If it was defined in the referencing source file, or if it was
-   * imported from a local file, or if it is an ambient definition, then externalPackageName
-   * will be undefined.
-   */
+  /** {@inheritdoc Entry.importPackagePath} */
   importPackagePath: string | undefined;
 
-  /**
-   * If importPackagePath is defined, then this specifies the export name for the definition.
-   */
+  /** {@inheritdoc Entry.importPackageExportName} */
   importPackageExportName: string | undefined;
 }
 
@@ -138,11 +152,18 @@ export default class PackageTypingsGenerator {
 
   /**
    * A mapping from Entry.followedSymbol --> Entry.
-   * NOTE:  Two different keys may map to the same value.
+   * NOTE: Two different keys may map to the same value.
    *
    * After following type aliases, we use this map to look up the corresponding Entry.
    */
   private readonly _entriesBySymbol: Map<ts.Symbol, Entry> = new Map<ts.Symbol, Entry>();
+
+  /**
+   * A mapping from Entry.importPackageKey --> Entry.
+   *
+   * If Entry.importPackageKey is undefined, then it is not included in the map.
+   */
+  private readonly _entriesByImportKey: Map<string, Entry> = new Map<string, Entry>();
 
   /**
    * This data structure stores the same entries as _entriesBySymbol.values().
@@ -712,21 +733,39 @@ export default class PackageTypingsGenerator {
       return undefined;
     }
 
-    let entry: Entry | undefined = this._entriesBySymbol.get(followedSymbol);
+    let importPackageKey: string | undefined = undefined;
+    let entry: Entry | undefined;
+
+    if (followAliasesResult.importPackagePath) {
+      importPackageKey = followAliasesResult.importPackagePath + ':' + followAliasesResult.importPackageExportName;
+
+      entry = this._entriesByImportKey.get(importPackageKey);
+    } else {
+      entry = this._entriesBySymbol.get(followedSymbol);
+    }
+
     if (!entry) {
       entry = new Entry({
         localName: followAliasesResult.localName,
         followedSymbol: followAliasesResult.followedSymbol,
         importPackagePath: followAliasesResult.importPackagePath,
-        importPackageExportName: followAliasesResult.importPackageExportName
+        importPackageExportName: followAliasesResult.importPackageExportName,
+        importPackageKey: importPackageKey
       });
 
       this._entries.push(entry);
+
       this._entriesBySymbol.set(followedSymbol, entry);
 
-      for (const declaration of followedSymbol.declarations || []) {
-        this._collectTypes(declaration);
-        this._collectTypeReferenceDirectives(declaration);
+      if (importPackageKey) {
+        // If it's an import, add it to the lookup
+        this._entriesByImportKey.set(importPackageKey, entry);
+      } else {
+        // If it's not an import, then crawl for type references
+        for (const declaration of followedSymbol.declarations || []) {
+          this._collectTypes(declaration);
+          this._collectTypeReferenceDirectives(declaration);
+        }
       }
     }
 

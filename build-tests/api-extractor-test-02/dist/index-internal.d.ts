@@ -10,8 +10,6 @@
 import { ISimpleInterface } from 'api-extractor-test-01';
 import { ReexportedClass } from 'api-extractor-test-01';
 import * as semver1 from 'semver';
-import * as semver2 from 'semver';
-import * as semver3 from 'semver';
 
 /**
  * An interface with a generic parameter.
