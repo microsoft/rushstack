@@ -177,6 +177,8 @@ export default class InstallManager {
         MAX_INSTALL_ATTEMPTS
       );
 
+      // Create the marker file to indicate a successful install
+      fsx.writeFileSync(packageManagerToolFlagFile, '');
       console.log(`Successfully installed ${packageManager} version ${packageManagerVersion}`);
     } else {
       console.log(`Found ${packageManager} version ${packageManagerVersion} in ${packageManagerToolFolder}`);

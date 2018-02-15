@@ -112,15 +112,15 @@ export default class InstallAction extends BaseRushAction {
 
       installManager.installCommonModules(installType);
 
+      stopwatch.stop();
+      console.log(colors.green(`Done. (${stopwatch.toString()})`));
+
+      this._collectTelemetry(stopwatch, true);
     } catch (error) {
       stopwatch.stop();
       this._collectTelemetry(stopwatch, false);
       throw error;
     }
-    stopwatch.stop();
-    console.log(colors.green(`Done. (${stopwatch.toString()})`));
-
-    this._collectTelemetry(stopwatch, true);
 
     this.eventHooksManager.handle(Event.postRushInstall);
 
