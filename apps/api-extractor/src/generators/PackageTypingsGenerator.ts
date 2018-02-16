@@ -35,6 +35,16 @@ class Entry {
   public readonly localName: string;
 
   /**
+   * If this entry is a top-level export of the package that we are analyzing, then its
+   * name is stored here.  In this case, the uniqueName must be the same as packageExportName.
+   * @remarks
+   * Since Entry objects are collected via a depth first search, we may encounter it
+   * before we realize that it is a package export; the packageExportName property is not
+   * accurate until the collection phase has completed.
+   */
+  public packageExportName: string | undefined;
+
+  /**
    * The localName, possibly renamed to ensure that all the top-level exports have unique names.
    */
   public get uniqueName(): string | undefined {
@@ -95,7 +105,12 @@ interface IFollowAliasesResult {
   /**
    * The original symbol that defined this entry, after following any aliases.
    */
-  symbol: ts.Symbol;
+  followedSymbol: ts.Symbol;
+
+  /**
+   * The original name used where it was defined.
+   */
+  localName: string;
 
   /**
    * True if this is an ambient definition, e.g. from a "typings" folder.
@@ -122,8 +137,10 @@ export default class PackageTypingsGenerator {
   private _indentedWriter: IndentedWriter = new IndentedWriter();
 
   /**
-   * A cache that tells us the Entry that is tracking a given symbol.  Because of aliases,
-   * two different symbols can map to the same Entry object.
+   * A mapping from Entry.followedSymbol --> Entry.
+   * NOTE:  Two different keys may map to the same value.
+   *
+   * After following type aliases, we use this map to look up the corresponding Entry.
    */
   private readonly _entriesBySymbol: Map<ts.Symbol, Entry> = new Map<ts.Symbol, Entry>();
 
@@ -132,6 +149,9 @@ export default class PackageTypingsGenerator {
    * They are sorted according to Entry.getSortKey().
    */
   private readonly _entries: Entry[] = [];
+
+  private readonly _typeDirectiveReferences: string[] = [];
+  private readonly _typeDirectiveReferencesFiles: Set<string> = new Set<string>();
 
   /**
    * Returns an ancestor of "node", such that the ancestor, any intermediary nodes,
@@ -191,6 +211,22 @@ export default class PackageTypingsGenerator {
   }
 
   /**
+   * Returns the first parent node with the specified  SyntaxKind, or undefined if there is no match.
+   */
+  private static _findFirstParent<T extends ts.Node>(node: ts.Node, kindToMatch: ts.SyntaxKind): T | undefined {
+    let current: ts.Node | undefined = node.parent;
+
+    while (current) {
+      if (current.kind === kindToMatch) {
+        return current as T;
+      }
+      current = current.parent;
+    }
+
+    return undefined;
+  }
+
+  /**
    * For the given symbol, follow imports and type alias to find the symbol that represents
    * the original definition.
    */
@@ -201,8 +237,10 @@ export default class PackageTypingsGenerator {
     // to see if any of them contains the "export" keyword; if not, then it's ambient.
     let isAmbient: boolean = true;
 
-    while (true) { // tslint:disable-line:no-constant-condition
+    // We will try to obtain the name from a declaration; otherwise we'll fall back to the symbol name
+    let declarationName: string | undefined = undefined;
 
+    while (true) { // tslint:disable-line:no-constant-condition
       for (const declaration of current.declarations || []) {
         // 1. Check for any signs that this is not an ambient definition
         if (declaration.kind === ts.SyntaxKind.ExportSpecifier
@@ -213,6 +251,11 @@ export default class PackageTypingsGenerator {
         const modifiers: ts.ModifierFlags = ts.getCombinedModifierFlags(declaration);
         if (modifiers & (ts.ModifierFlags.Export | ts.ModifierFlags.ExportDefault)) {
           isAmbient = false;
+        }
+
+        const declarationNameIdentifier: ts.DeclarationName | undefined = ts.getNameOfDeclaration(declaration);
+        if (declarationNameIdentifier && ts.isIdentifier(declarationNameIdentifier)) {
+          declarationName = declarationNameIdentifier.getText().trim();
         }
 
         // 2. Check for any signs that this was imported from an external package
@@ -243,7 +286,8 @@ export default class PackageTypingsGenerator {
     }
 
     return {
-      symbol: current,
+      followedSymbol: current,
+      localName: declarationName || current.name,
       importPackagePath: undefined,
       importPackageExportName: undefined,
       isAmbient: isAmbient
@@ -256,45 +300,53 @@ export default class PackageTypingsGenerator {
   private static _followAliasesForExportDeclaration(declaration: ts.Declaration,
     symbol: ts.Symbol): IFollowAliasesResult | undefined {
 
-    // EXAMPLE:
-    // "export { A } from './file-a';"
-    //
-    // ExportDeclaration:
-    //   ExportKeyword:  pre=[export] sep=[ ]
-    //   NamedExports:
-    //     FirstPunctuation:  pre=[{] sep=[ ]
-    //     SyntaxList:
-    //       ExportSpecifier:  <------------- declaration
-    //         Identifier:  pre=[A] sep=[ ]
-    //     CloseBraceToken:  pre=[}] sep=[ ]
-    //   FromKeyword:  pre=[from] sep=[ ]
-    //   StringLiteral:  pre=['./file-a']
-    //   SemicolonToken:  pre=[;]
     const exportDeclaration: ts.ExportDeclaration | undefined
-      = PackageTypingsGenerator._matchAncestor<ts.ExportDeclaration>(declaration,
-      [ts.SyntaxKind.ExportDeclaration, ts.SyntaxKind.NamedExports, ts.SyntaxKind.ExportSpecifier]);
+      = PackageTypingsGenerator._findFirstParent<ts.ExportDeclaration>(declaration, ts.SyntaxKind.ExportDeclaration);
 
-    if (exportDeclaration && exportDeclaration.moduleSpecifier) {
-      // Examples:
-      //    " '@microsoft/sp-lodash-subset'"
-      //    " "lodash/has""
-      const packagePath: string | undefined = PackageTypingsGenerator._getPackagePathFromModuleSpecifier(
-        exportDeclaration.moduleSpecifier);
+    if (exportDeclaration) {
+      let importPackageExportName: string;
 
-      if (packagePath) {
+      if (declaration.kind === ts.SyntaxKind.ExportSpecifier) {
+        // EXAMPLE:
+        // "export { A } from './file-a';"
+        //
+        // ExportDeclaration:
+        //   ExportKeyword:  pre=[export] sep=[ ]
+        //   NamedExports:
+        //     FirstPunctuation:  pre=[{] sep=[ ]
+        //     SyntaxList:
+        //       ExportSpecifier:  <------------- declaration
+        //         Identifier:  pre=[A] sep=[ ]
+        //     CloseBraceToken:  pre=[}] sep=[ ]
+        //   FromKeyword:  pre=[from] sep=[ ]
+        //   StringLiteral:  pre=['./file-a']
+        //   SemicolonToken:  pre=[;]
+
         // Example: " ExportName as RenamedName"
         const exportSpecifier: ts.ExportSpecifier = declaration as ts.ExportSpecifier;
-
-        const importPackageExportName: string =
-          (exportSpecifier.propertyName || exportSpecifier.name).getText();
-
-        return {
-          symbol: symbol,
-          importPackagePath: packagePath,
-          importPackageExportName: importPackageExportName.trim(),
-          isAmbient: false
-        };
+        importPackageExportName = (exportSpecifier.propertyName || exportSpecifier.name).getText().trim();
+      } else {
+        throw new Error('Unimplemented export declaration kind: ' + declaration.getText());
       }
+
+      if (exportDeclaration.moduleSpecifier) {
+        // Examples:
+        //    " '@microsoft/sp-lodash-subset'"
+        //    " "lodash/has""
+        const packagePath: string | undefined = PackageTypingsGenerator._getPackagePathFromModuleSpecifier(
+          exportDeclaration.moduleSpecifier);
+
+        if (packagePath) {
+          return {
+            followedSymbol: symbol,
+            localName: importPackageExportName,
+            importPackagePath: packagePath,
+            importPackageExportName: importPackageExportName,
+            isAmbient: false
+          };
+        }
+      }
+
     }
 
     return undefined;
@@ -306,39 +358,94 @@ export default class PackageTypingsGenerator {
   private static _followAliasesForImportDeclaration(declaration: ts.Declaration,
     symbol: ts.Symbol): IFollowAliasesResult | undefined {
 
-    // EXAMPLE:
-    // "import * as theLib from 'the-lib';"
-    //
-    // ImportDeclaration:
-    //   ImportKeyword:  pre=[import] sep=[ ]
-    //   ImportClause:
-    //     NamespaceImport:  <------------- declaration
-    //       AsteriskToken:  pre=[*] sep=[ ]
-    //       AsKeyword:  pre=[as] sep=[ ]
-    //       Identifier:  pre=[theLib] sep=[ ]
-    //   FromKeyword:  pre=[from] sep=[ ]
-    //   StringLiteral:  pre=['the-lib']
-    //   SemicolonToken:  pre=[;]
     const importDeclaration: ts.ImportDeclaration | undefined
-      = PackageTypingsGenerator._matchAncestor<ts.ImportDeclaration>(declaration,
-      [ts.SyntaxKind.ImportDeclaration, ts.SyntaxKind.ImportClause, ts.SyntaxKind.NamespaceImport]);
+      = PackageTypingsGenerator._findFirstParent<ts.ImportDeclaration>(declaration, ts.SyntaxKind.ImportDeclaration);
 
-    if (importDeclaration && importDeclaration.moduleSpecifier) {
-      // Examples:
-      //    " '@microsoft/sp-lodash-subset'"
-      //    " "lodash/has""
-      const packagePath: string | undefined = PackageTypingsGenerator._getPackagePathFromModuleSpecifier(
-        importDeclaration.moduleSpecifier);
+    if (importDeclaration) {
+      let importPackageExportName: string;
 
-      if (packagePath) {
-        return {
-          symbol: symbol,
-          importPackagePath: packagePath,
-          importPackageExportName: '*',
-          isAmbient: false
-        };
+      if (declaration.kind === ts.SyntaxKind.ImportSpecifier) {
+        // EXAMPLE:
+        // "import { A, B } from 'the-lib';"
+        //
+        // ImportDeclaration:
+        //   ImportKeyword:  pre=[import] sep=[ ]
+        //   ImportClause:
+        //     NamedImports:
+        //       FirstPunctuation:  pre=[{] sep=[ ]
+        //       SyntaxList:
+        //         ImportSpecifier:  <------------- declaration
+        //           Identifier:  pre=[A]
+        //         CommaToken:  pre=[,] sep=[ ]
+        //         ImportSpecifier:
+        //           Identifier:  pre=[B] sep=[ ]
+        //       CloseBraceToken:  pre=[}] sep=[ ]
+        //   FromKeyword:  pre=[from] sep=[ ]
+        //   StringLiteral:  pre=['the-lib']
+        //   SemicolonToken:  pre=[;]
+
+        // Example: " ExportName as RenamedName"
+        const importSpecifier: ts.ImportSpecifier = declaration as ts.ImportSpecifier;
+        importPackageExportName = (importSpecifier.propertyName || importSpecifier.name).getText().trim();
+      } else if (declaration.kind === ts.SyntaxKind.NamespaceImport) {
+        // EXAMPLE:
+        // "import * as theLib from 'the-lib';"
+        //
+        // ImportDeclaration:
+        //   ImportKeyword:  pre=[import] sep=[ ]
+        //   ImportClause:
+        //     NamespaceImport:  <------------- declaration
+        //       AsteriskToken:  pre=[*] sep=[ ]
+        //       AsKeyword:  pre=[as] sep=[ ]
+        //       Identifier:  pre=[theLib] sep=[ ]
+        //   FromKeyword:  pre=[from] sep=[ ]
+        //   StringLiteral:  pre=['the-lib']
+        //   SemicolonToken:  pre=[;]
+        importPackageExportName = '*';
+      } else if (declaration.kind === ts.SyntaxKind.ImportClause) {
+        // EXAMPLE:
+        // "import A, { B } from './A';"
+        //
+        // ImportDeclaration:
+        //   ImportKeyword:  pre=[import] sep=[ ]
+        //   ImportClause:  <------------- declaration (referring to A)
+        //     Identifier:  pre=[A]
+        //     CommaToken:  pre=[,] sep=[ ]
+        //     NamedImports:
+        //       FirstPunctuation:  pre=[{] sep=[ ]
+        //       SyntaxList:
+        //         ImportSpecifier:
+        //           Identifier:  pre=[B] sep=[ ]
+        //       CloseBraceToken:  pre=[}] sep=[ ]
+        //   FromKeyword:  pre=[from] sep=[ ]
+        //   StringLiteral:  pre=['./A']
+        //   SemicolonToken:  pre=[;]
+        importPackageExportName = 'default';
+      } else {
+        throw new Error('Unimplemented import declaration kind: ' + declaration.getText());
       }
+
+      if (importDeclaration.moduleSpecifier) {
+        // Examples:
+        //    " '@microsoft/sp-lodash-subset'"
+        //    " "lodash/has""
+        const packagePath: string | undefined = PackageTypingsGenerator._getPackagePathFromModuleSpecifier(
+          importDeclaration.moduleSpecifier);
+
+        if (packagePath) {
+          return {
+            followedSymbol: symbol,
+            localName: symbol.name,
+            importPackagePath: packagePath,
+            importPackageExportName: importPackageExportName,
+            isAmbient: false
+          };
+        }
+      }
+
     }
+
+    return undefined;
   }
 
   private static _getPackagePathFromModuleSpecifier(moduleSpecifier: ts.Expression): string | undefined {
@@ -353,9 +460,9 @@ export default class PackageTypingsGenerator {
       .replace(/^\s*['"]/, '')
       .replace(/['"]\s*$/, '');
 
-    // Does it start with something like "./"?
+    // Does it start with something like "./" or "../"?
     // If not, then assume it's an import from an external package
-    if (!/^\.\//.test(path)) {
+    if (!/^\.\.?\//.test(path)) {
       return path;
     }
 
@@ -386,7 +493,7 @@ export default class PackageTypingsGenerator {
     const exportSymbols: ts.Symbol[] = this._typeChecker.getExportsOfModule(packageSymbol) || [];
 
     for (const exportSymbol of exportSymbols) {
-      const entry: Entry | undefined = this._fetchEntryForSymbol(exportSymbol);
+      const entry: Entry | undefined = this._fetchEntryForSymbol(exportSymbol, true);
 
       if (!entry) {
         // This is an export of the current package, but for some reason _fetchEntryForSymbol()
@@ -408,7 +515,15 @@ export default class PackageTypingsGenerator {
       this._indentedWriter.writeLine();
     }
 
-    // Emit the imports first
+    // Emit the triple slash directives
+    this._typeDirectiveReferences.sort();
+    for (const typeDirectiveReference of this._typeDirectiveReferences) {
+      // tslint:disable-next-line:max-line-length
+      // https://github.com/Microsoft/TypeScript/blob/611ebc7aadd7a44a4c0447698bfda9222a78cb66/src/compiler/declarationEmitter.ts#L162
+      this._indentedWriter.writeLine(`/// <reference types="${typeDirectiveReference}" />`);
+    }
+
+    // Emit the imports
     for (const entry of this._entries) {
       if (entry.importPackagePath) {
         if (entry.importPackageExportName === '*') {
@@ -541,13 +656,33 @@ export default class PackageTypingsGenerator {
    */
   private _makeUniqueNames(): void {
     const usedNames: Set<string> = new Set<string>();
+
+    // First collect the package exports
     for (const entry of this._entries) {
-      let suffix: number = 1;
-      entry.uniqueName = entry.localName;
-      while (usedNames.has(entry.uniqueName)) {
-        entry.uniqueName = entry.localName + '_' + ++suffix;
+      if (entry.packageExportName) {
+        if (usedNames.has(entry.packageExportName)) {
+          // This should be impossible
+          throw new Error('Program bug: a package cannot have two exports with the same name');
+        }
+
+        entry.uniqueName = entry.packageExportName;
+
+        usedNames.add(entry.packageExportName);
       }
-      usedNames.add(entry.uniqueName);
+    }
+
+    // Next generate unique names for the non-exports
+    for (const entry of this._entries) {
+      if (!entry.packageExportName) {
+
+        let suffix: number = 1;
+        entry.uniqueName = entry.localName;
+        while (usedNames.has(entry.uniqueName)) {
+          entry.uniqueName = entry.localName + '_' + ++suffix;
+        }
+
+        usedNames.add(entry.uniqueName);
+      }
     }
   }
 
@@ -557,14 +692,14 @@ export default class PackageTypingsGenerator {
   private _getEntryForSymbol(symbol: ts.Symbol): Entry | undefined {
     const followAliasesResult: IFollowAliasesResult
       = PackageTypingsGenerator._followAliases(symbol, this._typeChecker);
-    return this._entriesBySymbol.get(followAliasesResult.symbol);
+    return this._entriesBySymbol.get(followAliasesResult.followedSymbol);
   }
 
   /**
    * Looks up the corresponding Entry for the requested symbol.  If it doesn't exist,
    * then it tries to create one.
    */
-  private _fetchEntryForSymbol(symbol: ts.Symbol): Entry | undefined {
+  private _fetchEntryForSymbol(symbol: ts.Symbol, symbolIsExported: boolean): Entry | undefined {
     const followAliasesResult: IFollowAliasesResult
       = PackageTypingsGenerator._followAliases(symbol, this._typeChecker);
 
@@ -572,30 +707,37 @@ export default class PackageTypingsGenerator {
       return undefined; // we don't care about ambient definitions
     }
 
-    const followedSymbol: ts.Symbol = followAliasesResult.symbol;
-    if (followedSymbol.flags & (
-      ts.SymbolFlags.TypeParameter | ts.SymbolFlags.TypeLiteral
-      )) {
+    const followedSymbol: ts.Symbol = followAliasesResult.followedSymbol;
+    if (followedSymbol.flags & (ts.SymbolFlags.TypeParameter | ts.SymbolFlags.TypeLiteral)) {
       return undefined;
     }
 
     let entry: Entry | undefined = this._entriesBySymbol.get(followedSymbol);
-    if (entry) {
-      return entry;
+    if (!entry) {
+      entry = new Entry({
+        localName: followAliasesResult.localName,
+        followedSymbol: followAliasesResult.followedSymbol,
+        importPackagePath: followAliasesResult.importPackagePath,
+        importPackageExportName: followAliasesResult.importPackageExportName
+      });
+
+      this._entries.push(entry);
+      this._entriesBySymbol.set(followedSymbol, entry);
+
+      for (const declaration of followedSymbol.declarations || []) {
+        this._collectTypes(declaration);
+        this._collectTypeReferenceDirectives(declaration);
+      }
     }
 
-    entry = new Entry({
-      localName: symbol.name,
-      followedSymbol: followedSymbol,
-      importPackagePath: followAliasesResult.importPackagePath,
-      importPackageExportName: followAliasesResult.importPackageExportName
-    });
+    if (symbolIsExported) {
+      if (entry.packageExportName && entry.packageExportName !== symbol.name) {
+        // TODO: If the same symbol is exported more than once, we need to emit an alias;
+        // We cannot simply export two definitions.
+        throw new Error(`${symbol.name} is exported twice`);
+      }
 
-    this._entries.push(entry);
-    this._entriesBySymbol.set(followedSymbol, entry);
-
-    for (const declaration of followedSymbol.declarations || []) {
-      this._collectTypes(declaration);
+      entry.packageExportName = symbol.name;
     }
 
     return entry;
@@ -624,13 +766,33 @@ export default class PackageTypingsGenerator {
             throw new Error('Symbol not found for identifier: ' + symbolNode.getText());
           }
 
-          this._fetchEntryForSymbol(symbol);
+          this._fetchEntryForSymbol(symbol, false);
         }
         break;  // keep recursing
     }
 
     for (const child of node.getChildren() || []) {
       this._collectTypes(child);
+    }
+  }
+
+  private _collectTypeReferenceDirectives(node: ts.Node): void {
+    const sourceFile: ts.SourceFile = node.getSourceFile();
+    if (!sourceFile || !sourceFile.fileName) {
+      return;
+    }
+
+    if (this._typeDirectiveReferencesFiles.has(sourceFile.fileName)) {
+      return;
+    }
+
+    this._typeDirectiveReferencesFiles.add(sourceFile.fileName);
+
+    for (const typeReferenceDirective of sourceFile.typeReferenceDirectives) {
+      const name: string = sourceFile.text.substring(typeReferenceDirective.pos, typeReferenceDirective.end);
+      if (this._typeDirectiveReferences.indexOf(name) < 0) {
+        this._typeDirectiveReferences.push(name);
+      }
     }
   }
 }
