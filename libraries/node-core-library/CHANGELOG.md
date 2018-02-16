@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Fri, 16 Feb 2018 17:05:11 GMT and should not be manually modified.
+This log was last generated on Fri, 16 Feb 2018 22:05:23 GMT and should not be manually modified.
+
+## 0.6.0
+Fri, 16 Feb 2018 22:05:23 GMT
+
+### Minor changes
+
+- Add an API to `LockFile` which allows the caller to asyncronously wait for a LockFile to become available.
 
 ## 0.5.1
 Fri, 16 Feb 2018 17:05:11 GMT
