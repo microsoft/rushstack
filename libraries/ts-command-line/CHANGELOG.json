@@ -2,6 +2,18 @@
   "name": "@microsoft/ts-command-line",
   "entries": [
     {
+      "version": "3.0.0",
+      "tag": "@microsoft/ts-command-line_v3.0.0",
+      "date": "Fri, 16 Feb 2018 17:05:11 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Change all CommandLineActions to have an asychronous API that returns a promise."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.3.10",
       "tag": "@microsoft/ts-command-line_v2.3.10",
       "date": "Wed, 07 Feb 2018 17:05:11 GMT",

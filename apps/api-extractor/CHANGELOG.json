@@ -2,6 +2,34 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "5.3.0",
+      "tag": "@microsoft/api-extractor_v5.3.0",
+      "date": "Fri, 16 Feb 2018 17:05:11 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the packageTypings feature sometimes emitted \"default\" instead of the class name"
+          },
+          {
+            "comment": "Improve the packageTypings feature to support triple-slash references to typings"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Fix an issue where the packageTypings feature didn't handle some import/export patterns"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.5.0` to `0.5.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `2.3.10` to `3.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.2.7",
       "tag": "@microsoft/api-extractor_v5.2.7",
       "date": "Wed, 07 Feb 2018 17:05:11 GMT",

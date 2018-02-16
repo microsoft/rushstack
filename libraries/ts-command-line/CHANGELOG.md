@@ -1,6 +1,13 @@
 # Change Log - @microsoft/ts-command-line
 
-This log was last generated on Wed, 07 Feb 2018 17:05:11 GMT and should not be manually modified.
+This log was last generated on Fri, 16 Feb 2018 17:05:11 GMT and should not be manually modified.
+
+## 3.0.0
+Fri, 16 Feb 2018 17:05:11 GMT
+
+### Breaking changes
+
+- Change all CommandLineActions to have an asychronous API that returns a promise.
 
 ## 2.3.10
 Wed, 07 Feb 2018 17:05:11 GMT

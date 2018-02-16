@@ -1,6 +1,18 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 07 Feb 2018 17:05:11 GMT and should not be manually modified.
+This log was last generated on Fri, 16 Feb 2018 17:05:11 GMT and should not be manually modified.
+
+## 5.3.0
+Fri, 16 Feb 2018 17:05:11 GMT
+
+### Minor changes
+
+- Fix an issue where the packageTypings feature didn't handle some import/export patterns
+
+### Patches
+
+- Fix an issue where the packageTypings feature sometimes emitted "default" instead of the class name
+- Improve the packageTypings feature to support triple-slash references to typings
 
 ## 5.2.7
 Wed, 07 Feb 2018 17:05:11 GMT
