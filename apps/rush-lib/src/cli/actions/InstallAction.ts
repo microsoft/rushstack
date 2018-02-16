@@ -79,9 +79,8 @@ export default class InstallAction extends BaseRushAction {
 
     this.eventHooksManager.handle(Event.preRushInstall);
 
-    try {
-      const installManager: InstallManager = new InstallManager(this.rushConfiguration);
-      installManager.ensureLocalPackageManager(this._cleanInstallFull.value);
+    const installManager: InstallManager = new InstallManager(this.rushConfiguration);
+    return installManager.ensureLocalPackageManager(this._cleanInstallFull.value).then(() => {
 
       const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
         this.rushConfiguration.packageManager,
@@ -110,26 +109,25 @@ export default class InstallAction extends BaseRushAction {
 
       installManager.installCommonModules(installType);
 
+    }).catch((error) => {
+      stopwatch.stop();
+      this._collectTelemetry(stopwatch, false);
+      throw error;
+    }).then(() => {
       stopwatch.stop();
       console.log(colors.green(`Done. (${stopwatch.toString()})`));
 
       this._collectTelemetry(stopwatch, true);
-    } catch (error) {
-      stopwatch.stop();
-      this._collectTelemetry(stopwatch, false);
-      throw error;
-    }
 
-    this.eventHooksManager.handle(Event.postRushInstall);
+      this.eventHooksManager.handle(Event.postRushInstall);
 
-    if (!this._noLinkParameter.value) {
-      const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
-      return linkManager.createSymlinksForProjects(false);
-    } else {
-      console.log(os.EOL + 'Next you should probably run: "rush link"');
-    }
-
-    return Promise.resolve();
+      if (!this._noLinkParameter.value) {
+        const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
+        return linkManager.createSymlinksForProjects(false);
+      } else {
+        console.log(os.EOL + 'Next you should probably run: "rush link"');
+      }
+    });
   }
 
   private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {

@@ -4,6 +4,7 @@
 import * as fsx from 'fs-extra';
 import * as path from 'path';
 import * as child_process from 'child_process';
+import { setTimeout } from 'timers';
 
 /**
  * Helper function that is exported for unit tests only.
@@ -56,15 +57,15 @@ export class LockFile {
    * Returns the path to the lockfile, should it be created successfully.
    */
   public static getLockFilePath(resourceDir: string, resourceName: string, pid: number = process.pid): string {
-    if (!resourceName.match(/^[a-zA-Z]+$/)) {
+    if (!resourceName.match(/^[a-zA-Z0-9][a-zA-Z0-9-.]+[a-zA-Z0-9]$/)) {
       throw new Error(`The resource name "${resourceName}" is invalid.`
-        + ` It must be an alphabetic string with no special characters.`);
+        + ` It must be an alphanumberic string with only "-" or "." It must start with an alphanumeric character.`);
     }
 
     if (process.platform === 'win32') {
       return path.join(path.resolve(resourceDir), `${resourceName}.lock`);
     } else if (process.platform === 'linux' || process.platform === 'darwin') {
-      return path.join(path.resolve(resourceDir), `${resourceName}.${pid}.lock`);
+      return path.join(path.resolve(resourceDir), `${resourceName}#${pid}.lock`);
     }
 
     throw new Error(`File locking not implemented for platform: "${process.platform}"`);
@@ -83,6 +84,42 @@ export class LockFile {
       return LockFile._tryAcquireMacOrLinux(resourceDir, resourceName);
     }
     throw new Error(`File locking not implemented for platform: "${process.platform}"`);
+  }
+
+  /**
+   * Attempts to create the lockfile.
+   * Will continue to loop at every 100ms until the lock becomes available or the maxWaitMs is surpassed.
+   * @remarks This function is subject to starvation, whereby it does not ensure that the process that has been
+   *          waiting the longest to acquire the lock will get it first. This means that a process could theoretically
+   *          wait for the lock forever, while other processes skipped it in line and acquired the lock first.
+   */
+  public static acquire(resourceDir: string, resourceName: string, maxWaitMs?: number): Promise<LockFile> {
+    const interval: number = 100;
+    const startTime: number = Date.now();
+
+    const retryLoop: () => Promise<LockFile> = () => {
+      const lock: LockFile | undefined = LockFile.tryAcquire(resourceDir, resourceName);
+      if (lock) {
+        return Promise.resolve(lock);
+      }
+      if (maxWaitMs && (Date.now() > startTime + maxWaitMs)) {
+        return Promise.reject(new Error(`Exceeded maximum wait time to acquire lock for resource "${resourceName}"`));
+      }
+
+      return LockFile._sleepForMs(interval).then(() => {
+        return retryLoop();
+      });
+    };
+
+    return retryLoop();
+  }
+
+  private static _sleepForMs(timeout: number): Promise<void> {
+    return new Promise<void>((resolve: () => void, reject: () => void) => {
+      setTimeout(() => {
+        resolve();
+      }, timeout);
+    });
   }
 
   /**
@@ -119,8 +156,8 @@ export class LockFile {
       // now, scan the directory for all lockfiles
       const files: string[] = fsx.readdirSync(resourceDir);
 
-      // look for anything ending with numbers and ".lock"
-      const lockFileRegExp: RegExp = /^([a-zA-Z]+)\.([0-9]+)\.lock$/;
+      // look for anything ending with # then numbers and ".lock"
+      const lockFileRegExp: RegExp = /^(.+)#([0-9]+)\.lock$/;
 
       let match: RegExpMatchArray | null;
       let otherPid: string;

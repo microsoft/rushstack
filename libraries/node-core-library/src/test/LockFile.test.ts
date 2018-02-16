@@ -20,17 +20,29 @@ describe('LockFile', () => {
 
   describe('getLockFilePath', () => {
     it('only acceps alphabetical characters for resource name', () => {
-      assert.throws(() => {
+      assert.doesNotThrow(() => {
         LockFile.getLockFilePath(process.cwd(), 'foo123');
       });
-      assert.throws(() => {
+      assert.doesNotThrow(() => {
         LockFile.getLockFilePath(process.cwd(), 'bar.123');
       });
-      assert.throws(() => {
+      assert.doesNotThrow(() => {
         LockFile.getLockFilePath(process.cwd(), 'foo.bar');
       });
+      assert.doesNotThrow(() => {
+        LockFile.getLockFilePath(process.cwd(), 'lock-file.123');
+      });
       assert.throws(() => {
-        LockFile.getLockFilePath(process.cwd(), 'lock-file');
+        LockFile.getLockFilePath(process.cwd(), '.foo123');
+      });
+      assert.throws(() => {
+        LockFile.getLockFilePath(process.cwd(), 'foo123.');
+      });
+      assert.throws(() => {
+        LockFile.getLockFilePath(process.cwd(), '-foo123');
+      });
+      assert.throws(() => {
+        LockFile.getLockFilePath(process.cwd(), 'foo123-');
       });
       assert.throws(() => {
         LockFile.getLockFilePath(process.cwd(), '');
@@ -43,14 +55,14 @@ describe('LockFile', () => {
       describe('getLockFilePath()', () => {
         it('returns a resolved path containing the pid', () => {
           assert.equal(
-            path.join(process.cwd(), `test.${process.pid}.lock`),
+            path.join(process.cwd(), `test#${process.pid}.lock`),
             LockFile.getLockFilePath('./', 'test')
           );
         });
 
         it('allows for overridden pid', () => {
           assert.equal(
-            path.join(process.cwd(), `test.99.lock`),
+            path.join(process.cwd(), `test#99.lock`),
             LockFile.getLockFilePath('./', 'test', 99)
           );
         });
