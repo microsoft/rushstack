@@ -55,14 +55,14 @@ describe('LockFile', () => {
       describe('getLockFilePath()', () => {
         it('returns a resolved path containing the pid', () => {
           assert.equal(
-            path.join(process.cwd(), `test.${process.pid}.lock`),
+            path.join(process.cwd(), `test#${process.pid}.lock`),
             LockFile.getLockFilePath('./', 'test')
           );
         });
 
         it('allows for overridden pid', () => {
           assert.equal(
-            path.join(process.cwd(), `test.99.lock`),
+            path.join(process.cwd(), `test#99.lock`),
             LockFile.getLockFilePath('./', 'test', 99)
           );
         });
