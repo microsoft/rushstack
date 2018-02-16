@@ -249,30 +249,31 @@ export class LockFile {
     const lockFilePath: string = LockFile.getLockFilePath(resourceDir, resourceName);
     let dirtyWhenAcquired: boolean = false;
 
-    if (fsx.existsSync(lockFilePath)) {
-      dirtyWhenAcquired = true;
-
-      // If the lockfile is held by an process with an exclusive lock, then removing it will
-      // silently fail. OpenSync() below will then fail and we will be unable to create a lock.
-
-      // Otherwise, the lockfile is sitting on disk, but nothing is holding it, implying that
-      // the last process to hold it died.
-      fsx.unlinkSync(lockFilePath);
-    }
-
     let fileDescriptor: number | undefined;
-    try {
-      // Attempt to open an exclusive lockfile
-      fileDescriptor = fsx.openSync(lockFilePath, 'wx');
-    } catch (error) {
-      // we tried to delete the lock, but something else is holding it,
-      // (probably an active process), therefore we are unable to create a lock
-      return undefined;
-    }
-
-    // Ensure we can hand off the file descriptor to the lockfile
     let lockFile: LockFile;
+
     try {
+      if (fsx.existsSync(lockFilePath)) {
+        dirtyWhenAcquired = true;
+
+        // If the lockfile is held by an process with an exclusive lock, then removing it will
+        // silently fail. OpenSync() below will then fail and we will be unable to create a lock.
+
+        // Otherwise, the lockfile is sitting on disk, but nothing is holding it, implying that
+        // the last process to hold it died.
+        fsx.unlinkSync(lockFilePath);
+      }
+
+      try {
+        // Attempt to open an exclusive lockfile
+        fileDescriptor = fsx.openSync(lockFilePath, 'wx');
+      } catch (error) {
+        // we tried to delete the lock, but something else is holding it,
+        // (probably an active process), therefore we are unable to create a lock
+        return undefined;
+      }
+
+      // Ensure we can hand off the file descriptor to the lockfile
       lockFile = new LockFile(fileDescriptor, lockFilePath, dirtyWhenAcquired);
       fileDescriptor = undefined;
     } finally {
