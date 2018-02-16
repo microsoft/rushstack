@@ -19,6 +19,12 @@ export declare interface GenericInterface<T> {
     member: T;
 }
 
+/** @public */
+export declare function importDeduping1(arg1: ISimpleInterface, arg2: ISimpleInterface2): void;
+
+/** @public */
+export declare function importDeduping2(arg1: ISimpleInterface, arg2: ISimpleInterface2): void;
+
 /**
  * A class that inherits from a type defined in the "semver" module imported from \@types/semver.
  * @public
