@@ -83,14 +83,14 @@ abstract class CommandLineParser extends CommandLineParameterProvider {
    * @param args   the command-line arguments to be parsed; if omitted, then
    *               the process.argv will be used
    */
-  public execute(args?: string[]): void {
+  public execute(args?: string[]): Promise<void> {
     if (!args) {
       // 0=node.exe, 1=script name
       args = process.argv.slice(2);
     }
     if (args.length === 0) {
       this._argumentParser.printHelp();
-      return;
+      return Promise.resolve();
     }
     const data: ICommandLineParserData = this._argumentParser.parseArgs();
 
@@ -107,15 +107,15 @@ abstract class CommandLineParser extends CommandLineParameterProvider {
       throw Error('Unrecognized action');
     }
 
-    this.onExecute();
+    return this.onExecute();
   }
 
   /**
    * This hook allows the subclass to perform additional operations before or after
    * the chosen action is executed.
    */
-  protected onExecute(): void {
-    this.selectedAction._execute();
+  protected onExecute(): Promise<void> {
+    return this.selectedAction._execute();
   }
 }
 

@@ -160,6 +160,7 @@ export default class InstallManager {
     // Example: "C:\Users\YourName\.rush\pnpm-1.2.3"
     const packageManagerToolFolder: string = path.join(rushHomeFolder,
       `${packageManager}-${packageManagerVersion}`);
+
     // Example: "C:\Users\YourName\.rush\pnpm-1.2.3\last-install.flag"
     const packageManagerToolFlagFile: string = path.join(packageManagerToolFolder, 'last-install.flag');
 
@@ -490,7 +491,7 @@ export default class InstallManager {
     if (!fsx.existsSync(packageManagerFilename)) {
       // This normally should never occur -- it indicates that some code path forgot to call
       // InstallManager.ensureLocalNpmTool().
-      throw new Error('Expected to find local NPM here: "' + packageManagerFilename + '"');
+      throw new Error('Expected to find local package manager tool here: "' + packageManagerFilename + '"');
     }
 
     console.log(os.EOL + colors.bold('Checking node_modules in ' + this._rushConfiguration.commonTempFolder)

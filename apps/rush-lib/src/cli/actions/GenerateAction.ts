@@ -68,7 +68,7 @@ export default class GenerateAction extends BaseRushAction {
     });
   }
 
-  protected run(): void {
+  protected run(): Promise<void> {
     const stopwatch: Stopwatch = Stopwatch.start();
     const isLazy: boolean = this._lazyParameter.value;
 
@@ -95,8 +95,8 @@ export default class GenerateAction extends BaseRushAction {
 
     try {
       const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
-          this.rushConfiguration.packageManager,
-          this.rushConfiguration.committedShrinkwrapFilename);
+        this.rushConfiguration.packageManager,
+        this.rushConfiguration.committedShrinkwrapFilename);
 
       if (shrinkwrapFile
         && !this._forceParameter.value
@@ -106,7 +106,7 @@ export default class GenerateAction extends BaseRushAction {
         console.log();
         console.log(`If you want to force an upgrade to the latest compatible versions, use ` +
           `${colors.yellow('rush generate --force')}. Otherwise, just run ${colors.green('rush install')}.)`);
-        return;
+        return Promise.resolve();
       }
     } catch (ex) {
       console.log();
@@ -114,7 +114,6 @@ export default class GenerateAction extends BaseRushAction {
     }
 
     installManager.ensureLocalPackageManager(false);
-
     installManager.createTempModules(true);
 
     // Delete both copies of the shrinkwrap file
@@ -132,8 +131,8 @@ export default class GenerateAction extends BaseRushAction {
 
       // Do an incremental install unless --clean is specified
       installManager.installCommonModules(this._cleanParameter.value
-        ?  InstallType.ForceClean
-        :  InstallType.Normal);
+        ? InstallType.ForceClean
+        : InstallType.Normal);
 
       this._syncShrinkwrapAndCheckInstallFlag(installManager);
 
@@ -182,10 +181,11 @@ export default class GenerateAction extends BaseRushAction {
         LinkManagerFactory.getLinkManager(this.rushConfiguration);
       // NOTE: Setting force=true here shouldn't be strictly necessary, since installCommonModules()
       // above should have already deleted the marker file, but it doesn't hurt to be explicit.
-      this._parser.catchSyncErrors(linkManager.createSymlinksForProjects(true));
+      return linkManager.createSymlinksForProjects(true);
     } else {
       console.log(os.EOL + 'Next you should probably run: "rush link"');
     }
+    return Promise.resolve();
   }
 
   private _syncShrinkwrapAndCheckInstallFlag(installManager: InstallManager): void {

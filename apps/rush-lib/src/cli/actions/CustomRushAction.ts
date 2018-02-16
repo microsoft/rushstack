@@ -62,7 +62,7 @@ export class CustomRushAction extends BaseRushAction {
     });
   }
 
-  public run(): void {
+  public run(): Promise<void> {
     if (!fsx.existsSync(this.rushConfiguration.rushLinkJsonFilename)) {
       throw new Error(`File not found: ${this.rushConfiguration.rushLinkJsonFilename}` +
         `${os.EOL}Did you run "rush link"?`);
@@ -107,7 +107,7 @@ export class CustomRushAction extends BaseRushAction {
       }
     );
 
-    tasks.execute().then(
+    return tasks.execute().then(
       () => {
         stopwatch.stop();
         console.log(colors.green(`rush ${this.options.actionVerb} (${stopwatch.toString()})`));

@@ -95,12 +95,13 @@ export default class ChangeAction extends BaseRushAction {
     });
   }
 
-  public run(): void {
+  public run(): Promise<void> {
     console.log(`Target branch is ${this._targetBranch}`);
     this._projectHostMap = this._generateHostMap();
 
     if (this._verifyParameter.value) {
-      return this._verify();
+      this._verify();
+      return Promise.resolve();
     }
     this._sortedProjectList = this._getChangedPackageNames()
       .sort();
@@ -108,17 +109,16 @@ export default class ChangeAction extends BaseRushAction {
     if (this._sortedProjectList.length === 0) {
       console.log('No change file is needed.');
       this._warnUncommittedChanges();
-      return;
+      return Promise.resolve();
     }
 
     this._prompt = inquirer.createPromptModule();
     this._changeFileData = new Map<string, IChangeFile>();
     this._changeComments = ChangeFiles.getChangeComments(this._getChangeFiles());
 
-    // We should consider making onExecute either be an async/await or have it return a promise
-    this._promptLoop()
+    return this._promptLoop()
       .catch((error: Error) => {
-        console.error('There was an error creating the changefile:' + os.EOL + error.toString());
+        throw new Error(`There was an error creating the changefile: ${error.toString()}`);
       });
   }
 

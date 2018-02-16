@@ -143,17 +143,17 @@ export default class PublishAction extends BaseRushAction {
   /**
    * Executes the publish action, which will read change request files, apply changes to package.jsons,
    */
-  protected run(): void {
+  protected run(): Promise<void> {
     if (!GitPolicy.check(this.rushConfiguration)) {
       process.exit(1);
-      return;
+      return Promise.resolve();
     }
     const allPackages: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
 
     if (this._regenerateChangelogs.value) {
       console.log('Regenerating changelogs');
       ChangelogGenerator.regenerateChangelogs(allPackages);
-      return;
+      return Promise.resolve();
     }
 
     if (this._includeAll.value) {
@@ -164,6 +164,7 @@ export default class PublishAction extends BaseRushAction {
     }
 
     console.log(EOL + colors.green('Rush publish finished successfully.'));
+    return Promise.resolve();
   }
 
   private _publishChanges(allPackages: Map<string, RushConfigurationProject>): void {

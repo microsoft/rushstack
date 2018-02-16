@@ -28,7 +28,7 @@ export default class CheckAction extends BaseRushAction {
     // abstract
   }
 
-  protected run(): void {
+  protected run(): Promise<void> {
     const pinnedVersions: { [dependency: string]: string } = {};
     this.rushConfiguration.pinnedVersions.forEach((version: string, dependency: string) => {
       pinnedVersions[dependency] = version;
@@ -59,5 +59,6 @@ export default class CheckAction extends BaseRushAction {
     } else {
       console.log(colors.green(`Found no mis-matching dependencies!`));
     }
+    return Promise.resolve();
   }
 }
