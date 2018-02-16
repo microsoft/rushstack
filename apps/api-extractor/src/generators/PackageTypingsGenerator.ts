@@ -636,35 +636,25 @@ export default class PackageTypingsGenerator {
           break;
 
         case ts.SyntaxKind.Identifier:
-          if (parentSpan) {
-            switch (parentSpan.kind) {
-              case ts.SyntaxKind.ExpressionWithTypeArguments:
-              case ts.SyntaxKind.TypeReference:
+          const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(span.node);
+          if (symbol) {
+            const referencedEntry: Entry | undefined = this._getEntryForSymbol(symbol);
+            if (referencedEntry) {
+              if (!referencedEntry.uniqueName) {
+                // This should never happen
+                throw new Error('referencedEntry.uniqueName is undefined');
+              }
 
-              case ts.SyntaxKind.ClassDeclaration:
-              case ts.SyntaxKind.InterfaceDeclaration:
-              case ts.SyntaxKind.EnumDeclaration:
-              case ts.SyntaxKind.TypeAliasDeclaration:
-              case ts.SyntaxKind.ModuleDeclaration:  // (namespaces are a type of module declaration)
-                {
-                  const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(span.node);
-                  if (!symbol) {
-                    throw new Error('Symbol not found');
-                  }
-
-                  const referencedEntry: Entry | undefined = this._getEntryForSymbol(symbol);
-                  if (referencedEntry) {
-                    if (!referencedEntry.uniqueName) {
-                      // This should never happen
-                      throw new Error('referencedEntry.uniqueName is undefined');
-                    }
-
-                    span.modification.prefix = referencedEntry.uniqueName;
-                    // span.modification.prefix += '/**/';
-                  }
-                }
-                break;
+              span.modification.prefix = referencedEntry.uniqueName;
+              // For debugging:
+              // span.modification.prefix += '/*R=FIX*/';
+            } else {
+              // For debugging:
+              // span.modification.prefix += '/*R=KEEP*/';
             }
+          } else {
+            // For debugging:
+            // span.modification.prefix += '/*R=NA*/';
           }
           break;
         }
@@ -733,38 +723,45 @@ export default class PackageTypingsGenerator {
       return undefined;
     }
 
-    let importPackageKey: string | undefined = undefined;
-    let entry: Entry | undefined;
-
-    if (followAliasesResult.importPackagePath) {
-      importPackageKey = followAliasesResult.importPackagePath + ':' + followAliasesResult.importPackageExportName;
-
-      entry = this._entriesByImportKey.get(importPackageKey);
-    } else {
-      entry = this._entriesBySymbol.get(followedSymbol);
-    }
+    let entry: Entry | undefined = this._entriesBySymbol.get(followedSymbol);
 
     if (!entry) {
-      entry = new Entry({
-        localName: followAliasesResult.localName,
-        followedSymbol: followAliasesResult.followedSymbol,
-        importPackagePath: followAliasesResult.importPackagePath,
-        importPackageExportName: followAliasesResult.importPackageExportName,
-        importPackageKey: importPackageKey
-      });
-
-      this._entries.push(entry);
-
-      this._entriesBySymbol.set(followedSymbol, entry);
+      const importPackageKey: string | undefined = followAliasesResult.importPackagePath
+        ? followAliasesResult.importPackagePath + ':' + followAliasesResult.importPackageExportName
+        : undefined;
 
       if (importPackageKey) {
-        // If it's an import, add it to the lookup
-        this._entriesByImportKey.set(importPackageKey, entry);
-      } else {
-        // If it's not an import, then crawl for type references
-        for (const declaration of followedSymbol.declarations || []) {
-          this._collectTypes(declaration);
-          this._collectTypeReferenceDirectives(declaration);
+        entry = this._entriesByImportKey.get(importPackageKey);
+
+        if (entry) {
+          // We didn't find the entry using  followedSymbol, but we did using importPackageKey,
+          // so add a mapping for followedSymbol; we'll need it later when renaming identifiers
+          this._entriesBySymbol.set(followedSymbol, entry);
+        }
+      }
+
+      if (!entry) {
+        // None of the above lookups worked, so create a new entry
+        entry = new Entry({
+          localName: followAliasesResult.localName,
+          followedSymbol: followAliasesResult.followedSymbol,
+          importPackagePath: followAliasesResult.importPackagePath,
+          importPackageExportName: followAliasesResult.importPackageExportName,
+          importPackageKey: importPackageKey
+        });
+
+        this._entries.push(entry);
+        this._entriesBySymbol.set(followedSymbol, entry);
+
+        if (importPackageKey) {
+          // If it's an import, add it to the lookup
+          this._entriesByImportKey.set(importPackageKey, entry);
+        } else {
+          // If it's not an import, then crawl for type references
+          for (const declaration of followedSymbol.declarations || []) {
+            this._collectTypes(declaration);
+            this._collectTypeReferenceDirectives(declaration);
+          }
         }
       }
     }

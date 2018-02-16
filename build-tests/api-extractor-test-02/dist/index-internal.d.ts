@@ -20,23 +20,23 @@ export declare interface GenericInterface<T> {
 }
 
 /** @public */
-export declare function importDeduping1(arg1: ISimpleInterface, arg2: ISimpleInterface2): void;
+export declare function importDeduping1(arg1: ISimpleInterface, arg2: ISimpleInterface): void;
 
 /** @public */
-export declare function importDeduping2(arg1: ISimpleInterface, arg2: ISimpleInterface2): void;
+export declare function importDeduping2(arg1: ISimpleInterface, arg2: ISimpleInterface): void;
 
 /**
  * A class that inherits from a type defined in the "semver" module imported from \@types/semver.
  * @public
  */
-export declare class ImportedModuleAsBaseClass extends semver3.SemVer {
+export declare class ImportedModuleAsBaseClass extends semver1.SemVer {
 }
 
 /**
  * A generic parameter that references the "semver" module imported from \@types/semver.
  * @public
  */
-export declare function importedModuleAsGenericParameter(): GenericInterface<semver2.SemVer> | undefined;
+export declare function importedModuleAsGenericParameter(): GenericInterface<semver1.SemVer> | undefined;
 
 /**
  * This definition references the "semver" module imported from \@types/semver.
