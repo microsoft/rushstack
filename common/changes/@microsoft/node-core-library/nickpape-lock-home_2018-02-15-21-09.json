@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/node-core-library",
-      "comment": "Add an API to `LockFile` which allows you to asyncronously wait for a LockFile to become available.",
+      "comment": "Add an API to `LockFile` which allows the caller to asyncronously wait for a LockFile to become available.",
       "type": "minor"
     }
   ],

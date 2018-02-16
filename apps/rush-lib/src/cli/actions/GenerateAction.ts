@@ -173,11 +173,6 @@ export default class GenerateAction extends BaseRushAction {
         throw new Error(`Program bug: invalid package manager "${packageManager}"`);
       }
 
-    }).catch((error) => {
-      stopwatch.stop();
-      console.log(os.EOL + colors.red(`Rush generate failed:${os.EOL}`));
-      throw error;
-    }).then(() => {
       stopwatch.stop();
       console.log(os.EOL + colors.green(`Rush generate finished successfully. (${stopwatch.toString()})`));
 
