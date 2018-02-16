@@ -91,3 +91,8 @@ export { default as IInterfaceAsDefaultExport } from './IInterfaceAsDefaultExpor
 
 export { default as AbstractClass } from './AbstractClass';
 export { default as AbstractClass2, AbstractClass3 } from './AbstractClass2';
+
+export {
+  DefaultExportEdgeCase,
+  default as ClassExportedAsDefault
+} from './DefaultExportEdgeCase';

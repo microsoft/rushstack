@@ -16,9 +16,10 @@ export class MarkdownAction extends BaseAction {
     });
   }
 
-  protected onExecute(): void { // override
+  protected onExecute(): Promise<void> { // override
     const docItemSet: DocItemSet = this.buildDocItemSet();
     const markdownDocumenter: MarkdownDocumenter = new MarkdownDocumenter(docItemSet);
     markdownDocumenter.generateFiles(this.outputFolder);
+    return Promise.resolve();
   }
 }

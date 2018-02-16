@@ -26,8 +26,17 @@ class AmbientConsumer {
 }
 
 // @public
+class ClassExportedAsDefault {
+}
+
+// @public
 class DecoratorTest {
   test(): void;
+}
+
+// @public (undocumented)
+class DefaultExportEdgeCase {
+  reference: ClassExportedAsDefault;
 }
 
 // @public (undocumented)

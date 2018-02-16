@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Fix an issue where the packageTypings feature sometimes emitted \"default\" instead of the class name",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "pgonzal@users.noreply.github.com"
+}

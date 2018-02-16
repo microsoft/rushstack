@@ -44,12 +44,6 @@ export default class RushCommandLineParser extends CommandLineParser {
     this._populateActions();
   }
 
-  public catchSyncErrors(promise: Promise<void>): void {
-    promise.catch((error: Error) => {
-      this._exitAndReportError(error);
-    });
-  }
-
   public exitWithError(): void {
     try {
       this.flushTelemetry();
@@ -81,6 +75,9 @@ export default class RushCommandLineParser extends CommandLineParser {
     return this._execute().catch((error: Error) => {
       if (this._debugParameter.value) {
         console.log(colors.red(error.toString()));
+        if (error.stack) {
+          console.log(os.EOL + error.stack);
+        }
       } else {
         this._exitAndReportError(error);
       }
@@ -88,22 +85,18 @@ export default class RushCommandLineParser extends CommandLineParser {
   }
 
   private _execute(): Promise<void> {
-    return new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
-      try {
-        if (this.rushConfig) {
-          this.telemetry = new Telemetry(this.rushConfig);
+    try {
+      if (this.rushConfig) {
+        this.telemetry = new Telemetry(this.rushConfig);
+      }
+      return super.onExecute().then(() => {
+        if (this.telemetry) {
+          this.flushTelemetry();
         }
-      } catch (error) {
-        reject(error);
-        return;
-      }
-
-      return super.onExecute();
-    }).then(() => {
-      if (this.telemetry) {
-        this.flushTelemetry();
-      }
-    });
+      });
+    } catch (error) {
+      return Promise.reject(error);
+    }
   }
 
   private _populateActions(): void {

@@ -7,6 +7,7 @@
  * @packagedocumentation
  */
 
+/// <reference types="jest" />
 
 /**
  * Example of an abstract class that is directly exported.
@@ -62,6 +63,13 @@ export declare class AmbientConsumer {
 }
 
 /**
+ * Referenced by DefaultExportEdgeCaseReferencer.
+ * @public
+ */
+export declare class ClassExportedAsDefault {
+}
+
+/**
  * Tests a decorator
  * @public
  */
@@ -70,6 +78,17 @@ export declare class DecoratorTest {
      * Function with a decorator
      */
     test(): void;
+}
+
+/**
+ * @public
+ */
+export declare class DefaultExportEdgeCase {
+    /**
+     * This reference is encountered before the definition of DefaultExportEdgeCase.
+     * The symbol.name will be "default" in this situation.
+     */
+    reference: ClassExportedAsDefault;
 }
 
 /** @public */
