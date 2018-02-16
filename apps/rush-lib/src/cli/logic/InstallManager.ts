@@ -551,7 +551,7 @@ export default class InstallManager {
         console.log(`Deleting the "npm-tmp" folder`);
         this._asyncRecycler.moveFolder(this._rushConfiguration.npmTmpFolder);
 
-      } else {
+      } else if (installType !== InstallType.Normal) {
         console.log(`Deleting the "pnpm-store" folder`);
         this._asyncRecycler.moveFolder(this._rushConfiguration.pnpmStoreFolder);
       }
