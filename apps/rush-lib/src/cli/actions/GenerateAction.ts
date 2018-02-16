@@ -181,7 +181,7 @@ export default class GenerateAction extends BaseRushAction {
         LinkManagerFactory.getLinkManager(this.rushConfiguration);
       // NOTE: Setting force=true here shouldn't be strictly necessary, since installCommonModules()
       // above should have already deleted the marker file, but it doesn't hurt to be explicit.
-      this._parser.catchSyncErrors(linkManager.createSymlinksForProjects(true));
+      return linkManager.createSymlinksForProjects(true);
     } else {
       console.log(os.EOL + 'Next you should probably run: "rush link"');
     }

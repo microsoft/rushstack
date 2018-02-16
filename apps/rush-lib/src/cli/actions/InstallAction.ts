@@ -92,8 +92,7 @@ export default class InstallAction extends BaseRushAction {
         console.log(colors.red('Unable to proceed: The shrinkwrap file is missing.'));
         console.log('');
         console.log('You need to run "rush generate" first.');
-        process.exit(1);
-        return Promise.resolve();
+        return process.exit(1);
       }
 
       let installType: InstallType = InstallType.Normal;
@@ -106,8 +105,7 @@ export default class InstallAction extends BaseRushAction {
       if (!installManager.createTempModulesAndCheckShrinkwrap(shrinkwrapFile, installType !== InstallType.Normal)) {
         console.log('');
         console.log(colors.red('You need to run "rush generate" to update your shrinkwrap file.'));
-        process.exit(1);
-        return Promise.resolve();
+        return process.exit(1);
       }
 
       installManager.installCommonModules(installType);
@@ -126,7 +124,7 @@ export default class InstallAction extends BaseRushAction {
 
     if (!this._noLinkParameter.value) {
       const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
-      this._parser.catchSyncErrors(linkManager.createSymlinksForProjects(false));
+      return linkManager.createSymlinksForProjects(false);
     } else {
       console.log(os.EOL + 'Next you should probably run: "rush link"');
     }

@@ -116,10 +116,9 @@ export default class ChangeAction extends BaseRushAction {
     this._changeFileData = new Map<string, IChangeFile>();
     this._changeComments = ChangeFiles.getChangeComments(this._getChangeFiles());
 
-    // We should consider making onExecute either be an async/await or have it return a promise
     return this._promptLoop()
       .catch((error: Error) => {
-        console.error('There was an error creating the changefile:' + os.EOL + error.toString());
+        throw new Error(`There was an error creating the changefile: ${error.toString()}`);
       });
   }
 
