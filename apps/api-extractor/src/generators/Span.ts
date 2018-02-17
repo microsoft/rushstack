@@ -4,16 +4,20 @@
 import * as ts from 'typescript';
 
 /**
- * Callback for Span.modify()
- */
-export type SpanModifyCallback = (span: Span, previousSpan: Span | undefined, parentSpan: Span | undefined) => void;
-
-/**
  * Specifies various transformations that will be performed by Span.getModifiedText().
  */
 export class SpanModification {
-  public skipChildren: boolean;
-  public skipSeparatorAfter: boolean;
+  /**
+   * If true, all of the child spans will be omitted from the Span.getModifiedText() output.
+   * @remarks
+   * Also, the modify() operation will not recurse into these spans.
+   */
+  public omitChildren: boolean;
+
+  /**
+   * If true, then the Span.separator will be removed from the Span.getModifiedText() output.
+   */
+  public omitSeparatorAfter: boolean;
 
   private readonly span: Span;
   private _prefix: string | undefined;
@@ -50,8 +54,8 @@ export class SpanModification {
    * Reverts any modifications made to this object.
    */
   public reset(): void {
-    this.skipChildren = false;
-    this.skipSeparatorAfter = false;
+    this.omitChildren = false;
+    this.omitSeparatorAfter = false;
     this._prefix = undefined;
     this._suffix = undefined;
   }
@@ -63,8 +67,8 @@ export class SpanModification {
   public skipAll(): void {
     this.prefix = '';
     this.suffix = '';
-    this.skipChildren = true;
-    this.skipSeparatorAfter = true;
+    this.omitChildren = true;
+    this.omitSeparatorAfter = true;
   }
 }
 
@@ -75,7 +79,7 @@ export class SpanModification {
  * from a source file.
  *
  * @remarks
- * Technically, TypeScript's abstract syntax tree (AST) is represented using Node objects.
+ * TypeScript's abstract syntax tree (AST) is represented using Node objects.
  * The Node text ignores its surrounding whitespace, and does not have an ordering guarantee.
  * For example, a JSDocComment node can be a child of a FunctionDeclaration node, even though
  * the actual comment precedes the function in the input stream.
@@ -99,33 +103,23 @@ export class Span {
   // To improve performance, substrings are not allocated until actually needed
   public readonly startIndex: number;
   public readonly endIndex: number;
-  public separatorStartIndex: number;
-  public separatorEndIndex: number;
 
   public readonly children: Span[];
 
   public readonly modification: SpanModification;
 
-  private static _modifyHelper(callback: SpanModifyCallback, spans: Span[], parentSpan: Span|undefined): void {
-    let previousSpan: Span|undefined = undefined;
+  private _parent: Span | undefined;
+  private _previousSibling: Span | undefined;
 
-    for (const span of spans) {
-      callback(span, previousSpan, parentSpan);
-
-      if (!span.modification.skipChildren) {
-        Span._modifyHelper(callback, span.children, span);
-      }
-
-      previousSpan = span;
-    }
-  }
+  private _separatorStartIndex: number;
+  private _separatorEndIndex: number;
 
   public constructor(node: ts.Node) {
     this.node = node;
     this.startIndex = node.getStart();
     this.endIndex = node.end;
-    this.separatorStartIndex = 0;
-    this.separatorEndIndex = 0;
+    this._separatorStartIndex = 0;
+    this._separatorEndIndex = 0;
     this.children = [];
     this.modification = new SpanModification(this);
 
@@ -133,6 +127,9 @@ export class Span {
 
     for (const childNode of this.node.getChildren() || []) {
       const childSpan: Span = new Span(childNode);
+      childSpan._parent = this;
+      childSpan._previousSibling = previousChildSpan;
+
       this.children.push(childSpan);
 
       // Normalize the bounds so that a child is never outside its parent
@@ -162,8 +159,8 @@ export class Span {
             }
             separatorRecipient = lastChild;
           }
-          separatorRecipient.separatorStartIndex = previousChildSpan.endIndex;
-          separatorRecipient.separatorEndIndex = childSpan.startIndex;
+          separatorRecipient._separatorStartIndex = previousChildSpan.endIndex;
+          separatorRecipient._separatorEndIndex = childSpan.startIndex;
         }
       }
 
@@ -173,6 +170,25 @@ export class Span {
 
   public get kind(): ts.SyntaxKind {
     return this.node.kind;
+  }
+
+  /**
+   * The parent Span, if any.
+   * NOTE: This will be undefined for a root Span, even though the corresponding Node
+   * may have a parent in the AST.
+   */
+  public get parent(): Span | undefined {
+    return this._parent;
+  }
+
+  /**
+   * If the current object is this.parent.children[i], then previousSibling corresponds
+   * to this.parent.children[i-1] if it exists.
+   * NOTE: This will be undefined for a root Span, even though the corresponding Node
+   * may have a previous sibling in the AST.
+   */
+  public get previousSibling(): Span | undefined {
+    return this._previousSibling;
   }
 
   /**
@@ -205,7 +221,7 @@ export class Span {
    * Here we mean "next" according to an inorder traversal, not necessarily a sibling.
    */
   public get separator(): string {
-    return this._getSubstring(this.separatorStartIndex, this.separatorEndIndex);
+    return this._getSubstring(this._separatorStartIndex, this._separatorEndIndex);
   }
 
   /**
@@ -224,11 +240,13 @@ export class Span {
 
   /**
    * Recursively invokes the callback on this Span and all its children.  The callback
-   * can make changes to Span.modification for each node.  If SpanModification.skipChildren
-   * is true, those children will not be processed.
+   * can make changes to Span.modification for each node.
    */
-  public modify(callback: SpanModifyCallback): void {
-    Span._modifyHelper(callback, [this], undefined);
+  public forEach(callback: (span: Span) => void): void {
+    callback(this);
+    for (const child of this.children) {
+      child.forEach(callback);
+    }
   }
 
   /**
@@ -255,14 +273,14 @@ export class Span {
     let result: string = '';
     result += this.modification.prefix;
 
-    if (!this.modification.skipChildren) {
+    if (!this.modification.omitChildren) {
       for (const child of this.children) {
         result += child.getModifiedText();
       }
     }
 
     result += this.modification.suffix;
-    if (!this.modification.skipSeparatorAfter) {
+    if (!this.modification.omitSeparatorAfter) {
       result += this.separator;
     }
 

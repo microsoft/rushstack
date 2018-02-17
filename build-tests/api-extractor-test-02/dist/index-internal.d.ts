@@ -10,8 +10,6 @@
 import { ISimpleInterface } from 'api-extractor-test-01';
 import { ReexportedClass } from 'api-extractor-test-01';
 import * as semver1 from 'semver';
-import * as semver2 from 'semver';
-import * as semver3 from 'semver';
 
 /**
  * An interface with a generic parameter.
@@ -21,18 +19,24 @@ export declare interface GenericInterface<T> {
     member: T;
 }
 
+/** @public */
+export declare function importDeduping1(arg1: ISimpleInterface, arg2: ISimpleInterface): void;
+
+/** @public */
+export declare function importDeduping2(arg1: ISimpleInterface, arg2: ISimpleInterface): void;
+
 /**
  * A class that inherits from a type defined in the "semver" module imported from \@types/semver.
  * @public
  */
-export declare class ImportedModuleAsBaseClass extends semver3.SemVer {
+export declare class ImportedModuleAsBaseClass extends semver1.SemVer {
 }
 
 /**
  * A generic parameter that references the "semver" module imported from \@types/semver.
  * @public
  */
-export declare function importedModuleAsGenericParameter(): GenericInterface<semver2.SemVer> | undefined;
+export declare function importedModuleAsGenericParameter(): GenericInterface<semver1.SemVer> | undefined;
 
 /**
  * This definition references the "semver" module imported from \@types/semver.

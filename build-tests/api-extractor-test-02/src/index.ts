@@ -14,6 +14,9 @@ export { SubclassWithImport } from './SubclassWithImport';
 
 export * from './TypeFromImportedModule';
 
+export { importDeduping1 } from './ImportDeduping1';
+export { importDeduping2 } from './ImportDeduping2';
+
 import { AmbientConsumer } from 'api-extractor-test-01';
 
 // Test that the ambient types are accessible even though api-extractor-02 doesn't
