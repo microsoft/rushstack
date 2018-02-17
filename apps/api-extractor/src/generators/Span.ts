@@ -103,8 +103,6 @@ export class Span {
   // To improve performance, substrings are not allocated until actually needed
   public readonly startIndex: number;
   public readonly endIndex: number;
-  public separatorStartIndex: number;
-  public separatorEndIndex: number;
 
   public readonly children: Span[];
 
@@ -113,12 +111,15 @@ export class Span {
   private _parent: Span | undefined;
   private _previousSibling: Span | undefined;
 
+  private _separatorStartIndex: number;
+  private _separatorEndIndex: number;
+
   public constructor(node: ts.Node) {
     this.node = node;
     this.startIndex = node.getStart();
     this.endIndex = node.end;
-    this.separatorStartIndex = 0;
-    this.separatorEndIndex = 0;
+    this._separatorStartIndex = 0;
+    this._separatorEndIndex = 0;
     this.children = [];
     this.modification = new SpanModification(this);
 
@@ -158,8 +159,8 @@ export class Span {
             }
             separatorRecipient = lastChild;
           }
-          separatorRecipient.separatorStartIndex = previousChildSpan.endIndex;
-          separatorRecipient.separatorEndIndex = childSpan.startIndex;
+          separatorRecipient._separatorStartIndex = previousChildSpan.endIndex;
+          separatorRecipient._separatorEndIndex = childSpan.startIndex;
         }
       }
 
@@ -220,7 +221,7 @@ export class Span {
    * Here we mean "next" according to an inorder traversal, not necessarily a sibling.
    */
   public get separator(): string {
-    return this._getSubstring(this.separatorStartIndex, this.separatorEndIndex);
+    return this._getSubstring(this._separatorStartIndex, this._separatorEndIndex);
   }
 
   /**
