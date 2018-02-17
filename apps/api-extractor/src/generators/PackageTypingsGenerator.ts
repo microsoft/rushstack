@@ -584,7 +584,14 @@ export default class PackageTypingsGenerator {
   private _modifySpan(span: Span, entry: Entry): void {
     const previousSpan: Span | undefined = span.previousSibling;
 
+    let recurseChildren: boolean = true;
+
     switch (span.kind) {
+      case ts.SyntaxKind.JSDocComment:
+        // For now, we don't transform JSDoc comment nodes at all
+        recurseChildren = false;
+        break;
+
       case ts.SyntaxKind.ExportKeyword:
       case ts.SyntaxKind.DefaultKeyword:
       case ts.SyntaxKind.DeclareKeyword:
@@ -660,8 +667,10 @@ export default class PackageTypingsGenerator {
         break;
     }
 
-    for (const child of span.children) {
-      this._modifySpan(child, entry);
+    if (recurseChildren) {
+      for (const child of span.children) {
+        this._modifySpan(child, entry);
+      }
     }
   }
 
