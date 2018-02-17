@@ -2,6 +2,24 @@
   "name": "@microsoft/node-library-build",
   "entries": [
     {
+      "version": "4.3.13",
+      "tag": "@microsoft/node-library-build_v4.3.13",
+      "date": "Sat, 17 Feb 2018 02:53:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.6.3` to `3.6.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" from `3.3.12` to `3.3.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `4.7.10` to `4.7.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.3.12",
       "tag": "@microsoft/node-library-build_v4.3.12",
       "date": "Fri, 16 Feb 2018 22:05:23 GMT",

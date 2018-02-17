@@ -2,6 +2,26 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "5.3.2",
+      "tag": "@microsoft/api-extractor_v5.3.2",
+      "date": "Sat, 17 Feb 2018 02:53:49 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix several bugs with the way that imports were being deduplicated by the packageTypings feature"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.6.0` to `0.6.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `3.0.1` to `3.0.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.3.1",
       "tag": "@microsoft/api-extractor_v5.3.1",
       "date": "Fri, 16 Feb 2018 22:05:23 GMT",
