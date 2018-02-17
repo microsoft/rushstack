@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-karma",
-  "version": "4.4.12",
+  "version": "4.4.13",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -13,7 +13,7 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.6.3",
+    "@microsoft/gulp-core-build": "3.6.4",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "gulp-karma": "~0.0.5",
