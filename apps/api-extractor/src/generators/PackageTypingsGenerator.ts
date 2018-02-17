@@ -581,85 +581,88 @@ export default class PackageTypingsGenerator {
   /**
    * Before writing out a declaration, _modifySpan() applies various fixups to make it nice.
    */
-  private _modifySpan(rootSpan: Span, entry: Entry): void {
-    rootSpan.modify((span: Span, previousSpan: Span | undefined, parentSpan: Span | undefined) => {
-      switch (span.kind) {
-        case ts.SyntaxKind.ExportKeyword:
-        case ts.SyntaxKind.DefaultKeyword:
-        case ts.SyntaxKind.DeclareKeyword:
-          // Delete any explicit "export" or "declare" keywords -- we will re-add them below
-          span.modification.skipAll();
-          break;
+  private _modifySpan(span: Span, entry: Entry): void {
+    const previousSpan: Span | undefined = span.previousSibling;
 
-        case ts.SyntaxKind.InterfaceKeyword:
-        case ts.SyntaxKind.ClassKeyword:
-        case ts.SyntaxKind.EnumKeyword:
-        case ts.SyntaxKind.NamespaceKeyword:
-        case ts.SyntaxKind.ModuleKeyword:
-        case ts.SyntaxKind.TypeKeyword:
-        case ts.SyntaxKind.FunctionKeyword:
-          // Replace the stuff we possibly deleted above
-          let replacedModifiers: string = 'declare ';
-          if (entry.exported) {
-            replacedModifiers = 'export ' + replacedModifiers;
+    switch (span.kind) {
+      case ts.SyntaxKind.ExportKeyword:
+      case ts.SyntaxKind.DefaultKeyword:
+      case ts.SyntaxKind.DeclareKeyword:
+        // Delete any explicit "export" or "declare" keywords -- we will re-add them below
+        span.modification.skipAll();
+        break;
+
+      case ts.SyntaxKind.InterfaceKeyword:
+      case ts.SyntaxKind.ClassKeyword:
+      case ts.SyntaxKind.EnumKeyword:
+      case ts.SyntaxKind.NamespaceKeyword:
+      case ts.SyntaxKind.ModuleKeyword:
+      case ts.SyntaxKind.TypeKeyword:
+      case ts.SyntaxKind.FunctionKeyword:
+        // Replace the stuff we possibly deleted above
+        let replacedModifiers: string = 'declare ';
+        if (entry.exported) {
+          replacedModifiers = 'export ' + replacedModifiers;
+        }
+
+        if (previousSpan && previousSpan.kind === ts.SyntaxKind.SyntaxList) {
+          // If there is a previous span of type SyntaxList, then apply it before any other modifiers
+          // (e.g. "abstract") that appear there.
+          previousSpan.modification.prefix = replacedModifiers + previousSpan.modification.prefix;
+        } else {
+          // Otherwise just stick it in front of this span
+          span.modification.prefix = replacedModifiers + span.modification.prefix;
+        }
+        break;
+
+      case ts.SyntaxKind.VariableDeclaration:
+        if (!span.parent) {
+          // The VariableDeclaration node is part of a VariableDeclarationList, however
+          // the Entry.followedSymbol points to the VariableDeclaration part because
+          // multiple definitions might share the same VariableDeclarationList.
+          //
+          // Since we are emitting a separate declaration for each one, we need to look upwards
+          // in the ts.Node tree and write a copy of the enclosing VariableDeclarationList
+          // content (e.g. "var" from "var x=1, y=2").
+          const list: ts.VariableDeclarationList | undefined = PackageTypingsGenerator._matchAncestor(span.node,
+            [ts.SyntaxKind.VariableDeclarationList, ts.SyntaxKind.VariableDeclaration]);
+          if (!list) {
+            throw new Error('Unsupported variable declaration');
           }
+          const listPrefix: string = list.getSourceFile().text
+            .substring(list.getStart(), list.declarations[0].getStart());
+          span.modification.prefix = 'declare ' + listPrefix + span.modification.prefix;
+          span.modification.suffix = ';';
+        }
+        break;
 
-          if (previousSpan && previousSpan.kind === ts.SyntaxKind.SyntaxList) {
-            // If there is a previous span of type SyntaxList, then apply it before any other modifiers
-            // (e.g. "abstract") that appear there.
-            previousSpan.modification.prefix = replacedModifiers + previousSpan.modification.prefix;
-          } else {
-            // Otherwise just stick it in front of this span
-            span.modification.prefix = replacedModifiers + span.modification.prefix;
-          }
-          break;
-
-        case ts.SyntaxKind.VariableDeclaration:
-          if (!parentSpan) {
-            // The VariableDeclaration node is part of a VariableDeclarationList, however
-            // the Entry.followedSymbol points to the VariableDeclaration part because
-            // multiple definitions might share the same VariableDeclarationList.
-            //
-            // Since we are emitting a separate declaration for each one, we need to look upwards
-            // in the ts.Node tree and write a copy of the enclosing VariableDeclarationList
-            // content (e.g. "var" from "var x=1, y=2").
-            const list: ts.VariableDeclarationList | undefined = PackageTypingsGenerator._matchAncestor(span.node,
-              [ts.SyntaxKind.VariableDeclarationList, ts.SyntaxKind.VariableDeclaration]);
-            if (!list) {
-              throw new Error('Unsupported variable declaration');
+      case ts.SyntaxKind.Identifier:
+        const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(span.node);
+        if (symbol) {
+          const referencedEntry: Entry | undefined = this._getEntryForSymbol(symbol);
+          if (referencedEntry) {
+            if (!referencedEntry.uniqueName) {
+              // This should never happen
+              throw new Error('referencedEntry.uniqueName is undefined');
             }
-            const listPrefix: string = list.getSourceFile().text
-              .substring(list.getStart(), list.declarations[0].getStart());
-            span.modification.prefix = 'declare ' + listPrefix + span.modification.prefix;
-            span.modification.suffix = ';';
-          }
-          break;
 
-        case ts.SyntaxKind.Identifier:
-          const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(span.node);
-          if (symbol) {
-            const referencedEntry: Entry | undefined = this._getEntryForSymbol(symbol);
-            if (referencedEntry) {
-              if (!referencedEntry.uniqueName) {
-                // This should never happen
-                throw new Error('referencedEntry.uniqueName is undefined');
-              }
-
-              span.modification.prefix = referencedEntry.uniqueName;
-              // For debugging:
-              // span.modification.prefix += '/*R=FIX*/';
-            } else {
-              // For debugging:
-              // span.modification.prefix += '/*R=KEEP*/';
-            }
+            span.modification.prefix = referencedEntry.uniqueName;
+            // For debugging:
+            // span.modification.prefix += '/*R=FIX*/';
           } else {
             // For debugging:
-            // span.modification.prefix += '/*R=NA*/';
+            // span.modification.prefix += '/*R=KEEP*/';
           }
-          break;
+        } else {
+          // For debugging:
+          // span.modification.prefix += '/*R=NA*/';
         }
-      }
-    );
+        break;
+    }
+
+    for (const child of span.children) {
+      this._modifySpan(child, entry);
+    }
   }
 
   /**

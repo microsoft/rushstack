@@ -4,11 +4,6 @@
 import * as ts from 'typescript';
 
 /**
- * Callback for Span.modify()
- */
-export type SpanModifyCallback = (span: Span, previousSpan: Span | undefined, parentSpan: Span | undefined) => void;
-
-/**
  * Specifies various transformations that will be performed by Span.getModifiedText().
  */
 export class SpanModification {
@@ -115,19 +110,8 @@ export class Span {
 
   public readonly modification: SpanModification;
 
-  private static _modifyHelper(callback: SpanModifyCallback, spans: Span[], parentSpan: Span|undefined): void {
-    let previousSpan: Span|undefined = undefined;
-
-    for (const span of spans) {
-      callback(span, previousSpan, parentSpan);
-
-      if (!span.modification.omitChildren) {
-        Span._modifyHelper(callback, span.children, span);
-      }
-
-      previousSpan = span;
-    }
-  }
+  private _parent: Span | undefined;
+  private _previousSibling: Span | undefined;
 
   public constructor(node: ts.Node) {
     this.node = node;
@@ -142,6 +126,9 @@ export class Span {
 
     for (const childNode of this.node.getChildren() || []) {
       const childSpan: Span = new Span(childNode);
+      childSpan._parent = this;
+      childSpan._previousSibling = previousChildSpan;
+
       this.children.push(childSpan);
 
       // Normalize the bounds so that a child is never outside its parent
@@ -182,6 +169,25 @@ export class Span {
 
   public get kind(): ts.SyntaxKind {
     return this.node.kind;
+  }
+
+  /**
+   * The parent Span, if any.
+   * NOTE: This will be undefined for a root Span, even though the corresponding Node
+   * may have a parent in the AST.
+   */
+  public get parent(): Span | undefined {
+    return this._parent;
+  }
+
+  /**
+   * If the current object is this.parent.children[i], then previousSibling corresponds
+   * to this.parent.children[i-1] if it exists.
+   * NOTE: This will be undefined for a root Span, even though the corresponding Node
+   * may have a previous sibling in the AST.
+   */
+  public get previousSibling(): Span | undefined {
+    return this._previousSibling;
   }
 
   /**
@@ -233,11 +239,13 @@ export class Span {
 
   /**
    * Recursively invokes the callback on this Span and all its children.  The callback
-   * can make changes to Span.modification for each node.  If SpanModification.skipChildren
-   * is true, those children will not be processed.
+   * can make changes to Span.modification for each node.
    */
-  public modify(callback: SpanModifyCallback): void {
-    Span._modifyHelper(callback, [this], undefined);
+  public forEach(callback: (span: Span) => void): void {
+    callback(this);
+    for (const child of this.children) {
+      child.forEach(callback);
+    }
   }
 
   /**
