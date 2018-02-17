@@ -12,8 +12,17 @@ export type SpanModifyCallback = (span: Span, previousSpan: Span | undefined, pa
  * Specifies various transformations that will be performed by Span.getModifiedText().
  */
 export class SpanModification {
-  public skipChildren: boolean;
-  public skipSeparatorAfter: boolean;
+  /**
+   * If true, all of the child spans will be omitted from the Span.getModifiedText() output.
+   * @remarks
+   * Also, the modify() operation will not recurse into these spans.
+   */
+  public omitChildren: boolean;
+
+  /**
+   * If true, then the Span.separator will be removed from the Span.getModifiedText() output.
+   */
+  public omitSeparatorAfter: boolean;
 
   private readonly span: Span;
   private _prefix: string | undefined;
@@ -50,8 +59,8 @@ export class SpanModification {
    * Reverts any modifications made to this object.
    */
   public reset(): void {
-    this.skipChildren = false;
-    this.skipSeparatorAfter = false;
+    this.omitChildren = false;
+    this.omitSeparatorAfter = false;
     this._prefix = undefined;
     this._suffix = undefined;
   }
@@ -63,8 +72,8 @@ export class SpanModification {
   public skipAll(): void {
     this.prefix = '';
     this.suffix = '';
-    this.skipChildren = true;
-    this.skipSeparatorAfter = true;
+    this.omitChildren = true;
+    this.omitSeparatorAfter = true;
   }
 }
 
@@ -75,7 +84,7 @@ export class SpanModification {
  * from a source file.
  *
  * @remarks
- * Technically, TypeScript's abstract syntax tree (AST) is represented using Node objects.
+ * TypeScript's abstract syntax tree (AST) is represented using Node objects.
  * The Node text ignores its surrounding whitespace, and does not have an ordering guarantee.
  * For example, a JSDocComment node can be a child of a FunctionDeclaration node, even though
  * the actual comment precedes the function in the input stream.
@@ -112,7 +121,7 @@ export class Span {
     for (const span of spans) {
       callback(span, previousSpan, parentSpan);
 
-      if (!span.modification.skipChildren) {
+      if (!span.modification.omitChildren) {
         Span._modifyHelper(callback, span.children, span);
       }
 
@@ -255,14 +264,14 @@ export class Span {
     let result: string = '';
     result += this.modification.prefix;
 
-    if (!this.modification.skipChildren) {
+    if (!this.modification.omitChildren) {
       for (const child of this.children) {
         result += child.getModifiedText();
       }
     }
 
     result += this.modification.suffix;
-    if (!this.modification.skipSeparatorAfter) {
+    if (!this.modification.omitSeparatorAfter) {
       result += this.separator;
     }
 
