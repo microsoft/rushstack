@@ -12,6 +12,7 @@ groups:
     conditions:
       files:
         - ".pullapprove.yml"
+        - ".travis.yml"
     required: 1
     users:
       - iclanton
@@ -40,6 +41,10 @@ groups:
         - "core-build/*"
         - "libraries/*"
         - "webpack/*"
+        - "rush.json"
+        - ".gitattributes"
+        - ".gitignore"
+        - "README.md"
     required: 1
     users:
       - iclanton
