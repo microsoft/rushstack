@@ -14,6 +14,9 @@ export class Path {
    * If the paths are relative, they will first be resolved using path.resolve().
    */
   public static isUnder(childPath: string, parentPath: string): boolean {
+    // If childPath is under parentPath, then relativePath will be something like
+    // "../.." or "..\\..", which consists entirely of periods and slashes.
+    // (Note that something like "....t" is actually a valid filename, but "...." is not.)
     const relativePath: string = path.relative(path.resolve(childPath), path.resolve(parentPath));
     return /^[.\/\\]+$/.test(relativePath);
   }
