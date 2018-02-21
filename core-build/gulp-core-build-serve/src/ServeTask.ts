@@ -110,7 +110,7 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
   public executeTask(gulp: typeof Gulp, completeCallback?: (error?: string) => void): void {
 
     /* tslint:disable:typedef */
-    const gulpConnect = this._loadGulpConnect();
+    const gulpConnect = require('gulp-connect');
     const open = require('gulp-open');
     const http = require('http');
     const https = require('https');
@@ -135,7 +135,8 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
       livereload: true,
       middleware: (): Function[] => [this._logRequestsMiddleware, this._enableCorsMiddleware],
       port: port,
-      root: rootPath
+      root: rootPath,
+      preferHttp1: true
     });
 
     // If an api is provided, spin it up.
@@ -292,67 +293,5 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
     } else {
       return undefined;
     }
-  }
-
-  /**
-   * Workaround for loading gulp-connect, which automatically uses http2 if it
-   * can require() a module called 'http2'
-   *
-   * https://github.com/AveVlad/gulp-connect/issues/246
-   *
-   * In versions of NodeJS < 8:
-   *   'http2' would have to be a module in the node_modules folder.
-   *   We did not provide this normally, so most of the time nobody used http2 with gulp serve.
-   *
-   * However, in versions of NodeJS >= 8:
-   *   They provide a built-in module called 'http2', which is experimental and unstable
-   *   The built-in module is preferred unless an environment variable is set: NODE_NO_HTTP2=1
-   *
-   * We don't want to enforce environmental requirements, nor
-   * do we want to support a toolchain that relies on an experimental API.
-   *
-   * Until gulp-connect provides a way to disable HTTP2, we're using this workaround:
-   * Inject a falsey value into the require() cache, require gulp-connect,
-   * then restore the old cache state.
-   *
-   * As a consequence, this approach will prevent "gulp-connect" from using http2 in
-   * environments with Node < 8. This is intentional, because we don't see a reason to
-   * support http2 for serving localhost scripts.
-   */
-  // tslint:disable-next-line:no-any
-  private _loadGulpConnect(): any {
-    // this will raise an exception if it can't find http2,
-    // which happens if we are on Node6 and 'http2' has not been required yet
-    let http2CacheKey: string = 'http2';
-    try {
-      http2CacheKey = require.resolve('http2');
-    } catch (exception) {
-      // no-op
-    }
-
-    /* tslint:disable:typedef */
-    let gulpConnect;
-
-    // node 6 and http2 is in cache
-    if (Object.keys(require.cache).indexOf(http2CacheKey) !== -1) {
-      // store the old cache value
-      const http2CacheObject = require.cache[http2CacheKey];
-      require.cache[http2CacheKey] = { exports: undefined };
-
-      gulpConnect = require('gulp-connect');
-
-      // restore the old cache value
-      require.cache[http2CacheKey] = http2CacheObject;
-    } else {
-      // node 8 or http2 is not in cache, insert a module with no exports into cache
-      require.cache[http2CacheKey] = { exports: undefined };
-
-      gulpConnect = require('gulp-connect');
-
-      // remove module with no exports from cache
-      delete require.cache[http2CacheKey];
-    }
-    /* tslint:enable:typedef */
-    return gulpConnect;
   }
 }

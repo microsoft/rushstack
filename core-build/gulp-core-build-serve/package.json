@@ -19,7 +19,7 @@
     "deasync": "~0.1.7",
     "express": "~4.16.2",
     "gulp": "~3.9.1",
-    "gulp-connect": "~5.2.0",
+    "gulp-connect": "~5.4.0",
     "gulp-open": "~2.0.0",
     "gulp-util": "~3.0.7",
     "node-forge": "~0.7.1",
