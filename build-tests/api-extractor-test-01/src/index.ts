@@ -96,3 +96,5 @@ export {
   DefaultExportEdgeCase,
   default as ClassExportedAsDefault
 } from './DefaultExportEdgeCase';
+
+export { TypeReferencesInAedoc as _TypeReferencesInAedoc } from './TypeReferencesInAedoc';

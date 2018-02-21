@@ -65,7 +65,7 @@ export default class PrettyPrinter {
     */
   public static getDeclarationSummary(node: ts.Node): string {
     const rootSpan: Span = new Span(node);
-    rootSpan.modify((span: Span, previousSpan: Span | undefined, parentSpan: Span | undefined) => {
+    rootSpan.forEach((span: Span) => {
       switch (span.kind) {
         case ts.SyntaxKind.JSDocComment:   // strip any code comments
         case ts.SyntaxKind.DeclareKeyword: // strip the "declare" keyword

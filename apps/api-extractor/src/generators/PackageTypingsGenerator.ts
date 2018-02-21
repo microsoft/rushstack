@@ -20,6 +20,7 @@ interface IEntryParameters {
   followedSymbol: ts.Symbol;
   importPackagePath: string | undefined;
   importPackageExportName: string | undefined;
+  importPackageKey: string | undefined;
 }
 
 /**
@@ -61,11 +62,30 @@ class Entry {
    */
   public readonly followedSymbol: ts.Symbol;
 
-  /** {@inheritdoc IFollowAliasesResult.importPackagePath} */
+  /**
+   * The name of the external package (and possibly module path) that this definition
+   * was imported from.  If it was defined in the referencing source file, or if it was
+   * imported from a local file, or if it is an ambient definition, then externalPackageName
+   * will be undefined.
+   *
+   * Example: "@microsoft/gulp-core-build/lib/IBuildConfig"
+   */
   public readonly importPackagePath: string | undefined;
 
-  /** {@inheritdoc IFollowAliasesResult.importPackageExportName} */
+  /**
+   * If importPackagePath is defined, then this specifies the export name for the definition.
+   *
+   * Example: "IBuildConfig"
+   */
   public readonly importPackageExportName: string | undefined;
+
+  /**
+   * If importPackagePath and importPackageExportName are defined, then this is a dictionary key
+   * that combines them with a colon (":").
+   *
+   * Example: "@microsoft/gulp-core-build/lib/IBuildConfig:IBuildConfig"
+   */
+  public readonly importPackageKey: string | undefined;
 
   /**
    * If true, this entry should be emitted using the "export" keyword instead of the "declare" keyword.
@@ -80,6 +100,7 @@ class Entry {
     this.followedSymbol = parameters.followedSymbol;
     this.importPackagePath = parameters.importPackagePath;
     this.importPackageExportName = parameters.importPackageExportName;
+    this.importPackageKey = parameters.importPackageKey;
   }
 
   public getSortKey(): string {
@@ -117,17 +138,10 @@ interface IFollowAliasesResult {
    */
   isAmbient: boolean;
 
-  /**
-   * The name of the external package (and possibly module path) that this definition
-   * was imported from.  If it was defined in the referencing source file, or if it was
-   * imported from a local file, or if it is an ambient definition, then externalPackageName
-   * will be undefined.
-   */
+  /** {@inheritdoc Entry.importPackagePath} */
   importPackagePath: string | undefined;
 
-  /**
-   * If importPackagePath is defined, then this specifies the export name for the definition.
-   */
+  /** {@inheritdoc Entry.importPackageExportName} */
   importPackageExportName: string | undefined;
 }
 
@@ -138,11 +152,18 @@ export default class PackageTypingsGenerator {
 
   /**
    * A mapping from Entry.followedSymbol --> Entry.
-   * NOTE:  Two different keys may map to the same value.
+   * NOTE: Two different keys may map to the same value.
    *
    * After following type aliases, we use this map to look up the corresponding Entry.
    */
   private readonly _entriesBySymbol: Map<ts.Symbol, Entry> = new Map<ts.Symbol, Entry>();
+
+  /**
+   * A mapping from Entry.importPackageKey --> Entry.
+   *
+   * If Entry.importPackageKey is undefined, then it is not included in the map.
+   */
+  private readonly _entriesByImportKey: Map<string, Entry> = new Map<string, Entry>();
 
   /**
    * This data structure stores the same entries as _entriesBySymbol.values().
@@ -560,95 +581,97 @@ export default class PackageTypingsGenerator {
   /**
    * Before writing out a declaration, _modifySpan() applies various fixups to make it nice.
    */
-  private _modifySpan(rootSpan: Span, entry: Entry): void {
-    rootSpan.modify((span: Span, previousSpan: Span | undefined, parentSpan: Span | undefined) => {
-      switch (span.kind) {
-        case ts.SyntaxKind.ExportKeyword:
-        case ts.SyntaxKind.DefaultKeyword:
-        case ts.SyntaxKind.DeclareKeyword:
-          // Delete any explicit "export" or "declare" keywords -- we will re-add them below
-          span.modification.skipAll();
-          break;
+  private _modifySpan(span: Span, entry: Entry): void {
+    const previousSpan: Span | undefined = span.previousSibling;
 
-        case ts.SyntaxKind.InterfaceKeyword:
-        case ts.SyntaxKind.ClassKeyword:
-        case ts.SyntaxKind.EnumKeyword:
-        case ts.SyntaxKind.NamespaceKeyword:
-        case ts.SyntaxKind.ModuleKeyword:
-        case ts.SyntaxKind.TypeKeyword:
-        case ts.SyntaxKind.FunctionKeyword:
-          // Replace the stuff we possibly deleted above
-          let replacedModifiers: string = 'declare ';
-          if (entry.exported) {
-            replacedModifiers = 'export ' + replacedModifiers;
-          }
+    let recurseChildren: boolean = true;
 
-          if (previousSpan && previousSpan.kind === ts.SyntaxKind.SyntaxList) {
-            // If there is a previous span of type SyntaxList, then apply it before any other modifiers
-            // (e.g. "abstract") that appear there.
-            previousSpan.modification.prefix = replacedModifiers + previousSpan.modification.prefix;
-          } else {
-            // Otherwise just stick it in front of this span
-            span.modification.prefix = replacedModifiers + span.modification.prefix;
-          }
-          break;
+    switch (span.kind) {
+      case ts.SyntaxKind.JSDocComment:
+        // For now, we don't transform JSDoc comment nodes at all
+        recurseChildren = false;
+        break;
 
-        case ts.SyntaxKind.VariableDeclaration:
-          if (!parentSpan) {
-            // The VariableDeclaration node is part of a VariableDeclarationList, however
-            // the Entry.followedSymbol points to the VariableDeclaration part because
-            // multiple definitions might share the same VariableDeclarationList.
-            //
-            // Since we are emitting a separate declaration for each one, we need to look upwards
-            // in the ts.Node tree and write a copy of the enclosing VariableDeclarationList
-            // content (e.g. "var" from "var x=1, y=2").
-            const list: ts.VariableDeclarationList | undefined = PackageTypingsGenerator._matchAncestor(span.node,
-              [ts.SyntaxKind.VariableDeclarationList, ts.SyntaxKind.VariableDeclaration]);
-            if (!list) {
-              throw new Error('Unsupported variable declaration');
-            }
-            const listPrefix: string = list.getSourceFile().text
-              .substring(list.getStart(), list.declarations[0].getStart());
-            span.modification.prefix = 'declare ' + listPrefix + span.modification.prefix;
-            span.modification.suffix = ';';
-          }
-          break;
+      case ts.SyntaxKind.ExportKeyword:
+      case ts.SyntaxKind.DefaultKeyword:
+      case ts.SyntaxKind.DeclareKeyword:
+        // Delete any explicit "export" or "declare" keywords -- we will re-add them below
+        span.modification.skipAll();
+        break;
 
-        case ts.SyntaxKind.Identifier:
-          if (parentSpan) {
-            switch (parentSpan.kind) {
-              case ts.SyntaxKind.ExpressionWithTypeArguments:
-              case ts.SyntaxKind.TypeReference:
-
-              case ts.SyntaxKind.ClassDeclaration:
-              case ts.SyntaxKind.InterfaceDeclaration:
-              case ts.SyntaxKind.EnumDeclaration:
-              case ts.SyntaxKind.TypeAliasDeclaration:
-              case ts.SyntaxKind.ModuleDeclaration:  // (namespaces are a type of module declaration)
-                {
-                  const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(span.node);
-                  if (!symbol) {
-                    throw new Error('Symbol not found');
-                  }
-
-                  const referencedEntry: Entry | undefined = this._getEntryForSymbol(symbol);
-                  if (referencedEntry) {
-                    if (!referencedEntry.uniqueName) {
-                      // This should never happen
-                      throw new Error('referencedEntry.uniqueName is undefined');
-                    }
-
-                    span.modification.prefix = referencedEntry.uniqueName;
-                    // span.modification.prefix += '/**/';
-                  }
-                }
-                break;
-            }
-          }
-          break;
+      case ts.SyntaxKind.InterfaceKeyword:
+      case ts.SyntaxKind.ClassKeyword:
+      case ts.SyntaxKind.EnumKeyword:
+      case ts.SyntaxKind.NamespaceKeyword:
+      case ts.SyntaxKind.ModuleKeyword:
+      case ts.SyntaxKind.TypeKeyword:
+      case ts.SyntaxKind.FunctionKeyword:
+        // Replace the stuff we possibly deleted above
+        let replacedModifiers: string = 'declare ';
+        if (entry.exported) {
+          replacedModifiers = 'export ' + replacedModifiers;
         }
+
+        if (previousSpan && previousSpan.kind === ts.SyntaxKind.SyntaxList) {
+          // If there is a previous span of type SyntaxList, then apply it before any other modifiers
+          // (e.g. "abstract") that appear there.
+          previousSpan.modification.prefix = replacedModifiers + previousSpan.modification.prefix;
+        } else {
+          // Otherwise just stick it in front of this span
+          span.modification.prefix = replacedModifiers + span.modification.prefix;
+        }
+        break;
+
+      case ts.SyntaxKind.VariableDeclaration:
+        if (!span.parent) {
+          // The VariableDeclaration node is part of a VariableDeclarationList, however
+          // the Entry.followedSymbol points to the VariableDeclaration part because
+          // multiple definitions might share the same VariableDeclarationList.
+          //
+          // Since we are emitting a separate declaration for each one, we need to look upwards
+          // in the ts.Node tree and write a copy of the enclosing VariableDeclarationList
+          // content (e.g. "var" from "var x=1, y=2").
+          const list: ts.VariableDeclarationList | undefined = PackageTypingsGenerator._matchAncestor(span.node,
+            [ts.SyntaxKind.VariableDeclarationList, ts.SyntaxKind.VariableDeclaration]);
+          if (!list) {
+            throw new Error('Unsupported variable declaration');
+          }
+          const listPrefix: string = list.getSourceFile().text
+            .substring(list.getStart(), list.declarations[0].getStart());
+          span.modification.prefix = 'declare ' + listPrefix + span.modification.prefix;
+          span.modification.suffix = ';';
+        }
+        break;
+
+      case ts.SyntaxKind.Identifier:
+        const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(span.node);
+        if (symbol) {
+          const referencedEntry: Entry | undefined = this._getEntryForSymbol(symbol);
+          if (referencedEntry) {
+            if (!referencedEntry.uniqueName) {
+              // This should never happen
+              throw new Error('referencedEntry.uniqueName is undefined');
+            }
+
+            span.modification.prefix = referencedEntry.uniqueName;
+            // For debugging:
+            // span.modification.prefix += '/*R=FIX*/';
+          } else {
+            // For debugging:
+            // span.modification.prefix += '/*R=KEEP*/';
+          }
+        } else {
+          // For debugging:
+          // span.modification.prefix += '/*R=NA*/';
+        }
+        break;
+    }
+
+    if (recurseChildren) {
+      for (const child of span.children) {
+        this._modifySpan(child, entry);
       }
-    );
+    }
   }
 
   /**
@@ -713,20 +736,45 @@ export default class PackageTypingsGenerator {
     }
 
     let entry: Entry | undefined = this._entriesBySymbol.get(followedSymbol);
+
     if (!entry) {
-      entry = new Entry({
-        localName: followAliasesResult.localName,
-        followedSymbol: followAliasesResult.followedSymbol,
-        importPackagePath: followAliasesResult.importPackagePath,
-        importPackageExportName: followAliasesResult.importPackageExportName
-      });
+      const importPackageKey: string | undefined = followAliasesResult.importPackagePath
+        ? followAliasesResult.importPackagePath + ':' + followAliasesResult.importPackageExportName
+        : undefined;
 
-      this._entries.push(entry);
-      this._entriesBySymbol.set(followedSymbol, entry);
+      if (importPackageKey) {
+        entry = this._entriesByImportKey.get(importPackageKey);
 
-      for (const declaration of followedSymbol.declarations || []) {
-        this._collectTypes(declaration);
-        this._collectTypeReferenceDirectives(declaration);
+        if (entry) {
+          // We didn't find the entry using  followedSymbol, but we did using importPackageKey,
+          // so add a mapping for followedSymbol; we'll need it later when renaming identifiers
+          this._entriesBySymbol.set(followedSymbol, entry);
+        }
+      }
+
+      if (!entry) {
+        // None of the above lookups worked, so create a new entry
+        entry = new Entry({
+          localName: followAliasesResult.localName,
+          followedSymbol: followAliasesResult.followedSymbol,
+          importPackagePath: followAliasesResult.importPackagePath,
+          importPackageExportName: followAliasesResult.importPackageExportName,
+          importPackageKey: importPackageKey
+        });
+
+        this._entries.push(entry);
+        this._entriesBySymbol.set(followedSymbol, entry);
+
+        if (importPackageKey) {
+          // If it's an import, add it to the lookup
+          this._entriesByImportKey.set(importPackageKey, entry);
+        } else {
+          // If it's not an import, then crawl for type references
+          for (const declaration of followedSymbol.declarations || []) {
+            this._collectTypes(declaration);
+            this._collectTypeReferenceDirectives(declaration);
+          }
+        }
       }
     }
 

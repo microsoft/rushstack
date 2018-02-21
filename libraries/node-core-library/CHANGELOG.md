@@ -1,6 +1,20 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Fri, 16 Feb 2018 22:05:23 GMT and should not be manually modified.
+This log was last generated on Wed, 21 Feb 2018 03:13:28 GMT and should not be manually modified.
+
+## 0.7.0
+Wed, 21 Feb 2018 03:13:28 GMT
+
+### Minor changes
+
+- Add "Path.isUnder()" API
+
+## 0.6.1
+Sat, 17 Feb 2018 02:53:49 GMT
+
+### Patches
+
+- Fix an issue for LockFiles where not all filesystem operations were wrapped in a try/catch block.
 
 ## 0.6.0
 Fri, 16 Feb 2018 22:05:23 GMT

@@ -2,6 +2,60 @@
   "name": "@microsoft/web-library-build",
   "entries": [
     {
+      "version": "4.4.16",
+      "tag": "@microsoft/web-library-build_v4.4.16",
+      "date": "Wed, 21 Feb 2018 03:13:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.6.4` to `3.6.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-karma\" from `4.4.13` to `4.4.14`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `4.2.15` to `4.2.16`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `3.2.14` to `3.2.15`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `4.7.11` to `4.7.12`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `3.3.13` to `3.3.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.4.15",
+      "tag": "@microsoft/web-library-build_v4.4.15",
+      "date": "Sat, 17 Feb 2018 02:53:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.6.3` to `3.6.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-karma\" from `4.4.12` to `4.4.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `4.2.14` to `4.2.15`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `3.2.13` to `3.2.14`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `4.7.10` to `4.7.11`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `3.3.12` to `3.3.13`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.4.14",
       "tag": "@microsoft/web-library-build_v4.4.14",
       "date": "Fri, 16 Feb 2018 22:05:23 GMT",

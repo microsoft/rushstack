@@ -1,6 +1,18 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 16 Feb 2018 22:05:23 GMT and should not be manually modified.
+This log was last generated on Wed, 21 Feb 2018 03:13:28 GMT and should not be manually modified.
+
+## 5.3.3
+Wed, 21 Feb 2018 03:13:28 GMT
+
+*Version update only*
+
+## 5.3.2
+Sat, 17 Feb 2018 02:53:49 GMT
+
+### Patches
+
+- Fix several bugs with the way that imports were being deduplicated by the packageTypings feature
 
 ## 5.3.1
 Fri, 16 Feb 2018 22:05:23 GMT
