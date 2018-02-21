@@ -26,13 +26,13 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-core-library": "0.6.1",
+    "@microsoft/node-core-library": "0.7.0",
     "@microsoft/rush-lib": "4.2.5",
     "fs-extra": "~0.26.7",
     "semver": "~5.3.0"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "4.3.13",
+    "@microsoft/node-library-build": "4.3.14",
     "@types/chai": "3.4.34",
     "@types/fs-extra": "0.0.37",
     "@types/mocha": "2.2.38",
