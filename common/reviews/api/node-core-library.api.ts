@@ -71,6 +71,6 @@ class PackageJsonLookup {
 
 // @public
 class Path {
-  static isUnder(childPath: string, parentPath: string): boolean;
+  static isUnder(childPath: string, parentFolderPath: string): boolean;
 }
 
