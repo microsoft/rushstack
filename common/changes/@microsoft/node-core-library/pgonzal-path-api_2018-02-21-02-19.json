@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/node-core-library",
-      "comment": "Add Path.isUnder() API",
+      "comment": "Add \"Path.isUnder()\" API",
       "type": "minor"
     }
   ],

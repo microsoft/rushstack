@@ -16,6 +16,8 @@ describe('Path', () => {
       assert.isFalse(Path.isUnder('C:\\a\\b.txt', 'C:\\b'), '4');
       assert.isFalse(Path.isUnder('C:\\a\\b.txt', 'C:\\b\\'), '5');
       assert.isFalse(Path.isUnder('C:\\a\\b\\c.txt', 'C:\\b'), '6');
+
+      assert.isFalse(Path.isUnder('C:\\a\\b.txt', 'D:\\a'), '7');
     });
     it('Unix paths', () => {
       assert.isTrue(Path.isUnder('/a/b.txt', '/a'), '1');
@@ -30,6 +32,15 @@ describe('Path', () => {
       assert.isFalse(Path.isUnder('/a', '/a'), '1');
       assert.isFalse(Path.isUnder('.', '.'), '2');
       assert.isFalse(Path.isUnder('', ''), '3');
+    });
+    it('Relative paths', () => {
+      assert.isTrue(Path.isUnder('a/b/c', 'a/b'), '1');
+      assert.isTrue(Path.isUnder('./a/b/c', './a/b'), '2');
+      assert.isTrue(Path.isUnder('../a/b/c', '../a/b'), '3');
+
+      assert.isFalse(Path.isUnder('a/b', 'a/b/c'), '4');
+      assert.isFalse(Path.isUnder('./a/b', './a/b/c'), '5');
+      assert.isFalse(Path.isUnder('../a/b', '../a/b/c'), '6');
     });
   });
 });

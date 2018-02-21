@@ -7,6 +7,7 @@ import {
   getPackageDeps,
   IPackageDeps
 } from '@microsoft/package-deps-hash';
+import { Path } from '@microsoft/node-core-library';
 
 import RushConfiguration from '../../data/RushConfiguration';
 import { RushConstants } from '../../RushConstants';
@@ -148,9 +149,6 @@ export class PackageChangeAnalyzer {
   }
 
   private _fileExistsInFolder(filePath: string, folderPath: string): boolean {
-    const relativePath: string = path.relative(folderPath, filePath);
-
-    // if the file exists in the folder, relativePath will not start with ".."
-    return relativePath.split(path.sep)[0] !== '..';
+    return Path.isUnder(filePath, folderPath);
   }
 }
