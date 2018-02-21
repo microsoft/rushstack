@@ -2,6 +2,18 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "0.7.0",
+      "tag": "@microsoft/node-core-library_v0.7.0",
+      "date": "Wed, 21 Feb 2018 03:13:28 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add \"Path.isUnder()\" API"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.1",
       "tag": "@microsoft/node-core-library_v0.6.1",
       "date": "Sat, 17 Feb 2018 02:53:49 GMT",
