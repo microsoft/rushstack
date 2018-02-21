@@ -23,3 +23,4 @@ export { PackageJsonLookup } from './PackageJsonLookup';
 export {
   LockFile
 } from './LockFile';
+export { Path } from './Path';

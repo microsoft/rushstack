@@ -69,3 +69,8 @@ class PackageJsonLookup {
   tryGetPackageFolder(sourceFilePath: string): string | undefined;
 }
 
+// @public
+class Path {
+  static isUnder(childPath: string, parentFolderPath: string): boolean;
+}
+
