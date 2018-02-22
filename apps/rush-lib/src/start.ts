@@ -4,20 +4,28 @@
 import * as colors from 'colors';
 import * as semver from 'semver';
 
-// check to ensure that we are using a supported version of NodeJS, otherwise write a warning
-if (semver.satisfies(process.versions.node, '< 6.0.0')) {
-  console.error(colors.red(`You are using an outdated version of Node ("${process.versions.node}").`
-    + ` You should upgrade to Node 6 or Node 8.`));
+const nodeVersion: string = process.versions.node;
+
+// We are on an ancient version of NodeJS that is known not to work with Rush
+if (semver.satisfies(nodeVersion, '<= 6.4.0')) {
+  console.error(colors.red(`Your version of Node.js (${nodeVersion}) is very old and incompatible with Rush.`
+    + ` Please upgrade to the latest Long-Term Support (LTS) version.`));
   process.exit(1);
-} else if (semver.satisfies(process.versions.node, '<= 6.4.0')) {
-  console.warn(colors.yellow(`You are using an outdated version of Node ("${process.versions.node}").`
-    + ` You should upgrade to Node >=6.5.0 or Node 8, as some Rush features may not work.`));
-} else if (semver.satisfies(process.versions.node, '^7.0.0')) {
-  console.warn(colors.yellow(`You are using a non-LTS version of Node ("${process.versions.node}").`
-    + ` You should consider upgrading to Node 8 or downgrading to Node 6, as some Rush features may not work.`));
-} else if (semver.satisfies(process.versions.node, '^9.0.0')) {
-  console.warn(colors.yellow(`You are using a new, non-LTS version of Node ("${process.versions.node}").`
-    + ` You should consider downgrading to Node 8, as some Rush features may not work.`));
+}
+
+// We are on a much newer release than we have tested and support
+else if (semver.satisfies(nodeVersion, '>=9.0.0')) {
+  console.warn(colors.yellow(`Your version of Node.js (${nodeVersion}) has not been tested with this release of Rush.`
+    + ` The Rush team will not accept issue reports for it.`
+    + ` Please consider upgrading Rush or downgrading Node.js.`));
+}
+
+// We are not on an LTS release
+else if (!semver.satisfies(nodeVersion, '^6.9.0')
+      && !semver.satisfies(nodeVersion, '^8.9.0')) {
+  console.warn(colors.yellow(`Your version of Node.js (${nodeVersion}) is not a Long-Term Support (LTS) release.`
+    + ` These versions frequently contain bugs, and the Rush team will not accept issue reports for them.`
+    + ` Please consider installing a stable release.`));
 }
 
 import Rush from './Rush';
