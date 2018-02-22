@@ -17,6 +17,10 @@
     "type": "git",
     "url": "https://github.com/microsoft/web-build-tools"
   },
+  "engines": {
+    "node": ">=5.6.0"
+  },
+  "engineStrict": true,
   "homepage": "http://aka.ms/rush",
   "scripts": {
     "build": "gulp test --clean"
