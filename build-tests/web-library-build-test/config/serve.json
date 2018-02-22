@@ -1,0 +1,7 @@
+{
+  "$schema": "https://dev.office.com/json-schemas/spfx-build/spfx-serve.schema.json",
+  "port": 4321,
+  "initialPage": "https://localhost:5432/workbench",
+  "https": true,
+  "tryCreateDevCertificate": true
+}
