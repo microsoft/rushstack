@@ -2,6 +2,29 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "4.7.13",
+      "tag": "@microsoft/gulp-core-build-typescript_v4.7.13",
+      "date": "Wed, 21 Feb 2018 22:04:19 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the line number for typescript errors were off by one."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.3.3` to `5.3.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.6.5` to `3.6.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.7.0` to `0.7.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.7.12",
       "tag": "@microsoft/gulp-core-build-typescript_v4.7.12",
       "date": "Wed, 21 Feb 2018 03:13:28 GMT",
