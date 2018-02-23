@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-serve",
   "entries": [
     {
+      "version": "3.2.17",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.17",
+      "date": "Fri, 23 Feb 2018 17:04:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade gulp-connect in order to remove the HTTP2/HTTPS workaround ."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.16",
       "tag": "@microsoft/gulp-core-build-serve_v3.2.16",
       "date": "Wed, 21 Feb 2018 22:04:19 GMT",

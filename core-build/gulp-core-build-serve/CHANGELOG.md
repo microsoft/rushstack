@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-serve
 
-This log was last generated on Wed, 21 Feb 2018 22:04:19 GMT and should not be manually modified.
+This log was last generated on Fri, 23 Feb 2018 17:04:33 GMT and should not be manually modified.
+
+## 3.2.17
+Fri, 23 Feb 2018 17:04:33 GMT
+
+### Patches
+
+- Upgrade gulp-connect in order to remove the HTTP2/HTTPS workaround .
 
 ## 3.2.16
 Wed, 21 Feb 2018 22:04:19 GMT
