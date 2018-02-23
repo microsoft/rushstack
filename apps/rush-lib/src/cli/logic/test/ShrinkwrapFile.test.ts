@@ -26,7 +26,7 @@ describe('npm ShrinkwrapFile', () => {
   it('extracts temp projects successfully', () => {
     const tempProjectNames: ReadonlyArray<string> = shrinkwrapFile.getTempProjectNames();
 
-    assert.deepEqual(tempProjectNames, ['@rush-temp/project1', '@rush-temp/project2']);
+    assert.deepEqual(tempProjectNames, ['@rush-temp/project1', '@rush-temp/project2' ]);
   });
 });
 
@@ -36,7 +36,6 @@ const filename: string = path.resolve(path.join(
 const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
 
   it('verifies root-level dependency', () => {
-    assert.isTrue(shrinkwrapFile.hasCompatibleTopLevelDependency('jquery', '>=2.0.0 <3.0.0'));
     assert.isFalse(shrinkwrapFile.hasCompatibleTopLevelDependency('q', '~1.5.0'));
   });
 
@@ -49,7 +48,11 @@ const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFi
   it('extracts temp projects successfully', () => {
     const tempProjectNames: ReadonlyArray<string> = shrinkwrapFile.getTempProjectNames();
 
-    assert.deepEqual(tempProjectNames, ['@rush-temp/project1', '@rush-temp/project2']);
+    assert.deepEqual(tempProjectNames, ['@rush-temp/project1', '@rush-temp/project2', '@rush-temp/project3']);
+  });
+
+  it('can reuse the latest version that another temp package is providing', () => {
+    assert.isTrue(shrinkwrapFile.hasCompatibleDependency('jquery', '>=2.0.0 <3.0.0', '@rush-temp/project3'));
   });
 });
 

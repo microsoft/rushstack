@@ -1,6 +1,7 @@
 import * as fsx from 'fs-extra';
 import * as yaml from 'js-yaml';
 import * as os from 'os';
+import * as semver from 'semver';
 
 import Utilities from '../../../utilities/Utilities';
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
@@ -124,9 +125,12 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
   /**
    * abstract
-   * Gets the resolved version number of a dependency for a specific temp project
+   * Gets the resolved version number of a dependency for a specific temp project.
+   * For PNPM, we can reuse the version that another project is using
    */
-  protected getDependencyVersion(dependencyName: string, tempProjectName: string): string | undefined {
+  protected getDependencyVersion(dependencyName: string,
+    tempProjectName: string,
+    checkOtherProjects: boolean = true): string | undefined {
     // PNPM doesn't have the same advantage of NPM, where we can skip generate as long as the
     // shrinkwrap file puts our dependency in either the top of the node_modules folder
     // or underneath the package we are looking at.
@@ -147,6 +151,26 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
 
     if (!packageDescription.dependencies.hasOwnProperty(dependencyName)) {
+      if (checkOtherProjects) {
+        // this means the current temp project doesn't provide this dependency,
+        // however, we may be able to use a different version. we prefer the latest version
+        const minimumVersion: string = '0.0.0';
+        let latestVersion: string = minimumVersion;
+
+        this.getTempProjectNames().forEach((otherTempProject: string) => {
+          const otherVersion: string | undefined = this.getDependencyVersion(dependencyName, otherTempProject, false);
+          if (otherVersion) {
+            if (semver.gt(otherVersion, latestVersion)) {
+              latestVersion = otherVersion;
+            }
+          }
+        });
+
+        if (latestVersion !== '0.0.0') {
+          return latestVersion;
+        }
+      }
+
       return undefined;
     }
 
