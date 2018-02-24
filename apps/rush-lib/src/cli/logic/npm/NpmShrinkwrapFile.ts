@@ -2,6 +2,10 @@ import * as fsx from 'fs-extra';
 import * as os from 'os';
 
 import {
+  JsonFile
+} from '@microsoft/node-core-library';
+
+import {
   BaseShrinkwrapFile
 } from '../base/BaseShrinkwrapFile';
 
@@ -46,11 +50,11 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   protected serialize(): string {
-    return JSON.stringify(this._shrinkwrapJson, undefined, 2);
+    return JsonFile.stringify(this._shrinkwrapJson);
   }
 
   protected getTopLevelDependencyVersion(dependencyName: string): string | undefined {
-    return this.tryEnsureDependencyVersion(dependencyName);
+    return this.tryEnsureDependencyVersion(dependencyName, undefined, undefined);
   }
 
   /**
@@ -70,7 +74,9 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
    * In this example, hasCompatibleDependency("lib-b", ">= 1.1.0", "temp-project") would fail
    * because it finds lib-b@1.0.0 which does not satisfy the pattern ">= 1.1.0".
    */
-  protected tryEnsureDependencyVersion(dependencyName: string, tempProjectName?: string): string | undefined {
+  protected tryEnsureDependencyVersion(dependencyName: string,
+    tempProjectName: string | undefined,
+    versionRange: string | undefined): string | undefined {
 
     // First, check under tempProjectName, as this is the first place "rush link" looks.
     let dependencyJson: IShrinkwrapDependencyJson | undefined = undefined;

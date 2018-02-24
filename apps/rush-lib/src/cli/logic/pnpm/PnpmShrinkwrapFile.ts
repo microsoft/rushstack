@@ -141,7 +141,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    */
   protected tryEnsureDependencyVersion(dependencyName: string,
     tempProjectName: string,
-    checkOtherProjects: boolean = true): string | undefined {
+    versionRange: string | undefined): string | undefined {
     // PNPM doesn't have the same advantage of NPM, where we can skip generate as long as the
     // shrinkwrap file puts our dependency in either the top of the node_modules folder
     // or underneath the package we are looking at.
@@ -162,7 +162,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
 
     if (!packageDescription.dependencies.hasOwnProperty(dependencyName)) {
-      if (checkOtherProjects) {
+      if (versionRange) {
         // this means the current temp project doesn't provide this dependency,
         // however, we may be able to use a different version. we prefer the latest version
         const minimumVersion: string = '0.0.0';
@@ -170,8 +170,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
         this.getTempProjectNames().forEach((otherTempProject: string) => {
           const otherVersion: string | undefined =
-            this.tryEnsureDependencyVersion(dependencyName, otherTempProject, false);
-          if (otherVersion) {
+            this.tryEnsureDependencyVersion(dependencyName, otherTempProject, undefined);
+          if (otherVersion && semver.satisfies(otherVersion, versionRange)) {
             if (semver.gt(otherVersion, latestVersion)) {
               latestVersion = otherVersion;
             }
@@ -180,7 +180,11 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
         if (latestVersion !== '0.0.0') {
           // go ahead and fixup the shrinkwrap file to point at this
-          this._shrinkwrapJson.packages[tempProjectDependencyKey].dependencies[dependencyName] = latestVersion;
+          const dependencies: { [key: string]: string } | undefined =
+            this._shrinkwrapJson.packages[tempProjectDependencyKey].dependencies || {};
+          dependencies[dependencyName] = latestVersion;
+          this._shrinkwrapJson.packages[tempProjectDependencyKey].dependencies = dependencies;
+
           return latestVersion;
         }
       }
