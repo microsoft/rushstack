@@ -45,6 +45,10 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
     return this._getTempProjectNames(this._shrinkwrapJson.dependencies);
   }
 
+  protected serialize(): string {
+    return JSON.stringify(this._shrinkwrapJson, undefined, 2);
+  }
+
   protected getTopLevelDependencyVersion(dependencyName: string): string | undefined {
     return this.getDependencyVersion(dependencyName);
   }

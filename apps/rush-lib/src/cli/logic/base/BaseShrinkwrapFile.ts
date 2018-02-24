@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as colors from 'colors';
+import * as fsx from 'fs-extra';
 import * as semver from 'semver';
 import npmPackageArg = require('npm-package-arg');
 
@@ -19,6 +20,13 @@ export abstract class BaseShrinkwrapFile {
       return dictionary[key];
     }
     return undefined;
+  }
+
+  /**
+   * Serializes and saves the shrinkwrap file to specified location
+   */
+  public save(filePath: string): void {
+    fsx.writeFileSync(filePath, this.serialize());
   }
 
   /**
@@ -56,6 +64,7 @@ export abstract class BaseShrinkwrapFile {
 
   protected abstract getDependencyVersion(dependencyName: string, tempProjectName?: string): string | undefined;
   protected abstract getTopLevelDependencyVersion(dependencyName: string): string | undefined;
+  protected abstract serialize(): string;
 
   protected _getTempProjectNames(dependencies: { [key: string]: {} } ): ReadonlyArray<string> {
     const result: string[] = [];

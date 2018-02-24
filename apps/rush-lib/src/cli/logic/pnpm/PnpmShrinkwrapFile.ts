@@ -116,6 +116,16 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
   /**
    * abstract
+   * Serializes the PNPM Shrinkwrap file
+   */
+  protected serialize(): string {
+    return yaml.safeDump(this._shrinkwrapJson, {
+      sortKeys: true
+    });
+  }
+
+  /**
+   * abstract
    * Gets the version number from the list of top-level dependencies in the "dependencies" section
    * of the shrinkwrap file
    */
@@ -126,7 +136,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   /**
    * abstract
    * Gets the resolved version number of a dependency for a specific temp project.
-   * For PNPM, we can reuse the version that another project is using
+   * For PNPM, we can reuse the version that another project is using.
+   * Note that this function modifies the shrinkwrap data.
    */
   protected getDependencyVersion(dependencyName: string,
     tempProjectName: string,
@@ -167,6 +178,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         });
 
         if (latestVersion !== '0.0.0') {
+          // go ahead and fixup the shrinkwrap file to point at this
+          this._shrinkwrapJson.packages[tempProjectDependencyKey].dependencies[dependencyName] = latestVersion;
           return latestVersion;
         }
       }
