@@ -386,7 +386,7 @@ export default class InstallManager {
         tempPackageJson.dependencies![pair.packageName] = pair.packageVersion;
 
         if (shrinkwrapFile) {
-          if (!shrinkwrapFile.hasCompatibleDependency(pair.packageName, pair.packageVersion,
+          if (!shrinkwrapFile.tryEnsureCompatibleDependency(pair.packageName, pair.packageVersion,
             rushProject.tempProjectName)) {
             console.log(colors.yellow(
               wrap(`${os.EOL}The NPM shrinkwrap file is missing "${pair.packageName}"`

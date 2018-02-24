@@ -47,8 +47,8 @@ export abstract class BaseShrinkwrapFile {
    * Returns true if the shrinkwrap file includes a package that would satisfiying the specified
    * package name and SemVer version range for a given temp project.
    */
-  public hasCompatibleDependency(dependencyName: string, versionRange: string, tempProjectName: string): boolean {
-    const dependencyVersion: string | undefined = this.getDependencyVersion(dependencyName, tempProjectName);
+  public tryEnsureCompatibleDependency(dependencyName: string, versionRange: string, tempProjectName: string): boolean {
+    const dependencyVersion: string | undefined = this.tryEnsureDependencyVersion(dependencyName, tempProjectName);
     if (!dependencyVersion) {
       return false;
     }
@@ -62,7 +62,7 @@ export abstract class BaseShrinkwrapFile {
    */
   public abstract getTempProjectNames(): ReadonlyArray<string>;
 
-  protected abstract getDependencyVersion(dependencyName: string, tempProjectName?: string): string | undefined;
+  protected abstract tryEnsureDependencyVersion(dependencyName: string, tempProjectName?: string): string | undefined;
   protected abstract getTopLevelDependencyVersion(dependencyName: string): string | undefined;
   protected abstract serialize(): string;
 

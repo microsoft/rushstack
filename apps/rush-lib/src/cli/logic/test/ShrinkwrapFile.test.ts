@@ -18,9 +18,9 @@ describe('npm ShrinkwrapFile', () => {
 
   it('verifies temp project dependencies', () => {
     // Found locally
-    assert.isTrue(shrinkwrapFile.hasCompatibleDependency('jquery', '>=2.2.4 <3.0.0', '@rush-temp/project2'));
+    assert.isTrue(shrinkwrapFile.tryEnsureCompatibleDependency('jquery', '>=2.2.4 <3.0.0', '@rush-temp/project2'));
     // Found at root
-    assert.isTrue(shrinkwrapFile.hasCompatibleDependency('q', '~1.5.0', '@rush-temp/project2'));
+    assert.isTrue(shrinkwrapFile.tryEnsureCompatibleDependency('q', '~1.5.0', '@rush-temp/project2'));
   });
 
   it('extracts temp projects successfully', () => {
@@ -40,9 +40,9 @@ const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFi
   });
 
   it('verifies temp project dependencies', () => {
-    assert.isTrue(shrinkwrapFile.hasCompatibleDependency('jquery', '>=2.0.0 <3.0.0', '@rush-temp/project1'));
-    assert.isTrue(shrinkwrapFile.hasCompatibleDependency('q', '~1.5.0', '@rush-temp/project2'));
-    assert.isFalse(shrinkwrapFile.hasCompatibleDependency('left-pad', '~9.9.9', '@rush-temp/project1'));
+    assert.isTrue(shrinkwrapFile.tryEnsureCompatibleDependency('jquery', '>=2.0.0 <3.0.0', '@rush-temp/project1'));
+    assert.isTrue(shrinkwrapFile.tryEnsureCompatibleDependency('q', '~1.5.0', '@rush-temp/project2'));
+    assert.isFalse(shrinkwrapFile.tryEnsureCompatibleDependency('left-pad', '~9.9.9', '@rush-temp/project1'));
   });
 
   it('extracts temp projects successfully', () => {
@@ -52,7 +52,7 @@ const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFi
   });
 
   it('can reuse the latest version that another temp package is providing', () => {
-    assert.isTrue(shrinkwrapFile.hasCompatibleDependency('jquery', '>=2.0.0 <3.0.0', '@rush-temp/project3'));
+    assert.isTrue(shrinkwrapFile.tryEnsureCompatibleDependency('jquery', '>=2.0.0 <3.0.0', '@rush-temp/project3'));
   });
 });
 

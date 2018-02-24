@@ -139,7 +139,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    * For PNPM, we can reuse the version that another project is using.
    * Note that this function modifies the shrinkwrap data.
    */
-  protected getDependencyVersion(dependencyName: string,
+  protected tryEnsureDependencyVersion(dependencyName: string,
     tempProjectName: string,
     checkOtherProjects: boolean = true): string | undefined {
     // PNPM doesn't have the same advantage of NPM, where we can skip generate as long as the
@@ -169,7 +169,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         let latestVersion: string = minimumVersion;
 
         this.getTempProjectNames().forEach((otherTempProject: string) => {
-          const otherVersion: string | undefined = this.getDependencyVersion(dependencyName, otherTempProject, false);
+          const otherVersion: string | undefined =
+            this.tryEnsureDependencyVersion(dependencyName, otherTempProject, false);
           if (otherVersion) {
             if (semver.gt(otherVersion, latestVersion)) {
               latestVersion = otherVersion;

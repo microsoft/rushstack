@@ -50,7 +50,7 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   protected getTopLevelDependencyVersion(dependencyName: string): string | undefined {
-    return this.getDependencyVersion(dependencyName);
+    return this.tryEnsureDependencyVersion(dependencyName);
   }
 
   /**
@@ -70,7 +70,7 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
    * In this example, hasCompatibleDependency("lib-b", ">= 1.1.0", "temp-project") would fail
    * because it finds lib-b@1.0.0 which does not satisfy the pattern ">= 1.1.0".
    */
-  protected getDependencyVersion(dependencyName: string, tempProjectName?: string): string | undefined {
+  protected tryEnsureDependencyVersion(dependencyName: string, tempProjectName?: string): string | undefined {
 
     // First, check under tempProjectName, as this is the first place "rush link" looks.
     let dependencyJson: IShrinkwrapDependencyJson | undefined = undefined;
