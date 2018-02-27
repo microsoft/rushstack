@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-sass",
-  "version": "4.2.17",
+  "version": "4.2.18",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -13,8 +13,8 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.6.6",
-    "@microsoft/load-themed-styles": "1.7.34",
+    "@microsoft/gulp-core-build": "3.6.7",
+    "@microsoft/load-themed-styles": "1.7.35",
     "@types/node": "8.5.8",
     "autoprefixer": "6.3.7",
     "gulp": "~3.9.1",
