@@ -115,7 +115,6 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /**
-   * abstract
    * Serializes the PNPM Shrinkwrap file
    */
   protected serialize(): string {
@@ -125,7 +124,6 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /**
-   * abstract
    * Gets the version number from the list of top-level dependencies in the "dependencies" section
    * of the shrinkwrap file
    */
@@ -134,13 +132,12 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /**
-   * abstract
    * Gets the resolved version number of a dependency for a specific temp project.
    * For PNPM, we can reuse the version that another project is using.
    * Note that this function modifies the shrinkwrap data.
    */
   protected tryEnsureDependencyVersion(dependencyName: string,
-    tempProjectName: string,
+    tempProjectName: string | undefined,
     versionRange: string | undefined): string | undefined {
     // PNPM doesn't have the same advantage of NPM, where we can skip generate as long as the
     // shrinkwrap file puts our dependency in either the top of the node_modules folder
@@ -149,6 +146,12 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     // to recreate the graph..
     // Because of this, we actually need to check for a version that this package is directly
     // linked to.
+
+    // this is an unexpected state
+    if (!tempProjectName) {
+      throw new Error(`Program Bug: PNPM tryEnsureDependencyVersion() requires a tempProjectName`);
+    }
+
 
     // Example: "project1"
     const unscopedTempProjectName: string = Utilities.parseScopedPackageName(tempProjectName).name;
@@ -165,20 +168,19 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       if (versionRange) {
         // this means the current temp project doesn't provide this dependency,
         // however, we may be able to use a different version. we prefer the latest version
-        const minimumVersion: string = '0.0.0';
-        let latestVersion: string = minimumVersion;
+        let latestVersion: string | undefined = undefined;
 
         this.getTempProjectNames().forEach((otherTempProject: string) => {
           const otherVersion: string | undefined =
             this.tryEnsureDependencyVersion(dependencyName, otherTempProject, undefined);
           if (otherVersion && semver.satisfies(otherVersion, versionRange)) {
-            if (semver.gt(otherVersion, latestVersion)) {
+            if (!latestVersion || semver.gt(otherVersion, latestVersion)) {
               latestVersion = otherVersion;
             }
           }
         });
 
-        if (latestVersion !== '0.0.0') {
+        if (latestVersion) {
           // go ahead and fixup the shrinkwrap file to point at this
           const dependencies: { [key: string]: string } | undefined =
             this._shrinkwrapJson.packages[tempProjectDependencyKey].dependencies || {};

@@ -58,21 +58,9 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /**
-   * Returns true if the shrinkwrap file includes a package that would satisfiying the specified
-   * package name and SemVer version range.  By default, the dependencies are resolved by looking
-   * at the root of the node_modules folder described by the shrinkwrap file.  However, if
-   * tempProjectName is specified, then the resolution will start in that subfolder.
-   *
-   * Consider this example:
-   *
-   * - node_modules\
-   *   - temp-project\
-   *     - lib-a@1.2.3
-   *     - lib-b@1.0.0
-   *   - lib-b@2.0.0
-   *
-   * In this example, hasCompatibleDependency("lib-b", ">= 1.1.0", "temp-project") would fail
-   * because it finds lib-b@1.0.0 which does not satisfy the pattern ">= 1.1.0".
+   * @param dependencyName the name of the dependency to get a version for
+   * @param tempProjectName the name of the temp project to check for this dependency
+   * @param versionRange Not used, just exists to satisfy abstract API contract
    */
   protected tryEnsureDependencyVersion(dependencyName: string,
     tempProjectName: string | undefined,
