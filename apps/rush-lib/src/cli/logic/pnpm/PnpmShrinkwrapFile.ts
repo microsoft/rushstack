@@ -152,7 +152,6 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       throw new Error(`Program Bug: PNPM tryEnsureDependencyVersion() requires a tempProjectName`);
     }
 
-
     // Example: "project1"
     const unscopedTempProjectName: string = Utilities.parseScopedPackageName(tempProjectName).name;
     const tempProjectDependencyKey: string = `file:projects/${unscopedTempProjectName}.tgz`;
