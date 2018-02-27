@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-karma
 
-This log was last generated on Wed, 21 Feb 2018 22:04:19 GMT and should not be manually modified.
+This log was last generated on Tue, 27 Feb 2018 22:05:56 GMT and should not be manually modified.
+
+## 4.4.16
+Tue, 27 Feb 2018 22:05:56 GMT
+
+### Patches
+
+- Pin karma-webpack to 3.0.9, since the latest 3.0.12 has an issue with a missing dependency in package.json, which causes pnpm installs to fail.
 
 ## 4.4.15
 Wed, 21 Feb 2018 22:04:19 GMT

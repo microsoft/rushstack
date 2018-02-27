@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Wed, 21 Feb 2018 22:04:19 GMT and should not be manually modified.
+This log was last generated on Tue, 27 Feb 2018 22:05:57 GMT and should not be manually modified.
+
+## 0.7.2
+Tue, 27 Feb 2018 22:05:57 GMT
+
+### Patches
+
+- Fix an issue where the LockFile was unable to acquire the lock if the resource dir doesn't exist.
 
 ## 0.7.1
 Wed, 21 Feb 2018 22:04:19 GMT

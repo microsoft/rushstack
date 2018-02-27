@@ -2,6 +2,18 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "0.7.2",
+      "tag": "@microsoft/node-core-library_v0.7.2",
+      "date": "Tue, 27 Feb 2018 22:05:57 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the LockFile was unable to acquire the lock if the resource dir doesn't exist."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.1",
       "tag": "@microsoft/node-core-library_v0.7.1",
       "date": "Wed, 21 Feb 2018 22:04:19 GMT",
