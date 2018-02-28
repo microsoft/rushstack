@@ -268,11 +268,6 @@ export default class InstallManager {
       }
     }
 
-    // Either way, resync the temporary shrinkwrap file.
-    // Copy (or delete) common\npm-shrinkwrap.json --> common\temp\npm-shrinkwrap.json
-    this.syncFile(this._rushConfiguration.committedShrinkwrapFilename,
-      this._rushConfiguration.tempShrinkwrapFilename);
-
     // Also copy down the committed .npmrc file, if there is one
     // "common\config\rush\.npmrc" --> "common\temp\.npmrc"
     const committedNpmrcPath: string = path.join(this._rushConfiguration.commonRushConfigFolder, '.npmrc');
@@ -391,7 +386,7 @@ export default class InstallManager {
         tempPackageJson.dependencies![pair.packageName] = pair.packageVersion;
 
         if (shrinkwrapFile) {
-          if (!shrinkwrapFile.hasCompatibleDependency(pair.packageName, pair.packageVersion,
+          if (!shrinkwrapFile.tryEnsureCompatibleDependency(pair.packageName, pair.packageVersion,
             rushProject.tempProjectName)) {
             console.log(colors.yellow(
               wrap(`${os.EOL}The NPM shrinkwrap file is missing "${pair.packageName}"`
@@ -468,6 +463,14 @@ export default class InstallManager {
     // Example: "C:\MyRepo\common\temp\package.json"
     const commonPackageJsonFilename: string = path.join(this._rushConfiguration.commonTempFolder,
       RushConstants.packageJsonFilename);
+
+    if (shrinkwrapFile) {
+      // Resync the temporary shrinkwrap file.
+      // Copy (or delete) common\npm-shrinkwrap.json --> common\temp\npm-shrinkwrap.json
+      shrinkwrapFile.save(this._rushConfiguration.tempShrinkwrapFilename);
+    } else {
+      fsx.removeSync(this._rushConfiguration.tempShrinkwrapFilename);
+    }
 
     // Don't update the file timestamp unless the content has changed, since "rush install"
     // will consider this timestamp

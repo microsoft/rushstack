@@ -2,6 +2,10 @@ import * as fsx from 'fs-extra';
 import * as os from 'os';
 
 import {
+  JsonFile
+} from '@microsoft/node-core-library';
+
+import {
   BaseShrinkwrapFile
 } from '../base/BaseShrinkwrapFile';
 
@@ -45,47 +49,43 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
     return this._getTempProjectNames(this._shrinkwrapJson.dependencies);
   }
 
+  protected serialize(): string {
+    return JsonFile.stringify(this._shrinkwrapJson);
+  }
+
   protected getTopLevelDependencyVersion(dependencyName: string): string | undefined {
-    return this.getDependencyVersion(dependencyName);
+     // First, check under tempProjectName, as this is the first place "rush link" looks.
+    const dependencyJson: IShrinkwrapDependencyJson | undefined =
+      NpmShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
+
+     if (!dependencyJson) {
+       return undefined;
+     }
+
+     return dependencyJson.version;
   }
 
   /**
-   * Returns true if the shrinkwrap file includes a package that would satisfiying the specified
-   * package name and SemVer version range.  By default, the dependencies are resolved by looking
-   * at the root of the node_modules folder described by the shrinkwrap file.  However, if
-   * tempProjectName is specified, then the resolution will start in that subfolder.
-   *
-   * Consider this example:
-   *
-   * - node_modules\
-   *   - temp-project\
-   *     - lib-a@1.2.3
-   *     - lib-b@1.0.0
-   *   - lib-b@2.0.0
-   *
-   * In this example, hasCompatibleDependency("lib-b", ">= 1.1.0", "temp-project") would fail
-   * because it finds lib-b@1.0.0 which does not satisfy the pattern ">= 1.1.0".
+   * @param dependencyName the name of the dependency to get a version for
+   * @param tempProjectName the name of the temp project to check for this dependency
+   * @param versionRange Not used, just exists to satisfy abstract API contract
    */
-  protected getDependencyVersion(dependencyName: string, tempProjectName?: string): string | undefined {
+  protected tryEnsureDependencyVersion(dependencyName: string,
+    tempProjectName: string,
+    versionRange: string): string | undefined {
 
     // First, check under tempProjectName, as this is the first place "rush link" looks.
     let dependencyJson: IShrinkwrapDependencyJson | undefined = undefined;
 
-    if (tempProjectName) {
-      const tempDependency: IShrinkwrapDependencyJson | undefined = NpmShrinkwrapFile.tryGetValue(
-        this._shrinkwrapJson.dependencies, tempProjectName);
-      if (tempDependency && tempDependency.dependencies) {
-        dependencyJson = NpmShrinkwrapFile.tryGetValue(tempDependency.dependencies, dependencyName);
-      }
+    const tempDependency: IShrinkwrapDependencyJson | undefined = NpmShrinkwrapFile.tryGetValue(
+      this._shrinkwrapJson.dependencies, tempProjectName);
+    if (tempDependency && tempDependency.dependencies) {
+      dependencyJson = NpmShrinkwrapFile.tryGetValue(tempDependency.dependencies, dependencyName);
     }
 
     // Otherwise look at the root of the shrinkwrap file
     if (!dependencyJson) {
-      dependencyJson = NpmShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
-    }
-
-    if (!dependencyJson) {
-      return undefined;
+      return this.getTopLevelDependencyVersion(dependencyName);
     }
 
     return dependencyJson.version;

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as colors from 'colors';
+import * as fsx from 'fs-extra';
 import * as semver from 'semver';
 import npmPackageArg = require('npm-package-arg');
 
@@ -22,6 +23,13 @@ export abstract class BaseShrinkwrapFile {
   }
 
   /**
+   * Serializes and saves the shrinkwrap file to specified location
+   */
+  public save(filePath: string): void {
+    fsx.writeFileSync(filePath, this.serialize());
+  }
+
+  /**
    * Returns true if the shrinkwrap file includes a top-level package that would satisfy the specified
    * package name and SemVer version range
    */
@@ -37,10 +45,24 @@ export abstract class BaseShrinkwrapFile {
 
   /**
    * Returns true if the shrinkwrap file includes a package that would satisfiying the specified
-   * package name and SemVer version range for a given temp project.
+   * package name and SemVer version range.  By default, the dependencies are resolved by looking
+   * at the root of the node_modules folder described by the shrinkwrap file.  However, if
+   * tempProjectName is specified, then the resolution will start in that subfolder.
+   *
+   * Consider this example:
+   *
+   * - node_modules\
+   *   - temp-project\
+   *     - lib-a@1.2.3
+   *     - lib-b@1.0.0
+   *   - lib-b@2.0.0
+   *
+   * In this example, hasCompatibleDependency("lib-b", ">= 1.1.0", "temp-project") would fail
+   * because it finds lib-b@1.0.0 which does not satisfy the pattern ">= 1.1.0".
    */
-  public hasCompatibleDependency(dependencyName: string, versionRange: string, tempProjectName: string): boolean {
-    const dependencyVersion: string | undefined = this.getDependencyVersion(dependencyName, tempProjectName);
+  public tryEnsureCompatibleDependency(dependencyName: string, versionRange: string, tempProjectName: string): boolean {
+    const dependencyVersion: string | undefined =
+      this.tryEnsureDependencyVersion(dependencyName, tempProjectName, versionRange);
     if (!dependencyVersion) {
       return false;
     }
@@ -54,8 +76,10 @@ export abstract class BaseShrinkwrapFile {
    */
   public abstract getTempProjectNames(): ReadonlyArray<string>;
 
-  protected abstract getDependencyVersion(dependencyName: string, tempProjectName?: string): string | undefined;
+  protected abstract tryEnsureDependencyVersion(dependencyName: string,
+    tempProjectName: string, versionRange: string): string | undefined;
   protected abstract getTopLevelDependencyVersion(dependencyName: string): string | undefined;
+  protected abstract serialize(): string;
 
   protected _getTempProjectNames(dependencies: { [key: string]: {} } ): ReadonlyArray<string> {
     const result: string[] = [];
