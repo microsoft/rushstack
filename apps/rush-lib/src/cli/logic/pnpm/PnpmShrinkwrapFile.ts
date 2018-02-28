@@ -137,8 +137,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    * Note that this function modifies the shrinkwrap data.
    */
   protected tryEnsureDependencyVersion(dependencyName: string,
-    tempProjectName: string | undefined,
-    versionRange: string | undefined): string | undefined {
+    tempProjectName: string,
+    versionRange: string): string | undefined {
     // PNPM doesn't have the same advantage of NPM, where we can skip generate as long as the
     // shrinkwrap file puts our dependency in either the top of the node_modules folder
     // or underneath the package we are looking at.
@@ -147,19 +147,10 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     // Because of this, we actually need to check for a version that this package is directly
     // linked to.
 
-    // this is an unexpected state
-    if (!tempProjectName) {
-      throw new Error(`Program Bug: PNPM tryEnsureDependencyVersion() requires a tempProjectName`);
-    }
-
-    // Example: "project1"
-    const unscopedTempProjectName: string = Utilities.parseScopedPackageName(tempProjectName).name;
-    const tempProjectDependencyKey: string = `file:projects/${unscopedTempProjectName}.tgz`;
-
-    const packageDescription: IShrinkwrapDependencyJson | undefined
-      = BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.packages, tempProjectDependencyKey);
-
-    if (!packageDescription || !packageDescription.dependencies) {
+    const tempProjectDependencyKey: string = this._getTempProjectKey(tempProjectName);
+    const packageDescription: IShrinkwrapDependencyJson | undefined =
+      this._getPackageDescription(tempProjectDependencyKey);
+    if (!packageDescription) {
       return undefined;
     }
 
@@ -170,8 +161,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         let latestVersion: string | undefined = undefined;
 
         this.getTempProjectNames().forEach((otherTempProject: string) => {
-          const otherVersion: string | undefined =
-            this.tryEnsureDependencyVersion(dependencyName, otherTempProject, undefined);
+          const otherVersion: string | undefined = this._getDependencyVersion(dependencyName, otherTempProject);
           if (otherVersion && semver.satisfies(otherVersion, versionRange)) {
             if (!latestVersion || semver.gt(otherVersion, latestVersion)) {
               latestVersion = otherVersion;
@@ -193,7 +183,67 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       return undefined;
     }
 
-    const version: string = packageDescription.dependencies[dependencyName];
+    return this._normalizeDependencyVersion(dependencyName, packageDescription.dependencies[dependencyName]);
+  }
+
+  private constructor(shrinkwrapJson: IShrinkwrapYaml) {
+    super();
+    this._shrinkwrapJson = shrinkwrapJson;
+
+    // Normalize the data
+    if (!this._shrinkwrapJson.registry) {
+      this._shrinkwrapJson.registry = '';
+    }
+    if (!this._shrinkwrapJson.dependencies) {
+      this._shrinkwrapJson.dependencies = { };
+    }
+    if (!this._shrinkwrapJson.specifiers) {
+      this._shrinkwrapJson.specifiers = { };
+    }
+    if (!this._shrinkwrapJson.packages) {
+      this._shrinkwrapJson.packages = { };
+    }
+  }
+
+  /**
+   * Returns the version of a dependency being used by a given project
+   */
+  private _getDependencyVersion(dependencyName: string, tempProjectName: string): string | undefined {
+    const tempProjectDependencyKey: string = this._getTempProjectKey(tempProjectName);
+    const packageDescription: IShrinkwrapDependencyJson | undefined =
+      this._getPackageDescription(tempProjectDependencyKey);
+    if (!packageDescription) {
+      return undefined;
+    }
+
+    if (!packageDescription.dependencies.hasOwnProperty(dependencyName)) {
+      return undefined;
+    }
+
+    return this._normalizeDependencyVersion(dependencyName, packageDescription.dependencies[dependencyName]);
+  }
+
+  /**
+   * Gets the package description for a tempProject from the shrinkwrap file.
+   */
+  private _getPackageDescription(tempProjectDependencyKey: string): IShrinkwrapDependencyJson | undefined {
+    const packageDescription: IShrinkwrapDependencyJson | undefined
+      = BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.packages, tempProjectDependencyKey);
+
+    if (!packageDescription || !packageDescription.dependencies) {
+      return undefined;
+    }
+
+    return packageDescription;
+  }
+
+  private _getTempProjectKey(tempProjectName: string): string {
+    // Example: "project1"
+    const unscopedTempProjectName: string = Utilities.parseScopedPackageName(tempProjectName).name;
+    return `file:projects/${unscopedTempProjectName}.tgz`;
+  }
+
+  private _normalizeDependencyVersion(dependencyName: string, version: string): string | undefined {
     // version will be either:
     // A - the version (e.g. "0.0.5")
     // B - a peer dep version (e.g. "/gulp-karma/0.0.5/karma@0.13.22"
@@ -216,25 +266,6 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       return extractedVersion;
     } else {
       return undefined;
-    }
-  }
-
-  private constructor(shrinkwrapJson: IShrinkwrapYaml) {
-    super();
-    this._shrinkwrapJson = shrinkwrapJson;
-
-    // Normalize the data
-    if (!this._shrinkwrapJson.registry) {
-      this._shrinkwrapJson.registry = '';
-    }
-    if (!this._shrinkwrapJson.dependencies) {
-      this._shrinkwrapJson.dependencies = { };
-    }
-    if (!this._shrinkwrapJson.specifiers) {
-      this._shrinkwrapJson.specifiers = { };
-    }
-    if (!this._shrinkwrapJson.packages) {
-      this._shrinkwrapJson.packages = { };
     }
   }
 }

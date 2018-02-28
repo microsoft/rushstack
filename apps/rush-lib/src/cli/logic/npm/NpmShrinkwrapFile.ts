@@ -54,7 +54,15 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   protected getTopLevelDependencyVersion(dependencyName: string): string | undefined {
-    return this.tryEnsureDependencyVersion(dependencyName, undefined, undefined);
+     // First, check under tempProjectName, as this is the first place "rush link" looks.
+    const dependencyJson: IShrinkwrapDependencyJson | undefined =
+      NpmShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
+
+     if (!dependencyJson) {
+       return undefined;
+     }
+
+     return dependencyJson.version;
   }
 
   /**
@@ -63,27 +71,21 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
    * @param versionRange Not used, just exists to satisfy abstract API contract
    */
   protected tryEnsureDependencyVersion(dependencyName: string,
-    tempProjectName: string | undefined,
-    versionRange: string | undefined): string | undefined {
+    tempProjectName: string,
+    versionRange: string): string | undefined {
 
     // First, check under tempProjectName, as this is the first place "rush link" looks.
     let dependencyJson: IShrinkwrapDependencyJson | undefined = undefined;
 
-    if (tempProjectName) {
-      const tempDependency: IShrinkwrapDependencyJson | undefined = NpmShrinkwrapFile.tryGetValue(
-        this._shrinkwrapJson.dependencies, tempProjectName);
-      if (tempDependency && tempDependency.dependencies) {
-        dependencyJson = NpmShrinkwrapFile.tryGetValue(tempDependency.dependencies, dependencyName);
-      }
+    const tempDependency: IShrinkwrapDependencyJson | undefined = NpmShrinkwrapFile.tryGetValue(
+      this._shrinkwrapJson.dependencies, tempProjectName);
+    if (tempDependency && tempDependency.dependencies) {
+      dependencyJson = NpmShrinkwrapFile.tryGetValue(tempDependency.dependencies, dependencyName);
     }
 
     // Otherwise look at the root of the shrinkwrap file
     if (!dependencyJson) {
-      dependencyJson = NpmShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
-    }
-
-    if (!dependencyJson) {
-      return undefined;
+      return this.getTopLevelDependencyVersion(dependencyName);
     }
 
     return dependencyJson.version;
