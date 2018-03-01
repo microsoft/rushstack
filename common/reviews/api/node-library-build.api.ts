@@ -194,6 +194,12 @@ interface IJestConfig {
   testPathIgnorePatterns?: string[];
 }
 
+// @beta (undocumented)
+interface ILoggerOptions {
+  // (undocumented)
+  shouldRelogIssues: boolean;
+}
+
 // @public
 export function initialize(gulp: typeof Gulp): void;
 
@@ -276,6 +282,9 @@ class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   loadSchema(): Object;
   mergeConfig(config: ITypeScriptTaskConfig): void;
 }
+
+// @beta (undocumented)
+export function updateLoggerOptions(options: Partial<ILoggerOptions>): void;
 
 // @public
 class ValidateShrinkwrapTask extends GulpTask<void> {
