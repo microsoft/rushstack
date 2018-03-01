@@ -16,7 +16,7 @@ import { ApiDefinitionReference, IScopedPackageName } from '../ApiDefinitionRefe
  *
  * @see AstFunction for functions that are defined inside of a package
  */
-export  class AstMethod extends AstMember {
+export class AstMethod extends AstMember {
   public readonly returnType: string;
   public readonly params: AstParameter[];
 

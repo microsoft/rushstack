@@ -25,7 +25,7 @@ const allowedTypes: string[] = ['string', 'number', 'boolean'];
   * - We currently still recommend to use static classes for utility libraries, since this
   * provides getters/setters, public/private, and some other structure missing from namespaces.
   */
-export  class AstNamespace extends AstModule {
+export class AstNamespace extends AstModule {
   private _exportedNormalizedSymbols: IExportedSymbol[] = [];
 
   constructor(options: IAstItemOptions) {

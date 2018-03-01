@@ -6,7 +6,7 @@
 import * as ts from 'typescript';
 import { PrettyPrinter } from './PrettyPrinter';
 
-export  class TypeScriptHelpers {
+export class TypeScriptHelpers {
   /**
    * Splits on CRLF and other newline sequences
    */

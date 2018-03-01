@@ -14,7 +14,7 @@ import { Extractor } from './extractor/Extractor';
  *
  * @beta
  */
-export  class ExternalApiHelper {
+export class ExternalApiHelper {
 
   /**
    * @param rootDir - the absolute path containing a 'package.json' file and is also a parent of the

@@ -7,7 +7,7 @@ import { TypeScriptHelpers } from '../utils/TypeScriptHelpers';
 /**
  * Handles the tokenization of an AEDoc comment.
  */
-export  class Tokenizer {
+export class Tokenizer {
 
   /**
    * Match AEDoc block tags and inline tags

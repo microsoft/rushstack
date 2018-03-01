@@ -17,7 +17,7 @@ import { PrettyPrinter } from '../utils/PrettyPrinter';
   * This class is part of the AstItem abstract syntax tree.  It represents a class,
   * interface, or type literal expression.
   */
-export  class AstStructuredType extends AstItemContainer {
+export class AstStructuredType extends AstItemContainer {
   public implements?: string;
   public extends?: string;
 

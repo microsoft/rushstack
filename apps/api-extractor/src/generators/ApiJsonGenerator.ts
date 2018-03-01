@@ -37,7 +37,7 @@ import { ApiJsonFile } from '../api/ApiJsonFile';
  *
  * @public
  */
-export  class ApiJsonGenerator extends AstItemVisitor {
+export class ApiJsonGenerator extends AstItemVisitor {
   private static _methodCounter: number = 0;
   private static _MEMBERS_KEY: string = 'members';
   private static _EXPORTS_KEY: string = 'exports';

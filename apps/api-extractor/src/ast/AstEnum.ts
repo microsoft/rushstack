@@ -12,7 +12,7 @@ import { TypeScriptHelpers }  from '../utils/TypeScriptHelpers';
  * This class is part of the AstItem abstract syntax tree. It represents a TypeScript enum definition.
  * The individual enum values are represented using AstEnumValue.
  */
-export  class AstEnum extends AstItemContainer {
+export class AstEnum extends AstItemContainer {
   constructor(options: IAstItemOptions) {
     super(options);
     this.kind = AstItemKind.Enum;

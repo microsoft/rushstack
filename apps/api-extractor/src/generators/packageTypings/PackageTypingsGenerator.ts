@@ -13,7 +13,7 @@ import { Span } from '../../utils/Span';
 import { Entry } from './Entry';
 import { SymbolAnalyzer, IFollowAliasesResult } from './SymbolAnalyzer';
 
-export  class PackageTypingsGenerator {
+export class PackageTypingsGenerator {
   private _context: ExtractorContext;
   private _typeChecker: ts.TypeChecker;
   private _indentedWriter: IndentedWriter = new IndentedWriter();

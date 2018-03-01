@@ -14,7 +14,7 @@ import { IExportedSymbol } from './IExportedSymbol';
   * This class is part of the AstItem abstract syntax tree.  It represents the top-level
   * exports for an Rush package.  This object acts as the root of the Extractor's tree.
   */
-export  class AstPackage extends AstModule {
+export class AstPackage extends AstModule {
   private _exportedNormalizedSymbols: IExportedSymbol[] = [];
 
   private static _getOptions(context: ExtractorContext, rootFile: ts.SourceFile): IAstItemOptions {

@@ -40,7 +40,7 @@ export interface IAedocParameter {
   description: MarkupBasicElement[];
 }
 
-export  class ApiDocumentation {
+export class ApiDocumentation {
   /**
    * Match AEDoc block tags and inline tags
    * Example "@a @b@c d@e @f {whatever} {@link a} { @something } \@g" => ["@a", "@f", "{@link a}", "{ @something }"]

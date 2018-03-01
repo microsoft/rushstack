@@ -15,7 +15,7 @@ import { Tokenizer } from '../aedoc/Tokenizer';
 import { ResolvedApiItem } from '../ResolvedApiItem';
 import { IApiItemReference} from '../api/ApiItem';
 
-export  class DocElementParser {
+export class DocElementParser {
   /**
    * Used to validate the display text for an \@link tag.  The display text can contain any
    * characters except for certain AEDoc delimiters: "@", "|", "{", "}".

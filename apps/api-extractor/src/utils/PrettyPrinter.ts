@@ -10,7 +10,7 @@ import { Span } from './Span';
 /**
   * Some helper functions for formatting certain TypeScript Compiler API expressions.
   */
-export  class PrettyPrinter {
+export class PrettyPrinter {
   /**
     * Used for debugging only.  This dumps the TypeScript Compiler's abstract syntax tree.
     */

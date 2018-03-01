@@ -27,7 +27,7 @@ import { ReleaseTag } from '../aedoc/ReleaseTag';
  *
  * @public
  */
-export  class ApiFileGenerator extends AstItemVisitor {
+export class ApiFileGenerator extends AstItemVisitor {
   protected _indentedWriter: IndentedWriter = new IndentedWriter();
 
   /**

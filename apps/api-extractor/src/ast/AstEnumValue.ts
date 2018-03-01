@@ -8,7 +8,7 @@ import { PrettyPrinter } from '../utils/PrettyPrinter';
  * This class is part of the AstItem abstract syntax tree. It represents a TypeScript enum value.
  * The parent container will always be an AstEnum instance.
  */
-export  class AstEnumValue extends AstItem {
+export class AstEnumValue extends AstItem {
   constructor(options: IAstItemOptions) {
     super(options);
     this.kind = AstItemKind.EnumValue;
