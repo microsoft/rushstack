@@ -13,6 +13,5 @@ export const mockBuildConfig: IBuildConfig = {
   verbose: false,
   production: false,
   args: {},
-  shouldWarningsFailBuild: false,
-  relogIssues: true
+  shouldWarningsFailBuild: false
 };

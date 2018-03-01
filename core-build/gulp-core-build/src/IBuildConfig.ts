@@ -66,7 +66,7 @@ export interface IBuildConfig {
   /**
    * Re-log known issues after the build is complete.
    */
-  relogIssues: boolean;
+  relogIssues?: boolean;
 
   /**
    * Show toast on build failures and recoveries.

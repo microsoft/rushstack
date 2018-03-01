@@ -41,7 +41,9 @@ export {
   fileWarning,
   reset,
   log,
-  logSummary
+  logSummary,
+  ILoggerOptions,
+  updateLoggerOptions
 } from './logging';
 export * from './tasks/CopyTask';
 export * from './tasks/GenerateShrinkwrapTask';
@@ -93,7 +95,7 @@ export function setConfig(config: Partial<IBuildConfig>): void {
   const objectAssign = require('object-assign');
   /* tslint:enable:typedef */
 
-  _buildConfig = objectAssign({}, _buildConfig, config || {});
+  _buildConfig = objectAssign({}, _buildConfig, config);
 }
 
 /**
@@ -107,7 +109,7 @@ export function mergeConfig(config: Partial<IBuildConfig>): void {
   const merge = require('lodash.merge');
   /* tslint:enable:typedef */
 
-  _buildConfig = merge({}, _buildConfig, config || {});
+  _buildConfig = merge({}, _buildConfig, config);
 }
 
 /**
