@@ -17,7 +17,7 @@ import { ExtractorContext } from '../ExtractorContext';
 import { ILogger } from './ILogger';
 import ApiJsonGenerator from '../generators/ApiJsonGenerator';
 import ApiFileGenerator from '../generators/ApiFileGenerator';
-import PackageTypingsGenerator from '../generators/PackageTypingsGenerator';
+import PackageTypingsGenerator from '../generators/packageTypings/PackageTypingsGenerator';
 import { MonitoredLogger } from './MonitoredLogger';
 
 /**

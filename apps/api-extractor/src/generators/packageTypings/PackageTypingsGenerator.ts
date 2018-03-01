@@ -6,10 +6,10 @@
 import * as fs from 'fs';
 import * as ts from 'typescript';
 
-import { ExtractorContext } from '../ExtractorContext';
-import IndentedWriter from '../IndentedWriter';
-import TypeScriptHelpers from '../TypeScriptHelpers';
-import { Span } from './Span';
+import { ExtractorContext } from '../../ExtractorContext';
+import IndentedWriter from '../../IndentedWriter';
+import TypeScriptHelpers from '../../TypeScriptHelpers';
+import { Span } from '../Span';
 
 /**
  * Constructor parameters for the Entry class
