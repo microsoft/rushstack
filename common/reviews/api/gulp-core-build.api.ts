@@ -181,6 +181,12 @@ interface IJestConfig {
   testPathIgnorePatterns?: string[];
 }
 
+// @beta (undocumented)
+interface ILoggerOptions {
+  // (undocumented)
+  shouldRelogIssues: boolean;
+}
+
 // @public
 export function initialize(gulp: typeof Gulp): void;
 
@@ -235,6 +241,9 @@ enum TestResultState {
   // (undocumented)
   Skipped = 3
 }
+
+// @beta (undocumented)
+export function updateLoggerOptions(options: Partial<ILoggerOptions>): void;
 
 // @public
 class ValidateShrinkwrapTask extends GulpTask<void> {
