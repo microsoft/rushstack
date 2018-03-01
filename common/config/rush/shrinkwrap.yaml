@@ -5,6 +5,7 @@ dependencies:
   '@rush-temp/api-extractor-test-01': 'file:projects/api-extractor-test-01.tgz'
   '@rush-temp/api-extractor-test-02': 'file:projects/api-extractor-test-02.tgz'
   '@rush-temp/api-extractor-test-03': 'file:projects/api-extractor-test-03.tgz'
+  '@rush-temp/api-extractor-test-04': 'file:projects/api-extractor-test-04.tgz'
   '@rush-temp/decorators': 'file:projects/decorators.tgz'
   '@rush-temp/gulp-core-build': 'file:projects/gulp-core-build.tgz'
   '@rush-temp/gulp-core-build-karma': 'file:projects/gulp-core-build-karma.tgz'
@@ -129,7 +130,7 @@ dependencies:
   merge2: 1.0.3
   minimatch: 3.0.4
   mocha: 3.4.2
-  node-forge: 0.7.1
+  node-forge: 0.7.2
   node-notifier: 5.0.2
   npm-package-arg: 5.1.2
   object-assign: 4.1.1
@@ -561,12 +562,12 @@ packages:
       node: '>=0.4.0'
     resolution:
       integrity: sha1-EFSVrlNh1pe9GVyCUZLhrX8lN4c=
-  /acorn/5.4.1:
+  /acorn/5.5.0:
     dev: false
     engines:
       node: '>=0.4.0'
     resolution:
-      integrity: sha512-XLmq3H/BVvW6/GbxKryGxWORz1ebilSsUDlyC27bXhWGWAZWkGwS6FLHjOlwFXNFoWFQEO/Df4u0YYd0K3BQgQ==
+      integrity: sha512-arn53F07VXmls4o4pUhSzBa4fvaagPRe7AVZ8l7NHxFWUie2DsuFSBMMNAkgzRlOhEhzAnxeKyaWVzOH4xqp/g==
   /after/0.8.2:
     dev: false
     resolution:
@@ -583,7 +584,7 @@ packages:
   /ajv/5.2.2:
     dependencies:
       co: 4.6.0
-      fast-deep-equal: 1.0.0
+      fast-deep-equal: 1.1.0
       json-schema-traverse: 0.3.1
       json-stable-stringify: 1.0.1
     dev: false
@@ -684,6 +685,13 @@ packages:
     dev: false
     resolution:
       integrity: sha512-0XNayC8lTHQ2OI8aljNCN3sSx6hsr/1+rlcDAotXJR7C1oZZHCNsfpbKwMjRA3Uqb5tF1Rae2oloTr4xpq+WjA==
+  /anymatch/2.0.0:
+    dependencies:
+      micromatch: 3.1.9
+      normalize-path: 2.1.1
+    dev: false
+    resolution:
+      integrity: sha512-5teOsQWABXHHBFP9y3skS5P3d/WfWXpv3FUpy+LorMrNYaT9pI4oLMQX7jzQ2KklNpGpWHzdCXTDT2Y3XGlZBw==
   /append-transform/0.4.0:
     dependencies:
       default-require-extensions: 1.0.0
@@ -1269,7 +1277,7 @@ packages:
       snapdragon: 0.8.1
       snapdragon-node: 2.1.1
       split-string: 3.1.0
-      to-regex: 3.0.1
+      to-regex: 3.0.2
     dev: false
     engines:
       node: '>=0.10.0'
@@ -1545,6 +1553,24 @@ packages:
       fsevents: 1.1.3
     resolution:
       integrity: sha1-eY5ol3gVHIB2tLNg5e3SjNortGg=
+  /chokidar/2.0.2:
+    dependencies:
+      anymatch: 2.0.0
+      async-each: 1.0.1
+      braces: 2.3.1
+      glob-parent: 3.1.0
+      inherits: 2.0.3
+      is-binary-path: 1.0.1
+      is-glob: 4.0.0
+      normalize-path: 2.1.1
+      path-is-absolute: 1.0.1
+      readdirp: 2.1.0
+      upath: 1.0.4
+    dev: false
+    optionalDependencies:
+      fsevents: 1.1.3
+    resolution:
+      integrity: sha512-l32Hw3wqB0L2kGVmSbK/a+xXLDrUEsc84pSgMkmwygHvD7ubRsP/vxxHa5BtB6oix1XLLVCHyYMsckRXxThmZw==
   /ci-info/1.1.2:
     dev: false
     resolution:
@@ -1967,7 +1993,7 @@ packages:
   /deasync/0.1.12:
     dependencies:
       bindings: 1.2.1
-      nan: 2.9.1
+      nan: 2.9.2
     dev: false
     engines:
       node: '>=0.11.0'
@@ -2427,7 +2453,7 @@ packages:
       source-map: 0.2.0
     resolution:
       integrity: sha1-WltTr0aTEQvrsIZ6o0MN07cKEBg=
-  /escodegen/1.9.0:
+  /escodegen/1.9.1:
     dependencies:
       esprima: 3.1.3
       estraverse: 4.2.0
@@ -2435,16 +2461,16 @@ packages:
       optionator: 0.8.2
     dev: false
     engines:
-      node: '>=0.12.0'
+      node: '>=4.0'
     optionalDependencies:
-      source-map: 0.5.7
+      source-map: 0.6.1
     resolution:
-      integrity: sha512-v0MYvNQ32bzwoG2OSFzWAkuahDQHK92JBN0pTAALJ4RIxEZe766QJPDR8Hqy7XNUy5K3fnVL76OqYAdc4TZEIw==
+      integrity: sha512-6hTjO1NAWkHnDk3OqQ4YrCuwwmGHL9S3nPlzBOUG/R44rda3wLNrfvQ5fkSGjyhHFKM7ALPKcKGrwvCLe0lC7Q==
   /escope/3.6.0:
     dependencies:
       es6-map: 0.1.5
       es6-weak-map: 2.0.2
-      esrecurse: 4.2.0
+      esrecurse: 4.2.1
       estraverse: 4.2.0
     dev: false
     engines:
@@ -2481,15 +2507,14 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha512-oftTcaMu/EGrEIu904mWteKIv8vMuOgGYo7EhVJJN00R/EED9DCua/xxHRdYnKtcECzVg7xOWhflvJMnqcFZjw==
-  /esrecurse/4.2.0:
+  /esrecurse/4.2.1:
     dependencies:
       estraverse: 4.2.0
-      object-assign: 4.1.1
     dev: false
     engines:
-      node: '>=0.10.0'
+      node: '>=4.0'
     resolution:
-      integrity: sha1-+pVo2Y04I/mkHZHpAtyrnqblsWM=
+      integrity: sha512-64RBB++fIOAXPw3P9cy89qfMlvZEXZkqqJkjqqXIvzP5ezRZjW+lPWjw35UX/3EhUPFYbg5ER4JYgDw4007/DQ==
   /estraverse/1.9.3:
     dev: false
     engines:
@@ -2620,7 +2645,7 @@ packages:
       posix-character-classes: 0.1.1
       regex-not: 1.0.2
       snapdragon: 0.8.1
-      to-regex: 3.0.1
+      to-regex: 3.0.2
     dev: false
     engines:
       node: '>=0.10.0'
@@ -2745,7 +2770,7 @@ packages:
       fragment-cache: 0.2.1
       regex-not: 1.0.2
       snapdragon: 0.8.1
-      to-regex: 3.0.1
+      to-regex: 3.0.2
     dev: false
     engines:
       node: '>=0.10.0'
@@ -2782,10 +2807,10 @@ packages:
       node: '>= 0.10'
     resolution:
       integrity: sha1-9BEl49hPLn2JpD0G2VjI94vha+E=
-  /fast-deep-equal/1.0.0:
+  /fast-deep-equal/1.1.0:
     dev: false
     resolution:
-      integrity: sha1-liVqO8l1WV6zbYLpkp0GDYk0Of8=
+      integrity: sha1-wFNHeBfIa1HaqFPIHgWbcz0CNhQ=
   /fast-levenshtein/1.0.7:
     dev: false
     resolution:
@@ -2909,7 +2934,7 @@ packages:
     dependencies:
       detect-file: 1.0.0
       is-glob: 3.1.0
-      micromatch: 3.1.8
+      micromatch: 3.1.9
       resolve-dir: 1.0.1
     dev: false
     engines:
@@ -3053,7 +3078,7 @@ packages:
     bundledDependencies:
       - node-pre-gyp
     dependencies:
-      nan: 2.9.1
+      nan: 2.9.2
     dev: false
     engines:
       node: '>=0.8.0'
@@ -4290,6 +4315,14 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-e6WuJCF4BKxwcHuWkiVnSGzD6Eo=
+  /is-glob/4.0.0:
+    dependencies:
+      is-extglob: 2.1.1
+    dev: false
+    engines:
+      node: '>=0.10.0'
+    resolution:
+      integrity: sha1-lSHHaEXMJhCoUgPd8ICpWML/q8A=
   /is-my-ip-valid/1.0.0:
     dev: false
     resolution:
@@ -4659,7 +4692,7 @@ packages:
       string-length: 2.0.0
       strip-ansi: 4.0.0
       which: 1.3.0
-      worker-farm: 1.5.2
+      worker-farm: 1.5.4
       yargs: 9.0.1
     dev: false
     engines:
@@ -4721,7 +4754,7 @@ packages:
       jest-docblock: 21.2.0
       micromatch: 2.3.11
       sane: 2.4.1
-      worker-farm: 1.5.2
+      worker-farm: 1.5.4
     dev: false
     resolution:
       integrity: sha512-5LhsY/loPH7wwOFRMs+PT4aIAORJ2qwgbpMFlbWbxfN0bk3ZCwxJ530vrbSiTstMkYLao6JwBkLhCJ5XbY7ZHw==
@@ -4787,7 +4820,7 @@ packages:
       jest-util: 21.2.1
       pify: 3.0.0
       throat: 4.1.0
-      worker-farm: 1.5.2
+      worker-farm: 1.5.4
     dev: false
     resolution:
       integrity: sha512-Anb72BOQlHqF/zETqZ2K20dbYsnqW/nZO7jV8BYENl+3c44JhMrA8zd1lt52+N7ErnsQMd2HHKiVwN9GYSXmrg==
@@ -4886,14 +4919,14 @@ packages:
       content-type-parser: 1.0.2
       cssom: 0.3.2
       cssstyle: 0.2.37
-      escodegen: 1.9.0
+      escodegen: 1.9.1
       html-encoding-sniffer: 1.0.2
       nwmatcher: 1.4.3
       parse5: 1.5.1
       request: 2.83.0
       sax: 1.2.4
       symbol-tree: 3.2.2
-      tough-cookie: 2.3.3
+      tough-cookie: 2.3.4
       webidl-conversions: 4.0.2
       whatwg-encoding: 1.0.3
       whatwg-url: 4.8.0
@@ -5742,7 +5775,7 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-hmd8l9FyCzY0MdBNDRUpO9OMFWU=
-  /micromatch/3.1.8:
+  /micromatch/3.1.9:
     dependencies:
       arr-diff: 4.0.0
       array-unique: 0.3.2
@@ -5756,12 +5789,12 @@ packages:
       object.pick: 1.3.0
       regex-not: 1.0.2
       snapdragon: 0.8.1
-      to-regex: 3.0.1
+      to-regex: 3.0.2
     dev: false
     engines:
       node: '>=0.10.0'
     resolution:
-      integrity: sha512-/XeuOQqYg+B5kwjDWekXseSwGS7CzE0w9Gjo4Cjkf/uFitNh47NrZHAY2vp/oS2YQVfebPIdbEIvgdy+kIcAog==
+      integrity: sha512-SlIz6sv5UPaAVVFRKodKjCg48EbNoIhgetzfK/Cy0v5U52Z6zB136M8tp0UC9jM53LYbmIRihJszvvqpKkfm9g==
   /miller-rabin/4.0.1:
     dependencies:
       bn.js: 4.11.8
@@ -5959,10 +5992,10 @@ packages:
     dev: false
     resolution:
       integrity: sha1-MHXOk7whuPq0PhvE2n6BFe0ee6s=
-  /nan/2.9.1:
+  /nan/2.9.2:
     dev: false
     resolution:
-      integrity: sha512-c609vVPyCEuuzqOjx3hwsSZMXLg5QTzbTfgBmEx6N444ymBt1+Yg/rTGr2+4S3VJ3btXI8m1TZ7nLcYcRTZYuQ==
+      integrity: sha512-ltW65co7f3PQWBDbqVvaU1WtFJUsNW7sWWm4HINhbMQIyVyzIeyZ8toX5TC5eeooE6piZoaEh4cZkueSKG3KYw==
   /nanomatch/1.2.9:
     dependencies:
       arr-diff: 4.0.0
@@ -5976,7 +6009,7 @@ packages:
       object.pick: 1.3.0
       regex-not: 1.0.2
       snapdragon: 0.8.1
-      to-regex: 3.0.1
+      to-regex: 3.0.2
     dev: false
     engines:
       node: '>=0.10.0'
@@ -5996,10 +6029,14 @@ packages:
       node: '>= 0.6'
     resolution:
       integrity: sha1-KzJxhOiZIQEXeyhWP7XnECrNDKk=
-  /node-forge/0.7.1:
+  /neo-async/2.5.0:
     dev: false
     resolution:
-      integrity: sha1-naYR6giYL0uUIGs760zJZl8gwwA=
+      integrity: sha512-nJmSswG4As/MkRq7QZFuH/sf/yuv8ODdMZrY4Bedjp77a5MK4A6s7YbBB64c9u79EBUOfXUXBvArmvzTD0X+6g==
+  /node-forge/0.7.2:
+    dev: false
+    resolution:
+      integrity: sha512-XTBoBY8NoeGAqQywTM8BjBz/Ro37eTmVF657yf6JumfOhxW9eET43Hve5+6L4+lo3hTDx7kTbC1WfasTHinDpg==
   /node-gyp/3.6.2:
     dependencies:
       fstream: 1.0.11
@@ -6075,7 +6112,7 @@ packages:
       lodash.mergewith: 4.6.1
       meow: 3.7.0
       mkdirp: 0.5.1
-      nan: 2.9.1
+      nan: 2.9.2
       node-gyp: 3.6.2
       npmlog: 4.1.2
       request: 2.79.0
@@ -6106,7 +6143,7 @@ packages:
       hosted-git-info: 2.5.0
       is-builtin-module: 1.0.0
       semver: 5.3.0
-      validate-npm-package-license: 3.0.1
+      validate-npm-package-license: 3.0.3
     dev: false
     resolution:
       integrity: sha512-9jjUFbTPfEy3R/ad/2oNbKtW9Hgovl5O1FvFWKkKblNXoN/Oou6+9+KKohPK13Yc3/TyunyWhJp6gvRNR/PPAw==
@@ -7195,7 +7232,7 @@ packages:
       oauth-sign: 0.8.2
       qs: 6.3.2
       stringstream: 0.0.5
-      tough-cookie: 2.3.3
+      tough-cookie: 2.3.4
       tunnel-agent: 0.4.3
       uuid: 3.2.1
     dev: false
@@ -7224,7 +7261,7 @@ packages:
       qs: 6.5.1
       safe-buffer: 5.1.1
       stringstream: 0.0.5
-      tough-cookie: 2.3.3
+      tough-cookie: 2.3.4
       tunnel-agent: 0.6.0
       uuid: 3.2.1
     dev: false
@@ -7787,20 +7824,28 @@ packages:
     dev: false
     resolution:
       integrity: sha1-sAeZVX63+wyDdsKdROih6mfldHY=
-  /spdx-correct/1.0.2:
+  /spdx-correct/3.0.0:
     dependencies:
-      spdx-license-ids: 1.2.2
+      spdx-expression-parse: 3.0.0
+      spdx-license-ids: 3.0.0
     dev: false
     resolution:
-      integrity: sha1-SzBz2TP/UfORLwOsVRlJikFQ20A=
-  /spdx-expression-parse/1.0.4:
+      integrity: sha512-N19o9z5cEyc8yQQPukRCZ9EUmb4HUpnrmaL/fxS2pBo2jbfcFRVuFZ/oFC+vZz0MNNk0h80iMn5/S6qGZOL5+g==
+  /spdx-exceptions/2.1.0:
     dev: false
     resolution:
-      integrity: sha1-m98vIOH0DtRH++JzJmGR/O1RYmw=
-  /spdx-license-ids/1.2.2:
+      integrity: sha512-4K1NsmrlCU1JJgUrtgEeTVyfx8VaYea9J9LvARxhbHtVtohPs/gFGG5yy49beySjlIMhhXZ4QqujIZEfS4l6Cg==
+  /spdx-expression-parse/3.0.0:
+    dependencies:
+      spdx-exceptions: 2.1.0
+      spdx-license-ids: 3.0.0
     dev: false
     resolution:
-      integrity: sha1-yd96NCRZSt5r0RkA1ZZpbcBrrFc=
+      integrity: sha512-Yg6D3XpRD4kkOmTpdgbUiEJFKghJH03fiC1OPll5h/0sO6neh2jqRDVHOQ4o/LMea0tgCkbMgea5ip/e+MkWyg==
+  /spdx-license-ids/3.0.0:
+    dev: false
+    resolution:
+      integrity: sha512-2+EPwgbnmOIl8HjGBXXMd9NAu02vLjOO1nWw4kmeRDFyHn+M/ETfHxQUK0oXg8ctgVnl9t3rosNVsZ1jG61nDA==
   /split-string/3.1.0:
     dependencies:
       extend-shallow: 3.0.2
@@ -8302,24 +8347,25 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-fIDBe53+vlmeJzZ+DU3VWQFB2zg=
-  /to-regex/3.0.1:
+  /to-regex/3.0.2:
     dependencies:
-      define-property: 0.2.5
-      extend-shallow: 2.0.1
+      define-property: 2.0.2
+      extend-shallow: 3.0.2
       regex-not: 1.0.2
+      safe-regex: 1.1.0
     dev: false
     engines:
       node: '>=0.10.0'
     resolution:
-      integrity: sha1-FTWL7kosg712N3uh3ASdDxiDeq4=
-  /tough-cookie/2.3.3:
+      integrity: sha512-FWtleNAtZ/Ki2qtqej2CXTOayOH9bHDQF+Q48VpWyDXjbYxA4Yz8iDB31zXOBUlOHHKidDbqGVrTUvQMPmBGBw==
+  /tough-cookie/2.3.4:
     dependencies:
       punycode: 1.4.1
     dev: false
     engines:
       node: '>=0.8'
     resolution:
-      integrity: sha1-C2GKVWW23qkL80JdBNVe3EdadWE=
+      integrity: sha512-TZ6TTfI5NtZnuyy/Kecv+CnoROnyXn2DN97LontgQpCwsX2XyLYCC0ENhYkehSOwAp8rTQKc/NUIF7BkQ5rKLA==
   /tr46/0.0.3:
     dev: false
     resolution:
@@ -8567,6 +8613,12 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-g3aHP30jNRef+x5vw6jtDfyKtVk=
+  /upath/1.0.4:
+    dev: false
+    engines:
+      node: '>=4 <=9'
+    resolution:
+      integrity: sha512-d4SJySNBXDaQp+DPrziv3xGS6w3d2Xt69FijJr86zMPBy23JEloMCEOUBBzuN7xCtjLCnmB9tI/z7SBCahHBOw==
   /urix/0.1.0:
     dev: false
     resolution:
@@ -8635,13 +8687,13 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-G5BKWWCfsyjvB4E4Qgk09rhnCaY=
-  /validate-npm-package-license/3.0.1:
+  /validate-npm-package-license/3.0.3:
     dependencies:
-      spdx-correct: 1.0.2
-      spdx-expression-parse: 1.0.4
+      spdx-correct: 3.0.0
+      spdx-expression-parse: 3.0.0
     dev: false
     resolution:
-      integrity: sha1-KAS6vnEq0zeUWaz74kdGqywwP7w=
+      integrity: sha512-63ZOUnL4SIXj4L0NixR3L1lcjO38crAbgrTpl28t8jjrfuiOBL5Iygm+60qPs/KsZGzPNg6Smnc/oY16QTjF0g==
   /validate-npm-package-name/3.0.0:
     dependencies:
       builtins: 1.0.3
@@ -8779,14 +8831,14 @@ packages:
       node: '>=0.1.95'
     resolution:
       integrity: sha1-KAlUdsbffJDJYxOJkMClQj60uYY=
-  /watchpack/1.4.0:
+  /watchpack/1.5.0:
     dependencies:
-      async: 2.6.0
-      chokidar: 1.7.0
+      chokidar: 2.0.2
       graceful-fs: 4.1.11
+      neo-async: 2.5.0
     dev: false
     resolution:
-      integrity: sha1-ShRyvLuVK9Cpu0A2gB+VTfs5+qw=
+      integrity: sha512-RSlipNQB1u48cq0wH/BNfCu1tD/cJ8ydFIkNYhp9o+3d+8unClkIovpW5qpFPgmL9OE48wfAnlZydXByWP82AA==
   /webidl-conversions/3.0.1:
     dev: false
     resolution:
@@ -8833,7 +8885,7 @@ packages:
       integrity: sha512-aqYp18kPphgoO5c/+NaUvEeACtZjMESmDChuD3NBciVpah3XpMEU9VAAtIaB1BsfJWWTSdv8Vv1m3T0aRk2dUw==
   /webpack/3.6.0:
     dependencies:
-      acorn: 5.4.1
+      acorn: 5.5.0
       acorn-dynamic-import: 2.0.2
       ajv: 5.2.2
       ajv-keywords: /ajv-keywords/2.1.1/ajv@5.2.2
@@ -8852,7 +8904,7 @@ packages:
       supports-color: 4.5.0
       tapable: 0.2.8
       uglifyjs-webpack-plugin: 0.4.6
-      watchpack: 1.4.0
+      watchpack: 1.5.0
       webpack-sources: 1.1.0
       yargs: 8.0.2
     dev: false
@@ -8936,13 +8988,13 @@ packages:
     dev: false
     resolution:
       integrity: sha1-J1hIEIkUVqQXHI0CJkQa3pDLyus=
-  /worker-farm/1.5.2:
+  /worker-farm/1.5.4:
     dependencies:
       errno: 0.1.7
       xtend: 4.0.1
     dev: false
     resolution:
-      integrity: sha512-XxiQ9kZN5n6mmnW+mFJ+wXjNNI/Nx4DIdaAKLX1Bn6LYBWlN/zaBhu34DQYPZ1AJobQuu67S2OfDdNSVULvXkQ==
+      integrity: sha512-ITyClEvcfv0ozqJl1vmWFWhvI+OIrkbInYqkEPE50wFPXj8J9Gd3FYf8+CkZJXJJsQBYe+2DvmoK9Zhx5w8W+w==
   /wrap-ansi/2.1.0:
     dependencies:
       string-width: 1.0.2
@@ -9186,6 +9238,15 @@ packages:
     resolution:
       tarball: 'file:projects/api-extractor-test-03.tgz'
     version: 0.0.0
+  'file:projects/api-extractor-test-04.tgz':
+    dependencies:
+      fs-extra: 0.26.7
+      typescript: 2.4.2
+    dev: false
+    name: '@rush-temp/api-extractor-test-04'
+    resolution:
+      tarball: 'file:projects/api-extractor-test-04.tgz'
+    version: 0.0.0
   'file:projects/api-extractor.tgz':
     dependencies:
       '@microsoft/node-library-build': 4.3.13
@@ -9318,7 +9379,7 @@ packages:
       gulp-connect: 5.5.0
       gulp-open: 2.0.0
       gulp-util: 3.0.8
-      node-forge: 0.7.1
+      node-forge: 0.7.2
       sudo: 1.0.3
     dev: false
     name: '@rush-temp/gulp-core-build-serve'
@@ -9681,6 +9742,7 @@ specifiers:
   '@rush-temp/api-extractor-test-01': 'file:./projects/api-extractor-test-01.tgz'
   '@rush-temp/api-extractor-test-02': 'file:./projects/api-extractor-test-02.tgz'
   '@rush-temp/api-extractor-test-03': 'file:./projects/api-extractor-test-03.tgz'
+  '@rush-temp/api-extractor-test-04': 'file:./projects/api-extractor-test-04.tgz'
   '@rush-temp/decorators': 'file:./projects/decorators.tgz'
   '@rush-temp/gulp-core-build': 'file:./projects/gulp-core-build.tgz'
   '@rush-temp/gulp-core-build-karma': 'file:./projects/gulp-core-build-karma.tgz'
@@ -9796,7 +9858,7 @@ specifiers:
   karma-mocha-clean-reporter: ~0.0.1
   karma-phantomjs-launcher: ~1.0.0
   karma-sinon-chai: ~1.2.0
-  karma-webpack: ~2.0.4
+  karma-webpack: 2.0.9
   loader-utils: ~1.1.0
   lodash: ~4.15.0
   lodash.merge: ~4.3.2
