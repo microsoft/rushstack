@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import AstItem, { IAstItemOptions } from './AstItem';
+import { AstItem, IAstItemOptions } from './AstItem';
 
 /**
   * This is an abstract base class for AstModule, AstEnum, and AstStructuredType,
   * which all act as containers for other AstItem definitions.
   */
-abstract class AstItemContainer extends AstItem {
+export abstract class AstItemContainer extends AstItem {
   private _memberItems: Map<string, AstItem> = new Map<string, AstItem>();
 
   constructor(options: IAstItemOptions) {
@@ -60,5 +60,3 @@ abstract class AstItemContainer extends AstItem {
     }
   }
 }
-
-export default AstItemContainer;

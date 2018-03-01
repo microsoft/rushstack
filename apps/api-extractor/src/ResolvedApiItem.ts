@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import AstItem, { AstItemKind } from './ast/AstItem';
+import { AstItem, AstItemKind } from './ast/AstItem';
 import { ReleaseTag } from './aedoc/ReleaseTag';
 import { MarkupElement, MarkupBasicElement } from './markup/MarkupElement';
 import { ApiItem } from './api/ApiItem';
@@ -12,7 +12,7 @@ import { IAedocParameter } from './aedoc/ApiDocumentation';
  * A class to abstract away the difference between an item from our public API that could be
  * represented by either an AstItem or an ApiItem that is retrieved from a JSON file.
  */
-export default class ResolvedApiItem {
+export class ResolvedApiItem {
   public kind: AstItemKind;
   public summary: MarkupElement[];
   public remarks: MarkupElement[];

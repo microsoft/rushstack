@@ -24,7 +24,7 @@
   *     two
   *   end
   */
-export default class IndentedWriter {
+export class IndentedWriter {
   /**
    * The text characters used to create one level of indentation.
    * Two spaces by default.

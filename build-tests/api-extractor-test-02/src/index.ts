@@ -2,14 +2,13 @@
 // See LICENSE in the project root for license information.
 
 /**
- * Example documentation for the package.
+ * api-extractor-test-02
  *
  * @remarks
- * Additional remarks
+ * This library consumes api-extractor-test-01 and is consumed by api-extractor-test-03.
  *
  * @packagedocumentation
  */
-
 export { SubclassWithImport } from './SubclassWithImport';
 
 export * from './TypeFromImportedModule';

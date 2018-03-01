@@ -4,9 +4,9 @@
 /* tslint:disable:no-bitwise */
 
 import * as ts from 'typescript';
-import PrettyPrinter from './PrettyPrinter';
+import { PrettyPrinter } from './PrettyPrinter';
 
-export default class TypeScriptHelpers {
+export class TypeScriptHelpers {
   /**
    * Splits on CRLF and other newline sequences
    */
@@ -239,5 +239,78 @@ export default class TypeScriptHelpers {
         + lines.join('\n * ')
         + '\n */';
     }
+  }
+
+  /**
+   * Returns an ancestor of "node", such that the ancestor, any intermediary nodes,
+   * and the starting node match a list of expected kinds.  Undefined is returned
+   * if there aren't enough ancestors, or if the kinds are incorrect.
+   *
+   * For example, suppose child "C" has parents A --> B --> C.
+   *
+   * Calling _matchAncestor(C, [ExportSpecifier, NamedExports, ExportDeclaration])
+   * would return A only if A is of kind ExportSpecifier, B is of kind NamedExports,
+   * and C is of kind ExportDeclaration.
+   *
+   * Calling _matchAncestor(C, [ExportDeclaration]) would return C.
+   */
+  public static matchAncestor<T extends ts.Node>(node: ts.Node, kindsToMatch: ts.SyntaxKind[]): T | undefined {
+    // (slice(0) clones an array)
+    const reversedParentKinds: ts.SyntaxKind[] = kindsToMatch.slice(0).reverse();
+
+    let current: ts.Node | undefined = undefined;
+
+    for (const parentKind of reversedParentKinds) {
+      if (!current) {
+        // The first time through, start with node
+        current = node;
+      } else {
+        // Then walk the parents
+        current = current.parent;
+      }
+
+      // If we ran out of items, or if the kind doesn't match, then fail
+      if (!current || current.kind !== parentKind) {
+        return undefined;
+      }
+    }
+
+    // If we matched everything, then return the node that matched the last parentKinds item
+    return current as T;
+  }
+
+  /**
+   * Does a depth-first search of the children of the specified node.  Returns the first child
+   * with the specified kind, or undefined if there is no match.
+   */
+  public static findFirstChildNode<T extends ts.Node>(node: ts.Node, kindToMatch: ts.SyntaxKind): T | undefined {
+    for (const child of node.getChildren()) {
+      if (child.kind === kindToMatch) {
+        return child as T;
+      }
+
+      const recursiveMatch: T | undefined = TypeScriptHelpers.findFirstChildNode(child, kindToMatch);
+      if (recursiveMatch) {
+        return recursiveMatch;
+      }
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Returns the first parent node with the specified  SyntaxKind, or undefined if there is no match.
+   */
+  public static findFirstParent<T extends ts.Node>(node: ts.Node, kindToMatch: ts.SyntaxKind): T | undefined {
+    let current: ts.Node | undefined = node.parent;
+
+    while (current) {
+      if (current.kind === kindToMatch) {
+        return current as T;
+      }
+      current = current.parent;
+    }
+
+    return undefined;
   }
 }

@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import Token, { TokenType } from '../Token';
-import Tokenizer from '../Tokenizer';
+import { Token, TokenType } from '../Token';
+import { Tokenizer } from '../Tokenizer';
 
 /* tslint:disable:no-function-expression - Mocha uses a poorly scoped "this" pointer */
 

@@ -3,13 +3,13 @@
 
 /* tslint:disable:no-bitwise */
 
-import AstPackage from '../ast/AstPackage';
-import DocElementParser from '../DocElementParser';
-import ApiDefinitionReference, { IApiDefinitionReferenceParts } from '../ApiDefinitionReference';
-import Token, { TokenType } from './Token';
-import Tokenizer from './Tokenizer';
+import { AstPackage } from '../ast/AstPackage';
+import { DocElementParser } from './DocElementParser';
+import { ApiDefinitionReference, IApiDefinitionReferenceParts } from '../ApiDefinitionReference';
+import { Token, TokenType } from './Token';
+import { Tokenizer } from './Tokenizer';
 import { ExtractorContext } from '../ExtractorContext';
-import ResolvedApiItem from '../ResolvedApiItem';
+import { ResolvedApiItem } from '../ResolvedApiItem';
 import { ReleaseTag } from './ReleaseTag';
 import { MarkupElement, MarkupBasicElement, IMarkupApiLink } from '../markup/MarkupElement';
 import { Markup } from '../markup/Markup';
@@ -40,7 +40,7 @@ export interface IAedocParameter {
   description: MarkupBasicElement[];
 }
 
-export default class ApiDocumentation {
+export class ApiDocumentation {
   /**
    * Match AEDoc block tags and inline tags
    * Example "@a @b@c d@e @f {whatever} {@link a} { @something } \@g" => ["@a", "@f", "{@link a}", "{ @something }"]

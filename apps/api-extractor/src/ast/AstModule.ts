@@ -5,16 +5,16 @@
 
 import * as ts from 'typescript';
 import { IAstItemOptions } from './AstItem';
-import AstItemContainer from './AstItemContainer';
-import TypeScriptHelpers from '../TypeScriptHelpers';
-import AstStructuredType from './AstStructuredType';
-import AstEnum from './AstEnum';
-import AstFunction from './AstFunction';
+import { AstItemContainer } from './AstItemContainer';
+import { TypeScriptHelpers } from '../utils/TypeScriptHelpers';
+import { AstStructuredType } from './AstStructuredType';
+import { AstEnum } from './AstEnum';
+import { AstFunction } from './AstFunction';
 
 /**
   * This is an abstract base class for AstPackage and AstNamespace.
   */
-abstract class AstModule extends AstItemContainer {
+export abstract class AstModule extends AstItemContainer {
 
   protected processModuleExport(exportSymbol: ts.Symbol): void {
     const followedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(exportSymbol, this.typeChecker);
@@ -50,7 +50,5 @@ abstract class AstModule extends AstItemContainer {
   }
 }
 
-export default AstModule;
-
 // This is defer imported to break the circular dependency
-import AstNamespace from './AstNamespace';
+import { AstNamespace } from './AstNamespace';

@@ -4,11 +4,11 @@
 /* tslint:disable:no-bitwise */
 
 import * as ts from 'typescript';
-import AstModuleVariable from './AstModuleVariable';
+import { AstModuleVariable } from './AstModuleVariable';
 import { AstItemKind, IAstItemOptions } from './AstItem';
 import { IExportedSymbol } from './IExportedSymbol';
-import AstModule from './AstModule';
-import TypeScriptHelpers from '../TypeScriptHelpers';
+import { AstModule } from './AstModule';
+import { TypeScriptHelpers } from '../utils/TypeScriptHelpers';
 
 const allowedTypes: string[] = ['string', 'number', 'boolean'];
 
@@ -25,7 +25,7 @@ const allowedTypes: string[] = ['string', 'number', 'boolean'];
   * - We currently still recommend to use static classes for utility libraries, since this
   * provides getters/setters, public/private, and some other structure missing from namespaces.
   */
-export default class AstNamespace extends AstModule {
+export class AstNamespace extends AstModule {
   private _exportedNormalizedSymbols: IExportedSymbol[] = [];
 
   constructor(options: IAstItemOptions) {

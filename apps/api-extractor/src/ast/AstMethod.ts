@@ -3,11 +3,11 @@
 
 import * as ts from 'typescript';
 import { AstItemKind, IAstItemOptions } from './AstItem';
-import AstMember from './AstMember';
-import AstParameter from './AstParameter';
-import TypeScriptHelpers from '../TypeScriptHelpers';
+import { AstMember } from './AstMember';
+import { AstParameter } from './AstParameter';
+import { TypeScriptHelpers } from '../utils/TypeScriptHelpers';
 import { Markup } from '../markup/Markup';
-import ApiDefinitionReference, { IScopedPackageName } from '../ApiDefinitionReference';
+import { ApiDefinitionReference, IScopedPackageName } from '../ApiDefinitionReference';
 
 /**
  * This class is part of the AstItem abstract syntax tree. It represents functions that are members of
@@ -16,7 +16,7 @@ import ApiDefinitionReference, { IScopedPackageName } from '../ApiDefinitionRefe
  *
  * @see AstFunction for functions that are defined inside of a package
  */
-export default class AstMethod extends AstMember {
+export class AstMethod extends AstMember {
   public readonly returnType: string;
   public readonly params: AstParameter[];
 

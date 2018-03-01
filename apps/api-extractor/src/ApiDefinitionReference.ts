@@ -59,7 +59,7 @@ export interface IScopedPackageName {
 /**
  * {@inheritdoc IApiDefinitionReferenceParts}
  */
-export default class ApiDefinitionReference {
+export class ApiDefinitionReference {
   /**
    * Splits an API reference expression into two parts, first part is the scopename/packageName and
    * the second part is the exportName.memberName.

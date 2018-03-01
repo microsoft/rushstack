@@ -73,6 +73,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "api-extractor-test-04",
+      "projectFolder": "build-tests/api-extractor-test-04",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "web-library-build-test",
       "projectFolder": "build-tests/web-library-build-test",
       "reviewCategory": "tests",

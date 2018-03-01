@@ -9,7 +9,7 @@
  * @packagedocumentation
  */
 
-export { default as ExternalApiHelper } from './ExternalApiHelper';
+export { ExternalApiHelper } from './ExternalApiHelper';
 
 export { Extractor, IAnalyzeProjectOptions, IExtractorOptions } from './extractor/Extractor';
 export {

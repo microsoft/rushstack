@@ -7,19 +7,19 @@ import * as ts from 'typescript';
 import { JsonFile, IJsonSchemaErrorInfo } from '@microsoft/node-core-library';
 
 import { ExtractorContext } from '../ExtractorContext';
-import AstStructuredType from '../ast/AstStructuredType';
-import AstEnum from '../ast/AstEnum';
-import AstEnumValue from '../ast/AstEnumValue';
-import AstFunction from '../ast/AstFunction';
-import AstItem, { AstItemKind } from '../ast/AstItem';
-import AstItemVisitor from './AstItemVisitor';
-import AstPackage from '../ast/AstPackage';
-import AstParameter from '../ast/AstParameter';
-import AstProperty from '../ast/AstProperty';
-import AstMember, { ApiAccessModifier } from '../ast/AstMember';
-import AstNamespace from '../ast/AstNamespace';
-import AstModuleVariable from '../ast/AstModuleVariable';
-import AstMethod from '../ast/AstMethod';
+import { AstStructuredType } from '../ast/AstStructuredType';
+import { AstEnum } from '../ast/AstEnum';
+import { AstEnumValue } from '../ast/AstEnumValue';
+import { AstFunction } from '../ast/AstFunction';
+import { AstItem, AstItemKind } from '../ast/AstItem';
+import { AstItemVisitor } from './AstItemVisitor';
+import { AstPackage } from '../ast/AstPackage';
+import { AstParameter } from '../ast/AstParameter';
+import { AstProperty } from '../ast/AstProperty';
+import { AstMember, ApiAccessModifier } from '../ast/AstMember';
+import { AstNamespace } from '../ast/AstNamespace';
+import { AstModuleVariable } from '../ast/AstModuleVariable';
+import { AstMethod } from '../ast/AstMethod';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { IAedocParameter } from '../aedoc/ApiDocumentation';
 import { IApiReturnValue, IApiParameter, IApiNameMap } from '../api/ApiItem';
@@ -37,7 +37,7 @@ import { ApiJsonFile } from '../api/ApiJsonFile';
  *
  * @public
  */
-export default class ApiJsonGenerator extends AstItemVisitor {
+export class ApiJsonGenerator extends AstItemVisitor {
   private static _methodCounter: number = 0;
   private static _MEMBERS_KEY: string = 'members';
   private static _EXPORTS_KEY: string = 'exports';
