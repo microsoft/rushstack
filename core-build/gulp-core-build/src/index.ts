@@ -41,9 +41,7 @@ export {
   fileWarning,
   reset,
   log,
-  logSummary,
-  ILoggerOptions,
-  updateLoggerOptions
+  logSummary
 } from './logging';
 export * from './tasks/CopyTask';
 export * from './tasks/GenerateShrinkwrapTask';

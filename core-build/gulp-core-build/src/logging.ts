@@ -4,9 +4,9 @@
 import * as colors from 'colors';
 import * as Gulp from 'gulp';
 import * as path from 'path';
-const prettyTime = require('pretty-hrtime'); // tslint:disable-line:typedef
-import * as merge from 'lodash.merge';
-
+/* tslint:disable:typedef */
+const prettyTime = require('pretty-hrtime');
+/* tslint:enable:typedef */
 import { IBuildConfig } from './IBuildConfig';
 import * as state from './State';
 import { getFlagValue } from './config';
@@ -46,15 +46,6 @@ interface ILocalCache {
   shouldLogWarningsDuringSummary: boolean;
   shouldLogErrorsDuringSummary: boolean;
 }
-
-/** @beta */
-export interface ILoggerOptions {
-  shouldRelogIssues: boolean;
-}
-
-let loggerOptions: ILoggerOptions = {
-  shouldRelogIssues: getFlagValue('relogIssues')
-};
 
 let wiredUpErrorHandling: boolean = false;
 let duringFastExit: boolean = false;
@@ -183,6 +174,8 @@ function afterStreamsFlushed(callback: () => void): void {
 }
 
 function writeSummary(callback: () => void): void {
+  const shouldRelogIssues: boolean = getFlagValue('relogIssues');
+
   localCache.writeSummaryCallbacks.push(callback);
 
   if (!localCache.writingSummary) {
@@ -193,13 +186,13 @@ function writeSummary(callback: () => void): void {
       log(colors.magenta('==================[ Finished ]=================='));
 
       const warnings: string[] = getWarnings();
-      if (loggerOptions.shouldRelogIssues) {
+      if (shouldRelogIssues) {
         for (let x: number = 0; x < warnings.length; x++) {
           console.error(colors.yellow(warnings[x]));
         }
       }
 
-      if (loggerOptions.shouldRelogIssues && (localCache.taskErrors > 0 || getErrors().length)) {
+      if (shouldRelogIssues && (localCache.taskErrors > 0 || getErrors().length)) {
         const errors: string[] = getErrors();
         for (let x: number = 0; x < errors.length; x++) {
           console.error(colors.red(errors[x]));
@@ -903,11 +896,4 @@ function normalizeMessage(message: string): string {
     .replace(colorCodeRegex, '') // remove colors
     .replace(/\r\n/g, '\n') // normalize newline
     .replace(/\\/g, '/'); // normalize slashes
-}
-
-/**
- * @beta
- */
-export function updateLoggerOptions(options: Partial<ILoggerOptions>): void {
-  loggerOptions = merge({}, loggerOptions, options || {});
 }
