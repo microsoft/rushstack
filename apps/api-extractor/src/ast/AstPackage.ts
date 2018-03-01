@@ -7,7 +7,7 @@ import * as ts from 'typescript';
 import { ExtractorContext } from '../ExtractorContext';
 import { AstItemKind, IAstItemOptions } from './AstItem';
 import AstModule from './AstModule';
-import TypeScriptHelpers from '../TypeScriptHelpers';
+import TypeScriptHelpers from '../utils/TypeScriptHelpers';
 import { IExportedSymbol } from './IExportedSymbol';
 
 /**

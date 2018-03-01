@@ -10,8 +10,8 @@ import AstMethod from './AstMethod';
 import AstProperty from './AstProperty';
 import AstItem, { AstItemKind, IAstItemOptions } from './AstItem';
 import AstItemContainer from './AstItemContainer';
-import TypeScriptHelpers from '../TypeScriptHelpers';
-import PrettyPrinter from '../PrettyPrinter';
+import TypeScriptHelpers from '../utils/TypeScriptHelpers';
+import PrettyPrinter from '../utils/PrettyPrinter';
 
 /**
   * This class is part of the AstItem abstract syntax tree.  It represents a class,

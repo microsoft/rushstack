@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import AstItem, { AstItemKind, IAstItemOptions } from './AstItem';
-import PrettyPrinter from '../PrettyPrinter';
+import PrettyPrinter from '../utils/PrettyPrinter';
 
 /**
  * This class is part of the AstItem abstract syntax tree. It represents a TypeScript enum value.

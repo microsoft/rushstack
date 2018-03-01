@@ -7,9 +7,9 @@ import * as fs from 'fs';
 import * as ts from 'typescript';
 
 import { ExtractorContext } from '../../ExtractorContext';
-import IndentedWriter from '../../IndentedWriter';
-import TypeScriptHelpers from '../../TypeScriptHelpers';
-import { Span } from '../Span';
+import IndentedWriter from '../../utils/IndentedWriter';
+import TypeScriptHelpers from '../../utils/TypeScriptHelpers';
+import { Span } from '../../utils/Span';
 import { Entry } from './Entry';
 
 /**

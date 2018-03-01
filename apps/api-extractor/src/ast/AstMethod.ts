@@ -5,7 +5,7 @@ import * as ts from 'typescript';
 import { AstItemKind, IAstItemOptions } from './AstItem';
 import AstMember from './AstMember';
 import AstParameter from './AstParameter';
-import TypeScriptHelpers from '../TypeScriptHelpers';
+import TypeScriptHelpers from '../utils/TypeScriptHelpers';
 import { Markup } from '../markup/Markup';
 import ApiDefinitionReference, { IScopedPackageName } from '../ApiDefinitionReference';
 

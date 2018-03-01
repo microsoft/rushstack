@@ -4,8 +4,8 @@
 import * as ts from 'typescript';
 import AstItem, { AstItemKind, IAstItemOptions } from './AstItem';
 import AstParameter from './AstParameter';
-import TypeScriptHelpers from '../TypeScriptHelpers';
-import PrettyPrinter from '../PrettyPrinter';
+import TypeScriptHelpers from '../utils/TypeScriptHelpers';
+import PrettyPrinter from '../utils/PrettyPrinter';
 
 /**
   * This class is part of the AstItem abstract syntax tree. It represents functions that are directly

@@ -4,8 +4,8 @@
 import * as ts from 'typescript';
 import AstItem, { IAstItemOptions } from './AstItem';
 import AstStructuredType from './AstStructuredType';
-import PrettyPrinter from '../PrettyPrinter';
-import TypeScriptHelpers from '../TypeScriptHelpers';
+import PrettyPrinter from '../utils/PrettyPrinter';
+import TypeScriptHelpers from '../utils/TypeScriptHelpers';
 
 export enum ApiAccessModifier {
   Private,

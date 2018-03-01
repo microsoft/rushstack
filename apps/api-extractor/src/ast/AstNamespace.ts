@@ -8,7 +8,7 @@ import AstModuleVariable from './AstModuleVariable';
 import { AstItemKind, IAstItemOptions } from './AstItem';
 import { IExportedSymbol } from './IExportedSymbol';
 import AstModule from './AstModule';
-import TypeScriptHelpers from '../TypeScriptHelpers';
+import TypeScriptHelpers from '../utils/TypeScriptHelpers';
 
 const allowedTypes: string[] = ['string', 'number', 'boolean'];
 

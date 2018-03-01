@@ -6,7 +6,7 @@ import { AstItemKind } from './AstItem';
 import AstItemContainer from './AstItemContainer';
 import { IAstItemOptions } from './AstItem';
 import AstEnumValue from './AstEnumValue';
-import TypeScriptHelpers from '../TypeScriptHelpers';
+import TypeScriptHelpers from '../utils/TypeScriptHelpers';
 
 /**
  * This class is part of the AstItem abstract syntax tree. It represents a TypeScript enum definition.

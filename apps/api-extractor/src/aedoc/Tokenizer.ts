@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import Token, { TokenType } from './Token';
-import TypeScriptHelpers from '../TypeScriptHelpers';
+import TypeScriptHelpers from '../utils/TypeScriptHelpers';
 
 /**
  * Handles the tokenization of an AEDoc comment.

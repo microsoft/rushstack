@@ -9,7 +9,7 @@ import { ExtractorContext } from '../ExtractorContext';
 import ApiDocumentation from '../aedoc/ApiDocumentation';
 import { MarkupElement } from '../markup/MarkupElement';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
-import TypeScriptHelpers from '../TypeScriptHelpers';
+import TypeScriptHelpers from '../utils/TypeScriptHelpers';
 import { Markup } from '../markup/Markup';
 import ResolvedApiItem from '../ResolvedApiItem';
 import ApiDefinitionReference,

@@ -13,7 +13,7 @@ import AstPackage from '../ast/AstPackage';
 import AstMember from '../ast/AstMember';
 import AstNamespace from '../ast/AstNamespace';
 import AstModuleVariable from '../ast/AstModuleVariable';
-import IndentedWriter from '../IndentedWriter';
+import IndentedWriter from '../utils/IndentedWriter';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
 
 /**

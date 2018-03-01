@@ -6,7 +6,7 @@
 import * as ts from 'typescript';
 import { IAstItemOptions } from './AstItem';
 import AstItemContainer from './AstItemContainer';
-import TypeScriptHelpers from '../TypeScriptHelpers';
+import TypeScriptHelpers from '../utils/TypeScriptHelpers';
 import AstStructuredType from './AstStructuredType';
 import AstEnum from './AstEnum';
 import AstFunction from './AstFunction';

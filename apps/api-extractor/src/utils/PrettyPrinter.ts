@@ -5,7 +5,7 @@
 
 import * as ts from 'typescript';
 
-import { Span } from './generators/Span';
+import { Span } from './Span';
 
 /**
   * Some helper functions for formatting certain TypeScript Compiler API expressions.
