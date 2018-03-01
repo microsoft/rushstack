@@ -22,7 +22,7 @@ export class RushVersionSelector {
     const isLegacyRushVersion: boolean = semver.lt(version, '4.0.0');
     const expectedRushPath: string = path.join(this._rushDirectory, `rush-${version}`);
 
-    const installMarker: rushLib.LastInstallFlag = new rushLib.LastInstallFlag(
+    const installMarker: rushLib._LastInstallFlag = new rushLib._LastInstallFlag(
       expectedRushPath,
       { node: process.versions.node }
     );

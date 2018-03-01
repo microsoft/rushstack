@@ -1,3 +1,12 @@
+// @internal
+class _LastInstallFlag {
+  constructor(folderPath: string, _state?: Object);
+  clear(): void;
+  readonly flagPath: string;
+  isValid(): boolean;
+  set(): void;
+}
+
 // @public
 class ApprovedPackagesConfiguration {
   constructor(jsonFilename: string);
@@ -137,20 +146,6 @@ interface IPackageJson {
     [key: string]: string;
   }
   version: string;
-}
-
-// WARNING: Because this definition is explicitly marked as @internal, an underscore prefix ("_") should be added to its name
-// @internal (undocumented)
-class LastInstallFlag {
-  constructor(folderPath: string, _state: Object);
-  // (undocumented)
-  clear(): void;
-  // (undocumented)
-  readonly flagPath: string;
-  // (undocumented)
-  isValid(): boolean;
-  // (undocumented)
-  set(): void;
 }
 
 // @beta

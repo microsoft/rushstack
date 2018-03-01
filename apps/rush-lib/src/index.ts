@@ -47,7 +47,7 @@ export {
 } from './utilities/IPackageJson';
 
 export {
-  LastInstallFlag
+  LastInstallFlag as _LastInstallFlag
 } from './utilities/LastInstallFlag';
 
 export {
