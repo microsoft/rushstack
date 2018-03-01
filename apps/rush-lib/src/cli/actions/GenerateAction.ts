@@ -199,7 +199,7 @@ export default class GenerateAction extends BaseRushAction {
     // won't do anything immediately after "rush generate".  This is a minor performance
     // optimization, but it helps people to understand the semantics of the commands.
     if (installManager.commonNodeModulesMarker.isValid()) {
-      installManager.commonNodeModulesMarker.set();
+      installManager.commonNodeModulesMarker.create();
     } else {
       // Sanity check -- since we requested a clean install above, this should never occur
       throw new Error('The install flag file is missing');

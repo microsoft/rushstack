@@ -183,7 +183,7 @@ export default class InstallManager {
         console.log(`Found ${packageManager} version ${packageManagerVersion} in ${packageManagerToolFolder}`);
       }
 
-      packageManagerMarker.set();
+      packageManagerMarker.create();
 
       // Example: "C:\MyRepo\common\temp"
       if (!fsx.existsSync(this._rushConfiguration.commonTempFolder)) {
@@ -536,7 +536,7 @@ export default class InstallManager {
 
       // NOTE: If commonNodeModulesMarkerFilename (or any of the potentiallyChangedFiles) does not
       // exist, then isFileTimestampCurrent() returns false.
-      if (Utilities.isFileTimestampCurrent(this._commonNodeModulesMarker.flagPath, potentiallyChangedFiles)) {
+      if (Utilities.isFileTimestampCurrent(this._commonNodeModulesMarker.path, potentiallyChangedFiles)) {
         // Nothing to do, because everything is up to date according to time stamps
         return;
       }
@@ -667,7 +667,7 @@ export default class InstallManager {
     this._fixupNpm5Regression();
 
     // Finally, create the marker file to indicate a successful install
-    this._commonNodeModulesMarker.set();
+    this._commonNodeModulesMarker.create();
     console.log('');
   }
 

@@ -7,28 +7,34 @@ export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';
 /**
  * A helper class for managing last-install flags, which are persistent and
  * indicate that something installed in the folder was sucessfully completed.
- * It also compares state, so that if something like the Node JS version has changed,
+ * It also compares state, so that if something like the Node.js version has changed,
  * it can invalidate the last install.
  * @internal
  */
 export class LastInstallFlag {
-  private _flagPath: string;
+  private _path: string;
+  private _state: Object;
 
   /**
    * Creates a new LastInstall flag
    * @param folderPath - the folder that this flag is managing
-   * @param _state - optional, the state that should be managed or compared
+   * @param state - optional, the state that should be managed or compared
   */
-  constructor(folderPath: string, private _state: Object = {}) {
-    this._flagPath = path.join(folderPath, LAST_INSTALL_FLAG_FILE_NAME);
+  constructor(folderPath: string, state: Object = {}) {
+    this._path = path.join(folderPath, LAST_INSTALL_FLAG_FILE_NAME);
+    this._state = state;
   }
 
   /**
    * Returns true if the file exists and the contents match the current state
    */
   public isValid(): boolean {
+    if (!fsx.existsSync(this._path)) {
+      return false;
+    }
     try {
-      return _.isEqual(fsx.readJsonSync(this._flagPath), this._state);
+      const contents: Object = fsx.readJsonSync(this._path);
+      return _.isEqual(contents, this._state);
     } catch (error) {
       return false;
     }
@@ -37,22 +43,22 @@ export class LastInstallFlag {
   /**
    * Writes the flag file to disk with the current state
    */
-  public set(): void {
-    fsx.mkdirsSync(path.dirname(this._flagPath));
-    fsx.writeJsonSync(this._flagPath, this._state);
+  public create(): void {
+    fsx.mkdirsSync(path.dirname(this._path));
+    fsx.writeJsonSync(this._path, this._state);
   }
 
   /**
    * Removes the flag file
    */
   public clear(): void {
-    fsx.removeSync(this._flagPath);
+    fsx.removeSync(this._path);
   }
 
   /**
    * Returns the full path to the flag file
    */
-  public get flagPath(): string {
-    return this._flagPath;
+  public get path(): string {
+    return this._path;
   }
 }

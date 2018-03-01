@@ -44,7 +44,7 @@ export class RushVersionSelector {
     }
 
     // If we've made it here without exception, write the flag file
-    installMarker.set();
+    installMarker.create();
 
     if (semver.lt(version, '3.0.20')) {
       return () => {

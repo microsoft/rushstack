@@ -1,10 +1,10 @@
 // @internal
 class _LastInstallFlag {
-  constructor(folderPath: string, _state?: Object);
+  constructor(folderPath: string, state?: Object);
   clear(): void;
-  readonly flagPath: string;
+  create(): void;
   isValid(): boolean;
-  set(): void;
+  readonly path: string;
 }
 
 // @public
