@@ -139,6 +139,20 @@ interface IPackageJson {
   version: string;
 }
 
+// WARNING: Because this definition is explicitly marked as @internal, an underscore prefix ("_") should be added to its name
+// @internal (undocumented)
+class LastInstallFlag {
+  constructor(folderPath: string, _state: Object);
+  // (undocumented)
+  clear(): void;
+  // (undocumented)
+  readonly flagPath: string;
+  // (undocumented)
+  isValid(): boolean;
+  // (undocumented)
+  set(): void;
+}
+
 // @beta
 class LockStepVersionPolicy extends VersionPolicy {
   // WARNING: The type "ILockStepVersionJson" needs to be exported by the package (e.g. added to index.ts)

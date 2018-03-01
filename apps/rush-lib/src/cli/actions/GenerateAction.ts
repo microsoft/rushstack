@@ -198,9 +198,8 @@ export default class GenerateAction extends BaseRushAction {
     // npm-shrinkwrap file, it's safe to bump the timestamp, which ensures that "rush install"
     // won't do anything immediately after "rush generate".  This is a minor performance
     // optimization, but it helps people to understand the semantics of the commands.
-    if (fsx.existsSync(installManager.commonNodeModulesMarkerFilename)) {
-      fsx.writeFileSync(installManager.commonNodeModulesMarkerFilename,
-        `${this.rushConfiguration.packageManager}@${this.rushConfiguration.packageManagerToolVersion}`);
+    if (installManager.commonNodeModulesMarker.isValid()) {
+      installManager.commonNodeModulesMarker.set();
     } else {
       // Sanity check -- since we requested a clean install above, this should never occur
       throw new Error('The install flag file is missing');

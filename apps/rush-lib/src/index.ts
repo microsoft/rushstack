@@ -47,6 +47,10 @@ export {
 } from './utilities/IPackageJson';
 
 export {
+  LastInstallFlag
+} from './utilities/LastInstallFlag';
+
+export {
   VersionPolicyDefinitionName,
   BumpType,
   LockStepVersionPolicy,
