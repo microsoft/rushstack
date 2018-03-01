@@ -4,7 +4,7 @@
 /* tslint:disable:no-bitwise */
 
 import AstPackage from '../ast/AstPackage';
-import DocElementParser from '../DocElementParser';
+import DocElementParser from './DocElementParser';
 import ApiDefinitionReference, { IApiDefinitionReferenceParts } from '../ApiDefinitionReference';
 import Token, { TokenType } from './Token';
 import Tokenizer from './Tokenizer';
