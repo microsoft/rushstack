@@ -3,7 +3,7 @@
 
 import * as ts from 'typescript';
 import { AstItemKind, IAstItemOptions } from './AstItem';
-import AstMember from './AstMember';
+import { AstMember } from './AstMember';
 
 /**
  * This class is part of the AstItem abstract syntax tree. It represents variables
@@ -11,7 +11,7 @@ import AstMember from './AstMember';
  * The variables have a name, a type, and an initializer. The AstNamespace implementation
  * currently requires them to use a primitive type and be declared as "const".
  */
-class AstModuleVariable extends AstMember {
+export class AstModuleVariable extends AstMember {
   public type: string;
   public name: string;
   public value: string;
@@ -36,5 +36,3 @@ class AstModuleVariable extends AstMember {
     }
   }
 }
-
-export default AstModuleVariable;

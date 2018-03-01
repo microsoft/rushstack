@@ -6,8 +6,8 @@ import * as fsx from 'fs-extra';
 import * as path from 'path';
 import { PackageJsonLookup } from '@microsoft/node-core-library';
 
-import AstPackage from './ast/AstPackage';
-import DocItemLoader from './DocItemLoader';
+import { AstPackage } from './ast/AstPackage';
+import { DocItemLoader } from './DocItemLoader';
 import { ILogger } from './extractor/ILogger';
 import { IExtractorPoliciesConfig } from './extractor/IExtractorConfig';
 

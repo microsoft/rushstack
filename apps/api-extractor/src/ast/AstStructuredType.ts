@@ -6,18 +6,18 @@
 import * as ts from 'typescript';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { Markup } from '../markup/Markup';
-import AstMethod from './AstMethod';
-import AstProperty from './AstProperty';
-import AstItem, { AstItemKind, IAstItemOptions } from './AstItem';
-import AstItemContainer from './AstItemContainer';
-import TypeScriptHelpers from '../utils/TypeScriptHelpers';
-import PrettyPrinter from '../utils/PrettyPrinter';
+import { AstMethod } from './AstMethod';
+import { AstProperty } from './AstProperty';
+import { AstItem, AstItemKind, IAstItemOptions } from './AstItem';
+import { AstItemContainer } from './AstItemContainer';
+import { TypeScriptHelpers } from '../utils/TypeScriptHelpers';
+import { PrettyPrinter } from '../utils/PrettyPrinter';
 
 /**
   * This class is part of the AstItem abstract syntax tree.  It represents a class,
   * interface, or type literal expression.
   */
-export default class AstStructuredType extends AstItemContainer {
+export  class AstStructuredType extends AstItemContainer {
   public implements?: string;
   public extends?: string;
 

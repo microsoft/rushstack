@@ -3,17 +3,17 @@
 
 import * as fs from 'fs';
 import { ExtractorContext } from '../ExtractorContext';
-import AstStructuredType from '../ast/AstStructuredType';
-import AstEnum from '../ast/AstEnum';
-import AstEnumValue from '../ast/AstEnumValue';
-import AstFunction from '../ast/AstFunction';
-import AstItem, { AstItemKind } from '../ast/AstItem';
-import AstItemVisitor from './AstItemVisitor';
-import AstPackage from '../ast/AstPackage';
-import AstMember from '../ast/AstMember';
-import AstNamespace from '../ast/AstNamespace';
-import AstModuleVariable from '../ast/AstModuleVariable';
-import IndentedWriter from '../utils/IndentedWriter';
+import { AstStructuredType } from '../ast/AstStructuredType';
+import { AstEnum } from '../ast/AstEnum';
+import { AstEnumValue } from '../ast/AstEnumValue';
+import { AstFunction } from '../ast/AstFunction';
+import { AstItem,  AstItemKind } from '../ast/AstItem';
+import { AstItemVisitor } from './AstItemVisitor';
+import { AstPackage } from '../ast/AstPackage';
+import { AstMember } from '../ast/AstMember';
+import { AstNamespace } from '../ast/AstNamespace';
+import { AstModuleVariable } from '../ast/AstModuleVariable';
+import { IndentedWriter } from '../utils/IndentedWriter';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
 
 /**
@@ -27,7 +27,7 @@ import { ReleaseTag } from '../aedoc/ReleaseTag';
  *
  * @public
  */
-export default class ApiFileGenerator extends AstItemVisitor {
+export  class ApiFileGenerator extends AstItemVisitor {
   protected _indentedWriter: IndentedWriter = new IndentedWriter();
 
   /**

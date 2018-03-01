@@ -4,9 +4,9 @@
 /* tslint:disable:no-bitwise */
 
 import * as ts from 'typescript';
-import PrettyPrinter from './PrettyPrinter';
+import { PrettyPrinter } from './PrettyPrinter';
 
-export default class TypeScriptHelpers {
+export  class TypeScriptHelpers {
   /**
    * Splits on CRLF and other newline sequences
    */

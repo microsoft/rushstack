@@ -6,15 +6,15 @@
 import * as ts from 'typescript';
 import { ExtractorContext } from '../ExtractorContext';
 import { AstItemKind, IAstItemOptions } from './AstItem';
-import AstModule from './AstModule';
-import TypeScriptHelpers from '../utils/TypeScriptHelpers';
+import { AstModule } from './AstModule';
+import { TypeScriptHelpers } from '../utils/TypeScriptHelpers';
 import { IExportedSymbol } from './IExportedSymbol';
 
 /**
   * This class is part of the AstItem abstract syntax tree.  It represents the top-level
   * exports for an Rush package.  This object acts as the root of the Extractor's tree.
   */
-export default class AstPackage extends AstModule {
+export  class AstPackage extends AstModule {
   private _exportedNormalizedSymbols: IExportedSymbol[] = [];
 
   private static _getOptions(context: ExtractorContext, rootFile: ts.SourceFile): IAstItemOptions {

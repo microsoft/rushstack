@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import AstItem, { AstItemKind, IAstItemOptions } from './AstItem';
-import AstParameter from './AstParameter';
-import TypeScriptHelpers from '../utils/TypeScriptHelpers';
-import PrettyPrinter from '../utils/PrettyPrinter';
+import { AstItem, AstItemKind, IAstItemOptions } from './AstItem';
+import { AstParameter } from './AstParameter';
+import { TypeScriptHelpers } from '../utils/TypeScriptHelpers';
+import { PrettyPrinter } from '../utils/PrettyPrinter';
 
 /**
   * This class is part of the AstItem abstract syntax tree. It represents functions that are directly
@@ -13,7 +13,7 @@ import PrettyPrinter from '../utils/PrettyPrinter';
   *
   * @see AstMethod for functions that are members of classes, interfaces, or nested type literal expressions
   */
-class AstFunction extends AstItem {
+export class AstFunction extends AstItem {
   public returnType: string;
   public params: AstParameter[];
 
@@ -55,5 +55,3 @@ class AstFunction extends AstItem {
     return PrettyPrinter.getDeclarationSummary(this.declaration);
   }
 }
-
-export default AstFunction;

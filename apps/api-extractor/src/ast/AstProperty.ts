@@ -4,13 +4,13 @@
 import * as ts from 'typescript';
 
 import { AstItemKind, IAstItemOptions } from './AstItem';
-import AstMember from './AstMember';
+import { AstMember } from './AstMember';
 
 /**
  * This class is part of the AstItem abstract syntax tree. It represents properties of classes or interfaces
  * (It does not represent member methods)
  */
-class AstProperty extends AstMember {
+export class AstProperty extends AstMember {
   public type: string;
   public isStatic: boolean;
   public isReadOnly: boolean;
@@ -46,5 +46,3 @@ class AstProperty extends AstMember {
     });
   }
 }
-
-export default AstProperty;

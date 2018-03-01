@@ -7,8 +7,8 @@ import * as fs from 'fs';
 import * as ts from 'typescript';
 
 import { ExtractorContext } from '../../ExtractorContext';
-import IndentedWriter from '../../utils/IndentedWriter';
-import TypeScriptHelpers from '../../utils/TypeScriptHelpers';
+import { IndentedWriter } from '../../utils/IndentedWriter';
+import { TypeScriptHelpers } from '../../utils/TypeScriptHelpers';
 import { Span } from '../../utils/Span';
 import { Entry } from './Entry';
 
@@ -38,7 +38,7 @@ interface IFollowAliasesResult {
   importPackageExportName: string | undefined;
 }
 
-export default class PackageTypingsGenerator {
+export  class PackageTypingsGenerator {
   private _context: ExtractorContext;
   private _typeChecker: ts.TypeChecker;
   private _indentedWriter: IndentedWriter = new IndentedWriter();

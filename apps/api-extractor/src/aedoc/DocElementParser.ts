@@ -7,15 +7,15 @@ import {
   MarkupElement
 } from '../markup/MarkupElement';
 import { Markup } from '../markup/Markup';
-import ApiDefinitionReference, { IScopedPackageName } from '../ApiDefinitionReference';
-import ApiDocumentation from '../aedoc/ApiDocumentation';
+import { ApiDefinitionReference, IScopedPackageName } from '../ApiDefinitionReference';
+import { ApiDocumentation } from '../aedoc/ApiDocumentation';
 import { AstItemKind } from '../ast/AstItem';
-import Token, { TokenType } from '../aedoc/Token';
-import Tokenizer from '../aedoc/Tokenizer';
-import ResolvedApiItem from '../ResolvedApiItem';
+import { Token, TokenType } from '../aedoc/Token';
+import { Tokenizer } from '../aedoc/Tokenizer';
+import { ResolvedApiItem } from '../ResolvedApiItem';
 import { IApiItemReference} from '../api/ApiItem';
 
-export default class DocElementParser {
+export  class DocElementParser {
   /**
    * Used to validate the display text for an \@link tag.  The display text can contain any
    * characters except for certain AEDoc delimiters: "@", "|", "{", "}".
