@@ -129,7 +129,7 @@ interface IBuildConfig {
   properties?: {
     [key: string]: any;
   }
-  relogIssues?: boolean;
+  relogIssues: boolean;
   rootPath: string;
   shouldWarningsFailBuild: boolean;
   showToast?: boolean;
@@ -192,12 +192,6 @@ interface IJestConfig {
   moduleDirectories?: string[];
   testMatch?: string[];
   testPathIgnorePatterns?: string[];
-}
-
-// @beta (undocumented)
-interface ILoggerOptions {
-  // (undocumented)
-  shouldRelogIssues: boolean;
 }
 
 // @public
@@ -282,9 +276,6 @@ class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   loadSchema(): Object;
   mergeConfig(config: ITypeScriptTaskConfig): void;
 }
-
-// @beta (undocumented)
-export function updateLoggerOptions(options: Partial<ILoggerOptions>): void;
 
 // @public
 class ValidateShrinkwrapTask extends GulpTask<void> {
