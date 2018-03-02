@@ -92,6 +92,10 @@ export default class GenerateAction extends BaseRushAction {
         + ' because its algorithm always performs a clean installation.'));
     }
 
+    if (this._conservativeParameter.value && this.rushConfiguration.packageManager !== 'pnpm') {
+      throw new Error(`The --conservative flag is only supported for pnpm.`);
+    }
+
     ApprovedPackagesChecker.rewriteConfigFiles(this.rushConfiguration);
 
     const installManager: InstallManager = new InstallManager(this.rushConfiguration);
