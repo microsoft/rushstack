@@ -25,6 +25,7 @@ export default class GenerateAction extends BaseRushAction {
   private _noLinkParameter: CommandLineFlagParameter;
   private _forceParameter: CommandLineFlagParameter;
   private _cleanParameter: CommandLineFlagParameter;
+  private _conservativeParameter: CommandLineFlagParameter;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -66,6 +67,11 @@ export default class GenerateAction extends BaseRushAction {
       description: 'When using pnpm, forces a non-incremental clean install which clears the node_module and pnpm'
         + ' store. Use this if any store corruption has occurred.'
     });
+    this._conservativeParameter = this.defineFlagParameter({
+      parameterLongName: '--conservative',
+      description: 'When using pnpm, this only bumps the minimal set of versions necessary to satisfy'
+      + ' package.json requirements, avoiding a full upgrade of unrelated shrinkwrap dependencies.'
+    });
   }
 
   protected run(): Promise<void> {
@@ -84,6 +90,10 @@ export default class GenerateAction extends BaseRushAction {
     if (this._cleanParameter.value && this.rushConfiguration.packageManager === 'npm') {
       console.warn(colors.yellow('The --clean flag is not required for npm'
         + ' because its algorithm always performs a clean installation.'));
+    }
+
+    if (this._conservativeParameter.value && this.rushConfiguration.packageManager !== 'pnpm') {
+      throw new Error(`The --conservative flag is only supported for pnpm.`);
     }
 
     ApprovedPackagesChecker.rewriteConfigFiles(this.rushConfiguration);
@@ -110,19 +120,29 @@ export default class GenerateAction extends BaseRushAction {
       }
     } catch (ex) {
       console.log();
-      console.log('There was a problem reading the shrinkwrap file. Proceeeding with "rush generate".');
+      console.log('There was a problem reading the shrinkwrap file. Proceeding with "rush generate".');
     }
 
     return installManager.ensureLocalPackageManager(false).then(() => {
       installManager.createTempModules(true);
 
-      // Delete both copies of the shrinkwrap file
-      if (fsx.existsSync(committedShrinkwrapFilename)) {
-        console.log(os.EOL + 'Deleting ' + committedShrinkwrapFilename);
-        fsx.unlinkSync(committedShrinkwrapFilename);
-      }
-      if (fsx.existsSync(tempShrinkwrapFilename)) {
-        fsx.unlinkSync(tempShrinkwrapFilename);
+      if (this._conservativeParameter.value) {
+        if (fsx.existsSync(committedShrinkwrapFilename)) {
+          console.log(os.EOL + 'The "--conservative" flag was provided, so preserving '
+            + committedShrinkwrapFilename);
+        } else {
+          throw new Error('The "--conservative" flag cannot be used because the shrinkwrap file is missing: '
+            + committedShrinkwrapFilename);
+        }
+
+        // Copy common\config\rush\shrinkwrap.yaml --> common\temp\shrinkwrap.yaml
+        console.log(os.EOL + 'Updating ' + tempShrinkwrapFilename);
+        fsx.copySync(committedShrinkwrapFilename, tempShrinkwrapFilename);
+      } else {
+        if (fsx.existsSync(tempShrinkwrapFilename)) {
+          console.log(os.EOL + 'Deleting ' + tempShrinkwrapFilename);
+          fsx.unlinkSync(tempShrinkwrapFilename);
+        }
       }
 
       const packageManager: PackageManager = this.rushConfiguration.packageManager;
@@ -189,7 +209,7 @@ export default class GenerateAction extends BaseRushAction {
   }
 
   private _syncShrinkwrapAndCheckInstallFlag(installManager: InstallManager): void {
-    // Copy (or delete) common\temp\npm-shrinkwrap.json --> common\npm-shrinkwrap.json
+    // Copy (or delete) common\temp\shrinkwrap.yaml --> common\config\rush\shrinkwrap.yaml
     installManager.syncFile(this.rushConfiguration.tempShrinkwrapFilename,
       this.rushConfiguration.committedShrinkwrapFilename);
 
