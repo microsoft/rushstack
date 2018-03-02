@@ -17,7 +17,7 @@ import { ExtractorContext } from '../ExtractorContext';
 import { ILogger } from './ILogger';
 import { ApiJsonGenerator } from '../generators/ApiJsonGenerator';
 import { ApiFileGenerator } from '../generators/ApiFileGenerator';
-import { PackageTypingsGenerator } from '../generators/packageTypings/PackageTypingsGenerator';
+import { PackageTypingsGenerator, PackageTypingsDtsKind } from '../generators/packageTypings/PackageTypingsGenerator';
 import { MonitoredLogger } from './MonitoredLogger';
 
 /**
@@ -153,16 +153,16 @@ export class Extractor {
 
     this._localBuild = options.localBuild || false;
 
-    switch (this._actualConfig.compiler.configType) {
+    switch (this.actualConfig.compiler.configType) {
       case 'tsconfig':
-        const rootFolder: string = this._actualConfig.compiler.rootFolder;
+        const rootFolder: string = this.actualConfig.compiler.rootFolder;
         if (!fsx.existsSync(rootFolder)) {
           throw new Error('The root folder does not exist: ' + rootFolder);
         }
 
         this._absoluteRootFolder = path.normalize(path.resolve(rootFolder));
 
-        let tsconfig: {} | undefined = this._actualConfig.compiler.overrideTsconfig;
+        let tsconfig: {} | undefined = this.actualConfig.compiler.overrideTsconfig;
         if (!tsconfig) {
           // If it wasn't overridden, then load it from disk
           tsconfig = JsonFile.load(path.join(this._absoluteRootFolder, 'tsconfig.json'));
@@ -172,7 +172,7 @@ export class Extractor {
           ts.sys, this._absoluteRootFolder);
 
         const normalizedEntryPointFile: string = path.normalize(
-          path.resolve(this._absoluteRootFolder, this._actualConfig.project.entryPointSourceFile));
+          path.resolve(this._absoluteRootFolder, this.actualConfig.project.entryPointSourceFile));
 
         // Append the normalizedEntryPointFile and remove any source files from the list
         const analysisFilePaths: string[] = Extractor.generateFilePathsForAnalysis(commandLine.fileNames
@@ -248,12 +248,12 @@ export class Extractor {
     }
 
     const projectConfig: IExtractorProjectConfig = options.projectConfig ?
-      options.projectConfig : this._actualConfig.project;
+      options.projectConfig : this.actualConfig.project;
 
     // This helps strict-null-checks to understand that _applyConfigDefaults() eliminated
     // any undefined members
-    if (!(this._actualConfig.policies && this._actualConfig.apiJsonFile && this._actualConfig.apiReviewFile
-      && this._actualConfig.packageTypings)) {
+    if (!(this.actualConfig.policies && this.actualConfig.apiJsonFile && this.actualConfig.apiReviewFile
+      && this.actualConfig.packageTypings)) {
       throw new Error('The configuration object wasn\'t normalized properly');
     }
 
@@ -265,7 +265,7 @@ export class Extractor {
       program: this._program,
       entryPointFile: path.resolve(this._absoluteRootFolder, projectConfig.entryPointSourceFile),
       logger: this._monitoredLogger,
-      policies: this._actualConfig.policies
+      policies: this.actualConfig.policies
     });
 
     for (const externalJsonFileFolder of projectConfig.externalJsonFileFolders || []) {
@@ -274,7 +274,7 @@ export class Extractor {
 
     const packageBaseName: string = path.basename(context.packageName);
 
-    const apiJsonFileConfig: IExtractorApiJsonFileConfig = this._actualConfig.apiJsonFile;
+    const apiJsonFileConfig: IExtractorApiJsonFileConfig = this.actualConfig.apiJsonFile;
 
     if (apiJsonFileConfig.enabled) {
       const outputFolder: string = path.resolve(this._absoluteRootFolder,
@@ -288,16 +288,16 @@ export class Extractor {
       jsonGenerator.writeJsonFile(apiJsonFilename, context);
     }
 
-    if (this._actualConfig.apiReviewFile.enabled) {
+    if (this.actualConfig.apiReviewFile.enabled) {
       const generator: ApiFileGenerator = new ApiFileGenerator();
       const apiReviewFilename: string = packageBaseName + '.api.ts';
 
       const actualApiReviewPath: string = path.resolve(this._absoluteRootFolder,
-        this._actualConfig.apiReviewFile.tempFolder, apiReviewFilename);
+        this.actualConfig.apiReviewFile.tempFolder, apiReviewFilename);
       const actualApiReviewShortPath: string = this._getShortFilePath(actualApiReviewPath);
 
       const expectedApiReviewPath: string = path.resolve(this._absoluteRootFolder,
-        this._actualConfig.apiReviewFile.apiReviewFolder, apiReviewFilename);
+        this.actualConfig.apiReviewFile.apiReviewFolder, apiReviewFilename);
       const expectedApiReviewShortPath: string = this._getShortFilePath(expectedApiReviewPath);
 
       const actualApiReviewContent: string = generator.generateApiFileContent(context);
@@ -339,17 +339,13 @@ export class Extractor {
       }
     }
 
-    if (this._actualConfig.packageTypings.enabled) {
+    if (this.actualConfig.packageTypings.enabled) {
       const packageTypingsGenerator: PackageTypingsGenerator = new PackageTypingsGenerator(context);
+      packageTypingsGenerator.analyze();
 
-      const dtsFilename: string = path.resolve(this._absoluteRootFolder,
-        this._actualConfig.packageTypings.outputFolder, this._actualConfig.packageTypings.dtsFilePathForInternal);
-
-      this._monitoredLogger.logVerbose(`Writing package typings: ${dtsFilename}`);
-
-      fsx.mkdirsSync(path.dirname(dtsFilename));
-
-      packageTypingsGenerator.writeTypingsFile(dtsFilename);
+      this._generateTypingsFile(packageTypingsGenerator,
+        this.actualConfig.packageTypings.dtsFilePathForInternal!,
+        PackageTypingsDtsKind.internalRelease);
     }
 
     if (this._localBuild) {
@@ -360,6 +356,18 @@ export class Extractor {
       return (this._monitoredLogger.errorCount + this._monitoredLogger.warningCount) === 0;
     }
   }
+
+  private _generateTypingsFile(packageTypingsGenerator: PackageTypingsGenerator,
+    dtsFilePath: string, dtsKind: PackageTypingsDtsKind): void {
+    const dtsFilename: string = path.resolve(this._absoluteRootFolder,
+      this.actualConfig.packageTypings!.outputFolder, dtsFilePath);
+
+    this._monitoredLogger.logVerbose(`Writing package typings: ${dtsFilename}`);
+
+    fsx.mkdirsSync(path.dirname(dtsFilename));
+
+    packageTypingsGenerator.writeTypingsFile(dtsFilename, dtsKind);
+}
 
   private _getShortFilePath(absolutePath: string): string {
     if (!path.isAbsolute(absolutePath)) {

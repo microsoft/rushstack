@@ -13,10 +13,34 @@ import { Span } from '../../utils/Span';
 import { Entry } from './Entry';
 import { SymbolAnalyzer, IFollowAliasesResult } from './SymbolAnalyzer';
 
+/**
+ * Used with PackageTypingsGenerator.writeTypingsFile()
+ */
+export enum PackageTypingsDtsKind {
+  /**
+   * Generate a *.d.ts file for an internal release.
+   * This output file will contain all definitions that are reachable from the entry point.
+   */
+  internalRelease,
+
+  /**
+   * Generate a *.d.ts file for a preview release.
+   * This output file will contain all definitions that are reachable from the entry point,
+   * except definitions marked as \@alpha or \@internal.
+   */
+  previewRelease,
+
+  /**
+   * Generate a *.d.ts file for a public release.
+   * This output file will contain all definitions that are reachable from the entry point,
+   * except definitions marked as \@beta, \@alpha, or \@internal.
+   */
+  publicRelease
+}
+
 export class PackageTypingsGenerator {
   private _context: ExtractorContext;
   private _typeChecker: ts.TypeChecker;
-  private _indentedWriter: IndentedWriter = new IndentedWriter();
 
   /**
    * A mapping from Entry.followedSymbol --> Entry.
@@ -42,24 +66,26 @@ export class PackageTypingsGenerator {
   private readonly _typeDirectiveReferences: string[] = [];
   private readonly _typeDirectiveReferencesFiles: Set<string> = new Set<string>();
 
+  private _analyzed: boolean = false;
+
+  /**
+   * Warnings encountered during the analyze() stage
+   */
+  private readonly _analyzeWarnings: string[] = [];
+
   public constructor(context: ExtractorContext) {
     this._context = context;
     this._typeChecker = context.typeChecker;
   }
 
   /**
-   * Generates the typings file and writes it to disk.
-   *
-   * @param dtsFilename    - The *.d.ts output filename
+   * Perform the analysis.  This must be called before writeTypingsFile().
    */
-  public writeTypingsFile(dtsFilename: string): void {
-    const fileContent: string = this.generateTypingsFileContent();
-    fs.writeFileSync(dtsFilename, fileContent);
-  }
-
-  public generateTypingsFileContent(): string {
-    this._indentedWriter.spacing = '';
-    this._indentedWriter.clear();
+  public analyze(): void {
+    if (this._analyzed) {
+      throw new Error('analyze() was already called');
+    }
+    this._analyzed = true;
 
     const packageSymbol: ts.Symbol = this._context.package.getDeclarationSymbol();
 
@@ -71,21 +97,49 @@ export class PackageTypingsGenerator {
       if (!entry) {
         // This is an export of the current package, but for some reason _fetchEntryForSymbol()
         // can't analyze it.
-        this._indentedWriter.writeLine('// Unsupported re-export: ' + exportSymbol.name);
+        this._analyzeWarnings.push('Unsupported re-export: ' + exportSymbol.name);
       } else {
         entry.exported = true;
       }
     }
 
     this._makeUniqueNames();
-
     this._entries.sort((a, b) => a.getSortKey().localeCompare(b.getSortKey()));
+  }
+
+  /**
+   * Generates the typings file and writes it to disk.
+   *
+   * @param dtsFilename    - The *.d.ts output filename
+   */
+  public writeTypingsFile(dtsFilename: string, dtsKind: PackageTypingsDtsKind): void {
+    if (!this._analyzed) {
+      throw new Error('analyze() was not called');
+    }
+
+    const indentedWriter: IndentedWriter = new IndentedWriter();
+
+    this._generateTypingsFileContent(indentedWriter, dtsKind);
+
+    // Normalize to CRLF
+    const fileContent: string = indentedWriter.toString().replace(/\r?\n/g, '\r\n');
+
+    fs.writeFileSync(dtsFilename, fileContent);
+  }
+
+  private _generateTypingsFileContent(indentedWriter: IndentedWriter, dtsKind: PackageTypingsDtsKind): void {
+    indentedWriter.spacing = '';
+    indentedWriter.clear();
+
+    for (const analyzeWarning of this._analyzeWarnings) {
+      indentedWriter.writeLine('// ' + analyzeWarning);
+    }
 
     // If there is a @packagedocumentation header, put it first:
     const packageDocumentation: string = this._context.package.documentation.originalAedoc;
     if (packageDocumentation) {
-      this._indentedWriter.writeLine(TypeScriptHelpers.formatJSDocContent(packageDocumentation));
-      this._indentedWriter.writeLine();
+      indentedWriter.writeLine(TypeScriptHelpers.formatJSDocContent(packageDocumentation));
+      indentedWriter.writeLine();
     }
 
     // Emit the triple slash directives
@@ -93,20 +147,20 @@ export class PackageTypingsGenerator {
     for (const typeDirectiveReference of this._typeDirectiveReferences) {
       // tslint:disable-next-line:max-line-length
       // https://github.com/Microsoft/TypeScript/blob/611ebc7aadd7a44a4c0447698bfda9222a78cb66/src/compiler/declarationEmitter.ts#L162
-      this._indentedWriter.writeLine(`/// <reference types="${typeDirectiveReference}" />`);
+      indentedWriter.writeLine(`/// <reference types="${typeDirectiveReference}" />`);
     }
 
     // Emit the imports
     for (const entry of this._entries) {
       if (entry.importPackagePath) {
         if (entry.importPackageExportName === '*') {
-          this._indentedWriter.write(`import * as ${entry.uniqueName}`);
+          indentedWriter.write(`import * as ${entry.uniqueName}`);
         } else if (entry.uniqueName !== entry.importPackageExportName) {
-          this._indentedWriter.write(`import { ${entry.importPackageExportName} as ${entry.uniqueName} }`);
+          indentedWriter.write(`import { ${entry.importPackageExportName} as ${entry.uniqueName} }`);
         } else {
-          this._indentedWriter.write(`import { ${entry.importPackageExportName} }`);
+          indentedWriter.write(`import { ${entry.importPackageExportName} }`);
         }
-        this._indentedWriter.writeLine(` from '${entry.importPackagePath}';`);
+        indentedWriter.writeLine(` from '${entry.importPackagePath}';`);
       }
     }
 
@@ -119,15 +173,11 @@ export class PackageTypingsGenerator {
 
           this._modifySpan(span, entry);
 
-          this._indentedWriter.writeLine();
-          this._indentedWriter.writeLine(span.getModifiedText());
+          indentedWriter.writeLine();
+          indentedWriter.writeLine(span.getModifiedText());
         }
       }
     }
-
-    // Normalize to CRLF
-    const fileContent: string = this._indentedWriter.toString().replace(/\r?\n/g, '\r\n');
-    return fileContent;
   }
 
   /**
