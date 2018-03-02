@@ -1,3 +1,12 @@
+// @internal
+class _LastInstallFlag {
+  constructor(folderPath: string, state?: Object);
+  clear(): void;
+  create(): void;
+  isValid(): boolean;
+  readonly path: string;
+}
+
 // @public
 class ApprovedPackagesConfiguration {
   constructor(jsonFilename: string);

@@ -23,6 +23,7 @@ import { Stopwatch } from '../../utilities/Stopwatch';
 import IPackageJson from '../../utilities/IPackageJson';
 import { IRushTempPackageJson } from '../logic/base/BasePackage';
 import { BaseShrinkwrapFile } from '../logic/base/BaseShrinkwrapFile';
+import { LastInstallFlag } from '../../utilities/LastInstallFlag';
 
 const MAX_INSTALL_ATTEMPTS: number = 5;
 
@@ -54,7 +55,7 @@ export enum InstallType {
  */
 export default class InstallManager {
   private _rushConfiguration: RushConfiguration;
-  private _commonNodeModulesMarkerFilename: string;
+  private _commonNodeModulesMarker: LastInstallFlag;
   private _asyncRecycler: AsyncRecycler;
 
   /**
@@ -121,24 +122,20 @@ export default class InstallManager {
     }
   }
 
+  public get commonNodeModulesMarker(): LastInstallFlag {
+    return this._commonNodeModulesMarker;
+  }
+
   constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
 
-    // Example: "C:\MyRepo\common\last-install.flag"
-    this._commonNodeModulesMarkerFilename = path.join(
-      this._rushConfiguration.commonTempFolder, 'last-install.flag');
+    this._commonNodeModulesMarker = new LastInstallFlag(this._rushConfiguration.commonTempFolder, {
+      node: process.versions.node,
+      packageManager: rushConfiguration.packageManager,
+      packageManagerVersion: rushConfiguration.packageManagerToolVersion
+    });
 
     this._asyncRecycler = new AsyncRecycler(this._rushConfiguration);
-  }
-
-  /**
-   * Returns the filename of the flag file used to detect invalid installations.
-   * The file itself may not actually exist.  If the file exists, it means an "npm install"
-   * was successfully completed for the "common/node_modules" folder.
-   * Example: "C:\MyRepo\common\last-install.flag"
-   */
-  public get commonNodeModulesMarkerFilename(): string {
-    return this._commonNodeModulesMarkerFilename;
   }
 
   /**
@@ -161,13 +158,18 @@ export default class InstallManager {
     // Example: "C:\Users\YourName\.rush\pnpm-1.2.3"
     const packageManagerToolFolder: string = path.join(rushHomeFolder, packageManagerAndVersion);
 
+    const packageManagerMarker: LastInstallFlag = new LastInstallFlag(packageManagerToolFolder, {
+      node: process.versions.node
+    });
+
     console.log(`Trying to acquire lock for ${packageManagerAndVersion}`);
     return LockFile.acquire(rushHomeFolder, packageManagerAndVersion).then((lock: LockFile) => {
       console.log(`Acquired lock for ${packageManagerAndVersion}`);
 
-      if (forceReinstall || lock.dirtyWhenAcquired) {
+      if (!packageManagerMarker.isValid() || forceReinstall || lock.dirtyWhenAcquired) {
         console.log(colors.bold(`Installing ${packageManager} version ${packageManagerVersion}${os.EOL}`));
 
+        // note that this will remove the last-install flag from the directory
         Utilities.installPackageInDirectory(
           packageManagerToolFolder,
           packageManager,
@@ -180,6 +182,8 @@ export default class InstallManager {
       } else {
         console.log(`Found ${packageManager} version ${packageManagerVersion} in ${packageManagerToolFolder}`);
       }
+
+      packageManagerMarker.create();
 
       // Example: "C:\MyRepo\common\temp"
       if (!fsx.existsSync(this._rushConfiguration.commonTempFolder)) {
@@ -504,16 +508,7 @@ export default class InstallManager {
       'node_modules');
 
     // This marker file indicates that the last "rush install" completed successfully
-    let markerFileExistedAndWasValidAtStart: boolean = false;
-
-    if (fsx.existsSync(this.commonNodeModulesMarkerFilename)) {
-      const markerFileContents: string = fsx.readFileSync(this.commonNodeModulesMarkerFilename).toString();
-      const expectedFileContents: string =
-        `${this._rushConfiguration.packageManager}@${this._rushConfiguration.packageManagerToolVersion}`;
-      if (markerFileContents === expectedFileContents) {
-        markerFileExistedAndWasValidAtStart = true;
-      }
-    }
+    const markerFileExistedAndWasValidAtStart: boolean = this._commonNodeModulesMarker.isValid();
 
     // If "--clean" or "--full-clean" was specified, or if the last install was interrupted,
     // then we will need to delete the node_modules folder.  Otherwise, we can do an incremental
@@ -541,7 +536,7 @@ export default class InstallManager {
 
       // NOTE: If commonNodeModulesMarkerFilename (or any of the potentiallyChangedFiles) does not
       // exist, then isFileTimestampCurrent() returns false.
-      if (Utilities.isFileTimestampCurrent(this.commonNodeModulesMarkerFilename, potentiallyChangedFiles)) {
+      if (Utilities.isFileTimestampCurrent(this._commonNodeModulesMarker.path, potentiallyChangedFiles)) {
         // Nothing to do, because everything is up to date according to time stamps
         return;
       }
@@ -560,10 +555,8 @@ export default class InstallManager {
       }
     }
 
-    if (fsx.existsSync(this.commonNodeModulesMarkerFilename)) {
-      // Delete the successful install file to indicate the install transaction has started
-      fsx.unlinkSync(this.commonNodeModulesMarkerFilename);
-    }
+    // Delete the successful install file to indicate the install transaction has started
+    this._commonNodeModulesMarker.clear();
 
     // Since we're tampering with common/node_modules, delete the "rush link" flag file if it exists;
     // this ensures that a full "rush link" is required next time
@@ -674,10 +667,7 @@ export default class InstallManager {
     this._fixupNpm5Regression();
 
     // Finally, create the marker file to indicate a successful install
-    const lastInstallFlagContents: string =
-      `${this._rushConfiguration.packageManager}@${this._rushConfiguration.packageManagerToolVersion}`;
-
-    fsx.writeFileSync(this.commonNodeModulesMarkerFilename, lastInstallFlagContents);
+    this._commonNodeModulesMarker.create();
     console.log('');
   }
 
