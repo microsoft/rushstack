@@ -174,7 +174,6 @@ function afterStreamsFlushed(callback: () => void): void {
 }
 
 function writeSummary(callback: () => void): void {
-  const shouldRelogIssues: boolean = getFlagValue('relogIssues');
 
   localCache.writeSummaryCallbacks.push(callback);
 
@@ -183,6 +182,7 @@ function writeSummary(callback: () => void): void {
 
     // flush the log
     afterStreamsFlushed(() => {
+      const shouldRelogIssues: boolean = getFlagValue('relogIssues');
       log(colors.magenta('==================[ Finished ]=================='));
 
       const warnings: string[] = getWarnings();
