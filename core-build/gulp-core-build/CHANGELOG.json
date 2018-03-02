@@ -2,6 +2,23 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.6.8",
+      "tag": "@microsoft/gulp-core-build_v3.6.8",
+      "date": "Fri, 02 Mar 2018 01:13:59 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix the \"relogIssues\" buld config option."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.7.2` to `0.7.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.6.7",
       "tag": "@microsoft/gulp-core-build_v3.6.7",
       "date": "Tue, 27 Feb 2018 22:05:57 GMT",
