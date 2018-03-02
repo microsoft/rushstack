@@ -1,6 +1,24 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 26 Jan 2018 00:36:51 GMT and should not be manually modified.
+This log was last generated on Fri, 02 Mar 2018 02:45:37 GMT and should not be manually modified.
+
+## 4.3.0
+Fri, 02 Mar 2018 02:45:37 GMT
+
+### Updates
+
+- Fix an issue where we always deleted the pnpm store. This is not necessary since the store is transactional. We should only delete the store if it is a --clean install.
+- Fix an issue where the package manager installation could get corrupted if the Rush tool was accidentally invoked multiple times concurrently.
+- Fix issue with pnpm where store was not removed after an unsuccessful installation
+- When Rush links PNPM packages to their dependencies, it should link to the realpath, rather than linking to the symlink. This will improve performance of builds by reducing the number of file system reads that are needed.
+- Update Rush to consider the shrinkwrap file during incremental builds.
+- Add a --changed-projects-only flag to 'rush build', which will skip rebuilding of downstream packages. It will only rebuild projects that change, but not their dependents.
+- Add a locking mechanism around certain rush commands so only one process can be working in a Rush repository at a single point in time. This is useful for commands that may corrupt each other, like generate, install, link, and rebuild.
+- When using pnpm, Rush will check and see if other projects are using a dependency and will re-use it if possible. This way, a user will not have to run "rush generate" if they are adding a dependency that is already being used elsewhere in the monorepo.
+- Add a notice for unsupported versions of NodeJS runtime
+- Add a new command-line flag "--conservative" which causes "rush generate" to perform a minimal upgrade
+- Improved "rush generate" so that if interrupted, it does not leave you with a deleted shrinkwrap.yaml; the new integrity checks eliminate the need for this, and it was annoying
+- Fix Rush version increase logic to handle cyclic dependencies properly
 
 ## 4.2.5
 Fri, 26 Jan 2018 00:36:51 GMT
