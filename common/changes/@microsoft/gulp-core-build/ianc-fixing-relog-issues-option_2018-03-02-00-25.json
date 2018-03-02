@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/gulp-core-build",
-      "comment": "Fix the \"reolgIssues\" buld config option.",
+      "comment": "Fix the \"relogIssues\" buld config option.",
       "type": "patch"
     }
   ],
