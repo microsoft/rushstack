@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Add a --no-deps flag to 'rush build', which will skip rebuilding of downstream packages. It will only rebuild projects that change, but not their dependents.",
+      "comment": "Add a --changed-projects-only flag to 'rush build', which will skip rebuilding of downstream packages. It will only rebuild projects that change, but not their dependents.",
       "packageName": "@microsoft/rush",
       "type": "none"
     }

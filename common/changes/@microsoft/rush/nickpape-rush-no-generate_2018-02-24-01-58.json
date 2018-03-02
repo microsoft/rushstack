@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "When using PNPM, Rush will check and see if other projects are using a dependency and will re-use it if possible. This way, a user will not have to run \"rush generate\" if they are adding a dependency that is already being used elsewhere in the monorepo.",
+      "comment": "When using pnpm, Rush will check and see if other projects are using a dependency and will re-use it if possible. This way, a user will not have to run \"rush generate\" if they are adding a dependency that is already being used elsewhere in the monorepo.",
       "packageName": "@microsoft/rush",
       "type": "none"
     }

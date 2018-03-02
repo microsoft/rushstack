@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Fix an issue where we always deleted the PNPM store. This is not necessary since the store is transactional. We should only delete the store if it is a --clean install.",
+      "comment": "Fix an issue where we always deleted the pnpm store. This is not necessary since the store is transactional. We should only delete the store if it is a --clean install.",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
