@@ -101,6 +101,7 @@ export default class GenerateAction extends BaseRushAction {
     const installManager: InstallManager = new InstallManager(this.rushConfiguration);
 
     const committedShrinkwrapFilename: string = this.rushConfiguration.committedShrinkwrapFilename;
+    const tempShrinkwrapFilename: string = this.rushConfiguration.tempShrinkwrapFilename;
 
     try {
       const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
@@ -127,15 +128,22 @@ export default class GenerateAction extends BaseRushAction {
 
       if (this._conservativeParameter.value) {
         if (fsx.existsSync(committedShrinkwrapFilename)) {
-          console.log(os.EOL + 'Preserving ' + committedShrinkwrapFilename);
+          console.log(os.EOL + 'The "--conservative" flag was provided, so preserving '
+            + committedShrinkwrapFilename);
         } else {
-          console.log(os.EOL + 'Missing ' + committedShrinkwrapFilename);
+          throw new Error('The "--conservative" flag cannot be used because the shrinkwrap file is missing: '
+            + committedShrinkwrapFilename);
+        }
+
+        // Copy common\config\rush\shrinkwrap.yaml --> common\temp\shrinkwrap.yaml
+        console.log(os.EOL + 'Updating ' + tempShrinkwrapFilename);
+        fsx.copySync(committedShrinkwrapFilename, tempShrinkwrapFilename);
+      } else {
+        if (fsx.existsSync(tempShrinkwrapFilename)) {
+          console.log(os.EOL + 'Deleting ' + tempShrinkwrapFilename);
+          fsx.unlinkSync(tempShrinkwrapFilename);
         }
       }
-
-      // Copy (or delete) common\config\rush\shrinkwrap.yaml --> common\temp\shrinkwrap.yaml
-      installManager.syncFile(this.rushConfiguration.committedShrinkwrapFilename,
-        this.rushConfiguration.tempShrinkwrapFilename);
 
       const packageManager: PackageManager = this.rushConfiguration.packageManager;
 
