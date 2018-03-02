@@ -4,9 +4,8 @@
 import * as colors from 'colors';
 import * as Gulp from 'gulp';
 import * as path from 'path';
-/* tslint:disable:typedef */
-const prettyTime = require('pretty-hrtime');
-/* tslint:enable:typedef */
+const prettyTime = require('pretty-hrtime'); // tslint:disable-line:typedef
+
 import { IBuildConfig } from './IBuildConfig';
 import * as state from './State';
 import { getFlagValue } from './config';
@@ -174,9 +173,9 @@ function afterStreamsFlushed(callback: () => void): void {
 }
 
 function writeSummary(callback: () => void): void {
-  const shouldRelogIssues: boolean = getFlagValue('relogIssues');
-
   localCache.writeSummaryCallbacks.push(callback);
+
+  const shouldRelogIssues: boolean = getConfig().relogIssues;
 
   if (!localCache.writingSummary) {
     localCache.writingSummary = true;

@@ -129,7 +129,7 @@ interface IBuildConfig {
   properties?: {
     [key: string]: any;
   }
-  relogIssues?: boolean;
+  relogIssues: boolean;
   rootPath: string;
   shouldWarningsFailBuild: boolean;
   showToast?: boolean;
