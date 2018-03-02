@@ -25,6 +25,7 @@ export default class GenerateAction extends BaseRushAction {
   private _noLinkParameter: CommandLineFlagParameter;
   private _forceParameter: CommandLineFlagParameter;
   private _cleanParameter: CommandLineFlagParameter;
+  private _conservativeParameter: CommandLineFlagParameter;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -66,6 +67,11 @@ export default class GenerateAction extends BaseRushAction {
       description: 'When using pnpm, forces a non-incremental clean install which clears the node_module and pnpm'
         + ' store. Use this if any store corruption has occurred.'
     });
+    this._conservativeParameter = this.defineFlagParameter({
+      parameterLongName: '--conservative',
+      description: 'When using pnpm, this only bumps the minimal set of versions necessary to satisfy'
+      + ' package.json requirements, avoiding a full upgrade of unrelated shrinkwrap dependencies.'
+    });
   }
 
   protected run(): Promise<void> {
@@ -91,7 +97,6 @@ export default class GenerateAction extends BaseRushAction {
     const installManager: InstallManager = new InstallManager(this.rushConfiguration);
 
     const committedShrinkwrapFilename: string = this.rushConfiguration.committedShrinkwrapFilename;
-    const tempShrinkwrapFilename: string = this.rushConfiguration.tempShrinkwrapFilename;
 
     try {
       const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
@@ -110,20 +115,23 @@ export default class GenerateAction extends BaseRushAction {
       }
     } catch (ex) {
       console.log();
-      console.log('There was a problem reading the shrinkwrap file. Proceeeding with "rush generate".');
+      console.log('There was a problem reading the shrinkwrap file. Proceeding with "rush generate".');
     }
 
     return installManager.ensureLocalPackageManager(false).then(() => {
       installManager.createTempModules(true);
 
-      // Delete both copies of the shrinkwrap file
-      if (fsx.existsSync(committedShrinkwrapFilename)) {
-        console.log(os.EOL + 'Deleting ' + committedShrinkwrapFilename);
-        fsx.unlinkSync(committedShrinkwrapFilename);
+      if (this._conservativeParameter.value) {
+        if (fsx.existsSync(committedShrinkwrapFilename)) {
+          console.log(os.EOL + 'Preserving ' + committedShrinkwrapFilename);
+        } else {
+          console.log(os.EOL + 'Missing ' + committedShrinkwrapFilename);
+        }
       }
-      if (fsx.existsSync(tempShrinkwrapFilename)) {
-        fsx.unlinkSync(tempShrinkwrapFilename);
-      }
+
+      // Copy (or delete) common\config\rush\shrinkwrap.yaml --> common\temp\shrinkwrap.yaml
+      installManager.syncFile(this.rushConfiguration.committedShrinkwrapFilename,
+        this.rushConfiguration.tempShrinkwrapFilename);
 
       const packageManager: PackageManager = this.rushConfiguration.packageManager;
 
@@ -189,7 +197,7 @@ export default class GenerateAction extends BaseRushAction {
   }
 
   private _syncShrinkwrapAndCheckInstallFlag(installManager: InstallManager): void {
-    // Copy (or delete) common\temp\npm-shrinkwrap.json --> common\npm-shrinkwrap.json
+    // Copy (or delete) common\temp\shrinkwrap.yaml --> common\config\rush\shrinkwrap.yaml
     installManager.syncFile(this.rushConfiguration.tempShrinkwrapFilename,
       this.rushConfiguration.committedShrinkwrapFilename);
 
