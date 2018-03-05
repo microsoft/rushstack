@@ -346,7 +346,15 @@ export class Extractor {
       this._generateTypingsFile(packageTypingsGenerator,
         this.actualConfig.packageTypings.dtsFilePathForInternal!,
         PackageTypingsDtsKind.internalRelease);
-    }
+
+      this._generateTypingsFile(packageTypingsGenerator,
+        this.actualConfig.packageTypings.dtsFilePathForPreview!,
+        PackageTypingsDtsKind.previewRelease);
+
+      this._generateTypingsFile(packageTypingsGenerator,
+        this.actualConfig.packageTypings.dtsFilePathForPublic!,
+        PackageTypingsDtsKind.publicRelease);
+      }
 
     if (this._localBuild) {
       // For a local build, fail if there were errors (but ignore warnings)
