@@ -12,6 +12,8 @@ import { TypeScriptHelpers } from '../../utils/TypeScriptHelpers';
 import { Span } from '../../utils/Span';
 import { Entry } from './Entry';
 import { SymbolAnalyzer, IFollowAliasesResult } from './SymbolAnalyzer';
+import { ReleaseTag } from '../../aedoc/ReleaseTag';
+import { release } from 'os';
 
 /**
  * Used with PackageTypingsGenerator.writeTypingsFile()
@@ -21,21 +23,21 @@ export enum PackageTypingsDtsKind {
    * Generate a *.d.ts file for an internal release.
    * This output file will contain all definitions that are reachable from the entry point.
    */
-  internalRelease,
+  InternalRelease,
 
   /**
    * Generate a *.d.ts file for a preview release.
    * This output file will contain all definitions that are reachable from the entry point,
    * except definitions marked as \@alpha or \@internal.
    */
-  previewRelease,
+  PreviewRelease,
 
   /**
    * Generate a *.d.ts file for a public release.
    * This output file will contain all definitions that are reachable from the entry point,
    * except definitions marked as \@beta, \@alpha, or \@internal.
    */
-  publicRelease
+  PublicRelease
 }
 
 export class PackageTypingsGenerator {
@@ -319,6 +321,50 @@ export class PackageTypingsGenerator {
     return this._entriesBySymbol.get(followAliasesResult.followedSymbol);
   }
 
+  // NOTE: THIS IS A TEMPORARY HACK.
+  // In the near future we will overhaul the AEDoc parser to separate syntactic/semantic analysis,
+  // at which point this will be wired up to the same ApiDocumentation layer used for the API Review files
+  private _getReleaseTagForSymbol(symbol: ts.Symbol): ReleaseTag {
+    const fullyFollowedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(symbol, this._typeChecker);
+
+    let releaseTag: ReleaseTag = ReleaseTag.None;
+
+    const releaseTagRegExp: RegExp = /(?:\s|\*)@(internal|alpha|beta|public)/g;
+
+    for (const declaration of fullyFollowedSymbol.declarations || []) {
+      const sourceFileText: string = declaration.getSourceFile().text;
+
+      for (const commentRange of TypeScriptHelpers.getJSDocCommentRanges(declaration, sourceFileText) || []) {
+        // NOTE: This string includes "/**"
+        const comment: string = sourceFileText.substring(commentRange.pos, commentRange.end);
+
+        let match: RegExpMatchArray | null;
+        while (match = releaseTagRegExp.exec(comment)) {
+          let foundReleaseTag: ReleaseTag = ReleaseTag.None;
+          switch (match[1]) {
+            case 'internal':
+              foundReleaseTag = ReleaseTag.Internal; break;
+            case 'alpha':
+              foundReleaseTag = ReleaseTag.Alpha; break;
+            case 'beta':
+              foundReleaseTag = ReleaseTag.Beta; break;
+            case 'public':
+              foundReleaseTag = ReleaseTag.Public; break;
+          }
+
+          if (releaseTag !== ReleaseTag.None && foundReleaseTag !== releaseTag) {
+            this._analyzeWarnings.push('WARNING: Conflicting release tags found for ' + symbol.name);
+            return releaseTag;
+          }
+
+          releaseTag = foundReleaseTag;
+        }
+      }
+    }
+
+    return releaseTag;
+  }
+
   /**
    * Looks up the corresponding Entry for the requested symbol.  If it doesn't exist,
    * then it tries to create one.
@@ -353,13 +399,16 @@ export class PackageTypingsGenerator {
       }
 
       if (!entry) {
+        const releaseTag: ReleaseTag = this._getReleaseTagForSymbol(symbol);
+
         // None of the above lookups worked, so create a new entry
         entry = new Entry({
           localName: followAliasesResult.localName,
           followedSymbol: followAliasesResult.followedSymbol,
           importPackagePath: followAliasesResult.importPackagePath,
           importPackageExportName: followAliasesResult.importPackageExportName,
-          importPackageKey: importPackageKey
+          importPackageKey: importPackageKey,
+          releaseTag: releaseTag
         });
 
         this._entries.push(entry);

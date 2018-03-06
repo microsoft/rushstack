@@ -345,15 +345,15 @@ export class Extractor {
 
       this._generateTypingsFile(packageTypingsGenerator,
         this.actualConfig.packageTypings.dtsFilePathForInternal!,
-        PackageTypingsDtsKind.internalRelease);
+        PackageTypingsDtsKind.InternalRelease);
 
       this._generateTypingsFile(packageTypingsGenerator,
         this.actualConfig.packageTypings.dtsFilePathForPreview!,
-        PackageTypingsDtsKind.previewRelease);
+        PackageTypingsDtsKind.PreviewRelease);
 
       this._generateTypingsFile(packageTypingsGenerator,
         this.actualConfig.packageTypings.dtsFilePathForPublic!,
-        PackageTypingsDtsKind.publicRelease);
+        PackageTypingsDtsKind.PublicRelease);
       }
 
     if (this._localBuild) {
