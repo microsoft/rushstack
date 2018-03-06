@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 02 Mar 2018 01:13:59 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Mar 2018 17:04:51 GMT and should not be manually modified.
+
+## 5.3.7
+Tue, 06 Mar 2018 17:04:51 GMT
+
+### Patches
+
+- Add preliminary support for preview and public outputs for packageTypings gtenerator
 
 ## 5.3.6
 Fri, 02 Mar 2018 01:13:59 GMT
