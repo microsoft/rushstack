@@ -7,21 +7,7 @@
  */
 
 
-/**
- * This is an alpha class.
- * @alpha
- */
-export declare class AlphaClass {
-    /**
-     * This is a comment
-     */
-    undecoratedMember(): void;
-    /**
-     * This is an internal member
-     * @internal
-     */
-    _internalMember(): void;
-}
+// Removed for this release type: AlphaClass
 
 /**
  * This is a beta class
@@ -44,16 +30,7 @@ export declare class BetaClass {
     _internalMember(): void;
 }
 
-/**
- * This is an internal class
- * @internal
- */
-export declare class InternalClass {
-    /**
-     * This is a comment
-     */
-    undecoratedMember(): void;
-}
+// Removed for this release type: InternalClass
 
 /**
  * This is a public class

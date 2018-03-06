@@ -7,53 +7,11 @@
  */
 
 
-/**
- * This is an alpha class.
- * @alpha
- */
-export declare class AlphaClass {
-    /**
-     * This is a comment
-     */
-    undecoratedMember(): void;
-    /**
-     * This is an internal member
-     * @internal
-     */
-    _internalMember(): void;
-}
+// Removed for this release type: AlphaClass
 
-/**
- * This is a beta class
- * @beta
- */
-export declare class BetaClass {
-    /**
-     * This is a comment
-     */
-    undecoratedMember(): void;
-    /**
-     * This is an alpha comment
-     * @alpha
-     */
-    alphaMember(): void;
-    /**
-     * This is an internal member
-     * @internal
-     */
-    _internalMember(): void;
-}
+// Removed for this release type: BetaClass
 
-/**
- * This is an internal class
- * @internal
- */
-export declare class InternalClass {
-    /**
-     * This is a comment
-     */
-    undecoratedMember(): void;
-}
+// Removed for this release type: InternalClass
 
 /**
  * This is a public class

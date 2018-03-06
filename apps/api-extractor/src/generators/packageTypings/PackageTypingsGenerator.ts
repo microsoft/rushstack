@@ -13,7 +13,6 @@ import { Span } from '../../utils/Span';
 import { Entry } from './Entry';
 import { SymbolAnalyzer, IFollowAliasesResult } from './SymbolAnalyzer';
 import { ReleaseTag } from '../../aedoc/ReleaseTag';
-import { release } from 'os';
 
 /**
  * Used with PackageTypingsGenerator.writeTypingsFile()
@@ -171,12 +170,16 @@ export class PackageTypingsGenerator {
       if (!entry.importPackagePath) {
         // If it's local, then emit all the declarations
         for (const declaration of entry.followedSymbol.declarations || []) {
-          const span: Span = new Span(declaration);
-
-          this._modifySpan(span, entry);
 
           indentedWriter.writeLine();
-          indentedWriter.writeLine(span.getModifiedText());
+
+          if (this._shouldIncludeReleaseTag(entry.releaseTag, dtsKind)) {
+            const span: Span = new Span(declaration);
+            this._modifySpan(span, entry);
+            indentedWriter.writeLine(span.getModifiedText());
+          } else {
+            indentedWriter.writeLine(`// Removed for this release type: ${entry.uniqueName}`);
+          }
         }
       }
     }
@@ -363,6 +366,20 @@ export class PackageTypingsGenerator {
     }
 
     return releaseTag;
+  }
+
+  private _shouldIncludeReleaseTag(releaseTag: ReleaseTag, dtsKind: PackageTypingsDtsKind): boolean {
+    switch (dtsKind) {
+      case PackageTypingsDtsKind.InternalRelease:
+        return true;
+      case PackageTypingsDtsKind.PreviewRelease:
+        // NOTE: If the release tag is "None", then we don't have enough information to trim it
+        return releaseTag === ReleaseTag.Beta || releaseTag === ReleaseTag.Public || releaseTag === ReleaseTag.None;
+      case PackageTypingsDtsKind.PublicRelease:
+        return releaseTag === ReleaseTag.Public || releaseTag === ReleaseTag.None;
+    }
+
+    throw new Error(`PackageTypingsDtsKind[dtsKind] is not implemented`);
   }
 
   /**

@@ -149,20 +149,7 @@ export declare class ReexportedClass {
     getValue(): string;
 }
 
-/**
- * This class has links such as {@link TypeReferencesInAedoc}.
- * @internal
- */
-export declare class _TypeReferencesInAedoc {
-    /**
-     * Returns a value
-     * @param arg1 - The input parameter of type {@link TypeReferencesInAedoc}.
-     * @returns An object of type {@link TypeReferencesInAedoc}.
-     */
-    getValue(arg1: _TypeReferencesInAedoc): _TypeReferencesInAedoc;
-    /** {@inheritdoc api-extractor-test-01:TypeReferencesInAedoc.getValue} */
-    getValue2(arg1: _TypeReferencesInAedoc): _TypeReferencesInAedoc;
-}
+// Removed for this release type: _TypeReferencesInAedoc
 
 /**
  * Example decorator
