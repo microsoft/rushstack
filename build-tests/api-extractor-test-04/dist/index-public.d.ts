@@ -11,6 +11,8 @@
 
 // Removed for this release type: BetaClass
 
+// Removed for this release type: EntangledNamespace
+
 // Removed for this release type: InternalClass
 
 /**
