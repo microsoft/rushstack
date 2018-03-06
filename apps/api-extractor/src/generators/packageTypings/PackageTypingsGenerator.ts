@@ -133,7 +133,7 @@ export class PackageTypingsGenerator {
     indentedWriter.clear();
 
     for (const analyzeWarning of this._analyzeWarnings) {
-      indentedWriter.writeLine('// ' + analyzeWarning);
+      indentedWriter.writeLine('// Warning: ' + analyzeWarning);
     }
 
     // If there is a @packagedocumentation header, put it first:
@@ -332,7 +332,9 @@ export class PackageTypingsGenerator {
 
     let releaseTag: ReleaseTag = ReleaseTag.None;
 
-    const releaseTagRegExp: RegExp = /(?:\s|\*)@(internal|alpha|beta|public)/g;
+    // We don't want to match "bill@example.com".  But we do want to match "/**@public*/".
+    // So for now we require whitespace or a star before/after the string.
+    const releaseTagRegExp: RegExp = /(?:\s|\*)@(internal|alpha|beta|public)(?:\s|\*)/g;
 
     for (const declaration of fullyFollowedSymbol.declarations || []) {
       const sourceFileText: string = declaration.getSourceFile().text;
