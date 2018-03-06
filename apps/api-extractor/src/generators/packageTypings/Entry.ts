@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { ReleaseTag } from '../../aedoc/ReleaseTag';
 import * as ts from 'typescript';
 
 /**
@@ -13,6 +14,7 @@ export interface IEntryParameters {
   importPackagePath: string | undefined;
   importPackageExportName: string | undefined;
   importPackageKey: string | undefined;
+  releaseTag: ReleaseTag;
 }
 
 /**
@@ -80,6 +82,11 @@ export class Entry {
   public readonly importPackageKey: string | undefined;
 
   /**
+   * The release tag parsed from the doc comments for this Entry.
+   */
+  public readonly releaseTag: ReleaseTag;
+
+  /**
    * If true, this entry should be emitted using the "export" keyword instead of the "declare" keyword.
    */
   public exported: boolean = false;
@@ -93,6 +100,7 @@ export class Entry {
     this.importPackagePath = parameters.importPackagePath;
     this.importPackageExportName = parameters.importPackageExportName;
     this.importPackageKey = parameters.importPackageKey;
+    this.releaseTag = parameters.releaseTag;
   }
 
   public getSortKey(): string {

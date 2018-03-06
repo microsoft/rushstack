@@ -12,11 +12,36 @@ import { TypeScriptHelpers } from '../../utils/TypeScriptHelpers';
 import { Span } from '../../utils/Span';
 import { Entry } from './Entry';
 import { SymbolAnalyzer, IFollowAliasesResult } from './SymbolAnalyzer';
+import { ReleaseTag } from '../../aedoc/ReleaseTag';
+
+/**
+ * Used with PackageTypingsGenerator.writeTypingsFile()
+ */
+export enum PackageTypingsDtsKind {
+  /**
+   * Generate a *.d.ts file for an internal release.
+   * This output file will contain all definitions that are reachable from the entry point.
+   */
+  InternalRelease,
+
+  /**
+   * Generate a *.d.ts file for a preview release.
+   * This output file will contain all definitions that are reachable from the entry point,
+   * except definitions marked as \@alpha or \@internal.
+   */
+  PreviewRelease,
+
+  /**
+   * Generate a *.d.ts file for a public release.
+   * This output file will contain all definitions that are reachable from the entry point,
+   * except definitions marked as \@beta, \@alpha, or \@internal.
+   */
+  PublicRelease
+}
 
 export class PackageTypingsGenerator {
   private _context: ExtractorContext;
   private _typeChecker: ts.TypeChecker;
-  private _indentedWriter: IndentedWriter = new IndentedWriter();
 
   /**
    * A mapping from Entry.followedSymbol --> Entry.
@@ -42,24 +67,26 @@ export class PackageTypingsGenerator {
   private readonly _typeDirectiveReferences: string[] = [];
   private readonly _typeDirectiveReferencesFiles: Set<string> = new Set<string>();
 
+  private _analyzed: boolean = false;
+
+  /**
+   * Warnings encountered during the analyze() stage
+   */
+  private readonly _analyzeWarnings: string[] = [];
+
   public constructor(context: ExtractorContext) {
     this._context = context;
     this._typeChecker = context.typeChecker;
   }
 
   /**
-   * Generates the typings file and writes it to disk.
-   *
-   * @param dtsFilename    - The *.d.ts output filename
+   * Perform the analysis.  This must be called before writeTypingsFile().
    */
-  public writeTypingsFile(dtsFilename: string): void {
-    const fileContent: string = this.generateTypingsFileContent();
-    fs.writeFileSync(dtsFilename, fileContent);
-  }
-
-  public generateTypingsFileContent(): string {
-    this._indentedWriter.spacing = '';
-    this._indentedWriter.clear();
+  public analyze(): void {
+    if (this._analyzed) {
+      throw new Error('analyze() was already called');
+    }
+    this._analyzed = true;
 
     const packageSymbol: ts.Symbol = this._context.package.getDeclarationSymbol();
 
@@ -71,21 +98,49 @@ export class PackageTypingsGenerator {
       if (!entry) {
         // This is an export of the current package, but for some reason _fetchEntryForSymbol()
         // can't analyze it.
-        this._indentedWriter.writeLine('// Unsupported re-export: ' + exportSymbol.name);
+        this._analyzeWarnings.push('Unsupported re-export: ' + exportSymbol.name);
       } else {
         entry.exported = true;
       }
     }
 
     this._makeUniqueNames();
-
     this._entries.sort((a, b) => a.getSortKey().localeCompare(b.getSortKey()));
+  }
+
+  /**
+   * Generates the typings file and writes it to disk.
+   *
+   * @param dtsFilename    - The *.d.ts output filename
+   */
+  public writeTypingsFile(dtsFilename: string, dtsKind: PackageTypingsDtsKind): void {
+    if (!this._analyzed) {
+      throw new Error('analyze() was not called');
+    }
+
+    const indentedWriter: IndentedWriter = new IndentedWriter();
+
+    this._generateTypingsFileContent(indentedWriter, dtsKind);
+
+    // Normalize to CRLF
+    const fileContent: string = indentedWriter.toString().replace(/\r?\n/g, '\r\n');
+
+    fs.writeFileSync(dtsFilename, fileContent);
+  }
+
+  private _generateTypingsFileContent(indentedWriter: IndentedWriter, dtsKind: PackageTypingsDtsKind): void {
+    indentedWriter.spacing = '';
+    indentedWriter.clear();
+
+    for (const analyzeWarning of this._analyzeWarnings) {
+      indentedWriter.writeLine('// Warning: ' + analyzeWarning);
+    }
 
     // If there is a @packagedocumentation header, put it first:
     const packageDocumentation: string = this._context.package.documentation.originalAedoc;
     if (packageDocumentation) {
-      this._indentedWriter.writeLine(TypeScriptHelpers.formatJSDocContent(packageDocumentation));
-      this._indentedWriter.writeLine();
+      indentedWriter.writeLine(TypeScriptHelpers.formatJSDocContent(packageDocumentation));
+      indentedWriter.writeLine();
     }
 
     // Emit the triple slash directives
@@ -93,20 +148,20 @@ export class PackageTypingsGenerator {
     for (const typeDirectiveReference of this._typeDirectiveReferences) {
       // tslint:disable-next-line:max-line-length
       // https://github.com/Microsoft/TypeScript/blob/611ebc7aadd7a44a4c0447698bfda9222a78cb66/src/compiler/declarationEmitter.ts#L162
-      this._indentedWriter.writeLine(`/// <reference types="${typeDirectiveReference}" />`);
+      indentedWriter.writeLine(`/// <reference types="${typeDirectiveReference}" />`);
     }
 
     // Emit the imports
     for (const entry of this._entries) {
       if (entry.importPackagePath) {
         if (entry.importPackageExportName === '*') {
-          this._indentedWriter.write(`import * as ${entry.uniqueName}`);
+          indentedWriter.write(`import * as ${entry.uniqueName}`);
         } else if (entry.uniqueName !== entry.importPackageExportName) {
-          this._indentedWriter.write(`import { ${entry.importPackageExportName} as ${entry.uniqueName} }`);
+          indentedWriter.write(`import { ${entry.importPackageExportName} as ${entry.uniqueName} }`);
         } else {
-          this._indentedWriter.write(`import { ${entry.importPackageExportName} }`);
+          indentedWriter.write(`import { ${entry.importPackageExportName} }`);
         }
-        this._indentedWriter.writeLine(` from '${entry.importPackagePath}';`);
+        indentedWriter.writeLine(` from '${entry.importPackagePath}';`);
       }
     }
 
@@ -115,19 +170,19 @@ export class PackageTypingsGenerator {
       if (!entry.importPackagePath) {
         // If it's local, then emit all the declarations
         for (const declaration of entry.followedSymbol.declarations || []) {
-          const span: Span = new Span(declaration);
 
-          this._modifySpan(span, entry);
+          indentedWriter.writeLine();
 
-          this._indentedWriter.writeLine();
-          this._indentedWriter.writeLine(span.getModifiedText());
+          if (this._shouldIncludeReleaseTag(entry.releaseTag, dtsKind)) {
+            const span: Span = new Span(declaration);
+            this._modifySpan(span, entry);
+            indentedWriter.writeLine(span.getModifiedText());
+          } else {
+            indentedWriter.writeLine(`// Removed for this release type: ${entry.uniqueName}`);
+          }
         }
       }
     }
-
-    // Normalize to CRLF
-    const fileContent: string = this._indentedWriter.toString().replace(/\r?\n/g, '\r\n');
-    return fileContent;
   }
 
   /**
@@ -269,6 +324,66 @@ export class PackageTypingsGenerator {
     return this._entriesBySymbol.get(followAliasesResult.followedSymbol);
   }
 
+  // NOTE: THIS IS A TEMPORARY HACK.
+  // In the near future we will overhaul the AEDoc parser to separate syntactic/semantic analysis,
+  // at which point this will be wired up to the same ApiDocumentation layer used for the API Review files
+  private _getReleaseTagForSymbol(symbol: ts.Symbol): ReleaseTag {
+    const fullyFollowedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(symbol, this._typeChecker);
+
+    let releaseTag: ReleaseTag = ReleaseTag.None;
+
+    // We don't want to match "bill@example.com".  But we do want to match "/**@public*/".
+    // So for now we require whitespace or a star before/after the string.
+    const releaseTagRegExp: RegExp = /(?:\s|\*)@(internal|alpha|beta|public)(?:\s|\*)/g;
+
+    for (const declaration of fullyFollowedSymbol.declarations || []) {
+      const sourceFileText: string = declaration.getSourceFile().text;
+
+      for (const commentRange of TypeScriptHelpers.getJSDocCommentRanges(declaration, sourceFileText) || []) {
+        // NOTE: This string includes "/**"
+        const comment: string = sourceFileText.substring(commentRange.pos, commentRange.end);
+
+        let match: RegExpMatchArray | null;
+        while (match = releaseTagRegExp.exec(comment)) {
+          let foundReleaseTag: ReleaseTag = ReleaseTag.None;
+          switch (match[1]) {
+            case 'internal':
+              foundReleaseTag = ReleaseTag.Internal; break;
+            case 'alpha':
+              foundReleaseTag = ReleaseTag.Alpha; break;
+            case 'beta':
+              foundReleaseTag = ReleaseTag.Beta; break;
+            case 'public':
+              foundReleaseTag = ReleaseTag.Public; break;
+          }
+
+          if (releaseTag !== ReleaseTag.None && foundReleaseTag !== releaseTag) {
+            this._analyzeWarnings.push('WARNING: Conflicting release tags found for ' + symbol.name);
+            return releaseTag;
+          }
+
+          releaseTag = foundReleaseTag;
+        }
+      }
+    }
+
+    return releaseTag;
+  }
+
+  private _shouldIncludeReleaseTag(releaseTag: ReleaseTag, dtsKind: PackageTypingsDtsKind): boolean {
+    switch (dtsKind) {
+      case PackageTypingsDtsKind.InternalRelease:
+        return true;
+      case PackageTypingsDtsKind.PreviewRelease:
+        // NOTE: If the release tag is "None", then we don't have enough information to trim it
+        return releaseTag === ReleaseTag.Beta || releaseTag === ReleaseTag.Public || releaseTag === ReleaseTag.None;
+      case PackageTypingsDtsKind.PublicRelease:
+        return releaseTag === ReleaseTag.Public || releaseTag === ReleaseTag.None;
+    }
+
+    throw new Error(`PackageTypingsDtsKind[dtsKind] is not implemented`);
+  }
+
   /**
    * Looks up the corresponding Entry for the requested symbol.  If it doesn't exist,
    * then it tries to create one.
@@ -303,13 +418,16 @@ export class PackageTypingsGenerator {
       }
 
       if (!entry) {
+        const releaseTag: ReleaseTag = this._getReleaseTagForSymbol(symbol);
+
         // None of the above lookups worked, so create a new entry
         entry = new Entry({
           localName: followAliasesResult.localName,
           followedSymbol: followAliasesResult.followedSymbol,
           importPackagePath: followAliasesResult.importPackagePath,
           importPackageExportName: followAliasesResult.importPackageExportName,
-          importPackageKey: importPackageKey
+          importPackageKey: importPackageKey,
+          releaseTag: releaseTag
         });
 
         this._entries.push(entry);
