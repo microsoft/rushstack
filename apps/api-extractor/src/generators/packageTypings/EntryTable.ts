@@ -133,7 +133,7 @@ export class EntryTable {
     }
   }
 
-  // NOTE: THIS IS A TEMPORARY HACK.
+  // NOTE: THIS IS A TEMPORARY WORKAROUND.
   // In the near future we will overhaul the AEDoc parser to separate syntactic/semantic analysis,
   // at which point this will be wired up to the same ApiDocumentation layer used for the API Review files
   private _getReleaseTagForSymbol(symbol: ts.Symbol): ReleaseTag {
