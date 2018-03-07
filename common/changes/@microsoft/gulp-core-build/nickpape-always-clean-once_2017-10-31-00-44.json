@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build",
+      "comment": "Deprecate --clean in favor of always cleaning unless the --no-clean flag is specified.",
+      "type": "major"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build",
+  "email": "nickpape-msft@users.noreply.github.com"
+}

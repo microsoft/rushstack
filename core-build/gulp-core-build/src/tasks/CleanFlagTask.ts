@@ -6,7 +6,8 @@ import * as Gulp from 'gulp';
 import { IBuildConfig } from './../IBuildConfig';
 
 /**
- * This task runs at the start of any command if the --clean or -c parameter is specified
+ * This task runs once at the start of any command,
+ * unless the --no-clean parameter is specified
  * @public
  */
 export class CleanFlagTask extends CleanTask {
@@ -19,17 +20,15 @@ export class CleanFlagTask extends CleanTask {
 
   public isEnabled(buildConfig: IBuildConfig): boolean {
   // tslint:disable-next-line:no-string-literal
-  const shouldRun: boolean = (!!buildConfig.args['clean'] || !!buildConfig.args['c'])
-    && this._hasRun === false;
-  return shouldRun;
+  return !buildConfig.args['no-clean'] && !this._hasRun;
 }
 
   public executeTask(
     gulp: typeof Gulp,
     completeCallback: (error?: string | Error) => void
   ): void {
+    this._hasRun = true;
     super.executeTask(gulp, () => {
-      this._hasRun = true;
       completeCallback();
     });
   }
