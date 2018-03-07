@@ -18,9 +18,19 @@ export interface IEntryParameters {
 }
 
 /**
- * An "Entry" is a type definition that we encounter while traversing the
- * references from the package entry point.  This data structure helps filter,
- * sort, and rename the entries that end up in the output package typings file.
+ * An "Entry" represents an API item such as a class member, interface, or namespace.
+ *
+ * @remarks
+ * We only model items that the PackageTypingsGenerator could potentially trim, e.g.
+ * function parameters and literal types are not represented.  It is a semantic unit
+ * (i.e. ts.Symbol not ts.Node), so a single Entry may emit multiple definitions.
+ * For nested API items (e.g. a member inside a class inside a namespace), the parent
+ * chain is always populated, but children are only added on demand.
+ *
+ * During analysis, "Entry" objects are created for three reasons:
+ * - Regular top-level exports (and all their nested members)
+ * - Forgotten exports (i.e. a referenced type that should have been a top-level export)
+ * - Imported dependencies (whose root will be emitted as an "import" statement)
  */
 export class Entry {
   /**
