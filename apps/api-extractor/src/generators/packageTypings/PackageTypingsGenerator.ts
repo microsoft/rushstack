@@ -10,7 +10,7 @@ import { ExtractorContext } from '../../ExtractorContext';
 import { IndentedWriter } from '../../utils/IndentedWriter';
 import { TypeScriptHelpers } from '../../utils/TypeScriptHelpers';
 import { Span } from '../../utils/Span';
-import { Entry } from './Entry';
+import { Entry, EntryRole } from './Entry';
 import { ReleaseTag } from '../../aedoc/ReleaseTag';
 import { EntryTable } from './EntryTable';
 
@@ -98,7 +98,7 @@ export class PackageTypingsGenerator {
 
     // Emit the imports
     for (const entry of this._entryTable.entries) {
-      if (entry.importPackagePath) {
+      if (entry.role === EntryRole.EmittedImport) {
         if (entry.importPackageExportName === '*') {
           indentedWriter.write(`import * as ${entry.uniqueName}`);
         } else if (entry.uniqueName !== entry.importPackageExportName) {
@@ -112,8 +112,8 @@ export class PackageTypingsGenerator {
 
     // Emit the regular declarations
     for (const entry of this._entryTable.entries) {
-      if (!entry.importPackagePath) {
-        // If it's local, then emit all the declarations
+      if (entry.role === EntryRole.EmittedDefinition) {
+        // Emit all the declarations for this entry
         for (const declaration of entry.followedSymbol.declarations || []) {
 
           indentedWriter.writeLine();
@@ -160,7 +160,7 @@ export class PackageTypingsGenerator {
       case ts.SyntaxKind.FunctionKeyword:
         // Replace the stuff we possibly deleted above
         let replacedModifiers: string = 'declare ';
-        if (entry.exported) {
+        if (entry.role === EntryRole.EmittedDefinition && !entry.forgottenExport) {
           replacedModifiers = 'export ' + replacedModifiers;
         }
 

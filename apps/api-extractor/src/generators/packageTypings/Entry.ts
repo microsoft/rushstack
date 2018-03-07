@@ -18,6 +18,28 @@ export interface IEntryParameters {
 }
 
 /**
+ * Indicates how this Entry will be processed when emitting the *.d.ts file.
+ */
+export const enum EntryRole {
+  /**
+   * The item will be a top-level definition in the emitted *.d.ts file.
+   */
+  EmittedDefinition = 'EmittedDefinition',
+
+  /**
+   * The item will be emitted as an import statement.  It is declared in
+   * a dependency package.
+   */
+  EmittedImport = 'EmittedImport',
+
+  /**
+   * The item is a nested part of its Entry.parent.  Its role will be determined
+   * by the root parent.
+   */
+  Child = 'Child'
+}
+
+/**
  * An "Entry" represents an API item such as a class member, interface, or namespace.
  *
  * @remarks
@@ -27,39 +49,20 @@ export interface IEntryParameters {
  * For nested API items (e.g. a member inside a class inside a namespace), the parent
  * chain is always populated, but children are only added on demand.
  *
- * During analysis, "Entry" objects are created for three reasons:
- * - Regular top-level exports (and all their nested members)
- * - Forgotten exports (i.e. a referenced type that should have been a top-level export)
- * - Imported dependencies (whose root will be emitted as an "import" statement)
+ * During analysis, "Entry" objects have three possible roles, represented by the
+ * EntryRole enum.
  */
 export class Entry {
+  // ------------------------------------------------------------------------
+  // IMMUTABLE STATE
+
+  public readonly role: EntryRole;
+
   /**
    * The original name of the symbol, as exported from the module (i.e. source file)
    * containing the original TypeScript definition.
    */
   public readonly localName: string;
-
-  /**
-   * If this entry is a top-level export of the package that we are analyzing, then its
-   * name is stored here.  In this case, the uniqueName must be the same as packageExportName.
-   * @remarks
-   * Since Entry objects are collected via a depth first search, we may encounter it
-   * before we realize that it is a package export; the packageExportName property is not
-   * accurate until the collection phase has completed.
-   */
-  public packageExportName: string | undefined;
-
-  /**
-   * The localName, possibly renamed to ensure that all the top-level exports have unique names.
-   */
-  public get uniqueName(): string | undefined {
-    return this._uniqueName;
-  }
-
-  public set uniqueName(value: string | undefined) {
-    this._uniqueName = value;
-    this._sortKey = undefined; // invalidate the cached value
-  }
 
   /**
    * The compiler symbol where this type was defined, after following any aliases.
@@ -96,13 +99,56 @@ export class Entry {
    */
   public readonly releaseTag: ReleaseTag;
 
+  // ------------------------------------------------------------------------
+  // MUTABLE STATE
+
   /**
-   * If true, this entry should be emitted using the "export" keyword instead of the "declare" keyword.
+   * If this entry is a top-level export of the package that we are analyzing, then its
+   * name is stored here.  In this case, the uniqueName must be the same as packageExportName.
+   * @remarks
+   * Since Entry objects are collected via a depth first search, we may encounter it
+   * before we realize that it is a package export; the packageExportName property is not
+   * accurate until the collection phase has completed.
    */
-  public exported: boolean = false;
+  public get packageExportName(): string | undefined {
+    return this._packageExportName;
+  }
+
+  public set packageExportName(value: string | undefined) {
+    this._role = EntryRole.EmittedDefinition;
+    this._packageExportName = value;
+  }
+
+  /**
+   * Indicates that the item must be emitted as a definition in the *.d.ts file but
+   * without an "export" keyword.  If so, then:
+   * - The API file will warn the developer that they referenced this type but forgot
+   *   to export it
+   * - The uniqueName may get renamed to avoid conflicts with the explicit exports
+   *
+   * NOTE: During analysis, the packageExportName can be assigned after the constructor
+   * is called.  If this happens, the forgottenExport state will change.
+   */
+  public get forgottenExport(): boolean {
+    return this.role === EntryRole.EmittedDefinition && !this.packageExportName;
+  }
+
+  /**
+   * The localName, possibly renamed to ensure that all the top-level exports have unique names.
+   */
+  public get uniqueName(): string | undefined {
+    return this._uniqueName;
+  }
+
+  public set uniqueName(value: string | undefined) {
+    this._uniqueName = value;
+    this._sortKey = undefined; // invalidate the cached value
+  }
 
   private _uniqueName: string | undefined = undefined;
   private _sortKey: string|undefined = undefined;
+  private _packageExportName: string | undefined;
+  private _role: EntryRole;
 
   public constructor(parameters: IEntryParameters) {
     this.localName = parameters.localName;
@@ -111,6 +157,12 @@ export class Entry {
     this.importPackageExportName = parameters.importPackageExportName;
     this.importPackageKey = parameters.importPackageKey;
     this.releaseTag = parameters.releaseTag;
+
+    if (this.importPackagePath) {
+      this.role = EntryRole.EmittedImport;
+    } else {
+      this.role = EntryRole.EmittedDefinition;
+    }
   }
 
   public getSortKey(): string {

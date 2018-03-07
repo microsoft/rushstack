@@ -6,9 +6,9 @@
 import * as ts from 'typescript';
 
 import { TypeScriptHelpers } from '../../utils/TypeScriptHelpers';
-import { Entry } from './Entry';
-import { SymbolAnalyzer, IFollowAliasesResult } from './SymbolAnalyzer';
 import { ReleaseTag } from '../../aedoc/ReleaseTag';
+import { Entry, EntryRole } from './Entry';
+import { SymbolAnalyzer, IFollowAliasesResult } from './SymbolAnalyzer';
 
 export class EntryTable {
   private _typeChecker: ts.TypeChecker;
@@ -80,8 +80,6 @@ export class EntryTable {
         // This is an export of the current package, but for some reason _fetchEntryForSymbol()
         // can't analyze it.
         this._analyzeWarnings.push('Unsupported re-export: ' + exportSymbol.name);
-      } else {
-        entry.exported = true;
       }
     }
 
@@ -104,9 +102,10 @@ export class EntryTable {
   private _makeUniqueNames(): void {
     const usedNames: Set<string> = new Set<string>();
 
-    // First collect the package exports
+    // First collect the explicit package exports
     for (const entry of this._entries) {
       if (entry.packageExportName) {
+
         if (usedNames.has(entry.packageExportName)) {
           // This should be impossible
           throw new Error('Program bug: a package cannot have two exports with the same name');
@@ -118,17 +117,18 @@ export class EntryTable {
       }
     }
 
-    // Next generate unique names for the non-exports
+    // Next generate unique names for the non-exports that will be emitted
     for (const entry of this._entries) {
       if (!entry.packageExportName) {
+        if (entry.role === EntryRole.EmittedImport || entry.role === EntryRole.EmittedDefinition) {
+          let suffix: number = 1;
+          entry.uniqueName = entry.localName;
+          while (usedNames.has(entry.uniqueName)) {
+            entry.uniqueName = entry.localName + '_' + ++suffix;
+          }
 
-        let suffix: number = 1;
-        entry.uniqueName = entry.localName;
-        while (usedNames.has(entry.uniqueName)) {
-          entry.uniqueName = entry.localName + '_' + ++suffix;
+          usedNames.add(entry.uniqueName);
         }
-
-        usedNames.add(entry.uniqueName);
       }
     }
   }
