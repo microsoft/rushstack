@@ -74,10 +74,17 @@ export class PackageTypingsGenerator {
       throw new Error('PackageTypingsGenerator.analyze() was already called');
     }
 
+    // Build the entry point
     this._astEntryPoint = this._astSymbolTable.fetchEntryPoint(this._context.package.getDeclaration().getSourceFile());
 
+    // Create a DtsEntry for each top-level export
     for (const exportedMember of this._astEntryPoint.exportedMembers) {
       const astSymbol: AstSymbol = exportedMember.astSymbol;
+
+      for (const d of astSymbol.astDeclarations) {
+        console.log('------------------');
+        console.log(d.getDump());
+      }
 
       const releaseTag: ReleaseTag = this._getReleaseTagForSymbol(astSymbol.followedSymbol);
 

@@ -89,7 +89,7 @@ export class AstSymbolTable {
       return;
     }
 
-    // Walk up to the parent of the tree
+    // Walk up to the root of the tree
     let rootAstSymbol: AstSymbol = astSymbol;
     while (rootAstSymbol.mainDeclaration.parent) {
       rootAstSymbol = rootAstSymbol.mainDeclaration.parent.astSymbol;
@@ -97,7 +97,7 @@ export class AstSymbolTable {
 
     // Calculate the full child tree for each definition
     for (const astDeclaration of rootAstSymbol.astDeclarations) {
-      this._analyzeChildTree(astDeclaration.declaration);
+      this._analyzeChildTree(astDeclaration.declaration, astDeclaration);
     }
 
     astSymbol.notifyAnalyzed();
@@ -115,6 +115,7 @@ export class AstSymbolTable {
       case ts.SyntaxKind.InterfaceDeclaration:
       case ts.SyntaxKind.FunctionDeclaration:
       case ts.SyntaxKind.ModuleDeclaration:
+      case ts.SyntaxKind.VariableDeclaration:
         return true;
     }
     return false;
@@ -129,17 +130,68 @@ export class AstSymbolTable {
   }
 
   /**
-   * Used by analyze to recursively analyze the entire child tree.
+   * For a given astDeclaration, this efficiently finds the child corresponding to the
+   * specified ts.Node.  It is assumed that isAstDeclaration() would return true for
+   * that node type, and that the node is an immediate child of the provided AstDeclaration.
    */
-  private _analyzeChildTree(node: ts.Node): void {
-    const childAstSymbol: AstSymbol | undefined = this._fetchAstSymbolForNode(node);
-
-    for (const child of node.getChildren()) {
-      this._analyzeChildTree(child);
+  // NOTE: This could be a method of AstSymbol if it had a backpointer to its AstSymbolTable.
+  public getChildAstDeclarationByNode(node: ts.Node, parentAstDeclaration: AstDeclaration): AstDeclaration {
+    if (!parentAstDeclaration.astSymbol.analyzed) {
+      throw new Error('getChildDeclarationByNode() cannot be used for an AstSymbol that was not analyzed');
     }
 
-    if (childAstSymbol) {
-      childAstSymbol.notifyAnalyzed();
+    const childAstDeclaration: AstDeclaration | undefined = this._astDeclarationsByDeclaration.get(node);
+    if (!childAstDeclaration) {
+      throw new Error('Child declaration not found for the specified node');
+    }
+    if (childAstDeclaration.parent !== parentAstDeclaration) {
+      throw new Error('Program Bug: The found child is not attached to the parent AstDeclaration');
+    }
+
+    return childAstDeclaration;
+  }
+
+  /**
+   * Used by analyze to recursively analyze the entire child tree.
+   */
+  private _analyzeChildTree(node: ts.Node, governingAstDeclaration: AstDeclaration): void {
+    // is this a reference to another AstSymbol?
+    switch (node.kind) {
+      case ts.SyntaxKind.TypeReference: // general type references
+      case ts.SyntaxKind.ExpressionWithTypeArguments: // special case for e.g. the "extends" keyword
+        {
+          // Sometimes the type reference will involve multiple identifiers, e.g. "a.b.C".
+          // In this case, we only need to worry about importing the first identifier,
+          // so do a depth-first search for it:
+          const symbolNode: ts.Node | undefined = TypeScriptHelpers.findFirstChildNode(
+            node, ts.SyntaxKind.Identifier);
+
+          if (!symbolNode) {
+            break;
+          }
+
+          const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(symbolNode);
+          if (!symbol) {
+            throw new Error('Symbol not found for identifier: ' + symbolNode.getText());
+          }
+
+          const referencedAstSymbol: AstSymbol | undefined = this._fetchAstSymbol(symbol, true);
+          if (referencedAstSymbol) {
+            governingAstDeclaration.notifyReferencedAstSymbol(referencedAstSymbol);
+          }
+        }
+        break;
+    }
+
+    // Is this node declaring a new AstSymbol?
+    const newGoverningAstDeclaration: AstDeclaration | undefined = this._fetchAstDeclaration(node);
+
+    for (const childNode of node.getChildren()) {
+      this._analyzeChildTree(childNode, newGoverningAstDeclaration || governingAstDeclaration);
+    }
+
+    if (newGoverningAstDeclaration) {
+      newGoverningAstDeclaration.astSymbol.notifyAnalyzed();
     }
   }
 
@@ -176,7 +228,11 @@ export class AstSymbolTable {
     const followAliasesResult: IFollowAliasesResult = SymbolAnalyzer.followAliases(symbol, this._typeChecker);
 
     const followedSymbol: ts.Symbol = followAliasesResult.followedSymbol;
-    if (followedSymbol.flags & (ts.SymbolFlags.TypeParameter | ts.SymbolFlags.TypeLiteral)) {
+    if (followedSymbol.flags & (ts.SymbolFlags.TypeParameter | ts.SymbolFlags.TypeLiteral | ts.SymbolFlags.Transient)) {
+      return undefined;
+    }
+
+    if (followAliasesResult.isAmbient) {
       return undefined;
     }
 
@@ -189,7 +245,9 @@ export class AstSymbolTable {
 
       for (const declaration of followedSymbol.declarations || []) {
         if (!this.isAstDeclaration(declaration)) {
-          throw new Error('Program Bug: Followed a symbol with an invalid declaration');
+          SymbolAnalyzer.followAliases(symbol, this._typeChecker);
+
+          throw new Error('Program Bug: Followed a symbol with an invalid declaration: ' + followedSymbol.name);
         }
       }
 

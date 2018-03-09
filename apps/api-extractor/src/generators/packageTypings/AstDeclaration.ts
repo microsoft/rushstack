@@ -21,7 +21,10 @@ export class AstDeclaration {
    */
   public readonly parent: AstDeclaration | undefined;
 
-  private readonly _knownChildren: AstDeclaration[] = [];
+  private readonly _analyzedChildren: AstDeclaration[] = [];
+
+  private readonly _analyzedReferencedAstSymbolsSet: Set<AstSymbol> = new Set<AstSymbol>();
+  private readonly _analyzedReferencedAstSymbols: AstSymbol[] = [];
 
   public constructor(parameters: IAstDeclarationParameters) {
     this.declaration = parameters.declaration;
@@ -37,10 +40,22 @@ export class AstDeclaration {
 
   /**
    * Returns the children for this AstDeclaration.
+   * @remarks
    * The collection will be empty until AstSymbol.analyzed is true.
    */
-  public get children(): AstDeclaration[] {
-    return this.astSymbol.analyzed ? this._knownChildren : [];
+  public get children(): ReadonlyArray<AstDeclaration> {
+    return this.astSymbol.analyzed ? this._analyzedChildren : [];
+  }
+
+  /**
+   * Returns the AstSymbols referenced by this node (ignoring references
+   * belonging to its parent, and ignoring references associated with its
+   * children).
+   * @remarks
+   * The collection will be empty until AstSymbol.analyzed is true.
+   */
+  public get referencedAstSymbols(): ReadonlyArray<AstSymbol> {
+    return this.astSymbol.analyzed ? this._analyzedReferencedAstSymbols : [];
   }
 
   public notifyChildAttach(child: AstDeclaration): void {
@@ -48,7 +63,7 @@ export class AstDeclaration {
       throw new Error('Program Bug: Invalid call to attachChild()');
     }
 
-    this._knownChildren.push(child);
+    this._analyzedChildren.push(child);
   }
 
   /**
@@ -57,7 +72,11 @@ export class AstDeclaration {
    */
   public getDump(indent: string = ''): string {
     const declarationKind: string = ts.SyntaxKind[this.declaration.kind];
-    let result: string = indent + `${this.astSymbol.localName} (${declarationKind})\n`;
+    let result: string = indent + `+ ${this.astSymbol.localName} (${declarationKind})\n`;
+
+    for (const referencedAstSymbol of this._analyzedReferencedAstSymbols) {
+      result += indent + `  ref: ${referencedAstSymbol.localName}\n`;
+    }
 
     for (const child of this.children) {
       result += child.getDump(indent + '  ');
@@ -73,5 +92,16 @@ export class AstDeclaration {
   public getSpanDump(indent: string = ''): string {
     const span: Span = new Span(this.declaration);
     return span.getDump(indent);
+  }
+
+  public notifyReferencedAstSymbol(referencedAstSymbol: AstSymbol): void {
+    if (this.astSymbol.analyzed) {
+      throw new Error('Program Bug: notifyReferencedAstSymbol() called after analysis is already complete');
+    }
+
+    if (!this._analyzedReferencedAstSymbolsSet.has(referencedAstSymbol)) {
+      this._analyzedReferencedAstSymbolsSet.add(referencedAstSymbol);
+      this._analyzedReferencedAstSymbols.push(referencedAstSymbol);
+    }
   }
 }
