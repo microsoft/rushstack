@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 export interface IAstImportParameters {
-  modulePath: string;
-  exportName: string;
+  readonly modulePath: string;
+  readonly exportName: string;
 }
 
 export class AstImport {

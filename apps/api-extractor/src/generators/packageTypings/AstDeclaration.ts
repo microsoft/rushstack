@@ -5,10 +5,10 @@ import * as ts from 'typescript';
 import { AstSymbol } from './AstSymbol';
 
 export interface IAstDeclarationParameters {
-  declaration: ts.Declaration;
-  astSymbol: AstSymbol;
-  typeDirectiveReferences: ReadonlyArray<string>;
-  parentAstDeclaration: AstDeclaration | undefined;
+  readonly declaration: ts.Declaration;
+  readonly astSymbol: AstSymbol;
+  readonly typeDirectiveReferences: ReadonlyArray<string>;
+  readonly parentAstDeclaration: AstDeclaration | undefined;
 }
 
 export class AstDeclaration {

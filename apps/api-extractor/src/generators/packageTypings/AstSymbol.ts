@@ -6,9 +6,9 @@ import { AstImport } from './AstImport';
 import { AstDeclaration } from './AstDeclaration';
 
 export interface IAstSymbolParameters {
-  followedSymbol: ts.Symbol;
-  localName: string;
-  astImport: AstImport | undefined;
+  readonly followedSymbol: ts.Symbol;
+  readonly localName: string;
+  readonly astImport: AstImport | undefined;
 }
 
 export class AstSymbol {

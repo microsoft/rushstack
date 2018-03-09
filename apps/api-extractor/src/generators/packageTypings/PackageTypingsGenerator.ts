@@ -58,7 +58,7 @@ export class PackageTypingsGenerator {
    * Perform the analysis.  This must be called before writeTypingsFile().
    */
   public analyze(): void {
-    this._astSymbolTable.analyzeEntryPoint(this._context.package.getDeclaration().getSourceFile());
+    this._astSymbolTable.fetchEntryPoint(this._context.package.getDeclaration().getSourceFile());
 
     const packageSymbol: ts.Symbol = this._context.package.getDeclarationSymbol();
     this._entryTable.analyze(packageSymbol);
@@ -128,10 +128,6 @@ export class PackageTypingsGenerator {
             const span: Span = new Span(declaration);
             this._modifySpan(span, entry);
             indentedWriter.writeLine(span.getModifiedText());
-
-console.log('-------');
-console.log(span.getDump());
-
           } else {
             indentedWriter.writeLine(`// Removed for this release type: ${entry.uniqueName}`);
           }

@@ -10,6 +10,7 @@ import { SymbolAnalyzer, IFollowAliasesResult } from './SymbolAnalyzer';
 import { TypeScriptHelpers } from '../../utils/TypeScriptHelpers';
 import { AstSymbol } from './AstSymbol';
 import { AstImport } from './AstImport';
+import { AstEntryPoint, IAstNamedExport } from './AstEntryPoint';
 
 export class AstSymbolTable {
   private _typeChecker: ts.TypeChecker;
@@ -36,6 +37,9 @@ export class AstSymbolTable {
    */
   private readonly _entriesByImportKey: Map<string, AstSymbol> = new Map<string, AstSymbol>();
 
+  private readonly _astEntryPointsBySourceFile: Map<ts.SourceFile, AstEntryPoint>
+    = new Map<ts.SourceFile, AstEntryPoint>();
+
   /**
    * A mapping from a source filename to a list of type declaration references.
    *
@@ -49,19 +53,33 @@ export class AstSymbolTable {
     this._typeChecker = typeChecker;
   }
 
-  public analyzeEntryPoint(sourceFile: ts.SourceFile): AstDeclaration {
-    const rootFileSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(sourceFile);
+  public fetchEntryPoint(sourceFile: ts.SourceFile): AstEntryPoint {
+    let astEntryPoint: AstEntryPoint | undefined = this._astEntryPointsBySourceFile.get(sourceFile);
+    if (!astEntryPoint) {
+      const rootFileSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(sourceFile);
 
-    if (!rootFileSymbol.declarations || !rootFileSymbol.declarations.length) {
-      throw new Error('Unable to find a root declaration for ' + sourceFile.fileName);
+      if (!rootFileSymbol.declarations || !rootFileSymbol.declarations.length) {
+        throw new Error('Unable to find a root declaration for ' + sourceFile.fileName);
+      }
+
+      const exportSymbols: ts.Symbol[] = this._typeChecker.getExportsOfModule(rootFileSymbol) || [];
+
+      const exports: IAstNamedExport[] = [];
+
+      for (const exportSymbol of exportSymbols) {
+        const astSymbol: AstSymbol | undefined = this._fetchAstSymbol(exportSymbol);
+
+        if (!astSymbol) {
+          throw new Error('Unsupported export: ' + exportSymbol.name);
+        }
+
+        exports.push({ name: exportSymbol.name, astSymbol: astSymbol });
+      }
+
+      astEntryPoint = new AstEntryPoint({ exports });
+      this._astEntryPointsBySourceFile.set(sourceFile, astEntryPoint);
     }
-
-    const result: AstSymbol | undefined = this._fetchAstSymbol(rootFileSymbol, true);
-    if (!result) {
-      throw new Error('Unable to analyze the entry point for ' + sourceFile.fileName);
-    }
-
-    return result.mainDeclaration;
+    return astEntryPoint;
   }
 
   /**
@@ -80,10 +98,10 @@ export class AstSymbolTable {
     return false;
   }
 
-  private _fetchAstSymbol(symbol: ts.Symbol, isEntryPoint: boolean): AstSymbol | undefined {
+  private _fetchAstSymbol(symbol: ts.Symbol): AstSymbol | undefined {
     const followAliasesResult: IFollowAliasesResult = SymbolAnalyzer.followAliases(symbol, this._typeChecker);
 
-    if (followAliasesResult.isAmbient && !isEntryPoint) {
+    if (followAliasesResult.isAmbient) {
       return undefined; // we don't care about ambient definitions
     }
 
@@ -153,7 +171,7 @@ export class AstSymbolTable {
             throw new Error('Program bug: missing parent symbol for declaration');
           }
 
-          parentAstSymbol = this._fetchAstSymbol(parentSymbol, false);
+          parentAstSymbol = this._fetchAstSymbol(parentSymbol);
         }
 
         // Okay, now while creating the declarations we will wire them up to the
@@ -193,7 +211,7 @@ export class AstSymbolTable {
    * Returns the first parent satisfying isAstDeclaration(), or undefined if none is found.
    */
   private _findFirstParentDeclaration(node: ts.Node): ts.Node | undefined {
-    let currentNode: ts.Node | undefined = node;
+    let currentNode: ts.Node | undefined = node.parent;
     while (currentNode) {
       if (this.isAstDeclaration(currentNode)) {
         return currentNode;
@@ -226,7 +244,7 @@ export class AstSymbolTable {
             throw new Error('Symbol not found for identifier: ' + symbolNode.getText());
           }
 
-          this._fetchAstSymbol(symbol, false);
+          this._fetchAstSymbol(symbol);
         }
         break;  // keep recursing
     }

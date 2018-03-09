@@ -14,23 +14,23 @@ export interface IFollowAliasesResult {
   /**
    * The original symbol that defined this entry, after following any aliases.
    */
-  followedSymbol: ts.Symbol;
+  readonly followedSymbol: ts.Symbol;
 
   /**
    * The original name used where it was defined.
    */
-  localName: string;
+  readonly localName: string;
 
   /**
    * True if this is an ambient definition, e.g. from a "typings" folder.
    */
-  isAmbient: boolean;
+  readonly isAmbient: boolean;
 
   /** {@inheritdoc Entry.importPackagePath} */
-  importPackagePath: string | undefined;
+  readonly importPackagePath: string | undefined;
 
   /** {@inheritdoc Entry.importPackageExportName} */
-  importPackageExportName: string | undefined;
+  readonly importPackageExportName: string | undefined;
 }
 
 export class SymbolAnalyzer {
