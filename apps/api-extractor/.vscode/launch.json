@@ -12,6 +12,7 @@
       "program": "${workspaceFolder}/lib/start.js",
       "cwd": "${workspaceFolder}/../../build-tests/api-extractor-test-01",
       "args": [
+        "-d",
         "run",
         "-l"
       ]
@@ -23,6 +24,7 @@
       "program": "${workspaceFolder}/lib/start.js",
       "cwd": "${workspaceFolder}/../../build-tests/api-extractor-test-02",
       "args": [
+        "-d",
         "run",
         "-l"
       ]
@@ -34,6 +36,7 @@
       "program": "${workspaceFolder}/lib/start.js",
       "cwd": "${workspaceFolder}/../../build-tests/api-extractor-test-04",
       "args": [
+        "-d",
         "run",
         "-l"
       ]

@@ -93,6 +93,26 @@ export class SymbolAnalyzer {
       current = currentAlias;
     }
 
+    // Is the followedSymbol actually the kind of thing that can be ambient?
+    if (isAmbient) {
+      for (const declaration of current.declarations || []) {
+        switch (declaration.kind) {
+          case ts.SyntaxKind.ClassDeclaration:
+          case ts.SyntaxKind.InterfaceDeclaration:
+          case ts.SyntaxKind.FunctionDeclaration:
+          case ts.SyntaxKind.ModuleDeclaration:
+          case ts.SyntaxKind.VariableDeclaration:
+            // These actually need "export" keywords
+            break;
+          default:
+            // Everything else we assume is some kind of nested declaration that
+            // doesn't need it.
+            isAmbient = false;
+            break;
+        }
+      }
+    }
+
     return {
       followedSymbol: current,
       localName: declarationName || current.name,
