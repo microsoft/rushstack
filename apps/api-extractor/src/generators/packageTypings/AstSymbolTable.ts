@@ -10,7 +10,7 @@ import { SymbolAnalyzer, IFollowAliasesResult } from './SymbolAnalyzer';
 import { TypeScriptHelpers } from '../../utils/TypeScriptHelpers';
 import { AstSymbol } from './AstSymbol';
 import { AstImport } from './AstImport';
-import { AstEntryPoint, IAstNamedExport } from './AstEntryPoint';
+import { AstEntryPoint, IExportedMember } from './AstEntryPoint';
 
 export class AstSymbolTable {
   private _typeChecker: ts.TypeChecker;
@@ -40,15 +40,6 @@ export class AstSymbolTable {
   private readonly _astEntryPointsBySourceFile: Map<ts.SourceFile, AstEntryPoint>
     = new Map<ts.SourceFile, AstEntryPoint>();
 
-  /**
-   * A mapping from a source filename to a list of type declaration references.
-   *
-   * For example, the file path "/project1/lib/example.d.ts" might map to an array
-   * such as [ "node", "es6-promise" ].
-   */
-  private readonly _typeDirectiveReferencesByFilePath: Map<string, ReadonlyArray<string>>
-    = new Map<string, ReadonlyArray<string>>();
-
   public constructor(typeChecker: ts.TypeChecker) {
     this._typeChecker = typeChecker;
   }
@@ -64,10 +55,10 @@ export class AstSymbolTable {
 
       const exportSymbols: ts.Symbol[] = this._typeChecker.getExportsOfModule(rootFileSymbol) || [];
 
-      const exports: IAstNamedExport[] = [];
+      const exportedMembers: IExportedMember[] = [];
 
       for (const exportSymbol of exportSymbols) {
-        const astSymbol: AstSymbol | undefined = this._fetchAstSymbol(exportSymbol);
+        const astSymbol: AstSymbol | undefined = this._fetchAstSymbol(exportSymbol, true);
 
         if (!astSymbol) {
           throw new Error('Unsupported export: ' + exportSymbol.name);
@@ -80,10 +71,10 @@ export class AstSymbolTable {
           console.log(d.getDump());
         }
 
-        exports.push({ name: exportSymbol.name, astSymbol: astSymbol });
+        exportedMembers.push({ name: exportSymbol.name, astSymbol: astSymbol });
       }
 
-      astEntryPoint = new AstEntryPoint({ exports });
+      astEntryPoint = new AstEntryPoint({ exportedMembers });
       this._astEntryPointsBySourceFile.set(sourceFile, astEntryPoint);
     }
     return astEntryPoint;
@@ -120,6 +111,7 @@ export class AstSymbolTable {
       case ts.SyntaxKind.ClassDeclaration:
       case ts.SyntaxKind.MethodDeclaration:
       case ts.SyntaxKind.PropertySignature:
+      case ts.SyntaxKind.PropertyDeclaration:
       case ts.SyntaxKind.InterfaceDeclaration:
       case ts.SyntaxKind.FunctionDeclaration:
       case ts.SyntaxKind.ModuleDeclaration:
@@ -128,8 +120,12 @@ export class AstSymbolTable {
     return false;
   }
 
-  public tryGetSymbolForAstDeclaration(node: ts.Node): ts.Symbol | undefined {
+  public tryGetSymbolForNode(node: ts.Node): ts.Symbol | undefined {
     return TypeScriptHelpers.getSymbolForDeclaration(node as ts.Declaration);
+  }
+
+  public tryGetAstSymbol(symbol: ts.Symbol): AstSymbol | undefined {
+    return this._fetchAstSymbol(symbol, false);
   }
 
   /**
@@ -168,15 +164,15 @@ export class AstSymbolTable {
       return undefined;
     }
 
-    const symbol: ts.Symbol | undefined = this.tryGetSymbolForAstDeclaration(node);
+    const symbol: ts.Symbol | undefined = this.tryGetSymbolForNode(node);
     if (!symbol) {
       throw new Error('Program Bug: Unable to find symbol for node');
     }
 
-    return this._fetchAstSymbol(symbol);
+    return this._fetchAstSymbol(symbol, true);
   }
 
-  private _fetchAstSymbol(symbol: ts.Symbol): AstSymbol | undefined {
+  private _fetchAstSymbol(symbol: ts.Symbol, addIfMissing: boolean): AstSymbol | undefined {
     const followAliasesResult: IFollowAliasesResult = SymbolAnalyzer.followAliases(symbol, this._typeChecker);
 
     const followedSymbol: ts.Symbol = followAliasesResult.followedSymbol;
@@ -240,20 +236,17 @@ export class AstSymbolTable {
         let parentAstSymbol: AstSymbol | undefined = undefined;
 
         if (arbitaryParent) {
-          const parentSymbol: ts.Symbol | undefined = this.tryGetSymbolForAstDeclaration(arbitaryParent);
+          const parentSymbol: ts.Symbol | undefined = this.tryGetSymbolForNode(arbitaryParent);
           if (!parentSymbol) {
             throw new Error('Program bug: missing parent symbol for declaration');
           }
 
-          parentAstSymbol = this._fetchAstSymbol(parentSymbol);
+          parentAstSymbol = this._fetchAstSymbol(parentSymbol, addIfMissing);
         }
 
         // Okay, now while creating the declarations we will wire them up to the
         // their corresopnding parent declarations
         for (const declaration of followedSymbol.declarations || []) {
-
-          const typeDirectiveReferences: ReadonlyArray<string>
-            = this._getTypeDirectiveReferences(declaration);
 
           let parentAstDeclaration: AstDeclaration | undefined = undefined;
           if (parentAstSymbol) {
@@ -271,7 +264,7 @@ export class AstSymbolTable {
           }
 
           const astDeclaration: AstDeclaration = new AstDeclaration({
-            declaration, astSymbol, typeDirectiveReferences, parentAstDeclaration});
+            declaration, astSymbol, parentAstDeclaration});
 
           this._astDeclarationsByDeclaration.set(declaration, astDeclaration);
         }
@@ -294,30 +287,4 @@ export class AstSymbolTable {
     }
     return undefined;
   }
-
-  private _getTypeDirectiveReferences(node: ts.Node): ReadonlyArray<string> {
-    const sourceFile: ts.SourceFile = node.getSourceFile();
-    if (!sourceFile || !sourceFile.fileName) {
-      return [];
-    }
-
-    const cachedList: ReadonlyArray<string> | undefined
-      = this._typeDirectiveReferencesByFilePath.get(sourceFile.fileName);
-    if (cachedList) {
-      return cachedList;
-    }
-
-    const list: string[] = [];
-
-    for (const typeReferenceDirective of sourceFile.typeReferenceDirectives) {
-      const name: string = sourceFile.text.substring(typeReferenceDirective.pos, typeReferenceDirective.end);
-      if (list.indexOf(name) < 0) {
-        list.push(name);
-      }
-    }
-
-    this._typeDirectiveReferencesByFilePath.set(sourceFile.fileName, list);
-    return list;
-  }
-
 }

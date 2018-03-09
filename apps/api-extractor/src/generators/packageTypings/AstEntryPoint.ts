@@ -3,19 +3,19 @@
 
 import { AstSymbol } from './AstSymbol';
 
-export interface IAstNamedExport {
+export interface IExportedMember {
   readonly name: string;
   readonly astSymbol: AstSymbol;
 }
 
 export interface IAstEntryPointParameters {
-  readonly exports: ReadonlyArray<IAstNamedExport>;
+  readonly exportedMembers: ReadonlyArray<IExportedMember>;
 }
 
 export class AstEntryPoint {
-  public readonly exports: ReadonlyArray<IAstNamedExport>;
+  public readonly exportedMembers: ReadonlyArray<IExportedMember>;
 
   public constructor(parameters: IAstEntryPointParameters) {
-    this.exports = parameters.exports;
+    this.exportedMembers = parameters.exportedMembers;
   }
 }

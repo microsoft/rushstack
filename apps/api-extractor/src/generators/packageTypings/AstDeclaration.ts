@@ -8,7 +8,6 @@ import { Span } from '../../utils/Span';
 export interface IAstDeclarationParameters {
   readonly declaration: ts.Declaration;
   readonly astSymbol: AstSymbol;
-  readonly typeDirectiveReferences: ReadonlyArray<string>;
   readonly parentAstDeclaration: AstDeclaration | undefined;
 }
 
@@ -16,13 +15,6 @@ export class AstDeclaration {
   public readonly declaration: ts.Declaration;
 
   public readonly astSymbol: AstSymbol;
-
-  /**
-   * A list of names (e.g. "example-library") that should appear in a reference like this:
-   *
-   * /// <reference types="example-library" />
-   */
-  public readonly typeDirectiveReferences: ReadonlyArray<string>;
 
   /**
    * The parent, if this object is nested inside another AstDeclaration.
@@ -34,7 +26,6 @@ export class AstDeclaration {
   public constructor(parameters: IAstDeclarationParameters) {
     this.declaration = parameters.declaration;
     this.astSymbol = parameters.astSymbol;
-    this.typeDirectiveReferences = parameters.typeDirectiveReferences;
     this.parent = parameters.parentAstDeclaration;
 
     this.astSymbol.notifyDeclarationAttach(this);
