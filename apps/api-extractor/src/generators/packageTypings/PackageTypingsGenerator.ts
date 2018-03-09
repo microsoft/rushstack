@@ -128,6 +128,10 @@ export class PackageTypingsGenerator {
             const span: Span = new Span(declaration);
             this._modifySpan(span, entry);
             indentedWriter.writeLine(span.getModifiedText());
+
+console.log('-------');
+console.log(span.getDump());
+
           } else {
             indentedWriter.writeLine(`// Removed for this release type: ${entry.uniqueName}`);
           }

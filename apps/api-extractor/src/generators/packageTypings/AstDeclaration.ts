@@ -8,6 +8,7 @@ export interface IAstDeclarationParameters {
   declaration: ts.Declaration;
   astSymbol: AstSymbol;
   typeDirectiveReferences: ReadonlyArray<string>;
+  parentAstDeclaration: AstDeclaration | undefined;
 }
 
 export class AstDeclaration {
@@ -22,9 +23,17 @@ export class AstDeclaration {
    */
   public readonly typeDirectiveReferences: ReadonlyArray<string>;
 
+  /**
+   * The parent, if this object is nested inside another AstDeclaration.
+   */
+  public readonly parentAstDeclaration: AstDeclaration | undefined;
+
   public constructor(parameters: IAstDeclarationParameters) {
     this.declaration = parameters.declaration;
     this.astSymbol = parameters.astSymbol;
     this.typeDirectiveReferences = parameters.typeDirectiveReferences;
+    this.parentAstDeclaration = parameters.parentAstDeclaration;
+
+    this.astSymbol.attachDeclaration(this);
   }
 }

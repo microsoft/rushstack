@@ -24,6 +24,12 @@ export class AstSymbolTable {
   private readonly _astSymbolsBySymbol: Map<ts.Symbol, AstSymbol> = new Map<ts.Symbol, AstSymbol>();
 
   /**
+   * A mapping from ts.Declaration --> AstDeclaration
+   */
+  private readonly _astDeclarationsByDeclaration: Map<ts.Node, AstDeclaration>
+    = new Map<ts.Node, AstDeclaration>();
+
+  /**
    * A mapping from Entry.importPackageKey --> Entry.
    *
    * If Entry.importPackageKey is undefined, then it is not included in the map.
@@ -58,6 +64,22 @@ export class AstSymbolTable {
     return result.mainDeclaration;
   }
 
+  /**
+   * This function determines which node types will generate an AstDeclaration.
+   */
+  public isAstDeclaration(node: ts.Node): boolean {
+    switch (node.kind) {
+      case ts.SyntaxKind.ClassDeclaration:
+      case ts.SyntaxKind.MethodDeclaration:
+      case ts.SyntaxKind.PropertySignature:
+      case ts.SyntaxKind.InterfaceDeclaration:
+      case ts.SyntaxKind.FunctionDeclaration:
+      case ts.SyntaxKind.ModuleDeclaration:
+        return true;
+    }
+    return false;
+  }
+
   private _fetchAstSymbol(symbol: ts.Symbol, isEntryPoint: boolean): AstSymbol | undefined {
     const followAliasesResult: IFollowAliasesResult = SymbolAnalyzer.followAliases(symbol, this._typeChecker);
 
@@ -73,6 +95,15 @@ export class AstSymbolTable {
     let astSymbol: AstSymbol | undefined = this._astSymbolsBySymbol.get(followedSymbol);
 
     if (!astSymbol) {
+      if (!followedSymbol.declarations || followedSymbol.declarations.length < 1) {
+        throw new Error('Program Bug: Followed a symbol with no declarations');
+      }
+
+      for (const declaration of followedSymbol.declarations || []) {
+        if (!this.isAstDeclaration(declaration)) {
+          throw new Error('Program Bug: Followed a symbol with an invalid declaration');
+        }
+      }
 
       let astImport: AstImport | undefined = undefined;
       if (followAliasesResult.importPackagePath) {
@@ -105,27 +136,71 @@ export class AstSymbolTable {
         if (astImport) {
           // If it's an import, add it to the lookup
           this._entriesByImportKey.set(astImport.key, astSymbol);
-        } else {
+        }
 
-          // If it's not an import, then crawl for type references
-          for (const declaration of followedSymbol.declarations || []) {
-            const typeDirectiveReferences: ReadonlyArray<string>
-              = this._getTypeDirectiveReferences(declaration);
+        // We always fetch the entire chain of parents for each declaration.
+        // (Children/siblings are only analyzed on demand.)
 
-            const astDeclaration: AstDeclaration = new AstDeclaration({
-              declaration: declaration,
-              astSymbol: astSymbol,
-              typeDirectiveReferences: typeDirectiveReferences
-            });
-            astSymbol.attachDeclaration(astDeclaration);
+        // Is there a parent AstSymbol?
+        const arbitaryParent: ts.Node | undefined
+          = this._findFirstParentDeclaration(followedSymbol.declarations[0]);
 
-            this._collectTypes(declaration);
+        let parentAstSymbol: AstSymbol | undefined = undefined;
+
+        if (arbitaryParent) {
+          const parentSymbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(arbitaryParent);
+          if (!parentSymbol) {
+            throw new Error('Program bug: missing parent symbol for declaration');
           }
+
+          parentAstSymbol = this._fetchAstSymbol(parentSymbol, false);
+        }
+
+        // Okay, now while creating the declarations we will wire them up to the
+        // their corresopnding parent declarations
+        for (const declaration of followedSymbol.declarations || []) {
+
+          const typeDirectiveReferences: ReadonlyArray<string>
+            = this._getTypeDirectiveReferences(declaration);
+
+          let parentAstDeclaration: AstDeclaration | undefined = undefined;
+          if (parentAstSymbol) {
+            const parentDeclaration: ts.Node | undefined
+              = this._findFirstParentDeclaration(declaration);
+
+            if (!parentDeclaration) {
+              throw new Error('Program bug: Missing parent declaration');
+            }
+
+            parentAstDeclaration = this._astDeclarationsByDeclaration.get(parentDeclaration);
+            if (!parentAstDeclaration) {
+              throw new Error('Program bug: Missing parent AstDeclaration');
+            }
+          }
+
+          const astDeclaration: AstDeclaration = new AstDeclaration({
+            declaration, astSymbol, typeDirectiveReferences, parentAstDeclaration});
+
+          this._astDeclarationsByDeclaration.set(declaration, astDeclaration);
         }
       }
     }
 
     return astSymbol;
+  }
+
+  /**
+   * Returns the first parent satisfying isAstDeclaration(), or undefined if none is found.
+   */
+  private _findFirstParentDeclaration(node: ts.Node): ts.Node | undefined {
+    let currentNode: ts.Node | undefined = node;
+    while (currentNode) {
+      if (this.isAstDeclaration(currentNode)) {
+        return currentNode;
+      }
+      currentNode = currentNode.parent;
+    }
+    return undefined;
   }
 
   private _collectTypes(node: ts.Node): void {
