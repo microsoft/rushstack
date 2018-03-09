@@ -73,6 +73,13 @@ export class AstSymbolTable {
           throw new Error('Unsupported export: ' + exportSymbol.name);
         }
 
+        this.analyze(astSymbol);
+
+        for (const d of astSymbol.astDeclarations) {
+          console.log('--------------------------------');
+          console.log(d.getDump());
+        }
+
         exports.push({ name: exportSymbol.name, astSymbol: astSymbol });
       }
 
@@ -80,6 +87,29 @@ export class AstSymbolTable {
       this._astEntryPointsBySourceFile.set(sourceFile, astEntryPoint);
     }
     return astEntryPoint;
+  }
+
+  /**
+   * Ensures that AstSymbol.analyzed is true for the provided symbol.  The operation
+   * locates the root symbol and then fetches all children of all declarations.
+   */
+  public analyze(astSymbol: AstSymbol): void {
+    if (astSymbol.analyzed) {
+      return;
+    }
+
+    // Walk up to the parent of the tree
+    let rootAstSymbol: AstSymbol = astSymbol;
+    while (rootAstSymbol.mainDeclaration.parent) {
+      rootAstSymbol = rootAstSymbol.mainDeclaration.parent.astSymbol;
+    }
+
+    // Calculate the full child tree for each definition
+    for (const astDeclaration of rootAstSymbol.astDeclarations) {
+      this._analyzeChildTree(astDeclaration.declaration);
+    }
+
+    astSymbol.notifyAnalyzed();
   }
 
   /**
@@ -98,12 +128,56 @@ export class AstSymbolTable {
     return false;
   }
 
+  public tryGetSymbolForAstDeclaration(node: ts.Node): ts.Symbol | undefined {
+    return TypeScriptHelpers.getSymbolForDeclaration(node as ts.Declaration);
+  }
+
+  /**
+   * Used by analyze to recursively analyze the entire child tree.
+   */
+  private _analyzeChildTree(node: ts.Node): void {
+    const childAstSymbol: AstSymbol | undefined = this._fetchAstSymbolForNode(node);
+
+    for (const child of node.getChildren()) {
+      this._analyzeChildTree(child);
+    }
+
+    if (childAstSymbol) {
+      childAstSymbol.notifyAnalyzed();
+    }
+  }
+
+  // tslint:disable-next-line:no-unused-variable
+  private _fetchAstDeclaration(node: ts.Node): AstDeclaration | undefined {
+    const astSymbol: AstSymbol | undefined = this._fetchAstSymbolForNode(node);
+    if (!astSymbol) {
+      return undefined;
+    }
+
+    const astDeclaration: AstDeclaration | undefined
+      = this._astDeclarationsByDeclaration.get(node);
+    if (!astDeclaration) {
+      throw new Error('Program Bug: Unable to find constructed AstDeclaration');
+    }
+
+    return astDeclaration;
+  }
+
+  private _fetchAstSymbolForNode(node: ts.Node): AstSymbol | undefined {
+    if (!this.isAstDeclaration(node)) {
+      return undefined;
+    }
+
+    const symbol: ts.Symbol | undefined = this.tryGetSymbolForAstDeclaration(node);
+    if (!symbol) {
+      throw new Error('Program Bug: Unable to find symbol for node');
+    }
+
+    return this._fetchAstSymbol(symbol);
+  }
+
   private _fetchAstSymbol(symbol: ts.Symbol): AstSymbol | undefined {
     const followAliasesResult: IFollowAliasesResult = SymbolAnalyzer.followAliases(symbol, this._typeChecker);
-
-    if (followAliasesResult.isAmbient) {
-      return undefined; // we don't care about ambient definitions
-    }
 
     const followedSymbol: ts.Symbol = followAliasesResult.followedSymbol;
     if (followedSymbol.flags & (ts.SymbolFlags.TypeParameter | ts.SymbolFlags.TypeLiteral)) {
@@ -166,7 +240,7 @@ export class AstSymbolTable {
         let parentAstSymbol: AstSymbol | undefined = undefined;
 
         if (arbitaryParent) {
-          const parentSymbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(arbitaryParent);
+          const parentSymbol: ts.Symbol | undefined = this.tryGetSymbolForAstDeclaration(arbitaryParent);
           if (!parentSymbol) {
             throw new Error('Program bug: missing parent symbol for declaration');
           }
@@ -219,39 +293,6 @@ export class AstSymbolTable {
       currentNode = currentNode.parent;
     }
     return undefined;
-  }
-
-  private _collectTypes(node: ts.Node): void {
-    switch (node.kind) {
-      case ts.SyntaxKind.Block:
-        // Don't traverse into code
-        return;
-      case ts.SyntaxKind.TypeReference: // general type references
-      case ts.SyntaxKind.ExpressionWithTypeArguments: // special case for e.g. the "extends" keyword
-        {
-          // Sometimes the type reference will involve multiple identifiers, e.g. "a.b.C".
-          // In this case, we only need to worry about importing the first identifier,
-          // so do a depth-first search for it:
-          const symbolNode: ts.Node | undefined = TypeScriptHelpers.findFirstChildNode(
-            node, ts.SyntaxKind.Identifier);
-
-          if (!symbolNode) {
-            break;
-          }
-
-          const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(symbolNode);
-          if (!symbol) {
-            throw new Error('Symbol not found for identifier: ' + symbolNode.getText());
-          }
-
-          this._fetchAstSymbol(symbol);
-        }
-        break;  // keep recursing
-    }
-
-    for (const child of node.getChildren() || []) {
-      this._collectTypes(child);
-    }
   }
 
   private _getTypeDirectiveReferences(node: ts.Node): ReadonlyArray<string> {

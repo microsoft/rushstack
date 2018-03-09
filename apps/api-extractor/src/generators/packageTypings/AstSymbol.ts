@@ -27,6 +27,8 @@ export class AstSymbol {
 
   private readonly _astDeclarations: AstDeclaration[];
 
+  private _analyzed: boolean = false;
+
   public constructor(parameters: IAstSymbolParameters) {
     this.followedSymbol = parameters.followedSymbol;
     this.localName = parameters.localName;
@@ -43,7 +45,20 @@ export class AstSymbol {
     return this._astDeclarations[0];
   }
 
-  public attachDeclaration(astDeclaration: AstDeclaration): void {
+  /**
+   * Returns true if the entire tree of children and parents have been fully
+   * constructed.  This supports partial analysis of symbols for
+   * external references.
+   */
+  public get analyzed(): boolean {
+    return this._analyzed;
+  }
+
+  public notifyDeclarationAttach(astDeclaration: AstDeclaration): void {
     this._astDeclarations.push(astDeclaration);
+  }
+
+  public notifyAnalyzed(): void {
+    this._analyzed = true;
   }
 }
