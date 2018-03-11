@@ -114,8 +114,11 @@ export class AstSymbolTable {
       case ts.SyntaxKind.PropertyDeclaration:
       case ts.SyntaxKind.InterfaceDeclaration:
       case ts.SyntaxKind.FunctionDeclaration:
+      // ModuleDeclaration is used for both "module" and "namespace" declarations
       case ts.SyntaxKind.ModuleDeclaration:
       case ts.SyntaxKind.VariableDeclaration:
+      // This is used for "import * as file from 'file';"
+      case ts.SyntaxKind.SourceFile:
         return true;
     }
     return false;
@@ -245,8 +248,6 @@ export class AstSymbolTable {
 
       for (const declaration of followedSymbol.declarations || []) {
         if (!this.isAstDeclaration(declaration)) {
-          SymbolAnalyzer.followAliases(symbol, this._typeChecker);
-
           throw new Error('Program Bug: Followed a symbol with an invalid declaration: ' + followedSymbol.name);
         }
       }

@@ -69,12 +69,12 @@ export class SymbolAnalyzer {
         // 2. Check for any signs that this was imported from an external package
         let result: IFollowAliasesResult | undefined;
 
-        result = SymbolAnalyzer._followAliasesForExportDeclaration(declaration, current);
+        result = SymbolAnalyzer._followAliasesForExportDeclaration(declaration, current, typeChecker);
         if (result) {
           return result;
         }
 
-        result = SymbolAnalyzer._followAliasesForImportDeclaration(declaration, current);
+        result = SymbolAnalyzer._followAliasesForImportDeclaration(declaration, current, typeChecker);
         if (result) {
           return result;
         }
@@ -125,7 +125,7 @@ export class SymbolAnalyzer {
    * Helper function for _followAliases(), for handling ts.ExportDeclaration patterns
    */
   private static _followAliasesForExportDeclaration(declaration: ts.Declaration,
-    symbol: ts.Symbol): IFollowAliasesResult | undefined {
+    symbol: ts.Symbol, typeChecker: ts.TypeChecker): IFollowAliasesResult | undefined {
 
     const exportDeclaration: ts.ExportDeclaration | undefined
       = TypeScriptHelpers.findFirstParent<ts.ExportDeclaration>(declaration, ts.SyntaxKind.ExportDeclaration);
@@ -165,7 +165,7 @@ export class SymbolAnalyzer {
 
         if (modulePath) {
           return {
-            followedSymbol: symbol,
+            followedSymbol: TypeScriptHelpers.followAliases(symbol, typeChecker),
             localName: exportName,
             astImport: new AstImport({ modulePath, exportName }),
             isAmbient: false
@@ -182,7 +182,7 @@ export class SymbolAnalyzer {
    * Helper function for _followAliases(), for handling ts.ImportDeclaration patterns
    */
   private static _followAliasesForImportDeclaration(declaration: ts.Declaration,
-    symbol: ts.Symbol): IFollowAliasesResult | undefined {
+    symbol: ts.Symbol, typeChecker: ts.TypeChecker): IFollowAliasesResult | undefined {
 
     const importDeclaration: ts.ImportDeclaration | undefined
       = TypeScriptHelpers.findFirstParent<ts.ImportDeclaration>(declaration, ts.SyntaxKind.ImportDeclaration);
@@ -260,7 +260,7 @@ export class SymbolAnalyzer {
 
         if (modulePath) {
           return {
-            followedSymbol: symbol,
+            followedSymbol: TypeScriptHelpers.followAliases(symbol, typeChecker),
             localName: symbol.name,
             astImport: new AstImport({ modulePath, exportName }),
             isAmbient: false
