@@ -61,4 +61,13 @@ export class AstSymbol {
   public notifyAnalyzed(): void {
     this._analyzed = true;
   }
+
+  /**
+   * Calls AstDeclaration.forEachDeclarationRecursive() for each AstDeclaration.
+   */
+  public forEachDeclarationRecursive(action: (astDeclaration: AstDeclaration) => void): void {
+    for (const astDeclaration of this.astDeclarations) {
+      astDeclaration.forEachDeclarationRecursive(action);
+    }
+  }
 }

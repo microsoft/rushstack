@@ -17,6 +17,7 @@ import { AstEntryPoint } from './AstEntryPoint';
 import { AstSymbol } from './AstSymbol';
 import { AstImport } from './AstImport';
 import { DtsEntry } from './DtsEntry';
+import { AstDeclaration } from './AstDeclaration';
 
 /**
  * Used with PackageTypingsGenerator.writeTypingsFile()
@@ -78,28 +79,22 @@ export class PackageTypingsGenerator {
     this._astEntryPoint = this._astSymbolTable.fetchEntryPoint(this._context.package.getDeclaration().getSourceFile());
 
     // Create a DtsEntry for each top-level export
+    const astSymbols: AstSymbol[] = [];
     for (const exportedMember of this._astEntryPoint.exportedMembers) {
       const astSymbol: AstSymbol = exportedMember.astSymbol;
 
-      for (const d of astSymbol.astDeclarations) {
-        console.log('------------------');
-        console.log(d.getDump());
-      }
+      this._createDtsEntryForSymbol(exportedMember.astSymbol, exportedMember.name);
 
-      const releaseTag: ReleaseTag = this._getReleaseTagForSymbol(astSymbol.followedSymbol);
+      astSymbols.push(astSymbol);
+    }
 
-      const dtsEntry: DtsEntry = new DtsEntry({
-        astSymbol: exportedMember.astSymbol,
-        originalName: exportedMember.name,
-        exported: true,
-        releaseTag: releaseTag
+    // Create a DtsEntry for each indirectly referenced export
+    for (const astSymbol of astSymbols) {
+      astSymbol.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
+        for (const referencedAstSymbol of astDeclaration.referencedAstSymbols) {
+          this._createDtsEntryForSymbol(referencedAstSymbol, undefined);
+        }
       });
-
-      this._dtsEntriesByAstSymbol.set(exportedMember.astSymbol, dtsEntry);
-      this._dtsEntriesBySymbol.set(exportedMember.astSymbol.followedSymbol, dtsEntry);
-      this._dtsEntries.push(dtsEntry);
-
-      this._collectTypeDefinitionReferences(astSymbol);
     }
 
     this._makeUniqueNames();
@@ -131,6 +126,42 @@ export class PackageTypingsGenerator {
     return this._astEntryPoint;
   }
 
+  private _createDtsEntryForSymbol(astSymbol: AstSymbol, exportedName: string | undefined): void {
+    let dtsEntry: DtsEntry | undefined = this._dtsEntriesByAstSymbol.get(astSymbol);
+
+    if (!dtsEntry) {
+      const releaseTag: ReleaseTag = this._getReleaseTagForSymbol(astSymbol.followedSymbol);
+
+      console.log('====> ' + (exportedName || astSymbol.localName));
+      if ((exportedName || astSymbol.localName) === 'getSelfReference') {
+        debugger;
+      }
+
+      dtsEntry = new DtsEntry({
+        astSymbol: astSymbol,
+        originalName: exportedName || astSymbol.localName,
+        exported: !!exportedName,
+        releaseTag: releaseTag
+      });
+
+      this._dtsEntriesByAstSymbol.set(astSymbol, dtsEntry);
+      this._dtsEntriesBySymbol.set(astSymbol.followedSymbol, dtsEntry);
+      this._dtsEntries.push(dtsEntry);
+
+      this._collectTypeDefinitionReferences(astSymbol);
+    } else {
+      if (exportedName) {
+        if (!dtsEntry.exported) {
+          throw new Error('Program Bug: DtsEntry should have been marked as exported');
+        }
+        if (dtsEntry.originalName !== exportedName) {
+          throw new Error(`The symbol ${exportedName} was also exported as ${dtsEntry.originalName};`
+            + ` this is not supported yet`);
+        }
+      }
+    }
+  }
+
   /**
    * Ensures a unique name for each item in the package typings file.
    */
@@ -143,7 +174,7 @@ export class PackageTypingsGenerator {
 
         if (usedNames.has(dtsEntry.originalName)) {
           // This should be impossible
-          throw new Error('Program bug: a package cannot have two exports with the same name');
+          throw new Error(`Program bug: a package cannot have two exports with the name ${dtsEntry.originalName}`);
         }
 
         dtsEntry.nameForEmit = dtsEntry.originalName;

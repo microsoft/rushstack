@@ -99,9 +99,29 @@ export class AstDeclaration {
       throw new Error('Program Bug: notifyReferencedAstSymbol() called after analysis is already complete');
     }
 
-    if (!this._analyzedReferencedAstSymbolsSet.has(referencedAstSymbol)) {
-      this._analyzedReferencedAstSymbolsSet.add(referencedAstSymbol);
-      this._analyzedReferencedAstSymbols.push(referencedAstSymbol);
+    for (let current: AstDeclaration | undefined = this; current; current = current.parent) {
+      // Don't add references to symbols that are already referenced by a parent
+      if (current._analyzedReferencedAstSymbolsSet.has(referencedAstSymbol)) {
+        return;
+      }
+      // Don't add the symbols of parents either
+      if (referencedAstSymbol === current.astSymbol) {
+        return;
+      }
+    }
+
+    this._analyzedReferencedAstSymbolsSet.add(referencedAstSymbol);
+    this._analyzedReferencedAstSymbols.push(referencedAstSymbol);
+  }
+
+  /**
+   * Visits all the current declaration and all children recursively in a depth-first traversal,
+   * and performs the specified action for each one.
+   */
+  public forEachDeclarationRecursive(action: (astDeclaration: AstDeclaration) => void): void {
+    action(this);
+    for (const child of this.children) {
+      child.forEachDeclarationRecursive(action);
     }
   }
 }
