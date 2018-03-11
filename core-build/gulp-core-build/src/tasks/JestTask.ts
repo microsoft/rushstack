@@ -225,28 +225,31 @@ export class JestTask extends GulpTask<IJestConfig> {
 
   private _copySnapshots(srcRoot: string, destRoot: string): void {
     const pattern: string = path.join(srcRoot, '**/__snapshots__/*.snap');
-    globby.sync(pattern).forEach(sourceFile => {
-      const destination: string = sourceFile.replace(srcRoot, destRoot);
-      const jsDestination: string = destination.replace(/\.test\..+\.snap$/, '.test.js.snap');
-      const jsxDestination: string = destination.replace(/\.test\..+\.snap$/, '.test.jsx.snap');
-      const tsDestination: string = destination.replace(/\.test\..+\.snap$/, '.test.ts.snap');
-      const tsxDestination: string = destination.replace(/\.test\..+\.snap$/, '.test.tsx.snap');
-
-      if (this._doesSnapBaseFileExist(jsDestination)) {
-        fsx.copySync(sourceFile, jsDestination);
-      } else if (this._doesSnapBaseFileExist(jsxDestination)) {
-        fsx.copySync(sourceFile, jsxDestination);
-      } else if (this._doesSnapBaseFileExist(tsDestination)) {
-        fsx.copySync(sourceFile, tsDestination);
-      } else if (this._doesSnapBaseFileExist(tsxDestination)) {
-        fsx.copySync(sourceFile, tsxDestination);
+    globby.sync(pattern).forEach(snapFile => {
+      const destination: string = snapFile.replace(srcRoot, destRoot);
+      if (this._copyIfMatchExtension(snapFile, destination, '.test.tsx.snap')) {
+        this.logVerbose(`Snapshot file ${snapFile} is copied to match extension ".test.tsx.snap".`);
+      } else if (this._copyIfMatchExtension(snapFile, destination, '.test.ts.snap')) {
+        this.logVerbose(`Snapshot file ${snapFile} is copied to match extension ".test.ts.snap".`);
+      } else if (this._copyIfMatchExtension(snapFile, destination, '.test.jsx.snap')) {
+        this.logVerbose(`Snapshot file ${snapFile} is copied to match extension ".test.jsx.snap".`);
+      } else if (this._copyIfMatchExtension(snapFile, destination, '.test.js.snap')) {
+        this.logVerbose(`Snapshot file ${snapFile} is copied to match extension ".test.js.snap".`);
+      } else {
+        this.logWarning(`Snapshot file ${snapFile} is not copied because don't find that matching test file.`);
       }
     });
   }
 
-  private _doesSnapBaseFileExist(snapFilePath: string): boolean {
-    const fileName: string = path.basename(snapFilePath, '.snap');
-    const snapBaseFilePath: string = path.resolve(snapFilePath, '../../', fileName);
-    return fsx.existsSync(snapBaseFilePath);
+  private _copyIfMatchExtension(snapSourceFile: string, destinationFile: string, extension: string): boolean {
+    const snapDestFile: string = destinationFile.replace(/\.test\..+\.snap$/, extension);
+    const testFileName: string = path.basename(snapDestFile, '.snap');
+    const testFile: string = path.resolve(path.dirname(snapDestFile), '..', testFileName); // Up from `__snapshots__`.
+    if (fsx.existsSync(testFile)) {
+      fsx.copySync(snapSourceFile, snapDestFile);
+      return true;
+    } else {
+      return false;
+    }
   }
 }
