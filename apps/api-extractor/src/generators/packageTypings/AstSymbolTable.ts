@@ -107,18 +107,25 @@ export class AstSymbolTable {
    * This function determines which node types will generate an AstDeclaration.
    */
   public isAstDeclaration(node: ts.Node): boolean {
+    // (alphabetical order)
     switch (node.kind) {
       case ts.SyntaxKind.ClassDeclaration:
-      case ts.SyntaxKind.MethodDeclaration:
-      case ts.SyntaxKind.PropertySignature:
-      case ts.SyntaxKind.PropertyDeclaration:
-      case ts.SyntaxKind.InterfaceDeclaration:
+      case ts.SyntaxKind.EnumDeclaration:
+      case ts.SyntaxKind.EnumMember:
       case ts.SyntaxKind.FunctionDeclaration:
+      case ts.SyntaxKind.InterfaceDeclaration:
+      case ts.SyntaxKind.MethodDeclaration:
+      case ts.SyntaxKind.MethodSignature:
+
       // ModuleDeclaration is used for both "module" and "namespace" declarations
       case ts.SyntaxKind.ModuleDeclaration:
-      case ts.SyntaxKind.VariableDeclaration:
-      // This is used for "import * as file from 'file';"
+      case ts.SyntaxKind.PropertyDeclaration:
+      case ts.SyntaxKind.PropertySignature:
+
+      // SourceFile is used for "import * as file from 'file';"
       case ts.SyntaxKind.SourceFile:
+      case ts.SyntaxKind.TypeAliasDeclaration:
+      case ts.SyntaxKind.VariableDeclaration:
         return true;
     }
     return false;
@@ -248,7 +255,8 @@ export class AstSymbolTable {
 
       for (const declaration of followedSymbol.declarations || []) {
         if (!this.isAstDeclaration(declaration)) {
-          throw new Error('Program Bug: Followed a symbol with an invalid declaration: ' + followedSymbol.name);
+          throw new Error(`Program Bug: The "${followedSymbol.name}" symbol uses the construct`
+            + ` "${ts.SyntaxKind[declaration.kind]}" which may be an unimplemented language feature`);
         }
       }
 

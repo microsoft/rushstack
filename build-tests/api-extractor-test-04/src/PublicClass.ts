@@ -7,6 +7,12 @@
  */
 export class PublicClass {
   /**
+   * This is a beta field
+   * @beta
+   */
+  public betaField: string = 'hello';
+
+  /**
    * This is a comment
    */
   public undecoratedMember(): void {
