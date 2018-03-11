@@ -6,6 +6,10 @@ export interface IAstImportParameters {
   readonly exportName: string;
 }
 
+/**
+ * For a symbol that was imported from an external package, this tracks the import
+ * statement that was used to reach it.
+ */
 export class AstImport {
   /**
    * The name of the external package (and possibly module path) that this definition

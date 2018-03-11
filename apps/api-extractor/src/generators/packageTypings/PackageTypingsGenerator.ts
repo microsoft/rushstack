@@ -132,11 +132,6 @@ export class PackageTypingsGenerator {
     if (!dtsEntry) {
       const releaseTag: ReleaseTag = this._getReleaseTagForSymbol(astSymbol.followedSymbol);
 
-      console.log('====> ' + (exportedName || astSymbol.localName));
-      if ((exportedName || astSymbol.localName) === 'getSelfReference') {
-        debugger;
-      }
-
       dtsEntry = new DtsEntry({
         astSymbol: astSymbol,
         originalName: exportedName || astSymbol.localName,

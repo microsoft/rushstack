@@ -251,13 +251,7 @@ export class AstSymbolTable {
         }
       }
 
-      let astImport: AstImport | undefined = undefined;
-      if (followAliasesResult.importPackagePath) {
-        astImport = new AstImport({
-          modulePath: followAliasesResult.importPackagePath,
-          exportName: followAliasesResult.importPackageExportName!
-        });
-      }
+      const astImport: AstImport | undefined = followAliasesResult.astImport;
 
       if (astImport) {
         astSymbol = this._entriesByImportKey.get(astImport.key);

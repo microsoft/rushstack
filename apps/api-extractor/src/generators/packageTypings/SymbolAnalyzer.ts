@@ -6,6 +6,7 @@
 import * as ts from 'typescript';
 
 import { TypeScriptHelpers } from '../../utils/TypeScriptHelpers';
+import { AstImport } from './AstImport';
 
 /**
  * Return value for PackageTypingsGenerator._followAliases()
@@ -26,11 +27,10 @@ export interface IFollowAliasesResult {
    */
   readonly isAmbient: boolean;
 
-  /** {@inheritdoc Entry.importPackagePath} */
-  readonly importPackagePath: string | undefined;
-
-  /** {@inheritdoc Entry.importPackageExportName} */
-  readonly importPackageExportName: string | undefined;
+  /**
+   * If this followedSymbol was reached by traversing
+   */
+  readonly astImport: AstImport | undefined;
 }
 
 export class SymbolAnalyzer {
@@ -116,8 +116,7 @@ export class SymbolAnalyzer {
     return {
       followedSymbol: current,
       localName: declarationName || current.name,
-      importPackagePath: undefined,
-      importPackageExportName: undefined,
+      astImport: undefined,
       isAmbient: isAmbient
     };
   }
@@ -132,7 +131,7 @@ export class SymbolAnalyzer {
       = TypeScriptHelpers.findFirstParent<ts.ExportDeclaration>(declaration, ts.SyntaxKind.ExportDeclaration);
 
     if (exportDeclaration) {
-      let importPackageExportName: string;
+      let exportName: string;
 
       if (declaration.kind === ts.SyntaxKind.ExportSpecifier) {
         // EXAMPLE:
@@ -152,7 +151,7 @@ export class SymbolAnalyzer {
 
         // Example: " ExportName as RenamedName"
         const exportSpecifier: ts.ExportSpecifier = declaration as ts.ExportSpecifier;
-        importPackageExportName = (exportSpecifier.propertyName || exportSpecifier.name).getText().trim();
+        exportName = (exportSpecifier.propertyName || exportSpecifier.name).getText().trim();
       } else {
         throw new Error('Unimplemented export declaration kind: ' + declaration.getText());
       }
@@ -161,15 +160,14 @@ export class SymbolAnalyzer {
         // Examples:
         //    " '@microsoft/sp-lodash-subset'"
         //    " "lodash/has""
-        const packagePath: string | undefined = SymbolAnalyzer._getPackagePathFromModuleSpecifier(
+        const modulePath: string | undefined = SymbolAnalyzer._getPackagePathFromModuleSpecifier(
           exportDeclaration.moduleSpecifier);
 
-        if (packagePath) {
+        if (modulePath) {
           return {
             followedSymbol: symbol,
-            localName: importPackageExportName,
-            importPackagePath: packagePath,
-            importPackageExportName: importPackageExportName,
+            localName: exportName,
+            astImport: new AstImport({ modulePath, exportName }),
             isAmbient: false
           };
         }
@@ -190,7 +188,7 @@ export class SymbolAnalyzer {
       = TypeScriptHelpers.findFirstParent<ts.ImportDeclaration>(declaration, ts.SyntaxKind.ImportDeclaration);
 
     if (importDeclaration) {
-      let importPackageExportName: string;
+      let exportName: string;
 
       if (declaration.kind === ts.SyntaxKind.ImportSpecifier) {
         // EXAMPLE:
@@ -214,7 +212,7 @@ export class SymbolAnalyzer {
 
         // Example: " ExportName as RenamedName"
         const importSpecifier: ts.ImportSpecifier = declaration as ts.ImportSpecifier;
-        importPackageExportName = (importSpecifier.propertyName || importSpecifier.name).getText().trim();
+        exportName = (importSpecifier.propertyName || importSpecifier.name).getText().trim();
       } else if (declaration.kind === ts.SyntaxKind.NamespaceImport) {
         // EXAMPLE:
         // "import * as theLib from 'the-lib';"
@@ -229,7 +227,7 @@ export class SymbolAnalyzer {
         //   FromKeyword:  pre=[from] sep=[ ]
         //   StringLiteral:  pre=['the-lib']
         //   SemicolonToken:  pre=[;]
-        importPackageExportName = '*';
+        exportName = '*';
       } else if (declaration.kind === ts.SyntaxKind.ImportClause) {
         // EXAMPLE:
         // "import A, { B } from './A';"
@@ -248,7 +246,7 @@ export class SymbolAnalyzer {
         //   FromKeyword:  pre=[from] sep=[ ]
         //   StringLiteral:  pre=['./A']
         //   SemicolonToken:  pre=[;]
-        importPackageExportName = 'default';
+        exportName = 'default';
       } else {
         throw new Error('Unimplemented import declaration kind: ' + declaration.getText());
       }
@@ -257,15 +255,14 @@ export class SymbolAnalyzer {
         // Examples:
         //    " '@microsoft/sp-lodash-subset'"
         //    " "lodash/has""
-        const packagePath: string | undefined = SymbolAnalyzer._getPackagePathFromModuleSpecifier(
+        const modulePath: string | undefined = SymbolAnalyzer._getPackagePathFromModuleSpecifier(
           importDeclaration.moduleSpecifier);
 
-        if (packagePath) {
+        if (modulePath) {
           return {
             followedSymbol: symbol,
             localName: symbol.name,
-            importPackagePath: packagePath,
-            importPackageExportName: importPackageExportName,
+            astImport: new AstImport({ modulePath, exportName }),
             isAmbient: false
           };
         }
