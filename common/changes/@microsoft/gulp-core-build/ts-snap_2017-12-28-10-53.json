@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/gulp-core-build",
-      "comment": "Respect the snapshot base file name.",
+      "comment": "Fix an issue where snapshot filenames did not follow Jest's naming convention.",
       "type": "patch"
     }
   ],
