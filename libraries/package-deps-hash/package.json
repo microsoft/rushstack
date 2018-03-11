@@ -1,9 +1,9 @@
 {
   "name": "@microsoft/package-deps-hash",
-  "version": "2.1.10",
+  "version": "2.2.18",
   "description": "",
   "main": "lib/index.js",
-  "typings": "lib/index.d.ts",
+  "typings": "dist/index-internal.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -13,11 +13,11 @@
     "build": "gulp test --clean"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "4.2.13",
+    "@microsoft/node-library-build": "4.3.18",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "@types/chai": "3.4.34",
     "@types/mocha": "2.2.38",
-    "@types/node": "6.0.88"
+    "@types/node": "8.5.8"
   }
 }

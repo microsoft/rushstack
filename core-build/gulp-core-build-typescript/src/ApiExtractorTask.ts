@@ -24,7 +24,7 @@ export interface IApiExtractorTaskConfig {
   /**
    * The file path of the exported entry point, relative to the project folder.
    *
-   * Example "src/index.ts"
+   * Example: "lib/index.d.ts"
    */
   entry?: string;
 
@@ -54,6 +54,13 @@ export interface IApiExtractorTaskConfig {
    * https://github.com/SharePoint/ts-spec-gen that generates an online API documentation.
    */
   apiJsonFolder?: string;
+
+  /**
+   * If true, then API Extractor will generate consolidated \*.d.ts outputs for this project.
+   * The filenames are: "index-internal.d.ts", "index-preview.d.ts", and "index-public.d.ts".
+   * @beta
+   */
+  generatePackageTypings?: boolean;
 }
 
 /**
@@ -101,7 +108,15 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
     }
 
     try {
-      const entryPointFile: string = path.join(this.buildConfig.rootPath, this.taskConfig.entry);
+      let entryPointFile: string;
+
+      if (this.taskConfig.entry === 'src/index.ts') {
+        // backwards compatibility for legacy projects that used *.ts files as their entry point
+        entryPointFile = path.join(this.buildConfig.rootPath, 'lib/index.d.ts');
+      } else {
+        entryPointFile = path.join(this.buildConfig.rootPath, this.taskConfig.entry);
+      }
+
       const typingsFilePath: string = path.join(this.buildConfig.rootPath, 'typings/tsd.d.ts');
       const otherFiles: string[] = fsx.existsSync(typingsFilePath) ? [typingsFilePath] : [];
 
@@ -113,9 +128,9 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
 
       const compilerOptions: ts.CompilerOptions = gulpTypeScript.createProject(gulpTypeScriptSettings).options;
 
-      const rootFiles: string[] = [ entryPointFile ].concat(otherFiles);
+      const analysisFileList: string[] = Extractor.generateFilePathsForAnalysis(otherFiles.concat(entryPointFile));
 
-      const compilerProgram: ts.Program = ts.createProgram(rootFiles, compilerOptions);
+      const compilerProgram: ts.Program = ts.createProgram(analysisFileList, compilerOptions);
 
       const extractorConfig: IExtractorConfig = {
         compiler: { configType: 'runtime' },
@@ -133,6 +148,12 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
           outputFolder: this.taskConfig.apiJsonFolder
         }
       };
+
+      if (this.taskConfig.generatePackageTypings) {
+        extractorConfig.packageTypings = {
+          enabled: true
+        };
+      }
 
       const extractorOptions: IExtractorOptions = {
         compilerProgram: compilerProgram,

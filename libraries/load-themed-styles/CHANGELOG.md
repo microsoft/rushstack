@@ -1,6 +1,118 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Fri, 22 Dec 2017 17:04:46 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Mar 2018 17:04:51 GMT and should not be manually modified.
+
+## 1.7.37
+Tue, 06 Mar 2018 17:04:51 GMT
+
+*Version update only*
+
+## 1.7.36
+Fri, 02 Mar 2018 01:13:59 GMT
+
+*Version update only*
+
+## 1.7.35
+Tue, 27 Feb 2018 22:05:57 GMT
+
+*Version update only*
+
+## 1.7.34
+Wed, 21 Feb 2018 22:04:19 GMT
+
+*Version update only*
+
+## 1.7.33
+Wed, 21 Feb 2018 03:13:29 GMT
+
+*Version update only*
+
+## 1.7.32
+Sat, 17 Feb 2018 02:53:49 GMT
+
+*Version update only*
+
+## 1.7.31
+Fri, 16 Feb 2018 22:05:23 GMT
+
+*Version update only*
+
+## 1.7.30
+Fri, 16 Feb 2018 17:05:11 GMT
+
+*Version update only*
+
+## 1.7.29
+Wed, 07 Feb 2018 17:05:11 GMT
+
+*Version update only*
+
+## 1.7.28
+Fri, 26 Jan 2018 22:05:30 GMT
+
+*Version update only*
+
+## 1.7.27
+Fri, 26 Jan 2018 17:53:38 GMT
+
+### Patches
+
+- Force a patch bump in case the previous version was an empty package
+
+## 1.7.26
+Fri, 26 Jan 2018 00:36:51 GMT
+
+*Version update only*
+
+## 1.7.25
+Tue, 23 Jan 2018 17:05:28 GMT
+
+*Version update only*
+
+## 1.7.24
+Thu, 18 Jan 2018 03:23:46 GMT
+
+*Version update only*
+
+## 1.7.23
+Thu, 18 Jan 2018 00:48:06 GMT
+
+*Version update only*
+
+## 1.7.22
+Wed, 17 Jan 2018 10:49:31 GMT
+
+*Version update only*
+
+## 1.7.21
+Fri, 12 Jan 2018 03:35:22 GMT
+
+*Version update only*
+
+## 1.7.20
+Thu, 11 Jan 2018 22:31:51 GMT
+
+*Version update only*
+
+## 1.7.19
+Wed, 10 Jan 2018 20:40:01 GMT
+
+*Version update only*
+
+## 1.7.18
+Sun, 07 Jan 2018 05:12:08 GMT
+
+*Version update only*
+
+## 1.7.17
+Fri, 05 Jan 2018 20:26:45 GMT
+
+*Version update only*
+
+## 1.7.16
+Fri, 05 Jan 2018 00:48:41 GMT
+
+*Version update only*
 
 ## 1.7.15
 Fri, 22 Dec 2017 17:04:46 GMT

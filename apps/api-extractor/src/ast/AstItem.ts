@@ -6,15 +6,18 @@
 
 import * as ts from 'typescript';
 import { ExtractorContext } from '../ExtractorContext';
-import ApiDocumentation from '../aedoc/ApiDocumentation';
+import { ApiDocumentation } from '../aedoc/ApiDocumentation';
 import { MarkupElement } from '../markup/MarkupElement';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
-import TypeScriptHelpers from '../TypeScriptHelpers';
+import { TypeScriptHelpers } from '../utils/TypeScriptHelpers';
 import { Markup } from '../markup/Markup';
-import ResolvedApiItem from '../ResolvedApiItem';
-import ApiDefinitionReference,
-  { IScopedPackageName, IApiDefinitionReferenceParts } from '../ApiDefinitionReference';
-import AstItemContainer from './AstItemContainer';
+import { ResolvedApiItem } from '../ResolvedApiItem';
+import {
+  ApiDefinitionReference,
+  IScopedPackageName,
+  IApiDefinitionReferenceParts
+} from '../ApiDefinitionReference';
+import { AstItemContainer } from './AstItemContainer';
 
 /**
  * Indicates the type of definition represented by a AstItem object.
@@ -111,12 +114,15 @@ export interface IAstItemOptions {
    * The semantic information for the declaration.
    */
   declarationSymbol: ts.Symbol;
+
   /**
-   * The declaration node that contains the JSDoc comments for this AstItem.
-   * In most cases this is the same as `declaration`, but for AstPackage it will be
-   * a separate node under the root.
+   * The JSDoc-style comment range (including the "/**" characters), which is assumed
+   * to be in the same source file as the IAstItemOptions.declaration node.
+   * If this is undefined, then the comment will be obtained from the
+   * IAstItemOptions.declaration node.
    */
-  jsdocNode: ts.Node | undefined;
+  aedocCommentRange?: ts.TextRange;
+
   /**
    * The symbol used to export this AstItem from the AstPackage.
    */
@@ -139,7 +145,7 @@ const typingsScopeNames: string[] = [ '@types' ];
  * abstract syntax tree from the TypeScript Compiler API, we use AstItem to extract a
  * simplified tree which correponds to the major topics for our API documentation.
  */
-abstract class AstItem {
+export abstract class AstItem {
 
   /**
    * Names of API items should only contain letters, numbers and underscores.
@@ -198,13 +204,6 @@ abstract class AstItem {
    * the API file produced by ApiFileGenerator.
    */
   public warnings: string[];
-
-  /**
-   * The declaration node that contains the JSDoc comments for this AstItem.
-   * In most cases this is the same as `declaration`, but for AstPackage it will be
-   * a separate node under the root.
-   */
-  public jsdocNode: ts.Node | undefined;
 
   /**
    * The parsed AEDoc comment for this item.
@@ -282,7 +281,6 @@ abstract class AstItem {
   constructor(options: IAstItemOptions) {
     this.reportError = this.reportError.bind(this);
 
-    this.jsdocNode = options.jsdocNode;
     this.declaration = options.declaration;
     this._errorNode = options.declaration;
     this._state = InitializationState.Incomplete;
@@ -295,13 +293,37 @@ abstract class AstItem {
 
     this.name = this.exportSymbol.name || '???';
 
-    let originalJsdoc: string = '';
-    if (this.jsdocNode) {
-      originalJsdoc = TypeScriptHelpers.getJsdocComments(this.jsdocNode, this.reportError);
+    const sourceFileText: string = this.declaration.getSourceFile().text;
+
+    let aedocCommentRange: ts.TextRange | undefined;
+
+    if (options.aedocCommentRange) { // but might be ""
+      // This is e.g. for the special @packagedocumentation comment, which is pulled
+      // from elsewhere in the AST.
+      aedocCommentRange = options.aedocCommentRange;
+    } else {
+      // This is the typical case
+      const ranges: ts.CommentRange[] = TypeScriptHelpers.getJSDocCommentRanges(
+        this.declaration, sourceFileText) || [];
+      if (ranges.length > 0) {
+        // We use the JSDoc comment block that is closest to the definition, i.e.
+        // the last one preceding it
+        aedocCommentRange = ranges[ranges.length - 1];
+      }
+    }
+
+    // This will be the AEDoc content, excluding the "/**" characters
+    let aedoc: string = '';
+    if (aedocCommentRange) {
+      // This is the raw comment including the "/**" characters, or "" if there was no comment
+      const rawComment: string = sourceFileText.substring(aedocCommentRange.pos, aedocCommentRange.end);
+      if (rawComment) {
+        aedoc = TypeScriptHelpers.extractJSDocContent(rawComment, this.reportError);
+      }
     }
 
     this.documentation = new ApiDocumentation(
-      originalJsdoc,
+      aedoc,
       this.context.docItemLoader,
       this.context,
       this.reportError,
@@ -460,16 +482,26 @@ abstract class AstItem {
       this.documentation.summary).replace(/\s\s/g, ' ');
     this.needsDocumentation = this.shouldHaveDocumentation() && summaryTextCondensed.length <= 10;
 
-    this.supportedName =  (this.kind === AstItemKind.Package) || AstItem._allowedNameRegex.test(this.name);
+    this.supportedName = (this.kind === AstItemKind.Package) || AstItem._allowedNameRegex.test(this.name);
     if (!this.supportedName) {
       this.warnings.push(`The name "${this.name}" contains unsupported characters; ` +
         'API names should use only letters, numbers, and underscores');
     }
 
     if (this.kind === AstItemKind.Package) {
+      if (this.documentation.originalAedoc.trim().length > 0) {
+        if (!this.documentation.isPackageDocumentation) {
+          this.reportError('A package comment was found, but it is missing the @packagedocumentation tag');
+        }
+      }
+
       if (this.documentation.releaseTag !== ReleaseTag.None) {
         const tag: string = '@' + ReleaseTag[this.documentation.releaseTag].toLowerCase();
         this.reportError(`The ${tag} tag is not allowed on the package, which is always considered to be @public`);
+      }
+    } else {
+      if (this.documentation.isPackageDocumentation) {
+        this.reportError(`The @packagedocumentation tag cannot be used for an item of type ${AstItemKind[this.kind]}`);
       }
     }
 
@@ -657,5 +689,3 @@ abstract class AstItem {
     }
   }
 }
-
-export default AstItem;

@@ -2,9 +2,15 @@
 // See LICENSE in the project root for license information.
 
 /**
- * Example package docs.
+ * api-extractor-test-01
+ *
+ * @remarks
+ * This library is consumed by api-extractor-test-02 and api-extractor-test-03.
+ * It tests the basic types of definitions, and all the weird cases for following
+ * chains of type aliases.
+ *
+ * @packagedocumentation
  */
-declare const packageDescription: void; // tslint:disable-line:no-unused-variable
 
 /**
  * Test the alias-following logic:  This class gets aliased twice before being
@@ -55,3 +61,42 @@ export class AmbientConsumer {
     return {} as IAmbientInterfaceExample;
   }
 }
+
+/**
+ * Example decorator
+ * @public
+ */
+export function virtual(target: Object, propertyKey: string | symbol,
+  descriptor: TypedPropertyDescriptor<any>): void {
+  // Eventually we may implement runtime validation (e.g. in DEBUG builds)
+  // but currently this decorator is only used by the build tools.
+}
+
+/**
+ * Tests a decorator
+ * @public
+ */
+export class DecoratorTest {
+  /**
+   * Function with a decorator
+   */
+  @virtual
+  public test(): void {
+    console.log('');
+  }
+}
+
+export { ForgottenExportConsumer1 } from './ForgottenExportConsumer1';
+export { ForgottenExportConsumer2 } from './ForgottenExportConsumer2';
+
+export { default as IInterfaceAsDefaultExport } from './IInterfaceAsDefaultExport';
+
+export { default as AbstractClass } from './AbstractClass';
+export { default as AbstractClass2, AbstractClass3 } from './AbstractClass2';
+
+export {
+  DefaultExportEdgeCase,
+  default as ClassExportedAsDefault
+} from './DefaultExportEdgeCase';
+
+export { TypeReferencesInAedoc as _TypeReferencesInAedoc } from './TypeReferencesInAedoc';

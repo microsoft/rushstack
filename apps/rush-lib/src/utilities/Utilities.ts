@@ -212,7 +212,7 @@ export default class Utilities {
    * The current directory will be set to the specified workingDirectory.
    */
   public static executeCommand(command: string, args: string[], workingDirectory: string,
-    suppressOutput: boolean = false, environmentVariables?: { [key: string]: string }): void {
+    suppressOutput: boolean = false, environmentVariables?: { [key: string]: string | undefined }): void {
 
     Utilities._executeCommandInternal(command, args, workingDirectory,
       suppressOutput ? undefined : [0, 1, 2],
@@ -224,7 +224,7 @@ export default class Utilities {
    * The current directory will be set to the specified workingDirectory.
    */
   public static executeCommandAndCaptureOutput(command: string, args: string[], workingDirectory: string,
-    environmentVariables?: { [key: string]: string }): string {
+    environmentVariables?: { [key: string]: string | undefined }): string {
 
     const  result: child_process.SpawnSyncReturns<Buffer>
       = Utilities._executeCommandInternal(command, args, workingDirectory,
@@ -237,7 +237,7 @@ export default class Utilities {
    * Attempts to run Utilities.executeCommand() up to maxAttempts times before giving up.
    */
   public static executeCommandWithRetry(command: string, args: string[], maxAttempts: number,
-    workingDirectory: string, suppressOutput: boolean = false): void {
+    workingDirectory: string, suppressOutput: boolean = false, retryCallback?: () => void): void {
 
     if (maxAttempts < 1) {
       throw new Error('The maxAttempts parameter cannot be less than 1');
@@ -257,6 +257,9 @@ export default class Utilities {
         if (attemptNumber < maxAttempts) {
           ++attemptNumber;
           console.log(`Trying again (attempt #${attemptNumber})...` + os.EOL);
+          if (retryCallback) {
+            retryCallback();
+          }
           continue;
         } else {
           console.error(`Giving up after ${attemptNumber} attempts` + os.EOL);
@@ -301,7 +304,7 @@ export default class Utilities {
   public static executeShellCommand(
     command: string,
     workingDirectory: string,
-    environmentVariables?: { [key: string]: string },
+    environmentVariables?: { [key: string]: string | undefined },
     captureOutput: boolean = false
   ): child_process.SpawnSyncReturns<Buffer> {
     let shellCommand: string = process.env.comspec || 'cmd';
@@ -337,7 +340,7 @@ export default class Utilities {
   public static executeShellCommandAsync(
     command: string,
     workingDirectory: string,
-    environmentVariables?: { [key: string]: string },
+    environmentVariables?: { [key: string]: string | undefined },
     captureOutput: boolean = false
   ): child_process.ChildProcess {
     let shellCommand: string = process.env.comspec || 'cmd';
@@ -423,7 +426,7 @@ export default class Utilities {
   private static _executeCommandInternal(
     command: string, args: string[], workingDirectory: string,
     stdio: (string|number)[] | undefined,
-    environmentVariables: { [key: string]: string } | undefined): child_process.SpawnSyncReturns<Buffer> {
+    environmentVariables: { [key: string]: string | undefined } | undefined): child_process.SpawnSyncReturns<Buffer> {
 
     const options: child_process.SpawnSyncOptions = {
       cwd: workingDirectory,

@@ -30,7 +30,7 @@ export enum TokenType {
 /**
  * A structured object created from a doc comment string within an AEDoc comment block.
  */
-export default class Token {
+export class Token {
 
   /**
    * The type of the token.

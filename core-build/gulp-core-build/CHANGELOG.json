@@ -2,6 +2,330 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.6.8",
+      "tag": "@microsoft/gulp-core-build_v3.6.8",
+      "date": "Fri, 02 Mar 2018 01:13:59 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix the \"relogIssues\" buld config option."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.7.2` to `0.7.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.7",
+      "tag": "@microsoft/gulp-core-build_v3.6.7",
+      "date": "Tue, 27 Feb 2018 22:05:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.7.1` to `0.7.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.6",
+      "tag": "@microsoft/gulp-core-build_v3.6.6",
+      "date": "Wed, 21 Feb 2018 22:04:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.7.0` to `0.7.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.5",
+      "tag": "@microsoft/gulp-core-build_v3.6.5",
+      "date": "Wed, 21 Feb 2018 03:13:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.6.1` to `0.7.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.4",
+      "tag": "@microsoft/gulp-core-build_v3.6.4",
+      "date": "Sat, 17 Feb 2018 02:53:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.6.0` to `0.6.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.3",
+      "tag": "@microsoft/gulp-core-build_v3.6.3",
+      "date": "Fri, 16 Feb 2018 22:05:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.5.1` to `0.6.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.2",
+      "tag": "@microsoft/gulp-core-build_v3.6.2",
+      "date": "Fri, 16 Feb 2018 17:05:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.5.0` to `0.5.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.1",
+      "tag": "@microsoft/gulp-core-build_v3.6.1",
+      "date": "Wed, 07 Feb 2018 17:05:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.10` to `0.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.0",
+      "tag": "@microsoft/gulp-core-build_v3.6.0",
+      "date": "Fri, 26 Jan 2018 22:05:30 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "made default testMatch and maxWorkers arguments in Jest task overridable"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.9` to `0.4.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.3",
+      "tag": "@microsoft/gulp-core-build_v3.5.3",
+      "date": "Fri, 26 Jan 2018 17:53:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Force a patch bump in case the previous version was an empty package"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.8` to `0.4.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.2",
+      "tag": "@microsoft/gulp-core-build_v3.5.2",
+      "date": "Fri, 26 Jan 2018 00:36:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.7` to `0.4.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.1",
+      "tag": "@microsoft/gulp-core-build_v3.5.1",
+      "date": "Tue, 23 Jan 2018 17:05:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace gulp-util.colors with colors package"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.6` to `0.4.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.0",
+      "tag": "@microsoft/gulp-core-build_v3.5.0",
+      "date": "Thu, 18 Jan 2018 03:23:46 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a feature where when shouldWarningsFailBuild is true, then we will hook stderr and fail the build if anything consequential is written there"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.5` to `0.4.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.4",
+      "tag": "@microsoft/gulp-core-build_v3.4.4",
+      "date": "Thu, 18 Jan 2018 00:48:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.4` to `0.4.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.3",
+      "tag": "@microsoft/gulp-core-build_v3.4.3",
+      "date": "Wed, 17 Jan 2018 10:49:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.2` to `0.4.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.2",
+      "tag": "@microsoft/gulp-core-build_v3.4.2",
+      "date": "Fri, 12 Jan 2018 03:35:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.1` to `0.4.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.1",
+      "tag": "@microsoft/gulp-core-build_v3.4.1",
+      "date": "Thu, 11 Jan 2018 22:31:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nicholas Pape <nickpape-msft@users.noreply.github.com>",
+            "commit": "f1ba3c91dcdb8eb661fb303583f4476bce2c099f",
+            "comment": "Fix Jest error handling"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.0` to `0.4.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.0",
+      "tag": "@microsoft/gulp-core-build_v3.4.0",
+      "date": "Wed, 10 Jan 2018 20:40:01 GMT",
+      "comments": {
+        "minor": [
+          {
+            "author": "Nicholas Pape <nickpape-msft@users.noreply.github.com>",
+            "commit": "1271a0dc21fedb882e7953f491771724f80323a1",
+            "comment": "Upgrade to Node 8"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.26` to `0.4.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.7",
+      "tag": "@microsoft/gulp-core-build_v3.3.7",
+      "date": "Tue, 09 Jan 2018 17:05:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nicholas Pape <nickpape-msft@users.noreply.github.com>",
+            "commit": "d00b6549d13610fbb6f84be3478b532be9da0747",
+            "comment": "Get web-build-tools building with pnpm"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.25` to `0.3.26`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.6",
+      "tag": "@microsoft/gulp-core-build_v3.3.6",
+      "date": "Sun, 07 Jan 2018 05:12:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.24` to `0.3.25`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.5",
+      "tag": "@microsoft/gulp-core-build_v3.3.5",
+      "date": "Fri, 05 Jan 2018 20:26:45 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "QZ <qz2017@users.noreply.github.com>",
+            "commit": "4626d69e54f05aaabf87479626e8c1b6fcdc7eff",
+            "comment": "Specify package version for chalk. It was used without version specified."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.23` to `0.3.24`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.4",
+      "tag": "@microsoft/gulp-core-build_v3.3.4",
+      "date": "Fri, 05 Jan 2018 00:48:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nicholas Pape <nickpape-msft@users.noreply.github.com>",
+            "commit": "b942f54445bf01dbdb98aaa5f0007f5b95315b58",
+            "comment": "Update Jest to ~21.2.1"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.22` to `0.3.23`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.3.3",
       "tag": "@microsoft/gulp-core-build_v3.3.3",
       "date": "Fri, 22 Dec 2017 17:04:46 GMT",

@@ -4,7 +4,6 @@
 /// <reference types="mocha" />
 
 import { assert } from 'chai';
-import * as colors from 'colors';
 import * as os from 'os';
 
 import Interleaver, { ITaskWriter } from '../Interleaver';
@@ -86,26 +85,12 @@ describe('Interleaver tests', () => {
       done();
     });
 
-    it('should redirect warnings to stdout in yellow', (done: MochaDone) => {
-      const taskA: ITaskWriter = Interleaver.registerTask('A');
-      const warning: string = 'Warning - This is a warning';
-
-      taskA.writeError(warning);
-      assert.equal(stdout.read(), colors.yellow(warning));
-
-      taskA.close();
-
-      assert.equal(taskA.getStdOutput(), warning);
-      assert.equal(taskA.getStdError(), '');
-      done();
-    });
-
-    it('should write errors in red', (done: MochaDone) => {
+    it('should write errors to stderr', (done: MochaDone) => {
       const taskA: ITaskWriter = Interleaver.registerTask('A');
       const error: string = 'Critical error';
 
       taskA.writeError(error);
-      assert.equal(stdout.read(), colors.red(error));
+      assert.equal(stdout.read(), error);
 
       taskA.close();
 

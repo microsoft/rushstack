@@ -6,42 +6,80 @@
 import * as ts from 'typescript';
 import { ExtractorContext } from '../ExtractorContext';
 import { AstItemKind, IAstItemOptions } from './AstItem';
-import AstModule from './AstModule';
-import TypeScriptHelpers from '../TypeScriptHelpers';
+import { AstModule } from './AstModule';
+import { TypeScriptHelpers } from '../utils/TypeScriptHelpers';
 import { IExportedSymbol } from './IExportedSymbol';
 
 /**
   * This class is part of the AstItem abstract syntax tree.  It represents the top-level
   * exports for an Rush package.  This object acts as the root of the Extractor's tree.
   */
-export default class AstPackage extends AstModule {
+export class AstPackage extends AstModule {
   private _exportedNormalizedSymbols: IExportedSymbol[] = [];
 
   private static _getOptions(context: ExtractorContext, rootFile: ts.SourceFile): IAstItemOptions {
     const rootFileSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(rootFile);
-    let statement: ts.VariableStatement;
-    let foundDescription: ts.Node | undefined = undefined;
 
-    for (const statementNode of rootFile.statements) {
-      if (statementNode.kind === ts.SyntaxKind.VariableStatement) {
-        statement = statementNode as ts.VariableStatement;
-        for (const statementDeclaration of statement.declarationList.declarations) {
-          if (statementDeclaration.name.getText() === 'packageDescription') {
-            foundDescription = statement;
+    if (!rootFileSymbol.declarations) {
+      throw new Error('Unable to find a root declaration for this package');
+    }
+
+    // The @packagedocumentation comment is special because it is not attached to an AST
+    // definition.  Instead, it is part of the "trivia" tokens that the compiler treats
+    // as irrelevant white space.
+    //
+    // WARNING: If the comment doesn't precede an export statement, the compiler will omit
+    // it from the *.d.ts file, and API Extractor won't find it.  If this happens, you need
+    // to rearrange your statements to ensure it is passed through.
+    //
+    // This implementation assumes that the "@packagedocumentation" will be in the first JSDoc-comment
+    // that appears in the entry point *.d.ts file.  We could possibly look in other places,
+    // but the above warning suggests enforcing a standardized layout.  This design choice is open
+    // to feedback.
+    let packageCommentRange: ts.TextRange | undefined = undefined; // empty string
+
+    for (const commentRange of ts.getLeadingCommentRanges(rootFile.text, rootFile.getFullStart()) || []) {
+      if (commentRange.kind === ts.SyntaxKind.MultiLineCommentTrivia) {
+        const commentBody: string = rootFile.text.substring(commentRange.pos, commentRange.end);
+
+        // Choose the first JSDoc-style comment
+        if (/^\s*\/\*\*/.test(commentBody)) {
+          // But onliy if it looks like it's trying to be @packagedocumentation
+          // (The ApiDocumentation parser will validate this more rigorously)
+          if (commentBody.indexOf('@packagedocumentation') >= 0) {
+            packageCommentRange = commentRange;
           }
+          break;
         }
       }
     }
 
-    if (!rootFileSymbol.declarations) {
-      throw new Error('Unable to find a root declaration for this package');
+    if (!packageCommentRange) {
+      // If we didn't find the @packagedocumentation tag in the expected place, is it in some
+      // wrong place?  This sanity check helps people to figure out why there comment isn't working.
+      for (const statement of rootFile.statements) {
+        const ranges: ts.CommentRange[] = [];
+        ranges.push(...ts.getLeadingCommentRanges(rootFile.text, statement.getFullStart()) || []);
+        ranges.push(...ts.getTrailingCommentRanges(rootFile.text, statement.getEnd()) || []);
+
+        for (const commentRange of ranges) {
+          const commentBody: string = rootFile.text.substring(commentRange.pos, commentRange.end);
+
+          if (commentBody.indexOf('@packagedocumentation') >= 0) {
+            context.reportError('The @packagedocumentation comment must appear at the top of entry point *.d.ts file',
+              rootFile, commentRange.pos);
+          }
+        }
+      }
     }
 
     return {
       context,
       declaration: rootFileSymbol.declarations[0],
       declarationSymbol: rootFileSymbol,
-      jsdocNode: foundDescription
+      // NOTE: If there is no range, then provide an empty range to prevent ApiItem from
+      // looking in the default place
+      aedocCommentRange: packageCommentRange || { pos: 0, end: 0 }
     };
   }
 

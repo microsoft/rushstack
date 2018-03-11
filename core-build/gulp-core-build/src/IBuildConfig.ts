@@ -96,7 +96,7 @@ export interface IBuildConfig {
   /**
    * Should warnings be written to STDERR and cause build to return non-zero exit code
    */
-  shouldWarningsFailBuild?: boolean;
+  shouldWarningsFailBuild: boolean;
 
   /**
    * Arguments passed in.

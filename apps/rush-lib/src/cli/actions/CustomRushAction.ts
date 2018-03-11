@@ -24,7 +24,7 @@ import {
 
 import RushCommandLineParser from './RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
-import { TaskSelector } from '../utilities/TaskSelector';
+import { TaskSelector } from '../logic/TaskSelector';
 import { Stopwatch } from '../../utilities/Stopwatch';
 
 interface ICustomOptionInstance {
@@ -35,6 +35,7 @@ interface ICustomOptionInstance {
 export class CustomRushAction extends BaseRushAction {
   private customOptions: Map<string, ICustomOptionInstance> = new Map<string, ICustomOptionInstance>();
 
+  private _changedProjectsOnly: CommandLineFlagParameter;
   private _fromFlag: CommandLineStringListParameter;
   private _toFlag: CommandLineStringListParameter;
   private _verboseParameter: CommandLineFlagParameter;
@@ -61,7 +62,7 @@ export class CustomRushAction extends BaseRushAction {
     });
   }
 
-  public run(): void {
+  public run(): Promise<void> {
     if (!fsx.existsSync(this.rushConfiguration.rushLinkJsonFilename)) {
       throw new Error(`File not found: ${this.rushConfiguration.rushLinkJsonFilename}` +
         `${os.EOL}Did you run "rush link"?`);
@@ -90,6 +91,8 @@ export class CustomRushAction extends BaseRushAction {
       }
     });
 
+    const changedProjectsOnly: boolean = this.options.actionVerb === 'build' && this._changedProjectsOnly.value;
+
     const tasks: TaskSelector = new TaskSelector(
       {
         rushConfiguration: this._parser.rushConfig,
@@ -99,11 +102,12 @@ export class CustomRushAction extends BaseRushAction {
         customFlags,
         isQuietMode,
         parallelism,
-        isIncrementalBuildAllowed: this.options.actionVerb === 'build'
+        isIncrementalBuildAllowed: this.options.actionVerb === 'build',
+        changedProjectsOnly
       }
     );
 
-    tasks.execute().then(
+    return tasks.execute().then(
       () => {
         stopwatch.stop();
         console.log(colors.green(`rush ${this.options.actionVerb} (${stopwatch.toString()})`));
@@ -148,6 +152,14 @@ export class CustomRushAction extends BaseRushAction {
       parameterShortName: '-v',
       description: 'Display the logs during the build, rather than just displaying the build status summary'
     });
+    if (this.options.actionVerb === 'build') {
+      this._changedProjectsOnly = this.defineFlagParameter({
+        parameterLongName: '--changed-projects-only',
+        parameterShortName: '-cpo',
+        description: 'If specified, the incremental build will only rebuild projects that have changed, '
+          + 'but not any projects that directly or indirectly depend on the changed package.'
+      });
+    }
 
     // @TODO we should throw if they are trying to overwrite built in flags
 

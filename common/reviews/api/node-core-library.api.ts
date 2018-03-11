@@ -1,8 +1,8 @@
 // @public
 class FileDiffTest {
-  public static assertEqual(actualFilePath: string, expectedFilePath: string): void;
-  public static clearCache(): void;
-  public static prepareFolder(unitTestDirName: string, testModule: string): string;
+  static assertEqual(actualFilePath: string, expectedFilePath: string): void;
+  static clearCache(): void;
+  static prepareFolder(unitTestDirName: string, testModule: string): string;
 }
 
 // @public
@@ -32,32 +32,45 @@ interface IJsonSchemaValidateOptions {
 
 // @public
 class JsonFile {
-  public static load(jsonFilename: string): any;
-  public static loadAndValidate(jsonFilename: string, jsonSchema: JsonSchema,
-      options?: IJsonSchemaValidateOptions): any;
-  public static loadAndValidateWithCallback(jsonFilename: string, jsonSchema: JsonSchema,
-      errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): any;
-  public static save(jsonObject: Object, jsonFilename: string, options: IJsonFileSaveOptions = {}): boolean;
-  public static stringify(jsonObject: Object, options?: IJsonFileStringifyOptions): string;
-  public static validateNoUndefinedMembers(jsonObject: Object): void;
+  static load(jsonFilename: string): any;
+  static loadAndValidate(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonSchemaValidateOptions): any;
+  static loadAndValidateWithCallback(jsonFilename: string, jsonSchema: JsonSchema, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): any;
+  static save(jsonObject: Object, jsonFilename: string, options?: IJsonFileSaveOptions): boolean;
+  static stringify(jsonObject: Object, options?: IJsonFileStringifyOptions): string;
+  static validateNoUndefinedMembers(jsonObject: Object): void;
 }
 
 // @public
 class JsonSchema {
-  public ensureCompiled(): void;
-  public static fromFile(filename: string, options?: IJsonSchemaFromFileOptions): JsonSchema;
-  public static fromLoadedObject(schemaObject: Object): JsonSchema;
-  public readonly shortName: string;
-  public validateObject(jsonObject: Object, filenameForErrors: string, options?: IJsonSchemaValidateOptions): void;
-  public validateObjectWithCallback(jsonObject: Object,
-      errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): void;
+  ensureCompiled(): void;
+  static fromFile(filename: string, options?: IJsonSchemaFromFileOptions): JsonSchema;
+  static fromLoadedObject(schemaObject: Object): JsonSchema;
+  readonly shortName: string;
+  validateObject(jsonObject: Object, filenameForErrors: string, options?: IJsonSchemaValidateOptions): void;
+  validateObjectWithCallback(jsonObject: Object, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): void;
+}
+
+// @public
+class LockFile {
+  static acquire(resourceDir: string, resourceName: string, maxWaitMs?: number): Promise<LockFile>;
+  readonly dirtyWhenAcquired: boolean;
+  readonly filePath: string;
+  static getLockFilePath(resourceDir: string, resourceName: string, pid?: number): string;
+  readonly isReleased: boolean;
+  release(): void;
+  static tryAcquire(resourceDir: string, resourceName: string): LockFile | undefined;
 }
 
 // @public
 class PackageJsonLookup {
   constructor();
-  public clearCache(): void;
-  public getPackageName(packageJsonPath: string): string;
-  public tryGetPackageFolder(sourceFilePath: string): string | undefined;
+  clearCache(): void;
+  getPackageName(packageJsonPath: string): string;
+  tryGetPackageFolder(sourceFilePath: string): string | undefined;
+}
+
+// @public
+class Path {
+  static isUnder(childPath: string, parentFolderPath: string): boolean;
 }
 

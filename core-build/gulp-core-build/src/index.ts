@@ -20,7 +20,7 @@ import { args, builtPackage } from './State';
 export { IExecutable } from './IExecutable';
 import { log } from './logging';
 import { initialize as initializeLogging, markTaskCreationTime, generateGulpError, setWatchMode } from './logging';
-import { getFlagValue, setConfigDefaults } from './config';
+import { getFlagValue } from './config';
 import * as Gulp from 'gulp';
 import * as notifier from 'node-notifier';
 import { JestTask, _isJestEnabled } from './tasks/JestTask';
@@ -342,15 +342,13 @@ export function initialize(gulp: typeof Gulp): void {
 
   _handleCommandLineArguments();
 
-  setConfigDefaults(_buildConfig);
-
   for (const uniqueTask of _buildConfig.uniqueTasks) {
     if (uniqueTask.onRegister) {
       uniqueTask.onRegister();
     }
   }
 
-  initializeLogging(gulp, undefined, undefined);
+  initializeLogging(gulp, getConfig(), undefined, undefined);
 
   Object.keys(_taskMap).forEach(taskName => _registerTask(gulp, taskName, _taskMap[taskName]));
 

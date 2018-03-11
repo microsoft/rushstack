@@ -1,7 +1,7 @@
 // @internal (undocumented)
 interface _ICommandLineParserData {
   // (undocumented)
-  [ key: string ]: any;
+  [key: string]: any;
   // (undocumented)
   action: string;
 }
@@ -10,13 +10,13 @@ interface _ICommandLineParserData {
 class CommandLineAction extends CommandLineParameterProvider {
   constructor(options: ICommandLineActionOptions);
   // @internal
-  public _buildParser(actionsSubParser: argparse.SubParser): void;
+  _buildParser(actionsSubParser: argparse.SubParser): void;
   // @internal
-  public _execute(): void;
+  _execute(): Promise<void>;
   // @internal
-  public _processParsedData(data: ICommandLineParserData): void;
-  protected abstract onExecute(): void;
-  public options: ICommandLineActionOptions;
+  _processParsedData(data: ICommandLineParserData): void;
+  protected abstract onExecute(): Promise<void>;
+  options: ICommandLineActionOptions;
 }
 
 // @public
@@ -35,10 +35,10 @@ class CommandLineOptionParameter extends CommandLineParameter<string> {
 class CommandLineParameter<T> {
   constructor(key: string, converter?: (data: string) => T);
   // @internal
-  public readonly _key: string;
+  readonly _key: string;
   // @internal
-  public _setValue(data: ICommandLineParserData): void;
-  public readonly value: T;
+  _setValue(data: ICommandLineParserData): void;
+  readonly value: T;
 }
 
 // @public
@@ -59,9 +59,9 @@ class CommandLineParameterProvider {
 // @public
 class CommandLineParser extends CommandLineParameterProvider {
   constructor(options: ICommandListParserOptions);
-  public addAction(command: CommandLineAction): void;
-  public execute(args?: string[]): void;
-  protected onExecute(): void;
+  addAction(command: CommandLineAction): void;
+  execute(args?: string[]): Promise<void>;
+  protected onExecute(): Promise<void>;
   protected selectedAction: CommandLineAction;
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/node-library-build",
-  "version": "4.2.13",
+  "version": "4.3.18",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -13,11 +13,11 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.3.3",
-    "@microsoft/gulp-core-build-mocha": "3.2.13",
-    "@microsoft/gulp-core-build-typescript": "4.3.1",
+    "@microsoft/gulp-core-build": "3.6.8",
+    "@microsoft/gulp-core-build-mocha": "3.3.17",
+    "@microsoft/gulp-core-build-typescript": "4.7.16",
     "@types/gulp": "3.8.32",
-    "@types/node": "6.0.88",
+    "@types/node": "8.5.8",
     "gulp": "~3.9.1"
   },
   "devDependencies": {}

@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import AstItem, { IAstItemOptions } from './AstItem';
-import AstStructuredType from './AstStructuredType';
-import PrettyPrinter from '../PrettyPrinter';
-import TypeScriptHelpers from '../TypeScriptHelpers';
+import { AstItem, IAstItemOptions } from './AstItem';
+import { AstStructuredType } from './AstStructuredType';
+import { PrettyPrinter } from '../utils/PrettyPrinter';
+import { TypeScriptHelpers } from '../utils/TypeScriptHelpers';
 
 export enum ApiAccessModifier {
   Private,
@@ -24,11 +24,11 @@ export enum ApiAccessModifier {
  *
  * AstMember is used to represent members of classes, interfaces, and nested type literal expressions.
  */
-export default class AstMember extends AstItem {
+export class AstMember extends AstItem {
+  public accessModifier: ApiAccessModifier;
   /**
    * True if the member is an optional field value, indicated by a question mark ("?") after the name
    */
-  public accessModifier: ApiAccessModifier;
   public isOptional: boolean;
   public isStatic: boolean;
 
@@ -69,8 +69,7 @@ export default class AstMember extends AstItem {
       const typeLiteralOptions: IAstItemOptions = {
         context: this.context,
         declaration: propertyTypeDeclaration,
-        declarationSymbol: propertyTypeSymbol,
-        jsdocNode: propertyTypeDeclaration
+        declarationSymbol: propertyTypeSymbol
       };
 
       this.typeLiteral = new AstStructuredType(typeLiteralOptions);

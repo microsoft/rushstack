@@ -51,7 +51,7 @@ export class RunAction extends CommandLineAction {
     });
   }
 
-  protected onExecute(): void { // override
+  protected onExecute(): Promise<void> { // override
     let configFilename: string;
 
     if (this._configFileParameter.value) {
@@ -88,5 +88,6 @@ export class RunAction extends CommandLineAction {
       console.log(os.EOL + colors.yellow('API Extractor completed with errors or warnings'));
       process.exitCode = 1;
     }
+    return Promise.resolve();
   }
 }

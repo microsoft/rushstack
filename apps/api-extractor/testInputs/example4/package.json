@@ -1,8 +1,0 @@
-{
-  "name": "example4",
-  "version": "1.0.0",
-  "typings": "src/index.ts",
-  "dependencies": {
-    "@ms/library": "^1.0.0"
-  }
-}

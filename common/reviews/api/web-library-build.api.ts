@@ -1,8 +1,8 @@
 // @internal
-export declare function _isJestEnabled(rootFolder: string): boolean;
+export function _isJestEnabled(rootFolder: string): boolean;
 
 // @public
-export declare function addSuppression(suppression: string | RegExp): void;
+export function addSuppression(suppression: string | RegExp): void;
 
 // @public
 class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig> {
@@ -45,22 +45,22 @@ class CopyTask extends GulpTask<ICopyConfig> {
 }
 
 // @public
-export declare function coverageData(coverage: number, threshold: number, filePath: string): void;
+export function coverageData(coverage: number, threshold: number, filePath: string): void;
 
 // @public
-export declare function error(...args: Array<string | Chalk.ChalkChain>): void;
+export function error(...args: Array<string>): void;
 
 // @public
-export declare function fileError(taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
+export function fileError(taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
 
 // @public
-export declare function fileLog(write: (text: string) => void, taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
+export function fileLog(write: (text: string) => void, taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
 
 // @public
-export declare function fileWarning(taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
+export function fileWarning(taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
 
 // @public
-export declare function functionalTestRun(name: string, result: TestResultState, duration: number): void;
+export function functionalTestRun(name: string, result: TestResultState, duration: number): void;
 
 // @public
 class GenerateShrinkwrapTask extends GulpTask<void> {
@@ -69,13 +69,13 @@ class GenerateShrinkwrapTask extends GulpTask<void> {
 }
 
 // @public
-export declare function getConfig(): IBuildConfig;
+export function getConfig(): IBuildConfig;
 
 // @public
-export declare function getErrors(): string[];
+export function getErrors(): string[];
 
 // @public
-export declare function getWarnings(): string[];
+export function getWarnings(): string[];
 
 // @public
 class GulpTask<TTaskConfig> implements IExecutable {
@@ -111,7 +111,7 @@ class GulpTask<TTaskConfig> implements IExecutable {
 // @public (undocumented)
 interface IBuildConfig {
   args: {
-    [ name: string ]: string | boolean;
+    [name: string]: string | boolean;
   }
   buildErrorIconPath?: string;
   buildSuccessIconPath?: string;
@@ -127,11 +127,11 @@ interface IBuildConfig {
   packageFolder: string;
   production: boolean;
   properties?: {
-    [ key: string ]: any;
+    [key: string]: any;
   }
   relogIssues?: boolean;
   rootPath: string;
-  shouldWarningsFailBuild?: boolean;
+  shouldWarningsFailBuild: boolean;
   showToast?: boolean;
   srcFolder: string;
   tempFolder: string;
@@ -142,7 +142,7 @@ interface IBuildConfig {
 // @public
 interface ICopyConfig {
   copyTo: {
-    [ destPath: string ]: string[];
+    [destPath: string]: string[];
   }
   shouldFlatten?: boolean;
 }
@@ -188,12 +188,14 @@ interface IJestConfig {
   coverage?: boolean;
   coverageReporters?: string[];
   isEnabled?: boolean;
+  maxWorkers?: number;
   moduleDirectories?: string[];
+  testMatch?: string[];
   testPathIgnorePatterns?: string[];
 }
 
 // @public
-export declare function initialize(gulp: typeof Gulp): void;
+export function initialize(gulp: typeof Gulp): void;
 
 // @public (undocumented)
 interface ITsConfigFile<T> {
@@ -227,34 +229,34 @@ class JestTask extends GulpTask<IJestConfig> {
 }
 
 // @public
-export declare function log(...args: Array<string | Chalk.ChalkChain>): void;
+export function log(...args: Array<string>): void;
 
 // @public
-export declare function logSummary(value: string): void;
+export function logSummary(value: string): void;
 
 // @public
-export declare function mergeConfig(config: Partial<IBuildConfig>): void;
+export function mergeConfig(config: Partial<IBuildConfig>): void;
 
 // @public
-export declare function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecutable;
+export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecutable;
 
 // @public
-export declare function replaceConfig(config: IBuildConfig): void;
+export function replaceConfig(config: IBuildConfig): void;
 
 // @public
-export declare function reset(): void;
+export function reset(): void;
 
 // @public
-export declare function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutable;
+export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutable;
 
 // @public
-export declare function setConfig(config: Partial<IBuildConfig>): void;
+export function setConfig(config: Partial<IBuildConfig>): void;
 
 // @public
-export declare function subTask(taskName: string, fn: ICustomGulpTask): IExecutable;
+export function subTask(taskName: string, fn: ICustomGulpTask): IExecutable;
 
 // @public
-export declare function task(taskName: string, taskExecutable: IExecutable): IExecutable;
+export function task(taskName: string, taskExecutable: IExecutable): IExecutable;
 
 // @public
 enum TestResultState {
@@ -297,13 +299,13 @@ class ValidateShrinkwrapTask extends GulpTask<void> {
 }
 
 // @public
-export declare function verbose(...args: Array<string | Chalk.ChalkChain>): void;
+export function verbose(...args: Array<string>): void;
 
 // @public
-export declare function warn(...args: Array<string | Chalk.ChalkChain>): void;
+export function warn(...args: Array<string>): void;
 
 // @public
-export declare function watch(watchMatch: string | string[], taskExecutable: IExecutable): IExecutable;
+export function watch(watchMatch: string | string[], taskExecutable: IExecutable): IExecutable;
 
 // @public (undocumented)
 class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConfig & TExtendedConfig> {
@@ -344,4 +346,4 @@ class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConfig & TE
 // WARNING: Unsupported export: reload
 // WARNING: Unsupported export: trustDevCert
 // WARNING: Unsupported export: untrustDevCert
-// (No packageDescription for this package)
+// (No @packagedocumentation comment for this package)

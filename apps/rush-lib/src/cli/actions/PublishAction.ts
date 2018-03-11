@@ -15,13 +15,14 @@ import {
 import RushConfigurationProject from '../../data/RushConfigurationProject';
 import Npm from '../../utilities/Npm';
 import RushCommandLineParser from './RushCommandLineParser';
-import PublishUtilities from '../utilities/PublishUtilities';
-import ChangelogGenerator from '../utilities/ChangelogGenerator';
-import GitPolicy from '../utilities/GitPolicy';
-import PrereleaseToken from '../utilities/PrereleaseToken';
-import ChangeManager from '../utilities/ChangeManager';
+import PublishUtilities from '../logic/PublishUtilities';
+import ChangelogGenerator from '../logic/ChangelogGenerator';
+import GitPolicy from '../logic/GitPolicy';
+import PrereleaseToken from '../logic/PrereleaseToken';
+import ChangeManager from '../logic/ChangeManager';
 import { BaseRushAction } from './BaseRushAction';
-import { Git } from '../utilities/Git';
+import { Git } from '../logic/Git';
+import VersionControl from '../../utilities/VersionControl';
 
 export default class PublishAction extends BaseRushAction {
   private _addCommitDetails: CommandLineFlagParameter;
@@ -142,17 +143,17 @@ export default class PublishAction extends BaseRushAction {
   /**
    * Executes the publish action, which will read change request files, apply changes to package.jsons,
    */
-  protected run(): void {
+  protected run(): Promise<void> {
     if (!GitPolicy.check(this.rushConfiguration)) {
       process.exit(1);
-      return;
+      return Promise.resolve();
     }
     const allPackages: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
 
     if (this._regenerateChangelogs.value) {
       console.log('Regenerating changelogs');
       ChangelogGenerator.regenerateChangelogs(allPackages);
-      return;
+      return Promise.resolve();
     }
 
     if (this._includeAll.value) {
@@ -163,6 +164,7 @@ export default class PublishAction extends BaseRushAction {
     }
 
     console.log(EOL + colors.green('Rush publish finished successfully.'));
+    return Promise.resolve();
   }
 
   private _publishChanges(allPackages: Map<string, RushConfigurationProject>): void {
@@ -183,39 +185,44 @@ export default class PublishAction extends BaseRushAction {
       changeManager.apply(this._apply.value);
       changeManager.updateChangelog(this._apply.value);
 
-      // Stage, commit, and push the changes to remote temp branch.
-      git.addChanges();
-      git.commit();
-      git.push(tempBranch);
+      if (VersionControl.hasUncommittedChanges()) {
+        // Stage, commit, and push the changes to remote temp branch.
+        git.addChanges();
+        git.commit();
+        git.push(tempBranch);
 
-      // Override tag parameter if there is a hotfix change.
-      for (const change of orderedChanges) {
-        if (change.changeType === ChangeType.hotfix) {
-          this._hotfixTagOverride = 'hotfix';
-          break;
-        }
-      }
-
-      // npm publish the things that need publishing.
-      for (const change of orderedChanges) {
-        if (change.changeType && change.changeType > ChangeType.dependency) {
-          const project: RushConfigurationProject | undefined = allPackages.get(change.packageName);
-          if (project) {
-            this._npmPublish(change.packageName, project.projectFolder);
+        // Override tag parameter if there is a hotfix change.
+        for (const change of orderedChanges) {
+          if (change.changeType === ChangeType.hotfix) {
+            this._hotfixTagOverride = 'hotfix';
+            break;
           }
         }
+
+        // npm publish the things that need publishing.
+        for (const change of orderedChanges) {
+          if (change.changeType && change.changeType > ChangeType.dependency) {
+            const project: RushConfigurationProject | undefined = allPackages.get(change.packageName);
+            if (project) {
+              this._npmPublish(change.packageName, project.projectFolder);
+            }
+          }
+        }
+
+        // Create and push appropriate git tags.
+        this._gitAddTags(git, orderedChanges);
+        git.push(tempBranch);
+
+        // Now merge to target branch.
+        git.checkout(this._targetBranch.value);
+        git.pull();
+        git.merge(tempBranch);
+        git.push(this._targetBranch.value);
+        git.deleteBranch(tempBranch);
+      } else {
+        git.checkout(this._targetBranch.value);
+        git.deleteBranch(tempBranch, false);
       }
-
-      // Create and push appropriate git tags.
-      this._gitAddTags(git, orderedChanges);
-      git.push(tempBranch);
-
-      // Now merge to target branch.
-      git.checkout(this._targetBranch.value);
-      git.pull();
-      git.merge(tempBranch);
-      git.push(this._targetBranch.value);
-      git.deleteBranch(tempBranch);
     }
   }
 
@@ -256,7 +263,7 @@ export default class PublishAction extends BaseRushAction {
   }
 
   private _npmPublish(packageName: string, packagePath: string): void {
-    const env: { [key: string]: string } = PublishUtilities.getEnvArgs();
+    const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
     const args: string[] = ['publish'];
 
     if (this.rushConfiguration.projectsByName.get(packageName)!.shouldPublish) {
@@ -291,7 +298,7 @@ export default class PublishAction extends BaseRushAction {
   }
 
   private _packageExists(packageConfig: RushConfigurationProject): boolean {
-    const env: { [key: string]: string } = PublishUtilities.getEnvArgs();
+    const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
     if (this._registryUrl.value) {
       env['npm_config_registry'] = this._registryUrl.value; // tslint:disable-line:no-string-literal
     }

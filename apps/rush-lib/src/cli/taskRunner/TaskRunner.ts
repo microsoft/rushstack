@@ -21,17 +21,23 @@ import TaskError from './TaskError';
  */
 export default class TaskRunner {
   private _tasks: Map<string, ITask>;
+  private _changedProjectsOnly: boolean;
   private _buildQueue: ITask[];
   private _quietMode: boolean;
   private _hasAnyFailures: boolean;
   private _parallelism: number;
   private _currentActiveTasks: number;
+  private _totalTasks: number;
+  private _completedTasks: number;
 
-  constructor(quietMode: boolean, parallelism: number | undefined) {
+  constructor(quietMode: boolean,
+    parallelism: number | undefined,
+    changedProjectsOnly: boolean) {
     this._tasks = new Map<string, ITask>();
     this._buildQueue = [];
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
+    this._changedProjectsOnly = changedProjectsOnly;
 
     if (parallelism) {
       this._parallelism = parallelism;
@@ -113,6 +119,8 @@ export default class TaskRunner {
    */
   public execute(): Promise<void> {
     this._currentActiveTasks = 0;
+    this._completedTasks = 0;
+    this._totalTasks = this._tasks.size;
     console.log(`Executing a maximum of ${this._parallelism} simultaneous processes...${os.EOL}`);
 
     this._checkForCyclicDependencies(this._tasks.values(), []);
@@ -178,7 +186,7 @@ export default class TaskRunner {
       this._currentActiveTasks++;
       const task: ITask = ctask;
       task.status = TaskStatus.Executing;
-      console.log(colors.white(`> Starting task [${task.name}]`));
+      console.log(colors.white(`[${task.name}] started`));
 
       task.stopwatch = Stopwatch.start();
       task.writer = Interleaver.registerTask(task.name, this._quietMode);
@@ -189,6 +197,7 @@ export default class TaskRunner {
           task.writer.close();
 
           this._currentActiveTasks--;
+          this._completedTasks++;
           switch (result) {
             case TaskStatus.Success:
               this._markTaskAsSuccess(task);
@@ -225,7 +234,7 @@ export default class TaskRunner {
    * Marks a task as having failed and marks each of its dependents as blocked
    */
   private _markTaskAsFailed(task: ITask): void {
-    console.log(colors.red(`${os.EOL}> Completed task [${task.name}] with errors!`));
+    console.log(colors.red(`${os.EOL}${this._getCurrentCompletedTaskString()}[${task.name}] failed to build!`));
     task.status = TaskStatus.Failure;
     task.dependents.forEach((dependent: ITask) => {
       this._markTaskAsBlocked(dependent, task);
@@ -237,7 +246,9 @@ export default class TaskRunner {
    */
   private _markTaskAsBlocked(task: ITask, failedTask: ITask): void {
     if (task.status === TaskStatus.Ready) {
-      console.log(colors.red(`> [${task.name}] blocked by [${failedTask.name}]!`));
+      this._completedTasks++;
+      console.log(colors.red(`${this._getCurrentCompletedTaskString()}`
+        + `[${task.name}] blocked by [${failedTask.name}]!`));
       task.status = TaskStatus.Blocked;
       task.dependents.forEach((dependent: ITask) => {
         this._markTaskAsBlocked(dependent, failedTask);
@@ -249,11 +260,14 @@ export default class TaskRunner {
    * Marks a task as being completed, and removes it from the dependencies list of all its dependents
    */
   private _markTaskAsSuccess(task: ITask): void {
-    console.log(colors.green(`> Completed task [${task.name}] in ${task.stopwatch.toString()}`));
+    console.log(colors.green(`${this._getCurrentCompletedTaskString()}`
+      + `[${task.name}] completed successfully in ${task.stopwatch.toString()}`));
     task.status = TaskStatus.Success;
 
     task.dependents.forEach((dependent: ITask) => {
-      dependent.isIncrementalBuildAllowed = false;
+      if (!this._changedProjectsOnly) {
+        dependent.isIncrementalBuildAllowed = false;
+      }
       dependent.dependencies.delete(task);
     });
   }
@@ -263,10 +277,13 @@ export default class TaskRunner {
    * list of all its dependents
    */
   private _markTaskAsSuccessWithWarning(task: ITask): void {
-    console.log(colors.yellow(`> Completed task [${task.name}] with warnings in ${task.stopwatch.toString()}`));
+    console.log(colors.yellow(`${this._getCurrentCompletedTaskString()}`
+      + `[${task.name}] completed with warnings in ${task.stopwatch.toString()}`));
     task.status = TaskStatus.SuccessWithWarning;
     task.dependents.forEach((dependent: ITask) => {
-      dependent.isIncrementalBuildAllowed = false;
+      if (!this._changedProjectsOnly) {
+        dependent.isIncrementalBuildAllowed = false;
+      }
       dependent.dependencies.delete(task);
     });
   }
@@ -275,11 +292,15 @@ export default class TaskRunner {
    * Marks a task as skipped.
    */
   private _markTaskAsSkipped(task: ITask): void {
-    console.log(colors.green(`> Skipped task [${task.name}] in ${task.stopwatch.toString()}`));
+    console.log(colors.green(`${this._getCurrentCompletedTaskString()}[${task.name}] skipped`));
     task.status = TaskStatus.Skipped;
     task.dependents.forEach((dependent: ITask) => {
       dependent.dependencies.delete(task);
     });
+  }
+
+  private _getCurrentCompletedTaskString(): string {
+    return `${this._completedTasks} of ${this._totalTasks}: `;
   }
 
   /**

@@ -6,4 +6,11 @@
  * @public
  */
 export class ReexportedClass2 {
+  public getSelfReference(): ReexportedClass2 {
+    return this;
+  }
+
+  public getValue(): string {
+    return 'Hello, world!';
+  }
 }

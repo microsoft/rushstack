@@ -2,12 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import AstItem, { AstItemKind, IAstItemOptions } from './AstItem';
+import { AstItem, AstItemKind, IAstItemOptions } from './AstItem';
 
 /**
  * This class is part of the AstItem abstract syntax tree. It represents parameters of a function declaration
  */
-class AstParameter extends AstItem {
+export class AstParameter extends AstItem {
   public isOptional: boolean;
   public type: string;
 
@@ -33,5 +33,3 @@ class AstParameter extends AstItem {
     this.isSpread = !!parameterDeclaration.dotDotDotToken;
   }
 }
-
-export default AstParameter;

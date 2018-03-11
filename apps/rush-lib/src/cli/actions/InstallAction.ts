@@ -9,13 +9,13 @@ import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import { Event } from '../../data/EventHooks';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import RushCommandLineParser from './RushCommandLineParser';
-import GitPolicy from '../utilities/GitPolicy';
-import InstallManager, { InstallType } from '../utilities/InstallManager';
-import { LinkManagerFactory } from '../utilities/LinkManagerFactory';
-import { ShrinkwrapFileFactory } from '../utilities/ShrinkwrapFileFactory';
-import { BaseLinkManager } from '../utilities/base/BaseLinkManager';
-import { BaseShrinkwrapFile } from '../utilities/base/BaseShrinkwrapFile';
-import { ApprovedPackagesChecker } from '../utilities/ApprovedPackagesChecker';
+import GitPolicy from '../logic/GitPolicy';
+import InstallManager, { InstallType } from '../logic/InstallManager';
+import { LinkManagerFactory } from '../logic/LinkManagerFactory';
+import { ShrinkwrapFileFactory } from '../logic/ShrinkwrapFileFactory';
+import { BaseLinkManager } from '../logic/base/BaseLinkManager';
+import { BaseShrinkwrapFile } from '../logic/base/BaseShrinkwrapFile';
+import { ApprovedPackagesChecker } from '../logic/ApprovedPackagesChecker';
 import { BaseRushAction } from './BaseRushAction';
 
 export default class InstallAction extends BaseRushAction {
@@ -65,11 +65,11 @@ export default class InstallAction extends BaseRushAction {
     });
   }
 
-  protected run(): void {
+  protected run(): Promise<void> {
     if (!this._bypassPolicy.value) {
       if (!GitPolicy.check(this.rushConfiguration)) {
         process.exit(1);
-        return;
+        return Promise.resolve();
       }
 
       ApprovedPackagesChecker.rewriteConfigFiles(this.rushConfiguration);
@@ -78,10 +78,9 @@ export default class InstallAction extends BaseRushAction {
     const stopwatch: Stopwatch = Stopwatch.start();
 
     this.eventHooksManager.handle(Event.preRushInstall);
-    try {
-      const installManager: InstallManager = new InstallManager(this.rushConfiguration);
 
-      installManager.ensureLocalPackageManager(this._cleanInstallFull.value);
+    const installManager: InstallManager = new InstallManager(this.rushConfiguration);
+    return installManager.ensureLocalPackageManager(this._cleanInstallFull.value).then(() => {
 
       const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
         this.rushConfiguration.packageManager,
@@ -89,11 +88,10 @@ export default class InstallAction extends BaseRushAction {
 
       if (!shrinkwrapFile) {
         console.log('');
-        console.log(colors.red('Unable to proceed: The NPM shrinkwrap file is missing.'));
+        console.log(colors.red('Unable to proceed: The shrinkwrap file is missing.'));
         console.log('');
         console.log('You need to run "rush generate" first.');
-        process.exit(1);
-        return;
+        return process.exit(1);
       }
 
       let installType: InstallType = InstallType.Normal;
@@ -105,31 +103,31 @@ export default class InstallAction extends BaseRushAction {
 
       if (!installManager.createTempModulesAndCheckShrinkwrap(shrinkwrapFile, installType !== InstallType.Normal)) {
         console.log('');
-        console.log(colors.red('You need to run "rush generate" to update your NPM shrinkwrap file.'));
-        process.exit(1);
-        return;
+        console.log(colors.red('You need to run "rush generate" to update your shrinkwrap file.'));
+        return process.exit(1);
       }
 
       installManager.installCommonModules(installType);
 
+    }).catch((error) => {
+      stopwatch.stop();
+      this._collectTelemetry(stopwatch, false);
+      throw error;
+    }).then(() => {
       stopwatch.stop();
       console.log(colors.green(`Done. (${stopwatch.toString()})`));
 
       this._collectTelemetry(stopwatch, true);
-    } catch (error) {
-      stopwatch.stop();
-      this._collectTelemetry(stopwatch, false);
-      throw error;
-    }
 
-    this.eventHooksManager.handle(Event.postRushInstall);
+      this.eventHooksManager.handle(Event.postRushInstall);
 
-    if (!this._noLinkParameter.value) {
-      const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
-      this._parser.catchSyncErrors(linkManager.createSymlinksForProjects(false));
-    } else {
-      console.log(os.EOL + 'Next you should probably run: "rush link"');
-    }
+      if (!this._noLinkParameter.value) {
+        const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
+        return linkManager.createSymlinksForProjects(false);
+      } else {
+        console.log(os.EOL + 'Next you should probably run: "rush link"');
+      }
+    });
   }
 
   private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {

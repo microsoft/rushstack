@@ -12,11 +12,11 @@ import {
   ApiMember
 } from './api/ApiItem';
 
-import ApiDefinitionReference from './ApiDefinitionReference';
-import AstItem from './ast/AstItem';
-import AstItemContainer from './ast/AstItemContainer';
-import AstPackage from './ast/AstPackage';
-import ResolvedApiItem from './ResolvedApiItem';
+import { ApiDefinitionReference } from './ApiDefinitionReference';
+import { AstItem } from './ast/AstItem';
+import { AstItemContainer } from './ast/AstItemContainer';
+import { AstPackage } from './ast/AstPackage';
+import { ResolvedApiItem } from './ResolvedApiItem';
 import { ApiJsonFile } from './api/ApiJsonFile';
 import { IReferenceResolver } from './aedoc/ApiDocumentation';
 
@@ -45,7 +45,7 @@ export interface IParsedScopeName {
  * To use DocItemLoader: provide a projectFolder to construct a instance of the DocItemLoader,
  * then use DocItemLoader.getItem to retrieve the ApiItem of a particular API item.
  */
-export default class DocItemLoader implements IReferenceResolver {
+export class DocItemLoader implements IReferenceResolver {
   private _cache: Map<string, IApiPackage>;
   private _projectFolder: string; // Root directory to check for node modules
 

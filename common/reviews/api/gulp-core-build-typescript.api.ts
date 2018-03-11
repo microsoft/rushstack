@@ -3,9 +3,9 @@
 class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig> {
   constructor();
   // (undocumented)
-  public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream | void;
+  executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream | void;
   // (undocumented)
-  public loadSchema(): Object;
+  loadSchema(): Object;
 }
 
 // @public (undocumented)
@@ -22,14 +22,12 @@ interface ITsConfigFile<T> {
 
 // @public
 class TypeScriptConfiguration {
-  public static fixupSettings(compilerOptions: ts.Settings,
-      logWarning: (msg: string) => void,
-      options: Partial<IFixupSettingsOptions> = {}): void;
-  public static getGulpTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<ts.Settings>;
-  public static getTsConfigFile(config: IBuildConfig): ITsConfigFile<ts.Settings>;
-  public static getTypescriptCompiler(): any;
-  public static setBaseConfig(config: ITsConfigFile<ts.Settings>): void;
-  public static setTypescriptCompiler(typescriptOverride: any): void;
+  static fixupSettings(compilerOptions: ts.Settings, logWarning: (msg: string) => void, options?: Partial<IFixupSettingsOptions>): void;
+  static getGulpTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<ts.Settings>;
+  static getTsConfigFile(config: IBuildConfig): ITsConfigFile<ts.Settings>;
+  static getTypescriptCompiler(): any;
+  static setBaseConfig(config: ITsConfigFile<ts.Settings>): void;
+  static setTypescriptCompiler(typescriptOverride: any): void;
 }
 
 // WARNING: The type "ITypeScriptTaskConfig" needs to be exported by the package (e.g. added to index.ts)
@@ -37,14 +35,14 @@ class TypeScriptConfiguration {
 class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   constructor();
   // (undocumented)
-  public executeTask(gulp: gulpType.Gulp, completeCallback: (error?: string) => void): void;
+  executeTask(gulp: gulpType.Gulp, completeCallback: (error?: string) => void): void;
   // WARNING: The type "ITypeScriptTaskConfig" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
-  public getCleanMatch(buildConfig: IBuildConfig, taskConfig: ITypeScriptTaskConfig = this.taskConfig): string[];
+  getCleanMatch(buildConfig: IBuildConfig, taskConfig?: ITypeScriptTaskConfig): string[];
   // (undocumented)
-  public loadSchema(): Object;
+  loadSchema(): Object;
   // WARNING: The type "ITypeScriptTaskConfig" needs to be exported by the package (e.g. added to index.ts)
-  public mergeConfig(config: ITypeScriptTaskConfig): void;
+  mergeConfig(config: ITypeScriptTaskConfig): void;
 }
 
 // WARNING: Unsupported export: apiExtractor
@@ -53,4 +51,4 @@ class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
 // WARNING: Unsupported export: text
 // WARNING: Unsupported export: removeTripleSlash
 // WARNING: Unsupported export: default
-// (No packageDescription for this package)
+// (No @packagedocumentation comment for this package)

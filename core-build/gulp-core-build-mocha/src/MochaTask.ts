@@ -39,7 +39,8 @@ export class MochaTask extends GulpTask<IMochaTaskConfig> {
 
     return gulp.src(this.taskConfig.testMatch, { read: false })
       .pipe(mocha({
-        grep: matchString
+        grep: matchString,
+        timeout: 15000
       }))
       .pipe(istanbul.writeReports({
         dir: this.taskConfig.reportDir

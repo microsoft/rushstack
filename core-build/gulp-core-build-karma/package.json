@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-karma",
-  "version": "4.3.12",
+  "version": "4.4.17",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -13,7 +13,7 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.3.3",
+    "@microsoft/gulp-core-build": "3.6.8",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "gulp-karma": "~0.0.5",
@@ -24,7 +24,7 @@
     "karma-mocha-clean-reporter": "~0.0.1",
     "karma-phantomjs-launcher": "~1.0.0",
     "karma-sinon-chai": "~1.2.0",
-    "karma-webpack": "~2.0.4",
+    "karma-webpack": "2.0.9",
     "lolex": "~1.4.0",
     "mocha": "~3.4.2",
     "phantomjs-polyfill": "~0.0.2",
@@ -34,10 +34,11 @@
     "webpack": "~3.6.0"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "4.2.3",
+    "@microsoft/node-library-build": "4.3.13",
     "@types/gulp": "3.8.32",
     "@types/karma": "0.13.33",
     "@types/log4js": "0.0.33",
+    "@types/node": "8.5.8",
     "@types/bluebird": "3.5.3"
   }
 }

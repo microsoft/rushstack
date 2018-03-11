@@ -21,6 +21,15 @@ function assertPathProperty(validatedPropertyName: string, absolutePath: string,
 }
 
 describe('RushConfiguration', () => {
+  it ('can\'t load too new rush', (done: MochaDone) => {
+    const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-too-new.json');
+
+    assert.throws(() => {
+      RushConfiguration.loadFromConfigurationFile(rushFilename);
+    }, 'Unable to load rush-too-new.json because its RushVersion is 99.0.0');
+
+    done();
+  });
 
   it('can load repo/rush-npm.json', (done: MochaDone) => {
     const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-npm.json');
@@ -82,6 +91,11 @@ describe('RushConfiguration', () => {
     assertPathProperty('project1.projectFolder', project1.projectFolder, './repo/project1');
     assert.equal(project1.tempProjectName, '@rush-temp/project1', 'Failed to validate project1.tempProjectName');
     assert.equal(project1.unscopedTempProjectName, 'project1');
+    assert.equal(project1.skipRushCheck, false);
+
+    // Validate project2 settings
+    const project2: RushConfigurationProject = rushConfiguration.getProjectByName('project2')!;
+    assert.equal(project2.skipRushCheck, true);
 
     done();
   });

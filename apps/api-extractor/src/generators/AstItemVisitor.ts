@@ -1,23 +1,23 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import AstPackage from '../ast/AstPackage';
-import AstItem from '../ast/AstItem';
-import AstEnum from '../ast/AstEnum';
-import AstEnumValue from '../ast/AstEnumValue';
-import AstFunction from '../ast/AstFunction';
-import AstStructuredType from '../ast/AstStructuredType';
-import AstMember from '../ast/AstMember';
-import AstMethod from '../ast/AstMethod';
-import AstNamespace from '../ast/AstNamespace';
-import AstProperty from '../ast/AstProperty';
-import AstModuleVariable from '../ast/AstModuleVariable';
+import { AstPackage } from '../ast/AstPackage';
+import { AstItem } from '../ast/AstItem';
+import { AstEnum } from '../ast/AstEnum';
+import { AstEnumValue } from '../ast/AstEnumValue';
+import { AstFunction } from '../ast/AstFunction';
+import { AstStructuredType } from '../ast/AstStructuredType';
+import { AstMember } from '../ast/AstMember';
+import { AstMethod } from '../ast/AstMethod';
+import { AstNamespace } from '../ast/AstNamespace';
+import { AstProperty } from '../ast/AstProperty';
+import { AstModuleVariable } from '../ast/AstModuleVariable';
 
 /**
   * This is a helper class that provides a standard way to walk the AstItem
   * abstract syntax tree.
   */
-abstract class AstItemVisitor {
+export abstract class AstItemVisitor {
   protected visit(astItem: AstItem, refObject?: Object): void {
     if (astItem instanceof AstStructuredType) {
       this.visitAstStructuredType(astItem as AstStructuredType, refObject);
@@ -66,5 +66,3 @@ abstract class AstItemVisitor {
     this.visitAstMember(astProperty, refObject);
   }
 }
-
-export default AstItemVisitor;

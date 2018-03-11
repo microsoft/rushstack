@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import Token, { TokenType } from './Token';
-import TypeScriptHelpers from '../TypeScriptHelpers';
+import { Token, TokenType } from './Token';
+import { TypeScriptHelpers } from '../utils/TypeScriptHelpers';
 
 /**
  * Handles the tokenization of an AEDoc comment.
  */
-export default class Tokenizer {
+export class Tokenizer {
 
   /**
    * Match AEDoc block tags and inline tags

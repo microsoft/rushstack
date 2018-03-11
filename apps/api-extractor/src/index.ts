@@ -5,10 +5,11 @@
  * API Extractor helps you build better TypeScript library packages.
  * It helps with validation, documentation, and reviewing of the exported API
  * for a TypeScript library.
+ *
+ * @packagedocumentation
  */
-declare const packageDescription: void; // tslint:disable-line:no-unused-variable
 
-export { default as ExternalApiHelper } from './ExternalApiHelper';
+export { ExternalApiHelper } from './ExternalApiHelper';
 
 export { Extractor, IAnalyzeProjectOptions, IExtractorOptions } from './extractor/Extractor';
 export {

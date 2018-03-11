@@ -18,7 +18,8 @@ export default class CheckAction extends BaseRushAction {
       summary: 'Checks each project\'s package.json files and ensures that all dependencies are of the same ' +
         'version throughout the repository.',
       documentation: 'Checks each project\'s package.json files and ensures that all dependencies are of the ' +
-        'same version throughout the repository.'
+        'same version throughout the repository.',
+      safeForSimultaneousRushProcesses: true
     });
     this._parser = parser;
   }
@@ -27,7 +28,7 @@ export default class CheckAction extends BaseRushAction {
     // abstract
   }
 
-  protected run(): void {
+  protected run(): Promise<void> {
     const pinnedVersions: { [dependency: string]: string } = {};
     this.rushConfiguration.pinnedVersions.forEach((version: string, dependency: string) => {
       pinnedVersions[dependency] = version;
@@ -58,5 +59,6 @@ export default class CheckAction extends BaseRushAction {
     } else {
       console.log(colors.green(`Found no mis-matching dependencies!`));
     }
+    return Promise.resolve();
   }
 }

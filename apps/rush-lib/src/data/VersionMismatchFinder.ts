@@ -47,14 +47,16 @@ export class VersionMismatchFinder {
 
   private _analyze(): void {
     this._projects.forEach((project: RushConfigurationProject) => {
-      this._addDependenciesToList(project.packageName,
-        project.packageJson.dependencies, project.cyclicDependencyProjects);
-      this._addDependenciesToList(project.packageName,
-        project.packageJson.devDependencies, project.cyclicDependencyProjects);
-      this._addDependenciesToList(project.packageName,
-        project.packageJson.peerDependencies, project.cyclicDependencyProjects);
-      this._addDependenciesToList(project.packageName,
-        project.packageJson.optionalDependencies, project.cyclicDependencyProjects);
+      if (!project.skipRushCheck) {
+        this._addDependenciesToList(project.packageName,
+          project.packageJson.dependencies, project.cyclicDependencyProjects);
+        this._addDependenciesToList(project.packageName,
+          project.packageJson.devDependencies, project.cyclicDependencyProjects);
+        this._addDependenciesToList(project.packageName,
+          project.packageJson.peerDependencies, project.cyclicDependencyProjects);
+        this._addDependenciesToList(project.packageName,
+          project.packageJson.optionalDependencies, project.cyclicDependencyProjects);
+      }
     });
 
     this._mismatches.forEach((mismatches: Map<string, string[]>, project: string) => {

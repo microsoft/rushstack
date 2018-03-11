@@ -49,6 +49,8 @@ export interface IChangeLogEntry {
     major?: IChangeLogComment[];
     /** Describes changes to the package's dependencies */
     dependency?: IChangeLogComment[];
+    /** Describe changes that do not have version information */
+    none?: IChangeLogComment[];
   };
 }
 

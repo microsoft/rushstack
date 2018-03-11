@@ -8,7 +8,7 @@ import { JsonFile } from '@microsoft/node-core-library';
 import IPackageJson from '../utilities/IPackageJson';
 import Utilities from '../utilities/Utilities';
 import RushConfiguration from '../data/RushConfiguration';
-import { VersionPolicy } from './VersionPolicy';
+import { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy';
 
 /**
  * This represents the JSON data object for a project entry in the rush.json configuration file.
@@ -20,6 +20,7 @@ export interface IRushConfigurationProjectJson {
   cyclicDependencyProjects: string[];
   versionPolicyName?: string;
   shouldPublish?: boolean;
+  skipRushCheck?: boolean;
 }
 
 /**
@@ -37,7 +38,9 @@ export default class RushConfigurationProject {
   private _unscopedTempProjectName: string;
   private _cyclicDependencyProjects: Set<string>;
   private _versionPolicyName: string | undefined;
+  private _versionPolicy: VersionPolicy;
   private _shouldPublish: boolean;
+  private _skipRushCheck: boolean;
   private _downstreamDependencyProjects: string[];
   private readonly _rushConfiguration: RushConfiguration;
 
@@ -104,8 +107,9 @@ export default class RushConfigurationProject {
         this._cyclicDependencyProjects.add(cyclicDependencyProject);
       }
     }
-    this._downstreamDependencyProjects = [];
     this._shouldPublish = !!projectJson.shouldPublish;
+    this._skipRushCheck = !!projectJson.skipRushCheck;
+    this._downstreamDependencyProjects = [];
     this._versionPolicyName = projectJson.versionPolicyName;
   }
 
@@ -200,6 +204,14 @@ export default class RushConfigurationProject {
   }
 
   /**
+   * If true, then this project will be ignored by the "rush check" command.
+   * The default value is false.
+   */
+  public get skipRushCheck(): boolean {
+    return this._skipRushCheck;
+  }
+
+  /**
    * Name of the version policy used by this project.
    * @beta
    */
@@ -212,10 +224,35 @@ export default class RushConfigurationProject {
    * @beta
    */
   public get versionPolicy(): VersionPolicy | undefined {
-    if (this.versionPolicyName && this._rushConfiguration.versionPolicyConfiguration) {
-      return this._rushConfiguration.versionPolicyConfiguration.getVersionPolicy(
-        this.versionPolicyName);
+    if (!this._versionPolicy) {
+      if (this.versionPolicyName && this._rushConfiguration.versionPolicyConfiguration) {
+        this._versionPolicy = this._rushConfiguration.versionPolicyConfiguration.getVersionPolicy(
+          this.versionPolicyName);
+      }
     }
-    return undefined;
+    return this._versionPolicy;
+  }
+
+  /**
+   * Indicate whether this project is the main project for the related version policy.
+   *
+   * False if the project is not for publishing.
+   * True if the project is individually versioned or if its lockstep version policy does not specify main project.
+   * False if the project is lockstepped and is not the main project for its version policy.
+   *
+   * @beta
+   */
+  public get isMainProject(): boolean {
+    if (!this.shouldPublish) {
+      return false;
+    }
+    let isMain: boolean = true;
+    if (this.versionPolicy && this.versionPolicy.isLockstepped) {
+      const lockStepPolicy: LockStepVersionPolicy = this.versionPolicy as LockStepVersionPolicy;
+      if (lockStepPolicy.mainProject && lockStepPolicy.mainProject !== this.packageName) {
+        isMain = false;
+      }
+    }
+    return isMain;
   }
 }

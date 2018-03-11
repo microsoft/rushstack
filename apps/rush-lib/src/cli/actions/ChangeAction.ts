@@ -23,10 +23,11 @@ import VersionControl from '../../utilities/VersionControl';
 import { ChangeFile } from '../../data/ChangeFile';
 import { BaseRushAction } from './BaseRushAction';
 import RushCommandLineParser from './RushCommandLineParser';
-import ChangeFiles from '../utilities/ChangeFiles';
+import ChangeFiles from '../logic/ChangeFiles';
 import {
   VersionPolicy,
   IndividualVersionPolicy,
+  LockStepVersionPolicy,
   VersionPolicyDefinitionName
 } from '../../data/VersionPolicy';
 
@@ -38,6 +39,7 @@ export default class ChangeAction extends BaseRushAction {
   private _verifyParameter: CommandLineFlagParameter;
   private _targetBranchParameter: CommandLineStringParameter;
   private _targetBranchName: string;
+  private _projectHostMap: Map<string, string>;
 
   private _prompt: inquirer.PromptModule;
 
@@ -72,7 +74,8 @@ export default class ChangeAction extends BaseRushAction {
       actionVerb: 'change',
       summary: 'Records changes made to projects, indicating how the package version number should be bumped ' +
         'for the next publish.',
-      documentation: documentation.join(os.EOL)
+      documentation: documentation.join(os.EOL),
+      safeForSimultaneousRushProcesses: true
     });
     this._parser = parser;
   }
@@ -92,10 +95,13 @@ export default class ChangeAction extends BaseRushAction {
     });
   }
 
-  public run(): void {
+  public run(): Promise<void> {
     console.log(`Target branch is ${this._targetBranch}`);
+    this._projectHostMap = this._generateHostMap();
+
     if (this._verifyParameter.value) {
-      return this._verify();
+      this._verify();
+      return Promise.resolve();
     }
     this._sortedProjectList = this._getChangedPackageNames()
       .sort();
@@ -103,19 +109,30 @@ export default class ChangeAction extends BaseRushAction {
     if (this._sortedProjectList.length === 0) {
       console.log('No change file is needed.');
       this._warnUncommittedChanges();
-      return;
+      return Promise.resolve();
     }
 
     this._prompt = inquirer.createPromptModule();
     this._changeFileData = new Map<string, IChangeFile>();
-    this._changeComments = ChangeFiles.getChangeComments(this._getChangeFiles(),
-      this._sortedProjectList);
+    this._changeComments = ChangeFiles.getChangeComments(this._getChangeFiles());
 
-    // We should consider making onExecute either be an async/await or have it return a promise
-    this._promptLoop()
+    return this._promptLoop()
       .catch((error: Error) => {
-        console.error('There was an error creating the changefile:' + os.EOL + error.toString());
+        throw new Error(`There was an error creating the changefile: ${error.toString()}`);
       });
+  }
+
+  private _generateHostMap(): Map<string, string> {
+    const hostMap: Map<string, string> = new Map<string, string>();
+    this.rushConfiguration.projects.forEach(project => {
+      let hostProjectName: string = project.packageName;
+      if (project.versionPolicy && project.versionPolicy.isLockstepped) {
+        const lockstepPolicy: LockStepVersionPolicy = project.versionPolicy as LockStepVersionPolicy;
+        hostProjectName = lockstepPolicy.mainProject || project.packageName;
+      }
+      hostMap.set(project.packageName, hostProjectName);
+    });
+    return hostMap;
   }
 
   private _verify(): void {
@@ -141,10 +158,18 @@ export default class ChangeAction extends BaseRushAction {
     if (!changedFolders) {
       return [];
     }
-    return this.rushConfiguration.projects
-      .filter(project => project.shouldPublish)
-      .filter(project => this._hasProjectChanged(changedFolders, project))
-      .map(project => project.packageName) as string[];
+    const changedPackageNames: Set<string> = new Set<string>();
+
+    this.rushConfiguration.projects
+    .filter(project => project.shouldPublish)
+    .filter(project => this._hasProjectChanged(changedFolders, project))
+    .forEach(project => {
+      const hostName: string | undefined = this._projectHostMap.get(project.packageName);
+      if (hostName) {
+        changedPackageNames.add(hostName);
+      }
+    });
+    return [...changedPackageNames];
   }
 
   private _validateChangeFile(changedPackages: string[]): void {
@@ -220,7 +245,7 @@ export default class ChangeAction extends BaseRushAction {
   private _askQuestions(packageName: string): Promise<IChangeInfo | undefined> {
     console.log(`${os.EOL}${packageName}`);
     const comments: string[] | undefined = this._changeComments.get(packageName);
-    if (comments && comments.length) {
+    if (comments) {
       console.log(`Found existing comments:`);
       comments.forEach(comment => {
         console.log(`    > ${comment}`);

@@ -52,9 +52,74 @@ export interface IJestConfig {
    * Same as Jest CLI option moduleDirectories
    */
   moduleDirectories?: string[];
+
+  /**
+   * Same as Jest CLI option maxWorkers
+   */
+  maxWorkers?: number;
+
+  /**
+   * Same as Jest CLI option testMatch
+   */
+  testMatch?: string[];
 }
 
 const DEFAULT_JEST_CONFIG_FILE_NAME: string = 'jest.config.json';
+
+/**
+ * We need to replace the resolver function which jest is using until the PR which
+ * fixes jest-resolves handling of symlinks is merged:
+ * https://github.com/facebook/jest/pull/5085
+ */
+// tslint:disable-next-line:no-any
+const nodeModulesPaths: any = require('jest-resolve/build/node_modules_paths');
+nodeModulesPaths.default = (
+  basedir: string,
+  options: {
+    moduleDirectory?: string[],
+    paths?: string[]
+  }
+): string[] => {
+
+  const nodeModulesFolders: string = 'node_modules';
+  const absoluteBaseDir: string = path.resolve(basedir);
+  const realAbsoluteBaseDir: string = fsx.realpathSync(absoluteBaseDir);
+  const possiblePaths: string[] = [realAbsoluteBaseDir];
+
+  let moduleFolders: string[] = [nodeModulesFolders];
+  if (options && options.moduleDirectory) {
+    moduleFolders = ([] as string[]).concat(options.moduleDirectory);
+  }
+
+  const windowsBaseRegex: RegExp = /^([A-Za-z]:)/;
+  const fileshareBaseRegex: RegExp = /^\\\\/;
+  let prefix: string = '/';
+  if (windowsBaseRegex.test(absoluteBaseDir)) {
+    prefix = '';
+  } else if (fileshareBaseRegex.test(absoluteBaseDir)) {
+    prefix = '\\\\';
+  }
+
+  let parsedPath: path.ParsedPath = path.parse(realAbsoluteBaseDir);
+  while (parsedPath.dir !== possiblePaths[possiblePaths.length - 1]) {
+    const realParsedDir: string = fsx.realpathSync(parsedPath.dir);
+    possiblePaths.push(realParsedDir);
+    parsedPath = path.parse(realParsedDir);
+  }
+
+  const dirs: string[] = possiblePaths.reduce((possibleDirs: string[], aPath: string) => {
+    return possibleDirs.concat(
+      moduleFolders.map((moduleDir: string) => {
+        return path.join(prefix, aPath, moduleDir);
+      })
+    );
+  }, []);
+
+  if (options.paths) {
+    return options.paths.concat(dirs);
+  }
+  return dirs;
+};
 
 /**
  * Indicates if jest is enabled
@@ -112,19 +177,20 @@ export class JestTask extends GulpTask<IJestConfig> {
     const jestConfig: any = {
       ci: this.buildConfig.production,
       cache: !!this.taskConfig.cache,
-      config: configFileFullPath,
+      config: fsx.existsSync(configFileFullPath) ? configFileFullPath : undefined,
       collectCoverageFrom: this.taskConfig.collectCoverageFrom,
       coverage: this.taskConfig.coverage,
       coverageReporters: this.taskConfig.coverageReporters,
       coverageDirectory: path.join(this.buildConfig.tempFolder, 'coverage'),
-      maxWorkers: 1,
+      maxWorkers: !!this.taskConfig.maxWorkers ?
+        this.taskConfig.maxWorkers : 1,
       moduleDirectories: !!this.taskConfig.moduleDirectories ?
         this.taskConfig.moduleDirectories :
         ['node_modules', this.buildConfig.libFolder],
       reporters: [path.join(__dirname, 'JestReporter.js')],
       rootDir: this.buildConfig.rootPath,
-      runInBand: true,
-      testMatch: ['**/*.test.js?(x)'],
+      testMatch: !!this.taskConfig.testMatch ?
+        this.taskConfig.testMatch : ['**/*.test.js?(x)'],
       testPathIgnorePatterns: this.taskConfig.testPathIgnorePatterns,
       updateSnapshot: !this.buildConfig.production
     };
@@ -134,10 +200,15 @@ export class JestTask extends GulpTask<IJestConfig> {
       jestConfig['cacheDirectory'] = this.taskConfig.cacheDirectory;
     }
 
+    // suppress 'Running coverage on untested files...' warning
+    const oldTTY: true | undefined = process.stdout.isTTY;
+    process.stdout.isTTY = undefined;
+
     Jest.runCLI(jestConfig,
-      [this.buildConfig.rootPath],
-      (result) => {
-        if (result.numFailedTests || result.numFailedTestSuites) {
+      [this.buildConfig.rootPath]).then(
+      (result: { results: Jest.AggregatedResult, globalConfig: Jest.GlobalConfig }) => {
+        process.stdout.isTTY = oldTTY;
+        if (result.results.numFailedTests || result.results.numFailedTestSuites) {
           completeCallback(new Error('Jest tests failed'));
         } else {
           if (!this.buildConfig.production) {
@@ -145,6 +216,10 @@ export class JestTask extends GulpTask<IJestConfig> {
           }
           completeCallback();
         }
+      },
+      (err) => {
+        process.stdout.isTTY = oldTTY;
+        completeCallback(err);
       });
   }
 

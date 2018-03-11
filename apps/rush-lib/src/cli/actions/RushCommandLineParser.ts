@@ -23,7 +23,7 @@ import VersionAction from './VersionAction';
 import { CustomCommandFactory } from './CustomCommandFactory';
 import { CustomRushAction } from './CustomRushAction';
 
-import Telemetry from '../utilities/Telemetry';
+import Telemetry from '../logic/Telemetry';
 
 export default class RushCommandLineParser extends CommandLineParser {
   public telemetry: Telemetry | undefined;
@@ -42,12 +42,6 @@ export default class RushCommandLineParser extends CommandLineParser {
       + ' NPM progress bar, Rush is for you.'
     });
     this._populateActions();
-  }
-
-  public catchSyncErrors(promise: Promise<void>): void {
-    promise.catch((error: Error) => {
-      this._exitAndReportError(error);
-    });
   }
 
   public exitWithError(): void {
@@ -76,28 +70,32 @@ export default class RushCommandLineParser extends CommandLineParser {
     });
   }
 
-  protected onExecute(): void {
-    if (this._debugParameter.value) {
-      // For debugging, don't catch any exceptions; show the full call stack
-      this._execute();
-    } else {
-      try {
-        this._execute();
-      } catch (error) {
+  protected onExecute(): Promise<void> {
+    // For debugging, don't catch any exceptions; show the full call stack
+    return this._execute().catch((error: Error) => {
+      if (this._debugParameter.value) {
+        console.log(colors.red(error.toString()));
+        if (error.stack) {
+          console.log(os.EOL + error.stack);
+        }
+      } else {
         this._exitAndReportError(error);
       }
-    }
+    });
   }
 
-  private _execute(): void {
-    if (this.rushConfig) {
-      this.telemetry = new Telemetry(this.rushConfig);
-    }
-
-    super.onExecute();
-
-    if (this.telemetry) {
-      this.flushTelemetry();
+  private _execute(): Promise<void> {
+    try {
+      if (this.rushConfig) {
+        this.telemetry = new Telemetry(this.rushConfig);
+      }
+      return super.onExecute().then(() => {
+        if (this.telemetry) {
+          this.flushTelemetry();
+        }
+      });
+    } catch (error) {
+      return Promise.reject(error);
     }
   }
 

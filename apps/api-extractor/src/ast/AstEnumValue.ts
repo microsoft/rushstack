@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import AstItem, { AstItemKind, IAstItemOptions } from './AstItem';
-import PrettyPrinter from '../PrettyPrinter';
+import { AstItem, AstItemKind, IAstItemOptions } from './AstItem';
+import { PrettyPrinter } from '../utils/PrettyPrinter';
 
 /**
  * This class is part of the AstItem abstract syntax tree. It represents a TypeScript enum value.
  * The parent container will always be an AstEnum instance.
  */
-export default class AstEnumValue extends AstItem {
+export class AstEnumValue extends AstItem {
   constructor(options: IAstItemOptions) {
     super(options);
     this.kind = AstItemKind.EnumValue;

@@ -7,6 +7,8 @@ import * as stream from 'stream';
 
 /**
  * A special type of stream which keeps track of everything written to it, which can be read with the readAll() function
+ *
+ * @public
  */
 export default class PersistentStream extends stream.Transform {
   private _buffer: string[] = [];

@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as fsx from 'fs-extra';
 import * as semver from 'semver';
 
 import Utilities from '@microsoft/rush-lib/lib/utilities/Utilities';
@@ -22,8 +21,13 @@ export class RushVersionSelector {
   public ensureRushVersionInstalled(version: string): () => void {
     const isLegacyRushVersion: boolean = semver.lt(version, '4.0.0');
     const expectedRushPath: string = path.join(this._rushDirectory, `rush-${version}`);
-    const expectedRushInstalledFlagPath: string = path.join(expectedRushPath, 'last-install.flag');
-    if (!fsx.existsSync(expectedRushInstalledFlagPath)) {
+
+    const installMarker: rushLib._LastInstallFlag = new rushLib._LastInstallFlag(
+      expectedRushPath,
+      { node: process.versions.node }
+    );
+
+    if (!installMarker.isValid()) {
       // Need to install Rush
       console.log(`Rush version ${version} is not currently installed. Installing...`);
 
@@ -36,10 +40,11 @@ export class RushVersionSelector {
         true
       );
 
-      // If we've made it here without exception, write the flag file
-      fsx.createFileSync(expectedRushInstalledFlagPath);
       console.log(`Successfully installed Rush version ${version} in ${expectedRushPath}`);
     }
+
+    // If we've made it here without exception, write the flag file
+    installMarker.create();
 
     if (semver.lt(version, '3.0.20')) {
       return () => {

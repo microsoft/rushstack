@@ -5,7 +5,7 @@ import { GulpTask } from '@microsoft/gulp-core-build';
 import { IBuildConfig } from '@microsoft/gulp-core-build/lib/IBuildConfig';
 import * as Gulp from 'gulp';
 import * as fs from 'fs';
-import * as ChalkType from 'chalk';
+import * as colors from 'colors';
 import * as HttpType from 'http';
 import * as HttpsType from 'https';
 import * as pathType from 'path';
@@ -16,6 +16,12 @@ import {
   ICertificate
 } from './certificates';
 
+/**
+ * @remarks
+ * If this schema is updated, dependant schemas MUST also be updated, including the spfx-serve.schema.json.
+ * The spfx-serve.schema.json is the serve.schema.json file with the spfx-specific properties included. The
+ * merge is simple, but must be done manually whenever the serve.schema.json file is changed.
+ */
 export interface IServeTaskConfig {
   /**
    * API server configuration
@@ -102,6 +108,7 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
   }
 
   public executeTask(gulp: typeof Gulp, completeCallback?: (error?: string) => void): void {
+
     /* tslint:disable:typedef */
     const gulpConnect = require('gulp-connect');
     const open = require('gulp-open');
@@ -128,7 +135,8 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
       livereload: true,
       middleware: (): Function[] => [this._logRequestsMiddleware, this._enableCorsMiddleware],
       port: port,
-      root: rootPath
+      root: rootPath,
+      preferHttp1: true
     });
 
     // If an api is provided, spin it up.
@@ -193,11 +201,10 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
   }
 
   private _logRequestsMiddleware(req: HttpType.IncomingMessage, res: HttpType.ServerResponse, next?: () => void): void {
-    const { colors }: typeof gUtilType = require('gulp-util');
     /* tslint:disable:no-any */
     const ipAddress: string = (req as any).ip;
     /* tslint:enable:no-any */
-    let resourceColor: ChalkType.ChalkChain = colors.cyan;
+    let resourceColor: (text: string) => string = colors.cyan;
 
     if (req && req.url) {
       if (req.url.indexOf('.bundle.js') >= 0) {

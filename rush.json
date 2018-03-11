@@ -1,13 +1,14 @@
 {
-  "npmVersion": "4.5.0",
-  "rushVersion": "4.1.0",
-  "nodeSupportedVersionRange": ">=6.9.0 <7.0.0",
+  "rushVersion": "4.3.0",
+  "pnpmVersion": "1.35.3",
+  "nodeSupportedVersionRange": ">=6.9.0 <7.0.0 || >=8.9.4 <9.0.0",
+
   "projectFolderMinDepth": 1,
 
   "approvedPackagesPolicy": {
     "reviewCategories": [
       "libraries",
-      "other"
+      "tests"
     ],
     "ignoredNpmScopes": [ "@types" ]
   },
@@ -43,26 +44,44 @@
       "packageName": "@microsoft/rush",
       "projectFolder": "apps/rush",
       "reviewCategory": "libraries",
-
-      // Rush is published manually for two reasons:
-      // 1. We need to do proper validation before pushing out a new release
-      //    that potentially could screw up everyone's daily work.
-      // 2. The "rush" and "rush-lib" packages need to have identical versions,
-      //    which is currently not supported by the automatic publishing system.
-      "shouldPublish": false
+      "versionPolicyName": "rush"
     },
     {
       "packageName": "@microsoft/rush-lib",
       "projectFolder": "apps/rush-lib",
       "reviewCategory": "libraries",
-      "shouldPublish": false
+      "versionPolicyName": "rush"
     },
 
     // "build-tests" folder (alphabetical order)
     {
       "packageName": "api-extractor-test-01",
       "projectFolder": "build-tests/api-extractor-test-01",
-      "reviewCategory": "libraries",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "api-extractor-test-02",
+      "projectFolder": "build-tests/api-extractor-test-02",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "api-extractor-test-03",
+      "projectFolder": "build-tests/api-extractor-test-03",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "api-extractor-test-04",
+      "projectFolder": "build-tests/api-extractor-test-04",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "web-library-build-test",
+      "projectFolder": "build-tests/web-library-build-test",
+      "reviewCategory": "tests",
       "shouldPublish": false
     },
 
@@ -135,12 +154,6 @@
       "projectFolder": "core-build/node-library-build",
       "reviewCategory": "libraries",
       "shouldPublish": true
-    },
-    {
-      "packageName": "test-web-library-build",
-      "projectFolder": "core-build/test-web-library-build",
-      "reviewCategory": "other",
-      "shouldPublish": false
     },
     {
       "packageName": "@microsoft/web-library-build",

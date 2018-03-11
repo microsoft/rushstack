@@ -31,6 +31,10 @@
         "nextBump": {
           "description": "Type of next version bump",
           "enum": [ "prerelease", "release", "minor", "patch", "major" ]
+        },
+        "mainProject": {
+          "description": "The main project for this version policy",
+          "type": "string"
         }
       },
       "required": [ "policyName", "definitionName", "version", "nextBump" ],

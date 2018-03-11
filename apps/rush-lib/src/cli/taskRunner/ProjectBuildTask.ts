@@ -19,7 +19,7 @@ import TaskError from './TaskError';
 import { ITaskDefinition } from '../taskRunner/ITask';
 import {
   PackageChangeAnalyzer
-} from '../utilities/PackageChangeAnalyzer';
+} from '../logic/PackageChangeAnalyzer';
 
 interface IPackageDependencies extends IPackageDeps {
   arguments: string;

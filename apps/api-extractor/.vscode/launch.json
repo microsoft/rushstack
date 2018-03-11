@@ -1,0 +1,42 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "test-01",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "${workspaceFolder}/../../build-tests/api-extractor-test-01",
+      "args": [
+        "run",
+        "-l"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "test-02",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "${workspaceFolder}/../../build-tests/api-extractor-test-02",
+      "args": [
+        "run",
+        "-l"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "test-04",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "${workspaceFolder}/../../build-tests/api-extractor-test-04",
+      "args": [
+        "run",
+        "-l"
+      ]
+    }
+  ]
+}

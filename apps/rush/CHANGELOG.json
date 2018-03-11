@@ -2,6 +2,155 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "4.3.0",
+      "tag": "@microsoft/rush_v4.3.0",
+      "date": "Fri, 02 Mar 2018 02:45:37 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where we always deleted the pnpm store. This is not necessary since the store is transactional. We should only delete the store if it is a --clean install."
+          },
+          {
+            "comment": "Fix an issue where the package manager installation could get corrupted if the Rush tool was accidentally invoked multiple times concurrently."
+          },
+          {
+            "comment": "Fix issue with pnpm where store was not removed after an unsuccessful installation"
+          },
+          {
+            "comment": "When Rush links PNPM packages to their dependencies, it should link to the realpath, rather than linking to the symlink. This will improve performance of builds by reducing the number of file system reads that are needed."
+          },
+          {
+            "comment": "Update Rush to consider the shrinkwrap file during incremental builds."
+          },
+          {
+            "comment": "Add a --changed-projects-only flag to 'rush build', which will skip rebuilding of downstream packages. It will only rebuild projects that change, but not their dependents."
+          },
+          {
+            "comment": "Add a locking mechanism around certain rush commands so only one process can be working in a Rush repository at a single point in time. This is useful for commands that may corrupt each other, like generate, install, link, and rebuild."
+          },
+          {
+            "comment": "When using pnpm, Rush will check and see if other projects are using a dependency and will re-use it if possible. This way, a user will not have to run \"rush generate\" if they are adding a dependency that is already being used elsewhere in the monorepo."
+          },
+          {
+            "comment": "Add a notice for unsupported versions of NodeJS runtime"
+          },
+          {
+            "comment": "Add a new command-line flag \"--conservative\" which causes \"rush generate\" to perform a minimal upgrade"
+          },
+          {
+            "comment": "Improved \"rush generate\" so that if interrupted, it does not leave you with a deleted shrinkwrap.yaml; the new integrity checks eliminate the need for this, and it was annoying"
+          },
+          {
+            "comment": "Fix Rush version increase logic to handle cyclic dependencies properly"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.2.5",
+      "tag": "@microsoft/rush_v4.2.5",
+      "date": "Fri, 26 Jan 2018 00:36:51 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue when parsing scoped peer dependencies in the pnpm shrinkwrap file"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.7` to `0.4.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.6` to `4.3.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.2.4",
+      "tag": "@microsoft/rush_v4.2.4",
+      "date": "Sun, 21 Jan 2018 06:33:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve the error message when loading rush.json from a newer release"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.2.3",
+      "tag": "@microsoft/rush_v4.2.3",
+      "date": "Thu, 18 Jan 2018 19:02:07 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Avoid git errors when there are only empty change files"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.2.2",
+      "tag": "@microsoft/rush_v4.2.2",
+      "date": "Wed, 17 Jan 2018 10:49:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.2` to `0.4.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-lib\" from `4.2.1` to `4.2.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.2` to `4.3.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.2.1",
+      "tag": "@microsoft/rush_v4.2.1",
+      "date": "Fri, 12 Jan 2018 23:35:48 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a bug in \"rush change\" to allow skipping changes when empty change file exists."
+          },
+          {
+            "comment": "Change the way Rush prints output, to make it more readable and easy to tell how far into a build you are."
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.2.0",
+      "tag": "@microsoft/rush_v4.2.0",
+      "date": "Mon, 11 Jan 2018 22:14:30 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Introduce a new project-specific setting \"skipRushCheck\" to exempt certain projects from the \"rush check\" validation"
+          },
+          {
+            "comment": "Introduce a new setting \"mainProject\" for lockstep version policies. This enables a scenario where a group of packages share a common change log, which is associated with the main project."
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.1.1",
+      "tag": "@microsoft/rush_v4.1.1",
+      "date": "Mon, 08 Jan 2018 20:34:30 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue with checking the pnpm shrinkwrap file when there are peer dependency version specifiers"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.1.0",
       "tag": "@microsoft/rush_v4.1.0",
       "date": "Thu, 30 Nov 2017 20:34:30 GMT",

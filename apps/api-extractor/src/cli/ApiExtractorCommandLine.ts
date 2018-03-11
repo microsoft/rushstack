@@ -19,13 +19,11 @@ export class ApiExtractorCommandLine extends CommandLineParser {
   protected onDefineParameters(): void { // override
   }
 
-  protected onExecute(): void { // override
-    try {
-      super.onExecute();
-    } catch (error) {
+  protected onExecute(): Promise<void> { // override
+    return super.onExecute().catch((error) => {
       console.error(os.EOL + colors.red('ERROR: ' + error.message.trim()));
       process.exitCode = 1;
-    }
+    });
   }
 
   private _populateActions(): void {

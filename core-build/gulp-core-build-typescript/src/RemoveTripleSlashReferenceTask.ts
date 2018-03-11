@@ -42,7 +42,7 @@ export class RemoveTripleSlashReferenceTask extends GulpTask<IRemoveTripleSlashR
           /* tslint:enable:no-function-expression */
 
           try {
-            const rawContents: string = file.contents.toString();
+            const rawContents: string = file.contents!.toString();
             const relativePathToCurrentFile: string = path.relative(taskScope.buildConfig.rootPath, file.path);
             taskScope.logVerbose(relativePathToCurrentFile);
 
