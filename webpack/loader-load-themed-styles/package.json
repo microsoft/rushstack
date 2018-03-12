@@ -16,7 +16,7 @@
   "devDependencies": {
     "@types/mocha": "2.2.38",
     "@types/node": "8.5.8",
-    "@types/loader-utils": "~1.1.0",
+    "@types/loader-utils": "1.1.0",
     "@types/webpack": "3.0.11",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
