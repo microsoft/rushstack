@@ -101,7 +101,6 @@ if (installedVersion) {
 
 if (installedVersion !== expectedVersion) {
   console.log(os.EOL + 'Installing Rush...');
-  child_process.execSync(`"${npmPath}" install ${packageName}@${expectedVersion}`,
-    { cwd: rushPath, stdio: ['ignore', 'ignore', 'ignore'] });
+  child_process.execSync(`"${npmPath}" install ${packageName}@${expectedVersion}`, { cwd: rushPath });
   console.log(os.EOL + `Successfully installed Rush ${expectedVersion}`);
 }
