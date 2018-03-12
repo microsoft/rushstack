@@ -2,6 +2,29 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "1.1.19",
+      "tag": "@microsoft/api-documenter_v1.1.19",
+      "date": "Mon, 12 Mar 2018 20:36:19 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Locked down some \"@types/\" dependency versions to avoid upgrade conflicts"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.3.7` to `5.3.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `3.0.6` to `3.0.7`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.18` to `4.3.19`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.18",
       "tag": "@microsoft/api-documenter_v1.1.18",
       "date": "Tue, 06 Mar 2018 17:04:51 GMT",

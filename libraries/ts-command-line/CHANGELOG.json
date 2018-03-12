@@ -2,6 +2,18 @@
   "name": "@microsoft/ts-command-line",
   "entries": [
     {
+      "version": "3.0.7",
+      "tag": "@microsoft/ts-command-line_v3.0.7",
+      "date": "Mon, 12 Mar 2018 20:36:19 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Locked down some \"@types/\" dependency versions to avoid upgrade conflicts"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.6",
       "tag": "@microsoft/ts-command-line_v3.0.6",
       "date": "Fri, 02 Mar 2018 01:13:59 GMT",
