@@ -10,10 +10,10 @@
     "build": "gulp test --clean"
   },
   "dependencies": {
+    "@types/tapable": "0.2.4",
     "@types/webpack": "3.0.11"
   },
   "devDependencies": {
-    "@types/tapable": "0.2.3",
     "@types/mocha": "2.2.38",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
