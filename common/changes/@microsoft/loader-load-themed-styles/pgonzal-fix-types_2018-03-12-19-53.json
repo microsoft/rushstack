@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/loader-load-themed-styles",
+      "comment": "Locked down some \"@types/\" dependency versions to avoid upgrade conflicts",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/loader-load-themed-styles",
+  "email": "pgonzal@users.noreply.github.com"
+}
