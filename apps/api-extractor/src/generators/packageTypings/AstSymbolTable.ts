@@ -66,11 +66,6 @@ export class AstSymbolTable {
 
         this.analyze(astSymbol);
 
-        for (const d of astSymbol.astDeclarations) {
-          console.log('--------------------------------');
-          console.log(d.getDump());
-        }
-
         exportedMembers.push({ name: exportSymbol.name, astSymbol: astSymbol });
       }
 
