@@ -139,6 +139,12 @@ declare interface IForgottenExport_2 {
 }
 
 /**
+ * This class is indirectly consumed by ForgottenExportConsumer3.
+ */
+declare interface IForgottenIndirectDependency {
+}
+
+/**
  * This interface is exported as the default export for its source file.
  * @public
  */

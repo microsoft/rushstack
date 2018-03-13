@@ -78,23 +78,23 @@ export class PackageTypingsGenerator {
     // Build the entry point
     this._astEntryPoint = this._astSymbolTable.fetchEntryPoint(this._context.package.getDeclaration().getSourceFile());
 
+    const exportedAstSymbols: AstSymbol[] = [];
+
     // Create a DtsEntry for each top-level export
-    const astSymbols: AstSymbol[] = [];
     for (const exportedMember of this._astEntryPoint.exportedMembers) {
       const astSymbol: AstSymbol = exportedMember.astSymbol;
 
       this._createDtsEntryForSymbol(exportedMember.astSymbol, exportedMember.name);
 
-      astSymbols.push(astSymbol);
+      exportedAstSymbols.push(astSymbol);
     }
 
-    // Create a DtsEntry for each indirectly referenced export
-    for (const astSymbol of astSymbols) {
-      astSymbol.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
-        for (const referencedAstSymbol of astDeclaration.referencedAstSymbols) {
-          this._createDtsEntryForSymbol(referencedAstSymbol, undefined);
-        }
-      });
+    // Create a DtsEntry for each indirectly referenced export.
+    // Note that we do this *after* the above loop, so that references to exported AstSymbols
+    // are encountered first as exports.
+    const alreadySeenAstSymbols: Set<AstSymbol> = new Set<AstSymbol>();
+    for (const exportedAstSymbol of exportedAstSymbols) {
+      this._createDtsEntryForIndirectReferences(exportedAstSymbol, alreadySeenAstSymbols);
     }
 
     this._makeUniqueNames();
@@ -155,6 +155,20 @@ export class PackageTypingsGenerator {
         }
       }
     }
+  }
+
+  private _createDtsEntryForIndirectReferences(astSymbol: AstSymbol, alreadySeenAstSymbols: Set<AstSymbol>): void {
+    if (alreadySeenAstSymbols.has(astSymbol)) {
+      return;
+    }
+    alreadySeenAstSymbols.add(astSymbol);
+
+    astSymbol.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
+      for (const referencedAstSymbol of astDeclaration.referencedAstSymbols) {
+        this._createDtsEntryForSymbol(referencedAstSymbol, undefined);
+        this._createDtsEntryForIndirectReferences(referencedAstSymbol, alreadySeenAstSymbols);
+      }
+    });
   }
 
   /**
