@@ -59,7 +59,7 @@ export class AstDeclaration {
 
   public notifyChildAttach(child: AstDeclaration): void {
     if (child.parent !== this) {
-      throw new Error('Program Bug: Invalid call to attachChild()');
+      throw new Error('Program Bug: Invalid call to notifyChildAttach()');
     }
 
     this._analyzedChildren.push(child);

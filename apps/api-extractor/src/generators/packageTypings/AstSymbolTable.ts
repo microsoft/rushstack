@@ -126,10 +126,6 @@ export class AstSymbolTable {
     return false;
   }
 
-  public tryGetSymbolForNode(node: ts.Node): ts.Symbol | undefined {
-    return TypeScriptHelpers.getSymbolForDeclaration(node as ts.Declaration);
-  }
-
   public tryGetAstSymbol(symbol: ts.Symbol): AstSymbol | undefined {
     return this._fetchAstSymbol(symbol, false);
   }
@@ -221,7 +217,7 @@ export class AstSymbolTable {
       return undefined;
     }
 
-    const symbol: ts.Symbol | undefined = this.tryGetSymbolForNode(node);
+    const symbol: ts.Symbol | undefined = TypeScriptHelpers.getSymbolForDeclaration(node as ts.Declaration);
     if (!symbol) {
       throw new Error('Program Bug: Unable to find symbol for node');
     }
@@ -292,10 +288,7 @@ export class AstSymbolTable {
         let parentAstSymbol: AstSymbol | undefined = undefined;
 
         if (arbitaryParent) {
-          const parentSymbol: ts.Symbol | undefined = this.tryGetSymbolForNode(arbitaryParent);
-          if (!parentSymbol) {
-            throw new Error('Program bug: missing parent symbol for declaration');
-          }
+          const parentSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(arbitaryParent as ts.Declaration);
 
           parentAstSymbol = this._fetchAstSymbol(parentSymbol, addIfMissing);
         }
