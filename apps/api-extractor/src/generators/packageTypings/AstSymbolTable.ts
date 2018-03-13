@@ -320,7 +320,7 @@ export class AstSymbolTable {
           }
 
           const astDeclaration: AstDeclaration = new AstDeclaration({
-            declaration, astSymbol, parentAstDeclaration});
+            declaration, astSymbol, parent: parentAstDeclaration});
 
           this._astDeclarationsByDeclaration.set(declaration, astDeclaration);
         }

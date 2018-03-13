@@ -8,7 +8,7 @@ import { Span } from '../../utils/Span';
 export interface IAstDeclarationParameters {
   readonly declaration: ts.Declaration;
   readonly astSymbol: AstSymbol;
-  readonly parentAstDeclaration: AstDeclaration | undefined;
+  readonly parent: AstDeclaration | undefined;
 }
 
 export class AstDeclaration {
@@ -24,12 +24,11 @@ export class AstDeclaration {
   private readonly _analyzedChildren: AstDeclaration[] = [];
 
   private readonly _analyzedReferencedAstSymbolsSet: Set<AstSymbol> = new Set<AstSymbol>();
-  private readonly _analyzedReferencedAstSymbols: AstSymbol[] = [];
 
   public constructor(parameters: IAstDeclarationParameters) {
     this.declaration = parameters.declaration;
     this.astSymbol = parameters.astSymbol;
-    this.parent = parameters.parentAstDeclaration;
+    this.parent = parameters.parent;
 
     this.astSymbol.notifyDeclarationAttach(this);
 
@@ -55,7 +54,7 @@ export class AstDeclaration {
    * The collection will be empty until AstSymbol.analyzed is true.
    */
   public get referencedAstSymbols(): ReadonlyArray<AstSymbol> {
-    return this.astSymbol.analyzed ? this._analyzedReferencedAstSymbols : [];
+    return this.astSymbol.analyzed ? [...this._analyzedReferencedAstSymbolsSet] : [];
   }
 
   public notifyChildAttach(child: AstDeclaration): void {
@@ -74,7 +73,7 @@ export class AstDeclaration {
     const declarationKind: string = ts.SyntaxKind[this.declaration.kind];
     let result: string = indent + `+ ${this.astSymbol.localName} (${declarationKind})\n`;
 
-    for (const referencedAstSymbol of this._analyzedReferencedAstSymbols) {
+    for (const referencedAstSymbol of this._analyzedReferencedAstSymbolsSet.values()) {
       result += indent + `  ref: ${referencedAstSymbol.localName}\n`;
     }
 
@@ -111,7 +110,6 @@ export class AstDeclaration {
     }
 
     this._analyzedReferencedAstSymbolsSet.add(referencedAstSymbol);
-    this._analyzedReferencedAstSymbols.push(referencedAstSymbol);
   }
 
   /**
