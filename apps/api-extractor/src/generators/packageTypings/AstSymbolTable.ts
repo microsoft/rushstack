@@ -278,14 +278,22 @@ export class AstSymbolTable {
         // We always fetch the entire chain of parents for each declaration.
         // (Children/siblings are only analyzed on demand.)
 
-        // Is there a parent AstSymbol?
-        const arbitaryParent: ts.Node | undefined
-          = this._tryFindFirstAstDeclarationParent(followedSymbol.declarations[0]);
+        // Key assumptions behind this squirrely logic:
+        //
+        // IF a given symbol has two declarations D1 and D2; AND
+        // If D1 has a parent P1, then
+        // - D2 will also have a parent P2; AND
+        // - P1 and P2's symbol will be the same
 
         let parentAstSymbol: AstSymbol | undefined = undefined;
 
-        if (arbitaryParent) {
-          const parentSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(arbitaryParent as ts.Declaration);
+        // Is there a parent AstSymbol?  First we check to see if there is a parent declaration:
+        const arbitaryParentDeclaration: ts.Node | undefined
+          = this._tryFindFirstAstDeclarationParent(followedSymbol.declarations[0]);
+
+        if (arbitaryParentDeclaration) {
+          const parentSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(
+            arbitaryParentDeclaration as ts.Declaration);
 
           parentAstSymbol = this._fetchAstSymbol(parentSymbol, addIfMissing);
         }
