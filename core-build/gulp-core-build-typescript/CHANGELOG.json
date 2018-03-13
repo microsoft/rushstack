@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "4.7.18",
+      "tag": "@microsoft/gulp-core-build-typescript_v4.7.18",
+      "date": "Tue, 13 Mar 2018 23:11:32 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update gulp-sourcemaps."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.7.17",
       "tag": "@microsoft/gulp-core-build-typescript_v4.7.17",
       "date": "Mon, 12 Mar 2018 20:36:19 GMT",

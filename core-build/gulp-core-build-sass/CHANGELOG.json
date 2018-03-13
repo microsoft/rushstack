@@ -2,6 +2,23 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "4.3.0",
+      "tag": "@microsoft/gulp-core-build-sass_v4.3.0",
+      "date": "Tue, 13 Mar 2018 23:11:32 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for sourcemaps."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.7.38` to `1.7.39`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.2.21",
       "tag": "@microsoft/gulp-core-build-sass_v4.2.21",
       "date": "Mon, 12 Mar 2018 20:36:19 GMT",
