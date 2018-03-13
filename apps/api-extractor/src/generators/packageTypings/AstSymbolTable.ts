@@ -283,7 +283,7 @@ export class AstSymbolTable {
 
         // Is there a parent AstSymbol?
         const arbitaryParent: ts.Node | undefined
-          = this._findFirstParentDeclaration(followedSymbol.declarations[0]);
+          = this._tryFindFirstAstDeclarationParent(followedSymbol.declarations[0]);
 
         let parentAstSymbol: AstSymbol | undefined = undefined;
 
@@ -294,13 +294,12 @@ export class AstSymbolTable {
         }
 
         // Okay, now while creating the declarations we will wire them up to the
-        // their corresopnding parent declarations
+        // their corresponding parent declarations
         for (const declaration of followedSymbol.declarations || []) {
 
           let parentAstDeclaration: AstDeclaration | undefined = undefined;
           if (parentAstSymbol) {
-            const parentDeclaration: ts.Node | undefined
-              = this._findFirstParentDeclaration(declaration);
+            const parentDeclaration: ts.Node | undefined = this._tryFindFirstAstDeclarationParent(declaration);
 
             if (!parentDeclaration) {
               throw new Error('Program bug: Missing parent declaration');
@@ -326,7 +325,7 @@ export class AstSymbolTable {
   /**
    * Returns the first parent satisfying isAstDeclaration(), or undefined if none is found.
    */
-  private _findFirstParentDeclaration(node: ts.Node): ts.Node | undefined {
+  private _tryFindFirstAstDeclarationParent(node: ts.Node): ts.Node | undefined {
     let currentNode: ts.Node | undefined = node.parent;
     while (currentNode) {
       if (this.isAstDeclaration(currentNode)) {

@@ -76,7 +76,8 @@ export class PackageTypingsGenerator {
     }
 
     // Build the entry point
-    this._astEntryPoint = this._astSymbolTable.fetchEntryPoint(this._context.package.getDeclaration().getSourceFile());
+    const sourceFile: ts.SourceFile = this._context.package.getDeclaration().getSourceFile();
+    this._astEntryPoint = this._astSymbolTable.fetchEntryPoint(sourceFile);
 
     const exportedAstSymbols: AstSymbol[] = [];
 
@@ -199,7 +200,7 @@ export class PackageTypingsGenerator {
         dtsEntry.nameForEmit = dtsEntry.originalName;
 
         while (usedNames.has(dtsEntry.nameForEmit)) {
-          dtsEntry.nameForEmit = dtsEntry.originalName + '_' + ++suffix;
+          dtsEntry.nameForEmit = `${dtsEntry.originalName}_${++suffix}`;
         }
 
         usedNames.add(dtsEntry.nameForEmit);
