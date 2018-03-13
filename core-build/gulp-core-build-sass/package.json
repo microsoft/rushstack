@@ -23,6 +23,7 @@
     "gulp-clone": "~1.0.0",
     "gulp-postcss": "~6.3.0",
     "gulp-sass": "~3.1.0",
+    "gulp-sourcemaps": "~2.6.4",
     "gulp-texttojs": "~1.0.3",
     "merge2": "~1.0.2",
     "postcss-modules": "~0.6.4",

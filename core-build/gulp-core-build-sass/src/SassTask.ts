@@ -145,6 +145,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     const postcss = require('gulp-postcss');
     const sass = require('gulp-sass');
     const texttojs = require('gulp-texttojs');
+    const sourcemaps = require('gulp-sourcemaps');
     /* tslint:enable:typedef */
 
     const tasks: NodeJS.ReadWriteStream[] = [];
@@ -164,7 +165,12 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       ))
       : srcStream);
 
-    const baseTask: NodeJS.ReadWriteStream = checkedStream
+    let baseTask: NodeJS.ReadWriteStream = checkedStream;
+    if (!this.buildConfig.production) {
+      baseTask = baseTask.pipe(sourcemaps.init());
+    }
+
+    baseTask = baseTask
       .pipe(sass.sync({
         importer: (url: string, prev: string, done: boolean): Object => ({ file: _patchSassUrl(url) })
       }).on('error', function (error: Error): void {
@@ -177,9 +183,12 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       }))
       .pipe(clipEmptyFiles());
 
+    if (!this.buildConfig.production) {
+      baseTask = baseTask.pipe(sourcemaps.write());
+    }
+
     if (this.taskConfig.dropCssFiles) {
-      tasks.push(baseTask.pipe(clone())
-        .pipe(gulp.dest(this.buildConfig.libFolder)));
+      tasks.push(baseTask.pipe(clone()).pipe(gulp.dest(this.buildConfig.libFolder)));
     }
 
     tasks.push(baseTask.pipe(clone())
