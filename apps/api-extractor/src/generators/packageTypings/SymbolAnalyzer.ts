@@ -34,6 +34,55 @@ export interface IFollowAliasesResult {
 }
 
 export class SymbolAnalyzer {
+
+  /**
+   * This function determines which ts.Node kinds will generate an AstDeclaration.
+   * These correspond to the definitions that we can add AEDoc to.
+   */
+  public static isAstDeclaration(kind: ts.SyntaxKind): boolean {
+    // (alphabetical order)
+    switch (kind) {
+      case ts.SyntaxKind.ClassDeclaration:
+      case ts.SyntaxKind.EnumDeclaration:
+      case ts.SyntaxKind.EnumMember:
+      case ts.SyntaxKind.FunctionDeclaration:
+      case ts.SyntaxKind.InterfaceDeclaration:
+      case ts.SyntaxKind.MethodDeclaration:
+      case ts.SyntaxKind.MethodSignature:
+
+      // ModuleDeclaration is used for both "module" and "namespace" declarations
+      case ts.SyntaxKind.ModuleDeclaration:
+      case ts.SyntaxKind.PropertyDeclaration:
+      case ts.SyntaxKind.PropertySignature:
+
+      // SourceFile is used for "import * as file from 'file';"
+      case ts.SyntaxKind.SourceFile:
+      case ts.SyntaxKind.TypeAliasDeclaration:
+      case ts.SyntaxKind.VariableDeclaration:
+        return true;
+    }
+    return false;
+  }
+
+  /**
+   * This function detects the subset of isAstDeclaration() items that can use
+   * the "export" keyword.  This is part of the heuristic for recognizing ambient types.
+   */
+  public static isExportableAstDeclaration(kind: ts.SyntaxKind): boolean {
+    // (alphabetical order)
+    switch (kind) {
+      case ts.SyntaxKind.ClassDeclaration:
+      case ts.SyntaxKind.EnumDeclaration:
+      case ts.SyntaxKind.FunctionDeclaration:
+      case ts.SyntaxKind.InterfaceDeclaration:
+      case ts.SyntaxKind.ModuleDeclaration:
+      case ts.SyntaxKind.TypeAliasDeclaration:
+      case ts.SyntaxKind.VariableDeclaration:
+      return true;
+    }
+    return false;
+  }
+
   /**
    * For the given symbol, follow imports and type alias to find the symbol that represents
    * the original definition.
@@ -96,19 +145,11 @@ export class SymbolAnalyzer {
     // Is the followedSymbol actually the kind of thing that can be ambient?
     if (isAmbient) {
       for (const declaration of current.declarations || []) {
-        switch (declaration.kind) {
-          case ts.SyntaxKind.ClassDeclaration:
-          case ts.SyntaxKind.InterfaceDeclaration:
-          case ts.SyntaxKind.FunctionDeclaration:
-          case ts.SyntaxKind.ModuleDeclaration:
-          case ts.SyntaxKind.VariableDeclaration:
-            // These actually need "export" keywords
-            break;
-          default:
-            // Everything else we assume is some kind of nested declaration that
-            // doesn't need it.
-            isAmbient = false;
-            break;
+        // These actually need "export" keywords
+        if (!SymbolAnalyzer.isExportableAstDeclaration(declaration.kind)) {
+          // Everything else we assume is some kind of nested declaration that
+          // doesn't need it.
+          isAmbient = false;
         }
       }
     }

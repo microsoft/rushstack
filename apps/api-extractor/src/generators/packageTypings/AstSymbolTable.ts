@@ -98,34 +98,6 @@ export class AstSymbolTable {
     astSymbol.notifyAnalyzed();
   }
 
-  /**
-   * This function determines which node types will generate an AstDeclaration.
-   */
-  public isAstDeclaration(node: ts.Node): boolean {
-    // (alphabetical order)
-    switch (node.kind) {
-      case ts.SyntaxKind.ClassDeclaration:
-      case ts.SyntaxKind.EnumDeclaration:
-      case ts.SyntaxKind.EnumMember:
-      case ts.SyntaxKind.FunctionDeclaration:
-      case ts.SyntaxKind.InterfaceDeclaration:
-      case ts.SyntaxKind.MethodDeclaration:
-      case ts.SyntaxKind.MethodSignature:
-
-      // ModuleDeclaration is used for both "module" and "namespace" declarations
-      case ts.SyntaxKind.ModuleDeclaration:
-      case ts.SyntaxKind.PropertyDeclaration:
-      case ts.SyntaxKind.PropertySignature:
-
-      // SourceFile is used for "import * as file from 'file';"
-      case ts.SyntaxKind.SourceFile:
-      case ts.SyntaxKind.TypeAliasDeclaration:
-      case ts.SyntaxKind.VariableDeclaration:
-        return true;
-    }
-    return false;
-  }
-
   public tryGetAstSymbol(symbol: ts.Symbol): AstSymbol | undefined {
     return this._fetchAstSymbol(symbol, false);
   }
@@ -213,7 +185,7 @@ export class AstSymbolTable {
   }
 
   private _fetchAstSymbolForNode(node: ts.Node): AstSymbol | undefined {
-    if (!this.isAstDeclaration(node)) {
+    if (!SymbolAnalyzer.isAstDeclaration(node.kind)) {
       return undefined;
     }
 
@@ -245,7 +217,7 @@ export class AstSymbolTable {
       }
 
       for (const declaration of followedSymbol.declarations || []) {
-        if (!this.isAstDeclaration(declaration)) {
+        if (!SymbolAnalyzer.isAstDeclaration(declaration.kind)) {
           throw new Error(`Program Bug: The "${followedSymbol.name}" symbol uses the construct`
             + ` "${ts.SyntaxKind[declaration.kind]}" which may be an unimplemented language feature`);
         }
@@ -328,7 +300,7 @@ export class AstSymbolTable {
   private _tryFindFirstAstDeclarationParent(node: ts.Node): ts.Node | undefined {
     let currentNode: ts.Node | undefined = node.parent;
     while (currentNode) {
-      if (this.isAstDeclaration(currentNode)) {
+      if (SymbolAnalyzer.isAstDeclaration(currentNode.kind)) {
         return currentNode;
       }
       currentNode = currentNode.parent;

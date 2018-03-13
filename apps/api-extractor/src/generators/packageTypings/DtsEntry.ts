@@ -19,7 +19,7 @@ export class DtsEntry {
 
   private _nameForEmit: string | undefined = undefined;
 
-  private _sortKey: string|undefined = undefined;
+  private _sortKey: string | undefined = undefined;
 
   public constructor(parameters: IDtsEntryParameters) {
     this.astSymbol = parameters.astSymbol;
