@@ -33,6 +33,11 @@ export interface IFollowAliasesResult {
   readonly astImport: AstImport | undefined;
 }
 
+/**
+ * This is a helper class for PackageTypingsAnalyzer and SymbolTable.
+ * Its main role is to provide an expanded version of TypeScriptHelpers.followAliases()
+ * that supports tracking of imports from eternal packages.
+ */
 export class SymbolAnalyzer {
 
   /**

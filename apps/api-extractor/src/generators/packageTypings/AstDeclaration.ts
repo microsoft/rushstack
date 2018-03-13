@@ -5,12 +5,32 @@ import * as ts from 'typescript';
 import { AstSymbol } from './AstSymbol';
 import { Span } from '../../utils/Span';
 
+/**
+ * Constructor parameters for AstDeclaration
+ */
 export interface IAstDeclarationParameters {
   readonly declaration: ts.Declaration;
   readonly astSymbol: AstSymbol;
   readonly parent: AstDeclaration | undefined;
 }
 
+/**
+ * The AstDeclaration and AstSymbol classes are API Extractor's equivalent of the compiler's
+ * ts.Declaration and ts.Symbol objects.  They are created by the SymbolTable class.
+ *
+ * @remarks
+ * The AstDeclaration represents one or more syntax components of a symbol.  Usually there is
+ * only one AstDeclaration per AstSymbol, but certain TypeScript constructs can have multiple
+ * declarations (e.g. overloaded functions, declaration merging, etc).
+ *
+ * Because of this the AstDeclaration manages the parent/child nesting hierarchy (e.g. with
+ * declaration merging, each declaration has its own children) and becomes the main focus
+ * of analyzing AEDoc and emitting *.d.ts files.
+ *
+ * The AstDeclarations correspond to items from the compiler's ts.Node hierarchy, but
+ * omitting/skipping any nodes that don't match the SymbolAnalyzer.isAstDeclaration()
+ * criteria.  This simplification makes the other API Extractor stages easier to implement.
+ */
 export class AstDeclaration {
   public readonly declaration: ts.Declaration;
 
@@ -30,10 +50,10 @@ export class AstDeclaration {
     this.astSymbol = parameters.astSymbol;
     this.parent = parameters.parent;
 
-    this.astSymbol.notifyDeclarationAttach(this);
+    this.astSymbol._notifyDeclarationAttach(this);
 
     if (this.parent) {
-      this.parent.notifyChildAttach(this);
+      this.parent._notifyChildAttach(this);
     }
   }
 
@@ -47,17 +67,29 @@ export class AstDeclaration {
   }
 
   /**
-   * Returns the AstSymbols referenced by this node (ignoring references
-   * belonging to its parent, and ignoring references associated with its
-   * children).
+   * Returns the AstSymbols referenced by this node.
    * @remarks
-   * The collection will be empty until AstSymbol.analyzed is true.
+   * NOTE: The collection will be empty until AstSymbol.analyzed is true.
+   *
+   * Since we assume references are always collected by a traversal starting at the
+   * root of the nesting declarations, this array omits the following items because they
+   * would be redundant:
+   * - symbols corresponding to parents of this declaration (e.g. a method that returns its own class)
+   * - symbols already listed in the referencedAstSymbols property for parents of this declaration
+   *   (e.g. a method that returns its own class's base class)
+   * - symbols that are referenced only by nested children of this declaration
+   *   (e.g. if a method returns an enum, this doesn't imply that the method's class references that enum)
    */
   public get referencedAstSymbols(): ReadonlyArray<AstSymbol> {
     return this.astSymbol.analyzed ? [...this._analyzedReferencedAstSymbolsSet] : [];
   }
 
-  public notifyChildAttach(child: AstDeclaration): void {
+  /**
+   * This is an internal callback used when the SymbolTable attaches a new
+   * child AstDeclaration to this object.
+   * @internal
+   */
+  public _notifyChildAttach(child: AstDeclaration): void {
     if (child.parent !== this) {
       throw new Error('Program Bug: Invalid call to notifyChildAttach()');
     }
@@ -93,7 +125,12 @@ export class AstDeclaration {
     return span.getDump(indent);
   }
 
-  public notifyReferencedAstSymbol(referencedAstSymbol: AstSymbol): void {
+  /**
+   * This is an internal callback used when SymbolTable.analyze() discovers a new
+   * type reference associated with this declaration.
+   * @internal
+   */
+  public _notifyReferencedAstSymbol(referencedAstSymbol: AstSymbol): void {
     if (this.astSymbol.analyzed) {
       throw new Error('Program Bug: notifyReferencedAstSymbol() called after analysis is already complete');
     }

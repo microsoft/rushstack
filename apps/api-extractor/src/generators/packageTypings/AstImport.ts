@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/**
+ * Constructor parameters for AstImport
+ */
 export interface IAstImportParameters {
   readonly modulePath: string;
   readonly exportName: string;

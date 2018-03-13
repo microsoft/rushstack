@@ -4,6 +4,9 @@
 import { AstSymbol } from './AstSymbol';
 import { ReleaseTag } from '../../aedoc/ReleaseTag';
 
+/**
+ * Constructor parameters for DtsEntry
+ */
 export interface IDtsEntryParameters {
   readonly astSymbol: AstSymbol;
   readonly originalName: string;
@@ -11,10 +14,34 @@ export interface IDtsEntryParameters {
   readonly releaseTag: ReleaseTag;
 }
 
+/**
+ * This is a data structure used by PackageTypingsGenerator to track an AstSymbol that may be
+ * emitted in the *.d.ts file.
+ * @remarks
+ * The additional contextual state beyond AstSymbol is:
+ * - Whether it's an export of this entry point or not
+ * - The calculated ReleaseTag, which we use for trimming
+ * - The nameForEmit, which may get renamed by PackageTypingsGenerator._makeUniqueNames()
+ */
 export class DtsEntry {
+  /**
+   * The AstSymbol that this entry represents.
+   */
   public readonly astSymbol: AstSymbol;
+
+  /**
+   * The original name, prior to any renaming by PackageTypingsGenerator._makeUniqueNames()
+   */
   public readonly originalName: string;
+
+  /**
+   * Whether this API item is exported by the *.t.s file
+   */
   public readonly exported: boolean;
+
+  /**
+   * The ReleaseTag used for trimming
+   */
   public readonly releaseTag: ReleaseTag;
 
   private _nameForEmit: string | undefined = undefined;
@@ -40,6 +67,9 @@ export class DtsEntry {
     this._sortKey = undefined; // invalidate the cached value
   }
 
+  /**
+   * A sorting key used by PackageTypingsGenerator._makeUniqueNames()
+   */
   public getSortKey(): string {
     if (!this._sortKey) {
       const name: string = this.nameForEmit || this.originalName;

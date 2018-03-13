@@ -12,6 +12,13 @@ import { AstSymbol } from './AstSymbol';
 import { AstImport } from './AstImport';
 import { AstEntryPoint, IExportedMember } from './AstEntryPoint';
 
+/**
+ * AstSymbolTable is the workhorse that builds AstSymbol and AstDeclaration objects.
+ * It maintains a cache of already constructed objects.  AstSymbolTable constructs
+ * AstEntryPoint objects, but otherwise the state that it maintains  is agnostic of
+ * any particular entry point.  (For example, it does not track whether a given AstSymbol
+ * is "exported" or not.)
+ */
 export class AstSymbolTable {
   private _typeChecker: ts.TypeChecker;
 
@@ -35,8 +42,11 @@ export class AstSymbolTable {
    *
    * If Entry.importPackageKey is undefined, then it is not included in the map.
    */
-  private readonly _entriesByImportKey: Map<string, AstSymbol> = new Map<string, AstSymbol>();
+  private readonly _astSymbolsByImportKey: Map<string, AstSymbol> = new Map<string, AstSymbol>();
 
+  /**
+   * Cache of fetchEntryPoint() results.
+   */
   private readonly _astEntryPointsBySourceFile: Map<ts.SourceFile, AstEntryPoint>
     = new Map<ts.SourceFile, AstEntryPoint>();
 
@@ -44,6 +54,10 @@ export class AstSymbolTable {
     this._typeChecker = typeChecker;
   }
 
+  /**
+   * For a given source file, this analyzes all of its exports and produces an AstEntryPoint
+   * object.
+   */
   public fetchEntryPoint(sourceFile: ts.SourceFile): AstEntryPoint {
     let astEntryPoint: AstEntryPoint | undefined = this._astEntryPointsBySourceFile.get(sourceFile);
     if (!astEntryPoint) {
@@ -77,7 +91,14 @@ export class AstSymbolTable {
 
   /**
    * Ensures that AstSymbol.analyzed is true for the provided symbol.  The operation
-   * locates the root symbol and then fetches all children of all declarations.
+   * locates the root symbol and then fetches all children of all declarations, and
+   * also calculates AstDeclaration.referencedAstSymbols for all declarations.
+   * @remarks
+   * This is an expensive operation, so we only perform it for top-level exports of an
+   * the AstEntryPoint.  For example, if some code references a nested class inside
+   * a namespace from another library, we do not analyze any of that class's siblings
+   * or members.  (We do always construct its parents however, since AstDefinition.parent
+   * is immutable, and needed e.g. to calculate release tag inheritance.)
    */
   public analyze(astSymbol: AstSymbol): void {
     if (astSymbol.analyzed) {
@@ -95,9 +116,13 @@ export class AstSymbolTable {
       this._analyzeChildTree(astDeclaration.declaration, astDeclaration);
     }
 
-    astSymbol.notifyAnalyzed();
+    astSymbol._notifyAnalyzed();
   }
 
+  /**
+   * Looks up the AstSymbol corresponding to the given ts.Symbol.
+   * This will not analyze or construct any new AstSymbol objects.
+   */
   public tryGetAstSymbol(symbol: ts.Symbol): AstSymbol | undefined {
     return this._fetchAstSymbol(symbol, false);
   }
@@ -150,7 +175,7 @@ export class AstSymbolTable {
 
           const referencedAstSymbol: AstSymbol | undefined = this._fetchAstSymbol(symbol, true);
           if (referencedAstSymbol) {
-            governingAstDeclaration.notifyReferencedAstSymbol(referencedAstSymbol);
+            governingAstDeclaration._notifyReferencedAstSymbol(referencedAstSymbol);
           }
         }
         break;
@@ -164,7 +189,7 @@ export class AstSymbolTable {
     }
 
     if (newGoverningAstDeclaration) {
-      newGoverningAstDeclaration.astSymbol.notifyAnalyzed();
+      newGoverningAstDeclaration.astSymbol._notifyAnalyzed();
     }
   }
 
@@ -226,7 +251,7 @@ export class AstSymbolTable {
       const astImport: AstImport | undefined = followAliasesResult.astImport;
 
       if (astImport) {
-        astSymbol = this._entriesByImportKey.get(astImport.key);
+        astSymbol = this._astSymbolsByImportKey.get(astImport.key);
 
         if (astSymbol) {
           // We didn't find the entry using followedSymbol, but we did using importPackageKey,
@@ -247,7 +272,7 @@ export class AstSymbolTable {
 
         if (astImport) {
           // If it's an import, add it to the lookup
-          this._entriesByImportKey.set(astImport.key, astSymbol);
+          this._astSymbolsByImportKey.set(astImport.key, astSymbol);
         }
 
         // We always fetch the entire chain of parents for each declaration.
