@@ -88,6 +88,7 @@ export class DecoratorTest {
 
 export { ForgottenExportConsumer1 } from './ForgottenExportConsumer1';
 export { ForgottenExportConsumer2 } from './ForgottenExportConsumer2';
+export { ForgottenExportConsumer3 } from './ForgottenExportConsumer3';
 
 export { default as IInterfaceAsDefaultExport } from './IInterfaceAsDefaultExport';
 

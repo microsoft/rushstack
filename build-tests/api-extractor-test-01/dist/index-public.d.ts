@@ -103,6 +103,15 @@ export declare class ForgottenExportConsumer2 {
     test2(): IForgottenExport_2 | undefined;
 }
 
+// Removed for this release type: ForgottenExportConsumer3
+
+/**
+ * This class is directly consumed by ForgottenExportConsumer3.
+ */
+declare interface IForgottenDirectDependency {
+    member: IForgottenIndirectDependency;
+}
+
 /**
  * The ForgottenExportConsumer1 class relies on this IForgottenExport.
  *

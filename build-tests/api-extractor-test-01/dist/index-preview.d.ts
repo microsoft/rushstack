@@ -104,6 +104,22 @@ export declare class ForgottenExportConsumer2 {
 }
 
 /**
+ * This class directly consumes IForgottenDirectDependency
+ * and indirectly consumes IForgottenIndirectDependency.
+ * @beta
+ */
+export declare class ForgottenExportConsumer3 {
+    test2(): IForgottenDirectDependency | undefined;
+}
+
+/**
+ * This class is directly consumed by ForgottenExportConsumer3.
+ */
+declare interface IForgottenDirectDependency {
+    member: IForgottenIndirectDependency;
+}
+
+/**
  * The ForgottenExportConsumer1 class relies on this IForgottenExport.
  *
  * This should end up as a non-exported "IForgottenExport" in the index.d.ts.
