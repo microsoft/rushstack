@@ -4,7 +4,7 @@
 import * as fsx from 'fs-extra';
 import * as path from 'path';
 import yaml = require('js-yaml');
-import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
+import { JsonFile, JsonSchema, Text } from '@microsoft/node-core-library';
 import {
   MarkupElement,
   IApiMethod,
@@ -376,7 +376,7 @@ export class YamlDocumenter {
       stringified = `### YamlMime:${yamlMimeType}\n` + stringified;
     }
 
-    const normalized: string = stringified.split('\n').join('\r\n');
+    const normalized: string = Text.convertToCrLf(stringified);
 
     fsx.mkdirsSync(path.dirname(filePath));
     fsx.writeFileSync(filePath, normalized);

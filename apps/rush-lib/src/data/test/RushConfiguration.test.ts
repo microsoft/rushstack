@@ -4,6 +4,7 @@
 /// <reference types='mocha' />
 
 import { assert } from 'chai';
+import { Text } from '@microsoft/node-core-library';
 import RushConfiguration from '../RushConfiguration';
 import { ApprovedPackagesPolicy } from '../ApprovedPackagesPolicy';
 import RushConfigurationProject from '../RushConfigurationProject';
@@ -11,7 +12,7 @@ import * as path from 'path';
 import Utilities from '../../utilities/Utilities';
 
 function normalizePathForComparison(pathToNormalize: string): string {
-  return Utilities.getAllReplaced(pathToNormalize, '\\', '/').toUpperCase();
+  return Text.replaceAll(pathToNormalize, '\\', '/').toUpperCase();
 }
 
 function assertPathProperty(validatedPropertyName: string, absolutePath: string, relativePath: string): void {
