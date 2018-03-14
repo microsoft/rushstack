@@ -74,3 +74,10 @@ class Path {
   static isUnder(childPath: string, parentFolderPath: string): boolean;
 }
 
+// @public
+class Text {
+  static convertToCrLf(input: string): string;
+  static convertToLf(input: string): string;
+  static replaceAll(input: string, searchValue: string, replaceValue: string): string;
+}
+
