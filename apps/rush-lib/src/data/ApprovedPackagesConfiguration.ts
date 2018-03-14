@@ -4,7 +4,7 @@
 import * as fsx from 'fs-extra';
 import * as path from 'path';
 import * as os from 'os';
-import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
+import { JsonFile, JsonSchema, Text } from '@microsoft/node-core-library';
 
 import Utilities from '../utilities/Utilities';
 
@@ -162,7 +162,7 @@ export class ApprovedPackagesConfiguration {
     body = '// DO NOT ADD COMMENTS IN THIS FILE.'
       + '  They will be lost when the Rush tool resaves it.\n' + body;
 
-    body = Utilities.getAllReplaced(body, '\n', '\r\n');
+    body = Text.convertToCrLf(body);
     fsx.writeFileSync(this._jsonFilename, body);
   }
 

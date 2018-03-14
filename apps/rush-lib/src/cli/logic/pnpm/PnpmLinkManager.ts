@@ -6,7 +6,7 @@ import * as os from 'os';
 import * as path from 'path';
 import uriEncode = require('strict-uri-encode');
 
-import { JsonFile } from '@microsoft/node-core-library';
+import { JsonFile, Text } from '@microsoft/node-core-library';
 
 import {
   BaseLinkManager,
@@ -135,7 +135,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       `${unscopedTempProjectName}.tgz`);
 
     // e.g.: C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz
-    const escapedPathToTgzFile: string = uriEncode(pathToTgzFile.split(path.sep).join('/'));
+    const escapedPathToTgzFile: string = uriEncode(Text.replaceAll(pathToTgzFile, path.sep, '/'));
 
     // tslint:disable-next-line:max-line-length
     // e.g.: C:\wbt\common\temp\node_modules\.local\C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz\node_modules

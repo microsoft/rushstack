@@ -24,3 +24,4 @@ export {
   LockFile
 } from './LockFile';
 export { Path } from './Path';
+export { Text } from './Text';

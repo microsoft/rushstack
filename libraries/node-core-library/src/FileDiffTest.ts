@@ -5,6 +5,7 @@ import * as path from 'path';
 import * as fsx from 'fs-extra';
 
 import { PackageJsonLookup } from './PackageJsonLookup';
+import { Text } from './Text';
 
 /**
  * Implements a unit testing strategy that generates output files, and then
@@ -84,7 +85,7 @@ export class FileDiffTest {
   }
 
   private static _getNormalizedContent(s: string): string {
-    return s.replace(/\r\n/g, '\n').replace(/\r/g, '') // convert to Unix-style newlines
+    return Text.convertToLf(s) // convert to Unix-style newlines
       .replace(/\s+\n/g, '\n') // strip spaces from end of line
       .replace(/\n+$/g, '');  // strip newlines from end of file
   }

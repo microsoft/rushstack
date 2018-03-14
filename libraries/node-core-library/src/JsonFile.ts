@@ -6,6 +6,7 @@ import * as os from 'os';
 import * as jju from 'jju';
 
 import { JsonSchema, IJsonSchemaErrorInfo, IJsonSchemaValidateOptions } from './JsonSchema';
+import { Text } from './Text';
 
 /**
  * Options for JsonFile.stringify()
@@ -92,7 +93,7 @@ export class JsonFile {
     if (options && options.unixNewlines) {
       return stringified;
     } else {
-      return JsonFile._getAllReplaced(stringified, '\n', '\r\n');
+      return Text.convertToCrLf(stringified);
     }
 
   }
@@ -197,16 +198,5 @@ export class JsonFile {
       }
     }
     return result;
-  }
-
-  /**
-   * Returns the same thing as targetString.replace(searchValue, replaceValue), except that
-   * all matches are replaced, rather than just the first match.
-   * @param targetString  The string to be modified
-   * @param searchValue   The value to search for
-   * @param replaceValue  The replacement text
-   */
-  private static _getAllReplaced(targetString: string, searchValue: string, replaceValue: string): string {
-    return targetString.split(searchValue).join(replaceValue);
   }
 }

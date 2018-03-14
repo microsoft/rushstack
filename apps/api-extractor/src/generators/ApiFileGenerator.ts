@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as fs from 'fs';
+import { Text } from '@microsoft/node-core-library';
 import { ExtractorContext } from '../ExtractorContext';
 import { AstStructuredType } from '../ast/AstStructuredType';
 import { AstEnum } from '../ast/AstEnum';
@@ -66,7 +67,7 @@ export class ApiFileGenerator extends AstItemVisitor {
     this._insideTypeLiteral = 0;
     // Normalize to CRLF
     this.visit(context.package);
-    const fileContent: string = this._indentedWriter.toString().replace(/\r?\n/g, '\r\n');
+    const fileContent: string = Text.convertToCrLf(this._indentedWriter.toString());
     return fileContent;
   }
 

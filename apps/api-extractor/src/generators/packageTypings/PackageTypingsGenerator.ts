@@ -5,6 +5,7 @@
 
 import * as fs from 'fs';
 import * as ts from 'typescript';
+import { Text } from '@microsoft/node-core-library';
 
 import { ExtractorContext } from '../../ExtractorContext';
 import { IndentedWriter } from '../../utils/IndentedWriter';
@@ -69,7 +70,7 @@ export class PackageTypingsGenerator {
     this._generateTypingsFileContent(indentedWriter, dtsKind);
 
     // Normalize to CRLF
-    const fileContent: string = indentedWriter.toString().replace(/\r?\n/g, '\r\n');
+    const fileContent: string = Text.convertToCrLf(indentedWriter.toString());
 
     fs.writeFileSync(dtsFilename, fileContent);
   }

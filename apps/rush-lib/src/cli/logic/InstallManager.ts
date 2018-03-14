@@ -10,7 +10,7 @@ import * as semver from 'semver';
 import * as tar from 'tar';
 import * as wordwrap from 'wordwrap';
 import globEscape = require('glob-escape');
-import { JsonFile, LockFile } from '@microsoft/node-core-library';
+import { JsonFile, LockFile, Text } from '@microsoft/node-core-library';
 
 import AsyncRecycler from '../../utilities/AsyncRecycler';
 import RushConfiguration, {
@@ -602,8 +602,7 @@ export default class InstallManager {
         const pathToDeleteWithoutStar: string = path.join(commonNodeModulesFolder, RushConstants.rushTempNpmScope);
         console.log(`Deleting ${pathToDeleteWithoutStar}\\*`);
         // Glob can't handle Windows paths
-        const normalizedpathToDeleteWithoutStar: string
-          = Utilities.getAllReplaced(pathToDeleteWithoutStar, '\\', '/');
+        const normalizedpathToDeleteWithoutStar: string = Text.replaceAll(pathToDeleteWithoutStar, '\\', '/');
 
         // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/*"
         for (const tempModulePath of glob.sync(globEscape(normalizedpathToDeleteWithoutStar) + '/*')) {
@@ -736,8 +735,7 @@ export default class InstallManager {
     const pathToDeleteWithoutStar: string = path.join(this._rushConfiguration.commonTempFolder,
       'node_modules', RushConstants.rushTempNpmScope);
     // Glob can't handle Windows paths
-    const normalizedpathToDeleteWithoutStar: string
-      = Utilities.getAllReplaced(pathToDeleteWithoutStar, '\\', '/');
+    const normalizedpathToDeleteWithoutStar: string = Text.replaceAll(pathToDeleteWithoutStar, '\\', '/');
 
     let anyChanges: boolean = false;
 
