@@ -52,7 +52,7 @@ export class AstStructuredType extends AstItemContainer {
     }
 
     for (const memberDeclaration of this._classLikeDeclaration.members || []) {
-      const memberSymbol: ts.Symbol = TypeScriptHelpers.tryGetSymbolForDeclaration(memberDeclaration);
+      const memberSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(memberDeclaration);
       if (memberSymbol) {
         this._processMember(memberSymbol, memberDeclaration);
       } else {
@@ -67,7 +67,7 @@ export class AstStructuredType extends AstItemContainer {
 
     // If there is a getter and no setter, mark it as readonly.
     for (const member of this.getSortedMemberItems()) {
-      const memberSymbol: ts.Symbol = TypeScriptHelpers.tryGetSymbolForDeclaration(member.getDeclaration());
+      const memberSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(member.getDeclaration());
       if (memberSymbol && (memberSymbol.flags === ts.SymbolFlags.GetAccessor)) {
         if (!this._setterNames.has(member.name)) {
           (member as AstProperty).isReadOnly = true;
