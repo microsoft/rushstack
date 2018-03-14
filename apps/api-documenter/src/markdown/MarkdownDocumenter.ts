@@ -588,13 +588,16 @@ export class MarkdownDocumenter {
           throw new Error('Unresolved: ' + JSON.stringify(args.reference));
         }
 
-        const docFilename: string = this._getFilenameForDocItem(resolveResult.docItem);
+        // NOTE: GitHub's markdown renderer does not resolve relative hyperlinks correctly
+        // unless they start with "./" or "../".
+        const docFilename: string = './' + this._getFilenameForDocItem(resolveResult.docItem);
         args.prefix = '[';
         args.suffix = '](' + docFilename + ')';
       }
     });
 
-    fsx.writeFileSync(filename, content);
+    const normalized: string = content.split('\n').join('\r\n');
+    fsx.writeFileSync(filename, normalized);
   }
 
   private _getFilenameForDocItem(docItem: DocItem): string {
