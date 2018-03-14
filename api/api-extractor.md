@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) 
 
 # api-extractor package
 
