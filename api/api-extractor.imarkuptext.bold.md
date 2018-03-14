@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [IMarkupText](api-extractor.imarkuptext.md) &gt; [bold](api-extractor.imarkuptext.bold.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [IMarkupText](./api-extractor.imarkuptext.md) &gt; [bold](./api-extractor.imarkuptext.bold.md)
 
 # IMarkupText.bold property
 

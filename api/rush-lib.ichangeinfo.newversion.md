@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [IChangeInfo](rush-lib.ichangeinfo.md) &gt; [newVersion](rush-lib.ichangeinfo.newversion.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [IChangeInfo](./rush-lib.ichangeinfo.md) &gt; [newVersion](./rush-lib.ichangeinfo.newversion.md)
 
 # IChangeInfo.newVersion property
 

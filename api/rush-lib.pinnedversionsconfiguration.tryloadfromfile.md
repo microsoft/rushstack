@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [PinnedVersionsConfiguration](rush-lib.pinnedversionsconfiguration.md) &gt; [tryLoadFromFile](rush-lib.pinnedversionsconfiguration.tryloadfromfile.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [PinnedVersionsConfiguration](./rush-lib.pinnedversionsconfiguration.md) &gt; [tryLoadFromFile](./rush-lib.pinnedversionsconfiguration.tryloadfromfile.md)
 
 # PinnedVersionsConfiguration.tryLoadFromFile method
 
@@ -6,7 +6,7 @@ Attempts to load pinned versions configuration from a given file
 
 **Signature:**
 ```javascript
-public static tryLoadFromFile(jsonFilename: string): PinnedVersionsConfiguration;
+static tryLoadFromFile(jsonFilename: string): PinnedVersionsConfiguration;
 ```
 **Returns:** `PinnedVersionsConfiguration`
 

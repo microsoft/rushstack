@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [ILogger](api-extractor.ilogger.md) &gt; [logWarning](api-extractor.ilogger.logwarning.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [ILogger](./api-extractor.ilogger.md) &gt; [logWarning](./api-extractor.ilogger.logwarning.md)
 
 # ILogger.logWarning method
 

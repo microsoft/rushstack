@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [IMarkupApiLink](api-extractor.imarkupapilink.md) &gt; [kind](api-extractor.imarkupapilink.kind.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [IMarkupApiLink](./api-extractor.imarkupapilink.md) &gt; [kind](./api-extractor.imarkupapilink.kind.md)
 
 # IMarkupApiLink.kind property
 

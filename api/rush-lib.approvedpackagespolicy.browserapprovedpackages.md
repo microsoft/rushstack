@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [ApprovedPackagesPolicy](rush-lib.approvedpackagespolicy.md) &gt; [browserApprovedPackages](rush-lib.approvedpackagespolicy.browserapprovedpackages.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [ApprovedPackagesPolicy](./rush-lib.approvedpackagespolicy.md) &gt; [browserApprovedPackages](./rush-lib.approvedpackagespolicy.browserapprovedpackages.md)
 
 # ApprovedPackagesPolicy.browserApprovedPackages property
 

@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [ApprovedPackagesPolicy](rush-lib.approvedpackagespolicy.md) &gt; [reviewCategories](rush-lib.approvedpackagespolicy.reviewcategories.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [ApprovedPackagesPolicy](./rush-lib.approvedpackagespolicy.md) &gt; [reviewCategories](./rush-lib.approvedpackagespolicy.reviewcategories.md)
 
 # ApprovedPackagesPolicy.reviewCategories property
 

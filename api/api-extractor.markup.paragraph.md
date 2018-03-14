@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [Markup](api-extractor.markup.md) &gt; [PARAGRAPH](api-extractor.markup.paragraph.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [Markup](./api-extractor.markup.md) &gt; [PARAGRAPH](./api-extractor.markup.paragraph.md)
 
 # Markup.PARAGRAPH property
 

@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [RushConfiguration](rush-lib.rushconfiguration.md) &gt; [rushLinkJsonFilename](rush-lib.rushconfiguration.rushlinkjsonfilename.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfiguration](./rush-lib.rushconfiguration.md) &gt; [rushLinkJsonFilename](./rush-lib.rushconfiguration.rushlinkjsonfilename.md)
 
 # RushConfiguration.rushLinkJsonFilename property
 

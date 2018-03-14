@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [Markup](api-extractor.markup.md) &gt; [normalize](api-extractor.markup.normalize.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [Markup](./api-extractor.markup.md) &gt; [normalize](./api-extractor.markup.normalize.md)
 
 # Markup.normalize method
 
@@ -6,7 +6,7 @@ Use this to clean up a MarkupElement sequence, assuming the sequence is now in i
 
 **Signature:**
 ```javascript
-public static normalize < T extends MarkupElement >(elements: T[]): void;
+static normalize<T extends MarkupElement>(elements: T[]): void;
 ```
 **Returns:** `void`
 

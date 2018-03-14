@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [VersionPolicyConfiguration](rush-lib.versionpolicyconfiguration.md) &gt; [getVersionPolicy](rush-lib.versionpolicyconfiguration.getversionpolicy.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [VersionPolicyConfiguration](./rush-lib.versionpolicyconfiguration.md) &gt; [getVersionPolicy](./rush-lib.versionpolicyconfiguration.getversionpolicy.md)
 
 # VersionPolicyConfiguration.getVersionPolicy method
 
@@ -8,7 +8,7 @@ Gets the version policy by its name. Throws error if the version policy is not f
 
 **Signature:**
 ```javascript
-public getVersionPolicy(policyName: string): VersionPolicy;
+getVersionPolicy(policyName: string): VersionPolicy;
 ```
 **Returns:** `VersionPolicy`
 

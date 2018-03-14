@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [RushConfiguration](rush-lib.rushconfiguration.md) &gt; [telemetryEnabled](rush-lib.rushconfiguration.telemetryenabled.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfiguration](./rush-lib.rushconfiguration.md) &gt; [telemetryEnabled](./rush-lib.rushconfiguration.telemetryenabled.md)
 
 # RushConfiguration.telemetryEnabled property
 

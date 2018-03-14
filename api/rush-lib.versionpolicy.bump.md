@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [VersionPolicy](rush-lib.versionpolicy.md) &gt; [bump](rush-lib.versionpolicy.bump.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [VersionPolicy](./rush-lib.versionpolicy.md) &gt; [bump](./rush-lib.versionpolicy.bump.md)
 
 # VersionPolicy.bump method
 
@@ -8,7 +8,7 @@ Bumps version based on the policy
 
 **Signature:**
 ```javascript
-public abstract bump(bumpType?: BumpType, identifier?: string): void;
+abstract bump(bumpType?: BumpType, identifier?: string): void;
 ```
 **Returns:** `void`
 

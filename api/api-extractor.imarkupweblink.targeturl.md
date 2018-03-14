@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [IMarkupWebLink](api-extractor.imarkupweblink.md) &gt; [targetUrl](api-extractor.imarkupweblink.targeturl.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [IMarkupWebLink](./api-extractor.imarkupweblink.md) &gt; [targetUrl](./api-extractor.imarkupweblink.targeturl.md)
 
 # IMarkupWebLink.targetUrl property
 

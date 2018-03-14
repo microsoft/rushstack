@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/node-core-library](node-core-library.md) &gt; [FileDiffTest](node-core-library.filedifftest.md) &gt; [prepareFolder](node-core-library.filedifftest.preparefolder.md)
+[Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [FileDiffTest](./node-core-library.filedifftest.md) &gt; [prepareFolder](./node-core-library.filedifftest.preparefolder.md)
 
 # FileDiffTest.prepareFolder method
 
@@ -6,7 +6,7 @@ Sets up a folder in the temp directory where the unit test should write its outp
 
 **Signature:**
 ```javascript
-public static prepareFolder(unitTestDirName: string, testModule: string): string;
+static prepareFolder(unitTestDirName: string, testModule: string): string;
 ```
 **Returns:** `string`
 

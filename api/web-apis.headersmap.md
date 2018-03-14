@@ -1,4 +1,4 @@
-[Home](./index) &gt; [web-apis](web-apis.md) &gt; [HeadersMap](web-apis.headersmap.md)
+[Home](./index) &gt; [web-apis](./web-apis.md) &gt; [HeadersMap](./web-apis.headersmap.md)
 
 # HeadersMap interface
 
@@ -6,5 +6,5 @@
 
 |  Method | Returns | Description |
 |  --- | --- | --- |
-|  [`__index(index)`](web-apis.headersmap.__index.md) | `string` |  |
+|  [`__index(index)`](./web-apis.headersmap.__index.md) | `string` |  |
 

@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [ILogger](api-extractor.ilogger.md) &gt; [logError](api-extractor.ilogger.logerror.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [ILogger](./api-extractor.ilogger.md) &gt; [logError](./api-extractor.ilogger.logerror.md)
 
 # ILogger.logError method
 

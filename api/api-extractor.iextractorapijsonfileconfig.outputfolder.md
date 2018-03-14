@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [IExtractorApiJsonFileConfig](api-extractor.iextractorapijsonfileconfig.md) &gt; [outputFolder](api-extractor.iextractorapijsonfileconfig.outputfolder.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [IExtractorApiJsonFileConfig](./api-extractor.iextractorapijsonfileconfig.md) &gt; [outputFolder](./api-extractor.iextractorapijsonfileconfig.outputfolder.md)
 
 # IExtractorApiJsonFileConfig.outputFolder property
 

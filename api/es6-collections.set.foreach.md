@@ -1,4 +1,4 @@
-[Home](./index) &gt; [es6-collections](es6-collections.md) &gt; [Set](es6-collections.set.md) &gt; [forEach](es6-collections.set.foreach.md)
+[Home](./index) &gt; [es6-collections](./es6-collections.md) &gt; [Set](./es6-collections.set.md) &gt; [forEach](./es6-collections.set.foreach.md)
 
 # Set.forEach method
 

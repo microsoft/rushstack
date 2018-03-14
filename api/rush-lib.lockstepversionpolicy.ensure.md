@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [LockStepVersionPolicy](rush-lib.lockstepversionpolicy.md) &gt; [ensure](rush-lib.lockstepversionpolicy.ensure.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [LockStepVersionPolicy](./rush-lib.lockstepversionpolicy.md) &gt; [ensure](./rush-lib.lockstepversionpolicy.ensure.md)
 
 # LockStepVersionPolicy.ensure method
 
@@ -8,7 +8,7 @@ Returns an updated package json that satisfies the version policy.
 
 **Signature:**
 ```javascript
-public ensure(project: IPackageJson): IPackageJson | undefined;
+ensure(project: IPackageJson): IPackageJson | undefined;
 ```
 **Returns:** `IPackageJson | undefined`
 

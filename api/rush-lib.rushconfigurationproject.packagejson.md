@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [RushConfigurationProject](rush-lib.rushconfigurationproject.md) &gt; [packageJson](rush-lib.rushconfigurationproject.packagejson.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfigurationProject](./rush-lib.rushconfigurationproject.md) &gt; [packageJson](./rush-lib.rushconfigurationproject.packagejson.md)
 
 # RushConfigurationProject.packageJson property
 

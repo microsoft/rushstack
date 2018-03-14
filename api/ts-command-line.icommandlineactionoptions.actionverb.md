@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/ts-command-line](ts-command-line.md) &gt; [ICommandLineActionOptions](ts-command-line.icommandlineactionoptions.md) &gt; [actionVerb](ts-command-line.icommandlineactionoptions.actionverb.md)
+[Home](./index) &gt; [@microsoft/ts-command-line](./ts-command-line.md) &gt; [ICommandLineActionOptions](./ts-command-line.icommandlineactionoptions.md) &gt; [actionVerb](./ts-command-line.icommandlineactionoptions.actionverb.md)
 
 # ICommandLineActionOptions.actionVerb property
 

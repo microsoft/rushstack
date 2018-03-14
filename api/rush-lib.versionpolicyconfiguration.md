@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [VersionPolicyConfiguration](rush-lib.versionpolicyconfiguration.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [VersionPolicyConfiguration](./rush-lib.versionpolicyconfiguration.md)
 
 # VersionPolicyConfiguration class
 
@@ -8,14 +8,15 @@
 
 |  Property | Access Modifier | Type | Description |
 |  --- | --- | --- | --- |
-|  [`versionPolicies`](rush-lib.versionpolicyconfiguration.versionpolicies.md) |  | `Map<string, VersionPolicy>` | Gets all the version policies |
+|  [`versionPolicies`](./rush-lib.versionpolicyconfiguration.versionpolicies.md) |  | `Map<string, VersionPolicy>` | Gets all the version policies |
 
 ## Methods
 
 |  Method | Access Modifier | Returns | Description |
 |  --- | --- | --- | --- |
-|  [`bump(versionPolicyName, bumpType, identifier, shouldCommit)`](rush-lib.versionpolicyconfiguration.bump.md) | `public` | `void` | Bumps up versions for the specified version policy or all version policies |
-|  [`getVersionPolicy(policyName)`](rush-lib.versionpolicyconfiguration.getversionpolicy.md) | `public` | `VersionPolicy` | Gets the version policy by its name. Throws error if the version policy is not found. |
+|  [`bump(versionPolicyName, bumpType, identifier, shouldCommit)`](./rush-lib.versionpolicyconfiguration.bump.md) |  | `void` | Bumps up versions for the specified version policy or all version policies |
+|  [`getVersionPolicy(policyName)`](./rush-lib.versionpolicyconfiguration.getversionpolicy.md) |  | `VersionPolicy` | Gets the version policy by its name. Throws error if the version policy is not found. |
+|  [`validate(projectsByName)`](./rush-lib.versionpolicyconfiguration.validate.md) |  | `void` | Validate the version policy configuration against the rush config |
 
 ## Remarks
 

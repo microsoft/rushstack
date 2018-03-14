@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [IExtractorOptions](api-extractor.iextractoroptions.md) &gt; [customLogger](api-extractor.iextractoroptions.customlogger.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [IExtractorOptions](./api-extractor.iextractoroptions.md) &gt; [customLogger](./api-extractor.iextractoroptions.customlogger.md)
 
 # IExtractorOptions.customLogger property
 

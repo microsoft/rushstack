@@ -1,11 +1,11 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [ApprovedPackagesConfiguration](rush-lib.approvedpackagesconfiguration.md) &gt; [addOrUpdatePackage](rush-lib.approvedpackagesconfiguration.addorupdatepackage.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [ApprovedPackagesConfiguration](./rush-lib.approvedpackagesconfiguration.md) &gt; [addOrUpdatePackage](./rush-lib.approvedpackagesconfiguration.addorupdatepackage.md)
 
 # ApprovedPackagesConfiguration.addOrUpdatePackage method
 
 
 **Signature:**
 ```javascript
-public addOrUpdatePackage(packageName: string, reviewCategory: string): void;
+addOrUpdatePackage(packageName: string, reviewCategory: string): void;
 ```
 **Returns:** `void`
 

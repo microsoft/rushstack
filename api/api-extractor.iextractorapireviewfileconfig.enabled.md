@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [IExtractorApiReviewFileConfig](api-extractor.iextractorapireviewfileconfig.md) &gt; [enabled](api-extractor.iextractorapireviewfileconfig.enabled.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [IExtractorApiReviewFileConfig](./api-extractor.iextractorapireviewfileconfig.md) &gt; [enabled](./api-extractor.iextractorapireviewfileconfig.enabled.md)
 
 # IExtractorApiReviewFileConfig.enabled property
 

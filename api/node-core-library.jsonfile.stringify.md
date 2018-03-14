@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/node-core-library](node-core-library.md) &gt; [JsonFile](node-core-library.jsonfile.md) &gt; [stringify](node-core-library.jsonfile.stringify.md)
+[Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [JsonFile](./node-core-library.jsonfile.md) &gt; [stringify](./node-core-library.jsonfile.stringify.md)
 
 # JsonFile.stringify method
 
@@ -6,7 +6,7 @@ Serializes the specified JSON object to a string buffer.
 
 **Signature:**
 ```javascript
-public static stringify(jsonObject: Object, options?: IJsonFileStringifyOptions): string;
+static stringify(jsonObject: Object, options?: IJsonFileStringifyOptions): string;
 ```
 **Returns:** `string`
 

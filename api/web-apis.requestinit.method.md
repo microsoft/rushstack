@@ -1,4 +1,4 @@
-[Home](./index) &gt; [web-apis](web-apis.md) &gt; [RequestInit](web-apis.requestinit.md) &gt; [method](web-apis.requestinit.method.md)
+[Home](./index) &gt; [web-apis](./web-apis.md) &gt; [RequestInit](./web-apis.requestinit.md) &gt; [method](./web-apis.requestinit.method.md)
 
 # RequestInit.method property
 

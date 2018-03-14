@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [Markup](api-extractor.markup.md) &gt; [createNoteBoxFromText](api-extractor.markup.createnoteboxfromtext.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [Markup](./api-extractor.markup.md) &gt; [createNoteBoxFromText](./api-extractor.markup.createnoteboxfromtext.md)
 
 # Markup.createNoteBoxFromText method
 
@@ -6,7 +6,7 @@ Constructs an IMarkupNoteBox element that will display the specified plain text 
 
 **Signature:**
 ```javascript
-public static createNoteBoxFromText(text: string): IMarkupNoteBox;
+static createNoteBoxFromText(text: string): IMarkupNoteBox;
 ```
 **Returns:** `IMarkupNoteBox`
 

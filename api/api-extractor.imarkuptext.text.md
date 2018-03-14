@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [IMarkupText](api-extractor.imarkuptext.md) &gt; [text](api-extractor.imarkuptext.text.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [IMarkupText](./api-extractor.imarkuptext.md) &gt; [text](./api-extractor.imarkuptext.text.md)
 
 # IMarkupText.text property
 

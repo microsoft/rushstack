@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [IndividualVersionPolicy](rush-lib.individualversionpolicy.md) &gt; [validate](rush-lib.individualversionpolicy.validate.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [IndividualVersionPolicy](./rush-lib.individualversionpolicy.md) &gt; [validate](./rush-lib.individualversionpolicy.validate.md)
 
 # IndividualVersionPolicy.validate method
 
@@ -8,7 +8,7 @@ Validates the specified version and throws if the version does not satisfy the p
 
 **Signature:**
 ```javascript
-public validate(versionString: string, packageName: string): void;
+validate(versionString: string, packageName: string): void;
 ```
 **Returns:** `void`
 

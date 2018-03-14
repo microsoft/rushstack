@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/node-core-library](node-core-library.md) &gt; [IJsonFileStringifyOptions](node-core-library.ijsonfilestringifyoptions.md) &gt; [unixNewlines](node-core-library.ijsonfilestringifyoptions.unixnewlines.md)
+[Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [IJsonFileStringifyOptions](./node-core-library.ijsonfilestringifyoptions.md) &gt; [unixNewlines](./node-core-library.ijsonfilestringifyoptions.unixnewlines.md)
 
 # IJsonFileStringifyOptions.unixNewlines property
 

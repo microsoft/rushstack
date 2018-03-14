@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/ts-command-line](ts-command-line.md) &gt; [CommandLineParser](ts-command-line.commandlineparser.md) &gt; [selectedAction](ts-command-line.commandlineparser.selectedaction.md)
+[Home](./index) &gt; [@microsoft/ts-command-line](./ts-command-line.md) &gt; [CommandLineParser](./ts-command-line.commandlineparser.md) &gt; [selectedAction](./ts-command-line.commandlineparser.selectedaction.md)
 
 # CommandLineParser.selectedAction property
 

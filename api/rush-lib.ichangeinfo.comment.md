@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [IChangeInfo](rush-lib.ichangeinfo.md) &gt; [comment](rush-lib.ichangeinfo.comment.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [IChangeInfo](./rush-lib.ichangeinfo.md) &gt; [comment](./rush-lib.ichangeinfo.comment.md)
 
 # IChangeInfo.comment property
 

@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [ApprovedPackagesItem](rush-lib.approvedpackagesitem.md) &gt; [allowedCategories](rush-lib.approvedpackagesitem.allowedcategories.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [ApprovedPackagesItem](./rush-lib.approvedpackagesitem.md) &gt; [allowedCategories](./rush-lib.approvedpackagesitem.allowedcategories.md)
 
 # ApprovedPackagesItem.allowedCategories property
 

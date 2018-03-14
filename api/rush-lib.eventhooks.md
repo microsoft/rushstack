@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [EventHooks](rush-lib.eventhooks.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [EventHooks](./rush-lib.eventhooks.md)
 
 # EventHooks class
 
@@ -10,7 +10,7 @@ This class represents Rush event hooks configured for this repo. Hooks are custo
 
 |  Method | Access Modifier | Returns | Description |
 |  --- | --- | --- | --- |
-|  [`get(event)`](rush-lib.eventhooks.get.md) | `public` | `string[]` | Return all the scripts associated with the specified event. |
+|  [`get(event)`](./rush-lib.eventhooks.get.md) |  | `string[]` | Return all the scripts associated with the specified event. |
 
 ## Remarks
 

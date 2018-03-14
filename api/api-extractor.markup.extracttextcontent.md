@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [Markup](api-extractor.markup.md) &gt; [extractTextContent](api-extractor.markup.extracttextcontent.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [Markup](./api-extractor.markup.md) &gt; [extractTextContent](./api-extractor.markup.extracttextcontent.md)
 
 # Markup.extractTextContent method
 
@@ -6,7 +6,7 @@ Extracts plain text from the provided markup elements, discarding any formatting
 
 **Signature:**
 ```javascript
-public static extractTextContent(elements: MarkupElement[]): string;
+static extractTextContent(elements: MarkupElement[]): string;
 ```
 **Returns:** `string`
 

@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [IExtractorRuntimeCompilerConfig](api-extractor.iextractorruntimecompilerconfig.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [IExtractorRuntimeCompilerConfig](./api-extractor.iextractorruntimecompilerconfig.md)
 
 # IExtractorRuntimeCompilerConfig interface
 
@@ -10,5 +10,5 @@ If configType='runtime' is specified, then IExtractorRuntimeOptions.compilerProg
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [`configType`](api-extractor.iextractorruntimecompilerconfig.configtype.md) | `'runtime'` |  |
+|  [`configType`](./api-extractor.iextractorruntimecompilerconfig.configtype.md) | `'runtime'` |  |
 

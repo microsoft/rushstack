@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [RushConfiguration](rush-lib.rushconfiguration.md) &gt; [gitSampleEmail](rush-lib.rushconfiguration.gitsampleemail.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfiguration](./rush-lib.rushconfiguration.md) &gt; [gitSampleEmail](./rush-lib.rushconfiguration.gitsampleemail.md)
 
 # RushConfiguration.gitSampleEmail property
 

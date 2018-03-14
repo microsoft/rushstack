@@ -1,4 +1,4 @@
-[Home](./index) &gt; [es6-collections](es6-collections.md) &gt; [Set](es6-collections.set.md) &gt; [delete](es6-collections.set.delete.md)
+[Home](./index) &gt; [es6-collections](./es6-collections.md) &gt; [Set](./es6-collections.set.md) &gt; [delete](./es6-collections.set.delete.md)
 
 # Set.delete method
 

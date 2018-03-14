@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [IMarkupHeading1](api-extractor.imarkupheading1.md) &gt; [kind](api-extractor.imarkupheading1.kind.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [IMarkupHeading1](./api-extractor.imarkupheading1.md) &gt; [kind](./api-extractor.imarkupheading1.kind.md)
 
 # IMarkupHeading1.kind property
 

@@ -1,8 +1,8 @@
-[Home](./index) &gt; [web-apis](web-apis.md) &gt; [Headers](web-apis.headers.md) &gt; [constructor](web-apis.headers.constructor.md)
+[Home](./index) &gt; [web-apis](./web-apis.md) &gt; [Headers](./web-apis.headers.md) &gt; [constructor](./web-apis.headers.constructor.md)
 
 # Headers.constructor method
 
-Constructs a new instance of the [Headers](web-apis.headers.md) class
+Constructs a new instance of the [Headers](./web-apis.headers.md) class
 
 **Signature:**
 ```javascript

@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [IndividualVersionPolicy](rush-lib.individualversionpolicy.md) &gt; [lockedMajor](rush-lib.individualversionpolicy.lockedmajor.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [IndividualVersionPolicy](./rush-lib.individualversionpolicy.md) &gt; [lockedMajor](./rush-lib.individualversionpolicy.lockedmajor.md)
 
 # IndividualVersionPolicy.lockedMajor property
 

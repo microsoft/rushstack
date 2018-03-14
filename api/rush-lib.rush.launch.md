@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [Rush](rush-lib.rush.md) &gt; [launch](rush-lib.rush.launch.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [Rush](./rush-lib.rush.md) &gt; [launch](./rush-lib.rush.launch.md)
 
 # Rush.launch method
 
@@ -6,7 +6,7 @@ Executes the Rush CLI. This is expected to be called by the @microsoft/rush pack
 
 **Signature:**
 ```javascript
-public static launch(launcherVersion: string, isManaged: boolean): void;
+static launch(launcherVersion: string, isManaged: boolean): void;
 ```
 **Returns:** `void`
 

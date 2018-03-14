@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [LockStepVersionPolicy](rush-lib.lockstepversionpolicy.md) &gt; [version](rush-lib.lockstepversionpolicy.version.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [LockStepVersionPolicy](./rush-lib.lockstepversionpolicy.md) &gt; [version](./rush-lib.lockstepversionpolicy.version.md)
 
 # LockStepVersionPolicy.version property
 

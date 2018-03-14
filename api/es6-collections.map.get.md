@@ -1,4 +1,4 @@
-[Home](./index) &gt; [es6-collections](es6-collections.md) &gt; [Map](es6-collections.map.md) &gt; [get](es6-collections.map.get.md)
+[Home](./index) &gt; [es6-collections](./es6-collections.md) &gt; [Map](./es6-collections.map.md) &gt; [get](./es6-collections.map.get.md)
 
 # Map.get method
 

@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [VersionPolicyConfiguration](rush-lib.versionpolicyconfiguration.md) &gt; [bump](rush-lib.versionpolicyconfiguration.bump.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [VersionPolicyConfiguration](./rush-lib.versionpolicyconfiguration.md) &gt; [bump](./rush-lib.versionpolicyconfiguration.bump.md)
 
 # VersionPolicyConfiguration.bump method
 
@@ -8,10 +8,7 @@ Bumps up versions for the specified version policy or all version policies
 
 **Signature:**
 ```javascript
-public bump(versionPolicyName?: string,
-    bumpType?: BumpType,
-    identifier?: string,
-    shouldCommit?: boolean): void;
+bump(versionPolicyName?: string, bumpType?: BumpType, identifier?: string, shouldCommit?: boolean): void;
 ```
 **Returns:** `void`
 

@@ -1,4 +1,4 @@
-[Home](./index) &gt; [es6-collections](es6-collections.md) &gt; [Iterator](es6-collections.iterator.md) &gt; [next](es6-collections.iterator.next.md)
+[Home](./index) &gt; [es6-collections](./es6-collections.md) &gt; [Iterator](./es6-collections.iterator.md) &gt; [next](./es6-collections.iterator.next.md)
 
 # Iterator.next method
 

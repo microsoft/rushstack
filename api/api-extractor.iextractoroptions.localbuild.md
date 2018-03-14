@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [IExtractorOptions](api-extractor.iextractoroptions.md) &gt; [localBuild](api-extractor.iextractoroptions.localbuild.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [IExtractorOptions](./api-extractor.iextractoroptions.md) &gt; [localBuild](./api-extractor.iextractoroptions.localbuild.md)
 
 # IExtractorOptions.localBuild property
 

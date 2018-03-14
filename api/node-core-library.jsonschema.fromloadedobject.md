@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/node-core-library](node-core-library.md) &gt; [JsonSchema](node-core-library.jsonschema.md) &gt; [fromLoadedObject](node-core-library.jsonschema.fromloadedobject.md)
+[Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [JsonSchema](./node-core-library.jsonschema.md) &gt; [fromLoadedObject](./node-core-library.jsonschema.fromloadedobject.md)
 
 # JsonSchema.fromLoadedObject method
 
@@ -6,7 +6,7 @@ Registers a JsonSchema that will be loaded from a file on disk.
 
 **Signature:**
 ```javascript
-public static fromLoadedObject(schemaObject: Object): JsonSchema;
+static fromLoadedObject(schemaObject: Object): JsonSchema;
 ```
 **Returns:** `JsonSchema`
 

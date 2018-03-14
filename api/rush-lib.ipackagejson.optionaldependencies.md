@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [IPackageJson](rush-lib.ipackagejson.md) &gt; [optionalDependencies](rush-lib.ipackagejson.optionaldependencies.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [IPackageJson](./rush-lib.ipackagejson.md) &gt; [optionalDependencies](./rush-lib.ipackagejson.optionaldependencies.md)
 
 # IPackageJson.optionalDependencies property
 
@@ -6,5 +6,7 @@ If a failure occurs (e.g. OS incompatibility) occurs while installing these depe
 
 **Signature:**
 ```javascript
-optionalDependencies: { [key: string]: string }
+optionalDependencies: {
+        [key: string]: string;
+    }
 ```

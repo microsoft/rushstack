@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [IndividualVersionPolicy](rush-lib.individualversionpolicy.md) &gt; [bump](rush-lib.individualversionpolicy.bump.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [IndividualVersionPolicy](./rush-lib.individualversionpolicy.md) &gt; [bump](./rush-lib.individualversionpolicy.bump.md)
 
 # IndividualVersionPolicy.bump method
 
@@ -8,7 +8,7 @@ Bumps version. Individual version policy lets change files drive version bump. T
 
 **Signature:**
 ```javascript
-public bump(bumpType?: BumpType, identifier?: string): void;
+bump(bumpType?: BumpType, identifier?: string): void;
 ```
 **Returns:** `void`
 

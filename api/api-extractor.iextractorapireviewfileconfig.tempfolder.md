@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [IExtractorApiReviewFileConfig](api-extractor.iextractorapireviewfileconfig.md) &gt; [tempFolder](api-extractor.iextractorapireviewfileconfig.tempfolder.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [IExtractorApiReviewFileConfig](./api-extractor.iextractorapireviewfileconfig.md) &gt; [tempFolder](./api-extractor.iextractorapireviewfileconfig.tempfolder.md)
 
 # IExtractorApiReviewFileConfig.tempFolder property
 

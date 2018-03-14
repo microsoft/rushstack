@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [Rush](rush-lib.rush.md) &gt; [version](rush-lib.rush.version.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [Rush](./rush-lib.rush.md) &gt; [version](./rush-lib.rush.version.md)
 
 # Rush.version property
 

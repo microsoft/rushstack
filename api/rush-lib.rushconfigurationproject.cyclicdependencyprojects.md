@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [RushConfigurationProject](rush-lib.rushconfigurationproject.md) &gt; [cyclicDependencyProjects](rush-lib.rushconfigurationproject.cyclicdependencyprojects.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfigurationProject](./rush-lib.rushconfigurationproject.md) &gt; [cyclicDependencyProjects](./rush-lib.rushconfigurationproject.cyclicdependencyprojects.md)
 
 # RushConfigurationProject.cyclicDependencyProjects property
 

@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/node-core-library](node-core-library.md) &gt; [JsonSchema](node-core-library.jsonschema.md) &gt; [validateObject](node-core-library.jsonschema.validateobject.md)
+[Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [JsonSchema](./node-core-library.jsonschema.md) &gt; [validateObject](./node-core-library.jsonschema.validateobject.md)
 
 # JsonSchema.validateObject method
 
@@ -6,7 +6,7 @@ Validates the specified JSON object against this JSON schema. If the validation 
 
 **Signature:**
 ```javascript
-public validateObject(jsonObject: Object, filenameForErrors: string, options?: IJsonSchemaValidateOptions): void;
+validateObject(jsonObject: Object, filenameForErrors: string, options?: IJsonSchemaValidateOptions): void;
 ```
 **Returns:** `void`
 

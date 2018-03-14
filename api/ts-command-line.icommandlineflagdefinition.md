@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/ts-command-line](ts-command-line.md) &gt; [ICommandLineFlagDefinition](ts-command-line.icommandlineflagdefinition.md)
+[Home](./index) &gt; [@microsoft/ts-command-line](./ts-command-line.md) &gt; [ICommandLineFlagDefinition](./ts-command-line.icommandlineflagdefinition.md)
 
 # ICommandLineFlagDefinition interface
 

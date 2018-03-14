@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/ts-command-line](ts-command-line.md) &gt; [CommandLineParameterProvider](ts-command-line.commandlineparameterprovider.md) &gt; [defineIntegerParameter](ts-command-line.commandlineparameterprovider.defineintegerparameter.md)
+[Home](./index) &gt; [@microsoft/ts-command-line](./ts-command-line.md) &gt; [CommandLineParameterProvider](./ts-command-line.commandlineparameterprovider.md) &gt; [defineIntegerParameter](./ts-command-line.commandlineparameterprovider.defineintegerparameter.md)
 
 # CommandLineParameterProvider.defineIntegerParameter method
 

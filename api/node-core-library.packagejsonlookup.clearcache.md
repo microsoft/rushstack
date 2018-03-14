@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/node-core-library](node-core-library.md) &gt; [PackageJsonLookup](node-core-library.packagejsonlookup.md) &gt; [clearCache](node-core-library.packagejsonlookup.clearcache.md)
+[Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [PackageJsonLookup](./node-core-library.packagejsonlookup.md) &gt; [clearCache](./node-core-library.packagejsonlookup.clearcache.md)
 
 # PackageJsonLookup.clearCache method
 
@@ -6,7 +6,7 @@ Clears the internal file cache.
 
 **Signature:**
 ```javascript
-public clearCache(): void;
+clearCache(): void;
 ```
 **Returns:** `void`
 

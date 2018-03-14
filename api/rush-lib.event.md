@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [Event](rush-lib.event.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [Event](./rush-lib.event.md)
 
 # Event enumeration
 

@@ -1,4 +1,4 @@
-[Home](./index) &gt; [es6-collections](es6-collections.md) &gt; [WeakSetConstructor](es6-collections.weaksetconstructor.md)
+[Home](./index) &gt; [es6-collections](./es6-collections.md) &gt; [WeakSetConstructor](./es6-collections.weaksetconstructor.md)
 
 # WeakSetConstructor interface
 
@@ -6,11 +6,11 @@
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [`prototype`](es6-collections.weaksetconstructor.prototype.md) | `WeakSet<any>` |  |
+|  [`prototype`](./es6-collections.weaksetconstructor.prototype.md) | `WeakSet<any>` |  |
 
 ## Methods
 
 |  Method | Returns | Description |
 |  --- | --- | --- |
-|  [`__new()`](es6-collections.weaksetconstructor.__new.md) | `WeakSet<T>` |  |
+|  [`__new()`](./es6-collections.weaksetconstructor.__new.md) | `WeakSet<T>` |  |
 

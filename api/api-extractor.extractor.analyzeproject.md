@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [Extractor](api-extractor.extractor.md) &gt; [analyzeProject](api-extractor.extractor.analyzeproject.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [Extractor](./api-extractor.extractor.md) &gt; [analyzeProject](./api-extractor.extractor.analyzeproject.md)
 
 # Extractor.analyzeProject method
 
@@ -6,7 +6,7 @@ Invokes the API Extractor engine, using the configuration that was passed to the
 
 **Signature:**
 ```javascript
-public analyzeProject(options?: IAnalyzeProjectOptions): void;
+analyzeProject(options?: IAnalyzeProjectOptions): void;
 ```
 **Returns:** `void`
 

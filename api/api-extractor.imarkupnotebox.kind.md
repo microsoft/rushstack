@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [IMarkupNoteBox](api-extractor.imarkupnotebox.md) &gt; [kind](api-extractor.imarkupnotebox.kind.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [IMarkupNoteBox](./api-extractor.imarkupnotebox.md) &gt; [kind](./api-extractor.imarkupnotebox.kind.md)
 
 # IMarkupNoteBox.kind property
 

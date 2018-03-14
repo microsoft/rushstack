@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [RushConfigurationProject](rush-lib.rushconfigurationproject.md) &gt; [shouldPublish](rush-lib.rushconfigurationproject.shouldpublish.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfigurationProject](./rush-lib.rushconfigurationproject.md) &gt; [shouldPublish](./rush-lib.rushconfigurationproject.shouldpublish.md)
 
 # RushConfigurationProject.shouldPublish property
 

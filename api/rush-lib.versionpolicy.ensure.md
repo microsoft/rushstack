@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [VersionPolicy](rush-lib.versionpolicy.md) &gt; [ensure](rush-lib.versionpolicy.ensure.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [VersionPolicy](./rush-lib.versionpolicy.md) &gt; [ensure](./rush-lib.versionpolicy.ensure.md)
 
 # VersionPolicy.ensure method
 
@@ -8,7 +8,7 @@ Returns an updated package json that satisfies the policy.
 
 **Signature:**
 ```javascript
-public abstract ensure(project: IPackageJson): IPackageJson | undefined;
+abstract ensure(project: IPackageJson): IPackageJson | undefined;
 ```
 **Returns:** `IPackageJson | undefined`
 

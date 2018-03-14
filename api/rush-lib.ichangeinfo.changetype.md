@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [IChangeInfo](rush-lib.ichangeinfo.md) &gt; [changeType](rush-lib.ichangeinfo.changetype.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [IChangeInfo](./rush-lib.ichangeinfo.md) &gt; [changeType](./rush-lib.ichangeinfo.changetype.md)
 
 # IChangeInfo.changeType property
 

@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [RushConfiguration](rush-lib.rushconfiguration.md) &gt; [loadFromConfigurationFile](rush-lib.rushconfiguration.loadfromconfigurationfile.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfiguration](./rush-lib.rushconfiguration.md) &gt; [loadFromConfigurationFile](./rush-lib.rushconfiguration.loadfromconfigurationfile.md)
 
 # RushConfiguration.loadFromConfigurationFile method
 
@@ -6,7 +6,7 @@ Loads the configuration data from an Rush.json configuration file and returns an
 
 **Signature:**
 ```javascript
-public static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
+static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
 ```
 **Returns:** `RushConfiguration`
 

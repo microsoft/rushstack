@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [IMarkupCodeBox](api-extractor.imarkupcodebox.md) &gt; [kind](api-extractor.imarkupcodebox.kind.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [IMarkupCodeBox](./api-extractor.imarkupcodebox.md) &gt; [kind](./api-extractor.imarkupcodebox.kind.md)
 
 # IMarkupCodeBox.kind property
 

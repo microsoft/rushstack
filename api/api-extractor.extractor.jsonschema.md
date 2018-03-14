@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [Extractor](api-extractor.extractor.md) &gt; [jsonSchema](api-extractor.extractor.jsonschema.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [Extractor](./api-extractor.extractor.md) &gt; [jsonSchema](./api-extractor.extractor.jsonschema.md)
 
 # Extractor.jsonSchema property
 

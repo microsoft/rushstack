@@ -1,4 +1,4 @@
-[Home](./index) &gt; [web-apis](web-apis.md) &gt; [Thenable](web-apis.thenable.md)
+[Home](./index) &gt; [web-apis](./web-apis.md) &gt; [Thenable](./web-apis.thenable.md)
 
 # Thenable interface
 
@@ -6,5 +6,5 @@
 
 |  Method | Returns | Description |
 |  --- | --- | --- |
-|  [`then(onFulfilled, onRejected)`](web-apis.thenable.then.md) | `Thenable<U>` |  |
+|  [`then(onFulfilled, onRejected)`](./web-apis.thenable.then.md) | `Thenable<U>` |  |
 

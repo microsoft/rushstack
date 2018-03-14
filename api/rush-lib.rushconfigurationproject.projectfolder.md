@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [RushConfigurationProject](rush-lib.rushconfigurationproject.md) &gt; [projectFolder](rush-lib.rushconfigurationproject.projectfolder.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfigurationProject](./rush-lib.rushconfigurationproject.md) &gt; [projectFolder](./rush-lib.rushconfigurationproject.projectfolder.md)
 
 # RushConfigurationProject.projectFolder property
 

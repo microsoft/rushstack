@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [RushConfiguration](rush-lib.rushconfiguration.md) &gt; [projectFolderMaxDepth](rush-lib.rushconfiguration.projectfoldermaxdepth.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfiguration](./rush-lib.rushconfiguration.md) &gt; [projectFolderMaxDepth](./rush-lib.rushconfiguration.projectfoldermaxdepth.md)
 
 # RushConfiguration.projectFolderMaxDepth property
 

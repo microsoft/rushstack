@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [IExtractorConfig](api-extractor.iextractorconfig.md) &gt; [compiler](api-extractor.iextractorconfig.compiler.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [IExtractorConfig](./api-extractor.iextractorconfig.md) &gt; [compiler](./api-extractor.iextractorconfig.compiler.md)
 
 # IExtractorConfig.compiler property
 

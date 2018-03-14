@@ -1,11 +1,11 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [ApprovedPackagesConfiguration](rush-lib.approvedpackagesconfiguration.md) &gt; [getItemByName](rush-lib.approvedpackagesconfiguration.getitembyname.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [ApprovedPackagesConfiguration](./rush-lib.approvedpackagesconfiguration.md) &gt; [getItemByName](./rush-lib.approvedpackagesconfiguration.getitembyname.md)
 
 # ApprovedPackagesConfiguration.getItemByName method
 
 
 **Signature:**
 ```javascript
-public getItemByName(packageName: string): ApprovedPackagesItem | undefined;
+getItemByName(packageName: string): ApprovedPackagesItem | undefined;
 ```
 **Returns:** `ApprovedPackagesItem | undefined`
 

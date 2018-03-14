@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [IPackageJson](rush-lib.ipackagejson.md) &gt; [version](rush-lib.ipackagejson.version.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [IPackageJson](./rush-lib.ipackagejson.md) &gt; [version](./rush-lib.ipackagejson.version.md)
 
 # IPackageJson.version property
 

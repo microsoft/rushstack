@@ -1,12 +1,12 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [IAnalyzeProjectOptions](api-extractor.ianalyzeprojectoptions.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [IAnalyzeProjectOptions](./api-extractor.ianalyzeprojectoptions.md)
 
 # IAnalyzeProjectOptions interface
 
-Options for [Extractor.analyzeProject](api-extractor.extractor.analyzeproject.md)<!-- -->.
+Options for [Extractor.processProject](./api-extractor.extractor.processproject.md)<!-- -->.
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [`projectConfig`](api-extractor.ianalyzeprojectoptions.projectconfig.md) | `IExtractorProjectConfig` | If omitted, then the [IExtractorConfig.project](api-extractor.iextractorconfig.project.md) config will be used by default. |
+|  [`projectConfig`](./api-extractor.ianalyzeprojectoptions.projectconfig.md) | `IExtractorProjectConfig` | If omitted, then the [IExtractorConfig.project](./api-extractor.iextractorconfig.project.md) config will be used by default. |
 

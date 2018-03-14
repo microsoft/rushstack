@@ -1,12 +1,12 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [Markup](api-extractor.markup.md) &gt; [createTextParagraphs](api-extractor.markup.createtextparagraphs.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [Markup](./api-extractor.markup.md) &gt; [createTextParagraphs](./api-extractor.markup.createtextparagraphs.md)
 
 # Markup.createTextParagraphs method
 
-This function is similar to [Markup.createTextElements](api-extractor.markup.createtextelements.md)<!-- -->, except that multiple newlines will be converted to a Markup.PARAGRAPH object.
+This function is similar to [Markup.createTextElements](./api-extractor.markup.createtextelements.md)<!-- -->, except that multiple newlines will be converted to a Markup.PARAGRAPH object.
 
 **Signature:**
 ```javascript
-public static createTextParagraphs(text: string, options?: IMarkupCreateTextOptions): MarkupBasicElement[];
+static createTextParagraphs(text: string, options?: IMarkupCreateTextOptions): MarkupBasicElement[];
 ```
 **Returns:** `MarkupBasicElement[]`
 

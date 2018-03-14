@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [ExternalApiHelper](api-extractor.externalapihelper.md) &gt; [generateApiJson](api-extractor.externalapihelper.generateapijson.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [ExternalApiHelper](./api-extractor.externalapihelper.md) &gt; [generateApiJson](./api-extractor.externalapihelper.generateapijson.md)
 
 # ExternalApiHelper.generateApiJson method
 
@@ -7,7 +7,7 @@
 
 **Signature:**
 ```javascript
-public static generateApiJson(rootDir: string, libFolder: string, externalPackageFilePath: string): void;
+static generateApiJson(rootDir: string, libFolder: string, externalPackageFilePath: string): void;
 ```
 **Returns:** `void`
 

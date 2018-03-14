@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [RushConfiguration](rush-lib.rushconfiguration.md) &gt; [changesFolder](rush-lib.rushconfiguration.changesfolder.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfiguration](./rush-lib.rushconfiguration.md) &gt; [changesFolder](./rush-lib.rushconfiguration.changesfolder.md)
 
 # RushConfiguration.changesFolder property
 

@@ -1,4 +1,4 @@
-[Home](./index) &gt; [web-apis](web-apis.md) &gt; [Promise](web-apis.promise.md) &gt; [reject](web-apis.promise.reject.md)
+[Home](./index) &gt; [web-apis](./web-apis.md) &gt; [Promise](./web-apis.promise.md) &gt; [reject](./web-apis.promise.reject.md)
 
 # Promise.reject method
 

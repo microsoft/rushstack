@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/ts-command-line](ts-command-line.md) &gt; [CommandLineParameterProvider](ts-command-line.commandlineparameterprovider.md) &gt; [defineStringListParameter](ts-command-line.commandlineparameterprovider.definestringlistparameter.md)
+[Home](./index) &gt; [@microsoft/ts-command-line](./ts-command-line.md) &gt; [CommandLineParameterProvider](./ts-command-line.commandlineparameterprovider.md) &gt; [defineStringListParameter](./ts-command-line.commandlineparameterprovider.definestringlistparameter.md)
 
 # CommandLineParameterProvider.defineStringListParameter method
 

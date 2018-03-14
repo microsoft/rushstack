@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/ts-command-line](ts-command-line.md) &gt; [CommandLineParameter](ts-command-line.commandlineparameter.md) &gt; [value](ts-command-line.commandlineparameter.value.md)
+[Home](./index) &gt; [@microsoft/ts-command-line](./ts-command-line.md) &gt; [CommandLineParameter](./ts-command-line.commandlineparameter.md) &gt; [value](./ts-command-line.commandlineparameter.value.md)
 
 # CommandLineParameter.value property
 

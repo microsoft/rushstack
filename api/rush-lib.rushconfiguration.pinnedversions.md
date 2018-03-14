@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [RushConfiguration](rush-lib.rushconfiguration.md) &gt; [pinnedVersions](rush-lib.rushconfiguration.pinnedversions.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfiguration](./rush-lib.rushconfiguration.md) &gt; [pinnedVersions](./rush-lib.rushconfiguration.pinnedversions.md)
 
 # RushConfiguration.pinnedVersions property
 

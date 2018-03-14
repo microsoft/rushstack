@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [Markup](api-extractor.markup.md) &gt; [createApiLinkFromText](api-extractor.markup.createapilinkfromtext.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [Markup](./api-extractor.markup.md) &gt; [createApiLinkFromText](./api-extractor.markup.createapilinkfromtext.md)
 
 # Markup.createApiLinkFromText method
 
@@ -6,7 +6,7 @@ Constructs an IMarkupApiLink element that represents a hyperlink to the specifie
 
 **Signature:**
 ```javascript
-public static createApiLinkFromText(text: string, target: IApiItemReference): IMarkupApiLink;
+static createApiLinkFromText(text: string, target: IApiItemReference): IMarkupApiLink;
 ```
 **Returns:** `IMarkupApiLink`
 

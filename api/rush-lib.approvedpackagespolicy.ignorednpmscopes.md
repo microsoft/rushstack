@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [ApprovedPackagesPolicy](rush-lib.approvedpackagespolicy.md) &gt; [ignoredNpmScopes](rush-lib.approvedpackagespolicy.ignorednpmscopes.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [ApprovedPackagesPolicy](./rush-lib.approvedpackagespolicy.md) &gt; [ignoredNpmScopes](./rush-lib.approvedpackagespolicy.ignorednpmscopes.md)
 
 # ApprovedPackagesPolicy.ignoredNpmScopes property
 

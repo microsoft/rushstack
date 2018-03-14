@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [IMarkupHighlightedText](api-extractor.imarkuphighlightedtext.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [IMarkupHighlightedText](./api-extractor.imarkuphighlightedtext.md)
 
 # IMarkupHighlightedText interface
 
@@ -8,9 +8,9 @@ Source code shown in a fixed-width font, with syntax highlighting.
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [`highlighter`](api-extractor.imarkuphighlightedtext.highlighter.md) | `MarkupHighlighter` | Indicates the syntax highlighting that will be applied to this text |
-|  [`kind`](api-extractor.imarkuphighlightedtext.kind.md) | `'code'` | The kind of markup element |
-|  [`text`](api-extractor.imarkuphighlightedtext.text.md) | `string` | The text content to display. |
+|  [`highlighter`](./api-extractor.imarkuphighlightedtext.highlighter.md) | `MarkupHighlighter` | Indicates the syntax highlighting that will be applied to this text |
+|  [`kind`](./api-extractor.imarkuphighlightedtext.kind.md) | `'code'` | The kind of markup element |
+|  [`text`](./api-extractor.imarkuphighlightedtext.text.md) | `string` | The text content to display. |
 
 ## Remarks
 

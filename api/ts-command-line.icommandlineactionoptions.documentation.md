@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/ts-command-line](ts-command-line.md) &gt; [ICommandLineActionOptions](ts-command-line.icommandlineactionoptions.md) &gt; [documentation](ts-command-line.icommandlineactionoptions.documentation.md)
+[Home](./index) &gt; [@microsoft/ts-command-line](./ts-command-line.md) &gt; [ICommandLineActionOptions](./ts-command-line.icommandlineactionoptions.md) &gt; [documentation](./ts-command-line.icommandlineactionoptions.documentation.md)
 
 # ICommandLineActionOptions.documentation property
 

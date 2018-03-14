@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [LockStepVersionPolicy](rush-lib.lockstepversionpolicy.md) &gt; [bump](rush-lib.lockstepversionpolicy.bump.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [LockStepVersionPolicy](./rush-lib.lockstepversionpolicy.md) &gt; [bump](./rush-lib.lockstepversionpolicy.bump.md)
 
 # LockStepVersionPolicy.bump method
 
@@ -8,7 +8,7 @@ Bumps the version of the lockstep policy
 
 **Signature:**
 ```javascript
-public bump(bumpType?: BumpType, identifier?: string): void;
+bump(bumpType?: BumpType, identifier?: string): void;
 ```
 **Returns:** `void`
 

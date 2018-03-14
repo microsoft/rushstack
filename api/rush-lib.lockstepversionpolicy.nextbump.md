@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [LockStepVersionPolicy](rush-lib.lockstepversionpolicy.md) &gt; [nextBump](rush-lib.lockstepversionpolicy.nextbump.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [LockStepVersionPolicy](./rush-lib.lockstepversionpolicy.md) &gt; [nextBump](./rush-lib.lockstepversionpolicy.nextbump.md)
 
 # LockStepVersionPolicy.nextBump property
 

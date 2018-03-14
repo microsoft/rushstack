@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [RushConfiguration](rush-lib.rushconfiguration.md) &gt; [getProjectByName](rush-lib.rushconfiguration.getprojectbyname.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfiguration](./rush-lib.rushconfiguration.md) &gt; [getProjectByName](./rush-lib.rushconfiguration.getprojectbyname.md)
 
 # RushConfiguration.getProjectByName method
 
@@ -6,7 +6,7 @@ Looks up a project in the projectsByName map. If the project is not found, then 
 
 **Signature:**
 ```javascript
-public getProjectByName(projectName: string): RushConfigurationProject | undefined;
+getProjectByName(projectName: string): RushConfigurationProject | undefined;
 ```
 **Returns:** `RushConfigurationProject | undefined`
 

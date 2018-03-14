@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [IMarkupHighlightedText](api-extractor.imarkuphighlightedtext.md) &gt; [text](api-extractor.imarkuphighlightedtext.text.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [IMarkupHighlightedText](./api-extractor.imarkuphighlightedtext.md) &gt; [text](./api-extractor.imarkuphighlightedtext.text.md)
 
 # IMarkupHighlightedText.text property
 

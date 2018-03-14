@@ -1,11 +1,11 @@
-[Home](./index) &gt; [es6-collections](es6-collections.md) &gt; [Iterator](es6-collections.iterator.md) &gt; [return](es6-collections.iterator.return.md)
+[Home](./index) &gt; [es6-collections](./es6-collections.md) &gt; [Iterator](./es6-collections.iterator.md) &gt; [return](./es6-collections.iterator.return.md)
 
 # Iterator.return method
 
 
 **Signature:**
 ```javascript
-return ?(value?: any): IteratorResult<T>;
+return?(value?: any): IteratorResult<T>;
 ```
 **Returns:** `IteratorResult<T>`
 

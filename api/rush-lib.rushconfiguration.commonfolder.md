@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [RushConfiguration](rush-lib.rushconfiguration.md) &gt; [commonFolder](rush-lib.rushconfiguration.commonfolder.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfiguration](./rush-lib.rushconfiguration.md) &gt; [commonFolder](./rush-lib.rushconfiguration.commonfolder.md)
 
 # RushConfiguration.commonFolder property
 

@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [VersionPolicyConfiguration](rush-lib.versionpolicyconfiguration.md) &gt; [versionPolicies](rush-lib.versionpolicyconfiguration.versionpolicies.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [VersionPolicyConfiguration](./rush-lib.versionpolicyconfiguration.md) &gt; [versionPolicies](./rush-lib.versionpolicyconfiguration.versionpolicies.md)
 
 # VersionPolicyConfiguration.versionPolicies property
 

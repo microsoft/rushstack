@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/ts-command-line](ts-command-line.md) &gt; [IBaseCommandLineDefinition](ts-command-line.ibasecommandlinedefinition.md) &gt; [parameterLongName](ts-command-line.ibasecommandlinedefinition.parameterlongname.md)
+[Home](./index) &gt; [@microsoft/ts-command-line](./ts-command-line.md) &gt; [IBaseCommandLineDefinition](./ts-command-line.ibasecommandlinedefinition.md) &gt; [parameterLongName](./ts-command-line.ibasecommandlinedefinition.parameterlongname.md)
 
 # IBaseCommandLineDefinition.parameterLongName property
 

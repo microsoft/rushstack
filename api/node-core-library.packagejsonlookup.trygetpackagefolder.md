@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/node-core-library](node-core-library.md) &gt; [PackageJsonLookup](node-core-library.packagejsonlookup.md) &gt; [tryGetPackageFolder](node-core-library.packagejsonlookup.trygetpackagefolder.md)
+[Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [PackageJsonLookup](./node-core-library.packagejsonlookup.md) &gt; [tryGetPackageFolder](./node-core-library.packagejsonlookup.trygetpackagefolder.md)
 
 # PackageJsonLookup.tryGetPackageFolder method
 
@@ -6,7 +6,7 @@ Finds the path to the package folder of a given currentPath, by probing upwards 
 
 **Signature:**
 ```javascript
-public tryGetPackageFolder(sourceFilePath: string): string | undefined;
+tryGetPackageFolder(sourceFilePath: string): string | undefined;
 ```
 **Returns:** `string | undefined`
 

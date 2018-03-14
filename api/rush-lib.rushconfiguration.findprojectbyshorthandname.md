@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [RushConfiguration](rush-lib.rushconfiguration.md) &gt; [findProjectByShorthandName](rush-lib.rushconfiguration.findprojectbyshorthandname.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfiguration](./rush-lib.rushconfiguration.md) &gt; [findProjectByShorthandName](./rush-lib.rushconfiguration.findprojectbyshorthandname.md)
 
 # RushConfiguration.findProjectByShorthandName method
 
@@ -6,7 +6,7 @@ This is used e.g. by command-line interfaces such as "rush build --to example". 
 
 **Signature:**
 ```javascript
-public findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
+findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
 ```
 **Returns:** `RushConfigurationProject | undefined`
 

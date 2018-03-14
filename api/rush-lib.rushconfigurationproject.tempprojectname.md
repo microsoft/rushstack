@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [RushConfigurationProject](rush-lib.rushconfigurationproject.md) &gt; [tempProjectName](rush-lib.rushconfigurationproject.tempprojectname.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfigurationProject](./rush-lib.rushconfigurationproject.md) &gt; [tempProjectName](./rush-lib.rushconfigurationproject.tempprojectname.md)
 
 # RushConfigurationProject.tempProjectName property
 

@@ -1,4 +1,4 @@
-[Home](./index) &gt; [es6-collections](es6-collections.md) &gt; [Map](es6-collections.map.md) &gt; [forEach](es6-collections.map.foreach.md)
+[Home](./index) &gt; [es6-collections](./es6-collections.md) &gt; [Map](./es6-collections.map.md) &gt; [forEach](./es6-collections.map.foreach.md)
 
 # Map.forEach method
 

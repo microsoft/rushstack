@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [ExternalApiHelper](api-extractor.externalapihelper.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [ExternalApiHelper](./api-extractor.externalapihelper.md)
 
 # ExternalApiHelper class
 
@@ -10,5 +10,5 @@ ExternalApiHelper has the specific use case of generating an API json file from 
 
 |  Method | Access Modifier | Returns | Description |
 |  --- | --- | --- | --- |
-|  [`generateApiJson(rootDir, libFolder, externalPackageFilePath)`](api-extractor.externalapihelper.generateapijson.md) | `public` | `void` |  |
+|  [`generateApiJson(rootDir, libFolder, externalPackageFilePath)`](./api-extractor.externalapihelper.generateapijson.md) |  | `void` |  |
 

@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/ts-command-line](ts-command-line.md) &gt; [CommandLineParameterProvider](ts-command-line.commandlineparameterprovider.md) &gt; [onDefineParameters](ts-command-line.commandlineparameterprovider.ondefineparameters.md)
+[Home](./index) &gt; [@microsoft/ts-command-line](./ts-command-line.md) &gt; [CommandLineParameterProvider](./ts-command-line.commandlineparameterprovider.md) &gt; [onDefineParameters](./ts-command-line.commandlineparameterprovider.ondefineparameters.md)
 
 # CommandLineParameterProvider.onDefineParameters method
 

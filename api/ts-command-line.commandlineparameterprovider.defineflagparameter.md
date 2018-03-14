@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/ts-command-line](ts-command-line.md) &gt; [CommandLineParameterProvider](ts-command-line.commandlineparameterprovider.md) &gt; [defineFlagParameter](ts-command-line.commandlineparameterprovider.defineflagparameter.md)
+[Home](./index) &gt; [@microsoft/ts-command-line](./ts-command-line.md) &gt; [CommandLineParameterProvider](./ts-command-line.commandlineparameterprovider.md) &gt; [defineFlagParameter](./ts-command-line.commandlineparameterprovider.defineflagparameter.md)
 
 # CommandLineParameterProvider.defineFlagParameter method
 

@@ -1,8 +1,8 @@
-[Home](./index) &gt; [@microsoft/ts-command-line](ts-command-line.md) &gt; [CommandLineParameter](ts-command-line.commandlineparameter.md) &gt; [constructor](ts-command-line.commandlineparameter.constructor.md)
+[Home](./index) &gt; [@microsoft/ts-command-line](./ts-command-line.md) &gt; [CommandLineParameter](./ts-command-line.commandlineparameter.md) &gt; [constructor](./ts-command-line.commandlineparameter.constructor.md)
 
 # CommandLineParameter.constructor method
 
-Constructs a new instance of the [CommandLineParameter](ts-command-line.commandlineparameter.md) class
+Constructs a new instance of the [CommandLineParameter](./ts-command-line.commandlineparameter.md) class
 
 **Signature:**
 ```javascript

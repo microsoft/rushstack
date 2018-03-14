@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [IExtractorTsconfigCompilerConfig](api-extractor.iextractortsconfigcompilerconfig.md) &gt; [rootFolder](api-extractor.iextractortsconfigcompilerconfig.rootfolder.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [IExtractorTsconfigCompilerConfig](./api-extractor.iextractortsconfigcompilerconfig.md) &gt; [rootFolder](./api-extractor.iextractortsconfigcompilerconfig.rootfolder.md)
 
 # IExtractorTsconfigCompilerConfig.rootFolder property
 

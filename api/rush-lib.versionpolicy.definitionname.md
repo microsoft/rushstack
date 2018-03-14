@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [VersionPolicy](rush-lib.versionpolicy.md) &gt; [definitionName](rush-lib.versionpolicy.definitionname.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [VersionPolicy](./rush-lib.versionpolicy.md) &gt; [definitionName](./rush-lib.versionpolicy.definitionname.md)
 
 # VersionPolicy.definitionName property
 

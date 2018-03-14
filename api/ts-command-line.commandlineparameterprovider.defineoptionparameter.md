@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/ts-command-line](ts-command-line.md) &gt; [CommandLineParameterProvider](ts-command-line.commandlineparameterprovider.md) &gt; [defineOptionParameter](ts-command-line.commandlineparameterprovider.defineoptionparameter.md)
+[Home](./index) &gt; [@microsoft/ts-command-line](./ts-command-line.md) &gt; [CommandLineParameterProvider](./ts-command-line.commandlineparameterprovider.md) &gt; [defineOptionParameter](./ts-command-line.commandlineparameterprovider.defineoptionparameter.md)
 
 # CommandLineParameterProvider.defineOptionParameter method
 

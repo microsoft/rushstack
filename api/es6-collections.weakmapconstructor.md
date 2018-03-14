@@ -1,4 +1,4 @@
-[Home](./index) &gt; [es6-collections](es6-collections.md) &gt; [WeakMapConstructor](es6-collections.weakmapconstructor.md)
+[Home](./index) &gt; [es6-collections](./es6-collections.md) &gt; [WeakMapConstructor](./es6-collections.weakmapconstructor.md)
 
 # WeakMapConstructor interface
 
@@ -6,11 +6,11 @@
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [`prototype`](es6-collections.weakmapconstructor.prototype.md) | `WeakMap<any, any>` |  |
+|  [`prototype`](./es6-collections.weakmapconstructor.prototype.md) | `WeakMap<any, any>` |  |
 
 ## Methods
 
 |  Method | Returns | Description |
 |  --- | --- | --- |
-|  [`__new()`](es6-collections.weakmapconstructor.__new.md) | `WeakMap<K, V>` |  |
+|  [`__new()`](./es6-collections.weakmapconstructor.__new.md) | `WeakMap<K, V>` |  |
 

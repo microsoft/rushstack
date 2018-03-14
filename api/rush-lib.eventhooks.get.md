@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [EventHooks](rush-lib.eventhooks.md) &gt; [get](rush-lib.eventhooks.get.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [EventHooks](./rush-lib.eventhooks.md) &gt; [get](./rush-lib.eventhooks.get.md)
 
 # EventHooks.get method
 
@@ -8,7 +8,7 @@ Return all the scripts associated with the specified event.
 
 **Signature:**
 ```javascript
-public get(event: Event): string[];
+get(event: Event): string[];
 ```
 **Returns:** `string[]`
 

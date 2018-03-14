@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [IPackageJson](rush-lib.ipackagejson.md) &gt; [description](rush-lib.ipackagejson.description.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [IPackageJson](./rush-lib.ipackagejson.md) &gt; [description](./rush-lib.ipackagejson.description.md)
 
 # IPackageJson.description property
 

@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/ts-command-line](ts-command-line.md) &gt; [ICommandLineOptionDefinition](ts-command-line.icommandlineoptiondefinition.md) &gt; [options](ts-command-line.icommandlineoptiondefinition.options.md)
+[Home](./index) &gt; [@microsoft/ts-command-line](./ts-command-line.md) &gt; [ICommandLineOptionDefinition](./ts-command-line.icommandlineoptiondefinition.md) &gt; [options](./ts-command-line.icommandlineoptiondefinition.options.md)
 
 # ICommandLineOptionDefinition.options property
 

@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [IExtractorProjectConfig](api-extractor.iextractorprojectconfig.md) &gt; [externalJsonFileFolders](api-extractor.iextractorprojectconfig.externaljsonfilefolders.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [IExtractorProjectConfig](./api-extractor.iextractorprojectconfig.md) &gt; [externalJsonFileFolders](./api-extractor.iextractorprojectconfig.externaljsonfilefolders.md)
 
 # IExtractorProjectConfig.externalJsonFileFolders property
 

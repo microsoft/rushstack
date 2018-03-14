@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [IMarkupLineBreak](api-extractor.imarkuplinebreak.md) &gt; [kind](api-extractor.imarkuplinebreak.kind.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [IMarkupLineBreak](./api-extractor.imarkuplinebreak.md) &gt; [kind](./api-extractor.imarkuplinebreak.kind.md)
 
 # IMarkupLineBreak.kind property
 

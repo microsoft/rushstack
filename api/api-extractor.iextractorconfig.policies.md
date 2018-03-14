@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [IExtractorConfig](api-extractor.iextractorconfig.md) &gt; [policies](api-extractor.iextractorconfig.policies.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [IExtractorConfig](./api-extractor.iextractorconfig.md) &gt; [policies](./api-extractor.iextractorconfig.policies.md)
 
 # IExtractorConfig.policies property
 

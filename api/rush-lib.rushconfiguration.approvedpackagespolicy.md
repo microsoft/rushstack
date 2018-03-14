@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [RushConfiguration](rush-lib.rushconfiguration.md) &gt; [approvedPackagesPolicy](rush-lib.rushconfiguration.approvedpackagespolicy.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfiguration](./rush-lib.rushconfiguration.md) &gt; [approvedPackagesPolicy](./rush-lib.rushconfiguration.approvedpackagespolicy.md)
 
 # RushConfiguration.approvedPackagesPolicy property
 

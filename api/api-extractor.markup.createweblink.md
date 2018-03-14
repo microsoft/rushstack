@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [Markup](api-extractor.markup.md) &gt; [createWebLink](api-extractor.markup.createweblink.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [Markup](./api-extractor.markup.md) &gt; [createWebLink](./api-extractor.markup.createweblink.md)
 
 # Markup.createWebLink method
 
@@ -6,7 +6,7 @@ Constructs an IMarkupWebLink element that represents a hyperlink an internet URL
 
 **Signature:**
 ```javascript
-public static createWebLink(textElements: MarkupLinkTextElement[], targetUrl: string): IMarkupWebLink;
+static createWebLink(textElements: MarkupLinkTextElement[], targetUrl: string): IMarkupWebLink;
 ```
 **Returns:** `IMarkupWebLink`
 

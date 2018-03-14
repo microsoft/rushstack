@@ -1,0 +1,12 @@
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [VersionPolicy](./rush-lib.versionpolicy.md) &gt; [isLockstepped](./rush-lib.versionpolicy.islockstepped.md)
+
+# VersionPolicy.isLockstepped property
+
+> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
+
+Whether it is a lockstepped version policy
+
+**Signature:**
+```javascript
+isLockstepped: boolean
+```

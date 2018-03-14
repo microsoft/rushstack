@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/node-core-library](node-core-library.md) &gt; [IJsonSchemaFromFileOptions](node-core-library.ijsonschemafromfileoptions.md) &gt; [dependentSchemas](node-core-library.ijsonschemafromfileoptions.dependentschemas.md)
+[Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [IJsonSchemaFromFileOptions](./node-core-library.ijsonschemafromfileoptions.md) &gt; [dependentSchemas](./node-core-library.ijsonschemafromfileoptions.dependentschemas.md)
 
 # IJsonSchemaFromFileOptions.dependentSchemas property
 

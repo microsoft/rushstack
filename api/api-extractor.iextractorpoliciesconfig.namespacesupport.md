@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [IExtractorPoliciesConfig](api-extractor.iextractorpoliciesconfig.md) &gt; [namespaceSupport](api-extractor.iextractorpoliciesconfig.namespacesupport.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [IExtractorPoliciesConfig](./api-extractor.iextractorpoliciesconfig.md) &gt; [namespaceSupport](./api-extractor.iextractorpoliciesconfig.namespacesupport.md)
 
 # IExtractorPoliciesConfig.namespaceSupport property
 

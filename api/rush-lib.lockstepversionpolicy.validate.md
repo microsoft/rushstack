@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [LockStepVersionPolicy](rush-lib.lockstepversionpolicy.md) &gt; [validate](rush-lib.lockstepversionpolicy.validate.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [LockStepVersionPolicy](./rush-lib.lockstepversionpolicy.md) &gt; [validate](./rush-lib.lockstepversionpolicy.validate.md)
 
 # LockStepVersionPolicy.validate method
 
@@ -8,7 +8,7 @@ Validates the specified version and throws if the version does not satisfy locks
 
 **Signature:**
 ```javascript
-public validate(versionString: string, packageName: string): void;
+validate(versionString: string, packageName: string): void;
 ```
 **Returns:** `void`
 

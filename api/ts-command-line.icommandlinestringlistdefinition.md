@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/ts-command-line](ts-command-line.md) &gt; [ICommandLineStringListDefinition](ts-command-line.icommandlinestringlistdefinition.md)
+[Home](./index) &gt; [@microsoft/ts-command-line](./ts-command-line.md) &gt; [ICommandLineStringListDefinition](./ts-command-line.icommandlinestringlistdefinition.md)
 
 # ICommandLineStringListDefinition interface
 

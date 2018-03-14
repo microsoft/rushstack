@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [Markup](api-extractor.markup.md) &gt; [createTable](api-extractor.markup.createtable.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [Markup](./api-extractor.markup.md) &gt; [createTable](./api-extractor.markup.createtable.md)
 
 # Markup.createTable method
 
@@ -6,7 +6,7 @@ Constructs an IMarkupTable element containing the specified header cells, which 
 
 **Signature:**
 ```javascript
-public static createTable(headerCellValues: MarkupBasicElement[][] | undefined = undefined): IMarkupTable;
+static createTable(headerCellValues?: MarkupBasicElement[][] | undefined): IMarkupTable;
 ```
 **Returns:** `IMarkupTable`
 

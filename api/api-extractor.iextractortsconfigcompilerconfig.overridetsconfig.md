@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [IExtractorTsconfigCompilerConfig](api-extractor.iextractortsconfigcompilerconfig.md) &gt; [overrideTsconfig](api-extractor.iextractortsconfigcompilerconfig.overridetsconfig.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [IExtractorTsconfigCompilerConfig](./api-extractor.iextractortsconfigcompilerconfig.md) &gt; [overrideTsconfig](./api-extractor.iextractortsconfigcompilerconfig.overridetsconfig.md)
 
 # IExtractorTsconfigCompilerConfig.overrideTsconfig property
 
@@ -6,7 +6,7 @@ Override the tsconfig.json file contents.
 
 **Signature:**
 ```javascript
-overrideTsconfig: { }
+overrideTsconfig: {}
 ```
 
 ## Remarks

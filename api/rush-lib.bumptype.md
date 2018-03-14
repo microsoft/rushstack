@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [BumpType](rush-lib.bumptype.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [BumpType](./rush-lib.bumptype.md)
 
 # BumpType enumeration
 
@@ -8,10 +8,10 @@ Type of version bumps
 
 |  Member | Value | Description |
 |  --- | --- | --- |
-|  major |  |  |
-|  minor |  |  |
-|  none |  |  |
-|  patch |  |  |
-|  preminor |  |  |
-|  prerelease |  |  |
+|  major | `= 5` |  |
+|  minor | `= 4` |  |
+|  none | `= 0` |  |
+|  patch | `= 2` |  |
+|  preminor | `= 3` |  |
+|  prerelease | `= 1` |  |
 

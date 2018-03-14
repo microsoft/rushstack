@@ -1,4 +1,4 @@
-[Home](./index) &gt; [web-apis](web-apis.md) &gt; [Headers](web-apis.headers.md) &gt; [getAll](web-apis.headers.getall.md)
+[Home](./index) &gt; [web-apis](./web-apis.md) &gt; [Headers](./web-apis.headers.md) &gt; [getAll](./web-apis.headers.getall.md)
 
 # Headers.getAll method
 

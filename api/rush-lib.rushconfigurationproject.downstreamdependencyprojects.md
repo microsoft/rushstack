@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [RushConfigurationProject](rush-lib.rushconfigurationproject.md) &gt; [downstreamDependencyProjects](rush-lib.rushconfigurationproject.downstreamdependencyprojects.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfigurationProject](./rush-lib.rushconfigurationproject.md) &gt; [downstreamDependencyProjects](./rush-lib.rushconfigurationproject.downstreamdependencyprojects.md)
 
 # RushConfigurationProject.downstreamDependencyProjects property
 

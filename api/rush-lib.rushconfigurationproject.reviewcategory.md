@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [RushConfigurationProject](rush-lib.rushconfigurationproject.md) &gt; [reviewCategory](rush-lib.rushconfigurationproject.reviewcategory.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfigurationProject](./rush-lib.rushconfigurationproject.md) &gt; [reviewCategory](./rush-lib.rushconfigurationproject.reviewcategory.md)
 
 # RushConfigurationProject.reviewCategory property
 

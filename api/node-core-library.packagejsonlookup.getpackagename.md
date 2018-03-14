@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/node-core-library](node-core-library.md) &gt; [PackageJsonLookup](node-core-library.packagejsonlookup.md) &gt; [getPackageName](node-core-library.packagejsonlookup.getpackagename.md)
+[Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [PackageJsonLookup](./node-core-library.packagejsonlookup.md) &gt; [getPackageName](./node-core-library.packagejsonlookup.getpackagename.md)
 
 # PackageJsonLookup.getPackageName method
 
@@ -6,7 +6,7 @@ Loads the package.json file and returns the name of the package.
 
 **Signature:**
 ```javascript
-public getPackageName(packageJsonPath: string): string;
+getPackageName(packageJsonPath: string): string;
 ```
 **Returns:** `string`
 

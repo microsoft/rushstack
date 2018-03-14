@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [IMarkupTableCell](api-extractor.imarkuptablecell.md) &gt; [elements](api-extractor.imarkuptablecell.elements.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [IMarkupTableCell](./api-extractor.imarkuptablecell.md) &gt; [elements](./api-extractor.imarkuptablecell.elements.md)
 
 # IMarkupTableCell.elements property
 

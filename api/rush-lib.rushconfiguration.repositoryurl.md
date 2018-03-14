@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [RushConfiguration](rush-lib.rushconfiguration.md) &gt; [repositoryUrl](rush-lib.rushconfiguration.repositoryurl.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfiguration](./rush-lib.rushconfiguration.md) &gt; [repositoryUrl](./rush-lib.rushconfiguration.repositoryurl.md)
 
 # RushConfiguration.repositoryUrl property
 

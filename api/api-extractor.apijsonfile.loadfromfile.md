@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [ApiJsonFile](api-extractor.apijsonfile.md) &gt; [loadFromFile](api-extractor.apijsonfile.loadfromfile.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [ApiJsonFile](./api-extractor.apijsonfile.md) &gt; [loadFromFile](./api-extractor.apijsonfile.loadfromfile.md)
 
 # ApiJsonFile.loadFromFile method
 
@@ -6,7 +6,7 @@ Loads an \*.api.json data file, and validates that it conforms to the api-json.s
 
 **Signature:**
 ```javascript
-public static loadFromFile(apiJsonFilePath: string): IApiPackage;
+static loadFromFile(apiJsonFilePath: string): IApiPackage;
 ```
 **Returns:** `IApiPackage`
 

@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [VersionPolicyDefinitionName](rush-lib.versionpolicydefinitionname.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [VersionPolicyDefinitionName](./rush-lib.versionpolicydefinitionname.md)
 
 # VersionPolicyDefinitionName enumeration
 
@@ -8,6 +8,6 @@ Version policy base type names
 
 |  Member | Value | Description |
 |  --- | --- | --- |
-|  individualVersion |  |  |
-|  lockStepVersion |  |  |
+|  individualVersion | `= 1` |  |
+|  lockStepVersion | `= 0` |  |
 

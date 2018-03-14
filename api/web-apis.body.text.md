@@ -1,4 +1,4 @@
-[Home](./index) &gt; [web-apis](web-apis.md) &gt; [Body](web-apis.body.md) &gt; [text](web-apis.body.text.md)
+[Home](./index) &gt; [web-apis](./web-apis.md) &gt; [Body](./web-apis.body.md) &gt; [text](./web-apis.body.text.md)
 
 # Body.text method
 

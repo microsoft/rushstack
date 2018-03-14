@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [RushConfiguration](rush-lib.rushconfiguration.md) &gt; [projectFolderMinDepth](rush-lib.rushconfiguration.projectfoldermindepth.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfiguration](./rush-lib.rushconfiguration.md) &gt; [projectFolderMinDepth](./rush-lib.rushconfiguration.projectfoldermindepth.md)
 
 # RushConfiguration.projectFolderMinDepth property
 

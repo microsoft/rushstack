@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [RushConfiguration](rush-lib.rushconfiguration.md) &gt; [gitAllowedEmailRegExps](rush-lib.rushconfiguration.gitallowedemailregexps.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfiguration](./rush-lib.rushconfiguration.md) &gt; [gitAllowedEmailRegExps](./rush-lib.rushconfiguration.gitallowedemailregexps.md)
 
 # RushConfiguration.gitAllowedEmailRegExps property
 

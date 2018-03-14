@@ -1,8 +1,8 @@
-[Home](./index) &gt; [web-apis](web-apis.md) &gt; [Promise](web-apis.promise.md) &gt; [constructor](web-apis.promise.constructor.md)
+[Home](./index) &gt; [web-apis](./web-apis.md) &gt; [Promise](./web-apis.promise.md) &gt; [constructor](./web-apis.promise.constructor.md)
 
 # Promise.constructor method
 
-Constructs a new instance of the [Promise](web-apis.promise.md) class
+Constructs a new instance of the [Promise](./web-apis.promise.md) class
 
 **Signature:**
 ```javascript

@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/node-core-library](node-core-library.md) &gt; [IJsonFileSaveOptions](node-core-library.ijsonfilesaveoptions.md) &gt; [onlyIfChanged](node-core-library.ijsonfilesaveoptions.onlyifchanged.md)
+[Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [IJsonFileSaveOptions](./node-core-library.ijsonfilesaveoptions.md) &gt; [onlyIfChanged](./node-core-library.ijsonfilesaveoptions.onlyifchanged.md)
 
 # IJsonFileSaveOptions.onlyIfChanged property
 

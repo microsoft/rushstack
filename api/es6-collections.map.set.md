@@ -1,4 +1,4 @@
-[Home](./index) &gt; [es6-collections](es6-collections.md) &gt; [Map](es6-collections.map.md) &gt; [set](es6-collections.map.set.md)
+[Home](./index) &gt; [es6-collections](./es6-collections.md) &gt; [Map](./es6-collections.map.md) &gt; [set](./es6-collections.map.set.md)
 
 # Map.set method
 

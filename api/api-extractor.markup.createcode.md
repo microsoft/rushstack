@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [Markup](api-extractor.markup.md) &gt; [createCode](api-extractor.markup.createcode.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [Markup](./api-extractor.markup.md) &gt; [createCode](./api-extractor.markup.createcode.md)
 
 # Markup.createCode method
 
@@ -6,7 +6,7 @@ Constructs an IMarkupHighlightedText element representing a program code text wi
 
 **Signature:**
 ```javascript
-public static createCode(code: string, highlighter?: MarkupHighlighter): IMarkupHighlightedText;
+static createCode(code: string, highlighter?: MarkupHighlighter): IMarkupHighlightedText;
 ```
 **Returns:** `IMarkupHighlightedText`
 

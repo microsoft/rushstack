@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [ApprovedPackagesPolicy](rush-lib.approvedpackagespolicy.md) &gt; [enabled](rush-lib.approvedpackagespolicy.enabled.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [ApprovedPackagesPolicy](./rush-lib.approvedpackagespolicy.md) &gt; [enabled](./rush-lib.approvedpackagespolicy.enabled.md)
 
 # ApprovedPackagesPolicy.enabled property
 

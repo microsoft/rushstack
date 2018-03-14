@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/api-extractor](api-extractor.md) &gt; [ILogger](api-extractor.ilogger.md) &gt; [logVerbose](api-extractor.ilogger.logverbose.md)
+[Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [ILogger](./api-extractor.ilogger.md) &gt; [logVerbose](./api-extractor.ilogger.logverbose.md)
 
 # ILogger.logVerbose method
 

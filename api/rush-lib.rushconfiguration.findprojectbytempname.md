@@ -1,4 +1,4 @@
-[Home](./index) &gt; [@microsoft/rush-lib](rush-lib.md) &gt; [RushConfiguration](rush-lib.rushconfiguration.md) &gt; [findProjectByTempName](rush-lib.rushconfiguration.findprojectbytempname.md)
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfiguration](./rush-lib.rushconfiguration.md) &gt; [findProjectByTempName](./rush-lib.rushconfiguration.findprojectbytempname.md)
 
 # RushConfiguration.findProjectByTempName method
 
@@ -6,7 +6,7 @@ Looks up a project by its RushConfigurationProject.tempProjectName field.
 
 **Signature:**
 ```javascript
-public findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
+findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
 ```
 **Returns:** `RushConfigurationProject | undefined`
 
