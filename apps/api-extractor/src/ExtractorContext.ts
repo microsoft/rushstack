@@ -9,7 +9,7 @@ import { PackageJsonLookup } from '@microsoft/node-core-library';
 import { AstPackage } from './ast/AstPackage';
 import { DocItemLoader } from './DocItemLoader';
 import { ILogger } from './extractor/ILogger';
-import { IExtractorPoliciesConfig } from './extractor/IExtractorConfig';
+import { IExtractorPoliciesConfig, IExtractorValidationRulesConfig } from './extractor/IExtractorConfig';
 
 /**
  * Options for ExtractorContext constructor.
@@ -35,6 +35,8 @@ export interface IExtractorContextOptions {
   logger: ILogger;
 
   policies: IExtractorPoliciesConfig;
+
+  validationRules: IExtractorValidationRulesConfig;
 }
 
 /**
@@ -55,6 +57,8 @@ export class ExtractorContext {
 
   public readonly policies: IExtractorPoliciesConfig;
 
+  public readonly validationRules: IExtractorValidationRulesConfig;
+
   private _packageName: string;
 
   // If the entry point is "C:\Folder\project\src\index.ts" and the nearest package.json
@@ -67,6 +71,7 @@ export class ExtractorContext {
     this.packageJsonLookup = new PackageJsonLookup();
 
     this.policies = options.policies;
+    this.validationRules = options.validationRules;
 
     const folder: string | undefined = this.packageJsonLookup.tryGetPackageFolder(options.entryPointFile);
     if (!folder) {

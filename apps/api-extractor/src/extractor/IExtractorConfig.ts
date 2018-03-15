@@ -85,7 +85,36 @@ export interface IExtractorPoliciesConfig {
    *
    * permissive - arbitrary nesting of namespaces is allowed
    */
-  namespaceSupport: 'conservative' | 'permissive';
+  namespaceSupport?: 'conservative' | 'permissive';
+}
+
+/**
+ * Configuration values used for the {@link IExtractorValidationRulesConfig} block.
+ * @public
+ */
+export const enum ExtractorValidationRulePolicy {
+  /**
+   * Violations of the rule will be reported as build errors.
+   */
+  error = 'error',
+  /**
+   * Violations of the rule are silently ignored.
+   */
+  allow = 'allow'
+}
+
+/**
+ * Configuration for various validation checks that ensure good API design
+ *
+ * @public
+ */
+export interface IExtractorValidationRulesConfig {
+  /**
+   * This rule checks for top-level API items that are missing a release tag such as \@beta or \@internal.
+   * If "allow" is chosen, then missing release tags will be assumed to be \@public.
+   * The default policy is "error".
+   */
+  missingReleaseTags?: ExtractorValidationRulePolicy;
 }
 
 /**
@@ -221,6 +250,11 @@ export interface IExtractorConfig {
    * {@inheritdoc IExtractorPoliciesConfig}
    */
   policies?: IExtractorPoliciesConfig;
+
+  /**
+   * {@inheritdoc IExtractorValidationRulesConfig}
+   */
+  validationRules?: IExtractorValidationRulesConfig;
 
   /**
    * {@inheritdoc IExtractorProjectConfig}
