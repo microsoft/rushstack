@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import { AstItemKind, IAstItemOptions } from './AstItem';
+import { AstItem, AstItemKind, IAstItemOptions } from './AstItem';
 import { AstMember } from './AstMember';
 import { AstParameter } from './AstParameter';
 import { TypeScriptHelpers } from '../utils/TypeScriptHelpers';
@@ -65,7 +65,7 @@ export class AstMethod extends AstMember {
     // If this is a class constructor, and if the documentation summary was omitted, then
     // we fill in a default summary versus flagging it as "undocumented".
     // Generally class constructors have uninteresting documentation.
-    if (this.kind === AstItemKind.Constructor) {
+    if (this.kind === AstItemKind.Constructor && this.parentContainer) {
       if (this.documentation.summary.length === 0) {
         this.documentation.summary.push(
           ...Markup.createTextElements('Constructs a new instance of the '));
@@ -73,15 +73,30 @@ export class AstMethod extends AstMember {
         const scopedPackageName: IScopedPackageName = ApiDefinitionReference
           .parseScopedPackageName(this.context.package.name);
 
-        this.documentation.summary.push(
-          Markup.createApiLinkFromText(this.parentContainer!.name, {
-              scopeName: scopedPackageName.scope,
-              packageName: scopedPackageName.package,
-              exportName: this.parentContainer!.name,
-              memberName: ''
-            }
-          )
-        );
+        const parentParentContainer: AstItem | undefined = this.parentContainer.parentContainer;
+        if (parentParentContainer && parentParentContainer.kind === AstItemKind.Namespace) {
+          // This is a temporary workaround to support policies.namespaceSupport === permissive
+          // until the new AstSymbolTable engine is wired up
+          this.documentation.summary.push(
+            Markup.createApiLinkFromText(this.parentContainer.name, {
+                scopeName: scopedPackageName.scope,
+                packageName: scopedPackageName.package,
+                exportName: parentParentContainer.name,
+                memberName: this.parentContainer.name
+              }
+            )
+          );
+        } else {
+          this.documentation.summary.push(
+            Markup.createApiLinkFromText(this.parentContainer.name, {
+                scopeName: scopedPackageName.scope,
+                packageName: scopedPackageName.package,
+                exportName: this.parentContainer.name,
+                memberName: ''
+              }
+            )
+          );
+        }
 
         this.documentation.summary.push(...Markup.createTextElements(' class'));
       }
