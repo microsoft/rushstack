@@ -367,6 +367,7 @@ class Markup {
   static createWebLink(textElements: MarkupLinkTextElement[], targetUrl: string): IMarkupWebLink;
   static createWebLinkFromText(text: string, targetUrl: string): IMarkupWebLink;
   static extractTextContent(elements: MarkupElement[]): string;
+  static formatApiItemReference(apiItemReference: IApiItemReference): string;
   static normalize<T extends MarkupElement>(elements: T[]): void;
   static PARAGRAPH: IMarkupParagraph;
 }

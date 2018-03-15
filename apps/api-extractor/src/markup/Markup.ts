@@ -358,6 +358,33 @@ export class Markup {
     }
   }
 
+  /**
+   * This formats an IApiItemReference as its AEDoc notation.
+   *
+   * @remarks
+   * Depending on the provided components, example return values might look like
+   * "\@ms/my-library:SomeClass.someProperty", "my-library:SomeClass", "SomeClass",
+   * or "SomeClass.someProperty".
+   */
+  public static formatApiItemReference(apiItemReference: IApiItemReference): string {
+    // Example: "SomeClass"
+    let result: string = apiItemReference.exportName;
+    if (apiItemReference.packageName) {
+        // Example: "my-library:SomeClass"
+        result = apiItemReference.packageName + ':' + result;
+
+      if (apiItemReference.scopeName) {
+        // Example: "@ms/my-library:SomeClass"
+        result = apiItemReference.scopeName + '/' + result;
+      }
+    }
+    if (apiItemReference.memberName) {
+        // Example: "@ms/my-library:SomeClass.someProperty"
+        result += '.' + apiItemReference.memberName;
+    }
+    return result;
+  }
+
   private static _extractTextContent(elements: MarkupElement[], buffer: { text: string }): void {
     for (const element of elements) {
       switch (element.kind) {
