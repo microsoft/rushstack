@@ -60,7 +60,8 @@ class CommandLineParameterProvider {
 class CommandLineParser extends CommandLineParameterProvider {
   constructor(options: ICommandListParserOptions);
   addAction(command: CommandLineAction): void;
-  execute(args?: string[]): Promise<void>;
+  execute(args?: string[]): Promise<boolean>;
+  executeWithoutErrorHandling(args?: string[]): Promise<void>;
   protected onExecute(): Promise<void>;
   protected selectedAction: CommandLineAction;
 }

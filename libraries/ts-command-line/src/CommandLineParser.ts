@@ -77,37 +77,66 @@ abstract class CommandLineParser extends CommandLineParameterProvider {
   }
 
   /**
-   * This is the main entry point to begin parsing command-line arguments
+   * The program entry point will call this method to begin parsing command-line arguments
    * and executing the corresponding action.
    *
-   * @param args   the command-line arguments to be parsed; if omitted, then
+   * @remarks
+   * The returned promise will never reject:  If an error occurs, it will be printed
+   * to stderr, process.exitCode will be set to 1, and the promise will resolve to false.
+   * This simplifies the most common usage scenario where the program entry point doesn't
+   * want to be involved with the command-line logic, and will discard the promise without
+   * a then() or catch() block.
+   *
+   * If your caller wants to trap and handle errors, use {@link CommandLineParser.executeWithoutErrorHandling}
+   * instead.
+   *
+   * @param args - the command-line arguments to be parsed; if omitted, then
    *               the process.argv will be used
    */
-  public execute(args?: string[]): Promise<void> {
-    if (!args) {
-      // 0=node.exe, 1=script name
-      args = process.argv.slice(2);
-    }
-    if (args.length === 0) {
-      this._argumentParser.printHelp();
-      return Promise.resolve();
-    }
-    const data: ICommandLineParserData = this._argumentParser.parseArgs();
+  public execute(args?: string[]): Promise<boolean> {
+    return this.executeWithoutErrorHandling(args).then(() => {
+      return true;
+    }).catch((e) => {
+      const message: string = (e.message || 'An unknown error occurred').trim();
+      console.error(colors.red('Error: ' + message));
+      process.exitCode = 1;
+      return false;
+    });
+  }
 
-    this._processParsedData(data);
-
-    for (const action of this._actions) {
-      if (action.options.actionVerb === data.action) {
-        this.selectedAction = action;
-        action._processParsedData(data);
-        break;
+  /**
+   * This is similar to {@link CommandLineParser.execute}, except that execution errors
+   * simply cause the promise to reject.  It is the caller's responsibility to trap
+   */
+  public executeWithoutErrorHandling(args?: string[]): Promise<void> {
+    try {
+      if (!args) {
+        // 0=node.exe, 1=script name
+        args = process.argv.slice(2);
       }
-    }
-    if (!this.selectedAction) {
-      throw Error('Unrecognized action');
-    }
+      if (args.length === 0) {
+        this._argumentParser.printHelp();
+        return Promise.resolve();
+      }
+      const data: ICommandLineParserData = this._argumentParser.parseArgs();
 
-    return this.onExecute();
+      this._processParsedData(data);
+
+      for (const action of this._actions) {
+        if (action.options.actionVerb === data.action) {
+          this.selectedAction = action;
+          action._processParsedData(data);
+          break;
+        }
+      }
+      if (!this.selectedAction) {
+        throw Error('Unrecognized action');
+      }
+
+      return this.onExecute();
+    } catch (error) {
+      return Promise.reject(error);
+    }
   }
 
   /**
