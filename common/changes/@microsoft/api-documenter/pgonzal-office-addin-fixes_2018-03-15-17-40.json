@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-documenter",
+      "comment": "Fix a bug where MarkdownRenderer did not handle newlines properly inside table cells",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter",
+  "email": "pgonzal@users.noreply.github.com"
+}
