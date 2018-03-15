@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/ts-command-line",
+      "comment": "Add a new API \"CommandLineParser.executeWithoutErrorHandling()\"",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/ts-command-line",
+  "email": "pgonzal@users.noreply.github.com"
+}

@@ -252,8 +252,8 @@ export class Extractor {
 
     // This helps strict-null-checks to understand that _applyConfigDefaults() eliminated
     // any undefined members
-    if (!(this.actualConfig.policies && this.actualConfig.apiJsonFile && this.actualConfig.apiReviewFile
-      && this.actualConfig.packageTypings)) {
+    if (!(this.actualConfig.policies && this.actualConfig.validationRules
+      && this.actualConfig.apiJsonFile && this.actualConfig.apiReviewFile && this.actualConfig.packageTypings)) {
       throw new Error('The configuration object wasn\'t normalized properly');
     }
 
@@ -265,7 +265,8 @@ export class Extractor {
       program: this._program,
       entryPointFile: path.resolve(this._absoluteRootFolder, projectConfig.entryPointSourceFile),
       logger: this._monitoredLogger,
-      policies: this.actualConfig.policies
+      policies: this.actualConfig.policies,
+      validationRules: this.actualConfig.validationRules
     });
 
     for (const externalJsonFileFolder of projectConfig.externalJsonFileFolders || []) {

@@ -77,6 +77,19 @@
       "additionalProperties": false
     },
 
+    "validationRules": {
+      "description": "Configuration for various validation checks that ensure good API design",
+      "type": "object",
+      "properties": {
+        "missingReleaseTags": {
+          "description": "This rule checks for top-level API items that are missing a release tag such as \"@beta\" or \"@internal\". If \"allow\" is chosen, then missing release tags will be assumed to be \"@public\". The default policy is \"error\".",
+          "type": "string",
+          "enum": [ "error", "allow" ]
+        }
+      },
+      "additionalProperties": false
+    },
+
     "apiReviewFile": {
       "description": "Configures how the API review files (*.api.ts) will be generated.",
       "type": "object",

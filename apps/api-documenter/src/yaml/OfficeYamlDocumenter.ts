@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as colors from 'colors';
 import * as fsx from 'fs-extra';
 import * as path from 'path';
 import yaml = require('js-yaml');
@@ -38,8 +39,9 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     super.generateFiles(outputFolder);
 
     // After we generate everything, check for any unused snippets
+    console.log();
     for (const apiName of Object.keys(this._snippets)) {
-      console.error('UNUSED SNIPPET: ' + apiName);
+      console.error(colors.yellow('Warning: Unused snippet ' + apiName));
     }
   }
 

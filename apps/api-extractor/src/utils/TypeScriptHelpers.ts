@@ -76,7 +76,7 @@ export class TypeScriptHelpers {
    * @returns The associated Symbol.  If there is no semantic information (e.g. if the
    * declaration is an extra semicolon somewhere), then "undefined" is returned.
    */
-  public static tryGetSymbolForDeclaration(declaration: ts.Declaration): ts.Symbol {
+  public static tryGetSymbolForDeclaration(declaration: ts.Declaration): ts.Symbol | undefined {
     /* tslint:disable:no-any */
     const symbol: ts.Symbol = (declaration as any).symbol;
     /* tslint:enable:no-any */
@@ -88,10 +88,10 @@ export class TypeScriptHelpers {
    * cannot be found.
    */
   public static getSymbolForDeclaration(declaration: ts.Declaration): ts.Symbol {
-    const symbol: ts.Symbol = TypeScriptHelpers.tryGetSymbolForDeclaration(declaration);
+    const symbol: ts.Symbol | undefined = TypeScriptHelpers.tryGetSymbolForDeclaration(declaration);
     if (!symbol) {
-      PrettyPrinter.throwUnexpectedSyntaxError(declaration,
-        'Unable to determine the semantic information for this declaration');
+      throw new Error(PrettyPrinter.formatFileAndLineNumber(declaration) + ': '
+        + 'Unable to determine semantic information for this declaration');
     }
     return symbol;
   }

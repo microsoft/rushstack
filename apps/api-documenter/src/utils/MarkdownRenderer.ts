@@ -229,7 +229,12 @@ export class MarkdownRenderer {
           break;
         case 'code':
           writer.write('`');
-          writer.write(element.text);
+          if (context.insideTable) {
+            const parts: string[] = element.text.split(/[\r\n]+/g);
+            writer.write(parts.join('`<p/>`'));
+          } else {
+            writer.write(element.text);
+          }
           writer.write('`');
           break;
         case 'api-link':

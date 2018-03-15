@@ -73,11 +73,7 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
    * @internal
    */
   public _execute(): Promise<void> {
-    try {
-      return this.onExecute();
-    } catch (error) {
-      return Promise.reject(error);
-    }
+    return this.onExecute();
   }
 
   /**

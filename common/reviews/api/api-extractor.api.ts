@@ -22,6 +22,12 @@ class Extractor {
 }
 
 // @public
+enum ExtractorValidationRulePolicy {
+  allow = "allow",
+  error = "error"
+}
+
+// @public
 interface IAnalyzeProjectOptions {
   projectConfig?: IExtractorProjectConfig;
 }
@@ -179,6 +185,7 @@ interface IExtractorConfig {
   packageTypings?: IExtractorPackageTypingsConfig;
   policies?: IExtractorPoliciesConfig;
   project: IExtractorProjectConfig;
+  validationRules?: IExtractorValidationRulesConfig;
 }
 
 // @public
@@ -199,7 +206,7 @@ interface IExtractorPackageTypingsConfig {
 
 // @public
 interface IExtractorPoliciesConfig {
-  namespaceSupport: 'conservative' | 'permissive';
+  namespaceSupport?: 'conservative' | 'permissive';
 }
 
 // @public
@@ -221,6 +228,11 @@ interface IExtractorTsconfigCompilerConfig {
   overrideTsconfig?: {
   }
   rootFolder: string;
+}
+
+// @public
+interface IExtractorValidationRulesConfig {
+  missingReleaseTags?: ExtractorValidationRulePolicy;
 }
 
 // @public
@@ -355,6 +367,7 @@ class Markup {
   static createWebLink(textElements: MarkupLinkTextElement[], targetUrl: string): IMarkupWebLink;
   static createWebLinkFromText(text: string, targetUrl: string): IMarkupWebLink;
   static extractTextContent(elements: MarkupElement[]): string;
+  static formatApiItemReference(apiItemReference: IApiItemReference): string;
   static normalize<T extends MarkupElement>(elements: T[]): void;
   static PARAGRAPH: IMarkupParagraph;
 }

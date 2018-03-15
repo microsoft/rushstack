@@ -27,7 +27,7 @@ export class AstFunction extends AstItem {
     if (methodDeclaration.parameters) {
       this.params = [];
       for (const param of methodDeclaration.parameters) {
-        const declarationSymbol: ts.Symbol = TypeScriptHelpers.tryGetSymbolForDeclaration(param);
+        const declarationSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(param);
         const astParameter: AstParameter = new AstParameter({
           context: this.context,
           declaration: param,

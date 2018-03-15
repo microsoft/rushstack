@@ -17,6 +17,8 @@ export {
   IExtractorRuntimeCompilerConfig,
   IExtractorProjectConfig,
   IExtractorPoliciesConfig,
+  ExtractorValidationRulePolicy,
+  IExtractorValidationRulesConfig,
   IExtractorApiReviewFileConfig,
   IExtractorApiJsonFileConfig,
   IExtractorPackageTypingsConfig,

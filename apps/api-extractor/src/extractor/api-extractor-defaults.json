@@ -11,6 +11,10 @@
     "namespaceSupport": "conservative"
   },
 
+  "validationRules": {
+    "missingReleaseTags": "error"
+  },
+
   "apiReviewFile": {
     "enabled": true,
     "apiReviewFolder": "./etc",

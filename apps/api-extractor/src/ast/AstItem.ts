@@ -536,11 +536,17 @@ export abstract class AstItem {
       if (this.parentContainer && this.parentContainer.kind === AstItemKind.Package) {
         // Don't warn about items that failed to parse.
         if (!this.documentation.failedToParse) {
-          // If there is no release tag, and this is a top-level export of the package, then
-          // report an error
-          this.reportError(`A release tag (@alpha, @beta, @public, @internal) must be specified`
-            + ` for ${this.name}`);
+          if (this.context.validationRules.missingReleaseTags === 'error') {
+            // If there is no release tag, and this is a top-level export of the package, then
+            // report an error
+            this.reportError(`A release tag (@alpha, @beta, @public, @internal) must be specified`
+              + ` for ${this.name}`);
+          }
         }
+
+        // If the release tag was not specified for a top-level export, then it defaults
+        // to @public (even if we reported an error above)
+        this.documentation.releaseTag = ReleaseTag.Public;
       }
     }
   }

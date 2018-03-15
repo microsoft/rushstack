@@ -18,7 +18,12 @@ export class AstPackage extends AstModule {
   private _exportedNormalizedSymbols: IExportedSymbol[] = [];
 
   private static _getOptions(context: ExtractorContext, rootFile: ts.SourceFile): IAstItemOptions {
-    const rootFileSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(rootFile);
+    const rootFileSymbol: ts.Symbol | undefined = TypeScriptHelpers.tryGetSymbolForDeclaration(rootFile);
+
+    if (!rootFileSymbol) {
+      throw new Error('The entry point file does not appear to have any exports:\n' + rootFile.fileName
+        + '\nNote that API Extractor does not yet support libraries consisting entirely of ambient types.');
+    }
 
     if (!rootFileSymbol.declarations) {
       throw new Error('Unable to find a root declaration for this package');
