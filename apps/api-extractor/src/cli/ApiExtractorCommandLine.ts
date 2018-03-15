@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as colors from 'colors';
+import * as os from 'os';
+
 import { CommandLineParser, CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import { RunAction } from './RunAction';
 
