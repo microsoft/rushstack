@@ -1,6 +1,15 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Thu, 15 Mar 2018 16:05:43 GMT and should not be manually modified.
+This log was last generated on Thu, 15 Mar 2018 20:00:50 GMT and should not be manually modified.
+
+## 1.1.22
+Thu, 15 Mar 2018 20:00:50 GMT
+
+### Patches
+
+- Fix an issue where GitHub changed its markdown parser such that "./" is now required for relative hyperlinks
+- Fix a bug where MarkdownRenderer did not handle newlines properly inside table cells
+- Improve appearance of warning messages
 
 ## 1.1.21
 Thu, 15 Mar 2018 16:05:43 GMT

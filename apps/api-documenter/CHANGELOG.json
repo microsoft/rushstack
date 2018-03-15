@@ -2,6 +2,35 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "1.1.22",
+      "tag": "@microsoft/api-documenter_v1.1.22",
+      "date": "Thu, 15 Mar 2018 20:00:50 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where GitHub changed its markdown parser such that \"./\" is now required for relative hyperlinks"
+          },
+          {
+            "comment": "Fix a bug where MarkdownRenderer did not handle newlines properly inside table cells"
+          },
+          {
+            "comment": "Improve appearance of warning messages"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.3.9` to `5.4.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `3.0.7` to `3.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.21` to `4.3.22`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.21",
       "tag": "@microsoft/api-documenter_v1.1.21",
       "date": "Thu, 15 Mar 2018 16:05:43 GMT",

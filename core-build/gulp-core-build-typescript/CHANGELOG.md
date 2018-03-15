@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Thu, 15 Mar 2018 16:05:43 GMT and should not be manually modified.
+This log was last generated on Thu, 15 Mar 2018 20:00:50 GMT and should not be manually modified.
+
+## 4.7.20
+Thu, 15 Mar 2018 20:00:50 GMT
+
+### Patches
+
+- Fix an issue where the column number for typescript errors was off by one
 
 ## 4.7.19
 Thu, 15 Mar 2018 16:05:43 GMT

@@ -1,6 +1,18 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 15 Mar 2018 16:05:43 GMT and should not be manually modified.
+This log was last generated on Thu, 15 Mar 2018 20:00:50 GMT and should not be manually modified.
+
+## 5.4.0
+Thu, 15 Mar 2018 20:00:50 GMT
+
+### Minor changes
+
+- Add a new setting validationRules.missingReleaseTags to optionally remove the requirement that every API item should have a release tag
+- Add new API "Markup.formatApiItemReference()"
+
+### Patches
+
+- Fix an issue where the automatically generated documentation for class constructors sometimes had a broken hyperlink
 
 ## 5.3.9
 Thu, 15 Mar 2018 16:05:43 GMT

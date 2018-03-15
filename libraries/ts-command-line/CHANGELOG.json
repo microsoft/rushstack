@@ -2,6 +2,21 @@
   "name": "@microsoft/ts-command-line",
   "entries": [
     {
+      "version": "3.1.0",
+      "tag": "@microsoft/ts-command-line_v3.1.0",
+      "date": "Thu, 15 Mar 2018 20:00:50 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add default error handler so the caller to CommandLineParser.execute() is not expected to handle promise rejections"
+          },
+          {
+            "comment": "Add a new API \"CommandLineParser.executeWithoutErrorHandling()\""
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.7",
       "tag": "@microsoft/ts-command-line_v3.0.7",
       "date": "Mon, 12 Mar 2018 20:36:19 GMT",

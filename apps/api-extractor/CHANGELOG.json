@@ -2,6 +2,31 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "5.4.0",
+      "tag": "@microsoft/api-extractor_v5.4.0",
+      "date": "Thu, 15 Mar 2018 20:00:50 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a new setting validationRules.missingReleaseTags to optionally remove the requirement that every API item should have a release tag"
+          },
+          {
+            "comment": "Add new API \"Markup.formatApiItemReference()\""
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Fix an issue where the automatically generated documentation for class constructors sometimes had a broken hyperlink"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `3.0.7` to `3.1.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.3.9",
       "tag": "@microsoft/api-extractor_v5.3.9",
       "date": "Thu, 15 Mar 2018 16:05:43 GMT",
