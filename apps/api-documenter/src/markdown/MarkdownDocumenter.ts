@@ -4,6 +4,7 @@
 import * as fsx from 'fs-extra';
 import * as path from 'path';
 
+import { Text } from '@microsoft/node-core-library';
 import {
   IApiClass,
   IApiEnum,
@@ -596,8 +597,7 @@ export class MarkdownDocumenter {
       }
     });
 
-    const normalized: string = content.split('\n').join('\r\n');
-    fsx.writeFileSync(filename, normalized);
+    fsx.writeFileSync(filename, Text.convertToCrLf(content));
   }
 
   private _getFilenameForDocItem(docItem: DocItem): string {
