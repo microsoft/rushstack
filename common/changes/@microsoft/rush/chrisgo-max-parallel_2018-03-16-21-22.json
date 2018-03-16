@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add support for overriding the default windows parallelism with 'max'.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "christiango@users.noreply.github.com"
+}

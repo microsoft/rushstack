@@ -131,7 +131,8 @@ export class CustomRushAction extends BaseRushAction {
         parameterLongName: '--parallelism',
         parameterShortName: '-p',
         key: 'COUNT',
-        description: 'Specify the number of concurrent build processes.'
+        description: 'Specify the number of concurrent build processes'
+          + ` A value of 'max' can be used to achieve the maximum default parallelism.`
           + ' If omitted, the parallelism will be based on the number of CPU cores.'
       });
     }
