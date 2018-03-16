@@ -358,6 +358,18 @@ export class AstSymbolTable {
       }
     }
 
+    if (followAliasesResult.astImport && !astSymbol.imported) {
+      // Our strategy for recognizing external declarations is to look for an import statement
+      // during SymbolAnalyzer.followAliases().  Although it is sometimes possible to reach a symbol
+      // without traversing an import statement, we assume that that the first reference will always
+      // involve an import statement.
+      //
+      // This assumption might be violated if the caller did something unusual like feeding random
+      // symbols to AstSymbolTable.analyze() in the middle of the analysis.
+      throw new Error('Program Bug: The symbol ' + astSymbol.localName + ' is being imported'
+        + ' after it was already registered as non-imported');
+    }
+
     return astSymbol;
   }
 
