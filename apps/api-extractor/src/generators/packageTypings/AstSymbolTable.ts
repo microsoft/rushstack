@@ -336,6 +336,10 @@ export class AstSymbolTable {
             arbitaryParentDeclaration as ts.Declaration);
 
           parentAstSymbol = this._fetchAstSymbol(parentSymbol, addIfMissing);
+          if (!parentAstSymbol) {
+            throw new Error('Program bug: Unable to construct a parent AstSymbol for '
+              + followedSymbol.name);
+          }
         }
 
         // Okay, now while creating the declarations we will wire them up to the
