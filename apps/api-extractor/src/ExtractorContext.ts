@@ -73,13 +73,13 @@ export class ExtractorContext {
     this.policies = options.policies;
     this.validationRules = options.validationRules;
 
-    const folder: string | undefined = this.packageJsonLookup.tryGetPackageFolder(options.entryPointFile);
+    const folder: string | undefined = this.packageJsonLookup.tryGetPackageFolderFor(options.entryPointFile);
     if (!folder) {
       throw new Error('Unable to find a package.json for entry point: ' + options.entryPointFile);
     }
     this._packageFolder = folder;
 
-    this._packageName = this.packageJsonLookup.getPackageName(this._packageFolder);
+    this._packageName = this.packageJsonLookup.tryLoadPackageJsonFor(this._packageFolder)!.name;
 
     this.docItemLoader = new DocItemLoader(this._packageFolder);
 
