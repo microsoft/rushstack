@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { IPackageJson } from '@microsoft/node-core-library';
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
 
 import { BumpType } from '../../data/VersionPolicy';
-import IPackageJson from '../../utilities/IPackageJson';
 import RushConfiguration from '../../data/RushConfiguration';
 import Utilities from '../../utilities/Utilities';
 import VersionControl from '../../utilities/VersionControl';

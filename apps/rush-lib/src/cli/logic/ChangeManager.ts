@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { IPackageJson } from '@microsoft/node-core-library';
+
 import { IChangeInfo } from '../../data/ChangeManagement';
 import { IChangelog } from '../../data/Changelog';
-import IPackageJson from '../../utilities/IPackageJson';
 import RushConfiguration from '../../data/RushConfiguration';
 import RushConfigurationProject from '../../data/RushConfigurationProject';
 import { VersionPolicyConfiguration } from '../../data/VersionPolicyConfiguration';

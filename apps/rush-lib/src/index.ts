@@ -43,10 +43,6 @@ export {
 } from './data/ChangeManagement';
 
 export {
-  default as IPackageJson
-} from './utilities/IPackageJson';
-
-export {
   LastInstallFlag as _LastInstallFlag
 } from './utilities/LastInstallFlag';
 

@@ -4,9 +4,9 @@
 import { EOL } from 'os';
 import * as path from 'path';
 import * as colors from 'colors';
+import { IPackageJson } from '@microsoft/node-core-library';
 
 import RushCommandLineParser from './cli/actions/RushCommandLineParser';
-import IPackageJson from './utilities/IPackageJson';
 
 /**
  * Operations involving the rush tool and its operation.
