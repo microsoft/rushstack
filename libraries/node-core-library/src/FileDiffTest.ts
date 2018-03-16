@@ -36,7 +36,7 @@ export class FileDiffTest {
    */
   public static prepareFolder(unitTestDirName: string, testModule: string): string {
     const packageJsonFolderPath: string | undefined
-      = this._packageJsonLookup.tryGetPackageFolder(unitTestDirName);
+      = this._packageJsonLookup.tryGetPackageFolderFor(unitTestDirName);
 
     if (packageJsonFolderPath === undefined) {
       throw new Error('Unable to find a package.json in any parent folder of ' + unitTestDirName);
