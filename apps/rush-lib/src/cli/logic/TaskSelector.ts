@@ -15,7 +15,7 @@ export interface ITaskSelectorConstructor {
   commandToRun: string;
   customFlags: string[];
   isQuietMode: boolean;
-  parallelism: number;
+  parallelism:  string;
   isIncrementalBuildAllowed: boolean;
   changedProjectsOnly: boolean;
 }
