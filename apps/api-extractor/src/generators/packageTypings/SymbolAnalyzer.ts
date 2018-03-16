@@ -95,26 +95,11 @@ export class SymbolAnalyzer {
   public static followAliases(symbol: ts.Symbol, typeChecker: ts.TypeChecker): IFollowAliasesResult {
     let current: ts.Symbol = symbol;
 
-    // Is it ambient?  We will examine all of the declarations we encounter
-    // to see if any of them contains the "export" keyword; if not, then it's ambient.
-    let isAmbient: boolean = true;
-
     // We will try to obtain the name from a declaration; otherwise we'll fall back to the symbol name
     let declarationName: string | undefined = undefined;
 
     while (true) { // tslint:disable-line:no-constant-condition
       for (const declaration of current.declarations || []) {
-        // 1. Check for any signs that this is not an ambient definition
-        if (declaration.kind === ts.SyntaxKind.ExportSpecifier
-          || declaration.kind === ts.SyntaxKind.ExportAssignment) {
-          isAmbient = false;
-        }
-
-        const modifiers: ts.ModifierFlags = ts.getCombinedModifierFlags(declaration);
-        if (modifiers & (ts.ModifierFlags.Export | ts.ModifierFlags.ExportDefault)) {
-          isAmbient = false;
-        }
-
         const declarationNameIdentifier: ts.DeclarationName | undefined = ts.getNameOfDeclaration(declaration);
         if (declarationNameIdentifier && ts.isIdentifier(declarationNameIdentifier)) {
           declarationName = declarationNameIdentifier.getText().trim();
@@ -147,15 +132,15 @@ export class SymbolAnalyzer {
       current = currentAlias;
     }
 
-    // Is the followedSymbol actually the kind of thing that can be ambient?
-    if (isAmbient) {
-      for (const declaration of current.declarations || []) {
-        // These actually need "export" keywords
-        if (!SymbolAnalyzer.isExportableAstDeclaration(declaration.kind)) {
-          // Everything else we assume is some kind of nested declaration that
-          // doesn't need it.
-          isAmbient = false;
-        }
+    // Is this an ambient declaration?  The way to determine this is by looking at the
+    // ts.SyntaxKind.SourceFile node to see whether it has a symbol or not (i.e. whether it
+    // is acting as a module or not).
+    let isAmbient: boolean = true;
+    if (current.declarations) {
+      const sourceFileNode: ts.Node | undefined = TypeScriptHelpers.findFirstParent(
+        current.declarations[0], ts.SyntaxKind.SourceFile);
+      if (sourceFileNode && !!typeChecker.getSymbolAtLocation(sourceFileNode)) {
+        isAmbient = false;
       }
     }
 
