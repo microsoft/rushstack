@@ -84,7 +84,7 @@ export class PackageJsonLookup {
       return this._packageFolderCache.get(resolvedFileOrFolderPath);
     }
 
-    // Is resolvedFileOrFolderPath itself a parent folder?  If so, return it.
+    // Is resolvedFileOrFolderPath itself a folder containing a package.json?  If so, return it.
     if (fsx.existsSync(path.join(resolvedFileOrFolderPath, FileConstants.PackageJson))) {
       this._packageFolderCache.set(resolvedFileOrFolderPath, resolvedFileOrFolderPath);
       return resolvedFileOrFolderPath;
@@ -92,12 +92,16 @@ export class PackageJsonLookup {
 
     const parentFolder: string | undefined = path.dirname(resolvedFileOrFolderPath);
     if (!parentFolder || parentFolder === resolvedFileOrFolderPath) {
+      // We reached the root directory without a match
       this._packageFolderCache.set(resolvedFileOrFolderPath, undefined);
       return undefined;  // no match
     }
 
     // Recurse upwards, caching every step along the way
-    return this.tryGetPackageFolderFor(parentFolder);
+    const parentResult: string | undefined = this.tryGetPackageFolderFor(parentFolder);
+    this._packageFolderCache.set(resolvedFileOrFolderPath, parentResult);
+
+    return parentResult;
   }
 
   /**
