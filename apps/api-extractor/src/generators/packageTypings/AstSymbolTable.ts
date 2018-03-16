@@ -93,6 +93,7 @@ export class AstSymbolTable {
    * Ensures that AstSymbol.analyzed is true for the provided symbol.  The operation
    * starts from the root symbol and then fills out all children of all declarations, and
    * also calculates AstDeclaration.referencedAstSymbols for all declarations.
+   * If the symbol is not imported, any non-imported references are also analyzed.
    * @remarks
    * This is an expensive operation, so we only perform it for top-level exports of an
    * the AstEntryPoint.  For example, if some code references a nested class inside
@@ -105,11 +106,8 @@ export class AstSymbolTable {
       return;
     }
 
-    // Walk up to the root of the tree
-    let rootAstSymbol: AstSymbol = astSymbol;
-    while (rootAstSymbol.mainDeclaration.parent) {
-      rootAstSymbol = rootAstSymbol.mainDeclaration.parent.astSymbol;
-    }
+    // Start at the root of the tree
+    const rootAstSymbol: AstSymbol = astSymbol.rootAstSymbol;
 
     // Calculate the full child tree for each definition
     for (const astDeclaration of rootAstSymbol.astDeclarations) {
@@ -118,30 +116,19 @@ export class AstSymbolTable {
 
     astSymbol._notifyAnalyzed();
 
-    // Now that we have finished analyzing this symbol, make sure we also analyzed
-    // any non-imported symbols that it references.
-    rootAstSymbol.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
-      for (const referencedAstSymbol of astDeclaration.referencedAstSymbols) {
-        // Walk up to the root of the tree, looking for any imports along the way
-        let isImported: boolean = false;
-        let current: AstSymbol | undefined = astSymbol;
-        while (current) {
-          if (!!current.astImport) {
-            isImported = true;
-            break;
-          }
-          if (!current.mainDeclaration.parent) {
-            current = undefined;
-          } else {
-            current = current.mainDeclaration.parent.astSymbol;
+    if (!astSymbol.astImport) {
+      // If this symbol is not imported, then we also analyze any referencedAstSymbols
+      // that are not imported.  For example, this ensures that forgotten exports get
+      // analyzed.
+      rootAstSymbol.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
+        for (const referencedAstSymbol of astDeclaration.referencedAstSymbols) {
+          // Walk up to the root of the tree, looking for any imports along the way
+          if (!referencedAstSymbol.imported) {
+            this.analyze(referencedAstSymbol);
           }
         }
-
-        if (!isImported) {
-          this.analyze(referencedAstSymbol);
-        }
-      }
-    });
+      });
+    }
   }
 
   /**
@@ -291,29 +278,18 @@ export class AstSymbolTable {
       const astImport: AstImport | undefined = followAliasesResult.astImport;
 
       if (astImport) {
-        astSymbol = this._astSymbolsByImportKey.get(astImport.key);
-
-        if (astSymbol) {
-          // We didn't find the entry using followedSymbol, but we did using importPackageKey,
-          // so add a mapping for followedSymbol; we'll need it later when renaming identifiers
-          this._astSymbolsBySymbol.set(followedSymbol, astSymbol);
+        if (!astSymbol) {
+          astSymbol = this._astSymbolsByImportKey.get(astImport.key);
+          if (astSymbol) {
+            // We didn't find the entry using followedSymbol, but we did using importPackageKey,
+            // so add a mapping for followedSymbol; we'll need it later when renaming identifiers
+            this._astSymbolsBySymbol.set(followedSymbol, astSymbol);
+          }
         }
       }
 
       if (!astSymbol) {
-        // None of the above lookups worked, so create a new entry
-        astSymbol = new AstSymbol({
-          localName: followAliasesResult.localName,
-          followedSymbol: followAliasesResult.followedSymbol,
-          astImport: astImport
-        });
-
-        this._astSymbolsBySymbol.set(followedSymbol, astSymbol);
-
-        if (astImport) {
-          // If it's an import, add it to the lookup
-          this._astSymbolsByImportKey.set(astImport.key, astSymbol);
-        }
+        // None of the above lookups worked, so create a new entry...
 
         // We always fetch the entire chain of parents for each declaration.
         // (Children/siblings are only analyzed on demand.)
@@ -340,6 +316,20 @@ export class AstSymbolTable {
             throw new Error('Program bug: Unable to construct a parent AstSymbol for '
               + followedSymbol.name);
           }
+        }
+
+        astSymbol = new AstSymbol({
+          localName: followAliasesResult.localName,
+          followedSymbol: followAliasesResult.followedSymbol,
+          astImport: astImport,
+          rootAstSymbol: parentAstSymbol ? parentAstSymbol.rootAstSymbol : undefined
+        });
+
+        this._astSymbolsBySymbol.set(followedSymbol, astSymbol);
+
+        if (astImport) {
+          // If it's an import, add it to the lookup
+          this._astSymbolsByImportKey.set(astImport.key, astSymbol);
         }
 
         // Okay, now while creating the declarations we will wire them up to the

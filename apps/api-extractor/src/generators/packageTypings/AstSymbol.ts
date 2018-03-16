@@ -12,6 +12,7 @@ export interface IAstSymbolParameters {
   readonly followedSymbol: ts.Symbol;
   readonly localName: string;
   readonly astImport: AstImport | undefined;
+  readonly rootAstSymbol: AstSymbol | undefined;
 }
 
 /**
@@ -23,9 +24,8 @@ export interface IAstSymbolParameters {
  * if a method has 3 overloads, each overloaded signature will have its own AstDeclaration,
  * but they will all share a common AstSymbol.
  *
- * For nested definitions, the AstSymbol has a unique parent
- * (i.e. AstSymbol.mainDeclaration.parent.astSymbol), but the parent/children for each
- * AstDeclaration may be different.
+ * For nested definitions, the AstSymbol has a unique parent (i.e. AstSymbol.rootAstSymbol),
+ * but the parent/children for each AstDeclaration may be different.
  */
 export class AstSymbol {
   /**
@@ -47,13 +47,15 @@ export class AstSymbol {
 
   private readonly _astDeclarations: AstDeclaration[];
 
+  private readonly _rootAstSymbol: AstSymbol;
+
   private _analyzed: boolean = false;
 
   public constructor(parameters: IAstSymbolParameters) {
     this.followedSymbol = parameters.followedSymbol;
     this.localName = parameters.localName;
     this.astImport = parameters.astImport;
-
+    this._rootAstSymbol = parameters.rootAstSymbol || this;
     this._astDeclarations = [];
   }
 
@@ -68,18 +70,25 @@ export class AstSymbol {
   }
 
   /**
-   * The first declaration that was encountered, which is guaranteed to exist.
-   */
-  public get mainDeclaration(): AstDeclaration {
-    return this._astDeclarations[0];
-  }
-
-  /**
    * Returns true if the AstSymbolTable.analyze() was called for this object.
    * See that function for details.
    */
   public get analyzed(): boolean {
     return this._analyzed;
+  }
+
+  /**
+   * Returns the symbol of the root of the AstDeclaration hierarchy.
+   */
+  public get rootAstSymbol(): AstSymbol {
+    return this._rootAstSymbol;
+  }
+
+  /**
+   * Returns true if this symbol was imported from another package.
+   */
+  public get imported(): boolean {
+    return !!this.rootAstSymbol.astImport;
   }
 
   /**
