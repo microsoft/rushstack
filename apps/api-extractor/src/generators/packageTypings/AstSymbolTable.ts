@@ -91,7 +91,7 @@ export class AstSymbolTable {
 
   /**
    * Ensures that AstSymbol.analyzed is true for the provided symbol.  The operation
-   * locates the root symbol and then fetches all children of all declarations, and
+   * starts from the root symbol and then fills out all children of all declarations, and
    * also calculates AstDeclaration.referencedAstSymbols for all declarations.
    * @remarks
    * This is an expensive operation, so we only perform it for top-level exports of an
@@ -117,6 +117,31 @@ export class AstSymbolTable {
     }
 
     astSymbol._notifyAnalyzed();
+
+    // Now that we have finished analyzing this symbol, make sure we also analyzed
+    // any non-imported symbols that it references.
+    rootAstSymbol.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
+      for (const referencedAstSymbol of astDeclaration.referencedAstSymbols) {
+        // Walk up to the root of the tree, looking for any imports along the way
+        let isImported: boolean = false;
+        let current: AstSymbol | undefined = astSymbol;
+        while (current) {
+          if (!!current.astImport) {
+            isImported = true;
+            break;
+          }
+          if (!current.mainDeclaration.parent) {
+            current = undefined;
+          } else {
+            current = current.mainDeclaration.parent.astSymbol;
+          }
+        }
+
+        if (!isImported) {
+          this.analyze(referencedAstSymbol);
+        }
+      }
+    });
   }
 
   /**
