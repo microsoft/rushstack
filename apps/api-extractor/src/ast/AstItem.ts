@@ -18,6 +18,7 @@ import {
   IApiDefinitionReferenceParts
 } from '../ApiDefinitionReference';
 import { AstItemContainer } from './AstItemContainer';
+import { IPackageJson } from '@microsoft/node-core-library';
 
 /**
  * Indicates the type of definition represented by a AstItem object.
@@ -602,18 +603,17 @@ export abstract class AstItem {
     // Walk upwards from that directory until you find a directory containing package.json,
     // this is where the referenced type is located.
     // Example: "c:\users\<username>\sp-client\spfx-core\sp-core-library"
-    const typeReferencePackagePath: string | undefined = this.context.packageJsonLookup
-      .tryGetPackageFolder(sourceFile.fileName);
+    const typeReferencePackageJson: IPackageJson | undefined = this.context.packageJsonLookup
+      .tryLoadPackageJsonFor(sourceFile.fileName);
     // Example: "@microsoft/sp-core-library"
     let typeReferencePackageName: string = '';
 
     // If we can not find a package path, we consider the type to be part of the current project's package.
     // One case where this happens is when looking for a type that is a symlink
-    if (!typeReferencePackagePath) {
+    if (!typeReferencePackageJson) {
       typeReferencePackageName = this.context.package.name;
     } else {
-      typeReferencePackageName = this.context.packageJsonLookup
-        .getPackageName(typeReferencePackagePath);
+      typeReferencePackageName = typeReferencePackageJson.name;
 
       typingsScopeNames.every(typingScopeName => {
         if (typeReferencePackageName.indexOf(typingScopeName) > -1) {
@@ -630,7 +630,7 @@ export abstract class AstItem {
     const currentPackageName: string = this.context.package.name;
 
     const typeName: string = typeReferenceNode.typeName.getText();
-    if (!typeReferencePackagePath || typeReferencePackageName === currentPackageName) {
+    if (!typeReferencePackageJson || typeReferencePackageName === currentPackageName) {
       // The type is defined in this project.  Did the person remember to export it?
       const exportedLocalName: string | undefined = this.context.package.tryGetExportedSymbolName(currentSymbol);
       if (exportedLocalName) {

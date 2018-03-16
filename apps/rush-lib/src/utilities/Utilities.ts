@@ -7,9 +7,7 @@ import * as os from 'os';
 import * as rimraf from 'rimraf';
 import * as tty from 'tty';
 import * as path from 'path';
-import { JsonFile } from '@microsoft/node-core-library';
-
-import IPackageJson from './IPackageJson';
+import { JsonFile, IPackageJson } from '@microsoft/node-core-library';
 
 /**
  * @public

@@ -3,12 +3,12 @@
 
 import { assert } from 'chai';
 import * as path from 'path';
+import { IPackageJson } from '@microsoft/node-core-library';
 
 import { BumpType } from '../../../data/VersionPolicy';
 import { ChangeFile } from '../../../data/ChangeFile';
 import { ChangeType, IChangeInfo } from '../../../data/ChangeManagement';
 import RushConfiguration from '../../../data/RushConfiguration';
-import IPackageJson from '../../../utilities/IPackageJson';
 import { VersionManager } from '../VersionManager';
 
 function _getChanges(changeFiles: Map<string, ChangeFile>,

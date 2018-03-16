@@ -1,8 +1,10 @@
 import * as path from 'path';
 import readPackageTree = require('read-package-tree');
-import { JsonFile } from '@microsoft/node-core-library';
+import {
+  JsonFile,
+  IPackageJson
+} from '@microsoft/node-core-library';
 
-import { IPackageJson } from '../../../index';
 import {
   BasePackage,
   IRushTempPackageJson

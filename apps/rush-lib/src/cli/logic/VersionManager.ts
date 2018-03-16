@@ -5,6 +5,7 @@ import * as path from 'path';
 import * as semver from 'semver';
 import * as fsx from 'fs-extra';
 import { cloneDeep } from 'lodash';
+import { IPackageJson } from '@microsoft/node-core-library';
 
 import {
   VersionPolicy,
@@ -16,7 +17,6 @@ import { ChangeType, IChangeInfo } from '../../data/ChangeManagement';
 import RushConfiguration from '../../data/RushConfiguration';
 import RushConfigurationProject from '../../data/RushConfigurationProject';
 import { VersionPolicyConfiguration } from '../../data/VersionPolicyConfiguration';
-import IPackageJson from '../../utilities/IPackageJson';
 import PublishUtilities from './PublishUtilities';
 import ChangeManager from './ChangeManager';
 

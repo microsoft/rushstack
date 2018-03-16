@@ -3,9 +3,11 @@
 
 import * as path from 'path';
 import * as fsx from 'fs-extra';
-import { JsonFile } from '@microsoft/node-core-library';
+import {
+  JsonFile,
+  IPackageJson
+} from '@microsoft/node-core-library';
 
-import IPackageJson from '../utilities/IPackageJson';
 import Utilities from '../utilities/Utilities';
 import RushConfiguration from '../data/RushConfiguration';
 import { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy';

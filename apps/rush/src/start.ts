@@ -2,10 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { JsonFile } from '@microsoft/node-core-library';
+import { JsonFile, IPackageJson } from '@microsoft/node-core-library';
 
 import {
-  IPackageJson,
   RushConfiguration,
   Rush
 } from '@microsoft/rush-lib';

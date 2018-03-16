@@ -127,27 +127,6 @@ class IndividualVersionPolicy extends VersionPolicy {
   validate(versionString: string, packageName: string): void;
 }
 
-// @public
-interface IPackageJson {
-  [key: string]: any;
-  dependencies?: {
-    [key: string]: string;
-  }
-  description?: string;
-  devDependencies?: {
-    [key: string]: string;
-  }
-  name: string;
-  optionalDependencies?: {
-    [key: string]: string;
-  }
-  private?: boolean;
-  scripts?: {
-    [key: string]: string;
-  }
-  version: string;
-}
-
 // @beta
 class LockStepVersionPolicy extends VersionPolicy {
   // WARNING: The type "ILockStepVersionJson" needs to be exported by the package (e.g. added to index.ts)

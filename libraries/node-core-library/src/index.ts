@@ -19,7 +19,19 @@ export {
   IJsonSchemaValidateOptions,
   IJsonSchemaFromFileOptions
 } from './JsonSchema';
-export { PackageJsonLookup } from './PackageJsonLookup';
+export {
+  IPackageJsonLookupParameters,
+  PackageJsonLookup
+} from './PackageJsonLookup';
+export {
+  IPackageJson,
+  IPackageJsonDependencyTable,
+  IPackageJsonScriptTable
+} from './IPackageJson';
+export {
+  FileConstants,
+  FolderConstants
+} from './Constants';
 export {
   LockFile
 } from './LockFile';

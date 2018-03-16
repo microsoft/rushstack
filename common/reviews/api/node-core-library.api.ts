@@ -1,8 +1,19 @@
 // @public
+enum FileConstants {
+  PackageJson = "package.json"
+}
+
+// @public
 class FileDiffTest {
   static assertEqual(actualFilePath: string, expectedFilePath: string): void;
   static clearCache(): void;
   static prepareFolder(unitTestDirName: string, testModule: string): string;
+}
+
+// @public
+enum FolderConstants {
+  Git = ".git",
+  NodeModules = "node_modules"
 }
 
 // @public
@@ -28,6 +39,39 @@ interface IJsonSchemaFromFileOptions {
 // @public
 interface IJsonSchemaValidateOptions {
   customErrorHeader?: string;
+}
+
+// @public
+interface IPackageJson {
+  bin?: string;
+  dependencies?: IPackageJsonDependencyTable;
+  description?: string;
+  devDependencies?: IPackageJsonDependencyTable;
+  homepage?: string;
+  license?: string;
+  main?: string;
+  name: string;
+  optionalDependencies?: IPackageJsonDependencyTable;
+  peerDependencies?: IPackageJsonDependencyTable;
+  private?: boolean;
+  scripts?: IPackageJsonScriptTable;
+  typings?: string;
+  version: string;
+}
+
+// @public
+interface IPackageJsonDependencyTable {
+  [dependencyName: string]: string;
+}
+
+// @public
+interface IPackageJsonLookupParameters {
+  loadExtraFields?: boolean;
+}
+
+// @public
+interface IPackageJsonScriptTable {
+  [scriptName: string]: string;
 }
 
 // @public
@@ -63,10 +107,12 @@ class LockFile {
 
 // @public
 class PackageJsonLookup {
-  constructor();
+  constructor(parameters?: IPackageJsonLookupParameters);
   clearCache(): void;
-  getPackageName(packageJsonPath: string): string;
-  tryGetPackageFolder(sourceFilePath: string): string | undefined;
+  loadPackageJson(jsonFilename: string): IPackageJson;
+  tryGetPackageFolderFor(fileOrFolderPath: string): string | undefined;
+  tryGetPackageJsonFilePathFor(fileOrFolderPath: string): string | undefined;
+  tryLoadPackageJsonFor(fileOrFolderPath: string): IPackageJson | undefined;
 }
 
 // @public

@@ -10,7 +10,12 @@ import * as semver from 'semver';
 import * as tar from 'tar';
 import * as wordwrap from 'wordwrap';
 import globEscape = require('glob-escape');
-import { JsonFile, LockFile, Text } from '@microsoft/node-core-library';
+import {
+  JsonFile,
+  LockFile,
+  Text,
+  IPackageJson
+} from '@microsoft/node-core-library';
 
 import AsyncRecycler from '../../utilities/AsyncRecycler';
 import RushConfiguration, {
@@ -20,7 +25,6 @@ import RushConfigurationProject from '../../data/RushConfigurationProject';
 import { RushConstants } from '../../RushConstants';
 import Utilities from '../../utilities/Utilities';
 import { Stopwatch } from '../../utilities/Stopwatch';
-import IPackageJson from '../../utilities/IPackageJson';
 import { IRushTempPackageJson } from '../logic/base/BasePackage';
 import { BaseShrinkwrapFile } from '../logic/base/BaseShrinkwrapFile';
 import { LastInstallFlag } from '../../utilities/LastInstallFlag';

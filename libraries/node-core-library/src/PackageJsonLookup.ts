@@ -6,12 +6,22 @@
 import * as fsx from 'fs-extra';
 import * as path from 'path';
 import { JsonFile } from './JsonFile';
+import { IPackageJson } from './IPackageJson';
+import { FileConstants } from './Constants';
 
 /**
- * Represents a package.json file.
+ * Constructor parameters for {@link PackageJsonLookup}
+ *
+ * @public
  */
-interface IPackageJson {
-  name: string;
+export interface IPackageJsonLookupParameters {
+  /**
+   * Certain package.json fields such as "contributors" can be very large, and may
+   * significantly increase the memory footprint for the PackageJsonLookup cache.
+   * By default, PackageJsonLookup only loads a subset of standard commonly used
+   * fields names.  Set loadExtraFields=true to always return all fields.
+   */
+  loadExtraFields?: boolean;
 }
 
 /**
@@ -21,15 +31,22 @@ interface IPackageJson {
  * @public
  */
 export class PackageJsonLookup {
+  private _loadExtraFields: boolean = false;
+
   // Cached the return values for tryGetPackageFolder():
   // sourceFilePath --> packageJsonFolder
   private _packageFolderCache: Map<string, string | undefined>;
 
   // Cached the return values for getPackageName():
   // packageJsonPath --> packageName
-  private _packageNameCache: Map<string, string>;
+  private _packageJsonCache: Map<string, IPackageJson>;
 
-  constructor() {
+  constructor(parameters?: IPackageJsonLookupParameters) {
+    if (parameters) {
+      if (parameters.loadExtraFields) {
+        this._loadExtraFields = parameters.loadExtraFields;
+      }
+    }
     this.clearCache();
   }
 
@@ -40,56 +57,152 @@ export class PackageJsonLookup {
    */
   public clearCache(): void {
     this._packageFolderCache = new Map<string, string | undefined>();
-    this._packageNameCache = new Map<string, string>();
+    this._packageJsonCache = new Map<string, IPackageJson>();
   }
 
   /**
-   * Finds the path to the package folder of a given currentPath, by probing
-   * upwards from the currentPath until a package.json file is found.
-   * If no package.json can be found, undefined is returned.
+   * Returns the absolute path of a folder containing a package.json file, by looking
+   * upwards from the specified fileOrFolderPath.  If no package.json can be found,
+   * undefined is returned.
    *
-   * @param currentPath - a path (relative or absolute) of the current location
-   * @returns a relative path to the package folder
+   * @remarks
+   * The fileOrFolderPath is not required to actually exist on disk.
+   * The fileOrFolderPath itself can be the return value, if it is a folder containing
+   * a package.json file.
+   * Both positive and negative lookup results are cached.
+   *
+   * @param fileOrFolderPath - a relative or absolute path to a source file or folder
+   * that may be part of a package
+   * @returns an absolute path to a folder containing a package.json file
    */
-  public tryGetPackageFolder(sourceFilePath: string): string | undefined {
+  public tryGetPackageFolderFor(fileOrFolderPath: string): string | undefined {
+    const resolvedFileOrFolderPath: string = path.resolve(fileOrFolderPath);
+
     // Two lookups are required, because get() cannot distinguish the undefined value
     // versus a missing key.
-    if (this._packageFolderCache.has(sourceFilePath)) {
-      return this._packageFolderCache.get(sourceFilePath);
+    if (this._packageFolderCache.has(resolvedFileOrFolderPath)) {
+      return this._packageFolderCache.get(resolvedFileOrFolderPath);
     }
 
-    let result: string | undefined;
-
-    const parentFolder: string = path.dirname(sourceFilePath);
-    if (!parentFolder || parentFolder === sourceFilePath) {
-      result = undefined;
-    } else if (fsx.existsSync(path.join(parentFolder, 'package.json'))) {
-      result = path.normalize(parentFolder);
-    } else {
-      result = this.tryGetPackageFolder(parentFolder);
+    // Is resolvedFileOrFolderPath itself a parent folder?  If so, return it.
+    if (fsx.existsSync(path.join(resolvedFileOrFolderPath, FileConstants.PackageJson))) {
+      this._packageFolderCache.set(resolvedFileOrFolderPath, resolvedFileOrFolderPath);
+      return resolvedFileOrFolderPath;
     }
 
-    this._packageFolderCache.set(sourceFilePath, result);
-    return result;
+    const parentFolder: string | undefined = path.dirname(resolvedFileOrFolderPath);
+    if (!parentFolder || parentFolder === resolvedFileOrFolderPath) {
+      this._packageFolderCache.set(resolvedFileOrFolderPath, undefined);
+      return undefined;  // no match
+    }
+
+    // Recurse upwards, caching every step along the way
+    return this.tryGetPackageFolderFor(parentFolder);
   }
 
   /**
-   * Loads the package.json file and returns the name of the package.
+   * If the specified file or folder is part of a package, this returns the absolute path
+   * to the associated package.json file.
    *
-   * @param packageJsonPath - an absolute path to the folder containing the
-   * package.json file, it does not include the 'package.json' suffix.
-   * @returns the name of the package (E.g. @microsoft/api-extractor)
+   * @remarks
+   * The package folder is determined using the same algorithm
+   * as {@link PackageJsonLookup.tryGetPackageFolderFor}.
+   *
+   * @param fileOrFolderPath - a relative or absolute path to a source file or folder
+   * that may be part of a package
+   * @returns an absolute path to * package.json file
    */
-  public getPackageName(packageJsonPath: string): string {
-    let result: string | undefined = this._packageNameCache.get(packageJsonPath);
-    if (result !== undefined) {
-      return result;
+  public tryGetPackageJsonFilePathFor(fileOrFolderPath: string): string | undefined {
+    const packageJsonFolder: string | undefined = this.tryGetPackageFolderFor(fileOrFolderPath);
+    if (!packageJsonFolder) {
+      return undefined;
+    }
+    return path.join(packageJsonFolder, FileConstants.PackageJson);
+  }
+
+  /**
+   * If the specified file or folder is part of a package, this loads and returns the
+   * associated package.json file.
+   *
+   * @remarks
+   * The package folder is determined using the same algorithm
+   * as {@link PackageJsonLookup.tryGetPackageFolderFor}.
+   *
+   * @param fileOrFolderPath - a relative or absolute path to a source file or folder
+   * that may be part of a package
+   * @returns an IPackageJson object, or undefined if the fileOrFolderPath does not
+   * belong to a package
+   */
+  public tryLoadPackageJsonFor(fileOrFolderPath: string): IPackageJson | undefined {
+    const packageJsonFilePath: string | undefined = this.tryGetPackageJsonFilePathFor(fileOrFolderPath);
+    if (!packageJsonFilePath) {
+      return undefined;
+    }
+    return this.loadPackageJson(packageJsonFilePath);
+  }
+
+  /**
+   * Loads the specified package.json file, if it is not already present in the cache.
+   *
+   * @remarks
+   * Unless {@link IPackageJsonLookupParameters.loadExtraFields} was specified,
+   * the returned IPackageJson object will contain a subset of essential fields.
+   * The returned object should be considered to be immutable; the caller must never
+   * modify it.
+   *
+   * @param jsonFilename - a relative or absolute path to a package.json file
+   */
+  public loadPackageJson(jsonFilename: string): IPackageJson {
+    if (!fsx.existsSync(jsonFilename)) {
+      throw new Error(`Input file not found: ${jsonFilename}`);
     }
 
-    const packageJson: IPackageJson = JsonFile.load(path.join(packageJsonPath, 'package.json')) as IPackageJson;
-    result = packageJson.name;
+    // Since this will be a cache key, follow any symlinks and get an absolute path
+    // to minimize duplication.  (Note that duplication can still occur due to e.g. character case.)
+    const normalizedFilePath: string = fsx.realpathSync(jsonFilename);
 
-    this._packageNameCache.set(packageJsonPath, result);
-    return result;
+    let packageJson: IPackageJson | undefined = this._packageJsonCache.get(normalizedFilePath);
+
+    if (!packageJson) {
+      const loadedPackageJson: IPackageJson = JsonFile.load(normalizedFilePath) as IPackageJson;
+
+      // Make sure this is really a package.json file.  CommonJS has fairly strict requirements,
+      // but NPM only requires "name" and "version"
+      if (!loadedPackageJson.name) {
+        throw new Error(`Error reading "${jsonFilename}":\n  `
+          + 'The required field "name" was not found');
+      }
+      if (!loadedPackageJson.version) {
+        throw new Error(`Error reading "${jsonFilename}":\n  `
+          + 'The required field "version" was not found');
+      }
+
+      if (this._loadExtraFields) {
+        packageJson = loadedPackageJson;
+      } else {
+        packageJson = { } as IPackageJson;
+
+        // Unless "loadExtraFields" was requested, copy over the essential fields only
+        packageJson.bin = loadedPackageJson.bin;
+        packageJson.dependencies = loadedPackageJson.dependencies;
+        packageJson.description = loadedPackageJson.description;
+        packageJson.devDependencies = loadedPackageJson.devDependencies;
+        packageJson.homepage = loadedPackageJson.homepage;
+        packageJson.license = loadedPackageJson.license;
+        packageJson.main = loadedPackageJson.main;
+        packageJson.name = loadedPackageJson.name;
+        packageJson.optionalDependencies = loadedPackageJson.optionalDependencies;
+        packageJson.peerDependencies = loadedPackageJson.peerDependencies;
+        packageJson.private = loadedPackageJson.private;
+        packageJson.scripts = loadedPackageJson.scripts;
+        packageJson.typings = loadedPackageJson.typings;
+        packageJson.version = loadedPackageJson.version;
+      }
+
+      Object.freeze(packageJson);
+      this._packageJsonCache.set(normalizedFilePath, packageJson);
+    }
+
+    return packageJson;
   }
 }

@@ -5,9 +5,9 @@
 
 import * as path from 'path';
 import { assert } from 'chai';
-import { VersionPolicyConfiguration } from '../VersionPolicyConfiguration';
-import IPackageJson from '../../utilities/IPackageJson';
+import { IPackageJson } from '@microsoft/node-core-library';
 
+import { VersionPolicyConfiguration } from '../VersionPolicyConfiguration';
 import {
   VersionPolicy,
   LockStepVersionPolicy,

@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile } from '@microsoft/node-core-library';
-
-import IPackageJson from '../../../utilities/IPackageJson';
+import {
+  JsonFile,
+  IPackageJson
+} from '@microsoft/node-core-library';
 
 /**
  * The type of dependency; used by IPackageDependency.

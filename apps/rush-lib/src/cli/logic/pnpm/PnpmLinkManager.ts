@@ -6,13 +6,16 @@ import * as os from 'os';
 import * as path from 'path';
 import uriEncode = require('strict-uri-encode');
 
-import { JsonFile, Text } from '@microsoft/node-core-library';
+import {
+  JsonFile,
+  Text,
+  IPackageJson
+} from '@microsoft/node-core-library';
 
 import {
   BaseLinkManager,
   SymlinkKind
 } from '../base/BaseLinkManager';
-import IPackageJson from '../../../utilities/IPackageJson';
 import Utilities from '../../../utilities/Utilities';
 import { BasePackage } from '../base/BasePackage';
 import { RushConstants } from '../../../RushConstants';
