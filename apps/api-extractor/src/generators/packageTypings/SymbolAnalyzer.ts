@@ -60,12 +60,17 @@ export class SymbolAnalyzer {
       case ts.SyntaxKind.PropertyDeclaration:
       case ts.SyntaxKind.PropertySignature:
 
-      // SourceFile is used for "import * as file from 'file';"
-      case ts.SyntaxKind.SourceFile:
       case ts.SyntaxKind.TypeAliasDeclaration:
       case ts.SyntaxKind.VariableDeclaration:
         return true;
+
+      // NOTE: In contexts where a source file is treated as a module, we do create
+      // AstSymbol objects corresponding to a ts.SyntaxKind.SourceFile node.  However, a source file
+      // is NOT considered a nesting structure, and it does NOT act as a root for the declarations
+      // appearing in the file.  This is because the *.d.ts generator is in the business of rolling up
+      // source files, and thus wants to ignore them in general.
     }
+
     return false;
   }
 

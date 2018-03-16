@@ -241,10 +241,25 @@ export class AstSymbolTable {
         throw new Error('Program Bug: Followed a symbol with no declarations');
       }
 
-      for (const declaration of followedSymbol.declarations || []) {
-        if (!SymbolAnalyzer.isAstDeclaration(declaration.kind)) {
-          throw new Error(`Program Bug: The "${followedSymbol.name}" symbol uses the construct`
-            + ` "${ts.SyntaxKind[declaration.kind]}" which may be an unimplemented language feature`);
+      // NOTE: In certain circumstances we need an AstSymbol for a source file that is acting
+      // as a TypeScript module.  For example, one of the unit tests has this line:
+      //
+      //   import * as semver1 from 'semver';
+      //
+      // To handle the expression "semver1.SemVer", we need "semver1" to map to an AstSymbol
+      // that causes us to emit the above import.  However we do NOT want it to act as the root
+      // of a declaration tree, because in general the *.d.ts generator is trying to roll up
+      // definitions and eliminate source files.  So, even though isAstDeclaration() would return
+      // false, we do create an AstDeclaration for a ts.SyntaxKind.SourceFile in this special edge case.
+      const isSourceFile: boolean = followedSymbol.declarations.length === 1
+        && followedSymbol.declarations[0].kind === ts.SyntaxKind.SourceFile;
+
+      if (!isSourceFile) {
+        for (const declaration of followedSymbol.declarations || []) {
+          if (!SymbolAnalyzer.isAstDeclaration(declaration.kind)) {
+            throw new Error(`Program Bug: The "${followedSymbol.name}" symbol uses the construct`
+              + ` "${ts.SyntaxKind[declaration.kind]}" which may be an unimplemented language feature`);
+          }
         }
       }
 
