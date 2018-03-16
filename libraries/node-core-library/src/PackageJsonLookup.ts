@@ -193,6 +193,7 @@ export class PackageJsonLookup {
         packageJson.name = loadedPackageJson.name;
         packageJson.optionalDependencies = loadedPackageJson.optionalDependencies;
         packageJson.peerDependencies = loadedPackageJson.peerDependencies;
+        packageJson.private = loadedPackageJson.private;
         packageJson.scripts = loadedPackageJson.scripts;
         packageJson.typings = loadedPackageJson.typings;
         packageJson.version = loadedPackageJson.version;

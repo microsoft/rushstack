@@ -49,6 +49,11 @@ export interface IPackageJson {
   version: string;
 
   /**
+   * Indicates whether this package is allowed to be published or not.
+   */
+  private?: boolean;
+
+  /**
    * A brief description of the package.
    */
   description?: string;

@@ -53,6 +53,7 @@ interface IPackageJson {
   name: string;
   optionalDependencies?: IPackageJsonDependencyTable;
   peerDependencies?: IPackageJsonDependencyTable;
+  private?: boolean;
   scripts?: IPackageJsonScriptTable;
   typings?: string;
   version: string;
