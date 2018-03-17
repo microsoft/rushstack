@@ -53,6 +53,7 @@ export class PackageTypingsGenerator {
   private _dtsEntries: DtsEntry[] = [];
   private _dtsEntriesByAstSymbol: Map<AstSymbol, DtsEntry> = new Map<AstSymbol, DtsEntry>();
   private _dtsEntriesBySymbol: Map<ts.Symbol, DtsEntry> = new Map<ts.Symbol, DtsEntry>();
+  private _releaseTagByAstSymbol: Map<AstSymbol, ReleaseTag> = new Map<AstSymbol, ReleaseTag>();
 
   /**
    * A list of names (e.g. "example-library") that should appear in a reference like this:
@@ -131,13 +132,10 @@ export class PackageTypingsGenerator {
     let dtsEntry: DtsEntry | undefined = this._dtsEntriesByAstSymbol.get(astSymbol);
 
     if (!dtsEntry) {
-      const releaseTag: ReleaseTag = this._getReleaseTagForSymbol(astSymbol.followedSymbol);
-
       dtsEntry = new DtsEntry({
         astSymbol: astSymbol,
         originalName: exportedName || astSymbol.localName,
-        exported: !!exportedName,
-        releaseTag: releaseTag
+        exported: !!exportedName
       });
 
       this._dtsEntriesByAstSymbol.set(astSymbol, dtsEntry);
@@ -247,7 +245,9 @@ export class PackageTypingsGenerator {
     for (const dtsEntry of this._dtsEntries) {
       if (!dtsEntry.astSymbol.astImport) {
 
-        if (this._shouldIncludeReleaseTag(dtsEntry.releaseTag, dtsKind)) {
+        const releaseTag: ReleaseTag = this._getReleaseTagForAstSymbol(dtsEntry.astSymbol);
+
+        if (this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
 
           // Emit all the declarations for this entry
           for (const astDeclaration of dtsEntry.astSymbol.astDeclarations || []) {
@@ -383,46 +383,75 @@ export class PackageTypingsGenerator {
     throw new Error(`PackageTypingsDtsKind[dtsKind] is not implemented`);
   }
 
+  private _getReleaseTagForAstSymbol(astSymbol: AstSymbol): ReleaseTag {
+    let releaseTag: ReleaseTag | undefined = this._releaseTagByAstSymbol.get(astSymbol);
+    if (releaseTag) {
+      return releaseTag;
+    }
+
+    releaseTag = ReleaseTag.None;
+
+    let current: AstSymbol | undefined = astSymbol;
+    while (current) {
+      for (const astDeclaration of current.astDeclarations) {
+        const declarationReleaseTag: ReleaseTag = this._getReleaseTagForDeclaration(astDeclaration.declaration);
+        if (releaseTag !== ReleaseTag.None && declarationReleaseTag !== releaseTag) {
+          // this._analyzeWarnings.push('WARNING: Conflicting release tags found for ' + symbol.name);
+        }
+      }
+
+      if (releaseTag !== ReleaseTag.None) {
+        break;
+      }
+
+      current = current.parentAstSymbol;
+    }
+
+    if (releaseTag === ReleaseTag.None) {
+      releaseTag = ReleaseTag.Public; // public by default
+    }
+
+    this._releaseTagByAstSymbol.set(astSymbol, releaseTag);
+
+    return releaseTag;
+  }
+
   // NOTE: THIS IS A TEMPORARY WORKAROUND.
   // In the near future we will overhaul the AEDoc parser to separate syntactic/semantic analysis,
   // at which point this will be wired up to the same ApiDocumentation layer used for the API Review files
-  private _getReleaseTagForSymbol(symbol: ts.Symbol): ReleaseTag {
-    const fullyFollowedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(symbol, this._typeChecker);
-
+  private _getReleaseTagForDeclaration(declaration: ts.Node): ReleaseTag {
     let releaseTag: ReleaseTag = ReleaseTag.None;
 
     // We don't want to match "bill@example.com".  But we do want to match "/**@public*/".
     // So for now we require whitespace or a star before/after the string.
     const releaseTagRegExp: RegExp = /(?:\s|\*)@(internal|alpha|beta|public)(?:\s|\*)/g;
 
-    for (const declaration of fullyFollowedSymbol.declarations || []) {
-      const sourceFileText: string = declaration.getSourceFile().text;
+    const sourceFileText: string = declaration.getSourceFile().text;
 
-      for (const commentRange of TypeScriptHelpers.getJSDocCommentRanges(declaration, sourceFileText) || []) {
-        // NOTE: This string includes "/**"
-        const comment: string = sourceFileText.substring(commentRange.pos, commentRange.end);
+    for (const commentRange of TypeScriptHelpers.getJSDocCommentRanges(declaration, sourceFileText) || []) {
+      // NOTE: This string includes "/**"
+      const comment: string = sourceFileText.substring(commentRange.pos, commentRange.end);
 
-        let match: RegExpMatchArray | null;
-        while (match = releaseTagRegExp.exec(comment)) {
-          let foundReleaseTag: ReleaseTag = ReleaseTag.None;
-          switch (match[1]) {
-            case 'internal':
-              foundReleaseTag = ReleaseTag.Internal; break;
-            case 'alpha':
-              foundReleaseTag = ReleaseTag.Alpha; break;
-            case 'beta':
-              foundReleaseTag = ReleaseTag.Beta; break;
-            case 'public':
-              foundReleaseTag = ReleaseTag.Public; break;
-          }
-
-          if (releaseTag !== ReleaseTag.None && foundReleaseTag !== releaseTag) {
-            // this._analyzeWarnings.push('WARNING: Conflicting release tags found for ' + symbol.name);
-            return releaseTag;
-          }
-
-          releaseTag = foundReleaseTag;
+      let match: RegExpMatchArray | null;
+      while (match = releaseTagRegExp.exec(comment)) {
+        let foundReleaseTag: ReleaseTag = ReleaseTag.None;
+        switch (match[1]) {
+          case 'internal':
+            foundReleaseTag = ReleaseTag.Internal; break;
+          case 'alpha':
+            foundReleaseTag = ReleaseTag.Alpha; break;
+          case 'beta':
+            foundReleaseTag = ReleaseTag.Beta; break;
+          case 'public':
+            foundReleaseTag = ReleaseTag.Public; break;
         }
+
+        if (releaseTag !== ReleaseTag.None && foundReleaseTag !== releaseTag) {
+          // this._analyzeWarnings.push('WARNING: Conflicting release tags found for ' + symbol.name);
+          return releaseTag;
+        }
+
+        releaseTag = foundReleaseTag;
       }
     }
 

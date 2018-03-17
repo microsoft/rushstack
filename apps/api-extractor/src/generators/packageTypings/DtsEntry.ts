@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import { AstSymbol } from './AstSymbol';
-import { ReleaseTag } from '../../aedoc/ReleaseTag';
 
 /**
  * Constructor parameters for DtsEntry
@@ -11,7 +10,6 @@ export interface IDtsEntryParameters {
   readonly astSymbol: AstSymbol;
   readonly originalName: string;
   readonly exported: boolean;
-  readonly releaseTag: ReleaseTag;
 }
 
 /**
@@ -39,11 +37,6 @@ export class DtsEntry {
    */
   public readonly exported: boolean;
 
-  /**
-   * The ReleaseTag used for trimming
-   */
-  public readonly releaseTag: ReleaseTag;
-
   private _nameForEmit: string | undefined = undefined;
 
   private _sortKey: string | undefined = undefined;
@@ -52,7 +45,6 @@ export class DtsEntry {
     this.astSymbol = parameters.astSymbol;
     this.originalName = parameters.originalName;
     this.exported = parameters.exported;
-    this.releaseTag = parameters.releaseTag;
   }
 
   /**
