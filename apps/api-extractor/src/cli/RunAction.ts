@@ -63,7 +63,7 @@ export class RunAction extends CommandLineAction {
       // Otherwise, figure out which project we're in and look for the config file
       // at the project root
       const lookup: PackageJsonLookup = new PackageJsonLookup();
-      const packageFolder: string|undefined = lookup.tryGetPackageFolderFor('.');
+      const packageFolder: string | undefined = lookup.tryGetPackageFolderFor('.');
 
       if (packageFolder) {
         configFilename = path.join(packageFolder, AE_CONFIG_FILENAME);

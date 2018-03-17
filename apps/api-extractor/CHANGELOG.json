@@ -62,7 +62,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "Add preliminary support for preview and public outputs for packageTypings gtenerator"
+            "comment": "Add preliminary support for preview and public outputs for packageTypings generator"
           }
         ]
       }

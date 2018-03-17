@@ -55,6 +55,8 @@ interface IPackageJson {
   peerDependencies?: IPackageJsonDependencyTable;
   private?: boolean;
   scripts?: IPackageJsonScriptTable;
+  // @beta
+  tsdoc?: IPackageJsonTsdocConfiguration;
   typings?: string;
   version: string;
 }

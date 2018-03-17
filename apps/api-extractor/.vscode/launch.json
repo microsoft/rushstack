@@ -4,7 +4,6 @@
   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
-
     {
       "type": "node",
       "request": "launch",
@@ -32,9 +31,33 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "test-03",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "${workspaceFolder}/../../build-tests/api-extractor-test-03",
+      "args": [
+        "-d",
+        "run",
+        "-l"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "test-04",
       "program": "${workspaceFolder}/lib/start.js",
       "cwd": "${workspaceFolder}/../../build-tests/api-extractor-test-04",
+      "args": [
+        "-d",
+        "run",
+        "-l"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "scratch",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "(your project path)",
       "args": [
         "-d",
         "run",

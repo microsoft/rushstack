@@ -40,6 +40,18 @@ class ClassExportedAsDefault {
 }
 
 // @public
+class ClassWithTypeLiterals {
+  method1(vector: {
+          x: number;
+          y: number;
+      }): void;
+  method2(): {
+          classValue: ClassWithTypeLiterals;
+          callback: () => number;
+      } | undefined;
+}
+
+// @public
 class DecoratorTest {
   test(): void;
 }

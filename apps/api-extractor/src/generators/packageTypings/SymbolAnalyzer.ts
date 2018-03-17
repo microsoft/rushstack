@@ -33,7 +33,66 @@ export interface IFollowAliasesResult {
   readonly astImport: AstImport | undefined;
 }
 
+/**
+ * This is a helper class for PackageTypingsAnalyzer and SymbolTable.
+ * Its main role is to provide an expanded version of TypeScriptHelpers.followAliases()
+ * that supports tracking of imports from eternal packages.
+ */
 export class SymbolAnalyzer {
+
+  /**
+   * This function determines which ts.Node kinds will generate an AstDeclaration.
+   * These correspond to the definitions that we can add AEDoc to.
+   */
+  public static isAstDeclaration(kind: ts.SyntaxKind): boolean {
+    // (alphabetical order)
+    switch (kind) {
+      case ts.SyntaxKind.ClassDeclaration:
+      case ts.SyntaxKind.EnumDeclaration:
+      case ts.SyntaxKind.EnumMember:
+      case ts.SyntaxKind.FunctionDeclaration:
+      case ts.SyntaxKind.InterfaceDeclaration:
+      case ts.SyntaxKind.MethodDeclaration:
+      case ts.SyntaxKind.MethodSignature:
+
+      // ModuleDeclaration is used for both "module" and "namespace" declarations
+      case ts.SyntaxKind.ModuleDeclaration:
+      case ts.SyntaxKind.PropertyDeclaration:
+      case ts.SyntaxKind.PropertySignature:
+
+      case ts.SyntaxKind.TypeAliasDeclaration:
+      case ts.SyntaxKind.VariableDeclaration:
+        return true;
+
+      // NOTE: In contexts where a source file is treated as a module, we do create
+      // AstSymbol objects corresponding to a ts.SyntaxKind.SourceFile node.  However, a source file
+      // is NOT considered a nesting structure, and it does NOT act as a root for the declarations
+      // appearing in the file.  This is because the *.d.ts generator is in the business of rolling up
+      // source files, and thus wants to ignore them in general.
+    }
+
+    return false;
+  }
+
+  /**
+   * This function detects the subset of isAstDeclaration() items that can use
+   * the "export" keyword.  This is part of the heuristic for recognizing ambient types.
+   */
+  public static isExportableAstDeclaration(kind: ts.SyntaxKind): boolean {
+    // (alphabetical order)
+    switch (kind) {
+      case ts.SyntaxKind.ClassDeclaration:
+      case ts.SyntaxKind.EnumDeclaration:
+      case ts.SyntaxKind.FunctionDeclaration:
+      case ts.SyntaxKind.InterfaceDeclaration:
+      case ts.SyntaxKind.ModuleDeclaration:
+      case ts.SyntaxKind.TypeAliasDeclaration:
+      case ts.SyntaxKind.VariableDeclaration:
+      return true;
+    }
+    return false;
+  }
+
   /**
    * For the given symbol, follow imports and type alias to find the symbol that represents
    * the original definition.
@@ -41,26 +100,11 @@ export class SymbolAnalyzer {
   public static followAliases(symbol: ts.Symbol, typeChecker: ts.TypeChecker): IFollowAliasesResult {
     let current: ts.Symbol = symbol;
 
-    // Is it ambient?  We will examine all of the declarations we encounter
-    // to see if any of them contains the "export" keyword; if not, then it's ambient.
-    let isAmbient: boolean = true;
-
     // We will try to obtain the name from a declaration; otherwise we'll fall back to the symbol name
     let declarationName: string | undefined = undefined;
 
     while (true) { // tslint:disable-line:no-constant-condition
       for (const declaration of current.declarations || []) {
-        // 1. Check for any signs that this is not an ambient definition
-        if (declaration.kind === ts.SyntaxKind.ExportSpecifier
-          || declaration.kind === ts.SyntaxKind.ExportAssignment) {
-          isAmbient = false;
-        }
-
-        const modifiers: ts.ModifierFlags = ts.getCombinedModifierFlags(declaration);
-        if (modifiers & (ts.ModifierFlags.Export | ts.ModifierFlags.ExportDefault)) {
-          isAmbient = false;
-        }
-
         const declarationNameIdentifier: ts.DeclarationName | undefined = ts.getNameOfDeclaration(declaration);
         if (declarationNameIdentifier && ts.isIdentifier(declarationNameIdentifier)) {
           declarationName = declarationNameIdentifier.getText().trim();
@@ -93,23 +137,15 @@ export class SymbolAnalyzer {
       current = currentAlias;
     }
 
-    // Is the followedSymbol actually the kind of thing that can be ambient?
-    if (isAmbient) {
-      for (const declaration of current.declarations || []) {
-        switch (declaration.kind) {
-          case ts.SyntaxKind.ClassDeclaration:
-          case ts.SyntaxKind.InterfaceDeclaration:
-          case ts.SyntaxKind.FunctionDeclaration:
-          case ts.SyntaxKind.ModuleDeclaration:
-          case ts.SyntaxKind.VariableDeclaration:
-            // These actually need "export" keywords
-            break;
-          default:
-            // Everything else we assume is some kind of nested declaration that
-            // doesn't need it.
-            isAmbient = false;
-            break;
-        }
+    // Is this an ambient declaration?  The way to determine this is by looking at the
+    // ts.SyntaxKind.SourceFile node to see whether it has a symbol or not (i.e. whether it
+    // is acting as a module or not).
+    let isAmbient: boolean = true;
+    if (current.declarations) {
+      const sourceFileNode: ts.Node | undefined = TypeScriptHelpers.findFirstParent(
+        current.declarations[0], ts.SyntaxKind.SourceFile);
+      if (sourceFileNode && !!typeChecker.getSymbolAtLocation(sourceFileNode)) {
+        isAmbient = false;
       }
     }
 

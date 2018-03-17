@@ -101,3 +101,5 @@ export {
 } from './DefaultExportEdgeCase';
 
 export { TypeReferencesInAedoc as _TypeReferencesInAedoc } from './TypeReferencesInAedoc';
+
+export { ClassWithTypeLiterals } from './ClassWithTypeLiterals';
