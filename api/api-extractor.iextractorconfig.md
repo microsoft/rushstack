@@ -14,4 +14,5 @@ Configuration options for the API Extractor tool. These options can be loaded fr
 |  [`packageTypings`](./api-extractor.iextractorconfig.packagetypings.md) | `IExtractorPackageTypingsConfig` | Configures how the package typings (\*.d.ts) will be generated. |
 |  [`policies`](./api-extractor.iextractorconfig.policies.md) | `IExtractorPoliciesConfig` | These policies determine how API Extractor validates various best practices for API design. |
 |  [`project`](./api-extractor.iextractorconfig.project.md) | `IExtractorProjectConfig` | Describes a specific project that will be analyzed. In principle, multiple individual projects can be processed while reusing a common compiler state. |
+|  [`validationRules`](./api-extractor.iextractorconfig.validationrules.md) | `IExtractorValidationRulesConfig` | Configuration for various validation checks that ensure good API design |
 

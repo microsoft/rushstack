@@ -27,6 +27,7 @@ API Extractor helps you build better TypeScript library packages. It helps with 
 |  [`IExtractorProjectConfig`](./api-extractor.iextractorprojectconfig.md) | Describes a specific project that will be analyzed. In principle, multiple individual projects can be processed while reusing a common compiler state. |
 |  [`IExtractorRuntimeCompilerConfig`](./api-extractor.iextractorruntimecompilerconfig.md) | With this configuration, API Extractor is configured using an already prepared compiler state that is provided programmatically at runtime. This can potentially enable faster builds, by reusing the same compiler invocation for tsc, tslint, and API Extractor.<p/><!-- -->If configType='runtime' is specified, then IExtractorRuntimeOptions.compilerProgram must be provided. |
 |  [`IExtractorTsconfigCompilerConfig`](./api-extractor.iextractortsconfigcompilerconfig.md) | With this configuration, API Extractor configures the compiler based on settings that it finds in the project's tsconfig.json file. |
+|  [`IExtractorValidationRulesConfig`](./api-extractor.iextractorvalidationrulesconfig.md) | Configuration for various validation checks that ensure good API design |
 |  [`ILogger`](./api-extractor.ilogger.md) | Provides a custom logging service to API Extractor. |
 |  [`IMarkupApiLink`](./api-extractor.imarkupapilink.md) | A hyperlink to an API item |
 |  [`IMarkupCodeBox`](./api-extractor.imarkupcodebox.md) | A box containing source code with syntax highlighting |
@@ -43,4 +44,10 @@ API Extractor helps you build better TypeScript library packages. It helps with 
 |  [`IMarkupTableRow`](./api-extractor.imarkuptablerow.md) | A row inside an IMarkupTable element. |
 |  [`IMarkupText`](./api-extractor.imarkuptext.md) | A block of plain text, possibly with simple formatting such as bold or italics. |
 |  [`IMarkupWebLink`](./api-extractor.imarkupweblink.md) | A hyperlink to an internet URL |
+
+## Enumerations
+
+|  Enumeration | Description |
+|  --- | --- |
+|  [`ExtractorValidationRulePolicy`](./api-extractor.extractorvalidationrulepolicy.md) | Configuration values used for the [IExtractorValidationRulesConfig](./api-extractor.iextractorvalidationrulesconfig.md) block. |
 

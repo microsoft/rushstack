@@ -31,5 +31,6 @@ Provides various operations for working with MarkupElement objects.
 |  [`createWebLink(textElements, targetUrl)`](./api-extractor.markup.createweblink.md) |  | `IMarkupWebLink` | Constructs an IMarkupWebLink element that represents a hyperlink an internet URL. |
 |  [`createWebLinkFromText(text, targetUrl)`](./api-extractor.markup.createweblinkfromtext.md) |  | `IMarkupWebLink` | Constructs an IMarkupWebLink element that represents a hyperlink an internet URL. |
 |  [`extractTextContent(elements)`](./api-extractor.markup.extracttextcontent.md) |  | `string` | Extracts plain text from the provided markup elements, discarding any formatting. |
+|  [`formatApiItemReference(apiItemReference)`](./api-extractor.markup.formatapiitemreference.md) |  | `string` | This formats an IApiItemReference as its AEDoc notation. |
 |  [`normalize(elements)`](./api-extractor.markup.normalize.md) |  | `void` | Use this to clean up a MarkupElement sequence, assuming the sequence is now in its final form. |
 

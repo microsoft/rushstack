@@ -16,6 +16,7 @@ The "argparse" library is a relatively advanced command-line parser with feature
 |  --- | --- | --- | --- |
 |  [`constructor(options)`](./ts-command-line.commandlineparser.constructor.md) |  |  | Constructs a new instance of the [CommandLineParser](./ts-command-line.commandlineparser.md) class |
 |  [`addAction(command)`](./ts-command-line.commandlineparser.addaction.md) |  | `void` | Defines a new action that can be used with the CommandLineParser instance. |
-|  [`execute(args)`](./ts-command-line.commandlineparser.execute.md) |  | `Promise<void>` | This is the main entry point to begin parsing command-line arguments and executing the corresponding action. |
+|  [`execute(args)`](./ts-command-line.commandlineparser.execute.md) |  | `Promise<boolean>` | The program entry point will call this method to begin parsing command-line arguments and executing the corresponding action. |
+|  [`executeWithoutErrorHandling(args)`](./ts-command-line.commandlineparser.executewithouterrorhandling.md) |  | `Promise<void>` | This is similar to [CommandLineParser.execute](./ts-command-line.commandlineparser.execute.md)<!-- -->, except that execution errors simply cause the promise to reject. It is the caller's responsibility to trap |
 |  [`onExecute()`](./ts-command-line.commandlineparser.onexecute.md) | `protected` | `Promise<void>` | This hook allows the subclass to perform additional operations before or after the chosen action is executed. |
 

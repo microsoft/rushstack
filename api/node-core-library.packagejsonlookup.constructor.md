@@ -6,5 +6,12 @@ Constructs a new instance of the [PackageJsonLookup](./node-core-library.package
 
 **Signature:**
 ```javascript
-constructor();
+constructor(parameters?: IPackageJsonLookupParameters);
 ```
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  `parameters` | `IPackageJsonLookupParameters` |  |
+

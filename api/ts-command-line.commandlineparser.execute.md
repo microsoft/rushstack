@@ -2,17 +2,23 @@
 
 # CommandLineParser.execute method
 
-This is the main entry point to begin parsing command-line arguments and executing the corresponding action.
+The program entry point will call this method to begin parsing command-line arguments and executing the corresponding action.
 
 **Signature:**
 ```javascript
-execute(args?: string[]): Promise<void>;
+execute(args?: string[]): Promise<boolean>;
 ```
-**Returns:** `Promise<void>`
+**Returns:** `Promise<boolean>`
+
+## Remarks
+
+The returned promise will never reject: If an error occurs, it will be printed to stderr, process.exitCode will be set to 1, and the promise will resolve to false. This simplifies the most common usage scenario where the program entry point doesn't want to be involved with the command-line logic, and will discard the promise without a then() or catch() block.
+
+If your caller wants to trap and handle errors, use [CommandLineParser.executeWithoutErrorHandling](./ts-command-line.commandlineparser.executewithouterrorhandling.md) instead.
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  `args` | `string[]` |  |
+|  `args` | `string[]` | the command-line arguments to be parsed; if omitted, then the process.argv will be used |
 

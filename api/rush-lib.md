@@ -27,7 +27,6 @@ A library for writing scripts that interact with the Rush tool.
 |  Interface | Description |
 |  --- | --- |
 |  [`IChangeInfo`](./rush-lib.ichangeinfo.md) | Defines an IChangeInfo object. |
-|  [`IPackageJson`](./rush-lib.ipackagejson.md) | Represents an NPM "package.json" file. |
 
 ## Enumerations
 
