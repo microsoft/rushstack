@@ -200,6 +200,7 @@ export class PackageJsonLookup {
         packageJson.private = loadedPackageJson.private;
         packageJson.scripts = loadedPackageJson.scripts;
         packageJson.typings = loadedPackageJson.typings;
+        packageJson.tsdoc = loadedPackageJson.tsdoc;
         packageJson.version = loadedPackageJson.version;
       }
 
