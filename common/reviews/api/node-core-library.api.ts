@@ -76,6 +76,11 @@ interface IPackageJsonScriptTable {
   [scriptName: string]: string;
 }
 
+// @beta
+interface IPackageJsonTsdocConfiguration {
+  tsdocFlavor?: string;
+}
+
 // @public
 class JsonFile {
   static load(jsonFilename: string): any;

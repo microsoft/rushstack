@@ -26,7 +26,8 @@ export {
 export {
   IPackageJson,
   IPackageJsonDependencyTable,
-  IPackageJsonScriptTable
+  IPackageJsonScriptTable,
+  IPackageJsonTsdocConfiguration
 } from './IPackageJson';
 export {
   FileConstants,
