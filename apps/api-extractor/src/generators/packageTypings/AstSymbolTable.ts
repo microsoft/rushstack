@@ -338,6 +338,7 @@ export class AstSymbolTable {
           // If D1 has a parent P1, then
           // - D2 will also have a parent P2; AND
           // - P1 and P2's symbol will be the same
+          // - but P1 and P2 may be different (e.g. merged namespaces containing merged interfaces)
 
           // Is there a parent AstSymbol?  First we check to see if there is a parent declaration:
           const arbitaryParentDeclaration: ts.Node | undefined
@@ -359,6 +360,7 @@ export class AstSymbolTable {
           localName: followAliasesResult.localName,
           followedSymbol: followAliasesResult.followedSymbol,
           astImport: astImport,
+          parentAstSymbol: parentAstSymbol,
           rootAstSymbol: parentAstSymbol ? parentAstSymbol.rootAstSymbol : undefined,
           nominal: nominal
         });

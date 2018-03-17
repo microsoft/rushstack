@@ -13,6 +13,7 @@ export interface IAstSymbolParameters {
   readonly localName: string;
   readonly astImport: AstImport | undefined;
   readonly nominal: boolean;
+  readonly parentAstSymbol: AstSymbol | undefined;
   readonly rootAstSymbol: AstSymbol | undefined;
 }
 
@@ -55,9 +56,25 @@ export class AstSymbol {
    */
   public readonly nominal: boolean;
 
-  private readonly _astDeclarations: AstDeclaration[];
+  /**
+   * Returns the symbol of the parent of this AstSymbol, or undefined if there is no parent.
+   * @remarks
+   * If a symbol has multiple declarations, we assume (as an axiom) that their parent
+   * decelarations will belong to the same symbol.  This means that the "parent" of a
+   * symbol is a well-defined concept.  However, the "children" of a symbol are not very
+   * meaningful, because different declarations may have different nested members,
+   * and this topology is generally important.
+   */
+  public readonly parentAstSymbol: AstSymbol | undefined;
 
-  private readonly _rootAstSymbol: AstSymbol;
+  /**
+   * Returns the symbol of the root of the AstDeclaration hierarchy.
+   * @remarks
+   * NOTE: If this AstSymbol is the root, then rootAstSymbol will point to itself.
+   */
+  public readonly rootAstSymbol: AstSymbol;
+
+  private readonly _astDeclarations: AstDeclaration[];
 
   private _analyzed: boolean = false;
 
@@ -66,7 +83,8 @@ export class AstSymbol {
     this.localName = parameters.localName;
     this.astImport = parameters.astImport;
     this.nominal = parameters.nominal;
-    this._rootAstSymbol = parameters.rootAstSymbol || this;
+    this.parentAstSymbol = parameters.parentAstSymbol;
+    this.rootAstSymbol = parameters.rootAstSymbol || this;
     this._astDeclarations = [];
   }
 
@@ -86,13 +104,6 @@ export class AstSymbol {
    */
   public get analyzed(): boolean {
     return this._analyzed;
-  }
-
-  /**
-   * Returns the symbol of the root of the AstDeclaration hierarchy.
-   */
-  public get rootAstSymbol(): AstSymbol {
-    return this._rootAstSymbol;
   }
 
   /**
