@@ -76,32 +76,20 @@ export class PackageJsonLookup {
    * @returns an absolute path to a folder containing a package.json file
    */
   public tryGetPackageFolderFor(fileOrFolderPath: string): string | undefined {
+    // Convert it to an absolute path
     const resolvedFileOrFolderPath: string = path.resolve(fileOrFolderPath);
 
-    // Two lookups are required, because get() cannot distinguish the undefined value
-    // versus a missing key.
+    // Optimistically hope that the starting string is already in the cache,
+    // in which case we can avoid disk access entirely.
+    //
+    // (Two lookups are required, because get() cannot distinguish the undefined value
+    // versus a missing key.)
     if (this._packageFolderCache.has(resolvedFileOrFolderPath)) {
       return this._packageFolderCache.get(resolvedFileOrFolderPath);
     }
 
-    // Is resolvedFileOrFolderPath itself a folder containing a package.json?  If so, return it.
-    if (fsx.existsSync(path.join(resolvedFileOrFolderPath, FileConstants.PackageJson))) {
-      this._packageFolderCache.set(resolvedFileOrFolderPath, resolvedFileOrFolderPath);
-      return resolvedFileOrFolderPath;
-    }
-
-    const parentFolder: string | undefined = path.dirname(resolvedFileOrFolderPath);
-    if (!parentFolder || parentFolder === resolvedFileOrFolderPath) {
-      // We reached the root directory without a match
-      this._packageFolderCache.set(resolvedFileOrFolderPath, undefined);
-      return undefined;  // no match
-    }
-
-    // Recurse upwards, caching every step along the way
-    const parentResult: string | undefined = this.tryGetPackageFolderFor(parentFolder);
-    this._packageFolderCache.set(resolvedFileOrFolderPath, parentResult);
-
-    return parentResult;
+    // Now call the recursive part of the algorithm
+    return this._tryGetPackageFolderFor(resolvedFileOrFolderPath, false);
   }
 
   /**
@@ -209,5 +197,49 @@ export class PackageJsonLookup {
     }
 
     return packageJson;
+  }
+
+  // Recursive part of the algorithm from tryGetPackageFolderFor()
+  private _tryGetPackageFolderFor(resolvedFileOrFolderPath: string, isRealPath: boolean): string | undefined {
+    if (!isRealPath) {
+      // While walking up the parent tree, as soon as we encounter a path that actually exists,
+      // we need to call realpathSync() to expand any symlinks that we encountered.
+      //
+      // Then we will set isRealPath=true, since this only needs to be done once.
+
+      if (fsx.existsSync(resolvedFileOrFolderPath)) {
+        // Walk any symlinks to avoid duplicate cache keys.
+        resolvedFileOrFolderPath = fsx.realpathSync(resolvedFileOrFolderPath);
+        isRealPath = true;
+      }
+    }
+
+    // Two lookups are required, because get() cannot distinguish the undefined value
+    // versus a missing key.
+    if (this._packageFolderCache.has(resolvedFileOrFolderPath)) {
+      return this._packageFolderCache.get(resolvedFileOrFolderPath);
+    }
+
+    // Is resolvedFileOrFolderPath itself a folder with a package.json file?  If so, return it.
+    if (fsx.existsSync(path.join(resolvedFileOrFolderPath, FileConstants.PackageJson))) {
+      this._packageFolderCache.set(resolvedFileOrFolderPath, resolvedFileOrFolderPath);
+      return resolvedFileOrFolderPath;
+    }
+
+    // Otherwise go up one level
+    const parentFolder: string | undefined = path.dirname(resolvedFileOrFolderPath);
+    if (!parentFolder || parentFolder === resolvedFileOrFolderPath) {
+      // We reached the root directory without finding a package.json file,
+      // so cache the negative result
+      this._packageFolderCache.set(resolvedFileOrFolderPath, undefined);
+      return undefined;  // no match
+    }
+
+    // Recurse upwards, caching every step along the way
+    const parentResult: string | undefined = this._tryGetPackageFolderFor(parentFolder, isRealPath);
+    // Cache the parent's answer as well
+    this._packageFolderCache.set(resolvedFileOrFolderPath, parentResult);
+
+    return parentResult;
   }
 }
