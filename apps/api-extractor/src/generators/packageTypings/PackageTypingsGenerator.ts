@@ -10,7 +10,7 @@ import { Text } from '@microsoft/node-core-library';
 import { ExtractorContext } from '../../ExtractorContext';
 import { IndentedWriter } from '../../utils/IndentedWriter';
 import { TypeScriptHelpers } from '../../utils/TypeScriptHelpers';
-import { Span } from '../../utils/Span';
+import { Span, SpanModification } from '../../utils/Span';
 import { ReleaseTag } from '../../aedoc/ReleaseTag';
 import { AstSymbolTable } from './AstSymbolTable';
 import { AstEntryPoint } from './AstEntryPoint';
@@ -18,6 +18,7 @@ import { AstSymbol } from './AstSymbol';
 import { AstImport } from './AstImport';
 import { DtsEntry } from './DtsEntry';
 import { AstDeclaration } from './AstDeclaration';
+import { SymbolAnalyzer } from './SymbolAnalyzer';
 
 /**
  * Used with PackageTypingsGenerator.writeTypingsFile()
@@ -255,12 +256,12 @@ export class PackageTypingsGenerator {
             indentedWriter.writeLine();
 
             const span: Span = new Span(astDeclaration.declaration);
-            this._modifySpan(span, dtsEntry);
+            this._modifySpan(span, dtsEntry, astDeclaration, dtsKind);
             indentedWriter.writeLine(span.getModifiedText());
           }
         } else {
           indentedWriter.writeLine();
-          indentedWriter.writeLine(`// Removed for this release type: ${dtsEntry.nameForEmit}`);
+          indentedWriter.writeLine(`/* Excluded from this release type: ${dtsEntry.nameForEmit} */`);
         }
       }
     }
@@ -269,11 +270,12 @@ export class PackageTypingsGenerator {
   /**
    * Before writing out a declaration, _modifySpan() applies various fixups to make it nice.
    */
-  private _modifySpan(span: Span, dtsEntry: DtsEntry): void {
+  private _modifySpan(span: Span, dtsEntry: DtsEntry, astDeclaration: AstDeclaration,
+    dtsKind: PackageTypingsDtsKind): void {
+
     const previousSpan: Span | undefined = span.previousSibling;
 
     let recurseChildren: boolean = true;
-
     switch (span.kind) {
       case ts.SyntaxKind.JSDocComment:
         // For now, we don't transform JSDoc comment nodes at all
@@ -364,7 +366,37 @@ export class PackageTypingsGenerator {
 
     if (recurseChildren) {
       for (const child of span.children) {
-        this._modifySpan(child, dtsEntry);
+        let childAstDeclaration: AstDeclaration = astDeclaration;
+
+        // Should we trim this node?
+        let trimmed: boolean = false;
+        if (SymbolAnalyzer.isAstDeclaration(child.kind)) {
+          childAstDeclaration = this._astSymbolTable.getChildAstDeclarationByNode(child.node, astDeclaration);
+
+          const releaseTag: ReleaseTag = this._getReleaseTagForAstSymbol(childAstDeclaration.astSymbol);
+          if (!this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
+            const modification: SpanModification = child.modification;
+
+            // Yes, trim it and stop here
+            const name: string = childAstDeclaration.astSymbol.localName;
+            modification.omitChildren = true;
+
+            modification.prefix = `/* Excluded from this release type: ${name} */`;
+            modification.suffix = '';
+
+            if (child.children.length > 0) {
+              // If there are grandchildren, then keep the last grandchild's separator,
+              // since it often has useful whitespace
+              modification.suffix = child.children[child.children.length - 1].separator;
+            }
+
+            trimmed = true;
+          }
+        }
+
+        if (!trimmed) {
+          this._modifySpan(child, dtsEntry, childAstDeclaration, dtsKind);
+        }
       }
     }
   }
@@ -397,7 +429,10 @@ export class PackageTypingsGenerator {
         const declarationReleaseTag: ReleaseTag = this._getReleaseTagForDeclaration(astDeclaration.declaration);
         if (releaseTag !== ReleaseTag.None && declarationReleaseTag !== releaseTag) {
           // this._analyzeWarnings.push('WARNING: Conflicting release tags found for ' + symbol.name);
+          break;
         }
+
+        releaseTag = declarationReleaseTag;
       }
 
       if (releaseTag !== ReleaseTag.None) {

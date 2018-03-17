@@ -7,7 +7,7 @@
  */
 
 
-// Removed for this release type: AlphaClass
+/* Excluded from this release type: AlphaClass */
 
 /**
  * This is a beta class
@@ -18,16 +18,8 @@ export declare class BetaClass implements BetaInterface {
      * This is a comment
      */
     undecoratedMember(): void;
-    /**
-     * This is an alpha comment
-     * @alpha
-     */
-    alphaMember(): void;
-    /**
-     * This is an internal member
-     * @internal
-     */
-    _internalMember(): void;
+    /* Excluded from this release type: alphaMember */
+    /* Excluded from this release type: _internalMember */
 }
 
 /**
@@ -39,16 +31,8 @@ export declare interface BetaInterface {
      * This is a comment
      */
     undecoratedMember(): void;
-    /**
-     * This is an alpha comment
-     * @alpha
-     */
-    alphaMember(): void;
-    /**
-     * This is an internal member
-     * @internal
-     */
-    _internalMember(): void;
+    /* Excluded from this release type: alphaMember */
+    /* Excluded from this release type: _internalMember */
 }
 
 /**
@@ -60,16 +44,8 @@ export declare const enum ConstEnum {
      * This member inherits its \@beta status from the parent
      */
     BetaMember2 = "BetaMember2",
-    /**
-     * This member is marked as \@alpha
-     * @alpha
-     */
-    AlphaMember = "AlphaMember",
-    /**
-     * This member is marked as \@internal
-     * @internal
-     */
-    _InternalMember = "_InternalMember",
+    /* Excluded from this release type: AlphaMember */,
+    /* Excluded from this release type: _InternalMember */,
 }
 
 /**
@@ -82,36 +58,14 @@ export declare namespace EntangledNamespace {
      * The "beta" release tag is inherited from the parent.
      */
     export declare namespace N2 {
-        /**
-         * This class is in a nested namespace.
-         * @alpha
-         */
-        export declare class ClassX {
-            /**
-             * The "alpha" release tag is inherited from the parent.
-             */
-            static a: string;
-        }
+        /* Excluded from this release type: ClassX */
     }
     /**
      * This is a nested namespace.
      * The "beta" release tag is inherited from the parent.
      */
     export declare namespace N3 {
-        /**
-         * This class is in a nested namespace.
-         * @internal
-         */
-        export declare class _ClassY {
-            /**
-             * This definition refers to a "alpha" namespaced class.
-             */
-            b: EntangledNamespace.N2.ClassX;
-            /**
-             * This definition refers to the type of a "alpha" namespaced member.
-             */
-            c(): typeof N2.ClassX.a;
-        }
+        /* Excluded from this release type: _ClassY */
     }
 }
 
@@ -120,7 +74,7 @@ export declare namespace EntangledNamespace {
  */
 export declare type ExportedAlias = AlphaClass;
 
-// Removed for this release type: InternalClass
+/* Excluded from this release type: InternalClass */
 
 /**
  * This is a public class
@@ -141,16 +95,8 @@ export declare class PublicClass {
      * @beta
      */
     betaMember(): void;
-    /**
-     * This is an alpha comment
-     * @alpha
-     */
-    alphaMember(): void;
-    /**
-     * This is an internal member
-     * @internal
-     */
-    _internalMember(): void;
+    /* Excluded from this release type: alphaMember */
+    /* Excluded from this release type: _internalMember */
 }
 
 /**
@@ -162,16 +108,8 @@ export declare enum RegularEnum {
      * This member inherits its \@beta status from the parent
      */
     BetaMember = 100,
-    /**
-     * This member is marked as \@alpha
-     * @alpha
-     */
-    AlphaMember = 101,
-    /**
-     * This member is marked as \@internal
-     * @internal
-     */
-    _InternalMember = 102,
+    /* Excluded from this release type: AlphaMember */,
+    /* Excluded from this release type: _InternalMember */,
 }
 
 declare const variableDeclaration: string;

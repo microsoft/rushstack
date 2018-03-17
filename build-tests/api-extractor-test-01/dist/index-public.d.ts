@@ -120,7 +120,7 @@ export declare class ForgottenExportConsumer2 {
     test2(): IForgottenExport_2 | undefined;
 }
 
-// Removed for this release type: ForgottenExportConsumer3
+/* Excluded from this release type: ForgottenExportConsumer3 */
 
 /**
  * This class is directly consumed by ForgottenExportConsumer3.
@@ -181,7 +181,7 @@ export declare class ReexportedClass {
     getValue(): string;
 }
 
-// Removed for this release type: _TypeReferencesInAedoc
+/* Excluded from this release type: _TypeReferencesInAedoc */
 
 /**
  * Example decorator

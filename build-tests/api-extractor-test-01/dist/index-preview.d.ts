@@ -188,7 +188,7 @@ export declare class ReexportedClass {
     getValue(): string;
 }
 
-// Removed for this release type: _TypeReferencesInAedoc
+/* Excluded from this release type: _TypeReferencesInAedoc */
 
 /**
  * Example decorator
