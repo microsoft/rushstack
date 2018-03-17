@@ -103,7 +103,11 @@ export class AstDeclaration {
    */
   public getDump(indent: string = ''): string {
     const declarationKind: string = ts.SyntaxKind[this.declaration.kind];
-    let result: string = indent + `+ ${this.astSymbol.localName} (${declarationKind})\n`;
+    let result: string = indent + `+ ${this.astSymbol.localName} (${declarationKind})`;
+    if (this.astSymbol.nominal) {
+      result += ' (nominal)';
+    }
+    result += '\n';
 
     for (const referencedAstSymbol of this._analyzedReferencedAstSymbolsSet.values()) {
       result += indent + `  ref: ${referencedAstSymbol.localName}\n`;

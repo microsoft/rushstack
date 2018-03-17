@@ -64,7 +64,7 @@ export class PackageTypingsGenerator {
   public constructor(context: ExtractorContext) {
     this._context = context;
     this._typeChecker = context.typeChecker;
-    this._astSymbolTable = new AstSymbolTable(this._context.typeChecker);
+    this._astSymbolTable = new AstSymbolTable(this._context.typeChecker, this._context.packageJsonLookup);
   }
 
   /**

@@ -4,6 +4,7 @@
 /* tslint:disable:no-bitwise */
 
 import * as ts from 'typescript';
+import { PackageJsonLookup } from '@microsoft/node-core-library';
 
 import { AstDeclaration } from './AstDeclaration';
 import { SymbolAnalyzer, IFollowAliasesResult } from './SymbolAnalyzer';
@@ -11,6 +12,7 @@ import { TypeScriptHelpers } from '../../utils/TypeScriptHelpers';
 import { AstSymbol } from './AstSymbol';
 import { AstImport } from './AstImport';
 import { AstEntryPoint, IExportedMember } from './AstEntryPoint';
+import { PackageMetadataManager } from './PackageMetadataManager';
 
 /**
  * AstSymbolTable is the workhorse that builds AstSymbol and AstDeclaration objects.
@@ -20,7 +22,9 @@ import { AstEntryPoint, IExportedMember } from './AstEntryPoint';
  * is "exported" or not.)
  */
 export class AstSymbolTable {
-  private _typeChecker: ts.TypeChecker;
+  private readonly _typeChecker: ts.TypeChecker;
+  private readonly _packageJsonLookup: PackageJsonLookup;
+  private readonly _packageMetadataManager: PackageMetadataManager;
 
   /**
    * A mapping from ts.Symbol --> AstSymbol
@@ -50,8 +54,10 @@ export class AstSymbolTable {
   private readonly _astEntryPointsBySourceFile: Map<ts.SourceFile, AstEntryPoint>
     = new Map<ts.SourceFile, AstEntryPoint>();
 
-  public constructor(typeChecker: ts.TypeChecker) {
+  public constructor(typeChecker: ts.TypeChecker, packageJsonLookup: PackageJsonLookup) {
     this._typeChecker = typeChecker;
+    this._packageJsonLookup = packageJsonLookup;
+    this._packageMetadataManager = new PackageMetadataManager(packageJsonLookup);
   }
 
   /**
@@ -65,6 +71,19 @@ export class AstSymbolTable {
 
       if (!rootFileSymbol.declarations || !rootFileSymbol.declarations.length) {
         throw new Error('Unable to find a root declaration for ' + sourceFile.fileName);
+      }
+
+      if (!this._packageMetadataManager.isAedocSupportedFor(sourceFile.fileName)) {
+        const packageJsonPath: string | undefined = this._packageJsonLookup
+          .tryGetPackageJsonFilePathFor(sourceFile.fileName);
+
+        if (packageJsonPath) {
+          throw new Error(`Please add a field such as "tsdoc": { "tsdocFlavor": "AEDoc" } to this file:\n`
+            + packageJsonPath);
+        } else {
+          throw new Error(`The specified entry point does not appear to have an associated package.json file:\n`
+            + sourceFile.fileName);
+        }
       }
 
       const exportSymbols: ts.Symbol[] = this._typeChecker.getExportsOfModule(rootFileSymbol) || [];
@@ -103,6 +122,12 @@ export class AstSymbolTable {
    */
   public analyze(astSymbol: AstSymbol): void {
     if (astSymbol.analyzed) {
+      return;
+    }
+
+    if (astSymbol.nominal) {
+      // We don't analyze nominal symbols
+      astSymbol._notifyAnalyzed();
       return;
     }
 
@@ -238,6 +263,8 @@ export class AstSymbolTable {
     const followAliasesResult: IFollowAliasesResult = SymbolAnalyzer.followAliases(symbol, this._typeChecker);
 
     const followedSymbol: ts.Symbol = followAliasesResult.followedSymbol;
+
+    // Filter out symbols representing constructs that we don't care about
     if (followedSymbol.flags & (ts.SymbolFlags.TypeParameter | ts.SymbolFlags.TypeLiteral | ts.SymbolFlags.Transient)) {
       return undefined;
     }
@@ -251,28 +278,6 @@ export class AstSymbolTable {
     if (!astSymbol) {
       if (!followedSymbol.declarations || followedSymbol.declarations.length < 1) {
         throw new Error('Program Bug: Followed a symbol with no declarations');
-      }
-
-      // NOTE: In certain circumstances we need an AstSymbol for a source file that is acting
-      // as a TypeScript module.  For example, one of the unit tests has this line:
-      //
-      //   import * as semver1 from 'semver';
-      //
-      // To handle the expression "semver1.SemVer", we need "semver1" to map to an AstSymbol
-      // that causes us to emit the above import.  However we do NOT want it to act as the root
-      // of a declaration tree, because in general the *.d.ts generator is trying to roll up
-      // definitions and eliminate source files.  So, even though isAstDeclaration() would return
-      // false, we do create an AstDeclaration for a ts.SyntaxKind.SourceFile in this special edge case.
-      const isSourceFile: boolean = followedSymbol.declarations.length === 1
-        && followedSymbol.declarations[0].kind === ts.SyntaxKind.SourceFile;
-
-      if (!isSourceFile) {
-        for (const declaration of followedSymbol.declarations || []) {
-          if (!SymbolAnalyzer.isAstDeclaration(declaration.kind)) {
-            throw new Error(`Program Bug: The "${followedSymbol.name}" symbol uses the construct`
-              + ` "${ts.SyntaxKind[declaration.kind]}" which may be an unimplemented language feature`);
-          }
-        }
       }
 
       const astImport: AstImport | undefined = followAliasesResult.astImport;
@@ -290,31 +295,63 @@ export class AstSymbolTable {
 
       if (!astSymbol) {
         // None of the above lookups worked, so create a new entry...
+        let nominal: boolean = false;
 
-        // We always fetch the entire chain of parents for each declaration.
-        // (Children/siblings are only analyzed on demand.)
-
-        // Key assumptions behind this squirrely logic:
+        // NOTE: In certain circumstances we need an AstSymbol for a source file that is acting
+        // as a TypeScript module.  For example, one of the unit tests has this line:
         //
-        // IF a given symbol has two declarations D1 and D2; AND
-        // If D1 has a parent P1, then
-        // - D2 will also have a parent P2; AND
-        // - P1 and P2's symbol will be the same
+        //   import * as semver1 from 'semver';
+        //
+        // To handle the expression "semver1.SemVer", we need "semver1" to map to an AstSymbol
+        // that causes us to emit the above import.  However we do NOT want it to act as the root
+        // of a declaration tree, because in general the *.d.ts generator is trying to roll up
+        // definitions and eliminate source files.  So, even though isAstDeclaration() would return
+        // false, we do create an AstDeclaration for a ts.SyntaxKind.SourceFile in this special edge case.
+        if (followedSymbol.declarations.length === 1
+          && followedSymbol.declarations[0].kind === ts.SyntaxKind.SourceFile) {
+          nominal = true;
+        }
+
+        // If the file is from a package that does not support AEDoc, then we process the
+        // symbol itself, but we don't attempt to process any parent/children of it.
+        if (!this._packageMetadataManager.isAedocSupportedFor(
+          followedSymbol.declarations[0].getSourceFile().fileName)) {
+          nominal = true;
+        }
 
         let parentAstSymbol: AstSymbol | undefined = undefined;
 
-        // Is there a parent AstSymbol?  First we check to see if there is a parent declaration:
-        const arbitaryParentDeclaration: ts.Node | undefined
-          = this._tryFindFirstAstDeclarationParent(followedSymbol.declarations[0]);
+        if (!nominal) {
+          for (const declaration of followedSymbol.declarations || []) {
+            if (!SymbolAnalyzer.isAstDeclaration(declaration.kind)) {
+              throw new Error(`Program Bug: The "${followedSymbol.name}" symbol uses the construct`
+                + ` "${ts.SyntaxKind[declaration.kind]}" which may be an unimplemented language feature`);
+            }
+          }
 
-        if (arbitaryParentDeclaration) {
-          const parentSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(
-            arbitaryParentDeclaration as ts.Declaration);
+          // We always fetch the entire chain of parents for each declaration.
+          // (Children/siblings are only analyzed on demand.)
 
-          parentAstSymbol = this._fetchAstSymbol(parentSymbol, addIfMissing);
-          if (!parentAstSymbol) {
-            throw new Error('Program bug: Unable to construct a parent AstSymbol for '
-              + followedSymbol.name);
+          // Key assumptions behind this squirrely logic:
+          //
+          // IF a given symbol has two declarations D1 and D2; AND
+          // If D1 has a parent P1, then
+          // - D2 will also have a parent P2; AND
+          // - P1 and P2's symbol will be the same
+
+          // Is there a parent AstSymbol?  First we check to see if there is a parent declaration:
+          const arbitaryParentDeclaration: ts.Node | undefined
+            = this._tryFindFirstAstDeclarationParent(followedSymbol.declarations[0]);
+
+          if (arbitaryParentDeclaration) {
+            const parentSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(
+              arbitaryParentDeclaration as ts.Declaration);
+
+            parentAstSymbol = this._fetchAstSymbol(parentSymbol, addIfMissing);
+            if (!parentAstSymbol) {
+              throw new Error('Program bug: Unable to construct a parent AstSymbol for '
+                + followedSymbol.name);
+            }
           }
         }
 
@@ -322,7 +359,8 @@ export class AstSymbolTable {
           localName: followAliasesResult.localName,
           followedSymbol: followAliasesResult.followedSymbol,
           astImport: astImport,
-          rootAstSymbol: parentAstSymbol ? parentAstSymbol.rootAstSymbol : undefined
+          rootAstSymbol: parentAstSymbol ? parentAstSymbol.rootAstSymbol : undefined,
+          nominal: nominal
         });
 
         this._astSymbolsBySymbol.set(followedSymbol, astSymbol);

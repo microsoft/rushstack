@@ -12,6 +12,7 @@ export interface IAstSymbolParameters {
   readonly followedSymbol: ts.Symbol;
   readonly localName: string;
   readonly astImport: AstImport | undefined;
+  readonly nominal: boolean;
   readonly rootAstSymbol: AstSymbol | undefined;
 }
 
@@ -45,6 +46,15 @@ export class AstSymbol {
    */
   public readonly astImport: AstImport | undefined;
 
+  /**
+   * If true, then this AstSymbol represents a foreign object whose structure will be
+   * ignored.  The AstDeclaration will not have any parent or children, and its references
+   * will not be analyzed.
+   *
+   * Nominal symbols are tracked because we still need to emit exports for them.
+   */
+  public readonly nominal: boolean;
+
   private readonly _astDeclarations: AstDeclaration[];
 
   private readonly _rootAstSymbol: AstSymbol;
@@ -55,6 +65,7 @@ export class AstSymbol {
     this.followedSymbol = parameters.followedSymbol;
     this.localName = parameters.localName;
     this.astImport = parameters.astImport;
+    this.nominal = parameters.nominal;
     this._rootAstSymbol = parameters.rootAstSymbol || this;
     this._astDeclarations = [];
   }
