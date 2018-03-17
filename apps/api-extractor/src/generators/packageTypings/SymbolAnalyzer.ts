@@ -137,15 +137,29 @@ export class SymbolAnalyzer {
       current = currentAlias;
     }
 
-    // Is this an ambient declaration?  The way to determine this is by looking at the
-    // ts.SyntaxKind.SourceFile node to see whether it has a symbol or not (i.e. whether it
-    // is acting as a module or not).
+    // Is this an ambient declaration?
     let isAmbient: boolean = true;
     if (current.declarations) {
-      const sourceFileNode: ts.Node | undefined = TypeScriptHelpers.findFirstParent(
-        current.declarations[0], ts.SyntaxKind.SourceFile);
-      if (sourceFileNode && !!typeChecker.getSymbolAtLocation(sourceFileNode)) {
-        isAmbient = false;
+
+      // Test 1: Are we inside the sinister "declare global {" construct?
+      let insideDeclareGlobal: boolean = false;
+      const highestModuleDeclaration: ts.ModuleDeclaration | undefined
+        = TypeScriptHelpers.findHighestParent(current.declarations[0], ts.SyntaxKind.ModuleDeclaration);
+      if (highestModuleDeclaration) {
+        if (highestModuleDeclaration.name.getText().trim() === 'global') {
+          insideDeclareGlobal = true;
+        }
+      }
+
+      // Test 2: Otherwise, the main heuristic for ambient declarations is by looking at the
+      // ts.SyntaxKind.SourceFile node to see whether it has a symbol or not (i.e. whether it
+      // is acting as a module or not).
+      if (!insideDeclareGlobal) {
+        const sourceFileNode: ts.Node | undefined = TypeScriptHelpers.findFirstParent(
+          current.declarations[0], ts.SyntaxKind.SourceFile);
+        if (sourceFileNode && !!typeChecker.getSymbolAtLocation(sourceFileNode)) {
+          isAmbient = false;
+        }
       }
     }
 
