@@ -30,7 +30,7 @@ export interface IPackageJsonScriptTable {
 /**
  * This interface is part of the IPackageJson file format.  It is used for the
  * "tsdoc" field.
- * @public
+ * @beta
  */
 export interface IPackageJsonTsdocConfiguration {
   /**

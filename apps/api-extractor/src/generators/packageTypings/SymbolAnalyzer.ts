@@ -64,7 +64,7 @@ export class SymbolAnalyzer {
       case ts.SyntaxKind.VariableDeclaration:
         return true;
 
-      // NOTE: In contexts where a source file is treated as a module, we do create
+      // NOTE: In contexts where a source file is treated as a module, we do create "nominal"
       // AstSymbol objects corresponding to a ts.SyntaxKind.SourceFile node.  However, a source file
       // is NOT considered a nesting structure, and it does NOT act as a root for the declarations
       // appearing in the file.  This is because the *.d.ts generator is in the business of rolling up

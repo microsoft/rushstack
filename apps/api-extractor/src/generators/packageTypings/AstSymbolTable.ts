@@ -42,9 +42,9 @@ export class AstSymbolTable {
     = new Map<ts.Node, AstDeclaration>();
 
   /**
-   * A mapping from Entry.importPackageKey --> Entry.
+   * A mapping from AstImport.key --> AstSymbol.
    *
-   * If Entry.importPackageKey is undefined, then it is not included in the map.
+   * If AstSymbol.astImport is undefined, then it is not included in the map.
    */
   private readonly _astSymbolsByImportKey: Map<string, AstSymbol> = new Map<string, AstSymbol>();
 
