@@ -55,6 +55,8 @@ interface IPackageJson {
   peerDependencies?: IPackageJsonDependencyTable;
   private?: boolean;
   scripts?: IPackageJsonScriptTable;
+  // @beta
+  tsdoc?: IPackageJsonTsdocConfiguration;
   typings?: string;
   version: string;
 }
@@ -72,6 +74,11 @@ interface IPackageJsonLookupParameters {
 // @public
 interface IPackageJsonScriptTable {
   [scriptName: string]: string;
+}
+
+// @beta
+interface IPackageJsonTsdocConfiguration {
+  tsdocFlavor?: string;
 }
 
 // @public

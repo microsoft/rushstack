@@ -88,6 +88,7 @@ export class DecoratorTest {
 
 export { ForgottenExportConsumer1 } from './ForgottenExportConsumer1';
 export { ForgottenExportConsumer2 } from './ForgottenExportConsumer2';
+export { ForgottenExportConsumer3 } from './ForgottenExportConsumer3';
 
 export { default as IInterfaceAsDefaultExport } from './IInterfaceAsDefaultExport';
 
@@ -100,3 +101,5 @@ export {
 } from './DefaultExportEdgeCase';
 
 export { TypeReferencesInAedoc as _TypeReferencesInAedoc } from './TypeReferencesInAedoc';
+
+export { ClassWithTypeLiterals } from './ClassWithTypeLiterals';

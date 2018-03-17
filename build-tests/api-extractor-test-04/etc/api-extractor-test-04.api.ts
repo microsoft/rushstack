@@ -6,12 +6,30 @@ class AlphaClass {
 }
 
 // @beta
-class BetaClass {
+class BetaClass implements BetaInterface {
   // @internal
   _internalMember(): void;
   // @alpha
   alphaMember(): void;
   undecoratedMember(): void;
+}
+
+// @beta
+interface BetaInterface {
+  // @internal
+  _internalMember(): void;
+  // @alpha
+  alphaMember(): void;
+  undecoratedMember(): void;
+}
+
+// @beta
+enum ConstEnum {
+  // @internal
+  _InternalMember = "_InternalMember",
+  // @alpha
+  AlphaMember = "AlphaMember",
+  BetaMember2 = "BetaMember2"
 }
 
 // WARNING: Unsupported export "N2" Currently the "namespace" block only supports constant variables.
@@ -33,7 +51,20 @@ class PublicClass {
   // @alpha
   alphaMember(): void;
   // @beta
+  betaField: string;
+  // @beta
   betaMember(): void;
   undecoratedMember(): void;
 }
 
+// @beta
+enum RegularEnum {
+  // @internal
+  _InternalMember = 102,
+  // @alpha
+  AlphaMember = 101,
+  BetaMember = 100
+}
+
+// WARNING: Unsupported export: variableDeclaration
+// WARNING: Unsupported export: ExportedAlias

@@ -1,30 +1,25 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { BetaInterface } from './BetaInterface';
-
 /**
- * This is a beta class
+ * This is a beta interface
  * @beta
  */
-export class BetaClass implements BetaInterface {
+export interface BetaInterface {
   /**
    * This is a comment
    */
-  public undecoratedMember(): void {
-  }
+  undecoratedMember(): void;
 
   /**
    * This is an alpha comment
    * @alpha
    */
-  public alphaMember(): void {
-  }
+  alphaMember(): void;
 
   /**
    * This is an internal member
    * @internal
    */
-  public _internalMember(): void {
-  }
+  _internalMember(): void;
 }

@@ -4,6 +4,9 @@
   "description": "",
   "main": "lib/index.js",
   "typings": "dist/index-internal.d.ts",
+  "tsdoc": {
+    "tsdocFlavor": "AEDoc"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",

@@ -28,6 +28,19 @@ export interface IPackageJsonScriptTable {
 }
 
 /**
+ * This interface is part of the IPackageJson file format.  It is used for the
+ * "tsdoc" field.
+ * @beta
+ */
+export interface IPackageJsonTsdocConfiguration {
+  /**
+   * A token indicating the dialect of TSDoc syntax used by *.d.ts files in this
+   * package.
+   */
+  tsdocFlavor?: string;
+}
+
+/**
  * An interface for accessing common fields from a package.json file.
  *
  * @remarks
@@ -78,6 +91,13 @@ export interface IPackageJson {
    * that will act as the main entry point.
    */
   typings?: string;
+
+  /**
+   * Describes the documentation comment syntax used for the *.d.ts files
+   * exposed by this package.
+   * @beta
+   */
+  tsdoc?: IPackageJsonTsdocConfiguration;
 
   /**
    * The main entry point for the package.

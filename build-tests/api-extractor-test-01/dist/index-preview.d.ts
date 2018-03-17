@@ -72,6 +72,23 @@ export declare class ClassExportedAsDefault {
 }
 
 /**
+ * This class illustrates some cases involving type literals.
+ * @public
+ */
+export declare class ClassWithTypeLiterals {
+    /** type literal in  */
+    method1(vector: {
+        x: number;
+        y: number;
+    }): void;
+    /** type literal output  */
+    method2(): {
+        classValue: ClassWithTypeLiterals;
+        callback: () => number;
+    } | undefined;
+}
+
+/**
  * Tests a decorator
  * @public
  */
@@ -104,6 +121,22 @@ export declare class ForgottenExportConsumer2 {
 }
 
 /**
+ * This class directly consumes IForgottenDirectDependency
+ * and indirectly consumes IForgottenIndirectDependency.
+ * @beta
+ */
+export declare class ForgottenExportConsumer3 {
+    test2(): IForgottenDirectDependency | undefined;
+}
+
+/**
+ * This class is directly consumed by ForgottenExportConsumer3.
+ */
+declare interface IForgottenDirectDependency {
+    member: IForgottenIndirectDependency;
+}
+
+/**
  * The ForgottenExportConsumer1 class relies on this IForgottenExport.
  *
  * This should end up as a non-exported "IForgottenExport" in the index.d.ts.
@@ -120,6 +153,12 @@ declare interface IForgottenExport {
  */
 declare interface IForgottenExport_2 {
     instance2: string;
+}
+
+/**
+ * This class is indirectly consumed by ForgottenExportConsumer3.
+ */
+declare interface IForgottenIndirectDependency {
 }
 
 /**

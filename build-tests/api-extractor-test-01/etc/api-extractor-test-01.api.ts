@@ -40,6 +40,18 @@ class ClassExportedAsDefault {
 }
 
 // @public
+class ClassWithTypeLiterals {
+  method1(vector: {
+          x: number;
+          y: number;
+      }): void;
+  method2(): {
+          classValue: ClassWithTypeLiterals;
+          callback: () => number;
+      } | undefined;
+}
+
+// @public
 class DecoratorTest {
   test(): void;
 }
@@ -61,6 +73,13 @@ class ForgottenExportConsumer2 {
   // WARNING: The type "IForgottenExport" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   test2(): IForgottenExport | undefined;
+}
+
+// @beta
+class ForgottenExportConsumer3 {
+  // WARNING: The type "IForgottenDirectDependency" needs to be exported by the package (e.g. added to index.ts)
+  // (undocumented)
+  test2(): IForgottenDirectDependency | undefined;
 }
 
 // @public

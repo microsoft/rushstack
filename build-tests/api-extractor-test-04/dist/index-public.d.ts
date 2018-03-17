@@ -11,7 +11,16 @@
 
 // Removed for this release type: BetaClass
 
+// Removed for this release type: BetaInterface
+
+// Removed for this release type: ConstEnum
+
 // Removed for this release type: EntangledNamespace
+
+/**
+ * This is an exported type alias.
+ */
+export declare type ExportedAlias = AlphaClass;
 
 // Removed for this release type: InternalClass
 
@@ -20,6 +29,11 @@
  * @public
  */
 export declare class PublicClass {
+    /**
+     * This is a beta field
+     * @beta
+     */
+    betaField: string;
     /**
      * This is a comment
      */
@@ -40,3 +54,7 @@ export declare class PublicClass {
      */
     _internalMember(): void;
 }
+
+// Removed for this release type: RegularEnum
+
+declare const variableDeclaration: string;
