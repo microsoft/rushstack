@@ -1,6 +1,18 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 15 Mar 2018 20:00:50 GMT and should not be manually modified.
+This log was last generated on Sat, 17 Mar 2018 02:54:22 GMT and should not be manually modified.
+
+## 5.5.0
+Sat, 17 Mar 2018 02:54:22 GMT
+
+### Minor changes
+
+- Overhaul the packageTypings generator analysis to get ready for the upcoming nested member trimming
+- Breaking change: Any projects using the package typings feature must now have a "tsdoc" section in their package.json
+
+### Patches
+
+- Add "--debug" flag for debugging
 
 ## 5.4.0
 Thu, 15 Mar 2018 20:00:50 GMT
@@ -31,7 +43,7 @@ Tue, 06 Mar 2018 17:04:51 GMT
 
 ### Patches
 
-- Add preliminary support for preview and public outputs for packageTypings gtenerator
+- Add preliminary support for preview and public outputs for packageTypings generator
 
 ## 5.3.6
 Fri, 02 Mar 2018 01:13:59 GMT

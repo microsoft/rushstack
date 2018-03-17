@@ -1,6 +1,22 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Thu, 15 Mar 2018 16:05:43 GMT and should not be manually modified.
+This log was last generated on Sat, 17 Mar 2018 02:54:22 GMT and should not be manually modified.
+
+## 1.0.0
+Sat, 17 Mar 2018 02:54:22 GMT
+
+### Breaking changes
+
+- Redesign the PackageJsonLookup API. This is a breaking change.
+
+### Minor changes
+
+- Add new APIs IPackageJson, FileConstants, and FolderConstants
+
+### Patches
+
+- Add "tsdoc" field to the IPackageJson API
+- Improve PackageJsonLookup.tryGetPackageFolderFor() to deduplicate symlinks by using fs.realpathSync()
 
 ## 0.8.0
 Thu, 15 Mar 2018 16:05:43 GMT

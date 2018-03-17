@@ -2,6 +2,21 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "4.3.3",
+      "tag": "@microsoft/gulp-core-build-sass_v4.3.3",
+      "date": "Sat, 17 Mar 2018 02:54:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.6.9` to `3.6.10`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.7.41` to `1.7.42`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.3.2",
       "tag": "@microsoft/gulp-core-build-sass_v4.3.2",
       "date": "Thu, 15 Mar 2018 20:00:50 GMT",

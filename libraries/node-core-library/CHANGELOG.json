@@ -2,6 +2,31 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "1.0.0",
+      "tag": "@microsoft/node-core-library_v1.0.0",
+      "date": "Sat, 17 Mar 2018 02:54:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add \"tsdoc\" field to the IPackageJson API"
+          },
+          {
+            "comment": "Improve PackageJsonLookup.tryGetPackageFolderFor() to deduplicate symlinks by using fs.realpathSync()"
+          }
+        ],
+        "major": [
+          {
+            "comment": "Redesign the PackageJsonLookup API. This is a breaking change."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add new APIs IPackageJson, FileConstants, and FolderConstants"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.8.0",
       "tag": "@microsoft/node-core-library_v0.8.0",
       "date": "Thu, 15 Mar 2018 16:05:43 GMT",

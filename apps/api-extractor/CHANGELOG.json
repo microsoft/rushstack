@@ -2,6 +2,31 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "5.5.0",
+      "tag": "@microsoft/api-extractor_v5.5.0",
+      "date": "Sat, 17 Mar 2018 02:54:22 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Overhaul the packageTypings generator analysis to get ready for the upcoming nested member trimming"
+          },
+          {
+            "comment": "Breaking change: Any projects using the package typings feature must now have a \"tsdoc\" section in their package.json"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Add \"--debug\" flag for debugging"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.8.0` to `1.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.4.0",
       "tag": "@microsoft/api-extractor_v5.4.0",
       "date": "Thu, 15 Mar 2018 20:00:50 GMT",
