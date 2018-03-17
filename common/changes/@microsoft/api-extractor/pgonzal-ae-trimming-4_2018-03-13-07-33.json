@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Overhaul the packageTypings generator analysis to get ready for the upcoming nested member trimming",
+      "comment": "Breaking change: Any projects using the package typings feature must now have a \"tsdoc\" section in their package.json",
       "type": "minor"
     }
   ],

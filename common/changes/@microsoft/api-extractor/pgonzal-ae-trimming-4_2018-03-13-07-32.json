@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Overhaul the packageTypings generator analysis to get ready for the upcoming nested member trimming",
-      "type": "minor"
+      "comment": "Add \"--debug\" flag for debugging",
+      "type": "patch"
     }
   ],
   "packageName": "@microsoft/api-extractor",
