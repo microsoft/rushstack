@@ -8,6 +8,9 @@
   },
   "main": "lib/index.js",
   "typings": "dist/index-internal.d.ts",
+  "tsdoc": {
+    "tsdocFlavor": "AEDoc"
+  },
   "license": "MIT",
   "devDependencies": {
     "@microsoft/node-library-build": "4.3.22",

@@ -5,6 +5,9 @@
   "private": true,
   "main": "lib/index.js",
   "typings": "dist/index-internal.d.ts",
+  "tsdoc": {
+    "tsdocFlavor": "AEDoc"
+  },
   "scripts": {
     "build": "node build.js"
   },

@@ -20,6 +20,9 @@
   "homepage": "http://aka.ms/extractor",
   "main": "lib/index.js",
   "typings": "dist/index-internal.d.ts",
+  "tsdoc": {
+    "tsdocFlavor": "AEDoc"
+  },
   "bin": {
     "api-extractor": "./bin/api-extractor"
   },
