@@ -59,6 +59,8 @@ export class AstSymbol {
 
   private readonly _rootAstSymbol: AstSymbol;
 
+  // This flag is unused if this is not the root symbol.
+  // Being "analyzed" is a property of the root symbol.
   private _analyzed: boolean = false;
 
   public constructor(parameters: IAstSymbolParameters) {
@@ -83,9 +85,12 @@ export class AstSymbol {
   /**
    * Returns true if the AstSymbolTable.analyze() was called for this object.
    * See that function for details.
+   * @remarks
+   * AstSymbolTable.analyze() is always performed on the root AstSymbol.  This function
+   * returns true if-and-only-if the root symbol was analyzed.
    */
   public get analyzed(): boolean {
-    return this._analyzed;
+    return this.rootAstSymbol._analyzed;
   }
 
   /**
@@ -108,6 +113,9 @@ export class AstSymbol {
    * @internal
    */
   public _notifyDeclarationAttach(astDeclaration: AstDeclaration): void {
+    if (this.analyzed) {
+      throw new Error('Program Bug: _notifyDeclarationAttach() called after analysis is already complete');
+    }
     this._astDeclarations.push(astDeclaration);
   }
 
@@ -117,6 +125,9 @@ export class AstSymbol {
    * @internal
    */
   public _notifyAnalyzed(): void {
+    if (this.parentAstSymbol) {
+      throw new Error('Program Bug: _notifyAnalyzed() called for an AstSymbol which is not the root');
+    }
     this._analyzed = true;
   }
 
