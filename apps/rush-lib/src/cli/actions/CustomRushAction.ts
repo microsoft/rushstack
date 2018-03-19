@@ -16,7 +16,7 @@ import {
 
 import {
   CommandLineFlagParameter,
-  CommandLineIntegerParameter,
+  CommandLineStringParameter,
   CommandLineStringListParameter,
   CommandLineOptionParameter,
   ICommandLineActionOptions
@@ -39,7 +39,7 @@ export class CustomRushAction extends BaseRushAction {
   private _fromFlag: CommandLineStringListParameter;
   private _toFlag: CommandLineStringListParameter;
   private _verboseParameter: CommandLineFlagParameter;
-  private _parallelismParameter: CommandLineIntegerParameter | undefined;
+  private _parallelismParameter: CommandLineStringParameter | undefined;
 
   constructor(private _parser: RushCommandLineParser,
     options: ICommandLineActionOptions,
@@ -75,9 +75,9 @@ export class CustomRushAction extends BaseRushAction {
 
     // if this is parallizable, then use the value from the flag (undefined or a number),
     // if this is not parallelized, then use 1 core
-    const parallelism: number | undefined = this._isParallelized()
+    const parallelism: string | undefined = this._isParallelized()
       ? this._parallelismParameter!.value
-      : 1;
+      : '1';
 
     // collect all custom flags here
     const customFlags: string[] = [];
@@ -127,12 +127,13 @@ export class CustomRushAction extends BaseRushAction {
 
   protected onDefineParameters(): void {
     if (this._isParallelized()) {
-      this._parallelismParameter = this.defineIntegerParameter({
+      this._parallelismParameter = this.defineStringParameter({
         parameterLongName: '--parallelism',
         parameterShortName: '-p',
         key: 'COUNT',
-        description: 'Specify the number of concurrent build processes.'
-          + ' If omitted, the parallelism will be based on the number of CPU cores.'
+        description: 'Specify the number of concurrent build processes'
+          + ' The value "max" can be specified to indicate the number of CPU cores.'
+          + ' If this parameter omitted, the default value depends on the operating system and number of CPU cores.'
       });
     }
     this._toFlag = this.defineStringListParameter({
