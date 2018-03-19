@@ -125,7 +125,7 @@ export class AstSymbol {
    * @internal
    */
   public _notifyAnalyzed(): void {
-    if (this.parentAstSymbol) {
+    if (this.rootAstSymbol !== this) {
       throw new Error('Program Bug: _notifyAnalyzed() called for an AstSymbol which is not the root');
     }
     this._analyzed = true;

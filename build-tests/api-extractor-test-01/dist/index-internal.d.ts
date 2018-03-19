@@ -173,6 +173,40 @@ export declare interface IInterfaceAsDefaultExport {
 }
 
 /**
+ * IMergedInterface instance 1.
+ * @alpha
+ */
+export declare interface IMergedInterface {
+    type: string;
+    reference: IMergedInterfaceReferencee;
+}
+
+/**
+ * IMergedInterface instance 2.
+ * @alpha
+ */
+export declare interface IMergedInterface {
+    type: string;
+    reference: IMergedInterfaceReferencee;
+}
+
+/**
+ * @alpha
+ */
+export declare interface IMergedInterfaceReferencee {
+}
+
+/**
+ * api-extractor-test-01
+ *
+ * @remarks
+ * This library is consumed by api-extractor-test-02 and api-extractor-test-03.
+ * It tests the basic types of definitions, and all the weird cases for following
+ * chains of type aliases.
+ *
+ * @packagedocumentation
+ */
+/**
  * A simple, normal definition
  * @public
  */
