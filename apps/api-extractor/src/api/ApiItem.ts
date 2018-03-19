@@ -401,14 +401,3 @@ export type ApiMember = IApiProperty | IApiMethod | IApiConstructor;
  */
 export type ApiItem = IApiProperty | ApiMember | IApiFunction | IApiConstructor |
    IApiClass | IApiEnum | IApiEnumMember | IApiInterface | IApiNamespace | IApiPackage;
-
-/**
- * Describes a return type and description of the return type
- * that is given in documentation comments.
- *
- * @alpha
- */
-export interface IApiReturnValue {
-  type: string;
-  description: MarkupBasicElement[];
-}
