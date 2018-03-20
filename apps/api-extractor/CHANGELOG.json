@@ -2,6 +2,21 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "5.5.1",
+      "tag": "@microsoft/api-extractor_v5.5.1",
+      "date": "Tue, 20 Mar 2018 02:44:45 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve packageTypings generator to trim nested members according to their release tag"
+          },
+          {
+            "comment": "Fix a bug where packageTypings failed to handle merged declarations properly"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.5.0",
       "tag": "@microsoft/api-extractor_v5.5.0",
       "date": "Sat, 17 Mar 2018 02:54:22 GMT",

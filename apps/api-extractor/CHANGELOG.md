@@ -1,6 +1,14 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sat, 17 Mar 2018 02:54:22 GMT and should not be manually modified.
+This log was last generated on Tue, 20 Mar 2018 02:44:45 GMT and should not be manually modified.
+
+## 5.5.1
+Tue, 20 Mar 2018 02:44:45 GMT
+
+### Patches
+
+- Improve packageTypings generator to trim nested members according to their release tag
+- Fix a bug where packageTypings failed to handle merged declarations properly
 
 ## 5.5.0
 Sat, 17 Mar 2018 02:54:22 GMT
