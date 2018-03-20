@@ -1,11 +1,13 @@
-const fsx = require('fs-extra');
+const fsx = require('../api-extractor-test-04/node_modules/fs-extra');
 const child_process = require('child_process');
 const path = require('path');
 const process = require('process');
 
-function executeCommand(command) {
+console.log(`==> Invoking tsc in the "preview-consumer" folder`);
+
+function executeCommand(command, cwd) {
   console.log('---> ' + command);
-  child_process.execSync(command, { stdio: 'inherit' });
+  child_process.execSync(command, { stdio: 'inherit', cwd: cwd });
 }
 
 // Clean the old build outputs
@@ -23,5 +25,12 @@ if (process.argv.indexOf('--production') >= 0) {
 } else {
   executeCommand('node node_modules/@microsoft/api-extractor/lib/start run --local');
 }
+
+// Run the TypeScript compiler in the preview-consumer folder
+console.log(`==> Invoking tsc in the "preview-consumer" folder`);
+
+fsx.emptyDirSync('preview-consumer/lib');
+const tscPath = path.resolve('node_modules/typescript/lib/tsc');
+executeCommand(`node ${tscPath}`, 'preview-consumer');
 
 console.log(`==> Finished build.js for ${path.basename(process.cwd())}`);
