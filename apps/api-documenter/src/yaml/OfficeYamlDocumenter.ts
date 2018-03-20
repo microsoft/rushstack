@@ -90,9 +90,6 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     if (uid.search(/Excel/i) !== -1) {
       return markup.replace(/\\\[(Api set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=excel) \\]`);
     }
-    else if (uid.search(/Word/i) !== -1) {
-      return markup.replace(/\\\[(Api set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=word) \\]`);
-    }
     else if (uid.search(/OneNote/i) !== -1) {
       return markup.replace(/\\\[(Api set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=onenote) \\]`);
     }
@@ -101,6 +98,9 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     }
     else if (uid.search(/Outlook/i) !== -1) {
       return markup.replace(/\\\[(Api set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=outlook) \\]`);
+    }
+    else if (uid.search(/Word/i) !== -1) {
+      return markup.replace(/\\\[(Api set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=word) \\]`);
     }
     else {
       return markup.replace(/\\\[(Api set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com) \\]`);
