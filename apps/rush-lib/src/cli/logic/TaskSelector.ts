@@ -6,7 +6,7 @@ import { default as RushConfigurationProject } from '../../data/RushConfiguratio
 import { JsonFile } from '@microsoft/node-core-library';
 
 import TaskRunner from '../taskRunner/TaskRunner';
-import ProjectBuildTask from '../taskRunner/ProjectBuildTask';
+import ProjectTask from '../taskRunner/ProjectTask';
 
 export interface ITaskSelectorConstructor {
   rushConfiguration: RushConfiguration;
@@ -18,13 +18,14 @@ export interface ITaskSelectorConstructor {
   parallelism:  string;
   isIncrementalBuildAllowed: boolean;
   changedProjectsOnly: boolean;
+  optional: boolean;
 }
 
 /**
  * This class is responsible for:
  *  - based on to/from flags, solving the dependency graph and figuring out which projects need to be run
- *  - creating a ProjectBuildTask for each project that needs to be built
- *  - registering the necessary ProjectBuildTasks with the TaskRunner, which actually orchestrates execution
+ *  - creating a ProjectTask for each project that needs to be built
+ *  - registering the necessary ProjectTasks with the TaskRunner, which actually orchestrates execution
  *
  * This class is currently only used by CustomRushAction
  */
@@ -162,12 +163,14 @@ export class TaskSelector {
   private _registerTask(project: RushConfigurationProject | undefined): void {
     if (project) {
 
-      const projectTask: ProjectBuildTask = new ProjectBuildTask(
+      const projectTask: ProjectTask = new ProjectTask(
         project,
         this._options.rushConfiguration,
         this._options.commandToRun,
         this._options.customFlags,
-        this._options.isIncrementalBuildAllowed);
+        this._options.isIncrementalBuildAllowed,
+        this._options.optional
+      );
 
       if (!this._taskRunner.hasTask(projectTask.name)) {
         this._taskRunner.addTask(projectTask);

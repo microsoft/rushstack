@@ -20,7 +20,7 @@
         "title": "Custom Command",
         "type": "object",
         "additionalProperties": false,
-        "required": [ "name", "summary", "documentation", "parallelized" ],
+        "required": [ "name", "summary", "documentation", "parallelized", "optional" ],
         "properties": {
           "name": {
             "title": "Custom Command Name",
@@ -40,6 +40,11 @@
           "parallelized": {
             "title": "Is Parallelized",
             "description": "Describes whether or not this command can be run in parallel (with multiple instances running on several projects simultaneously). Defaults to 'true'.",
+            "type": "boolean"
+          },
+          "optional": {
+            "title": "Is optional and only applies to projects with corresponding npm script",
+            "description": "Indicates whether the command runs on every project or just projects that have the corresponding npm script.",
             "type": "boolean"
           }
         }

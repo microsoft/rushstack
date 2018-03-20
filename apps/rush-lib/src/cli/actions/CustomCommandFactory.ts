@@ -46,11 +46,13 @@ export class CustomCommandFactory {
           throw new Error(`Cannot define two custom actions with the same name: "${command.name}"`);
         }
         customActions.set(command.name, new CustomRushAction(parser, {
-          actionVerb: command.name,
-          summary: command.summary,
-          documentation: command.documentation || command.summary
-        },
-        command.parallelized));
+            actionVerb: command.name,
+            summary: command.summary,
+            documentation: command.documentation || command.summary
+          },
+          command.parallelized,
+          command.optional
+        ));
       });
 
       // Associate each custom option to a command
