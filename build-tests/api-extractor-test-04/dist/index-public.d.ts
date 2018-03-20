@@ -21,15 +21,27 @@
 
 /* Excluded from this release type: InternalClass */
 
-/* Excluded from this release type: IPublicClassParameters */
+/* Excluded from this release type: IPublicClassInternalParameters */
+
+/**
+ * This is a public class
+ * @public
+ */
+export declare interface IPublicComplexInterface {
+    /**
+     * Example of trimming an indexer.
+     * @internal
+     */
+    /* Excluded from this release type: __index */
+    /* Excluded from this release type: __new */
+}
 
 /**
  * This is a public class
  * @public
  */
 export declare class PublicClass {
-    /** @internal */
-    constructor(parameters: IPublicClassParameters);
+    /* Excluded from this release type: __constructor */
     /* Excluded from this release type: betaField */
     /**
      * This is a comment

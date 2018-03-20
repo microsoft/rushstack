@@ -150,7 +150,24 @@ export declare class InternalClass {
  * These are internal constructor parameters for PublicClass's internal constructor.
  * @internal
  */
-export declare interface IPublicClassParameters {
+export declare interface IPublicClassInternalParameters {
+}
+
+/**
+ * This is a public class
+ * @public
+ */
+export declare interface IPublicComplexInterface {
+    /**
+     * Example of trimming an indexer.
+     * @internal
+     */
+    [key: string]: IPublicClassInternalParameters;
+    /**
+     * Example of trimming a construct signature.
+     * @internal
+     */
+    new (): any;
 }
 
 /**
@@ -159,7 +176,7 @@ export declare interface IPublicClassParameters {
  */
 export declare class PublicClass {
     /** @internal */
-    constructor(parameters: IPublicClassParameters);
+    constructor(parameters: IPublicClassInternalParameters);
     /**
      * This is a beta field
      * @beta

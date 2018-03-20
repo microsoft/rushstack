@@ -46,13 +46,21 @@ class InternalClass {
 
 // WARNING: Because this definition is explicitly marked as @internal, an underscore prefix ("_") should be added to its name
 // @internal
-interface IPublicClassParameters {
+interface IPublicClassInternalParameters {
+}
+
+// @public
+interface IPublicComplexInterface {
+  // @internal
+  [key: string]: IPublicClassInternalParameters;
+  // @internal
+  new (): any;
 }
 
 // @public
 class PublicClass {
   // @internal
-  constructor(parameters: IPublicClassParameters);
+  constructor(parameters: IPublicClassInternalParameters);
   // @internal
   _internalMember(): void;
   // @alpha

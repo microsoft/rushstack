@@ -48,9 +48,12 @@ export class SymbolAnalyzer {
     // (alphabetical order)
     switch (kind) {
       case ts.SyntaxKind.ClassDeclaration:
+      case ts.SyntaxKind.Constructor: // Example: new(x: number);
+      case ts.SyntaxKind.ConstructSignature: // Example: new(x: number);
       case ts.SyntaxKind.EnumDeclaration:
       case ts.SyntaxKind.EnumMember:
       case ts.SyntaxKind.FunctionDeclaration:
+      case ts.SyntaxKind.IndexSignature:  // Example: [key: string]: string
       case ts.SyntaxKind.InterfaceDeclaration:
       case ts.SyntaxKind.MethodDeclaration:
       case ts.SyntaxKind.MethodSignature:
@@ -71,25 +74,6 @@ export class SymbolAnalyzer {
       // source files, and thus wants to ignore them in general.
     }
 
-    return false;
-  }
-
-  /**
-   * This function detects the subset of isAstDeclaration() items that can use
-   * the "export" keyword.  This is part of the heuristic for recognizing ambient types.
-   */
-  public static isExportableAstDeclaration(kind: ts.SyntaxKind): boolean {
-    // (alphabetical order)
-    switch (kind) {
-      case ts.SyntaxKind.ClassDeclaration:
-      case ts.SyntaxKind.EnumDeclaration:
-      case ts.SyntaxKind.FunctionDeclaration:
-      case ts.SyntaxKind.InterfaceDeclaration:
-      case ts.SyntaxKind.ModuleDeclaration:
-      case ts.SyntaxKind.TypeAliasDeclaration:
-      case ts.SyntaxKind.VariableDeclaration:
-      return true;
-    }
     return false;
   }
 

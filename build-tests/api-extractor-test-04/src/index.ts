@@ -11,7 +11,7 @@
 
 export { AlphaClass } from './AlphaClass';
 export { BetaClass } from './BetaClass';
-export { PublicClass, IPublicClassParameters } from './PublicClass';
+export { PublicClass, IPublicClassInternalParameters } from './PublicClass';
 export { InternalClass } from './InternalClass';
 export { EntangledNamespace } from './EntangledNamespace';
 
@@ -32,3 +32,5 @@ import { AlphaClass } from './AlphaClass';
  * @alpha
  */
 export type ExportedAlias = AlphaClass;
+
+export { IPublicComplexInterface } from './IPublicComplexInterface';

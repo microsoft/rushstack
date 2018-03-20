@@ -5,7 +5,7 @@
  * These are internal constructor parameters for PublicClass's internal constructor.
  * @internal
  */
-export interface IPublicClassParameters {
+export interface IPublicClassInternalParameters {
 }
 
 /**
@@ -14,7 +14,7 @@ export interface IPublicClassParameters {
  */
 export class PublicClass {
   /** @internal */
-  constructor(parameters: IPublicClassParameters) {
+  constructor(parameters: IPublicClassInternalParameters) {
   }
 
   /**
