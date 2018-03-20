@@ -59,7 +59,7 @@
   },
   "devDependencies": {
     "@types/z-schema": "3.16.31",
-    "@microsoft/node-library-build": "4.3.13",
+    "@microsoft/node-library-build": "4.3.24",
     "chai": "~3.5.0"
   }
 }
