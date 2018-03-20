@@ -93,7 +93,7 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     else if (uid.search(/Word/i) !== -1) {
       return markup.replace(/\\\[(Api set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=word) \\]`);
     }
-    else if (uid.search(/OneNotel/i) !== -1) {
+    else if (uid.search(/OneNote/i) !== -1) {
       return markup.replace(/\\\[(Api set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=onenote) \\]`);
     }
     else if (uid.search(/Visio/i) !== -1) {
