@@ -7,54 +7,51 @@
  */
 
 
-// Removed for this release type: AlphaClass
+/* Excluded from this release type: AlphaClass */
 
-// Removed for this release type: BetaClass
+/* Excluded from this release type: BetaClass */
 
-// Removed for this release type: BetaInterface
+/* Excluded from this release type: BetaInterface */
 
-// Removed for this release type: ConstEnum
+/* Excluded from this release type: ConstEnum */
 
-// Removed for this release type: EntangledNamespace
+/* Excluded from this release type: EntangledNamespace */
+
+/* Excluded from this release type: ExportedAlias */
+
+/* Excluded from this release type: InternalClass */
+
+/* Excluded from this release type: IPublicClassInternalParameters */
 
 /**
- * This is an exported type alias.
+ * This is a public class
+ * @public
  */
-export declare type ExportedAlias = AlphaClass;
-
-// Removed for this release type: InternalClass
+export declare interface IPublicComplexInterface {
+    /**
+     * Example of trimming an indexer.
+     * @internal
+     */
+    /* Excluded from this release type: __index */
+    /* Excluded from this release type: __new */
+}
 
 /**
  * This is a public class
  * @public
  */
 export declare class PublicClass {
-    /**
-     * This is a beta field
-     * @beta
-     */
-    betaField: string;
+    /* Excluded from this release type: __constructor */
+    /* Excluded from this release type: betaField */
     /**
      * This is a comment
      */
     undecoratedMember(): void;
-    /**
-     * This is a beta comment
-     * @beta
-     */
-    betaMember(): void;
-    /**
-     * This is an alpha comment
-     * @alpha
-     */
-    alphaMember(): void;
-    /**
-     * This is an internal member
-     * @internal
-     */
-    _internalMember(): void;
+    /* Excluded from this release type: betaMember */
+    /* Excluded from this release type: alphaMember */
+    /* Excluded from this release type: _internalMember */
 }
 
-// Removed for this release type: RegularEnum
+/* Excluded from this release type: RegularEnum */
 
 declare const variableDeclaration: string;

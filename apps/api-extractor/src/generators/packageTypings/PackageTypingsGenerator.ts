@@ -10,7 +10,7 @@ import { Text } from '@microsoft/node-core-library';
 import { ExtractorContext } from '../../ExtractorContext';
 import { IndentedWriter } from '../../utils/IndentedWriter';
 import { TypeScriptHelpers } from '../../utils/TypeScriptHelpers';
-import { Span } from '../../utils/Span';
+import { Span, SpanModification } from '../../utils/Span';
 import { ReleaseTag } from '../../aedoc/ReleaseTag';
 import { AstSymbolTable } from './AstSymbolTable';
 import { AstEntryPoint } from './AstEntryPoint';
@@ -18,6 +18,7 @@ import { AstSymbol } from './AstSymbol';
 import { AstImport } from './AstImport';
 import { DtsEntry } from './DtsEntry';
 import { AstDeclaration } from './AstDeclaration';
+import { SymbolAnalyzer } from './SymbolAnalyzer';
 
 /**
  * Used with PackageTypingsGenerator.writeTypingsFile()
@@ -53,6 +54,7 @@ export class PackageTypingsGenerator {
   private _dtsEntries: DtsEntry[] = [];
   private _dtsEntriesByAstSymbol: Map<AstSymbol, DtsEntry> = new Map<AstSymbol, DtsEntry>();
   private _dtsEntriesBySymbol: Map<ts.Symbol, DtsEntry> = new Map<ts.Symbol, DtsEntry>();
+  private _releaseTagByAstSymbol: Map<AstSymbol, ReleaseTag> = new Map<AstSymbol, ReleaseTag>();
 
   /**
    * A list of names (e.g. "example-library") that should appear in a reference like this:
@@ -131,13 +133,10 @@ export class PackageTypingsGenerator {
     let dtsEntry: DtsEntry | undefined = this._dtsEntriesByAstSymbol.get(astSymbol);
 
     if (!dtsEntry) {
-      const releaseTag: ReleaseTag = this._getReleaseTagForSymbol(astSymbol.followedSymbol);
-
       dtsEntry = new DtsEntry({
         astSymbol: astSymbol,
         originalName: exportedName || astSymbol.localName,
-        exported: !!exportedName,
-        releaseTag: releaseTag
+        exported: !!exportedName
       });
 
       this._dtsEntriesByAstSymbol.set(astSymbol, dtsEntry);
@@ -247,7 +246,9 @@ export class PackageTypingsGenerator {
     for (const dtsEntry of this._dtsEntries) {
       if (!dtsEntry.astSymbol.astImport) {
 
-        if (this._shouldIncludeReleaseTag(dtsEntry.releaseTag, dtsKind)) {
+        const releaseTag: ReleaseTag = this._getReleaseTagForAstSymbol(dtsEntry.astSymbol);
+
+        if (this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
 
           // Emit all the declarations for this entry
           for (const astDeclaration of dtsEntry.astSymbol.astDeclarations || []) {
@@ -255,12 +256,12 @@ export class PackageTypingsGenerator {
             indentedWriter.writeLine();
 
             const span: Span = new Span(astDeclaration.declaration);
-            this._modifySpan(span, dtsEntry);
+            this._modifySpan(span, dtsEntry, astDeclaration, dtsKind);
             indentedWriter.writeLine(span.getModifiedText());
           }
         } else {
           indentedWriter.writeLine();
-          indentedWriter.writeLine(`// Removed for this release type: ${dtsEntry.nameForEmit}`);
+          indentedWriter.writeLine(`/* Excluded from this release type: ${dtsEntry.nameForEmit} */`);
         }
       }
     }
@@ -269,11 +270,12 @@ export class PackageTypingsGenerator {
   /**
    * Before writing out a declaration, _modifySpan() applies various fixups to make it nice.
    */
-  private _modifySpan(span: Span, dtsEntry: DtsEntry): void {
+  private _modifySpan(span: Span, dtsEntry: DtsEntry, astDeclaration: AstDeclaration,
+    dtsKind: PackageTypingsDtsKind): void {
+
     const previousSpan: Span | undefined = span.previousSibling;
 
     let recurseChildren: boolean = true;
-
     switch (span.kind) {
       case ts.SyntaxKind.JSDocComment:
         // For now, we don't transform JSDoc comment nodes at all
@@ -295,7 +297,12 @@ export class PackageTypingsGenerator {
       case ts.SyntaxKind.TypeKeyword:
       case ts.SyntaxKind.FunctionKeyword:
         // Replace the stuff we possibly deleted above
-        let replacedModifiers: string = 'declare ';
+        let replacedModifiers: string = '';
+
+        // Add a declare statement for root declarations (but not for nested declarations)
+        if (!astDeclaration.parent) {
+          replacedModifiers += 'declare ';
+        }
 
         if (dtsEntry.exported) {
           replacedModifiers = 'export ' + replacedModifiers;
@@ -364,7 +371,47 @@ export class PackageTypingsGenerator {
 
     if (recurseChildren) {
       for (const child of span.children) {
-        this._modifySpan(child, dtsEntry);
+        let childAstDeclaration: AstDeclaration = astDeclaration;
+
+        // Should we trim this node?
+        let trimmed: boolean = false;
+        if (SymbolAnalyzer.isAstDeclaration(child.kind)) {
+          childAstDeclaration = this._astSymbolTable.getChildAstDeclarationByNode(child.node, astDeclaration);
+
+          const releaseTag: ReleaseTag = this._getReleaseTagForAstSymbol(childAstDeclaration.astSymbol);
+          if (!this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
+            const modification: SpanModification = child.modification;
+
+            // Yes, trim it and stop here
+            const name: string = childAstDeclaration.astSymbol.localName;
+            modification.omitChildren = true;
+
+            modification.prefix = `/* Excluded from this release type: ${name} */`;
+            modification.suffix = '';
+
+            if (child.children.length > 0) {
+              // If there are grandchildren, then keep the last grandchild's separator,
+              // since it often has useful whitespace
+              modification.suffix = child.children[child.children.length - 1].separator;
+            }
+
+            if (child.nextSibling) {
+              // If the thing we are trimming is followed by a comma, then trim the comma also.
+              // An example would be an enum member.
+              if (child.nextSibling.kind === ts.SyntaxKind.CommaToken) {
+                // Keep its separator since it often has useful whitespace
+                modification.suffix += child.nextSibling.separator;
+                child.nextSibling.modification.skipAll();
+              }
+            }
+
+            trimmed = true;
+          }
+        }
+
+        if (!trimmed) {
+          this._modifySpan(child, dtsEntry, childAstDeclaration, dtsKind);
+        }
       }
     }
   }
@@ -383,46 +430,78 @@ export class PackageTypingsGenerator {
     throw new Error(`PackageTypingsDtsKind[dtsKind] is not implemented`);
   }
 
+  private _getReleaseTagForAstSymbol(astSymbol: AstSymbol): ReleaseTag {
+    let releaseTag: ReleaseTag | undefined = this._releaseTagByAstSymbol.get(astSymbol);
+    if (releaseTag) {
+      return releaseTag;
+    }
+
+    releaseTag = ReleaseTag.None;
+
+    let current: AstSymbol | undefined = astSymbol;
+    while (current) {
+      for (const astDeclaration of current.astDeclarations) {
+        const declarationReleaseTag: ReleaseTag = this._getReleaseTagForDeclaration(astDeclaration.declaration);
+        if (releaseTag !== ReleaseTag.None && declarationReleaseTag !== releaseTag) {
+          // this._analyzeWarnings.push('WARNING: Conflicting release tags found for ' + symbol.name);
+          break;
+        }
+
+        releaseTag = declarationReleaseTag;
+      }
+
+      if (releaseTag !== ReleaseTag.None) {
+        break;
+      }
+
+      current = current.parentAstSymbol;
+    }
+
+    if (releaseTag === ReleaseTag.None) {
+      releaseTag = ReleaseTag.Public; // public by default
+    }
+
+    this._releaseTagByAstSymbol.set(astSymbol, releaseTag);
+
+    return releaseTag;
+  }
+
   // NOTE: THIS IS A TEMPORARY WORKAROUND.
   // In the near future we will overhaul the AEDoc parser to separate syntactic/semantic analysis,
   // at which point this will be wired up to the same ApiDocumentation layer used for the API Review files
-  private _getReleaseTagForSymbol(symbol: ts.Symbol): ReleaseTag {
-    const fullyFollowedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(symbol, this._typeChecker);
-
+  private _getReleaseTagForDeclaration(declaration: ts.Node): ReleaseTag {
     let releaseTag: ReleaseTag = ReleaseTag.None;
 
     // We don't want to match "bill@example.com".  But we do want to match "/**@public*/".
     // So for now we require whitespace or a star before/after the string.
     const releaseTagRegExp: RegExp = /(?:\s|\*)@(internal|alpha|beta|public)(?:\s|\*)/g;
 
-    for (const declaration of fullyFollowedSymbol.declarations || []) {
-      const sourceFileText: string = declaration.getSourceFile().text;
+    const sourceFileText: string = declaration.getSourceFile().text;
 
-      for (const commentRange of TypeScriptHelpers.getJSDocCommentRanges(declaration, sourceFileText) || []) {
-        // NOTE: This string includes "/**"
-        const comment: string = sourceFileText.substring(commentRange.pos, commentRange.end);
+    for (const commentRange of TypeScriptHelpers.getJSDocCommentRanges(declaration, sourceFileText) || []) {
+      // NOTE: This string includes "/**"
+      const comment: string = sourceFileText.substring(commentRange.pos, commentRange.end);
 
-        let match: RegExpMatchArray | null;
-        while (match = releaseTagRegExp.exec(comment)) {
-          let foundReleaseTag: ReleaseTag = ReleaseTag.None;
-          switch (match[1]) {
-            case 'internal':
-              foundReleaseTag = ReleaseTag.Internal; break;
-            case 'alpha':
-              foundReleaseTag = ReleaseTag.Alpha; break;
-            case 'beta':
-              foundReleaseTag = ReleaseTag.Beta; break;
-            case 'public':
-              foundReleaseTag = ReleaseTag.Public; break;
-          }
-
-          if (releaseTag !== ReleaseTag.None && foundReleaseTag !== releaseTag) {
-            // this._analyzeWarnings.push('WARNING: Conflicting release tags found for ' + symbol.name);
-            return releaseTag;
-          }
-
-          releaseTag = foundReleaseTag;
+      let match: RegExpMatchArray | null;
+      while (match = releaseTagRegExp.exec(comment)) {
+        let foundReleaseTag: ReleaseTag = ReleaseTag.None;
+        switch (match[1]) {
+          case 'internal':
+            foundReleaseTag = ReleaseTag.Internal; break;
+          case 'alpha':
+            foundReleaseTag = ReleaseTag.Alpha; break;
+          case 'beta':
+            foundReleaseTag = ReleaseTag.Beta; break;
+          case 'public':
+            foundReleaseTag = ReleaseTag.Public; break;
         }
+
+        if (releaseTag !== ReleaseTag.None && foundReleaseTag !== releaseTag) {
+          // this._analyzeWarnings.push('WARNING: Conflicting release tags found for ' + symbol.name);
+          return releaseTag;
+        }
+
+        releaseTag = foundReleaseTag;
       }
     }
 

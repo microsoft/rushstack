@@ -95,12 +95,12 @@ export declare namespace EntangledNamespace {
      * This is a nested namespace.
      * The "beta" release tag is inherited from the parent.
      */
-    export declare namespace N2 {
+    export namespace N2 {
         /**
          * This class is in a nested namespace.
          * @alpha
          */
-        export declare class ClassX {
+        export class ClassX {
             /**
              * The "alpha" release tag is inherited from the parent.
              */
@@ -111,12 +111,12 @@ export declare namespace EntangledNamespace {
      * This is a nested namespace.
      * The "beta" release tag is inherited from the parent.
      */
-    export declare namespace N3 {
+    export namespace N3 {
         /**
          * This class is in a nested namespace.
          * @internal
          */
-        export declare class _ClassY {
+        export class _ClassY {
             /**
              * This definition refers to a "alpha" namespaced class.
              */
@@ -131,6 +131,7 @@ export declare namespace EntangledNamespace {
 
 /**
  * This is an exported type alias.
+ * @alpha
  */
 export declare type ExportedAlias = AlphaClass;
 
@@ -146,10 +147,36 @@ export declare class InternalClass {
 }
 
 /**
+ * These are internal constructor parameters for PublicClass's internal constructor.
+ * @internal
+ */
+export declare interface IPublicClassInternalParameters {
+}
+
+/**
+ * This is a public class
+ * @public
+ */
+export declare interface IPublicComplexInterface {
+    /**
+     * Example of trimming an indexer.
+     * @internal
+     */
+    [key: string]: IPublicClassInternalParameters;
+    /**
+     * Example of trimming a construct signature.
+     * @internal
+     */
+    new (): any;
+}
+
+/**
  * This is a public class
  * @public
  */
 export declare class PublicClass {
+    /** @internal */
+    constructor(parameters: IPublicClassInternalParameters);
     /**
      * This is a beta field
      * @beta
