@@ -60,10 +60,10 @@ export class AstSymbol {
    * Returns the symbol of the parent of this AstSymbol, or undefined if there is no parent.
    * @remarks
    * If a symbol has multiple declarations, we assume (as an axiom) that their parent
-   * decelarations will belong to the same symbol.  This means that the "parent" of a
+   * declarations will belong to the same symbol.  This means that the "parent" of a
    * symbol is a well-defined concept.  However, the "children" of a symbol are not very
    * meaningful, because different declarations may have different nested members,
-   * and this topology is generally important.
+   * so we usually need to traverse declarations to find children.
    */
   public readonly parentAstSymbol: AstSymbol | undefined;
 
