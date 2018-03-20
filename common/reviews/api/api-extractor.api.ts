@@ -157,9 +157,7 @@ interface IApiProperty extends IApiBaseDefinition {
 
 // @alpha
 interface IApiReturnValue {
-  // (undocumented)
   description: MarkupBasicElement[];
-  // (undocumented)
   type: string;
 }
 

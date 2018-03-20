@@ -13,12 +13,6 @@
  */
 
 /**
- * Test the alias-following logic:  This class gets aliased twice before being
- * exported from the package.
- */
-export { ReexportedClass1 as ReexportedClass } from './ReexportedClass1';
-
-/**
  * A simple, normal definition
  * @public
  */
@@ -86,20 +80,28 @@ export class DecoratorTest {
   }
 }
 
-export { ForgottenExportConsumer1 } from './ForgottenExportConsumer1';
-export { ForgottenExportConsumer2 } from './ForgottenExportConsumer2';
-export { ForgottenExportConsumer3 } from './ForgottenExportConsumer3';
-
-export { default as IInterfaceAsDefaultExport } from './IInterfaceAsDefaultExport';
-
 export { default as AbstractClass } from './AbstractClass';
 export { default as AbstractClass2, AbstractClass3 } from './AbstractClass2';
+
+export { ClassWithTypeLiterals } from './ClassWithTypeLiterals';
+
+export * from './DeclarationMerging';
 
 export {
   DefaultExportEdgeCase,
   default as ClassExportedAsDefault
 } from './DefaultExportEdgeCase';
 
-export { TypeReferencesInAedoc as _TypeReferencesInAedoc } from './TypeReferencesInAedoc';
+export { ForgottenExportConsumer1 } from './ForgottenExportConsumer1';
+export { ForgottenExportConsumer2 } from './ForgottenExportConsumer2';
+export { ForgottenExportConsumer3 } from './ForgottenExportConsumer3';
 
-export { ClassWithTypeLiterals } from './ClassWithTypeLiterals';
+export { default as IInterfaceAsDefaultExport } from './IInterfaceAsDefaultExport';
+
+/**
+ * Test the alias-following logic:  This class gets aliased twice before being
+ * exported from the package.
+ */
+export { ReexportedClass1 as ReexportedClass } from './ReexportedClass1';
+
+export { TypeReferencesInAedoc as _TypeReferencesInAedoc } from './TypeReferencesInAedoc';
