@@ -30,7 +30,7 @@
     "through2": "~2.0.1"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "4.3.13",
+    "@microsoft/node-library-build": "4.3.24",
     "@types/gulp": "3.8.32",
     "@types/gulp-util": "3.0.30",
     "@types/mime": "0.0.29",
