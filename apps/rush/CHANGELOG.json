@@ -2,6 +2,27 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "4.3.1",
+      "tag": "@microsoft/rush_v4.3.1",
+      "date": "Tue, 20 Mar 2018 20:02:56 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add support for overriding the default windows parallelism with 'max'."
+          },
+          {
+            "comment": "Remove IPackageJson API. Consumers should now use the equivalent definition from @microsoft/node-core-library instead."
+          },
+          {
+            "comment": "Move the environment checks from rush-lib to rush"
+          },
+          {
+            "comment": "Fix an annoyance where common/temp/shrinkwrap.yaml was formatted in a way that made diffs less readable"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.3.0",
       "tag": "@microsoft/rush_v4.3.0",
       "date": "Fri, 02 Mar 2018 02:45:37 GMT",

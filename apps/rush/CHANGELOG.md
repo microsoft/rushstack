@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 02 Mar 2018 02:45:37 GMT and should not be manually modified.
+This log was last generated on Tue, 20 Mar 2018 20:02:56 GMT and should not be manually modified.
+
+## 4.3.1
+Tue, 20 Mar 2018 20:02:56 GMT
+
+### Updates
+
+- Add support for overriding the default windows parallelism with 'max'.
+- Remove IPackageJson API. Consumers should now use the equivalent definition from @microsoft/node-core-library instead.
+- Move the environment checks from rush-lib to rush
+- Fix an annoyance where common/temp/shrinkwrap.yaml was formatted in a way that made diffs less readable
 
 ## 4.3.0
 Fri, 02 Mar 2018 02:45:37 GMT
