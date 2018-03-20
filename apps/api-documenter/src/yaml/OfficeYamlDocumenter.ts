@@ -63,26 +63,47 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
         yamlItem.remarks = '';
       }
 
-      yamlItem.remarks += '\n\n## Snippets\n';
+      yamlItem.remarks += '\n\n#### Examples\n';
       for (const snippet of snippets) {
-        yamlItem.remarks += '\n```typescript\n' + snippet + '\n```\n';
+        if (snippet.search(/await/) == -1) {
+          yamlItem.remarks += '\n```javascript\n' + snippet + '\n```\n';
+        } else {
+          yamlItem.remarks += '\n```typescript\n' + snippet + '\n```\n';
+        }
       }
     }
 
     if (yamlItem.summary) {
-      yamlItem.summary = this._fixupApiSet(yamlItem.summary);
+      yamlItem.summary = this._fixupApiSet(yamlItem.summary, yamlItem.uid);
     }
     if (yamlItem.remarks) {
-      yamlItem.remarks = this._fixupApiSet(yamlItem.remarks);
+      yamlItem.remarks = this._fixupApiSet(yamlItem.remarks, yamlItem.uid);
     }
   }
 
-  private _fixupApiSet(markup: string): string {
+  private _fixupApiSet(markup: string, uid: string): string {
     // Search for a pattern such as this:
     // \[Api set: ExcelApi 1.1\]
     //
     // Hyperlink it like this:
-    // \[ [Api set: ExcelApi 1.1](http://bing.com) \]
-    return markup.replace(/\\\[(Api set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com) \\]`);
+    // \[ [Api set: ExcelApi 1.1](http://bing.com?type=excel) \]
+    if (uid.search(/Excel/i) !== -1) {
+      return markup.replace(/\\\[(Api set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=excel) \\]`);
+    }
+    else if (uid.search(/Word/i) !== -1) {
+      return markup.replace(/\\\[(Api set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=word) \\]`);
+    }
+    else if (uid.search(/OneNotel/i) !== -1) {
+      return markup.replace(/\\\[(Api set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=onenote) \\]`);
+    }
+    else if (uid.search(/Visio/i) !== -1) {
+      return markup.replace(/\\\[(Api set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=visio) \\]`);
+    }
+    else if (uid.search(/Outlook/i) !== -1) {
+      return markup.replace(/\\\[(Api set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=outlook) \\]`);
+    }
+    else {
+      return markup.replace(/\\\[(Api set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com) \\]`);
+    }
   }
 }
