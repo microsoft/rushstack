@@ -110,6 +110,7 @@ export class Span {
 
   private _parent: Span | undefined;
   private _previousSibling: Span | undefined;
+  private _nextSibling: Span | undefined;
 
   private _separatorStartIndex: number;
   private _separatorEndIndex: number;
@@ -129,6 +130,10 @@ export class Span {
       const childSpan: Span = new Span(childNode);
       childSpan._parent = this;
       childSpan._previousSibling = previousChildSpan;
+
+      if (previousChildSpan) {
+        previousChildSpan._nextSibling = childSpan;
+      }
 
       this.children.push(childSpan);
 
@@ -189,6 +194,16 @@ export class Span {
    */
   public get previousSibling(): Span | undefined {
     return this._previousSibling;
+  }
+
+  /**
+   * If the current object is this.parent.children[i], then previousSibling corresponds
+   * to this.parent.children[i+1] if it exists.
+   * NOTE: This will be undefined for a root Span, even though the corresponding Node
+   * may have a previous sibling in the AST.
+   */
+  public get nextSibling(): Span | undefined {
+    return this._nextSibling;
   }
 
   /**

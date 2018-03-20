@@ -390,6 +390,16 @@ export class PackageTypingsGenerator {
               modification.suffix = child.children[child.children.length - 1].separator;
             }
 
+            if (child.nextSibling) {
+              // If the thing we are trimming is followed by a comma, then trim the comma also.
+              // An example would be an enum member.
+              if (child.nextSibling.kind === ts.SyntaxKind.CommaToken) {
+                // Keep its separator since it often has useful whitespace
+                modification.suffix += child.nextSibling.separator;
+                child.nextSibling.modification.skipAll();
+              }
+            }
+
             trimmed = true;
           }
         }

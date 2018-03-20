@@ -44,8 +44,8 @@ export declare const enum ConstEnum {
      * This member inherits its \@beta status from the parent
      */
     BetaMember2 = "BetaMember2",
-    /* Excluded from this release type: AlphaMember */,
-    /* Excluded from this release type: _InternalMember */,
+    /* Excluded from this release type: AlphaMember */
+    /* Excluded from this release type: _InternalMember */
 }
 
 /**
@@ -108,8 +108,8 @@ export declare enum RegularEnum {
      * This member inherits its \@beta status from the parent
      */
     BetaMember = 100,
-    /* Excluded from this release type: AlphaMember */,
-    /* Excluded from this release type: _InternalMember */,
+    /* Excluded from this release type: AlphaMember */
+    /* Excluded from this release type: _InternalMember */
 }
 
 declare const variableDeclaration: string;

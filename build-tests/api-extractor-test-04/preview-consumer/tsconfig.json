@@ -7,9 +7,6 @@
     "sourceMap": true,
     "experimentalDecorators": true,
     "strictNullChecks": true,
-    "types": [
-      "node"
-    ],
     "lib": [
       "es5",
       "scripthost",

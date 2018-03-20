@@ -29,5 +29,6 @@ import { AlphaClass } from './AlphaClass';
 
 /**
  * This is an exported type alias.
+ * @alpha
  */
 export type ExportedAlias = AlphaClass;
