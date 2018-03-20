@@ -172,9 +172,9 @@ export declare interface IInterfaceAsDefaultExport {
     member: string;
 }
 
-// Removed for this release type: IMergedInterface
+/* Excluded from this release type: IMergedInterface */
 
-// Removed for this release type: IMergedInterfaceReferencee
+/* Excluded from this release type: IMergedInterfaceReferencee */
 
 /**
  * api-extractor-test-01
