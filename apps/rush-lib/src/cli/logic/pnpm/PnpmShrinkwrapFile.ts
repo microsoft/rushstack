@@ -6,6 +6,15 @@ import * as semver from 'semver';
 import Utilities from '../../../utilities/Utilities';
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 
+// This is based on PNPM's own configuration:
+// https://github.com/pnpm/pnpm-shrinkwrap/blob/master/src/write.ts
+const SHRINKWRAP_YAML_FORMAT: yaml.DumpOptions = {
+  lineWidth: 1000,
+  noCompatMode: true,
+  noRefs: true,
+  sortKeys: true
+};
+
 interface IShrinkwrapDependencyJson {
   /** Information about the resolved package */
   resolution: {
@@ -118,9 +127,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    * Serializes the PNPM Shrinkwrap file
    */
   protected serialize(): string {
-    return yaml.safeDump(this._shrinkwrapJson, {
-      sortKeys: true
-    });
+    return yaml.safeDump(this._shrinkwrapJson, SHRINKWRAP_YAML_FORMAT);
   }
 
   /**
