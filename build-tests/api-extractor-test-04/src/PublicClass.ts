@@ -2,10 +2,21 @@
 // See LICENSE in the project root for license information.
 
 /**
+ * These are internal constructor parameters for PublicClass's internal constructor.
+ * @internal
+ */
+export interface IPublicClassParameters {
+}
+
+/**
  * This is a public class
  * @public
  */
 export class PublicClass {
+  /** @internal */
+  constructor(parameters: IPublicClassParameters) {
+  }
+
   /**
    * This is a beta field
    * @beta

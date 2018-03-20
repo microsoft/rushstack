@@ -21,11 +21,15 @@
 
 /* Excluded from this release type: InternalClass */
 
+/* Excluded from this release type: IPublicClassParameters */
+
 /**
  * This is a public class
  * @public
  */
 export declare class PublicClass {
+    /** @internal */
+    constructor(parameters: IPublicClassParameters);
     /* Excluded from this release type: betaField */
     /**
      * This is a comment

@@ -147,10 +147,19 @@ export declare class InternalClass {
 }
 
 /**
+ * These are internal constructor parameters for PublicClass's internal constructor.
+ * @internal
+ */
+export declare interface IPublicClassParameters {
+}
+
+/**
  * This is a public class
  * @public
  */
 export declare class PublicClass {
+    /** @internal */
+    constructor(parameters: IPublicClassParameters);
     /**
      * This is a beta field
      * @beta

@@ -44,8 +44,15 @@ class InternalClass {
   undecoratedMember(): void;
 }
 
+// WARNING: Because this definition is explicitly marked as @internal, an underscore prefix ("_") should be added to its name
+// @internal
+interface IPublicClassParameters {
+}
+
 // @public
 class PublicClass {
+  // @internal
+  constructor(parameters: IPublicClassParameters);
   // @internal
   _internalMember(): void;
   // @alpha

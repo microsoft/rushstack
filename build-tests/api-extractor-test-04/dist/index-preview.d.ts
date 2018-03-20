@@ -73,11 +73,15 @@ export declare namespace EntangledNamespace {
 
 /* Excluded from this release type: InternalClass */
 
+/* Excluded from this release type: IPublicClassParameters */
+
 /**
  * This is a public class
  * @public
  */
 export declare class PublicClass {
+    /** @internal */
+    constructor(parameters: IPublicClassParameters);
     /**
      * This is a beta field
      * @beta

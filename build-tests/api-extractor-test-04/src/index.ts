@@ -11,7 +11,7 @@
 
 export { AlphaClass } from './AlphaClass';
 export { BetaClass } from './BetaClass';
-export { PublicClass } from './PublicClass';
+export { PublicClass, IPublicClassParameters } from './PublicClass';
 export { InternalClass } from './InternalClass';
 export { EntangledNamespace } from './EntangledNamespace';
 
