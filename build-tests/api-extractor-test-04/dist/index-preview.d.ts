@@ -57,22 +57,19 @@ export declare namespace EntangledNamespace {
      * This is a nested namespace.
      * The "beta" release tag is inherited from the parent.
      */
-    export declare namespace N2 {
+    export namespace N2 {
         /* Excluded from this release type: ClassX */
     }
     /**
      * This is a nested namespace.
      * The "beta" release tag is inherited from the parent.
      */
-    export declare namespace N3 {
+    export namespace N3 {
         /* Excluded from this release type: _ClassY */
     }
 }
 
-/**
- * This is an exported type alias.
- */
-export declare type ExportedAlias = AlphaClass;
+/* Excluded from this release type: ExportedAlias */
 
 /* Excluded from this release type: InternalClass */
 

@@ -17,10 +17,7 @@
 
 /* Excluded from this release type: EntangledNamespace */
 
-/**
- * This is an exported type alias.
- */
-export declare type ExportedAlias = AlphaClass;
+/* Excluded from this release type: ExportedAlias */
 
 /* Excluded from this release type: InternalClass */
 

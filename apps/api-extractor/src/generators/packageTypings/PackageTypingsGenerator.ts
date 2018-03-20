@@ -297,7 +297,12 @@ export class PackageTypingsGenerator {
       case ts.SyntaxKind.TypeKeyword:
       case ts.SyntaxKind.FunctionKeyword:
         // Replace the stuff we possibly deleted above
-        let replacedModifiers: string = 'declare ';
+        let replacedModifiers: string = '';
+
+        // Add a declare statement for root declarations (but not for nested declarations)
+        if (!astDeclaration.parent) {
+          replacedModifiers += 'declare ';
+        }
 
         if (dtsEntry.exported) {
           replacedModifiers = 'export ' + replacedModifiers;
