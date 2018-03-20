@@ -119,7 +119,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    */
   protected serialize(): string {
     return yaml.safeDump(this._shrinkwrapJson, {
-      sortKeys: true
+      sortKeys: true,
+      noRefs: true
     });
   }
 
