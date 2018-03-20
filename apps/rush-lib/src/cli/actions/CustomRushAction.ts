@@ -44,7 +44,7 @@ export class CustomRushAction extends BaseRushAction {
   constructor(private _parser: RushCommandLineParser,
     options: ICommandLineActionOptions,
     private _parallelized: boolean = false,
-    private _optional: boolean = false
+    private _ignoreMissingScript: boolean = false
   ) {
     super(options);
   }
@@ -105,7 +105,7 @@ export class CustomRushAction extends BaseRushAction {
         parallelism,
         isIncrementalBuildAllowed: this.options.actionVerb === 'build',
         changedProjectsOnly,
-        optional: this._optional
+        ignoreMissingScript: this._ignoreMissingScript
       }
     );
 

@@ -18,7 +18,7 @@ export interface ITaskSelectorConstructor {
   parallelism:  string;
   isIncrementalBuildAllowed: boolean;
   changedProjectsOnly: boolean;
-  optional: boolean;
+  ignoreMissingScript: boolean;
 }
 
 /**
@@ -169,7 +169,7 @@ export class TaskSelector {
         this._options.commandToRun,
         this._options.customFlags,
         this._options.isIncrementalBuildAllowed,
-        this._options.optional
+        this._options.ignoreMissingScript
       );
 
       if (!this._taskRunner.hasTask(projectTask.name)) {

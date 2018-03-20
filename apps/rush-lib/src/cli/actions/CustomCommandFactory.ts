@@ -51,7 +51,7 @@ export class CustomCommandFactory {
             documentation: command.documentation || command.summary
           },
           command.parallelized,
-          command.optional
+          command.ignoreMissingScript
         ));
       });
 

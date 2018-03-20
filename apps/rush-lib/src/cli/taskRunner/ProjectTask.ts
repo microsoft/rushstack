@@ -41,7 +41,7 @@ export default class ProjectTask implements ITaskDefinition {
     private _commandToRun: string,
     private _customFlags: string[],
     public isIncrementalBuildAllowed: boolean,
-    private _optional: boolean
+    private _ignoreMissingScript: boolean
   ) {}
 
   public execute(writer: ITaskWriter): Promise<TaskStatus> {
@@ -173,7 +173,7 @@ export default class ProjectTask implements ITaskDefinition {
     } else {
       script = this._getScriptCommand(this._commandToRun);
 
-      if (script === undefined && !this._optional) {
+      if (script === undefined && !this._ignoreMissingScript) {
         // tslint:disable-next-line:max-line-length
         throw new Error(`The project [${this._rushProject.packageName}] does not define a '${this._commandToRun}' command in the 'scripts' section of its package.json`);
       }

@@ -20,7 +20,7 @@
         "title": "Custom Command",
         "type": "object",
         "additionalProperties": false,
-        "required": [ "name", "summary", "documentation", "parallelized", "optional" ],
+        "required": [ "name", "summary", "documentation", "parallelized" ],
         "properties": {
           "name": {
             "title": "Custom Command Name",
@@ -42,9 +42,9 @@
             "description": "Describes whether or not this command can be run in parallel (with multiple instances running on several projects simultaneously). Defaults to 'true'.",
             "type": "boolean"
           },
-          "optional": {
-            "title": "Is optional and only applies to projects with corresponding npm script",
-            "description": "Indicates whether the command runs on every project or just projects that have the corresponding npm script.",
+          "ignoreMissingScript": {
+            "title": "Ignore missing script",
+            "description": "Normally Rush requires that each project's package.json has a \"script\" entry matching the custom command name. To disable this check, set \"ignoreMissingScript\" to true.",
             "type": "boolean"
           }
         }
