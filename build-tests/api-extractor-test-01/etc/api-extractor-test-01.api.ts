@@ -87,6 +87,18 @@ interface IInterfaceAsDefaultExport {
   member: string;
 }
 
+// @alpha
+interface IMergedInterface {
+  // (undocumented)
+  reference: IMergedInterfaceReferencee;
+  // (undocumented)
+  type: string;
+}
+
+// @alpha (undocumented)
+interface IMergedInterfaceReferencee {
+}
+
 // @public
 interface ISimpleInterface {
 }

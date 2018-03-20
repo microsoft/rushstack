@@ -139,7 +139,7 @@ export class AstSymbolTable {
       this._analyzeChildTree(astDeclaration.declaration, astDeclaration);
     }
 
-    astSymbol._notifyAnalyzed();
+    rootAstSymbol._notifyAnalyzed();
 
     if (!astSymbol.astImport) {
       // If this symbol is not imported, then we also analyze any referencedAstSymbols
@@ -223,10 +223,6 @@ export class AstSymbolTable {
 
     for (const childNode of node.getChildren()) {
       this._analyzeChildTree(childNode, newGoverningAstDeclaration || governingAstDeclaration);
-    }
-
-    if (newGoverningAstDeclaration) {
-      newGoverningAstDeclaration.astSymbol._notifyAnalyzed();
     }
   }
 

@@ -94,6 +94,10 @@ export class AstDeclaration {
       throw new Error('Program Bug: Invalid call to notifyChildAttach()');
     }
 
+    if (this.astSymbol.analyzed) {
+      throw new Error('Program Bug: _notifyChildAttach() called after analysis is already complete');
+    }
+
     this._analyzedChildren.push(child);
   }
 

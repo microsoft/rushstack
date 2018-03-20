@@ -31,7 +31,7 @@ export default class TaskRunner {
   private _completedTasks: number;
 
   constructor(quietMode: boolean,
-    parallelism: number | undefined,
+    parallelism: string |undefined,
     changedProjectsOnly: boolean) {
     this._tasks = new Map<string, ITask>();
     this._buildQueue = [];
@@ -39,17 +39,28 @@ export default class TaskRunner {
     this._hasAnyFailures = false;
     this._changedProjectsOnly = changedProjectsOnly;
 
+    const numberOfCores: number = os.cpus().length;
+
     if (parallelism) {
-      this._parallelism = parallelism;
-    } else {
+      if (parallelism === 'max') {
+        this._parallelism = numberOfCores;
+      } else {
+        const parallelismInt: number = parseInt(parallelism, 10);
+
+        if (isNaN(parallelismInt)) {
+          throw new Error(`Invalid parallelism value of '${parallelism}', expected a number or 'max'`);
+        }
+
+        this._parallelism = parallelismInt;
+      }
+
+    }  else {
       // If an explicit parallelism number wasn't provided, then choose a sensible
       // default.
-      const numberOfCores: number = os.cpus().length;
-
       if (os.platform() === 'win32') {
         // On desktop Windows, some people have complained that their system becomes
         // sluggish if Rush is using all the CPU cores.  Leave one thread for
-        // other operations.
+        // other operations. For CI environments, you can use the "max" argument to use all available cores.
         this._parallelism = Math.max(numberOfCores - 1, 1);
       } else {
         // Unix-like operating systems have more balanced scheduling, so default
