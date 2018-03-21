@@ -124,7 +124,7 @@ export default class PublishAction extends BaseRushAction {
         `--include-all is specified. If this flag is specified, NPM registry related parameters will be ignored.`
     });
     this._releaseFolder = this.defineStringParameter({
-      parameterLongName: '--releaseFolder',
+      parameterLongName: '--release-folder',
       key: 'RELEASEFOLDER',
       description:
       `This parameter is used with --pack parameter to provide customized location for the tarballs instead of ` +
