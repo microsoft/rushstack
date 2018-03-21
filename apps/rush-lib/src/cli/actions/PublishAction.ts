@@ -3,6 +3,8 @@
 
 import * as colors from 'colors';
 import { EOL } from 'os';
+import * as fsx from 'fs-extra';
+import * as path from 'path';
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter
@@ -40,6 +42,9 @@ export default class PublishAction extends BaseRushAction {
   private _force: CommandLineFlagParameter;
   private _prereleaseToken: PrereleaseToken;
   private _versionPolicy: CommandLineStringParameter;
+
+  private _releaseFolder: CommandLineStringParameter;
+  private _pack: CommandLineFlagParameter;
 
   private _hotfixTagOverride: string;
 
@@ -84,6 +89,8 @@ export default class PublishAction extends BaseRushAction {
       parameterShortName: undefined,
       description: 'Regenerates all changelog files based on the current JSON content.'
     });
+
+    // NPM registry related parameters
     this._registryUrl = this.defineStringParameter({
       parameterLongName: '--registry',
       parameterShortName: '-r',
@@ -108,6 +115,22 @@ export default class PublishAction extends BaseRushAction {
       `the package is older than the current latest, so in publishing workflows for older releases, providing ` +
       `a tag is important. When hotfix changes are made, this parameter defaults to 'hotfix'.`
     });
+
+    // NPM pack tarball related parameters
+    this._pack = this.defineFlagParameter({
+      parameterLongName: '--pack',
+      description:
+        `Packs projects into tarballs instead of publishing to npm repository. It can only be used when ` +
+        `--include-all is specified. If this flag is specified, NPM registry related parameters will be ignored.`
+    });
+    this._releaseFolder = this.defineStringParameter({
+      parameterLongName: '--release-folder',
+      key: 'RELEASEFOLDER',
+      description:
+      `This parameter is used with --pack parameter to provide customized location for the tarballs instead of ` +
+      `the default value. `
+    });
+
     this._includeAll = this.defineFlagParameter({
       parameterLongName: '--include-all',
       parameterShortName: undefined,
@@ -156,6 +179,8 @@ export default class PublishAction extends BaseRushAction {
       return Promise.resolve();
     }
 
+    this._validate();
+
     if (this._includeAll.value) {
       this._publishAll(allPackages);
     } else {
@@ -165,6 +190,21 @@ export default class PublishAction extends BaseRushAction {
 
     console.log(EOL + colors.green('Rush publish finished successfully.'));
     return Promise.resolve();
+  }
+
+  /**
+   * Validate some input parameters
+   */
+  private _validate(): void {
+    if (this._pack.value && !this._includeAll.value) {
+      throw new Error('--pack can only be used with --include-all');
+    }
+    if (this._releaseFolder.value && !this._pack.value) {
+      throw new Error(`--release-folder can only be used with --pack`);
+    }
+    if (this._registryUrl.value && this._pack.value) {
+      throw new Error(`--registry cannot be used with --pack`);
+    }
   }
 
   private _publishChanges(allPackages: Map<string, RushConfigurationProject>): void {
@@ -236,7 +276,11 @@ export default class PublishAction extends BaseRushAction {
       if (packageConfig.shouldPublish &&
         (!this._versionPolicy.value || this._versionPolicy.value === packageConfig.versionPolicyName)
       ) {
-        if (this._force.value || !this._packageExists(packageConfig)) {
+        if (this._pack.value) {
+          // packs to tarball instead of publishing to NPM repository
+          this._npmPack(packageName, packageConfig);
+        } else if (this._force.value || !this._packageExists(packageConfig)) {
+          // Publish to npm repository
           this._npmPublish(packageName, packageConfig.projectFolder);
           git.addTag(!!this._publish.value && !this._registryUrl.value, packageName, packageConfig.packageJson.version);
           updated = true;
@@ -306,5 +350,38 @@ export default class PublishAction extends BaseRushAction {
       packageConfig.projectFolder,
       env);
     return publishedVersions.indexOf(packageConfig.packageJson.version) >= 0;
+  }
+
+  private _npmPack(packageName: string, project: RushConfigurationProject): void {
+    const args: string[] = ['pack'];
+    const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
+
+    PublishUtilities.execCommand(
+      !!this._publish.value,
+      this.rushConfiguration.packageManagerToolFilename,
+      args,
+      project.projectFolder,
+      env
+    );
+
+    if (!!this._publish.value) {
+      // Copy the tarball the release folder
+      const tarballName: string = this._calculateTarballName(project);
+      const tarballPath: string = path.join(project.projectFolder, tarballName);
+      const destFolder: string = this._releaseFolder.value ?
+       this._releaseFolder.value : path.join(this.rushConfiguration.commonTempFolder, 'artifacts', 'packages');
+
+      fsx.copySync(tarballPath, path.join(destFolder, tarballName));
+      fsx.unlinkSync(tarballPath);
+    }
+  }
+
+  private _calculateTarballName(project: RushConfigurationProject): string {
+    // Same logic as how npm forms the tarball name
+    const packageName: string = project.packageName;
+    const name: string = packageName[0] === '@' ?
+      packageName.substr(1).replace(/\//g, '-') : packageName;
+
+    return `${name}-${project.packageJson.version}.tgz`;
   }
 }
