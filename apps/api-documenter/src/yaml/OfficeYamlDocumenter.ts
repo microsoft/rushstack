@@ -86,24 +86,25 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     // \[Api set: ExcelApi 1.1\]
     //
     // Hyperlink it like this:
-    // \[ [Api set: ExcelApi 1.1](http://bing.com?type=excel) \]
+    // \[ [API set: ExcelApi 1.1](http://bing.com?type=excel) \]
+    markup = markup.replace(/Api/, "API");
     if (uid.search(/Excel/i) !== -1) {
-      return markup.replace(/\\\[(Api set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=excel) \\]`);
+      return markup.replace(/\\\[(API set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=excel) \\]`);
     }
     else if (uid.search(/OneNote/i) !== -1) {
-      return markup.replace(/\\\[(Api set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=onenote) \\]`);
+      return markup.replace(/\\\[(API set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=onenote) \\]`);
     }
     else if (uid.search(/Visio/i) !== -1) {
-      return markup.replace(/\\\[(Api set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=visio) \\]`);
+      return markup.replace(/\\\[(API set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=visio) \\]`);
     }
     else if (uid.search(/Outlook/i) !== -1) {
-      return markup.replace(/\\\[(Api set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=outlook) \\]`);
+      return markup.replace(/\\\[(API set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=outlook) \\]`);
     }
     else if (uid.search(/Word/i) !== -1) {
-      return markup.replace(/\\\[(Api set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=word) \\]`);
+      return markup.replace(/\\\[(API set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=word) \\]`);
     }
     else {
-      return markup.replace(/\\\[(Api set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com) \\]`);
+      return markup.replace(/\\\[(API set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com) \\]`);
     }
   }
 }
