@@ -179,6 +179,8 @@ export default class PublishAction extends BaseRushAction {
       return Promise.resolve();
     }
 
+    this._validate();
+
     if (this._includeAll.value) {
       this._publishAll(allPackages);
     } else {
@@ -188,6 +190,21 @@ export default class PublishAction extends BaseRushAction {
 
     console.log(EOL + colors.green('Rush publish finished successfully.'));
     return Promise.resolve();
+  }
+
+  /**
+   * Validate some input parameters
+   */
+  private _validate(): void {
+    if (this._pack.value && !this._includeAll.value) {
+      throw new Error('--pack can only be used with --include-all');
+    }
+    if (this._releaseFolder.value && !this._pack.value) {
+      throw new Error(`--release-folder can only be used with --pack`);
+    }
+    if (this._registryUrl.value && this._pack.value) {
+      throw new Error(`--registry cannot be used with --pack`);
+    }
   }
 
   private _publishChanges(allPackages: Map<string, RushConfigurationProject>): void {
