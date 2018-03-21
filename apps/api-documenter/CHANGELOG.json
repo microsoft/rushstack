@@ -2,6 +2,24 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "1.1.25",
+      "tag": "@microsoft/api-documenter_v1.1.25",
+      "date": "Wed, 21 Mar 2018 21:05:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Change heading for code snippets section from `## Snippets` to `#### Examples`."
+          },
+          {
+            "comment": "Customize the `API Set #.#` hyperlink target by host. "
+          },
+          {
+            "comment": "Designate proper language for each code snippet (TypeScript or JavaScript)."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.24",
       "tag": "@microsoft/api-documenter_v1.1.24",
       "date": "Tue, 20 Mar 2018 02:44:45 GMT",
