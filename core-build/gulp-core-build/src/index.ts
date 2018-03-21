@@ -69,6 +69,7 @@ let _buildConfig: IBuildConfig = {
   srcFolder: 'src',
   distFolder: path.join(packageFolder, 'dist'),
   libAMDFolder: undefined,
+  libESNextFolder: undefined,
   libFolder: path.join(packageFolder, 'lib'),
   tempFolder: 'temp',
   properties: {},
