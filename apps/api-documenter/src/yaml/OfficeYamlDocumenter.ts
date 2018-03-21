@@ -65,7 +65,7 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
 
       yamlItem.remarks += '\n\n#### Examples\n';
       for (const snippet of snippets) {
-        if (snippet.search(/await/) == -1) {
+        if (snippet.search(/await/) === -1) {
           yamlItem.remarks += '\n```javascript\n' + snippet + '\n```\n';
         } else {
           yamlItem.remarks += '\n```typescript\n' + snippet + '\n```\n';
@@ -87,23 +87,18 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     //
     // Hyperlink it like this:
     // \[ [API set: ExcelApi 1.1](http://bing.com?type=excel) \]
-    markup = markup.replace(/Api/, "API");
+    markup = markup.replace(/Api/, 'API');
     if (uid.search(/Excel/i) !== -1) {
       return markup.replace(/\\\[(API set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=excel) \\]`);
-    }
-    else if (uid.search(/OneNote/i) !== -1) {
+    } else if (uid.search(/OneNote/i) !== -1) {
       return markup.replace(/\\\[(API set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=onenote) \\]`);
-    }
-    else if (uid.search(/Visio/i) !== -1) {
+    } else if (uid.search(/Visio/i) !== -1) {
       return markup.replace(/\\\[(API set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=visio) \\]`);
-    }
-    else if (uid.search(/Outlook/i) !== -1) {
+    } else if (uid.search(/Outlook/i) !== -1) {
       return markup.replace(/\\\[(API set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=outlook) \\]`);
-    }
-    else if (uid.search(/Word/i) !== -1) {
+    } else if (uid.search(/Word/i) !== -1) {
       return markup.replace(/\\\[(API set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=word) \\]`);
-    }
-    else {
+    } else {
       return markup.replace(/\\\[(API set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com) \\]`);
     }
   }
