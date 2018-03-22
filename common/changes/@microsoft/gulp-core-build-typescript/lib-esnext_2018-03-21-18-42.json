@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Add a `libESNextFolder` option",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-typescript",
+  "email": "elliottsj@users.noreply.github.com"
+}

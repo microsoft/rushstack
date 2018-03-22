@@ -61,14 +61,19 @@ export interface ITypeScriptTaskConfig {
   libDir?: string;
 
   /**
-   * If defined, drop typescript files from an AMD build here. Defaults to buildConfig.libAMDFolder
+   * If defined, emit compiled typescript modules here using `module: 'amd'`. Defaults to buildConfig.libAMDFolder
    */
   libAMDDir?: string;
 
   /**
-   * If defined, drop typescript files build using modules=ES6.
+   * If defined, emit compiled typescript modules here using `module: 'es6'`. Defaults to buildConfig.libES6Folder
    */
   libES6Dir?: string;
+
+  /**
+   * If defined, emit compiled typescript modules here using `module: 'esnext'`. Defaults to buildConfig.libESNextFolder
+   */
+  libESNextDir?: string;
 
   /**
    * If defined, apply these settings on top of the standardized project TypeScript compiler configuration.
@@ -83,6 +88,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   private _tsProject: ts.Project;
   private _tsAMDProject: ts.Project;
   private _tsES6Project: ts.Project;
+  private _tsESNextProject: ts.Project;
 
   constructor() {
     super(
@@ -124,7 +130,8 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
         emitSourceMaps: true,
         libDir: undefined,
         libAMDDir: undefined,
-        libES6Dir: undefined
+        libES6Dir: undefined,
+        libESNextDir: undefined
       }
     );
   }
@@ -195,6 +202,18 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       this._compileProject(gulp, this._tsES6Project, this.taskConfig.libES6Dir, allStreams, result);
     }
 
+    // If esnext modules are required, also build that.
+    if (this.taskConfig.libESNextDir) {
+      allStreams.push(
+        staticSrc.pipe(gulp.dest(this.taskConfig.libESNextDir)));
+
+      this._tsESNextProject = (
+        this._tsESNextProject ||
+        ts.createProject(assign({}, compilerOptions, { module: 'esnext' }))
+      );
+      this._compileProject(gulp, this._tsESNextProject, this.taskConfig.libESNextDir, allStreams, result);
+    }
+
     // Listen for pass/fail, and ensure that the task passes/fails appropriately.
     merge(allStreams)
       .on('queueDrain', () => {
@@ -223,6 +242,10 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       cleanMatch.push(this.taskConfig.libES6Dir);
     }
 
+    if (this.taskConfig.libESNextDir) {
+      cleanMatch.push(this.taskConfig.libESNextDir);
+    }
+
     return cleanMatch;
   }
 
@@ -242,6 +265,10 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
 
     if (!this.taskConfig.libES6Dir) {
       this.taskConfig.libES6Dir = buildConfig.libES6Folder;
+    }
+
+    if (!this.taskConfig.libESNextDir) {
+      this.taskConfig.libESNextDir = buildConfig.libESNextFolder;
     }
   }
 
