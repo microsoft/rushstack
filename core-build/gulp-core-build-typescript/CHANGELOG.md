@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Tue, 20 Mar 2018 02:44:45 GMT and should not be manually modified.
+This log was last generated on Thu, 22 Mar 2018 18:34:13 GMT and should not be manually modified.
+
+## 4.8.0
+Thu, 22 Mar 2018 18:34:13 GMT
+
+### Minor changes
+
+- Add a `libESNextFolder` option
 
 ## 4.7.22
 Tue, 20 Mar 2018 02:44:45 GMT

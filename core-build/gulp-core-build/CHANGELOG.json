@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.7.0",
+      "tag": "@microsoft/gulp-core-build_v3.7.0",
+      "date": "Thu, 22 Mar 2018 18:34:13 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a `libESNextFolder` option"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.6.10",
       "tag": "@microsoft/gulp-core-build_v3.6.10",
       "date": "Sat, 17 Mar 2018 02:54:22 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Sat, 17 Mar 2018 02:54:22 GMT and should not be manually modified.
+This log was last generated on Thu, 22 Mar 2018 18:34:13 GMT and should not be manually modified.
+
+## 3.7.0
+Thu, 22 Mar 2018 18:34:13 GMT
+
+### Minor changes
+
+- Add a `libESNextFolder` option
 
 ## 3.6.10
 Sat, 17 Mar 2018 02:54:22 GMT

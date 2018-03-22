@@ -1,6 +1,11 @@
 # Change Log - @microsoft/gulp-core-build-webpack
 
-This log was last generated on Sat, 17 Mar 2018 02:54:22 GMT and should not be manually modified.
+This log was last generated on Thu, 22 Mar 2018 18:34:13 GMT and should not be manually modified.
+
+## 3.3.21
+Thu, 22 Mar 2018 18:34:13 GMT
+
+*Version update only*
 
 ## 3.3.20
 Sat, 17 Mar 2018 02:54:22 GMT
