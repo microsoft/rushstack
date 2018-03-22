@@ -18,11 +18,10 @@
   "dependencies": {
     "argparse": "~1.0.9",
     "@types/argparse": "1.0.33",
-    "colors": "~1.1.2",
+    "colors": "~1.2.1",
     "@types/node": "8.5.8"
   },
   "devDependencies": {
-    "@types/colors": "1.1.3",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "mocha": "~3.4.2",

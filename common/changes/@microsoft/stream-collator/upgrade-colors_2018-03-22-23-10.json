@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/stream-collator",
+      "comment": "Upgrade colors to version ~1.2.1",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/stream-collator",
+  "email": "elliottsj@users.noreply.github.com"
+}

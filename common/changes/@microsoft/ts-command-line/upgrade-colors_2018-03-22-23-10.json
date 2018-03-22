@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/ts-command-line",
+      "comment": "Upgrade colors to version ~1.2.1",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/ts-command-line",
+  "email": "elliottsj@users.noreply.github.com"
+}
