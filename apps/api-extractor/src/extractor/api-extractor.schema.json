@@ -129,27 +129,35 @@
     },
 
     "dtsRollup": {
-      "description": "Configures how the package typings (*.d.ts) will be generated.",
+      "description": "Configures how the *.d.ts rollup files will be generated.",
       "type": "object",
       "properties": {
         "enabled": {
           "description": "Whether to generate package typings.  The default is false.",
           "type": "boolean"
         },
-        "outputFolder": {
-          "description": "Specifies where the *.d.ts files should be written. The default value is \"./dist\"",
+        "trimming": {
+          "description": "If \"trimming\" is false (the default), then a single *.d.ts rollup file will be generated in the \"publishFolder\".  If \"trimming\" is true, then three separate *.d.ts rollups will be generated in \"publishFolderForInternal\", \"publishFolderForBeta\", and \"publishFolderForPublic\".",
+          "type": "boolean"
+        },
+        "publishFolder": {
+          "description": "This setting is only used if \"trimming\" is false. It indicates the folder where \"npm publish\" will be run.  The default value is \"./dist\".",
           "type": "string"
         },
-        "dtsFilePathForInternal": {
-          "description": "Specifies the output filename for an internal release. The default value is \"index-internal.d.ts\". If the path is not an absolute path, it will be resolved relative to the outputFolder. This file will contain all definitions that are reachable from the entry point.",
+        "publishFolderForInternal": {
+          "description": "This setting is only used if \"trimming\" is false. It indicates the folder where \"npm publish\" will be run for an internal release. The default value is \"./dist/internal\". An internal release will contain all definitions that are reachable from the entry point.",
           "type": "string"
         },
-        "dtsFilePathForPreview": {
-          "description": "Specifies the output filename for a preview release. The default value is \"index-preview.d.ts\". If the path is not an absolute path, it will be resolved relative to the outputFolder. This file will contain all definitions that are reachable from the entry point, except definitions marked as @alpha or @internal",
+        "publishFolderForBeta": {
+          "description": "This setting is only used if \"trimming\" is false. It indicates the folder where \"npm publish\" will be run for a beta release. The default value is \"./dist/beta\". A beta release will contain all definitions that are reachable from the entry point, except definitions marked as @alpha or @internal.",
           "type": "string"
         },
-        "dtsFilePathForPublic": {
-          "description": "Specifies the output filename for a public release. The default value is \"index-public.d.ts\". If the path is not an absolute path, it will be resolved relative to the outputFolder. This file will contain all definitions that are reachable from the entry point, except definitions marked as @beta, @alpha, or @internal.",
+        "publishFolderForPublic": {
+          "description": "This setting is only used if \"trimming\" is false. It indicates the folder where \"npm publish\" will be run for a public release. The default value is \"./dist/public\". A public release will contain all definitions that are reachable from the entry point, except definitions marked as @beta, @alpha, or @internal.",
+          "type": "string"
+        },
+        "mainDtsRollupPath": {
+          "description": "Specifies the relative path for the *.d.ts rollup file to be generated for the package's main entry point. The default value is an empty string, which causes the path to be automatically inferred from the \"typings\" field of the project's package.json file. If specified, the value must be a relative path that can be combined with one of the publish folder settings.",
           "type": "string"
         }
       },

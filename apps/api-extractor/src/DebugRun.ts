@@ -50,7 +50,9 @@ const extractor: Extractor = new Extractor(
     },
     dtsRollup: {
       enabled: true,
-      outputFolder: path.join(__dirname, 'debug')
+      publishFolderForInternal: path.join(__dirname, 'debug/internal'),
+      publishFolderForBeta: path.join(__dirname, 'debug/beta'),
+      publishFolderForPublic: path.join(__dirname, 'debug/public')
     }
   }
 );
