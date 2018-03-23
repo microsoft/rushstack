@@ -2,6 +2,21 @@
   "name": "@microsoft/loader-load-themed-styles",
   "entries": [
     {
+      "version": "1.7.26",
+      "tag": "@microsoft/loader-load-themed-styles_v1.7.26",
+      "date": "Fri, 23 Mar 2018 00:34:53 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.7.44` to `1.7.45`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.25` to `4.3.26`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.7.25",
       "tag": "@microsoft/loader-load-themed-styles_v1.7.25",
       "date": "Thu, 22 Mar 2018 18:34:13 GMT",

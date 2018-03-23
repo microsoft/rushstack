@@ -2,6 +2,29 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "1.1.27",
+      "tag": "@microsoft/api-documenter_v1.1.27",
+      "date": "Fri, 23 Mar 2018 00:34:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade colors to version ~1.2.1"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.5.1` to `5.5.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `3.1.0` to `3.1.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.25` to `4.3.26`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.26",
       "tag": "@microsoft/api-documenter_v1.1.26",
       "date": "Thu, 22 Mar 2018 18:34:13 GMT",

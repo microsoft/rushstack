@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 20 Mar 2018 02:44:45 GMT and should not be manually modified.
+This log was last generated on Fri, 23 Mar 2018 00:34:53 GMT and should not be manually modified.
+
+## 5.5.2
+Fri, 23 Mar 2018 00:34:53 GMT
+
+### Patches
+
+- Upgrade colors to version ~1.2.1
 
 ## 5.5.1
 Tue, 20 Mar 2018 02:44:45 GMT

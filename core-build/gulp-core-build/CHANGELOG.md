@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Thu, 22 Mar 2018 18:34:13 GMT and should not be manually modified.
+This log was last generated on Fri, 23 Mar 2018 00:34:53 GMT and should not be manually modified.
+
+## 3.7.1
+Fri, 23 Mar 2018 00:34:53 GMT
+
+### Patches
+
+- Upgrade colors to version ~1.2.1
 
 ## 3.7.0
 Thu, 22 Mar 2018 18:34:13 GMT
