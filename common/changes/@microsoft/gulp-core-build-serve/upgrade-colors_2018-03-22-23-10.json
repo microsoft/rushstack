@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-serve",
+      "comment": "Upgrade colors to version ~1.2.1",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-serve",
+  "email": "elliottsj@users.noreply.github.com"
+}
