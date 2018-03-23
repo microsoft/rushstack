@@ -21,7 +21,7 @@ export {
   IExtractorValidationRulesConfig,
   IExtractorApiReviewFileConfig,
   IExtractorApiJsonFileConfig,
-  IExtractorPackageTypingsConfig,
+  IExtractorDtsRollupConfig,
   IExtractorConfig
 } from './extractor/IExtractorConfig';
 

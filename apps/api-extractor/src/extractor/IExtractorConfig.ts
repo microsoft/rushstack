@@ -186,7 +186,7 @@ export interface IExtractorApiJsonFileConfig {
  *
  * @beta
  */
-export interface IExtractorPackageTypingsConfig {
+export interface IExtractorDtsRollupConfig {
   /**
    * Whether to generate package typings.  The default is false.
    */
@@ -272,8 +272,8 @@ export interface IExtractorConfig {
   apiJsonFile?: IExtractorApiJsonFileConfig;
 
   /**
-   * {@inheritdoc IExtractorPackageTypingsConfig}
+   * {@inheritdoc IExtractorDtsRollupConfig}
    * @beta
    */
-  packageTypings?: IExtractorPackageTypingsConfig;
+  dtsRollup?: IExtractorDtsRollupConfig;
 }

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "For the API Extractor task config file, the \"generatePackageTypings\" setting was renamed to \"generateDtsRollup\"",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-typescript",
+  "email": "pgonzal@users.noreply.github.com"
+}

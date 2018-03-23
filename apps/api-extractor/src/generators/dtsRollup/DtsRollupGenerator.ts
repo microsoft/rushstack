@@ -21,9 +21,9 @@ import { AstDeclaration } from './AstDeclaration';
 import { SymbolAnalyzer } from './SymbolAnalyzer';
 
 /**
- * Used with PackageTypingsGenerator.writeTypingsFile()
+ * Used with DtsRollupGenerator.writeTypingsFile()
  */
-export enum PackageTypingsDtsKind {
+export enum DtsRollupKind {
   /**
    * Generate a *.d.ts file for an internal release.
    * This output file will contain all definitions that are reachable from the entry point.
@@ -45,7 +45,7 @@ export enum PackageTypingsDtsKind {
   PublicRelease
 }
 
-export class PackageTypingsGenerator {
+export class DtsRollupGenerator {
   private _context: ExtractorContext;
   private _typeChecker: ts.TypeChecker;
   private _astSymbolTable: AstSymbolTable;
@@ -74,7 +74,7 @@ export class PackageTypingsGenerator {
    */
   public analyze(): void {
     if (this._astEntryPoint) {
-      throw new Error('PackageTypingsGenerator.analyze() was already called');
+      throw new Error('DtsRollupGenerator.analyze() was already called');
     }
 
     // Build the entry point
@@ -111,7 +111,7 @@ export class PackageTypingsGenerator {
    *
    * @param dtsFilename    - The *.d.ts output filename
    */
-  public writeTypingsFile(dtsFilename: string, dtsKind: PackageTypingsDtsKind): void {
+  public writeTypingsFile(dtsFilename: string, dtsKind: DtsRollupKind): void {
     const indentedWriter: IndentedWriter = new IndentedWriter();
 
     this._generateTypingsFileContent(indentedWriter, dtsKind);
@@ -124,7 +124,7 @@ export class PackageTypingsGenerator {
 
   private get astEntryPoint(): AstEntryPoint {
     if (!this._astEntryPoint) {
-      throw new Error('PackageTypingsGenerator.analyze() was not called');
+      throw new Error('DtsRollupGenerator.analyze() was not called');
     }
     return this._astEntryPoint;
   }
@@ -207,7 +207,7 @@ export class PackageTypingsGenerator {
     }
   }
 
-  private _generateTypingsFileContent(indentedWriter: IndentedWriter, dtsKind: PackageTypingsDtsKind): void {
+  private _generateTypingsFileContent(indentedWriter: IndentedWriter, dtsKind: DtsRollupKind): void {
 
     indentedWriter.spacing = '';
     indentedWriter.clear();
@@ -271,7 +271,7 @@ export class PackageTypingsGenerator {
    * Before writing out a declaration, _modifySpan() applies various fixups to make it nice.
    */
   private _modifySpan(span: Span, dtsEntry: DtsEntry, astDeclaration: AstDeclaration,
-    dtsKind: PackageTypingsDtsKind): void {
+    dtsKind: DtsRollupKind): void {
 
     const previousSpan: Span | undefined = span.previousSibling;
 
@@ -416,18 +416,18 @@ export class PackageTypingsGenerator {
     }
   }
 
-  private _shouldIncludeReleaseTag(releaseTag: ReleaseTag, dtsKind: PackageTypingsDtsKind): boolean {
+  private _shouldIncludeReleaseTag(releaseTag: ReleaseTag, dtsKind: DtsRollupKind): boolean {
     switch (dtsKind) {
-      case PackageTypingsDtsKind.InternalRelease:
+      case DtsRollupKind.InternalRelease:
         return true;
-      case PackageTypingsDtsKind.PreviewRelease:
+      case DtsRollupKind.PreviewRelease:
         // NOTE: If the release tag is "None", then we don't have enough information to trim it
         return releaseTag === ReleaseTag.Beta || releaseTag === ReleaseTag.Public || releaseTag === ReleaseTag.None;
-      case PackageTypingsDtsKind.PublicRelease:
+      case DtsRollupKind.PublicRelease:
         return releaseTag === ReleaseTag.Public || releaseTag === ReleaseTag.None;
     }
 
-    throw new Error(`PackageTypingsDtsKind[dtsKind] is not implemented`);
+    throw new Error(`DtsRollupKind[dtsKind] is not implemented`);
   }
 
   private _getReleaseTagForAstSymbol(astSymbol: AstSymbol): ReleaseTag {

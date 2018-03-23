@@ -20,12 +20,18 @@
       "type": "string"
     },
     "apiReviewFolder": {
-      "description": "The file path of the folder containing already approved API files, relative to the project folder",
+      "description": "The file path of the folder containing already approved API files, relative to the project folder.",
       "type": "string"
     },
-    "generatePackageTypings": {
+    "apiJsonFolder": {
+      "description": "The file path of the folder containing the *.api.json output file containing API information, relative to the project folder.",
+      "type": "string"
+    },
+    "generateDtsRollup": {
       "description": "If true, then API Extractor will generate consolidated *.d.ts outputs for this project. The filenames are: \"index-internal.d.ts\", \"index-preview.d.ts\", and \"index-public.d.ts\".",
       "type": "boolean"
     }
-  }
+  },
+  "required": [ "enabled" ],
+  "additionalProperties": false
 }

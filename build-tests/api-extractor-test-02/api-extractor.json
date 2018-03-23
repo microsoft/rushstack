@@ -5,7 +5,7 @@
     "rootFolder": "."
   },
 
-  "packageTypings": {
+  "dtsRollup": {
     "enabled": true
   },
 

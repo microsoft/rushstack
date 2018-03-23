@@ -48,7 +48,7 @@ const extractor: Extractor = new Extractor(
       enabled: true,
       outputFolder: path.join(__dirname, 'debug')
     },
-    packageTypings: {
+    dtsRollup: {
       enabled: true,
       outputFolder: path.join(__dirname, 'debug')
     }

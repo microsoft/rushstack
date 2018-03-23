@@ -9,7 +9,7 @@ import { TypeScriptHelpers } from '../../utils/TypeScriptHelpers';
 import { AstImport } from './AstImport';
 
 /**
- * Return value for PackageTypingsGenerator._followAliases()
+ * Return value for DtsRollupGenerator._followAliases()
  */
 export interface IFollowAliasesResult {
   /**
@@ -34,7 +34,7 @@ export interface IFollowAliasesResult {
 }
 
 /**
- * This is a helper class for PackageTypingsAnalyzer and SymbolTable.
+ * This is a helper class for DtsRollupGenerator and AstSymbolTable.
  * Its main role is to provide an expanded version of TypeScriptHelpers.followAliases()
  * that supports tracking of imports from eternal packages.
  */
