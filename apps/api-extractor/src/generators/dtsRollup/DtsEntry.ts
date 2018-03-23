@@ -13,13 +13,13 @@ export interface IDtsEntryParameters {
 }
 
 /**
- * This is a data structure used by PackageTypingsGenerator to track an AstSymbol that may be
+ * This is a data structure used by DtsRollupGenerator to track an AstSymbol that may be
  * emitted in the *.d.ts file.
  * @remarks
  * The additional contextual state beyond AstSymbol is:
  * - Whether it's an export of this entry point or not
  * - The calculated ReleaseTag, which we use for trimming
- * - The nameForEmit, which may get renamed by PackageTypingsGenerator._makeUniqueNames()
+ * - The nameForEmit, which may get renamed by DtsRollupGenerator._makeUniqueNames()
  */
 export class DtsEntry {
   /**
@@ -28,7 +28,7 @@ export class DtsEntry {
   public readonly astSymbol: AstSymbol;
 
   /**
-   * The original name, prior to any renaming by PackageTypingsGenerator._makeUniqueNames()
+   * The original name, prior to any renaming by DtsRollupGenerator._makeUniqueNames()
    */
   public readonly originalName: string;
 
@@ -60,7 +60,7 @@ export class DtsEntry {
   }
 
   /**
-   * A sorting key used by PackageTypingsGenerator._makeUniqueNames()
+   * A sorting key used by DtsRollupGenerator._makeUniqueNames()
    */
   public getSortKey(): string {
     if (!this._sortKey) {

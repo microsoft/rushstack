@@ -17,7 +17,7 @@ import { ExtractorContext } from '../ExtractorContext';
 import { ILogger } from './ILogger';
 import { ApiJsonGenerator } from '../generators/ApiJsonGenerator';
 import { ApiFileGenerator } from '../generators/ApiFileGenerator';
-import { PackageTypingsGenerator, PackageTypingsDtsKind } from '../generators/packageTypings/PackageTypingsGenerator';
+import { DtsRollupGenerator, DtsRollupKind } from '../generators/dtsRollup/DtsRollupGenerator';
 import { MonitoredLogger } from './MonitoredLogger';
 
 /**
@@ -253,7 +253,7 @@ export class Extractor {
     // This helps strict-null-checks to understand that _applyConfigDefaults() eliminated
     // any undefined members
     if (!(this.actualConfig.policies && this.actualConfig.validationRules
-      && this.actualConfig.apiJsonFile && this.actualConfig.apiReviewFile && this.actualConfig.packageTypings)) {
+      && this.actualConfig.apiJsonFile && this.actualConfig.apiReviewFile && this.actualConfig.dtsRollup)) {
       throw new Error('The configuration object wasn\'t normalized properly');
     }
 
@@ -340,21 +340,21 @@ export class Extractor {
       }
     }
 
-    if (this.actualConfig.packageTypings.enabled) {
-      const packageTypingsGenerator: PackageTypingsGenerator = new PackageTypingsGenerator(context);
-      packageTypingsGenerator.analyze();
+    if (this.actualConfig.dtsRollup.enabled) {
+      const dtsRollupGenerator: DtsRollupGenerator = new DtsRollupGenerator(context);
+      dtsRollupGenerator.analyze();
 
-      this._generateTypingsFile(packageTypingsGenerator,
-        this.actualConfig.packageTypings.dtsFilePathForPublic!,
-        PackageTypingsDtsKind.PublicRelease);
+      this._generateTypingsFile(dtsRollupGenerator,
+        this.actualConfig.dtsRollup.dtsFilePathForPublic!,
+        DtsRollupKind.PublicRelease);
 
-      this._generateTypingsFile(packageTypingsGenerator,
-        this.actualConfig.packageTypings.dtsFilePathForPreview!,
-        PackageTypingsDtsKind.PreviewRelease);
+      this._generateTypingsFile(dtsRollupGenerator,
+        this.actualConfig.dtsRollup.dtsFilePathForPreview!,
+        DtsRollupKind.PreviewRelease);
 
-      this._generateTypingsFile(packageTypingsGenerator,
-        this.actualConfig.packageTypings.dtsFilePathForInternal!,
-        PackageTypingsDtsKind.InternalRelease);
+      this._generateTypingsFile(dtsRollupGenerator,
+        this.actualConfig.dtsRollup.dtsFilePathForInternal!,
+        DtsRollupKind.InternalRelease);
     }
 
     if (this._localBuild) {
@@ -366,16 +366,16 @@ export class Extractor {
     }
   }
 
-  private _generateTypingsFile(packageTypingsGenerator: PackageTypingsGenerator,
-    dtsFilePath: string, dtsKind: PackageTypingsDtsKind): void {
+  private _generateTypingsFile(dtsRollupGenerator: DtsRollupGenerator,
+    dtsFilePath: string, dtsKind: DtsRollupKind): void {
     const dtsFilename: string = path.resolve(this._absoluteRootFolder,
-      this.actualConfig.packageTypings!.outputFolder, dtsFilePath);
+      this.actualConfig.dtsRollup!.outputFolder, dtsFilePath);
 
     this._monitoredLogger.logVerbose(`Writing package typings: ${dtsFilename}`);
 
     fsx.mkdirsSync(path.dirname(dtsFilename));
 
-    packageTypingsGenerator.writeTypingsFile(dtsFilename, dtsKind);
+    dtsRollupGenerator.writeTypingsFile(dtsFilename, dtsKind);
 }
 
   private _getShortFilePath(absolutePath: string): string {

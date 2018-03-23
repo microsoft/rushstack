@@ -46,7 +46,7 @@ export interface IApiExtractorTaskConfig {
 
   /**
    * The file path of the folder containing the *.api.json output file containing
-   * the API information. The default location is in the “dist” folder,
+   * API information. The default location is in the “dist” folder,
    * e.g. my-project/dist/my-project.api.json. This file should be published as part
    * of the NPM package. When building other projects that depend on this package,
    * api-extractor will look for this file in the node_modules folder and use it as an input.
@@ -60,7 +60,7 @@ export interface IApiExtractorTaskConfig {
    * The filenames are: "index-internal.d.ts", "index-preview.d.ts", and "index-public.d.ts".
    * @beta
    */
-  generatePackageTypings?: boolean;
+  generateDtsRollup?: boolean;
 }
 
 /**
@@ -149,8 +149,8 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
         }
       };
 
-      if (this.taskConfig.generatePackageTypings) {
-        extractorConfig.packageTypings = {
+      if (this.taskConfig.generateDtsRollup) {
+        extractorConfig.dtsRollup = {
           enabled: true
         };
       }

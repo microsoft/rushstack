@@ -26,7 +26,7 @@
     "outputFolder": "./dist"
   },
 
-  "packageTypings": {
+  "dtsRollup": {
     "enabled": false,
     "outputFolder": "./dist",
     "dtsFilePathForInternal": "index-internal.d.ts",
