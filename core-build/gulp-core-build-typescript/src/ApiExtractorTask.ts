@@ -19,7 +19,7 @@ export interface IApiExtractorTaskConfig {
   /**
    * Indicates whether the task should be run.
    */
-  enabled?: boolean;
+  enabled: boolean;
 
   /**
    * The file path of the exported entry point, relative to the project folder.
