@@ -128,7 +128,7 @@
       "additionalProperties": false
     },
 
-    "packageTypings": {
+    "dtsRollup": {
       "description": "Configures how the package typings (*.d.ts) will be generated.",
       "type": "object",
       "properties": {
