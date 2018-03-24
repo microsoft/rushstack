@@ -12,7 +12,7 @@
   "engineStrict": true,
   "homepage": "http://aka.ms/rush",
   "main": "lib/index.js",
-  "typings": "dist/index-internal.d.ts",
+  "typings": "dist/rush-lib.d.ts",
   "tsdoc": {
     "tsdocFlavor": "AEDoc"
   },

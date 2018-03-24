@@ -6,7 +6,8 @@
   },
 
   "dtsRollup": {
-    "enabled": true
+    "enabled": true,
+    "trimming": true
   },
 
   "project": {
