@@ -25,7 +25,7 @@ import { SymbolAnalyzer } from './SymbolAnalyzer';
  */
 export enum DtsRollupKind {
   /**
-   * Generate a *.d.ts file for an internal release.
+   * Generate a *.d.ts file for an internal release, or for the trimming=false mode.
    * This output file will contain all definitions that are reachable from the entry point.
    */
   InternalRelease,
@@ -35,7 +35,7 @@ export enum DtsRollupKind {
    * This output file will contain all definitions that are reachable from the entry point,
    * except definitions marked as \@alpha or \@internal.
    */
-  PreviewRelease,
+  BetaRelease,
 
   /**
    * Generate a *.d.ts file for a public release.
@@ -420,7 +420,7 @@ export class DtsRollupGenerator {
     switch (dtsKind) {
       case DtsRollupKind.InternalRelease:
         return true;
-      case DtsRollupKind.PreviewRelease:
+      case DtsRollupKind.BetaRelease:
         // NOTE: If the release tag is "None", then we don't have enough information to trim it
         return releaseTag === ReleaseTag.Beta || releaseTag === ReleaseTag.Public || releaseTag === ReleaseTag.None;
       case DtsRollupKind.PublicRelease:

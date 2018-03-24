@@ -402,7 +402,7 @@ export class Extractor {
 
         this._generateTypingsFile(dtsRollupGenerator,
           path.resolve(context.packageFolder, dtsRollup.publishFolderForBeta!, mainDtsRollupPath),
-          DtsRollupKind.PreviewRelease);
+          DtsRollupKind.BetaRelease);
 
         this._generateTypingsFile(dtsRollupGenerator,
           path.resolve(context.packageFolder, dtsRollup.publishFolderForInternal!, mainDtsRollupPath),
