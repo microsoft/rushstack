@@ -278,6 +278,12 @@ export class DtsRollupGenerator {
     let recurseChildren: boolean = true;
     switch (span.kind) {
       case ts.SyntaxKind.JSDocComment:
+        // If the @packagedocumentation comment seems to be attached to one of the regular API items,
+        // omit it.  It gets explictly emitted at the top of the file.
+        if (span.node.getText().match(/(?:\s|\*)@packagedocumentation(?:\s|\*)/g)) {
+          span.modification.skipAll();
+        }
+
         // For now, we don't transform JSDoc comment nodes at all
         recurseChildren = false;
         break;
