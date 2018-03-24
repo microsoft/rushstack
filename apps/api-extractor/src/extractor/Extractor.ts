@@ -345,6 +345,18 @@ export class Extractor {
       }
     }
 
+    this._generateRollupDtsFiles(context);
+
+    if (this._localBuild) {
+      // For a local build, fail if there were errors (but ignore warnings)
+      return this._monitoredLogger.errorCount === 0;
+    } else {
+      // For a production build, fail if there were any errors or warnings
+      return (this._monitoredLogger.errorCount + this._monitoredLogger.warningCount) === 0;
+    }
+  }
+
+  private _generateRollupDtsFiles(context: ExtractorContext): void {
     const dtsRollup: IExtractorDtsRollupConfig = this.actualConfig.dtsRollup!;
     if (dtsRollup.enabled) {
       let mainDtsRollupPath: string = dtsRollup.mainDtsRollupPath!;
@@ -354,19 +366,18 @@ export class Extractor {
         if (!context.packageJson.typings) {
           this._monitoredLogger.logError('Either the "mainDtsRollupPath" setting must be specified,'
             + ' or else the package.json file must contain a "typings" field.');
-          return false;
+          return;
         }
 
         // Resolve the "typings" field relative to package.json itself
-        const resolvedTypings: string = path.resolve(context.packageFolder,
-          context.packageJson.typings);
+        const resolvedTypings: string = path.resolve(context.packageFolder, context.packageJson.typings);
 
         if (dtsRollup.trimming) {
           if (!Path.isUnder(resolvedTypings, dtsRollup.publishFolderForInternal!)) {
             this._monitoredLogger.logError('The "mainDtsRollupPath" setting was not specified.'
               + ' In this case, the package.json "typings" field must point to a file under'
               + ' the "publishFolderForInternal": ' + dtsRollup.publishFolderForInternal!);
-            return false;
+            return;
           }
           mainDtsRollupPath = path.relative(dtsRollup.publishFolderForInternal!, resolvedTypings);
         } else {
@@ -374,7 +385,7 @@ export class Extractor {
             this._monitoredLogger.logError('The "mainDtsRollupPath" setting was not specified.'
               + ' In this case, the package.json "typings" field must point to a file under'
               + ' the "publishFolder": ' + dtsRollup.publishFolder!);
-            return false;
+            return;
           }
           mainDtsRollupPath = path.relative(dtsRollup.publishFolder!, resolvedTypings);
         }
@@ -386,9 +397,8 @@ export class Extractor {
 
         if (!path.isAbsolute(mainDtsRollupPath)) {
           this._monitoredLogger.logError('The "mainDtsRollupPath" setting must be a relative path'
-            + ' that can be combined with "publishFolderForInternal", "publishFolderForBeta", '
-            + 'or "publishFolderForPublic".');
-          return false;
+            + ' that can be combined with one of the "publishFolder" settings.');
+          return;
         }
       }
 
@@ -396,34 +406,26 @@ export class Extractor {
       dtsRollupGenerator.analyze();
 
       if (dtsRollup.trimming) {
-        this._generateTypingsFile(dtsRollupGenerator,
+        this._generateRollupDtsFile(dtsRollupGenerator,
           path.resolve(context.packageFolder, dtsRollup.publishFolderForPublic!, mainDtsRollupPath),
           DtsRollupKind.PublicRelease);
 
-        this._generateTypingsFile(dtsRollupGenerator,
+        this._generateRollupDtsFile(dtsRollupGenerator,
           path.resolve(context.packageFolder, dtsRollup.publishFolderForBeta!, mainDtsRollupPath),
           DtsRollupKind.BetaRelease);
 
-        this._generateTypingsFile(dtsRollupGenerator,
+        this._generateRollupDtsFile(dtsRollupGenerator,
           path.resolve(context.packageFolder, dtsRollup.publishFolderForInternal!, mainDtsRollupPath),
           DtsRollupKind.InternalRelease);
       } else {
-        this._generateTypingsFile(dtsRollupGenerator,
+        this._generateRollupDtsFile(dtsRollupGenerator,
           path.resolve(context.packageFolder, dtsRollup.publishFolder!, mainDtsRollupPath),
           DtsRollupKind.InternalRelease); // (no trimming)
       }
     }
-
-    if (this._localBuild) {
-      // For a local build, fail if there were errors (but ignore warnings)
-      return this._monitoredLogger.errorCount === 0;
-    } else {
-      // For a production build, fail if there were any errors or warnings
-      return (this._monitoredLogger.errorCount + this._monitoredLogger.warningCount) === 0;
-    }
   }
 
-  private _generateTypingsFile(dtsRollupGenerator: DtsRollupGenerator, mainDtsRollupFullPath: string,
+  private _generateRollupDtsFile(dtsRollupGenerator: DtsRollupGenerator, mainDtsRollupFullPath: string,
     dtsKind: DtsRollupKind): void {
 
     this._monitoredLogger.logVerbose(`Writing package typings: ${mainDtsRollupFullPath}`);

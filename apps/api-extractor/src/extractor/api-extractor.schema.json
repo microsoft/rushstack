@@ -133,7 +133,7 @@
       "type": "object",
       "properties": {
         "enabled": {
-          "description": "Whether to generate package typings.  The default is false.",
+          "description": "Whether to generate rollup *.d.ts files.  The default is false.",
           "type": "boolean"
         },
         "trimming": {

@@ -181,7 +181,7 @@ export interface IExtractorApiJsonFileConfig {
  * Configures how the *.d.ts rollup files will be generated.
  *
  * @remarks
- * API Extractor can generate a single unified *.d.ts file that contains all
+ * API Extractor can generate a consolidated *.d.ts file that contains all
  * the exported typings for the package entry point.  It can also trim
  * \@alpha, \@beta, and \@internal definitions according to the release type.
  *
@@ -189,7 +189,7 @@ export interface IExtractorApiJsonFileConfig {
  */
 export interface IExtractorDtsRollupConfig {
   /**
-   * Whether to generate package typings.  The default is false.
+   * Whether to generate rollup *.d.ts files.  The default is false.
    */
   enabled: boolean;
 
