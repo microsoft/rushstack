@@ -56,11 +56,18 @@ export interface IApiExtractorTaskConfig {
   apiJsonFolder?: string;
 
   /**
-   * If true, then API Extractor will generate consolidated \*.d.ts outputs for this project.
-   * The filenames are: "index-internal.d.ts", "index-preview.d.ts", and "index-public.d.ts".
+   * If true, then API Extractor will generate *.d.ts rollup files for this project.
    * @beta
    */
   generateDtsRollup?: boolean;
+
+  /**
+   * Only used if generateDtsRollup=true.  If dtsRollupTrimming=true, then API Extractor will
+   * generate separate *.d.ts rollup files for internal, beta, and public release types;
+   * otherwise a single *.d.ts file will be generated with no trimming.
+   * @beta
+   */
+  dtsRollupTrimming: boolean;
 }
 
 /**
@@ -151,7 +158,8 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
 
       if (this.taskConfig.generateDtsRollup) {
         extractorConfig.dtsRollup = {
-          enabled: true
+          enabled: true,
+          trimming: !!this.taskConfig.dtsRollupTrimming
         };
       }
 

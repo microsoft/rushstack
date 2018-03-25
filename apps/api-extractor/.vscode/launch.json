@@ -14,7 +14,8 @@
         "-d",
         "run",
         "-l"
-      ]
+      ],
+      "sourceMaps": false
     },
     {
       "type": "node",
@@ -26,7 +27,8 @@
         "-d",
         "run",
         "-l"
-      ]
+      ],
+      "sourceMaps": false
     },
     {
       "type": "node",
@@ -38,7 +40,8 @@
         "-d",
         "run",
         "-l"
-      ]
+      ],
+      "sourceMaps": false
     },
     {
       "type": "node",
@@ -62,7 +65,8 @@
         "-d",
         "run",
         "-l"
-      ]
+      ],
+      "sourceMaps": false
     }
   ]
 }

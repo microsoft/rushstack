@@ -188,11 +188,13 @@ interface IExtractorConfig {
 
 // @beta
 interface IExtractorDtsRollupConfig {
-  dtsFilePathForInternal?: string;
-  dtsFilePathForPreview?: string;
-  dtsFilePathForPublic?: string;
   enabled: boolean;
-  outputFolder?: string;
+  mainDtsRollupPath?: string;
+  publishFolder?: string;
+  publishFolderForBeta?: string;
+  publishFolderForInternal?: string;
+  publishFolderForPublic?: string;
+  trimming?: boolean;
 }
 
 // @public

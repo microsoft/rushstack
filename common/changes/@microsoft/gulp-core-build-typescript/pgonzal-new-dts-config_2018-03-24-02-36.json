@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Add a new GCB option dtsRollupTrimming which corresponds to the new \"trimming\" flag for API Extractor",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-typescript",
+  "email": "pgonzal@users.noreply.github.com"
+}

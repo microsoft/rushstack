@@ -28,7 +28,11 @@
       "type": "string"
     },
     "generateDtsRollup": {
-      "description": "If true, then API Extractor will generate consolidated *.d.ts outputs for this project. The filenames are: \"index-internal.d.ts\", \"index-preview.d.ts\", and \"index-public.d.ts\".",
+      "description": "If true, then API Extractor will generate *.d.ts rollup files for this project.",
+      "type": "boolean"
+    },
+    "dtsRollupTrimming": {
+      "description": "Only used if generateDtsRollup=true.  If dtsRollupTrimming=true, then API Extractor will generate separate *.d.ts rollup files for internal, beta, and public release types; otherwise a single *.d.ts file will be generated with no trimming.",
       "type": "boolean"
     }
   },
