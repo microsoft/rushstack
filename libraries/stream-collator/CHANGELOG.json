@@ -2,6 +2,23 @@
   "name": "@microsoft/stream-collator",
   "entries": [
     {
+      "version": "2.2.27",
+      "tag": "@microsoft/stream-collator_v2.2.27",
+      "date": "Sun, 25 Mar 2018 01:26:19 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Change *.d.ts file path"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.26` to `4.3.27`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.26",
       "tag": "@microsoft/stream-collator_v2.2.26",
       "date": "Fri, 23 Mar 2018 00:34:53 GMT",

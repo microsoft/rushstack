@@ -2,6 +2,26 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "5.6.0",
+      "tag": "@microsoft/api-extractor_v5.6.0",
+      "date": "Sun, 25 Mar 2018 01:26:19 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "In preparation for initial release, the \"Package Typings\" feature was renamed to \"DTS Rollup\""
+          },
+          {
+            "comment": "Fix an issue where the @packagedocumentation comment was sometimes getting mixed into the middle of the rollup *.d.ts file"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Improve the api-extractor.json config file so that *.d.ts rollups go in separate folders, and trimming can now be disabled"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.5.2",
       "tag": "@microsoft/api-extractor_v5.5.2",
       "date": "Fri, 23 Mar 2018 00:34:53 GMT",

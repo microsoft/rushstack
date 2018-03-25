@@ -1,6 +1,14 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Fri, 23 Mar 2018 00:34:53 GMT and should not be manually modified.
+This log was last generated on Sun, 25 Mar 2018 01:26:19 GMT and should not be manually modified.
+
+## 4.9.0
+Sun, 25 Mar 2018 01:26:19 GMT
+
+### Minor changes
+
+- For the API Extractor task config file, the "generatePackageTypings" setting was renamed to "generateDtsRollup"
+- Add a new GCB option dtsRollupTrimming which corresponds to the new "trimming" flag for API Extractor
 
 ## 4.8.1
 Fri, 23 Mar 2018 00:34:53 GMT
