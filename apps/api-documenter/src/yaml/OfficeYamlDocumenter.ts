@@ -47,7 +47,8 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
 
   protected onGetTocRoot(): IYamlTocItem { // override
     return {
-      name: 'Office Add-ins',
+      name: 'API reference',
+      href: '~/docs-ref-autogen/overview/office.md',
       items: [ ]
     };
   }
