@@ -2,6 +2,18 @@
   "name": "@microsoft/resolve-chunk-plugin",
   "entries": [
     {
+      "version": "1.0.45",
+      "tag": "@microsoft/resolve-chunk-plugin_v1.0.45",
+      "date": "Mon, 26 Mar 2018 19:12:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.27` to `4.3.28`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.44",
       "tag": "@microsoft/resolve-chunk-plugin_v1.0.44",
       "date": "Sun, 25 Mar 2018 01:26:19 GMT",

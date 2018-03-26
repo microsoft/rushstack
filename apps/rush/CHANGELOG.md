@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 20 Mar 2018 20:02:56 GMT and should not be manually modified.
+This log was last generated on Mon, 26 Mar 2018 19:12:42 GMT and should not be manually modified.
+
+## 4.3.2
+Mon, 26 Mar 2018 19:12:42 GMT
+
+### Updates
+
+- Change *.d.ts file path for rush-lib
+- Add "ignoreMissingScript" flag to custom command and fix other minor issues
+- Add --pack option to "rush publish" to support packing packages into tarballs instead of publishing to NPM registry
+- Upgrade colors to version ~1.2.1
 
 ## 4.3.1
 Tue, 20 Mar 2018 20:02:56 GMT

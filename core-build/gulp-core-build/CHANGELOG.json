@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.7.2",
+      "tag": "@microsoft/gulp-core-build_v3.7.2",
+      "date": "Mon, 26 Mar 2018 19:12:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where snapshot filenames did not follow Jest's naming convention."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.7.1",
       "tag": "@microsoft/gulp-core-build_v3.7.1",
       "date": "Fri, 23 Mar 2018 00:34:53 GMT",
