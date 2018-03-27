@@ -14,6 +14,10 @@ import { RushConstants } from '../RushConstants';
 import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
 import EventHooks from './EventHooks';
 import { VersionPolicyConfiguration } from './VersionPolicyConfiguration';
+import {
+  EnvironmentConfiguration,
+  EnvironmentValue
+} from './EnvironmentConfiguration';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 
@@ -117,6 +121,7 @@ export default class RushConfiguration {
   private _changesFolder: string;
   private _commonFolder: string;
   private _commonTempFolder: string;
+  private _commonTempFolderOverride: string | undefined;
   private _commonRushConfigFolder: string;
   private _packageManager: PackageManager;
   private _pnpmStoreFolder: string;
@@ -377,7 +382,7 @@ export default class RushConfiguration {
    * Example: "C:\MyRepo\common\temp"
    */
   public get commonTempFolder(): string {
-    return this._commonTempFolder;
+    return this._commonTempFolderOverride || this._commonTempFolder;
   }
 
   /**
@@ -624,6 +629,8 @@ export default class RushConfiguration {
    * instead.
    */
   private constructor(rushConfigurationJson: IRushConfigurationJson, rushJsonFilename: string) {
+    EnvironmentConfiguration.initialize();
+
     if (rushConfigurationJson.nodeSupportedVersionRange) {
       if (!semver.validRange(rushConfigurationJson.nodeSupportedVersionRange)) {
         throw new Error('Error parsing the node-semver expression in the "nodeSupportedVersionRange"'
@@ -643,37 +650,45 @@ export default class RushConfiguration {
     this._commonRushConfigFolder = path.join(this._commonFolder, 'config', 'rush');
 
     this._commonTempFolder = path.join(this._commonFolder, RushConstants.rushTempFolderName);
-    this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
-    this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));
-    this._pnpmStoreFolder = path.resolve(path.join(this._commonTempFolder, 'pnpm-store'));
+    this._commonTempFolderOverride = EnvironmentConfiguration.getEnvironmentValue(
+      EnvironmentValue.TempDirectoryOverride
+    );
 
     this._changesFolder = path.join(this._commonFolder, RushConstants.changeFilesFolderName);
     this._homeFolder = RushConfiguration.getHomeDirectory();
-
-    this._rushLinkJsonFilename = path.join(this._commonTempFolder, 'rush-link.json');
 
     if (rushConfigurationJson.npmVersion) {
       this._packageManager = 'npm';
 
       this._committedShrinkwrapFilename = path.join(this._commonRushConfigFolder, RushConstants.npmShrinkwrapFilename);
-      this._tempShrinkwrapFilename = path.join(this._commonTempFolder, RushConstants.npmShrinkwrapFilename);
 
       this._packageManagerToolVersion = rushConfigurationJson.npmVersion;
-      this._packageManagerToolFilename = path.resolve(path.join(this._commonTempFolder,
-        'npm-local', 'node_modules', '.bin', 'npm'));
-
     } else if (rushConfigurationJson.pnpmVersion) {
       this._packageManager = 'pnpm';
 
       this._committedShrinkwrapFilename = path.join(this._commonRushConfigFolder, RushConstants.pnpmShrinkwrapFilename);
-      this._tempShrinkwrapFilename = path.join(this._commonTempFolder, RushConstants.pnpmShrinkwrapFilename);
 
       this._packageManagerToolVersion = rushConfigurationJson.pnpmVersion;
-      this._packageManagerToolFilename = path.resolve(path.join(this._commonTempFolder,
-        'pnpm-local', 'node_modules', '.bin', 'pnpm'));
-
     } else {
       throw new Error(`Neither "npmVersion" nor "pnpmVersion" was defined in the rush configuration.`);
+    }
+
+    this._npmCacheFolder = path.resolve(path.join(this.commonTempFolder, 'npm-cache'));
+    this._npmTmpFolder = path.resolve(path.join(this.commonTempFolder, 'npm-tmp'));
+    this._pnpmStoreFolder = path.resolve(path.join(this.commonTempFolder, 'pnpm-store'));
+
+    this._rushLinkJsonFilename = path.join(this.commonTempFolder, 'rush-link.json');
+
+    if (this.packageManager === 'npm') {
+      this._tempShrinkwrapFilename = path.join(this.commonTempFolder, RushConstants.npmShrinkwrapFilename);
+      this._packageManagerToolFilename = path.resolve(
+        path.join(this.commonTempFolder, 'npm-local', 'node_modules', '.bin', 'npm')
+      );
+    } else if (this.packageManager === 'pnpm') {
+      this._tempShrinkwrapFilename = path.join(this.commonTempFolder, RushConstants.pnpmShrinkwrapFilename);
+      this._packageManagerToolFilename = path.resolve(
+        path.join(this.commonTempFolder, 'pnpm-local', 'node_modules', '.bin', 'pnpm')
+      );
     }
 
     RushConfiguration._validateCommonRushConfigFolder(this._commonRushConfigFolder, this.packageManager);
