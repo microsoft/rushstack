@@ -2,6 +2,86 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "1.1.29",
+      "tag": "@microsoft/api-documenter_v1.1.29",
+      "date": "Mon, 26 Mar 2018 19:12:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.27` to `4.3.28`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.28",
+      "tag": "@microsoft/api-documenter_v1.1.28",
+      "date": "Sun, 25 Mar 2018 01:26:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.5.2` to `5.6.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.26` to `4.3.27`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.27",
+      "tag": "@microsoft/api-documenter_v1.1.27",
+      "date": "Fri, 23 Mar 2018 00:34:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade colors to version ~1.2.1"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.5.1` to `5.5.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `3.1.0` to `3.1.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.25` to `4.3.26`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.26",
+      "tag": "@microsoft/api-documenter_v1.1.26",
+      "date": "Thu, 22 Mar 2018 18:34:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.24` to `4.3.25`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.25",
+      "tag": "@microsoft/api-documenter_v1.1.25",
+      "date": "Wed, 21 Mar 2018 21:05:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Change heading for code snippets section from `## Snippets` to `#### Examples`."
+          },
+          {
+            "comment": "Customize the `API Set #.#` hyperlink target by host. "
+          },
+          {
+            "comment": "Designate proper language for each code snippet (TypeScript or JavaScript)."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.24",
       "tag": "@microsoft/api-documenter_v1.1.24",
       "date": "Tue, 20 Mar 2018 02:44:45 GMT",

@@ -225,9 +225,31 @@ export class JestTask extends GulpTask<IJestConfig> {
 
   private _copySnapshots(srcRoot: string, destRoot: string): void {
     const pattern: string = path.join(srcRoot, '**/__snapshots__/*.snap');
-    globby.sync(pattern).forEach(sourceFile => {
-      const destination: string = sourceFile.replace(srcRoot, destRoot);
-      fsx.copySync(sourceFile, destination);
+    globby.sync(pattern).forEach(snapFile => {
+      const destination: string = snapFile.replace(srcRoot, destRoot);
+      if (this._copyIfMatchExtension(snapFile, destination, '.test.tsx.snap')) {
+        this.logVerbose(`Snapshot file ${snapFile} is copied to match extension ".test.tsx.snap".`);
+      } else if (this._copyIfMatchExtension(snapFile, destination, '.test.ts.snap')) {
+        this.logVerbose(`Snapshot file ${snapFile} is copied to match extension ".test.ts.snap".`);
+      } else if (this._copyIfMatchExtension(snapFile, destination, '.test.jsx.snap')) {
+        this.logVerbose(`Snapshot file ${snapFile} is copied to match extension ".test.jsx.snap".`);
+      } else if (this._copyIfMatchExtension(snapFile, destination, '.test.js.snap')) {
+        this.logVerbose(`Snapshot file ${snapFile} is copied to match extension ".test.js.snap".`);
+      } else {
+        this.logWarning(`Snapshot file ${snapFile} is not copied because don't find that matching test file.`);
+      }
     });
+  }
+
+  private _copyIfMatchExtension(snapSourceFile: string, destinationFile: string, extension: string): boolean {
+    const snapDestFile: string = destinationFile.replace(/\.test\..+\.snap$/, extension);
+    const testFileName: string = path.basename(snapDestFile, '.snap');
+    const testFile: string = path.resolve(path.dirname(snapDestFile), '..', testFileName); // Up from `__snapshots__`.
+    if (fsx.existsSync(testFile)) {
+      fsx.copySync(snapSourceFile, snapDestFile);
+      return true;
+    } else {
+      return false;
+    }
   }
 }

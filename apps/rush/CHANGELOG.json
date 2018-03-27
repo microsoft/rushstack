@@ -2,6 +2,32 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "4.3.2",
+      "tag": "@microsoft/rush_v4.3.2",
+      "date": "Mon, 26 Mar 2018 19:12:42 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Change *.d.ts file path for rush-lib"
+          },
+          {
+            "comment": "Add \"ignoreMissingScript\" flag to custom command and fix other minor issues"
+          },
+          {
+            "comment": "Add --pack option to \"rush publish\" to support packing packages into tarballs instead of publishing to NPM registry"
+          },
+          {
+            "comment": "Upgrade colors to version ~1.2.1"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.27` to `4.3.28`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.3.1",
       "tag": "@microsoft/rush_v4.3.1",
       "date": "Tue, 20 Mar 2018 20:02:56 GMT",

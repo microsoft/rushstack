@@ -4,7 +4,7 @@
 import * as ts from 'typescript';
 import * as fsx from 'fs-extra';
 import * as path from 'path';
-import { PackageJsonLookup } from '@microsoft/node-core-library';
+import { PackageJsonLookup, IPackageJson } from '@microsoft/node-core-library';
 
 import { AstPackage } from './ast/AstPackage';
 import { DocItemLoader } from './DocItemLoader';
@@ -47,6 +47,12 @@ export interface IExtractorContextOptions {
 export class ExtractorContext {
   public typeChecker: ts.TypeChecker;
   public package: AstPackage;
+
+  /**
+   * The parsed package.json file for this package.
+   */
+  public readonly packageJson: IPackageJson;
+
   /**
    * One DocItemLoader is needed per analyzer to look up external API members
    * as needed.
@@ -58,8 +64,6 @@ export class ExtractorContext {
   public readonly policies: IExtractorPoliciesConfig;
 
   public readonly validationRules: IExtractorValidationRulesConfig;
-
-  private _packageName: string;
 
   // If the entry point is "C:\Folder\project\src\index.ts" and the nearest package.json
   // is "C:\Folder\project\package.json", then the packageFolder is "C:\Folder\project"
@@ -79,7 +83,7 @@ export class ExtractorContext {
     }
     this._packageFolder = folder;
 
-    this._packageName = this.packageJsonLookup.tryLoadPackageJsonFor(this._packageFolder)!.name;
+    this.packageJson = this.packageJsonLookup.tryLoadPackageJsonFor(this._packageFolder)!;
 
     this.docItemLoader = new DocItemLoader(this._packageFolder);
 
@@ -108,7 +112,7 @@ export class ExtractorContext {
    * Returns the full name of the package being analyzed.
    */
   public get packageName(): string {
-    return this._packageName;
+    return this.packageJson.name;
   }
 
   /**

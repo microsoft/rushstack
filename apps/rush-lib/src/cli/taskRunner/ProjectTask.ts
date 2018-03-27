@@ -28,7 +28,7 @@ interface IPackageDependencies extends IPackageDeps {
 /**
  * A TaskRunner task which cleans and builds a project
  */
-export default class ProjectBuildTask implements ITaskDefinition {
+export default class ProjectTask implements ITaskDefinition {
   public get name(): string {
     return this._rushProject.packageName;
   }
@@ -41,7 +41,8 @@ export default class ProjectBuildTask implements ITaskDefinition {
     private _rushConfiguration: RushConfiguration,
     private _commandToRun: string,
     private _customFlags: string[],
-    public isIncrementalBuildAllowed: boolean
+    public isIncrementalBuildAllowed: boolean,
+    private _ignoreMissingScript: boolean
   ) {
     this._packageChangeAnalyzer = new PackageChangeAnalyzer(this._rushConfiguration);
   }
@@ -49,22 +50,22 @@ export default class ProjectBuildTask implements ITaskDefinition {
   public execute(writer: ITaskWriter): Promise<TaskStatus> {
     return new Promise<TaskStatus>((resolve: (status: TaskStatus) => void, reject: (errors: TaskError[]) => void) => {
       try {
-        const build: string = this._getScriptToRun();
-        const deps: IPackageDependencies | undefined = this._getPackageDependencies(build, writer);
-        this._executeTask(build, writer, deps, resolve, reject);
+        const taskCommand: string = this._getScriptToRun();
+        const deps: IPackageDependencies | undefined = this._getPackageDependencies(taskCommand, writer);
+        this._executeTask(taskCommand, writer, deps, resolve, reject);
       } catch (error) {
         reject([new TaskError('executing', error.toString())]);
       }
     });
   }
 
-  private _getPackageDependencies(buildCommand: string, writer: ITaskWriter): IPackageDependencies | undefined {
+  private _getPackageDependencies(taskCommand: string, writer: ITaskWriter): IPackageDependencies | undefined {
     let deps: IPackageDependencies | undefined = undefined;
     this._rushConfiguration = this._rushConfiguration;
     try {
       deps = {
         files: this._packageChangeAnalyzer.getPackageDepsHash(this._rushProject.packageName)!.files,
-        arguments: buildCommand
+        arguments: taskCommand
       };
     } catch (error) {
       writer.writeLine('Unable to calculate incremental build state. ' +
@@ -75,7 +76,7 @@ export default class ProjectBuildTask implements ITaskDefinition {
   }
 
   private _executeTask(
-    buildCommand: string,
+    taskCommand: string,
     writer: ITaskWriter,
     currentPackageDeps: IPackageDependencies | undefined,
     resolve: (status: TaskStatus) => void,
@@ -111,29 +112,29 @@ export default class ProjectBuildTask implements ITaskDefinition {
           fsx.unlinkSync(currentDepsPath);
         }
 
-        if (!buildCommand) {
+        if (!taskCommand) {
           // tslint:disable-next-line:max-line-length
-          writer.writeLine(`The 'build' or 'test' command was registered in the package.json but is blank, so no action will be taken.`);
-          resolve(TaskStatus.Success);
+          writer.writeLine(`The task command ${this._commandToRun} was registered in the package.json but is blank, so no action will be taken.`);
+          resolve(TaskStatus.Skipped);
           return;
         }
 
-        // Run the build step
-        writer.writeLine(buildCommand);
-        const buildTask: child_process.ChildProcess =
-          Utilities.executeShellCommandAsync(buildCommand, projectFolder, process.env, true);
+        // Run the task
+        writer.writeLine(taskCommand);
+        const task: child_process.ChildProcess =
+          Utilities.executeShellCommandAsync(taskCommand, projectFolder, process.env, true);
 
         // Hook into events, in order to get live streaming of build log
-        buildTask.stdout.on('data', (data: string) => {
+        task.stdout.on('data', (data: string) => {
           writer.write(data);
         });
 
-        buildTask.stderr.on('data', (data: string) => {
+        task.stderr.on('data', (data: string) => {
           writer.writeError(data);
           this._hasWarningOrError = true;
         });
 
-        buildTask.on('close', (code: number) => {
+        task.on('close', (code: number) => {
           // Write the logs to disk
           this._writeLogsToDisk(writer);
 
@@ -176,14 +177,14 @@ export default class ProjectBuildTask implements ITaskDefinition {
     } else {
       script = this._getScriptCommand(this._commandToRun);
 
-      if (script === undefined) {
+      if (script === undefined && !this._ignoreMissingScript) {
         // tslint:disable-next-line:max-line-length
         throw new Error(`The project [${this._rushProject.packageName}] does not define a '${this._commandToRun}' command in the 'scripts' section of its package.json`);
       }
     }
 
-    if (script === '') {
-      return script;
+    if (!script) {
+      return '';
     }
 
     return `${script} ${this._customFlags.join(' ')}`;

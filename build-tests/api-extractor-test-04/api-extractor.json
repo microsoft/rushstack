@@ -5,8 +5,9 @@
     "rootFolder": "."
   },
 
-  "packageTypings": {
-    "enabled": true
+  "dtsRollup": {
+    "enabled": true,
+    "trimming": true
   },
 
   "project": {

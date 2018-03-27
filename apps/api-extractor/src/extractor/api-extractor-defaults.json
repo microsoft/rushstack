@@ -26,11 +26,16 @@
     "outputFolder": "./dist"
   },
 
-  "packageTypings": {
+  "dtsRollup": {
     "enabled": false,
-    "outputFolder": "./dist",
-    "dtsFilePathForInternal": "index-internal.d.ts",
-    "dtsFilePathForPreview": "index-preview.d.ts",
-    "dtsFilePathForPublic": "index-public.d.ts"
+    "trimming": false,
+
+    "publishFolder": "./dist",
+
+    "publishFolderForInternal": "./dist/internal",
+    "publishFolderForBeta": "./dist/beta",
+    "publishFolderForPublic": "./dist/public",
+
+    "mainDtsRollupPath": ""
   }
 }

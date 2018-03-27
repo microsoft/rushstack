@@ -54,6 +54,11 @@ export interface IBuildConfig {
   libES6Folder?: string;
 
   /**
+   * Unbundled esnext modules folder, which can be optionally set to cause build tasks to output esnext modules.
+   */
+  libESNextFolder?: string;
+
+  /**
    * Dist folder, which includes all bundled resources which would be copied to a CDN for the project.
    */
   distFolder: string;

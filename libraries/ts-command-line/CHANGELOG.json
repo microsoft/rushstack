@@ -2,6 +2,18 @@
   "name": "@microsoft/ts-command-line",
   "entries": [
     {
+      "version": "3.1.1",
+      "tag": "@microsoft/ts-command-line_v3.1.1",
+      "date": "Fri, 23 Mar 2018 00:34:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade colors to version ~1.2.1"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.1.0",
       "tag": "@microsoft/ts-command-line_v3.1.0",
       "date": "Thu, 15 Mar 2018 20:00:50 GMT",

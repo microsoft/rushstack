@@ -1,6 +1,37 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Tue, 20 Mar 2018 02:44:45 GMT and should not be manually modified.
+This log was last generated on Mon, 26 Mar 2018 19:12:42 GMT and should not be manually modified.
+
+## 1.1.29
+Mon, 26 Mar 2018 19:12:42 GMT
+
+*Version update only*
+
+## 1.1.28
+Sun, 25 Mar 2018 01:26:19 GMT
+
+*Version update only*
+
+## 1.1.27
+Fri, 23 Mar 2018 00:34:53 GMT
+
+### Patches
+
+- Upgrade colors to version ~1.2.1
+
+## 1.1.26
+Thu, 22 Mar 2018 18:34:13 GMT
+
+*Version update only*
+
+## 1.1.25
+Wed, 21 Mar 2018 21:05:22 GMT
+
+### Patches
+
+- Change heading for code snippets section from `## Snippets` to `#### Examples`.
+- Customize the `API Set #.#` hyperlink target by host. 
+- Designate proper language for each code snippet (TypeScript or JavaScript).
 
 ## 1.1.24
 Tue, 20 Mar 2018 02:44:45 GMT

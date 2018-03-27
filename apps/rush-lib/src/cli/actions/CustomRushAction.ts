@@ -44,7 +44,8 @@ export class CustomRushAction extends BaseRushAction {
   constructor(
     private _parser: RushCommandLineParser,
     options: ICommandLineActionOptions,
-    private _parallelized: boolean = false
+    private _parallelized: boolean = false,
+    private _ignoreMissingScript: boolean = false
   ) {
     super({
       ...options,
@@ -71,7 +72,7 @@ export class CustomRushAction extends BaseRushAction {
       throw new Error(`File not found: ${this.rushConfiguration.rushLinkJsonFilename}` +
         `${os.EOL}Did you run "rush link"?`);
     }
-    this.eventHooksManager.handle(Event.preRushBuild);
+    this._doBeforeTask();
 
     const stopwatch: Stopwatch = Stopwatch.start();
 
@@ -107,7 +108,8 @@ export class CustomRushAction extends BaseRushAction {
         isQuietMode,
         parallelism,
         isIncrementalBuildAllowed: this.options.actionVerb === 'build',
-        changedProjectsOnly
+        changedProjectsOnly,
+        ignoreMissingScript: this._ignoreMissingScript
       }
     );
 
@@ -115,16 +117,12 @@ export class CustomRushAction extends BaseRushAction {
       () => {
         stopwatch.stop();
         console.log(colors.green(`rush ${this.options.actionVerb} (${stopwatch.toString()})`));
-        this._collectTelemetry(stopwatch, true);
-        this._parser.flushTelemetry();
-        this.eventHooksManager.handle(Event.postRushBuild, this._parser.isDebug);
+        this._doAfterTask(stopwatch, true);
       },
       () => {
         stopwatch.stop();
         console.log(colors.red(`rush ${this.options.actionVerb} - Errors! (${stopwatch.toString()})`));
-        this._collectTelemetry(stopwatch, false);
-        this._parser.flushTelemetry();
-        this.eventHooksManager.handle(Event.postRushBuild, this._parser.isDebug);
+        this._doAfterTask(stopwatch, false);
         this._parser.exitWithError();
       });
   }
@@ -193,6 +191,25 @@ export class CustomRushAction extends BaseRushAction {
     return this.options.actionVerb === 'build'
       || this.options.actionVerb === 'rebuild'
       || this._parallelized;
+  }
+
+  private _doBeforeTask(): void {
+    if (this.options.actionVerb !== 'build' && this.options.actionVerb !== 'rebuild') {
+      // Only collects information for built-in tasks like build or rebuild.
+      return;
+    }
+
+    this.eventHooksManager.handle(Event.preRushBuild);
+  }
+
+  private _doAfterTask(stopwatch: Stopwatch, success: boolean): void {
+    if (this.options.actionVerb !== 'build' && this.options.actionVerb !== 'rebuild') {
+      // Only collects information for built-in tasks like build or rebuild.
+      return;
+    }
+    this._collectTelemetry(stopwatch, success);
+    this._parser.flushTelemetry();
+    this.eventHooksManager.handle(Event.postRushBuild, this._parser.isDebug);
   }
 
   private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {

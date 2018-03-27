@@ -1,6 +1,25 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 20 Mar 2018 02:44:45 GMT and should not be manually modified.
+This log was last generated on Sun, 25 Mar 2018 01:26:19 GMT and should not be manually modified.
+
+## 5.6.0
+Sun, 25 Mar 2018 01:26:19 GMT
+
+### Minor changes
+
+- Improve the api-extractor.json config file so that *.d.ts rollups go in separate folders, and trimming can now be disabled
+
+### Patches
+
+- In preparation for initial release, the "Package Typings" feature was renamed to "DTS Rollup"
+- Fix an issue where the @packagedocumentation comment was sometimes getting mixed into the middle of the rollup *.d.ts file
+
+## 5.5.2
+Fri, 23 Mar 2018 00:34:53 GMT
+
+### Patches
+
+- Upgrade colors to version ~1.2.1
 
 ## 5.5.1
 Tue, 20 Mar 2018 02:44:45 GMT

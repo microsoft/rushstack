@@ -7,17 +7,22 @@ import * as ts from 'typescript';
 import lodash = require('lodash');
 import colors = require('colors');
 
-import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
+import {
+  JsonFile,
+  JsonSchema,
+  Path
+} from '@microsoft/node-core-library';
 import {
   IExtractorConfig,
   IExtractorProjectConfig,
-  IExtractorApiJsonFileConfig
+  IExtractorApiJsonFileConfig,
+  IExtractorDtsRollupConfig
 } from './IExtractorConfig';
 import { ExtractorContext } from '../ExtractorContext';
 import { ILogger } from './ILogger';
 import { ApiJsonGenerator } from '../generators/ApiJsonGenerator';
 import { ApiFileGenerator } from '../generators/ApiFileGenerator';
-import { PackageTypingsGenerator, PackageTypingsDtsKind } from '../generators/packageTypings/PackageTypingsGenerator';
+import { DtsRollupGenerator, DtsRollupKind } from '../generators/dtsRollup/DtsRollupGenerator';
 import { MonitoredLogger } from './MonitoredLogger';
 
 /**
@@ -253,7 +258,7 @@ export class Extractor {
     // This helps strict-null-checks to understand that _applyConfigDefaults() eliminated
     // any undefined members
     if (!(this.actualConfig.policies && this.actualConfig.validationRules
-      && this.actualConfig.apiJsonFile && this.actualConfig.apiReviewFile && this.actualConfig.packageTypings)) {
+      && this.actualConfig.apiJsonFile && this.actualConfig.apiReviewFile && this.actualConfig.dtsRollup)) {
       throw new Error('The configuration object wasn\'t normalized properly');
     }
 
@@ -340,22 +345,7 @@ export class Extractor {
       }
     }
 
-    if (this.actualConfig.packageTypings.enabled) {
-      const packageTypingsGenerator: PackageTypingsGenerator = new PackageTypingsGenerator(context);
-      packageTypingsGenerator.analyze();
-
-      this._generateTypingsFile(packageTypingsGenerator,
-        this.actualConfig.packageTypings.dtsFilePathForPublic!,
-        PackageTypingsDtsKind.PublicRelease);
-
-      this._generateTypingsFile(packageTypingsGenerator,
-        this.actualConfig.packageTypings.dtsFilePathForPreview!,
-        PackageTypingsDtsKind.PreviewRelease);
-
-      this._generateTypingsFile(packageTypingsGenerator,
-        this.actualConfig.packageTypings.dtsFilePathForInternal!,
-        PackageTypingsDtsKind.InternalRelease);
-    }
+    this._generateRollupDtsFiles(context);
 
     if (this._localBuild) {
       // For a local build, fail if there were errors (but ignore warnings)
@@ -366,16 +356,83 @@ export class Extractor {
     }
   }
 
-  private _generateTypingsFile(packageTypingsGenerator: PackageTypingsGenerator,
-    dtsFilePath: string, dtsKind: PackageTypingsDtsKind): void {
-    const dtsFilename: string = path.resolve(this._absoluteRootFolder,
-      this.actualConfig.packageTypings!.outputFolder, dtsFilePath);
+  private _generateRollupDtsFiles(context: ExtractorContext): void {
+    const dtsRollup: IExtractorDtsRollupConfig = this.actualConfig.dtsRollup!;
+    if (dtsRollup.enabled) {
+      let mainDtsRollupPath: string = dtsRollup.mainDtsRollupPath!;
 
-    this._monitoredLogger.logVerbose(`Writing package typings: ${dtsFilename}`);
+      if (!mainDtsRollupPath) {
+        // If the mainDtsRollupPath is not specified, then infer it from the package.json file
+        if (!context.packageJson.typings) {
+          this._monitoredLogger.logError('Either the "mainDtsRollupPath" setting must be specified,'
+            + ' or else the package.json file must contain a "typings" field.');
+          return;
+        }
 
-    fsx.mkdirsSync(path.dirname(dtsFilename));
+        // Resolve the "typings" field relative to package.json itself
+        const resolvedTypings: string = path.resolve(context.packageFolder, context.packageJson.typings);
 
-    packageTypingsGenerator.writeTypingsFile(dtsFilename, dtsKind);
+        if (dtsRollup.trimming) {
+          if (!Path.isUnder(resolvedTypings, dtsRollup.publishFolderForInternal!)) {
+            this._monitoredLogger.logError('The "mainDtsRollupPath" setting was not specified.'
+              + ' In this case, the package.json "typings" field must point to a file under'
+              + ' the "publishFolderForInternal": ' + dtsRollup.publishFolderForInternal!);
+            return;
+          }
+          mainDtsRollupPath = path.relative(dtsRollup.publishFolderForInternal!, resolvedTypings);
+        } else {
+          if (!Path.isUnder(resolvedTypings, dtsRollup.publishFolder!)) {
+            this._monitoredLogger.logError('The "mainDtsRollupPath" setting was not specified.'
+              + ' In this case, the package.json "typings" field must point to a file under'
+              + ' the "publishFolder": ' + dtsRollup.publishFolder!);
+            return;
+          }
+          mainDtsRollupPath = path.relative(dtsRollup.publishFolder!, resolvedTypings);
+        }
+
+        this._monitoredLogger.logVerbose(`The "mainDtsRollupPath" setting was inferred'
+          + ' from package.json: ${mainDtsRollupPath}`);
+      } else {
+        this._monitoredLogger.logVerbose(`The "mainDtsRollupPath" is: ${mainDtsRollupPath}`);
+
+        if (!path.isAbsolute(mainDtsRollupPath)) {
+          this._monitoredLogger.logError('The "mainDtsRollupPath" setting must be a relative path'
+            + ' that can be combined with one of the "publishFolder" settings.');
+          return;
+        }
+      }
+
+      const dtsRollupGenerator: DtsRollupGenerator = new DtsRollupGenerator(context);
+      dtsRollupGenerator.analyze();
+
+      if (dtsRollup.trimming) {
+        this._generateRollupDtsFile(dtsRollupGenerator,
+          path.resolve(context.packageFolder, dtsRollup.publishFolderForPublic!, mainDtsRollupPath),
+          DtsRollupKind.PublicRelease);
+
+        this._generateRollupDtsFile(dtsRollupGenerator,
+          path.resolve(context.packageFolder, dtsRollup.publishFolderForBeta!, mainDtsRollupPath),
+          DtsRollupKind.BetaRelease);
+
+        this._generateRollupDtsFile(dtsRollupGenerator,
+          path.resolve(context.packageFolder, dtsRollup.publishFolderForInternal!, mainDtsRollupPath),
+          DtsRollupKind.InternalRelease);
+      } else {
+        this._generateRollupDtsFile(dtsRollupGenerator,
+          path.resolve(context.packageFolder, dtsRollup.publishFolder!, mainDtsRollupPath),
+          DtsRollupKind.InternalRelease); // (no trimming)
+      }
+    }
+  }
+
+  private _generateRollupDtsFile(dtsRollupGenerator: DtsRollupGenerator, mainDtsRollupFullPath: string,
+    dtsKind: DtsRollupKind): void {
+
+    this._monitoredLogger.logVerbose(`Writing package typings: ${mainDtsRollupFullPath}`);
+
+    fsx.mkdirsSync(path.dirname(mainDtsRollupFullPath));
+
+    dtsRollupGenerator.writeTypingsFile(mainDtsRollupFullPath, dtsKind);
 }
 
   private _getShortFilePath(absolutePath: string): string {

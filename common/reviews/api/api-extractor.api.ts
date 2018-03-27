@@ -180,10 +180,21 @@ interface IExtractorConfig {
   apiReviewFile?: IExtractorApiReviewFileConfig;
   compiler: IExtractorTsconfigCompilerConfig | IExtractorRuntimeCompilerConfig;
   // @beta
-  packageTypings?: IExtractorPackageTypingsConfig;
+  dtsRollup?: IExtractorDtsRollupConfig;
   policies?: IExtractorPoliciesConfig;
   project: IExtractorProjectConfig;
   validationRules?: IExtractorValidationRulesConfig;
+}
+
+// @beta
+interface IExtractorDtsRollupConfig {
+  enabled: boolean;
+  mainDtsRollupPath?: string;
+  publishFolder?: string;
+  publishFolderForBeta?: string;
+  publishFolderForInternal?: string;
+  publishFolderForPublic?: string;
+  trimming?: boolean;
 }
 
 // @public
@@ -191,15 +202,6 @@ interface IExtractorOptions {
   compilerProgram?: ts.Program;
   customLogger?: Partial<ILogger>;
   localBuild?: boolean;
-}
-
-// @beta
-interface IExtractorPackageTypingsConfig {
-  dtsFilePathForInternal?: string;
-  dtsFilePathForPreview?: string;
-  dtsFilePathForPublic?: string;
-  enabled: boolean;
-  outputFolder?: string;
 }
 
 // @public

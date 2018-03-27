@@ -178,58 +178,80 @@ export interface IExtractorApiJsonFileConfig {
 }
 
 /**
- * Configures how the package typings (*.d.ts) will be generated.
+ * Configures how the *.d.ts rollup files will be generated.
+ *
  * @remarks
- * API Extractor can generate a single unified *.d.ts file that contains all
- * the exported typings for the package entry point.  It can also remove
- * \@alpha \@beta \@internal definitions depending on the release type.
+ * API Extractor can generate a consolidated *.d.ts file that contains all
+ * the exported typings for the package entry point.  It can also trim
+ * \@alpha, \@beta, and \@internal definitions according to the release type.
  *
  * @beta
  */
-export interface IExtractorPackageTypingsConfig {
+export interface IExtractorDtsRollupConfig {
   /**
-   * Whether to generate package typings.  The default is false.
+   * Whether to generate rollup *.d.ts files.  The default is false.
    */
   enabled: boolean;
 
   /**
-   * Specifies where the *.d.ts files should be written.
-   *
-   * The default value is "./dist"
-   */
-  outputFolder?: string;
-
-  /**
-   * Specifies the *.d.ts file path used for an internal release.
-   * The default value is "index-internal.d.ts".
+   * If "trimming" is false (the default), then a single *.d.ts rollup file will be generated in the
+   * "publishFolder".  If "trimming" is true, then three separate *.d.ts rollups will be
+   * generated in "publishFolderForInternal", "publishFolderForBeta", and "publishFolderForPublic".
    *
    * @remarks
-   * If the path is not an absolute path, it will be resolved relative to the outputFolder.
-   * This output file will contain all definitions that are reachable from the entry point.
+   * In either case, "mainDtsRollupPath" indicates the relative file path.
    */
-  dtsFilePathForInternal?: string;
+  trimming?: boolean;
 
   /**
-   * Specifies the output filename for a preview release.
-   * The default value is "index-preview.d.ts".
+   * This setting is only used if "trimming" is false.
+   * It indicates the folder where "npm publish" will be run.  The default value is "./dist".
+   */
+  publishFolder?: string;
+
+  /**
+   * This setting is only used if "trimming" is true.
+   * It indicates the folder where "npm publish" will be run for an internal release.
+   * The default value is "./dist/internal".
    *
    * @remarks
-   * If the path is not an absolute path, it will be resolved relative to the outputFolder.
-   * This output file will contain all definitions that are reachable from the entry point,
+   * An internal release will contain all definitions that are reachable from the entry point.
+   */
+  publishFolderForInternal?: string;
+
+  /**
+   * This setting is only used if "trimming" is true.
+   * It indicates the folder where "npm publish" will be run for a beta release.
+   * The default value is "./dist/beta".
+   *
+   * @remarks
+   * A beta release will contain all definitions that are reachable from the entry point,
    * except definitions marked as \@alpha or \@internal.
    */
-  dtsFilePathForPreview?: string;
+  publishFolderForBeta?: string;
 
   /**
-   * Specifies the output filename for a public release.
-   * The default value is "index-public.d.ts".
+   * This setting is only used if "trimming" is true.
+   * It indicates the folder where "npm publish" will be run for a public release.
+   * The default value is "./dist/public".
    *
    * @remarks
-   * If the path is not an absolute path, it will be resolved relative to the outputFolder.
-   * This output file will contain all definitions that are reachable from the entry point,
+   * A public release will contain all definitions that are reachable from the entry point,
    * except definitions marked as \@beta, \@alpha, or \@internal.
    */
-  dtsFilePathForPublic?: string;
+  publishFolderForPublic?: string;
+
+  /**
+   * Specifies the relative path for the *.d.ts rollup file to be generated for the
+   * package's main entry point.  The default value is an empty string, which causes
+   * the path to be automatically inferred from the "typings" field of the project's
+   * package.json file.
+   *
+   * @remarks
+   * If specified, the value must be a relative path that can be combined with one of
+   * the publish folder settings.
+   */
+  mainDtsRollupPath?: string;
 }
 
 /**
@@ -272,8 +294,8 @@ export interface IExtractorConfig {
   apiJsonFile?: IExtractorApiJsonFileConfig;
 
   /**
-   * {@inheritdoc IExtractorPackageTypingsConfig}
+   * {@inheritdoc IExtractorDtsRollupConfig}
    * @beta
    */
-  packageTypings?: IExtractorPackageTypingsConfig;
+  dtsRollup?: IExtractorDtsRollupConfig;
 }

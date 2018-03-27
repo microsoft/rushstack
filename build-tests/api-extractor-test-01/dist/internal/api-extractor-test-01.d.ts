@@ -120,7 +120,14 @@ export declare class ForgottenExportConsumer2 {
     test2(): IForgottenExport_2 | undefined;
 }
 
-/* Excluded from this release type: ForgottenExportConsumer3 */
+/**
+ * This class directly consumes IForgottenDirectDependency
+ * and indirectly consumes IForgottenIndirectDependency.
+ * @beta
+ */
+export declare class ForgottenExportConsumer3 {
+    test2(): IForgottenDirectDependency | undefined;
+}
 
 /**
  * This class is directly consumed by ForgottenExportConsumer3.
@@ -165,20 +172,30 @@ export declare interface IInterfaceAsDefaultExport {
     member: string;
 }
 
-/* Excluded from this release type: IMergedInterface */
-
-/* Excluded from this release type: IMergedInterfaceReferencee */
+/**
+ * IMergedInterface instance 1.
+ * @alpha
+ */
+export declare interface IMergedInterface {
+    type: string;
+    reference: IMergedInterfaceReferencee;
+}
 
 /**
- * api-extractor-test-01
- *
- * @remarks
- * This library is consumed by api-extractor-test-02 and api-extractor-test-03.
- * It tests the basic types of definitions, and all the weird cases for following
- * chains of type aliases.
- *
- * @packagedocumentation
+ * IMergedInterface instance 2.
+ * @alpha
  */
+export declare interface IMergedInterface {
+    type: string;
+    reference: IMergedInterfaceReferencee;
+}
+
+/**
+ * @alpha
+ */
+export declare interface IMergedInterfaceReferencee {
+}
+
 /**
  * A simple, normal definition
  * @public
@@ -195,7 +212,20 @@ export declare class ReexportedClass {
     getValue(): string;
 }
 
-/* Excluded from this release type: _TypeReferencesInAedoc */
+/**
+ * This class has links such as {@link TypeReferencesInAedoc}.
+ * @internal
+ */
+export declare class _TypeReferencesInAedoc {
+    /**
+     * Returns a value
+     * @param arg1 - The input parameter of type {@link TypeReferencesInAedoc}.
+     * @returns An object of type {@link TypeReferencesInAedoc}.
+     */
+    getValue(arg1: _TypeReferencesInAedoc): _TypeReferencesInAedoc;
+    /** {@inheritdoc api-extractor-test-01:TypeReferencesInAedoc.getValue} */
+    getValue2(arg1: _TypeReferencesInAedoc): _TypeReferencesInAedoc;
+}
 
 /**
  * Example decorator

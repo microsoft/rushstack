@@ -41,6 +41,11 @@
             "title": "Is Parallelized",
             "description": "Describes whether or not this command can be run in parallel (with multiple instances running on several projects simultaneously). Defaults to 'true'.",
             "type": "boolean"
+          },
+          "ignoreMissingScript": {
+            "title": "Ignore missing script",
+            "description": "Normally Rush requires that each project's package.json has a \"script\" entry matching the custom command name. To disable this check, set \"ignoreMissingScript\" to true.",
+            "type": "boolean"
           }
         }
       }

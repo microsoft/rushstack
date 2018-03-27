@@ -19,7 +19,7 @@ export interface IApiExtractorTaskConfig {
   /**
    * Indicates whether the task should be run.
    */
-  enabled?: boolean;
+  enabled: boolean;
 
   /**
    * The file path of the exported entry point, relative to the project folder.
@@ -46,7 +46,7 @@ export interface IApiExtractorTaskConfig {
 
   /**
    * The file path of the folder containing the *.api.json output file containing
-   * the API information. The default location is in the “dist” folder,
+   * API information. The default location is in the “dist” folder,
    * e.g. my-project/dist/my-project.api.json. This file should be published as part
    * of the NPM package. When building other projects that depend on this package,
    * api-extractor will look for this file in the node_modules folder and use it as an input.
@@ -56,11 +56,18 @@ export interface IApiExtractorTaskConfig {
   apiJsonFolder?: string;
 
   /**
-   * If true, then API Extractor will generate consolidated \*.d.ts outputs for this project.
-   * The filenames are: "index-internal.d.ts", "index-preview.d.ts", and "index-public.d.ts".
+   * If true, then API Extractor will generate *.d.ts rollup files for this project.
    * @beta
    */
-  generatePackageTypings?: boolean;
+  generateDtsRollup?: boolean;
+
+  /**
+   * Only used if generateDtsRollup=true.  If dtsRollupTrimming=true, then API Extractor will
+   * generate separate *.d.ts rollup files for internal, beta, and public release types;
+   * otherwise a single *.d.ts file will be generated with no trimming.
+   * @beta
+   */
+  dtsRollupTrimming: boolean;
 }
 
 /**
@@ -149,9 +156,10 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
         }
       };
 
-      if (this.taskConfig.generatePackageTypings) {
-        extractorConfig.packageTypings = {
-          enabled: true
+      if (this.taskConfig.generateDtsRollup) {
+        extractorConfig.dtsRollup = {
+          enabled: true,
+          trimming: !!this.taskConfig.dtsRollupTrimming
         };
       }
 
